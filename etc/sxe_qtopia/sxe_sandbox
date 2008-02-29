@@ -1,0 +1,35 @@
+#!/bin/sh
+test -x $1 || { echo "Usage: $0 <executable> <sandbox dir>"; exit 1; }
+test -d $2 || { echo "Usage: $0 <executable> <sandbox dir>"; exit 1; }
+
+lidsconf -A -o $1 -j READONLY
+lidsconf -A -s $QTOPIA_DIR/plugins/application/libpackagemanager.so -o $1 -i 1 -j WRITE
+lidsconf -A -s $1 -o LIDS_SANDBOX -j ENABLE
+lidsconf -A -s $1 -o $2 -j WRITE
+
+lidsconf -A -s $1 -o /lib -j READONLY
+lidsconf -A -s $1 -o /usr/lib -j READONLY
+
+lidsconf -A -s $1 -o /usr/share -j READONLY
+lidsconf -A -s $1 -o  CAP_DAC_OVERRIDE -j GRANT
+
+lidsconf -A -s $1 -o /proc -j READONLY
+lidsconf -A -s $1 -o /proc/lids -j DENY
+
+lidsconf -A -s $1 -o /tmp -j READONLY
+lidsconf -A -s $1 -o /tmp/qtopia-0 -j WRITE
+
+lidsconf -A -s $1 -o $QTOPIA_DIR/lib -j READONLY
+
+lidsconf -A -s $1 -o $QTOPIA_DIR/etc -j READONLY
+lidsconf -A -s $1 -o $QTOPIA_DIR/etc/sxe_domains -j DENY
+lidsconf -A -s $1 -o $QTOPIA_DIR/etc/sxe_qtopia -j DENY
+
+lidsconf -A -s $1 -o $QTOPIA_DIR/pics -j READONLY
+lidsconf -A -s $1 -o $QTOPIA_DIR/sounds -j READONLY
+lidsconf -A -s $1 -o $QTOPIA_DIR/qt_plugins -j READONLY
+lidsconf -A -s $1 -o $QTOPIA_DIR/services -j READONLY
+lidsconf -A -s $1 -o $QTOPIA_DIR/i18n -j READONLY
+
+lidsconf -A -s $1 -o $UPDATE_DIR/etc/defaultbuttons.conf -j READONLY
+lidsconf -A -s $1 -o $HOME/Settings -j READONLY

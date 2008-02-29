@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,8 +32,8 @@
 #include <QApplication>
 #include <QKeyEvent>
 #include <QTimeLine>
-#include <QSvgRenderer>
 #include <QTimer>
+#include <Qtopia>
 
 
 /*!
@@ -56,6 +56,7 @@
   Since SelectedItem does not inherit from QObject, it contains a SelectedItemConnector to
   handle callbacks, thus avoiding multiple inheritance.
 
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   \sa SelectedItemConnector
   \sa GridItem
 */
@@ -76,18 +77,17 @@
 SelectedItem::SelectedItem(const QString &_backgroundFileName,
                            int _margin,int _slideTimeInterval,QGraphicsScene *scene)
     : QGraphicsRectItem(0,scene)
-    , highlightColor(qApp->palette().color(QPalette::Disabled,QPalette::Highlight))
-    , backgroundHighlightColor(qApp->palette().color(QPalette::Disabled,QPalette::Button))
-    , connector(0)
+    , mConnector(0)
     , background(0)
     , backgroundFileName(_backgroundFileName)
     , margin(_margin)
-    , selectedSize(-1,-1)
+    , mSelectedSize(-1,-1)
     , table()
     , currentItem(0)
     , destItem(0)
     , movie(0)
     , active(false)
+    , pressed(false)
     , moveTimeLine(0)
     , playTimeLine(0)
     , slideTimeInterval(_slideTimeInterval)
@@ -97,8 +97,8 @@ SelectedItem::SelectedItem(const QString &_backgroundFileName,
     , currentY(-1)
     , destX(-1)
     , destY(-1)
-    , xDrift(-1)
-    , yDrift(-1)
+    , mXDrift(-1)
+    , mYDrift(-1)
 {
     // The item supports selection. Enabling this feature will enable setSelected()
     // to toggle selection for the item.
@@ -110,13 +110,13 @@ SelectedItem::SelectedItem(const QString &_backgroundFileName,
     setFlag(QGraphicsItem::ItemIsFocusable,true);
 
     // Create the connector object that supports the signals/slots mechanism.
-    connector = new SelectedItemConnector(this);
+    mConnector = new SelectedItemConnector(this);
 
     // Create the timeline that is responsible for moving the SelectedItem from one
     // GridItem to its neighbour.
     createMoveTimeLine();
 
-    // And a timeline to control manual animation.
+    // And a timeline to control coded animation.
     createPlayTimeLine();
 }
 
@@ -128,23 +128,23 @@ void SelectedItem::createMoveTimeLine()
         delete moveTimeLine;
     }
 
-    moveTimeLine = new QTimeLine(slideTimeInterval,connector);
-    moveTimeLine->setFrameRange(0,100);
-    QObject::connect(moveTimeLine,SIGNAL(frameChanged(int)),connector,SLOT(moving(int)));
-    QObject::connect(moveTimeLine,SIGNAL(stateChanged(QTimeLine::State)),connector,SLOT(movingStateChanged(QTimeLine::State)));
+    moveTimeLine = new QTimeLine(slideTimeInterval,mConnector);
+    moveTimeLine->setFrameRange(15,85);
+    QObject::connect(moveTimeLine,SIGNAL(frameChanged(int)),mConnector,SLOT(moving(int)));
+    QObject::connect(moveTimeLine,SIGNAL(stateChanged(QTimeLine::State)),mConnector,SLOT(movingStateChanged(QTimeLine::State)));
 }
 
-// And a timeline to control manual animation.
+// And a timeline to control coded animation.
 void SelectedItem::createPlayTimeLine()
 {
     if ( playTimeLine ) {
         delete playTimeLine;
     }
 
-    playTimeLine = new QTimeLine(ANIMATION_TIME,connector);
+    playTimeLine = new QTimeLine(ANIMATION_TIME,mConnector);
     playTimeLine->setFrameRange(0,100);
-    QObject::connect(playTimeLine,SIGNAL(frameChanged(int)),connector,SLOT(playing(int)));
-    QObject::connect(playTimeLine,SIGNAL(stateChanged(QTimeLine::State)),connector,SLOT(animationStateChanged(QTimeLine::State)));
+    QObject::connect(playTimeLine,SIGNAL(frameChanged(int)),mConnector,SLOT(playing(int)));
+    QObject::connect(playTimeLine,SIGNAL(stateChanged(QTimeLine::State)),mConnector,SLOT(animationStateChanged(QTimeLine::State)));
 }
 
 /*!
@@ -158,7 +158,7 @@ SelectedItem::~SelectedItem()
 
     delete moveTimeLine;
     delete playTimeLine;
-    delete connector;
+    delete mConnector;
     if ( background ) {
         delete background;
     }
@@ -177,10 +177,10 @@ bool SelectedItem::addItem(GridItem *item)
 
 /*!
   \internal
-  \fn GridItem *SelectedItem::getCurrent() const
+  \fn GridItem *SelectedItem::current() const
   Returns the current GridItem object, or 0 if no item is current.
 */
-GridItem *SelectedItem::getCurrent() const
+GridItem *SelectedItem::current() const
 {
     if ( destItem ) {
         return destItem;
@@ -191,52 +191,52 @@ GridItem *SelectedItem::getCurrent() const
 
 /*!
   \internal
-  \fn GridItem *SelectedItem::getItem(int row,int column) const
+  \fn GridItem *SelectedItem::item(int row,int column) const
   Returns the GridItem object that is stored at the given row and column position, or 0 if
   no object is stored at that position.
 */
-GridItem *SelectedItem::getItem(int row,int column) const
+GridItem *SelectedItem::item(int row,int column) const
 {
-    return table.getItem(row,column);
+    return table.item(row,column);
 }
 
 /*!
   \internal
-  \fn QObject *SelectedItem::getConnector() const
+  \fn QObject *SelectedItem::connector() const
   Returns the object responsible for handling the SelectedItem's signals and slots.
 */
-QObject *SelectedItem::getConnector() const
+QObject *SelectedItem::connector() const
 {
     // Upcast.
-    return static_cast<QObject *>(connector);
+    return static_cast<QObject *>(mConnector);
 }
 
 /*!
   \internal
-  \fn QPoint SelectedItem::getPos(GridItem *_item) const
+  \fn QPoint SelectedItem::pos(GridItem *_item) const
   Returns the appropriate pixel position for the SelectedItem when positioned over the given
   item.
 */
-QPoint SelectedItem::getPos(GridItem *item) const
+QPoint SelectedItem::pos(GridItem *item) const
 {
     int x = 0, y = 0;
-    QSize _selectedSize = getSelectedSize(item);
+    QSize _selectedSize = selectedSize(item);
 
-    if ( item->getColumn() <= 0 ) { // sitting on left border
-        x = qRound(item->rect().x());
-    } else if ( item->getColumn() >= table.getTopColumn() ) { // sitting on right border
-        x = qRound(item->rect().x() + item->rect().width() - _selectedSize.width());
+    if ( item->column() <= 0 ) { // sitting on left border
+        x = static_cast<int>(item->rect().x());
+    } else if ( item->column() >= table.topColumn() ) { // sitting on right border
+        x = static_cast<int>(item->rect().x()) + static_cast<int>(item->rect().width()) - _selectedSize.width();
     } else {
         // This object should be centred over the GridItem.
-        x = qRound(item->rect().x() + (item->rect().width()/2) - _selectedSize.width()/2);
+        x = static_cast<int>(item->rect().x()) + static_cast<int>(item->rect().width())/2 - _selectedSize.width()/2;
     }
-    if ( item->getRow() <= 0 ) { // sitting on top row
-        y = qRound(item->rect().y());
-    } else if ( item->getRow() >= table.getTopRow() ) { // sitting on bottom row
-        y = qRound(item->rect().y() + item->rect().height() - _selectedSize.height());
+    if ( item->row() <= 0 ) { // sitting on top row
+        y = static_cast<int>(item->rect().y());
+    } else if ( item->row() >= table.topRow() ) { // sitting on bottom row
+        y = static_cast<int>(item->rect().y()) + static_cast<int>(item->rect().height()) - _selectedSize.height();
     } else {
         // This object should be centred over the GridItem.
-        y = qRound(item->rect().y() + (item->rect().height()/2) - getSelectedSize(item).height()/2);
+        y = static_cast<int>(item->rect().y()) + static_cast<int>(item->rect().height())/2 - selectedSize(item).height()/2;
     }
 
     return QPoint(x,y);
@@ -244,7 +244,7 @@ QPoint SelectedItem::getPos(GridItem *item) const
 
 /*!
   \internal
-  \fn QSize SelectedItem::getSelectedSize(GridItem *item) const
+  \fn QSize SelectedItem::selectedSize(GridItem *item) const
   Returns the size for this SelectedItem, wrt the given GridItem object. The size
   of this item must be larger than the GridItem size, but must retain the same
   width/height ratio, and also be large enough to comfortably accommodate the
@@ -252,48 +252,48 @@ QPoint SelectedItem::getPos(GridItem *item) const
   Note that the dimensions are created on demand, and rely on the assumption that the
   GridItem's size and the selected image's size don't change at runtime.
 */
-QSize SelectedItem::getSelectedSize(GridItem *item) const
+QSize SelectedItem::selectedSize(GridItem *item) const
 {
-    if ( selectedSize.width() == -1 || selectedSize.height() == -1 ) {
+    if ( mSelectedSize.width() == -1 || mSelectedSize.height() == -1 ) {
         // Recalculate the size.
-        selectedSize.setWidth(qRound(item->rect().width()) + (margin * 2));
-        selectedSize.setHeight(qRound(item->rect().height()) + (margin * 2));
+        mSelectedSize.setWidth(static_cast<int>(item->rect().width()) + (margin * 2));
+        mSelectedSize.setHeight(static_cast<int>(item->rect().height()) + (margin * 2));
 
-        int minimum = item->getSelectedImageSize() + (margin * 2);
+        int minimum = item->selectedImageSize() + (margin * 2);
 
-        if ( selectedSize.width() < minimum ) {
+        if ( mSelectedSize.width() < minimum ) {
             // Increase width.
-            int diff = minimum - selectedSize.width();
-            selectedSize.setWidth(minimum);
-            selectedSize.setHeight(selectedSize.height() + diff);
+            int diff = minimum - mSelectedSize.width();
+            mSelectedSize.setWidth(minimum);
+            mSelectedSize.setHeight(mSelectedSize.height() + diff);
         }
-        if ( selectedSize.height() < minimum ) {
+        if ( mSelectedSize.height() < minimum ) {
             // Increase height.
-            int diff = minimum - selectedSize.height();
-            selectedSize.setHeight(minimum);
-            selectedSize.setWidth(selectedSize.width() + diff);
+            int diff = minimum - mSelectedSize.height();
+            mSelectedSize.setHeight(minimum);
+            mSelectedSize.setWidth(mSelectedSize.width() + diff);
         }
     }
 
-    return selectedSize;
+    return mSelectedSize;
 }
 
 /*!
   \internal
-  \fn QRect SelectedItem::getGeometry(GridItem *item) const
+  \fn QRect SelectedItem::geometry(GridItem *item) const
   Returns the appropriate pixel position and dimensions for the SelectedItem when positioned
   over the given item.
 */
-QRect SelectedItem::getGeometry(GridItem *item) const
+QRect SelectedItem::geometry(GridItem *item) const
 {
     // First, get the (x,y) top left-hand corner of this item, when positioned over
     // the GridItem.
-    QPoint point = getPos(item);
+    QPoint point = pos(item);
 
     // Also width & height.
-    QSize selectedSize = getSelectedSize(item);
-    int w = selectedSize.width();
-    int h = selectedSize.height();
+    QSize mSelectedSize = selectedSize(item);
+    int w = mSelectedSize.width();
+    int h = mSelectedSize.height();
 
     return QRect(point.x(),point.y(),w,h);
 }
@@ -311,8 +311,10 @@ void SelectedItem::drawBackground(QPainter *painter)
         // Create on demand.
         QImage bgImage(backgroundFileName);
 
-        blendColor(bgImage,backgroundHighlightColor);
-        background = new QPixmap(QPixmap::fromImage(bgImage.scaled(rectangle.width(),rectangle.height())));
+        blendColor(bgImage,QApplication::palette().color(QPalette::Highlight));
+        background = new QPixmap(QPixmap::fromImage(
+                    bgImage.scaled(rectangle.width(),rectangle.height(),
+                        Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
     }
 
     painter->drawPixmap(rectangle.x(),rectangle.y(),*background);
@@ -331,8 +333,8 @@ void SelectedItem::paint(QPainter *painter,const QStyleOptionGraphicsItem *,QWid
         return;
     }
 
-    // Draw the background.
-    drawBackground(painter);
+    if (!Qtopia::mousePreferred() || active)
+        drawBackground(painter);
 
     if ( animationState() == Animating ) {
         // During animation, we get multiple calls to paint(...). In each, we paint the next
@@ -342,7 +344,7 @@ void SelectedItem::paint(QPainter *painter,const QStyleOptionGraphicsItem *,QWid
             draw(painter,moviePixmap,
                     static_cast<int>(rect().x()),static_cast<int>(rect().y()));
         } else {
-            // We'll try to do a manual animation using the GridItem's Animator object.
+            // We'll try to do a coded animation using the GridItem's Animator object.
             // This call to paint(...) will have been invoked via a signal from playTimeLine
             // which ultimatey triggers playStep(...), which saves the point at which the
             // animation has run to (animationStage) - drawAnimated(...) will make use of
@@ -365,7 +367,8 @@ void SelectedItem::paint(QPainter *painter,const QStyleOptionGraphicsItem *,QWid
             draw(painter,destItem->selectedPic(),destX,destY);
         } else {
             // We're not sliding, we're just drawing 'item' as the selected item.
-            draw(painter,currentItem->selectedPic(),static_cast<int>(rect().x()),static_cast<int>(rect().y()));
+            if (!Qtopia::mousePreferred() || active)
+                draw(painter,currentItem->selectedPic(),static_cast<int>(rect().x()),static_cast<int>(rect().y()));
         }
     }
 }
@@ -381,13 +384,13 @@ void SelectedItem::draw(QPainter *painter,const QPixmap &pixmap,int x,int y) con
 {
     if ( !pixmap.isNull() ) {
         // Position the image in the centre of this item.
-        x += static_cast<int>(rect().width()/2.0 - pixmap.width()/2.0);
-        y += static_cast<int>(rect().height()/2.0 - pixmap.height()/2.0);
+        x += (static_cast<int>(rect().width()) - pixmap.width())/2;
+        y += (static_cast<int>(rect().height()) - pixmap.height())/2;
 
         // The 'active' image has a different appearance.
         if ( active ) {
             QImage img = pixmap.toImage();
-            blendColor(img,highlightColor);
+            blendColor(img,QApplication::palette().color(QPalette::Highlight));
             painter->drawPixmap(x,y,QPixmap::fromImage(img));
         } else {
             painter->drawPixmap(x,y,pixmap);
@@ -398,13 +401,13 @@ void SelectedItem::draw(QPainter *painter,const QPixmap &pixmap,int x,int y) con
 /*!
   \internal
   \fn void SelectedItem::drawAnimated(QPainter *painter)
-  Draws a single step of the animation for a manual animation, using the current
+  Draws a single step of the animation for a coded animation, using the current
   GridItem's Animator object.
 */
 void SelectedItem::drawAnimated(QPainter *painter)
 {
     // Pass painter and the percentage of the animation through to the current Animator.
-    Animator *animator = currentItem->getSelectedAnimator();
+    Animator *animator = currentItem->selectedAnimator();
     if ( !animator ) {
         draw(painter,currentItem->selectedPic(),static_cast<int>(rect().x()),static_cast<int>(rect().y()));
         return;
@@ -415,8 +418,8 @@ void SelectedItem::drawAnimated(QPainter *painter)
     qreal percent = static_cast<qreal>(animationStage)/100;
     // Draw the animated background first - if there is one - then the animator for
     // this stage of the animation.
-    Animator *backgroundAnimator = currentItem->getSelectedBackgroundAnimator();
-    painter->setBrush(backgroundHighlightColor);
+    Animator *backgroundAnimator = currentItem->selectedBackgroundAnimator();
+    painter->setBrush(QApplication::palette().color(QPalette::Button));
     if ( backgroundAnimator ) {
         backgroundAnimator->animate(painter,this,percent);
     }
@@ -433,13 +436,13 @@ void SelectedItem::blendColor(QImage &img,QColor color)
     //if (img.format() == QImage::Format_ARGB32_Premultiplied) {
     //    img = img.convertToFormat(QImage::Format_ARGB32);
     //}
-    color.setAlphaF(0.4);
+    color.setAlphaF(0.5);
 
     // Blend the pixels in 'img' with those in 'color'.
     QPainter blendPainter(&img);
     //blendPainter.setRenderHint(QPainter::Antialiasing,true);
     blendPainter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-    blendPainter.fillRect(0,0,img.width(),img.height(),color);
+    blendPainter.fillRect(0, 0, img.width(), img.height(), color.darker());
     blendPainter.end();
 }
 
@@ -455,9 +458,9 @@ void SelectedItem::detachAnimation()
     // If there was a movie, make sure it isn't still connected to any slots that we're responsible
     // for, and kiss it goodbye (but do not delete it - it is owned by a GridItem).
     if ( movie ) {
-        QObject::disconnect(movie,SIGNAL(frameChanged(int)),connector,SLOT(animationChanged()));
-        QObject::disconnect(movie,SIGNAL(finished()),connector,SLOT(animationFinished()));
-        QObject::disconnect(movie,SIGNAL(error(QImageReader::ImageReaderError)),connector,SLOT(animationError(QImageReader::ImageReaderError)));
+        QObject::disconnect(movie,SIGNAL(frameChanged(int)),mConnector,SLOT(animationChanged()));
+        QObject::disconnect(movie,SIGNAL(finished()),mConnector,SLOT(animationFinished()));
+        QObject::disconnect(movie,SIGNAL(error(QImageReader::ImageReaderError)),mConnector,SLOT(animationError(QImageReader::ImageReaderError)));
         movie = 0;
     }
 }
@@ -482,9 +485,9 @@ void SelectedItem::resetAnimation()
     movie = currentItem->movie();
     if ( movie ) {
         // Item can animate.
-        QObject::connect(movie,SIGNAL(frameChanged(int)),connector,SLOT(animationChanged()));
-        QObject::connect(movie,SIGNAL(finished()),connector,SLOT(animationFinished()));
-        QObject::connect(movie,SIGNAL(error(QImageReader::ImageReaderError)),connector,SLOT(animationError(QImageReader::ImageReaderError)));
+        QObject::connect(movie,SIGNAL(frameChanged(int)),mConnector,SLOT(animationChanged()));
+        QObject::connect(movie,SIGNAL(finished()),mConnector,SLOT(animationFinished()));
+        QObject::connect(movie,SIGNAL(error(QImageReader::ImageReaderError)),mConnector,SLOT(animationError(QImageReader::ImageReaderError)));
     }
 }
 
@@ -499,9 +502,9 @@ void SelectedItem::updateImages()
     detachAnimation();
 
     // Get all the GridItem objects to rebuild their pixmaps.
-    for ( int row = 0; row < table.getTopRow(); row++ ) {
-        for ( int col = 0; col < table.getTopColumn(); col++ ) {
-            GridItem *item = table.getItem(row,col);
+    for ( int row = 0; row < table.topRow(); row++ ) {
+        for ( int col = 0; col < table.topColumn(); col++ ) {
+            GridItem *item = table.item(row,col);
             if ( item ) {
                 item->updateImages();
             }
@@ -520,11 +523,11 @@ void SelectedItem::updateImages()
 */
 void SelectedItem::resize()
 {
-    selectedSize = QSize(-1,-1);
+    mSelectedSize = QSize(-1,-1);
 
     if ( currentItem ) {
         // Position this object over currentItem.
-        QRect rectangle = getGeometry(currentItem);
+        QRect rectangle = geometry(currentItem);
         setRect(rectangle);
     }
 }
@@ -562,7 +565,7 @@ void SelectedItem::setCurrent(GridItem *item,bool animate)
     resize();
 
     // Now we are current - tell the world.
-    connector->triggerSelectionChanged(currentItem);
+    mConnector->triggerSelectionChanged(currentItem);
 
     if ( currentItem && animate ) {
         // When a new item is current (i.e. a move is finished, or the view has been shown) we animate
@@ -578,7 +581,7 @@ void SelectedItem::setCurrent(GridItem *item,bool animate)
 */
 void SelectedItem::setCurrent(int row,int column,bool animate)
 {
-    GridItem *item = table.getItem(row,column);
+    GridItem *item = table.item(row,column);
     setCurrent(item,animate);
 }
 
@@ -592,9 +595,6 @@ void SelectedItem::setCurrent(int row,int column,bool animate)
 */
 void SelectedItem::keyPressEvent(QKeyEvent *event)
 {
-    if ( event->isAutoRepeat() ) {
-        return;
-    }
     if ( !currentItem ) {
         qWarning("SelectedItem::keyPressEvent(...): No current item.");
         QGraphicsRectItem::keyPressEvent(event);
@@ -603,19 +603,53 @@ void SelectedItem::keyPressEvent(QKeyEvent *event)
 
     switch( event->key() ) {
     case Qt::Key_Right:
+        if ( event->isAutoRepeat() && destItem )
+            return;
         moveRequested(Right);
         break;
     case Qt::Key_Left:
+        if ( event->isAutoRepeat() && destItem )
+            return;
         moveRequested(Left);
         break;
     case Qt::Key_Up:
+        if ( event->isAutoRepeat() && destItem )
+            return;
         moveRequested(Up);
         break;
     case Qt::Key_Down:
+        if ( event->isAutoRepeat() && destItem )
+            return;
         moveRequested(Down);
         break;
     case Qt::Key_Select: // Qtopia pad
     case Qt::Key_Return: // otherwise
+        if ( event->isAutoRepeat())
+            return;
+        setActive(true);
+        pressed = true;
+        break;
+    default:
+        if ( event->isAutoRepeat())
+            return;
+        QGraphicsRectItem::keyPressEvent(event);
+        return;
+    }
+}
+
+void SelectedItem::keyReleaseEvent(QKeyEvent *event)
+{
+    if ( !currentItem ) {
+        qWarning("SelectedItem::keyReleaseEvent(...): No current item.");
+        QGraphicsRectItem::keyReleaseEvent(event);
+        return;
+    }
+
+    switch( event->key() ) {
+    case Qt::Key_Select: // Qtopia pad
+    case Qt::Key_Return: // otherwise
+        if ( event->isAutoRepeat() || !pressed)
+            return;
         if ( destItem ) {
             // User has chosen to move to a new destination already, so they want to select
             // that one.
@@ -623,9 +657,11 @@ void SelectedItem::keyPressEvent(QKeyEvent *event)
         } else if ( currentItem ) {
             triggerItemSelected(currentItem);
         } // Otherwise, nothing to select
+        setActive(false);
+        pressed = false;
         break;
     default:
-        QGraphicsRectItem::keyPressEvent(event);
+        QGraphicsRectItem::keyReleaseEvent(event);
         return;
     }
 }
@@ -641,11 +677,11 @@ void SelectedItem::moveRequested(Direction direction)
     int col;
     if ( destItem ) {
         // Move already in progress.
-        row = destItem->getRow();
-        col = destItem->getColumn();
+        row = destItem->row();
+        col = destItem->column();
     } else {
-        row = currentItem->getRow();
-        col = currentItem->getColumn();
+        row = currentItem->row();
+        col = currentItem->column();
     }
 
     switch( direction) {
@@ -666,13 +702,13 @@ void SelectedItem::moveRequested(Direction direction)
         return;
     }
 
-    if ( (row < 0) || (row > table.getTopRow()) || (col < 0) || (col > table.getTopColumn()) ) {
+    if ( (row < 0) || (row > table.topRow()) || (col < 0) || (col > table.topColumn()) ) {
         // We ain't going nowhere.
         return;
     }
 
     // Retrieve the destination item.
-    GridItem *_destItem = table.getItem(row,col);
+    GridItem *_destItem = table.item(row,col);
     if ( !_destItem ) {
         qWarning("SelectedItem::moveRequested(...): Error - no item for row %d, column %d.",row,col);
         return;
@@ -695,29 +731,29 @@ void SelectedItem::triggerItemSelected(GridItem *item)
     }
 
     // Cause connector to emit itemSelected(GridItem *) signal.
-    connector->triggerItemSelected(item);
+    mConnector->triggerItemSelected(item);
 }
 
-qreal SelectedItem::getXDrift()
+qreal SelectedItem::xDrift()
 {
-    if ( xDrift == -1 ) {
+    if ( mXDrift == -1 ) {
         // Hasn't been worked out yet.
-        xDrift = ((1 + GridItem::SELECTED_IMAGE_SIZE_FACTOR) * rect().width())
+        mXDrift = ((1 + GridItem::SELECTED_IMAGE_SIZE_FACTOR) * rect().width())
                  - rect().width();
     }
 
-    return xDrift;
+    return mXDrift;
 }
 
-qreal SelectedItem::getYDrift()
+qreal SelectedItem::yDrift()
 {
-    if ( yDrift == -1 ) {
+    if ( mYDrift == -1 ) {
         // Hasn't been worked out yet.
-        yDrift = ((1 + GridItem::SELECTED_IMAGE_SIZE_FACTOR) * rect().height())
+        mYDrift = ((1 + GridItem::SELECTED_IMAGE_SIZE_FACTOR) * rect().height())
                  - rect().height();
     }
 
-    return yDrift;
+    return mYDrift;
 }
 
 /*!
@@ -778,8 +814,8 @@ void SelectedItem::moveStep(int n)
 
     // Find out how where the SelectedItem box ought to be at this stage in the move, and
     // shift it accordingly.
-    QRect destRect = getGeometry(destItem);
-    QRect srcRect = getGeometry(currentItem); // we might be in the middle of a move, so don't use rect() here!
+    QRect destRect = geometry(destItem);
+    QRect srcRect = geometry(currentItem); // we might be in the middle of a move, so don't use rect() here!
 
     qreal moveByX = (destRect.x() - srcRect.x()) * percent;
     qreal moveByY = (destRect.y() - srcRect.y()) * percent;
@@ -806,25 +842,25 @@ void SelectedItem::moveStep(int n)
     destY = destRect.y();
 
     // Find the x position of current and dest items.
-    if ( currentItem->getColumn() < destItem->getColumn() ) {
+    if ( currentItem->column() < destItem->column() ) {
         // Moving from left to right.
-        currentX -= qRound(percent * getXDrift()); // current (left) drifts away to the left over time
-        destX += qRound((1-percent) * getXDrift()); // destination (right) drifts in from the right over time
-    } else if ( currentItem->getColumn() > destItem->getColumn() ) {
+        currentX -= qRound(percent * xDrift()); // current (left) drifts away to the left over time
+        destX += qRound((1-percent) * xDrift()); // destination (right) drifts in from the right over time
+    } else if ( currentItem->column() > destItem->column() ) {
         // Moving from right to left.
-        currentX += qRound(percent * getXDrift()); // current (right) drifts away to the right over time
-        destX -= qRound((1-percent) * getXDrift()); // destination (left) drifts in from the left over time
+        currentX += qRound(percent * xDrift()); // current (right) drifts away to the right over time
+        destX -= qRound((1-percent) * xDrift()); // destination (left) drifts in from the left over time
     } // else, if they're equal, currentX & destX will be their usual positions
 
     // Find the y position of current and dest items.
-    if ( currentItem->getRow() < destItem->getRow() ) {
+    if ( currentItem->row() < destItem->row() ) {
         // Moving down.
-        currentY -= qRound(percent * getYDrift()); // current (top) drifts upwards over time
-        destY += qRound((1-percent) * getYDrift()); // destination (bottom) drifts up from below over time
-    } else if ( currentItem->getRow() > destItem->getRow() ) {
+        currentY -= qRound(percent * yDrift()); // current (top) drifts upwards over time
+        destY += qRound((1-percent) * yDrift()); // destination (bottom) drifts up from below over time
+    } else if ( currentItem->row() > destItem->row() ) {
         // Moving up.
-        currentY += qRound(percent * getYDrift()); // current (bottom) drifts downwards over time
-        destY -= qRound((1-percent) * getYDrift()); // destination (top) drifts down from above over time
+        currentY += qRound(percent * yDrift()); // current (bottom) drifts downwards over time
+        destY -= qRound((1-percent) * yDrift()); // destination (top) drifts down from above over time
     } // else, if they're equal, currentY & destY will be their usual positions
 }
 
@@ -846,7 +882,7 @@ void SelectedItem::moveFinished()
 /*!
   \internal
   \fn void SelectedItem::playStep(int _animationStage)
-  Called during manual animation (i.e. when no movie is available).
+  Called during coded animation (i.e. when no movie is available).
   Causes the item to be redrawn for this step of the animation.
 */
 void SelectedItem::playStep(int _animationStage)
@@ -914,7 +950,7 @@ void SelectedItem::startAnimating()
     // immediately stopping, which also affects performance.
     animationPending = true; // I hate these stupid little flags, but it gets around the problem that
     // we're delaying an event and we can find out about it in the meantime.
-    QTimer::singleShot(ANIMATION_DELAY_INTERVAL,connector,SLOT(startAnimation()));
+    QTimer::singleShot(ANIMATION_DELAY_INTERVAL,mConnector,SLOT(startAnimation()));
 }
 
 void SelectedItem::startAnimationDelayed()
@@ -933,8 +969,8 @@ void SelectedItem::startAnimationDelayed()
             qWarning("SelectedItem::startAnimating() - trying to start animation, but no current item!");
             return;
         }
-        if ( currentItem->getSelectedAnimator() ) {
-            // We can start animating manually.
+        if ( currentItem->selectedAnimator() ) {
+            // We can start animating codedly.
             playTimeLine->start();
         }
         // Otherwise, no animation for this item.
@@ -959,3 +995,16 @@ void SelectedItem::animationFinished()
        update(boundingRect());
     }
 }
+
+/*!
+  \internal
+  Updates the colors used by the SelectedItem.
+*/
+void SelectedItem::paletteChanged()
+{
+    // Force colorized background to be reloaded.
+    delete background;
+    background = 0;
+    update(boundingRect());
+}
+

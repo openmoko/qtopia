@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,24 +40,24 @@
 #define QDESIGNER_RESOURCE_H
 
 #include "formeditor_global.h"
-
-#include <QtDesigner/QtDesigner>
-
 #include "qsimpleresource_p.h"
 
 #include <QtCore/QHash>
 #include <QtCore/QStack>
+#include <QtCore/QList>
 
+class DomCustomWidget;
 class DomCustomWidgets;
 
 class QDesignerContainerExtension;
 class QDesignerFormEditorInterface;
 class QDesignerCustomWidgetInterface;
+class QDesignerWidgetDataBaseItemInterface;
 
 class QDesignerTabWidget;
 class QDesignerStackedWidget;
 class QDesignerToolBox;
-class QDesignerToolBar;
+class QToolBar;
 class QDesignerDockWidget;
 class QLayoutWidget;
 
@@ -62,6 +77,7 @@ public:
     DomUI *copy(const QList<QWidget*> &selection);
     QList<QWidget*> paste(DomUI *ui, QWidget *parentWidget);
     QList<QWidget*> paste(QIODevice *dev, QWidget *parentWidget);
+    static QString qtify(const QString &name);
 
 protected:
     using QSimpleResource::create;
@@ -106,7 +122,7 @@ protected:
     DomWidget *saveWidget(QDesignerStackedWidget *widget, DomWidget *ui_parentWidget);
     DomWidget *saveWidget(QDesignerToolBox *widget, DomWidget *ui_parentWidget);
     DomWidget *saveWidget(QWidget *widget, QDesignerContainerExtension *container, DomWidget *ui_parentWidget);
-    DomWidget *saveWidget(QDesignerToolBar *toolBar, DomWidget *ui_parentWidget);
+    DomWidget *saveWidget(QToolBar *toolBar, DomWidget *ui_parentWidget);
     DomWidget *saveWidget(QDesignerDockWidget *dockWidget, DomWidget *ui_parentWidget);
 
     virtual DomCustomWidgets *saveCustomWidgets();
@@ -120,9 +136,15 @@ protected:
     DomProperty *createIconProperty(const QVariant &v) const;
 
     void changeObjectName(QObject *o, QString name);
-    static QString qtify(const QString &name);
+
+    DomProperty *applyProperStdSetAttribute(QObject *object, const QString &propertyName, DomProperty *property);
 
 private:
+    void addUserDefinedScripts(QWidget *w, DomWidget *ui_widget);
+
+    typedef QList<DomCustomWidget*> DomCustomWidgetList;
+    void addCustomWidgetsToWidgetDatabase(DomCustomWidgetList& list);
+    void fixIconPath(IconPaths &) const;
     FormWindow *m_formWindow;
     bool m_isMainWidget;
     QHash<QString, QString> m_internal_to_qt;

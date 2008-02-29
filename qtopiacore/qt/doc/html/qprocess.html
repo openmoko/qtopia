@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/io/qprocess.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/io/qprocess.cpp -->
 <head>
-  <title>Qt 4.2: QProcess Class Reference</title>
+  <title>Qt 4.3: QProcess Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QProcess Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QProcess Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QProcess class is used to start external programs and to communicate with them. <a href="#details">More...</a></p>
 <pre> #include &lt;QProcess&gt;</pre><p>Inherits <a href="qiodevice.html">QIODevice</a>.</p>
 <p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
@@ -93,8 +94,9 @@
 <ul>
 <li><div class="fn"/>int <b><a href="qprocess.html#execute">execute</a></b> ( const QString &amp; <i>program</i>, const QStringList &amp; <i>arguments</i> )</li>
 <li><div class="fn"/>int <b><a href="qprocess.html#execute-2">execute</a></b> ( const QString &amp; <i>program</i> )</li>
-<li><div class="fn"/>bool <b><a href="qprocess.html#startDetached">startDetached</a></b> ( const QString &amp; <i>program</i>, const QStringList &amp; <i>arguments</i> )</li>
-<li><div class="fn"/>bool <b><a href="qprocess.html#startDetached-2">startDetached</a></b> ( const QString &amp; <i>program</i> )</li>
+<li><div class="fn"/>bool <b><a href="qprocess.html#startDetached">startDetached</a></b> ( const QString &amp; <i>program</i>, const QStringList &amp; <i>arguments</i>, const QString &amp; <i>workingDirectory</i>, qint64 * <i>pid</i> = 0 )</li>
+<li><div class="fn"/>bool <b><a href="qprocess.html#startDetached-2">startDetached</a></b> ( const QString &amp; <i>program</i>, const QStringList &amp; <i>arguments</i> )</li>
+<li><div class="fn"/>bool <b><a href="qprocess.html#startDetached-3">startDetached</a></b> ( const QString &amp; <i>program</i> )</li>
 <li><div class="fn"/>QStringList <b><a href="qprocess.html#systemEnvironment">systemEnvironment</a></b> ()</li>
 </ul>
 <ul>
@@ -215,7 +217,7 @@
 <h3 class="fn"><a name="QProcess"></a>QProcess::QProcess ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a <a href="qprocess.html">QProcess</a> object with the given <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QProcess"></a>QProcess::~QProcess ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Destructs the <a href="qprocess.html">QProcess</a> object, i.e., killing the process.</p>
+<p>Destructs the <a href="qprocess.html">QProcess</a> object, i.e&#x2e;, killing the process.</p>
 <p>Note that this function will not return until the process is terminated.</p>
 <h3 class="fn"><a name="close"></a>void QProcess::close ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Closes all communication with the process. After calling this function, <a href="qprocess.html">QProcess</a> will no longer emit <a href="qiodevice.html#readyRead">readyRead</a>(), and data can no longer be read or written.</p>
@@ -311,7 +313,6 @@
 <p>See also <a href="qprocess.html#state">state</a>().</p>
 <h3 class="fn"><a name="setReadChannel"></a>void QProcess::setReadChannel ( <a href="qprocess.html#ProcessChannel-enum">ProcessChannel</a> <i>channel</i> )</h3>
 <p>Sets the current read channel of the <a href="qprocess.html">QProcess</a> to the given <i>channel</i>. The current input channel is used by the functions <a href="qiodevice.html#read">read</a>(), <a href="qiodevice.html#readAll">readAll</a>(), <a href="qiodevice.html#readLine">readLine</a>(), and <a href="qiodevice.html#getChar">getChar</a>(). It also determines which channel triggers <a href="qprocess.html">QProcess</a> to emit <a href="qiodevice.html#readyRead">readyRead</a>().</p>
-<p>Changing the read channel will clear the unget buffer.</p>
 <p>See also <a href="qprocess.html#readChannel">readChannel</a>().</p>
 <h3 class="fn"><a name="setStandardErrorFile"></a>void QProcess::setStandardErrorFile ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i>, <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a> <i>mode</i> = Truncate )</h3>
 <p>Redirects the process' standard error to the file <i>fileName</i>. When the redirection is in place, the standard error read channel is closed: reading from it using <a href="qiodevice.html#read">read</a>() will always fail, as will <a href="qprocess.html#readAllStandardError">readAllStandardError</a>(). The file will be appended to if <i>mode</i> is Append, otherwise, it will be truncated.</p>
@@ -349,7 +350,7 @@
 <p>Sets the working directory to <i>dir</i>. <a href="qprocess.html">QProcess</a> will start the process in this directory. The default behavior is to start the process in the working directory of the calling process.</p>
 <p>See also <a href="qprocess.html#workingDirectory">workingDirectory</a>() and <a href="qprocess.html#start">start</a>().</p>
 <h3 class="fn"><a name="setupChildProcess"></a>void QProcess::setupChildProcess ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This function is called in the child process context just before the program is executed on Unix or Mac OS X (i.e., after <i>fork()</i>, but before <i>execve()</i>). Reimplement this function to do last minute initialization of the child process. Example:</p>
+<p>This function is called in the child process context just before the program is executed on Unix or Mac OS X (i.e&#x2e;, after <i>fork()</i>, but before <i>execve()</i>). Reimplement this function to do last minute initialization of the child process. Example:</p>
 <pre> class SandboxProcess : public QProcess
  {
      ...
@@ -391,11 +392,18 @@
 <pre> QProcess process;
  process.start(&quot;dir \&quot;\&quot;\&quot;My Documents\&quot;\&quot;\&quot;&quot;);</pre>
 <p>The <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a> is set to <i>mode</i>.</p>
-<h3 class="fn"><a name="startDetached"></a>bool QProcess::startDetached ( const <a href="qstring.html">QString</a> &amp; <i>program</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>arguments</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="startDetached"></a>bool QProcess::startDetached ( const <a href="qstring.html">QString</a> &amp; <i>program</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>arguments</i>, const <a href="qstring.html">QString</a> &amp; <i>workingDirectory</i>, <a href="qtglobal.html#qint64-typedef">qint64</a> * <i>pid</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Starts the program <i>program</i> with the arguments <i>arguments</i> in a new process, and detaches from it. Returns true on success; otherwise returns false. If the calling process exits, the detached process will continue to live.</p>
 <p>On Unix, the started process will run in its own session and act like a daemon. On Windows, it will run as a regular standalone process.</p>
 <p>On Windows, arguments that contain spaces are wrapped in quotes.</p>
-<h3 class="fn"><a name="startDetached-2"></a>bool QProcess::startDetached ( const <a href="qstring.html">QString</a> &amp; <i>program</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>The process will be started in the directory <i>workingDirectory</i>.</p>
+<p>If the function is successful then *<i>pid</i> is set to the process identifier of the started process.</p>
+<h3 class="fn"><a name="startDetached-2"></a>bool QProcess::startDetached ( const <a href="qstring.html">QString</a> &amp; <i>program</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>arguments</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Starts the program <i>program</i> with the arguments <i>arguments</i> in a new process, and detaches from it. Returns true on success; otherwise returns false. If the calling process exits, the detached process will continue to live.</p>
+<p>On Unix, the started process will run in its own session and act like a daemon. On Windows, it will run as a regular standalone process.</p>
+<p>On Windows, arguments that contain spaces are wrapped in quotes.</p>
+<h3 class="fn"><a name="startDetached-3"></a>bool QProcess::startDetached ( const <a href="qstring.html">QString</a> &amp; <i>program</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Starts the program <i>program</i> in a new process. <i>program</i> is a single string of text containing both the program name and its arguments. The arguments are separated by one or more spaces.</p>
 <p>The <i>program</i> string can also contain quotes, to ensure that arguments containing spaces are correctly supplied to the new process.</p>
@@ -416,7 +424,8 @@
 <h3 class="fn"><a name="terminate"></a>void QProcess::terminate ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Attempts to terminate the process.</p>
 <p>The process may not exit as a result of calling this function (it is given the chance to prompt the user for any unsaved files, etc).</p>
-<p>On Windows, terminate() posts a WM_CLOSE message to the process, and on Unix and Mac OS X the SIGTERM signal is sent.</p>
+<p>On Windows, terminate() posts a WM_CLOSE message to all toplevel windows of the process and then to the main thread of the process itself. On Unix and Mac OS X the SIGTERM signal is sent.</p>
+<p>Console applications on Windows that do not run an event loop, or whose event loop does not handle the WM_CLOSE message, can only be terminated by calling <a href="qprocess.html#kill">kill</a>().</p>
 <p>See also <a href="qprocess.html#kill">kill</a>().</p>
 <h3 class="fn"><a name="waitForFinished"></a>bool QProcess::waitForFinished ( int <i>msecs</i> = 30000 )</h3>
 <p>Blocks until the process has finished and the <a href="qprocess.html#finished">finished</a>() signal has been emitted, or until <i>msecs</i> milliseconds have passed.</p>
@@ -444,6 +453,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

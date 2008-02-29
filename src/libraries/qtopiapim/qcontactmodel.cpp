@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -76,6 +76,7 @@ void QContactModel::initMaps()
         { "defaultemail", QT_TR_NOOP( "Default Email" ), DefaultEmail },
         { "emails", QT_TR_NOOP( "Emails" ), Emails },
 
+        { "defaultphone", QT_TR_NOOP( "Default Phone" ), DefaultPhone },
         // other
         { "otherphone", QT_TR_NOOP( "Home Phone" ), OtherPhone },
         { "otherfax", QT_TR_NOOP( "Home Fax" ), OtherFax},
@@ -89,6 +90,7 @@ void QContactModel::initMaps()
         { "homezip", QT_TR_NOOP( "Home Zip" ), HomeZip },
         { "homecountry", QT_TR_NOOP( "Home Country" ), HomeCountry },
         { "homephone", QT_TR_NOOP( "Home Phone" ), HomePhone },
+        { "homevoip", QT_TR_NOOP( "Home VOIP" ), HomeVOIP },
         { "homefax", QT_TR_NOOP( "Home Fax" ), HomeFax},
         { "homemobile", QT_TR_NOOP( "Home Mobile" ), HomeMobile},
         { "homepager", QT_TR_NOOP( "Home Pager" ), HomePager},
@@ -108,6 +110,7 @@ void QContactModel::initMaps()
         { "businessphone", QT_TR_NOOP( "Business Phone" ), BusinessPhone},
         { "businessfax", QT_TR_NOOP( "Business Fax" ), BusinessFax},
         { "businessmobile", QT_TR_NOOP( "Business Mobile" ), BusinessMobile},
+        { "businessvoip", QT_TR_NOOP( "Business VOIP" ), BusinessVOIP},
         { "businesspager", QT_TR_NOOP( "Business Pager" ), BusinessPager},
         { "profession", QT_TR_NOOP( "Profession" ), Profession},
         { "assistant", QT_TR_NOOP( "Assistant" ), Assistant},
@@ -200,13 +203,23 @@ QList<QContactModel::Field> QContactModel::phoneFields()
     //result.append(OtherPager);
     result.append(HomePhone);
     result.append(HomeMobile);
+    result.append(HomeVOIP);
     result.append(HomeFax);
     //result.append(HomePager);
     result.append(BusinessPhone);
     result.append(BusinessMobile);
+    result.append(BusinessVOIP);
     result.append(BusinessFax);
     result.append(BusinessPager);
     return result;
+}
+
+/*!
+  Returns the contact model fields that represent the label for a contact.
+*/
+QList<QContactModel::Field> QContactModel::labelFields()
+{
+    return QContactIO::labelKeys();
 }
 
 /*!
@@ -250,7 +263,7 @@ public:
     static QUniqueId mPersonalId;
     static bool mPersonalIdRead;
 
-    QContactIO *defaultmodel;
+    QContactIO *defaultio;
     QPimSource phoneSource;
     QPimSource simSource;
     uint simContext;
@@ -311,7 +324,7 @@ QIcon QContactModel::fieldIcon(Field field)
   both within this application and from other applications.  This will result in
   the modelReset() signal being emitted.
 
-  \sa QContact, QContactListView, QSortFilterProxyModel
+  \sa QContact, QContactListView, QSortFilterProxyModel, {Pim Library}
 */
 
 /*!
@@ -372,6 +385,8 @@ QIcon QContactModel::fieldIcon(Field field)
     The home fax number of the contact
   \value HomeMobile
     The home mobile number of the contact
+  \value DefaultPhone
+    The default phone number for the contact
   \value DefaultEmail
     The default email address for the contact
   \value Emails
@@ -380,6 +395,7 @@ QIcon QContactModel::fieldIcon(Field field)
   \omitvalue OtherFax
   \omitvalue OtherMobile
   \omitvalue OtherPager
+  \omitvalue OtherVOIP
   \omitvalue HomePager
   \value BusinessStreet
     The business street address for the contact
@@ -439,6 +455,10 @@ QIcon QContactModel::fieldIcon(Field field)
     The identifier of the contact
   \value Categories
     The list of categories the contact belongs to
+  \value HomeVOIP
+    The URI for the contact's home VOIP id
+  \value BusinessVOIP
+    The URI for the contact's business VOIP id
  */
 
 /*!
@@ -454,15 +474,14 @@ QContactModel::QContactModel(QObject *parent)
     : QPimModel(parent)
 {
     d = new QContactModelData;
-    QtopiaSql::openDatabase();
+    QtopiaSql::instance()->openDatabase();
 
     ContactSqlIO *access = new ContactSqlIO(this);
     QContactDefaultContext *context = new QContactDefaultContext(this, access);
 
     addAccess(access);
     addContext(context);
-    d->phoneSource = context->defaultSource();
-    d->defaultmodel = access;
+    d->defaultio = access;
 
 #ifdef QTOPIA_CELL
     QContactSimContext *scon = new QContactSimContext(this, access);
@@ -473,8 +492,8 @@ QContactModel::QContactModel(QObject *parent)
 
     QtopiaChannel *channel = new QtopiaChannel( "QPE/PIM",  this );
 
-    connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
-            this, SLOT(pimMessage(const QString&,const QByteArray&)) );
+    connect( channel, SIGNAL(received(QString,QByteArray)),
+            this, SLOT(pimMessage(QString,QByteArray)) );
 }
 
 /*!
@@ -530,81 +549,108 @@ void QContactModel::sort(int column, Qt::SortOrder order)
 */
 QVariant QContactModel::data(const QModelIndex &index, int role) const
 {
-    //generic = QPixmap(":image/addressbook/generic-contact");
-    //sim = QPixmap(":image/addressbook/sim-contact");
-    QContact c(contact(index));
-    switch(index.column()) {
-        case Label:
-            if (index.row() < rowCount()){
-                // later, take better advantage of roles.
-                switch(role) {
-                    default:
-                        break;
-                    case Qt::DecorationRole:
-                    case PortraitRole:
-#ifdef QTOPIA_PHONE
-                        if (c.portraitFile().isEmpty() && isSIMCardContact(index)) {
-                            QPixmap pm;
-                            static const QLatin1String key("pimcontact-sim-thumb");
-                            if (!QGlobalPixmapCache::find(key, pm)) {
-                                QImageReader reader(":image/addressbook/sim-contact");
-                                reader.setScaledSize(QContact::thumbnailSize());
-                                QImage img = reader.read();
-                                if (!img.isNull()) {
-                                    pm = QPixmap::fromImage(img);
-                                    QGlobalPixmapCache::insert(key, pm);
-                                }
-                            }
+    /* XXX Early out if we don't understand the role to avoid creating a contact */
+    if (index.column() == Label) {
+        switch(role) {
+            case Qt::DecorationRole:
+            case PortraitRole:
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+            case LabelRole:
+            case SubLabelRole:
+            case StatusIconRole:
+                break;
 
-                            return qvariant_cast<QPixmap>(pm);
-                        }
-#endif
-                        return qvariant_cast<QPixmap>(c.thumbnail());
-                    case Qt::DisplayRole:
-                        return QVariant(c.label());
-                    case Qt::EditRole:
-                        return QVariant(c.uid().toByteArray());
-                    case LabelRole:
-                        {
-                            QString l = c.label();
-#if 0
-                            /* only way to really match is to get
-                               the contactio to do the underlining/build the label.
-                               leave out for the moment till can be right.
-                               */
-                            if (!d->searchText.isEmpty()) {
-                                int pos = searchIndex(l);
-                                if (pos != -1) {
-                                    // should scrub each.
-                                    l = Qt::escape(l.left(pos)) +
-                                        "<u>" + Qt::escape(l.mid(pos, d->searchText.length())) +
-                                        "</u>" + Qt::escape(l.mid(pos + d->searchText.length()));
-                                }
-                            }A
-#endif
-                            return "<b>" + l + "</b>";
-                        }
-                    case SubLabelRole:
+            default:
+                return QVariant();
+        }
+    }
+
+    // No I/O means no contact
+    QContactIO *io = qobject_cast<QContactIO*>(access(index.row()));
+    if (io) {
+        int row = index.row();
+        switch(index.column()) {
+            case Label:
+                if (row < rowCount()){
+                    // later, take better advantage of roles.
+                    switch(role) {
+                        default:
+                            break;
+                        case Qt::DecorationRole:
+                            // We can tell if this is a SIM contact, but not much else
+                            if (io->contactField(row, Portrait).toString().isEmpty() && isSIMCardContact(index))
+                                return QContactModelData::getCachedIcon(QLatin1String(":icon/addressbook/sim-contact"));
+                            else {
+                                QContact c = io->simpleContact(row);
+                                return c.icon();
+                            }
+                        case PortraitRole:
 #ifdef QTOPIA_PHONE
-                        if (!c.defaultPhoneNumber().isEmpty())
-                            return Qt::escape(c.defaultPhoneNumber());
+                            if (io->contactField(row, Portrait).toString().isEmpty() && isSIMCardContact(index)) {
+                                QPixmap pm;
+                                static const QLatin1String key("pimcontact-sim-thumb");
+                                if (!QGlobalPixmapCache::find(key, pm)) {
+                                    QImageReader reader(":image/addressbook/sim-contact");
+                                    reader.setScaledSize(QContact::thumbnailSize());
+                                    QImage img = reader.read();
+                                    if (!img.isNull()) {
+                                        pm = QPixmap::fromImage(img);
+                                        QGlobalPixmapCache::insert(key, pm);
+                                    }
+                                }
+
+                                return qvariant_cast<QPixmap>(pm);
+                            } else
 #endif
-                        if (c.label() != c.company())
-                            return Qt::escape(c.company());
-                        if (c.categories().contains("Business"))
-                            return Qt::escape(c.businessCity());
-                        return Qt::escape(c.homeCity());
-                    case StatusIconRole:
-                        if (isPersonalDetails(c.uid()))
-                            return QPixmap(":image/addressbook/business");
-                        return QPixmap();
+                            {
+                                // Don't duplicate the thumbnail logic here
+                                QContact c = io->simpleContact(row);
+                                return qvariant_cast<QPixmap>(c.thumbnail());
+                            }
+                        case Qt::DisplayRole:
+                            return QVariant(io->formattedLabel(row));
+                        case Qt::EditRole:
+                            return QVariant(id(row).toByteArray());
+                        case LabelRole:
+                            {
+                                QString l = io->formattedLabel(row);
+                                return "<b>" + l + "</b>";
+                            }
+                        case SubLabelRole:
+                            {
+                                int f = filterFlags();
+                                QString email = io->contactField(row, DefaultEmail).toString();
+                                // If we are set to filter in email and not phones, check the email address
+                                if (((f & (ContainsEmail|ContainsPhoneNumber)) == ContainsEmail) && !email.isEmpty())
+                                    return Qt::escape(email);
+#ifdef QTOPIA_PHONE
+                                QString phone = io->contactField(row, DefaultPhone).toString();
+                                if (!phone.isEmpty())
+                                    return Qt::escape(phone);
+#endif
+                                // If we have any inclination towards email, use it
+                                if ((f == 0 || f & ContainsEmail) && !email.isEmpty())
+                                    return Qt::escape(email);
+
+                                QString label = io->contactField(row, Label).toString();
+                                QString company = io->contactField(row, Company).toString();
+                                // Otherwise use this other stuff
+                                if (label != company)
+                                    return Qt::escape(company);
+                            }
+                        case StatusIconRole:
+                            if (isPersonalDetails(id(row)))
+                                return QPixmap(":image/addressbook/business");
+                            return QPixmap();
+                    }
                 }
-            }
-            break;
-        default:
-            if (index.column() > 0 && index.column() < columnCount())
-                return contactField(c, (Field)index.column());
-            break;
+                break;
+            default:
+                if (index.column() > 0 && index.column() < columnCount())
+                    return io->contactField(row, (Field)index.column());
+                break;
+        }
     }
     return QVariant();
 }
@@ -788,8 +834,12 @@ QVariant QContactModel::contactField(const QContact &contact, QContactModel::Fie
             return contact.businessFax();
         case QContactModel::BusinessMobile:
             return contact.businessMobile();
+        case QContactModel::BusinessVOIP:
+            return contact.businessVOIP();
         case QContactModel::DefaultEmail:
             return contact.defaultEmail();
+        case QContactModel::DefaultPhone:
+            return contact.defaultPhoneNumber();
         case QContactModel::Emails:
             return contact.emailList();
 
@@ -808,6 +858,8 @@ QVariant QContactModel::contactField(const QContact &contact, QContactModel::Fie
             return contact.phoneNumber(QContact::HomeFax);
         case QContactModel::HomeMobile:
             return contact.phoneNumber(QContact::HomeMobile);
+        case QContactModel::HomeVOIP:
+            return contact.phoneNumber(QContact::HomeVOIP);
         case QContactModel::HomePager:
             return contact.phoneNumber(QContact::HomePager);
 
@@ -958,6 +1010,18 @@ bool QContactModel::setContactField(QContact &contact, QContactModel::Field fiel
                 return true;
             }
             return false;
+        case QContactModel::BusinessVOIP:
+            if (value.canConvert(QVariant::String)) {
+                contact.setPhoneNumber(QContact::BusinessVOIP, value.toString());
+                return true;
+            }
+            return false;
+        case QContactModel::DefaultPhone:
+            if (value.canConvert(QVariant::String)) {
+                contact.setDefaultPhoneNumber(value.toString());
+                return true;
+            }
+            return false;
         case QContactModel::DefaultEmail:
             if (value.canConvert(QVariant::String)) {
                 contact.setDefaultEmail(value.toString());
@@ -997,6 +1061,12 @@ bool QContactModel::setContactField(QContact &contact, QContactModel::Field fiel
         case QContactModel::HomePhone:
             if (value.canConvert(QVariant::String)) {
                 contact.setPhoneNumber(QContact::HomePhone, value.toString());
+                return true;
+            }
+            return false;
+        case QContactModel::HomeVOIP:
+            if (value.canConvert(QVariant::String)) {
+                contact.setPhoneNumber(QContact::HomeVOIP, value.toString());
                 return true;
             }
             return false;
@@ -1229,8 +1299,16 @@ bool QContactModel::removeContact(const QUniqueId& identifier)
 {
     QContactContext *c = qobject_cast<QContactContext *>(context(identifier));
     if (c) {
+        /* delete the portrait, if any XXX - we shouldn't have to fetch the whole contact */
+        QString portraitFile = contact(identifier).portraitFile();
         bool result = c->removeContact(identifier);
         if (result) {
+            if (!portraitFile.isEmpty() && !portraitFile.startsWith(QChar(':'))) {
+                QString baseDir = Qtopia::applicationFileName( "addressbook", "contactimages/" );
+                QFile pFile( baseDir + portraitFile );
+                if( pFile.exists() )
+                    pFile.remove();
+            }
             if (identifier == personalID())
                 clearPersonalDetails();
             refresh();
@@ -1571,6 +1649,29 @@ QContact QContactModel::matchPhoneNumber(const QString &text)
 #endif
 
 /*!
+  Returns the best match for the email address \a text.  If no contact
+  in the model has an email address matching the given text returns a
+  null contact.
+*/
+QContact QContactModel::matchEmailAddress(const QString &text)
+{
+    int bestMatch = 0;
+    QUniqueId bestId;
+    foreach(const QRecordIO *model, accessModels()) {
+        const QContactIO *contactModel = qobject_cast<const QContactIO *>(model);
+        int match;
+        QUniqueId id = contactModel->matchEmailAddress(text, match);
+        if (match > bestMatch) {
+            bestMatch = match;
+            bestId = id;
+        }
+    }
+    if (bestMatch > 0)
+        return contact(bestId);
+    return QContact();
+}
+
+/*!
   \enum QContactModel::FilterFlags
 
   These flags describe what kind of contact information to filter contacts on.
@@ -1689,7 +1790,7 @@ void QContactModel::setSortField(Field s)
 QContactModel::Field QContactModel::sortField() const
 {
     // assumed others are the same.
-    return d->defaultmodel->sortKey();
+    return d->defaultio->sortKey();
 }
 
 /*!
@@ -1701,11 +1802,11 @@ QPimSource QContactModel::simSource() const
 }
 
 /*!
-  Returns the identifier for storage sources relating to the Phone memory.
+  Returns the default identifier for storage sources relating to the device memory.
  */
 QPimSource QContactModel::phoneSource() const
 {
-    return d->phoneSource;
+    return defaultSource();
 }
 
 /*!

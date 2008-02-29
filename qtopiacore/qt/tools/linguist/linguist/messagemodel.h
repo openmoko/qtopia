@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,7 +43,6 @@
 #include <QAbstractItemModel>
 #include <QList>
 #include <QHash>
-#include <QtCore/QCoreApplication>
 #include <QtCore/QLocale>
 
 class ContextItem;
@@ -50,7 +64,7 @@ public:
     inline void setContextItem(ContextItem *ctxtI) {cntxtItem = ctxtI;}
     inline ContextItem *contextItem() const {return cntxtItem;}
 
-    inline QString context() const {return m.context();}
+    inline QString context() const {return QLatin1String(m.context());}
     inline QString sourceText() const {return tx;}
     inline QString comment() const {return com;}
     inline QString translation() const {return m.translation();}
@@ -58,6 +72,7 @@ public:
     inline void setTranslations(const QStringList &translations) { m.setTranslations(translations); }
 
     inline bool finished() const {return m.type() == MetaTranslatorMessage::Finished;}
+    inline bool obsolete() const { return m.type() == MetaTranslatorMessage::Obsolete; }
     inline MetaTranslatorMessage message() const {return m;}
     bool compare(const QString &findText, bool matchSubstring, Qt::CaseSensitivity cs)
     {
@@ -167,6 +182,7 @@ class MessageModel : public QAbstractItemModel
     Q_OBJECT
 public:
     MessageModel(QObject *parent = 0);
+    void init();
 
     class iterator
     {
@@ -236,6 +252,7 @@ public:
     inline int contextsInList() const {return cntxtList.count();}
     bool findMessage(int *contextNo, int *itemNo, const QString &findItem, int where, 
         bool matchSubstring, Qt::CaseSensitivity cs = Qt::CaseSensitive);
+    MessageItem *findMessage(const char *context, const char *sourcetext, const char *comment = 0) const;
 
     ContextItem *createContextItem(const QString &c)
     {
@@ -288,7 +305,6 @@ public:
                     Translator::SaveMode mode = Translator::Stripped );
     
     QTranslator *translator();
-    MessageItem *findMessage(const char *context, const char *sourcetext, const char *comment = 0) const;
 
     QLocale::Language language() const;
     void setLanguage(QLocale::Language lang);
@@ -339,6 +355,7 @@ private:
 
     QLocale::Language m_language;
     QLocale::Country m_country;
+    QByteArray m_codecForTr;
 
     friend class iterator;
 };

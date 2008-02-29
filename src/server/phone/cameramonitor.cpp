@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,9 +21,13 @@
 
 // Local includes
 #include "cameramonitor.h"
+#include "qtopiaserverapplication.h"
 
 // Qtopia includes
 #include <QtopiaFeatures>
+#include <QValueSpaceItem>
+#include <QTimer>
+#include <custom.h>
 
 // System includes
 #include <sys/types.h>
@@ -32,7 +36,10 @@
 #include <unistd.h>
 
 // Constants
-static const char* const CAMERA_MONITOR_VIDEODEV        =   "/dev/video";
+#ifndef V4L_VIDEO_DEVICE
+#define V4L_VIDEO_DEVICE "/dev/video"
+#endif
+static const char* const CAMERA_MONITOR_VIDEODEV        =   V4L_VIDEO_DEVICE;
 static const char* const CAMERA_MONITOR_CAMERA_FEATURE  =   "Camera";
 
 // ============================================================================
@@ -49,6 +56,8 @@ static const char* const CAMERA_MONITOR_CAMERA_FEATURE  =   "Camera";
   The default implementation checks the camera availablity at startup and
   exports the "Camera" QtopiaFeature, if the camera can added and removed
   during device operation then update() should be called when this occurs.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 /*!
@@ -57,7 +66,10 @@ static const char* const CAMERA_MONITOR_CAMERA_FEATURE  =   "Camera";
 CameraMonitor::CameraMonitor( QObject* parent )
 :   QObject( parent )
 {
-    update();
+    //delay the update to minimize startup time
+    serverWidgetVsi = new QValueSpaceItem("/System/ServerWidgets/Initialized", this);
+    connect( serverWidgetVsi, SIGNAL(contentsChanged()), this, SLOT(delayedUpdate()) );
+    delayedUpdate(); //in case its visible already
 }
 
 /*!
@@ -67,6 +79,18 @@ CameraMonitor::~CameraMonitor()
 {
 }
 
+/*!
+  \internal
+  */
+void CameraMonitor::delayedUpdate()
+{
+    if ( serverWidgetVsi && serverWidgetVsi->value( QByteArray(), false ).toBool() ) {
+        serverWidgetVsi->disconnect();
+        serverWidgetVsi->deleteLater();
+        serverWidgetVsi = 0;
+        QTimer::singleShot( 5000, this, SLOT(update()) );
+    }
+}
 /*!
     Updates the availability of the camera feature.
 */

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -34,13 +34,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
 #include <stdlib.h>
-#ifndef Q_OS_WIN32
 #include <unistd.h>
-#else
-#include <process.h>
-#endif
 
 struct timerEventItem {
     uint UTCtime;
@@ -57,18 +52,18 @@ struct timerEventItem {
 
 class TimerReceiverObject : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  TimerReceiverObject() : timerId(0) { }
-  ~TimerReceiverObject() { }
+    TimerReceiverObject() : timerId(0) { }
+    ~TimerReceiverObject() { }
 
-  void resetTimer();
-  void setTimerEventItem();
-  void deleteTimer();
-  void killTimers() { if (timerId) killTimer(timerId); timerId = 0; }
+    void resetTimer();
+    void setTimerEventItem();
+    void deleteTimer();
+    void killTimers() { if (timerId) killTimer(timerId); timerId = 0; }
 
 protected:
-  void timerEvent( QTimerEvent *te );
+    void timerEvent( QTimerEvent *te );
 private:
     QString atfilename;
     int timerId;
@@ -158,9 +153,6 @@ QTOPIA_EXPORT void Qtopia_initAlarmServer()
         alarmServer = new AlarmServerService;
 }
 
-
-
-
 static const char* atdir = "/var/spool/at/";
 
 static bool triggerAtd( bool writeHWClock = false )
@@ -234,10 +226,7 @@ void TimerReceiverObject::resetTimer()
             atfile.close();
             unlink( atfilename.toAscii().constData() );
             QDir d; d.rename(fn+".new",fn);
-//### revise to suit WINNt?
-#ifndef Q_OS_WIN32
             chmod(fn.toLatin1(),0755);
-#endif
             atfilename = fn;
             triggerAtd( false );
         } else {
@@ -267,11 +256,15 @@ void TimerReceiverObject::timerEvent( QTimerEvent * )
             QDateTime time;
             time.setTime_t(nearestTimerEvent->UTCtime);
             QString channel = nearestTimerEvent->channel;
-            if ( !channel.contains( QChar('/') ) )
-                channel = QtopiaService::channel( channel );
-            QtopiaIpcEnvelope e( channel, nearestTimerEvent->message );
-            e << time
-              << nearestTimerEvent->data;
+            if ( !channel.contains( QChar('/') ) ) {
+                QtopiaServiceRequest e( channel, nearestTimerEvent->message );
+                e << time << nearestTimerEvent->data;
+                e.send();
+
+            } else {
+                QtopiaIpcEnvelope e( channel, nearestTimerEvent->message );
+                e << time << nearestTimerEvent->data;
+            }
 
             timerEventList.removeAll(nearestTimerEvent);
             delete nearestTimerEvent;
@@ -404,7 +397,6 @@ void Qtopia::deleteAlarm (QDateTime when, const QString& channel, const QString&
     }
 }
 
-#ifdef Q_WS_QWS
 /*!
   Writes the system clock to the hardware clock.
 */
@@ -415,7 +407,6 @@ void Qtopia::writeHWClock()
         system("/sbin/hwclock -w"); // ##### UTC?
     }
 }
-#endif
 
 /*!
     \service AlarmServerService AlarmServer

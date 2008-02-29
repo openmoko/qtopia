@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qabstractspinbox.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/widgets/qabstractspinbox.cpp -->
 <head>
-  <title>Qt 4.2: QAbstractSpinBox Class Reference</title>
+  <title>Qt 4.3: QAbstractSpinBox Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QAbstractSpinBox Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QAbstractSpinBox Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QAbstractSpinBox class provides a spinbox and a line edit to display values. <a href="#details">More...</a></p>
 <pre> #include &lt;QAbstractSpinBox&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
 <p>Inherited by <a href="qdatetimeedit.html">QDateTimeEdit</a>, <a href="qdoublespinbox.html">QDoubleSpinBox</a>, and <a href="qspinbox.html">QSpinBox</a>.</p>
@@ -22,7 +23,7 @@
 <a name="public-types"></a>
 <h3>Public Types</h3>
 <ul>
-<li><div class="fn"/>enum <b><a href="qabstractspinbox.html#ButtonSymbols-enum">ButtonSymbols</a></b> { UpDownArrows, PlusMinus }</li>
+<li><div class="fn"/>enum <b><a href="qabstractspinbox.html#ButtonSymbols-enum">ButtonSymbols</a></b> { UpDownArrows, PlusMinus, NoButtons }</li>
 <li><div class="fn"/>enum <b><a href="qabstractspinbox.html#CorrectionMode-enum">CorrectionMode</a></b> { CorrectToPreviousValue, CorrectToNearestValue }</li>
 <li><div class="fn"/>flags <b><a href="qabstractspinbox.html#StepEnabledFlag-enum">StepEnabled</a></b></li>
 <li><div class="fn"/>enum <b><a href="qabstractspinbox.html#StepEnabledFlag-enum">StepEnabledFlag</a></b> { StepNone, StepUpEnabled, StepDownEnabled }</li>
@@ -36,8 +37,9 @@
 <li><div class="fn"/><b><a href="qabstractspinbox.html#alignment-prop">alignment</a></b> : Qt::Alignment</li>
 <li><div class="fn"/><b><a href="qabstractspinbox.html#buttonSymbols-prop">buttonSymbols</a></b> : ButtonSymbols</li>
 <li><div class="fn"/><b><a href="qabstractspinbox.html#correctionMode-prop">correctionMode</a></b> : CorrectionMode</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><b><a href="qabstractspinbox.html#frame-prop">frame</a></b> : bool</li>
+</ul></td><td valign="top"><ul>
+<li><div class="fn"/><b><a href="qabstractspinbox.html#keyboardTracking-prop">keyboardTracking</a></b> : bool</li>
 <li><div class="fn"/><b><a href="qabstractspinbox.html#readOnly-prop">readOnly</a></b> : bool</li>
 <li><div class="fn"/><b><a href="qabstractspinbox.html#specialValueText-prop">specialValueText</a></b> : QString</li>
 <li><div class="fn"/><b><a href="qabstractspinbox.html#text-prop">text</a></b> : const QString</li>
@@ -46,7 +48,7 @@
 </td></tr>
 </table></p>
 <ul>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -63,11 +65,13 @@
 <li><div class="fn"/>void <b><a href="qabstractspinbox.html#interpretText">interpretText</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qabstractspinbox.html#accelerated-prop">isAccelerated</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qabstractspinbox.html#readOnly-prop">isReadOnly</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qabstractspinbox.html#keyboardTracking-prop">keyboardTracking</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qabstractspinbox.html#accelerated-prop">setAccelerated</a></b> ( bool <i>on</i> )</li>
 <li><div class="fn"/>void <b><a href="qabstractspinbox.html#alignment-prop">setAlignment</a></b> ( Qt::Alignment <i>flag</i> )</li>
 <li><div class="fn"/>void <b><a href="qabstractspinbox.html#buttonSymbols-prop">setButtonSymbols</a></b> ( ButtonSymbols <i>bs</i> )</li>
 <li><div class="fn"/>void <b><a href="qabstractspinbox.html#correctionMode-prop">setCorrectionMode</a></b> ( CorrectionMode <i>cm</i> )</li>
 <li><div class="fn"/>void <b><a href="qabstractspinbox.html#frame-prop">setFrame</a></b> ( bool )</li>
+<li><div class="fn"/>void <b><a href="qabstractspinbox.html#keyboardTracking-prop">setKeyboardTracking</a></b> ( bool <i>kt</i> )</li>
 <li><div class="fn"/>void <b><a href="qabstractspinbox.html#readOnly-prop">setReadOnly</a></b> ( bool <i>r</i> )</li>
 <li><div class="fn"/>void <b><a href="qabstractspinbox.html#specialValueText-prop">setSpecialValueText</a></b> ( const QString &amp; <i>txt</i> )</li>
 <li><div class="fn"/>void <b><a href="qabstractspinbox.html#wrapping-prop">setWrapping</a></b> ( bool <i>w</i> )</li>
@@ -78,7 +82,7 @@
 <li><div class="fn"/>bool <b><a href="qabstractspinbox.html#wrapping-prop">wrapping</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>201 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -106,6 +110,7 @@
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
 <ul>
+<li><div class="fn"/>void <b><a href="qabstractspinbox.html#initStyleOption">initStyleOption</a></b> ( QStyleOptionSpinBox * <i>option</i> ) const</li>
 <li><div class="fn"/>QLineEdit * <b><a href="qabstractspinbox.html#lineEdit">lineEdit</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qabstractspinbox.html#setLineEdit">setLineEdit</a></b> ( QLineEdit * <i>lineEdit</i> )</li>
 <li><div class="fn"/>virtual StepEnabled <b><a href="qabstractspinbox.html#stepEnabled">stepEnabled</a></b> () const</li>
@@ -132,7 +137,7 @@
 <li><a href="qabstractspinbox.html#alignment-prop">alignment</a>: The alignment of the text in the QAbstractSpinBox.</li>
 <li><a href="qabstractspinbox.html#wrapping-prop">wrapping</a>: Whether the QAbstractSpinBox wraps from the minimum value to the maximum value and vica versa.</li>
 </ol>
-<p>QAbstractSpinBox provides a virtual <a href="qabstractspinbox.html#stepBy">stepBy</a>() function that is called whenever the user triggers a step. This function takes an integer value to signify how many steps were taken. E.g. Pressing <a href="qt.html#Key-enum">Qt::Key_Down</a> will trigger a call to stepBy(-1).</p>
+<p>QAbstractSpinBox provides a virtual <a href="qabstractspinbox.html#stepBy">stepBy</a>() function that is called whenever the user triggers a step. This function takes an integer value to signify how many steps were taken. E.g&#x2e; Pressing <a href="qt.html#Key-enum">Qt::Key_Down</a> will trigger a call to stepBy(-1).</p>
 <p>QAbstractSpinBox also provide a virtual function <a href="qabstractspinbox.html#stepEnabled">stepEnabled</a>() to determine whether stepping up/down is allowed at any point. This function returns a bitset of <a href="qabstractspinbox.html#StepEnabledFlag-enum">StepEnabled</a>.</p>
 <p>See also <a href="qabstractslider.html">QAbstractSlider</a>, <a href="qspinbox.html">QSpinBox</a>, <a href="qdoublespinbox.html">QDoubleSpinBox</a>, <a href="qdatetimeedit.html">QDateTimeEdit</a>, and <a href="widgets-spinboxes.html">Spin Boxes Example</a>.</p>
 <hr />
@@ -144,6 +149,7 @@
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QAbstractSpinBox::UpDownArrows</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Little arrows in the classic style.</td></tr>
 <tr><td valign="top"><tt>QAbstractSpinBox::PlusMinus</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top"><b>+</b> and <b>-</b> symbols.</td></tr>
+<tr><td valign="top"><tt>QAbstractSpinBox::NoButtons</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">Don't display buttons.</td></tr>
 </table></p>
 <p>See also <a href="qabstractspinbox.html#buttonSymbols-prop">QAbstractSpinBox::buttonSymbols</a>.</p>
 <h3 class="fn"><a name="CorrectionMode-enum"></a>enum QAbstractSpinBox::CorrectionMode</h3>
@@ -166,7 +172,7 @@
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="accelerated-prop"></a>accelerated : bool</h3>
 <p>This property holds whether the spin box will accelerate the frequency of the steps when pressing the step Up/Down buttons.</p>
-<p>If enabled the spin box will increase/decrease the value faster the longer you hold the button down. This only applied</p>
+<p>If enabled the spin box will increase/decrease the value faster the longer you hold the button down.</p>
 <p>This property was introduced in Qt 4.2.</p>
 <p>Access functions:</p>
 <ul>
@@ -195,6 +201,7 @@
 <h3 class="fn"><a name="buttonSymbols-prop"></a>buttonSymbols : <a href="qabstractspinbox.html#ButtonSymbols-enum">ButtonSymbols</a></h3>
 <p>This property holds the current button symbol mode.</p>
 <p>The possible values can be either <tt>UpDownArrows</tt> or <tt>PlusMinus</tt>. The default is <tt>UpDownArrows</tt>.</p>
+<p>Note that some styles might render <a href="qabstractspinbox.html#ButtonSymbols-enum">PlusMinus</a> and <a href="qabstractspinbox.html#ButtonSymbols-enum">UpDownArrows</a> identically.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>ButtonSymbols buttonSymbols () const</b></li>
@@ -219,6 +226,17 @@
 <li><div class="fn"/><b>bool hasFrame () const</b></li>
 <li><div class="fn"/><b>void setFrame ( bool )</b></li>
 </ul>
+<h3 class="fn"><a name="keyboardTracking-prop"></a>keyboardTracking : bool</h3>
+<p>This property holds whether keyboard tracking is enabled for the spinbox.</p>
+<p>If keyboard tracking is enabled (the default), the spinbox emits the valueChanged() signal while the new value is being entered from the keyboard.</p>
+<p>E.g&#x2e; when the user enters the value 600 by typing 6, 0, and 0, the spinbox emits 3 signals with the values 6, 60, and 600 respectively.</p>
+<p>If keyboard tracking is disabled, the spinbox doesn't emit the valueChanged() signal while typing. It emits the signal later, when the return key is pressed, when keyboard focus is lost, or when other spinbox functionality is used, e.g&#x2e; pressing an arrow key.</p>
+<p>This property was introduced in Qt 4.3.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool keyboardTracking () const</b></li>
+<li><div class="fn"/><b>void setKeyboardTracking ( bool <i>kt</i> )</b></li>
+</ul>
 <h3 class="fn"><a name="readOnly-prop"></a>readOnly : bool</h3>
 <p>This property holds whether the spin box is read only.</p>
 <p>In read-only mode, the user can still copy the text to the clipboard, or drag and drop the text; but cannot edit it.</p>
@@ -241,7 +259,7 @@
      zoomSpinBox-&gt;setValue(100);</pre>
 <p>The user will then be able to choose a scale from 1% to 1000% or select &quot;Auto&quot; to leave it up to the application to choose. Your code must then interpret the spin box value of 0 as a request from the user to scale the image to fit inside the window.</p>
 <p>All values are displayed with the prefix and suffix (if set), <i>except</i> for the special value, which only shows the special value text. This special text is passed in the <a href="qspinbox.html#valueChanged">QSpinBox::valueChanged</a>() signal that passes a <a href="qstring.html">QString</a>.</p>
-<p>To turn off the special-value text display, call this function with an empty string. The default is no special-value text, i.e. the numeric value is shown as usual.</p>
+<p>To turn off the special-value text display, call this function with an empty string. The default is no special-value text, i.e&#x2e; the numeric value is shown as usual.</p>
 <p>If no special-value text is set, specialValueText() returns an empty string.</p>
 <p>Access functions:</p>
 <ul>
@@ -261,8 +279,8 @@
 <pre> QSpinBox *spinBox = new QSpinBox(this);
  spinBox-&gt;setRange(0, 100);
  spinBox-&gt;setWrapping(true);
- sb-&gt;setValue(100);
- sb-&gt;stepBy(1);
+ spinBox-&gt;setValue(100);
+ spinBox-&gt;stepBy(1);
 <span class="comment"> // value is 0</span></pre>
 <p>Access functions:</p>
 <ul>
@@ -282,6 +300,9 @@
 <p>This signal is emitted editing is finished. This happens when the spinbox loses focus and when enter is pressed.</p>
 <h3 class="fn"><a name="fixup"></a>void QAbstractSpinBox::fixup ( <a href="qstring.html">QString</a> &amp; <i>input</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This virtual function is called by the <a href="qabstractspinbox.html">QAbstractSpinBox</a> if the <i>input</i> is not validated to <a href="qvalidator.html#State-enum">QValidator::Acceptable</a> when Return is pressed or <a href="qabstractspinbox.html#interpretText">interpretText</a>() is called. It will try to change the text so it is valid. Reimplemented in the various subclasses.</p>
+<h3 class="fn"><a name="initStyleOption"></a>void QAbstractSpinBox::initStyleOption ( <a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a> * <i>option</i> ) const&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Initialize <i>option</i> with the values from this <a href="qspinbox.html">QSpinBox</a>. This method is useful for subclasses when they need a <a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a>, but don't want to fill in all the information themselves.</p>
+<p>See also <a href="qstyleoption.html#initFrom">QStyleOption::initFrom</a>().</p>
 <h3 class="fn"><a name="interpretText"></a>void QAbstractSpinBox::interpretText ()</h3>
 <p>This function interprets the text of the spin box. If the value has changed since last interpretation it will emit signals.</p>
 <h3 class="fn"><a name="lineEdit"></a><a href="qlineedit.html">QLineEdit</a> * QAbstractSpinBox::lineEdit () const&nbsp;&nbsp;<tt> [protected]</tt></h3>
@@ -295,7 +316,7 @@
 <p>If <a href="qlineedit.html#validator">QLineEdit::validator</a>() for the <i>lineEdit</i> returns 0, the internal validator of the spinbox will be set on the line edit.</p>
 <p>See also <a href="qabstractspinbox.html#lineEdit">lineEdit</a>().</p>
 <h3 class="fn"><a name="stepBy"></a>void QAbstractSpinBox::stepBy ( int <i>steps</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Virtual function that is called whenever the user triggers a step. The <i>steps</i> parameter indicates how many steps were taken, e.g. Pressing <a href="qt.html#Key-enum">Qt::Key_Down</a> will trigger a call to stepBy(-1), whereas pressing <a href="qt.html#Key-enum">Qt::Key_Prior</a> will trigger a call to stepBy(10).</p>
+<p>Virtual function that is called whenever the user triggers a step. The <i>steps</i> parameter indicates how many steps were taken, e.g&#x2e; Pressing <a href="qt.html#Key-enum">Qt::Key_Down</a> will trigger a call to stepBy(-1), whereas pressing <a href="qt.html#Key-enum">Qt::Key_Prior</a> will trigger a call to stepBy(10).</p>
 <p>If you subclass <a href="qabstractspinbox.html">QAbstractSpinBox</a> you must reimplement this function. Note that this function is called even if the resulting value will be outside the bounds of minimum and maximum. It's this function's job to handle these situations.</p>
 <h3 class="fn"><a name="stepDown"></a>void QAbstractSpinBox::stepDown ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Steps down by one linestep Calling this slot is analogous to calling stepBy(-1);</p>
@@ -315,6 +336,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

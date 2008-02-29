@@ -36,6 +36,25 @@
 <li><a href="#accessory-api">Accessory API</a></li>
 <li><a href="#network-configuration-file-format">Network configuration file format</a></li>
 </ul>
+<li><a href="#porting-to-qtopia-4-2-5">Porting to Qtopia 4.2&#x2e;5</a></li>
+<ul><li><a href="#bluetooth-api">Bluetooth API</a></li>
+</ul>
+<li><a href="#porting-to-qtopia-4-3-0">Porting to Qtopia 4.3&#x2e;0</a></li>
+<ul><li><a href="#accessory-api">Accessory API</a></li>
+<li><a href="#openssl">OpenSSL</a></li>
+<li><a href="#qwizard">QWizard</a></li>
+<li><a href="#qoccurrencemodel">QOccurrenceModel</a></li>
+<li><a href="#qtopia-pim-delegates">Qtopia PIM Delegates</a></li>
+<li><a href="#qtopiasendvia">QtopiaSendVia</a></li>
+<li><a href="#qbluetoothaudiogateway">QBluetoothAudioGateway</a></li>
+<li><a href="#qirserver">QIrServer</a></li>
+<li><a href="#qtopia-namespace">Qtopia Namespace</a></li>
+<li><a href="#qbluetoothabstractserver">QBluetoothAbstractServer</a></li>
+<li><a href="#qbluetoothabstractsocket">QBluetoothAbstractSocket</a></li>
+<li><a href="#obex-api-and-obex-related-classes-in-bluetooth-and-irda-apis">OBEX API and OBEX-related classes in Bluetooth and IrDA APIs</a></li>
+<li><a href="#voip-integration">VoIP Integration</a></li>
+<li><a href="#qdawg-files">QDawg files</a></li>
+</ul>
 </ul>
 <a name="overview"></a>
 <h2>Overview</h2>
@@ -78,29 +97,29 @@
 <p>Qtopia 4.1's Telephony API used a central <tt>QPhoneLine</tt> object, from which all telephony features were accessed. This class has been replaced with several classes for each area of telephony functionality. In particular, previous code that used <tt>QPhoneLine::query()</tt> and <tt>QPhoneLine::modify()</tt> must be modified to use methods in the classes below:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Interface</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>QAdviceOfCharge</td><td>Advice of charge information during a call.</td></tr>
-<tr valign="top" class="even"><td>QBandSelection</td><td>Selection of GSM bands - 850 MHz, 900 MHz, 1800 MHz, 1900 MHz, dual, and tri-band.</td></tr>
-<tr valign="top" class="odd"><td>QCallBarring</td><td>Settings related to call barring.</td></tr>
-<tr valign="top" class="even"><td>QCallForwarding</td><td>Settings related to call forwarding.</td></tr>
-<tr valign="top" class="odd"><td>QCallSettings</td><td>Other call settings: call waiting and caller ID restrictriction.</td></tr>
-<tr valign="top" class="even"><td>QCellBroadcast</td><td>Access to cell broadcast messages.</td></tr>
-<tr valign="top" class="odd"><td>QGprsNetworkRegistration</td><td>Notification of GPRS registration state.</td></tr>
-<tr valign="top" class="even"><td>QNetworkRegistration</td><td>Notification of general network registration state, plus operator selection.</td></tr>
-<tr valign="top" class="odd"><td>QPhoneBook</td><td>Access to phone books that are stored on a SIM.</td></tr>
-<tr valign="top" class="even"><td>QPhoneCallManager</td><td>Making and receiving calls: voice, data, fax, etc.</td></tr>
-<tr valign="top" class="odd"><td>QPhoneRfFunctionality</td><td>Manipulation of the RF functionality level for selecting airplane and non-airplane modes.</td></tr>
-<tr valign="top" class="even"><td>QPinManager</td><td>Notification of PIN requests, and PIN management (change, lock, unlock, etc).</td></tr>
-<tr valign="top" class="odd"><td>QPreferredNetworkOperators</td><td>Access to the preferred network operator list in a SIM.</td></tr>
-<tr valign="top" class="even"><td>QPresence</td><td>VoIP presence information.</td></tr>
-<tr valign="top" class="odd"><td>QServiceChecker</td><td>Check that a service was started and has sufficient resources to perform operations.</td></tr>
-<tr valign="top" class="even"><td>QServiceNumbers</td><td>Access to service numbers such as SMS service center and the voice mail number.</td></tr>
-<tr valign="top" class="odd"><td>QSimFiles</td><td>Raw access to files on the SIM.</td></tr>
-<tr valign="top" class="even"><td>QSimInfo</td><td>Information about the SIM's identity and whether or not it is currently inserted.</td></tr>
-<tr valign="top" class="odd"><td>QSimToolkit</td><td>Access to SIM Application Toolkit features of the SIM.</td></tr>
-<tr valign="top" class="even"><td>QSMSReader</td><td>Access to the incoming SMS message queue.</td></tr>
-<tr valign="top" class="odd"><td>QSMSSender</td><td>Access to the outgoing SMS message queue.</td></tr>
-<tr valign="top" class="even"><td>QSupplementaryServices</td><td>SS and USSD support for GSM networks.</td></tr>
-<tr valign="top" class="odd"><td>QTelephonyConfiguration</td><td>Service configuration interface and miscellaneous settings.</td></tr>
+<tr valign="top" class="odd"><td><a href="qadviceofcharge.html">QAdviceOfCharge</a></td><td>Advice of charge information during a call.</td></tr>
+<tr valign="top" class="even"><td><a href="qbandselection.html">QBandSelection</a></td><td>Selection of GSM bands - 850 MHz, 900 MHz, 1800 MHz, 1900 MHz, dual, and tri-band.</td></tr>
+<tr valign="top" class="odd"><td><a href="qcallbarring.html">QCallBarring</a></td><td>Settings related to call barring.</td></tr>
+<tr valign="top" class="even"><td><a href="qcallforwarding.html">QCallForwarding</a></td><td>Settings related to call forwarding.</td></tr>
+<tr valign="top" class="odd"><td><a href="qcallsettings.html">QCallSettings</a></td><td>Other call settings: call waiting and caller ID restrictriction.</td></tr>
+<tr valign="top" class="even"><td><a href="qcellbroadcast.html">QCellBroadcast</a></td><td>Access to cell broadcast messages.</td></tr>
+<tr valign="top" class="odd"><td><a href="qgprsnetworkregistration.html">QGprsNetworkRegistration</a></td><td>Notification of GPRS registration state.</td></tr>
+<tr valign="top" class="even"><td><a href="qnetworkregistration.html">QNetworkRegistration</a></td><td>Notification of general network registration state, plus operator selection.</td></tr>
+<tr valign="top" class="odd"><td><a href="qphonebook.html">QPhoneBook</a></td><td>Access to phone books that are stored on a SIM.</td></tr>
+<tr valign="top" class="even"><td><a href="qphonecallmanager.html">QPhoneCallManager</a></td><td>Making and receiving calls: voice, data, fax, etc.</td></tr>
+<tr valign="top" class="odd"><td><a href="qphonerffunctionality.html">QPhoneRfFunctionality</a></td><td>Manipulation of the RF functionality level for selecting airplane and non-airplane modes.</td></tr>
+<tr valign="top" class="even"><td><a href="qpinmanager.html">QPinManager</a></td><td>Notification of PIN requests, and PIN management (change, lock, unlock, etc).</td></tr>
+<tr valign="top" class="odd"><td><a href="qpreferrednetworkoperators.html">QPreferredNetworkOperators</a></td><td>Access to the preferred network operator list in a SIM.</td></tr>
+<tr valign="top" class="even"><td><a href="qpresence.html">QPresence</a></td><td>VoIP presence information.</td></tr>
+<tr valign="top" class="odd"><td><a href="qservicechecker.html">QServiceChecker</a></td><td>Check that a service was started and has sufficient resources to perform operations.</td></tr>
+<tr valign="top" class="even"><td><a href="qservicenumbers.html">QServiceNumbers</a></td><td>Access to service numbers such as SMS service center and the voice mail number.</td></tr>
+<tr valign="top" class="odd"><td><a href="qsimfiles.html">QSimFiles</a></td><td>Raw access to files on the SIM.</td></tr>
+<tr valign="top" class="even"><td><a href="qsiminfo.html">QSimInfo</a></td><td>Information about the SIM's identity and whether or not it is currently inserted.</td></tr>
+<tr valign="top" class="odd"><td><a href="qsimtoolkit.html">QSimToolkit</a></td><td>Access to SIM Application Toolkit features of the SIM.</td></tr>
+<tr valign="top" class="even"><td><a href="qsmsreader.html">QSMSReader</a></td><td>Access to the incoming SMS message queue.</td></tr>
+<tr valign="top" class="odd"><td><a href="qsmssender.html">QSMSSender</a></td><td>Access to the outgoing SMS message queue.</td></tr>
+<tr valign="top" class="even"><td><a href="qsupplementaryservices.html">QSupplementaryServices</a></td><td>SS and USSD support for GSM networks.</td></tr>
+<tr valign="top" class="odd"><td><a href="qtelephonyconfiguration.html">QTelephonyConfiguration</a></td><td>Service configuration interface and miscellaneous settings.</td></tr>
 </table></p>
 <p>Modem vendor plugins and multiplexer implementations from Qtopia 4.1 must also be updated. See the following pages for more information:</p>
 <ul>
@@ -194,7 +213,7 @@
 <li>The QSDAP::cancelSearch method's implementation has been modified. You now must wait until the searchCancelled() signal is sent before being able to start a new SDP Query.</li>
 <li>The QSDAPSearchResult::errorOccurred() method has been renamed to isValid()</li>
 <li>The QBluetoothAbstractSocket::lastError() has been renamed to <a href="qbluetoothabstractsocket.html#error">QBluetoothAbstractSocket::error</a>()</li>
-<li>The QBluetoothAbstractServer::lastError() has been renamed to <a href="qbluetoothabstractserver.html#error">QBluetoothAbstractServer::error</a>()</li>
+<li>The QBluetoothAbstractServer::lastError() has been renamed to QBluetoothAbstractServer::error()</li>
 <li>The <a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a> class no longer subclasses QAbstractIpcInterfaceGropu</li>
 <li>The <a href="qbluetoothabstractservice.html#start">QBluetoothAbstractService::start</a>() no longer has a channel argument</li>
 <li>The QBluetoothAbstractService::translatableDisplayName() has been renamed to displayName()</li>
@@ -215,15 +234,15 @@
 <li>The QBluetoothObexServer::encrypted has been renamed to isEncrypted</li>
 <li>The QBluetoothAbstractSocket::TimedoutError has been renamed to <a href="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::TimeoutError</a></li>
 <li>The QBluetoothObexSocket::authenticated has been renamed to isAuthenticated</li>
-<li>the QBluetoothObexSocket::encrypted has been renamed to isEncrypted</li>
+<li>The QBluetoothObexSocket::encrypted has been renamed to isEncrypted</li>
 <li>The QBluetoothPasskeyAgent::lastError has been renamed to error</li>
 <li>The QSDAP searchLocalServices, browseLocalServices methods have been removed</li>
 <li>The QSDAPSearchResult class has been renamed to <a href="qbluetoothsdpqueryresult.html">QBluetoothSdpQueryResult</a></li>
 <li>The QSDAP class has been renamed to <a href="qbluetoothsdpquery.html">QBluetoothSdpQuery</a></li>
-<li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes no longer delete the provided <a href="qobexsocket.html">QObexSocket</a> object. The socket object should be deleted by the programmer when it is no longer required.</li>
+<li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes no longer delete the provided QObexSocket object. The socket object should be deleted by the programmer when it is no longer required.</li>
 <li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes' setAutoDelete() and autoDelete() functions have been removed. To replicate the auto-delete functionality, connect <a href="qobexpushclient.html#done">QObexPushClient::done</a>() or <a href="qobexpushservice.html#done">QObexPushService::done</a>() to <a href="qobject.html#deleteLater">QObject::deleteLater</a>().</li>
-<li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes' state() and error() functions now return enumeration values from their own classes rather than from the QObex namespace</li>
-<li>The QObex namespace has been removed</li>
+<li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes' state() and error() functions now return enumeration values from their own classes rather than from the <a href="qobex.html">QObex</a> namespace</li>
+<li>The <a href="qobex.html">QObex</a> namespace has been removed</li>
 <li>The <a href="qobexpushclient.html#abort">QObexPushClient::abort</a>() now only aborts the current command instead of performing a hard abort and closing itself.</li>
 <li>The QLocalUniqueId class has been removed</li>
 <li>The <a href="quniqueid.html">QUniqueId</a> class no longer uses a device id as part of its composition</li>
@@ -244,7 +263,7 @@
 <h2>Porting to Qtopia 4.2&#x2e;3</h2>
 <a name="telephony-api"></a>
 <h3>Telephony API</h3>
-<p>The QCBSMessage::Language enumeration has three new language values: <tt>Hungarian</tt>, <tt>Polish</tt>, and <tt>Unspecified</tt>, to improve conformance with 3GPP TS 23.038. Pre-4.2&#x2e;3 code can check for such messages by casting the result of QCBSMessage::language() to <tt>int</tt> and comparing against 13 (for Hungarian), 14 (for Polish), or 15 (for Unspecified).</p>
+<p>The <a href="qcbsmessage.html#Language-enum">QCBSMessage::Language</a> enumeration has three new language values: <tt>Hungarian</tt>, <tt>Polish</tt>, and <tt>Unspecified</tt>, to improve conformance with 3GPP TS 23.038. Pre-4.2&#x2e;3 code can check for such messages by casting the result of <a href="qcbsmessage.html#language">QCBSMessage::language</a>() to <tt>int</tt> and comparing against 13 (for Hungarian), 14 (for Polish), or 15 (for Unspecified).</p>
 <a name="bluetooth-api"></a>
 <h3>Bluetooth API</h3>
 <ul>
@@ -279,10 +298,130 @@
 <li><tt>Properties/DeviceName</tt> - this entry has been added and may contain the name of the Linux interface that the current configuration should be associated with</li>
 </ul>
 <p>A detailed description of the file format can be found in the <a href="networkservices.html">Network Services</a> documentation.</p>
+<a name="porting-to-qtopia-4-2-5"></a>
+<h2>Porting to Qtopia 4.2&#x2e;5</h2>
+<a name="bluetooth-api"></a>
+<h3>Bluetooth API</h3>
+<p><a href="qbluetoothremotedevicedialogfilter.html">QBluetoothRemoteDeviceDialogFilter</a>'s copy constructor and assignment operator have been made private, and <a href="qbluetoothremotedevicedialog.html#getRemoteDevice">QBluetoothRemoteDeviceDialog::getRemoteDevice</a>() and <a href="qbluetoothremotedevicedialog.html#setFilter">QBluetoothRemoteDeviceDialog::setFilter</a>() now accept pointers to <a href="qbluetoothremotedevicedialogfilter.html">QBluetoothRemoteDeviceDialogFilter</a> objects rather than references.</p>
+<a name="porting-to-qtopia-4-3-0"></a>
+<h2>Porting to Qtopia 4.3&#x2e;0</h2>
+<a name="accessory-api"></a>
+<h3>Accessory API</h3>
+<ul>
+<li>The QBatteryAccessory classes has been removed and replaced with a <a href="qpowersource.html">QPowerSource</a> equivalent.</li>
+<li>The <a href="qpowerstatus.html">QPowerStatus</a> class has been refactored to be more consistent with the new API and the rest of Qtopia. In the process QPowerStatusManager class has been removed.</li>
+<li>The QInfraredAccessory classes has been removed. Qtopia's <a href="qtopiair.html">IrDA</a> API should be used as a replacement.</li>
+<li>The QSerialCommAccessory classes has been removed.</li>
+<li>The QSpeakerPhoneAccessory, QHeadsetAccessory, QHandsfreeAccessory and QHandsetAccessory classes have been replaced by a new audio management API. For more details see <a href="qaudiostate.html">QAudioState</a>, <a href="qaudiostatemanager.html">QAudioStateManager</a>, <a href="qaudiostateinfo.html">QAudioStateInfo</a> and <a href="qaudiostateconfiguration.html">QAudioStateConfiguration</a>.</li>
+</ul>
+<p>Due to the removal of certain accessories (see above) <a href="qphoneprofile.html">QPhoneProfile</a> was changed:</p>
+<ul>
+<li>QPhoneProfile::setAccessory() was replaced by <a href="qphoneprofile.html#setAudioProfile">QPhoneProfile::setAudioProfile</a>().</li>
+<li>QPhoneProfile::accessory() was replaced by <a href="qphoneprofile.html#audioProfile">QPhoneProfile::audioProfile</a>()</li>
+</ul>
+<p>More details about the change can be found in the class documentation for <a href="qphoneprofile.html">QPhoneProfile</a>.</p>
+<a name="openssl"></a>
+<h3>OpenSSL</h3>
+<p>Qt 4.3 introduced SSL support based on <a href="#openssl">OpenSSL</a>. In the process the new class <a href="qsslsocket.html">QSslSocket</a> has been added to Qt 4.3&#x2e; Qtopia 4.3 makes use of this new class and subsequently the previous solution QtSslSocket has been removed from libqtopiacomm.</p>
+<a name="qwizard"></a>
+<h3>QWizard</h3>
+<p>In Qtopia 4.2, there is a <a href="qwizard.html">QWizard</a> class in the Qtopia libraries. In Qtopia 4.3 and subsequent releases, a rewritten class of the same name is part of the Qtopia Core libraries.</p>
+<p>When porting code that used the 4.2 <a href="qwizard.html">QWizard</a>, the most significant difference is that now pages in the wizard are of type <a href="qwizardpage.html">QWizardPage</a> (they were just any <a href="qwidget.html">QWidget</a> in 4.2). Your compiler will report clearly where you need to change <a href="qwidget.html">QWidget</a> to <a href="qwizardpage.html">QWizardPage</a>.</p>
+<p>Approximate equivalents for methods are:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Qtopia 4.2</th><th>Qtopia 4.3</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>aboutToShowPage(int)</tt> (signal)</td><td>QWizard::initializePage(int) (virtual)</td></tr>
+<tr valign="top" class="even"><td><tt>setNextText(QString)</tt></td><td>QWizard::setButtonText(<a href="qwizard.html#WizardButton-enum">QWizard::NextButton</a>,<a href="qstring.html">QString</a>)</td></tr>
+<tr valign="top" class="odd"><td><tt>nextText()</tt></td><td>QWizard::buttonText(<a href="qwizard.html#WizardButton-enum">QWizard::NextButton</a>)</td></tr>
+<tr valign="top" class="even"><td><tt>setPrevText(QString)</tt></td><td>QWizard::setButtonText(<a href="qwizard.html#WizardButton-enum">QWizard::BackButton</a>,<a href="qstring.html">QString</a>)</td></tr>
+<tr valign="top" class="odd"><td><tt>prevText()</tt></td><td>QWizard::buttonText(<a href="qwizard.html#WizardButton-enum">QWizard::BackButton</a>)</td></tr>
+<tr valign="top" class="even"><td><tt>setNextEnabled()</tt></td><td>Manage the QWizard::button(<a href="qwizard.html#WizardButton-enum">QWizard::NextButton</a>) directly</td></tr>
+<tr valign="top" class="odd"><td><tt>setPrevEnabled()</tt></td><td>Manage the QWizard::button(<a href="qwizard.html#WizardButton-enum">QWizard::BackButton</a>) directly</td></tr>
+<tr valign="top" class="even"><td><tt>connectPageEnabler()</tt></td><td><a href="qwizard.html#nextId">QWizard::nextId</a>() (virtual) or <a href="qwizardpage.html#nextId">QWizardPage::nextId</a>() (virtual)</td></tr>
+<tr valign="top" class="odd"><td><tt>setAppropriate()</tt></td><td><a href="qwizard.html#nextId">QWizard::nextId</a>() (virtual) or <a href="qwizardpage.html#nextId">QWizardPage::nextId</a>() (virtual)</td></tr>
+<tr valign="top" class="even"><td><tt>showPage()</tt></td><td><a href="qwizard.html#restart">QWizard::restart</a>(), <a href="qwizard.html#next">QWizard::next</a>() or QWizardPage::back()</td></tr>
+</table></p>
+<a name="qoccurrencemodel"></a>
+<h3>QOccurrenceModel</h3>
+<p>The following functions no longer act on <a href="qoccurrencemodel.html">QOccurrenceModel</a></p>
+<ul>
+<li><tt>fetching()</tt></li>
+<li><tt>completeFetch()</tt></li>
+</ul>
+<p>Additionally the signal <tt>fetchCompleted()</tt> is no longer emitted from the model. It is also no longer necessary to explicitly call <tt>rebuildCache()</tt> as this will be handled automatically by the model.</p>
+<a name="qtopia-pim-delegates"></a>
+<h3>Qtopia PIM Delegates</h3>
+<p>The addition of the <tt>QPimDelegate</tt> class means that <tt>QTaskDelegate</tt> and <tt>QContactDelegate</tt> are no longer based on <tt>QAbstractItemDelegate</tt>. Instead, they are based on <tt>QPimDelegate</tt> and now have a different appearance.</p>
+<a name="qtopiasendvia"></a>
+<h3>QtopiaSendVia</h3>
+<p>The <a href="qtopiasendvia.html#sendFile">QtopiaSendVia::sendFile</a>() function that accepted a filename string, a MIME type string and a <tt>bool</tt> in 4.2 now accepts an additional <a href="qstring.html">QString</a> argument for the file description.</p>
+<a name="qbluetoothaudiogateway"></a>
+<h3>QBluetoothAudioGateway</h3>
+<p>The following functions have been removed:</p>
+<ul>
+<li><tt>audioDevice()</tt></li>
+<li><tt>audioFrequency()</tt></li>
+</ul>
+<a name="qirserver"></a>
+<h3>QIrServer</h3>
+<p>The <tt>QIrServer::ServerError</tt> enumeration has been removed. The <tt>QIrSocket::SocketError</tt> enumeration is used instead. The <tt>error()</tt> function has been renamed to <tt>serverError()</tt></p>
+<a name="qtopia-namespace"></a>
+<h3>Qtopia Namespace</h3>
+<p>The following function has been removed.</p>
+<ul>
+<li><tt>compatibleVersions()</tt></li>
+</ul>
+<a name="qbluetoothabstractserver"></a>
+<h3>QBluetoothAbstractServer</h3>
+<p>The <tt>QBluetoothAbstractServer::ServerError</tt> enumeration has been removed. The <tt>QBluetoothAbstractSocket::SocketError</tt> enumeration is used instead. The <tt>error()</tt> function has been renamed to <tt>serverError()</tt></p>
+<a name="qbluetoothabstractsocket"></a>
+<h3>QBluetoothAbstractSocket</h3>
+<p>The <tt>QBluetoothAbstractSocket::BindError</tt> enumeration value has been removed.</p>
+<a name="obex-api-and-obex-related-classes-in-bluetooth-and-irda-apis"></a>
+<h3>OBEX API and OBEX-related classes in Bluetooth and IrDA APIs</h3>
+<p><tt>QObexSocket</tt> and its subclasses, <tt>QBluetoothObexSocket</tt> and <tt>QIrObexSocket</tt>, have been removed. In Qtopia 4.2, these classes provided a way to specify the transport to be used for a <a href="qobexpushclient.html">QObexPushClient</a> or <a href="qobexpushservice.html">QObexPushService</a>; in Qtopia 4.3, they are no longer necessary as <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> now accept <a href="qiodevice.html">QIODevice</a> pointers instead of <tt>QObexSocket</tt> pointers for this purpose. This means the developer can use any <a href="qiodevice.html">QIODevice</a> subclass such as <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a>, <a href="qirsocket.html">QIrSocket</a> or <a href="qtcpsocket.html">QTcpSocket</a> to specify the transport layer for a OBEX Object Push client or service.</p>
+<p>These changes also mean that <tt>QObexServer</tt>, <tt>QBluetoothObexServer</tt> and <tt>QIrObexServer</tt> are no longer necessary and have been removed. The developer can directly use <a href="qbluetoothrfcommserver.html">QBluetoothRfcommServer</a> and <a href="qirserver.html">QIrServer</a> instead.</p>
+<p>To port existing code to the 4.3 API:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Task</th><th>Qtopia 4.2</th><th>Qtopia 4.3</th></tr></thead>
+<tr valign="top" class="odd"><td>To connect to a remote Bluetooth or IrDA device and run an OBEX Object Push client or service.</td><td>Use <tt>QBluetoothObexSocket</tt> or <tt>QIrObexSocket</tt> to construct a <a href="qobexpushclient.html">QObexPushClient</a> or <a href="qobexpushservice.html">QObexPushService</a>.</td><td>Use <tt>QBluetoothRfcommSocket</tt> or <a href="qirsocket.html">QIrSocket</a> to construct a <a href="qobexpushclient.html">QObexPushClient</a> or <a href="qobexpushservice.html">QObexPushService</a>.</td></tr>
+<tr valign="top" class="even"><td>To accept a client connection from a remote Bluetooth or IrDA device and run an OBEX Object Push client or service.</td><td>Run a server using <tt>QBluetoothObexServer</tt> or <tt>QIrObexServer</tt>, and use the <tt>nextPendingConnection()</tt> to construct a <a href="qobexpushclient.html">QObexPushClient</a> or <a href="qobexpushservice.html">QObexPushService</a>.</td><td>Run a server using <a href="qbluetoothrfcommserver.html">QBluetoothRfcommServer</a> or <a href="qirserver.html">QIrServer</a>, and use the <tt>nextPendingConnection()</tt> to construct a <a href="qobexpushclient.html">QObexPushClient</a> or <a href="qobexpushservice.html">QObexPushService</a>.</td></tr>
+</table></p>
+<p>Changes to the <a href="qobexpushclient.html">QObexPushClient</a> API:</p>
+<ul>
+<li>The constructor accepts a <a href="qiodevice.html">QIODevice</a> pointer instead of a QObexSocket pointer, as shown above.</li>
+<li>The QObexPushClient::State enumeration has been removed. Use <a href="qobexpushclient.html#Command-enum">QObexPushClient::Command</a> and <a href="qobexpushclient.html#currentCommand">QObexPushClient::currentCommand</a>() to determine whether a command is in progress.</li>
+<li><tt>LinkError</tt> is now <tt>ConnectionError</tt>.</li>
+<li><tt>TransportConnectionError</tt> has been removed; use <tt>ConnectionError</tt> instead.</li>
+<li>The <tt>progress()</tt> signal is now <tt>dataTransferProgress()</tt>.</li>
+</ul>
+<p>Changes to the <a href="qobexpushservice.html">QObexPushService</a> API:</p>
+<ul>
+<li>The constructor accepts a <a href="qiodevice.html">QIODevice</a> pointer instead of a QObexSocket pointer, as shown above.</li>
+<li><tt>acceptFile()</tt> arguments have changed, and it now returns a <a href="qiodevice.html">QIODevice</a> pointer instead of a <tt>bool</tt>; this means <tt>setIncomingDirectory()</tt> and <tt>incomingDirectory()</tt> are no longer necessary and have been removed.</li>
+<li><tt>close()</tt> has been removed.</li>
+<li><tt>socket()</tt> has been removed. Use <tt>sessionDevice()</tt> to get the <a href="qiodevice.html">QIODevice</a> provided in the constructor.</li>
+<li><tt>LinkError</tt> is now <tt>ConnectionError</tt>.</li>
+<li>Some signals have been renamed:<ul>
+<li><tt>putRequest()</tt> is now <tt>putRequested()</tt> and the arguments have changed</li>
+<li><tt>getRequest()</tt> is now <tt>businessCardRequested()</tt> (since only business card objects can be requested) and the arguments have changed</li>
+<li><tt>progress()</tt> is now <tt>dataTransferProgress()</tt></li>
+<li><tt>requestComplete()</tt> is now <tt>requestFinished()</tt></li>
+</ul>
+</li>
+</ul>
+<a name="voip-integration"></a>
+<h3>VoIP Integration</h3>
+<p>In Qtopia 4.2 and earlier, VoIP stacks could be integrated into Qtopia using a socket-based protocol. Qtopia 4.3 can still support the socket-based protocol, but it is considered deprecated and will probably be removed in a future version of Qtopia.</p>
+<p>VoIP stacks should now implement a <a href="qtelephonyservice.html">QTelephonyService</a> handler. See the <a href="syscust-voip.html">VoIP Integration Guide</a> for more information. The source code for the <tt>sipagent</tt> program provides an example of how to do this for SIP-based VoIP stacks.</p>
+<p>The VoIP API's for <a href="qphonecallprovider.html">QPhoneCallProvider</a> and <a href="qnetworkregistration.html">QNetworkRegistration</a> are reasonably stable at this point. The <a href="qpresence.html">QPresence</a> API is preliminary and may be altered in a future version of Qtopia to handle richer presence information than is currently possible.</p>
+<a name="qdawg-files"></a>
+<h3>QDawg files</h3>
+<p>The bit arrangement of <a href="qdawg-node.html">QDawg::Node</a> has been optimized. You will need to regenerate dawg files (this happens automatically during normal Qtopia build process).</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

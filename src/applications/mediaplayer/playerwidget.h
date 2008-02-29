@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -48,6 +48,11 @@ class ThrottleKeyMapper;
 class TrackInfoWidget;
 class TrackInfoDialog;
 
+class VoteDialog;
+
+class RepeatState;
+class RepeatDialog;
+
 class PlayerWidget : public QWidget
 {
     Q_OBJECT
@@ -60,6 +65,12 @@ public:
     void setPlaylist( Playlist* playlist );
 
     bool eventFilter( QObject* o, QEvent* e );
+
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+#ifndef NO_HELIX
+    QAction *settingsAction(){ return m_settingsaction; }
+#endif
+#endif
 
 signals:
     void contentChanged( QMediaContent* content );
@@ -96,6 +107,10 @@ private slots:
 
     void execTrackInfoDialog();
 
+    void execVoteDialog();
+
+    void execRepeatDialog();
+
 protected:
     void keyPressEvent( QKeyEvent* e );
     void keyReleaseEvent( QKeyEvent* e );
@@ -126,11 +141,17 @@ private:
 
     QDialog *m_settingsdialog;
 
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+#ifndef NO_HELIX
+    QAction *m_settingsaction;
+#endif
+#endif
+
     QVBoxLayout *m_videolayout;
     QWidget *m_videowidget;
     VisualizationWidget *m_visualization;
 
-#ifndef NO_HELIX_LOGO
+#ifndef NO_HELIX
     QWidget *m_helixlogoaudio;
     QWidget *m_helixlogovideo;
 #endif
@@ -157,6 +178,13 @@ private:
 
     TrackInfoWidget *m_trackinfo;
     TrackInfoDialog *m_trackinfodialog;
+
+    QAction *m_voteaction;
+    VoteDialog *m_votedialog;
+
+    QAction *m_repeataction;
+    RepeatState *m_repeatstate;
+    RepeatDialog *m_repeatdialog;
 };
 
 #endif // PLAYERWIDGET_H

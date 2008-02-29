@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,24 +19,19 @@
 **
 ****************************************************************************/
 
+#include "qiconselector.h"
+
 #include <QListWidget>
 #include <QIcon>
 #include <QString>
 #include <QList>
-#include <QIcon>
 #include <QSize>
 #include <QDesktopWidget>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QToolButton>
-
 #include <qtopiaapplication.h>
-
-#ifdef QTOPIA_PHONE
-# include <qtopia/qsoftmenubar.h>
-#endif
-
-#include "qiconselector.h"
+#include <qtopia/qsoftmenubar.h>
 
 class QIconSelectorData
 {
@@ -80,7 +75,6 @@ public:
     QWidget* mPopup;
     QSize iconSize;
 };
-
 
 /*!
   \class QIconSelector
@@ -139,18 +133,9 @@ void QIconSelector::init()
     d->iconSize = QSize(iconSize, iconSize);
     setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
-    if ( parentWidget() ) {
-        //transparent
-        QPalette pal = QToolButton::palette();
-        pal.setBrush( QPalette::Button, parentWidget()->palette().window() );
-        setPalette( pal );
-    }
-
     d->mPopup = new QWidget(0, Qt::Popup | Qt::WindowStaysOnTopHint);
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::setLabel( d->mPopup, Qt::Key_Select, QSoftMenuBar::Select );
     QSoftMenuBar::setLabel( d->mPopup, Qt::Key_Back, QSoftMenuBar::Cancel );
-#endif
 
     d->list = new QListWidget(d->mPopup);
     d->list->setMouseTracking(true);
@@ -159,6 +144,7 @@ void QIconSelector::init()
     d->list->setFrameStyle(QFrame::Box | QFrame::Plain);
     d->list->setLineWidth(1);
     d->list->move(0, 0);
+    connect(d->list, SIGNAL(currentRowChanged(int)), this, SLOT(itemChanged(int)));
 
     connect(this, SIGNAL(clicked()), this, SLOT(popup()));
 }
@@ -178,6 +164,19 @@ QSize QIconSelector::sizeHint() const
     }
 
     return QSize( w+border, h+border ).expandedTo( QApplication::globalStrut() );
+}
+
+/*!
+  Returns the text that is associated with the icon that is currently being displayed.
+*/
+QString QIconSelector::text() const
+{
+    if (d->current >= 0 && d->current < d->data.count()) {
+        QIconSelectorData *cur = d->data[d->current];
+        if (cur)
+            return cur->text;
+    }
+    return "";
 }
 
 /*!
@@ -297,11 +296,10 @@ void QIconSelector::popup()
     for( int i = 0 ; i < d->list->count() ; ++i )
         totalItemsHeight += d->list->sizeHintForRow(i);
 
-    int totalHeight = totalItemsHeight+(d->list->frameWidth()*2)+2;
-    int w = d->list->sizeHintForColumn(0)+d->list->frameWidth()*2+2;
+    int frameWidth = d->list->frameWidth();
+    int totalHeight = totalItemsHeight+(frameWidth*2)+2;
+    int w = d->list->sizeHintForColumn(0)+(frameWidth*2)+2;
     int h = totalHeight;
-    d->mPopup->resize(w, h);
-    d->list->resize(w, h);
 
     //
     //  Ensure the entire widget will be visible
@@ -318,7 +316,13 @@ void QIconSelector::popup()
     // first meet assumptions about y on screen and list height able to fit somehow.
     y = qMax(y, desktopRect.top());
     y = qMin(y, desktopRect.bottom());
-    if (h > desktopRect.height()) d->list->resize(w, desktopRect.height());
+    if (h > desktopRect.height()) {
+        h = desktopRect.height();
+    }
+
+    d->mPopup->resize(w, h);
+    d->list->resize(w - (frameWidth*2), h - (frameWidth*2));
+    d->list->move(frameWidth, frameWidth);
 
     if (y + h > desktopRect.bottom()) {
         if (y - h >= desktopRect.top())
@@ -349,6 +353,7 @@ void QIconSelector::popup()
 */
 void QIconSelector::popdown()
 {
+    d->list->clearFocus();
     d->list->removeEventFilter(this);
     d->list->viewport()->removeEventFilter(this);
     d->mPopup->removeEventFilter(this);
@@ -362,6 +367,16 @@ void QIconSelector::itemSelected( int index )
 {
     popdown();
     setCurrentIndex( index );
+}
+
+/*!
+  \internal
+
+  Make sure the current item is visible.
+*/
+void QIconSelector::itemChanged( int index)
+{
+    d->list->scrollToItem(d->list->item(index));
 }
 
 /*!
@@ -405,18 +420,14 @@ bool QIconSelector::eventFilter( QObject *obj, QEvent *e ) //mostly copied from 
 
                     case Qt::Key_F4:
                     case Qt::Key_Escape:
-#ifdef QTOPIA_PHONE
                     case Qt::Key_Back:
                     case Qt::Key_No:
-#endif
                         popdown();
                         return true;
                         break;
 
 
-#ifdef QTOPIA_PHONE
                     case Qt::Key_Select:
-#endif
                     case Qt::Key_Enter:
                     case Qt::Key_Return:
                         itemSelected(d->list->currentRow());

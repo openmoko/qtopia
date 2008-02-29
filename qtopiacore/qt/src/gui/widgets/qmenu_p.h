@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -46,6 +61,7 @@
 #ifndef QT_NO_MENU
 
 class QTornOffMenu;
+class QEventLoop;
 
 #ifdef Q_WS_MAC
 struct QMacMenuAction {
@@ -61,7 +77,7 @@ class QMenuPrivate : public QWidgetPrivate
 {
     Q_DECLARE_PUBLIC(QMenu)
 public:
-    QMenuPrivate() : itemsDirty(0), maxIconWidth(0), tabWidth(0), ncols(0), collapsibleSeparators(true), mouseDown(0), hasHadMouse(0), motions(0),
+    QMenuPrivate() : itemsDirty(0), maxIconWidth(0), tabWidth(0), ncols(0), collapsibleSeparators(true), hasHadMouse(0), motions(0),
                       currentAction(0), scroll(0), eventLoop(0), tearoff(0), tornoff(0), tearoffHighlighted(0),
                       hasCheckableItems(0), sloppyAction(0)
 #ifdef Q_WS_MAC
@@ -75,6 +91,7 @@ public:
         delete mac_menu;
 #endif
     }
+    void init();
 
     //item calculations
     mutable uint itemsDirty : 1;
@@ -91,7 +108,9 @@ public:
     uint collapsibleSeparators : 1;
 
     //selection
-    uint mouseDown : 1, hasHadMouse : 1;
+    static QPointer<QMenu> mouseDown;
+    QPoint mousePopupPos;
+    uint hasHadMouse : 1;
     int motions;
     QAction *currentAction;
     static QBasicTimer menuDelayTimer;
@@ -103,6 +122,7 @@ public:
     void setFirstActionActive();
     void setCurrentAction(QAction *, int popup = -1, SelectionReason reason = SelectedFromElsewhere, bool activateFirst = false);
     void popupAction(QAction *, int, bool);
+    void setSyncAction();
 
     //scrolling support
     struct QMenuScroller {
@@ -115,13 +135,13 @@ public:
         QMenuScroller() : scrollFlags(ScrollNone), scrollDirection(ScrollNone), scrollOffset(0), scrollTimer(0) { }
         ~QMenuScroller() { delete scrollTimer; }
     } *scroll;
+    void scrollMenu(QMenuScroller::ScrollLocation location, bool active=false);
     void scrollMenu(QMenuScroller::ScrollDirection direction, bool page=false, bool active=false);
     void scrollMenu(QAction *action, QMenuScroller::ScrollLocation location, bool active=false);
 
     //synchronous operation (ie exec())
     QEventLoop *eventLoop;
     QPointer<QAction> syncAction;
-    QStyleOptionMenuItem getStyleOption(const QAction *action) const;
 
     //search buffer
     QString searchBuffer;
@@ -136,6 +156,7 @@ public:
         QPointer<QWidget> widget;
         QPointer<QAction> action;
     };
+    virtual QList<QPointer<QWidget> > calcCausedStack() const;
     QMenuCaused causedPopup;
     void hideUpToMenuBar();
 
@@ -158,12 +179,18 @@ public:
     QPointer<QAction> defaultAction;
 
     QAction *menuAction;
+    QAction *defaultMenuAction;
+
+    void setOverrideMenuAction(QAction *);
+    void _q_overrideMenuActionDestroyed();
 
     //firing of events
-    void activateAction(QAction *, QAction::ActionEvent);
+    void activateAction(QAction *, QAction::ActionEvent, bool self=true);
 
     void _q_actionTriggered();
     void _q_actionHovered();
+
+    bool hasMouseMoved(const QPoint &globalPos);
 
     //menu fading/scrolling effects
     bool doChildEffects;
@@ -193,6 +220,7 @@ public:
         }
     } *mac_menu;
     MenuRef macMenu(MenuRef merge);
+    void setMacMenuEnabled(bool enable = true);
 #endif
 
     QPointer<QWidget> noReplayFor;

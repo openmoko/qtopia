@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -61,6 +76,7 @@
 #include <private/qcursor_p.h>
 #include "qstyle.h"
 #include "qmetaobject.h"
+#include "qtimer.h"
 
 #if !defined(QT_NO_GLIB)
 #  include "qguieventdispatcher_glib_p.h"
@@ -167,6 +183,9 @@ static const char * x11_atomnames = {
     "_NET_VIRTUAL_ROOTS\0"
     "_NET_WORKAREA\0"
 
+    "_NET_MOVERESIZE_WINDOW\0"
+    "_NET_WM_MOVERESIZE\0"
+
     "_NET_WM_NAME\0"
     "_NET_WM_ICON_NAME\0"
     "_NET_WM_ICON\0"
@@ -182,6 +201,7 @@ static const char * x11_atomnames = {
     "_NET_WM_STATE_MAXIMIZED_VERT\0"
     "_NET_WM_STATE_MODAL\0"
     "_NET_WM_STATE_STAYS_ON_TOP\0"
+    "_NET_WM_STATE_DEMANDS_ATTENTION\0"
 
     "_NET_WM_USER_TIME\0"
     "_NET_WM_FULL_PLACEMENT\0"
@@ -267,14 +287,12 @@ static bool        app_save_rootinfo = false;        // save root info
 static bool        app_do_modal        = false;        // modal mode
 static Window        curWin = 0;                        // current window
 
-// detect broken window managers
-bool                qt_broken_wm                = false;
-static void qt_detect_broken_window_manager();
-
 
 // function to update the workarea of the screen - in qdesktopwidget_x11.cpp
 extern void qt_desktopwidget_update_workarea();
 
+// Function to change the window manager state (from qwidget_x11.cpp)
+extern void qt_change_net_wm_state(const QWidget *w, bool set, Atom one, Atom two = 0);
 
 // modifier masks for alt, meta, super, hyper, and mode_switch - detected when the application starts
 // and/or keyboard layout changes
@@ -304,8 +322,6 @@ static bool replayPopupMouseEvent = false;
 static bool popupGrabOk;
 
 bool qt_sm_blockUserInput = false;                // session management
-
-bool qt_reuse_double_buffer = true;
 
 Q_GUI_EXPORT int qt_xfocusout_grab_counter = 0;
 
@@ -346,7 +362,6 @@ extern bool qt_xdnd_dragging;
 
 // gui or non-gui from qapplication.cpp
 extern bool qt_is_gui_used;
-extern bool qt_app_has_font;
 
 class QETWidget : public QWidget                // event translator widget
 {
@@ -362,6 +377,35 @@ public:
     bool translateXinputEvent(const XEvent*, const QTabletDeviceData *tablet);
 #endif
     bool translatePropertyEvent(const XEvent *);
+
+    void doDeferredMap()
+    {
+        Q_ASSERT(testAttribute(Qt::WA_WState_Created));
+        if (!testAttribute(Qt::WA_Resized)) {
+            adjustSize();
+            setAttribute(Qt::WA_Resized, false);
+        }
+
+        /*
+          workaround for WM's that throw away ConfigureRequests from the following:
+
+          window->hide();
+          window->move(x, y); // could also be resize(), move()+resize(), or setGeometry()
+          window->show();
+        */
+        QPoint p = d_func()->topData()->posFromMove ? pos() : geometry().topLeft();
+        QSize s = size();
+        XMoveResizeWindow(X11->display,
+                          internalWinId(),
+                          p.x(),
+                          p.y(),
+                          s.width(),
+                          s.height());
+
+        setAttribute(Qt::WA_Mapped);
+        d_func()->topData()->waitingForMapNotify = 1;
+        XMapWindow(X11->display, internalWinId());
+    }
 };
 
 
@@ -369,7 +413,7 @@ void QApplicationPrivate::createEventDispatcher()
 {
     Q_Q(QApplication);
 #if !defined(QT_NO_GLIB)
-    if (qgetenv("QT_NO_GLIB").isEmpty())
+    if (qgetenv("QT_NO_GLIB").isEmpty() && QEventDispatcherGlib::versionSupported())
         eventDispatcher = (q->type() != QApplication::Tty
                            ? new QGuiEventDispatcherGlib(q)
                            : new QEventDispatcherGlib(q));
@@ -393,18 +437,61 @@ static int (*original_xio_errhandler)(Display *dpy);
 
 static int qt_x_errhandler(Display *dpy, XErrorEvent *err)
 {
-    if (err->error_code == BadWindow) {
-        X11->seen_badwindow = true;
-        if (err->request_code == 25 /* X_SendEvent */ && X11->xdndHandleBadwindow())
+    switch (err->error_code) {
+    case BadAtom:
+        if (err->request_code == 20 /* X_GetProperty */
+            && (err->resourceid == XA_RESOURCE_MANAGER
+                || err->resourceid == XA_RGB_DEFAULT_MAP
+                || err->resourceid == ATOM(_NET_SUPPORTED)
+                || err->resourceid == ATOM(_NET_SUPPORTING_WM_CHECK)
+                || err->resourceid == ATOM(KDE_FULL_SESSION)
+                || err->resourceid == ATOM(KWIN_RUNNING)
+                || err->resourceid == ATOM(XdndProxy)
+                || err->resourceid == ATOM(XdndAware))) {
+            // Perhaps we're running under SECURITY reduction? :/
             return 0;
+        }
+        break;
+
+    case BadWindow:
+        if (err->request_code == 2 /* X_ChangeWindowAttributes */
+            || err->request_code == 38 /* X_QueryPointer */) {
+            for (int i = 0; i < ScreenCount(dpy); ++i) {
+                if (err->resourceid == RootWindow(dpy, i)) {
+                    // Perhaps we're running under SECURITY reduction? :/
+                    return 0;
+                }
+            }
+        }
+        X11->seen_badwindow = true;
+        if (err->request_code == 25 /* X_SendEvent */) {
+            for (int i = 0; i < ScreenCount(dpy); ++i) {
+                if (err->resourceid == RootWindow(dpy, i)) {
+                    // Perhaps we're running under SECURITY reduction? :/
+                    return 0;
+                }
+            }
+            if (X11->xdndHandleBadwindow()) {
+                qDebug("xdndHandleBadwindow returned true");
+                return 0;
+            }
+        }
         if (X11->ignore_badwindow)
             return 0;
-    } else if (err->request_code == X11->xinput_major
-                && err->error_code == (X11->xinput_errorbase + XI_BadDevice)
-                && err->minor_code == 3 /* X_OpenDevice */) {
-        return 0;
-    } else if (err->error_code == BadMatch && err->request_code == 42 /* X_SetInputFocus */) {
-        return 0;
+        break;
+
+    case BadMatch:
+        if (err->request_code == 42 /* X_SetInputFocus */)
+            return 0;
+        break;
+
+    default:
+        if (err->request_code == X11->xinput_major
+            && err->error_code == (X11->xinput_errorbase + XI_BadDevice)
+            && err->minor_code == 3 /* X_OpenDevice */) {
+            return 0;
+        }
+        break;
     }
 
     char errstr[256];
@@ -571,19 +658,18 @@ bool QApplicationPrivate::x11_apply_settings()
     if (groupCount == QPalette::NColorGroups)
         QApplicationPrivate::setSystemPalette(pal);
 
-    if (!qt_app_has_font && !appFont) {
-        QFont font(QApplication::font());
+    if (!appFont) {
         QString str = settings.value(QLatin1String("font")).toString();
         if (!str.isEmpty()) {
+            QFont font(QApplication::font());
             font.fromString(str);
-            if (font != QApplication::font())
-                QApplication::setFont(font);
+            QApplicationPrivate::setSystemFont(font);
         }
     }
 
     // read library (ie. plugin) path list
     QString libpathkey =
-        QString(QLatin1String("%1.%2/libraryPath"))
+        QString::fromLatin1("%1.%2/libraryPath")
         .arg(QT_VERSION >> 16)
         .arg((QT_VERSION & 0xff00) >> 8);
     QStringList pathlist = settings.value(libpathkey).toString().split(QLatin1Char(':'));
@@ -670,14 +756,8 @@ bool QApplicationPrivate::x11_apply_settings()
     }
     settings.endGroup();
 
-    qt_broken_wm =
-        settings.value(QLatin1String("brokenWindowManager"), qt_broken_wm).toBool();
-
     qt_use_rtl_extensions =
         settings.value(QLatin1String("useRtlExtensions"), false).toBool();
-
-    qt_reuse_double_buffer =
-        settings.value(QLatin1String("reuseDoubleBuffer"), true).toBool();
 
 #ifndef QT_NO_XIM
     if (qt_xim_preferred_style == 0) {
@@ -721,12 +801,12 @@ static void qt_set_input_encoding()
     Atom type;
     int format;
     ulong  nitems, after = 1;
-    const char *data = 0;
+    unsigned char *data = 0;
 
     int e = XGetWindowProperty(X11->display, QX11Info::appRootWindow(),
                                 ATOM(_QT_INPUT_ENCODING), 0, 1024,
                                 False, XA_STRING, &type, &format, &nitems,
-                                &after, (unsigned char**)&data);
+                                &after, &data);
     if (e != Success || !nitems || type == XNone) {
         // Always use the locale codec, since we have no examples of non-local
         // XIMs, and since we cannot get a sensible answer about the encoding
@@ -734,10 +814,10 @@ static void qt_set_input_encoding()
         qt_input_mapper = QTextCodec::codecForLocale();
 
     } else {
-        if (!qstricmp(data, "locale"))
+        if (!qstricmp((char *)data, "locale"))
             qt_input_mapper = QTextCodec::codecForLocale();
         else
-            qt_input_mapper = QTextCodec::codecForName(data);
+            qt_input_mapper = QTextCodec::codecForName((char *)data);
         // make sure we have an input codec
         if(!qt_input_mapper)
             qt_input_mapper = QTextCodec::codecForName("ISO 8859-1");
@@ -754,7 +834,7 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
                                  const char* bg = 0, const char* button = 0)
 {
 
-    QString resFont, resFG, resBG, resEF, sysFont, selectBackground, selectForeground;
+    QString resFont, resFG, resBG, resButton, resEF, sysFont, selectBackground, selectForeground;
 
     QApplication::setEffectEnabled(Qt::UI_General, false);
     QApplication::setEffectEnabled(Qt::UI_AnimateMenu, false);
@@ -783,11 +863,14 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
 
         while (after > 0) {
             uchar *data = 0;
-            XGetWindowProperty(X11->display, QX11Info::appRootWindow(0),
-                               ATOM(RESOURCE_MANAGER),
-                               offset, 8192, False, AnyPropertyType,
-                               &type, &format, &nitems, &after,
-                               &data);
+            if (XGetWindowProperty(X11->display, QX11Info::appRootWindow(0),
+                                   ATOM(RESOURCE_MANAGER),
+                                   offset, 8192, False, AnyPropertyType,
+                                   &type, &format, &nitems, &after,
+                                   &data) != Success) {
+                res = QString();
+                break;
+            }
             if (type == XA_STRING)
                 res += QString::fromLatin1((char*)data);
             else
@@ -809,7 +892,7 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
             r = res.indexOf(QLatin1Char('\n'), l);
             if (r < 0)
                 r = resl;
-            while (QUnicodeTables::isSpace(res.at(l)))
+            while (res.at(l).isSpace())
                 l++;
             bool mine = false;
             QChar sc = res.at(l + 1);
@@ -853,6 +936,8 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
                         resFG = value;
                     else if (!bg && key == QLatin1String("background"))
                         resBG = value;
+                    else if (!bg && !button && key == QLatin1String("button.background"))
+                        resButton = value;
                     else if (key == QLatin1String("text.selectbackground")) {
                         selectBackground = value;
                     } else if (key == QLatin1String("text.selectforeground")) {
@@ -874,7 +959,9 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
         resFG = QString::fromLocal8Bit(fg);
     if (resBG.isEmpty())
         resBG = QString::fromLocal8Bit(bg);
-    if (!qt_app_has_font && !resFont.isEmpty()) { // set application font
+    if (resButton.isEmpty())
+        resButton = QString::fromLocal8Bit(button);
+    if (!resFont.isEmpty() && !X11->has_fontconfig) { // set application font
         QFont fnt;
         fnt.setRawName(resFont);
 
@@ -908,6 +995,9 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
     }
 
     if ((button || !resBG.isEmpty() || !resFG.isEmpty())) {// set app colors
+        bool allowX11ColorNames = QColor::allowX11ColorNames();
+        QColor::setAllowX11ColorNames(true);
+
         (void) QApplication::style();  // trigger creation of application style and system palettes
         QColor btn;
         QColor bg;
@@ -922,8 +1012,8 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
         if (!fg.isValid())
             fg = QApplicationPrivate::sys_pal->color(QPalette::Active, QPalette::WindowText);
 
-        if (button)
-            btn = QColor(QString::fromLocal8Bit(button));
+        if (!resButton.isEmpty())
+            btn = QColor(resButton);
         else if (!resBG.isEmpty())
             btn = bg;
         if (!btn.isValid())
@@ -933,17 +1023,17 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
         fg.getHsv(&h,&s,&v);
         QColor base = Qt::white;
         bool bright_mode = false;
-        if (v >= 255-50) {
-            base = btn.dark(150);
+        if (v >= 255 - 50) {
+            base = btn.darker(150);
             bright_mode = true;
         }
 
-        QPalette pal(fg, btn, btn.light(), btn.dark(), btn.dark(150), fg, Qt::white, base, bg);
+        QPalette pal(fg, btn, btn.lighter(125), btn.darker(130), btn.darker(120), fg, Qt::white, base, bg);
         QColor disabled((fg.red()   + btn.red())  / 2,
                         (fg.green() + btn.green())/ 2,
                         (fg.blue()  + btn.blue()) / 2);
-        pal.setColorGroup(QPalette::Disabled, disabled, btn, btn.light(125),
-                          btn.dark(), btn.dark(150), disabled, Qt::white, Qt::white, bg);
+        pal.setColorGroup(QPalette::Disabled, disabled, btn, btn.lighter(125),
+                          btn.darker(130), btn.darker(150), disabled, Qt::white, Qt::white, bg);
 
         QColor highlight, highlightText;
         if (!selectBackground.isEmpty() && !selectForeground.isEmpty()) {
@@ -973,6 +1063,8 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
         }
 
         QApplicationPrivate::setSystemPalette(pal);
+
+        QColor::setAllowX11ColorNames(allowX11ColorNames);
     }
 
     if (!resEF.isEmpty()) {
@@ -990,27 +1082,6 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
                                        effects.contains(QLatin1String("fadetooltip")));
         QApplication::setEffectEnabled(Qt::UI_AnimateToolBox,
                                        effects.contains(QLatin1String("animatetoolbox")));
-    }
-}
-
-
-static void qt_detect_broken_window_manager()
-{
-    Atom type;
-    int format;
-    ulong nitems, after;
-    uchar *data = 0;
-
-    // look for SGI's 4Dwm
-    int e = XGetWindowProperty(X11->display, QX11Info::appRootWindow(),
-                               ATOM(_SGI_DESKS_MANAGER), 0, 1, False, XA_WINDOW,
-                               &type, &format, &nitems, &after, &data);
-    if (data)
-        XFree(data);
-
-    if (e == Success && type == XA_WINDOW && format == 32 && nitems == 1 && after == 0) {
-        // detected SGI 4Dwm
-        qt_broken_wm = true;
     }
 }
 
@@ -1065,9 +1136,9 @@ static void qt_get_net_supported()
 }
 
 
-bool qt_net_supports(Atom atom)
+bool QX11Data::isSupportedByWM(Atom atom)
 {
-    if (! X11->net_supported_list)
+    if (!X11->net_supported_list)
         return false;
 
     bool supported = false;
@@ -1090,7 +1161,7 @@ static void qt_get_net_virtual_roots()
         delete [] X11->net_virtual_root_list;
     X11->net_virtual_root_list = 0;
 
-    if (!qt_net_supports(ATOM(_NET_VIRTUAL_ROOTS)))
+    if (!X11->isSupportedByWM(ATOM(_NET_VIRTUAL_ROOTS)))
         return;
 
     Atom type;
@@ -1283,6 +1354,14 @@ void qt_init(QApplicationPrivate *priv, int,
     // outside visual/colormap
     X11->visual = reinterpret_cast<Visual *>(visual);
     X11->colormap = colormap;
+
+    // Fontconfig
+    X11->has_fontconfig = false;
+#if !defined(QT_NO_FONTCONFIG)
+    if (qgetenv("QT_X11_NO_FONTCONFIG").isNull())
+        X11->has_fontconfig = FcInit();
+    X11->fc_antialias = true;
+#endif
 
 #ifndef QT_NO_XRENDER
     memset(X11->solid_fills, 0, sizeof(X11->solid_fills));
@@ -1491,9 +1570,6 @@ void qt_init(QApplicationPrivate *priv, int,
         // Finally create all atoms
         qt_x11_create_intern_atoms();
 
-        // look for broken window managers
-        qt_detect_broken_window_manager();
-
         // initialize NET lists
         qt_get_net_supported();
         qt_get_net_virtual_roots();
@@ -1558,11 +1634,7 @@ void qt_init(QApplicationPrivate *priv, int,
         }
 #endif // QT_NO_XFIXES
 
-        X11->has_fontconfig = false;
 #if !defined(QT_NO_FONTCONFIG)
-        if (qgetenv("QT_X11_NO_FONTCONFIG").isNull())
-            X11->has_fontconfig = FcInit();
-
         int dpi = 0;
         getXDefault("Xft", FC_DPI, &dpi);
         if (dpi) {
@@ -1605,7 +1677,6 @@ void qt_init(QApplicationPrivate *priv, int,
             getXDefault("Xft", FC_RGBA, &subpixel);
             X11->screens[s].subpixel = subpixel;
         }
-        X11->fc_antialias = true;
         getXDefault("Xft", FC_ANTIALIAS, &X11->fc_antialias);
 #ifdef FC_HINT_STYLE
         getXDefault("Xft", FC_HINT_STYLE, &X11->fc_hint_style);
@@ -1634,9 +1705,9 @@ void qt_init(QApplicationPrivate *priv, int,
 #if 0 //disabled for now..
         QSegfaultHandler::initialize(priv->argv, priv->argc);
 #endif
-        QFont::initialize();
         QCursorData::initialize();
     }
+    QFont::initialize();
 
     if(qt_is_gui_used) {
         qApp->setObjectName(QString::fromLocal8Bit(appName));
@@ -1722,6 +1793,10 @@ void qt_init(QApplicationPrivate *priv, int,
                                               0, 1, False, AnyPropertyType, &type, &format, &length,
                                               &after, &data) == Success && length)) {
                 X11->desktopEnvironment = DE_KDE;
+            } else if (XGetWindowProperty(X11->display, QX11Info::appRootWindow(), ATOM(_SGI_DESKS_MANAGER),
+                                          0, 1, False, XA_WINDOW, &type, &format, &length, &after, &data) == Success
+                       && length) {
+                X11->desktopEnvironment = DE_4DWM;
             }
             if (data)
                 XFree((char *)data);
@@ -1741,10 +1816,11 @@ void qt_init(QApplicationPrivate *priv, int,
                     : (int) (((QX11Info::appDpiY() >= 95 ? 17. : 12.) *
                               72. / (float) QX11Info::appDpiY()) + 0.5));
 
-        if (!qt_app_has_font) {
+        if (!QApplicationPrivate::sys_font) {
+            // no font from settings or RESOURCE_MANAGER, provide a fallback
             QFont f(X11->has_fontconfig ? QLatin1String("Sans Serif") : QLatin1String("Helvetica"),
                     ptsz);
-            QApplication::setFont(f);
+            QApplicationPrivate::setSystemFont(f);
         }
 
 #if !defined (QT_NO_TABLET)
@@ -1931,7 +2007,7 @@ void qt_init(QApplicationPrivate *priv, int,
             settings.beginGroup(QLatin1String("Qt"));
 
             // read library (ie. plugin) path list
-            QString libpathkey = QString(QLatin1String("%1.%2/libraryPath"))
+            QString libpathkey = QString::fromLatin1("%1.%2/libraryPath")
                                  .arg(QT_VERSION >> 16)
                                  .arg((QT_VERSION & 0xff00) >> 8);
             QStringList pathlist =
@@ -1967,10 +2043,16 @@ void QApplicationPrivate::x11_initialize_style()
 
     switch(X11->desktopEnvironment) {
         case DE_KDE:
-            QApplicationPrivate::app_style = QStyleFactory::create(QLatin1String("plastique"));
+            if (X11->use_xrender)
+                QApplicationPrivate::app_style = QStyleFactory::create(QLatin1String("plastique"));
+            else
+                QApplicationPrivate::app_style = QStyleFactory::create(QLatin1String("windows"));
             break;
         case DE_GNOME:
-            QApplicationPrivate::app_style = QStyleFactory::create(QLatin1String("cleanlooks"));
+            if (X11->use_xrender)
+                QApplicationPrivate::app_style = QStyleFactory::create(QLatin1String("cleanlooks"));
+            else
+                QApplicationPrivate::app_style = QStyleFactory::create(QLatin1String("windows"));
             break;
         case DE_CDE:
             QApplicationPrivate::app_style = QStyleFactory::create(QLatin1String("cde"));
@@ -2263,7 +2345,7 @@ void QApplication::setOverrideCursor(const QCursor &cursor)
     QWidgetList all = allWidgets();
     for (QWidgetList::ConstIterator it = all.constBegin(); it != all.constEnd(); ++it) {
         register QWidget *w = *it;
-        if (w->testAttribute(Qt::WA_SetCursor))
+        if (w->testAttribute(Qt::WA_SetCursor) || w->isWindow())
             qt_x11_enforce_cursor(w);
     }
     XFlush(X11->display);                                // make X execute it NOW
@@ -2290,7 +2372,7 @@ void QApplication::restoreOverrideCursor()
         QWidgetList all = allWidgets();
         for (QWidgetList::ConstIterator it = all.constBegin(); it != all.constEnd(); ++it) {
             register QWidget *w = *it;
-            if (w->testAttribute(Qt::WA_SetCursor))
+            if (w->testAttribute(Qt::WA_SetCursor) || w->isWindow())
                 qt_x11_enforce_cursor(w);
         }
         XFlush(X11->display);
@@ -2410,7 +2492,74 @@ void QApplication::beep()
         printf("\7");
 }
 
+/*!
+      \since 4.3
 
+      Causes an alert to be shown for \a widget if the window is not the active
+      window. The alert is shown for \a msec miliseconds. If \a msec is zero (the
+      default), then the alert is shown indefinitely until the window becomes
+      active again.
+
+      Currently this function does nothing on Qtopia Core.
+
+      On Mac OS X, this works more at the application level and will cause the
+      application icon to bounce in the dock.
+
+      On Windows this causes the window's taskbar entry to flash for a time. If \a
+      msec is zero, the flashing will stop and the taskbar entry will turn a
+      different color (currently orange).
+
+      On X11, this will cause the window to be marked as "demands attention",
+      the window must not be hidden (i.e. not have hide() called on it, but be
+      visible in some sort of way) in order for this to work.
+*/
+void QApplication::alert(QWidget *widget, int msec)
+{
+    if (!QApplicationPrivate::checkInstance("alert"))
+        return;
+
+    QWidgetList windowsToMark;
+    if (!widget) {
+        windowsToMark += topLevelWidgets();
+    } else {
+        windowsToMark.append(widget->window());
+    }
+
+    for (int i = 0; i < windowsToMark.size(); ++i) {
+        QWidget *window = windowsToMark.at(i);
+        if (!window->isActiveWindow()) {
+            qt_change_net_wm_state(window, true, ATOM(_NET_WM_STATE_DEMANDS_ATTENTION));
+            if (msec != 0) {
+                QTimer *timer = new QTimer(qApp);
+                timer->setSingleShot(true);
+                connect(timer, SIGNAL(timeout()), qApp, SLOT(_q_alertTimeOut()));
+                if (QTimer *oldTimer = qApp->d_func()->alertTimerHash.value(window)) {
+                    qApp->d_func()->alertTimerHash.remove(window);
+                    delete oldTimer;
+                }
+                qApp->d_func()->alertTimerHash.insert(window, timer);
+                timer->start(msec);
+            }
+        }
+    }
+}
+
+void QApplicationPrivate::_q_alertTimeOut()
+{
+    if (QTimer *timer = qobject_cast<QTimer *>(q_func()->sender())) {
+        QHash<QWidget *, QTimer *>::iterator it = alertTimerHash.begin();
+        while (it != alertTimerHash.end()) {
+            if (it.value() == timer) {
+                QWidget *window = it.key();
+                qt_change_net_wm_state(window, false, ATOM(_NET_WM_STATE_DEMANDS_ATTENTION));
+                alertTimerHash.erase(it);
+                timer->deleteLater();
+                break;
+            }
+            ++it;
+        }
+    }
+}
 
 /*****************************************************************************
   Special lookup functions for windows that have been reparented recently
@@ -2701,11 +2850,12 @@ int QApplication::x11ProcessEvent(XEvent* event)
     QTabletDeviceDataList *tablets = qt_tablet_devices();
     for (int i = 0; i < tablets->size(); ++i) {
         const QTabletDeviceData &tab = tablets->at(i);
-        if (event->type == tab.xinput_motion
+        if ((event->type == tab.xinput_motion
             || event->type == tab.xinput_button_release
             || event->type == tab.xinput_button_press
             || event->type == tab.xinput_proximity_in
-            || event->type == tab.xinput_proximity_out) {
+            || event->type == tab.xinput_proximity_out)
+            && ! qt_xdnd_dragging) {
             widget->translateXinputEvent(event, &tab);
             return 0;
         }
@@ -2828,8 +2978,28 @@ int QApplication::x11ProcessEvent(XEvent* event)
             event->xfocus.detail != NotifyNonlinearVirtual &&
             event->xfocus.detail != NotifyNonlinear)
             break;
-        if (!d->inPopupMode() && widget == QApplicationPrivate::active_window)
-            setActiveWindow(0);
+        if (!d->inPopupMode() && widget == QApplicationPrivate::active_window) {
+            XEvent ev;
+            bool focus_will_change = false;
+            if (XCheckTypedEvent(X11->display, XFocusIn, &ev)) {
+                // we're about to get an XFocusIn, if we know we will
+                // get a new active window, we don't want to set the
+                // active window to 0 now
+                QWidget *w2 = QWidget::find(ev.xany.window);
+                if (w2
+                    && w2->windowType() != Qt::Desktop
+                    && !d->inPopupMode() // some delayed focus event to ignore
+                    && w2->isWindow()
+                    && (ev.xfocus.detail == NotifyAncestor
+                        || ev.xfocus.detail == NotifyInferior
+                        || ev.xfocus.detail == NotifyNonlinear))
+                    focus_will_change = true;
+
+                XPutBackEvent(X11->display, &ev);
+            }
+            if (!focus_will_change)
+                setActiveWindow(0);
+        }
         break;
 
     case EnterNotify: {                        // enter window
@@ -2837,9 +3007,10 @@ int QApplication::x11ProcessEvent(XEvent* event)
             break;
         if (d->inPopupMode() && widget->window() != activePopupWidget())
             break;
-        if (event->xcrossing.mode != NotifyNormal ||
-            event->xcrossing.detail == NotifyVirtual  ||
-            event->xcrossing.detail == NotifyNonlinearVirtual)
+        if ((event->xcrossing.mode != NotifyNormal
+             && event->xcrossing.mode != NotifyUngrab)
+            || event->xcrossing.detail == NotifyVirtual
+            || event->xcrossing.detail == NotifyNonlinearVirtual)
             break;
         if (event->xcrossing.focus &&
             !(widget->windowType() == Qt::Desktop) && !widget->isActiveWindow()) {
@@ -2859,7 +3030,9 @@ int QApplication::x11ProcessEvent(XEvent* event)
             break;
         if (curWin && widget->internalWinId() != curWin)
             break;
-        if (event->xcrossing.mode != NotifyNormal)
+        if ((event->xcrossing.mode != NotifyNormal
+            && event->xcrossing.mode != NotifyUngrab)
+            || event->xcrossing.detail == NotifyInferior)
             break;
         if (!(widget->windowType() == Qt::Desktop))
             widget->translateMouseEvent(event); //we don't get MotionNotify, emulate it
@@ -2872,7 +3045,8 @@ int QApplication::x11ProcessEvent(XEvent* event)
             if(event_widget && event_widget->x11Event(&ev))
                 break;
             if (ev.type == LeaveNotify
-                || ev.xcrossing.mode != NotifyNormal
+                || (ev.xcrossing.mode != NotifyNormal
+                    && ev.xcrossing.mode != NotifyUngrab)
                 || ev.xcrossing.detail == NotifyVirtual
                 || ev.xcrossing.detail == NotifyNonlinearVirtual)
                 continue;
@@ -2922,14 +3096,8 @@ int QApplication::x11ProcessEvent(XEvent* event)
                 }
             }
 
-            if (!widget->d_func()->topData()->validWMState) {
-                int idx = X11->deferred_map.indexOf(widget);
-                if (idx != -1) {
-                    X11->deferred_map.removeAt(idx);
-                    Q_ASSERT(widget->testAttribute(Qt::WA_WState_Created));
-                    XMapWindow(X11->display, widget->internalWinId());
-                }
-            }
+            if (!widget->d_func()->topData()->validWMState && X11->deferred_map.removeAll(widget))
+                widget->doDeferredMap();
         }
         break;
 
@@ -2960,12 +3128,18 @@ int QApplication::x11ProcessEvent(XEvent* event)
     case ClientMessage:                        // client message
         return x11ClientMessage(widget,event,False);
 
-    case ReparentNotify:                        // window manager reparents
+    case ReparentNotify: {                      // window manager reparents
+        // compress old reparent events to self
+        XEvent ev;
         while (XCheckTypedWindowEvent(X11->display,
                                       widget->internalWinId(),
                                       ReparentNotify,
-                                      event))
-            ;        // skip old reparent events
+                                      &ev)) {
+            if (ev.xreparent.window != ev.xreparent.event) {
+                XPutBackEvent(X11->display, &ev);
+                break;
+            }
+        }
         if (widget->isWindow()) {
             QTLWExtra *topData = widget->d_func()->topData();
 
@@ -2973,7 +3147,7 @@ int QApplication::x11ProcessEvent(XEvent* event)
             topData->parentWinId = event->xreparent.parent;
 
             // the widget frame strut should also be invalidated
-            topData->frameStrut.setCoords(0, 0, 0, 0);
+            widget->data->fstrut_dirty = 1;
 
             // work around broken window managers... if we get a
             // ReparentNotify before the MapNotify, we assume that
@@ -3001,7 +3175,7 @@ int QApplication::x11ProcessEvent(XEvent* event)
             }
         }
         break;
-
+    }
     case SelectionRequest: {
         XSelectionRequestEvent *req = &event->xselectionrequest;
         if (! req)
@@ -3097,6 +3271,12 @@ int QApplication::x11ProcessEvent(XEvent* event)
     Return true if you want to stop the event from being processed.
     Return false for normal event dispatching. The default
     implementation returns false.
+
+    It is only the directly addressed messages that are filtered.
+    You must install an event filter directly on the event
+    dispatcher, which is returned by
+    QAbstractEventDispatcher::instance(), to handle system wide
+    messages.
 
     \sa x11ProcessEvent()
 */
@@ -3549,7 +3729,7 @@ bool QETWidget::translateMouseEvent(const XEvent *event)
         if (popup != this) {
             if (event->type == LeaveNotify)
                 return false;
-            if ((windowType() == Qt::Popup) && rect().contains(pos))
+            if ((windowType() == Qt::Popup) && rect().contains(pos) && 0)
                 popup = this;
             else                                // send to last popup
                 pos = popup->mapFromGlobal(globalPos);
@@ -3577,25 +3757,41 @@ bool QETWidget::translateMouseEvent(const XEvent *event)
 
         int oldOpenPopupCount = openPopupCount;
 
-        // deliver event
-        replayPopupMouseEvent = false;
-        if (qt_button_down) {
-            QMouseEvent e(type, qt_button_down->mapFromGlobal(globalPos),
-                          globalPos, button, buttons, modifiers);
-            QApplication::sendSpontaneousEvent(qt_button_down, &e);
-        } else if (popupChild) {
-            QMouseEvent e(type, popupChild->mapFromGlobal(globalPos),
-                          globalPos, button, buttons, modifiers);
-            QApplication::sendSpontaneousEvent(popupChild, &e);
+        if (popup->isEnabled()) {
+            // deliver event
+            replayPopupMouseEvent = false;
+            if (qt_button_down) {
+                QMouseEvent e(type, qt_button_down->mapFromGlobal(globalPos),
+                              globalPos, button, buttons, modifiers);
+                QApplication::sendSpontaneousEvent(qt_button_down, &e);
+            } else if (popupChild) {
+                QMouseEvent e(type, popupChild->mapFromGlobal(globalPos),
+                              globalPos, button, buttons, modifiers);
+                QApplication::sendSpontaneousEvent(popupChild, &e);
+            } else {
+                QMouseEvent e(type, pos, globalPos, button, buttons, modifiers);
+                QApplication::sendSpontaneousEvent(popup, &e);
+            }
         } else {
-            QMouseEvent e(type, pos, globalPos, button, buttons, modifiers);
-            QApplication::sendSpontaneousEvent(popup, &e);
+            // close disabled popups when a mouse button is pressed or released
+            switch (type) {
+            case QEvent::MouseButtonPress:
+            case QEvent::MouseButtonDblClick:
+            case QEvent::MouseButtonRelease:
+                popup->close();
+                break;
+            default:
+                break;
+            }
         }
 
         if (qApp->activePopupWidget() != activePopupWidget
             && replayPopupMouseEvent) {
             // the active popup was closed, replay the mouse event
             if (!(windowType() == Qt::Popup)) {
+#if 1
+                qt_button_down = 0;
+#else
                 if (buttons == button)
                     qt_button_down = this;
                 QMouseEvent e(type, mapFromGlobal(globalPos), globalPos, button,
@@ -3608,6 +3804,7 @@ bool QETWidget::translateMouseEvent(const XEvent *event)
                     QContextMenuEvent e(QContextMenuEvent::Mouse, mapFromGlobal(globalPos), globalPos);
                     QApplication::sendSpontaneousEvent(this, &e);
                 }
+#endif
             }
             replayPopupMouseEvent = false;
         } else if (type == QEvent::MouseButtonPress
@@ -3956,8 +4153,6 @@ bool QETWidget::translatePropertyEvent(const XEvent *event)
     unsigned long nitems, after;
 
     if (event->xproperty.atom == ATOM(_KDE_NET_WM_FRAME_STRUT)) {
-        QTLWExtra *topData = d->topData();
-        topData->frameStrut.setCoords(0, 0, 0, 0);
         this->data->fstrut_dirty = 1;
 
         if (event->xproperty.state == PropertyNewValue) {
@@ -3968,7 +4163,7 @@ bool QETWidget::translatePropertyEvent(const XEvent *event)
             if (e == Success && ret == XA_CARDINAL &&
                 format == 32 && nitems == 4) {
                 long *strut = (long *) data;
-                topData->frameStrut.setCoords(strut[0], strut[1], strut[2], strut[3]);
+                d->topData()->frameStrut.setCoords(strut[0], strut[1], strut[2], strut[3]);
                 this->data->fstrut_dirty = 0;
             }
         }
@@ -3987,20 +4182,26 @@ bool QETWidget::translatePropertyEvent(const XEvent *event)
                 Atom *states = (Atom *) data;
 
                 unsigned long i;
+                uint maximized = 0;
                 for (i = 0; i < nitems; i++) {
-                    if (states[i] == ATOM(_NET_WM_STATE_MAXIMIZED_VERT)
-                        || states[i] == ATOM(_NET_WM_STATE_MAXIMIZED_HORZ))
-                        max = true;
+                    if (states[i] == ATOM(_NET_WM_STATE_MAXIMIZED_VERT))
+                        maximized |= 1;
+                    else if (states[i] == ATOM(_NET_WM_STATE_MAXIMIZED_HORZ))
+                        maximized |= 2;
                     else if (states[i] == ATOM(_NET_WM_STATE_FULLSCREEN))
                         full = true;
+                }
+                if (maximized == 3) {
+                    // only set maximized if both horizontal and vertical properties are set
+                    max = true;
                 }
             }
         }
 
         bool send_event = false;
 
-        if (qt_net_supports(ATOM(_NET_WM_STATE_MAXIMIZED_VERT))
-            && qt_net_supports(ATOM(_NET_WM_STATE_MAXIMIZED_HORZ))) {
+        if (X11->isSupportedByWM(ATOM(_NET_WM_STATE_MAXIMIZED_VERT))
+            && X11->isSupportedByWM(ATOM(_NET_WM_STATE_MAXIMIZED_HORZ))) {
             if (max && !isMaximized()) {
                 this->data->window_state = this->data->window_state | Qt::WindowMaximized;
                 send_event = true;
@@ -4010,7 +4211,7 @@ bool QETWidget::translatePropertyEvent(const XEvent *event)
             }
         }
 
-        if (qt_net_supports(ATOM(_NET_WM_STATE_FULLSCREEN))) {
+        if (X11->isSupportedByWM(ATOM(_NET_WM_STATE_FULLSCREEN))) {
             if (full && !isFullScreen()) {
                 this->data->window_state = this->data->window_state | Qt::WindowFullScreen;
                 send_event = true;
@@ -4026,7 +4227,6 @@ bool QETWidget::translatePropertyEvent(const XEvent *event)
         }
     } else if (event->xproperty.atom == ATOM(WM_STATE)) {
         // the widget frame strut should also be invalidated
-        d->topData()->frameStrut.setCoords(0, 0, 0, 0);
         this->data->fstrut_dirty = 1;
 
         if (event->xproperty.state == PropertyDelete) {
@@ -4038,8 +4238,10 @@ bool QETWidget::translatePropertyEvent(const XEvent *event)
             // map the window if we were waiting for a transition to
             // withdrawn
             if (X11->deferred_map.removeAll(this)) {
-                XMapWindow(X11->display, internalWinId());
-            } else if (isVisible() && !testAttribute(Qt::WA_Mapped)) {
+                doDeferredMap();
+            } else if (isVisible()
+                       && !testAttribute(Qt::WA_Mapped)
+                       && !testAttribute(Qt::WA_OutsideWSRange)) {
                 // so that show() will work again. As stated in the
                 // ICCCM section 4.1.4: "Only the client can effect a
                 // transition into or out of the Withdrawn state.",
@@ -4071,8 +4273,10 @@ bool QETWidget::translatePropertyEvent(const XEvent *event)
                     // map the window if we were waiting for a
                     // transition to withdrawn
                     if (X11->deferred_map.removeAll(this)) {
-                        XMapWindow(X11->display, internalWinId());
-                    } else if (isVisible() && !testAttribute(Qt::WA_Mapped)) {
+                        doDeferredMap();
+                    } else if (isVisible()
+                               && !testAttribute(Qt::WA_Mapped)
+                               && !testAttribute(Qt::WA_OutsideWSRange)) {
                         // so that show() will work again. As stated
                         // in the ICCCM section 4.1.4: "Only the
                         // client can effect a transition into or out
@@ -4257,6 +4461,16 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
     bool wasResize = testAttribute(Qt::WA_WState_ConfigPending); // set in QWidget::setGeometry_sys()
     setAttribute(Qt::WA_WState_ConfigPending, false);
 
+    if (testAttribute(Qt::WA_OutsideWSRange)) {
+        // discard events for windows that have a geometry X can't handle
+        XEvent xevent;
+        while (XCheckTypedWindowEvent(X11->display,internalWinId(), ConfigureNotify,&xevent) &&
+               !qt_x11EventFilter(&xevent)  &&
+               !x11Event(&xevent)) // send event through filter
+            ;
+        return true;
+    }
+
     if (isWindow()) {
         QPoint newCPos(geometry().topLeft());
         QSize  newSize(event->xconfigure.width, event->xconfigure.height);
@@ -4318,10 +4532,10 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
             data->crect = cr;
 
             uint old_state = data->window_state;
-            if (!qt_net_supports(ATOM(_NET_WM_STATE_MAXIMIZED_VERT))
-                && !qt_net_supports(ATOM(_NET_WM_STATE_MAXIMIZED_HORZ)))
+            if (!X11->isSupportedByWM(ATOM(_NET_WM_STATE_MAXIMIZED_VERT))
+                && !X11->isSupportedByWM(ATOM(_NET_WM_STATE_MAXIMIZED_HORZ)))
                 data->window_state &= ~Qt::WindowMaximized;
-            if (!qt_net_supports(ATOM(_NET_WM_STATE_FULLSCREEN)))
+            if (!X11->isSupportedByWM(ATOM(_NET_WM_STATE_FULLSCREEN)))
                 data->window_state &= ~Qt::WindowFullScreen;
 
             if (old_state != data->window_state) {
@@ -4715,7 +4929,7 @@ static void sm_performSaveYourself(QSessionManagerPrivate* smd)
     sm_setProperty(QString::fromLatin1(SmProgram), argument0);
     // tell the session manager about our user as well.
     struct passwd *entryPtr = 0;
-#if !defined(QT_NO_THREAD) && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
+#if !defined(QT_NO_THREAD) && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && !defined(Q_OS_OPENBSD)
     QVarLengthArray<char, 1024> buf(sysconf(_SC_GETPW_R_SIZE_MAX));
     struct passwd entry;
     getpwuid_r(geteuid(), &entry, buf.data(), buf.size(), &entryPtr);

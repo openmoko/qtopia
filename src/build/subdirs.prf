@@ -64,7 +64,7 @@ build_all_dirs {
 
 # If not SUBDIRS targets exist, try to build part of the tree
 search=
-depotProject:isEmpty(SUBDIRS) {
+isEmpty(SUBDIRS) {
     search=$$fixpath($$QTOPIA_ID/)
     win32:search~=s,\\\,/,g
     echo(Looking for $$search)
@@ -112,9 +112,10 @@ for(t,ORDERED_TARGETS) {
             # We should only do syncqtopia for projects with CONFIG+=syncqtopia (ie. libs and subdirs)
             # However, for ordered stuff we don't bother to read .pro files so we don't know
             # what the CONFIG value is. Since "make [first_]syncqtopa" is guaranteed to work anyway, just do it.
-            #!contains(SYNCQTOPIA,$$t)|contains(subdirconf,syncqtopia) {
+            # special case for the server in singleexec mode
+            !contains(SYNCQTOPIA,$$t)|!equals(s,src/server) {
                 commands+=@$$MAKE -C $$fixpath($$s) $$t
-            #}
+            }
         }
         ignore_subdir_errors:commands+=|| $$DUMMY_COMMAND
     }
@@ -169,6 +170,7 @@ for(t,ORDERED_TARGETS) {
     QMAKE_EXTRA_TARGETS*=$$TARGETS printsubdirsdependrules
 }
 
+THE_SUBDIRS=$$SUBDIRS
 # Since we are overriding the qmake rules, we need to stop it from doing anything
 SUBDIRS=
 

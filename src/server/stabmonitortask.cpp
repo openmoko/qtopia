@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -55,6 +55,8 @@
   This task is a replacement for the SysFileMonitor class in earlier versions of Qtopia 
   (before Qtopia 4.2.2). The old SysFileMonitor used active polling to detect stab changes which
   was very inefficient.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 const char* stab0 = "/var/run/stab";
@@ -86,8 +88,8 @@ StabMonitor::StabMonitor( QObject* parent )
             //are never deleted
             watcher = new QFileSystemWatcher( this );
             watcher->addPath( QLatin1String( tab[i] ) );
-            connect( watcher, SIGNAL(fileChanged(const QString&)),
-                     this, SLOT(stabChanged(const QString&)) );
+            connect( watcher, SIGNAL(fileChanged(QString)),
+                     this, SLOT(stabChanged(QString)) );
             break;
         }
     }

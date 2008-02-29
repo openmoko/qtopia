@@ -69,9 +69,9 @@ print_options()
 #                       * [-authmode <open|shared> -multikey <defaultKey> <key1> <key2> <key3> <key4>] 
 #                       * [-authmode <open|shared> -phrase <passphrase> ]   
 #                       * [-authmode <none> -nokey ]  
-#                       * [-authmode <WPA-PSK> <password> ]
-#                       * [-authmode <WPA-EAP> <TLS> <identity> <password>
-#                       * [-authmode <WPA-EAP> <TTLS|PEAP> <client certificate> <server certificate>
+#                       * [-authmode <WPA-PSK> <password> <TKIP|AES> ]
+#                       * [-authmode <WPA-EAP> <TLS> <identity> <client-key-password> <clientKey> <clientCert> <serverCert>
+#                       * [-authmode <WPA-EAP> <TTLS|PEAP> <identity> <password> <serverCert> <MD5|GTC|MSCHAPV2|Any> <anonymous identity>
  
 install()
 {

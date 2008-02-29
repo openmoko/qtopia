@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/global/qglobal.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/global/qglobal.cpp -->
 <head>
-  <title>Qt 4.2: QFlags Class Reference</title>
+  <title>Qt 4.3: QFlags Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QFlags Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QFlags Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QFlags class provides a type-safe way of storing OR-combinations of enum values. <a href="#details">More...</a></p>
 <pre> #include &lt;QFlags&gt;</pre><ul>
 <li><a href="qflags-members.html">List of all members, including inherited members</a></li>
@@ -79,7 +80,7 @@
 
  Q_DECLARE_OPERATORS_FOR_FLAGS(MyClass::Options)</pre>
 <p>You can then use the <tt>MyClass::Options</tt> type to store combinations of <tt>MyClass::Option</tt> values.</p>
-<p>A sensible naming convension for enum types and associated QFlags types is to give a singular name to the enum type (e.g., <tt>Option</tt>) and a plural name to the QFlags type (e.g., <tt>Options</tt>). When a singular name is desired for the QFlags type (e.g., <tt>Alignment</tt>), you can use <tt>Flag</tt> as the suffix for the enum type (e.g., <tt>AlignmentFlag</tt>).</p>
+<p>A sensible naming convension for enum types and associated QFlags types is to give a singular name to the enum type (e.g&#x2e;, <tt>Option</tt>) and a plural name to the QFlags type (e.g&#x2e;, <tt>Options</tt>). When a singular name is desired for the QFlags type (e.g&#x2e;, <tt>Alignment</tt>), you can use <tt>Flag</tt> as the suffix for the enum type (e.g&#x2e;, <tt>AlignmentFlag</tt>).</p>
 <p>See also <a href="qflag.html">QFlag</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -95,14 +96,14 @@
 <p>Constructs a <a href="qflags.html">QFlags</a> object with no flags set. <i>zero</i> must be a literal 0 value.</p>
 <h3 class="fn"><a name="QFlags-4"></a>QFlags::QFlags ( <a href="qflag.html">QFlag</a> <i>value</i> )</h3>
 <p>Constructs a <a href="qflags.html">QFlags</a> object initialized with the given integer <i>value</i>.</p>
-<p>The <a href="qflag.html">QFlag</a> type is a helper type. By using it here instead of <tt>int</tt>, we effectively ensure that arbitrary enum values cannot be cast to a <a href="qflags.html">QFlags</a>, whereas untyped enum values (i.e., <tt>int</tt> values) can.</p>
+<p>The <a href="qflag.html">QFlag</a> type is a helper type. By using it here instead of <tt>int</tt>, we effectively ensure that arbitrary enum values cannot be cast to a <a href="qflags.html">QFlags</a>, whereas untyped enum values (i.e&#x2e;, <tt>int</tt> values) can.</p>
 <h3 class="fn"><a name="testFlag"></a>bool QFlags::testFlag ( Enum <i>flag</i> ) const</h3>
 <p>Returns true if the <i>flag</i> is set, otherwise false.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <h3 class="fn"><a name="operator-int"></a>QFlags::operator int () const</h3>
 <p>Returns the value stored in the <a href="qflags.html">QFlags</a> object as an integer.</p>
 <h3 class="fn"><a name="operator-not"></a>bool QFlags::operator! () const</h3>
-<p>Returns true if no flag is set (i.e., if the value stored by the <a href="qflags.html">QFlags</a> object is 0); otherwise returns false.</p>
+<p>Returns true if no flag is set (i.e&#x2e;, if the value stored by the <a href="qflags.html">QFlags</a> object is 0); otherwise returns false.</p>
 <h3 class="fn"><a name="operator-and"></a>QFlags QFlags::operator&amp; ( int <i>mask</i> ) const</h3>
 <p>Returns a <a href="qflags.html">QFlags</a> object containing the result of the bitwise AND operation on this object and <i>mask</i>.</p>
 <p>See also <a href="qflags.html#operator-and-eq">operator&amp;=</a>(), <a href="qflags.html#operator-7c">operator|</a>(), <a href="qflags.html#operator-5e">operator^</a>(), and <a href="qflags.html#operator-7e">operator~</a>().</p>
@@ -156,6 +157,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

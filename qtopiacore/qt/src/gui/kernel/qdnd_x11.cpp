@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -42,6 +57,7 @@
 #include "qdebug.h"
 #include "qimagewriter.h"
 #include "qbuffer.h"
+#include "qtextcodec.h"
 
 #include "qdnd_p.h"
 #include "qt_x11_p.h"
@@ -297,9 +313,10 @@ static WId xdndProxy(WId w)
     Atom type = XNone;
     int f;
     unsigned long n, a;
-    WId *proxy_id_ptr;
+    unsigned char *retval = 0;
     XGetWindowProperty(X11->display, w, ATOM(XdndProxy), 0, 1, False,
-                       XA_WINDOW, &type, &f,&n,&a,(uchar**)&proxy_id_ptr);
+                       XA_WINDOW, &type, &f,&n,&a,&retval);
+    WId *proxy_id_ptr = (WId *)retval;
     WId proxy_id = 0;
     if (type == XA_WINDOW && proxy_id_ptr) {
         proxy_id = *proxy_id_ptr;
@@ -308,7 +325,8 @@ static WId xdndProxy(WId w)
         // Already exists. Real?
         X11->ignoreBadwindow();
         XGetWindowProperty(X11->display, proxy_id, ATOM(XdndProxy), 0, 1, False,
-                           XA_WINDOW, &type, &f,&n,&a,(uchar**)&proxy_id_ptr);
+                           XA_WINDOW, &type, &f,&n,&a,&retval);
+        proxy_id_ptr = (WId *)retval;
         if (X11->badwindow() || type != XA_WINDOW || !proxy_id_ptr || *proxy_id_ptr != proxy_id)
             // Bogus - we will overwrite.
             proxy_id = 0;
@@ -445,7 +463,7 @@ bool QX11Data::xdndMimeDataForAtom(Atom a, QMimeData *mimeData, QByteArray *data
         ret = true;
     } else {
         if ((a == ATOM(UTF8_STRING) || a == XA_STRING
-            || a == ATOM(TEXT) || a == ATOM(COMPOUND_TEXT))
+             || a == ATOM(TEXT) || a == ATOM(COMPOUND_TEXT))
             && QInternalMimeData::hasFormatHelper(QLatin1String("text/plain"), mimeData)) {
             if (a == ATOM(UTF8_STRING)){
                 *data = QInternalMimeData::renderDataHelper(QLatin1String("text/plain"), mimeData);
@@ -540,21 +558,33 @@ QList<Atom> QX11Data::xdndMimeAtomsForFormat(const QString &format)
 }
 
 //$$$
-QByteArray QX11Data::xdndMimeConvertToFormat(Atom a, const QByteArray &data, const QString &format)
+QVariant QX11Data::xdndMimeConvertToFormat(Atom a, const QByteArray &data, const QString &format, QVariant::Type requestedType, const QByteArray &encoding)
 {
     QString atomName = xdndMimeAtomToString(a);
     if (atomName == format)
         return data;
 
+    if (!encoding.isEmpty()
+        && atomName == format + QLatin1String(";charset=") + QString::fromLatin1(encoding)) {
+
+        if (requestedType == QVariant::String) {
+            QTextCodec *codec = QTextCodec::codecForName(encoding);
+            if (codec)
+                return codec->toUnicode(data);
+        }
+
+        return data;
+    }
+
     // special cases for string types
     if (format == QLatin1String("text/plain")) {
         if (a == ATOM(UTF8_STRING))
-            return data;
+            return QString::fromUtf8(data);
         if (a == XA_STRING)
-            return QString::fromLatin1(data).toUtf8();
+            return QString::fromLatin1(data);
         if (a == ATOM(TEXT) || a == ATOM(COMPOUND_TEXT))
             // #### might be wrong for COMPUND_TEXT
-            return QString::fromLocal8Bit(data, data.size()).toUtf8();
+            return QString::fromLocal8Bit(data, data.size());
     }
 
     // special case for uri types
@@ -603,24 +633,22 @@ QByteArray QX11Data::xdndMimeConvertToFormat(Atom a, const QByteArray &data, con
             return buf.buffer();
         }
     }
-    return QByteArray();
+    return QVariant();
 }
 
 //$$$ middle of xdndObtainData
-Atom QX11Data::xdndMimeAtomForFormat(const QString &format, const QList<Atom> &atoms)
+Atom QX11Data::xdndMimeAtomForFormat(const QString &format, QVariant::Type requestedType, const QList<Atom> &atoms, QByteArray *encoding)
 {
-    Atom a = xdndMimeStringToAtom(format);
-    if (a && atoms.contains(a))
-        return a;
+    encoding->clear();
 
     // find matches for string types
     if (format == QLatin1String("text/plain")) {
         if (atoms.contains(ATOM(UTF8_STRING)))
             return ATOM(UTF8_STRING);
         if (atoms.contains(ATOM(COMPOUND_TEXT)))
-            return XA_STRING;
+            return ATOM(COMPOUND_TEXT);
         if (atoms.contains(ATOM(TEXT)))
-            return XA_STRING;
+            return ATOM(TEXT);
         if (atoms.contains(XA_STRING))
             return XA_STRING;
     }
@@ -637,6 +665,26 @@ Atom QX11Data::xdndMimeAtomForFormat(const QString &format, const QList<Atom> &a
         if (atoms.contains(XA_PIXMAP))
             return XA_PIXMAP;
     }
+
+    // for string/text requests try to use a format with a well-defined charset
+    // first to avoid encoding problems
+    if (requestedType == QVariant::String
+        && format.startsWith(QLatin1String("text/"))
+        && !format.contains(QLatin1String("charset="))) {
+
+        QString formatWithCharset = format;
+        formatWithCharset.append(QLatin1String(";charset=utf-8"));
+
+        Atom a = xdndMimeStringToAtom(formatWithCharset);
+        if (a && atoms.contains(a)) {
+            *encoding = "utf-8";
+            return a;
+        }
+    }
+
+    Atom a = xdndMimeStringToAtom(format);
+    if (a && atoms.contains(a))
+        return a;
 
     return 0;
 }
@@ -754,9 +802,10 @@ void QX11Data::xdndHandleEnter(QWidget *, const XEvent * xe, bool /*passive*/)
         Atom   type = XNone;
         int f;
         unsigned long n, a;
-        Atom *data;
+        unsigned char *retval;
         XGetWindowProperty(X11->display, qt_xdnd_dragsource_xid, ATOM(XdndTypelist), 0,
-                           qt_xdnd_max_type, False, XA_ATOM, &type, &f,&n,&a,(uchar**)&data);
+                           qt_xdnd_max_type, False, XA_ATOM, &type, &f,&n,&a,&retval);
+        Atom *data = (Atom *)retval;
         for (; j<qt_xdnd_max_type && j < (int)n; j++) {
             qt_xdnd_types[j] = data[j];
         }
@@ -1075,7 +1124,17 @@ void QX11Data::xdndHandleDrop(QWidget *, const XEvent * xe, bool passive)
     }
 
     if (!passive) {
-        QMimeData *dropData = (manager->object) ? manager->dragPrivate()->data : manager->dropData;
+        // this could be a same-application drop, just proxied due to
+        // some XEMBEDding, so try to find the real QMimeData used
+        // based on the timestamp for this drop.
+        QMimeData *dropData = 0;
+        int at = findXdndDropTransactionByTime(qt_xdnd_target_current_time);
+        if (at != -1)
+            dropData = QDragManager::dragPrivate(X11->dndDropTransactions.at(at).object)->data;
+        // if we can't find it, then use the data in the drag manager
+        if (!dropData)
+            dropData = (manager->object) ? manager->dragPrivate()->data : manager->dropData;
+
         QDropEvent de(qt_xdnd_current_position, possible_actions, dropData,
                       QApplication::mouseButtons(), QApplication::keyboardModifiers());
         QApplication::sendEvent(qt_xdnd_current_widget, &de);
@@ -1464,10 +1523,11 @@ void QDragManager::move(const QPoint & globalPos)
         Atom   type = XNone;
         int r, f;
         unsigned long n, a;
-        int *tv;
+        unsigned char *retval;
         X11->ignoreBadwindow();
         r = XGetWindowProperty(X11->display, proxy_target, ATOM(XdndAware), 0,
-                               1, False, AnyPropertyType, &type, &f,&n,&a,(uchar**)&tv);
+                               1, False, AnyPropertyType, &type, &f,&n,&a,&retval);
+        int *tv = (int *)retval;
         if (r != Success || X11->badwindow()) {
             target = 0;
         } else {
@@ -1725,7 +1785,7 @@ void QX11Data::xdndHandleSelectionRequest(const XSelectionRequestEvent * req)
     XSendEvent(X11->display, req->requestor, False, 0, &evt);
 }
 
-static QByteArray xdndObtainData(const char *format)
+static QVariant xdndObtainData(const char *format, QVariant::Type requestedType)
 {
     QByteArray result;
 
@@ -1747,7 +1807,8 @@ static QByteArray xdndObtainData(const char *format)
         atoms.append(qt_xdnd_types[i]);
         ++i;
     }
-    Atom a = X11->xdndMimeAtomForFormat(QLatin1String(format), atoms);
+    QByteArray encoding;
+    Atom a = X11->xdndMimeAtomForFormat(QLatin1String(format), requestedType, atoms, &encoding);
     if (!a)
         return result;
 
@@ -1779,7 +1840,7 @@ static QByteArray xdndObtainData(const char *format)
     if (!qt_xdnd_current_widget || (qt_xdnd_current_widget->windowType() == Qt::Desktop))
         delete tw;
 
-    return X11->xdndMimeConvertToFormat(a, result, QLatin1String(format));
+    return X11->xdndMimeConvertToFormat(a, result, QLatin1String(format), requestedType, encoding);
 }
 
 
@@ -1791,11 +1852,9 @@ bool QX11Data::dndEnable(QWidget* w, bool on)
 {
     w = w->window();
 
-    if (on) {
-        if (((QExtraWidget*)w)->topData()->dnd)
-            return true; // been there, done that
-        ((QExtraWidget*)w)->topData()->dnd  = 1;
-    }
+    if (bool(((QExtraWidget*)w)->topData()->dnd) == on)
+        return true; // been there, done that
+    ((QExtraWidget*)w)->topData()->dnd = on ? 1 : 0;
 
     motifdndEnable(w, on);
     return xdndEnable(w, on);
@@ -1919,12 +1978,12 @@ void QDragManager::updatePixmap()
     }
 }
 
-QVariant QDropData::retrieveData_sys(const QString &mimetype, QVariant::Type) const
+QVariant QDropData::retrieveData_sys(const QString &mimetype, QVariant::Type requestedType) const
 {
     QByteArray mime = mimetype.toLatin1();
-    QByteArray data = X11->motifdnd_active
+    QVariant data = X11->motifdnd_active
                       ? X11->motifdndObtainData(mime)
-                      : xdndObtainData(mime);
+                      : xdndObtainData(mime, requestedType);
     return data;
 }
 

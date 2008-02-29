@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,11 +24,17 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-#include <qstring.h>
-#include <qobject.h>
-#include "email.h"
+#include <QDate>
+#include <QObject>
+#include <QString>
 
-class Search : public QObject
+#include <qtopiaglobal.h>
+
+#include <QMailMessage>
+
+class QSettings;
+
+class QTOPIAMAIL_EXPORT Search : public QObject
 {
     Q_OBJECT
 
@@ -44,7 +50,7 @@ public:
     typedef uint MailStatus;
 
     void reset();
-    bool matches(Email *in);
+    bool matches(const QMailMessage& in);
     void setMailbox(QString mailbox);
     QString mailbox();
     QString name();
@@ -67,6 +73,9 @@ public:
     QDate getBeforeDate();
     QDate getAfterDate();
 
+    void readSettings(QSettings*);
+    void saveSettings(QSettings*);
+
 private:
     bool matchesTo();
     bool matchesBody();
@@ -80,7 +89,7 @@ private:
     bool match(const QString &source, const QString &target);
 
 private:
-    Email *mail;
+    QMailMessage mail;
 
     uint _status;
     QString _name, fromMail, recipient, subject, body, folder;

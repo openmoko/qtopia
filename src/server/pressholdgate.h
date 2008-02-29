@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,11 +32,11 @@ public:
         : QObject( parent ), held_key(0), held_tid(0), hardfilter(false) { }
     PressHoldGate(const QString& contxt, QObject* parent)
         : QObject( parent ), held_key(0), held_tid(0), context(contxt), hardfilter(false) { }
-    bool filterKey(int keycode, bool pressed, bool pressable, bool holdable);
+    bool filterKey(int keycode, bool pressed, bool pressable, bool holdable, bool releasable);
     bool filterDeviceButton(int keycode, bool pressed, bool isautorepeat);
     void setHardFilter(bool y) { hardfilter=y; }
 signals:
-    void activate(int keycode, bool held);
+    void activate(int keycode, bool held, bool pressed);
 private:
     void timerEvent(QTimerEvent*);
     int held_key;

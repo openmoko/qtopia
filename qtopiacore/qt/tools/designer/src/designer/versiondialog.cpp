@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -26,6 +41,7 @@
 #include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QPushButton>
+#include <QtGui/QDialogButtonBox>
 #include <QtGui/QPainter>
 #include <QtGui/QPainterPath>
 #include <QtGui/QStyleOption>
@@ -56,7 +72,7 @@ private:
 VersionLabel::VersionLabel(QWidget *parent)
         : QLabel(parent), secondStage(false), m_pushed(false)
 {
-    setPixmap(QPixmap(":/trolltech/designer/images/designer.png"));
+    setPixmap(QPixmap(QLatin1String(":/trolltech/designer/images/designer.png")));
     hitPoints.append(QPoint(56, 25));
     hitPoints.append(QPoint(29, 55));
     hitPoints.append(QPoint(56, 87));
@@ -143,48 +159,49 @@ VersionDialog::VersionDialog(QWidget *parent)
 #endif
             )
 {
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint | Qt::MSWindowsFixedSizeDialogHint);
     QGridLayout *layout = new QGridLayout(this);
     VersionLabel *label = new VersionLabel(this);
     QLabel *lbl = new QLabel(this);
-    lbl->setText(tr("<h3>%1</h3>"
-                    "<br/><br/>Version %2"
+    QString version = tr("<h3>%1</h3><br/><br/>Version %2");
 #if QT_EDITION == QT_EDITION_OPENSOURCE
-                    " Open Source Edition"
+    QString open = tr(" Open Source Edition");
+    version.append(open);
 #endif
-                    "<br/>Qt Designer is a graphical user interface designer "
-                    "for Qt applications.<br/><br/>"
+    version = version.arg(tr("Qt Designer")).arg(QLatin1String(QT_VERSION_STR));
+    version.append(tr("<br/>Qt Designer is a graphical user interface designer for Qt applications.<br/>"));
+
+    QString edition =
 #if QT_EDITION == QT_EDITION_OPENSOURCE
-                    "This version of Qt Designer is part of the Qt Open Source Edition, for use "
+                    tr("This version of Qt Designer is part of the Qt Open Source Edition, for use "
                     "in the development of Open Source applications. "
                     "Qt is a comprehensive C++ framework for cross-platform application "
                     "development.<br/><br/>"
                     "You need a commercial Qt license for development of proprietary (closed "
                     "source) applications. Please see <a href=\"http://www.trolltech.com/company/model.html\">http://www.trolltech.com/company/model"
-                    ".html</a> for an overview of Qt licensing.<br/>"
+                    ".html</a> for an overview of Qt licensing.<br/>");
 #else
-                    "This program is licensed to you under the terms of the "
+                    tr("This program is licensed to you under the terms of the "
                     "Qt Commercial License Agreement. For details, see the file LICENSE "
-                    "that came with this software distribution.<br/>"
+                    "that came with this software distribution.<br/>");
 #endif
+
+    lbl->setText(tr("%1"
+                    "<br/>%2"
                     "<br/>Copyright 2000-2007 Trolltech ASA. All rights reserved."
                     "<br/><br/>The program is provided AS IS with NO WARRANTY OF ANY KIND,"
                     " INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A"
-                    " PARTICULAR PURPOSE.<br/> ").arg(tr("Qt Designer"))
-                    .arg(QLatin1String(QT_VERSION_STR)));
+                    " PARTICULAR PURPOSE.<br/> ").arg(version).arg(edition));
+
     lbl->setWordWrap(true);
     lbl->setOpenExternalLinks(true);
-    QPushButton *cmd = new QPushButton("OK", this);
-    cmd->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    cmd->setDefault(true);
-    connect(cmd, SIGNAL(clicked()), this, SLOT(reject()));
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Close);
+    connect(buttonBox , SIGNAL(rejected()), this, SLOT(reject()));
     connect(label, SIGNAL(triggered()), this, SLOT(accept()));
     layout->addWidget(label, 0, 0, 1, 1);
     layout->addWidget(lbl, 0, 1, 4, 4);
-    layout->addWidget(cmd, 4, 2, 1, 1);
-}
-
-VersionDialog::~VersionDialog()
-{
+    layout->addWidget(buttonBox, 4, 2, 1, 1);
 }
 
 #include "versiondialog.moc"

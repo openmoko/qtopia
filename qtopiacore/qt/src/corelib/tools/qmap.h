@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -98,13 +113,6 @@ template <class Ptr> inline bool qMapLessThanKey(const Ptr *key1, const Ptr *key
 }
 #endif // QT_NO_PARTIAL_TEMPLATE_SPECIALIZATION
 
-#if !defined(QT_NO_DATASTREAM)
-class QDataStream;
-template <class Key, class T> class QMap;
-template <class aKey, class aT>
-QDataStream &operator>>(QDataStream &in, QMap<aKey, aT> &map);
-#endif
-
 template <class Key, class T>
 class QMap
 {
@@ -153,6 +161,7 @@ public:
     inline void detach() { if (d->ref != 1) detach_helper(); }
     inline bool isDetached() const { return d->ref == 1; }
     inline void setSharable(bool sharable) { if (!sharable) detach(); d->sharable = sharable; }
+    inline void setInsertInOrder(bool ordered) { d->insertInOrder = ordered; }
 
     void clear();
 
@@ -161,6 +170,7 @@ public:
 
     bool contains(const Key &key) const;
     const Key key(const T &value) const;
+    const Key key(const T &value, const Key &defaultKey) const;
     const T value(const Key &key) const;
     const T value(const Key &key, const T &defaultValue) const;
     T &operator[](const Key &key);
@@ -366,17 +376,6 @@ private:
     QMapData::Node *mutableFindNode(QMapData::Node *update[], const Key &key) const;
     QMapData::Node *node_create(QMapData *d, QMapData::Node *update[], const Key &key,
                                 const T &value);
-
-#if !defined(QT_NO_DATASTREAM)
-#if !defined(Q_CC_BOR)
-#if defined Q_CC_MSVC && _MSC_VER < 1300
-    friend QDataStream &operator>> (QDataStream &in, QMap &map);
-#else
-    template <class aKey, class aT>
-    friend QDataStream &operator>> (QDataStream &in, QMap<aKey, aT> &map);
-#endif
-#endif
-#endif
 };
 
 template <class Key, class T>
@@ -432,8 +431,8 @@ Q_INLINE_TEMPLATE QMapData::Node *QMap<Key, T>::findNode(const Key &akey) const
 template <class Key, class T>
 Q_INLINE_TEMPLATE const T QMap<Key, T>::value(const Key &akey) const
 {
-    QMapData::Node *node = findNode(akey);
-    if (node == e) {
+    QMapData::Node *node;
+    if (d->size == 0 || (node = findNode(akey)) == e) {
         return T();
     } else {
         return concrete(node)->value;
@@ -443,8 +442,8 @@ Q_INLINE_TEMPLATE const T QMap<Key, T>::value(const Key &akey) const
 template <class Key, class T>
 Q_INLINE_TEMPLATE const T QMap<Key, T>::value(const Key &akey, const T &adefaultValue) const
 {
-    QMapData::Node *node = findNode(akey);
-    if (node == e) {
+    QMapData::Node *node;
+    if (d->size == 0 || (node = findNode(akey)) == e) {
         return adefaultValue;
     } else {
         return concrete(node)->value;
@@ -578,9 +577,15 @@ Q_OUTOFLINE_TEMPLATE void QMap<Key, T>::freeData(QMapData *x)
         while (next != y) {
             cur = next;
             next = cur->forward[0];
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#pragma warning(disable:4189)
+#endif
             Node *concreteNode = concrete(cur);
             concreteNode->key.~Key();
             concreteNode->value.~T();
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#pragma warning(default:4189)
+#endif
         }
     }
     x->continueFreeData(payload());
@@ -764,6 +769,12 @@ Q_OUTOFLINE_TEMPLATE QList<Key> QMap<Key, T>::keys(const T &avalue) const
 template <class Key, class T>
 Q_OUTOFLINE_TEMPLATE const Key QMap<Key, T>::key(const T &avalue) const
 {
+    return key(avalue, Key());
+}
+
+template <class Key, class T>
+Q_OUTOFLINE_TEMPLATE const Key QMap<Key, T>::key(const T &avalue, const Key &defaultKey) const
+{
     const_iterator i = begin();
     while (i != end()) {
         if (i.value() == avalue)
@@ -771,7 +782,7 @@ Q_OUTOFLINE_TEMPLATE const Key QMap<Key, T>::key(const T &avalue) const
         ++i;
     }
 
-    return Key();
+    return defaultKey;
 }
 
 template <class Key, class T>
@@ -870,7 +881,7 @@ Q_OUTOFLINE_TEMPLATE QMap<Key, T>::QMap(const std::map<Key, T> &other)
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE  std::map<Key, T> QMap<Key, T>::toStdMap() const
+Q_OUTOFLINE_TEMPLATE std::map<Key, T> QMap<Key, T>::toStdMap() const
 {
     std::map<Key, T> map;
     const_iterator it = end();
@@ -890,27 +901,108 @@ public:
     QMultiMap() {}
     QMultiMap(const QMap<Key, T> &other) : QMap<Key, T>(other) {}
 
-    inline typename QMap<Key, T>::iterator replace(const Key &key, const T &value);
-    inline typename QMap<Key, T>::iterator insert(const Key &key, const T &value);
+    inline typename QMap<Key, T>::iterator replace(const Key &key, const T &value)
+    { return QMap<Key, T>::insert(key, value); }
+    inline typename QMap<Key, T>::iterator insert(const Key &key, const T &value)
+    { return QMap<Key, T>::insertMulti(key, value); }
 
     inline QMultiMap &operator+=(const QMultiMap &other)
     { unite(other); return *this; }
     inline QMultiMap operator+(const QMultiMap &other) const
     { QMultiMap result = *this; result += other; return result; }
 
+#ifndef Q_NO_USING_KEYWORD
+    using QMap<Key, T>::contains;
+    using QMap<Key, T>::remove;
+    using QMap<Key, T>::count;
+    using QMap<Key, T>::find;
+    using QMap<Key, T>::constFind;
+#else
+    inline bool contains(const Key &key) const
+    { return QMap<Key, T>::contains(key); }
+    inline int remove(const Key &key)
+    { return QMap<Key, T>::remove(key); }
+    inline int count(const Key &key) const
+    { return QMap<Key, T>::count(key); }
+    inline int count() const
+    { return QMap<Key, T>::count(); }
+    inline typename QMap<Key, T>::iterator find(const Key &key)
+    { return QMap<Key, T>::find(key); }
+    inline typename QMap<Key, T>::const_iterator find(const Key &key) const
+    { return QMap<Key, T>::find(key); }
+    inline typename QMap<Key, T>::const_iterator constFind(const Key &key) const
+    { return QMap<Key, T>::constFind(key); }
+#endif
+
+    bool contains(const Key &key, const T &value) const;
+
+    int remove(const Key &key, const T &value);
+
+    int count(const Key &key, const T &value) const;
+
+    typename QMap<Key, T>::iterator find(const Key &key, const T &value) {
+        typename QMap<Key, T>::iterator i(find(key));
+        typename QMap<Key, T>::iterator end(this->end());
+        while (i != end && !qMapLessThanKey<Key>(key, i.key())) {
+            if (i.value() == value)
+                return i;
+            ++i;
+        }
+        return end;
+    }
+    typename QMap<Key, T>::const_iterator find(const Key &key, const T &value) const {
+        typename QMap<Key, T>::const_iterator i(constFind(key));
+        typename QMap<Key, T>::const_iterator end(QMap<Key, T>::constEnd());
+        while (i != end && !qMapLessThanKey<Key>(key, i.key())) {
+            if (i.value() == value)
+                return i;
+            ++i;
+        }
+        return end;
+    }
+    typename QMap<Key, T>::const_iterator constFind(const Key &key, const T &value) const
+        { return find(key, value); }
 private:
     T &operator[](const Key &key);
     const T operator[](const Key &key) const;
 };
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE Q_TYPENAME QMap<Key, T>::iterator QMultiMap<Key, T>::replace(const Key &akey, const T &avalue)
-{ return QMap<Key, T>::insert(akey, avalue); }
+Q_INLINE_TEMPLATE bool QMultiMap<Key, T>::contains(const Key &key, const T &value) const
+{
+    return constFind(key, value) != QMap<Key, T>::constEnd();
+}
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE Q_TYPENAME QMap<Key, T>::iterator QMultiMap<Key, T>::insert(const Key &akey, const T &avalue)
-{ return QMap<Key, T>::insertMulti(akey, avalue); }
+Q_INLINE_TEMPLATE int QMultiMap<Key, T>::remove(const Key &key, const T &value)
+{
+    int n = 0;
+    typename QMap<Key, T>::iterator i(find(key));
+    typename QMap<Key, T>::const_iterator end(QMap<Key, T>::constEnd());
+    while (i != end && !qMapLessThanKey<Key>(key, i.key())) {
+        if (i.value() == value) {
+            i = erase(i);
+            ++n;
+        } else {
+            ++i;
+        }
+    }
+    return n;
+}
 
+template <class Key, class T>
+Q_INLINE_TEMPLATE int QMultiMap<Key, T>::count(const Key &key, const T &value) const
+{
+    int n = 0;
+    typename QMap<Key, T>::const_iterator i(constFind(key));
+    typename QMap<Key, T>::const_iterator end(QMap<Key, T>::constEnd());
+    while (i != end && !qMapLessThanKey<Key>(key, i.key())) {
+        if (i.value() == value)
+            ++n;
+        ++i;
+    }
+    return n;
+}
 
 Q_DECLARE_ASSOCIATIVE_ITERATOR(Map)
 Q_DECLARE_MUTABLE_ASSOCIATIVE_ITERATOR(Map)

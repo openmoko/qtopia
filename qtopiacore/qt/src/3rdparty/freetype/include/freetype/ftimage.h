@@ -5,7 +5,7 @@
 /*    FreeType glyph image formats and default raster interface            */
 /*    (specification).                                                     */
 /*                                                                         */
-/*  Copyright 1996-2001, 2002, 2003, 2004, 2005, 2006 by                   */
+/*  Copyright 1996-2001, 2002, 2003, 2004, 2005, 2006, 2007 by             */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -318,11 +318,11 @@ FT_BEGIN_HEADER
   /*                                                                       */
   /*    tags       :: A pointer to an array of `n_points' chars, giving    */
   /*                  each outline point's type.  If bit 0 is unset, the   */
-  /*                  point is `off' the curve, i.e., a B\303\251zier control     */
+  /*                  point is `off' the curve, i.e., a Bezier control     */
   /*                  point, while it is `on' when set.                    */
   /*                                                                       */
   /*                  Bit 1 is meaningful for `off' points only.  If set,  */
-  /*                  it indicates a third-order B\303\251zier arc control point; */
+  /*                  it indicates a third-order Bezier arc control point; */
   /*                  and a second-order control point if unset.           */
   /*                                                                       */
   /*    contours   :: An array of `n_contours' shorts, giving the end      */
@@ -381,8 +381,7 @@ FT_BEGIN_HEADER
   /*                                 the outline uses the opposite         */
   /*                                 direction (typically for Type 1       */
   /*                                 fonts).  This flag is ignored by the  */
-  /*                                 scan-converter.  However, it is very  */
-  /*                                 important for the auto-hinter.        */
+  /*                                 scan-converter.                       */
   /*                                                                       */
   /*   FT_OUTLINE_IGNORE_DROPOUTS :: By default, the scan converter will   */
   /*                                 try to detect drop-outs in an outline */
@@ -526,7 +525,7 @@ FT_BEGIN_HEADER
   /*    A function pointer type use to describe the signature of a `conic  */
   /*    to' function during outline walking/decomposition.                 */
   /*                                                                       */
-  /*    A `conic to' is emitted to indicate a second-order B\303\251zier arc in   */
+  /*    A `conic to' is emitted to indicate a second-order Bezier arc in   */
   /*    the outline.                                                       */
   /*                                                                       */
   /* <Input>                                                               */
@@ -557,12 +556,12 @@ FT_BEGIN_HEADER
   /*    A function pointer type used to describe the signature of a `cubic */
   /*    to' function during outline walking/decomposition.                 */
   /*                                                                       */
-  /*    A `cubic to' is emitted to indicate a third-order B\303\251zier arc.      */
+  /*    A `cubic to' is emitted to indicate a third-order Bezier arc.      */
   /*                                                                       */
   /* <Input>                                                               */
-  /*    control1 :: A pointer to the first B\303\251zier control point.           */
+  /*    control1 :: A pointer to the first Bezier control point.           */
   /*                                                                       */
-  /*    control2 :: A pointer to the second B\303\251zier control point.          */
+  /*    control2 :: A pointer to the second Bezier control point.          */
   /*                                                                       */
   /*    to       :: A pointer to the target end point.                     */
   /*                                                                       */
@@ -588,7 +587,7 @@ FT_BEGIN_HEADER
   /*                                                                       */
   /* <Description>                                                         */
   /*    A structure to hold various function pointers used during outline  */
-  /*    decomposition in order to emit segments, conic, and cubic B\303\251ziers, */
+  /*    decomposition in order to emit segments, conic, and cubic Beziers, */
   /*    as well as `move to' and `close to' operations.                    */
   /*                                                                       */
   /* <Fields>                                                              */
@@ -596,9 +595,9 @@ FT_BEGIN_HEADER
   /*                                                                       */
   /*    line_to  :: The segment emitter.                                   */
   /*                                                                       */
-  /*    conic_to :: The second-order B\303\251zier arc emitter.                   */
+  /*    conic_to :: The second-order Bezier arc emitter.                   */
   /*                                                                       */
-  /*    cubic_to :: The third-order B\303\251zier arc emitter.                    */
+  /*    cubic_to :: The third-order Bezier arc emitter.                    */
   /*                                                                       */
   /*    shift    :: The shift that is applied to coordinates before they   */
   /*                are sent to the emitter.                               */
@@ -695,7 +694,7 @@ FT_BEGIN_HEADER
   /*                                                                       */
   /*    FT_GLYPH_FORMAT_OUTLINE ::                                         */
   /*      The glyph image is a vectorial outline made of line segments     */
-  /*      and B\303\251zier arcs; it can be described as an @FT_Outline; you      */
+  /*      and Bezier arcs; it can be described as an @FT_Outline; you      */
   /*      generally want to access the `outline' field of the              */
   /*      @FT_GlyphSlotRec structure to read it.                           */
   /*                                                                       */
@@ -724,7 +723,7 @@ FT_BEGIN_HEADER
   /*    ft_glyph_format_xxx                                                */
   /*                                                                       */
   /* <Description>                                                         */
-  /*    A list of decprecated constants.  Use the corresponding            */
+  /*    A list of deprecated constants.  Use the corresponding             */
   /*    @FT_Glyph_Format values instead.                                   */
   /*                                                                       */
   /* <Values>                                                              */

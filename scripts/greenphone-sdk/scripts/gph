@@ -30,6 +30,7 @@ gp_net()
   # Bring up network to greenphone
 
   sudo modprobe usbnet >/dev/null 2>&1
+  export DEVNODE=`greenphone_devnode`
   if [ "$DEVNODE" = "" ] ; then
     echo "Networking failed. Please unplug and plug the Greenphone back in."
     return 1;
@@ -42,7 +43,7 @@ gp_net()
   PHONEIP=`phoneip`
 
   if ! ping -c 1 -i 2 $PHONEIP >/dev/null 2>&1 ; then
-    echo "Networking failed. Please unplug and plug the Greenphone back in."
+    echo "Could not contact Greenphone at $PHONEIP. Please unplug and plug the Greenphone back in."
     return 1;
   fi
 
@@ -52,22 +53,14 @@ gp_net()
     ssh-keygen -t dsa -N '' -f $HOME/.ssh/id_dsa >/dev/null 2>&1
   fi
 
-  # send public key to Greenphone
-  if netcat -n $PHONEIP 10022 < $HOME/.ssh/id_dsa.pub >/dev/null 2>&1; then
-     [ "$VERBOSE" = "1" ] && echo "Sent DSA public key to Greenphone"
-  else
-     [ "$VERBOSE" = "1" ] && echo "Greenphone already has DSA public key."
-     
-     # test if we can connect to Greenphone
-     if ! ssh root@$PHONEIP /bin/true >/dev/null 2>&1; then
-       echo "Authentication failed. Run 'Devtools/Reqacquire Auth Key' on Greenphone."
-       return 1
-     fi
-  fi
-
-  if [ "$VERBOSE" = "1" ]; then
+  # attempt to connect to Greenphone
+  if ! ssh root@$PHONEIP /bin/true >/dev/null 2>&1; then
+    echo "Connection to Greenphone at $PHONEIP failed."
+    return 1
+  elif [ "$VERBOSE" = "1" ]; then
     echo "Success! Greenphone address is $PHONEIP"
   fi
+
   return 0;
 }
 
@@ -213,20 +206,22 @@ gp_install()
 			sudo cp -f pkg/$PKG $QPKWEBSERVER
 			sudo chmod 644 $QPKWEBSERVER/$PKG
 	done;
-  sudo /opt/Qtopia/SDK/scripts/mkPackages $QPKWEBSERVER --descriptors http://$HOSTIP
+  sudo /opt/Qtopia/SDK/scripts/mkPackages $QPKWEBSERVER --descriptors http://$HOSTIP/
 
   if [ "$ARCH" = "x86" ] ;then
     PATH=/opt/Qtopia/SDK/$QPEVER/x86/image/bin:$PATH
     for PKG in $LIST; do
       echo "Install process for ${PKG} successfully initiated"
-      qcop service send PackageManager 'installPackageConfirm(QString)' http://$HOSTIP/$PKG.qpd
+      PKGFILE=`echo $PKG|sed 's/.qpk//g'`
+      qcop service send PackageManager 'installPackageConfirm(QString)' http://$HOSTIP/$PKGFILE.qpd
     done;
   else
 
     for PKG in $LIST; do
       echo "Install process for ${PKG} successfully initiated"
+      PKGFILE=`echo $PKG|sed 's/.qpk//g'`
 
-      ssh root@$PHONEIP ". /opt/Qtopia.rom/qpe.env; qcop service send PackageManager 'installPackageConfirm(QString)' 'http://${HOSTIP}/${PKG}.qpd'; sleep 3; echo DONE;"
+      ssh root@$PHONEIP ". /opt/Qtopia/qpe.env; qcop service send PackageManager 'installPackageConfirm(QString)' 'http://${HOSTIP}/${PKGFILE}.qpd'; sleep 3; echo DONE;"
     done;
   fi
   return 0;
@@ -248,11 +243,11 @@ gp_run()
     fi
 if [ "$QDEBUG" = "-debug" ] ; then
 
-  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ] && [ -f \$file ]; then echo \$file; exit; fi; done); . /opt/Qtopia.rom/qpe.env; gdbserver hostpc:22222 \$binary 2>&1 | logger -t 'DEBUGGER' &"
+  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ] && [ -f \$file ]; then echo \$file; exit; fi; done); . /opt/Qtopia/qpe.env; gdbserver hostpc:22222 \$binary 2>&1 | logger -t 'DEBUGGER' &"
 
 else
   
-  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ] && [ -f \$file ]; then echo \$file; exit; fi; done); . /opt/Qtopia.rom/qpe.env; \$binary 2>&1 | logger -t 'DEBUGGER' &"
+  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ] && [ -f \$file ]; then echo \$file; exit; fi; done); . /opt/Qtopia/qpe.env; \$binary 2>&1 | logger -t 'DEBUGGER' &"
  
   fi
 fi
@@ -270,7 +265,7 @@ gp_rescan()
       return 1; 
     fi
 
- ssh root@$PHONEIP ". /opt/Qtopia.rom/qpe.env; qcop QPE/DocAPI 'scanPath(QString,int)' 'all' '1'; sleep 3; echo DONE;"
+ ssh root@$PHONEIP ". /opt/Qtopia/qpe.env; qcop QPE/DocAPI 'scanPath(QString,int)' 'all' '1'; sleep 3; echo DONE;"
 fi 
 }
 

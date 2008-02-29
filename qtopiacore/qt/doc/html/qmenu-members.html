@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qmenu.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/widgets/qmenu.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QMenu</title>
+  <title>Qt 4.3: List of All Members for QMenu</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -17,6 +17,8 @@
 <p><table width="100%" border="0" cellpadding="0" cellspacing="0">
 <tr><td width="45%" valign="top"><ul>
 <li><div class="fn"/>enum <a href="qpaintdevice.html#PaintDeviceMetric-enum">PaintDeviceMetric</a></li>
+<li><div class="fn"/>enum <a href="qwidget.html#RenderFlag-enum">RenderFlag</a></li>
+<li><div class="fn"/>flags <a href="qwidget.html#RenderFlag-enum">RenderFlags</a></li>
 <li><div class="fn"/><a href="qmenu.html#QMenu">QMenu</a> ( QWidget * )</li>
 <li><div class="fn"/><a href="qmenu.html#QMenu-2">QMenu</a> ( const QString &amp;, QWidget * )</li>
 <li><div class="fn"/><a href="qmenu.html#dtor.QMenu">~QMenu</a> ()</li>
@@ -31,11 +33,11 @@
 <li><div class="fn"/><a href="qwidget.html#actions">actions</a> () const : QList&lt;QAction *&gt;</li>
 <li><div class="fn"/><a href="qwidget.html#activateWindow">activateWindow</a> ()</li>
 <li><div class="fn"/><a href="qmenu.html#activeAction">activeAction</a> () const : QAction *</li>
-<li><div class="fn"/><a href="qmenu.html#addAction-var">addAction</a> : using</li>
 <li><div class="fn"/><a href="qmenu.html#addAction">addAction</a> ( const QString &amp; ) : QAction *</li>
 <li><div class="fn"/><a href="qmenu.html#addAction-2">addAction</a> ( const QIcon &amp;, const QString &amp; ) : QAction *</li>
 <li><div class="fn"/><a href="qmenu.html#addAction-3">addAction</a> ( const QString &amp;, const QObject *, const char *, const QKeySequence &amp; ) : QAction *</li>
 <li><div class="fn"/><a href="qmenu.html#addAction-4">addAction</a> ( const QIcon &amp;, const QString &amp;, const QObject *, const char *, const QKeySequence &amp; ) : QAction *</li>
+<li><div class="fn"/><a href="qmenu.html#addAction-5">addAction</a> ( QAction * )</li>
 <li><div class="fn"/><a href="qwidget.html#addActions">addActions</a> ( QList&lt;QAction *&gt; )</li>
 <li><div class="fn"/><a href="qmenu.html#addMenu">addMenu</a> ( QMenu * ) : QAction *</li>
 <li><div class="fn"/><a href="qmenu.html#addMenu-2">addMenu</a> ( const QString &amp; ) : QMenu *</li>
@@ -129,6 +131,7 @@
 <li><div class="fn"/><a href="qmenu.html#hovered">hovered</a> ( QAction * )</li>
 <li><div class="fn"/><a href="qmenu.html#icon-prop">icon</a> () const : QIcon</li>
 <li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const : bool</li>
+<li><div class="fn"/><a href="qmenu.html#initStyleOption">initStyleOption</a> ( QStyleOptionMenuItem *, const QAction * ) const</li>
 <li><div class="fn"/><a href="qwidget.html#inputContext">inputContext</a> () : QInputContext *</li>
 <li><div class="fn"/><a href="qwidget.html#inputMethodEvent">inputMethodEvent</a> ( QInputMethodEvent * )</li>
 <li><div class="fn"/><a href="qwidget.html#inputMethodQuery">inputMethodQuery</a> ( Qt::InputMethodQuery ) const : QVariant</li>
@@ -161,10 +164,13 @@
 <li><div class="fn"/><a href="qwidget.html#layout">layout</a> () const : QLayout *</li>
 <li><div class="fn"/><a href="qwidget.html#layoutDirection-prop">layoutDirection</a> () const : Qt::LayoutDirection</li>
 <li><div class="fn"/><a href="qwidget.html#leaveEvent">leaveEvent</a> ( QEvent * )</li>
+<li><div class="fn"/><a href="qwidget.html#locale-prop">locale</a> () const : QLocale</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiX">logicalDpiX</a> () const : int</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiY">logicalDpiY</a> () const : int</li>
 <li><div class="fn"/><a href="qwidget.html#lower">lower</a> ()</li>
+<li><div class="fn"/><a href="qwidget.html#macCGHandle">macCGHandle</a> () const : Qt::HANDLE</li>
 <li><div class="fn"/><a href="qwidget.html#macEvent">macEvent</a> ( EventHandlerCallRef, EventRef ) : bool</li>
+<li><div class="fn"/><a href="qwidget.html#macQDHandle">macQDHandle</a> () const : Qt::HANDLE</li>
 <li><div class="fn"/><a href="qwidget.html#mapFrom">mapFrom</a> ( QWidget *, const QPoint &amp; ) const : QPoint</li>
 <li><div class="fn"/><a href="qwidget.html#mapFromGlobal">mapFromGlobal</a> ( const QPoint &amp; ) const : QPoint</li>
 <li><div class="fn"/><a href="qwidget.html#mapFromParent">mapFromParent</a> ( const QPoint &amp; ) const : QPoint</li>
@@ -191,9 +197,9 @@
 <li><div class="fn"/><a href="qwidget.html#pos-prop">move</a> ( int, int )</li>
 <li><div class="fn"/><a href="qwidget.html#moveEvent">moveEvent</a> ( QMoveEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#moveToThread">moveToThread</a> ( QThread * )</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qwidget.html#nextInFocusChain">nextInFocusChain</a> () const : QWidget *</li>
 <li><div class="fn"/><a href="qwidget.html#normalGeometry-prop">normalGeometry</a> () const : QRect</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qpaintdevice.html#numColors">numColors</a> () const : int</li>
 <li><div class="fn"/><a href="qobject.html#objectName-prop">objectName</a> () const : QString</li>
 <li><div class="fn"/><a href="qwidget.html#overrideWindowFlags">overrideWindowFlags</a> ( Qt::WindowFlags )</li>
@@ -218,6 +224,7 @@
 <li><div class="fn"/><a href="qwidget.html#releaseShortcut">releaseShortcut</a> ( int )</li>
 <li><div class="fn"/><a href="qwidget.html#removeAction">removeAction</a> ( QAction * )</li>
 <li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
+<li><div class="fn"/><a href="qwidget.html#render">render</a> ( QPaintDevice *, const QPoint &amp;, const QRegion &amp;, RenderFlags )</li>
 <li><div class="fn"/><a href="qwidget.html#repaint">repaint</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#repaint-6">repaint</a> ( int, int, int, int )</li>
 <li><div class="fn"/><a href="qwidget.html#repaint-7">repaint</a> ( const QRect &amp; )</li>
@@ -265,6 +272,7 @@
 <li><div class="fn"/><a href="qwidget.html#setInputContext">setInputContext</a> ( QInputContext * )</li>
 <li><div class="fn"/><a href="qwidget.html#setLayout">setLayout</a> ( QLayout * )</li>
 <li><div class="fn"/><a href="qwidget.html#layoutDirection-prop">setLayoutDirection</a> ( Qt::LayoutDirection )</li>
+<li><div class="fn"/><a href="qwidget.html#locale-prop">setLocale</a> ( const QLocale &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setMask">setMask</a> ( const QBitmap &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setMask-2">setMask</a> ( const QRegion &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#maximumHeight-prop">setMaximumHeight</a> ( int )</li>
@@ -337,6 +345,7 @@
 <li><div class="fn"/><a href="qwidget.html#underMouse">underMouse</a> () const : bool</li>
 <li><div class="fn"/><a href="qwidget.html#cursor-prop">unsetCursor</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#layoutDirection-prop">unsetLayoutDirection</a> ()</li>
+<li><div class="fn"/><a href="qwidget.html#locale-prop">unsetLocale</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#update">update</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#update-2">update</a> ( int, int, int, int )</li>
 <li><div class="fn"/><a href="qwidget.html#update-3">update</a> ( const QRect &amp; )</li>
@@ -374,6 +383,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

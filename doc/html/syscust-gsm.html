@@ -29,7 +29,7 @@
 <a name="outline-of-a-modem-vendor-plugin"></a>
 <h2>Outline of a Modem Vendor Plugin</h2>
 <p>There are two sample implementations under <tt>src/plugins/phonevendors/ericsson</tt> and <tt>src/plugins/phonevendors/wavecom</tt>. This section reviews the major components of the wavecom plugin to demonstrate how to write such a plug-in.</p>
-<p>The plug-in inherits from the QModemServicePlugin class, which provides modem detection and service creation functions.</p>
+<p>The plug-in inherits from the <a href="qmodemserviceplugin.html">QModemServicePlugin</a> class, which provides modem detection and service creation functions.</p>
 <pre>    #include &lt;qmodemserviceplugin.h&gt;
 
     class WavecomPluginImpl : public QModemServicePlugin
@@ -67,8 +67,8 @@
         return new WavecomModemService( service, mux, parent );
     }</pre>
 <p>The <tt>supports()</tt> function checks the manufacturer string from the <tt>AT+CGMI</tt> command against the expected value. The first plug-in that returns true from <tt>supports()</tt> will used.</p>
-<p>The <tt>create()</tt> function creates a QModemService instance to handle the modem specifics. It is passed the name of the service (usually <tt>modem</tt>), the multiplexing object that is used to communicate with the modem, and the parent <a href="qobject.html">QObject</a> to attach the modem service to.</p>
-<p>The modem service implementation inherits from QModemService and should override <tt>initialize()</tt> to create the vendor-specific functionality handlers:</p>
+<p>The <tt>create()</tt> function creates a <a href="qmodemservice.html">QModemService</a> instance to handle the modem specifics. It is passed the name of the service (usually <tt>modem</tt>), the multiplexing object that is used to communicate with the modem, and the parent <a href="qobject.html">QObject</a> to attach the modem service to.</p>
+<p>The modem service implementation inherits from <a href="qmodemservice.html">QModemService</a> and should override <tt>initialize()</tt> to create the vendor-specific functionality handlers:</p>
 <pre>    #include &lt;qmodemservice.h&gt;
 
     class WavecomModemService : public QModemService
@@ -112,13 +112,13 @@
         QModemService::initialize();
     }</pre>
 <p>Modem services within Qtopia are split up into several handlers, one for each functionality area (phone calls, network registration, SMS, SIM toolkit, phone books, etc).</p>
-<p>The QModemService class creates default implementations based on the 3GPP TS 27.007 and 3GPP TS 27.005 specifications. The modem vendor plug-in overrides those handlers that are different from the standard, and only those that are different. When QModemService::initialize() is called, the missing handlers will be created automatically.</p>
+<p>The <a href="qmodemservice.html">QModemService</a> class creates default implementations based on the 3GPP TS 27.007 and 3GPP TS 27.005 specifications. The modem vendor plug-in overrides those handlers that are different from the standard, and only those that are different. When <a href="qabstractipcinterfacegroup.html#initialize">QModemService::initialize</a>() is called, the missing handlers will be created automatically.</p>
 <p>The handlers mentioned above inherit from the following standard classes:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><tt>WavecomSimInfo</tt></td><td>QModemSimInfo</td></tr>
-<tr valign="top" class="even"><td><tt>WavecomSimToolkit</tt></td><td>QModemSimToolkit</td></tr>
-<tr valign="top" class="odd"><td><tt>WavecomPhoneBook</tt></td><td>QModemPhoneBook</td></tr>
-<tr valign="top" class="even"><td><tt>WavecomCallProvider</tt></td><td>QModemCallProvider</td></tr>
+<tr valign="top" class="odd"><td><tt>WavecomSimInfo</tt></td><td><a href="qmodemsiminfo.html">QModemSimInfo</a></td></tr>
+<tr valign="top" class="even"><td><tt>WavecomSimToolkit</tt></td><td><a href="qmodemsimtoolkit.html">QModemSimToolkit</a></td></tr>
+<tr valign="top" class="odd"><td><tt>WavecomPhoneBook</tt></td><td><a href="qmodemphonebook.html">QModemPhoneBook</a></td></tr>
+<tr valign="top" class="even"><td><tt>WavecomCallProvider</tt></td><td><a href="qmodemcallprovider.html">QModemCallProvider</a></td></tr>
 </table></p>
 <p>A complete list of classes for accessing AT-based modems can be found on the <a href="telephony-modem.html">Modem Classes</a> page.</p>
 <a name="gsm-modem-porting-sequence"></a>
@@ -137,7 +137,7 @@
 </ol>
 <a name="modem-emulator"></a><a name="modem-emulator"></a>
 <h2>Modem Emulator</h2>
-<p>Most modern phones have an external serial interface, which is used to connect to a computer for the purposes of data calls, FAX transmissions, or synchronization with desktop applications. The <a href="#modem-emulator">Modem Emulator</a> assists with supporting such interfaces.</p>
+<p>Most modern phones have an external serial interface, which is used to connect to a computer for the purposes of data calls, FAX transmissions, or synchronization with desktop applications. The <a href="modem-emulator.html">Modem Emulator</a> assists with supporting such interfaces.</p>
 <p>To enable the modem emulator to use an external serial interface, the <tt>Phone.conf</tt> file should be placed under the <tt>etc/default/Trolltech</tt> directory on the vendor system, with contents such as the following:</p>
 <pre>    [SerialDevices]
     ExternalAccessDevice=/dev/ttyS1:115200</pre>
@@ -147,6 +147,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

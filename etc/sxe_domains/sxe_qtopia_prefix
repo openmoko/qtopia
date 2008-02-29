@@ -1,0 +1,3 @@
+#!/bin/sh
+# Access to the system database qtopia_db.sqlite and its journal files
+lidsconf -A -s ${BIN} -o ${QTOPIA_DIR} -j WRITE

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,18 +19,12 @@
 **
 ****************************************************************************/
 
-#include <qtopia/comm/qbluetoothscosocket.h>
-#include <qtopia/comm/qbluetoothaddress.h>
-#include <qtopia/comm/qbluetoothnamespace.h>
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
-#include <qtopiacomm/private/qbluetoothabstractsocket_p.h>
-
-#include <bluetooth/bluetooth.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <bluetooth/sco.h>
-#include <unistd.h>
+#include <qbluetoothscosocket.h>
+#include <qbluetoothaddress.h>
+#include <qbluetoothnamespace.h>
+#include "qbluetoothnamespace_p.h"
+#include "qbluetoothabstractsocket_p.h"
+#include "qbluetoothsocketengine_p.h"
 
 class QBluetoothScoSocketPrivate : public QBluetoothAbstractSocketPrivate
 {
@@ -103,34 +97,19 @@ bool QBluetoothScoSocket::connect(const QBluetoothAddress &local,
 
     resetSocketParameters();
 
-    int sk = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_SCO);
-    if (sk < 0) {
-        setError(QBluetoothAbstractSocket::ResourceError);
+    int sockfd = m_data->m_engine->scoSocket();
+
+    if (sockfd < 0) {
+        setError(m_data->m_engine->error());
         return false;
     }
 
-    struct sockaddr_sco addr;
+    m_data->m_engine->setSocketOption(sockfd, QBluetoothSocketEngine::NonBlockingOption);
 
-    bdaddr_t remoteBdaddr;
-    str2bdaddr(remote.toString(), &remoteBdaddr);
-    bdaddr_t localBdaddr;
-    str2bdaddr(local.toString(), &localBdaddr);
+    QBluetoothAbstractSocket::SocketState connectState =
+            m_data->m_engine->connectSco(sockfd, local, remote);
 
-    memset(&addr, 0, sizeof(addr));
-    addr.sco_family = AF_BLUETOOTH;
-    memcpy(&addr.sco_bdaddr, &localBdaddr, sizeof(bdaddr_t));
-
-    if (::bind(sk, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
-        ::close(sk);
-        setError(QBluetoothAbstractSocket::BindError);
-        return false;
-    }
-
-    memset(&addr, 0, sizeof(addr));
-    addr.sco_family = AF_BLUETOOTH;
-    memcpy(&addr.sco_bdaddr, &remoteBdaddr, sizeof(bdaddr_t));
-
-    return initiateConnect(sk, (struct sockaddr *) &addr, sizeof(addr));
+    return handleConnect(sockfd, connectState);
 }
 
 /*!
@@ -176,36 +155,11 @@ bool QBluetoothScoSocket::readSocketParameters(int sockfd)
 {
     SOCKET_DATA(QBluetoothScoSocket);
 
-    struct sockaddr_sco addr;
-    socklen_t len = sizeof(addr);
+    m_data->m_engine->getsocknameSco(sockfd, &m_data->m_local);
+    m_data->m_engine->getpeernameSco(sockfd, &m_data->m_remote);
 
-    memset(&addr, 0, sizeof(addr));
-    if (::getsockname(sockfd, (struct sockaddr *) &addr, &len) == 0) {
-
-        if (addr.sco_family != AF_BLUETOOTH) {
-            qWarning("rc_family doesn't match AF_BLUETOOTH!!");
-            return false;
-        }
-
-        bdaddr_t localBdaddr;
-        memcpy(&localBdaddr, &addr.sco_bdaddr, sizeof(bdaddr_t));
-        QString str = bdaddr2str(&localBdaddr);
-        m_data->m_local = QBluetoothAddress(str);
-    }
-
-    memset(&addr, 0, sizeof(addr));
-    if (::getpeername(sockfd, (struct sockaddr *) &addr, &len) == 0) {
-        bdaddr_t remoteBdaddr;
-        memcpy(&remoteBdaddr, &addr.sco_bdaddr, sizeof(bdaddr_t));
-        QString str = bdaddr2str(&remoteBdaddr);
-        m_data->m_remote = QBluetoothAddress(str);
-    }
-
-    struct sco_options opts;
-    len = sizeof(opts);
-    if (::getsockopt(sockfd, SOL_SCO, SCO_OPTIONS, &opts, &len) == 0) {
-        m_data->m_mtu = opts.mtu;
-    }
+    if (!m_data->m_engine->getScoMtu(sockfd, &m_data->m_mtu))
+        return false;
 
     setReadMtu(m_data->m_mtu);
     setWriteMtu(m_data->m_mtu);

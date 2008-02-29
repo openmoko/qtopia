@@ -1,7 +1,7 @@
 TARGET	 = qdecorationwindows
 include(../../qpluginbase.pri)
 
-DESTDIR	 = $$QT_BUILD_TREE/plugins/decorations
+QTDIR_build:DESTDIR	 = $$QT_BUILD_TREE/plugins/decorations
 
 HEADERS		= ../../../gui/embedded/qdecorationwindows_qws.h
 SOURCES		= main.cpp \

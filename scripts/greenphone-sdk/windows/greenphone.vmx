@@ -7,9 +7,9 @@ memsize = "256"
 MemAllowAutoScaleDown = "FALSE"
 scsi0:0.present = "TRUE"
 scsi0:0.fileName = "toolchain.vmdk"
-ide1:0.present = "FALSE"
-ide1:0.fileName = "auto detect"
-ide1:0.deviceType = "cdrom-raw"
+ide1:0.present = "TRUE"
+ide1:0.fileName = "qtopia.iso"
+ide1:0.deviceType = "cdrom-image"
 floppy0.fileName = "A:"
 ethernet0.present = "TRUE"
 ethernet0.connectionType = "nat"
@@ -27,10 +27,10 @@ ide0:0.fileName = "rootfs.vmdk"
 
 ide0:0.redo = ""
 ethernet0.addressType = "generated"
-uuid.location = "56 4d a9 d4 27 fa 2c 06-31 54 be c4 01 f2 4a 15"
-uuid.bios = "56 4d a9 d4 27 fa 2c 06-31 54 be c4 01 f2 4a 15"
+uuid.location = "56 4d 89 f4 2c 6b 24 e0-8e 79 9e 51 a6 83 b3 8e"
+uuid.bios = "56 4d 89 f4 2c 6b 24 e0-8e 79 9e 51 a6 83 b3 8e"
 ide1:0.autodetect = "TRUE"
-ethernet0.generatedAddress = "00:0c:29:f2:4a:15"
+ethernet0.generatedAddress = "00:0c:29:83:b3:8e"
 ethernet0.generatedAddressOffset = "0"
 tools.syncTime = "FALSE"
 
@@ -53,10 +53,14 @@ uuid.action = "create"
 checkpoint.vmState = ""
 
 ide0:1.present = "FALSE"
-ide0:1.fileName = "qtopia.iso"
-
+ide0:1.fileName = "auto detect"
 ide0:1.redo = ""
-
-ide0:1.deviceType = "cdrom-image"
+ide0:1.deviceType = "cdrom-raw"
 
 usb.autoConnect.device0 = ""
+
+tools.upgrade.policy = "manual"
+
+extendedConfigFile = "greenphone.vmxf"
+
+ide0:1.autodetect = "TRUE"

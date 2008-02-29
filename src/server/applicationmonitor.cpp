@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,7 +25,11 @@
 #include <QTime>
 #include <QValueSpaceItem>
 #include <QtAlgorithms>
+#ifdef Q_WS_X11
+#include <qcopchannel_x11.h>
+#else
 #include <QCopChannel>
+#endif
 #include <QTimer>
 
 inline UIApplicationMonitor::ApplicationState operator|(const UIApplicationMonitor::ApplicationState &lhs, const UIApplicationMonitor::ApplicationState &rhs)
@@ -113,21 +117,21 @@ UIApplicationMonitorPrivate::UIApplicationMonitorPrivate()
 
     // For tracking raise()
     QCopChannel *channel = new QCopChannel( "QPE/Application/*", this );
-    connect(channel, SIGNAL(received(const QString&,const QByteArray&)),
-            this, SLOT(applicationMessage(const QString&,const QByteArray&)) );
+    connect(channel, SIGNAL(received(QString,QByteArray)),
+            this, SLOT(applicationMessage(QString,QByteArray)) );
 
 
     // For tracking busy(QString), notBusy(QString) and appRaised(QString)
     QtopiaChannel *sysChannel = new QtopiaChannel("QPE/QtopiaApplication", this);
     QObject::connect(sysChannel,
-                     SIGNAL(received(const QString &, const QByteArray &)),
+                     SIGNAL(received(QString,QByteArray)),
                      this,
-                     SLOT(sysMessage(const QString &, const QByteArray &)));
+                     SLOT(sysMessage(QString,QByteArray)));
 
     // For tracking application terminations
     ApplicationLauncher *launcher = qtopiaTask<ApplicationLauncher>();
-    QObject::connect(launcher, SIGNAL(applicationTerminated(const QString &, ApplicationTypeLauncher::TerminationReason, bool)), this, SLOT(applicationTerminated(const QString &)));
-    QObject::connect(launcher, SIGNAL(applicationNotFound(const QString &)), this, SLOT(applicationTerminated(const QString &)));
+    QObject::connect(launcher, SIGNAL(applicationTerminated(QString,ApplicationTypeLauncher::TerminationReason,bool)), this, SLOT(applicationTerminated(QString)));
+    QObject::connect(launcher, SIGNAL(applicationNotFound(QString)), this, SLOT(applicationTerminated(QString)));
 }
 
 int UIApplicationMonitorPrivate::notRespondingTimeout()
@@ -415,6 +419,8 @@ UIApplicationMonitorPrivate::applicationState(const QString &app) const
   \header \o Value Space Key \o Description
   \row \o \c {/System/Applications/<app name>/Tasks/UI} \o True when the application is showing UI, false if not.
   \endtable
+
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!

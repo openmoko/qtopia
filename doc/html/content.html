@@ -14,6 +14,8 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Content<br /><span class="subtitle"></span>
 </h1>
 <p>These classes provide interfaces to content management.</p>
+<p>New or existing applications sometimes need to access the data in Qtopia's document database, or to add/remove documents to/from the database. This can be achieved via Qtopia's Document API, which abstracts away all database related coding. For more information on the Document API, please refer to the page <a href="docsys-overview.html">Document System</a>. Please also refer to the <a href="tut-index.html">Tutorials and Examples</a> section, which provides several documented examples on how to use the content related classes.</p>
+<p>Note that if an application must access the database directly, it should do so in accordance with Qtopia's <a href="database-policy.html">Database Policy</a>.</p>
 <p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><th><a href="qcontent.html">QContent</a></th><td>Represents a content carrying entity in the Qtopia system, where content includes resources which an end-user may view or manage</td></tr>
 <tr valign="top" class="even"><th><a href="qcontentfilter.html">QContentFilter</a></th><td>Defines criteria for defining a sub-set of all available content</td></tr>
@@ -21,8 +23,8 @@
 <tr valign="top" class="even"><th><a href="qcontentfiltermodel.html">QContentFilterModel</a></th><td>Defines a model for displaying and selecting possible content filters</td></tr>
 <tr valign="top" class="odd"><th><a href="qcontentfilterselector.html">QContentFilterSelector</a></th><td>Allows the user to select filters to refine the visible selection of content on a device</td></tr>
 <tr valign="top" class="even"><th><a href="qcontentplugin.html">QContentPlugin</a></th><td>Provide an interface for the Qtopia Document System to discover detailed information about a file</td></tr>
-<tr valign="top" class="odd"><th><a href="qcontentset.html">QContentSet</a></th><td>Represents a set of QContent objects</td></tr>
-<tr valign="top" class="even"><th><a href="qcontentsetmodel.html">QContentSetModel</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qcontentset.html">QContentSet</a></th><td>Represents a filtered view of all content on a device</td></tr>
+<tr valign="top" class="even"><th><a href="qcontentsetmodel.html">QContentSetModel</a></th><td>Data model to represent the items in a QContentSet</td></tr>
 <tr valign="top" class="odd"><th><a href="qdocumentpropertiesdialog.html">QDocumentPropertiesDialog</a></th><td>Allows the user to examine and modify properties of a document</td></tr>
 <tr valign="top" class="even"><th><a href="qdocumentpropertieswidget.html">QDocumentPropertiesWidget</a></th><td>Controls for viewing and modifying the properties of a document</td></tr>
 <tr valign="top" class="odd"><th><a href="qfilesystem.html">QFileSystem</a></th><td>Describes a single mount point</td></tr>
@@ -34,6 +36,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

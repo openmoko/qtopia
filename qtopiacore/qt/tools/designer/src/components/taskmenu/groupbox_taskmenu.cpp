@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,7 +43,8 @@ TRANSLATOR qdesigner_internal::GroupBoxTaskMenu
 #include "groupbox_taskmenu.h"
 #include "inplace_editor.h"
 
-#include <QtDesigner/QtDesigner>
+#include <QtDesigner/QDesignerFormWindowInterface>
+#include <QtDesigner/QDesignerFormWindowCursorInterface>
 
 #include <QtGui/QAction>
 #include <QtGui/QStyle>
@@ -42,9 +58,10 @@ using namespace qdesigner_internal;
 
 GroupBoxTaskMenu::GroupBoxTaskMenu(QGroupBox *groupbox, QObject *parent)
     : QDesignerTaskMenu(groupbox, parent),
-      m_groupbox(groupbox)
+      m_groupbox(groupbox),
+      m_editTitleAction(new QAction(tr("Change title..."), this))
+   
 {
-    m_editTitleAction = new QAction(tr("Change title..."), this);
     connect(m_editTitleAction, SIGNAL(triggered()), this, SLOT(editTitle()));
     m_taskActions.append(m_editTitleAction);
 
@@ -70,25 +87,15 @@ void GroupBoxTaskMenu::editTitle()
         connect(fw, SIGNAL(selectionChanged()), this, SLOT(updateSelection()));
         Q_ASSERT(m_groupbox->parentWidget() != 0);
 
-        m_editor = new InPlaceEditor(m_groupbox, fw);
-        m_editor->setFrame(false);
-        m_editor->setText(m_groupbox->title());
-        m_editor->selectAll();
-        m_editor->setBackgroundRole(m_groupbox->backgroundRole());
-        m_editor->setObjectName(QLatin1String("__qt__passive_m_editor"));
-        connect(m_editor, SIGNAL(returnPressed()), m_editor, SLOT(deleteLater()));
-        connect(m_editor, SIGNAL(textChanged(QString)), this, SLOT(updateText(QString)));
-        m_editor->installEventFilter(this); // ### we need this??
         QStyleOption opt; // ## QStyleOptionGroupBox
         opt.init(m_groupbox);
-        QRect r = QRect(QPoint(), m_groupbox->size());
+        const QRect r = QRect(QPoint(), QSize(m_groupbox->width(),20));
         // ### m_groupbox->style()->subRect(QStyle::SR_GroupBoxTitle, &opt, m_groupbox);
-        r.setHeight(20);
 
-        m_editor->setGeometry(QRect(m_groupbox->mapTo(m_groupbox->window(), r.topLeft()), r.size()));
+        m_editor = new InPlaceEditor(m_groupbox, ValidationSingleLine, fw, m_groupbox->title(),r);
 
-        m_editor->setFocus();
-        m_editor->show();
+        connect(m_editor, SIGNAL(textChanged(QString)), this, SLOT(updateText(QString)));
+
     }
 }
 
@@ -114,8 +121,7 @@ QObject *GroupBoxTaskMenuFactory::createExtension(QObject *object, const QString
 
 void GroupBoxTaskMenu::updateText(const QString &text)
 {
-    formWindow()->cursor()->setWidgetProperty(m_groupbox,
-                                QLatin1String("title"), QVariant(text));
+    formWindow()->cursor()->setProperty(QLatin1String("title"), QVariant(text));
 }
 
 void GroupBoxTaskMenu::updateSelection()

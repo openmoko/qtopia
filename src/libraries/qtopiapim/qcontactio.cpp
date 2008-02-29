@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -78,55 +78,6 @@
   \internal
 */
 
-#ifdef SUPPORT_SYNCML
-/*!
-  \fn bool QContactIO::canProvideDiff() const
-
-  Should return true if possible to provide a diff for this IO object suitable for syncing via SyncML.
-
-  By default returns false.
-
-  \internal
-*/
-
-/*!
-  \fn void QContactIO::clearJournal()
-
-  If canProvideDiff() returns true
-  should clear record of changes made since last time this function was called.
-
-  \sa canProvideDiff(), addContacts(), modifiedContacts(), deletedContacts();
-  \internal
- */
-
-/*!
-  \fn QList<QUniqueId> QContactIO::addedContacts() const
-
-  If canProvideDiff() returns true, should return a list of contacts added since clearJournal() was last called.
-
-  By default returns an empty list.
-
-  \internal
- */
-/*!
-  \fn QList<QUniqueId> QContactIO::modifiedContacts() const
-
-  If canProvideDiff() returns true, should return a list of contacts modified since clearJournal() was last called.
-
-  By default returns an empty list.
-  \internal
- */
-
-/*!
-  \fn QList<QUniqueId> QContactIO::deletedContacts() const
-
-  If canProvideDiff() returns true, should return a list of contacts deleted since clearJournal() was last called.
-
-  By default returns an empty list.
-  \internal
-*/
-#endif
-
 QList< QList<QVariant> > QContactIO::mFormat;
 QList< QContactModel::Field > QContactIO::mFormatFieldOrder;
 QList<QContactIO *> QContactIO::activeContacts;
@@ -144,8 +95,8 @@ QContactIO::QContactIO(QObject *parent)
     //setFormat("firstname , _ lastname | lastname | firstname | company");
     QtopiaChannel *channel = new QtopiaChannel( "QPE/PIM",  this );
 
-    connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
-            this, SLOT(pimMessage(const QString&,const QByteArray&)) );
+    connect( channel, SIGNAL(received(QString,QByteArray)),
+            this, SLOT(pimMessage(QString,QByteArray)) );
     activeContacts.append(this);
 }
 
@@ -396,14 +347,14 @@ void QContactIO::initFormat()
 {
     QSettings config( "Trolltech", "Contacts" );
     config.beginGroup( "formatting" );
-    /* get default from default config file, not code */
-    QString curfmt = config.value( "NameFormat" ).toString();
+    int curfmtn = config.value( "NameFormat" ).toInt();
+    QString curfmt = config.value( "NameFormatFormat"+QString::number(curfmtn) ).toString();
     setFormat( curfmt );
     config.endGroup();
 }
 
 /*!
-  Sets the label field of \a contact based of the other fields already set for \a contact
+  Returns the label for \a contact based on the other fields set for \a contact
   and the current label format set.
 
   \sa setFormat()
@@ -437,6 +388,41 @@ QString QContactIO::formattedLabel(const QContact &contact)
 }
 
 /*!
+  Returns the label for the contact at the given \a row, based on the other fields
+  and the current label format set.
+
+  \sa setFormat()
+*/
+QString QContactIO::formattedLabel(int row)
+{
+    if (mFormat.count() == 0)
+        initFormat();
+    foreach(QList<QVariant> f, mFormat) {
+        QString value;
+        QListIterator<QVariant> fit(f);
+        bool match = true;
+        while(fit.hasNext()) {
+            QVariant v = fit.next();
+            if (v.type() == QVariant::Int) {
+                QContactModel::Field k = (QContactModel::Field)v.toInt();
+                QString field = contactField(row, k).toString();
+                if (field.isEmpty()) {
+                    match = false;
+                    break;
+                }
+                value += field;
+            } else if (v.type() == QVariant::String) {
+                value += v.toString();
+            }
+        }
+        if (match)
+            return value;
+    }
+    return contactField(row, QContactModel::FirstName).toString();
+}
+
+
+/*!
   Sets the format for labels of contacts returned by the QContactModel to
   \a value.
 
@@ -463,7 +449,7 @@ void QContactIO::setFormat(const QString &value) {
         if (keys.contains(key)) {
             lastvalid = true;
             last.append(key);
-            if (!newFormatOrder.contains(key))
+            if (!newFormatOrder.contains(key) && key != QContactModel::NameTitle && key != QContactModel::Suffix)
                 newFormatOrder.append(key);
         } else if (token == "|") {
             if (lastvalid)
@@ -569,6 +555,76 @@ QStringList QContactIO::labelIdentifiers()
     }
     return result;
 
+}
+
+// Note: this logic is also in QMailAddress.  Currently qtopiamail depends
+// on qtopiapim, but not vice-versa, so a good way of sharing code will
+// need to be determined.
+static QString minimalEmailAddress(const QString& address) 
+{
+    QString result;
+
+    // Email addresses can contained quoted sections (delimited with ""), or 
+    // comments (including nested), delimited with parentheses.  Whitespace is
+    // legal but removed to give the canonical form.
+
+    int commentDepth = 0;
+    bool quoted = false;
+    bool escaped = false;
+
+    // Remove any whitespace or comments from the email address
+    const QChar* it = address.constData();
+    const QChar* end = it + address.length();
+    for ( ; it != end; ++it ) {
+        if ( !escaped && ( *it == '\\' ) ) {
+            escaped = true;
+            continue;
+        }
+
+        if ( *it == '(' && !escaped && !quoted ) {
+            commentDepth += 1;
+        }
+        else if ( *it == ')' && !escaped && !quoted && ( commentDepth > 0 ) ) {
+            commentDepth -= 1;
+        }
+        else if ( quoted || !(*it).isSpace() ) {
+            if ( !quoted && *it == '"' && !escaped ) {
+                quoted = true;
+            }
+            else if ( quoted && *it == '"' && !escaped ) {
+                quoted = false;
+            }
+            if ( commentDepth == 0 ) {
+                result.append( *it );
+            }
+        }
+
+        escaped = false;
+    }
+
+    return result;
+}
+
+QUniqueId QContactIO::matchEmailAddress(const QString &address, int &bestMatch) const
+{
+    bestMatch = 0;
+    QList<QContactModel::Field> esf;
+    esf << QContactModel::DefaultEmail;
+    esf << QContactModel::Emails;
+    const QString inputAddress(minimalEmailAddress(address));
+    QContactModel::Field f;
+    for (int i = 0; i < count(); ++i) {
+        foreach(f, esf) {
+            QStringList addresses = contactField(i, f).toStringList();
+            foreach (QString element, addresses) {
+                if (inputAddress.compare(minimalEmailAddress(element)) == 0) {
+                    bestMatch = 100;
+                    return QUniqueId(contactField(i, QContactModel::Identifier).toByteArray());
+                }
+            }
+        }
+    }
+    return QUniqueId();
 }
 
 #ifdef QTOPIA_PHONE

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -62,7 +77,6 @@ public:
     int valueFromPoint(const QPoint &) const;
     double angle(const QPoint &, const QPoint &) const;
     void init();
-    QStyleOptionSlider getStyleOption() const;
 };
 
 void QDialPrivate::init()
@@ -77,30 +91,38 @@ void QDialPrivate::init()
 #endif
 }
 
-QStyleOptionSlider QDialPrivate::getStyleOption() const
+/*!
+    Initialize \a option with the values from this QDial. This method
+    is useful for subclasses when they need a QStyleOptionSlider, but don't want
+    to fill in all the information themselves.
+
+    \sa QStyleOption::initFrom()
+*/
+void QDial::initStyleOption(QStyleOptionSlider *option) const
 {
-    Q_Q(const QDial);
-    QStyleOptionSlider opt;
-    opt.init(q);
-    opt.minimum = minimum;
-    opt.maximum = maximum;
-    opt.sliderPosition = position;
-    opt.sliderValue = value;
-    opt.singleStep = singleStep;
-    opt.pageStep = pageStep;
-    opt.upsideDown = !invertedAppearance;
-    opt.notchTarget = target;
-    opt.dialWrapping = wrapping;
-    opt.subControls = QStyle::SC_All;
-    opt.activeSubControls = QStyle::SC_None;
-    if (!showNotches) {
-        opt.subControls &= ~QStyle::SC_DialTickmarks;
-        opt.tickPosition = QSlider::TicksAbove;
+    if (!option)
+        return;
+
+    Q_D(const QDial);
+    option->initFrom(this);
+    option->minimum = d->minimum;
+    option->maximum = d->maximum;
+    option->sliderPosition = d->position;
+    option->sliderValue = d->value;
+    option->singleStep = d->singleStep;
+    option->pageStep = d->pageStep;
+    option->upsideDown = !d->invertedAppearance;
+    option->notchTarget = d->target;
+    option->dialWrapping = d->wrapping;
+    option->subControls = QStyle::SC_All;
+    option->activeSubControls = QStyle::SC_None;
+    if (!d->showNotches) {
+        option->subControls &= ~QStyle::SC_DialTickmarks;
+        option->tickPosition = QSlider::TicksAbove;
     } else {
-        opt.tickPosition = QSlider::NoTicks;
+        option->tickPosition = QSlider::NoTicks;
     }
-    opt.tickInterval = q->notchSize();
-    return opt;
+    option->tickInterval = notchSize();
 }
 
 int QDialPrivate::valueFromPoint(const QPoint &p) const
@@ -132,7 +154,7 @@ int QDialPrivate::valueFromPoint(const QPoint &p) const
     if (dist > 0)
         v -= dist;
 
-    return bound(v);
+    return !invertedAppearance ? bound(v) : maximum - bound(v);
 }
 
 /*!
@@ -140,7 +162,7 @@ int QDialPrivate::valueFromPoint(const QPoint &p) const
 
     \brief The QDial class provides a rounded range control (like a speedometer or potentiometer).
 
-    \ingroup basic
+    \ingroup basicwidgets
     \mainclass
 
     QDial is used when the user needs to control a value within a
@@ -255,9 +277,10 @@ void QDial::resizeEvent(QResizeEvent *e)
 
 void QDial::paintEvent(QPaintEvent *)
 {
-    Q_D(QDial);
     QStylePainter p(this);
-    p.drawComplexControl(QStyle::CC_Dial, d->getStyleOption());
+    QStyleOptionSlider option;
+    initStyleOption(&option);
+    p.drawComplexControl(QStyle::CC_Dial, option);
 }
 
 /*!
@@ -307,14 +330,13 @@ void QDial::mouseReleaseEvent(QMouseEvent * e)
 void QDial::mouseMoveEvent(QMouseEvent * e)
 {
     Q_D(QDial);
-    if (!d->tracking || !(e->buttons() & Qt::LeftButton)) {
+    if (!(e->buttons() & Qt::LeftButton)) {
         e->ignore();
         return;
     }
     e->accept();
     d->doNotEmit = true;
     setSliderPosition(d->valueFromPoint(e->pos()));
-    emit sliderMoved(d->value);
     d->doNotEmit = false;
 }
 

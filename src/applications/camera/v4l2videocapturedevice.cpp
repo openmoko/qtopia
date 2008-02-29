@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,7 @@
 
 #include <qset.h>
 #include <QMapIterator>
+#include <QDebug>
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -32,14 +33,12 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <linux/videodev.h>
+#include <custom.h>
 
-#ifdef HAVE_V4L2
+#ifdef QTOPIA_HAVE_V4L2
 
 #include "v4l2videocapturedevice.h"
 #include "formatconverter.h"
-
-#define VIDEO_DEVICE            "/dev/video"
-
 
 
 inline
@@ -162,7 +161,9 @@ void V4L2VideoCaptureDevice::setupCamera()
     v4l2_capability     capability;
 
     // Open the video device.
-//    if ((m_fd = open(VIDEO_DEVICE, O_RDWR)) != -1)        TODO: see factory
+//    if ((m_fd = open(V4L_VIDEO_DEVICE, O_RDWR)) != -1)        TODO: see factory
+    
+    enumerateFormats();
     if (m_fd != -1)
     {
         memset(&capability, 0, sizeof(capability));
@@ -188,30 +189,28 @@ void V4L2VideoCaptureDevice::setupCamera()
                         {
                             calcPhotoSizes();
 
-                            m_size = m_imageTypes.keys().front();
-
                             beginCapture();
 
                             success = true;
                             break;
                         }
                         else
-                            qWarning("%s: Failed select input", VIDEO_DEVICE);
+                            qWarning("%s: Failed select input", V4L_VIDEO_DEVICE);
                     }
                 }
             }
             else {
-                qWarning("%s is not a suitable capture device", VIDEO_DEVICE);
+                qWarning("%s is not a suitable capture device", V4L_VIDEO_DEVICE);
             }
         }
         else {
-            qWarning("%s: could not retrieve the video capabilities", VIDEO_DEVICE);
+            qWarning("%s: could not retrieve the video capabilities", V4L_VIDEO_DEVICE);
         }
     }
     else {
-        qWarning("Unable to open %s: %s", VIDEO_DEVICE, strerror(errno));
+        qWarning("Unable to open %s: %s", V4L_VIDEO_DEVICE, strerror(errno));
     }
-
+    
     if (!success && m_fd != -1) {
         close(m_fd);
         m_fd = -1;
@@ -297,6 +296,8 @@ void V4L2VideoCaptureDevice::endCapture()
     FormatConverter::releaseFormatConverter(m_converter);
 }
 
+
+
 void V4L2VideoCaptureDevice::calcPhotoSizes()
 {
     QList<QSize>    resolutions;
@@ -307,6 +308,13 @@ void V4L2VideoCaptureDevice::calcPhotoSizes()
 
     // test if the resolutions are supported (write back modifications)
     QMutableListIterator<QSize> sizeIt(resolutions);
+    
+    unsigned int pf;
+
+    if (m_supportedFormats.isEmpty())
+        pf = V4L2_PIX_FMT_RGB32;
+    else
+        pf = m_supportedFormats.takeFirst().pixelformat;
 
     while (sizeIt.hasNext())
     {
@@ -318,28 +326,73 @@ void V4L2VideoCaptureDevice::calcPhotoSizes()
         format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         format.fmt.pix.width = currentSize.width();
         format.fmt.pix.height = currentSize.height();
-        format.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB32;
+        format.fmt.pix.pixelformat = pf; //V4L2_PIX_FMT_RGB32;
         format.fmt.pix.field = V4L2_FIELD_NONE;
-
+        
         if (ioctl(m_fd, VIDIOC_TRY_FMT, &format) == 0)
         {
-            qWarning("V4L2: Tried resolution & format (%d, %d, RGB4) - device wants (%d, %d, %4s)",
-                    currentSize.width(),
-                    currentSize.height(),
+            qWarning() << QString("V4L2: Tried resolution (%1, %2)").arg(currentSize.width()).arg(currentSize.height()); 
+            qWarning (" device wants (%d, %d, %4s)",
                     format.fmt.pix.width,
                     format.fmt.pix.height,
                     (char const*)&format.fmt.pix.pixelformat);
 
-            unsigned int&   imageType = m_imageTypes[QSize(format.fmt.pix.width, format.fmt.pix.height)];
+            unsigned int&  imageType = m_imageTypes[QSize(format.fmt.pix.width, format.fmt.pix.height)];
 
-            if (imageType != V4L2_PIX_FMT_RGB32)    // have been here? keep RGB32 if we can
+            if (imageType != pf)    // have been here? keep RGB32 if we can
             {
                 imageType = format.fmt.pix.pixelformat;
             }
         }
     }
+    if (m_imageTypes.isEmpty())
+    {
+        qWarning("V4L2: Negotiation of Image Format/Sizes failed!");
+        close(m_fd);
+        m_fd = -1;
+        return;
+    }
+     
+    m_size =  m_imageTypes.keys().front();
+    qWarning() << "V4L2: Current photo size: "<< m_size;
+}
+
+bool V4L2VideoCaptureDevice::enumerateFormats()
+{
+    v4l2_fmtdesc fmt;
+    
+    m_supportedFormats.clear();
+    QList<unsigned int> converterSupported = FormatConverter::supportedFormats();
+
+    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    qWarning () << "V4L2 Camera Device  supports: ";
+    for (fmt.index = 0;;fmt.index++)
+    {
+        
+        if (-1 == ioctl(m_fd, VIDIOC_ENUM_FMT, &fmt))
+        {
+            if (errno == EINVAL)
+                break;
+        } 
+        QString s((const char*)fmt.description); 
+        qWarning () << fmt.index <<": "<< s <<  ((fmt.flags & V4L2_FMT_FLAG_COMPRESSED)?"(compressed)":"");
+        
+        if (converterSupported.contains(fmt.pixelformat))
+        {
+            qWarning ()<< "V4L2: Found Qtopia supported format: "<< s;
+            m_supportedFormats.append(fmt);
+        }    
+
+    }
+    if (m_supportedFormats.isEmpty())
+    {
+        qWarning () << "V4L2: No supported formats found on Device!";     
+        return false;
+    } 
+    return true;
 }
 
 } // ns camera
 
-#endif // HAVE_V4L2
+#endif // QTOPIA_HAVE_V4L2

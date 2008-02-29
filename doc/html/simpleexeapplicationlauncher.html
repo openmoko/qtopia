@@ -24,7 +24,7 @@
 <li><div class="fn"/>virtual <b><a href="simpleexeapplicationlauncher.html#dtor.SimpleExeApplicationLauncher">~SimpleExeApplicationLauncher</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
+<li><div class="fn"/>5 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="applicationipcrouter-routedestination.html#public-functions">ApplicationIpcRouter::RouteDestination</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
@@ -51,8 +51,9 @@
 <tr valign="top" class="even"><td>Interfaces</td><td><a href="applicationtypelauncher.html">ApplicationTypeLauncher</a></td></tr>
 <tr valign="top" class="odd"><td>Services</td><td>None</td></tr>
 </table></p>
-<p>The SimpleExeApplicationLauncher class provides the ApplicationLauncherType implementation for simple, executable based applications. It also (implicitly) doubles as the fallback for the <a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a>.</p>
+<p>The SimpleExeApplicationLauncher class provides the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> implementation for simple, executable based applications. It also (implicitly) doubles as the fallback for the <a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a>.</p>
 <p>If the application requested is an absolute path, it is run as is. Otherwise, the paths returned by the <a href="qtopia.html#installPaths">Qtopia::installPaths</a>() method are searched for <tt>bin/&lt;application name&gt;</tt>.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="SimpleExeApplicationLauncher"></a>SimpleExeApplicationLauncher::SimpleExeApplicationLauncher ()</h3>
@@ -63,6 +64,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

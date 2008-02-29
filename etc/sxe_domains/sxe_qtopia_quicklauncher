@@ -1,0 +1,3 @@
+#!/bin/sh
+lidsconf -A POSTBOOT -s ${BIN} -o /proc/lids -j READONLY
+lidsconf -A POSTBOOT -s ${BIN} -o /proc/lids/suid -j WRITE

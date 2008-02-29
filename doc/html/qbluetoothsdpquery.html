@@ -72,7 +72,7 @@
 <p>The method returns true if the request could be started successfully, and false otherwise.</p>
 <p>Please note, that if you require all services, which might not be part of the public browse group, you can try to perform a search using the L2CAP UUID (0x0100).</p>
 <pre>    QBluetoothSdpQuery qsdap;
-    qsdap.searchServices(QBluetoothAddress(remote), QBluetoothLocalDevice(), 0x0100);</pre>
+    qsdap.searchServices(QBluetoothAddress(remote), QBluetoothLocalDevice(), QBluetoothSdpUuid(0x0100u));</pre>
 <p>The <a href="qbluetoothsdpquery.html#searchComplete">searchComplete</a>() signal will be sent once the search is finished. You can attempt to cancel SDP queries by using the <a href="qbluetoothsdpquery.html#cancelSearch">cancelSearch</a>() method.</p>
 <p>See also <a href="qbluetoothsdpquery.html#searchComplete">searchComplete</a>().</p>
 <h3 class="fn"><a name="cancelSearch"></a>void QBluetoothSdpQuery::cancelSearch ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -97,6 +97,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

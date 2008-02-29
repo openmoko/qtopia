@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -58,12 +58,12 @@ int MailList::currentSize()
     return mPtr->size;
 }
 
-QUuid MailList::currentId()
+QMailId MailList::currentId()
 {
     dList *mPtr;
 
     if (currentPos == 0)
-        return QUuid();
+        return QMailId();
 
     mPtr = sortedList.at(currentPos - 1);
     return mPtr->internalId;
@@ -96,7 +96,7 @@ QString* MailList::next()
 {
     dList *mPtr;
 
-    if ( currentPos >= (uint)sortedList.count())
+    if ( currentPos >= static_cast<uint>(sortedList.count()))
         return NULL;
 
     mPtr = sortedList.at(currentPos);
@@ -104,7 +104,7 @@ QString* MailList::next()
     return &(mPtr->serverId);
 }
 
-void MailList::sizeInsert(QString serverId, uint size, QUuid id, QString box)
+void MailList::sizeInsert(QString serverId, uint size, QMailId id, QString box)
 {
     int x = 0;
 
@@ -125,7 +125,7 @@ void MailList::sizeInsert(QString serverId, uint size, QUuid id, QString box)
     sortedList.append(newEntry);
 }
 
-void MailList::append(QString serverId, uint size, QUuid id, QString box)
+void MailList::append(QString serverId, uint size, QMailId id, QString box)
 {
     dList *newEntry = new dList;
     newEntry->serverId = serverId;
@@ -142,10 +142,10 @@ void MailList::moveFront(QString serverId)
     uint tempPos;
 
     tempPos = currentPos;
-    if ( tempPos >= (uint)sortedList.count() )
+    if ( tempPos >= static_cast<uint>(sortedList.count()) )
         return;
     currentPtr = sortedList.at(tempPos);
-    while ( ((tempPos+1) < (uint)sortedList.count()) && ( currentPtr->serverId != serverId) ) {
+    while ( ((tempPos+1) < static_cast<uint>(sortedList.count())) && ( currentPtr->serverId != serverId) ) {
         tempPos++;
         currentPtr = sortedList.at(tempPos);
     }
@@ -165,10 +165,10 @@ bool MailList::remove(QString serverId)
     uint tempPos;
 
     tempPos = currentPos;
-    if ( tempPos >= (uint)sortedList.count() )
+    if ( tempPos >= static_cast<uint>(sortedList.count()) )
         return false;
     currentPtr = sortedList.at(tempPos);
-    while ( ((tempPos + 1) < (uint)sortedList.count()) && ( currentPtr->serverId != serverId) ) {
+    while ( ((tempPos + 1) < static_cast<uint>(sortedList.count())) && ( currentPtr->serverId != serverId) ) {
         tempPos++;
         currentPtr = sortedList.at(tempPos);
     }

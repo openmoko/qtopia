@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -291,7 +306,7 @@
 
     \relates QTest
 
-    Implements a main() function that instanciates a QApplication object and
+    Implements a main() function that instantiates a QApplication object and
     the \a TestClass, and executes all tests in the order they were defined.
     Use this macro to build stand-alone executables.
 
@@ -310,7 +325,7 @@
 
     Implements a main() function that executes all tests in \a TestClass.
 
-    Behaves like \l QTEST_MAIN(), but doesn't instanciate a QApplication
+    Behaves like \l QTEST_MAIN(), but doesn't instantiate a QApplication
     object. Use this macro for really simple stand-alone non-GUI tests.
 
     \sa QTEST_MAIN()
@@ -592,6 +607,15 @@
 */
 
 /*!
+    \fn char *QTest::toString(const QByteArray &ba)
+    \overload
+
+    Returns a textual representation of the byte array \a ba.
+
+    \sa QTest::toHexRepresentation()
+*/
+
+/*!
     \fn char *QTest::toString(const QTime &time)
     \overload
 
@@ -682,7 +706,6 @@
 
 namespace QTest
 {
-    static bool skipCurrentTest = false;
     static QObject *currentTestObject = 0;
 
     struct TestFunction {
@@ -691,6 +714,13 @@ namespace QTest
         int function;
         char *data;
     } testFuncs[512];
+
+    /**
+     * Contains the count of test functions that was supplied
+     * on the command line, if any. Hence, if lastTestFuncIdx is
+     * more than zero, those functions should be run instead of
+     * all appearing in the test case.
+     */
     static int lastTestFuncIdx = -1;
 
     static int keyDelay = -1;
@@ -801,6 +831,8 @@ static int qToInt(char *str)
 
 static void qParseArgs(int argc, char *argv[])
 {
+    lastTestFuncIdx = -1;
+
     const char *testOptions =
          " options:\n"
          " -functions : Returns a list of current testfunctions\n"
@@ -925,8 +957,13 @@ struct QTestDataSetter
 };
 
 /*!
+    \internal
+
     Call init(), slot_data(), slot(), slot(), slot()..., cleanup()
     If data is set then it is the only test that is performed
+
+    If the function was successfully called, true is returned, otherwise
+    false.
  */
 static bool qInvokeTestMethod(const char *slotName, const char *data=0)
 {
@@ -942,6 +979,8 @@ static bool qInvokeTestMethod(const char *slotName, const char *data=0)
     const QTestTable *gTable = QTestTable::globalTestTable();
     const int globalDataCount = gTable->dataCount();
     int curGlobalDataIndex = 0;
+
+    /* For each test function that has a *_data() table/function, do: */
     do {
         if (!gTable->isEmpty())
             QTestResult::setCurrentGlobalTestData(gTable->testData(curGlobalDataIndex));
@@ -952,24 +991,27 @@ static bool qInvokeTestMethod(const char *slotName, const char *data=0)
             QMetaObject::invokeMethod(QTest::currentTestObject, member, Qt::DirectConnection);
             // if we encounter a SkipAll in the _data slot, we skip the whole
             // testfunction, no matter how much global data exists
-            if (QTest::skipCurrentTest) {
+            if (QTestResult::skipCurrentTest()) {
                 QTestResult::setCurrentGlobalTestData(0);
                 break;
             }
         }
 
         bool foundFunction = false;
-        if (!QTest::skipCurrentTest) {
+        if (!QTestResult::skipCurrentTest()) {
             int curDataIndex = 0;
             const int dataCount = table.dataCount();
+            QTestResult::setSkipCurrentTest(false);
+
+            /* For each entry in the data table, do: */
             do {
                 if (!data || !qstrcmp(data, table.testData(curDataIndex)->dataTag())) {
                     foundFunction = true;
-                    QTestDataSetter s(table.isEmpty() ? static_cast<QTestData *>(0) 
+                    QTestDataSetter s(table.isEmpty() ? static_cast<QTestData *>(0)
                                                       : table.testData(curDataIndex));
                     QTestResult::setCurrentTestLocation(QTestResult::InitFunc);
                     QMetaObject::invokeMethod(QTest::currentTestObject, "init");
-                    if (QTest::skipCurrentTest)
+                    if (QTestResult::skipCurrentTest())
                         break;
 
                     QTestResult::setCurrentTestLocation(QTestResult::Func);
@@ -983,7 +1025,7 @@ static bool qInvokeTestMethod(const char *slotName, const char *data=0)
                     QMetaObject::invokeMethod(QTest::currentTestObject, "cleanup");
                     QTestResult::setCurrentTestLocation(QTestResult::NoWhere);
 
-                    if (QTest::skipCurrentTest)
+                    if (QTestResult::skipCurrentTest())
                         // check whether SkipAll was requested
                         break;
                     if (data)
@@ -992,7 +1034,6 @@ static bool qInvokeTestMethod(const char *slotName, const char *data=0)
                 ++curDataIndex;
             } while (curDataIndex < dataCount);
         }
-        QTest::skipCurrentTest = false;
 
         if (data && !foundFunction) {
             printf("Unknown testdata for function %s: '%s'\n", slotName, data);
@@ -1006,8 +1047,8 @@ static bool qInvokeTestMethod(const char *slotName, const char *data=0)
         ++curGlobalDataIndex;
     } while (curGlobalDataIndex < globalDataCount);
 
-    QTest::skipCurrentTest = false;
     QTestResult::finishedCurrentTestFunction();
+    QTestResult::setSkipCurrentTest(false);
     QTestResult::setCurrentTestData(0);
     delete[] slot;
 
@@ -1017,7 +1058,7 @@ static bool qInvokeTestMethod(const char *slotName, const char *data=0)
 void *fetchData(QTestData *data, const char *tagName, int typeId)
 {
     QTEST_ASSERT(typeId);
-    QTEST_ASSERT_X(data, "QTest::fetchData()", "Test data requested, but no testdata available .");
+    QTEST_ASSERT_X(data, "QTest::fetchData()", "Test data requested, but no testdata available.");
     QTEST_ASSERT(data->parent());
 
     int idx = data->parent()->indexOf(tagName);
@@ -1034,6 +1075,73 @@ void *fetchData(QTestData *data, const char *tagName, int typeId)
     }
 
     return data->data(idx);
+}
+
+/*!
+  \fn char* QTest::toHexRepresentation(const char *ba, int length)
+  
+  Returns a pointer to a string that is the string \a ba represented
+  as a space-separated sequence of hex characters. If the input is
+  considered too long, it is truncated. A trucation is indicated in
+  the returned string as an ellipsis at the end.
+
+  \a length is the length of the string \a ba. 
+ */
+char *toHexRepresentation(const char *ba, int length)
+{
+    if(length == 0)
+        return qstrdup("");
+
+    /* We output at maximum about maxLen characters in order to avoid
+     * running out of memory and flooding things when the byte array
+     * is large.
+     *
+     * maxLen can't be for example 200 because QTestLib is sprinkled with fixed
+     * size char arrays.
+     * */
+    const int maxLen = 50;
+    const int len = qMin(maxLen, length);
+    char *result = 0;
+
+    if(length > maxLen) {
+        const int size = len * 3 + 4;
+        result = new char[size];
+
+        char *const forElipsis = result + size - 5;
+        forElipsis[0] = ' ';
+        forElipsis[1] = '.';
+        forElipsis[2] = '.';
+        forElipsis[3] = '.';
+        result[size - 1] = '\0';
+    }
+    else {
+        const int size = len * 3;
+        result = new char[size];
+        result[size - 1] = '\0';
+    }
+
+    const char toHex[] = "0123456789ABCDEF";
+    int i = 0;
+    int o = 0;
+
+    while(true) {
+        const char at = ba[i];
+
+        result[o] = toHex[(at >> 4) & 0x0F];
+        ++o;
+        result[o] = toHex[at & 0x0F];
+
+        ++i;
+        ++o;
+        if(i == len)
+            break;
+        else {
+            result[o] = ' ';
+            ++o;
+        }
+    }
+
+    return result;
 }
 
 } // namespace
@@ -1069,13 +1177,13 @@ void *fetchData(QTestData *data, const char *tagName, int typeId)
 */
 int QTest::qExec(QObject *testObject, int argc, char **argv)
 {
-#ifndef QT_NO_EXCEPTIONS
-    try {
-#endif
+ #ifndef QT_NO_EXCEPTIONS
+     try {
+ #endif
 
-#if defined(Q_OS_WIN)
-    SetErrorMode(SetErrorMode(0) | SEM_NOGPFAULTERRORBOX);
-#endif
+ #if defined(Q_OS_WIN)
+     SetErrorMode(SetErrorMode(0) | SEM_NOGPFAULTERRORBOX);
+ #endif
 
     QTestResult::reset();
 
@@ -1096,28 +1204,35 @@ int QTest::qExec(QObject *testObject, int argc, char **argv)
     QTestTable::globalTestTable();
     QMetaObject::invokeMethod(testObject, "initTestCase_data", Qt::DirectConnection);
 
-    if (!QTest::skipCurrentTest) {
-        QTestResult::setCurrentTestLocation(QTestResult::Func);
+    if (!QTestResult::skipCurrentTest() && !QTest::currentTestFailed()) {
+        QTestResult::setCurrentTestLocation(QTestResult::InitFunc);
         QMetaObject::invokeMethod(testObject, "initTestCase");
+
+        // finishedCurrentTestFunction() resets QTestResult::testFailed(), so use a local copy.
+        const bool previousFailed = QTestResult::testFailed();
         QTestResult::finishedCurrentTestFunction();
 
-        if (lastTestFuncIdx >= 0) {
-            for (int i = 0; i <= lastTestFuncIdx; ++i) {
-                if (!qInvokeTestMethod(metaObject->method(testFuncs[i].function).signature(),
-                                       testFuncs[i].data))
-                    break;
-            }
-        } else {
-            int methodCount = metaObject->methodCount();
-            for (int i = 0; i < methodCount; ++i) {
-                QMetaMethod slotMethod = metaObject->method(i);
-                if (!isValidSlot(slotMethod))
-                    continue;
-                if (!qInvokeTestMethod(slotMethod.signature()))
-                    break;
+        if(!QTestResult::skipCurrentTest() && !previousFailed) {
+
+            if (lastTestFuncIdx >= 0) {
+                for (int i = 0; i <= lastTestFuncIdx; ++i) {
+                    if (!qInvokeTestMethod(metaObject->method(testFuncs[i].function).signature(),
+                                           testFuncs[i].data))
+                        break;
+                }
+            } else {
+                int methodCount = metaObject->methodCount();
+                for (int i = 0; i < methodCount; ++i) {
+                    QMetaMethod slotMethod = metaObject->method(i);
+                    if (!isValidSlot(slotMethod))
+                        continue;
+                    if (!qInvokeTestMethod(slotMethod.signature()))
+                        break;
+                }
             }
         }
 
+        QTestResult::setSkipCurrentTest(false);
         QTestResult::setCurrentTestFunction("cleanupTestCase");
         QMetaObject::invokeMethod(testObject, "cleanupTestCase");
     }
@@ -1125,22 +1240,22 @@ int QTest::qExec(QObject *testObject, int argc, char **argv)
     QTestResult::setCurrentTestFunction(0);
     QTestTable::clearGlobalTestTable();
 
-#ifndef QT_NO_EXCEPTIONS
-    } catch (...) {
-        QTestResult::addFailure("Caught unhandled exception", __FILE__, __LINE__);
-        if (QTestResult::currentTestFunction()) {
-            QTestResult::finishedCurrentTestFunction();
-            QTestResult::setCurrentTestFunction(0);
-        }
+ #ifndef QT_NO_EXCEPTIONS
+     } catch (...) {
+         QTestResult::addFailure("Caught unhandled exception", __FILE__, __LINE__);
+         if (QTestResult::currentTestFunction()) {
+             QTestResult::finishedCurrentTestFunction();
+             QTestResult::setCurrentTestFunction(0);
+         }
 
-        QTestLog::stopLogging();
-#ifdef Q_OS_WIN
-        // rethrow exception to make debugging easier
-        throw;
-#endif
-        return -1;
-    }
-#endif
+         QTestLog::stopLogging();
+ #ifdef Q_OS_WIN
+         // rethrow exception to make debugging easier
+         throw;
+ #endif
+         return -1;
+     }
+ #endif
 
     QTestLog::stopLogging();
     currentTestObject = 0;
@@ -1174,7 +1289,7 @@ void QTest::qSkip(const char *message, QTest::SkipMode mode,
 {
     QTestResult::addSkip(message, mode, file, line);
     if (mode == QTest::SkipAll)
-        skipCurrentTest = true;
+        QTestResult::setSkipCurrentTest(true);
 }
 
 /*! \fn bool QTest::qExpectFail(const char *dataIndex, const char *comment, TestFailMode mode, const char *file, int line)
@@ -1183,7 +1298,7 @@ void QTest::qSkip(const char *message, QTest::SkipMode mode,
 bool QTest::qExpectFail(const char *dataIndex, const char *comment,
                        QTest::TestFailMode mode, const char *file, int line)
 {
-    return QTestResult::expectFail(dataIndex, comment, mode, file, line);
+    return QTestResult::expectFail(dataIndex, qstrdup(comment), mode, file, line);
 }
 
 /*! \internal
@@ -1452,12 +1567,17 @@ COMPARE_IMPL2(int, %d)
 COMPARE_IMPL2(uint, %u)
 COMPARE_IMPL2(long, %ld)
 COMPARE_IMPL2(ulong, %lu)
+#if defined(Q_OS_WIN)
+COMPARE_IMPL2(qint64, %I64d)
+COMPARE_IMPL2(quint64, %I64u)
+#else
 COMPARE_IMPL2(qint64, %lld)
 COMPARE_IMPL2(quint64, %llu)
+#endif
 COMPARE_IMPL2(bool, %d)
 COMPARE_IMPL2(char, %c)
-COMPARE_IMPL2(float, %f);
-COMPARE_IMPL2(double, %lf);
+COMPARE_IMPL2(float, %g);
+COMPARE_IMPL2(double, %lg);
 
 /*! \internal
  */

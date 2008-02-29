@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -252,7 +267,7 @@ public:
 
 void Q3HttpPGHRequest::start( Q3Http *http )
 {
-    header.setValue( "Host", http->d->hostname );
+    header.setValue( QLatin1String("Host"), http->d->hostname );
     Q3HttpNormalRequest::start( http );
 }
 
@@ -438,11 +453,11 @@ bool Q3HttpHeader::isValid() const
 bool Q3HttpHeader::parse( const QString& str )
 {
     QStringList lst;
-    int pos = str.find( '\n' );
-    if ( pos > 0 && str.at( pos - 1 ) == '\r' )
-	lst = QStringList::split( "\r\n", str.stripWhiteSpace(), false );
+    int pos = str.find( QLatin1Char('\n') );
+    if ( pos > 0 && str.at( pos - 1 ) == QLatin1Char('\r') )
+	lst = QStringList::split( QLatin1String("\r\n"), str.stripWhiteSpace(), false );
     else
-	lst = QStringList::split( "\n", str.stripWhiteSpace(), false );
+	lst = QStringList::split( QLatin1String("\n"), str.stripWhiteSpace(), false );
 
     if ( lst.isEmpty() )
 	return true;
@@ -453,7 +468,7 @@ bool Q3HttpHeader::parse( const QString& str )
 	if ( !(*it).isEmpty() ) {
 	    if ( (*it)[0].isSpace() ) {
 		if ( !lines.isEmpty() ) {
-		    lines.last() += " ";
+		    lines.last() += QLatin1String(" ");
 		    lines.last() += (*it).stripWhiteSpace();
 		}
 	    } else {
@@ -547,7 +562,7 @@ void Q3HttpHeader::removeValue( const QString& key )
 */
 bool Q3HttpHeader::parseLine( const QString& line, int )
 {
-    int i = line.find( ":" );
+    int i = line.find( QLatin1String(":") );
     if ( i == -1 )
 	return false;
 
@@ -566,13 +581,13 @@ bool Q3HttpHeader::parseLine( const QString& line, int )
 QString Q3HttpHeader::toString() const
 {
     if ( !isValid() )
-	return "";
+	return QLatin1String("");
 
-    QString ret = "";
+    QString ret = QLatin1String("");
 
     QMap<QString,QString>::ConstIterator it = values.begin();
     for( ; it != values.end(); ++it )
-	ret += it.key() + ": " + it.data() + "\r\n";
+	ret += it.key() + QLatin1String(": ") + it.data() + QLatin1String("\r\n");
 
     return ret;
 }
@@ -585,7 +600,7 @@ QString Q3HttpHeader::toString() const
 */
 bool Q3HttpHeader::hasContentLength() const
 {
-    return hasKey( "content-length" );
+    return hasKey( QLatin1String("content-length") );
 }
 
 /*!
@@ -596,7 +611,7 @@ bool Q3HttpHeader::hasContentLength() const
 */
 uint Q3HttpHeader::contentLength() const
 {
-    return values[ "content-length" ].toUInt();
+    return values[ QLatin1String("content-length") ].toUInt();
 }
 
 /*!
@@ -607,7 +622,7 @@ uint Q3HttpHeader::contentLength() const
 */
 void Q3HttpHeader::setContentLength( int len )
 {
-    values[ "content-length" ] = QString::number( len );
+    values[ QLatin1String("content-length") ] = QString::number( len );
 }
 
 /*!
@@ -618,7 +633,7 @@ void Q3HttpHeader::setContentLength( int len )
 */
 bool Q3HttpHeader::hasContentType() const
 {
-    return hasKey( "content-type" );
+    return hasKey( QLatin1String("content-type") );
 }
 
 /*!
@@ -628,11 +643,11 @@ bool Q3HttpHeader::hasContentType() const
 */
 QString Q3HttpHeader::contentType() const
 {
-    QString type = values[ "content-type" ];
+    QString type = values[ QLatin1String("content-type") ];
     if ( type.isEmpty() )
 	return QString();
 
-    int pos = type.find( ";" );
+    int pos = type.find( QLatin1String(";") );
     if ( pos == -1 )
 	return type;
 
@@ -647,7 +662,7 @@ QString Q3HttpHeader::contentType() const
 */
 void Q3HttpHeader::setContentType( const QString& type )
 {
-    values[ "content-type" ] = type;
+    values[ QLatin1String("content-type") ] = type;
 }
 
 /****************************************************
@@ -781,12 +796,12 @@ bool Q3HttpResponseHeader::parseLine( const QString& line, int number )
     if ( l.length() < 10 )
 	return false;
 
-    if ( l.left( 5 ) == "HTTP/" && l[5].isDigit() && l[6] == '.' &&
-	    l[7].isDigit() && l[8] == ' ' && l[9].isDigit() ) {
+    if ( l.left( 5 ) == QLatin1String("HTTP/") && l[5].isDigit() && l[6] == QLatin1Char('.') &&
+	    l[7].isDigit() && l[8] == QLatin1Char(' ') && l[9].isDigit() ) {
 	majVer = l[5].latin1() - '0';
 	minVer = l[7].latin1() - '0';
 
-	int pos = l.find( ' ', 9 );
+	int pos = l.find( QLatin1Char(' '), 9 );
 	if ( pos != -1 ) {
 	    reasonPhr = l.mid( pos + 1 );
 	    statCode = l.mid( 9, pos - 9 ).toInt();
@@ -805,7 +820,7 @@ bool Q3HttpResponseHeader::parseLine( const QString& line, int number )
 */
 QString Q3HttpResponseHeader::toString() const
 {
-    QString ret( "HTTP/%1.%2 %3 %4\r\n%5\r\n" );
+    QString ret( QLatin1String("HTTP/%1.%2 %3 %4\r\n%5\r\n") );
     return ret.arg( majVer ).arg ( minVer ).arg( statCode ).arg( reasonPhr ).arg( Q3HttpHeader::toString() );
 }
 
@@ -944,15 +959,15 @@ bool Q3HttpRequestHeader::parseLine( const QString& line, int number )
     if ( number != 0 )
 	return Q3HttpHeader::parseLine( line, number );
 
-    QStringList lst = QStringList::split( " ", line.simplifyWhiteSpace() );
+    QStringList lst = QStringList::split( QLatin1String(" "), line.simplifyWhiteSpace() );
     if ( lst.count() > 0 ) {
 	m = lst[0];
 	if ( lst.count() > 1 ) {
 	    p = lst[1];
 	    if ( lst.count() > 2 ) {
 		QString v = lst[2];
-		if ( v.length() >= 8 && v.left( 5 ) == "HTTP/" &&
-			v[5].isDigit() && v[6] == '.' && v[7].isDigit() ) {
+		if ( v.length() >= 8 && v.left( 5 ) == QLatin1String("HTTP/") &&
+			v[5].isDigit() && v[6] == QLatin1Char('.') && v[7].isDigit() ) {
 		    majVer = v[5].latin1() - '0';
 		    minVer = v[7].latin1() - '0';
 		    return true;
@@ -968,8 +983,8 @@ bool Q3HttpRequestHeader::parseLine( const QString& line, int number )
 */
 QString Q3HttpRequestHeader::toString() const
 {
-    QString first( "%1 %2");
-    QString last(" HTTP/%3.%4\r\n%5\r\n" );
+    QString first( QLatin1String("%1 %2"));
+    QString last(QLatin1String(" HTTP/%3.%4\r\n%5\r\n") );
     return first.arg( m ).arg( p ) +
 	last.arg( majVer ).arg( minVer ).arg( Q3HttpHeader::toString());
 }
@@ -1085,7 +1100,7 @@ QString Q3HttpRequestHeader::toString() const
 
     The dataSendProgress() and dataReadProgress() signals in the above
     example are useful if you want to show a \link QProgressBar
-    progressbar\endlink to inform the user about the progress of the
+    progress bar\endlink to inform the user about the progress of the
     download. The second argument is the total size of data. In
     certain cases it is not possible to know the total amount in
     advance, in which case the second argument is 0. (If you connect
@@ -1590,8 +1605,8 @@ int Q3Http::setHost(const QString &hostname, Q_UINT16 port )
 */
 int Q3Http::get( const QString& path, QIODevice* to )
 {
-    Q3HttpRequestHeader header( "GET", path );
-    header.setValue( "Connection", "Keep-Alive" );
+    Q3HttpRequestHeader header( QLatin1String("GET"), path );
+    header.setValue( QLatin1String("Connection"), QLatin1String("Keep-Alive") );
     return addRequest( new Q3HttpPGHRequest( header, (QIODevice*)0, to ) );
 }
 
@@ -1625,8 +1640,8 @@ int Q3Http::get( const QString& path, QIODevice* to )
 */
 int Q3Http::post( const QString& path, QIODevice* data, QIODevice* to  )
 {
-    Q3HttpRequestHeader header( "POST", path );
-    header.setValue( "Connection", "Keep-Alive" );
+    Q3HttpRequestHeader header( QLatin1String("POST"), path );
+    header.setValue( QLatin1String("Connection"), QLatin1String("Keep-Alive") );
     return addRequest( new Q3HttpPGHRequest( header, data, to ) );
 }
 
@@ -1637,8 +1652,8 @@ int Q3Http::post( const QString& path, QIODevice* data, QIODevice* to  )
 */
 int Q3Http::post( const QString& path, const QByteArray& data, QIODevice* to )
 {
-    Q3HttpRequestHeader header( "POST", path );
-    header.setValue( "Connection", "Keep-Alive" );
+    Q3HttpRequestHeader header( QLatin1String("POST"), path );
+    header.setValue( QLatin1String("Connection"), QLatin1String("Keep-Alive") );
     return addRequest( new Q3HttpPGHRequest( header, new QByteArray(data), to ) );
 }
 
@@ -1662,8 +1677,8 @@ int Q3Http::post( const QString& path, const QByteArray& data, QIODevice* to )
 */
 int Q3Http::head( const QString& path )
 {
-    Q3HttpRequestHeader header( "HEAD", path );
-    header.setValue( "Connection", "Keep-Alive" );
+    Q3HttpRequestHeader header( QLatin1String("HEAD"), path );
+    header.setValue( QLatin1String("Connection"), QLatin1String("Keep-Alive") );
     return addRequest( new Q3HttpPGHRequest( header, (QIODevice*)0, 0 ) );
 }
 
@@ -1820,7 +1835,7 @@ void Q3Http::slotClosed()
 	return;
 
     if ( d->state == Reading ) {
-	if ( d->response.hasKey( "content-length" ) ) {
+	if ( d->response.hasKey( QLatin1String("content-length") ) ) {
 	    // We got Content-Length, so did we get all bytes?
 	    if ( d->bytesDone+bytesAvailable() != d->response.contentLength() ) {
 		finishedWithError( QHttp::tr("Wrong content length"), WrongContentLength );
@@ -1911,7 +1926,7 @@ void Q3Http::slotReadyRead()
 	setState( Reading );
 	d->buffer = QByteArray();
 	d->readHeader = true;
-	d->headerStr = "";
+	d->headerStr = QLatin1String("");
 	d->bytesDone = 0;
 	d->chunkedSize = -1;
     }
@@ -1920,8 +1935,8 @@ void Q3Http::slotReadyRead()
 	bool end = false;
 	QString tmp;
 	while ( !end && d->socket.canReadLine() ) {
-	    tmp = d->socket.readLine();
-	    if ( tmp == "\r\n" || tmp == "\n" )
+	    tmp = QLatin1String(d->socket.readLine());
+	    if ( tmp == QLatin1String("\r\n") || tmp == QLatin1String("\n") )
 		end = true;
 	    else
 		d->headerStr += tmp;
@@ -1934,7 +1949,7 @@ void Q3Http::slotReadyRead()
 	qDebug( "Q3Http: read response header:\n---{\n%s}---", d->headerStr.latin1() );
 #endif
 	d->response = Q3HttpResponseHeader( d->headerStr );
-	d->headerStr = "";
+	d->headerStr = QLatin1String("");
 #if defined(Q3HTTP_DEBUG)
 	qDebug( "Q3Http: read response header:\n---{\n%s}---", d->response.toString().latin1() );
 #endif
@@ -1950,8 +1965,8 @@ void Q3Http::slotReadyRead()
 	// one chunk.
 	if (d->response.statusCode() != 100) {
 	    d->readHeader = false;
-	    if ( d->response.hasKey( "transfer-encoding" ) &&
-		 d->response.value( "transfer-encoding" ).lower().contains( "chunked" ) )
+	    if ( d->response.hasKey( QLatin1String("transfer-encoding") ) &&
+		 d->response.value( QLatin1String("transfer-encoding") ).lower().contains( QLatin1String("chunked") ) )
 		d->chunkedSize = 0;
 
 	    emit responseHeaderReceived( d->response );
@@ -1961,7 +1976,7 @@ void Q3Http::slotReadyRead()
     if ( !d->readHeader ) {
 	bool everythingRead = false;
 
-	if ( currentRequest().method() == "HEAD" ) {
+	if ( currentRequest().method() == QLatin1String("HEAD") ) {
 	    everythingRead = true;
 	} else {
 	    Q_ULONG n = d->socket.bytesAvailable();
@@ -1973,8 +1988,8 @@ void Q3Http::slotReadyRead()
 		    if ( d->chunkedSize == 0 ) {
 			if ( !d->socket.canReadLine() )
 			    break;
-			QString sizeString = d->socket.readLine();
-			int tPos = sizeString.find( ';' );
+			QString sizeString = QLatin1String(d->socket.readLine());
+			int tPos = sizeString.find( QLatin1Char(';') );
 			if ( tPos != -1 )
 			    sizeString.truncate( tPos );
 			bool ok;
@@ -1991,8 +2006,8 @@ void Q3Http::slotReadyRead()
 
 		    // read trailer
 		    while ( d->chunkedSize == -2 && d->socket.canReadLine() ) {
-			QString read = d->socket.readLine();
-			if ( read == "\r\n" || read == "\n" )
+			QString read = QLatin1String(d->socket.readLine());
+			if ( read == QLatin1String("\r\n") || read == QLatin1String("\n") )
 			    d->chunkedSize = -1;
 		    }
 		    if ( d->chunkedSize == -1 ) {
@@ -2078,7 +2093,7 @@ void Q3Http::slotReadyRead()
 
 	if ( everythingRead ) {
 	    // Handle "Connection: close"
-	    if ( d->response.value("connection").lower() == "close" ) {
+	    if ( d->response.value(QLatin1String("connection")).lower() == QLatin1String("close") ) {
 		close();
 	    } else {
 		setState( Connected );
@@ -2209,8 +2224,8 @@ void Q3Http::operationGet( Q3NetworkOperation *op )
     bytesRead = 0;
     op->setState( StInProgress );
     Q3Url u( operationInProgress()->arg( 0 ) );
-    Q3HttpRequestHeader header( "GET", u.encodedPathAndQuery(), 1, 0 );
-    header.setValue( "Host", u.host() );
+    Q3HttpRequestHeader header( QLatin1String("GET"), u.encodedPathAndQuery(), 1, 0 );
+    header.setValue( QLatin1String("Host"), u.host() );
     setHost( u.host(), u.port() != -1 ? u.port() : 80 );
     request( header );
 }
@@ -2229,8 +2244,8 @@ void Q3Http::operationPut( Q3NetworkOperation *op )
     bytesRead = 0;
     op->setState( StInProgress );
     Q3Url u( operationInProgress()->arg( 0 ) );
-    Q3HttpRequestHeader header( "POST", u.encodedPathAndQuery(), 1, 0 );
-    header.setValue( "Host", u.host() );
+    Q3HttpRequestHeader header( QLatin1String("POST"), u.encodedPathAndQuery(), 1, 0 );
+    header.setValue( QLatin1String("Host"), u.host() );
     setHost( u.host(), u.port() != -1 ? u.port() : 80 );
     request( header, op->rawArg(1) );
 }
@@ -2242,7 +2257,7 @@ void Q3Http::clientReply( const Q3HttpResponseHeader &rep )
 	if ( rep.statusCode() >= 400 && rep.statusCode() < 600 ) {
 	    op->setState( StFailed );
 	    op->setProtocolDetail(
-		    QString("%1 %2").arg(rep.statusCode()).arg(rep.reasonPhrase())
+		    QString(QLatin1String("%1 %2")).arg(rep.statusCode()).arg(rep.reasonPhrase())
 						    );
 	    switch ( rep.statusCode() ) {
 		case 401:

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,10 +21,21 @@
 
 #ifndef QCONTENT_P_H__
 #define QCONTENT_P_H__
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 #include <QObject>
 #include <QTimer>
 #include <QMutex>
-#include <QAtomic>
+#include <qatomic.h>
 #include <qcontent.h>
 
 class QValueSpaceObject;
@@ -57,11 +68,11 @@ class QValueSpaceProxyObject : public QObject
         QString path;
 };
 
-class QContentUpdateManagerPrivate;
 class QContentUpdateManager : public QObject
 {
     Q_OBJECT
     public:
+        QContentUpdateManager(QObject *parent=NULL);
         void addUpdated(QContentId id, QContent::ChangeType c);
         void requestRefresh();
 
@@ -75,18 +86,20 @@ class QContentUpdateManager : public QObject
         void endInstall();
         void beginSendingUpdates();
         void endSendingUpdates();
-
-    private slots:
         void sendUpdate();
 
     private:
-        QContentUpdateManager(QObject *parent=NULL);
-        friend class QContentUpdateManagerPrivate;
+
         QList<QPair<QContentId,QContent::ChangeType> > updateList;
         QTimer updateTimer;
         QMutex mutex;
+#if QT_VERSION < 0x040400
         QAtomic installAtom;
         QAtomic updateAtom;
+#else
+        QAtomicInt installAtom;
+        QAtomicInt updateAtom;
+#endif
         QValueSpaceProxyObject *vsoDocuments;
 };
 

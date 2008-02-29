@@ -35,6 +35,8 @@ protected:
     virtual void drawCell(QPainter *p, int row, int col, bool selected) = 0;
     void paintEvent(QPaintEvent* event);
     void drawFrame(QPainter *p);
+    void showEvent(QShowEvent *e);
+    void hideEvent(QHideEvent *e);
 
 private:
     void updateContentsSize();

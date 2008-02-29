@@ -20,16 +20,16 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/>virtual QUniqueId <b><a href="qcontactcontext.html#addContact">addContact</a></b> ( const QContact &amp; <i>contact</i>, const QPimSource &amp; <i>source</i> ) = 0</li>
+<li><div class="fn"/>virtual QUniqueId <b><a href="qcontactcontext.html#addContact">addContact</a></b> ( const QContact &amp; <i>contact</i>, const QPimSource &amp; <i>source</i> )</li>
 <li><div class="fn"/>virtual QContact <b><a href="qcontactcontext.html#exportContact">exportContact</a></b> ( const QUniqueId &amp; <i>id</i>, bool &amp; <i>ok</i> ) const</li>
 <li><div class="fn"/>virtual QList&lt;QContact&gt; <b><a href="qcontactcontext.html#exportContacts">exportContacts</a></b> ( const QPimSource &amp; <i>source</i>, bool &amp; <i>ok</i> ) const</li>
 <li><div class="fn"/>virtual bool <b><a href="qcontactcontext.html#importContact">importContact</a></b> ( const QPimSource &amp; <i>source</i>, const QContact &amp; <i>contact</i> )</li>
 <li><div class="fn"/>virtual bool <b><a href="qcontactcontext.html#importContacts">importContacts</a></b> ( const QPimSource &amp; <i>source</i>, const QList&lt;QContact&gt; &amp; <i>contacts</i> )</li>
-<li><div class="fn"/>virtual bool <b><a href="qcontactcontext.html#removeContact">removeContact</a></b> ( const QUniqueId &amp; <i>id</i> ) = 0</li>
-<li><div class="fn"/>virtual bool <b><a href="qcontactcontext.html#updateContact">updateContact</a></b> ( const QContact &amp; <i>contact</i> ) = 0</li>
+<li><div class="fn"/>virtual bool <b><a href="qcontactcontext.html#removeContact">removeContact</a></b> ( const QUniqueId &amp; <i>id</i> )</li>
+<li><div class="fn"/>virtual bool <b><a href="qcontactcontext.html#updateContact">updateContact</a></b> ( const QContact &amp; <i>contact</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>13 public functions inherited from <a href="qpimcontext.html#public-functions">QPimContext</a></li>
+<li><div class="fn"/>14 public functions inherited from <a href="qpimcontext.html#public-functions">QPimContext</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
@@ -56,11 +56,12 @@
 <p>The QContactContext class represents a storage context of contact data.</p>
 <p>This includes storage contexts such as SIM Card contacts or contacts stored on the phone in Qtopia's native format. The class can be used to perform operations that relate to a specific context of PIM data.</p>
 <p>Currently there is no way for applications to implement their own contexts. This feature is being considered for future versions of Qtopia.</p>
+<p>See also <a href="qcontactmodel.html">QContactModel</a> and <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QContactContext"></a>QContactContext::QContactContext ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Constructs a <a href="qcontactcontext.html">QContactContext</a> with parent <i>parent</i>.</p>
-<h3 class="fn"><a name="addContact"></a><a href="quniqueid.html">QUniqueId</a> QContactContext::addContact ( const <a href="qcontact.html">QContact</a> &amp; <i>contact</i>, const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="addContact"></a><a href="quniqueid.html">QUniqueId</a> QContactContext::addContact ( const <a href="qcontact.html">QContact</a> &amp; <i>contact</i>, const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Adds the <i>contact</i> to the PIM data <i>source</i> if it is controlled by this context. If the contact is successfully added, returns the new unique id for this contact, otherwise returns a null id.</p>
 <h3 class="fn"><a name="exportContact"></a><a href="qcontact.html">QContact</a> QContactContext::exportContact ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, bool &amp; <i>ok</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Exports a single contact identified by <i>id</i>. If successful sets <i>ok</i> to true, otherwise sets <i>ok</i> to false.</p>
@@ -74,14 +75,14 @@
 <h3 class="fn"><a name="importContacts"></a>bool QContactContext::importContacts ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, const <a href="qlist.html">QList</a>&lt;<a href="qcontact.html">QContact</a>&gt; &amp; <i>contacts</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Imports the <i>contacts</i> and merges them with the contacts listed in the PIM data <i>source</i>. The source must be controlled by this context. If successful returns true, otherwise returns false.</p>
 <p>There isn't necessarily going to be a one to one match to contacts in the PIM data source. Contacts may be merged or split over multiple contacts. Also contacts that match in name will be updated from the list rather than additional contacts created.</p>
-<h3 class="fn"><a name="removeContact"></a>bool QContactContext::removeContact ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="removeContact"></a>bool QContactContext::removeContact ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Removes the contact with the identifier <i>id</i> if it exists in this context. Returns true upon success; otherwise returns false.</p>
-<h3 class="fn"><a name="updateContact"></a>bool QContactContext::updateContact ( const <a href="qcontact.html">QContact</a> &amp; <i>contact</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="updateContact"></a>bool QContactContext::updateContact ( const <a href="qcontact.html">QContact</a> &amp; <i>contact</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Updates the contact with the same identifier as <i>contact</i> if it exists in this context. Returns true upon success; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

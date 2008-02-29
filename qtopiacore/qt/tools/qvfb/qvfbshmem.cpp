@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -39,7 +54,6 @@
 #include <sys/stat.h>
 #include <sys/sem.h>
 #include <sys/mman.h>
-#include <asm/page.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <math.h>
@@ -100,26 +114,26 @@ private:
 };
 
 QShMemViewProtocol::QShMemViewProtocol(int displayid, const QSize &s,
-        int d, QObject *parent)
+                                       int d, QObject *parent)
     : QVFbViewProtocol(displayid, parent), hdr(0), dataCache(0), lockId(-1)
 {
     int actualdepth=d;
 
     switch ( d ) {
-	case 12:
-	    actualdepth=16;
-	    break;
-	case 1:
-	case 4:
-	case 8:
-	case 16:
-	case 18:
-	case 24:
-	case 32:
-	    break;
+    case 12:
+        actualdepth=16;
+        break;
+    case 1:
+    case 4:
+    case 8:
+    case 16:
+    case 18:
+    case 24:
+    case 32:
+        break;
 
-	default:
-	    qFatal( "Unsupported bit depth %d\n", d );
+    default:
+        qFatal("Unsupported bit depth %d\n", d);
     }
 
     int w = s.width();
@@ -196,9 +210,11 @@ QShMemViewProtocol::QShMemViewProtocol(int displayid, const QSize &s,
     hdr->height = h;
     hdr->depth = actualdepth;
     hdr->linestep = bpl;
-    hdr->numcols = 0;
     hdr->dataoffset = data_offset_value;
     hdr->update = QRect();
+    hdr->dirty = 0;
+    hdr->numcols = 0;
+    hdr->viewerVersion = QT_VERSION;
 
     displayPipe = qws_dataDir(displayid) + QString( QTE_PIPE ).arg( displayid );
 

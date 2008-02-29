@@ -21,4 +21,6 @@ win32:DEFINES-=QT_NO_CAST_TO_ASCII
 
 QMAKE_LIBS += $$QMAKE_LIBS_CORE
 
+QMAKE_DYNAMIC_LIST_FILE = $$PWD/QtCore.dynlist
+
 contains(DEFINES,QT_EVAL):include(eval.pri)

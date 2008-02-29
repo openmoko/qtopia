@@ -31,9 +31,9 @@
 <li><div class="fn"/><b><a href="qphoneprofile.html#QPhoneProfile-2">QPhoneProfile</a></b> ( int <i>id</i> )</li>
 <li><div class="fn"/><b><a href="qphoneprofile.html#QPhoneProfile-3">QPhoneProfile</a></b> ( const QPhoneProfile &amp; <i>other</i> )</li>
 <li><div class="fn"/>virtual <b><a href="qphoneprofile.html#dtor.QPhoneProfile">~QPhoneProfile</a></b> ()</li>
-<li><div class="fn"/>QString <b><a href="qphoneprofile.html#accessory">accessory</a></b> () const</li>
 <li><div class="fn"/>Setting <b><a href="qphoneprofile.html#applicationSetting">applicationSetting</a></b> ( const QString &amp; <i>application</i> ) const</li>
 <li><div class="fn"/>Settings <b><a href="qphoneprofile.html#applicationSettings">applicationSettings</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qphoneprofile.html#audioProfile">audioProfile</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qphoneprofile.html#autoAnswer">autoAnswer</a></b> () const</li>
 <li><div class="fn"/>AlertType <b><a href="qphoneprofile.html#callAlert">callAlert</a></b> () const</li>
 <li><div class="fn"/>QContent <b><a href="qphoneprofile.html#callTone">callTone</a></b> () const</li>
@@ -47,9 +47,9 @@
 <li><div class="fn"/>QString <b><a href="qphoneprofile.html#name">name</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qphoneprofile.html#planeMode">planeMode</a></b> () const</li>
 <li><div class="fn"/>Schedule <b><a href="qphoneprofile.html#schedule">schedule</a></b> () const</li>
-<li><div class="fn"/>void <b><a href="qphoneprofile.html#setAccessory">setAccessory</a></b> ( const QString &amp; <i>accessory</i> )</li>
 <li><div class="fn"/>void <b><a href="qphoneprofile.html#setApplicationSetting">setApplicationSetting</a></b> ( const Setting &amp; <i>setting</i> )</li>
 <li><div class="fn"/>void <b><a href="qphoneprofile.html#setApplicationSettings">setApplicationSettings</a></b> ( const Settings &amp; <i>settings</i> )</li>
+<li><div class="fn"/>void <b><a href="qphoneprofile.html#setAudioProfile">setAudioProfile</a></b> ( const QString &amp; <i>audioProfile</i> )</li>
 <li><div class="fn"/>void <b><a href="qphoneprofile.html#setAutoAnswer">setAutoAnswer</a></b> ( bool <i>autoAnswer</i> )</li>
 <li><div class="fn"/>void <b><a href="qphoneprofile.html#setCallAlert">setCallAlert</a></b> ( AlertType <i>type</i> )</li>
 <li><div class="fn"/>void <b><a href="qphoneprofile.html#setCallTone">setCallTone</a></b> ( const QContent &amp; <i>tone</i> )</li>
@@ -64,11 +64,13 @@
 <li><div class="fn"/>void <b><a href="qphoneprofile.html#setSchedule">setSchedule</a></b> ( const Schedule &amp; <i>schedule</i> )</li>
 <li><div class="fn"/>void <b><a href="qphoneprofile.html#setSpeedDialInput">setSpeedDialInput</a></b> ( const QString &amp; <i>input</i> )</li>
 <li><div class="fn"/>void <b><a href="qphoneprofile.html#setVibrate">setVibrate</a></b> ( bool <i>vibrate</i> )</li>
+<li><div class="fn"/>void <b><a href="qphoneprofile.html#setVideoTone">setVideoTone</a></b> ( const QContent &amp; <i>tone</i> )</li>
 <li><div class="fn"/>void <b><a href="qphoneprofile.html#setVolume">setVolume</a></b> ( int <i>volume</i> )</li>
 <li><div class="fn"/>QString <b><a href="qphoneprofile.html#speedDialInput">speedDialInput</a></b> () const</li>
 <li><div class="fn"/>QContent <b><a href="qphoneprofile.html#systemCallTone">systemCallTone</a></b> () const</li>
 <li><div class="fn"/>QContent <b><a href="qphoneprofile.html#systemMessageTone">systemMessageTone</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qphoneprofile.html#vibrate">vibrate</a></b> () const</li>
+<li><div class="fn"/>QContent <b><a href="qphoneprofile.html#videoTone">videoTone</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qphoneprofile.html#volume">volume</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qphoneprofile.html#operator-not-eq">operator!=</a></b> ( const QPhoneProfile &amp; <i>other</i> ) const</li>
 <li><div class="fn"/>QPhoneProfile &amp; <b><a href="qphoneprofile.html#operator-eq">operator=</a></b> ( const QPhoneProfile &amp; <i>other</i> )</li>
@@ -81,12 +83,12 @@
 <p>The QPhoneProfile class holds data on how the phone behaves for incoming calls or messages when it is activated. When a new profile is created it plays system default tones, <a href="qphoneprofile.html#systemCallTone">systemCallTone</a>() and <a href="qphoneprofile.html#systemMessageTone">systemMessageTone</a>(), which can be personalized by <a href="qphoneprofile.html#setCallTone">setCallTone</a>() and <a href="qphoneprofile.html#setMessageTone">setMessageTone</a>().</p>
 <a name="activation"></a>
 <h3>Activation</h3>
-<p>A profile can be manually activated through the <a href="qphoneprofilemanager.html#activateProfile">QPhoneProfileManager::activateProfile</a>() method. Alternatively a profile may be set to auto-activate at certain times, controlled through by <a href="qphoneprofile.html#schedule">QPhoneProfile::schedule</a>(), or when a phone hardware accessory is attached by <a href="qphoneprofile.html#setAccessory">QPhoneProfile::setAccessory</a>(). For example, a profile can be automatically activated when hands-free hardware accessory is enabled.</p>
+<p>A profile can be manually activated through the <a href="qphoneprofilemanager.html#activateProfile">QPhoneProfileManager::activateProfile</a>() method. Alternatively a profile may be set to auto-activate at certain times, controlled through by <a href="qphoneprofile.html#schedule">QPhoneProfile::schedule</a>(), or when a phone audio profile is attached by <a href="qphoneprofile.html#setAudioProfile">QPhoneProfile::setAudioProfile</a>(). For example, a profile can be automatically activated when Bluetooth hands-free is enabled.</p>
 <a name="associated-settings"></a>
 <h3>Associated Settings</h3>
 <p>A profile can have a number of associated settings that can be retrieved by <a href="qphoneprofile.html#applicationSetting">applicationSetting</a>() and <a href="qphoneprofile.html#applicationSettings">applicationSettings</a>(). These settings are passed to applications by <a href="settingsservice.html#activateSettings">SettingsService::activateSettings</a>() to be applied when the profile is activated.</p>
 <p>Applications that wish to add their settings to a profile can use <a href="settingsmanagerservice.html">SettingsManagerService</a>.</p>
-<p>See also <a href="qphoneprofile-schedule.html">QPhoneProfile::Schedule</a>, <a href="qhardwareinterface.html">QHardwareInterface</a>, <a href="qphoneprofilemanager.html">QPhoneProfileManager</a>, <a href="settingsmanagerservice.html">SettingsManagerService</a>, and <a href="settingsservice.html">SettingsService</a>.</p>
+<p>See also <a href="qphoneprofile-schedule.html">QPhoneProfile::Schedule</a>, <a href="qhardwareinterface.html">QHardwareInterface</a>, <a href="qphoneprofilemanager.html">QPhoneProfileManager</a>, <a href="qphoneprofileprovider.html">QPhoneProfileProvider</a>, <a href="settingsmanagerservice.html">SettingsManagerService</a>, and <a href="settingsservice.html">SettingsService</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="AlertType-enum"></a>enum QPhoneProfile::AlertType</h3>
@@ -113,15 +115,15 @@
 <p>Constructs a copy of <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QPhoneProfile"></a>QPhoneProfile::~QPhoneProfile ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="qphoneprofile.html">QPhoneProfile</a> object.</p>
-<h3 class="fn"><a name="accessory"></a><a href="qstring.html">QString</a> QPhoneProfile::accessory () const</h3>
-<p>Returns the accessory on which this profile should auto activate if applicable; otherwise returns an empty string.</p>
-<p>See also <a href="qphoneprofile.html#setAccessory">setAccessory</a>().</p>
 <h3 class="fn"><a name="applicationSetting"></a><a href="qphoneprofile-setting.html">Setting</a> QPhoneProfile::applicationSetting ( const <a href="qstring.html">QString</a> &amp; <i>application</i> ) const</h3>
 <p>Returns the setting for <i>application</i> for this profile if applicable; otherwise returns a null setting.</p>
 <p>See also <a href="qphoneprofile.html#setApplicationSetting">setApplicationSetting</a>().</p>
 <h3 class="fn"><a name="applicationSettings"></a><a href="qphoneprofile.html#Settings-typedef">Settings</a> QPhoneProfile::applicationSettings () const</h3>
 <p>Returns all application settings for this profile.</p>
 <p>See also <a href="qphoneprofile.html#setApplicationSettings">setApplicationSettings</a>().</p>
+<h3 class="fn"><a name="audioProfile"></a><a href="qstring.html">QString</a> QPhoneProfile::audioProfile () const</h3>
+<p>Returns the audio profile on which this profile should auto activate if applicable; otherwise returns an empty string.</p>
+<p>See also <a href="qphoneprofile.html#setAudioProfile">setAudioProfile</a>() and <a href="qaudiostateinfo.html">QAudioStateInfo</a>.</p>
 <h3 class="fn"><a name="autoAnswer"></a>bool QPhoneProfile::autoAnswer () const</h3>
 <p>Returns true if incoming calls should be automatically answered in this profile; otherwise returns false.</p>
 <p>See also <a href="qphoneprofile.html#setAutoAnswer">setAutoAnswer</a>().</p>
@@ -160,15 +162,19 @@
 <h3 class="fn"><a name="schedule"></a><a href="qphoneprofile-schedule.html">Schedule</a> QPhoneProfile::schedule () const</h3>
 <p>Returns the auto activation schedule for this profile.</p>
 <p>See also <a href="qphoneprofile.html#setSchedule">setSchedule</a>().</p>
-<h3 class="fn"><a name="setAccessory"></a>void QPhoneProfile::setAccessory ( const <a href="qstring.html">QString</a> &amp; <i>accessory</i> )</h3>
-<p>Sets the auto activation <i>accessory</i>.</p>
-<p>See also <a href="qphoneprofile.html#accessory">accessory</a>().</p>
 <h3 class="fn"><a name="setApplicationSetting"></a>void QPhoneProfile::setApplicationSetting ( const <a href="qphoneprofile-setting.html">Setting</a> &amp; <i>setting</i> )</h3>
 <p>Adds a single application <i>setting</i> if it does not exist; otherwise updates the existing setting.</p>
 <p>See also <a href="qphoneprofile.html#applicationSetting">applicationSetting</a>().</p>
 <h3 class="fn"><a name="setApplicationSettings"></a>void QPhoneProfile::setApplicationSettings ( const <a href="qphoneprofile.html#Settings-typedef">Settings</a> &amp; <i>settings</i> )</h3>
 <p>Sets the application <i>settings</i>.</p>
 <p>See also <a href="qphoneprofile.html#applicationSettings">applicationSettings</a>().</p>
+<h3 class="fn"><a name="setAudioProfile"></a>void QPhoneProfile::setAudioProfile ( const <a href="qstring.html">QString</a> &amp; <i>audioProfile</i> )</h3>
+<p>Sets the auto activation <i>audioProfile</i>. A phone profile is activated if</p>
+<pre>    QPhoneProfile profile;
+    QAudioStateConfiguration config;
+    QAudioStateInfo info = config.currentState();
+    info.profile() == profile.audioProfile() <span class="comment">//must be true</span></pre>
+<p>See also <a href="qphoneprofile.html#audioProfile">audioProfile</a>(), <a href="qaudiostateconfiguration.html">QAudioStateConfiguration</a>, and <a href="qaudiostateinfo.html">QAudioStateInfo</a>.</p>
 <h3 class="fn"><a name="setAutoAnswer"></a>void QPhoneProfile::setAutoAnswer ( bool <i>autoAnswer</i> )</h3>
 <p>Sets whether auto answering is enabled for this profile to <i>autoAnswer</i>.</p>
 <p>See also <a href="qphoneprofile.html#autoAnswer">autoAnswer</a>().</p>
@@ -177,7 +183,7 @@
 <p>See also <a href="qphoneprofile.html#callAlert">callAlert</a>().</p>
 <h3 class="fn"><a name="setCallTone"></a>void QPhoneProfile::setCallTone ( const <a href="qcontent.html">QContent</a> &amp; <i>tone</i> )</h3>
 <p>Sets the incoming call <i>tone</i>.</p>
-<p>See also <a href="qphoneprofile.html#callTone">callTone</a>().</p>
+<p>See also <a href="qphoneprofile.html#callTone">callTone</a>() and <a href="qphoneprofile.html#setVideoTone">setVideoTone</a>().</p>
 <h3 class="fn"><a name="setIcon"></a>void QPhoneProfile::setIcon ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i> )</h3>
 <p>Sets the profile's icon to <i>fileName</i>.</p>
 <p>See also <a href="qphoneprofile.html#icon">icon</a>().</p>
@@ -211,6 +217,9 @@
 <h3 class="fn"><a name="setVibrate"></a>void QPhoneProfile::setVibrate ( bool <i>vibrate</i> )</h3>
 <p>Sets the profile vibration to <i>vibrate</i>.</p>
 <p>See also <a href="qphoneprofile.html#vibrate">vibrate</a>().</p>
+<h3 class="fn"><a name="setVideoTone"></a>void QPhoneProfile::setVideoTone ( const <a href="qcontent.html">QContent</a> &amp; <i>tone</i> )</h3>
+<p>Sets the incoming video ring <i>tone</i>.</p>
+<p>See also <a href="qphoneprofile.html#videoTone">videoTone</a>() and <a href="qphoneprofile.html#setCallTone">setCallTone</a>().</p>
 <h3 class="fn"><a name="setVolume"></a>void QPhoneProfile::setVolume ( int <i>volume</i> )</h3>
 <p>Sets the profile <i>volume</i>. Valid values are from 0 to 5.</p>
 <p>See also <a href="qphoneprofile.html#volume">volume</a>().</p>
@@ -224,6 +233,9 @@
 <h3 class="fn"><a name="vibrate"></a>bool QPhoneProfile::vibrate () const</h3>
 <p>Returns true if vibration is enabled; otherwise returns false.</p>
 <p>See also <a href="qphoneprofile.html#setVibrate">setVibrate</a>().</p>
+<h3 class="fn"><a name="videoTone"></a><a href="qcontent.html">QContent</a> QPhoneProfile::videoTone () const</h3>
+<p>Returns the video ring tone to use for incoming calls.</p>
+<p>See also <a href="qphoneprofile.html#setVideoTone">setVideoTone</a>().</p>
 <h3 class="fn"><a name="volume"></a>int QPhoneProfile::volume () const</h3>
 <p>Returns the volume for this profile.</p>
 <p>See also <a href="qphoneprofile.html#setVolume">setVolume</a>().</p>
@@ -237,6 +249,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

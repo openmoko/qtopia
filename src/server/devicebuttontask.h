@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,12 +22,12 @@
 #ifndef _DEVICEBUTTONTASK_H_
 #define _DEVICEBUTTONTASK_H_
 
-#include <qwindowsystem_qws.h>
+#include "qtopiainputevents.h"
 #include "qtopiaserverapplication.h"
 class QDeviceButton;
 class PressHoldGate;
 class QValueSpaceItem;
-class DeviceButtonTask : public QObject, public QWSServer::KeyboardFilter
+class DeviceButtonTask : public QObject, public QtopiaKeyboardFilter
 {
 Q_OBJECT
 public:
@@ -37,10 +37,10 @@ public:
                         bool autoRepeat);
 
 signals:
-    void activated(int, bool);
+    void activated(int keyCode, bool held, bool isPressed);
 
 private slots:
-    void doActivate(int, bool);
+    void doActivate(int keyCode, bool held, bool isPressed);
 
 private:
     bool keyLocked();

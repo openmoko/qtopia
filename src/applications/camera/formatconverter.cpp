@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,10 +30,11 @@
 #include <sys/mman.h>
 #include <linux/videodev.h>
 
-#ifdef HAVE_V4L2
+#ifdef QTOPIA_HAVE_V4L2
 
 #include "formatconverter.h"
 #include "bayerconverter.h"
+#include "yuvconverter.h"
 
 namespace camera
 {
@@ -56,7 +57,9 @@ FormatConverter* FormatConverter::createFormatConverter(unsigned int type, int w
     case V4L2_PIX_FMT_GREY:
     case V4L2_PIX_FMT_YVU410:
     case V4L2_PIX_FMT_YVU420:
+        return new NullConverter;
     case V4L2_PIX_FMT_YUYV:
+       return new YUVConverter(V4L2_PIX_FMT_YUYV,width, height);
     case V4L2_PIX_FMT_UYVY:
     case V4L2_PIX_FMT_YUV422P:
     case V4L2_PIX_FMT_YUV411P:
@@ -88,6 +91,12 @@ unsigned char* NullConverter::convert(unsigned char* src)
     return src;
 }
 
+QList<unsigned int> FormatConverter::supportedFormats()
+{
+    QList<unsigned int> list;
+    list << V4L2_PIX_FMT_YUYV << V4L2_PIX_FMT_SBGGR8 << V4L2_PIX_FMT_RGB32;
+    return list;
+}
 
 }   // ns camera
 

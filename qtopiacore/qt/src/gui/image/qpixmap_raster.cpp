@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -42,13 +57,28 @@
 #include "qdebug.h"
 #include "qpaintengine.h"
 
-extern int qt_defaultDpi();
+#if !defined(QT_NO_DIRECT3D) && defined(Q_WS_WIN)
+#include <private/qpaintengine_d3d_p.h>
+#include <d3d9.h>
+extern QDirect3DPaintEngine *qt_d3dEngine();
+#endif
 
+extern int qt_defaultDpi();
+extern int qt_defaultDpiX();
+extern int qt_defaultDpiY();
+
+// ### Qt 5: remove
 typedef void (*_qt_pixmap_cleanup_hook)(int);
 Q_GUI_EXPORT _qt_pixmap_cleanup_hook qt_pixmap_cleanup_hook = 0;
+
+// ### Qt 5: rename
+typedef void (*_qt_pixmap_cleanup_hook_64)(qint64);
+Q_GUI_EXPORT _qt_pixmap_cleanup_hook_64 qt_pixmap_cleanup_hook_64 = 0;
+
+// ### Qt 5: remove
 Q_GUI_EXPORT qint64 qt_pixmap_id(const QPixmap &pixmap)
 {
-    return (((qint64) pixmap.data->image.serialNumber()) << 32) | ((qint64) pixmap.data->detach_no);
+    return pixmap.cacheKey();
 }
 
 QPixmap::QPixmap()
@@ -345,21 +375,15 @@ QBitmap QPixmap::createHeuristicMask(bool clipTight ) const
 }
 #endif
 
+QBitmap QPixmap::createMaskFromColor(const QColor &maskColor, Qt::MaskMode mode) const
+{
+    QImage image = toImage().convertToFormat(QImage::Format_ARGB32);
+    return QBitmap::fromImage(image.createMaskFromColor(maskColor.rgba(), mode));
+}
+
 QBitmap QPixmap::createMaskFromColor(const QColor &maskColor) const
 {
-    QImage maskImage(size(), QImage::Format_MonoLSB);
-    QImage image = toImage();
-    QRgb mColor = maskColor.rgba();
-    for (int w = 0; w < width(); w++) {
-        for (int h = 0; h < height(); h++) {
-            if (image.pixel(w, h) == mColor)
-                maskImage.setPixel(w, h, Qt::color1);
-            else
-                maskImage.setPixel(w, h, Qt::color0);
-        }
-    }
-    QBitmap m = fromImage(maskImage);
-    return m;
+    return createMaskFromColor(maskColor, Qt::MaskInColor);
 }
 
 
@@ -394,9 +418,10 @@ QPixmap QPixmap::grabWidget(QWidget *widget, const QRect &rect)
     if (!r.intersects(widget->rect()))
         return QPixmap();
 
-     QPixmap res(r.size());
+    QPixmap res(r.size());
+    widget->render(&res, -r.topLeft(), r,
+                   QWidget::DrawWindowBackground | QWidget::DrawChildren | QWidget::IgnoreMask);
 
-    widget->d_func()->drawWidget(&res, r, -r.topLeft(), QWidgetPrivate::DrawRecursive | QWidgetPrivate::DrawAsRoot | QWidgetPrivate::DrawPaintOnScreen | QWidgetPrivate::DrawInvisible);
     return res;
 }
 
@@ -419,11 +444,24 @@ QPixmap QPixmap::scaledToHeight(int h, Qt::TransformationMode mode) const
 
 QPixmap QPixmap::transformed(const QMatrix &matrix, Qt::TransformationMode mode ) const
 {
+    if (depth() == 1)
+        return QBitmap::fromImage(data->image.transformed(matrix, mode));
     return QPixmap::fromImage(data->image.transformed(matrix, mode));
 }
 
+QPixmap QPixmap::transformed(const QTransform &matrix, Qt::TransformationMode mode ) const
+{
+    if (depth() == 1)
+        return QBitmap::fromImage(data->image.transformed(matrix, mode));
+    return QPixmap::fromImage(data->image.transformed(matrix, mode));
+}
 
 QMatrix QPixmap::trueMatrix(const QMatrix &m, int w, int h)
+{
+    return QImage::trueMatrix(m, w, h);
+}
+
+QTransform QPixmap::trueMatrix(const QTransform &m, int w, int h)
 {
     return QImage::trueMatrix(m, w, h);
 }
@@ -447,9 +485,7 @@ QPixmap QPixmap::fromImage(const QImage &image, Qt::ImageConversionFlags flags )
         break;
     case QImage::Format_RGB32:
     case QImage::Format_ARGB32_Premultiplied:
-#ifdef Q_WS_QWS
     case QImage::Format_RGB16:
-#endif
         pixmap.data->image = image;
         break;
     default:
@@ -470,7 +506,6 @@ bool QPixmap::load(const QString& fileName, const char *format, Qt::ImageConvers
                QLatin1Char('_')).append(QString::number(info.lastModified().toTime_t())).append(
                QLatin1Char('_')).append(QString::number(data->type));
 
-    detach();
     if (QPixmapCache::find(key, *this))
             return true;
     QImage image = QImageReader(fileName, format).read();
@@ -494,7 +529,6 @@ bool QPixmap::loadFromData(const uchar *buf, uint len, const char* format, Qt::I
     QBuffer b(&a);
     b.open(QIODevice::ReadOnly);
 
-    detach();
     QImage image = QImageReader(&b, format).read();
     if (!image.isNull()) {
         if (data->type == BitmapType)
@@ -526,16 +560,41 @@ int QPixmap::serialNumber() const
     return data->image.serialNumber();
 }
 
+qint64 QPixmap::cacheKey() const
+{
+    // avoid exposing the internal QImageData structure..
+#if defined (Q_CC_MINGW) || (defined (_MSC_VER) && _MSC_VER >= 1310)
+    return ((data->image.cacheKey() & 0xffffffff00000000LL) | ((qint64) data->detach_no));
+#else
+    // MSVC 6.0 can't handle 64 bit constants properly..
+    qint64 mask = 0xffffffff;
+    mask <<= 32;
+    return ((data->image.cacheKey() & mask) | ((qint64) data->detach_no));
+#endif
+}
+
 bool QPixmap::isDetached() const
 {
     return data->count == 1;
 }
 
+typedef void (*_qt_pixmap_cleanup_hook_64)(qint64);
+extern _qt_pixmap_cleanup_hook_64 qt_pixmap_cleanup_hook_64;
+
 void QPixmap::detach()
 {
-    ++data->detach_no;
+#if !defined(QT_NO_DIRECT3D) && defined(Q_WS_WIN)
+    if (data->texture)
+        data->texture->Release();
+    data->texture = 0;
+#endif
+
+    if (qt_pixmap_cleanup_hook_64 && data->count == 1)
+        qt_pixmap_cleanup_hook_64(cacheKey());
+
     if (data->count != 1)
         *this = copy();
+    ++data->detach_no;
 }
 
 #ifdef QT3_SUPPORT
@@ -575,31 +634,37 @@ bool QPixmap::convertFromImage(const QImage &image, ColorMode mode)
 int QPixmap::metric(PaintDeviceMetric metric) const
 {
     // override the image dpi with the screen dpi when rendering to a pixmap
-
-    int dpm = qRound(qt_defaultDpi()*100./2.54);
+    // ### Qt 4.4: remove #ifdef
+#ifdef Q_WS_QWS
+    int dpmX = qRound(qt_defaultDpiX()*100./2.54);
+    int dpmY = qRound(qt_defaultDpiY()*100./2.54);
+#else
+    int dpmX = qRound(qt_defaultDpi()*100./2.54);
+    int dpmY = dpmX;
+#endif
     switch (metric) {
     case PdmWidthMM:
-        return qRound(data->image.width() * 1000 / dpm);
+        return qRound(data->image.width() * 1000 / dpmX);
         break;
 
     case PdmHeightMM:
-        return qRound(data->image.height() * 1000 / dpm);
+        return qRound(data->image.height() * 1000 / dpmY);
         break;
 
     case PdmDpiX:
-        return qRound(dpm * 0.0254);
+        return qRound(dpmX * 0.0254);
         break;
 
     case PdmDpiY:
-        return qRound(dpm * 0.0254);
+        return qRound(dpmY * 0.0254);
         break;
 
     case PdmPhysicalDpiX:
-        return qRound(dpm * 0.0254);
+        return qRound(dpmX * 0.0254);
         break;
 
     case PdmPhysicalDpiY:
-        return qRound(dpm * 0.0254);
+        return qRound(dpmY * 0.0254);
         break;
     default:
         return data->image.metric(metric);
@@ -624,6 +689,9 @@ void QPixmap::init(int w, int h, Type type)
     data = new QPixmapData;
     data->type = type;
     data->detach_no = 0;
+#if !defined(QT_NO_DIRECT3D) && defined(Q_WS_WIN)
+    data->texture = 0;
+#endif
     if (w > 0 && h > 0) {
         if (type == PixmapType) {
             data->image = QImage(w, h, QImage::Format_RGB32);
@@ -636,8 +704,13 @@ void QPixmap::init(int w, int h, Type type)
 void QPixmap::deref()
 {
     if(data && data->deref()) { // Destroy image if last ref
-        if (qt_pixmap_cleanup_hook)
-            qt_pixmap_cleanup_hook(serialNumber());
+#if !defined(QT_NO_DIRECT3D) && defined(Q_WS_WIN)
+        if (data->texture)
+            data->texture->Release();
+        data->texture = 0;
+#endif
+        if (qt_pixmap_cleanup_hook_64)
+            qt_pixmap_cleanup_hook_64(cacheKey());
         delete data;
         data = 0;
     }
@@ -660,12 +733,16 @@ QDataStream &operator<<(QDataStream &s, const QPixmap &pixmap)
 
 QDataStream &operator>>(QDataStream &s, QPixmap &pixmap)
 {
-    QImage img;
-    s >> img;
-    if (pixmap.data->type == QPixmap::BitmapType)
-        pixmap = QBitmap::fromImage(img);
-    else
-        pixmap = QPixmap::fromImage(img);
+    QImage image;
+    s >> image;
+
+    if (image.isNull()) {
+        pixmap = QPixmap();
+    } else if (image.depth() == 1) {
+        pixmap = QBitmap::fromImage(image);
+    } else {
+        pixmap = QPixmap::fromImage(image);
+    }
     return s;
 }
 #endif // QT_NO_DATASTREAM

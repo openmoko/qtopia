@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -73,12 +88,12 @@ Config *Config::loadConfig(const QString &profileFileName)
 
     QFile file(profileFileName);
     if (!file.exists()) {
-        qWarning( (QLatin1String("File does not exist: ") + profileFileName).toAscii().constData() );
+        qWarning( "File does not exist: %s", qPrintable(profileFileName) );
         return 0;
     }
     DocuParser *parser = DocuParser::createParser( profileFileName );
     if (!parser) {
-        qWarning( (QLatin1String("Failed to create parser for file: ") + profileFileName).toAscii().constData() );
+        qWarning( "Failed to create parser for file: %s", qPrintable(profileFileName) );
         return 0;
     }
     if (parser->parserVersion() < DocuParser::Qt320) {
@@ -89,7 +104,7 @@ Config *Config::loadConfig(const QString &profileFileName)
     parser->parse(&file);
     config->profil = profileParser->profile();
     if (!config->profil) {
-        qWarning( (QLatin1String("Config::loadConfig(), no profile in: ") + profileFileName).toAscii().constData() );
+        qWarning( "Config::loadConfig(), no profile in: %s", qPrintable(profileFileName) );
         return 0;
     }
     config->profil->setProfileType(Profile::UserProfile);
@@ -108,16 +123,16 @@ void Config::load()
 {
     const QString key = getVersionString() + QLatin1String("/");
 
-    const QString pKey = (profil->props[QLatin1String("name")] == QLatin1String("default"))
-        ? QString::fromLatin1(QT_VERSION_STR)
+    bool isDefaultProfile = profil->props[QLatin1String("name")] == QLatin1String("default");
+    const QString pKey = isDefaultProfile ? QString::fromLatin1(QT_VERSION_STR)
         : getVersionString();
 
     const QString profkey = pKey + QLatin1String("/Profile/") + profil->props[QLatin1String("name")] + QLatin1String("/");
 
     QSettings settings;
 
-    home = profil->props[QLatin1String("startpage")];
-    if (home.isEmpty())
+    home = profil->props[QLatin1String("startpage")];;
+    if (home.isEmpty() && isDefaultProfile)
         home = QLibraryInfo::location(QLibraryInfo::DocumentationPath) + QLatin1String("/html/index.html");
     src = settings.value( profkey + QLatin1String("Source") ).toStringList();
     sideBar = settings.value( key + QLatin1String("SideBarPage") ).toInt();
@@ -129,6 +144,17 @@ void Config::load()
     rebuildDocs = settings.value( key + QLatin1String("RebuildDocDB"), true ).toBool();
 
     profileNames = settings.value( key + QLatin1String("Profile") ).toStringList();
+    
+    m_fontSettings.windowFont = qVariantValue<QFont>(settings.value(key + QLatin1String("windowfont"), qApp->font()));
+    m_fontSettings.browserFont = qVariantValue<QFont>(settings.value(key + QLatin1String("browserfont"), qApp->font()));
+    m_fontSettings.useWindowFont = settings.value(key + QLatin1String("usewindowfont"), false).toBool();
+    m_fontSettings.useBrowserFont = settings.value(key + QLatin1String("usebrowserfont"), false).toBool();
+    m_fontSettings.windowWritingSystem = static_cast<QFontDatabase::WritingSystem>(
+        settings.value(key + QLatin1String("windowwritingsystem"), QFontDatabase::Latin).toInt());
+    m_fontSettings.browserWritingSystem = static_cast<QFontDatabase::WritingSystem>(
+        settings.value(key + QLatin1String("browserwritingsystem"), QFontDatabase::Latin).toInt());
+
+    m_fontSettings.browserFont.setPointSizeF(pointFntSize);
 }
 
 void Config::save()
@@ -157,6 +183,13 @@ void Config::saveSettings()
     settings.setValue( key + QLatin1String("MainWindowState"), mainWinState );
     settings.setValue( key + QLatin1String("FontSize"), pointFntSize);
     settings.setValue( key + QLatin1String("RebuildDocDB"), rebuildDocs );
+
+    settings.setValue(key + QLatin1String("windowfont"), m_fontSettings.windowFont);
+    settings.setValue(key + QLatin1String("browserfont"), m_fontSettings.browserFont);
+    settings.setValue(key + QLatin1String("usewindowfont"), m_fontSettings.useWindowFont);
+    settings.setValue(key + QLatin1String("usebrowserfont"), m_fontSettings.useBrowserFont);
+    settings.setValue(key + QLatin1String("windowwritingsystem"), m_fontSettings.windowWritingSystem);
+    settings.setValue(key + QLatin1String("browserwritingsystem"), m_fontSettings.browserWritingSystem);
 }
 
 #ifdef ASSISTANT_DEBUG
@@ -247,7 +280,7 @@ void Config::saveProfile( Profile *profile )
 
     const QString profKey = key + QLatin1String("/Profile/") + profile->props[QLatin1String("name")] + QLatin1String("/");
 
-    QString path = QLibraryInfo::location(QLibraryInfo::DocumentationPath).replace("\\", "/");
+    QString path = QLibraryInfo::location(QLibraryInfo::DocumentationPath).replace(QLatin1String("\\"), QLatin1String("/"));
     QStringList indexes, icons, imgDirs, dcfs;
     QStringList titles = profile->dcfTitles.keys();
     QStringList::ConstIterator it = titles.constBegin();
@@ -348,7 +381,7 @@ QPixmap Config::docIcon( const QString &title ) const
     if (QFile::exists(resName))
         return QPixmap(resName);
 
-    if (name.startsWith("file:"))
+    if (name.startsWith(QLatin1String("file:")))
         name = name.mid(5);
     return QPixmap(name);
 }
@@ -361,7 +394,7 @@ QPixmap Config::applicationIcon() const
     if (QFile::exists(resName))
         return QPixmap(resName);
 
-    if (name.startsWith("file:"))
+    if (name.startsWith(QLatin1String("file:")))
         name = name.mid(5);
     return QPixmap(name);
 }

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,19 +24,38 @@
 #include <qtopiabase/qtopiaglobal.h>
 
 class QTime;
+class QPerformanceLogData;
 
 class QTOPIA_EXPORT QPerformanceLog
 {
 public:
+    enum EventType {
+        NoEvent = 0x00,
+
+        Begin  = 0x01,
+        End    = 0x02,
+
+        LibraryLoading = 0x04,
+        EventLoop      = 0x08,
+        MainWindow     = 0x10
+    };
+    Q_DECLARE_FLAGS(Event, EventType)
+
     QPerformanceLog( QString const &applicationName = QString() );
     ~QPerformanceLog();
-    QPerformanceLog &operator<<(const char*t);
+    QPerformanceLog &operator<<(QString const &string);
+    QPerformanceLog &operator<<(Event const &event);
 
     static void adjustTimezone( QTime &preAdjustTime );
+    static bool enabled();
+    static QString stringFromEvent(Event const &event);
 
 private:
-    QString buf;
+    Q_DISABLE_COPY(QPerformanceLog)
+    QPerformanceLogData *data;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QPerformanceLog::Event)
 
 #endif // __QPERFORMANCELOG_H__
 

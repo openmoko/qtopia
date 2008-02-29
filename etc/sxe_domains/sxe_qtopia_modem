@@ -1,0 +1,5 @@
+#!/bin/sh
+lidsconf -A POSTBOOT -s ${BIN} -o LIDS_SOCKET_CREATE -j ENABLE
+lidsconf -A POSTBOOT -s ${BIN} -o /dev/ttyS0 -j WRITE
+lidsconf -A POSTBOOT -s ${BIN} -o /dev/ttyS1 -j WRITE
+lidsconf -A POSTBOOT -s ${BIN} -o /dev/ttyS2 -j WRITE

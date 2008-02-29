@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** $TROLLTECH_DUAL_LICENSE$
 **
@@ -65,7 +65,7 @@ class KSprite : public QGraphicsPixmapItem
     virtual void expire() { }
     virtual void advance(int phase);
     virtual void advanceImage();
-    virtual int type() const { return 0; }
+    virtual int type() const=0;
     virtual bool isRock() const { return false; }
     virtual bool isLargeRock() const { return false; }
     virtual bool isMediumRock() const { return false; }
@@ -81,12 +81,11 @@ class KSprite : public QGraphicsPixmapItem
     virtual bool isBrakePowerup() const { return false; }
     virtual bool isShieldPowerup() const { return false; }
     virtual bool isShootPowerup() const { return false; }
-    virtual QList<QPixmap>& images() const = 0;
     virtual bool apply() const { return false; }
     virtual void markApply() { }
 
     int currentImage() const { return current_image_; }
-    int imageCount() const { return images().size(); }
+    int frameCount() const { return frames().size(); }
     void setImage(int index);
     void resetImage();
     void markDead() { dead_ = true; }
@@ -98,8 +97,11 @@ class KSprite : public QGraphicsPixmapItem
     qreal velocityY() const { return vy_; }
     void wrap();
 
- protected:
-    static QList<QPixmap>* images(int id);
+    void ensureCache() const;
+    // override
+    QPainterPath shape() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    QRectF boundingRect() const;
 
  public:
     static void reset();
@@ -111,30 +113,41 @@ class KSprite : public QGraphicsPixmapItem
     static KShip* ship() { return ship_; }
     static KShield* shield() { return shield_; }
     static KShip* newShip();
-    static bool dying() { return dying_; } 
+    static bool dying() { return dying_; }
     static void markDying(bool d) { dying_ = d; }
     static bool shipKilled();
 
  protected:
+    struct Frame {
+        QPixmap pixmap;
+        QPainterPath shape;
+        QRectF boundingRect;
+    };
+
+ protected:
     static bool				dying_;
     static bool				shipKilled_;
-    static KShip* 			ship_;
-    static KShield* 			shield_;
+    static KShip*			ship_;
+    static KShield*			shield_;
     static QGraphicsScene*		scene_;
     static KAsteroidsView*		view_;
-    static QMap<int,QList<QPixmap> >	map_; 
+    static QMap<int,QList<QPixmap> >	map_;
+    static QMap<int,QList<Frame> >	shapemap_;
 
  protected:
     bool	dead_;
-    int 	current_image_;
-    qreal 	vx_;
-    qreal 	vy_;
+    int	current_image_;
+    qreal	vx_;
+    qreal	vy_;
+
+    mutable const QList<Frame>* frameshape;
+    const QList<Frame>& frames() const;
 };
 
 class KAgingSprite : public KSprite
 {
  public:
-    KAgingSprite(int max) 
+    KAgingSprite(int max)
 	: KSprite(), currentAge_(0), maximumAge_(max) { }
     virtual ~KAgingSprite() { }
 
@@ -156,7 +169,6 @@ class KMissile : public KAgingSprite
 
     virtual int type() const { return ID_MISSILE; }
     virtual bool isMissile() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
 
     static int shotsFired() { return shotsFired_; }
@@ -164,9 +176,8 @@ class KMissile : public KAgingSprite
     static int missiles() { return missiles_; }
 
  protected:
-    static int 			shotsFired_;
-    static int 			missiles_;
-    static QList<QPixmap>*	images_;
+    static int			shotsFired_;
+    static int			missiles_;
 };
 
 class KFragment : public KAgingSprite
@@ -177,14 +188,12 @@ class KFragment : public KAgingSprite
 
     virtual int type() const {  return ID_FRAGMENT; }
     virtual bool isFragment() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
 
     static bool exploding() { return (count_ > 0); }
 
  protected:
     static int			count_;
-    static QList<QPixmap>* 	images_;
 };
 
 class KExhaust : public KAgingSprite
@@ -195,19 +204,15 @@ class KExhaust : public KAgingSprite
 
     virtual int type() const {  return ID_EXHAUST; }
     virtual bool isExhaust() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
 
     static void add(double x, double y, double dx, double dy, int count);
-
- protected:
-    static QList<QPixmap>* 	images_;
 };
 
 class KPowerup : public KAgingSprite
 {
  public:
-    KPowerup() : KAgingSprite(MAX_POWERUP_AGE), apply_(false)  { } 
+    KPowerup() : KAgingSprite(MAX_POWERUP_AGE), apply_(false)  { }
     virtual ~KPowerup() { }
 
     virtual bool isPowerup() const { return true; }
@@ -228,11 +233,7 @@ class KEnergyPowerup : public KPowerup
     virtual ~KEnergyPowerup() { }
     virtual int type() const { return ID_ENERGY_POWERUP; }
     virtual bool isEnergyPowerup() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
-    
- protected:
-    static QList<QPixmap>* 	images_;
 };
 
 class KTeleportPowerup : public KPowerup
@@ -242,11 +243,7 @@ class KTeleportPowerup : public KPowerup
     virtual ~KTeleportPowerup() { }
     virtual int type() const { return ID_TELEPORT_POWERUP; }
     virtual bool isTeleportPowerup() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
-
- protected:
-    static QList<QPixmap>* 	images_;
 };
 
 class KBrakePowerup : public KPowerup
@@ -256,11 +253,7 @@ class KBrakePowerup : public KPowerup
     virtual ~KBrakePowerup() { }
     virtual int type() const { return ID_BRAKE_POWERUP; }
     virtual bool isBrakePowerup() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
-    
- protected:
-    static QList<QPixmap>* 	images_;
 };
 
 class KShieldPowerup : public KPowerup
@@ -270,11 +263,7 @@ class KShieldPowerup : public KPowerup
     virtual ~KShieldPowerup() { }
     virtual int type() const { return ID_SHIELD_POWERUP; }
     virtual bool isShieldPowerup() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
-    
- protected:
-    static QList<QPixmap>* 	images_;
 };
 
 class KShootPowerup : public KPowerup
@@ -284,17 +273,13 @@ class KShootPowerup : public KPowerup
     virtual ~KShootPowerup() { }
     virtual int type() const { return ID_SHOOT_POWERUP; }
     virtual bool isShootPowerup() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
-    
- protected:
-    static QList<QPixmap>* 	images_;
 };
 
 class KRock : public KSprite
 {
  public:
-    KRock(); 
+    KRock();
     virtual ~KRock();
     virtual void advanceImage();
     virtual bool isRock() const { return true; }
@@ -310,15 +295,14 @@ class KRock : public KSprite
 
  protected:
     static int		rocksCreated_;
-    static int 		rocksDestroyed_;
+    static int		rocksDestroyed_;
     static bool		allRocksDestroyed_;
-    static double 	rockSpeed_;
-    
- protected:
-    int 		skip_;
-    int 		cskip_;
-    int 		step_;
+    static double	rockSpeed_;
 
+ protected:
+    int		skip_;
+    int		cskip_;
+    int		step_;
 };
 
 class KLargeRock : public KRock
@@ -329,11 +313,7 @@ class KLargeRock : public KRock
 
     virtual int type() const { return ID_ROCK_LARGE; }
     virtual bool isLargeRock() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
-
- protected:
-    static QList<QPixmap>* 	images_;
 };
 
 class KMediumRock : public KRock
@@ -344,11 +324,7 @@ class KMediumRock : public KRock
 
     virtual int type() const { return ID_ROCK_MEDIUM; }
     virtual bool isMediumRock() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
-
- protected:
-    static QList<QPixmap>* 	images_;
 };
 
 class KSmallRock : public KRock
@@ -359,11 +335,7 @@ class KSmallRock : public KRock
 
     virtual int type() const { return ID_ROCK_SMALL; }
     virtual bool isSmallRock() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
-
- protected:
-    static QList<QPixmap>* 	images_;
 };
 
 class KShield : public KSprite
@@ -374,11 +346,10 @@ class KShield : public KSprite
 
     virtual int type() const { return ID_SHIELD; }
     virtual bool isShield() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
 
     void resetPosition();
-    
+
     int  strength() const { return strength_; }
     void setStrength(int t) { strength_ = t; }
     void incrementStrength();
@@ -389,10 +360,7 @@ class KShield : public KSprite
     bool isUp() const { return isUp_; }
 
  protected:
-    static QList<QPixmap>* 	images_;
-
- protected:
-    bool 	isUp_;
+    bool	isUp_;
     int		strength_;
 };
 
@@ -404,7 +372,6 @@ class KShip : public KSprite
 
     virtual int type() const { return ID_SHIP; }
     virtual bool isShip() const { return true; }
-    virtual QList<QPixmap>& images() const { return *images_; }
     virtual void advance(int phase);
 
     void resetPosition();
@@ -444,36 +411,32 @@ class KShip : public KSprite
     static void reset();
 
  private:
-    void applyBrakes() { isBraking_ = true; } 
-    void releaseBrakes() { isBraking_ = false; } 
+    void applyBrakes() { isBraking_ = true; }
+    void releaseBrakes() { isBraking_ = false; }
     void explode();
 
  protected:
-    static QList<QPixmap>* 	images_;
-
- protected:
-    bool 	teleport_;
-    bool 	rotateLeft_;
-    bool 	rotateRight_;
-    bool 	engineIsOn_;
+    bool	teleport_;
+    bool	rotateLeft_;
+    bool	rotateRight_;
+    bool	engineIsOn_;
     bool	isBraking_;
-    bool 	isShooting_;
+    bool	isShooting_;
 
-    int 	powerLevel_;
-    int 	teleportCount_;
-    int 	angleIndex_;
-    int 	brakeForce_;
-    int 	firePower_;
-    int 	rotateSlow_;
-    int 	rotationRate_;
-    int 	nextShotDelay_;
+    int	powerLevel_;
+    int	teleportCount_;
+    int	angleIndex_;
+    int	brakeForce_;
+    int	firePower_;
+    int	rotateSlow_;
+    int	rotationRate_;
+    int	nextShotDelay_;
 
-    double 	dx_;
-    double 	dy_;
-    double 	angle_;
-    double 	cosangle_;
-    double 	sinangle_;
-
+    double	dx_;
+    double	dy_;
+    double	angle_;
+    double	cosangle_;
+    double	sinangle_;
 };
 
 #endif

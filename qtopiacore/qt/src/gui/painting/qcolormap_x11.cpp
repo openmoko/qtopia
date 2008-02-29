@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -24,7 +39,9 @@
 #include "qcolormap.h"
 
 #include "qapplication.h"
+#include "qdebug.h"
 #include "qdesktopwidget.h"
+#include "qvarlengtharray.h"
 
 #include "qx11info_x11.h"
 #include <private/qt_x11_p.h>
@@ -157,20 +174,18 @@ static void query_colormap(QColormapPrivate *d, int screen)
 
     d->colors.resize(q_colors);
     for (int x = 0; x < q_colors; ++x) {
-        d->colors[x] = QColor::fromRgbF(queried[x].red / float(USHRT_MAX),
-                                        queried[x].green / float(USHRT_MAX),
-                                        queried[x].blue / float(USHRT_MAX));
-
         if (queried[x].red == 0
             && queried[x].green == 0
             && queried[x].blue == 0
             && queried[x].pixel != BlackPixel(display, screen)) {
-            // end of colormap
-            q_colors = x;
-            break;
+            // unallocated color cell, skip it
+            continue;
         }
+
+        d->colors[x] = QColor::fromRgbF(queried[x].red / float(USHRT_MAX),
+                                        queried[x].green / float(USHRT_MAX),
+                                        queried[x].blue / float(USHRT_MAX));
     }
-    d->colors.resize(q_colors);
 
     // for missing colors, find the closest color in the existing colormap
     Q_ASSERT(d->pixels.size());
@@ -279,6 +294,40 @@ static void init_indexed(QColormapPrivate *d, int screen)
     }
 
     query_colormap(d, screen);
+}
+
+static void init_direct(QColormapPrivate *d, bool ownColormap)
+{
+    if (d->visual->c_class != DirectColor || !ownColormap)
+        return;
+
+    // preallocate 768 on the stack, so that we don't have to malloc
+    // for the common case (<= 24 bpp)
+    QVarLengthArray<XColor, 768> colorTable(d->r_max + d->g_max + d->b_max);
+    int i = 0;
+
+    for (int r = 0; r < d->r_max; ++r) {
+        colorTable[i].red = r << 8 | r;
+        colorTable[i].pixel = r << d->r_shift;
+        colorTable[i].flags = DoRed;
+        ++i;
+    }
+
+    for (int g = 0; g < d->g_max; ++g) {
+        colorTable[i].green = g << 8 | g;
+        colorTable[i].pixel = g << d->g_shift;
+        colorTable[i].flags = DoGreen;
+        ++i;
+    }
+
+    for (int b = 0; b < d->b_max; ++b) {
+        colorTable[i].blue = (b << 8 | b);
+        colorTable[i].pixel = b << d->b_shift;
+        colorTable[i].flags = DoBlue;
+        ++i;
+    }
+
+    XStoreColors(X11->display, d->colormap, colorTable.data(), colorTable.count());
 }
 
 /*!
@@ -474,17 +523,21 @@ void QColormap::initialize()
             }
         }
 
+        bool ownColormap = false;
         if (X11->colormap && i == DefaultScreen(display)) {
             // only use the outside colormap on the default screen
             d->colormap = X11->colormap;
             d->defaultColormap = (d->colormap == DefaultColormap(display, i));
-        } else if (((d->visual->c_class & 1) && X11->custom_cmap)
-                   || d->visual != DefaultVisual(display, i)) {
-            // allocate custom colormap
+        } else if (!use_stdcmap
+                   && (((d->visual->c_class & 1) && X11->custom_cmap)
+                       || d->visual != DefaultVisual(display, i))
+                       || d->visual->c_class == DirectColor) {
+            // allocate custom colormap (we always do this when using DirectColor visuals)
             d->colormap =
                 XCreateColormap(display, RootWindow(display, i), d->visual,
                                 d->visual->c_class == DirectColor ? AllocAll : AllocNone);
             d->defaultColormap = false;
+            ownColormap = true;
         }
 
         switch (d->mode) {
@@ -494,7 +547,8 @@ void QColormap::initialize()
         case Indexed:
             init_indexed(d, i);
             break;
-        default:
+        case Direct:
+            init_direct(d, ownColormap);
             break;
         }
 

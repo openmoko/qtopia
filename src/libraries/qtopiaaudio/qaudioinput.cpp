@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,6 +23,7 @@
 #include <qsocketnotifier.h>
 #include <qevent.h>
 #include <qapplication.h>
+#include <qtopialog.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -584,61 +585,65 @@ bool QAudioInputPrivate::open( QObject *input )
 
         snd_pcm_hw_params(handle, hwparams);
 
-        int                  dir;
-        unsigned int         vval, vval2;
-        snd_pcm_uframes_t    size;
-        snd_pcm_uframes_t    frames;
+        if (qtopiaLogEnabled("QAudioInput")) {
+            int                  dir;
+            unsigned int         vval, vval2;
+            snd_pcm_uframes_t    size;
+            snd_pcm_uframes_t    frames;
 
-        qDebug("QAudioInput: PCM handle name = '%s'\n",snd_pcm_name(handle));
-        qDebug("PCM state = %s",snd_pcm_state_name(snd_pcm_state(handle)));
-        snd_pcm_hw_params_get_access(hwparams,(snd_pcm_access_t *) &vval);
-        qDebug("access type = %s",snd_pcm_access_name((snd_pcm_access_t)vval));
-        snd_pcm_hw_params_get_format(hwparams, (snd_pcm_format_t *) &vval);
-        qDebug("format = '%s' (%s)",snd_pcm_format_name((snd_pcm_format_t)vval),
-                  snd_pcm_format_description((snd_pcm_format_t)vval));
-        snd_pcm_hw_params_get_subformat(hwparams,(snd_pcm_subformat_t *)&vval);
-        qDebug("subformat = '%s' (%s)",snd_pcm_subformat_name((snd_pcm_subformat_t)vval),
-                  snd_pcm_subformat_description((snd_pcm_subformat_t)vval));
-        snd_pcm_hw_params_get_channels(hwparams, &vval);
-        qDebug("channels = %d", vval);
-        snd_pcm_hw_params_get_rate(hwparams, &vval, &dir);
-        qDebug("rate = %d bps", vval);
-        snd_pcm_hw_params_get_period_time(hwparams,&vval, &dir);
-        qDebug("period time = %d us", vval);
-        snd_pcm_hw_params_get_period_size(hwparams,&frames, &dir);
-        qDebug("period size = %d frames", (int)frames);
-        snd_pcm_hw_params_get_buffer_time(hwparams,&vval, &dir);
-        qDebug("buffer time = %d us", vval);
-        snd_pcm_hw_params_get_buffer_size(hwparams,(snd_pcm_uframes_t *) &vval);
-        qDebug("buffer size = %d frames", vval);
-        snd_pcm_hw_params_get_periods(hwparams, &vval, &dir);
-        qDebug("periods per buffer = %d frames", vval);
-        snd_pcm_hw_params_get_rate_numden(hwparams, &vval, &vval2);
-        qDebug("exact rate = %d/%d bps", vval, vval2);
-        val = snd_pcm_hw_params_get_sbits(hwparams);
-        qDebug("significant bits = %d", vval);
-        snd_pcm_hw_params_get_tick_time(hwparams,&vval, &dir);
-        qDebug("tick time = %d us", vval);
-        vval = snd_pcm_hw_params_is_batch(hwparams);
-        qDebug("is batch = %d", vval);
-        vval = snd_pcm_hw_params_is_block_transfer(hwparams);
-        qDebug("is block transfer = %d", vval);
-        vval = snd_pcm_hw_params_is_double(hwparams);
-        qDebug("is double = %d", vval);
-        vval = snd_pcm_hw_params_is_half_duplex(hwparams);
-        qDebug("is half duplex = %d", vval);
-        vval = snd_pcm_hw_params_is_joint_duplex(hwparams);
-        qDebug("is joint duplex = %d", vval);
-        vval = snd_pcm_hw_params_can_overrange(hwparams);
-        qDebug("can overrange = %d", vval);
-        vval = snd_pcm_hw_params_can_mmap_sample_resolution(hwparams);
-        qDebug("can mmap = %d", vval);
-        vval = snd_pcm_hw_params_can_pause(hwparams);
-        qDebug("can pause = %d", vval);
-        vval = snd_pcm_hw_params_can_resume(hwparams);
-        qDebug("can resume = %d", vval);
-        vval = snd_pcm_hw_params_can_sync_start(hwparams);
-        qDebug("can sync start = %d", vval);
+            qLog(QAudioInput) << "PCM handle name =" << snd_pcm_name(handle);
+            qLog(QAudioInput) << "PCM state =" << snd_pcm_state_name(snd_pcm_state(handle));
+            snd_pcm_hw_params_get_access(hwparams,(snd_pcm_access_t *) &vval);
+            qLog(QAudioInput) << "access type =" << snd_pcm_access_name((snd_pcm_access_t)vval);
+            snd_pcm_hw_params_get_format(hwparams, (snd_pcm_format_t *) &vval);
+            qLog(QAudioInput) << QString("format = '%1' (%2)").arg(snd_pcm_format_name((snd_pcm_format_t)vval))
+                                                              .arg(snd_pcm_format_description((snd_pcm_format_t)vval))
+                                                              .toLatin1().constData();
+            snd_pcm_hw_params_get_subformat(hwparams,(snd_pcm_subformat_t *)&vval);
+            qLog(QAudioInput) << QString("subformat = '%1' (%2)").arg(snd_pcm_subformat_name((snd_pcm_subformat_t)vval))
+                                                                 .arg(snd_pcm_subformat_description((snd_pcm_subformat_t)vval))
+                                                                 .toLatin1().constData();
+            snd_pcm_hw_params_get_channels(hwparams, &vval);
+            qLog(QAudioInput) << "channels =" << vval;
+            snd_pcm_hw_params_get_rate(hwparams, &vval, &dir);
+            qLog(QAudioInput) << "rate =" << vval << "bps";
+            snd_pcm_hw_params_get_period_time(hwparams,&vval, &dir);
+            qLog(QAudioInput) << "period time =" << vval << "us";
+            snd_pcm_hw_params_get_period_size(hwparams,&frames, &dir);
+            qLog(QAudioInput) << "period size =" << (int)frames << "frames";
+            snd_pcm_hw_params_get_buffer_time(hwparams,&vval, &dir);
+            qLog(QAudioInput) << "buffer time =" << vval << "us";
+            snd_pcm_hw_params_get_buffer_size(hwparams,(snd_pcm_uframes_t *) &vval);
+            qLog(QAudioInput) << "buffer size =" << vval << "frames";
+            snd_pcm_hw_params_get_periods(hwparams, &vval, &dir);
+            qLog(QAudioInput) << "periods per buffer =" << vval << "frames";
+            snd_pcm_hw_params_get_rate_numden(hwparams, &vval, &vval2);
+            qLog(QAudioInput) << QString("exact rate = %1/%2 bps").arg(vval).arg(vval2).toLatin1().constData();
+            val = snd_pcm_hw_params_get_sbits(hwparams);
+            qLog(QAudioInput) << "significant bits =" << vval;
+            snd_pcm_hw_params_get_tick_time(hwparams,&vval, &dir);
+            qLog(QAudioInput) << "tick time =" << vval << "us";
+            vval = snd_pcm_hw_params_is_batch(hwparams);
+            qLog(QAudioInput) << "is batch =" << vval;
+            vval = snd_pcm_hw_params_is_block_transfer(hwparams);
+            qLog(QAudioInput) << "is block transfer =" << vval;
+            vval = snd_pcm_hw_params_is_double(hwparams);
+            qLog(QAudioInput) << "is double =" << vval;
+            vval = snd_pcm_hw_params_is_half_duplex(hwparams);
+            qLog(QAudioInput) << "is half duplex =" << vval;
+            vval = snd_pcm_hw_params_is_joint_duplex(hwparams);
+            qLog(QAudioInput) << "is joint duplex =" << vval;
+            vval = snd_pcm_hw_params_can_overrange(hwparams);
+            qLog(QAudioInput) << "can overrange =" << vval;
+            vval = snd_pcm_hw_params_can_mmap_sample_resolution(hwparams);
+            qLog(QAudioInput) << "can mmap =" << vval;
+            vval = snd_pcm_hw_params_can_pause(hwparams);
+            qLog(QAudioInput) << "can pause =" << vval;
+            vval = snd_pcm_hw_params_can_resume(hwparams);
+            qLog(QAudioInput) << "can resume =" << vval;
+            vval = snd_pcm_hw_params_can_sync_start(hwparams);
+            qLog(QAudioInput) << "can sync start =" << vval;
+        }
 
         // Prepare for audio input.
         snd_pcm_prepare(handle);

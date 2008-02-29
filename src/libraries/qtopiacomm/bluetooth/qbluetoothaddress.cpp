@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,7 @@
 
 #include <qbluetoothaddress.h>
 #include <qhash.h>
+#include <qsettings.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -31,7 +32,7 @@
     \brief The QBluetoothAddress class represents a bluetooth address.
 
     Each Bluetooth device can have one and only one address.  There are certain
-    special addresses defined.  Namely \c{any}, \c{local}, \c{all}.
+    special addresses defined, namely \c{any}, \c{local}, \c{all}.
 
     The Bluetooth address can be constructed from a string representation.
     For instance,
@@ -47,13 +48,35 @@
     \sa QBluetoothLocalDevice, QBluetoothRemoteDevice
  */
 
+
+static QChar getAddressSeparator()
+{
+    QSettings settings("Trolltech", "Bluetooth");
+    QString sep = settings.value("AddressSeparatorChar").toString();
+    if (sep.isEmpty())
+        return ':';
+    return sep[0].toAscii();
+}
+
+static QString constructAddress(char sep, const char *pt1, const char *pt2, const char *pt3, const char *pt4, const char *pt5, const char *pt6)
+{
+    size_t bufSize = 18;
+    char buf[bufSize];
+    ::snprintf(buf, bufSize, "%s%c%s%c%s%c%s%c%s%c%s",
+            pt1, sep, pt2, sep, pt3, sep, pt4, sep, pt5, sep, pt6);
+    return QString::fromAscii(buf);
+}
+
+static const char SEPARATOR = getAddressSeparator().toAscii();
+
+
 /*!
     Constructs a new invalid bluetooth address.
  */
 QBluetoothAddress::QBluetoothAddress()
 {
     m_valid = false;
-    m_bdaddr = "00:00:00:00:00:00";
+    m_bdaddr = constructAddress(SEPARATOR, "00", "00", "00", "00", "00", "00");
 }
 
 /*!
@@ -78,15 +101,27 @@ QBluetoothAddress::QBluetoothAddress(const QString &addr)
     QByteArray asciiArr = addr.toAscii();
     const char *buf = asciiArr.constData();
 
-    if (sscanf(buf, "%x:%x:%x:%x:%x:%x",
-        &baddr[0], &baddr[1], &baddr[2], &baddr[3], &baddr[4], &baddr[5]) == 6) {
+    static const QByteArray defaultSepFormatStr =
+            constructAddress(SEPARATOR, "%x", "%x", "%x", "%x", "%x", "%x").toAscii();
+
+    if ( (sscanf(buf, defaultSepFormatStr.constData(),
+            &baddr[0], &baddr[1], &baddr[2], &baddr[3], &baddr[4], &baddr[5]) == 6) ||
+         (sscanf(buf, "%x:%x:%x:%x:%x:%x",
+            &baddr[0], &baddr[1], &baddr[2], &baddr[3], &baddr[4], &baddr[5]) == 6) ||
+         (sscanf(buf, "%x-%x-%x-%x-%x-%x",
+            &baddr[0], &baddr[1], &baddr[2], &baddr[3], &baddr[4], &baddr[5]) == 6) ) {
         m_valid = true;
         m_bdaddr = addr;
+
+        // force strings to use the default separator
+        if (addr[2] != SEPARATOR) {
+            m_bdaddr.replace(addr[2], SEPARATOR);
+        }
     }
     else {
         m_valid = false;
         m_bdaddr = QBluetoothAddress::invalid.m_bdaddr;
-    }
+    };
 }
 
 /*!
@@ -149,19 +184,22 @@ const QBluetoothAddress QBluetoothAddress::invalid = QBluetoothAddress();
     \variable QBluetoothAddress::any
     Bluetooth address that represents a special address \bold any
 */
-const QBluetoothAddress QBluetoothAddress::any = QBluetoothAddress("00:00:00:00:00:00");
+const QBluetoothAddress QBluetoothAddress::any = QBluetoothAddress(
+        constructAddress(SEPARATOR, "00", "00", "00", "00", "00", "00"));
 
 /*!
     \variable QBluetoothAddress::all
     Bluetooth address that represents a special address \bold all
  */
-const QBluetoothAddress QBluetoothAddress::all = QBluetoothAddress("FF:FF:FF:FF:FF:FF");
+const QBluetoothAddress QBluetoothAddress::all = QBluetoothAddress(
+        constructAddress(SEPARATOR, "FF", "FF", "FF", "FF", "FF", "FF"));
 
 /*!
     \variable QBluetoothAddress::local
     Bluetooth address that represents a special address \bold local
 */
-const QBluetoothAddress QBluetoothAddress::local = QBluetoothAddress("00:00:00:FF:FF:FF");
+const QBluetoothAddress QBluetoothAddress::local = QBluetoothAddress(
+        constructAddress(SEPARATOR, "00", "00", "00", "FF", "FF", "FF"));
 
 /*!
     \fn bool QBluetoothAddress::operator!=(const QBluetoothAddress &other) const
@@ -170,6 +208,15 @@ const QBluetoothAddress QBluetoothAddress::local = QBluetoothAddress("00:00:00:F
     Returns true if the addresses are not equal, false if they are.
 */
 
+/*!
+    \internal
+*/
+uint qHash(const QBluetoothAddress &addr)
+{
+    return qHash(addr.m_bdaddr);
+}
+
+#ifdef QTOPIA_BLUETOOTH
 /*!
     \internal
     \fn void QBluetoothAddress::serialize(Stream &stream) const
@@ -190,12 +237,6 @@ template <typename Stream> void QBluetoothAddress::deserialize(Stream &stream)
     stream >> m_valid;
 }
 
-/*!
-    \internal
-*/
-uint qHash(const QBluetoothAddress &addr)
-{
-    return qHash(addr.m_bdaddr);
-}
-
 Q_IMPLEMENT_USER_METATYPE(QBluetoothAddress)
+
+#endif

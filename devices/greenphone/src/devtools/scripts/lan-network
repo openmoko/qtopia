@@ -22,7 +22,7 @@ DEBUG=1
 LOG=0
 LOG_FILE="/tmp/qtopia-network.log"
 TMP_FILE="/tmp/lan-intern-network.temp";
-RESOLVCONF="/mnt/user/etc/resolv.conf"
+RESOLVCONF="/etc/resolv.conf"
 ###############################
 
 
@@ -54,6 +54,17 @@ print_options()
     echo "route     <iface name> [-gw <gateway IP>] -> the given interface becomes the default gateway for IP traffic (don't pass gateway IP if DHCP used)";
         
     exit 1;
+}
+
+update_hosts()
+{
+    TMPHOSTS=$(mktemp /etc/hosts.XXXXXX)
+    awk -v interface=$1 -v ipaddress=$2 '
+        BEGIN {done = 0}
+        $2 == interface {printf "%s\t%s\n", ipaddress, $2 ; done = 1}
+        $2 != interface {print $0}
+        END { if (done == 0) printf "%s\t%s\n", ipaddress, interface }' /etc/hosts > $TMPHOSTS
+    mv -f $TMPHOSTS /etc/hosts
 }
 
 
@@ -206,6 +217,17 @@ install()
                             WPA-PSK)
                                 shift;
                                 echo "WIRELESS_PSK=$1" >> $NET_OPTIONS
+                                shift;
+                                case "$1" in
+                                    TKIP)
+                                        echo "WIRELESS_PAIRWISE=TKIP" >> $NET_OPTIONS
+                                        echo "WIRELESS_GROUP=TKIP" >> $NET_OPTIONS
+                                        ;;
+                                    AES)
+                                        echo "WIRELESS_PAIRWISE=CCMP" >> $NET_OPTIONS
+                                        echo "WIRELESS_GROUP=CCMP" >> $NET_OPTIONS
+                                        ;;
+                                esac
                                 ;;
                             WPA-EAP)
                                 shift;
@@ -251,12 +273,13 @@ start()
         [ -n "$WIRELESS_ESSID" ] && echo "    ssid=\"$WIRELESS_ESSID\"" >> $WPACONF
         echo "    proto=WPA2 WPA RSN" >> $WPACONF
         [ -n "$WIRELESS_AUTH_MODE" ] && echo "    key_mgmt=$WIRELESS_AUTH_MODE" >> $WPACONF
-        echo "    pairwise=CCMP TKIP" >> $WPACONF
-        echo "    group=CCMP TKIP" >> $WPACONF
+        [ -n "$WIRELESS_PAIRWISE" ] && echo "    pairwise=$WIRELESS_PAIRWISE" >> $WPACONF
+        [ -n "$WIRELESS_GROUP" ] && echo "    group=$WIRELESS_GROUP" >> $WPACONF
         [ -n "$WIRELESS_PSK" ] && echo "    psk=\"$WIRELESS_PSK\"" >> $WPACONF
         echo "}" >> $WPACONF
         
         ifconfig $1 down
+        ifconfig $1 hw ether $(/usr/bin/tat localmac)
         ifconfig $1 up
 
         if [ "$WIRELESS_ESSID" != "" ]; then
@@ -283,8 +306,9 @@ start()
             iwconfig $1 channel $WIRELESS_CHANNEL
         fi
         
-        if [ "$WIRELESS_AUTH_MODE" = "WPA-PSK" ]; then
-            /sbin/wpa_supplicant -i $1 -D socketcf -c $WPACONF -B
+        if [ "$WIRELESS_AUTH_MODE" = "WPA-PSK" ] ||
+           [ "$WIRELESS_AUTH_MODE" = "WPA-EAP" ]; then
+            /sbin/wpa_supplicant -i $1 -D socketcf -c $WPACONF -dd | logger -t WPA &
         fi
     fi
     
@@ -298,8 +322,13 @@ start()
             ;;
         static)
             /sbin/ifconfig $1 netmask $NETMASK broadcast $BROADCAST $IPADDR up
-            /sbin/route del default 2>/dev/null
-            /sbin/route add default gw $GATEWAY
+
+            if [ "$1" = "eth0" ]; then
+                update_hosts greenphone $IPADDR
+            else
+                update_hosts greenphone-$1 $IPADDR
+            fi
+            /etc/rc.d/rc.inetd reload
             ;;
         *)
             ;;

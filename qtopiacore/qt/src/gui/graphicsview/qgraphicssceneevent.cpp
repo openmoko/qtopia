@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,7 +47,7 @@
     drop events (QMouseEvent, QKeyEvent, QDragEvent, etc.), it
     translates them into instances of QGraphicsSceneEvent subclasses
     and forwards them to the QGraphicsScene it displays. The scene
-    then forwards the events to the relevent items.
+    then forwards the events to the relevant items.
 
     For example, when a QGraphicsView receives a QMouseEvent of type
     MousePress as a response to a user click, the view sends a
@@ -88,14 +103,15 @@
     \class QGraphicsSceneWheelEvent
     \brief The QGraphicsSceneWheelEvent class provides wheel events 
 	   in the graphics view framework.
+    \brief The QGraphicsSceneWheelEvent class provides wheel events in the
+    graphics view framework.
     \since 4.2
     \ingroup multimedia
 
-    \l{QWheelEvent}{QWheelEvent}s received by a QGraphicsView are
-    translated into
-    \l{QGraphicsSceneWheelEvent}{QGraphicsSceneWheelEvents}. The
-    QWheelEvent::globalPos() is translated into item, scene, and
-    screen coordinates (pos(), scenePos(), and screenPos()).
+    \l{QWheelEvent}{QWheelEvent}s received by a QGraphicsView are translated
+    into QGraphicsSceneWheelEvents; it translates the QWheelEvent::globalPos()
+    into item, scene, and screen coordinates (pos(), scenePos(), and
+    screenPos()).
 
     \sa QGraphicsSceneMouseEvent, QGraphicsSceneContextMenuEvent,
     QGraphicsSceneHoverEvent, QWheelEvent
@@ -114,7 +130,7 @@
     screen coordinates (pos(), scenePos(), and screenPos()).
 
     \sa QGraphicsSceneMouseEvent, QGraphicsSceneWheelEvent,
-    QGraphicsSceneContextMenuEvent, QContextMenuEvent
+    QContextMenuEvent
 */
 
 /*!
@@ -143,8 +159,8 @@
     it into QGraphicsSceneHoverEvent. The event is then forwarded to
     the QGraphicsScene associated with the view.
 
-    \sa QGraphicsSceneMouseEvent, QGraphicsViewContextMenuEvent,
-    QGraphicsSceneWheelEvent, QHoverEvent
+    \sa QGraphicsSceneMouseEvent, QGraphicsSceneContextMenuEvent,
+        QGraphicsSceneWheelEvent, QHoverEvent
 */
 
 /*!
@@ -253,8 +269,6 @@ QGraphicsSceneEvent::~QGraphicsSceneEvent()
 /*!
     Returns the widget where the event originated, or 0 if the event
     originates from another application.
-
-    \sa setWidget()
 */
 QWidget *QGraphicsSceneEvent::widget() const
 {
@@ -458,9 +472,10 @@ void QGraphicsSceneMouseEvent::setLastPos(const QPointF &pos)
 }
 
 /*!
-    Returns the last recorded, the scene coordinates of the
-    previous mouse event received by the view, that created the
-    event mouse cursor position in scene coordinates.
+    Returns the last recorded mouse cursor position in scene 
+    coordinates. The last recorded position is the position of
+    the previous mouse event received by the view that created
+    the event.
 
     \sa lastPos(), lastScreenPos(), scenePos()
 */
@@ -569,7 +584,7 @@ class QGraphicsSceneWheelEventPrivate : public QGraphicsSceneEventPrivate
     Q_DECLARE_PUBLIC(QGraphicsSceneWheelEvent)
 public:
     inline QGraphicsSceneWheelEventPrivate()
-        : buttons(0), modifiers(0), delta(0)
+        : buttons(0), modifiers(0), delta(0), orientation(Qt::Horizontal)
     { }
 
     QPointF pos;
@@ -578,6 +593,7 @@ public:
     Qt::MouseButtons buttons;
     Qt::KeyboardModifiers modifiers;
     int delta;
+    Qt::Orientation orientation;
 };
 
 /*!
@@ -602,7 +618,7 @@ QGraphicsSceneWheelEvent::~QGraphicsSceneWheelEvent()
     Returns the position of the cursor in item coordinates when the
     wheel event occurred.
 
-    \sa setPos(), scenePos(), screenPos()
+    \sa scenePos(), screenPos()
 */
 QPointF QGraphicsSceneWheelEvent::pos() const
 {
@@ -623,7 +639,7 @@ void QGraphicsSceneWheelEvent::setPos(const QPointF &pos)
     Returns the position of the cursor in item coordinates when the wheel
     event occurred.
 
-    \sa setScenePos(), pos(), screenPos()
+    \sa pos(), screenPos()
 */
 QPointF QGraphicsSceneWheelEvent::scenePos() const
 {
@@ -644,7 +660,7 @@ void QGraphicsSceneWheelEvent::setScenePos(const QPointF &pos)
     Returns the position of the cursor in screen coordinates when the wheel
     event occurred.
 
-    \sa setScreenPos(), pos(), scenePos()
+    \sa pos(), scenePos()
 */
 QPoint QGraphicsSceneWheelEvent::screenPos() const
 {
@@ -664,7 +680,7 @@ void QGraphicsSceneWheelEvent::setScreenPos(const QPoint &pos)
 /*!
     Returns the mouse buttons that were pressed when the wheel event occurred.
 
-    \sa setButtons(), modifiers()
+    \sa modifiers()
 */
 Qt::MouseButtons QGraphicsSceneWheelEvent::buttons() const
 {
@@ -685,7 +701,7 @@ void QGraphicsSceneWheelEvent::setButtons(Qt::MouseButtons buttons)
     Returns the keyboard modifiers that were active when the wheel event
     occurred.
 
-    \sa setModifiers(), buttons()
+    \sa buttons()
 */
 Qt::KeyboardModifiers QGraphicsSceneWheelEvent::modifiers() const
 {
@@ -710,8 +726,6 @@ void QGraphicsSceneWheelEvent::setModifiers(Qt::KeyboardModifiers modifiers)
 
     Most mouse types work in steps of 15 degrees, in which case the delta
     value is a multiple of 120 (== 15 * 8).
-
-    \sa setDelta()
 */
 int QGraphicsSceneWheelEvent::delta() const
 {
@@ -726,6 +740,24 @@ void QGraphicsSceneWheelEvent::setDelta(int delta)
 {
     Q_D(QGraphicsSceneWheelEvent);
     d->delta = delta;
+}
+
+/*!
+    Returns the wheel orientation.
+*/
+Qt::Orientation QGraphicsSceneWheelEvent::orientation() const
+{
+    Q_D(const QGraphicsSceneWheelEvent);
+    return d->orientation;
+}
+
+/*!
+    \internal
+*/
+void QGraphicsSceneWheelEvent::setOrientation(Qt::Orientation orientation)
+{
+    Q_D(QGraphicsSceneWheelEvent);
+    d->orientation = orientation;
 }
 
 class QGraphicsSceneContextMenuEventPrivate : public QGraphicsSceneEventPrivate
@@ -859,7 +891,7 @@ void QGraphicsSceneContextMenuEvent::setModifiers(Qt::KeyboardModifiers modifier
 /*!
     Returns the reason for the context menu event.
 
-    \sa setReason(), QGraphicsContextMenu::Reason
+    \sa QGraphicsSceneContextMenuEvent::Reason
 */
 QGraphicsSceneContextMenuEvent::Reason QGraphicsSceneContextMenuEvent::reason() const
 {
@@ -1171,7 +1203,7 @@ void QGraphicsSceneDragDropEvent::setScreenPos(const QPoint &pos)
     were pressed on the mouse when this mouse event was
     generated.
 
-    \sa Qt::MouseButtons, button()
+    \sa Qt::MouseButtons
 */
 Qt::MouseButtons QGraphicsSceneDragDropEvent::buttons() const
 {
@@ -1337,7 +1369,7 @@ QWidget *QGraphicsSceneDragDropEvent::source() const
 /*!
     \internal
     This function set the source widget, i.e., the widget that
-    created the drop event, to \source.
+    created the drop event, to \a source.
 */
 void QGraphicsSceneDragDropEvent::setSource(QWidget *source)
 {

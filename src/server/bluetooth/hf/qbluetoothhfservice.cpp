@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -125,6 +125,8 @@ public:
     (phone) and the Bluetooth Audio headset.  This class
     implements the Bluetooth Handsfree Audio Gateway as defined
     in the Handsfree Bluetooth Profile specification.
+  
+    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 */
 
 /*!
@@ -221,9 +223,9 @@ bool QBluetoothHandsfreeService::audioGatewayInitialized()
     QByteArray audioDev = find_btsco_device("Handsfree");
 
     if (audioDev.isEmpty()) {
-        qWarning("No headset audio devices available...");
+        qWarning("No handsfree audio devices available...");
     }
-    else if (!bt_sco_open(&m_data->m_audioDev, audioDev.constData()) < 0) {
+    else if (!bt_sco_open(&m_data->m_audioDev, audioDev.constData())) {
         qWarning("Unable to open audio device: %s", audioDev.constData());
     }
 
@@ -307,10 +309,8 @@ void QBluetoothHandsfreeService::stop()
 */
 void QBluetoothHandsfreeService::setSecurityOptions(QBluetooth::SecurityOptions options)
 {
-    qDebug() << "SetSecurityOptions for Handsfree service got called" << options;
     m_data->m_securityOptions = options;
     if (m_data->m_server->isListening()) {
-        qDebug() << "Setting security options to server socket";
         m_data->m_server->setSecurityOptions(options);
     }
 }
@@ -330,6 +330,7 @@ void QBluetoothHandsfreeService::sessionOpen()
         if (!ret) {
             delete m_data->m_client;
             m_data->m_client = 0;
+            m_data->m_session->endSession();
             emit connectResult(false, tr("Connect failed."));
             return;
         }
@@ -415,10 +416,17 @@ void QBluetoothHandsfreeService::connect(const QBluetoothAddress &addr,
 */
 void QBluetoothHandsfreeService::disconnect()
 {
-    // We have connected, but not setup the tty yet
+    // We are connecting/have connected, but not setup the tty yet
     if (m_data->m_client &&
-        (m_data->m_client->state() == QBluetoothRfcommSocket::ConnectedState)) {
+        (m_data->m_client->state() == QBluetoothRfcommSocket::ConnectedState ||
+        m_data->m_client->state() == QBluetoothRfcommSocket::ConnectingState))
+    {
+        m_data->m_connectInProgress = false;
         m_data->m_client->disconnect();
+        delete m_data->m_client;
+        m_data->m_client = 0;
+        m_data->m_session->endSession();
+        emit disconnected();
         return;
     }
 
@@ -529,19 +537,8 @@ void QBluetoothHandsfreeService::scoStateChanged(QBluetoothAbstractSocket::Socke
         case QBluetoothRfcommSocket::ConnectingState:
             break;
         case QBluetoothRfcommSocket::ConnectedState:
-            // This is gonna be ugly...
-            m_data->m_scofd = dup(m_data->m_scoSocket->socketDescriptor());
-            ::fcntl(m_data->m_scofd, F_SETFD, FD_CLOEXEC);
-
-            // Disconnect the signals
-            m_data->m_scoSocket->QObject::disconnect();
-            delete m_data->m_scoSocket;
+            scoConnectionEstablished(m_data->m_scoSocket);
             m_data->m_scoSocket = 0;
-
-            if (m_data->m_audioDev)
-                bt_sco_set_fd(m_data->m_audioDev, m_data->m_scofd);
-            m_data->m_interface->setValue("AudioEnabled", true);
-            emit audioStateChanged();
             break;
         case QBluetoothRfcommSocket::ClosingState:
             break;
@@ -644,8 +641,6 @@ bool QBluetoothHandsfreeService::doConnectAudio()
 */
 void QBluetoothHandsfreeService::newConnection()
 {
-    qDebug() << "New Connection to QBluetoothHandsfreeService";
-
     // New client has connected
     QBluetoothRfcommSocket *socket =
         static_cast<QBluetoothRfcommSocket *>(m_data->m_server->nextPendingConnection());
@@ -670,7 +665,8 @@ void QBluetoothHandsfreeService::newConnection()
 
     setupTty(socket, true);
 
-    m_data->m_session->startSession();
+    if (m_data->m_activeClient)
+        m_data->m_session->startSession();
 }
 
 /*!
@@ -699,6 +695,8 @@ void QBluetoothHandsfreeService::stateChanged(QBluetoothAbstractSocket::SocketSt
         case QBluetoothRfcommSocket::ConnectedState:
             setupTty(m_data->m_client, false);
             m_data->m_client = 0;
+            if (!m_data->m_activeClient)
+                m_data->m_session->endSession();
             break;
 
         case QBluetoothRfcommSocket::ClosingState:
@@ -711,6 +709,7 @@ void QBluetoothHandsfreeService::stateChanged(QBluetoothAbstractSocket::SocketSt
                 emit connectResult(false, "Connection failed.");
                 m_data->m_client->deleteLater();
                 m_data->m_client = 0;
+                m_data->m_session->endSession();
             }
 
             break;
@@ -770,7 +769,7 @@ bool QBluetoothHandsfreeService::setupTty(QBluetoothRfcommSocket *socket, bool i
     m_data->m_activeClient = 0;
     qWarning("Could not create tty device!!");
 
-    if (incoming)
+    if (!incoming)
         emit connectResult(false, "Unable to setup TTY port");
 
     return false;
@@ -787,6 +786,25 @@ bool QBluetoothHandsfreeService::canConnectAudio()
 /*!
     \internal
 */
+void QBluetoothHandsfreeService::scoConnectionEstablished(QBluetoothScoSocket *socket)
+{
+    // This is gonna be ugly...
+    m_data->m_scofd = dup(socket->socketDescriptor());
+    ::fcntl(m_data->m_scofd, F_SETFD, FD_CLOEXEC);
+
+    // Disconnect the signals
+    socket->QObject::disconnect();
+    delete socket;
+
+    if (m_data->m_audioDev)
+        bt_sco_set_fd(m_data->m_audioDev, m_data->m_scofd);
+    m_data->m_interface->setValue("AudioEnabled", true);
+    emit audioStateChanged();
+}
+
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::newScoConnection()
 {
     qLog(Bluetooth) << "QBluetoothHandsfreeService::New Sco Connection hint";
@@ -795,8 +813,8 @@ void QBluetoothHandsfreeService::newScoConnection()
     QBluetoothScoSocket *socket =
         static_cast<QBluetoothScoSocket *>(m_data->m_scoServer->nextPendingConnection());
 
-    if (m_data->m_scoSocket) {
-        qWarning("Voice connection already active, closing.");
+    if ((m_data->m_scofd != -1) || (m_data->m_scoSocket)) {
+        qWarning("Voice connection already active, closing");
         delete socket;
         return;
     }
@@ -813,7 +831,7 @@ void QBluetoothHandsfreeService::newScoConnection()
         return;
     }
 
-    m_data->m_scoSocket = socket;
+    scoConnectionEstablished(socket);
 }
 
 /*!
@@ -864,6 +882,8 @@ public:
     implementation of the QBluetoothAudioGateway interface
     which forwards all calls to the implementation object,
     which is passed in the constructor.
+  
+    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 */
 
 /*!
@@ -879,10 +899,10 @@ QBluetoothHandsfreeCommInterface::QBluetoothHandsfreeCommInterface(const QByteAr
     m_data->m_gatewayServer = new QBluetoothHandsfreeAudioGatewayServer(this, audioDev,
             parent->name());
 
-    QObject::connect(parent, SIGNAL(connectResult(bool, const QString &)),
-                     SIGNAL(connectResult(bool, const QString &)));
-    QObject::connect(parent, SIGNAL(newConnection(const QBluetoothAddress &)),
-                     SIGNAL(newConnection(const QBluetoothAddress &)));
+    QObject::connect(parent, SIGNAL(connectResult(bool,QString)),
+                     SIGNAL(connectResult(bool,QString)));
+    QObject::connect(parent, SIGNAL(newConnection(QBluetoothAddress)),
+                     SIGNAL(newConnection(QBluetoothAddress)));
     QObject::connect(parent, SIGNAL(disconnected()),
                      SIGNAL(disconnected()));
     QObject::connect(parent, SIGNAL(speakerVolumeChanged()),

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -52,7 +52,6 @@ protected:
 private slots:
     void changePassCode();
     void clearPassCode();
-    void setSyncNet(const QString&);
 
     void markProtected(bool);
     void updateGUI();
@@ -62,12 +61,6 @@ private slots:
     void phoneLockDone(bool success);
 
 private:
-    bool telnetAvailable() const;
-    bool sshAvailable() const;
-
-    static bool parseNet(const QString& sn,int& auth_peer,int& auth_peer_bits);
-    void selectNet(int auth_peer,int auth_peer_bits);
-
     QString enterPassCode(const QString&, bool encrypt = true, bool last = true);
     QString passcode;
     bool valid;

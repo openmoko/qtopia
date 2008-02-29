@@ -1,6 +1,14 @@
 exists($$QPEDIR/src/build/trace_on):message(default_post.prf)
 # Setup the post processing
 
+syncqtopia {
+    # This file ensures that dependencies are correctly created between headers in a library
+    # and code in that library. It is changed when headers are installed and this change
+    # causes qmake to parse the .pro file again, this time seeing the newly-installed headers.
+    exists($$OUT_PWD/syncqtopia.pri):include($$OUT_PWD/syncqtopia.pri)
+    else:error(Missing $$OUT_PWD/syncqtopia.pri)
+}
+
 # debug_and_release breaks our build system
 CONFIG-=debug_and_release
 
@@ -33,7 +41,10 @@ part_of_qtopia:!desktop:enable_singleexec:CONFIG+=singleexec
 
 # Mandatory targets
 QMAKE_EXTRA_TARGETS*=lupdate packages syncqtopia first_syncqtopia
-!equals(QTOPIA_SDKROOT,$$QPEDIR):QMAKE_EXTRA_TARGETS+=sdk
+!equals(QTOPIA_SDKROOT,$$QPEDIR) {
+    QMAKE_EXTRA_TARGETS+=sdk
+    create_raw_dependency(.PHONY,sdk)
+}
 
 !subdirs {
     # Set the default license

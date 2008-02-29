@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt Tutorial 8 - Preparing for Battle</title>
+  <title>Qt 4.3: Qt Tutorial 8 - Preparing for Battle</title>
   <link rel="prev" href="tutorial-t7.html" />
   <link rel="contents" href="tutorial.html" />
   <link rel="next" href="tutorial-t9.html" />
@@ -19,7 +19,8 @@
 [<a href="tutorial.html">Qt Tutorial</a>]
 [Next: <a href="tutorial-t9.html">Chapter 9</a>]
 </p>
-<h1 align="center">Qt Tutorial 8 - Preparing for Battle<br /><small></small></h1>
+<h1 align="center">Qt Tutorial 8 - Preparing for Battle<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="tutorial-t8-cannonfield-cpp.html">tutorial/t8/cannonfield.cpp</a></li>
@@ -71,7 +72,7 @@
 <p>For the time being, <tt>CannonField</tt> only contains an angle value for which we provide an interface using the same idiom as for value in <tt>LCDRange</tt>.</p>
 <pre> protected:
      void paintEvent(QPaintEvent *event);</pre>
-<p>This is the second of the many event handlers in <a href="qwidget.html">QWidget</a> that we encounter. This virtual function is called by Qt whenever a widget needs to update itself (i.e., paint the widget's surface).</p>
+<p>This is the second of the many event handlers in <a href="qwidget.html">QWidget</a> that we encounter. This virtual function is called by Qt whenever a widget needs to update itself (i.e&#x2e;, paint the widget's surface).</p>
 <a name="t8-cannonfield-cpp"></a>
 <h3><a href="tutorial-t8-cannonfield-cpp.html">t8/cannonfield.cpp</a></h3>
 <pre> CannonField::CannonField(QWidget *parent)
@@ -140,7 +141,7 @@
 </table></p>
 <p>The diagram above shows the layout we're trying to achieve. The left side shows a schematic view of the layout; the right side is an actual screenshot of the program.</p>
 <pre>     gridLayout-&gt;addWidget(quit, 0, 0);</pre>
-<p>We add the <b>Quit</b> button in the top-left cell of the grid, i.e., the cell with coordinates (0, 0).</p>
+<p>We add the <b>Quit</b> button in the top-left cell of the grid, i.e&#x2e;, the cell with coordinates (0, 0).</p>
 <pre>     gridLayout-&gt;addWidget(angle, 1, 0);</pre>
 <p>We put the angle <tt>LCDRange</tt> cell (1, 0).</p>
 <pre>     gridLayout-&gt;addWidget(cannonField, 1, 1, 2, 1);</pre>
@@ -175,6 +176,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

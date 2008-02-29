@@ -77,7 +77,5 @@ project.AddDefines('__GCC__')
 
 DisableRTTIIfNecessary() 
 
-## X11 isn't really set up for cross-compiling
-project.RemoveIncludes('/usr/X11R6/include')
-project.RemoveSystemPaths('-L/usr/X11R6/lib')
-project.RemoveSystemLibraries("X11")
+# Compile without X11
+project.RemoveDefines('USE_XWINDOWS')

@@ -19,15 +19,21 @@ public:
     MidiDecoder();
     ~MidiDecoder();
 
-    void setInputPipe(QMediaPipe* inputPipe);
-    void setOutputPipe(QMediaPipe* outputPipe);
+    void connectInputPipe(QMediaPipe* inputPipe);
+    void connectOutputPipe(QMediaPipe* outputPipe);
+
+    void disconnectInputPipe(QMediaPipe* inputPipe);
+    void disconnectOutputPipe(QMediaPipe* outputPipe);
+
+    void setValue(QString const& name, QVariant const& value);
+    QVariant value(QString const& name);
 
     void start();
     void stop();
     void pause();
 
     quint32 length();
-    void seek(quint32 ms);
+    bool seek(qint64 ms);
 
     void setVolume(int volume);
     int volume();
@@ -41,9 +47,6 @@ signals:
     void lengthChanged(quint32);
     void volumeChanged(int);
     void volumeMuted(bool);
-
-private slots:
-    void next();
 
 private:
     qint64 readData(char *data, qint64 maxlen);

@@ -17,19 +17,12 @@
 <ul>
 <li><a href="virtualkeyboardservice-members.html">List of all members, including inherited members</a></li>
 </ul>
-<a name="public-functions"></a>
-<h3>Public Functions</h3>
-<ul>
-<li><div class="fn"/><b><a href="virtualkeyboardservice.html#VirtualKeyboardService">VirtualKeyboardService</a></b> ( QObject * <i>parent</i> = 0 )</li>
-<li><div class="fn"/><b><a href="virtualkeyboardservice.html#dtor.VirtualKeyboardService">~VirtualKeyboardService</a></b> ()</li>
-</ul>
-<ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-</ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
 <ul>
 <li><div class="fn"/>void <b><a href="virtualkeyboardservice.html#keyPress">keyPress</a></b> ( int <i>key</i> )</li>
+<li><div class="fn"/>void <b><a href="virtualkeyboardservice.html#processKeyEvent">processKeyEvent</a></b> ( int <i>unicode</i>, int <i>keycode</i>, int <i>modifiers</i>, bool <i>isPress</i>, bool <i>autoRepeat</i> )</li>
+<li><div class="fn"/>void <b><a href="virtualkeyboardservice.html#sendKeyEvent">sendKeyEvent</a></b> ( int <i>unicode</i>, int <i>keycode</i>, int <i>modifiers</i>, bool <i>isPress</i>, bool <i>autoRepeat</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
@@ -37,6 +30,7 @@
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
@@ -50,20 +44,22 @@
 <h2>Detailed Description</h2>
 <p>The VirtualKeyboardService class provides a service to simulate keypresses on a device.</p>
 <p>The <tt>VirtualKeyboard</tt> service provided by the VirtualKeyboardService class allows applications to cause the equivalent of physical keypresses on a device.</p>
-<p>The VirtualKeyboardService class provides the <tt>VirtualKeyboard</tt> task.</p>
+<p>The VirtualKeyboardService class provides the <tt>VirtualKeyboard</tt> task. It is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="VirtualKeyboardService"></a>VirtualKeyboardService::VirtualKeyboardService ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Construct a new <a href="virtualkeyboardservice.html">VirtualKeyboardService</a> instance with the provided <i>parent</i>.</p>
-<h3 class="fn"><a name="dtor.VirtualKeyboardService"></a>VirtualKeyboardService::~VirtualKeyboardService ()</h3>
-<p>Destroys the <a href="virtualkeyboardservice.html">VirtualKeyboardService</a> instance.</p>
 <h3 class="fn"><a name="keyPress"></a>void VirtualKeyboardService::keyPress ( int <i>key</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Simulate the press and release of <i>key</i>. This is equivalent to calling the <a href="qwsserver.html#processKeyEvent">QWSServer::processKeyEvent</a>() method for a press and then a release.</p>
+<p>Simulate the press and release of <i>key</i>. This is equivalent to calling the <a href="qtopiainputevents.html#processKeyEvent">QtopiaInputEvents::processKeyEvent</a>() method for a press and then a release.</p>
 <p>This slot corresponds to the QCop service message <tt>VirtualKeyboard::keyPress(int)</tt>.</p>
+<h3 class="fn"><a name="processKeyEvent"></a>void VirtualKeyboardService::processKeyEvent ( int <i>unicode</i>, int <i>keycode</i>, int <i>modifiers</i>, bool <i>isPress</i>, bool <i>autoRepeat</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Process a key event consisting of <i>unicode</i>, <i>keycode</i>, <i>modifiers</i>, <i>isPress</i>, and <i>autoRepeat</i>.</p>
+<p>This slot corresponds to the QCop service message <tt>VirtualKeyboard::processKeyEvent(int,int,int,bool,bool)</tt>.</p>
+<h3 class="fn"><a name="sendKeyEvent"></a>void VirtualKeyboardService::sendKeyEvent ( int <i>unicode</i>, int <i>keycode</i>, int <i>modifiers</i>, bool <i>isPress</i>, bool <i>autoRepeat</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Send a key event consisting of <i>unicode</i>, <i>keycode</i>, <i>modifiers</i>, <i>isPress</i>, and <i>autoRepeat</i>.</p>
+<p>This slot corresponds to the QCop service message <tt>VirtualKeyboard::sendKeyEvent(int,int,int,bool,bool)</tt>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

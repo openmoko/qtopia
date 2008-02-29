@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,7 +32,7 @@ public:
 
     QWSKeyboardHandler* create(const QString& driver, const QString& device);
     QWSKeyboardHandler* create(const QString& driver);
-    QStringList keys()const;
+    QStringList keys() const;
 };
 
 #endif // EXAMPLEKBDDRIVERPLUGIN_H

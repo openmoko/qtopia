@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,7 +26,7 @@
 #include <QPainter>
 #include <QGraphicsRectItem>
 
-const QString Shearer::description("Shear");
+const QString Shearer::mDescription("Shear");
 const qreal Shearer::DEFAULT_MAX_SHEAR_VAL = 0.8;
 
 
@@ -57,6 +57,6 @@ void Shearer::animate(QPainter *painter,SelectedItem *item,qreal percent)
     // Now that we've done the shear, translate back again.
     painter->translate(-item->rect().width()/2 - pos.x(),-item->rect().height()/2 - pos.y());
 
-    int imageSize = item->getCurrent()->getSelectedImageSize();
+    int imageSize = item->current()->selectedImageSize();
     draw(painter,item,imageSize,imageSize);
 }

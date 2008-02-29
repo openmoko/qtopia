@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: List of All Members for QBitmap</title>
+  <title>Qt 4.3: List of All Members for QBitmap</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -24,11 +24,13 @@
 <li><div class="fn"/><a href="qbitmap.html#QBitmap-5">QBitmap</a> ( const QString &amp;, const char * )</li>
 <li><div class="fn"/><a href="qbitmap.html#dtor.QBitmap">~QBitmap</a> ()</li>
 <li><div class="fn"/><a href="qpixmap.html#alphaChannel">alphaChannel</a> () const : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#cacheKey">cacheKey</a> () const : qint64</li>
 <li><div class="fn"/><a href="qbitmap.html#clear">clear</a> ()</li>
 <li><div class="fn"/><a href="qpixmap.html#copy">copy</a> ( const QRect &amp; ) const : QPixmap</li>
 <li><div class="fn"/><a href="qpixmap.html#copy-2">copy</a> ( int, int, int, int ) const : QPixmap</li>
 <li><div class="fn"/><a href="qpixmap.html#createHeuristicMask">createHeuristicMask</a> ( bool ) const : QBitmap</li>
-<li><div class="fn"/><a href="qpixmap.html#createMaskFromColor">createMaskFromColor</a> ( const QColor &amp; ) const : QBitmap</li>
+<li><div class="fn"/><a href="qpixmap.html#createMaskFromColor">createMaskFromColor</a> ( const QColor &amp;, Qt::MaskMode ) const : QBitmap</li>
+<li><div class="fn"/><a href="qpixmap.html#createMaskFromColor-2">createMaskFromColor</a> ( const QColor &amp; ) const : QBitmap</li>
 <li><div class="fn"/><a href="qpixmap.html#defaultDepth">defaultDepth</a> () : int</li>
 <li><div class="fn"/><a href="qpixmap.html#depth">depth</a> () const : int</li>
 <li><div class="fn"/><a href="qpixmap.html#detach">detach</a> ()</li>
@@ -69,15 +71,16 @@
 <li><div class="fn"/><a href="qpixmap.html#scaled-2">scaled</a> ( int, int, Qt::AspectRatioMode, Qt::TransformationMode ) const : QPixmap</li>
 <li><div class="fn"/><a href="qpixmap.html#scaledToHeight">scaledToHeight</a> ( int, Qt::TransformationMode ) const : QPixmap</li>
 <li><div class="fn"/><a href="qpixmap.html#scaledToWidth">scaledToWidth</a> ( int, Qt::TransformationMode ) const : QPixmap</li>
-<li><div class="fn"/><a href="qpixmap.html#serialNumber">serialNumber</a> () const : int</li>
 <li><div class="fn"/><a href="qpixmap.html#setAlphaChannel">setAlphaChannel</a> ( const QPixmap &amp; )</li>
 <li><div class="fn"/><a href="qpixmap.html#setMask">setMask</a> ( const QBitmap &amp; )</li>
 <li><div class="fn"/><a href="qpixmap.html#size">size</a> () const : QSize</li>
 <li><div class="fn"/><a href="qpixmap.html#toImage">toImage</a> () const : QImage</li>
 <li><div class="fn"/><a href="qpixmap.html#toMacCGImageRef">toMacCGImageRef</a> () const : CGImageRef</li>
 <li><div class="fn"/><a href="qpixmap.html#toWinHBITMAP">toWinHBITMAP</a> ( HBitmapFormat ) const : HBITMAP</li>
-<li><div class="fn"/><a href="qbitmap.html#transformed">transformed</a> ( const QMatrix &amp; ) const : QBitmap</li>
-<li><div class="fn"/><a href="qpixmap.html#trueMatrix">trueMatrix</a> ( const QMatrix &amp;, int, int ) : QMatrix</li>
+<li><div class="fn"/><a href="qbitmap.html#transformed">transformed</a> ( const QTransform &amp; ) const : QBitmap</li>
+<li><div class="fn"/><a href="qbitmap.html#transformed-2">transformed</a> ( const QMatrix &amp; ) const : QBitmap</li>
+<li><div class="fn"/><a href="qpixmap.html#trueMatrix">trueMatrix</a> ( const QTransform &amp;, int, int ) : QTransform</li>
+<li><div class="fn"/><a href="qpixmap.html#trueMatrix-2">trueMatrix</a> ( const QMatrix &amp;, int, int ) : QMatrix</li>
 <li><div class="fn"/><a href="qpixmap.html#width">width</a> () const : int</li>
 <li><div class="fn"/><a href="qpaintdevice.html#widthMM">widthMM</a> () const : int</li>
 <li><div class="fn"/><a href="qpixmap.html#x11Info">x11Info</a> () const : const QX11Info &amp;</li>
@@ -92,6 +95,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

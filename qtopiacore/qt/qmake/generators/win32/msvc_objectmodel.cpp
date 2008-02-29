@@ -1,10 +1,35 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the qmake application of the Qt Toolkit.
 **
-** $TROLLTECH_COMMERCIAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -81,6 +106,8 @@ const char _ExcludedFromBuild[]                 = "ExcludedFromBuild";
 const char _ExpandAttributedSource[]            = "ExpandAttributedSource";
 const char _ExportNamedFunctions[]              = "ExportNamedFunctions";
 const char _FavorSizeOrSpeed[]                  = "FavorSizeOrSpeed";
+const char _FloatingPointModel[]                = "FloatingPointModel";
+const char _FloatingPointExceptions[]           = "FloatingPointExceptions";
 const char _ForceConformanceInForLoopScope[]    = "ForceConformanceInForLoopScope";
 const char _ForceSymbolReferences[]             = "ForceSymbolReferences";
 const char _ForcedIncludeFiles[]                = "ForcedIncludeFiles";
@@ -260,9 +287,11 @@ VCCLCompilerTool::VCCLCompilerTool()
         EnableFiberSafeOptimizations(unset),
         EnableFunctionLevelLinking(unset),
         EnableIntrinsicFunctions(unset),
-        ExceptionHandling(_False),
+        ExceptionHandling(ehDefault),
         ExpandAttributedSource(unset),
         FavorSizeOrSpeed(favorNone),
+        FloatingPointModel(floatingPointNotSet),
+        FloatingPointExceptions(unset),
         ForceConformanceInForLoopScope(unset),
         GeneratePreprocessedFile(preprocessNo),
         GlobalOptimizations(unset),
@@ -315,6 +344,17 @@ inline XmlOutput::xml_output xformUsePrecompiledHeaderForNET2005(pchOption whatP
     return attrE(_UsePrecompiledHeader, whatPch);
 }
 
+inline XmlOutput::xml_output xformExceptionHandlingNET2005(exceptionHandling eh, DotNET compilerVersion)
+{
+    if (eh == ehDefault)
+        return noxml();
+
+    if (compilerVersion == NET2005)
+        return attrE(_ExceptionHandling, eh);
+
+    return attrS(_ExceptionHandling, (eh == ehNoSEH ? "true" : "false"));
+}
+
 XmlOutput &operator<<(XmlOutput &xml, const VCCLCompilerTool &tool)
 {
     return xml
@@ -342,9 +382,13 @@ XmlOutput &operator<<(XmlOutput &xml, const VCCLCompilerTool &tool)
             << attrT(_EnableFiberSafeOptimizations, tool.EnableFiberSafeOptimizations)
             << attrT(_EnableFunctionLevelLinking, tool.EnableFunctionLevelLinking)
             << attrT(_EnableIntrinsicFunctions, tool.EnableIntrinsicFunctions)
-            << attrT(_ExceptionHandling, tool.ExceptionHandling)
+            << xformExceptionHandlingNET2005(tool.ExceptionHandling, tool.config->CompilerVersion)
             << attrT(_ExpandAttributedSource, tool.ExpandAttributedSource)
             << attrE(_FavorSizeOrSpeed, tool.FavorSizeOrSpeed, /*ifNot*/ favorNone)
+
+            << attrE(_FloatingPointModel, tool.FloatingPointModel, /*ifNot*/ floatingPointNotSet)
+            << attrT(_FloatingPointExceptions, tool.FloatingPointExceptions)
+
             << attrT(_ForceConformanceInForLoopScope, tool.ForceConformanceInForLoopScope)
             << attrX(_ForcedIncludeFiles, tool.ForcedIncludeFiles)
             << attrX(_ForcedUsingFiles, tool.ForcedUsingFiles)
@@ -420,21 +464,23 @@ bool VCCLCompilerTool::parseOption(const char* option)
         break;
     case 'E':
         if(second == 'H') {
-            if(third == 'a'
-                || (third == 'c' && fourth != 's')
-                || (third == 's' && fourth != 'c')) {
+            QString opt(option);
+            if (opt.contains('a') && !opt.contains('s') && !opt.contains('c'))
+                ExceptionHandling = ehSEH;
+            else if (!opt.contains('a') && opt.contains('s') && opt.contains('c'))
+                ExceptionHandling = ehNoSEH;
+            else {
                 // ExceptionHandling must be false, or it will override
                 // with an /EHsc option
-                ExceptionHandling = _False;
+                ExceptionHandling = ehNone;
                 AdditionalOptions += option;
-                break;
-            } else if((third == 'c' && fourth == 's')
-                     || (third == 's' && fourth == 'c')) {
-                ExceptionHandling = _True;
-                AdditionalOptions += option;
-                break;
             }
-            found = false; break;
+            if (config->CompilerVersion != NET2005
+                && ExceptionHandling == ehSEH) {
+                ExceptionHandling = ehNone;
+                AdditionalOptions += option;
+            }
+            break;
         }
         GeneratePreprocessedFile = preprocessYes;
         break;
@@ -537,9 +583,9 @@ bool VCCLCompilerTool::parseOption(const char* option)
             EnableFiberSafeOptimizations = _True;
             break;
         case 'X':
-            // ExceptionHandling == true will override with
-            // an /EHsc option, which is correct with /GX
-            ExceptionHandling = _True; // Fall-through
+            // Same as the /EHsc option, which is Exception Handling without SEH
+            ExceptionHandling = ehNoSEH;
+            break;
         case 'Z':
         case 'e':
         case 'h':
@@ -580,6 +626,9 @@ bool VCCLCompilerTool::parseOption(const char* option)
         break;
     case 'I':
         AdditionalIncludeDirectories += option+2;
+        break;
+    case 'J':
+        DefaultCharIsUnsigned = _True;
         break;
     case 'L':
         if(second == 'D') {
@@ -839,9 +888,21 @@ bool VCCLCompilerTool::parseOption(const char* option)
                 const char *o = option;
                 if (o[6] == 'S' && o[7] == 'S' && o[8] == 'E') {
                     EnableEnhancedInstructionSet = o[9] == '2' ? archSSE2 : archSSE;
+                    break;
                 }
             }
         }
+        found = false;
+        break;
+    case 'b':   // see http://msdn2.microsoft.com/en-us/library/ms173499.aspx
+        if (second == 'i' && third == 'g' && fourth == 'o') {
+            const char *o = option;
+            if (o[5] == 'b' && o[6] == 'j') {
+                AdditionalOptions += option;
+                break;
+            }
+        }
+        found = false;
         break;
     case 'c':
         if(second == '\0') {
@@ -893,6 +954,31 @@ bool VCCLCompilerTool::parseOption(const char* option)
         }
         CompileAsManaged = managedAssembly;
         break;
+    case 'f':
+        if(second == 'p' && third == ':') {
+            // Go to the end of the option
+            const char *c = option + 4;
+            while (*c != '\0' && *c != ' ' && *c != '-')
+                ++c;
+            switch (fourth) {
+            case 'e':
+                FloatingPointExceptions = ((*c) == '-' ? _False : _True);
+                break;
+            case 'f':
+                FloatingPointModel = floatingPointFast;
+                break;
+            case 'p':
+                FloatingPointModel = floatingPointPrecise;
+                break;
+            case 's':
+                FloatingPointModel = floatingPointStrict;
+                break;
+            default:
+                found = false;
+                break;
+            }
+        }
+        break;
     case 'n':
         if(second == 'o' && third == 'B' && fourth == 'o') {
             AdditionalOptions += "/noBool";
@@ -931,10 +1017,13 @@ bool VCCLCompilerTool::parseOption(const char* option)
         }
         break;
     default:
-        found = false; break;
+        AdditionalOptions += option;
+        break;
     }
-    if(!found)
-        warn_msg(WarnLogic, "Could not parse Compiler option: %s", option);
+    if(!found) {
+        warn_msg(WarnLogic, "Could not parse Compiler option: %s, added as AdditionalOption", option);
+        AdditionalOptions += option;
+    }
     return true;
 }
 
@@ -1175,7 +1264,7 @@ bool VCLinkerTool::parseOption(const char* option)
         break;
     case 0xb28103c: // /INCREMENTAL[:no]
         if(*(option+12) == ':' &&
-             *(option+13) == 'n')
+             (*(option+13) == 'n' || *(option+13) == 'N'))
             LinkIncremental = linkIncrementalNo;
         else
             LinkIncremental = linkIncrementalYes;
@@ -1200,8 +1289,11 @@ bool VCLinkerTool::parseOption(const char* option)
         break;
     case 0x157cf65: // /MACHINE:{AM33|ARM|CEE|IA64|X86|M32R|MIPS|MIPS16|MIPSFPU|MIPSFPU16|MIPSR41XX|PPC|SH3|SH4|SH5|THUMB|TRICORE}
         switch (elfHash(option+9)) {
-            // Very limited documentation on all options but X86,
-            // so we put the others in AdditionalOptions...
+        // Very limited documentation on all options but X86,
+        case 0x0005bb6: // X86
+            TargetMachine = machineX86;
+            break;
+        // so we put the others in AdditionalOptions...
         case 0x0005b94: // X64
         case 0x0046063: // AM33
         case 0x000466d: // ARM
@@ -1221,13 +1313,9 @@ bool VCLinkerTool::parseOption(const char* option)
         case 0x00057b5: // SH5
         case 0x058da12: // THUMB
         case 0x96d8435: // TRICORE
+        default:
             AdditionalOptions += option;
             break;
-        case 0x0005bb6: // X86
-            TargetMachine = machineX86;
-            break;
-        default:
-            found = false;
         }
         break;
     case 0x0034160: // /MAP[:filename]
@@ -1371,10 +1459,13 @@ bool VCLinkerTool::parseOption(const char* option)
         Version = option+9;
         break;
     default:
-        found = false;
+        AdditionalOptions += option;
+        break;
     }
-    if(!found)
-        warn_msg(WarnLogic, "Could not parse Linker options: %s", option);
+    if(!found) {
+        warn_msg(WarnLogic, "Could not parse Linker options: %s, added as AdditionalOption", option);
+        AdditionalOptions += option;
+    }
     return found;
 }
 
@@ -1704,11 +1795,36 @@ VCCustomBuildTool::VCCustomBuildTool()
 
 XmlOutput &operator<<(XmlOutput &xml, const VCCustomBuildTool &tool)
 {
+    // The code below offers two ways to split custom build step commands.
+    // Normally the $$escape_expand(\n\t) is used in a project file, which is correctly translated
+    // in all generators. However, if you use $$escape_expand(\n\r) (or \n\h) instead, the VCPROJ
+    // generator will instead of binding the commands with " && " will insert a proper newline into
+    // the VCPROJ file. We sometimes use this method of splitting commands if the custom buildstep
+    // contains a command-line which is too big to run on certain OS.
+    QString cmds;
+    int end = tool.CommandLine.count();
+    for(int i = 0; i < end; ++i) {
+        QString cmdl = tool.CommandLine.at(i);
+        if (cmdl.contains("\r\t")) {
+            if (i == end - 1)
+                cmdl = cmdl.trimmed();
+            cmdl.replace("\r\t", " && ");
+        } else if (cmdl.contains("\r\n")) {
+            ;
+        } else if (cmdl.contains("\r\\h")) {
+            // The above \r\n should work, but doesn't, so we have this hack
+            cmdl.replace("\r\\h", "\r\n");
+        } else {
+            if (i < end - 1)
+                cmdl += " && ";
+        }
+        cmds += cmdl;
+    }
     return xml
         << tag(_Tool)
             << attrS(_Name, tool.ToolName)
             << attrX(_AdditionalDependencies, tool.AdditionalDependencies, ";")
-            << attrX(_CommandLine, tool.CommandLine, " && ")
+            << attrS(_CommandLine, cmds)
             << attrS(_Description, tool.Description)
             << attrX(_Outputs, tool.Outputs, ";")
             << attrS(_Path, tool.ToolPath)
@@ -1985,20 +2101,27 @@ bool VCFilter::addExtraCompiler(const VCFilterFile &info)
             // Execute dependency command, and add every line as a dep
 	    char buff[256];
 	    QString dep_cmd = Project->replaceExtraCompilerVariables(tmp_dep_cmd,
-							             inFile,
+							             Option::fixPathToLocalOS(inFile, true, false),
                                                                      out);
-            dep_cmd = Option::fixPathToLocalOS(dep_cmd);
-            if(FILE *proc = QT_POPEN(dep_cmd.toLatin1().constData(), "r")) {
-	        QString indeps;
-                while(!feof(proc)) {
-                    int read_in = (int)fread(buff, 1, 255, proc);
-                    if(!read_in)
-                        break;
-                    indeps += QByteArray(buff, read_in);
+            if(Project->canExecute(dep_cmd)) {
+                if(FILE *proc = QT_POPEN(dep_cmd.toLatin1().constData(), "r")) {
+                    QString indeps;
+                    while(!feof(proc)) {
+                        int read_in = (int)fread(buff, 1, 255, proc);
+                        if(!read_in)
+                            break;
+                        indeps += QByteArray(buff, read_in);
+                    }
+                    fclose(proc);
+                    if(!indeps.isEmpty()) {
+                        QStringList extradeps = indeps.split(QLatin1Char('\n'));
+                        for (int i = 0; i < extradeps.count(); ++i) {
+                            QString dd = extradeps.at(i).simplified();
+                            if (!dd.isEmpty())
+                                deps += Project->fileFixify(dd);
+                        }
+                    }
                 }
-                fclose(proc);
-                if(!indeps.isEmpty())
-                    deps += " " + Project->fileFixify(indeps.replace('\n', ' ').simplified().split(' ')).join(";");
             }
         }
         for (int i = 0; i < deps.count(); ++i)
@@ -2024,6 +2147,7 @@ bool VCFilter::addExtraCompiler(const VCFilterFile &info)
                                                          inputs.join(" "),
                                                          out);
         } else {
+            deps += inFile; // input file itself too..
             cmd = Project->replaceExtraCompilerVariables(tmp_cmd,
                                                          inFile,
                                                          out);
@@ -2043,7 +2167,6 @@ bool VCFilter::addExtraCompiler(const VCFilterFile &info)
 	}
 
         // Fixify paths
-        cmd = Option::fixPathToTargetOS(cmd, false, false);
         for (int i = 0; i < deps.count(); ++i)
             deps[i] = Option::fixPathToTargetOS(deps[i], false);
 
@@ -2056,16 +2179,25 @@ bool VCFilter::addExtraCompiler(const VCFilterFile &info)
         int space = cmd.indexOf(' ');
         QFileInfo finf(cmd.left(space));
         if (CustomBuildTool.ToolPath.isEmpty())
-            CustomBuildTool.ToolPath += finf.path();
+            CustomBuildTool.ToolPath += Option::fixPathToTargetOS(finf.path());
         CustomBuildTool.Outputs += out;
 
-        // Make sure that all deps are only once
         deps += CustomBuildTool.AdditionalDependencies;
+        deps += cmd.left(cmd.indexOf(' '));
+        // Make sure that all deps are only once
         QMap<QString, bool> uniqDeps;
-        for (int c = 0; c < deps.count(); ++c)
-            uniqDeps[deps.at(c)] = false;
-        uniqDeps[cmd.left(cmd.indexOf(' '))] = false;
+        for (int c = 0; c < deps.count(); ++c) {
+            QString aDep = deps.at(c).trimmed();
+            if (!aDep.isEmpty())
+                uniqDeps[aDep] = false;
+        }
         CustomBuildTool.AdditionalDependencies = uniqDeps.keys();
+    }
+
+    // Ensure that none of the output files are also dependencies. Or else, the custom buildstep
+    // will be rebuild every time, even if nothing has changed.
+    foreach(QString output, CustomBuildTool.Outputs) {
+        CustomBuildTool.AdditionalDependencies.removeAll(output);
     }
 
     useCustomBuildTool = !CustomBuildTool.CommandLine.isEmpty();
@@ -2083,7 +2215,7 @@ void VCFilter::outputFileConfig(XmlOutput &xml, const QString &filename)
     // Unset some default options
     CompilerTool.BufferSecurityCheck = unset;
     CompilerTool.DebugInformationFormat = debugUnknown;
-    CompilerTool.ExceptionHandling = unset;
+    CompilerTool.ExceptionHandling = ehDefault;
     CompilerTool.GeneratePreprocessedFile = preprocessUnknown;
     CompilerTool.Optimization = optimizeDefault;
     CompilerTool.ProgramDataBaseFileName.clear();
@@ -2139,7 +2271,7 @@ XmlOutput &operator<<(XmlOutput &xml, VCFilter &tool)
     for (int i = 0; i < tool.Files.count(); ++i) {
         const VCFilterFile &info = tool.Files.at(i);
         xml << tag(_File)
-                << attrS(_RelativePath, info.file)
+                << attrS(_RelativePath, Option::fixPathToLocalOS(info.file))
             << data(); // In case no custom builds, to avoid "/>" endings
         tool.outputFileConfig(xml, tool.Files.at(i).file);
         xml << closetag(_File);
@@ -2178,18 +2310,23 @@ XmlOutput &operator<<(XmlOutput &xml, const VCProjectSingleConfig &tool)
             << tag(_Configurations)
             << tool.Configuration;
     xml     << closetag(_Configurations)
-            << tag(_Files)
-                << (VCFilter&)tool.SourceFiles
-                << (VCFilter&)tool.HeaderFiles
-                << (VCFilter&)tool.GeneratedFiles
-                << (VCFilter&)tool.LexYaccFiles
-                << (VCFilter&)tool.TranslationFiles
-                << (VCFilter&)tool.FormFiles
-                << (VCFilter&)tool.ResourceFiles;
-    for(int j = 0; j < tool.ExtraCompilersFiles.size(); ++j)
-        xml     << (VCFilter&)tool.ExtraCompilersFiles.at(j);
-    xml     << (VCFilter&)tool.RootFiles
-            << closetag(_Files)
+            << tag(_Files);
+    // Add this configuration into a multi-config project, since that's where we have the flat/tree
+    // XML output functionality
+    VCProject tempProj;
+    tempProj.SingleProjects += tool;
+    tempProj.outputFilter(xml, "Sources");
+    tempProj.outputFilter(xml, "Headers");
+    tempProj.outputFilter(xml, "GeneratedFiles");
+    tempProj.outputFilter(xml, "LexYaccFiles");
+    tempProj.outputFilter(xml, "TranslationFiles");
+    tempProj.outputFilter(xml, "FormFiles");
+    tempProj.outputFilter(xml, "ResourceFiles");
+    for (int x = 0; x < tempProj.ExtraCompilers.count(); ++x) {
+        tempProj.outputFilter(xml, tempProj.ExtraCompilers.at(x));
+    }
+    tempProj.outputFilter(xml, "RootFiles");
+    xml     << closetag(_Files)
             << tag(_Globals)
                 << data(); // No "/>" end tag
     return xml;
@@ -2207,11 +2344,11 @@ void TreeNode::generateXML(XmlOutput &xml, const QString &tagName, VCProject &to
                 << attr("Filter", "");
         }
         // First round, do nested filters
-        for(it = children.constBegin(); it != end; it++)
+        for (it = children.constBegin(); it != end; ++it)
             if ((*it)->children.size())
                 (*it)->generateXML(xml, it.key(), tool, filter);
         // Second round, do leafs
-        for(it = children.constBegin(); it != end; it++)
+        for (it = children.constBegin(); it != end; ++it)
             if (!(*it)->children.size())
                 (*it)->generateXML(xml, it.key(), tool, filter);
 
@@ -2229,7 +2366,7 @@ void FlatNode::generateXML(XmlOutput &xml, const QString &/*tagName*/, VCProject
     if (children.size()) {
         ChildrenMapFlat::ConstIterator it = children.constBegin();
         ChildrenMapFlat::ConstIterator end = children.constEnd();
-        for( ; it != end; it++) {
+        for (; it != end; ++it) {
             tool.outputFileConfigs(xml, (*it), filter);
         }
     }
@@ -2245,7 +2382,7 @@ void VCProject::outputFileConfigs(XmlOutput &xml,
                                   const QString &filtername)
 {
     xml << tag(_File)
-            << attrS(_RelativePath, info.file);
+            << attrS(_RelativePath, Option::fixPathToLocalOS(info.file));
     for (int i = 0; i < SingleProjects.count(); ++i) {
         VCFilter filter;
         if (filtername == "RootFiles") {

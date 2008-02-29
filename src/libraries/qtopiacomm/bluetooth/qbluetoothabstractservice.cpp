@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,16 +22,14 @@
 #include "qbluetoothabstractservice.h"
 
 #include <qbluetoothaddress.h>
-#include <QBluetoothSdpRecord>
-#include <QBluetoothLocalDevice>
+#include <qbluetoothsdprecord.h>
+#include <qbluetoothlocaldevice.h>
 #include <qtopiacomm/private/qsdpxmlgenerator_p.h>
+#include <qtopiaipcadaptor.h>
 
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusReply>
-
-#include <QtopiaIpcAdaptor>
-#include <qtopialog.h>
 
 #include <QTimer>
 #include <QFile>
@@ -41,6 +39,14 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+
+
+#undef QBLUETOOTHABSTRACTSERVICE_DEBUG
+
+#ifdef QBLUETOOTHABSTRACTSERVICE_DEBUG
+#   include <QDebug>
+#endif
 
 
 /*
@@ -78,8 +84,8 @@ Messenger::Messenger(QBluetoothAbstractService *service)
 {
     publishAll(SignalsAndSlots);
 
-    QObject::connect(service, SIGNAL(started(bool, const QString &)),
-                     SLOT(started(bool, const QString &)));
+    QObject::connect(service, SIGNAL(started(bool,QString)),
+                     SLOT(started(bool,QString)));
     QObject::connect(service, SIGNAL(stopped()), SLOT(stopped()));
 
     // register the service at the end of this run loop
@@ -155,8 +161,10 @@ quint32 QBluetoothAbstractServicePrivate::registerRecord(const QString &record)
 
     QDBusReply<quint32> reply = iface.call("AddServiceRecordFromXML", record);
     if (!reply.isValid()) {
-        qLog(Bluetooth) << "BluetoothAbstractService: registerRecord() error:"
+#ifdef QBLUETOOTHABSTRACTSERVICE_DEBUG
+        qDebug() << "QBluetoothAbstractService: registerRecord() error:"
                 << reply.error().type() << reply.error().message();
+#endif
         return 0;
     }
 
@@ -174,8 +182,10 @@ bool QBluetoothAbstractServicePrivate::unregisterRecord(quint32 handle)
     QDBusReply<void> reply = iface.call("RemoveServiceRecord",
                                         QVariant::fromValue(handle));
     if (!reply.isValid()) {
-        qLog(Bluetooth) << "BluetoothAbstractService: unregisterRecord() error:"
+#ifdef QBLUETOOTHABSTRACTSERVICE_DEBUG
+        qDebug() << "QBluetoothAbstractService: unregisterRecord() error:"
                 << reply.error().type() << reply.error().message();
+#endif
         return false;
     }
 
@@ -336,17 +346,7 @@ quint32 QBluetoothAbstractService::registerRecord(const QBluetoothSdpRecord &rec
     QSdpXmlGenerator::generate(record, &buffer);
 
     buffer.seek(0);
-    quint32 r = m_data->registerRecord(QString::fromUtf8(buffer.readAll()));
-
-    if (r == 0) {
-        qLog(Bluetooth) << "QBluetoothAbstractService: registerRecord() failed for "
-                << record.serviceName();
-    } else {
-        qLog(Bluetooth) << "QBluetoothAbstractService: registerRecord() successful for"
-                << record.serviceName();
-    }
-
-    return r;
+    return m_data->registerRecord(QString::fromUtf8(buffer.readAll()));
 }
 
 /*!
@@ -401,8 +401,7 @@ quint32 QBluetoothAbstractService::registerRecord(const QString &filename)
 {
     int fd = ::open(QFile::encodeName(filename), O_RDONLY);
     if (fd == -1) {
-        qLog(Bluetooth) << "QBluetoothAbstractService: registerRecord() error:"
-                << "cannot open file" << filename;
+        qWarning("QBluetoothAbstractService: error opening file %s, cannot register SDP record", filename.toLatin1().constData());
         return 0;
     }
 
@@ -424,20 +423,16 @@ quint32 QBluetoothAbstractService::registerRecord(const QString &filename)
             // unmap to clean up
             munmap(ptr, st.st_size);
         } else {
-            qLog(Bluetooth) << "QBluetoothAbstractService: registerRecord() mmap failed";
+#ifdef QBLUETOOTHABSTRACTSERVICE_DEBUG
+            qDebug() << "QBluetoothAbstractService: registerRecord() mmap failed";
+#endif
         }
     } else {
-        qLog(Bluetooth) << "QBluetoothAbstractService: registerRecord() fstat failed";
+#ifdef QBLUETOOTHABSTRACTSERVICE_DEBUG
+        qDebug() << "QBluetoothAbstractService: registerRecord() fstat failed";
+#endif
     }
     ::close(fd);
-
-    if (result == 0) {
-        qLog(Bluetooth) << "QBluetoothAbstractService: registerRecord() failed for "
-                << filename;
-    } else {
-        qLog(Bluetooth) << "QBluetoothAbstractService: registerRecord() successful for"
-                << filename;
-    }
 
     return result;
 }
@@ -491,7 +486,7 @@ QString QBluetoothAbstractService::displayName() const
     while trying to start, to announce the result of the start() invocation.
 
     \warning This function must be implementated in such a way that any intermediate
-    objects (which have been created up to the point where the error occured)
+    objects (which have been created up to the point where the error occurred)
     are cleaned up before the error signal is emitted.
 
     \sa started(), stop()

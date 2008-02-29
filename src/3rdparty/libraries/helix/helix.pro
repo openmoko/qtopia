@@ -14,6 +14,7 @@ enable_rpath:!isEmpty(QTOPIA_RPATH):RPATHVALUE=$$QTOPIA_RPATH$$QTOPIA_PREFIX
 # setup the helix bulid tree
 # this code is copied into configure
 setup_helixbuild.commands=$$COMMAND_HEADER\
+    if [ -d $$HELIX_PATH ]; then rm -rf $$HELIX_PATH; fi $$LINE_SEP\
     mkdir -p $$HELIX_PATH $$LINE_SEP\
     cp -aRpf $$PWD/src/* $$HELIX_PATH $$LINE_SEP\
     cp -aRpf $$PWD/trolltech/src/* $$HELIX_PATH $$LINE_SEP\
@@ -27,7 +28,7 @@ setup_helixbuild.commands=$$COMMAND_HEADER\
         $$LITERAL_QUOTE$$HELIX_PATH/buildrc$$LITERAL_QUOTE $$LINE_SEP\
     cd $$HELIX_PATH;\
     for patch in $$PWD/trolltech/patches/*.patch; do\
-        patch -p2 <\$$patch;\
+        patch -g0 -t -p2 <\$$patch;\
     done
 QMAKE_EXTRA_TARGETS+=setup_helixbuild
 regenerate.depends+=setup_helixbuild
@@ -54,7 +55,7 @@ setup_helix.commands=$$COMMAND_HEADER\
           BUILDRC=$$LITERAL_QUOTE$$HELIX_PATH/buildrc$$LITERAL_QUOTE\
           SYSTEM_ID=$$HELIX_SYSTEM_ID \
     # we have to ignore errors from this script because it always give us an error
-    python build/bin/build $$release -U -m hxclient_1_5_0_cayenne -P helix-client-qtopia-nodist splay_nodist \$$output || true $$LINE_SEP\
+    python build/bin/build.py $$release -U -P helix-client-qtopia-nodist splay_nodist_qtopia \$$output || true $$LINE_SEP\
     if [ ! -f $$HELIX_PATH/Makefile ]; then\
         echo $${LITERAL_QUOTE}ERROR: Helix build system failure.$${LITERAL_QUOTE};\
         exit 1;\
@@ -77,8 +78,13 @@ redirect_all.commands=$$COMMAND_HEADER\
     if [ ! -e $$HELIX_PATH/Makefile -o $$OUT_PWD/Makefile -nt $$HELIX_PATH/Makefile ]; then\
         $$MAKE setup_helix;\
     fi $$LINE_SEP\
-    $$MAKE -C $$HELIX_PATH $$LINE_SEP\
-    $$MAKE -C $$HELIX_PATH copy >/dev/null
+    cd $$HELIX_PATH;\
+    eval $$ENV BUILD_ROOT=$$LITERAL_QUOTE$$HELIX_PATH/build$$LITERAL_QUOTE\
+          PATH=$$LITERAL_QUOTE\$$PATH:\$$BUILD_ROOT/bin$$LITERAL_QUOTE\
+          BUILDRC=$$LITERAL_QUOTE$$HELIX_PATH/buildrc$$LITERAL_QUOTE\
+          SYSTEM_ID=$$HELIX_SYSTEM_ID \
+    # we have to ignore errors from this script because it always give us an error
+    python build/bin/build.py $$release -P helix-client-qtopia-nodist splay_nodist_qtopia $$LINE_SEP
 QMAKE_EXTRA_TARGETS+=redirect_all
 ALL_DEPS+=redirect_all
 
@@ -97,14 +103,14 @@ else:debug=debug
 
 # install some libs and binaries at "make install" time
 install_libs.commands=$$COMMAND_HEADER\
-    mkdir -p $(INSTALL_ROOT)/lib $$LINE_SEP\
+    mkdir -p $(INSTALL_ROOT)/lib/helix $$LINE_SEP\
     mkdir -p $(INSTALL_ROOT)/bin $$LINE_SEP\
     for file in $$HELIX_PATH/$$debug/*.so*; do\
-        echo cp -afp \$$file $(INSTALL_ROOT)/lib;\
-        cp -afp \$$file $(INSTALL_ROOT)/lib;
+        echo cp -afp \$$file $(INSTALL_ROOT)/lib/helix;\
+        cp -afp \$$file $(INSTALL_ROOT)/lib/helix;
 CONFIG(release,debug|release):!isEmpty(QMAKE_STRIP):install_libs.commands+=\
-        echo $$QMAKE_STRIP $$QMAKE_STRIPFLAGS_LIB $(INSTALL_ROOT)/lib/\$$(basename \$$file);\
-        $$QMAKE_STRIP $$QMAKE_STRIPFLAGS_LIB $(INSTALL_ROOT)/lib/\$$(basename \$$file);
+        echo $$QMAKE_STRIP $$QMAKE_STRIPFLAGS_LIB $(INSTALL_ROOT)/lib/helix/\$$(basename \$$file);\
+        $$QMAKE_STRIP $$QMAKE_STRIPFLAGS_LIB $(INSTALL_ROOT)/lib/helix/\$$(basename \$$file);
 install_libs.commands+=\
     done $$LINE_SEP_VERBOSE\
     cp -R $$HELIX_PATH/$$debug/splay $(INSTALL_ROOT)/bin
@@ -115,6 +121,7 @@ INSTALLS+=install_libs
 
 idep(INCLUDEPATH+=\
     $$HELIX_PATH/common/include\
+    $$HELIX_PATH/common/dbgtool/pub\
     $$HELIX_PATH/common/runtime/pub\
     $$HELIX_PATH/common/util/pub\
     $$HELIX_PATH/client/include\

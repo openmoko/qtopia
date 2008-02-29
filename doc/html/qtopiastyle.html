@@ -17,7 +17,6 @@
 <p>Inherited by <a href="qphonestyle.html">QPhoneStyle</a>.</p>
 <ul>
 <li><a href="qtopiastyle-members.html">List of all members, including inherited members</a></li>
-<li><a href="qtopiastyle-obsolete.html">Obsolete members</a></li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
@@ -26,8 +25,18 @@
 <li><div class="fn"/>virtual <b><a href="qtopiastyle.html#dtor.QtopiaStyle">~QtopiaStyle</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>22 public functions inherited from <a href="qstyle.html#public-functions">QStyle</a></li>
+<li><div class="fn"/>24 public functions inherited from <a href="qstyle.html#public-functions">QStyle</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qtopiastyle.html#drawRoundRect">drawRoundRect</a></b> ( QPainter * <i>painter</i>, const QRect &amp; <i>r</i>, int <i>xRnd</i>, int <i>yRnd</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiastyle.html#drawRoundRect-2">drawRoundRect</a></b> ( QPainter * <i>painter</i>, const QRectF &amp; <i>r</i>, int <i>xRnd</i>, int <i>yRnd</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>6 static public members inherited from <a href="qstyle.html#static-public-members">QStyle</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
@@ -35,10 +44,8 @@
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>6 static public members inherited from <a href="qstyle.html#static-public-members">QStyle</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>1 protected slot inherited from <a href="qstyle.html#protected-slots">QStyle</a></li>
+<li><div class="fn"/>2 protected slots inherited from <a href="qstyle.html#protected-slots">QStyle</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 <li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
 </ul>
@@ -54,10 +61,21 @@
 <p>Constructs a <a href="qtopiastyle.html">QtopiaStyle</a> object.</p>
 <h3 class="fn"><a name="dtor.QtopiaStyle"></a>QtopiaStyle::~QtopiaStyle ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="qtopiastyle.html">QtopiaStyle</a> object.</p>
+<h3 class="fn"><a name="drawRoundRect"></a>void QtopiaStyle::drawRoundRect ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qrect.html">QRect</a> &amp; <i>r</i>, int <i>xRnd</i>, int <i>yRnd</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Draws a rectangle <i>r</i> with rounded corners using <i>painter</i>.</p>
+<p>The <i>xRnd</i> and <i>yRnd</i> arguments specify how rounded the corners should be. 0 is angled corners, 99 is maximum roundedness.</p>
+<p>The roundness is scaled to maintain a similar appearance at different display resolutions.</p>
+<p>See also <a href="qpainter.html#drawRoundRect">QPainter::drawRoundRect</a>().</p>
+<h3 class="fn"><a name="drawRoundRect-2"></a>void QtopiaStyle::drawRoundRect ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qrectf.html">QRectF</a> &amp; <i>r</i>, int <i>xRnd</i>, int <i>yRnd</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Draws a rectangle <i>r</i> with rounded corners using <i>painter</i>.</p>
+<p>The <i>xRnd</i> and <i>yRnd</i> arguments specify how rounded the corners should be. 0 is angled corners, 99 is maximum roundedness.</p>
+<p>The roundness is scaled to maintain a similar appearance at different display resolutions.</p>
+<p>See also <a href="qpainter.html#drawRoundRect">QPainter::drawRoundRect</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

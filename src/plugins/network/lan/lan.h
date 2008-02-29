@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,9 +26,11 @@
 #include <qtopianetwork.h>
 #include <qvaluespace.h>
 #include <scriptthread.h>
+#include <custom.h>
 
 #ifndef NO_WIRELESS_LAN
 class RoamingMonitor;
+class WlanRegistrationProvider;
 #endif
 
 class LanImpl : public QtopiaNetworkInterface
@@ -60,9 +62,7 @@ protected:
     bool isActive() const;
 
 private slots:
-#ifndef NO_WIRELESS_LAN
     void reconnectWLAN();
-#endif
     void updateState();
 
 private:
@@ -76,6 +76,7 @@ private:
 
 #ifndef NO_WIRELESS_LAN
     RoamingMonitor* roaming;
+    WlanRegistrationProvider* wlanRegProvider;
 #endif
     QValueSpaceObject *netSpace;
     ScriptThread thread;

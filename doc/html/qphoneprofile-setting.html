@@ -70,8 +70,8 @@
 <p>Therefore applications should be listening to the Qtopia application channels to handle these requests. For example, in the application:</p>
 <pre>    SomeApplication::SomeApplication()
     {
-        connect( qApp, SIGNAL(appMessage(const QString&amp;,const QByteArray&amp;)),
-            this, SLOT(receive(const QString&amp;,const QByteArray&amp;)) );
+        connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
+            this, SLOT(receive(QString,QByteArray)) );
         ...
     }
 
@@ -107,6 +107,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

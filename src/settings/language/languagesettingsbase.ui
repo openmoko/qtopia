@@ -1,12 +1,6 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>LanguageSettingsBase</class>
  <widget class="QDialog" name="LanguageSettingsBase" >
-  <property name="objectName" >
-   <string notr="true" >LanguageSettingsBase</string>
-  </property>
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -19,35 +13,30 @@
    <string>Language</string>
   </property>
   <layout class="QVBoxLayout" >
-   <property name="objectName" >
-    <string notr="true" />
-   </property>
-   <property name="margin" >
+   <property name="spacing" >
     <number>2</number>
    </property>
-   <property name="spacing" >
+   <property name="leftMargin" >
+    <number>2</number>
+   </property>
+   <property name="topMargin" >
+    <number>2</number>
+   </property>
+   <property name="rightMargin" >
+    <number>2</number>
+   </property>
+   <property name="bottomMargin" >
     <number>2</number>
    </property>
    <item>
     <widget class="QLabel" name="TextLabel1" >
-     <property name="objectName" >
-      <string notr="true" >TextLabel1</string>
-     </property>
-     <property name="geometry" >
-      <rect>
-       <x>2</x>
-       <y>2</y>
-       <width>396</width>
-       <height>20</height>
-      </rect>
-     </property>
      <property name="text" >
-      <string>Select language</string>
+      <string>Select language:</string>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <pixmapfunction></pixmapfunction>
+ <resources/>
  <connections/>
 </ui>

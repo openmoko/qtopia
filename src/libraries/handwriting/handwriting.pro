@@ -3,15 +3,13 @@ TARGET=qmstroke
 CONFIG += qtopia_visibility
 
 HEADERS += char.h \
-           combining.h \
-           match.h \
+           combining_p.h \
            profile.h \
            signature.h \
            stroke.h
 
 SOURCES += char.cpp \
            combining.cpp \
-           match.cpp \
            profile.cpp \
            signature.cpp \
            stroke.cpp

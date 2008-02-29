@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 Trolltech AS. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,17 @@
 ****************************************************************************/
 #ifndef __DBUSAPPLICATIONCHANNEL_H__
 #define __DBUSAPPLICATIONCHANNEL_H__
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 #if defined(QTOPIA_DBUS_IPC)
 

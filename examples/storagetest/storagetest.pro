@@ -1,6 +1,6 @@
 qtopia_project(app qtopia)
 TARGET=storagetest
-CONFIG+=no_tr no_singleexec
+CONFIG+=no_tr no_singleexec no_sxe_test
 SOURCES=main.cpp
 
 pkg.name=storagetest

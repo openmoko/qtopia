@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -161,7 +176,8 @@ char *qstrncpy(char *dst, const char *src, uint len)
     \sa qstrlen()
 */
 
-/*! \relates QByteArray
+/*! 
+    \relates QByteArray
 
     A safe \c strcmp() function.
 
@@ -171,7 +187,7 @@ char *qstrncpy(char *dst, const char *src, uint len)
 
     Special case 1: Returns 0 if \a str1 and \a str2 are both 0.
 
-    Special case 2: Returns a random non-zero value if \a str1 is 0
+    Special case 2: Returns an arbitrary non-zero value if \a str1 is 0
     or \a str2 is 0 (but not both).
 
     \sa qstrncmp(), qstricmp(), qstrnicmp(), {Note on 8-bit character comparisons}
@@ -231,7 +247,7 @@ int qstricmp(const char *str1, const char *str2)
     uchar c;
     if (!s1 || !s2)
         return s1 ? 1 : (s2 ? -1 : 0);
-    for (; !(res = (c = QUnicodeTables::lower(*s1)) - QUnicodeTables::lower(*s2)); s1++, s2++)
+    for (; !(res = (c = QChar::toLower((ushort)*s1)) - QChar::toLower((ushort)*s2)); s1++, s2++)
         if (!c)                                // strings are equal
             break;
     return res;
@@ -267,7 +283,7 @@ int qstrnicmp(const char *str1, const char *str2, uint len)
     if (!s1 || !s2)
         return s1 ? 1 : (s2 ? -1 : 0);
     for (; len--; s1++, s2++) {
-        if ((res = (c = QUnicodeTables::lower(*s1)) - QUnicodeTables::lower(*s2)))
+        if ((res = (c = QChar::toLower((ushort)*s1)) - QChar::toLower((ushort)*s2)))
             return res;
         if (!c)                                // strings are equal
             break;
@@ -609,11 +625,12 @@ QByteArray::Data QByteArray::shared_empty = { Q_ATOMIC_INIT(1), 0, 0, shared_emp
     position from which to start erasing and the number of bytes that
     should be erased.
 
-    If you are building a QByteArray gradually and know in advance
-    approximately how many bytes the QByteArray will contain,
-    you can call reserve(), asking QByteArray to preallocate a
-    certain amount of memory. You can also call capacity() to find
-    out how much memory QByteArray actually allocated.
+    When you append() data to a non-empty array, the array will be
+    reallocated and the new data copied to it. You can avoid this
+    behavior by calling reserve(), which preallocates a certain amount
+    of memory. You can also call capacity() to find out how much
+    memory QByteArray actually allocated. Data appended to an empty
+    array is not copied.
 
     A frequent requirement is to remove whitespace characters from a
     byte array ('\\n', '\\t', ' ', etc.). If you want to remove
@@ -1339,10 +1356,10 @@ void QByteArray::resize(int size)
     Example:
     \code
         QByteArray ba("Istambul");
-        ba.fill("o");
+        ba.fill('o');
         // ba == "oooooooo"
 
-        ba.fill("X", 2);
+        ba.fill('X', 2);
         // ba == "XX"
     \endcode
 
@@ -2435,7 +2452,7 @@ QByteArray QByteArray::toLower() const
     register uchar *p = reinterpret_cast<uchar *>(s.data());
     if (p) {
         while (*p) {
-            *p = QUnicodeTables::lower(*p);
+            *p = QChar::toLower((ushort)*p);
             p++;
         }
     }
@@ -2462,7 +2479,7 @@ QByteArray QByteArray::toUpper() const
     register uchar *p = reinterpret_cast<uchar *>(s.data());
     if (p) {
         while (*p) {
-            *p = QUnicodeTables::upper(*p);
+            *p = QChar::toUpper((ushort)*p);
             p++;
         }
     }
@@ -3501,7 +3518,7 @@ QByteArray &QByteArray::setNum(double n, char f, int prec)
         int n = 63;
         QByteArray::number(n);              // returns "63"
         QByteArray::number(n, 16);          // returns "3f"
-        QByteArray::number(n, 16).upper();  // returns "3F"
+        QByteArray::number(n, 16).toUpper();  // returns "3F"
     \endcode
 
     \sa setNum(), toInt()
@@ -3693,6 +3710,80 @@ QByteArray QByteArray::fromBase64(const QByteArray &base64)
     return tmp;
 }
 
+/*!
+    Returns a decoded copy of the hex encoded array \a hexEncoded. Input is not checked
+    for validity; invalid characters in the input are skipped, enabling the
+    decoding process to continue with subsequent characters.
+
+    For example:
+
+    \code
+        QByteArray text = QByteArray::fromHex("517420697320677265617421");
+        text.data();            // returns "Qt is great!"
+    \endcode
+
+    \sa toHex()
+*/
+QByteArray QByteArray::fromHex(const QByteArray &hexEncoded)
+{
+    QByteArray res;
+    res.resize(hexEncoded.size() / 2);
+    uchar *result = (uchar *)res.data();
+
+    bool first = true;
+    for (int i = 0; i < hexEncoded.size(); ++i) {
+        int ch = hexEncoded.at(i);
+        int tmp;
+        if (ch >= '0' && ch <= '9')
+            tmp = ch - '0';
+        else if (ch >= 'a' && ch <= 'f')
+            tmp = ch - 'a' + 10;
+        else if (ch >= 'A' && ch <= 'F')
+            tmp = ch - 'A' + 10;
+        else
+            continue;
+        if (first) {
+            *result = tmp << 4;
+            first = false;
+        } else {
+            *result |= tmp;
+            ++result;
+            first = true;
+        }
+    }
+
+    res.truncate(result - (const uchar *)res.constData());
+    return res;
+}
+
+/*!
+    Returns a hex encoded copy of the byte array. The hex encoding uses the numbers 0-9 and
+    the letters a-f.
+
+    \sa fromHex()
+*/
+QByteArray QByteArray::toHex() const
+{
+    QByteArray hex;
+    hex.resize(d->size*2);
+    char *hexData = hex.data();
+    const uchar *data = (const uchar *)d->data;
+    for (int i = 0; i < d->size; ++i) {
+        int j = (data[i] >> 4) & 0xf;
+        if (j <= 9)
+            hexData[i*2] = (j + '0');
+         else
+            hexData[i*2] = (j + 'a' - 10);
+        j = data[i] & 0xf;
+        if (j <= 9)
+            hexData[i*2+1] = (j + '0');
+         else
+            hexData[i*2+1] = (j + 'a' - 10);
+    }
+    return hex;
+}
+
+
 /*! \typedef QByteArray::ConstIterator
     \internal
 */
@@ -3834,3 +3925,12 @@ QByteArray QByteArray::fromBase64(const QByteArray &base64)
     Use lastIndexOf() instead.
 */
 
+/*!
+    \fn DataPtr &QByteArray::data_ptr()
+    \internal
+*/
+
+/*!
+    \typedef QByteArray::DataPtr
+    \internal
+*/

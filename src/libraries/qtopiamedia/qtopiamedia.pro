@@ -12,31 +12,41 @@ PRIVATE_HEADERS += mediastyle_p.h \
             browser_p.h \
             activitymonitor_p.h \
             keyhold_p.h \
-            observer_p.h
+            observer_p.h \
+            qmediahandle_p.h \
+            qmediacontentplayer_p.h
 
 HEADERS += qmediatools.h \
-            qmediawidgets.h
+            qmediawidgets.h \
 
-HEADERS += qmediasession.h \
+HEADERS += \
+            qmediaabstractcontrol.h \
             qmediacontrol.h \
             qmediavideocontrol.h \
-            qmediahelixsettingscontrol.h \
-            qmediahandle.h \
+            qmediaseekcontrol.h \
             qmediacontent.h \
-            qmediacontentplayer.h \
-            qmediacodecinfo.h \
-            qmediacodecrep.h \
-            qmediadeviceinfo.h \
-            qmediadevicerep.h \
             qmediapipe.h \
             qmediadevice.h \
             qmediaencoder.h \
             qmediadecoder.h \
-            qmediacodecplugin.h \
-            qmediadevicemanager.h \
-            qmediadevicemanagerfactory.h
+            qmediacodecplugin.h
 
-HEADERS += private/mediaserverproxy.h
+HEADERS +=  qaudiodomain.h \
+            qdomainmanagerconfiguration.h
+
+HEADERS +=  private/mediaserverproxy_p.h
+
+HEADERS += \
+            server\qmediaenginefactory.h \
+            server\qmediaengine.h \
+            server\qmediaengineinformation.h \
+            server\qmediaserversession.h \
+            server\qmediasessionbuilder.h \
+            server\qmediasessionrequest.h \
+            server\qmediaabstractcontrolserver.h \
+            server\qmediavideocontrolserver.h \
+            server\qmediaseekcontrolserver.h
+
             
 SOURCES = media.cpp
 
@@ -50,22 +60,39 @@ SOURCES += mediastyle.cpp \
             activitymonitor.cpp \
             keyhold.cpp
 
-SOURCES += qmediasession.cpp \
+SOURCES += \
+            qmediaabstractcontrol.cpp \
             qmediacontrol.cpp \
             qmediavideocontrol.cpp \
-            qmediahelixsettingscontrol.cpp \
+            qmediaseekcontrol.cpp \
             qmediacontent.cpp \
             qmediacontentplayer.cpp \
-            qmediacodecinfo.cpp \
-            qmediacodecrep.cpp \
-            qmediadeviceinfo.cpp \
-            qmediadevicerep.cpp \
-            qmediapipe.cpp
+            qmediapipe.cpp \
+            qmediacodecplugin.cpp \
+            qmediadecoder.cpp \
+            qmediaencoder.cpp
+
+SOURCES +=  qaudiodomain.cpp \
+            qdomainmanagerconfiguration.cpp
 
 SOURCES += private/mediaserverproxy.cpp
 
+SOURCES += \
+            server\qmediaengine.cpp \
+            server\qmediaengineinformation.cpp \
+            server\qmediaserversession.cpp \
+            server\qmediasessionbuilder.cpp \
+            server\qmediasessionrequest.cpp \
+            server\qmediaabstractcontrolserver.cpp \
+            server\qmediavideocontrolserver.cpp \
+            server\qmediaseekcontrolserver.cpp
+
+contains(QTOPIAMEDIA_ENGINES,helix) {
+    HEADERS += qmediahelixsettingscontrol.h
+    SOURCES += qmediahelixsettingscontrol.cpp
+}
+
 depends(libraries/qtopia)
-!enable_qtopiabase:depends(libraries/qtopiail)
 
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -51,6 +66,8 @@ public:
     QDBusCustomTypeInfo() : signature(0, '\0'), marshall(0), demarshall(0)
     { }
 
+    // Suggestion:
+    // change 'signature' to char* and make QDBusCustomTypeInfo a Movable type
     QByteArray signature;
     QDBusMetaType::MarshallFunction marshall;
     QDBusMetaType::DemarshallFunction demarshall;
@@ -71,6 +88,8 @@ int QDBusMetaTypeId::argument;
 int QDBusMetaTypeId::variant;
 int QDBusMetaTypeId::objectpath;
 int QDBusMetaTypeId::signature;
+int QDBusMetaTypeId::error;
+
 void QDBusMetaTypeId::init()
 {
     static volatile bool initialized = false;
@@ -84,6 +103,7 @@ void QDBusMetaTypeId::init()
         variant = qRegisterMetaType<QDBusVariant>("QDBusVariant");
         objectpath = qRegisterMetaType<QDBusObjectPath>("QDBusObjectPath");
         signature = qRegisterMetaType<QDBusSignature>("QDBusSignature");
+	error = qRegisterMetaType<QDBusError>("QDBusError");
 
 #ifndef QDBUS_NO_SPECIALTYPES
         // and register QtCore's with us
@@ -109,6 +129,8 @@ void QDBusMetaTypeId::init()
         qDBusRegisterMetaType<QList<qlonglong> >();
         qDBusRegisterMetaType<QList<qulonglong> >();
         qDBusRegisterMetaType<QList<double> >();
+        qDBusRegisterMetaType<QList<QDBusObjectPath> >();
+        qDBusRegisterMetaType<QList<QDBusSignature> >();
 #endif
 
         initialized = true;
@@ -254,7 +276,8 @@ bool QDBusMetaType::demarshall(const QDBusArgument &arg, int id, void *data)
             df = info.demarshall;
     }
 
-    df(arg, data);
+    QDBusArgument copy = arg;
+    df(copy, data);
     return true;
 }
 
@@ -327,6 +350,12 @@ int QDBusMetaType::signatureToType(const char *signature)
 
         case DBUS_TYPE_VARIANT:
             return QVariant::List;
+
+        case DBUS_TYPE_OBJECT_PATH:
+            return qMetaTypeId<QList<QDBusObjectPath> >();
+
+        case DBUS_TYPE_SIGNATURE:
+            return qMetaTypeId<QList<QDBusSignature> >();
 
         }
         // fall through

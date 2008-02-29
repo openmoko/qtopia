@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/examples/menus.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/menus.qdoc -->
 <head>
-  <title>Qt 4.2: Menus Example</title>
+  <title>Qt 4.3: Menus Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Menus Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Menus Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="mainwindows-menus-mainwindow-cpp.html">mainwindows/menus/mainwindow.cpp</a></li>
@@ -56,11 +57,11 @@
      void setParagraphSpacing();
      void about();
      void aboutQt();</pre>
-<p>We must also implement a collection of private slots to respond to the user activating any of our menu entries. Note that these slots are left out of this documentation since they are trivial, i.e., most of them are only displaying the action's path in the main window's central widget.</p>
+<p>We must also implement a collection of private slots to respond to the user activating any of our menu entries. Note that these slots are left out of this documentation since they are trivial, i.e&#x2e;, most of them are only displaying the action's path in the main window's central widget.</p>
 <pre> private:
      void createActions();
      void createMenus();</pre>
-<p>We have chosen to simplify the constructor by implementing two private convenience functions to create the various actions, to add them to menues and to insert the menus into our main window's menu bar.</p>
+<p>We have chosen to simplify the constructor by implementing two private convenience functions to create the various actions, to add them to menus and to insert the menus into our main window's menu bar.</p>
 <pre>     QMenu *fileMenu;
      QMenu *editMenu;
      QMenu *formatMenu;
@@ -90,7 +91,7 @@
  };</pre>
 <p>Finally, we declare the various menus and actions as well as a simple information label in the application wide scope.</p>
 <p>The <a href="qmenu.html">QMenu</a> class provides a menu widget for use in menu bars, context menus, and other popup menus while the <a href="qaction.html">QAction</a> class provides an abstract user interface action that can be inserted into widgets.</p>
-<p>In some situations it is useful to group actions together, e.g., we have a <b>Left Align</b> action, a <b>Right Align</b> action, a <b>Justify</b> action, and a <b>Center</b> action, and we want only one of these actions to be active at any one time. One simple way of achieving this is to group the actions together in an action group using the <a href="qactiongroup.html">QActionGroup</a> class.</p>
+<p>In some situations it is useful to group actions together, e.g&#x2e;, we have a <b>Left Align</b> action, a <b>Right Align</b> action, a <b>Justify</b> action, and a <b>Center</b> action, and we want only one of these actions to be active at any one time. One simple way of achieving this is to group the actions together in an action group using the <a href="qactiongroup.html">QActionGroup</a> class.</p>
 <a name="mainwindow-class-implementation"></a>
 <h2>MainWindow Class Implementation</h2>
 <p>In the constructor, we start off by creating a regular <a href="qwidget.html">QWidget</a> and make it our main window's central widget. Note that the main window takes ownership of the widget pointer and deletes it at the appropriate time.</p>
@@ -174,7 +175,7 @@
      helpMenu-&gt;addAction(aboutQtAct);</pre>
 <p><a href="qmenubar.html">QMenuBar</a>'s <a href="qmenubar.html#addMenu">addMenu()</a> function appends a new <a href="qmenu.html">QMenu</a> with the given title, to the menu bar (note that the menu bar takes ownership of the menu). We use <a href="qwidget.html">QWidget</a>'s <a href="qwidget.html#addAction">addAction()</a> function to add each action to the corresponding menu.</p>
 <p>Alternatively, the <a href="qmenu.html">QMenu</a> class provides several <a href="qmenu.html#addAction">addAction()</a> convenience functions that create and add new actions from given texts and/or icons. You can also provide a member that will automatically connect to the new action's <a href="qaction.html#triggered">triggered()</a> signal, and a shortcut represented by a <a href="qkeysequence.html">QKeySequence</a> instance.</p>
-<p>The <a href="qmenu.html#addSeparator">QMenu::addSeparator</a>() function creates and returns a new separator action, i.e. an action for which <a href="qaction.html#isSeparator">QAction::isSeparator</a>() returns true, and adds the new action to the menu's list of actions.</p>
+<p>The <a href="qmenu.html#addSeparator">QMenu::addSeparator</a>() function creates and returns a new separator action, i.e&#x2e; an action for which <a href="qaction.html#isSeparator">QAction::isSeparator</a>() returns true, and adds the new action to the menu's list of actions.</p>
 <pre>     formatMenu = editMenu-&gt;addMenu(tr(&quot;&amp;Format&quot;));
      formatMenu-&gt;addAction(boldAct);
      formatMenu-&gt;addAction(italicAct);
@@ -202,6 +203,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -33,7 +33,7 @@ else
     echo "Found VMPlayer installed at: $VMPLAYER_DIR"
 fi
 echo
-echo "NOTE: SDK requires 2.2GB free disk space and 512MB RAM"
+echo "NOTE: SDK requires 3.2GB free disk space and 512MB RAM"
 echo
 echo -n "What directory would you like to install the SDK? [$HOME/QtopiaGreenphoneSDK] : "
 read dir
@@ -96,7 +96,7 @@ ERROR="0"
 
 function unpack()
 {
-if ! tar -xzf "$1" >"$dir"/.install.log 2>"$dir"/.install.log
+if ! tar -xjf "$1" >"$dir"/.install.log 2>"$dir"/.install.log
       then
       ERROR="1"
       echo "FAILED!"
@@ -144,6 +144,21 @@ if [ "$ERROR" -ne "1" ]; then
   else
     echo "Installing rootfs.......1.0 minutes remaining"
     unpack "$currentdir/rootfs.dat"
+  fi
+
+fi
+
+if [ "$ERROR" -ne "1" ]; then
+  if [ -e "$dir/qtopia.iso" ]; then
+    echo -n "Do you want to update the Qtopia update iso? (y/n) : "
+    read option
+    if [ "$option" != "n" ] ; then
+      echo "Updating qtopia iso.......1.0 minutes remaining"
+      cp "$currentdir/qtopia.iso" "$dir"
+    fi
+  else
+    echo "Installing qtopia iso.......1.0 minutes remaining"
+      cp "$currentdir/qtopia.iso" "$dir"
   fi
 
 fi

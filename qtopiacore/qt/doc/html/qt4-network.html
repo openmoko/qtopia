@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/qt4-network.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qt4-network.qdoc -->
 <head>
-  <title>Qt 4.2: The Network Module in Qt 4</title>
+  <title>Qt 4.3: The Network Module in Qt 4</title>
   <link rel="prev" href="qt4-sql.html" />
   <link rel="contents" href="qt4-intro.html" />
   <link rel="next" href="qt4-styles.html" />
@@ -20,7 +20,8 @@
 [<a href="qt4-intro.html">Home</a>]
 [Next: <a href="qt4-styles.html">The Qt 4 Style API</a>]
 </p>
-<h1 align="center">The Network Module in Qt 4<br /><small></small></h1>
+<h1 align="center">The Network Module in Qt 4<br /><span class="subtitle"></span>
+</h1>
 <p>The network module in Qt 4 provides some new features, such as support for internationalized domain names, better IPv6 support, and better performance. And since Qt 4 allows us to break binary compatibility with previous releases, we took this opportunity to improve the class names and API to make them more intuitive to use.</p>
 <ul><li><a href="#general-overview">General Overview</a></li>
 <li><a href="#example-code">Example Code</a></li>
@@ -36,7 +37,7 @@
 <ul>
 <li>The Qt 4 network classes have more intuitive names and APIs. For example, <a href="porting4.html#qserversocket">QServerSocket</a> has been renamed <a href="qtcpserver.html">QTcpServer</a>.</li>
 <li>The entire network module is <a href="threads.html#reentrant">reentrant</a>, making it possible to use them simultaneously from multiple threads.</li>
-<li>It is now possible to send and receive UDP datagrams and to use synchronous (i.e., blocking) sockets without having to use a low-level API (<a href="porting4.html#qsocketdevice">QSocketDevice</a> in Qt 3).</li>
+<li>It is now possible to send and receive UDP datagrams and to use synchronous (i.e&#x2e;, blocking) sockets without having to use a low-level API (<a href="porting4.html#qsocketdevice">QSocketDevice</a> in Qt 3).</li>
 <li><a href="qhostaddress.html">QHostAddress</a> and <a href="qhostinfo.html">QHostInfo</a> support internationalized domain names (RFC 3492).</li>
 <li><a href="qurl.html">QUrl</a> is more lightweight and fully supports the latest URI specification draft.</li>
 <li>UDP broadcasting is now supported.</li>
@@ -49,8 +50,8 @@
 <li><a href="qudpsocket.html">QUdpSocket</a> is an API for sending and receiving UDP datagrams.</li>
 </ul>
 <p><a href="qtcpsocket.html">QTcpSocket</a> and <a href="qudpsocket.html">QUdpSocket</a> inherit most of their functionality from <a href="qabstractsocket.html">QAbstractSocket</a>. You can also use <a href="qabstractsocket.html">QAbstractSocket</a> directly as a wrapper around a native socket descriptor.</p>
-<p>By default, the socket classes work asynchronously (i.e., they are non-blocking), emitting signals to notify when data has arrived or when the peer has closed the connection. In multithreaded applications and in non-GUI applications, you also have the opportunity of using blocking (synchronous) functions on the socket, which often results in a more straightforward style of programming, with the networking logic concentrated in one or two functions instead of spread across multiple slots.</p>
-<p><a href="qftp.html">QFtp</a> and <a href="qhttp.html">QHttp</a> use <a href="qtcpsocket.html">QTcpSocket</a> internally to implement the FTP and HTTP protocols. Both classes work asynchronously and can schedule (i.e., queue) requests.</p>
+<p>By default, the socket classes work asynchronously (i.e&#x2e;, they are non-blocking), emitting signals to notify when data has arrived or when the peer has closed the connection. In multithreaded applications and in non-GUI applications, you also have the opportunity of using blocking (synchronous) functions on the socket, which often results in a more straightforward style of programming, with the networking logic concentrated in one or two functions instead of spread across multiple slots.</p>
+<p><a href="qftp.html">QFtp</a> and <a href="qhttp.html">QHttp</a> use <a href="qtcpsocket.html">QTcpSocket</a> internally to implement the FTP and HTTP protocols. Both classes work asynchronously and can schedule (i.e&#x2e;, queue) requests.</p>
 <p>The network module contains four helper classes: <a href="qhostaddress.html">QHostAddress</a>, <a href="qhostinfo.html">QHostInfo</a>, <a href="qurl.html">QUrl</a>, and <a href="qurlinfo.html">QUrlInfo</a>. <a href="qhostaddress.html">QHostAddress</a> stores an IPv4 or IPv6 address, <a href="qhostinfo.html">QHostInfo</a> resolves host names into addresses, <a href="qurl.html">QUrl</a> stores a URL, and <a href="qurlinfo.html">QUrlInfo</a> stores information about a resource pointed to by a URL, such as the file size and modification date. (Because <a href="qurl.html">QUrl</a> is used by <a href="qtextbrowser.html">QTextBrowser</a>, it is part of the <a href="qtcore.html">QtCore</a> library and not of <a href="qtnetwork.html">QtNetwork</a>.)</p>
 <p>See the <a href="qtnetwork.html">QtNetwork</a> module overview for more information.</p>
 <a name="example-code"></a>
@@ -177,11 +178,11 @@
      }</pre>
 <a name="comparison-with-qt-3"></a>
 <h2>Comparison with Qt 3</h2>
-<p>The main difference between Qt 3 and Qt 4 is that the very high level <a href="porting4.html#qnetworkprotocol">QNetworkProtocol</a> and <a href="porting4.html#qurloperator">QUrlOperator</a> abstraction has been eliminated. These classes attempted the impossible (unify FTP and HTTP under one roof), and unsurprisingly failed at that. Qt 4 still provides <a href="qftp.html">QFtp</a> and <a href="qhttp.html">QHttp</a> classes, but only with the more mature API that appeared in Qt 3.1.</p>
+<p>The main difference between Qt 3 and Qt 4 is that the very high level <a href="porting4.html#qnetworkprotocol">QNetworkProtocol</a> and <a href="porting4.html#qurloperator">QUrlOperator</a> abstraction has been eliminated. These classes attempted the impossible (unify FTP and HTTP under one roof), and unsurprisingly failed at that. Qt 4 still provides <a href="qftp.html">QFtp</a> and <a href="qhttp.html">QHttp</a> classes, but only with the more mature API that appeared in Qt 3.1&#x2e;</p>
 <p>The <a href="porting4.html#qsocket">QSocket</a> class in Qt 3 has been renamed <a href="qtcpsocket.html">QTcpSocket</a>. The new class is reentrant and supports blocking. It's also easier to handle closing than with Qt 3, where you had to connect to both the QSocket::connectionClosed() and the QSocket::delayedCloseFinished() signals.</p>
 <p>The <a href="porting4.html#qserversocket">QServerSocket</a> class in Qt 3 has been renamed <a href="qtcpserver.html">QTcpServer</a>. The API has changed quite a bit. While in Qt 3 it was necessary to subclass <a href="porting4.html#qserversocket">QServerSocket</a> and reimplement the newConnection() pure virtual function, <a href="qtcpserver.html">QTcpServer</a> now emits a <a href="qtcpserver.html#newConnection">newConnection()</a> signal that you can connect to a slot.</p>
 <p>The <a href="qhostinfo.html">QHostInfo</a> class has been redesigned to use the operating system's getaddrinfo() function instead of implementing the DNS protocol. Internally, <a href="qhostinfo.html">QHostInfo</a> simply starts a thread and calls getaddrinfo() in that thread. This wasn't possible in Qt 3 because getaddrinfo() is a blocking call and Qt 3 could be configured without multithreading support.</p>
-<p>The <a href="porting4.html#qsocketdevice">QSocketDevice</a> class in Qt 3 is no longer part of the public Qt API. If you used <a href="porting4.html#qsocketdevice">QSocketDevice</a> to send or receive UDP datagrams, use <a href="qudpsocket.html">QUdpSocket</a> instead. If you used <a href="porting4.html#qsocketdevice">QSocketDevice</a> because it supported blocking sockets, use <a href="qtcpsocket.html">QTcpSocket</a> or <a href="qudpsocket.html">QUdpSocket</a> instead and use the blocking functions (<a href="qabstractsocket.html#waitForConnected">waitForConnected()</a>, <a href="qabstractsocket.html#waitForConnected">waitForReadyRead()</a>, etc.). If you used <a href="porting4.html#qsocketdevice">QSocketDevice</a> from a non-GUI thread because it was the only reentrant networking class in Qt 3, use <a href="qtcpsocket.html">QTcpSocket</a>, <a href="qtcpserver.html">QTcpServer</a>, or <a href="qudpsocket.html">QUdpSocket</a> instead.</p>
+<p>The <a href="porting4.html#qsocketdevice">QSocketDevice</a> class in Qt 3 is no longer part of the public Qt API. If you used <a href="porting4.html#qsocketdevice">QSocketDevice</a> to send or receive UDP datagrams, use <a href="qudpsocket.html">QUdpSocket</a> instead. If you used <a href="porting4.html#qsocketdevice">QSocketDevice</a> because it supported blocking sockets, use <a href="qtcpsocket.html">QTcpSocket</a> or <a href="qudpsocket.html">QUdpSocket</a> instead and use the blocking functions (<a href="qabstractsocket.html#waitForConnected">waitForConnected()</a>, <a href="qabstractsocket.html#waitForConnected">waitForReadyRead()</a>, etc.)&#x2e; If you used <a href="porting4.html#qsocketdevice">QSocketDevice</a> from a non-GUI thread because it was the only reentrant networking class in Qt 3, use <a href="qtcpsocket.html">QTcpSocket</a>, <a href="qtcpserver.html">QTcpServer</a>, or <a href="qudpsocket.html">QUdpSocket</a> instead.</p>
 <p>Internally, Qt 4 has a class called QSocketLayer that provides a cross-platform low-level socket API. It resembles the old <a href="porting4.html#qsocketdevice">QSocketDevice</a> class. We might make it public in a later release if users ask for it.</p>
 <p>As an aid to porting to Qt 4, the <a href="qt3support.html">Qt3Support</a> library includes Q3Dns, Q3ServerSocket, Q3Socket, and Q3SocketDevice classes.</p>
 <p>
@@ -193,6 +194,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -46,7 +46,7 @@
        <property name="sizePolicy" >
         <sizepolicy>
          <hsizetype>5</hsizetype>
-         <vsizetype>0</vsizetype>
+         <vsizetype>3</vsizetype>
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -56,6 +56,9 @@
        </property>
        <property name="wordWrap" >
         <bool>true</bool>
+       </property>
+       <property name="buddy" >
+        <cstring>exitNotify</cstring>
        </property>
       </widget>
      </item>
@@ -86,6 +89,9 @@
      </property>
      <property name="wordWrap" >
       <bool>true</bool>
+     </property>
+     <property name="buddy" >
+      <cstring>configFile</cstring>
      </property>
     </widget>
    </item>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -108,11 +108,11 @@ static const int KEY_SELECT_HOLD = Qt::Key_unknown + Qt::Key_Select;
 MenuView::MenuView( QWidget* parent )
     : QListView( parent ), m_eventcache( QEvent::None, QPoint(), Qt::NoButton, Qt::NoButton, Qt::NoModifier )
 {
-    static const int HOLD_THRESHOLD = 500;
+    static const int HOLD_THRESHOLD = 1000;
 
     new KeyHold( Qt::Key_Select, KEY_SELECT_HOLD, HOLD_THRESHOLD, this, this );
-    connect( this, SIGNAL(activated(const QModelIndex&)),
-        this, SIGNAL(selected(const QModelIndex&)) );
+    connect( this, SIGNAL(activated(QModelIndex)),
+        this, SIGNAL(selected(QModelIndex)) );
 
     // Customize list view appearance
     setFrameStyle( QFrame::NoFrame );

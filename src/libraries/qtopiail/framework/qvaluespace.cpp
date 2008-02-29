@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -532,18 +532,18 @@ struct QValueSpaceItemPrivateData : public QValueSpaceItemPrivate
             connections = new QValueSpaceItemPrivateProxy;
             connections->readers = readers;
             connections->connections.insert(space,1);
-            QObject::connect(space, SIGNAL(destroyed(QObject *)),
+            QObject::connect(space, SIGNAL(destroyed(QObject*)),
                              connections, SLOT(objDestroyed()));
             QObject::connect(connections, SIGNAL(changed()),
                              space, SIGNAL(contentsChanged()));
             for(int ii = 0; ii < readers.count(); ++ii) {
                 readers.at(ii).first->setProperty(readers.at(ii).second, IValueSpaceLayer::Publish);
-                QObject::connect(readers.at(ii).first, SIGNAL(handleChanged(unsigned int)), connections, SLOT(handleChanged(unsigned int)));
+                QObject::connect(readers.at(ii).first, SIGNAL(handleChanged(uint)), connections, SLOT(handleChanged(uint)));
             }
         } else if(!connections->connections.contains(space)) {
             connections->connections[space] = 1;
 
-            QObject::connect(space, SIGNAL(destroyed(QObject *)),
+            QObject::connect(space, SIGNAL(destroyed(QObject*)),
                     connections, SLOT(objDestroyed()));
             QObject::connect(connections, SIGNAL(changed()),
                     space, SIGNAL(contentsChanged()));
@@ -560,7 +560,7 @@ struct QValueSpaceItemPrivateData : public QValueSpaceItemPrivate
             if(iter != connections->connections.end()) {
                 --(*iter);
                 if(!*iter) {
-                    QObject::disconnect(space, SIGNAL(destroyed(QObject *)),
+                    QObject::disconnect(space, SIGNAL(destroyed(QObject*)),
                                         connections, SLOT(objDestroyed()));
                     QObject::disconnect(connections, SIGNAL(changed()),
                                         space, SIGNAL(contentsChanged()));

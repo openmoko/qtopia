@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,14 +26,52 @@
 #include <qtopia/pim/qpimdelegate.h>
 
 #include <QListView>
+#include <QStandardItem>
+#include <QStandardItemModel>
 #include <QMap>
 #include <QDialog>
 
-class QFont;
-class QKeyEvent;
+//class QFont;
+//class QKeyEvent;
+
+class QTOPIAPIM_EXPORT QContactItem : public QStandardItem
+{
+public:
+    QContactItem();
+    QContactItem(const QContact &, const QString &sublabel = QString(), const QPixmap &statusIcon = QPixmap());
+    ~QContactItem();
+
+    QString label() const;
+    void setLabel(const QString &text);
+
+    QPixmap portrait() const;
+    void setPortrait(const QPixmap &image);
+
+    QString subLabel() const;
+    void setSubLabel(const QString &text);
+
+    QPixmap statusIcon() const;
+    void setStatusIcon(const QPixmap &image);
+};
+
+class QTOPIAPIM_EXPORT QContactItemModel : public QStandardItemModel
+{
+    Q_OBJECT
+public:
+    using QStandardItemModel::appendRow;
+    QContactItemModel(QObject *parent = 0);
+    ~QContactItemModel();
+
+    void appendRow(const QContact &, const QString &sublabel = QString(), const QPixmap &statusIcon = QPixmap());
+
+    QStringList labels() const;
+    QStringList subLabels() const;
+};
 
 class QTOPIAPIM_EXPORT QContactDelegate : public QPimDelegate
 {
+    Q_OBJECT
+
 public:
     explicit QContactDelegate( QObject * parent = 0 );
     virtual ~QContactDelegate();
@@ -47,6 +85,8 @@ public:
     QSize decorationsSizeHint(const QStyleOptionViewItem& option, const QModelIndex& index, const QSize& textSize) const;
 };
 
+class QTextEntryProxy;
+class QContactListViewPrivate;
 class QTOPIAPIM_EXPORT QContactListView : public QListView
 {
     Q_OBJECT
@@ -71,13 +111,22 @@ public:
 
     QContactDelegate *contactDelegate() const { return qobject_cast<QContactDelegate *>(itemDelegate()); }
 
+    void setTextEntryProxy(QTextEntryProxy *);
+    QTextEntryProxy *textEntryProxy() const;
+
 private slots:
     void currentContactChanged(const QModelIndex& newIdx);
 
+private slots:
+    void setFilterText();
+
 protected:
 
-    // This is a binary compat stub now.
-    void keyPressEvent(QKeyEvent *event);
+    void focusInEvent(QFocusEvent *);
+    void focusOutEvent(QFocusEvent *);
+
+private:
+    QContactListViewPrivate *d;
 };
 
 class QContactSelectorPrivate;
@@ -85,18 +134,36 @@ class QTOPIAPIM_EXPORT QContactSelector : public QDialog
 {
     Q_OBJECT
 public:
-    QContactSelector(bool allowNew, QWidget *);
+    QContactSelector(bool allowNew, QWidget * = 0);
+    QContactSelector(QWidget * = 0);
+
+    void setCreateNewContactEnabled(bool);
+    void setAcceptTextEnabled(bool);
+
     void setModel(QContactModel *);
 
     bool newContactSelected() const;
     bool contactSelected() const;
+    bool textSelected() const;
+
     QContact selectedContact() const;
+    QString selectedText() const;
+
+    bool eventFilter(QObject *, QEvent *);
+
+signals:
+    void contactSelected(const QContact&);
+    void textSelected(const QString&);
 
 private slots:
     void setNewSelected();
     void setSelected(const QModelIndex&);
+    void filterList(const QString &);
+    void contactModelReset();
+    void completed();
 
 private:
+    void init();
     QContactSelectorPrivate *d;
 };
 
@@ -108,17 +175,20 @@ class QTOPIAPIM_EXPORT QPhoneTypeSelector : public QDialog
 public:
     QPhoneTypeSelector( const QContact &cnt, const QString &number,
         QWidget *parent = 0);
+    QPhoneTypeSelector( const QContact &cnt, const QString &number,
+        QList<QContact::PhoneType> allowedTypes, QWidget *parent = 0);
 
     QContact::PhoneType selected() const;
     QString selectedNumber() const;
 
     void updateContact(QContact &, const QString &) const;
-protected slots:
+public slots:
     void accept();
 signals:
     void selected(QContact::PhoneType);
 protected:
     void resizeEvent(QResizeEvent *resizeEvent);
+    void keyPressEvent(QKeyEvent *ke);
 private:
     void init();
 

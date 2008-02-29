@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -53,169 +53,215 @@
   The following image shows three QTask objects, rendered using a QTaskDelegate and a QTaskListView:
   \image qtaskview.png "QTaskListView and QTaskDelegate"
 
-  \sa QTask, QTaskListView, QTaskModel
+  \sa QTask, QTaskListView, QTaskModel, {Pim Library}
 */
 
 /*!
   Constructs a QTaskDelegate with parent \a parent.
 */
-QTaskDelegate::QTaskDelegate( QObject * parent )
-    : QAbstractItemDelegate(parent)
+QTaskDelegate::QTaskDelegate(QObject *parent) : QPimDelegate(parent)
 {
+
 }
 
 /*!
   Destroys a QTaskDelegate.
 */
-QTaskDelegate::~QTaskDelegate() {}
+QTaskDelegate::~QTaskDelegate()
+{
+
+}
 
 /*!
   \internal
-  Provides an alternate font based off the \a start font.  Reduces the size of the returned font
-  by at least step point sizes.  Will attempt a total of six point size steps beyond the requested
-  point size until a valid font size that differs from the starting font size is found.
+  Format a date in a "useful" format.
 */
-QFont QTaskDelegate::differentFont(const QFont& start, int step) const
+QString QTaskDelegate::formatDate(const QDate& date) const
 {
-    int osize = QFontMetrics(start).lineSpacing();
-    QFont f = start;
-    for (int t=1; t<6; t++) {
-        int newSize = f.pointSize() + step;
-        if ( newSize > 0 )
-            f.setPointSize(f.pointSize()+step);
-        else
-            return start; // we cannot find a font -> return old one
-        step += step < 0 ? -1 : +1;
-        QFontMetrics fm(f);
-        if ( fm.lineSpacing() != osize )
+    QDate today = QDate::currentDate();
+    if (today == date)
+        return tr("Today");
+    else if (today.year() == date.year())
+        return QTimeString::localMD(date);
+    else
+        return QTimeString::localYMD(date);
+}
+
+/*!
+  \reimp
+  */
+int QTaskDelegate::subTextsCountHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    // Always one line of subtexts
+    Q_UNUSED(option);
+    Q_UNUSED(index);
+    return 1;
+}
+
+// Draw headers non bold
+/*!
+  \reimp
+*/
+QFont QTaskDelegate::secondaryHeaderFont(const QStyleOptionViewItem &option, const QModelIndex& index) const
+{
+    return QTaskDelegate::secondaryFont(option, index);
+}
+
+/*!
+  \reimp
+*/
+QList<StringPair> QTaskDelegate::subTexts(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    Q_UNUSED(option);
+
+    QList< StringPair > subTexts;
+    QString progress = index.model()->data(index.sibling(index.row(), QTaskModel::PercentCompleted),Qt::DisplayRole).toString();
+    QTask::Status s = (QTask::Status)index.model()->data(index.sibling(index.row(), QTaskModel::Status),Qt::DisplayRole).toInt();
+
+    static const QLatin1String space(" ");
+
+    // We only have one line
+    QString valueStr;
+    QString headerStr;
+
+    switch(s) {
+        case QTask::Completed: // Just display the completed date
+            {
+                QDate finishedDate = index.model()->data(index.sibling(index.row(), QTaskModel::CompletedDate),Qt::DisplayRole).toDate();
+                // finishedDate should be valid since it is 100% complete..
+                headerStr = tr("Completed:");
+                valueStr = formatDate(finishedDate);
+            }
+            break;
+
+        case QTask::NotStarted: // Display due date, if any, otherwise not started
+            {
+                QDate dueDate = index.model()->data(index.sibling(index.row(), QTaskModel::DueDate),Qt::DisplayRole).toDate();
+                if (dueDate.isValid()) {
+                    headerStr = tr("Due:");
+                    valueStr = tr("%1 (%2)", "4th July (Not started)").arg(formatDate( dueDate ), tr("Not started"));
+                } else {
+                    headerStr = tr("Status:");
+                    valueStr = tr("Not started");
+                }
+            }
+            break;
+
+        case QTask::InProgress: // Display due date, if any, with progress
+            {
+                QDate dueDate = index.model()->data(index.sibling(index.row(), QTaskModel::DueDate),Qt::DisplayRole).toDate();
+                if (dueDate.isValid()) {
+                    headerStr = tr("Due:");
+                    valueStr = tr("%1 (%2\%)", "4th July (10%)").arg(formatDate(dueDate), progress);
+                } else {
+                    // No due date, display "Progress: 10%"
+                    headerStr = tr("Progress:");
+                    valueStr =  tr("%1\%", "50%").arg(progress);
+                }
+            }
+            break;
+
+        case QTask::Waiting:
+        case QTask::Deferred: // Display due date, if any, with progress and the task state
+            {
+                QDate dueDate = index.model()->data(index.sibling(index.row(), QTaskModel::DueDate),Qt::DisplayRole).toDate();
+                QString stateStr = (s == QTask::Waiting) ? tr("Waiting") : tr("Deferred");
+                if (dueDate.isValid()) {
+                    headerStr = tr("Due:");
+                    valueStr = tr("%1 (%2\%, %3)", "4th July (10%, Deferred)").arg(formatDate(dueDate), progress, stateStr);
+                } else {
+                    // No due date, display "Progress: 10% (Deferred)"
+                    headerStr = tr("Progress:");
+                    valueStr =  tr("%1\% (%2)", "50% (Deferred)").arg(progress, stateStr);
+                }
+            }
             break;
     }
-    return f;
+    subTexts.append(qMakePair(headerStr + space, valueStr));
+
+    return subTexts;
 }
 
 /*!
-  \internal
-  Returns the font to use for painting the main label text of the item.
-  Due to the nature of rich text painting in Qt 4.0 attributes such as bold and italic will be
-  ignored.
-
-  By default returns the font of the style option \a o.
+  \reimp
 */
-QFont QTaskDelegate::mainFont(const QStyleOptionViewItem &o) const
+void QTaskDelegate::drawDecorations(QPainter* p, bool rtl, const QStyleOptionViewItem &option, const QModelIndex& index,
+                                  QList<QRect>& leadingFloats, QList<QRect>& trailingFloats) const
 {
-    return o.font;
+    Q_UNUSED(option);
+    Q_UNUSED(trailingFloats);
+
+    int decorationSize = qApp->style()->pixelMetric(QStyle::PM_ListViewIconSize) / 2;
+
+    QIcon i = qvariant_cast<QIcon>(index.model()->data(index, Qt::DecorationRole));
+
+    QRect drawRect = option.rect;
+    // 8px padding, 4 on either side
+    if (rtl) {
+        drawRect.setLeft(drawRect.right() - decorationSize - 8);
+    } else {
+        drawRect.setRight(decorationSize + 8);
+    }
+    QPoint drawOffset = QPoint(drawRect.left() + ((drawRect.width() - decorationSize)/2), drawRect.top() + ((drawRect.height() - decorationSize) / 2));
+
+    p->drawPixmap(drawOffset, i.pixmap(decorationSize));
+
+    leadingFloats.append(drawRect);
+
+    // Check for recurrence (draw trailing icon)
+    int repeatrule = index.model()->data(index.sibling(index.row(), QTaskModel::RepeatRule), Qt::DisplayRole).toInt();
+    int reminder = index.model()->data(index.sibling(index.row(), QTaskModel::Alarm), Qt::DisplayRole).toInt();
+
+    QList<QIcon*> trailicons;
+
+    if (repeatrule != 0) {
+        static QIcon repicon(":icon/repeat");
+        trailicons.append(&repicon);
+    }
+
+    if (reminder == QAppointment::Audible) {
+        static QIcon audicon(":icon/datebook/audible");
+        trailicons.append(&audicon);
+    }
+
+    if (reminder == QAppointment::Visible) {
+        static QIcon visicon(":icon/datebook/silent");
+        trailicons.append(&visicon);
+    }
+
+    if (trailicons.count() != 0) {
+        drawRect = option.rect;
+        // 4px at the ends, 4px between
+        int iconswidth = (trailicons.count() * (decorationSize + 4)) + 4;
+        if (rtl) {
+            drawRect.setRight(iconswidth);
+        } else {
+            drawRect.setLeft(drawRect.right() - iconswidth);
+        }
+
+        QPoint drawOffset = QPoint(rtl ? drawRect.left() + 4 : drawRect.right() - decorationSize - 4, drawRect.top() + ((drawRect.height() - decorationSize) / 2));
+        foreach(QIcon *i, trailicons) {
+            p->drawPixmap(drawOffset, i->pixmap(decorationSize));
+            drawOffset.rx() += rtl ? decorationSize + 4 : -(decorationSize + 4);
+        }
+
+        trailingFloats.append(drawRect);
+    }
+
 }
 
 /*!
-  \internal
-  Paints the element at \a index using \a painter with style options \a option.
-
-  The \c description() of the QTask corresponding to \a index is rendered
-  as bold rich text, using the font from \l mainFont() as the base font.
-
-  If the task is selected, it will be drawn with a highlighted background and
-  a different foreground color.
+  \reimp
 */
-void QTaskDelegate::paint(QPainter *painter, const QStyleOptionViewItem & option,
-        const QModelIndex & index ) const
+QSize QTaskDelegate::decorationsSizeHint(const QStyleOptionViewItem& option, const QModelIndex& index, const QSize& s) const
 {
-    QString text = "<b>";
-    text += qobject_cast<const QTaskModel*>(index.model())->task(index).description();
-    text += "<b>";
-
-    painter->save();
-    painter->setClipRect(option.rect);
-
-    // fill rect based on row background
-    // or assume can be left to list class
-    bool selected = (option.state & QStyle::State_Selected) == QStyle::State_Selected;
-    QBrush baseBrush = selected ? option.palette.highlight() : option.palette.base();
-    QBrush textBrush = selected ? option.palette.highlightedText() : option.palette.text();
-    QPalette modpalette(option.palette);
-
-    modpalette.setBrush(QPalette::Text, textBrush);
-    modpalette.setBrush(QPalette::Base, baseBrush);
-
-    painter->setBrush(baseBrush);
-    painter->setPen(textBrush.color());
-
-    painter->fillRect(option.rect, baseBrush);
-
-    // set up fonts, fbold, fsmall, fsmallbold
-    QFont fbold = mainFont(option);
-
-    int x = option.rect.x();
-    int y = option.rect.y();
-    int width = option.rect.width();
-    int height = option.rect.height()-1;
-
-    // draw label bold
-    painter->setFont(fbold);
-
-    // fit inside available width;
-    QFontMetrics fboldM(fbold);
-
-    // somehow underline appropriate characters.
-    // clm->markSearchedText(text);, if richtext, would be <u>...</u> but only first
-    // QTaskModel maybe could do a better job of this.
-
-    QRect space;
-    bool rtl = QtopiaApplication::layoutDirection() == Qt::RightToLeft ;
-    if ( rtl )
-        space = QRect(option.rect.x(), y, width, height);
-    else
-        space = QRect(x, y, width, height);
-
-    // draw label/fileas
-    QTextOption to;
-    to.setWrapMode(QTextOption::WordWrap);
-    to.setAlignment(QStyle::visualAlignment(qApp->layoutDirection(),
-                Qt::AlignLeft));
-
-    QString drawText;
-    /* elidedText drops formatting from rich text */
-    if(fboldM.width(text) > space.width())
-        drawText = elidedText(fboldM, space.width(), Qt::ElideRight, text);
-    else
-        drawText = text;
-
-    // Painting simple rich text, although all I need to do is deal with a bit of
-    // an underline.
-    QTextDocument document;
-    document.setDefaultFont(fbold);
-    document.setHtml(drawText); // or setPlainText or create using QTextCursor, etc.
-
-    /* seemingly the only way to stop wrapping in a QTextDocument... */
-    document.setPageSize(space.size().expandedTo(QSize(1000, 0)));
-
-    QTextCursor cursor = document.rootFrame()->firstCursorPosition();
-    QTextBlockFormat frmt = cursor.blockFormat();
-    frmt.setAlignment(QStyle::visualAlignment( qApp->layoutDirection(), Qt::AlignLeft ));
-    cursor.setBlockFormat( frmt );
-    QTextCharFormat charFmt = cursor.charFormat();
-    QAbstractTextDocumentLayout::PaintContext ctx;
-    ctx.palette = modpalette;
-    ctx.clip = QRect(0, 0, space.width(), space.height());
-    painter->restore();
-    painter->save();
-    painter->translate(space.x(), space.y());
-    painter->setClipRect(0, 0, space.width(), space.height());
-    document.documentLayout()->draw(painter, ctx);
-    painter->restore();
-}
-
-/*!
-   \reimp
-*/
-QSize QTaskDelegate::sizeHint(const QStyleOptionViewItem & option,
-                              const QModelIndex &index) const
-{
+    Q_UNUSED(option);
     Q_UNUSED(index);
 
-    QFontMetrics fm(mainFont(option));
-
-    return QSize(fm.width("M") * 10, fm.height() + 9);
+    int decorationSize = qApp->style()->pixelMetric(QStyle::PM_ListViewIconSize) / 2;
+    return QSize(decorationSize + s.width(), qMax(decorationSize + 2, s.height()));
 }
+
 /*!
   \class QTaskListView
   \mainclass
@@ -236,7 +282,7 @@ QSize QTaskDelegate::sizeHint(const QStyleOptionViewItem & option,
   The following image shows three QTask objects, rendered using a QTaskDelegate and a QTaskListView:
   \image qtaskview.png "QTaskListView and QTaskDelegate"
 
-  \sa QTask, QTaskDelegate, QTaskModel
+  \sa QTask, QTaskDelegate, QTaskModel, {Pim Library}
 */
 
 /*!
@@ -357,6 +403,8 @@ public:
 
   The following image shows a QTaskSelector with the option to create a new task highlighted.
   \image qtaskselector.png "QTaskSelector, with the new task option highlighted"
+
+  \sa {Pim Library}
 */
 
 /*!
@@ -371,12 +419,13 @@ QTaskSelector::QTaskSelector(bool allowNew, QWidget *parent)
     d->mTaskSelected = false;
     setWindowTitle( tr("Select Tasks") );
     QVBoxLayout *l = new QVBoxLayout( this );
+    l->setMargin(0);
 
     d->view = new QTaskListView( this );
     d->view->setItemDelegate(new QTaskDelegate(d->view));
     d->view->setSelectionMode( QListView::SingleSelection );
-    connect( d->view, SIGNAL(clicked(const QModelIndex&)), this, SLOT(setSelected(const QModelIndex&)) );
-    connect( d->view, SIGNAL(activated(const QModelIndex&)), this, SLOT(setSelected(const QModelIndex&)) );
+    connect( d->view, SIGNAL(clicked(QModelIndex)), this, SLOT(setSelected(QModelIndex)) );
+    connect( d->view, SIGNAL(activated(QModelIndex)), this, SLOT(setSelected(QModelIndex)) );
 
     l->addWidget( d->view );
 
@@ -426,7 +475,29 @@ void QTaskSelector::setSelected(const QModelIndex& idx)
 */
 void QTaskSelector::setModel(QTaskModel *model)
 {
+    QAbstractItemModel *m = d->view->model();
     d->view->setModel(model);
+    if (m != model) {
+        if (m)
+            disconnect(m, SIGNAL(modelReset()), this, SLOT(taskModelReset()));
+        if (model)
+            connect(model, SIGNAL(modelReset()), this, SLOT(taskModelReset()));
+    }
+}
+
+/*!
+  \internal
+   Model resets don't generate current index changed message, so
+   force the first task to be selected.
+*/
+void QTaskSelector::taskModelReset()
+{
+    /* we know our selection is invalid.. */
+    QModelIndex newSel = d->view->model()->index(0,0);
+    if (newSel.isValid()) {
+        d->view->setCurrentIndex(newSel);
+        d->view->selectionModel()->setCurrentIndex(newSel, QItemSelectionModel::ClearAndSelect);
+    }
 }
 
 /*!

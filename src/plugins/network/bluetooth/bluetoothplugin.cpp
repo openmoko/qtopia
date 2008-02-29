@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -47,7 +47,7 @@ BluetoothPlugin::~BluetoothPlugin()
 
 QPointer<QtopiaNetworkInterface> BluetoothPlugin::network( const QString& confFile)
 {
-    qLog(Network) << "new Bluetooth interface instance requested";
+    qLog(Network) << "new Bluetooth interface instance requested -> " << confFile;
     QPointer<QtopiaNetworkInterface> impl = new BluetoothImpl( confFile );
     instances.append(impl);
 
@@ -59,4 +59,8 @@ QtopiaNetwork::Type BluetoothPlugin::type() const
     return ( QtopiaNetwork::Bluetooth| QtopiaNetwork::BluetoothDUN );
 }
 
+QByteArray BluetoothPlugin::customID() const
+{
+    return QByteArray();
+}
 QTOPIA_EXPORT_PLUGIN( BluetoothPlugin );

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -366,6 +381,8 @@ QPixmapData::~QPixmapData()
     delete paintEngine;
 }
 
+typedef void (*_qt_pixmap_cleanup_hook_64)(qint64);
+extern _qt_pixmap_cleanup_hook_64 qt_pixmap_cleanup_hook_64;
 
 /*!
     Detaches the pixmap from shared pixmap data.
@@ -384,13 +401,14 @@ QPixmapData::~QPixmapData()
     The detach() function returns immediately if there is just a
     single reference or if the pixmap has not been initialized yet.
 */
-
 void QPixmap::detach()
 {
-    ++data->detach_no;
+    if (qt_pixmap_cleanup_hook_64 && data->count == 1)
+        qt_pixmap_cleanup_hook_64(cacheKey());
+
     if (data->count != 1)
         *this = copy();
-
+    ++data->detach_no;
     data->uninit = false;
 
     // reset the cache data
@@ -425,6 +443,7 @@ void QPixmap::fill(const QColor &fillColor)
     if (fillColor.alpha() != 255) {
 #ifndef QT_NO_XRENDER
         if (data->picture && data->d == 32) {
+            detach();
             ::Picture src  = X11->getSolidFill(data->xinfo.screen(), fillColor);
             XRenderComposite(X11->display, PictOpSrc, src, 0, data->picture,
                              0, 0, width(), height(),
@@ -720,7 +739,7 @@ QImage QPixmap::toImage() const
     int            h  = height();
     int            d  = depth();
     Visual *visual = (Visual *) data->xinfo.visual();
-    bool    trucol = (visual->c_class >= TrueColor) && d > 8;
+    bool    trucol = (visual->c_class >= TrueColor) && d > 1;
 
     QImage::Format format = QImage::Format_Mono;
     if (d > 1 && d <= 8) {
@@ -745,6 +764,30 @@ QImage QPixmap::toImage() const
     if (data->picture && data->d == 32) {
         QImage image(data->w, data->h, QImage::Format_ARGB32_Premultiplied);
         memcpy(image.bits(), xi->data, xi->bytes_per_line * xi->height);
+
+        // we may have to swap the byte order
+        if ((QSysInfo::ByteOrder == QSysInfo::LittleEndian && xi->byte_order == MSBFirst)
+            || (QSysInfo::ByteOrder == QSysInfo::BigEndian))
+        {
+            for (int i=0; i < image.height(); i++) {
+                uint *p = (uint*) image.scanLine(i);
+                uint *end = p + image.width();
+                if ((xi->byte_order == LSBFirst && QSysInfo::ByteOrder == QSysInfo::BigEndian)
+                    || (xi->byte_order == MSBFirst && QSysInfo::ByteOrder == QSysInfo::LittleEndian)) {
+                    while (p < end) {
+                        *p = ((*p << 24) & 0xff000000) | ((*p << 8) & 0x00ff0000)
+                             | ((*p >> 8) & 0x0000ff00) | ((*p >> 24) & 0x000000ff);
+                        p++;
+                    }
+                } else if (xi->byte_order == MSBFirst && QSysInfo::ByteOrder == QSysInfo::BigEndian) {
+                    while (p < end) {
+                        *p = ((*p << 16) & 0x00ff0000) | ((*p >> 16) & 0x000000ff)
+                             | ((*p ) & 0xff00ff00);
+                        p++;
+                    }
+                }
+            }
+        }
 
         // throw away image data
         qSafeXDestroyImage(xi);
@@ -1055,7 +1098,7 @@ QPixmap QPixmap::fromImage(const QImage &img, Qt::ImageConversionFlags flags)
         }
     }
 
-    if (d == 1) {
+    if (d == 1 || d == 16) {
         QImage im = image.convertToFormat(QImage::Format_RGB32, flags);
         return fromImage(im);
     }
@@ -1790,23 +1833,10 @@ QPixmap QPixmap::grabWindow(WId window, int x, int y, int w, int h)
     pm.data->uninit = false;
     pm.x11SetScreen(scr);
 
-#ifndef QT_NO_XRENDER
-    if (pm.data->picture) {
-        XRenderPictFormat *format = XRenderFindVisualFormat(dpy, window_attr.visual);
-        XRenderPictureAttributes pattr;
-        pattr.subwindow_mode = IncludeInferiors;
-        Picture src_pict = XRenderCreatePicture(dpy, window, format, CPSubwindowMode, &pattr);
-        Picture dst_pict = pm.x11PictureHandle();
-        XRenderComposite(dpy, PictOpSrc, src_pict, 0, dst_pict, x, y, x, y, 0, 0, w, h);
-        XRenderFreePicture(dpy, src_pict);
-    } else
-#endif
-        {
-            GC gc = XCreateGC(dpy, pm.handle(), 0, 0);
-            XSetSubwindowMode(dpy, gc, IncludeInferiors);
-            XCopyArea(dpy, window, pm.handle(), gc, x, y, w, h, 0, 0);
-            XFreeGC(dpy, gc);
-        }
+    GC gc = XCreateGC(dpy, pm.handle(), 0, 0);
+    XSetSubwindowMode(dpy, gc, IncludeInferiors);
+    XCopyArea(dpy, window, pm.handle(), gc, x, y, w, h, 0, 0);
+    XFreeGC(dpy, gc);
 
     return pm;
 }
@@ -1829,27 +1859,28 @@ QPixmap QPixmap::grabWindow(WId window, int x, int y, int w, int h)
     \sa trueMatrix(), {QPixmap#Pixmap Transformations}{Pixmap
     Transformations}
 */
-
-QPixmap QPixmap::transformed(const QMatrix &matrix, Qt::TransformationMode mode) const
+QPixmap QPixmap::transformed(const QTransform &matrix, Qt::TransformationMode mode) const
 {
-    uint          w = 0;
-    uint          h = 0;                                // size of target pixmap
-    uint          ws, hs;                                // size of source pixmap
+    uint   w = 0;
+    uint   h = 0;                               // size of target pixmap
+    uint   ws, hs;                              // size of source pixmap
     uchar *dptr;                                // data in target pixmap
-    uint          dbpl, dbytes;                        // bytes per line/bytes total
+    uint   dbpl, dbytes;                        // bytes per line/bytes total
     uchar *sptr;                                // data in original pixmap
-    int           sbpl;                                // bytes per line in original
-    int           bpp;                                        // bits per pixel
+    int    sbpl;                                // bytes per line in original
+    int    bpp;                                 // bits per pixel
     bool   depth1 = depth() == 1;
     Display *dpy = X11->display;
 
-    if (isNull())                                // this is a null pixmap
+    if (isNull())
         return copy();
 
     ws = width();
     hs = height();
 
-    QMatrix mat(matrix.m11(), matrix.m12(), matrix.m21(), matrix.m22(), 0., 0.);
+    QTransform mat(matrix.m11(), matrix.m12(), matrix.m13(),
+                   matrix.m21(), matrix.m22(), matrix.m23(),
+                   0., 0., 1);
     bool complex_xform = false;
     qreal scaledWidth;
     qreal scaledHeight;
@@ -1875,10 +1906,11 @@ QPixmap QPixmap::transformed(const QMatrix &matrix, Qt::TransformationMode mode)
 
 
     bool invertible;
-    mat = mat.inverted(&invertible);                // invert matrix
+    mat = mat.inverted(&invertible);  // invert matrix
 
     if (h == 0 || w == 0 || !invertible
-        || qAbs(scaledWidth) >= 32768 || qAbs(scaledHeight) >= 32768 )	// error, return null pixmap
+        || qAbs(scaledWidth) >= 32768 || qAbs(scaledHeight) >= 32768 )
+	// error, return null pixmap
         return QPixmap();
 
     if (mode == Qt::SmoothTransformation) {
@@ -2024,6 +2056,17 @@ QPixmap QPixmap::transformed(const QMatrix &matrix, Qt::TransformationMode mode)
     }
 }
 
+/*!
+  \overload
+
+  This convenience function loads the \a matrix into a
+  QTransform and calls the overloaded function.
+ */
+QPixmap QPixmap::transformed(const QMatrix &matrix, Qt::TransformationMode mode) const
+{
+    return transformed(QTransform(matrix), mode);
+}
+
 
 /*!
   \internal
@@ -2069,7 +2112,10 @@ void QPixmap::x11SetScreen(int screen)
 
     QImage img = toImage();
     x11SetDefaultScreen(screen);
-    (*this) = fromImage(img);
+    if (img.depth() == 1)
+        (*this) = QBitmap::fromImage(img);
+    else
+        (*this) = fromImage(img);
 }
 
 /*!

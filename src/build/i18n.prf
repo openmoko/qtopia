@@ -15,7 +15,7 @@ DEFINES+=QTOPIA_TRTARGET=$$LITERAL_ESCAPED_QUOTE$$TRTARGET$$LITERAL_ESCAPED_QUOT
 
 # The "template" that can be used for multiple installations
 linstall_template=$$COMMAND_HEADER\
-    $$fixpath($$QPEDIR/bin/linstall)\
+    $$fixpath($$QBS_BIN/linstall)\
         $${LITERAL_QUOTE}TRTARGET$$LITERAL_QUOTE\
         $$LITERAL_QUOTE$$TRANSLATIONS$$LITERAL_QUOTE\
         $$LITERAL_QUOTE$$DQTDIR$$LITERAL_QUOTE\
@@ -63,7 +63,7 @@ for(it,INSTALLS) {
                 commands~=s/^"//
                 commands~=s/"$//
             }
-            commands~=s,TRTARGET,$$eval($${it}.trtarget),gq
+            commands~=s,TRTARGET,$$trtarget,gq
             outdir=$$eval($${it}.outdir)
             isEmpty(outdir):outdir=$$SRCDIR
             commands~=s,SRCDIR,$$outdir,gq
@@ -76,7 +76,7 @@ for(it,INSTALLS) {
         eval(nct_lupdate_$${it}.CONFIG=no_link no_dependencies combine ignore_no_exist no_clean)
         commands=$$COMMAND_HEADER\
             cd $$outdir $$COMMAND_SEP\
-            $$fixpath($$QPEDIR/bin/nct_lupdate)
+            $$fixpath($$QBS_BIN/nct_lupdate)
         contains(hint,content) {
             containsre($$trtarget,^Qtopia):commands+=\
                 -depot $$fixpath($$QTOPIA_DEPOT_PATH)
@@ -113,7 +113,7 @@ for(it,INSTALLS) {
         eval(theme_lupdate_$${it}.CONFIG=no_link no_dependencies ignore_no_exist no_clean)
         commands=$$COMMAND_HEADER\
             cd $$outdir $$COMMAND_SEP\
-            $$fixpath($$QPEDIR/bin/theme_lupdate)\
+            $$fixpath($$QBS_BIN/theme_lupdate)\
                 $$DQTDIR\
                 $$LITERAL_QUOTE$$TRANSLATIONS$$LITERAL_QUOTE\
                 ${QMAKE_FILE_IN}

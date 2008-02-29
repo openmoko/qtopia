@@ -263,7 +263,7 @@ private:
 
     int prefixLength(const QString &, int f = 0) const;
     int suffixLength(const QString &, int f = 0) const;
-    QStringList searchDict(bool prefixfallback, bool predict, const QString& lang, const QStringList& extradict, int start, int len , uint *merror = 0) const;
+    QStringList searchDict(bool allowprefix, bool predict, const QString& lang, const QStringList& extradict, int start, int len , uint *merror = 0) const;
 
     InputMatcherWordErrorList findWords(const QDawg::Node* node, int set, int maxset, const QString& str, uint error, bool allowprefix, bool predict) const;
 

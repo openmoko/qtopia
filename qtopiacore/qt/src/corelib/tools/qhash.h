@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,14 +43,17 @@
 #include <QtCore/qchar.h>
 #include <QtCore/qiterator.h>
 #include <QtCore/qlist.h>
+#include <QtCore/qpair.h>
 
 QT_BEGIN_HEADER
 
 #undef QT_QHASH_DEBUG
 QT_MODULE(Core)
 
+class QBitArray;
 class QByteArray;
 class QString;
+class QStringRef;
 
 inline uint qHash(char key) { return uint(key); }
 inline uint qHash(uchar key) { return uint(key); }
@@ -65,6 +83,8 @@ inline uint qHash(qint64 key) { return qHash(quint64(key)); }
 inline uint qHash(QChar key) { return qHash(key.unicode()); }
 Q_CORE_EXPORT uint qHash(const QByteArray &key);
 Q_CORE_EXPORT uint qHash(const QString &key);
+Q_CORE_EXPORT uint qHash(const QStringRef &key);
+Q_CORE_EXPORT uint qHash(const QBitArray &key);
 
 #if defined(Q_CC_MSVC)
 #pragma warning( push )
@@ -80,6 +100,13 @@ template <class T> inline uint qHash(const T *key)
 #if defined(Q_CC_MSVC)
 #pragma warning( pop )
 #endif
+
+template <typename T1, typename T2> inline uint qHash(const QPair<T1, T2> &key)
+{
+    uint h1 = qHash(key.first);
+    uint h2 = qHash(key.second);
+    return ((h1 << 16) | (h1 >> 16)) ^ h2;
+}
 
 struct Q_CORE_EXPORT QHashData
 {
@@ -249,6 +276,7 @@ public:
 
     bool contains(const Key &key) const;
     const Key key(const T &value) const;
+    const Key key(const T &value, const Key &defaultKey) const;
     const T value(const Key &key) const;
     const T value(const Key &key, const T &defaultValue) const;
     T &operator[](const Key &key);
@@ -543,8 +571,8 @@ Q_INLINE_TEMPLATE QHash<Key, T> &QHash<Key, T>::operator=(const QHash<Key, T> &o
 template <class Key, class T>
 Q_INLINE_TEMPLATE const T QHash<Key, T>::value(const Key &akey) const
 {
-    Node *node = *findNode(akey);
-    if (node == e) {
+    Node *node;
+    if (d->size == 0 || (node = *findNode(akey)) == e) {
         return T();
     } else {
         return node->value;
@@ -554,8 +582,8 @@ Q_INLINE_TEMPLATE const T QHash<Key, T>::value(const Key &akey) const
 template <class Key, class T>
 Q_INLINE_TEMPLATE const T QHash<Key, T>::value(const Key &akey, const T &adefaultValue) const
 {
-    Node *node = *findNode(akey);
-    if (node == e) {
+    Node *node;
+    if (d->size == 0 || (node = *findNode(akey)) == e) {
         return adefaultValue;
     } else {
         return node->value;
@@ -609,6 +637,12 @@ Q_OUTOFLINE_TEMPLATE QList<Key> QHash<Key, T>::keys(const T &avalue) const
 template <class Key, class T>
 Q_OUTOFLINE_TEMPLATE const Key QHash<Key, T>::key(const T &avalue) const
 {
+    return key(avalue, Key());
+}
+
+template <class Key, class T>
+Q_OUTOFLINE_TEMPLATE const Key QHash<Key, T>::key(const T &avalue, const Key &defaultValue) const
+{
     const_iterator i = begin();
     while (i != end()) {
         if (i.value() == avalue)
@@ -616,7 +650,7 @@ Q_OUTOFLINE_TEMPLATE const Key QHash<Key, T>::key(const T &avalue) const
         ++i;
     }
 
-    return Key();
+    return defaultValue;
 }
 
 template <class Key, class T>
@@ -848,27 +882,109 @@ public:
     QMultiHash() {}
     QMultiHash(const QHash<Key, T> &other) : QHash<Key, T>(other) {}
 
-    inline typename QHash<Key, T>::iterator replace(const Key &key, const T &value);
-    inline typename QHash<Key, T>::iterator insert(const Key &key, const T &value);
+    inline typename QHash<Key, T>::iterator replace(const Key &key, const T &value)
+    { return QHash<Key, T>::insert(key, value); }
+
+    inline typename QHash<Key, T>::iterator insert(const Key &key, const T &value)
+    { return QHash<Key, T>::insertMulti(key, value); }
 
     inline QMultiHash &operator+=(const QMultiHash &other)
     { unite(other); return *this; }
     inline QMultiHash operator+(const QMultiHash &other) const
     { QMultiHash result = *this; result += other; return result; }
 
+#ifndef Q_NO_USING_KEYWORD
+    using QHash<Key, T>::contains;
+    using QHash<Key, T>::remove;
+    using QHash<Key, T>::count;
+    using QHash<Key, T>::find;
+    using QHash<Key, T>::constFind;
+#else
+    inline bool contains(const Key &key) const
+    { return QHash<Key, T>::contains(key); }
+    inline int remove(const Key &key)
+    { return QHash<Key, T>::remove(key); }
+    inline int count(const Key &key) const
+    { return QHash<Key, T>::count(key); }
+    inline int count() const
+    { return QHash<Key, T>::count(); }
+    inline typename QHash<Key, T>::iterator find(const Key &key)
+    { return QHash<Key, T>::find(key); }
+    inline typename QHash<Key, T>::const_iterator find(const Key &key) const
+    { return QHash<Key, T>::find(key); }
+    inline typename QHash<Key, T>::const_iterator constFind(const Key &key) const
+    { return QHash<Key, T>::constFind(key); }
+#endif
+
+    bool contains(const Key &key, const T &value) const;
+
+    int remove(const Key &key, const T &value);
+
+    int count(const Key &key, const T &value) const;
+
+    typename QHash<Key, T>::iterator find(const Key &key, const T &value) {
+        typename QHash<Key, T>::iterator i(find(key));
+        typename QHash<Key, T>::iterator end(this->end());
+        while (i != end && i.key() == key) {
+            if (i.value() == value)
+                return i;
+            ++i;
+        }
+        return end;
+    }
+    typename QHash<Key, T>::const_iterator find(const Key &key, const T &value) const {
+        typename QHash<Key, T>::const_iterator i(constFind(key));
+        typename QHash<Key, T>::const_iterator end(QHash<Key, T>::constEnd());
+        while (i != end && i.key() == key) {
+            if (i.value() == value)
+                return i;
+            ++i;
+        }
+        return end;
+    }
+    typename QHash<Key, T>::const_iterator constFind(const Key &key, const T &value) const
+        { return find(key, value); }
 private:
     T &operator[](const Key &key);
     const T operator[](const Key &key) const;
 };
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE Q_TYPENAME QHash<Key, T>::iterator QMultiHash<Key, T>::replace(const Key &akey, const T &avalue)
-{ return QHash<Key, T>::insert(akey, avalue); }
+Q_INLINE_TEMPLATE bool QMultiHash<Key, T>::contains(const Key &key, const T &value) const
+{
+    return constFind(key, value) != QHash<Key, T>::constEnd();
+}
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE Q_TYPENAME QHash<Key, T>::iterator QMultiHash<Key, T>::insert(const Key &akey, const T &avalue)
-{ return QHash<Key, T>::insertMulti(akey, avalue); }
+Q_INLINE_TEMPLATE int QMultiHash<Key, T>::remove(const Key &key, const T &value)
+{
+    int n = 0;
+    typename QHash<Key, T>::iterator i(find(key));
+    typename QHash<Key, T>::const_iterator end(QHash<Key, T>::constEnd());
+    while (i != end && i.key() == key) {
+        if (i.value() == value) {
+            i = erase(i);
+            ++n;
+        } else {
+            ++i;
+        }
+    }
+    return n;
+}
 
+template <class Key, class T>
+Q_INLINE_TEMPLATE int QMultiHash<Key, T>::count(const Key &key, const T &value) const
+{
+    int n = 0;
+    typename QHash<Key, T>::const_iterator i(constFind(key));
+    typename QHash<Key, T>::const_iterator end(QHash<Key, T>::constEnd());
+    while (i != end && i.key() == key) {
+        if (i.value() == value)
+            ++n;
+        ++i;
+    }
+    return n;
+}
 
 Q_DECLARE_ASSOCIATIVE_ITERATOR(Hash)
 Q_DECLARE_MUTABLE_ASSOCIATIVE_ITERATOR(Hash)

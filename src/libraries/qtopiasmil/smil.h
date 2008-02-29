@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,9 +22,6 @@
 #ifndef SMIL_H
 #define SMIL_H
 
-// WARNING: These classes are not part of the Qtopia API.
-// They are subject to change at any time.
-
 #include <qwidget.h>
 #include <qtopiaglobal.h>
 
@@ -40,7 +37,7 @@ public:
     explicit SmilView(QWidget *parent=0, Qt::WFlags f=0);
     ~SmilView();
 
-    void setSource(const QString &str);
+    bool setSource(const QString &str);
     SmilElement *rootElement() const;
 
 public slots:

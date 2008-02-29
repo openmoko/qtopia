@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -57,6 +57,7 @@ public:
     bool mAllDay;
 
     QUniqueId mExceptionParent;
+    QDate mExceptionDate;
 
     QList<QAppointment::Exception> exceptions;
 
@@ -89,6 +90,7 @@ static QDateTime trimSeconds( const QDateTime &dt )
 
   This data includes descriptive data of the appointment and scheduling information.
 
+  \sa {Pim Library}
 */
 
 /*!
@@ -133,7 +135,8 @@ static QDateTime trimSeconds( const QDateTime &dt )
 /*!
   \enum QAppointment::WeekFlag
 
-  The WeekFlags only apply to appointments that have a RepeatRule of Weekly.
+  The WeekFlags only apply to appointments that have a RepeatRule of Weekly,
+  MonthlyDay or MonthlyEndDay.
 
   \value OccurMonday
     The appointment occurs on each Monday
@@ -646,16 +649,13 @@ int QAppointment::toDateDay(WeekFlag day)
 }
 
 /*!
-  If the repeat type of the appointment is Weekly and the appointment is set to repeat on
+  If the appointment is set to repeat on the given
   \a day of the week, then returns true.  Otherwise returns false.
 
   \sa setRepeatOnWeekDay()
 */
 bool QAppointment::repeatOnWeekDay(int day) const
 {
-    if (repeatRule() != Weekly)
-        return false;
-
     return weekFlags() & fromDateDay(day);
 }
 
@@ -771,6 +771,28 @@ QOccurrence QAppointment::firstOccurrence() const
 
 /*!
   \internal
+  Returns true if more than one week day is set in weekFlags()
+*/
+bool QAppointment::p_weekFlagsActive() const
+{
+    switch(weekFlags())
+    {
+        case OccurMonday:
+        case OccurTuesday:
+        case OccurWednesday:
+        case OccurThursday:
+        case OccurFriday:
+        case OccurSaturday:
+        case OccurSunday:
+        case 0:
+            return false;
+        default:
+            return true;
+    }
+}
+
+/*!
+  \internal
   Code that handles the algorithms for repeat rules.  Exceptions excluded.
 */
 QDate QAppointment::p_nextOccurrence(const QDate &from) const
@@ -872,6 +894,41 @@ QDate QAppointment::p_nextOccurrence(const QDate &from) const
             break;
         case MonthlyDay:
         case MonthlyEndDay:
+#if 0
+            // complied out for the moment until the gui can catch up
+            if (p_weekFlagsActive()) {
+                QDate candidate(after.year(), after.month(), 1);
+                int monthsBetween = monthsTo(d->mStart.date(), candidate);
+                int outBy = monthsBetween % d->mFrequency;
+                if (outBy) {
+                    outBy = d->mFrequency - outBy;
+                }
+                result = candidate.addMonths(outBy);
+                // with weekflags we are referring to the last matching day
+                // in month, not a week offset.
+                // for instance last workday of the month.
+                for (int attempt = 0; attempt < 2; ++attempt) {
+                    int direction;
+                    if (d->mType == MonthlyEndDay) {
+                        direction = -1;
+                        result.setDate(result.year(), result.month(), result.daysInMonth());
+                    } else {
+                        direction = 1;
+                        result.setDate(result.year(), result.month(), 1);
+                    }
+                    while(!repeatOnWeekDay(result.dayOfWeek()))
+                        result = result.addDays(direction);
+                    if (result > after) {
+                        break;
+                    } else {
+                        result = result.addMonths(d->mFrequency);
+                    }
+                }
+                // chance is that result will still be before direction
+
+            }
+            else
+#endif
             {
                 // + for MonthlyDay, - for MonthlyEndDay.
                 // otherwise these are basically the same.
@@ -1073,6 +1130,10 @@ static VObject *createVObject( const QAppointment &e )
                 repeat_format = "MD%1 %2";
                 break;
             case QAppointment::MonthlyDay:
+                /* vCal can't handle the type of week masked monthly
+                   rules Outlook and Qtopia support.
+                   Do best match instead.
+                */
                 repeat_format = "MP%3 %1 %2%4";
                 repeat_format = repeat_format.arg(e.weekOffset());
                 repeat_format = repeat_format.arg(dayToString(e.start().date().dayOfWeek()));
@@ -1481,6 +1542,10 @@ static QAppointment parseVObject( VObject *obj )
                 QString subname = vObjectName( o );
                 QString subvalue = vObjectStringZValue( o );
                 if ( subname == VCRunTimeProp ) {
+                    // utc time
+                    if (subvalue.endsWith("Z")) {
+                        subvalue = subvalue.mid(0, subvalue.length()-1);
+                    }
                     alarmTime = QDateTime::fromString( subvalue, vCalDateTimeFormat );
                 }
             }
@@ -1621,6 +1686,65 @@ static QAppointment parseVObject( VObject *obj )
 }
 
 /*!
+  Writes the given list of \a appointments to the given \a device as vCalendars.
+
+  Returns true on success.
+  \sa readVCalendar()
+*/
+bool QAppointment::writeVCalendar( QIODevice *device, const QList<QAppointment> &appointments )
+{
+    foreach (QAppointment t, appointments)
+        if (!writeVCalendar(device, t))
+            return false;
+    return true;
+}
+
+/*!
+  Writes the given \a appointment to the given \a device as vCalendars.
+
+  Returns true on success.
+  \sa readVCalendar()
+*/
+bool QAppointment::writeVCalendar( QIODevice *device, const QAppointment &appointment )
+{
+    VObject *obj = createVObject(appointment);
+    writeVObject( device, obj );
+    cleanVObject( obj );
+    cleanStrTbl();
+    return true;
+}
+
+/*!
+  Reads a list of vCalendars from the given \a device and returns the
+  equivalent set of appointments.
+
+  \sa writeVCalendar()
+*/
+QList<QAppointment> QAppointment::readVCalendar( QIODevice *device )
+{
+    QList<QAppointment> appointments;
+
+    QBuffer *buffer = qobject_cast<QBuffer *>(device);
+    QFile *file = qobject_cast<QFile *>(device);
+    if (file) {
+        int handle = file->handle();
+        FILE *input = fdopen(handle, "r");
+        if (input) {
+            appointments = readVCalendarData( Parse_MIME_FromFile( input ) );
+        }
+    } else if (buffer) {
+        appointments = readVCalendarData( Parse_MIME( (const char*)buffer->data(), buffer->data().count() ) );
+    } else {
+        const QByteArray bytes = device->readAll();
+        appointments = readVCalendarData( Parse_MIME( (const char*)bytes, bytes.count() ) );
+    }
+
+    return appointments;
+}
+
+/*!
+  \deprecated
+
    Write the list of \a appointments as vCalendar objects to the file
    specified by \a filename.
 
@@ -1646,6 +1770,8 @@ void QAppointment::writeVCalendar( const QString &filename, const QList<QAppoint
 }
 
 /*!
+  \deprecated
+
    Writes the appointment as a vCalendar object to the file specified
    by \a filename.
 
@@ -1659,7 +1785,7 @@ void QAppointment::writeVCalendar( const QString &filename ) const
 }
 
 /*!
-   \overload
+   \deprecated
 
    Writes the appointment as a vCalendar object to the given \a file,
    which must be already open for writing.
@@ -1674,7 +1800,7 @@ void QAppointment::writeVCalendar( QFile &file ) const
 }
 
 /*!
-   \overload
+   \deprecated
 
    Writes the appointment as a vCalendar object to the given \a stream,
    which must be writable.
@@ -1684,12 +1810,14 @@ void QAppointment::writeVCalendar( QFile &file ) const
 void QAppointment::writeVCalendar( QDataStream *stream ) const
 {
     VObject *obj = createVObject(*this);
-    writeVObject( stream, obj );
+    writeVObject( stream->device(), obj );
     cleanVObject( obj );
     cleanStrTbl();
 }
 
 /*!
+  \deprecated
+
    Write the \a appointment as a vCalendar to the file specified by \a filename.
 
    \sa readVCalendar()
@@ -1711,6 +1839,8 @@ void QAppointment::writeVCalendar( const QString &filename, const QAppointment &
 }
 
 /*!
+  \deprecated
+
   Reads the file specified by \a filename as a list of vCalendar objects
   and returns the list of near equivalent appointments.
 
@@ -1723,7 +1853,9 @@ QList<QAppointment> QAppointment::readVCalendar( const QString &filename )
 }
 
 /*!
-  Reads the \a data of \a len byets as a list of vCalendar objects
+  \deprecated
+
+  Reads the \a data of \a len bytes as a list of vCalendar objects
   and returns the list of near equivalent appointments.
 
   \sa writeVCalendar()
@@ -1735,6 +1867,8 @@ QList<QAppointment> QAppointment::readVCalendarData( const char *data, unsigned 
 }
 
 /*!
+  \deprecated
+
   Reads the given VCalendar data in \a vcal and returns the list of
   near equivalent appointments.
 
@@ -1827,22 +1961,6 @@ QDate QAppointment::repeatUntilInCurrentTZ() const
     return rtDateTime.addSecs(start().secsTo(nStart)).date();
 }
 
-time_t asUTC(const QDateTime &dt, const QTimeZone &z)
-{
-    if (z.isValid())
-        return z.toTime_t(dt);
-    else
-        return QTimeZone::utc().toTime_t(dt);
-}
-
-QDateTime asDateTime( time_t dt, const QTimeZone &z)
-{
-    if (z.isValid())
-        return z.fromTime_t(dt);
-    else
-        return QTimeZone::utc().fromTime_t(dt);
-}
-
 /*!
   \class QOccurrence
   \mainclass
@@ -1852,7 +1970,7 @@ QDateTime asDateTime( time_t dt, const QTimeZone &z)
 
   This data includes descriptive data of the appointment and scheduling information.
 
-  \sa QAppointment
+  \sa QAppointment, {Pim Library}
 */
 
 
@@ -1861,6 +1979,13 @@ QDateTime asDateTime( time_t dt, const QTimeZone &z)
 
   Returns the type of alarm to sound.
 */
+
+/*!
+    \fn bool QAppointment::hasExceptions() const
+
+    Returns if there are any exceptions to the appointments recurrence rule.
+*/
+
 
 /*!
   \fn int QOccurrence::alarmDelay() const
@@ -1967,7 +2092,7 @@ QOccurrence& QOccurrence::operator=(const QOccurrence &other)
 }
 
 /*!
-  Returns true if the occurrence is equal to \a other.  Otherwise
+  Returns true if this occurrence is equal to \a other.  Otherwise
   returns false.
 */
 bool QOccurrence::operator==(const QOccurrence &other) const
@@ -2112,7 +2237,7 @@ template <typename Stream> void QAppointment::serialize(Stream &s) const
 }
 
 /*!
-  Returns true if the appointment is equal to \a other.  Otherwise
+  Returns true if this appointment is equal to \a other.  Otherwise
   returns false.
 */
 bool QAppointment::operator==( const QAppointment &other ) const
@@ -2141,7 +2266,7 @@ bool QAppointment::operator==( const QAppointment &other ) const
 }
 
 /*!
-  Returns true if the appointment is not equal to \a other.  Otherwise
+  Returns true if this appointment is not equal to \a other.  Otherwise
   returns false.
 */
 bool QAppointment::operator!=( const QAppointment &other ) const
@@ -2172,11 +2297,29 @@ void QAppointment::setExceptionParent( const QUniqueId &identifier )
 }
 
 /*!
+  Sets the appointment to be an exception to the recurring appointment with the specified \a identifier.  The appointment is specified to replace the occurrence that occurs on the given \a date.
+*/
+void QAppointment::setAsException(const QUniqueId &identifier, const QDate &date)
+{
+    d->mExceptionParent = identifier;
+    d->mExceptionDate = date;
+}
+
+/*!
   Returns the identifier of the repeating appointment to which this appointment is an exception.
  */
 QUniqueId QAppointment::exceptionParent() const
 {
     return d->mExceptionParent;
+}
+
+/*!
+  Returns the date of the repeating appointment to which this appointment is
+  an exception.
+*/
+QDate QAppointment::exceptionDate() const
+{
+    return d->mExceptionDate;
 }
 
 /*!
@@ -2199,5 +2342,6 @@ Q_IMPLEMENT_USER_METATYPE(QAppointment)
 
   QUniqueId alternative;
 
+  \sa {Pim Library}
 */
 

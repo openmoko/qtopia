@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,10 +29,11 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <linux/videodev.h>
+#include <custom.h>
 
 #include "videocapturedevicefactory.h"
 #include "videocapturedevice.h"
-#ifdef HAVE_V4L2
+#ifdef QTOPIA_HAVE_V4L2
 #include "v4l2videocapturedevice.h"
 #include "nodevice.h"
 #endif
@@ -40,8 +41,6 @@
 #ifdef _CAMERA_DEBUG
 #include "dummyvideocapturedevice.h"
 #endif
-
-#define VIDEO_DEVICE    "/dev/video"    // TODO: fetched from settings
 
 namespace camera
 {
@@ -54,11 +53,11 @@ VideoCaptureDevice* VideoCaptureDeviceFactory::createVideoCaptureDevice()
     rc = new DummyVideoCaptureDevice;
 #else
 
-#ifdef HAVE_V4L2
+#ifdef QTOPIA_HAVE_V4L2
 
     int fd;
 
-    if ((fd = open(VIDEO_DEVICE, O_RDWR)) != -1)
+    if ((fd = open(V4L_VIDEO_DEVICE, O_RDWR)) != -1)
     {
         v4l2_capability     capability;
 
@@ -85,7 +84,7 @@ VideoCaptureDevice* VideoCaptureDeviceFactory::createVideoCaptureDevice()
 
 #else
     rc = new V4L1VideoCaptureDevice;
-#endif  // HAVE_V4L2
+#endif  // QTOPIA_HAVE_V4L2
 #endif  // QTOPIA_CAMERA_DEBUG
 
     return rc;

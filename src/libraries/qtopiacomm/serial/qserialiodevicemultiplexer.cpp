@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -182,6 +182,7 @@ bool QSerialIODeviceMultiplexer::chat
             return false;
         }
         if ( line.startsWith( "OK" ) ||
+             line.startsWith( "AT-Command Interpreter ready" ) ||
              line.startsWith( "AT-command Interpreter ready" ) ) {
             return true;
         }
@@ -225,6 +226,7 @@ QString QSerialIODeviceMultiplexer::chatWithResponse
             return QString();
         }
         if ( line.startsWith( "OK" ) ||
+             line.startsWith( "AT-Command Interpreter ready" ) ||
              line.startsWith( "AT-command Interpreter ready" ) ) {
             return response;
         }

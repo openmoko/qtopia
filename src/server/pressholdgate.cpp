@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,13 +22,14 @@
 #include "pressholdgate.h"
 #include <QDeviceButtonManager>
 #include <QtopiaApplication>
-#include <qwindowsystem_qws.h>
+#include "qtopiainputevents.h"
 
 /*!
   \class PressHoldGate
   \brief The PressHoldGate class encapsulates the processing of a key with press and press-and-hold actions.
   \ingroup QtopiaServer
   \internal
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*! \internal */
@@ -38,7 +39,7 @@ void PressHoldGate::timerEvent(QTimerEvent* e)
         killTimer(held_tid);
         // button held
         if ( held_key ) {
-            emit activate(held_key, true);
+            emit activate(held_key, true, true);
             held_key = 0;
         }
         held_tid = 0;
@@ -47,7 +48,7 @@ void PressHoldGate::timerEvent(QTimerEvent* e)
     QObject::timerEvent(e);
 }
 
-bool PressHoldGate::filterKey(int keycode, bool pressed, bool pressable, bool holdable)
+bool PressHoldGate::filterKey(int keycode, bool pressed, bool pressable, bool holdable, bool releasable)
 {
     bool filterout=true;
     if ( held_tid ) {
@@ -58,9 +59,7 @@ bool PressHoldGate::filterKey(int keycode, bool pressed, bool pressable, bool ho
         if ( !pressable ) {
             filterout=false;
         } else {
-            if ( pressed ) {
-                emit activate(keycode,false);
-            }
+            emit activate(keycode, false, pressed);
         }
     } else if ( pressed ) {
         if ( held_key ) {
@@ -76,14 +75,19 @@ bool PressHoldGate::filterKey(int keycode, bool pressed, bool pressable, bool ho
     } else if ( held_key ) {
         if ( pressable ) {
             held_key = 0;
-            emit activate(keycode,false);
+            emit activate(keycode,false, pressed);
         } else {
             if ( hardfilter ) // send the press now...
-                QWSServer::sendKeyEvent(0, keycode, 0, true, false);
+                QtopiaInputEvents::sendKeyEvent(0, keycode, 0, true, false);
             held_key = 0;
             filterout=false;
         }
     }
+    else if (releasable && !pressed)
+    {
+        emit activate(keycode, false, false);
+    }
+
     return filterout;
 }
 
@@ -98,7 +102,8 @@ bool PressHoldGate::filterDeviceButton(int keycode, bool press, bool autorepeat)
     if (button) {
         bool pressable=!button->pressedAction().isNull();
         bool holdable=!button->heldAction().isNull();
-        if ( autorepeat || filterKey(keycode,press,pressable,holdable) )
+        bool releasable = !button->releasedAction().isNull();
+        if ( autorepeat || filterKey(keycode,press,pressable,holdable, releasable) )
             return true;
     }
 

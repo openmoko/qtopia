@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,15 +22,16 @@
 #ifndef __QBLUETOOTHREMOTEDEVICE_H__
 #define __QBLUETOOTHREMOTEDEVICE_H__
 
+#include <qbluetoothglobal.h>
 #include <qbluetoothnamespace.h>
+#include <qbluetoothaddress.h>
 
 #include <QString>
 #include <qglobal.h>
 
 class QBluetoothRemoteDevicePrivate;
-class QBluetoothAddress;
 
-class QTOPIACOMM_EXPORT QBluetoothRemoteDevice
+class QBLUETOOTH_EXPORT QBluetoothRemoteDevice
 {
 public:
     explicit QBluetoothRemoteDevice(const QBluetoothAddress &address);
@@ -40,6 +41,7 @@ public:
                            const QString &revision,
                            const QString &manufacturer,
                            const QString &company,
+                           int rssi,
                            QBluetooth::DeviceMajor devMajor,
                            quint8 devMinor,
                            QBluetooth::ServiceClasses serviceClasses);
@@ -68,6 +70,9 @@ public:
 
     QString company() const;
     void setCompany(const QString &company);
+
+    int rssi() const;
+    void setRssi(int rssi);
 
     QBluetooth::DeviceMajor deviceMajor() const;
     QString deviceMajorAsString() const;

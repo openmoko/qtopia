@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -46,7 +61,7 @@
 #include "qspinbox.h"
 
 #ifdef Q_WS_MAC
-QRgb macGetRgba(QRgb initial, bool *ok, QWidget *parent);
+QRgb macGetRgba(QRgb initial, bool needAlpha, bool *ok, QWidget *parent);
 QColor macGetColor(const QColor& initial, QWidget *parent);
 #endif
 
@@ -886,6 +901,7 @@ public:
 
 
     QRgb currentColor() const { return curCol; }
+    void retranslateStrings();
 
 public slots:
     void setRgb(QRgb rgb);
@@ -899,6 +915,12 @@ private:
     void showCurrentColor();
     int hue, sat, val;
     QRgb curCol;
+    QLabel *lblHue;
+    QLabel *lblSat;
+    QLabel *lblVal;
+    QLabel *lblRed;
+    QLabel *lblGreen;
+    QLabel *lblBlue;
     QColSpinBox *hEd;
     QColSpinBox *sEd;
     QColSpinBox *vEd;
@@ -1043,61 +1065,61 @@ QColorShower::QColorShower(QWidget *parent)
 
     hEd = new QColSpinBox(this);
     hEd->setRange(0, 359);
-    QLabel *l = new QLabel(QColorDialog::tr("Hu&e:"), this);
+    lblHue = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
-    l->setBuddy(hEd);
+    lblHue->setBuddy(hEd);
 #endif
-    l->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
-    gl->addWidget(l, 0, 1);
+    lblHue->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    gl->addWidget(lblHue, 0, 1);
     gl->addWidget(hEd, 0, 2);
 
     sEd = new QColSpinBox(this);
-    l = new QLabel(QColorDialog::tr("&Sat:"), this);
+    lblSat = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
-    l->setBuddy(sEd);
+    lblSat->setBuddy(sEd);
 #endif
-    l->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
-    gl->addWidget(l, 1, 1);
+    lblSat->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    gl->addWidget(lblSat, 1, 1);
     gl->addWidget(sEd, 1, 2);
 
     vEd = new QColSpinBox(this);
-    l = new QLabel(QColorDialog::tr("&Val:"), this);
+    lblVal = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
-    l->setBuddy(vEd);
+    lblVal->setBuddy(vEd);
 #endif
-    l->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
-    gl->addWidget(l, 2, 1);
+    lblVal->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    gl->addWidget(lblVal, 2, 1);
     gl->addWidget(vEd, 2, 2);
 
     rEd = new QColSpinBox(this);
-    l = new QLabel(QColorDialog::tr("&Red:"), this);
+    lblRed = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
-    l->setBuddy(rEd);
+    lblRed->setBuddy(rEd);
 #endif
-    l->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
-    gl->addWidget(l, 0, 3);
+    lblRed->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    gl->addWidget(lblRed, 0, 3);
     gl->addWidget(rEd, 0, 4);
 
     gEd = new QColSpinBox(this);
-    l = new QLabel(QColorDialog::tr("&Green:"), this);
+    lblGreen = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
-    l->setBuddy(gEd);
+    lblGreen->setBuddy(gEd);
 #endif
-    l->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
-    gl->addWidget(l, 1, 3);
+    lblGreen->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    gl->addWidget(lblGreen, 1, 3);
     gl->addWidget(gEd, 1, 4);
 
     bEd = new QColSpinBox(this);
-    l = new QLabel(QColorDialog::tr("Bl&ue:"), this);
+    lblBlue = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
-    l->setBuddy(bEd);
+    lblBlue->setBuddy(bEd);
 #endif
-    l->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
-    gl->addWidget(l, 2, 3);
+    lblBlue->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    gl->addWidget(lblBlue, 2, 3);
     gl->addWidget(bEd, 2, 4);
 
     alphaEd = new QColSpinBox(this);
-    alphaLab = new QLabel(QColorDialog::tr("A&lpha channel:"), this);
+    alphaLab = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
     alphaLab->setBuddy(alphaEd);
 #endif
@@ -1115,6 +1137,8 @@ QColorShower::QColorShower(QWidget *parent)
     connect(gEd, SIGNAL(valueChanged(int)), this, SLOT(rgbEd()));
     connect(bEd, SIGNAL(valueChanged(int)), this, SLOT(rgbEd()));
     connect(alphaEd, SIGNAL(valueChanged(int)), this, SLOT(rgbEd()));
+
+    retranslateStrings();
 }
 
 void QColorShower::showCurrentColor()
@@ -1200,6 +1224,17 @@ void QColorShower::setHsv(int h, int s, int v)
     showCurrentColor();
 }
 
+void QColorShower::retranslateStrings()
+{
+    lblHue->setText(QColorDialog::tr("Hu&e:"));
+    lblSat->setText(QColorDialog::tr("&Sat:"));
+    lblVal->setText(QColorDialog::tr("&Val:"));
+    lblRed->setText(QColorDialog::tr("&Red:"));
+    lblGreen->setText(QColorDialog::tr("&Green:"));
+    lblBlue->setText(QColorDialog::tr("Bl&ue:"));
+    alphaLab->setText(QColorDialog::tr("A&lpha channel:"));
+}
+
 class QColorDialogPrivate : public QDialogPrivate
 {
     Q_DECLARE_PUBLIC(QColorDialog)
@@ -1211,6 +1246,7 @@ public:
     int currentAlpha() const { return cs->currentAlpha(); }
     void setCurrentAlpha(int a) { cs->setCurrentAlpha(a); }
     void showAlpha(bool b) { cs->showAlpha(b); }
+    void retranslateStrings();
 
     void _q_addCustom();
 
@@ -1225,6 +1261,12 @@ public:
     QColorPicker *cp;
     QColorLuminancePicker *lp;
     QColorShower *cs;
+    QLabel *lblBasicColors;
+    QLabel *lblCustomColors;
+    QPushButton *custbut;
+    QPushButton *ok;
+    QPushButton *cancel;
+    QPushButton *addCusBt;
     int nextCust;
     bool compact;
 };
@@ -1292,12 +1334,12 @@ void QColorDialogPrivate::init()
 
     if (!compact) {
         standard = new QColorWell(q, 6, 8, stdrgb);
-        QLabel *lab = new QLabel(QColorDialog::tr("&Basic colors"), q);
+        lblBasicColors = new QLabel(q);
 #ifndef QT_NO_SHORTCUT
-        lab->setBuddy(standard);
+        lblBasicColors->setBuddy(standard);
 #endif
         q->connect(standard, SIGNAL(selected(int,int)), SLOT(_q_newStandard(int,int)));
-        leftLay->addWidget(lab);
+        leftLay->addWidget(lblBasicColors);
         leftLay->addWidget(standard);
 
 
@@ -1307,14 +1349,14 @@ void QColorDialogPrivate::init()
         custom->setAcceptDrops(true);
 
         q->connect(custom, SIGNAL(selected(int,int)), SLOT(_q_newCustom(int,int)));
-        lab = new QLabel(QColorDialog::tr("&Custom colors") , q);
+        lblCustomColors = new QLabel(q);
 #ifndef QT_NO_SHORTCUT
-        lab->setBuddy(custom);
+        lblCustomColors->setBuddy(custom);
 #endif
-        leftLay->addWidget(lab);
+        leftLay->addWidget(lblCustomColors);
         leftLay->addWidget(custom);
 
-        QPushButton *custbut = new QPushButton(QColorDialog::tr("&Define Custom Colors >>"), q);
+        custbut = new QPushButton(q);
         custbut->setEnabled(false);
         leftLay->addWidget(custbut);
     } else {
@@ -1362,21 +1404,21 @@ void QColorDialogPrivate::init()
         leftLay->addLayout(buttons);
     }
 
-    QPushButton *ok, *cancel;
-    ok = new QPushButton(QColorDialog::tr("OK"), q);
+    ok = new QPushButton(q);
     QObject::connect(ok, SIGNAL(clicked()), q, SLOT(accept()));
     ok->setDefault(true);
-    cancel = new QPushButton(QColorDialog::tr("Cancel"), q);
+    cancel = new QPushButton(q);
     QObject::connect(cancel, SIGNAL(clicked()), q, SLOT(reject()));
     buttons->addWidget(ok);
     buttons->addWidget(cancel);
     buttons->addStretch();
 
     if (!compact) {
-        QPushButton *addCusBt = new QPushButton(QColorDialog::tr("&Add to Custom Colors"), q);
+        addCusBt = new QPushButton(q);
         rightLay->addWidget(addCusBt);
         QObject::connect(addCusBt, SIGNAL(clicked()), q, SLOT(_q_addCustom()));
     }
+    retranslateStrings();
 }
 
 void QColorDialogPrivate::_q_addCustom()
@@ -1387,6 +1429,19 @@ void QColorDialogPrivate::_q_addCustom()
     nextCust = (nextCust+1) % 16;
 }
 
+void QColorDialogPrivate::retranslateStrings()
+{
+    if (!compact) {
+        lblBasicColors->setText(QColorDialog::tr("&Basic colors"));
+        lblCustomColors->setText(QColorDialog::tr("&Custom colors"));
+        custbut->setText(QColorDialog::tr("&Define Custom Colors >>"));
+        addCusBt->setText(QColorDialog::tr("&Add to Custom Colors"));
+    }
+    ok->setText(QColorDialog::tr("OK"));
+    cancel->setText(QColorDialog::tr("Cancel"));
+
+    cs->retranslateStrings();
+}
 
 /*!
     \class QColorDialog
@@ -1501,7 +1556,7 @@ QColor QColorDialog::getColor(const QColor& initial, QWidget *parent)
 QRgb QColorDialog::getRgba(QRgb initial, bool *ok, QWidget *parent)
 {
 #if defined(Q_WS_MAC)
-    return macGetRgba(initial, ok, parent);
+    return macGetRgba(initial, true, ok, parent);
 #endif
 
     QColorDialog *dlg = new QColorDialog(parent, true);  //modal
@@ -1556,6 +1611,19 @@ QColorDialog::~QColorDialog()
         settings.endGroup();
     }
 #endif
+}
+
+
+/*!
+    \reimp
+*/
+void QColorDialog::changeEvent(QEvent *e)
+{
+    Q_D(QColorDialog);
+    if (e->type() == QEvent::LanguageChange) {
+        d->retranslateStrings();
+    }
+    QDialog::changeEvent(e);
 }
 
 

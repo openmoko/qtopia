@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,10 +24,11 @@
 
 #include <QDialog>
 #include <QHash>
+#include <QLineEdit>
+#include <QTextEdit>
 
 #include "ui_serveredit.h"
 
-class QTreeWidgetItem;
 class ServerItem;
 
 class ServerEdit : public QDialog, private Ui_ServerEditBase
@@ -46,22 +47,45 @@ private slots:
     void init();
     void addNewServer();
     void removeServer();
-    void editServer( QTreeWidgetItem*  );
-    void activateServer();
-    void deactivateServer();
-    void serverChanged( QTreeWidgetItem * item, int column );
-    void serverSelected( QTreeWidgetItem* current, QTreeWidgetItem* previous );
-    void nameChanged( const QString & );
-    void urlChanged( const QString & );
+    void editServer();
+    void contextMenuShow();
+
 private:
-    void updateIcons();
-    QHash<QString,QString> activeServers;
-    bool modified;
-    ServerItem *editedServer;
+    bool m_modified;
     QAction *removeServerAction;
-    QAction *activateServerAction;
-    QAction *deactivateServerAction;
+    QAction *editServerAction;
     QStringList serversToRemove;
+    QStringList permanentServers;
+};
+
+class QLabel;
+
+class ServerEditor : public QDialog
+{
+
+Q_OBJECT
+
+public:    
+    enum Mode { New, ViewOnly, ViewEdit };
+    ServerEditor( Mode mode, ServerEdit *parent = 0, const QString &name = "", 
+                  const QString &url = "" );
+    QString name() const;
+    QString url() const;
+    bool wasModified() const;
+
+public slots:
+    virtual void accept();
+
+private:
+    Mode m_mode;
+    ServerEdit *m_parent;
+    bool m_modified;
+    QLabel *m_nameLabel;
+    QLabel *m_urlLabel;
+    QLineEdit *m_nameLineEdit;
+    QTextEdit *m_urlTextEdit; 
+    QString m_initialName;
+    QString m_initialUrl; 
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -70,17 +94,26 @@ private:
 /////
 inline bool ServerEdit::wasModified() const
 {
-    return modified;
+    return m_modified;
 }
 
-/**
-  \internal
-  return the list of possibly updated servers
-  note that the list is only non-empty after the call to done( int )
-*/
-inline QHash<QString,QString> ServerEdit::serverList() const
+////////////////////////////////////////////////////////////////////////
+/////
+///// inline ServerEditor implementations
+/////
+inline QString ServerEditor::name() const
 {
-    return activeServers;
+    return m_nameLineEdit->text();
+}
+
+inline QString ServerEditor::url() const
+{
+    return m_urlTextEdit->toPlainText();
+}
+
+inline bool ServerEditor::wasModified() const
+{
+    return m_modified;
 }
 
 #endif

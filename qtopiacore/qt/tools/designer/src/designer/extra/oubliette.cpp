@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -92,7 +107,7 @@ void Oubliette::paintEvent(QPaintEvent *pe)
 
     QPoint pt = m_character.position();
     QPixmap pm;
-    QString pcString = ":/qthack/images/human.png";
+    QString pcString = QLatin1String(":/qthack/images/human.png");
     QPixmapCache::find(pcString, pm);
     if (pm.isNull()) {
         pm = QPixmap(pcString);
@@ -142,13 +157,13 @@ void Oubliette::fillTile(QPainter *p, int x, int y, Tile le)
     QString str;
     switch (le.type) {
     case Tile::ClosedDoor:
-        str = ":/qthack/images/dngn_closed_door.png";
+        str = QLatin1String(":/qthack/images/dngn_closed_door.png");
         break;
     case Tile::OpenDoor:
-        str = ":/qthack/images/dngn_open_door.png";
+        str = QLatin1String(":/qthack/images/dngn_open_door.png");
         break;
     case Tile::Wall:
-        str = ":/qthack/images/dngn_rock_wall_07.png";
+        str = QLatin1String(":/qthack/images/dngn_rock_wall_07.png");
         break;
     case Tile::Floor:
         break;
@@ -212,6 +227,7 @@ void Oubliette::showInventory()
 {
     QDialog *d = new QDialog();
     d->setWindowTitle(tr("Inventory"));
+    d->setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     QGridLayout *gl = new QGridLayout(d);
     int row = 0;
     QLabel *label;
@@ -234,9 +250,8 @@ void Oubliette::showInventory()
         connect(lw, SIGNAL(itemActivated(QListWidgetItem*)),
                 this, SLOT(showInventoryItem(QListWidgetItem*)));
     }
-    label = new QLabel(tr("You have %1 of %2 items")
-                      .arg(items.size())
-                      .arg(m_oubliettePlan.level(m_currentLevel)->totalItems()), d);
+    label = new QLabel(tr("You have %1 of %2 items", "", m_oubliettePlan.level(m_currentLevel)->totalItems())
+                      .arg(items.size()), d);
     gl->addWidget(label, 1, 1, 1, 1);
     QPushButton *btn = new QPushButton(tr("OK"), d);
     btn->setDefault(true);
@@ -339,8 +354,8 @@ void Oubliette::showInstructions()
 void Oubliette::showVictory()
 {
     int value = QMessageBox::information(window(), tr("You Did It!"),
-            tr("You've collected all the Trolltech cards. It took you %1 steps.\n"
-               "There's nothing more here. You should get back to work.").arg(m_character.totalSteps()),
+            tr("You've collected all the Trolltech cards. It took you %n steps.\n"
+               "There's nothing more here. You should get back to work.", "", m_character.totalSteps()),
             tr("That's rather anti-climatic"), tr("Quit"));
     if (value == 1)
         QApplication::instance()->quit();

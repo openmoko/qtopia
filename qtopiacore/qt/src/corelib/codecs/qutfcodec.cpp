@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -55,12 +70,11 @@ QByteArray QUtf8Codec::convertFromUnicode(const QChar *uc, int len, ConverterSta
         *cursor++ = 0xbf;
     }
 
-    for (int i=0; i < len; i++) {
+    const QChar *end = ch + len;
+    while (ch < end) {
         uint u = ch->unicode();
         if (surrogate_high >= 0) {
             if (u >= 0xdc00 && u < 0xe000) {
-                ++ch;
-                ++i;
                 u = (surrogate_high - 0xd800)*0x400 + (u - 0xdc00) + 0x10000;
                 surrogate_high = -1;
             } else {
@@ -122,20 +136,24 @@ QByteArray QUtf8Codec::convertFromUnicode(const QChar *uc, int len, ConverterSta
     return rstr;
 }
 
-QString QUtf8Codec::convertToUnicode(const char *chars, int len, ConverterState *state) const
+void QUtf8Codec::convertToUnicode(QString *target, const char *chars, int len, ConverterState *state) const
 {
     bool headerdone = false;
     QChar replacement = QChar::ReplacementCharacter;
     int need = 0;
+    int error = -1;
     uint uc = 0;
+    uint min_uc = 0;
     if (state) {
         if (state->flags & IgnoreHeader)
             headerdone = true;
         if (state->flags & ConvertInvalidToNull)
             replacement = QChar::Null;
         need = state->remainingChars;
-        if (need)
+        if (need) {
             uc = state->state_data[0];
+            min_uc = state->state_data[1];
+        }
     }
     if (!headerdone && len > 3
         && (uchar)chars[0] == 0xef && (uchar)chars[1] == 0xbb && (uchar)chars[2] == 0xbf) {
@@ -145,33 +163,47 @@ QString QUtf8Codec::convertToUnicode(const char *chars, int len, ConverterState 
         headerdone = true;
     }
 
-    QString result;
-    result.resize(len); // worst case
-    QChar *qch = result.data();
+    int originalLength = target->length();
+    QString &result = *target;
+    result.resize(originalLength + len + 1); // worst case
+    QChar *qch = result.data() + originalLength;
     uchar ch;
     int invalid = 0;
 
     for (int i=0; i<len; i++) {
-        ch = *chars++;
+        ch = chars[i];
         if (need) {
             if ((ch&0xc0) == 0x80) {
                 uc = (uc << 6) | (ch & 0x3f);
                 need--;
                 if (!need) {
-                    if (uc > 0xffff) {
+                    if (uc > 0xffff && uc < 0x110000) {
                         // surrogate pair
                         uc -= 0x10000;
                         unsigned short high = uc/0x400 + 0xd800;
                         unsigned short low = uc%0x400 + 0xdc00;
+
+                        // resize if necessary
+                        long where = qch - result.unicode();
+                        if (where + 2 >= result.length()) {
+                            result.resize(where + 2);
+                            qch = result.data() + where;
+                        }
+
                         *qch++ = QChar(high);
                         *qch++ = QChar(low);
+                    } else if ((uc < min_uc) || (uc >= 0xd800 && uc <= 0xdfff) || (uc >= 0xfffe)) {
+                        // error
+                        *qch++ = replacement;
+                        ++invalid;
                     } else {
                         *qch++ = uc;
                     }
                 }
             } else {
                 // error
-                *qch++ = QChar::ReplacementCharacter;
+                i = error;
+                *qch++ = replacement;
                 ++invalid;
                 need = 0;
             }
@@ -181,13 +213,30 @@ QString QUtf8Codec::convertToUnicode(const char *chars, int len, ConverterState 
             } else if ((ch & 0xe0) == 0xc0) {
                 uc = ch & 0x1f;
                 need = 1;
+                error = i;
+                min_uc = 0x80;
             } else if ((ch & 0xf0) == 0xe0) {
                 uc = ch & 0x0f;
                 need = 2;
+                error = i;
+                min_uc = 0x800;
             } else if ((ch&0xf8) == 0xf0) {
                 uc = ch & 0x07;
                 need = 3;
+                error = i;
+                min_uc = 0x10000;
+            } else {
+                // error
+                *qch++ = replacement;
+                ++invalid;
             }
+        }
+    }
+    if (!state && need > 0) {
+        // unterminated UTF sequence
+        for (int i = error; i < len; ++i) {
+            *qch++ = replacement;
+            ++invalid;
         }
     }
     result.truncate(qch - result.unicode());
@@ -197,7 +246,14 @@ QString QUtf8Codec::convertToUnicode(const char *chars, int len, ConverterState 
         if (headerdone)
             state->flags |= IgnoreHeader;
         state->state_data[0] = need ? uc : 0;
+        state->state_data[1] = need ? min_uc : 0;
     }
+}
+
+QString QUtf8Codec::convertToUnicode(const char *chars, int len, ConverterState *state) const
+{
+    QString result;
+    convertToUnicode(&result, chars, len, state);
     return result;
 }
 

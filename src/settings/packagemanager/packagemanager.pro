@@ -1,6 +1,8 @@
 qtopia_project(qtopia app)
 TARGET=packagemanager
 CONFIG+=qtopia_main
+# Give us a direct connection to the document system
+DEFINES+=QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION
 
 FORMS           = serveredit.ui \
                     packagedetails.ui
@@ -16,7 +18,8 @@ HEADERS         = packageview.h \
                     sandboxinstall.h \
                     md5file.h \
                     packagemanagerservice.h \
-                    version.h
+                    version.h \
+                    utils.h
 
 SOURCES         = main.cpp \
                     packageview.cpp \
@@ -31,7 +34,8 @@ SOURCES         = main.cpp \
                     sandboxinstall.cpp \
                     md5file.cpp \
                     packagemanagerservice.cpp \
-                    version.cpp
+                    version.cpp \
+                    utils.cpp
 
 INCLUDEPATH+=$$QT_DEPOT_PATH/src/3rdparty/md5
 
@@ -42,27 +46,36 @@ enable_sxe:depends(libraries/qtopiasecurity)
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=packagemanager*
 help.hint=help
-desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/PackageManager.desktop
+INSTALLS+=help
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/packagemanager.desktop
 desktop.path=/apps/Settings
 desktop.hint=desktop
+INSTALLS+=desktop
 pics.files=$$QTOPIA_DEPOT_PATH/pics/packagemanager/*
 pics.path=/pics/packagemanager
 pics.hint=pics
             
-!isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/default/Trolltech/PackageServers.conf) {
-    secsettings.files+=$$DEVICE_CONFIG_PATH/etc/default/Trolltech/PackageServers.conf
+# This is documented in src/build/doc/src/deviceprofiles.qdoc
+!isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/default/Trolltech/PackageManager.conf) {
+    secsettings.files+=$$DEVICE_CONFIG_PATH/etc/default/Trolltech/PackageManager.conf
 } else {
-    secsettings.files+=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/PackageServers.conf
+    secsettings.files+=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/PackageManager.conf
 }
+INSTALLS+=pics
 secsettings.path=/etc/default/Trolltech
 secsettings.hint=secsettings
-
+INSTALLS+=secsettings
 packagemanagerservice.files=$$QTOPIA_DEPOT_PATH/services/PackageManager/packagemanager
 packagemanagerservice.path=/services/PackageManager
+INSTALLS+=packagemanagerservice
 qdspackagemanagerservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/PackageManager
 qdspackagemanagerservice.path=/etc/qds
-INSTALLS+=packagemanagerservice qdspackagemanagerservice
-INSTALLS+=help desktop pics secsettings
+INSTALLS+=qdspackagemanagerservice
+
+packages_category.files=$$QTOPIA_DEPOT_PATH/apps/Packages/.directory
+packages_category.path=/apps/Packages
+packages_category.hint=desktop
+INSTALLS+=packages_category
 
 enable_sxe {
     SOURCES+=domaininfo.cpp
@@ -70,4 +83,4 @@ enable_sxe {
 }
 
 pkg.desc=Safely download and install programs for Qtopia.
-pkg.domain=window,cardreader,docapi,policy,launcher,prefix
+pkg.domain=window,cardreader,docapi,policy,prefix,doc_server,doc_write,doc_install,tmp_write,key_manager,packagemanagement,kill

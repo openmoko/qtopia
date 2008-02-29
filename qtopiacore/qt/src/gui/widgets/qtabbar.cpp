@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -52,69 +67,82 @@ inline static bool verticalTabs(QTabBar::Shape shape)
            || shape == QTabBar::TriangularEast;
 }
 
-QStyleOptionTabV2 QTabBarPrivate::getStyleOption(int tab) const
+/*!
+    Initialize \a option with the values from the tab at \a tabIndex. This method
+    is useful for subclasses when they need a QStyleOptionTab or QStyleOptionTabV2, but don't want
+    to fill in all the information themselves. This function will check the version
+    of the QStyleOptionTab and fill in the additional values for a
+    QStyleOptionTabV2.
+
+    \sa QStyleOption::initFrom() QTabWidget::initStyleOption()
+*/
+void QTabBar::initStyleOption(QStyleOptionTab *option, int tabIndex) const
 {
-    Q_Q(const QTabBar);
-    QStyleOptionTabV2 opt;
-    const QTabBarPrivate::Tab *ptab = &tabList.at(tab);
-    opt.init(q);
-    opt.state &= ~(QStyle::State_HasFocus | QStyle::State_MouseOver);
-    opt.rect = q->tabRect(tab);
-    bool isCurrent = tab == currentIndex;
-    opt.row = 0;
-    if (tab == pressedIndex)
-        opt.state |= QStyle::State_Sunken;
+    Q_D(const QTabBar);
+    int totalTabs = d->tabList.size();
+
+    if (!option || (tabIndex < 0 || tabIndex >= totalTabs))
+        return;
+
+    const QTabBarPrivate::Tab &tab = d->tabList.at(tabIndex);
+    option->initFrom(this);
+    option->state &= ~(QStyle::State_HasFocus | QStyle::State_MouseOver);
+    option->rect = tabRect(tabIndex);
+    bool isCurrent = tabIndex == d->currentIndex;
+    option->row = 0;
+    if (tabIndex == d->pressedIndex)
+        option->state |= QStyle::State_Sunken;
     if (isCurrent)
-        opt.state |= QStyle::State_Selected;
-    if (isCurrent && q->hasFocus())
-        opt.state |= QStyle::State_HasFocus;
-    if (!ptab->enabled)
-        opt.state &= ~QStyle::State_Enabled;
-    if (q->isActiveWindow())
-        opt.state |= QStyle::State_Active;
-    if (opt.rect == hoverRect)
-        opt.state |= QStyle::State_MouseOver;
-    opt.shape = shape;
-    opt.text = ptab->text;
+        option->state |= QStyle::State_Selected;
+    if (isCurrent && hasFocus())
+        option->state |= QStyle::State_HasFocus;
+    if (!tab.enabled)
+        option->state &= ~QStyle::State_Enabled;
+    if (isActiveWindow())
+        option->state |= QStyle::State_Active;
+    if (option->rect == d->hoverRect)
+        option->state |= QStyle::State_MouseOver;
+    option->shape = d->shape;
+    option->text = tab.text;
 
-    if (ptab->textColor.isValid())
-        opt.palette.setColor(q->foregroundRole(), ptab->textColor);
+    if (tab.textColor.isValid())
+        option->palette.setColor(foregroundRole(), tab.textColor);
 
-    opt.icon = ptab->icon;
-    opt.iconSize = q->iconSize();  // Will get the default value then.
+    option->icon = tab.icon;
+    if (QStyleOptionTabV2 *optionV2 = qstyleoption_cast<QStyleOptionTabV2 *>(option))
+        optionV2->iconSize = iconSize();  // Will get the default value then.
 
-    int totalTabs = tabList.size();
 
-    if (tab > 0 && tab - 1 == currentIndex)
-        opt.selectedPosition = QStyleOptionTab::PreviousIsSelected;
-    else if (tab < totalTabs - 1 && tab + 1 == currentIndex)
-        opt.selectedPosition = QStyleOptionTab::NextIsSelected;
+    if (tabIndex > 0 && tabIndex - 1 == d->currentIndex)
+        option->selectedPosition = QStyleOptionTab::PreviousIsSelected;
+    else if (tabIndex < totalTabs - 1 && tabIndex + 1 == d->currentIndex)
+        option->selectedPosition = QStyleOptionTab::NextIsSelected;
     else
-        opt.selectedPosition = QStyleOptionTab::NotAdjacent;
+        option->selectedPosition = QStyleOptionTab::NotAdjacent;
 
-    if (tab == 0) {
+    if (tabIndex == 0) {
         if (totalTabs > 1)
-            opt.position = QStyleOptionTab::Beginning;
+            option->position = QStyleOptionTab::Beginning;
         else
-            opt.position = QStyleOptionTab::OnlyOneTab;
-    } else if (tab == totalTabs - 1) {
-        opt.position = QStyleOptionTab::End;
+            option->position = QStyleOptionTab::OnlyOneTab;
+    } else if (tabIndex == totalTabs - 1) {
+        option->position = QStyleOptionTab::End;
     } else {
-        opt.position = QStyleOptionTab::Middle;
+        option->position = QStyleOptionTab::Middle;
     }
 #ifndef QT_NO_TABWIDGET
-    if (const QTabWidget *tw = qobject_cast<const QTabWidget *>(q->parentWidget())) {
+    if (const QTabWidget *tw = qobject_cast<const QTabWidget *>(parentWidget())) {
         if (tw->cornerWidget(Qt::TopLeftCorner) || tw->cornerWidget(Qt::BottomLeftCorner))
-            opt.cornerWidgets |= QStyleOptionTab::LeftCornerWidget;
+            option->cornerWidgets |= QStyleOptionTab::LeftCornerWidget;
         if (tw->cornerWidget(Qt::TopRightCorner) || tw->cornerWidget(Qt::BottomRightCorner))
-            opt.cornerWidgets |= QStyleOptionTab::RightCornerWidget;
+            option->cornerWidgets |= QStyleOptionTab::RightCornerWidget;
     }
-    int hframe  = q->style()->pixelMetric(QStyle::PM_TabBarTabHSpace, &opt, q);
+    int hframe  = style()->pixelMetric(QStyle::PM_TabBarTabHSpace, option, this);
 
-    opt.text = q->fontMetrics().elidedText(opt.text, elideMode, 1 + (verticalTabs(shape) ? ptab->rect.height() : ptab->rect.width()) - hframe,
-                                           Qt::TextShowMnemonic);
+    option->text = fontMetrics().elidedText(option->text, d->elideMode,
+                        1 + (verticalTabs(d->shape) ? tab.rect.height() : tab.rect.width()) - hframe,
+                        Qt::TextShowMnemonic);
 #endif
-    return opt;
 }
 
 /*!
@@ -239,16 +267,19 @@ void QTabBarPrivate::init()
 {
     Q_Q(QTabBar);
     leftB = new QToolButton(q);
+    leftB->setAutoRepeat(true);
     QObject::connect(leftB, SIGNAL(clicked()), q, SLOT(_q_scrollTabs()));
     leftB->hide();
     rightB = new QToolButton(q);
+    rightB->setAutoRepeat(true);
     QObject::connect(rightB, SIGNAL(clicked()), q, SLOT(_q_scrollTabs()));
     rightB->hide();
 #ifdef QT_KEYPAD_NAVIGATION
     if (QApplication::keypadNavigationEnabled()) {
         leftB->setFocusPolicy(Qt::NoFocus);
         rightB->setFocusPolicy(Qt::NoFocus);
-    }
+        q->setFocusPolicy(Qt::NoFocus);
+    } else
 #endif
     q->setFocusPolicy(Qt::TabFocus);
     q->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -297,13 +328,15 @@ void QTabBarPrivate::layoutTabs()
     tabChain[tabChainIndex].expansive = tabAlignment != Qt::AlignLeft;
     tabChain[tabChainIndex].empty = true;
     ++tabChainIndex;
-    
+
     // We now go through our list of tabs and set the minimum size and the size hint
     // This will allow us to elide text if necessary. Since we don't set
     // a maximum size, tabs will EXPAND to fill up the empty space.
     // Since tab widget is rather *ahem* strict about keeping the geometry of the
-    // tabbar to its absolute minimum, this won't bleed through, but will show up
-    // if you use tabbar on its own (a.k.a. not a bug, but a feature).
+    // tab bar to its absolute minimum, this won't bleed through, but will show up
+    // if you use tab bar on its own (a.k.a. not a bug, but a feature).
+    // Update: if squeezeTabs is true, we DO set a maximum size to prevent the tabs
+    // being wider than necessary.
     if (!vertTabs) {
         int minx = 0;
         int x = 0;
@@ -321,6 +354,9 @@ void QTabBarPrivate::layoutTabs()
             tabChain[tabChainIndex].minimumSize = sz.width();
             tabChain[tabChainIndex].empty = false;
             tabChain[tabChainIndex].expansive = true;
+
+            if (squeezeTabs)
+                tabChain[tabChainIndex].maximumSize = tabChain[tabChainIndex].sizeHint;
         }
 
         last = minx;
@@ -343,6 +379,9 @@ void QTabBarPrivate::layoutTabs()
             tabChain[tabChainIndex].minimumSize = sz.height();
             tabChain[tabChainIndex].empty = false;
             tabChain[tabChainIndex].expansive = true;
+
+            if (squeezeTabs)
+                tabChain[tabChainIndex].maximumSize = tabChain[tabChainIndex].sizeHint;
         }
 
         last = miny;
@@ -368,7 +407,7 @@ void QTabBarPrivate::layoutTabs()
             tabList[i].rect.setRect(0, lstruct.pos, maxExtent, lstruct.size);
     }
 
-    if (tabList.count() && last > available) {
+    if (useScrollButtons && tabList.count() && last > available) {
         int extra = extraWidth();
         if (!vertTabs) {
             Qt::LayoutDirection ld = q->layoutDirection();
@@ -424,15 +463,11 @@ void QTabBarPrivate::makeVisible(int index)
     else if (end > scrollOffset + available) // too far right
         scrollOffset = end - available + 1;
 
-    if (scrollOffset && end < available)  // need scrolling at all?
-        scrollOffset = 0;
-
     leftB->setEnabled(scrollOffset > 0);
     const int last = horiz ? tabList.last().rect.right() : tabList.last().rect.bottom();
     rightB->setEnabled(last - scrollOffset >= available);
     if (oldScrollOffset != scrollOffset)
         q->update();
-
 }
 
 void QTabBarPrivate::_q_scrollTabs()
@@ -534,7 +569,7 @@ void QTabBar::setShape(Shape shape)
 
 /*!
     \property QTabBar::drawBase
-    \brief defines whether or not tabbar should draw its base.
+    \brief defines whether or not tab bar should draw its base.
 
     If true then QTabBar draws a base in relation to the styles overlab.
     Otherwise only the tabs are drawn.
@@ -632,13 +667,17 @@ void QTabBar::removeTab(int index)
 #endif
         d->tabList.removeAt(index);
         if (index == d->currentIndex) {
+            // The current tab is going away, in order to make sure
+            // we emit that "current has changed", we need to reset this
+            // around.
+            d->currentIndex = -1;
             if (index == d->tabList.size()) {
                 setCurrentIndex(d->validIndex(index - 1) ? index - 1 : 0);
             } else {
                 setCurrentIndex(d->validIndex(index) ? index : 0);
             }
         } else if (index < d->currentIndex) {
-            --d->currentIndex;
+            setCurrentIndex(d->currentIndex - 1);
         }
         d->refresh();
         tabRemoved(index);
@@ -863,6 +902,28 @@ QRect QTabBar::tabRect(int index) const
 }
 
 /*!
+    \since 4.3
+    Returns the index of the tab that covers \a position or -1 if no
+    tab covers \a position;
+*/
+
+int QTabBar::tabAt(const QPoint &position) const
+{
+    Q_D(const QTabBar);
+    if (d->validIndex(d->currentIndex)
+        && tabRect(d->currentIndex).contains(position)) {
+        return d->currentIndex;
+    }
+    const int max = d->tabList.size();
+    for (int i = 0; i < max; ++i) {
+        if (tabRect(i).contains(position)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/*!
     \property QTabBar::currentIndex
     \brief the index of the tab bar's visible tab
 */
@@ -895,7 +956,9 @@ void QTabBar::setCurrentIndex(int index)
     \brief The size for icons in the tab bar
     \since 4.1
 
-    The default value is style-dependent.
+    The default value is style-dependent. \c iconSize is a maximum
+    size; icons that are smaller are not scaled up.
+
     \sa QTabWidget::iconSize
 */
 QSize QTabBar::iconSize() const
@@ -1003,7 +1066,8 @@ QSize QTabBar::tabSizeHint(int index) const
 {
     Q_D(const QTabBar);
     if (const QTabBarPrivate::Tab *tab = d->at(index)) {
-        QStyleOptionTabV2 opt = d->getStyleOption(index);
+        QStyleOptionTabV2 opt;
+        initStyleOption(&opt, index);
         opt.text = d->tabList.at(index).text;
         QSize iconSize = tab->icon.isNull() ? QSize() : opt.iconSize;
         int hframe  = style()->pixelMetric(QStyle::PM_TabBarTabHSpace, &opt, this);
@@ -1094,7 +1158,7 @@ bool QTabBar::event(QEvent *e)
         return true;
 #ifndef QT_NO_TOOLTIP
     } else if (e->type() == QEvent::ToolTip) {
-        if (const QTabBarPrivate::Tab *tab = d->at(d->indexAtPos(static_cast<QHelpEvent*>(e)->pos()))) {
+        if (const QTabBarPrivate::Tab *tab = d->at(tabAt(static_cast<QHelpEvent*>(e)->pos()))) {
             if (!tab->toolTip.isEmpty()) {
                 QToolTip::showText(static_cast<QHelpEvent*>(e)->globalPos(), tab->toolTip, this);
                 return true;
@@ -1184,7 +1248,8 @@ void QTabBar::paintEvent(QPaintEvent *)
     QStyleOptionTab cutTab;
     QStyleOptionTab selectedTab;
     for (int i = 0; i < d->tabList.count(); ++i) {
-        QStyleOptionTabV2 tab = d->getStyleOption(i);
+        QStyleOptionTabV2 tab;
+        initStyleOption(&tab, i);
         if (!(tab.state & QStyle::State_Enabled)) {
             tab.palette.setCurrentColorGroup(QPalette::Disabled);
         }
@@ -1212,7 +1277,8 @@ void QTabBar::paintEvent(QPaintEvent *)
 
     // Draw the selected tab last to get it "on top"
     if (selected >= 0) {
-        QStyleOptionTabV2 tab = d->getStyleOption(selected);
+        QStyleOptionTabV2 tab;
+        initStyleOption(&tab, selected);
         p.drawControl(QStyle::CE_TabBarTab, tab);
     }
     if (d->drawBase)
@@ -1304,6 +1370,10 @@ void QTabBar::keyPressEvent(QKeyEvent *e)
 void QTabBar::changeEvent(QEvent *e)
 {
     Q_D(QTabBar);
+    if (e->type() == QEvent::StyleChange) {
+        d->elideMode = Qt::TextElideMode(style()->styleHint(QStyle::SH_TabBar_ElideMode, 0, this));
+        d->useScrollButtons = !style()->styleHint(QStyle::SH_TabBar_PreferNoArrows, 0, this);
+    }
     d->refresh();
     QWidget::changeEvent(e);
 }

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,12 +22,12 @@
 #include <QAbstractListModel>
 #include <QFont>
 #include <QItemDelegate>
-#include <QDebug>
 
 struct FontedItem
 {
-    FontedItem(const QString &lang, QFont &f, bool hasDictionary)
-        : langName(lang), fnt(f), hasDict(hasDictionary), direction( Qt::LeftToRight )
+    FontedItem(const QString &lang, QFont &f, bool hasDictionary, bool isCurrentLanguage)
+        : langName(lang), fnt(f), hasDict(hasDictionary), direction( Qt::LeftToRight ),
+          isCurrentLang(isCurrentLanguage)
     {
     }
 
@@ -36,6 +36,7 @@ struct FontedItem
         langName = other.langName;
         fnt = other.fnt;
         hasDict = other.hasDict;
+        isCurrentLang = other.isCurrentLang;
         return *this;
     }
 
@@ -43,6 +44,7 @@ struct FontedItem
     QFont fnt;
     bool hasDict;
     Qt::LayoutDirection direction;
+    bool isCurrentLang;
 };
 
 class LanguageModel : public QAbstractListModel

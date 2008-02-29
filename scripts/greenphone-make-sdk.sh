@@ -59,11 +59,11 @@ make_greenphone_sdk()
 
   EXTRA_OPTIONS=""
   test "$DRM" = "1" && EXTRA_OPTIONS="-drm"
-  test "$SXE" = "1" && EXTRA_OPTIONS=$EXTRA_OPTIONS" -sxe"
+  test "$SXE" = "0" && EXTRA_OPTIONS=$EXTRA_OPTIONS" -no-sxe"
 
 
-  if [ "$CLEAN" = "1" ]; then      
-      if $QPEDIR/configure -device greenphone -platform $QPEDIR/devices/gcc411/mkspecs/linux-g++ -sdk /opt/Qtopia/SDK/$QPEVER/greenphone -image /opt/Qtopia/SDK/$QPEVER/greenphone/image -confirm-license $SKIP $EXTRA_OPTIONS >${OUTPUT} 2>&1; then
+  if [ "$CLEAN" = "1" ]; then
+      if $QPEDIR/configure -device greenphone -platform $QPEDIR/devices/gcc411/mkspecs/linux-g++ -sdk /opt/Qtopia/SDK/$QPEVER/greenphone -image /opt/Qtopia/SDK/$QPEVER/greenphone/image -extra-qt-config -no-glib -confirm-license $SKIP $EXTRA_OPTIONS >${OUTPUT} 2>&1; then
         echo "DONE"
       else
         echo "$0 FAILED in configure for greenphone SDK"
@@ -100,7 +100,7 @@ make_greenphone_sdk()
   fi
 
   # Remove some helix file formats
-  cd /opt/Qtopia/SDK/$QPEVER/greenphone/image/lib
+  cd /opt/Qtopia/SDK/$QPEVER/greenphone/image/lib/helix
   rm -f amrff.so
   rm -f amrn.so
   rm -f amrw.so
@@ -114,6 +114,20 @@ make_greenphone_sdk()
   rm -Rf /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/host
   cd /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore
   ln -s /opt/Qtopia/SDK/$QPEVER/x86/qtopiacore/host
+
+  # Optimise the space requirements for the docs.
+  # Most of the Qt docs exist in the Qtopia doc directory so we save about 55MB.
+  cd /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/doc/html
+  rm -r images
+  ln -s ../../../../doc/html/images .
+  for file in *.html; do
+      if [ "$file" != "*.html" ]; then
+          if diff -q $file ../../../../doc/html/$file >/dev/null 2>&1; then
+              rm $file
+              ln -s ../../../../doc/html/$file .
+          fi
+      fi
+  done
 }
 
 make_x86_sdk()
@@ -140,7 +154,7 @@ make_x86_sdk()
   test "$SXE" = "1" && EXTRA_OPTIONS=$EXTRA_OPTIONS" -sxe"
 
   if [ $CLEAN = "1" ]; then      
-      if $QPEDIR/configure -device gcc411 -prefix /opt/Qtopia/SDK/$QPEVER/x86/image -sdk /opt/Qtopia/SDK/$QPEVER/x86 -image /opt/Qtopia/SDK/$QPEVER/x86/image -helix -helix-system-id linux-2.2-libc6-gcc32-i586 -ssl -debug -confirm-license -no-infrared -dbus -dbuspath /usr/local -bluetooth -extra-qt-config="-release" -extra-qt-config="-qt-libpng" $EXTRA_OPTIONS >${OUTPUT} 2>&1; then
+      if $QPEDIR/configure -device gcc411 -prefix /opt/Qtopia/SDK/$QPEVER/x86/image -sdk /opt/Qtopia/SDK/$QPEVER/x86 -image /opt/Qtopia/SDK/$QPEVER/x86/image -qtopiamedia -mediaengines helix -helix-system-id linux-2.2-libc6-gcc32-i586 -ssl -debug -confirm-license -no-infrared -dbus -dbuspath /usr/local -bluetooth -extra-qt-config="-release" -extra-qt-config="-qt-libpng" -extra-qt-config -no-glib $EXTRA_OPTIONS >${OUTPUT} 2>&1; then
         echo "DONE"
       else
         echo "$0 FAILED in configure for x86 SDK"
@@ -194,7 +208,7 @@ make_x86_sdk()
   ln -s ../../../image/lib/libQtXml.so.${QTVER}
 
   # Remove some helix file formats
-  cd /opt/Qtopia/SDK/$QPEVER/x86/image/lib
+  cd /opt/Qtopia/SDK/$QPEVER/x86/image/lib/helix
   rm -f amrff.so
   rm -f amrn.so
   rm -f amrw.so
@@ -209,6 +223,10 @@ make_x86_sdk()
   cd /opt/Qtopia/SDK/$QPEVER/x86
   rm -rf /opt/Qtopia/SDK/$QPEVER/x86/doc
   ln -s /opt/Qtopia/SDK/$QPEVER/greenphone/doc
+
+  rm -rf /opt/Qtopia/SDK/$QPEVER/x86/qtopiacore/qt/doc
+  ln -s /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/doc /opt/Qtopia/SDK/$QPEVER/x86/qtopiacore/qt/doc
+  ln -s /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/tools /opt/Qtopia/SDK/$QPEVER/x86/qtopiacore/qt/tools
 
   # Update the x86 version of the sxe_qtopia script to point to the x86 path
   if [ "$SXE" = "1" ] ; then
@@ -234,11 +252,11 @@ update_extras()
   mkdir -p /opt/Qtopia/extras/bin
   cd /opt/Qtopia/extras/bin
   rm -f /opt/Qtopia/extras/bin/*
-  wget -nv http://qtopiaweb:/dist/input/qtopia/$QPEVER/greenphone/extras/uic3
+  wget -nv http://qtopiaweb.trolltech.com.au/dist/input/qtopia/$QPEVER/greenphone/extras/uic3
   chmod 555 uic3
-  wget -nv http://qtopiaweb:/dist/input/qtopia/$QPEVER/greenphone/extras/qt3to4
+  wget -nv http://qtopiaweb.trolltech.com.au/dist/input/qtopia/$QPEVER/greenphone/extras/qt3to4
   chmod 555 qt3to4
-  wget -nv http://qtopiaweb:/dist/input/qtopia/$QPEVER/greenphone/extras/usbflash
+  wget -nv http://qtopiaweb.trolltech.com.au/dist/input/qtopia/$QPEVER/greenphone/extras/usbflash
   chmod 555 usbflash
 }
 
@@ -253,23 +271,19 @@ echo "make_flash "
   if [ "$ROOTFS" = "0" ] ; then
     mkdir -p $QPEDIR/rootfs
     cd rootfs
-    cp /opt/Qtopia/extras/images/greenphone_rootfs.ext2 .
-    cp /opt/Qtopia/extras/images/greenphone_kernel .
+    cp /opt/Qtopia/extras/images/greenphone-rootfs.tar.gz .
+    cp /opt/Qtopia/extras/images/greenphone-kernel .
     cd ..
-    EXTRA_FLASH_OPTIONS=" --rootfs $QPEDIR/rootfs/greenphone_rootfs.ext2 --kernel $QPEDIR/rootfs/greenphone_kernel"
+    EXTRA_FLASH_OPTIONS=" --rootfs $QPEDIR/rootfs/greenphone-rootfs.tar.gz --kernel $QPEDIR/rootfs/greenphone-kernel"
   else
-    sudo cp -f $BUILD_PATH/greenphone_rootfs.ext2 /opt/Qtopia/extras/images/greenphone_rootfs.ext2
-    sudo cp -f $BUILD_PATH/greenphone_kernel /opt/Qtopia/extras/images/greenphone_kernel
+    sudo cp -f $BUILD_PATH/greenphone-rootfs.tar.gz /opt/Qtopia/extras/images/greenphone-rootfs.tar.gz
+    sudo cp -f $BUILD_PATH/greenphone-kernel /opt/Qtopia/extras/images/greenphone-kernel
   fi
 
-if [ -z $QTOPIA_SOURCE_PATH ]; then
-  sudo $QPEDIR/scripts/greenphone-make-flash.sh --qtopia-build $QPEDIR/$IMAGE_PATH --flash $EXTRA_FLASH_OPTIONS
-else
-		echo "Make flash now..."
-		sleep 2
-		sudo $QPEDIR/scripts/greenphone-make-flash.sh --qtopia-build $QPEDIR/$IMAGE_PATH --qtopia-source $QTOPIA_SOURCE_PATH --flash $EXTRA_FLASH_OPTIONS
+  echo "Make flash now..."
+  sleep 2
+  $QPEDIR/scripts/greenphone-make-flash.sh --qtopia-build $QPEDIR/$IMAGE_PATH --flash $EXTRA_FLASH_OPTIONS
 
-fi
   if [ -s $QPEDIR/qtopia-greenphone-flash ]; then
     sudo cp -f $QPEDIR/qtopia-greenphone-flash /opt/Qtopia/extras/images/qtopia-greenphone-flash-$QPEVER
     echo ""
@@ -295,7 +309,7 @@ fi
 }
 
 HELP=yes
-OUTPUT="/dev/fd/0"
+OUTPUT="/dev/stdout"
 SDKGRN=0
 SDKX86=0
 SDKIMG=0
@@ -309,7 +323,6 @@ DRM=0
 IMAGE_PATH=image
 BUILD_PATH=$PWD/rootfs
 CLEAN=1
-QTOPIA_SOURCE_PATH=
 
 while [ -n "$1" ] ; do
   case $1 in
@@ -365,17 +378,6 @@ while [ -n "$1" ] ; do
   -no-clean | --no-clean)
     CLEAN=0
     ;;
-  --qtopia-source)
-    if [ $# -ge 2 ]; then
-				unset QTOPIA_SOURCE_PATH
-        QTOPIA_SOURCE_PATH="$2"
-          shift 1
-      else
-          echo "$1 requires an argument"
-          usage
-          exit 1
-      fi
-      ;;
   *)
     echo $1: unknown argument
     ;;
@@ -401,7 +403,6 @@ if [ "$HELP" = "yes" ] ; then
   echo " --drm             Builds the specified SDK with DRM"
   echo " --image-path      Specify the path where the Qtopia filesystem is."
   echo " --build-path      Specify the path where the rootfs is."
-  echo " --qtopia-source   Specify where the Qtopia sources live."
   echo " --no-clean        Build without first cleaning the build directory"
   echo
   exit
@@ -467,6 +468,7 @@ if [ ! -e /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/tools/qvfb/Greenphone
   mkdir -p /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/tools/qvfb 
   cp -dpR $QPEDIR/devices/greenphone/Greenphone.skin /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/tools/qvfb 
 fi
+ln -s /opt/Qtopia/SDK/$QPEVER/x86/image/pics /opt/Qtopia/SDK/pics
 
 mkdir -p /opt/Qtopia/SDK/scripts
 cp $QPEDIR/bin/mkPackages /opt/Qtopia/SDK/scripts
@@ -480,4 +482,5 @@ chmod 755 /opt/Qtopia/SDK/scripts/functions
 echo "Built: `date`">/opt/Qtopia/SDK/versioninfo
 echo "By:    `whoami`">>/opt/Qtopia/SDK/versioninfo
 echo "Host:  `hostname`">>/opt/Qtopia/SDK/versioninfo
+echo "Device: Greenphone" >> /opt/Qtopia/SDK/versioninfo
 fi

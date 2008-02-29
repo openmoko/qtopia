@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,8 @@
 // Local includes
 #include "qhardwareinterface.h"
 #include "qhardwareinterface_p.h"
+
+#include <QValueSpaceItem>
 
 // Qt includes
 #include <QSettings>
@@ -57,20 +59,27 @@
     created by passing QAbstractIpcInterface::Client as the mode parameter when
     constructing QHardwareInterface derived classes.
 
+    Qtopia automatically recognizes any subclass of QHardwareInterface as a Qtopia accessory.
+    Each accessory follows the principal of accessory and accessory provider whereby
+    the provider is a subclass of the accessory class. See the documentation for 
+    QAbstractIpcInterface for more information on wrting and using interface classes.
+
     The accessory system supports multiple accessory providers of the same
     interface type.  For example, a device could have a primary and secondary
     battery.  Each battery would be exposed as a separate instance of a
-    QBatteryAccessoryProvider derived class.  Default accessories are defined
-    in \c {<Qtopia Runtime Prefix>/etc/default/Trolltech/HardwareAccessories.conf}.
-    This file contains a list of interface names and the identity of the
-    default accessory, for example:
+    QPowerSourceProvider derived class.  Default accessories can be defined in
+    the \c {Trolltech/HardwareAccessories.conf} configuration file.  The file
+    contains a list of interface names and the identity of the default
+    accessory, for example:
 
     \code
     [Defaults]
-    QBatteryAccessory = StandardBattery
+    QPowerSource = DefaultBattery
+    QSignalSource = DefaultSignal
+    QVibrateAccessory = Modem
     \endcode
 
-    \sa QHardwareManager
+    \sa QHardwareManager, QAbstractIpcInterface
 
     \ingroup hardware
 */
@@ -108,4 +117,3 @@ QHardwareInterface::QHardwareInterface( const QString& name,
 QHardwareInterface::~QHardwareInterface()
 {
 }
-

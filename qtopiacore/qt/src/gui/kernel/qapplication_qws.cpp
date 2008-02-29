@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -64,9 +79,15 @@
 #include "qsettings.h"
 #include "qdebug.h"
 #include "qeventdispatcher_qws_p.h"
+#if !defined(QT_NO_GLIB)
+#  include "qwseventdispatcher_glib_p.h"
+#endif
+
+
 #include "private/qwidget_p.h"
 #include "private/qbackingstore_p.h"
 #include "private/qwindowsurface_qws_p.h"
+#include "private/qfont_p.h"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -104,7 +125,6 @@ extern void qt_directpainter_embedevent(QDirectPainter *dp,
 const int qwsSharedRamSize = 1 * 1024; // misc data, written by server, read by clients
 
 extern QApplication::Type qt_appType;
-extern bool qt_app_has_font;
 
 //these used to be environment variables, they are initialized from
 //environment variables in
@@ -160,7 +180,10 @@ extern "C" void dumpmem(const char* m)
 // live.
 QString qws_dataDir()
 {
-    QByteArray dataDir = QString("/tmp/qtembedded-%1").arg(qws_display_id).toLocal8Bit();
+    static QString result;
+    if (!result.isEmpty())
+        return result;
+    QByteArray dataDir = QString(QLatin1String("/tmp/qtembedded-%1")).arg(qws_display_id).toLocal8Bit();
     if (mkdir(dataDir, 0700)) {
         if (errno != EEXIST) {
             qFatal("Cannot create Qtopia Core data directory: %s", dataDir.constData());
@@ -173,20 +196,24 @@ QString qws_dataDir()
 
     if (!S_ISDIR(buf.st_mode))
         qFatal("%s is not a directory", dataDir.constData());
+
+#ifndef Q_OS_INTEGRITY
     if (buf.st_uid != getuid())
         qFatal("Qtopia Core data directory is not owned by user %d", getuid());
 
     if ((buf.st_mode & 0677) != 0600)
         qFatal("Qtopia Core data directory has incorrect permissions: %s", dataDir.constData());
+#endif
     dataDir += "/";
 
-    return QString(dataDir);
+    result = QString::fromLocal8Bit(dataDir);
+    return result;
 }
 
 // Get the filename of the pipe Qtopia Core uses for server/client comms
 Q_GUI_EXPORT QString qws_qtePipeFilename()
 {
-    return (qws_dataDir() + QString(QTE_PIPE).arg(qws_display_id));
+    return (qws_dataDir() + QString(QLatin1String(QTE_PIPE)).arg(qws_display_id));
 }
 
 static void setMaxWindowRect(const QRect &rect)
@@ -285,6 +312,13 @@ public:
 void QApplicationPrivate::createEventDispatcher()
 {
     Q_Q(QApplication);
+#if !defined(QT_NO_GLIB)
+    if (qgetenv("QT_NO_GLIB").isEmpty() && QEventDispatcherGlib::versionSupported())
+        eventDispatcher = (q->type() != QApplication::Tty
+                           ? new QWSEventDispatcherGlib(q)
+                           : new QEventDispatcherGlib(q));
+    else
+#endif
     eventDispatcher = (q->type() != QApplication::Tty
                        ? new QEventDispatcherQWS(q)
                        : new QEventDispatcherUNIX(q));
@@ -345,6 +379,8 @@ QWSDisplay::Data::~Data()
 #ifndef QT_NO_QWS_MULTIPROCESS
     shm.detach();
     if (csocket) {
+        QWSCommand shutdownCmd(QWSCommand::Shutdown, 0, 0);
+        shutdownCmd.write(csocket);
         csocket->flush(); // may be pending QCop message, eg.
         delete csocket;
     }
@@ -360,6 +396,7 @@ QWSDisplay::Data::~Data()
 #endif
 }
 
+#ifndef QT_NO_QWS_MULTIPROCESS
 bool QWSDisplay::Data::lockClient(QWSLock::LockType type, int timeout)
 {
     return !clientLock || clientLock->lock(type, timeout);
@@ -379,6 +416,7 @@ QWSLock* QWSDisplay::Data::getClientLock()
 {
     return clientLock;
 }
+#endif // QT_NO_QWS_MULTIPROCESS
 
 void QWSDisplay::Data::flush()
 {
@@ -496,15 +534,16 @@ void QWSDisplay::Data::setMouseFilter(void (*filter)(QWSMouseEvent*))
     mouseFilter = filter;
 }
 
+#ifndef QT_NO_QWS_MULTIPROCESS
+
 QWSLock* QWSDisplay::Data::clientLock = 0;
 
-#ifndef QT_NO_QWS_MULTIPROCESS
 void Q_GUI_EXPORT qt_app_reinit( const QString& newAppName )
 {
     qt_fbdpy->d->reinit( newAppName );
 }
 
-#endif
+#endif // QT_NO_QWS_MULTIPROCESS
 
 class QDesktopWidget;
 extern QDesktopWidget *qt_desktopWidget;
@@ -579,8 +618,10 @@ void QWSDisplay::Data::reinit( const QString& newAppName )
         qFatal("Cannot get display lock");
 
     if (shm.attach(connected_event->simpleData.servershmid)) {
+        sharedRam = static_cast<uchar *>(shm.address());
         QScreen *s = qt_get_screen(qws_display_id, qws_display_spec.constData());
-        sharedRamSize += s->memoryNeeded(qws_display_spec.constData());
+        if (s)
+            sharedRamSize += s->memoryNeeded(QLatin1String(qws_display_spec.constData()));
     } else {
         perror("QWSDisplay::Data::init");
         qFatal("Client can't attach to main ram memory.");
@@ -593,8 +634,6 @@ void QWSDisplay::Data::reinit( const QString& newAppName )
     // before object id creation.  Waiting here avoids later window
     // resizing since we have the MWR before windows are displayed.
     waitForCreation();
-
-    sharedRam = static_cast<uchar *>(shm.address());
 
     sharedRamSize -= sizeof(int);
     qt_last_x = reinterpret_cast<int *>(sharedRam + sharedRamSize);
@@ -667,13 +706,14 @@ void QWSDisplay::Data::init()
             qFatal("Cannot get display lock");
 
         if (shm.attach(connected_event->simpleData.servershmid)) {
+            sharedRam = static_cast<uchar *>(shm.address());
             QScreen *s = qt_get_screen(qws_display_id, qws_display_spec.constData());
-            sharedRamSize += s->memoryNeeded(qws_display_spec.constData());
+            if (s)
+                sharedRamSize += s->memoryNeeded(QLatin1String(qws_display_spec.constData()));
         } else {
             perror("QWSDisplay::Data::init");
             qFatal("Client can't attach to main ram memory.");
         }
-        sharedRam = static_cast<uchar *>(shm.address());
 
         // We wait for creation mainly so that we can process important
         // initialization events such as MaxWindowRect that are sent
@@ -690,7 +730,8 @@ void QWSDisplay::Data::init()
             qFatal("Cannot get display lock");
 
         QScreen *s = qt_get_screen(qws_display_id, qws_display_spec.constData());
-        sharedRamSize += s->memoryNeeded(qws_display_spec.constData());
+        if (s)
+            sharedRamSize += s->memoryNeeded(QLatin1String(qws_display_spec.constData()));
 
 #ifndef QT_NO_QWS_MULTIPROCESS
 
@@ -783,7 +824,14 @@ void QWSDisplay::Data::fillQueue()
 {
     QWSServer::processEventQueue();
     QWSEvent *e = readMore();
+#ifndef QT_NO_QWS_MULTIPROCESS
+    int bytesAvailable = csocket ? csocket->bytesAvailable() : 0;
+    int bytesRead = 0;
+#endif
     while (e) {
+#ifndef QT_NO_QWS_MULTIPROCESS
+        bytesRead += 2* sizeof(int) + e->simpleLen + e->rawLen;
+#endif
         if (e->type == QWSEvent::Connected) {
             connected_event = static_cast<QWSConnectedEvent *>(e);
             return;
@@ -831,6 +879,12 @@ void QWSDisplay::Data::fillQueue()
                            me->window(), mouse_event_count);
 #endif
             }
+#ifndef QT_NO_QWS_MULTIPROCESS
+        } else if (e->type == QWSEvent::Region && clientLock) {
+            // not really an unlock, decrements the semaphore
+            clientLock->unlock(QWSLock::RegionEvent);
+            queue.append(e);
+#endif
 #if 0
         } else if (e->type == QWSEvent::RegionModified) {
             QWSRegionModifiedEvent *re = static_cast<QWSRegionModifiedEvent *>(e);
@@ -863,6 +917,21 @@ void QWSDisplay::Data::fillQueue()
                 }
             }
 #endif // 0 (RegionModified)
+#ifndef QT_NO_QWS_PROPERTIES
+        } else if (e->type == QWSEvent::PropertyReply) {
+            QWSPropertyReplyEvent *pe = static_cast<QWSPropertyReplyEvent*>(e);
+            int len = pe->simpleData.len;
+            char *data;
+            if (len <= 0) {
+                data = 0;
+            } else {
+                data = new char[len];
+                memcpy(data, pe->data, len) ;
+            }
+            QPaintDevice::qwsDisplay()->getPropertyLen = len;
+            QPaintDevice::qwsDisplay()->getPropertyData = data;
+            delete e;
+#endif // QT_NO_QWS_PROPERTIES
         } else if (e->type==QWSEvent::MaxWindowRect && qt_screen) {
             // Process this ASAP, in case new widgets are created (startup)
             setMaxWindowRect((static_cast<QWSMaxWindowRectEvent*>(e))->simpleData.rect);
@@ -880,6 +949,10 @@ void QWSDisplay::Data::fillQueue()
             queue.append(e);
         }
         //debugQueue();
+#ifndef QT_NO_QWS_MULTIPROCESS
+        if (csocket && bytesRead >= bytesAvailable)
+            break;
+#endif
         e = readMore();
     }
 }
@@ -909,15 +982,21 @@ void QWSDisplay::Data::offsetPendingExpose(int window, const QPoint &offset)
 }
 #endif
 
+static int qws_connection_timeout = 5;
+
 #ifndef QT_NO_QWS_MULTIPROCESS
 void QWSDisplay::Data::connectToPipe()
 {
     Q_ASSERT(csocket);
 
+    int timeout = qgetenv("QWS_CONNECTION_TIMEOUT").toInt();
+    if (timeout)
+        qws_connection_timeout = timeout;
+
     const QString pipe = qws_qtePipeFilename();
     int i = 0;
     while (!csocket->connectToLocalFile(pipe)) {
-        if (++i > 5) {
+        if (++i > qws_connection_timeout) {
             qWarning("No Qtopia Core server appears to be running.");
             qWarning("If you want to run this program as a server,");
             qWarning("add the \"-qws\" command-line option.");
@@ -931,7 +1010,7 @@ void QWSDisplay::Data::waitForConnection()
 {
     connected_event = 0;
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < qws_connection_timeout; i++) {
         fillQueue();
         if (connected_event)
             return;
@@ -944,26 +1023,84 @@ void QWSDisplay::Data::waitForConnection()
         qFatal("Did not receive a connection event from the qws server");
 }
 
-#if 0
-void QWSDisplay::Data::waitForRegionAck()
+void QWSDisplay::Data::waitForRegionAck(int winId)
 {
-    for (;;) {
+    QWSEvent *ack = 0;
+
+    if (csocket) { // GuiClient
+        int i = 0;
+        while (!ack) {
+            fillQueue();
+
+            while (i < queue.size()) {
+                QWSEvent *e = queue.at(i);
+                if (e->type == QWSEvent::Region && e->window() == winId) {
+                    ack = e;
+                    queue.removeAt(i);
+                    break;
+                }
+                ++i;
+            }
+
+            if (!ack) {
+                csocket->flush();
+                csocket->waitForReadyRead(1000);
+            }
+        }
+    } else { // GuiServer
         fillQueue();
-        if (region_ack)
-            break;
-#ifndef QT_NO_QWS_MULTIPROCESS
-        if (csocket) {
+        for (int i = 0; i < queue.size(); /* nothing */) {
+            QWSEvent *e = queue.at(i);
+            if (e->type == QWSEvent::Region && e->window() == winId) {
+                ack = e;
+                queue.removeAt(i);
+                break;
+            }
+            ++i;
+        }
+        if (!ack) // already processed
+            return;
+    }
+
+    Q_ASSERT(ack);
+
+    qApp->qwsProcessEvent(ack);
+    delete ack;
+}
+
+void QWSDisplay::Data::waitForRegionEvents(int winId)
+{
+    if (!clientLock)
+        return;
+
+    // fill queue with unreceived region events
+    if (!clientLock->hasLock(QWSLock::RegionEvent)) {
+        for (;;) {
+            fillQueue();
+            if (clientLock->hasLock(QWSLock::RegionEvent))
+                break;
             csocket->flush();
             csocket->waitForReadyRead(1000);
-            if (csocket->state() != QAbstractSocket::ConnectedState)
-                return;
         }
-#endif
     }
-    queue.prepend(region_ack);
-    region_ack = 0;
+
+    // check the queue for pending region events
+    QWSEvent *regionEvent = 0;
+    for (int i = 0; i < queue.size(); /* nothing */) {
+        QWSEvent *e = queue.at(i);
+        if (e->type == QWSEvent::Region && e->window() == winId) {
+            delete regionEvent;
+            regionEvent = e;
+            queue.removeAt(i);
+        } else {
+            ++i;
+        }
+    }
+    if (regionEvent) {
+        qApp->qwsProcessEvent(regionEvent);
+        delete regionEvent;
+    }
 }
-#endif
 #endif // QT_NO_QWS_MULTIPROCESS
 
 void QWSDisplay::Data::waitForCreation()
@@ -979,6 +1116,21 @@ void QWSDisplay::Data::waitForCreation()
     }
 #endif
 }
+
+
+#ifndef QT_NO_QWS_MULTIPROCESS
+void QWSDisplay::Data::waitForPropertyReply()
+{
+    if (!csocket)
+        return;
+    fillQueue();
+    while (qt_fbdpy->getPropertyLen == -2) {
+        csocket->flush();
+        csocket->waitForReadyRead(1000);
+        fillQueue();
+    }
+}
+#endif
 
 #ifndef QT_NO_COP
 void QWSDisplay::Data::waitForQCopResponse()
@@ -1079,6 +1231,7 @@ bool QWSDisplay::supportsDepth(int depth) const { return qt_screen->supportsDept
 uchar *QWSDisplay::sharedRam() const { return d->sharedRam; }
 int QWSDisplay::sharedRamSize() const { return d->sharedRamSize; }
 
+#ifndef QT_NO_QWS_PROPERTIES
 
 void QWSDisplay::addProperty(int winId, int property)
 {
@@ -1122,6 +1275,17 @@ void QWSDisplay::removeProperty(int winId, int property)
  */
 bool QWSDisplay::getProperty(int winId, int property, char *&data, int &len)
 {
+    if (d->directServerConnection()) {
+        const char *propertyData;
+        bool retval = qwsServer->d_func()->get_property(winId, property, propertyData, len);
+        if (len <= 0) {
+            data = 0;
+        } else {
+            data = new char[len];
+            memcpy(data, propertyData, len) ;
+        }
+        return retval;
+    }
     QWSGetPropertyCommand cmd;
     cmd.simpleData.windowid = winId;
     cmd.simpleData.property = property;
@@ -1130,8 +1294,9 @@ bool QWSDisplay::getProperty(int winId, int property, char *&data, int &len)
     getPropertyLen = -2;
     getPropertyData = 0;
 
-    while (getPropertyLen == -2)
-        qApp->processEvents(); //########## USE an ACK event instead. That's dangerous!
+#ifndef QT_NO_QWS_MULTIPROCESS
+    d->waitForPropertyReply();
+#endif
 
     len = getPropertyLen;
     data = getPropertyData;
@@ -1141,6 +1306,8 @@ bool QWSDisplay::getProperty(int winId, int property, char *&data, int &len)
 
     return len != -1;
 }
+
+#endif // QT_NO_QWS_PROPERTIES
 
 void QWSDisplay::setAltitude(int winId, int alt, bool fixed)
 {
@@ -1186,7 +1353,12 @@ void QWSDisplay::requestFocus(int winId, bool get)
 void QWSDisplay::setIdentity(const QString &appName)
 {
     QWSIdentifyCommand cmd;
-    cmd.setId(appName, QWSDisplay::Data::clientLock ? QWSDisplay::Data::clientLock->id() : -1 );
+#ifdef QT_NO_QWS_MULTIPROCESS
+    const int id = -1;
+#else
+    const int id = QWSDisplay::Data::clientLock ? QWSDisplay::Data::clientLock->id() : -1;
+#endif
+    cmd.setId(appName, id);
     if (d->directServerConnection())
         qwsServer->d_func()->set_identity(&cmd);
     else
@@ -1218,10 +1390,10 @@ void QWSDisplay::requestRegion(int winId, const QString &surfaceKey,
     }
 }
 
-void QWSDisplay::repaintRegion(int winId, bool opaque, QRegion r)
+void QWSDisplay::repaintRegion(int winId, int windowFlags, bool opaque, QRegion r)
 {
     if (d->directServerConnection()) {
-        qwsServer->d_func()->repaint_region(winId, opaque, r);
+        qwsServer->d_func()->repaint_region(winId, windowFlags, opaque, r);
     } else {
         QVector<QRect> ra = r.rects();
 
@@ -1240,6 +1412,7 @@ void QWSDisplay::repaintRegion(int winId, bool opaque, QRegion r)
         memset(cmd.simpleDataPtr, 0, sizeof(cmd.simpleData)); //shut up Valgrind
 #endif
         cmd.simpleData.windowid = winId;
+        cmd.simpleData.windowFlags = windowFlags;
         cmd.simpleData.opaque = opaque;
         cmd.simpleData.nrectangles = ra.count();
         cmd.setData(reinterpret_cast<const char *>(ra.constData()),
@@ -1472,6 +1645,13 @@ QWSQCopMessageEvent* QWSDisplay::waitForQCopResponse()
 }
 #endif
 
+void QWSDisplay::sendFontCommand(int type, const QByteArray &fontName)
+{
+    QWSFontCommand cmd;
+    cmd.simpleData.type = type;
+    cmd.setFontName(fontName);
+    d->sendCommand(cmd);
+}
 
 void QWSDisplay::setWindowCaption(QWidget *w, const QString &c)
 {
@@ -1641,7 +1821,7 @@ static void qt_set_qws_resources()
         QApplicationPrivate::qws_apply_settings();
 
     if (appFont)
-        QApplication::setFont(QFont(appFont));
+        QApplication::setFont(QFont(QString::fromLocal8Bit(appFont)));
 
     if (appBGCol || appBTNCol || appFGCol) {
         (void) QApplication::style();  // trigger creation of application style and system palettes
@@ -1665,12 +1845,12 @@ static void qt_set_qws_resources()
         fg.getHsv(&h,&s,&v);
         QColor base = Qt::white;
         bool bright_mode = false;
-        if (v >= 255-50) {
-            base = btn.dark(150);
+        if (v >= 255 - 50) {
+            base = btn.darker(150);
             bright_mode = true;
         }
 
-        QPalette pal(fg, btn, btn.light(), btn.dark(), btn.dark(150), fg, Qt::white, base, bg);
+        QPalette pal(fg, btn, btn.lighter(), btn.darker(), btn.darker(150), fg, Qt::white, base, bg);
         if (bright_mode) {
             pal.setColor(QPalette::HighlightedText, base);
             pal.setColor(QPalette::Highlight, Qt::white);
@@ -1681,8 +1861,8 @@ static void qt_set_qws_resources()
         QColor disabled((fg.red()   + btn.red())  / 2,
                         (fg.green() + btn.green())/ 2,
                         (fg.blue()  + btn.blue()) / 2);
-        pal.setColorGroup(QPalette::Disabled, disabled, btn, btn.light(125),
-                          btn.dark(), btn.dark(150), disabled, Qt::white, Qt::white, bg);
+        pal.setColorGroup(QPalette::Disabled, disabled, btn, btn.lighter(125),
+                          btn.darker(), btn.darker(150), disabled, Qt::white, Qt::white, bg);
         if (bright_mode) {
             pal.setColor(QPalette::Disabled, QPalette::HighlightedText, base);
             pal.setColor(QPalette::Disabled, QPalette::Highlight, Qt::white);
@@ -1738,19 +1918,16 @@ bool QApplicationPrivate::qws_apply_settings()
     if (groupCount == QPalette::NColorGroups)
         QApplicationPrivate::setSystemPalette(pal);
 
-    if (!qt_app_has_font) {
+    QString str = settings.value(QLatin1String("font")).toString();
+    if (!str.isEmpty()) {
         QFont font(QApplication::font());
-        QString str = settings.value(QLatin1String("font")).toString();
-        if (!str.isEmpty()) {
-            font.fromString(str);
-            if (font != QApplication::font())
-                QApplication::setFont(font);
-        }
+        font.fromString(str);
+        QApplicationPrivate::setSystemFont(font);
     }
 
     // read library (ie. plugin) path list
     QString libpathkey =
-        QString(QLatin1String("%1.%2/libraryPath"))
+        QString::fromLatin1("%1.%2/libraryPath")
         .arg(QT_VERSION >> 16)
         .arg((QT_VERSION & 0xff00) >> 8);
     QStringList pathlist = settings.value(libpathkey).toString().split(QLatin1Char(':'));
@@ -1845,6 +2022,14 @@ bool QApplicationPrivate::qws_apply_settings()
 
     settings.endGroup(); // Qt
 
+    settings.beginGroup(QLatin1String("QWS Font Fallbacks"));
+    if (!settings.childKeys().isEmpty()) {
+        // from qfontdatabase_qws.cpp
+        extern void qt_applyFontDatabaseSettings(const QSettings &);
+        qt_applyFontDatabaseSettings(settings);
+    }
+    settings.endGroup();
+
     return true;
 #else
     return false;
@@ -1875,7 +2060,11 @@ static void init_display()
 
     if (!QApplicationPrivate::app_font) {
         QFont f;
+#ifdef QT_NO_FREETYPE
         f = QFont(QLatin1String("helvetica"), 10);
+#else
+        f = QFont(QLatin1String("DejaVu Sans"), 12);
+#endif
         QApplication::setFont(f);
     }
     qt_set_qws_resources();
@@ -1921,7 +2110,7 @@ void qt_init(QApplicationPrivate *priv, int type)
 
     if (argv && *argv) { //apparently, we allow people to pass 0 on the other platforms
         p = strrchr(argv[0], '/');
-        appName = p ? p + 1 : argv[0];
+        appName = QString::fromLocal8Bit(p ? p + 1 : argv[0]);
     }
 
     // Get command line params
@@ -1948,7 +2137,7 @@ void qt_init(QApplicationPrivate *priv, int type)
                 appFGCol = argv[i];
         } else if (arg == "-name") {
             if (++i < argc)
-                appName = argv[i];
+                appName = QString::fromLocal8Bit(argv[i]);
         } else if (arg == "-title") {
             if (++i < argc)
                 mwTitle = argv[i];
@@ -1984,7 +2173,7 @@ void qt_init(QApplicationPrivate *priv, int type)
                 qws_display_spec = argv[i];
         } else if (arg == "-decoration") {
             if (++i < argc)
-                decoration = argv[i];
+                decoration = QString::fromLocal8Bit(argv[i]);
         } else {
             argv[j++] = argv[i];
         }
@@ -1996,8 +2185,8 @@ void qt_init(QApplicationPrivate *priv, int type)
 
     mouseInWidget = new QPointer<QWidget>;
 
-    const QString disp(qws_display_spec);
-    QRegExp regexp(":(\\d+)$");
+    const QString disp = QString::fromLatin1(qws_display_spec);
+    QRegExp regexp(QLatin1String(":(\\d+)$"));
     if (regexp.lastIndexIn(disp) != -1) {
         const QString capture = regexp.cap(1);
         bool ok = false;
@@ -2274,7 +2463,7 @@ void QApplicationPrivate::applyQWSSpecificCommandLineArguments(QWidget *main_wid
     if (qApp->windowIcon().isNull() && main_widget->testAttribute(Qt::WA_SetWindowIcon))
         qApp->setWindowIcon(main_widget->windowIcon());
     if (mwTitle) //  && main_widget->windowTitle().isEmpty())
-        main_widget->setWindowTitle(mwTitle);
+        main_widget->setWindowTitle(QString::fromLocal8Bit(mwTitle));
     if (mwGeometry) { // parse geometry
         int x = 0;
         int y = 0;
@@ -2410,6 +2599,10 @@ void QApplication::beep()
 {
 }
 
+void QApplication::alert(QWidget *, int)
+{
+}
+
 /*!
     \internal
 */
@@ -2446,29 +2639,34 @@ int QApplication::qwsProcessEvent(QWSEvent* event)
             }
 #endif
         }
-    } else if (event->type == QWSEvent::PropertyReply) {
-        QWSPropertyReplyEvent *e = static_cast<QWSPropertyReplyEvent*>(event);
-        int len = e->simpleData.len;
-        char *data;
-        if (len <= 0) {
-            data = 0;
-        } else {
-            data = new char[len];
-            memcpy(data, e->data, len) ;
-        }
-        QPaintDevice::qwsDisplay()->getPropertyLen = len;
-        QPaintDevice::qwsDisplay()->getPropertyData = data;
     }
 #endif //QT_NO_QWS_PROPERTIES
 #ifndef QT_NO_COP
-    if (event->type == QWSEvent::QCopMessage) {
+    else if (event->type == QWSEvent::QCopMessage) {
         QWSQCopMessageEvent *e = static_cast<QWSQCopMessageEvent*>(event);
-        QCopChannel::sendLocally(e->channel, e->message, e->data);
+        QCopChannel::sendLocally(QLatin1String(e->channel), QLatin1String(e->message), e->data);
         return 0;
+    }
+#endif
+#if !defined(QT_NO_QWS_QPF2)
+    else if (event->type == QWSEvent::Font) {
+        QWSFontEvent *e = static_cast<QWSFontEvent *>(event);
+        if (e->simpleData.type == QWSFontEvent::FontRemoved
+            && QFontCache::instance) {
+            QFontCache::instance->removeEngineForFont(e->fontName);
+        }
     }
 #endif
 
     QPointer<QETWidget> widget = static_cast<QETWidget*>(QWidget::find(WId(event->window())));
+#ifdef Q_BACKINGSTORE_SUBSURFACES
+    if (!widget) { // XXX: hw: hack for accessing subsurfaces
+        extern QWSWindowSurface* qt_findWindowSurface(int);
+        QWSWindowSurface *s = qt_findWindowSurface(event->window());
+        if (s)
+            widget = static_cast<QETWidget*>(s->window());
+    }
+#endif
 
 #ifndef QT_NO_DIRECTPAINTER
     if (!widget && d->directPainters) {
@@ -2845,7 +3043,7 @@ QDecoration &QApplication::qwsDecoration()
 /*!
     \fn void QApplication::qwsSetDecoration(QDecoration *decoration)
 
-    Set the QWSDecoration derived class to use for decorating the
+    Sets the QDecoration derived class to use for decorating the
     Qtopia Core windows to \a decoration.
 
     This method is non-portable. It is only available in Qtopia Core.
@@ -3337,25 +3535,19 @@ bool QETWidget::translateKeyEvent(const QWSKeyEvent *event, bool grab) /* grab i
 
 bool QETWidget::translateRegionEvent(const QWSRegionEvent *event)
 {
-    Q_D(QWidget);
-
-    QWidget *win = QWidget::find(WId(event->window()));
-    if (!win)
-        return true;
-
-    QWidgetBackingStore *bs = d->topData()->backingStore;
-    QWSWindowSurface *surface = static_cast<QWSWindowSurface*>(bs->windowSurface);
+    QWSWindowSurface *surface = static_cast<QWSWindowSurface*>(windowSurface());
+    Q_ASSERT(surface);
 
     QRegion region;
     region.setRects(event->rectangles, event->simpleData.nrectangles);
 
     switch (event->simpleData.type) {
     case QWSRegionEvent::Allocation:
-        region.translate(-win->geometry().topLeft());
+        region.translate(-mapToGlobal(QPoint()));
         surface->setClipRegion(region);
         break;
     case QWSRegionEvent::Request:
-        win->setGeometry(region.boundingRect());
+        setGeometry(region.boundingRect());
         break;
     default:
         break;

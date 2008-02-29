@@ -13,6 +13,7 @@
 UmakefileVersion(2,1)
 
 project.AddModuleIncludes("common/include",
+                          "common/dbgtool/pub",
 						  "common/system/pub")
 
 project.AddIncludes(os.path.join(GetSDKPath("qt"),"include"))

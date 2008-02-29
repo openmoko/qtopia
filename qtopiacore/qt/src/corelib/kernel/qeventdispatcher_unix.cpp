@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,10 +45,15 @@
 
 #include "qeventdispatcher_unix_p.h"
 #include <private/qthread_p.h>
+#include <private/qcoreapplication_p.h>
 
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#if (_POSIX_MONOTONIC_CLOCK-0 <= 0)
+#  include <sys/times.h>
+#endif
 
 Q_CORE_EXPORT bool qt_disable_lowpriority_timers=false;
 
@@ -51,6 +71,20 @@ static void signalHandler(int sig)
 }
 
 
+static void initThreadPipeFD(int fd)
+{
+    int ret = fcntl(fd, F_SETFD, FD_CLOEXEC);
+    if (ret == -1)
+        perror("QEventDispatcherUNIXPrivate: Unable to init thread pipe");
+
+    int flags = fcntl(fd, F_GETFL);
+    if (flags == -1)
+        perror("QEventDispatcherUNIXPrivate: Unable to get flags on thread pipe");
+
+    ret = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    if (ret == -1)
+        perror("QEventDispatcherUNIXPrivate: Unable to set flags on thread pipe");
+}
 
 
 QEventDispatcherUNIXPrivate::QEventDispatcherUNIXPrivate()
@@ -59,11 +93,17 @@ QEventDispatcherUNIXPrivate::QEventDispatcherUNIXPrivate()
     mainThread = (QThread::currentThreadId() == qt_application_thread_id);
 
     // initialize the common parts of the event loop
-    pipe(thread_pipe);
-    fcntl(thread_pipe[0], F_SETFD, FD_CLOEXEC);
-    fcntl(thread_pipe[1], F_SETFD, FD_CLOEXEC);
-    fcntl(thread_pipe[0], F_SETFL, fcntl(thread_pipe[0], F_GETFL) | O_NONBLOCK);
-    fcntl(thread_pipe[1], F_SETFL, fcntl(thread_pipe[1], F_GETFL) | O_NONBLOCK);
+#ifdef Q_OS_INTEGRITY
+    // INTEGRITY doesn't like a "select" on pipes, so use socketpair instead
+    if (socketpair(AF_INET, SOCK_STREAM, PF_INET, thread_pipe) == -1)
+        perror("QEventDispatcherUNIXPrivate(): Unable to create socket pair");
+#else
+    if (pipe(thread_pipe) == -1)
+        perror("QEventDispatcherUNIXPrivate(): Unable to create thread pipe");
+#endif
+
+    initThreadPipeFD(thread_pipe[0]);
+    initThreadPipeFD(thread_pipe[1]);
 
     sn_highest = -1;
 
@@ -84,6 +124,9 @@ int QEventDispatcherUNIXPrivate::doSelect(QEventLoop::ProcessEventsFlags flags, 
 {
     Q_Q(QEventDispatcherUNIX);
 
+    // needed in QEventDispatcherUNIX::select()
+    timerList.updateCurrentTime();
+
     int nsel;
     do {
         if (mainThread) {
@@ -100,18 +143,16 @@ int QEventDispatcherUNIXPrivate::doSelect(QEventLoop::ProcessEventsFlags flags, 
 
         // Process timers and socket notifiers - the common UNIX stuff
         int highest = 0;
-        FD_ZERO(&sn_vec[0].select_fds);
-        FD_ZERO(&sn_vec[1].select_fds);
-        FD_ZERO(&sn_vec[2].select_fds);
         if (! (flags & QEventLoop::ExcludeSocketNotifiers) && (sn_highest >= 0)) {
             // return the highest fd we can wait for input on
-            if (!sn_vec[0].list.isEmpty())
                 sn_vec[0].select_fds = sn_vec[0].enabled_fds;
-            if (!sn_vec[1].list.isEmpty())
                 sn_vec[1].select_fds = sn_vec[1].enabled_fds;
-            if (!sn_vec[2].list.isEmpty())
                 sn_vec[2].select_fds = sn_vec[2].enabled_fds;
             highest = sn_highest;
+        } else {
+            FD_ZERO(&sn_vec[0].select_fds);
+            FD_ZERO(&sn_vec[1].select_fds);
+            FD_ZERO(&sn_vec[2].select_fds);
         }
 
         FD_SET(thread_pipe[0], &sn_vec[0].select_fds);
@@ -133,7 +174,7 @@ int QEventDispatcherUNIXPrivate::doSelect(QEventLoop::ProcessEventsFlags flags, 
             tm.tv_sec = tm.tv_usec = 0l;
 
             for (int type = 0; type < 3; ++type) {
-                QList<QSockNot *> &list = sn_vec[type].list;
+                QSockNotType::List &list = sn_vec[type].list;
                 if (list.size() == 0)
                     continue;
 
@@ -193,7 +234,7 @@ int QEventDispatcherUNIXPrivate::doSelect(QEventLoop::ProcessEventsFlags flags, 
         // if select says data is ready on any socket, then set the socket notifier
         // to pending
         for (int i=0; i<3; i++) {
-            QList<QSockNot *> &list = sn_vec[i].list;
+            QSockNotType::List &list = sn_vec[i].list;
             for (int j = 0; j < list.size(); ++j) {
                 QSockNot *sn = list.at(j);
                 if (FD_ISSET(sn->fd, &sn_vec[i].select_fds))
@@ -211,16 +252,133 @@ int QEventDispatcherUNIXPrivate::doSelect(QEventLoop::ProcessEventsFlags flags, 
 
 QTimerInfoList::QTimerInfoList()
 {
-    getTime(watchtime);
+#if (_POSIX_MONOTONIC_CLOCK-0 <= 0)
+    useMonotonicTimers = false;
+
+#  if (_POSIX_MONOTONIC_CLOCK == 0)
+    // detect if the system support monotonic timers
+    long x = sysconf(_SC_MONOTONIC_CLOCK);
+    useMonotonicTimers = x >= 200112L;
+#  endif
+
+    getTime(currentTime);
+
+    if (!useMonotonicTimers) {
+        // not using monotonic timers, initialize the timeChanged() machinery
+        previousTime = currentTime;
+
+        tms unused;
+        previousTicks = times(&unused);
+
+        ticksPerSecond = sysconf(_SC_CLK_TCK);
+        msPerTick = 1000/ticksPerSecond;
+    } else {
+        // detected monotonic timers
+        previousTime.tv_sec = previousTime.tv_usec = 0;
+        previousTicks = 0;
+        ticksPerSecond = 0;
+        msPerTick = 0;
+    }
+#else
+    // using monotonic timers unconditionally
+    getTime(currentTime);
+#endif
+
+    firstTimerInfo = currentTimerInfo = 0;
 }
 
-
-void QTimerInfoList::updateWatchTime(const timeval &currentTime)
+timeval QTimerInfoList::updateCurrentTime()
 {
-    if (currentTime < watchtime)        // clock was turned back
-        timerRepair(watchtime - currentTime);
-    watchtime = currentTime;
+    getTime(currentTime);
+    return currentTime;
 }
+
+#if (_POSIX_MONOTONIC_CLOCK-0 > 0)
+
+void QTimerInfoList::getTime(timeval &t)
+{
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    t.tv_sec = ts.tv_sec;
+    t.tv_usec = ts.tv_nsec / 1000;
+}
+
+void QTimerInfoList::repairTimersIfNeeded()
+{
+}
+
+#else
+
+/*
+  Returns true if the real time clock has changed by more than 10%
+  relative to the processor time since the last time this function was
+  called. This presumably means that the system time has been changed.
+
+  If /a delta is nonzero, delta is set to our best guess at how much the system clock was changed.
+*/
+bool QTimerInfoList::timeChanged(timeval *delta)
+{
+    tms unused;
+    clock_t currentTicks = times(&unused);
+
+    int elapsedTicks = currentTicks - previousTicks;
+    timeval elapsedTime = currentTime - previousTime;
+    int elapsedMsecTicks = (elapsedTicks * 1000) / ticksPerSecond;
+    int deltaMsecs = (elapsedTime.tv_sec * 1000 + elapsedTime.tv_usec / 1000)
+                     - elapsedMsecTicks;
+
+    if (delta) {
+	delta->tv_sec = deltaMsecs / 1000;
+	delta->tv_usec = (deltaMsecs % 1000) * 1000;
+    }
+    previousTicks = currentTicks;
+    previousTime = currentTime;
+
+    // If tick drift is more than 10% off compared to realtime, we assume that the clock has
+    // been set. Of course, we have to allow for the tick granularity as well.
+
+     return (qAbs(deltaMsecs) - msPerTick) * 10 > elapsedMsecTicks;
+}
+
+void QTimerInfoList::getTime(timeval &t)
+{
+#if !defined(QT_NO_CLOCK_MONOTONIC)
+    if (useMonotonicTimers) {
+        timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        t.tv_sec = ts.tv_sec;
+        t.tv_usec = ts.tv_nsec / 1000;
+        return;
+    }
+#endif
+
+    gettimeofday(&t, 0);
+    // NTP-related fix
+    while (t.tv_usec >= 1000000l) {
+        t.tv_usec -= 1000000l;
+        ++t.tv_sec;
+    }
+    while (t.tv_usec < 0l) {
+        if (t.tv_sec > 0l) {
+            t.tv_usec += 1000000l;
+            --t.tv_sec;
+        } else {
+            t.tv_usec = 0l;
+            break;
+        }
+    }
+}
+
+void QTimerInfoList::repairTimersIfNeeded()
+{
+    if (useMonotonicTimers)
+        return;
+    timeval delta;
+    if (timeChanged(&delta))
+        timerRepair(delta);
+}
+
+#endif
 
 /*
   insert timer info into list
@@ -254,9 +412,8 @@ void QTimerInfoList::timerRepair(const timeval &diff)
 */
 bool QTimerInfoList::timerWait(timeval &tm)
 {
-    timeval currentTime;
-    getTime(currentTime);
-    updateWatchTime(currentTime);
+    timeval currentTime = updateCurrentTime();
+    repairTimersIfNeeded();
 
     if (isEmpty())
         return false;
@@ -272,6 +429,141 @@ bool QTimerInfoList::timerWait(timeval &tm)
     }
 
     return true;
+}
+
+void QTimerInfoList::registerTimer(int timerId, int interval, QObject *object)
+{
+    QTimerInfo *t = new QTimerInfo;
+    t->id = timerId;
+    t->interval.tv_sec  = interval / 1000;
+    t->interval.tv_usec = (interval % 1000) * 1000;
+    t->timeout = updateCurrentTime() + t->interval;
+    t->obj = object;
+    t->inTimerEvent = false;
+
+    timerInsert(t);
+}
+
+bool QTimerInfoList::unregisterTimer(int timerId)
+{
+    // set timer inactive
+    for (int i = 0; i < count(); ++i) {
+        register QTimerInfo *t = at(i);
+        if (t->id == timerId) {
+            removeAt(i);
+            if (t == firstTimerInfo)
+                firstTimerInfo = 0;
+            if (t == currentTimerInfo)
+                currentTimerInfo = 0;
+            delete t;
+            return true;
+        }
+    }
+    // id not found
+    return false;
+}
+
+bool QTimerInfoList::unregisterTimers(QObject *object)
+{
+    if (isEmpty())
+        return false;
+    for (int i = 0; i < count(); ++i) {
+        register QTimerInfo *t = at(i);
+        if (t->obj == object) {
+            // object found
+            removeAt(i);
+            if (t == firstTimerInfo)
+                firstTimerInfo = 0;
+            if (t == currentTimerInfo)
+                currentTimerInfo = 0;
+            delete t;
+            // move back one so that we don't skip the new current item
+            --i;
+        }
+    }
+    return true;
+}
+
+QList<QPair<int, int> > QTimerInfoList::registeredTimers(QObject *object) const
+{
+    QList<QPair<int, int> > list;
+    for (int i = 0; i < count(); ++i) {
+        register const QTimerInfo * const t = at(i);
+        if (t->obj == object)
+            list << QPair<int, int>(t->id, t->interval.tv_sec * 1000 + t->interval.tv_usec / 1000);
+    }
+    return list;
+}
+
+/*
+    Activate pending timers, returning how many where activated.
+*/
+int QTimerInfoList::activateTimers()
+{
+    if (qt_disable_lowpriority_timers || isEmpty())
+        return 0; // nothing to do
+
+    bool firstTime = true;
+    timeval currentTime;
+    int n_act = 0, maxCount = count();
+
+    QTimerInfo *saveFirstTimerInfo = firstTimerInfo;
+    QTimerInfo *saveCurrentTimerInfo = currentTimerInfo;
+    firstTimerInfo = currentTimerInfo = 0;
+
+    while (maxCount--) {
+        currentTime = updateCurrentTime();
+        if (firstTime) {
+            repairTimersIfNeeded();
+            firstTime = false;
+        }
+
+        if (isEmpty())
+            break;
+
+        currentTimerInfo = first();
+        if (currentTime < currentTimerInfo->timeout)
+            break; // no timer has expired
+
+        if (!firstTimerInfo) {
+            firstTimerInfo = currentTimerInfo;
+        } else if (firstTimerInfo == currentTimerInfo) {
+            // avoid sending the same timer multiple times
+            break;
+        } else if (currentTimerInfo->interval <  firstTimerInfo->interval
+                   || currentTimerInfo->interval == firstTimerInfo->interval) {
+            firstTimerInfo = currentTimerInfo;
+        }
+
+        // remove from list
+        removeFirst();
+
+        // determine next timeout time
+        currentTimerInfo->timeout += currentTimerInfo->interval;
+        if (currentTimerInfo->timeout < currentTime)
+            currentTimerInfo->timeout = currentTime + currentTimerInfo->interval;
+
+        // reinsert timer
+        timerInsert(currentTimerInfo);
+        if (currentTimerInfo->interval.tv_usec > 0 || currentTimerInfo->interval.tv_sec > 0)
+            n_act++;
+
+        if (!currentTimerInfo->inTimerEvent) {
+            // send event, but don't allow it to recurse
+            currentTimerInfo->inTimerEvent = true;
+
+            QTimerEvent e(currentTimerInfo->id);
+            QCoreApplication::sendEvent(currentTimerInfo->obj, &e);
+
+            if (currentTimerInfo)
+                currentTimerInfo->inTimerEvent = false;
+        }
+    }
+
+    firstTimerInfo = saveFirstTimerInfo;
+    currentTimerInfo = saveCurrentTimerInfo;
+
+    return n_act;
 }
 
 QEventDispatcherUNIX::QEventDispatcherUNIX(QObject *parent)
@@ -292,7 +584,7 @@ int QEventDispatcherUNIX::select(int nfds, fd_set *readfds, fd_set *writefds, fd
     if (timeout) {
         // handle the case where select returns with a timeout, too
         // soon.
-        timeval tvStart = d->timerList.watchtime;
+        timeval tvStart = d->timerList.currentTime;
         timeval tvCurrent = tvStart;
         timeval originalTimeout = *timeout;
 
@@ -300,7 +592,7 @@ int QEventDispatcherUNIX::select(int nfds, fd_set *readfds, fd_set *writefds, fd
         do {
             timeval tvRest = originalTimeout + tvStart - tvCurrent;
             nsel = ::select(nfds, readfds, writefds, exceptfds, &tvRest);
-            getTime(tvCurrent);
+            d->timerList.getTime(tvCurrent);
         } while (nsel == 0 && (tvCurrent - tvStart) < originalTimeout);
 
         return nsel;
@@ -314,6 +606,7 @@ int QEventDispatcherUNIX::select(int nfds, fd_set *readfds, fd_set *writefds, fd
 */
 void QEventDispatcherUNIX::registerTimer(int timerId, int interval, QObject *obj)
 {
+#ifndef QT_NO_DEBUG
     if (timerId < 1 || interval < 0 || !obj) {
         qWarning("QEventDispatcherUNIX::registerTimer: invalid arguments");
         return;
@@ -321,19 +614,10 @@ void QEventDispatcherUNIX::registerTimer(int timerId, int interval, QObject *obj
         qWarning("QObject::startTimer: timers cannot be started from another thread");
         return;
     }
-
-    QTimerInfo *t = new QTimerInfo;                // create timer
-    t->id = timerId;
-    t->interval.tv_sec  = interval / 1000;
-    t->interval.tv_usec = (interval % 1000) * 1000;
-    timeval currentTime;
-    getTime(currentTime);
-    t->timeout = currentTime + t->interval;
-    t->obj = obj;
-    t->inTimerEvent = false;
+#endif
 
     Q_D(QEventDispatcherUNIX);
-    d->timerList.timerInsert(t);                                // put timer in list
+    d->timerList.registerTimer(timerId, interval, obj);
 }
 
 /*!
@@ -341,6 +625,7 @@ void QEventDispatcherUNIX::registerTimer(int timerId, int interval, QObject *obj
 */
 bool QEventDispatcherUNIX::unregisterTimer(int timerId)
 {
+#ifndef QT_NO_DEBUG
     if (timerId < 1) {
         qWarning("QEventDispatcherUNIX::unregisterTimer: invalid argument");
         return false;
@@ -348,19 +633,10 @@ bool QEventDispatcherUNIX::unregisterTimer(int timerId)
         qWarning("QObject::killTimer: timers cannot be stopped from another thread");
         return false;
     }
+#endif
 
     Q_D(QEventDispatcherUNIX);
-    // set timer inactive
-    for (int i = 0; i < d->timerList.size(); ++i) {
-        register QTimerInfo *t = d->timerList.at(i);
-        if (t->id == timerId) {
-            d->timerList.removeAt(i);
-            delete t;
-            return true;
-        }
-    }
-    // id not found
-    return false;
+    return d->timerList.unregisterTimer(timerId);
 }
 
 /*!
@@ -368,6 +644,7 @@ bool QEventDispatcherUNIX::unregisterTimer(int timerId)
 */
 bool QEventDispatcherUNIX::unregisterTimers(QObject *object)
 {
+#ifndef QT_NO_DEBUG
     if (!object) {
         qWarning("QEventDispatcherUNIX::unregisterTimers: invalid argument");
         return false;
@@ -375,21 +652,10 @@ bool QEventDispatcherUNIX::unregisterTimers(QObject *object)
         qWarning("QObject::killTimers: timers cannot be stopped from another thread");
         return false;
     }
+#endif
 
     Q_D(QEventDispatcherUNIX);
-    if (d->timerList.isEmpty())
-        return false;
-    for (int i = 0; i < d->timerList.size(); ++i) {
-        register QTimerInfo *t = d->timerList.at(i);
-        if (t->obj == object) {
-            // object found
-            d->timerList.removeAt(i);
-            delete t;
-            // move back one so that we don't skip the new current item
-            --i;
-        }
-    }
-    return true;
+    return d->timerList.unregisterTimers(object);
 }
 
 QList<QEventDispatcherUNIX::TimerInfo>
@@ -401,13 +667,7 @@ QEventDispatcherUNIX::registeredTimers(QObject *object) const
     }
 
     Q_D(const QEventDispatcherUNIX);
-    QList<TimerInfo> list;
-    for (int i = 0; i < d->timerList.size(); ++i) {
-        register const QTimerInfo * const t = d->timerList.at(i);
-        if (t->obj == object)
-            list << TimerInfo(t->id, t->interval.tv_sec * 1000 + t->interval.tv_usec / 1000);
-    }
-    return list;
+    return d->timerList.registeredTimers(object);
 }
 
 /*****************************************************************************
@@ -432,13 +692,12 @@ QSockNotType::~QSockNotType()
 
 void QEventDispatcherUNIX::registerSocketNotifier(QSocketNotifier *notifier)
 {
-    int sockfd;
-    int type;
-    if (!notifier
-        || (sockfd = notifier->socket()) < 0
-        || unsigned(sockfd) >= FD_SETSIZE
-        || (type = notifier->type()) < 0
-        || type > 2) {
+    Q_ASSERT(notifier);
+    int sockfd = notifier->socket();
+    int type = notifier->type();
+#ifndef QT_NO_DEBUG
+    if (sockfd < 0
+        || unsigned(sockfd) >= FD_SETSIZE) {
         qWarning("QSocketNotifier: Internal error");
         return;
     } else if (notifier->thread() != thread()
@@ -446,9 +705,10 @@ void QEventDispatcherUNIX::registerSocketNotifier(QSocketNotifier *notifier)
         qWarning("QSocketNotifier: socket notifiers cannot be enabled from another thread");
         return;
     }
+#endif
 
     Q_D(QEventDispatcherUNIX);
-    QList<QSockNot *> &list = d->sn_vec[type].list;
+    QSockNotType::List &list = d->sn_vec[type].list;
     fd_set *fds  = &d->sn_vec[type].enabled_fds;
     QSockNot *sn;
 
@@ -476,13 +736,12 @@ void QEventDispatcherUNIX::registerSocketNotifier(QSocketNotifier *notifier)
 
 void QEventDispatcherUNIX::unregisterSocketNotifier(QSocketNotifier *notifier)
 {
-    int sockfd;
-    int type;
-    if (!notifier
-        || (sockfd = notifier->socket()) < 0
-        || unsigned(sockfd) >= FD_SETSIZE
-        || (type = notifier->type()) < 0
-        || type > 2) {
+    Q_ASSERT(notifier);
+    int sockfd = notifier->socket();
+    int type = notifier->type();
+#ifndef QT_NO_DEBUG
+    if (sockfd < 0
+        || unsigned(sockfd) >= FD_SETSIZE) {
         qWarning("QSocketNotifier: Internal error");
         return;
     } else if (notifier->thread() != thread()
@@ -490,11 +749,12 @@ void QEventDispatcherUNIX::unregisterSocketNotifier(QSocketNotifier *notifier)
         qWarning("QSocketNotifier: socket notifiers cannot be disabled from another thread");
         return;
     }
+#endif
 
     Q_D(QEventDispatcherUNIX);
-    QList<QSockNot *> &list = d->sn_vec[type].list;
+    QSockNotType::List &list = d->sn_vec[type].list;
     fd_set *fds  =  &d->sn_vec[type].enabled_fds;
-    QSockNot *sn;
+    QSockNot *sn = 0;
     int i;
     for (i = 0; i < list.size(); ++i) {
         sn = list.at(i);
@@ -522,21 +782,20 @@ void QEventDispatcherUNIX::unregisterSocketNotifier(QSocketNotifier *notifier)
 
 void QEventDispatcherUNIX::setSocketNotifierPending(QSocketNotifier *notifier)
 {
-    int sockfd;
-    int type;
-    if (!notifier
-        || (sockfd = notifier->socket()) < 0
-        || sockfd > FD_SETSIZE
-        || (type = notifier->type()) < 0
-        || type > 2) {
+    Q_ASSERT(notifier);
+    int sockfd = notifier->socket();
+    int type = notifier->type();
+#ifndef QT_NO_DEBUG
+    if (sockfd < 0
+        || unsigned(sockfd) >= FD_SETSIZE) {
         qWarning("QSocketNotifier: Internal error");
         return;
     }
-
     Q_ASSERT(notifier->thread() == thread() && thread() == QThread::currentThread());
+#endif
 
     Q_D(QEventDispatcherUNIX);
-    QList<QSockNot *> &list = d->sn_vec[type].list;
+    QSockNotType::List &list = d->sn_vec[type].list;
     QSockNot *sn = 0;
     int i;
     for (i = 0; i < list.size(); ++i) {
@@ -554,8 +813,12 @@ void QEventDispatcherUNIX::setSocketNotifierPending(QSocketNotifier *notifier)
     // delete other entries from the list before those other entries are
     // processed.
     if (! FD_ISSET(sn->fd, sn->queue)) {
-        d->sn_pending_list.insert((qrand() & 0xff) %
-                                  (d->sn_pending_list.size()+1), sn);
+        if (d->sn_pending_list.isEmpty()) {
+            d->sn_pending_list.append(sn);
+        } else {
+            d->sn_pending_list.insert((qrand() & 0xff) %
+                                      (d->sn_pending_list.size()+1), sn);
+        }
         FD_SET(sn->fd, sn->queue);
     }
 }
@@ -563,62 +826,8 @@ void QEventDispatcherUNIX::setSocketNotifierPending(QSocketNotifier *notifier)
 int QEventDispatcherUNIX::activateTimers()
 {
     Q_ASSERT(thread() == QThread::currentThread());
-
     Q_D(QEventDispatcherUNIX);
-    if (qt_disable_lowpriority_timers || d->timerList.isEmpty())
-        return 0; // nothing to do
-
-    bool first = true;
-    timeval currentTime;
-    int n_act = 0, maxCount = d->timerList.size();
-    QTimerInfo *begin = 0;
-
-    while (maxCount--) {
-        getTime(currentTime);
-        if (first) {
-            d->timerList.updateWatchTime(currentTime);
-            first = false;
-        }
-
-        if (d->timerList.isEmpty()) break;
-        QTimerInfo *t = d->timerList.first();
-        if (currentTime < t->timeout)
-            break; // no timer has expired
-
-        if (!begin) {
-            begin = t;
-        } else if (begin == t) {
-            // avoid sending the same timer multiple times
-            break;
-        } else if (t->interval <  begin->interval || t->interval == begin->interval) {
-            begin = t;
-        }
-
-        // remove from list
-        d->timerList.removeFirst();
-        t->timeout += t->interval;
-        if (t->timeout < currentTime)
-            t->timeout = currentTime + t->interval;
-
-        // reinsert timer
-        d->timerList.timerInsert(t);
-        if (t->interval.tv_usec > 0 || t->interval.tv_sec > 0)
-            n_act++;
-
-        if (!t->inTimerEvent) {
-            // send event, but don't allow it to recurse
-            t->inTimerEvent = true;
-
-            QTimerEvent e(t->id);
-            QCoreApplication::sendEvent(t->obj, &e);
-
-            if (d->timerList.contains(t))
-                t->inTimerEvent = false;
-        }
-
-        if (!d->timerList.contains(begin)) begin = 0;
-    }
-    return n_act;
+    return d->timerList.activateTimers();
 }
 
 int QEventDispatcherUNIX::activateSocketNotifiers()
@@ -626,27 +835,6 @@ int QEventDispatcherUNIX::activateSocketNotifiers()
     Q_D(QEventDispatcherUNIX);
     if (d->sn_pending_list.isEmpty())
         return 0;
-
-    // create sets that match the current pending sets (note: we skip
-    // the first one, because we activate first and check second)
-    fd_set rset, wset, xset;
-    FD_ZERO(&rset);
-    FD_ZERO(&wset);
-    FD_ZERO(&xset);
-    for (int i = 1; i < d->sn_pending_list.size(); ++i) {
-        const QSockNot * const sn = d->sn_pending_list.at(i);
-        switch (sn->obj->type()) {
-        case QSocketNotifier::Read:
-            FD_SET(sn->fd, &rset);
-            break;
-        case QSocketNotifier::Write:
-            FD_SET(sn->fd, &wset);
-            break;
-        case QSocketNotifier::Exception:
-            FD_SET(sn->fd, &xset);
-            break;
-        }
-    }
 
     // activate entries
     int n_act = 0;
@@ -669,7 +857,7 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
 
     // we are awake, broadcast it
     emit awake();
-    QCoreApplication::sendPostedEvents(0, (flags & QEventLoop::DeferredDeletion) ? -1 : 0);
+    QCoreApplicationPrivate::sendPostedEvents(0, (flags & QEventLoop::DeferredDeletion) ? -1 : 0, d->threadData);
 
     int nevents = 0;
     const bool canWait = (d->threadData->canWait

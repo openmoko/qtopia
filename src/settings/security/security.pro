@@ -22,13 +22,15 @@ TRANSLATABLES +=  phonesecurity.h \
 pics.files=$$QTOPIA_DEPOT_PATH/pics/security/*
 pics.path=/pics/security
 pics.hint=pics
-desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/Security.desktop
+INSTALLS+=pics
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/security.desktop
 desktop.path=/apps/Settings
 desktop.hint=desktop
+INSTALLS+=desktop
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=security*
 help.hint=help
-INSTALLS+=pics desktop help
+INSTALLS+=help
 
 pkg.description=Security settings application
 pkg.domain=window,phonecomm,security

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,17 @@
 #ifndef DRMCONTENT_H
 #define DRMCONTENT_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <QObject>
 #include <QDateTime>
 #include <qtimestring.h>
@@ -32,7 +43,6 @@
 #include <qdrmcontent.h>
 #include "thumbnailview_p.h"
 #include "singleview_p.h"
-#include "contentlnk_p.h"
 #include <qdrmcontentplugin.h>
 #include <qpluginmanager.h>
 
@@ -73,6 +83,8 @@ public:
 
     static QPixmap drmIcon( int size );
 
+    static QPixmap drmIconInvalid( int size );
+
     static QPixmap compositeDrmIcon( const QPixmap &base, int size, bool validRights = true );
 
 };
@@ -88,8 +100,11 @@ class DrmContentPluginManager
     QList< QDrmContentPlugin * > plugins() const;
 
     static DrmContentPluginManager *instance();
+
+    void load();
 private:
-    QPluginManager m_manager;
+    QPluginManager *m_agentManager;
+    QPluginManager *m_contentManager;
 
     QMap< QString, QDrmContentPlugin * > m_pluginMap;
     QList< QDrmContentPlugin * > m_plugins;

@@ -5,6 +5,12 @@
 #include <QPixmapCache>
 #include <QPainter>
 
+static QDebug operator<<(QDebug s, const InputMatcherWordError& e)
+{
+    s << e.text << "(" << e.error << ")";
+    return s;
+}
+
 // could later move all this info into conf file?
 struct MatcherConfig {
     char *name;
@@ -55,6 +61,7 @@ MatcherAlias aliasLookup[] =
 {
     { "extended", "ext" },
     { "words", "dict" },
+    { "propernouns", "dict" },
     { "text", "abc" },
     { "int", "phone" },
     { 0, 0 }
@@ -433,7 +440,7 @@ static InputMatcherFunc funcNameToEnum(const QString &s, QString& arg, bool* sho
 }
 
 
-QStringList InputMatcher::searchDict(bool prefixfallback,
+QStringList InputMatcher::searchDict(bool allowprefix,
 	bool predict, const QString& language,
 	const QStringList& extradict, int start, int end, uint *me) const
 {
@@ -452,8 +459,10 @@ QStringList InputMatcher::searchDict(bool prefixfallback,
 	lang2 = lang.left(2);
     }
 
+    bool prefixequal=true; // XXX could be parameterized if needed
+
     uint minError = UINT_MAX;
-    for (int prefix=0; r.isEmpty() && prefix<=1; ++prefix) {
+    for (int prefix=0; (r.isEmpty() || prefixequal) && prefix<=1; ++prefix) {
 	InputMatcherWordErrorList preferred, added, extra;
 	InputMatcherWordErrorList common, fixed, common2, fixed2;
 
@@ -486,13 +495,13 @@ QStringList InputMatcher::searchDict(bool prefixfallback,
 	nerror = r.merge(preferred);
 	if (nerror < minError)
 	    minError = nerror;
-	nerror = r.merge(added);
-	if (nerror < minError)
-	    minError = nerror;
 	nerror = r.merge(common);
 	if (nerror < minError)
 	    minError = nerror;
 	nerror = r.merge(fixed);
+	if (nerror < minError)
+	    minError = nerror;
+	nerror = r.merge(added);
 	if (nerror < minError)
 	    minError = nerror;
 	nerror = r.merge(common2);
@@ -502,14 +511,18 @@ QStringList InputMatcher::searchDict(bool prefixfallback,
 	if (nerror < minError)
 	    minError = nerror;
 
-        QStringList deleted = findWords(Qtopia::dawg("deleted").root(),start,end,"",0, prefix, predict).asStringList();
-        for ( QStringList::ConstIterator i=deleted.begin(); i!=deleted.end(); ++i) {
-            r.remove(*i);
-        };
-        if ( !prefixfallback )
+        if ( !allowprefix )
             break;
     }
+    QStringList deleted = findWords(Qtopia::dawg("deleted").root(),start,end,"",0, false, predict).asStringList();
+    for ( QStringList::ConstIterator i=deleted.begin(); i!=deleted.end(); ++i) {
+        r.remove(*i);
+    };
 
+    qLog(Input) << "searchDict" <<
+        (allowprefix ? " with prefixes" : "") <<
+        (predict ? " with prediction" : "") <<
+        " in" << language << ": " << r;
 
     if (me)
 	*me = minError;
@@ -558,7 +571,6 @@ InputMatcherWordErrorList InputMatcher::findWords(const QDawg::Node* node,
 	    return InputMatcherWordErrorList();
 	}
     }
-    InputMatcherWordError any;
     while (node) {
 	QChar ch = node->letter();
 	IMIGuess guess;
@@ -578,10 +590,8 @@ InputMatcherWordErrorList InputMatcher::findWords(const QDawg::Node* node,
 		we.error = error;
 		if (guess.error != UINT_MAX)
 		    we.error += guess.error;
-		if ( node->isWord() )
+		if ( node->isWord() || allowprefix )
 		    r.append(we);
-		else
-		    any = we;
 	    }
 	    // is >> 10 so can up 2^10 = 1024 char words.
 	    if (guess.length) {
@@ -597,9 +607,6 @@ InputMatcherWordErrorList InputMatcher::findWords(const QDawg::Node* node,
 	    }
 	}
 	node = node->next();
-    }
-    if ( allowprefix && r.isEmpty() && !any.text.isEmpty() ) {
-	r.append(any);
     }
     return r;
 }

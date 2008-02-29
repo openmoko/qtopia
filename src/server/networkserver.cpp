@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,8 @@
 ****************************************************************************/
 
 #include "networkserver.h"
+
+#include "systemsuspend.h"
 
 #include <QApplication>
 #include <QFile>
@@ -190,6 +192,8 @@ void QtopiaNetworkSession::interfaceStateChanged()
   \internal
   \class QtopiaNetworkSession
   \brief This class keeps track of requested network sessions.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 /*!
@@ -218,8 +222,8 @@ void QtopiaSessionManager::registerSession( const QByteArray& ifaceHandle, const
         qLog(Network) << "Creating network session for" << appName << "on" << ifaceHandle;
         s = new QtopiaNetworkSession( ifaceHandle, this );
         s->addApplication( appName );
-        connect( s, SIGNAL(sessionExpired(const QByteArray&)), this, SLOT(sessionChanged(const QByteArray&)) );
-        connect( s, SIGNAL(sessionObsolete(const QByteArray&)), this, SLOT(sessionObsolete(const QByteArray&)) );
+        connect( s, SIGNAL(sessionExpired(QByteArray)), this, SLOT(sessionChanged(QByteArray)) );
+        connect( s, SIGNAL(sessionObsolete(QByteArray)), this, SLOT(sessionObsolete(QByteArray)) );
         sessions.insert( ifaceHandle, s );
     } else {
         qLog(Network) << "Adding" << appName << "to the network session associated with" << ifaceHandle;
@@ -394,8 +398,11 @@ void QtopiaSessionManager::invalidateSession( const QByteArray& ifaceHandle )
   The network server ensures the automated start-up of network interfaces during 
   Qtopia's start phase, stops all network interfaces when Qtopia shuts down and 
   manages the network sessions for all network devices.
+  External network devices such as PCMCIA cards are automatically detected and initialized 
+  by the network server when they are plugged into the Qtopia device.
 
-  The QtopiaNetworkServer class provides the \c {QtopiaNetworkServer} task.
+  The QtopiaNetworkServer is a Qtopia server task and is automatically started by the server.
+  It is part of the Qtopia server and cannot be used by other Qtopia applications.
 
   \sa QtopiaNetwork, QtopiaNetworkInterface
 */
@@ -416,9 +423,13 @@ QtopiaNetworkServer::QtopiaNetworkServer()
     NetworkServerShutdownHandler* ss = new NetworkServerShutdownHandler( this );
     QtopiaServerApplication::addAggregateObject( this, ss );
 
+    SystemSuspend *suspend = qtopiaTask<SystemSuspend>();
+    Q_ASSERT(suspend);
+    QObject::connect(suspend, SIGNAL(systemActive()), this, SLOT(updateNetwork()));
+
     sessionManager = new QtopiaSessionManager( this );
-    QObject::connect( sessionManager, SIGNAL(quitInterface(const QString&)),
-            this, SLOT(sessionManagerQuitRequest(const QString&)) );
+    QObject::connect( sessionManager, SIGNAL(quitInterface(QString)),
+            this, SLOT(sessionManagerQuitRequest(QString)) );
 
     QtopiaIpcAdaptor* stab = new QtopiaIpcAdaptor("QPE/Card", this);
     QtopiaIpcAdaptor::connect(stab, MESSAGE(stabChanged()),
@@ -859,7 +870,8 @@ void QtopiaNetworkServer::timerEvent(QTimerEvent* /*tEvent*/)
             iter.remove();
             continue;
         }
-
+        
+        
         //updateNetwork() has been called at least once already
         //hence we can assume that the interface has been initialized
         if ( iface->status() == QtopiaNetworkInterface::Down ) {
@@ -870,6 +882,10 @@ void QtopiaNetworkServer::timerEvent(QTimerEvent* /*tEvent*/)
                 sessionManager->setExtendedLifetime( config.toLatin1().constData(), true );
             if ( code != NotReady )
                 iter.remove();
+        } else if ( iface->status() == QtopiaNetworkInterface::Up )
+        {
+            qLog(Network) << "Automatic start not necessary for" << config;
+            iter.remove();
         }
     }
 }

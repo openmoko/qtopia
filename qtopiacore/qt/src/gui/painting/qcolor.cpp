@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,6 +43,15 @@
 #include "qdatastream.h"
 #include "qvariant.h"
 #include "qdebug.h"
+
+#ifdef Q_WS_X11
+#  include "qapplication.h"
+#  include "qx11info_x11.h"
+#  include "private/qt_x11_p.h"
+
+static bool allowX11ColorNames = false;
+
+#endif
 
 #include <math.h>
 #include <stdio.h>
@@ -74,9 +98,9 @@
     or a color name (such as "blue"), to the setNamedColor() function.
     The color names are taken from the SVG 1.0 color names. The name()
     function returns the name of the color in the format
-    #AARRGGBB. Colors can also be set using setRgb(), setHsv() and
-    setCmyk(). To get a lighter or darker color use the light() and
-    dark() functions respectively.
+    "#RRGGBB". Colors can also be set using setRgb(), setHsv() and
+    setCmyk(). To get a lighter or darker color use the lighter() and
+    darker() functions respectively.
 
     The isValid() function indicates whether a QColor is legal at
     all. For example, a RGB color with RGB values out of range is
@@ -105,7 +129,7 @@
     QColor is platform and device independent. The QColormap class
     maps the color to the hardware.
 
-    For more information about painting in general, see {The Paint
+    For more information about painting in general, see \l{The Paint
     System} documentation.
 
     \tableofcontents
@@ -120,7 +144,7 @@
     and the values returned by the getRgbF() function due to rounding.
 
     While the integer based functions take values in the range 0-255
-    (except hue() which must can be specified within the range 0-359),
+    (except hue() which must have values within the range 0-359),
     the floating point functions accept values in the range 0.0 - 1.0.
 
     \section1 Alpha-Blended Drawing
@@ -483,11 +507,13 @@ QString QColor::name() const
        provided by the World Wide Web Consortium; for example, "steelblue" or "gainsboro".
        These color names work on all platforms.
     \i \c transparent - representing the absence of a color.
+    \i \e{X11 only}: If allowX11ColorNames() returns true, any valid X11 color name. See
+       the documentation for \c XParseColor() for information about valid X11 color names.
     \endlist
 
     The color is invalid if \a name cannot be parsed.
 
-    \sa QColor(), name(), isValid()
+    \sa QColor(), name(), isValid(), allowX11ColorNames()
 */
 
 void QColor::setNamedColor(const QString &name)
@@ -497,24 +523,37 @@ void QColor::setNamedColor(const QString &name)
         return;
     }
 
-    QByteArray n = name.toLatin1();
-    if (n.startsWith('#')) {
+    if (name.startsWith(QLatin1Char('#'))) {
         QRgb rgb;
-        if (qt_get_hex_rgb(n, &rgb)) {
+        if (qt_get_hex_rgb(name.constData(), name.length(), &rgb)) {
             setRgb(rgb);
         } else {
-            qWarning("QColor::setNamedColor: Could not parse color '%s'", n.constData());
+            qWarning("QColor::setNamedColor: Could not parse color '%s'", name.toLatin1().constData());
             invalidate();
         }
         return;
     }
 
+#ifndef QT_NO_COLORNAMES
     QRgb rgb;
-    if (qt_get_named_rgb(n, &rgb)) {
+    if (qt_get_named_rgb(name.constData(), name.length(), &rgb)) {
         setRgb(rgb);
-    } else {
-        qWarning("QColor::setNamedColor: Unknown color name '%s'", n.constData());
-        invalidate();
+    } else
+#endif
+    {
+#ifdef Q_WS_X11
+        XColor result;
+        if (allowX11ColorNames()
+            && QApplication::instance()
+            && QX11Info::display()
+            && XParseColor(QX11Info::display(), QX11Info::appColormap(), name.toLatin1().constData(), &result)) {
+            setRgb(result.red >> 8, result.green >> 8, result.blue >> 8);
+        } else
+#endif
+        {
+            qWarning("QColor::setNamedColor: Unknown color name '%s'", name.toLatin1().constData());
+            invalidate();
+        }
     }
 }
 
@@ -525,7 +564,11 @@ void QColor::setNamedColor(const QString &name)
 */
 QStringList QColor::colorNames()
 {
+#ifndef QT_NO_COLORNAMES
     return qt_get_colornames();
+#else
+    return QStringList();
+#endif
 }
 
 /*!
@@ -1350,7 +1393,7 @@ QColor QColor::toHsv() const
     const qreal min = Q_MIN_3(r, g, b);
     const qreal delta = max - min;
     color.ct.ahsv.value = qRound(max * USHRT_MAX);
-    if (delta == 0.0) {
+    if (qFuzzyCompare(delta, qreal(0.0))) {
         // achromatic case, hue is undefined
         color.ct.ahsv.hue = USHRT_MAX;
         color.ct.ahsv.saturation = 0;
@@ -1358,11 +1401,11 @@ QColor QColor::toHsv() const
         // chromatic case
         qreal hue = 0;
         color.ct.ahsv.saturation = qRound((delta / max) * USHRT_MAX);
-        if (r == max) {
+        if (qFuzzyCompare(r, max)) {
             hue = ((g - b) /delta);
-        } else if (g == max) {
+        } else if (qFuzzyCompare(g, max)) {
             hue = (2.0 + (b - r) / delta);
-        } else if (b == max) {
+        } else if (qFuzzyCompare(b, max)) {
             hue = (4.0 + (r - g) / delta);
         } else {
             Q_ASSERT_X(false, "QColor::toHsv", "internal error");
@@ -1772,13 +1815,16 @@ QColor QColor::fromCmykF(qreal c, qreal m, qreal y, qreal k, qreal a)
 }
 
 /*!
+    \fn QColor QColor::lighter(int factor) const
+    \since 4.3
+
     Returns a lighter (or darker) color, but does not change this
     object.
 
     If the \a factor is greater than 100, this functions returns a
     lighter color. Setting \a factor to 150 returns a color that is
     50% brighter. If the \a factor is less than 100, the return color
-    is darker, but we recommend using the dark() function for this
+    is darker, but we recommend using the darker() function for this
     purpose. If the \a factor is 0 or negative, the return value is
     unspecified.
 
@@ -1786,14 +1832,20 @@ QColor QColor::fromCmykF(qreal c, qreal m, qreal y, qreal k, qreal a)
     value (V) component by \a factor and converts the color back to
     RGB.
 
-    \sa dark(), isValid()
+    \sa darker(), isValid()
+*/
+
+/*!
+    \obsolete
+
+    Use lighter(\a factor) instead.
 */
 QColor QColor::light(int factor) const
 {
     if (factor <= 0)                                // invalid lightness factor
         return *this;
     else if (factor < 100)                        // makes color darker
-        return dark(10000/factor);
+        return darker(10000 / factor);
 
     QColor hsv = toHsv();
     int s = hsv.ct.ahsv.saturation;
@@ -1816,13 +1868,16 @@ QColor QColor::light(int factor) const
 }
 
 /*!
+    \fn QColor QColor::darker(int factor) const
+    \since 4.3
+
     Returns a darker (or lighter) color, but does not change this
     object.
 
     If the \a factor is greater than 100, this functions returns a
     darker color. Setting \a factor to 300 returns a color that has
     one-third the brightness. If the \a factor is less than 100, the
-    return color is lighter, but we recommend using the light()
+    return color is lighter, but we recommend using the lighter()
     function for this purpose. If the \a factor is 0 or negative, the
     return value is unspecified.
 
@@ -1830,14 +1885,20 @@ QColor QColor::light(int factor) const
     value (V) component by \a factor and converts the color back to
     RGB.
 
-    \sa light(), isValid()
+    \sa lighter(), isValid()
+*/
+
+/*!
+    \obsolete
+
+    Use darker(\a factor) instead.
 */
 QColor QColor::dark(int factor) const
 {
     if (factor <= 0)                                // invalid darkness factor
         return *this;
     else if (factor < 100)                        // makes color lighter
-        return light(10000/factor);
+        return lighter(10000 / factor);
 
     QColor hsv = toHsv();
     hsv.ct.ahsv.value = (hsv.ct.ahsv.value * 100) / factor;
@@ -1894,6 +1955,31 @@ QColor::operator QVariant() const
 {
     return QVariant(QVariant::Color, this);
 }
+
+#ifdef Q_WS_X11
+/*!
+    Returns true if setNamedColor() is allowed to look up colors in
+    the X11 color database. By default, this function returns false.
+
+    \sa setAllowX11ColorNames()
+*/
+bool QColor::allowX11ColorNames()
+{
+    return ::allowX11ColorNames;
+}
+
+/*!
+    Allow setNamedColor() to look up colors in the X11 color database
+    if \a enabled. By default, setNamedColor() does \e not look up
+    colors in the X11 color database.
+
+    \sa setNamedColor(), allowX11ColorNames()
+*/
+void QColor::setAllowX11ColorNames(bool enabled)
+{
+    ::allowX11ColorNames = enabled;
+}
+#endif
 
 /*! \internal
 

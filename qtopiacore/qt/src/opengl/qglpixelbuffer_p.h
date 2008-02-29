@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -35,7 +50,7 @@
 // We mean it.
 //
 
-#if defined (Q_OS_HPUX) && !defined (GLX_VERSION_1_3)
+#if defined (Q_OS_HPUX)
 typedef unsigned long GLXPbuffer;
 
 struct GLXFBConfig {
@@ -110,7 +125,7 @@ DECLARE_HANDLE(HPBUFFERARB);
 class QGLPixelBufferPrivate {
     Q_DECLARE_PUBLIC(QGLPixelBuffer)
 public:
-    QGLPixelBufferPrivate() : invalid(true), qctx(0), pbuf(0), ctx(0)
+    QGLPixelBufferPrivate(QGLPixelBuffer *q) : q_ptr(q), invalid(true), qctx(0), pbuf(0), ctx(0)
     {
         QGLExtensions::init();
 #ifdef Q_WS_WIN
@@ -123,9 +138,9 @@ public:
     void common_init(const QSize &size, const QGLFormat &f, QGLWidget *shareWidget);
     bool cleanup();
 
+    QGLPixelBuffer *q_ptr;
     bool invalid;
     QGLContext *qctx;
-    QGLPixelBuffer *q_ptr;
     QGLFormat format;
 
     QGLFormat req_format;
@@ -139,6 +154,7 @@ public:
     HDC dc;
     HPBUFFERARB pbuf;
     HGLRC ctx;
+    bool has_render_texture :1;
 #elif defined(Q_WS_MACX)
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_3)
     AGLPbuffer pbuf;

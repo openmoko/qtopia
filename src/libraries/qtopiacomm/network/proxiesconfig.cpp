@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,9 +30,7 @@
 #include <QLayout>
 
 #include <qtopiaapplication.h>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 
 #include "ui_proxiesconfigbase.h"
 
@@ -72,14 +70,13 @@ ProxiesPage::ProxiesPage( const QtopiaNetworkProperties& cfg, QWidget* parent, Q
     d = new ProxiesPageBaseContainer( this );
     tl->addWidget(d);
 
-#ifdef QTOPIA_PHONE
     QtopiaApplication::setInputMethodHint(d->http_host,"url");
     QtopiaApplication::setInputMethodHint(d->ftp_host,"url");
     QtopiaApplication::setInputMethodHint(d->noproxies,"url");
 
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this , true );
-#endif
+
     setObjectName("proxies");
     readConfig( cfg );
     connect(d->type,SIGNAL(activated(int)),this,SLOT(typeChanged(int)));

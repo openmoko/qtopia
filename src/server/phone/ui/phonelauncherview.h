@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -68,6 +68,8 @@ signals:
 protected:
 
     void keyPressEvent(QKeyEvent *event);
+    
+    void keyReleaseEvent(QKeyEvent *event);
 
     void mousePressEvent(QMouseEvent *event);
 
@@ -76,6 +78,8 @@ protected:
     void resizeEvent (QResizeEvent *event);
 
     void focusInEvent(QFocusEvent *event);
+
+    void changeEvent(QEvent *e);
 
 private slots:
 
@@ -89,13 +93,13 @@ private:
 
     GridItem *createItem(QContent *content,int row,int column) const;
 
-    void getItemDimensions(int &itemWidth,int &itemHeight) const;
+    void itemDimensions(int &itemWidth,int &itemHeight) const;
 
-    void getRowAndColumn(int idx,int &row,int &column) const;
+    void rowAndColumn(int idx,int &row,int &column) const;
 
-    GridItem *getCurrentItem() const;
+    GridItem *currentGridItem() const;
 
-    GridItem *getItemAt(const QPoint &point) const;
+    GridItem *itemAt(const QPoint &point) const;
 
     // Potential value of margin - used for selectedItem.
     static const int MARGIN_MOUSE_PREFERRED = 2;
@@ -107,7 +111,7 @@ private:
     // GridItem - used for selectedItem.
     // Override this by building with compiler option -DMOVE_TIME_DURATION=0
 
-    #define MOVE_TIME_DURATION 400
+    #define MOVE_TIME_DURATION 200
 #endif
     static const int DEFAULT_MOVE_TIME_DURATION = MOVE_TIME_DURATION;
 
@@ -128,10 +132,12 @@ private:
     SelectedItem *selectedItem;
     // Used by mousePressEvent(...) and mouseReleaseEvent(...).
     GridItem *pressedItem;
+    // Used by keyPressEvent(...) and keyReleaseEvent(...).
+    int pressedindex;
 
-    // String to be passed to AnimatorFactory to construct manual Animator objects for GridItems.
+    // String to be passed to AnimatorFactory to construct coded Animator objects for GridItems.
     QString animatorDescription;
-    // Background animator for manual animation - to be shared by all the GridItem objects.
+    // Background animator for coded animation - to be shared by all the GridItem objects.
     Animator *animatorBackground;
 
     // Provided by the ctor as a list of characters that map to GridItem objects according

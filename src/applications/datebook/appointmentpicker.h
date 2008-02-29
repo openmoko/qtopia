@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,10 +21,9 @@
 #ifndef APPOINTMENTPICKER_H
 #define APPOINTMENTPICKER_H
 
-
 #include <qdialog.h>
 #include <qdatetime.h>
-
+#include <QAppointmentModel>
 
 class QStackedWidget;
 class DayView;
@@ -38,7 +37,7 @@ class AppointmentPicker : public QDialog
     Q_OBJECT
 
 public:
-    AppointmentPicker( DateBook *db, QWidget *parent = 0, Qt::WFlags f = 0 );
+    AppointmentPicker( DateBook *db, QSet<QPimSource> sources, QWidget *parent = 0, Qt::WFlags f = 0 );
     ~AppointmentPicker();
 
     bool appointmentSelected() const;
@@ -48,6 +47,7 @@ public:
 private slots:
     void nextView();
     void viewDay(const QDate& dt);
+    void viewMonthAgain();
 
 private:
     void viewToday();
@@ -62,6 +62,8 @@ private:
     MonthView *monthView;
     QDate lastToday; // last date that was the selected as 'Today'
     DateBook *datebook;
+    QSet<QPimSource> mSources;
+
 };
 
 

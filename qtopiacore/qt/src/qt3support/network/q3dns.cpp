@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -338,14 +353,14 @@ QString Q3DnsAnswer::readString(bool multipleLabels)
 	    if ( b == 0 ) {
 		if ( p > pp )
 		    pp = p;
-                return r.isNull() ? QString( "." ) : r;
+                return r.isNull() ? QLatin1String( "." ) : r;
 	    }
 
             // Read a label of size 'b' characters
             if ( !r.isNull() )
-		r += '.';
+		r += QLatin1Char('.');
 	    while( b-- > 0 )
-                r += QChar( answer[p++] );
+                r += QLatin1Char( answer[p++] );
 
             // Return immediately if we were only supposed to read one
             // label.
@@ -1161,7 +1176,7 @@ void Q3DnsManager::transmitQuery( int i )
     int pp = 12;
     uint lp = 0;
     while( lp < (uint) q->l.length() ) {
-	int le = q->l.find( '.', lp );
+	int le = q->l.find( QLatin1Char('.'), lp );
 	if ( le < 0 )
 	    le = q->l.length();
 	QString component = q->l.mid( lp, le-lp );
@@ -1320,7 +1335,7 @@ Q3PtrList<Q3DnsRR> * Q3DnsDomain::cached( const Q3Dns * r )
 
     // test at first if you have to start a query at all
     if ( r->recordType() == Q3Dns::A ) {
-	if ( r->label().lower() == "localhost" ) {
+	if ( r->label().lower() == QLatin1String("localhost") ) {
 	    // undocumented hack. ipv4-specific. also, may be a memory
 	    // leak? not sure. would be better to do this in doResInit(),
 	    // anyway.
@@ -1467,7 +1482,7 @@ Q3PtrList<Q3DnsRR> * Q3DnsDomain::cached( const Q3Dns * r )
 	    // we haven't done it before, so maybe we should.  but
 	    // wait - if it's an unqualified name, only ask when all
 	    // the other alternatives are exhausted.
-	    if ( q == m->queries.size() && ( s.find( '.' ) >= 0 ||
+	    if ( q == m->queries.size() && ( s.find( QLatin1Char('.') ) >= 0 ||
 					     int(l->count()) >= n.count()-1 ) ) {
 		Q3DnsQuery * query = new Q3DnsQuery;
 		query->started = now();
@@ -1702,14 +1717,14 @@ void Q3Dns::setLabel( const QString & label )
 
     // construct a list of qualified names
     n.clear();
-    if ( l.length() > 1 && l[(int)l.length()-1] == '.' ) {
+    if ( l.length() > 1 && l[(int)l.length()-1] == QLatin1Char('.') ) {
 	n.append( l.left( l.length()-1 ).lower() );
     } else {
 	int i = l.length();
 	int dots = 0;
 	const int maxDots = 2;
 	while( i && dots < maxDots ) {
-	    if ( l[--i] == '.' )
+	    if ( l[--i] == QLatin1Char('.') )
 		dots++;
 	}
 	if ( dots < maxDots ) {
@@ -1718,7 +1733,7 @@ void Q3Dns::setLabel( const QString & label )
 	    const char * dom;
 	    while( (dom=it.current()) != 0 ) {
 		++it;
-		n.append( l.lower() + "." + dom );
+		n.append( l.lower() + QLatin1String(".") + QLatin1String(dom) );
 	    }
 	}
 	n.append( l.lower() );
@@ -1886,11 +1901,11 @@ QString Q3Dns::toInAddrArpaDomain( const QHostAddress &address )
 	// RFC 3152. (1886 is deprecated, and clients no longer need to
 	// support it, in practice).
 	Q_IPV6ADDR i = address.toIPv6Address();
-	s = "ip6.arpa";
+	s = QLatin1String("ip6.arpa");
 	uint b = 0;
 	while( b < 16 ) {
-	    s = QString::number( i.c[b]%16, 16 ) + "." +
-		QString::number( i.c[b]/16, 16 ) + "." + s;
+	    s = QString::number( i.c[b]%16, 16 ) + QLatin1String(".") +
+		QString::number( i.c[b]/16, 16 ) + QLatin1String(".") + s;
 	    b++;
 	}
     }
@@ -2277,7 +2292,7 @@ static QString getWindowsRegString( HKEY key, const QString &subKey )
 	    char *ptr = new char[bsz+1];
 	    r = RegQueryValueEx( key, (TCHAR*)subKey.ucs2(), 0, 0, (LPBYTE)ptr, &bsz );
 	    if ( r == ERROR_SUCCESS )
-		s = ptr;
+		s = QLatin1String(ptr);
 	    delete [] ptr;
 	}
     } , {
@@ -2285,12 +2300,12 @@ static QString getWindowsRegString( HKEY key, const QString &subKey )
 	DWORD bsz = sizeof(buf);
 	int r = RegQueryValueExA( key, subKey.local8Bit(), 0, 0, (LPBYTE)buf, &bsz );
 	if ( r == ERROR_SUCCESS ) {
-	    s = buf;
+	    s = QLatin1String(buf);
 	} else if ( r == ERROR_MORE_DATA ) {
 	    char *ptr = new char[bsz+1];
 	    r = RegQueryValueExA( key, subKey.local8Bit(), 0, 0, (LPBYTE)ptr, &bsz );
 	    if ( r == ERROR_SUCCESS )
-		s = ptr;
+		s = QLatin1String(ptr);
 	    delete [] ptr;
 	}
     } );
@@ -2313,15 +2328,15 @@ static bool getDnsParamsFromRegistry( const QString &path,
     } );
 
     if ( r == ERROR_SUCCESS ) {
-	*domainName = getWindowsRegString( k, "DhcpDomain" );
+	*domainName = getWindowsRegString( k, QLatin1String("DhcpDomain") );
 	if ( domainName->isEmpty() )
-	    *domainName = getWindowsRegString( k, "Domain" );
+	    *domainName = getWindowsRegString( k, QLatin1String("Domain") );
 
-	*nameServer = getWindowsRegString( k, "DhcpNameServer" );
+	*nameServer = getWindowsRegString( k, QLatin1String("DhcpNameServer") );
 	if ( nameServer->isEmpty() )
-	    *nameServer = getWindowsRegString( k, "NameServer" );
+	    *nameServer = getWindowsRegString( k, QLatin1String("NameServer") );
 
-	*searchList = getWindowsRegString( k, "SearchList" );
+	*searchList = getWindowsRegString( k, QLatin1String("SearchList") );
     }
     RegCloseKey( k );
     return r == ERROR_SUCCESS;
@@ -2362,16 +2377,16 @@ void Q3Dns::doResInit()
 		FIXED_INFO *finfo = (FIXED_INFO*)new char[l];
 		res = getNetworkParams( finfo, &l );
 		if ( res == ERROR_SUCCESS ) {
-		    domainName = finfo->DomainName;
-		    nameServer = "";
+		    domainName = QLatin1String(finfo->DomainName);
+		    nameServer = QLatin1String("");
 		    IP_ADDR_STRING *dnsServer = &finfo->DnsServerList;
 		    while ( dnsServer != 0 ) {
-			nameServer += dnsServer->IpAddress.String;
+			nameServer += QLatin1String(dnsServer->IpAddress.String);
 			dnsServer = dnsServer->Next;
 			if ( dnsServer != 0 )
-			    nameServer += " ";
+			    nameServer += QLatin1String(" ");
 		    }
-		    searchList = "";
+		    searchList = QLatin1String("");
 		    separator = ' ';
 		    gotNetworkParams = true;
 		}
@@ -2382,20 +2397,20 @@ void Q3Dns::doResInit()
     }
     if ( !gotNetworkParams ) {
 	if ( getDnsParamsFromRegistry(
-	    QString( "System\\CurrentControlSet\\Services\\Tcpip\\Parameters" ),
+	    QString( QLatin1String("System\\CurrentControlSet\\Services\\Tcpip\\Parameters") ),
 		    &domainName, &nameServer, &searchList )) {
 	    // for NT
 	    separator = ' ';
 	} else if ( getDnsParamsFromRegistry(
-	    QString( "System\\CurrentControlSet\\Services\\VxD\\MSTCP" ),
+	    QString( QLatin1String("System\\CurrentControlSet\\Services\\VxD\\MSTCP") ),
 		    &domainName, &nameServer, &searchList )) {
 	    // for Windows 98
 	    separator = ',';
 	} else {
 	    // Could not access the TCP/IP parameters
-	    domainName = "";
-	    nameServer = "127.0.0.1";
-	    searchList = "";
+	    domainName = QLatin1String("");
+	    nameServer = QLatin1String("127.0.0.1");
+	    searchList = QLatin1String("");
 	    separator = ' ';
 	}
     }
@@ -2405,7 +2420,7 @@ void Q3Dns::doResInit()
     if ( !nameServer.isEmpty() ) {
 	first = 0;
 	do {
-	    last = nameServer.find( separator, first );
+	    last = nameServer.find( QLatin1Char(separator), first );
 	    if ( last < 0 )
 		last = nameServer.length();
 	    Q3Dns tmp( nameServer.mid( first, last-first ), Q3Dns::A );
@@ -2417,11 +2432,11 @@ void Q3Dns::doResInit()
 	} while( first < (int)nameServer.length() );
     }
 
-    searchList = searchList + " " + domainName;
+    searchList = searchList + QLatin1String(" ") + domainName;
     searchList = searchList.simplifyWhiteSpace().lower();
     first = 0;
     do {
-	last = searchList.find( separator, first );
+	last = searchList.find( QLatin1Char(separator), first );
 	if ( last < 0 )
 	    last = searchList.length();
 	domains->append( qstrdup( searchList.mid( first, last-first ).latin1() ) );
@@ -2502,19 +2517,19 @@ void Q3Dns::doResInit()
     domains->setAutoDelete( true );
 
     // read resolv.conf manually.
-    QFile resolvConf("/etc/resolv.conf");
+    QFile resolvConf(QLatin1String("/etc/resolv.conf"));
     if (resolvConf.open(QIODevice::ReadOnly)) {
         QTextStream stream( &resolvConf );
 	QString line;
 
 	while ( !stream.atEnd() ) {
             line = stream.readLine();
-	    QStringList list = QStringList::split( " ", line );
-	    if( line.startsWith( "#" ) || list.size() < 2 )
+	    QStringList list = QStringList::split( QLatin1String(" "), line );
+	    if( line.startsWith( QLatin1String("#") ) || list.size() < 2 )
 	       continue;
 	    const QString type = list[0].lower();
 
-	    if ( type == "nameserver" ) {
+	    if ( type == QLatin1String("nameserver") ) {
 		QHostAddress *address = new QHostAddress();
 		if ( address->setAddress( QString(list[1]) ) ) {
 		    // only add ipv6 addresses from resolv.conf if
@@ -2526,12 +2541,12 @@ void Q3Dns::doResInit()
 		} else {
 		    delete address;
 		}
-	    } else if ( type == "search" ) {
-		QStringList srch = QStringList::split( " ", list[1] );
+	    } else if ( type == QLatin1String("search") ) {
+		QStringList srch = QStringList::split( QLatin1String(" "), list[1] );
 		for ( QStringList::Iterator i = srch.begin(); i != srch.end(); ++i )
 		    domains->append( (*i).lower().local8Bit() );
 
-	    } else if ( type == "domain" ) {
+	    } else if ( type == QLatin1String("domain") ) {
 		domains->append( list[1].lower().local8Bit() );
 	    }
 	}
@@ -2593,7 +2608,7 @@ void Q3Dns::doResInit()
 	while( !i.atEnd() ) {
 	    line = i.readLine().simplifyWhiteSpace().lower();
 	    uint n = 0;
-	    while( (int) n < line.length() && line[(int)n] != '#' )
+	    while( (int) n < line.length() && line[(int)n] != QLatin1Char('#') )
 		n++;
 	    line.truncate( n );
 	    n = 0;

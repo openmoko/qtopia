@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -263,7 +263,8 @@ void QPacketProtocol::send(const QPacket & p)
     qint64 sendSize = p.b.size() + sizeof(qint32);
 
     d->sendingPackets.append(sendSize);
-    qint64 writeBytes = d->dev->write((char *)&sendSize, sizeof(qint32));
+    qint32 sendSize32 = sendSize;
+    qint64 writeBytes = d->dev->write((char *)&sendSize32, sizeof(qint32));
     Q_ASSERT(writeBytes == sizeof(qint32));
     writeBytes = d->dev->write(p.b);
     Q_ASSERT(writeBytes == p.b.size());

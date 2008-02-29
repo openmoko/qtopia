@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,17 @@
 
 #ifndef APPOINTMENT_SQLIO_PRIVATE_H
 #define APPOINTMENT_SQLIO_PRIVATE_H
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 #include <qlist.h>
 #include <qdatetime.h>
@@ -56,6 +67,7 @@ public:
 
     using QAppointmentContext::exists;
     bool exists(const QUniqueId &) const;
+    bool exists(const QUniqueId &id, const QPimSource &source) const;
     QPimSource source(const QUniqueId &) const;
 
     bool updateAppointment(const QAppointment &);
@@ -63,6 +75,7 @@ public:
     QUniqueId addAppointment(const QAppointment &, const QPimSource &);
 
     bool removeOccurrence(const QUniqueId &original, const QDate &);
+    bool restoreOccurrence(const QUniqueId &original, const QDate &);
     QUniqueId replaceOccurrence(const QUniqueId &original, const QOccurrence &, const QDate&);
     QUniqueId replaceRemaining(const QUniqueId &original, const QAppointment &, const QDate&);
 private:
@@ -74,7 +87,7 @@ class QAppointmentSqlIO : public QAppointmentIO, public QPimSqlIO {
     Q_OBJECT
 
 public:
-    explicit QAppointmentSqlIO(QObject *parent);
+    explicit QAppointmentSqlIO(QObject *parent = 0);
     ~QAppointmentSqlIO();
 
     bool editableByRow() const { return true; }
@@ -82,12 +95,15 @@ public:
 
     bool removeAppointment(const QUniqueId &id);
     bool removeAppointment(int);
+    bool removeAppointments(const QList<QUniqueId> ids);
     bool updateAppointment(const QAppointment& appointment);
     QUniqueId addAppointment(const QAppointment& appointment, const QPimSource &s)
     { return addAppointment(appointment, s, true); }
     QUniqueId addAppointment(const QAppointment& appointment, const QPimSource &, bool);
 
     bool removeOccurrence(const QUniqueId &original,
+            const QDate &);
+    bool restoreOccurrence(const QUniqueId &original,
             const QDate &);
     QUniqueId replaceOccurrence(const QUniqueId &original,
             const QOccurrence &, const QDate &);
@@ -142,7 +158,7 @@ public:
     bool removeExtraTables(uint);
 
     /* subclased from sql io */
-    void bindFields(const QPimRecord &r, QSqlQuery &) const;
+    void bindFields(const QPimRecord &r, QPreparedSqlQuery &) const;
 
     QStringList sortColumns() const;
 
@@ -153,8 +169,13 @@ public:
     void checkRemoved(const QUniqueId &);
     void checkRemoved(const QList<QUniqueId> &);
     void checkUpdated(const QUniqueId &);
-private:
+
     QAppointment appointment(const QUniqueId &, bool minimal) const;
+    QAppointment appointment(int, bool minimal) const;
+
+
+    QList<QAppointment> fastRange(const QDateTime &start, const QDateTime &end, int count) const;
+private:
 
     void invalidateCache();
 

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -544,8 +559,8 @@ static bool qt_linef_intersect(qreal x1, qreal y1, qreal x2, qreal y2,
 QLineF::IntersectType QLineF::intersect(const QLineF &l, QPointF *intersectionPoint) const
 {
     if (isNull() || l.isNull()
-        || !qIsFinite(pt1.x()) || !qIsFinite(pt1.y()) || !qIsFinite(pt2.x()) || !qIsFinite(pt2.y())
-        || !qIsFinite(l.pt1.x()) || !qIsFinite(l.pt1.y()) || !qIsFinite(l.pt2.x()) || !qIsFinite(l.pt2.y()))
+        || !qt_is_finite(pt1.x()) || !qt_is_finite(pt1.y()) || !qt_is_finite(pt2.x()) || !qt_is_finite(pt2.y())
+        || !qt_is_finite(l.pt1.x()) || !qt_is_finite(l.pt1.y()) || !qt_is_finite(l.pt2.x()) || !qt_is_finite(l.pt2.y()))
         return NoIntersection;
 
     QPointF isect;
@@ -553,13 +568,16 @@ QLineF::IntersectType QLineF::intersect(const QLineF &l, QPointF *intersectionPo
                                             l.x1(), l.y1(), l.x2(), l.y2())
                          ? BoundedIntersection : UnboundedIntersection;
 
+    bool dx_zero = qFuzzyCompare(dx(), 0);
+    bool ldx_zero = qFuzzyCompare(l.dx(), 0);
+
     // For special case where one of the lines are vertical
-    if (dx() == 0 && l.dx() == 0) {
+    if (dx_zero && ldx_zero) {
         type = NoIntersection;
-    } else if (dx() == 0) {
+    } else if (dx_zero) {
         qreal la = l.dy() / l.dx();
         isect = QPointF(pt1.x(), la * pt1.x() + l.y1() - la*l.x1());
-    } else if (l.dx() == 0) {
+    } else if (ldx_zero) {
         qreal ta = dy() / dx();
         isect = QPointF(l.x1(), ta * l.x1() + y1() - ta*x1());
     } else {

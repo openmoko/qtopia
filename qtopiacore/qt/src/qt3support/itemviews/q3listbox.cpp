@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -804,6 +819,7 @@ Q3ListBox::Q3ListBox(QWidget *parent, const char *name, Qt::WindowFlags f)
     viewport()->setFocusProxy(this);
     viewport()->setFocusPolicy(Qt::WheelFocus);
     setFocusPolicy(Qt::WheelFocus);
+    setAttribute(Qt::WA_MacShowFocusRect);
 }
 
 
@@ -3722,6 +3738,9 @@ QRect Q3ListBox::itemRect(Q3ListBoxItem *item) const
         return QRect(0, 0, -1, -1);
 
     int i = index(item);
+    if (i == -1)
+        return QRect(0, 0, -1, -1);
+    
     int col = i / numRows();
     int row = i % numRows();
 
@@ -4451,7 +4470,7 @@ int Q3ListBoxItem::rtti() const
 /*!
     \fn bool Q3ListBox::autoScroll() const
 
-    Use dragAutoScroll() instead;
+    Use dragAutoScroll() instead. This function always returns true.
 */
 
 /*!
@@ -4463,7 +4482,8 @@ int Q3ListBoxItem::rtti() const
 /*!
     \fn bool Q3ListBox::autoScrollBar() const
 
-    Use vScrollBarMode() instead.
+    Use vScrollBarMode() instead. Returns true if the vertical
+    scrollbar mode is \c Auto.
 */
 
 /*!
@@ -4478,7 +4498,8 @@ int Q3ListBoxItem::rtti() const
 /*!
     \fn bool Q3ListBox::scrollBar() const
 
-    Use vScrollBarMode() instead.
+    Use vScrollBarMode() instead. Returns true if the vertical
+    scrollbar mode is not \c AlwaysOff.
 */
 
 /*!
@@ -4493,7 +4514,8 @@ int Q3ListBoxItem::rtti() const
 /*!
     \fn bool Q3ListBox::autoBottomScrollBar() const
 
-    Use hScrollBarMode() instead.
+    Use hScrollBarMode() instead. Returns true if the horizontal
+    scrollbar mode is set to \c Auto.
 */
 
 /*!
@@ -4508,7 +4530,8 @@ int Q3ListBoxItem::rtti() const
 /*!
     \fn bool Q3ListBox::bottomScrollBar() const
 
-    Use hScrollBarMode() instead.
+    Use hScrollBarMode() instead. Returns true if the horizontal
+    scrollbar mode is not \c AlwaysOff.
 */
 
 /*!
@@ -4609,15 +4632,16 @@ int Q3ListBoxItem::rtti() const
 /*!
     \fn bool Q3ListBoxItem::selected() const
 
-    Use isSelected() instead.
+    Use isSelected() instead. Returns true if isSelected()
+    returns true.
 */
 
 /*!
     \fn bool Q3ListBoxItem::current() const
 
-    Use isCurrent() instead.
+    Use isCurrent() instead. Returns true if isCurrent()
+    returns true.
 */
-
 
 /*!
     \enum Q3ListBox::StringComparisonMode

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -24,6 +39,7 @@
 #ifndef QSTYLEOPTION_H
 #define QSTYLEOPTION_H
 
+#include <QtCore/qvariant.h>
 #include <QtGui/qabstractspinbox.h>
 #include <QtGui/qicon.h>
 #include <QtGui/qmatrix.h>
@@ -205,7 +221,7 @@ public:
     enum StyleOptionVersion { Version = 1 };
 
     enum ButtonFeature { None = 0x00, Flat = 0x01, HasMenu = 0x02, DefaultButton = 0x04,
-                         AutoDefaultButton = 0x08 };
+                         AutoDefaultButton = 0x08, CommandLinkButton = 0x10  };
     Q_DECLARE_FLAGS(ButtonFeatures, ButtonFeature)
 
     ButtonFeatures features;
@@ -424,6 +440,23 @@ protected:
     QStyleOptionDockWidget(int version);
 };
 
+class Q_GUI_EXPORT QStyleOptionDockWidgetV2 : public QStyleOptionDockWidget
+{
+public:
+    enum StyleOptionVersion { Version = 2 };
+
+    bool verticalTitleBar;
+
+    QStyleOptionDockWidgetV2();
+    QStyleOptionDockWidgetV2(const QStyleOptionDockWidgetV2 &other)
+        : QStyleOptionDockWidget(Version) { *this = other; }
+    QStyleOptionDockWidgetV2(const QStyleOptionDockWidget &other);
+    QStyleOptionDockWidgetV2 &operator = (const QStyleOptionDockWidget &other);
+
+protected:
+    QStyleOptionDockWidgetV2(int version);
+};
+
 class Q_GUI_EXPORT QStyleOptionViewItem : public QStyleOption
 {
 public:
@@ -470,6 +503,24 @@ protected:
     QStyleOptionViewItemV2(int version);
 };
 
+class Q_GUI_EXPORT QStyleOptionViewItemV3 : public QStyleOptionViewItemV2
+{
+public:
+    enum StyleOptionVersion { Version = 3 };
+
+    QLocale locale;
+    const QWidget *widget;
+
+    QStyleOptionViewItemV3();
+    QStyleOptionViewItemV3(const QStyleOptionViewItemV3 &other)
+        : QStyleOptionViewItemV2(Version) { *this = other; }
+    QStyleOptionViewItemV3(const QStyleOptionViewItem &other);
+    QStyleOptionViewItemV3 &operator = (const QStyleOptionViewItem &other);
+
+protected:
+    QStyleOptionViewItemV3(int version);
+};
+
 Q_DECLARE_OPERATORS_FOR_FLAGS(QStyleOptionViewItemV2::ViewItemFeatures)
 
 class Q_GUI_EXPORT QStyleOptionToolBox : public QStyleOption
@@ -486,6 +537,25 @@ public:
 
 protected:
     QStyleOptionToolBox(int version);
+};
+
+class Q_GUI_EXPORT QStyleOptionToolBoxV2 : public QStyleOptionToolBox
+{
+public:
+    enum StyleOptionVersion { Version = 2 };
+    enum TabPosition { Beginning, Middle, End, OnlyOneTab };
+    enum SelectedPosition { NotAdjacent, NextIsSelected, PreviousIsSelected };
+
+    TabPosition position;
+    SelectedPosition selectedPosition;
+
+    QStyleOptionToolBoxV2();
+    QStyleOptionToolBoxV2(const QStyleOptionToolBoxV2 &other) : QStyleOptionToolBox(Version) { *this = other; }
+    QStyleOptionToolBoxV2(const QStyleOptionToolBox &other);
+    QStyleOptionToolBoxV2 &operator=(const QStyleOptionToolBox &other);
+
+protected:
+    QStyleOptionToolBoxV2(int version);
 };
 
 #ifndef QT_NO_RUBBERBAND
@@ -594,7 +664,8 @@ public:
     enum StyleOptionType { Type = SO_ToolButton };
     enum StyleOptionVersion { Version = 1 };
 
-    enum ToolButtonFeature { None = 0x00, Arrow = 0x01, Menu = 0x04, PopupDelay = 0x08 };
+    enum ToolButtonFeature { None = 0x00, Arrow = 0x01, Menu = 0x04, MenuButtonPopup = Menu, PopupDelay = 0x08,
+                             HasMenu = 0x10 };
     Q_DECLARE_FLAGS(ToolButtonFeatures, ToolButtonFeature)
 
     ToolButtonFeatures features;
@@ -728,7 +799,7 @@ T qstyleoption_cast(QStyleOption *opt)
 class Q_GUI_EXPORT QStyleHintReturn {
 public:
     enum HintReturnType {
-        SH_Default=0xf000, SH_Mask
+        SH_Default=0xf000, SH_Mask, SH_Variant
     };
 
     enum StyleOptionType { Type = SH_Default };
@@ -749,6 +820,16 @@ public:
     QStyleHintReturnMask();
 
     QRegion region;
+};
+
+class Q_GUI_EXPORT QStyleHintReturnVariant : public QStyleHintReturn {
+public:
+    enum StyleOptionType { Type = SH_Variant };
+    enum StyleOptionVersion { Version = 1 };
+
+    QStyleHintReturnVariant();
+
+    QVariant variant;
 };
 
 template <typename T>

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -79,6 +94,7 @@ QApplicationPrivate *QApplicationPrivate::self = 0;
 QInputContext *QApplicationPrivate::inputContext;
 
 bool QApplicationPrivate::quitOnLastWindowClosed = true;
+bool QApplicationPrivate::tryEmitLastWindowClosedPending = false;
 
 QApplicationPrivate::QApplicationPrivate(int &argc, char **argv, QApplication::Type type)
     : QCoreApplicationPrivate(argc, argv)
@@ -91,6 +107,7 @@ QApplicationPrivate::QApplicationPrivate(int &argc, char **argv, QApplication::T
 #endif
 
     quitOnLastWindowClosed = true;
+    tryEmitLastWindowClosedPending = false;
 
 #ifdef QT3_SUPPORT
     qt_compat_used = 0;
@@ -353,17 +370,22 @@ Qt::MouseButtons QApplicationPrivate::mouse_buttons = Qt::NoButton;
 Qt::KeyboardModifiers QApplicationPrivate::modifier_buttons = Qt::NoModifier;
 
 QStyle *QApplicationPrivate::app_style = 0;        // default application style
+
+#ifndef QT_NO_STYLE_STYLESHEET
 QString QApplicationPrivate::styleSheet;           // default application stylesheet
+#endif
 
 int QApplicationPrivate::app_cspec = QApplication::NormalColor;
 QPalette *QApplicationPrivate::app_pal = 0;        // default application palette
 QPalette *QApplicationPrivate::sys_pal = 0;        // default system palette
 QPalette *QApplicationPrivate::set_pal = 0;        // default palette set by programmer
 QFont *QApplicationPrivate::app_font = 0;        // default application font
-bool qt_app_has_font = false;
+QFont *QApplicationPrivate::sys_font = 0;        // default system font
+QFont *QApplicationPrivate::set_font = 0;        // default font set by programmer
 QIcon *QApplicationPrivate::app_icon = 0;
 QWidget *QApplicationPrivate::main_widget = 0;        // main application widget
 QWidget *QApplicationPrivate::focus_widget = 0;        // has keyboard input focus
+QWidget *QApplicationPrivate::hidden_focus_widget = 0; // will get keyboard input focus after show()
 QWidget *QApplicationPrivate::active_window = 0;        // toplevel with keyboard focus
 bool QApplicationPrivate::obey_desktop_settings = true;        // use winsys resources
 int QApplicationPrivate::cursor_flash_time = 1000;        // text caret flash time
@@ -463,6 +485,14 @@ void QApplicationPrivate::process_cmdline()
                 is_session_restored = true;
             }
 #endif
+#ifndef QT_NO_STYLE_STYLESHEET
+        } else if (arg == "-stylesheet" && i < argc -1) {
+            styleSheet = QLatin1String("file:///");
+            styleSheet.append(QString::fromLocal8Bit(argv[++i]));
+        } else if (arg.indexOf("-stylesheet=") != -1) {
+            styleSheet = QLatin1String("file:///");
+            styleSheet.append(QString::fromLocal8Bit(arg.right(arg.length() - 12)));
+#endif
         } else if (qstrcmp(arg, "-reverse") == 0) {
             force_reverse = true;
             q->setLayoutDirection(Qt::RightToLeft);
@@ -472,6 +502,10 @@ void QApplicationPrivate::process_cmdline()
             argv[j++] = argv[i];
         }
         if (!s.isEmpty()) {
+            if (app_style) {
+                delete app_style;
+                app_style = 0;
+            }
             if (!styleOverride)
                 styleOverride = new QString;
             *styleOverride = s;
@@ -522,6 +556,10 @@ void QApplicationPrivate::process_cmdline()
        with additional styles or have additional styles as plugins these
        will be available to the \c -style command line option.
   \o -style \e style, is the same as listed above.
+  \o -stylesheet= \e stylesheet, sets the application \l styleSheet. The value
+       must be a path to a file that contains the Style Sheet. Note that relative URLs
+       in the Style Sheet file are relative to the Style Sheet file's path.
+  \o -stylesheet \e stylesheet, is the same as listed above.
   \o -session= \e session, restores the application from an earlier
        \link session.html session \endlink.
   \o -session \e session, is the same as listed above.
@@ -529,6 +567,13 @@ void QApplicationPrivate::process_cmdline()
         undestroyed and maximum number of widgets existed at the same time
   \o -reverse, sets the application's layout direction to Qt::RightToLeft
 
+  \endlist
+
+  The Windows version of Qt also support one additional command line
+  option, if Direct3D support has been compiled into Qt:
+  \list
+  \o -direct3d will make the Direct3D paint engine the default widget
+               paint engine in Qt. \bold {This functionality is experimental.}
   \endlist
 
   The X11 version of Qt also supports some traditional X11
@@ -652,6 +697,9 @@ void QApplicationPrivate::construct(
                                     )
 {
     Q_INIT_RESOURCE(qstyle);
+#if !defined(QT_NO_DIRECT3D) && defined(Q_WS_WIN)
+    Q_INIT_RESOURCE(qpaintengine_d3d);
+#endif
 
     qt_is_gui_used = (qt_appType != QApplication::Tty);
     process_cmdline();
@@ -898,6 +946,8 @@ QApplication::~QApplication()
     app_palettes()->clear();
     delete QApplicationPrivate::app_font;
     QApplicationPrivate::app_font = 0;
+    delete QApplicationPrivate::set_font;
+    QApplicationPrivate::set_font = 0;
     app_fonts()->clear();
 
     delete QApplicationPrivate::app_style;
@@ -922,7 +972,6 @@ QApplication::~QApplication()
     d->session_manager = 0;
 #endif //QT_NO_SESSIONMANAGER
 
-    qt_app_has_font = false;
     QApplicationPrivate::obey_desktop_settings = true;
     QApplicationPrivate::cursor_flash_time = 1000;
     QApplicationPrivate::mouse_double_click_time = 400;
@@ -941,6 +990,10 @@ QApplication::~QApplication()
     QApplicationPrivate::animate_tooltip = false;
     QApplicationPrivate::fade_tooltip = false;
     QApplicationPrivate::widgetCount = false;
+
+    // trigger unregistering of QVariant's GUI types
+    extern int qUnregisterGuiVariant();
+    qUnregisterGuiVariant();
 }
 
 
@@ -1020,7 +1073,7 @@ bool QApplication::compressEvent(QEvent *event, QObject *receiver, QPostEventLis
           || event->type() == QEvent::Resize
           || event->type() == QEvent::Move
           || event->type() == QEvent::LanguageChange
-	  || event->type() == QEvent::InputMethod)) {
+          || event->type() == QEvent::InputMethod)) {
         for (int i = 0; i < postedEvents->size(); ++i) {
             const QPostEvent &cur = postedEvents->at(i);
             if (cur.receiver != receiver || cur.event == 0 || cur.event->type() != event->type())
@@ -1038,11 +1091,12 @@ bool QApplication::compressEvent(QEvent *event, QObject *receiver, QPostEventLis
                 ((QMoveEvent *)(cur.event))->p = ((QMoveEvent *)event)->p;
             } else if (cur.event->type() == QEvent::LanguageChange) {
                 ;
-	    } else if ( cur.event->type() == QEvent::InputMethod ) {
+            } else if ( cur.event->type() == QEvent::InputMethod ) {
                 *(QInputMethodEvent *)(cur.event) = *(QInputMethodEvent *)event;
             } else {
                 continue;
             }
+            delete event;
             return true;
         }
         return false;
@@ -1108,10 +1162,13 @@ QStyle *QApplication::style()
             delete QApplicationPrivate::styleOverride;
             QApplicationPrivate::styleOverride = 0;
         } else {
-#  if defined(Q_WS_WIN) && defined(Q_OS_TEMP)
+#if defined(Q_WS_WIN) && defined(Q_OS_TEMP)
             style = QLatin1String("PocketPC");
 #elif defined(Q_WS_WIN)
-            if ((QSysInfo::WindowsVersion >= QSysInfo::WV_XP
+            if ((QSysInfo::WindowsVersion >= QSysInfo::WV_VISTA
+                && QSysInfo::WindowsVersion < QSysInfo::WV_NT_based))
+                style = QLatin1String("WindowsVista");
+                else if ((QSysInfo::WindowsVersion >= QSysInfo::WV_XP
                 && QSysInfo::WindowsVersion < QSysInfo::WV_NT_based))
                 style = QLatin1String("WindowsXP");
             else
@@ -1120,12 +1177,10 @@ QStyle *QApplication::style()
             style = QLatin1String("CDE");                        // default style for X11 on Solaris
 #elif defined(Q_WS_X11) && defined(Q_OS_IRIX)
             style = QLatin1String("SGI");                        // default style for X11 on IRIX
-#elif defined(Q_WS_X11)
-                style = QLatin1String("Motif");                // default style for X11
+#elif defined(Q_WS_X11) || defined(Q_WS_QWS)
+            style = QLatin1String("Plastique");                  // default style for X11 and small devices
 #elif defined(Q_WS_MAC)
-                style = QLatin1String("Macintosh");                // default style for all Mac's
-#elif defined(Q_WS_QWS)
-            style = QLatin1String("Plastique");                // default style for small devices
+                style = QLatin1String("Macintosh");              // default style for all Mac's
 #endif
         }
 
@@ -1149,8 +1204,13 @@ QStyle *QApplication::style()
     if (QApplicationPrivate::set_pal) // repolish set palette with the new style
         QApplication::setPalette(*QApplicationPrivate::set_pal);
 
+#ifndef QT_NO_STYLE_STYLESHEET
+    if (!QApplicationPrivate::styleSheet.isEmpty()) {
+        qApp->setStyleSheet(QApplicationPrivate::styleSheet);
+    } else
+#endif
+        QApplicationPrivate::app_style->polish(qApp);
 
-    QApplicationPrivate::app_style->polish(qApp);
     return QApplicationPrivate::app_style;
 }
 
@@ -1231,10 +1291,7 @@ void QApplication::setStyle(QStyle *style)
         for (QWidgetList::ConstIterator it1 = all.constBegin(); it1 != all.constEnd(); ++it1) {
             register QWidget *w = *it1;
             if (w->windowType() != Qt::Desktop && w->testAttribute(Qt::WA_WState_Polished)) {
-                // For widgets that have a custom style, we let them repolish themselves
-                // by touching the stylesheet. This is required since they may require to
-                // create a new proxy themselves (depending on whether they too have stylesheets)
-                if (!w->testAttribute(Qt::WA_SetStyle))
+                if (w->style() == QApplicationPrivate::app_style)
                     QApplicationPrivate::app_style->polish(w);                // repolish
 #ifndef QT_NO_STYLE_STYLESHEET
                 else
@@ -1245,8 +1302,7 @@ void QApplication::setStyle(QStyle *style)
 
         for (QWidgetList::ConstIterator it2 = all.constBegin(); it2 != all.constEnd(); ++it2) {
             register QWidget *w = *it2;
-            if (w->windowType() != Qt::Desktop && w->testAttribute(Qt::WA_WState_Polished)
-                && !w->testAttribute(Qt::WA_SetStyle)) {
+            if (w->windowType() != Qt::Desktop && !w->testAttribute(Qt::WA_SetStyle)) {
                     QEvent e(QEvent::StyleChange);
                     QApplication::sendEvent(w, &e);
 #ifdef QT3_SUPPORT
@@ -1523,6 +1579,11 @@ void QApplicationPrivate::setPalette_helper(const QPalette &palette, const char*
   The palette may be changed according to the current GUI style in
   QStyle::polish().
 
+  \warning Do not use this function in conjunction with \l{Qt Style Sheets}.
+  When using style sheets, the palette of a widget can be customized using the "color",
+  "background-color", "selection-color", "selection-background-color" and
+  "alternate-background-color".
+
   \sa QWidget::setPalette(), palette(), QStyle::polish()
 */
 
@@ -1628,6 +1689,11 @@ QFont QApplication::font(const char *className)
     overriding may be a bad idea because, for example, some locales need
     extra large fonts to support their special characters.
 
+    \warning Do not use this function in conjunction with \l{Qt Style Sheets}.
+    The font of an application can be customized using the "font" style sheet
+    property. To set a bold font for all QPushButtons, set the application
+    styleSheet() as "QPushButton { font: bold }"
+
     \sa font(), fontMetrics(), QWidget::setFont()
 */
 
@@ -1636,7 +1702,6 @@ void QApplication::setFont(const QFont &font, const char *className)
     bool all = false;
     FontHash *hash = app_fonts();
     if (!className) {
-        qt_app_has_font = true;
         if (!QApplicationPrivate::app_font)
             QApplicationPrivate::app_font = new QFont(font);
         else
@@ -1657,6 +1722,25 @@ void QApplication::setFont(const QFont &font, const char *className)
                 sendEvent(w, &e);
         }
     }
+    if (!className && (!QApplicationPrivate::sys_font || !font.isCopyOf(*QApplicationPrivate::sys_font))) {
+        if (!QApplicationPrivate::set_font)
+            QApplicationPrivate::set_font = new QFont(font);
+        else
+            *QApplicationPrivate::set_font = font;
+    }
+}
+
+/*! \internal
+*/
+void QApplicationPrivate::setSystemFont(const QFont &font)
+{
+     if (!sys_font)
+        sys_font = new QFont(font);
+    else
+        *sys_font = font;
+
+    if (!QApplicationPrivate::set_font)
+        QApplication::setFont(*sys_font);
 }
 
 /*!
@@ -1768,7 +1852,14 @@ QWidget *QApplication::focusWidget()
 
 void QApplicationPrivate::setFocusWidget(QWidget *focus, Qt::FocusReason reason)
 {
+    hidden_focus_widget = 0;
+
     if (focus != focus_widget) {
+        if (focus && focus->isHidden()) {
+            hidden_focus_widget = focus;
+            return;
+        }
+
         if (focus && (reason == Qt::BacktabFocusReason || reason == Qt::TabFocusReason)
             && qt_in_tab_key_event)
             focus->window()->setAttribute(Qt::WA_KeyboardFocusChange);
@@ -1786,6 +1877,8 @@ void QApplicationPrivate::setFocusWidget(QWidget *focus, Qt::FocusReason reason)
         }
 
         focus_widget = focus;
+        if(focus_widget)
+            focus_widget->d_func()->setFocus_sys();
 
         if (reason != Qt::NoFocusReason) {
 
@@ -1793,22 +1886,25 @@ void QApplicationPrivate::setFocusWidget(QWidget *focus, Qt::FocusReason reason)
             if (prev) {
 #ifdef QT_KEYPAD_NAVIGATION
                 if (QApplication::keypadNavigationEnabled()) {
-                    if (prev->hasEditFocus())
+                    if (prev->hasEditFocus() && reason != Qt::PopupFocusReason)
                         prev->setEditFocus(false);
                 }
 #endif
                 QFocusEvent out(QEvent::FocusOut, reason);
-                QStyle *style = prev->style();
+                QPointer<QWidget> that = prev;
                 QApplication::sendEvent(prev, &out);
-                QApplication::sendEvent(style, &out);
+                if (that)
+                    QApplication::sendEvent(that->style(), &out);
             }
             if(focus && QApplicationPrivate::focus_widget == focus) {
                 QInputContext *qic = focus->inputContext();
                 if (qic && focus_widget->testAttribute(Qt::WA_WState_Created))
-	            qic->setFocusWidget( focus_widget );
+                    qic->setFocusWidget( focus_widget );
                 QFocusEvent in(QEvent::FocusIn, reason);
+                QPointer<QWidget> that = focus;
                 QApplication::sendEvent(focus, &in);
-                QApplication::sendEvent(focus->style(), &in);
+                if (that)
+                    QApplication::sendEvent(that->style(), &in);
             }
         }
         emit qApp->focusChanged(prev, focus_widget);
@@ -1885,8 +1981,8 @@ void QApplication::closeAllWindows()
     Displays a simple message box about Qt. The message includes the
     version number of Qt being used by the application.
 
-    This is useful for inclusion in the Help menu of an application.
-    See the examples/menu/menu.cpp example.
+    This is useful for inclusion in the \gui Help menu of an application,
+    as shown in the \l{mainwindows/menus}{Menus} example.
 
     This function is a convenience slot for QMessageBox::aboutQt().
 */
@@ -1986,7 +2082,9 @@ bool QApplication::event(QEvent *e)
         if (te->timerId() == d->toolTipWakeUp.timerId()) {
             d->toolTipWakeUp.stop();
             d->toolTipFallAsleep.start(2000, this);
-            if (d->toolTipWidget) {
+            if (d->toolTipWidget
+                && (d->toolTipWidget->window()->testAttribute(Qt::WA_AlwaysShowToolTips)
+                    || d->toolTipWidget->isActiveWindow())) {
                 QHelpEvent e(QEvent::ToolTip, d->toolTipPos, d->toolTipGlobalPos);
                 QApplication::sendEvent(d->toolTipWidget, &e);
             }
@@ -2052,6 +2150,9 @@ void QApplication::setActiveWindow(QWidget* act)
         }
     }
 
+#if !defined(Q_WS_MAC)
+    QWidget *previousActiveWindow =  QApplicationPrivate::active_window;
+#endif
     QApplicationPrivate::active_window = window;
 
     if (QApplicationPrivate::active_window) {
@@ -2072,6 +2173,14 @@ void QApplication::setActiveWindow(QWidget* act)
     QEvent activationChange(QEvent::ActivationChange);
     QEvent windowActivate(QEvent::WindowActivate);
     QEvent windowDeactivate(QEvent::WindowDeactivate);
+
+#if !defined(Q_WS_MAC)
+    if (!previousActiveWindow) {
+        QEvent appActivate(QEvent::ApplicationActivate);
+        sendSpontaneousEvent(qApp, &appActivate);
+    }
+#endif
+
     for (int i = 0; i < toBeActivated.size(); ++i) {
         QWidget *w = toBeActivated.at(i);
         sendSpontaneousEvent(w, &windowActivate);
@@ -2084,18 +2193,31 @@ void QApplication::setActiveWindow(QWidget* act)
         sendSpontaneousEvent(w, &activationChange);
     }
 
+#if !defined(Q_WS_MAC)
+    if (!QApplicationPrivate::active_window) {
+        QEvent appDeactivate(QEvent::ApplicationDeactivate);
+        sendSpontaneousEvent(qApp, &appDeactivate);
+    }
+#endif
+
     if (QApplicationPrivate::popupWidgets == 0) { // !inPopupMode()
         // then focus events
         if (!QApplicationPrivate::active_window && QApplicationPrivate::focus_widget) {
             QApplicationPrivate::setFocusWidget(0, Qt::ActiveWindowFocusReason);
         } else if (QApplicationPrivate::active_window) {
             QWidget *w = QApplicationPrivate::active_window->focusWidget();
-            if (w /*&& w->focusPolicy() != QWidget::NoFocus*/)
+            if (w && w->isVisible() /*&& w->focusPolicy() != QWidget::NoFocus*/)
                 w->setFocus(Qt::ActiveWindowFocusReason);
             else {
-                QWidget *w = QApplicationPrivate::focusNextPrevChild_helper(QApplicationPrivate::active_window, true);
-                if (w)
+                w = QApplicationPrivate::focusNextPrevChild_helper(QApplicationPrivate::active_window, true);
+                if (w) {
                     w->setFocus(Qt::ActiveWindowFocusReason);
+                } else {
+                    // If the focus widget is not in the activate_window, clear the focus
+                    w = QApplicationPrivate::focus_widget;
+                    if (w && !QApplicationPrivate::active_window->isAncestorOf(w))
+                        QApplicationPrivate::setFocusWidget(0, Qt::ActiveWindowFocusReason);
+                }
             }
         }
     }
@@ -2119,6 +2241,7 @@ QWidget *QApplicationPrivate::focusNextPrevChild_helper(QWidget *toplevel, bool 
         if ((test->focusPolicy() & focus_flag) == focus_flag
             && !(test->d_func()->extra && test->d_func()->extra->focus_proxy)
             && test->isVisibleTo(toplevel) && test->isEnabled()
+            && !(w->windowType() == Qt::SubWindow && !w->isAncestorOf(test))
             && (toplevel->windowType() != Qt::SubWindow || toplevel->isAncestorOf(test))) {
             w = test;
             if (next)
@@ -2946,45 +3069,24 @@ bool QApplication::notify(QObject *receiver, QEvent *e)
         return true;
     }
 
+#ifndef QT_NO_DEBUG
     d->checkReceiverThread(receiver);
+#endif
 
 #ifdef QT3_SUPPORT
-    if (e->type() == QEvent::ChildRemoved && receiver->d_func()->postedChildInsertedEvents)
-        d->removePostedChildInsertedEvents(receiver, static_cast<QChildEvent *>(e)->child());
+    if (e->type() == QEvent::ChildRemoved && !receiver->d_func()->pendingChildInsertedEvents.isEmpty())
+        receiver->d_func()->removePendingChildInsertedEvents(static_cast<QChildEvent *>(e)->child());
 #endif // QT3_SUPPORT
 
     // capture the current mouse/keyboard state
     if(e->spontaneous()) {
         if(e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) {
-            Qt::KeyboardModifier modif = Qt::NoModifier;
-            switch(static_cast<QKeyEvent*>(e)->key()) {
-            case Qt::Key_Shift:
-                modif = Qt::ShiftModifier;
-                break;
-            case Qt::Key_Control:
-                modif = Qt::ControlModifier;
-                break;
-            case Qt::Key_Meta:
-                modif = Qt::MetaModifier;
-                break;
-            case Qt::Key_Alt:
-                modif = Qt::AltModifier;
-                break;
-            case Qt::Key_NumLock:
-                modif = Qt::KeypadModifier;
-                break;
-            default:
-                break;
-            }
-            if(modif != Qt::NoModifier) {
-                if(e->type() == QEvent::KeyPress)
-                    QApplicationPrivate::modifier_buttons |= modif;
-                else
-                    QApplicationPrivate::modifier_buttons &= ~modif;
-            }
+            QKeyEvent *ke = static_cast<QKeyEvent*>(e);
+            QApplicationPrivate::modifier_buttons = ke->modifiers();
         } else if(e->type() == QEvent::MouseButtonPress
                   || e->type() == QEvent::MouseButtonRelease) {
             QMouseEvent *me = static_cast<QMouseEvent*>(e);
+            QApplicationPrivate::modifier_buttons = me->modifiers();
             if(me->type() == QEvent::MouseButtonPress)
                 QApplicationPrivate::mouse_buttons |= me->button();
             else
@@ -2994,6 +3096,7 @@ bool QApplication::notify(QObject *receiver, QEvent *e)
 
     // User input and window activation makes tooltips sleep
     switch (e->type()) {
+    case QEvent::Wheel:
     case QEvent::ActivationChange:
     case QEvent::KeyPress:
     case QEvent::KeyRelease:
@@ -3002,9 +3105,9 @@ bool QApplication::notify(QObject *receiver, QEvent *e)
     case QEvent::MouseButtonPress:
     case QEvent::MouseButtonRelease:
     case QEvent::MouseButtonDblClick:
-        d->toolTipWakeUp.stop();
         d->toolTipFallAsleep.stop();
-        break;
+    case QEvent::Leave:
+        d->toolTipWakeUp.stop();
     default:
         break;
     }
@@ -3059,14 +3162,30 @@ bool QApplication::notify(QObject *receiver, QEvent *e)
                                        || key->key() == Qt::Key_Down);
             }
             bool def = key->isAccepted();
+            QPointer<QWidget> pw = w;
             while (w) {
                 if (def)
                     key->accept();
                 else
                     key->ignore();
                 res = d->notify_helper(w, e);
-                if ((res && key->isAccepted()) || w->isWindow() || !w->parentWidget())
+                if ((res && key->isAccepted())
+                    /*
+                       QLineEdit will emit a signal on Key_Return, but
+                       ignore the event, and sometimes the connected
+                       slot deletes the QLineEdit (common in itemview
+                       delegates), so we have to check if the widget
+                       was destroyed even if the event was ignored (to
+                       prevent a crash)
+
+                       note that we don't have to reset pw while
+                       propagating (because the original receiver will
+                       be destroyed if one of it's ancestors is)
+                    */
+                    || !pw
+                    || w->isWindow() || !w->parentWidget()) {
                     break;
+                }
                 w = w->parentWidget();
             }
             qt_in_tab_key_event = false;
@@ -3449,41 +3568,45 @@ bool QApplicationPrivate::notify_helper(QObject *receiver, QEvent * e)
   \ingroup application
   \ingroup environment
 
-  The session manager is responsible for session management, most
-  importantly for interruption and resumption. A "session" is a kind
-  of record of the state of the system, e.g. which applications were
-  run at start up and which applications are currently running. The
-  session manager is used to save the session, e.g. when the machine
-  is shut down; and to restore a session, e.g. when the machine is
-  started up. Use QSettings to save and restore an individual
-  application's settings, e.g. window positions, recently used files,
-  etc.
+  A session manager in a desktop environment (in which Qt GUI
+  applications live) keeps track of a session, which is a group of
+  running applications, each of which has a particular state. The
+  state of an application contains (most notably) the documents the
+  application has open and the position and size of its windows.
 
-  QSessionManager provides an interface between the application and
-  the session manager so that the program can work well with the
-  session manager. In Qt, session management requests for action
-  are handled by the two virtual functions QApplication::commitData()
-  and QApplication::saveState(). Both provide a reference to
-  a session manager object as argument, to allow the application
-  to communicate with the session manager.
+  The session manager is used to save the session, e.g. when the
+  machine is shut down, and to restore a session, e.g. when the
+  machine is started up. We recommend that you use QSettings to save
+  an individual application's settings, e.g. window positions,
+  recently used files, etc. When the application is restarted by the
+  session manager, you can restore the settings.
 
-  During a session management action (i.e. within
-  \l{QApplication::commitData()}{commitData()} and
-  \l{QApplication::saveState()}{saveState()}), no user interaction is
-  possible \e unless the application got explicit permission from the
-  session manager. You ask for permission by calling allowsInteraction()
-  or, if it's really urgent, allowsErrorInteraction(). Qt does not
-  enforce this, but the session manager may.
+  QSessionManager provides an interface between the application
+  and the session manager so that the program can work well with the
+  session manager. In Qt, session management requests for action are
+  handled by the two virtual functions QApplication::commitData()
+  and QApplication::saveState(). Both provide a reference to a
+  session manager object as argument, to allow the application to
+  communicate with the session manager. The session manager can only
+  be accessed through these functions.
+
+  No user interaction is possible \e unless the application gets
+  explicit permission from the session manager. You ask for permission
+  by calling allowsInteraction() or, if it's really urgent,
+  allowsErrorInteraction(). Qt does not enforce this, but the session
+  manager may.
 
   You can try to abort the shutdown process by calling cancel(). The
   default commitData() function does this if some top-level window
   rejected its closeEvent().
 
   For sophisticated session managers provided on Unix/X11, QSessionManager
-  offers further possibilites to fine-tune an application's session
+  offers further possibilities to fine-tune an application's session
   management behavior: setRestartCommand(), setDiscardCommand(),
   setRestartHint(), setProperty(), requestPhase2(). See the respective
   function descriptions for further details.
+
+  \sa QApplication, {Session Management}
 */
 
 /*! \enum QSessionManager::RestartHint
@@ -4070,6 +4193,8 @@ void QApplicationPrivate::emitLastWindowClosed()
 
 void QApplicationPrivate::_q_tryEmitLastWindowClosed()
 {
+    tryEmitLastWindowClosedPending = false;
+
     /* if there is no non-withdrawn primary window left (except
        the ones without QuitOnClose), we emit the lastWindowClosed
        signal */
@@ -4137,7 +4262,8 @@ bool QApplication::keypadNavigationEnabled()
 
     A global pointer referring to the unique application object. It is
     equivalent to the pointer returned by the
-    QCoreApplication::instance() function.
+    QCoreApplication::instance() function except that, in GUI applications,
+    it is a pointer to a QApplication instance.
 
     Only one application object can be created.
 

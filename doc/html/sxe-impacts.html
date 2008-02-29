@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -9,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Impact and Implications<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Impact and Implications<br /><span class="subtitle"></span>
+</h1>
 <p>The SXE policy has a number of impacts and implications for the following:</p>
 <ul><li><a href="#qtopia-development">Qtopia Development</a></li>
 <li><a href="#developers">Developers</a></li>
@@ -56,14 +58,14 @@
 <li>For trusted transports, eg QCop messaging on Unix Domain Sockets where the endpoints are protected by MAC rules, simple message authentication only occurs at the time of initial socket connect.</li>
 <li>The current implementation for message authentication is HMAC-MD5 with an option to switch to HMAC-SHA1 for greater security at performance cost. These algorithms are built into the Linux kernel and accessible to Qtopia via a userspace framework; or are shipped with a vendor supplied accelerated cryptographic solution. As a generalization HMAC-MD5 for short messages like QCop is very fast.<p>This is only required if an untrusted transport is used, for example if a UDP socket or similar system.</p>
 </li>
-<li>The current implementation for install time certification uses X509 certificate signatures. The X509 code will be part of an external library, possibly <a href="openssl.html">OpenSSL</a> or a proprietary cryptography library optimized for small platforms.</li>
+<li>The current implementation for install time certification uses X509 certificate signatures. The X509 code will be part of an external library, possibly <a href="porting.html#openssl">OpenSSL</a> or a proprietary cryptography library optimized for small platforms.</li>
 <li>The application rule-set will contain a row for each message authorized by a program identifier: entries will be in an order of magnitude of 10^2.<p>To mitigate performance impact from application rule-set, execution without authentication is used for safe messages, for example, retrieve battery life. Also rule-set lookups are cached and the caching policy maybe adjusted for better performance if memory resources are available.</p>
 </li>
 </ul>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,339 +1,447 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "interface.h"
+#include "sprites.h"
+#include "snake.h"
 
-#include <qtopia/resource.h>
+#include <QApplication>
+#include <QKeyEvent>
+#include <QDateTime>
+#include <QTimer>
+#include <stdlib.h>
+#include <QtopiaApplication>
+#include <QSoftMenuBar>
+#include <QToolBar>
+#include <QLabel>
+#include <QGraphicsTextItem>
+#include <QDesktopWidget>
+#include <QGraphicsSceneMouseEvent>
 
-#include <qtopia/qpetoolbar.h>
-#include <qtoolbutton.h>
-#include <qstyle.h>
-#include <qapplication.h>
-#include <qmessagebox.h>
-#include <qtopia/qpeapplication.h>
-#include <qtopia/contextbar.h>
+///////////////////////////////////////////////////////////////////////////
+// Simple sprite classes for the mice and walls
+///////////////////////////////////////////////////////////////////////////
 
-SnakeGame::SnakeGame(QWidget* parent, const char* name, WFlags f) :
-    QMainWindow(parent,name,f),
-    canvas(232, 258), gamemessage(0), gamemessagebkg(0)
+class Mouse : public QAnimatedPixmapItem
 {
-    setCaption( tr("Snake") );
-    canvas.setBackgroundPixmap(*(SpriteDB::spriteCache()->image(SpriteDB::ground())));
-    canvas.setUpdatePeriod(100);
-    snake = 0;
+public:
+    Mouse(QGraphicsScene* scene, int x, int y)
+        : QAnimatedPixmapItem(scene)
+    {
+        setSequence(SpriteDB::spriteCache());
+        setFrame(SpriteDB::mouse());
+        setPos(x, y);
+        show();
+    }
 
-    // when turned to true, get segfaults.
-    // shouldn't though... not sure what is happening.
-    obs.setAutoDelete(FALSE);
-    cv = new QCanvasView(&canvas, this);
-    cv->setFrameStyle(QFrame::NoFrame);
-#ifndef QTOPIA_PHONE
-    setToolBarsMovable( FALSE );
+    virtual int type() const
+    {
+        return mouse_rtti;
+    }
+};
 
-    QPEToolBar* toolbar = new QPEToolBar( this);
-    toolbar->setHorizontalStretchable( TRUE );
-    (void)new QToolButton(Resource::loadPixmap("Snake"), tr("New Game"), 0,
-                            this, SLOT(newGame()), toolbar, "New Game");
+class Wall : public QAnimatedPixmapItem
+{
+public:
+    Wall(QGraphicsScene* scene, int x, int y, bool left, bool right, bool up, bool down)
+        : QAnimatedPixmapItem(scene)
+    {
+        setSequence(SpriteDB::spriteCache());
+        setFrame(SpriteDB::wall(left, right, up, down));
+        setZValue(-100);
+        setPos(x, y);
+        show();
+    }
 
-    scorelabel = new QLabel(toolbar);
-    showScore(0);
-    scorelabel->setBackgroundMode( PaletteButton );
-    scorelabel->setAlignment( AlignRight | AlignVCenter | ExpandTabs );
-    toolbar->setStretchableWidget( scorelabel );
-#endif
-    setFocusPolicy(StrongFocus);
+    virtual int type() const
+    {
+        return wall_rtti;
+    }
+};
 
-    setCentralWidget(cv);
+///////////////////////////////////////////////////////////////////////////
+// Main game class
+///////////////////////////////////////////////////////////////////////////
 
-    gamestopped = true;
-    waitover = true;
-   QPEApplication::setInputMethodHint( this, QPEApplication::AlwaysOff );
+SnakeGame::SnakeGame(QWidget* parent, Qt::WFlags)
+    : QGraphicsView(parent)
+    , snake(0)
+    , waitover(true)
+    , gamestopped(true)
+    , paused(false)
+    , gamemessage(0)
+    , gamemessagebkg(0)
+{
+    setWindowTitle(tr("Snake"));
 
-#ifdef QTOPIA_PHONE
-    contextMenu = new ContextMenu( this );
-    ContextBar::setLabel( this, Qt::Key_Select, ContextBar::Select );
-#endif
+    scene = new QGraphicsScene(this);
+
+    scene->setBackgroundBrush(QBrush(SpriteDB::spriteCache().at(SpriteDB::ground())));
+    QRect workarea=QApplication::desktop()->availableGeometry();
+    QRectF sceneRect;
+    if(workarea.width() > workarea.height() && workarea.width() > 320)
+        sceneRect = QRectF(0,0, 320, workarea.height()*320/workarea.width());
+    else if(workarea.width() < workarea.height() && workarea.height() > 320)
+        sceneRect = QRectF(0,0, workarea.width()*320/workarea.height(), 320);
+    else
+        sceneRect = QRectF(0,0, workarea.width(), workarea.height());
+    scene->setSceneRect(sceneRect);
+
+    setScene(scene);
+    setFrameStyle(QFrame::NoFrame);
+    fitInView(sceneRect, Qt::KeepAspectRatio);
+
+    setFocusPolicy(Qt::StrongFocus);
+    QtopiaApplication::setInputMethodHint( this, QtopiaApplication::AlwaysOff );
+
+    (void)QSoftMenuBar::menuFor( this );
+    QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
+
+    // Seed the random number generator for randomly positioning the targets
+    QTime midnight(0, 0, 0);
+    srand(midnight.secsTo(QTime::currentTime()) );
 }
 
 SnakeGame::~SnakeGame()
 {
-   delete snake;
+    delete snake;
 }
 
-#ifndef QTOPIA_PHONE
-void SnakeGame::closeEvent( QCloseEvent* e )
+void SnakeGame::resizeEvent(QResizeEvent *event)
 {
+    QGraphicsView::resizeEvent(event);
+
+    QRectF sceneRect = scene->sceneRect();
+    fitInView(sceneRect, Qt::KeepAspectRatio);
+
+    // Calculate the number of tiles on the board for use in laying out the board.
+    int tilesize = SpriteDB::tileSize();
+    screenwidth = sceneRect.width() / tilesize;
+    screenheight = sceneRect.height() / tilesize;
+
+    // End any running game and layout the board ready to start again.
+    newGame(false);
+}
+
+void SnakeGame::pause()
+{
+    snake->stop();
+    showMessage(tr("Game Paused:\nPress Select\nkey to resume."));
+    paused = true;
+}
+
+void SnakeGame::resume()
+{
+    paused = false;
+    clearMessage();
+    snake->start();
+}
+
+void SnakeGame::focusOutEvent(QFocusEvent *)
+{
+    // We're losing focus, so pause the game if it's running.  We make the user
+    // explicitly resume the game when we regain focus rather than starting
+    // again automatically, which they might not be ready for.
+    if (!gamestopped && !paused)
+        pause();
+}
+
+void SnakeGame::newGame(bool start)
+{
+// TODO: Show pause/play icons instead of Select
+    QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
+
+    // End any previous game
     clear();
-    setupWalls();
-    gamestopped = true;
-    waitover = true;
-    e->accept();
-}
-#endif
 
-void SnakeGame::resizeEvent(QResizeEvent *)
-{
-    QSize s = centralWidget()->size();
-    int fw = style().defaultFrameWidth();
-    canvas.resize( s.width() - fw - 2, s.height() - fw - 2);
-
-    if (snake) {
-	newGame();
-    } else {
-        clear();
-	setupWalls();
-    }
-}
-
-void SnakeGame::focusOutEvent(QFocusEvent *) {
-    if (snake)
-	snake->pause();
-}
-
-void SnakeGame::focusInEvent(QFocusEvent *) {
-    if (snake)
-	snake->pause();
-}
-
-void SnakeGame::newGame()
-{
-#ifdef QTOPIA_PHONE
-    ContextBar::setLabel( this, Qt::Key_Select, ContextBar::NoLabel );
-#endif   
-    clear();
-    snake = new Snake(&canvas);
+    // Setup the new game
+    snake = new Snake(scene);
     connect(snake, SIGNAL(dead()), this, SLOT(gameOver()) );
-    connect(snake, SIGNAL(targethit()), this, SLOT(levelUp()) );
-    connect(snake, SIGNAL(scorechanged()), this, SLOT(scoreInc()) );
-    connect(this, SIGNAL(moveFaster()), snake, SLOT(increaseSpeed()) );
-    last = 0;
-    targetamount = 1;
-    notargets = 1;
+    connect(snake, SIGNAL(ateMouse()), this, SLOT(levelUp()) );
     level = 1;
-    stage = 1;
-    showScore(0);
+    stage = 0;
+    mice = 0;
     gamestopped = false;
     waitover = true;
+    if (start) {
+        paused = false;
+        snake->start();
+    }
+    else {
+        paused = true;
+        showMessage(tr("Press Select\nkey to start"));
+    }
 
-    setupWalls();
-    createTargets();
+    createWalls();
+    createMice();
 }
 
 //
 // Create walls and obstacles.
 //
-void SnakeGame::setupWalls(void)
+void SnakeGame::createWalls()
 {
-    obs.clear();
-
     int tilesize = SpriteDB::tileSize();
-    int screenwidth = canvas.width() / tilesize;
-    if ((canvas.width() % tilesize) > (tilesize >>1))
-	screenwidth++;
-    int screenheight = canvas.height() / tilesize;
-    if ((canvas.height() % tilesize) > (tilesize >>1))
-	screenheight++;
-    
-    // now for walls.
-    //corners
-    obs.append(new Obstacle(&canvas, 0, 0, FALSE, TRUE, FALSE, TRUE));
-    obs.append(new Obstacle(&canvas, tilesize*screenwidth-tilesize,
-		tilesize*screenheight-tilesize,
-		TRUE, FALSE, TRUE, FALSE));
-    obs.append(new Obstacle(&canvas, tilesize*screenwidth-tilesize, 0,
-		TRUE, FALSE, FALSE, TRUE));
-    obs.append(new Obstacle(&canvas, 0, tilesize*screenheight-tilesize,
-		FALSE, TRUE, TRUE, FALSE));
-    //sides
-    int i;
-    for (i = 1; i+1 < screenwidth; ++i) {
-	obs.append(new Obstacle(&canvas, i*tilesize, 0,
-		    TRUE, TRUE, FALSE, FALSE));
-	obs.append(new Obstacle(&canvas, i*tilesize, tilesize*screenheight-tilesize,
-		    TRUE, TRUE, FALSE, FALSE));
-    }
-    for (i = 1; i+1 < screenheight; ++i) {
-	obs.append(new Obstacle(&canvas, 0, i*tilesize,
-		    FALSE, FALSE, TRUE, TRUE));
-	obs.append(new Obstacle(&canvas, tilesize*screenwidth-tilesize, i*tilesize,
-		    FALSE, FALSE, TRUE, TRUE));
+
+    int right = tilesize*screenwidth-tilesize;
+    int bottom = tilesize*screenheight-tilesize;
+
+    // corners
+    new Wall(scene, 0, 0, false, true, false, true);
+    new Wall(scene, right, bottom, true, false, true, false);
+    new Wall(scene, right, 0, true, false, false, true);
+    new Wall(scene, 0, bottom, false, true, true, false);
+
+    // top and bottom sides
+    for (int i = 1; i+1 < screenwidth; ++i) {
+        new Wall(scene, i*tilesize, 0, true, true, false, false);
+        new Wall(scene, i*tilesize, bottom, true, true, false, false);
     }
 
-    // now make a couple of med screen obsticals?
+    // left and right sides
+    for (int i = 1; i+1 < screenheight; ++i) {
+        new Wall(scene, 0, i*tilesize, false, false, true, true);
+        new Wall(scene, right, i*tilesize, false, false, true, true);
+    }
 
+    // now make a couple of mid screen walls
     int obwidth = (screenwidth-2) >> 1;
     int obstart = ((screenwidth-2) >> 2) + 1;
     int oboffset = (screenheight-2) / 3;
-    for (i = obstart; i < obstart+obwidth; i++) {
-	obs.append(new Obstacle(&canvas, i*tilesize, tilesize+oboffset*tilesize,
-		    i!=obstart, i!=obstart+obwidth-1, FALSE, FALSE));
-	obs.append(new Obstacle(&canvas, i*tilesize, tilesize+2*oboffset*tilesize,
-		    i!=obstart, i!=obstart+obwidth-1, FALSE, FALSE));
+    for (int i = obstart; i < obstart+obwidth; ++i) {
+        new Wall(scene, i*tilesize, tilesize+oboffset*tilesize,
+                     i!=obstart, i!=obstart+obwidth-1, false, false);
+        new Wall(scene, i*tilesize, tilesize+2*oboffset*tilesize,
+                     i!=obstart, i!=obstart+obwidth-1, false, false);
     }
-
-    //ob_top = new Obstacle(&canvas, tilesize,tilesize, FALSE, FALSE, FALSE, FALSE);
-}
-
-
-void SnakeGame::showScore(int score)
-{
-#ifndef QTOPIA_PHONE
-    scorelabel->setText(tr("     Score :    %1   ").arg(score) );
-#endif
-}
-
-
-void SnakeGame::scoreInc()
-{
-   showScore( snake->getScore() );
 }
 
 void SnakeGame::levelUp()
 {
-   notargets--;
-   if (notargets == 0) {
+    // If there are no mice left, replace them and go up a stage.
+    // At every third stage go up a level.
+    mice--;
+    if (mice == 0) {
         stage++;
-       if (stage == 3) {
-          level++;
-          emit moveFaster();
-          targetamount++;
-          stage = 0;
-       }
-       createTargets();
-   }
+        if (stage == 3) {
+           level++;
+           snake->increaseSpeed();
+           stage = 0;
+        }
+        createMice();
+    }
 }
 
-void SnakeGame::createTargets()
-{  
-    Target  *foo;
-    int	    new_target_count = 0;
+void SnakeGame::createMice()
+{
+    // Create randomly placed mice equal to the level number.
 
-    for (int i = 0; i < targetamount; i++) {
-	foo = new Target(&canvas);
-	if(foo->position() == FALSE) {
-	    delete foo;		// ran out of room for targets
-	} else {
-	    foo->show();
-	    new_target_count++;
-	}
+// TODO: Better way to handle running out of space, e.g. restart the game
+// at higher difficulty when snake reaches some percentage of the empty space.
+
+    int tilesize = SpriteDB::tileSize();
+
+    for (int i = 0; i < level; ++i) {
+        int max_position_tries = 100;
+        int x;
+        int y;
+        do {
+            x = (rand() % (screenwidth-2)) * tilesize + tilesize;
+            y = (rand() % (screenheight-2)) * tilesize + tilesize;
+        } while (!scene->items(QPoint(x,y)).isEmpty() && --max_position_tries);
+
+        if (max_position_tries > 0) {
+            new Mouse(scene, x, y);
+            mice++;
+        }
+        else
+            break;  // can't place any more mice
     }
-
-    notargets = targetamount = new_target_count;
 }
 
 void SnakeGame::clear()
 {
-   delete snake;
-   snake = 0;
-   QCanvasItemList l = canvas.allItems();
-   for (QCanvasItemList::Iterator it=l.begin(); it!=l.end(); ++it) {
+    clearMessage();
+    delete snake;
+    snake = 0;
+    QList<QGraphicsItem *> l = scene->items();
+    for (QList<QGraphicsItem *>::Iterator it=l.begin(); it!=l.end(); ++it) {
         delete *it;
-   }  
-   gamemessage = 0;
-   gamemessagebkg = 0;
-
-   if (obs.count() > 0)
-       obs.clear();
+    }
+    scene->update();
 }
 
 void SnakeGame::showMessage(const QString &text)
 {
-#define DEFAULT_TEXT_SIZE 20
+#define DEFAULT_TEXT_SIZE 9
 
-   if (!gamemessage) {
-       gamemessage = new QCanvasText(&canvas);
-       gamemessage->setZ(100);
-       //gamemessage->setColor(yellow);
-       gamemessage->setColor(palette().color(QPalette::Normal, QColorGroup::HighlightedText));
-   }
-   if (!gamemessagebkg) {
-       gamemessagebkg = new QCanvasRectangle(&canvas);
-       gamemessagebkg->setZ(99);
-       gamemessagebkg->setBrush(palette().color(QPalette::Normal, QColorGroup::Highlight));
-   }
-   gamemessage->setText(text);
-   
-   int size = DEFAULT_TEXT_SIZE;
-   do gamemessage->setFont( QFont( "times", size, QFont::Bold ) );
-   while( ( gamemessage->boundingRect().width() > canvas.width() ||
-       gamemessage->boundingRect().height() > canvas.height() ) && --size );
-       
-   int w = gamemessage->boundingRect().width();
-   int h = gamemessage->boundingRect().height();
-   gamemessage->move(canvas.width()/2 -w/2, canvas.height()/2 -h/2);
-   gamemessagebkg->setSize(w+10, h+10);
-   gamemessagebkg->move(canvas.width()/2 -w/2 - 5, canvas.height()/2 -h/2 - 5);
-   gamemessagebkg->show();
-   gamemessage->show();
+    if (!gamemessage) {
+        gamemessage = new QGraphicsSimpleTextItem;
+        gamemessage->setZValue(100);
+        gamemessage->setBrush(QBrush(palette().color(QPalette::Normal, QPalette::HighlightedText)));
+        scene->addItem(gamemessage);
+    }
+    if (!gamemessagebkg) {
+        gamemessagebkg = new QGraphicsRectItem;
+        gamemessagebkg->setZValue(99);
+        gamemessagebkg->setBrush(palette().color(QPalette::Normal, QPalette::Highlight));
+        scene->addItem(gamemessagebkg);
+    }
+    gamemessage->setText(text);
 
+    int size = DEFAULT_TEXT_SIZE;
+    QFont fnt( QApplication::font() );
+    fnt.setPointSize( size );
+    fnt.setBold( true );
+
+    do {
+        gamemessage->setFont( fnt );
+    }
+    while( ( gamemessage->boundingRect().width() > (scene->width()-15) ||
+        gamemessage->boundingRect().height() > (scene->height()-15) ) && --size );
+
+    int w = gamemessage->boundingRect().width();
+    int h = gamemessage->boundingRect().height();
+    gamemessage->setPos(scene->width()/2 -w/2, scene->height()/2 -h/2);
+    gamemessagebkg->setRect(QRect(QPoint(scene->width()/2 -w/2 - 5, scene->height()/2 -h/2 - 5), QSize(w+10, h+10)));
+    gamemessagebkg->show();
+    gamemessage->show();
+    scene->update();
 }
+
+void SnakeGame::clearMessage()
+{
+    if (gamemessage) {
+        delete gamemessage;
+        gamemessage = 0;
+    }
+    if (gamemessagebkg) {
+        delete gamemessagebkg;
+        gamemessagebkg = 0;
+    }
+    scene->update();
+}
+
 void SnakeGame::gameOver()
 {
-#ifdef QTOPIA_PHONE
-    ContextBar::setLabel( this, Qt::Key_Select, ContextBar::Select );
-#endif
-   if( snake ) showMessage( tr( "GAME OVER!\nYour Score: %1" ).arg( snake->getScore() ) );
-   gamestopped = true;
-   waitover = false;
-   // timer on waitover?
-   QTimer::singleShot(2000, this, SLOT(endWait()));
+    QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
+    if (snake)
+        showMessage( tr( "GAME OVER!\nYour Score: %1" ).arg( snake->getScore() ) );
+    gamestopped = true;
+    waitover = false;
+    QTimer::singleShot(2000, this, SLOT(endWait()));
 }
 
 void SnakeGame::endWait()
 {
     waitover = true;
-    if( snake ) showMessage(tr("GAME OVER!\nYour Score: %1\nPress any\nkey to start\nnew game", "limited space for line length").arg(snake->getScore()));
+    if (snake)
+        showMessage(tr("GAME OVER!\nYour Score: %1\nPress Select\nkey to start\nnew game").arg(snake->getScore()));
 }
 
 void SnakeGame::keyPressEvent(QKeyEvent* event)
-{ 
+{
     switch( event->key() ) {
-#ifdef QTOPIA_PHONE
     case Qt::Key_Select:
-        if( gamestopped && waitover ) newGame();
+    case Qt::Key_Enter:
+    case Qt::Key_Return:
+        if (paused) {
+            resume();
+        } else if (gamestopped) {
+            if (waitover) newGame(true);
+        } else {
+            pause();
+        }
+        event->accept();
         break;
-    case Qt::Key_Back:
-    case Qt::Key_No:
-        QMainWindow::keyPressEvent( event );
-        break;
-#endif
+
     default:
-        if( gamestopped ) {
-            if( waitover ) newGame();
-        } else snake->go( event->key() );
+        if (!paused && !gamestopped && snake && snake->go( event->key() ))
+            event->accept();
+        else
+            event->ignore();
         break;
     }
 }
 
+int orientation(const QPointF &p1, const QPointF &p2, const QPointF &point)
+{
+    qreal orient = ((p2.x() - p1.x()) * (point.y() - p1.y())) - ((point.x() - p1.x()) * (p2.y() - p1.y()));
+    if(orient > 0.0)
+        return 1;             // Orientaion is to the right-hand side
+    else if(orient < 0.0)
+        return -1;            // Orientaion is to the left-hand side
+    else
+        return 0;             // Orientaion is neutral aka collinear
+}
+
+bool pointInTriangle(const QPointF &t1, const QPointF &t2, const QPointF &t3, const QPointF &p)
+{
+    int orient1 = orientation(t1, t2, p);
+    int orient2 = orientation(t2, t3, p);
+    int orient3 = orientation(t3, t1, p);
+
+    if (orient1 == orient2 && orient2 == orient3)
+        return true;
+    else if (orient1 == 0)
+        return (orient2 == 0) || (orient3 == 0);
+    else if (orient2 == 0)
+        return (orient1 = 0) || (orient3 = 0);
+    else if (orient3 == 0)
+        return (orient2 = 0) || (orient1 = 0);
+    else
+        return false;
+}
+
+void SnakeGame::mousePressEvent(QMouseEvent* mouseEvent)
+{
+    if (!gamestopped && !paused && snake)
+    {
+        // calculate the quadrant.
+        if(pointInTriangle(rect().topLeft(), rect().topRight(), rect().center(), mouseEvent->pos()))
+        {
+            if(snake->go(Qt::Key_Up))
+                mouseEvent->accept();
+        }
+        else if(pointInTriangle(rect().topRight(), rect().bottomRight(), rect().center(), mouseEvent->pos()))
+        {
+            if(snake->go(Qt::Key_Right))
+                mouseEvent->accept();
+        }
+        else if(pointInTriangle(rect().bottomLeft(), rect().bottomRight(), rect().center(), mouseEvent->pos()))
+        {
+            if(snake->go(Qt::Key_Down))
+                mouseEvent->accept();
+        }
+        else if(pointInTriangle(rect().topLeft(), rect().bottomLeft(), rect().center(), mouseEvent->pos()))
+        {
+            if(snake->go(Qt::Key_Left))
+                mouseEvent->accept();
+        }
+        // todo later, maybe give a bit of visual feedback of the quadrant pressed
+    }
+
+    if ( paused ) {
+        resume();
+        mouseEvent->accept();
+    }
+
+}

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,12 +22,11 @@
 #include "videocaptureview.h"
 #include "videocapturedevice.h"
 #include "videocapturedevicefactory.h"
+#include <math.h>
 
 #include <qimage.h>
 #include <qpainter.h>
 #include <qevent.h>
-
-#include <qdebug.h>
 
 VideoCaptureView::VideoCaptureView(QWidget *parent, Qt::WFlags fl):
     QWidget(parent, fl),
@@ -46,6 +45,15 @@ VideoCaptureView::VideoCaptureView(QWidget *parent, Qt::WFlags fl):
     setPalette(pal);
 
     setLive();
+
+
+    m_doZoom = false;
+    m_zoomlevel = 0;
+    m_zoomfactor = 1.0;
+    m_minZoom = 0;
+    m_maxZoom = 2;
+
+
 }
 
 VideoCaptureView::~VideoCaptureView()
@@ -154,8 +162,28 @@ void VideoCaptureView::paintEvent(QPaintEvent* paintEvent)
     else
     {
         if (m_tidUpdate > 0)
+        {
             m_capture->getCameraImage(m_image);
+            if (m_doZoom)
+            {
+                //Crop
+                int i;
+                float dw = 0.0,dh = 0.0;
+                QRect r = m_image.rect();
+                int w = (int)(r.width() * m_zoomfactor);
+                int h = (int)(r.height() * m_zoomfactor);
+                //center image
+                for(i = m_zoomlevel; i > 0; i--) {
+                    dw += w/(i<<1);
+                    dh += h/(i<<1);
+                }    
+                QRect d (r.x() + (unsigned int)dw*m_zoomlevel, r.y() + (unsigned int)dh*m_zoomlevel , w, h); 
+                QImage img2 = m_image.copy(d);
+                m_image = img2; 
+            }
 
+        }
+        
         int w = m_image.width();
         int h = m_image.height();
 
@@ -179,6 +207,45 @@ void VideoCaptureView::paintEvent(QPaintEvent* paintEvent)
 
 void VideoCaptureView::timerEvent(QTimerEvent*)
 {
+    m_cleared = true;
+    repaint();
+    m_cleared = false;
+}
+
+void VideoCaptureView::zoomIn()
+{
+
+    m_zoomlevel = (m_zoomlevel+1<=m_maxZoom)?++m_zoomlevel:m_zoomlevel;
+    m_zoomfactor = 1.0 / ::pow(2,m_zoomlevel);
+    doZoom();
+}    
+
+void VideoCaptureView::zoomOut()
+{
+    m_zoomlevel = (m_zoomlevel-1>=m_minZoom)?--m_zoomlevel:m_zoomlevel;
+    m_zoomfactor = 1.0 / ::pow(2,m_zoomlevel);
+    doZoom();
+}
+
+void VideoCaptureView::doZoom(void)
+{
+    if (m_zoomlevel == m_minZoom) 
+    {
+        // reset
+        //m_capture->doZoom(m_zoomlevel);
+        m_doZoom = false;
+    }    
+    else
+    {
+        
+        //bool ret = m_capture->doZoom(m_zoomlevel);
+       // if (ret)
+        //    m_doZoom = false;
+        //else
+            m_doZoom = true;
+    }    
+
     repaint();
 }
+
 

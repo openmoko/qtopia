@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -359,9 +359,20 @@ bool QtopiaServiceRequest::send() const
     qLog(DBUS) << "Calling method finished...";
 
     return true;
-#elif !defined(QT_NO_COP)
-    QString ch = QtopiaService::channel(m_Service, QString());
+#elif !defined(QT_NO_COP) || defined(Q_WS_X11)
+    QString ch;
+    bool rawMessage = false;
 
+    if(m_Service.startsWith("Application:")) {
+        ch = "QPE/Application/" + m_Service.mid(12);
+        rawMessage = true;
+    } else if(m_Service.startsWith("Channel:")) {
+        ch = m_Service.mid(8);
+        rawMessage = true;
+    } else {
+        ch = QtopiaService::channel(m_Service, QString());
+    }
+    
     if (ch.isNull())
         return false;
 
@@ -376,15 +387,17 @@ bool QtopiaServiceRequest::send() const
 
     QString msg = message();
 
-    int indexOfCC = msg.indexOf("::");
-    if (indexOfCC != -1) {
-        int indexOfParen = msg.indexOf("(");
-        if (indexOfCC > indexOfParen) {
+    if(!rawMessage) {
+        int indexOfCC = msg.indexOf("::");
+        if (indexOfCC != -1) {
+            int indexOfParen = msg.indexOf("(");
+            if (indexOfCC > indexOfParen) {
+                msg = service() + "::" + msg;
+            }
+        }
+        else {
             msg = service() + "::" + msg;
         }
-    }
-    else {
-        msg = service() + "::" + msg;
     }
 
     QtopiaIpcEnvelope e(ch, msg);

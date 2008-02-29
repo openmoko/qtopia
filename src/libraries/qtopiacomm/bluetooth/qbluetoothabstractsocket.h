@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,17 +23,16 @@
 #define __QBLUETOOTHABSTRACTSOCKET_H__
 
 #include <QIODevice>
-#include <QAbstractSocket>
 #include <QtGlobal>
 
-#include <qtopiaglobal.h>
+#include <qbluetoothglobal.h>
 #include <qbluetoothnamespace.h>
 
 class QBluetoothAddress;
 struct sockaddr;
 
 class QBluetoothAbstractSocketPrivate;
-class QTOPIACOMM_EXPORT QBluetoothAbstractSocket : public QIODevice
+class QBLUETOOTH_EXPORT QBluetoothAbstractSocket : public QIODevice
 {
     Q_OBJECT
     friend class QBluetoothAbstractSocketPrivate;
@@ -57,6 +56,11 @@ public:
         NetworkError,
         TimeoutError,
         RemoteHostClosedError,
+        BusyError,
+        HostUnreachableError,
+        UnsupportedOperationError,
+        AddressInUseError,
+        AddressNotAvailableError,
         UnknownError
     };
 
@@ -103,7 +107,7 @@ protected:
     virtual qint64 readData(char *data, qint64 maxsize);
     virtual qint64 writeData(const char *data, qint64 size);
 
-    bool initiateConnect(int socket, sockaddr *, int size);
+    bool handleConnect(int socket, QBluetoothAbstractSocket::SocketState state);
     virtual bool readSocketParameters(int sockfd) = 0;
     virtual void resetSocketParameters();
     void setError(QBluetoothAbstractSocket::SocketError error);

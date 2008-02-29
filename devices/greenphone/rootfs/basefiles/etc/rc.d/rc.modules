@@ -6,7 +6,7 @@ exec 2>/dev/null
 
 case "$1" in
     boot)
-        splash "Loading filesystem" "modules"
+        splash "Loading boot" "modules"
 
         # FAT Support
         insmod fat
@@ -14,13 +14,28 @@ case "$1" in
         insmod nls_cp437
         insmod nls_iso8859-1
         insmod nls_utf8
+
+        # TAT Table
         insmod docparatable
+
+        # Power Management
+        insmod omega_pmu
+        insmod omega_power
+        insmod omega_poweroff
         ;;
-    *)
-        splash -p + "Loading modules"
+    debug)
+        splash -p + "Loading debug" "modules"
 
         # Loopback block device
         insmod loop
+
+        # NFS Support
+        insmod sunrpc
+        insmod lockd
+        insmod nfs
+        ;;
+    *)
+        splash -p + "Loading modules"
 
         # Networking and PPP
         insmod af_packet
@@ -28,11 +43,6 @@ case "$1" in
         insmod slhc
         insmod ppp_generic
         insmod ppp_async
-
-        # USB
-        insmod usbdcore
-        insmod net_fd if_name=eth
-        insmod bvd_bi
 
         # Multimedia interfaces
         insmod omega_i2c
@@ -54,11 +64,6 @@ case "$1" in
         insmod omega_kpbl
         insmod pseudo_serial
 
-        # Power Management
-        insmod omega_pmu
-        insmod omega_power
-        insmod omega_poweroff
-
         # miniSD Card
         insmod mmc_base
         insmod mmc_omega
@@ -71,11 +76,6 @@ case "$1" in
         insmod sco
         insmod hci_uart
         insmod rfcomm
-
-        # NFS Support
-        insmod sunrpc
-        insmod lockd
-        insmod nfs
         ;;
 esac
 

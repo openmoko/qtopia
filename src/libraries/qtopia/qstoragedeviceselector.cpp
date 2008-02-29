@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -72,7 +72,7 @@ public:
 QStorageDeviceSelector::QStorageDeviceSelector( QWidget *parent )
     : QComboBox( parent ), filter( 0 )
 {
-    storage = new QStorageMetaInfo;
+    storage = QStorageMetaInfo::instance();
     d = new QStorageDeviceSelectorPrivate;
     setLocation( QContent() );
     connect( this, SIGNAL(activated(int)), this, SIGNAL(newPath()) );
@@ -86,7 +86,7 @@ QStorageDeviceSelector::QStorageDeviceSelector( QWidget *parent )
 QStorageDeviceSelector::QStorageDeviceSelector( const QContent & lnk, QWidget *parent )
     : QComboBox( parent ), filter( 0 )
 {
-    storage = new QStorageMetaInfo;
+    storage = QStorageMetaInfo::instance();
     d = new QStorageDeviceSelectorPrivate;
     setLocation(lnk);
     connect( this, SIGNAL(activated(int)), this, SIGNAL(newPath()) );
@@ -102,7 +102,6 @@ QStorageDeviceSelector::~QStorageDeviceSelector()
         delete filter;
         filter = 0;
     }
-    delete storage;
     delete d;
 }
 
@@ -112,12 +111,12 @@ QStorageDeviceSelector::~QStorageDeviceSelector()
  */
 void QStorageDeviceSelector::setLocation( const QContent &lnk )
 {
-    // NB: setLocation(const QString) assumes only lnk->file() is used.
+    // NB: setLocation(const QString) assumes only lnk->fileName() is used.
 
     if ( lnk.isValid() ) {
-        QFileInfo fi( lnk.file() );
+        QFileInfo fi( lnk.fileName() );
         d->fileSize = fi.size();
-        const QFileSystem *fs =  storage->fileSystemOf( lnk.file() );
+        const QFileSystem *fs =  storage->fileSystemOf( lnk.fileName() );
         d->originalPath = fs ? fs->path() : QString();
     } else {
         d->fileSize = 0;
@@ -130,7 +129,7 @@ void QStorageDeviceSelector::setLocation( const QContent &lnk )
     if ( lnk.isValid()) {
         int n = locations.count();
         for ( int i = 0; i < n; i++ ) {
-            if ( lnk.file().contains( locations[i] ) )
+            if ( lnk.fileName().contains( locations[i] ) )
                 currentLocation = i;
         }
     }

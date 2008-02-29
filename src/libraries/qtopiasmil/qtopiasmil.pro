@@ -1,4 +1,4 @@
-qtopia_project(qtopia core lib)
+qtopia_project(qtopia lib)
 TARGET=qtopiasmil
 CONFIG+=no_tr
 
@@ -27,8 +27,5 @@ sdk_qtopiasmil_headers.files=$${HEADERS}
 sdk_qtopiasmil_headers.path=/include/qtopia/smil
 sdk_qtopiasmil_headers.hint=sdk headers
 INSTALLS+=sdk_qtopiasmil_headers
-
-# evilness necessary since this lib has circular deps - fixed by qtopiabase
-!enable_qtopiabase:INCLUDEPATH+=$$QPEDIR/include/qtopia
 
 idep(LIBS+=-l$$TARGET)

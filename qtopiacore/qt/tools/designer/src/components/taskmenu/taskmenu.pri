@@ -21,7 +21,8 @@ HEADERS += $$PWD/button_taskmenu.h \
   $$PWD/taskmenu_component.h \
   $$PWD/listwidgeteditor.h \
   $$PWD/treewidgeteditor.h \
-  $$PWD/tablewidgeteditor.h
+  $$PWD/tablewidgeteditor.h \
+  $$PWD/inplace_widget_helper.h
 
 SOURCES += $$PWD/button_taskmenu.cpp \
   $$PWD/groupbox_taskmenu.cpp \
@@ -38,4 +39,5 @@ SOURCES += $$PWD/button_taskmenu.cpp \
   $$PWD/taskmenu_component.cpp \
   $$PWD/listwidgeteditor.cpp \
   $$PWD/treewidgeteditor.cpp \
-  $$PWD/tablewidgeteditor.cpp
+  $$PWD/tablewidgeteditor.cpp \
+  $$PWD/inplace_widget_helper.cpp

@@ -2,13 +2,14 @@
 <html>
 <head><title>Call Barring</title></head>
 <body>
+<!--#include file="device-name.html"-->
 <!--#if expr="$USERGUIDE"-->
    <h3>Call Barring</h3>
 <!--#else -->
    <h3>Call Barring</h3>
 <!--#endif-->
-<p>Use these settings to selectively block calls to/from your phone.</p>
-<p>To activate or deacativate call barring, select a condition using <img src=":image/help/dpad"> </img> and press <img src=":icon/select"> </img> to enter call barring password (PIN2).</p>
+<p>Use these settings to selectively block calls to/from your <!--#echo var="device-name" -->.</p>
+<p>To activate or deacativate call barring, select a condition using <img src=":image/help/dpad"> </img> and press <img src=":icon/select"><b>Select</b> to enter call barring password (PIN2).</p>
 </body>
 </html>
 <!--#endif-->

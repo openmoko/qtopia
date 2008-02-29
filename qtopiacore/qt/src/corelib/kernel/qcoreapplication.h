@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -59,8 +74,8 @@ public:
     ~QCoreApplication();
 
 #ifdef QT_DEPRECATED
-    static int argc() QT_DEPRECATED;
-    static char **argv() QT_DEPRECATED;
+    QT_DEPRECATED static int argc();
+    QT_DEPRECATED static char **argv();
 #endif
     static QStringList arguments();
 
@@ -83,9 +98,11 @@ public:
 
     static bool sendEvent(QObject *receiver, QEvent *event);
     static void postEvent(QObject *receiver, QEvent *event);
+    static void postEvent(QObject *receiver, QEvent *event, int priority);
     static void sendPostedEvents(QObject *receiver, int event_type);
     static void sendPostedEvents();
     static void removePostedEvents(QObject *receiver);
+    static void removePostedEvents(QObject *receiver, int eventType);
     static bool hasPendingEvents();
 
     virtual bool notify(QObject *, QEvent *);
@@ -108,7 +125,7 @@ public:
     static void removeTranslator(QTranslator * messageFile);
 #endif
     enum Encoding { CodecForTr, UnicodeUTF8, DefaultCodec = CodecForTr };
-    // ### merge in Qt 5
+    // ### Qt 5: merge
     static QString translate(const char * context,
                              const char * key,
                              const char * comment = 0,
@@ -162,6 +179,7 @@ protected:
 
 private:
     static bool sendSpontaneousEvent(QObject *receiver, QEvent *event);
+    bool notifyInternal(QObject *receiver, QEvent *event);
 
     void init();
 
@@ -177,13 +195,14 @@ private:
     friend class QWidgetPrivate;
     friend bool qt_sendSpontaneousEvent(QObject*, QEvent*);
     friend Q_CORE_EXPORT QString qAppName();
+    friend class QClassFactory;
 };
 
 inline bool QCoreApplication::sendEvent(QObject *receiver, QEvent *event)
-{  if (event) event->spont = false; return self ? self->notify(receiver, event) : false; }
+{  if (event) event->spont = false; return self ? self->notifyInternal(receiver, event) : false; }
 
 inline bool QCoreApplication::sendSpontaneousEvent(QObject *receiver, QEvent *event)
-{ if (event) event->spont = true; return self ? self->notify(receiver, event) : false; }
+{ if (event) event->spont = true; return self ? self->notifyInternal(receiver, event) : false; }
 
 inline void QCoreApplication::sendPostedEvents() { sendPostedEvents(0, 0); }
 

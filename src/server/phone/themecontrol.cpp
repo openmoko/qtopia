@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include "themecontrol.h"
+#include "qabstractthemewidgetfactory.h"
 #include <QSettings>
 #include <QDebug>
 #include <themedview.h>
@@ -30,6 +31,8 @@
   \class ThemeControl
   \ingroup QtopiaServer::Task
   \brief The ThemeControl class manages the registered theme views.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
@@ -45,7 +48,7 @@ ThemeControl *ThemeControl::instance()
 
 /*! \internal */
 ThemeControl::ThemeControl()
-: m_exportBackground(false)
+: m_exportBackground(false), m_widgetFactory(0)
 {
     refresh();
 }
@@ -119,6 +122,18 @@ void ThemeControl::refresh()
 }
 
 /*!
+    Sets the factory used to create theme widgets displayed in themes
+    to \a factory.
+*/
+void ThemeControl::setThemeWidgetFactory(QAbstractThemeWidgetFactory *factory)
+{
+    delete m_widgetFactory;
+    m_widgetFactory = factory;
+    for (int ii = 0; ii < m_themes.count(); ++ii)
+        doThemeWidgets(m_themes.at(ii).first);
+}
+
+/*!
   \fn ThemeControl::themeChanging()
 
   Emitted just before the theme is changed.
@@ -137,8 +152,19 @@ void ThemeControl::doTheme(ThemedView *view, const QString &name)
         QString file = m_themeDir + path;
         view->setThemeName(m_themeName);
         view->loadSource(m_themeDir + path);
+        doThemeWidgets(view);
     } else {
         qWarning("Invalid %s theme.", name.toAscii().constData());
+    }
+}
+
+void ThemeControl::doThemeWidgets(ThemedView *view)
+{
+    if (m_widgetFactory) {
+        QList<ThemeItem*> items = view->findItems(QString(), ThemedView::Widget);
+        QList<ThemeItem*>::ConstIterator it;
+        for (it = items.begin(); it != items.end(); ++it)
+            m_widgetFactory->createWidget((ThemeWidgetItem*)*it);
     }
 }
 

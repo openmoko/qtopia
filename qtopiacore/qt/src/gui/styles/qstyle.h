@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,7 +45,7 @@
 #include <QtGui/qicon.h>
 #include <QtGui/qpixmap.h>
 #include <QtGui/qpalette.h>
-#include <QtCore/qobject.h>
+#include <QtGui/qsizepolicy.h>
 
 QT_BEGIN_HEADER
 
@@ -81,37 +96,40 @@ public:
     virtual QPalette standardPalette() const;
 
     enum StateFlag {
-        State_None    =       0x00000000,
+        State_None =                0x00000000,
 #ifdef QT3_SUPPORT
-        State_Default = State_None,
+        State_Default =             State_None,
 #endif
-        State_Enabled =       0x00000001,
-        State_Raised =        0x00000002,
-        State_Sunken =        0x00000004,
-        State_Off =           0x00000008,
-        State_NoChange =      0x00000010,
-        State_On =            0x00000020,
-        State_DownArrow =     0x00000040,
-        State_Horizontal =    0x00000080,
-        State_HasFocus =      0x00000100,
-        State_Top =           0x00000200,
-        State_Bottom =        0x00000400,
-        State_FocusAtBorder = 0x00000800,
-        State_AutoRaise =     0x00001000,
-        State_MouseOver =     0x00002000,
-        State_UpArrow =       0x00004000,
-        State_Selected =      0x00008000,
-        State_Active =        0x00010000,
-        State_Open =          0x00040000,
-        State_Children =      0x00080000,
-        State_Item =          0x00100000,
-        State_Sibling =       0x00200000,
-        State_Editing =       0x00400000,
+        State_Enabled =             0x00000001,
+        State_Raised =              0x00000002,
+        State_Sunken =              0x00000004,
+        State_Off =                 0x00000008,
+        State_NoChange =            0x00000010,
+        State_On =                  0x00000020,
+        State_DownArrow =           0x00000040,
+        State_Horizontal =          0x00000080,
+        State_HasFocus =            0x00000100,
+        State_Top =                 0x00000200,
+        State_Bottom =              0x00000400,
+        State_FocusAtBorder =       0x00000800,
+        State_AutoRaise =           0x00001000,
+        State_MouseOver =           0x00002000,
+        State_UpArrow =             0x00004000,
+        State_Selected =            0x00008000,
+        State_Active =              0x00010000,
+        State_Window =              0x00020000,
+        State_Open =                0x00040000,
+        State_Children =            0x00080000,
+        State_Item =                0x00100000,
+        State_Sibling =             0x00200000,
+        State_Editing =             0x00400000,
         State_KeyboardFocusChange = 0x00800000,
 #ifdef QT_KEYPAD_NAVIGATION
-        State_HasEditFocus =  0x01000000,
+        State_HasEditFocus =        0x01000000,
 #endif
-        State_ReadOnly =      0x02000000
+        State_ReadOnly =            0x02000000,
+        State_Small =               0x04000000,
+        State_Mini =                0x08000000
     };
     Q_DECLARE_FLAGS(State, StateFlag)
 
@@ -171,6 +189,8 @@ public:
         PE_PanelScrollAreaCorner,
 
         PE_Widget,
+
+        PE_IndicatorColumnViewArrow,
 
         // do not add any values below/greater this
         PE_CustomBase = 0xf000000
@@ -233,6 +253,11 @@ public:
         CE_ComboBoxLabel,
 
         CE_ToolBar,
+        CE_ToolBoxTabShape,
+        CE_ToolBoxTabLabel,
+        CE_HeaderEmptyArea,
+
+        CE_ColumnViewGrip,
 
         // do not add any values below/greater than this
         CE_CustomBase = 0xf0000000
@@ -265,7 +290,7 @@ public:
         SE_ProgressBarContents,
         SE_ProgressBarLabel,
 
-
+        // ### Qt 5: These values are unused; eliminate them
         SE_DialogButtonAccept,
         SE_DialogButtonReject,
         SE_DialogButtonApply,
@@ -296,6 +321,27 @@ public:
         SE_LineEditContents,
         SE_FrameContents,
 
+        SE_DockWidgetCloseButton,
+        SE_DockWidgetFloatButton,
+        SE_DockWidgetTitleBarText,
+        SE_DockWidgetIcon,
+
+        SE_CheckBoxLayoutItem,
+        SE_ComboBoxLayoutItem,
+        SE_DateTimeEditLayoutItem,
+        SE_DialogButtonBoxLayoutItem, // ### remove
+        SE_LabelLayoutItem,
+        SE_ProgressBarLayoutItem,
+        SE_PushButtonLayoutItem,
+        SE_RadioButtonLayoutItem,
+        SE_SliderLayoutItem,
+        SE_SpinBoxLayoutItem,
+        SE_ToolButtonLayoutItem,
+
+        SE_FrameLayoutItem,
+        SE_GroupBoxLayoutItem,
+        SE_TabWidgetLayoutItem,
+
         // do not add any values below/greater than this
         SE_CustomBase = 0xf0000000
     };
@@ -314,6 +360,7 @@ public:
         CC_Q3ListView,
         CC_Dial,
         CC_GroupBox,
+        CC_MdiControls,
 
         // do not add any values below/greater than this
         CC_CustomBase = 0xf0000000
@@ -370,6 +417,10 @@ public:
         SC_GroupBoxLabel =         0x00000002,
         SC_GroupBoxContents =      0x00000004,
         SC_GroupBoxFrame =         0x00000008,
+        
+        SC_MdiMinButton     =      0x00000001,
+        SC_MdiNormalButton  =      0x00000002,
+        SC_MdiCloseButton   =      0x00000004,
 
         SC_All =                   0xffffffff
     };
@@ -446,8 +497,11 @@ public:
         PM_DialogButtonsButtonWidth,
         PM_DialogButtonsButtonHeight,
 
-        PM_MDIFrameWidth,
-        PM_MDIMinimizedWidth,
+        PM_MdiSubWindowFrameWidth,
+        PM_MDIFrameWidth = PM_MdiSubWindowFrameWidth,            //obsolete
+        PM_MdiSubWindowMinimizedWidth,
+        PM_MDIMinimizedWidth = PM_MdiSubWindowMinimizedWidth,    //obsolete
+
         PM_HeaderMargin,
         PM_HeaderMarkSize,
         PM_HeaderGripMargin,
@@ -485,6 +539,15 @@ public:
         PM_MessageBoxIconSize,
         PM_ButtonIconSize,
 
+        PM_DockWidgetTitleBarButtonMargin,
+
+        PM_RadioButtonLabelSpacing,
+        PM_LayoutLeftMargin,
+        PM_LayoutTopMargin,
+        PM_LayoutRightMargin,
+        PM_LayoutBottomMargin,
+        PM_LayoutHorizontalSpacing,
+        PM_LayoutVerticalSpacing,
 
         // do not add any values below/greater than this
         PM_CustomBase = 0xf0000000
@@ -517,6 +580,7 @@ public:
         CT_DialogButtons,
         CT_HeaderSection,
         CT_GroupBox,
+        CT_MdiControls,
         // do not add any values below/greater than this
         CT_CustomBase = 0xf0000000
     };
@@ -603,6 +667,11 @@ public:
         SH_MessageBox_CenterButtons,
         SH_Menu_SelectionWrap,
         SH_ItemView_MovementWithoutUpdatingSelection,
+        SH_ToolTip_Mask,
+        SH_FocusFrame_AboveWidget,
+        SH_TextControl_FocusIndicatorTextCharFormat,
+        SH_WizardStyle,
+        SH_ItemView_ArrowKeysNavigateIntoChildren,
 
         // Add new style hint values here
 
@@ -675,6 +744,9 @@ public:
         SP_ArrowRight,
         SP_ArrowBack,
         SP_ArrowForward,
+        SP_DirHomeIcon,
+        SP_CommandLink,
+        SP_VistaShield,
         // do not add any values below/greater than this
         SP_CustomBase = 0xf0000000
     };
@@ -700,9 +772,21 @@ public:
     static QRect alignedRect(Qt::LayoutDirection direction, Qt::Alignment alignment,
                              const QSize &size, const QRect &rectangle);
 
+    int layoutSpacing(QSizePolicy::ControlType control1,
+                      QSizePolicy::ControlType control2, Qt::Orientation orientation,
+                      const QStyleOption *option = 0, const QWidget *widget = 0) const;
+    int combinedLayoutSpacing(QSizePolicy::ControlTypes controls1,
+                              QSizePolicy::ControlTypes controls2, Qt::Orientation orientation,
+                              QStyleOption *option = 0, QWidget *widget = 0) const;
+
 protected Q_SLOTS:
     QIcon standardIconImplementation(StandardPixmap standardIcon, const QStyleOption *opt = 0,
                                      const QWidget *widget = 0) const;
+    int layoutSpacingImplementation(QSizePolicy::ControlType control1,
+                                    QSizePolicy::ControlType control2, 
+                                    Qt::Orientation orientation,
+                                    const QStyleOption *option = 0, 
+                                    const QWidget *widget = 0) const;
 
 private:
     Q_DISABLE_COPY(QStyle)

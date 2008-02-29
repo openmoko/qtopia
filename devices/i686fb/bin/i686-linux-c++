@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ "$TEAMBUILDER_SYSTEM" = 'x86:i686' ]; then
+    exec $TOOLCHAIN/bin/i686-linux-c++ "$@"
+else
+    export TEAMBUILDER_SYSTEM='x86:i686'
+    exec /opt/teambuilder/bin/i686-linux-c++ "$@"
+fi

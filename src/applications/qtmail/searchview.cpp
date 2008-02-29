@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,7 +23,7 @@
 
 #include "searchview.h"
 #include "accountlist.h"
-#include "common.h"
+#include "emailfolderlist.h"
 
 
 #include <qtopiaapplication.h>
@@ -32,8 +32,6 @@
 #include <QDesktopWidget>
 
 
-
-using namespace QtMail;
 
 SearchView::SearchView(bool query,  QWidget* parent, Qt::WFlags fl )
     : QDialog(parent, fl)
@@ -50,11 +48,9 @@ SearchView::SearchView(bool query,  QWidget* parent, Qt::WFlags fl )
     sv->setFocusPolicy(Qt::NoFocus);
     g->addWidget(sv, 0, 0);
 
-#ifdef QTOPIA_PHONE
     int dw = QApplication::desktop()->availableGeometry().width();
     searchFrame->setMaximumWidth(dw - qApp->style()->pixelMetric(QStyle::PM_SliderLength) + 4 );
     sv->setMaximumWidth(dw);
-#endif
 
     queryType = query;
 
@@ -78,21 +74,15 @@ SearchView::~SearchView()
 void SearchView::init()
 {
     /*  Set up dateBookMonth popups */
-
-
-
     dateAfter = QDate::currentDate();
     dateAfterButton->setDate( dateAfter );
-    connect( dateAfterButton, SIGNAL( dateChanged(const QDate&) ),
-            this, SLOT( dateAfterChanged(const QDate&) ) );
-
-
-
+    connect( dateAfterButton, SIGNAL(dateChanged(QDate)),
+            this, SLOT(dateAfterChanged(QDate)) );
 
     dateBefore = QDate::currentDate();
     dateBeforeButton->setDate( dateBefore );
-    connect( dateBeforeButton, SIGNAL( dateChanged(const QDate&) ),
-            this, SLOT( dateBeforeChanged(const QDate&) ) );
+    connect( dateBeforeButton, SIGNAL(dateChanged(QDate)),
+            this, SLOT(dateBeforeChanged(QDate)) );
 
     /*  Fix tab order   */
     setTabOrder(mailbox, status);
@@ -104,14 +94,11 @@ void SearchView::init()
     setTabOrder(dateAfterBox, dateAfterButton);
     setTabOrder(dateAfterButton, dateBeforeBox);
     setTabOrder(dateBeforeBox, dateBeforeButton);
-
-
-
 }
 
 void SearchView::setQueryBox(QString box)
 {
-    box = mailboxTrName(box);
+    box = MailboxList::mailboxTrName(box);
     for (int i = 0; i < mailbox->count(); i++) {
         if (mailbox->itemText(i).toLower() == box.toLower() ) {
             mailbox->setCurrentIndex(i);
@@ -126,15 +113,15 @@ void SearchView::setQueryBox(QString box)
 void SearchView::setSearch(Search *in)
 {
     QString str = in->mailbox();
-    if ( str == InboxString )
+    if ( str == MailboxList::InboxString )
         mailbox->setCurrentIndex(0);
-    else if ( str == OutboxString )
+    else if ( str == MailboxList::OutboxString )
         mailbox->setCurrentIndex(1);
-    else if ( str == DraftsString )
+    else if ( str == MailboxList::DraftsString )
         mailbox->setCurrentIndex(2);
-    else if ( str == SentString )
+    else if ( str == MailboxList::SentString )
         mailbox->setCurrentIndex(3);
-    else if ( str == TrashString )
+    else if ( str == MailboxList::TrashString )
         mailbox->setCurrentIndex(4);
 
     switch( in->status() ) {
@@ -187,11 +174,11 @@ Search* SearchView::getSearch()
 
     int i = mailbox->currentIndex();
     switch(i) {
-        case 0: search->setMailbox(InboxString); break;
-        case 1: search->setMailbox(OutboxString); break;
-        case 2: search->setMailbox(DraftsString); break;
-        case 3: search->setMailbox(SentString); break;
-        case 4: search->setMailbox(TrashString); break;
+        case 0: search->setMailbox(MailboxList::InboxString); break;
+        case 1: search->setMailbox(MailboxList::OutboxString); break;
+        case 2: search->setMailbox(MailboxList::DraftsString); break;
+        case 3: search->setMailbox(MailboxList::SentString); break;
+        case 4: search->setMailbox(MailboxList::TrashString); break;
     }
 
     search->setMailFrom( fromLine->text() );
@@ -229,10 +216,6 @@ Search* SearchView::getSearch()
 
     return search;
 }
-
-
-
-
 
 void SearchView::dateAfterChanged(const QDate &ymd)
 {

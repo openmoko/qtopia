@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -102,9 +117,7 @@ public:
     virtual ~QXmlAttributes() {}
 
     int index(const QString& qName) const;
-#ifdef Q_WS_QWS
     int index(const QLatin1String& qName) const;
-#endif
     int index(const QString& uri, const QString& localPart) const;
     int length() const;
     int count() const;
@@ -116,9 +129,7 @@ public:
     QString type(const QString& uri, const QString& localName) const;
     QString value(int index) const;
     QString value(const QString& qName) const;
-#ifdef Q_WS_QWS
     QString value(const QLatin1String& qName) const;
-#endif
     QString value(const QString& uri, const QString& localName) const;
 
     void clear();
@@ -347,6 +358,7 @@ public:
     virtual bool internalEntityDecl(const QString& name, const QString& value) = 0;
     virtual bool externalEntityDecl(const QString& name, const QString& publicId, const QString& systemId) = 0;
     virtual QString errorString() const = 0;
+    // ### Qt5: Conform to SAX by adding elementDecl
 };
 
 

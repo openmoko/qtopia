@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -66,7 +81,7 @@ public:
     virtual bool startElement(const QString &, const QString &, const QString &qName, const QXmlAttributes &attrs)
     {
         if (qName == QLatin1String("item")) {
-            m_state.kind = attrs.value("Type");
+            m_state.kind = attrs.value(QLatin1String("Type"));
 
             m_state.current.clear();
             m_state.q3.clear();
@@ -126,19 +141,19 @@ private:
 
 void Porting::readXML(RuleList *renamedHeaders, RuleList *renamedClasses, RuleList *renamedEnums)
 {
-    QString fileName = "q3porting.xml";
+    QString fileName = QLatin1String("q3porting.xml");
     QString filePath;
     //check QLibraryInfo::DataPath/filename
-    filePath = QDir::cleanPath(QLibraryInfo::location(QLibraryInfo::DataPath) + "/" + fileName)  ;
+    filePath = QDir::cleanPath(QLibraryInfo::location(QLibraryInfo::DataPath) + QLatin1String("/") + fileName)  ;
 
     //check QLibraryInfo::PrefixPath/tools/porting/src/filename
     if (!QFile::exists(filePath))
-        filePath = QDir::cleanPath(QLibraryInfo::location(QLibraryInfo::PrefixPath) + "/tools/porting/src/" + fileName);
+        filePath = QDir::cleanPath(QLibraryInfo::location(QLibraryInfo::PrefixPath) + QLatin1String("/tools/porting/src/") + fileName);
 
     // for bootstrapping, look in the rules file in a location
     // relative to where it would be in the source tree
     if (!QFile::exists(filePath))
-        filePath = QDir::cleanPath(QApplication::instance()->applicationDirPath() + "/../tools/porting/src/" + fileName);
+        filePath = QDir::cleanPath(QApplication::instance()->applicationDirPath() + QLatin1String("/../tools/porting/src/") + fileName);
 
     if (!QFile::exists(filePath)) {
         fprintf(stderr, "Error: Could not find rules file: %s\n", fileName.toLatin1().constData());

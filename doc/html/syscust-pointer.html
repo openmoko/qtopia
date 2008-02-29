@@ -24,6 +24,7 @@
 <p><b>Note:</b> The driver must be specified explicitly for systems with a modem otherwise Qtopia Core may attempt to try to auto-detect the mouse device and thereby disrupt the modems operation.</p>
 <p>Provided that the &quot;pc&quot; mouse driver is enabled, Qtopia Core will try to auto-detect the mouse device if it is one of the supported types on <tt>/dev/psaux</tt> or one of the <tt>/dev/ttyS</tt>? serial lines. If multiple mice are detected, all may be used simultaneously. Note that Qtopia Core does not support auto-detection of <b>touch panels</b> in which case the driver must be specified explicitly to determine which device to use.</p>
 <p>Other drivers can be added by deriving from the <a href="qwsmousehandler.html">QWSMouseHandler</a> and <a href="qmousedriverplugin.html">QMouseDriverPlugin</a> classes and using Qt's plugin mechanism.</p>
+<p>This can be part of a device configuration profile. For an example implementation, see <tt>&lt;qtopia-root-dir&gt;/devices/examples/src/plugins/qtopiacore/mousedrivers</tt></p>
 <p>For a tutorial on how to add a new keyboard driver plugin see : <a href="tut-deviceexample.html">Tutorial: Implementing a Device Plug-in</a></p>
 <a name="specifying-a-driver"></a>
 <h2>Specifying a Driver</h2>
@@ -34,6 +35,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

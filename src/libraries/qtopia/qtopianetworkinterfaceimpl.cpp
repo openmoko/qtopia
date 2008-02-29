@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,6 +32,47 @@
     plug-ins. Each plug-in implements this interface. It allows to start() and stop() 
     network devices, changes to the routing table via setDefaultGateway() and provides 
     access to the status() and Linux device() name.
+
+    Note that applications should usually not handle QtopiaNetworkInterface instances directly.
+    This interface is only of interest to device integrators intending to implement their 
+    own network plug-ins. Most functions of this interface have a public equivalent which can be used
+    by application developer wanting to utilise Qtopia's network facilities:
+
+    \table
+    \header 
+        \o QtopiaNetworkInterface call  
+        \o Public replacement call
+    \row
+        \o \c cleanup()
+        \o none (internally used by network server only)
+    \row
+        \o \c configuration()
+        \o can be savely called from any Qtopia application that intends to configure the interface.
+    \row
+        \o \c device()
+        \o use \l QNetworkDevice::interfaceName()
+    \row
+        \o \c initialize()
+        \o none (internally used by network server only)
+    \row
+        \o \c setDefaultGateway() 
+        \o use \l QtopiaNetwork::setDefaultGateway() and \l QtopiaNetwork::unsetDefaultGateway()
+    \row
+        \o \c setProperties()
+        \o \c no equivalent available (use configuration())
+    \row
+        \o \c start()
+        \o use \l QtopiaNetwork::startInterface() 
+    \row
+        \o \c status()
+        \o use \l QNetworkDevice::state() and QNetworkDevice::stateChanged()
+    \row
+        \o \c stop()
+        \o use \l QtopiaNetwork::stopInterface()
+    \row
+        \o \c type()
+        \o use \l QNetworkState::deviceType()
+    \endtable
 
     Each instance publishes various internal states to the network value space.
     The network value space can be found under \c{/Network/Interfaces/<config hash>}.
@@ -143,8 +184,8 @@
 /*!
   \fn bool QtopiaNetworkInterface::setDefaultGateway()
 
-  This interface becomes the default gateway for the device.
-  Returns true upon success; otherwise returns false.
+  This interface becomes the default gateway for the device. This function returns false
+  if the default gateway could not be set.
  */
 
 /*!
@@ -165,6 +206,8 @@
   \fn QtopiaNetworkConfiguration *QtopiaNetworkInterface::configuration()
 
   Returns a pointer to allow access to the configuration for this interface.
+  This function must not change the internal state of the current network interface instance.
+  Its sole purpose is to allow applications to change the underlying configuration. 
  */
 
 /*!
@@ -442,6 +485,27 @@ QtopiaNetworkMonitor* QtopiaNetworkInterface::monitor()
   Multiple calls to this function will return several instances. \a handle is 
   the configuration file that this interface should be initialized with.
 */
+
+/*!
+  \fn QByteArray QtopiaNetworkFactoryIface::customID() const
+
+  The network server automatically matches network plug-ins and network configurations by comparing
+  QtopiaNetworkFactoryIface::type() and QNetworkState::deviceType(). This may mean that in some situations 
+  several plug-ins match the same network configuration. If these plug-ins provide different functionality
+  or user interfaces the user may become confused because the matching process may cause a race condition.
+  
+  To resolve such problems the QtopiaNetwork::Custom flag
+  can be used in combination with this function to uniquely match a network configuration with a particular plug-in.
+  If a plug-in sets the custom flag the network server will compare the custom ID of the current network configuration with
+  the value returned by this function. Only if they match the plug-in will be allowed to manage this 
+  configuration. The custom ID string can be any string as long as it is unique and not empty. The custom
+  flag is not raised when the configuration doesn't set the customID field.
+  Note that the remaining type flags must still match. 
+  
+  For more details about the network configuration file format refer to the 
+  \l{Network Services#Network configuration file format}{Network Services} documentation.
+    
+  */
 
 /*!
   \internal

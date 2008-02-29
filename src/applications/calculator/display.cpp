@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,19 +19,18 @@
 **
 ****************************************************************************/
 
-#include <qtopiaapplication.h>
-
 #include <QApplication>
+#include <QtopiaApplication>
 #include <QPixmap>
-#include <QWhatsThis>
-#include <QDebug>
+#include <QPainter>
 
 #include "display.h"
 #include "engine.h"
 
 // Lcd display class
 MyLcdDisplay::MyLcdDisplay(QWidget *p)
-    :QScrollArea(p) {
+    :QScrollArea(p)
+{
     setWhatsThis( tr("Displays the current input or result") );
     lcdPixmap = 0;
     lcdPainter = 0;
@@ -108,7 +107,6 @@ void MyLcdDisplay::readStack() {
             lcdPainter->drawPixmap(drawPoint - myoffset,verticalOffset,*tmp,srcStart, 0, -1, -1);
             verticalOffset += tmp->height();
         }
-#ifdef QTOPIA_PHONE
         else {
             niStack = new QStack<QString*>();
             ndStack = new QStack<Data*>();
@@ -125,8 +123,6 @@ void MyLcdDisplay::readStack() {
             delete niStack;
             delete ndStack;
         }
-
-#endif
     }
     lcdPainter->end();
 
@@ -136,8 +132,8 @@ void MyLcdDisplay::readStack() {
     w->update();
 }
 
-#ifdef QTOPIA_PHONE
-int MyLcdDisplay::drawNextItem(int hoffset,bool newline, int visibleWidth) {
+int MyLcdDisplay::drawNextItem(int hoffset,bool newline, int visibleWidth)
+{
     QPixmap *tmp;
     int myoffset = hoffset;
     if (!niStack->isEmpty() && *(niStack->top()) == "Open brace impl") { // No tr
@@ -167,14 +163,15 @@ int MyLcdDisplay::drawNextItem(int hoffset,bool newline, int visibleWidth) {
             lcdPainter->end();
             QPixmap *old = lcdPixmap;
             lcdPixmap = new QPixmap( visibleWidth-3, old->height()+pmHeight );
+            lcdPixmap->fill(Qt::transparent);
             lcdPainter->begin(lcdPixmap);
+            lcdPainter->drawPixmap( 0, 0, *old );
             lcdPainter->setPen(Qt::color1);
             delete old;
         }
     }
     return myoffset + tmp->width();
 }
-#endif
 
 void MyLcdDisplay::paintEvent(QPaintEvent *pe)
 {

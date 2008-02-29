@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -71,6 +86,7 @@ public:
 
     void connectToHost(const QString & host, quint16 port);
     int setupListener(const QHostAddress &address);
+    void waitForConnection();
 
     QTcpSocket::SocketState state() const;
     qint64 bytesAvailable() const;
@@ -79,7 +95,7 @@ public:
 
     void abortConnection();
 
-    static bool parseDir(const QString &buffer, const QString &userName, QUrlInfo *info);
+    static bool parseDir(const QByteArray &buffer, const QString &userName, QUrlInfo *info);
 
 signals:
     void listInfo(const QUrlInfo&);
@@ -226,32 +242,21 @@ public:
     bool is_ba;
 
     static QBasicAtomic idCounter;
-    static int nextId();
 };
 
 QBasicAtomic QFtpCommand::idCounter = Q_ATOMIC_INIT(1);
-int QFtpCommand::nextId()
-{
-    register int id;
-    for (;;) {
-        id = idCounter;
-        if (idCounter.testAndSet(id, id + 1))
-            break;
-    }
-    return id;
-}
 
 QFtpCommand::QFtpCommand(QFtp::Command cmd, QStringList raw, const QByteArray &ba)
     : command(cmd), rawCmds(raw), is_ba(true)
 {
-    id = nextId();
+    id = idCounter.fetchAndAdd(1);
     data.ba = new QByteArray(ba);
 }
 
 QFtpCommand::QFtpCommand(QFtp::Command cmd, QStringList raw, QIODevice *dev)
     : command(cmd), rawCmds(raw), is_ba(false)
 {
-    id = nextId();
+    id = idCounter.fetchAndAdd(1);
     data.dev = dev;
 }
 
@@ -318,8 +323,16 @@ int QFtpDTP::setupListener(const QHostAddress &address)
 {
     if (!listener.isListening() && !listener.listen(address, 0))
         return -1;
-
     return listener.serverPort();
+}
+
+void QFtpDTP::waitForConnection()
+{
+    // This function is only interesting in Active transfer mode; it works
+    // around a limitation in QFtp's design by blocking, waiting for an
+    // incoming connection. For the default Passive mode, it does nothing.
+    if (listener.isListening())
+        listener.waitForNewConnection();
 }
 
 QTcpSocket::SocketState QFtpDTP::state() const
@@ -431,139 +444,180 @@ void QFtpDTP::abortConnection()
         socket->abort();
 }
 
-bool QFtpDTP::parseDir(const QString &buffer, const QString &userName, QUrlInfo *info)
+static void _q_fixupDateTime(QDateTime *dateTime)
 {
-    QStringList lst = buffer.simplified().split(QLatin1String(" "));
+    // Adjust for future tolerance.
+    const int futureTolerance = 86400;
+    if (dateTime->secsTo(QDateTime::currentDateTime()) < -futureTolerance) {
+        QDate d = dateTime->date();
+        d.setYMD(d.year() - 1, d.month(), d.day());
+        dateTime->setDate(d);
+    }
+}
 
-    if (lst.count() < 9)
-        return false;
+static void _q_parseUnixDir(const QStringList &tokens, const QString &userName, QUrlInfo *info)
+{
+    // Unix style, 7 + 1 entries
+    // -rw-r--r--    1 ftp      ftp      17358091 Aug 10  2004 qt-x11-free-3.3.3.tar.gz
+    // drwxr-xr-x    3 ftp      ftp          4096 Apr 14  2000 compiled-examples
+    // lrwxrwxrwx    1 ftp      ftp             9 Oct 29  2005 qtscape -> qtmozilla
+    if (tokens.size() != 8)
+        return;
 
-    QString tmp;
-
-    // permissions
-    tmp = lst[0];
-
-    if (tmp[0] == QLatin1Char('d')) {
+    char first = tokens.at(1).at(0).toLatin1();
+    if (first == 'd') {
         info->setDir(true);
         info->setFile(false);
         info->setSymLink(false);
-    } else if (tmp[0] == QLatin1Char('-')) {
+    } else if (first == '-') {
         info->setDir(false);
         info->setFile(true);
         info->setSymLink(false);
-    } else if (tmp[0] == QLatin1Char('l')) {
+    } else if (first == 'l') {
         info->setDir(true);
         info->setFile(false);
         info->setSymLink(true);
-    } else {
-        return false;
     }
 
-    static int user = 0;
-    static int group = 1;
-    static int other = 2;
-    static int readable = 0;
-    static int writable = 1;
-    static int executable = 2;
-
-    bool perms[3][3];
-    perms[0][0] = (tmp[1] == QLatin1Char('r'));
-    perms[0][1] = (tmp[2] == QLatin1Char('w'));
-    perms[0][2] = (tmp[3] == QLatin1Char('x'));
-    perms[1][0] = (tmp[4] == QLatin1Char('r'));
-    perms[1][1] = (tmp[5] == QLatin1Char('w'));
-    perms[1][2] = (tmp[6] == QLatin1Char('x'));
-    perms[2][0] = (tmp[7] == QLatin1Char('r'));
-    perms[2][1] = (tmp[8] == QLatin1Char('w'));
-    perms[2][2] = (tmp[9] == QLatin1Char('x'));
-
-    // owner
-    tmp = lst[2];
-    info->setOwner(tmp);
-
-    // group
-    tmp = lst[3];
-    info->setGroup(tmp);
-
-    // detect permissions
-    info->setWritable((userName == info->owner() && perms[user][writable]) ||
-        perms[other][writable]);
-    info->setReadable((userName == info->owner() && perms[user][readable]) ||
-        perms[other][readable]);
-
-    int p = 0;
-    if (perms[user][readable])
-        p |= QUrlInfo::ReadOwner;
-    if (perms[user][writable])
-        p |= QUrlInfo::WriteOwner;
-    if (perms[user][executable])
-        p |= QUrlInfo::ExeOwner;
-    if (perms[group][readable])
-        p |= QUrlInfo::ReadGroup;
-    if (perms[group][writable])
-        p |= QUrlInfo::WriteGroup;
-    if (perms[group][executable])
-        p |= QUrlInfo::ExeGroup;
-    if (perms[other][readable])
-        p |= QUrlInfo::ReadOther;
-    if (perms[other][writable])
-        p |= QUrlInfo::WriteOther;
-    if (perms[other][executable])
-        p |= QUrlInfo::ExeOther;
-    info->setPermissions(p);
-
-    // size
-    tmp = lst[4];
-    info->setSize(tmp.toLongLong());
-
-    // date and time
-    QTime time;
-    QString dateStr;
-    dateStr += QLatin1String("Sun ");
-    lst[5][0] = lst[5][0].toUpper();
-    dateStr += lst[5];
-    dateStr += QLatin1Char(' ');
-    dateStr += lst[6];
-    dateStr += QLatin1Char(' ');
-
-    if (lst[7].contains(QLatin1Char(':'))) {
-        time = QTime(lst[7].left(2).toInt(), lst[7].right(2).toInt());
-        dateStr += QString::number(QDate::currentDate().year());
-    } else {
-        dateStr += lst[7];
+    // Resolve filename
+    QString name = tokens.at(7);
+    if (info->isSymLink()) {
+        int linkPos = name.indexOf(QLatin1String(" ->"));
+        if (linkPos != -1)
+            name.resize(linkPos);
     }
+    info->setName(name);
 
+    // Resolve owner & group
+    info->setOwner(tokens.at(3));
+    info->setGroup(tokens.at(4));
+
+    // Resolve size
+    info->setSize(tokens.at(5).toLongLong());
+
+    QStringList formats;
+    formats << QLatin1String("MMM dd  yyyy") << QLatin1String("MMM dd hh:mm") << QLatin1String("MMM  d  yyyy")
+            << QLatin1String("MMM  d hh:mm") << QLatin1String("MMM  d yyyy") << QLatin1String("MMM dd yyyy");
+
+    QString dateString = tokens.at(6);
+    dateString[0] = dateString[0].toUpper();
+
+    // Resolve the modification date by parsing all possible formats
+    QDateTime dateTime;
+    int n = 0;
 #ifndef QT_NO_DATESTRING
-    QDate date = QDate::fromString(dateStr);
-    info->setLastModified(QDateTime(date, time));
+    do {
+        dateTime = QDateTime::fromString(dateString, formats.at(n++));
+    }  while (n < formats.size() && (!dateTime.isValid()));
 #endif
 
-    if (lst[7].contains(QLatin1Char(':'))) {
-        // if the year-field is missing, check the modification date/time of
-        // the file and compare to "now". If the file was changed in the
-        // "future", also considering a possible 24 hour time zone gap, then
-        // we assume it was changed a year ago.
-        const int futureTolerance = 86400;
-        if(info->lastModified().secsTo(QDateTime::currentDateTime()) < -futureTolerance) {
-            QDateTime dt = info->lastModified();
-            QDate d = dt.date();
-            d.setYMD(d.year()-1, d.month(), d.day());
-            dt.setDate(d);
-            info->setLastModified(dt);
-        }
+    if (n == 2 || n == 4) {
+        // Guess the year.
+        dateTime.setDate(QDate(QDate::currentDate().year(),
+                               dateTime.date().month(),
+                               dateTime.date().day()));
+        _q_fixupDateTime(&dateTime);
+    }
+    if (dateTime.isValid())
+        info->setLastModified(dateTime);
+
+    // Resolve permissions
+    int permissions = 0;
+    QString p = tokens.at(2);
+    permissions |= (p[0] == QLatin1Char('r') ? QUrlInfo::ReadOwner : 0);
+    permissions |= (p[1] == QLatin1Char('w') ? QUrlInfo::WriteOwner : 0);
+    permissions |= (p[2] == QLatin1Char('x') ? QUrlInfo::ExeOwner : 0);
+    permissions |= (p[3] == QLatin1Char('r') ? QUrlInfo::ReadGroup : 0);
+    permissions |= (p[4] == QLatin1Char('w') ? QUrlInfo::WriteGroup : 0);
+    permissions |= (p[5] == QLatin1Char('x') ? QUrlInfo::ExeGroup : 0);
+    permissions |= (p[6] == QLatin1Char('r') ? QUrlInfo::ReadOther : 0);
+    permissions |= (p[7] == QLatin1Char('w') ? QUrlInfo::WriteOther : 0);
+    permissions |= (p[8] == QLatin1Char('x') ? QUrlInfo::ExeOther : 0);
+    info->setPermissions(permissions);
+
+    bool isOwner = info->owner() == userName;
+    info->setReadable((permissions & QUrlInfo::ReadOther) || ((permissions & QUrlInfo::ReadOwner) && isOwner));
+    info->setWritable((permissions & QUrlInfo::WriteOther) || ((permissions & QUrlInfo::WriteOwner) && isOwner));
+}
+
+static void _q_parseDosDir(const QStringList &tokens, const QString &userName, QUrlInfo *info)
+{
+    // DOS style, 3 + 1 entries
+    // 01-16-02  11:14AM       <DIR>          epsgroup
+    // 06-05-03  03:19PM                 1973 readme.txt
+    if (tokens.size() != 4)
+        return;
+
+    Q_UNUSED(userName);
+
+    QString name = tokens.at(3);
+    info->setName(name);
+    info->setSymLink(name.toLower().endsWith(QLatin1String(".lnk")));
+
+    if (tokens.at(2) == QLatin1String("<DIR>")) {
+        info->setFile(false);
+        info->setDir(true);
+    } else {
+        info->setFile(true);
+        info->setDir(false);
+        info->setSize(tokens.at(2).toLongLong());
     }
 
-    // name
-    if (info->isSymLink())
-        info->setName(lst[8].trimmed());
-    else {
-        QString n;
-        for (int i = 8; i < lst.count(); ++i)
-            n += lst[i] + QLatin1Char(' ');
-        n = n.trimmed();
-        info->setName(n);
+    // Note: We cannot use QFileInfo; permissions are for the server-side
+    // machine, and QFileInfo's behavior depends on the local platform.
+    int permissions = QUrlInfo::ReadOwner | QUrlInfo::WriteOwner
+                      | QUrlInfo::ReadGroup | QUrlInfo::WriteGroup
+                      | QUrlInfo::ReadOther | QUrlInfo::WriteOther;
+    QString ext;
+    int extIndex = name.lastIndexOf(QLatin1Char('.'));
+    if (extIndex != -1)
+        ext = name.mid(extIndex + 1);
+    if (ext == QLatin1String("exe") || ext == QLatin1String("bat") || ext == QLatin1String("com"))
+        permissions |= QUrlInfo::ExeOwner | QUrlInfo::ExeGroup | QUrlInfo::ExeOther;
+    info->setPermissions(permissions);
+
+    info->setReadable(true);
+    info->setWritable(info->isFile());
+
+    QDateTime dateTime;
+#ifndef QT_NO_DATESTRING
+    dateTime = QDateTime::fromString(tokens.at(1), QLatin1String("MM-dd-yy  hh:mmAP"));
+    if (dateTime.date().year() < 1971) {
+        dateTime.setDate(QDate(dateTime.date().year() + 100,
+                               dateTime.date().month(),
+                               dateTime.date().day()));
     }
-    return true;
+#endif
+
+    info->setLastModified(dateTime);
+
+}
+
+bool QFtpDTP::parseDir(const QByteArray &buffer, const QString &userName, QUrlInfo *info)
+{
+    if (buffer.isEmpty())
+        return false;
+
+    QString bufferStr = QString::fromLatin1(buffer).trimmed();
+
+    // Unix style FTP servers
+    QRegExp unixPattern(QLatin1String("^([\\-dl])([a-zA-Z\\-]{9,9})\\s+\\d+\\s+(\\S*)\\s+"
+                                      "(\\S*)\\s+(\\d+)\\s+(\\S+\\s+\\S+\\s+\\S+)\\s+(\\S.*)"));
+    if (unixPattern.indexIn(bufferStr) == 0) {
+        _q_parseUnixDir(unixPattern.capturedTexts(), userName, info);
+        return true;
+    }
+
+    // DOS style FTP servers
+    QRegExp dosPattern(QLatin1String("^(\\d\\d-\\d\\d-\\d\\d\\ \\ \\d\\d:\\d\\d[AP]M)\\s+"
+                                     "(<DIR>|\\d+)\\s+(\\S.*)$"));
+    if (dosPattern.indexIn(bufferStr) == 0) {
+        _q_parseDosDir(dosPattern.capturedTexts(), userName, info);
+        return true;
+    }
+
+    // Unsupported
+    return false;
 }
 
 void QFtpDTP::socketConnected()
@@ -598,9 +652,9 @@ void QFtpDTP::socketReadyRead()
     if (pi->currentCommand().startsWith(QLatin1String("LIST"))) {
         while (socket->canReadLine()) {
             QUrlInfo i;
-            QString line = QString::fromAscii(socket->readLine());
+            QByteArray line = socket->readLine();
 #if defined(QFTPDTP_DEBUG)
-            qDebug("QFtpDTP read (list): '%s'", line.toLatin1().constData());
+            qDebug("QFtpDTP read (list): '%s'", line.constData());
 #endif
             if (parseDir(line, QLatin1String(""), &i)) {
                 emit listInfo(i);
@@ -608,28 +662,34 @@ void QFtpDTP::socketReadyRead()
                 // some FTP servers don't return a 550 if the file or directory
                 // does not exist, but rather write a text to the data socket
                 // -- try to catch these cases
-                if (line.endsWith(QLatin1String("No such file or directory\r\n")))
-                    err = line;
+                if (line.endsWith("No such file or directory\r\n"))
+                    err = QString::fromLatin1(line);
             }
         }
     } else {
         if (!is_ba && data.dev) {
-            QByteArray ba;
-            ba.resize(socket->bytesAvailable());
-            qint64 bytesRead = socket->read(ba.data(), ba.size());
-            if (bytesRead < 0) {
-                // a read following a readyRead() signal will
-                // never fail.
-                return;
-            }
-            ba.resize(bytesRead);
-            bytesDone += bytesRead;
+            do {
+                QByteArray ba;
+                ba.resize(socket->bytesAvailable());
+                qint64 bytesRead = socket->read(ba.data(), ba.size());
+                if (bytesRead < 0) {
+                    // a read following a readyRead() signal will
+                    // never fail.
+                    return;
+                }
+                ba.resize(bytesRead);
+                bytesDone += bytesRead;
 #if defined(QFTPDTP_DEBUG)
-            qDebug("QFtpDTP read: %lli bytes (total %lli bytes)", bytesRead, bytesDone);
+                qDebug("QFtpDTP read: %lli bytes (total %lli bytes)", bytesRead, bytesDone);
 #endif
-            emit dataTransferProgress(bytesDone, bytesTotal);
-            if (data.dev)       // make sure it wasn't deleted in the slot
-                data.dev->write(ba);
+                if (data.dev)       // make sure it wasn't deleted in the slot
+                    data.dev->write(ba);
+                emit dataTransferProgress(bytesDone, bytesTotal);
+
+                // Need to loop; dataTransferProgress is often connected to
+                // slots that update the GUI (e.g., progress bar values), and
+                // if events are processed, more data may have arrived.
+            } while (socket->bytesAvailable());
         } else {
 #if defined(QFTPDTP_DEBUG)
             qDebug("QFtpDTP readyRead: %lli bytes available (total %lli bytes read)",
@@ -1008,6 +1068,7 @@ bool QFtpPI::processReply()
         if (currentCmd.startsWith(QLatin1String("SIZE ")))
             dtp.setBytesTotal(replyText.simplified().toLongLong());
     } else if (replyCode[0]==1 && currentCmd.startsWith(QLatin1String("STOR "))) {
+        dtp.waitForConnection();
         dtp.writeData();
     }
 
@@ -1079,10 +1140,9 @@ bool QFtpPI::startNextCmd()
     // should try the extended transfer connection commands EPRT and
     // EPSV. The PORT command also triggers setting up a listener, and
     // the address/port arguments are edited in.
+    QHostAddress address = commandSocket.localAddress();
     if (currentCmd.startsWith(QLatin1String("PORT"))) {
-        QHostAddress address = commandSocket.localAddress();
-
-        if (transferConnectionExtended) {
+        if ((address.protocol() == QTcpSocket::IPv6Protocol) && transferConnectionExtended) {
             int port = dtp.setupListener(address);
             currentCmd = QLatin1String("EPRT |");
             currentCmd += (address.protocol() == QTcpSocket::IPv4Protocol) ? QLatin1Char('1') : QLatin1Char('2');
@@ -1109,7 +1169,7 @@ bool QFtpPI::startNextCmd()
 
         currentCmd += QLatin1String("\r\n");
     } else if (currentCmd.startsWith(QLatin1String("PASV"))) {
-        if (transferConnectionExtended)
+        if ((address.protocol() == QTcpSocket::IPv6Protocol) && transferConnectionExtended)
             currentCmd = QLatin1String("EPSV\r\n");
     }
 
@@ -1305,7 +1365,7 @@ int QFtpPrivate::addCommand(QFtpCommand *cmd)
     \endcode
 
     The dataTransferProgress() signal in the above example is useful
-    if you want to show a \link QProgressBar progressbar \endlink to
+    if you want to show a \link QProgressBar progress bar \endlink to
     inform the user about the progress of the download. The
     readyRead() signal tells you that there is data ready to be read.
     The amount of data can be queried then with the bytesAvailable()

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,30 +53,64 @@ QDBusAbstractInterfacePrivate::QDBusAbstractInterfacePrivate(const QString &serv
 {
     if (isDynamic) {
         // QDBusInterface: service and object path can't be empty, but interface can
+#if 0
         Q_ASSERT_X(QDBusUtil::isValidBusName(service),
                    "QDBusInterface::QDBusInterface", "Invalid service name");
         Q_ASSERT_X(QDBusUtil::isValidObjectPath(path),
                    "QDBusInterface::QDBusInterface", "Invalid object path given");
         Q_ASSERT_X(interface.isEmpty() || QDBusUtil::isValidInterfaceName(interface),
                    "QDBusInterface::QDBusInterface", "Invalid interface name");
+#else
+        if (!QDBusUtil::isValidBusName(service)) {
+            lastError = QDBusError(QDBusError::Disconnected,
+                                   QLatin1String("Invalid service name"));
+            isValid = false;
+        } else if (!QDBusUtil::isValidObjectPath(path)) {
+            lastError = QDBusError(QDBusError::Disconnected,
+                                   QLatin1String("Invalid object name given"));
+            isValid = false;
+        } else if (!interface.isEmpty() && !QDBusUtil::isValidInterfaceName(interface)) {
+            lastError = QDBusError(QDBusError::Disconnected,
+                                   QLatin1String("Invalid interface name"));
+            isValid = false;
+        }
+#endif
     } else {
         // all others: service and path can be empty here, but interface can't
+#if 0
         Q_ASSERT_X(service.isEmpty() || QDBusUtil::isValidBusName(service),
                    "QDBusAbstractInterface::QDBusAbstractInterface", "Invalid service name");
         Q_ASSERT_X(path.isEmpty() || QDBusUtil::isValidObjectPath(path),
                    "QDBusAbstractInterface::QDBusAbstractInterface", "Invalid object path given");
         Q_ASSERT_X(QDBusUtil::isValidInterfaceName(interface),
                    "QDBusAbstractInterface::QDBusAbstractInterface", "Invalid interface class!");
+#else
+        if (!service.isEmpty() && !QDBusUtil::isValidBusName(service)) {
+            lastError = QDBusError(QDBusError::Disconnected,
+                                   QLatin1String("Invalid service name"));
+            isValid = false;
+        } else if (!path.isEmpty() && !QDBusUtil::isValidObjectPath(path)) {
+            lastError = QDBusError(QDBusError::Disconnected,
+                                   QLatin1String("Invalid object path given"));
+            isValid = false;
+        } else if (!QDBusUtil::isValidInterfaceName(interface)) {
+            lastError = QDBusError(QDBusError::Disconnected,
+                                   QLatin1String("Invalid interface class"));
+            isValid = false;
+        }
+#endif
     }
+
+    if (!isValid)
+        return;
 
     if (!connection.isConnected()) {
         lastError = QDBusError(QDBusError::Disconnected,
                                QLatin1String("Not connected to D-Bus server"));
         isValid = false;
     } else if (!service.isEmpty()) {
-        // check if it's there first -- FIXME: add binding mode
-        QString owner = connectionPrivate()->getNameOwner(service); // verify the name owner
-        if (owner.isEmpty()) {
+        currentOwner = connectionPrivate()->getNameOwner(service); // verify the name owner
+        if (currentOwner.isEmpty()) {
             isValid = false;
             lastError = connectionPrivate()->lastError;
         }
@@ -135,8 +184,10 @@ void QDBusAbstractInterfacePrivate::_q_serviceOwnerChanged(const QString &name,
 {
     Q_UNUSED(oldOwner);
     //qDebug() << "QDBusAbstractInterfacePrivate serviceOwnerChanged" << name << oldOwner << newOwner;
-    if (name == service)
+    if (name == service) {
+        currentOwner = newOwner;
         isValid = !newOwner.isEmpty();
+    }
 }
 
 
@@ -147,13 +198,15 @@ void QDBusAbstractInterfacePrivate::_q_serviceOwnerChanged(const QString &name,
 
     \brief The QDBusAbstractInterface class is the base class for all D-Bus interfaces in the QtDBus binding, allowing access to remote interfaces
 
-    Generated-code classes also derive from QDBusAbstractInterface, all methods described here are also
-    valid for generated-code classes. In addition to those described here, generated-code classes
-    provide member functions for the remote methods, which allow for compile-time checking of the
-    correct parameters and return values, as well as property type-matching and signal
+    Generated-code classes also derive from QDBusAbstractInterface,
+    all methods described here are also valid for generated-code
+    classes. In addition to those described here, generated-code
+    classes provide member functions for the remote methods, which
+    allow for compile-time checking of the correct parameters and
+    return values, as well as property type-matching and signal
     parameter-matching.
 
-    \sa {dbusxml2cpp.html}{The dbusxml2cpp compiler}, QDBusInterface
+    \sa {qdbusxml2cpp.html}{The QDBus compiler}, QDBusInterface
 */
 
 /*!
@@ -164,8 +217,9 @@ QDBusAbstractInterface::QDBusAbstractInterface(QDBusAbstractInterfacePrivate &d,
     : QObject(d, parent)
 {
     // keep track of the service owner
-    QObject::connect(d_func()->connectionPrivate(), SIGNAL(serviceOwnerChanged(QString,QString,QString)),
-                     this, SLOT(_q_serviceOwnerChanged(QString,QString,QString)));
+    if (d_func()->isValid)
+        QObject::connect(d_func()->connectionPrivate(), SIGNAL(serviceOwnerChanged(QString,QString,QString)),
+                         this, SLOT(_q_serviceOwnerChanged(QString,QString,QString)));
 }
 
 /*!
@@ -180,8 +234,9 @@ QDBusAbstractInterface::QDBusAbstractInterface(const QString &service, const QSt
                                                  con, false), parent)
 {
     // keep track of the service owner
-    QObject::connect(d_func()->connectionPrivate(), SIGNAL(serviceOwnerChanged(QString,QString,QString)),
-                     this, SLOT(_q_serviceOwnerChanged(QString,QString,QString)));
+    if (d_func()->connection.isConnected())
+        QObject::connect(d_func()->connectionPrivate(), SIGNAL(serviceOwnerChanged(QString,QString,QString)),
+                         this, SLOT(_q_serviceOwnerChanged(QString,QString,QString)));
 }
 
 /*!
@@ -310,35 +365,70 @@ QDBusMessage QDBusAbstractInterface::callWithArgumentList(QDBus::CallMode mode,
 }
 
 /*!
-    \overload
-    Places a call to the remote method specified by \a method on this interface, using \a args as
-    arguments. This function will return immediately after queueing the call. The reply from the
-    remote function or any errors emitted by it will be delivered to the \a slot slot on object \a
-    receiver.
+    Places a call to the remote method specified by \a method
+    on this interface, using \a args as arguments. This function
+    returns immediately after queueing the call. The reply from
+    the remote function is delivered to the \a returnMethod on
+    object \a receiver. If an error occurs, the \a errorMethod
+    on object \a receiver is called instead.
 
-    This function returns true if the queueing succeeded: it does not indicate that the call
-    succeeded. If it failed, the slot will be called with an error message. lastError() will not be
+    This function returns true if the queueing succeeds. It does
+    not indicate that the executed call succeeded. If it fails,
+    the \a errorMethod is called.
+ 
+    The \a returnMethod must have as its parameters the types returned
+    by the function call. Optionally, it may have a QDBusMessage
+    parameter as its last or only parameter.  The \a errorMethod must
+    have a QDBusError as its only parameter.
+
+    \since 4.3
+    \sa QDBusError, QDBusMessage
+ */
+bool QDBusAbstractInterface::callWithCallback(const QString &method,
+                                              const QList<QVariant> &args,
+                                              QObject *receiver,
+					      const char *returnMethod,
+                                              const char *errorMethod)
+{
+    Q_D(QDBusAbstractInterface);
+
+    QDBusMessage msg = QDBusMessage::createMethodCall(service(),
+						      path(),
+						      interface(),
+						      method);
+    msg.setArguments(args);
+
+    d->lastError = 0;
+    return d->connection.callWithCallback(msg,
+					  receiver,
+					  returnMethod,
+					  errorMethod);
+}
+
+/*!
+    \overload
+
+    This function is deprecated. Please use the overloaded version.
+
+    Places a call to the remote method specified by \a method
+    on this interface, using \a args as arguments. This function
+    returns immediately after queueing the call. The reply from
+    the remote function or any errors emitted by it are delivered
+    to the \a slot slot on object \a receiver.
+
+    This function returns true if the queueing succeeded: it does
+    not indicate that the call succeeded. If it failed, the slot
+    will be called with an error message. lastError() will not be
     set under those circumstances.
 
     \sa QDBusError, QDBusMessage
 */
 bool QDBusAbstractInterface::callWithCallback(const QString &method,
                                               const QList<QVariant> &args,
-                                              QObject *receiver, const char *slot)
+                                              QObject *receiver,
+					      const char *slot)
 {
-    Q_D(QDBusAbstractInterface);
-
-    QString m = method;
-    // split out the signature from the method
-    int pos = method.indexOf(QLatin1Char('.'));
-    if (pos != -1)
-        m.truncate(pos);
-
-    QDBusMessage msg = QDBusMessage::createMethodCall(service(), path(), interface(), m);
-    msg.setArguments(args);
-
-    d->lastError = 0;           // clear
-    return d->connection.callWithCallback(msg, receiver, slot);
+    return callWithCallback(method, args, receiver, slot, 0);
 }
 
 /*!
@@ -347,10 +437,17 @@ bool QDBusAbstractInterface::callWithCallback(const QString &method,
 */
 void QDBusAbstractInterface::connectNotify(const char *signal)
 {
+    // we end up recursing here, so optimise away
+    if (qstrcmp(signal, SIGNAL(destroyed(QObject*))) == 0)
+        return;
+
     // someone connecting to one of our signals
     Q_D(QDBusAbstractInterface);
 
-    d->connectionPrivate()->connectRelay(d->service, d->path, d->interface, this, signal);
+    QDBusConnectionPrivate *conn = d->connectionPrivate();
+    if (conn)
+        conn->connectRelay(d->service, d->currentOwner, d->path, d->interface,
+                           this, signal);
 }
 
 /*!
@@ -362,7 +459,10 @@ void QDBusAbstractInterface::disconnectNotify(const char *signal)
     // someone disconnecting from one of our signals
     Q_D(QDBusAbstractInterface);
 
-    d->connectionPrivate()->disconnectRelay(d->service, d->path, d->interface, this, signal);
+    QDBusConnectionPrivate *conn = d->connectionPrivate();
+    if (conn)
+        conn->disconnectRelay(d->service, d->currentOwner, d->path, d->interface,
+                              this, signal);
 }
 
 /*!

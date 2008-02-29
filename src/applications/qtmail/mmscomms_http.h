@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -40,13 +40,12 @@ public:
     MmsCommsHttp(MailAccount *acc, QObject *parent=0);
     ~MmsCommsHttp();
 
-    virtual void sendMessage(MMSMessage &msg);
+    virtual void sendMessage(MMSMessage &msg, const QByteArray& encoded);
     virtual void retrieveMessage(const QUrl &url);
     virtual bool isActive() const;
     virtual void clearRequests();
 
 private slots:
-    void appMessage(const QString &msg, const QByteArray &data);
     void dataReadProgress(int done, int total);
     void dataSendProgress(int done, int total);
     void done(bool error);

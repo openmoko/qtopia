@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2006-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,7 +21,6 @@
 #ifndef LOGGINGVIEW_H
 #define LOGGINGVIEW_H
 
-#include <qtopialog.h>
 #include <QTextEdit>
 #include <QBasicTimer>
 
@@ -36,11 +35,13 @@ public:
     ~LoggingView();
 
     void resizeEvent(QResizeEvent*);
+    void showEvent(QShowEvent*);
     bool isAvailable() const;
 
-protected slots:
+private slots:
     void settings();
     void readLogFollow();
+    void init();
 
 private:
     QProcess *logfollow;

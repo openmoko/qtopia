@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,10 +28,13 @@
 #include <qtablewidget.h>
 #include <qheaderview.h>
 #include <qevent.h>
+#include <QDebug>
+#include <QMailMessage>
+#include <qtopiaapplication.h>
 
 //#define ENACT_INSTALLATION_IMMEDIATELY
 
-ViewAtt::ViewAtt(Email *mailIn, bool _inbox, QWidget *parent, Qt::WFlags f)
+ViewAtt::ViewAtt(QMailMessage* mailIn, bool _inbox, QWidget *parent, Qt::WFlags f)
     : QDialog(parent, f)
 {
     mail = mailIn;
@@ -109,24 +112,33 @@ void ViewAtt::init()
         label->setText(tr("<p>These are the attachments in this mail"));
     }
 
-    for ( int i = 0; i < (int)mail->messagePartCount(); i++ ) {
-        MailMessagePart &part = mail->messagePartAt( i );
-    QString name = part.prettyName();
-#ifdef QTOPIA_PHONE
-    if(part.name().isEmpty() && !part.contentLocation().isEmpty())
-        name = part.contentLocation();
-#endif
+    for ( uint i = 0; i < mail->partCount(); i++ ) {
+        QMailMessagePart &part = mail->partAt( i );
+
+        bool isFilePart = part.hasBody() && !part.contentType().name().isEmpty();
+        bool hasContentLocation = !part.contentLocation().isEmpty();
+
+        if(!isFilePart && !hasContentLocation)
+            continue;
+
+        QString attachmentName;
+
+        if(!isFilePart)
+            attachmentName = part.contentLocation();
+        else 
+            attachmentName = part.displayName();
+
         if ( inbox ) {
-            bool ins = !part.linkFile().isEmpty();
-            if ( ins ) {
-                ins = QContent( part.linkFile() ).isValid();
+            QTableWidgetItem *item = new QTableWidgetItem( attachmentName );
+            attachmentMap.insert(item,i);
+            if(part.attachmentPath().isEmpty())
+            {
+                item->setFlags( Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
+                item->setCheckState(!part.attachmentPath().isEmpty() ? Qt::Checked : Qt::Unchecked);
             }
-            QTableWidgetItem *item = new QTableWidgetItem( name );
-            item->setFlags( Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
-            item->setCheckState( ins ? Qt::Checked : Qt::Unchecked );
             listView->setRowCount( listView->rowCount() + 1 );
             listView->setItem( listView->rowCount() - 1, 0, item );
-            item = new QTableWidgetItem( part.contentType() );
+            item = new QTableWidgetItem( QString( part.contentType().content() ) );
             item->setFlags( Qt::ItemIsEnabled );
             listView->setItem( listView->rowCount() - 1, 1, item );
 #ifdef ENACT_INSTALLATION_IMMEDIATELY
@@ -136,10 +148,10 @@ void ViewAtt::init()
                 off.append(item);
 #endif
         } else {
-            QTableWidgetItem *item = new QTableWidgetItem( name );
+            QTableWidgetItem *item = new QTableWidgetItem( attachmentName);
             listView->setRowCount( listView->rowCount() + 1 );
             listView->setItem( listView->rowCount() - 1, 0, item );
-            item = new QTableWidgetItem( part.contentType() );
+            item = new QTableWidgetItem( QString( part.contentType().content() ) );
             listView->setItem( listView->rowCount() - 1, 1, item );
         }
     }
@@ -151,7 +163,7 @@ void ViewAtt::init()
 
 void ViewAtt::setInstall(QTableWidgetItem* i)
 {
-    bool res = true;
+    bool res = false;
     if ( !inbox )
         return;
 
@@ -161,10 +173,34 @@ void ViewAtt::setInstall(QTableWidgetItem* i)
         QString filename  = item->text(); // unique?
         bool checked = item->checkState() == Qt::Checked;
 
-        if ( !mail->setAttachmentInstalled(filename, checked )) {
-            // beep? status error message?
-            item->setCheckState( checked ? Qt::Unchecked : Qt::Checked );
-            res = false;
+        if(!checked)
+            return;
+
+        int partIndex = attachmentMap.value(i);
+
+        QMailMessagePart& part = mail->partAt(partIndex);
+
+        if(!part.attachmentPath().isEmpty())
+            return;
+
+        //detach the attachment from the mail
+
+        if(part.detachAttachment(Qtopia::documentDir()))
+        {
+            res = true;
+            QContent d( part.attachmentPath());
+
+            if( part.hasBody() )
+            {
+                QMailMessageContentType type(part.contentType());
+
+                if( d.drmState() == QContent::Unprotected )
+                    d.setType( type.content() );
+
+                QString name = type.name();
+                d.setName( !name.isEmpty() ? name : part.contentLocation() );
+            }
+            d.commit();
         }
     }
 
@@ -181,21 +217,18 @@ void ViewAtt::setInstall(QTableWidgetItem* i)
 bool ViewAtt::eventFilter( QObject *o, QEvent *e )
 {
     if ((o == listView) && (e->type() == QEvent::KeyPress)) {
-        QKeyEvent *keyEvent = (QKeyEvent*)e;
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(e);
         switch( keyEvent->key() ) {
-#ifdef QTOPIA_PHONE
         case Qt::Key_Select:
-#endif
         case Qt::Key_Space:
         case Qt::Key_Return:
         case Qt::Key_Enter:
         {
-#ifdef QTOPIA_PHONE
             if(!inbox)
                 return false;
             if(!listView->hasEditFocus())
                 listView->setEditFocus(true);
-#endif
+
             QTableWidgetItem* i = listView->currentItem();
             if (i) {
                 int row = listView->row( i );

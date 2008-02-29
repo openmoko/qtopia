@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,24 +29,30 @@
 #include <QStyle>
 #include <QPixmapCache>
 #include <QDebug>
+#include <QApplication>
+#include <QTimer>
 #include "qsoftmenubarprovider.h"
-
-extern QWSServer *qwsServer;
+#include "qtopiainputevents.h"
 
 /*!
   \class ContextLabel
   \ingroup QtopiaServer::PhoneUI
   \brief The ContextLabel class provides a themeable, dockable soft key bar for phones.
 
-  This class is part of the Qtopia server.
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
   Create a new ContextLabel widget, with the appropriate \a parent and \a flags.
   */
 ContextLabel::ContextLabel( QWidget *parent, Qt::WFlags flags )
-    : PhoneThemedView(parent, flags), buttons(0), blockUpdates(false), pressedBtn(-1), menuProvider(0)
+    : PhoneThemedView(parent, flags), buttons(0), blockUpdates(false),
+    pressedBtn(-1), loadedTheme(false), themeInit(false), menuProvider(0)
+
 {
+    if(!parent)
+        setWindowTitle("_decoration_");
+
     menuProvider = new QSoftMenuBarProvider(this);
     QObject::connect(menuProvider, SIGNAL(keyChanged(QSoftMenuBarProvider::MenuButton)), this, SLOT(keyChanged(QSoftMenuBarProvider::MenuButton)));
     buttonCount = menuProvider->keyCount();
@@ -67,7 +73,7 @@ ContextLabel::ContextLabel( QWidget *parent, Qt::WFlags flags )
     connect(this, SIGNAL(itemReleased(ThemeItem*)),
             this, SLOT(itemReleased(ThemeItem*)));
 
-    qwsServer->addKeyboardFilter(this);
+    QtopiaInputEvents::addKeyboardFilter(this);
 }
 
 /*!
@@ -94,52 +100,62 @@ QSize ContextLabel::reservedSize() const
 /*! \internal */
 void ContextLabel::themeLoaded(const QString &)
 {
-    int availBtns = 0;
-    int maxbuttons = buttonCount >= 3 ? 3 : buttonCount;
-    ThemeImageItem *img[3] = { NULL, NULL, NULL };
-    ThemeTextItem *txt[3] = { NULL, NULL, NULL };
+    loadedTheme = true;
+    themeInit = false;
+    QTimer::singleShot(0, this, SLOT(initializeButtons()));
+}
 
-    if (buttonCount) {
-        for (int i = 0; i < maxbuttons; i++) {
-            buttons[i].imgItem = 0;
-            buttons[i].txtItem = 0;
-            buttons[i].changed = true;
-            ThemeImageItem *ii = (ThemeImageItem *)findItem("button"+QString::number(i),
-                Image);
-            ThemeTextItem *ti = (ThemeTextItem *)findItem("button"+QString::number(i),
-                Text);
+void ContextLabel::initializeButtons()
+{
+    if (loadedTheme && !themeInit) {
+        int availBtns = 0;
+        int maxbuttons = buttonCount >= 3 ? 3 : buttonCount;
+        ThemeImageItem *img[3] = { NULL, NULL, NULL };
+        ThemeTextItem *txt[3] = { NULL, NULL, NULL };
 
-            if (ii || ti) {
-                img[availBtns] = ii;
-                txt[availBtns] = ti;
-                availBtns++;
+        if (buttonCount) {
+            for (int i = 0; i < maxbuttons; i++) {
+                buttons[i].imgItem = 0;
+                buttons[i].txtItem = 0;
+                buttons[i].changed = true;
+                ThemeImageItem *ii = (ThemeImageItem *)findItem("button"+QString::number(i),
+                        Image);
+                ThemeTextItem *ti = (ThemeTextItem *)findItem("button"+QString::number(i),
+                        Text);
+
+                if (ii || ti) {
+                    img[availBtns] = ii;
+                    txt[availBtns] = ti;
+                    availBtns++;
+                }
             }
         }
-    }
 
-    if (buttonCount) {
-        buttons[0].imgItem = img[0];
-        buttons[0].txtItem = txt[0];
-    }
+        if (buttonCount) {
+            buttons[0].imgItem = img[0];
+            buttons[0].txtItem = txt[0];
+        }
 
-    if (availBtns == buttonCount) {
-        for (int i = 1; i < availBtns; i++) {
-            buttons[i].imgItem = img[i];
-            buttons[i].txtItem = txt[i];
+        if (availBtns == buttonCount) {
+            for (int i = 1; i < availBtns; i++) {
+                buttons[i].imgItem = img[i];
+                buttons[i].txtItem = txt[i];
+            }
+        } else if (availBtns < buttonCount) {
+            if (availBtns == 2) {
+                buttons[2].imgItem = img[1];
+                buttons[2].txtItem = txt[1];
+            }
+        } else {
+            if (buttonCount == 2) {
+                buttons[1].imgItem = img[2];
+                buttons[1].txtItem = txt[2];
+            }
         }
-    } else if (availBtns < buttonCount) {
-        if (availBtns == 2) {
-            buttons[2].imgItem = img[1];
-            buttons[2].txtItem = txt[1];
-        }
-    } else {
-        if (buttonCount == 2) {
-            buttons[1].imgItem = img[2];
-            buttons[1].txtItem = txt[2];
-        }
-    }
+        themeInit = true;
 
-    updateLabels();
+        updateLabels();
+    }
 }
 
 int ContextLabel::buttonForItem(ThemeItem *item) const
@@ -165,6 +181,7 @@ int ContextLabel::buttonForItem(ThemeItem *item) const
 /*! \internal */
 void ContextLabel::itemPressed(ThemeItem *item)
 {
+    initializeButtons();
     pressedBtn = buttonForItem(item);
     if (pressedBtn >= 0) {
         int keycode = buttons[pressedBtn].key;
@@ -176,7 +193,7 @@ void ContextLabel::itemPressed(ThemeItem *item)
             else if ( keycode == Qt::Key_Back )
                 keycode = Qt::Key_Context1;
         }
-        qwsServer->processKeyEvent(0xffff, keycode, 0, true, false);
+        QtopiaInputEvents::processKeyEvent(0xffff, keycode, 0, true, false);
     }
 }
 
@@ -184,6 +201,7 @@ void ContextLabel::itemPressed(ThemeItem *item)
 void ContextLabel::itemReleased( ThemeItem *item )
 {
     Q_UNUSED(item);
+    initializeButtons();
     if (pressedBtn >= 0) {
         int keycode = buttons[pressedBtn].key;
         //we have to swap the keycode because the Keyfilter in ServerApplication
@@ -194,7 +212,7 @@ void ContextLabel::itemReleased( ThemeItem *item )
             else if ( keycode == Qt::Key_Back )
                 keycode = Qt::Key_Context1;
         }
-        qwsServer->processKeyEvent(0xffff, keycode, 0, false, false);
+        QtopiaInputEvents::processKeyEvent(0xffff, keycode, 0, false, false);
         pressedBtn = -1;
     }
 }
@@ -215,7 +233,7 @@ bool ContextLabel::filter(int unicode, int keycode, int modifiers, bool press,
         if ( keycode == Qt::Key_Back )
             code = Qt::Key_Context1;
         if ( code >= 0 ) {
-            qwsServer->sendKeyEvent( unicode, code, (Qt::KeyboardModifiers) modifiers, press, autoRepeat );
+            QtopiaInputEvents::sendKeyEvent( unicode, code, (Qt::KeyboardModifiers) modifiers, press, autoRepeat );
             return true;
         }
     }
@@ -226,6 +244,7 @@ bool ContextLabel::filter(int unicode, int keycode, int modifiers, bool press,
 void ContextLabel::keyChanged(const QSoftMenuBarProvider::MenuButton &button)
 {
     Q_ASSERT(button.index() < buttonCount);
+    initializeButtons();
     buttons[button.index()].changed = true;
     updateLabels();
 }
@@ -233,6 +252,7 @@ void ContextLabel::keyChanged(const QSoftMenuBarProvider::MenuButton &button)
 /*! \internal */
 void ContextLabel::updateLabels()
 {
+    initializeButtons();
     for (int idx = 0; idx < buttonCount; idx++) {
         if (buttons[idx].changed) {
             if (buttons[idx].txtItem)

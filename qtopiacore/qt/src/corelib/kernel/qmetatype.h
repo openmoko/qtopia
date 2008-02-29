@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -58,8 +73,8 @@ public:
         QFont = 64, QPixmap = 65, QBrush = 66, QColor = 67, QPalette = 68,
         QIcon = 69, QImage = 70, QPolygon = 71, QRegion = 72, QBitmap = 73,
         QCursor = 74, QSizePolicy = 75, QKeySequence = 76, QPen = 77,
-        QTextLength = 78, QTextFormat = 79, QMatrix = 80,
-        LastGuiType = 80 /* QMatrix */,
+        QTextLength = 78, QTextFormat = 79, QMatrix = 80, QTransform = 81,
+        LastGuiType = 81 /* QTransform */,
 
         FirstCoreExtType = 128 /* VoidStar */,
         VoidStar = 128, Long = 129, Short = 130, Char = 131, ULong = 132,
@@ -185,7 +200,11 @@ inline int qRegisterMetaType(
 #endif
 )
 {
+#ifdef Q_CC_SUN
+    return qMetaTypeId(static_cast<T *>(0));
+#else
     return qMetaTypeId(dummy);
+#endif
 }
 
 #define Q_DECLARE_METATYPE(TYPE) \
@@ -195,10 +214,10 @@ struct QMetaTypeId< TYPE > \
     enum { Defined = 1 }; \
     static int qt_metatype_id() \
     { \
-        static QBasicAtomic id = Q_ATOMIC_INIT(0); \
-        if (!id) \
-           id = qRegisterMetaType< TYPE >(#TYPE); \
-       return id; \
+        static QBasicAtomic metatype_id = Q_ATOMIC_INIT(0);     \
+        if (!metatype_id)                                       \
+            metatype_id = qRegisterMetaType< TYPE >(#TYPE);     \
+        return metatype_id;                                     \
     } \
 };
 
@@ -227,7 +246,9 @@ class QLine;
 class QLineF;
 class QPoint;
 class QPointF;
+#ifndef QT_NO_REGEXP
 class QRegExp;
+#endif
 class QWidget;
 class QObject;
 
@@ -251,6 +272,7 @@ class QPen;
 class QTextLength;
 class QTextFormat;
 class QMatrix;
+class QTransform;
 
 Q_DECLARE_BUILTIN_METATYPE(QString, QString)
 Q_DECLARE_BUILTIN_METATYPE(int, Int)
@@ -286,7 +308,9 @@ Q_DECLARE_BUILTIN_METATYPE(QLine, QLine)
 Q_DECLARE_BUILTIN_METATYPE(QLineF, QLineF)
 Q_DECLARE_BUILTIN_METATYPE(QPoint, QPoint)
 Q_DECLARE_BUILTIN_METATYPE(QPointF, QPointF)
+#ifndef QT_NO_REGEXP
 Q_DECLARE_BUILTIN_METATYPE(QRegExp, QRegExp)
+#endif
 
 #ifdef QT3_SUPPORT
 Q_DECLARE_BUILTIN_METATYPE(QColorGroup, QColorGroup)
@@ -308,6 +332,7 @@ Q_DECLARE_BUILTIN_METATYPE(QPen, QPen)
 Q_DECLARE_BUILTIN_METATYPE(QTextLength, QTextLength)
 Q_DECLARE_BUILTIN_METATYPE(QTextFormat, QTextFormat)
 Q_DECLARE_BUILTIN_METATYPE(QMatrix, QMatrix)
+Q_DECLARE_BUILTIN_METATYPE(QTransform, QTransform)
 
 QT_END_HEADER
 

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,13 @@
 #include "qabstractmessagebox.h"
 #include "qtopiaserverapplication.h"
 
+#include <QBasicTimer>
+
+#ifndef Q_WS_X11
+#  include <qtopia/private/testslaveinterface_p.h>
+#  define QTOPIA_USE_TEST_SLAVE 1
+#endif
+
 // declare QAbstractMessageBoxPrivate
 class QAbstractMessageBoxPrivate : public QObject
 {
@@ -29,7 +36,7 @@ class QAbstractMessageBoxPrivate : public QObject
 public:
     QAbstractMessageBoxPrivate(int time, QAbstractMessageBox::Button but,
                                QObject *parent)
-    : QObject(parent), button(but), timeout(time), timerId(0)
+    : QObject(parent), button(but), timeout(time)
     {
     }
 
@@ -42,33 +49,31 @@ public:
 
     void startTimeout()
     {
-        if(!timerId) {
-            timerId = startTimer(timeout);
-        }
+        if (timeout > 0)
+            timer.start(timeout, this);
     }
 
     void endTimeout()
     {
-        if(timerId) {
-            killTimer(timerId);
-            timerId = 0;
-        }
+        timer.stop();
     }
 
 signals:
     void done(int);
 
 protected:
-    virtual void timerEvent(QTimerEvent *)
+    virtual void timerEvent(QTimerEvent *e)
     {
-        endTimeout();
-        emit done(button);
+        if (timer.timerId() == e->timerId()) {
+            endTimeout();
+            emit done(button);
+        }
     }
 
 private:
     QAbstractMessageBox::Button button;
     int timeout;
-    int timerId;
+    QBasicTimer timer;
 };
 
 /*!
@@ -88,6 +93,8 @@ private:
 
   The QAbstractMessageBox API is intentionally designed to be similar to the 
   QMessageBox API to facilitate easily replacing one with the other.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   */
 
 /*!
@@ -305,6 +312,7 @@ void QAbstractMessageBox::setTimeout(int timeoutMs, Button button)
             d->changeTimeout(timeoutMs, button);
         } else {
             d = new QAbstractMessageBoxPrivate(timeoutMs, button, this);
+            connect( d, SIGNAL(done(int)), this, SLOT(done(int)) );
         }
 
         if(!isHidden())
@@ -333,8 +341,16 @@ void QAbstractMessageBox::showEvent(QShowEvent *e)
     if(d)
         d->startTimeout();
 
+#ifdef QTOPIA_USE_TEST_SLAVE
+    if (QtopiaApplication::instance()->testSlave()) {
+        QVariantMap map;
+        map["title"] = windowTitle();
+        map["text"] = text();
+        QtopiaApplication::instance()->testSlave()->postMessage("show_messagebox", map);
+    }
+#endif
+
     QDialog::showEvent(e);
 }
 
 #include "qabstractmessagebox.moc"
-

@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qtopia Core's Virtual Framebuffer</title>
+  <title>Qt 4.3: Qtopia Core's Virtual Framebuffer</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,11 +11,12 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Qtopia Core's Virtual Framebuffer<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Qtopia Core's Virtual Framebuffer<br /><span class="subtitle"></span>
+</h1>
 <p><a href="qtopiacore.html">Qtopia Core</a> applications write directly to the framebuffer, eliminating the need for the X Window System and saving memory. For development and debugging purposes, a virtual framebuffer can be used, allowing <a href="qtopiacore.html">Qtopia Core</a> programs to be developed on a desktop machine, without switching between consoles and X11.</p>
 <p>QVFb is an X11 application supplied with Qt/X11 that provides a virtual framebuffer for Qtopia Core to use. To use it, you need to <a href="install-x11.html">configure and install Qt/X11</a> according</p>
 <p align="center"><img src="images/qtopiacore-virtualframebuffer.png" /></p><p>The virtual framebuffer emulates a framebuffer using a shared memory region and the <tt>qvfb</tt> tool to display the framebuffer in a window. The <tt>qvfb</tt> tool also supports a feature known as a skin which can be used to change the look and feel of the display. The tool is located in Qt's <tt>tools/qvfb</tt> directory, and provides several additional features accessible through its <b>File</b> and <b>View</b> menus.</p>
-<p>Please note that the virtual framebuffer is a development tool only. No security issues have been considered in the virtual framebuffer design. It should be avoided in a production environment, i.e. do not configure production libraries with the <tt>-qvfb</tt> option.</p>
+<p>Please note that the virtual framebuffer is a development tool only. No security issues have been considered in the virtual framebuffer design. It should be avoided in a production environment, i.e&#x2e; do not configure production libraries with the <tt>-qvfb</tt> option.</p>
 <ul><li><a href="#displaying-the-virtual-framebuffer">Displaying the Virtual Framebuffer</a></li>
 <ul><li><a href="#skins">Skins</a></li>
 <li><a href="#the-file-menu">The File Menu</a></li>
@@ -29,7 +30,7 @@
 <pre> cd path/to/Qtopia/Core
  ./configure -qvfb
  make</pre>
-<p>Then compile and run the <tt>qvfb</tt> tool as a normal Qt/X11 application (i.e. do <i>not</i> compile it as a <a href="qtopiacore.html">Qtopia Core</a> application):</p>
+<p>Then compile and run the <tt>qvfb</tt> tool as a normal Qt/X11 application (i.e&#x2e; do <i>not</i> compile it as a <a href="qtopiacore.html">Qtopia Core</a> application):</p>
 <pre> cd path/to/Qt/tools/qvfb
  make
  ./qvfb</pre>
@@ -126,17 +127,17 @@
 </table></p>
 <a name="the-file-menu"></a>
 <h3>The File Menu</h3>
-<p align="center"><img src="images/qtopiacore-qvfbfilemenu.png" /></p><p>The <b>File</b> menu allows the user to configure the virtual framebuffer display (<b>File|Configure...</b>), save a snapshot of the framebuffer contents (<b>File|Save Image...</b>) and record the movements in the framebuffer (<b>File|Animation...</b>).</p>
-<p>When choosing the <b>File|Configure</b> menu item, the <tt>qvfb</tt> tool provides a configuration dialog allowing the user to customize the display of the virtual framebuffer. The user can modify the size and depth as well as the Gamma values, and also select the preferred skin (i.e. making the virtual framebuffer simulate the target device environment). In addition, it is possible to emulate a touch screen and a LCD screen.</p>
+<p align="center"><img src="images/qtopiacore-qvfbfilemenu.png" /></p><p>The <b>File</b> menu allows the user to configure the virtual framebuffer display (<b>File|Configure..&#x2e;</b>), save a snapshot of the framebuffer contents (<b>File|Save Image..&#x2e;</b>) and record the movements in the framebuffer (<b>File|Animation..&#x2e;</b>).</p>
+<p>When choosing the <b>File|Configure</b> menu item, the <tt>qvfb</tt> tool provides a configuration dialog allowing the user to customize the display of the virtual framebuffer. The user can modify the size and depth as well as the Gamma values, and also select the preferred skin (i.e&#x2e; making the virtual framebuffer simulate the target device environment). In addition, it is possible to emulate a touch screen and a LCD screen.</p>
 <p>Note that when configuring (except when changing the Gamma values only), any applications using the virtual framebuffer will be terminated.</p>
 <a name="the-view-menu"></a>
 <h3>The View Menu</h3>
-<p align="center"><img src="images/qtopiacore-qvfbviewmenu.png" /></p><p>The <b>View</b> menu allows the user to modify the target's refresh rate (<b>View|Refresh Rate...</b>), making <tt>qvfb</tt> check for updated regions more or less frequently.</p>
-<p>The regions of the display that have changed are updated periodically, i.e. the virtual framebuffer is displaying discrete snapshots of the framebuffer rather than each individual drawing operation. For this reason drawing problems such as flickering may not be apparent until the program is run using a real framebuffer. If little drawing is being done, the framebuffer will not show any updates between drawing events. If an application is displaying an animation, the updates will be frequent, and the application and <tt>qvfb</tt> will compete for processor time.</p>
+<p align="center"><img src="images/qtopiacore-qvfbviewmenu.png" /></p><p>The <b>View</b> menu allows the user to modify the target's refresh rate (<b>View|Refresh Rate..&#x2e;</b>), making <tt>qvfb</tt> check for updated regions more or less frequently.</p>
+<p>The regions of the display that have changed are updated periodically, i.e&#x2e; the virtual framebuffer is displaying discrete snapshots of the framebuffer rather than each individual drawing operation. For this reason drawing problems such as flickering may not be apparent until the program is run using a real framebuffer. If little drawing is being done, the framebuffer will not show any updates between drawing events. If an application is displaying an animation, the updates will be frequent, and the application and <tt>qvfb</tt> will compete for processor time.</p>
 <p>The <b>View</b> menu also allows the user to zoom the view of the application (<b>View|Zoom *</b>).</p>
 <a name="running-applications-using-the-virtual-framebuffer"></a>
 <h2>Running Applications Using the Virtual Framebuffer</h2>
-<p>Once the virtual framebuffer (the <tt>qvfb</tt> application) is running, it is ready for use: Start a server application (i.e. construct a <a href="qapplication.html">QApplication</a> object with the <a href="qapplication.html#Type-enum">QApplication::GuiServer</a> flag or use the <tt>-qws</tt> command line parameter. See the <a href="qtopiacore-running.html">running applications</a> documentation for details). For example:</p>
+<p>Once the virtual framebuffer (the <tt>qvfb</tt> application) is running, it is ready for use: Start a server application (i.e&#x2e; construct a <a href="qapplication.html">QApplication</a> object with the <a href="qapplication.html#Type-enum">QApplication::GuiServer</a> flag or use the <tt>-qws</tt> command line parameter. See the <a href="qtopiacore-running.html">running applications</a> documentation for details). For example:</p>
 <pre> cd path/to/Qtopia/Core/examples/widgets/analogclock
  make
  ./analogclock -qws</pre>
@@ -149,6 +150,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

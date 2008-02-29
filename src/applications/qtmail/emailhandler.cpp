@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,55 +25,72 @@
 #include "mmsclient.h"
 #endif
 
-#include "common.h"
-
-#include <qmimetype.h>
-
 #include <QFileInfo>
 #include <QApplication>
 #include <QMessageBox>
 #include <QString>
-#include <longstream.h>
+#include <longstream_p.h>
 #include <qtopialog.h>
+#include <qmailaddress.h>
 
 EmailHandler::EmailHandler()
 {
     LongStream::cleanupTempFiles();
+
     mailAccount = 0;
     smtpAccount = 0;
     smsAccount = 0;
     mmsAccount = 0;
-    smtpClient = new SmtpClient();
-#ifdef QTOPIA_PHONE
-#ifndef QTOPIA_NO_SMS
-    smsClient = new SmsClient();
-#endif
-#ifndef QTOPIA_NO_MMS
-    mmsClient = new MmsClient();
-#endif
-#endif
-    popClient = new PopClient();
-    imapClient = new ImapClient();
 
+    receiving = false;
+    totalSendSize = 0;
+
+    smtpClient = new SmtpClient();
     connectClient(smtpClient, Sending, SIGNAL(smtpError(int,QString&)));
 
-#ifdef QTOPIA_PHONE
 #ifndef QTOPIA_NO_SMS
-    connectClient(smsClient, Sending|Receiving, SIGNAL(smsError(int,QString&)));
+    smsClient = new SmsClient();
+    connectClient(smsClient, Sending|Receiving|AsyncArrival, SIGNAL(smsError(int,QString&)));
+#endif
+
+#ifndef QTOPIA_NO_MMS
+    mmsClient = new MmsClient();
+    connectClient(mmsClient, Sending|Receiving|AsyncArrival, SIGNAL(mmsError(int,QString&)));
+#endif
+
+    popClient = new PopClient();
+    connectClient(popClient, Receiving, SIGNAL(popError(int,QString&)));
+
+    imapClient = new ImapClient();
+    connectClient(imapClient, Receiving|AsyncDeletion, SIGNAL(popError(int,QString&)));
+}
+
+EmailHandler::~EmailHandler()
+{
+    delete smtpClient;
+#ifndef QTOPIA_NO_SMS
+    delete smsClient;
 #endif
 #ifndef QTOPIA_NO_MMS
-    connectClient(mmsClient, Sending|Receiving, SIGNAL(mmsError(int,QString&)));
+    delete mmsClient;
 #endif
-#endif
-    connectClient(popClient, Receiving, SIGNAL(popError(int,QString&)));
-    connectClient(imapClient, Receiving, SIGNAL(popError(int,QString&)));
-    receiving = false;
+    delete popClient;
+    delete imapClient;
 }
 
 int EmailHandler::unreceivedSmsCount()
 {
 #ifndef QTOPIA_NO_SMS
     return smsClient->unreceivedSmsCount();
+#else
+    return 0;
+#endif
+}
+
+int EmailHandler::unreadSmsCount()
+{
+#ifndef QTOPIA_NO_SMS
+    return smsClient->unreadSmsCount();
 #else
     return 0;
 #endif
@@ -88,175 +105,244 @@ bool EmailHandler::smsReadyToDelete() const
 #endif
 }
 
-EmailHandler::~EmailHandler()
+void EmailHandler::synchroniseClients()
 {
-    delete smtpClient;
-#ifdef QTOPIA_PHONE
 #ifndef QTOPIA_NO_SMS
-    delete smsClient;
+    if (!unsynchronised.contains(smsClient))
+        unsynchronised.append(smsClient);
 #endif
 #ifndef QTOPIA_NO_MMS
-    delete mmsClient;
+    if (!unsynchronised.contains(mmsClient))
+        unsynchronised.append(mmsClient);
 #endif
+    /* At this time, we don't have asynchronous arrival of email
+    if (!unsynchronised.contains(popClient))
+        unsynchronised.append(popClient);
+    if (!unsynchronised.contains(imapClient))
+        unsynchronised.append(imapClient);
+    */
+
+#ifndef QTOPIA_NO_SMS
+    smsClient->checkForNewMessages();
 #endif
-    delete popClient;
-    delete imapClient;
+#ifndef QTOPIA_NO_MMS
+    mmsClient->checkForNewMessages();
+#endif
+    /*
+    popClient->checkForNewMessages();
+    imapClient->checkForNewMessages();
+    */
 }
+
+#ifdef DEBUG_CLIENT_SIGNALS
+void EmailHandler::reportErrorOccurred(int n, QString& s) { qLog(Messaging) << static_cast<Client*>(sender()) << ": errorOccurred(" << n << ',' << s << ')'; }
+void EmailHandler::reportMailSent(int n) { qLog(Messaging) << static_cast<Client*>(sender()) << ": mailSent(" << n << ')'; }
+void EmailHandler::reportTransmissionCompleted() { qLog(Messaging) << static_cast<Client*>(sender()) << ": transmissionCompleted()"; }
+void EmailHandler::reportNonexistentMessage(const QMailId& id) { qLog(Messaging) << static_cast<Client*>(sender()) << ": nonexistentMessage(" << id.toULongLong() << ')'; }
+void EmailHandler::reportUpdateStatus(const QString& s) { qLog(Messaging) << static_cast<Client*>(sender()) << ": updateStatus(" << s << ')'; }
+void EmailHandler::reportNewMessage(const QMailMessage& m) { qLog(Messaging) << static_cast<Client*>(sender()) << ": newMessage(" << m.subject() << ')'; }
+void EmailHandler::reportAllMessagesReceived() { qLog(Messaging) << static_cast<Client*>(sender()) << ": allMessagesReceived()"; }
+void EmailHandler::reportMailTransferred(int n) { qLog(Messaging) << static_cast<Client*>(sender()) << ": mailTransferred(" << n << ')'; }
+void EmailHandler::reportDownloadedSize(int n) { qLog(Messaging) << static_cast<Client*>(sender()) << ": downloadedSize(" << n << ')'; }
+void EmailHandler::reportMailboxSize(int n) { qLog(Messaging) << static_cast<Client*>(sender()) << ": mailboxSize(" << n << ')'; }
+void EmailHandler::reportSendProgress(const QMailId& id, uint percentage) { qLog(Messaging) << static_cast<Client*>(sender()) << ": sendProgess(" << id.toULongLong() << ',' << percentage << ')'; }
+void EmailHandler::reportMessageProcessed(const QMailId& id) { qLog(Messaging) << static_cast<Client*>(sender()) << ": messageProcessed(" << id.toULongLong() << ')'; }
+
+#define DEBUG_CONNECT(a,b,c,d) connect(a,b,c,d)
+#else
+#define DEBUG_CONNECT(a,b,c,d)
+#endif
 
 void EmailHandler::connectClient(Client *client, int type, QString sigName)
 {
+    DEBUG_CONNECT(client, SIGNAL(errorOccurred(int,QString&)), this, SLOT(reportErrorOccurred(int,QString&)));
     connect(client, SIGNAL(errorOccurred(int,QString&)),sigName.toAscii() );
+    DEBUG_CONNECT(client, SIGNAL(mailSent(int)), this, SLOT(reportMailSent(int)) );
     connect(client, SIGNAL(mailSent(int)), this, SIGNAL(mailSent(int)) );
+    DEBUG_CONNECT(client, SIGNAL(transmissionCompleted()), this, SLOT(reportTransmissionCompleted()) );
+    connect(client, SIGNAL(transmissionCompleted()), this, SIGNAL(transmissionCompleted()) );
 
     if (type & Receiving)
     {
-        connect(client, SIGNAL(updateStatus(const QString&)), this,
-                SIGNAL(updatePopStatus(const QString&)) );
+        if (type & AsyncArrival) {
+            /* Actually, we don't want to get a synchronised signal until we
+               explicitly ask for it, with synchroniseClients()...
+            unsynchronised.append(client);
+            */
+        }
+        if (type & AsyncDeletion) {
+            DEBUG_CONNECT(client, SIGNAL(nonexistentMessage(QMailId)), this, SLOT(reportNonexistentMessage(QMailId)) );
+            connect(client, SIGNAL(nonexistentMessage(QMailId)), this, SIGNAL(nonexistentMessage(QMailId)) );
+        }
 
-        connect(client, SIGNAL(newMessage(const Email&)),
-                this, SIGNAL(mailArrived(const Email&)) );
+        DEBUG_CONNECT(client, SIGNAL(updateStatus(QString)), this, SLOT(reportUpdateStatus(QString)) );
+        connect(client, SIGNAL(updateStatus(QString)), this, SLOT(receiveStatusChange(QString)) );
+        DEBUG_CONNECT(client, SIGNAL(newMessage(QMailMessage)), this, SLOT(reportNewMessage(QMailMessage)) );
+        connect(client, SIGNAL(newMessage(QMailMessage)), this, SIGNAL(mailArrived(QMailMessage)) );
+        DEBUG_CONNECT(client, SIGNAL(allMessagesReceived()), this, SLOT(reportAllMessagesReceived()) );
+        connect(client, SIGNAL(allMessagesReceived()), this, SLOT(messagesReceived()) );
     }
     if (type & Sending)
-        connect(client, SIGNAL(updateStatus(const QString&)), this,
-                SIGNAL(updateSendingStatus(const QString&)) );
+    {
+        DEBUG_CONNECT(client, SIGNAL(updateStatus(QString)), this, SLOT(reportUpdateStatus(QString)) );
+        connect(client, SIGNAL(updateStatus(QString)), this, SLOT(sendStatusChange(QString)) );
+        DEBUG_CONNECT(client, SIGNAL(sendProgress(QMailId, uint)), this, SLOT(reportSendProgress(QMailId, uint)) );
+        connect(client, SIGNAL(sendProgress(QMailId, uint)), this, SLOT(sendProgress(QMailId, uint)) );
+        DEBUG_CONNECT(client, SIGNAL(messageProcessed(QMailId)), this, SLOT(reportMessageProcessed(QMailId)) );
+        connect(client, SIGNAL(messageProcessed(QMailId)), this, SLOT(messageProcessed(QMailId)) );
+    }
 
-    connect(client, SIGNAL(mailTransferred(int)), this,
-            SIGNAL(mailTransferred(int)) );
-    connect(client, SIGNAL( unresolvedUidlList(QStringList&) ),
-            this, SLOT( unresolvedUidl(QStringList&) ) );
-    connect(client, SIGNAL(serverFolders()), this,
-            SIGNAL(serverFolders()) );
+    DEBUG_CONNECT(client, SIGNAL(mailTransferred(int)), this, SLOT(reportMailTransferred(int)) );
+    connect(client, SIGNAL(mailTransferred(int)), this, SIGNAL(mailTransferred(int)) );
+    connect(client, SIGNAL(unresolvedUidlList(QStringList&)), this, SLOT(unresolvedUidl(QStringList&)) );
+    connect(client, SIGNAL(serverFolders()), this, SIGNAL(serverFolders()) );
 
     //relaying size information
-    connect(client, SIGNAL(downloadedSize(int)),
-        this, SIGNAL(downloadedSize(int)) );
-    connect(client, SIGNAL(mailboxSize(int)),
-        this, SIGNAL(mailboxSize(int)) );
-    connect(client, SIGNAL(transferredSize(int)),
-        this, SIGNAL(transferredSize(int)) );
-    connect(client, SIGNAL( failedList(QStringList&) ),
-        this, SIGNAL( failedList(QStringList&) ) );
+    DEBUG_CONNECT(client, SIGNAL(downloadedSize(int)), this, SLOT(reportDownloadedSize(int)) );
+    connect(client, SIGNAL(downloadedSize(int)), this, SIGNAL(downloadedSize(int)) );
+    DEBUG_CONNECT(client, SIGNAL(mailboxSize(int)), this, SLOT(reportMailboxSize(int)) );
+    connect(client, SIGNAL(mailboxSize(int)), this, SIGNAL(mailboxSize(int)) );
+    connect(client, SIGNAL(failedList(QStringList&)), this, SIGNAL(failedList(QStringList&)) );
 }
 
-void EmailHandler::sendMail(QList<Email*>* mailList)
+void EmailHandler::sendMail(QList<QMailMessage>& mailList)
 {
-    Email *currentMail;
-    QString temp;
-    QStringList combinedList;
-    bool allOk = (mailList->count() > 0);
-#ifdef QTOPIA_PHONE
-#ifndef QTOPIA_NO_SMS
-    bool smsOk = false;
-#endif
+    bool errorOccurred = false;
+    uint smtpCount = 0;
+    uint smsCount = 0;
+    uint mmsCount = 0;
+
+    // We shouldn't have anything left in our send list...
+    if (!sendSize.isEmpty()) {
+        foreach (const QMailId& id, sendSize.keys())
+            qWarning() << "Message" << id.toULongLong() << "still in send map...";
+
+        sendSize.clear();
+    }
+
+    for (int i = 0; i < mailList.count(); i++) {
+
+        // Get the complete message
+        QMailMessage currentMail(mailList[i].id(),QMailMessage::HeaderAndBody);
+
+        if ( !currentMail.hasRecipients() ) {
+            QString temp = tr("No recipients specified for mail with subject:\n"
+                              "%1\nNO mail has been sent.").arg( currentMail.subject() );
+            QMessageBox::warning(qApp->activeWindow(), tr("Mail encoding error"), temp, tr("OK"));
+            errorOccurred = true;
+        } else {
+            //mms message
 #ifndef QTOPIA_NO_MMS
-    bool mmsOk = false;
+            if (currentMail.messageType() == QMailMessage::Mms) {
+                if (mmsClient->addMail(currentMail)) {
+                    ++mmsCount;
+                    sendSize.insert(currentMail.id(), currentMail.indicativeSize());
+                } else {
+                    errorOccurred = true;
+                }
+                continue;
+            }
 #endif
+
+            int mailRecipients = 0;
+            int phoneRecipients = 0;
+
+            foreach (const QMailAddress& address, currentMail.recipients()){
+                if (address.isEmailAddress())
+                    ++mailRecipients;
+                else if (address.isPhoneNumber())
+                    ++phoneRecipients;
+            }
+
+#ifndef QTOPIA_NO_SMS
+            // sms message
+            if (currentMail.messageType() == QMailMessage::Sms
+                && phoneRecipients > 0)
+            {
+                if (smsClient->addMail(currentMail)) {
+                    ++smsCount;
+                    sendSize.insert(currentMail.id(), currentMail.indicativeSize());
+                } else {
+                    errorOccurred = true;
+                }
+            }
 #endif
-    bool smtpOk = false;
-    int allMailSize = 0;
 
-    for (int i = 0; i < mailList->count(); i++) {
-    currentMail = mailList->at(i);
+            if (errorOccurred)
+                continue;
 
-    currentMail->readFromFile();
+            //email message
+            if (mailRecipients == 0)
+                continue;
 
-        if ( currentMail->encodeMail() ) {
-            if ( !currentMail->hasRecipients() ) {
-                temp = tr("No recipients specified for\n mail with subject:\n"
-                          "%1\nNO mail has been sent.")
-                    .arg( currentMail->subject() );
-                QMessageBox::warning(qApp->activeWindow(),
-                                     tr("Mail encoding error"),
-                                     temp, tr("OK"));
-                allOk = false;
+            if (smtpCount == 0) {
+                // We need the account already set to addMail correctly
+                smtpClient->setAccount(smtpAccount);
+            }
+            if (smtpClient->addMail(currentMail)) {
+                ++smtpCount;
+                sendSize.insert(currentMail.id(), currentMail.indicativeSize());
             } else {
-#ifdef QTOPIA_PHONE
-        //mms message
-#ifndef QTOPIA_NO_MMS
-        if (currentMail->type() & MailMessage::MMS) {
-            qLog(Messaging) << "Detected MMS message";
-            if (allOk)
-                mmsOk = true;
-            mmsClient->addMail(*currentMail);
-            continue;
+                errorOccurred = true;
+            }
         }
-#endif
-
-#ifndef QTOPIA_NO_SMS
-        // sms message
-        QStringList phoneRecipients = currentMail->phoneRecipients();
-
-        if(phoneRecipients.count() > 0)
-        {
-            qLog(Messaging) << "Detected SMS Message";
-            int mailSendSize = smsClient->addMail(currentMail);
-            allOk = (mailSendSize >= 0);
-            if(allOk)
-                allMailSize += mailSendSize;
-            smsOk = allOk;
-        }
-#endif
-
-        if (!allOk)
-            continue;
-#endif
-
-        //email message
-        if(currentMail->mailRecipients().isEmpty())
-            continue;
-
-        qLog(Messaging) << "Detected Email Message";
-
-        int mailSendSize = smtpClient->addMail(currentMail);
-        allOk = (mailSendSize >= 0);
-        if(allOk)
-            allMailSize += mailSendSize;
-        smtpOk = allOk;
-    }
-        } else {                                                        //error
-            temp = tr("Could not locate all files\nin mail with subject:\n"
-                      "%1\nNO mail has been sent")
-                .arg( currentMail->subject() );
-
-            QMessageBox::warning(qApp->activeWindow(), tr( "Mail encoding error" ), temp, tr( "OK" ));
-            allOk = false;
-    }
     }
 
-    if (allOk && (smtpOk
-#ifdef QTOPIA_PHONE
-#ifndef QTOPIA_NO_SMS
-                || smsOk
-#endif
-#ifndef QTOPIA_NO_MMS
-                || mmsOk
-#endif
-#endif
-                )) {
-        if (smtpOk) {
-            smtpClient->setAccount(smtpAccount);
+    if (!errorOccurred && ((smtpCount + smsCount + mmsCount) > 0)) {
+        if (smtpCount)
             smtpClient->newConnection();
-        }
-#ifdef QTOPIA_PHONE
 #ifndef QTOPIA_NO_SMS
-        if (smsOk)
+        if (smsCount)
             smsClient->newConnection();
-        else
-            smsClient->clearList();
 #endif
 #ifndef QTOPIA_NO_MMS
-        if (mmsOk)
+        if (mmsCount)
             mmsClient->newConnection();
 #endif
-#endif
-        emit mailSendSize(allMailSize);
+
+        // Calculate the total idicative size of the messages we're sending
+        uint totalSize = 0;
+        foreach (uint size, sendSize.values())
+            totalSize += size;
+
+        totalSendSize = 0;
+        emit mailSendSize(totalSize);
     } else {
         emit mailSent(-1);
-#ifdef QTOPIA_PHONE
+    }
+
 #ifndef QTOPIA_NO_SMS
+    if (!errorOccurred && (smsCount == 0))
         smsClient->clearList();
 #endif
-#endif
+}
+
+void EmailHandler::sendProgress(const QMailId& id, uint percentage)
+{
+    QMap<QMailId, uint>::const_iterator it = sendSize.find(id);
+    if (it != sendSize.end()) {
+        if (percentage > 100)
+            percentage = 100;
+
+        // Update the progress figure to count the sent portion of this message
+        uint partialSize = (*it) * percentage / 100;
+        emit transferredSize(totalSendSize + partialSize);
+    } else {
+        qWarning() << "Message" << id.toULongLong() << "not present in send map...";
+    }
+}
+
+void EmailHandler::messageProcessed(const QMailId& id)
+{
+    QMap<QMailId, uint>::iterator it = sendSize.find(id);
+    if (it != sendSize.end()) {
+        // Update the progress figure
+        totalSendSize += *it;
+        emit transferredSize(totalSendSize);
+
+        sendSize.erase(it);
+    } else {
+        qWarning() << "Message" << id.toULongLong() << "not present in send map...";
     }
 }
 
@@ -273,21 +359,16 @@ void EmailHandler::setMailAccount(MailAccount *account)
 void EmailHandler::setSmsAccount(MailAccount *account)
 {
     smsAccount = account;
-#ifdef QTOPIA_PHONE
 #ifndef QTOPIA_NO_SMS
     smsClient->setAccount( account );
 #endif
-#endif
 }
-
 
 void EmailHandler::setMmsAccount(MailAccount *account)
 {
     mmsAccount = account;
-#ifdef QTOPIA_PHONE
 #ifndef QTOPIA_NO_MMS
     mmsClient->setAccount(account);
-#endif
 #endif
 }
 
@@ -306,7 +387,8 @@ void EmailHandler::getMailHeaders()
 
 void EmailHandler::getMailByList(MailList *mailList, bool newConnection)
 {
-    if (mailList->count() == 0) {       //should not occur though
+    if ((mailList->count() == 0)
+        || !mailAccount){       //should not occur though
         emit mailTransferred(0);
         return;
     }
@@ -335,27 +417,28 @@ void EmailHandler::popQuit()
     receiving = false;
 }
 
-void EmailHandler::acceptMail(const Email &mail)
+void EmailHandler::acceptMail(const QMailMessage& mail, bool closeAfterSend)
 {
-#if defined(QTOPIA_PHONE) && !defined(QTOPIA_NO_MMS)
-    if (mmsClient && mail.type() == MailMessage::MMS) {
+#ifndef QTOPIA_NO_MMS
+    if (mmsClient && mail.messageType() == QMailMessage::Mms) {
         mmsClient->sendNotifyResp(mail, "Deferred");
     }
-#elif !defined(QTOPIA_DESKTOP)
-    //Q_CONST_UNUSED(mail);
-    (void)mail;
+
+    if (closeAfterSend)
+        mmsClient->closeWhenDone();
+#else
+    Q_UNUSED(mail);
 #endif
 }
 
-void EmailHandler::rejectMail(const Email &mail)
+void EmailHandler::rejectMail(const QMailMessage& mail)
 {
-#if defined(QTOPIA_PHONE) && !defined(QTOPIA_NO_MMS)
-    if (mmsClient && mail.type() == MailMessage::MMS) {
+#ifndef QTOPIA_NO_MMS
+    if (mmsClient && mail.messageType() == QMailMessage::Mms) {
         mmsClient->sendNotifyResp(mail, "Rejected");
     }
-#elif !defined(QTOPIA_DESKTOP)
-    //Q_CONST_UNUSED(mail);
-    (void)mail;
+#else
+    Q_UNUSED(mail);
 #endif
 }
 
@@ -366,9 +449,9 @@ void EmailHandler::unresolvedUidl(QStringList &list)
     emit unresolvedUidlList(user, list);
 }
 
-void EmailHandler::mailRead(Email *mail)
+void EmailHandler::mailRead(const QMailMessage& mail)
 {
-#if defined(QTOPIA_PHONE) && !defined(QTOPIA_NO_SMS)
+#ifndef QTOPIA_NO_SMS
     smsClient->mailRead( mail );
 #else
     Q_UNUSED(mail);
@@ -386,21 +469,20 @@ void EmailHandler::cancel()
     popClient->errorHandling(ErrCancel, msg);
     imapClient->errorHandling(ErrCancel, msg);
     smtpClient->errorHandling(ErrCancel, msg);
-#ifdef QTOPIA_PHONE
 #ifndef QTOPIA_NO_SMS
     smsClient->errorHandling(ErrCancel, msg);
 #endif
 #ifndef QTOPIA_NO_MMS
     mmsClient->errorHandling(ErrCancel, msg);
 #endif
-#endif
 }
 
-Client* EmailHandler::clientFromAccount(MailAccount *account)
+Client* EmailHandler::clientFromAccount(const MailAccount *account) const
 {
+    if ( !account )
+	return 0;
     if ( account->accountType() == MailAccount::POP )
         return popClient;
-#ifdef QTOPIA_PHONE
 #ifndef QTOPIA_NO_MMS
     else if ( account->accountType() == MailAccount::MMS)
         return mmsClient;
@@ -409,8 +491,74 @@ Client* EmailHandler::clientFromAccount(MailAccount *account)
     else if ( account->accountType() == MailAccount::SMS)
         return smsClient;
 #endif
-#endif
     else if ( account->accountType() == MailAccount::IMAP)
         return imapClient;
     return 0;
 }
+
+MailAccount* EmailHandler::accountFromClient(const Client *client) const
+{
+    if ( client == popClient || client == imapClient )
+        return mailAccount;
+#ifndef QTOPIA_NO_MMS
+    else if ( client == mmsClient )
+        return mmsAccount;
+#endif
+#ifndef QTOPIA_NO_SMS
+    else if ( client == smsClient )
+        return smsAccount;
+#endif
+    else if ( client == smtpClient )
+        return smtpAccount;
+    return 0;
+}
+
+void EmailHandler::messagesReceived()
+{
+    if (const Client* client = static_cast<const Client*>(sender())) {
+        if (unsynchronised.contains(client)) {
+            unsynchronised.removeAll(client);
+
+            if (unsynchronised.isEmpty()) {
+                qLog(Messaging) << "Messaging clients synchronised";
+                emit allMessagesReceived();
+            }
+        }
+    }
+}
+
+int EmailHandler::newMessageCount()
+{
+    QSettings mailconf("Trolltech", "qtmail");
+    mailconf.beginGroup("SystemMessages");
+    int count = mailconf.value("newSystemCount").toInt();
+
+#ifndef QTOPIA_NO_SMS
+    count += smsClient->unreadSmsCount();
+#endif
+#ifndef QTOPIA_NO_MMS
+    count += mmsClient->unreadMmsCount();
+#endif
+
+    return count;
+}
+
+void EmailHandler::pushMmsMessage(const QDSActionRequest& request)
+{
+#ifndef QTOPIA_NO_MMS
+    mmsClient->pushMmsMessage(request);
+#endif
+}
+
+void EmailHandler::receiveStatusChange(const QString& status)
+{
+    if (const Client* client = static_cast<const Client*>(sender()))
+        emit updateReceiveStatus(client, status);
+}
+
+void EmailHandler::sendStatusChange(const QString& status)
+{
+    if (const Client* client = static_cast<const Client*>(sender()))
+        emit updateSendStatus(client, status);
+}
+

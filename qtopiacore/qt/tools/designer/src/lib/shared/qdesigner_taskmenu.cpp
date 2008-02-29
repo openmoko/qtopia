@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -23,39 +38,38 @@
 
 #include "qdesigner_taskmenu_p.h"
 #include "qdesigner_command_p.h"
-#include "qdesigner_promotedwidget_p.h"
-#include <QtGui/QUndoCommand>
 #include "richtexteditor_p.h"
 #include "stylesheeteditor_p.h"
-#include "promotetocustomwidgetdialog_p.h"
-#include "widgetfactory_p.h"
-#include "widgetdatabase_p.h"
 #include "qlayout_widget_p.h"
-#include "spacer_widget_p.h"
 #include "layout_p.h"
+#include "spacer_widget_p.h"
+#include "textpropertyeditor_p.h"
+#include "promotiontaskmenu_p.h"
+#include "metadatabase_p.h"
+#include "scriptdialog_p.h"
+#include "scriptcommand_p.h"
 
-#include <QtDesigner/QtDesigner>
+#include <shared_enums_p.h>
+
+#include <QtDesigner/QDesignerFormWindowInterface>
+#include <QtDesigner/QDesignerFormWindowCursorInterface>
+#include <QtDesigner/QDesignerPropertySheetExtension>
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <QtDesigner/QDesignerLanguageExtension>
 #include <QtDesigner/QExtensionManager>
-#include <QtDesigner/QDesignerLayoutDecorationExtension>
 
 #include <QtGui/QAction>
-#include <QtGui/QToolBar>
 #include <QtGui/QWidget>
 #include <QtGui/QMenuBar>
-#include <QtGui/QInputDialog>
 #include <QtGui/QMainWindow>
-#include <QtGui/QDockWidget>
 #include <QtGui/QStatusBar>
-#include <QtCore/QVariant>
 #include <QtGui/QDialogButtonBox>
-
-#include <QtCore/qdebug.h>
-
-namespace qdesigner_internal {
+#include <QtGui/QVBoxLayout>
+#include <QtGui/QPushButton>
 
 static QMenuBar *findMenuBar(const QWidget *widget)
 {
-    QList<QObject*> children = widget->children();
+    const QList<QObject*> children = widget->children();
     foreach (QObject *obj, widget->children()) {
         if (QMenuBar *mb = qobject_cast<QMenuBar*>(obj)) {
             return mb;
@@ -67,7 +81,7 @@ static QMenuBar *findMenuBar(const QWidget *widget)
 
 static QStatusBar *findStatusBar(const QWidget *widget)
 {
-    QList<QObject*> children = widget->children();
+    const QList<QObject*> children = widget->children();
     foreach (QObject *obj, widget->children()) {
         if (QStatusBar *sb = qobject_cast<QStatusBar*>(obj)) {
             return sb;
@@ -77,63 +91,91 @@ static QStatusBar *findStatusBar(const QWidget *widget)
     return 0;
 }
 
-QDesignerTaskMenu::QDesignerTaskMenu(QWidget *widget, QObject *parent)
-    : QObject(parent),
-      m_widget(widget)
+namespace  {
+class ObjectNameDialog : public QDialog
+{
+     public:
+         ObjectNameDialog(QWidget *parent, const QString &oldName);
+         QString newObjectName() const;
+
+     private:
+         qdesigner_internal::TextPropertyEditor *m_editor;
+};
+
+ObjectNameDialog::ObjectNameDialog(QWidget *parent, const QString &oldName)
+    : QDialog(parent),
+      m_editor( new qdesigner_internal::TextPropertyEditor(qdesigner_internal::TextPropertyEditor::EmbeddingNone,
+                                                           qdesigner_internal::ValidationObjectName, this))
+{
+    setWindowTitle(QObject::tr("Change Object Name"));
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+    QVBoxLayout *vboxLayout = new QVBoxLayout(this);
+    vboxLayout->addWidget(new QLabel(QObject::tr("Object Name")));
+
+    m_editor->setText(oldName);
+    m_editor->selectAll();
+    m_editor->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    vboxLayout->addWidget(m_editor);
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+                                                       Qt::Horizontal, this);
+    QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
+    okButton->setDefault(true);
+    vboxLayout->addWidget(buttonBox);
+
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+}
+
+QString ObjectNameDialog::newObjectName() const
+{
+    return m_editor->text();
+}
+
+}
+
+namespace qdesigner_internal {
+
+QDesignerTaskMenu::QDesignerTaskMenu(QWidget *widget, QObject *parent) :
+    QObject(parent),
+    m_widget(widget),
+    m_separator(createSeparator()),
+    m_separator2(createSeparator()),
+    m_separator3(createSeparator()),
+    m_separator4(createSeparator()),
+    m_changeObjectNameAction(new QAction(tr("Change objectName..."), this)),
+    m_changeToolTip(new QAction(tr("Change toolTip..."), this)),
+    m_changeWhatsThis(new QAction(tr("Change whatsThis..."), this)),
+    m_changeStyleSheet(new QAction(tr("Change styleSheet..."), this)),
+    m_addMenuBar(new QAction(tr("Create Menu Bar"), this)),
+    m_addToolBar(new QAction(tr("Add Tool Bar"), this)),
+    m_addStatusBar(new QAction(tr("Create Status Bar"), this)),
+    m_removeStatusBar(new QAction(tr("Remove Status Bar"), this)),
+    m_changeScript(new QAction(tr("Change script..."), this)),
+    m_promotionTaskMenu(new PromotionTaskMenu(widget, PromotionTaskMenu::ModeMultiSelection, this))
 {
     Q_ASSERT(qobject_cast<QDesignerFormWindowInterface*>(widget) == 0);
 
-    m_separator = new QAction(this);
-    m_separator->setSeparator(true);
-
-    m_separator2 = new QAction(this);
-    m_separator2->setSeparator(true);
-
-
-    m_changeObjectNameAction = new QAction(tr("Change objectName..."), this);
     connect(m_changeObjectNameAction, SIGNAL(triggered()), this, SLOT(changeObjectName()));
-
-    m_changeStatusTip = new QAction(tr("Change statusTip..."), this);
-    connect(m_changeStatusTip, SIGNAL(triggered()), this, SLOT(changeStatusTip()));
-
-    m_changeToolTip = new QAction(tr("Change toolTip..."), this);
     connect(m_changeToolTip, SIGNAL(triggered()), this, SLOT(changeToolTip()));
-
-    m_changeWhatsThis = new QAction(tr("Change whatsThis..."), this);
     connect(m_changeWhatsThis, SIGNAL(triggered()), this, SLOT(changeWhatsThis()));
-
-    m_changeStyleSheet = new QAction(tr("Change styleSheet..."), this);
-    connect(m_changeStyleSheet, SIGNAL(triggered()), this, SLOT(changeStyleSheet()));
-
-    m_addMenuBar = new QAction(tr("Create Menu Bar"), this);
+    connect(m_changeStyleSheet, SIGNAL(triggered()), this,  SLOT(changeStyleSheet()));
     connect(m_addMenuBar, SIGNAL(triggered()), this, SLOT(createMenuBar()));
-
-    m_addToolBar = new QAction(tr("Add Tool Bar"), this);
     connect(m_addToolBar, SIGNAL(triggered()), this, SLOT(addToolBar()));
-
-    m_addStatusBar = new QAction(tr("Create Status Bar"), this);
     connect(m_addStatusBar, SIGNAL(triggered()), this, SLOT(createStatusBar()));
-
-    m_removeStatusBar = new QAction(tr("Remove Status Bar"), this);
     connect(m_removeStatusBar, SIGNAL(triggered()), this, SLOT(removeStatusBar()));
-
-    m_createDockWidgetAction = new QAction(tr("Create Dock Window"), this);
-    connect(m_createDockWidgetAction, SIGNAL(triggered()), this, SLOT(createDockWidget()));
-
-    m_promoteToCustomWidgetAction = new QAction(tr("Promote to Custom Widget"), this);
-    m_promoteToCustomWidgetAction->setObjectName(QLatin1String("__qt__promoteToCustomWidgetAction"));
-    connect(m_promoteToCustomWidgetAction, SIGNAL(triggered()), this, SLOT(promoteToCustomWidget()));
-
-    QString demote_string = tr("Demote from Custom Widget");
-    if (const QDesignerPromotedWidget *promoted = qobject_cast<const QDesignerPromotedWidget*>(widget))
-        demote_string = tr("Demote to ") + promoted->item()->extends();
-
-    m_demoteFromCustomWidgetAction = new QAction(demote_string, this);
-    connect(m_demoteFromCustomWidgetAction, SIGNAL(triggered()), this, SLOT(demoteFromCustomWidget()));
+    connect(m_changeScript, SIGNAL(triggered()), this, SLOT(changeScript()));
 }
 
 QDesignerTaskMenu::~QDesignerTaskMenu()
 {
+}
+
+QAction *QDesignerTaskMenu::createSeparator() {
+    QAction *rc = new QAction(this);
+    rc->setSeparator(true);
+    return rc;
 }
 
 QWidget *QDesignerTaskMenu::widget() const
@@ -213,7 +255,7 @@ QList<QAction*> QDesignerTaskMenu::taskActions() const
     QDesignerFormWindowInterface *formWindow = QDesignerFormWindowInterface::findFormWindow(widget());
     Q_ASSERT(formWindow);
 
-    bool isMainContainer = formWindow->mainContainer() == widget();
+    const bool isMainContainer = formWindow->mainContainer() == widget();
 
     QList<QAction*> actions;
 
@@ -229,23 +271,23 @@ QList<QAction*> QDesignerTaskMenu::taskActions() const
                 actions.append(m_addStatusBar);
             else
                 actions.append(m_removeStatusBar);
-            actions.append(m_separator2);
+            actions.append(m_separator);
         }
     }
     actions.append(m_changeObjectNameAction);
-    actions.append(m_separator);
+    actions.append(m_separator2);
     actions.append(m_changeToolTip);
     actions.append(m_changeWhatsThis);
     actions.append(m_changeStyleSheet);
 
-    if (!isMainContainer) {
-        actions.append(m_separator);
-        if (qobject_cast<const QDesignerPromotedWidget*>(m_widget) == 0)
-            actions.append(m_promoteToCustomWidgetAction);
-        else
-            actions.append(m_demoteFromCustomWidgetAction);
-    }
+    m_promotionTaskMenu->addActions(formWindow, PromotionTaskMenu::LeadingSeparator, actions);
 
+#ifdef WANT_SCRIPT_OPTION
+    if (!isMainContainer) {
+        actions.append(m_separator4);
+        actions.append(m_changeScript);
+    }
+#endif
     return actions;
 }
 
@@ -258,29 +300,14 @@ void QDesignerTaskMenu::changeObjectName()
     QDesignerPropertySheetExtension *sheet = qt_extension<QDesignerPropertySheetExtension*>(core->extensionManager(), widget());
     Q_ASSERT(sheet != 0);
 
-    bool ok;
-    QString newObjectName = QInputDialog::getText(widget(), tr("Change Object Name"),
-            tr("Object Name"), QLineEdit::Normal, sheet->property(sheet->indexOf(QLatin1String("objectName"))).toString(), &ok);
-
-    if (ok && !newObjectName.isEmpty()) {
-        fw->cursor()->setProperty(QLatin1String("objectName"), newObjectName);
+    ObjectNameDialog dialog(fw, sheet->property(sheet->indexOf(QLatin1String("objectName"))).toString());
+    if (dialog.exec() == QDialog::Accepted) {
+        const QString newObjectName = dialog.newObjectName();
+        if (!newObjectName.isEmpty())
+            fw->cursor()->setProperty(QLatin1String("objectName"), newObjectName);
     }
 }
 
-void QDesignerTaskMenu::createDockWidget()
-{
-    if (QDesignerFormWindowInterface *fw = formWindow()) {
-        QMainWindow *mw = qobject_cast<QMainWindow*>(fw->mainContainer());
-        if (!mw) {
-            // ### warning message
-            return;
-        }
-
-        AddDockWidgetCommand *cmd = new AddDockWidgetCommand(fw);
-        cmd->init(mw);
-        fw->commandHistory()->push(cmd);
-    }
-}
 
 QDesignerTaskMenuFactory::QDesignerTaskMenuFactory(QExtensionManager *extensionManager)
     : QExtensionFactory(extensionManager)
@@ -297,71 +324,19 @@ QObject *QDesignerTaskMenuFactory::createExtension(QObject *object, const QStrin
         return 0;
 
     // check if is an internal widget (### generalize)
-    if (qobject_cast<QLayoutWidget*>(widget) || qobject_cast<Spacer*>(widget))
+    if (qobject_cast<const QLayoutWidget*>(widget) || qobject_cast<const Spacer*>(widget))
         return 0;
 
     return new QDesignerTaskMenu(widget, parent);
 }
 
-void QDesignerTaskMenu::promoteToCustomWidget()
-{
-    QDesignerFormWindowInterface *fw = formWindow();
-    QDesignerFormEditorInterface *core = fw->core();
-    QWidget *wgt = widget();
-    QDesignerWidgetDataBaseInterface *db = core->widgetDataBase();
-
-    Q_ASSERT(qobject_cast<QDesignerPromotedWidget*>(wgt) == 0);
-
-    QString base_class_name = QLatin1String(WidgetFactory::classNameOf(wgt));
-
-    PromoteToCustomWidgetDialog dialog(db, base_class_name);
-    if (!dialog.exec())
-        return;
-
-    QString custom_class_name = dialog.customClassName();
-    QString include_file = dialog.includeFile();
-
-    QDesignerWidgetDataBaseItemInterface *item = 0;
-    int idx = db->indexOfClassName(custom_class_name);
-    if (idx == -1) {
-        item = new WidgetDataBaseItem(custom_class_name, tr("Promoted Widgets"));
-        item->setCustom(true);
-        item->setPromoted(true);
-        item->setExtends(base_class_name);
-        db->append(item);
-    } else {
-        item = db->item(idx);
-    }
-    item->setIncludeFile(include_file);
-
-    // ### use the undo stack
-    // fw->beginCommand(tr("Promote to custom widget"));
-
-    PromoteToCustomWidgetCommand *cmd = new PromoteToCustomWidgetCommand(fw);
-    cmd->init(item, wgt);
-    fw->commandHistory()->push(cmd);
-}
-
-void QDesignerTaskMenu::demoteFromCustomWidget()
-{
-    QDesignerFormWindowInterface *fw = formWindow();
-    QDesignerPromotedWidget *promoted = qobject_cast<QDesignerPromotedWidget*>(widget());
-    Q_ASSERT(promoted != 0);
-
-    // ### use the undo stack
-    //fw->beginCommand(tr("Demote to ") + promoted->item()->extends());
-
-    DemoteFromCustomWidgetCommand *cmd = new DemoteFromCustomWidgetCommand(fw);
-    cmd->init(promoted);
-    fw->commandHistory()->push(cmd);
-}
-
 void QDesignerTaskMenu::changeRichTextProperty(const QString &propertyName)
 {
     if (QDesignerFormWindowInterface *fw = formWindow()) {
-        RichTextEditorDialog *dlg = new RichTextEditorDialog(fw);
         Q_ASSERT(m_widget->parentWidget() != 0);
-        RichTextEditor *editor = dlg->editor();
+
+        RichTextEditorDialog dlg(fw);
+        RichTextEditor *editor = dlg.editor();
 
         QDesignerPropertySheetExtension *sheet = qt_extension<QDesignerPropertySheetExtension*>(fw->core()->extensionManager(), m_widget);
         Q_ASSERT(sheet != 0);
@@ -371,23 +346,16 @@ void QDesignerTaskMenu::changeRichTextProperty(const QString &propertyName)
         editor->selectAll();
         editor->setFocus();
 
-        if (dlg->exec()) {
-            QString text = editor->text(Qt::RichText);
+        if (dlg.exec()) {
+            const QString text = editor->text(Qt::RichText);
             fw->cursor()->setWidgetProperty(m_widget, propertyName, QVariant(text));
         }
-
-        delete dlg;
     }
 }
 
 void QDesignerTaskMenu::changeToolTip()
 {
     changeRichTextProperty(QLatin1String("toolTip"));
-}
-
-void QDesignerTaskMenu::changeStatusTip()
-{
-    changeRichTextProperty(QLatin1String("statusTip"));
 }
 
 void QDesignerTaskMenu::changeWhatsThis()
@@ -398,10 +366,49 @@ void QDesignerTaskMenu::changeWhatsThis()
 void QDesignerTaskMenu::changeStyleSheet()
 {
     if (QDesignerFormWindowInterface *fw = formWindow()) {
-        StyleSheetEditorDialog *dlg = new StyleSheetEditorDialog(fw, m_widget);
-        dlg->exec();
-        delete dlg;
+        StyleSheetEditorDialog dlg(fw, m_widget);
+        dlg.exec();
     }
 }
 
+void QDesignerTaskMenu::changeScript()
+{
+    QDesignerFormWindowInterface *fw = formWindow();
+    if (!fw)
+        return;
+
+    MetaDataBase *metaDataBase = qobject_cast<MetaDataBase*>(fw->core()->metaDataBase());
+    if (!metaDataBase)
+        return;
+
+    const MetaDataBaseItem* item = metaDataBase->metaDataBaseItem(m_widget);
+    if (!item)
+        return;
+
+    const QString oldScript = item->script();
+    QString newScript = oldScript;
+   
+    ScriptDialog scriptDialog(fw);
+    if (!scriptDialog.editScript(newScript))
+        return;
+    
+    // compile list of selected objects
+    ScriptCommand::ObjectList objects;
+    objects += (QWidget *)m_widget;
+
+    const QDesignerFormWindowCursorInterface *cursor = fw->cursor();
+    const int selectionCount =  cursor->selectedWidgetCount();
+    for (int i = 0; i < selectionCount; i++) {
+        QWidget *w = cursor->selectedWidget(i);
+        if (w != m_widget)
+             objects += w;
+    }
+    ScriptCommand *scriptCommand = new ScriptCommand(fw);
+    if (!scriptCommand->init(objects, newScript)) {
+        delete scriptCommand;
+        return;
+    }
+    
+    fw->commandHistory()->push(scriptCommand); 
+}
 } // namespace qdesigner_internal

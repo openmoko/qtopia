@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -78,8 +93,8 @@
     \value ActionChanged                    An action has been changed (QActionEvent).
     \value ActionRemoved                    An action has been removed (QActionEvent).
     \value ActivationChange                 A widget's top-level window activation state has changed.
-    \value ApplicationActivated             The application has been made available to the user.
-    \value ApplicationDeactivated           The application has been suspended, and is unavailable to the user.
+    \value ApplicationActivate              The application has been made available to the user.
+    \value ApplicationDeactivate            The application has been suspended, and is unavailable to the user.
     \value ApplicationFontChange            The default application font has changed.
     \value ApplicationLayoutDirectionChange The default application layout direction has changed.
     \value ApplicationPaletteChange         The default application palette has changed.
@@ -89,6 +104,7 @@
     \value ChildRemoved                     An object loses a child (QChildEvent).
     \value Clipboard                        The clipboard contents have changed (QClipboardEvent).
     \value Close                            Widget was closed (QCloseEvent).
+    \value ContentsRectChange               The margins of the widget's content rect changed.
     \value ContextMenu                      Context popup menu (QContextMenuEvent).
     \value DeferredDelete                   The object will be deleted after it has cleaned up.
     \value DragEnter                        The cursor enters a widget during a drag and drop operation (QDragEnterEvent).
@@ -134,6 +150,11 @@
     \value LeaveEditFocus                   An editor widget loses focus for editing.
     \value LeaveWhatsThisMode               Send to toplevel widgets when the application leaves "What's This?" mode.
     \value LocaleChange                     The system locale has changed.
+    \value NonClientAreaMouseButtonDblClick A mouse double click occurred outside the client area.
+    \value NonClientAreaMouseButtonPress    A mouse button press occurred outside the client area.
+    \value NonClientAreaMouseButtonRelease  A mouse button release occurred outside the client area.
+    \value NonClientAreaMouseMove           A mouse move occurred outside the client area.
+    \value MacSizeChange                    The user changed his widget sizes (Mac OS X only).
     \value MenubarUpdated                   The window's menu bar has been updated.
     \value MetaCall                         An asynchronous method invocation via QMetaObject::invokeMethod().
     \value ModifiedChange                   Widgets modification state has been changed.
@@ -194,6 +215,7 @@
     \omitvalue AcceptDropsChange
     \omitvalue ActivateControl
     \omitvalue CaptionChange
+    \omitvalue ChildInsertedRequest
     \omitvalue ChildInserted
     \omitvalue Create
     \omitvalue DeactivateControl
@@ -211,6 +233,9 @@
     \omitvalue Style
     \omitvalue ThreadChange
     \omitvalue ZeroTimerEvent
+    \omitvalue ApplicationActivated
+    \omitvalue ApplicationDeactivated
+    \omitvalue MacGLWindowChange
 */
 
 /*!

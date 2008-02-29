@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -35,12 +50,14 @@
 // We mean it.
 //
 
-#include <QStringList>
-#include <QVector>
-#include <QVariant>
-#include <QPair>
-#include <QSize>
-#include <QFont>
+#include <QtCore/QStringList>
+#include <QtCore/QVector>
+#include <QtCore/QVariant>
+#include <QtCore/QPair>
+#include <QtCore/QSize>
+#include <QtGui/QFont>
+#include <QtGui/QPalette>
+#include <QtGui/QIcon>
 
 namespace QCss
 {
@@ -64,8 +81,10 @@ enum Property {
     QtListIndent,
     QtParagraphType,
     QtTableType,
+    QtUserState,
     TextDecoration,
     TextIndent,
+    TextUnderlineStyle,
     VerticalAlignment,
     Whitespace,
     QtSelectionForeground,
@@ -105,8 +124,10 @@ enum Property {
     BorderRadius,
     Background,
     BackgroundOrigin,
+    BackgroundClip,
     BackgroundRepeat,
     BackgroundPosition,
+    BackgroundAttachment,
     BackgroundImage,
     BorderImage,
     QtSpacing,
@@ -124,6 +145,12 @@ enum Property {
     QtOrigin,
     QtPosition,
     Position,
+    QtStyleFeatures,
+    QtBackgroundRole,
+    ListStyleType,
+    ListStyle,
+    QtImageAlignment,
+    TextAlignment,
     NumProperties
 };
 
@@ -152,9 +179,50 @@ enum KnownValue {
     Value_Bottom,
     Value_Center,
     Value_Native,
+    Value_Solid,
+    Value_Dotted,
+    Value_Dashed,
+    Value_DotDash,
+    Value_DotDotDash,
+    Value_Double,
+    Value_Groove,
+    Value_Ridge,
+    Value_Inset,
+    Value_Outset,
+    Value_Wave,
+    Value_Middle,
     Value_Auto,
     Value_Always,
     Value_None,
+    Value_Transparent,
+    Value_Disc,
+    Value_Circle,
+    Value_Square,
+    Value_Decimal,
+    Value_LowerAlpha,
+    Value_UpperAlpha,
+
+    /* keep these in same order as QPalette::ColorRole */
+    Value_FirstColorRole,
+    Value_WindowText = Value_FirstColorRole,
+    Value_Button,
+    Value_Light,
+    Value_Midlight,
+    Value_Dark,
+    Value_Mid,
+    Value_Text,
+    Value_BrightText,
+    Value_ButtonText,
+    Value_Base,
+    Value_Window,
+    Value_Shadow,
+    Value_Highlight,
+    Value_HighlightedText,
+    Value_Link,
+    Value_LinkVisited,
+    Value_AlternateBase,
+    Value_LastColorRole = Value_AlternateBase,
+
     NumKnownValues
 };
 
@@ -171,6 +239,7 @@ enum BorderStyle {
     BorderStyle_Ridge,
     BorderStyle_Inset,
     BorderStyle_Outset,
+    BorderStyle_Native,
     NumKnownBorderStyles
 };
 
@@ -224,6 +293,20 @@ enum PositionMode {
     NumKnownPositionModes
 };
 
+enum Attachment {
+    Attachment_Unknown,
+    Attachment_Fixed,
+    Attachment_Scroll,
+    NumKnownAttachments
+};
+
+enum StyleFeature {
+    StyleFeature_None = 0,
+    StyleFeature_BackgroundColor = 1,
+    StyleFeature_BackgroundGradient = 2,
+    NumKnownStyleFeatures = 4
+};
+
 struct Q_GUI_EXPORT Value
 {
     enum Type {
@@ -261,9 +344,10 @@ struct Q_GUI_EXPORT Declaration
     bool important;
 
     // helper functions
-    QColor colorValue() const;
-    void colorValues(QColor *c) const;
-    QBrush brushValue() const;
+    QColor colorValue(const QPalette & = QPalette()) const;
+    void colorValues(QColor *c, const QPalette & = QPalette()) const;
+    QBrush brushValue(const QPalette & = QPalette()) const;
+    void brushValues(QBrush *c, const QPalette & = QPalette()) const;
 
     BorderStyle styleValue() const;
     void styleValues(BorderStyle *s) const;
@@ -272,38 +356,69 @@ struct Q_GUI_EXPORT Declaration
     Repeat repeatValue() const;
     Qt::Alignment alignmentValue() const;
     PositionMode positionValue() const;
+    Attachment attachmentValue() const;
+    int  styleFeaturesValue() const;
 
     bool intValue(int *i, const char *unit = 0) const;
     bool realValue(qreal *r, const char *unit = 0) const;
 
+    QSize sizeValue() const;
     QRect rectValue() const;
     QString uriValue() const;
+    QIcon iconValue() const;
 
     void borderImageValue(QString *image, int *cuts, TileMode *h, TileMode *v) const;
 };
 
-enum PseudoState
+enum PseudoClass
 {
-    PseudoState_Unknown         = 0x00000000,
-    PseudoState_Enabled         = 0x00000001,
-    PseudoState_Disabled        = 0x00000002,
-    PseudoState_Pressed         = 0x00000004,
-    PseudoState_Focus           = 0x00000008,
-    PseudoState_Hover           = 0x00000010,
-    PseudoState_Checked         = 0x00000020,
-    PseudoState_On              = PseudoState_Checked,
-    PseudoState_Unchecked       = 0x00000040,
-    PseudoState_Off             = PseudoState_Unchecked,
-    PseudoState_Indeterminate   = 0x00000080,
-    PseudoState_Unspecified     = 0x00000100,
-    NumPseudos = 11
+    PseudoClass_Unknown         = 0x00000000,
+    PseudoClass_Enabled         = 0x00000001,
+    PseudoClass_Disabled        = 0x00000002,
+    PseudoClass_Pressed         = 0x00000004,
+    PseudoClass_Focus           = 0x00000008,
+    PseudoClass_Hover           = 0x00000010,
+    PseudoClass_Checked         = 0x00000020,
+    PseudoClass_On              = PseudoClass_Checked,
+    PseudoClass_Unchecked       = 0x00000040,
+    PseudoClass_Off             = PseudoClass_Unchecked,
+    PseudoClass_Indeterminate   = 0x00000080,
+    PseudoClass_Editable        = PseudoClass_Indeterminate,
+    PseudoClass_Unspecified     = 0x00000100,
+    PseudoClass_Selected        = 0x00000200,
+    PseudoClass_Horizontal      = 0x00000400,
+    PseudoClass_Vertical        = 0x00000800,
+    PseudoClass_Open            = 0x00001000,
+    PseudoClass_Children        = 0x00002000,
+    PseudoClass_Sibling         = 0x00004000,
+    PseudoClass_Default         = 0x00008000,
+    PseudoClass_Item            = PseudoClass_Default,
+    PseudoClass_First           = 0x00010000,
+    PseudoClass_Last            = 0x00020000,
+    PseudoClass_Middle          = 0x00040000,
+    PseudoClass_OnlyOne         = 0x00080000,
+    PseudoClass_PreviousSelected = 0x00100000,
+    PseudoClass_NextSelected     = 0x00200000,
+    PseudoClass_Flat             = 0x00400000,
+    PseudoClass_Left             = 0x00800000,
+    PseudoClass_Right            = 0x01000000,
+    PseudoClass_Top              = 0x02000000,
+    PseudoClass_Bottom           = 0x04000000,
+    PseudoClass_Exclusive        = 0x08000000,
+    PseudoClass_NonExclusive     = 0x10000000,
+    PseudoClass_Frameless        = 0x20000000,
+    PseudoClass_ReadOnly         = 0x40000000,
+    PseudoClass_Closed           = 0x80000000,
+    NumPseudos = 36
 };
 
 struct Q_GUI_EXPORT Pseudo
 {
-    PseudoState type;
+    Pseudo() : negated(false) { }
+    PseudoClass type;
     QString name;
     QString function;
+    bool negated;
 };
 
 struct Q_GUI_EXPORT AttributeSelector
@@ -345,7 +460,7 @@ struct Q_GUI_EXPORT Selector
 {
     QVector<BasicSelector> basicSelectors;
     int specificity() const;
-    int pseudoState() const;
+    int pseudoClass(int *negated = 0) const;
     QString pseudoElement() const;
 };
 
@@ -356,20 +471,23 @@ struct ImportRule;
 
 struct Q_GUI_EXPORT ValueExtractor
 {
-    ValueExtractor(const QVector<Declaration> &declarations);
+    ValueExtractor(const QVector<Declaration> &declarations, const QPalette & = QPalette());
 
-    void extractFont(QFont *font, int *fontSizeAdjustment);
-    bool extractBackground(QBrush *, QString *, Repeat *, Qt::Alignment *, QCss::Origin *);
-    bool extractGeometry(int *w, int *h, int *mw, int *mh);
-    bool extractPosition(int *l, int *t, int *r, int *b, QCss::Origin *, Qt::Alignment *, 
-                         QCss::PositionMode *);
+    bool extractFont(QFont *font, int *fontSizeAdjustment);
+    bool extractBackground(QBrush *, QString *, Repeat *, Qt::Alignment *, QCss::Origin *, QCss::Attachment *,
+                           QCss::Origin *);
+    bool extractGeometry(int *w, int *h, int *minw, int *minh, int *maxw, int *maxh);
+    bool extractPosition(int *l, int *t, int *r, int *b, QCss::Origin *, Qt::Alignment *,
+                         QCss::PositionMode *, Qt::Alignment *);
     bool extractBox(int *margins, int *paddings, int *spacing = 0);
-    bool extractBorder(int *borders, QColor *colors, BorderStyle *Styles, QSize *radii);
-    bool extractPalette(QColor *fg, QColor *sfg, QBrush *sbg, QBrush *abg);
+    bool extractBorder(int *borders, QBrush *colors, BorderStyle *Styles, QSize *radii);
+    bool extractPalette(QBrush *fg, QBrush *sfg, QBrush *sbg, QBrush *abg);
+    int  extractStyleFeatures();
+    bool extractImage(QIcon *icon, Qt::Alignment *a, QSize *size);
 
 private:
     void extractFont();
-    void borderValue(const Declaration &decl, int *width, QCss::BorderStyle *style, QColor *color);
+    void borderValue(const Declaration &decl, int *width, QCss::BorderStyle *style, QBrush *color);
     int lengthValue(const Declaration &decl);
     int lengthValue(const Value& v);
     void lengthValues(const Declaration &decl, int *m);
@@ -379,7 +497,8 @@ private:
     QVector<Declaration> declarations;
     QFont f;
     int adjustment;
-    bool fontExtracted;
+    int fontExtracted;
+    QPalette pal;
 };
 
 struct Q_GUI_EXPORT StyleRule
@@ -436,7 +555,7 @@ public:
     };
 
     QVector<StyleRule> styleRulesForNode(NodePtr node);
-    QVector<Declaration> declarationsForNode(NodePtr node);
+    QVector<Declaration> declarationsForNode(NodePtr node, const char *extraPseudo = 0);
 
     virtual bool nodeNameEquals(NodePtr node, const QString& nodeName) const = 0;
     virtual QString attribute(NodePtr node, const QString &name) const = 0;
@@ -444,12 +563,12 @@ public:
     virtual bool hasAttributes(NodePtr node) const = 0;
     virtual QStringList nodeIds(NodePtr node) const;
     virtual bool isNullNode(NodePtr node) const = 0;
-    virtual NodePtr parentNode(NodePtr node) = 0;
-    virtual NodePtr previousSiblingNode(NodePtr node) = 0;
-    virtual NodePtr duplicateNode(NodePtr node) = 0;
-    virtual void freeNode(NodePtr node) = 0;
+    virtual NodePtr parentNode(NodePtr node) const = 0;
+    virtual NodePtr previousSiblingNode(NodePtr node) const = 0;
+    virtual NodePtr duplicateNode(NodePtr node) const = 0;
+    virtual void freeNode(NodePtr node) const = 0;
 
-    QList<StyleSheet> styleSheets;
+    QVector<StyleSheet> styleSheets;
     QString medium;
 private:
     void matchRules(NodePtr node, const QVector<StyleRule> &rules, StyleSheetOrigin origin,
@@ -518,16 +637,18 @@ struct Q_GUI_EXPORT Symbol
 class Q_AUTOTEST_EXPORT Scanner
 {
 public:
-    static QString preprocess(const QString &input);
-    static QVector<Symbol> scan(const QString &preprocessedInput);
+    static QString preprocess(const QString &input, bool *hasEscapeSequences = 0);
+    static void scan(const QString &preprocessedInput, QVector<Symbol> *symbols);
     static const char *tokenName(TokenType t);
 };
 
 class Q_GUI_EXPORT Parser
 {
 public:
-    explicit Parser(const QString &css);
+    Parser();
+    Parser(QString css, bool file = false);
 
+    void init(const QString &css);
     bool parse(StyleSheet *styleSheet);
     Symbol errorSymbol();
 
@@ -604,6 +725,8 @@ public:
     QVector<Symbol> symbols;
     int index;
     int errorIndex;
+    bool hasEscapeSequences;
+    QString sourcePath;
 };
 
 }

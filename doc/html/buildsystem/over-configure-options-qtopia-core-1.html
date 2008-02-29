@@ -10,7 +10,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">configure Options (Qtopia Core)<br /><span class="subtitle"></span>
 </h1>
 <p>These options can be passed by using <tt>-extra-qtopiacore-config</tt>. For other switches that Qtopia supports see <a href="over-configure-options-1.html">configure Options</a>. Note that quoting can get a bit tricky with <tt>-extra-qtopiacore-config</tt> so be careful. The <tt>-extra-qtopiacore-config</tt> switch can be passed multiple times which can simplify quoting issues in many cases.</p>
@@ -20,7 +20,7 @@
               -extra-qtopiacore-config -arg=word\
               -extra-qtopiacore-config &quot;-arg 'words and stuff'&quot;</pre>
 <a name="qtopiacore-qt-configure-embedded-help"></a>
-<h2>qtopiacore/qt/configure -embedded -help</h2>
+<h3>qtopiacore/qt/configure -embedded -help</h3>
 <pre>    This is the Qtopia Core Open Source Edition.
 
     Usage:  configure [-prefix &lt;dir&gt;] [-prefix-install] [-bindir &lt;dir&gt;] [-libdir &lt;dir&gt;]
@@ -32,13 +32,14 @@
             [-accessibility] [-no-stl] [-stl] [-no-sql-&lt;driver&gt;] [-sql-&lt;driver&gt;]
             [-plugin-sql-&lt;driver&gt;] [-system-sqlite] [-no-qt3support] [-qt3support]
             [-platform] [-D &lt;string&gt;] [-I &lt;string&gt;] [-L &lt;string&gt;] [-help] [-no-zlib]
-            [-qt-zlib] [-system-zlib] [-no-gif] [-qt-gif] [-no-libpng] [-qt-libpng]
-            [-system-libpng] [-no-libmng] [-qt-libmng] [-system-libmng] [-no-libjpeg]
-            [-qt-libjpeg] [-system-libjpeg] [-make &lt;part&gt;] [-no-make &lt;part&gt;]
-            [-R &lt;string&gt;]  [-l &lt;string&gt;] [-no-rpath]  [-rpath] [-continue]
+            [-qt-zlib] [-system-zlib] [-no-gif] [-qt-gif] [-no-libtiff] [-system-libtiff]
+            [-no-libpng] [-qt-libpng] [-system-libpng] [-no-libmng] [-qt-libmng]
+            [-system-libmng] [-no-libjpeg] [-qt-libjpeg] [-system-libjpeg] [-make &lt;part&gt;]
+            [-no-make &lt;part&gt;] [-R &lt;string&gt;]  [-l &lt;string&gt;] [-no-rpath]  [-rpath] [-continue]
             [-verbose] [-v] [-silent] [-no-nis] [-nis] [-no-cups] [-cups] [-no-iconv]
             [-iconv] [-no-pch] [-pch] [-no-qdbus] [-qdbus] [-no-separate-debug-info]
-            [-separate-debug-info]
+            [-no-mmx] [-no-3dnow] [-no-sse] [-no-sse2]
+            [-separate-debug-info] [-armfpa] [-no-optimized-qmake] [-optimized-qmake]
 
             [additional platform specific options (see below)]
 
@@ -47,11 +48,15 @@
      These are optional, but you may specify install directories.
 
         -prefix &lt;dir&gt; ...... This will install everything relative to &lt;dir&gt;
-                             (default /usr/local/Trolltech/QtopiaCore-4.2.3)
+                             (default /usr/local/Trolltech/QtopiaCore-4.3.2)
+
+        -hostprefix [dir] .. Tools and libraries needed when developing
+                             applications are installed in [dir]. If [dir] is
+                             not given, the current build directory will be used.
 
       * -prefix-install .... Force a sandboxed &quot;local&quot; installation of
                              Qt. This will install into
-                             /usr/local/Trolltech/QtopiaCore-4.2.3, if this option is
+                             /usr/local/Trolltech/QtopiaCore-4.3.2, if this option is
                              disabled then some platforms will attempt a
                              &quot;system&quot; install by placing default values to
                              be placed in a system location other than
@@ -125,7 +130,7 @@
                              at run time.
 
                              Possible values for &lt;driver&gt;:
-                             [ ibase mysql odbc psql sqlite sqlite2 ]
+                             [  ibase mysql odbc psql sqlite sqlite2 ]
 
         -system-sqlite ..... Use sqlite from the operating system.
 
@@ -137,6 +142,11 @@
 
                              See the README file for a list of supported
                              operating systems and compilers.
+
+        -no-mmx ............ Do not compile with use of MMX instructions.
+        -no-3dnow .......... Do not compile with use of 3DNOW instructions.
+        -no-sse ............ Do not compile with use of SSE instructions.
+        -no-sse2 ........... Do not compile with use of SSE2 instructions.
 
         -D &lt;string&gt; ........ Add an explicit define to the preprocessor.
         -I &lt;string&gt; ........ Add an explicit include path.
@@ -151,9 +161,14 @@
      +  -system-zlib ....... Use zlib from the operating system.
                              See http://www.gzip.org/zlib
 
-     *  -no-gif ............ Do not compile the plugin for GIF reading support.
-        -qt-gif ............ Compile the plugin for GIF reading support.
+        -no-gif ............ Do not compile the plugin for GIF reading support.
+     *  -qt-gif ............ Compile the plugin for GIF reading support.
                              See also src/plugins/imageformats/gif/qgifhandler.h
+
+        -no-libtiff ........ Do not compile the plugin for TIFF support.
+        -qt-libtiff ........ Use the libtiff bundled with Qt.
+     +  -system-libtiff .... Use libtiff from the operating system.
+                             See http://www.libtiff.org
 
         -no-libpng ......... Do not compile in PNG support.
         -qt-libpng ......... Use the libpng bundled with Qt.
@@ -170,10 +185,13 @@
      +  -system-libjpeg .... Use libjpeg from the operating system.
                              See http://www.ijg.org
 
+        -no-openssl ........ Do not compile support for OpenSSL.
+     +  -openssl ........... Use OpenSSL from the operating system.
+
     Additional options:
 
         -make &lt;part&gt; ....... Add part to the list of parts to be built at make time.
-                             (libs tools examples)
+                             (libs tools examples demos)
         -nomake &lt;part&gt; ..... Exclude part from the list of parts to be built.
 
         -R &lt;string&gt; ........ Add an explicit runtime library path to the Qt
@@ -194,6 +212,9 @@
         -silent ............ Reduce the build output so that warnings and errors
                              can be seen more easily.
 
+     *  -no-optimized-qmake ... Do not build qmake optimized.
+        -optimized-qmake ...... Build qmake optimized.
+
         -no-nis ............ Do not compile NIS support.
      *  -nis ............... Compile NIS support.
 
@@ -209,8 +230,9 @@
         -no-qdbus........... Do not compile the QtDBus module.
      +  -qdbus.............. Compile the QtDBus module.
 
-        -no-separate-debug-info Do not store debug information in a separate file
-     *  -separate-debug-info    Strip debug information into a separate .debug file
+        -reduce-relocations ... Reduce relocations in the libraries through extra linker
+                                optimizations (Qt/X11 / Qtopia/Core only;
+                                experimental; needs GNU ld &gt;= 2.18)
 
     Qtopia Core only:
 
@@ -223,6 +245,12 @@
         -embedded &lt;arch&gt;..... This will enable the embedded build, you must have a
                               proper license for this switch to work.
                               Example values for &lt;arch&gt;: arm mips x86 generic
+
+        -armfpa ............. Target platform is uses the ARM-FPA floating point format.
+        -no-armfpa .......... Target platform does not use the ARM-FPA floating point format.
+
+                              The floating point format is usually autodetected by configure. Use this
+                              to override the detected value.
 
         -little-endian ...... Target platform is little endian (LSB first).
         -big-endian ......... Target platform is big endian (MSB first).
@@ -240,24 +268,24 @@
                               default (full).
 
         -depths &lt;list&gt; ...... Comma-separated list of supported bit-per-pixel
-                              depths, from: 4, 8, 16, 18, 24, and 32.
+                              depths, from: 1, 4, 8, 16, 18, 24, and 32.
 
         -qt-decoration-&lt;style&gt; ....Enable a decoration &lt;style&gt; in the QtGui library,
                                    by default all available decorations are on.
                                    Possible values for &lt;style&gt;: [ styled windows default ]
         -plugin-decoration-&lt;style&gt; Enable decoration &lt;style&gt; as a plugin to be
                                    linked to at run time.
-                                   Possible values for &lt;style&gt;: [ default windows ]
+                                   Possible values for &lt;style&gt;: [  default windows ]
         -no-decoration-&lt;style&gt; ....Disable decoration &lt;style&gt; entirely.
                                    Possible values for &lt;style&gt;: [ styled windows default ]
 
         -qt-gfx-&lt;driver&gt; ... Enable a graphics &lt;driver&gt; in the QtGui library.
-                             Possible values for &lt;driver&gt;: [ linuxfb transformed qvfb vnc ]
+                             Possible values for &lt;driver&gt;: [ linuxfb transformed qvfb vnc multiscreen ]
         -plugin-gfx-&lt;driver&gt; Enable graphics &lt;driver&gt; as a plugin to be
                              linked to at run time.
-                             Possible values for &lt;driver&gt;: [ qvfb transformed vnc ]
+                             Possible values for &lt;driver&gt;: [  hybrid qvfb transformed vnc ]
         -no-gfx-&lt;driver&gt; ... Disable graphics &lt;driver&gt; entirely.
-                             Possible values for &lt;driver&gt;: [ linuxfb transformed qvfb vnc ]
+                             Possible values for &lt;driver&gt;: [ linuxfb transformed qvfb vnc multiscreen ]
 
         -qt-kbd-&lt;driver&gt; ... Enable a keyboard &lt;driver&gt; in the QtGui library.
         -no-kbd-&lt;driver&gt; ... Disable keyboard &lt;driver&gt; entirely.
@@ -268,12 +296,16 @@
                                Possible values for &lt;driver&gt;: [ pc bus linuxtp yopy vr41xx tslib qvfb ]
         -plugin-mouse-&lt;driver&gt; Enable mouse &lt;driver&gt; as a plugin to be
                                linked to at runtime.
-                               Possible values for &lt;driver&gt;: [ tslib ]
+                               Possible values for &lt;driver&gt;: [  tslib ]
         -no-mouse-&lt;driver&gt; ... Disable mouse &lt;driver&gt; entirely.
                                Possible values for &lt;driver&gt;: [ pc bus linuxtp yopy vr41xx tslib qvfb ]
 
         -iwmmxt............. Compile using the iWMMXt instruction set
-                             (available on some XScale CPUs).</pre>
+                             (available on some XScale CPUs).
+
+     +  -no-glib............ Do not compile Glib support.
+        -glib............... Compile Glib support.</pre>
+<p>See also <a href="overviews.html">Overviews</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 Trolltech</td>

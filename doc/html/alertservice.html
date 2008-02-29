@@ -44,16 +44,17 @@
 <p>Provides the Qtopia Alert service.</p>
 <p>The <i>Alert</i> service enables applications to sound the audible system alert. Normally an application will use <a href="qtopia.html#soundAlarm">Qtopia::soundAlarm</a>() for this.</p>
 <p>The <i>Alert</i> service is typically supplied by the <a href="alertservicetask.html">AlertServiceTask</a> task in the Qtopia server, but the system integrator may change the provider of this service if the device has special hardware (e.g&#x2e; a buzzer or vibration system) that can alert the user.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <p>See also <a href="qtopia.html#soundAlarm">Qtopia::soundAlarm</a>().</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="soundAlert"></a>void AlertService::soundAlert ()&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
-<p>Sounds the audible system alert. This is used for applications such as Calendar when it needs to inform the user of an event.</p>
+<p>Sounds the audible system alert (once). This is used for applications such as Calendar when it needs to inform the user of an event.</p>
 <p>This slot corresponds to the QCop service message <tt>Alert::soundAlert()</tt>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

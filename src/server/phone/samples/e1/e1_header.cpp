@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -160,11 +160,11 @@ E1Header::E1Header(QWidget *parent, Qt::WFlags wflags)
     E1HeaderButton * button = 0;
 
     button = new E1HeaderButton(QIcon(":icon/home").pixmap(20, 20), "home", this);
-    connect(button, SIGNAL(clicked(const QString &)), this, SLOT(clicked(const QString &)));
+    connect(button, SIGNAL(clicked(QString)), this, SLOT(clicked(QString)));
     layout->addWidget(button);
 
     button = new E1HeaderButton(QIcon(":icon/addressbook/AddressBook").pixmap(20, 20), "contacts", this);
-    connect(button, SIGNAL(clicked(const QString &)), this, SLOT(clicked(const QString &)));
+    connect(button, SIGNAL(clicked(QString)), this, SLOT(clicked(QString)));
     layout->addWidget(button);
 
     m_alertButton = new E1HeaderAlertButton(this);
@@ -173,11 +173,11 @@ E1Header::E1Header(QWidget *parent, Qt::WFlags wflags)
     layout->addWidget(m_alertButton);
 
     button = new E1HeaderButton(QIcon(":icon/email").pixmap(20, 20), "email", this);
-    connect(button, SIGNAL(clicked(const QString &)), this, SLOT(clicked(const QString &)));
+    connect(button, SIGNAL(clicked(QString)), this, SLOT(clicked(QString)));
     layout->addWidget(button);
 
     button = new E1HeaderButton(QIcon(":icon/phone/calls").pixmap(20, 20), "dialer", this);
-    connect(button, SIGNAL(clicked(const QString &)), this, SLOT(clicked(const QString &)));
+    connect(button, SIGNAL(clicked(QString)), this, SLOT(clicked(QString)));
     layout->addWidget(button);
 
     WindowManagement::dockWindow(this, WindowManagement::Top,

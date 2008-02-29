@@ -1,8 +1,9 @@
+// -*-C++-*-
 /****************************************************************************
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,16 +28,24 @@
 
 class MemoryMonitor : public QObject
 {
-Q_OBJECT
-public:
-    enum MemState { MemUnknown, MemCritical, MemVeryLow, MemLow, MemNormal };
+    Q_OBJECT
+
+  public:
+    enum MemState {
+	MemUnknown 	= 0,
+	MemCritical 	= 1,
+	MemVeryLow	= 2,
+	MemLow		= 3,
+	MemNormal	= 4
+    };
 
     virtual MemState memoryState() const = 0;
     virtual unsigned int timeInState() const = 0;
 
-signals:
-    void memoryStateChanged(MemState newState);
+  signals:
+    void memoryStateChanged(MemoryMonitor::MemState newState);
 };
+
 QTOPIA_TASK_INTERFACE(MemoryMonitor);
 
 #endif // _MEMORYMONITOR_H_

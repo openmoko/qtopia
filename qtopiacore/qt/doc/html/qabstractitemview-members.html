@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qabstractitemview.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/itemviews/qabstractitemview.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QAbstractItemView</title>
+  <title>Qt 4.3: List of All Members for QAbstractItemView</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -22,6 +22,8 @@
 <li><div class="fn"/>enum <a href="qabstractitemview.html#EditTrigger-enum">EditTrigger</a></li>
 <li><div class="fn"/>flags <a href="qabstractitemview.html#EditTrigger-enum">EditTriggers</a></li>
 <li><div class="fn"/>enum <a href="qpaintdevice.html#PaintDeviceMetric-enum">PaintDeviceMetric</a></li>
+<li><div class="fn"/>enum <a href="qwidget.html#RenderFlag-enum">RenderFlag</a></li>
+<li><div class="fn"/>flags <a href="qwidget.html#RenderFlag-enum">RenderFlags</a></li>
 <li><div class="fn"/>enum <a href="qabstractitemview.html#ScrollHint-enum">ScrollHint</a></li>
 <li><div class="fn"/>enum <a href="qabstractitemview.html#ScrollMode-enum">ScrollMode</a></li>
 <li><div class="fn"/>enum <a href="qabstractitemview.html#SelectionBehavior-enum">SelectionBehavior</a></li>
@@ -190,10 +192,13 @@
 <li><div class="fn"/><a href="qwidget.html#layoutDirection-prop">layoutDirection</a> () const : Qt::LayoutDirection</li>
 <li><div class="fn"/><a href="qwidget.html#leaveEvent">leaveEvent</a> ( QEvent * )</li>
 <li><div class="fn"/><a href="qframe.html#lineWidth-prop">lineWidth</a> () const : int</li>
+<li><div class="fn"/><a href="qwidget.html#locale-prop">locale</a> () const : QLocale</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiX">logicalDpiX</a> () const : int</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiY">logicalDpiY</a> () const : int</li>
 <li><div class="fn"/><a href="qwidget.html#lower">lower</a> ()</li>
+<li><div class="fn"/><a href="qwidget.html#macCGHandle">macCGHandle</a> () const : Qt::HANDLE</li>
 <li><div class="fn"/><a href="qwidget.html#macEvent">macEvent</a> ( EventHandlerCallRef, EventRef ) : bool</li>
+<li><div class="fn"/><a href="qwidget.html#macQDHandle">macQDHandle</a> () const : Qt::HANDLE</li>
 <li><div class="fn"/><a href="qwidget.html#mapFrom">mapFrom</a> ( QWidget *, const QPoint &amp; ) const : QPoint</li>
 <li><div class="fn"/><a href="qwidget.html#mapFromGlobal">mapFromGlobal</a> ( const QPoint &amp; ) const : QPoint</li>
 <li><div class="fn"/><a href="qwidget.html#mapFromParent">mapFromParent</a> ( const QPoint &amp; ) const : QPoint</li>
@@ -241,8 +246,8 @@
 <li><div class="fn"/><a href="qabstractitemview.html#pressed">pressed</a> ( const QModelIndex &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#property">property</a> ( const char * ) const : QVariant</li>
 <li><div class="fn"/><a href="qwidget.html#qwsEvent">qwsEvent</a> ( QWSEvent * ) : bool</li>
-<li><div class="fn"/><a href="qwidget.html#raise">raise</a> ()</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qwidget.html#raise">raise</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#receivers">receivers</a> ( const char * ) const : int</li>
 <li><div class="fn"/><a href="qwidget.html#rect-prop">rect</a> () const : QRect</li>
 <li><div class="fn"/><a href="qwidget.html#releaseDC">releaseDC</a> ( HDC ) const</li>
@@ -251,6 +256,7 @@
 <li><div class="fn"/><a href="qwidget.html#releaseShortcut">releaseShortcut</a> ( int )</li>
 <li><div class="fn"/><a href="qwidget.html#removeAction">removeAction</a> ( QAction * )</li>
 <li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
+<li><div class="fn"/><a href="qwidget.html#render">render</a> ( QPaintDevice *, const QPoint &amp;, const QRegion &amp;, RenderFlags )</li>
 <li><div class="fn"/><a href="qwidget.html#repaint">repaint</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#repaint-6">repaint</a> ( int, int, int, int )</li>
 <li><div class="fn"/><a href="qwidget.html#repaint-7">repaint</a> ( const QRect &amp; )</li>
@@ -335,6 +341,7 @@
 <li><div class="fn"/><a href="qwidget.html#setLayout">setLayout</a> ( QLayout * )</li>
 <li><div class="fn"/><a href="qwidget.html#layoutDirection-prop">setLayoutDirection</a> ( Qt::LayoutDirection )</li>
 <li><div class="fn"/><a href="qframe.html#lineWidth-prop">setLineWidth</a> ( int )</li>
+<li><div class="fn"/><a href="qwidget.html#locale-prop">setLocale</a> ( const QLocale &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setMask">setMask</a> ( const QBitmap &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setMask-2">setMask</a> ( const QRegion &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#maximumHeight-prop">setMaximumHeight</a> ( int )</li>
@@ -426,7 +433,8 @@
 <li><div class="fn"/><a href="qwidget.html#underMouse">underMouse</a> () const : bool</li>
 <li><div class="fn"/><a href="qwidget.html#cursor-prop">unsetCursor</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#layoutDirection-prop">unsetLayoutDirection</a> ()</li>
-<li><div class="fn"/><a href="qwidget.html#update">update</a> ()</li>
+<li><div class="fn"/><a href="qwidget.html#locale-prop">unsetLocale</a> ()</li>
+<li><div class="fn"/><a href="qabstractitemview.html#update">update</a> ( const QModelIndex &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#update-2">update</a> ( int, int, int, int )</li>
 <li><div class="fn"/><a href="qwidget.html#update-3">update</a> ( const QRect &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#update-4">update</a> ( const QRegion &amp; )</li>
@@ -473,6 +481,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

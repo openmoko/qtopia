@@ -1,164 +1,88 @@
-<ui version="4.0" stdsetdef="1" >
-  <author></author>
-  <comment></comment>
-  <exportmacro></exportmacro>
-  <class>SecurityBase</class>
-  <widget class="QDialog" name="SecurityBase" >
-    <property name="objectName" >
-      <string notr="true" >SecurityBase</string>
-    </property>
-    <property name="geometry" >
-      <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>209</width>
-        <height>182</height>
-      </rect>
-    </property>
-    <property name="windowTitle" >
-      <string>Security</string>
-    </property>
-    <layout class="QVBoxLayout" >
+<ui version="4.0" >
+ <class>SecurityBase</class>
+ <widget class="QDialog" name="SecurityBase" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>212</width>
+    <height>193</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Security</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>4</number>
+   </property>
+   <property name="spacing" >
+    <number>2</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="GroupBox9" >
+     <property name="title" >
+      <string>Passcode</string>
+     </property>
+     <layout class="QVBoxLayout" >
       <property name="margin" >
-        <number>6</number>
+       <number>9</number>
       </property>
       <property name="spacing" >
-        <number>6</number>
+       <number>6</number>
       </property>
       <item>
-        <widget class="QGroupBox" name="GroupBox9" >
-          <property name="objectName" >
-            <string notr="true" >GroupBox9</string>
+       <layout class="QHBoxLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QPushButton" name="changepasscode" >
+          <property name="text" >
+           <string>Change</string>
           </property>
-          <property name="title" >
-            <string>Passcode</string>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="clearpasscode" >
+          <property name="text" >
+           <string>Clear</string>
           </property>
-          <layout class="QVBoxLayout" >
-            <property name="margin" >
-              <number>6</number>
-            </property>
-            <property name="spacing" >
-              <number>6</number>
-            </property>
-            <item>
-              <layout class="QHBoxLayout" >
-                <property name="margin" >
-                  <number>0</number>
-                </property>
-                <property name="spacing" >
-                  <number>-1</number>
-                </property>
-                <item>
-                  <widget class="QPushButton" name="changepasscode" >
-                    <property name="objectName" >
-                      <string notr="true" >changepasscode</string>
-                    </property>
-                    <property name="text" >
-                      <string>Change</string>
-                    </property>
-                  </widget>
-                </item>
-                <item>
-                  <widget class="QPushButton" name="clearpasscode" >
-                    <property name="objectName" >
-                      <string notr="true" >clearpasscode</string>
-                    </property>
-                    <property name="text" >
-                      <string>Clear code</string>
-                    </property>
-                  </widget>
-                </item>
-              </layout>
-            </item>
-            <item>
-              <widget class="QCheckBox" name="passcode_poweron" >
-                <property name="objectName" >
-                  <string notr="true" >passcode_poweron</string>
-                </property>
-                <property name="text" >
-                  <string>Give code at power-on</string>
-                </property>
-                <property name="whatsThis" >
-                  <string>Pass code protection provides a minimal level of protection from casual access to this device.</string>
-                </property>
-              </widget>
-            </item>
-          </layout>
-        </widget>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-        <widget class="QGroupBox" name="GroupBox1" >
-          <property name="objectName" >
-            <string notr="true" >GroupBox1</string>
-          </property>
-          <property name="title" >
-            <string>Sync</string>
-          </property>
-          <layout class="QVBoxLayout" >
-            <property name="margin" >
-              <number>11</number>
-            </property>
-            <property name="spacing" >
-              <number>6</number>
-            </property>
-            <item>
-              <widget class="QLabel" name="TextLabel1_2" >
-                <property name="objectName" >
-                  <string notr="true" >TextLabel1_2</string>
-                </property>
-                <property name="text" >
-                  <string>Accept sync from network:</string>
-                </property>
-              </widget>
-            </item>
-            <item>
-              <widget class="QComboBox" name="syncnet" >
-                <property name="objectName" >
-                  <string notr="true" >syncnet</string>
-                </property>
-                <property name="editable" >
-                  <bool>true</bool>
-                </property>
-                <item>
-                  <property name="text" >
-                    <string>192.168.129.0/24 (default)</string>
-                  </property>
-                </item>
-                <item>
-                  <property name="text" >
-                    <string>192.168.1.0/24</string>
-                  </property>
-                </item>
-                <item>
-                  <property name="text" >
-                    <string>192.168.0.0/16</string>
-                  </property>
-                </item>
-                <item>
-                  <property name="text" >
-                    <string>172.16.0.0/12</string>
-                  </property>
-                </item>
-                <item>
-                  <property name="text" >
-                    <string>10.0.0.0/8</string>
-                  </property>
-                </item>
-                <item>
-                  <property name="text" >
-                    <string>Any</string>
-                  </property>
-                </item>
-                <item>
-                  <property name="text" >
-                    <string>None</string>
-                  </property>
-                </item>
-              </widget>
-            </item>
-          </layout>
-        </widget>
+       <widget class="QCheckBox" name="passcode_poweron" >
+        <property name="whatsThis" >
+         <string>Pass code protection provides a minimal level of protection from casual access to this device.</string>
+        </property>
+        <property name="text" >
+         <string>Use at power-on</string>
+        </property>
+       </widget>
       </item>
-    </layout>
-  </widget>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

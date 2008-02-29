@@ -10,33 +10,29 @@
 CREATE TABLE content 
 (
     cid INTEGER PRIMARY KEY,        -- SQLite chokes on "AUTO_INCREMENT", will make this auto inc anyway
-    uiName VARCHAR(100) NOT NULL COLLATE NOCASE,   -- indexed
+    uiName VARCHAR(100) NOT NULL,   -- indexed
+    uiNameSortOrder VARCHAR(100) NOT NULL,
     mType INTEGER,          -- indexed
     drmFlags INTEGER,              -- enum "[p]lain", "[c]ontrolled", or "[u]nrenderable"
     docStatus CHAR(1),              -- enum "[d]oc", or "[b]in", indexed
-    path VARCHAR(255) COLLATE NOCASE,              -- path + filename, unique
+    path VARCHAR(255),              -- path + filename, unique
     location INTEGER,
-    icon VARCHAR(255) COLLATE NOCASE,              -- path + filename
-    linkFile VARCHAR(255) COLLATE NOCASE,
-    linkLocation INTEGER,
-    mimeTypes VARCHAR(255) COLLATE NOCASE,
+    icon VARCHAR(255),              -- path + filename
     lastUpdated INTEGER
 );
 
 CREATE INDEX cNameIndex ON content ( uiName );
 
+CREATE INDEX cNameSortOrderIndex ON content ( uiNameSortOrder );
+
 CREATE INDEX cMimeIndex ON content ( mType );
 
 CREATE INDEX cDocStatusIndex ON content ( docStatus );
 
-CREATE UNIQUE INDEX cLinkPathIndex ON content ( path, location, linkFile, linkLocation );
+CREATE UNIQUE INDEX cLinkPathIndex ON content ( path, location );
 
 CREATE INDEX cLocationIndex ON content ( location );
 
-CREATE INDEX cLinkLocationIndex ON content ( linkLocation );
-
 CREATE INDEX cPath on content (path);
 
-CREATE INDEX cLinkFile on content (linkFile);
-
-PRAGMA user_version=109;
+PRAGMA user_version=110;

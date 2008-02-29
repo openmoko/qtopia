@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -67,7 +67,7 @@ void WirelessPage::init()
 #endif
 
     connect( ui.mode, SIGNAL(currentIndexChanged(int)), this, SLOT(changeChannelMode(int)) );
-    connect( ui.essid, SIGNAL(textChanged(const QString&)), this, SLOT(setNewNetworkTitle(const QString&)) );
+    connect( ui.essid, SIGNAL(textChanged(QString)), this, SLOT(setNewNetworkTitle(QString)) );
     connect( ui.newButton, SIGNAL(clicked()), this, SLOT(addWLAN()) );
     connect( ui.delButton, SIGNAL(clicked()), this, SLOT(removeWLAN()) );
 }
@@ -100,7 +100,7 @@ void WirelessPage::initNetSelector( const QtopiaNetworkProperties& prop )
     foreach( QString key, keys ) {
         if ( !key.startsWith( "WirelessNetworks" ) )
             continue;
-        int idx = key.mid(17, key.indexOf(QChar('/'), 17)-17).toInt();
+        int idx = key.mid(17 /*strlen("WirelessNetworks/")*/, key.indexOf(QChar('/'), 17)-17).toInt();
         if ( idx <= numKnownNetworks ) {
             //copy all values into changedSettings where we keep track of changes
             changedSettings.insert( key, prop.value( key ) );
@@ -218,7 +218,7 @@ void WirelessPage::saveConfig()
             changedSettings.insert(s+"WirelessMode", "Managed");
     }
 
-    changedSettings.insert( s+"ESSID", ui.essid->text() );
+    changedSettings.insert(s+"ESSID", ui.essid->text());
     changedSettings.insert(s+"AccessPoint", ui.ap->text());
     changedSettings.insert(s+"Nickname", ui.nickname->text());
     changedSettings.insert(s+"CHANNEL", ui.channel->value());
@@ -227,6 +227,12 @@ void WirelessPage::saveConfig()
         changedSettings.insert(s+"BitRate", "0");
     else
         changedSettings.insert(s+"BitRate", ui.bitrate->currentText());
+
+    //save create/save connection Uuid
+    if ( !changedSettings.contains( s+"Uuid" ) ) {
+        QUuid uid = QUuid::createUuid();
+        changedSettings.insert( s+"Uuid", uid.toString() );
+    }
 }
 
 

@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/qtuiloader.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qtuiloader.qdoc -->
 <head>
-  <title>Qt 4.2: QtUiTools Module</title>
+  <title>Qt 4.3: QtUiTools Module</title>
   <link rel="prev" href="qtdesigner.html" />
   <link rel="contents" href="modules.html" />
   <link rel="next" href="qtassistant.html" />
@@ -20,23 +20,21 @@
 [<a href="modules.html">Qt's Modules</a>]
 [Next: <a href="qtassistant.html">QtAssistant Module</a>]
 </p>
-<h1 align="center">QtUiTools Module<br /><small></small></h1>
+<h1 align="center">QtUiTools Module<br /><span class="subtitle"></span>
+</h1>
 <p>The QtUiTools module provides classes to handle forms created with Qt Designer. <a href="#details">More...</a></p>
 <h2>Classes</h2>
-<p><table width="100%" class="annotated">
+<p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><th><a href="quiloader.html">QUiLoader</a></th><td>Allows standalone applications dynamically create user interfaces at run-time using the information stored in .ui files or specified plugin paths</td></tr>
 </table></p>
 <a name="details"></a>
 <h2>Detailed Description</h2>
-<p>The QtUiTools module provides classes to handle forms created with Qt Designer.</p>
-<ul><li><a href="#configuring-the-build-process">Configuring the Build Process</a></li>
-</ul>
-<a name="configuring-the-build-process"></a>
-<h3>Configuring the Build Process</h3>
-<p>Applications that use the form handling classes need to be configured to be built against the QtUiTools module. The following declaration in a <tt>qmake</tt> project file ensures that an application is compiled and linked appropriately:</p>
+<p>These forms are processed at run-time to produce dynamically-generated user interfaces. In order to generate a form at run-time, a resource file containing a <tt>.ui</tt> file is needed. Applications that use the form handling classes need to be configured to be built against the QtUiTools module. This is done by including the following declaration in a <tt>qmake</tt> project file to ensure that the application is compiled and linked appropriately.</p>
 <pre> CONFIG += uitools</pre>
+<p>A form loader object, provided by the <a href="quiloader.html">QUiLoader</a> class, is used to construct the user interface. This user interface can be retrieved from any <a href="qiodevice.html">QIODevice</a>; for example, a <a href="qfile.html">QFile</a> object can be used to obtain a form stored in a project's resources. The <a href="quiloader.html#load">QUiLoader::load</a>() function takes the user interface description contained in the file and constructs the form widget.</p>
 <p>To include the definitions of the module's classes, use the following directive:</p>
 <pre> #include &lt;QtUiTools&gt;</pre>
+<p>See also <a href="designer-calculatorbuilder.html">Calculator Builder Example</a> and <a href="designer-worldtimeclockbuilder.html">World Time Clock Builder Example</a>.</p>
 <p>
 [Previous: <a href="qtdesigner.html">QtDesigner Module</a>]
 [<a href="modules.html">Qt's Modules</a>]
@@ -46,6 +44,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

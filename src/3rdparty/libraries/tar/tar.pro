@@ -3,6 +3,7 @@ license(BSD GPL_COMPATIBLE)
 TARGET		=   tar
 VERSION		=   1.1.2
 CONFIG+=staticlib
+equals(arch,x86_64):QMAKE_CFLAGS+=-fPIC
 CONFIG -= warn_on
 
 HEADERS		=   libtar.h libtar_listhash.h

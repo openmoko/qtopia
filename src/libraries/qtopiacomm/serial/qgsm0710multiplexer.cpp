@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,6 +23,7 @@
 #include <qtopialog.h>
 #include <qmap.h>
 #include <alloca.h>
+#include "gsm0710_p.h"
 
 /*!
     \class QGsm0710Multiplexer
@@ -52,22 +53,44 @@ public:
                                 bool server )
     {
         this->device = device;
-        this->frameSize = frameSize;
-        this->advanced = advanced;
-        this->used = 0;
         this->server = server;
+        gsm0710_initialize( &ctx );
+        ctx.frame_size = frameSize;
+        ctx.mode = ( advanced ? GSM0710_MODE_ADVANCED : GSM0710_MODE_BASIC );
+        ctx.port_speed = device->rate();
+        ctx.server = (int)server;
+        ctx.user_data = (void *)this;
+        ctx.at_command = at_command;
+        ctx.read = read;
+        ctx.write = write;
+        ctx.deliver_data = deliver_data;
+        ctx.deliver_status = deliver_status;
+        ctx.debug_message = debug_message;
+        ctx.open_channel = open_channel;
+        ctx.close_channel = close_channel;
+        ctx.terminate = terminate;
     }
     ~QGsm0710MultiplexerPrivate();
 
     void closeAll();
 
     QSerialIODevice *device;
-    int frameSize;
-    bool advanced;
-    QMap<int,QGsm0710MultiplexerChannel *> channels;
-    char buffer[4096];
-    uint used;
     bool server;
+    struct gsm0710_context ctx;
+    QMap<int,QGsm0710MultiplexerChannel *> channels;
+    QGsm0710Multiplexer *mux;
+
+    static int at_command(struct gsm0710_context *ctx, const char *cmd);
+    static int read(struct gsm0710_context *ctx, void *data, int len);
+    static int write(struct gsm0710_context *ctx, const void *data, int len);
+    static void deliver_data(struct gsm0710_context *ctx, int channel,
+                             const void *data, int len);
+    static void deliver_status(struct gsm0710_context *ctx,
+                               int channel, int status);
+    static void debug_message(struct gsm0710_context *ctx, const char *msg);
+    static void open_channel(struct gsm0710_context *ctx, int channel);
+    static void close_channel(struct gsm0710_context *ctx, int channel);
+    static void terminate(struct gsm0710_context *ctx);
 };
 
 class QGsm0710MultiplexerChannel : public QSerialIODevice
@@ -96,14 +119,11 @@ public:
     bool cts() const;
     void discard();
 
-    void reopen();
 protected:
     qint64 readData( char *data, qint64 maxlen );
     qint64 writeData( const char *data, qint64 len );
 
 public:
-    static void writeFrame( QGsm0710Multiplexer *mux, int channel,
-                            int type, const char *data, uint len );
     void add( const char *data, uint len );
     void setStatus( int status );
 
@@ -136,20 +156,96 @@ void QGsm0710MultiplexerPrivate::closeAll()
     }
 }
 
-#define Gsm710_FC       0x02
-#define Gsm710_DTR      0x04
-#define Gsm710_DSR      0x04
-#define Gsm710_RTS      0x08
-#define Gsm710_CTS      0x08
-#define Gsm710_DCD      0x80
+#define MUXP(ctx)   ((QGsm0710MultiplexerPrivate *)((ctx)->user_data))
+
+int QGsm0710MultiplexerPrivate::at_command
+        (struct gsm0710_context *ctx, const char *cmd)
+{
+    return QSerialIODeviceMultiplexer::chat( MUXP(ctx)->device, QString(cmd) );
+}
+
+int QGsm0710MultiplexerPrivate::read
+        (struct gsm0710_context *ctx, void *data, int len)
+{
+    len = (int)(MUXP(ctx)->device->read( (char *)data, len ));
+    if ( qLogEnabled(Mux) ) {
+        qLog(Mux) << "QGsm0710MultiplexerPrivate::read()";
+        for ( int i = 0; i < len; ++i ) {
+            if( i >= 16 && (i % 16) == 0 )
+                fprintf(stdout, "\n");
+            fprintf(stdout, "%02x ", ((char *)data)[i] & 0xFF);
+        }
+        fprintf(stdout, "\n");
+    }
+    return (int)len;
+}
+
+int QGsm0710MultiplexerPrivate::write
+        (struct gsm0710_context *ctx, const void *data, int len)
+{
+    if ( qLogEnabled(Mux) ) {
+        qLog(Mux) << "QGsm0710MultiplexerPrivate::write()";
+        for ( int i = 0; i < len; ++i ) {
+            if( i >= 16 && (i % 16) == 0 )
+                fprintf(stdout, "\n");
+            fprintf(stdout, "%02x ", ((const char *)data)[i] & 0xFF);
+        }
+        fprintf(stdout, "\n");
+    }
+    return MUXP(ctx)->device->write( (const char *)data, len );
+}
+
+void QGsm0710MultiplexerPrivate::deliver_data
+        (struct gsm0710_context *ctx, int channel, const void *data, int len)
+{
+    QGsm0710MultiplexerPrivate *d = MUXP(ctx);
+    if ( d->channels.contains( channel ) ) {
+        QGsm0710MultiplexerChannel *chan = d->channels.value( channel );
+        chan->add( (const char *)data, len );
+    }
+}
+
+void QGsm0710MultiplexerPrivate::deliver_status
+        (struct gsm0710_context *ctx, int channel, int status)
+{
+    QGsm0710MultiplexerPrivate *d = MUXP(ctx);
+    if ( d->channels.contains( channel ) ) {
+        QGsm0710MultiplexerChannel *chan = d->channels.value( channel );
+        chan->setStatus( status );
+    }
+}
+
+void QGsm0710MultiplexerPrivate::debug_message
+        (struct gsm0710_context *ctx, const char *msg)
+{
+    Q_UNUSED(ctx);
+    qLog(Mux) << msg;
+}
+
+void QGsm0710MultiplexerPrivate::open_channel
+        (struct gsm0710_context *ctx, int channel)
+{
+    MUXP(ctx)->mux->open( channel );
+}
+
+void QGsm0710MultiplexerPrivate::close_channel
+        (struct gsm0710_context *ctx, int channel)
+{
+    MUXP(ctx)->mux->close( channel );
+}
+
+void QGsm0710MultiplexerPrivate::terminate(struct gsm0710_context *ctx)
+{
+    MUXP(ctx)->mux->terminate();
+}
 
 QGsm0710MultiplexerChannel::QGsm0710MultiplexerChannel
         ( QGsm0710Multiplexer *mux, int channel )
 {
     this->mux = mux;
     this->channel = channel;
-    this->incomingStatus = Gsm710_DSR | Gsm710_CTS;
-    this->outgoingStatus = Gsm710_DTR | Gsm710_RTS | Gsm710_DCD | 0x01;
+    this->incomingStatus = GSM0710_DSR | GSM0710_CTS;
+    this->outgoingStatus = GSM0710_DTR | GSM0710_RTS | GSM0710_DCD | 0x01;
     this->previouslyOpened = false;
     this->currentlyOpen = false;
     this->waitingForReadyRead = false;
@@ -160,7 +256,7 @@ QGsm0710MultiplexerChannel::~QGsm0710MultiplexerChannel()
 {
     // Send a close request for this channel if it was ever open.
     if ( previouslyOpened )
-        writeFrame( mux, channel, 0x53, 0, 0 );
+        gsm0710_close_channel( &(mux->d->ctx), channel );
 }
 
 bool QGsm0710MultiplexerChannel::open( OpenMode mode )
@@ -168,19 +264,13 @@ bool QGsm0710MultiplexerChannel::open( OpenMode mode )
     QIODevice::setOpenMode( ( mode & ReadWrite ) | Unbuffered );
     if ( !previouslyOpened && !mux->d->server ) {
         // Send an open request for this channel.
-        writeFrame( mux, channel, 0x3F, 0, 0 );
+        gsm0710_open_channel( &(mux->d->ctx), channel );
         previouslyOpened = true;
     }
     currentlyOpen = true;
     return true;
 }
 
-
-void QGsm0710MultiplexerChannel::reopen()
-{
-    if ( !mux->d->server )
-        writeFrame( mux, channel, 0x3F, 0, 0 );
-}
 
 void QGsm0710MultiplexerChannel::close()
 {
@@ -221,60 +311,60 @@ int QGsm0710MultiplexerChannel::rate() const
 
 bool QGsm0710MultiplexerChannel::dtr() const
 {
-    return ( ( outgoingStatus & Gsm710_DTR ) != 0 );
+    return ( ( outgoingStatus & GSM0710_DTR ) != 0 );
 }
 
 void QGsm0710MultiplexerChannel::setDtr( bool value )
 {
     if ( value != dtr() ) {
         if ( value )
-            outgoingStatus |= Gsm710_DTR;
+            outgoingStatus |= GSM0710_DTR;
         else
-            outgoingStatus &= ~Gsm710_DTR;
+            outgoingStatus &= ~GSM0710_DTR;
         updateStatus();
     }
 }
 
 bool QGsm0710MultiplexerChannel::dsr() const
 {
-    return ( ( incomingStatus & Gsm710_DSR ) != 0 );
+    return ( ( incomingStatus & GSM0710_DSR ) != 0 );
 }
 
 bool QGsm0710MultiplexerChannel::carrier() const
 {
-    return ( ( incomingStatus & Gsm710_DCD ) != 0 );
+    return ( ( incomingStatus & GSM0710_DCD ) != 0 );
 }
 
 bool QGsm0710MultiplexerChannel::setCarrier( bool value )
 {
     if ( value )
-        outgoingStatus |= Gsm710_DCD;
+        outgoingStatus |= GSM0710_DCD;
     else
-        outgoingStatus &= ~Gsm710_DCD;
+        outgoingStatus &= ~GSM0710_DCD;
     updateStatus();
     return true;
 }
 
 bool QGsm0710MultiplexerChannel::rts() const
 {
-    return ( ( outgoingStatus & Gsm710_RTS ) != 0 );
+    return ( ( outgoingStatus & GSM0710_RTS ) != 0 );
 }
 
 void QGsm0710MultiplexerChannel::setRts( bool value )
 {
     if ( value != rts() ) {
-        outgoingStatus &= ~( Gsm710_RTS | Gsm710_FC );
+        outgoingStatus &= ~( GSM0710_RTS | GSM0710_FC );
         if ( value )
-            outgoingStatus |= Gsm710_RTS;
+            outgoingStatus |= GSM0710_RTS;
         else
-            outgoingStatus |= Gsm710_FC;
+            outgoingStatus |= GSM0710_FC;
         updateStatus();
     }
 }
 
 bool QGsm0710MultiplexerChannel::cts() const
 {
-    return ( ( incomingStatus & Gsm710_CTS ) != 0 );
+    return ( ( incomingStatus & GSM0710_CTS ) != 0 );
 }
 
 void QGsm0710MultiplexerChannel::discard()
@@ -307,143 +397,14 @@ qint64 QGsm0710MultiplexerChannel::writeData( const char *data, qint64 len )
     uint framelen;
     while ( len > 0 ) {
         framelen = len;
-        if ( framelen > (uint)( mux->d->frameSize ) ) {
-            framelen = (uint)( mux->d->frameSize );
+        if ( framelen > (uint)( mux->d->ctx.frame_size ) ) {
+            framelen = (uint)( mux->d->ctx.frame_size );
         }
-        writeFrame( mux, channel, 0xEF, data, framelen );
+        gsm0710_write_data( &(mux->d->ctx), channel, data, (int)framelen );
         data += framelen;
         len -= framelen;
     }
     return result;
-}
-
-static const unsigned char crcTable[256] = {
-    0x00, 0x91, 0xE3, 0x72, 0x07, 0x96, 0xE4, 0x75,
-    0x0E, 0x9F, 0xED, 0x7C, 0x09, 0x98, 0xEA, 0x7B,
-    0x1C, 0x8D, 0xFF, 0x6E, 0x1B, 0x8A, 0xF8, 0x69,
-    0x12, 0x83, 0xF1, 0x60, 0x15, 0x84, 0xF6, 0x67,
-    0x38, 0xA9, 0xDB, 0x4A, 0x3F, 0xAE, 0xDC, 0x4D,
-    0x36, 0xA7, 0xD5, 0x44, 0x31, 0xA0, 0xD2, 0x43,
-    0x24, 0xB5, 0xC7, 0x56, 0x23, 0xB2, 0xC0, 0x51,
-    0x2A, 0xBB, 0xC9, 0x58, 0x2D, 0xBC, 0xCE, 0x5F,
-    0x70, 0xE1, 0x93, 0x02, 0x77, 0xE6, 0x94, 0x05,
-    0x7E, 0xEF, 0x9D, 0x0C, 0x79, 0xE8, 0x9A, 0x0B,
-    0x6C, 0xFD, 0x8F, 0x1E, 0x6B, 0xFA, 0x88, 0x19,
-    0x62, 0xF3, 0x81, 0x10, 0x65, 0xF4, 0x86, 0x17,
-    0x48, 0xD9, 0xAB, 0x3A, 0x4F, 0xDE, 0xAC, 0x3D,
-    0x46, 0xD7, 0xA5, 0x34, 0x41, 0xD0, 0xA2, 0x33,
-    0x54, 0xC5, 0xB7, 0x26, 0x53, 0xC2, 0xB0, 0x21,
-    0x5A, 0xCB, 0xB9, 0x28, 0x5D, 0xCC, 0xBE, 0x2F,
-    0xE0, 0x71, 0x03, 0x92, 0xE7, 0x76, 0x04, 0x95,
-    0xEE, 0x7F, 0x0D, 0x9C, 0xE9, 0x78, 0x0A, 0x9B,
-    0xFC, 0x6D, 0x1F, 0x8E, 0xFB, 0x6A, 0x18, 0x89,
-    0xF2, 0x63, 0x11, 0x80, 0xF5, 0x64, 0x16, 0x87,
-    0xD8, 0x49, 0x3B, 0xAA, 0xDF, 0x4E, 0x3C, 0xAD,
-    0xD6, 0x47, 0x35, 0xA4, 0xD1, 0x40, 0x32, 0xA3,
-    0xC4, 0x55, 0x27, 0xB6, 0xC3, 0x52, 0x20, 0xB1,
-    0xCA, 0x5B, 0x29, 0xB8, 0xCD, 0x5C, 0x2E, 0xBF,
-    0x90, 0x01, 0x73, 0xE2, 0x97, 0x06, 0x74, 0xE5,
-    0x9E, 0x0F, 0x7D, 0xEC, 0x99, 0x08, 0x7A, 0xEB,
-    0x8C, 0x1D, 0x6F, 0xFE, 0x8B, 0x1A, 0x68, 0xF9,
-    0x82, 0x13, 0x61, 0xF0, 0x85, 0x14, 0x66, 0xF7,
-    0xA8, 0x39, 0x4B, 0xDA, 0xAF, 0x3E, 0x4C, 0xDD,
-    0xA6, 0x37, 0x45, 0xD4, 0xA1, 0x30, 0x42, 0xD3,
-    0xB4, 0x25, 0x57, 0xC6, 0xB3, 0x22, 0x50, 0xC1,
-    0xBA, 0x2B, 0x59, 0xC8, 0xBD, 0x2C, 0x5E, 0xCF
-};
-
-static int computeCrc( const char *data, uint len )
-{
-    int sum = 0xFF;
-    while ( len > 0 ) {
-        sum = crcTable[ ( sum ^ *data++ ) & 0xFF ];
-        --len;
-    }
-    return ((0xFF - sum) & 0xFF);
-}
-
-
-void QGsm0710MultiplexerChannel::writeFrame
-        ( QGsm0710Multiplexer *mux, int channel,
-          int type, const char *data, uint len )
-{
-    char *frame = (char *)alloca(mux->d->frameSize * 2 + 8);
-    if ( mux->d->advanced ) {
-        uint size = 0;
-        int temp, crc;
-        frame[0] = (char)((channel << 2) | 0x03);
-        frame[1] = (char)type;
-        crc = computeCrc( frame, 2 );
-        frame[size++] = (char)0x7E;
-        temp = ((channel << 2) | 0x03);
-        if ( temp != 0x7E && temp != 0x7D ) {
-            frame[size++] = (char)temp;
-        } else {
-            frame[size++] = (char)0x7D;
-            frame[size++] = (char)(temp ^ 0x20);
-        }
-        if ( type != 0x7E && type != 0x7D ) {
-            frame[size++] = (char)type;
-        } else {
-            frame[size++] = (char)0x7D;
-            frame[size++] = (char)(type ^ 0x20);
-        }
-        while ( len > 0 ) {
-            temp = *data++ & 0xFF;
-            --len;
-            if ( temp != 0x7E && temp != 0x7D ) {
-                frame[size++] = (char)temp;
-            } else {
-                frame[size++] = (char)0x7D;
-                frame[size++] = (char)(temp ^ 0x20);
-            }
-        }
-        if ( crc != 0x7E && crc != 0x7D ) {
-            frame[size++] = (char)crc;
-        } else {
-            frame[size++] = (char)0x7D;
-            frame[size++] = (char)(crc ^ 0x20);
-        }
-        frame[size++] = (char)0x7E;
-        if ( qLogEnabled(Mux) ) {
-            qLog(Mux) << "QMuxDevice::writeFrameAdvanced()";
-            for ( uint i = 0; i < size; ++i ) {
-                if( i >= 16 && (i % 16) == 0 )
-                    fprintf(stdout, "\n");
-                fprintf(stdout, "%02x ", frame[i] & 0xFF);
-            }
-            fprintf(stdout, "\n");
-        }
-        mux->d->device->write( frame, size );
-    } else {
-        uint size;
-        frame[0] = (char)0xF9;
-        frame[1] = (char)((channel << 2) | 0x03);
-        frame[2] = (char)type;
-        if ( len <= 127 ) {
-            frame[3] = (char)((len << 1) | 0x01);
-            size = 4;
-        } else {
-            frame[3] = (char)(len << 1);
-            frame[4] = (char)(len >> 7);
-            size = 5;
-        }
-        if ( len > 0 )
-            memcpy( frame + size, data, len);
-        // Note: GSM 07.10 says that the CRC is only computed over the header.
-        frame[len + size] = (char)computeCrc( frame + 1, size - 1 );
-        frame[len + size + 1] = (char)0xF9;
-        if ( qLogEnabled(Mux) ) {
-            qLog(Mux) << "QMuxDevice::writeFrameBasic()";
-            for ( uint i = 0; i < len + size + 2; ++i ) {
-                if( i >= 16 && (i % 16) == 0 )
-                    fprintf(stdout, "\n");
-                fprintf(stdout, "%02x ", frame[i] & 0xFF);
-            }
-            fprintf(stdout, "\n");
-        }
-        mux->d->device->write( frame, len + size + 2 );
-    }
 }
 
 void QGsm0710MultiplexerChannel::add( const char *data, uint len )
@@ -469,28 +430,23 @@ void QGsm0710MultiplexerChannel::add( const char *data, uint len )
 void QGsm0710MultiplexerChannel::setStatus( int status )
 {
     int lastStatus = incomingStatus;
-    status &= ( Gsm710_DSR | Gsm710_DCD | Gsm710_CTS );
+    status &= ( GSM0710_DSR | GSM0710_DCD | GSM0710_CTS );
     incomingStatus = (char)status;
-    if ( ( ( status ^ lastStatus ) & Gsm710_DSR ) != 0 ) {
-        emit dsrChanged( ( status & Gsm710_DSR ) != 0 );
+    if ( ( ( status ^ lastStatus ) & GSM0710_DSR ) != 0 ) {
+        emit dsrChanged( ( status & GSM0710_DSR ) != 0 );
     }
-    if ( ( ( status ^ lastStatus ) & Gsm710_DCD ) != 0 ) {
-        emit carrierChanged( ( status & Gsm710_DCD ) != 0 );
+    if ( ( ( status ^ lastStatus ) & GSM0710_DCD ) != 0 ) {
+        emit carrierChanged( ( status & GSM0710_DCD ) != 0 );
     }
-    if ( ( ( status ^ lastStatus ) & Gsm710_CTS ) != 0 ) {
-        emit ctsChanged( ( status & Gsm710_CTS ) != 0 );
+    if ( ( ( status ^ lastStatus ) & GSM0710_CTS ) != 0 ) {
+        emit ctsChanged( ( status & GSM0710_CTS ) != 0 );
     }
 }
 
 // Update the outgoing status of DTR and RTS on this channel.
 void QGsm0710MultiplexerChannel::updateStatus()
 {
-    char data[4];
-    data[0] = (char)0xE3;
-    data[1] = (char)0x03;
-    data[2] = ( channel << 2 ) | 0x03;
-    data[3] = outgoingStatus;
-    writeFrame( mux, 0, 0xEF, data, 4 );
+    gsm0710_set_status( &(mux->d->ctx), channel, outgoingStatus );
 }
 
 /*!
@@ -508,10 +464,11 @@ QGsm0710Multiplexer::QGsm0710Multiplexer( QSerialIODevice *device,
     : QSerialIODeviceMultiplexer( parent )
 {
     d = new QGsm0710MultiplexerPrivate( device, frameSize, advanced, false );
+    d->mux = this;
     connect( device, SIGNAL(readyRead()), this, SLOT(incoming()) );
 
     // Create the control channel (0).
-    QGsm0710MultiplexerChannel::writeFrame( this, 0, 0x3F, 0, 0 );
+    gsm0710_startup( &(d->ctx), 0 );
 }
 
 // This constructor is called from QGsm0710MultiplexerServer only.
@@ -521,6 +478,7 @@ QGsm0710Multiplexer::QGsm0710Multiplexer( QSerialIODevice *device,
     : QSerialIODeviceMultiplexer( parent )
 {
     d = new QGsm0710MultiplexerPrivate( device, frameSize, advanced, server );
+    d->mux = this;
     connect( device, SIGNAL(readyRead()), this, SLOT(incoming()) );
 }
 
@@ -533,11 +491,7 @@ QGsm0710Multiplexer::~QGsm0710Multiplexer()
     d->closeAll();
 
     // Send the terminate command to exit AT+CMUX multiplexing in client mode.
-    if ( !d->server ) {
-        static char const gsm0710_terminate[] = {0xC3, 0x01};
-        QGsm0710MultiplexerChannel::writeFrame
-            ( this, 0, 0xEF, gsm0710_terminate, 2 );
-    }
+    gsm0710_shutdown( &(d->ctx) );
 
     // Clean up everything else.
     delete d;
@@ -648,251 +602,13 @@ int QGsm0710Multiplexer::channelNumber( const QString& name ) const
 */
 void QGsm0710Multiplexer::reinit()
 {
-    // Send the AT+CMUX command to re-initialize the session.
-    if ( !cmuxChat( d->device, d->frameSize, d->advanced ) ) {
-        qLog(Mux) << "Could not re-initialize multiplexing with AT+CMUX";
-        return;
-    }
-
-    // Re-create the control channel (0).
-    QGsm0710MultiplexerChannel::writeFrame( this, 0, 0x3F, 0, 0 );
-
-    // Reopen any channels that we were using before the session aborted.
-    QMap<int,QGsm0710MultiplexerChannel *>::Iterator iter;
-    for ( iter = d->channels.begin(); iter != d->channels.end(); ++iter ) {
-        iter.value()->reopen();
-        iter.value()->add( "\r\nERROR\r\n", 9 );
-    }
+    // Restart the GSM 07.10 implementation, and recreate all channels.
+    gsm0710_startup( &(d->ctx), 1 );
 }
 
 void QGsm0710Multiplexer::incoming()
 {
-    // Read more data from the serial device.
-    int len = d->device->read( d->buffer + d->used,
-                               sizeof(d->buffer) - d->used );
-    if ( len <= 0 )
-        return;
-
-    // Log the new data to the debug stream.
-    if ( qLogEnabled(Mux) ) {
-        qLog(Mux) << "QGsm0710Multiplexer::incoming()";
-        for ( uint i = d->used; i < d->used + (uint)len; ++i ) {
-            if( i >= 16 && (i % 16) == 0 )
-                fprintf(stdout, "\n");
-            fprintf(stdout, "%02x ", d->buffer[i] & 0xFF);
-        }
-        fprintf(stdout, "\n");
-    }
-
-    // Update the buffer size.
-    d->used += (uint)len;
-
-    // Break the incoming data up into packets.
-    uint posn = 0;
-    uint posn2;
-    uint headerSize;
-    int channel, type;
-    while ( posn < d->used ) {
-        if ( d->buffer[posn] == (char)0xF9 ) {
-
-            // Basic format: skip additional 0xF9 bytes between frames.
-            while ( ( posn + 1 ) < d->used &&
-                    d->buffer[posn + 1] == (char)0xF9 ) {
-                ++posn;
-            }
-
-            // We need at least 4 bytes for the header.
-            if ( ( posn + 4 ) > d->used )
-                break;
-
-            // The low bit of the second byte should be 1,
-            // which indicates a short channel number.
-            if ( ( d->buffer[posn + 1] & 0x01 ) == 0 ) {
-                ++posn;
-                continue;
-            }
-
-            // Get the packet length and validate it.
-            len = (d->buffer[posn + 3] >> 1) & 0x7F;
-            if ( ( d->buffer[posn + 3] & 0x01 ) != 0 ) {
-                // Single-byte length indication.
-                headerSize = 3;
-            } else {
-                // Double-byte length indication.
-                if ( ( posn + 5 ) > d->used )
-                    break;
-                len |= ((int)(unsigned char)(d->buffer[posn + 4])) << 7;
-                headerSize = 4;
-            }
-            if ( ( posn + headerSize + 2 + len ) > d->used )
-                break;
-
-            // Verify the packet header checksum.
-            if ( ( ( computeCrc( d->buffer + posn + 1, headerSize ) ^
-                     d->buffer[posn + len + headerSize + 1] ) & 0xFF )
-                            != 0 ) {
-                qLog(Mux) << "*** GSM 07.10 checksum check failed ***";
-                int totalsize = len + headerSize + 2;
-                if ( qLogEnabled(Mux) ) {
-                    qLog(Mux) << "printing out failed mux packet, starting at buffer addr " << posn << ". read data length from serial port is " << len << ", packet headersize is " << headerSize;
-                    for( uint i = posn ; i <= (posn+totalsize) ; ++i ) {
-                        if( (posn % 8) == 0 )
-                            fprintf( stdout, "\n");
-                        fprintf( stdout, "%x ", d->buffer[i] );
-                    }
-                }
-
-                posn += len + headerSize + 2;
-                continue;
-            }
-
-            // Get the channel number and packet type from the header.
-            channel = (d->buffer[posn + 1] >> 2) & 0x3F;
-            type = d->buffer[posn + 2] & 0xEF;  // Strip "PF" bit.
-
-            // Dispatch data packets to the appropriate channel.
-            if ( !packet( channel, type,
-                          d->buffer + posn + headerSize + 1, len ) ) {
-                // Session has been terminated.
-                d->used = 0;
-                return;
-            }
-            posn += len + headerSize + 2;
-
-        } else if ( d->buffer[posn] == (char)0x7E ) {
-
-            // Advanced format: skip additional 0x7E bytes between frames.
-            while ( ( posn + 1 ) < d->used &&
-                    d->buffer[posn + 1] == (char)0x7E ) {
-                ++posn;
-            }
-
-            // Search for the end of the packet (the next 0x7E byte).
-            len = posn + 1;
-            while ( ((uint)len) < d->used &&
-                    d->buffer[len] != (char)0x7E ) {
-                ++len;
-            }
-            if ( ((uint)len) >= d->used ) {
-                // There are insufficient bytes for a packet at present.
-                if ( posn == 0 && len >= (int)sizeof( d->buffer ) ) {
-                    // The buffer is full and we were unable to find a
-                    // legitimate packet.  Discard the buffer and restart.
-                    posn = len;
-                }
-                break;
-            }
-
-            // Undo control byte quoting in the packet.
-            posn2 = 0;
-            ++posn;
-            while ( posn < (uint)len ) {
-                if ( d->buffer[posn] == 0x7D ) {
-                    ++posn;
-                    if ( posn >= (uint)len )
-                        break;
-                    d->buffer[posn2++] = (char)(d->buffer[posn++] ^ 0x20);
-                } else {
-                    d->buffer[posn2++] = d->buffer[posn++];
-                }
-            }
-
-            // Validate the checksum on the packet header.
-            if ( posn2 >= 3 ) {
-                if ( ( ( computeCrc( d->buffer, 2 ) ^
-                     d->buffer[posn2 - 1] ) & 0xFF ) != 0 ) {
-                    qLog(Mux) << "*** GSM 07.10 advanced checksum "
-                                   "check failed ***";
-                    continue;
-                }
-            } else {
-                qLog(Mux) << "*** GSM 07.10 advanced packet is too small ***";
-                continue;
-            }
-
-            // Decode and dispatch the packet.
-            channel = (d->buffer[0] >> 2) & 0x3F;
-            type = d->buffer[1] & 0xEF;  // Strip "PF" bit.
-            if ( !packet( channel, type, d->buffer + 2, posn2 - 3 ) ) {
-                // Session has been terminated.
-                d->used = 0;
-                return;
-            }
-
-        } else {
-            ++posn;
-        }
-    }
-    if ( posn < d->used ) {
-        memmove( d->buffer, d->buffer + posn, d->used - posn );
-        d->used -= posn;
-    } else {
-        d->used = 0;
-    }
-}
-
-bool QGsm0710Multiplexer::packet( int channel, int type,
-                                  const char *data, uint len )
-{
-    QGsm0710MultiplexerChannel *chan;
-    if ( type == 0xEF || type == 0x03 ) {
-
-        if ( d->channels.contains( channel ) ) {
-            // Ordinary data packet.
-            chan = d->channels.value( channel );
-            chan->add( data, len );
-        } else if ( channel == 0 ) {
-            // An embedded command or response on channel 0.
-            if ( len >= 2 && data[0] == (char)0xE3 ) {
-                return packet( channel, 0xE1, data + 2, len - 2 );
-            } else if ( len >= 2 && data[0] == (char)0xC3 && d->server ) {
-                // Incoming terminate request on server side.
-                terminate();
-                return false;
-            } else if ( len >= 2 && data[0] == (char)0x43 ) {
-                // Test command from the other side - send the same bytes back.
-                char *resp = (char *)alloca( len );
-                memcpy( resp, data, len );
-                resp[0] = (char)0x41;   // Clear the C/R bit in the response.
-                QGsm0710MultiplexerChannel::writeFrame
-                    ( this, 0, 0xEF, resp, len );
-            }
-        }
-
-    } else if ( type == 0xE1 && channel == 0 ) {
-
-        // Status change message.
-        if ( len >= 2 ) {
-            // Handle status changes on other channels.
-            channel = ( ( data[0] & 0xFC ) >> 2 );
-            if ( d->channels.contains( channel ) ) {
-                chan = d->channels.value( channel );
-                chan->setStatus( data[1] & 0xFF );
-            }
-        }
-
-        // Send the response to the status change request to ACK it.
-        qLog(Mux) << "Received status line signal, sending response";
-        char resp[33];
-        if ( len > 31 )
-            len = 31;
-        resp[0] = (char)0xE1;
-        resp[1] = (char)((len << 1) | 0x01);
-        memcpy( resp + 2, data, len );
-        QGsm0710MultiplexerChannel::writeFrame( this, 0, 0xEF, resp, len + 2 );
-
-    } else if ( type == ( 0x3F & 0xEF ) && d->server && channel != 0 ) {
-
-        // Incoming channel open request on server side.
-        open( channel );
-
-    } else if ( type == ( 0x53 & 0xEF ) && d->server && channel != 0 ) {
-
-        // Incoming channel close request on server side.
-        close( channel );
-
-    }
-    return true;
+    gsm0710_ready_read( &(d->ctx) );
 }
 
 void QGsm0710Multiplexer::terminate()

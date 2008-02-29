@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -101,19 +101,18 @@ InstallControl::PackageInfo InstalledPackageScanner::scan( const QString &contro
         InstallControl::PackageInfo pkg = informationReader.package();
         if ( pkg.md5Sum.isEmpty() )
             pkg.md5Sum =controlPath.mid( controlPath.lastIndexOf("/") + 1, 32 );  
-            
-        QString md5Sum = pkg.md5Sum;
-            
-        if ( isPackageEnabled( md5Sum ) )
+
+        if ( isPackageEnabled( pkg ) )
             pkg.isEnabled = true;
-         else
+        else
             pkg.isEnabled = false;
 
         return pkg;
 }
 
-bool InstalledPackageScanner::isPackageEnabled( const QString &md5Sum ) const
+bool InstalledPackageScanner::isPackageEnabled( const InstallControl::PackageInfo &pkgInfo )
 {
+    QString md5Sum = pkgInfo.md5Sum;
     //TODO: This does not handle the case where the package is installed on a media card
     QDir installSystemBinPath( Qtopia::packagePath() + "/bin" );
     QFileInfoList links = installSystemBinPath.entryInfoList( QStringList(md5Sum + "*" ), QDir::System );
@@ -125,15 +124,21 @@ bool InstalledPackageScanner::isPackageEnabled( const QString &md5Sum ) const
     return true;
 }
 
-bool InstalledPackageScanner::isPackageInstalled( const QString &md5Sum ) const
+bool InstalledPackageScanner::isPackageInstalled( const InstallControl::PackageInfo &pkgInfo )
 {
-    QDir installSystemBinPath( Qtopia::packagePath() + "/controls" );
-    QFileInfoList links = installSystemBinPath.entryInfoList( QStringList(md5Sum + "*" ) );
-   
-    if( links.count() == 0 )
-        return false;
-    else    
-        return true;    
+    QDir controlsDir( Qtopia::packagePath() + "/controls" );
+    QFileInfoList flist = controlsDir.entryInfoList();
+
+    InstallControl::PackageInfo pkgInfoControl;
+    for ( int i = 0; i < flist.count(); ++i )
+    {
+        if ( !flist[i].filePath().endsWith( AbstractPackageController::INFORMATION_FILE ) )
+            continue;
+        pkgInfoControl = scan( flist[i].filePath() );
+        if ( pkgInfo == pkgInfoControl )
+            return true;
+    }
+    return false;
 }
 
 

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,13 +32,14 @@
   A small tutorial on how to develop new server widgets using one of the abstract widgets as base can
   be found in QAbstractServerInterface class documentation.
 
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   \ingroup QtopiaServer::PhoneUI::TTSmartPhone
  */
 
 /*!
   \fn QAbstractBrowserScreen::QAbstractBrowserScreen(QWidget *parent, Qt::WFlags flags)
 
-  Construct a new QAbstractBrowserScreen instance, with the specified \a parent
+  Constructs a new QAbstractBrowserScreen instance, with the specified \a parent
   and widget \a flags.
 */
 
@@ -57,14 +58,14 @@
 /*!
   \fn void QAbstractBrowserScreen::resetToView(const QString &view)
 
-  Display the \a view immediately.  Any logical back or history handling
+  Displays the \a view immediately.  Any logical back or history handling
   should be reset to have \a view as a starting point.
  */
 
 /*!
   \fn void QAbstractBrowserScreen::moveToView(const QString &view)
 
-  Display the \a view using any appropriate transition effects.  \a view
+  Displays the \a view using any appropriate transition effects.  \a view
   should be added to the end of any back or history handing list.
  */
 

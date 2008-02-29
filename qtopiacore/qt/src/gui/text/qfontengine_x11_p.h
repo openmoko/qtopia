@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -35,15 +50,10 @@
 // We mean it.
 //
 #include <private/qt_x11_p.h>
-#ifndef QT_NO_FONTCONFIG
-#include <fontconfig/fontconfig.h>
-#endif
-#ifndef QT_NO_FREETYPE
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#endif
 
-struct QFreetypeFace;
+#include <private/qfontengine_ft_p.h>
+
+class QFreetypeFace;
 
 // --------------------------------------------------------------------------
 
@@ -130,125 +140,20 @@ private:
     int screen;
 };
 
-class Q_GUI_EXPORT QFontEngineFT : public QFontEngine
+class Q_GUI_EXPORT QFontEngineX11FT : public QFontEngineFT
 {
 public:
-    explicit QFontEngineFT(FcPattern *pattern, const QFontDef &fd, int screen);
-    ~QFontEngineFT();
+    explicit QFontEngineX11FT(FcPattern *pattern, const QFontDef &fd, int screen);
+    ~QFontEngineX11FT();
 
-    QFontEngine::FaceId faceId() const;
-    QFontEngine::Properties properties() const;
-    void getUnscaledGlyph(glyph_t glyph, QPainterPath *path, glyph_metrics_t *metrics);
-    QByteArray getSfntTable(uint tag) const;
-    int synthesized() const;
-
-    bool stringToCMap(const QChar *str, int len, QGlyphLayout *glyphs, int *nglyphs,
-                      QTextEngine::ShaperFlags flags) const;
-
-    glyph_metrics_t boundingBox(const QGlyphLayout *glyphs, int numGlyphs);
-    glyph_metrics_t boundingBox(glyph_t glyph);
-
-    QFixed ascent() const;
-    QFixed descent() const;
-    QFixed leading() const;
-    QFixed xHeight() const;
-    QFixed averageCharWidth() const;
-
-    qreal maxCharWidth() const;
-    qreal minLeftBearing() const;
-    qreal minRightBearing() const;
-    QFixed lineThickness() const;
-    QFixed underlinePosition() const;
-
-    inline Type type() const
-    { return QFontEngine::Freetype; }
-
-    bool canRender(const QChar *string, int len);
-    inline const char *name() const
-    { return "freetype"; }
-
-    void recalcAdvances(int len, QGlyphLayout *glyphs, QTextEngine::ShaperFlags flags) const;
-    void doKerning(int , QGlyphLayout *, QTextEngine::ShaperFlags) const;
-    void addGlyphsToPath(glyph_t *glyphs, QFixedPoint *positions, int nglyphs,
-                         QPainterPath *path, QTextItem::RenderFlags flags);
-    void addOutlineToPath(qreal x, qreal y, const QGlyphLayout *glyphs, int numGlyphs,
-                          QPainterPath *path, QTextItem::RenderFlags flags);
-    virtual QImage alphaMapForGlyph(glyph_t);
-
-    FcPattern *pattern() const { return _pattern; }
-    QOpenType *openType() const;
-
-    FT_Face lockFace() const;
-    void unlockFace() const;
-
-    FT_Face non_locked_face() const;
-    bool drawAsOutline() const { return outline_drawing; }
-    bool invalid() const { return xsize == 0 && ysize == 0; }
-private:
-    QFreetypeFace *freetype;
-    QFontEngine::FaceId face_id;
-
-    mutable QFixed lbearing;
-    mutable QFixed rbearing;
-    QFixed line_thickness;
-    QFixed underline_position;
-    FcPattern *_pattern;
-    int xsize;
-    int ysize;
-    bool antialias;
-    bool outline_drawing;
-    int subpixel;
-    bool transform;
-    int hint_style;
-    bool autohint;
-    FT_Matrix matrix;
-
-public:
-    enum GlyphFormat {
-        Format_None,
-        Format_Render = Format_None,
-        Format_Mono,
-        Format_A8,
-        Format_A32
-    };
-
-    /* we don't cache glyphs that are too large anyway, so we can make this struct rather small */
-    struct Glyph {
-        ~Glyph();
-        short linearAdvance;
-        unsigned char width;
-        unsigned char height;
-        signed char x;
-        signed char y;
-        signed char advance;
-        signed char format;
-        uchar *data;
-    };
-    inline Glyph *loadGlyph(uint glyph, GlyphFormat format = Format_None) const
-    { return fnt.loadGlyph(this, glyph, format); }
-    struct Font
-    {
-        Font();
-        ~Font();
-        FT_Matrix transformationMatrix;
-#ifndef QT_NO_XRENDER
-        GlyphSet glyphSet;
-#endif
-        mutable QHash<int, Glyph *> glyph_data; // maps from glyph index to glyph data
-        Glyph *loadGlyph(const QFontEngineFT *fe, uint glyph, GlyphFormat = Format_None) const;
-    };
-    friend struct Font;
-    mutable Font fnt;
 #ifndef QT_NO_XRENDER
     int xglyph_format;
-
-    QList<Font> transformedFonts;
-    bool loadTransformedGlyphSet(glyph_t *glyphs, int num_glyphs, const QMatrix &matrix, GlyphSet *gs);
 #endif
-    inline Glyph *cachedGlyph(glyph_t g) const { return fnt.glyph_data.value(g); }
-private:
-    mutable QOpenType *_openType;
-    FT_Size_Metrics metrics;
+
+protected:
+    virtual bool uploadGlyphToServer(QGlyphSet *set, uint glyphid, Glyph *g, GlyphInfo *info, int glyphDataSize) const;
+    virtual unsigned long allocateServerGlyphSet();
+    virtual void freeServerGlyphSet(unsigned long id);
 };
 
 #endif // QT_NO_FONTCONFIG

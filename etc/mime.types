@@ -82,6 +82,7 @@ audio/basic			au snd
 audio/midi			mid midi kar
 audio/mpeg			mp3 mpga mp2
 audio/3gpp			3gp
+audio/mp4			m4a aac
 audio/x-aiff			aif aifc aiff
 audio/x-pn-realaudio		ra ram
 audio/x-pn-realaudio-plugin
@@ -90,6 +91,8 @@ audio/x-wav			wav
 audio/amr			amr
 audio/mpegurl       m3u
 audio/x-scpls       pls
+audio/ogg           oga
+audio/ogg+vorbis    ogg
 chemical/x-pdb			xyz
 image/gif			gif
 image/ief			ief
@@ -131,6 +134,7 @@ text/x-sgml			sgml sgm
 text/x-vCalendar		vcs
 text/x-vCard			vcf
 text/x-xml-tableviewer		xmlt
+text/x-log			log
 text/xml			xml dtd
 video/dl			dl
 video/fli			fli
@@ -141,6 +145,8 @@ video/quicktime			mov qt
 video/3gpp			3gp
 video/x-msvideo			avi
 video/x-sgi-movie		movie
+video/ogg           ogv
 x-conference/x-cooltalk		ice
 x-world/x-vrml			wrl vrml
 application/qtopia-package qpd
+application/x-kradio-presets    krp

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,7 +26,6 @@
 #include <QKeyEvent>
 #include <QPhoneProfileManager>
 #include "phonelauncher.h"
-#include "qkeyboardlock.h"
 
 // declare BasicKeyLockPrivate
 class BasicKeyLockPrivate
@@ -192,13 +191,15 @@ class BasicSimPinLockPrivate
 public:
     BasicSimPinLockPrivate()
         : m_state(BasicSimPinLock::Open),
-          m_cell(0) {}
+          m_cell(0),
+          m_vso(0) {}
     BasicSimPinLock::State m_state;
 
     CellModemManager *m_cell;
 
     QString m_number;
     QString m_puk;
+    QValueSpaceObject *m_vso;
 };
 
 // define BasicSimPinLock
@@ -214,6 +215,9 @@ BasicSimPinLock::BasicSimPinLock(QObject *parent)
             d->m_state = Waiting;
         }
     }
+
+    d->m_vso = new QValueSpaceObject("/UI", this);
+    d->m_vso->setAttribute("SimLock", false);
 }
 
 BasicSimPinLock::~BasicSimPinLock()
@@ -244,6 +248,7 @@ void BasicSimPinLock::cellStateChanged(CellModemManager::State cellState)
     if(newState != d->m_state) {
         d->m_number.clear();
         d->m_state = newState;
+        d->m_vso->setAttribute("SimLock", d->m_state != Open);
         emit stateChanged(d->m_state, d->m_number);
     }
 }
@@ -256,16 +261,18 @@ BasicSimPinLock::stateFromCellState(CellModemManager::State cellState)
     switch(cellState) {
         case CellModemManager::Initializing:
             if(newState != Waiting)
-                newState = Open;
+                newState = Waiting;
             break;
-        case CellModemManager::SIMMissing:
         case CellModemManager::FailureReset:
         case CellModemManager::UnrecoverableFailure:
         case CellModemManager::SIMDead:
-        case CellModemManager::AerialOff:
-        case CellModemManager::Ready:
         case CellModemManager::Initializing2:
         case CellModemManager::NoCellModem:
+            newState = Pending;
+            break;
+        case CellModemManager::AerialOff:
+        case CellModemManager::SIMMissing:
+        case CellModemManager::Ready:
             newState = Open;
             break;
         case CellModemManager::WaitingSIMPin:
@@ -335,6 +342,7 @@ void BasicSimPinLock::processKeyEvent(QKeyEvent *e)
             d->m_puk = d->m_number;
             d->m_number = QString();
             d->m_state = NewSimPinRequired;
+            d->m_vso->setAttribute("SimLock", d->m_state != Open);
             emit stateChanged(d->m_state, d->m_number);
 
         } else if(NewSimPinRequired == state()) {
@@ -372,7 +380,8 @@ void BasicSimPinLock::reset()
     if(d->m_cell) {
         if(!d->m_number.isEmpty() || Open != state()) {
             d->m_number.clear();
-            d->m_state = Open;
+            d->m_state = stateFromCellState(d->m_cell->state());
+            d->m_vso->setAttribute("SimLock", d->m_state != Open);
             emit stateChanged(d->m_state, d->m_number);
         }
     } else {
@@ -436,19 +445,35 @@ void BasicEmergencyLock::reset()
 bool BasicEmergencyLock::processKeyEvent(QKeyEvent *e)
 {
     int key = e->key();
+    QString newNumber = d->m_number;
 
-    if(EmergencyNumber == state() && 
-       (Qt::Key_Call == key || Qt::Key_Yes == key || lockKey() == key)) {
+    if(EmergencyNumber == state() &&
+            (Qt::Key_Call == key || lockKey() == key) ) {
+        // Using the lock key can create conflicts with BasicSimPinLock,
+        // where a quickly typed 0000 ends up as 000 and causes an emergency
+        // call when the user presses unlock too early.  Therefore, we
+        // require that the call key be used to place the emergency call.
+        // Uncomment this only on phones that use the same key for the
+        // lock key and the call key.
 
-        emit dialEmergency(emergencyNumber());
-        reset();
+        // Also, while the emergency number is entered, lock key should be disabled.
+        // Otherwise the keyevent is passed down to SimLock
+        // trying to unlock the sim with the emergency number.
+        if (Qtopia::mousePreferred() || Qt::Key_Call == key) {
+            emit dialEmergency(emergencyNumber());
+            reset();
+        }
         return true;
     } else if(key >= Qt::Key_0 && key <= Qt::Key_9) {
+        if (newNumber.count() >= 8)
+            return false;
         int number = key - Qt::Key_0;
-
-        QString newNumber = d->m_number;
         newNumber.append(QString::number(number));
+    } else if(key == Qt::Key_Back || key == Qt::Key_Cancel) {
+        newNumber = newNumber.left(newNumber.length() - 1);
+    }
 
+    if (newNumber != d->m_number) {
         QStringList emergency = CellModemManager::emergencyNumbers();
 
         for(int ii = 0; ii < emergency.count(); ++ii) {
@@ -466,6 +491,10 @@ bool BasicEmergencyLock::processKeyEvent(QKeyEvent *e)
             }
         }
 
+        d->m_state = NoEmergencyNumber;
+        d->m_number = newNumber;
+        emit stateChanged(d->m_state, d->m_number);
+        return false;
     }
 
     reset();

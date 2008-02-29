@@ -59,7 +59,7 @@ platform.link.xplatform = "arm-linux-"
 platform.cc.args["default"] = \
     "-pipe -W -Wreturn-type -fno-exceptions " \
     "-mcpu=iwmmxt " \
-    "-mtune=iwmmxt -fomit-frame-pointer -finline-functions -funroll-loops -falign-functions=2 -falign-loops=2 -falign-jumps=2"
+    "-mtune=iwmmxt -Wall -fPIC -mabi=aapcs-linux"
 
 platform.cxx.args["default"] = platform.cc.args["default"] + " --permissive -fno-rtti"
 
@@ -71,3 +71,6 @@ else:
     if project.IsDefined('HELIX_CONFIG_USE_RLINK'):
         platform.cc.args["default"] = platform.cc.args["default"] + " -ffunction-sections -fdata-sections"
         platform.cxx.args["default"] = platform.cxx.args["default"] + " -ffunction-sections -fdata-sections"
+
+# Compile without X11
+project.RemoveDefines('USE_XWINDOWS')

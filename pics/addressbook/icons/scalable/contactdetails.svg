@@ -24,10 +24,8 @@
 			l-0.181,1.32l-2.063,0.508C10.093,12.599,12.052,9.891,12.597,8.181z"/>
 		<path style="fill:#656D70;stroke:#000000;stroke-width:0.25;" d="M7.382,8.264C7.356,8.316,6.58,10.57,6.58,10.57l1.063,0.284
 			l0.181,1.32l2.409,0.804C10.232,12.978,7.926,9.974,7.382,8.264z"/>
-		<ellipse style="fill:#FFFFFF;stroke:#888F95;stroke-width:0.25;" cx="10.058" cy="14.618" rx="0.285" ry="0.272"/>
-		<ellipse style="fill:#FFFFFF;stroke:#888F95;stroke-width:0.25;" cx="10.058" cy="17.26" rx="0.311" ry="0.271"/>
 		<polygon style="fill:#505859;stroke:#000000;stroke-width:0.25;" points="10.291,9.438 9.591,9.438 9.41,8.621 10.446,8.621 		"/>
-		<radialGradient id="XMLID_42_" cx="8.4512" cy="1.9897" r="6.2652" gradientUnits="userSpaceOnUse">
+		<radialGradient id="XMLID_2_" cx="8.4512" cy="1.9897" r="6.2652" gradientUnits="userSpaceOnUse">
 			<stop  offset="0.0056" style="stop-color:#F2E8CE"/>
 			<stop  offset="0.0821" style="stop-color:#F4E5BE"/>
 			<stop  offset="0.1852" style="stop-color:#F5E1AE"/>
@@ -37,7 +35,7 @@
 			<stop  offset="0.8408" style="stop-color:#D3B26F"/>
 			<stop  offset="1" style="stop-color:#CFAD6A"/>
 		</radialGradient>
-		<circle style="fill:url(#XMLID_42_);stroke:#000000;stroke-width:0.25;" cx="10.282" cy="4.373" r="4.248"/>
+		<circle style="fill:url(#XMLID_2_);stroke:#000000;stroke-width:0.25;" cx="10.282" cy="4.373" r="4.248"/>
 	</g>
 </g>
 </svg>

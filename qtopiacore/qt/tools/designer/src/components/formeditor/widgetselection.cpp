@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -26,19 +41,20 @@
 #include "formwindowmanager.h"
 
 // sdk
-#include <QtDesigner/QtDesigner>
+#include <QtDesigner/QDesignerFormEditorInterface>
 #include <QtDesigner/QExtensionManager>
+#include <QtDesigner/QDesignerTaskMenuExtension>
 
 // shared
 #include <qdesigner_command_p.h>
+#include <qdesigner_propertycommand_p.h>
 #include <layout_p.h>
 #include <layoutinfo_p.h>
+#include <formwindowbase_p.h>
+#include <grid_p.h>
 
 #include <QtGui/QMenu>
 #include <QtGui/QWidget>
-#include <QtGui/QApplication>
-#include <QtGui/QLabel>
-#include <QtGui/QPainter>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QStylePainter>
 #include <QtGui/QGridLayout>
@@ -49,9 +65,10 @@
 
 #define NO_TOPWIDGET
 
-#ifndef Q_MOC_RUN
-using namespace qdesigner_internal;
-#endif
+
+namespace qdesigner_internal
+{
+
 
 class TopWidget: public InvisibleWidget
 {
@@ -65,21 +82,21 @@ public:
 };
 
 WidgetHandle::WidgetHandle(FormWindow *parent, WidgetHandle::Type t, WidgetSelection *s)
-    : InvisibleWidget(parent->mainContainer())
+    : InvisibleWidget(parent->mainContainer()),
+    m_widget(0),
+    m_type(t),
+    m_formWindow( parent),
+    m_sel(s),
+    m_active(true)
 {
-    active = true;
-    widget = 0;
-    type = t;
     setMouseTracking(false);
-    formWindow = parent;
-    sel = s;
     setAutoFillBackground(true);
 
-    if (type == TaskMenu) {
+    if (m_type == TaskMenu) {
         setBackgroundRole(QPalette::Button);
         setFixedSize(12, 12);
     } else {
-        setBackgroundRole(active ? QPalette::Text : QPalette::Dark);
+        setBackgroundRole(m_active ? QPalette::Text : QPalette::Dark);
         setFixedSize(6, 6);
     }
 
@@ -88,12 +105,12 @@ WidgetHandle::WidgetHandle(FormWindow *parent, WidgetHandle::Type t, WidgetSelec
 
 void WidgetHandle::updateCursor()
 {
-    if (!active) {
+    if (!m_active) {
         setCursor(Qt::ArrowCursor);
         return;
     }
 
-    switch (type) {
+    switch (m_type) {
     case LeftTop:
         setCursor(Qt::SizeFDiagCursor);
         break;
@@ -128,33 +145,32 @@ void WidgetHandle::updateCursor()
 
 QDesignerFormEditorInterface *WidgetHandle::core() const
 {
-    if (QDesignerFormWindowInterface *fw = formWindow)
-        return fw->core();
+    if (m_formWindow)
+        return m_formWindow->core();
 
     return 0;
 }
 
 void WidgetHandle::setActive(bool a)
 {
-    active = a;
-    if (type != TaskMenu) {
-        setBackgroundRole(active ? QPalette::Text : QPalette::Dark);
+    m_active = a;
+    if (m_type != TaskMenu) {
+        setBackgroundRole(m_active ? QPalette::Text : QPalette::Dark);
     }
     updateCursor();
 }
 
 void WidgetHandle::setWidget(QWidget *w)
 {
-    widget = w;
+    m_widget = w;
 }
 
 void WidgetHandle::paintEvent(QPaintEvent *)
 {
-    FormWindow *fw = formWindow;
-    QDesignerFormWindowManagerInterface *m = fw->core()->formWindowManager();
+    QDesignerFormWindowManagerInterface *m = m_formWindow->core()->formWindowManager();
 
     QStylePainter p(this);
-    if (type == TaskMenu) {
+    if (m_type == TaskMenu) {
         QStyleOptionToolButton option;
         option.init(this);
         option.state |= QStyle::State_Raised;
@@ -163,8 +179,8 @@ void WidgetHandle::paintEvent(QPaintEvent *)
         option.features = QStyleOptionToolButton::Arrow;
         option.subControls = QStyle::SC_ToolButton;
         p.drawComplexControl(QStyle::CC_ToolButton, option);
-    } else if (fw->currentWidget() == widget) {
-        p.setPen(m->activeFormWindow() == fw ? Qt::blue : Qt::red);
+    } else if (m_formWindow->currentWidget() == m_widget) {
+        p.setPen(m->activeFormWindow() == m_formWindow ? Qt::blue : Qt::red);
         p.drawRect(0, 0, width() - 1, height() - 1);
     }
 }
@@ -173,25 +189,25 @@ void WidgetHandle::mousePressEvent(QMouseEvent *e)
 {
     e->accept();
 
-    if (!formWindow->hasFeature(FormWindow::EditFeature))
+    if (!m_formWindow->hasFeature(FormWindow::EditFeature))
         return;
 
-    if (!(widget && e->button() == Qt::LeftButton))
+    if (!(m_widget && e->button() == Qt::LeftButton))
         return;
 
-    if (!(active || type == TaskMenu))
+    if (!(m_active || m_type == TaskMenu))
         return;
 
-    QWidget *container = widget->parentWidget();
+    QWidget *container = m_widget->parentWidget();
 
-    origPressPos = container->mapFromGlobal(e->globalPos());
-    geom = origGeom = widget->geometry();
+    m_origPressPos = container->mapFromGlobal(e->globalPos());
+    m_geom = m_origGeom = m_widget->geometry();
 
-    if (type == TaskMenu && e->button() == Qt::LeftButton) {
-        Q_ASSERT(sel->taskMenuExtension());
+    if (m_type == TaskMenu && e->button() == Qt::LeftButton) {
+        Q_ASSERT(m_sel->taskMenuExtension());
 
         QMenu m(this);
-        foreach (QAction *a, sel->taskMenuExtension()->taskActions()) {
+        foreach (QAction *a, m_sel->taskMenuExtension()->taskActions()) {
             m.addAction(a);
         }
         m.exec(e->globalPos());
@@ -199,28 +215,28 @@ void WidgetHandle::mousePressEvent(QMouseEvent *e)
 
 }
 
-int WidgetHandle::adjustPoint(int x, int dx)
-{ return (x / dx) * dx + 1; }
-
 void WidgetHandle::mouseMoveEvent(QMouseEvent *e)
 {
-    if (!(widget && active && e->buttons() & Qt::LeftButton))
+    if (!(m_widget && m_active && e->buttons() & Qt::LeftButton))
         return;
 
-    if (type == TaskMenu)
+    if (m_type == TaskMenu)
         return;
 
     e->accept();
 
-    QWidget *container = widget->parentWidget();
+    QWidget *container = m_widget->parentWidget();
 
-    QPoint rp = container->mapFromGlobal(e->globalPos());
-    QPoint d = rp - origPressPos;
+    const QPoint rp = container->mapFromGlobal(e->globalPos());
+    const QPoint d = rp - m_origPressPos;
 
-    QRect pr = container->rect();
-    QPoint grid = formWindow->grid();
+    const QRect pr = container->rect();
 
-    switch (type) {
+    qdesigner_internal::Grid grid;
+    if (const qdesigner_internal::FormWindowBase *fwb = qobject_cast<const qdesigner_internal::FormWindowBase*>(m_formWindow))
+        grid = fwb->designerGrid();
+
+    switch (m_type) {
 
     case TaskMenu:
         break;
@@ -229,231 +245,231 @@ void WidgetHandle::mouseMoveEvent(QMouseEvent *e)
         if (rp.x() > pr.width() - 2 * width() || rp.y() > pr.height() - 2 * height())
             return;
 
-        int w = origGeom.width() - d.x();
-        geom.setWidth(w);
-        w = adjustPoint(w, grid.x());
+        int w = m_origGeom.width() - d.x();
+        m_geom.setWidth(w);
+        w = grid.widgetHandleAdjustX(w);
 
-        int h = origGeom.height() - d.y();
-        geom.setHeight(h);
-        h = adjustPoint(h, grid.y());
+        int h = m_origGeom.height() - d.y();
+        m_geom.setHeight(h);
+        h = grid.widgetHandleAdjustY(h);
 
-        int dx = widget->width() - w;
-        int dy = widget->height() - h;
+        const int dx = m_widget->width() - w;
+        const int dy = m_widget->height() - h;
 
-        trySetGeometry(widget, widget->x() + dx, widget->y() + dy, w, h);
+        trySetGeometry(m_widget, m_widget->x() + dx, m_widget->y() + dy, w, h);
     } break;
 
     case Top: {
         if (rp.y() > pr.height() - 2 * height())
             return;
 
-        int h = origGeom.height() - d.y();
-        geom.setHeight(h);
-        h = adjustPoint(h, grid.y());
+        int h = m_origGeom.height() - d.y();
+        m_geom.setHeight(h);
+        h = grid.widgetHandleAdjustY(h);
 
-        int dy = widget->height() - h;
-        trySetGeometry(widget, widget->x(), widget->y() + dy, widget->width(), h);
+        const int dy = m_widget->height() - h;
+        trySetGeometry(m_widget, m_widget->x(), m_widget->y() + dy, m_widget->width(), h);
     } break;
 
     case RightTop: {
         if (rp.x() < 2 * width() || rp.y() > pr.height() - 2 * height())
             return;
 
-        int h = origGeom.height() - d.y();
-        geom.setHeight(h);
-        h = adjustPoint(h, grid.y());
+        int h = m_origGeom.height() - d.y();
+        m_geom.setHeight(h);
+        h = grid.widgetHandleAdjustY(h);
 
-        int dy = widget->height() - h;
+        const int dy = m_widget->height() - h;
 
-        int w = origGeom.width() + d.x();
-        geom.setWidth(w);
-        w = adjustPoint(w, grid.x());
+        int w = m_origGeom.width() + d.x();
+        m_geom.setWidth(w);
+        w = grid.widgetHandleAdjustX(w);
 
-        trySetGeometry(widget, widget->x(), widget->y() + dy, w, h);
+        trySetGeometry(m_widget, m_widget->x(), m_widget->y() + dy, w, h);
     } break;
 
     case Right: {
         if (rp.x() < 2 * width())
             return;
 
-        int w = origGeom.width() + d.x();
-        geom.setWidth(w);
-        w = adjustPoint(w, grid.x());
+        int w = m_origGeom.width() + d.x();
+        m_geom.setWidth(w);
+        w = grid.widgetHandleAdjustX(w);
 
-        tryResize(widget, w, widget->height());
+        tryResize(m_widget, w, m_widget->height());
     } break;
 
     case RightBottom: {
         if (rp.x() < 2 * width() || rp.y() < 2 * height())
             return;
 
-        int w = origGeom.width() + d.x();
-        geom.setWidth(w);
-        w = adjustPoint(w, grid.x());
+        int w = m_origGeom.width() + d.x();
+        m_geom.setWidth(w);
+        w = grid.widgetHandleAdjustX(w);
 
-        int h = origGeom.height() + d.y();
-        geom.setHeight(h);
-        h = adjustPoint(h, grid.y());
+        int h = m_origGeom.height() + d.y();
+        m_geom.setHeight(h);
+        h = grid.widgetHandleAdjustY(h);
 
-        tryResize(widget, w, h);
+        tryResize(m_widget, w, h);
     } break;
 
     case Bottom: {
         if (rp.y() < 2 * height())
             return;
 
-        int h = origGeom.height() + d.y();
-        geom.setHeight(h);
-        h = adjustPoint(h, grid.y());
+        int h = m_origGeom.height() + d.y();
+        m_geom.setHeight(h);
+        h = grid.widgetHandleAdjustY(h);
 
-        tryResize(widget, widget->width(), h);
+        tryResize(m_widget, m_widget->width(), h);
     } break;
 
     case LeftBottom: {
         if (rp.x() > pr.width() - 2 * width() || rp.y() < 2 * height())
             return;
 
-        int w = origGeom.width() - d.x();
-        geom.setWidth(w);
-        w = adjustPoint(w, grid.x());
+        int w = m_origGeom.width() - d.x();
+        m_geom.setWidth(w);
+        w = grid.widgetHandleAdjustX(w);
 
-        int h = origGeom.height() + d.y();
-        geom.setHeight(h);
-        h = adjustPoint(h, grid.y());
+        int h = m_origGeom.height() + d.y();
+        m_geom.setHeight(h);
+        h = grid.widgetHandleAdjustY(h);
 
-        int dx = widget->width() - w;
+        int dx = m_widget->width() - w;
 
-        trySetGeometry(widget, widget->x() + dx, widget->y(), w, h);
+        trySetGeometry(m_widget, m_widget->x() + dx, m_widget->y(), w, h);
     } break;
 
     case Left: {
         if (rp.x() > pr.width() - 2 * width())
             return;
 
-        int w = origGeom.width() - d.x();
-        geom.setWidth(w);
-        w = adjustPoint(w, grid.x());
+        int w = m_origGeom.width() - d.x();
+        m_geom.setWidth(w);
+        w = grid.widgetHandleAdjustX(w);
 
-        int dx = widget->width() - w;
+        const int dx = m_widget->width() - w;
 
-        trySetGeometry(widget, widget->x() + dx, widget->y(), w, widget->height());
+        trySetGeometry(m_widget, m_widget->x() + dx, m_widget->y(), w, m_widget->height());
     } break;
 
     default: break;
 
     } // end switch
 
-    sel->updateGeometry();
+    m_sel->updateGeometry();
 
-    if (LayoutInfo::layoutType(formWindow->core(), widget) != LayoutInfo::NoLayout)
-        formWindow->updateChildSelections(widget);
+    if (LayoutInfo::layoutType(m_formWindow->core(), m_widget) != LayoutInfo::NoLayout)
+        m_formWindow->updateChildSelections(m_widget);
 }
 
 void WidgetHandle::mouseReleaseEvent(QMouseEvent *e)
 {
-    if (e->button() != Qt::LeftButton || !active)
+    if (e->button() != Qt::LeftButton || !m_active)
         return;
 
-    if (type == TaskMenu)
+    if (m_type == TaskMenu)
         return;
 
     e->accept();
 
-    if (!formWindow->hasFeature(FormWindow::EditFeature))
+    if (!m_formWindow->hasFeature(FormWindow::EditFeature))
         return;
 
-    LayoutInfo::Type layoutType = widget->parentWidget()
-            ? LayoutInfo::layoutType(formWindow->core(), widget->parentWidget())
+    LayoutInfo::Type layoutType = m_widget->parentWidget()
+            ? LayoutInfo::layoutType(m_formWindow->core(), m_widget->parentWidget())
             : LayoutInfo::NoLayout;
 
     if (layoutType == LayoutInfo::Grid) {
-        QSize size = widget->parentWidget()->size();
-        QGridLayout *grid = static_cast<QGridLayout*>(widget->parentWidget()->layout());
+        const QSize size = m_widget->parentWidget()->size();
+        QGridLayout *grid = static_cast<QGridLayout*>(m_widget->parentWidget()->layout());
 
-        QDesignerLayoutDecorationExtension *deco = qt_extension<QDesignerLayoutDecorationExtension*>(core()->extensionManager(), widget->parentWidget());
+        QDesignerLayoutDecorationExtension *deco = qt_extension<QDesignerLayoutDecorationExtension*>(core()->extensionManager(), m_widget->parentWidget());
 
-        int index = deco->indexOf(widget);
-        QRect info = deco->itemInfo(index);
-        int top = deco->findItemAt(info.top() - 1, info.left());
-        int left = deco->findItemAt(info.top(), info.left() - 1);
-        int bottom = deco->findItemAt(info.bottom() + 1, info.left());
-        int right = deco->findItemAt(info.top(), info.right() + 1);
+        const int index = deco->indexOf(m_widget);
+        const QRect info = deco->itemInfo(index);
+        const int top = deco->findItemAt(info.top() - 1, info.left());
+        const int left = deco->findItemAt(info.top(), info.left() - 1);
+        const int bottom = deco->findItemAt(info.bottom() + 1, info.left());
+        const int right = deco->findItemAt(info.top(), info.right() + 1);
 
-        QPoint pt = origGeom.center() - widget->geometry().center();
+        const QPoint pt = m_origGeom.center() - m_widget->geometry().center();
 
         ChangeLayoutItemGeometry *cmd = 0;
 
-        switch (type) {
+        switch (m_type) {
             default: break;
 
             case WidgetHandle::Top: {
                 if (pt.y() < 0 && info.height() > 1) {
-                    cmd = new ChangeLayoutItemGeometry(formWindow);
-                    cmd->init(widget, info.y() + 1, info.x(), info.height() - 1, info.width());
+                    cmd = new ChangeLayoutItemGeometry(m_formWindow);
+                    cmd->init(m_widget, info.y() + 1, info.x(), info.height() - 1, info.width());
                 } else if (pt.y() > 0 && top != -1 && grid->itemAt(top)->spacerItem()) {
-                    cmd = new ChangeLayoutItemGeometry(formWindow);
-                    cmd->init(widget, info.y() - 1, info.x(), info.height() + 1, info.width());
+                    cmd = new ChangeLayoutItemGeometry(m_formWindow);
+                    cmd->init(m_widget, info.y() - 1, info.x(), info.height() + 1, info.width());
                 }
             } break;
 
             case WidgetHandle::Left: {
                 if (pt.x() < 0 && info.width() > 1) {
-                    cmd = new ChangeLayoutItemGeometry(formWindow);
-                    cmd->init(widget, info.y(), info.x() + 1, info.height(), info.width() - 1);
+                    cmd = new ChangeLayoutItemGeometry(m_formWindow);
+                    cmd->init(m_widget, info.y(), info.x() + 1, info.height(), info.width() - 1);
                 } else if (pt.x() > 0 && left != -1 && grid->itemAt(left)->spacerItem()) {
-                    cmd = new ChangeLayoutItemGeometry(formWindow);
-                    cmd->init(widget, info.y(), info.x() - 1, info.height(), info.width() + 1);
+                    cmd = new ChangeLayoutItemGeometry(m_formWindow);
+                    cmd->init(m_widget, info.y(), info.x() - 1, info.height(), info.width() + 1);
                 }
             } break;
 
             case WidgetHandle::Right: {
                 if (pt.x() > 0 && info.width() > 1) {
-                    cmd = new ChangeLayoutItemGeometry(formWindow);
-                    cmd->init(widget, info.y(), info.x(), info.height(), info.width() - 1);
+                    cmd = new ChangeLayoutItemGeometry(m_formWindow);
+                    cmd->init(m_widget, info.y(), info.x(), info.height(), info.width() - 1);
                 } else if (pt.x() < 0 && right != -1 && grid->itemAt(right)->spacerItem()) {
-                    cmd = new ChangeLayoutItemGeometry(formWindow);
-                    cmd->init(widget, info.y(), info.x(), info.height(), info.width() + 1);
+                    cmd = new ChangeLayoutItemGeometry(m_formWindow);
+                    cmd->init(m_widget, info.y(), info.x(), info.height(), info.width() + 1);
                 }
             } break;
 
             case WidgetHandle::Bottom: {
                 if (pt.y() > 0 && info.width() > 1) {
-                    cmd = new ChangeLayoutItemGeometry(formWindow);
-                    cmd->init(widget, info.y(), info.x(), info.height() - 1, info.width());
+                    cmd = new ChangeLayoutItemGeometry(m_formWindow);
+                    cmd->init(m_widget, info.y(), info.x(), info.height() - 1, info.width());
                 } else if (pt.y() < 0 && bottom != -1 && grid->itemAt(bottom)->spacerItem()) {
-                    cmd = new ChangeLayoutItemGeometry(formWindow);
-                    cmd->init(widget, info.y(), info.x(), info.height() + 1, info.width());
+                    cmd = new ChangeLayoutItemGeometry(m_formWindow);
+                    cmd->init(m_widget, info.y(), info.x(), info.height() + 1, info.width());
                 }
             } break;
         }
 
         if (cmd != 0) {
-            formWindow->commandHistory()->push(cmd);
+            m_formWindow->commandHistory()->push(cmd);
         } else {
             grid->invalidate();
             grid->activate();
-            formWindow->clearSelection(false);
-            formWindow->selectWidget(widget);
+            m_formWindow->clearSelection(false);
+            m_formWindow->selectWidget(m_widget);
         }
-    } else if (geom != widget->geometry()) {
-        SetPropertyCommand *cmd = new SetPropertyCommand(formWindow);
-        cmd->init(widget, QLatin1String("geometry"), widget->geometry());
-        cmd->setOldValue(origGeom);
-        formWindow->commandHistory()->push(cmd);
-        formWindow->emitSelectionChanged();
+    } else if (m_geom != m_widget->geometry()) {
+        SetPropertyCommand *cmd = new SetPropertyCommand(m_formWindow);
+        cmd->init(m_widget, QLatin1String("geometry"), m_widget->geometry());
+        cmd->setOldValue(m_origGeom);
+        m_formWindow->commandHistory()->push(cmd);
+        m_formWindow->emitSelectionChanged();
     }
 }
 
 void WidgetHandle::trySetGeometry(QWidget *w, int x, int y, int width, int height)
 {
-    if (!formWindow->hasFeature(FormWindow::EditFeature))
+    if (!m_formWindow->hasFeature(FormWindow::EditFeature))
         return;
 
     int minw = qMax(w->minimumSizeHint().width(), w->minimumSize().width());
-    minw = qMax(minw, 2 * formWindow->grid().x());
+    minw = qMax(minw, 2 * m_formWindow->grid().x());
 
     int minh = qMax(w->minimumSizeHint().height(), w->minimumSize().height());
-    minh = qMax(minh, 2 * formWindow->grid().y());
+    minh = qMax(minh, 2 * m_formWindow->grid().y());
 
     if (qMax(minw, width) > w->maximumWidth() ||
          qMax(minh, height) > w->maximumHeight())
@@ -481,24 +497,22 @@ void WidgetHandle::tryResize(QWidget *w, int width, int height)
 
 // ------------------------------------------------------------------------
 
-WidgetSelection::WidgetSelection(FormWindow *parent, QHash<QWidget *, WidgetSelection *> *selDict)
-    : selectionDict(selDict)
+WidgetSelection::WidgetSelection(FormWindow *parent)   :
+    m_topWidget(0),
+    m_wid(0),
+    m_formWindow(parent),
+    m_taskMenu(0)
 {
-    wid = 0;
-    taskMenu = 0;
-    formWindow = parent;
     for (int i = WidgetHandle::LeftTop; i < WidgetHandle::TypeCount; ++i) {
-        handles.insert(i, new WidgetHandle(formWindow, (WidgetHandle::Type)i, this));
+        m_handles.insert(i, new WidgetHandle(m_formWindow, static_cast<WidgetHandle::Type>(i), this));
     }
-
-    m_topWidget = 0;
 
     hide();
 }
 
-void WidgetSelection::setWidget(QWidget *w, bool updateDict)
+void WidgetSelection::setWidget(QWidget *w)
 {
-    taskMenu = 0; // ### qt_extension<QDesignerTaskMenuExtension*>(core()->extensionManager(), w);
+    m_taskMenu = 0; // ### qt_extension<QDesignerTaskMenuExtension*>(core()->extensionManager(), w);
 
 #ifndef NO_TOPWIDGET
     if (m_topWidget) {
@@ -510,43 +524,41 @@ void WidgetSelection::setWidget(QWidget *w, bool updateDict)
     m_topWidget = 0;
 #endif
 
-    if (wid != 0)
-        wid->removeEventFilter(this);
+    if (m_wid != 0)
+        m_wid->removeEventFilter(this);
 
     if (w == 0) {
         hide();
-        if (updateDict)
-            selectionDict->remove(wid);
-        wid = 0;
+        m_wid = 0;
         return;
     }
 
-    wid = w;
+    m_wid = w;
 
-    wid->installEventFilter(this);
+    m_wid->installEventFilter(this);
 
-    bool active = LayoutInfo::isWidgetLaidout(formWindow->core(), wid) == false;
+    const bool active = LayoutInfo::isWidgetLaidout(m_formWindow->core(), m_wid) == false;
 
     for (int i = WidgetHandle::LeftTop; i < WidgetHandle::TypeCount; ++i) {
-        if (WidgetHandle *h = handles[i]) {
-            h->setWidget(wid);
+        if (WidgetHandle *h = m_handles[i]) {
+            h->setWidget(m_wid);
             h->setActive(active);
         }
     }
 
-    QLayout *layout = LayoutInfo::managedLayout(formWindow->core(), formWindow->designerWidget(wid->parentWidget()));
+    QLayout *layout = LayoutInfo::managedLayout(m_formWindow->core(), m_formWindow->designerWidget(m_wid->parentWidget()));
     if (QGridLayout *grid = qobject_cast<QGridLayout*>(layout)) {
-        int index = grid->indexOf(wid);
+        const int index = grid->indexOf(m_wid);
         if (index == -1) {
 #if defined(QD_DEBUG)
-            qWarning() << "unexpected call to WidgetSelection::setWidget()" << "widget:" << wid << "grid:"<< grid;
+            qDebug() << "unexpected call to WidgetSelection::setWidget()" << "widget:" << m_wid << "grid:"<< grid;
 #endif
             return;
         }
 
         Q_ASSERT(index != -1);
 
-        QDesignerLayoutDecorationExtension *deco = qt_extension<QDesignerLayoutDecorationExtension*>(core()->extensionManager(), wid->parentWidget());
+        QDesignerLayoutDecorationExtension *deco = qt_extension<QDesignerLayoutDecorationExtension*>(core()->extensionManager(), m_wid->parentWidget());
         if (deco == 0) {
             // try with the actual layout
             deco = qt_extension<QDesignerLayoutDecorationExtension*>(core()->extensionManager(), layout);
@@ -554,20 +566,20 @@ void WidgetSelection::setWidget(QWidget *w, bool updateDict)
 
         if (deco != 0) {
             // bottom cell
-            handles[WidgetHandle::Bottom]->setActive(true);
+            m_handles[WidgetHandle::Bottom]->setActive(true);
             // top cell
-            handles[WidgetHandle::Top]->setActive(true);
+            m_handles[WidgetHandle::Top]->setActive(true);
             // left cell
-            handles[WidgetHandle::Left]->setActive(true);
-            // right cell
-            handles[WidgetHandle::Right]->setActive(true);
+            m_handles[WidgetHandle::Left]->setActive(true);
+            // right cellg59
+            m_handles[WidgetHandle::Right]->setActive(true);
         } else {
-            qWarning() << "no QDesignerLayoutDecorationExtension for widget:" << wid;
+            qDebug() << "no QDesignerLayoutDecorationExtension for widget:" << m_wid;
         }
     }
 
 #ifndef NO_TOPWIDGET
-    wid->setAttribute(Qt::WA_ContentsPropagated, true);
+    m_wid->setAttribute(Qt::WA_ContentsPropagated, true);
     m_topWidget = new TopWidget(wid);
     QPalette p = m_topWidget->palette();
     p.setColor(m_topWidget->backgroundRole(), QColor(255, 0, 0, 32));
@@ -576,30 +588,27 @@ void WidgetSelection::setWidget(QWidget *w, bool updateDict)
 
     updateGeometry();
     show();
-
-    if (updateDict)
-        selectionDict->insert(w, this);
 }
 
 bool WidgetSelection::isUsed() const
 {
-    return wid != 0;
+    return m_wid != 0;
 }
 
 void WidgetSelection::updateGeometry()
 {
-    if (!wid || !wid->parentWidget())
+    if (!m_wid || !m_wid->parentWidget())
         return;
 
-    QPoint p = wid->parentWidget()->mapToGlobal(wid->pos());
-    p = formWindow->mapFromGlobal(p);
-    QRect r(p, wid->size());
+    QPoint p = m_wid->parentWidget()->mapToGlobal(m_wid->pos());
+    p = m_formWindow->mapFromGlobal(p);
+    const QRect r(p, m_wid->size());
 
-    int w = 6;
-    int h = 6;
+    const int w = 6;
+    const int h = 6;
 
     for (int i = WidgetHandle::LeftTop; i < WidgetHandle::TypeCount; ++i) {
-        WidgetHandle *hndl = handles[ i ];
+        WidgetHandle *hndl = m_handles[ i ];
         if (!hndl)
             continue;
         switch (i) {
@@ -645,7 +654,7 @@ void WidgetSelection::updateGeometry()
 void WidgetSelection::hide()
 {
     for (int i = WidgetHandle::LeftTop; i < WidgetHandle::TypeCount; ++i) {
-        WidgetHandle *h = handles[ i ];
+        WidgetHandle *h = m_handles[ i ];
         if (h)
             h->hide();
     }
@@ -659,7 +668,7 @@ void WidgetSelection::hide()
 void WidgetSelection::show()
 {
     for (int i = WidgetHandle::LeftTop; i < WidgetHandle::TypeCount; ++i) {
-        WidgetHandle *h = handles[ i ];
+        WidgetHandle *h = m_handles[ i ];
         if (h) {
             if (i == WidgetHandle::TaskMenu) {
                 h->setVisible(taskMenuExtension() != 0);
@@ -682,7 +691,7 @@ void WidgetSelection::show()
 void WidgetSelection::update()
 {
     for (int i = WidgetHandle::LeftTop; i < WidgetHandle::TypeCount; ++i) {
-        WidgetHandle *h = handles[ i ];
+        WidgetHandle *h = m_handles[ i ];
         if (h)
             h->update();
     }
@@ -695,13 +704,13 @@ void WidgetSelection::update()
 
 QWidget *WidgetSelection::widget() const
 {
-    return wid;
+    return m_wid;
 }
 
 QDesignerFormEditorInterface *WidgetSelection::core() const
 {
-    if (formWindow)
-        return formWindow->core();
+    if (m_formWindow)
+        return m_formWindow->core();
 
     return 0;
 }
@@ -721,6 +730,8 @@ bool WidgetSelection::eventFilter(QObject *object, QEvent *event)
     } // end switch
 
     return false;
+}
+
 }
 
 #include "widgetselection.moc"

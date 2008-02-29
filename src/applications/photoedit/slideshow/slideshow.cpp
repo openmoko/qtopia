@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -31,16 +31,14 @@ SlideShow::SlideShow( QObject* parent )
     , drm_content( QDrmRights::Display, QDrmContent::NoLicenseOptions )
 {
     // When timeout advance to next image in collection
-    connect( &timer, SIGNAL( timeout() ), this, SLOT( advance() ) );
+    connect( &timer, SIGNAL(timeout()), this, SLOT(advance()) );
     connect( this, SIGNAL(stopped()), &drm_content, SLOT(renderStopped()) );
 }
 
 SlideShow::~SlideShow()
 {
-#ifdef Q_WS_QWS
     // Ensure backlight dimmer is re-enabled.
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
-#endif
 }
 
 void SlideShow::setFirstImage( const QContent& image )
@@ -74,9 +72,7 @@ void SlideShow::start()
 
     // Disable power save while playing so that the device
     // doesn't suspend before the slides finish.
-#ifdef Q_WS_QWS
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Disable);
-#endif
 
     timer.start( pause*FACTOR );
 }
@@ -86,9 +82,7 @@ void SlideShow::stop()
     timer.stop();
 
     // Re-enable power save (that was disabled in start()).
-#ifdef Q_WS_QWS
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
-#endif
 
     emit stopped();
 }
@@ -114,9 +108,7 @@ void SlideShow::advance()
                 // Wrap around - and put the power saving back on, just in case it wraps
                 // around forever.
                 collection_i = 0;
-#ifdef Q_WS_QWS
                 QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
-#endif
             }
 
             QContent image = collection_model.content( collection_i );

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,23 +21,19 @@
 
 #include "addwapui.h"
 
-#include <QDebug>
-#include <QFile>
 #include <QLabel>
 #include <QLayout>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QRegExp>
 #include <QScrollArea>
 #include <QSettings>
 #include <QStackedWidget>
-#include <QTabWidget>
 
 #include <qtopiaapplication.h>
 #include <qtopianamespace.h>
 #include <qtopianetworkinterface.h>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 
 #include "ui_gatewaybase.h"
 #include "ui_mmsbase.h"
@@ -52,9 +48,10 @@ class WapAccountPage : public QWidget
 {
 Q_OBJECT
 public:
-    WapAccountPage( QString file, QWidget* parent = 0, Qt::WFlags fl = 0)
-        : QWidget( parent, fl )
+    WapAccountPage( QWapAccount* acc, QWidget* parent = 0, Qt::WFlags fl = 0)
+        : QWidget( parent, fl ), wapAccount( acc )
     {
+        Q_ASSERT(wapAccount);
         QVBoxLayout* vb = new QVBoxLayout( this );
         vb->setMargin( 5 );
         vb->setSpacing( 4 );
@@ -64,32 +61,31 @@ public:
 
         account = new QLineEdit( this );
         vb->addWidget( account );
+        account_label->setBuddy( account );
 
         QLabel * dataAccount_label = new QLabel(tr("Use data account:"), this);
         vb->addWidget(dataAccount_label);
 
         dataAccount = new QComboBox( this );
         vb->addWidget( dataAccount );
+        dataAccount_label->setBuddy( dataAccount );
 
         QSpacerItem* spacer = new QSpacerItem( 10, 100,
                 QSizePolicy::Minimum, QSizePolicy::Expanding );
         vb->addItem( spacer );
 
-        QSettings cfg( file, QSettings::IniFormat );
-        QString name = cfg.value("Info/Name").toString();
-        if ( name.isEmpty() )
+        if ( wapAccount->name().isEmpty() )
             account->setText( tr("WAP account", "name of default wap account") );
         else
-            account->setText( name );
+            account->setText( wapAccount->name() );
 
-        QString accountConfig = cfg.value("Info/DataAccount").toString();
-        dataConfigs = QtopiaNetwork::availableNetworkConfigs( QtopiaNetwork::GPRS );
+        dataInterfaces = QtopiaNetwork::availableNetworkConfigs( QtopiaNetwork::GPRS );
 
         int found = -1;
-        for( int i = 0; i<dataConfigs.count(); i++ ) {
-            QSettings dataCfg( dataConfigs[i], QSettings::IniFormat );
+        for( int i = 0; i<dataInterfaces.count(); i++ ) {
+            QSettings dataCfg( dataInterfaces[i], QSettings::IniFormat );
             dataAccount->addItem( dataCfg.value("Info/Name").toString() );
-            if (dataConfigs[i] == accountConfig)
+            if (dataInterfaces[i] == wapAccount->dataInterface())
                 found = i;
         }
 
@@ -101,76 +97,87 @@ public:
             dataAccount->setCurrentIndex( found );
         }
 
-#ifdef QTOPIA_PHONE
         QtopiaApplication::setInputMethodHint( account, QtopiaApplication::Words );
         QSoftMenuBar::menuFor( this );
         QSoftMenuBar::setHelpEnabled( this, true );
-#endif
         setObjectName("wap-account");
+
+        connect( account, SIGNAL(editingFinished()), this, SLOT(nameChanged()) );
+        connect( dataAccount, SIGNAL(currentIndexChanged(int)), this, SLOT(dataInterfaceChanged(int)) );
     }
 
     virtual ~WapAccountPage()
     {
+        wapAccount = 0; //pointer owned by AddWapUI
     }
 
-    QtopiaNetworkProperties properties()
+private slots:
+
+    void nameChanged()
     {
-        QtopiaNetworkProperties prop;
-        prop.insert("Info/Name", account->text());
+        wapAccount->setName( account->text() );
+    }
 
-        int idx = dataAccount->currentIndex();
-        if (idx >= 0 && idx < dataAccount->count() && dataConfigs.count() )
-            prop.insert("Info/DataAccount", dataConfigs[idx]);
+    void dataInterfaceChanged( int idx )
+    {
+        if (idx >= 0 && idx < dataAccount->count() && dataInterfaces.count() )
+            wapAccount->setDataInterface( dataInterfaces[idx] );
         else
-            prop.insert("Info/DataAccount", "");
-
-        return prop;
+            wapAccount->setDataInterface( "" );
     }
 
 private:
-    QStringList dataConfigs;
+    QStringList dataInterfaces;
     QLineEdit* account;
     QComboBox* dataAccount;
+    QWapAccount* wapAccount;
 };
 
 class GatewayPage: public QWidget
 {
+    Q_OBJECT
 public:
-    GatewayPage( QString file, QWidget* parent = 0, Qt::WFlags fl = 0)
-        :QWidget( parent, fl )
+    GatewayPage( QWapAccount* acc, QWidget* parent = 0, Qt::WFlags fl = 0)
+        :QWidget( parent, fl ), wapAccount( acc )
     {
+        Q_ASSERT(wapAccount);
         ui.setupUi( this );
-#ifdef QTOPIA_PHONE
-        QtopiaApplication::setInputMethodHint( ui.gateway, QtopiaApplication::Text );
-        QtopiaApplication::setInputMethodHint( ui.username, QtopiaApplication::Text );
-        QtopiaApplication::setInputMethodHint( ui.password, QtopiaApplication::Text );
-#endif
-
-        QSettings cfg( file, QSettings::IniFormat );
-        ui.gateway->setText( cfg.value("Wap/Gateway").toString() );
-        ui.port->setValue( cfg.value("Wap/Port").toInt());
-        ui.username->setText( cfg.value("Wap/UserName").toString() );
-        ui.password->setText( cfg.value("Wap/Password").toString() );
+        QtopiaApplication::setInputMethodHint( ui.gateway, "url" );
+        QtopiaApplication::setInputMethodHint( ui.username, "text noautocapitalization" );
+        // automatically sets the password hint modifier
         ui.password->setEchoMode( QLineEdit::PasswordEchoOnEdit );
 
-#ifdef QTOPIA_PHONE
+        QUrl url = wapAccount->gateway();
+        ui.gateway->setText( url.host() );
+        ui.port->setValue( url.port() == 9200 ? 0 : url.port() );
+        ui.username->setText( url.userName() );
+        ui.password->setText( url.password() );
+        ui.password->setEchoMode( QLineEdit::PasswordEchoOnEdit );
+
         QSoftMenuBar::menuFor( this );
         QSoftMenuBar::setHelpEnabled( this, true );
-#endif
         setObjectName("wap-gateway");
-    };
 
-    QtopiaNetworkProperties properties()
-    {
-        QtopiaNetworkProperties prop;
-        prop.insert("Wap/Gateway", ui.gateway->text());
-        prop.insert("Wap/Port", ui.port->value());
-        prop.insert("Wap/UserName", ui.username->text());
-        prop.insert("Wap/Password", ui.password->text());
-        return prop;
+        connect( ui.gateway, SIGNAL(editingFinished()), this, SLOT(gatewayChanged()) );
+        connect( ui.username, SIGNAL(editingFinished()), this, SLOT(gatewayChanged()) );
+        connect( ui.password, SIGNAL(editingFinished()), this, SLOT(gatewayChanged()) );
+
+        connect( ui.port, SIGNAL(valueChanged(int)), this, SLOT(gatewayChanged()) );
     };
+private slots:
+    void gatewayChanged()
+    {
+        QUrl url;
+        url.setHost( ui.gateway->text() );
+        url.setPort( ui.port->value() == 0 ? 9200 : ui.port->value() );
+        url.setUserName( ui.username->text() );
+        url.setPassword( ui.password->text() );
+        wapAccount->setGateway( url );
+    }
+
 private:
     Ui::GatewayBase ui;
+    QWapAccount* wapAccount;
 };
 
 struct ExpiryTime {
@@ -193,19 +200,26 @@ static const ExpiryTime expiryTimes[] = {
 
 class MMSPage: public QWidget
 {
+    Q_OBJECT
 public:
-    MMSPage( QString file, QWidget* parent = 0, Qt::WFlags fl = 0)
-        :QWidget( parent, fl )
+    MMSPage( QWapAccount* acc, QWidget* parent = 0, Qt::WFlags fl = 0)
+        :QWidget( parent, fl ), wapAccount( acc )
     {
+        Q_ASSERT( wapAccount );
         ui.setupUi( this );
-#ifdef QTOPIA_PHONE
         QtopiaApplication::setInputMethodHint( ui.mms, QtopiaApplication::Text );
-#endif
 
-        QSettings cfg( file, QSettings::IniFormat );
-        QString server = cfg.value("MMS/Server").toString();
-        if ( !server.isEmpty() )
-            ui.mms->setText( server );
+        QUrl url( wapAccount->mmsServer() );
+        
+        QString host( url.toString( QUrl::RemovePort ) );
+        if ( host.startsWith( "http://" ) )
+            host.remove(0, 7);
+        if ( host.startsWith( "//" ) )
+            host.remove(0, 2);
+        ui.mms->setText( host );
+
+        int port = url.port();
+        ui.mmsPort->setValue( port == 80 ? 0 : port );
 
         int idx = 0;
         while (expiryTimes[idx].desc) {
@@ -214,81 +228,126 @@ public:
         }
 
         idx = 0;
-        int exp = cfg.value("MMS/Expiry").toInt();
+        int exp = wapAccount->mmsExpiry();
         while (expiryTimes[idx].desc && expiryTimes[idx].expiry < exp)
             idx++;
         if (!expiryTimes[idx].desc)
             idx = 0;
         ui.expiry->setCurrentIndex(idx);
 
-        QString visibility = cfg.value("MMS/Visibility").toString();
-        if ( visibility == "show" )
-            ui.visibility->setCurrentIndex( 1 );
-        else if ( visibility == "hidden" )
-            ui.visibility->setCurrentIndex( 2 );
-        else
-            ui.visibility->setCurrentIndex( 0 );
-
-        if ( cfg.value("MMS/AllowDeliveryReport").toString() != "y" )
-            ui.delivery->setCheckState( Qt::Unchecked );
-        else
-            ui.delivery->setCheckState( Qt::Checked );
-
-#ifdef QTOPIA_PHONE
-        QSoftMenuBar::menuFor( this );
-        QSoftMenuBar::setHelpEnabled( this, true );
-#endif
-        setObjectName("wap-mms");
-    };
-
-    QtopiaNetworkProperties properties()
-    {
-        QtopiaNetworkProperties prop;
-        prop.insert("MMS/Server", ui.mms->text());
-
-        prop.insert("MMS/Expiry",
-                expiryTimes[ui.expiry->currentIndex()].expiry );
-
-        int idx = ui.visibility->currentIndex();
-        switch (idx) {
-            case 0:
+        switch( wapAccount->mmsSenderVisibility() ) {
+            case QWapAccount::SenderHidden:
+                ui.visibility->setCurrentIndex( 2 );
+                break;
+            case QWapAccount::SenderVisible:
+                ui.visibility->setCurrentIndex( 1 );
+                break;
             default:
-                prop.insert( "MMS/Visibility", "default" );
-                break;
-            case 1:
-                prop.insert( "MMS/Visibility", "show" );
-                break;
-            case 2:
-                prop.insert( "MMS/Visibility", "hidden" );
+                ui.visibility->setCurrentIndex( 0 );
                 break;
         }
 
-        if ( ui.delivery->checkState() == Qt::Checked )
-            prop.insert("MMS/AllowDeliveryReport", "y");
-        else
-            prop.insert("MMS/AllowDeliveryReport", "n");
+        ui.delivery->setCheckState( wapAccount->mmsDeliveryReport() ? Qt::Checked : Qt::Unchecked );
 
+        QSoftMenuBar::menuFor( this );
+        QSoftMenuBar::setHelpEnabled( this, true );
+        setObjectName("wap-mms");
 
-        return prop;
+        connect( ui.mms, SIGNAL(editingFinished()), this, SLOT(mmsServerChanged()) );
+        connect( ui.mmsPort, SIGNAL(valueChanged(int)), this, SLOT(mmsServerChanged()) );
+        connect( ui.expiry, SIGNAL(currentIndexChanged(int)), this, SLOT(expiryChanged(int)) );
+        connect( ui.visibility, SIGNAL(currentIndexChanged(int)), this, SLOT(visibilityChanged(int)) );
+        connect( ui.delivery, SIGNAL(stateChanged(int)), this, SLOT(deliveryChanged(int)) );
     };
+
+private slots:
+
+    void mmsServerChanged()
+    {
+        QUrl url;
+
+        // Parse the input: 
+        QRegExp elements( "(?:(\\w+)://)?"  // optional scheme info
+                          "([^:/]+)"        // mandatory host component
+                          "(?::(\\d+))?"    // optional port specifier
+                          "(?:/(.+))?" );   // optional path information
+
+        if ( elements.indexIn( ui.mms->text() ) != -1 ) {
+            QString scheme( elements.cap(1) );
+            QString host( elements.cap(2) );
+            QString port( elements.cap(3) );
+            QString path( elements.cap(4) );
+
+            if ( !scheme.isEmpty() )
+                url.setScheme( scheme );
+            if ( !host.isEmpty() )
+                url.setHost( host );
+            if ( !port.isEmpty() )
+                url.setPort( port.toInt() );
+            if ( !path.isEmpty() )
+                url.setPath( path );
+        }
+
+        // If the port is specified individually, override any existing port value
+        int port( ui.mmsPort->value() );
+        if ( port != 0 )
+            url.setPort( port );
+
+        wapAccount->setMmsServer( url );
+    }
+
+    void expiryChanged( int idx )
+    {
+        if ( idx < 0 )
+            return;
+        wapAccount->setMmsExpiry( expiryTimes[idx].expiry );
+    }
+
+    void visibilityChanged( int idx )
+    {
+        if ( idx < 0 )
+            return;
+        switch (idx) {
+            case 0:
+            default:
+                wapAccount->setMmsSenderVisibility( QWapAccount::Default );
+                break;
+            case 1:
+                wapAccount->setMmsSenderVisibility( QWapAccount::SenderVisible );
+                break;
+            case 2:
+                wapAccount->setMmsSenderVisibility( QWapAccount::SenderHidden );
+                break;
+        }
+    }
+
+    void deliveryChanged( int state )
+    {
+        wapAccount->setMmsDeliveryReport( state == Qt::Checked ? true : false );
+    }
 private:
+    QWapAccount* wapAccount;
     Ui::MMSBase ui;
 };
 
 class BrowserPage : public QWidget
 {
+    Q_OBJECT
 public:
     BrowserPage( QString file, QWidget* parent = 0, Qt::WFlags fl = 0)
-        :QWidget( parent, fl )
+        :QWidget( parent, fl ), cfg( file, QSettings::IniFormat )
     {
         ui.setupUi( this );
 
-        QSettings cfg( file, QSettings::IniFormat );
         if ( cfg.value("Browser/ShowPictures").toString() != "y" )
             ui.showPics->setCheckState(Qt::Unchecked);
         else
             ui.showPics->setCheckState( Qt::Checked );
 
+        btnGrp = new QButtonGroup( this );
+        btnGrp->addButton( ui.confirm );
+        btnGrp->addButton( ui.accept );
+        btnGrp->addButton( ui.reject );
         QString cookies = cfg.value("Browser/Cookies").toString();
         if ( cookies == "Confirm" )
             ui.confirm->setChecked( true );
@@ -296,61 +355,50 @@ public:
             ui.accept->setChecked( true );
         else
             ui.reject->setChecked( true );
-#ifdef QTOPIA_PHONE
         QSoftMenuBar::menuFor( this );
         QSoftMenuBar::setHelpEnabled( this, true );
-#endif
         setObjectName("wap-browser");
 
+        connect( ui.showPics, SIGNAL(stateChanged(int)), this, SLOT(picsChanged()) );
+        connect( btnGrp, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(cookiesChanged()) );
     }
 
-    QtopiaNetworkProperties properties()
+private slots:
+
+    void picsChanged()
     {
-        QtopiaNetworkProperties prop;
-        if ( ui.showPics->checkState() == Qt::Checked )
-            prop.insert("Browser/ShowPictures", "y");
-        else
-            prop.insert("Browser/ShowPictures", "n");
+       if ( ui.showPics->checkState() == Qt::Checked )
+           cfg.setValue("Browser/ShowPictures", "y");
+       else
+           cfg.setValue("Browser/ShowPictures", "n");
+    }
 
+    void cookiesChanged()
+    {
         if ( ui.confirm->isChecked() )
-            prop.insert("Browser/Cookies", "Confirm");
+            cfg.setValue( QLatin1String("Browser/Cookies"), "Confirm" );
         else if ( ui.accept->isChecked() )
-            prop.insert("Browser/Cookies", "Accept");
+            cfg.setValue( QLatin1String("Browser/Cookies"), "Accept" );
         else
-            prop.insert("Browser/Cookies", "Reject");
-
-        return prop;
+            cfg.setValue( QLatin1String("Browser/Cookies"), "Reject" );
     }
 
 private:
+    QButtonGroup* btnGrp;
+    QSettings cfg;
     Ui::BrowserBase ui;
 };
 
 
 
 AddWapUI::AddWapUI( QString file, QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+    : QDialog( parent, fl ), acc( file )
 {
     setModal( true );
 
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this, true );
-#endif
     setObjectName("wap-menu");
-
-    if ( file.isEmpty() || !QFile::exists(file) ) {
-        QString path = Qtopia::applicationFileName("Network", "wap") + '/';
-        QString newName = path +"wap.conf";
-        int index = 0;
-        while ( QFile::exists(newName) ) {
-            index++;
-            newName = path+"wap"+QString::number(index)+".conf";
-        }
-        configFile = newName;
-    } else {
-        configFile = file;
-    }
 
     init();
 }
@@ -365,25 +413,7 @@ void AddWapUI::init()
     QVBoxLayout* mainLayout = new QVBoxLayout( this );
     mainLayout->setMargin( 0 );
     mainLayout->setSpacing( 0 );
-#ifndef QTOPIA_PHONE
-    QTabWidget* tabWidget = new QTabWidget( this );
-    accountPage = new WapAccountPage( configFile );
-    tabWidget->addTab( accountPage, tr("Account") );
-    tabWidget->setTabIcon(0, QIcon(":icon/account") );
 
-    gatewayPage = new GatewayPage( configFile );
-    tabWidget->addTab( gatewayPage, tr("Gateway") );
-    tabWidget->setTabIcon(1, QIcon(":icon/wap") );
-
-    mmsPage = new MMSPage( configFile );
-    tabWidget->addTab( mmsPage, tr("MMS") );
-    tabWidget->setTabIcon(2, QIcon(":icon/mms") );
-
-    browserPage = new BrowserPage( configFile );
-    tabWidget->addTab( browserPage, tr("Misc") );
-
-    mainLayout->addWidget( tabWidget );
-#else
     stack = new QStackedWidget( this );
 
     QWidget* page = new QWidget();
@@ -403,7 +433,8 @@ void AddWapUI::init()
     item = new QListWidgetItem( QIcon(":icon/mms"),
             tr("MMS"), options, MMS );
     item->setTextAlignment( Qt::AlignHCenter);
-    item = new QListWidgetItem( tr("Misc"), options, Browsing );
+    item = new QListWidgetItem( QIcon(":icon/settings"), 
+            tr("Misc"), options, Browsing );
     item->setTextAlignment( Qt::AlignHCenter);
     vb->addWidget( options );
 
@@ -426,27 +457,27 @@ void AddWapUI::init()
 
     QScrollArea* scroll = 0;
 
-    accountPage = new WapAccountPage( configFile );
+    accountPage = new WapAccountPage( &acc );
     stack->addWidget( accountPage );
 
     scroll = new QScrollArea();
     scroll->setWidgetResizable( true );
     scroll->setFocusPolicy( Qt::NoFocus );
-    gatewayPage = new GatewayPage( configFile );
+    gatewayPage = new GatewayPage( &acc );
     scroll->setWidget( gatewayPage );
     stack->addWidget( scroll );
 
     scroll = new QScrollArea();
     scroll->setWidgetResizable( true );
     scroll->setFocusPolicy( Qt::NoFocus );
-    mmsPage = new MMSPage( configFile );
+    mmsPage = new MMSPage( &acc );
     scroll->setWidget( mmsPage );
     stack->addWidget( scroll );
 
     scroll = new QScrollArea();
     scroll->setWidgetResizable( true );
     scroll->setFocusPolicy( Qt::NoFocus );
-    browserPage = new BrowserPage( configFile );
+    browserPage = new BrowserPage( acc.configuration() );
     scroll->setWidget( browserPage );
     stack->addWidget( scroll );
 
@@ -455,52 +486,17 @@ void AddWapUI::init()
     mainLayout->addWidget( stack );
     connect(options, SIGNAL(itemActivated(QListWidgetItem*)),
             this, SLOT(optionSelected(QListWidgetItem*)));
-#endif
 }
 
 void AddWapUI::accept()
 {
-#ifdef QTOPIA_PHONE
     if ( stack->currentIndex() == 0 ) {
-
-        QtopiaNetworkProperties props = accountPage->properties();
-        writeConfig(props);
-        props = gatewayPage->properties();
-        writeConfig(props);
-        props = mmsPage->properties();
-        writeConfig(props);
-        props = browserPage->properties();
-        writeConfig(props);
         QDialog::accept();
     } else {
         stack->setCurrentIndex( 0 );
     }
-#else
-    QtopiaNetworkProperties props = accountPage->properties();
-    writeConfig(props);
-    props = gatewayPage->properties();
-    writeConfig(props);
-    props = mmsPage->properties();
-    writeConfig(props);
-    props = browserPage->properties();
-    writeConfig(props);
-    QDialog::accept();
-#endif
 }
 
-void AddWapUI::writeConfig(const QtopiaNetworkProperties prop)
-{
-    QSettings cfg( configFile, QSettings::IniFormat );
-    QMapIterator<QString,QVariant> i(prop);
-    QString key;
-    while (i.hasNext()) {
-        i.next();
-        QString key = i.key();
-        cfg.setValue( key, i.value() );
-    }
-}
-
-#ifdef QTOPIA_PHONE
 void AddWapUI::optionSelected(QListWidgetItem* item)
 {
     if (item) {
@@ -553,9 +549,6 @@ void AddWapUI::updateUserHint( QListWidgetItem* newItem, QListWidgetItem* /*prev
     }
     hint->setText( text );
 }
-
-
-#endif
 
 #include "addwapui.moc"
 

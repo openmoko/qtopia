@@ -1,0 +1,30 @@
+#!/bin/sh
+
+export TOOLCHAIN=/opt/toolchains/i686/gcc-3.4.3-glibc-2.3.4/i686-linux
+
+if [ -d /opt/teambuilder ]; then
+    # our bin path has special wrapper scripts that set TEAMBUILDER_SYSTEM
+    export PATH="$DEVICE_CONFIG_PATH/bin:/opt/teambuilder/bin:$TOOLCHAIN/bin:$PATH"
+    # remove any i686-linux-* stuff from TEAMBUILDER_CC_VERSION
+    export TEAMBUILDER_CC_VERSION="$(echo $TEAMBUILDER_CC_VERSION | sed 's/arm-linux-[^:]*:[[digit].][[digit].]*;*//')"
+    # check to see how the variable is set
+    if [ -n "$TEAMBUILDER_CC_VERSION" ]; then
+        echo "$TEAMBUILDER_CC_VERSION" | grep ':' >/dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            # handle the old-style setting (ie. just a version number)
+            export TEAMBUILDER_CC_VERSION="*:$TEAMBUILDER_CC_VERSION"
+        fi
+    fi
+    # set i686-linux-* to version 3.4.3, keeping the rest of the TEAMBUILDER_CC_VERSION (for the host compile)
+    export TEAMBUILDER_CC_VERSION="i686-linux-*:3.4.3;$TEAMBUILDER_CC_VERSION"
+    # this must not be set or cross compiles won't be farmed out
+    if [ "$TEAMBUILDER_SYSTEM" = 'x86:i686' ]; then
+        unset TEAMBUILDER_SYSTEM
+    fi
+else
+    # don't destroy the environment if $TOOLCHAIN/bin is already somewhere in the $PATH
+    if ! echo "$PATH" | grep "$TOOLCHAIN/bin" ; then
+        export PATH="$TOOLCHAIN/bin:$PATH"
+    fi
+fi
+

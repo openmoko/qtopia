@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/styles/qmacstyle_mac.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/styles/qmacstyle_mac.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QMacStyle</title>
+  <title>Qt 4.3: List of All Members for QMacStyle</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -36,6 +36,7 @@
 <li><div class="fn"/><a href="qobject.html#blockSignals">blockSignals</a> ( bool ) : bool</li>
 <li><div class="fn"/><a href="qobject.html#childEvent">childEvent</a> ( QChildEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#children">children</a> () const : const QObjectList &amp;</li>
+<li><div class="fn"/><a href="qstyle.html#combinedLayoutSpacing">combinedLayoutSpacing</a> ( QSizePolicy::ControlTypes, QSizePolicy::ControlTypes, Qt::Orientation, QStyleOption *, QWidget * ) const : int</li>
 <li><div class="fn"/><a href="qobject.html#connect">connect</a> ( const QObject *, const char *, const QObject *, const char *, Qt::ConnectionType ) : bool</li>
 <li><div class="fn"/><a href="qobject.html#connect-2">connect</a> ( const QObject *, const char *, const char *, Qt::ConnectionType ) const : bool</li>
 <li><div class="fn"/><a href="qobject.html#connectNotify">connectNotify</a> ( const char * )</li>
@@ -59,16 +60,17 @@
 <li><div class="fn"/><a href="qobject.html#findChild">findChild</a> ( const QString &amp; ) const : T</li>
 <li><div class="fn"/><a href="qobject.html#findChildren">findChildren</a> ( const QString &amp; ) const : QList&lt;T&gt;</li>
 <li><div class="fn"/><a href="qobject.html#findChildren-2">findChildren</a> ( const QRegExp &amp; ) const : QList&lt;T&gt;</li>
-<li><div class="fn"/><a href="qmacstyle.html#focusRectPolicy">focusRectPolicy</a> ( const QWidget * ) : FocusRectPolicy</li>
 <li><div class="fn"/><a href="qstyle.html#generatedIconPixmap">generatedIconPixmap</a> ( QIcon::Mode, const QPixmap &amp;, const QStyleOption * ) const : QPixmap</li>
 <li><div class="fn"/><a href="qstyle.html#hitTestComplexControl">hitTestComplexControl</a> ( ComplexControl, const QStyleOptionComplex *, const QPoint &amp;, const QWidget * ) const : SubControl</li>
-<li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const : bool</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const : bool</li>
 <li><div class="fn"/><a href="qobject.html#installEventFilter">installEventFilter</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#isWidgetType">isWidgetType</a> () const : bool</li>
 <li><div class="fn"/><a href="qstyle.html#itemPixmapRect">itemPixmapRect</a> ( const QRect &amp;, int, const QPixmap &amp; ) const : QRect</li>
 <li><div class="fn"/><a href="qstyle.html#itemTextRect">itemTextRect</a> ( const QFontMetrics &amp;, const QRect &amp;, int, bool, const QString &amp; ) const : QRect</li>
 <li><div class="fn"/><a href="qobject.html#killTimer">killTimer</a> ( int )</li>
+<li><div class="fn"/><a href="qstyle.html#layoutSpacing">layoutSpacing</a> ( QSizePolicy::ControlType, QSizePolicy::ControlType, Qt::Orientation, const QStyleOption *, const QWidget * ) const : int</li>
+<li><div class="fn"/><a href="qstyle.html#layoutSpacingImplementation">layoutSpacingImplementation</a> ( QSizePolicy::ControlType, QSizePolicy::ControlType, Qt::Orientation, const QStyleOption *, const QWidget * ) const : int</li>
 <li><div class="fn"/><a href="qobject.html#metaObject">metaObject</a> () const : const QMetaObject *</li>
 <li><div class="fn"/><a href="qobject.html#moveToThread">moveToThread</a> ( QThread * )</li>
 <li><div class="fn"/><a href="qobject.html#objectName-prop">objectName</a> () const : QString</li>
@@ -81,11 +83,9 @@
 <li><div class="fn"/><a href="qobject.html#receivers">receivers</a> ( const char * ) const : int</li>
 <li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#sender">sender</a> () const : QObject *</li>
-<li><div class="fn"/><a href="qmacstyle.html#setFocusRectPolicy">setFocusRectPolicy</a> ( QWidget *, FocusRectPolicy )</li>
 <li><div class="fn"/><a href="qobject.html#objectName-prop">setObjectName</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#setParent">setParent</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#setProperty">setProperty</a> ( const char *, const QVariant &amp; ) : bool</li>
-<li><div class="fn"/><a href="qmacstyle.html#setWidgetSizePolicy">setWidgetSizePolicy</a> ( const QWidget *, WidgetSizePolicy )</li>
 <li><div class="fn"/><a href="qobject.html#signalsBlocked">signalsBlocked</a> () const : bool</li>
 <li><div class="fn"/><a href="qstyle.html#sizeFromContents">sizeFromContents</a> ( ContentsType, const QStyleOption *, const QSize &amp;, const QWidget * ) const : QSize</li>
 <li><div class="fn"/><a href="qstyle.html#sliderPositionFromValue">sliderPositionFromValue</a> ( int, int, int, int, bool ) : int</li>
@@ -93,7 +93,6 @@
 <li><div class="fn"/><a href="qstyle.html#standardIcon">standardIcon</a> ( StandardPixmap, const QStyleOption *, const QWidget * ) const : QIcon</li>
 <li><div class="fn"/><a href="qstyle.html#standardIconImplementation">standardIconImplementation</a> ( StandardPixmap, const QStyleOption *, const QWidget * ) const : QIcon</li>
 <li><div class="fn"/><a href="qstyle.html#standardPalette">standardPalette</a> () const : QPalette</li>
-<li><div class="fn"/><a href="qstyle.html#standardPixmap">standardPixmap</a> ( StandardPixmap, const QStyleOption *, const QWidget * ) const : QPixmap</li>
 <li><div class="fn"/><a href="qobject.html#startTimer">startTimer</a> ( int ) : int</li>
 <li><div class="fn"/><a href="qobject.html#staticMetaObject-var">staticMetaObject</a> : const QMetaObject</li>
 <li><div class="fn"/><a href="qstyle.html#styleHint">styleHint</a> ( StyleHint, const QStyleOption *, const QWidget *, QStyleHintReturn * ) const : int</li>
@@ -108,7 +107,6 @@
 <li><div class="fn"/><a href="qstyle.html#visualAlignment">visualAlignment</a> ( Qt::LayoutDirection, Qt::Alignment ) : Qt::Alignment</li>
 <li><div class="fn"/><a href="qstyle.html#visualPos">visualPos</a> ( Qt::LayoutDirection, const QRect &amp;, const QPoint &amp; ) : QPoint</li>
 <li><div class="fn"/><a href="qstyle.html#visualRect">visualRect</a> ( Qt::LayoutDirection, const QRect &amp;, const QRect &amp; ) : QRect</li>
-<li><div class="fn"/><a href="qmacstyle.html#widgetSizePolicy">widgetSizePolicy</a> ( const QWidget * ) : WidgetSizePolicy</li>
 </ul>
 </td></tr>
 </table></p>
@@ -116,6 +114,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

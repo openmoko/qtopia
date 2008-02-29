@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt 3 Support Members for QAbstractSocket</title>
+  <title>Qt 4.3: Qt 3 Support Members for QAbstractSocket</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -68,7 +68,7 @@
 <p>Use <a href="qabstractsocket.html#socketDescriptor">socketDescriptor</a>() instead.</p>
 <p>See also <a href="qabstractsocket-qt3.html#setSocket">setSocket</a>().</p>
 <h3 class="fn"><a name="waitForMore"></a><a href="qtglobal.html#qulonglong-typedef">qulonglong</a> QAbstractSocket::waitForMore ( int <i>msecs</i>, bool * <i>timeout</i> = 0 ) const</h3>
-<p>Use <a href="qiodevice.html#waitForReadyRead">waitForReadyRead</a>() instead.</p>
+<p>Use <a href="qabstractsocket.html#waitForReadyRead">waitForReadyRead</a>() instead.</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> bool timeout;
  Q_ULONG numBytes = socket-&gt;waitForMore(30000, &amp;timeout);</font></pre>
@@ -77,11 +77,11 @@
  if (socket-&gt;waitForReadyRead(msecs))
      numBytes = socket-&gt;bytesAvailable();
  bool timeout = (error() == QAbstractSocket::SocketTimeoutError);</pre>
-<p>See also <a href="qiodevice.html#waitForReadyRead">waitForReadyRead</a>(), <a href="qabstractsocket.html#bytesAvailable">bytesAvailable</a>(), <a href="qabstractsocket.html#error">error</a>(), and <a href="qabstractsocket.html#SocketError-enum">SocketTimeoutError</a>.</p>
+<p>See also <a href="qabstractsocket.html#waitForReadyRead">waitForReadyRead</a>(), <a href="qabstractsocket.html#bytesAvailable">bytesAvailable</a>(), <a href="qabstractsocket.html#error">error</a>(), and <a href="qabstractsocket.html#SocketError-enum">SocketTimeoutError</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -254,6 +269,17 @@ void QSqlRelationalTableModelPrivate::clearCache()
        rows in the referenced table, the rows containing the invalid
        keys will not be exposed through the model. The user or the
        database is responsible for keeping referential integrity.
+    \o If a relation's display column name is also used as a column
+       name in the main table, or if it is used as display column
+       name in more than one relation it will be aliased. The alias is
+       is the relation's table name and display column name joined
+       by an underscore (e.g. tablename_columnname). All occurances
+       of the duplicate display column name are aliased when
+       duplication is detected, but no aliasing is done to the column
+       names in the main table. The aliasing doesn't affect
+       QSqlRelation, so QSqlRelation::displayColumn() will return the
+       original display column name, but QSqlRecord::fieldName() will
+       return aliases.
     \endlist
 
     \sa QSqlRelation, QSqlRelationalDelegate,
@@ -391,15 +417,34 @@ QString QSqlRelationalTableModel::selectStatement() const
     QSqlRecord rec = d->baseRec;
     QStringList tables;
     const QRelation nullRelation;
+
+    // Count how many times each field name occurs in the record
+    QHash<QString, int> fieldNames;
+    for (int i = 0; i < rec.count(); ++i) {
+        QSqlRelation relation = d->relations.value(i, nullRelation).rel;
+        QString name;
+        if (relation.isValid())
+            // Count the display column name, not the original foreign key
+            name = relation.displayColumn();
+        else
+            name = rec.fieldName(i);
+        fieldNames.insert(name, fieldNames.value(name, 0) + 1);
+    }
+
     for (int i = 0; i < rec.count(); ++i) {
         QSqlRelation relation = d->relations.value(i, nullRelation).rel;
         if (relation.isValid()) {
             QString relTableAlias = QString::fromLatin1("relTblAl_%1").arg(i);
             fList.append(d->escapedRelationField(relTableAlias, relation.displayColumn()));
+            
+            // If there are duplicate field names they must be aliased
+            if (fieldNames.value(relation.displayColumn()) > 1)
+                fList.append(QString::fromLatin1(" AS %1_%2").arg(relation.tableName()).arg(relation.displayColumn()));
+
             fList.append(QLatin1Char(','));
             if (!tables.contains(relation.tableName()))
                 tables.append(d->db.driver()->escapeIdentifier(relation.tableName(),
-                       QSqlDriver::TableName).append(QLatin1String(" AS ")).append(
+                       QSqlDriver::TableName).append(QLatin1String(" ")).append(
                        d->db.driver()->escapeIdentifier(relTableAlias, QSqlDriver::TableName)));
             where.append(d->escapedRelationField(tableName(), rec.fieldName(i)));
             where.append(QLatin1Char('='));

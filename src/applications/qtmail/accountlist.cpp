@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -40,9 +40,9 @@ int AccountList::count()
     return list.count();
 }
 
-MailAccount* AccountList::at(int x) 
+MailAccount* AccountList::at(int x)
 {
-    return list.at(x); 
+    return list.at(x);
 };
 
 
@@ -53,14 +53,12 @@ void AccountList::readAccounts()
 
     accountconf.beginGroup( "accountglobal" );
     int count = accountconf.value("accounts", 0).toInt();
-#ifdef QTOPIA_PHONE
 #ifndef QTOPIA_NO_SMS
     bool smsExists = false;
 #endif
     bool systemExists = false;
 #ifndef QTOPIA_NO_MMS
     bool mmsExists = false;
-#endif
 #endif
 
     for (int x = 0; x < count; x++) {
@@ -70,7 +68,6 @@ void AccountList::readAccounts()
         account->readSettings(&accountconf);
         append(account);
 
-#ifdef QTOPIA_PHONE
 #ifndef QTOPIA_NO_SMS
         if (account->accountType() == MailAccount::SMS)
             smsExists = true;
@@ -82,7 +79,6 @@ void AccountList::readAccounts()
         else if (account->accountType() == MailAccount::MMS)
             mmsExists = true;
 #endif
-#endif
     }
     accountconf.endGroup();
 
@@ -93,9 +89,9 @@ void AccountList::readAccounts()
     };
     Q_UNUSED(account_names);
 
-#ifdef QTOPIA_PHONE
 #ifndef QTOPIA_NO_SMS
     if (!smsExists) {
+        qDebug() << "SMS2";
         account = new MailAccount();
         account->setAccountType( MailAccount::SMS );
         account->setAccountName( "SMS" );
@@ -104,6 +100,7 @@ void AccountList::readAccounts()
     }
 #endif
     if (!systemExists) {
+        qDebug() << "MMS2";
         account = new MailAccount();
         account->setAccountType( MailAccount::System );
         account->setAccountName( "System" );
@@ -120,7 +117,6 @@ void AccountList::readAccounts()
         append(account);
     }
 #endif
-#endif
 }
 
 void AccountList::saveAccounts()
@@ -128,7 +124,7 @@ void AccountList::saveAccounts()
     QSettings accountconf("Trolltech","qtmail_account");
     accountconf.beginGroup( "accountglobal" );
 
-    accountconf.setValue("accounts", (int) count() );
+    accountconf.setValue("accounts", count() );
     int count = 0;
     QListIterator<MailAccount*> it(list);
     while (it.hasNext()) {

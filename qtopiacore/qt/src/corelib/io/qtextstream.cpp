@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -212,7 +227,7 @@ static const int QTEXTSTREAM_BUFFERSIZE = 16384;
                        there are no decimals.
     \value ForceSign  Always put the sign in numbers, even for positive numbers.
     \value UppercaseBase  Use uppercase versions of base prefixes ("0X", "0B").
-    \value UppercaseDigits  Use uppercare letters for expressing
+    \value UppercaseDigits  Use uppercase letters for expressing
                             digits 10 to 35 instead of lowercase.
 
     \sa setNumberFlags()
@@ -233,6 +248,7 @@ static const int QTEXTSTREAM_BUFFERSIZE = 16384;
 #include "qtextstream.h"
 #include "qbuffer.h"
 #include "qfile.h"
+#include "qnumeric.h"
 #ifndef QT_NO_TEXTCODEC
 #include "qtextcodec.h"
 #endif
@@ -253,7 +269,7 @@ static QByteArray qt_prettyDebug(const char *data, int len, int maxSize)
     QByteArray out;
     for (int i = 0; i < len; ++i) {
         char c = data[i];
-        if (isprint(c)) {
+        if (isprint(int(uchar(c)))) {
             out += c;
         } else switch (c) {
         case '\n': out += "\\n"; break;
@@ -401,11 +417,9 @@ public:
     QString readBuffer;
     int readBufferOffset;
     qint64 readBufferStartDevicePos;
-    QString endOfBufferState;
 #ifndef QT_NO_TEXTCODEC
     QTextCodec::ConverterState readBufferStartReadConverterState;
 #endif
-    QString readBufferStartEndOfBufferState;
 
     // streaming parameters
     int realNumberPrecision;
@@ -480,7 +494,6 @@ void QTextStreamPrivate::reset()
 
     readBufferOffset = 0;
     readBufferStartDevicePos = 0;
-    endOfBufferState.clear();
     lastTokenSize = 0;
 
 #ifndef QT_NO_TEXTCODEC
@@ -558,16 +571,16 @@ bool QTextStreamPrivate::fillReadBuffer(qint64 maxBytes)
     qDebug("QTextStreamPrivate::fillReadBuffer(), device->read(\"%s\", %d) == %d",
            qt_prettyDebug(buf, qMin(32,int(bytesRead)) , int(bytesRead)).constData(), sizeof(buf), int(bytesRead));
 #endif
+    
     if (bytesRead <= 0)
         return false;
 
     int oldReadBufferSize = readBuffer.size();
-    readBuffer += endOfBufferState;
 #ifndef QT_NO_TEXTCODEC
     // convert to unicode
     readBuffer += codec->toUnicode(buf, bytesRead, &readConverterState);
 #else
-    readBuffer += QString(QByteArray(buf, bytesRead));
+    readBuffer += QString::fromLatin1(QByteArray(buf, bytesRead).constData());
 #endif
 
     // reset the Text flag.
@@ -577,34 +590,31 @@ bool QTextStreamPrivate::fillReadBuffer(qint64 maxBytes)
     // remove all '\r\n' in the string.
     if (readBuffer.size() > oldReadBufferSize && textModeEnabled) {
         QChar CR = QLatin1Char('\r');
-        QChar LF = QLatin1Char('\n');
-        QChar *writePtr = readBuffer.data();
-        QChar *readPtr = readBuffer.data();
+        QChar *writePtr = readBuffer.data() + oldReadBufferSize;
+        QChar *readPtr = readBuffer.data() + oldReadBufferSize;
         QChar *endPtr = readBuffer.data() + readBuffer.size();
 
-        int n = 0;
+        int n = oldReadBufferSize;
+        if (readPtr < endPtr) {
+            // Cut-off to avoid unnecessary self-copying.
+            while (*readPtr++ != CR) {
+                ++n;
+                if (++writePtr == endPtr)
+                    break;
+            }
+        }
         while (readPtr < endPtr) {
-            if (readPtr + 1 < endPtr && *readPtr == CR && *(readPtr + 1) == LF) {
-                *writePtr = LF;
+            QChar ch = *readPtr++;
+            if (ch != CR) {
+                *writePtr++ = ch;
+            } else {
                 if (n < readBufferOffset)
                     --readBufferOffset;
-                ++readPtr;
-            } else  if (readPtr != writePtr) {
-                *writePtr = *readPtr;
+                --bytesRead;
             }
-
             ++n;
-            ++writePtr;
-            ++readPtr;
         }
         readBuffer.resize(writePtr - readBuffer.data());
-
-        if (readBuffer.endsWith(QLatin1Char('\r')) && !device->atEnd()) {
-            endOfBufferState = QLatin1String("\r");
-            readBuffer.chop(1);
-        } else {
-            endOfBufferState.clear();
-        }
     }
 
 #if defined (QTEXTSTREAM_DEBUG)
@@ -810,7 +820,6 @@ inline void QTextStreamPrivate::consume(int size)
 #ifndef QT_NO_TEXTCODEC
             copyConverterState(&readBufferStartReadConverterState, &readConverterState);
 #endif
-            readBufferStartEndOfBufferState = endOfBufferState;
         }
     }
 }
@@ -1108,9 +1117,7 @@ bool QTextStream::seek(qint64 pos)
             return false;
         d->readBuffer.clear();
         d->readBufferOffset = 0;
-        d->endOfBufferState.clear();
         d->readBufferStartDevicePos = d->device->pos();
-        d->readBufferStartEndOfBufferState.clear();
 
 #ifndef QT_NO_TEXTCODEC
         // Reset the codec converter states.
@@ -1148,7 +1155,7 @@ qint64 QTextStream::pos() const
     Q_D(const QTextStream);
     if (d->device) {
         // Cutoff
-        if (d->readBuffer.isEmpty() && d->endOfBufferState.isEmpty())
+        if (d->readBuffer.isEmpty())
             return d->device->pos();
         if (d->device->isSequential())
             return 0;
@@ -1166,7 +1173,6 @@ qint64 QTextStream::pos() const
 #ifndef QT_NO_TEXTCODEC
         ::copyConverterState(&thatd->readConverterState, &d->readBufferStartReadConverterState);
 #endif
-        thatd->endOfBufferState = d->readBufferStartEndOfBufferState;
 #ifndef QT_NO_TEXTCODEC
         if (d->readBufferStartDevicePos == 0)
             thatd->autoDetectUnicode = true;
@@ -1215,6 +1221,9 @@ void QTextStream::skipWhiteSpace()
     Sets the current device to \a device. If a device has already been
     assigned, QTextStream will call flush() before the old device is
     replaced.
+    
+    \note This function resets the codec to the default codec,
+    QTextCodec::codecForLocale().
 
     \sa device(), setString()
 */
@@ -1229,8 +1238,10 @@ void QTextStream::setDevice(QIODevice *device)
         delete d->device;
         d->deleteDevice = false;
     }
+    
+    d->reset();
+    d->status = Ok;    
     d->device = device;
-    d->string = 0;
 #ifndef QT_NO_QOBJECT
     d->deviceClosedNotifier.setupDevice(this, d->device);
 #endif
@@ -1266,8 +1277,10 @@ void QTextStream::setString(QString *string, QIODevice::OpenMode openMode)
         delete d->device;
         d->deleteDevice = false;
     }
+    
+    d->reset();
+    d->status = Ok;
     d->string = string;
-    d->device = 0;
     d->stringOpenMode = openMode;
 }
 
@@ -1805,26 +1818,41 @@ bool QTextStreamPrivate::getReal(double *f)
         ExpMark = 5,
         ExpSign = 6,
         Exponent = 7,
-        Done = 8
+        Nan1 = 8,
+        Nan2 = 9,
+        Inf1 = 10,
+        Inf2 = 11,
+        NanInf = 12,
+        Done = 13
     };
     enum InputToken {
         None = 0,
         InputSign = 1,
         InputDigit = 2,
         InputDot = 3,
-        InputExp = 4
+        InputExp = 4,
+        InputI = 5,
+        InputN = 6,
+        InputF = 7,
+        InputA = 8,
+        InputT = 9
     };
 
-    static uchar table[8][5] = {
-        // None InputSign InputDigit InputDot InputExp
-        { 0,    Sign,     Mantissa,  Dot,     0        }, // Init
-        { 0,    0,        Mantissa,  Dot,     0        }, // Sign
-        { Done, Done,     Mantissa,  Dot,     ExpMark  }, // Mantissa
-        { 0,    0,        Abscissa,  0,       0        }, // Dot
-        { Done, Done,     Abscissa,  Done,    ExpMark  }, // Abscissa
-        { 0,    ExpSign,  Exponent,  0,       0        }, // ExpMark
-        { 0,    0,        Exponent,  0,       0        }, // ExpSign
-        { Done, Done,     Exponent,  Done,    Done     }  // Exponent
+    static uchar table[13][10] = {
+        // None InputSign InputDigit InputDot InputExp InputI    InputN    InputF    InputA    InputT
+        { 0,    Sign,     Mantissa,  Dot,     0,       Inf1,     Nan1,     0,        0,        0      }, // 0  Init
+        { 0,    0,        Mantissa,  Dot,     0,       Inf1,     Nan1,     0,        0,        0      }, // 1  Sign
+        { Done, Done,     Mantissa,  Dot,     ExpMark, 0,        0,        0,        0,        0      }, // 2  Mantissa
+        { 0,    0,        Abscissa,  0,       0,       0,        0,        0,        0,        0      }, // 3  Dot
+        { Done, Done,     Abscissa,  Done,    ExpMark, 0,        0,        0,        0,        0      }, // 4  Abscissa
+        { 0,    ExpSign,  Exponent,  0,       0,       0,        0,        0,        0,        0      }, // 5  ExpMark
+        { 0,    0,        Exponent,  0,       0,       0,        0,        0,        0,        0      }, // 6  ExpSign
+        { Done, Done,     Exponent,  Done,    Done,    0,        0,        0,        0,        0      }, // 7  Exponent
+        { 0,    0,        0,         0,       0,       0,        0,        0,        Nan2,     0      }, // 8  Nan1
+        { 0,    0,        0,         0,       0,       0,        NanInf,   0,        0,        0      }, // 9  Nan2
+        { 0,    0,        0,         0,       0,       0,        Inf2,     0,        0,        0      }, // 10 Inf1
+        { 0,    0,        0,         0,       0,       0,        0,        NanInf,   0,        0      }, // 11 Inf2
+        { Done, 0,        0,         0,       0,       0,        0,        0,        0,        0      }, // 11 NanInf
     };
 
     ParserState state = Init;
@@ -1855,6 +1883,21 @@ bool QTextStreamPrivate::getReal(double *f)
         case 'E':
             input = InputExp;
             break;
+        case 'i': case 'I':
+            input = InputI;
+            break;
+        case 'n': case 'N':
+            input = InputN;
+            break;
+        case 'f': case 'F':
+            input = InputF;
+            break;
+        case 'a': case 'A':
+            input = InputA;
+            break;
+        case 't': case 'T':
+            input = InputT;
+            break;
         default:
             input = None;
             break;
@@ -1880,11 +1923,25 @@ bool QTextStreamPrivate::getReal(double *f)
 
     if (i == 0)
         return false;
+    if (!f)
+        return true;
 
-    buf[i] = '\0';
-
-    if (f)
+    // ### Number parsing should really be handled by QLocale.
+    char c0 = buf[0] | 32; // tolower
+    char c1 = buf[1] | 32; // tolower
+    bool sign = true;
+    if (c0 == '+' || c0 == '-') {
+        sign = (c0 == '+');
+        c0 = c1;
+    }
+    if (c0 == 'i') {
+        *f = sign ? qInf() : -qInf();
+    } else if (c0 == 'n') {
+        *f = qQNaN();
+    } else {
+        buf[i] = '\0';
         *f = strtod(buf, 0);
+    }
     return true;
 }
 
@@ -1931,7 +1988,7 @@ QTextStream &QTextStream::operator>>(char &c)
 
 /*!
     Reads an integer from the stream and stores it in \a i, then
-    returns a reference to the QTextStream. The number is casted to
+    returns a reference to the QTextStream. The number is cast to
     the correct type before it is stored. If no number was detected on
     the stream, \a i is set to 0.
 
@@ -2030,9 +2087,12 @@ QTextStream &QTextStream::operator>>(qulonglong &i)
 
 /*!
     Reads a real number from the stream and stores it in \a f, then
-    returns a reference to the QTextStream. The number is casted to
+    returns a reference to the QTextStream. The number is cast to
     the correct type. If no real number is detect on the stream, \a f
     is set to 0.0.
+
+    As a special exception, QTextStream allows the strings "nan" and "inf" to
+    represent NAN and INF floats or doubles.
 
     Leading whitespace is skipped.
 */
@@ -2148,26 +2208,28 @@ QTextStream &QTextStream::operator>>(char *c)
  */
 bool QTextStreamPrivate::putNumber(qulonglong number, bool negative)
 {
-    QString tmp;
+    QString prefix;
     if (negative)
-        tmp = QLatin1Char('-');
+        prefix = QLatin1Char('-');
     else if (numberFlags & QTextStream::ForceSign)
-        tmp = QLatin1Char('+');
+        prefix = QLatin1Char('+');
 
     if (numberFlags & QTextStream::ShowBase) {
         switch (integerBase) {
-        case 2: tmp += QLatin1String("0b"); break;
-        case 8: tmp += QLatin1String("0"); break;
-        case 16: tmp += QLatin1String("0x"); break;
+        case 2: prefix += QLatin1String("0b"); break;
+        case 8: prefix += QLatin1String("0"); break;
+        case 16: prefix += QLatin1String("0x"); break;
         default: break;
         }
+        if (numberFlags & QTextStream::UppercaseBase)
+            prefix = prefix.toUpper(); // ### in-place instead
     }
 
-    tmp += QString::number(number, integerBase ? integerBase : 10);
-    if (numberFlags & QTextStream::UppercaseBase)
-        tmp = tmp.toUpper(); // ### in-place instead
+    QString digits = QString::number(number, integerBase ? integerBase : 10);
+    if (numberFlags & QTextStream::UppercaseDigits)
+        digits = digits.toUpper(); // ### in-place instead
 
-    return putString(tmp);
+    return putString(prefix + digits);
 }
 
 /*!
@@ -2338,6 +2400,21 @@ QTextStream &QTextStream::operator<<(double f)
 {
     Q_D(QTextStream);
     CHECK_VALID_STREAM(*this);
+
+    // Handle nans and infs.
+    bool upperCaseDigits = (d->numberFlags & QTextStream::UppercaseDigits);
+    if (qIsInf(f)) {
+        if (f < 0) {
+            operator<<(upperCaseDigits ? "-INF" : "-inf");
+        } else {
+            operator<<(upperCaseDigits ? "INF" : "inf");
+        }
+        return *this;
+    }
+    if (qIsNaN(f)) {
+        operator<<(upperCaseDigits ? "NAN" : "nan");
+        return *this;
+    }
 
     char f_char;
     char format[16];

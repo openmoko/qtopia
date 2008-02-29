@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,6 +23,8 @@
 extern "C" {
 #include "gsm.h"
 };
+
+//#define WAVGSM_SUPPORTED 1
 
 
 const int WAV_PCM_HEADER_LEN = 44;
@@ -58,7 +60,7 @@ WavRecorderPlugin::WavRecorderPlugin()
 
 int WavRecorderPlugin::pluginNumFormats() const
 {
-#ifdef QTOPIA4_TODO
+#ifdef WAVGSM_SUPPORTED
     return 2;
 #else
     return 1;
@@ -66,9 +68,10 @@ int WavRecorderPlugin::pluginNumFormats() const
 }
 
 
-QString WavRecorderPlugin::pluginFormatName( int /*format*/ ) const
+QString WavRecorderPlugin::pluginFormatName( int format ) const
 {
-#ifdef QTOPIA4_TODO
+    Q_UNUSED(format);
+#ifdef WAVGSM_SUPPORTED
     if (format == 1)
         return "GSM WAV"; // No tr
     else
@@ -77,9 +80,10 @@ QString WavRecorderPlugin::pluginFormatName( int /*format*/ ) const
 }
 
 
-QString WavRecorderPlugin::pluginFormatTag( int /*format*/ ) const
+QString WavRecorderPlugin::pluginFormatTag( int format ) const
 {
-#ifdef QTOPIA4_TODO
+    Q_UNUSED(format);
+#ifdef WAVGSM_SUPPORTED
     if (format == 1)
         return "gsm";
     else

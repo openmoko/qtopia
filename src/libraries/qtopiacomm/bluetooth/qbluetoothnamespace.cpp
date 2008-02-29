@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,12 +24,11 @@
 #include <bluetooth/l2cap.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <qtopianamespace.h>
 #include <qbluetoothnamespace.h>
 #include <qbluetoothremotedevice.h>
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
-#include <qtopialog.h>
+#include "qbluetoothnamespace_p.h"
 
+#include <QApplication>
 #include <QString>
 #include <QStringList>
 #include <QList>
@@ -146,125 +145,125 @@ using namespace QBluetooth;
 
 // These are bits 7, 6, 5, 4, 3, 2
 const char *computer_minor_classes[] = {
-    QT_TR_NOOP("Uncategorized"),
-    QT_TR_NOOP("Desktop workstation"),
-    QT_TR_NOOP("Server-class computer"),
-    QT_TR_NOOP("Laptop"),
-    QT_TR_NOOP("Handheld PC/PDA (clam shell)"),
-    QT_TR_NOOP("Palm sized PC/PDA"),
-    QT_TR_NOOP("Wearable computer (Watch sized)"),
+    QT_TRANSLATE_NOOP("QBluetooth","Uncategorized"),
+    QT_TRANSLATE_NOOP("QBluetooth","Desktop workstation"),
+    QT_TRANSLATE_NOOP("QBluetooth","Server-class computer"),
+    QT_TRANSLATE_NOOP("QBluetooth","Laptop"),
+    QT_TRANSLATE_NOOP("QBluetooth","Handheld PC/PDA (clam shell)"),
+    QT_TRANSLATE_NOOP("QBluetooth","Palm sized PC/PDA"),
+    QT_TRANSLATE_NOOP("QBluetooth","Wearable computer (Watch sized)"),
     NULL
 };
 
 // These are bits 7, 6, 5, 4, 3, 2
 const char *phone_minor_classes[] = {
-    QT_TR_NOOP("Uncategorized"),
-    QT_TR_NOOP("Cellular"),
-    QT_TR_NOOP("Cordless"),
-    QT_TR_NOOP("Smart phone"),
-    QT_TR_NOOP("Wired modem or voice gateway"),
-    QT_TR_NOOP("Common ISDN Access"),
+    QT_TRANSLATE_NOOP("QBluetooth","Uncategorized"),
+    QT_TRANSLATE_NOOP("QBluetooth","Cellular"),
+    QT_TRANSLATE_NOOP("QBluetooth","Cordless"),
+    QT_TRANSLATE_NOOP("QBluetooth","Smart phone"),
+    QT_TRANSLATE_NOOP("QBluetooth","Wired modem or voice gateway"),
+    QT_TRANSLATE_NOOP("QBluetooth","Common ISDN Access"),
     NULL
 };
 
 // These are bits 7, 6, 5
 const char *lan_access_minor_classes[] = {
-    QT_TR_NOOP("Fully available"),
-    QT_TR_NOOP("17% utilized"),
-    QT_TR_NOOP("17-33% utilized"),
-    QT_TR_NOOP("33-50% utilized"),
-    QT_TR_NOOP("50-67% utilized"),
-    QT_TR_NOOP("67-83% utilized"),
-    QT_TR_NOOP("83-99% utilized"),
-    QT_TR_NOOP("No service available"),
+    QT_TRANSLATE_NOOP("QBluetooth","Fully available"),
+    QT_TRANSLATE_NOOP("QBluetooth","17% utilized"),
+    QT_TRANSLATE_NOOP("QBluetooth","17-33% utilized"),
+    QT_TRANSLATE_NOOP("QBluetooth","33-50% utilized"),
+    QT_TRANSLATE_NOOP("QBluetooth","50-67% utilized"),
+    QT_TRANSLATE_NOOP("QBluetooth","67-83% utilized"),
+    QT_TRANSLATE_NOOP("QBluetooth","83-99% utilized"),
+    QT_TRANSLATE_NOOP("QBluetooth","No service available"),
     NULL
 };
 
 // These are bits 7, 6, 5, 4, 3, 2
 const char *audio_video_minor_classes[] = {
-    QT_TR_NOOP("Uncategorized, code not assigned"),
-    QT_TR_NOOP("Wearable Headset Device"),
-    QT_TR_NOOP("Hands-free Device"),
-    QT_TR_NOOP("(Reserved)"),
-    QT_TR_NOOP("Microphone"),
-    QT_TR_NOOP("Loudspeaker"),
-    QT_TR_NOOP("Headphones"),
-    QT_TR_NOOP("Portable Audio"),
-    QT_TR_NOOP("Car audio"),
-    QT_TR_NOOP("Set-top box"),
-    QT_TR_NOOP("HiFi Audio Device"),
-    QT_TR_NOOP("VCR"),
-    QT_TR_NOOP("Video Camera"),
-    QT_TR_NOOP("Camcorder"),
-    QT_TR_NOOP("Video Monitor"),
-    QT_TR_NOOP("Video Display and Loudspeaker"),
-    QT_TR_NOOP("Video Conferencing"),
-    QT_TR_NOOP("(Reserved)"),
-    QT_TR_NOOP("Gaming/Toy"),
+    QT_TRANSLATE_NOOP("QBluetooth","Uncategorized, code not assigned"),
+    QT_TRANSLATE_NOOP("QBluetooth","Wearable Headset Device"),
+    QT_TRANSLATE_NOOP("QBluetooth","Hands-free Device"),
+    QT_TRANSLATE_NOOP("QBluetooth","(Reserved)"),
+    QT_TRANSLATE_NOOP("QBluetooth","Microphone"),
+    QT_TRANSLATE_NOOP("QBluetooth","Loudspeaker"),
+    QT_TRANSLATE_NOOP("QBluetooth","Headphones"),
+    QT_TRANSLATE_NOOP("QBluetooth","Portable Audio"),
+    QT_TRANSLATE_NOOP("QBluetooth","Car audio"),
+    QT_TRANSLATE_NOOP("QBluetooth","Set-top box"),
+    QT_TRANSLATE_NOOP("QBluetooth","HiFi Audio Device"),
+    QT_TRANSLATE_NOOP("QBluetooth","VCR"),
+    QT_TRANSLATE_NOOP("QBluetooth","Video Camera"),
+    QT_TRANSLATE_NOOP("QBluetooth","Camcorder"),
+    QT_TRANSLATE_NOOP("QBluetooth","Video Monitor"),
+    QT_TRANSLATE_NOOP("QBluetooth","Video Display and Loudspeaker"),
+    QT_TRANSLATE_NOOP("QBluetooth","Video Conferencing"),
+    QT_TRANSLATE_NOOP("QBluetooth","(Reserved)"),
+    QT_TRANSLATE_NOOP("QBluetooth","Gaming/Toy"),
     NULL
 };
 
 //Bits 7,6
 const char *peripheral_minor_classes[] = {
-    QT_TR_NOOP("Not Keyboard / Not Pointing Device"),
-    QT_TR_NOOP("Keyboard"),
-    QT_TR_NOOP("Pointing device"),
-    QT_TR_NOOP("Combo keyboard/pointing device"),
+    QT_TRANSLATE_NOOP("QBluetooth","Not Keyboard / Not Pointing Device"),
+    QT_TRANSLATE_NOOP("QBluetooth","Keyboard"),
+    QT_TRANSLATE_NOOP("QBluetooth","Pointing device"),
+    QT_TRANSLATE_NOOP("QBluetooth","Combo keyboard/pointing device"),
     NULL
 };
 
 // Bits 5, 4, 3, 2 (combination with the above)
 // E.g. can be Keyboard + Gamepad or something
 const char *peripheral_device_field_minor_classes[] = {
-    QT_TR_NOOP("Uncategorized device"),
-    QT_TR_NOOP("Joystick"),
-    QT_TR_NOOP("Gamepad"),
-    QT_TR_NOOP("Remote control"),
-    QT_TR_NOOP("Sensing device"),
-    QT_TR_NOOP("Digitizer tablet"),
-    QT_TR_NOOP("Card Reader"),
+    QT_TRANSLATE_NOOP("QBluetooth","Uncategorized device"),
+    QT_TRANSLATE_NOOP("QBluetooth","Joystick"),
+    QT_TRANSLATE_NOOP("QBluetooth","Gamepad"),
+    QT_TRANSLATE_NOOP("QBluetooth","Remote control"),
+    QT_TRANSLATE_NOOP("QBluetooth","Sensing device"),
+    QT_TRANSLATE_NOOP("QBluetooth","Digitizer tablet"),
+    QT_TRANSLATE_NOOP("QBluetooth","Card Reader"),
     NULL
 };
 
 // Bits 7, 6, 5, 4
 const char *imaging_minor_classes[] = {
-    QT_TR_NOOP("Uncategorized"),
-    QT_TR_NOOP("Display"),
-    QT_TR_NOOP("Camera"),
-    QT_TR_NOOP("Camera"),
-    QT_TR_NOOP("Scanner"),
-    QT_TR_NOOP("Scanner"),
-    QT_TR_NOOP("Scanner"),
-    QT_TR_NOOP("Scanner"),
-    QT_TR_NOOP("Printer"),
-    QT_TR_NOOP("Printer"),
-    QT_TR_NOOP("Printer"),
-    QT_TR_NOOP("Printer"),
-    QT_TR_NOOP("Printer"),
-    QT_TR_NOOP("Printer"),
-    QT_TR_NOOP("Printer"),
-    QT_TR_NOOP("Printer"),
+    QT_TRANSLATE_NOOP("QBluetooth","Uncategorized"),
+    QT_TRANSLATE_NOOP("QBluetooth","Display"),
+    QT_TRANSLATE_NOOP("QBluetooth","Camera"),
+    QT_TRANSLATE_NOOP("QBluetooth","Camera"),
+    QT_TRANSLATE_NOOP("QBluetooth","Scanner"),
+    QT_TRANSLATE_NOOP("QBluetooth","Scanner"),
+    QT_TRANSLATE_NOOP("QBluetooth","Scanner"),
+    QT_TRANSLATE_NOOP("QBluetooth","Scanner"),
+    QT_TRANSLATE_NOOP("QBluetooth","Printer"),
+    QT_TRANSLATE_NOOP("QBluetooth","Printer"),
+    QT_TRANSLATE_NOOP("QBluetooth","Printer"),
+    QT_TRANSLATE_NOOP("QBluetooth","Printer"),
+    QT_TRANSLATE_NOOP("QBluetooth","Printer"),
+    QT_TRANSLATE_NOOP("QBluetooth","Printer"),
+    QT_TRANSLATE_NOOP("QBluetooth","Printer"),
+    QT_TRANSLATE_NOOP("QBluetooth","Printer"),
     NULL
 };
 
 // These are bits 7, 6, 5, 4, 3, 2
 const char *wearable_minor_classes[] = {
-    QT_TR_NOOP("Uncategorized"),
-    QT_TR_NOOP("Wrist Watch"),
-    QT_TR_NOOP("Pager"),
-    QT_TR_NOOP("Jacket"),
-    QT_TR_NOOP("Helmet"),
-    QT_TR_NOOP("Glasses"),
+    QT_TRANSLATE_NOOP("QBluetooth","Uncategorized"),
+    QT_TRANSLATE_NOOP("QBluetooth","Wrist Watch"),
+    QT_TRANSLATE_NOOP("QBluetooth","Pager"),
+    QT_TRANSLATE_NOOP("QBluetooth","Jacket"),
+    QT_TRANSLATE_NOOP("QBluetooth","Helmet"),
+    QT_TRANSLATE_NOOP("QBluetooth","Glasses"),
     NULL
 };
 
 const char *toy_minor_classes[] = {
-    QT_TR_NOOP("Uncategorized"),
-    QT_TR_NOOP("Robot"),
-    QT_TR_NOOP("Vehicle"),
-    QT_TR_NOOP("Doll / Action Figure"),
-    QT_TR_NOOP("Controller"),
-    QT_TR_NOOP("Game"),
+    QT_TRANSLATE_NOOP("QBluetooth","Uncategorized"),
+    QT_TRANSLATE_NOOP("QBluetooth","Robot"),
+    QT_TRANSLATE_NOOP("QBluetooth","Vehicle"),
+    QT_TRANSLATE_NOOP("QBluetooth","Doll / Action Figure"),
+    QT_TRANSLATE_NOOP("QBluetooth","Controller"),
+    QT_TRANSLATE_NOOP("QBluetooth","Game"),
     NULL
 };
 
@@ -298,49 +297,49 @@ QString convertDeviceMinorToString(QBluetooth::DeviceMajor major, qint8 minor)
         case Computer:
             m = minor_to_str(minor & 0x3F, computer_minor_classes);
             if (m != NULL) {
-                ret = QObject::tr(m);
+                ret = qApp->translate("QBluetooth",m);
             }
             break;
         case Phone:
             m = minor_to_str(minor & 0x3F, phone_minor_classes);
             if (m != NULL) {
-                ret = QObject::tr(m);
+                ret = qApp->translate("QBluetooth",m);
             }
             break;
         case LANAccess:
             m = minor_to_str((minor >> 3) & 0x7, lan_access_minor_classes);
             if (m != NULL) {
-                ret = QObject::tr(m);
+                ret = qApp->translate("QBluetooth",m);
             }
             break;
         case AudioVideo:
             m = minor_to_str(minor & 0x3F, audio_video_minor_classes);
             if (m != NULL) {
-                ret = QObject::tr(m);
+                ret = qApp->translate("QBluetooth",m);
             }
             break;
         case Peripheral:
             m = minor_to_str((minor >> 4) & 0x3, peripheral_minor_classes);
             if (m != NULL) {
-                ret = QObject::tr(m);
+                ret = qApp->translate("QBluetooth",m);
             }
             break;
         case Imaging:
             m = minor_to_str((minor >> 2) & 0xF, imaging_minor_classes);
             if (m != NULL) {
-                ret = QObject::tr(m);
+                ret = qApp->translate("QBluetooth",m);
             }
             break;
         case Wearable:
             m = minor_to_str(minor & 0x3F, wearable_minor_classes);
             if (m != NULL) {
-                ret = QObject::tr(m);
+                ret = qApp->translate("QBluetooth",m);
             }
             break;
         case Toy:
             m = minor_to_str(minor & 0x3F, toy_minor_classes);
             if (m != NULL) {
-                ret = QObject::tr(m);
+                ret = qApp->translate("QBluetooth",m);
             }
             break;
         case Uncategorized:
@@ -450,7 +449,7 @@ QStringList convertServiceClassesToString(QBluetooth::ServiceClasses classes)
     return ret;
 }
 
-QBluetooth::DeviceMajor major_to_device_major(quint8 major)
+QBluetooth::DeviceMajor QTOPIA_AUTOTEST_EXPORT major_to_device_major(quint8 major)
 {
     if (major > 9)
         return QBluetooth::Uncategorized;
@@ -458,6 +457,8 @@ QBluetooth::DeviceMajor major_to_device_major(quint8 major)
     return static_cast<QBluetooth::DeviceMajor>(major);
 }
 
+#ifdef QTOPIA_BLUETOOTH
+//TODO: Need to move this to the BluetoothGui Library
 /*!
     \internal
 
@@ -470,23 +471,51 @@ QBluetooth::DeviceMajor major_to_device_major(quint8 major)
 */
 QIcon find_device_icon(const QBluetoothRemoteDevice &remote)
 {
-    if (remote.deviceMajor() == QBluetooth::Computer)
+    return find_device_icon(remote.deviceMajor(), remote.deviceMinor(), remote.serviceClasses());
+}
+
+/*!
+    \internal
+    \overload
+
+    Returns the device icon for the device represented by the given \a major,
+    \a minor and \a serviceClasses.
+*/
+QIcon find_device_icon(QBluetooth::DeviceMajor major, quint8 minor, QBluetooth::ServiceClasses serviceClasses)
+{
+    Q_UNUSED(serviceClasses);   // would this ever be used for the icon?
+
+    if (major == QBluetooth::Computer)
         return QIcon(":icon/icons/computer");
-    if (remote.deviceMajor() == QBluetooth::Phone)
+    if (major == QBluetooth::Phone)
         return QIcon(":icon/phone/phone");
 
-    if (remote.deviceMinorAsString() == "Printer")
-        return QIcon(":icon/icons/print");
-    if (remote.deviceMinorAsString() == "Camera")
-        return QIcon(":icon/icons/camera");
-
-    if (remote.deviceMinorAsString() == "Headphones" ||
-        remote.deviceMinorAsString() == "Wearable Headset Device") {
-        return QIcon(":icon/icons/headset");
+    // until device minor are available in QBluetooth namespace,
+    // just compare the untranslated device minor strings to return
+    // more specific device icons
+    const char *untranslatedMinor;
+    switch (major) {
+        case AudioVideo:
+            untranslatedMinor = minor_to_str(minor & 0x3F, audio_video_minor_classes);
+            if (strcmp(untranslatedMinor, "Headphones") == 0)
+                return QIcon(":icon/icons/headset");
+            else if (strcmp(untranslatedMinor, "Wearable Headset Device") == 0)
+                return QIcon(":icon/icons/headset");
+            break;
+        case Imaging:
+            untranslatedMinor = minor_to_str((minor >> 2) & 0xF, imaging_minor_classes);
+            if (strcmp(untranslatedMinor, "Printer") == 0)
+                return QIcon(":icon/icons/print");
+            else if (strcmp(untranslatedMinor, "Camera") == 0)
+                return QIcon(":icon/icons/camera");
+            break;
+        default:
+            break;
     }
 
     return QIcon();
 }
+#endif
 
 /*!
     \class qint128
@@ -532,85 +561,6 @@ quint128::quint128(const quint8 indata[16])
 {
     for (unsigned int i = 0; i < 16; i++)
         data[i] = indata[i];
-}
-
-/*! \internal
-    Converts a QSDPProfile enum into something that can be used by the bluez hcitool command.
-    Here since both QSDP and QBluetoothSdpQuery use this functionality.
-
-    \ingroup qtopiabluetooth
- */
-QString map_sdp_profile_to_bluez_name(SDPProfile profile)
-{
-    QString ret;
-
-    switch (profile) {
-        case SerialPortProfile:
-            ret = "SP";
-            break;
-        case DialupNetworkingProfile:
-            ret = "DUN";
-            break;
-        case LanAccessProfile:
-            ret = "LAN";
-            break;
-        case FaxProfile:
-            ret = "FAX";
-            break;
-        case ObjectPushProfile:
-            ret = "OPUSH";
-            break;
-        case FileTransferProfile:
-            ret = "FTP";
-            break;
-        case DirectPrintingProfile:
-            ret = "PRINT";
-            break;
-        case HeadsetProfile:
-            ret = "HS";
-            break;
-        //TODO: THIS DOES NOT EXIST YET!!!
-        case HeadsetAudioGatewayProfile:
-            ret = "HSAG";
-            break;
-        case HandsFreeProfile:
-            ret = "HF";
-            break;
-        case HandsFreeAudioGatewayProfile:
-            ret = "HFAG";
-            break;
-        case SimAccessProfile:
-            ret = "SAP";
-            break;
-        case NetworkAccessPointProfile:
-            ret = "NAP";
-            break;
-        case GroupAdHocNetworkProfile:
-            ret = "GN";
-            break;
-        case PersonalAreaNetworkUserProfile:
-            ret = "PANU";
-            break;
-        case HardCopyReplacementProfile:
-            ret = "HCRP";
-            break;
-        case AdvancedAudioSourceProfile:
-            ret = "A2SRC";
-            break;
-        case AdvancedAudioSinkProfile:
-            ret = "A2SNK";
-            break;
-        case AudioVideoRemoteControlProfile:
-            ret = "AVRCT";
-            break;
-        case AudioVideoTargetProfile:
-            ret = "AVRTG";
-            break;
-        default:
-            break;
-    }
-
-    return ret;
 }
 
 /*!
@@ -716,7 +666,7 @@ bool _q_setSecurityOptions(int sockfd, QBluetooth::SecurityOptions options)
     if (options & QBluetooth::Secure)
         lm |= RFCOMM_LM_SECURE;
 
-    if (lm && setsockopt(sockfd, SOL_RFCOMM, RFCOMM_LM, &lm, sizeof(lm)) < 0)
+    if (setsockopt(sockfd, SOL_RFCOMM, RFCOMM_LM, &lm, sizeof(lm)) < 0)
     {
         return false;
     }
@@ -765,7 +715,7 @@ bool _q_setL2CapSecurityOptions(int sockfd, QBluetooth::SecurityOptions options)
     if (options & QBluetooth::Secure)
         lm |= L2CAP_LM_SECURE;
 
-    if (lm && setsockopt(sockfd, SOL_L2CAP, L2CAP_LM, &lm, sizeof(lm)) < 0)
+    if (setsockopt(sockfd, SOL_L2CAP, L2CAP_LM, &lm, sizeof(lm)) < 0)
     {
         return false;
     }
@@ -788,5 +738,7 @@ RegisterMetaTypes::RegisterMetaTypes()
 
 RegisterMetaTypes sdpMetaTypes;
 
-Q_IMPLEMENT_USER_METATYPE_ENUM(QBluetooth::SDPProfile);
-Q_IMPLEMENT_USER_METATYPE_ENUM(QBluetooth::SecurityOptions);
+#ifdef QTOPIA_BLUETOOTH
+Q_IMPLEMENT_USER_METATYPE_ENUM(QBluetooth::SDPProfile)
+Q_IMPLEMENT_USER_METATYPE_ENUM(QBluetooth::SecurityOptions)
+#endif

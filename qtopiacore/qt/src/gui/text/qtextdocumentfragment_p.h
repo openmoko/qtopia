@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -80,8 +95,7 @@ private:
 class QTextDocumentFragmentPrivate
 {
 public:
-    QTextDocumentFragmentPrivate();
-    QTextDocumentFragmentPrivate(const QTextCursor &cursor);
+    QTextDocumentFragmentPrivate(const QTextCursor &cursor = QTextCursor());
     inline ~QTextDocumentFragmentPrivate() { delete doc; }
 
     void insert(QTextCursor &cursor) const;
@@ -89,7 +103,6 @@ public:
     QAtomic ref;
     QTextDocument *doc;
 
-    uint containsCompleteDocument : 1;
     uint importedFromPlainText : 1;
 private:
     Q_DISABLE_COPY(QTextDocumentFragmentPrivate)
@@ -99,22 +112,35 @@ class QTextHtmlImporter : public QTextHtmlParser
 {
     struct Table;
 public:
-    QTextHtmlImporter(QTextDocument *_doc, const QString &html, const QTextDocument *resourceProvider = 0);
+    enum ImportMode {
+        ImportToFragment,
+        ImportToDocument
+    };
+
+    QTextHtmlImporter(QTextDocument *_doc, const QString &html,
+                      ImportMode mode,
+                      const QTextDocument *resourceProvider = 0);
 
     void import();
 
-    bool containsCompleteDocument() const { return containsCompleteDoc; }
-
 private:
-    bool closeTag(int i);
+    bool closeTag();
 
     Table scanTable(int tableNodeIdx);
 
+    enum ProcessNodeResult { ContinueWithNextNode, ContinueWithCurrentNode };
+
     void appendBlock(const QTextBlockFormat &format, QTextCharFormat charFmt = QTextCharFormat());
+    bool appendNodeText();
+
+    ProcessNodeResult processBlockNode();
+    ProcessNodeResult processSpecialNodes();
 
     struct List
     {
+        inline List() : listNode(0) {}
         QTextListFormat format;
+        int listNode;
         QPointer<QTextList> list;
     };
     QVector<List> lists;
@@ -122,8 +148,7 @@ private:
 
     // insert a named anchor the next time we emit a char format,
     // either in a block or in regular text
-    bool setNamedAnchorInNextOutput;
-    QString namedAnchor;
+    QStringList namedAnchors;
 
 #ifdef Q_CC_SUN
     friend struct QTextHtmlImporter::Table;
@@ -158,21 +183,36 @@ private:
         int column;
     };
 
+    friend struct Table;
     struct Table
     {
-        Table() : isTextFrame(false), rows(0), columns(0), currentRow(0) {}
+        Table() : isTextFrame(false), rows(0), columns(0), currentRow(0), lastIndent(0) {}
         QPointer<QTextFrame> frame;
         bool isTextFrame;
         int rows;
         int columns;
         int currentRow; // ... for buggy html (see html_skipCell testcase)
         TableCellIterator currentCell;
+        int lastIndent;
     };
     QVector<Table> tables;
 
+    struct RowColSpanInfo
+    {
+        int row, col;
+        int rowSpan, colSpan;
+    };
+
     QTextDocument *doc;
     QTextCursor cursor;
-    bool containsCompleteDoc;
+    QTextHtmlParserNode::WhiteSpaceMode wsm;
+    ImportMode importMode;
+    bool compressNextWhitespace;
+    bool hasBlock;
+    bool forceBlockMerging;
+    bool blockTagClosed;
+    int currentNodeIdx;
+    const QTextHtmlParserNode *currentNode;
 };
 
 #endif // QTEXTDOCUMENTFRAGMENT_P_H

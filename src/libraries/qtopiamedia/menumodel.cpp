@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -70,16 +70,72 @@ SimpleMenuModel::~SimpleMenuModel()
 }
 
 /*!
+    \fn SimpleMenuModel::addItem( const QString& text, const QIcon& icon, NavigationHint hint, const ServiceRequest& request )
+    \internal
+*/
+void SimpleMenuModel::addItem( const QString& text, const QIcon& icon, NavigationHint hint, const ServiceRequest& request )
+{
+    TextRequestPair pair;
+    pair.text = text;
+    pair.icon = icon;
+    pair.hint = hint;
+    pair.request = request.clone();
+
+    beginInsertRows( QModelIndex(), m_items.count(), m_items.count() );
+
+    m_items.append( pair );
+
+    endInsertRows();
+}
+
+/*!
+    \fn SimpleMenuModel::addItem( const QString& text, const QIcon& icon, NavigationHint hint, QObject* receiver, const char* member )
+    \internal
+*/
+void SimpleMenuModel::addItem( const QString& text, const QIcon& icon, NavigationHint hint, QObject* receiver, const char* member )
+{
+    TextRequestPair pair;
+    pair.text = text;
+    pair.icon = icon;
+    pair.hint = hint;
+    pair.request = new TriggerSlotRequest( receiver, member );
+
+    beginInsertRows( QModelIndex(), m_items.count(), m_items.count() );
+
+    m_items.append( pair );
+
+    endInsertRows();
+}
+
+/*!
+    \fn SimpleMenuModel::addItem( const QString& text, const QIcon& icon, NavigationHint hint, MenuModel* model )
+    \internal
+*/
+void SimpleMenuModel::addItem( const QString& text, const QIcon& icon, NavigationHint hint, MenuModel* model )
+{
+    TextRequestPair pair;
+    pair.text = text;
+    pair.icon = icon;
+    pair.hint = hint;
+
+    PushMenuRequest pushmenu( model );
+    PushTitleRequest pushtitle( text );
+    pair.request = new CompoundRequest( QList<ServiceRequest*>() << &pushmenu << &pushtitle );
+
+    beginInsertRows( QModelIndex(), m_items.count(), m_items.count() );
+
+    m_items.append( pair );
+
+    endInsertRows();
+}
+
+/*!
     \fn void SimpleMenuModel::addItem( const QString& text, const ServiceRequest& request )
     \internal
 */
 void SimpleMenuModel::addItem( const QString& text, const ServiceRequest& request )
 {
-    TextRequestPair pair;
-    pair.text = text;
-    pair.request = request.clone();
-
-    m_items.append( pair );
+    addItem( text, QIcon(), NodeHint, request );
 }
 
 /*!
@@ -88,11 +144,7 @@ void SimpleMenuModel::addItem( const QString& text, const ServiceRequest& reques
 */
 void SimpleMenuModel::addItem( const QString& text, QObject* receiver, const char* member )
 {
-    TextRequestPair pair;
-    pair.text = text;
-    pair.request = new TriggerSlotRequest( receiver, member );
-
-    m_items.append( pair );
+    addItem( text, QIcon(), NodeHint, receiver, member );
 }
 
 /*!
@@ -101,14 +153,20 @@ void SimpleMenuModel::addItem( const QString& text, QObject* receiver, const cha
 */
 void SimpleMenuModel::addItem( const QString& text, MenuModel* model )
 {
-    TextRequestPair pair;
-    pair.text = text;
+    addItem( text, QIcon(), NodeHint, model );
+}
 
-    PushMenuRequest pushmenu( model );
-    PushTitleRequest pushtitle( text );
-    pair.request = new CompoundRequest( QList<ServiceRequest*>() << &pushmenu << &pushtitle );
+/*!
+    \fn void SimpleMenuModel::removeRow( int row )
+    \internal
+*/
+void SimpleMenuModel::removeRow( int row )
+{
+    beginRemoveRows( QModelIndex(), row, row );
 
-    m_items.append( pair );
+    m_items.removeAt( row );
+
+    endRemoveRows();
 }
 
 /*!
@@ -132,10 +190,23 @@ ServiceRequest* SimpleMenuModel::action( const QModelIndex& index, ActionContext
 */
 QVariant SimpleMenuModel::data( const QModelIndex& index, int role ) const
 {
-    if( role == Qt::DisplayRole ) {
-        TextRequestPair item = m_items[index.row()];
-
-        return item.text;
+    switch( role )
+    {
+    case Qt::DisplayRole:
+        return m_items[index.row()].text;
+    case Qt::DecorationRole:
+        {
+        QIcon icon = m_items[index.row()].icon;
+        if( !icon.isNull() ) {
+            return icon;
+        }
+        }
+        break;
+    case NAVIGATION_HINT_ROLE:
+        return m_items[index.row()].hint;
+    default:
+        // Ignore
+        break;
     }
 
     return QVariant();

@@ -15,21 +15,15 @@ if [ -e /tmp/qtembedded-$LOGNAME/QtEmbedded-$display ]; then
     exit 1;
 fi
 
-if [ -z "$QPEDIR" -a -d $PWD/qtopiacore/host/tools/qvfb ];then
+if [ -z "$QPEDIR" -a -d $PWD/src/tools/qt/qvfb ];then
     QPEDIR=$PWD
 fi
 
-if [ -d $QPEDIR/qtopiacore/host/tools/qvfb ]; then
-    cd $QPEDIR/qtopiacore/host/tools/qvfb
-elif [ -d $DQTDIR/tools/qvfb ]; then
-    cd $DQTDIR/tools/qvfb
+if [ -d $QPEDIR/src/tools/qt/qvfb ]; then
+    cd $QPEDIR/src/tools/qt/qvfb
 else
-    if which qvfb >/dev/null 2>&1; then
-	cd $(dirname $(which qvfb))
-    else
-	echo "Cannot find QVfb!"
-	exit 1
-    fi
+    echo "Cannot find QVfb!"
+    exit 1
 fi
 verbose=0
 while getopts "v" opt; do
@@ -39,17 +33,8 @@ while getopts "v" opt; do
             ;;
     esac
 done
-srcdir=$(dirname $(awk '/^# Project:/{print $3}' Makefile) 2>/dev/null)
-if [ -z "$srcdir" ]; then
-    qvfb=./qvfb
-else
-    qvfb=$(/bin/pwd)/qvfb
-    if [ "$verbose" = 1 ]; then
-        echo "Running from $srcdir"
-    fi
-    cd $srcdir
-fi
 shift $(expr $OPTIND - 1)
+qvfb=$QPEDIR/bin/qvfb
 args=
 skins="$QVFB_SKIN Trolltech-Keypad Trolltech-Touchscreen"
 if [ -f $1.skin -o -d $1.skin ]; then
@@ -63,9 +48,6 @@ do
         break
     fi
 done
-if [ ! -x "$qvfb" ]; then
-    qvfb=$QPEDIR/qtopiacore/host/bin/qvfb
-fi
 if [ "$verbose" = 1 ]; then
     echo $qvfb -qwsdisplay :$display $args
     $qvfb -qwsdisplay :$display $args "$@"

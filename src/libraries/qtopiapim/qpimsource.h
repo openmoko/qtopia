@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -68,8 +68,9 @@ public:
     virtual QString title() const = 0;
     virtual QString title(const QPimSource &) const { return title(); }
 
-    // better to be flags ?
-    virtual bool editable() const; // default true
+    virtual QPimSource defaultSource() const = 0;
+
+    virtual bool editable() const;
     virtual bool editable(const QUniqueId &) const { return editable(); } // default true
 
     virtual void setVisibleSources(const QSet<QPimSource> &) {}
@@ -84,8 +85,6 @@ public:
     }
     virtual QPimSource source(const QUniqueId &) const = 0;
 
-    // assumption is that the record is of they type for the pim contact...
-
 protected:
     explicit QPimContext(QObject *parent = 0);
 };
@@ -97,10 +96,11 @@ class QTask;
 
 class QTOPIAPIM_EXPORT QContactContext : public QPimContext
 {
+    Q_OBJECT
 public:
-    virtual bool updateContact(const QContact &) = 0;
-    virtual bool removeContact(const QUniqueId &) = 0;
-    virtual QUniqueId addContact(const QContact &, const QPimSource &) = 0;
+    virtual bool updateContact(const QContact &) { return false; }
+    virtual bool removeContact(const QUniqueId &) { return false; }
+    virtual QUniqueId addContact(const QContact &, const QPimSource &) { return QUniqueId(); }
 
     virtual QList<QContact> exportContacts(const QPimSource &, bool &ok) const { ok = false; return QList<QContact>(); }
     virtual bool importContacts(const QPimSource &, const QList<QContact> &) { return false; }
@@ -116,14 +116,16 @@ protected:
 
 class QTOPIAPIM_EXPORT QAppointmentContext : public QPimContext
 {
+    Q_OBJECT
 public:
-    virtual bool updateAppointment(const QAppointment &) = 0;
-    virtual bool removeAppointment(const QUniqueId &) = 0;
-    virtual QUniqueId addAppointment(const QAppointment &, const QPimSource &) = 0;
+    virtual bool updateAppointment(const QAppointment &) { return false; }
+    virtual bool removeAppointment(const QUniqueId &) { return false; }
+    virtual QUniqueId addAppointment(const QAppointment &, const QPimSource &) { return QUniqueId(); }
 
-    virtual bool removeOccurrence(const QUniqueId &original, const QDate &) = 0;
-    virtual QUniqueId replaceOccurrence(const QUniqueId &original, const QOccurrence &, const QDate& = QDate()) = 0;
-    virtual QUniqueId replaceRemaining(const QUniqueId &original, const QAppointment &, const QDate& = QDate()) = 0;
+    virtual bool removeOccurrence(const QUniqueId &, const QDate &) { return false; }
+    virtual bool restoreOccurrence(const QUniqueId &, const QDate &) { return false; }
+    virtual QUniqueId replaceOccurrence(const QUniqueId &, const QOccurrence &, const QDate& = QDate()) { return QUniqueId(); }
+    virtual QUniqueId replaceRemaining(const QUniqueId &, const QAppointment &, const QDate& = QDate()) { return QUniqueId(); }
 
     virtual QList<QAppointment> exportAppointments(const QPimSource &, bool &ok) const { ok = false; return QList<QAppointment>(); }
     virtual bool importAppointments(const QPimSource &, const QList<QAppointment> &) { return false; }
@@ -139,10 +141,11 @@ protected:
 
 class QTOPIAPIM_EXPORT QTaskContext : public QPimContext
 {
+    Q_OBJECT
 public:
-    virtual bool updateTask(const QTask &) = 0;
-    virtual bool removeTask(const QUniqueId &) = 0;
-    virtual QUniqueId addTask(const QTask &, const QPimSource &) = 0;
+    virtual bool updateTask(const QTask &) { return false; }
+    virtual bool removeTask(const QUniqueId &) { return false; }
+    virtual QUniqueId addTask(const QTask &, const QPimSource &) { return QUniqueId(); }
 
     virtual QList<QTask> exportTasks(const QPimSource &, bool &ok) const { ok = false; return QList<QTask>(); }
     virtual bool importTasks(const QPimSource &, const QList<QTask> &) { return false; }

@@ -1,0 +1,5 @@
+#!/bin/sh
+for i in /dev/rfcomm*; do
+    lidsconf -A POSTBOOT -s ${BIN} -o $i -j WRITE
+done
+

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -139,6 +154,7 @@ public:
     void _q_styleHighlighted(int);
     void _q_sizeHighlighted(int);
     void _q_updateSample();
+    void retranslateStrings();
 
     QLabel * familyAccel;
     QLineEdit * familyEdit;
@@ -203,7 +219,7 @@ QFontDialog::QFontDialog(QWidget *parent, bool modal, Qt::WindowFlags f)
     d->familyList = new QFontListView(this);
     d->familyEdit->setFocusProxy(d->familyList);
 
-    d->familyAccel = new QLabel(tr("&Font"), this);
+    d->familyAccel = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
     d->familyAccel->setBuddy(d->familyList);
 #endif
@@ -214,7 +230,7 @@ QFontDialog::QFontDialog(QWidget *parent, bool modal, Qt::WindowFlags f)
     d->styleList = new QFontListView(this);
     d->styleEdit->setFocusProxy(d->styleList);
 
-    d->styleAccel = new QLabel(tr("Font st&yle"), this);
+    d->styleAccel = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
     d->styleAccel->setBuddy(d->styleList);
 #endif
@@ -226,23 +242,21 @@ QFontDialog::QFontDialog(QWidget *parent, bool modal, Qt::WindowFlags f)
     d->sizeEdit->setValidator(validator);
     d->sizeList = new QFontListView(this);
 
-    d->sizeAccel = new QLabel(tr("&Size"), this);
+    d->sizeAccel = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
     d->sizeAccel->setBuddy(d->sizeEdit);
 #endif
     d->sizeAccel->setIndent(2);
 
     // effects box
-    d->effects = new QGroupBox(tr("Effects"), this);
+    d->effects = new QGroupBox(this);
     QVBoxLayout *vbox = new QVBoxLayout(d->effects);
     d->strikeout = new QCheckBox(d->effects);
-    d->strikeout->setText(tr("Stri&keout"));
     vbox->addWidget(d->strikeout);
     d->underline = new QCheckBox(d->effects);
-    d->underline->setText(tr("&Underline"));
     vbox->addWidget(d->underline);
 
-    d->sample = new QGroupBox(tr("Sample"), this);
+    d->sample = new QGroupBox(this);
     QHBoxLayout *hbox = new QHBoxLayout(d->sample);
     d->sampleEdit = new QLineEdit(d->sample);
     d->sampleEdit->setSizePolicy(QSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored));
@@ -254,7 +268,7 @@ QFontDialog::QFontDialog(QWidget *parent, bool modal, Qt::WindowFlags f)
 
     d->writingSystemCombo = new QComboBox(this);
 
-    d->writingSystemAccel = new QLabel(tr("Wr&iting System"), this);
+    d->writingSystemAccel = new QLabel(this);
 #ifndef QT_NO_SHORTCUT
     d->writingSystemAccel->setBuddy(d->writingSystemCombo);
 #endif
@@ -292,10 +306,22 @@ QFontDialog::QFontDialog(QWidget *parent, bool modal, Qt::WindowFlags f)
         d->familyList->setCurrentItem(0);
 
     // grid layout
-    QGridLayout * mainGrid = new QGridLayout(this);
-    int margin = mainGrid->margin();
+    QGridLayout *mainGrid = new QGridLayout(this);
+
     int spacing = mainGrid->spacing();
-    mainGrid->setSpacing(0);
+    if (spacing >= 0) {     // uniform spacing
+       mainGrid->setSpacing(0);
+
+       mainGrid->setColumnMinimumWidth(1, spacing);
+       mainGrid->setColumnMinimumWidth(3, spacing);
+
+       int margin = 0;
+       mainGrid->getContentsMargins(0, 0, 0, &margin);
+
+       mainGrid->setRowMinimumHeight(3, margin);
+       mainGrid->setRowMinimumHeight(6, 2);
+       mainGrid->setRowMinimumHeight(8, margin);
+    }
 
     mainGrid->addWidget(d->familyAccel, 0, 0);
     mainGrid->addWidget(d->familyEdit, 1, 0);
@@ -313,20 +339,12 @@ QFontDialog::QFontDialog(QWidget *parent, bool modal, Qt::WindowFlags f)
     mainGrid->setColumnStretch(2, 24);
     mainGrid->setColumnStretch(4, 10);
 
-    mainGrid->setColumnMinimumWidth(1, spacing);
-    mainGrid->setColumnMinimumWidth(3, spacing);
-
-    mainGrid->setRowMinimumHeight(3, margin);
-
     mainGrid->addWidget(d->effects, 4, 0);
 
     mainGrid->addWidget(d->sample, 4, 2, 4, 3);
 
     mainGrid->addWidget(d->writingSystemAccel, 5, 0);
-    mainGrid->setRowMinimumHeight(6, 2);
     mainGrid->addWidget(d->writingSystemCombo, 7, 0);
-
-    mainGrid->setRowMinimumHeight(8, margin);
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(this);
     mainGrid->addWidget(buttonBox, 9, 0, 1, 5);
@@ -349,6 +367,7 @@ QFontDialog::QFontDialog(QWidget *parent, bool modal, Qt::WindowFlags f)
     d->sizeList->installEventFilter(this);
 
     d->familyList->setFocus();
+    d->retranslateStrings();
 }
 
 /*!
@@ -363,14 +382,14 @@ QFontDialog::~QFontDialog()
 /*!
   Executes a modal font dialog and returns a font.
 
-  If the user clicks OK, the selected font is returned. If the user
-  clicks Cancel, the \a initial font is returned.
+  If the user clicks \gui OK, the selected font is returned. If the user
+  clicks \gui Cancel, the \a initial font is returned.
 
   The dialog is constructed with the given \a parent.  \a caption is
   shown as the window title of the dialog and  \a initial is the
-  initially selected font. If the \a ok parameter is not-null, \e *\a
-  ok is set to true if the user clicked OK, and set to false if the
-  user clicked Cancel.
+  initially selected font. If the \a ok parameter is not-null, the
+  value it refers to is set to true if the user clicks \gui OK, and
+  set to false if the user clicks \gui Cancel.
 
   This static function is less flexible than the full QFontDialog
   object, but is convenient and easy to use.
@@ -414,12 +433,13 @@ QFont QFontDialog::getFont(bool *ok, const QFont &initial,
 
   Executes a modal font dialog and returns a font.
 
-  If the user clicks OK, the selected font is returned. If the user
-  clicks Cancel, the Qt default font is returned.
+  If the user clicks \gui OK, the selected font is returned. If the user
+  clicks \gui Cancel, the Qt default font is returned.
 
   The dialog is constructed with the given \a parent.
-  If the \a ok parameter is not-null, \e *\a ok is set to true if the
-  user clicked OK, and false if the user clicked Cancel.
+  If the \a ok parameter is not-null, the value it refers to is set
+  to true if the user clicks \gui OK, and false if the user clicks
+  \gui Cancel.
 
   This static function is less functional than the full QFontDialog
   object, but is convenient and easy to use.
@@ -785,6 +805,31 @@ void QFontDialogPrivate::_q_sizeChanged(const QString &s)
         sizeList->blockSignals(false);
     }
     _q_updateSample();
+}
+
+void QFontDialogPrivate::retranslateStrings()
+{
+    familyAccel->setText(QFontDialog::tr("&Font"));
+    styleAccel->setText(QFontDialog::tr("Font st&yle"));
+    sizeAccel->setText(QFontDialog::tr("&Size"));
+    effects->setTitle(QFontDialog::tr("Effects"));
+    strikeout->setText(QFontDialog::tr("Stri&keout"));
+    underline->setText(QFontDialog::tr("&Underline"));
+    sample->setTitle(QFontDialog::tr("Sample"));
+    writingSystemAccel->setText(QFontDialog::tr("Wr&iting System"));
+}
+
+
+/*!
+    \reimp
+*/
+void QFontDialog::changeEvent(QEvent *e)
+{
+    Q_D(QFontDialog);
+    if (e->type() == QEvent::LanguageChange) {
+        d->retranslateStrings();
+    }
+    QDialog::changeEvent(e);
 }
 
 /*!

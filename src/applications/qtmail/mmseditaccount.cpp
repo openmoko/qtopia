@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,6 +23,7 @@
 #include "account.h"
 #include <qtopiaapplication.h>
 #include <qtopiaservices.h>
+#include <QWapAccount>
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
@@ -61,9 +62,8 @@ void MmsEditAccount::populateNetwork()
     // Add to combo
     networkCombo->clear();
     foreach( QString config, configList ) {
-        QSettings cfg( config, QSettings::IniFormat );
-        QString name = cfg.value("Info/Name").toString();
-        networkCombo->addItem(QIcon(":icon/netsetup/wap"), name, config);
+        QWapAccount acc( config );
+        networkCombo->addItem(QIcon(":icon/netsetup/wap"), acc.name(), config);
         if ( config == defaultWap ) {
             defaultConfig = networkCombo->count()-1;
         }

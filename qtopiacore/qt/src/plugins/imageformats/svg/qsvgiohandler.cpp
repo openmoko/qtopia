@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -33,17 +48,35 @@ class QSvgIOHandlerPrivate
 {
 public:
     QSvgIOHandlerPrivate()
-        : r(new QSvgRenderer())
+        : r(new QSvgRenderer()), loaded(false)
     {}
     ~QSvgIOHandlerPrivate()
     {
         delete r;
     }
 
+    bool load(QIODevice *device);
+
     QSvgRenderer *r;
     QSize         defaultSize;
     QSize         currentSize;
+    bool          loaded;
 };
+
+bool QSvgIOHandlerPrivate::load(QIODevice *device)
+{
+    if (loaded)
+        return true;
+
+    if (r->load(device->readAll())) {
+        defaultSize = QSize(r->viewBox().width(), r->viewBox().height());
+        if (currentSize.isEmpty())
+            currentSize = defaultSize;
+    }
+    loaded = r->isValid();
+
+    return loaded;
+}
 
 QSvgIOHandler::QSvgIOHandler()
     : d(new QSvgIOHandlerPrivate())
@@ -74,19 +107,16 @@ QByteArray QSvgIOHandler::name() const
 
 bool QSvgIOHandler::read(QImage *image)
 {
+    if (d->load(device())) {
+        *image = QImage(d->currentSize, QImage::Format_ARGB32_Premultiplied);
+        image->fill(0x00000000);
+        QPainter p(image);
+        d->r->render(&p);
+        p.end();
+        return true;
+    }
 
-    d->r->load(device()->readAll());
-    d->defaultSize = QSize(d->r->viewBox().width(), d->r->viewBox().height());
-    if (d->currentSize.isEmpty())
-        d->currentSize = d->defaultSize;
-    if (!d->r->isValid())
-        return false;
-    *image = QImage(d->currentSize, QImage::Format_ARGB32_Premultiplied);
-    image->fill(0x00000000);
-    QPainter p(image);
-    d->r->render(&p);
-    p.end();
-    return true;
+    return false;
 }
 
 
@@ -94,6 +124,7 @@ QVariant QSvgIOHandler::option(ImageOption option) const
 {
     switch(option) {
     case Size:
+        d->load(device());
         return d->defaultSize;
         break;
     case ScaledSize:

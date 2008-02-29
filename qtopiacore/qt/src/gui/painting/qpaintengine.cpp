@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -29,9 +44,8 @@
 #include "qapplication.h"
 #include <qdebug.h>
 #include <private/qtextengine_p.h>
+#include <private/qmath_p.h>
 #include <qvarlengtharray.h>
-
-#include <math.h>
 
 /*!
     \class QTextItem
@@ -118,34 +132,37 @@ QFont QTextItem::font() const
   means and pass on an alpha blended QImage to the engine with the
   emulated results. Some features cannot be emulated: AlphaBlend and PorterDuff.
 
-  \value PrimitiveTransform The engine has support for transforming
-                            drawing primitives.
-  \value PatternTransform   The engine has support for transforming brush
-                            patterns.
-  \value PixmapTransform    The engine can transform pixmaps, including
-                            rotation and shearing.
-  \value PatternBrush       The engine is capable of rendering brushes with
-                            the brush patterns specified in Qt::BrushStyle.
-  \value LinearGradientFill The engine supports linear gradient fills.
-  \value RadialGradientFill The engine supports radial gradient fills.
-  \value ConicalGradientFill The engine supports conical gradient fills.
   \value AlphaBlend         The engine can alpha blend primitives.
-  \value PorterDuff         The engine supports Porter-Duff operations
-  \value PainterPaths       The engine has path support.
   \value Antialiasing       The engine can use antialising to improve the appearance
                             of rendered primitives.
+  \value BlendModes         The engine supports blending modes.
   \value BrushStroke        The engine supports drawing strokes that
                             contain brushes as fills, not just solid
                             colors (e.g. a dashed gradient line of
                             width 2).
+  \value ConicalGradientFill The engine supports conical gradient fills.
   \value ConstantOpacity    The engine supports the feature provided by
                             QPainter::setOpacity().
+  \value LinearGradientFill The engine supports linear gradient fills.
   \value MaskedBrush        The engine is capable of rendering brushes that has a
                             texture with an alpha channel or a mask.
-
+  \value PainterPaths       The engine has path support.
   \value PaintOutsidePaintEvent The engine is capable of painting outside of
                                 paint events.
-  \value AllFeatures
+  \value PatternBrush       The engine is capable of rendering brushes with
+                            the brush patterns specified in Qt::BrushStyle.
+  \value PatternTransform   The engine has support for transforming brush
+                            patterns.
+  \value PerspectiveTransform The engine has support for performing perspective
+                            transformations on primitives.
+  \value PixmapTransform    The engine can transform pixmaps, including
+                            rotation and shearing.
+  \value PorterDuff         The engine supports Porter-Duff operations
+  \value PrimitiveTransform The engine has support for transforming
+                            drawing primitives.
+  \value RadialGradientFill The engine supports radial gradient fills.
+  \value AllFeatures        All of the above features. This enum value is usually
+                            used as a bit mask.
 */
 
 /*!
@@ -223,7 +240,7 @@ QFont QTextItem::font() const
     from QPainters state to the native state is required.
 */
 
-static int qt_polygon_recursion;
+static QPaintEngine *qt_polygon_recursion = 0;
 struct QT_Point {
     int x;
     int y;
@@ -243,9 +260,9 @@ struct QT_Point {
 */
 void QPaintEngine::drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode)
 {
-    Q_ASSERT_X(!qt_polygon_recursion, "QPaintEngine::drawPolygon",
+    Q_ASSERT_X(qt_polygon_recursion != this, "QPaintEngine::drawPolygon",
                "At least one drawPolygon function must be implemented");
-    qt_polygon_recursion = 1;
+    qt_polygon_recursion = this;
     Q_ASSERT(sizeof(QT_Point) == sizeof(QPoint));
     QVarLengthArray<QT_Point> p(pointCount);
     for (int i = 0; i < pointCount; ++i) {
@@ -272,9 +289,9 @@ struct QT_PointF {
 */
 void QPaintEngine::drawPolygon(const QPoint *points, int pointCount, PolygonDrawMode mode)
 {
-    Q_ASSERT_X(!qt_polygon_recursion, "QPaintEngine::drawPolygon",
+    Q_ASSERT_X(qt_polygon_recursion != this, "QPaintEngine::drawPolygon",
                "At least one drawPolygon function must be implemented");
-    qt_polygon_recursion = 1;
+    qt_polygon_recursion = this;
     Q_ASSERT(sizeof(QT_PointF) == sizeof(QPointF));
     QVarLengthArray<QT_PointF> p(pointCount);
     for (int i=0; i<pointCount; ++i) {
@@ -299,6 +316,7 @@ void QPaintEngine::drawPolygon(const QPoint *points, int pointCount, PolygonDraw
     \value Picture QPicture format
     \value SVG Scalable Vector Graphics XML format
     \value Raster
+    \value Direct3D Windows only, Direct3D based engine
     \value User First user type ID
     \value MaxUser Last user type ID
 */
@@ -371,7 +389,7 @@ void QPaintEngine::drawPoints(const QPoint *points, int pointCount)
             fp[i].y = points[i].y();
             ++i;
         }
-        drawPoints((QPointF *)fp, i);
+        drawPoints((QPointF *)(void *)fp, i);
         points += i;
         pointCount -= i;
     }
@@ -477,16 +495,12 @@ void QPaintEngine::drawTiledPixmap(const QRectF &rect, const QPixmap &pixmap, co
         while (tw*th < 32678 && th < rect.height()/2)
             th *= 2;
         QPixmap tile;
-        if (pixmap.hasAlphaChannel()) {
-            // ####################
-            QImage image(tw, th, QImage::Format_ARGB32_Premultiplied);
-            image.fill(qRgba(127, 0, 0, 127));
-            tile = QPixmap::fromImage(image);
+        if (pixmap.depth() == 1) {
+            tile = QBitmap(tw, th);
         } else {
-            if (pixmap.depth() == 1)
-                tile = QBitmap(tw, th);
-            else
-                tile = QPixmap(tw, th);
+            tile = QPixmap(tw, th);
+            if (pixmap.hasAlphaChannel())
+                tile.fill(Qt::transparent);
         }
         qt_fill_tile(&tile, pixmap);
         qt_draw_tile(this, rect.x(), rect.y(), rect.width(), rect.height(), tile, p.x(), p.y());
@@ -510,8 +524,8 @@ void QPaintEngine::drawImage(const QRectF &r, const QImage &image, const QRectF 
     QRectF baseSize(0, 0, image.width(), image.height());
     QImage im = image;
     if (baseSize != sr)
-        im = im.copy((int)floor(sr.x()), (int)floor(sr.y()),
-                     (int)ceil(sr.width()), (int)ceil(sr.height()));
+        im = im.copy(qFloor(sr.x()), qFloor(sr.y()),
+                     qCeil(sr.width()), qCeil(sr.height()));
     if (im.depth() == 1)
         im = im.convertToFormat(QImage::Format_RGB32);
     QPixmap pm = QPixmap::fromImage(im, flags);
@@ -636,27 +650,11 @@ void QPaintEngine::drawTextItem(const QPointF &p, const QTextItem &textItem)
     const QTextItemInt &ti = static_cast<const QTextItemInt &>(textItem);
 
     QPainterPath path;
-    QPainterPath effects;
+#ifndef Q_WS_MAC
     path.setFillRule(Qt::WindingFill);
-    effects.setFillRule(Qt::WindingFill);
+#endif
     if (ti.num_glyphs)
         ti.fontEngine->addOutlineToPath(p.x(), p.y(), ti.glyphs, ti.num_glyphs, &path, ti.flags);
-    if (ti.flags) {
-        const QFontEngine *fe = ti.fontEngine;
-        const qreal lw = fe->lineThickness().toReal();
-        if (ti.flags & QTextItem::Underline) {
-            qreal pos = fe->underlinePosition().toReal();
-            effects.addRect(p.x(), p.y() + pos, ti.width.toReal(), lw);
-        }
-        if (ti.flags & QTextItem::Overline) {
-            qreal pos = fe->ascent().toReal() + 1;
-            effects.addRect(p.x(), p.y() - pos, ti.width.toReal(), lw);
-        }
-        if (ti.flags & QTextItem::StrikeOut) {
-            qreal pos = fe->ascent().toReal() / 3;
-            effects.addRect(p.x(), p.y() - pos, ti.width.toReal(), lw);
-        }
-    }
     if (!path.isEmpty()) {
         painter()->save();
         painter()->setRenderHint(QPainter::Antialiasing,
@@ -665,7 +663,6 @@ void QPaintEngine::drawTextItem(const QPointF &p, const QTextItem &textItem)
         painter()->setBrush(state->pen().brush());
         painter()->setPen(Qt::NoPen);
         painter()->drawPath(path);
-        painter()->drawPath(effects);
         painter()->restore();
     }
 }
@@ -712,7 +709,7 @@ void QPaintEngine::drawLines(const QLine *lines, int lineCount)
             fl[i].p2.y = lines[i].y2();
             ++i;
         }
-        drawLines((QLineF *)fl, i);
+        drawLines((QLineF *)(void *)fl, i);
         lines += i;
         lineCount -= i;
     }
@@ -745,7 +742,7 @@ void QPaintEngine::drawRects(const QRect *rects, int rectCount)
             fr[i].h = rects[i].height();
             ++i;
         }
-        drawRects((QRectF *)fr, i);
+        drawRects((QRectF *)(void *)fr, i);
         rects += i;
         rectCount -= i;
     }
@@ -758,7 +755,9 @@ void QPaintEngine::drawRects(const QRect *rects, int rectCount)
 */
 void QPaintEngine::drawRects(const QRectF *rects, int rectCount)
 {
-    if (hasFeature(PainterPaths)) {
+    if (hasFeature(PainterPaths) &&
+        !state->penNeedsResolving() &&
+        !state->brushNeedsResolving()) {
         for (int i=0; i<rectCount; ++i) {
             QPainterPath path;
             path.addRect(rects[i]);
@@ -788,7 +787,7 @@ void QPaintEngine::setPaintDevice(QPaintDevice *device)
 }
 
 /*!
-    Returns the engine that this engine is painting on, if painting is
+    Returns the device that this engine is painting on, if painting is
     active; otherwise returns 0.
 */
 QPaintDevice *QPaintEngine::paintDevice() const

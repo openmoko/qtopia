@@ -20,6 +20,7 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
+<li><div class="fn"/>virtual QByteArray <b><a href="qtopianetworkfactoryiface.html#customID">customID</a></b> () const = 0</li>
 <li><div class="fn"/>virtual QPointer&lt;QtopiaNetworkInterface&gt; <b><a href="qtopianetworkfactoryiface.html#network">network</a></b> ( const QString &amp; <i>handle</i> ) = 0</li>
 <li><div class="fn"/>virtual QtopiaNetwork::Type <b><a href="qtopianetworkfactoryiface.html#type">type</a></b> () const = 0</li>
 </ul>
@@ -31,6 +32,10 @@
 <p>See also <a href="qtopianetworkplugin.html">QtopiaNetworkPlugin</a> and <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="customID"></a><a href="qbytearray.html">QByteArray</a> QtopiaNetworkFactoryIface::customID () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>The network server automatically matches network plug-ins and network configurations by comparing <a href="qtopianetworkfactoryiface.html#type">QtopiaNetworkFactoryIface::type</a>() and <a href="qnetworkstate.html#deviceType">QNetworkState::deviceType</a>(). This may mean that in some situations several plug-ins match the same network configuration. If these plug-ins provide different functionality or user interfaces the user may become confused because the matching process may cause a race condition.</p>
+<p>To resolve such problems the <a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::Custom</a> flag can be used in combination with this function to uniquely match a network configuration with a particular plug-in. If a plug-in sets the custom flag the network server will compare the custom ID of the current network configuration with the value returned by this function. Only if they match the plug-in will be allowed to manage this configuration. The custom ID string can be any string as long as it is unique and not empty. The custom flag is not raised when the configuration doesn't set the customID field. Note that the remaining type flags must still match.</p>
+<p>For more details about the network configuration file format refer to the <a href="networkservices.html#network-configuration-file-format">Network Services</a> documentation.</p>
 <h3 class="fn"><a name="network"></a><a href="qpointer.html">QPointer</a>&lt;<a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a>&gt; QtopiaNetworkFactoryIface::network ( const <a href="qstring.html">QString</a> &amp; <i>handle</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the instance of the <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a> provided by the plug-in. Multiple calls to this function will return several instances. <i>handle</i> is the configuration file that this interface should be initialized with.</p>
 <h3 class="fn"><a name="type"></a><a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::Type</a> QtopiaNetworkFactoryIface::type () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
@@ -40,6 +45,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

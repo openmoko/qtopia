@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -45,7 +45,8 @@ public:
     escapeBtnNum(-1),
     customButton(false),
     icon(PhoneMessageBox::NoIcon),
-    yesKey(0) {}
+    yesKey(0),
+    vbox(0) {}
 
     QString title;
 
@@ -62,6 +63,8 @@ public:
     PhoneMessageBox::Icon icon;
 
     int yesKey;
+
+    QVBoxLayout *vbox;
 };
 
 
@@ -71,6 +74,7 @@ public:
   \ingroup QtopiaServer::PhoneUI
   
   This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+  It is part of the Qtopia server and cannot be used by other Qtopia applications.
 
   \sa QAbstractServerInterface, QAbstractMessageBox
   */
@@ -84,13 +88,16 @@ PhoneMessageBox::PhoneMessageBox(QWidget *parent, Qt::WFlags flags)
 {
     d = new PhoneMessageBoxPrivate;
 
-    QHBoxLayout *hb = new QHBoxLayout(this);
+    d->vbox = new QVBoxLayout(this);
+    QWidget *messageArea = new QWidget(this);
+    d->vbox->addWidget(messageArea);
+    QHBoxLayout *hb = new QHBoxLayout(messageArea);
     hb->setMargin(6);
     hb->setSpacing(6);
-    d->iconLabel = new QLabel(this);
+    d->iconLabel = new QLabel(messageArea);
     d->iconLabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     hb->addWidget(d->iconLabel);
-    d->msg = new QLabel(this);
+    d->msg = new QLabel(messageArea);
     d->msg->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     d->msg->setWordWrap(true);
     hb->addWidget(d->msg, 100);
@@ -289,6 +296,14 @@ bool PhoneMessageBox::eventFilter(QObject *, QEvent *e)
     }
 
     return false;
+}
+
+/*!
+  \internal
+  */
+void PhoneMessageBox::addContents(QWidget *c)
+{
+    d->vbox->addWidget(c);
 }
 
 QTOPIA_REPLACE_WIDGET(QAbstractMessageBox, PhoneMessageBox);

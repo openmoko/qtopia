@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,9 +21,6 @@
 
 #ifndef ELEMENT_H
 #define ELEMENT_H
-
-// WARNING: These classes are not part of the Qtopia API.
-// They are subject to change at any time.
 
 #include <qmap.h>
 #include <qstring.h>
@@ -110,6 +107,9 @@ public:
     const QRect &rect() const { return r; }
     virtual void setRect(const QRect &r);
 
+    const QColor &backgroundColor() const { return bg; }
+    virtual void setBackgroundColor(const QColor &c);
+
     virtual void setData(const QByteArray &, const QString &type);
 
     SmilModuleAttribute *module(const QString &name) const;
@@ -148,6 +148,7 @@ public:
 
 protected:
     QRect r;
+    QColor bg;
     SmilSystem *sys;
     SmilElement *prnt;
     QString ename;

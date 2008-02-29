@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,7 +24,6 @@
 #include <qprinterinterface.h>
 #include <qtopiaapplication.h>
 #include <QDebug>
-#include <QCopChannel>
 #include <QPluginManager>
 #include <QPrintEngine>
 #include <QVBoxLayout>
@@ -70,8 +69,8 @@ PrintServer::PrintServer(QObject *parent)
     d = new PrintServerPrivate();
 
     // listen to the application channel messages
-    connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
-            this, SLOT(receive(const QString&,const QByteArray&)) );
+    connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
+            this, SLOT(receive(QString,QByteArray)) );
 
     // load printer plugins
     d->m_pluginManager = new QPluginManager( "qtopiaprinting" );
@@ -99,19 +98,6 @@ void PrintServer::receive(const QString &message, const QByteArray &data)
         QVariant variant;
         stream >> variant;
         enqueuePPKPrintJob( variant );
-    } else if ( message == "print(QString)" ) {
-        QString fileName;
-        stream >> fileName;
-        enqueueFilePrintJob( fileName );
-    } else if ( message == "Print::print(QString,QString)" ) {
-        QString fileName, mimeType;
-        stream >> fileName;
-        stream >> mimeType;
-        enqueueFilePrintJob( fileName, mimeType );
-    } else if ( message == "printHtml(QString)" ) {
-        QString html;
-        stream >> html;
-        enqueueHtmlPrintJob( html );
     } else if ( message == "done(bool)" ) {
         bool error;
         stream >> error;
@@ -230,6 +216,7 @@ void PrintServer::selectPrinterPlugin()
             this, SLOT(pluginSelected(QListWidgetItem*)) );
     connect( &list, SIGNAL(itemActivated(QListWidgetItem*)),
             &dlg, SLOT(accept()) );
+    connect( &dlg, SIGNAL(rejected()), this, SLOT(cancelJob()) );
 
     QStringList pluginList = d->m_pluginManager->list();
     pluginList.sort();
@@ -328,6 +315,15 @@ void PrintServer::done( bool error )
 }
 
 /*!
+    \internal
+    User closed printer dialog. Remove the job from the queue.
+*/
+void PrintServer::cancelJob()
+{
+    done( false );
+}
+
+/*!
     \service PrintService PrintServer
     \brief The class PrintService provides the Qtopia Printing service.
 
@@ -364,7 +360,7 @@ void PrintService::print(QString fileName)
     This slot corresponds to the QCop message
     \c{Print::print(QString,QString)}.
 */
-void PrintService::printFile(QString fileName, QString mimeType)
+void PrintService::print(QString fileName, QString mimeType)
 {
     parent->enqueueFilePrintJob( fileName, mimeType );
 }

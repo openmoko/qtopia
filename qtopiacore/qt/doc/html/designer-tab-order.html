@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/designer-manual.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/designer-manual.qdoc -->
 <head>
-  <title>Qt 4.2: Qt Designer's Tab Order Editing Mode</title>
+  <title>Qt 4.3: Qt Designer's Tab Order Editing Mode</title>
   <link rel="prev" href="designer-buddy-mode.html" />
   <link rel="contents" href="designer-manual.html" />
   <link rel="next" href="designer-resources.html" />
@@ -20,12 +20,14 @@
 [<a href="designer-manual.html">Contents</a>]
 [Next: <a href="designer-resources.html">Editing Resources with Qt Designer</a>]
 </p>
-<h1 align="center">Qt Designer's Tab Order Editing Mode<br /><small></small></h1>
+<h1 align="center">Qt Designer's Tab Order Editing Mode<br /><span class="subtitle"></span>
+</h1>
 <p align="center"><img src="images/designer-tab-order-mode.png" /></p><p>Many users expect to be able to navigate between widgets and controls using only the keyboard. Qt lets the user navigate between input widgets with the <b>Tab</b> and <b>Shift-Tab</b> keyboard shortcuts. The default <i>tab order</i> is based on the order in which widgets are constructed and, although this order may be sufficient for many users, it is often better to explictly specify the tab order to make your application easier to use.</p>
 <a name="setting-the-tab-order"></a>
 <h2>Setting the Tab Order</h2>
 <p>To enter tab order editing mode, open the <b>Edit</b> menu and select <b>Edit Tab Order</b>. In this mode, each input widget in the form is shown with a number indicating its position in the tab order. So, if the user gives the first input widget the input focus then presses the tab key, the focus will move to the second input widget, and so on.</p>
-<p>The tab order is defined by clicking on each of the numbers in the correct order.You can set the first widget in the tab order by double-clicking on it. After this has been done, click on another widget to make it the second in the tab order, set the third with the next click, and so on until you are satisfied. If you make a mistake, simply double click to set the first widget, and start again.</p>
+<p>The tab order is defined by clicking on each of the numbers in the correct order. The first number you click will change to red, indicating the currently edited position in tab order chain, and the widget associated with the number will become the first one in the tab order chain. Clicking on another widget will make it the second in the tab order, and so on. You can continue this process until you are satisfied with the tab order in the form - you do not need to click every input widget if you see that the remaining widget are already in the correct order. Numbers, for which you already set the order, change to green, while those which were not clicked yet, remain blue.</p>
+<p>If you make a mistake, simply double click outside of any number or choose &quot;Restart&quot; action from the form's context menu to start again. If you have many widgets on your form and want to change the order in the middle or by the end of tab order chain, you can start edit tab order chain at any position you wish. Just press the control modifier and click the number from which you want to start, or alternatively choose &quot;Start from Here&quot; action from context menu.</p>
 <p>
 [Previous: <a href="designer-buddy-mode.html">Qt Designer's Buddy Editing Mode</a>]
 [<a href="designer-manual.html">Contents</a>]
@@ -35,6 +37,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/io/qdir.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/io/qdir.cpp -->
 <head>
-  <title>Qt 4.2: QDir Class Reference</title>
+  <title>Qt 4.3: QDir Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDir Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDir Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QDir class provides access to directory structures and their contents. <a href="#details">More...</a></p>
 <pre> #include &lt;QDir&gt;</pre><p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
 <ul>
@@ -80,7 +81,7 @@
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="qdir.html#addResourceSearchPath">addResourceSearchPath</a></b> ( const QString &amp; <i>path</i> )</li>
+<li><div class="fn"/>void <b><a href="qdir.html#addSearchPath">addSearchPath</a></b> ( const QString &amp; <i>prefix</i>, const QString &amp; <i>path</i> )</li>
 <li><div class="fn"/>QString <b><a href="qdir.html#cleanPath">cleanPath</a></b> ( const QString &amp; <i>path</i> )</li>
 <li><div class="fn"/>QDir <b><a href="qdir.html#current">current</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qdir.html#currentPath">currentPath</a></b> ()</li>
@@ -94,8 +95,10 @@
 <li><div class="fn"/>bool <b><a href="qdir.html#match-2">match</a></b> ( const QStringList &amp; <i>filters</i>, const QString &amp; <i>fileName</i> )</li>
 <li><div class="fn"/>QDir <b><a href="qdir.html#root">root</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qdir.html#rootPath">rootPath</a></b> ()</li>
+<li><div class="fn"/>QStringList <b><a href="qdir.html#searchPaths">searchPaths</a></b> ( const QString &amp; <i>prefix</i> )</li>
 <li><div class="fn"/>QChar <b><a href="qdir.html#separator">separator</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qdir.html#setCurrent">setCurrent</a></b> ( const QString &amp; <i>path</i> )</li>
+<li><div class="fn"/>void <b><a href="qdir.html#setSearchPaths">setSearchPaths</a></b> ( const QString &amp; <i>prefix</i>, const QStringList &amp; <i>searchPaths</i> )</li>
 <li><div class="fn"/>QDir <b><a href="qdir.html#temp">temp</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qdir.html#tempPath">tempPath</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qdir.html#toNativeSeparators">toNativeSeparators</a></b> ( const QString &amp; <i>pathName</i> )</li>
@@ -126,7 +129,7 @@
 <p>The name of a directory is found using the <a href="qdir.html#dirName">dirName</a>() function. This typically returns the last element in the absolute path that specifies the location of the directory. However, it can also return &quot;.&quot; if the QDir represents the current directory.</p>
 <pre> QDir(&quot;Documents/Letters/Applications&quot;).dirName() <span class="comment">// &quot;Applications&quot;</span>
  QDir().dirName()                                 <span class="comment">// &quot;.&quot;</span></pre>
-<p>The path for a directory can also be changed with the <a href="qdir.html#cd">cd</a>() and <a href="qdir.html#cdUp">cdUp</a>() functions, both of which operate like familiar shell commands. When <a href="qdir.html#cd">cd</a>() is called with the name of an existing directory, the QDir object changes directory so that it represents that directory instead. The <a href="qdir.html#cdUp">cdUp</a>() function changes the directory of the QDir object so that it refers to its parent directory; i.e. cd(&quot;..&quot;) is equivalent to <a href="qdir.html#cdUp">cdUp</a>().</p>
+<p>The path for a directory can also be changed with the <a href="qdir.html#cd">cd</a>() and <a href="qdir.html#cdUp">cdUp</a>() functions, both of which operate like familiar shell commands. When <a href="qdir.html#cd">cd</a>() is called with the name of an existing directory, the QDir object changes directory so that it represents that directory instead. The <a href="qdir.html#cdUp">cdUp</a>() function changes the directory of the QDir object so that it refers to its parent directory; i.e&#x2e; cd(&quot;..&quot;) is equivalent to <a href="qdir.html#cdUp">cdUp</a>().</p>
 <p>Directories can be created with <a href="qdir.html#mkdir">mkdir</a>(), renamed with <a href="qdir.html#rename">rename</a>(), and removed with <a href="qdir.html#rmdir">rmdir</a>().</p>
 <p>You can test for the presence of a directory with a given name by using <a href="qdir.html#exists">exists</a>(), and the properties of a directory can be tested with <a href="qdir.html#isReadable">isReadable</a>(), <a href="qdir.html#isAbsolute">isAbsolute</a>(), <a href="qdir.html#isRelative">isRelative</a>(), and <a href="qdir.html#isRoot">isRoot</a>().</p>
 <p>The <a href="qdir.html#refresh">refresh</a>() function re-reads the directory's data from disk.</p>
@@ -200,21 +203,21 @@
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="flags"><a name="Filter-enum"></a>enum QDir::Filter<br />flags QDir::Filters</h3>
-<p>This enum describes the filtering options available to <a href="qdir.html">QDir</a>; e.g. for <a href="qdir.html#entryList">entryList</a>() and <a href="qdir.html#entryInfoList">entryInfoList</a>(). The filter value is specified by combining values from the following list using the bitwise OR operator:</p>
+<p>This enum describes the filtering options available to <a href="qdir.html">QDir</a>; e.g&#x2e; for <a href="qdir.html#entryList">entryList</a>() and <a href="qdir.html#entryInfoList">entryInfoList</a>(). The filter value is specified by combining values from the following list using the bitwise OR operator:</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QDir::Dirs</tt></td><td align="center" valign="top"><tt>0x001</tt></td><td valign="top">List directories that match the filters.</td></tr>
-<tr><td valign="top"><tt>QDir::AllDirs</tt></td><td align="center" valign="top"><tt>0x400</tt></td><td valign="top">List all directories; i.e. don't apply the filters to directory names.</td></tr>
+<tr><td valign="top"><tt>QDir::AllDirs</tt></td><td align="center" valign="top"><tt>0x400</tt></td><td valign="top">List all directories; i.e&#x2e; don't apply the filters to directory names.</td></tr>
 <tr><td valign="top"><tt>QDir::Files</tt></td><td align="center" valign="top"><tt>0x002</tt></td><td valign="top">List files only.</td></tr>
 <tr><td valign="top"><tt>QDir::Drives</tt></td><td align="center" valign="top"><tt>0x004</tt></td><td valign="top">List disk drives (ignored under Unix).</td></tr>
 <tr><td valign="top"><tt>QDir::NoSymLinks</tt></td><td align="center" valign="top"><tt>0x008</tt></td><td valign="top">Do not list symbolic links (ignored by operating systems that don't support symbolic links).</td></tr>
-<tr><td valign="top"><tt>QDir::NoDotAndDotDot</tt></td><td align="center" valign="top"><tt>0x1000</tt></td><td valign="top">Do not list the special entries &quot;.&quot; and &quot;..&quot;.</td></tr>
+<tr><td valign="top"><tt>QDir::NoDotAndDotDot</tt></td><td align="center" valign="top"><tt>0x1000</tt></td><td valign="top">Do not list the special entries &quot;.&quot; and &quot;..&quot;&#x2e;</td></tr>
 <tr><td valign="top"><tt>QDir::AllEntries</tt></td><td align="center" valign="top"><tt>Dirs | Files | Drives</tt></td><td valign="top">List directories, files, drives and symlinks (this does not list broken symlinks unless you specify System).</td></tr>
 <tr><td valign="top"><tt>QDir::Readable</tt></td><td align="center" valign="top"><tt>0x010</tt></td><td valign="top">List files for which the application has read access. The Readable value needs to be combined with Dirs or Files.</td></tr>
 <tr><td valign="top"><tt>QDir::Writable</tt></td><td align="center" valign="top"><tt>0x020</tt></td><td valign="top">List files for which the application has write access. The Writable value needs to be combined with Dirs or Files.</td></tr>
 <tr><td valign="top"><tt>QDir::Executable</tt></td><td align="center" valign="top"><tt>0x040</tt></td><td valign="top">List files for which the application has execute access. The Executable value needs to be combined with Dirs or Files.</td></tr>
 <tr><td valign="top"><tt>QDir::Modified</tt></td><td align="center" valign="top"><tt>0x080</tt></td><td valign="top">Only list files that have been modified (ignored under Unix).</td></tr>
-<tr><td valign="top"><tt>QDir::Hidden</tt></td><td align="center" valign="top"><tt>0x100</tt></td><td valign="top">List hidden files (on Unix, files starting with a .).</td></tr>
+<tr><td valign="top"><tt>QDir::Hidden</tt></td><td align="center" valign="top"><tt>0x100</tt></td><td valign="top">List hidden files (on Unix, files starting with a .)&#x2e;</td></tr>
 <tr><td valign="top"><tt>QDir::System</tt></td><td align="center" valign="top"><tt>0x200</tt></td><td valign="top">List system files (on Unix, FIFOs, sockets and device files)</td></tr>
 <tr><td valign="top"><tt>QDir::CaseSensitive</tt></td><td align="center" valign="top"><tt>0x800</tt></td><td valign="top">The filter should be case sensitive if the file system is case sensitive.</td></tr>
 </table></p>
@@ -226,7 +229,7 @@
 <h3 class="fn"><a name="FilterSpec-typedef"></a>typedef QDir::FilterSpec</h3>
 <p>Use <a href="qdir.html#Filter-enum">QDir::Filters</a> instead.</p>
 <h3 class="flags"><a name="SortFlag-enum"></a>enum QDir::SortFlag<br />flags QDir::SortFlags</h3>
-<p>This enum describes the sort options available to <a href="qdir.html">QDir</a>, e.g. for <a href="qdir.html#entryList">entryList</a>() and <a href="qdir.html#entryInfoList">entryInfoList</a>(). The sort value is specified by OR-ing together values from the following list:</p>
+<p>This enum describes the sort options available to <a href="qdir.html">QDir</a>, e.g&#x2e; for <a href="qdir.html#entryList">entryList</a>() and <a href="qdir.html#entryInfoList">entryInfoList</a>(). The sort value is specified by OR-ing together values from the following list:</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QDir::Name</tt></td><td align="center" valign="top"><tt>0x00</tt></td><td valign="top">Sort by name.</td></tr>
@@ -255,7 +258,7 @@
 <p>See also <a href="qdir.html#currentPath">currentPath</a>().</p>
 <h3 class="fn"><a name="QDir-3"></a>QDir::QDir ( const <a href="qstring.html">QString</a> &amp; <i>path</i>, const <a href="qstring.html">QString</a> &amp; <i>nameFilter</i>, <a href="qdir.html#SortFlag-enum">SortFlags</a> <i>sort</i> = SortFlags( Name | IgnoreCase ), <a href="qdir.html#Filter-enum">Filters</a> <i>filters</i> = AllEntries )</h3>
 <p>Constructs a <a href="qdir.html">QDir</a> with path <i>path</i>, that filters its entries by name using <i>nameFilter</i> and by attributes using <i>filters</i>. It also sorts the names using <i>sort</i>.</p>
-<p>The default <i>nameFilter</i> is an empty string, which excludes nothing; the default <i>filters</i> is <a href="qdir.html#Filter-enum">AllEntries</a>, which also means exclude nothing. The default <i>sort</i> is <a href="qdir.html#SortFlag-enum">Name</a> | <a href="qdir.html#SortFlag-enum">IgnoreCase</a>, i.e. sort by name case-insensitively.</p>
+<p>The default <i>nameFilter</i> is an empty string, which excludes nothing; the default <i>filters</i> is <a href="qdir.html#Filter-enum">AllEntries</a>, which also means exclude nothing. The default <i>sort</i> is <a href="qdir.html#SortFlag-enum">Name</a> | <a href="qdir.html#SortFlag-enum">IgnoreCase</a>, i.e&#x2e; sort by name case-insensitively.</p>
 <p>If <i>path</i> is an empty string, <a href="qdir.html">QDir</a> uses &quot;.&quot; (the current directory). If <i>nameFilter</i> is an empty string, <a href="qdir.html">QDir</a> uses the name filter &quot;*&quot; (all files).</p>
 <p>Note that <i>path</i> need not exist.</p>
 <p>See also <a href="qdir.html#exists">exists</a>(), <a href="qdir.html#setPath">setPath</a>(), <a href="qdir-qt3.html#setNameFilter">setNameFilter</a>(), <a href="qdir.html#setFilter">setFilter</a>(), and <a href="qdir.html#setSorting">setSorting</a>().</p>
@@ -267,11 +270,12 @@
 <h3 class="fn"><a name="absolutePath"></a><a href="qstring.html">QString</a> QDir::absolutePath () const</h3>
 <p>Returns the absolute path (a path that starts with &quot;/&quot; or with a drive specification), which may contain symbolic links, but never contains redundant &quot;.&quot;, &quot;..&quot; or multiple separators.</p>
 <p>See also <a href="qdir.html#setPath">setPath</a>(), <a href="qdir.html#canonicalPath">canonicalPath</a>(), <a href="qdir.html#exists">exists</a>(), <a href="qdir.html#cleanPath">cleanPath</a>(), <a href="qdir.html#dirName">dirName</a>(), and <a href="qdir.html#absoluteFilePath">absoluteFilePath</a>().</p>
-<h3 class="fn"><a name="addResourceSearchPath"></a>void QDir::addResourceSearchPath ( const <a href="qstring.html">QString</a> &amp; <i>path</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Adds <i>path</i> to the search paths searched in to find resources that are not specified with an absolute path. The default search path is to search only in the root (<tt>:/</tt>).</p>
-<p>See also <a href="resources.html">The Qt Resource System</a> and <a href="qresource.html#addSearchPath">QResource::addSearchPath</a>().</p>
+<h3 class="fn"><a name="addSearchPath"></a>void QDir::addSearchPath ( const <a href="qstring.html">QString</a> &amp; <i>prefix</i>, const <a href="qstring.html">QString</a> &amp; <i>path</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Adds <i>path</i> to the search path for <i>prefix</i>.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qdir.html#setSearchPaths">setSearchPaths</a>().</p>
 <h3 class="fn"><a name="canonicalPath"></a><a href="qstring.html">QString</a> QDir::canonicalPath () const</h3>
-<p>Returns the canonical path, i.e. a path without symbolic links or redundant &quot;.&quot; or &quot;..&quot; elements.</p>
+<p>Returns the canonical path, i.e&#x2e; a path without symbolic links or redundant &quot;.&quot; or &quot;..&quot; elements.</p>
 <p>On systems that do not have symbolic links this function will always return the same string that <a href="qdir.html#absolutePath">absolutePath</a>() returns. If the canonical path does not exist (normally due to dangling symbolic links) canonicalPath() returns an empty string.</p>
 <p>Example:</p>
 <pre> QString bin = &quot;/local/bin&quot;;         <span class="comment">// where /local/bin is a symlink to /usr/bin</span>
@@ -309,12 +313,12 @@
 <p>Returns the absolute path of the application's current directory.</p>
 <p>See also <a href="qdir.html#current">current</a>(), <a href="qdir.html#homePath">homePath</a>(), <a href="qdir.html#rootPath">rootPath</a>(), and <a href="qdir.html#tempPath">tempPath</a>().</p>
 <h3 class="fn"><a name="dirName"></a><a href="qstring.html">QString</a> QDir::dirName () const</h3>
-<p>Returns the name of the directory; this is <i>not</i> the same as the path, e.g. a directory with the name &quot;mail&quot;, might have the path &quot;/var/spool/mail&quot;. If the directory has no name (e.g. it is the root directory) an empty string is returned.</p>
+<p>Returns the name of the directory; this is <i>not</i> the same as the path, e.g&#x2e; a directory with the name &quot;mail&quot;, might have the path &quot;/var/spool/mail&quot;. If the directory has no name (e.g&#x2e; it is the root directory) an empty string is returned.</p>
 <p>No check is made to ensure that a directory with this name actually exists; but see <a href="qdir.html#exists">exists</a>().</p>
 <p>See also <a href="qdir.html#path">path</a>(), <a href="qdir.html#filePath">filePath</a>(), <a href="qdir.html#absolutePath">absolutePath</a>(), and <a href="qdir.html#absoluteFilePath">absoluteFilePath</a>().</p>
 <h3 class="fn"><a name="drives"></a><a href="qfileinfo.html#QFileInfoList-typedef">QFileInfoList</a> QDir::drives ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of the root directories on this system.</p>
-<p>On Windows this returns a list of <a href="qfileinfo.html">QFileInfo</a> objects containing &quot;C:/&quot;, &quot;D:/&quot;, etc. On other operating systems, it returns a list containing just one root directory (i.e. &quot;/&quot;).</p>
+<p>On Windows this returns a list of <a href="qfileinfo.html">QFileInfo</a> objects containing &quot;C:/&quot;, &quot;D:/&quot;, etc. On other operating systems, it returns a list containing just one root directory (i.e&#x2e; &quot;/&quot;).</p>
 <p>See also <a href="qdir.html#root">root</a>() and <a href="qdir.html#rootPath">rootPath</a>().</p>
 <h3 class="fn"><a name="entryInfoList"></a><a href="qfileinfo.html#QFileInfoList-typedef">QFileInfoList</a> QDir::entryInfoList ( const <a href="qstringlist.html">QStringList</a> &amp; <i>nameFilters</i>, <a href="qdir.html#Filter-enum">Filters</a> <i>filters</i> = NoFilter, <a href="qdir.html#SortFlag-enum">SortFlags</a> <i>sort</i> = NoSort ) const</h3>
 <p>Returns a list of <a href="qfileinfo.html">QFileInfo</a> objects for all the files and directories in the directory, ordered according to the name and attribute filters previously set with <a href="qdir.html#setNameFilters">setNameFilters</a>() and <a href="qdir.html#setFilter">setFilter</a>(), and sorted according to the flags set with <a href="qdir.html#setSorting">setSorting</a>().</p>
@@ -394,7 +398,7 @@
 <p>See also <a href="qdir.html#isRelative">isRelative</a>(), <a href="qdir.html#isAbsolutePath">isAbsolutePath</a>(), and <a href="qdir.html#makeAbsolute">makeAbsolute</a>().</p>
 <h3 class="fn"><a name="isRoot"></a>bool QDir::isRoot () const</h3>
 <p>Returns true if the directory is the root directory; otherwise returns false.</p>
-<p>Note: If the directory is a symbolic link to the root directory this function returns false. If you want to test for this use <a href="qdir.html#canonicalPath">canonicalPath</a>(), e.g.</p>
+<p>Note: If the directory is a symbolic link to the root directory this function returns false. If you want to test for this use <a href="qdir.html#canonicalPath">canonicalPath</a>(), e.g&#x2e;</p>
 <pre> QDir dir(&quot;/tmp/root_link&quot;);
  dir = dir.canonicalPath();
  if (dir.isRoot())
@@ -433,8 +437,8 @@
 <pre> QDir dir(&quot;/home/bob&quot;);
  QString s;
 
- s = dir.relativePath(&quot;images/file.jpg&quot;);     <span class="comment">// s is &quot;images/file.jpg&quot;</span>
- s = dir.relativePath(&quot;/home/mary/file.txt&quot;); <span class="comment">// s is &quot;../mary/file.txt&quot;</span></pre>
+ s = dir.relativeFilePath(&quot;images/file.jpg&quot;);     <span class="comment">// s is &quot;images/file.jpg&quot;</span>
+ s = dir.relativeFilePath(&quot;/home/mary/file.txt&quot;); <span class="comment">// s is &quot;../mary/file.txt&quot;</span></pre>
 <p>See also <a href="qdir.html#absoluteFilePath">absoluteFilePath</a>(), <a href="qdir.html#filePath">filePath</a>(), and <a href="qdir.html#canonicalPath">canonicalPath</a>().</p>
 <h3 class="fn"><a name="remove"></a>bool QDir::remove ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i> )</h3>
 <p>Removes the file, <i>fileName</i>.</p>
@@ -461,6 +465,10 @@
 <p>Returns the absolute path of the root directory.</p>
 <p>For Unix operating systems this returns &quot;/&quot;. For Windows file systems this normally returns &quot;c:/&quot;.</p>
 <p>See also <a href="qdir.html#root">root</a>(), <a href="qdir.html#drives">drives</a>(), <a href="qdir.html#currentPath">currentPath</a>(), <a href="qdir.html#homePath">homePath</a>(), and <a href="qdir.html#tempPath">tempPath</a>().</p>
+<h3 class="fn"><a name="searchPaths"></a><a href="qstringlist.html">QStringList</a> QDir::searchPaths ( const <a href="qstring.html">QString</a> &amp; <i>prefix</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the search paths for <i>prefix</i>.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qdir.html#setSearchPaths">setSearchPaths</a>() and <a href="qdir.html#addSearchPath">addSearchPath</a>().</p>
 <h3 class="fn"><a name="separator"></a><a href="qchar.html">QChar</a> QDir::separator ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the native directory separator: &quot;/&quot; under Unix (including Mac OS X) and &quot;\&quot; under Windows.</p>
 <p>You do not need to use this function to build file paths. If you always use &quot;/&quot;, Qt will translate your paths to conform to the underlying operating system. If you want to display paths to the user using their operating system's separator use <a href="qdir.html#toNativeSeparators">toNativeSeparators</a>().</p>
@@ -482,6 +490,19 @@
 <p>Sets the path of the directory to <i>path</i>. The path is cleaned of redundant &quot;.&quot;, &quot;..&quot; and of multiple separators. No check is made to see whether a directory with this path actually exists; but you can check for yourself using <a href="qdir.html#exists">exists</a>().</p>
 <p>The path can be either absolute or relative. Absolute paths begin with the directory separator &quot;/&quot; (optionally preceded by a drive specification under Windows). Relative file names begin with a directory name or a file name and specify a path relative to the current directory. An example of an absolute path is the string &quot;/tmp/quartz&quot;, a relative path might look like &quot;src/fatlib&quot;.</p>
 <p>See also <a href="qdir.html#path">path</a>(), <a href="qdir.html#absolutePath">absolutePath</a>(), <a href="qdir.html#exists">exists</a>(), <a href="qdir.html#cleanPath">cleanPath</a>(), <a href="qdir.html#dirName">dirName</a>(), <a href="qdir.html#absoluteFilePath">absoluteFilePath</a>(), <a href="qdir.html#isRelative">isRelative</a>(), and <a href="qdir.html#makeAbsolute">makeAbsolute</a>().</p>
+<h3 class="fn"><a name="setSearchPaths"></a>void QDir::setSearchPaths ( const <a href="qstring.html">QString</a> &amp; <i>prefix</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>searchPaths</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Sets or replaces Qt's search paths for file names with the prefix <i>prefix</i> to <i>searchPaths</i>.</p>
+<p>To specify a prefix for a file name, prepend the prefix followed by a single colon (e.g&#x2e;, &quot;images:undo.png&quot;, &quot;xmldocs:books.xml&quot;). <i>prefix</i> can only contain letters or numbers (e.g&#x2e;, it cannot contain a colon, nor a slash).</p>
+<p>Qt uses this search path to locate files with a known prefix. The search path entries are tested in order, starting with the first entry.</p>
+<pre> QDir::setSearchPaths(&quot;icons&quot;, QStringList(QDir::homePath() + &quot;/images&quot;));
+ QDir::setSearchPaths(&quot;docs&quot;, QStringList(&quot;:/embeddedDocuments&quot;));
+ ...
+ QPixmap pixmap(&quot;icons:undo.png&quot;); <span class="comment">// will look for undo.png in QDir::homePath() + &quot;/images&quot;</span>
+ QFile file(&quot;docs:design.odf&quot;); <span class="comment">// will look in the :/embeddedDocuments resource path</span></pre>
+<p>File name prefix must be at least 2 characters long to avoid conflicts with Windows drive letters.</p>
+<p>Search paths may contain paths to {The Qt Resource System}.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qdir.html#searchPaths">searchPaths</a>().</p>
 <h3 class="fn"><a name="setSorting"></a>void QDir::setSorting ( <a href="qdir.html#SortFlag-enum">SortFlags</a> <i>sort</i> )</h3>
 <p>Sets the sort order used by <a href="qdir.html#entryList">entryList</a>() and <a href="qdir.html#entryInfoList">entryInfoList</a>().</p>
 <p>The <i>sort</i> is specified by OR-ing values from the enum <a href="qdir.html#SortFlag-enum">QDir::SortFlag</a>.</p>
@@ -562,14 +583,12 @@
 <p>Use <a href="qdir.html#absolutePath">absolutePath</a>() instead.</p>
 <h3 class="fn"><a name="cleanDirPath"></a><a href="qstring.html">QString</a> QDir::cleanDirPath ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Use <a href="qdir.html#cleanPath">cleanPath</a>() instead.</p>
-<h3 class="fn"><a name="convertSeparators"></a><a href="qstring.html">QString</a> QDir::convertSeparators ( const <a href="qstring.html">QString</a> &amp; <i>pathName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qdir.html#toNativeSeparators">QDir::toNativeSeparators</a>() instead.</p>
 <h3 class="fn"><a name="convertToAbs"></a>void QDir::convertToAbs ()</h3>
 <p>Use <a href="qdir.html#makeAbsolute">makeAbsolute</a>() instead.</p>
 <h3 class="fn"><a name="currentDirPath"></a><a href="qstring.html">QString</a> QDir::currentDirPath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the absolute path of the application's current directory.</p>
 <p>Use <a href="qdir.html#currentPath">currentPath</a>() instead.</p>
-<p>Returns the current working directory or &quot;/&quot; if the current directory cannot be determined.</p>
-<p>See also <a href="qdir.html#homePath">homePath</a>() and <a href="qdir.html#rootPath">rootPath</a>().</p>
+<p>See also <a href="qdir.html#currentPath">currentPath</a>().</p>
 <h3 class="fn"><a name="entryInfoList-3"></a><a href="qfileinfo.html#QFileInfoList-typedef">QFileInfoList</a> QDir::entryInfoList ( const <a href="qstring.html">QString</a> &amp; <i>nameFilter</i>, <a href="qdir.html#Filter-enum">Filters</a> <i>filters</i> = NoFilter, <a href="qdir.html#SortFlag-enum">SortFlags</a> <i>sort</i> = NoSort ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Use the overload that takes a name filter string list as first argument instead of a combination of attribute filter flags.</p>
@@ -577,9 +596,9 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Use the overload that takes a name filter string list as first argument instead of a combination of attribute filter flags.</p>
 <h3 class="fn"><a name="homeDirPath"></a><a href="qstring.html">QString</a> QDir::homeDirPath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the absolute path of the user's home directory.</p>
 <p>Use <a href="qdir.html#homePath">homePath</a>() instead.</p>
-<p>Returns the user's home directory or an empty string if it cannot be determined.</p>
-<p>See also <a href="qdir.html#currentPath">currentPath</a>() and <a href="qdir.html#rootPath">rootPath</a>().</p>
+<p>See also <a href="qdir.html#homePath">homePath</a>().</p>
 <h3 class="fn"><a name="matchAllDirs"></a>bool QDir::matchAllDirs () const</h3>
 <p>Use <a href="qdir.html#filter">filter</a>() &amp; <a href="qdir.html#Filter-enum">AllDirs</a> instead.</p>
 <p>See also <a href="qdir-qt3.html#setMatchAllDirs">setMatchAllDirs</a>().</p>
@@ -595,9 +614,9 @@
 <p>Use rmdir(<i>dirName</i>) instead.</p>
 <p>The <i>acceptAbsPath</i> parameter is ignored.</p>
 <h3 class="fn"><a name="rootDirPath"></a><a href="qstring.html">QString</a> QDir::rootDirPath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the absolute path of the root directory.</p>
 <p>Use <a href="qdir.html#rootPath">rootPath</a>() instead.</p>
-<p>Returns &quot;/&quot;.</p>
-<p>See also <a href="qdir.html#homePath">homePath</a>() and <a href="qdir.html#currentPath">currentPath</a>().</p>
+<p>See also <a href="qdir.html#rootPath">rootPath</a>().</p>
 <h3 class="fn"><a name="setMatchAllDirs"></a>void QDir::setMatchAllDirs ( bool <i>on</i> )</h3>
 <p>Use <a href="qdir.html#setFilter">setFilter</a>() instead.</p>
 <p>See also <a href="qdir-qt3.html#matchAllDirs">matchAllDirs</a>().</p>
@@ -616,6 +635,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

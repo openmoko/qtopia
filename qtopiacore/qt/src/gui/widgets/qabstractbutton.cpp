@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -35,7 +50,6 @@
 
 #define AUTO_REPEAT_DELAY  300
 #define AUTO_REPEAT_INTERVAL 100
-
 
 /*!
     \class QAbstractButton
@@ -142,7 +156,7 @@
     \sa QButtonGroup
 */
 
-QAbstractButtonPrivate::QAbstractButtonPrivate()
+QAbstractButtonPrivate::QAbstractButtonPrivate(QSizePolicy::ControlType type)
     :
 #ifndef QT_NO_SHORTCUT
     shortcutId(0),
@@ -153,7 +167,8 @@ QAbstractButtonPrivate::QAbstractButtonPrivate()
     group(0),
 #endif
     autoRepeatDelay(AUTO_REPEAT_DELAY),
-    autoRepeatInterval(AUTO_REPEAT_INTERVAL)
+    autoRepeatInterval(AUTO_REPEAT_INTERVAL),
+    controlType(type)
 {}
 
 #ifndef QT_NO_BUTTONGROUP
@@ -461,7 +476,7 @@ void QAbstractButtonPrivate::init()
     Q_Q(QAbstractButton);
 
     q->setFocusPolicy(Qt::FocusPolicy(q->style()->styleHint(QStyle::SH_Button_FocusPolicy)));
-    q->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+    q->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed, controlType));
     q->setForegroundRole(QPalette::ButtonText);
     q->setBackgroundRole(QPalette::Button);
 }
@@ -553,7 +568,7 @@ void QAbstractButtonPrivate::emitReleased()
     Constructs an abstract button with a \a parent.
 */
 QAbstractButton::QAbstractButton(QWidget *parent)
-    :QWidget(*new QAbstractButtonPrivate, parent, 0)
+    : QWidget(*new QAbstractButtonPrivate, parent, 0)
 {
     Q_D(QAbstractButton);
     d->init();
@@ -609,6 +624,7 @@ void QAbstractButton::setText(const QString &text)
     if (!newMnemonic.isEmpty())
         setShortcut(newMnemonic);
 #endif
+    d->sizeHint = QSize();
     update();
     updateGeometry();
 #ifndef QT_NO_ACCESSIBILITY
@@ -634,6 +650,7 @@ void QAbstractButton::setIcon(const QIcon &icon)
 {
     Q_D(QAbstractButton);
     d->icon = icon;
+    d->sizeHint = QSize();
     update();
     updateGeometry();
 }
@@ -771,11 +788,14 @@ bool QAbstractButton::isDown() const
 \property QAbstractButton::autoRepeat
 \brief whether autoRepeat is enabled
 
-If autoRepeat is enabled then the clicked() signal is emitted at
-regular intervals when the button is down. This property has no effect
-on toggle buttons. autoRepeat is off by default. The initial delay and
-the repetition interval are defined in milliseconds by \l
+If autoRepeat is enabled, then the pressed(), released(), and clicked() signals are emitted at
+regular intervals when the button is down. autoRepeat is off by default.
+The initial delay and the repetition interval are defined in milliseconds by \l
 autoRepeatDelay and \l autoRepeatInterval.
+
+Note: If a button is pressed down by a shortcut key, then auto-repeat is enabled and timed by the
+system and not by this class. The pressed(), released(), and clicked() signals will be emitted
+like in the normal case.
 */
 
 void QAbstractButton::setAutoRepeat(bool autoRepeat)
@@ -890,8 +910,11 @@ QButtonGroup *QAbstractButton::group() const
 #endif // QT_NO_BUTTONGROUP
 
 /*!
-Performs an animated click: the button is pressed and released
-\a msec milliseconds later (the default is 100 ms).
+Performs an animated click: the button is pressed immediately, and
+released \a msec milliseconds later (the default is 100 ms).
+
+Calling this function again before the button was released will reset
+the release timer.
 
 All signals associated with a click are emitted as appropriate.
 
@@ -910,7 +933,8 @@ void QAbstractButton::animateClick(int msec)
     setDown(true);
     repaint(); //flush paint event before invoking potentially expensive operation
     QApplication::flush();
-    d->emitPressed();
+    if (!d->animateTimer.isActive())
+        d->emitPressed();
     d->animateTimer.start(msec, this);
 }
 
@@ -1026,12 +1050,14 @@ bool QAbstractButton::event(QEvent *e)
         QShortcutEvent *se = static_cast<QShortcutEvent *>(e);
         if (d->shortcutId != se->shortcutId())
             return false;
-        if (focusPolicy() != Qt::NoFocus)
-            setFocus();
-        if (!se->isAmbiguous())
-            animateClick();
-        else
+        if (!se->isAmbiguous()) {
+            if (!d->animateTimer.isActive())
+                animateClick();
+        } else {
+            if (focusPolicy() != Qt::NoFocus)
+                setFocus(Qt::ShortcutFocusReason);
             window()->setAttribute(Qt::WA_KeyboardFocusChange);
+        }
         return true;
     }
 #endif
@@ -1062,17 +1088,17 @@ void QAbstractButton::mouseReleaseEvent(QMouseEvent *e)
 {
     Q_D(QAbstractButton);
     if (e->button() != Qt::LeftButton) {
-        // clean up apperance if left button has been pressed
-        if (d->down)
-            setDown(false);
         e->ignore();
         return;
     }
 
-    if (!d->down)
+    if (!d->down) {
+        e->ignore();
         return;
+    }
 
     if (hitButton(e->pos())) {
+        d->repeatTimer.stop();
         d->click();
         e->accept();
     } else {
@@ -1129,6 +1155,12 @@ void QAbstractButton::keyPressEvent(QKeyEvent *e)
         // fall through
     case Qt::Key_Right:
     case Qt::Key_Down:
+#ifdef QT_KEYPAD_NAVIGATION
+        if (QApplication::keypadNavigationEnabled() && (e->key() == Qt::Key_Left || e->key() == Qt::Key_Right)) {
+            e->ignore();
+            return;
+        }
+#endif
 #ifndef QT_NO_BUTTONGROUP
         if (d->group || d->autoExclusive) {
 #else
@@ -1138,11 +1170,6 @@ void QAbstractButton::keyPressEvent(QKeyEvent *e)
             if (hasFocus()) // nothing happend, propagate
                 e->ignore();
         } else {
-#ifdef QT_KEYPAD_NAVIGATION
-            if (QApplication::keypadNavigationEnabled() && (e->key() == Qt::Key_Left || e->key() == Qt::Key_Right))
-                e->ignore();
-            else
-#endif
             focusNextPrevChild(next);
         }
         break;
@@ -1164,6 +1191,10 @@ void QAbstractButton::keyPressEvent(QKeyEvent *e)
 void QAbstractButton::keyReleaseEvent(QKeyEvent *e)
 {
     Q_D(QAbstractButton);
+
+    if (!e->isAutoRepeat())
+        d->repeatTimer.stop();
+
     switch (e->key()) {
     case Qt::Key_Select:
     case Qt::Key_Space:
@@ -1219,13 +1250,14 @@ void QAbstractButton::focusOutEvent(QFocusEvent *e)
 /*! \reimp */
 void QAbstractButton::changeEvent(QEvent *e)
 {
-//     Q_D(QAbstractButton);
+    Q_D(QAbstractButton);
     switch (e->type()) {
     case QEvent::EnabledChange:
         if (!isEnabled())
             setDown(false);
         break;
     default:
+        d->sizeHint = QSize();
         break;
     }
     QWidget::changeEvent(e);
@@ -1307,7 +1339,8 @@ updates to the button states monitored with the
     \property QAbstractButton::iconSize
     \brief the icon size used for this button.
 
-    The default size is defined by the GUI style.
+    The default size is defined by the GUI style. This is a maximum
+    size for the icons. Smaller icons will not be scaled up.
 */
 
 QSize QAbstractButton::iconSize() const
@@ -1326,6 +1359,7 @@ void QAbstractButton::setIconSize(const QSize &size)
         return;
 
     d->iconSize = size;
+    d->sizeHint = QSize();
     updateGeometry();
     if (isVisible()) {
         update();

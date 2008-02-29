@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,10 +21,11 @@
 
 #include "account.h"
 #include "search.h"
-#include "email.h"
 #include <qtimer.h>
 #include <qsettings.h>
 #include <qtopialog.h>
+#include <QApplication>
+#include <QDir>
 
 //* LIST (\flags) "/" "INBOX" response for each list
 Mailbox::Mailbox(MailAccount *account, QString _flags, QString _delimiter, QString _name)
@@ -93,13 +94,13 @@ Mailbox::~Mailbox()
     delete search;
 }
 
-QString Mailbox::baseName()
+QString Mailbox::baseName() const
 {
     QStringList list = _name.split(delimiter);
     return list.last();
 }
 
-QString Mailbox::path()
+QString Mailbox::path() const
 {
     QStringList list = _name.split(delimiter);
     list.erase( list.end() );
@@ -158,7 +159,7 @@ void Mailbox::saveSettings(QSettings *config)
     config->setValue("deleted", deleted);
     config->setValue("queuedelete", delList.join(",") );
     config->setValue("localcopy", _localCopy);
-    config->setValue("syncsettings", (int) _syncSetting);
+    config->setValue("syncsettings", _syncSetting);
 
     int pos = 1;
     for (QStringList::Iterator it = serverUidList.begin();
@@ -176,7 +177,7 @@ void Mailbox::readSettings(QSettings *config)
     oldName = config->value("oldname").toString();
     delimiter = config->value("delimiter").toString();
     uid = config->value("uid").toString();
-    exists = (uint) config->value("exists", 0).toInt();
+    exists = config->value("exists", 0).toInt();
     byUser = config->value("byuser").toBool();
     deleted = config->value("deleted").toBool();
     delList = config->value("queuedelete").toString().split( "," );
@@ -203,15 +204,15 @@ void Mailbox::readSettings(QSettings *config)
 void Mailbox::setServerUid(QStringList list)
 {
     serverUidList = list;
-    exists = (int) serverUidList.count();
+    exists = serverUidList.count();
 }
 
-QStringList Mailbox::getServerUid()
+QStringList Mailbox::getServerUid() const
 {
     return serverUidList;
 }
 
-bool Mailbox::containsMsg(QString _uid)
+bool Mailbox::containsMsg(QString _uid) const
 {
     if ( (serverUidList.contains(_uid)) )
         return true;
@@ -219,7 +220,7 @@ bool Mailbox::containsMsg(QString _uid)
     return false;
 }
 
-QStringList Mailbox::getNewUid(QStringList list)
+QStringList Mailbox::getNewUid(QStringList list) const
 {
     QStringList newUidList;
 
@@ -231,12 +232,12 @@ QStringList Mailbox::getNewUid(QStringList list)
     return newUidList;
 }
 
-bool Mailbox::matchesEmail(Email *mail)
+bool Mailbox::matchesEmail(const QMailMessage& message) const
 {
-    return search->matches(mail);
+    return search->matches(message);
 }
 
-QString Mailbox::fullName()
+QString Mailbox::fullName() const
 {
      return ( _account->accountName() + " - " + _displayName );
 }
@@ -283,29 +284,31 @@ QString Mailbox::decodeModBase64(QString in)
     if(in.isEmpty())
         return "&";
 
-    unsigned char c, z;
-    QByteArray buf(in.length(),(char)0);
-    QByteArray out(in.length() * 3 / 4 + 2,(char)0);
-    QString result;
+    QByteArray buf(in.length(),static_cast<char>(0));
+    QByteArray out(in.length() * 3 / 4 + 2,static_cast<char>(0));
 
     //chars to numeric
 
+    QByteArray latinChars = in.toLatin1();
     for (int x = 0; x < in.length(); x++) {
-        c = in.toLatin1()[x];
-        if ( (int) c >= 'A' && (int) c <= 'Z')
-            buf[x] = (int) c - (int) 'A';
-        if ( (int) c >= 'a' && (int) c <= 'z')
-            buf[x] = (int) c - (int) 'a' + 26;
-        if ( (int) c >= '0' && (int) c <= '9')
-            buf[x] = (int) c - (int) '0' + 52;
-        if (c == '+')
+        int c = latinChars[x];
+        if ( c >= 'A' && c <= 'Z')
+            buf[x] = c - 'A';
+        if ( c >= 'a' && c <= 'z')
+            buf[x] = c - 'a' + 26;
+        if ( c >= '0' && c <= '9')
+            buf[x] = c - '0' + 52;
+        if ( c == '+')
             buf[x] = 62;
-        if (c == ',')
+        if ( c == ',')
             buf[x] = 63;
     }
 
     int i = 0; //in buffer index
     int j = i; //out buffer index
+
+    unsigned char z;
+    QString result;
 
     while(i+1 < buf.size())
     {
@@ -370,7 +373,7 @@ MailAccount::MailAccount()
 {
     _mailPort = 110;
     _smtpPort = 25;
-#ifdef SMTPAUTH
+#ifndef QT_NO_OPENSSL
     _smtpAuthentication = Auth_NONE;
     _smtpEncryption = Encrypt_NONE;
     _mailEncryption = Encrypt_NONE;
@@ -390,6 +393,7 @@ MailAccount::MailAccount()
              this, SLOT(checkIntervalTimeout()) );
 
     _unreadCount = 0;
+    _count = 0;
 }
 
 MailAccount::~MailAccount()
@@ -398,7 +402,7 @@ MailAccount::~MailAccount()
 }
 
 /* General */
-QString MailAccount::accountName()
+QString MailAccount::accountName() const
 {
     return qApp->translate( "AccountList", _accountName.toLatin1() );
 }
@@ -408,7 +412,7 @@ void MailAccount::setAccountName(QString str)
     _accountName = str;
 }
 
-QString MailAccount::userName()
+QString MailAccount::userName() const
 {
     return _userName;
 }
@@ -419,7 +423,7 @@ void MailAccount::setUserName(QString str)
 }
 
 /* SMTP */
-QString MailAccount::emailAddress()
+QString MailAccount::emailAddress() const
 {
     return _emailAddress;
 }
@@ -434,12 +438,12 @@ void MailAccount::setSmtpServer(QString str)
     _smtpServer = str;
 }
 
-QString MailAccount::smtpServer()
+QString MailAccount::smtpServer() const
 {
     return _smtpServer;
 }
 
-int MailAccount::smtpPort()
+int MailAccount::smtpPort() const
 {
     return _smtpPort;
 }
@@ -449,7 +453,7 @@ void MailAccount::setSmtpPort(int i)
     _smtpPort = i;
 }
 
-#ifdef SMTPAUTH
+#ifndef QT_NO_OPENSSL
 
 QString MailAccount::smtpUsername() const
 {
@@ -471,30 +475,54 @@ void MailAccount::setSmtpPassword(const QString& password)
     _smtpPassword = password;
 }
 
+#endif
+
 MailAccount::AuthType MailAccount::smtpAuthentication() const
 {
+#ifndef QT_NO_OPENSSL
     return _smtpAuthentication;
+#else
+    return Auth_NONE;
+#endif
 }
+
+#ifndef QT_NO_OPENSSL
 
 void MailAccount::setSmtpAuthentication(AuthType t)
 {
     _smtpAuthentication = t;
 }
 
+#endif
+
 MailAccount::EncryptType MailAccount::smtpEncryption() const
 {
+#ifndef QT_NO_OPENSSL
     return _smtpEncryption;
+#else
+    return Encrypt_NONE;
+#endif
 }
+
+#ifndef QT_NO_OPENSSL
 
 void MailAccount::setSmtpEncryption(EncryptType t)
 {
     _smtpEncryption = t;
 }
 
+#endif
+
 MailAccount::EncryptType MailAccount::mailEncryption() const
 {
+#ifndef QT_NO_OPENSSL
     return _mailEncryption;
+#else
+    return Encrypt_NONE;
+#endif
 }
+
+#ifndef QT_NO_OPENSSL
 
 void MailAccount::setMailEncryption(EncryptType t)
 {
@@ -503,7 +531,7 @@ void MailAccount::setMailEncryption(EncryptType t)
 
 #endif
 
-bool MailAccount::useSig()
+bool MailAccount::useSig() const
 {
     return _useSig;
 }
@@ -513,7 +541,7 @@ void MailAccount::setUseSig(bool b)
     _useSig = b;
 }
 
-QString MailAccount::sig()
+QString MailAccount::sig() const
 {
     return _sig;
 }
@@ -523,7 +551,7 @@ void MailAccount::setSig(QString str)
     _sig = str;
 }
 
-bool MailAccount::defaultMailServer()
+bool MailAccount::defaultMailServer() const
 {
     return _defaultMailServer;
 }
@@ -534,7 +562,7 @@ void MailAccount::setDefaultMailServer(bool b)
 }
 
 /* POP/IMAP */
-QString MailAccount::mailUserName()
+QString MailAccount::mailUserName() const
 {
     return _mailUserName;
 }
@@ -546,7 +574,7 @@ void MailAccount::setMailUserName(QString str)
     search->setFromAccount( id() );
 }
 
-QString MailAccount::mailPassword()
+QString MailAccount::mailPassword() const
 {
     return _mailPassword;
 }
@@ -556,7 +584,7 @@ void MailAccount::setMailPassword(QString str)
     _mailPassword = str;
 }
 
-QString MailAccount::mailServer()
+QString MailAccount::mailServer() const
 {
     return _mailServer;
 }
@@ -568,7 +596,7 @@ void MailAccount::setMailServer(QString str)
     search->setFromAccount( id() );
 }
 
-int MailAccount::mailPort()
+int MailAccount::mailPort() const
 {
     return _mailPort;
 }
@@ -578,7 +606,7 @@ void MailAccount::setMailPort(int i)
     _mailPort = i;
 }
 
-bool MailAccount::canCollectMail()
+bool MailAccount::canCollectMail() const
 {
     if ( accountType() == MailAccount::Synchronized ||
          accountType() == MailAccount::SMS ||
@@ -588,7 +616,7 @@ bool MailAccount::canCollectMail()
     return true;
 }
 
-bool MailAccount::deleteMail()
+bool MailAccount::deleteMail() const
 {
     return _deleteMail;
 }
@@ -598,7 +626,7 @@ void MailAccount::setDeleteMail(bool b)
     _deleteMail = b;
 }
 
-int MailAccount::maxMailSize()
+int MailAccount::maxMailSize() const
 {
     return _maxMailSize;
 }
@@ -608,7 +636,7 @@ void MailAccount::setMaxMailSize(int i)
     _maxMailSize = i;
 }
 
-int MailAccount::checkInterval()
+int MailAccount::checkInterval() const
 {
     return _checkInterval;
 }
@@ -647,7 +675,7 @@ void MailAccount::msgDeleted(QString serverId, const QString &boxName )
 }
 
 /* POP Only */
-bool MailAccount::synchronize()
+bool MailAccount::synchronize() const
 {
     return _synchronize;
 }
@@ -666,7 +694,7 @@ void MailAccount::setUidlList(QStringList in)
     accountconf.beginGroup( id() );
     accountconf.remove("");
 
-    accountconf.setValue("idcount", (int) uidList.count() );
+    accountconf.setValue("idcount", uidList.count() );
 
     int pos = 1;
     for (QStringList::Iterator it = uidList.begin();
@@ -679,7 +707,7 @@ void MailAccount::setUidlList(QStringList in)
 }
 
 // get uidllist belonging to this account
-QStringList MailAccount::getUidlList()
+QStringList MailAccount::getUidlList() const
 {
     return uidList;
 }
@@ -719,7 +747,7 @@ Mailbox* MailAccount::getMailboxRefByMsgUid(QString uid, const QString &boxName 
 void MailAccount::removeBox(Mailbox *box)
 {
     QSettings accountconf("Trolltech","qtmail_account");
-    for (uint x = 0; x < (uint)mailboxes.count(); x++) {
+    for (int x = 0; x < mailboxes.count(); x++) {
         accountconf.beginGroup( id() + "_" + QString::number(x) );
         accountconf.remove("");
         accountconf.endGroup();
@@ -729,7 +757,7 @@ void MailAccount::removeBox(Mailbox *box)
 }
 
 /* General */
-QString MailAccount::id()
+QString MailAccount::id() const
 {
     return ( _mailUserName + "@" + _mailServer);
 }
@@ -794,7 +822,7 @@ void MailAccount::saveSettings(QSettings *conf)
 
     conf->setValue("smtpserver", _smtpServer );
     conf->setValue("smtpport", _smtpPort);
-#ifdef SMTPAUTH
+#ifndef QT_NO_OPENSSL
     conf->setValue("smtpUsername",_smtpUsername);
     conf->setValue("smtpPassword",_smtpPassword);
     conf->setValue("smtpAuthentication",_smtpAuthentication);
@@ -806,7 +834,7 @@ void MailAccount::saveSettings(QSettings *conf)
     conf->setValue("checkinterval", _checkInterval);
     conf->setValue("defaultmailserver", _defaultMailServer);
 
-    QString file = QString(getenv("HOME")) + "/Applications/qtmail/sig_" + _mailUserName + "_" + _mailServer;
+    QString file = QDir::homePath() + "/Applications/qtmail/sig_" + _mailUserName + "_" + _mailServer;
     QFile f(file);
     if ( f.open(QIODevice::WriteOnly) ) {    // file opened successfully
         QTextStream t( &f );        // use a text stream
@@ -822,7 +850,7 @@ void MailAccount::saveSettings(QSettings *conf)
 
     if ( _accountType == IMAP ) {
         int count = 0;
-        conf->setValue("mailboxes", (int) mailboxes.count() );
+        conf->setValue("mailboxes", mailboxes.count() );
         QListIterator<Mailbox*> it(mailboxes);
         while ( it.hasNext() ) {
             Mailbox *box = it.next();
@@ -845,7 +873,7 @@ void MailAccount::readSettings(QSettings *conf)
     _mailPassword = conf->value("mailpassword").toString(); //TODO fix decipher
     _mailServer = conf->value("mailserver").toString();
     _mailPort = conf->value("mailport", 110).toInt();
-    _accountType = (AccountType) conf->value("type", POP ).toInt();
+    _accountType = static_cast<AccountType>( conf->value("type", POP ).toInt() );
     _baseFolder = conf->value("basefolder").toString();
 
     _useSig = conf->value("usesig").toBool();
@@ -853,7 +881,7 @@ void MailAccount::readSettings(QSettings *conf)
     setCheckInterval( conf->value("checkinterval", -1).toInt() );
 
     // write signature to a file (to resolve problem with config.h)
-    QString file = QString(getenv("HOME")) + "/Applications/qtmail/sig_" + _mailUserName + "_" + _mailServer;
+    QString file = QString(QDir::homePath()) + "/Applications/qtmail/sig_" + _mailUserName + "_" + _mailServer;
     QFile f(file);
     if ( f.open(QIODevice::ReadOnly) ) {    // file opened successfully
         QTextStream t( &f );        // use a text stream
@@ -863,7 +891,7 @@ void MailAccount::readSettings(QSettings *conf)
 
     _smtpServer = conf->value("smtpserver").toString();
     _smtpPort = conf->value("smtpport", 25).toInt();
-#ifdef SMTPAUTH
+#ifndef QT_NO_OPENSSL
     _smtpUsername = conf->value("smtpUsername").toString();
     _smtpPassword = conf->value("smtpPassword").toString();
 
@@ -911,9 +939,9 @@ void MailAccount::readSettings(QSettings *conf)
     search->setFromAccount( id() );
 }
 
-bool MailAccount::matchesEmail(Email *mail)
+bool MailAccount::matchesEmail(const QMailMessage& message) const
 {
-    return search->matches(mail);
+    return search->matches(message);
 }
 
 void MailAccount::checkIntervalTimeout()
@@ -921,7 +949,7 @@ void MailAccount::checkIntervalTimeout()
     emit intervalCheck( this );
 }
 
-int MailAccount::unreadCount()
+int MailAccount::unreadCount() const
 {
     return _unreadCount;
 }
@@ -929,6 +957,16 @@ int MailAccount::unreadCount()
 void MailAccount::setUnreadCount( int count )
 {
     _unreadCount = count;
+}
+
+int MailAccount::count() const
+{
+    return _count;
+}
+
+void MailAccount::setCount( int count )
+{
+    _count = count;
 }
 
 QString MailAccount::networkConfig() const

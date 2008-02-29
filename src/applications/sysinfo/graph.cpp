@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -46,35 +46,6 @@ void Graph::paintEvent(QPaintEvent *pe) {
     QFrame::paintEvent(pe);
     QPainter p(this);
     drawContents( &p );
-}
-
-PieGraph::PieGraph(QWidget *parent, Qt::WFlags f )
-    : Graph( parent, f )
-{
-}
-
-void PieGraph::drawContents( QPainter *p )
-{
-    int size = qMin( contentsRect().width(), contentsRect().height() ) - 1;
-
-    int total = 0;
-    for ( int i = 0; i < data->count(); i++ )
-        total += data->value(i);
-
-    int angle = 0;
-    for ( int i = 0; i < data->count(); i++ ) {
-        int len;
-        if ( i == data->count() - 1 || !total )
-            len = 5760 - angle;
-        else
-            len = data->value(i) * 5760 / total;
-        QColor col;
-        col.setHsv( i * 360 / data->count(), 255, 255 );
-        p->setBrush( col );
-        p->drawPie ( contentsRect().x(), contentsRect().y(),
-                     size, size, angle, len+32 );
-        angle += len;
-    }
 }
 
 BarGraph::BarGraph(QWidget *parent, Qt::WFlags f )

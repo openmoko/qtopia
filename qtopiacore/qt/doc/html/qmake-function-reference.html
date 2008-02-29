@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/qmake-manual.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qmake-manual.qdoc -->
 <head>
-  <title>Qt 4.2: qmake Function Reference</title>
+  <title>Qt 4.3: qmake Function Reference</title>
   <link rel="prev" href="qmake-variable-reference.html" />
   <link rel="contents" href="qmake-manual.html" />
   <link rel="next" href="qmake-environment-reference.html" />
@@ -20,7 +20,8 @@
 [<a href="qmake-manual.html">Contents</a>]
 [Next: <a href="qmake-environment-reference.html">Configuring qmake's Environment</a>]
 </p>
-<h1 align="center">qmake Function Reference<br /><small></small></h1>
+<h1 align="center">qmake Function Reference<br /><span class="subtitle"></span>
+</h1>
 <p><tt>qmake</tt> provides built-in functions to allow the contents of variables to be processed, and to enable tests to be performed during the configuration process. Functions that process the contents of variables typically return values that can be assigned to other variables, and these values are obtained by prefixing function with the <tt>$$</tt> operator. Functions that perform tests are usually used as the conditional parts of scopes; these are indicated in the function descriptions below.</p>
 <p><table width="100%">
 <tr valign="top"><td width="50%">
@@ -43,7 +44,8 @@
 <li><a href="#message-string">message(string)</a></li>
 <li><a href="#prompt-question">prompt(question)</a></li>
 <li><a href="#quote-string">quote(string)</a></li>
-<li><a href="#sprintf-string-arguments">sprintf(string, arguments...)</a></li>
+<li><a href="#replace-string-old-string-new-string">replace(string, old_string, new_string)</a></li>
+<li><a href="#sprintf-string-arguments">sprintf(string, arguments..&#x2e;)</a></li>
 <li><a href="#system-command">system(command)</a></li>
 <li><a href="#unique-variablename">unique(variablename)</a></li>
 <li><a href="#warning-string">warning(string)</a></li>
@@ -57,7 +59,7 @@
 <a name="config-config"></a>
 <h2>CONFIG(config)</h2>
 <p>[Conditional]</p>
-<p>This function can be used to test for variables placed into the <tt>CONFIG</tt> variable. This is the same as regular old style (tmake) scopes, but has the added advantage a second parameter can be passed to test for the active config. As the order of values is important in <tt>CONFIG</tt> variables (i.e. the last one set will be considered the active config for mutually exclusive values) a second parameter can be used to specify a set of values to consider. For example:</p>
+<p>This function can be used to test for variables placed into the <tt>CONFIG</tt> variable. This is the same as regular old style (tmake) scopes, but has the added advantage a second parameter can be passed to test for the active config. As the order of values is important in <tt>CONFIG</tt> variables (i.e&#x2e; the last one set will be considered the active config for mutually exclusive values) a second parameter can be used to specify a set of values to consider. For example:</p>
 <pre>  CONFIG = debug
   CONFIG += release
   CONFIG(release, debug|release):message(Release build!) #will print
@@ -167,23 +169,30 @@
 <a name="quote-string"></a>
 <h2>quote(string)</h2>
 <p>Converts a whole <i>string</i> into a single entity and returns the result. Newlines, carriage returns, and tabs can be specified in the string with \n \r and \t. The return value does not contain either single or double quotation marks unless you explicitly include them yourself, but will be placed into a single entry (for literal expansion).</p>
+<a name="replace-string-old-string-new-string"></a>
+<h2>replace(string, old_string, new_string)</h2>
+<p>Replaces each instance of <tt>old_string</tt> with <tt>new_string</tt> in the contents of the variable supplied as <tt>string</tt>. For example, the code</p>
+<pre> MESSAGE = This is a tent.
+ message($$replace(MESSAGE, tent, test))</pre>
+<p>prints the message:</p>
+<pre> This is a test.</pre>
 <a name="sprintf-string-arguments"></a>
-<h2>sprintf(string, arguments...)</h2>
+<h2>sprintf(string, arguments..&#x2e;)</h2>
 <p>Replaces %1-%9 with the arguments passed in the comma-separated list of function <i>arguments</i> and returns the processed string.</p>
 <a name="system-command"></a>
 <h2>system(command)</h2>
 <p>[Conditional]</p>
 <p>Executes the given <tt>command</tt> in a secondary shell, and succeeds if the command returns with a zero exit status; otherwise fails. You can check the return value of this function using a scope:</p>
 <p>For example:</p>
-<pre>  system(ls /bin):HAS_BIN=FALSE</pre>
+<pre>     system(ls /bin):HAS_BIN=FALSE</pre>
 <p>Alternatively, you can use this function to obtain stdout and stderr from the command, and assign it to a variable. For example, you can use this to interrogate information about the platform:</p>
-<pre>  UNAME = $$system(uname -s)
-  contains( UNAME, [lL]inux ):message( This looks like Linux ($$UNAME) to me )</pre>
+<pre>     UNAME = $$system(uname -s)
+     contains( UNAME, [lL]inux ):message( This looks like Linux ($$UNAME) to me )</pre>
 <a name="unique"></a><a name="unique-variablename"></a>
 <h2>unique(variablename)</h2>
 <p>This will return a list of values in variable that are unique (that is with repetitive entries removed). For example:</p>
-<pre> ARGS = 1 2 3 2 5 1
- ARGS = $$unique(ARGS) #1 2 3 5</pre>
+<pre>    ARGS = 1 2 3 2 5 1
+    ARGS = $$unique(ARGS) #1 2 3 5</pre>
 <a name="warning-string"></a>
 <h2>warning(string)</h2>
 <p>This function will always succeed, and will display the given <i>string</i> to the user. message() is a synonym for warning().</p>
@@ -196,6 +205,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

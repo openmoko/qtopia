@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,9 +21,8 @@
 
 #include "qbluetoothservicecontroller.h"
 
-#include <QtopiaIpcAdaptor>
+#include <qtopiaipcadaptor.h>
 #include <QValueSpaceItem>
-#include <qtopialog.h>
 
 /*
     This receives IPC messages from the BluetoothServiceManager when a service
@@ -109,7 +108,7 @@ QBluetooth::SecurityOptions QBluetoothServiceControllerPrivate::securityOptions(
     if (options.isValid())
         return static_cast<QBluetooth::SecurityOptions>(options.toInt());
 
-    qLog(Obex) << "QBluetoothServiceController::securityOptions() no valid security options for service:" << name;
+    // no valid security options
     return 0;
 }
 
@@ -135,7 +134,7 @@ void QBluetoothServiceControllerPrivate::serviceStopped(const QString &name)
 
 QVariant QBluetoothServiceControllerPrivate::serviceValue(const QString &name, const QString &attr) const
 {
-    return QValueSpaceItem(VALUE_SPACE_PATH + "/" + name).value(attr);
+    return QValueSpaceItem(VALUE_SPACE_PATH + '/' + name).value(attr);
 }
 
 

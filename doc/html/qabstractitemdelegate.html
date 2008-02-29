@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QAbstractItemDelegate Class Reference</title>
+  <title>Qt 4.3: QAbstractItemDelegate Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QAbstractItemDelegate Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QAbstractItemDelegate Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QAbstractItemDelegate class is used to display and edit data items from a model. <a href="#details">More...</a></p>
 <pre> #include &lt;QAbstractItemDelegate&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <p>Inherited by <a href="qitemdelegate.html">QItemDelegate</a>.</p>
@@ -40,6 +41,14 @@
 <ul>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
+<li><div class="fn"/>bool <b><a href="qabstractitemdelegate.html#helpEvent">helpEvent</a></b> ( QHelpEvent * <i>event</i>, QAbstractItemView * <i>view</i>, const QStyleOptionViewItem &amp; <i>option</i>, const QModelIndex &amp; <i>index</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+</ul>
 <a name="signals"></a>
 <h3>Signals</h3>
 <ul>
@@ -52,7 +61,6 @@
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>5 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
@@ -103,11 +111,17 @@
 <h3 class="fn"><a name="createEditor"></a><a href="qwidget.html">QWidget</a> * QAbstractItemDelegate::createEditor ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the editor to be used for editing the data item with the given <i>index</i>. Note that the index contains information about the model being used. The editor's parent widget is specified by <i>parent</i>, and the item options by <i>option</i>.</p>
 <p>The base implementation returns 0. If you want custom editing you will need to reimplement this function.</p>
-<p>The returned editor widget should have <a href="qt.html#FocusPolicy-enum">Qt::StrongFocus</a>; otherwise, <a href="qmouseevent.html">QMouseEvent</a>s received by the widget will propagate to the view. The view's background will shine through unless the editor paints its own background (e.g., with <a href="qwidget.html#autoFillBackground-prop">setAutoFillBackground()</a>).</p>
+<p>The returned editor widget should have <a href="qt.html#FocusPolicy-enum">Qt::StrongFocus</a>; otherwise, <a href="qmouseevent.html">QMouseEvent</a>s received by the widget will propagate to the view. The view's background will shine through unless the editor paints its own background (e.g&#x2e;, with <a href="qwidget.html#autoFillBackground-prop">setAutoFillBackground()</a>).</p>
 <p>See also <a href="qabstractitemdelegate.html#setModelData">setModelData</a>() and <a href="qabstractitemdelegate.html#setEditorData">setEditorData</a>().</p>
 <h3 class="fn"><a name="editorEvent"></a>bool QAbstractItemDelegate::editorEvent ( <a href="qevent.html">QEvent</a> * <i>event</i>, <a href="qabstractitemmodel.html">QAbstractItemModel</a> * <i>model</i>, const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Whenever an event occurs, this function is called with the <i>event</i> <i>model</i> <i>option</i> and the <i>index</i> that corresponds to the item being edited.</p>
 <p>The base implementation returns false (indicating that it has not handled the event).</p>
+<h3 class="fn"><a name="helpEvent"></a>bool QAbstractItemDelegate::helpEvent ( <a href="qhelpevent.html">QHelpEvent</a> * <i>event</i>, <a href="qabstractitemview.html">QAbstractItemView</a> * <i>view</i>, const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Whenever a help event occurs, this function is called with the <i>event</i> <i>view</i> <i>option</i> and the <i>index</i> that corresponds to the item where the event occurs.</p>
+<p>Returns true if the delegate can handle the event; otherwise returns false. A return value of true indicates that the data obtained using the index had the required role.</p>
+<p>For <a href="qevent.html#Type-enum">QEvent::ToolTip</a> and <a href="qevent.html#Type-enum">QEvent::WhatsThis</a> events that were handled successfully, the relevant popup may be shown depending on the user's system configuration.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qhelpevent.html">QHelpEvent</a>.</p>
 <h3 class="fn"><a name="paint"></a>void QAbstractItemDelegate::paint ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This pure abstract function must be reimplemented if you want to provide custom rendering. Use the <i>painter</i> and style <i>option</i> to render the item specified by the item <i>index</i>.</p>
 <p>If you reimplement this you must also reimplement <a href="qabstractitemdelegate.html#sizeHint">sizeHint</a>().</p>
@@ -129,6 +143,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,7 +24,7 @@
 #include <QAbstractItemModel>
 #include <QDebug>
 #include "qtopiaapplication.h"
-
+#include <qpixmapcache.h>
 
 class QPimDelegateData
 {
@@ -40,20 +40,20 @@ public:
   \module qpepim
   \ingroup pim
   \brief The QPimDelegate class provides an abstract delegate for
-         rendering multiple lines of text.
+         rendering multiple lines of text for a PIM record.
 
-  QPimDelegate draws an item with the following features:
+  QPimDelegate draws an item with the following features.
   \list
-  \o a background
-  \o an optional number of decorations
-  \o a main line of text, displayed in bold at the top
-  \o a variable number of subsidiary lines of text, each consisting of a
+  \o A background.
+  \o An optional number of decorations.
+  \o A main line of text, displayed in bold at the top.
+  \o A variable number of subsidiary lines of text, each consisting of a
     'header' string rendered in bold, and a 'value' string rendered in a
     normal weight font.  The subsidiary lines of text are rendered slightly
-    smaller than the main line of text.  Each sub line can be rendered
+    smaller than the main line of text.  Each subsidiary line can be rendered
     independently, or all subsidiary lines in a given item can have the header
     and value strings lined up consistently.
-  \o an optional foreground
+  \o An optional foreground.
   \endlist
 
   All text lines will be elided if they are too wide.
@@ -61,11 +61,11 @@ public:
   Much like QAbstractItemDelegate, this class is not intended to be used
   directly.  Subclasses are expected to override some or all of the
   customization functions providing the above pieces of information
-  or styling settings.
+  or style settings.
 
   \image qpimdelegate-subtexts.png "Sample image of QPimDelegate"
 
-  \sa QAbstractItemDelegate, QContactDelegate, QPimRecord
+  \sa QAbstractItemDelegate, QContactDelegate, QPimRecord, {Pim Library}
 */
 
 /*!
@@ -78,7 +78,7 @@ QPimDelegate::QPimDelegate(QObject *parent)
 }
 
 /*!
- Destroys a QPimDelegate.
+ Destroys a \c QPimDelegate.
 */
 QPimDelegate::~QPimDelegate()
 {
@@ -87,7 +87,7 @@ QPimDelegate::~QPimDelegate()
 
 /*!
   Returns the string to be displayed as the main text element of the
-  delegate.  The default implementation returns the DisplayRole of the
+  delegate.  The default implementation returns the \c DisplayRole of the
   supplied \a index, and ignores \a option.
 */
 QString QPimDelegate::mainText(const QStyleOptionViewItem &option,
@@ -99,12 +99,10 @@ QString QPimDelegate::mainText(const QStyleOptionViewItem &option,
 }
 
 /*!
-  Given the size hint for the rendered text, return the size hint
-  for the entire delegate, based on how any decorations are rendered.
-  For example, if decorations are rendered on the left or right of the
-  text, the given \a textSizeHint should be expanded horizontally by the
-  width of any decorations, and the height should be expanded (if
-  necessary) to the height of any decorations.
+  Returns the size hint for the whole delegate, which will include the
+  space required for decorations, if any. The returned value is calculated
+  by adding any space required for decorations to the given \a textSizeHint
+  parameter.
 
   The default implementation returns the supplied \a textSizeHint, and
   ignores the supplied \a index and \a option parameters.
@@ -127,12 +125,12 @@ QSize QPimDelegate::decorationsSizeHint(
 
   The default implementation obtains the actual list of subsidiary
   lines of text to render with the supplied \a option and \a index,
-  (\l {QPimDelegate::}{subTexts()}) and returns the size of this list.
+  and returns the size of this list.
 
-  Override this if it can be slow to retrieve the actual list of
-  subsidiary lines, but fast to estimate the number (for example,
+  This method should be overridden if it can be slow to retrieve the list of
+  subsidiary lines but fast to estimate the number of lines, for example,
   if all items are rendered with two subsidiary lines of text, but
-  each subsidiary line of text requires a database lookup).
+  each subsidiary line of text requires a database lookup.
 
   \sa subTexts()
  */
@@ -144,9 +142,9 @@ int QPimDelegate::subTextsCountHint(
 
 /*!
   Returns the list of subsidiary lines to render.  This is
-  stored in a list of pairs of strings, with the first member
-  of the pair being the "header" string, and the second member
-  of the pair being the "value" string.
+  stored in a list of pairs of strings, where the first member
+  of the pair is the "header" string, and the second member
+  of the pair is the "value" string.
 
   If either member of the pair is a null QString (\c QString()),
   then the subsidiary line is considered to consist of a single
@@ -189,10 +187,12 @@ QList<StringPair> QPimDelegate::subTexts(
  */
 
 /*!
-  Returns the way that the background of this item should be rendered.
+  Returns a value that indicates how the background of this item should be rendered.
 
   The default implementation returns QPimDelegate::SelectedOnly, and
   ignores the supplied \a index and \a option parameters.
+
+  \sa drawBackground()
  */
 QPimDelegate::BackgroundStyle QPimDelegate::backgroundStyle(
         const QStyleOptionViewItem &option, const QModelIndex& index) const
@@ -241,15 +241,14 @@ QPimDelegate::SubTextAlignment QPimDelegate::subTextAlignment(
 }
 
 /*!
-  Paints any decorations, and return (by reference) two lists of rectangles
-  used to align the painted text.  The \a rtl argument is a convenience
-  parameter that is true if the decorations should be painted in a
-  right-to-left manner, or false if they should be painted in a left-to right
-  manner.  This may affect which side of the rectangle a decoration should
-  be painted on.
+  Paints any decorations, and assigns to the given lists of rectangles, which
+  the caller can then use to align painted text, if required. The \a rtl argument
+  is a convenience parameter that is true if the decorations should be painted
+  right-to-left, or false if they should be painted left-to-right.
+  This may affect which side of the rectangle a decoration is painted on.
 
   The rectangle to paint in (using \a p) should be obtained from
-  \a option (\a {option}.rect), and the \a index of the item to paint.
+  \a option (\a {option}.rect) and the \a index of the item to paint.
 
   This function should return (in the \a leadingFloats and \a trailingFloats
   parameters) lists of rectangles that the rendered text will be wrapped
@@ -277,10 +276,14 @@ void QPimDelegate::drawDecorations(QPainter* p, bool rtl, const QStyleOptionView
 }
 
 /*!
-  Given the list of left (\a leftFloats) and right (\a rightFloats) decoration
-  rectangles, and the \a entireRect rectangle describing the entire area, and
-  the \a top pixel coordinate of a line of text, and the \a height of a line of
-  text, return the rectangle that that line of text should be rendered in.
+  Returns the rectangle that a line of text should be rendered in, given the following parameters.
+  \list
+  \o \a top - The top pixel coordinate of a line of text.
+  \o \a height - The height of a line of text, in pixels.
+  \o \a entireRect - The area of the entire delegate.
+  \o \a leftFloats - The areas for any decorations at the left of the delegate.
+  \o \a rightFloats - The areas for any decorations at the right of the delegate.
+  \endlist
 
   Note that the \l {QPimDelegate::}{drawDecorations()} function returns lists of
   rectangles that are RTL independent (e.g. leading and trailing instead of
@@ -288,8 +291,7 @@ void QPimDelegate::drawDecorations(QPainter* p, bool rtl, const QStyleOptionView
   absolute terms (left and right) - for an LTR language, they are equivalent, but
   for an RTL language the two lists will be exchanged.
 
-  This function is used while rendering each line of text in the item (both
-  the main line and any subsidiary lines).
+  This function is used while rendering each line of text, including any subsidiary lines.
 
   \sa drawDecorations()
  */
@@ -315,7 +317,7 @@ QRect QPimDelegate::textRectangle(const QRect& entireRect,
   Paints the background of the item.
 
   The rectangle to paint in (using \a p) should be obtained from
-  \a option (\a {option}.rect), and the \a index of the item to paint.
+  \a option (\a {option}.rect) and the \a index of the item to paint.
 
   The default implementation fetches the background style to paint
   by calling \l {QPimDelegate::}{backgroundStyle()} for the given
@@ -334,22 +336,53 @@ void QPimDelegate::drawBackground(QPainter *p,
     bool selected = (option.state & QStyle::State_Selected) == QStyle::State_Selected;
     QBrush baseBrush = selected ? option.palette.highlight() : option.palette.base();
 
-    if (style == Gradient) {
+    if (selected) {
+        QPalette::ColorGroup cg = option.state & QStyle::State_Enabled
+            ? QPalette::Normal : QPalette::Disabled;
 
-        QLinearGradient bgg(0, option.rect.top(), 0, option.rect.bottom());
+        QString key = QLatin1String("_QPIMD_");
+        key += QString::number(option.rect.width());
+        key += QString::number(option.rect.height());
+        key += QString::number(int(option.palette.color(cg, QPalette::Highlight).rgba()));
+
+        QPixmap pm;
+        if (!QPixmapCache::find(key, pm)) {
+            QSize size = option.rect.size();
+            QImage img(size, QImage::Format_ARGB32_Premultiplied);
+            img.fill(0x00000000);
+            QPainter pp(&img);
+            pp.setRenderHint(QPainter::Antialiasing);
+            QColor color = option.palette.color(cg, QPalette::Highlight);
+            pp.setPen(color);
+
+            QLinearGradient bgg(QPoint(0,0), QPoint(0, size.height()));
 #if QT_VERSION >= 0x040300
-        bgg.setColorAt(0.05f, baseBrush.color().lighter(120));  /* light still works, but is obsolete */
-        bgg.setColorAt(0.8f, baseBrush.color().darker(200));
+            bgg.setColorAt(0.0f, color.lighter(175));
+            bgg.setColorAt(0.49f, color.lighter(105));
 #else
-        bgg.setColorAt(0.05f, baseBrush.color().light(120));
-        bgg.setColorAt(0.8f, baseBrush.color().dark(200));
+            bgg.setColorAt(0.0f, color.light(175));
+            bgg.setColorAt(0.49f, color.light(105));
 #endif
-        p->setPen(Qt::NoPen);
-
-        p->fillRect(option.rect, bgg);
+            bgg.setColorAt(0.5f, color);
+            pp.setBrush(bgg);
+            pp.drawRoundRect(QRect(QPoint(0,0),size), 800/size.width(),800/size.height());
+            pm = QPixmap::fromImage(img);
+            QPixmapCache::insert(key, pm);
+        }
+        p->drawPixmap(option.rect.topLeft(), pm);
     } else {
-        if (selected)
-            p->fillRect(option.rect, baseBrush);
+        if (selected && !option.rect.isEmpty()) {
+            QPainter::RenderHints rh = p->renderHints();
+            p->setRenderHint(QPainter::Antialiasing);
+            QColor color = option.palette.color(QPalette::Highlight);
+            p->setPen(color);
+            p->setBrush(baseBrush);
+            int adj = p->pen().width();
+            QRect rr = option.rect.adjusted(adj/2, adj/2, -(adj - (adj/2)), -(adj - (adj/2)));
+            if (!rr.isEmpty())
+                p->drawRoundRect(rr, 800/rr.width(),800/rr.height());
+            p->setRenderHints(rh);
+        }
     }
 }
 
@@ -357,7 +390,7 @@ void QPimDelegate::drawBackground(QPainter *p,
   Paints the foreground of the item.
 
   The rectangle to paint in (using \a p) should be obtained from
-  \a option (\a {option}.rect), and the \a index of the item to paint.
+  \a option (\a {option}.rect) and the \a index of the item to paint.
 
   This function is called after painting all other visual elements
   (background, decorations, text etc) and could be used to apply a
@@ -379,24 +412,9 @@ void QPimDelegate::drawForeground(QPainter *p,
   Paints the item specified by \a index, using the supplied \a painter and
   style option \a option.
 
-  The default implementation will first draw the background and decorations
-  (\l {QPimDelegate::}{drawBackground()},
-  \l {QPimDelegate::}{drawDecorations()}).  Then, the main text string
-  is painted (using the font from \l {QPimDelegate::}{mainFont()}), and any
-  subsidiary lines are painted (using the fonts from
-  \l {QPimDelegate::}{secondaryFont()},
-  and \l {QPimDelegate::}{secondaryHeaderFont()})
-  according the the alignment given by \l {QPimDelegate::}{subTextAlignment()}.
-  Finally, any foreground items will be drawn by
-  \l {QPimDelegate::}{drawForeground()}.
-
-  The bounding rectangle used for drawing each line of text is returned by
-  \l {QPimDelegate::}{textRectangle()}.
-
-  The entire text region will be drawn vertically centered if there is only a
-  small amount of left over space (less than the line spacing of the main
-  font).  Otherwise, the text region will be drawn vertically aligned to the
-  top of the item.
+  The default implementation will first draw the background and decorations,
+  then the text items, and finally, any foreground items. All the
+  drawing is accomplished using basic methods in this class.
 
   \sa drawBackground(), drawDecorations(), mainFont(),
       secondaryFont(), secondaryHeaderFont(),
@@ -415,6 +433,9 @@ void QPimDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     bool sel = (option.state & QStyle::State_Selected)==QStyle::State_Selected;
     QBrush baseBrush = sel ? option.palette.highlight() : option.palette.base();
     QBrush textBrush = sel ? option.palette.highlightedText() : option.palette.text();
+
+    // Clip
+    painter->setClipRect(option.rect);
 
     // Draw the background and icons first
     QList<QRect> leftFloats;
@@ -521,11 +542,11 @@ void QPimDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 }
 
 /*!
-  Returns the font to use for painting the main label text of the item,
+  Returns the font to use for painting the main label text of the item
   for the given \a index and style option \a option.
 
-  By default returns a bold version of the font of the style option
-  \a option and ignores \a index.
+  The default behavior is to return the font of the style option
+  \a option, modified for bold rendering, and to ignore \a index.
  */
 QFont QPimDelegate::mainFont(const QStyleOptionViewItem &option, const QModelIndex& index) const
 {
@@ -541,14 +562,17 @@ QFont QPimDelegate::mainFont(const QStyleOptionViewItem &option, const QModelInd
   Returns the font to use for painting the subsidiary header texts of the item,
   for the given \a index and style option \a option.
 
-  By default returns an at least two point size smaller and bold version
-  of the font of the style option \a option and ignores the supplied \a index.
+  The default return value is a bold font that is at least two point sizes smaller
+  than the font of the style option \a option. The supplied \a index is ignored
+  in this case.
+
+  \sa mainFont(), secondaryFont()
  */
 QFont QPimDelegate::secondaryHeaderFont(const QStyleOptionViewItem &option, const QModelIndex& index) const
 {
     Q_UNUSED(index);
 
-    QFont fsubheader = differentFont(option.font, -2);
+    QFont fsubheader = differentFont(option.font, -1);
     fsubheader.setWeight(QFont::Bold);
 
     return fsubheader;
@@ -558,20 +582,22 @@ QFont QPimDelegate::secondaryHeaderFont(const QStyleOptionViewItem &option, cons
   Returns the font to use for painting the subsidiary value texts of the item,
   for the given \a index and style option \a option.
 
-  By default returns an at least two point sizes smaller version of the
-  font of the style option \a option and ignores the supplied \a index.
+  The default return value is a font that is at least two point sizes smaller
+  than the font of the style option \a option. The supplied \a index is ignored
+  in this case.
+
+  \sa mainFont(), secondaryHeaderFont()
  */
 QFont QPimDelegate::secondaryFont(const QStyleOptionViewItem &option, const QModelIndex& index) const
 {
     Q_UNUSED(index);
 
-    return differentFont(option.font, -2);
+    return differentFont(option.font, -1);
 }
 
 /*!
-  Given a starting font \a start, and a point size difference \a step,
-  attempt to return a font that is similar to \a start except different
-  in size by approximately \a step.  If no matching font for a given
+  Attempts to return a font that is similar to \a start but has the
+  given size difference of \a step. If no matching font for the given
   \a step value is found, it will try increasingly larger/smaller fonts
   (depending on whether \a step was originally positive or negative).  If
   no suitable font is found after trying different sizes, the original font
@@ -596,17 +622,7 @@ QFont QPimDelegate::differentFont(const QFont& start, int step) const
 }
 
 /*!
-  Calculate the size hint for a specific index \a index and item style \a option.
-
-  The text size hint is calculated from several pieces of information:
-  \list
-  \o the line spacing of the main font and the sub header fonts
-  \o the number of subsidiary lines of text
-  \endlist
-
-  The text size hint is then passed to \l {QPimDelegate::}{decorationsSizeHint()}, which
-  can modify the text hint as appropriate for the decorations drawn (taking into account
-  whether the decoration will be beside or on top of the text, etc).
+  Returns the delegate's size hint for a specific index \a index and item style \a option.
 
   \sa decorationsSizeHint()
  */

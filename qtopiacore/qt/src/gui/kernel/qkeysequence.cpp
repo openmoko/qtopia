@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -283,7 +298,7 @@ void Q_GUI_EXPORT qt_set_sequence_auto_mnemonic(bool b) { qt_sequence_no_mnemoni
 
     \value NativeText The key sequence as a platform specific string.
     This means that it will be shown translated and on the Mac it will
-    resemble a keysequence from the menu bar. This enum is best used when you
+    resemble a key sequence from the menu bar. This enum is best used when you
     want to display the string to the user.
 
     \value PortableText The key sequence is given in a "portable" format,
@@ -935,7 +950,7 @@ int QKeySequencePrivate::decodeString(const QString &str, QKeySequence::Sequence
 #else
     int i = 0;
     int lastI = 0;
-    while ((i = sl.indexOf('+', i + 1)) != -1) {
+    while ((i = sl.indexOf(QLatin1Char('+'), i + 1)) != -1) {
         const QString sub = sl.mid(lastI, i - lastI + 1);
         // Just shortcut the check here if we only have one character.
         // Rational: A modifier will contain the name AND +, so longer than 1, a length of 1 is just
@@ -1001,7 +1016,7 @@ static inline void addKey(QString &str, const QString &theKey, QKeySequence::Seq
 {
     if (!str.isEmpty())
         str += (format == QKeySequence::NativeText) ? QShortcut::tr("+")
-                                                    : QString(QLatin1String("+"));
+                                                    : QString::fromLatin1("+");
     str += theKey;
 }
 
@@ -1025,13 +1040,13 @@ QString QKeySequencePrivate::encodeString(int key, QKeySequence::SequenceFormat 
     {
         // On other systems the order is Meta, Control, Alt, Shift
         if ((key & Qt::META) == Qt::META)
-            s = nativeText ? QShortcut::tr("Meta") : QString(QLatin1String("Meta"));
+            s = nativeText ? QShortcut::tr("Meta") : QString::fromLatin1("Meta");
         if ((key & Qt::CTRL) == Qt::CTRL)
-            addKey(s, nativeText ? QShortcut::tr("Ctrl") : QString(QLatin1String("Ctrl")), format);
+            addKey(s, nativeText ? QShortcut::tr("Ctrl") : QString::fromLatin1("Ctrl"), format);
         if ((key & Qt::ALT) == Qt::ALT)
-            addKey(s, nativeText ? QShortcut::tr("Alt") : QString(QLatin1String("Alt")), format);
+            addKey(s, nativeText ? QShortcut::tr("Alt") : QString::fromLatin1("Alt"), format);
         if ((key & Qt::SHIFT) == Qt::SHIFT)
-            addKey(s, nativeText ? QShortcut::tr("Shift") : QString(QLatin1String("Shift")), format);
+            addKey(s, nativeText ? QShortcut::tr("Shift") : QString::fromLatin1("Shift"), format);
     }
 
 
@@ -1047,13 +1062,13 @@ QString QKeySequencePrivate::encodeString(int key, QKeySequence::SequenceFormat 
         }
     } else if (key >= Qt::Key_F1 && key <= Qt::Key_F35) {
             p = nativeText ? QShortcut::tr("F%1").arg(key - Qt::Key_F1 + 1)
-                           : QString(QLatin1String("F%1")).arg(key - Qt::Key_F1 + 1);
+                           : QString::fromLatin1("F%1").arg(key - Qt::Key_F1 + 1);
     } else if (key) {
         int i=0;
         while (keyname[i].name) {
             if (key == keyname[i].key) {
                 p = nativeText ? QShortcut::tr(keyname[i].name)
-                               : QString(QLatin1String(keyname[i].name));
+                               : QString::fromLatin1(keyname[i].name);
                 break;
             }
             ++i;
@@ -1111,7 +1126,11 @@ QKeySequence::SequenceMatch QKeySequence::matches(const QKeySequence &seq) const
 /*!
     \obsolete
 
-    Use toString() instead.
+    Use toString() instead. 
+    
+    Returns the key sequence as a QString. This is equivalent to 
+    calling toString(QKeySequence::NativeText). Note that the
+    result is not platform independent.
 */
 QKeySequence::operator QString() const
 {
@@ -1251,7 +1270,7 @@ bool QKeySequence::isDetached() const
     If the key sequence has no keys, an empty string is returned.
 
     On Mac OS X, the string returned resembles the sequence that is
-    shown in the menubar.
+    shown in the menu bar.
 
     \sa fromString()
 */
@@ -1348,3 +1367,14 @@ QDebug operator<<(QDebug dbg, const QKeySequence &p)
 #endif
 
 #endif // QT_NO_SHORTCUT
+
+
+/*!
+    \typedef QKeySequence::DataPtr
+    \internal
+*/
+
+ /*!
+    \fn DataPtr &QKeySequence::data_ptr()
+    \internal
+*/

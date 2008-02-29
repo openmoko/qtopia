@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -325,15 +325,6 @@ QUuid QUniqueId::temporaryIdContext()
     return QUuid("f3ed326a-f37a-4aa0-bad3-f7968e9ecd60");
 }
 
-/*
-  \obsolete
-  Replaced by QUniqueIdGenerator::createTemporaryId().
-*/
-QUniqueId QUniqueId::constructApplicationLocalUniqueId()
-{
-    return QUniqueIdGenerator::createTemporaryId();
-}
-
 /*!
   \class QUniqueIdGenerator
   \mainclass
@@ -447,16 +438,6 @@ QUniqueId QUniqueIdGenerator::constructTemporaryId(uint index)
     id.setIdentity(context, index);
     return id;
 }
-
-/*!
-  \obsolete
-  Replaced by constructTemporaryId().
-*/
-QUniqueId QUniqueIdGenerator::temporaryID(uint index)
-{
-    return constructTemporaryId(index);
-}
-
 
 
 /*!

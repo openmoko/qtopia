@@ -1,30 +1,26 @@
-<page name="home" base="themes/smart">
+<?xml version="1.0"?>
+<page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="home" base="themes/smart">
   <group name="background">
     <image name="background" rect="0,0,0,0" src="background" color="Highlight" tile="yes"/>
     <plugin name="bgplugin"/>
   </group>
-  <rect rect="0,9.5%,0x12pt">
-    <text name="profile" size="6" bold="yes" rect="0,0,0x12pt" color="#000000" align="right,vcenter" outline="#eeeeee" transient="yes" active="expr:!@/UI/Profile/Default">
-      expr:@/UI/Profile/Name . " "
-    </text>
-    </rect>
-    <line rect="0,10%,0x1" color="Text"/>
     <text name="datetime" rect="0,11%,0x9pt" align="hcenter,vcenter" short ="yes" size="7" bold="yes" outline="#eeeeee">
         expr:@/UI/DisplayTime/Date . "  " . @/UI/DisplayTime/Time
     </text>
-    <line rect="0,18%,0x1" color="Text"/>
     <widget name="LauncherHSWidget" rect="0%,18%,100%x15%" interactive="yes"/>
-    <line rect="0,32%,0x1" color="Text"/>
     <widget name="AppointmentsHSWidget"/>
-    <text name="appointmenttitle" rect="0,33%,0x8pt" bold="yes" color="Text" size="7" align="center,vcenter" elided="right">
+    <text name="appointmenttitle" rect="0,33%,0x8pt" bold="yes" color="Text" outline="#eeeeee" size="7" align="center,vcenter" elided="right">
         expr: @/PIM/Appointments/Next/title
     </text>
-    <text name="appointmenttitle" rect="0,40%,0x8pt" bold="yes" color="Text" size="7" align="center,vcenter" elided="right" transient="yes"  active="expr:!@/PIM/Appointments/Next/none">
+    <text name="appointmenttitle" rect="0,40%,0x8pt" bold="yes" color="Text" outline="#eeeeee" size="7" align="center,vcenter" elided="right" transient="yes"  active="expr:!@/PIM/Appointments/Next/none">
         expr: @/PIM/Appointments/Next/location . ", " . @/PIM/Appointments/Next/time
     </text>
-    <line rect="0,48%,0x1" color="Text"/>
     <widget name="WorldmapHSWidget" rect="5%,49%,90%x25%" interactive="yes" />
-    <line rect="0,75%,0x1" color="Text" />
+    <layout rect="0,81%,0x9pt" align="hcenter">
+      <text name="profile" rect="0,0,0x0" align="hcenter" transient="yes" short ="yes" size="6" bold="yes" outline="#eeeeee" active="expr:!@/UI/Profile/Default">
+        expr:@/UI/Profile/Name
+      </text>
+    </layout>
     <rect name="infobox" rect="5%,50%,90%x20%" color="#eeeeee" brush="#eeeeee" alpha="150" transient="yes" active="no">
       <image name="infobox" rect="0,0,40x100%"/>
       <text name="infobox" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter"/>

@@ -3,9 +3,10 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt Linguist Manual: Programmers</title>
+  <title>Qt 4.3: Qt Linguist Manual: Programmers</title>
   <link rel="prev" href="linguist-translators.html" />
   <link rel="contents" href="linguist-manual.html" />
+  <link rel="next" href="linguist-ts-file-format.html" />
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -16,8 +17,10 @@
 <td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><p>
 [Previous: <a href="linguist-translators.html">Qt Linguist Manual: Translators</a>]
 [<a href="linguist-manual.html">Contents</a>]
+[Next: <a href="linguist-ts-file-format.html">Qt Linguist Manual: TS File Format</a>]
 </p>
-<h1 align="center">Qt Linguist Manual: Programmers<br /><small></small></h1>
+<h1 align="center">Qt Linguist Manual: Programmers<br /><span class="subtitle"></span>
+</h1>
 <p>Support for multiple languages is extremely simple in Qt applications, and adds little overhead to the programmer's workload.</p>
 <p>Qt minimizes the performance cost of using translations by translating the phrases for each window as they are created. In most applications the main window is created just once. Dialogs are often created once and then shown and hidden as required. Once the initial translation has taken place there is no further runtime overhead for the translated windows. Only those windows that are created, destroyed and subsequently created will have a translation performance cost.</p>
 <p>Creating applications that can switch language at runtime is possible with Qt, but requires a certain amount of programmer intervention and will of course incur some runtime performance cost.</p>
@@ -61,8 +64,9 @@
      QTranslator translator;
      translator.load(QString(&quot;arrowpad_&quot;) + locale);
      app.installTranslator(&amp;translator);</pre>
-<p>In production applications a more flexible approach, for example, loading translations according to locale, might be more appropriate. If the <tt>.ts</tt> files are all named according to a convention such as <i>appname_locale</i>, e.g. <tt>tt2_fr</tt>, <tt>tt2_de</tt> etc, then the code above will load the current locale's translation at runtime.</p>
+<p>In production applications a more flexible approach, for example, loading translations according to locale, might be more appropriate. If the <tt>.ts</tt> files are all named according to a convention such as <i>appname_locale</i>, e.g&#x2e; <tt>tt2_fr</tt>, <tt>tt2_de</tt> etc, then the code above will load the current locale's translation at runtime.</p>
 <p>If there is no translation file for the current locale the application will fall back to using the original source text.</p>
+<p>Note that if you need to programmatically add translations at runtime, you can reimplement <a href="qtranslator.html#translate">QTranslator::translate</a>().</p>
 <a name="making-the-application-translate-user-visible-strings"></a>
 <h3>Making the Application Translate User-Visible Strings</h3>
 <p>User-visible strings are marked as translation targets by wrapping them in a <tt>tr()</tt> call, for example:</p>
@@ -76,7 +80,7 @@
 <pre>     QObject::tr(&quot;&amp;Quit&quot;)</pre>
 <a name="distinguishing-identical-strings-that-require-different-translations"></a>
 <h3>Distinguishing Identical Strings That Require Different Translations</h3>
-<p>The <a href="linguist-manager.html#lupdate">lupdate</a> program automatically provides a <i>context</i> for every source text. This context is the class name of the class that contains the <tt>tr()</tt> call. This is sufficient in the vast majority of cases. Sometimes however, the translator will need further information to uniquely identify a source text; for example, a dialog that contained two separate frames, each of which contained an &quot;Enabled&quot; option would need each identified because in some languages the translation would differ between the two. This is easily achieved using the two argument form of the <tt>tr()</tt> call, e.g.</p>
+<p>The <a href="linguist-manager.html#lupdate">lupdate</a> program automatically provides a <i>context</i> for every source text. This context is the class name of the class that contains the <tt>tr()</tt> call. This is sufficient in the vast majority of cases. Sometimes however, the translator will need further information to uniquely identify a source text; for example, a dialog that contained two separate frames, each of which contained an &quot;Enabled&quot; option would need each identified because in some languages the translation would differ between the two. This is easily achieved using the two argument form of the <tt>tr()</tt> call, e.g&#x2e;</p>
 <pre>    rbc = new QRadioButton(tr(&quot;Enabled&quot;, &quot;Color frame&quot;), this);</pre>
 <p>and</p>
 <pre>    rbh = new QRadioButton(tr(&quot;Enabled&quot;, &quot;Hue frame&quot;), this);</pre>
@@ -86,7 +90,7 @@
 <p>It is strongly recommended that the two argument form of <tt>tr()</tt> is used for Ctrl key accelerators. The second argument is the only clue the translator has as to the function performed by the accelerator.</p>
 <a name="helping-the-translator-with-navigation-information"></a>
 <h3>Helping the Translator with Navigation Information</h3>
-<p>In large complex applications it may be difficult for the translator to see where a particular source text comes from. This problem can be solved by adding a comment using the keyword <i>TRANSLATOR</i> which describes the navigation steps to reach the text in question; e.g.</p>
+<p>In large complex applications it may be difficult for the translator to see where a particular source text comes from. This problem can be solved by adding a comment using the keyword <i>TRANSLATOR</i> which describes the navigation steps to reach the text in question; e.g&#x2e;</p>
 <pre> /*
      TRANSLATOR FindDialog
 
@@ -165,11 +169,12 @@
 <p>
 [Previous: <a href="linguist-translators.html">Qt Linguist Manual: Translators</a>]
 [<a href="linguist-manual.html">Contents</a>]
+[Next: <a href="linguist-ts-file-format.html">Qt Linguist Manual: TS File Format</a>]
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

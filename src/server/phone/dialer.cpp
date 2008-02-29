@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,7 +36,7 @@
 
 #include <qtopia/pim/qcontactview.h>
 #include "phonelauncher.h"
-#include "homescreen.h"
+#include "homescreencontrol.h"
 #include "savetocontacts.h"
 #include "themecontrol.h"
 #include <QDebug>
@@ -80,6 +80,7 @@ signals:
     void dial(const QString&, const QUniqueId&);
     void closeMe();
     void keyEntered(const QString&);
+    void filterSelect(const QString&, bool&);
 
 protected slots:
     virtual void dialerItemClicked( ThemeItem *item );
@@ -124,7 +125,7 @@ DialerLineEdit::DialerLineEdit( QWidget *parent )
     f.setBold( true );
     setFont( f );
 
-    connect( this, SIGNAL(textChanged(const QString&)), this, SLOT(updateIcons()) );
+    connect( this, SIGNAL(textChanged(QString)), this, SLOT(updateIcons()) );
     updateIcons();
     QtopiaApplication::setInputMethodHint( this, QtopiaApplication::AlwaysOff );
 }
@@ -149,7 +150,6 @@ void DialerLineEdit::keyPressEvent( QKeyEvent *e )
 {
     switch( e->key() )
     {
-#ifdef QTOPIA_PHONE
         case Qt::Key_Hangup:
         case Qt::Key_No:
         case Qt::Key_Flip:
@@ -182,7 +182,6 @@ void DialerLineEdit::keyPressEvent( QKeyEvent *e )
             e->accept();
             break;
         }
-#endif
         default:
             QLineEdit::keyPressEvent( e );
             //let unhandled keys fall through to parent widget
@@ -212,7 +211,7 @@ Dialer::Dialer( QWidget *parent, Qt::WFlags f )
     ThemeControl::instance()->registerThemedView(this, "Dialer");
 
     QtopiaChannel* channel = new QtopiaChannel( "Qtopia/Phone/TouchscreenDialer", this );
-    connect( channel, SIGNAL(received(const QString&, const QByteArray&)), this, SLOT(msgReceived(const QString&,const QByteArray&)) );
+    connect( channel, SIGNAL(received(QString,QByteArray)), this, SLOT(msgReceived(QString,QByteArray)) );
 }
 
 Dialer::~Dialer()
@@ -295,8 +294,8 @@ void Dialer::themeLoaded( const QString & )
         display = qobject_cast<DialerLineEdit *>(i->widget());
     }
 
-    connect( display, SIGNAL(textChanged(const QString&)), this, SLOT(updateIcons(const QString&)) );
-    connect( display, SIGNAL(textChanged(const QString&)), this, SIGNAL(keyEntered(const QString&)) );
+    connect( display, SIGNAL(textChanged(QString)), this, SLOT(updateIcons(QString)) );
+    connect( display, SIGNAL(textChanged(QString)), this, SIGNAL(keyEntered(QString)) );
     display->setFocus();
     display->setFocusPolicy(Qt::StrongFocus);
     setFocusPolicy(Qt::NoFocus);
@@ -334,9 +333,9 @@ void Dialer::themeLoaded( const QString & )
     }
     if( actionCount > 0 )
     {
-        QMenu *menu = QSoftMenuBar::menuFor( display );
-        menu->clear();
+        QMenu *menu = new QMenu(this);
         menu->addActions(m_actions->actions());
+        QSoftMenuBar::addMenuTo(display, menu);
     }
     else
     {
@@ -344,7 +343,7 @@ void Dialer::themeLoaded( const QString & )
         m_actions = 0;
     }
 
-    connect( display, SIGNAL(numberSelected(const QString&)), this, SLOT(numberSelected(const QString&)) );
+    connect( display, SIGNAL(numberSelected(QString)), this, SLOT(numberSelected(QString)) );
     connect( display, SIGNAL(hangupActivated()), this, SIGNAL(closeMe()) );
 }
 
@@ -366,6 +365,7 @@ void Dialer::selectContact()
 {
     QContactSelector contactSelector( false, this );
     contactSelector.setModel(ServerContactModel::instance());
+    contactSelector.showMaximized();
     if( QtopiaApplication::execDialog( &contactSelector ) && contactSelector.contactSelected() )
     {
         QContact cnt = contactSelector.selectedContact();
@@ -378,7 +378,7 @@ void Dialer::selectContact()
 
 void Dialer::selectCallHistory()
 {
-    HomeScreen::getInstancePtr()->showCallHistory(false, display ? display->text() : QString());
+    HomeScreenControl::instance()->homeScreen()->showCallHistory(false, display ? display->text() : QString());
 }
 
 void Dialer::sms()
@@ -395,8 +395,13 @@ void Dialer::numberSelected()
 
 void Dialer::numberSelected( const QString &number )
 {
-    if( !number.isEmpty() )
-        emit dial( number, QUniqueId() );
+    // Filter for special GSM key sequences.
+    if (!number.isEmpty()) {
+        bool filtered = false;
+        emit filterSelect( number, filtered );
+        if (!filtered)
+            emit dial(number, QUniqueId());
+    }
     closeMe();
 }
 
@@ -482,6 +487,7 @@ QMenu *Dialer::characterMenu()
   \brief The PhoneTouchDialerScreen class implements a touchscreen dialer.
   
   This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+  It is part of the Qtopia server and cannot be used by other Qtopia applications.
 
   \sa QAbstractServerInterface, QAbstractDialerScreen
  */
@@ -503,11 +509,13 @@ PhoneTouchDialerScreen::PhoneTouchDialerScreen(QWidget *parent, Qt::WFlags flags
     layout->addWidget(m_dialer);
 
     QObject::connect(m_dialer,
-                     SIGNAL(dial(const QString&, const QUniqueId&)),
+                     SIGNAL(dial(QString,QUniqueId)),
                      this,
-                     SIGNAL(requestDial(const QString &, const QUniqueId &)));
+                     SIGNAL(requestDial(QString,QUniqueId)));
     QObject::connect(m_dialer, SIGNAL(closeMe()), this, SLOT(close()));
-    QObject::connect(m_dialer, SIGNAL(keyEntered(const QString&)), this, SLOT(keyEntered(const QString&)));
+    QObject::connect(m_dialer, SIGNAL(keyEntered(QString)), this, SLOT(keyEntered(QString)));
+    QObject::connect(m_dialer, SIGNAL(filterSelect(QString,bool&)),
+                     this, SIGNAL(filterSelect(QString,bool&)));
 }
 
 /*! \reimp */

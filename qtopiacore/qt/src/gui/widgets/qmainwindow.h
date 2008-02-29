@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -43,14 +58,29 @@ class Q_GUI_EXPORT QMainWindow : public QWidget
 {
     Q_OBJECT
 
+    Q_ENUMS(DockOption)
+    Q_FLAGS(DockOptions)
     Q_PROPERTY(QSize iconSize READ iconSize WRITE setIconSize)
     Q_PROPERTY(Qt::ToolButtonStyle toolButtonStyle READ toolButtonStyle WRITE setToolButtonStyle)
 #ifndef QT_NO_DOCKWIDGET
     Q_PROPERTY(bool animated READ isAnimated WRITE setAnimated)
     Q_PROPERTY(bool dockNestingEnabled READ isDockNestingEnabled WRITE setDockNestingEnabled)
 #endif
+    Q_PROPERTY(DockOptions dockOptions READ dockOptions WRITE setDockOptions)
+#ifndef QT_NO_TOOLBAR
+    Q_PROPERTY(bool unifiedTitleAndToolBarOnMac READ unifiedTitleAndToolBarOnMac WRITE setUnifiedTitleAndToolBarOnMac)
+#endif
 
 public:
+    enum DockOption {
+        AnimatedDocks = 0x01,
+        AllowNestedDocks = 0x02,
+        AllowTabbedDocks = 0x04,
+        ForceTabbedDocks = 0x08,  // implies AllowTabbedDocks, !AllowNestedDocks
+        VerticalTabs = 0x10       // implies AllowTabbedDocks
+    };
+    Q_DECLARE_FLAGS(DockOptions, DockOption)
+
     explicit QMainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
     ~QMainWindow();
 
@@ -62,6 +92,9 @@ public:
 
     bool isAnimated() const;
     bool isDockNestingEnabled() const;
+
+    void setDockOptions(DockOptions options);
+    DockOptions dockOptions() const;
 
     bool isSeparator(const QPoint &pos) const;
 
@@ -95,8 +128,13 @@ public:
     QToolBar *addToolBar(const QString &title);
     void insertToolBar(QToolBar *before, QToolBar *toolbar);
     void removeToolBar(QToolBar *toolbar);
+    void removeToolBarBreak(QToolBar *before);
+
+    void setUnifiedTitleAndToolBarOnMac(bool set);
+    bool unifiedTitleAndToolBarOnMac() const;
 
     Qt::ToolBarArea toolBarArea(QToolBar *toolbar) const;
+    bool toolBarBreak(QToolBar *toolbar) const;
 #endif
 #ifndef QT_NO_DOCKWIDGET
     void addDockWidget(Qt::DockWidgetArea area, QDockWidget *dockwidget);
@@ -139,6 +177,8 @@ private:
     Q_DECLARE_PRIVATE(QMainWindow)
     Q_DISABLE_COPY(QMainWindow)
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QMainWindow::DockOptions)
 
 #endif // QT_NO_MAINWINDOW
 

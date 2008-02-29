@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,6 +52,8 @@
 #include "qstyle.h"
 #include "qstyleoption.h"
 #include "qtoolbar.h"
+#include "qdebug.h"
+#include "qlayoutitem.h"
 
 #ifndef QT_NO_ACCESSIBILITY
 #include "qaccessible.h"
@@ -49,12 +66,17 @@ class QPushButtonPrivate : public QAbstractButtonPrivate
 {
     Q_DECLARE_PUBLIC(QPushButton)
 public:
-    enum AutoDefaultValue {Off = 0, On = 1, Auto = 2};
-    QPushButtonPrivate():autoDefault(Auto), defaultButton(false), flat(false), menuOpen(false){}
-    void init();
+    enum AutoDefaultValue { Off = 0, On = 1, Auto = 2 };
+
+    QPushButtonPrivate()
+        : QAbstractButtonPrivate(QSizePolicy::PushButton), autoDefault(Auto),
+          defaultButton(false), flat(false), menuOpen(false) {}
+
+    inline void init() { resetLayoutItemMargins(); }
+    void resetLayoutItemMargins();
     void _q_popupPressed();
-    QStyleOptionButton getStyleOption() const;
     QDialog *dialogParent() const;
+
     QPointer<QMenu> menu;
     uint autoDefault : 2;
     uint defaultButton : 1;
@@ -66,7 +88,7 @@ public:
     \class QPushButton qpushbutton.h
     \brief The QPushButton widget provides a command button.
 
-    \ingroup basic
+    \ingroup basicwidgets
     \mainclass
 
     The push button, or command button, is perhaps the most commonly
@@ -174,10 +196,10 @@ public:
 
 /*!
     \property QPushButton::autoDefault
-    \brief whether the push button is the auto default button
+    \brief whether the push button is an auto default button
 
-    If this property is set to true then the push button is the auto
-    default button in a dialog.
+    If this property is set to true then the push button is an auto
+    default button.
 
     In some GUI styles a default button is drawn with an extra frame
     around it, up to 3 pixels or more. Qt automatically keeps this
@@ -195,16 +217,15 @@ public:
     \property QPushButton::default
     \brief whether the push button is the default button
 
-    If this property is set to true then the push button will be
-    pressed if the user presses the Enter (or Return) key in a dialog.
+    Default and autodefault buttons decide what happens when the user
+    presses enter in a dialog.
 
-    Regardless of focus, if the user presses Enter: If there is a
-    default button the default button is pressed; otherwise, if
-    there are one or more \l autoDefault buttons the first \l autoDefault
-    button that is next in the tab order is pressed. If there are no
-    default or \l autoDefault buttons only pressing Space on a button
-    with focus, mouse clicking, or using a shortcut will press a
-    button.
+    A button with this property set to true (i.e., the dialog's
+    \e default button,) will automatically be pressed when the user presses enter,
+    with one exception: if an \a autoDefault button currently has focus, the autoDefault
+    button is pressed. When the dialog has \l autoDefault buttons but no default button,
+    pressing enter will press either the \l autoDefault button that currently has focus, or if no
+    button has focus, the next \l autoDefault button in the focus chain.
 
     In a dialog, only one push button at a time can be the default
     button. This button is then displayed with an additional frame
@@ -214,17 +235,22 @@ public:
     can always be clicked from the keyboard by pressing Spacebar when
     the button has focus.
 
+    If the default property is set to false on the current default button
+    while the dialog is visible, a new default will automatically be
+    assigned the next time a pushbutton in the dialog receives focus.
+
     This property's default is false.
 */
 
 /*!
     \property QPushButton::flat
-    \brief whether the border is disabled
+    \brief whether the button border is raised
 
-    This property's default is false.
+    This property's default is false. If this property is set, most
+    styles will not paint the button background unless the button is
+    being pressed. setAutoFillBackground() can be used to ensure that
+    the background is filled using the QPalette::Button brush.
 */
-
-
 
 /*!
     Constructs a push button with no text and a \a parent.
@@ -246,8 +272,8 @@ QPushButton::QPushButton(const QString &text, QWidget *parent)
     : QAbstractButton(*new QPushButtonPrivate, parent)
 {
     Q_D(QPushButton);
-    d->init();
     setText(text);
+    d->init();
 }
 
 
@@ -262,9 +288,9 @@ QPushButton::QPushButton(const QIcon& icon, const QString &text, QWidget *parent
     : QAbstractButton(*new QPushButtonPrivate, parent)
 {
     Q_D(QPushButton);
-    d->init();
     setText(text);
     setIcon(icon);
+    d->init();
 }
 
 
@@ -287,38 +313,40 @@ QDialog *QPushButtonPrivate::dialogParent() const
     return 0;
 }
 
-void QPushButtonPrivate::init()
-{
-    Q_Q(QPushButton);
-    q->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
-}
+/*!
+    Initialize \a option with the values from this QPushButton. This method is useful
+    for subclasses when they need a QStyleOptionButton, but don't want to fill
+    in all the information themselves.
 
-QStyleOptionButton QPushButtonPrivate::getStyleOption() const
+    \sa QStyleOption::initFrom()
+*/
+void QPushButton::initStyleOption(QStyleOptionButton *option) const
 {
-    Q_Q(const QPushButton);
-    QStyleOptionButton opt;
-    opt.init(q);
-    opt.features = QStyleOptionButton::None;
-    if (flat)
-        opt.features |= QStyleOptionButton::Flat;
+    if (!option)
+        return;
+
+    Q_D(const QPushButton);
+    option->initFrom(this);
+    option->features = QStyleOptionButton::None;
+    if (d->flat)
+        option->features |= QStyleOptionButton::Flat;
 #ifndef QT_NO_MENU
-    if (menu)
-        opt.features |= QStyleOptionButton::HasMenu;
+    if (d->menu)
+        option->features |= QStyleOptionButton::HasMenu;
 #endif
-    if (q->autoDefault() || defaultButton)
-        opt.features |= QStyleOptionButton::AutoDefaultButton;
-    if (defaultButton)
-        opt.features |= QStyleOptionButton::DefaultButton;
-    if (down || menuOpen)
-        opt.state |= QStyle::State_Sunken;
-    if (checked)
-        opt.state |= QStyle::State_On;
-    if (!flat && !down)
-        opt.state |= QStyle::State_Raised;
-    opt.text = text;
-    opt.icon = icon;
-    opt.iconSize = q->iconSize();
-    return opt;
+    if (autoDefault() || d->defaultButton)
+        option->features |= QStyleOptionButton::AutoDefaultButton;
+    if (d->defaultButton)
+        option->features |= QStyleOptionButton::DefaultButton;
+    if (d->down || d->menuOpen)
+        option->state |= QStyle::State_Sunken;
+    if (d->checked)
+        option->state |= QStyle::State_On;
+    if (!d->flat && !d->down)
+        option->state |= QStyle::State_Raised;
+    option->text = d->text;
+    option->icon = d->icon;
+    option->iconSize = iconSize();
 }
 
 void QPushButton::setAutoDefault(bool enable)
@@ -328,6 +356,7 @@ void QPushButton::setAutoDefault(bool enable)
     if (d->autoDefault != QPushButtonPrivate::Auto && d->autoDefault == state)
         return;
     d->autoDefault = state;
+    d->sizeHint = QSize();
     update();
     updateGeometry();
 }
@@ -368,11 +397,14 @@ bool QPushButton::isDefault() const
 QSize QPushButton::sizeHint() const
 {
     Q_D(const QPushButton);
+    if (d->sizeHint.isValid())
+        return d->sizeHint;
     ensurePolished();
 
     int w = 0, h = 0;
 
-    QStyleOptionButton opt = d->getStyleOption();
+    QStyleOptionButton opt;
+    initStyleOption(&opt);
 
     // calculate contents size...
 #ifndef QT_NO_ICON
@@ -397,19 +429,28 @@ QSize QPushButton::sizeHint() const
         w += sz.width();
     if(!empty || !h)
         h = qMax(h, sz.height());
-    return (style()->sizeFromContents(QStyle::CT_PushButton, &opt, QSize(w, h), this).
-            expandedTo(QApplication::globalStrut()));
+    d->sizeHint = (style()->sizeFromContents(QStyle::CT_PushButton, &opt, QSize(w, h), this).
+                  expandedTo(QApplication::globalStrut()));
+    return d->sizeHint;
 }
 
+/*!
+    \reimp
+ */
+QSize QPushButton::minimumSizeHint() const
+{
+    return sizeHint();
+}
 
 
 /*!\reimp
 */
 void QPushButton::paintEvent(QPaintEvent *)
 {
-    Q_D(QPushButton);
     QStylePainter p(this);
-    p.drawControl(QStyle::CE_PushButton, d->getStyleOption());
+    QStyleOptionButton option;
+    initStyleOption(&option);
+    p.drawControl(QStyle::CE_PushButton, option);
 }
 
 
@@ -499,6 +540,9 @@ void QPushButton::setMenu(QMenu* menu)
     d->menu = menu;
     if (d->menu)
         addAction(d->menu->menuAction());
+
+    d->resetLayoutItemMargins();
+    d->sizeHint = QSize();
     update();
     updateGeometry();
 }
@@ -542,7 +586,10 @@ void QPushButtonPrivate::_q_popupPressed()
     if (tb && tb->orientation() == Qt::Vertical)
         horizontal = false;
 #endif
-    QRect rect = q->rect();
+    QWidgetItem item(q);
+    QRect rect = item.geometry();
+    rect.setRect(rect.x() - q->x(), rect.y() - q->y(), rect.width(), rect.height());
+
     QSize menuSize = menu->sizeHint();
     QPoint globalPos = q->mapToGlobal(rect.topLeft());
     int x = globalPos.x();
@@ -574,12 +621,22 @@ void QPushButtonPrivate::_q_popupPressed()
 }
 #endif // QT_NO_MENU
 
+void QPushButtonPrivate::resetLayoutItemMargins()
+{
+    Q_Q(QPushButton);
+    QStyleOptionButton opt;
+    q->initStyleOption(&opt);
+    setLayoutItemMargins(QStyle::SE_PushButtonLayoutItem, &opt);
+}
+
 void QPushButton::setFlat(bool flat)
 {
     Q_D(QPushButton);
     if (d->flat == flat)
         return;
     d->flat = flat;
+	d->resetLayoutItemMargins();
+    d->sizeHint = QSize();
     update();
     updateGeometry();
 }
@@ -593,6 +650,20 @@ bool QPushButton::isFlat() const
 /*! \reimp */
 bool QPushButton::event(QEvent *e)
 {
+    Q_D(QPushButton);
+    if (e->type() == QEvent::ParentChange) {
+        if (QDialog *dialog = d->dialogParent()) {
+            if (d->defaultButton)
+                dialog->d_func()->setMainDefault(this);
+        }
+    } else if (e->type() == QEvent::StyleChange
+#ifdef Q_WS_MAC
+               || e->type() == QEvent::MacSizeChange
+#endif
+               ) {
+		d->resetLayoutItemMargins();
+		updateGeometry();
+    }
     return QAbstractButton::event(e);
 }
 
@@ -618,8 +689,8 @@ QPushButton::QPushButton(const QString &text, QWidget *parent, const char *name)
 {
     Q_D(QPushButton);
     setObjectName(QString::fromAscii(name));
-    d->init();
     setText(text);
+    d->init();
 }
 
 /*!
@@ -631,9 +702,9 @@ QPushButton::QPushButton(const QIcon& icon, const QString &text, QWidget *parent
 {
     Q_D(QPushButton);
     setObjectName(QString::fromAscii(name));
-    d->init();
     setText(text);
     setIcon(icon);
+    d->init();
 }
 #endif
 

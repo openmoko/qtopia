@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -49,25 +49,25 @@ E2CallScreen::E2CallScreen(E2Button *b, QWidget *parent, Qt::WFlags flags)
     m_state = "Connected";
 
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callConnected(const QPhoneCall &)),
+                     SIGNAL(callConnected(QPhoneCall)),
                      this,
-                     SLOT(callConnected(const QPhoneCall &)));
+                     SLOT(callConnected(QPhoneCall)));
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callIncoming(const QPhoneCall &)),
+                     SIGNAL(callIncoming(QPhoneCall)),
                      this,
-                     SLOT(callIncoming(const QPhoneCall &)));
+                     SLOT(callIncoming(QPhoneCall)));
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callDialing(const QPhoneCall &)),
+                     SIGNAL(callDialing(QPhoneCall)),
                      this,
-                     SLOT(callDialing(const QPhoneCall &)));
+                     SLOT(callDialing(QPhoneCall)));
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callMissed(const QPhoneCall &)),
+                     SIGNAL(callMissed(QPhoneCall)),
                      this,
-                     SLOT(callEnded(const QPhoneCall &)));
+                     SLOT(callEnded(QPhoneCall)));
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callDropped(const QPhoneCall &)),
+                     SIGNAL(callDropped(QPhoneCall)),
                      this,
-                     SLOT(callEnded(const QPhoneCall &)));
+                     SLOT(callEnded(QPhoneCall)));
 
     QObject::connect(m_button, SIGNAL(clicked()),
                      this, SLOT(end()));
@@ -258,8 +258,8 @@ E2CallHistory::E2CallHistory(QWidget *parent)
 
     m_list = new E2ListWidget(this);
     layout->addWidget(m_list);
-//    QObject::connect(m_list, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(itemActivated()));
-    QObject::connect(m_list, SIGNAL(itemActivated(QListWidgetItem *)), this, SLOT(itemActivated()));
+//    QObject::connect(m_list, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(itemActivated()));
+    QObject::connect(m_list, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(itemActivated()));
 
     E2Button *button = new E2Button(bar());
     button->setText("Cancel");
@@ -411,13 +411,13 @@ E2Incoming::E2Incoming()
     setAttribute(Qt::WA_ShowModal);
 
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callIncoming(const QPhoneCall &)),
+                     SIGNAL(callIncoming(QPhoneCall)),
                      this,
-                     SLOT(callIncoming(const QPhoneCall &)));
+                     SLOT(callIncoming(QPhoneCall)));
     QObject::connect(DialerControl::instance(),
-                        SIGNAL(callMissed(const QPhoneCall&)),
+                        SIGNAL(callMissed(QPhoneCall)),
                         this,
-                        SLOT(missedIncomingCall(const QPhoneCall&)));
+                        SLOT(missedIncomingCall(QPhoneCall)));
 
     E2Button * but = new E2Button(bar());
     but->setText("Ignore");
@@ -715,8 +715,8 @@ E2FSCallHistoryScreen::E2FSCallHistoryScreen(QWidget *parent)
     m_list = new E2ListWidget(this);
     m_list->setFrameShape(QFrame::NoFrame);
     layout->addWidget(m_list);
-//    QObject::connect(m_list, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(itemActivated()));
-    QObject::connect(m_list, SIGNAL(itemActivated(QListWidgetItem *)), this, SLOT(itemActivated()));
+//    QObject::connect(m_list, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(itemActivated()));
+    QObject::connect(m_list, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(itemActivated()));
 
     updateScreen();
 }
@@ -999,7 +999,7 @@ E2NewMessage::E2NewMessage()
 : E2TitleFrame(E2TitleFrame::NoTitle, 0), m_fetching(false), m_messageCount(-1)
 {
     smsReq = new QSMSReader( QString(), this );
-    QObject::connect( smsReq, SIGNAL(messageCount( int )), this, SLOT(messageCount(int)) );
+    QObject::connect( smsReq, SIGNAL(messageCount(int)), this, SLOT(messageCount(int)) );
     QObject::connect( smsReq, SIGNAL(fetched(QString,QSMSMessage)), this, SLOT(fetched(QString,QSMSMessage)) );
 
     E2Button *but = new E2Button(bar());

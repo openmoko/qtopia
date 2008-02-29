@@ -22,22 +22,25 @@
 <h3>Public Types</h3>
 <ul>
 <li><div class="fn"/>enum <b><a href="qtopiaapplication.html#InputMethodHint-enum">InputMethodHint</a></b> { Normal, AlwaysOff, AlwaysOn, Number, ..., Named }</li>
-<li><div class="fn"/>enum <b><a href="qtopiaapplication.html#PowerConstraint-enum">PowerConstraint</a></b> { Disable, DisableLightOff, DisableReturnToHomeScreen, DisableSuspend, Enable }</li>
+<li><div class="fn"/>enum <b><a href="qtopiaapplication.html#PowerConstraint-enum">PowerConstraint</a></b> { Disable, DisableLightOff, DisableSuspend, Enable }</li>
 <li><div class="fn"/>enum <b><a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a></b> { LeftOnly, RightOnHold }</li>
+<li><div class="fn"/>enum <b><a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerRole</a></b> { SxeAuthorizerClientOnly, SxeAuthorizerServerAndClient, SxeAuthorizerServerOnly }</li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qtopiaapplication.html#QtopiaApplication">QtopiaApplication</a></b> ( int &amp; <i>argc</i>, char ** <i>argv</i>, Type <i>t</i> = GuiClient )</li>
+<li><div class="fn"/><b><a href="qtopiaapplication.html#QtopiaApplication">QtopiaApplication</a></b> ( int &amp; <i>argc</i>, char ** <i>argv</i> )</li>
 <li><div class="fn"/><b><a href="qtopiaapplication.html#dtor.QtopiaApplication">~QtopiaApplication</a></b> ()</li>
 <li><div class="fn"/>int <b><a href="qtopiaapplication.html#exec">exec</a></b> ()</li>
 <li><div class="fn"/>QWidget * <b><a href="qtopiaapplication.html#mainWidget">mainWidget</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#registerRunningTask">registerRunningTask</a></b> ( const QString &amp; <i>name</i>, QObject * <i>taskObj</i> = 0 )</li>
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#setMainWidget">setMainWidget</a></b> ( QWidget * <i>widget</i>, bool <i>noMaximize</i> = false )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#setSxeAuthorizerRole">setSxeAuthorizerRole</a></b> ( SxeAuthorizerRole <i>role</i> )</li>
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#showMainDocumentWidget">showMainDocumentWidget</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#showMainDocumentWidget-2">showMainDocumentWidget</a></b> ( QWidget * <i>widget</i>, bool <i>noMaximize</i> = false )</li>
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#showMainWidget">showMainWidget</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#showMainWidget-2">showMainWidget</a></b> ( QWidget * <i>widget</i>, bool <i>noMaximize</i> = false )</li>
+<li><div class="fn"/>SxeAuthorizerRole <b><a href="qtopiaapplication.html#sxeAuthorizerRole">sxeAuthorizerRole</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#unregisterRunningTask">unregisterRunningTask</a></b> ( const QString &amp; <i>name</i> )</li>
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#unregisterRunningTask-2">unregisterRunningTask</a></b> ( QObject * <i>taskObj</i> )</li>
 <li><div class="fn"/>bool <b><a href="qtopiaapplication.html#willKeepRunning">willKeepRunning</a></b> () const</li>
@@ -69,7 +72,6 @@
 <h3>Static Public Members</h3>
 <ul>
 <li><div class="fn"/>int <b><a href="qtopiaapplication.html#execDialog">execDialog</a></b> ( QDialog * <i>dialog</i>, bool <i>noMaximize</i> = false )</li>
-<li><div class="fn"/>void <b><a href="qtopiaapplication.html#grabKeyboard">grabKeyboard</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#hideInputMethod">hideInputMethod</a></b> ()</li>
 <li><div class="fn"/>InputMethodHint <b><a href="qtopiaapplication.html#inputMethodHint">inputMethodHint</a></b> ( QWidget * <i>widget</i> )</li>
 <li><div class="fn"/>QString <b><a href="qtopiaapplication.html#inputMethodHintParam">inputMethodHintParam</a></b> ( QWidget * <i>widget</i> )</li>
@@ -85,19 +87,22 @@
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#showDialog">showDialog</a></b> ( QDialog * <i>dialog</i>, bool <i>noMaximize</i> = false )</li>
 <li><div class="fn"/>void <b><a href="qtopiaapplication.html#showInputMethod">showInputMethod</a></b> ()</li>
 <li><div class="fn"/>StylusMode <b><a href="qtopiaapplication.html#stylusOperation">stylusOperation</a></b> ( QWidget * <i>w</i> )</li>
-<li><div class="fn"/>void <b><a href="qtopiaapplication.html#ungrabKeyboard">ungrabKeyboard</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>89 static public members inherited from <a href="qapplication.html#static-public-members">QApplication</a></li>
-<li><div class="fn"/>37 static public members inherited from <a href="qcoreapplication.html#static-public-members">QCoreApplication</a></li>
+<li><div class="fn"/>90 static public members inherited from <a href="qapplication.html#static-public-members">QApplication</a></li>
+<li><div class="fn"/>39 static public members inherited from <a href="qcoreapplication.html#static-public-members">QCoreApplication</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <a name="macros"></a>
 <h3>Macros</h3>
 <ul>
 <li><div class="fn"/><b><a href="qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a></b> (  <i>name</i>,  <i>classname</i> )</li>
+<li><div class="fn"/><b><a href="qtopiaapplication.html#QTOPIA_APP_KEY">QTOPIA_APP_KEY</a></b></li>
+<li><div class="fn"/><b><a href="qtopiaapplication.html#QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION">QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION</a></b></li>
 <li><div class="fn"/><b><a href="qtopiaapplication.html#QTOPIA_EXPORT_PLUGIN">QTOPIA_EXPORT_PLUGIN</a></b> (  <i>classname</i> )</li>
 <li><div class="fn"/><b><a href="qtopiaapplication.html#QTOPIA_MAIN">QTOPIA_MAIN</a></b></li>
+<li><div class="fn"/><b><a href="qtopiaapplication.html#QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION">QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION</a></b> ()</li>
+<li><div class="fn"/><b><a href="qtopiaapplication.html#QTOPIA_SET_KEY">QTOPIA_SET_KEY</a></b> (  <i>name</i> )</li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
@@ -129,6 +134,7 @@
 <p>Lazy application shutdown is a similar, system-wide optimization. When enabled, applications will continue running in a hidden state even if they have no work to do until they are explicitly shutdown by the Qtopia system server when the system becomes too loaded, or too many such applications are superfluously running. While preloaded applications allow a system configurator to improve performance of a preselected few applications, the rationale behind lazy application shutdown is to allow the system to dynamically tune itself to improve performance of the most frequently run applications. For example, if the user constantly switched between the <tt>addressbook</tt> and <tt>todo</tt> applications, these would remain in the lazy shutdown state which would improve the startup time of subsequent &quot;launches&quot;. To enable lazy application shutdown, set the <tt>AppLoading/LazyShutdown</tt> key in the <tt>Trolltech/Launcher</tt> configuration file to true. For example,</p>
 <pre>    [AppLoading]
     LazyShutdown=true</pre>
+<p>For information on creating a new application to run within Qtopia, see <a href="application.html">Creating a New Application</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="InputMethodHint-enum"></a>enum QtopiaApplication::InputMethodHint</h3>
@@ -140,17 +146,17 @@
 <tr><td valign="top"><tt>QtopiaApplication::Number</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">the widget needs numeric input.</td></tr>
 <tr><td valign="top"><tt>QtopiaApplication::PhoneNumber</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">the widget needs phone-style numeric input.</td></tr>
 <tr><td valign="top"><tt>QtopiaApplication::Words</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">the widget needs word input.</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::ProperNouns</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">the widget needs proper names of peoples or places.</td></tr>
 <tr><td valign="top"><tt>QtopiaApplication::Text</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">the widget needs non-word input.</td></tr>
 <tr><td valign="top"><tt>QtopiaApplication::Named</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">the widget needs special input, defined by <tt>param</tt>. Each input method may support a different range of special input types, but will default to Text if they do not know the type.</td></tr>
 </table></p>
-<p>By default, <a href="qlineedit.html">QLineEdit</a> and <a href="qtextedit.html">QTextEdit</a> have the Words hint unless they have a <a href="qintvalidator.html">QIntValidator</a>, in which case they have the Number hint. This is appropriate for most cases, including the input of names (new names being added to the user's dictionary). All other widgets default to Normal mode.</p>
+<p>By default, <a href="qlineedit.html">QLineEdit</a> and <a href="qtextedit.html">QTextEdit</a> have the Words hint unless they have a <a href="qintvalidator.html">QIntValidator</a>, in which case they have the Number hint. This is appropriate for most cases, including the input of names (new names are added to the user's dictionary by switching to text mode and entering them as usual). All other widgets default to Normal mode.</p>
 <p>See also <a href="qtopiaapplication.html#inputMethodHint">inputMethodHint</a>() and <a href="qtopiaapplication.html#setInputMethodHint">setInputMethodHint</a>().</p>
 <h3 class="fn"><a name="PowerConstraint-enum"></a>enum QtopiaApplication::PowerConstraint</h3>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QtopiaApplication::Disable</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">all power saving functions are disabled.</td></tr>
 <tr><td valign="top"><tt>QtopiaApplication::DisableLightOff</tt></td><td align="center" valign="top"><tt>50</tt></td><td valign="top">the screen's backlight will not be turned off (dimming remains active).</td></tr>
-<tr><td valign="top"><tt>QtopiaApplication::DisableReturnToHomeScreen</tt></td><td align="center" valign="top"><tt>100</tt></td><td valign="top">the device will not go back to the homescreen (phone edition only).</td></tr>
 <tr><td valign="top"><tt>QtopiaApplication::DisableSuspend</tt></td><td align="center" valign="top"><tt>900</tt></td><td valign="top">the device will not suspend</td></tr>
 <tr><td valign="top"><tt>QtopiaApplication::Enable</tt></td><td align="center" valign="top"><tt>1000</tt></td><td valign="top">all power saving functions are enabled.</td></tr>
 </table></p>
@@ -163,11 +169,18 @@
 <tr><td valign="top"><tt>QtopiaApplication::RightOnHold</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">the stylus generates RightButton events if the user uses the press-and-hold gesture.</td></tr>
 </table></p>
 <p>See also <a href="qtopiaapplication.html#setStylusOperation">setStylusOperation</a>() and <a href="qtopiaapplication.html#stylusOperation">stylusOperation</a>().</p>
+<h3 class="fn"><a name="SxeAuthorizerRole-enum"></a>enum QtopiaApplication::SxeAuthorizerRole</h3>
+<p>Specifies whether to create SXE Authorizer resources in this Qtopia Application.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QtopiaApplication::SxeAuthorizerClientOnly</tt></td><td align="center" valign="top"><tt>0x01</tt></td><td valign="top">No SXE Authorizer resources required, only acts as a client</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::SxeAuthorizerServerAndClient</tt></td><td align="center" valign="top"><tt>SxeAuthorizerClientOnly | SxeAuthorizerServerOnly</tt></td><td valign="top">Authorizer resources required, also acts as a client of other authorizers</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::SxeAuthorizerServerOnly</tt></td><td align="center" valign="top"><tt>0x02</tt></td><td valign="top">Authorizer resources required.</td></tr>
+</table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QtopiaApplication"></a>QtopiaApplication::QtopiaApplication ( int &amp; <i>argc</i>, char ** <i>argv</i>, <a href="qapplication.html#Type-enum">Type</a> <i>t</i> = GuiClient )</h3>
-<p>Constructs a <a href="qtopiaapplication.html">QtopiaApplication</a> just as you would construct a <a href="qapplication.html">QApplication</a>, passing <i>argc</i>, <i>argv</i>, and <i>t</i>.</p>
-<p>For applications, <i>t</i> should be the default, <a href="qapplication.html#Type-enum">GuiClient</a>. Only the Qtopia server passes <a href="qapplication.html#Type-enum">GuiServer</a>.</p>
+<h3 class="fn"><a name="QtopiaApplication"></a>QtopiaApplication::QtopiaApplication ( int &amp; <i>argc</i>, char ** <i>argv</i> )</h3>
+<p>Constructs a <a href="qtopiaapplication.html">QtopiaApplication</a> just as you would construct a <a href="qapplication.html">QApplication</a>, passing <i>argc</i> and <i>argv</i>.</p>
 <h3 class="fn"><a name="dtor.QtopiaApplication"></a>QtopiaApplication::~QtopiaApplication ()</h3>
 <p>Destroys the <a href="qtopiaapplication.html">QtopiaApplication</a>.</p>
 <h3 class="fn"><a name="appMessage"></a>void QtopiaApplication::appMessage ( const <a href="qstring.html">QString</a> &amp; <i>msg</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -205,10 +218,6 @@
 <p>Shows and calls <a href="qtopiaapplication.html#exec">exec</a>() on <i>dialog</i>. A heuristic approach is taken to determine the size of the dialog and whether it is maximized.</p>
 <p>If <i>noMaximize</i> is true then the dialog may not be maximized. This is usually unnecessary and it is recommended that the system be allowed to decide how the dialog is displayed by passing false for <i>noMaximize</i>.</p>
 <p>See also <a href="qtopiaapplication.html#showDialog">showDialog</a>().</p>
-<h3 class="fn"><a name="grabKeyboard"></a>void QtopiaApplication::grabKeyboard ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Grabs the physical keyboard keys, including keys which would otherwise be acted on by the system. This is usually unnecessary and leads to an inconsistent user experience, however some games grab system keys to make interaction easier.</p>
-<p>Under Qtopia Phone Edition this function does nothing. It is not possible to grab the keyboard under Qtopia Phone Edition.</p>
-<p>See also <a href="qtopiaapplication.html#ungrabKeyboard">ungrabKeyboard</a>().</p>
 <h3 class="fn"><a name="hideInputMethod"></a>void QtopiaApplication::hideInputMethod ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Explicitly hide the current input method.</p>
 <p>The current input method is still indicated in the title, but no longer takes up screen space, and can no longer be interacted with.</p>
@@ -254,14 +263,23 @@
 <h3 class="fn"><a name="setInputMethodHint-2"></a>void QtopiaApplication::setInputMethodHint ( <a href="qwidget.html">QWidget</a> * <i>widget</i>, const <a href="qstring.html">QString</a> &amp; <i>named</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Provides a hint to the system that <i>widget</i> has use for the text input method specified by <i>named</i>. Such methods are input-method-specific and are defined by the files in [qt_prefix]/etc/im/ for each input method.</p>
-<p>For example, the phone key input method includes support for the named input methods:</p>
+<p>For example, the phone-keys input method includes support for the named input methods:</p>
 <ul>
 <li>email</li>
 <li>netmask</li>
 <li>url</li>
 </ul>
 <p>The effect in the phone key input method is to modify the binding of phone keys to characters (such as making &quot;<tt>@</tt>&quot; easier to input), and to add additional <i>words</i> to the recognition word lists, such as: <i>www</i>.</p>
-<p>If the current input method doesn't understand the hint, it will be ignored.</p>
+<p><b>Note:</b> If the current input method doesn't understand the hint, it will be ignored.</p>
+<p>In addition, Qtopia supports auxiliary hints. These modify the hint without overriding it, and are appended to the hint, separated by whitespace.</p>
+<p>For example, the phone-keys input method includes support for the following auxiliary hints:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>name</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>autocapitalization</td><td>The first word of the field, and the first word of a sentence have their first letter capitalized.</td></tr>
+<tr valign="top" class="even"><td>noautocapitalization</td><td>All words not capitalized by the user are in lower-case</td></tr>
+<tr valign="top" class="odd"><td>propernouns</td><td>The first letter of every word is capitalized (propernouns can be used as either an auxiliary hint, e.g&#x2e; &quot;text autocapitalization propernouns&quot; or as a hint on it's own, in which case autocapitalization and words are implied).</td></tr>
+</table></p>
+<p>Specific input methods may ignore these auxiliary hints, or only handle some of them. Like all hints, if the input method does not understand the hint, it will ignore it.</p>
 <p>See also <a href="qtopiaapplication.html#inputMethodHint">inputMethodHint</a>() and <a href="qtopiaapplication.html#InputMethodHint-enum">InputMethodHint</a>.</p>
 <h3 class="fn"><a name="setMainWidget"></a>void QtopiaApplication::setMainWidget ( <a href="qwidget.html">QWidget</a> * <i>widget</i>, bool <i>noMaximize</i> = false )</h3>
 <p>Set the main widget for this application to <i>widget</i>. If <i>noMaximize</i> is true, then the widget will not be maximized.</p>
@@ -281,6 +299,10 @@
 <p>Allows <i>widget</i> to receive mouse events according to the stylus <i>mode</i>.</p>
 <p>Setting the stylus mode to <a href="qtopiaapplication.html#StylusMode-enum">RightOnHold</a> causes right mouse button events to be generated when the stylus is held pressed for 500ms. The default mode is <a href="qtopiaapplication.html#StylusMode-enum">LeftOnly</a>.</p>
 <p>See also <a href="qtopiaapplication.html#stylusOperation">stylusOperation</a>() and <a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a>.</p>
+<h3 class="fn"><a name="setSxeAuthorizerRole"></a>void QtopiaApplication::setSxeAuthorizerRole ( <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerRole</a> <i>role</i> )</h3>
+<p>Sets this applications <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">QtopiaApplication::SxeAuthorizerRole</a> to <i>role</i>. In general this should not be required for all but a few applications such as the mediaserver, and other applications which must authorize requests using SXE; since the default value of <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerClientOnly</a> will be correct.</p>
+<p>The qpe server (actually any app for which <a href="qapplication.html#type">type</a>() is <a href="qapplication.html#Type-enum">GuiServer</a>) will default to <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerServerOnly</a>.</p>
+<p>See also <a href="qtopiaapplication.html#sxeAuthorizerRole">sxeAuthorizerRole</a>() and <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">QtopiaApplication::SxeAuthorizerRole</a>.</p>
 <h3 class="fn"><a name="showDialog"></a>void QtopiaApplication::showDialog ( <a href="qdialog.html">QDialog</a> * <i>dialog</i>, bool <i>noMaximize</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Shows <i>dialog</i>. A heuristic approach is taken to determine the size of the dialog and whether it is maximized.</p>
 <p>If <i>noMaximize</i> is true then the dialog may not be maximized. This is usually unnecessary and it is recommended that the system be allowed to decide how the dialog is displayed by passing false for <i>noMaximize</i>.</p>
@@ -310,11 +332,12 @@
 <h3 class="fn"><a name="stylusOperation"></a><a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a> QtopiaApplication::stylusOperation ( <a href="qwidget.html">QWidget</a> * <i>w</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the current <a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a> for widget <i>w</i>.</p>
 <p>See also <a href="qtopiaapplication.html#setStylusOperation">setStylusOperation</a>() and <a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a>.</p>
+<h3 class="fn"><a name="sxeAuthorizerRole"></a><a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerRole</a> QtopiaApplication::sxeAuthorizerRole () const</h3>
+<p>Returns this applications <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">QtopiaApplication::SxeAuthorizerRole</a>. In general this will be <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerClientOnly</a> for all but a few applications such as the qpe server, mediaserver, and other applications which must authorize requests using SXE.</p>
+<p>See also <a href="qtopiaapplication.html#setSxeAuthorizerRole">setSxeAuthorizerRole</a>() and <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">QtopiaApplication::SxeAuthorizerRole</a>.</p>
 <h3 class="fn"><a name="timeChanged"></a>void QtopiaApplication::timeChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the time changes outside the normal passage of time, that is, if the time is set backwards or forwards.</p>
 <p>If the application offers the TimeMonitor service, it will get the QCop message that causes this signal even if it is not running, thus allowing it to update any alarms or other time-related records.</p>
-<h3 class="fn"><a name="ungrabKeyboard"></a>void QtopiaApplication::ungrabKeyboard ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Releases the keyboard previously grabbed by <a href="qtopiaapplication.html#grabKeyboard">grabKeyboard</a>(). The keyboard is automatically ungrabbed on application exit.</p>
 <h3 class="fn"><a name="unregisterRunningTask"></a>void QtopiaApplication::unregisterRunningTask ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Unregister the task <i>name</i> previously registered with <a href="qtopiaapplication.html#registerRunningTask">registerRunningTask</a>(). Attempting to unregister a task that has not been registered has no effect.</p>
 <h3 class="fn"><a name="unregisterRunningTask-2"></a>void QtopiaApplication::unregisterRunningTask ( <a href="qobject.html">QObject</a> * <i>taskObj</i> )</h3>
@@ -331,15 +354,29 @@
 <h3 class="fn"><a name="QTOPIA_ADD_APPLICATION"></a>QTOPIA_ADD_APPLICATION (  <i>name</i>,  <i>classname</i> )</h3>
 <p>This macro registers the application uniquely identified by <i>name</i> with the main widget <i>classname</i>. This macro is used to simplify switching between quicklaunch and normal launching.</p>
 <p>In singleexec builds, this macro is used to indicate the name of the main function rather than specifying the class to instantiate.</p>
-<p>/sa Applications, {Writing Applications that Startup Quickly}</p>
+<p>See also <a href="buildsystem/over-applications-1.html">Applications</a>.</p>
+<h3 class="fn"><a name="QTOPIA_APP_KEY"></a>QTOPIA_APP_KEY</h3>
+<p>This macro is used by the <a href="qtopiaapplication.html#QTOPIA_MAIN">QTOPIA_MAIN</a> macro to allocate space for the SXE key. It's set to either <a href="sxeprograminfo.html#QSXE_APP_KEY">QSXE_APP_KEY</a> or <a href="sxeprograminfo.html#QSXE_QL_APP_KEY">QSXE_QL_APP_KEY</a> depending on if you're building a quicklaunch plugin or a standalone app.</p>
+<p>See also <a href="buildsystem/over-applications-1.html">Applications</a> and <a href="qtopiaapplication.html#QTOPIA_SET_KEY">QTOPIA_SET_KEY</a>().</p>
+<h3 class="fn"><a name="QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION"></a>QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION</h3>
+<p>This macro should be set to specify that the app needs a direct connection to the document system. Note that enabling this define will mean extra security priviliges are required. If you are not using the <a href="qtopiaapplication.html#QTOPIA_MAIN">QTOPIA_MAIN</a> macros you should ensure that <a href="qtopiaapplication.html#QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION">QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION</a>() is being called or this macro will have no effect.</p>
+<p>See also <a href="buildsystem/over-applications-1.html">Applications</a> and <a href="qcontent.html#setDocumentSystemConnection">QContent::setDocumentSystemConnection</a>().</p>
 <h3 class="fn"><a name="QTOPIA_EXPORT_PLUGIN"></a>QTOPIA_EXPORT_PLUGIN (  <i>classname</i> )</h3>
 <p>This macro causes a <a href="qobject.html">QObject</a>-derived <i>classname</i> to be made available from a plugin file (eg foo.so). This plugin should be used instead of Q_EXPORT_PLUGIN because it works correctly in both dynamic and singleexec builds.</p>
 <h3 class="fn"><a name="QTOPIA_MAIN"></a>QTOPIA_MAIN</h3>
 <p>This macro inserts an appropriate main function when normal launching is used.</p>
+<p>See also <a href="buildsystem/over-applications-1.html">Applications</a>.</p>
+<h3 class="fn"><a name="QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION"></a>QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION ()</h3>
+<p>This macro is used by the <a href="qtopiaapplication.html#QTOPIA_MAIN">QTOPIA_MAIN</a> macro to set the default document system connection type. If you are implementing a <tt>main()</tt> function you should call this after constructing <a href="qtopiaapplication.html">QtopiaApplication</a>. Failure to call this macro is not fatal but you will be unable to influence the default connection type.</p>
+<p>The <a href="qtopiaapplication.html#QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION">QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION</a> macro affects the implementation of this function.</p>
+<p>See also <a href="buildsystem/over-applications-1.html">Applications</a> and <a href="qcontent.html#setDocumentSystemConnection">QContent::setDocumentSystemConnection</a>().</p>
+<h3 class="fn"><a name="QTOPIA_SET_KEY"></a>QTOPIA_SET_KEY (  <i>name</i> )</h3>
+<p>This macro is used by the <a href="qtopiaapplication.html#QTOPIA_MAIN">QTOPIA_MAIN</a> macro to copy the SXE key into memory. It's set to either <a href="sxeprograminfo.html#QSXE_SET_APP_KEY">QSXE_SET_APP_KEY</a>() or <a href="sxeprograminfo.html#QSXE_SET_QL_KEY">QSXE_SET_QL_KEY</a>() (passing along <i>name</i>) depending on if you're building a quicklaunch plugin or a standalone app.</p>
+<p>See also <a href="buildsystem/over-applications-1.html">Applications</a> and <a href="qtopiaapplication.html#QTOPIA_APP_KEY">QTOPIA_APP_KEY</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

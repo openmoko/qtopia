@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -33,13 +33,20 @@ CityInfo::CityInfo(QWidget *parent, Qt::WFlags f)
     : QFrame(parent,f)
 {
     mUtc = QTimeZone::utcDateTime();
+//    QFontInfo *fontInfo;
+//    fontInfo = new QFontInfo(font());
+//    qLog(Time)<<"font size"<< fontInfo->pointSize();
+//    QFont font = font();
+//    font.setPointSize(fontInfo->pointSize()-2);
+//    setFont(font);
 }
 
 void CityInfo::setZone(const QString &zone)
 {
     mZone = zone;
-    qLog(Time) << "CityInfo()::setZone() " <<
+//    qLog(Time) << "CityInfo()::setZone() " <<
         mZone.toLocal8Bit().constData();
+    repaint();
 }
 
 void CityInfo::setUtcTime(const QDateTime &dt)
@@ -57,15 +64,16 @@ QString CityInfo::text() const
         QTimeZone curZone( mZone.toLocal8Bit().constData() );
         if ( curZone.isValid() )
             cityTime = curZone.fromUtc(mUtc);
-        else
-            qLog(Time) << "CityInfo()::text() curZone Not valid!";
-        line = QTimeString::localHMDayOfWeek(cityTime);
-        qLog(Time) << "CityInfo()::text() cityTime=" << cityTime.toString("hh:mm");
-        qLog(Time) << "CityInfo()::text() timestring=" << line.toLocal8Bit().constData();
+//        else
+        //          qLog(Time) << "CityInfo()::text() curZone Not valid!";
+        line = QTimeString::localHMDayOfWeek(cityTime).simplified();
+        
+//         qLog(Time) << "CityInfo()::text() cityTime=" << cityTime.toString("hh:mm");
+//         qLog(Time) << "CityInfo()::text() timestring=" << line.toLocal8Bit().constData();
         return line;
     }
     else {
-        qLog(Time) << "CityInfo()::text() - mZone is NULL!";
+//        qLog(Time) << "CityInfo()::text() - mZone is NULL!";
         return QString();
     }
 }
@@ -91,8 +99,8 @@ QSize CityInfo::sizeHint() const
 {
     QSize res;
     QFontMetrics fm( font() );
-    res.setWidth(fm.width(text())+2);
-    res.setHeight(fm.height());
-    qLog(Time) << "CityInfo(QFrame)::sizeHint(w=" << res.width() << ", h=" << res.height();
+    res.setWidth(fm.width(text()) + 2 );
+    res.setHeight(fm.height() );
+//    qLog(Time) << "CityInfo(QFrame)::sizeHint(w=" << res.width() << ", h=" << res.height();
     return res;
 }

@@ -2,7 +2,9 @@ qtopia_project(qtopia core lib)
 license(LGPL)
 TARGET		=   dissipate2
 VERSION		=   1.0.0
-CONFIG+=no_tr no_singleexec
+CONFIG+=no_tr
+# Disable this in singleexec because it can't possibly work without violating the LGPL
+idep(CONFIG+=no_singleexec,CONFIG)
 
 HEADERS		=   \
     base64.h \

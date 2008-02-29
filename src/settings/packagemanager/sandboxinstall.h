@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,9 +26,11 @@
 
 #include <qtopiasxe.h>
 
+class SandboxUninstallJob; 
 class SandboxInstallJob : public QObject
 {
     Q_OBJECT
+    friend class SandboxUninstallJob;
     public:
         SandboxInstallJob( const InstallControl::PackageInfo *, const QString &, ErrorReporter *errorReporter = 0 );
         virtual ~SandboxInstallJob() {};
@@ -38,7 +40,7 @@ class SandboxInstallJob : public QObject
         void removeDestination() const;
         bool installContent();
         bool setupSandbox();
-        void runSandbox( const QString & );
+        void runSandbox( const QString &, const QString & );
         bool createLink( const QString &target, const QString &link );
 
 #ifndef QT_NO_SXE
@@ -49,18 +51,22 @@ class SandboxInstallJob : public QObject
     private:
         void mediaSandboxRoot();
         void clearMiscFiles() const;
+        void applyDomainRules( const QString &, const QString & );
         const InstallControl::PackageInfo *package;
         QString destination;
         QString media;
         QStringList desktopPaths;
         bool abort;
         ErrorReporter *reporter;
+
+        static void reloadRules();
 };
 
 class SandboxUninstallJob
 {
     public:
         SandboxUninstallJob( const InstallControl::PackageInfo *, const QString &media, ErrorReporter *reporter = 0 );
+        void terminateApps() const;
         void unregisterPackageFiles() const;
         void dismantleSandbox() const;
         void rollBackSandboxRule( const QString &binPath ) const;

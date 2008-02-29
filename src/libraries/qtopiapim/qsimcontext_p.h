@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,17 @@
 ****************************************************************************/
 #ifndef _QSIMCONTEXT_P_H_
 #define _QSIMCONTEXT_P_H_
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 #include <qtopiasql.h>
 #include <qpimsource.h>
@@ -46,6 +57,7 @@ public:
     bool editable(const QUniqueId &) const; // default true
 
     QPimSource defaultSource() const;
+    QPimSource serviceNumbersSource() const;
 
     void setVisibleSources(const QSet<QPimSource> &);
     QSet<QPimSource> visibleSources() const;
@@ -80,7 +92,6 @@ private:
 
     int nextFreeIndex() const;
 
-    QContact contact(const QPhoneBookEntry &entry) const;
     bool isSIMContactCompatible(const QContact &c) const;
 
     static QString typeToSIMExtension(QContactModel::Field type);
@@ -89,6 +100,7 @@ private:
 
     ContactSqlIO *mAccess;
     QContactSimSyncer *mSync;
+    QContactSimSyncer *mServiceNumbers;
     QPhoneBook *mPhoneBook;
     QSimInfo *mSimInfo;
 };

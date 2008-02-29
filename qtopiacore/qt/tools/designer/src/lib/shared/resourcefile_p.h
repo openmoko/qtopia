@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -62,19 +77,26 @@ public:
 
     int prefixCount() const;
     QString prefix(int idx) const;
+    QString lang(int idx) const;
+    
     int fileCount(int prefix_idx) const;
     QString file(int prefix_idx, int file_idx) const;
     QString alias(int prefix_idx, int file_idx) const;
 
     void addFile(int prefix_idx, const QString &file);
     void addPrefix(const QString &prefix);
+    
     void removePrefix(int prefix_idx);
     void removeFile(int prefix_idx, int file_idx);
+    
     void replacePrefix(int prefix_idx, const QString &prefix);
+    void replaceLang(int prefix_idx, const QString &lang);
+    void replaceAlias(int prefix_idx, int file_idx, const QString &alias);
     void replaceFile(int pref_idx, int file_idx, const QString &file);
 
     int indexOfPrefix(const QString &prefix) const;
     int indexOfFile(int pref_idx, const QString &file) const;
+    
     bool contains(const QString &prefix, const QString &file = QString()) const;
     bool contains(int pref_idx, const QString &file) const;
 
@@ -97,10 +119,10 @@ public:
     };
     typedef QList<File> FileList;
     struct Prefix {
-        Prefix(const QString &_name = QString(),
-                const FileList &_file_list = FileList())
-            : name(_name), file_list(_file_list) {}
+        Prefix(const QString &_name = QString(), const QString &_lang = QString(), const FileList &_file_list = FileList())
+            : name(_name), lang(_lang), file_list(_file_list) {}
         QString name;
+        QString lang;
         FileList file_list;
     };
     typedef QList<Prefix> PrefixList;
@@ -108,8 +130,6 @@ private:
     PrefixList m_prefix_list;
     QString m_file_name;
     QString m_error_message;
-
-    int matchPrefix(const QString &path) const;
 };
 
 class QDESIGNER_SHARED_EXPORT ResourceModel : public QAbstractItemModel
@@ -132,9 +152,14 @@ public:
     void setFileName(const QString &file_name) { m_resource_file.setFileName(file_name); }
     void getItem(const QModelIndex &index, QString &prefix, QString &file) const;
 
+    QString lang(const QModelIndex &index) const;
+    QString alias(const QModelIndex &index) const;
+    
     virtual QModelIndex addNewPrefix();
     virtual QModelIndex addFiles(const QModelIndex &idx, const QStringList &file_list);
     virtual void changePrefix(const QModelIndex &idx, const QString &prefix);
+    virtual void changeLang(const QModelIndex &idx, const QString &lang);
+    virtual void changeAlias(const QModelIndex &idx, const QString &alias);
     virtual QModelIndex deleteItem(const QModelIndex &idx);
     QModelIndex getIndex(const QString &prefix, const QString &file);
     QModelIndex getIndex(const QString &prefixed_file);
@@ -154,7 +179,10 @@ public:
     bool dirty() const { return m_dirty; }
     void setDirty(bool b);
 
+    virtual QMimeData *mimeData (const QModelIndexList & indexes) const;
+
     static bool iconFileExtension(const QString &path);
+    static QString resourcePath(const QString &prefix, const QString &file);
 
 signals:
     void dirtyChanged(bool b);

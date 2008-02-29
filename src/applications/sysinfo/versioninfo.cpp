@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,21 +19,19 @@
 **
 ****************************************************************************/
 
+#include "versioninfo.h"
+
 #include <qtopianamespace.h>
 #include <qthumbnail.h>
-
 #include <QLabel>
-#include <QPixmap>
-#include <QPainter>
-#include <QImage>
-#include <QTimer>
 #include <QFile>
 #include <QTextStream>
 #include <QLayout>
 #include <QApplication>
 #include <QDesktopWidget>
-#include <QDebug>
-#include "versioninfo.h"
+
+// For releases, this define gets replaced with the appropriate year by the packaging scripts
+#define QTOPIA_COPYRIGHT_YEAR	2007
 
 VersionInfo::VersionInfo( QWidget *parent, Qt::WFlags f )
     : QWidget( parent, f )
@@ -44,6 +42,8 @@ VersionInfo::VersionInfo( QWidget *parent, Qt::WFlags f )
 VersionInfo::~VersionInfo()
 {
 }
+
+#define SYSINFO_GEEK_MODE
 
 void VersionInfo::init()
 {
@@ -90,7 +90,7 @@ void VersionInfo::init()
     vBoxLayout1->addSpacing( 10 );
 
     QLabel *qtopiaCopyright = new QLabel(this);
-    qtopiaCopyright->setText(tr( "Copyright \251 %1", "%1 = 'year'" ).arg(2007));
+    qtopiaCopyright->setText(tr( "Copyright \251 %1", "%1 = 'year'" ).arg(QTOPIA_COPYRIGHT_YEAR));
     vBoxLayout1->addWidget(qtopiaCopyright);
     QLabel* qtopiaCopyright1 = new QLabel( this );
     qtopiaCopyright1->setText( "Trolltech ASA" );
@@ -101,7 +101,14 @@ void VersionInfo::init()
 
     QLabel *qtopiaBuild = new QLabel(this);
     qtopiaBuild->setWordWrap( true );
-    qtopiaBuild->setText(tr("Built by %1", "%1 = name").arg(BUILDER));
+    QString builder( BUILDER );
+    int atIndex = builder.indexOf( QChar('@') );
+    int dotIndex = -1;
+    if ( atIndex >= 0 )
+        dotIndex = builder.indexOf( QChar('.'), atIndex );
+    if ( dotIndex >= 0 )
+        builder = builder.left( dotIndex );
+    qtopiaBuild->setText(tr("Built by\n%1", "%1 = name").arg(builder));
     vBoxLayout1->addWidget(qtopiaBuild);
     
     qtopiaBuild = new QLabel(this);

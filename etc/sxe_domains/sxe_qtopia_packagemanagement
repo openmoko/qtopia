@@ -1,0 +1,14 @@
+#!/bin/sh
+# Grant privileges to packagemanager
+
+lidsconf -A POSTBOOT -s ${BIN} -o ${QTOPIA_DIR}/etc/sxe_qtopia/sxe_sandbox -i 1 -j READONLY
+lidsconf -A POSTBOOT -s ${BIN} -o ${QTOPIA_DIR}/etc/sxe_qtopia/sxe_unsandbox -i 1 -j READONLY
+lidsconf -A POSTBOOT -s ${BIN} -o ${QTOPIA_DIR}/etc/sxe_qtopia/sxe_reloadconf -i 1 -j READONLY
+
+for script in ${QTOPIA_DIR}/etc/sxe_domains/*; do
+    lidsconf -A POSTBOOT -s ${BIN} -o $script -i 1 -j READONLY
+done
+
+lidsconf -A -s ${BIN} -o CAP_FOWNER -j GRANT
+lidsconf -A -s ${BIN} -o CAP_CHOWN -j GRANT
+lidsconf -A -s ${BIN} -o CAP_FSETID -j GRANT

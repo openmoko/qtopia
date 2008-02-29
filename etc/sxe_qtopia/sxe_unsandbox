@@ -1,0 +1,5 @@
+#!/bin/sh
+lidsconf -D POSTBOOT -s $1 
+lidsconf -D -s $1
+lidsconf -D POSTBOOT -o $1 
+lidsconf -D -o $1

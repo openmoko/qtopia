@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -46,6 +46,7 @@ namespace Qtopia
     */
 
     QTOPIABASE_EXPORT QStringList installPaths();
+    QTOPIABASE_EXPORT QString updateDir();
     QTOPIABASE_EXPORT QString qtopiaDir();
     QTOPIABASE_EXPORT QString packagePath();
     QTOPIABASE_EXPORT QString documentDir();
@@ -57,6 +58,7 @@ namespace Qtopia
     QTOPIABASE_EXPORT QString tempDir( );
     QTOPIABASE_EXPORT QString tempName(const QString &filename);
 
+    QTOPIABASE_EXPORT QString sandboxDir();
     QTOPIABASE_EXPORT QString applicationFileName(const QString& appname, const QString& filename);
 
     QTOPIABASE_EXPORT bool isDocumentFileName(const QString& file);
@@ -69,7 +71,9 @@ namespace Qtopia
     QTOPIABASE_EXPORT bool mousePreferred();
     QTOPIABASE_EXPORT bool hasKey(int key);
 
+#ifndef QTOPIA_CONTENT_INSTALLER
     QTOPIABASE_EXPORT void execute(const QString &exec, const QString &document=QString());
+#endif
 
     /*
 
@@ -93,7 +97,7 @@ namespace Qtopia
 
     QTOPIABASE_EXPORT bool weekStartsOnMonday();
     QTOPIABASE_EXPORT void setWeekStartsOnMonday(bool );
-    
+
     QTOPIABASE_EXPORT QVariant findDisplayFont(const QString &s);
 
     /*
@@ -103,9 +107,7 @@ namespace Qtopia
     */
     QTOPIABASE_EXPORT void addAlarm ( QDateTime when, const QString& channel, const QString& msg, int data=0);
     QTOPIABASE_EXPORT void deleteAlarm (QDateTime when, const QString& channel, const QString& msg, int data=0);
-#ifdef Q_WS_QWS
     QTOPIABASE_EXPORT void writeHWClock();
-#endif
 
     /*
 
@@ -124,13 +126,10 @@ namespace Qtopia
     QTOPIABASE_EXPORT void msleep(unsigned long msecs);
     QTOPIABASE_EXPORT void usleep(unsigned long usecs);
 
-#ifdef Q_WS_QWS
     QTOPIABASE_EXPORT QString version();
-    QTOPIABASE_EXPORT QString compatibleVersions();
     QTOPIABASE_EXPORT QString architecture();
     QTOPIABASE_EXPORT QString deviceId();
     QTOPIABASE_EXPORT QString ownerName();
-#endif
 
     /*
 
@@ -138,7 +137,6 @@ namespace Qtopia
 
     */
 
-#ifdef Q_WS_QWS
     // Dictionaries
     QTOPIABASE_EXPORT const QDawg& fixedDawg();
     QTOPIABASE_EXPORT const QDawg& addedDawg();
@@ -149,7 +147,16 @@ namespace Qtopia
     QTOPIABASE_EXPORT void removeWords(const QStringList& word);
     QTOPIABASE_EXPORT void removeWords(const QString& dictname, const QStringList& word);
     QTOPIABASE_EXPORT void qtopiaReloadWords( const QString& dictname );
-#endif
+
+    /*
+
+    Qtopia enums
+
+    */
+    enum ItemDataRole {
+        AdditionalDecorationRole = 1000,
+        UserRole = 2000
+    };
 
 }
 #endif

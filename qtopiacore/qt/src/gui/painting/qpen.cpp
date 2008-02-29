@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -239,7 +254,9 @@ public:
     Qt::PenCapStyle capStyle;
     Qt::PenJoinStyle joinStyle;
     mutable QVector<qreal> dashPattern;
+    qreal dashOffset;
     qreal miterLimit;
+    uint cosmetic : 1;
 };
 
 
@@ -249,8 +266,10 @@ public:
 inline QPenPrivate::QPenPrivate(const QBrush &_brush, qreal _width, Qt::PenStyle penStyle,
                                 Qt::PenCapStyle _capStyle, Qt::PenJoinStyle _joinStyle)
     : ref(1), width(_width), brush(_brush), style(penStyle), capStyle(_capStyle),
-      joinStyle(_joinStyle), miterLimit(2)
+      joinStyle(_joinStyle), dashOffset(0), miterLimit(2),
+      cosmetic(false)
 {
+
 }
 
 static const Qt::PenCapStyle qpen_default_cap = Qt::SquareCap;
@@ -395,6 +414,8 @@ void QPen::detach()
                                      d->joinStyle);
     x->miterLimit = d->miterLimit;
     x->dashPattern = d->dashPattern;
+    x->dashOffset = d->dashOffset;
+    x->cosmetic = d->cosmetic;
     x = qAtomicSetPtr(&d, x);
     if (!x->ref.deref())
         delete x;
@@ -537,6 +558,29 @@ void QPen::setDashPattern(const QVector<qreal> &pattern)
         qWarning("QPen::setDashPattern: Pattern not of even length");
         d->dashPattern << 1;
     }
+}
+
+
+/*!
+    Returns the dash offset for the pen.
+
+    \sa setDashOffset()
+*/
+qreal QPen::dashOffset() const
+{
+    return d->dashOffset;
+}
+/*!
+    Sets the dash offset for this pen to the given \a offset. This
+    implicitly converts the style of the pen to Qt::CustomDashLine.
+*/
+void QPen::setDashOffset(qreal offset)
+{
+    if (qFuzzyCompare(offset, d->dashOffset))
+        return;
+    detach();
+    d->dashOffset = offset;
+    d->style = Qt::CustomDashLine;
 }
 
 /*!
@@ -763,6 +807,41 @@ bool QPen::isSolid() const
 
 
 /*!
+    Returns true if the pen is cosmetic; otherwise returns false.
+
+    Cosmetic pens are used to draw strokes that have a constant width
+    regardless of any transformations applied to the QPainter they are
+    used with. Drawing a shape with a cosmetic pen ensures that its
+    outline will have the same thickness at different scale factors.
+
+    A zero width pen is cosmetic by default; pens with a non-zero width
+    are non-cosmetic.
+
+    \sa setCosmetic(), widthF()
+*/
+
+bool QPen::isCosmetic() const
+{
+    return (d->cosmetic == true) || d->width == 0;
+}
+
+
+/*!
+    Sets this pen to cosmetic or non-cosmetic, depending on the value of
+    \a cosmetic.
+
+    \sa isCosmetic()
+*/
+
+void QPen::setCosmetic(bool cosmetic)
+{
+    detach();
+    d->cosmetic = cosmetic;
+}
+
+
+
+/*!
     \fn bool QPen::operator!=(const QPen &pen) const
 
     Returns true if the pen is different from the given \a pen;
@@ -790,7 +869,8 @@ bool QPen::operator==(const QPen &p) const
                           && p.d->width == d->width
                           && p.d->miterLimit == d->miterLimit
                           && (d->style != Qt::CustomDashLine
-                              || p.dashPattern() == dashPattern())
+                              || (qFuzzyCompare(p.dashOffset(), dashOffset()) &&
+                                  p.dashPattern() == dashPattern()))
                           && p.d->brush == d->brush);
 }
 
@@ -823,10 +903,14 @@ bool QPen::isDetached()
 
 QDataStream &operator<<(QDataStream &s, const QPen &p)
 {
-    if (s.version() < 3)
+    if (s.version() < 3) {
         s << (quint8)p.style();
-    else
+    } else if (s.version() < QDataStream::Qt_4_3) {
         s << (quint8)(p.style() | p.capStyle() | p.joinStyle());
+    } else {
+        s << (quint16)(p.style() | p.capStyle() | p.joinStyle());
+        s << p.isCosmetic();
+    }
 
     if (s.version() < 7) {
         s << (quint8)p.width();
@@ -835,7 +919,19 @@ QDataStream &operator<<(QDataStream &s, const QPen &p)
         s << double(p.widthF());
         s << p.brush();
         s << double(p.miterLimit());
-        s << p.dashPattern();
+        if (sizeof(qreal) == sizeof(double)) {
+            s << p.dashPattern();
+        } else {
+            // ensure that we write doubles here instead of streaming the pattern
+            // directly; otherwise, platforms that redefine qreal might generate
+            // data that cannot be read on other platforms.
+            QVector<qreal> pattern = p.dashPattern();
+            s << quint32(pattern.size());
+            for (int i = 0; i < pattern.size(); ++i)
+                s << double(pattern.at(i));
+        }
+        if (s.version() >= 9)
+            s << double(p.dashOffset());
     }
     return s;
 }
@@ -852,14 +948,23 @@ QDataStream &operator<<(QDataStream &s, const QPen &p)
 
 QDataStream &operator>>(QDataStream &s, QPen &p)
 {
-    quint8 style;
+    quint16 style;
     quint8 width8 = 0;
     double width = 0;
     QColor color;
     QBrush brush;
     double miterLimit = 2;
     QVector<qreal> dashPattern;
-    s >> style;
+    double dashOffset = 0;
+    bool cosmetic = false;
+    if (s.version() < QDataStream::Qt_4_3) {
+        quint8 style8;
+        s >> style8;
+        style = style8;
+    } else {
+        s >> style;
+        s >> cosmetic;
+    }
     if (s.version() < 7) {
         s >> width8;
         s >> color;
@@ -869,7 +974,19 @@ QDataStream &operator>>(QDataStream &s, QPen &p)
         s >> width;
         s >> brush;
         s >> miterLimit;
-        s >> dashPattern;
+        if (sizeof(qreal) == sizeof(double)) {
+            s >> dashPattern;
+        } else {
+            quint32 numDashes;
+            s >> numDashes;
+            double dash;
+            for (quint32 i = 0; i < numDashes; ++i) {
+                s >> dash;
+                dashPattern << dash;
+            }
+        }
+        if (s.version() >= 9)
+            s >> dashOffset;
     }
 
     p.detach();
@@ -880,6 +997,8 @@ QDataStream &operator>>(QDataStream &s, QPen &p)
     p.d->joinStyle = Qt::PenJoinStyle(style & Qt::MPenJoinStyle);
     p.d->dashPattern = dashPattern;
     p.d->miterLimit = miterLimit;
+    p.d->dashOffset = dashOffset;
+    p.d->cosmetic = cosmetic;
 
     return s;
 }
@@ -892,6 +1011,7 @@ QDebug operator<<(QDebug dbg, const QPen &p)
     dbg.nospace() << "QPen(" << p.width() << ',' << p.brush()
                   << ',' << int(p.style()) << ',' << int(p.capStyle())
                   << ',' << int(p.joinStyle()) << ',' << p.dashPattern()
+                  << "," << p.dashOffset()
                   << ',' << p.miterLimit() << ')';
     return dbg.space();
 #else
@@ -902,3 +1022,12 @@ QDebug operator<<(QDebug dbg, const QPen &p)
 }
 #endif
 
+/*!
+    \fn DataPtr &QPen::data_ptr()
+    \internal
+*/
+
+/*!
+    \typedef QPen::DataPtr
+    \internal
+*/

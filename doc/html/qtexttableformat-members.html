@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: List of All Members for QTextTableFormat</title>
+  <title>Qt 4.3: List of All Members for QTextTableFormat</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -15,6 +15,7 @@
 <p>This is the complete list of members for <a href="qtexttableformat.html">QTextTableFormat</a>, including inherited members.</p>
 <p><table width="100%" border="0" cellpadding="0" cellspacing="0">
 <tr><td width="45%" valign="top"><ul>
+<li><div class="fn"/>enum <a href="qtextframeformat.html#BorderStyle-enum">BorderStyle</a></li>
 <li><div class="fn"/>enum <a href="qtextformat.html#FormatType-enum">FormatType</a></li>
 <li><div class="fn"/>enum <a href="qtextformat.html#ObjectTypes-enum">ObjectTypes</a></li>
 <li><div class="fn"/>enum <a href="qtextformat.html#PageBreakFlag-enum">PageBreakFlag</a></li>
@@ -26,6 +27,9 @@
 <li><div class="fn"/><a href="qtextformat.html#background">background</a> () const : QBrush</li>
 <li><div class="fn"/><a href="qtextformat.html#boolProperty">boolProperty</a> ( int ) const : bool</li>
 <li><div class="fn"/><a href="qtextframeformat.html#border">border</a> () const : qreal</li>
+<li><div class="fn"/><a href="qtextframeformat.html#borderBrush">borderBrush</a> () const : QBrush</li>
+<li><div class="fn"/><a href="qtextframeformat.html#borderStyle">borderStyle</a> () const : BorderStyle</li>
+<li><div class="fn"/><a href="qtextframeformat.html#bottomMargin">bottomMargin</a> () const : qreal</li>
 <li><div class="fn"/><a href="qtextformat.html#brushProperty">brushProperty</a> ( int ) const : QBrush</li>
 <li><div class="fn"/><a href="qtexttableformat.html#cellPadding">cellPadding</a> () const : qreal</li>
 <li><div class="fn"/><a href="qtexttableformat.html#cellSpacing">cellSpacing</a> () const : qreal</li>
@@ -50,31 +54,37 @@
 <li><div class="fn"/><a href="qtextformat.html#isTableFormat">isTableFormat</a> () const : bool</li>
 <li><div class="fn"/><a href="qtexttableformat.html#isValid">isValid</a> () const : bool</li>
 <li><div class="fn"/><a href="qtextformat.html#layoutDirection">layoutDirection</a> () const : Qt::LayoutDirection</li>
+<li><div class="fn"/><a href="qtextframeformat.html#leftMargin">leftMargin</a> () const : qreal</li>
 <li><div class="fn"/><a href="qtextformat.html#lengthProperty">lengthProperty</a> ( int ) const : QTextLength</li>
 <li><div class="fn"/><a href="qtextformat.html#lengthVectorProperty">lengthVectorProperty</a> ( int ) const : QVector&lt;QTextLength&gt;</li>
 <li><div class="fn"/><a href="qtextframeformat.html#margin">margin</a> () const : qreal</li>
 <li><div class="fn"/><a href="qtextformat.html#merge">merge</a> ( const QTextFormat &amp; )</li>
 <li><div class="fn"/><a href="qtextformat.html#objectIndex">objectIndex</a> () const : int</li>
 <li><div class="fn"/><a href="qtextformat.html#objectType">objectType</a> () const : int</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qtextframeformat.html#padding">padding</a> () const : qreal</li>
 <li><div class="fn"/><a href="qtextframeformat.html#pageBreakPolicy">pageBreakPolicy</a> () const : PageBreakFlags</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qtextformat.html#penProperty">penProperty</a> ( int ) const : QPen</li>
 <li><div class="fn"/><a href="qtextframeformat.html#position">position</a> () const : Position</li>
 <li><div class="fn"/><a href="qtextformat.html#properties">properties</a> () const : QMap&lt;int, QVariant&gt;</li>
 <li><div class="fn"/><a href="qtextformat.html#property">property</a> ( int ) const : QVariant</li>
+<li><div class="fn"/><a href="qtextformat.html#propertyCount">propertyCount</a> () const : int</li>
+<li><div class="fn"/><a href="qtextframeformat.html#rightMargin">rightMargin</a> () const : qreal</li>
 <li><div class="fn"/><a href="qtexttableformat.html#setAlignment">setAlignment</a> ( Qt::Alignment )</li>
 <li><div class="fn"/><a href="qtextformat.html#setBackground">setBackground</a> ( const QBrush &amp; )</li>
 <li><div class="fn"/><a href="qtextframeformat.html#setBorder">setBorder</a> ( qreal )</li>
+<li><div class="fn"/><a href="qtextframeformat.html#setBorderBrush">setBorderBrush</a> ( const QBrush &amp; )</li>
+<li><div class="fn"/><a href="qtextframeformat.html#setBorderStyle">setBorderStyle</a> ( BorderStyle )</li>
+<li><div class="fn"/><a href="qtextframeformat.html#setBottomMargin">setBottomMargin</a> ( qreal )</li>
 <li><div class="fn"/><a href="qtexttableformat.html#setCellPadding">setCellPadding</a> ( qreal )</li>
 <li><div class="fn"/><a href="qtexttableformat.html#setCellSpacing">setCellSpacing</a> ( qreal )</li>
 <li><div class="fn"/><a href="qtexttableformat.html#setColumnWidthConstraints">setColumnWidthConstraints</a> ( const QVector&lt;QTextLength&gt; &amp; )</li>
-<li><div class="fn"/><a href="qtexttableformat.html#setColumns">setColumns</a> ( int )</li>
 <li><div class="fn"/><a href="qtextformat.html#setForeground">setForeground</a> ( const QBrush &amp; )</li>
 <li><div class="fn"/><a href="qtexttableformat.html#setHeaderRowCount">setHeaderRowCount</a> ( int )</li>
 <li><div class="fn"/><a href="qtextframeformat.html#setHeight">setHeight</a> ( const QTextLength &amp; )</li>
 <li><div class="fn"/><a href="qtextframeformat.html#setHeight-2">setHeight</a> ( qreal )</li>
 <li><div class="fn"/><a href="qtextformat.html#setLayoutDirection">setLayoutDirection</a> ( Qt::LayoutDirection )</li>
+<li><div class="fn"/><a href="qtextframeformat.html#setLeftMargin">setLeftMargin</a> ( qreal )</li>
 <li><div class="fn"/><a href="qtextframeformat.html#setMargin">setMargin</a> ( qreal )</li>
 <li><div class="fn"/><a href="qtextformat.html#setObjectIndex">setObjectIndex</a> ( int )</li>
 <li><div class="fn"/><a href="qtextformat.html#setObjectType">setObjectType</a> ( int )</li>
@@ -83,6 +93,8 @@
 <li><div class="fn"/><a href="qtextframeformat.html#setPosition">setPosition</a> ( Position )</li>
 <li><div class="fn"/><a href="qtextformat.html#setProperty">setProperty</a> ( int, const QVariant &amp; )</li>
 <li><div class="fn"/><a href="qtextformat.html#setProperty-2">setProperty</a> ( int, const QVector&lt;QTextLength&gt; &amp; )</li>
+<li><div class="fn"/><a href="qtextframeformat.html#setRightMargin">setRightMargin</a> ( qreal )</li>
+<li><div class="fn"/><a href="qtextframeformat.html#setTopMargin">setTopMargin</a> ( qreal )</li>
 <li><div class="fn"/><a href="qtextframeformat.html#setWidth">setWidth</a> ( const QTextLength &amp; )</li>
 <li><div class="fn"/><a href="qtextframeformat.html#setWidth-2">setWidth</a> ( qreal )</li>
 <li><div class="fn"/><a href="qtextformat.html#stringProperty">stringProperty</a> ( int ) const : QString</li>
@@ -92,6 +104,7 @@
 <li><div class="fn"/><a href="qtextformat.html#toImageFormat">toImageFormat</a> () const : QTextImageFormat</li>
 <li><div class="fn"/><a href="qtextformat.html#toListFormat">toListFormat</a> () const : QTextListFormat</li>
 <li><div class="fn"/><a href="qtextformat.html#toTableFormat">toTableFormat</a> () const : QTextTableFormat</li>
+<li><div class="fn"/><a href="qtextframeformat.html#topMargin">topMargin</a> () const : qreal</li>
 <li><div class="fn"/><a href="qtextformat.html#type">type</a> () const : int</li>
 <li><div class="fn"/><a href="qtextframeformat.html#width">width</a> () const : QTextLength</li>
 <li><div class="fn"/><a href="qtextformat.html#operator-QVariant">operator QVariant</a> () const</li>
@@ -105,6 +118,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

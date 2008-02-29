@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,6 +49,7 @@
 #include "qtextdocument_p.h"
 #include "qtextcursor.h"
 #include "qfont_p.h"
+#include "private/qunicodetables_p.h"
 
 #define MAX_ENTITY 258
 static const struct QTextHtmlEntity { const char *name; quint16 code; } entities[MAX_ENTITY]= {
@@ -317,6 +333,41 @@ static QChar resolveEntity(const QString &entity)
     return e->code;
 }
 
+static const uint windowsLatin1ExtendedCharacters[0xA0 - 0x80] = {
+    0x20ac, // 0x80
+    0x0081, // 0x81 direct mapping
+    0x201a, // 0x82
+    0x0192, // 0x83
+    0x201e, // 0x84
+    0x2026, // 0x85
+    0x2020, // 0x86
+    0x2021, // 0x87
+    0x02C6, // 0x88
+    0x2030, // 0x89
+    0x0160, // 0x8A
+    0x2039, // 0x8B
+    0x0152, // 0x8C
+    0x008D, // 0x8D direct mapping
+    0x017D, // 0x8E
+    0x008F, // 0x8F directmapping
+    0x0090, // 0x90 directmapping
+    0x2018, // 0x91
+    0x2019, // 0x92
+    0x201C, // 0x93
+    0X201D, // 0x94
+    0x2022, // 0x95
+    0x2013, // 0x96
+    0x2014, // 0x97
+    0x02DC, // 0x98
+    0x2122, // 0x99
+    0x0161, // 0x9A
+    0x203A, // 0x9B
+    0x0153, // 0x9C
+    0x009D, // 0x9D direct mapping
+    0x017E, // 0x9E
+    0x0178  // 0x9F
+};
+
 // the displayMode value is according to the what are blocks in the piecetable, not
 // what the w3c defines.
 static const QTextHtmlElement elements[Html_NumElements]= {
@@ -327,6 +378,7 @@ static const QTextHtmlElement elements[Html_NumElements]= {
     { "blockquote", Html_blockquote, QTextHtmlElement::DisplayBlock },
     { "body",       Html_body,       QTextHtmlElement::DisplayBlock },
     { "br",         Html_br,         QTextHtmlElement::DisplayInline },
+    { "caption",    Html_caption,    QTextHtmlElement::DisplayBlock },
     { "center",     Html_center,     QTextHtmlElement::DisplayBlock },
     { "cite",       Html_cite,       QTextHtmlElement::DisplayInline },
     { "code",       Html_code,       QTextHtmlElement::DisplayInline },
@@ -417,87 +469,19 @@ static QString quoteNewline(const QString &s)
 }
 
 QTextHtmlParserNode::QTextHtmlParserNode()
-    : parent(0), id(-1), isBlock(false), isListItem(false), isListStart(false), isTableCell(false), isAnchor(false),
-      fontItalic(Unspecified), fontUnderline(Unspecified), fontOverline(Unspecified), fontStrikeOut(Unspecified), fontFixedPitch(Unspecified),
-      cssFloat(QTextFrameFormat::InFlow), hasOwnListStyle(false), hasFontPointSize(false), hasFontPixelSize(false), hasFontSizeAdjustment(false),
-      hasCssBlockIndent(false), hasCssListIndent(false), isEmptyParagraph(false), isTextFrame(false), direction(3),
-      displayMode(QTextHtmlElement::DisplayInline), fontPointSize(-1), fontPixelSize(-1), fontSizeAdjustment(0),
-      fontWeight(-1), alignment(0), verticalAlignment(QTextCharFormat::AlignNormal),
+    : parent(0), id(Html_unknown),
+      cssFloat(QTextFrameFormat::InFlow), hasOwnListStyle(false),
+      hasCssListIndent(false), isEmptyParagraph(false), isTextFrame(false), isRootFrame(false),
+      displayMode(QTextHtmlElement::DisplayInline), hasHref(false),
       listStyle(QTextListFormat::ListStyleUndefined), imageWidth(-1), imageHeight(-1), tableBorder(0),
-      tableCellRowSpan(1), tableCellColSpan(1), tableCellSpacing(2), tableCellPadding(0), cssBlockIndent(0),
-      cssListIndent(0), text_indent(0), wsm(WhiteSpaceModeUndefined)
+      tableCellRowSpan(1), tableCellColSpan(1), tableCellSpacing(2), tableCellPadding(0),
+      borderBrush(Qt::darkGray), borderStyle(QTextFrameFormat::BorderStyle_Outset),
+      userState(-1), cssListIndent(0), wsm(WhiteSpaceModeUndefined)
 {
     margin[QTextHtmlParser::MarginLeft] = 0;
     margin[QTextHtmlParser::MarginRight] = 0;
     margin[QTextHtmlParser::MarginTop] = 0;
     margin[QTextHtmlParser::MarginBottom] = 0;
-    pageBreakPolicy = QTextFormat::PageBreak_Auto;
-}
-
-QTextCharFormat QTextHtmlParserNode::charFormat() const
-{
-    QTextCharFormat format;
-
-    if (fontItalic != Unspecified) {
-        format.setFontItalic(fontItalic == On);
-    }
-    if (fontUnderline != Unspecified) {
-        format.setFontUnderline(fontUnderline == On);
-    }
-    if (fontOverline != Unspecified) {
-        format.setFontOverline(fontOverline == On);
-    }
-    if (fontStrikeOut != Unspecified) {
-        format.setFontStrikeOut(fontStrikeOut == On);
-    }
-    if (fontFixedPitch != Unspecified) {
-        format.setFontFixedPitch(fontFixedPitch == On);
-    }
-    if (fontFamily.size())
-        format.setFontFamily(fontFamily);
-
-    if (hasFontPointSize)
-        format.setFontPointSize(fontPointSize);
-    else if (hasFontPixelSize)
-        format.setProperty(QTextFormat::FontPixelSize, fontPixelSize);
-
-    if (hasFontSizeAdjustment)
-        format.setProperty(QTextFormat::FontSizeAdjustment, fontSizeAdjustment);
-    if (fontWeight > 0)
-        format.setFontWeight(fontWeight);
-    if (foreground.style() != Qt::NoBrush)
-        format.setForeground(foreground);
-    if (background.style() != Qt::NoBrush)
-        format.setBackground(background);
-    if (verticalAlignment != QTextCharFormat::AlignNormal)
-        format.setVerticalAlignment(verticalAlignment);
-    if (isAnchor) {
-        format.setAnchor(true);
-        format.setAnchorHref(anchorHref);
-        format.setAnchorName(anchorName);
-    }
-
-    return format;
-}
-
-QTextBlockFormat QTextHtmlParserNode::blockFormat() const
-{
-    QTextBlockFormat format;
-
-    if (alignment)
-        format.setAlignment(alignment);
-    if (direction < 2)
-        format.setLayoutDirection(Qt::LayoutDirection(direction));
-
-    if (hasCssBlockIndent)
-        format.setIndent(cssBlockIndent);
-    if (text_indent != 0.)
-        format.setTextIndent(text_indent);
-
-    if (pageBreakPolicy != QTextFormat::PageBreak_Auto)
-        format.setPageBreakPolicy(pageBreakPolicy);
-
-    return format;
 }
 
 void QTextHtmlParser::dumpHtml()
@@ -525,7 +509,7 @@ QTextHtmlParserNode *QTextHtmlParser::newNode(int parent)
             reuseLastNode = true;
         } else { // last node is a text node (empty tag) with some text
 
-            if (lastNode->text == QLatin1String(" ")) {
+            if (lastNode->text.length() == 1 && lastNode->text.at(0).isSpace()) {
 
                 int lastSibling = count() - 2;
                 while (lastSibling
@@ -555,7 +539,7 @@ QTextHtmlParserNode *QTextHtmlParser::newNode(int parent)
         newNode = lastNode;
         newNode->tag.clear();
         newNode->text.clear();
-        newNode->id = -1;
+        newNode->id = Html_unknown;
     } else {
         nodes.resize(nodes.size() + 1);
         newNode = &nodes.last();
@@ -595,9 +579,9 @@ int QTextHtmlParser::margin(int i, int mar) const {
         || mar == MarginRight) {
         while (i) {
             node = &at(i);
-            if (!node->isBlock)
+            if (!node->isBlock() && node->id != Html_table)
                 break;
-            if (node->isTableCell)
+            if (node->isTableCell())
                 break;
             m += node->margin[mar];
             i = node->parent;
@@ -611,41 +595,6 @@ int QTextHtmlParser::topMargin(int i) const
     if (!i)
         return 0;
     return at(i).margin[MarginTop];
-    // we do margin collapsing in QTextDocumentFragment
-#if 0
-    int m = 0;
-    const QTextHtmlParserNode *node;
-    while (i) {
-        node = &at(i);
-        if (!node->isBlock)
-            return 0;
-        m = qMax(m, node->margin[MarginTop]);
-
-        // collapsing margins across table cells makes no sense
-        if (node->isTableCell)
-            break;
-
-        // don't collapse margins across list items
-        // (the top margin of the list is merged as part of the block
-        // merging in documentfragment.cpp)
-        if (node->isListItem)
-            break;
-
-        // <ul>
-        //  ..
-        //  <ul> <-- this one should not take the first <ul>'s margin into account
-        if (node->isNestedList(this))
-            break;
-
-        // get previous block
-        while (i-1 && !at(i-1).isBlock)
-            --i;
-        if (i && node->parent == at(i).parent)
-            break;
-        i = node->parent;
-    }
-    return m;
-#endif
 }
 
 int QTextHtmlParser::bottomMargin(int i) const
@@ -653,39 +602,6 @@ int QTextHtmlParser::bottomMargin(int i) const
     if (!i)
         return 0;
     return at(i).margin[MarginBottom];
-#if 0
-    // we do margin collapsing in QTextDocumentFragment
-    int m = 0;
-    const QTextHtmlParserNode *node;
-    while (i) {
-        node = &at(i);
-        if (!node->isBlock)
-            return 0;
-        m = qMax(m, node->margin[MarginBottom]);
-
-        // collapsing margins across table cells makes no sense
-        if (node->isTableCell)
-            break;
-
-        // don't collapse margins across list items
-        if (node->isListItem)
-            break;
-
-        // <ul>
-        //  ..
-        //  <ul> <-- this one should not take the first <ul>'s margin into account
-        if (node->isNestedList(this))
-            break;
-
-        // get next block
-        while (i+1 < count() && !at(i+1).isBlock)
-            ++i;
-        if (i && node->parent == at(i).parent)
-            break;
-        i = node->parent;
-    }
-    return m;
-#endif
 }
 
 void QTextHtmlParser::eatSpace()
@@ -704,25 +620,6 @@ void QTextHtmlParser::parse() {
         } else if (c == QLatin1Char('&')) {
             nodes.last().text += parseEntity();
         } else {
-            if (c.isSpace() && c != QChar(QChar::Nbsp) && c != QChar::ParagraphSeparator) {
-                if (wsm == QTextHtmlParserNode::WhiteSpacePre
-                    || textEditMode) {
-                    if (c == QLatin1Char('\n')) {
-                        if (textEditMode)
-                            continue;
-                    } else if (c == QLatin1Char('\r')) {
-                        continue;
-                    }
-                } else if (wsm != QTextHtmlParserNode::WhiteSpacePreWrap) { // non-pre mode: collapse whitespace except nbsp
-                    while (pos < len && txt.at(pos).isSpace()
-                           && txt.at(pos) != QChar::Nbsp)
-                        pos++;
-                    if (wsm == QTextHtmlParserNode::WhiteSpaceNoWrap)
-                        c = QChar::Nbsp;
-                    else
-                        c = QLatin1Char(' ');
-                }
-            }
             nodes.last().text += c;
         }
     }
@@ -761,7 +658,6 @@ void QTextHtmlParser::parseTag()
         p = at(p).parent;
 
     QTextHtmlParserNode *node = newNode(p);
-    const int nodeIndex = int(QVector<QTextHtmlParserNode>::const_iterator(node) - nodes.constBegin());
 
     // parse tag name
     node->tag = parseWord().toLower();
@@ -769,24 +665,23 @@ void QTextHtmlParser::parseTag()
     const QTextHtmlElement *elem = ::lookupElement(node->tag);
     if (elem) {
         node->id = elem->id;
-        node->isBlock = (elem->displayMode == QTextHtmlElement::DisplayBlock);
         node->displayMode = elem->displayMode;
     } else {
-        node->id = -1;
+        node->id = Html_unknown;
     }
-
-    node->isListItem = (node->id == Html_li);
-    node->isListStart = (node->id == Html_ol || node->id == Html_ul);
-    node->isTableCell = (node->id == Html_td || node->id == Html_th);
 
     node->attributes.clear();
     // _need_ at least one space after the tag name, otherwise there can't be attributes
     if (pos < len && txt.at(pos).isSpace())
         node->attributes = parseAttributes();
 
-    resolveParent();
+    // resolveParent() may have to change the order in the tree and
+    // insert intermediate nodes for buggy HTML, so re-initialize the 'node'
+    // pointer through the return value
+    node = resolveParent();
     resolveNode();
 
+    const int nodeIndex = nodes.count() - 1; // this new node is always the last
     node->applyCssDeclarations(declarationsForNode(nodeIndex), resourceProvider);
     applyAttributes(node->attributes);
 
@@ -796,15 +691,18 @@ void QTextHtmlParser::parseTag()
         if (txt.at(pos) == QLatin1Char('/'))
             tagClosed = true;
 
-
         pos++;
     }
     pos++;
 
-    if (node->wsm != QTextHtmlParserNode::WhiteSpacePre
-        && node->wsm != QTextHtmlParserNode::WhiteSpacePreWrap
-        && !textEditMode)
-        eatSpace();
+    // in a white-space preserving environment strip off a initial newline
+    // since the element itself already generates a newline
+    if ((node->wsm == QTextHtmlParserNode::WhiteSpacePre
+         || node->wsm == QTextHtmlParserNode::WhiteSpacePreWrap)
+        && node->isBlock()) {
+        if (pos < len - 1 && txt.at(pos) == QLatin1Char('\n'))
+            ++pos;
+    }
 
     if (node->mayNotHaveChildren() || tagClosed) {
         newNode(node->parent);
@@ -838,6 +736,17 @@ void QTextHtmlParser::parseCloseTag()
     // html such as <font>blah</font></font>
     if (!p)
         return;
+
+    // in a white-space preserving environment strip off a trailing newline
+    // since the closing of the opening block element will automatically result
+    // in a new block for elements following the <pre>
+    // ...foo\n</pre><p>blah -> foo</pre><p>blah
+    if ((at(p).wsm == QTextHtmlParserNode::WhiteSpacePre
+         || at(p).wsm == QTextHtmlParserNode::WhiteSpacePreWrap)
+        && at(p).isBlock()) {
+        if (at(last()).text.endsWith(QLatin1Char('\n')))
+            nodes[last()].text.chop(1);
+    }
 
     newNode(at(p).parent);
     resolveNode();
@@ -892,10 +801,10 @@ QString QTextHtmlParser::parseEntity()
             base = 16;
         }
 
-        int uc = entity.toInt(&ok, base);
+        uint uc = entity.toUInt(&ok, base);
         if (ok) {
-            if (uc == 151) // ### hack for designer manual
-                uc = '-';
+            if (uc >= 0x80 && uc < 0x80 + (sizeof(windowsLatin1ExtendedCharacters)/sizeof(windowsLatin1ExtendedCharacters[0])))
+                uc = windowsLatin1ExtendedCharacters[uc - 0x80];
             QString str;
             if (uc > 0xffff) {
                 // surrogate pair
@@ -960,10 +869,55 @@ QString QTextHtmlParser::parseWord()
 }
 
 // gives the new node the right parent
-void QTextHtmlParser::resolveParent()
+QTextHtmlParserNode *QTextHtmlParser::resolveParent()
 {
     QTextHtmlParserNode *node = &nodes.last();
+
     int p = node->parent;
+
+    // Excel gives us buggy HTML with just tr without surrounding table tags
+    // or with just td tags
+
+    if (node->id == Html_td) {
+        int n = p;
+        while (n && at(n).id != Html_tr)
+            n = at(n).parent;
+
+        if (!n) {
+            nodes.insert(nodes.count() - 1, QTextHtmlParserNode());
+            nodes.insert(nodes.count() - 1, QTextHtmlParserNode());
+
+            QTextHtmlParserNode *table = &nodes[nodes.count() - 3];
+            table->parent = p;
+            table->id = Html_table;
+            table->tag = QLatin1String("table");
+            table->children.append(nodes.count() - 2); // add row as child
+
+            QTextHtmlParserNode *row = &nodes[nodes.count() - 2];
+            row->parent = nodes.count() - 3; // table as parent
+            row->id = Html_tr;
+            row->tag = QLatin1String("tr");
+
+            p = nodes.count() - 2;
+            node = &nodes.last(); // re-initialize pointer
+        }
+    }
+
+    if (node->id == Html_tr) {
+        int n = p;
+        while (n && at(n).id != Html_table)
+            n = at(n).parent;
+
+        if (!n) {
+            nodes.insert(nodes.count() - 1, QTextHtmlParserNode());
+            QTextHtmlParserNode *table = &nodes[nodes.count() - 2];
+            table->parent = p;
+            table->id = Html_table;
+            table->tag = QLatin1String("table");
+            p = nodes.count() - 2;
+            node = &nodes.last(); // re-initialize pointer
+        }
+    }
 
     // permit invalid html by letting block elements be children
     // of inline elements with the exception of paragraphs:
@@ -985,7 +939,7 @@ void QTextHtmlParser::resolveParent()
     // <body><b><p>Foo<p>Bar <-- Foo and Bar should be bold.
     //
     if (node->id == Html_p) {
-        while (p && !at(p).isBlock)
+        while (p && !at(p).isBlock())
             p = at(p).parent;
 
         if (!p || at(p).id != Html_p)
@@ -1009,6 +963,7 @@ void QTextHtmlParser::resolveParent()
 
     // makes it easier to traverse the tree, later
     nodes[p].children.append(nodes.count() - 1);
+    return node;
 }
 
 // sets all properties on the new node
@@ -1021,12 +976,12 @@ void QTextHtmlParser::resolveNode()
 
 bool QTextHtmlParserNode::isNestedList(const QTextHtmlParser *parser) const
 {
-    if (!isListStart)
+    if (!isListStart())
         return false;
 
     int p = parent;
     while (p) {
-        if (parser->at(p).isListStart)
+        if (parser->at(p).isListStart())
             return true;
         p = parser->at(p).parent;
     }
@@ -1036,40 +991,29 @@ bool QTextHtmlParserNode::isNestedList(const QTextHtmlParser *parser) const
 void QTextHtmlParserNode::initializeProperties(const QTextHtmlParserNode *parent, const QTextHtmlParser *parser)
 {
     // inherit properties from parent element
-    isAnchor = parent->isAnchor;
-    fontItalic = parent->fontItalic;
-    fontUnderline = parent->fontUnderline;
-    fontOverline = parent->fontOverline;
-    fontStrikeOut = parent->fontStrikeOut;
-    fontFixedPitch = parent->fontFixedPitch;
-    fontFamily = parent->fontFamily;
-    hasFontPointSize = parent->hasFontPointSize;
-    fontPointSize = parent->fontPointSize;
-    hasFontPixelSize = parent->hasFontPixelSize;
-    fontPixelSize = parent->fontPixelSize;
-    fontSizeAdjustment = parent->fontSizeAdjustment;
-    hasFontSizeAdjustment = parent->hasFontSizeAdjustment;
-    fontWeight = parent->fontWeight;
-    foreground = parent->foreground;
-    verticalAlignment = parent->verticalAlignment;
+    charFormat = parent->charFormat;
 
     if (parent->displayMode == QTextHtmlElement::DisplayNone)
         displayMode = QTextHtmlElement::DisplayNone;
 
-    if (parent->id != Html_table) {
-        alignment = parent->alignment;
+    if (parent->id != Html_table || id == Html_caption) {
+        if (parent->blockFormat.hasProperty(QTextFormat::BlockAlignment))
+            blockFormat.setAlignment(parent->blockFormat.alignment());
+        else
+            blockFormat.clearProperty(QTextFormat::BlockAlignment);
     }
     // we don't paint per-row background colors, yet. so as an
     // exception inherit the background color here
-    if (parent->id == Html_tr && isTableCell) {
-        background = parent->background;
+    // we also inherit the background between inline elements
+    if ((parent->id != Html_tr || !isTableCell())
+        && (displayMode != QTextHtmlElement::DisplayInline || parent->displayMode != QTextHtmlElement::DisplayInline)) {
+        charFormat.clearProperty(QTextFormat::BackgroundBrush);
     }
 
     listStyle = parent->listStyle;
-    anchorHref = parent->anchorHref;
     // makes no sense to inherit that property, a named anchor is a single point
     // in the document, which is set by the DocumentFragment
-    //anchorName = parent->anchorName;
+    charFormat.clearProperty(QTextFormat::AnchorName);
     wsm = parent->wsm;
 
     // initialize remaining properties
@@ -1079,18 +1023,17 @@ void QTextHtmlParserNode::initializeProperties(const QTextHtmlParserNode *parent
     margin[QTextHtmlParser::MarginBottom] = 0;
     cssFloat = QTextFrameFormat::InFlow;
 
-    const int oldFontPointSize = fontPointSize;
-
     // set element specific attributes
     switch (id) {
         case Html_a:
-            isAnchor = true;
+            charFormat.setAnchor(true);
             for (int i = 0; i < attributes.count(); i += 2) {
                 const QString key = attributes.at(i);
                 if (key.compare(QLatin1String("href"), Qt::CaseInsensitive) == 0
                     && !attributes.at(i + 1).isEmpty()) {
-                    fontUnderline = true;
-                    foreground = Qt::blue;
+                    hasHref = true;
+                    charFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+                    charFormat.setForeground(Qt::blue);
                 }
             }
 
@@ -1101,52 +1044,45 @@ void QTextHtmlParserNode::initializeProperties(const QTextHtmlParserNode *parent
         case Html_address:
         case Html_var:
         case Html_dfn:
-            fontItalic = On;
+            charFormat.setFontItalic(true);
             break;
         case Html_big:
-            fontSizeAdjustment = 1;
-            hasFontSizeAdjustment = true;
+            charFormat.setProperty(QTextFormat::FontSizeAdjustment, int(1));
             break;
         case Html_small:
-            fontSizeAdjustment = -1;
-            hasFontSizeAdjustment = true;
+            charFormat.setProperty(QTextFormat::FontSizeAdjustment, int(-1));
             break;
         case Html_strong:
         case Html_b:
-            fontWeight = QFont::Bold;
+            charFormat.setFontWeight(QFont::Bold);
             break;
         case Html_h1:
-            fontWeight = QFont::Bold;
-            fontSizeAdjustment = 3;
-            hasFontSizeAdjustment = true;
+            charFormat.setFontWeight(QFont::Bold);
+            charFormat.setProperty(QTextFormat::FontSizeAdjustment, int(3));
             margin[QTextHtmlParser::MarginTop] = 18;
             margin[QTextHtmlParser::MarginBottom] = 12;
             break;
         case Html_h2:
-            fontWeight = QFont::Bold;
-            fontSizeAdjustment = 2;
-            hasFontSizeAdjustment = true;
+            charFormat.setFontWeight(QFont::Bold);
+            charFormat.setProperty(QTextFormat::FontSizeAdjustment, int(2));
             margin[QTextHtmlParser::MarginTop] = 16;
             margin[QTextHtmlParser::MarginBottom] = 12;
             break;
         case Html_h3:
-            fontWeight = QFont::Bold;
-            fontSizeAdjustment = 1;
-            hasFontSizeAdjustment = true;
+            charFormat.setFontWeight(QFont::Bold);
+            charFormat.setProperty(QTextFormat::FontSizeAdjustment, int(1));
             margin[QTextHtmlParser::MarginTop] = 14;
             margin[QTextHtmlParser::MarginBottom] = 12;
             break;
         case Html_h4:
-            fontWeight = QFont::Bold;
-            fontSizeAdjustment = 0;
-            hasFontSizeAdjustment = true;
+            charFormat.setFontWeight(QFont::Bold);
+            charFormat.setProperty(QTextFormat::FontSizeAdjustment, int(0));
             margin[QTextHtmlParser::MarginTop] = 12;
             margin[QTextHtmlParser::MarginBottom] = 12;
             break;
         case Html_h5:
-            fontWeight = QFont::Bold;
-            fontSizeAdjustment = -1;
-            hasFontSizeAdjustment = true;
+            charFormat.setFontWeight(QFont::Bold);
+            charFormat.setProperty(QTextFormat::FontSizeAdjustment, int(-1));
             margin[QTextHtmlParser::MarginTop] = 12;
             margin[QTextHtmlParser::MarginBottom] = 4;
             break;
@@ -1155,7 +1091,7 @@ void QTextHtmlParserNode::initializeProperties(const QTextHtmlParserNode *parent
             margin[QTextHtmlParser::MarginBottom] = 12;
             break;
         case Html_center:
-            alignment = Qt::AlignCenter;
+            blockFormat.setAlignment(Qt::AlignCenter);
             break;
         case Html_ul:
             listStyle = QTextListFormat::ListDisc;
@@ -1179,23 +1115,26 @@ void QTextHtmlParserNode::initializeProperties(const QTextHtmlParserNode *parent
         case Html_tt:
         case Html_kbd:
         case Html_samp:
-            fontFamily = QString::fromLatin1("Courier New,courier");
+            charFormat.setFontFamily(QString::fromLatin1("Courier New,courier"));
             // <tt> uses a fixed font, so set the property
-            fontFixedPitch = On;
+            charFormat.setFontFixedPitch(true);
             break;
         case Html_br:
             text = QChar(QChar::LineSeparator);
+            wsm = QTextHtmlParserNode::WhiteSpacePre;
             break;
         // ##### sub / sup
         case Html_pre:
-            fontFamily = QString::fromLatin1("Courier New,courier");
+            charFormat.setFontFamily(QString::fromLatin1("Courier New,courier"));
             wsm = WhiteSpacePre;
             margin[QTextHtmlParser::MarginTop] = 12;
             margin[QTextHtmlParser::MarginBottom] = 12;
             // <pre> uses a fixed font
-            fontFixedPitch = On;
+            charFormat.setFontFixedPitch(true);
             break;
         case Html_blockquote:
+            margin[QTextHtmlParser::MarginTop] = 12;
+            margin[QTextHtmlParser::MarginBottom] = 12;
             margin[QTextHtmlParser::MarginLeft] = 40;
             margin[QTextHtmlParser::MarginRight] = 40;
             break;
@@ -1207,32 +1146,49 @@ void QTextHtmlParserNode::initializeProperties(const QTextHtmlParserNode *parent
             margin[QTextHtmlParser::MarginLeft] = 30;
             break;
         case Html_u:
-            fontUnderline = On;
+            charFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
             break;
         case Html_s:
-            fontStrikeOut = On;
+            charFormat.setFontStrikeOut(true);
             break;
         case Html_nobr:
             wsm = WhiteSpaceNoWrap;
             break;
         case Html_th:
-            fontWeight = QFont::Bold;
-            alignment = Qt::AlignCenter;
+            charFormat.setFontWeight(QFont::Bold);
+            blockFormat.setAlignment(Qt::AlignCenter);
             break;
         case Html_td:
-            alignment = Qt::AlignLeft;
+            blockFormat.setAlignment(Qt::AlignLeft);
             break;
         case Html_sub:
-            verticalAlignment = QTextCharFormat::AlignSubScript;
+            charFormat.setVerticalAlignment(QTextCharFormat::AlignSubScript);
             break;
         case Html_sup:
-            verticalAlignment = QTextCharFormat::AlignSuperScript;
+            charFormat.setVerticalAlignment(QTextCharFormat::AlignSuperScript);
             break;
         default: break;
     }
+}
 
-    if (fontPointSize != oldFontPointSize)
-        hasFontPointSize = true;
+void QTextHtmlParserNode::setListStyle(const QVector<QCss::Value> &cssValues)
+{
+    for (int i = 0; i < cssValues.count(); ++i) {
+        if (cssValues.at(i).type == QCss::Value::KnownIdentifier) {
+            switch (static_cast<QCss::KnownValue>(cssValues.at(i).variant.toInt())) {
+                case QCss::Value_Disc: hasOwnListStyle = true; listStyle = QTextListFormat::ListDisc; break;
+                case QCss::Value_Square: hasOwnListStyle = true; listStyle = QTextListFormat::ListSquare; break;
+                case QCss::Value_Circle: hasOwnListStyle = true; listStyle = QTextListFormat::ListCircle; break;
+                case QCss::Value_Decimal: hasOwnListStyle = true; listStyle = QTextListFormat::ListDecimal; break;
+                case QCss::Value_LowerAlpha: hasOwnListStyle = true; listStyle = QTextListFormat::ListLowerAlpha; break;
+                case QCss::Value_UpperAlpha: hasOwnListStyle = true; listStyle = QTextListFormat::ListUpperAlpha; break;
+                default: break;
+            }
+        }
+    }
+    // allow individual list items to override the style
+    if (id == Html_li && hasOwnListStyle)
+        blockFormat.setProperty(QTextFormat::ListStyle, listStyle);
 }
 
 void QTextHtmlParserNode::applyCssDeclarations(const QVector<QCss::Declaration> &declarations, const QTextDocument *resourceProvider)
@@ -1244,23 +1200,34 @@ void QTextHtmlParserNode::applyCssDeclarations(const QVector<QCss::Declaration> 
     for (int i = 0; i < declarations.count(); ++i) {
         const QCss::Declaration &decl = declarations.at(i);
         if (decl.values.isEmpty()) continue;
+
+        QCss::KnownValue identifier = QCss::UnknownValue;
+        if (decl.values.first().type == QCss::Value::KnownIdentifier)
+            identifier = static_cast<QCss::KnownValue>(decl.values.first().variant.toInt());
+
         switch (decl.propertyId) {
-            case QCss::Color: foreground = decl.colorValue(); break;
+            case QCss::BorderColor: borderBrush = QBrush(decl.colorValue()); break;
+            case QCss::BorderStyles:
+                if (decl.styleValue() != QCss::BorderStyle_Unknown && decl.styleValue() != QCss::BorderStyle_Native)
+                    borderStyle = static_cast<QTextFrameFormat::BorderStyle>(decl.styleValue() - 1);
+                break;
+            case QCss::Color: charFormat.setForeground(decl.colorValue()); break;
             case QCss::Float:
                 cssFloat = QTextFrameFormat::InFlow;
-                if (decl.values.first().type == QCss::Value::KnownIdentifier) {
-                    switch (decl.values.first().variant.toInt()) {
-                        case QCss::Value_Left: cssFloat = QTextFrameFormat::FloatLeft; break;
-                        case QCss::Value_Right: cssFloat = QTextFrameFormat::FloatRight; break;
-                        default: break;
-                    }
+                switch (identifier) {
+                    case QCss::Value_Left: cssFloat = QTextFrameFormat::FloatLeft; break;
+                    case QCss::Value_Right: cssFloat = QTextFrameFormat::FloatRight; break;
+                    default: break;
                 }
                 break;
             case QCss::QtBlockIndent:
-                hasCssBlockIndent = true;
-                cssBlockIndent = decl.values.first().variant.toInt();
+                blockFormat.setIndent(decl.values.first().variant.toInt());
                 break;
-            case QCss::TextIndent: decl.realValue(&text_indent, "px"); break;
+            case QCss::TextIndent: {
+                 qreal indent = 0;
+                 if (decl.realValue(&indent, "px"))
+                     blockFormat.setTextIndent(indent);
+                 break; }
             case QCss::QtListIndent:
                 if (decl.intValue(&cssListIndent))
                     hasCssListIndent = true;
@@ -1272,41 +1239,62 @@ void QTextHtmlParserNode::applyCssDeclarations(const QVector<QCss::Declaration> 
             case QCss::QtTableType:
                 if (decl.values.first().variant.toString().compare(QLatin1String("frame"), Qt::CaseInsensitive) == 0)
                     isTextFrame = true;
+                else if (decl.values.first().variant.toString().compare(QLatin1String("root"), Qt::CaseInsensitive) == 0) {
+                    isTextFrame = true;
+                    isRootFrame = true;
+                }
+                break;
+            case QCss::QtUserState:
+                userState = decl.values.first().variant.toInt();
                 break;
             case QCss::Whitespace:
-                if (decl.values.first().type == QCss::Value::KnownIdentifier) {
-                    switch (decl.values.first().variant.toInt()) {
-                        case QCss::Value_Normal: wsm = QTextHtmlParserNode::WhiteSpaceNormal; break;
-                        case QCss::Value_Pre: wsm = QTextHtmlParserNode::WhiteSpacePre; break;
-                        case QCss::Value_NoWrap: wsm = QTextHtmlParserNode::WhiteSpaceNoWrap; break;
-                        case QCss::Value_PreWrap: wsm = QTextHtmlParserNode::WhiteSpacePreWrap; break;
-                        default: break;
-                    }
+                switch (identifier) {
+                    case QCss::Value_Normal: wsm = QTextHtmlParserNode::WhiteSpaceNormal; break;
+                    case QCss::Value_Pre: wsm = QTextHtmlParserNode::WhiteSpacePre; break;
+                    case QCss::Value_NoWrap: wsm = QTextHtmlParserNode::WhiteSpaceNoWrap; break;
+                    case QCss::Value_PreWrap: wsm = QTextHtmlParserNode::WhiteSpacePreWrap; break;
+                    default: break;
                 }
+                break;
             case QCss::VerticalAlignment:
-                if (decl.values.first().type == QCss::Value::KnownIdentifier) {
-                    switch (decl.values.first().variant.toInt()) {
-                        case QCss::Value_Sub: verticalAlignment = QTextCharFormat::AlignSubScript; break;
-                        case QCss::Value_Super: verticalAlignment = QTextCharFormat::AlignSuperScript; break;
-                        default: verticalAlignment = QTextCharFormat::AlignNormal; break;
-                    }
+                switch (identifier) {
+                    case QCss::Value_Sub: charFormat.setVerticalAlignment(QTextCharFormat::AlignSubScript); break;
+                    case QCss::Value_Super: charFormat.setVerticalAlignment(QTextCharFormat::AlignSuperScript); break;
+                    case QCss::Value_Middle: charFormat.setVerticalAlignment(QTextCharFormat::AlignMiddle); break;
+                    case QCss::Value_Top: charFormat.setVerticalAlignment(QTextCharFormat::AlignTop); break;
+                    case QCss::Value_Bottom: charFormat.setVerticalAlignment(QTextCharFormat::AlignBottom); break;
+                    default: charFormat.setVerticalAlignment(QTextCharFormat::AlignNormal); break;
                 }
                 break;
             case QCss::PageBreakBefore:
-                if (decl.values.first().type == QCss::Value::KnownIdentifier) {
-                    switch (decl.values.first().variant.toInt()) {
-                        case QCss::Value_Always: pageBreakPolicy |= QTextFormat::PageBreak_AlwaysBefore; break;
-                        case QCss::Value_Auto: pageBreakPolicy &= ~QTextFormat::PageBreak_AlwaysBefore; break;
-                    }
+                switch (identifier) {
+                    case QCss::Value_Always: blockFormat.setPageBreakPolicy(blockFormat.pageBreakPolicy() | QTextFormat::PageBreak_AlwaysBefore); break;
+                    case QCss::Value_Auto: blockFormat.setPageBreakPolicy(blockFormat.pageBreakPolicy() & ~QTextFormat::PageBreak_AlwaysBefore); break;
+                    default: break;
                 }
                 break;
             case QCss::PageBreakAfter:
-                if (decl.values.first().type == QCss::Value::KnownIdentifier) {
-                    switch (decl.values.first().variant.toInt()) {
-                        case QCss::Value_Always: pageBreakPolicy |= QTextFormat::PageBreak_AlwaysAfter; break;
-                        case QCss::Value_Auto: pageBreakPolicy &= ~QTextFormat::PageBreak_AlwaysAfter; break;
-                    }
+                switch (identifier) {
+                    case QCss::Value_Always: blockFormat.setPageBreakPolicy(blockFormat.pageBreakPolicy() | QTextFormat::PageBreak_AlwaysAfter); break;
+                    case QCss::Value_Auto: blockFormat.setPageBreakPolicy(blockFormat.pageBreakPolicy() & ~QTextFormat::PageBreak_AlwaysAfter); break;
+                    default: break;
                 }
+                break;
+            case QCss::TextUnderlineStyle:
+                switch (identifier) {
+                    case QCss::Value_None: charFormat.setUnderlineStyle(QTextCharFormat::NoUnderline); break;
+                    case QCss::Value_Solid: charFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline); break;
+                    case QCss::Value_Dashed: charFormat.setUnderlineStyle(QTextCharFormat::DashUnderline); break;
+                    case QCss::Value_Dotted: charFormat.setUnderlineStyle(QTextCharFormat::DotLine); break;
+                    case QCss::Value_DotDash: charFormat.setUnderlineStyle(QTextCharFormat::DashDotLine); break;
+                    case QCss::Value_DotDotDash: charFormat.setUnderlineStyle(QTextCharFormat::DashDotDotLine); break;
+                    case QCss::Value_Wave: charFormat.setUnderlineStyle(QTextCharFormat::WaveUnderline); break;
+                    default: break;
+                }
+                break;
+            case QCss::ListStyleType:
+            case QCss::ListStyle:
+                setListStyle(decl.values);
                 break;
             default: break;
         }
@@ -1317,58 +1305,63 @@ void QTextHtmlParserNode::applyCssDeclarations(const QVector<QCss::Declaration> 
     extractor.extractFont(&f, &adjustment);
     if (f.resolve() & QFontPrivate::Size) {
         if (f.pointSize() > 0) {
-            fontPointSize = f.pointSize();
-            hasFontPointSize = true;
+            charFormat.setFontPointSize(f.pointSize());
         } else if (f.pixelSize() > 0) {
-            fontPixelSize = f.pixelSize();
-            hasFontPixelSize = true;
+            charFormat.setProperty(QTextFormat::FontPixelSize, f.pixelSize());
         }
     }
     if (f.resolve() & QFontPrivate::Style)
-        fontItalic = (f.style() == QFont::StyleNormal) ? Off : On;
+        charFormat.setFontItalic(f.style() != QFont::StyleNormal);
 
     if (f.resolve() & QFontPrivate::Weight)
-        fontWeight = f.weight();
+        charFormat.setFontWeight(f.weight());
 
     if (f.resolve() & QFontPrivate::Family)
-        fontFamily = f.family();
+        charFormat.setFontFamily(f.family());
 
     if (f.resolve() & QFontPrivate::Underline)
-        fontUnderline = f.underline() ? On : Off;
+        charFormat.setUnderlineStyle(f.underline() ? QTextCharFormat::SingleUnderline : QTextCharFormat::NoUnderline);
 
     if (f.resolve() & QFontPrivate::Overline)
-        fontOverline = f.overline() ? On : Off;
+        charFormat.setFontOverline(f.overline());
 
     if (f.resolve() & QFontPrivate::StrikeOut)
-        fontStrikeOut = f.strikeOut() ? On : Off;
+        charFormat.setFontStrikeOut(f.strikeOut());
 
-    if (adjustment >= -1) {
-        hasFontSizeAdjustment = true;
-        fontSizeAdjustment = adjustment;
-    }
+    if (adjustment >= -1)
+        charFormat.setProperty(QTextFormat::FontSizeAdjustment, adjustment);
 
     {
         Qt::Alignment ignoredAlignment;
         QCss::Repeat ignoredRepeat;
         QString bgImage;
         QBrush bgBrush;
-        QCss::Origin ignoredOrigin;
+        QCss::Origin ignoredOrigin, ignoredClip;
+        QCss::Attachment ignoredAttachment;
         extractor.extractBackground(&bgBrush, &bgImage, &ignoredRepeat, &ignoredAlignment,
-                                    &ignoredOrigin);
+                                    &ignoredOrigin, &ignoredAttachment, &ignoredClip);
 
         if (!bgImage.isEmpty() && resourceProvider) {
             QVariant val = resourceProvider->resource(QTextDocument::ImageResource, bgImage);
             if (val.type() == QVariant::Image || val.type() == QVariant::Pixmap) {
-                background = qvariant_cast<QPixmap>(val);
+                charFormat.setBackground(qvariant_cast<QPixmap>(val));
             } else if (val.type() == QVariant::ByteArray) {
                 QPixmap pm;
                 if (pm.loadFromData(val.toByteArray()))
-                    background = pm;
+                    charFormat.setBackground(pm);
             }
         } else if (bgBrush.style() != Qt::NoBrush) {
-            background = bgBrush;
+            charFormat.setBackground(bgBrush);
         }
     }
+}
+
+bool QTextHtmlParserNode::hasOnlyWhitespace() const
+{
+    for (int i = 0; i < text.count(); ++i)
+        if (!text.at(i).isSpace())
+            return false;
+    return true;
 }
 
 static bool setIntAttribute(int *destination, const QString &value)
@@ -1409,7 +1402,7 @@ static void setWidthAttribute(QTextLength *width, QString value)
     }
 }
 
-static void parseStyleAttribute(QTextHtmlParserNode *node, const QString &value, const QTextDocument *resourceProvider)
+void QTextHtmlParserNode::parseStyleAttribute(const QString &value, const QTextDocument *resourceProvider)
 {
     QString css = value;
     css.prepend(QLatin1String("dummy {"));
@@ -1418,7 +1411,7 @@ static void parseStyleAttribute(QTextHtmlParserNode *node, const QString &value,
     QCss::StyleSheet sheet;
     parser.parse(&sheet);
     if (sheet.styleRules.count() != 1) return;
-    node->applyCssDeclarations(sheet.styleRules.at(0).declarations, resourceProvider);
+    applyCssDeclarations(sheet.styleRules.at(0).declarations, resourceProvider);
 }
 
 QStringList QTextHtmlParser::parseAttributes()
@@ -1470,13 +1463,12 @@ void QTextHtmlParser::applyAttributes(const QStringList &attributes)
                     int n = value.toInt();
                     if (value.at(0) != QLatin1Char('+') && value.at(0) != QLatin1Char('-'))
                         n -= 3;
-                    node->fontSizeAdjustment = n;
-                    node->hasFontSizeAdjustment = true;
+                    node->charFormat.setProperty(QTextFormat::FontSizeAdjustment, n);
                 } else if (key == QLatin1String("face")) {
-                    node->fontFamily = value;
+                    node->charFormat.setFontFamily(value);
                 } else if (key == QLatin1String("color")) {
                     QColor c; c.setNamedColor(value);
-                    node->foreground = c;
+                    node->charFormat.setForeground(c);
                 }
                 break;
             case Html_ol:
@@ -1502,9 +1494,9 @@ void QTextHtmlParser::applyAttributes(const QStringList &attributes)
                 break;
             case Html_a:
                 if (key == QLatin1String("href"))
-                    node->anchorHref = value;
+                    node->charFormat.setAnchorHref(value);
                 else if (key == QLatin1String("name"))
-                    node->anchorName = value;
+                    node->charFormat.setAnchorName(value);
                 break;
             case Html_img:
                 if (key == QLatin1String("src") || key == QLatin1String("source")) {
@@ -1519,7 +1511,7 @@ void QTextHtmlParser::applyAttributes(const QStringList &attributes)
             case Html_body:
                 if (key == QLatin1String("bgcolor")) {
                     QColor c; c.setNamedColor(value);
-                    node->background = c;
+                    node->charFormat.setBackground(c);
                 }
                 break;
             case Html_th:
@@ -1528,7 +1520,7 @@ void QTextHtmlParser::applyAttributes(const QStringList &attributes)
                     setWidthAttribute(&node->width, value);
                 } else if (key == QLatin1String("bgcolor")) {
                     QColor c; c.setNamedColor(value);
-                    node->background = c;
+                    node->charFormat.setBackground(c);
                 } else if (key == QLatin1String("rowspan")) {
                     if (setIntAttribute(&node->tableCellRowSpan, value))
                         node->tableCellRowSpan = qMax(1, node->tableCellRowSpan);
@@ -1542,7 +1534,7 @@ void QTextHtmlParser::applyAttributes(const QStringList &attributes)
                     setFloatAttribute(&node->tableBorder, value);
                 } else if (key == QLatin1String("bgcolor")) {
                     QColor c; c.setNamedColor(value);
-                    node->background = c;
+                    node->charFormat.setBackground(c);
                 } else if (key == QLatin1String("cellspacing")) {
                     setFloatAttribute(&node->tableCellSpacing, value);
                 } else if (key == QLatin1String("cellpadding")) {
@@ -1581,31 +1573,54 @@ void QTextHtmlParser::applyAttributes(const QStringList &attributes)
         }
 
         if (key == QLatin1String("style")) {
-            parseStyleAttribute(node, value, resourceProvider);
+            node->parseStyleAttribute(value, resourceProvider);
         } else if (key == QLatin1String("align")) {
             value = value.toLower();
-            if (value == QLatin1String("left"))
-                node->alignment = Qt::AlignLeft|Qt::AlignAbsolute;
-            else if (value == QLatin1String("right"))
-                node->alignment = Qt::AlignRight|Qt::AlignAbsolute;
-            else if (value == QLatin1String("center"))
-                node->alignment = Qt::AlignHCenter;
-            else if (value == QLatin1String("justify"))
-                node->alignment = Qt::AlignJustify;
+            bool alignmentSet = true;
 
-            // HTML4 compat
+            if (value == QLatin1String("left"))
+                node->blockFormat.setAlignment(Qt::AlignLeft|Qt::AlignAbsolute);
+            else if (value == QLatin1String("right"))
+                node->blockFormat.setAlignment(Qt::AlignRight|Qt::AlignAbsolute);
+            else if (value == QLatin1String("center"))
+                node->blockFormat.setAlignment(Qt::AlignHCenter);
+            else if (value == QLatin1String("justify"))
+                node->blockFormat.setAlignment(Qt::AlignJustify);
+            else
+                alignmentSet = false;
+
             if (node->id == Html_img) {
-                if (node->alignment == Qt::AlignLeft)
-                    node->cssFloat = QTextFrameFormat::FloatLeft;
-                else if (node->alignment == Qt::AlignRight)
-                    node->cssFloat = QTextFrameFormat::FloatRight;
+                // HTML4 compat
+                if (alignmentSet) {
+                    if (node->blockFormat.alignment() & Qt::AlignLeft)
+                        node->cssFloat = QTextFrameFormat::FloatLeft;
+                    else if (node->blockFormat.alignment() & Qt::AlignRight)
+                        node->cssFloat = QTextFrameFormat::FloatRight;
+                } else if (value == QLatin1String("middle")) {
+                    node->charFormat.setVerticalAlignment(QTextCharFormat::AlignMiddle);
+                } else if (value == QLatin1String("top")) {
+                    node->charFormat.setVerticalAlignment(QTextCharFormat::AlignTop);
+                }
             }
+        } else if (key == QLatin1String("valign")) {
+            value = value.toLower();
+            if (value == QLatin1String("top"))
+                node->charFormat.setVerticalAlignment(QTextCharFormat::AlignTop);
+            else if (value == QLatin1String("middle"))
+                node->charFormat.setVerticalAlignment(QTextCharFormat::AlignMiddle);
+            else if (value == QLatin1String("bottom"))
+                node->charFormat.setVerticalAlignment(QTextCharFormat::AlignBottom);
         } else if (key == QLatin1String("dir")) {
             value = value.toLower();
             if (value == QLatin1String("ltr"))
-                node->direction = Qt::LeftToRight;
+                node->blockFormat.setLayoutDirection(Qt::LeftToRight);
             else if (value == QLatin1String("rtl"))
-                node->direction = Qt::RightToLeft;
+                node->blockFormat.setLayoutDirection(Qt::RightToLeft);
+        } else if (key == QLatin1String("title")) {
+            node->charFormat.setToolTip(value);
+        } else if (key == QLatin1String("id")) {
+            node->charFormat.setAnchor(true);
+            node->charFormat.setAnchorName(value);
         }
     }
 
@@ -1624,10 +1639,10 @@ public:
     virtual bool hasAttribute(NodePtr node, const QString &name) const;
     virtual bool hasAttributes(NodePtr node) const;
     virtual bool isNullNode(NodePtr node) const;
-    virtual NodePtr parentNode(NodePtr node);
-    virtual NodePtr previousSiblingNode(NodePtr node);
-    virtual NodePtr duplicateNode(NodePtr node);
-    virtual void freeNode(NodePtr node);
+    virtual NodePtr parentNode(NodePtr node) const;
+    virtual NodePtr previousSiblingNode(NodePtr node) const;
+    virtual NodePtr duplicateNode(NodePtr node) const;
+    virtual void freeNode(NodePtr node) const;
 
 private:
     const QTextHtmlParser *parser;
@@ -1673,7 +1688,7 @@ bool QTextHtmlStyleSelector::isNullNode(NodePtr node) const
     return node.id == 0;
 }
 
-QCss::StyleSelector::NodePtr QTextHtmlStyleSelector::parentNode(NodePtr node)
+QCss::StyleSelector::NodePtr QTextHtmlStyleSelector::parentNode(NodePtr node) const
 {
     NodePtr parent;
     parent.id = 0;
@@ -1683,12 +1698,12 @@ QCss::StyleSelector::NodePtr QTextHtmlStyleSelector::parentNode(NodePtr node)
     return parent;
 }
 
-QCss::StyleSelector::NodePtr QTextHtmlStyleSelector::duplicateNode(NodePtr node)
+QCss::StyleSelector::NodePtr QTextHtmlStyleSelector::duplicateNode(NodePtr node) const
 {
     return node;
 }
 
-QCss::StyleSelector::NodePtr QTextHtmlStyleSelector::previousSiblingNode(NodePtr node)
+QCss::StyleSelector::NodePtr QTextHtmlStyleSelector::previousSiblingNode(NodePtr node) const
 {
     NodePtr sibling;
     sibling.id = 0;
@@ -1704,7 +1719,7 @@ QCss::StyleSelector::NodePtr QTextHtmlStyleSelector::previousSiblingNode(NodePtr
     return sibling;
 }
 
-void QTextHtmlStyleSelector::freeNode(NodePtr)
+void QTextHtmlStyleSelector::freeNode(NodePtr) const
 {
 }
 
@@ -1720,8 +1735,11 @@ void QTextHtmlParser::resolveStyleSheetImports(const QCss::StyleSheet &sheet)
 
 void QTextHtmlParser::importStyleSheet(const QString &href)
 {
-    if (externalStyleSheets.contains(href) || !resourceProvider)
+    if (!resourceProvider)
         return;
+    for (int i = 0; i < externalStyleSheets.count(); ++i)
+        if (externalStyleSheets.at(i).url == href)
+            return;
 
     QVariant res = resourceProvider->resource(QTextDocument::StyleSheetResource, href);
     QString css;
@@ -1735,7 +1753,7 @@ void QTextHtmlParser::importStyleSheet(const QString &href)
         QCss::Parser parser(css);
         QCss::StyleSheet sheet;
         parser.parse(&sheet);
-        externalStyleSheets.insert(href, sheet);
+        externalStyleSheets.append(ExternalStyleSheet(href, sheet));
         resolveStyleSheetImports(sheet);
     }
 }
@@ -1745,15 +1763,39 @@ QVector<QCss::Declaration> QTextHtmlParser::declarationsForNode(int node) const
     QVector<QCss::Declaration> decls;
 
     QTextHtmlStyleSelector selector(this);
+
+    int idx = 0;
+    selector.styleSheets.resize((resourceProvider ? 1 : 0)
+                                + externalStyleSheets.count()
+                                + inlineStyleSheets.count());
     if (resourceProvider)
-        selector.styleSheets += resourceProvider->docHandle()->parsedDefaultStyleSheet;
-    selector.styleSheets += externalStyleSheets.values();
-    selector.styleSheets += inlineStyleSheets;
+        selector.styleSheets[idx++] = resourceProvider->docHandle()->parsedDefaultStyleSheet;
+
+    for (int i = 0; i < externalStyleSheets.count(); ++i, ++idx)
+        selector.styleSheets[idx] = externalStyleSheets.at(i).sheet;
+
+    for (int i = 0; i < inlineStyleSheets.count(); ++i, ++idx)
+        selector.styleSheets[idx] = inlineStyleSheets.at(i);
+
     selector.medium = QLatin1String("screen");
 
     QCss::StyleSelector::NodePtr n;
     n.id = node;
-    decls = selector.declarationsForNode(n);
+
+    const char *extraPseudo = 0;
+    if (nodes.at(node).id == Html_a && nodes.at(node).hasHref)
+        extraPseudo = "link";
+    decls = selector.declarationsForNode(n, extraPseudo);
 
     return decls;
+}
+
+bool QTextHtmlParser::nodeIsChildOf(int i, QTextHTMLElements id) const
+{
+    while (i) {
+        if (at(i).id == id)
+            return true;
+        i = at(i).parent;
+    }
+    return false;
 }

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,26 +27,26 @@
 
 #include <qbluetoothl2capserver.h>
 #include <qbluetoothl2capsocket.h>
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
+#include "qbluetoothnamespace_p.h"
 #include <qbluetoothaddress.h>
 
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <bluetooth/l2cap.h>
-#include <fcntl.h>
+#include "qbluetoothabstractserver_p.h"
+#include "qbluetoothsocketengine_p.h"
 
-class QBluetoothL2CapServerPrivate
+class QBluetoothL2CapServerPrivate : public QBluetoothAbstractServerPrivate
 {
 public:
+    QBluetoothL2CapServerPrivate(QBluetoothL2CapServer *parent);
     int m_psm;
     QBluetoothAddress m_address;
     QBluetooth::SecurityOptions m_options;
 };
+
+QBluetoothL2CapServerPrivate::QBluetoothL2CapServerPrivate(QBluetoothL2CapServer *parent)
+    : QBluetoothAbstractServerPrivate(parent)
+{
+
+}
 
 /*!
     \class QBluetoothL2CapServer
@@ -96,9 +96,9 @@ public:
     The server is in the UnconnectedState.
  */
 QBluetoothL2CapServer::QBluetoothL2CapServer(QObject *parent)
-    : QBluetoothAbstractServer(parent)
+    : QBluetoothAbstractServer(new QBluetoothL2CapServerPrivate(this), parent)
 {
-    m_data = new QBluetoothL2CapServerPrivate();
+    SERVER_DATA(QBluetoothL2CapServer);
     m_data->m_psm = -1;
 }
 
@@ -107,8 +107,6 @@ QBluetoothL2CapServer::QBluetoothL2CapServer(QObject *parent)
 */
 QBluetoothL2CapServer::~QBluetoothL2CapServer()
 {
-    if (m_data)
-        delete m_data;
 }
 
 /*!
@@ -128,67 +126,41 @@ QBluetoothL2CapServer::~QBluetoothL2CapServer()
  */
 bool QBluetoothL2CapServer::listen(const QBluetoothAddress &local, int psm, int mtu)
 {
+    SERVER_DATA(QBluetoothL2CapServer);
+
     if (isListening()) {
         return false;
     }
 
-    int fd = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
+    m_data->m_fd = m_data->m_engine->l2capSocket();
 
-    if (fd < 0) {
-        setError(QBluetoothAbstractServer::ResourceError);
+    if (m_data->m_fd < 0) {
         return false;
     }
 
-    struct sockaddr_l2 addr;
-    bdaddr_t localBdaddr;
+    m_data->m_engine->setSocketOption(m_data->m_fd,
+                                      QBluetoothSocketEngine::NonBlockingOption);
 
-    str2bdaddr(local.toString(), &localBdaddr);
-
-    memset(&addr, 0, sizeof(addr));
-    addr.l2_family = AF_BLUETOOTH;
-    memcpy(&addr.l2_bdaddr, &localBdaddr, sizeof(bdaddr_t));
-    addr.l2_psm = htobs(psm);
-
-    struct l2cap_options opts;
-    memset(&opts, 0, sizeof(opts));
-    socklen_t optlen = sizeof(opts);
-
-    if (::getsockopt(fd, SOL_L2CAP, L2CAP_OPTIONS, &opts, &optlen) == -1) {
-        perror("getsockopt failed");
-        setError(QBluetoothAbstractServer::ListenError);
-        ::close(fd);
+    if (!m_data->m_engine->l2capBind(m_data->m_fd, local, psm, mtu)) {
+        m_data->m_engine->close(m_data->m_fd);
+        m_data->m_fd = -1;
         return false;
     }
 
-    opts.imtu = mtu;
-
-    if (setsockopt(fd, SOL_L2CAP, L2CAP_OPTIONS, &opts, sizeof(opts)) == -1) {
-        perror("setsockopt failed");
-        setError(QBluetoothAbstractServer::ListenError);
-        ::close(fd);
+    if (!m_data->m_engine->listen(m_data->m_fd, 1)) {
+        m_data->m_engine->close(m_data->m_fd);
+        m_data->m_fd = -1;
         return false;
     }
 
-    bool ret = initiateListen(fd, (struct sockaddr *) &addr, sizeof(addr));
+    setListening();
 
-    if (ret) {
-        m_data->m_psm = psm;
-        m_data->m_address = local;
+    m_data->m_psm = psm;
+    m_data->m_address = local;
 
-        struct sockaddr_l2 addr;
-        socklen_t len = sizeof(addr);
-        memset(&addr, 0, sizeof(addr));
+    m_data->m_engine->getsocknameL2Cap(m_data->m_fd, &m_data->m_address, &m_data->m_psm);
 
-        if (::getsockname(fd, (struct sockaddr *) &addr, &len) == 0) {
-            bdaddr_t localBdaddr;
-            memcpy(&localBdaddr, &addr.l2_bdaddr, sizeof(bdaddr_t));
-            QString str = bdaddr2str(&localBdaddr);
-            m_data->m_address = QBluetoothAddress(str);
-            m_data->m_psm = btohs(addr.l2_psm);
-        }
-    }
-
-    return ret;
+    return true;
 }
 
 /*!
@@ -196,6 +168,8 @@ bool QBluetoothL2CapServer::listen(const QBluetoothAddress &local, int psm, int 
  */
 void QBluetoothL2CapServer::close()
 {
+    SERVER_DATA(QBluetoothL2CapServer);
+
     QBluetoothAbstractServer::close();
 
     m_data->m_address = QBluetoothAddress::invalid;
@@ -210,6 +184,8 @@ void QBluetoothL2CapServer::close()
  */
 int QBluetoothL2CapServer::serverPsm() const
 {
+    SERVER_DATA(QBluetoothL2CapServer);
+
     return m_data->m_psm;
 }
 
@@ -221,6 +197,8 @@ int QBluetoothL2CapServer::serverPsm() const
  */
 QBluetoothAddress QBluetoothL2CapServer::serverAddress() const
 {
+    SERVER_DATA(QBluetoothL2CapServer);
+
     return m_data->m_address;
 }
 
@@ -251,6 +229,8 @@ bool QBluetoothL2CapServer::isAuthenticated() const
  */
 QBluetooth::SecurityOptions QBluetoothL2CapServer::securityOptions() const
 {
+    SERVER_DATA(QBluetoothL2CapServer);
+
     if (!isListening())
         return m_data->m_options;
 
@@ -269,6 +249,8 @@ QBluetooth::SecurityOptions QBluetoothL2CapServer::securityOptions() const
  */
 bool QBluetoothL2CapServer::setSecurityOptions(QBluetooth::SecurityOptions options)
 {
+    SERVER_DATA(QBluetoothL2CapServer);
+
     m_data->m_options = options;
 
     if (!isListening())
@@ -292,16 +274,15 @@ QBluetoothAbstractSocket * QBluetoothL2CapServer::createSocket()
 */
 int QBluetoothL2CapServer::mtu() const
 {
+    SERVER_DATA(QBluetoothL2CapServer);
+
     if (!isListening()) {
         return -1;
     }
 
-    struct l2cap_options opts;
-    memset(&opts, 0, sizeof(opts));
-    socklen_t optlen = sizeof(opts);
-
-    if (::getsockopt(socketDescriptor(), SOL_L2CAP, L2CAP_OPTIONS, &opts, &optlen) == 0) {
-        return opts.imtu;
+    int imtu;
+    if (m_data->m_engine->getL2CapIncomingMtu(socketDescriptor(), &imtu)) {
+        return imtu;
     }
 
     return -1;

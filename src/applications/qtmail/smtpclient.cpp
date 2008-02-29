@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,166 +19,31 @@
 **
 ****************************************************************************/
 
-
-
 #include "smtpclient.h"
-#include "emailhandler.h"
-#include <qtopiaapplication.h>
+
 #include <QTextCodec>
 
-#ifdef SMTPAUTH
-#include "common.h"
-#endif
+#include <qmailaddress.h>
+#include <qmailcodec.h>
+#include <qtopiaapplication.h>
 
-//helper class to normalize newlines on the fly
-
-class NewLineFilter : public QTextCodec
-{
-public:
-    NewLineFilter():QTextCodec(),_state(0){};
-    ~NewLineFilter(){};
-    int mibEnum() const{return -1;};
-    QByteArray name() const{return "NewLineFilter";};
-    QByteArray convertFromUnicode ( const QChar * input, int number, ConverterState * state ) const;
-    QString convertToUnicode ( const char * chars, int len, ConverterState * state ) const;
-private:
-    mutable int _state; //ugh
-};
-
-QByteArray NewLineFilter::convertFromUnicode(const QChar* input, int number, ConverterState* state) const
-{
-    Q_UNUSED(state);
-    QByteArray result;
-    for (int i = 0; i < number; ++i)
-    {
-        QChar current = input[i];
-        if (current == '\n')
-        {
-            if (_state == 0)
-                _state = 1;
-            else if (_state == 2)
-            {
-                result.append('.');
-                _state = 0;
-            }
-            result.append('\r');
-        }
-        else if (current == '.' && _state == 1)
-            _state = 2;
-        else _state = 0;
-
-        result.append(current.toAscii());
-    }
-    return result;
-}
-
-QString NewLineFilter::convertToUnicode(const char* chars, int len, ConverterState* state) const
-{
-    Q_UNUSED(state);
-    return QByteArray(chars,len);
-}
+#include "mailtransport.h"
+#include "emailhandler.h"
 
 SmtpClient::SmtpClient()
 {
-#ifndef SMTPAUTH
-    createSocket();
-#else
-    socket = 0;
-    stream = 0;
-    _secureSocket = 0;
-    _plainSocket = 0;
-#endif
-
-    socketAuthenticate = new QTcpSocket(this);
-    socketAuthenticate->setObjectName("smtpClient-Authenticate");
-    streamLogin = new QTextStream(socketAuthenticate);
-    connect(socketAuthenticate, SIGNAL(error(QAbstractSocket::SocketError)),
-            SLOT(socketError(QAbstractSocket::SocketError)));
-    connect(socketAuthenticate, SIGNAL(readyRead()), this, SLOT(authenticate()));
-
+    qLog(SMTP) << "Constructor" << flush;
     sending = false;
     authenticating = false;
     account = 0;
-}
-
-void SmtpClient::createSocket()
-{
-
-#ifdef SMTPAUTH
-    if (account->smtpEncryption() == MailAccount::Encrypt_SSL)
-    {
-
-        //previous == none
-        if (socket && (socket != _secureSocket))
-        {
-            socket->deleteLater();
-            delete stream;
-            socket = 0;
-        }
-        //previous == tls
-        if (_plainSocket)
-        {
-            _plainSocket->deleteLater();
-            _plainSocket = 0;
-            _secureSocket->deleteLater();
-            _secureSocket = 0;
-            delete stream;
-        }
-        //previous == ssl
-        if (_secureSocket)
-            return;
-
-        _secureSocket = new QtSslSocket(QtSslSocket::Client,this);
-        _secureSocket->setObjectName("smtpClient-secure");
-        _secureSocket->setPathToCACertDir(QtMail::sslCertsPath());
-        connect(_secureSocket,SIGNAL(connectionVerificationDone(QtSslSocket::VerifyResult,
-                                     bool, const QString&)),SLOT(certCheckDone(QtSslSocket::VerifyResult,bool,const QString&)));
-        socket = _secureSocket;
-    }
-    else
-    {
-
-        //previous == ssl or tls
-        if (socket && (socket == _secureSocket))
-        {
-            _secureSocket->deleteLater();
-            delete stream;
-            _secureSocket = 0;
-            socket = 0;
-        }
-        //previous == tls
-        if (_plainSocket)
-        {
-            _plainSocket->deleteLater();
-            _plainSocket = 0;
-        }
-        //previous == none
-        if (socket)
-            return;
-        socket = new QTcpSocket(this);
-        socket->setObjectName("smtpClient");
-    }
-#else
-    socket = new QTcpSocket(this);
-    socket->setObjectName("smtpClient");
-#endif
-    stream = new QTextStream(socket);
-
-    connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
-            SLOT(socketError(QAbstractSocket::SocketError)));
-    connect(socket, SIGNAL(connected()), this, SLOT(connectionEstablished()));
-    connect(socket, SIGNAL(readyRead()), this, SLOT(incomingData()));
-    connect(socket, SIGNAL(bytesWritten(qint64)), this, SLOT(sent(qint64)) );
+    transport = 0;
+    sendMail = 0;
 }
 
 SmtpClient::~SmtpClient()
 {
-    delete socketAuthenticate;
-    delete stream;
-    delete socket;
-#ifdef SMTPAUTH
-    delete _plainSocket;
-#endif
+    delete transport;
+    qLog(SMTP) << "Destructor" << flush;
 }
 
 void SmtpClient::setAccount(MailAccount *_account)
@@ -188,259 +53,231 @@ void SmtpClient::setAccount(MailAccount *_account)
 
 void SmtpClient::newConnection()
 {
+    qLog(SMTP) << "newConnection" << flush;
     if (sending) {
-        qWarning("socket in use, connection refused");
+        qWarning("transport in use, connection refused");
         return;
     }
-
-#ifdef SMTPAUTH
-    createSocket();
-#endif
 
     if ( !account || account->smtpServer().isEmpty() ) {
-        qWarning("Tried to send an email without a account and/or SMTP server");
+        qWarning("Tried to send an email without an account and/or SMTP server");
         status = Done;
         emit mailSent(-1);
         return;
     }
 
-    if ( account->smtpServer().isEmpty() ) {
-        status = Done;
-        emit mailSent(-1);
-        return;
+    if (!transport) {
+        // Set up the transport
+        transport = new MailTransport("SMTP");
+
+        connect(transport, SIGNAL(updateStatus(QString)),
+                this, SIGNAL(updateStatus(QString)));
+        connect(transport, SIGNAL(errorOccurred(int,QString)),
+                this, SLOT(errorHandling(int,QString)));
     }
 
-    // authenticate with POP first
-#ifdef SMTPAUTH
-    if ( !account->mailServer().isEmpty() && (account->smtpAuthentication() == MailAccount::Auth_NONE)) {
-#else
-    if (!account->mailServer().isEmpty()) {
-#endif
-        authenticating = true;
-        status = Init;
-        sending = true;
-        emit updateStatus(tr("DNS lookup"));
-        socketAuthenticate->connectToHost( account->mailServer(), account->mailPort() );
-    } else {
-        doSend();
-    }
-
+    // authenticate with POP first?
+    bool authenticateFirst = ( !account->mailServer().isEmpty() && 
+                               (account->smtpAuthentication() == MailAccount::Auth_NONE) );
+    doSend(authenticateFirst);
 }
 
-void SmtpClient::doSend()
+void SmtpClient::doSend(bool authenticating)
 {
+    qLog(SMTP) << "doSend begin" << flush;
     status = Init;
     sending = true;
-    authenticating = false;
+    this->authenticating = authenticating;
 
-    emit updateStatus(tr("DNS lookup"));
-    sentSize = 0;
-#ifdef SMTPAUTH
-    if (_secureSocket) //connectToHost not virtual
-        _secureSocket->connectToHost(account->smtpServer(),account->smtpPort());
+    if (authenticating)
+    {
+        qLog(SMTP) << "Authenticating" << flush;
+        connect(transport, SIGNAL(readyRead()),
+                this, SLOT(authenticate()));
+
+        qLog(SMTP) << "Open connection" << flush;
+        transport->open(account->mailServer(), account->mailPort(), account->mailEncryption());
+    }
     else
-#endif
-        socket->connectToHost(account->smtpServer(), account->smtpPort() );
+    {
+        qLog(SMTP) << "Not authenticating" << flush;
+        connect(transport, SIGNAL(connected(MailAccount::EncryptType)),
+                this, SLOT(connected(MailAccount::EncryptType)));
+        connect(transport, SIGNAL(readyRead()),
+                this, SLOT(incomingData()));
+        connect(transport, SIGNAL(bytesWritten(qint64)),
+                this, SLOT(sent(qint64)));
+
+        qLog(SMTP) << "Open connection" << flush;
+        transport->open(account->smtpServer(), account->smtpPort(), account->smtpEncryption());
+    }
+    qLog(SMTP) << "doSend end" << flush;
 }
 
-
-#ifdef SMTPAUTH
-
+#ifndef QT_NO_OPENSSL
 QString SmtpClient::_toBase64(const QString& in) const
 {
-    QByteArray temp(in.toAscii().data(),in.length());
-    return MailMessage::encodeBase64(temp);
+    // We really should QByteArray::toBase64 here, because we don't want embedded line breaks
+    QMailBase64Codec codec(QMailBase64Codec::Text);
+    QByteArray encoded = codec.encode(in, "ISO-8859-1");
+    return QString::fromLatin1(encoded.constData(), encoded.length());
 }
-
-void SmtpClient::_switchSecure()
-{
-    _secureSocket = new QtSslSocket(QtSslSocket::Client,this);
-    _secureSocket->setObjectName("smtpClient-secure");
-    _secureSocket->setPathToCACertDir(QtMail::sslCertsPath());
-    _secureSocket->setSocket(socket);
-    connect(_secureSocket,SIGNAL(connectionVerificationDone(QtSslSocket::VerifyResult,
-                                 bool, const QString &)),SLOT(certCheckDone(QtSslSocket::VerifyResult,bool,const QString&)));
-    _plainSocket = socket;
-    socket = _secureSocket;
-    stream = new QTextStream(socket);
-    connect(socket, SIGNAL(error( QAbstractSocket::SocketError)),
-            SLOT(socketError(QAbstractSocket::SocketError)));
-    connect(socket, SIGNAL(connected()), this, SLOT(connectionEstablished()));
-    connect(socket, SIGNAL(readyRead()), this, SLOT(incomingData()));
-    connect(socket, SIGNAL(bytesWritten(qint64)), this, SLOT(sent(qint64)) );
-    _secureSocket->sslConnect();
-}
-
 #endif
 
-int SmtpClient::addMail(Email* mail)
+bool SmtpClient::addMail(const QMailMessage& mail)
 {
-    int pos, endPos;
-    int mailSize = 0;
+    QStringList sendTo;
 
-    //only send to mail addresses
-
-    QStringList addressList = mail->mailRecipients();
-
-    for (QStringList::Iterator it = addressList.begin();
-            it != addressList.end(); ++it) {
-        if ( (pos = (*it).indexOf('<', 0 , Qt::CaseInsensitive)) != -1) {
-
-            pos++;
-            endPos = (*it).indexOf('>', pos, Qt::CaseInsensitive);
-            *it = (*it).mid(pos, endPos - pos).trimmed();
-        }
+    foreach (const QMailAddress& address, mail.recipients()) {
+        // Only send to mail addresses
+        if (address.isEmailAddress())
+            sendTo.append(address.address());
     }
 
-    if ( account && account->useSig() )
-        mail->setPlainTextBody( mail->plainTextBody() + "\n" + account->sig() );
+    if (sendTo.isEmpty())
+        return false;
 
     QString userName;
     if (account)
         userName = "<" + account->emailAddress() + ">";
 
-    //create a raw mail
-
-    //TODO get rid of this, lock removed mails so they don't get deleted
-
-
     RawEmail rawmail;
-    if ( mail->replyTo().isEmpty() )
-        rawmail.from = "<" + mail->fromEmail() + ">";
+    if ( mail.replyTo().isNull() )
+        rawmail.from = "<" + mail.from().address() + ">";
     else
         rawmail.from = userName;
-    rawmail.to = addressList;
+    rawmail.to = sendTo;
     rawmail.mail = mail;
-    mailList.append(rawmail);
 
-    return mailSize;
+    //set signature if present
+
+    if ( account && account->useSig() ) {
+        QString text = rawmail.mail.body().data() + QMailMessage::CRLF + account->sig();
+        QMailMessageContentType type("text/plain; charset=UTF-8");
+        rawmail.mail.setBody( QMailMessageBody::fromData( text, type, rawmail.mail.body().transferEncoding() ) );
+    }
+
+    mailList.append(rawmail);
+    return true;
 }
 
-void SmtpClient::connectionEstablished()
+void SmtpClient::connected(MailAccount::EncryptType encryptType)
 {
-#ifdef QTOPIA_PHONE
-    emit updateStatus(tr("Connected"));
-#else
-    emit updateStatus(tr("Connection established"));
-#endif
+    if (account->smtpEncryption() == encryptType) {
+        qLog(SMTP) << "Connected" << flush;
+        emit updateStatus(tr("Connected"));
+    }
 
-#ifdef SMTPAUTH
+#ifndef QT_NO_OPENSSL
     if (status == TLS)
     {
-        *stream << "EHLO qtmail\r\n" << flush;
+        transport->stream() << "EHLO qtmail\r\n" << flush;
         if (account->smtpAuthentication() != MailAccount::Auth_NONE)
             status = Auth;
         else
             status = From;
     }
 #endif
-
 }
-#ifdef SMTPAUTH
-void SmtpClient::certCheckDone(QtSslSocket::VerifyResult result,
-                               bool hostNameMatched,
-                               const QString& description)
-{
-    Q_UNUSED(hostNameMatched)
-    if (result == QtSslSocket::VerifyOk)
-        return;
-    qWarning(("SSL cert check failed: " + description).toAscii());
-    errorHandling(ErrLoginFailed, "");
-}
-#endif
 
-void SmtpClient::errorHandling(int status, QString msg)
+void SmtpClient::errorHandling(int errorCode, QString msg)
 {
     if ( !sending )
         return;
 
-    if (authenticating) {
-        qWarning("login failed");
-        //login failed, try sending anyway
-        socketAuthenticate->close();
+    transport->close();
+    qLog(SMTP) << "Closed connection" << flush;
+    
+    // C
 
-        if (status == ErrCancel) {
+    if (authenticating) {
+	disconnect(transport, SIGNAL(readyRead()),
+		   this, SLOT(authenticate()));
+        //socket fail: pop may be down, but try sending anyway?
+        qWarning() << "POP/IMAP authentication unavailable";
+
+        if (errorCode == ErrCancel) {
             mailList.clear();
+            sendMail = 0;
             sending = false;
-            emit errorOccurred(status, msg);
-            return;
+            emit errorOccurred(errorCode, msg);
         } else {
             doSend();
         }
-    } else {
-        socket->close();
-
-        //brutal, but I can't see any other way to delete
-        //the outgoing buffer
-#ifndef SMTPAUTH
-        delete stream;
-        delete socket;
-        createSocket();
-#endif
-        mailList.clear();
-        sending = false;
-        emit errorOccurred(status, msg);
-        qWarning("socket closed");
-    }
-}
-
-void SmtpClient::socketError(QAbstractSocket::SocketError status)
-{
-    if (authenticating) {
-        //scoket fail, pop may be down, but try sending anyway
-        socketAuthenticate->close();
-        doSend();
         return;
     } else {
-        socket->close();
+        disconnect(transport, SIGNAL(connected(MailAccount::EncryptType)),
+		   this, SLOT(connected(MailAccount::EncryptType)));
+        disconnect(transport, SIGNAL(readyRead()),
+		   this, SLOT(incomingData()));
+        disconnect(transport, SIGNAL(bytesWritten(qint64)),
+               this, SLOT(sent(qint64)));
     }
 
-    QString msg = tr("Error occurred");
+    if (msg.isEmpty())
+        msg = tr("Error occurred");
+
     mailList.clear();
+    sendMail = 0;
     sending = false;
     emit updateStatus(msg);
-    emit errorOccurred(static_cast<int>(status), msg);
+    emit errorOccurred(errorCode, msg);
 }
 
 void SmtpClient::sent(qint64 size)
 {
-    if (status == From || status == Quit) {
-        sentSize += size;
-        emit transferredSize(sentSize);
+    if (sendMail && messageLength) {
+        sentLength += size;
+        uint percentage = qMin<uint>(sentLength * 100 / messageLength, 100);
+        emit sendProgress(sendMail->mail.id(), percentage);
     }
 }
 
 void SmtpClient::authenticate()
 {
-    QString response;
-
-    response = socketAuthenticate->readLine();
+    qLog(SMTP) << "Authenticate begin" << flush;
+    QTextStream& stream = transport->stream();
+    QString response = transport->readLine();
+    qLog(SMTP) << "Authenticate response " << response.left(response.length() - 2) << flush;
 
     if ( account->accountType() == MailAccount::IMAP ) {
         if (status == Init ) {
+            qLog(SMTP) << "Authenticating IMAP Init" << flush;
             status = Done;
-            *streamLogin << "A01 LOGIN " + account->mailUserName() + " " + account->mailPassword() + "\r\n" << flush;
+            qLog(SMTP) << "sent:" << "A01 LOGIN " + account->mailUserName() + " <password hidden>" << flush;
+            stream << "A01 LOGIN " + account->mailUserName() + " " + account->mailPassword() + "\r\n" << flush;
+            qLog(SMTP) << "Authenticate end" << flush;
             return;
         } else if ( status == Done ) {
+            qLog(SMTP) << "Authenticating IMAP Done" << flush;
             QString rsp = response.mid(3, response.indexOf(" ") ).trimmed();
             if ( rsp.toUpper() != "OK") {
+                qLog(SMTP) << "Authentication failed:" << rsp << flush;
                 errorHandling(ErrLoginFailed, "");
+                qLog(SMTP) << "Authenticate end" << flush;
                 return;
             }
 
             status = Quit;
-            *streamLogin << "A02 LOGOUT\r\n" << flush;
+            qLog(SMTP) << "sent:" << "A02 LOGOUT" << flush;
+            stream << "A02 LOGOUT\r\n" << flush;
+            qLog(SMTP) << "Authenticate end" << flush;
             return;
         } else if ( status == Quit ) {
-            socketAuthenticate->close();
+            qLog(SMTP) << "Authenticating IMAP Quit" << flush;
+            transport->close();
+            qLog(SMTP) << "Closed connection" << flush;
+            disconnect(transport, SIGNAL(readyRead()), this, SLOT(authenticate()));
             doSend();
+            qLog(SMTP) << "Authenticate end" << flush;
             return;
         }
     }
 
     if (status == Init) {
         status = Pass;
-        *streamLogin << "USER " << account->mailUserName() << "\r\n" <<flush;
+        qLog(SMTP) << "Authenticating POP sent:" << "USER " << account->mailUserName() << flush;
+        stream << "USER " << account->mailUserName() << "\r\n" <<flush;
         return;
     } else if (status == Pass) {
         if (response[0] != '+') {
@@ -449,7 +286,8 @@ void SmtpClient::authenticate()
         }
 
         status = Done;
-        *streamLogin << "PASS " << account->mailPassword() << "\r\n" << flush;
+        qLog(SMTP) << "Authenticating POP sent:" << "PASS <password hidden>" << flush;
+        stream << "PASS " << account->mailPassword() << "\r\n" << flush;
         return;
     } else if (status == Done) {
         if (response[0] != '+') {
@@ -458,10 +296,13 @@ void SmtpClient::authenticate()
         }
 
         status = Quit;
-        *streamLogin << "QUIT\r\n" << flush;
+        qLog(SMTP) << "Authenticating POP sent:" << "QUIT" << flush;
+        stream << "QUIT\r\n" << flush;
         return;
     } else if ( status == Quit ) {
-        socketAuthenticate->close();
+        transport->close();
+        qLog(SMTP) << "Closed connection" << flush;
+        disconnect(transport, SIGNAL(readyRead()), this, SLOT(authenticate()));
         doSend();
     }
 }
@@ -471,28 +312,30 @@ void SmtpClient::incomingData()
     QString response;
     QString line;
 
-
-    if (!socket->canReadLine())
+    if (!transport->canReadLine())
         return;
 
     do
     {
-        line = socket->readLine();
+        line = transport->readLine();
         response += line;
     }
-    while (socket->canReadLine() && line.length() != 0);
+    while (transport->canReadLine() && line.length() != 0);
+    qLog(SMTP) << "response:" << response.left(response.length() - 2) << flush;
 
+    QTextStream& stream = transport->stream();
 
     switch (status) {
     case Init:  {
         if (response[0] == '2') {
             status = From;
             mailItr = mailList.begin();
-#ifdef SMTPAUTH
+#ifndef QT_NO_OPENSSL
             if (account->smtpAuthentication() != MailAccount::Auth_NONE ||
-                    account->smtpEncryption() == MailAccount::Encrypt_TLS)
+                account->smtpEncryption() == MailAccount::Encrypt_TLS)
             {
-                *stream << "EHLO qtmail\r\n" << flush;
+                qLog(SMTP) << "Init: sent:" << "EHLO qtmail" << flush;
+                stream << "EHLO qtmail\r\n" << flush;
                 if (account->smtpEncryption() == MailAccount::Encrypt_TLS)
                     status = StartTLS;
                 else
@@ -500,18 +343,25 @@ void SmtpClient::incomingData()
             }
             else
 #endif
-                *stream << "HELO qtmail\r\n" << flush;
-        } else errorHandling(ErrUnknownResponse, response);
+            {
+                qLog(SMTP) << "Init: sent:" << "HELO qtmail" << flush;
+                stream << "HELO qtmail\r\n" << flush;
+            }
+        } 
+        else 
+            errorHandling(ErrUnknownResponse, response);
         break;
     }
-#ifdef SMTPAUTH
+#ifndef QT_NO_OPENSSL
     case StartTLS:
     {
         if (line[0] == '2')
         {
-            *stream << "STARTTLS\r\n" << flush;
+            qLog(SMTP) << "StartTLS: sent:" << "STARTTLS" << flush;
+            stream << "STARTTLS\r\n" << flush;
             status = TLS;
-        } else
+        } 
+        else 
             errorHandling(ErrUnknownResponse,response);
         break;
     }
@@ -519,9 +369,10 @@ void SmtpClient::incomingData()
     {
         if (line[0] == '2')
         {
-            _switchSecure();
+            // Switch into encrypted mode
+            transport->switchToEncrypted();
         }
-        else
+        else 
             errorHandling(ErrUnknownResponse,response);
         break;
     }
@@ -532,20 +383,21 @@ void SmtpClient::incomingData()
         {
             if (account->smtpAuthentication() == MailAccount::Auth_LOGIN)
             {
-                *stream << "AUTH LOGIN \r\n" << flush;
+                qLog(SMTP) << "Auth: sent:" << "AUTH LOGIN " << flush;
+                stream << "AUTH LOGIN \r\n" << flush;
                 status = AuthUser;
             }
             else if (account->smtpAuthentication() == MailAccount::Auth_PLAIN)
             {
                 QString temp = account->smtpUsername() + '\0' + account->smtpUsername() + '\0' + account->smtpPassword();
                 temp = _toBase64(temp);
-                *stream << "AUTH PLAIN " << temp << "\r\n" << flush;
+                qLog(SMTP) << "Auth: sent:" << "AUTH PLAIN " << "<Base64 username/password hidden>" << flush;
+                stream << "AUTH PLAIN " << temp << "\r\n" << flush;
                 status = From;
             }
         }
-        else
+        else 
             errorHandling(ErrUnknownResponse, response);
-
         break;
     }
 
@@ -554,7 +406,8 @@ void SmtpClient::incomingData()
 
         if (line[0] == '3')
         {
-            *stream << _toBase64(account->smtpUsername()) << "\r\n" << flush;
+            qLog(SMTP) << "AuthUser: sent:" << _toBase64(account->smtpUsername()) << flush;
+            stream << _toBase64(account->smtpUsername()) << "\r\n" << flush;
             status = AuthPass;
         }
         else
@@ -565,7 +418,8 @@ void SmtpClient::incomingData()
     {
         if (line[0] == '3')
         {
-            *stream << _toBase64(account->smtpPassword()) << "\r\n" << flush;
+            qLog(SMTP) << "AuthPass: sent:" << "<Base64 password hidden>" << flush;
+            stream << _toBase64(account->smtpPassword()) << "\r\n" << flush;
             status = From;
         }
         else
@@ -574,11 +428,28 @@ void SmtpClient::incomingData()
     }
 #endif
 
+    case Login:
+    case Pass:
+    case Done:  {
+        // Supposed to be unused here - handled by authentication
+        qWarning() << "incomingData - Unexpected status value: " << status;
+        break;
+    }
+
     case From:  {
+        if (sendMail) {
+            // The last send operation is complete
+            emit messageProcessed(sendMail->mail.id());
+            sendMail = 0;
+        }
+
         if (response[0] == '2') {
-            *stream << "MAIL FROM: " << mailItr->from << "\r\n" << flush;
+            qLog(SMTP) << "From: sent:" << "MAIL FROM: " << mailItr->from << flush;
+            stream << "MAIL FROM: " << mailItr->from << "\r\n" << flush;
             status = Recv;
-        } else errorHandling(ErrUnknownResponse, response);
+        } 
+        else 
+            errorHandling(ErrUnknownResponse, response);
         break;
     }
     case Recv:  {
@@ -586,16 +457,20 @@ void SmtpClient::incomingData()
             it = mailItr->to.begin();
             if (it == mailItr->to.end())
                 errorHandling(ErrUnknownResponse, "no recipients");
-            *stream << "RCPT TO: <" << *it << ">\r\n" << flush;
+            qLog(SMTP) << "Recv: sent:" << "RCPT TO: <" << *it << '>' << flush;
+            stream << "RCPT TO: <" << *it << ">\r\n" << flush;
             status = MRcv;
-        } else errorHandling(ErrUnknownResponse, response);
+        } 
+        else 
+            errorHandling(ErrUnknownResponse, response);
         break;
     }
     case MRcv:  {
         if (response[0] == '2') {
             it++;
             if ( it != mailItr->to.end() ) {
-                *stream << "RCPT TO: <" << *it << ">\r\n" << flush;
+                qLog(SMTP) << "MRcv: sent:" << "RCPT TO: <" << *it << '>' << flush;
+                stream << "RCPT TO: <" << *it << ">\r\n" << flush;
                 break;
             } else  {
                 status = Data;
@@ -607,20 +482,28 @@ void SmtpClient::incomingData()
     }
     case Data:  {
         if (response[0] == '2') {
-            *stream << "DATA\r\n" << flush;
+            qLog(SMTP) << "Data: sent:" << "DATA" << flush;
+            stream << "DATA\r\n" << flush;
             status = Body;
-            emit updateStatus(tr( "Sending: %1").arg(mailItr->mail->subject()) );
-        } else errorHandling(ErrUnknownResponse, response);
+            emit updateStatus(tr( "Sending: %1").arg(mailItr->mail.subject()) );
+        } 
+        else 
+            errorHandling(ErrUnknownResponse, response);
         break;
     }
     case Body:  {
         if (response[0] == '3' || response[0] == '2') {
-            NewLineFilter* f = new NewLineFilter();
-            stream->setCodec(f);
-            mailItr->mail->encodeMail(*stream,false,true);
-            stream->setCodec("UTF-8");
-            *stream << "\r\n.\r\n" << flush;
-            //*stream << mailItr->body << "\r\n.\r\n" << flush;
+            QByteArray rfcData = mailItr->mail.toRfc2822(QMailMessage::TransmissionFormat);
+
+            sendMail = &(*mailItr);
+            messageLength = rfcData.length();
+            sentLength = 0;
+
+            qLog(SMTP) << "Body: sent:" << "<rfcData omitted for brevity>" << flush;
+            stream << rfcData;
+            qLog(SMTP) << "Body: sent:" << "." << flush;
+            stream << "\r\n.\r\n" << flush;
+
             mailItr++;
             if (mailItr != mailList.end()) {
                 status = From;
@@ -632,19 +515,31 @@ void SmtpClient::incomingData()
         break;
     }
     case Quit:  {
+        if (sendMail) {
+            // The last send operation is complete
+            emit messageProcessed(sendMail->mail.id());
+            sendMail = 0;
+        }
+
         if ( response[0] == '2' || response[0] == '3' ) {
-            *stream << "QUIT\r\n" << flush;
+            qLog(SMTP) << "Quit: sent:" << "QUIT" << flush;
+            stream << "QUIT\r\n" << flush;
             status = Done;
             int count = mailList.count();
             emit updateStatus( tr("Sent %1 messages").arg(count) );
             mailList.clear();
             sending = false;
-            socket->close();
+            transport->close();
+            qLog(SMTP) << "Closed connection" << flush;
+            disconnect(transport, SIGNAL(connected(MailAccount::EncryptType)),
+		       this, SLOT(connected(MailAccount::EncryptType)));
+            disconnect(transport, SIGNAL(readyRead()),
+		       this, SLOT(incomingData()));
+            disconnect(transport, SIGNAL(bytesWritten(qint64)),
+		       this, SLOT(sent(qint64)));
             emit mailSent(count);
-            emit mailSent(-1);
         } else errorHandling(ErrUnknownResponse, response);
         break;
     }
     }
-
 }

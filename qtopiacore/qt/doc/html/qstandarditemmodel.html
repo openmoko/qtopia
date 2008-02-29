@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qstandarditemmodel.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/itemviews/qstandarditemmodel.cpp -->
 <head>
-  <title>Qt 4.2: QStandardItemModel Class Reference</title>
+  <title>Qt 4.3: QStandardItemModel Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QStandardItemModel Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QStandardItemModel Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QStandardItemModel class provides a generic model for storing custom data. <a href="#details">More...</a></p>
 <pre> #include &lt;QStandardItemModel&gt;</pre><p>Inherits <a href="qabstractitemmodel.html">QAbstractItemModel</a>.</p>
 <ul>
@@ -40,7 +41,9 @@
 <li><div class="fn"/>QStandardItem * <b><a href="qstandarditemmodel.html#horizontalHeaderItem">horizontalHeaderItem</a></b> ( int <i>column</i> ) const</li>
 <li><div class="fn"/>QModelIndex <b><a href="qstandarditemmodel.html#indexFromItem">indexFromItem</a></b> ( const QStandardItem * <i>item</i> ) const</li>
 <li><div class="fn"/>void <b><a href="qstandarditemmodel.html#insertColumn">insertColumn</a></b> ( int <i>column</i>, const QList&lt;QStandardItem *&gt; &amp; <i>items</i> )</li>
+<li><div class="fn"/>bool <b><a href="qstandarditemmodel.html#insertColumn-2">insertColumn</a></b> ( int <i>column</i>, const QModelIndex &amp; <i>parent</i> = QModelIndex() )</li>
 <li><div class="fn"/>void <b><a href="qstandarditemmodel.html#insertRow">insertRow</a></b> ( int <i>row</i>, const QList&lt;QStandardItem *&gt; &amp; <i>items</i> )</li>
+<li><div class="fn"/>bool <b><a href="qstandarditemmodel.html#insertRow-2">insertRow</a></b> ( int <i>row</i>, const QModelIndex &amp; <i>parent</i> = QModelIndex() )</li>
 <li><div class="fn"/>void <b><a href="qstandarditemmodel.html#insertRow-3">insertRow</a></b> ( int <i>row</i>, QStandardItem * <i>item</i> )</li>
 <li><div class="fn"/>QStandardItem * <b><a href="qstandarditemmodel.html#invisibleRootItem">invisibleRootItem</a></b> () const</li>
 <li><div class="fn"/>QStandardItem * <b><a href="qstandarditemmodel.html#item">item</a></b> ( int <i>row</i>, int <i>column</i> = 0 ) const</li>
@@ -178,10 +181,18 @@
 <p>Inserts a column at <i>column</i> containing <i>items</i>. If necessary, the row count is increased to the size of <i>items</i>.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qstandarditemmodel.html#takeColumn">takeColumn</a>(), <a href="qstandarditemmodel.html#appendColumn">appendColumn</a>(), and <a href="qstandarditemmodel.html#insertRow">insertRow</a>().</p>
+<h3 class="fn"><a name="insertColumn-2"></a>bool QStandardItemModel::insertColumn ( int <i>column</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> = QModelIndex() )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Inserts a single column before the given <i>column</i> in the child items of the <i>parent</i> specified. Returns true if the column is inserted; otherwise returns false.</p>
+<p>See also <a href="qabstractitemmodel.html#insertColumns">insertColumns</a>(), <a href="qstandarditemmodel.html#insertRow">insertRow</a>(), and <a href="qabstractitemmodel.html#removeColumn">removeColumn</a>().</p>
 <h3 class="fn"><a name="insertRow"></a>void QStandardItemModel::insertRow ( int <i>row</i>, const <a href="qlist.html">QList</a>&lt;<a href="qstandarditem.html">QStandardItem</a> *&gt; &amp; <i>items</i> )</h3>
 <p>Inserts a row at <i>row</i> containing <i>items</i>. If necessary, the column count is increased to the size of <i>items</i>.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qstandarditemmodel.html#takeRow">takeRow</a>(), <a href="qstandarditemmodel.html#appendRow">appendRow</a>(), and <a href="qstandarditemmodel.html#insertColumn">insertColumn</a>().</p>
+<h3 class="fn"><a name="insertRow-2"></a>bool QStandardItemModel::insertRow ( int <i>row</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> = QModelIndex() )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Inserts a single row before the given <i>row</i> in the child items of the <i>parent</i> specified. Returns true if the row is inserted; otherwise returns false.</p>
+<p>See also <a href="qabstractitemmodel.html#insertRows">insertRows</a>(), <a href="qstandarditemmodel.html#insertColumn">insertColumn</a>(), and <a href="qabstractitemmodel.html#removeRow">removeRow</a>().</p>
 <h3 class="fn"><a name="insertRow-3"></a>void QStandardItemModel::insertRow ( int <i>row</i>, <a href="qstandarditem.html">QStandardItem</a> * <i>item</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Inserts a row at <i>row</i> containing <i>item</i>.</p>
@@ -272,6 +283,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

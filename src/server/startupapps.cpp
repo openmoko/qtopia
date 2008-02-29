@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -336,9 +336,8 @@ bool StartupApplicationsPrivate::terminated(const QString &name,
 {
     if(ApplicationTypeLauncher::Normal == reason) return false;
 
-    QContentSet set(QContentFilter::Role, "Application");
-    QContent app = set.findExecutable(name);
-    if(app.id() == QContent::InvalidId || !app.isValid()) return false;
+    QContent app(name, false);
+    if( app.isNull() ) return false;
 
     // Disable crashing preloaded applications
     if(app.isPreloaded()) {
@@ -433,6 +432,8 @@ bool StartupApplicationsPrivate::terminated(const QString &name,
   \row \o \c {RestartMessage} \o A message to send when the application exits.  This message is optional and will only be sent if the application had previously been started with \c {StartupMessage}.
   \row \o \c {ShutdownMessage} \o A message to send at system shutdown.  This message is optional and will only be sent if the application had previously been started with \c {StartupMessage}.  Following this message, the application is expected to exit within 5 seconds.
   \endtable
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
@@ -442,8 +443,8 @@ StartupApplications::StartupApplications(QObject *parent)
 : QObject(parent)
 {
     StartupApplicationsPrivate *d = new StartupApplicationsPrivate(this);
-    QObject::connect(d, SIGNAL(preloadCrashed(const QString &)),
-                     this, SIGNAL(preloadCrashed(const QString &)));
+    QObject::connect(d, SIGNAL(preloadCrashed(QString)),
+                     this, SIGNAL(preloadCrashed(QString)));
     QtopiaServerApplication::addAggregateObject(this, d);
     QtopiaServerApplication::addAggregateObject(this, daemonLauncher());
 

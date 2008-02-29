@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/io/qdatastream.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/io/qdatastream.cpp -->
 <head>
-  <title>Qt 4.2: QDataStream Class Reference</title>
+  <title>Qt 4.3: QDataStream Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDataStream Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDataStream Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QDataStream class provides serialization of binary data to a <a href="qiodevice.html">QIODevice</a>. <a href="#details">More...</a></p>
 <pre> #include &lt;QDataStream&gt;</pre><p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
 <ul>
@@ -24,7 +25,7 @@
 <ul>
 <li><div class="fn"/>enum <b><a href="qdatastream.html#ByteOrder-enum">ByteOrder</a></b> { BigEndian, LittleEndian }</li>
 <li><div class="fn"/>enum <b><a href="qdatastream.html#Status-enum">Status</a></b> { Ok, ReadPastEnd, ReadCorruptData }</li>
-<li><div class="fn"/>enum <b><a href="qdatastream.html#Version-enum">Version</a></b> { Qt_1_0, Qt_2_0, Qt_2_1, Qt_3_0, ..., Qt_4_2 }</li>
+<li><div class="fn"/>enum <b><a href="qdatastream.html#Version-enum">Version</a></b> { Qt_1_0, Qt_2_0, Qt_2_1, Qt_3_0, ..., Qt_4_3 }</li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
@@ -182,6 +183,7 @@
 <tr><td valign="top"><tt>QDataStream::Qt_4_0</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">Version 7 (Qt 4.0, Qt 4.1)</td></tr>
 <tr><td valign="top"><tt>QDataStream::Qt_4_1</tt></td><td align="center" valign="top"><tt>Qt_4_0</tt></td><td valign="top">Version 7 (Qt 4.0, Qt 4.1)</td></tr>
 <tr><td valign="top"><tt>QDataStream::Qt_4_2</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">Version 8 (Qt 4.2)</td></tr>
+<tr><td valign="top"><tt>QDataStream::Qt_4_3</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">Version 9 (Qt 4.3)</td></tr>
 </table></p>
 <p>See also <a href="qdatastream.html#setVersion">setVersion</a>() and <a href="qdatastream.html#version">version</a>().</p>
 <hr />
@@ -202,7 +204,7 @@
 <p>Since <a href="qbytearray.html">QByteArray</a> is not a <a href="qiodevice.html">QIODevice</a> subclass, internally a <a href="qbuffer.html">QBuffer</a> is created to wrap the byte array.</p>
 <h3 class="fn"><a name="dtor.QDataStream"></a>QDataStream::~QDataStream ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the data stream.</p>
-<p>The destructor will not affect the current I/O device, unless it is an internal I/O device (e.g. a <a href="qbuffer.html">QBuffer</a>) processing a <a href="qbytearray.html">QByteArray</a> passed in the <i>constructor</i>, in which case the internal I/O device is destroyed.</p>
+<p>The destructor will not affect the current I/O device, unless it is an internal I/O device (e.g&#x2e; a <a href="qbuffer.html">QBuffer</a>) processing a <a href="qbytearray.html">QByteArray</a> passed in the <i>constructor</i>, in which case the internal I/O device is destroyed.</p>
 <h3 class="fn"><a name="atEnd"></a>bool QDataStream::atEnd () const</h3>
 <p>Returns true if the I/O device has reached the end position (end of the stream or file) or if there is no I/O device set; otherwise returns false.</p>
 <p>See also <a href="qiodevice.html#atEnd">QIODevice::atEnd</a>().</p>
@@ -370,6 +372,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

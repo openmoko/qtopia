@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,6 +53,13 @@
 
 #ifndef QT_NO_ACCESSIBILITY
 
+using namespace QAccessible2;
+extern QList<QWidget*> childWidgets(const QWidget *widget, bool includeTopLevel = false);
+
+#ifdef Q_OS_MAC
+#include <qfocusframe.h>
+#endif
+
 QString Q_GUI_EXPORT qt_accStripAmp(const QString &text);
 QString Q_GUI_EXPORT qt_accHotKey(const QString &text);
 
@@ -51,16 +73,16 @@ QString Q_GUI_EXPORT qt_accHotKey(const QString &text);
 
 /*!
   Creates a QAccessibleButton object for \a w.
-  \a role is propagated to the QAccessibleWidget constructor.
+  \a role is propagated to the QAccessibleWidgetEx constructor.
 */
 QAccessibleButton::QAccessibleButton(QWidget *w, Role role)
-: QAccessibleWidget(w, role)
+: QAccessibleWidgetEx(w, role)
 {
     Q_ASSERT(button());
     if (button()->isCheckable())
-        addControllingSignal("toggled(bool)");
+        addControllingSignal(QLatin1String("toggled(bool)"));
     else
-        addControllingSignal("clicked()");
+        addControllingSignal(QLatin1String("clicked()"));
 }
 
 /*! Returns the button. */
@@ -98,21 +120,21 @@ QString QAccessibleButton::actionText(int action, Text text, int child) const
         }
         break;
     }
-    return QAccessibleWidget::actionText(action, text, child);
+    return QAccessibleWidgetEx::actionText(action, text, child);
 }
 
 /*! \reimp */
 bool QAccessibleButton::doAction(int action, int child, const QVariantList &params)
 {
-    if (child || !widget()->isEnabled())
+    if (child || !widget()->isEnabled() || !widget()->isVisible())
         return false;
 
     switch (action) {
     case DefaultAction:
     case Press:
         {
-            QPushButton *pb = qobject_cast<QPushButton*>(object());
 #ifndef QT_NO_MENU
+            QPushButton *pb = qobject_cast<QPushButton*>(object());
             if (pb && pb->menu())
                 pb->showMenu();
             else
@@ -121,19 +143,21 @@ bool QAccessibleButton::doAction(int action, int child, const QVariantList &para
         }
         return true;
     }
-    return QAccessibleWidget::doAction(action, child, params);
+    return QAccessibleWidgetEx::doAction(action, child, params);
 }
 
 /*! \reimp */
 QString QAccessibleButton::text(Text t, int child) const
 {
     QString str;
+    if (!widget()->isVisible())
+        return str;
 
     switch (t) {
     case Accelerator:
         {
-            QPushButton *pb = qobject_cast<QPushButton*>(object());
 #ifndef QT_NO_SHORTCUT
+            QPushButton *pb = qobject_cast<QPushButton*>(object());
             if (pb && pb->isDefault())
                 str = (QString)QKeySequence(Qt::Key_Enter);
 #endif
@@ -142,20 +166,22 @@ QString QAccessibleButton::text(Text t, int child) const
         }
         break;
     case Name:
-        str = button()->text();
+        str = widget()->accessibleName();
+        if (str.isEmpty())
+            str = button()->text();
         break;
     default:
         break;
     }
     if (str.isEmpty())
-        str = QAccessibleWidget::text(t, child);;
+        str = QAccessibleWidgetEx::text(t, child);;
     return qt_accStripAmp(str);
 }
 
 /*! \reimp */
 QAccessible::State QAccessibleButton::state(int child) const
 {
-    State state = QAccessibleWidget::state(child);
+    State state = QAccessibleWidgetEx::state(child);
 
     QAbstractButton *b = button();
     QCheckBox *cb = qobject_cast<QCheckBox *>(b);
@@ -199,7 +225,7 @@ QAccessible::State QAccessibleButton::state(int child) const
 
 /*!
   Creates a QAccessibleToolButton object for \a w.
-  \a role is propagated to the QAccessibleWidget constructor.
+  \a role is propagated to the QAccessibleWidgetEx constructor.
 */
 QAccessibleToolButton::QAccessibleToolButton(QWidget *w, Role role)
 : QAccessibleButton(w, role)
@@ -253,6 +279,8 @@ QAccessible::State QAccessibleToolButton::state(int child) const
 /*! \reimp */
 int QAccessibleToolButton::childCount() const
 {
+    if (!toolButton()->isVisible())
+        return 0;
     return isSplitButton() ? ButtonDropMenu : 0;
 }
 
@@ -264,6 +292,8 @@ int QAccessibleToolButton::childCount() const
 */
 QRect QAccessibleToolButton::rect(int child) const
 {
+    if (!toolButton()->isVisible())
+        return QRect();
     if (!child)
         return QAccessibleButton::rect(child);
 
@@ -289,6 +319,8 @@ QRect QAccessibleToolButton::rect(int child) const
 QString QAccessibleToolButton::text(Text t, int child) const
 {
     QString str;
+    if (!toolButton()->isVisible())
+        return str;
 
     switch (t) {
     case Name:
@@ -350,7 +382,7 @@ QString QAccessibleToolButton::actionText(int action, Text text, int child) cons
 #endif
             //fall through
         case 2:
-            return "Set Focus";
+            return QLatin1String("Set Focus");
         }
     }
     return QString();
@@ -361,7 +393,7 @@ QString QAccessibleToolButton::actionText(int action, Text text, int child) cons
 */
 bool QAccessibleToolButton::doAction(int action, int child, const QVariantList &params)
 {
-    if (!widget()->isEnabled())
+    if (!widget()->isEnabled() || !widget()->isVisible())
         return false;
     if (action == 1 || child == ButtonDropMenu) {
         if(!child)
@@ -386,10 +418,10 @@ bool QAccessibleToolButton::doAction(int action, int child, const QVariantList &
 
 /*!
   Constructs a QAccessibleDisplay object for \a w.
-  \a role is propagated to the QAccessibleWidget constructor.
+  \a role is propagated to the QAccessibleWidgetEx constructor.
 */
 QAccessibleDisplay::QAccessibleDisplay(QWidget *w, Role role)
-: QAccessibleWidget(w, role)
+: QAccessibleWidgetEx(w, role)
 {
 }
 
@@ -413,29 +445,34 @@ QAccessible::Role QAccessibleDisplay::role(int child) const
         return ProgressBar;
 #endif
     }
-    return QAccessibleWidget::role(child);
+    return QAccessibleWidgetEx::role(child);
 }
 
 /*! \reimp */
 QString QAccessibleDisplay::text(Text t, int child) const
 {
     QString str;
+    if (!widget()->isVisible())
+        return str;
     switch (t) {
     case Name:
-        if (qobject_cast<QLabel*>(object())) {
-            str = qobject_cast<QLabel*>(object())->text();
+        str = widget()->accessibleName();
+        if (str.isEmpty()) {
+            if (qobject_cast<QLabel*>(object())) {
+                str = qobject_cast<QLabel*>(object())->text();
 #ifndef QT_NO_GROUPBOX
-        } else if (qobject_cast<QGroupBox*>(object())) {
-            str = qobject_cast<QGroupBox*>(object())->title();
+            } else if (qobject_cast<QGroupBox*>(object())) {
+                str = qobject_cast<QGroupBox*>(object())->title();
 #endif
-#ifndef QT_NO_LCDNUMBER	    
-        } else if (qobject_cast<QLCDNumber*>(object())) {
-            QLCDNumber *l = qobject_cast<QLCDNumber*>(object());
-            if (l->numDigits())
-                str = QString::number(l->value());
-            else
-                str = QString::number(l->intValue());
+#ifndef QT_NO_LCDNUMBER
+            } else if (qobject_cast<QLCDNumber*>(object())) {
+                QLCDNumber *l = qobject_cast<QLCDNumber*>(object());
+                if (l->numDigits())
+                    str = QString::number(l->value());
+                else
+                    str = QString::number(l->intValue());
 #endif
+            }
         }
         break;
     case Value:
@@ -448,7 +485,7 @@ QString QAccessibleDisplay::text(Text t, int child) const
         break;
     }
     if (str.isEmpty())
-        str = QAccessibleWidget::text(t, child);;
+        str = QAccessibleWidgetEx::text(t, child);;
     return qt_accStripAmp(str);
 }
 
@@ -456,7 +493,7 @@ QString QAccessibleDisplay::text(Text t, int child) const
 QAccessible::Relation QAccessibleDisplay::relationTo(int child, const QAccessibleInterface *other,
                                                      int otherChild) const
 {
-    Relation relation = QAccessibleWidget::relationTo(child, other, otherChild);
+    Relation relation = QAccessibleWidgetEx::relationTo(child, other, otherChild);
     if (child || otherChild)
         return relation;
 
@@ -470,7 +507,7 @@ QAccessible::Relation QAccessibleDisplay::relationTo(int child, const QAccessibl
 #ifndef QT_NO_GROUPBOX
     } else {
 	QGroupBox *groupbox = qobject_cast<QGroupBox*>(object());
-	if (groupbox && !groupbox->title().isEmpty()) 
+	if (groupbox && !groupbox->title().isEmpty())
 	    if (groupbox->children().contains(o))
 		relation |= Label;
 #endif
@@ -493,7 +530,7 @@ int QAccessibleDisplay::navigate(RelationFlag rel, int entry, QAccessibleInterfa
 #ifndef QT_NO_GROUPBOX
         } else {
 	    QGroupBox *groupbox = qobject_cast<QGroupBox*>(object());
-	    if (groupbox && !groupbox->title().isEmpty()) 
+	    if (groupbox && !groupbox->title().isEmpty())
 		rel = Child;
 #endif
         }
@@ -501,7 +538,7 @@ int QAccessibleDisplay::navigate(RelationFlag rel, int entry, QAccessibleInterfa
         if (*target)
             return 0;
     }
-    return QAccessibleWidget::navigate(rel, entry, target);
+    return QAccessibleWidgetEx::navigate(rel, entry, target);
 }
 
 #ifndef QT_NO_LINEEDIT
@@ -515,13 +552,13 @@ int QAccessibleDisplay::navigate(RelationFlag rel, int entry, QAccessibleInterfa
 
 /*!
   Constructs a QAccessibleLineEdit object for \a w.
-  \a name is propagated to the QAccessibleWidget constructor.
+  \a name is propagated to the QAccessibleWidgetEx constructor.
 */
 QAccessibleLineEdit::QAccessibleLineEdit(QWidget *w, const QString &name)
-: QAccessibleWidgetEx(w, EditableText, name)
+: QAccessibleWidgetEx(w, EditableText, name), QAccessibleSimpleEditableTextInterface(this)
 {
-    addControllingSignal("textChanged(const QString&)");
-    addControllingSignal("returnPressed()");
+    addControllingSignal(QLatin1String("textChanged(const QString&)"));
+    addControllingSignal(QLatin1String("returnPressed()"));
 }
 
 /*! Returns the line edit. */
@@ -534,6 +571,8 @@ QLineEdit *QAccessibleLineEdit::lineEdit() const
 QString QAccessibleLineEdit::text(Text t, int child) const
 {
     QString str;
+    if (!lineEdit()->isVisible())
+        return str;
     switch (t) {
     case Value:
         str = lineEdit()->text();
@@ -549,6 +588,8 @@ QString QAccessibleLineEdit::text(Text t, int child) const
 /*! \reimp */
 void QAccessibleLineEdit::setText(Text t, int control, const QString &text)
 {
+    if (!lineEdit()->isVisible())
+        return;
     if (t != Value || control) {
         QAccessibleWidgetEx::setText(t, control, text);
         return;
@@ -570,6 +611,10 @@ QAccessible::State QAccessibleLineEdit::state(int child) const
     if (l->hasSelectedText())
         state |= Selected;
 
+    if (l->contextMenuPolicy() != Qt::NoContextMenu
+        && l->contextMenuPolicy() != Qt::PreventContextMenu)
+        state |= HasPopup;
+
     return state;
 }
 
@@ -581,18 +626,128 @@ QVariant QAccessibleLineEdit::invokeMethodEx(QAccessible::Method method, int chi
 
     switch (method) {
     case ListSupportedMethods: {
-        QVariantList list;
-        list << 0 << 1 << 2;
-        return list;
+        QSet<QAccessible::Method> set;
+        set << ListSupportedMethods << SetCursorPosition << GetCursorPosition;
+        return qVariantFromValue(set | qvariant_cast<QSet<QAccessible::Method> >(
+                QAccessibleWidgetEx::invokeMethodEx(method, child, params)));
     }
     case SetCursorPosition:
-        lineEdit()->setCursorPosition(params.value(0).toInt());
+        setCursorPosition(params.value(0).toInt());
         return true;
     case GetCursorPosition:
-        return lineEdit()->cursorPosition();
+        return cursorPosition();
+    default:
+        return QAccessibleWidgetEx::invokeMethodEx(method, child, params);
     }
-
-    return QVariant();
 }
+
+void QAccessibleLineEdit::addSelection(int startOffset, int endOffset)
+{
+    setSelection(0, startOffset, endOffset);
+}
+
+QString QAccessibleLineEdit::attributes(int offset, int *startOffset, int *endOffset)
+{
+    // QLineEdit doesn't have text attributes
+    *startOffset = *endOffset = offset;
+    return QString();
+}
+
+int QAccessibleLineEdit::cursorPosition()
+{
+    return lineEdit()->cursorPosition();
+}
+
+QRect QAccessibleLineEdit::characterRect(int /*offset*/, CoordinateType /*coordType*/)
+{
+    // QLineEdit doesn't hand out character rects
+    return QRect();
+}
+
+int QAccessibleLineEdit::selectionCount()
+{
+    return lineEdit()->hasSelectedText() ? 1 : 0;
+}
+
+int QAccessibleLineEdit::offsetAtPoint(const QPoint &point, CoordinateType coordType)
+{
+    QPoint p = point;
+    if (coordType == RelativeToScreen)
+        p = lineEdit()->mapFromGlobal(p);
+
+    return lineEdit()->cursorPositionAt(p);
+}
+
+void QAccessibleLineEdit::selection(int selectionIndex, int *startOffset, int *endOffset)
+{
+    *startOffset = *endOffset = 0;
+    if (selectionIndex != 0)
+        return;
+
+    *startOffset = lineEdit()->selectionStart();
+    *endOffset = *startOffset + lineEdit()->selectedText().count();
+}
+
+QString QAccessibleLineEdit::text(int startOffset, int endOffset)
+{
+    if (startOffset > endOffset)
+        return QString();
+    return lineEdit()->text().mid(startOffset, endOffset - startOffset);
+}
+
+QString QAccessibleLineEdit::textBeforeOffset (int /*offset*/, BoundaryType /*boundaryType*/,
+        int * /*startOffset*/, int * /*endOffset*/)
+{
+    // TODO
+    return QString();
+}
+
+QString QAccessibleLineEdit::textAfterOffset(int /*offset*/, BoundaryType /*boundaryType*/,
+        int * /*startOffset*/, int * /*endOffset*/)
+{
+    // TODO
+    return QString();
+}
+
+QString QAccessibleLineEdit::textAtOffset(int /*offset*/, BoundaryType /*boundaryType*/,
+        int * /*startOffset*/, int * /*endOffset*/)
+{
+    // TODO
+    return QString();
+}
+
+void QAccessibleLineEdit::removeSelection(int selectionIndex)
+{
+    if (selectionIndex != 0)
+        return;
+
+    lineEdit()->deselect();
+}
+
+void QAccessibleLineEdit::setCursorPosition(int position)
+{
+    lineEdit()->setCursorPosition(position);
+}
+
+void QAccessibleLineEdit::setSelection(int selectionIndex, int startOffset, int endOffset)
+{
+    if (selectionIndex != 0)
+        return;
+
+    lineEdit()->setSelection(startOffset, endOffset - startOffset);
+}
+
+int QAccessibleLineEdit::characterCount()
+{
+    return lineEdit()->text().count();
+}
+
+void QAccessibleLineEdit::scrollToSubstring(int startIndex, int endIndex)
+{
+    lineEdit()->setCursorPosition(endIndex);
+    lineEdit()->setCursorPosition(startIndex);
+}
+
+
 #endif // QT_NO_LINEEDIT
 #endif // QT_NO_ACCESSIBILITY

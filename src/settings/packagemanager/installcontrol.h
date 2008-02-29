@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -45,55 +45,43 @@ public:
 private:
     virtual void doReportError( const QString &simpleError, const QString &detailedError );
     QString packageName;   
-    QString prefix; 
+    QString prefix;
+    QString subject; 
 };
 
 class InstallControl
 {
 public:
 
-    enum InstallStatus
-    {
-        Available,        // Available for install, but neither installed nor partly installed
-        PartlyInstalled,  // Part-way thru install process, some - but not all - files have been written to store
-        Installed,        // The install process has completed (but may still be in error)
-        Error    = 0x08   // The install process has resulted in an error
-    };
     struct PackageInfo
     {
+        enum Source
+        {
+            Control, //package information obtained from control file
+            PkgList  //package information obtained from packages list or qpd descriptor
+        };
+
         PackageInfo() { isEnabled = true; }
         ~PackageInfo() {}
         PackageInfo( const PackageInfo& d ) { *this = d; }
-        InstallStatus status;
         QString name;
         QString description;
         QString fullDescription;
-        QString size;
+        QString size; //size of package to download
         QString section;
         QString domain;
         QString packageFile;
         QString trust;
         QString md5Sum;
-        QStringList files;
+        QStringList files;//this member is deprecated
         QString version;
         QString qtopiaVersion;
         QString url;
+        QString devices;
+        QString installedSize; //size after decompression
+        QString type;
         bool isEnabled;
-        bool isComplete( bool fromControl = false ) const
-        {
-            bool ret = !(name.isEmpty() ||
-                description.isEmpty() || 
-#ifndef QT_NO_SXE
-                domain.isEmpty() || 
-#endif
-                files.isEmpty() ||
-                qtopiaVersion.isEmpty() );   
-            
-            if ( !fromControl )
-                return ( ret && !( md5Sum.isEmpty() || size.isEmpty() ) );
-            else
-                return ret;
-        }
+        bool isComplete( Source source = PackageInfo::PkgList, QString *reason = 0) const;
         bool isSystemPackage() const
         {
             return !trust.isEmpty() && trust != "Untrusted";
@@ -167,19 +155,14 @@ inline bool InstallControl::PackageInfo::operator< ( const PackageInfo &other ) 
 }
 
 /*!
-  Return true is this is the same package as the other.
+  Return true if this is the same package as the other.
 
-  It is the same package, if the name is the same and the version is the same.
-
-  A simplifying assumption is made, that the same package provider will not issue
-  a package where the version number is meant to reflect the same version, but uses
-  a different format - ie  "version 1.0.3" and "V 1.0.3".  This seems like a safe
-  assumption.
+ The packages are considered the same if they either have the same
+ md5sum or the same name
 */
 inline bool InstallControl::PackageInfo::operator==( const PackageInfo &d ) const
 {
-//    return ( name == d.name && version == d.version );
-      return ( md5Sum == d.md5Sum );
+      return ( md5Sum == d.md5Sum ) || ( name == d.name );
 }
 
 inline InstallControl::PackageInfo &InstallControl::PackageInfo::operator=( const InstallControl::PackageInfo &d )
@@ -188,6 +171,7 @@ inline InstallControl::PackageInfo &InstallControl::PackageInfo::operator=( cons
     description = d.description;
     fullDescription = d.fullDescription;
     size = d.size;
+    installedSize = d.installedSize;
     section = d.section;
     domain = d.domain;
     trust = d.trust;
@@ -196,8 +180,11 @@ inline InstallControl::PackageInfo &InstallControl::PackageInfo::operator=( cons
     version = d.version;
     url = d.url;
     qtopiaVersion = d.qtopiaVersion;
+    devices = d.devices;
     isEnabled = d.isEnabled;
-    files = d.files;
+    files = d.files; //files is deprecated
+    installedSize = d.installedSize;
+    type = d.type;
     return *this;
 }
 

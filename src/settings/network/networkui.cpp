@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,7 +30,6 @@
 
 #include <QFile>
 #include <QHeaderView>
-#include <QKeyEvent>
 #include <QLabel>
 #include <QLayout>
 #include <QListWidget>
@@ -38,13 +37,9 @@
 #include <QTableWidget>
 #include <QTimer>
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <QAction>
 #include <QMenu>
 #include <qsoftmenubar.h>
-#else
-#include <QPushButton>
-#endif
 #include <QDSData>
 
 #include <qtopiaapplication.h>
@@ -57,8 +52,6 @@
 #include <qnetworkstate.h>
 #include <qnetworkdevice.h>
 #include <qvaluespace.h>
-
-#include <qsoftmenubar.h>
 
 #ifdef QTOPIA_CELL
 #include <qotareader.h>
@@ -126,6 +119,8 @@ public:
         else if ( itemType & QtopiaNetwork::Bluetooth )
             p = "bluetooth/bluetooth-";
 
+        QIcon i(QPixmap(":icon/"+p+"notavail") );
+
         state = status;
         switch (status) {
             case QtopiaNetworkInterface::Unavailable:
@@ -173,7 +168,7 @@ public:
     {
         lifeExtention = isExtended;
     }
-    
+
     bool extendedLifeTime( )
     {
         return lifeExtention;
@@ -214,8 +209,8 @@ NetworkMonitor::NetworkMonitor(  NetworkWidgetItem* item )
 {
     QNetworkState *netState = new QNetworkState( this );
     setDefaultGateway( netState->gateway() );
-    connect( netState, SIGNAL(defaultGatewayChanged(QString,const QNetworkInterface&)),
-            this, SLOT(setDefaultGateway(const QString&)) );
+    connect( netState, SIGNAL(defaultGatewayChanged(QString,QNetworkInterface)),
+            this, SLOT(setDefaultGateway(QString)) );
 
     pending = new QTimer( this );
     connect( pending, SIGNAL(timeout()), this, SLOT(update()) );
@@ -237,14 +232,14 @@ void NetworkMonitor::updateStatus( int state )
     if ( (s == QtopiaNetworkInterface::Pending || s== QtopiaNetworkInterface::Demand )
             && (netItem->status() == QtopiaNetworkInterface::Down) ) {
         /*
-            The current limitation is that a device must be in the Pending, Demand or Up state in order to extend 
+            The current limitation is that a device must be in the Pending, Demand or Up state in order to extend
             its life time. Hence we just set the life time flag whenever we discover a state transition from Down state
             to any of the other states mentioned above. Consequently we have to ensure that the current device
             was actually started by netsetup and not any other application.
-        
+
             All NetworkWidgetItems with the extendedLifeTime flag were started by NetworkUI.
-            This way we can keep track of who started the network device as only NetworkUI can set the extended 
-            life time flag. It prevents that devices gain the extention just because the netsetup application 
+            This way we can keep track of who started the network device as only NetworkUI can set the extended
+            life time flag. It prevents that devices gain the extention just because the netsetup application
             happens to be running in the background when another application starts a new device/interface.
         */
         if ( netItem->extendedLifeTime() ) {
@@ -341,14 +336,13 @@ void NetworkUI::init()
     connect(table, SIGNAL(itemChanged(QTableWidgetItem*)),
              this, SLOT(updateActions()));
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     connect( table, SIGNAL(itemActivated(QTableWidgetItem*)),
             this, SLOT(serviceSelected()));
 
     contextMenu = QSoftMenuBar::menuFor( dataPage );
 
     a_add = new QAction( QIcon(":icon/new"), tr("New"), this );
-    connect( a_add, SIGNAL( triggered(bool) ), this, SLOT( addService() ) );
+    connect( a_add, SIGNAL(triggered(bool)), this, SLOT(addService()) );
     contextMenu->addAction(a_add);
 
     a_remove = new QAction( QIcon(":icon/trash"), tr("Delete"), this );
@@ -356,39 +350,13 @@ void NetworkUI::init()
     contextMenu->addAction(a_remove);
 
     a_gateway = new QAction( QIcon(":icon/defaultgateway"), tr("Default Gateway"), this );
-    connect( a_gateway, SIGNAL( triggered(bool) ), this, SLOT(setGateway()) );
+    connect( a_gateway, SIGNAL(triggered(bool)), this, SLOT(setGateway()) );
     contextMenu->addAction( a_gateway );
 
     a_props = new QAction( QIcon(":icon/settings"), tr("Properties..."), this );
     connect( a_props, SIGNAL(triggered(bool)), this, SLOT(doProperties()) );
     a_props->setData( QString() );
     contextMenu->addAction(a_props);
-#else
-    QGridLayout* grid = new QGridLayout();
-    vb->addItem( grid );
-    grid->setSpacing( 4 );
-    grid->setMargin( 4 );
-    startPB = new QPushButton( tr("Start/Stop"), dataPage );
-    connect( startPB, SIGNAL(clicked()), this, SLOT(serviceSelected()));
-    grid->addWidget( startPB, 0, 0 );
-
-    propPB = new QPushButton( tr("Properties..."), dataPage );
-    propPB->setIcon( QIcon(":icon/settings") );
-    connect( propPB, SIGNAL(clicked()), this, SLOT(doProperties()));
-    grid->addWidget( propPB, 0, 1 );
-
-    addPB = new QPushButton( tr("New..."), dataPage );
-    addPB->setIcon( QIcon(":icon/new") );
-    connect( addPB, SIGNAL(clicked()), this, SLOT(addService()));
-    grid->addWidget( addPB, 1, 0 );
-
-    removePB = new QPushButton( tr("Delete"), dataPage );
-    removePB->setIcon( QIcon(":icon/trash") );
-    connect( removePB, SIGNAL(clicked()), this, SLOT(removeService()));
-    grid->addWidget( removePB, 1, 1 );
-
-    //TODO add gateway option
-#endif
     tabWidget->addTab( dataPage, tr("Data") );
     tabWidget->setTabIcon( 0, QIcon(":icon/internet") );
 
@@ -401,21 +369,12 @@ void NetworkUI::init()
 #ifdef QTOPIA_VPN
     vpnPage = new VpnUI();
     tabWidget->addTab( vpnPage, tr("VPN") );
+    tabWidget->setTabIcon( 2, QIcon(":icon/server") );
 #endif //QTOPIA_VPN
 
     layout->addWidget( tabWidget );
     connect( tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)) );
     tabWidget->setCurrentIndex( 0 );
-
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    table->installEventFilter( this );
-#ifdef QTOPIA_CELL
-    wapPage->wapList->installEventFilter( this );
-#endif
-#ifdef QTOPIA_VPN
-    vpnPage->vpnList->installEventFilter( this );
-#endif //QTOPIA_VPN
-#endif //QTOPIA_KEYPAD_NAVIGATION
 
     // call update twice because the first call will create the
     // remote signal connections and the second call updates the states
@@ -493,34 +452,21 @@ void NetworkUI::setCurrentTab(int idx)
 void NetworkUI::updateActions()
 {
     if (!table->rowCount() || table->currentRow() < 0) {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         a_remove->setVisible( false );
         a_props->setVisible( false );
         a_gateway->setVisible( false );
-#else
-        startPB->setEnabled( false );
-        propPB->setEnabled( false );
-        removePB->setEnabled( false );
-#endif
         updateExtraActions( QString(), QtopiaNetworkInterface::Unknown );
     } else {
         QTableWidgetItem *nameItem = table->item( table->currentRow(), 0 );
         QTableWidgetItem *statusItem = table->item( table->currentRow(), 1 );
         if (!nameItem || !statusItem ){
-#ifdef QTOPIA_KEYPAD_NAVIGATION
             a_remove->setVisible( false );
             a_props->setVisible( false );
             a_gateway->setVisible( false );
-#else
-            startPB->setEnabled( false );
-            propPB->setEnabled( false );
-            removePB->setEnabled( false );
-#endif
             return;
         }
         NetworkWidgetItem *netItem = (NetworkWidgetItem*)statusItem;
         QtopiaNetworkInterface::Status type = netItem->status();
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         a_gateway->setVisible( false );
         switch ( type ) {
             case QtopiaNetworkInterface::Unknown:
@@ -543,40 +489,12 @@ void NetworkUI::updateActions()
             QSoftMenuBar::setLabel( table, Qt::Key_Select, QSoftMenuBar::NoLabel );
         else
             QSoftMenuBar::setLabel( table, Qt::Key_Select, QSoftMenuBar::Select );
-
-#else
-        switch( type ){
-            case  QtopiaNetworkInterface::Down:
-                startPB->setEnabled( true );
-                propPB->setEnabled( true );
-                removePB->setEnabled( true );
-                break;
-            case  QtopiaNetworkInterface::Up:
-            case  QtopiaNetworkInterface::Pending:
-            case  QtopiaNetworkInterface::Demand:
-                startPB->setEnabled( true );
-                propPB->setEnabled( true );
-                removePB->setEnabled( false );
-                break;
-            case  QtopiaNetworkInterface::Unavailable:
-                propPB->setEnabled( true );
-                startPB->setEnabled( false );
-                removePB->setEnabled( true );
-                break;
-            default:
-                removePB->setEnabled( true );
-                propPB->setEnabled( false );
-                startPB->setEnabled( false );
-                break;
-        }
-#endif
         updateExtraActions( nameItem->data( Qt::UserRole ).toString(), type );
     }
 }
 
 void NetworkUI::updateExtraActions( const QString& config, QtopiaNetworkInterface::Status newState )
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     //reset all extra actions
     QList<QString> list = actionMap.keys();
     foreach( QString key, list ) {
@@ -623,9 +541,6 @@ void NetworkUI::updateExtraActions( const QString& config, QtopiaNetworkInterfac
             }
         }
     }
-#else
-    //TODO
-#endif
 }
 
 
@@ -638,6 +553,7 @@ void NetworkUI::addService(const QString& newConfig)
             dlg->showMaximized();
             if ( dlg->exec() == QDialog::Accepted ) {
                qLog(Network) << "New Network interface configuration saved";
+               table->setEditFocus( true );
             } else {
                 QFile::remove(newConfig);
             }
@@ -706,6 +622,7 @@ void NetworkUI::removeService()
         //we cant delete the interface until it's been stopped anyway
         QtopiaNetwork::stopInterface( config, true );
     }
+    table->setEditFocus( true );
 }
 
 void NetworkUI::doProperties()
@@ -723,13 +640,9 @@ void NetworkUI::doProperties()
         return;
 
     QString type;
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QAction* a = qobject_cast<QAction*>(sender());
     if ( a )
         type = a->data().toString();
-#else
-    //TODO
-#endif
 
     QDialog * dialog = plugin->configuration()->configure( this, type );
     if ( !dialog )
@@ -989,52 +902,6 @@ void NetworkUI::updateIfaceStates()
     o.send( MESSAGE(updateNetwork()) );
 }
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-bool NetworkUI::eventFilter( QObject* watched, QEvent* event )
-{
-    int currentIndex = tabWidget->currentIndex();
-    int count = tabWidget->count();
-    bool rtl = QtopiaApplication::layoutDirection() == Qt::RightToLeft;
-    if ( watched == table 
-#ifdef QTOPIA_CELL
-            || watched == wapPage->wapList
-#endif
-#ifdef QTOPIA_VPN
-            || watched == vpnPage->vpnList
-#endif
-            ) {
-        if ( event->type() == QEvent::KeyPress ) {
-            QKeyEvent *ke = (QKeyEvent*) event;
-            int key = ke->key();
-            switch ( key ) {
-                case Qt::Key_Back:
-                    event->ignore();
-                    break;
-                case Qt::Key_Left:
-                {
-                    if ( rtl && currentIndex < count - 1 )
-                        ++currentIndex;
-                    else if ( !rtl && currentIndex > 0 )
-                        --currentIndex;
-                    tabWidget->setCurrentIndex( currentIndex );
-                    return true;
-                }
-                case Qt::Key_Right:
-                {
-                    if ( rtl && currentIndex > 0 )
-                        --currentIndex;
-                    else if ( !rtl && currentIndex < count - 1 )
-                        ++currentIndex;
-                    tabWidget->setCurrentIndex( currentIndex );
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-#endif
-
 void NetworkUI::tabChanged( int index )
 {
     switch( index ) {
@@ -1061,10 +928,18 @@ void NetworkUI::tabChanged( int index )
 
 /*!
     \service NetworkSetupService NetworkSetup
-    \brief Provides network configuration service.
+    \brief Provides network configuration services.
 
-    The \i NetworkSetup service allows applications to configure the
-    network.
+    The \i NetworkSetup service allows applications to configure various details of the
+    network. 
+
+    Client applications can request the \i NetworkSetupService with the 
+    following code:
+
+    \code
+    QtopiaServiceRequest req( "NetworkSetupService", "configureData()" );
+    req.send();
+    \endcode
 */
 
 /*!
@@ -1074,6 +949,13 @@ NetworkSetupService::~NetworkSetupService()
 {
 }
 
+
+/*!
+  Instructs the \i NetworkSetupService to display a dialog to allow the user to edit the
+  current network interfaces.
+
+  This slot corresponds to the QCop service message \c{NetworkSetupService::configureData()}.
+  */
 void NetworkSetupService::configureData()
 {
     if ( !parent->isVisible() )
@@ -1082,6 +964,15 @@ void NetworkSetupService::configureData()
 }
 
 #ifdef QTOPIA_CELL
+/*!
+  Instructs the \i NetworkSetupService to display a dialog to allow the user to edit the
+  current WAP settings.
+
+  This slot corresponds to the QCop service message \c{NetworkSetupService::configureWap()}.
+
+  Note: This functionality is only available when Qtopia is configured to use a modem
+  or modem equivalent that could connect to WAP.
+  */
 void NetworkSetupService::configureWap()
 {
     if ( !parent->isVisible() )
@@ -1100,6 +991,11 @@ static QString extractSender( const QByteArray& auxData )
     return msg.sender();
 }
 
+/*!
+  This function provides OTA network configuration support according to WAP/OMA standards.
+  \a request contains the new OTA settings to be used.
+  The payload is defined by the QDS NetworkSetup service (\c{QPEDIR/etc/qds/NetworkSetup)
+  */
 void NetworkSetupService::pushWapNetworkSettings
         ( const QDSActionRequest& request )
 {
@@ -1109,6 +1005,11 @@ void NetworkSetupService::pushWapNetworkSettings
     QDSActionRequest( request ).respond();
 }
 
+/*!
+  This function provides OTA network configuration support according to Nokia's OTA settings 
+  specification 7. \a request contains the new OTA settings to be used.
+  The payload is defined by the QDS NetworkSetup service (\c{QPEDIR/etc/qds/NetworkSetup)
+  */
 void NetworkSetupService::pushNokiaNetworkSettings
         ( const QDSActionRequest& request )
 {

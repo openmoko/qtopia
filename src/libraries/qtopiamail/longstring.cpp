@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -18,15 +18,27 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <longstring.h>
-#include <qstring.h>
-#include <qfile.h>
-#include <limits.h> // for CHAR_BIT
-#include <QFileInfo>
 
-// mmap
+#include "longstring_p.h"
+
+#include <qtopialog.h>
+
+#include <QDataStream>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+
+#include <limits.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#ifndef USE_FANCY_MATCH_ALGORITHM
+#include <ctype.h>
+#endif
 
 // LongString: A string/array class for processing IETF documents such as
 // RFC(2)822 messages in a memory efficient method.
@@ -57,192 +69,62 @@
 // is useful as email fields/tokens (From, Date, Subject etc) are case
 // insensitive.
 
-class LongStringPrivate
-{
-public:
-    LongStringPrivate(const QString &fileName, bool autoRemove );
-    ~LongStringPrivate();
-    QByteArray toQByteArray() const;
-    void ref();
-    void deref();
-    QString fileName() const;
-
-private:
-    int mRefCount;
-    size_t mSize;
-    char* mBuffer;
-    int mPageMod;
-    QString mFileName;
-    bool mAutoRemove;
-};
-
-LongStringPrivate::LongStringPrivate(const QString &fileName, bool autoRemove)
-    :mRefCount(1), mSize( 0 ), mBuffer( 0 ), mPageMod( 0 )
-{
-  mFileName = fileName;
-  mAutoRemove = autoRemove;
-  QFileInfo fi( fileName );
-  static int pagesize = -1;
-  if (pagesize < 0)
-      pagesize = getpagesize();
-
-  if (fi.exists() && fi.isFile() && fi.isWritable() && fi.size() > 0)
-  {
-    FILE* stream = fopen(QFile::encodeName( fileName ), "r+" );
-    int tell = ftell( stream );
-    mPageMod = tell % pagesize;
-    mSize = fi.size();
-    mBuffer = (char *)mmap(0, fi.size() + mPageMod, PROT_READ, MAP_SHARED, fileno(stream), tell - mPageMod) + mPageMod;
-    ++mPageMod;
-    if (mBuffer == MAP_FAILED) {
-        mBuffer = 0;
-        mSize = 0;
-        mPageMod = 0;
-    }
-  }
-}
-
-LongStringPrivate::~LongStringPrivate()
-{
-    if (mPageMod) {
-        --mPageMod;
-        munmap(mBuffer - mPageMod, mSize + mPageMod);
-
-        if (mAutoRemove) {
-            QFile tempFile( mFileName );
-            tempFile.remove();
-        }
-    }
-}
-
-QByteArray LongStringPrivate::toQByteArray() const
-{
-    if (!mBuffer)
-        return QByteArray();
-
-    QByteArray ba( QByteArray::fromRawData( mBuffer, mSize ) );
-    return ba;
-}
-
-QString LongStringPrivate::fileName() const
-{
-    return mFileName;
-}
-
-void LongStringPrivate::ref()
-{
-    ++mRefCount;
-}
-
-void LongStringPrivate::deref()
-{
-    --mRefCount;
-    if (!mRefCount)
-        delete this;
-}
-
-LongString::LongString()
-  :d( 0 )
-{
-}
-
-LongString::LongString(const LongString &s)
-{
-    mBa = s.mBa;
-    mPrimaryBa = s.mPrimaryBa;
-    d = s.d;
-    if (d)
-        d->ref();
-}
-
-LongString::LongString(const QByteArray &ba)
-  :d( 0 )
-{
-    mBa = ba;
-    mPrimaryBa = ba;
-}
-
-LongString::LongString(const QByteArray &ba, const QByteArray &pBa, LongStringPrivate *otherD)
-{
-    mBa = ba;
-    mPrimaryBa = pBa;
-    d = otherD;
-    if (d)
-        d->ref();
-}
-
-LongString::LongString(const QString &fileName, bool autoRemove )
-  :d( 0 )
-{
-  d = new LongStringPrivate( fileName, autoRemove );
-  mBa = d->toQByteArray();
-  mPrimaryBa = mBa;
-}
-
-LongString::~LongString()
-{
-    if (d)
-        d->deref();
-    // Reference to mPrimaryBa is released
-}
-
-LongString &LongString::operator=(const LongString &other)
-{
-    if (this == &other)
-        return *this;
-    mBa = other.mBa;
-    mPrimaryBa = other.mPrimaryBa;
-    if (d)
-        d->deref();
-    d = other.d;
-    if (d)
-        d->ref();
-    return *this;
-}
-
-int LongString::length() const
-{
-    return mBa.length();
-}
-
-bool LongString::isEmpty() const
-{
-    return mBa.isEmpty();
-}
-
+#ifdef USE_FANCY_MATCH_ALGORITHM
 #define REHASH(a) \
     if (ol_minus_1 < sizeof(uint) * CHAR_BIT) \
         hashHaystack -= (a) << ol_minus_1; \
     hashHaystack <<= 1
+#endif
 
-int LongString::indexOf(const QByteArray &ba, int from) const
+static int insensitiveIndexOf(const QByteArray& target, const QByteArray &source, int from, int off, int len) 
 {
+#ifndef USE_FANCY_MATCH_ALGORITHM
+    const char* const matchBegin = target.constData();
+    const char* const matchEnd = matchBegin + target.length();
+
+    const char* const begin = source.constData() + off;
+    const char* const end = begin + len - (target.length() - 1);
+
+    const char* it = begin + from;
+    while (it < end)
+    {
+        if (toupper(*it++) == toupper(*matchBegin))
+        {
+            const char* restart = it;
+
+            // See if the remainder matches
+            const char* searchIt = it;
+            const char* matchIt = matchBegin + 1;
+
+            do 
+            {
+                if (matchIt == matchEnd)
+                    return ((it - 1) - begin);
+
+                // We may find the next place to search in our scan
+                if ((restart == it) && (*searchIt == *(it - 1)))
+                    restart = searchIt;
+            }
+            while (toupper(*searchIt++) == toupper(*matchIt++));
+
+            // No match
+            it = restart;
+        }
+    }
+
+    return -1;
+#else
     // Based on QByteArray::indexOf, except use strncasecmp for
     // case-insensitive string comparison
-    const int l = mBa.length();
-    while ((from < 0) && (l > 0))
-        from += l;
-
-    const int ol = ba.size();
-    if (from > l || ol + from > l) {
+    const int ol = target.length();
+    if (from > len || ol + from > len)
         return -1;
-    }
-    if (ol == 0) {
+    if (ol == 0)
         return from;
-    }
-    if (ol == 1) {
-        return mBa.indexOf(*ba.data(), from);
-    }
-/*
-    Haven't reimplemented this code as it's doubtful that
-    this indexof method is a bottleneck.
 
-    if (l > 500 && ol > 5)
-        return QByteArrayMatcher(ba).indexIn(*this, from);
-*/
-    const char *needle = ba.data();
-    const char *haystack = mBa.data() + from;
-    const char *end = mBa.data() + (l - ol);
+    const char *needle = target.data();
+    const char *haystack = source.data() + off + from;
+    const char *end = source.data() + off + (len - ol);
     const uint ol_minus_1 = ol - 1;
     uint hashNeedle = 0, hashHaystack = 0;
     int idx;
@@ -257,56 +139,284 @@ int LongString::indexOf(const QByteArray &ba, int from) const
         if (hashHaystack == hashNeedle  && *needle == *haystack
              && strncasecmp(needle, haystack, ol) == 0)
         {
-            return haystack - mBa.data();
+            return haystack - source.data();
         }
         REHASH(*haystack);
         ++haystack;
     }
     return -1;
+#endif
 }
 
-const LongString LongString::mid(int i, int len) const
-{
-    if (len < 0)
-        len = length() - i;
 
-    QByteArray ba( QByteArray::fromRawData( mBa.constData() + i, len ) );
-    return LongString( ba, mPrimaryBa, d );
+static const int PageSize = ::getpagesize();
+
+class LongStringFileMapping : public QSharedData
+{
+public:
+    LongStringFileMapping(const QString& filename);
+    ~LongStringFileMapping();
+
+    const QByteArray toQByteArray() const;
+
+private:
+    const char* buffer;
+    int len;
+};
+
+LongStringFileMapping::LongStringFileMapping(const QString& filename)
+    : QSharedData(),
+      buffer(0),
+      len(0)
+{
+    QFileInfo fi(filename);
+    if (fi.exists() && fi.isFile() && fi.isReadable() && fi.size())
+    {
+        int fd = ::open(QFile::encodeName(fi.absoluteFilePath()), O_RDONLY);
+        if (fd != -1)
+        {
+            int mapLength = ((fi.size() + (PageSize - 1)) / PageSize) * PageSize;
+            void* address = ::mmap(0, mapLength, PROT_READ, MAP_SHARED, fd, 0);
+            if (address == MAP_FAILED)
+            {
+                qWarning() << "Unable to mmap" << mapLength << "bytes from" << fi.absoluteFilePath() << ':' << errno;
+            }
+            else
+            {
+                buffer = reinterpret_cast<char*>(address);
+                len = fi.size();
+            }
+
+            ::close(fd);
+        }
+    }
+
+    if (!buffer)
+        qWarning() << "Unable to mmap:" << fi.absoluteFilePath();
 }
 
-const LongString LongString::left(int len) const
+LongStringFileMapping::~LongStringFileMapping()
 {
-    if (len < 0)
-        len = mBa.length(); // QString compatibility
-
-    QByteArray ba( QByteArray::fromRawData( mBa.constData(), len ) );
-    return LongString( ba, mPrimaryBa, d );
+    if (buffer)
+    {
+        int mapLength = ((len + (PageSize - 1)) / PageSize) * PageSize;
+        if (munmap(const_cast<char*>(buffer), mapLength) == -1)
+        {
+            qWarning() << "Unable to munmap" << mapLength << "bytes from buffer at" << reinterpret_cast<const void*>(buffer) << ':' << errno;
+        }
+    }
 }
 
-const LongString LongString::right(int len) const
+const QByteArray LongStringFileMapping::toQByteArray() const
 {
-    if (len < 0)
-        len = mBa.length(); // QString compatibility
-
-    QByteArray ba( QByteArray::fromRawData( mBa.constData() + mBa.length() - len, len ) );
-    return LongString( ba, mPrimaryBa, d );
+    // Does not create a copy:
+    return QByteArray::fromRawData(buffer, len);
 }
 
-QString LongString::toQString() const
+
+class LongStringPrivate : public QSharedData
 {
-    return mBa;
+public:
+    LongStringPrivate();
+    LongStringPrivate(const QByteArray& ba);
+    LongStringPrivate(const QString& filename);
+
+    int length() const;
+    bool isEmpty() const;
+
+    int indexOf(const QByteArray &target, int from) const;
+
+    void mid(int i, int len);
+    void left(int i);
+    void right(int i);
+
+    const QByteArray toQByteArray() const;
+
+    QDataStream* dataStream() const;
+    QTextStream* textStream() const;
+
+private:
+    QSharedDataPointer<LongStringFileMapping> mapping;
+    QByteArray data;
+    int offset;
+    int len;
+};
+
+LongStringPrivate::LongStringPrivate()
+    : QSharedData(),
+      mapping(0),
+      data(),
+      offset(0), 
+      len(0) 
+{
+}
+
+LongStringPrivate::LongStringPrivate(const QByteArray& ba)
+    : QSharedData(),
+      mapping(0),
+      data(ba),
+      offset(0), 
+      len(data.length()) 
+{
+}
+
+LongStringPrivate::LongStringPrivate(const QString& filename)
+    : QSharedData(),
+      mapping(new LongStringFileMapping(filename)),
+      data(mapping->toQByteArray()),
+      offset(0), 
+      len(data.length()) 
+{
+}
+
+int LongStringPrivate::length() const
+{
+    return len;
+}
+
+bool LongStringPrivate::isEmpty() const
+{
+    return (len == 0);
+}
+
+int LongStringPrivate::indexOf(const QByteArray &target, int from) const
+{
+    return insensitiveIndexOf(target, data, from, offset, len);
+}
+
+void LongStringPrivate::mid(int i, int size)
+{
+    i = qMax(i, 0);
+    if (i > len)
+    {
+        len = 0;
+    }
+    else
+    {
+        int remainder = len - i;
+        if (size < 0 || size > remainder)
+            size = remainder;
+
+        offset += i;
+        len = size;
+    }
+}
+
+void LongStringPrivate::left(int size)
+{
+    if (size < 0 || size > len)
+        size = len;
+
+    len = size;
+}
+
+void LongStringPrivate::right(int size)
+{
+    if (size < 0 || size > len)
+        size = len;
+
+    offset = (len - size) + offset;
+    len = size;
+}
+
+const QByteArray LongStringPrivate::toQByteArray() const
+{
+    // Does not copy:
+    return QByteArray::fromRawData(data.constData() + offset, len);
+}
+
+QDataStream* LongStringPrivate::dataStream() const
+{
+    const QByteArray input = toQByteArray();
+    return new QDataStream(input);
+}
+
+QTextStream* LongStringPrivate::textStream() const
+{
+    const QByteArray input = toQByteArray();
+    return new QTextStream(input);
+}
+
+
+
+LongString::LongString()
+{
+    d = new LongStringPrivate();
+}
+
+LongString::LongString(const LongString &other)
+{
+    this->operator=(other);
+}
+
+LongString::LongString(const QByteArray &ba)
+{
+    d = new LongStringPrivate(ba);
+}
+
+LongString::LongString(const QString &fileName)
+{
+    d = new LongStringPrivate(fileName);
+}
+
+LongString::~LongString()
+{
+}
+
+LongString &LongString::operator=(const LongString &other)
+{
+    d = other.d;
+    return *this;
+}
+
+int LongString::length() const
+{
+    return d->length();
+}
+
+bool LongString::isEmpty() const
+{
+    return d->isEmpty();
+}
+
+int LongString::indexOf(const QByteArray &target, int from) const
+{
+    return d->indexOf(target, from);
+}
+
+LongString LongString::mid(int i, int len) const
+{
+    LongString copy(*this);
+    copy.d->mid(i, len);
+    return copy;
+}
+
+LongString LongString::left(int len) const
+{
+    LongString copy(*this);
+    copy.d->left(len);
+    return copy;
+}
+
+LongString LongString::right(int len) const
+{
+    LongString copy(*this);
+    copy.d->right(len);
+    return copy;
 }
 
 const QByteArray LongString::toQByteArray() const
 {
-    return mBa;
+    return d->toQByteArray();
 }
 
-QString LongString::fileName() const
+QDataStream* LongString::dataStream() const
 {
-    if (d)
-        return d->fileName();
+    return d->dataStream();
+}
 
-    return QString::null;
+QTextStream* LongString::textStream() const
+{
+    return d->textStream();
 }
 

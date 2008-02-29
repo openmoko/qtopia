@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,7 @@
 
 #include "griditem.h"
 #include "animator_p.h"
+#include "renderer.h"
 
 #include <QContent>
 #include <QPainter>
@@ -36,10 +37,6 @@ const QString GridItem::MOVIE_PREFIX(":image/");
 const QString GridItem::MOVIE_SUFFIX("_48_anim");
 const qreal GridItem::SELECTED_IMAGE_SIZE_FACTOR = 0.4;
 
-const QColor GridItem::DEFAULT_PEN_COLOR(0xbb,0xbb,0xbb);
-const Qt::PenStyle GridItem::DEFAULT_PEN_STYLE(Qt::DotLine);
-
-
 /*!
   \internal
   \class GridItem
@@ -52,7 +49,7 @@ const Qt::PenStyle GridItem::DEFAULT_PEN_STYLE(Qt::DotLine);
 
   In addition to using \a basicPixmap to draw itself, GridItem creates and
   maintains the pixmap used to display SelectedItem (when it is positioned over this
-  GridItem object), an SVG renderer (if the GridItem can be loaded from an SVG file)
+  GridItem object), a renderer (if the GridItem can be loaded from a scalable image format)
   and the movie used to animate SelectedItem (when it is positioned
   over this GridItem object).
 
@@ -62,6 +59,7 @@ const Qt::PenStyle GridItem::DEFAULT_PEN_STYLE(Qt::DotLine);
   object can be used in those cases where a particular version of Qtopia will not release all of
   the available applications.
 
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   \sa PhoneLauncherView
   \sa SelectedItem
 */
@@ -80,7 +78,7 @@ const Qt::PenStyle GridItem::DEFAULT_PEN_STYLE(Qt::DotLine);
   \a totalCols: The total number of columns in the grid in which this item is contained.
   \a animator: An object which is able to animate the GridItem when it is selected (i.e. by
   SelectedItem), in the absence of a QMovie object.
-  \a animatorBackground: An object which (optionally) provides a background for manual animation.
+  \a animatorBackground: An object which (optionally) provides a background for coded animation.
   \a loadMovie: Determines whether or not the object should search for a movie file for its animation.
   \a scene: The (optional) scene on which this item should be drawn.
 */
@@ -90,23 +88,22 @@ GridItem::GridItem(QContent *_content,int _row,int _col,
                    bool _loadMovie,
                    QGraphicsScene *scene)
     : QGraphicsRectItem(0,scene)
-    , content(_content)
-    , row(_row)
-    , col(_col)
+    , mContent(_content)
+    , mRow(_row)
+    , mCol(_col)
     , totalRows(_totalRows)
     , totalCols(_totalCols)
-    , selectedImageSize(-1)
+    , mSelectedImageSize(-1)
+    , mRenderer(0)
     , basicPixmap()
-    , selectedPixmap()
-    , selectedMovie(0)
-    , selectedAnimator(animator)
-    , selectedBackgroundAnimator(animatorBackground)
+    , mSelectedPixmap()
+    , mSelectedMovie(0)
+    , mSelectedAnimator(animator)
+    , mSelectedBackgroundAnimator(animatorBackground)
     , loadMovie(_loadMovie)
 {
     // Set up a pen to use for drawing operations.
-    QPen pen(DEFAULT_PEN_COLOR);
-    pen.setStyle(DEFAULT_PEN_STYLE);
-    setPen(pen);
+    paletteChanged();
 
     updateImages();
 }
@@ -117,17 +114,17 @@ GridItem::GridItem(QContent *_content,int _row,int _col,
 */
 GridItem::~GridItem()
 {
-    if ( selectedAnimator ) {
-        delete selectedAnimator;
+    if ( mSelectedAnimator ) {
+        delete mSelectedAnimator;
     }
-    if ( selectedMovie ) {
-        delete selectedMovie;
+    if ( mSelectedMovie ) {
+        delete mSelectedMovie;
     }
 }
 
 /*!
   \internal
-  \fn QContent *GridItem::getContent() const
+  \fn QContent *GridItem::content() const
 */
 
 /*!
@@ -137,20 +134,20 @@ GridItem::~GridItem()
 */
 void GridItem::setContent(QContent *_content)
 {
-    content = _content;
+    mContent = _content;
     updateImages();
-    selectedPixmap = QPixmap();
+    mSelectedPixmap = QPixmap();
 }
 
 /*!
   \internal
-  \fn int GridItem::getRow() const
+  \fn int GridItem::row() const
   Returns the grid row that this GridItem resides in. Rows are counted from 0.
 */
 
 /*!
   \internal
-  \fn int GridItem::getColumn() const
+  \fn int GridItem::column() const
   Returns the grid column that this GridItem resides in. Columns are counted from 0.
 */
 
@@ -162,17 +159,18 @@ void GridItem::setContent(QContent *_content)
 */
 void GridItem::updateImages()
 {
-    if ( selectedMovie ) {
-        delete selectedMovie;
-        selectedMovie = 0;
+    if ( mSelectedMovie ) {
+        delete mSelectedMovie;
+        mSelectedMovie = 0;
     }
 
-    if ( !content ) {
+    if ( !mContent ) {
         // We won't be able to make any images. It is valid to have an empty content - see doco above.
         basicPixmap = QPixmap();
-        if ( renderer.isValid() ) {
-            // Make sure it's not anymore! Load an empty byte array.
-            renderer.load(QByteArray());
+        if (mRenderer) {
+            // Make sure it's not anymore!
+            delete mRenderer;
+            mRenderer = 0;
         }
         return;
     }
@@ -180,37 +178,37 @@ void GridItem::updateImages()
     // Retrieve the static images, one for displaying the GridItem (basicPixmap)
     // the other for displaying the SelectedItem when it is positioned over this
     // GridItem.
-    int basicImageSize = getBasicImageSize();
+    int sz = basicImageSize();
 
-    // First, attempt to create the SVG renderer.
-    renderer.load(":image/" + content->iconName() + ".svg");
-    if ( renderer.isValid() ) {
+    // First, attempt to create the renderer.
+    mRenderer = Renderer::rendererFor(":image/" + mContent->iconName());
+    if (mRenderer) {
         // We use the renderer to create two Pixmaps -- one to display the GridItem itself, and
         // one to display the SelectedItem when it is magnifying the GridItem object.
         // Obviously, the SelectedItem's Pixmap is exactly the same as the GridItem's Pixmap,
         // except that it has a different size. We hang on to the renderer, because we may need
-        // that to do manual animations.
-        QImage image = QImage(basicImageSize,basicImageSize,QImage::Format_ARGB32_Premultiplied);
+        // that to do coded animations.
+        QImage image = QImage(sz,sz,QImage::Format_ARGB32_Premultiplied);
         image.fill(0);
         QPainter painter(&image);
-        renderer.render(&painter,QRectF(0,0,basicImageSize,basicImageSize));
+        mRenderer->render(&painter,QRectF(0,0,sz,sz));
         painter.end();
         basicPixmap = QPixmap::fromImage(image);
     } else {
-        // Probably not an SVG file - use the content's icon, directly, to get pixmaps.
-        basicPixmap = content->icon().pixmap(basicImageSize);
+        // Probably not a scalable image - use the content's icon, directly, to get pixmaps.
+        basicPixmap = mContent->icon().pixmap(sz);
     }
 
     // Create the movie.
-    if ( loadMovie && !(content->iconName().isNull()) ) {
-        selectedMovie = new QMovie(MOVIE_PREFIX  + content->iconName() + MOVIE_SUFFIX);
-        if ( selectedMovie->isValid() ) {
+    if ( loadMovie && !(mContent->iconName().isNull()) ) {
+        mSelectedMovie = new QMovie(MOVIE_PREFIX  + mContent->iconName() + MOVIE_SUFFIX);
+        if ( mSelectedMovie->isValid() ) {
             // TODO !!!!!!!!!!!! THIS HAS GOT TO GO. Waiting for Oslo...
-            selectedMovie->setCacheMode(QMovie::CacheAll);
+            mSelectedMovie->setCacheMode(QMovie::CacheAll);
         } else {
             // This movie was never meant to be...
-            delete selectedMovie;
-            selectedMovie = 0;
+            delete mSelectedMovie;
+            mSelectedMovie = 0;
         }
     }
 }
@@ -222,28 +220,28 @@ void GridItem::updateImages()
 */
 const QPixmap &GridItem::selectedPic() const
 {
-    if (selectedPixmap.isNull()) {
-        int selectedImageSize = getSelectedImageSize();
-        if ( renderer.isValid() ) {
-            QImage image = QImage(selectedImageSize,selectedImageSize,QImage::Format_ARGB32_Premultiplied);
+    if (mSelectedPixmap.isNull()) {
+        int sz = selectedImageSize();
+        if (mRenderer) {
+            QImage image = QImage(sz,sz,QImage::Format_ARGB32_Premultiplied);
             image.fill(0);
             QPainter painter(&image);
-            const_cast<GridItem *>(this)->renderer.render(&painter,QRectF(0,0,selectedImageSize,selectedImageSize));
+            const_cast<GridItem *>(this)->mRenderer->render(&painter,QRectF(0,0,sz,sz));
             painter.end();
-            const_cast<GridItem *>(this)->selectedPixmap = QPixmap::fromImage(image);
-        } else if ( content ) {
-            const_cast<GridItem *>(this)->selectedPixmap = content->icon().pixmap(selectedImageSize);
+            const_cast<GridItem *>(this)->mSelectedPixmap = QPixmap::fromImage(image);
+        } else if ( mContent ) {
+            const_cast<GridItem *>(this)->mSelectedPixmap = mContent->icon().pixmap(sz);
         }
     }
 
-    return selectedPixmap;
+    return mSelectedPixmap;
 }
 
 /*!
   \internal
   \fn const QPixmap &GridItem::basicPic() const
-  This function should be used for drawing the GridItem if there is no valid SVG renderer.
-  \sa getSvgRenderer()
+  This function should be used for drawing the GridItem if there is no valid renderer.
+  \sa renderer()
 */
 
 /*!
@@ -256,31 +254,28 @@ const QPixmap &GridItem::selectedPic() const
 
 /*!
   \internal
-  \fn QSvgRenderer *GridItem::getSvgRenderer()
-  Returns a valid SVG renderer, or 0.
-  The renderer can be used during painting. If there is no valid SVG renderer for this GridItem
+  \fn Renderer *GridItem::renderer()
+  Returns a valid renderer, or 0.
+  The renderer can be used during painting. If there is no valid renderer for this GridItem
   object, the pixmap methods can be used to retrieve pixmaps to draw. NOTE that if possible, the
-  pixmap methods should be used, since rendering from SVG is very expensive.
+  pixmap methods should be used, since rendering is very expensive.
   \sa selectedPic()
 */
-QSvgRenderer *GridItem::getSvgRenderer()
+Renderer *GridItem::renderer()
 {
-    if ( renderer.isValid() ) {
-        return &renderer;
-    }
-    return 0;
+    return mRenderer;
 }
 
 /*!
   \internal
-  \fn Animator *GridItem::getSelectedAnimator() const
-  Returns the Animator object for manual animation by the SelectedItem, or 0 if none is available.
+  \fn Animator *GridItem::selectedAnimator() const
+  Returns the Animator object for coded animation by the SelectedItem, or 0 if none is available.
 */
 
 /*!
   \internal
-  \fn Animator *GridItem::getSelectedBackgroundAnimator() const
-  Returns the background animator for manual animation by the SelectedItem, or 0 if none is
+  \fn Animator *GridItem::selectedBackgroundAnimator() const
+  Returns the background animator for coded animation by the SelectedItem, or 0 if none is
   available.
 */
 
@@ -298,19 +293,11 @@ void GridItem::paint(QPainter *painter,const QStyleOptionGraphicsItem *,QWidget 
     int y1 = static_cast<int>(rect().y());
     int x2 = x1 + static_cast<int>(rect().width()) - 1;
     int y2 = y1 + static_cast<int>(rect().height()) - 1;
-    if ( row > 0 ) {
-        // Draw top line.
-        painter->drawLine(x1+IMAGE_LINE_OFFSET, y1, x2-IMAGE_LINE_OFFSET, y1);
-    }
-    if ( row < totalRows-1 ) {
+    if ( mRow < totalRows-1 ) {
         // Draw bottom line.
         painter->drawLine(x1+IMAGE_LINE_OFFSET, y2, x2-IMAGE_LINE_OFFSET, y2);
     }
-    if ( col > 0 ) {
-        // Draw left line.
-        painter->drawLine(x1, y1+IMAGE_LINE_OFFSET, x1, y2-IMAGE_LINE_OFFSET);
-    }
-    if ( col < totalCols-1 ) {
+    if ( mCol < totalCols-1 ) {
         // Draw right line.
         painter->drawLine(x2, y1+IMAGE_LINE_OFFSET, x2, y2-IMAGE_LINE_OFFSET);
     }
@@ -327,39 +314,39 @@ void GridItem::paint(QPainter *painter,const QStyleOptionGraphicsItem *,QWidget 
 
 /*!
   \internal
-  \fn QRectF GridItem::getRenderingBounds()
-  Creates on demand the bounding infomration for the SVG renderer.
+  \fn QRectF GridItem::renderingBounds()
+  Creates on demand the bounding infomration for the renderer.
 */
-QRectF GridItem::getRenderingBounds()
+QRectF GridItem::renderingBounds()
 {
-    int requiredSize = getBasicImageSize();
+    int requiredSize = basicImageSize();
 
     // We update the rendering bounds if a) we have a valid renderer (otherwise there's no point)
     // and b) either the bounds have not yet been created, or something has caused the basic
     // image size to change - which generally it will not.
-    if ( renderer.isValid() &&
-         (renderingBounds.isNull() || (requiredSize != renderingBounds.width())) ) {
+    if (mRenderer &&
+         (mRenderingBounds.isNull() || (requiredSize != mRenderingBounds.width())) ) {
         // Position the image in the middle of the drawing area.
         int x1 = static_cast<int>(rect().x());
         int y1 = static_cast<int>(rect().y());
         x1 += (static_cast<int>(rect().width()) - requiredSize)/2;
         y1 += (static_cast<int>(rect().height()) - requiredSize)/2;
 
-        renderingBounds.setX(x1);
-        renderingBounds.setY(y1);
-        renderingBounds.setWidth(requiredSize);
-        renderingBounds.setHeight(requiredSize);
+        mRenderingBounds.setX(x1);
+        mRenderingBounds.setY(y1);
+        mRenderingBounds.setWidth(requiredSize);
+        mRenderingBounds.setHeight(requiredSize);
     }
 
-    return renderingBounds;
+    return mRenderingBounds;
 }
 
 /*!
   \internal
-  \fn int GridItem::getBasicImageSize() const;
+  \fn int GridItem::basicImageSize() const;
   Returns the image size (in pixels) for GridItem's \a basicImage, for the current resolution.
 */
-int GridItem::getBasicImageSize() const
+int GridItem::basicImageSize() const
 {
     int imageSize = qApp->style()->pixelMetric(QStyle::PM_IconViewIconSize);
     return imageSize;
@@ -367,12 +354,25 @@ int GridItem::getBasicImageSize() const
 
 /*!
   \internal
-  \fn int GridItem::getSelectedImageSize() const;
+  \fn int GridItem::selectedImageSize() const;
   Returns the size of this GridItem when it is selected (i.e. by SelectedItem).
 */
-int GridItem::getSelectedImageSize() const
+int GridItem::selectedImageSize() const
 {
-    int basicImageSize = getBasicImageSize();
+    int sz = basicImageSize();
 
-    return basicImageSize + qRound(basicImageSize * SELECTED_IMAGE_SIZE_FACTOR);
+    return sz + qRound(sz * SELECTED_IMAGE_SIZE_FACTOR);
 }
+
+/*!
+  \internal
+  Updates the colors used by the GridItem.
+*/
+void GridItem::paletteChanged()
+{
+    QColor col(QApplication::palette().color(QPalette::Midlight));
+    col.setAlpha(64);
+    QPen pen(col);
+    setPen(pen);
+}
+

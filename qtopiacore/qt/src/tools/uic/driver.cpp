@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -105,7 +120,7 @@ QString Driver::findOrInsertName(const QString &name)
 QString Driver::normalizedName(const QString &name)
 {
     QString result = name;
-    result.replace(QRegExp(QLatin1String("[^a-zA-Z_0-9]")), QLatin1String("_"));
+    result.replace(QRegExp(QLatin1String("[^a-zA-Z_0-9]")), QString(QLatin1Char('_')));
     return result;
 }
 
@@ -191,7 +206,7 @@ QString Driver::headerFileName(const QString &fileName)
         if (!isAnsiCCharacter(c)) {
             // Replace character by its unicode value
             QString hex = QString::number(c.unicode(), 16);
-            baseName.replace(i, 1, "_" + hex + "_");
+            baseName.replace(i, 1, QLatin1Char('_') + hex + QLatin1Char('_'));
             i += hex.size() + 1;
         }
     }
@@ -250,7 +265,15 @@ bool Driver::uic(const QString &fileName, QTextStream *out)
     if (out) {
         m_output = out;
     } else {
+#ifdef Q_WS_WIN
+        // As one might also redirect the output to a file on win, 
+        // we should not create the textstream with QFile::Text flag.
+        // The redirected file is opened in TextMode and this will
+        // result in broken line endings as writing will replace \n again.
+        m_output = new QTextStream(stdout, QIODevice::WriteOnly);
+#else
         m_output = new QTextStream(stdout, QIODevice::WriteOnly | QFile::Text);
+#endif
         deleteOutput = true;
     }
 

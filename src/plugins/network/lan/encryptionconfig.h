@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,7 +26,9 @@
 
 #ifndef NO_WIRELESS_LAN
 
+#include <QContent>
 #include <QWidget>
+#include <QHash>
 #include <qtopianetworkinterface.h>
 
 #include "ui_wirelessencryptbase.h"
@@ -52,11 +54,13 @@ private slots:
     void selectEncryptType( int index );
     void checkPassword();
     void wpaEnterpriseChanged(int index);
+    void fileSelected();
 
 private:
     Ui::WirelessEncryptionBase ui;
     QtopiaNetworkProperties props;
     int lastIndex;
+    QHash<QToolButton*,QContent> documents;
 };
 
 #endif // NO_WIRELESS_LAN

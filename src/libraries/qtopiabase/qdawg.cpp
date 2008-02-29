@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -18,12 +18,12 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+#define QTOPIA_INTERNAL_QDAWG_TRIE
 #include "qdawg.h"
 #include <QHash>
 #include <qlist.h>
 #include <qtextstream.h>
 #include <qfile.h>
-// #include <qtl.h>
 #include <qiodevice.h>
 
 #include <limits.h>
@@ -37,9 +37,13 @@ class QTrie;
 typedef QList<QTrie*> TrieClub;
 typedef QHash<int, TrieClub *> TrieClubDirectory;
 
+static bool global_trie_mode = false;
+static uint global_trie_value = 0;
+
 class TriePtr {
 public:
     QChar letter;
+    int val; // see QDawg::createTrieFromWords
     QTrie* p;
     int operator <(const TriePtr& o) const;
     int operator >(const TriePtr& o) const;
@@ -54,7 +58,7 @@ public:
         sorted=true;
     }
 
-    QTrie* findAdd(QChar c);
+    QTrie* findAdd(QChar c,bool last);
     bool equal(TrieList& l);
 
     void sort()
@@ -84,6 +88,7 @@ private:
     int maxdepth;
     int decendants;
     int key;
+
     void distributeKeys(TrieClubDirectory& directory);
     QTrie* clubLeader(TrieClubDirectory& directory);
     int collectKeys();
@@ -105,10 +110,15 @@ QTrie::~QTrie()
 
 void QTrie::insertWord(const QString& s, uint index)
 {
+    if ( global_trie_mode && (int)index == s.length()-1 && s[(int)index]=='-' )
+        return;
     if ( (int)index == s.length() ) {
         isword = true;
     } else {
-        QTrie* t = children.findAdd(s[(int)index]);
+        bool last = (int)index == s.length()-1;
+        if ( global_trie_mode && (int)index == s.length()-2 && s[(int)index+1]=='-' )
+            last = true;
+        QTrie* t = children.findAdd(s[(int)index],last);
         t->insertWord(s,index+1);
     }
 }
@@ -116,6 +126,7 @@ void QTrie::insertWord(const QString& s, uint index)
 bool QTrie::equal(QTrie* o)
 {
     if ( o == this ) return true;
+    if ( global_trie_mode ) return false;
     if ( isword != o->isword )
         return false;
     return children.equal(o->children);
@@ -125,9 +136,10 @@ void QTrie::dump(int indent)
 {
     for (TrieList::Iterator it=children.begin(); it!=children.end(); ++it) {
         QTrie* s = (*it).p;
+        fprintf(stderr,"%p: ",this);
         for (int in=0; in<indent; in++)
             fputc(' ',stderr);
-        fprintf(stderr," %c %d %s %p\n",(*it).letter.unicode(),
+        fprintf(stderr," %c %d %d %s %p\n",(*it).letter.unicode(),(*it).val,
             s->key,s->isword?"word":"",s); // No tr
         s->dump(indent+2);
     }
@@ -169,7 +181,6 @@ QTrie* QTrie::clubLeader(TrieClubDirectory& directory)
     // i.e. the first subtree in the directory that
     // is identical to this subtree.
 
-    if ( !key ) return directory[0]->first();
     for (TrieList::Iterator itList=children.begin();
          itList!=children.end(); ++itList) {
         QTrie* t= (*itList).p->clubLeader(directory);
@@ -216,15 +227,22 @@ bool TrieList::equal(TrieList& l)
             return false;
     return true;
 }
-QTrie* TrieList::findAdd(QChar c)
+QTrie* TrieList::findAdd(QChar c,bool last)
 {
     for (Iterator it=begin(); it!=end(); ++it) {
-        if ( (*it).letter == c )
+        if ( (*it).letter == c ) {
+            if ( last && global_trie_mode )
+                (*it).val = global_trie_value;
             return (*it).p;
+        }
     }
     TriePtr p;
     p.p = new QTrie;
     p.letter = c;
+    if ( last && global_trie_mode )
+        p.val = global_trie_value;
+    else
+        p.val = 0;
     prepend(p);
     sorted=false;
     sort();
@@ -346,8 +364,8 @@ public:
             fprintf(stderr,"%d: ",nid+i);
             for (int in=0; in<indent; in++)
                 fputc(' ',stderr);
-            fprintf(stderr," %c %d %d %d\n",n.let,
-                n.isword,n.islast,n.offset);
+            fprintf(stderr," %c %d %d %d %d\n",n.let,
+                n.isword,n.islast,n.offset,n.val);
             if ( n.offset ) dump(n.offset+nid+i,indent+2);
         } while (!node[nid+i++].islast);
     }
@@ -424,6 +442,9 @@ private:
                 ++n;
                 n->let = (*it).letter.unicode();
                 n->isword = s->isword;
+                if ( global_trie_mode ) {
+                    n->val = (*it).val;
+                }
                 n->islast = 0;
                 n->offset = appendToArray(s);
                 if ( n->offset ) {
@@ -548,14 +569,54 @@ bool QDawg::createFromWords(QIODevice* dev)
     QTrie* trie = new QTrie;
     int n=0;
     while (!i.atEnd()) {
-        trie->insertWord(i.readLine());
+        QString line = i.readLine();
+        if ( global_trie_mode ) {
+            QStringList t = line.split(' ');
+            global_trie_value = t.count() > 1 ? t[1].toUInt() : 0;
+            line = t[0];
+        }
+        trie->insertWord(line);
         n++;
     }
+    //trie->dump();
     if ( n )
         d = new QDawgPrivate(trie);
     else
         d = 0;
     return true;
+}
+
+/*XXX
+  \fn int QDawg::Node::value() const
+
+  \internal
+
+  Not yet supported.
+
+  Returns the value stored at the node.
+  \sa QDawg::createTrieFromWords
+*/
+
+/*!
+  \internal
+
+  Not yet supported.
+
+  Not thread-safe.
+
+  Format of file is:
+  \code
+  word value
+  pref- value 
+  \endcode
+  Words and prefixes can thus be assigned a value.
+*/
+bool QDawg::createTrieFromWords(QIODevice* dev)
+{
+    global_trie_mode = true;
+    bool y = createFromWords(dev);
+    global_trie_mode = false;
+    return y;
 }
 
 /*!
@@ -568,8 +629,6 @@ void QDawg::createFromWords(const QStringList& list)
     if ( list.count() ) {
         QTrie* trie = new QTrie;
         for (QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
-            QString word = (*it).toUtf8();
-            //trie->insertWord(word);
             trie->insertWord(*it);
         }
         d = new QDawgPrivate(trie);

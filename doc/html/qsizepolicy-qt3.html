@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt 3 Support Members for QSizePolicy</title>
+  <title>Qt 4.3: Qt 3 Support Members for QSizePolicy</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -21,8 +21,8 @@
 </ul>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qsizepolicy-qt3.html#QSizePolicy-3">QSizePolicy</a></b> ( Policy <i>horizontal</i>, Policy <i>vertical</i>, bool <i>dependent</i> )</li>
-<li><div class="fn"/><b><a href="qsizepolicy-qt3.html#QSizePolicy-4">QSizePolicy</a></b> ( Policy <i>horizontal</i>, Policy <i>vertical</i>, uchar <i>horizontalStretch</i>, uchar <i>verticalStretch</i>, bool <i>dependent</i> = false )</li>
+<li><div class="fn"/><b><a href="qsizepolicy-qt3.html#QSizePolicy-4">QSizePolicy</a></b> ( Policy <i>horizontal</i>, Policy <i>vertical</i>, bool <i>dependent</i> )</li>
+<li><div class="fn"/><b><a href="qsizepolicy-qt3.html#QSizePolicy-5">QSizePolicy</a></b> ( Policy <i>horizontal</i>, Policy <i>vertical</i>, uchar <i>horizontalStretch</i>, uchar <i>verticalStretch</i>, bool <i>dependent</i> = false )</li>
 <li><div class="fn"/>Qt::Orientations <b><a href="qsizepolicy-qt3.html#expanding">expanding</a></b> () const</li>
 <li><div class="fn"/>Policy <b><a href="qsizepolicy-qt3.html#horData">horData</a></b> () const</li>
 <li><div class="fn"/>uint <b><a href="qsizepolicy-qt3.html#horStretch">horStretch</a></b> () const</li>
@@ -52,14 +52,14 @@
 <p>Use the <a href="qsizepolicy.html#Policy-enum">QSizePolicy::Policy</a> enum instead.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSizePolicy-3"></a>QSizePolicy::QSizePolicy ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>horizontal</i>, <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>vertical</i>, bool <i>dependent</i> )</h3>
+<h3 class="fn"><a name="QSizePolicy-4"></a>QSizePolicy::QSizePolicy ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>horizontal</i>, <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>vertical</i>, bool <i>dependent</i> )</h3>
 <p>Use the <a href="qsizepolicy.html#QSizePolicy">QSizePolicy</a>() constructor and the <a href="qsizepolicy.html#setHeightForWidth">setHeightForWidth</a>() function instead.</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> QSizePolicy *policy = new QSizePolicy(horizontal, vertical, dependent);</font></pre>
 <p>you can rewrite it as</p>
 <pre> QSizePolicy *policy = new QSizePolicy(horizontal, vertical);
  policy-&gt;setHeightForWidth(dependent);</pre>
-<h3 class="fn"><a name="QSizePolicy-4"></a>QSizePolicy::QSizePolicy ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>horizontal</i>, <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>vertical</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>horizontalStretch</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>verticalStretch</i>, bool <i>dependent</i> = false )</h3>
+<h3 class="fn"><a name="QSizePolicy-5"></a>QSizePolicy::QSizePolicy ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>horizontal</i>, <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>vertical</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>horizontalStretch</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>verticalStretch</i>, bool <i>dependent</i> = false )</h3>
 <p>Use the <a href="qsizepolicy.html#QSizePolicy">QSizePolicy</a>() constructor and call the <a href="qsizepolicy.html#setHorizontalStretch">setHorizontalStretch</a>(), <a href="qsizepolicy.html#setVerticalStretch">setVerticalStretch</a>(), and <a href="qsizepolicy.html#setHeightForWidth">setHeightForWidth</a>() functions instead.</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> QSizePolicy *policy = new QSizePolicy(horizontal, vertical,
@@ -124,6 +124,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

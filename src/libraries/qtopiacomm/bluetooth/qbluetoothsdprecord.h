@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,31 +19,31 @@
 **
 ****************************************************************************/
 
-#ifndef __SERVICE_H__
-#define __SERVICE_H__
+#ifndef __QBLUETOOTHSDPRECORD_H__
+#define __QBLUETOOTHSDPRECORD_H__
 
 #include <QMap>
 #include <QVariant>
 #include <QList>
 #include <qglobal.h>
 
-#include <qtopiaglobal.h>
+#include <qbluetoothglobal.h>
 #include <qbluetoothnamespace.h>
 
 class QString;
 class QBluetoothSdpUuid;
 
-class QTOPIACOMM_EXPORT QBluetoothSdpAlternative : public QList<QVariant>
+class QBLUETOOTH_EXPORT QBluetoothSdpAlternative : public QList<QVariant>
 {
 
 };
 
-class QTOPIACOMM_EXPORT QBluetoothSdpSequence : public QList<QVariant>
+class QBLUETOOTH_EXPORT QBluetoothSdpSequence : public QList<QVariant>
 {
 
 };
 
-class QTOPIACOMM_EXPORT QBluetoothSdpRecord {
+class QBLUETOOTH_EXPORT QBluetoothSdpRecord {
 public:
     static int rfcommChannel(const QBluetoothSdpRecord &service);
 

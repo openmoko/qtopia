@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -27,12 +42,15 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qregexp.h>
+#include <QtCore/qlocale.h>
 
 QT_BEGIN_HEADER
 
 QT_MODULE(Gui)
 
 #ifndef QT_NO_VALIDATOR
+
+class QValidatorPrivate;
 
 class Q_GUI_EXPORT QValidator : public QObject
 {
@@ -51,6 +69,9 @@ public:
 #endif
     };
 
+    void setLocale(const QLocale &locale);
+    QLocale locale() const;
+
     virtual State validate(QString &, int &) const = 0;
     virtual void fixup(QString &) const;
 
@@ -58,9 +79,13 @@ public:
 public:
     QT3_SUPPORT_CONSTRUCTOR QValidator(QObject * parent, const char *name);
 #endif
+protected:
+    QValidator(QObjectPrivate &d, QObject *parent);
+    QValidator(QValidatorPrivate &d, QObject *parent);
 
 private:
     Q_DISABLE_COPY(QValidator)
+    Q_DECLARE_PRIVATE(QValidator)
 };
 
 class Q_GUI_EXPORT QIntValidator : public QValidator
@@ -98,17 +123,25 @@ private:
 
 #ifndef QT_NO_REGEXP
 
+class QDoubleValidatorPrivate;
+
 class Q_GUI_EXPORT QDoubleValidator : public QValidator
 {
     Q_OBJECT
     Q_PROPERTY(double bottom READ bottom WRITE setBottom)
     Q_PROPERTY(double top READ top WRITE setTop)
     Q_PROPERTY(int decimals READ decimals WRITE setDecimals)
+    Q_PROPERTY(Notation notation READ notation WRITE setNotation)
 
 public:
     explicit QDoubleValidator(QObject * parent);
     QDoubleValidator(double bottom, double top, int decimals, QObject * parent);
     ~QDoubleValidator();
+
+    enum Notation {
+        StandardNotation,
+        ScientificNotation
+    };
 
     QValidator::State validate(QString &, int &) const;
 
@@ -116,10 +149,12 @@ public:
     void setBottom(double);
     void setTop(double);
     void setDecimals(int);
+    void setNotation(Notation);
 
     double bottom() const { return b; }
     double top() const { return t; }
-    int decimals() const { return d; }
+    int decimals() const { return dec; }
+    Notation notation() const;
 
 #ifdef QT3_SUPPORT
 public:
@@ -128,11 +163,12 @@ public:
                                            QObject * parent, const char *name);
 #endif
 private:
+    Q_DECLARE_PRIVATE(QDoubleValidator)
     Q_DISABLE_COPY(QDoubleValidator)
 
     double b;
     double t;
-    int d;
+    int dec;
 };
 
 

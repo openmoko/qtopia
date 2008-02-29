@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,9 +19,6 @@
 **
 ****************************************************************************/
 
-#include <qglobal.h>
-
-#ifdef Q_WS_QWS
 #ifndef CALIBRATESETTINGS_H
 #define CALIBRATESETTINGS_H
 
@@ -30,25 +27,17 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPixmap>
-#include <QTimer>
 #include <QWSServer>
-#include <QFile>
-#include <QString>
-#include <QMessageBox>
-
-#include <stdlib.h>
 
 class QTimer;
 class QPoint;
-class QPixmap;
-
 
 class Calibrate : public QDialog
 {
     Q_OBJECT
 public:
     Calibrate(QWidget* parent=0, Qt::WFlags f=0);
-    ~Calibrate();
+    virtual ~Calibrate();
 
     void showEvent( QShowEvent *e );
     void hideEvent( QHideEvent *e );
@@ -79,7 +68,6 @@ private:
     QWSPointerCalibrationData::Location location;
     QPoint crossPos;
     QPoint penPos;
-    QPixmap saveUnder;
     QTimer *timer;
     int dx;
     int dy;
@@ -89,5 +77,4 @@ private:
 };
 
 #endif // CALIBRATESETTINGS_H
-#endif // Q_WS_QWS
 

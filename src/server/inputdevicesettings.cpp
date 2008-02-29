@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,8 +22,8 @@
 #include "inputdevicesettings.h"
 #include <QtopiaChannel>
 #include <QDataStream>
-#include <qwindowsystem_qws.h>
 #include "qtopiaserverapplication.h"
+#include "qtopiainputevents.h"
 #include <stdlib.h>
 
 /*!
@@ -49,6 +49,7 @@
   \endtable
 
   The InputDeviceSettings class provides the \c {InputDeviceSettings} task.
+  It is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 /*!
   Create a new InputDeviceSettings instance with the specified \a parent.
@@ -57,8 +58,8 @@ InputDeviceSettings::InputDeviceSettings(QObject *parent)
 : QObject(parent)
 {
     QtopiaChannel *channel = new QtopiaChannel("QPE/System", this);
-    connect(channel, SIGNAL(received(const QString&,const QByteArray&)),
-            this, SLOT(systemMsg(const QString&,const QByteArray&)) );
+    connect(channel, SIGNAL(received(QString,QByteArray)),
+            this, SLOT(systemMsg(QString,QByteArray)) );
 }
 
 void InputDeviceSettings::systemMsg(const QString &msg, const QByteArray &data)
@@ -69,12 +70,12 @@ void InputDeviceSettings::systemMsg(const QString &msg, const QByteArray &data)
         QString mice;
         stream >> mice;
         ::setenv("QWS_MOUSE_PROTO",(const char *)mice.toLatin1(),1);
-        qwsServer->openMouse();
+        QtopiaInputEvents::openMouse();
     } else if ( msg == "setKeyboard(QString)" ) {
         QString kb;
         stream >> kb;
         ::setenv("QWS_KEYBOARD",(const char *)kb.toLatin1(),1);
-        qwsServer->openKeyboard();
+        QtopiaInputEvents::openKeyboard();
 
     }
 }

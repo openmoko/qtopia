@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qtopia/qtopia-opensource-4.3.0/src/qtopiadesktop/doc/src/qdsyncprotocol.qdocpp -->
+<head>
+  <title>qdsync Protocol</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">Classes</font></a>&nbsp;&middot; <a href="headers.html"><font color="#004faf">Headers</font></a>&nbsp;&middot; <a href="overviews.html"><font color="#004faf">Overviews</font></a> </td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">qdsync Protocol<br /><span class="subtitle"></span>
+</h1>
+<a name="overview"></a>
+<h3>Overview</h3>
+<p>This page describes how the qdsync protocol works. Individual commands are documented in <a href="qdsync-commands.html">qdsync Protocol Commands</a>.</p>
+<p>The qdsync protocol is a line-oriented protocol that can be implemented on top of a socket. It consists of a number of required commands and some optional commands.</p>
+<a name="state-machine"></a>
+<h3>State Machine</h3>
+<p>While there is no formal state machine there is an expected order of message arrival.</p>
+<ul>
+<li>When a connection is initiated the device will send a <a href="qdsync-220-1.html">220</a> message.</li>
+<li>The desktop sends a <a href="qdsync-user-1.html">USER</a> message.</li>
+<li>The device responds with a <a href="qdsync-331-1.html">331</a> message.</li>
+<li>The desktop sends a <a href="qdsync-pass-1.html">PASS</a> message.</li>
+<li>The device responds with a <a href="qdsync-230-1.html">230</a> message.</li>
+<li>The desktop and device can now send <a href="qdsync-call-1.html">CALL</a> or <a href="qdsync-callb-1.html">CALLB</a> messages.</li>
+<li>The device responds to these with <a href="qdsync-200-1.html">200</a> messages.</li>
+<li>The connection is ended when the desktop sends a <a href="qdsync-quit-1.html">QUIT</a> message.</li>
+</ul>
+<p>Additionally, once the desktop has sent the <a href="qdsync-helper-init-1.html">HELPER_INIT</a> message the device expects to receive a message of some kind within the specified duration period. The <a href="qdsync-helper-ping-1.html">HELPER_PING</a> and <a href="qdsync-helper-ack-1.html">HELPER_ACK</a> commands exist for this purpose. The <a href="qdsync-helper-quit-1.html">HELPER_QUIT</a> command is used by the device to indicate failure to send a command in the specified time.</p>
+<p>See also <a href="overviews.html">Overviews</a>.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2007 Trolltech</td>
+<td align="right">Qtopia Sync Agent Documentation</td>
+</tr></table></div></address></body>
+</html>

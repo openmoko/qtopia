@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -51,10 +66,10 @@ QWidget *Q3TableExtraInfo::widget() const
 QDesignerFormEditorInterface *Q3TableExtraInfo::core() const
 { return m_core; }
 
-bool Q3TableExtraInfo::saveUiExtraInfo(DomUi *ui)
+bool Q3TableExtraInfo::saveUiExtraInfo(DomUI *ui)
 { Q_UNUSED(ui); return false; }
 
-bool Q3TableExtraInfo::loadUiExtraInfo(DomUi *ui)
+bool Q3TableExtraInfo::loadUiExtraInfo(DomUI *ui)
 { Q_UNUSED(ui); return false; }
 
 
@@ -64,7 +79,45 @@ bool Q3TableExtraInfo::saveWidgetExtraInfo(DomWidget *ui_widget)
 
     Q3Table *table = qobject_cast<Q3Table*>(widget());
     Q_ASSERT(table != 0);
-    Q_UNUSED(table);
+
+    Q3Header *hHeader = table->horizontalHeader();
+
+    QList<DomColumn*> columns;
+    for (int i=0; i<hHeader->count(); ++i) {
+        DomColumn *column = new DomColumn();
+        QList<DomProperty *> properties;
+
+        DomProperty *property = new DomProperty();
+        DomString *string = new DomString();
+        string->setText(hHeader->label(i));
+        property->setElementString(string);
+        property->setAttributeName("text");
+        properties.append(property);
+
+        column->setElementProperty(properties);
+        columns.append(column);
+    }
+    ui_widget->setElementColumn(columns);
+
+    Q3Header *vHeader = table->verticalHeader();
+
+    QList<DomRow*> rows;
+    for (int i=0; i<vHeader->count(); ++i) {
+        DomRow *row = new DomRow();
+        QList<DomProperty *> properties;
+
+        DomProperty *property = new DomProperty();
+        DomString *string = new DomString();
+        string->setText(vHeader->label(i));
+        property->setElementString(string);
+        property->setAttributeName("text");
+        properties.append(property);
+
+        row->setElementProperty(properties);
+        rows.append(row);
+    }
+    ui_widget->setElementRow(rows);
+
     return true;
 }
 
@@ -74,7 +127,49 @@ bool Q3TableExtraInfo::loadWidgetExtraInfo(DomWidget *ui_widget)
 
     Q3Table *table = qobject_cast<Q3Table*>(widget());
     Q_ASSERT(table != 0);
-    Q_UNUSED(table);
+
+    Q3Header *hHeader = table->horizontalHeader();
+
+    QList<DomColumn*> columns = ui_widget->elementColumn();
+    for (int i=0; i<columns.size(); ++i) {
+        DomColumn *column = columns.at(i);
+
+        QHash<QString, DomProperty*> properties = propertyMap(column->elementProperty());
+        DomProperty *text = properties.value(QLatin1String("text"));
+        DomProperty *pixmap = properties.value(QLatin1String("pixmap"));
+
+        QString txt = text->elementString()->text();
+
+        if (pixmap != 0) {
+            DomResourcePixmap *pix = pixmap->elementPixmap();
+            QIcon icon(core()->iconCache()->resolveQrcPath(pix->text(), pix->attributeResource(), workingDirectory()));
+            hHeader->setLabel(i, icon, txt);
+        } else {
+            hHeader->setLabel(i, txt);
+        }
+    }
+
+    Q3Header *vHeader = table->verticalHeader();
+
+    QList<DomRow*> rows = ui_widget->elementRow();
+    for (int i=0; i<rows.size(); ++i) {
+        DomRow *row = rows.at(i);
+
+        QHash<QString, DomProperty*> properties = propertyMap(row->elementProperty());
+        DomProperty *text = properties.value(QLatin1String("text"));
+        DomProperty *pixmap = properties.value(QLatin1String("pixmap"));
+
+        QString txt = text->elementString()->text();
+
+        if (pixmap != 0) {
+            DomResourcePixmap *pix = pixmap->elementPixmap();
+            QIcon icon(core()->iconCache()->resolveQrcPath(pix->text(), pix->attributeResource(), workingDirectory()));
+            vHeader->setLabel(i, icon, txt);
+        } else {
+            vHeader->setLabel(i, txt);
+        }
+    }
+
     return true;
 }
 

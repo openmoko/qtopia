@@ -1,71 +1,19 @@
 qtopia_project(stub)
 
 # Fonts...
-!isEmpty(QTOPIA_FONTS) {
-    fonts.files=$$QTOPIA_FONTS
-    fonts.path=/lib/fonts
-    INSTALLS+=fonts
+fonts.files=$$QTOPIA_FONTS
+fonts.path=/lib/fonts
+INSTALLS+=fonts
 
-    fontdir.commands=$$COMMAND_HEADER\
-        :>$(INSTALL_ROOT)/lib/fonts/fontdir
-    fontdir.path=/lib/fonts
-    INSTALLS+=fontdir
-} else {
-    font_sources=$$QTE_DEPOT_PATH/dist/embedded/lib/fonts $$QTOPIA_DEPOT_PATH/dist/fonts
-    font_styles=$$QTOPIA_FONT_STYLES
-    contains(QTOPIA_DISP_ROTS,0):font_rotations+=$$font_styles
-    contains(QTOPIA_DISP_ROTS,90):for(w,font_styles):font_rotations+=$${w}_t5
-    contains(QTOPIA_DISP_ROTS,180):for(w,font_styles):font_rotations+=$${w}_t15
-    contains(QTOPIA_DISP_ROTS,270):for(w,font_styles):font_rotations+=$${w}_t10
-    font_sizes=$$QTOPIA_FONT_SIZES
-    contains(font_sizes,all):font_sizes=*
-    font_families=$$QTOPIA_FONT_FAMILIES
-    for(f,font_families) {
-        for(s,font_sizes) {
-            for(r,font_rotations) {
-                for(font_source,font_sources) {
-                    font_files+=$$font_source/$${f}_$${s}_$${r}.qpf
-                }
-            }
-        }
-    }
-    
-    # Create a "font compiler" to handle the wildcards (should we bother with combine?)
-    font_installer.CONFIG=no_link no_dependencies no_build ignore_no_exist no_clean
-    font_installer.commands=$$COMMAND_HEADER\
-        mkdir -p $(INSTALL_ROOT)$$libdir/fonts $$LINE_SEP_VERBOSE\
-        install -c ${QMAKE_FILE_IN} ${QMAKE_FILE_OUT}
-    font_installer.input=font_files
-    font_installer.output=$(INSTALL_ROOT)$$libdir/fonts/${QMAKE_FILE_BASE}.qpf
-    font_installer.name=font_installer
-    QMAKE_EXTRA_COMPILERS+=font_installer
-    
-    for(font_source,font_sources) {
-        fontdir.files+=$$font_source/fontdir
-    }
-    fontdir.path=/lib/fonts
-    fontdir.depends=compiler_font_installer_make_all
-    INSTALLS+=fontdir
-}
+fontdir.commands=$$COMMAND_HEADER\
+    :>$(INSTALL_ROOT)/lib/fonts/fontdir
+fontdir.path=/lib/fonts
+INSTALLS+=fontdir
 
 pkg.name=qt-embedded
 pkg.desc=Qt/Embedded
 pkg.version=$$QTE_VERSION
 pkg.domain=libs
-
-# package descriptions for the fonts (based on the .control files that were here)
-#for(r,font_rotations) {
-#    font_files=
-#    for(f,font_families) {
-#        for(s,font_sizes) {
-#            font_files+=$$font_source/$${f}_$${s}_$${r}.qpf
-#        }
-#    }
-#    eval(font_$${r}.name=qt-embedded-fonts-\$$r)
-#    eval(font_$${r}.desc=Qt/Embedded fonts for rotation \$$r)
-#    eval(font_$${r}.files=\$$font_files)
-#    PACKAGES+=font_$$r
-#}
 
 !disable_qt_lupdate {
     #

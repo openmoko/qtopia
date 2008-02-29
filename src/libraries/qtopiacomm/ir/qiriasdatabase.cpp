@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,18 +19,25 @@
 **
 ****************************************************************************/
 
-#include <qtopiacomm/private/qirnamespace_p.h>
+#include "qirnamespace_p.h"
 #include <qiriasdatabase.h>
-#include <qtopialog.h>
 
+#if defined(Q_OS_LINUX)
 #include <sys/socket.h>
 #include <linux/types.h>
 #include <linux/irda.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <net/if.h>
-
 #include <errno.h>
+#endif
+
+#if defined(Q_OS_WIN32)
+#include <winsock2.h>
+#define _WIN32_WINDOWS
+#include <AF_IrDA.h>
+#endif
+
 #include <stdio.h>
 
 #include <QStringList>
@@ -76,6 +83,7 @@ bool QIrIasDatabase::setAttribute(const QString &className,
                                   const QString &attribName,
                                   const QVariant &attr)
 {
+#if defined(Q_OS_LINUX) || defined (Q_OS_WIN32)
     if (className.size() > IAS_MAX_CLASSNAME)
         return false;
 
@@ -86,59 +94,89 @@ bool QIrIasDatabase::setAttribute(const QString &className,
     if ( fd == -1 )
         return false;
 
-    qLog(Infrared) << "Successfully opened Infrared socket";
-
+#if defined(Q_OS_LINUX)
     struct irda_ias_set entry;
     strcpy(entry.irda_class_name, className.toAscii().constData());
     strcpy(entry.irda_attrib_name, attribName.toAscii().constData());
+#else
+    IAS_SET entry;
+    strncpy(entry.irdaClassName, className.toAscii().constData(), IAS_MAX_CLASSNAME);
+    strncpy(entry.irdaAttribName, attribName.toAscii().constData(), IAS_MAX_ATTRIBNAME);
+#endif
+
     switch (attr.type()) {
         case QVariant::String:
         {
             QByteArray value;
-
-            qLog(Infrared) << "Attribute is a string...";
-            entry.irda_attrib_type = IAS_STRING;
-
             value = attr.value<QString>().toAscii();
+
+#if defined(Q_OS_LINUX)
             // Linux only supports the ASCII charset right now
-            entry.attribute.irda_attrib_string.charset =
-                    CS_ASCII;
+            entry.irda_attrib_type = IAS_STRING;
+            entry.attribute.irda_attrib_string.charset = CS_ASCII;
+
             int len = value.length() < IAS_MAX_STRING ?
-                    value.length() : IAS_MAX_STRING;
-            entry.attribute.irda_attrib_string.len = len;
+                      value.length() : IAS_MAX_STRING;
+                      entry.attribute.irda_attrib_string.len = len;
             strncpy(reinterpret_cast<char *>(entry.attribute.irda_attrib_string.string),
                     value.constData(), IAS_MAX_STRING);
+#else
+            entry.irdaAttribType = IAS_ATTRIB_STR;
+            entry.irdaAttribute.irdaAttribUsrStr.CharSet = LmCharSetASCII;
+            int len = value.length() < IAS_MAX_USER_STRING ?
+                      value.length() : IAS_MAX_USER_STRING;
+            entry.irdaAttribute.irdaAttribUsrStr.Len = len;
+            strncpy(reinterpret_cast<char *>(entry.irdaAttribute.irdaAttribUsrStr.UsrStr),
+                    value.constData(), IAS_MAX_USER_STRING);
+#endif
             break;
         }
         case QVariant::UInt:
         {
+#if defined(Q_OS_LINUX)
             entry.irda_attrib_type = IAS_INTEGER;
             entry.attribute.irda_attrib_int = attr.value<uint>();
+#else
+            entry.irdaAttribType = IAS_ATTRIB_INT;
+            entry.irdaAttribute.irdaAttribInt = attr.value<uint>();
+#endif
             break;
         }
         case QVariant::ByteArray:
         {
+#if defined(Q_OS_LINUX)
             entry.irda_attrib_type = IAS_OCT_SEQ;
             int len = attr.value<QByteArray>().length() < IAS_MAX_OCTET_STRING ?
                     attr.value<QByteArray>().length() : IAS_MAX_OCTET_STRING;
             entry.attribute.irda_attrib_octet_seq.len = len;
             strncpy(reinterpret_cast<char *>(entry.attribute.irda_attrib_octet_seq.octet_seq),
                     attr.value<QByteArray>().constData(), IAS_MAX_OCTET_STRING);
+#else
+            entry.irdaAttribType = IAS_ATTRIB_OCTETSEQ;
+            int len = attr.value<QByteArray>().length() < IAS_MAX_OCTET_STRING ?
+                      attr.value<QByteArray>().length() : IAS_MAX_OCTET_STRING;
+            entry.irdaAttribute.irdaAttribOctetSeq.Len = len;
+            strncpy(reinterpret_cast<char *>(entry.irdaAttribute.irdaAttribOctetSeq.OctetSeq),
+                    attr.value<QByteArray>().constData(), IAS_MAX_OCTET_STRING);
+#endif
             break;
         }
         default:
             return false;
     }
 
-    int status = setsockopt(fd, SOL_IRLMP, IRLMP_IAS_SET, &entry, sizeof(entry));
-    if (status != 0) {
-        qLog(Infrared) << "Error is: " << strerror(errno);
-    }
+    int status = setsockopt(fd, SOL_IRLMP, IRLMP_IAS_SET, reinterpret_cast<char *>(&entry), sizeof(entry));
 
+#if defined(Q_OS_LINUX)
     close(fd);
+#else
+    ::closesocket(fd);
+#endif
 
     return status == 0;
-
+#else
+    return false;
+#endif
 }
 
 /*!
@@ -153,12 +191,14 @@ bool QIrIasDatabase::setAttribute(const QString &className,
         \o \bold{QByteArray} - Represents an octet sequence IAS attribute.
     \endlist
 
-    NOTE: Under linux this function requires administrator privileges.
+    NOTE: Under linux this function requires administrator privileges.  Under
+    windows this function has no effect and always returns an invalid value.
 
     \sa setAttribute(), removeAttribute()
  */
 QVariant QIrIasDatabase::attribute(const QString &className, const QString &attribName)
 {
+#if defined(Q_OS_LINUX)
     if (className.size() > IAS_MAX_CLASSNAME)
         return QVariant();
 
@@ -168,8 +208,6 @@ QVariant QIrIasDatabase::attribute(const QString &className, const QString &attr
     int fd = socket(AF_IRDA, SOCK_STREAM, 0);
     if ( fd == -1 )
         return QVariant();
-
-    qLog(Infrared) << "Successfully opened Infrared socket";
 
     struct irda_ias_set entry;
     strcpy(entry.irda_class_name, className.toAscii().constData());
@@ -184,6 +222,11 @@ QVariant QIrIasDatabase::attribute(const QString &className, const QString &attr
         return QVariant();
 
     return convert_ias_entry(entry);
+#else
+    Q_UNUSED(attribName)
+    Q_UNUSED(className)
+    return QVariant();
+#endif
 }
 
 /*!
@@ -192,13 +235,15 @@ QVariant QIrIasDatabase::attribute(const QString &className, const QString &attr
     The \a attribName parameter specifies the attribute name.
     Returns true if the attribute could be removed, false otherwise.
 
-    NOTE: Under linux this function requires administrator privileges.
+    NOTE: Under linux this function requires administrator privileges.  Under Windows
+    this function has no effect and always returns false
 
     \sa setAttribute(), attribute()
 */
 bool QIrIasDatabase::removeAttribute(const QString &className,
                                      const QString &attribName)
 {
+#if defined(Q_OS_LINUX)
     if (className.size() > IAS_MAX_CLASSNAME)
         return false;
 
@@ -209,8 +254,6 @@ bool QIrIasDatabase::removeAttribute(const QString &className,
     if ( fd == -1 )
         return false;
 
-    qLog(Infrared) << "Successfully opened Infrared socket";
-
     struct irda_ias_set entry;
     strcpy(entry.irda_class_name, className.toAscii().constData());
     strcpy(entry.irda_attrib_name, attribName.toAscii().constData());
@@ -219,4 +262,9 @@ bool QIrIasDatabase::removeAttribute(const QString &className,
     close(fd);
 
     return status == 0;
+#else
+    Q_UNUSED(attribName)
+    Q_UNUSED(className)
+    return false;
+#endif
 }

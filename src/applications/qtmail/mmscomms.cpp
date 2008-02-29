@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -35,9 +35,10 @@
 */
 
 /*!
-  \fn void MmsComms::sendMessage(MMSMessage &msg)
+  \fn void MmsComms::sendMessage(MMSMessage &msg, const QByteArray& encoded)
 
-  Connect to the MMSC and POST the specified MMS message \a msg.
+  Connect to the MMSC and POST the specified MMS message \a msg, the
+  encoded content of which is contained in \a encoded.
   If a connection to a WAP gateway is necessary, it should be done also.
   The MailAccount details can be accessed via the \i account variable.
 

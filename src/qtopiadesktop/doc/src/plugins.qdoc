@@ -1,0 +1,25 @@
+/*!
+
+\overview Qtopia Sync Agent Plugins
+\brief A description of the plugin mechanism used by Qtopia Sync Agent.
+
+\tableofcontents
+
+\section1 Overview
+
+This page describes how plugins are used in Qtopia Sync Agent.
+
+\list
+\o \l QDPlugin
+\o \l QDAppPlugin
+\o \l QDLinkPlugin
+\o \l QDConPlugin
+\o \l QDDevPlugin
+\o \l QDSyncPlugin
+\endlist
+
+\section1 Implementing a plugin
+
+You should decide what type of plugin you want to build.
+
+*/

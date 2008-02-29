@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: The Tulip Container Classes</title>
+  <title>Qt 4.3: The Tulip Container Classes</title>
   <link rel="prev" href="qt4-intro.html" />
   <link rel="contents" href="qt4-intro.html" />
   <link rel="next" href="qt4-interview.html" />
@@ -19,7 +19,8 @@
 [<a href="qt4-intro.html">Home</a>]
 [Next: <a href="qt4-interview.html">The Interview Framework</a>]
 </p>
-<h1 align="center">The Tulip Container Classes<br /><small></small></h1>
+<h1 align="center">The Tulip Container Classes<br /><span class="subtitle"></span>
+</h1>
 <p>Qt 4 introduces a new set of containers that supersede both the old QCollection pointer-based containers and the newer QTL value-based containers.</p>
 <ul><li><a href="#general-overview">General Overview</a></li>
 <li><a href="#examples">Examples</a></li>
@@ -116,7 +117,7 @@
 <a name="comparison-with-qt-3"></a>
 <h2>Comparison with Qt 3</h2>
 <p>Tulip containers are value based. If you want to store a list where each item is a <a href="qwidget.html">QWidget</a> *, use <a href="qlist.html">QList</a>&lt;<a href="qwidget.html">QWidget</a> *&gt;.</p>
-<p>The new containers do not support auto-delete. In practice, we discovered that the only case where auto-delete proved worthwhile was when the data really should be stored as a value rather than as a pointer (e.g., <a href="qlist.html">QList</a>&lt;int&gt; rather than <a href="qlist.html">QList</a>&lt;int *&gt;). If you need to delete all the items in a container, use <a href="qtalgorithms.html#qDeleteAll">qDeleteAll</a>().</p>
+<p>The new containers do not support auto-delete. In practice, we discovered that the only case where auto-delete proved worthwhile was when the data really should be stored as a value rather than as a pointer (e.g&#x2e;, <a href="qlist.html">QList</a>&lt;int&gt; rather than <a href="qlist.html">QList</a>&lt;int *&gt;). If you need to delete all the items in a container, use <a href="qtalgorithms.html#qDeleteAll">qDeleteAll</a>().</p>
 <p>If you use QValueList in Qt 3, you can replace it with either <a href="qlist.html">QList</a> or <a href="qlinkedlist.html">QLinkedList</a> in Qt 4. In most cases, <a href="qlist.html">QList</a> is the best choice: It is typically faster, results in less code in your executable, and requires less memory. However, <a href="qlinkedlist.html">QLinkedList</a>'s iterators provide stronger guarantees, and only <a href="qlinkedlist.html">QLinkedList</a> provides constant-time insertions in the middle, which can make a difference for lists with thousands of items.</p>
 <p>If you use QValueVector or <a href="qmap.html">QMap</a> in Qt 3, the corresponding Qt 4 classes (<a href="qvector.html">QVector</a>, <a href="qmap.html">QMap</a>) are very similar to use.</p>
 <p>
@@ -128,6 +129,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

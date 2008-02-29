@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,25 +22,40 @@
 #include "qsqlpimtablemodel_p.h"
 #include <qtopialog.h>
 #include <QSqlResult>
-#include <QSqlQuery>
 #include <QSqlError>
 #include <QVariant>
 #include <QTimer>
 #include <QDebug>
 #include <QVector>
+#include <QTimerEvent>
 #include <QtopiaSql>
+#include <QMap>
 
 #include "qpimsqlio_p.h"
 
-/* there may be an argument to make this more dynamic */
-const int QSqlPimTableModel::rowStep(25);
+#ifdef GREENPHONE_EFFECTS
+static const int rowStep(10); // where to grab key frames
+static const int cacheSize(1000); // how many indexes to grab.
+static const int keyCacheSize(1000); // how many key frames to grab
+// interval by lookahead gives approximate 'busy' time after starting list.
+static const int cacheTimerInterval(5);
+static const int cacheTimerLookAhead(900);
+#else
+// non-greenphone effects numbers. Keep processing time and memory usage down.
+static const int rowStep(20); // where to grab key frames
+static const int cacheSize(200); // how many indexes to grab.
+static const int keyCacheSize(500); // how many key frames to grab
+static const int cacheTimerInterval(5);
+static const int cacheTimerLookAhead(100);
+#endif
 
 QSqlPimTableModel::QSqlPimTableModel(const QString &table, const QString &categoryTable)
-    : cCatFilter(QCategoryFilter::All), mExcludeContexts(true), cachedCount(-1),
-    cachedIndexes(2*rowStep), cachedKeys(100),
+    : QObject(), cCatFilter(QCategoryFilter::All), mExcludeContexts(true), cachedCount(-1),
+    cachedIndexes(cacheSize), cachedKeyValues(cacheSize), cachedKeys(keyCacheSize), mSimpleCache(0),
     tableText(table),
     catUnfiledText(" LEFT JOIN " + categoryTable + " AS cat ON t1.recid = cat.recid"),
-    catSelectedText(categoryTable)
+    catSelectedText(categoryTable),idByRowValid(false), cacheTimerTarget(0),
+    lastCachedRow(-1)
 {
     mOrderBy << "recid";
 }
@@ -51,18 +66,13 @@ QSqlPimTableModel::~QSqlPimTableModel()
 
 QList<QVariant> QSqlPimTableModel::orderKey(const QUniqueId &id) const
 {
-    QSqlQuery keyQuery(QPimSqlIO::database());
-    if (!keyQuery.prepare("SELECT " + sortColumn()
+    QPreparedSqlQuery keyQuery(QPimSqlIO::database());
+    keyQuery.prepare("SELECT " + sortColumn()
                 + ", t1.recid FROM "
-                + tableText + " AS t1 WHERE t1.recid = :id")) {
-        qWarning("QSqlPimTableModel::orderKey() - Could not prepare query: %s",
-                keyQuery.lastError().text().toLocal8Bit().constData());
-        qLog(Sql) << keyQuery.lastQuery();
-    }
+                + tableText + " AS t1 WHERE t1.recid = :id");
     keyQuery.bindValue(":id", id.toUInt());
 
     QList<QVariant> list;
-    QtopiaSql::logQuery(keyQuery);
     if (keyQuery.exec()) {
         if (keyQuery.next()) {
             for (int i = 0; i < mOrderBy.count() + 1; i++)
@@ -71,7 +81,6 @@ QList<QVariant> QSqlPimTableModel::orderKey(const QUniqueId &id) const
     } else {
         qWarning("QSqlPimTableModel::orderKey() - Could not execute query: %s",
                 keyQuery.lastError().text().toLocal8Bit().constData());
-        qLog(Sql) << keyQuery.executedQuery();
     }
 
     return list;
@@ -82,7 +91,7 @@ QString QSqlPimTableModel::selectText(const QStringList &temporaryFilters) const
     return selectText("distinct t1.recid", temporaryFilters);
 }
 
-QString QSqlPimTableModel::selectText(const QString &retrieve, const QStringList &temporaryFilters) const
+QString QSqlPimTableModel::selectText(const QString &retrieve, const QStringList &temporaryFilters, const QStringList & temporaryJoins) const
 {
     /*
        select
@@ -115,6 +124,9 @@ QString QSqlPimTableModel::selectText(const QString &retrieve, const QStringList
             qtext += " JOIN simcardidmap ON (t1.recid = simcardidmap.sqlid) ";
         else
             qtext += " JOIN " + join + " ON (t1.recid = " + join + ".recid) ";
+    }
+    foreach (QString join, temporaryJoins) {
+        qtext += join;
     }
 
     /* THE JOINS */
@@ -194,15 +206,12 @@ int QSqlPimTableModel::count() const
 
     qLog(Sql) << " QSqlPimTable::count() - not cached";
     // may not be sqlite compatible...
-    QSqlQuery countQuery(QPimSqlIO::database());
-    countQuery.setForwardOnly(true);
+    QPreparedSqlQuery countQuery;
     countQuery.prepare(selectText("count(distinct t1.recid)"));
 
-    QtopiaSql::logQuery(countQuery);
     if (!countQuery.exec()) {
         qWarning("QSqlPimTableModel::count() - Could not execute query: %s",
                 countQuery.lastError().text().toLocal8Bit().constData());
-        qLog(Sql) << countQuery.executedQuery();
         return 0;
     }
     if (countQuery.next() && !countQuery.isNull(0)) {
@@ -222,8 +231,8 @@ int QSqlPimTableModel::count() const
 void QSqlPimTableModel::setCategoryFilter(const QCategoryFilter &f)
 {
     if (cCatFilter != f) {
-        invalidateQueries();
         cCatFilter = f;
+        invalidateQueries();
     }
 }
 
@@ -244,9 +253,9 @@ QCategoryFilter QSqlPimTableModel::categoryFilter() const
 void QSqlPimTableModel::setContextFilter(const QSet<int> &f, bool b)
 {
     if (mContextFilter != f || b != mExcludeContexts) {
-        invalidateQueries();
         mContextFilter = f;
         mExcludeContexts = b;
+        invalidateQueries();
     }
 }
 
@@ -274,118 +283,175 @@ bool QSqlPimTableModel::contextFilterExcludes() const
 */
 QUniqueId QSqlPimTableModel::recordId(int row) const
 {
-    qLog(Sql) << "QSqlPimTableModel::recordId(" << row << ")";
+    // works now, not later.
+    if (!cachedIndexes.contains(row)) {
+        buildCache(row);
+    }
+
+    // should detect if forwards or backwards, assume forwards.
+    if (cacheTimerInterval != -1 && !cacheTimer.isActive()) {
+        cacheRow = ((row/rowStep)+1)*rowStep; // first target.
+
+        cacheTimerTarget = cacheRow + cacheTimerLookAhead;
+
+        if (lastCachedRow != -1)
+            cacheRow = ((lastCachedRow/rowStep)+1)*rowStep;
+
+        if (cachedCount > 0)
+            cacheTimerTarget = qMin(cachedCount-1, cacheTimerTarget);
+
+        if (cacheRow < cacheTimerTarget && !cachedIndexes.contains(cacheTimerTarget))
+            cacheTimer.start(cacheTimerInterval, (QObject *)this);
+    }
+
+    // don't assume it was a valid row.
     if (cachedIndexes.contains(row))
         return *cachedIndexes[row];
+    return QUniqueId();
+}
 
-    if (cachedCount != -1 && row >= cachedCount)
-        return QUniqueId();
+void QSqlPimTableModel::setSimpleQueryCache(QPimQueryCache *c)
+{
+    mSimpleCache = c;
+    mSimpleCache->setMaxCost(cacheSize);
+}
 
-    qLog(Sql) << "QSqlPimTableModel::recordId() - not cached";
-
-    int rowBlockStart = row / rowStep;
-    int rowEnd = (rowBlockStart+1) * rowStep;
-
-
-    QList<QVariant> keys;
-    QStringList  keyJumpFilter;
+/*
+   Ensures that \a row is in the cache, assuming its in the current filter at.
+ */
+void QSqlPimTableModel::buildCache(int row) const
+{
+// first thing, work out if we can jump some rows.
+    QUniqueId keyJumpId;
+    QVariant keyValue;
+    int rowBlockStart = row/rowStep;
     for (;rowBlockStart > 0; rowBlockStart--) {
         if (cachedKeys.contains(rowBlockStart)) {
-            keys = orderKey(*cachedKeys[rowBlockStart]);
-            QStringList sc = orderBy();
-            QString k;
-            QString filter;
-            int i = 0;
-            foreach(k, sc) {
-                // If we have a NULL key, we have to construct a query
-                // such that either other records have the same field as
-                // NULL and the other fields less than (the sub sort is ok),
-                // or that other fields have a non NULL key (which gets sorted
-                // after a NULL key.
-                if (!keys[i].isNull())
-                    filter += "(t1." + k + " > ? or t1." + k + " = ? and ";
-                else
-                    filter += "(t1." + k + " IS NOT NULL or (t1." + k + " IS NULL and ";
-                i++;
-            }
-            filter += "(t1.recid > ? or t1.recid = ?)";
-            i = 0;
-            foreach(k, sc) {
-                if (!keys[i].isNull())
-                    filter += ")";
-                else
-                    filter += "))";
-                i++;
-            }
-            keyJumpFilter << filter;
+            // we have a jump row
+            keyJumpId = *cachedKeys[rowBlockStart];
+            keyValue = *cachedKeyValues[rowBlockStart];
             break;
         }
     }
+    int current = rowBlockStart*rowStep;
+    int rowStart = (row/rowStep)*rowStep;
+    int rowEnd = (row/rowStep+1)*rowStep;
 
-    qLog(Sql) << "QSqlPimTableModel::recordId() - row block" << rowBlockStart;
-    QString joinText;
-    QSqlQuery idByRowQuery(QPimSqlIO::database());
-    /* if adding a limit... needs to be row-rowBlockStart *rowStep  */
-    QString sortColumnString = sortColumn();
-    if (!idByRowQuery.prepare( selectText("distinct t1.recid", keyJumpFilter) +
-            (!sortColumnString.isNull() ? " ORDER BY " + sortColumnString : QString::null) +
-            ", t1.recid"))
+    if (!idByRowValid)
+        prepareRowQueries();
+
+    uint recid = keyJumpId.toUInt();
+    if (keyValue.isNull()) {
+        idByRowQuery.prepare();
+        idByRowQuery.exec();
+#ifdef GREENPHONE_EFFECTS
+        cacheRows(idByRowQuery, current, current, rowEnd, recid);
+#else
+        cacheRows(idByRowQuery, current, rowStart, rowEnd, recid);
+#endif
+
+        idByRowQuery.reset();
+    } else {
+        idByJumpedRowQuery.prepare();
+        idByJumpedRowQuery.bindValue(":key", keyValue);
+        idByJumpedRowQuery.exec();
+
+#ifdef GREENPHONE_EFFECTS
+        cacheRows(idByJumpedRowQuery, current, current, rowEnd, recid);
+#else
+        cacheRows(idByJumpedRowQuery, current, rowStart, rowEnd, recid);
+#endif
+
+        idByJumpedRowQuery.reset();
+    }
+}
+
+// if recid != -1, then current refers to that row, and we won't be able to increment it till we hit it.
+void QSqlPimTableModel::cacheRows(QPreparedSqlQuery &q, int current, int cacheStart, int cacheEnd, uint recid) const
+{
+    // can't use next, Qt caches on that.  use seek instead.
+    while(q.next()) {
+        if (current > cacheEnd)
+            break;
+
+        uint rowid = q.value(0).toUInt();
+
+        if (recid == 0) {
+            // e.g. current is accurate
+            if (!(current % rowStep) && !cachedKeys.contains(current/rowStep)) {
+                cachedKeys.insert(current/rowStep, new QUniqueId(QUniqueId::fromUInt(rowid)));
+                cachedKeyValues.insert(current/rowStep, new QVariant(q.value(1)));
+            }
+
+            if (current >= cacheStart) {
+                cachedIndexes.insert(current, new QUniqueId(QUniqueId::fromUInt(q.value(0).toUInt())));
+                if ( mSimpleCache )
+                    mSimpleCache->cacheRow(current, q);
+            }
+
+            current++;
+        } else if (rowid == recid) {
+            recid = 0;
+            current++;
+        }
+    }
+    lastCachedRow = current;
+    if (cachedCount == -1 && !q.next())
+        cachedCount = current;
+}
+
+void QSqlPimTableModel::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == cacheTimer.timerId())
     {
-        qWarning("QSqlPimTableModel::recordId() - Could not prepare query: %s",
-                idByRowQuery.lastError().text().toLocal8Bit().constData());
-        qLog(Sql) << idByRowQuery.lastQuery();
-        return QUniqueId();
-    }
-
-    if (rowBlockStart) {
-        int pos = 0;
-        foreach(QVariant v, keys) {
-            if (!v.isNull()) {
-                qLog(Sql) << "bind value" << v.toString();
-                idByRowQuery.bindValue(pos++, v);
-                idByRowQuery.bindValue(pos++, v);
-            }
+        cacheRow += rowStep;
+        if (cachedCount != -1)
+            cacheRow = qMin(cachedCount-1, cacheRow);
+        if (!cachedIndexes.contains(cacheRow)) {
+            buildCache(cacheRow);
+        }
+        if (cacheRow >= cacheTimerTarget ||
+                cacheRow >= cachedCount-1 && cachedCount != -1) {
+            cacheTimer.stop();
+            cacheRow = 0;
+            cacheTimerTarget = 0;
         }
     }
+}
 
-    qLog(Sql) << "QSqlPimTableModel::recordId() - statement: " << idByRowQuery.lastQuery();
+void QSqlPimTableModel::prepareRowQueries() const
+{
+    QString sortColumnString = sortColumn();
+    QStringList keyJumpFilter;
+    QStringList joinJumpFilter;
 
-    QtopiaSql::logQuery(idByRowQuery);
-    if (!idByRowQuery.exec()) {
-        qWarning("QSqlPimTableModel::recordId() - Could not execute query: %s",
-                idByRowQuery.lastError().text().toLocal8Bit().constData());
-        qLog(Sql) << idByRowQuery.executedQuery();
-        return QUniqueId();
+    QString k;
+    if (orderBy().isEmpty())
+        k = "recid";
+    else {
+        k = orderBy()[0];
     }
 
-    int jumpedRow = rowBlockStart * rowStep;
-    while (idByRowQuery.next()) {
-        qLog(Sql) << "QSqlPimTableModel::recordId() - check if should cache" << jumpedRow << rowEnd << rowStep;
+    keyJumpFilter << "t1." + k + " >= :key";
 
-        /* cache any block keys we come across */
-        if (!(jumpedRow % rowStep) && !cachedKeys.contains(jumpedRow/rowStep)) {
-            qLog(Sql) << "QSqlPimTableModel::recordId() - cache set point" << jumpedRow;
-            cachedKeys.insert(jumpedRow/rowStep, new QUniqueId(QUniqueId::fromUInt(idByRowQuery.value(0).toUInt())));
-        }
+    QString targetFields, postString;
+    targetFields = "DISTINCT t1.recid, t1." + k;
+    if (mSimpleCache)
+        targetFields += ", " + mSimpleCache->fields();
 
-        if (jumpedRow >= rowEnd)
-            break;
+    if (!sortColumnString.isNull())
+        postString = " ORDER BY " + sortColumnString + ", t1.recid";
+    else
+        postString = " ORDER BY t1.recid";
 
-        if (jumpedRow > rowEnd-2*rowStep) {
-            qLog(Sql) << "QSqlPimTableModel::recordId() - cache" << jumpedRow;
-           cachedIndexes.insert(jumpedRow, new QUniqueId(QUniqueId::fromUInt(idByRowQuery.value(0).toUInt())));
-        }
-        ++jumpedRow;
-    }
-    if (cachedCount == -1 && !idByRowQuery.next())
-        cachedCount = jumpedRow;
+    idByJumpedRowQuery.prepare(
+                selectText( targetFields, keyJumpFilter, joinJumpFilter )
+                + postString );
+    idByRowQuery.prepare(
+                selectText( targetFields )
+                + postString );
 
-    if (cachedIndexes.contains(row)) {
-        qLog(Sql) << "QSqlPimTable::recordId() - result:" << cachedIndexes[row]->toString();
-        return *cachedIndexes[row];
-    }
-    qLog(Sql) << "QSqlPimTable::recordId() - no result, returning nil id";
-    return QUniqueId();
+    idByRowValid = true;
 }
 
 QString QSqlPimTableModel::sortColumn() const
@@ -414,10 +480,9 @@ bool QSqlPimTableModel::contains(const QUniqueId &id) const
 {
     QStringList filter;
     filter << "t1.recid = :id";
-    QSqlQuery q(QPimSqlIO::database());
+    QPreparedSqlQuery q;
     q.prepare(selectText(filter));
     q.bindValue(":id", id.toUInt());
-    QtopiaSql::logQuery(q);
     q.exec();
     return q.next();
 }
@@ -459,33 +524,21 @@ int QSqlPimTableModel::predictedRow(const QList<QVariant> &keys) const
     filters << filter;
     QString querytext = selectText("count(distinct t1.recid)", filters);
 
-    QSqlQuery rowByIdQuery(QPimSqlIO::database());
-    if (!rowByIdQuery.prepare(querytext)) {
-        qWarning("QSqlPimTableModel::row() - Could not prepare Query: %s", rowByIdQuery.lastError().text().toLocal8Bit().constData());
-        qLog(Sql) << rowByIdQuery.lastQuery();
-        return -1;
-    }
+    QPreparedSqlQuery rowByIdQuery(QPimSqlIO::database());
+    rowByIdQuery.prepare(querytext);
 
     int pos = 0;
     foreach(QVariant v, keys) {
         if (!v.isNull()) {
-            qLog(Sql) << "bind value" << v.toString();
             rowByIdQuery.bindValue(pos++, v);
             rowByIdQuery.bindValue(pos++, v);
         }
     }
 
 
-    QtopiaSql::logQuery(rowByIdQuery);
-    if (!rowByIdQuery.exec()) {
-        qWarning("QSqlPimTableModel::row() - Could not execute Query: %s", rowByIdQuery.lastError().text().toLocal8Bit().constData());
-        qLog(Sql) << rowByIdQuery.executedQuery();
-        return -1;
-    }
-
+    rowByIdQuery.exec();
     if (!rowByIdQuery.next())
         return -1; // record doesn't exists
-    //qLog(Sql) << "SqlIO::row" << rowByIdQuery->value(0).toInt();
     return rowByIdQuery.value(0).toInt();
 }
 
@@ -496,9 +549,18 @@ void QSqlPimTableModel::reset()
 
 void QSqlPimTableModel::invalidateCache()
 {
+    cacheTimer.stop();
+    cacheRow = 0;
+    cacheTimerTarget = 0;
+    lastCachedRow = -1;
+
     cachedCount = -1;
     cachedIndexes.clear();
+    cachedKeyValues.clear();
     cachedKeys.clear();
+    if (mSimpleCache)
+        mSimpleCache->clear();
+    idByRowValid = false;
 }
 
 void QSqlPimTableModel::invalidateQueries()

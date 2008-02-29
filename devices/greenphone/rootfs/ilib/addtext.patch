@@ -1,15 +1,27 @@
 diff -Nur diff/Ilib-1.1.9/addtext/addtext.c Ilib-1.1.9/addtext/addtext.c
 --- diff/Ilib-1.1.9/addtext/addtext.c	1970-01-01 10:00:00.000000000 +1000
-+++ Ilib-1.1.9/addtext/addtext.c	2007-03-22 07:59:00.000000000 +1000
-@@ -0,0 +1,97 @@
++++ Ilib-1.1.9/addtext/addtext.c	2007-06-08 13:43:14.000000000 +1000
+@@ -0,0 +1,198 @@
 +#include <stdio.h>
 +#include <stdlib.h>
 +#include <string.h>
++#include <unistd.h>
++#include <signal.h>
++
++#include <sys/time.h>
 +
 +#include <Ilib.h>
 +
 +// An embedded font
 +#include "helvR24.h"
++
++int done;
++
++void signalHandler(int signum)
++{
++    if (signum == SIGINT || signum == SIGTERM)
++        done = 1;
++}
 +
 +int main ( int argc, char *argv[] )
 +{
@@ -23,18 +35,60 @@ diff -Nur diff/Ilib-1.1.9/addtext/addtext.c Ilib-1.1.9/addtext/addtext.c
 +    int x, y, argvIndex;
 +    int center;
 +
-+    // Read a GIF file from stdin
-+    if ( ( ret = IReadImageFile( stdin, IFORMAT_GIF, IOPTION_NONE, &image ) ) ) {
-+        fprintf( stderr, "Error reading image: %s\n", IErrorString( ret ) );
-+        return 1;
-+    }
++    FILE *input = stdin;
++    IFileFormat inputFormat = IFORMAT_GIF;
++    FILE *output = NULL;
++    IFileFormat outputFormat = IFORMAT_LFB;
 +
 +    // Initialize the graphics context
 +    gc = ICreateGC();
 +    IAllocNamedColor( "black", &textcolor );
 +
 +    argvIndex = 1;
-+    if ( argc >= argvIndex+2 && argv[argvIndex][0] == 'p' ) {
++
++    if ( argc >= argvIndex+2 &&
++         argv[argvIndex][0] == 'i' && argv[argvIndex][1] == '\0' ) {
++        // open input file
++        input = fopen(argv[argvIndex+1], "r");
++        
++        IFileType(argv[argvIndex+1], &inputFormat);
++
++        argvIndex += 2;
++    }
++
++    // Read image from input
++    if ( ( ret = IReadImageFile(input, inputFormat, IOPTION_NONE, &image ) ) ) {
++        fprintf( stderr, "Error reading image: %s\n", IErrorString( ret ) );
++        return 1;
++    }
++
++    if (argc >= argvIndex+2 &&
++        argv[argvIndex][0] == 'o' && argv[argvIndex][1] == '\0' ) {
++        // open output file
++        output = fopen(argv[argvIndex+1], "w+");
++
++        IFileType(argv[argvIndex+1], &outputFormat);
++
++        argvIndex += 2;
++    }
++
++    if (output == NULL) {
++        // open /dev/fb for output
++        output = fopen("/dev/fb", "r+");
++
++        outputFormat = IFORMAT_LFB;
++    }
++
++    if (argc > argvIndex) {
++        // animated files only need to animate part of the image
++        // flatten these images so we can add text
++        IFlattenImage(image, gc);
++    }
++
++    if ( argc >= argvIndex+2 &&
++         argv[argvIndex][0] == 'p' && argv[argvIndex][1] == '\0' ) {
++        // add progress bar to images
++
 +        int progress;
 +        int p;
 +
@@ -47,7 +101,11 @@ diff -Nur diff/Ilib-1.1.9/addtext/addtext.c Ilib-1.1.9/addtext/addtext.c
 +        ISetForeground( gc, progcolor );
 +
 +        for ( p = 0; p < progress; p++ ) {
-+            ret = IFillRectangle( image, gc, 11 + (p * 22), 243, 19, 19 );
++            IImage frame = image;
++            while (frame != NULL) {
++                ret = IFillRectangle( frame , gc, 11 + (p * 22), 243, 19, 19 );
++                INextFrame(frame, &frame);
++            }
 +        }
 +    }
 +
@@ -60,7 +118,9 @@ diff -Nur diff/Ilib-1.1.9/addtext/addtext.c Ilib-1.1.9/addtext/addtext.c
 +    ISetFont( gc, font );
 +    ISetForeground( gc, textcolor );
 +    center = 1;
-+    if ( argc >= argvIndex+1 && argv[argvIndex][0] == 'l' ) {
++    if ( argc >= argvIndex+1 &&
++         argv[argvIndex][0] == 'l' && argv[argvIndex][1] == '\0' ) {
++        // center text
 +        center = 0;
 +        x = 10;
 +        argvIndex++;
@@ -69,6 +129,7 @@ diff -Nur diff/Ilib-1.1.9/addtext/addtext.c Ilib-1.1.9/addtext/addtext.c
 +    y = 0;
 +
 +    for ( ; argvIndex < argc; argvIndex++ ) {
++        // add text
 +        int tmp;
 +        text = argv[argvIndex];
 +        tmp = atoi(text);
@@ -86,14 +147,54 @@ diff -Nur diff/Ilib-1.1.9/addtext/addtext.c Ilib-1.1.9/addtext/addtext.c
 +        }
 +
 +        // Draw the text
-+        IDrawString( image, gc, x, y, text, strlen(text) );
++        IImage frame = image;
++        while (frame != NULL) {
++            IDrawString( frame, gc, x, y, text, strlen(text) );
++            INextFrame(frame, &frame);
++        }
 +    }
 +
 +    // Write the image to stdout in GIF format
 +    //IWriteImageFile( stdout, image, IFORMAT_GIF, IOPTION_NONE );
 +
 +    // Write the image to stdout in Linux FB 16bit rgba = 5/11,6/5,5/0,0/0 format
-+    IWriteImageFB( 1, image );
++    IImage frame;
++    INextFrame(image, &frame);
++    if (frame == NULL) {
++        IWriteImageFile(output, image, outputFormat, IOPTION_NONE);
++        fflush(output);
++    } else {
++        frame = image;
++        done = 0;
++        signal(SIGINT, signalHandler);
++        signal(SIGTERM, signalHandler);
++
++        struct timeval then;
++        struct timeval now;
++        unsigned int delay = 0;
++        while (!done || frame != image) {
++            if (delay > 0) {
++                gettimeofday(&now, NULL);
++
++                usleep(delay - (1000000*(now.tv_sec - then.tv_sec) + now.tv_usec - then.tv_usec));
++            }
++
++            IWriteImageFile(output, frame, outputFormat, IOPTION_NONE);
++            gettimeofday(&then, NULL);
++
++            delay = IFrameDelay(frame);
++
++            INextFrame(frame, &frame);
++            if (frame == NULL)
++                frame = image;
++        }
++    }
++
++    if (input != stdin)
++        fclose(input);
++
++    if (output != NULL)
++        fclose(output);
 +
 +    return 0;
 +}

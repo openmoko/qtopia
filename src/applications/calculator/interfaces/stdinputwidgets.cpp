@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,6 +19,7 @@
 **
 ****************************************************************************/
 #include "stdinputwidgets.h"
+#include <Qtopia>
 
 extern Engine *systemEngine;
 
@@ -233,6 +234,26 @@ void InputWidget::init( int fromRow, int fromCol )
     setTabOrder(PBMinus,PBPlus);
     setTabOrder(PBPlus,PBEval);
     setTabOrder(PBEval,PBNegate);
+#else
+    if (Qtopia::mousePreferred()) {
+        PB0->setFocusPolicy(Qt::NoFocus);
+        PB1->setFocusPolicy(Qt::NoFocus);
+        PB2->setFocusPolicy(Qt::NoFocus);
+        PB3->setFocusPolicy(Qt::NoFocus);
+        PB4->setFocusPolicy(Qt::NoFocus);
+        PB5->setFocusPolicy(Qt::NoFocus);
+        PB6->setFocusPolicy(Qt::NoFocus);
+        PB7->setFocusPolicy(Qt::NoFocus);
+        PB8->setFocusPolicy(Qt::NoFocus);
+        PB9->setFocusPolicy(Qt::NoFocus);
+        PBEval->setFocusPolicy(Qt::NoFocus);
+        PBDiv->setFocusPolicy(Qt::NoFocus);
+        PBPlus->setFocusPolicy(Qt::NoFocus);
+        PBMinus->setFocusPolicy(Qt::NoFocus);
+        PBTimes->setFocusPolicy(Qt::NoFocus);
+        PBNegate->setFocusPolicy(Qt::NoFocus);
+        PBBS->setFocusPolicy(Qt::NoFocus);
+    }
 #endif
 
     // Connect
@@ -272,6 +293,9 @@ void DecimalInputWidget::init(int fromRow, int fromCol) {
     PBDecimal->setText( tr( ".", "decimal point" ) );
 #ifndef QTOPIA_PHONE
     PBDecimal->setFocusPolicy(Qt::TabFocus);
+#else
+    if (Qtopia::mousePreferred())
+        PBDecimal->setFocusPolicy(Qt::NoFocus);
 #endif
     InputWidgetLayout->addWidget( PBDecimal, fromRow + 4, fromCol + 1);
     connect (PBDecimal, SIGNAL(clicked()), this, SLOT(decimalClicked()));

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -24,52 +39,28 @@
 #include "abstractformwindow.h"
 #include "inplace_editor.h"
 
-#include <QtGui/QResizeEvent>
-#include <QtGui/QPushButton>
-#include <QtGui/QToolButton>
-#include <QtGui/QShortcut>
+namespace qdesigner_internal {
 
-#include <QtCore/QMetaProperty>
-#include <QtCore/qdebug.h>
-
-using namespace qdesigner_internal;
-
-InPlaceEditor::InPlaceEditor(QWidget *widget, QDesignerFormWindowInterface *fw)
-    : QLineEdit(),
-      m_widget(widget)
+InPlaceEditor::InPlaceEditor(QWidget *widget,
+                             TextPropertyValidationMode validationMode,
+                             QDesignerFormWindowInterface *fw,
+                             const QString& text,
+                             const QRect& r) :
+    TextPropertyEditor(EmbeddingInPlace, validationMode, widget),
+    m_InPlaceWidgetHelper(this, widget, fw)
 {
-    (void) new QShortcut(Qt::Key_Escape, this, SLOT(close()));
+    setAlignment(m_InPlaceWidgetHelper.alignment());
+    setObjectName(QLatin1String("__qt__passive_m_editor"));
 
-    m_noChildEvent = widget->testAttribute(Qt::WA_NoChildEventsForParent);
-    setAttribute(Qt::WA_DeleteOnClose);
-    setParent(widget->window());
-    m_widget->installEventFilter(this);
-    connect(this, SIGNAL(destroyed()), fw->mainContainer(), SLOT(setFocus()));
+    setText(text);
+    selectAll();
+        
+    setGeometry(QRect(widget->mapTo(widget->window(), r.topLeft()), r.size()));
+    setFocus();
+    show();
 
-    if (m_widget->metaObject()->indexOfProperty("alignment") != -1) {
-        Qt::Alignment alignment = Qt::Alignment(m_widget->property("alignment").toInt());
-        setAlignment(alignment);
-    } else if (qobject_cast<QPushButton *>(widget)
-            || qobject_cast<QToolButton *>(widget) /* tool needs to be more complex */) {
-        setAlignment(Qt::AlignHCenter);
-    }
-    // ### more ...
+    connect(this, SIGNAL(editingFinished()),this, SLOT(close()));
+ 
 }
 
-InPlaceEditor::~InPlaceEditor()
-{
-    m_widget->setAttribute(Qt::WA_NoChildEventsForParent, m_noChildEvent);
-}
-
-bool InPlaceEditor::eventFilter(QObject *object, QEvent *e)
-{
-    Q_ASSERT(object == m_widget);
-    Q_UNUSED(object);
-
-    if (e->type() == QEvent::Resize) {
-        QResizeEvent *event = static_cast<QResizeEvent*>(e);
-        resize(event->size().width() - 2, height());
-    }
-
-    return false;
 }

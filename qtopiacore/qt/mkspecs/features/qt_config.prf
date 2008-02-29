@@ -10,5 +10,5 @@ isEmpty(QMAKE_QT_CONFIG)|!exists($$QMAKE_QT_CONFIG) {
    debug(1, "Loaded .qconfig.pri from ($$QMAKE_QT_CONFIG)")
 }
 
-load(qt_functions.prf)
+load(qt_functions)
 

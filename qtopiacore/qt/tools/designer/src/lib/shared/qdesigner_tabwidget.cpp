@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -23,6 +38,8 @@
 
 #include "qdesigner_tabwidget_p.h"
 #include "qdesigner_command_p.h"
+#include "qdesigner_propertycommand_p.h"
+#include "promotiontaskmenu_p.h"
 
 #include <QtDesigner/QDesignerFormWindowInterface>
 
@@ -30,44 +47,46 @@
 #include <QtGui/QTabBar>
 #include <QtGui/QAction>
 #include <QtGui/QMouseEvent>
+#include <QtGui/QMenu>
+#include <QtGui/QLabel>
 
 #include <QtCore/qdebug.h>
 
 namespace qdesigner_internal {
-
+// Store tab widget as drag source
 class MyMimeData : public QMimeData
 {
     Q_OBJECT
 public:
-    QDesignerTabWidget *tab;
+    MyMimeData(const QDesignerTabWidget *tab) : m_tab(tab) {}
+    static bool fromMyTab(const QMimeData *mimeData, const QDesignerTabWidget *tab) {
+        if (!mimeData)
+            return false;
+        const MyMimeData *m = qobject_cast<const MyMimeData *>(mimeData);
+        return m &&  m->m_tab ==  tab;
+    }
+private:
+    const QDesignerTabWidget *m_tab;
 };
 
 } // namespace qdesigner_internal
 
-using namespace qdesigner_internal;
-
-QDesignerTabWidget::QDesignerTabWidget(QWidget *parent)
-    : QTabWidget(parent), m_actionDeletePage(0)
+QDesignerTabWidget::QDesignerTabWidget(QWidget *parent) :
+    QTabWidget(parent),
+    m_dropIndicator(0),
+    m_dragPage(0),
+    m_mousePressed(false),
+    m_actionDeletePage(new QAction(tr("Delete"),  this)),
+    m_actionInsertPage(new QAction(tr("Before Current Page"), this)),
+    m_actionInsertPageAfter(new QAction(tr("After Current Page"), this)),
+    m_pagePromotionTaskMenu(new qdesigner_internal::PromotionTaskMenu(0, qdesigner_internal::PromotionTaskMenu::ModeSingleWidget, this))
 {
-    dropIndicator = 0;
-    dragPage = 0;
-    mousePressed = false;
-
     tabBar()->setAcceptDrops(true);
     tabBar()->installEventFilter(this);
 
-    m_actionInsertPage = new QAction(this);
-    m_actionInsertPage->setText(tr("Before Current Page"));
     connect(m_actionInsertPage, SIGNAL(triggered()), this, SLOT(addPage()));
-
-    m_actionInsertPageAfter = new QAction(this);
-    m_actionInsertPageAfter->setText(tr("After Current Page"));
     connect(m_actionInsertPageAfter, SIGNAL(triggered()), this, SLOT(addPageAfter()));
-
-    m_actionDeletePage = new QAction(this);
-    m_actionDeletePage->setText(tr("Delete Page"));
     connect(m_actionDeletePage, SIGNAL(triggered()), this, SLOT(removeCurrentPage()));
-
     connect(this, SIGNAL(currentChanged(int)), this, SLOT(slotCurrentChanged(int)));
 }
 
@@ -123,24 +142,25 @@ bool QDesignerTabWidget::eventFilter(QObject *o, QEvent *e)
     if (o != tabBar())
         return false;
 
-    if (formWindow() == 0)
+    QDesignerFormWindowInterface *fw = formWindow();
+    if (!fw)
         return false;
 
     switch (e->type()) {
-    case QEvent::MouseButtonDblClick: break;
-
+    case QEvent::MouseButtonDblClick:
+        break;
     case QEvent::MouseButtonPress: {
         QMouseEvent *mev = static_cast<QMouseEvent*>(e);
         if (mev->button() & Qt::LeftButton) {
-            mousePressed = true;
-            pressPoint = mev->pos();
+            m_mousePressed = true;
+            m_pressPoint = mev->pos();
 
             for (int i = 0; i < tabBar()->count(); ++i) {
-                if (tabBar()->tabRect(i).contains(pressPoint)) {
+                if (tabBar()->tabRect(i).contains(m_pressPoint)) {
                     if (i != tabBar()->currentIndex()) {
-                        SetPropertyCommand *cmd = new SetPropertyCommand(formWindow());
-                        cmd->init(this, "currentIndex", i);
-                        formWindow()->commandHistory()->push(cmd);
+                        qdesigner_internal::SetPropertyCommand *cmd = new qdesigner_internal::SetPropertyCommand(fw);
+                        cmd->init(this, QLatin1String("currentIndex"), i);
+                        fw->commandHistory()->push(cmd);
                     }
                     break;
                 }
@@ -148,83 +168,71 @@ bool QDesignerTabWidget::eventFilter(QObject *o, QEvent *e)
         }
     } break;
 
-    case QEvent::MouseButtonRelease: {
-        mousePressed = false;
-    } break;
+    case QEvent::MouseButtonRelease:
+        m_mousePressed = false;
+        break;
 
     case QEvent::MouseMove: {
         QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(e);
-        if (mousePressed && canMove(mouseEvent)) {
-            mousePressed = false;
+        if (m_mousePressed && canMove(mouseEvent)) {
+            m_mousePressed = false;
             QDrag *drg = new QDrag(this);
-            qdesigner_internal::MyMimeData *mimeData = new qdesigner_internal::MyMimeData();
-            mimeData->tab = this;
-            drg->setMimeData(mimeData);
+            drg->setMimeData(new qdesigner_internal::MyMimeData(this));
 
-            dragIndex = currentIndex();
-            dragPage = currentWidget();
-            dragLabel = currentTabText();
-            dragIcon = currentTabIcon();
-
-            removeTab(dragIndex);
-
-            Qt::DropActions dropAction = drg->start(Qt::MoveAction);
-
-            if (dropAction == 0) {
-                // abort
-                insertTab(dragIndex, dragPage, dragIcon, dragLabel);
-                setCurrentIndex(dragIndex);
+            m_dragIndex = currentIndex();
+            m_dragPage = currentWidget();
+            m_dragLabel = currentTabText();
+            m_dragIcon = currentTabIcon();
+            if (m_dragIcon.isNull()) {
+                QLabel *label = new QLabel(m_dragLabel);
+                label->adjustSize();
+                drg->setPixmap(QPixmap::grabWidget(label));
+                label->deleteLater();
+            } else {
+                drg->setPixmap(m_dragIcon.pixmap(22, 22));
             }
 
-            if (dropIndicator)
-                dropIndicator->hide();
+            removeTab(m_dragIndex);
+
+            const Qt::DropActions dropAction = drg->start(Qt::MoveAction);
+
+            if (dropAction == Qt::IgnoreAction) {
+                // abort
+                insertTab(m_dragIndex, m_dragPage, m_dragIcon, m_dragLabel);
+                setCurrentIndex(m_dragIndex);
+            }
+
+            if (m_dropIndicator)
+                m_dropIndicator->hide();
         }
     } break;
 
     case QEvent::DragLeave: {
-        if (dropIndicator)
-            dropIndicator->hide();
+        if (m_dropIndicator)
+            m_dropIndicator->hide();
     } break;
 
     case QEvent::DragEnter:
     case QEvent::DragMove: {
         QDragMoveEvent *de = static_cast<QDragMoveEvent*>(e);
-
-        bool accept = false;
-        if (const QMimeData *mimeData = de->mimeData()) {
-            const qdesigner_internal::MyMimeData *m = qobject_cast<const qdesigner_internal::MyMimeData *>(mimeData);
-            if (m && m->tab == this)
-                accept = true;
-        }
-
-        if (!accept)
+        if (!qdesigner_internal::MyMimeData::fromMyTab(de->mimeData(), this))
             return false;
 
-        de->accept();
-        de->acceptProposedAction();
+        if (de->proposedAction() == Qt::MoveAction)
+            de->acceptProposedAction();
+        else {
+            de->setDropAction(Qt::MoveAction);
+            de->accept();
+        }
 
-        int index = 0;
         QRect rect;
-        for (; index < count(); index++) {
-            QRect rc = tabBar()->tabRect(index);
-            if (rc.contains(de->pos())) {
-                rect = rc;
-                break;
-            }
-        }
+        const int index = pageFromPosition(de->pos(), rect);
 
-        if (index == count() -1) {
-            QRect rect2 = rect;
-            rect2.setLeft(rect2.left() + rect2.width() / 2);
-            if (rect2.contains(de->pos()))
-                index++;
-        }
-
-        if (!dropIndicator) {
-            dropIndicator = new QWidget(this);
-            QPalette p = dropIndicator->palette();
+        if (!m_dropIndicator) {
+            m_dropIndicator = new QWidget(this);
+            QPalette p = m_dropIndicator->palette();
             p.setColor(backgroundRole(), Qt::red);
-            dropIndicator->setPalette(p);
+            m_dropIndicator->setPalette(p);
         }
 
         QPoint pos;
@@ -233,45 +241,24 @@ bool QDesignerTabWidget::eventFilter(QObject *o, QEvent *e)
         else
             pos = tabBar()->mapToParent(QPoint(rect.x(), rect.y()));
 
-        dropIndicator->setGeometry(pos.x(), pos.y() , 3, rect.height());
-        dropIndicator->show();
+        m_dropIndicator->setGeometry(pos.x(), pos.y() , 3, rect.height());
+        m_dropIndicator->show();
     } break;
 
     case QEvent::Drop: {
         QDropEvent *de = static_cast<QDropEvent*>(e);
-
-        bool accept = false;
-        if (const QMimeData *mimeData = de->mimeData()) {
-            const qdesigner_internal::MyMimeData *m = qobject_cast<const qdesigner_internal::MyMimeData *>(mimeData);
-            if (m && m->tab == this)
-                accept = true;
-        }
-
-        if (!accept)
+        if (!qdesigner_internal::MyMimeData::fromMyTab(de->mimeData(), this))
             return false;
         de->acceptProposedAction();
         de->accept();
 
-        int newIndex = 0;
-        for (; newIndex < count(); newIndex++) {
-            QRect rc = tabBar()->tabRect(newIndex);
-            if (rc.contains(de->pos()))
-                break;
-        }
+        QRect rect;
+        const int newIndex = pageFromPosition(de->pos(), rect);
 
-        if (newIndex == count() -1) {
-            QRect rect2 = tabBar()->tabRect(newIndex);
-            rect2.setLeft(rect2.left() + rect2.width() / 2);
-            if (rect2.contains(de->pos()))
-                newIndex++;
-        }
-
-        if (QDesignerFormWindowInterface *fw = formWindow()) {
-            MoveTabPageCommand *cmd = new MoveTabPageCommand(fw);
-            insertTab(dragIndex, dragPage, dragIcon, dragLabel);
-            cmd->init(this, dragPage, dragIcon, dragLabel, dragIndex, newIndex);
-            fw->commandHistory()->push(cmd);
-        }
+        qdesigner_internal::MoveTabPageCommand *cmd = new qdesigner_internal::MoveTabPageCommand(fw);
+        insertTab(m_dragIndex, m_dragPage, m_dragIcon, m_dragLabel);
+        cmd->init(this, m_dragPage, m_dragIcon, m_dragLabel, m_dragIndex, newIndex);
+        fw->commandHistory()->push(cmd);
     } break;
 
     default:
@@ -287,7 +274,7 @@ void QDesignerTabWidget::removeCurrentPage()
         return;
 
     if (QDesignerFormWindowInterface *fw = formWindow()) {
-        DeleteTabPageCommand *cmd = new DeleteTabPageCommand(fw);
+        qdesigner_internal::DeleteTabPageCommand *cmd = new qdesigner_internal::DeleteTabPageCommand(fw);
         cmd->init(this);
         fw->commandHistory()->push(cmd);
     }
@@ -296,8 +283,8 @@ void QDesignerTabWidget::removeCurrentPage()
 void QDesignerTabWidget::addPage()
 {
     if (QDesignerFormWindowInterface *fw = formWindow()) {
-        AddTabPageCommand *cmd = new AddTabPageCommand(fw);
-        cmd->init(this, AddTabPageCommand::InsertBefore);
+        qdesigner_internal::AddTabPageCommand *cmd = new qdesigner_internal::AddTabPageCommand(fw);
+        cmd->init(this, qdesigner_internal::AddTabPageCommand::InsertBefore);
         fw->commandHistory()->push(cmd);
     }
 }
@@ -305,15 +292,15 @@ void QDesignerTabWidget::addPage()
 void QDesignerTabWidget::addPageAfter()
 {
     if (QDesignerFormWindowInterface *fw = formWindow()) {
-        AddTabPageCommand *cmd = new AddTabPageCommand(fw);
-        cmd->init(this, AddTabPageCommand::InsertAfter);
+        qdesigner_internal::AddTabPageCommand *cmd = new qdesigner_internal::AddTabPageCommand(fw);
+        cmd->init(this, qdesigner_internal::AddTabPageCommand::InsertAfter);
         fw->commandHistory()->push(cmd);
     }
 }
 
 bool QDesignerTabWidget::canMove(QMouseEvent *e) const
 {
-    QPoint pt = pressPoint - e->pos();
+    const QPoint pt = m_pressPoint - e->pos();
     return pt.manhattanLength() > QApplication::startDragDistance();
 }
 
@@ -348,5 +335,47 @@ void QDesignerTabWidget::tabRemoved(int index)
         m_actionDeletePage->setEnabled(count() > 1);
 }
 
+// Get page from mouse position. Default to new page if in right half of last page?
+int QDesignerTabWidget::pageFromPosition(const QPoint &pos, QRect &rect) const {
+    int index = 0;
+    for (; index < count(); index++) {
+        const QRect rc = tabBar()->tabRect(index);
+        if (rc.contains(pos)) {
+            rect = rc;
+            break;
+        }
+    }
 
-#include "qdesigner_tabwidget.moc"
+    if (index == count() -1) {
+        QRect rect2 = rect;
+        rect2.setLeft(rect2.left() + rect2.width() / 2);
+        if (rect2.contains(pos))
+            index++;
+    }
+    return index;
+}
+
+QMenu *QDesignerTabWidget::addContextMenuActions(QMenu *popup)
+{
+    QMenu *pageMenu = 0;
+    if (count()) {
+        const QString pageSubMenuLabel = tr("Page %1 of %2").arg(currentIndex() + 1).arg(count());
+        pageMenu = popup->addMenu(pageSubMenuLabel);
+        pageMenu->addAction(m_actionDeletePage);
+        // Set up promotion menu for current widget.
+        if (QWidget *page =  currentWidget ()) {
+            m_pagePromotionTaskMenu->setWidget(page);
+            m_pagePromotionTaskMenu->addActions(QDesignerFormWindowInterface::findFormWindow(this), 
+                                                qdesigner_internal::PromotionTaskMenu::SuppressGlobalEdit, 
+                                                pageMenu);
+        }
+    }
+
+    QMenu *insertPageMenu = popup->addMenu(tr("Insert Page"));
+    insertPageMenu->addAction(m_actionInsertPageAfter);
+    insertPageMenu->addAction(m_actionInsertPage);
+    popup->addSeparator();
+    return pageMenu;
+}
+
+#include "qdesigner_tabwidget.moc" // required for MyMimeData

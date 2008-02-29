@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/examples/concentriccircles.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/concentriccircles.qdoc -->
 <head>
-  <title>Qt 4.2: Concentric Circles Example</title>
+  <title>Qt 4.3: Concentric Circles Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Concentric Circles Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Concentric Circles Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="painting-concentriccircles-circlewidget-cpp.html">painting/concentriccircles/circlewidget.cpp</a></li>
@@ -23,7 +24,7 @@
 </ul>
 <p>The Concentric Circles example shows the improved rendering quality that can be obtained using floating point precision and anti-aliasing when drawing custom widgets. The example also shows how to do simple animations.</p>
 <p>The application's main window displays several widgets which are drawn using the various combinations of precision and anti-aliasing.</p>
-<p align="center"><img src="images/concentriccircles-example.png" /></p><p>Anti-aliasing is one of <a href="qpainter.html">QPainter</a>'s render hints. The <a href="qpainter.html#RenderHint-enum">QPainter::RenderHints</a> are used to specify flags to <a href="qpainter.html">QPainter</a> that may, or may not, be respected by any given engine. <a href="qpainter.html#RenderHint-enum">QPainter::Antialiasing</a> indicates that the engine should anti-alias the edges of primitives if possible, i.e. put additional pixels around the original ones to smooth the edges.</p>
+<p align="center"><img src="images/concentriccircles-example.png" /></p><p>Anti-aliasing is one of <a href="qpainter.html">QPainter</a>'s render hints. The <a href="qpainter.html#RenderHint-enum">QPainter::RenderHints</a> are used to specify flags to <a href="qpainter.html">QPainter</a> that may, or may not, be respected by any given engine. <a href="qpainter.html#RenderHint-enum">QPainter::Antialiasing</a> indicates that the engine should anti-alias the edges of primitives if possible, i.e&#x2e; put additional pixels around the original ones to smooth the edges.</p>
 <p>The difference between floating point precision and integer precision is a matter of accuracy, and is visible in the application's main window: Even though the logic that is calculating the circles' geometry is the same, floating points ensure that the white spaces between each circle are of the same size, while integers make two and two circles appear as if they belong together. The reason is that the integer based precision rely on rounding off non-integer calculations.</p>
 <p>The example consists of two classes:</p>
 <ul>
@@ -87,7 +88,7 @@
      this-&gt;antialiased = antialiased;
      update();
  }</pre>
-<p>The public <tt>setFloatBased()</tt> and <tt>setAntialiased()</tt> functions update the widget's rendering preferences, i.e. whether the widget should be rendered with integer or float based precision, and whether the rendering should be anti-aliased or not.</p>
+<p>The public <tt>setFloatBased()</tt> and <tt>setAntialiased()</tt> functions update the widget's rendering preferences, i.e&#x2e; whether the widget should be rendered with integer or float based precision, and whether the rendering should be anti-aliased or not.</p>
 <p>The functions also generate a paint event by calling the <a href="qwidget.html#update">QWidget::update</a>() function, forcing a repaint of the widget with the new rendering preferences.</p>
 <pre> QSize CircleWidget::minimumSizeHint() const
  {
@@ -202,6 +203,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

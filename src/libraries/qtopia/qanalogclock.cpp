@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -108,6 +108,8 @@ QPoint QAnalogClockPrivate::rotate( QPoint c, QPoint p, int a )
     QAnalogClock::display() to display an appropriate time.
 
     This class exists to ensure consistent appearance of such a widget in Qtopia.
+
+    \ingroup time
 */
 
 /*!
@@ -200,7 +202,7 @@ void QAnalogClock::drawContents( QPainter *pp )
     QPoint s1( pr.x() + pr.width() / 2, pr.y() + 8 );
     QPoint s2( pr.x() + pr.width() / 2, pr.y() + pr.height() / 2 );
 
-    QColor color(Qt::black);
+    QColor color(palette().color(QPalette::Text));
     QTime time = d->currTime;
 
     if ( d->isEvent || d->prevTime.minute() != d->currTime.minute()

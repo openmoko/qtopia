@@ -71,7 +71,7 @@
 <p>Results from an AT command are reported in two parameters. The first parameter is a simple boolean parameter that allows the slot to quickly determine if the command succeeded (true) or failed (false). The second parameter is a <a href="qatresult.html">QAtResult</a> object that contains detailed information about the command response, or the reason for command failure. The <a href="qatresultparser.html">QAtResultParser</a> class can be used to assist in parsing complex responses to AT commands.</p>
 <p>QAtChat objects can also be used to receive unsolicited notifications from the modem device. The caller registers a slot with <a href="qatchat.html#registerNotificationType">registerNotificationType</a>() which is invoked whenever a particular unsolicited notification prefix is encountered in the device's input stream. The following example registers for unsolicited <tt>+CSSI:</tt> notifications from <tt>device</tt>:</p>
 <pre>    QAtChat *atchat = device-&gt;atchat();
-    atchat()-&gt;registerNotificationType(&quot;+CSSI:&quot;, this, SLOT(cssi(const QString&amp;)));</pre>
+    atchat()-&gt;registerNotificationType(&quot;+CSSI:&quot;, this, SLOT(cssi(QString)));</pre>
 <p>When the corresponding slot is invoked for an unsolicited notification, the entire notification, including the prefix, is passed to the slot as a <a href="qstring.html">QString</a> parameter. The <a href="qatresultparser.html">QAtResultParser</a> class can be used to assist in parsing complex unsolicited notification strings.</p>
 <p>See also <a href="qserialiodevice.html">QSerialIODevice</a>, <a href="qatresult.html">QAtResult</a>, and <a href="qatresultparser.html">QAtResultParser</a>.</p>
 <hr />
@@ -121,7 +121,7 @@
 <p>If <i>mayBeCommand</i> is true, then the notification type may sometimes appear as a command result. When it does, the command's completion slot should be called, not the unsolicited notification slot. An example is <tt>+CREG:</tt>, which can appear in response to an <tt>AT+CREG</tt> command, or as an unsolicited notification.</p>
 <p>The following example registers for unsolicited <tt>+CSSI:</tt> notifications from <tt>device</tt>:</p>
 <pre>    QAtChat *atchat = device-&gt;atchat();
-    atchat()-&gt;registerNotificationType(&quot;+CSSI:&quot;, this, SLOT(cssi(const QString&amp;)));</pre>
+    atchat()-&gt;registerNotificationType(&quot;+CSSI:&quot;, this, SLOT(cssi(QString)));</pre>
 <p>When the <tt>cssi()</tt> slot is invoked for the <tt>+CSSI:</tt> unsolicited notification, the entire notification, including the prefix, is passed to the slot as a <a href="qstring.html">QString</a> parameter. The <a href="qatresultparser.html">QAtResultParser</a> class can be used to assist in parsing complex unsolicited notification strings.</p>
 <p>See also <a href="qatresultparser.html">QAtResultParser</a>.</p>
 <h3 class="fn"><a name="requestNextLine"></a>void QAtChat::requestNextLine ( <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i> )</h3>
@@ -153,6 +153,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

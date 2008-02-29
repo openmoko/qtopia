@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,7 +22,7 @@
 #include <qstringlist.h>
 #include <qtopianamespace.h>
 #include <qdebug.h>
-
+#include <qtopialog.h>
 
 const long Version::MAJOR_MAG = 1000000;
 const long Version::MINOR_MAG = 1000;
@@ -455,3 +455,41 @@ bool VersionUtil::checkVersionLists( const QString &verListStr1, const QString &
 
     return false;
 }
+/*!
+  \internal
+  Returns true if any of the devices listed in \a devList1 and \a devList2 are common
+  to both.  This means that the providers of the two lists are device compatable.
+
+  The parameters are comma delimited lists of devices.  If any of the lists is set to
+  Unknown or a list is empty, true is returned.
+*/
+bool DeviceUtil::checkDeviceLists( const QString &devList1, const QString &devList2 )
+{
+
+    qLog(Package) << "DeviceUtil::checkDevicelists list 1: " << devList1 << " list2: " << devList2;
+    //if device type is specifically set to Unknown or not set at all let it it pass this check
+    if ( devList1 == QLatin1String("Unknown") || devList2 == QLatin1String("Unknown") 
+         || devList1 == QString::null || devList2 == QString::null )
+        return true; 
+
+    QStringList list1 = devList1.toLower().split(",");
+    QStringList list2 = devList2.toLower().split(",");
+    foreach( QString device, list1 )
+    {
+        if ( list2.contains(device) )
+            return true;
+    }
+    return false;
+}
+
+/*!
+  \internal
+  Returns list of devices compatible with this device.  By convnetion, this device
+  should be listed first.
+*/
+QString DeviceUtil::compatibleDevices()
+{
+    return QTOPIA_COMPATIBLE_DEVICES;
+}
+
+

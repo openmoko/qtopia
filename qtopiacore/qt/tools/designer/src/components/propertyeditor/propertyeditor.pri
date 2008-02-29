@@ -7,6 +7,7 @@ INCLUDEPATH += $$PWD
 FORMS += $$PWD/paletteeditor.ui \
     $$PWD/stringlisteditor.ui \
     $$PWD/previewwidget.ui \
+    $$PWD/newdynamicpropertydialog.ui \
     $$PWD/qtgradientstopseditor.ui \
     $$PWD/qtgradienteditor.ui \
     $$PWD/qtgradientdialog.ui \
@@ -22,6 +23,7 @@ HEADERS += $$PWD/propertyeditor.h \
     $$PWD/stringlisteditorbutton.h \
     $$PWD/previewwidget.h \
     $$PWD/previewframe.h \
+    $$PWD/newdynamicpropertydialog.h \
     $$PWD/styledbutton.h \
     $$PWD/qtgradientstopsmodel.h\
     $$PWD/qtgradientstopswidget.h\
@@ -37,7 +39,8 @@ HEADERS += $$PWD/propertyeditor.h \
     $$PWD/qtbrushpatterndialog.h\
     $$PWD/qtspinbox.h\
     $$PWD/qtcolorbutton.h\
-    $$PWD/qtcolorline.h
+    $$PWD/qtcolorline.h \
+    $$PWD/graphicspropertyeditor.h
 
 SOURCES += $$PWD/propertyeditor.cpp \
     $$PWD/paletteeditor.cpp \
@@ -46,6 +49,7 @@ SOURCES += $$PWD/propertyeditor.cpp \
     $$PWD/stringlisteditorbutton.cpp \
     $$PWD/previewwidget.cpp \
     $$PWD/previewframe.cpp \
+    $$PWD/newdynamicpropertydialog.cpp \
     $$PWD/styledbutton.cpp \
     $$PWD/qtgradientstopsmodel.cpp\
     $$PWD/qtgradientstopswidget.cpp\
@@ -61,7 +65,8 @@ SOURCES += $$PWD/propertyeditor.cpp \
     $$PWD/qtbrushpatterndialog.cpp\
     $$PWD/qtspinbox.cpp\
     $$PWD/qtcolorbutton.cpp\
-    $$PWD/qtcolorline.cpp
+    $$PWD/qtcolorline.cpp \
+    $$PWD/graphicspropertyeditor.cpp
 
 HEADERS += $$PWD/qpropertyeditor.h \
     $$PWD/qpropertyeditor_items_p.h \

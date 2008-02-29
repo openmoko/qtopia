@@ -1,0 +1,3 @@
+#!/bin/sh
+lidsconf -A -s ${BIN} -o /etc -i 2 -j WRITE
+lidsconf -A -s ${BIN} -o CAP_SYS_TIME -j GRANT

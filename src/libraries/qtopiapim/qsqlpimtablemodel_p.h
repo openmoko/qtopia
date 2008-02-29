@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,17 +22,46 @@
 #ifndef QSQLPIMTABLEMODEL_PRIVATE_H
 #define QSQLPIMTABLEMODEL_PRIVATE_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
+#include "qpreparedquery_p.h"
+
 #include <qcategorymanager.h>
 #include <quniqueid.h>
 
 #include <QCache>
 #include <QSet>
+#include <QBasicTimer>
 
 class QFile;
 class QTimer;
+class QPreparedSqlQuery;
+
+class QPimQueryCache
+{
+public:
+    QPimQueryCache() {}
+    virtual ~QPimQueryCache() {}
+
+    virtual void setMaxCost(int) = 0;
+
+    virtual QString fields() const = 0;
+    virtual void cacheRow(int row, const QPreparedSqlQuery &q) = 0;
+    virtual void clear() = 0;
+};
 
 /* read only */
-class QSqlPimTableModel {
+class QSqlPimTableModel : public QObject {
+    Q_OBJECT
 public:
     QSqlPimTableModel(const QString &table, const QString &categoryTable);
     virtual ~QSqlPimTableModel();
@@ -73,7 +102,19 @@ public:
 
     void reset();
 
+    QString selectText(const QStringList & = QStringList()) const;
+    QString selectText(const QString &, const QStringList & = QStringList(), const QStringList & = QStringList()) const;
+
+    void setSimpleQueryCache(QPimQueryCache *c);
+
+protected:
+    void timerEvent(QTimerEvent *event);
 private:
+    /* gets the row you want, returns, schedules remainder for loop */
+    void buildCache(int) const;
+    void cacheRows(QPreparedSqlQuery &, int, int, int, uint = 0) const;
+    void prepareRowQueries() const;
+
     void invalidateQueries();
     void invalidateCache();
 
@@ -86,11 +127,11 @@ private:
     QStringList mJoins;
     QStringList mOrderBy;
 
-    static const int rowStep;
-
     mutable int cachedCount;
     mutable QCache<int, QUniqueId> cachedIndexes;
+    mutable QCache<int, QVariant> cachedKeyValues;
     mutable QCache<int, QUniqueId> cachedKeys;
+    mutable QPimQueryCache *mSimpleCache;
 
     const QString tableText;
 
@@ -98,9 +139,15 @@ private:
     const QString catUnfiledText;
     const QString catSelectedText;
 
-    // used only for the view now.
-    QString selectText(const QStringList & = QStringList()) const;
-    QString selectText(const QString &, const QStringList & = QStringList()) const;
+    mutable QPreparedSqlQuery idByRowQuery;
+    mutable QPreparedSqlQuery idByJumpedRowQuery;
+    mutable bool idByRowValid;
+
+    mutable QBasicTimer cacheTimer;
+    mutable int cacheRow;
+    mutable int cacheTimerTarget;
+    mutable int lastCachedRow;
+
 };
 
 #endif // QSQLPIMTABLEMODEL_PRIVATE_H

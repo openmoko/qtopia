@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,18 +20,10 @@
 ****************************************************************************/
 
 #include <qconfig.h>
-#ifdef Q_WS_QWS
-//#include <QApplication>
-//#include <QStyle>
-//#include <QStyleOption>
-//#include <QWidget>
-//#include <private/qwidget_p.h>
 #include <QPainter>
 #include <QTimer>
 #include <QWhatsThis>
 #include <QMenu>
-//#include <QDialog>
-//#include <qdrawutil.h>
 #include <QMessageBox>
 #include <QFile>
 #include <QFileInfo>
@@ -50,10 +42,7 @@
 
 #include <stdlib.h>
 
-
-#ifdef QTOPIA_PHONE
 #include "phonedecoration_p.h"
-#endif
 
 #ifndef QT_NO_QWS_QPE_WM_STYLE
 
@@ -282,11 +271,7 @@ QtopiaDecoration::QtopiaDecoration()
     } else {
         delete wdiface;
     }
-#ifdef QTOPIA_PHONE
     wdiface = new PhoneDecoration;
-#else
-    wdiface = new DefaultWindowDecoration;
-#endif
 
     helpexists = false; // We don't know (flagged by helpFile being null)
     imageOk = QImage( ":image/qpe/pda/OKButton" );
@@ -296,11 +281,8 @@ QtopiaDecoration::QtopiaDecoration()
     desktopRect = desktop->screenGeometry(desktop->primaryScreen());
 }
 
-QtopiaDecoration::QtopiaDecoration( const QString &
-#ifndef QTOPIA_PHONE
-        plugin
-#endif
- )   : QDecorationDefault()
+QtopiaDecoration::QtopiaDecoration( const QString & )
+    : QDecorationDefault()
 {
     if ( wdLoader ) {
         delete wdLoader;
@@ -308,30 +290,7 @@ QtopiaDecoration::QtopiaDecoration( const QString &
     } else {
         delete wdiface;
     }
-#ifdef QTOPIA_PHONE
     wdiface = new PhoneDecoration;
-#else
-    if ( plugin == "Qtopia" ) { // No tr
-        wdiface = new DefaultWindowDecoration;
-    } else {
-        QWindowDecorationFactoryInterface *iface = 0;
-        wdLoader = new QPluginManager( "decorations" ); // No tr
-        if (!wdLoader->inSafeMode() && wdLoader->isEnabled(plugin)) {
-            QObject *instance = wdLoader->instance(plugin);
-            iface = qobject_cast<QWindowDecorationFactoryInterface*>(instance);
-            if (iface) {
-                wdiface = iface->decoration(iface->keys()[0]);
-            } else {
-                delete instance;
-            }
-        }
-        if (!iface) {
-            delete wdLoader;
-            wdLoader = 0;
-            wdiface = new DefaultWindowDecoration;
-        }
-    }
-#endif
     helpexists = false; // We don't know (flagged by helpFile being null)
     QDesktopWidget *desktop = QApplication::desktop();
     desktopRect = desktop->screenGeometry(desktop->primaryScreen());
@@ -374,14 +333,6 @@ QRegion QtopiaDecoration::region(const QWidget *widget, const QRect &rect, int t
 
     switch ((int)type) {
         case Menu:
-#ifdef QTOPIA_PHONE
-            // This is how we stop the mouse from interacting with
-            // windows in phone edition.  QWSManager first checks whether
-            // the mouse is in Menu.  By ensuring the mouse is in
-            // Menu we guarantee that no action is taken on mouse
-            // events.
-//          region = wdiface->mask(&wd);
-#endif
             break;
         case Maximize: {
             if (!widget->inherits("QDialog") && desktopRect.width() > 350) {
@@ -532,17 +483,8 @@ QRegion QtopiaDecoration::region(const QWidget *widget, const QRect &rect, int t
             }
             break;
         case All:
-#ifndef QTOPIA_PHONE
-            if ( widget->isMaximized() ) {
-                QRect r(rect.left(), rect.top() - titleHeight,
-                        rect.width(), rect.height() + titleHeight);
-                region = r;
-            } else
-#endif
-            {
-                region = wdiface->mask(&wd);
-                region -= rect;
-            }
+            region = wdiface->mask(&wd);
+            region -= rect;
             break;
         default:
             region = QDecorationDefault::region(widget, rect, type);
@@ -550,6 +492,14 @@ QRegion QtopiaDecoration::region(const QWidget *widget, const QRect &rect, int t
     }
 
     return region;
+}
+
+// This is how we stop the mouse from interacting with
+// windows.  regionAt() is used to determine what area the mouse has been
+// clicked.  By returning QDecoration::None no mouse action will be performed.
+int QtopiaDecoration::regionAt(const QWidget *w, const QPoint &point)
+{
+    return QDecoration::None;
 }
 
 bool QtopiaDecoration::paint(QPainter *painter, const QWidget *widget, int decRegion, DecorationState state)
@@ -574,7 +524,7 @@ bool QtopiaDecoration::paint(QPainter *painter, const QWidget *widget, int decRe
         int lb = wdiface->metric(QWindowDecorationInterface::LeftBorder,&wd);
         int rb = wdiface->metric(QWindowDecorationInterface::RightBorder,&wd);
         int bb = wdiface->metric(QWindowDecorationInterface::BottomBorder,&wd);
-        if (titleHeight > 0 && lb > 0 && rb > 0 && bb > 0)
+        if (titleHeight > 0 || lb > 0 || rb > 0 || bb > 0)
             wdiface->drawArea( QWindowDecorationInterface::Border, painter, &wd );
         handled |= true;
     }
@@ -592,10 +542,7 @@ bool QtopiaDecoration::paint(QPainter *painter, const QWidget *widget, int decRe
             titlePen   = pal.color(QPalette::Text);
         }
 
-        QRegion oldClip = painter->clipRegion();
-        painter->setClipRegion( QRegion( titleRect ) ); // reduce flicker
         wdiface->drawArea( QWindowDecorationInterface::Title, painter, &wd );
-        painter->setClipRegion( oldClip );
 
         // Draw caption
         painter->setPen(titlePen);
@@ -682,20 +629,7 @@ void QtopiaDecoration::paintButton(QPainter *painter, const QWidget *w,
 
 void QtopiaDecoration::buildSysMenu( QWidget *widget, QMenu *menu )
 {
-#ifndef QTOPIA_PHONE
-    QDecorationAction *act = new QDecorationAction("Restore", menu, Maximize);
-    bool is_max = widget && (widget->windowFlags() & Qt::WindowMaximizeButtonHint) == Qt::WindowMaximizeButtonHint;
-    act->setEnabled(is_max);
-    menu->addAction(act);
-    menu->addAction(new QDecorationAction("Move", menu, Move));
-    menu->addAction(new QDecorationAction("Size", menu, Resize));
-    act = new QDecorationAction("Maximize", menu, Maximize);
-    act->setDisabled(is_max);
-    menu->addAction(act);
-    menu->addSeparator();
-#else
     Q_UNUSED(widget)
-#endif
     menu->addAction(new QDecorationAction("Close", menu, Close));
 }
 
@@ -718,9 +652,6 @@ void QtopiaDecoration::regionClicked(QWidget *widget, int region)
     switch (region) {
         case Maximize:
             {
-#ifndef QTOPIA_PHONE
-                QDecorationDefault::regionClicked( widget, Maximize );
-#else
                 // find out how much space the decoration needs
                 QWindowDecorationInterface::WindowData wd;
                 windowData(widget, wd);
@@ -731,7 +662,6 @@ void QtopiaDecoration::regionClicked(QWidget *widget, int region)
                 QRect nr = desktop->availableGeometry(desktop->screenNumber(widget));
                 nr.setTop(nr.top()+th);
                 widget->setGeometry(nr);
-#endif
             }
             break;
 
@@ -817,5 +747,3 @@ QMenu *QtopiaDecoration::menu(QWSManager*, const QWidget*, const QPoint&)
 
 
 #endif // QT_NO_QWS_QPE_WM_STYLE
-#endif
-

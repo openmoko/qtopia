@@ -21,7 +21,8 @@ SERIAL_PRIVATE_HEADERS+=\
     qserialiodevice_p.h\
     qprefixmatcher_p.h\
     qatchat_p.h\
-    qpassthroughserialiodevice_p.h
+    qpassthroughserialiodevice_p.h\
+    gsm0710_p.h
 
 SERIAL_SOURCES+=\
     qgsm0710multiplexer.cpp\
@@ -39,7 +40,8 @@ SERIAL_SOURCES+=\
     qretryatchat.cpp\
     qatutils.cpp\
     qgsmcodec.cpp\
-    qpassthroughserialiodevice.cpp
+    qpassthroughserialiodevice.cpp\
+    gsm0710.c
 
 sdk_serial_headers.files=$$SERIAL_HEADERS
 sdk_serial_headers.path=/include/qtopia/serial

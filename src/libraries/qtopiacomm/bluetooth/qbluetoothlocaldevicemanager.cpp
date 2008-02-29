@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,13 +20,14 @@
 ****************************************************************************/
 
 #include <qbluetoothlocaldevicemanager.h>
-#include <qtopialog.h>
 
-#include <qtdbus/qdbusargument.h>
-#include <qtdbus/qdbusconnection.h>
-#include <qtdbus/qdbusinterface.h>
-#include <qtdbus/qdbusreply.h>
-#include <qtdbus/qdbusmessage.h>
+#include <QDBusArgument>
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusReply>
+#include <QDBusMessage>
+
+#include <QDebug>
 
 class QBluetoothLocalDeviceManager_Private : public QObject
 {
@@ -45,9 +46,15 @@ public:
 };
 
 QBluetoothLocalDeviceManager_Private::QBluetoothLocalDeviceManager_Private(
-        QBluetoothLocalDeviceManager *parent) : QObject(parent), m_parent(parent)
+        QBluetoothLocalDeviceManager *parent) : QObject(parent), m_parent(parent), m_iface(0)
 {
-    QDBusConnection dbc = QDBusConnection::systemBus();
+    QDBusConnection dbc =
+#ifdef QTOPIA_TEST
+        QDBusConnection::sessionBus();
+#else
+        QDBusConnection::systemBus();
+#endif
+
     if (!dbc.isConnected()) {
         qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
         return;
@@ -61,11 +68,11 @@ QBluetoothLocalDeviceManager_Private::QBluetoothLocalDeviceManager_Private(
     }
 
     dbc.connect("org.bluez", "/org/bluez", "org.bluez.Manager", "AdapterAdded",
-                this, SIGNAL(deviceAdded(const QString &)));
+                this, SIGNAL(deviceAdded(QString)));
     dbc.connect("org.bluez", "/org/bluez", "org.bluez.Manager", "AdapterRemoved",
-                this, SIGNAL(deviceRemoved(const QString &)));
+                this, SIGNAL(deviceRemoved(QString)));
     dbc.connect("org.bluez", "/org/bluez", "org.bluez.Manager", "DefaultAdapterChanged",
-                this, SIGNAL(defaultDeviceChanged(const QString &)));
+                this, SIGNAL(defaultDeviceChanged(QString)));
 }
 
 void QBluetoothLocalDeviceManager_Private::deviceAdded(const QString &device)
@@ -138,7 +145,7 @@ QStringList QBluetoothLocalDeviceManager::devices()
 {
     QStringList ret;
 
-    if (!m_data->m_iface->isValid())
+    if (!m_data->m_iface || !m_data->m_iface->isValid())
         return ret;
 
     QDBusReply<QStringList> reply = m_data->m_iface->call("ListAdapters");
@@ -166,7 +173,7 @@ QStringList QBluetoothLocalDeviceManager::devices()
  */
 QString QBluetoothLocalDeviceManager::defaultDevice()
 {
-    if (!m_data->m_iface->isValid())
+    if (!m_data->m_iface || !m_data->m_iface->isValid())
         return QString();
 
     QDBusReply<QString> reply = m_data->m_iface->call("DefaultAdapter");

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -249,38 +264,18 @@ void QtPrivate::QStringList_sort(QStringList *that)
 
     This version of the function uses a QString as separator.
 
-    If \a sep is an empty string, the return value is a list of
-    one-character strings: split(QString(""), "four") returns the
-    four-item list, "f", "o", "u", "r".
-
-    If \a allowEmptyEntries is true, an empty string is inserted in
-    the list wherever the separator matches twice without intervening
-    text.
-
     \sa join() QString::section()
 */
 #ifndef QT_NO_REGEXP
 /*!
     \fn QStringList QStringList::split(const QRegExp &sep, const QString &str, bool allowEmptyEntries)
 
-    Splits the string \a str into strings wherever the regular
-    expression \a sep occurs, and returns the list of those strings.
+    Use QString::split(\a sep, QString::SkipEmptyParts) or
+    QString::split(\a sep, QString::KeepEmptyParts) instead.
 
-    If \a allowEmptyEntries is true, an empty string is inserted in
-    the list wherever the separator matches twice without intervening
-    text.
-
-    For example, if you split the string "a,,b,c" on commas, split()
-    returns the three-item list "a", "b", "c" if \a allowEmptyEntries
-    is false (the default), and the four-item list "a", "", "b", "c"
-    if \a allowEmptyEntries is true.
-
-    Use \c{split(QRegExp("\\s+"), str)} to split on arbitrary amounts
-    of whitespace.
-
-    If \a sep does not match anywhere in \a str, split() returns a
-    single element list with the element containing the original
-    string, \a str.
+    Be aware that the QString::split()'s return value is a
+    QStringList that always contains at least one element, even if \a
+    str is empty.
 
     \sa join() QString::section()
 */
@@ -589,3 +584,24 @@ int QtPrivate::QStringList_lastIndexOf(const QStringList *that, const QRegExp &r
     return -1;
 }
 #endif
+
+/*!
+    \fn int QStringList::indexOf(const QString &value, int from = 0) const
+
+    Returns the index position of the first occurrence of \a value in
+    the list, searching forward from index position \a from. Returns
+    -1 if no item matched.
+
+    \sa lastIndexOf(), contains(), QList::indexOf()
+*/
+
+/*!
+    \fn int QStringList::lastIndexOf(const QString &value, int from = -1) const
+
+    Returns the index position of the last occurrence of \a value in
+    the list, searching backward from index position \a from. If \a
+    from is -1 (the default), the search starts at the last item.
+    Returns -1 if no item matched.
+
+    \sa indexOf(), QList::lastIndexOf()
+*/

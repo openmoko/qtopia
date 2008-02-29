@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qboxlayout.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qboxlayout.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QHBoxLayout</title>
+  <title>Qt 4.3: List of All Members for QHBoxLayout</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -39,6 +39,8 @@
 <li><div class="fn"/><a href="qobject.html#connect">connect</a> ( const QObject *, const char *, const QObject *, const char *, Qt::ConnectionType ) : bool</li>
 <li><div class="fn"/><a href="qobject.html#connect-2">connect</a> ( const QObject *, const char *, const char *, Qt::ConnectionType ) const : bool</li>
 <li><div class="fn"/><a href="qobject.html#connectNotify">connectNotify</a> ( const char * )</li>
+<li><div class="fn"/><a href="qlayout.html#contentsRect">contentsRect</a> () const : QRect</li>
+<li><div class="fn"/><a href="qlayoutitem.html#controlTypes">controlTypes</a> () const : QSizePolicy::ControlTypes</li>
 <li><div class="fn"/><a href="qlayout.html#count">count</a> () const : int</li>
 <li><div class="fn"/><a href="qobject.html#customEvent">customEvent</a> ( QEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#deleteLater">deleteLater</a> ()</li>
@@ -58,6 +60,7 @@
 <li><div class="fn"/><a href="qobject.html#findChildren">findChildren</a> ( const QString &amp; ) const : QList&lt;T&gt;</li>
 <li><div class="fn"/><a href="qobject.html#findChildren-2">findChildren</a> ( const QRegExp &amp; ) const : QList&lt;T&gt;</li>
 <li><div class="fn"/><a href="qlayoutitem.html#geometry">geometry</a> () const : QRect</li>
+<li><div class="fn"/><a href="qlayout.html#getContentsMargins">getContentsMargins</a> ( int *, int *, int *, int * ) const</li>
 <li><div class="fn"/><a href="qlayoutitem.html#hasHeightForWidth">hasHeightForWidth</a> () const : bool</li>
 <li><div class="fn"/><a href="qlayoutitem.html#heightForWidth">heightForWidth</a> ( int ) const : int</li>
 <li><div class="fn"/><a href="qlayout.html#indexOf">indexOf</a> ( QWidget * ) const : int</li>
@@ -68,15 +71,14 @@
 <li><div class="fn"/><a href="qboxlayout.html#insertStretch">insertStretch</a> ( int, int )</li>
 <li><div class="fn"/><a href="qboxlayout.html#insertWidget">insertWidget</a> ( int, QWidget *, int, Qt::Alignment )</li>
 <li><div class="fn"/><a href="qobject.html#installEventFilter">installEventFilter</a> ( QObject * )</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qboxlayout.html#invalidate">invalidate</a> ()</li>
 <li><div class="fn"/><a href="qlayoutitem.html#isEmpty">isEmpty</a> () const : bool</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qlayout.html#isEnabled">isEnabled</a> () const : bool</li>
 <li><div class="fn"/><a href="qobject.html#isWidgetType">isWidgetType</a> () const : bool</li>
 <li><div class="fn"/><a href="qlayout.html#itemAt">itemAt</a> ( int ) const : QLayoutItem *</li>
 <li><div class="fn"/><a href="qobject.html#killTimer">killTimer</a> ( int )</li>
 <li><div class="fn"/><a href="qlayoutitem.html#layout">layout</a> () : QLayout *</li>
-<li><div class="fn"/><a href="qlayout.html#margin-prop">margin</a> () const : int</li>
 <li><div class="fn"/><a href="qlayout.html#maximumSize">maximumSize</a> () const : QSize</li>
 <li><div class="fn"/><a href="qlayout.html#menuBar">menuBar</a> () const : QWidget *</li>
 <li><div class="fn"/><a href="qobject.html#metaObject">metaObject</a> () const : const QMetaObject *</li>
@@ -92,26 +94,26 @@
 <li><div class="fn"/><a href="qlayout.html#removeItem">removeItem</a> ( QLayoutItem * )</li>
 <li><div class="fn"/><a href="qlayout.html#removeWidget">removeWidget</a> ( QWidget * )</li>
 <li><div class="fn"/><a href="qobject.html#sender">sender</a> () const : QObject *</li>
-<li><div class="fn"/><a href="qlayout.html#setAlignment-var">setAlignment</a> : using</li>
 <li><div class="fn"/><a href="qlayout.html#setAlignment">setAlignment</a> ( QWidget *, Qt::Alignment ) : bool</li>
-<li><div class="fn"/><a href="qlayout.html#setAlignment-2">setAlignment</a> ( QLayout *, Qt::Alignment ) : bool</li>
+<li><div class="fn"/><a href="qlayout.html#setAlignment-2">setAlignment</a> ( Qt::Alignment )</li>
+<li><div class="fn"/><a href="qlayout.html#setAlignment-3">setAlignment</a> ( QLayout *, Qt::Alignment ) : bool</li>
+<li><div class="fn"/><a href="qlayout.html#setContentsMargins">setContentsMargins</a> ( int, int, int, int )</li>
 <li><div class="fn"/><a href="qboxlayout.html#setDirection">setDirection</a> ( Direction )</li>
 <li><div class="fn"/><a href="qlayout.html#setEnabled">setEnabled</a> ( bool )</li>
 <li><div class="fn"/><a href="qlayoutitem.html#setGeometry">setGeometry</a> ( const QRect &amp; )</li>
-<li><div class="fn"/><a href="qlayout.html#margin-prop">setMargin</a> ( int )</li>
 <li><div class="fn"/><a href="qlayout.html#setMenuBar">setMenuBar</a> ( QWidget * )</li>
 <li><div class="fn"/><a href="qobject.html#objectName-prop">setObjectName</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#setParent">setParent</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#setProperty">setProperty</a> ( const char *, const QVariant &amp; ) : bool</li>
 <li><div class="fn"/><a href="qlayout.html#sizeConstraint-prop">setSizeConstraint</a> ( SizeConstraint )</li>
-<li><div class="fn"/><a href="qlayout.html#spacing-prop">setSpacing</a> ( int )</li>
+<li><div class="fn"/><a href="qboxlayout.html#setSpacing">setSpacing</a> ( int )</li>
 <li><div class="fn"/><a href="qboxlayout.html#setStretchFactor">setStretchFactor</a> ( QWidget *, int ) : bool</li>
 <li><div class="fn"/><a href="qboxlayout.html#setStretchFactor-2">setStretchFactor</a> ( QLayout *, int ) : bool</li>
 <li><div class="fn"/><a href="qobject.html#signalsBlocked">signalsBlocked</a> () const : bool</li>
 <li><div class="fn"/><a href="qlayout.html#sizeConstraint-prop">sizeConstraint</a> () const : SizeConstraint</li>
 <li><div class="fn"/><a href="qlayoutitem.html#sizeHint">sizeHint</a> () const : QSize</li>
 <li><div class="fn"/><a href="qlayoutitem.html#spacerItem">spacerItem</a> () : QSpacerItem *</li>
-<li><div class="fn"/><a href="qlayout.html#spacing-prop">spacing</a> () const : int</li>
+<li><div class="fn"/><a href="qboxlayout.html#spacing">spacing</a> () const : int</li>
 <li><div class="fn"/><a href="qobject.html#startTimer">startTimer</a> ( int ) : int</li>
 <li><div class="fn"/><a href="qobject.html#staticMetaObject-var">staticMetaObject</a> : const QMetaObject</li>
 <li><div class="fn"/><a href="qlayout.html#takeAt">takeAt</a> ( int ) : QLayoutItem *</li>
@@ -128,6 +130,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

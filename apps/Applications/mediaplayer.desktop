@@ -4,10 +4,10 @@ Exec=mediaplayer
 Type=Application
 Name[]=Media Player
 Icon=mediaplayer/VideoPlayer
-MimeType="audio/x-wav;audio/mpeg;audio/mpegurl;audio/x-scpls;audio/amr;audio/midi;video/3gpp"
-MimeTypeIcons="mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/VideoPlayer"
+MimeType="audio/x-wav;audio/mpeg;audio/mpeg3;audio/mp3;audio/x-mp3;audio/mpegurl;audio/x-scpls;audio/amr;audio/mp4;audio/midi;video/3gpp;audio/3gpp;video/mp4"
+MimeTypeIcons="mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/AudioPlayer;mediaplayer/VideoPlayer;mediaplayer/VideoPlayer;mediaplayer/VideoPlayer"
 [Translation]
 File=QtopiaApplications
 Context=MediaPlayer
 [DRM]
-MimeTypePermissions="Play;Play;Play;Play;Play;Play;Play"
+MimeTypePermissions="Play;Play;Play;Play;Play;Play;Play;Play;Play;Play;Play;Play;Play"

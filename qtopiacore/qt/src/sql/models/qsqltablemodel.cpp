@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -29,6 +44,7 @@
 #include "qsqlindex.h"
 #include "qsqlquery.h"
 #include "qsqlrecord.h"
+#include "qsqlresult.h"
 
 #include "qsqltablemodel_p.h"
 
@@ -163,6 +179,11 @@ bool QSqlTableModelPrivate::exec(const QString &stmt, bool prepStatement,
     if (editQuery.driver() != db.driver())
         editQuery = QSqlQuery(db);
 
+    // workaround for In-Process databases - remove all read locks
+    // from the table to make sure the editQuery succeeds
+    if (db.driver()->hasFeature(QSqlDriver::SimpleLocking))
+        const_cast<QSqlResult *>(query.result())->detachFromResultSet();
+
     if (prepStatement) {
         if (editQuery.lastQuery() != stmt) {
             if (!editQuery.prepare(stmt)) {
@@ -256,6 +277,10 @@ QSqlRecord QSqlTableModelPrivate::primaryValues(int row)
     the QSqlRelationalTableModel and QSqlRelationalDelegate if you
     want to resolve foreign keys.
 
+    The \l{QSQLITE} driver locks for updates until a select is finished.
+    QSqlTableModel fetches data (QSqlQuery::fetchMore()) as needed;
+    this may cause the updates to time out.
+
     \sa QSqlRelationalTableModel, QSqlQuery, {Model/View Programming},
         {Table Model Example}, {Cached Table Example}
 */
@@ -333,7 +358,9 @@ QSqlTableModel::~QSqlTableModel()
 
     To populate the model with the table's data, call select().
 
-    \sa select(), setFilter()
+    Error information can be retrieved with \l lastError().
+
+    \sa select(), setFilter(), lastError()
 */
 void QSqlTableModel::setTable(const QString &tableName)
 {
@@ -341,6 +368,11 @@ void QSqlTableModel::setTable(const QString &tableName)
     clear();
     d->tableName = tableName;
     d->initRecordAndPrimaryIndex();
+    d->initColOffsets(d->rec.count());
+
+    if (d->rec.count() == 0)
+        d->error = QSqlError(QLatin1String("Unable to find table ") + d->tableName, QString(),
+                             QSqlError::StatementError);
 }
 
 /*!
@@ -605,6 +637,12 @@ bool QSqlTableModel::insertRowIntoTable(const QSqlRecord &values)
     QString stmt = d->db.driver()->sqlStatement(QSqlDriver::InsertStatement, d->tableName,
                                                 rec, prepStatement);
 
+    if (stmt.isEmpty()) {
+        d->error = QSqlError(QLatin1String("No Fields to update"), QString(),
+                                 QSqlError::StatementError);
+        return false;
+    }
+
     return d->exec(stmt, prepStatement, rec);
 }
 
@@ -646,6 +684,9 @@ bool QSqlTableModel::deleteRowFromTable(int row)
     Submits all pending changes and returns true on success.
     Returns false on error, detailed error information can be
     obtained with lastError().
+
+    On success the model will be repopulated. Any views 
+    presenting it will lose their selections.
 
     Note: In OnManualSubmit mode, already submitted changes won't
     be cleared from the cache when submitAll() fails. This allows
@@ -719,6 +760,9 @@ bool QSqlTableModel::submitAll()
 
     Returns true on success; otherwise returns false. Use lastError()
     to query detailed error information.
+
+    On success the model will be repopulated. Any views 
+    presenting it will lose their selections.
 
     \sa revert(), revertRow(), submitAll(), revertAll(), lastError()
 */
@@ -896,7 +940,7 @@ void QSqlTableModel::sort(int column, Qt::SortOrder order)
 }
 
 /*!
-    Sets the sort oder for \a column to \a order. This does not
+    Sets the sort order for \a column to \a order. This does not
     affect the current data, to refresh the data using the new
     sort order, call select().
 
@@ -922,8 +966,12 @@ QString QSqlTableModel::orderByClause() const
     QSqlField f = d->rec.field(d->sortColumn);
     if (!f.isValid())
         return s;
-    s.append(QLatin1String("ORDER BY ")).append(d->tableName).append(QLatin1Char('.')).append(f.name());
+        
+    QString table = d->db.driver()->escapeIdentifier(d->tableName, QSqlDriver::TableName);
+    QString field = d->db.driver()->escapeIdentifier(f.name(), QSqlDriver::FieldName);
+    s.append(QLatin1String("ORDER BY ")).append(table).append(QLatin1Char('.')).append(field);
     s += d->sortOrder == Qt::AscendingOrder ? QLatin1String(" ASC") : QLatin1String(" DESC");
+
     return s;
 }
 

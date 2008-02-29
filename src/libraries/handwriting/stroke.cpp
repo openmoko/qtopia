@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -110,7 +110,7 @@ void QIMPenStroke::beginInput( QPoint p )
 */
 bool QIMPenStroke::addPoint( QPoint p )
 {
-    if ( links.count() > 500 ) // sanity check (that the user is sane).
+    if ( links.count() > 2000 ) // sanity check (that the user is sane).
         return false;
 
     int dx = p.x() - lastPoint.x();
@@ -192,10 +192,6 @@ unsigned int QIMPenStroke::match( QIMPenStroke *pen )
         lratio =  (pen->links.count()+2) / (links.count()+2);
 
     lratio -= 1.0;
-
-    if ( lratio > 2.0 ) {
-        return 400000;
-    }
 
     createSignatures();
     pen->createSignatures();

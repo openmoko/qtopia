@@ -23,6 +23,7 @@
 <li><div class="fn"/><b><a href="qserialport.html#QSerialPort">QSerialPort</a></b> ( const QString &amp; <i>device</i>, int <i>rate</i> = 38400, bool <i>trackStatus</i> = false )</li>
 <li><div class="fn"/><b><a href="qserialport.html#dtor.QSerialPort">~QSerialPort</a></b> ()</li>
 <li><div class="fn"/>virtual void <b><a href="qserialport.html#close">close</a></b> ()</li>
+<li><div class="fn"/>int <b><a href="qserialport.html#fd">fd</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qserialport.html#flowControl">flowControl</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qserialport.html#flush">flush</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qserialport.html#keepOpen">keepOpen</a></b> () const</li>
@@ -79,6 +80,9 @@
 <h3 class="fn"><a name="create"></a>QSerialPort * QSerialPort::create ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, int <i>defaultRate</i> = 115200, bool <i>flowControl</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Create and open a serial device from a <i>name</i> of the form <tt>device:rate</tt>. Returns NULL if the device could not be opened. The <i>defaultRate</i> parameter indicates the default rate to use if <tt>:rate</tt> was not included in the device name. If <i>flowControl</i> is true, then CTS/RTS flow control should be enabled on the device.</p>
 <p>The <i>name</i> parameter can have the special form <tt>sim:hostname</tt>, where <tt>hostname</tt> is the name of a host running a phone simulator daemon (usually <tt>localhost</tt>). The phone simulator mode is intended for debugging purposes only.</p>
+<h3 class="fn"><a name="fd"></a>int QSerialPort::fd () const</h3>
+<p>Returns the operating system file descriptor for this serial port, or -1 if the port is currently closed.</p>
+<p>This function was introduced in Qtopia 4.3.</p>
 <h3 class="fn"><a name="flowControl"></a>bool QSerialPort::flowControl () const</h3>
 <p>Returns the state of CTS/RTS flow control on the serial device. The default value is false.</p>
 <p>See also <a href="qserialport.html#setFlowControl">setFlowControl</a>().</p>
@@ -106,6 +110,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -39,24 +54,12 @@
 #include <private/qmath_p.h>
 #include <private/qnumeric_p.h>
 #include <private/qobject_p.h>
+#include <private/qpathclipper_p.h>
 #include <private/qstroker_p.h>
 #include <private/qtextengine_p.h>
 
-#include <qbitmap.h>
-#include <qdebug.h>
-#include <qlist.h>
-#include <qmatrix.h>
-#include <qpen.h>
-#include <qpolygon.h>
-#include <qtextlayout.h>
-#include <qvarlengtharray.h>
-
 #include <limits.h>
 #include <math.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #if 0
 #include <performance.h>
@@ -80,17 +83,17 @@ QPainterPath qt_stroke_dash(const QPainterPath &path, qreal *dashes, int dashCou
 void qt_find_ellipse_coords(const QRectF &r, qreal angle, qreal length,
                             QPointF* startPoint, QPointF *endPoint)
 {
-#define ANGLE(t) ((t) * 2 * M_PI / 360.0)
-    qreal a = r.width() / 2.0;
-    qreal b = r.height() / 2.0;
+#define ANGLE(t) ((t) * 2 * Q_PI / qreal(360.0))
+    qreal a = r.width() / qreal(2.0);
+    qreal b = r.height() / qreal(2.0);
 
     if (startPoint) {
         *startPoint = r.center()
-                      + QPointF(a * cos(ANGLE(angle)), -b * sin(ANGLE(angle)));
+                      + QPointF(a * qCos(ANGLE(angle)), -b * qSin(ANGLE(angle)));
     }
     if (endPoint) {
         *endPoint = r.center()
-                    + QPointF(a * cos(ANGLE(angle + length)), -b * sin(ANGLE(angle + length)));
+                    + QPointF(a * qCos(ANGLE(angle + length)), -b * qSin(ANGLE(angle + length)));
     }
 }
 
@@ -213,7 +216,7 @@ static void qt_debug_path(const QPainterPath &path)
     \o Qt::WindingFill
     \endtable
 
-    See the Qt::Fillrule documentation for the definition of the
+    See the Qt::FillRule documentation for the definition of the
     rules. A painter path's currently set fill rule can be retrieved
     using the fillRule() function, and altered using the setFillRule()
     function.
@@ -591,7 +594,7 @@ void QPainterPath::moveTo(const QPointF &p)
     printf("QPainterPath::moveTo() (%.2f,%.2f)\n", p.x(), p.y());
 #endif
 #ifndef QT_NO_DEBUG
-    if (qIsNan(p.x()) || qIsNan(p.y()))
+    if (qt_is_nan(p.x()) || qt_is_nan(p.y()))
         qWarning("QPainterPath::moveTo: Adding point where x or y is NaN, results are undefined");
 #endif
     ensureData();
@@ -637,7 +640,7 @@ void QPainterPath::lineTo(const QPointF &p)
     printf("QPainterPath::lineTo() (%.2f,%.2f)\n", p.x(), p.y());
 #endif
 #ifndef QT_NO_DEBUG
-    if (qIsNan(p.x()) || qIsNan(p.y()))
+    if (qt_is_nan(p.x()) || qt_is_nan(p.y()))
         qWarning("QPainterPath::lineTo: Adding point where x or y is NaN, results are undefined");
 #endif
     ensureData();
@@ -701,8 +704,8 @@ void QPainterPath::cubicTo(const QPointF &c1, const QPointF &c2, const QPointF &
            c1.x(), c1.y(), c2.x(), c2.y(), e.x(), e.y());
 #endif
 #ifndef QT_NO_DEBUG
-    if (qIsNan(c1.x()) || qIsNan(c1.y()) || qIsNan(c2.x()) || qIsNan(c2.y())
-        || qIsNan(e.x()) || qIsNan(e.y()))
+    if (qt_is_nan(c1.x()) || qt_is_nan(c1.y()) || qt_is_nan(c2.x()) || qt_is_nan(c2.y())
+        || qt_is_nan(e.x()) || qt_is_nan(e.y()))
         qWarning("QPainterPath::cubicTo: Adding point where x or y is NaN, results are undefined");
 #endif
     ensureData();
@@ -754,7 +757,7 @@ void QPainterPath::quadTo(const QPointF &c, const QPointF &e)
            c.x(), c.y(), e.x(), e.y());
 #endif
 #ifndef QT_NO_DEBUG
-    if (qIsNan(c.x()) || qIsNan(c.y()) || qIsNan(e.x()) || qIsNan(e.y()))
+    if (qt_is_nan(c.x()) || qt_is_nan(c.y()) || qt_is_nan(e.x()) || qt_is_nan(e.y()))
         qWarning("QPainterPath::quadTo: Adding point where x or y is NaN, results are undefined");
 #endif
     ensureData();
@@ -836,8 +839,8 @@ void QPainterPath::arcTo(const QRectF &rect, qreal startAngle, qreal sweepLength
            rect.x(), rect.y(), rect.width(), rect.height(), startAngle, sweepLength);
 #endif
 #ifndef QT_NO_DEBUG
-    if (qIsNan(rect.x()) || qIsNan(rect.y()) || qIsNan(rect.width()) || qIsNan(rect.height())
-        || qIsNan(startAngle) || qIsNan(sweepLength))
+    if (qt_is_nan(rect.x()) || qt_is_nan(rect.y()) || qt_is_nan(rect.width()) || qt_is_nan(rect.height())
+        || qt_is_nan(startAngle) || qt_is_nan(sweepLength))
         qWarning("QPainterPath::arcTo: Adding arc where a parameter is NaN, results are undefined");
 #endif
     if (rect.isNull())
@@ -951,7 +954,7 @@ QPointF QPainterPath::currentPosition() const
 void QPainterPath::addRect(const QRectF &r)
 {
 #ifndef QT_NO_DEBUG
-    if (qIsNan(r.x()) || qIsNan(r.y()) || qIsNan(r.width()) || qIsNan(r.height()))
+    if (qt_is_nan(r.x()) || qt_is_nan(r.y()) || qt_is_nan(r.width()) || qt_is_nan(r.height()))
         qWarning("QPainterPath::addRect: Adding rect where a parameter is NaN, results are undefined");
 #endif
     if (r.isNull())
@@ -1052,8 +1055,8 @@ void QPainterPath::addPolygon(const QPolygonF &polygon)
 void QPainterPath::addEllipse(const QRectF &boundingRect)
 {
 #ifndef QT_NO_DEBUG
-    if (qIsNan(boundingRect.x()) || qIsNan(boundingRect.y())
-        || qIsNan(boundingRect.width()) || qIsNan(boundingRect.height()))
+    if (qt_is_nan(boundingRect.x()) || qt_is_nan(boundingRect.y())
+        || qt_is_nan(boundingRect.width()) || qt_is_nan(boundingRect.height()))
         qWarning("QPainterPath::addEllipse: Adding ellipse where a parameter is NaN, results are undefined");
 #endif
     if (boundingRect.isNull())
@@ -1341,10 +1344,12 @@ static QRectF qt_painterpath_bezier_extrema(const QBezier &b)
             }
 
         } else {
-            qreal t1 = (-bx + sqrt(bx * bx - 4 * ax * cx)) / (2 * ax);
+            qreal temp = qSqrt(bx * bx - 4 * ax * cx);
+            qreal rcp = 1 / (2 * ax);
+            qreal t1 = (-bx + temp) * rcp;
             QT_BEZIER_CHECK_T(b, t1);
 
-            qreal t2 = (-bx - sqrt(bx * bx - 4 * ax * cx)) / (2 * ax);
+            qreal t2 = (-bx - temp) * rcp;
             QT_BEZIER_CHECK_T(b, t2);
         }
     }
@@ -1365,10 +1370,12 @@ static QRectF qt_painterpath_bezier_extrema(const QBezier &b)
             }
 
         } else {
-            qreal t1 = (-by + sqrt(by * by - 4 * ay * cy)) / (2 * ay);
+            qreal temp = qSqrt(by * by - 4 * ay * cy);
+            qreal rcp = 1 / (2 * ay);
+            qreal t1 = (-by + temp) * rcp;
             QT_BEZIER_CHECK_T(b, t1);
 
-            qreal t2 = (-by - sqrt(by * by - 4 * ay * cy)) / (2 * ay);
+            qreal t2 = (-by - temp) * rcp;
             QT_BEZIER_CHECK_T(b, t2);
         }
     }
@@ -1383,45 +1390,13 @@ static QRectF qt_painterpath_bezier_extrema(const QBezier &b)
 */
 QRectF QPainterPath::boundingRect() const
 {
-    Q_D(QPainterPath);
     if (isEmpty())
-        return QRect();
+        return QRectF();
+    QPainterPathData *d = d_func();
 
-    qreal minx, maxx, miny, maxy;
-    minx = maxx = d->elements.at(0).x;
-    miny = maxy = d->elements.at(0).y;
-    for (int i=1; i<d->elements.size(); ++i) {
-        const Element &e = d->elements.at(i);
-
-        switch (e.type) {
-        case MoveToElement:
-        case LineToElement:
-            if (e.x > maxx) maxx = e.x;
-            else if (e.x < minx) minx = e.x;
-            if (e.y > maxy) maxy = e.y;
-            else if (e.y < miny) miny = e.y;
-            break;
-        case CurveToElement:
-            {
-                QBezier b = QBezier::fromPoints(d->elements.at(i-1),
-                                                e,
-                                                d->elements.at(i+1),
-                                                d->elements.at(i+2));
-                QRectF r = qt_painterpath_bezier_extrema(b);
-                qreal right = r.right();
-                qreal bottom = r.bottom();
-                if (r.x() < minx) minx = r.x();
-                if (right > maxx) maxx = right;
-                if (r.y() < miny) miny = r.y();
-                if (bottom > maxy) maxy = bottom;
-                i += 2;
-            }
-            break;
-        default:
-            break;
-        }
-    }
-    return QRectF(minx, miny, maxx - minx, maxy - miny);
+    if (d->dirtyBounds)
+        computeBoundingRect();
+    return d->bounds;
 }
 
 /*!
@@ -1436,21 +1411,13 @@ QRectF QPainterPath::boundingRect() const
 */
 QRectF QPainterPath::controlPointRect() const
 {
-    Q_D(QPainterPath);
     if (isEmpty())
-        return QRect();
+        return QRectF();
+    QPainterPathData *d = d_func();
 
-    qreal minx, maxx, miny, maxy;
-    minx = maxx = d->elements.at(0).x;
-    miny = maxy = d->elements.at(0).y;
-    for (int i=1; i<d->elements.size(); ++i) {
-        const Element &e = d->elements.at(i);
-        if (e.x > maxx) maxx = e.x;
-        else if (e.x < minx) minx = e.x;
-        if (e.y > maxy) maxy = e.y;
-        else if (e.y < miny) miny = e.y;
-    }
-    return QRectF(minx, miny, maxx - minx, maxy - miny);
+    if (d->dirtyControlBounds)
+        computeControlPointRect();
+    return d->controlBounds;
 }
 
 
@@ -1513,10 +1480,9 @@ QPainterPath QPainterPath::toReversed() const
     return rev;
 }
 
-
 /*!
-    Converts the path into a list of polygons using the given
-    transformation \a matrix, and returns the list.
+    Converts the path into a list of polygons using the QTransform
+    \a matrix, and returns the list.
 
     This function creates one polygon for each subpath regardless of
     intersecting subpaths (i.e. overlapping bounding rectangles). To
@@ -1526,8 +1492,9 @@ QPainterPath QPainterPath::toReversed() const
     \sa toFillPolygons(), toFillPolygon(), {QPainterPath#QPainterPath
     Conversion}{QPainterPath Conversion}
 */
-QList<QPolygonF> QPainterPath::toSubpathPolygons(const QMatrix &matrix) const
+QList<QPolygonF> QPainterPath::toSubpathPolygons(const QTransform &matrix) const
 {
+
     Q_D(const QPainterPath);
     QList<QPolygonF> flatCurves;
     if (isEmpty())
@@ -1571,36 +1538,11 @@ QList<QPolygonF> QPainterPath::toSubpathPolygons(const QMatrix &matrix) const
 }
 
 /*!
-    Converts the path into a polygon using the given transformation \a
-    matrix, and returns the polygon.
-
-    The polygon is created by first converting all subpaths to
-    polygons, then using a rewinding technique to make sure that
-    overlapping subpaths can be filled using the correct fill rule.
-
-    Note that rewinding inserts addition lines in the polygon so
-    the outline of the fill polygon does not match the outline of
-    the path.
-
-    \sa toSubpathPolygons(), toFillPolygons(),
-    {QPainterPath#QPainterPath Conversion}{QPainterPath Conversion}
-*/
-QPolygonF QPainterPath::toFillPolygon(const QMatrix &matrix) const
+  \overload
+ */
+QList<QPolygonF> QPainterPath::toSubpathPolygons(const QMatrix &matrix) const
 {
-
-    QList<QPolygonF> flats = toSubpathPolygons(matrix);
-    QPolygonF polygon;
-    if (flats.isEmpty())
-        return polygon;
-    QPointF first = flats.first().first();
-    for (int i=0; i<flats.size(); ++i) {
-        polygon += flats.at(i);
-        if (!flats.at(i).isClosed())
-            polygon += flats.at(i).first();
-        if (i > 0)
-            polygon += first;
-    }
-    return polygon;
+    return toSubpathPolygons(QTransform(matrix));
 }
 
 static inline bool rect_intersects(const QRectF &r1, const QRectF &r2)
@@ -1608,9 +1550,10 @@ static inline bool rect_intersects(const QRectF &r1, const QRectF &r2)
     return qMax(r1.left(), r2.left()) <= qMin(r1.right(), r2.right())
         && qMax(r1.top(), r2.top()) <= qMin(r1.bottom(), r2.bottom());
 }
+
 /*!
-    Converts the path into a list of polygons using the given
-    transformation \a matrix, and returns the list.
+    Converts the path into a list of polygons using the 
+    QTransform \a matrix, and returns the list.
 
     The function differs from the toFillPolygon() function in that it
     creates several polygons. It is provided because it is usually
@@ -1630,11 +1573,9 @@ static inline bool rect_intersects(const QRectF &r1, const QRectF &r2)
     \sa toSubpathPolygons(), toFillPolygon(),
     {QPainterPath#QPainterPath Conversion}{QPainterPath Conversion}
 */
-
-// #define QPP_FILLPOLYGONS_DEBUG
-
-QList<QPolygonF> QPainterPath::toFillPolygons(const QMatrix &matrix) const
+QList<QPolygonF> QPainterPath::toFillPolygons(const QTransform &matrix) const
 {
+
     QList<QPolygonF> polys;
 
     QList<QPolygonF> subpaths = toSubpathPolygons(matrix);
@@ -1724,7 +1665,18 @@ QList<QPolygonF> QPainterPath::toFillPolygons(const QMatrix &matrix) const
     return polys;
 }
 
-static void qt_painterpath_isect_line(const QPointF &p1, const QPointF &p2, const QPointF &pos,
+/*!
+  \overload
+ */
+QList<QPolygonF> QPainterPath::toFillPolygons(const QMatrix &matrix) const
+{
+    return toFillPolygons(QTransform(matrix));
+}
+
+//same as qt_polygon_isect_line in qpolygon.cpp
+static void qt_painterpath_isect_line(const QPointF &p1,
+				      const QPointF &p2,
+				      const QPointF &pos,
                                       int *winding)
 {
     qreal x1 = p1.x();
@@ -1769,7 +1721,7 @@ static void qt_painterpath_isect_curve(const QBezier &bezier, const QPointF &pt,
 
         // hit lower limit... This is a rough threshold, but its a
         // tradeoff between speed and precision.
-        const qreal lower_bound = .01;
+        const qreal lower_bound = .001;
         if (bounds.width() < lower_bound && bounds.height() < lower_bound) {
             // We make the assumption here that the curve starts to
             // approximate a line after while (i.e. that it doesn't
@@ -2239,7 +2191,7 @@ QDataStream &operator>>(QDataStream &s, QPainterPath &p)
         s >> y;
         Q_ASSERT(type >= 0 && type <= 3);
 #ifndef QT_NO_DEBUG
-        if (qIsNan(x) || qIsNan(y))
+        if (qt_is_nan(x) || qt_is_nan(y))
             qWarning("QDataStream::operator>>: Adding a NaN element to path, results are undefined");
 #endif
         QPainterPath::Element elm = { x, y, QPainterPath::ElementType(type) };
@@ -2250,6 +2202,8 @@ QDataStream &operator>>(QDataStream &s, QPainterPath &p)
     s >> fillRule;
     Q_ASSERT(fillRule == Qt::OddEvenFill || Qt::WindingFill);
     p.d_func()->fillRule = Qt::FillRule(fillRule);
+    p.d_func()->dirtyBounds = true;
+    p.d_func()->dirtyControlBounds = true;
     return s;
 }
 #endif
@@ -2309,7 +2263,7 @@ void qt_path_stroke_cubic_to(qfixed c1x, qfixed c1y,
 
     In addition you can specify a curve's threshold, controlling the
     granularity with which a curve is drawn, using the
-    setCurveThreshold() fucntion. The default threshold is a well
+    setCurveThreshold() function. The default threshold is a well
     adjusted value (0.25), and normally you should not need to modify
     it. However, you can make the curve's appearance smoother by
     decreasing its value.
@@ -2333,6 +2287,7 @@ class QPainterPathStrokerPrivate
 {
 public:
     QPainterPathStrokerPrivate()
+        : dashOffset(0)
     {
         stroker.setMoveToHook(qt_path_stroke_move_to);
         stroker.setLineToHook(qt_path_stroke_line_to);
@@ -2341,6 +2296,7 @@ public:
 
     QStroker stroker;
     QVector<qfixed> dashPattern;
+    qreal dashOffset;
 };
 
 /*!
@@ -2378,11 +2334,12 @@ QPainterPath QPainterPathStroker::createStroke(const QPainterPath &path) const
     QPainterPathStrokerPrivate *d = const_cast<QPainterPathStrokerPrivate *>(d_func());
     QPainterPath stroke;
     if (d->dashPattern.isEmpty()) {
-        d->stroker.strokePath(path, &stroke, QMatrix());
+        d->stroker.strokePath(path, &stroke, QTransform());
     } else {
         QDashStroker dashStroker(&d->stroker);
         dashStroker.setDashPattern(d->dashPattern);
-        dashStroker.strokePath(path, &stroke, QMatrix());
+        dashStroker.setDashOffset(d->dashOffset);
+        dashStroker.strokePath(path, &stroke, QTransform());
     }
     stroke.setFillRule(Qt::WindingFill);
     return stroke;
@@ -2529,4 +2486,615 @@ void QPainterPathStroker::setDashPattern(const QVector<qreal> &dashPattern)
 QVector<qreal> QPainterPathStroker::dashPattern() const
 {
     return d_func()->dashPattern;
+}
+
+/*!
+    Returns the dash offset for the generated outlines.
+ */
+qreal QPainterPathStroker::dashOffset() const
+{
+    return d_func()->dashOffset;
+}
+
+/*!
+  Sets the dash offset for the generated outlines to \a offset.
+ */
+void QPainterPathStroker::setDashOffset(qreal offset)
+{
+    d_func()->dashOffset = offset;
+}
+
+/*!
+  Converts the path into a polygon using the QTransform
+  \a matrix, and returns the polygon.
+  
+  The polygon is created by first converting all subpaths to
+  polygons, then using a rewinding technique to make sure that
+  overlapping subpaths can be filled using the correct fill rule.
+  
+  Note that rewinding inserts addition lines in the polygon so
+  the outline of the fill polygon does not match the outline of
+  the path.
+  
+  \sa toSubpathPolygons(), toFillPolygons(),
+  {QPainterPath#QPainterPath Conversion}{QPainterPath Conversion}
+*/
+QPolygonF QPainterPath::toFillPolygon(const QTransform &matrix) const
+{
+
+    QList<QPolygonF> flats = toSubpathPolygons(matrix);
+    QPolygonF polygon;
+    if (flats.isEmpty())
+        return polygon;
+    QPointF first = flats.first().first();
+    for (int i=0; i<flats.size(); ++i) {
+        polygon += flats.at(i);
+        if (!flats.at(i).isClosed())
+            polygon += flats.at(i).first();
+        if (i > 0)
+            polygon += first;
+    }
+    return polygon;
+}
+
+/*!
+  \overload
+*/
+QPolygonF QPainterPath::toFillPolygon(const QMatrix &matrix) const
+{
+    return toFillPolygon(QTransform(matrix));
+}
+
+
+//derivative of the equation
+static inline qreal slopeAt(qreal t, qreal a, qreal b, qreal c, qreal d)
+{
+    return 3*t*t*(d - 3*c + 3*b - a) + 6*t*(c - 2*b + a) + 3*(b - a);
+}
+
+/*!
+    Returns the length of the current path.
+*/
+qreal QPainterPath::length() const
+{
+    Q_D(QPainterPath);
+    if (isEmpty())
+        return 0;
+
+    qreal len = 0;
+    for (int i=1; i<d->elements.size(); ++i) {
+        const Element &e = d->elements.at(i);
+
+        switch (e.type) {
+        case MoveToElement:
+            break;
+        case LineToElement:
+        {
+            len += QLineF(d->elements.at(i-1), e).length();
+            break;
+        }
+        case CurveToElement:
+        {
+            QBezier b = QBezier::fromPoints(d->elements.at(i-1),
+                                            e,
+                                            d->elements.at(i+1),
+                                            d->elements.at(i+2));
+            len += b.length();
+            i += 2;
+            break;
+        }
+        default:
+            break;
+        }
+    }
+    return len;
+}
+
+/*!
+    Returns percentage of the whole path at the specified length \a len.
+
+    Note that similarly to other percent methods, the percentage measurment
+    is not linear with regards to the length, if curves are present
+    in the path. When curves are present the percentage argument is mapped
+    to the t parameter of the Bezier equations.
+*/
+qreal QPainterPath::percentAtLength(qreal len) const
+{
+    Q_D(QPainterPath);
+    if (isEmpty() || len <= 0)
+        return 0;
+
+    qreal totalLength = length();
+    if (len > totalLength)
+        return 1;
+
+    qreal curLen = 0;
+    for (int i=1; i<d->elements.size(); ++i) {
+        const Element &e = d->elements.at(i);
+
+        switch (e.type) {
+        case MoveToElement:
+            break;
+        case LineToElement:
+        {
+            QLineF line(d->elements.at(i-1), e);
+            qreal llen = line.length();
+            curLen += llen;
+            if (curLen >= len) {
+                return len/totalLength ;
+            }
+
+            break;
+        }
+        case CurveToElement:
+        {
+            QBezier b = QBezier::fromPoints(d->elements.at(i-1),
+                                            e,
+                                            d->elements.at(i+1),
+                                            d->elements.at(i+2));
+            qreal blen = b.length();
+            qreal prevLen = curLen;
+            curLen += blen;
+
+            if (curLen >= len) {
+                qreal res = b.tAtLength(len - prevLen);
+                return (res * blen + prevLen)/totalLength;
+            }
+
+            i += 2;
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
+    return 0;
+}
+
+static inline QBezier bezierAtT(const QPainterPath &path, qreal t, qreal *startingLength, qreal *bezierLength)
+{
+    *startingLength = 0;
+    if (t > 1)
+        return QBezier();
+
+    qreal curLen = 0;
+    qreal totalLength = path.length();
+
+    for (int i=0; i < path.elementCount(); ++i) {
+        const QPainterPath::Element &e = path.elementAt(i);
+
+        switch (e.type) {
+        case QPainterPath::MoveToElement:
+            break;
+        case QPainterPath::LineToElement:
+        {
+            QLineF line(path.elementAt(i-1), e);
+            qreal llen = line.length();
+            curLen += llen;
+            if (curLen/totalLength >= t) {
+                *bezierLength = llen;
+                QPointF a = path.elementAt(i-1);
+                QPointF delta = e - a;
+                return QBezier::fromPoints(a, a + delta / 3, a + 2 * delta / 3, e);
+            }
+            break;
+        }
+        case QPainterPath::CurveToElement:
+        {
+            QBezier b = QBezier::fromPoints(path.elementAt(i-1),
+                                            e,
+                                            path.elementAt(i+1),
+                                            path.elementAt(i+2));
+            qreal blen = b.length();
+            curLen += blen;
+
+            if (curLen/totalLength >= t) {
+                *bezierLength = blen;
+                return b;
+            }
+
+            i += 2;
+            break;
+        }
+        default:
+            break;
+        }
+        *startingLength = curLen;
+    }
+    return QBezier();
+}
+
+/*!
+    Returns the point at at the percentage \a t of the current path.
+    The argument \a t has to be between 0 and 1.
+
+    Note that similarly to other percent methods, the percentage measurment
+    is not linear with regards to the length, if curves are present
+    in the path. When curves are present the percentage argument is mapped
+    to the t parameter of the Bezier equations.
+*/
+QPointF QPainterPath::pointAtPercent(qreal t) const
+{
+    if (t < 0 || t > 1) {
+        qWarning("QPainterPath::pointAtPercent accepts only values between 0 and 1");
+        return QPointF();
+    }
+
+    if (isEmpty())
+        return QPointF();
+
+    qreal totalLength = length();
+    qreal curLen = 0;
+    qreal bezierLen = 0;
+    QBezier b = bezierAtT(*this, t, &curLen, &bezierLen);
+    qreal realT = (totalLength * t - curLen) / bezierLen;
+
+    return b.pointAt(realT);
+}
+
+/*!
+    Returns the angle perpendicular to the slope of the path at the
+    percentage \a t. The angle is constructed with the reference frame
+    of the horizontal (x) axis and the left side of the path (left as
+    defined by the direction of the path).
+    The argument \a t has to be between 0 and 1.
+
+    Note that similarly to the other percent methods, the percentage measurment
+    is not linear with regards to the length if curves are present
+    in the path. When curves are present the percentage argument is mapped
+    to the t parameter of the Bezier equations.
+*/
+qreal QPainterPath::angleAtPercent(qreal t) const
+{
+    if (t < 0 || t > 1) {
+        qWarning("QPainterPath::angleAtPercent accepts only values between 0 and 1");
+        return 0;
+    }
+
+    qreal totalLength = length();
+    qreal curLen = 0;
+    qreal bezierLen = 0;
+    QBezier bez = bezierAtT(*this, t, &curLen, &bezierLen);
+    qreal realT = (totalLength * t - curLen) / bezierLen;
+
+    qreal m1 = slopeAt(realT, bez.x1, bez.x2, bez.x3, bez.x4);
+    qreal m2 = slopeAt(realT, bez.y1, bez.y2, bez.y3, bez.y4);
+    //tangent line
+    qreal slope = 0;
+
+#define SIGN(x) ((x < 0)?-1:1)
+    qreal angle = 0;
+    if (m1) {
+        slope = m2/m1;
+        angle = (atan((-slope)/(1.0))*180./Q_PI);
+    } else {
+        if (m2 > 0) {
+            angle = -90;
+        } else {
+            angle = 90;
+        }
+    }
+
+    //adjust the angle so that it's in the direction
+    //in which the path is going
+    if (m1 >= 0 && m2 >= 0) {
+        //Quadrant 1
+        angle *= -1;
+    } else if (m1 <  0 && m2 >= 0) {
+        //Quadrant 2
+        angle = 180 - angle;
+    } else if (m1 <  0 && m2 < 0) {
+        //Quadrant 3
+        angle = -180-angle;
+    } else if (m1 >= 0 && m2 < 0) {
+        //Quadrant 4
+        angle *= -1;
+    }
+
+    return angle;
+}
+
+
+/*!
+    Returns the slope of the path at the percentage \a t. The
+    argument \a t has to be between 0 and 1.
+
+    Note that similarly to other percent methods, the percentage measurment
+    is not linear with regards to the length, if curves are present
+    in the path. When curves are present the percentage argument is mapped
+    to the t parameter of the Bezier equations.
+*/
+qreal QPainterPath::slopeAtPercent(qreal t) const
+{
+    if (t < 0 || t > 1) {
+        qWarning("QPainterPath::slopeAtPercent accepts only values between 0 and 1");
+        return 0;
+    }
+
+    qreal totalLength = length();
+    qreal curLen = 0;
+    qreal bezierLen = 0;
+    QBezier bez = bezierAtT(*this, t, &curLen, &bezierLen);
+    qreal realT = (totalLength * t - curLen) / bezierLen;
+
+    qreal m1 = slopeAt(realT, bez.x1, bez.x2, bez.x3, bez.x4);
+    qreal m2 = slopeAt(realT, bez.y1, bez.y2, bez.y3, bez.y4);
+    //tangent line
+    qreal slope = 0;
+
+#define SIGN(x) ((x < 0)?-1:1)
+    if (m1)
+        slope = m2/m1;
+    else {
+        //windows doesn't define INFINITY :(
+#ifdef INFINITY
+        slope = INFINITY*SIGN(m2);
+#else
+        if (sizeof(qreal) == sizeof(double)) {
+            return 1.79769313486231570e+308;
+        } else {
+            return ((qreal)3.40282346638528860e+38);
+        }
+#endif
+    }
+
+    return slope;
+}
+
+/*!
+  Adds a rectangle \a r with rounded corners to the path.
+
+  The \a xRnd and \a yRnd arguments specify how rounded the corners
+  should be. 0 is angled corners, 99 is maximum roundedness.
+
+  A filled rectangle has a size of r.size(). A stroked rectangle has a
+  size of r.size() plus the pen width.
+
+  \sa addRect(), QPen
+*/
+void QPainterPath::addRoundRect(const QRectF &r, int xRnd, int yRnd)
+{
+    if(xRnd >= 100)                          // fix ranges
+        xRnd = 99;
+    if(yRnd >= 100)
+        yRnd = 99;
+    if(xRnd <= 0 || yRnd <= 0) {             // add normal rectangle
+        addRect(r);
+        return;
+    }
+
+    QRectF rect = r.normalized();
+
+    if (rect.isNull())
+        return;
+
+    qreal x = rect.x();
+    qreal y = rect.y();
+    qreal w = rect.width();
+    qreal h = rect.height();
+    qreal rxx = w*xRnd/200;
+    qreal ryy = h*yRnd/200;
+    // were there overflows?
+    if (rxx < 0)
+        rxx = w/200*xRnd;
+    if (ryy < 0)
+        ryy = h/200*yRnd;
+    qreal rxx2 = 2*rxx;
+    qreal ryy2 = 2*ryy;
+
+    ensureData();
+    detach();
+
+    arcMoveTo(x, y, rxx2, ryy2, 90);
+    arcTo(x, y, rxx2, ryy2, 90, 90);
+    arcTo(x, y+h-ryy2, rxx2, ryy2, 2*90, 90);
+    arcTo(x+w-rxx2, y+h-ryy2, rxx2, ryy2, 3*90, 90);
+    arcTo(x+w-rxx2, y, rxx2, ryy2, 0, 90);
+    closeSubpath();
+
+    d_func()->require_moveTo = true;
+}
+
+/*!
+  \fn bool QPainterPath::addRoundRect(const QRectF &rect, int roundness);
+  \since 4.3
+  \overload
+
+  Adds a rounded rectangle, \a rect, to the path.
+
+  The \a roundness argument specifies uniform roundness for the
+  rectangle.  Vertical and horizontal roundness factors will be
+  adjusted accordingly to act uniformly around both axes. Use this
+  method if you want a rectangle equally rounded across both the X and
+  Y axis.
+
+  \sa addRoundRect()
+*/
+
+/*!
+  \fn void QPainterPath::addRoundRect(qreal x, qreal y, qreal w, qreal h, int xRnd, int yRnd);
+  \overload
+
+  Adds a rectangle with rounded corners to the path. The rectangle
+  is constructed from \a x, \a y, and the width and height \a w
+  and \a h.
+  
+  The \a xRnd and \a yRnd arguments specify how rounded the corners
+  should be. 0 is angled corners, 99 is maximum roundedness.
+ */
+
+/*!
+  \fn bool QPainterPath::addRoundRect(qreal x, qreal y, qreal width, qreal height, int roundness);
+  \since 4.3
+  \overload
+
+  Adds a rounded rectangle to the path, defined by the coordinates \a
+  x and \a y with the specified \a width and \a height.
+
+  The \a roundness argument specifies uniform roundness for the
+  rectangle. Vertical and horizontal roundness factors will be
+  adjusted accordingly to act uniformly around both axes. Use this
+  method if you want a rectangle equally rounded across both the X and
+  Y axis.
+
+  \sa addRoundRect()
+*/
+
+/*!
+    \since 4.3
+
+    Returns a path which is the union of this path and \a p.
+
+    \sa intersected(), subtracted(), subtractedInverted()
+*/
+QPainterPath QPainterPath::united(const QPainterPath &p) const
+{
+    if (isEmpty() || p.isEmpty())
+        return isEmpty() ? p : *this;
+    QPathClipper clipper(*this, p);
+    return clipper.clip(QPathClipper::BoolOr);
+}
+
+/*!
+    \since 4.3
+
+    Returns a path which is the intersection of this path and \a p.
+*/
+QPainterPath QPainterPath::intersected(const QPainterPath &p) const
+{
+    if (isEmpty() || p.isEmpty())
+        return QPainterPath();
+    QPathClipper clipper(*this, p);
+    return clipper.clip(QPathClipper::BoolAnd);
+}
+
+/*!
+    \since 4.3
+
+    Returns a path which is \a p subtracted from this path.
+*/
+QPainterPath QPainterPath::subtracted(const QPainterPath &p) const
+{
+    if (isEmpty() || p.isEmpty())
+        return *this;
+    QPathClipper clipper(*this, p);
+    return clipper.clip(QPathClipper::BoolSub);
+}
+
+/*!
+    \since 4.3
+
+    Returns a path which is this path subtracted from \a p.
+*/
+QPainterPath QPainterPath::subtractedInverted(const QPainterPath &p) const
+{
+    if (isEmpty() || p.isEmpty())
+        return p;
+    QPathClipper clipper(*this, p);
+    return clipper.clip(QPathClipper::BoolInSub);
+}
+
+/*!
+  \since 4.3
+
+  Returns true if the current path intersects at any point the
+  given path \a p. The intersection will return false if the path
+  is fully contained within this path (use contains() to check for that
+  case).
+ */
+bool QPainterPath::intersects(const QPainterPath &p) const
+{
+    if (isEmpty() || p.isEmpty())
+        return false;
+    QPathClipper clipper(*this, p);
+    return clipper.intersect();
+}
+
+/*!
+  \since 4.3
+
+  Returns true if the given path \a p is contained within
+  the current path.
+ */
+bool QPainterPath::contains(const QPainterPath &p) const
+{
+    if (isEmpty() || p.isEmpty())
+        return false;
+    QPathClipper clipper(*this, p);
+    return clipper.contains();
+}
+
+void QPainterPath::setDirty(bool dirty)
+{
+    d_func()->dirtyBounds        = dirty;
+    d_func()->dirtyControlBounds = dirty;
+}
+
+void QPainterPath::computeBoundingRect() const
+{
+    QPainterPathData *d = d_func();
+    d->dirtyBounds = false;
+    if (isEmpty()) {
+        d->bounds = QRect();
+        return;
+    }
+
+    qreal minx, maxx, miny, maxy;
+    minx = maxx = d->elements.at(0).x;
+    miny = maxy = d->elements.at(0).y;
+    for (int i=1; i<d->elements.size(); ++i) {
+        const Element &e = d->elements.at(i);
+
+        switch (e.type) {
+        case MoveToElement:
+        case LineToElement:
+            if (e.x > maxx) maxx = e.x;
+            else if (e.x < minx) minx = e.x;
+            if (e.y > maxy) maxy = e.y;
+            else if (e.y < miny) miny = e.y;
+            break;
+        case CurveToElement:
+            {
+                QBezier b = QBezier::fromPoints(d->elements.at(i-1),
+                                                e,
+                                                d->elements.at(i+1),
+                                                d->elements.at(i+2));
+                QRectF r = qt_painterpath_bezier_extrema(b);
+                qreal right = r.right();
+                qreal bottom = r.bottom();
+                if (r.x() < minx) minx = r.x();
+                if (right > maxx) maxx = right;
+                if (r.y() < miny) miny = r.y();
+                if (bottom > maxy) maxy = bottom;
+                i += 2;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    d->bounds = QRectF(minx, miny, maxx - minx, maxy - miny);
+}
+
+void QPainterPath::computeControlPointRect() const
+{
+    QPainterPathData *d = d_func();
+    d->dirtyControlBounds = false;
+    if (isEmpty()) {
+        d->controlBounds = QRect();
+        return;
+    }
+
+    qreal minx, maxx, miny, maxy;
+    minx = maxx = d->elements.at(0).x;
+    miny = maxy = d->elements.at(0).y;
+    for (int i=1; i<d->elements.size(); ++i) {
+        const Element &e = d->elements.at(i);
+        if (e.x > maxx) maxx = e.x;
+        else if (e.x < minx) minx = e.x;
+        if (e.y > maxy) maxy = e.y;
+        else if (e.y < miny) miny = e.y;
+    }
+    d->controlBounds = QRectF(minx, miny, maxx - minx, maxy - miny);
 }

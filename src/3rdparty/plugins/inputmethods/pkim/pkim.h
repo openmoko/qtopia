@@ -74,6 +74,8 @@ private slots:
 
 protected:
     virtual void updateHandler ( int type );
+    virtual void processAuxiliaryHints(QStringList auxiliaryHints);
+
 private:
     QIMPenStroke *inputStroke;
     bool protectInputStroke;
@@ -94,7 +96,7 @@ private:
 
     QIMPenProfile *profile;
     QList<QIMPenProfile *> profileList;
-      
+
     enum Mode {
 	Off,
 	Phone,
@@ -112,7 +114,7 @@ private:
     void loadProfiles();
     
     // Worker functions for interpreting input
-    bool processInputMatcherChar(InputMatcher *matcher, int unicode, int keycode, bool isPress);
+    bool processInputMatcherChar(InputMatcher *matcher, int unicode, int keycode, bool isPress, bool autoRepeat);
     bool processBackspace();
 
     void selectProfile(const QString &);
@@ -121,7 +123,6 @@ private:
     void updateWord();
     void updateChoices();
 
-
     void processStroke(QIMPenStroke *);
     bool shift;
     bool autoCapitalize;
@@ -129,6 +130,9 @@ private:
     bool hintedAutoCapitalization;
     QString autoCapitalizingPunctuation;
     bool autoCapitalizeEveryWord;
+#ifdef GREENPHONE_EFFECTS
+    bool allowHandwriting;
+#endif
     bool active;
 
     int lastUnicode;
@@ -138,7 +142,6 @@ private:
     QLabel* tip;
     QTimer* tip_hider;
     int choice;
-    int tid_hold;
     int tid_abcautoend;
     int hold_uc;
     int hold_key;
@@ -174,6 +177,13 @@ private:
 
     QStringList adjustChoices(const QStringList &) const;
     void compose();
+
+    enum holdstate {
+        null = 0,
+        waiting_for_hold,
+        waiting_for_release,
+    };
+    holdstate key_hold_status;  
 };
 
 

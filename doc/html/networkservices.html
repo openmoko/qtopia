@@ -18,7 +18,7 @@
 <ul><li><a href="#network-configuration-file-format">Network configuration file format</a></li>
 <li><a href="#distribution-specific-configuration">Distribution specific configuration</a></li>
 <li><a href="#the-dialup-plug-in">The Dialup Plug-in</a></li>
-<ul><li><a href="#general-configuration">General configuration</a></li>
+<ul><li><a href="#general-dial-up-configuration">General dial-up configuration</a></li>
 <li><a href="#gprs">GPRS</a></li>
 <ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#gprs-startup-procedure">GPRS startup procedure</a></li>
@@ -27,12 +27,12 @@
 <li><a href="#ppp-network-script">PPP network script</a></li>
 </ul>
 <li><a href="#the-lan-plug-in">The LAN Plug-in</a></li>
-<ul><li><a href="#general-configuration">General configuration</a></li>
+<ul><li><a href="#general-lan-configuration">General LAN configuration</a></li>
 <li><a href="#w-lan-network-script">(W)LAN network script</a></li>
 </ul>
-<li><a href="#the-bluetooth-dial-up-networking-dun-plug-in">The Bluetooth Dial-up Networking (DUN) Plug-in</a></li>
-<ul><li><a href="#general-configuration">General configuration</a></li>
-<li><a href="#bluetooth-dun-network-script">Bluetooth DUN network script</a></li>
+<li><a href="#the-bluetooth-dial-up-plug-in">The Bluetooth Dial-up Plug-in</a></li>
+<ul><li><a href="#general-dun-configuration">General DUN configuration</a></li>
+<li><a href="#bluetooth-dial-up-network-script">Bluetooth dial-up network script</a></li>
 </ul>
 <li><a href="#the-proxies-page">The Proxies page</a></li>
 </ul>
@@ -74,6 +74,7 @@
 </li>
 <li><tt>Help</tt> - long description of the service (translatable and user visible).</li>
 <li><tt>Visibility</tt> - set to &quot;hidden&quot; if this interface should be hidden from the user view (e.g&#x2e; server connections)</li>
+<li><tt>CustomID</tt> - this id allows the mapping of a network configuration to a plug-in. This means this configuration cannot be loaded by plug-in's which don't support the same custom ID. For more details refer to <a href="qtopianetworkfactoryiface.html#customID">QtopiaNetworkFactoryIface::customID</a>().</li>
 </ul>
 </li>
 <li>[Properties] The Properties group specifies parameters which are common to most plug-ins.<ul>
@@ -103,8 +104,8 @@
 <p>The network scripts need root permissions. If Qtopia is started without root permissions a combination of sudo and setuid bit must be used.</p>
 <a name="the-dialup-plug-in"></a>
 <h3>The Dialup Plug-in</h3>
-<a name="general-configuration"></a>
-<h4>General configuration</h4>
+<a name="general-dial-up-configuration"></a>
+<h4>General dial-up configuration</h4>
 <p>The Dialup plug-in:</p>
 <ul>
 <li>recognizes/configures the following types of modems for dialup/GPRS:<ul>
@@ -220,13 +221,13 @@
 </li>
 </ul>
 </li>
-<li><tt>route</tt> &lt;PPP-IFACE&gt;<p>PPP_IFACE becomes the default gateway for packages. Any existing default route will be implicitly removed.</p>
+<li><tt>route &lt;PPP-IFACE&gt;</tt><p>PPP_IFACE becomes the default gateway for packages. Any existing default route will be implicitly removed.</p>
 </li>
 </ul>
 <a name="the-lan-plug-in"></a>
 <h3>The LAN Plug-in</h3>
-<a name="general-configuration"></a>
-<h4>General configuration</h4>
+<a name="general-lan-configuration"></a>
+<h4>General LAN configuration</h4>
 <p>The LAN plug-in:</p>
 <ul>
 <li>recognizes/configures the following types of Ethernet and WLAN adapter:<ul>
@@ -258,10 +259,15 @@
 <li><tt>BitRate</tt> - the bit rate zero uses auto detection (values = 1..&#x2e;54/[0])</li>
 <li><tt>Nickname</tt> - wlan nickname</li>
 <li><tt>WPAEnterprise</tt> - values = [TLS]|TTLS|PEAP</li>
-<li><tt>Identity</tt> - Identity for WPA-EAP encryption ( when using TTLS or PEAP )</li>
-<li><tt>IdentityPassword</tt> - Pasword for WPA-EAP encryption ( when using TTLS or PEAP )</li>
-<li><tt>ClientCert</tt> - certificate for WPA-EAP ( when using TLS )</li>
-<li><tt>ServerCert</tt> - certificate for WPA-EAP ( when using TLS )</li>
+<li><tt>PSKAlgorithm</tt> - values = [TKIP]|AES (used by WPA-PSK)</li>
+<li><tt>EAPAuthentication</tt> - values = [Any]|MD5|GTC|MSCHAPV2 ( TTLS &amp; PEAP only )</li>
+<li><tt>EAPIdentity</tt> - pdentity for WPA-EAP encryption</li>
+<li><tt>EAPIdentityPassword</tt> - password for WPA-EAP ( TTLS &amp; PEAP only )</li>
+<li><tt>EAPAnonIdentity</tt> - anonymous identity (TTLS &amp; PEAP only )</li>
+<li><tt>EAPClientCert</tt> - client certificate for WPA-EAP ( TLS only )</li>
+<li><tt>EAPClientKey</tt> - client key file for WPA-EAP ( TLS only )</li>
+<li><tt>EAPClientKeyPassword</tt> - client key file password for WPA-EAP ( TLS only )</li>
+<li><tt>EAPServerCert</tt> - server certificate for WPA-EAP</li>
 </ul>
 </li>
 </ul>
@@ -285,7 +291,7 @@
 </li>
 <li><tt>dhcp</tt><p>The IP, subnet mask, broadcast address and the gateway must be obtained via dhcp.</p>
 </li>
-<li><tt>static &lt;IP&gt; &lt;subnet&gt; &lt;broadcast&gt; &lt;gateway&gt;</tt><p>If no DHCP is used Qtopia requires that the user enters the IP details manually. This parameter writes the detailsi out to the system configuration.</p>
+<li><tt>static &lt;IP&gt; &lt;subnet&gt; &lt;broadcast&gt; &lt;gateway&gt;</tt><p>If no DHCP is used Qtopia requires that the user enters the IP details manually. This parameter writes the details out to the system configuration.</p>
 </li>
 <li><tt>wireless &lt;PARAM&gt;</tt><p>The <tt>wireless</tt> option is used to pass wireless LAN details. The parameter is made up of a combination of the following options:</p>
 <ul>
@@ -311,7 +317,25 @@
 </li>
 <li><tt>&lt;none&gt; -nokey</tt><p>The WLAN uses open/shared WEP encryption without any password.</p>
 </li>
-<li><tt>&lt;WPA-PSK&gt;&gt; &lt;PASSWORD&gt;</tt><p>The WLAN uses WPA-PSK as encryption. PASSWORD is used for the encryption algorithm.</p>
+<li><tt>&lt;WPA-PSK&gt; &lt;PASSWORD&gt; &lt;TKIP|AES&gt;</tt><p>The WLAN uses WPA-PSK as encryption. PASSWORD is used for the encryption algorithm. The last parameter determines what encryption algorithm is chosen. This determines whether WPA-PSK or WPA-PSK2 is used.</p>
+</li>
+<li><tt>&lt;TLS&gt; &lt;IDENTITY&gt; &lt;CLIENT-KEY-PASSWORD&gt; &lt;CLIENT-KEY&gt; &lt;CLIENT-CERT&gt; &lt;SERVER-CERT&gt;</tt><p>The WLAN uses WPA-EAP as encryption. The authentication is done via TLS.</p>
+<ol type="I">
+<li><tt>&lt;IDENTITY&gt;</tt> the RADIUS server identity</li>
+<li><tt>&lt;CLIENT-KEY&gt;</tt> the file ( &amp; path ) providing the client key (private key)</li>
+<li><tt>&lt;CLIENT-KEY-PASSWORD&gt;</tt> the password for &lt;CLIENT-KEY&gt;</li>
+<li><tt>&lt;CLIENT-CERT&gt;</tt> the client certificate for this identity</li>
+<li><tt>&lt;SERVER-CERT&gt;</tt> validates the servers authenticity</li>
+</ol>
+</li>
+<li><tt>&lt;TTLS|PEAP&gt; &lt;IDENTITY&gt; &lt;PASSWORD&gt; &lt;SERVER-CERT&gt; &lt;AUTHENTICATION&gt; &lt;ANON-IDENTITY&gt;</tt><p>The WLAN uses WPA-EAP as encryption. The authentication is done via either PEAP or TTLS.</p>
+<ol type="I">
+<li><tt>&lt;IDENTITY&gt;</tt> the RADIUS server identity</li>
+<li><tt>&lt;PASSWORD&gt;</tt> the password for the identity as configured on the RADIUS server</li>
+<li><tt>&lt;SERVER-CERT&gt;</tt> validates the servers authenticity</li>
+<li><tt>&lt;AUTHENTICATION&gt;</tt> the inner authentication (phase 2) method. Possible values MD5|GTC|MSCHAPV2|Any.</li>
+<li><tt>&lt;ANON-IDENTITY&gt;</tt> the anonymous identity (usually not needed)</li>
+</ol>
 </li>
 </ol>
 </li>
@@ -328,13 +352,13 @@
 <li><tt>route &lt;IFACE&gt; -gw &lt;GATEWAY IP&gt;</tt><p>IFACE becomes the default gateway for packages. Any existing default route will be implicitly removed.</p>
 </li>
 </ul>
-<a name="the-bluetooth-dial-up-networking-dun-plug-in"></a>
-<h3>The Bluetooth Dial-up Networking (DUN) Plug-in</h3>
-<a name="general-configuration"></a>
-<h4>General configuration</h4>
-<p>The Blueooth DUN plug-in:</p>
+<a name="the-bluetooth-dial-up-plug-in"></a>
+<h3>The Bluetooth Dial-up Plug-in</h3>
+<a name="general-dun-configuration"></a>
+<h4>General DUN configuration</h4>
+<p>The Bluetooth dial-up plug-in:</p>
 <ul>
-<li>handles ppp interfaces established via blueooth connections</li>
+<li>handles ppp interfaces established via Bluetooth connections</li>
 <li>configures PPPD peer files in <tt>/etc/ppp/peers/</tt></li>
 <li>controls the pppd process</li>
 <li>is implemented in <tt>$QPEDIR/src/plugins/network/bluetooth/</tt></li>
@@ -348,15 +372,16 @@
 <li>[Serial]<ul>
 <li><tt>DialString</tt> - the main dial string (e.g&#x2e; *99***1#). Qtopia automatically prepends AT to this string.</li>
 <li><tt>ExtraDialString</tt> - additional AT commands which need to be executed prior to the main dial string (e.g&#x2e; +CGDCONT=1,&quot;ip&quot;,&quot;&lt;APN&gt;&quot;). Qtopia automatically prepends AT to this string.</li>
+<li><tt>PartnerDevice</tt> - the Bluetooth address of the device that provides the DUN server</li>
 <li><tt>PeerID</tt> - the peer name (generated by Qtopia)</li>
 <li><tt>Speed</tt> - the modem speed ( e.g&#x2e; value = 115200 )</li>
 <li><tt>Timeout</tt> - the disconnect/idle timeout (in seconds) after which pppd automatically disconnects the connection ( values = [none]/&lt;number&gt; )</li>
 </ul>
 </li>
 </ul>
-<a name="bluetooth-dun-network-script"></a>
-<h4>Bluetooth DUN network script</h4>
-<p>The Bluetooth DUN network script is called <tt>btdun-network</tt> and is almost identical to the <a href="#ppp-network-script">dialup network script</a>.</p>
+<a name="bluetooth-dial-up-network-script"></a>
+<h4>Bluetooth dial-up network script</h4>
+<p>The Bluetooth dial-up network script is called <tt>btdun-network</tt> and is almost identical to the <a href="#ppp-network-script">dialup network script</a>.</p>
 <a name="the-proxies-page"></a>
 <h3>The Proxies page</h3>
 <p>The Dialup and LAN plug-ins share a proxies page. The settings for this page are defined in the configuration as:</p>
@@ -374,15 +399,15 @@
 </ul>
 <a name="connectivity-state-of-the-device"></a>
 <h2>Connectivity state of the device</h2>
-<p>Applications which are interested in the state of devices network interfaces should either use <a href="qtopianetwork.html">QtopiaNetwork::online()</a>. If more detailed information are required an application can either use the <a href="qnetworkstate.html">QNetworkState</a> or <a href="qnetworkdevice.html">QNetworkDevice</a> classes.</p>
-<p>In order to integrate new plugins into the <a href="qnetworkstate.html">QNetworkState</a>/<a href="qnetworkdevice.html">QNetworkDevice</a> monitoring system a few requirements must be fulfilled. Each interface must post its state transitions into the network value space. The network value space for a plugin can be found under <tt>/Network/Interfaces/&lt;ident&gt;</tt>. <tt>&lt;ident&gt;</tt> is the hash value of the interface handle associated to the particular interface instance of the plugin. The following entries must be published by the plugin:</p>
+<p>Applications which are interested in the state of network interfaces should use <a href="qtopianetwork.html">QtopiaNetwork::online()</a>. If more detailed information are required an application can use the <a href="qnetworkstate.html">QNetworkState</a> or <a href="qnetworkdevice.html">QNetworkDevice</a> classes.</p>
+<p>In order to integrate new plugins into the <a href="qnetworkstate.html">QNetworkState</a>/<a href="qnetworkdevice.html">QNetworkDevice</a> monitoring system a few requirements must be fulfilled. Each interface must post its state transitions into the network value space. The network value space for a plugin can be found under <tt>/Network/Interfaces/&lt;ident&gt;</tt>. <tt>&lt;ident&gt;</tt> is the hash value of the interface handle associated with the particular instance of the plugin. The following entries must be published by the plugin:</p>
 <ul>
-<li><tt>UpdateTrigger</tt> Changing this integer value triggers an update to subscribed clients.</li>
-<li><tt>Config</tt> The full path (incl. filename) to the settings file for this interface.</li>
-<li><tt>NetDevice</tt> The name of the *nix network interface. If the name is not known this value is empty.</li>
-<li><tt>State</tt> This is the state of the network interface (see <a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Status</a>).</li>
-<li><tt>Error</tt> The latest error code of the interface (see <a href="qtopianetworkinterface.html#Error-enum">QtopiaNetworkInterface::Error</a>).</li>
-<li><tt>ErrorString</tt> A user visible error string which explains the last error. The string doesn't change if no further error occurs.</li>
+<li><tt>UpdateTrigger</tt> - Changing this integer value triggers an update to subscribed clients.</li>
+<li><tt>Config</tt> - The full path (incl. filename) to the settings file for this interface.</li>
+<li><tt>NetDevice</tt> - The name of the *nix network interface. If the name is not known this value is empty.</li>
+<li><tt>State</tt> - This is the state of the network interface (see <a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Status</a>).</li>
+<li><tt>Error</tt> - The latest error code of the interface (see <a href="qtopianetworkinterface.html#Error-enum">QtopiaNetworkInterface::Error</a>).</li>
+<li><tt>ErrorString</tt> - A user visible error string which explains the last error. The string doesn't change if no further error occurs.</li>
 </ul>
 <a name="wap"></a>
 <h2>WAP</h2>
@@ -423,6 +448,7 @@
 </ul>
 </li>
 </ul>
+<p>The <a href="qwapaccount.html">QWapAccount</a> class may be used as an alternative to directly reading the configuration files.</p>
 <a name="ota-configuration"></a>
 <h3>OTA configuration</h3>
 <p>Qtopia can handle OTA network configuration messages. These messages contain details like WAP/MMS server and login details. Every received message is handled by the <tt>Internet</tt> Settings application and will eventually be stored as a WAP/Internet configuration file.</p>
@@ -577,6 +603,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

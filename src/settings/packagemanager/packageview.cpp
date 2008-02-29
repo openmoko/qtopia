@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,103 +29,123 @@
 #include <QHeaderView>
 #include <QMenu>
 #include <QTimer>
-#include <QUrl>
 #include <QtopiaApplication>
-
-#ifdef QTOPIA_PHONE
 #include <QKeyEvent>
-
+#include <QWaitWidget>
 #include <qsoftmenubar.h>
-#else
-#include <QMenuBar>
-#endif
-
 #include <qtopialog.h>
-#include <qdebug.h>
 
 #ifndef QT_NO_SXE
 #include "domaininfo.h"
 #endif
 
 #include "packagemanagerservice.h"
+/*! \internal
+    Case sensitive less than operation for two QActions.
+    Intended to be used with qSort on a list of QActions. 
+*/
+bool actionLessThan(QAction *a, QAction *b)
+{
+    return a->text() < b->text();
+}
 
-PackageView *PackageView::latestInstance;
+PackageDetails::PackageDetails(QWidget *parent, Type type, bool modal) : QDialog(parent)
+{
+    setupUi(this);
+    setModal(modal);
+
+    QMenu *contextMenu = new QMenu( this );
+    if ( type == PackageDetails::Install || type == PackageDetails::Uninstall ) 
+    {
+        QAction *confirmAction = new QAction( tr("Confirm"), this );
+        connect( confirmAction, SIGNAL(triggered()), this, SLOT(accept()) );
+        contextMenu->addAction( confirmAction );
+    }
+    else { //otherwise assume package info
+        description->setText("<font color=\"#000000\"> INFORMATION</font>");
+    }
+
+    QAction *cancelInstallAction = new QAction( tr("Cancel"), this );
+    connect( cancelInstallAction, SIGNAL(triggered()), this, SLOT(reject()) );
+
+    contextMenu->addAction( cancelInstallAction );
+    QSoftMenuBar::addMenuTo( this->description, contextMenu );
+}
+
+
+const int PackageView::InstalledIndex = 0;
+const int PackageView::DownloadIndex = 1;
 
 PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
-    : QDialog( parent, flags )
-    , listsPrepared( false )
+    : QMainWindow( parent, flags )
 {
     setWindowTitle( tr( "Package Manager" ));
     model = new PackageModel( this );
 
-    connect(model, SIGNAL(targetsUpdated(const QStringList&)),
-            this, SLOT(targetsChanged(const QStringList&)));
-    connect(model, SIGNAL(serversUpdated(const QStringList&)),
-            this, SLOT(serversChanged(const QStringList&)));
-    connect( this, SIGNAL(targetChoiceChanged(const QString &)),
-            model, SLOT(userTargetChoice(const QString &)) );
+    connect(model, SIGNAL(targetsUpdated(QStringList)),
+            this, SLOT(targetsChanged(QStringList)));
+    connect(model, SIGNAL(serversUpdated(QStringList)),
+            this, SLOT(serversChanged(QStringList)));
+    connect(this, SIGNAL(targetChoiceChanged(QString)),
+            model, SLOT(userTargetChoice(QString)));
+    connect(model, SIGNAL(serverStatus(QString)),
+            this, SLOT(postServerStatus(QString)));
+    connect(model,  SIGNAL(newlyInstalled(QModelIndex)),
+            this, SLOT(selectNewlyInstalled(QModelIndex)));
 
-    QVBoxLayout *vb = new QVBoxLayout( this );
-    vb->setSpacing( 2 );
-    vb->setMargin( 2 );
+    //setup view for installed packages
+    installedView = new QTreeView( this );
+    installedView->setModel( model  );
+    installedView->setRootIndex( model->index(0,0,QModelIndex()) );
+    installedView->setRootIsDecorated( false );
+    connect( installedView, SIGNAL(activated(QModelIndex)),
+            this, SLOT(activateItem(QModelIndex)) );
+    connect( model, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)),
+            installedView, SLOT(rowsAboutToBeRemoved(QModelIndex,int,int)));
+    connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+            installedView, SLOT(rowsRemoved(QModelIndex,int,int)));
 
-    view = new QTreeView( this );
-    view->setModel( model );
-    connect( view, SIGNAL(activated(const QModelIndex&)),
-            this, SLOT(activateItem(const QModelIndex&)) );
-    connect( model, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)),
-            view, SLOT(rowsAboutToBeRemoved(const QModelIndex &, int, int)));
-    connect( model, SIGNAL(rowsRemoved(const QModelIndex&, int, int)),
-            view, SLOT(rowsRemoved(const QModelIndex &, int, int)));
-    vb->addWidget( view );
+    //setup page for installed packages
+    QWidget *installedPage = new QWidget;
+    QVBoxLayout *vbInstalledPage = new QVBoxLayout( installedPage );
+    vbInstalledPage->setSpacing( 2 );
+    vbInstalledPage->setMargin( 2 );
+    vbInstalledPage->addWidget( installedView );
 
-    info = new QTextEdit( this );
-    info->setReadOnly( true );
-    info->setFocusPolicy( Qt::NoFocus );
+    //setup view for downloadable packages
+    downloadView = new QTreeView( this );
+    downloadView->setModel( model );
+    downloadView->setRootIndex( model->index(1,0,QModelIndex()) );
+    downloadView->setRootIsDecorated( false );
+    connect( downloadView, SIGNAL(activated(QModelIndex)),
+            this, SLOT(activateItem(QModelIndex)) );
+    connect( model, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)),
+            downloadView, SLOT(rowsAboutToBeRemoved(QModelIndex,int,int)));
+    connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+            downloadView, SLOT(rowsRemoved(QModelIndex,int,int)));
 
-    connect( model, SIGNAL(infoHtml(const QString&)),
-            info, SLOT(setHtml(const QString&)) );
-#ifndef QT_NO_SXE
-    connect( model, SIGNAL(domainUpdate(const QString&)),
-            this, SLOT(postDomainUpdate(const QString&)) );
-#endif
-    vb->addWidget( info );
+    //setup page for downloadable packages
+    QWidget *downloadPage = new QWidget(this);
+    QVBoxLayout *vbDownloadPage = new QVBoxLayout( downloadPage );
+    vbDownloadPage->setSpacing( 2 );
+    vbDownloadPage->setMargin( 2 );
+    vbDownloadPage->addWidget( downloadView );
+    statusLabel = new QLabel( "No Server Chosen", this );
+    statusLabel->setWordWrap( true );
+    vbDownloadPage->addWidget( statusLabel );
 
-    menuServers = new QMenu( tr( "Servers" ), this );
-    QAction* actionEditServers = new QAction( QIcon( ":icon/globe" ),
-            tr( "Edit servers..." ), this );
-    menuServers->addAction( actionEditServers );
-    connect( actionEditServers, SIGNAL(triggered()), this, SLOT(editServers()) );
-
-    menuTarget = new QMenu( tr( "Install to" ), this );
-#ifdef QTOPIA_PHONE
-    QMenu* contextMenu = QSoftMenuBar::menuFor( this );
-    contextMenu->addMenu( menuServers );
-    //contextMenu->addMenu( menuTarget );
-
-    // under phone, the select key ("OK") activates installSelection()
-    QSoftMenuBar::setLabel( view, Qt::Key_Select, QSoftMenuBar::Ok, QSoftMenuBar::EditFocus );
-#else
-    QMenuBar *mb = new QMenuBar( this );
-    vb->setMenuBar( mb );
-    mb->addMenu( menuServers );
-    //mb->addMenu( menuTarget );
-    QPushButton* pbShowDetails = new QPushButton( QIcon( ":icon/details" ),
-            tr( "Details" ), this );
-    connect( pbShowDetails, SIGNAL(clicked()),
-            this, SLOT(showDetails()) );
-    QPushButton* pbInstall = new QPushButton( QIcon( ":icon/install" ),
-            tr( "Install" ), this );
-    connect( pbInstall, SIGNAL(clicked()),
-            this, SLOT(installSelection()) );
-    QHBoxLayout *hb = new QHBoxLayout();
-    hb->addWidget( pbShowDetails );
-    hb->addWidget( pbInstall );
-    vb->addLayout( hb );
-#endif
-
+    installedView->hideColumn( 1 );
+    installedView->header()->hide();
+    downloadView->hideColumn( 1 );
+    downloadView->header()->hide();
+//TODO: install to media card
+     menuTarget = new QMenu( tr( "Install to" ), this );
     new PackageManagerService( this );
 
+    tabWidget = new QTabWidget( this );
+    tabWidget->addTab( installedPage, tr( "Installed" ) );
+    tabWidget->addTab( downloadPage, tr( "Downloads" ) );
+    setCentralWidget( tabWidget );
     QTimer::singleShot( 0, this, SLOT(init()) );
 }
 
@@ -139,8 +159,50 @@ PackageView::~PackageView()
 */
 void PackageView::init()
 {
-    latestInstance = this;
+    //setup context menu for installed packages
+    QWidget * installedPage = tabWidget->widget( 0 );
+    QMenu *installedContext = QSoftMenuBar::menuFor( installedPage );
+    detailsAction = new QAction( tr("Details"), this);
+    detailsAction->setVisible( false );
+    connect( detailsAction, SIGNAL(triggered()), this, SLOT(displayDetails()) );
+
+    uninstallAction = new QAction( tr("Uninstall"), installedPage );
+    uninstallAction->setVisible( false );
+    connect( uninstallAction, SIGNAL(triggered()), this, SLOT(startUninstall()) );
+
+    reenableAction = new QAction( tr("Re-enable"), installedPage );
+    reenableAction->setVisible( false );
+    connect( reenableAction, SIGNAL(triggered()), this, SLOT(confirmReenable()) );
+
+    installedContext->addAction( detailsAction );
+    installedContext->addAction( uninstallAction );
+    installedContext->addAction( reenableAction );
+    connect( installedContext, SIGNAL(aboutToShow()),
+                this,   SLOT(contextMenuShow()) );
+
+    //setup context menu for downloadable packages
+    QWidget * downloadPage = tabWidget->widget( 1 );
+    QMenu *downloadContext = QSoftMenuBar::menuFor( tabWidget->widget(1) );
+    installAction = new QAction( tr("Install"), downloadPage );
+    installAction->setVisible( false );
+    connect( installAction, SIGNAL(triggered()), this, SLOT(startInstall()) );
+
+    menuServers = new QMenu( tr( "Connect" ), this );
+
+    QAction* editServersAction = new QAction( tr( "Edit servers" ), this );
+    connect( editServersAction, SIGNAL(triggered()), this, SLOT(editServers()) );
+
+    downloadContext->addMenu( menuServers );
+    downloadContext->addAction( detailsAction );
+    downloadContext->addAction( installAction );
+    downloadContext->addAction( editServersAction );
+
+    connect( downloadContext, SIGNAL(aboutToShow()),
+                this,   SLOT(contextMenuShow()) );
+
+    model->populateServers();
     QStringList servers = model->getServers();
+    qSort( servers );
     QAction *sa;
     serversActionGroup = new QActionGroup( this );
     serversActionGroup->setExclusive( true );
@@ -149,8 +211,6 @@ void PackageView::init()
     for ( int i = 0; i < servers.count(); i++ )
     {
         sa = new QAction( servers[i], serversActionGroup );
-        sa->setCheckable( true );
-        if ( i == 0 ) sa->setChecked( true );
         serversActionGroup->addAction( sa );
     }
     menuServers->addActions( serversActionGroup->actions() );
@@ -159,55 +219,29 @@ void PackageView::init()
     targetActionGroup->setExclusive( true );
     connect( targetActionGroup, SIGNAL(triggered(QAction*)),
             this, SLOT(targetChoice(QAction*)) );
-    view->resizeColumnToContents( 0 );
-    view->resizeColumnToContents( 1 );
-    view->header()->hide();
-    QItemSelectionModel *sel = new QItemSelectionModel( model );
-    sel->setCurrentIndex( model->index( 1, 0, QModelIndex()), QItemSelectionModel::Select ); 
-    view->setSelectionModel( sel );
-    connect( sel, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
-            this, SLOT(updateText(const QModelIndex&, const QModelIndex&)) );
+
+     waitWidget = new QWaitWidget( this );
 }
 
 void PackageView::activateItem( const QModelIndex &item )
 {
     if ( model->rowCount( item ) > 0 ) // has children
     {
-        if ( view->isExpanded( item ) )
-            view->collapse( item );
+        if ( installedView->isExpanded( item ) )
+            installedView->collapse( item );
         else
-            view->expand( item );
+            installedView->expand( item );
     }
 
     QModelIndex ix = item.parent();
     if ( ix.isValid() ) // is a child node
-        showDetails( item );
-}
-
-void PackageView::postDomainUpdate( const QString &dom )
-{
-#ifndef QT_NO_SXE
-    QModelIndex curIndex = view->currentIndex();
-    QVariant packageName = model->data( curIndex, Qt::DisplayRole );
-
-    if( model->hasSensitiveDomains( dom ) )
-    {
-        info->setHtml( tr( "%1 utilizes protected resources" ).arg( packageName.toString() ) );
-    }
-    else
-    {
-        info->setHtml( DomainInfo::explain( dom, packageName.toString() ));
-    }
-#else
-    Q_UNUSED( dom );
-#endif
+        showDetails( item, PackageDetails::Info );
 }
 
 void PackageView::serverChoice( QAction *a )
 {
     Q_UNUSED( a );
-
-    QString server = serversActionGroup->checkedAction()->text();
+    QString server = a->text();
     model->setServer( server );
 }
 
@@ -222,10 +256,15 @@ void PackageView::targetChoice( QAction * )
     emit targetChoiceChanged( newChoice );
 }
 
+/*! \internal
+    Updates list of available servers to connect to under the
+    "Connect" option of the context menu.
+*/
 void PackageView::serversChanged( const QStringList &servers )
 {
     QList<QAction*> actionList = serversActionGroup->actions();
     QStringList serverList = servers;
+    qSort( serverList );
     QAction *sa;
 
     // remove from the list everything thats in the menu, and
@@ -248,18 +287,13 @@ void PackageView::serversChanged( const QStringList &servers )
     // now the list contains just what wasnt in the menu so add
     // them if there are any
     for ( int i = 0; i < serverList.count(); i++ )
-    {
         sa = new QAction( serverList[i], serversActionGroup );
-        sa->setCheckable( true );
-    }
 
-    if ( serversActionGroup->checkedAction() == 0 )
-    {
-        actionList = serversActionGroup->actions();
-        if ( actionList.count() > 0 )
-            actionList[0]->setChecked( true );
-    }
-    menuServers->addActions( serversActionGroup->actions() );
+    actionList = serversActionGroup->actions();
+    qSort( actionList.begin(), actionList.end(), actionLessThan );
+
+    menuServers->clear();
+    menuServers->addActions( actionList );
 }
 
 /**
@@ -290,10 +324,8 @@ void PackageView::targetsChanged( const QStringList &targets )
     // now the list contains just what wasnt in the menu so add
     // them if there are any
     for ( int i = 0; i < targetList.count(); i++ )
-    {
         sa = new QAction( targetList[i], targetActionGroup );
-        sa->setCheckable( true );
-    }
+
     if ( targetActionGroup->checkedAction() == 0 )
     {
         actionList = targetActionGroup->actions();
@@ -321,123 +353,179 @@ void PackageView::editServers()
     from "Internal Storage" to "CF Card"
 */
 
-void PackageView::showDetails( const QModelIndex &item )
+
+/* \a type must be either be Install or Info */
+void PackageView::showDetails( const QModelIndex &item , PackageDetails::Type type )
 {
-    if( !item.isValid() || !item.parent().isValid() )
+    if( !item.isValid() || !item.parent().isValid()
+        || !model->hasIndex(item.row(), item.column(), item.parent()) )
+        return;
+
+    if ( type != PackageDetails::Install && type != PackageDetails::Info )
         return;
 
     QString name = model->data( item, Qt::DisplayRole ).toString(); //package name
-    bool enabled = model->data( item, Qt::StatusTipRole ).toBool(); //whether package enabled
 
-    PackageDetails *pd = new PackageDetails( this, true );
-    QString op = model->getOperation( item );
-    pd->installButton->setText( op );
-
+    PackageDetails *pd = new PackageDetails( this, type, true );
+    QSoftMenuBar::setLabel(pd->description, Qt::Key_Select, QSoftMenuBar::NoLabel); //shouldn't be need once
+    QSoftMenuBar::setLabel(pd->description, Qt::Key_Back, QSoftMenuBar::Back);      //softkey helpers are in place
     QtopiaApplication::setMenuLike( pd, true );
 
-    if ( enabled )
-        pd->reenableButton->setVisible( false );
-    else
-        pd->reenableButton->setVisible( true );
-
     pd->setWindowTitle( name );
+
     QString details;
-    if ( op == AbstractPackageController::tr("Install") )
+    if ( type == PackageDetails::Install )
     {
 #ifndef QT_NO_SXE
-        if( model->hasSensitiveDomains( model->data( item, Qt::WhatsThisRole ).toString() ) )
+        if( model->hasSensitiveDomains(model->data(item,AbstractPackageController::Domains).toString()) )
         {
-            details = tr( "The package <font color=\"#0000FF\">%1</font> <b>cannot be installed</b> as it utilizes protected resources" ).arg( name );
-
-            pd->installButton->setVisible( false );
-            pd->cancelButton->setText( tr( "OK" ) );
+            details = QLatin1String( "<font color=\"#0000FF\">");
+            details += tr( "The package <font color=\"#0000FF\">%1</font> <b>cannot be installed</b> as it utilizes protected resources" ).arg( name );
+            details += QLatin1String("</font>");
+            pd->description->setHtml( details );
+            pd->showMaximized();
+            return;
         }
         else
         {
 #endif
-            details = tr( "<font color=\"#66CC00\"><b>Installing package</b></font> %1 <b>Go ahead?</b>" )
-#ifndef QT_NO_SXE
-                .arg( DomainInfo::explain( model->data( item, Qt::WhatsThisRole ).toString(), name ));
 
-            pd->installButton->setVisible( true );
-            pd->cancelButton->setText( tr( "Cancel" ) );
+#ifndef QT_NO_SXE
+            details = QString("<font color=\"#000000\">") + "<center><b><u>" + tr( "Security Alert" ) + "</u></b></center><p>"
+                    + QString("%1")
+                    .arg( DomainInfo::explain( model->data( item, AbstractPackageController::Domains ).toString(), name ));
         }
 #else
-                .arg( model->data( item, Qt::DisplayRole ).toString() );
+            details = QString("<font color=\"#000000\">") + "<center><b><u>" + tr( "Confirm Install") + " </u></b></center><p>"
+                        + tr("About to install <font color=\"#0000CC\"><b> %1 </b></font>", "%1 = package name")
+                            .arg( model->data( item, Qt::DisplayRole ).toString() );
 #endif
+            details += QString("<br>") + tr( "Confirm Install?" ) + QString("</font>");
+            pd->description->setHtml( details );
+            QtopiaApplication::setMenuLike( pd, true );
     }
-    else 
+    else //must be requesting package information
     {
-#ifndef QT_NO_SXE
-        pd->installButton->setVisible( true );
-        pd->cancelButton->setText( tr( "Cancel" ) );
-#endif
-        if ( enabled )
-        {
-            details = tr( "<font color=\"#FF9900\"><b>Uninstall package</b></font> %1 <b>Go ahead?</b>" )
-                      .arg( model->data( item, Qt::WhatsThisRole ).toString() );
-        } else
-        {
-            details = tr( "<font color=\"#FF9900\"><b>Uninstall/Re-enable package</b></font> %1" )
-                      .arg( model->data( item, Qt::WhatsThisRole ).toString() );
+        pd->description->setHtml( QString("<font color=\"#000000\">") + model->data(item, Qt::WhatsThisRole).toString() +"</font>");
+        QtopiaApplication::setMenuLike( pd, false );
+    }
 
+    qLog(Package) << "show details" << ( name.isNull() ? "no valid name" : name );
+
+    pd->showMaximized();
+
+    int result = pd->exec();
+    
+    if ( type == PackageDetails::Install && result == QDialog::Accepted )
+    {
+            model->activateItem( item );
+    }
+
+    delete pd;
+}
+
+void PackageView::startInstall()
+{
+    const char *dummyStr = QT_TRANSLATE_NOOP( "PackageView", "Installing..." );
+    Q_UNUSED( dummyStr );
+
+    showDetails( downloadView->currentIndex(), PackageDetails::Install );
+
+}
+
+void PackageView::startUninstall()
+{
+    if ( QMessageBox::warning(this, tr("Confirm Uninstall?"), tr("Are you sure you wish to uninstall %1?","%1=package name")
+                .arg( model->data( installedView->currentIndex(), Qt::DisplayRole ).toString()) + QLatin1String("<BR>")
+                + tr("All running instances will be terminated."), QMessageBox::Yes | QMessageBox::No )
+         == QMessageBox::Yes)
+    {
+            waitWidget->show();
+            waitWidget->setText(tr("Uninstalling..."));
+            model->activateItem( installedView->currentIndex() );
+            installedView->setCurrentIndex(QModelIndex());
+            waitWidget->hide();
+    }
+}
+
+void PackageView::displayDetails()
+{
+    if ( tabWidget->currentIndex() == InstalledIndex )
+        showDetails( installedView->currentIndex(), PackageDetails::Info );
+    else
+        showDetails( downloadView->currentIndex(), PackageDetails::Info );
+}
+
+void PackageView::confirmReenable()
+{
+    if ( QMessageBox::warning(this, tr("Confirm Re-enable?"), tr("Are you sure you wish to re-enable %1?","%1=package name")
+            .arg( model->data( installedView->currentIndex(), Qt::DisplayRole ).toString()), QMessageBox::Yes | QMessageBox::No )
+         == QMessageBox::Yes)
+    {
+        model->reenableItem( installedView->currentIndex() );
+    }
+}
+
+/*!
+    \internal
+    Slot to be called whenever the context menu is shown.
+    Sets the appropriate options available in the context menu.
+*/
+void PackageView::contextMenuShow()
+{
+    QModelIndex currIndex = ( tabWidget->currentIndex() == InstalledIndex ) ? (installedView->currentIndex())
+                                                               : (downloadView->currentIndex());
+    if( !currIndex.isValid() || !currIndex.parent().isValid()
+        || !model->hasIndex(currIndex.row(), currIndex.column(), currIndex.parent()) )
+    {
+        detailsAction->setVisible( false );
+
+        if ( tabWidget->currentIndex() == InstalledIndex )
+        {
+            uninstallAction->setVisible( false );
+            reenableAction->setVisible( false );
+        }
+        else //otherwise dealing with Downloads tab
+        {
+            installAction->setVisible( false );
         }
     }
-
-    pd->description->setHtml( details );
-    qLog(Package) << "show details" << ( name.isNull() ? "no valid name" : name );
-    pd->showMaximized();
-    switch ( pd->exec() )
+    else
     {
-        case ( QDialog::Accepted ):
-            model->activateItem( item );
-            break;
-        case ( PackageDetails::Reenable ):
-            model->reenableItem( item );
-            break;
+        detailsAction->setVisible( true );
+        if ( tabWidget->currentIndex() == InstalledIndex )
+        {
+            uninstallAction->setVisible( true );
+            if ( model->data( currIndex, Qt::StatusTipRole ).toBool() ) //if package is enabled
+                reenableAction->setVisible( false );
+            else
+                reenableAction->setVisible( true );
+        }
+        else //Downloads tab
+        {
+            installAction->setVisible( true );
+        }
     }
 }
 
-void PackageView::installSelection()
+/*!
+  \internal
+  Displays the status of the server
+*/
+void PackageView::postServerStatus( const QString &status )
 {
-    showDetails( view->currentIndex() );
+    statusLabel->setText( status );
 }
 
-void PackageView::updateText( const QModelIndex& newCurrent, const QModelIndex& )
+/*!
+  \internal
+  Show a newly installed package as the currently selected package.
+*/
+void PackageView::selectNewlyInstalled( const QModelIndex &index)
 {
-    model->sendUpdatedText( newCurrent );
+    tabWidget->setCurrentIndex( PackageView::InstalledIndex );
+    installedView->setCurrentIndex( index );
+    QMessageBox::information( this, tr("Successful Installation"), tr("Package successfully installed" ) );
 }
 
-void PackageView::displayMessage( const QString &s )
-{
-    latestInstance->info->setHtml( s );
-}
 
-#ifdef QTOPIA_PHONE
-void PackageView::keyPressEvent( QKeyEvent *e )
-{
-    switch ( e->key() )
-    {
-        case Qt::Key_Right:
-            showDetails( view->currentIndex() );
-            e->accept();
-            return;
-
-        default:
-            // fall thru to ignore
-            ;
-    }
-
-    e->ignore();
-}
-#endif
-
-void PackageView::showEvent( QShowEvent * )
-{
-    if( !listsPrepared )
-    {
-        QTimer::singleShot( 0, model, SLOT(populateLists()) );
-
-        listsPrepared = true;
-    }
-}

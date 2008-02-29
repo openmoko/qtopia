@@ -13,72 +13,47 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Document System: Document Server<br /><span class="subtitle"></span>
 </h1>
-<ul><li><a href="#performance">Performance</a></li>
-<ul><li><a href="#performance">Performance</a></li>
-<li><a href="#database-schema-implementation">Database Schema Implementation</a></li>
-<ul><li><a href="#data-update-process">Data Update Process</a></li>
-<li><a href="#synchronization">Synchronization</a></li>
-<li><a href="#metadata-import-and-export">Metadata Import and Export</a></li>
+<ul><li><a href="#security">Security</a></li>
+<li><a href="#document-selector-service">Document Selector Service</a></li>
+<li><a href="#document-scanning">Document Scanning</a></li>
+<ul><li><a href="#removable-media">Removable media</a></li>
 </ul>
+<li><a href="#directly-accessing-the-document-system">Directly Accessing the Document System</a></li>
 </ul>
-</ul>
-<a name="performance"></a>
-<p>The <tt>Document Server</tt> maintains the document meta-information database and provides synchronized <tt>Content</tt> list models. It handles requests for document services such as <i>delete</i>, <i>rename</i> and <i>open</i>. The following sections describe the functionality of the Document Server together with key criteria for optimum implementation.</p>
-<a name="performance"></a>
-<h3>Performance</h3>
-<p>Performance is a key criterion, especially where large numbers of files are processed. When inserting a large capacity removable media and scanning file systems to extract <tt>Content</tt> metadata the document server does not schedule blocking reads in the GUI thread. This means that scanning is done incrementally thus, reducing the impact on GUI response.</p>
-<a name="database-schema-implementation"></a>
-<h3>Database Schema Implementation</h3>
-<p>Metadata records are stored in an embedded SQL database. The database backing store is in the main storage on the device, not on removable media. A server process monitors changes in storage and updates the SQL database as required.</p>
-<p>The database schema is as follows:</p>
-<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th colspan="3">ContentTable</th></tr>
-<tr valign="top" class="qt-style"><th>Field</th><th>Type</th><th>Details/Index</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>id</tt></td><td><tt>int</tt></td><td>autoincrement unique key</td></tr>
-<tr valign="top" class="even"><td><tt>uiName</tt></td><td><tt>varchar 100</tt></td><td>indexed</td></tr>
-<tr valign="top" class="odd"><td><tt>mimeType</tt></td><td><tt>varchar 50</tt></td><td>indexed</td></tr>
-<tr valign="top" class="even"><td><tt>size</tt></td><td><tt>int</tt></td><td></td></tr>
-<tr valign="top" class="odd"><td><tt>drmStatus</tt></td><td><tt>enum</tt> one of: <tt>plain</tt> <tt>controlled</tt> <tt>unrenderable</tt></td><td></td></tr>
-<tr valign="top" class="even"><td>docStatus</td><td>enum one of: <tt>doc</tt> <tt>dat</tt></td><td>indexed</td></tr>
-<tr valign="top" class="odd"><td><tt>icon</tt></td><td><tt>blob</tt> (binary large object)</td><td></td></tr>
-<tr valign="top" class="even"><td><tt>thumbnail</tt></td><td><tt>blob</tt></td><td></td></tr>
-<tr valign="top" class="odd"><td><tt>owner</tt></td><td><tt>int</tt></td><td>index (foreign key)</td></tr>
+<p>The document server provides a centralized service through which access to the document system is managed in a secure manner. Through the document server applications may create, manipulate and delete user documents, as well as query the document system for content matching a variety of criteria.</p>
+<p>The functionality provided by the document server is accessed through the Content (<a href="qcontent.html">QContent</a>, <a href="qcontentset.html">QContentSet</a>) API. Connections to the document server are made implicitly so no set up is required to utilize the document server.</p>
+<a name="security"></a>
+<h2>Security</h2>
+<p>The document server forms part of Qtopia's <a href="sxe.html">Safe Execution Environment (SXE)</a> and the functionality an application can utilize is restricted according to the SXE profiles it has been awarded. All applications are able to look-up content by file name or ID and view the content meta-data, doing anything more requires one or more of the SXE profiles below:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Profile</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>doc_read</tt></td><td>Allows an application to open user documents in read-only mode.</td></tr>
+<tr valign="top" class="even"><td><tt>doc_write</tt></td><td>Allows an application to open user documents in read-write mode and edit content meta-data.</td></tr>
+<tr valign="top" class="odd"><td><tt>doc_server</tt></td><td>Allows an application to create content sets and search user documents.</td></tr>
+<tr valign="top" class="even"><td><tt>doc_mimetypes</tt></td><td>Allows an application to manage application to MIME type associations.</td></tr>
+<tr valign="top" class="odd"><td><tt>doc_install</tt></td><td>Allows an application to install other applications.</td></tr>
+<tr valign="top" class="even"><td><tt>categories</tt></td><td>Allows an application to edit categories. No profile is required to view categories.</td></tr>
+<tr valign="top" class="odd"><td><tt>drm</tt></td><td>Allows an application access to DRM protected content.</td></tr>
 </table></p>
-<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th colspan="3">CategoryMapTable</th></tr>
-<tr valign="top" class="qt-style"><th>Field</th><th>Type</th><th>Details/Index</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>contentId</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>ContentTable</tt></td></tr>
-<tr valign="top" class="even"><td><tt>category</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>Categories</tt></td></tr>
-</table></p>
-<p><b>Note:</b></p>
-<ul>
-<li>Exactly one row in <tt>ContentTable</tt> maps to zero to N rows in <tt>CategoryMapTable</tt>.</li>
-<li>Exactly one row in <tt>CategoryTable</tt> (see Catgory sub-system) maps to zero to N rows in <tt>CategoryMapTable</tt>.</li>
-</ul>
-<a name="data-update-process"></a>
-<h4>Data Update Process</h4>
-<p>A process running inside the Qtopia server is responsible for keeping the database view synchronized with the files and content on the device. This is the Data Update Process (DUP).</p>
-<p>When new content arrives on the device either by download, Bluetooth transfer or insertion of media records, it will be added or refreshed in the database. When content is no longer on the device due to removal of media, or deletion of files, these are deleted from the database.</p>
-<p>When new media is inserted the DUP also checks it for metadata in import-format. The DUP ensures that any metadata is correct and up-to-date with respect to the actual content on the media, and automatically imports it.</p>
-<p>After that point calls to the <tt>ContentLnk</tt> API to change the files will result in updates to the import-format metadata. The DUP is not required to perform those updates.</p>
-<a name="synchronization"></a>
-<h4>Synchronization</h4>
-<p>If QtopiaDesktop is used to mirror the device as is the case when PIM contacts and other data are synchronized, the metadata, especially categorization information, can be transferred via a database synchronization. This is done by replaying the journal files from the point at which the last synchronization took place. Journal files are normally recorded automatically by the database system.</p>
-<a name="metaimportexport"></a><a name="metadata-import-and-export"></a>
-<h4>Metadata Import and Export</h4>
-<p>When data is transferred other than by a synchronization, for example:</p>
-<ul>
-<li>a number of media files are uploaded</li>
-<li><tt>qtopiadesktop</tt> is used to place files on to the device</li>
-<li>data is copied or moved by Bluetooth or removable media</li>
-</ul>
-<p>the metadata must be translated into an import format on one side of the transfer and translated back on the other side.</p>
-<p>In the case of category data additional information, such as a device specifier has to be added to disambiguate the categories from top-level name collisions if there is more than one Qtopia device.</p>
-<p>The Qtopia metadata import format (<tt>QDIF</tt>) files are XML and are essentially serialized from the database and have a device identifier embedded in them.</p>
+<a name="document-selector-service"></a>
+<h2>Document Selector Service</h2>
+<p>The document selector service allows applications to open only documents selected by the user. Using the <a href="qdocumentselectorservice.html">QDocumentSelectorService</a> class an application can request the server display a document selector and return a read-only file handle to the document selected by the user. If the application wishes to save changes to the opened document it can then request the server display a confirmation dialog which if accepted will re-open the document in write-only mode. The service also allows saving new documents, in this case the application specifies a suggested document name and a list of possible types, the user can then edit the name and select from the types before accepting the dialog and creating a new document.</p>
+<p>The document selector service allows applications to provide document viewing and editing capabilities without requiring the <tt>doc_read</tt> and <tt>doc_write</tt> SXE profiles which give access to all user documents. To open documents using the document selector service the <tt>doc_open</tt> profile is required, and to save documents the <tt>doc_save</tt> profile is required.</p>
+<a name="document-scanning"></a>
+<h2>Document Scanning</h2>
+<p>The document server is also responsible for scanning document directories to ensure the information kept by the document system is up to date. Changes made to documents using the document system are updated immediately so scanning is only required to detect changes which are external to Qtopia as such is done sparingly. Typically scans are only performed when starting Qtopia and after external media has been inserted, if needed a document scan on a directory can be started explicitly with <a href="qcontentset.html#scan">QContentSet::scan</a>().</p>
+<a name="removable-media"></a>
+<h3>Removable media</h3>
+<p>Where possible the database containing the meta-data for documents on removable media is stored on the media itself, this allows meta-data to be preserved when the media is removed and can reduce the amount of scanning that needs to be done when inserting media that has already been scanned. See <a href="syscust-docstorage.html">Document Storage</a> for information on configuring removable media.</p>
+<a name="directly-accessing-the-document-system"></a>
+<h2>Directly Accessing the Document System</h2>
+<p>Applications can access the document system in two ways; directly or through the document server. By default applications use the document server but if direct access is desired this can be achieved by changing the document system connection with <a href="qcontent.html#setDocumentSystemConnection">QContent::setDocumentSystemConnection</a>() before connecting to the document system. Because connections are made implicitly this must be done immediately after constructing the application's <a href="qtopiaapplication.html">QtopiaApplication</a>, when using the <a href="qtopiaapplication.html#QTOPIA_MAIN">QTOPIA_MAIN</a> macro this can be set by adding the define <tt>QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION</tt> in the application's .pro file.</p>
+<pre>    DEFINES+=QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION</pre>
+<p>An application must also have the <tt>docapi</tt> SXE profile in order to connect directly to the document system.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

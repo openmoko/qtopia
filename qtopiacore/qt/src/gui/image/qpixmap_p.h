@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -40,6 +55,12 @@
 #include "QtGui/qx11info_x11.h"
 #endif
 
+#if defined(Q_WS_WIN)
+#include "qt_windows.h"
+#ifndef QT_NO_DIRECT3D
+#include <d3d9.h>
+#endif
+#endif
 
 #if defined(Q_WS_WIN) || defined(Q_WS_QWS)
 
@@ -52,6 +73,9 @@ struct QPixmapData { // internal pixmap data
     int detach_no;
     QImage image;
     QPixmap::Type type;
+#if !defined(QT_NO_DIRECT3D) && defined(Q_WS_WIN)
+    IDirect3DTexture9 *texture;
+#endif
 
     QImage createBitmapImage(int w, int h);
 };
@@ -90,13 +114,15 @@ struct QPixmapData { // internal pixmap data
     void macSetHasAlpha(bool b);
     void macGetAlphaChannel(QPixmap *, bool asMask) const;
     void macSetAlphaChannel(const QPixmap *, bool asMask);
-    void macQDDisposeAlpha();
-    void macQDUpdateAlpha();
     quint32 *pixels;
     uint nbytes;
     QRectF cg_mask_rect;
     CGImageRef cg_data, cg_mask;
+#ifdef Q_WS_MAC32
     GWorldPtr qd_data, qd_alpha;
+    void macQDDisposeAlpha();
+    void macQDUpdateAlpha();
+#endif
 #endif
     QPaintEngine *paintEngine;
 #if !defined(Q_WS_MAC)
@@ -112,11 +138,16 @@ struct QPixmapData { // internal pixmap data
 
 #endif // Q_WS_WIN
 
+#ifdef Q_WS_WIN
+QPixmap convertHIconToPixmap( const HICON icon);
+QPixmap loadIconFromShell32( int resourceId, int size );
+#endif
+
 #  define QT_XFORM_TYPE_MSBFIRST 0
 #  define QT_XFORM_TYPE_LSBFIRST 1
 #  if defined(Q_WS_WIN)
 #    define QT_XFORM_TYPE_WINDOWSPIXMAP 2
 #  endif
-extern bool qt_xForm_helper(const QMatrix&, int, int, int, uchar*, int, int, int, const uchar*, int, int, int);
+extern bool qt_xForm_helper(const QTransform&, int, int, int, uchar*, int, int, int, const uchar*, int, int, int);
 
 #endif // QPIXMAP_P_H

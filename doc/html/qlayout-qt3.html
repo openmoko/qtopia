@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt 3 Support Members for QLayout</title>
+  <title>Qt 4.3: Qt 3 Support Members for QLayout</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -64,12 +64,12 @@
 <h3 class="fn"><a name="deleteAllItems"></a>void QLayout::deleteAllItems ()&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Removes and deletes all items in this layout.</p>
 <h3 class="fn"><a name="freeze"></a>void QLayout::freeze ( int <i>w</i> = 0, int <i>h</i> = 0 )</h3>
-<p>Sets this layout's parent widget to a fixed size with width <i>w</i> and height <i>h</i>, stopping the user from resizing it, and also prevents the layout from resizing it, even if the layout's size hint should change. Does nothing if this is not a top-level layout (i.e., if <a href="qobject.html#parent">parent</a>()-&gt;<a href="qobject.html#isWidgetType">isWidgetType</a>()).</p>
+<p>Sets this layout's parent widget to a fixed size with width <i>w</i> and height <i>h</i>, stopping the user from resizing it, and also prevents the layout from resizing it, even if the layout's size hint should change. Does nothing if this is not a top-level layout (i.e&#x2e;, if <a href="qobject.html#parent">parent</a>()-&gt;<a href="qobject.html#isWidgetType">isWidgetType</a>()).</p>
 <p>As a special case, if both <i>w</i> and <i>h</i> are 0, then the layout's current <a href="qlayoutitem.html#sizeHint">sizeHint</a>() is used.</p>
 <p>Use <tt>setResizeMode(Fixed)</tt> to stop the widget from being resized by the user, while still allowing the layout to resize it when the <a href="qlayoutitem.html#sizeHint">sizeHint</a>() changes.</p>
 <p>Use <tt>setResizeMode(FreeResize)</tt> to allow the user to resize the widget, while preventing the layout from resizing it.</p>
 <h3 class="fn"><a name="isTopLevel"></a>bool QLayout::isTopLevel () const</h3>
-<p>Returns true if this layout is a top-level layout, i.e. not a child of another layout; otherwise returns false.</p>
+<p>Returns true if this layout is a top-level layout, i.e&#x2e; not a child of another layout; otherwise returns false.</p>
 <h3 class="fn"><a name="iterator"></a>QLayoutIterator QLayout::iterator ()</h3>
 <p>Use a <a href="porting4.html#qlayoutiterator">QLayoutIterator</a>() constructor instead.</p>
 <h3 class="fn"><a name="mainWidget"></a><a href="qwidget.html">QWidget</a> * QLayout::mainWidget () const</h3>
@@ -89,6 +89,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

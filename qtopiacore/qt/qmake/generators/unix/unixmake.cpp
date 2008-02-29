@@ -1,25 +1,40 @@
 /****************************************************************************
- **
- ** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
- **
- ** This file is part of the qmake application of the Qt Toolkit.
- **
- ** This file may be used under the terms of the GNU General Public
+**
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+**
+** This file is part of the qmake application of the Qt Toolkit.
+**
+** This file may be used under the terms of the GNU General Public
 ** License version 2.0 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
- **
- ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
- ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- **
- ****************************************************************************/
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "unixmake.h"
 #include "option.h"
@@ -28,7 +43,7 @@
 #include <qhash.h>
 #include <qdir.h>
 #include <time.h>
-
+#include <qdebug.h>
 
 void
 UnixMakefileGenerator::init()
@@ -52,22 +67,12 @@ UnixMakefileGenerator::init()
             project->values("QMAKE_EXTENSION_SHLIB").append("dll");
         }
     }
-    if(project->isEmpty("QMAKE_CFLAGS_PRECOMPILE"))
-        project->values("QMAKE_CFLAGS_PRECOMPILE").append("-x c-header -c");
-    if(project->isEmpty("QMAKE_CXXFLAGS_PRECOMPILE"))
-        project->values("QMAKE_CXXFLAGS_PRECOMPILE").append("-x c++-header -c");
-    if(project->isActiveConfig("objective_c")) {
-        if(project->isEmpty("QMAKE_OBJCFLAGS_PRECOMPILE"))
-            project->values("QMAKE_OBJCFLAGS_PRECOMPILE").append("-x objective-c-header -c");
-        if(project->isEmpty("QMAKE_OBJCXXFLAGS_PRECOMPILE"))
-            project->values("QMAKE_OBJCXXFLAGS_PRECOMPILE").append("-x objective-c++-header -c");
-    }
-    if(project->isEmpty("QMAKE_CFLAGS_USE_PRECOMPILE"))
-        project->values("QMAKE_CFLAGS_USE_PRECOMPILE").append("-include");
     if(project->isEmpty("QMAKE_EXTENSION_PLUGIN"))
         project->values("QMAKE_EXTENSION_PLUGIN").append(project->first("QMAKE_EXTENSION_SHLIB"));
     if(project->isEmpty("QMAKE_COPY_FILE"))
         project->values("QMAKE_COPY_FILE").append("$(COPY)");
+    if(project->isEmpty("QMAKE_STREAM_EDITOR"))
+        project->values("QMAKE_STREAM_EDITOR").append("sed");
     if(project->isEmpty("QMAKE_COPY_DIR"))
         project->values("QMAKE_COPY_DIR").append("$(COPY) -R");
     if(project->isEmpty("QMAKE_INSTALL_FILE"))
@@ -114,9 +119,9 @@ UnixMakefileGenerator::init()
 
     project->values("QMAKE_ORIG_TARGET") = project->values("TARGET");
     project->values("QMAKE_ORIG_DESTDIR") = project->values("DESTDIR");
-    project->values("QMAKE_LIBS") += project->values("LIBS");
+    project->values("QMAKE_LIBS") += escapeFilePaths(project->values("LIBS"));
     if((!project->isEmpty("QMAKE_LIB_FLAG") && !project->isActiveConfig("staticlib")) ||
-       (project->isActiveConfig("qt") &&  project->isActiveConfig("plugin"))) {
+         (project->isActiveConfig("qt") &&  project->isActiveConfig("plugin"))) {
         if(configs.indexOf("dll") == -1) configs.append("dll");
     } else if(!project->isEmpty("QMAKE_APP_FLAG") || project->isActiveConfig("dll")) {
         configs.removeAll("staticlib");
@@ -131,55 +136,31 @@ UnixMakefileGenerator::init()
         project->values("INCLUDEPATH") += project->values("QMAKE_INCDIR");
     if(!project->isEmpty("QMAKE_LIBDIR")) {
         const QStringList &libdirs = project->values("QMAKE_LIBDIR");
-        for(QStringList::ConstIterator it = libdirs.begin(); it != libdirs.end(); ++it) {
+        for(int i = 0; i < libdirs.size(); ++i) {
             if(!project->isEmpty("QMAKE_LFLAGS_RPATH") && project->isActiveConfig("rpath_libdirs"))
-                project->values("QMAKE_LFLAGS") += var("QMAKE_LFLAGS_RPATH") + (*it);
-            project->values("QMAKE_LIBDIR_FLAGS") += "-L" + escapeFilePath((*it));
+                project->values("QMAKE_LFLAGS") += var("QMAKE_LFLAGS_RPATH") + libdirs[i];
+            project->values("QMAKE_LIBDIR_FLAGS") += "-L" + escapeFilePath(libdirs[i]);
         }
     }
-    if(project->isActiveConfig("macx") && !project->isEmpty("QMAKE_FRAMEWORKDIR")) {
-        const QStringList &fwdirs = project->values("QMAKE_FRAMEWORKDIR");
-        for(QStringList::ConstIterator it = fwdirs.begin(); it != fwdirs.end(); ++it) {
-            project->values("QMAKE_FRAMEWORKDIR_FLAGS") += "-F" + escapeFilePath((*it));
+    if(project->isActiveConfig("macx") && !project->isEmpty("QMAKE_FRAMEWORKPATH")) {
+        const QStringList &fwdirs = project->values("QMAKE_FRAMEWORKPATH");
+        for(int i = 0; i < fwdirs.size(); ++i) {
+            project->values("QMAKE_FRAMEWORKPATH_FLAGS") += "-F" + escapeFilePath(fwdirs[i]);
         }
     }
     if(!project->isEmpty("QMAKE_RPATHDIR")) {
         const QStringList &rpathdirs = project->values("QMAKE_RPATHDIR");
-        for(QStringList::ConstIterator it = rpathdirs.begin(); it != rpathdirs.end(); ++it) {
+        for(int i = 0; i < rpathdirs.size(); ++i) {
             if(!project->isEmpty("QMAKE_LFLAGS_RPATH"))
-                project->values("QMAKE_LFLAGS") += var("QMAKE_LFLAGS_RPATH") + escapeFilePath(QFileInfo((*it)).absoluteFilePath());
+                project->values("QMAKE_LFLAGS") += var("QMAKE_LFLAGS_RPATH") + escapeFilePath(QFileInfo(rpathdirs[i]).absoluteFilePath());
         }
     }
-    QString compile_flag = var("QMAKE_COMPILE_FLAG");
-    if(compile_flag.isEmpty())
-        compile_flag = "-c";
-    if(doPrecompiledHeaders() && !project->isEmpty("PRECOMPILED_HEADER")) {
-        QString prefix_flags = project->first("QMAKE_CFLAGS_PREFIX_INCLUDE");
-        if(prefix_flags.isEmpty())
-            prefix_flags = "-include";
-        QString includename;
-        if(!project->isEmpty("OBJECTS_DIR")) {
-            includename = Option::fixPathToTargetOS(project->first("OBJECTS_DIR"));
-            if(!includename.endsWith(Option::dir_sep))
-                includename += Option::dir_sep;
-        }
-        includename += project->first("QMAKE_ORIG_TARGET");
-        compile_flag += " " + prefix_flags + " " + includename;
-    }
-    if(project->isEmpty("QMAKE_RUN_CC"))
-        project->values("QMAKE_RUN_CC").append("$(CC) " + compile_flag + " $(CFLAGS) $(INCPATH) -o $obj $src");
-    if(project->isEmpty("QMAKE_RUN_CC_IMP"))
-        project->values("QMAKE_RUN_CC_IMP").append("$(CC) " + compile_flag + " $(CFLAGS) $(INCPATH) -o \"$@\" \"$<\"");
-    if(project->isEmpty("QMAKE_RUN_CXX"))
-        project->values("QMAKE_RUN_CXX").append("$(CXX) " + compile_flag + " $(CXXFLAGS) $(INCPATH) -o $obj $src");
-    if(project->isEmpty("QMAKE_RUN_CXX_IMP"))
-        project->values("QMAKE_RUN_CXX_IMP").append("$(CXX) " + compile_flag + " $(CXXFLAGS) $(INCPATH) -o \"$@\" \"$<\"");
 
     project->values("QMAKE_FILETAGS") << "SOURCES" << "GENERATED_SOURCES" << "TARGET" << "DESTDIR";
     if(!project->isEmpty("QMAKE_EXTRA_COMPILERS")) {
         const QStringList &quc = project->values("QMAKE_EXTRA_COMPILERS");
-        for(QStringList::ConstIterator it = quc.begin(); it != quc.end(); ++it)
-            project->values("QMAKE_FILETAGS") += project->values((*it)+".input");
+        for(int i = 0; i < quc.size(); ++i)
+            project->values("QMAKE_FILETAGS") += project->values(quc[i]+".input");
     }
 
     if(project->isActiveConfig("GNUmake") && !project->isEmpty("QMAKE_CFLAGS_DEPS"))
@@ -188,6 +169,56 @@ UnixMakefileGenerator::init()
         Option::obj_ext = ".lo"; //override the .o
 
     MakefileGenerator::init();
+
+    QString comps[] = { "C", "CXX", "OBJC", "OBJCXX", QString() };
+    for(int i = 0; !comps[i].isNull(); i++) {
+        QString compile_flag = var("QMAKE_COMPILE_FLAG");
+        if(compile_flag.isEmpty())
+            compile_flag = "-c";
+
+        if(doPrecompiledHeaders() && !project->isEmpty("PRECOMPILED_HEADER")) {
+            QString pchFlags = var("QMAKE_" + comps[i] + "FLAGS_USE_PRECOMPILE");
+
+            QString pchBaseName;
+            if(!project->isEmpty("PRECOMPILED_DIR")) {
+                pchBaseName = Option::fixPathToTargetOS(project->first("PRECOMPILED_DIR"));
+                if(!pchBaseName.endsWith(Option::dir_sep))
+                    pchBaseName += Option::dir_sep;
+            }
+            pchBaseName += project->first("QMAKE_ORIG_TARGET");
+
+            // replace place holders
+            pchFlags = pchFlags.replace("${QMAKE_PCH_INPUT}",
+                                        fileFixify(project->first("PRECOMPILED_HEADER")));
+            pchFlags = pchFlags.replace("${QMAKE_PCH_OUTPUT_BASE}", pchBaseName);
+            if (project->isActiveConfig("icc_pch_style")) {
+                // icc style
+                pchFlags = pchFlags.replace("${QMAKE_PCH_OUTPUT}",
+                                            pchBaseName + project->first("QMAKE_PCH_OUTPUT_EXT"));
+            }
+
+            if (!pchFlags.isEmpty())
+                compile_flag += " " + pchFlags;
+        }
+
+        QString cflags;
+        if(comps[i] == "OBJC" || comps[i] == "OBJCXX")
+            cflags += " $(CFLAGS)";
+        else
+            cflags += " $(" + comps[i] + "FLAGS)";
+        compile_flag += cflags + " $(INCPATH)";
+
+        QString compiler = comps[i];
+        if (compiler == "C")
+            compiler = "CC";
+
+        QString runComp = "QMAKE_RUN_" + compiler;
+        if(project->isEmpty(runComp))
+            project->values(runComp).append("$(" + compiler + ") " + compile_flag + " -o $obj $src");
+        QString runCompImp = "QMAKE_RUN_" + compiler + "_IMP";
+        if(project->isEmpty(runCompImp))
+            project->values(runCompImp).append("$(" + compiler + ") " + compile_flag + " -o \"$@\" \"$<\"");
+    }
 
     if(project->isActiveConfig("macx") && !project->isEmpty("TARGET") && !project->isActiveConfig("compile_libtool") &&
        ((project->isActiveConfig("build_pass") || project->isEmpty("BUILDS")))) {
@@ -226,14 +257,14 @@ UnixMakefileGenerator::init()
             }
         }
         if(!bundle.isEmpty()) {
-            project->values("QMAKE_BUNDLE_NAME") = QStringList(bundle);
+            project->values("QMAKE_BUNDLE") = QStringList(bundle);
             project->values("ALL_DEPS") += project->first("QMAKE_PKGINFO");
         } else {
-            project->values("QMAKE_BUNDLE_NAME").clear();
+            project->values("QMAKE_BUNDLE").clear();
             project->values("QMAKE_BUNDLE_LOCATION").clear();
         }
     } else { //no bundling here
-        project->values("QMAKE_BUNDLE_NAME").clear();
+        project->values("QMAKE_BUNDLE").clear();
         project->values("QMAKE_BUNDLE_LOCATION").clear();
     }
 
@@ -242,15 +273,14 @@ UnixMakefileGenerator::init()
     project->values("DISTFILES") += project->projectFile();
 
     init2();
-    project->values("QMAKE_INTERNAL_PRL_LIBS") << "QMAKE_LIBDIR_FLAGS" << "QMAKE_FRAMEWORKDIR_FLAG" << "QMAKE_LIBS";
+    project->values("QMAKE_INTERNAL_PRL_LIBS") << "QMAKE_LIBDIR_FLAGS" << "QMAKE_FRAMEWORKPATH_FLAGS" << "QMAKE_LIBS";
     if(!project->isEmpty("QMAKE_MAX_FILES_PER_AR")) {
         bool ok;
         int max_files = project->first("QMAKE_MAX_FILES_PER_AR").toInt(&ok);
         QStringList ar_sublibs, objs = project->values("OBJECTS");
         if(ok && max_files > 5 && max_files < (int)objs.count()) {
-            int obj_cnt = 0, lib_cnt = 0;
             QString lib;
-            for(QStringList::Iterator objit = objs.begin(); objit != objs.end(); ++objit) {
+            for(int i = 0, obj_cnt = 0, lib_cnt = 0; i != objs.size(); ++i) {
                 if((++obj_cnt) >= max_files) {
                     if(lib_cnt) {
                         lib.sprintf("lib%s-tmp%d.a",
@@ -330,47 +360,58 @@ QStringList
     if(doPrecompiledHeaders() && !project->isEmpty("PRECOMPILED_HEADER")
        && file != project->first("QMAKE_IMAGE_COLLECTION")) {
         QString header_prefix;
-        if(!project->isEmpty("OBJECTS_DIR"))
-            header_prefix = project->first("OBJECTS_DIR");
-        header_prefix += project->first("QMAKE_ORIG_TARGET") + ".gch" + Option::dir_sep;
-        header_prefix += project->first("QMAKE_PRECOMP_PREFIX");
-        for(QStringList::Iterator it = Option::c_ext.begin(); it != Option::c_ext.end(); ++it) {
-            if(file.endsWith(*it)) {
-                if(!project->isEmpty("QMAKE_CFLAGS_PRECOMPILE")) {
-                    QString precomp_c_h = header_prefix + "c";
-                    if(!ret.contains(precomp_c_h))
-                        ret += precomp_c_h;
+        if(!project->isEmpty("PRECOMPILED_DIR"))
+            header_prefix = project->first("PRECOMPILED_DIR");
+        header_prefix += project->first("QMAKE_ORIG_TARGET") + project->first("QMAKE_PCH_OUTPUT_EXT");
+        if (project->isActiveConfig("icc_pch_style")) {
+            // icc style
+            for(QStringList::Iterator it = Option::cpp_ext.begin(); it != Option::cpp_ext.end(); ++it) {
+                if(file.endsWith(*it)) {
+                    ret += header_prefix;
+                    break;
                 }
-                if(project->isActiveConfig("objective_c")) {
-                    if(!project->isEmpty("QMAKE_OBJCFLAGS_PRECOMPILE")) {
-                        QString precomp_objc_h = header_prefix + "objective-c";
-                        if(!ret.contains(precomp_objc_h))
-                            ret += precomp_objc_h;
-                    }
-                    if(!project->isEmpty("QMAKE_OBJCXXFLAGS_PRECOMPILE")) {
-                        QString precomp_objcpp_h = header_prefix + "objective-c++";
-                        if(!ret.contains(precomp_objcpp_h))
-                            ret += precomp_objcpp_h;
-                    }
-                }
-                break;
             }
-        }
-        for(QStringList::Iterator it = Option::cpp_ext.begin(); it != Option::cpp_ext.end(); ++it) {
-            if(file.endsWith(*it)) {
-                if(!project->isEmpty("QMAKE_CXXFLAGS_PRECOMPILE")) {
-                    QString precomp_cpp_h = header_prefix + "c++";
-                    if(!ret.contains(precomp_cpp_h))
-                        ret += precomp_cpp_h;
-                }
-                if(project->isActiveConfig("objective_c")) {
-                    if(!project->isEmpty("QMAKE_OBJCXXFLAGS_PRECOMPILE")) {
-                        QString precomp_objcpp_h = header_prefix + "objective-c++";
-                        if(!ret.contains(precomp_objcpp_h))
-                            ret += precomp_objcpp_h;
+        } else {
+            // gcc style
+            header_prefix += Option::dir_sep + project->first("QMAKE_PRECOMP_PREFIX");
+            for(QStringList::Iterator it = Option::c_ext.begin(); it != Option::c_ext.end(); ++it) {
+                if(file.endsWith(*it)) {
+                    if(!project->isEmpty("QMAKE_CFLAGS_PRECOMPILE")) {
+                        QString precomp_c_h = header_prefix + "c";
+                        if(!ret.contains(precomp_c_h))
+                            ret += precomp_c_h;
                     }
+                    if(project->isActiveConfig("objective_c")) {
+                        if(!project->isEmpty("QMAKE_OBJCFLAGS_PRECOMPILE")) {
+                            QString precomp_objc_h = header_prefix + "objective-c";
+                            if(!ret.contains(precomp_objc_h))
+                                ret += precomp_objc_h;
+                        }
+                        if(!project->isEmpty("QMAKE_OBJCXXFLAGS_PRECOMPILE")) {
+                            QString precomp_objcpp_h = header_prefix + "objective-c++";
+                            if(!ret.contains(precomp_objcpp_h))
+                                ret += precomp_objcpp_h;
+                        }
+                    }
+                    break;
                 }
-                break;
+            }
+            for(QStringList::Iterator it = Option::cpp_ext.begin(); it != Option::cpp_ext.end(); ++it) {
+                if(file.endsWith(*it)) {
+                    if(!project->isEmpty("QMAKE_CXXFLAGS_PRECOMPILE")) {
+                        QString precomp_cpp_h = header_prefix + "c++";
+                        if(!ret.contains(precomp_cpp_h))
+                            ret += precomp_cpp_h;
+                    }
+                    if(project->isActiveConfig("objective_c")) {
+                        if(!project->isEmpty("QMAKE_OBJCXXFLAGS_PRECOMPILE")) {
+                            QString precomp_objcpp_h = header_prefix + "objective-c++";
+                            if(!ret.contains(precomp_objcpp_h))
+                                ret += precomp_objcpp_h;
+                        }
+                    }
+                    break;
+                }
             }
         }
     }
@@ -383,7 +424,7 @@ UnixMakefileGenerator::findLibraries()
     QList<QMakeLocalFileName> libdirs, frameworkdirs;
     frameworkdirs.append(QMakeLocalFileName("/System/Library/Frameworks"));
     frameworkdirs.append(QMakeLocalFileName("/Library/Frameworks"));
-    const QString lflags[] = { "QMAKE_LIBDIR_FLAGS", "QMAKE_FRAMEWORKDIR_FLAGS", "QMAKE_LFLAGS", "QMAKE_LIBS", QString() };
+    const QString lflags[] = { "QMAKE_LIBDIR_FLAGS", "QMAKE_FRAMEWORKPATH_FLAGS", "QMAKE_LFLAGS", "QMAKE_LIBS", QString() };
     for(int i = 0; !lflags[i].isNull(); i++) {
         QStringList &l = project->values(lflags[i]);
         for(QStringList::Iterator it = l.begin(); it != l.end(); ++it) {
@@ -391,7 +432,9 @@ UnixMakefileGenerator::findLibraries()
             QString stub, dir, extn, opt = (*it).trimmed();
             if(opt.startsWith("-")) {
                 if(opt.startsWith("-L")) {
-                    libdirs.append(QMakeLocalFileName(opt.right(opt.length()-2)));
+                    QMakeLocalFileName f(opt.right(opt.length()-2));
+                    if(!libdirs.contains(f))
+                        libdirs.append(f);
                 } else if(opt.startsWith("-l")) {
                     stub = opt.mid(2);
                 } else if(Option::target_mode == Option::TARG_MACX_MODE && opt.startsWith("-F")) {
@@ -436,7 +479,7 @@ UnixMakefileGenerator::findLibraries()
                         QString lib_stub;
                         for(QList<QMakeLocalFileName>::Iterator dep_it = libdirs.begin(); dep_it != libdirs.end(); ++dep_it) {
                             if(exists((*dep_it).local() + Option::dir_sep + "lib" + stub +
-                                      "." + (*extit))) {
+                                             "." + (*extit))) {
                                 lib_stub = stub;
                                 break;
                             }
@@ -455,9 +498,9 @@ UnixMakefileGenerator::findLibraries()
                     }
                 }
                 if(!found && project->isActiveConfig("compile_libtool")) {
-                    for(QList<QMakeLocalFileName>::Iterator dep_it = libdirs.begin(); dep_it != libdirs.end(); ++dep_it) {
-                        if(exists((*dep_it).local() + Option::dir_sep + "lib" + stub + Option::libtool_ext)) {
-                            (*it) = (*dep_it).real() + Option::dir_sep + "lib" + stub + Option::libtool_ext;
+                    for(int dep_i = 0; dep_i < libdirs.size(); ++dep_i) {
+                        if(exists(libdirs[dep_i].local() + Option::dir_sep + "lib" + stub + Option::libtool_ext)) {
+                            (*it) = libdirs[dep_i].real() + Option::dir_sep + "lib" + stub + Option::libtool_ext;
                             found = true;
                             break;
                         }
@@ -470,11 +513,11 @@ UnixMakefileGenerator::findLibraries()
 }
 
 QString linkLib(const QString &file, const QString &libName) {
-    QString ret;
-    QRegExp reg("^.*lib(" + QRegExp::escape(libName) + "[^./=]*).*$");
-    if(reg.exactMatch(file))
-        ret = "-l" + reg.cap(1);
-    return ret;
+  QString ret;
+  QRegExp reg("^.*lib(" + QRegExp::escape(libName) + "[^./=]*).*$");
+  if(reg.exactMatch(file))
+    ret = "-l" + reg.cap(1);
+  return ret;
 }
 
 void
@@ -483,18 +526,20 @@ UnixMakefileGenerator::processPrlFiles()
     QList<QMakeLocalFileName> libdirs, frameworkdirs;
     frameworkdirs.append(QMakeLocalFileName("/System/Library/Frameworks"));
     frameworkdirs.append(QMakeLocalFileName("/Library/Frameworks"));
-    const QString lflags[] = { "QMAKE_LIBDIR_FLAGS", "QMAKE_FRAMEWORKDIR_FLAGS", "QMAKE_LFLAGS", "QMAKE_LIBS", QString() };
+    const QString lflags[] = { "QMAKE_LIBDIR_FLAGS", "QMAKE_FRAMEWORKPATH_FLAGS", "QMAKE_LFLAGS", "QMAKE_LIBS", QString() };
     for(int i = 0; !lflags[i].isNull(); i++) {
         QStringList &l = project->values(lflags[i]);
         for(int lit = 0; lit < l.size(); ++lit) {
             QString opt = l.at(lit).trimmed();
             if(opt.startsWith("-")) {
                 if(opt.startsWith("-L")) {
-                    libdirs.append(QMakeLocalFileName(opt.right(opt.length()-2)));
+                    QMakeLocalFileName l(opt.right(opt.length()-2));
+                    if(!libdirs.contains(l))
+                       libdirs.append(l);
                 } else if(opt.startsWith("-l")) {
                     QString lib = opt.right(opt.length() - 2);
-                    for(int dep_idx = 0; dep_idx < libdirs.count(); ++dep_idx) {
-                        const QMakeLocalFileName &lfn = libdirs[dep_idx];
+                    for(int dep_i = 0; dep_i < libdirs.size(); ++dep_i) {
+                        const QMakeLocalFileName &lfn = libdirs[dep_i];
                         if(!project->isActiveConfig("compile_libtool")) { //give them the .libs..
                             QString la = lfn.local() + Option::dir_sep + "lib" + lib + Option::libtool_ext;
                             if(exists(la) && QFile::exists(lfn.local() + Option::dir_sep + ".libs")) {
@@ -515,7 +560,9 @@ UnixMakefileGenerator::processPrlFiles()
                         }
                     }
                 } else if(Option::target_mode == Option::TARG_MACX_MODE && opt.startsWith("-F")) {
-                    frameworkdirs.append(QMakeLocalFileName(opt.right(opt.length()-2)));
+                    QMakeLocalFileName f(opt.right(opt.length()-2));
+                    if(!frameworkdirs.contains(f))
+                        frameworkdirs.append(f);
                 } else if(Option::target_mode == Option::TARG_MACX_MODE && opt.startsWith("-framework")) {
                     if(opt.length() > 11)
                         opt = opt.mid(11);
@@ -523,8 +570,8 @@ UnixMakefileGenerator::processPrlFiles()
                         opt = l.at(++lit);
                     opt = opt.trimmed();
                     const QList<QMakeLocalFileName> dirs = frameworkdirs + libdirs;
-                    for(QList<QMakeLocalFileName>::ConstIterator dep_it = dirs.begin(); dep_it != dirs.end(); ++dep_it) {
-                        QString prl = (*dep_it).local() + "/" + opt + ".framework/" + opt + Option::prl_ext;
+                    for(int dep_i = 0; dep_i < dirs.size(); ++dep_i) {
+                        QString prl = dirs[dep_i].local() + "/" + opt + ".framework/" + opt + Option::prl_ext;
                         if(processPrlFile(prl))
                             break;
                     }
@@ -618,19 +665,12 @@ UnixMakefileGenerator::defaultInstall(const QString &t)
     QStringList links;
     QString target="$(TARGET)";
     QStringList &targets = project->values(t + ".targets");
-    if(!project->isEmpty("QMAKE_BUNDLE_NAME")) {
-        target = project->first("QMAKE_BUNDLE_NAME");
+    if(!project->isEmpty("QMAKE_BUNDLE")) {
+        target = project->first("QMAKE_BUNDLE");
         bundle = true;
     } else if(project->first("TEMPLATE") == "app") {
         target = "$(QMAKE_TARGET)";
     } else if(project->first("TEMPLATE") == "lib") {
-        if(project->isActiveConfig("create_prl") && !project->isActiveConfig("no_install_prl") &&
-           !project->isEmpty("QMAKE_INTERNAL_PRL_FILE"))
-            targets += project->first("QMAKE_INTERNAL_PRL_FILE");
-        if(project->isActiveConfig("create_libtool") && !project->isActiveConfig("compile_libtool"))
-            targets += libtoolFileName();
-        if(project->isActiveConfig("create_pc"))
-            targets += pkgConfigFileName();
         if(project->isEmpty("QMAKE_CYGWIN_SHLIB")) {
             if(!project->isActiveConfig("staticlib") && !project->isActiveConfig("plugin")) {
                 if(project->isEmpty("QMAKE_HPUX_SHLIB")) {
@@ -719,12 +759,12 @@ UnixMakefileGenerator::defaultInstall(const QString &t)
         else
             uninst.append("-$(DEL_FILE) \"" + dst_targ + "\"");
         if(!links.isEmpty()) {
-            for(QStringList::Iterator it = links.begin(); it != links.end(); it++) {
+            for(int i = 0; i < links.size(); ++i) {
                 if(Option::target_mode == Option::TARG_WIN_MODE ||
                    Option::target_mode == Option::TARG_MAC9_MODE) {
                 } else if(Option::target_mode == Option::TARG_UNIX_MODE ||
                           Option::target_mode == Option::TARG_MACX_MODE) {
-                    QString link = Option::fixPathToTargetOS(destdir + (*it), false);
+                    QString link = Option::fixPathToTargetOS(destdir + links[i], false);
                     int lslash = link.lastIndexOf(Option::dir_sep);
                     if(lslash != -1)
                         link = link.right(link.length() - (lslash + 1));
@@ -733,6 +773,56 @@ UnixMakefileGenerator::defaultInstall(const QString &t)
                     if(!uninst.isEmpty())
                         uninst.append("\n\t");
                     uninst.append("-$(DEL_FILE) \"" + dst_link + "\"");
+                }
+            }
+        }
+    }
+    if(project->first("TEMPLATE") == "lib") {
+        QStringList types;
+        types << "prl" << "libtool" << "pkgconfig";
+        for(int i = 0; i < types.size(); ++i) {
+            const QString type = types.at(i);
+            QString meta;
+            if(type == "prl" && project->isActiveConfig("create_prl") && !project->isActiveConfig("no_install_prl") &&
+               !project->isEmpty("QMAKE_INTERNAL_PRL_FILE"))
+                meta = prlFileName(false);
+            if(type == "libtool" && project->isActiveConfig("create_libtool") && !project->isActiveConfig("compile_libtool"))
+                meta = libtoolFileName(false);
+            if(type == "pkgconfig" && project->isActiveConfig("create_pc"))
+                meta = pkgConfigFileName(false);
+            if(!meta.isEmpty()) {
+                QString src_meta = meta;
+                if(!destdir.isEmpty())
+                    src_meta = Option::fixPathToTargetOS(destdir + meta, false);
+                QString dst_meta = filePrefixRoot(root, fileFixify(targetdir + meta, FileFixifyAbsolute));
+                if(!uninst.isEmpty())
+                    uninst.append("\n\t");
+                uninst.append("-$(DEL_FILE) \"" + dst_meta + "\"");
+                const QString replace_rule("QMAKE_" + type.toUpper() + "_INSTALL_REPLACE");
+                const QString dst_meta_dir = fileInfo(dst_meta).path();
+                if(!dst_meta_dir.isEmpty()) {
+                    if(!ret.isEmpty())
+                        ret += "\n\t";
+                    ret += mkdir_p_asstring(dst_meta_dir, true);
+                }
+                QString install_meta = "$(INSTALL_FILE) \"" + src_meta + "\" \"" + dst_meta + "\"";
+                if(project->isEmpty(replace_rule) || project->isActiveConfig("no_sed_meta_install")) {
+                    if(!ret.isEmpty())
+                        ret += "\n\t";
+                    ret += "-" + install_meta;
+                } else {
+                    if(!ret.isEmpty())
+                        ret += "\n\t";
+                    ret += "-$(SED)";
+                    QStringList replace_rules = project->values(replace_rule);
+                    for(int r = 0; r < replace_rules.size(); ++r) {
+                        const QString match = project->first(replace_rules.at(r) + ".match"),
+                                    replace = project->first(replace_rules.at(r) + ".replace");
+                        if(!match.isEmpty() /*&& match != replace*/)
+                            ret += " -e \"s," + match + "," + replace + ",g\"";
+                    }
+                    ret += " \"" + src_meta + "\" >\"" + dst_meta + "\"";
+                    //ret += " || " + install_meta;
                 }
             }
         }

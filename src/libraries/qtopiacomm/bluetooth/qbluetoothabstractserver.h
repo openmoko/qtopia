@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,35 +24,26 @@
 
 #include <QObject>
 
-#include <qtopiaglobal.h>
+#include <qbluetoothglobal.h>
 #include <qbluetoothnamespace.h>
+#include <qbluetoothabstractsocket.h>
 
 class QBluetoothAbstractServerPrivate;
 struct sockaddr;
-class QBluetoothAbstractSocket;
 
-class QTOPIACOMM_EXPORT QBluetoothAbstractServer : public QObject
+class QBLUETOOTH_EXPORT QBluetoothAbstractServer : public QObject
 {
     Q_OBJECT
     friend class QBluetoothAbstractServerPrivate;
 
 public:
-    enum ServerError {
-        NoError,
-        UnknownError,
-        ResourceError,
-        ListenError,
-        BindError,
-    };
-
-    explicit QBluetoothAbstractServer(QObject *parent = 0);
     ~QBluetoothAbstractServer();
 
     virtual void close();
 
     bool isListening() const;
 
-    QBluetoothAbstractServer::ServerError error() const;
+    QBluetoothAbstractSocket::SocketError serverError() const;
     QString errorString() const;
 
     int maxPendingConnections() const;
@@ -68,13 +59,15 @@ signals:
     void newConnection();
 
 protected:
-    bool initiateListen(int socket, sockaddr *addr, int len);
-    void setError(QBluetoothAbstractServer::ServerError serverError);
+    explicit QBluetoothAbstractServer(QBluetoothAbstractServerPrivate *data,
+                                        QObject *parent = 0);
+    void setListening();
     virtual QBluetoothAbstractSocket * createSocket() = 0;
+
+    QBluetoothAbstractServerPrivate *m_data;
 
 private:
     Q_DISABLE_COPY(QBluetoothAbstractServer)
-    QBluetoothAbstractServerPrivate *m_data;
 };
 
 #endif

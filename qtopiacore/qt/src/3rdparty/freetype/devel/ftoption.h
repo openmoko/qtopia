@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    User-selectable configuration macros (specification only).           */
 /*                                                                         */
-/*  Copyright 1996-2001, 2002, 2003, 2004, 2005, 2006 by                   */
+/*  Copyright 1996-2001, 2002, 2003, 2004, 2005, 2006, 2007 by             */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -73,6 +73,26 @@ FT_BEGIN_HEADER
   /****                                                                 ****/
   /*************************************************************************/
   /*************************************************************************/
+
+
+  /*************************************************************************/
+  /*                                                                       */
+  /* Uncomment the line below if you want to activate sub-pixel rendering  */
+  /* (a.k.a. LCD rendering, or ClearType) in this build of the library.    */
+  /*                                                                       */
+  /* Note that this feature is covered by several Microsoft patents        */
+  /* and should not be activated in any default build of the library.      */
+  /*                                                                       */
+  /* This macro has no impact on the FreeType API, only on its             */
+  /* _implementation_.  For example, using FT_RENDER_MODE_LCD when calling */
+  /* FT_Render_Glyph still generates a bitmap that is 3 times larger than  */
+  /* the original size; the difference will be that each triplet of        */
+  /* subpixels has R=G=B.                                                  */
+  /*                                                                       */
+  /* This is done to allow FreeType clients to run unmodified, forcing     */
+  /* them to display normal gray-level anti-aliased glyphs.                */
+  /*                                                                       */
+#define FT_CONFIG_OPTION_SUBPIXEL_RENDERING
 
 
   /*************************************************************************/
@@ -471,7 +491,7 @@ FT_BEGIN_HEADER
   /* component offsets in composite glyphs.                                */
   /*                                                                       */
   /* Apple and MS disagree on the default behavior of component offsets    */
-  /* in composites.  Apple says that they should be scaled by the scale    */
+  /* in composites.  Apple says that they should be scaled by the scaling  */
   /* factors in the transformation matrix (roughly, it's more complex)     */
   /* while MS says they should not.  OpenType defines two bits in the      */
   /* composite flags array which can be used to disambiguate, but old      */
@@ -574,12 +594,6 @@ FT_BEGIN_HEADER
 
   /* */
 
-  /*
-   * This temporary macro is used to control various optimizations for
-   * reducing the heap footprint of memory-mapped TrueType files.
-   */
-#define FT_OPTIMIZE_MEMORY
-
 
   /*
    * Define this variable if you want to keep the layout of internal
@@ -593,6 +607,16 @@ FT_BEGIN_HEADER
    */
 #undef FT_CONFIG_OPTION_OLD_INTERNALS
 
+
+  /*
+   * This variable is defined if either unpatented or native TrueType
+   * hinting is requested by the definitions above.
+   */
+#ifdef TT_CONFIG_OPTION_BYTECODE_INTERPRETER
+#define  TT_USE_BYTECODE_INTERPRETER
+#elif defined TT_CONFIG_OPTION_UNPATENTED_HINTING
+#define  TT_USE_BYTECODE_INTERPRETER
+#endif
 
 FT_END_HEADER
 

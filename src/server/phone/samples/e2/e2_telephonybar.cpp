@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -31,8 +31,8 @@ E2TelephonyBar::E2TelephonyBar(QWidget *parent, Qt::WFlags flags)
   batPix(":image/samples/e1_bat"),
   signalPix(":image/samples/e1_signal"),
   time("/UI/DisplayTime/Time"),
-  battery("/Accessories/Battery/VisualCharge"),
-  signal("/Hardware/Accessories/QSignalSource/DefaultSignal/Values/SignalStrength")
+  battery("/Hardware/Accessories/QPowerSource/DefaultBattery/Charge"),
+  signal("/Hardware/Accessories/QSignalSource/DefaultSignal/SignalStrength")
 {
     setFixedHeight(fillBrush.height());
 

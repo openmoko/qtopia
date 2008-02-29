@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** $TROLLTECH_DUAL_LICENSE$
 **
@@ -27,6 +27,7 @@
 #include <math.h>
 #include <time.h>
 
+//#define REFRESH_DELAY          20
 #define REFRESH_DELAY          33
 #define TEXT_SPEED              2
 
@@ -96,12 +97,16 @@ KAsteroidsView::KAsteroidsView(QWidget* parent)
 {
     srand (time(NULL));
     scene_ = KSprite::scene();
-    textSprite_ = new QGraphicsTextItem(0,scene_);
+    textSprite_ = new QGraphicsSimpleTextItem(0,scene_);
     textPending_ = false;
 
     view_ = new MyGraphicsView(scene_,this);
+    view_->setFrameStyle(QFrame::NoFrame);
     view_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view_->setInteractive(false);
+    view_->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    view_->setOptimizationFlag(QGraphicsView::DontClipPainter);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(view_);
@@ -113,7 +118,13 @@ KAsteroidsView::KAsteroidsView(QWidget* parent)
 
     shieldTimer_ = new QTimer(this);
     connect(shieldTimer_, SIGNAL(timeout()), this, SLOT(dropShield()));
-    masterTimerId_ = -1;
+
+    mainTimer_ = new QTimer(this);
+    connect(mainTimer_, SIGNAL(timeout()), this, SLOT(mainTimerEvent()));
+    mainTimer_->setInterval(REFRESH_DELAY);
+    mainTimer_->setSingleShot(false);
+    timerEventCount_ = 0;
+
     vitalsChanged_ = false;
     instruct_user_ = true;
     game_paused_ = true;
@@ -130,7 +141,7 @@ KAsteroidsView::KAsteroidsView(QWidget* parent)
  */
 KAsteroidsView::~KAsteroidsView()
 {
-    // nothing
+    mainTimer_->stop();
 }
 
 /*!
@@ -142,10 +153,8 @@ KAsteroidsView::~KAsteroidsView()
 void KAsteroidsView::newGame()
 {
     KSprite::reset();
-    timerEventCount_ = 0;
     game_paused_ = false;
-    if (masterTimerId_ < 0)
-        masterTimerId_ = startTimer(REFRESH_DELAY);
+    mainTimer_->start();
     emit updateVitals();
 }
 
@@ -163,13 +172,10 @@ void KAsteroidsView::newGame()
 void KAsteroidsView::pause(bool p)
 {
     if (!game_paused_ && p) {
-        if (masterTimerId_ >= 0) {
-            killTimer(masterTimerId_);
-            masterTimerId_ = -1;
-        }
+        mainTimer_->stop();
     }
     else if (game_paused_ && !p)
-        masterTimerId_ = startTimer(REFRESH_DELAY);
+        mainTimer_->start();
     game_paused_ = p;
 }
 
@@ -216,8 +222,8 @@ void KAsteroidsView::dropShield()
  */
 void KAsteroidsView::showText(const QString& text)
 {
-    textSprite_->setPlainText(text);
-    textSprite_->setDefaultTextColor(Qt::yellow);
+    textSprite_->setText(text);
+    textSprite_->setBrush(Qt::yellow);
     qreal x = (scene_->width()-textSprite_->boundingRect().width())/2;
     qreal y = (scene_->height()-textSprite_->boundingRect().height())/4;
     textDy_ = 0;
@@ -279,6 +285,7 @@ void KAsteroidsView::reportShipKilled()
 void KAsteroidsView::reportGameOver()
 {
     showText(gameOverMessage_);
+    QTimer::singleShot(60000, mainTimer_, SLOT(stop()));
 }
 
 /*!
@@ -295,7 +302,7 @@ void KAsteroidsView::reportGameOver()
   sprites.
  */
 void
-KAsteroidsView::timerEvent(QTimerEvent* )
+KAsteroidsView::mainTimerEvent()
 {
     if (instruct_user_) {
 	reportStartGame();
@@ -341,7 +348,7 @@ KAsteroidsView::timerEvent(QTimerEvent* )
         vitalsChanged_ = false;
     }
     timerEventCount_++;
-    view_->update();
+    //view_->update();
 }
 
 /*!

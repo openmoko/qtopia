@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -63,13 +78,13 @@ struct Option
     static void init()
     {
 #ifdef Q_OS_WIN
-        Option::dirlist_sep = ';';
+        Option::dirlist_sep = QLatin1Char(';');
         Option::dir_sep = QLatin1Char('\\');
 #else
-        Option::dirlist_sep = ':';
-        Option::dir_sep = QLatin1Char('/');
+        Option::dirlist_sep = QLatin1Char(':');
+        Option::dir_sep = QLatin1Char(QLatin1Char('/'));
 #endif
-        Option::qmakespec = qgetenv("QMAKESPEC");
+        Option::qmakespec = QString::fromLatin1(qgetenv("QMAKESPEC"));
     }
 };
 #if defined(Q_OS_WIN32)
@@ -168,7 +183,7 @@ static QStringList split_arg_list(QString params)
 static QStringList qmake_mkspec_paths()
 {
     QStringList ret;
-    const QString concat = QDir::separator() + QString("mkspecs");
+    const QString concat = QDir::separator() + QString(QLatin1String("mkspecs"));
     QByteArray qmakepath = qgetenv("QMAKEPATH");
     if (!qmakepath.isEmpty()) {
         const QStringList lst = splitPathList(QString::fromLocal8Bit(qmakepath));
@@ -183,36 +198,36 @@ static QStringList qmake_mkspec_paths()
 
 static QString getPropertyValue(const QString &v)
 {
-    if(v == "QT_INSTALL_PREFIX")
+    if(v == QLatin1String("QT_INSTALL_PREFIX"))
         return QLibraryInfo::location(QLibraryInfo::PrefixPath);
-    else if(v == "QT_INSTALL_DATA")
+    else if(v == QLatin1String("QT_INSTALL_DATA"))
         return QLibraryInfo::location(QLibraryInfo::DataPath);
-    else if(v == "QT_INSTALL_DOCS")
+    else if(v == QLatin1String("QT_INSTALL_DOCS"))
         return QLibraryInfo::location(QLibraryInfo::DocumentationPath);
-    else if(v == "QT_INSTALL_HEADERS")
+    else if(v == QLatin1String("QT_INSTALL_HEADERS"))
         return QLibraryInfo::location(QLibraryInfo::HeadersPath);
-    else if(v == "QT_INSTALL_LIBS")
+    else if(v == QLatin1String("QT_INSTALL_LIBS"))
         return QLibraryInfo::location(QLibraryInfo::LibrariesPath);
-    else if(v == "QT_INSTALL_BINS")
+    else if(v == QLatin1String("QT_INSTALL_BINS"))
         return QLibraryInfo::location(QLibraryInfo::BinariesPath);
-    else if(v == "QT_INSTALL_PLUGINS")
+    else if(v == QLatin1String("QT_INSTALL_PLUGINS"))
         return QLibraryInfo::location(QLibraryInfo::PluginsPath);
-    else if(v == "QT_INSTALL_TRANSLATIONS")
+    else if(v == QLatin1String("QT_INSTALL_TRANSLATIONS"))
         return QLibraryInfo::location(QLibraryInfo::TranslationsPath);
-    else if(v == "QT_INSTALL_CONFIGURATION")
+    else if(v == QLatin1String("QT_INSTALL_CONFIGURATION"))
         return QLibraryInfo::location(QLibraryInfo::SettingsPath);
-    else if(v == "QT_INSTALL_EXAMPLES")
+    else if(v == QLatin1String("QT_INSTALL_EXAMPLES"))
         return QLibraryInfo::location(QLibraryInfo::ExamplesPath);
-    else if(v == "QT_INSTALL_DEMOS")
+    else if(v == QLatin1String("QT_INSTALL_DEMOS"))
         return QLibraryInfo::location(QLibraryInfo::DemosPath);
-    else if(v == "QMAKE_MKSPECS")
+    else if(v == QLatin1String("QMAKE_MKSPECS"))
         return qmake_mkspec_paths().join(Option::dirlist_sep);
-    else if(v == "QMAKE_VERSION")
-        return QLatin1String("1.0");        //###
+    else if(v == QLatin1String("QMAKE_VERSION"))
+        return QLatin1String(QLatin1String("1.0"));        //###
         //return qmake_version();
 #ifdef QT_VERSION_STR
-    else if(v == "QT_VERSION")
-        return QT_VERSION_STR;
+    else if(v == QLatin1String("QT_VERSION"))
+        return QLatin1String(QT_VERSION_STR);
 #endif
     return QLatin1String("UNKNOWN");        //###
 }

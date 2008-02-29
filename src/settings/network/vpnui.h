@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,7 +28,6 @@
 
 class QAction;
 class QListView;
-class QValueSpaceItem;
 class VPNListModel;
 
 class VpnUI : public QWidget {
@@ -48,10 +47,8 @@ private slots:
     void vpnActivated( const QModelIndex& item );
 
 private:
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QAction* propertyAction;
     QAction* removeAction;
-#endif
     QListView* vpnList;
     VPNListModel* model;
 

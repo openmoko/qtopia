@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,19 +23,10 @@
 #define QPE_USE_MALLOC_FOR_NEW
 #endif
 
-#define QPE_DEFAULT_TODAY_MODE "Daily"
-
-//#define QPE_HAVE_MEMALERTER
-//#define QPE_LAZY_APPLICATION_SHUTDOWN
-
 // The serial device for AT command access to the phone
 // hardware:
 //
 #define QTOPIA_PHONE_DEVICE "/dev/ttyS0"
-//
-// The baud rate for the serial connection:
-//
-#define QTOPIA_PHONE_RATE 38400
 
 // Displays the homescreen background in the phone launcher.
 #define QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
@@ -55,3 +46,12 @@
 // Extended Wireless LAN support (scanning and active reconnection) requires Wireless extension v14+ and will only be enabled if the 
 // device supports WE v14+
 //#define NO_WIRELESS_LAN
+
+// Define the devices whose packages are compatible with this device,
+// by convention the first device listed is this device.
+#define QTOPIA_COMPATIBLE_DEVICES "Desktop"
+
+// Define the name of the Video4Linux device to use for the camera.
+#ifndef V4L_VIDEO_DEVICE
+#define V4L_VIDEO_DEVICE            "/dev/video"
+#endif

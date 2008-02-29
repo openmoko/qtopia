@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -73,11 +88,19 @@ class QCheckBox;
 class Q3GroupBoxPrivate
 {
 public:
-    Q3GroupBoxPrivate():
-        vbox(0), grid(0), row(0), col(0), nRows(0), nCols(0), dir(Qt::Horizontal),
+    Q3GroupBoxPrivate(Q3GroupBox *w):
+      q(w), vbox(0), grid(0), row(0), col(0), nRows(0), nCols(0), dir(Qt::Horizontal),
         spac(5), marg(11),
-        checkbox(0) {}
+        checkbox(0),
+        frameStyle(Q3GroupBox::GroupBoxPanel | Q3GroupBox::Sunken),
+        lineWidth(1), midLineWidth(0), frameWidth(0),
+        leftFrameWidth(0), rightFrameWidth(0),
+        topFrameWidth(0), bottomFrameWidth(0) {}
 
+    void updateFrameWidth();
+    void updateStyledFrameWidths();
+
+    Q3GroupBox *q;
     QVBoxLayout *vbox;
     QGridLayout *grid;
     int row;
@@ -87,7 +110,93 @@ public:
     int spac, marg;
 
     QCheckBox *checkbox;
+
+    int frameStyle;
+    int oldFrameStyle;
+    short lineWidth, //line width
+        midLineWidth; //midline width
+    int frameWidth;
+    short leftFrameWidth, rightFrameWidth, 
+      topFrameWidth, bottomFrameWidth;
 };
+
+/*!
+  \internal
+  Updates the frame widths from the style.
+*/
+void Q3GroupBoxPrivate::updateStyledFrameWidths()
+{
+    QStyleOptionFrameV2 opt;
+    opt.initFrom(q);
+    QRect cr = q->style()->subElementRect(QStyle::SE_FrameContents, &opt, q);
+    leftFrameWidth = cr.left() - opt.rect.left();
+    topFrameWidth = cr.top() - opt.rect.top();
+    rightFrameWidth = opt.rect.right() - cr.right(), 
+    bottomFrameWidth = opt.rect.bottom() - cr.bottom();
+    frameWidth = qMax(qMax(leftFrameWidth, rightFrameWidth), 
+                      qMax(topFrameWidth, bottomFrameWidth));
+}
+
+/*!
+  \internal
+  Updated the frameWidth parameter.
+*/
+
+void Q3GroupBoxPrivate::updateFrameWidth()
+{
+    QRect fr = q->frameRect();
+
+    int frameShape  = frameStyle & QFrame::Shape_Mask;
+    int frameShadow = frameStyle & QFrame::Shadow_Mask;
+
+    frameWidth = -1;
+
+    switch (frameShape)  {
+
+    case QFrame::NoFrame:
+        frameWidth = 0;
+        break;
+
+    case QFrame::Box:
+    case QFrame::HLine:
+    case QFrame::VLine:
+        switch (frameShadow) {
+    case QFrame::Plain:
+        frameWidth = lineWidth;
+        break;
+    case QFrame::Raised:
+    case QFrame::Sunken:
+        frameWidth = (short)(lineWidth*2 + midLineWidth);
+        break;
+        }
+        break;
+
+    case QFrame::StyledPanel:
+        updateStyledFrameWidths();
+        break;
+
+    case QFrame::WinPanel:
+        frameWidth = 2;
+        break;
+
+
+    case QFrame::Panel:
+        switch (frameShadow) {
+    case QFrame::Plain:
+    case QFrame::Raised:
+    case QFrame::Sunken:
+        frameWidth = lineWidth;
+        break;
+        }
+        break;
+    }
+
+    if (frameWidth == -1)                                // invalid style
+        frameWidth = 0;
+
+    q->setFrameRect(fr);
+}
+
 
 
 
@@ -169,7 +278,7 @@ Q3GroupBox::~Q3GroupBox()
 
 void Q3GroupBox::init()
 {
-    d = new Q3GroupBoxPrivate();
+    d = new Q3GroupBoxPrivate(this);
 }
 
 
@@ -420,16 +529,376 @@ void Q3GroupBox::changeEvent(QEvent *ev)
     QGroupBox::changeEvent(ev);
 }
 
+/*! \reimp */
+bool Q3GroupBox::event(QEvent *e)
+{
+    if (e->type()==QEvent::Paint)
+    {
+        QStyleOptionGroupBox opt;
+        initStyleOption(&opt);
+        opt.lineWidth=d->lineWidth;
+        opt.midLineWidth=d->midLineWidth;
+        QPainter p(this);
+        if (frameShape()==GroupBoxPanel)
+        {
+            style()->drawComplexControl(QStyle::CC_GroupBox, &opt, &p, this);
+        }
+        else {
+            //in case it is a Paint event with a frame shape different from the group box
+            const QRect textRect = style()->subControlRect(QStyle::CC_GroupBox, &opt, QStyle::SC_GroupBoxLabel, this);
+            const QRect checkBoxRect = style()->subControlRect(QStyle::CC_GroupBox, &opt, QStyle::SC_GroupBoxCheckBox, this);
+
+            // Draw title
+            if ((opt.subControls & QStyle::SC_GroupBoxLabel) && !opt.text.isEmpty()) {
+                QColor textColor = opt.textColor;
+                if (textColor.isValid())
+                    p.setPen(textColor);
+                int alignment = int(opt.textAlignment);
+                if (!style()->styleHint(QStyle::SH_UnderlineShortcut, &opt, this))
+                    alignment |= Qt::TextHideMnemonic;
+
+                style()->drawItemText(&p, textRect,  Qt::TextShowMnemonic | Qt::AlignHCenter | alignment,
+                    opt.palette, opt.state & QStyle::State_Enabled, opt.text,
+                    textColor.isValid() ? QPalette::NoRole : QPalette::WindowText);
+
+                if (opt.state & QStyle::State_HasFocus) {
+                    QStyleOptionFocusRect fropt;
+                    fropt.QStyleOption::operator=(opt);
+                    fropt.rect = textRect;
+                    style()->drawPrimitive(QStyle::PE_FrameFocusRect, &fropt, &p, this);
+                }
+            }
+
+            // Draw checkbox
+            if (opt.subControls & QStyle::SC_GroupBoxCheckBox) {
+                QStyleOptionButton box;
+                box.QStyleOption::operator=(opt);
+                box.rect = checkBoxRect;
+                style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &box, &p, this);
+            }
+
+            //sets clipping
+            QRegion region(rect());
+            if (!title().isEmpty()) {
+                bool ltr = layoutDirection() == Qt::LeftToRight;
+                QRect finalRect = checkBoxRect.united(textRect);
+                if (isCheckable())
+                    finalRect.adjust(ltr ? -4 : 0, 0, ltr ? 0 : 4, 0);
+                region -= finalRect;
+            }
+            p.setClipRegion(region);
+
+            drawFrame(&p);
+        }
+        return false;
+    }
+    return QGroupBox::event(e);
+}
 
 /*!
-    \fn void Q3GroupBox::setFrameRect(QRect)
+    \fn void Q3GroupBox::drawFrame(QPainter *p)
     \internal
+*/
+
+void Q3GroupBox::drawFrame(QPainter *p)
+{
+    QPoint      p1, p2;
+    QStyleOptionFrame opt;
+    opt.init(this);
+
+    int frameShape  = d->frameStyle & QFrame::Shape_Mask;
+    int frameShadow = d->frameStyle & QFrame::Shadow_Mask;
+
+    int lw = 0;
+    int mlw = 0;
+    opt.rect = frameRect();
+
+    switch (frameShape) {
+    case QFrame::Box:
+    case QFrame::HLine:
+    case QFrame::VLine:
+    case QFrame::StyledPanel:
+        lw = d->lineWidth;
+        mlw = d->midLineWidth;
+        break;
+    default:
+        // most frame styles do not handle customized line and midline widths
+        // (see updateFrameWidth()).
+        lw = d->frameWidth;
+        break;
+    }
+    opt.lineWidth = lw;
+    opt.midLineWidth = mlw;
+    if (frameShadow == Sunken)
+        opt.state |= QStyle::State_Sunken;
+    else if (frameShadow == Raised)
+        opt.state |= QStyle::State_Raised;
+
+    switch (frameShape) {
+    case Box:
+        if (frameShadow == Plain)
+            qDrawPlainRect(p, opt.rect, opt.palette.foreground().color(), lw);
+        else
+            qDrawShadeRect(p, opt.rect, opt.palette, frameShadow == Sunken, lw, mlw);
+        break;
+
+    case StyledPanel:
+        style()->drawPrimitive(QStyle::PE_Frame, &opt, p, this);
+        break;
+
+    case Panel:
+        if (frameShadow == Plain)
+            qDrawPlainRect(p, opt.rect, opt.palette.foreground().color(), lw);
+        else
+            qDrawShadePanel(p, opt.rect, opt.palette, frameShadow == Sunken, lw);
+        break;
+
+    case WinPanel:
+        if (frameShadow == Plain)
+            qDrawPlainRect(p, opt.rect, opt.palette.foreground().color(), lw);
+        else
+            qDrawWinPanel(p, opt.rect, opt.palette, frameShadow == Sunken);
+        break;
+    case HLine:
+    case VLine:
+        if (frameShape == HLine) {
+            p1 = QPoint(opt.rect.x(), opt.rect.height() / 2);
+            p2 = QPoint(opt.rect.x() + opt.rect.width(), p1.y());
+        } else {
+            p1 = QPoint(opt.rect.x()+opt.rect.width() / 2, 0);
+            p2 = QPoint(p1.x(), opt.rect.height());
+        }
+        if (frameShadow == Plain) {
+            QPen oldPen = p->pen();
+            p->setPen(QPen(opt.palette.foreground().color(), lw));
+            p->drawLine(p1, p2);
+            p->setPen(oldPen);
+        } else {
+            qDrawShadeLine(p, p1, p2, opt.palette, frameShadow == Sunken, lw, mlw);
+        }
+        break;
+    }
+
+#ifdef QT_KEYPAD_NAVIGATION
+    if (QApplication::keypadNavigationEnabled() && hasFocus()) {
+        QStyleOptionFocusRect fopt;
+        fopt.init(this);
+        fopt.state |= QStyle::State_KeyboardFocusChange;
+        fopt.rect = frameRect();
+        style()->drawPrimitive(QStyle::PE_FrameFocusRect, &fopt, p, this);
+    }
+#endif
+}
+
+/*!
+    \property Q3GroupBox::frameShadow
+    \brief the frame shadow value from the frame style
+
+    \sa frameStyle() 
+*/
+
+/*
+    \enum Q3GroupBox::FrameShape
+    
+    This enum defines the available frame shapes a group box can
+    have. All values have equivalents in QFrame.
+
+    \value Box QFrame::Box
+    \value Sunken QFrame::Sunken
+    \value Plain QFrame::Plain
+    \value Raised QFrame::Raised
+    \value MShadow QFrame::Shadow_Mask
+    \value NoFrame QFrame::NoFrame
+    \value Panel QFrame::Panel
+    \value StyledPanel QFrame::StyledPanel
+    \value HLine QFrame::HLine
+    \value VLine QFrame::VLine
+    \value WinPanel QFrame::WinPanel
+    \value ToolBarPanel QFrame::StyledPanel
+    \value MenuBarPanel = QFrame::StyledPanel
+    \value PopupPanel QFrame::StyledPanel
+    \value LineEditPanel QFrame::StyledPanel
+    \value TabWidgetPanel QFrame::StyledPanel
+    \value GroupBoxPanel 0x0007
+    \value MShape QFrame::Shape_Mask
+*/
+
+
+void Q3GroupBox::setFrameShadow(DummyFrame s)
+{
+    setFrameStyle((d->frameStyle & MShape) | s);
+}
+
+Q3GroupBox::DummyFrame Q3GroupBox::frameShadow() const
+{
+    return (DummyFrame) (d->frameStyle & MShadow);
+}
+
+/*!
+    \property Q3GroupBox::frameShape
+    \brief the frame shape value from the frame style
+
+    \sa frameStyle(), frameShadow()
+*/
+
+void Q3GroupBox::setFrameShape(DummyFrame s)
+{
+    setFrameStyle((d->frameStyle & MShadow) | s);
+}
+
+Q3GroupBox::DummyFrame Q3GroupBox::frameShape() const
+{
+    return (DummyFrame) (d->frameStyle & MShape);
+}
+
+/*!
+    \fn void Q3GroupBox::setFrameStyle(int style)
+    
+    Sets the frame style to \a style.  The style is the bitwise OR
+    between a frame shape and a frame shadow style.
+*/
+
+void Q3GroupBox::setFrameStyle(int style)
+{
+    if (!testAttribute(Qt::WA_WState_OwnSizePolicy)) {
+        switch (style & MShape) {
+        case HLine:
+            setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+            break;
+        case VLine:
+            setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+            break;
+        default:
+            if ((d->frameStyle & MShape) == HLine || (d->frameStyle & MShape) == VLine)
+                setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        }
+        setAttribute(Qt::WA_WState_OwnSizePolicy, false);
+    }
+    d->frameStyle = style;
+    update();
+    d->updateFrameWidth();
+    d->oldFrameStyle = style;
+}
+
+/*!
+    \fn int Q3GroupBox::frameStyle() const
+    
+    Returns the frame style.
+*/
+
+int Q3GroupBox::frameStyle() const
+{
+    return d->frameStyle;
+}
+
+/*!
+    \property Q3GroupBox::lineWidth
+    \brief This property holds the width of the line.
+
+    \sa frameStyle(), frameShadow()
+*/
+
+void Q3GroupBox::setLineWidth(int w) 
+{
+    if (short(w) == d->lineWidth)
+        return;
+    d->lineWidth = short(w);
+    d->updateFrameWidth();
+}
+
+int Q3GroupBox::lineWidth() const
+{
+    return d->lineWidth;
+}    
+
+/*!
+    \property Q3GroupBox::midLineWidth
+    \brief This property holds the width of the mid-line.
+
+    \sa frameStyle(), frameShadow()
+*/
+
+void Q3GroupBox::setMidLineWidth(int w)
+{
+    if (short(w) == d->midLineWidth)
+        return;
+    d->midLineWidth = short(w);
+    d->updateFrameWidth();
+}
+
+int Q3GroupBox::midLineWidth() const
+{
+    return d->midLineWidth;
+}
+
+/*!
+    \property Q3GroupBox::frameRect
+    \brief the bounding rectangle of the frame of the group box.
 */
 
 /*!
     \fn QRect Q3GroupBox::frameRect() const
     \internal
 */
+
+QRect Q3GroupBox::frameRect() const
+{
+    QStyleOptionGroupBox opt;
+    initStyleOption(&opt);
+    QRect fr = style()->subControlRect(QStyle::CC_GroupBox, &opt, QStyle::SC_GroupBoxFrame, this);
+    return fr;
+}
+
+/*!
+    \fn void Q3GroupBox::setFrameRect(QRect)
+    \internal
+*/
+
+void Q3GroupBox::setFrameRect(QRect r)
+{
+    QRect cr = r.isValid() ? r : rect();
+    if ((d->frameStyle & QFrame::Shape_Mask) == StyledPanel) {
+        cr.adjust(d->leftFrameWidth, d->topFrameWidth, -d->rightFrameWidth, -d->bottomFrameWidth);
+    } else
+        cr.adjust(d->frameWidth, d->frameWidth, -d->frameWidth, -d->frameWidth);
+    setContentsMargins(cr.left(), cr.top(), rect().right() - cr.right(), rect().bottom() - cr.bottom());
+}
+
+/*!
+    \fn int Q3GroupBox::frameWidth() const
+    \internal
+*/
+
+int Q3GroupBox::frameWidth() const
+{
+    return d->frameWidth;
+}
+
+#if defined(Q_MOC_RUN)
+/*!
+    \enum Q3GroupBox::FrameShape
+    \internal
+
+    \value Box
+    \value Sunken
+    \value Plain
+    \value Raised
+    \value MShadow
+    \value NoFrame
+    \value Panel 
+    \value StyledPanel
+    \value HLine 
+    \value VLine 
+    \value GroupBoxPanel
+    \value WinPanel 
+    \value ToolBarPanel 
+    \value MenuBarPanel 
+    \value PopupPanel 
+    \value LineEditPanel 
+    \value TabWidgetPanel 
+    \value MShape
+*/
+#else
 /*!
     \enum Q3GroupBox::DummyFrame
     \internal
@@ -453,50 +922,17 @@ void Q3GroupBox::changeEvent(QEvent *ev)
     \value TabWidgetPanel 
     \value MShape
 */
+#endif
 
 /*!
-    \fn void Q3GroupBox::setFrameShadow(DummyFrame)
-    \internal
+    \typedef Q3GroupBox::FrameShape
+    \internal 
 */
 
 /*!
-    \fn DummyFrame Q3GroupBox::frameShadow() const
-    \internal
-*/
-
-/*!
-    \fn void Q3GroupBox::setFrameShape(DummyFrame)
-    \internal
-*/
-
-/*!
-    \fn DummyFrame Q3GroupBox::frameShape() const
-    \internal
-*/
-
-/*!
-    \fn void Q3GroupBox::setFrameStyle(int)
-    \internal
-*/
-
-/*!
-    \fn int Q3GroupBox::frameStyle() const
-    \internal
-*/
-
-/*!
-    \fn int Q3GroupBox::frameWidth() const
-    \internal
-*/
-
-/*!
-    \fn void Q3GroupBox::setLineWidth(int)
-    \internal
-*/
-
-/*!
-    \fn int Q3GroupBox::lineWidth() const
-    \internal
+    \property Q3GroupBox::margin
+    \brief the width of the margin around the contents of the
+           group box.
 */
 
 /*!
@@ -513,18 +949,8 @@ void Q3GroupBox::changeEvent(QEvent *ev)
     \fn int Q3GroupBox::margin() const 
     \since 4.2
 
-    Returns the with of the the margin around the contents of the widget.
+    Returns the width of the the margin around the contents of the widget.
     
     This function uses QWidget::getContentsMargins() to get the margin.
     \sa setMargin(), QWidget::getContentsMargins()
-*/
-
-/*!
-    \fn void Q3GroupBox::setMidLineWidth(int)
-    \internal
-*/
-
-/*!
-    \fn int Q3GroupBox::midLineWidth() const
-    \internal
 */

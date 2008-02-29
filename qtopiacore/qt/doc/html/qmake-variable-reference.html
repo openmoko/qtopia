@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/qmake-manual.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qmake-manual.qdoc -->
 <head>
-  <title>Qt 4.2: qmake Variable Reference</title>
+  <title>Qt 4.3: qmake Variable Reference</title>
   <link rel="prev" href="qmake-reference.html" />
   <link rel="contents" href="qmake-manual.html" />
   <link rel="next" href="qmake-function-reference.html" />
@@ -20,7 +20,8 @@
 [<a href="qmake-manual.html">Contents</a>]
 [Next: <a href="qmake-function-reference.html">qmake Function Reference</a>]
 </p>
-<h1 align="center">qmake Variable Reference<br /><small></small></h1>
+<h1 align="center">qmake Variable Reference<br /><span class="subtitle"></span>
+</h1>
 <p><tt>qmake</tt>'s fundamental behavior is influenced by variable declarations that define the build process of each project. Some of these declare resources, such as headers and source files, that are common to each platform; others are used to customize the behavior of compilers and linkers on specific platforms.</p>
 <p>Platform-specific variables follow the naming pattern of the variables which they extend or modify, but include the name of the relevant platform in their name. For example, <tt>QMAKE_LIBS</tt> can be used to specify a list of libraries that a project needs to link against, and <tt>QMAKE_LIBS_X11</tt> can be used to extend or override this list.</p>
 <p><table width="100%">
@@ -230,7 +231,7 @@
 <thead><tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td>flat</td><td>When using the vcapp template this will put all the source files into the source group and the header files into the header group regardless of what directory they reside in. Turning this option off will group the files within the source/header group depending on the directory they reside. This is turned on by default.</td></tr>
 <tr valign="top" class="even"><td>embed_manifest_dll</td><td>Embeds a manifest file in the DLL created as part of a library project.</td></tr>
-<tr valign="top" class="odd"><td>embed_manifest_dll</td><td>Embeds a manifest file in the DLL created as part of an application project.</td></tr>
+<tr valign="top" class="odd"><td>embed_manifest_exe</td><td>Embeds a manifest file in the DLL created as part of an application project.</td></tr>
 </table></p>
 <p>See <a href="qmake-platform-notes.html#visual-studio-2005-manifest-files">qmake Platform Notes</a> for more information on the options for embedding manifest files.</p>
 <p>These options only have an effect on Mac OS X:</p>
@@ -370,11 +371,11 @@
 <p>This variable is set by <tt>qmake</tt> if files can be found that contain the <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> macro. <tt>OBJMOC</tt> contains the name of all intermediate moc object files. The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
 <a name="post-targetdeps"></a><a name="post-targetdeps"></a>
 <h2>POST_TARGETDEPS</h2>
-<p>All libraries that the <a href="#target">target</a> depends on can be listed in this variable. Some backends do not support this, these include MSVC Dsp, and ProjectBuilder .pbproj files. Generally this is support internally by these build tools, this is usefull for explicitly listing dependant static libraries.</p>
+<p>All libraries that the <a href="#target">target</a> depends on can be listed in this variable. Some backends do not support this, these include MSVC Dsp, and ProjectBuilder .pbproj files. Generally this is supported internally by these build tools, this is useful for explicitly listing dependant static libraries.</p>
 <p>This list will go after all builtin (and <a href="#pre-targetdeps">$$PRE_TARGETDEPS</a>) dependencies.</p>
 <a name="pre-targetdeps"></a><a name="pre-targetdeps"></a>
 <h2>PRE_TARGETDEPS</h2>
-<p>All libraries that the <a href="#target">target</a> depends on can be listed in this variable. Some backends do not support this, these include MSVC Dsp, and ProjectBuilder .pbproj files. Generally this is support internally by these build tools, this is usefull for explicitly listing dependant static libraries.</p>
+<p>All libraries that the <a href="#target">target</a> depends on can be listed in this variable. Some backends do not support this, these include MSVC Dsp, and ProjectBuilder .pbproj files. Generally this is supported internally by these build tools, this is useful for explicitly listing dependant static libraries.</p>
 <p>This list will go before all builtin dependencies.</p>
 <a name="precompiled-header"></a><a name="precompiled-header"></a>
 <h2>PRECOMPILED_HEADER</h2>
@@ -603,7 +604,7 @@
 <a name="qmake-lflags-windows"></a>
 <h2>QMAKE_LFLAGS_WINDOWS</h2>
 <p><i>This is used on Windows only.</i></p>
-<p>This variable contains link flags when building Windows GUI projects (i.e. non-console applications). The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
+<p>This variable contains link flags when building Windows GUI projects (i.e&#x2e; non-console applications). The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
 <a name="qmake-lflags-windows-dll"></a>
 <h2>QMAKE_LFLAGS_WINDOWS_DLL</h2>
 <p><i>This is used on Windows only.</i></p>
@@ -886,6 +887,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

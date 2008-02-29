@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,8 +36,14 @@ class QMimeTypeData;
 class QTOPIA_EXPORT QMimeType
 {
 public:
+    QMimeType();
     explicit QMimeType( const QString& ext_or_id );
     explicit QMimeType( const QContent& );
+    QMimeType( const QMimeType &other );
+
+    QMimeType &operator =( const QMimeType &other );
+
+    bool operator ==( const QMimeType &other ) const;
 
     enum IconType
     {
@@ -58,25 +64,32 @@ public:
     QDrmRights::Permission permission() const;
     QList<QDrmRights::Permission> permissions() const;
 
-    static QString appsFolderName();
     static void updateApplications();
+
+    bool isNull() const;
+
+    static QMimeType fromId( const QString &mimeId );
+    static QMimeType fromExtension( const QString &extension );
+    static QMimeType fromFileName( const QString &fileName );
+
+    static void addAssociation(const QString& mimeType, const QString& application, const QString& icon, QDrmRights::Permission permission);
+    static void removeAssociation(const QString& mimeType, const QString& application);
+    static QContentList applicationsFor(const QContent&);
+    static QContentList applicationsFor(const QMimeType&);
+    static QContent defaultApplicationFor(const QContent&);
+    static QContent defaultApplicationFor(const QMimeType&);
+    static void setDefaultApplicationFor(const QString&, const QContent&);
 
 private:
     static void clear();
-    static void registerApp( const QContent& );
     static void loadExtensions();
     static void loadExtensions(const QString&);
-    static void initializeAppManager();
     void init( const QString& ext_or_id );
-    class Private;
-    static Private* d;
-    static Private& data();
-    static QMimeTypeData* data(const QString& id);
+    static QMimeTypeData data(const QString& id);
     QString mimeId;
     static QMutex staticsGuardMutex;
 
     friend class QMimeTypeData;
-    friend class QMimeTypeAppManager;
     friend class QtopiaApplication;
 };
 

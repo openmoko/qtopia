@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,6 +49,7 @@
 //convenience
 const char *Option::application_argv0 = 0;
 QString Option::prf_ext;
+QString Option::js_ext;
 QString Option::prl_ext;
 QString Option::libtool_ext;
 QString Option::pkgcfg_ext;
@@ -73,6 +89,7 @@ QStringList Option::user_configs;
 QStringList Option::after_user_configs;
 QString Option::user_template;
 QString Option::user_template_prefix;
+QStringList Option::shellPath;
 #if defined(Q_OS_WIN32)
 Option::TARG_MODE Option::target_mode = Option::TARG_WIN_MODE;
 #elif defined(Q_OS_MAC)
@@ -97,6 +114,7 @@ bool Option::mkfile::do_deps = true;
 bool Option::mkfile::do_mocs = true;
 bool Option::mkfile::do_dep_heuristics = true;
 bool Option::mkfile::do_preprocess = false;
+bool Option::mkfile::do_stub_makefile = false;
 bool Option::mkfile::do_cache = true;
 QString Option::mkfile::cachefile;
 QStringList Option::mkfile::project_files;
@@ -254,6 +272,8 @@ Option::parseCommandLine(int argc, char **argv, int skip)
                         Option::mkfile::do_mocs = false;
                     } else if(opt == "nocache") {
                         Option::mkfile::do_cache = false;
+                    } else if(opt == "createstub") {
+                        Option::mkfile::do_stub_makefile = true;
                     } else if(opt == "nodependheuristics") {
                         Option::mkfile::do_dep_heuristics = false;
                     } else if(opt == "E") {
@@ -310,6 +330,22 @@ Option::parseCommandLine(int argc, char **argv, int skip)
     return Option::QMAKE_CMDLINE_SUCCESS;
 }
 
+#ifdef Q_OS_WIN
+static QStringList detectShellPath()
+{
+    QStringList paths;
+    QString path = qgetenv("PATH");
+    QStringList pathlist = path.toLower().split(";");
+    for (int i = 0; i < pathlist.count(); i++) {
+        QString maybeSh = pathlist.at(i) + "/sh.exe";
+        if (QFile::exists(maybeSh)) {
+            paths.append(maybeSh);
+        }
+    }
+    return paths;
+}
+#endif
+
 int
 Option::init(int argc, char **argv)
 {
@@ -322,6 +358,7 @@ Option::init(int argc, char **argv)
     Option::libtool_ext = ".la";
     Option::pkgcfg_ext = ".pc";
     Option::prf_ext = ".prf";
+    Option::js_ext = ".js";
     Option::ui_ext = ".ui";
     Option::h_ext << ".h" << ".hpp" << ".hh" << ".hxx";
     Option::c_ext << ".c";
@@ -339,6 +376,7 @@ Option::init(int argc, char **argv)
     Option::pro_ext = ".pro";
 #ifdef Q_OS_WIN
     Option::dirlist_sep = ";";
+    Option::shellPath = detectShellPath();
 #else
     Option::dirlist_sep = ":";
 #endif
@@ -350,9 +388,13 @@ Option::init(int argc, char **argv)
         QString argv0 = argv[0];
         if(Option::qmake_mode == Option::QMAKE_GENERATE_NOTHING)
             Option::qmake_mode = default_mode(argv0);
-        if(!argv0.isEmpty() && argv0.at(0) == QLatin1Char('/')) {
+        if(!argv0.isEmpty() && !QFileInfo(argv0).isRelative()) {
             Option::qmake_abslocation = argv0;
-        } else if (argv0.contains(QLatin1Char('/'))) { //relative PWD
+        } else if (argv0.contains(QLatin1Char('/'))
+#ifdef Q_OS_WIN
+		   || argv0.contains(QLatin1Char('\\'))
+#endif
+	    ) { //relative PWD
             Option::qmake_abslocation = QDir::current().absoluteFilePath(argv0);
         } else { //in the PATH
             QByteArray pEnv = qgetenv("PATH");
@@ -366,6 +408,9 @@ Option::init(int argc, char **argv)
                 if ((*p).isEmpty())
                     continue;
                 QString candidate = currentDir.absoluteFilePath(*p + QLatin1Char('/') + argv0);
+#ifdef Q_OS_WIN
+                candidate += ".exe";
+#endif
                 if (QFile::exists(candidate)) {
                     Option::qmake_abslocation = candidate;
                     break;
@@ -469,6 +514,7 @@ Option::init(int argc, char **argv)
             Option::dir_sep = "/";
         Option::obj_ext = ".o";
     }
+    Option::qmake_abslocation = Option::fixPathToTargetOS(Option::qmake_abslocation);
     return QMAKE_CMDLINE_SUCCESS;
 }
 
@@ -494,6 +540,8 @@ bool Option::postProcessProject(QMakeProject *project)
         Option::prl_ext = project->first("QMAKE_EXT_PRL");
     if(!project->isEmpty("QMAKE_EXT_PRF"))
         Option::prf_ext = project->first("QMAKE_EXT_PRF");
+    if(!project->isEmpty("QMAKE_EXT_JS"))
+        Option::prf_ext = project->first("QMAKE_EXT_JS");
     if(!project->isEmpty("QMAKE_EXT_UI"))
         Option::ui_ext = project->first("QMAKE_EXT_UI");
     if(!project->isEmpty("QMAKE_EXT_CPP_MOC"))
@@ -693,7 +741,8 @@ QString qmake_libraryInfoFile()
             if ((*p).isEmpty())
                 continue;
             QString candidate = currentDir.absoluteFilePath(*p + QLatin1Char('/') + argv0);
-            if (QFile::exists(candidate)) {
+            QFileInfo candidate_fi(candidate);
+            if (candidate_fi.exists() && !candidate_fi.isDir()) {
                 absPath = candidate;
                 break;
             }

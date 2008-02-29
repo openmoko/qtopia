@@ -19,7 +19,7 @@
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>When planning to customize and install Qtopia on a specific device a number of a number of factors that must be taken into consideration:</p>
+<p>When planning to customize and install Qtopia on a specific device there are a number of factors that must be taken into consideration:</p>
 <ul>
 <li>If the device has a touch screen, Qtopia calibration must be enabled.</li>
 <li>If the device runs off batteries, Qtopia may be required to call APM functions for power saving. See the Power Management section below for more details.</li>
@@ -34,30 +34,9 @@
 <p>All the changes required to add these device specific customizations are centralized in Qtopia and involve a small number of files (described below). This document should make it easy for OEMs and system integrators to understand how to make Qtopia aware of any special hardware that a device might have.</p>
 <a name="devicespecific"></a><a name="device-specific-code"></a>
 <h2>Device-specific Code</h2>
-<p>During configure, the <tt>-xplatform</tt> option is used to select which <tt>custom-&lt;platform-spec&gt;.h</tt> file will be used when compiling Qtopia.</p>
-<p>The following macros can be defined or undefined in a <tt>custom.h</tt> file to customize Qtopia for the specific hardware. The associated <tt>custom-&lt;platform-spec&gt;.cpp</tt> file will be compiled and linked to provide any custom functions that are required.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Macro Name</th><th>description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>NO_WIRELESS_LAN</tt></td><td><tt>#define</tt> this to disable wireless LAN. This reduces Qtopia's foot print by a considerable amount.</td></tr>
-<tr valign="top" class="even"><td><tt>QPE_USE_MALLOC_FOR_NEW</tt></td><td>#define this to have memory allocated using <tt>malloc()</tt> instead of the default C++ new implementation (this is faster in some cases).</td></tr>
-<tr valign="top" class="odd"><td><tt>QPE_NEED_CALIBRATION</tt></td><td>#define this if there is a touch screen that requires calibration.</td></tr>
-<tr valign="top" class="even"><td><tt>QPE_ARCHITECTURE</tt></td><td>#define this with a string that contains the manufacturer and model that uniquely identifies the device, for example <i>SHARP/SL5500</i>.</td></tr>
-<tr valign="top" class="odd"><td><tt>QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</tt></td><td><tt>#define</tt> this to have the phone homescreen background used as the background for the launcher.</td></tr>
-<tr valign="top" class="even"><td><tt>QTOPIA_ENABLE_GLOBAL_BACKGROUNDS</tt></td><td><tt>#define</tt> this to have the phone homescreen background used as the background for all applications. Requires <tt>QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</tt>.</td></tr>
-<tr valign="top" class="odd"><td><tt>QGLOBAL_PIXMAP_CACHE_LIMIT=5242880</tt></td><td><tt>#define</tt> this if the default 1M pixmap cache size is not big enough, screen size of 640x480 or bigger.</td></tr>
-<tr valign="top" class="even"><td><tt>QTOPIA_PHONE_DEVICE</tt></td><td><tt>#define</tt> this to select the modem device, e.g&#x2e; <tt>/dev/ttyS0</tt> (for details see <a href="tut-multiplexing.html">Tutorial: Writing a Multiplexer Plug-in</a>)</td></tr>
-<tr valign="top" class="odd"><td><tt>QTOPIA_PHONE_MUX</tt></td><td><tt>enables/disables</tt> multiplexing in Qtopia (for details see <a href="syscust-gsm.html">GSM Modem Integration</a>)</td></tr>
-<tr valign="top" class="even"><td><tt>QTOPIA_PHONE_VENDOR</tt></td><td><tt>#define</tt> this to select the default multiplexer (for details see <a href="syscust-gsm.html">GSM Modem Integration</a>)</td></tr>
-<tr valign="top" class="odd"><td><tt>QTOPIA_ZONEINFO_PATH</tt></td><td><tt>#define</tt> this to select the path to zoneinfo information (for details see <a href="syscust-time.html">Time on an Embedded Device</a>)</td></tr>
-</table></p>
-<p>In addition to the above macros and defines, the following three functions must be implemented in the <tt>custom-&lt;platform-spec&gt;.cpp</tt> file.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Function Name</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>int qpe_sysBrightnessSteps();</tt></td><td>This function is called by Qtopia to query the number of graduations the device's LCD backlight/frontlight has.</td></tr>
-<tr valign="top" class="even"><td><tt>void qpe_setBrightness(int);</tt></td><td>This function must be implemented with any device specific code used to set the backlight/frontlight brightness to the specified level.</td></tr>
-<tr valign="top" class="odd"><td><tt>void PowerStatusManager::getStatus();</tt></td><td>This function must be implemented to query the power status. The <tt>PowerStatus</tt> class in <tt>qtopia/power.h</tt> defines the power status abstraction. See the <tt>custom-linux-generic-g++.cpp</tt> file for details of a default implementation.</td></tr>
-</table></p>
-<p>For reference implementations of the device specific code, the existing <tt>custom-*.*</tt> files found in <tt>src/libraries/qtopia/</tt> may be of assistance.</p>
+<p>Device-specific code is implemented in <a href="buildsystem/over-device-profiles-1.html#custom-h-custom-cpp">custom.h/custom.cpp</a>.</p>
+<p>Since these files are tied to a device it is useful to have them in the device profile. If these files are not present configure will look in the traditional location, <tt>&lt;source&gt;/src/libraries/qtopia/custom-&lt;xplatform&gt;.(h|cpp)</tt>. See <a href="custom-h.html">&lt;custom.h&gt;</a> for more information about these files.</p>
+<p>For reference implementations of these files, the existing files found in <tt>&lt;source&gt;/devices/&lt;device&gt;/custom.*</tt> and <tt>&lt;source&gt;/src/libraries/qtopiabase/custom-&lt;xplatform&gt;.*</tt> may be of assistance.</p>
 <a name="removable-media-and-devices"></a>
 <h2>Removable Media and Devices</h2>
 <p>Qtopia supports both removable media, such as SD cards, and removable hotplug devices, such as PCMCIA network cards. However, as there is no standard way in Linux for Qtopia to detect when these devices or media are inserted or removed, it is the system integrators responsibility to detect whenever the attached PCMCIA devices or mounted filesystems change notify Qtopia appropriately.</p>
@@ -76,6 +55,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

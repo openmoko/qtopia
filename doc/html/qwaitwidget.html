@@ -17,23 +17,43 @@
 <ul>
 <li><a href="qwaitwidget-members.html">List of all members, including inherited members</a></li>
 </ul>
+<a name="properties"></a>
+<h3>Properties</h3>
+<ul>
+<li><div class="fn"/><b><a href="qwaitwidget.html#cancelEnabled-prop">cancelEnabled</a></b> : bool</li>
+<li><div class="fn"/><b><a href="qwaitwidget.html#wasCancelled-prop">wasCancelled</a></b> : const bool</li>
+</ul>
+<ul>
+<li><div class="fn"/>2 properties inherited from <a href="qdialog.html#properties">QDialog</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+</ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
 <li><div class="fn"/><b><a href="qwaitwidget.html#QWaitWidget">QWaitWidget</a></b> ( QWidget * <i>parent</i> )</li>
+<li><div class="fn"/>bool <b><a href="qwaitwidget.html#wasCancelled-prop">wasCancelled</a></b> () const</li>
+</ul>
+<ul>
+<li><div class="fn"/>9 public functions inherited from <a href="qdialog.html#public-functions">QDialog</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+</ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
 <li><div class="fn"/>void <b><a href="qwaitwidget.html#hide">hide</a></b> ()</li>
-<li><div class="fn"/>void <b><a href="qwaitwidget.html#setCancelEnabled">setCancelEnabled</a></b> ( bool <i>enabled</i> )</li>
+<li><div class="fn"/>void <b><a href="qwaitwidget.html#cancelEnabled-prop">setCancelEnabled</a></b> ( bool <i>enabled</i> )</li>
 <li><div class="fn"/>void <b><a href="qwaitwidget.html#setColor">setColor</a></b> ( const QColor &amp; <i>col</i> )</li>
 <li><div class="fn"/>void <b><a href="qwaitwidget.html#setExpiryTime">setExpiryTime</a></b> ( int <i>msec</i> )</li>
 <li><div class="fn"/>void <b><a href="qwaitwidget.html#setText">setText</a></b> ( const QString &amp; <i>label</i> )</li>
 <li><div class="fn"/>void <b><a href="qwaitwidget.html#show">show</a></b> ()</li>
-<li><div class="fn"/>bool <b><a href="qwaitwidget.html#wasCancelled">wasCancelled</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>9 public functions inherited from <a href="qdialog.html#public-functions">QDialog</a></li>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>5 public slots inherited from <a href="qdialog.html#public-slots">QDialog</a></li>
+<li><div class="fn"/>20 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -47,12 +67,6 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>2 properties inherited from <a href="qdialog.html#properties">QDialog</a></li>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>5 public slots inherited from <a href="qdialog.html#public-slots">QDialog</a></li>
-<li><div class="fn"/>20 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>5 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
@@ -69,13 +83,13 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QWaitWidget class provides an informative idle screen for a slow operation.</p>
-<p>A wait widget is used to give the user an indication that an operation is going to take some time, and to demonstrate that the application has not frozen. It can also give the user an opportunity to abort the operation when <a href="qwaitwidget.html#setCancelEnabled">setCancelEnabled</a>() is set to be true.</p>
+<p>A wait widget is used to give the user an indication that an operation is going to take some time, and to demonstrate that the application has not frozen. It can also give the user an opportunity to abort the operation when <a href="qwaitwidget.html#cancelEnabled-prop">setCancelEnabled</a>() is set to be true.</p>
 <p>For example, construct a QWaitWidget to popup over <i>parent</i>.</p>
 <pre>    QWaitWidget *waitWidget = new QWaitWidget(this);
     waitWidget-&gt;show();
 <span class="comment">    // do time consuming operations</span>
     delete waitWidget;</pre>
-<p>Use <a href="qwaitwidget.html#setText">setText</a>() and <a href="qwaitwidget.html#setCancelEnabled">setCancelEnabled</a>() to give more feedback and control to the user. For example,</p>
+<p>Use <a href="qwaitwidget.html#setText">setText</a>() and <a href="qwaitwidget.html#cancelEnabled-prop">setCancelEnabled</a>() to give more feedback and control to the user. For example,</p>
 <pre>    QWaitWidget *waitWidget = new QWaitWidget(this);
     waitWidget-&gt;setCancelEnabled( true );
     waitWidget-&gt;setText( &quot;Searching...&quot; );
@@ -92,30 +106,39 @@
     waitWidget-&gt;hide();</pre>
 <p>The wait widget, in this example, emits a signal <a href="qwaitwidget.html#cancelled">cancelled</a>() when the user presses the Cancel button.</p>
 <p align="center"><img src="images/qwaitwidget.png" alt="&quot;A wait widget with text&quot;" /></p><hr />
+<h2>Property Documentation</h2>
+<h3 class="fn"><a name="cancelEnabled-prop"></a>cancelEnabled : bool</h3>
+<p>This property holds indicates whether the Cancel button appears on the context menu.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>void setCancelEnabled ( bool <i>enabled</i> )</b></li>
+</ul>
+<h3 class="fn"><a name="wasCancelled-prop"></a>wasCancelled : const bool</h3>
+<p>This property holds indicates whether the widget was cancelled by the user when it was last shown.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool wasCancelled () const</b></li>
+</ul>
+<hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QWaitWidget"></a>QWaitWidget::QWaitWidget ( <a href="qwidget.html">QWidget</a> * <i>parent</i> )</h3>
 <p>Constructs an <a href="qwaitwidget.html">QWaitWidget</a> object with the given <i>parent</i>.</p>
 <h3 class="fn"><a name="cancelled"></a>void QWaitWidget::cancelled ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever the wait widget dialog is cancelled by user.</p>
-<h3 class="fn"><a name="hide"></a>void QWaitWidget::hide ()</h3>
+<h3 class="fn"><a name="hide"></a>void QWaitWidget::hide ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Hides the widget and its child widgets.</p>
-<h3 class="fn"><a name="setCancelEnabled"></a>void QWaitWidget::setCancelEnabled ( bool <i>enabled</i> )</h3>
-<p>Sets whether the Cancel button appears on the context menu to <i>enabled</i>. When the Cancel button is presed the signal <a href="qwaitwidget.html#cancelled">cancelled</a>() is emitted.</p>
-<p>See also <a href="qwaitwidget.html#cancelled">cancelled</a>().</p>
-<h3 class="fn"><a name="setColor"></a>void QWaitWidget::setColor ( const <a href="qcolor.html">QColor</a> &amp; <i>col</i> )</h3>
+<h3 class="fn"><a name="setColor"></a>void QWaitWidget::setColor ( const <a href="qcolor.html">QColor</a> &amp; <i>col</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Blends the image with color <i>col</i>.</p>
-<h3 class="fn"><a name="setExpiryTime"></a>void QWaitWidget::setExpiryTime ( int <i>msec</i> )</h3>
+<h3 class="fn"><a name="setExpiryTime"></a>void QWaitWidget::setExpiryTime ( int <i>msec</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Hides the widget after <i>msec</i>.</p>
-<h3 class="fn"><a name="setText"></a>void QWaitWidget::setText ( const <a href="qstring.html">QString</a> &amp; <i>label</i> )</h3>
+<h3 class="fn"><a name="setText"></a>void QWaitWidget::setText ( const <a href="qstring.html">QString</a> &amp; <i>label</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Sets the informative text <i>label</i> for this wait widget.</p>
-<h3 class="fn"><a name="show"></a>void QWaitWidget::show ()</h3>
+<h3 class="fn"><a name="show"></a>void QWaitWidget::show ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Shows the widget and its child widgets. The widget is shown maximized.</p>
-<h3 class="fn"><a name="wasCancelled"></a>bool QWaitWidget::wasCancelled () const</h3>
-<p>Returns whether the widget was cancelled by the user when it was last shown.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

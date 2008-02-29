@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: List of All Members for QGraphicsEllipseItem</title>
+  <title>Qt 4.3: List of All Members for QGraphicsEllipseItem</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -18,9 +18,9 @@
 <li><div class="fn"/>enum <a href="qgraphicsitem.html#GraphicsItemChange-enum">GraphicsItemChange</a></li>
 <li><div class="fn"/>enum <a href="qgraphicsitem.html#GraphicsItemFlag-enum">GraphicsItemFlag</a></li>
 <li><div class="fn"/>flags <a href="qgraphicsitem.html#GraphicsItemFlag-enum">GraphicsItemFlags</a></li>
-<li><div class="fn"/><a href="qgraphicsellipseitem.html#QGraphicsEllipseItem">QGraphicsEllipseItem</a> ( QGraphicsItem *, QGraphicsScene * )</li>
-<li><div class="fn"/><a href="qgraphicsellipseitem.html#QGraphicsEllipseItem-2">QGraphicsEllipseItem</a> ( const QRectF &amp;, QGraphicsItem *, QGraphicsScene * )</li>
-<li><div class="fn"/><a href="qgraphicsellipseitem.html#QGraphicsEllipseItem-3">QGraphicsEllipseItem</a> ( qreal, qreal, qreal, qreal, QGraphicsItem *, QGraphicsScene * )</li>
+<li><div class="fn"/><a href="qgraphicsellipseitem.html#QGraphicsEllipseItem">QGraphicsEllipseItem</a> ( QGraphicsItem * )</li>
+<li><div class="fn"/><a href="qgraphicsellipseitem.html#QGraphicsEllipseItem-2">QGraphicsEllipseItem</a> ( const QRectF &amp;, QGraphicsItem * )</li>
+<li><div class="fn"/><a href="qgraphicsellipseitem.html#QGraphicsEllipseItem-3">QGraphicsEllipseItem</a> ( qreal, qreal, qreal, qreal, QGraphicsItem * )</li>
 <li><div class="fn"/><a href="qgraphicsellipseitem.html#dtor.QGraphicsEllipseItem">~QGraphicsEllipseItem</a> ()</li>
 <li><div class="fn"/><a href="qgraphicsellipseitem.html#Type-var">Type</a> : const int</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#UserType-var">UserType</a> : const int</li>
@@ -40,6 +40,7 @@
 <li><div class="fn"/><a href="qgraphicsitem.html#contextMenuEvent">contextMenuEvent</a> ( QGraphicsSceneContextMenuEvent * )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#cursor">cursor</a> () const : QCursor</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#data">data</a> ( int ) const : QVariant</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#deviceTransform">deviceTransform</a> ( const QTransform &amp; ) const : QTransform</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#dragEnterEvent">dragEnterEvent</a> ( QGraphicsSceneDragDropEvent * )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#dragLeaveEvent">dragLeaveEvent</a> ( QGraphicsSceneDragDropEvent * )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#dragMoveEvent">dragMoveEvent</a> ( QGraphicsSceneDragDropEvent * )</li>
@@ -63,6 +64,8 @@
 <li><div class="fn"/><a href="qgraphicsitem.html#isAncestorOf">isAncestorOf</a> ( const QGraphicsItem * ) const : bool</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#isEnabled">isEnabled</a> () const : bool</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#isObscured">isObscured</a> () const : bool</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#isObscured-2">isObscured</a> ( qreal, qreal, qreal, qreal ) const : bool</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#isObscured-3">isObscured</a> ( const QRectF &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#isObscuredBy">isObscuredBy</a> ( const QGraphicsItem * ) const : bool</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#isSelected">isSelected</a> () const : bool</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#isVisible">isVisible</a> () const : bool</li>
@@ -73,34 +76,39 @@
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromItem-2">mapFromItem</a> ( const QGraphicsItem *, const QRectF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromItem-3">mapFromItem</a> ( const QGraphicsItem *, const QPolygonF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromItem-4">mapFromItem</a> ( const QGraphicsItem *, const QPainterPath &amp; ) const : QPainterPath</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#mapFromItem-5">mapFromItem</a> ( const QGraphicsItem *, qreal, qreal ) const : QPointF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapFromItem-5">mapFromItem</a> ( const QGraphicsItem *, qreal, qreal, qreal, qreal ) const : QPolygonF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapFromItem-6">mapFromItem</a> ( const QGraphicsItem *, qreal, qreal ) const : QPointF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromParent">mapFromParent</a> ( const QPointF &amp; ) const : QPointF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromParent-2">mapFromParent</a> ( const QRectF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromParent-3">mapFromParent</a> ( const QPolygonF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromParent-4">mapFromParent</a> ( const QPainterPath &amp; ) const : QPainterPath</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#mapFromParent-5">mapFromParent</a> ( qreal, qreal ) const : QPointF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapFromParent-5">mapFromParent</a> ( qreal, qreal, qreal, qreal ) const : QPolygonF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapFromParent-6">mapFromParent</a> ( qreal, qreal ) const : QPointF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromScene">mapFromScene</a> ( const QPointF &amp; ) const : QPointF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromScene-2">mapFromScene</a> ( const QRectF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromScene-3">mapFromScene</a> ( const QPolygonF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapFromScene-4">mapFromScene</a> ( const QPainterPath &amp; ) const : QPainterPath</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#mapFromScene-5">mapFromScene</a> ( qreal, qreal ) const : QPointF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapFromScene-5">mapFromScene</a> ( qreal, qreal, qreal, qreal ) const : QPolygonF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapFromScene-6">mapFromScene</a> ( qreal, qreal ) const : QPointF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToItem">mapToItem</a> ( const QGraphicsItem *, const QPointF &amp; ) const : QPointF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToItem-2">mapToItem</a> ( const QGraphicsItem *, const QRectF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToItem-3">mapToItem</a> ( const QGraphicsItem *, const QPolygonF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToItem-4">mapToItem</a> ( const QGraphicsItem *, const QPainterPath &amp; ) const : QPainterPath</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#mapToItem-5">mapToItem</a> ( const QGraphicsItem *, qreal, qreal ) const : QPointF</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#mapToParent">mapToParent</a> ( const QPointF &amp; ) const : QPointF</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapToItem-5">mapToItem</a> ( const QGraphicsItem *, qreal, qreal, qreal, qreal ) const : QPolygonF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapToItem-6">mapToItem</a> ( const QGraphicsItem *, qreal, qreal ) const : QPointF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapToParent">mapToParent</a> ( const QPointF &amp; ) const : QPointF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToParent-2">mapToParent</a> ( const QRectF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToParent-3">mapToParent</a> ( const QPolygonF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToParent-4">mapToParent</a> ( const QPainterPath &amp; ) const : QPainterPath</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#mapToParent-5">mapToParent</a> ( qreal, qreal ) const : QPointF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapToParent-5">mapToParent</a> ( qreal, qreal, qreal, qreal ) const : QPolygonF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapToParent-6">mapToParent</a> ( qreal, qreal ) const : QPointF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToScene">mapToScene</a> ( const QPointF &amp; ) const : QPointF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToScene-2">mapToScene</a> ( const QRectF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToScene-3">mapToScene</a> ( const QPolygonF &amp; ) const : QPolygonF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mapToScene-4">mapToScene</a> ( const QPainterPath &amp; ) const : QPainterPath</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#mapToScene-5">mapToScene</a> ( qreal, qreal ) const : QPointF</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#matrix">matrix</a> () const : QMatrix</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapToScene-5">mapToScene</a> ( qreal, qreal, qreal, qreal ) const : QPolygonF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#mapToScene-6">mapToScene</a> ( qreal, qreal ) const : QPointF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a> ( QGraphicsSceneMouseEvent * )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mouseMoveEvent">mouseMoveEvent</a> ( QGraphicsSceneMouseEvent * )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#mousePressEvent">mousePressEvent</a> ( QGraphicsSceneMouseEvent * )</li>
@@ -114,15 +122,15 @@
 <li><div class="fn"/><a href="qgraphicsitem.html#prepareGeometryChange">prepareGeometryChange</a> ()</li>
 <li><div class="fn"/><a href="qgraphicsellipseitem.html#rect">rect</a> () const : QRectF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#removeSceneEventFilter">removeSceneEventFilter</a> ( QGraphicsItem * )</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#resetMatrix">resetMatrix</a> ()</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#resetTransform">resetTransform</a> ()</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#rotate">rotate</a> ( qreal )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#scale">scale</a> ( qreal, qreal )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#scene">scene</a> () const : QGraphicsScene *</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#sceneBoundingRect">sceneBoundingRect</a> () const : QRectF</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#sceneEvent">sceneEvent</a> ( QEvent * ) : bool</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#sceneEventFilter">sceneEventFilter</a> ( QGraphicsItem *, QEvent * ) : bool</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#sceneMatrix">sceneMatrix</a> () const : QMatrix</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#scenePos">scenePos</a> () const : QPointF</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#sceneTransform">sceneTransform</a> () const : QTransform</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#setAcceptDrops">setAcceptDrops</a> ( bool )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#setAcceptedMouseButtons">setAcceptedMouseButtons</a> ( Qt::MouseButtons )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#setAcceptsHoverEvents">setAcceptsHoverEvents</a> ( bool )</li>
@@ -135,7 +143,6 @@
 <li><div class="fn"/><a href="qgraphicsitem.html#setFocus">setFocus</a> ( Qt::FocusReason )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#setGroup">setGroup</a> ( QGraphicsItemGroup * )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#setHandlesChildEvents">setHandlesChildEvents</a> ( bool )</li>
-<li><div class="fn"/><a href="qgraphicsitem.html#setMatrix">setMatrix</a> ( const QMatrix &amp;, bool )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#setParentItem">setParentItem</a> ( QGraphicsItem * )</li>
 <li><div class="fn"/><a href="qabstractgraphicsshapeitem.html#setPen">setPen</a> ( const QPen &amp; )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#setPos">setPos</a> ( const QPointF &amp; )</li>
@@ -146,6 +153,7 @@
 <li><div class="fn"/><a href="qgraphicsellipseitem.html#setSpanAngle">setSpanAngle</a> ( int )</li>
 <li><div class="fn"/><a href="qgraphicsellipseitem.html#setStartAngle">setStartAngle</a> ( int )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#setToolTip">setToolTip</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#setTransform">setTransform</a> ( const QTransform &amp;, bool )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#setVisible">setVisible</a> ( bool )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#setZValue">setZValue</a> ( qreal )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#shape">shape</a> () const : QPainterPath</li>
@@ -155,6 +163,7 @@
 <li><div class="fn"/><a href="qgraphicsellipseitem.html#startAngle">startAngle</a> () const : int</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#toolTip">toolTip</a> () const : QString</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#topLevelItem">topLevelItem</a> () const : QGraphicsItem *</li>
+<li><div class="fn"/><a href="qgraphicsitem.html#transform">transform</a> () const : QTransform</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#translate">translate</a> ( qreal, qreal )</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#type">type</a> () const : int</li>
 <li><div class="fn"/><a href="qgraphicsitem.html#unsetCursor">unsetCursor</a> ()</li>
@@ -171,6 +180,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

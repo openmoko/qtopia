@@ -59,7 +59,7 @@ Section "Greenphone SDK"
   CreateShortCut "$SMPROGRAMS\Trolltech\Greenphone\Dev Quick Start.lnk" "$INSTDIR\greenphone_quickstart.pdf"
   CreateShortCut "$SMPROGRAMS\Trolltech\Greenphone\Release Notes.lnk" "$INSTDIR\release.html"
   CreateShortCut "$DESKTOP\Greenphone SDK.lnk" "$INSTDIR\greenphone.vmx"
-  File greenphone.vmx
+  ;File greenphone.vmx
   File install.ico
   File license.txt
 
@@ -70,6 +70,8 @@ Section "Greenphone SDK"
   CopyFiles "$EXEDIR\trolltech.png" "$INSTDIR"
   CopyFiles "$EXEDIR\vmware_player.png" "$INSTDIR"
   CopyFiles "$EXEDIR\release.html" "$INSTDIR"
+  CopyFiles "$EXEDIR\qtopia.iso" "$INSTDIR"
+  CopyFiles "$EXEDIR\greenphone.vmx" "$INSTDIR"
 
 
   DetailPrint "" 
@@ -77,7 +79,7 @@ Section "Greenphone SDK"
   MessageBox MB_YESNO "Overwrite Qtopia SDK source partition?" IDYES doit1 IDNO next1
   doit1:
   DetailPrint "Installing qtopia src..."
-  untgz::extract -d "$INSTDIR" "$EXEDIR\qtopiasrc.dat"
+  untgz::extract -d "$INSTDIR" -zbz2 "$EXEDIR\qtopiasrc.dat"
   AddSize 10000
   next1:
 
@@ -86,18 +88,18 @@ Section "Greenphone SDK"
   MessageBox MB_YESNO "Overwrite Qtopia SDK home partition?" IDYES doit2 IDNO next2
   doit2:
   DetailPrint "Installing home........."
-  untgz::extract -d "$INSTDIR" "$EXEDIR\home.dat"
+  untgz::extract -d "$INSTDIR" -zbz2 "$EXEDIR\home.dat"
   AddSize 50000
   next2:
 
   DetailPrint "" 
   DetailPrint "Installing qtopia SDK...3.5 minutes remaining"
-  untgz::extract -d "$INSTDIR" "$EXEDIR\qtopia.dat"  
+  untgz::extract -d "$INSTDIR" -zbz2 "$EXEDIR\qtopia.dat"  
   AddSize 500000
 
   DetailPrint "" 
   DetailPrint "Installing toolchain....2.5 minutes remaining"
-  untgz::extract -d "$INSTDIR" "$EXEDIR\toolchain.dat"
+  untgz::extract -d "$INSTDIR" -zbz2 "$EXEDIR\toolchain.dat"
   AddSize 220000
 
   DetailPrint "" 
@@ -105,7 +107,7 @@ Section "Greenphone SDK"
   MessageBox MB_YESNO "Overwrite Qtopia SDK root filesystem partition?" IDYES doit3 IDNO next3
   doit3:
   DetailPrint "Installing root.........2.0 minutes remaining"
-  untgz::extract -d "$INSTDIR" "$EXEDIR\rootfs.dat"
+  untgz::extract -d "$INSTDIR" -zbz2 "$EXEDIR\rootfs.dat"
   AddSize 1100000
   next3:
 
@@ -151,9 +153,11 @@ Section "Uninstall"
   Delete "$INSTDIR\toolchain.vmdk"
   Delete "$INSTDIR\home.vmdk"
   Delete "$INSTDIR\rootfs.vmdk"
+  Delete "$INSTDIR\qtopia.iso"
   Delete "$INSTDIR\*.vmsd"
   Delete "$INSTDIR\*.log"
   Delete "$INSTDIR\*.nvram"
+  Delete "$INSTDIR\*.vmxf"
   Delete "$INSTDIR\*.vmss"
   Delete "$INSTDIR\*.vmem"
   Delete "$INSTDIR\*.lck"

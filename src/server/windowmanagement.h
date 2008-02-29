@@ -1,8 +1,9 @@
+// -*-C++-*-
 /****************************************************************************
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,17 +24,19 @@
 #define _WINDOWMANAGEMENT_H_
 
 #include <qobject.h>
+#include <qwindowdefs.h>
 
 class QRect;
 class QString;
 class QSize;
-class QWSWindow;
 class QWidget;
 class WindowManagementPrivate;
+
 class WindowManagement : public QObject
 {
     Q_OBJECT
-public:
+
+  public:
     WindowManagement(QObject *parent = 0);
     virtual ~WindowManagement();
 
@@ -41,12 +44,18 @@ public:
     static void protectWindow(QWidget *);
     static void dockWindow(QWidget *, DockArea, int screen=-1);
     static void dockWindow(QWidget *, DockArea, const QSize &, int screen=-1);
+    static void showDockedWindow(QWidget *);
+    static void hideDockedWindow(QWidget *);
+    static void setLowestWindow(QWidget *);
+    static QString activeAppName();
+    static bool supportsSoftMenus(WId winId);
+    static void closeWindow(WId winId);
 
-signals:
-    void windowActive(const QString &, const QRect &, QWSWindow *);
+  signals:
+    void windowActive(const QString &, const QRect &, WId winId);
     void windowCaption(const QString &);
 
-private:
+  private:
     WindowManagementPrivate * d;
 };
 

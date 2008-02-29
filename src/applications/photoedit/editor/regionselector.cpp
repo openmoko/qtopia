@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,11 +23,9 @@
 
 #include "imageui.h"
 
-
 #include <qsoftmenubar.h>
 #include <qtopianamespace.h>
 
-#include <qaction.h>
 #include <qpainter.h>
 #include <qbrush.h>
 #include <qregion.h>
@@ -38,15 +36,15 @@
 RegionSelector::RegionSelector( ImageUI* iui, Qt::WFlags f )
     : QWidget( iui, f ), image_ui( iui ), enabled( false )
 {
-#ifdef QTOPIA_PHONE
-    if( Qtopia::mousePreferred() ) {
-#endif
+    if( Qtopia::mousePreferred() )
         current_state = MARK;
-#ifdef QTOPIA_PHONE
-    } else current_state = MOVE;
-#endif
+    else
+        current_state = MOVE;
+
+    previous_state = current_state;
+
     // Update display when image ui updated
-    connect( image_ui, SIGNAL( updated() ), this, SLOT( update() ) );
+    connect( image_ui, SIGNAL(updated()), this, SLOT(update()) );
 }
 
 QRect RegionSelector::region() const
@@ -63,7 +61,6 @@ void RegionSelector::setEnabled( bool b )
 {
     enabled = b;
 
-#ifdef QTOPIA_PHONE
     // If selection enabled, add labels to context bar
     // Otherwise, remove labels from context bar
     if( enabled ) {
@@ -80,7 +77,6 @@ void RegionSelector::setEnabled( bool b )
         if( !Qtopia::mousePreferred() ) QSoftMenuBar::clearLabel( this, Qt::Key_Select );
         QSoftMenuBar::clearLabel( this, Qt::Key_Back );
     }
-#endif
 }
 
 void RegionSelector::reset()
@@ -89,13 +85,10 @@ void RegionSelector::reset()
 #define DEFAULT_HEIGHT 100
 
     // Reset region
-#ifdef QTOPIA_PHONE
     if( Qtopia::mousePreferred() ) {
-#endif
         region_start = QPoint();
         _region = QRect();
         current_state = MARK;
-#ifdef QTOPIA_PHONE
     } else {
         // Set default region
         _region = QRect( 0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT );
@@ -105,12 +98,10 @@ void RegionSelector::reset()
         // If enabled toggle state label
         if( enabled ) setStateLabel();
     }
-#endif
 }
 
 void RegionSelector::paintEvent( QPaintEvent* )
 {
-#ifdef QTOPIA_PHONE
 static const QPixmap top_left( ":image/photoedit/top_left" );
 static const QPixmap top_right( ":image/photoedit/top_right" );
 static const QPixmap bottom_left( ":image/photoedit/bottom_left" );
@@ -121,7 +112,6 @@ static const QPixmap crosshair( ":image/photoedit/crosshair" );
 #define CORNER_WIDTH 7
 #define CORNER_HEIGHT 7
 #define INSET 1
-#endif
 
 #define PAINTER_COLOR Qt::white
 #define SPACE_FILL_PATTERN Qt::Dense6Pattern
@@ -138,7 +128,6 @@ static const QPixmap crosshair( ":image/photoedit/crosshair" );
         // Draw box around current selection region
         painter.drawRect( _region.normalized().adjusted( 0, 0, -PEN_WIDTH, -PEN_WIDTH ) );
 
-#ifdef QTOPIA_PHONE
         if( !Qtopia::mousePreferred() ) {
             QPoint center( _region.center() );
             switch( current_state ) {
@@ -158,7 +147,7 @@ static const QPixmap crosshair( ":image/photoedit/crosshair" );
                 break;
             }
         }
-#endif
+
         QRegion region = image_ui->region().subtract( _region.normalized() );
         if( !region.isEmpty() ) {
             painter.setClipRegion( region );
@@ -170,7 +159,6 @@ static const QPixmap crosshair( ":image/photoedit/crosshair" );
     }
 }
 
-#ifdef QTOPIA_PHONE
 void RegionSelector::keyPressEvent( QKeyEvent* e )
 {
 #define STEP 4
@@ -257,7 +245,6 @@ void RegionSelector::keyPressEvent( QKeyEvent* e )
         e->ignore();
     }
 }
-#endif
 
 void RegionSelector::mousePressEvent( QMouseEvent* e )
 {
@@ -293,7 +280,8 @@ void RegionSelector::mouseReleaseEvent( QMouseEvent* e )
             break;
         // If region is moving, change to mark
         case MOVING:
-            current_state = MARK;
+            current_state = previous_state;
+            update();
             break;
         default:
             // Ignore
@@ -305,13 +293,7 @@ void RegionSelector::mouseReleaseEvent( QMouseEvent* e )
 void RegionSelector::mouseMoveEvent( QMouseEvent* e )
 {
     if( enabled ) {
-        switch( current_state ) {
-        case MARK:
-            // If stylus has moved outside lag area, change to moving
-            if( !lag_area.contains( e->pos() ) ) current_state = MOVING;
-            break;
-        case MOVING:
-            {
+        if ( current_state == MOVING ) {
             // Update region
             int x = e->pos().x(), y = e->pos().y();
 
@@ -323,18 +305,15 @@ void RegionSelector::mouseMoveEvent( QMouseEvent* e )
 
             // Update region end with current stylus position
             _region = QRect( region_start, QPoint( x, y ) );
-            }
             // Update display
             update();
-            break;
-        default:
-            // Ignore
-            break;
+        } else if ( !lag_area.contains( e->pos() ) ) {
+            previous_state = current_state;
+            current_state = MOVING;
         }
     }
 }
 
-#ifdef QTOPIA_PHONE
 void RegionSelector::setStateLabel()
 {
     switch( current_state ) {
@@ -395,5 +374,4 @@ void RegionSelector::sizeBy( int dw, int dh )
     if( _region.bottom() > rect().bottom() )
         _region.setBottom( rect().bottom() );
 }
-#endif
 

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,36 +24,36 @@
 #include <qcontent.h>
 #include <qtopiaapplication.h>
 #include <qdocumentproperties.h>
-#ifdef QTOPIA_PHONE
+#include <qdocumentselector.h>
 #include <qsoftmenubar.h>
-#endif
 #include <qtopiaservices.h>
 
+#include <QListWidget>
 #include <QClipboard>
 #include <QCloseEvent>
-#include <QDebug>
 #include <QFontDatabase>
 #include <QLineEdit>
 #include <QMenu>
-#include <QMenuBar>
 #include <QMessageBox>
+#include <QLabel>
 #include <QStackedWidget>
 #include <QTextCodec>
 #include <QTextCursor>
 #include <QTextDocument>
 #include <QTextEdit>
+#include <QVBoxLayout>
 #include <QTimer>
-#include <QToolBar>
 #include <QSettings>
 #include <QWhatsThis>
-
+#include <unistd.h>
+#include <QToolTip>
 
 class QpeEditor : public QTextEdit
 {
     Q_OBJECT
 public:
     QpeEditor( QWidget *parent )
-        : QTextEdit( parent )
+        : QTextEdit( parent ), lastTxtFound(false)
     {
     }
 
@@ -71,39 +71,125 @@ public:
                 (txt.startsWith( lastTxt, s ) || lastTxt.startsWith( txt, s ) ) ){
             setTextCursor( QTextCursor( document() ) );
         }
-        bool found = find( txt, flags );
 
-        if ( !found ) {
-            if ( findNext )
-                emit findWrapped();
-            else
-                emit findNotFound();
+        QList<QTextEdit::ExtraSelection> extrasels;
+        if (!txt.isEmpty()) {
+            bool found = find( txt, flags );
+
+            if ( !found ) {
+                if ( findNext && lastTxtFound) {
+                    emit findWrapped(); // We don't actually wrap, though
+                    setTextCursor( QTextCursor( document() ) ); // make sure we start at the start
+                } else
+                    emit findNotFound();
+                lastTxtFound = false;
+            } else {
+                lastTxtFound = true;
+
+                emit findFound();
+
+                QTextEdit::ExtraSelection es;
+                es.cursor = textCursor();
+                QPalette p = palette();
+                es.format.setBackground(p.brush(QPalette::Active, QPalette::Highlight));
+                es.format.setForeground(p.brush(QPalette::Active, QPalette::HighlightedText));
+                extrasels.append(es);
+            }
         }
-
+        setExtraSelections(extrasels);
         lastTxt = txt;
+    }
+
+    void clearSearchResults()
+    {
+        setExtraSelections(QList<QTextEdit::ExtraSelection>());
     }
 
 signals:
     void findNotFound();
     void findWrapped();
+    void findFound();
 
 private:
     QString lastTxt;
+    bool lastTxtFound;
 };
 
+class StupidToolTip : public QObject
+{
+    Q_OBJECT;
 
-static int nfontsizes;
-static int *fontsize;
+public:
+    StupidToolTip(QWidget *parent);
+    ~StupidToolTip();
+
+public slots:
+    void show(const QString& lbl);
+    void hide();
+
+protected:
+    QWidget *mParent;
+    QLabel* mLabel;
+    QTimer* mTimer;
+};
+
+StupidToolTip::StupidToolTip(QWidget *parent)
+    : QObject(parent), mParent(parent), mLabel(0), mTimer(0)
+{
+
+}
+
+StupidToolTip::~StupidToolTip()
+{
+}
+
+void StupidToolTip::hide()
+{
+    if(mLabel)
+        mLabel->hide();
+    if(mTimer && mTimer->isActive())
+        mTimer->stop();
+}
+
+void StupidToolTip::show(const QString& lbl)
+{
+    if (!mLabel) {
+        mLabel = new QLabel(mParent);
+        mLabel->setFocusPolicy(Qt::NoFocus);
+        mLabel->setBackgroundRole(QPalette::Button);
+        mLabel->setForegroundRole(QPalette::ButtonText);
+        mLabel->setFrameStyle(QFrame::Panel);
+        mLabel->setAutoFillBackground(true);
+        mLabel->setMargin(2);
+        QPalette p = mLabel->palette();
+        QColor bg = p.brush(QPalette::Button).color();
+        bg.setAlpha(255);
+        p.setBrush(QPalette::Button, bg);
+        mLabel->setPalette(p);
+    }
+    if (!mTimer) {
+        mTimer = new QTimer(this);
+        mTimer->setSingleShot(true);
+        connect(mTimer, SIGNAL(timeout()), mLabel, SLOT(hide()));
+    }
+    mLabel->setText(lbl);
+
+    // Hide the tooltip in 2.5 seconds
+    mTimer->start(2500);
+
+    // Now set the geometry.
+    QSize lblsh = mLabel->sizeHint();
+    mLabel->setGeometry(0, mParent->height() - lblsh.height() - 2, mParent->width(), lblsh.height());
+    mLabel->show();
+}
 
 TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
     : QMainWindow( parent, f )
 {
-    connect(qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
-            this, SLOT(message(const QString&,const QByteArray&)));
+    connect(qApp, SIGNAL(appMessage(QString,QByteArray)),
+            this, SLOT(message(QString,QByteArray)));
 
-#ifdef QTOPIA_PHONE
     qCopActivated = canceled = false;
-#endif
 
     doc = 0;
 
@@ -112,46 +198,57 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
 
     editor = new QpeEditor( editorStack );
     editor->setFrameStyle( QFrame::NoFrame );
-    editorStack->addWidget( editor );
+    editor->installEventFilter(this);
+
+    QWidget *editWidget = new QWidget();
+    mEditorLayout = new QVBoxLayout();
+    mEditorLayout->setMargin(0);
+    mEditorLayout->setSpacing(0);
+    mEditorLayout->addWidget(editor);
+    editWidget->setLayout(mEditorLayout);
+    editorStack->addWidget( editWidget );
 
     fileSelector = new QDocumentSelector( editorStack );
-    fileSelector->setFilter( QContentFilter( QContent::Document ) & QContentFilter( QContentFilter::MimeType, "text/*" ) );
+    fileSelector->setFilter( QContentFilter( QContent::Document )
+            & QContentFilter( QContentFilter::MimeType, "text/*" )
+            & QContentFilter( QContentFilter::DRM, QLatin1String( "Unprotected" ) ) );
     fileSelector->enableOptions( QDocumentSelector::NewDocument );
     fileSelector->setFocus();
     editorStack->addWidget(fileSelector);
 
-    setupFontSizes();
+    mToolTip = new StupidToolTip(editor);
+    mFindTextWidget = 0;
+    mFindTextEntry = 0;
+    mFindIcon = 0;
 
     QAction *newAction = new QAction(QIcon( ":icon/new" ), tr( "New" ), this);
-    connect( newAction, SIGNAL( triggered() ), this, SLOT( fileNew() ) );
+    connect( newAction, SIGNAL(triggered()), this, SLOT(fileNew()) );
     newAction->setWhatsThis( tr( "Create a document." ) );
 
     QAction *openAction = new QAction(QIcon( ":icon/txt" ), tr( "Open" ), this );
-    connect( openAction, SIGNAL( triggered() ), this, SLOT( fileOpen() ) );
+    connect( openAction, SIGNAL(triggered()), this, SLOT(fileOpen()) );
     openAction->setWhatsThis( tr( "Open a document." ) );
 
     QAction *propAction = new QAction(QIcon( ":icon/info" ), tr( "Properties" ), this );
-    connect( propAction, SIGNAL( triggered() ), this, SLOT( fileName() ) );
+    connect( propAction, SIGNAL(triggered()), this, SLOT(fileName()) );
     propAction->setWhatsThis( tr( "Edit the document properties." ) );
 
+#ifndef QT_NO_CLIPBOARD
     QAction *cutAction = new QAction(QIcon( ":icon/cut" ), tr( "Cut" ), this );
-    connect( cutAction, SIGNAL( triggered() ), this, SLOT( editCut() ) );
+    connect( cutAction, SIGNAL(triggered()), this, SLOT(editCut()) );
     cutAction->setWhatsThis( tr("Cut the currently selected text and move it to the clipboard.") );
-#ifdef QTOPIA_PHONE
     cutAction->setVisible( false );
-#endif
 
     QAction *copyAction = new QAction(QIcon( ":icon/copy" ), tr( "Copy" ), this );
-    connect( copyAction, SIGNAL( triggered() ), this, SLOT( editCopy() ) );
+    connect( copyAction, SIGNAL(triggered()), this, SLOT(editCopy()) );
     copyAction->setWhatsThis( tr("Copy the currently selected text to the clipboard.") );
-#ifdef QTOPIA_PHONE
     copyAction->setVisible( false );
-#endif
 
     pasteAction = new QAction(QIcon( ":icon/paste" ), tr( "Paste" ), this );
-    connect( pasteAction, SIGNAL( triggered() ), this, SLOT( editPaste() ) );
+    connect( pasteAction, SIGNAL(triggered()), this, SLOT(editPaste()) );
     pasteAction->setWhatsThis( tr("Paste the text in the clipboard at the cursor position.") );
     QTimer::singleShot(0, this, SLOT(clipboardChanged()));
+#endif
 
     findAction = new QAction(QIcon( ":icon/find" ), tr( "Find" ), this );
     findAction->setCheckable( true );
@@ -159,26 +256,19 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
     findAction->setWhatsThis( tr("Click to find text in the document.\nClick again to hide the search bar.") );
 
     zin = new QAction(tr( "Zoom In" ), this);
-    connect( zin, SIGNAL( triggered() ), this, SLOT( zoomIn() ) );
+    connect( zin, SIGNAL(triggered()), this, SLOT(zoomIn()) );
     zin->setWhatsThis( tr( "Increase the font size." ) );
 
     zout = new QAction(tr( "Zoom Out" ), this);
-    connect( zout, SIGNAL( triggered() ), this, SLOT( zoomOut() ) );
+    connect( zout, SIGNAL(triggered()), this, SLOT(zoomOut()) );
     zout->setWhatsThis( tr( "Decrease the font size." ) );
 
     QAction *wa = new QAction(tr( "Wrap Lines" ), this);
-    connect( wa, SIGNAL( toggled(bool) ), this, SLOT( setWordWrap(bool) ) );
+    connect( wa, SIGNAL(toggled(bool)), this, SLOT(setWordWrap(bool)) );
     wa->setWhatsThis( tr("Break long lines into two or more lines.") );
     wa->setCheckable(true);
 
-    fixedAction = new QAction(tr( "Fixed Width" ),this);
-    connect( fixedAction, SIGNAL(toggled(bool) ),
-        this, SLOT( setFixedWidth(bool)));
-    fixedAction->setWhatsThis( tr( "Use a fixed width font. Useful for preformatted documents." ) );
-    fixedAction->setCheckable(true);
-
-#ifdef QTOPIA_PHONE
-    contextMenu = new QMenu(editor);
+    QMenu *contextMenu = new QMenu(editor);
     QSoftMenuBar::addMenuTo(editor, contextMenu, QSoftMenuBar::AnyFocus);
     QSoftMenuBar::setHelpEnabled(editor, true);
 
@@ -186,104 +276,57 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
     settingsMenu->addAction( zin );
     settingsMenu->addAction( zout );
     settingsMenu->addAction( wa );
-    settingsMenu->addAction( fixedAction );
 
     contextMenu->addAction( propAction );
+#ifndef QT_NO_CLIPBOARD
     contextMenu->addAction( cutAction );
     contextMenu->addAction( copyAction );
     contextMenu->addAction( pasteAction );
+#endif
     contextMenu->addAction( findAction );
     contextMenu->addMenu( settingsMenu );
     contextMenu->addSeparator();
-
     contextMenu->addAction( tr( "Print" ), this, SLOT(print()) );
+    contextMenu->addAction( QIcon( ":icon/cancel" ), tr( "Cancel" ), this, SLOT(fileRevert()) );
 
-    QMenu *menu = (QMenu*)contextMenu;
-    menu->addAction( QIcon( ":icon/cancel" ), tr( "Cancel" ), this, SLOT( fileRevert() ) );
-#else
-    QToolBar *bar = new QToolBar( this );
-    addToolBar(bar);
-#ifdef QTOPIA4_TODO
-    bar->setHorizontalStretchable( true );
-#endif
-    bar->setMovable(false);
-    menu = bar;
+    bool wrap;
 
-    QMenuBar *mb = new QMenuBar( bar );
-    bar->addWidget(mb);
-    QMenu *file = new QMenu( tr( "File" ), this );
-    QMenu *edit = new QMenu( tr( "Edit" ), this );
-    QMenu *font = new QMenu( tr( "View" ), this );
+    QSettings cfg("Trolltech","TextEdit");
+    cfg.beginGroup("View");
+    defaultFontSize = cfg.value("FontSize", 0.0).toDouble();
 
-    mb->addMenu( file );
-    mb->addMenu( edit );
-    mb->addMenu( font );
-
-    bar = new QToolBar( this );
-    bar->setMovable(false);
-    addToolBar(bar);
-    editBar = bar;
-
-    bar->addAction(newAction);
-    file->addAction(newAction);
-    bar->addAction(openAction);
-    file->addAction(openAction);
-    bar->addAction(propAction);
-    file->addAction(propAction);
-    bar->addAction(cutAction);
-    edit->addAction(cutAction);
-    bar->addAction(copyAction);
-    edit->addAction(copyAction);
-    bar->addAction(pasteAction);
-    edit->addAction(pasteAction);
-    bar->addAction(findAction);
-    edit->addAction(findAction);
-    font->addAction(zin);
-    font->addAction(zout);
-    font->addSeparator();
-    font->addAction(wa);
-    font->addAction(fixedAction);
-#endif
-
-    int defsize;
-    bool wrap, fixedwidth;
-    {
-        QSettings cfg("Trolltech","TextEdit");
-        cfg.beginGroup("View");
-        defsize = cfg.value("FontSize",10).toInt();
-        wrap = cfg.value("Wrap",true).toBool();
-        fixedwidth = cfg.value("Fixed-width", false).toBool();
+    if (defaultFontSize == 0.0) {
+        QSettings gcfg("Trolltech","qpe");
+        gcfg.beginGroup("Font");
+        defaultFontSize = gcfg.value("FontSize[]", 7.0).toDouble();
     }
+    setupFontSizes();
+
+    wrap = cfg.value("Wrap",true).toBool();
 
     connect( editor, SIGNAL(findWrapped()), this, SLOT(findWrapped()) );
     connect( editor, SIGNAL(findNotFound()), this, SLOT(findNotFound()) );
-#ifdef QTOPIA_PHONE
+    connect( editor, SIGNAL(findFound()), mToolTip, SLOT(hide()));
+#ifndef QT_NO_CLIPBOARD
     connect( editor, SIGNAL(copyAvailable(bool)), cutAction, SLOT(setVisible(bool)) );
     connect( editor, SIGNAL(copyAvailable(bool)), copyAction, SLOT(setVisible(bool)) );
 #endif
 
     // create search bar on demand
-    searchBar = 0;
-    searchEdit = 0;
     searchVisible = false;
 
     connect( fileSelector, SIGNAL(newSelected()), this, SLOT(newFile()) );
-    connect( fileSelector, SIGNAL(documentSelected(const QContent&)), this, SLOT(openFile(const QContent&)) );
+    connect( fileSelector, SIGNAL(documentSelected(QContent)), this, SLOT(openFile(QContent)) );
     fileOpen();
 
+#ifndef QT_NO_CLIPBOARD
     connect( qApp->clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboardChanged()) );
-    connect( qApp, SIGNAL(contentChanged(const QContentIdList&,const QContent::ChangeType)),
-        this, SLOT(contentChanged(const QContentIdList&,const QContent::ChangeType)));
+#endif
+    connect( qApp, SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
+        this, SLOT(contentChanged(QContentIdList,QContent::ChangeType)));
 
-    resize( 200, 300 );
-
-    variableFontSize = defsize;
-    zoomOutLast = true;
-    setFontSize(defsize,zoomOutLast);
+    setFontSize(defaultFontSize);
     wa->setChecked(wrap);
-
-    fixedAction->setChecked(fixedwidth);
-    setFixedWidth(fixedAction->isChecked());
 
     if ( qApp->argc() == 3 && qApp->argv()[1] == QLatin1String("-f") )
         setDocument(qApp->argv()[2]);
@@ -291,15 +334,10 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
 
 TextEdit::~TextEdit()
 {
-    if (fontsize)
-        delete [] fontsize;
-
     QSettings cfg("Trolltech","TextEdit");
     cfg.beginGroup("View");
-    QFont f = editor->font();
-    cfg.setValue("FontSize",f.pointSize());
+    cfg.setValue("FontSize", defaultFontSize);
     cfg.setValue("Wrap",editor->lineWrapMode() == QTextEdit::WidgetWidth);
-    cfg.setValue("Fixed-width", fixedAction->isChecked() ? "1" : "0");
 }
 
 //
@@ -308,68 +346,49 @@ TextEdit::~TextEdit()
 void
 TextEdit::setupFontSizes(void)
 {
-    QFontDatabase       fd;
-    QList<int> pointSizes = fd.pointSizes(editor->font().family().toLower());
-    QList<int>::Iterator it;
+    QFontDatabase fd;
+    QList<int> ptSizes = fd.standardSizes();
 
-    nfontsizes = pointSizes.count();
-    fontsize = new int[nfontsizes];
-
-    if (fontsize) {
-        int i = 0;
-        for (it = pointSizes.begin(); it != pointSizes.end(); ++it) {
-            int foo = *it;
-            fontsize[i++] = foo;
-        }
-    } else {
-        nfontsizes = 0;
+    foreach (int e, ptSizes) {
+        fontSizes << (qreal)e;
     }
+    if (!fontSizes.contains(defaultFontSize))
+        fontSizes << defaultFontSize;
+    qSort(fontSizes.begin(), fontSizes.end());
 }
 
 void TextEdit::zoomIn()
 {
-    zoomOutLast = false;
-    variableFontSize = editor->font().pointSize()+1;
-    setFontSize(variableFontSize,false);
+    qreal fsize;
+    if (editor->document())
+        fsize = editor->document()->defaultFont().pointSizeF();
+
+    int index = fontSizes.indexOf(fsize);
+    setFontSize(fontSizes.at(index + 1));
+    defaultFontSize = fontSizes.at(index + 1);
 }
 
 void TextEdit::zoomOut()
 {
-    zoomOutLast = true;
-    variableFontSize = editor->font().pointSize()-1;
-    setFontSize(variableFontSize,true);
+    qreal fsize;
+    if (editor->document())
+        fsize = editor->document()->defaultFont().pointSizeF();
+
+    int index = fontSizes.indexOf(fsize);
+    setFontSize(fontSizes.at(index - 1));
+    defaultFontSize = fontSizes.at(index - 1);
 }
 
-
-void TextEdit::setFontSize(int sz, bool round_down_not_up)
+void TextEdit::setFontSize(qreal size)
 {
-    int s=10;
-    for (int i=0; i<nfontsizes; i++) {
-        if ( fontsize[i] == sz ) {
-            s = sz;
-            break;
-        } else if ( round_down_not_up ) {
-            if ( fontsize[i] < sz )
-                s = fontsize[i];
-        } else {
-            if ( fontsize[i] > sz ) {
-                s = fontsize[i];
-                break;
-            }
-        }
-    }
-
     QFont f = editor->font();
-    f.setPointSize(s);
+    f.setPointSizeF(size);
     editor->setFont(f);
 
-    //
     // Zooming only makes sense if we have more than one font size.
-    //
-    if (nfontsizes > 1) {
-        zin->setVisible(s != fontsize[nfontsizes-1]);
-        zout->setVisible(s != fontsize[0]);
-
+    if (fontSizes.count() > 1) {
+        zin->setVisible(size != fontSizes.last());
+        zout->setVisible(size != fontSizes.first());
         zinE = zin->isVisible();
         zoutE = zout->isVisible();
     }
@@ -382,25 +401,11 @@ void TextEdit::setWordWrap(bool y)
     editor->document()->setModified( state );
 }
 
-void TextEdit::setFixedWidth(bool y)
-{
-    if (y) {
-        editor->setFont(QFont("fixed"));
-        zinE = zin->isVisible();
-        zoutE = zout->isVisible();
-        zin->setVisible(false);
-        zout->setVisible(false);
-    } else {
-        editor->setFont(QFont());
-        setFontSize(variableFontSize,zoomOutLast);
-        zin->setVisible(zinE);
-        zout->setVisible(zoutE);
-    }
-}
-
 void TextEdit::clipboardChanged()
 {
+#ifndef QT_NO_CLIPBOARD
     pasteAction->setVisible( !qApp->clipboard()->text().isEmpty() );
+#endif
 }
 
 void TextEdit::contentChanged( const QContentIdList& idList, const QContent::ChangeType type )
@@ -432,16 +437,15 @@ void TextEdit::fileOpen()
 {
 
     if ( !save() ) {
-       QMessageBox box( tr( "Out of space"),
-                        tr( "<qt>Text Editor was unable to "
+        QMessageBox box( tr( "Out of space"),
+                        tr( "<qt>Notes was unable to "
                             "save your changes. "
                             "Free some space and try again."
                             "<br>Continue anyway?</qt>" ),
                         QMessageBox::Critical,
                         QMessageBox::Yes|QMessageBox::Escape,
                         QMessageBox::No|QMessageBox::Default,
-                        QMessageBox::Cancel, this);
-        box.setButtonText(QMessageBox::Cancel, tr("Cleanup"));
+                        QMessageBox::NoButton, this);
         switch(box.exec()){
             case QMessageBox::Yes:
                 delete doc;
@@ -450,40 +454,27 @@ void TextEdit::fileOpen()
             case QMessageBox::No:
                 return;
                 break;
-            case QMessageBox::Cancel:
-                QtopiaServiceRequest req( "CleanupWizard", "showCleanupWizard()");
-                req.send();
-                return;
-                break;
         }
     }
-#ifndef QTOPIA_PHONE
-    menu->hide();
-    editBar->hide();
-#endif
-    if (searchBar)
-        searchBar->hide();
+
+    if (mFindTextWidget)
+        mFindTextWidget->hide();
     editorStack->setCurrentIndex(1);
     updateCaption();
 }
 
 void TextEdit::fileRevert()
 {
-#ifdef QTOPIA_PHONE
     if (wasCreated)
         doc->removeFiles();
     else if (saved)
         doc->save(backup.toUtf8());
-#endif
     clear();
-#ifdef QTOPIA_PHONE
     if( qCopActivated ) {
         close();
         canceled = true;
-    } else fileOpen();
-#else
-    fileOpen();
-#endif
+    } else
+        fileOpen();
 }
 
 void TextEdit::editCut()
@@ -491,8 +482,8 @@ void TextEdit::editCut()
 #ifndef QT_NO_CLIPBOARD
     if( qApp->focusWidget() == editor )
         editor->cut();
-    else if( qApp->focusWidget() == searchEdit )
-        searchEdit->cut();
+    else if( qApp->focusWidget() == mFindTextEntry )
+        mFindTextEntry->copy();
 #endif
 }
 
@@ -501,8 +492,8 @@ void TextEdit::editCopy()
 #ifndef QT_NO_CLIPBOARD
     if( qApp->focusWidget() == editor )
         editor->copy();
-    else if( qApp->focusWidget() == searchEdit )
-        searchEdit->copy();
+    else if( qApp->focusWidget() == mFindTextEntry )
+        mFindTextEntry->copy();
 #endif
 }
 
@@ -511,84 +502,89 @@ void TextEdit::editPaste()
 #ifndef QT_NO_CLIPBOARD
     if( qApp->focusWidget() == editor )
         editor->paste();
-    else if( qApp->focusWidget() == searchEdit )
-        searchEdit->paste();
+    else if( qApp->focusWidget() == mFindTextEntry )
+        mFindTextEntry->copy();
 #endif
 }
 
 void TextEdit::editFind(bool s)
 {
-    if ( !searchBar ) {
-        searchBar = new QToolBar(this);
+    if (!mFindTextWidget) {
+        mFindTextWidget = new QWidget();
+        mFindTextEntry = new QLineEdit();
+        int findHeight = mFindTextEntry->sizeHint().height();
+        mFindIcon = new QLabel;
+        mFindIcon->setPixmap(QIcon(":icon/find").pixmap(findHeight-2, findHeight-2));
+        mFindIcon->setMargin(2);
+        mFindIcon->installEventFilter(this);
 
-        addToolBar( Qt::TopToolBarArea, searchBar );
+        QHBoxLayout *findLayout = new QHBoxLayout;
+        findLayout->addWidget(mFindIcon);
+        findLayout->addWidget(mFindTextEntry);
+        mFindTextWidget->setLayout(findLayout);
 
-        searchEdit = new QLineEdit( searchBar );
-        searchBar->addWidget( searchEdit );
-        connect( searchEdit, SIGNAL(textChanged(const QString&)),
-                this, SLOT(search()) );
-        connect( searchEdit, SIGNAL(editingFinished()/*returnPressed()*/), this, SLOT(searchNext()));
+        mEditorLayout->addWidget(mFindTextWidget);
 
+        connect( mFindTextEntry, SIGNAL(textChanged(QString)), this, SLOT(search(QString)) );
 
-#ifdef QTOPIA_PHONE
-        findTb = new QToolButton( searchBar );
-        findTb->setIcon( QIcon( ":icon/i18n/next" ) );
-        findTb->setText( tr( "Find Next" ) );
-        findTb->setWhatsThis( tr("Find the next occurrence of the search text.") );
-        searchBar->addWidget( findTb );
-        connect( findTb, SIGNAL( clicked() ), this, SLOT( search() ) );
-#endif
+        QMenu * menu = QSoftMenuBar::menuFor(mFindTextEntry);
+        menu->addAction(findAction);
+
+        QSoftMenuBar::setLabel(mFindTextEntry, Qt::Key_Select, QSoftMenuBar::Next);
+        mFindTextEntry->installEventFilter(this);
     }
     if ( s ) {
-        searchBar->show();
+        mFindTextWidget->show();
+        editor->setFocusPolicy(Qt::NoFocus);
         searchVisible = true;
-        searchEdit->setFocus();
-#ifdef QTOPIA_PHONE
+        mFindTextEntry->setFocus();
         if( !Qtopia::mousePreferred() ) {
-            if (!searchEdit->hasEditFocus())
-                searchEdit->setEditFocus(true);
+            if (!mFindTextEntry->hasEditFocus())
+                mFindTextEntry->setEditFocus(true);
         }
-#endif
     } else {
         searchVisible = false;
-#ifdef QTOPIA_PHONE
         if( !Qtopia::mousePreferred() ) {
-            if (searchEdit->hasEditFocus())
-                searchEdit->setEditFocus(false);
+            if (mFindTextEntry->hasEditFocus())
+                mFindTextEntry->setEditFocus(false);
         }
-#endif
+        editor->setFocusPolicy(Qt::StrongFocus);
+        mFindTextWidget->hide();
         editor->setFocus();
-        searchBar->hide();
-#ifdef QTOPIA_PHONE
+        editor->clearSearchResults();
         if( !Qtopia::mousePreferred() ) {
             if (!editor->hasEditFocus())
                 editor->setEditFocus(true);
         }
-#endif
     }
+}
+
+void TextEdit::search(const QString& text)
+{
+    editor->findText(text, false);
+    if (text.isEmpty())
+        mToolTip->hide();
 }
 
 void TextEdit::search()
 {
-    editor->findText( searchEdit->text(), false );
+    if (mFindTextEntry)
+        editor->findText( mFindTextEntry->text(), false );
 }
 
 void TextEdit::searchNext()
 {
-#ifdef QTOPIA_PHONE
-    if (findTb)
-        findTb->setFocus();
-#endif
+    search();
 }
 
 void TextEdit::findWrapped()
 {
-    Qtopia::statusMessage( tr("Find: reached end") );
+    mToolTip->show(tr("Find: reached end"));
 }
 
 void TextEdit::findNotFound()
 {
-    Qtopia::statusMessage( tr("Find: not found") );
+    mToolTip->show(tr("Find: not found"));
 }
 
 void TextEdit::newFile()
@@ -605,58 +601,141 @@ void TextEdit::newFile()
 
 void TextEdit::setDocument(const QString& f)
 {
-#ifdef QTOPIA_PHONE
     qCopActivated = true;
-#endif
     save();
     QContent nf(f);
     nf.setType("text/plain");
     openFile(nf);
-    showEditTools();
-    // Show filename in caption
-    QString name;
-    if ( nf.linkFileKnown() && !nf.name().isEmpty() ) {
-        name = nf.name();
+    if (doc) {
+        showEditTools();
+        // Show filename in caption
+        QString name;
+        if ( nf.linkFileKnown() && !nf.name().isEmpty() ) {
+            name = nf.name();
+        } else {
+            name = f;
+            int sep = name.lastIndexOf( '/' );
+            if ( sep > 0 )
+                name = name.mid( sep+1 );
+        }
+        updateCaption( name );
     } else {
-        name = f;
-        int sep = name.lastIndexOf( '/' );
-        if ( sep > 0 )
-            name = name.mid( sep+1 );
+        // Ensure we just go away if there is a problem (eg. too large file).
+        if (isHidden())
+            deleteLater();
     }
-    updateCaption( name );
 }
+
+class TextCodecSelector : public QDialog {
+    Q_OBJECT
+public:
+    TextCodecSelector(QWidget* parent=0) :
+        QDialog(parent)
+    {
+        list = new QListWidget(this);
+        connect(list,SIGNAL(itemActivated(QListWidgetItem*)),this,SLOT(accept()));
+        connect(list,SIGNAL(itemPressed(QListWidgetItem*)),this,SLOT(accept()));
+        codecs = QTextCodec::availableCodecs();
+        qSort(codecs);
+        list->addItem(tr("Automatic"));
+        foreach (QByteArray n, codecs) {
+            list->addItem(n);
+        }
+        QLabel *label = new QLabel(tr("<qt>Choose the encoding for this file:</qt>"));
+        label->setWordWrap(true);
+        QVBoxLayout *vb = new QVBoxLayout(this);
+        vb->addWidget(label);
+        vb->addWidget(list);
+        setLayout(vb);
+    }
+
+    QTextCodec *selection(QByteArray ba) const
+    {
+        int n = list->currentRow();
+        if ( n<0 ) {
+            return 0;
+        } else if ( n==0 ) {
+            // Automatic... just try them all and pick the one that can convert
+            // in and out without losing anything with the smallest intermediate length.
+            QTextCodec *best=0;
+            int shortest=INT_MAX;
+            foreach (QByteArray name, codecs) {
+                QTextCodec* c = QTextCodec::codecForName(name);
+                QString enc = c->toUnicode(ba);
+                if ( c->fromUnicode(enc)==ba ) {
+                    if ( enc.length() < shortest ) {
+                        best=c;
+                        shortest=enc.length();
+                    }
+                }
+            }
+            return best;
+        } else {
+            return QTextCodec::codecForName(codecs.at(n-1));
+        }
+    }
+
+    static QTextCodec* codecForContent(QByteArray ba, QWidget *parent=0)
+    {
+        TextCodecSelector tcs(parent);
+        tcs.setModal(true);
+        QtopiaApplication::setMenuLike(&tcs,true);
+        if (QtopiaApplication::execDialog(&tcs)) {
+            return tcs.selection(ba);
+        }
+        return 0;
+    }
+
+private:
+    QListWidget *list;
+    QList<QByteArray> codecs;
+};
 
 void TextEdit::openFile( const QContent &f )
 {
+    // XXX 8 times this space will be used.
+    QSettings cfg("Trolltech","TextEdit");
+    const int max_supported_text_file_size = cfg.value("Limits/FileSize",256*1024).toInt();
+
     clear();
     QString txt;
-    QByteArray ba;
     bool needsave = false;
-    if (f.load(ba)) {
-        txt = QString::fromUtf8(ba, ba.size());
-        if ( strlen(txt.toUtf8()) != (size_t)ba.size() ) {
-            // not UTF8
-#ifdef QTOPIA4_TODO
-            QTextCodec* codec = QTextCodec::codecForContent(ba.data(),ba.size());
-            if ( codec ) {
-                txt = codec->toUnicode(ba);
-                needsave = true;
+    {
+        QByteArray ba;
+        if (f.load(ba)) {
+            if ( ba.size() > max_supported_text_file_size ) {
+                QMessageBox::critical(this, tr( "File Too Large"),
+                                tr("<qt>This file is too large for Notes to open."));
+                return;
             }
-#else
-            //XXX wrong!
-            txt = QString::fromLatin1(ba, ba.size());
-#endif
+
+            txt = QString::fromUtf8(ba, ba.size());
+            if ( txt.toUtf8().size() != ba.size() ) {
+                // not UTF8
+                QTextCodec* codec = TextCodecSelector::codecForContent(ba,this);
+                if ( codec ) {
+                    txt = codec->toUnicode(ba);
+                    needsave = true;
+                } else {
+                    txt = "";
+                }
+            }
         }
     }
     fileNew();
     if ( doc )
         delete doc;
     doc = new QContent(f);
-#ifdef QTOPIA_PHONE
+
+    QTextDocument *d = new QTextDocument(txt, editor);
+
     backup = txt;
-#endif
-    editor->setDocument(new QTextDocument(txt, editor));
-    editor->document()->setModified(needsave);
+
+    editor->setDocument(d);
+    d->setModified(needsave);
+    QFont font = editor->font();
+    font.setPointSizeF(defaultFontSize);
+    d->setDefaultFont(font);
     updateCaption();
 }
 
@@ -666,12 +745,8 @@ void TextEdit::showEditTools()
         close();
     fileSelector->hide();
     editorStack->setCurrentIndex(0);
-#ifndef QTOPIA_PHONE
-    menu->show();
-    editBar->show();
-#endif
-    if ( searchBar && searchVisible )
-        searchBar->show();
+    if ( mFindTextWidget && searchVisible )
+        mFindTextWidget->show();
     updateCaption();
 }
 
@@ -687,10 +762,10 @@ bool TextEdit::save()
         return true;
     }
 
-    QString rt = editor->toPlainText();
-
     if ( doc->name().isEmpty() )
-        doc->setName(calculateName(rt));
+        fileName();
+
+    QString rt = editor->toPlainText();
 
     if (!doc->save(rt.toUtf8()))
         return false;
@@ -702,18 +777,15 @@ bool TextEdit::save()
 
 QString TextEdit::calculateName(QString rt)
 {
-    QString pt = rt.simplified();
-    int i = pt.indexOf( ' ' );
+    QString pt = rt.left(20).simplified();
+    int i = pt.lastIndexOf(' ');
     QString docname = pt;
     if ( i > 0 )
         docname = pt.left( i );
     // remove "." at the beginning
     while( docname.startsWith( "." ) )
         docname = docname.mid( 1 );
-    docname.replace( QRegExp("/"), "_" );
-    // cut the length. filenames longer than that don't make sense and something goes wrong when they get too long.
-    if ( docname.length() > 40 )
-        docname = docname.left(40);
+    docname.replace(QChar('/'), QChar('_'));
     if ( docname.isEmpty() )
         docname = tr("Empty Text");
     return docname;
@@ -733,9 +805,7 @@ void TextEdit::fileName()
     if (!doc->save(editor->document()->toPlainText().toUtf8()))
         return;
 
-#ifdef QTOPIA_PHONE
     saved = true;
-#endif
 
     QDocumentPropertiesDialog *lp = new QDocumentPropertiesDialog(*doc, this);
     if (QtopiaApplication::execDialog(lp)) {
@@ -749,9 +819,7 @@ void TextEdit::clear()
     delete doc;
     doc = 0;
     editor->clear();
-#ifdef QTOPIA_PHONE
     saved = false;
-#endif
     wasCreated = false;
 }
 
@@ -759,18 +827,7 @@ void TextEdit::updateCaption( const QString &name )
 {
     if ( !doc )
         setWindowTitle( tr("Notes") );
-#ifndef QTOPIA_PHONE
-    else {
-        QString s = name;
-        if ( s.isNull() )
-            s = doc->name();
-        if ( s.isEmpty() )
-            s = tr( "Unnamed" );
-        setWindowTitle( s + " - " + tr("Notes") );
-    }
-#else
-    Q_UNUSED( name )
-#endif
+    Q_UNUSED( name );
 }
 
 void TextEdit::accept()
@@ -782,9 +839,7 @@ void TextEdit::message(const QString& msg, const QByteArray& data)
 {
     if ( msg == "viewFile(QString)" || msg == "openFile(QString)" ) {
         save();
-#ifdef QTOPIA_PHONE
         qCopActivated = true;
-#endif
         QDataStream d(data);
         QString filename;
         d >> filename;
@@ -804,7 +859,7 @@ void TextEdit::message(const QString& msg, const QByteArray& data)
                 openFile(dc);
             }
         } else {
-        openFile(QContent(filename));
+            openFile(QContent(filename));
         }
         showEditTools();
         updateCaption( filename );
@@ -822,7 +877,6 @@ void TextEdit::setReadOnly(bool y)
 
 void TextEdit::closeEvent( QCloseEvent* e )
 {
-#ifdef QTOPIA_PHONE
     if( searchVisible ) {
         findAction->setChecked( false );
     } else {
@@ -839,11 +893,37 @@ void TextEdit::closeEvent( QCloseEvent* e )
             e->accept();
         }
     }
-#else
-    if ( editorStack->currentIndex() == 0 )
-        fileOpen();
-    e->accept();
-#endif
+}
+
+bool TextEdit::eventFilter(QObject *o, QEvent *e)
+{
+    if (e->type() == QEvent::KeyPress) {
+        QKeyEvent* ke = static_cast<QKeyEvent*>(e);
+        if (ke->key() == Qt::Key_Select) {
+            if (editor->hasEditFocus()) {
+                close();
+                return true;
+            } else if (mFindTextEntry->hasEditFocus()) {
+                searchNext();
+                return true;
+            }
+        } else if (ke->key() == Qt::Key_Back) {
+            if (mFindTextEntry && mFindTextEntry->hasEditFocus() && mFindTextEntry->text().isEmpty()) {
+                editFind(false);
+                findAction->setChecked(false);
+                return true;
+            }
+        }
+    } else if (e->type() == QEvent::MouseButtonPress) {
+        QMouseEvent *me = static_cast<QMouseEvent*>(e);
+        if (me->button() == Qt::LeftButton) {
+            if (o == mFindIcon) {
+                searchNext();
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void TextEdit::print()

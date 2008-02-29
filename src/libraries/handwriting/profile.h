@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -50,8 +50,6 @@ public:
     int ignoreStrokeTimeout() const { return isTimeout; }
     void setIgnoreStrokeTimeout( int t );
 
-    bool matchWords() const { return wordMatch; }
-
     // shouldn't use, overly restricts usage of set
     // returns first char set of this type.
     QIMPenCharSet *uppercase();
@@ -80,7 +78,7 @@ private:
     struct ProfileSet {
         ProfileSet() : set(0) {}
         ProfileSet(QIMPenCharSet *s) : set(s) {}
-        ~ProfileSet() { if (set) delete set; }
+        ~ProfileSet() { delete set; }
 
         QString id;
         QIMPenCharSet *set;
@@ -99,7 +97,6 @@ private:
     bool istyle;
     int msTimeout;
     int isTimeout;
-    bool wordMatch;
 };
 
 #endif

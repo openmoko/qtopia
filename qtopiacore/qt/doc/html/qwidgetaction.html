@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qwidgetaction.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qwidgetaction.cpp -->
 <head>
-  <title>Qt 4.2: QWidgetAction Class Reference</title>
+  <title>Qt 4.3: QWidgetAction Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QWidgetAction Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QWidgetAction Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QWidgetAction class extends <a href="qaction.html">QAction</a> by an interface for inserting custom widgets into action based containers, such as toolbars. <a href="#details">More...</a></p>
 <pre> #include &lt;QWidgetAction&gt;</pre><p>Inherits <a href="qaction.html">QAction</a>.</p>
 <p>This class was introduced in Qt 4.2.</p>
@@ -64,7 +65,7 @@
 <p>Note that it is up to the widget to activate the action, for example by reimplementing mouse event handlers and calling <a href="qaction.html#trigger">QAction::trigger</a>().</p>
 <p><b>Mac OS X</b>: If you add widgets to a menu in the application's menu bar on Mac OS X, the widget will be added and function but there are some limitations:</p>
 <ol type="1">
-<li>The widget is reparented away from the <a href="qmenu.html">QMenu</a> to the native menu view. If you show the menu some other place (e.g. as a popup menu), the widget will not be there.</li>
+<li>The widget is reparented away from the <a href="qmenu.html">QMenu</a> to the native menu view. If you show the menu some other place (e.g&#x2e; as a popup menu), the widget will not be there.</li>
 <li>Focus/Keyboard handling of the widget is not possible</li>
 <li>Mouse tracking on the widget currently does not work</li>
 <li>Connecting the <a href="qaction.html#triggered">triggered</a>() signal to a slot that opens a modal dialog will cause a crash in Mac OS X 10.4 (known bug acknowledged by Apple), a workaround is to use a QueuedConnection instead of a DirectConnection.</li>
@@ -102,6 +103,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

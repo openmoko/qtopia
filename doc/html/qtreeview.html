@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QTreeView Class Reference</title>
+  <title>Qt 4.3: QTreeView Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTreeView Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTreeView Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QTreeView class provides a default model/view implementation of a tree view. <a href="#details">More...</a></p>
 <pre> #include &lt;QTreeView&gt;</pre><p>Inherits <a href="qabstractitemview.html">QAbstractItemView</a>.</p>
 <p>Inherited by <a href="qtreewidget.html">QTreeWidget</a>.</p>
@@ -25,12 +26,14 @@
 <tr><td width="45%" valign="top"><ul>
 <li><div class="fn"/><b><a href="qtreeview.html#allColumnsShowFocus-prop">allColumnsShowFocus</a></b> : bool</li>
 <li><div class="fn"/><b><a href="qtreeview.html#animated-prop">animated</a></b> : bool</li>
+<li><div class="fn"/><b><a href="qtreeview.html#autoExpandDelay-prop">autoExpandDelay</a></b> : int</li>
 <li><div class="fn"/><b><a href="qtreeview.html#indentation-prop">indentation</a></b> : int</li>
 <li><div class="fn"/><b><a href="qtreeview.html#itemsExpandable-prop">itemsExpandable</a></b> : bool</li>
 </ul></td><td valign="top"><ul>
 <li><div class="fn"/><b><a href="qtreeview.html#rootIsDecorated-prop">rootIsDecorated</a></b> : bool</li>
 <li><div class="fn"/><b><a href="qtreeview.html#sortingEnabled-prop">sortingEnabled</a></b> : bool</li>
 <li><div class="fn"/><b><a href="qtreeview.html#uniformRowHeights-prop">uniformRowHeights</a></b> : bool</li>
+<li><div class="fn"/><b><a href="qtreeview.html#wordWrap-prop">wordWrap</a></b> : bool</li>
 </ul>
 </td></tr>
 </table></p>
@@ -38,7 +41,7 @@
 <li><div class="fn"/>14 properties inherited from <a href="qabstractitemview.html#properties">QAbstractItemView</a></li>
 <li><div class="fn"/>2 properties inherited from <a href="qabstractscrollarea.html#properties">QAbstractScrollArea</a></li>
 <li><div class="fn"/>6 properties inherited from <a href="qframe.html#properties">QFrame</a></li>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -47,6 +50,7 @@
 <li><div class="fn"/><b><a href="qtreeview.html#QTreeView">QTreeView</a></b> ( QWidget * <i>parent</i> = 0 )</li>
 <li><div class="fn"/><b><a href="qtreeview.html#dtor.QTreeView">~QTreeView</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qtreeview.html#allColumnsShowFocus-prop">allColumnsShowFocus</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qtreeview.html#autoExpandDelay-prop">autoExpandDelay</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qtreeview.html#columnAt">columnAt</a></b> ( int <i>x</i> ) const</li>
 <li><div class="fn"/>int <b><a href="qtreeview.html#columnViewportPosition">columnViewportPosition</a></b> ( int <i>column</i> ) const</li>
 <li><div class="fn"/>int <b><a href="qtreeview.html#columnWidth">columnWidth</a></b> ( int <i>column</i> ) const</li>
@@ -57,6 +61,7 @@
 <li><div class="fn"/>bool <b><a href="qtreeview.html#animated-prop">isAnimated</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qtreeview.html#isColumnHidden">isColumnHidden</a></b> ( int <i>column</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qtreeview.html#isExpanded">isExpanded</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qtreeview.html#isFirstColumnSpanned">isFirstColumnSpanned</a></b> ( int <i>row</i>, const QModelIndex &amp; <i>parent</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qtreeview.html#isRowHidden">isRowHidden</a></b> ( int <i>row</i>, const QModelIndex &amp; <i>parent</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qtreeview.html#sortingEnabled-prop">isSortingEnabled</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qtreeview.html#itemsExpandable-prop">itemsExpandable</a></b> () const</li>
@@ -64,9 +69,11 @@
 <li><div class="fn"/>virtual void <b><a href="qtreeview.html#scrollTo">scrollTo</a></b> ( const QModelIndex &amp; <i>index</i>, ScrollHint <i>hint</i> = EnsureVisible )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#allColumnsShowFocus-prop">setAllColumnsShowFocus</a></b> ( bool <i>enable</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#animated-prop">setAnimated</a></b> ( bool <i>enable</i> )</li>
+<li><div class="fn"/>void <b><a href="qtreeview.html#autoExpandDelay-prop">setAutoExpandDelay</a></b> ( int <i>delay</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#setColumnHidden">setColumnHidden</a></b> ( int <i>column</i>, bool <i>hide</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#setColumnWidth">setColumnWidth</a></b> ( int <i>column</i>, int <i>width</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#setExpanded">setExpanded</a></b> ( const QModelIndex &amp; <i>index</i>, bool <i>expanded</i> )</li>
+<li><div class="fn"/>void <b><a href="qtreeview.html#setFirstColumnSpanned">setFirstColumnSpanned</a></b> ( int <i>row</i>, const QModelIndex &amp; <i>parent</i>, bool <i>span</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#setHeader">setHeader</a></b> ( QHeaderView * <i>header</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#indentation-prop">setIndentation</a></b> ( int <i>i</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#itemsExpandable-prop">setItemsExpandable</a></b> ( bool <i>enable</i> )</li>
@@ -74,15 +81,17 @@
 <li><div class="fn"/>void <b><a href="qtreeview.html#setRowHidden">setRowHidden</a></b> ( int <i>row</i>, const QModelIndex &amp; <i>parent</i>, bool <i>hide</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#sortingEnabled-prop">setSortingEnabled</a></b> ( bool <i>enable</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#uniformRowHeights-prop">setUniformRowHeights</a></b> ( bool <i>uniform</i> )</li>
+<li><div class="fn"/>void <b><a href="qtreeview.html#wordWrap-prop">setWordWrap</a></b> ( bool <i>on</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#sortByColumn">sortByColumn</a></b> ( int <i>column</i>, Qt::SortOrder <i>order</i> )</li>
 <li><div class="fn"/>bool <b><a href="qtreeview.html#uniformRowHeights-prop">uniformRowHeights</a></b> () const</li>
 <li><div class="fn"/>virtual QRect <b><a href="qtreeview.html#visualRect">visualRect</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qtreeview.html#wordWrap-prop">wordWrap</a></b> () const</li>
 </ul>
 <ul>
 <li><div class="fn"/>52 public functions inherited from <a href="qabstractitemview.html#public-functions">QAbstractItemView</a></li>
 <li><div class="fn"/>15 public functions inherited from <a href="qabstractscrollarea.html#public-functions">QAbstractScrollArea</a></li>
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
-<li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>201 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -93,13 +102,14 @@
 <li><div class="fn"/>void <b><a href="qtreeview.html#collapseAll">collapseAll</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#expand">expand</a></b> ( const QModelIndex &amp; <i>index</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#expandAll">expandAll</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qtreeview.html#expandToDepth">expandToDepth</a></b> ( int <i>depth</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#hideColumn">hideColumn</a></b> ( int <i>column</i> )</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#resizeColumnToContents">resizeColumnToContents</a></b> ( int <i>column</i> )</li>
 <li><div class="fn"/>virtual void <b><a href="qtreeview.html#selectAll">selectAll</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qtreeview.html#showColumn">showColumn</a></b> ( int <i>column</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>8 public slots inherited from <a href="qabstractitemview.html#public-slots">QAbstractItemView</a></li>
+<li><div class="fn"/>9 public slots inherited from <a href="qabstractitemview.html#public-slots">QAbstractItemView</a></li>
 <li><div class="fn"/>19 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
@@ -123,6 +133,7 @@
 <li><div class="fn"/>virtual int <b><a href="qtreeview.html#horizontalOffset">horizontalOffset</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qtreeview.html#indexRowSizeHint">indexRowSizeHint</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
 <li><div class="fn"/>virtual QModelIndex <b><a href="qtreeview.html#moveCursor">moveCursor</a></b> ( CursorAction <i>cursorAction</i>, Qt::KeyboardModifiers <i>modifiers</i> )</li>
+<li><div class="fn"/>int <b><a href="qtreeview.html#rowHeight">rowHeight</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
 <li><div class="fn"/>virtual void <b><a href="qtreeview.html#rowsAboutToBeRemoved">rowsAboutToBeRemoved</a></b> ( const QModelIndex &amp; <i>parent</i>, int <i>start</i>, int <i>end</i> )</li>
 <li><div class="fn"/>virtual void <b><a href="qtreeview.html#rowsInserted">rowsInserted</a></b> ( const QModelIndex &amp; <i>parent</i>, int <i>start</i>, int <i>end</i> )</li>
 <li><div class="fn"/>virtual void <b><a href="qtreeview.html#scrollContentsBy">scrollContentsBy</a></b> ( int <i>dx</i>, int <i>dy</i> )</li>
@@ -193,12 +204,15 @@
 <tr valign="top" class="odd"><td><img src="images/windowsxp-treeview.png" alt="Screenshot of a Windows XP style tree view" /></td><td><img src="images/macintosh-treeview.png" alt="Screenshot of a Macintosh style tree view" /></td><td><img src="images/plastique-treeview.png" alt="Screenshot of a Plastique style tree view" /></td></tr>
 <tr valign="top" class="even"><td>A <a href="gallery-windowsxp.html">Windows XP style</a> tree view.</td><td>A <a href="gallery-macintosh.html">Macintosh style</a> tree view.</td><td>A <a href="gallery-plastique.html">Plastique style</a> tree view.</td></tr>
 </table></p>
+<a name="improving-performance"></a>
+<h3>Improving Performance</h3>
+<p>It is possible to give the view hints about the data it is handling in order to improve its performance when displaying large numbers of items. One approach that can be taken for views that are intended to display items with equal heights is to set the <a href="qtreeview.html#uniformRowHeights-prop">uniformRowHeights</a> property to true.</p>
 <p>See also <a href="qlistview.html">QListView</a>, <a href="qtreewidget.html">QTreeWidget</a>, <a href="model-view-view.html">View Classes</a>, <a href="qabstractitemmodel.html">QAbstractItemModel</a>, <a href="qabstractitemview.html">QAbstractItemView</a>, and <a href="itemviews-dirview.html">Dir View Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="allColumnsShowFocus-prop"></a>allColumnsShowFocus : bool</h3>
 <p>This property holds whether items should show keyboard focus using all columns.</p>
-<p>If this property is true all columns will show focus and selection states, otherwise only one column will show focus.</p>
+<p>If this property is true all columns will show focus, otherwise only one column will show focus.</p>
 <p>The default is false.</p>
 <p>This property was introduced in Qt 4.2.</p>
 <p>Access functions:</p>
@@ -214,6 +228,15 @@
 <ul>
 <li><div class="fn"/><b>bool isAnimated () const</b></li>
 <li><div class="fn"/><b>void setAnimated ( bool <i>enable</i> )</b></li>
+</ul>
+<h3 class="fn"><a name="autoExpandDelay-prop"></a>autoExpandDelay : int</h3>
+<p>This property holds the delay time before items in a tree are opened during a drag and drop operation.</p>
+<p>This property holds the amount of time in milliseconds that the user must wait over a node before that node will automatically open or close. If the time is set to less then 0 then it will not be activated.</p>
+<p>This property was introduced in Qt 4.3.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>int autoExpandDelay () const</b></li>
+<li><div class="fn"/><b>void setAutoExpandDelay ( int <i>delay</i> )</b></li>
 </ul>
 <h3 class="fn"><a name="indentation-prop"></a>indentation : int</h3>
 <p>This property holds indentation of the items in the tree view.</p>
@@ -257,6 +280,15 @@
 <ul>
 <li><div class="fn"/><b>bool uniformRowHeights () const</b></li>
 <li><div class="fn"/><b>void setUniformRowHeights ( bool <i>uniform</i> )</b></li>
+</ul>
+<h3 class="fn"><a name="wordWrap-prop"></a>wordWrap : bool</h3>
+<p>This property holds the item text word-wrapping policy.</p>
+<p>If this property is true then the item text is wrapped where necessary at word-breaks; otherwise it is not wrapped at all. This property is false by default.</p>
+<p>This property was introduced in Qt 4.3.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool wordWrap () const</b></li>
+<li><div class="fn"/><b>void setWordWrap ( bool <i>on</i> )</b></li>
 </ul>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -302,8 +334,13 @@
 <p>See also <a href="qtreeview.html#expanded">expanded</a>().</p>
 <h3 class="fn"><a name="expandAll"></a>void QTreeView::expandAll ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Expands all expandable items.</p>
+<p>Warning: if the model contains a large number of items, this function will be take time to execute.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qtreeview.html#collapseAll">collapseAll</a>(), <a href="qtreeview.html#expand">expand</a>(), <a href="qtreeview.html#collapse">collapse</a>(), and <a href="qtreeview.html#setExpanded">setExpanded</a>().</p>
+<h3 class="fn"><a name="expandToDepth"></a>void QTreeView::expandToDepth ( int <i>depth</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Expands all expandable items to the given <i>depth</i>.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qtreeview.html#expandAll">expandAll</a>(), <a href="qtreeview.html#collapseAll">collapseAll</a>(), <a href="qtreeview.html#expand">expand</a>(), <a href="qtreeview.html#collapse">collapse</a>(), and <a href="qtreeview.html#setExpanded">setExpanded</a>().</p>
 <h3 class="fn"><a name="expanded"></a>void QTreeView::expanded ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the item specified by <i>index</i> is expanded.</p>
 <p>See also <a href="qtreeview.html#setExpanded">setExpanded</a>().</p>
@@ -330,7 +367,11 @@
 <p>See also <a href="qtreeview.html#hideColumn">hideColumn</a>() and <a href="qtreeview.html#isRowHidden">isRowHidden</a>().</p>
 <h3 class="fn"><a name="isExpanded"></a>bool QTreeView::isExpanded ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>Returns true if the model item <i>index</i> is expanded; otherwise returns false.</p>
-<p>See also <a href="qtreeview.html#expand">expand</a>() and <a href="qtreeview.html#expanded">expanded</a>().</p>
+<p>See also <a href="qtreeview.html#expand">expand</a>(), <a href="qtreeview.html#expanded">expanded</a>(), and <a href="qtreeview.html#setExpanded">setExpanded</a>().</p>
+<h3 class="fn"><a name="isFirstColumnSpanned"></a>bool QTreeView::isFirstColumnSpanned ( int <i>row</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> ) const</h3>
+<p>Returns true if the item in first column in the given <i>row</i> of the <i>parent</i> is spanning all the columns; otherwise returns false.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qtreeview.html#setFirstColumnSpanned">setFirstColumnSpanned</a>().</p>
 <h3 class="fn"><a name="isRowHidden"></a>bool QTreeView::isRowHidden ( int <i>row</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> ) const</h3>
 <p>Returns true if the item in the given <i>row</i> of the <i>parent</i> is hidden; otherwise returns false.</p>
 <p>See also <a href="qtreeview.html#setRowHidden">setRowHidden</a>() and <a href="qtreeview.html#isColumnHidden">isColumnHidden</a>().</p>
@@ -340,6 +381,10 @@
 <h3 class="fn"><a name="resizeColumnToContents"></a>void QTreeView::resizeColumnToContents ( int <i>column</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Resizes the <i>column</i> given to the size of its contents.</p>
 <p>See also <a href="qtreeview.html#columnWidth">columnWidth</a>() and <a href="qtreeview.html#setColumnWidth">setColumnWidth</a>().</p>
+<h3 class="fn"><a name="rowHeight"></a>int QTreeView::rowHeight ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Returns the height of the row indicated by the given <i>index</i>.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qtreeview.html#indexRowSizeHint">indexRowSizeHint</a>().</p>
 <h3 class="fn"><a name="rowsAboutToBeRemoved"></a>void QTreeView::rowsAboutToBeRemoved ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i>, int <i>start</i>, int <i>end</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Informs the view that the rows from the <i>start</i> row to the <i>end</i> row inclusive are about to removed from the given <i>parent</i> model item.</p>
 <p>Reimplemented from <a href="qabstractitemview.html#rowsAboutToBeRemoved">QAbstractItemView</a>.</p>
@@ -367,7 +412,11 @@
 <p>See also <a href="qtreeview.html#columnWidth">columnWidth</a>() and <a href="qtreeview.html#resizeColumnToContents">resizeColumnToContents</a>().</p>
 <h3 class="fn"><a name="setExpanded"></a>void QTreeView::setExpanded ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i>, bool <i>expanded</i> )</h3>
 <p>Sets the item referred to by <i>index</i> to either collapse or expanded, depending on the value of <i>expanded</i>.</p>
-<p>See also <a href="qtreeview.html#expanded">expanded</a>() and <a href="qtreeview.html#expand">expand</a>().</p>
+<p>See also <a href="qtreeview.html#expanded">expanded</a>(), <a href="qtreeview.html#expand">expand</a>(), and <a href="qtreeview.html#isExpanded">isExpanded</a>().</p>
+<h3 class="fn"><a name="setFirstColumnSpanned"></a>void QTreeView::setFirstColumnSpanned ( int <i>row</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i>, bool <i>span</i> )</h3>
+<p>If <i>span</i> is true the item in the first column in the <i>row</i> with the given <i>parent</i> is set to span all columns, otherwise all items on the <i>row</i> are shown.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qtreeview.html#isFirstColumnSpanned">isFirstColumnSpanned</a>().</p>
 <h3 class="fn"><a name="setHeader"></a>void QTreeView::setHeader ( <a href="qheaderview.html">QHeaderView</a> * <i>header</i> )</h3>
 <p>Sets the header for the tree view, to the given <i>header</i>.</p>
 <p>The view takes ownership over the given <i>header</i> and deletes it when a new header is set.</p>
@@ -406,6 +455,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

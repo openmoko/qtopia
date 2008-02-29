@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,7 +29,7 @@
 #include <QHBoxLayout>
 #include <QGridLayout>
 #include <QDebug>
-#include <qwindowsystem_qws.h>
+#include "qtopiainputevents.h"
 #include "phone/dialercontrol.h"
 #include "e2_callscreen.h"
 
@@ -156,8 +156,8 @@ void E2Dialer::callNow()
 
 void E2Dialer::backspace()
 {
-    QWSServer::sendKeyEvent(0xFFFF, Qt::Key_Backspace, 0, true, false);
-    QWSServer::sendKeyEvent(0xFFFF, Qt::Key_Backspace, 0, false, false);
+    QtopiaInputEvents::sendKeyEvent(0xFFFF, Qt::Key_Backspace, 0, true, false);
+    QtopiaInputEvents::sendKeyEvent(0xFFFF, Qt::Key_Backspace, 0, false, false);
 }
 
 void E2Dialer::addDtmf(const QString &s)
@@ -177,8 +177,8 @@ void E2Dialer::number()
             if(m_activeCallCount)
                 addDtmf(t);
 
-            QWSServer::sendKeyEvent(t[0].unicode(), Qt::Key_0 + ii, 0, true, false);
-            QWSServer::sendKeyEvent(t[0].unicode(), Qt::Key_0 + ii, 0, false, false);
+            QtopiaInputEvents::sendKeyEvent(t[0].unicode(), Qt::Key_0 + ii, 0, true, false);
+            QtopiaInputEvents::sendKeyEvent(t[0].unicode(), Qt::Key_0 + ii, 0, false, false);
             return;
         }
     }
@@ -191,8 +191,8 @@ void E2Dialer::hash()
     if(m_activeCallCount)
         addDtmf("#");
 
-    QWSServer::sendKeyEvent(QChar('#').unicode(), Qt::Key_NumberSign, 0, true, false);
-    QWSServer::sendKeyEvent(QChar('#').unicode(), Qt::Key_NumberSign, 0, false, false);
+    QtopiaInputEvents::sendKeyEvent(QChar('#').unicode(), Qt::Key_NumberSign, 0, true, false);
+    QtopiaInputEvents::sendKeyEvent(QChar('#').unicode(), Qt::Key_NumberSign, 0, false, false);
 }
 
 void E2Dialer::star()
@@ -200,8 +200,8 @@ void E2Dialer::star()
     if(m_activeCallCount)
         addDtmf("*");
 
-    QWSServer::sendKeyEvent(QChar('*').unicode(), Qt::Key_Asterisk, 0, true, false);
-    QWSServer::sendKeyEvent(QChar('*').unicode(), Qt::Key_Asterisk, 0, false, false);
+    QtopiaInputEvents::sendKeyEvent(QChar('*').unicode(), Qt::Key_Asterisk, 0, true, false);
+    QtopiaInputEvents::sendKeyEvent(QChar('*').unicode(), Qt::Key_Asterisk, 0, false, false);
 }
 
 void E2Dialer::setActive()

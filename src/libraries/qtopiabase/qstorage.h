@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -60,6 +60,7 @@ signals:
 
 public slots:
     void update();
+    void update(QString& mountpoint, bool connected);
 
 private slots:
     void cardMessage( const QString& msg, const QByteArray& data );

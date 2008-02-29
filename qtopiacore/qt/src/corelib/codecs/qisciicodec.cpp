@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -66,8 +81,7 @@ int QIsciiCodec::mibEnum() const
     return -3000-idx;
 }
 
-
-#define INV 0xff
+static const uchar inv = 0xFF;
 
 /* iscii range from 0xa0 - 0xff */
 static const uchar iscii_to_uni_table[0x60] = {
@@ -88,7 +102,7 @@ static const uchar iscii_to_uni_table[0x60] = {
 
     0x31, 0x32, 0x33, 0x34,
     0x35, 0x36, 0x37, 0x38,
-    0x39,  INV, 0x3e, 0x3f,
+    0x39,  inv, 0x3e, 0x3f,
     0x40, 0x41, 0x42, 0x43,
 
     0x46, 0x47, 0x48, 0x45,
@@ -171,12 +185,22 @@ QByteArray QIsciiCodec::convertFromUnicode(const QChar *uc, int len, ConverterSt
     QByteArray result;
     result.resize(2*len); //worst case
 
-    uchar *ch = (uchar *)result.data();
+    uchar *ch = reinterpret_cast<uchar *>(result.data());
 
-    int base = codecs[idx].base;
+    const int base = codecs[idx].base;
 
     for (int i =0; i < len; ++i) {
-        int pos = uc[i].unicode() - base;
+        const ushort codePoint = uc[i].unicode();
+
+        /* The low 7 bits of ISCII is plain ASCII. However, we go all the
+         * way up to 0xA0 such that we can roundtrip with convertToUnicode()'s
+         * behavior. */
+        if(codePoint < 0xA0) {
+            *ch++ = static_cast<uchar>(codePoint);
+            continue;
+        }
+
+        const int pos = codePoint - base;
         if (pos > 0 && pos < 0x80) {
             uchar iscii = uni_to_iscii_table[pos];
             if (iscii > 0x80) {
@@ -223,9 +247,9 @@ QString QIsciiCodec::convertToUnicode(const char* chars, int len, ConverterState
 
     QString result;
     result.resize(len);
-    QChar *uc = (QChar *)result.unicode();
+    QChar *uc = result.data();
 
-    int base = codecs[idx].base;
+    const int base = codecs[idx].base;
 
     for (int i = 0; i < len; ++i) {
         ushort ch = (uchar) chars[i];
@@ -233,8 +257,8 @@ QString QIsciiCodec::convertToUnicode(const char* chars, int len, ConverterState
             *uc++ = ch;
         else {
             ushort c = iscii_to_uni_table[ch - 0xa0];
-            if (halant && (c == INV || c == 0xe9)) {
-                // Consonant Halant INV -> Consonant Halant ZWJ
+            if (halant && (c == inv || c == 0xe9)) {
+                // Consonant Halant inv -> Consonant Halant ZWJ
                 // Consonant Halant Nukta -> Consonant Halant ZWJ
                 *uc++ = QChar(0x200d);
             } else if (halant && c == 0xe8) {
@@ -253,4 +277,5 @@ QString QIsciiCodec::convertToUnicode(const char* chars, int len, ConverterState
     }
     return result;
 }
+
 #endif // QT_NO_CODECS

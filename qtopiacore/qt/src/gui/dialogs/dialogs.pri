@@ -16,22 +16,28 @@ HEADERS += \
 	dialogs/qmessagebox.h \
 	dialogs/qpagesetupdialog.h \
 	dialogs/qprintdialog.h \
-	dialogs/qprogressdialog.h
+	dialogs/qprogressdialog.h \
+        dialogs/qsidebar_p.h \
+        dialogs/qfilesystemmodel_p.h \
+        dialogs/qfileinfogatherer_p.h \
+	dialogs/qwizard.h
 
-!embedded:mac:SOURCES	+= dialogs/qcolordialog_mac.cpp \
-                           dialogs/qfiledialog_mac.cpp
+!embedded:mac {
+    SOURCES	+= dialogs/qfiledialog_mac.cpp \
+                   dialogs/qprintdialog_mac.cpp \
+                   dialogs/qpagesetupdialog_mac.cpp
+    OBJECTIVE_SOURCES += dialogs/qcolordialog_mac.mm
+}
 win32 {
+    HEADERS += dialogs/qwizard_win_p.h
     SOURCES += dialogs/qfiledialog_win.cpp \
-	       dialogs/qpagesetupdialog_win.cpp \
-	       dialogs/qprintdialog_win.cpp 
+               dialogs/qpagesetupdialog_win.cpp \
+               dialogs/qprintdialog_win.cpp \
+               dialogs/qwizard_win.cpp
     
     !win32-borland:LIBS += -lshell32 	# the filedialog needs this library
 }
 
-mac {
-	SOURCES += dialogs/qprintdialog_mac.cpp \
-                   dialogs/qpagesetupdialog_mac.cpp
-}
 !mac:!embedded:unix {
 	SOURCES += dialogs/qprintdialog_unix.cpp \
 		   dialogs/qpagesetupdialog_unix.cpp
@@ -52,6 +58,8 @@ embedded {
         }
 }
 
+FORMS += dialogs/qfiledialog.ui
+INCLUDEPATH += $$PWD
 SOURCES += \
 	dialogs/qabstractprintdialog.cpp \
 	dialogs/qabstractpagesetupdialog.cpp \
@@ -62,4 +70,8 @@ SOURCES += \
 	dialogs/qfontdialog.cpp \
 	dialogs/qinputdialog.cpp \
 	dialogs/qmessagebox.cpp \
-	dialogs/qprogressdialog.cpp
+	dialogs/qprogressdialog.cpp \
+        dialogs/qsidebar.cpp \
+        dialogs/qfilesystemmodel.cpp \
+        dialogs/qfileinfogatherer.cpp \
+	dialogs/qwizard.cpp

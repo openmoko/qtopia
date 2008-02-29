@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -33,6 +48,7 @@ QT_MODULE(Gui)
 #ifndef QT_NO_ITEMVIEWS
 
 class QHeaderViewPrivate;
+class QStyleOptionHeader;
 
 class Q_GUI_EXPORT QHeaderView : public QAbstractItemView
 {
@@ -134,9 +150,17 @@ public:
     bool sectionsMoved() const;
     bool sectionsHidden() const;
 
+#ifndef QT_NO_DATASTREAM
+    QByteArray saveState() const;
+    bool restoreState(const QByteArray &state);
+#endif
+
+    void reset();
+
 public Q_SLOTS:
     void setOffset(int offset);
     void setOffsetToSectionPosition(int visualIndex);
+    void setOffsetToLastSection();
     void headerDataChanged(Qt::Orientation orientation, int logicalFirst, int logicalLast);
 
 Q_SIGNALS:
@@ -144,11 +168,13 @@ Q_SIGNALS:
     void sectionResized(int logicalIndex, int oldSize, int newSize);
     void sectionPressed(int logicalIndex);
     void sectionClicked(int logicalIndex);
+    void sectionEntered(int logicalIndex);
     void sectionDoubleClicked(int logicalIndex);
     void sectionCountChanged(int oldCount, int newCount);
     void sectionHandleDoubleClicked(int logicalIndex);
     void sectionAutoResize(int logicalIndex, QHeaderView::ResizeMode mode);
     void geometriesChanged();
+    void sortIndicatorChanged(int logicalIndex, Qt::SortOrder order);
 
 protected Q_SLOTS:
     void updateSection(int logicalIndex);
@@ -192,9 +218,12 @@ protected:
     QModelIndex moveCursor(CursorAction, Qt::KeyboardModifiers);
     void setSelection(const QRect&, QItemSelectionModel::SelectionFlags);
     QRegion visualRegionForSelection(const QItemSelection &selection) const;
+    void initStyleOption(QStyleOptionHeader *option) const;
 
 private:
     Q_PRIVATE_SLOT(d_func(), void _q_sectionsRemoved(const QModelIndex &parent, int logicalFirst, int logicalLast))
+    Q_PRIVATE_SLOT(d_func(), void _q_layoutAboutToBeChanged())
+    Q_PRIVATE_SLOT(d_func(), void _q_layoutChanged())
     Q_DECLARE_PRIVATE(QHeaderView)
     Q_DISABLE_COPY(QHeaderView)
 };

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -87,6 +102,7 @@ QPixmap qt_pixmapForBrush(int brushStyle, bool invert)
     return pm;
 }
 
+Q_GUI_EXPORT
 QImage qt_imageForBrush(int brushStyle, bool invert)
 {
     QImage image(8, 8, QImage::Format_MonoLSB);
@@ -102,6 +118,7 @@ QImage qt_imageForBrush(int brushStyle, bool invert)
 struct QTexturedBrushData : public QBrushData
 {
     QTexturedBrushData() {
+        m_has_pixmap_texture = false;
         m_pixmap = 0;
     }
     ~QTexturedBrushData() {
@@ -111,10 +128,13 @@ struct QTexturedBrushData : public QBrushData
     void setPixmap(const QPixmap &pm) {
         delete m_pixmap;
 
-        if (pm.isNull())
+        if (pm.isNull()) {
             m_pixmap = 0;
-        else
+            m_has_pixmap_texture = false;
+        } else {
             m_pixmap = new QPixmap(pm);
+            m_has_pixmap_texture = true;
+        }
 
         m_image = QImage();
     }
@@ -123,6 +143,7 @@ struct QTexturedBrushData : public QBrushData
         m_image = image;
         delete m_pixmap;
         m_pixmap = 0;
+        m_has_pixmap_texture = false;
     }
 
     QPixmap &pixmap() {
@@ -140,7 +161,16 @@ struct QTexturedBrushData : public QBrushData
 
     QPixmap *m_pixmap;
     QImage m_image;
+    bool m_has_pixmap_texture;
 };
+
+// returns true if the brush has a pixmap (or bitmap) set as the
+// brush texture, false otherwise
+bool hasPixmapTexture(const QBrush& brush)
+{
+    QTexturedBrushData *tx_data = static_cast<QTexturedBrushData *>(brush.d);
+    return tx_data->m_has_pixmap_texture;
+}
 
 struct QGradientBrushData : public QBrushData
 {
@@ -177,11 +207,20 @@ struct QGradientBrushData : public QBrushData
 
     The gradient() defines the gradient fill used when the current
     style is either Qt::LinearGradientPattern,
-    Qt::RadialGradientPattern or Qt::ConicalGradientPattern. The
-    gradient can only be set when constructing the brush, while the
-    texture() can be set using the appropriate constructor or by using
-    the setTexture() function. The texture() defines the pixmap used
-    when the current style is Qt::TexturePattern.
+    Qt::RadialGradientPattern or Qt::ConicalGradientPattern. Gradient
+    brushes are created by giving a QGradient as a constructor
+    argument when creating the QBrush. Qt provides three different
+    gradients: QLinearGradient, QConicalGradient, and QRadialGradient
+    - all of which inherit QGradient.
+
+    \quotefromfile snippets/brush/gradientcreationsnippet.cpp
+    \skipto QRadialGradient
+    \printuntil QBrush
+
+    The texture() defines the pixmap used when the current style is
+    Qt::TexturePattern.  You can create a brush with a texture by
+    providing the pixmap when the brush is created or by using
+    setTexture().
 
     Note that applying setTexture() makes style() ==
     Qt::TexturePattern, regardless of previous style
@@ -256,9 +295,10 @@ static QBrushData *nullBrushInstance()
     if (!defaultBrush.pointer && !defaultBrush.destroyed) {
         QBrushData *x = new QBrushData;
         x->ref = 1; x->style = Qt::BrushStyle(0); x->color = Qt::black;
+        x->hasTransform = false;
+        x->forceTextureClamp = false;
         if (!q_atomic_test_and_set_ptr(&defaultBrush.pointer, 0, x))
             delete x;
-        x->hasTransform = false;
     }
     return defaultBrush.pointer;
 }
@@ -308,6 +348,7 @@ void QBrush::init(const QColor &color, Qt::BrushStyle style)
     d->style = style;
     d->color = color;
     d->hasTransform = false;
+    d->forceTextureClamp = false;
 }
 
 /*!
@@ -522,6 +563,7 @@ void QBrush::detach(Qt::BrushStyle newStyle)
     x->color = d->color;
     x->transform = d->transform;
     x->hasTransform = d->hasTransform;
+    x->forceTextureClamp = d->forceTextureClamp;
     x = qAtomicSetPtr(&d, x);
     if (!x->ref.deref())
         cleanUp(x);
@@ -783,6 +825,20 @@ bool QBrush::isOpaque() const
 */
 void QBrush::setMatrix(const QMatrix &matrix)
 {
+    setTransform(QTransform(matrix));
+}
+
+/*!
+    \since 4.3
+
+    Sets \a matrix as an explicit transformation matrix on the
+    current brush. The brush transformation matrix is merged with
+    QPainter transformation matrix to produce the final result.
+
+    \sa transform()
+*/
+void QBrush::setTransform(const QTransform &matrix)
+{
     detach(d->style);
     d->transform = matrix;
     d->hasTransform = !matrix.isIdentity();
@@ -831,7 +887,7 @@ bool QBrush::operator==(const QBrush &b) const
         case Qt::TexturePattern: {
             QPixmap &us = ((QTexturedBrushData *) d)->pixmap();
             QPixmap &them = ((QTexturedBrushData *) b.d)->pixmap();
-            return ((us.isNull() && them.isNull()) || us.serialNumber() == them.serialNumber());
+            return ((us.isNull() && them.isNull()) || us.cacheKey() == them.cacheKey());
         }
         case Qt::LinearGradientPattern:
         case Qt::RadialGradientPattern:
@@ -898,6 +954,10 @@ QDataStream &operator<<(QDataStream &s, const QBrush &b)
         const QGradient *gradient = b.gradient();
         int type_as_int = int(gradient->type());
         s << type_as_int;
+        if (s.version() >= QDataStream::Qt_4_3) {
+            s << int(gradient->spread());
+            s << int(gradient->coordinateMode());
+        }
 
         if (sizeof(qreal) == sizeof(double)) {
             s << gradient->stops();
@@ -925,6 +985,8 @@ QDataStream &operator<<(QDataStream &s, const QBrush &b)
             s << (double) static_cast<const QConicalGradient *>(gradient)->angle();
         }
     }
+    if (s.version() >= QDataStream::Qt_4_3)
+        s << b.transform();
     return s;
 }
 
@@ -955,9 +1017,17 @@ QDataStream &operator>>(QDataStream &s, QBrush &b)
         int type_as_int;
         QGradient::Type type;
         QGradientStops stops;
+        QGradient::CoordinateMode cmode = QGradient::LogicalMode;
+        QGradient::Spread spread = QGradient::PadSpread;
 
         s >> type_as_int;
         type = QGradient::Type(type_as_int);
+        if (s.version() >= QDataStream::Qt_4_3) {
+            s >> type_as_int;
+            spread = QGradient::Spread(type_as_int);
+            s >> type_as_int;
+            cmode = QGradient::CoordinateMode(type_as_int);
+        }
 
         if (sizeof(qreal) == sizeof(double)) {
             s >> stops;
@@ -979,6 +1049,8 @@ QDataStream &operator>>(QDataStream &s, QBrush &b)
             s >> p2;
             QLinearGradient lg(p1, p2);
             lg.setStops(stops);
+            lg.setSpread(spread);
+            lg.setCoordinateMode(cmode);
             b = QBrush(lg);
         } else if (type == QGradient::RadialGradient) {
             QPointF center, focal;
@@ -988,6 +1060,8 @@ QDataStream &operator>>(QDataStream &s, QBrush &b)
             s >> radius;
             QRadialGradient rg(center, radius, focal);
             rg.setStops(stops);
+            rg.setSpread(spread);
+            rg.setCoordinateMode(cmode);
             b = QBrush(rg);
         } else { // type == QGradient::ConicalGradient
             QPointF center;
@@ -996,11 +1070,17 @@ QDataStream &operator>>(QDataStream &s, QBrush &b)
             s >> angle;
             QConicalGradient cg(center, angle);
             cg.setStops(stops);
+            cg.setSpread(spread);
+            cg.setCoordinateMode(cmode);
             b = QBrush(cg);
         }
-
     } else {
         b = QBrush(color, (Qt::BrushStyle)style);
+    }
+    if (s.version() >= QDataStream::Qt_4_3) {
+        QTransform transform;
+        s >> transform;
+        b.setTransform(transform);
     }
     return s;
 }
@@ -1014,6 +1094,7 @@ QDataStream &operator>>(QDataStream &s, QBrush &b)
 /*!
     \class QGradient
     \ingroup multimedia
+    \ingroup shared
 
     \brief The QGradient class is used in combination with QBrush to
     specify gradient fills.
@@ -1103,7 +1184,7 @@ QDataStream &operator>>(QDataStream &s, QBrush &b)
     \internal
 */
 QGradient::QGradient()
-    : dummy(0)
+    : m_type(NoGradient), dummy(0)
 {
 }
 
@@ -1235,6 +1316,7 @@ QGradientStops QGradient::stops() const
 
     \value LogicalMode
     \value StretchToDeviceMode
+    \value ObjectBoundingMode
 */
 
 /*!
@@ -1247,8 +1329,10 @@ QGradient::CoordinateMode QGradient::coordinateMode() const
 {
     if (dummy == 0)
         return LogicalMode;
-    else
+    else if (dummy == (void*)1)
         return StretchToDeviceMode;
+    else
+        return ObjectBoundingMode;
 }
 
 /*!
@@ -1261,8 +1345,10 @@ void QGradient::setCoordinateMode(CoordinateMode mode)
 {
     if (mode == LogicalMode)
         dummy = 0;
-    else
+    else if (mode == StretchToDeviceMode)
         dummy = (void *) 1;
+    else
+        dummy = (void *) 2;
 }
 
 
@@ -1761,7 +1847,7 @@ void QRadialGradient::setFocalPoint(const QPointF &focalPoint)
     Conical gradients interpolate interpolate colors counter-clockwise
     around a center point.
 
-    \image qconicalgradient
+    \image qconicalgradient.png
 
     The colors in a gradient is defined using stop points of the
     QGradientStop type, i.e. a position and a color. Use the
@@ -1908,7 +1994,6 @@ void QConicalGradient::setAngle(qreal angle)
     m_data.conical.angle = angle;
 }
 
-
 /*!
     \typedef QGradientStop
     \relates QGradient
@@ -1921,4 +2006,29 @@ void QConicalGradient::setAngle(qreal angle)
     \relates QGradient
 
     Typedef for QVector<QGradientStop>.
+*/
+
+/*!
+    \typedef QBrush::DataPtr
+    \internal
+*/
+
+/*!
+    \fn DataPtr &QBrush::data_ptr()
+    \internal
+*/
+
+
+/*!
+    \fn bool QBrush::isDetached() const
+    \internal
+*/
+
+/*!
+    \fn QTransform QBrush::transform() const
+    \since 4.3
+
+    Returns the current transformation matrix for the brush.
+
+    \sa setTransform()
 */

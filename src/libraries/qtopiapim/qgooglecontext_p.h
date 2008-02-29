@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,14 +22,27 @@
 #ifndef APPOINTMENT_GCALIO_PRIVATE_H
 #define APPOINTMENT_GCALIO_PRIVATE_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <QList>
 #include <QDateTime>
 #include <QUrl>
 #include <QHttp>
+#include <QSslSocket>
+
+#ifndef QT_NO_OPENSSL
 
 #include <qtopia/pim/qappointment.h>
 #include <qtopiasql.h>
-#include <qtsslsocket.h>
 
 #include "qappointmentsqlio_p.h"
 
@@ -62,6 +75,8 @@ public:
     QSet<QPimSource> sources() const;
     QUuid id() const;
 
+    QPimSource defaultSource() const;
+
     using QAppointmentContext::exists;
     bool exists(const QUniqueId &) const;
     QPimSource source(const QUniqueId &) const;
@@ -71,6 +86,7 @@ public:
     QUniqueId addAppointment(const QAppointment &, const QPimSource &);
 
     bool removeOccurrence(const QUniqueId &original, const QDate &);
+    bool restoreOccurrence(const QUniqueId &original, const QDate &);
     QUniqueId replaceOccurrence(const QUniqueId &original, const QOccurrence &, const QDate& = QDate());
     QUniqueId replaceRemaining(const QUniqueId &original, const QAppointment &, const QDate& = QDate());
 
@@ -78,7 +94,7 @@ public:
     //void addUser(const QString &user);
     //QStringList users() const;
 
-    void addAccount(const QString &user, const QString &password);
+    QString addAccount(const QString &user, const QString &password);
     void removeAccount(const QString &);
 
     QStringList accounts() const;
@@ -89,12 +105,16 @@ public:
         FreeBusyPublic
     };
 
-    QString password(const QString &email) const;
-    FeedType feedType(const QString &email) const;
-    QString name(const QString &email) const;
+    QString password(const QString &account) const;
+    FeedType feedType(const QString &account) const;
+    QString name(const QString &account) const;
+    QString email(const QString &account) const;
+    QString accountHolder(const QString &account) const; // From the server
 
-    void setPassword(const QString &email, const QString &password);
-    void setFeedType(const QString &email, FeedType);
+    void setEmail(const QString &account, const QString &email);
+    void setPassword(const QString &account, const QString &password);
+    void setFeedType(const QString &account, FeedType);
+    void setName(const QString& account, const QString& name);
 
     void syncAccount(const QString &account);
     void syncAllAccounts();
@@ -118,13 +138,14 @@ public:
         ServiceUnavailable,
         CertificateError,
         ParseError,
+        DataAccessError,
         UnknownError
     };
 
-    static QString statusMessage(Status status);
+    static QString statusMessage(int status);
 signals:
     void syncProgressChanged(int, int);
-    void syncStatusChanged(const QString &account, Status);
+    void syncStatusChanged(const QString &account, int);
     void finishedSyncing();
 
 private slots:
@@ -140,6 +161,8 @@ private:
         FeedType type;
         QString password;
         QString name;
+        QString email;
+        QString accountHolder;
     };
 
     QMap<QString, Account> mAccounts;
@@ -160,7 +183,7 @@ class QGoogleCalendarFetcher : public QObject // : public QThread
 {
     Q_OBJECT
 public:
-    QGoogleCalendarFetcher(const QPimSource & sqlContext, const QString &email, const QString &password, const QString &url, QObject *parent = 0);
+    QGoogleCalendarFetcher(const QPimSource & sqlContext, const QString& account, const QString &email, const QString &password, const QString &url, QObject *parent = 0);
 
     QGoogleCalendarContext::Status status() const;
     QString statusMessage() const;
@@ -172,6 +195,7 @@ public:
     void fetch();
 
     QString account() const;
+    QString email() const;
     QString name() const;
 
     void fetchProgress(int &, int &) const;
@@ -187,7 +211,7 @@ private slots:
     void parsePartial(const QHttpResponseHeader &);
     void httpFetchProgress(int, int);
 
-    void sendCertificateError(QtSslSocket::VerifyResult result, bool hostNameWrong, const QString &str);
+    //void sendCertificateError(QtSslSocket::VerifyResult result, bool hostNameWrong, const QString &str);
 private:
     void fetchAuthentication();
     void fetchAppointments();
@@ -209,6 +233,7 @@ private:
     QUrl mUrl;
     QPimSource mContext;
     QString mAccount;
+    QString mEmail;
     QString mPassword;
     QString mAuth;
 
@@ -221,9 +246,10 @@ private:
     GoogleCalHandler *mHandler;
 
     QtopiaHttp *mDownloader;
-    QtSslSocket *mSslSocket;
+    QSslSocket *mSslSocket;
 
     QAppointmentSqlIO *mAccess;
 };
 
+#endif //QT_NO_OPENSSL
 #endif

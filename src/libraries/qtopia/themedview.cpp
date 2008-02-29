@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -47,9 +47,11 @@
 #include <QtopiaService>
 #include <QSvgRenderer>
 #include <QPixmapCache>
+#include <QPicture>
 
 #include <limits.h>
 
+#include <QXmlStreamReader>
 
 //===================================================================
 /* declare ThemeListDelegate */
@@ -71,19 +73,11 @@ private:
 };
 
 class ThemeFactory;
-struct ThemedViewPrivate : public QXmlDefaultHandler
+struct ThemedViewPrivate
 {
     ThemedViewPrivate(ThemedView *view);
     ~ThemedViewPrivate();
 
-    /* XML Parser related methods */
-    bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts);
-    bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName);
-    bool characters(const QString &ch);
-    bool error(const QXmlParseException &exception);
-    bool fatalError(const QXmlParseException &exception);
-
-    /* ThemedView general data */
     QString themeName;
     ThemeItem *root;
     ThemedView *view;
@@ -102,42 +96,11 @@ struct ThemedViewPrivate : public QXmlDefaultHandler
 class ThemeAttributes
 {
 public:
-    virtual ~ThemeAttributes() {}
-    virtual QString value( const QString& ) const = 0;
-    virtual QMap<QString,QString> map() const = 0;
-};
+    ThemeAttributes(const QXmlStreamAttributes &atts) : m_atts(atts) {}
+    QString value(const QString &key) const { return m_atts.value(key).toString(); }
 
-class XmlAttributes : public ThemeAttributes // only acts as a wrapper around QXmlAttributes
-{
-public:
-    XmlAttributes( const QXmlAttributes& atts ) : m_atts(atts) {}
-    QString value( const QString& key ) const { return m_atts.value(key); }
-    QMap<QString,QString> map() const {
-        QMap<QString,QString> m;
-            for( int i = 0 ; i < m_atts.count() ; ++i )
-            m.insert( m_atts.qName( i ), m_atts.value( i ) );
-        return m;
-    }
 private:
-    const QXmlAttributes& m_atts;
-};
-
-class MapAttributes : public ThemeAttributes // copies QMap
-{
-public:
-    MapAttributes( const QMap<QString,QString>& atts ) : m_atts(atts) {}
-    MapAttributes( const QXmlAttributes& atts ) { // deep copy
-        for( int i = 0 ; i < atts.count() ; ++i )
-            m_atts[atts.qName(i)] = atts.value(i);
-    }
-
-    QMap<QString,QString> map() const {
-        return m_atts;
-    }
-
-    QString value( const QString& key ) const { return m_atts[key]; }
-private:
-    QMap<QString,QString> m_atts;
+    QXmlStreamAttributes m_atts;
 };
 
 struct ThemeItemPrivate
@@ -167,350 +130,276 @@ struct ThemeItemPrivate
     bool isDataExpression;
 };
 
-
-/* define ThemeFactory */
-class ThemeFactory
+class ThemeFactory : public QXmlStreamReader
 {
-    enum TrElementType {
-        TrRoot,
-        TrText,
-        TrArg
-
-    };
 public:
-    enum Mode {
-        Template,
-        View
-    };
 
-    void setMode( const Mode& m ) {
-        Q_ASSERT(currentlyParsing == false);
-        m_mode = m;
-    }
+    ThemeFactory(ThemedView *view)
+      : QXmlStreamReader(), m_root(0), m_view(view) { }
 
-    ThemeFactory(ThemedView *view) : view(view), m_mode(View), ignore(0), parseDone(false), root(0),  insideTemplate(false), templateCount(0), templateParent(0), currentlyParsing(false) {}
+    bool readThemedView(QIODevice *device)
+    {
+        Q_ASSERT(device && m_view);
 
-    void setTemplateParent( ThemeItem *parent ) {
-        templateParent = parent;
-    }
-
-    void setTemplateUid( const QString& uid ) {
-        templateUid = uid;
-    }
-
-    void reset() {
-        Q_ASSERT(currentlyParsing == false);
-        root = 0;
-        parseDone = false;
-        ignore = 0;
-        templateCount = 0;
-        templateParent = 0;
-        templateUid = QString();
-        insideTemplate = false;
-        parseStack.clear();
-        parseTrStack.clear();
-        trData.text = QString();
-        trData.args = QStringList();
-        trData.seenTrText = false;
-        trData.argCount = 0;
-    }
-
-    bool startElement( const QString& qName, const ThemeAttributes &atts ) {
-        currentlyParsing = true;
-        if ( filter( qName, atts ) ) {
-            if (m_mode == ThemeFactory::View && qName == QLatin1String("page")) {
-                if ( insideTemplate ) {
-                    qWarning("ThemedViewPrivate::startElement - Error - Cannot create 'page' element inside a 'template' element.");
-                    return false;
-                }
-                Q_ASSERT(!root);
-                root = new ThemePageItem(view, atts);
-                parseStack.push(root);
-            } else if ( m_mode == ThemeFactory::Template && qName == QLatin1String("template") && !ignore ) {
-                Q_ASSERT(!root);
-                root = new ThemeTemplateInstanceItem(templateParent, view, atts);
-                root->setVSPath( templateUid ); // set this instance's vs path to its uid
-                if ( templateParent != 0 && root != 0 )
-                    templateParent->addChild( root );
-                parseStack.push(root);
-            } else if (root && !ignore) {
-                ThemeItem *top = parseStack.top();
-                ThemeItem *item = 0;
-                if ( m_mode == ThemeFactory::View && insideTemplate ) {
-                    Q_ASSERT(top != 0);
-                    Q_ASSERT(top->rtti() == ThemedView::Template);
-                    if ( qName == "template" ) {
-                        qWarning("ThemeFactory - Error - Template items cannot be nested.");
-                        return false;
-                    }
-                    ThemeTemplateItem* ti = static_cast<ThemeTemplateItem*>(top);
-                    ti->startElement( qName, atts );
-                    ++templateCount;
-                    return true;
-                }
-                if (parseTrStack.count() > 0 ) {
-                    if ( parseTrStack.top() == TrText ) {
-                        qWarning("ThemeFactory - Error - trtext element cannot have any children.");
-                        return false;
-                    }
-                    if ( parseTrStack.top() == TrArg ) {
-                        qWarning("ThemeFactory - Error - trarg element cannot have any children.");
-                        return false;
-                    }
-                }
-                if (qName == QLatin1String("anim")) {
-                    item = new ThemeAnimationItem(top, view, atts);
-                } else if (qName == QLatin1String("level")) {
-                    item = new ThemeLevelItem(top, view, atts);
-                } else if (qName == QLatin1String("status")) {
-                    item = new ThemeStatusItem(top, view, atts);
-                } else if (qName == QLatin1String("image")) {
-                    item = new ThemeImageItem(top, view, atts);
-                } else if (qName == QLatin1String("text")) {
-                    item = new ThemeTextItem(top, view, atts);
-                } else if (qName == QLatin1String("tr")) {
-                    Q_ASSERT(parseTrStack.count() == 0);
-                    //seenTrElement = true;
-                    parseTrStack.push(ThemeFactory::TrRoot);
-                } else if (qName == QLatin1String("trtext")) {
-                    if (parseTrStack.count() <= 0 ||  parseTrStack.top() != ThemeFactory::TrRoot) {
-                        qWarning("ThemeFactory - Error - trtext element can only be used inside a tr element.");
-                        return false;
-                    }
-                    if (trData.seenTrText) {
-                        qWarning("ThemeFactory - Error - Only a single trtext element can only be defined under a tr element.");
-                        return false;
-                    }
-                    parseTrStack.push(ThemeFactory::TrText);
-                    trData.seenTrText = true;
-                } else if (qName == QLatin1String("trarg")) {
-                    if (parseTrStack.count() <= 0 || parseTrStack.top() != ThemeFactory::TrRoot) {
-                        qWarning("ThemeFactory - Error - trarg element can only be used inside a tr element.");
-                        return false;
-                    }
-                    parseTrStack.push(ThemeFactory::TrArg);
-                    ++trData.argCount;
-                } else if (qName == QLatin1String("rect")) {
-                    item = new ThemeRectItem(top, view, atts);
-                } else if (qName == QLatin1String("line")) {
-                    item = new ThemeLineItem(top, view, atts);
-                } else if (qName == QLatin1String("plugin")) {
-                    item = new ThemePluginItem(top, view, atts);
-                } else if (qName == QLatin1String("exclusive")) {
-                    item = new ThemeExclusiveItem(top, view, atts);
-                } else if (qName == QLatin1String("layout")) {
-                    item = new ThemeLayoutItem(top, view, atts);
-                } else if (qName == QLatin1String("group")) {
-                    item = new ThemeGroupItem(top, view, atts);
-                } else if (qName == QLatin1String("list")) {
-                    item = new ThemeListItem(top,view,atts);
-                } else if (qName == QLatin1String("widget")) {
-                    item = new ThemeWidgetItem(top,view,atts);
-                } else if (qName == QLatin1String("template")) {
-                    // mode == view && !insideTemplate
-                    Q_ASSERT(!insideTemplate);
-                    Q_ASSERT(m_mode == ThemeFactory::View);
-                    ThemeTemplateItem* ti = new ThemeTemplateItem(top,view,atts);
-                    item = ti;
-                    insideTemplate = true;
-                    ti->startElement("template", atts);
-                }
-                if (item && top) {
-                    parseStack.top()->addChild(item);
-                    parseStack.push(item);
-                } else if (!parseTrStack.count()) {
-                    //invalid item, ignore
-                    ignore++;
-                }
-            } else if ( root ) {
-                //ignoring from previous
-                ++ignore;
-            }
-        } else {
-                    //doesn't pass filter, ignore
-            ++ignore;
+        m_root = 0;
+        clear();
+        setDevice(device);
+        while (!atEnd()) {
+            readNext();
+            if (isStartElement() && name() == "page")
+                readPage();
         }
-
-        return true;
+        return !error();
     }
 
-    bool endElement() {
-        if (ignore) {
-            ignore--;
-        } else {
-            Q_ASSERT(parseStack.count());
-            if ( m_mode == ThemeFactory::View ) {
-                if ( insideTemplate ) {
-                    Q_ASSERT(templateCount >= 0);
-                    Q_ASSERT(parseStack.top()->rtti() == ThemedView::Template);
-                    ThemeTemplateItem* ti = static_cast<ThemeTemplateItem*>(parseStack.top());
-                    if ( templateCount > 0 ) {
-                        ti->endElement();
-                        --templateCount;
-                        return true;
-                    } else {
-                        // template item, end of this template
-                        ti->endElement();
-                        insideTemplate = false;
-                    }
-                }
-            }
-            if (parseTrStack.count() > 0) {
-                if (parseTrStack.top() == ThemeFactory::TrRoot) {
-                    // ending element tr, generate expression
-                    // translate the trtext
-                    if (!trData.seenTrText) {
-                        if (trData.argCount > 0) {
-                            qWarning("ThemeFactory - Error - trarg elements given for tr element with no trtext element.");
-                            return false;
-                        }
-                        // else fall through
-                    }
-                    QString name = view->themeName();
-                    name.replace(QChar(' '), QLatin1String(" "));
-                    name.prepend( QLatin1String("Theme-") );
-                    QString translated = Qtopia::translate(name, view->pageName(), trData.text);
-                    QRegExp numregex("%[0-9]");
-                    QStringList split;
-                    int curIdx = 0, idx = 0;
-                    while(idx != -1) {
-                        idx = translated.indexOf(numregex, curIdx);
-                        if (idx >= 0) {
-                            if (idx-curIdx > 0) {
-                                split.append(translated.mid(curIdx, idx-curIdx));
-                                curIdx = idx;
-                            }
-                            split.append(translated.mid(curIdx, 2));
-                            curIdx += 2;
-                            idx = curIdx;
-                        } else if (curIdx < translated.length()) {
-                            split.append(translated.right(translated.length()-curIdx));
-                        }
-                        // else at last index
-                    }
-                    QString expanded;
-                    int ii = 0;
-                    while(ii < split.count()) {
-                        QString cur = split[ii];
-                        if (numregex.exactMatch(cur)) {
-                            // variable operand
-                            if (ii > 0)
-                                expanded += " . ";
-                            expanded += cur;
-                        } else {
-                            // string data
-                            if (ii > 0)
-                                expanded += " . ";
-                            if (cur.isEmpty())
-                                expanded += "\"\"";
-                            else
-                                expanded += (QString("\"") + cur + QString("\""));
-                        }
-                        ++ii;
-                    }
-                    for(QStringList::Iterator it = trData.args.begin(); it != trData.args.end() ; ++it)
-                        expanded = expanded.arg(*it);
-                    if (expanded.isEmpty())
-                        expanded += "\"\"";
-                    if (expanded.contains(numregex)) {
-                        qWarning("ThemeFactory - Error - trtext has more variable markers than corresponding trarg elements.");
-                        return false;
-                    }
-                    parseStack.top()->addCharacters(expanded);
-                    parseStack.top()->setDataExpression(true);
-                    trData.argCount = 0;
-                    trData.text = QString();
-                    trData.seenTrText = false;
-                    trData.args.clear();
-                }
-                parseTrStack.pop();
-            } else {
-                parseStack.top()->constructionComplete();
-                if (parseStack.top() != root)
-                    parseStack.pop();
-                else {
-                    parseDone = true;
-                    currentlyParsing = false;
-                }
-            }
+    bool readTemplate(const QString &data, ThemeItem *parent, const QString &uid)
+    {
+        Q_ASSERT(parent && m_view);
+
+        m_root = 0;
+        clear();
+        addData(data);
+        while (!atEnd()) {
+            readNext();
+            if (isStartElement())
+                readTemplateInstance(parent, uid);
         }
-        return true;
+        return !error();
     }
 
-    bool characters( const QString& str ) {
-        if (!parseDone && !parseStack.isEmpty()) {
-            if ( insideTemplate ) {
-                ThemeTemplateItem* ti = static_cast<ThemeTemplateItem*>(parseStack.top());
-                ti->characters( str );
-            } else {
-                if (parseTrStack.count() > 0) {
-                    if (parseTrStack.top() == ThemeFactory::TrText)
-                        trData.text += str;
-                    else if (parseTrStack.top() == ThemeFactory::TrArg) {
-                        Q_ASSERT(trData.args.count() <= trData.argCount);
-                        if (trData.args.count() == trData.argCount)
-                            trData.args.last().append(str);
-                        else {
-                            trData.args.append(str);
-                            Q_ASSERT(trData.args.count() == trData.argCount);
-                        }
-                    }
-                } else {
-                    parseStack.top()->addCharacters(str);
-                }
-            }
-        }
-        return true;
-    }
-
-    ThemeItem* rootItem() const { return root; }
+    ThemeItem *root() const { return m_root; }
 
 private:
-    bool filter( const QString& qName, const ThemeAttributes &atts ) {
-        if ( qName == "template" && insideTemplate ) {
-            qWarning("ThemedView: Template inside template, ignoring.");
-            return false;
+
+    void readTemplateInstance(ThemeItem *parent, const QString &uid)
+    {
+        Q_ASSERT(parent && m_view && isStartElement());
+
+        ThemeAttributes atts(attributes());
+        m_root = new ThemeTemplateInstanceItem(parent, m_view, atts);
+        m_root->setVSPath(uid);
+
+        while (!atEnd()) {
+            readNext();
+            if (isEndElement())
+                break;
+            if (isStartElement())
+                startElement(m_root);
         }
-        bool keypad = atts.value( QLatin1String("keypad") ) != QLatin1String("no");
-        bool touchscreen = atts.value( QLatin1String("touchscreen") ) != QLatin1String("no");
-        if ( !keypad && !Qtopia::mousePreferred() )
-            return false;
-        if ( !touchscreen && Qtopia::mousePreferred() )
-            return false;
-        return true;
+        parent->addChild(m_root);
+        m_root->constructionComplete();
     }
 
-    ThemedView *view;
+    void readPage()
+    {
+        Q_ASSERT(isStartElement() && name() == "page");
 
-    // mode stuff
-    Mode m_mode;
+        ThemeAttributes atts(attributes());
+        m_root = new ThemePageItem(m_view, atts);
 
-    /* Construction related data */
-    int ignore;
+        while (!atEnd()) {
+            readNext();
+            if (isEndElement())
+                break;
+            if (isStartElement()) {
+                startElement(m_root);
+            }
+        }
+        m_root->constructionComplete();
+    }
 
-    /* Parser related data */
-    bool parseDone;
-    QStack<ThemeItem*> parseStack;
+    void startElement(ThemeItem *parent)
+    {
+        Q_ASSERT(isStartElement());
 
-    struct TrData {
-        TrData() : argCount(0), seenTrText(false) {}
-        int argCount;
-        bool seenTrText;
-        QString text;
-        QStringList args;
-    };
-    struct TrData trData;
-    QStack<TrElementType> parseTrStack;
-    //bool seenTrElement;
+        if (!filter(attributes())) {
+            readElementText();
+            return;
+        }
 
-    ThemeItem *root;
+        ThemeAttributes atts(attributes());
+        ThemeItem *item = 0;
+        QStringRef iname = name();
+        if (iname == "image") {
+            item = new ThemeImageItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "level") {
+            item = new ThemeLevelItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "status") {
+            item = new ThemeStatusItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "rect") {
+            item = new ThemeRectItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "text") {
+            item = new ThemeTextItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "layout") {
+            item = new ThemeLayoutItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "group") {
+            item = new ThemeGroupItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "plugin") {
+            item = new ThemePluginItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "widget") {
+            item = new ThemeWidgetItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "exclusive") {
+            item = new ThemeExclusiveItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "list") {
+            item = new ThemeListItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "template") {
+            ThemeTemplateItem *templateItem = new ThemeTemplateItem(parent, m_view, atts);
+            item = templateItem;
+            readTemplateItem(templateItem);
+        } else if (iname == "line") {
+            item = new ThemeLineItem(parent, m_view, atts);
+            readElement(item);
+        } else if (iname == "tr") {
+            readTr(parent);
+        }
 
-    bool insideTemplate;
-    int templateCount;
-    ThemeItem* templateParent;
-    QString templateUid;
+        if (item && parent) {
+            parent->addChild(item);
+            item->constructionComplete();
+        }
+    }
 
-    bool currentlyParsing;
+    void readElement(ThemeItem *item)
+    {
+        while (!atEnd()) {
+            readNext();
+            if (isCharacters() && !text().isEmpty()) {
+               item->addCharacters(text().toString());
+            }
+            if (isEndElement())
+                break;
+            if (isStartElement())
+                startElement(item);
+        }
+    }
+
+    void readTr(ThemeItem *parent)
+    {
+        Q_ASSERT(isStartElement() && name() == "tr");
+
+        QString trtext;
+        QStringList trargs;
+
+        while (!(isEndElement() && name() == "tr")) {
+            readNext();
+            if (isStartElement() && name() == "trtext")
+                trtext = readElementText();
+            if (isStartElement() && name() == "trarg")
+                trargs += readTrArg();
+        }
+        QString name = m_view->themeName();
+        name.replace(QChar(' '), QLatin1String(" "));
+        name.prepend( QLatin1String("Theme-") );
+        QString translated = Qtopia::translate(name, m_view->pageName(), trtext);
+        QRegExp numregex("%[0-9]");
+        QStringList split;
+        int curIdx = 0, idx = 0;
+        while (idx != -1) {
+            idx = translated.indexOf(numregex, curIdx);
+            if (idx >= 0) {
+                if (idx-curIdx > 0) {
+                    split.append(translated.mid(curIdx, idx-curIdx));
+                    curIdx = idx;
+                }
+                split.append(translated.mid(curIdx, 2));
+                curIdx += 2;
+                idx = curIdx;
+            } else if (curIdx < translated.length()) {
+                split.append(translated.right(translated.length()-curIdx));
+            }
+        }
+        QString expanded;
+        int ii = 0;
+        while (ii < split.count()) {
+            QString cur = split[ii];
+            if (numregex.exactMatch(cur)) {
+                if (ii > 0)
+                    expanded += " . ";
+                expanded += cur;
+            } else {
+                if (ii > 0)
+                    expanded += " . ";
+                if (cur.isEmpty())
+                    expanded += "\"\"";
+                else
+                    expanded += (QString("\"") + cur + QString("\""));
+            }
+            ++ii;
+        }
+        for (QStringList::Iterator it = trargs.begin(); it != trargs.end() ; ++it)
+            expanded = expanded.arg(*it);
+        if (expanded.isEmpty())
+            expanded += "\"\"";
+        if (expanded.contains(numregex))
+            qWarning("trtext has more variable markers than corresponding trarg elements.");
+        parent->addCharacters(expanded);
+        parent->setDataExpression(true);
+    }
+
+    QString readTrArg()
+    {
+        while (!(isEndElement() && name() == "trarg")) {
+            readNext();
+            if (isEndElement())
+                break;
+            if (isCharacters())
+                return text().toString().trimmed();
+        }
+        return QString();
+    }
+
+    void readTemplateItem(ThemeTemplateItem *t)
+    {
+        Q_ASSERT(isStartElement() && name() == "template");
+
+        QString data;
+        data += "<template ";
+        foreach ( QXmlStreamAttribute a, attributes())
+            data += a.name().toString() + "='" + a.value().toString() + "' ";
+        data += '>';
+
+        while (!(isEndElement() && name() == "template")) {
+            readNext();
+            if (isStartElement()) {
+                data += '<' + name().toString() + ' ';
+                foreach ( QXmlStreamAttribute a, attributes()) {
+                    data += a.name().toString() + "='" + a.value().toString() + "' ";
+                }
+                data += '>';
+            }
+            else if (isCharacters())
+                data += text().toString().trimmed();
+            else if (isEndElement())
+                data += "</" + name().toString() + '>';
+        }
+        t->setData(data);
+    }
+
+    bool filter(const QXmlStreamAttributes &atts)
+    {
+        bool keypad = atts.value(QLatin1String("keypad")) != QLatin1String("no");
+        bool touchscreen = atts.value(QLatin1String("touchscreen")) != QLatin1String("no");
+        if (!keypad && !Qtopia::mousePreferred())
+            return false;
+        if (!touchscreen && Qtopia::mousePreferred())
+            return false;
+        return true;
+     }
+
+private:
+    ThemeItem   *m_root;
+    ThemedView  *m_view;
 };
 
 
@@ -558,12 +447,7 @@ int ThemeTemplateInstanceItem::rtti() const
 
 struct ThemeTemplateItemPrivate
 {
-    ThemeTemplateItemPrivate()
-        : ostream( &binarytheme, QIODevice::WriteOnly )
-    {
-    }
-    QByteArray binarytheme;
-    QDataStream ostream;
+    QString data;
 };
 
 /*!
@@ -618,66 +502,21 @@ int ThemeTemplateItem::rtti() const
   The template instance item is parented to the parent of this template item.
 */
 ThemeTemplateInstanceItem* ThemeTemplateItem::createInstance( const QString& uid ) {
-    QDataStream istream( d->binarytheme );
     ThemeFactory* factory = view()->d->factory;
     Q_ASSERT(factory != 0);
-    factory->reset();
-    factory->setMode( ThemeFactory::Template );
-    factory->setTemplateParent( parentItem() );
-    factory->setTemplateUid( uid );
-    QString str;
-    QMap<QString,QString> atts;
-    while( !istream.atEnd() ) {
-        int m = 0;
-        istream >> m;
-        switch( m ) {
-            case Start:
-            {
-                istream >> str;
-                istream >> atts;
-                MapAttributes matts(atts);
-                factory->startElement( str, matts );
-                break;
-            }
-            case End:
-            {
-                factory->endElement();
-                break;
-            }
-            case Chars:
-            {
-                istream >> str;
-                factory->characters( str );
-                break;
-            }
-            default:
-                qFatal("ThemeTemplateItem::createInstance() - Read unknown marker %d", m);
-                break;
-        }
-    }
-    ThemeItem* item = factory->rootItem();
+
+    factory->readTemplate(d->data, parentItem(), uid);
+    ThemeItem* item = factory->root();
+
     Q_ASSERT(item->rtti() == ThemedView::TemplateInstance);
-    //view->layout(); // calling ThemedView::layout() here results in infinite recursion.
-    view()->d->needLayout = true; // just set the need layout flag
+    view()->d->needLayout = true;
     return static_cast<ThemeTemplateInstanceItem*>(item);
 }
 
-bool ThemeTemplateItem::startElement( const QString& qName, const ThemeAttributes &atts ) {
-    d->ostream << (int)Start;
-    d->ostream << qName;
-    d->ostream << atts.map();
-    return true;
-}
 
-bool ThemeTemplateItem::endElement() {
-    d->ostream << (int)ThemeTemplateItem::End;
-    return true;
-}
-
-bool ThemeTemplateItem::characters( const QString& str ) {
-    d->ostream << (int)ThemeTemplateItem::Chars;
-    d->ostream << str;
-    return true;
+void ThemeTemplateItem::setData(const QString& data)
+{
+    d->data = data;
 }
 
 ThemedViewPrivate::ThemedViewPrivate(ThemedView *view)
@@ -691,36 +530,6 @@ ThemedViewPrivate::~ThemedViewPrivate()
 {
     delete root;
 }
-
-bool ThemedViewPrivate::startElement(const QString &, const QString &, const QString &qName, const QXmlAttributes &atts)
-{
-    XmlAttributes xatts(atts);
-    return factory->startElement( qName, xatts );
-}
-
-bool ThemedViewPrivate::endElement(const QString &, const QString &, const QString &)
-{
-    return factory->endElement();
-}
-
-bool ThemedViewPrivate::characters(const QString &ch)
-{
-    return factory->characters(ch);
-}
-
-bool ThemedViewPrivate::error(const QXmlParseException &exception)
-{
-    qWarning("%s (line %d)", exception.message().toLatin1().constData(), exception.lineNumber());
-    return true;
-}
-
-bool ThemedViewPrivate::fatalError(const QXmlParseException &exception)
-{
-    qWarning("%s (line %d)", exception.message().toLatin1().constData(), exception.lineNumber());
-    return true;
-}
-
-//---------------------------------------------------------------------------
 
 struct ThemeMessageData
 {
@@ -1938,21 +1747,24 @@ void ThemeLayoutItem::layout()
     int fixedSize = 0;
     int visCount = 0;
     int expandingCount = 0;
+    int w, h;
     QList<ThemeItem*> c = children();
     foreach ( ThemeItem *item, c ) {
         if ((!item->transient() || item->active()) && item->isVisible()) {
             visCount++;
             item->layout(); // need to layout child items now, in order to get their width/height
             if (d->orient == Qt::Horizontal) {
-                if ( item->attribute("expanding") != 0 )
+                w = qRound(item->d->sr.width());
+                if ( item->attribute("expanding") != 0 || w == 0)
                     ++expandingCount;
                 else
-                    fixedSize += resolveUnit(item->geometry().width(), geometry().width(), item->d->runit[2]);
+                    fixedSize += resolveUnit(w, geometry().width(), item->d->runit[2]);
             } else {
-                if ( item->attribute("expanding") != 0 )
+                h = qRound(item->d->sr.height());
+                if ( item->attribute("expanding") != 0 || h == 0)
                     ++expandingCount;
                 else {
-                    fixedSize += resolveUnit(item->geometry().height(), geometry().height(), item->d->runit[3]);
+                    fixedSize += resolveUnit(h, geometry().height(), item->d->runit[3]);
                 }
             }
         }
@@ -1971,24 +1783,26 @@ void ThemeLayoutItem::layout()
         else if (d->align & Qt::AlignRight)
             offs = size - fixedSize - (visCount-1)*d->spacing;
     }
-    int w, h;
     foreach ( ThemeItem *item, c ) {
         if ((!item->transient() || item->active()) && item->isVisible()) {
             if (d->orient == Qt::Horizontal) {
-                w = item->geometry().width();
-                if ( item->attribute("expanding") != 0 ) {
+                w = qRound(item->d->sr.width());
+                if ( item->attribute("expanding") != 0 || w == 0) {
                     w = expansionSize;
                     item->d->runit[2] = Pixel;
+                } else {
+                    w = item->geometry().width();
                 }
 
                 item->setGeometry(QRect(offs,0,w,geometry().height()));
                 offs += qAbs(resolveUnit(item->geometry().width(), geometry().width(), item->d->runit[2]));
-
             } else {
-                h = item->geometry().height();
-                if (item->attribute("expanding")) {
+                h = qRound(item->d->sr.height());
+                if (item->attribute("expanding") || h == 0) {
                     h = expansionSize;
                     item->d->runit[3] = Pixel;
+                } else {
+                    h = item->geometry().height();
                 }
 
                 item->setGeometry(QRect(0,offs,geometry().width(),h));
@@ -2190,14 +2004,9 @@ void ThemePageItem::paint(QPainter *painter, const QRect &rect)
     painter->restore();
 }
 
-/*!
-  \reimp
-  Lays out the page item.
-*/
-void ThemePageItem::layout()
+QRectF ThemePageItem::calcPageGeometry(const QSize &defSize) const
 {
-    int oldWidth = geometry().width();
-    QSize ps = view()->size();
+    QSize ps = defSize;
     if (view()->isWindow()) {
         QDesktopWidget *desktop = QApplication::desktop();
         QRect desktopRect(desktop->screenGeometry(desktop->screenNumber(view())));
@@ -2230,6 +2039,20 @@ void ThemePageItem::layout()
         pgr.setHeight(resolveUnit(pgr.height(), ps.height(), ThemeItem::d->runit[3]));
     }
 
+    return pgr;
+}
+
+/*!
+  \reimp
+  Lays out the page item.
+*/
+void ThemePageItem::layout()
+{
+    int oldWidth = geometry().width();
+    QSize ps = view()->size();
+
+    QRectF pgr = calcPageGeometry(ps);
+
     setGeometry( pgr.toRect() );
     if (!d->maskImg.isEmpty() && pgr.width() != oldWidth)
         applyMask();
@@ -2245,8 +2068,10 @@ QSize ThemePageItem::sizeHint() const
     QRect desktopRect(desktop->screenGeometry(desktop->screenNumber(view())));
     QSize ps = view()->isWindow() ? desktopRect.size()
                                 : view()->parentWidget()->size();
-    return QSize(resolveUnit(geometryHint().width(), ps.width(), ThemeItem::d->runit[2]),
-                resolveUnit(geometryHint().height(), ps.height(), ThemeItem::d->runit[3]));
+
+    QSize sh = calcPageGeometry(ps).toRect().size();
+
+    return sh;
 }
 
 //---------------------------------------------------------------------------
@@ -2783,16 +2608,29 @@ void ThemeTextItem::drawOutline(QPainter *painter, const QRect &rect, int flags,
 
     // Cheaper to paint into pixmap and blit that four times than
     // to draw text four times.
-    QFontMetrics fm(painter->font());
-    QRect br = fm.boundingRect(rect, flags, text);
-    QImage img(br.size(), QImage::Format_ARGB32_Premultiplied);
-    img.fill(qRgba(0,0,0,0));
+
+    // First get correct image size for DPI of target.
+    QImage img(QSize(1,1), QImage::Format_ARGB32_Premultiplied);
+    // Make our image have the same DPI as our paint device.
+    img.setDotsPerMeterX(1000*painter->device()->width()/painter->device()->widthMM());
+    img.setDotsPerMeterY(1000*painter->device()->height()/painter->device()->heightMM());
     QPainter ppm(&img);
+    ppm.setFont(painter->font());
+    QFontMetrics fm(ppm.font());
+    QRect br = fm.boundingRect(rect, flags, text);
+    ppm.end();
+
+    // Now create proper image and paint.
+    img = QImage(br.size(), QImage::Format_ARGB32_Premultiplied);
+    // Make our image have the same DPI as our paint device.
+    img.setDotsPerMeterX(1000*painter->device()->width()/painter->device()->widthMM());
+    img.setDotsPerMeterY(1000*painter->device()->height()/painter->device()->heightMM());
+    img.fill(qRgba(0,0,0,0));
+    ppm.begin(&img);
     ppm.setFont(painter->font());
     ppm.setPen(getColor(outlineColor, outlineRole));
     ppm.translate(rect.topLeft()-br.topLeft());
     ppm.drawText(rect, flags, text);
-
 
     QPoint pos(br.topLeft());
     pos += QPoint(-1,0);
@@ -2804,7 +2642,12 @@ void ThemeTextItem::drawOutline(QPainter *painter, const QRect &rect, int flags,
     pos += QPoint(0,2);
     painter->drawImage(pos, img);
 
-    painter->drawText(rect, flags, text);
+    img.fill(qRgba(0,0,0,0));
+    ppm.setPen(painter->pen());
+    ppm.drawText(rect, flags, text);
+
+    pos += QPoint(0,-1);
+    painter->drawImage(pos, img);
 }
 
 void ThemeTextItem::drawOutline(QPainter *p, const QRect &r, const QPalette &pal, QAbstractTextDocumentLayout *layout)
@@ -3153,6 +2996,59 @@ void ThemePixmapItem::colorizeImage( QImage& img, const QColor& col, int alpha, 
 }
 
 /*!
+    \internal
+    Replaces pixels with color \a before with color \a after in the \a image.
+*/
+bool ThemePixmapItem::replaceColor(QImage &image, const QColor &before, const QColor &after)
+{
+    QRgb b = before.rgb();
+    QRgb a = after.rgb();
+    bool modified = false;
+
+    for (int j = 0; j < image.height(); j++) {
+        for (int i = 0; i < image.width(); i++) {
+            if (image.pixel(i, j) == b) {
+                image.setPixel(QPoint(i, j), a);
+                modified = true;
+            }
+        }
+    }
+    return modified;
+}
+
+/*
+   We cannot use QtopiaResource translation lookup 
+   because we use absolute addressing with two subdirs. QtopiaResource only looks up
+   one subdir down.
+
+   Note that there is no guarantee that the returned filename actually exists
+   */
+QString imageTr( const QString& path, const QString& image, bool i18n )
+{
+    if ( !i18n )
+        return QString (path+image);
+    
+    static QStringList langs;
+    if ( langs.empty() ) {
+        langs = Qtopia::languageList();
+        langs.append(QLatin1String("en_US"));
+    }
+
+    QFileInfo fi;
+    QString file;
+    foreach ( QString l, langs )
+    {
+        file = path + QLatin1String("i18n/")+ l + QLatin1String("/") + image;
+        fi.setFile( file );
+        if ( fi.exists() ) //we have to do the lookup to determine whether we have to change to alternative language
+            return file;
+    }
+    //if we cannot find anything we just return the en_US version which is last in the language list
+
+    return file;
+}
+
+/*!
   Loads the image given by \a filename for the given \a width and \a height.
   If \a colorRole is a valid index to QPalette, or if the color \a col is valid,
   and \a alpha is less than 255, the image is passed through ThemePixmapItem::colorizeImage().
@@ -3167,6 +3063,12 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
         return pm;
 
     QString imgName = filename;
+
+    bool i18n = false;
+    if ( imgName.startsWith(QLatin1String("i18n/")) ) {
+        i18n = true;
+        imgName.remove(0, 5 /*strlen("i18n/") */ );
+    }
 
     if (filename.endsWith(".svg")) {
         int w = width ? width : geometry().width();
@@ -3183,15 +3085,55 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
         QImage buffer(w, h, QImage::Format_ARGB32_Premultiplied);
         buffer.fill(0);
         QPainter painter(&buffer);
-        painter.setViewport(0, 0, w, h);
-        QSvgRenderer doc;
-        if (!imgName.startsWith(dflt_path))
-            doc.load(QLatin1String(":image/")+view()->base()+imgName);
-        else
-            imgName = imgName.mid(dflt_path.length());
-        if (buffer.isNull())
-            doc.load(QLatin1String(":image/")+view()->defaultPics()+imgName);
-        doc.render(&painter);
+
+#ifndef QT_NO_PICTURE
+
+        QString picFile(imgName);
+        picFile.replace(imgName.length()-3, 3, QLatin1String("pic"));
+        QFileInfo fi;
+        if (picFile.startsWith(dflt_path)) {
+            picFile = picFile.mid(dflt_path.length());
+            fi.setFile(imageTr(QLatin1String(":image/")+view()->defaultPics(),picFile,i18n));
+        } else {
+
+            if (picFile.startsWith(":"))
+                fi.setFile(picFile);
+            else {
+            fi.setFile(imageTr(QLatin1String(":image/")+view()->base(),picFile,i18n));
+            if (!fi.exists())
+                fi.setFile(imageTr(QLatin1String(":image/")+view()->defaultPics(),picFile,i18n));
+            }
+        }
+        if (fi.exists()) {
+            QPicture picture;
+            QRectF viewRect;
+            picture.load(fi.filePath());
+            QRect br = picture.boundingRect();
+            painter.setViewport(0,0,w,h);
+            painter.translate(-br.topLeft());
+            painter.scale(qreal(w)/br.width(), qreal(h)/br.height());
+            painter.drawPicture(0, 0, picture);
+        } else {
+#endif
+            painter.setViewport(0, 0, w, h);
+            QSvgRenderer doc;
+            if (!imgName.startsWith(dflt_path))
+                doc.load(imageTr(QLatin1String(":image/")+view()->base(),imgName, i18n));
+            else
+                imgName = imgName.mid(dflt_path.length());
+            if(buffer.isNull())
+                doc.load(imageTr(QLatin1String(":image/")+view()->defaultPics(),imgName,i18n));
+            doc.render(&painter);
+#ifndef QT_NO_PICTURE
+        }
+#endif
+
+        // If we replace a color we need to regenerate a key for QPixmapCache
+        if (replaceColor(buffer, QColor(255, 0, 255), view()->palette().color(QPalette::Highlight))) {
+            key = "QTV_%1_%2_%3_%4";
+            key = key.arg(filename).arg(w).arg(h).arg(view()->palette().color(QPalette::Highlight).name());
+        }
+
         if ( colour.isValid() ) // only call colorizeImage if the colour isValid
             colorizeImage( buffer, colour, alpha, colorRole != QPalette::NColorRoles );
         pm = QPixmap::fromImage(buffer);
@@ -3202,30 +3144,65 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
     if (colorRole != QPalette::NColorRoles || alpha != 255) {
         QColor colour = getColor(col, colorRole);
         QImage img;
-        if (!imgName.startsWith(dflt_path))
-            img = QImage(QLatin1String(":image/")+view()->base()+imgName);
-        else
-            imgName = imgName.mid(dflt_path.length());
+        if (imgName.startsWith(":icon")) {
+            int w = width ? width : geometry().width();
+            int h = height ? height : geometry().height();
+            if ( !w || !h )
+                return pm;
+            QIcon icon(imgName);
+            img = icon.pixmap(w, h).toImage();
+        } else {
+            if (itemName() == "background") {
+                QSettings config("Trolltech", "qpe");
+                config.beginGroup( "Appearance" );
+                QString s = config.value("BackgroundImage").toString();
+                img = QImage(QLatin1String(":image/") + view()->base() + s);
+            }
+            if (img.isNull()) {
+                if (!imgName.startsWith(dflt_path))
+                    img = QImage(imageTr(QLatin1String(":image/")+view()->base(),imgName,i18n));
+                else
+                    imgName = imgName.mid(dflt_path.length());
+                if( img.isNull() )
+                    img = QImage(imageTr(QLatin1String(":image/")+view()->defaultPics(),imgName,i18n));
+                if( img.isNull() )
+                    img = QImage(imgName);
+            }
+        }
         if ( img.isNull() )
-            img = QImage(QLatin1String(":image/")+view()->defaultPics()+imgName);
-        if ( img.isNull() )
-            img = QImage(imgName);
         if ( img.isNull() )
             return pm;
         if ( colour.isValid() ) // only call colorizeImage if the colour isValid
             colorizeImage( img, colour, alpha, colorRole != QPalette::NColorRoles );
         pm = pm.fromImage( img );
     } else {
-        if (!imgName.startsWith(dflt_path))
-            pm = QPixmap(QLatin1String(":image/")+view()->base()+imgName);
-        else
-            imgName = imgName.mid(dflt_path.length());
-        if ( pm.isNull() )
-            pm = QPixmap(QLatin1String(":image/")+view()->defaultPics()+imgName);
-        if ( pm.isNull() )
+        if (imgName.startsWith(":icon")) {
+            int w = width ? width : geometry().width();
+            int h = height ? height : geometry().height();
+            if ( !w || !h )
+                return pm;
+            QIcon icon(imgName);
+            if (!icon.isNull())
+                pm = icon.pixmap(w, h);
+        } else {
+            if (itemName() == "background") {
+                QSettings config("Trolltech", "qpe");
+                config.beginGroup( "Appearance" );
+                QString s = config.value("BackgroundImage").toString();
+                pm = QPixmap(QLatin1String(":image/") + view()->base() + s);
+            }
+            if (pm.isNull()) {
+                if (!imgName.startsWith(dflt_path))
+                    pm = QPixmap(imageTr(QLatin1String(":image/")+view()->base(),imgName,i18n));
+                else
+                    imgName = imgName.mid(dflt_path.length());
+                if( pm.isNull() )
+                    pm = QPixmap(imageTr(QLatin1String(":image/")+view()->defaultPics(),imgName,i18n));
+            }
+        }
+        if( pm.isNull() )
             pm = QPixmap(imgName);
     }
-
     return pm;
 }
 
@@ -3288,9 +3265,8 @@ void ThemePixmapItem::scaleImage( const QString &key, int width, int height )
         QString filename = map[key].filename;
         if ( filename.endsWith(".svg") ) {
             QColor colour = color( QLatin1String("color") );
-            int role = attribute( QLatin1String("colorRole") );
             int alpha = attribute( QLatin1String("alpha") );
-            map[key].pixmap = loadImage( map[key].filename, role, colour, alpha, width, height );
+            map[key].pixmap = loadImage( map[key].filename, QPalette::NColorRoles, colour, alpha, width, height );
         } else {
             map[key].pixmap = scalePixmap( map[key].pixmap, width, height );
         }
@@ -3422,7 +3398,7 @@ ThemeAnimationItem::ThemeAnimationItem(ThemeItem *parent, ThemedView *view, cons
             onFocusAtts[QLatin1String("loop")], onFocusAtts[QLatin1String("looprev")], onFocusAtts[QLatin1String("delay")], onFocusAtts[QLatin1String("play")], ThemeItem::Focus);
 
     for( int i = 0 ; i < 3 ; ++i )
-        if ( !pixmap( QLatin1String("src"), indexToState(i) ).isNull() && attribute( QLatin1String("delay"), indexToState(i) ) > 0 )
+        if ( attribute( QLatin1String("delay"), indexToState(i) ) > 0 )
             d->fi[i] = new ThemeAnimationFrameInfo(this, attribute(QLatin1String("delay"), indexToState(i) ));
         else
             d->fi[i] = 0;
@@ -3990,22 +3966,43 @@ void ThemeStatusItem::createImage( const QString &key, const QString &filename, 
     int role = QPalette::NColorRoles;
     int al = 255;
     QPixmap pm;
+    QString name = filename;
     if ( !filename.isEmpty() ) {
         role = parseColor( col, colour );
         if ( !alpha.isEmpty() )
             al = alpha.toInt();
-        pm = loadImage( filename, role, colour, al );
     } else if ( st != ThemeItem::Default ) {
-
-        role = attribute( QLatin1String("colorrole") + key );
-        pm = pixmap( QLatin1String("image") + key );
+        role = attribute( QLatin1String("colorRole") + key );
+        name = strAttribute(QLatin1String("image") + key);
         colour = color( QLatin1String("color") + key );
         al = attribute( QLatin1String("alpha") + key );
     }
-    setPixmap( QLatin1String("image") + key, pm, st, filename );
-    setAttribute( QLatin1String("colorrole") + key, role, st );
+    setAttribute(QLatin1String("image") + key, name, st);
+    setAttribute( QLatin1String("colorRole") + key, role, st );
     setColor( QLatin1String("color") + key , colour, st );
     setAttribute( QLatin1String("alpha") + key, al, st );
+}
+
+void ThemeStatusItem::updateImage(const QString &key, ThemeItem::State st)
+{
+    if (strAttribute(QLatin1String("image") + key, st).isEmpty())
+        return;
+
+    int width = 0, height = 0;
+    QPixmap pm = pixmap(QLatin1String("image") + key);
+    if ( horizontalScale() && pm.width() != geometry().width() ||
+             verticalScale() && pm.height() != geometry().height() ) {
+        width = horizontalScale() ? geometry().width() : pm.width();
+        height = verticalScale() ? geometry().height() : pm.height();
+    }
+
+    int alpha = attribute(QLatin1String("alpha") + key,st);
+
+    pm = loadImage( strAttribute(QLatin1String("image") + key, st),
+                    attribute(QLatin1String("colorRole") + key, st),
+                    color(QLatin1String("color") + key,st), alpha, width, height );
+    setPixmap( QLatin1String("image") + key, pm, st,
+                strAttribute(QLatin1String("image") + key, st ) );
 }
 
 /*!
@@ -4046,7 +4043,15 @@ int ThemeStatusItem::rtti() const
 void ThemeStatusItem::paint(QPainter *p, const QRect &rect)
 {
     Q_UNUSED(rect);
-    const QPixmap &pm = d->isOn ? pixmap( QLatin1String("imageon"), state() ) : pixmap( QLatin1String("imageoff") );
+    QPixmap pm = d->isOn ? pixmap( QLatin1String("imageon"), state() ) : pixmap( QLatin1String("imageoff") );
+    if (pm.isNull()) {
+        if (d->isOn)
+            updateImage(QLatin1String("on"), state());
+        else
+            updateImage(QLatin1String("off"), ThemeItem::Default);
+        pm = d->isOn ? pixmap( QLatin1String("imageon"), state() ) : pixmap( QLatin1String("imageoff") );
+    }
+
     if (!pm.isNull())
         p->drawPixmap((geometry().width()-pm.width())/2, (geometry().height()-pm.height())/2, pm);
 }
@@ -4058,7 +4063,6 @@ void ThemeStatusItem::paint(QPainter *p, const QRect &rect)
 void ThemeStatusItem::layout()
 {
     ThemeItem::layout();
-    scaleImages();
 }
 
 //---------------------------------------------------------------------------
@@ -4227,8 +4231,10 @@ void ThemeImageItem::updateImage( ThemeItem::State st )
         alpha = strAttribute("alpha",st).toInt();
     pm = loadImage( strAttribute("src", st), attribute("colorRole", st), color("color",st), alpha );
     setPixmap( QLatin1String("src"), pm, st, strAttribute("src", st) );
-    if ( isVisible() )
+    if( isVisible() ) {
         scaleImages();  //updated image might be different size. scalePixmap internally verifies whether a scale is needed.
+        update();
+    }
     /*
     setAttribute( QLatin1String("colorRole"), colorRole, st );
     setColor( QLatin1String("color"), colour, st );
@@ -4288,6 +4294,14 @@ void ThemeImageItem::layout()
         d->offs[1] = qRound( ratio * d->offs[1] );
     }
     scaleImage( QLatin1String("src"), width, height );
+}
+
+/*!
+  Update the default image.
+*/
+void ThemeImageItem::updateDefaultImage()
+{
+    updateImage(ThemeItem::Default);
 }
 
 /*!
@@ -4389,7 +4403,8 @@ public:
         if ( widget != 0 && autoDelete )
             delete widget;
         widget = w;
-        if ( !item->active() ) widget->hide();
+        widget->setParent(item->view());
+        if( !item->active() ) widget->hide();
         else widget->show();
         // trying to base active semantic on show/hide events doesn't seem to work, too complicated, just always enforce widget visibility in paint()
         //widget->installEventFilter(this);
@@ -4549,6 +4564,7 @@ void ThemeWidgetItem::updateWidget()
 void ThemeWidgetItem::constructionComplete()
 {
     const QString in = itemName().toLower();
+
     QWidget* w = view()->newWidget(this,in); // done after virtual function table has been created, eg. for rtti()
     if ( w )
         setWidget( w );
@@ -4603,9 +4619,9 @@ void ThemeWidgetItem::layout()
     if ( !d->widget )
         return;
 
-    if ( ThemeItem::d->sr.width() < 0 )
+    if( ThemeItem::d->rmode == Rect && ThemeItem::d->sr.width() < 0 )
         ThemeItem::d->sr.setWidth( d->widget->sizeHint().width() );
-    if ( ThemeItem::d->sr.height() < 0 )
+    if( ThemeItem::d->rmode == Rect && ThemeItem::d->sr.height() < 0 )
         ThemeItem::d->sr.setHeight( d->widget->sizeHint().height() );
 
     ThemeItem::layout();
@@ -4769,7 +4785,7 @@ struct ThemeListModelEntryPrivate
 
     The ThemeListModelEntry has a uid() and a type(), which are used by templateInstance() to associate
     a single template instance to this entry. The ThemeListModelEntry stores this template instance
-    internally and can be retrieved using templateInstnace().
+    internally and can be retrieved using templateInstance().
 
     This class must be subclassed and the pure virtual type() function reimplemented to return the appropriate
     value.
@@ -4791,11 +4807,9 @@ ThemeListModelEntry::ThemeListModelEntry( ThemeListModel* model )
 }
 
 /*!
-    Destroys the ThemeListModelEntry. Any associated theme template instance is deleted.
+    Destroys the ThemeListModelEntry.
 */
 ThemeListModelEntry::~ThemeListModelEntry() {
-    if ( d->templateInstance != 0 )
-        delete d->templateInstance;
     delete d;
 }
 
@@ -5274,6 +5288,12 @@ int ThemeListDelegate::height(ThemeListModelEntry* entry, const QModelIndex& ) c
 */
 
 /*!
+  \fn void ThemedView::loaded()
+
+  Emitted when the theme is successfully loaded.
+*/
+
+/*!
   Constructs a ThemedView object passing the \a parent widget and widget flags \a f to the QWidget constructor.
 */
 ThemedView::ThemedView(QWidget *parent, Qt::WFlags f)
@@ -5484,26 +5504,20 @@ bool ThemedView::loadSource(const QString &fileName)
     if ( d->themeSource.isEmpty() ) {
         qWarning("ThemedView::loadSource() - No theme file to set.");
         themeLoaded(QString());
+        emit loaded();
         return false;
     }
-
 
     if ( d->root ) { // delete before reset
         delete d->root;
         d->root = 0;
     }
-    d->factory->reset();
-    d->factory->setMode(ThemeFactory::View);
     QFile file(d->themeSource);
     if (file.exists()){
-        QXmlInputSource source( &file );
-        QXmlSimpleReader reader;
-        reader.setContentHandler( d );
-        reader.setErrorHandler( d );
-        if (!reader.parse( source )){
-            qWarning() << "Unable to parse Theme file " << file.fileName();
-        }
-        d->root = d->factory->rootItem();
+        if (file.open(QFile::ReadOnly | QFile::Text))
+            d->factory->readThemedView(&file);
+        file.close();
+        d->root = d->factory->root();
         if (d->root && isVisible()) {
             layout();
             update();
@@ -5514,9 +5528,11 @@ bool ThemedView::loadSource(const QString &fileName)
     } else {
         qWarning() << "Unable to open " << file.fileName();
         themeLoaded(QString());
+        emit loaded();
         return false;
     }
     themeLoaded(d->themeSource);
+    emit loaded();
     return true;
 }
 
@@ -5659,7 +5675,7 @@ ThemePageItem* ThemedView::pageItem() const
     ThemeItem* item = d->root;
     if ( !item ) { // get from factory if in the process of parsing
         Q_ASSERT(d->factory != 0);
-        item = d->factory->rootItem();
+        item = d->factory->root();
     }
     Q_ASSERT(item != 0);
     Q_ASSERT(item->rtti() == ThemedView::Page);
@@ -5763,11 +5779,13 @@ ThemeItem *ThemedView::findItem(const QString &name, ThemedView::Type type, Them
 {
     if (!d->root)
         return 0;
-    if (d->needLayout) {
-        ThemedView *that = (ThemedView *)this;
-        that->layout();
+    ThemeItem *item = findItem(d->root, name, type, state);
+    if (item && d->needLayout) {
+        ThemedView *v = const_cast<ThemedView*>(this);
+        v->layout();
     }
-    return findItem(d->root, name, type, state);
+
+    return item;
 }
 
 ThemeItem *ThemedView::findItem(ThemeItem *item, const QString &name,

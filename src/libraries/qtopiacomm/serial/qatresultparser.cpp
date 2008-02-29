@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -335,6 +335,7 @@ QAtResultParser::Node::Node( uint first, uint last )
     _kind = Range;
     _number = first;
     _last = last;
+    _list = 0;
 }
 
 QAtResultParser::Node::Node( const QString& str )
@@ -357,6 +358,7 @@ QAtResultParser::Node::Node( const Node& other )
 {
     _kind = other._kind;
     _number = other._number;
+    _last = other._last;
     _str = other._str;
     _list = ( other._list ? new QList<Node>( *other._list ) : 0 );
 }

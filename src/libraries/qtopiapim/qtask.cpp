@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,6 +30,7 @@
 #include <QApplication>
 #include <QTextDocument>
 #include <QDataStream>
+#include <QBuffer>
 
 #include <stdio.h>
 
@@ -92,7 +93,7 @@ public:
   \o setting the \c percentCompleted to 99 will force the \c status to become \c InProgress (unless it is currently \c Deferred or \c Waiting), sets the \c startedDate to be the current date (if it was previously null), and clears the \c completedDate
   \endlist
 
-  \sa Status, Priority
+  \sa Status, Priority, {Pim Library}
 */
 
 
@@ -345,7 +346,7 @@ QTask::QTask() : QPimRecord()
 }
 
 /*!
-  Returns true if \a other is identical to the task. Otherwise return false.
+  Returns true if \a other is identical to this task. Otherwise return false.
 */
 bool QTask::operator==(const QTask &other) const
 {
@@ -362,7 +363,7 @@ bool QTask::operator==(const QTask &other) const
 }
 
 /*!
-  Returns false if \a other is identical to the task. Otherwise return true.
+  Returns false if \a other is identical to this task. Otherwise return true.
 */
 bool QTask::operator!=(const QTask &other) const
 {
@@ -749,6 +750,65 @@ static QTask parseVObject( VObject *obj )
 }
 
 /*!
+  Writes the given list of \a tasks to the given \a device as vCalendars.
+
+  Returns true on success.
+  \sa readVCalendar()
+*/
+bool QTask::writeVCalendar( QIODevice *device, const QList<QTask> &tasks )
+{
+    foreach (QTask t, tasks)
+        if (!writeVCalendar(device, t))
+            return false;
+    return true;
+}
+
+/*!
+  Writes the given \a task to the given \a device as vCalendars.
+
+  Returns true on success.
+  \sa readVCalendar()
+*/
+bool QTask::writeVCalendar( QIODevice *device, const QTask &task )
+{
+    VObject *obj = createVObject(task);
+    writeVObject( device, obj );
+    cleanVObject( obj );
+    cleanStrTbl();
+    return true;
+}
+
+/*!
+  Reads a list of vCalendars from the given \a device and returns the
+  equivalent set of tasks.
+
+  \sa writeVCalendar()
+*/
+QList<QTask> QTask::readVCalendar( QIODevice *device )
+{
+    QList<QTask> tasks;
+
+    QBuffer *buffer = qobject_cast<QBuffer *>(device);
+    QFile *file = qobject_cast<QFile *>(device);
+    if (file) {
+        int handle = file->handle();
+        FILE *input = fdopen(handle, "r");
+        if (input) {
+            tasks = readVCalendarData( Parse_MIME_FromFile( input ) );
+        }
+    } else if (buffer) {
+        tasks = readVCalendarData( Parse_MIME( (const char*)buffer->data(), buffer->data().count() ) );
+    } else {
+        const QByteArray bytes = device->readAll();
+        tasks = readVCalendarData( Parse_MIME( (const char*)bytes, bytes.count() ) );
+    }
+
+    return tasks;
+}
+
+/*!
+  \deprecated
+
    Write the list of \a tasks as vCalendar objects to the file
    specified by \a filename.
 
@@ -758,7 +818,7 @@ void QTask::writeVCalendar( const QString &filename, const QList<QTask> &tasks)
 {
     FILE *f = fopen(filename.toLocal8Bit(),"w");
     if ( !f ) {
-        qWarning("Unable to open vcard write");
+        qWarning("Unable to open vcalendar write");
         return;
     }
 
@@ -774,6 +834,8 @@ void QTask::writeVCalendar( const QString &filename, const QList<QTask> &tasks)
 }
 
 /*!
+  \deprecated
+
    Write the \a task as a vCalendar to the file specified by \a filename.
 
    \sa readVCalendar()
@@ -782,7 +844,7 @@ void QTask::writeVCalendar( const QString &filename, const QTask &task)
 {
     FILE *f = fopen(filename.toLocal8Bit(),"w");
     if ( !f ) {
-        qWarning("Unable to open vcard write");
+        qWarning("Unable to open vcalendar write");
         return;
     }
 
@@ -795,6 +857,8 @@ void QTask::writeVCalendar( const QString &filename, const QTask &task)
 }
 
 /*!
+  \deprecated
+
    Writes this task as a vCalendar object to the file specified
    by \a filename.
 
@@ -806,7 +870,7 @@ void QTask::writeVCalendar( const QString &filename ) const
 }
 
 /*!
-   \overload
+  \deprecated
 
    Writes this task as a vCalendar object to the given \a file,
    which must be already open for writing.
@@ -821,7 +885,7 @@ void QTask::writeVCalendar( QFile &file ) const
 }
 
 /*!
-   \overload
+  \deprecated
 
    Writes this task as a vCalendar object to the given \a stream,
    which must be writable.
@@ -831,12 +895,14 @@ void QTask::writeVCalendar( QFile &file ) const
 void QTask::writeVCalendar( QDataStream *stream ) const
 {
     VObject *obj = createVObject(*this);
-    writeVObject( stream, obj );
+    writeVObject( stream->device(), obj );
     cleanVObject( obj );
     cleanStrTbl();
 }
 
 /*!
+  \deprecated
+
   Reads the file specified by \a filename as a list of vCalendar objects
   and returns a list of QTasks that correspond to the data.  Note that
   some vCalendar properties may not be supported by QTask.
@@ -884,6 +950,8 @@ QList<QTask> QTask::readVCalendarData( VObject *obj )
 }
 
 /*!
+  \deprecated
+
   Reads the \a data of \a len bytes as a list of vCalendar objects
   and returns the list of corresponding QTasks.
 
@@ -896,6 +964,8 @@ QList<QTask> QTask::readVCalendarData( const char *data, unsigned long len )
 }
 
 /*!
+  \deprecated
+
   Reads the given vCalendar data in \a vcal and returns the list of
   corresponding QTasks.
 

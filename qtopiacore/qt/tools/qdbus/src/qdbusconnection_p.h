@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -40,12 +55,12 @@
 #include <qdbusconnection.h>
 
 #include <QtCore/qatomic.h>
-#include <QtCore/qeventloop.h>
 #include <QtCore/qhash.h>
 #include <QtCore/qmutex.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qpointer.h>
 #include <QtCore/qreadwritelock.h>
+#include <QtCore/qstringlist.h>
 #include <QtCore/qvarlengtharray.h>
 #include <QtCore/qvector.h>
 
@@ -58,11 +73,24 @@ class QSocketNotifier;
 class QTimerEvent;
 class QDBusObjectPrivate;
 class CallDeliveryEvent;
+class ActivateObjectEvent;
 class QMetaMethod;
 class QDBusInterfacePrivate;
 struct QDBusMetaObject;
 class QDBusAbstractInterface;
 class QDBusConnectionInterface;
+
+class QDBusErrorInternal
+{
+    mutable DBusError error;
+    Q_DISABLE_COPY(QDBusErrorInternal);
+public:
+    inline QDBusErrorInternal() { dbus_error_init(&error); }
+    inline ~QDBusErrorInternal() { dbus_error_free(&error); }
+    inline bool operator !() const { return !dbus_error_is_set(&error); }
+    inline operator DBusError *() { dbus_error_free(&error); return &error; }
+    inline operator QDBusError() const { QDBusError err(&error); dbus_error_free(&error); return err; }
+};
 
 // QDBusConnectionPrivate holds the DBusConnection and
 // can have many QDBusConnection objects referring to it
@@ -89,33 +117,23 @@ public:
         QObject* obj;
         int midx;
         QList<int> params;
+        QByteArray matchRule;
     };
 
     struct ObjectTreeNode
     {
-        struct Data
-        {
-            QString name;
-            ObjectTreeNode *node;
-
-            inline bool operator<(const QString &other) const
-            { return name < other; }
-        };
-        typedef QVector<Data> DataList;
+        typedef QVector<ObjectTreeNode> DataList;
 
         inline ObjectTreeNode() : obj(0), flags(0) { }
-        inline ~ObjectTreeNode() { clear(); }
-        inline void clear()
-        {
-            DataList::ConstIterator it = children.constBegin();
-            DataList::ConstIterator end = children.constEnd();
-            for ( ; it != end; ++it) {
-                it->node->clear();
-                delete it->node;
-            }
-            children.clear();
-        }
+        inline ObjectTreeNode(const QString &n) // intentionally implicit
+            : name(n), obj(0), flags(0) { }
+        inline ~ObjectTreeNode() { }
+        inline bool operator<(const QString &other) const
+            { return name < other; }
+        inline bool operator<(const QStringRef &other) const
+            { return QStringRef(&name) < other; }
 
+        QString name;
         QObject* obj;
         int flags;
         DataList children;
@@ -127,58 +145,68 @@ public:
     typedef QHash<int, DBusTimeout *> TimeoutHash;
     typedef QMultiHash<QString, SignalHook> SignalHookHash;
     typedef QHash<QString, QDBusMetaObject* > MetaObjectHash;
+    typedef QHash<QByteArray, int> MatchRefCountHash;
 
 public:
-    // public methods
-    QDBusConnectionPrivate(QObject *parent = 0);
+    // public methods are entry points from other objects
+    explicit QDBusConnectionPrivate(QObject *parent = 0);
     ~QDBusConnectionPrivate();
 
-    void bindToApplication();
-
-    void setConnection(DBusConnection *connection);
-    void setServer(DBusServer *server);
+    void setConnection(DBusConnection *connection, const QDBusErrorInternal &error);
+    void setServer(DBusServer *server, const QDBusErrorInternal &error);
     void closeConnection();
-    void timerEvent(QTimerEvent *e);
 
     QString getNameOwner(const QString &service);
 
-    int send(const QDBusMessage &message) const;
+    int send(const QDBusMessage &message);
     QDBusMessage sendWithReply(const QDBusMessage &message, int mode, int timeout = -1);
+    QDBusMessage sendWithReplyLocal(const QDBusMessage &message);
     int sendWithReplyAsync(const QDBusMessage &message, QObject *receiver,
-                           const char *method, int timeout = -1);
+                           const char *returnMethod, const char *errorMethod, int timeout = -1);
     void connectSignal(const QString &key, const SignalHook &hook);
-    void disconnectSignal(const QString &key, const SignalHook &hook);
+    SignalHookHash::Iterator disconnectSignal(SignalHookHash::Iterator &it);
     void registerObject(const ObjectTreeNode *node);
-    void connectRelay(const QString &service, const QString &path, const QString &interface,
+    void connectRelay(const QString &service, const QString &currentOwner,
+                      const QString &path, const QString &interface,
                       QDBusAbstractInterface *receiver, const char *signal);
-    void disconnectRelay(const QString &service, const QString &path, const QString &interface,
+    void disconnectRelay(const QString &service, const QString &currentOwner,
+                         const QString &path, const QString &interface,
                          QDBusAbstractInterface *receiver, const char *signal);
 
-    bool handleSignal(const QString &key, const QDBusMessage &msg);
-    bool handleSignal(const QDBusMessage &msg);
-    bool handleObjectCall(const QDBusMessage &message);
-    bool handleError();
-
-    bool activateSignal(const SignalHook& hook, const QDBusMessage &msg);
-    bool activateCall(QObject* object, int flags, const QDBusMessage &msg);
-    bool activateObject(const ObjectTreeNode *node, const QDBusMessage &msg);
-    bool activateInternalFilters(const ObjectTreeNode *node, const QDBusMessage &msg);
-
-    void sendCallDeliveryEvent(CallDeliveryEvent *data);
-    void postCallDeliveryEvent(CallDeliveryEvent *data);
-    CallDeliveryEvent *postedCallDeliveryEvent();
-    void deliverCall(const CallDeliveryEvent &data) const;
+    bool handleMessage(const QDBusMessage &msg);
 
     QDBusMetaObject *findMetaObject(const QString &service, const QString &path,
-                                    const QString &interface);
+                                    const QString &interface, QDBusError &error);
 
     void registerService(const QString &serviceName);
     void unregisterService(const QString &serviceName);
+
+    void postEventToThread(int action, QObject *target, QEvent *event);
+
+private:
+    void checkThread();
+    bool handleError(const QDBusErrorInternal &error);
+
+    void handleSignal(const QString &key, const QDBusMessage &msg);
+    void handleSignal(const QDBusMessage &msg);
+    void handleObjectCall(const QDBusMessage &message);
+
+    void activateSignal(const SignalHook& hook, const QDBusMessage &msg);
+    void activateObject(ObjectTreeNode &node, const QDBusMessage &msg, int pathStartPos);
+    bool activateInternalFilters(const ObjectTreeNode &node, const QDBusMessage &msg);
+    bool activateCall(QObject *object, int flags, const QDBusMessage &msg);
+    CallDeliveryEvent *prepareReply(QObject *object, int idx, const QList<int> &metaTypes,
+                                    const QDBusMessage &msg);
+
+    void sendError(const QDBusMessage &msg, QDBusError::ErrorType code);
+    void deliverCall(QObject *object, int flags, const QDBusMessage &msg,
+                     const QList<int> &metaTypes, int slotIdx);
+
     bool isServiceRegisteredByThread(const QString &serviceName) const;
-    QString baseService() const;
 
 protected:
-    virtual void customEvent(QEvent *event);
+    void customEvent(QEvent *e);
+    void timerEvent(QTimerEvent *e);
 
 public slots:
     // public slots
@@ -191,26 +219,33 @@ public slots:
 
 signals:
     void serviceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
+    void callWithCallbackFailed(const QDBusError &error, const QDBusMessage &message);
 
 public:
-    // public member variables
-    QString name;               // this connection's name
-
-    DBusError error;
-    QDBusError lastError;
-
     QAtomic ref;
-    QReadWriteLock lock;
+    QString name;               // this connection's name
+    QString baseService;        // this connection's base service
+
     ConnectionMode mode;
+
+    // members accessed in unlocked mode (except for deletion)
+    // connection and server provide their own locking mechanisms
+    // busService doesn't have state to be changed
+    // watchers and timeouts are accessed only in the object's owning thread
     DBusConnection *connection;
     DBusServer *server;
     QDBusConnectionInterface *busService;
-
     WatcherHash watchers;
     TimeoutHash timeouts;
-    SignalHookHash signalHooks;
-    QList<DBusTimeout *> pendingTimeouts;
 
+    // members accessed through a lock
+    QMutex dispatchLock;
+    QReadWriteLock lock;
+    QDBusError lastError;
+
+    QStringList serviceNames;
+    SignalHookHash signalHooks;
+    MatchRefCountHash matchRefCounts;
     ObjectTreeNode rootNode;
     MetaObjectHash cachedMetaObjects;
 
@@ -231,16 +266,9 @@ public:
     static QDBusConnectionPrivate *d(const QDBusConnection& q) { return q.d; }
 
     static void setSender(const QDBusConnectionPrivate *s);
-};
 
-class QDBusReplyWaiter: public QEventLoop
-{
-    Q_OBJECT
-public:
-    QDBusMessage replyMsg;
-
-public slots:
-    void reply(const QDBusMessage &msg);
+    friend class ActivateObjectEvent;
+    friend class CallDeliveryEvent;
 };
 
 // in qdbusmisc.cpp
@@ -249,10 +277,13 @@ extern int qDBusNameToTypeId(const char *name);
 extern bool qDBusCheckAsyncTag(const char *tag);
 
 // in qdbusinternalfilters.cpp
-extern QString qDBusIntrospectObject(const QDBusConnectionPrivate::ObjectTreeNode *node);
-extern QDBusMessage qDBusPropertyGet(const QDBusConnectionPrivate::ObjectTreeNode *node,
+extern QString qDBusIntrospectObject(const QDBusConnectionPrivate::ObjectTreeNode &node);
+extern QDBusMessage qDBusPropertyGet(const QDBusConnectionPrivate::ObjectTreeNode &node,
                                      const QDBusMessage &msg);
-extern QDBusMessage qDBusPropertySet(const QDBusConnectionPrivate::ObjectTreeNode *node,
+extern QDBusMessage qDBusPropertySet(const QDBusConnectionPrivate::ObjectTreeNode &node,
                                      const QDBusMessage &msg);
+
+// in qdbusxmlgenerator.cpp
+extern QString qDBusInterfaceFromMetaObject(const QMetaObject *mo);
 
 #endif

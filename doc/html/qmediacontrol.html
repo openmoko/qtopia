@@ -20,11 +20,9 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qmediacontrol.html#QMediaControl">QMediaControl</a></b> ( QMediaHandle const &amp; <i>mediaHandle</i>, QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qmediacontrol.html#QMediaControl">QMediaControl</a></b> ( QMediaContent * <i>mediaContent</i> )</li>
 <li><div class="fn"/><b><a href="qmediacontrol.html#dtor.QMediaControl">~QMediaControl</a></b> ()</li>
-<li><div class="fn"/>QStringList <b><a href="qmediacontrol.html#controls">controls</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qmediacontrol.html#errorString">errorString</a></b> () const</li>
-<li><div class="fn"/>QMediaHandle <b><a href="qmediacontrol.html#handle">handle</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qmediacontrol.html#isMuted">isMuted</a></b> () const</li>
 <li><div class="fn"/>quint32 <b><a href="qmediacontrol.html#length">length</a></b> () const</li>
 <li><div class="fn"/>QtopiaMedia::State <b><a href="qmediacontrol.html#playerState">playerState</a></b> () const</li>
@@ -50,11 +48,11 @@
 <a name="signals"></a>
 <h3>Signals</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="qmediacontrol.html#controlAvailable">controlAvailable</a></b> ( const QString &amp; <i>control</i> )</li>
-<li><div class="fn"/>void <b><a href="qmediacontrol.html#controlUnavailable">controlUnavailable</a></b> ( const QString &amp; <i>control</i> )</li>
+<li><div class="fn"/>void <b><a href="qmediacontrol.html#invalid">invalid</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qmediacontrol.html#lengthChanged">lengthChanged</a></b> ( quint32 <i>ms</i> )</li>
 <li><div class="fn"/>void <b><a href="qmediacontrol.html#playerStateChanged">playerStateChanged</a></b> ( QtopiaMedia::State <i>state</i> )</li>
 <li><div class="fn"/>void <b><a href="qmediacontrol.html#positionChanged">positionChanged</a></b> ( quint32 <i>ms</i> )</li>
+<li><div class="fn"/>void <b><a href="qmediacontrol.html#valid">valid</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qmediacontrol.html#volumeChanged">volumeChanged</a></b> ( int <i>volume</i> )</li>
 <li><div class="fn"/>void <b><a href="qmediacontrol.html#volumeMuted">volumeMuted</a></b> ( bool <i>muted</i> )</li>
 </ul>
@@ -83,22 +81,16 @@
 <p>The QMediaControl class is used to manipulate a media resource in the Qtopia media system.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMediaControl"></a>QMediaControl::QMediaControl ( <a href="qmediahandle.html">QMediaHandle</a> const &amp; <i>mediaHandle</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QMediaControl"></a>QMediaControl::QMediaControl ( <a href="qmediacontent.html">QMediaContent</a> * <i>mediaContent</i> )</h3>
 <p>Construct a <a href="qmediacontrol.html">QMediaControl</a>.</p>
-<p>The <a href="qmediacontrol.html">QMediaControl</a> needs to be constructed with a valid <a href="qmediahandle.html">QMediaHandle</a> obtained from a <a href="qmediacontent.html">QMediaContent</a> instance. The <a href="qmediacontrol.html">QMediaControl</a> can be constructed only after the <a href="qmediacontent.html">QMediaContent</a> instance has signaled that it is available via the QMediaContenet::controlAvailable signal.</p>
-<p>The <i>mediaHandle</i> parameter is the handle of the media content for which the control is being constructed The <i>parent</i> is the Parent <a href="qobject.html">QObject</a>.</p>
+<p>Construct a <a href="qmediacontrol.html">QMediaControl</a> for controlling <i>mediaContent</i>. The <a href="qmediacontrol.html">QMediaControl</a> can be constructed only after the <i>mediaContent</i> instance has signaled that it is available via the <a href="qmediacontent.html#controlAvailable">QMediaContent::controlAvailable</a>() signal.</p>
+<p>See also <a href="qmediacontent.html#controlAvailable">QMediaContent::controlAvailable</a>().</p>
 <h3 class="fn"><a name="dtor.QMediaControl"></a>QMediaControl::~QMediaControl ()</h3>
 <p>Destroy the <a href="qmediacontrol.html">QMediaControl</a> object.</p>
-<h3 class="fn"><a name="controlAvailable"></a>void QMediaControl::controlAvailable ( const <a href="qstring.html">QString</a> &amp; <i>control</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Signals that a control with identity <i>control</i> is available in the system.</p>
-<h3 class="fn"><a name="controlUnavailable"></a>void QMediaControl::controlUnavailable ( const <a href="qstring.html">QString</a> &amp; <i>control</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Signals that a control with identity <i>control</i> is no longer available in the system.</p>
-<h3 class="fn"><a name="controls"></a><a href="qstringlist.html">QStringList</a> QMediaControl::controls () const</h3>
-<p>Return a list of Controls that this Media supports.</p>
 <h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QMediaControl::errorString () const</h3>
-<p>When an error occurs, indicated by the QtopiaMedia::Errpr state, this function will return a <a href="qstring.html">QString</a> with appropriate information regarding the error.</p>
-<h3 class="fn"><a name="handle"></a><a href="qmediahandle.html">QMediaHandle</a> QMediaControl::handle () const</h3>
-<p>Return the handle of the media content that this control is manipulating.</p>
+<p>When an error occurs, indicated by the <a href="qtopiamedia.html#State-enum">QtopiaMedia::Error</a> state, this function will return a <a href="qstring.html">QString</a> with appropriate information regarding the error.</p>
+<h3 class="fn"><a name="invalid"></a>void QMediaControl::invalid ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signal that is emitted when the control is invalid and no longer available for use.</p>
 <h3 class="fn"><a name="isMuted"></a>bool QMediaControl::isMuted () const</h3>
 <p>Return the mute state of the media content.</p>
 <h3 class="fn"><a name="length"></a>quint32 QMediaControl::length () const</h3>
@@ -131,6 +123,8 @@
 <p>Start playing the media content.</p>
 <h3 class="fn"><a name="stop"></a>void QMediaControl::stop ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Stop playing the media content.</p>
+<h3 class="fn"><a name="valid"></a>void QMediaControl::valid ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signal that is emitted when the control is valid and available for use.</p>
 <h3 class="fn"><a name="volume"></a>int QMediaControl::volume () const</h3>
 <p>Return the current volume for the media content.</p>
 <p>See also <a href="qmediacontrol.html#setVolume">setVolume</a>().</p>
@@ -142,6 +136,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

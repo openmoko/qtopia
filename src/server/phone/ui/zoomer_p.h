@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,17 @@
 #ifndef ZOOMER_P_H
 #define ZOOMER_P_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include "animator_p.h"
 
 #include <QString>
@@ -38,17 +49,17 @@ public:
     void animate(QPainter *,SelectedItem *,qreal percent);
 
     // Returns description of this class for configuration purposes.
-    static const QString &getDescription() { return description; }
+    static const QString &description() { return mDescription; }
 
 private:
 
-    static const QString description;
+    static const QString mDescription;
 
     // Percentag by which the image grows during the zoom.
-    static const qreal growthFactor = 0.8;
+    static const qreal growthFactor;
 
-    static const qreal stop1 = 0.6;
-    static const qreal stop2 = 0.8;
+    static const qreal stop1;
+    static const qreal stop2;
 };
 
 #endif

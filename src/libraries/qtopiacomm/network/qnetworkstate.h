@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,11 +24,7 @@
 #include <qtopianetworkinterface.h>
 #include <qtopiaglobal.h>
 
-#if QT_VERSION < 0x040200
-#include <QHostAddress>
-#else
 #include <QNetworkInterface>
-#endif
 #include <QList>
 #include <QString>
 #include <QObject>

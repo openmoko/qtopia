@@ -34,8 +34,8 @@
 <p>Before continuing, you must ensure that the SDK package has been downloaded, or that you have a CD/DVD available that contains the Qtopia SDK.</p>
 <a name="installing-a-software-development-kit-sdk"></a>
 <h2>Installing a Software Development Kit (SDK)</h2>
-<p>SDKs are typically delivered as an ISO image or are pre-burned on a CD/DVD. The ISO image can be downloaded and then burned onto a CD/DVD using a regular CD/DVD burning tool, or on Linux can be alternatively mounted as a loopback device.</p>
-<p>The procedure for burning a CD/DVD falls outside the scope of this document and won't be discussed any further, please read the user manual of your burning tool for detailed instructions.</p>
+<p>SDKs are typically delivered as an ISO image or are pre-written on a CD/DVD. The ISO image can be downloaded and then written onto a CD/DVD using a regular CD/DVD writer, or on Linux can be alternatively mounted as a loopback device. For Windows, there is 'Virtual CD-ROM Control Panel' available from Microsoft, which can mount an iso and be displayed as a drive in Windows Explorer.</p>
+<p>The procedure for writing a CD/DVD falls outside the scope of this document and won't be discussed any further, please read the user manual of your CD/DVD writer for detailed instructions.</p>
 <p>For the Qtopia SDK to work properly you also need to install VmPlayer. This package needs to be downloaded from the VmWare website. The install program will prompt you at the appropriate time and give some hints on how to install VmPlayer. For a detailed instruction on how to set up VmPlayer, please refer to the VmWare website.</p>
 <a name="installing-the-sdk-on-windows"></a>
 <h3>Installing the SDK on Windows.</h3>
@@ -68,13 +68,13 @@
 <pre>    cd /home/&lt;username&gt;/QtopiaGreenphoneSDK (or wherever the SDK is installed)
     vmplayer greenphone.vmx</pre>
 <p>Once the VMPlayer is running a fully functional Linux environment is available inside the VMPlayer that contains all the Qtopia SDK tools, pre-build Qtopia binaries, documentation, etc to be used. To run Qtopia, click on <tt>runqtopia</tt>.</p>
-<p>With just the SDK it is not possible to rebuild Qtopia (it comes in a pre-build form) so the starting point of an SDK is basically the point where a Source Package user would be after having configured and build Qtopia both for the desktop and for the device. Apart from the fact that you cannot rebuild Qtopia itself using an SDK there are no differences with respect to running Qtopia, or to building and running your own applications.</p>
+<p>The SDK does not come with any source code, Qtopia comes in a pre-build form. The starting point of an SDK is where a Source Package user would be after having configured and build Qtopia both for the desktop and for the device. If you want to rebuild Qtopia, you must download the source code package separately.</p>
 <p>The Qtopia binaries are located (from within the VmPlayer environment) in <tt>/opt/Qtopia/SDK/&lt;version&gt;/x86</tt> and <tt>/opt/Qtopia/SDK/&lt;version&gt;/&lt;device&gt;</tt>. The &lt;device&gt; directory contains all the files (and <i>only</i> the files) that should be installed onto the device. Note that we have passed -prefix to specify the location that Qtopia will run from /opt/Qtopia.</p>
 <p>For further information about running Qtopia refer to <a href="running-qtopia.html">Running Qtopia</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,15 +21,24 @@
 #ifndef QPE_DECORATION_QWS_H__
 #define QPE_DECORATION_QWS_H__
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <qconfig.h>
-#ifdef Q_WS_QWS
 #include <qtopiaglobal.h>
 #include <qdecorationdefault_qws.h>
 #include <qimage.h>
 #include <qdatetime.h>
 #include <qpointer.h>
 #include <qwindowdecorationinterface.h>
-
 
 #ifndef QT_NO_QWS_QPE_WM_STYLE
 
@@ -44,6 +53,7 @@ public:
     virtual ~QtopiaDecoration();
 
     virtual QRegion region(const QWidget *, const QRect &rect, int region);
+    virtual int regionAt(const QWidget *w, const QPoint &point);
     virtual bool paint(QPainter *, const QWidget *, int region, DecorationState state);
     virtual void paintButton(QPainter *, const QWidget *, int region, int state);
 
@@ -69,6 +79,5 @@ protected:
 };
 
 #endif // QT_NO_QWS_QPE_WM_STYLE
-#endif // Q_WS_QWS
 
 #endif // QPE_DECORATION_QWS_H__

@@ -1,0 +1,1482 @@
+diff -Naru opieII.orig/devices/oe/config.pri opieII/devices/oe/config.pri
+--- opieII.orig/devices/oe/config.pri	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/config.pri	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,2 @@
++#DEFINES+=DEBUG
++DEFINES+=QT_QWS_PXA27X
+diff -Naru opieII.orig/devices/oe/configure opieII/devices/oe/configure
+--- opieII.orig/devices/oe/configure	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/configure	2007-06-17 23:45:36.000000000 +0200
+@@ -0,0 +1 @@
++-helix-system-id linux-2.2-libc6-xscale-cross-gcc41
+diff -Naru opieII.orig/devices/oe/custom.cpp opieII/devices/oe/custom.cpp
+--- opieII.orig/devices/oe/custom.cpp	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/custom.cpp	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,56 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#include <qtopianamespace.h>
++#include <qpowerstatus.h>
++#include <qwindowsystem_qws.h>
++
++int qpe_sysBrightnessSteps()
++{
++    return 255;
++}
++
++void qpe_setBrightness(int value)
++{
++	Q_UNUSED( value );
++/*
++    if(value <= 1) {
++      system("echo standby > /sys/power/state");
++    }
++*/
++}
++
++void QPowerStatusManager::getStatus()
++{
++#ifdef Q_WS_QWS
++    int ac, bs, bf, pc, sec;
++    if ( getProcApmStatus( ac, bs, bf, pc, sec ) ) {
++	ps->percentRemain = pc;
++	ps->secsRemain = sec;
++	ps->percentAccurate = TRUE;
++    } else {
++	ps->percentRemain = 100;
++	ps->secsRemain = -1;
++	ps->percentAccurate = FALSE;
++    }
++#endif
++}
++
+diff -Naru opieII.orig/devices/oe/custom.h opieII/devices/oe/custom.h
+--- opieII.orig/devices/oe/custom.h	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/custom.h	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,64 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#ifndef QT_QWS_PXA27X
++#define QT_QWS_PXA27X
++#endif
++
++#if defined(__GNUC__) && (__GNUC__ > 2)
++#define QPE_USE_MALLOC_FOR_NEW
++#endif
++
++#define QPE_DEFAULT_TODAY_MODE "Daily"
++
++#define QPE_NEED_CALIBRATION
++
++// The serial device for AT command access to the phone
++// hardware:
++//
++//#define QTOPIA_PHONE_DEVICE "/dev/ttyS1"
++//
++// The baud rate for the serial connection:
++//
++//#define QTOPIA_PHONE_RATE 115200
++
++// Sets the phone vendor plugin to load (normally all plugins are loaded).
++//#define QTOPIA_PRELOAD_PHONE_PLUGIN "pxa27xvendor"
++
++// Define this to use the "advanced" GSM 07.10 CMUX mode instead of "basic".
++//#define QTOPIA_ADVANCED_CMUX
++
++// Define these to use direct serial ports for multiplexing channels.
++// The primary AT command channel is defined by "QTOPIA_PHONE_DEVICE".
++// Channels may be omitted if they aren't appropriate.
++//
++// This enables the use of CSMI on the TI device, instead of GMS 07.10.
++//#define QTOPIA_MUX_SECONDARY_DEVICE "/dev/csmi/6"
++//#define QTOPIA_MUX_DATA_DEVICE "/dev/csmi/8"
++//#define QTOPIA_MUX_SPARE_DEVICE "/dev/ttyXX"
++//#define QTOPIA_MUX_RAW_DEVICE "/dev/ttyXX"
++
++// Define this if setup commands for GPRS data sessions should be sent
++// on the primary command channel instead of the data channel.
++//#define QTOPIA_MUX_DATA_SETUP_ON_COMMAND_CHANNEL
++
++#define QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
++#define QTOPIA_ENABLE_GLOBAL_BACKGROUNDS
+diff -Naru opieII.orig/devices/oe/defaultbuttons.conf opieII/devices/oe/defaultbuttons.conf
+--- opieII.orig/devices/oe/defaultbuttons.conf	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/defaultbuttons.conf	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,116 @@
++[Translation]
++File=QtopiaDefaults
++Context=Buttons
++[Menu]
++Rows=4
++Columns=3
++Map=123456789*0#
++Default=5
++1=Applications/camera.desktop
++2=Applications/mediaplayer.desktop,Applications/photoedit.desktop
++3=Applications/simapp.desktop{@/Telephony/Status/SimToolkitAvailable},Applications/calculator.desktop
++4=Applications/qtmail.desktop
++5=Applications/addressbook.desktop
++6=Applications/datebook.desktop
++7=Games
++8=Settings/Beaming.desktop
++9=Applications/todolist.desktop
++*=Settings
++0=Applications
++#=Documents
++Animator=Bounce
++AnimatorBackground=Radial
++[SoftKeys]
++Count=3
++Key0=Context1
++Key1=Select
++Key2=Back
++[SystemButtons]
++Count=5
++Key0=Context1
++Key1=Select
++Key2=Back
++Key3=Call
++Key4=Hangup
++[TextButtons]
++Buttons=0123456789*#
++Hold0='0
++Hold1='1
++Hold2='2
++Hold3='3
++Hold4='4
++Hold5='5
++Hold6='6
++Hold7='7
++Hold8='8
++Hold9='9
++Hold*=symbol
++Hold#=mode
++Tap0=space
++Tap1="\".,'?!-@:1"
++Tap2="\"a\xe4\xe5\xe6\xe0\xe1\xe2\x62\x63\xe7\x32"
++Tap3="\"de\xe8\xe9\xea\x66\x33"
++Tap4="\"ghi\xec\xed\xee\x34"
++Tap5="\"jkl5"
++Tap6="\"mn\xf1o\xf6\xf8\xf2\xf3\x36"
++Tap7="\"pqrs\xdf\x37"
++Tap8="\"tu\xfc\xf9\xfav8"
++Tap9="\"wxyz9"
++Tap*=modify
++Tap#=shift
++[LocaleTextButtons]
++Buttons=23456789
++Tap2[]='abc
++Tap3[]='def
++Tap4[]='ghi
++Tap5[]='jkl
++Tap6[]='mno
++Tap7[]='pqrs
++Tap8[]='tuv
++Tap9[]='wxyz
++[PhoneTextButtons]
++Buttons=*#
++Tap*='*+pw
++Hold*=+
++Tap#='#
++Hold#=mode
++[Device]
++PrimaryInput=Keypad
++[Button]
++Count=5
++[Button0]
++Name=Home
++Key=Home
++PressedActionMappable=0
++PressedActionService=TaskManager
++PressedActionMessage=multitask()
++HeldActionMappable=0
++HeldActionService=TaskManager
++HeldActionMessage=showRunningTasks()
++[Button1]
++Name=Calendar Button
++Key=F2
++PressedActionService=Calendar
++PressedActionMessage=raiseToday()
++HeldActionService=Calendar
++HeldActionMessage=raise()
++[Button2]
++Name=Contacts Button
++Key=F3
++PressedActionService=Contacts
++PressedActionMessage=raise()
++HeldActionService=Contacts
++HeldActionMessage=beamBusinessCard()
++[Button3]
++Name[]=Mail Button
++Key=F4
++PressedActionService=Email
++PressedActionMessage=raise()
++HeldActionService=Email
++HeldActionMessage=writeMail()
++[Button4]
++Name=HomeHeld
++Key=F1
++PressedActionMappable=0
++PressedActionService=TaskManager
++PressedActionMessage=showRunningTasks()
+diff -Naru opieII.orig/devices/oe/DESCRIPTION opieII/devices/oe/DESCRIPTION
+--- opieII.orig/devices/oe/DESCRIPTION	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/DESCRIPTION	2007-06-17 23:42:40.000000000 +0200
+@@ -0,0 +1,2 @@
++Support for OpenEmbedded.
++
+diff -Naru opieII.orig/devices/oe/mkspecs/qws/linux-pxa27x-g++/qmake.conf opieII/devices/oe/mkspecs/qws/linux-pxa27x-g++/qmake.conf
+--- opieII.orig/devices/oe/mkspecs/qws/linux-pxa27x-g++/qmake.conf	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/mkspecs/qws/linux-pxa27x-g++/qmake.conf	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,81 @@
++#
++# qmake configuration for linux-g++ using the arm-linux-g++ crosscompiler
++#
++
++MAKEFILE_GENERATOR	= UNIX
++TEMPLATE		= app
++CONFIG			+= qt warn_on release link_prl
++QT                      += core gui network
++QMAKE_INCREMENTAL_STYLE = sublib
++
++QMAKE_CC		= arm-linux-gcc
++QMAKE_LEX		= flex
++QMAKE_LEXFLAGS		=
++QMAKE_YACC		= yacc
++QMAKE_YACCFLAGS		= -d
++QMAKE_CFLAGS		= -pipe
++QMAKE_CFLAGS_WARN_ON	= -Wall -W
++QMAKE_CFLAGS_WARN_OFF	=
++QMAKE_CFLAGS_RELEASE	= -O2 -fomit-frame-pointer -finline-functions -funroll-loops -falign-functions=2 -falign-loops=2 -falign-jumps=2 -mcpu=iwmmxt -mtune=iwmmxt
++#QMAKE_CFLAGS_RELEASE	= -O2
++QMAKE_CFLAGS_DEBUG	= -g
++QMAKE_CFLAGS_SHLIB	= -fPIC
++QMAKE_CFLAGS_YACC	= -Wno-unused -Wno-parentheses
++QMAKE_CFLAGS_THREAD	= -D_REENTRANT
++
++QMAKE_CXX		= arm-linux-g++
++QMAKE_CXXFLAGS		= $$QMAKE_CFLAGS -DQT_QWS_PXA27X -fno-exceptions -fno-rtti
++QMAKE_CXXFLAGS_WARN_ON	= $$QMAKE_CFLAGS_WARN_ON
++QMAKE_CXXFLAGS_WARN_OFF	= $$QMAKE_CFLAGS_WARN_OFF
++QMAKE_CXXFLAGS_RELEASE	= $$QMAKE_CFLAGS_RELEASE
++QMAKE_CXXFLAGS_DEBUG	= $$QMAKE_CFLAGS_DEBUG
++QMAKE_CXXFLAGS_SHLIB	= $$QMAKE_CFLAGS_SHLIB
++QMAKE_CXXFLAGS_YACC	= $$QMAKE_CFLAGS_YACC
++QMAKE_CXXFLAGS_THREAD	= $$QMAKE_CFLAGS_THREAD
++
++QMAKE_INCDIR		=
++QMAKE_LIBDIR		=
++QMAKE_INCDIR_X11	= 
++QMAKE_LIBDIR_X11	= 
++QMAKE_INCDIR_QT		= $$[QT_INSTALL_HEADERS]
++QMAKE_LIBDIR_QT		= $$[QT_INSTALL_LIBS]
++QMAKE_INCDIR_OPENGL	= 
++QMAKE_LIBDIR_OPENGL	= 
++
++QMAKE_LINK		= arm-linux-g++
++QMAKE_LINK_SHLIB	= arm-linux-g++
++QMAKE_LFLAGS		=
++QMAKE_LFLAGS_RELEASE	=
++QMAKE_LFLAGS_DEBUG	=
++QMAKE_LFLAGS_SHLIB      = -shared
++QMAKE_LFLAGS_PLUGIN     = $$QMAKE_LFLAGS_SHLIB
++QMAKE_LFLAGS_SONAME     = -Wl,-soname,
++QMAKE_LFLAGS_THREAD     =
++QMAKE_RPATH             = -Wl,-rpath-link,
++
++QMAKE_LIBS		= 
++QMAKE_LIBS_DYNLOAD      = -ldl
++QMAKE_LIBS_X11		= 
++QMAKE_LIBS_X11SM	= 
++QMAKE_LIBS_QT		= -lqte
++QMAKE_LIBS_QT_THREAD    = -lqte-mt
++QMAKE_LIBS_QT_OPENGL	= -lqgl
++QMAKE_LIBS_QTOPIA	= -lqpe -lqtopia
++QMAKE_LIBS_THREAD       = -lpthread
++
++QMAKE_MOC		= $$[QT_INSTALL_BINS]/moc
++QMAKE_UIC		= $$[QT_INSTALL_BINS]/uic
++
++QMAKE_AR		= arm-linux-ar cqs
++QMAKE_RANLIB		=
++
++QMAKE_TAR		= tar -cf
++QMAKE_GZIP		= gzip -9f
++
++QMAKE_COPY		= cp -f
++QMAKE_MOVE		= mv -f
++QMAKE_DEL_FILE		= rm -f
++QMAKE_DEL_DIR		= rmdir
++QMAKE_CHK_DIR_EXISTS	= test -d
++QMAKE_MKDIR		= mkdir -p
++load(qt_config)
+diff -Naru opieII.orig/devices/oe/mkspecs/qws/linux-pxa27x-g++/qplatformdefs.h opieII/devices/oe/mkspecs/qws/linux-pxa27x-g++/qplatformdefs.h
+--- opieII.orig/devices/oe/mkspecs/qws/linux-pxa27x-g++/qplatformdefs.h	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/mkspecs/qws/linux-pxa27x-g++/qplatformdefs.h	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,144 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#ifndef QPLATFORMDEFS_H
++#define QPLATFORMDEFS_H
++
++// Get Qt defines/settings
++
++#include "qglobal.h"
++
++// Set any POSIX/XOPEN defines at the top of this file to turn on specific APIs
++
++// 1) need to reset default environment if _BSD_SOURCE is defined
++// 2) need to specify POSIX thread interfaces explicitly in glibc 2.0
++// 3) it seems older glibc need this to include the X/Open stuff
++#ifndef _GNU_SOURCE
++#  define _GNU_SOURCE
++#endif
++
++#include <unistd.h>
++
++
++// We are hot - unistd.h should have turned on the specific APIs we requested
++
++#include <features.h>
++#include <pthread.h>
++#include <dirent.h>
++#include <fcntl.h>
++#include <grp.h>
++#include <pwd.h>
++#include <signal.h>
++#include <dlfcn.h>
++
++#include <sys/types.h>
++#include <sys/ioctl.h>
++#include <sys/ipc.h>
++#include <sys/time.h>
++#include <sys/shm.h>
++#include <sys/socket.h>
++#include <sys/stat.h>
++#include <sys/wait.h>
++#include <netinet/in.h>
++#ifndef QT_NO_IPV6IFNAME
++#include <net/if.h>
++#endif
++
++#ifdef QT_LARGEFILE_SUPPORT
++#define QT_STATBUF              struct stat64
++#define QT_STATBUF4TSTAT        struct stat64
++#define QT_STAT                 ::stat64
++#define QT_FSTAT                ::fstat64
++#define QT_LSTAT                ::lstat64
++#define QT_OPEN                 ::open64
++#define QT_TRUNCATE             ::truncate64
++#define QT_FTRUNCATE            ::ftruncate64
++#define QT_LSEEK                ::lseek64
++#else
++#define QT_STATBUF              struct stat
++#define QT_STATBUF4TSTAT        struct stat
++#define QT_STAT                 ::stat
++#define QT_FSTAT                ::fstat
++#define QT_LSTAT                ::lstat
++#define QT_OPEN                 ::open
++#define QT_TRUNCATE             ::truncate
++#define QT_FTRUNCATE            ::ftruncate
++#define QT_LSEEK                ::lseek
++#endif
++
++#ifdef QT_LARGEFILE_SUPPORT
++#define QT_FOPEN                ::fopen64
++#define QT_FSEEK                ::fseeko64
++#define QT_FTELL                ::ftello64
++#define QT_FGETPOS              ::fgetpos64
++#define QT_FSETPOS              ::fsetpos64
++#define QT_FPOS_T               fpos64_t
++#define QT_OFF_T                off64_t
++#else
++#define QT_FOPEN                ::fopen
++#define QT_FSEEK                ::fseek
++#define QT_FTELL                ::ftell
++#define QT_FGETPOS              ::fgetpos
++#define QT_FSETPOS              ::fsetpos
++#define QT_FPOS_T               fpos_t
++#define QT_OFF_T                long
++#endif
++
++#define QT_STAT_REG		S_IFREG
++#define QT_STAT_DIR		S_IFDIR
++#define QT_STAT_MASK		S_IFMT
++#define QT_STAT_LNK		S_IFLNK
++#define QT_SOCKET_CONNECT	::connect
++#define QT_SOCKET_BIND		::bind
++#define QT_SOCKET_BIND		::bind
++#define QT_FILENO		fileno
++#define QT_CLOSE		::close
++#define QT_READ			::read
++#define QT_WRITE		::write
++#define QT_ACCESS		::access
++#define QT_GETCWD		::getcwd
++#define QT_CHDIR		::chdir
++#define QT_MKDIR		::mkdir
++#define QT_RMDIR		::rmdir
++#define QT_OPEN_RDONLY		O_RDONLY
++#define QT_OPEN_WRONLY		O_WRONLY
++#define QT_OPEN_RDWR		O_RDWR
++#define QT_OPEN_CREAT		O_CREAT
++#define QT_OPEN_TRUNC		O_TRUNC
++#define QT_OPEN_APPEND		O_APPEND
++
++#define QT_SIGNAL_RETTYPE	void
++#define QT_SIGNAL_ARGS		int
++#define QT_SIGNAL_IGNORE	SIG_IGN
++
++#if defined(__GLIBC__) && (__GLIBC__ >= 2)
++#define QT_SOCKLEN_T		socklen_t
++#else
++#define QT_SOCKLEN_T		int
++#endif
++
++#if defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 500)
++#define QT_SNPRINTF		::snprintf
++#define QT_VSNPRINTF		::vsnprintf
++#endif
++
++
++#endif // QPLATFORMDEFS_H
+diff -Naru opieII.orig/devices/oe/src/plugins/plugins.pro opieII/devices/oe/src/plugins/plugins.pro
+--- opieII.orig/devices/oe/src/plugins/plugins.pro	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/plugins.pro	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1 @@
++qtopia_project(subdirs)
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/kbddrivers.pro opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/kbddrivers.pro
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/kbddrivers.pro	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/kbddrivers.pro	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1 @@
++qtopia_project(subdirs)
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbddriverplugin.cpp opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbddriverplugin.cpp
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbddriverplugin.cpp	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbddriverplugin.cpp	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,54 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#include "pxa27xkbddriverplugin.h"
++#include "pxa27xkbdhandler.h"
++
++#include <qtopiaglobal.h>
++
++Pxa27xKbdDriverPlugin::Pxa27xKbdDriverPlugin( QObject *parent )
++    : QKbdDriverPlugin( parent )
++{}
++
++Pxa27xKbdDriverPlugin::~Pxa27xKbdDriverPlugin()
++{}
++
++QWSKeyboardHandler* Pxa27xKbdDriverPlugin::create(const QString& driver, const QString&)
++{
++    qWarning("Pxa27xKbdDriverPlugin:create()");
++    return create( driver );
++}
++
++QWSKeyboardHandler* Pxa27xKbdDriverPlugin::create( const QString& driver)
++{
++    if( driver.toLower() == "pxa27xkbdhandler" ) {
++        qWarning("Before call Pxa27xKbdHandler()");
++        return new Pxa27xKbdHandler();
++    }
++    return 0;
++}
++
++QStringList Pxa27xKbdDriverPlugin::keys() const
++{
++    return QStringList() << "pxa27xkbdhandler";
++}
++
++QTOPIA_EXPORT_QT_PLUGIN(Pxa27xKbdDriverPlugin)
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbddriverplugin.h opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbddriverplugin.h
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbddriverplugin.h	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbddriverplugin.h	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,38 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#ifndef PXA27XKBDDRIVERPLUGIN_H
++#define PXA27XKBDDRIVERPLUGIN_H
++
++#include <QtGui/QWSKeyboardHandlerFactoryInterface>
++
++class Pxa27xKbdDriverPlugin : public QKbdDriverPlugin {
++    Q_OBJECT
++public:
++    Pxa27xKbdDriverPlugin( QObject *parent  = 0 );
++    ~Pxa27xKbdDriverPlugin();
++
++    QWSKeyboardHandler* create(const QString& driver, const QString& device);
++    QWSKeyboardHandler* create(const QString& driver);
++    QStringList keys()const;
++};
++
++#endif // PXA27XKBDDRIVERPLUGIN_H
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbdhandler.cpp opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbdhandler.cpp
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbdhandler.cpp	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbdhandler.cpp	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,324 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#include "pxa27xkbdhandler.h"
++
++#ifdef QT_QWS_PXA27X
++#include <QFile>
++#include <QTextStream>
++#include <QScreen>
++#include <QSocketNotifier>
++#include <QDebug>
++
++#include <string.h>
++#include <errno.h>
++#include <stdlib.h>
++#include <fcntl.h>
++#include <unistd.h>
++
++struct Pxa27xInput {
++    unsigned int   dummy1;
++    unsigned int   dummy2;
++    unsigned short type;
++    unsigned short code;
++    unsigned int   value;
++};
++
++Pxa27xKbdHandler::Pxa27xKbdHandler()
++{
++    qWarning( "***Loaded Pxa27x keypad plugin!");
++    setObjectName( "Pxa27x Keypad Handler" );
++    kbdFD = ::open("/dev/input/event0", O_RDONLY, 0);
++    if (kbdFD >= 0) {
++      qWarning("Opened event0 as keypad input");
++      m_notify = new QSocketNotifier( kbdFD, QSocketNotifier::Read, this );
++      connect( m_notify, SIGNAL(activated(int)), this, SLOT(readKbdData()));
++    } else {
++      qWarning("Cannot open event0 for keypad (%s)", strerror(errno));
++      return;
++    }
++    shift=false;
++}
++
++Pxa27xKbdHandler::~Pxa27xKbdHandler()
++{
++}
++
++void Pxa27xKbdHandler::readKbdData()
++{
++    Pxa27xInput event;
++
++    int n = read(kbdFD, &event, sizeof(Pxa27xInput));
++    if(n !=16) {
++      qWarning("keypressed: n=%03d",n);
++      return;
++    }  
++
++    qWarning("keypressed: type=%03d, code=%03d, value=%03d (%s)",event.type, event.code,event.value,((event.value)!=0) ? "Down":"Up");
++
++    int modifiers=0;
++    int unicode=0xffff;
++    int key_code=0;
++
++    switch(event.code)
++    {
++      case 0x110:
++        key_code = Qt::Key_Context1;
++        unicode  = 0xffff; 
++        break;
++      case 0x111:
++        key_code = Qt::Key_Back;
++        unicode  = 0xffff;
++        break;
++      case 0xA9:
++        key_code = Qt::Key_Call;
++        unicode  = 0xffff;
++        break;
++      case 0x80:
++        key_code = Qt::Key_Hangup;
++        unicode  = 0xffff;
++        break;
++      case 0x1C:
++        key_code = Qt::Key_Select;
++        unicode  = 0xffff;
++        break;
++      case 0x67:
++        key_code = Qt::Key_Up;
++        unicode  = 0xffff; 
++        break;
++      case 0x6C:
++        key_code = Qt::Key_Down;
++        unicode  = 0xffff; 
++        break;
++      case 0x69:
++        key_code = Qt::Key_Left;
++        unicode  = 0xffff;
++        break;
++      case 0x6A:
++        key_code = Qt::Key_Right;
++        unicode  = 0xffff;
++        break;
++      case 0x66:
++        key_code = Qt::Key_Home;
++        unicode  = 0xffff;
++        break;
++      case 0x39:
++        key_code = Qt::Key_Space;
++        unicode  = 0x20;
++        break;
++      case 0x0F:
++        key_code = Qt::Key_F1; // tab key!
++        unicode  = 0xffff; 
++        break;
++      case 0x1A:
++        key_code = Qt::Key_F2; // ( key!
++        unicode  = 0xffff; 
++        break;
++      case 0x0E:
++        key_code = Qt::Key_F3; // clr key!
++        unicode  = 0xffff; 
++        break;
++      case 0x1B:
++        key_code = Qt::Key_F4; // ) key!
++        unicode  = 0xffff; 
++        break;
++      case 0x2A:
++        key_code = Qt::Key_Shift;
++        unicode  = 0xffff; 
++        modifiers |= Qt::ShiftModifier;
++        if(shift) {
++          shift = FALSE;
++          qWarning("Caps Off!");
++        } else {
++          shift = TRUE;
++          qWarning("Caps On!");
++        }
++        break;
++      case 0x2:
++        key_code = Qt::Key_1;
++        unicode  = 0x31;
++        break;
++      case 0x3:
++        key_code = Qt::Key_2;
++        unicode  = 0x32;
++        break;
++      case 0x21:
++        key_code = Qt::Key_3;
++        unicode  = 0x33;
++        break;
++      case 0x5:
++        key_code = Qt::Key_4;
++        unicode  = 0x34;
++        break;
++      case 0x6:
++        key_code = Qt::Key_5;
++        unicode  = 0x35;
++        break;
++      case 0x7:
++        key_code = Qt::Key_6;
++        unicode  = 0x36;
++        break;
++      case 0x8:
++        key_code = Qt::Key_7;
++        unicode  = 0x37;
++        break;
++      case 0x9:
++        key_code = Qt::Key_8;
++        unicode  = 0x38;
++        break;
++      case 0xA:
++        key_code = Qt::Key_9;
++        unicode  = 0x39;
++        break;
++      case 0xB:
++        key_code = Qt::Key_0;
++        unicode  = 0x30;
++        break;
++      case 0x37:
++        key_code = Qt::Key_Asterisk;
++        unicode  = 0x2A;
++        break;
++      case 0x29:
++        key_code = Qt::Key_NumberSign;
++        unicode  = 0x2A;
++        break;
++      case 0x1E:
++        key_code = Qt::Key_A;
++        unicode  = ((!shift) ? 0x61           : 0x41              ); 
++        break;
++      case 0x30:
++        key_code = Qt::Key_B;
++        unicode  = ((!shift) ? 0x62           : 0x42              ); 
++        break;
++      case 0x2E:
++        key_code = Qt::Key_C;
++        unicode  = ((!shift) ? 0x63           : 0x43              ); 
++        break;
++      case 0x20:
++        key_code = Qt::Key_D; 
++        unicode  = ((!shift) ? 0x64           : 0x44              ); 
++        break;
++      case 0x12:
++        key_code = Qt::Key_E;
++        unicode  = ((!shift) ? 0x65           : 0x45              ); 
++        break;
++        /*
++      case 0x21:
++        key_code = Qt::Key_F;
++        unicode  = ((!shift) ? 0x66           : 0x46              ); 
++        break;
++       */ 
++      case 0x22:
++        key_code = Qt::Key_G;
++        unicode  = ((!shift) ? 0x67           : 0x47              ); 
++        break;
++      case 0x23:
++        key_code = Qt::Key_H;
++        unicode  = ((!shift) ? 0x68           : 0x48              ); 
++        break;
++      case 0x17:
++        key_code = Qt::Key_I;
++        unicode  = ((!shift) ? 0x69           : 0x49              ); 
++        break;
++      case 0x24:
++        key_code = Qt::Key_J;
++        unicode  = ((!shift) ? 0x6A           : 0x4A              ); 
++        break;
++      case 0x25:
++        key_code = Qt::Key_K;
++        unicode  = ((!shift) ? 0x6B           : 0x4B              ); 
++        break;
++      case 0x26:
++        key_code = Qt::Key_L;
++        unicode  = ((!shift) ? 0x6C           : 0x4C              ); 
++        break;
++      case 0x32:
++        key_code = Qt::Key_M;
++        unicode  = ((!shift) ? 0x6D           : 0x4D              ); 
++        break;
++      case 0x31:
++        key_code = Qt::Key_N;
++        unicode  = ((!shift) ? 0x6E           : 0x4E              ); 
++        break;
++      case 0x18:
++        key_code = Qt::Key_O;
++        unicode  = ((!shift) ? 0x6F           : 0x4F              ); 
++        break;
++      case 0x19:
++        key_code = Qt::Key_P;
++        unicode  = ((!shift) ? 0x70           : 0x50              ); 
++        break;
++      case 0x10:
++        key_code = Qt::Key_Q;
++        unicode  = ((!shift) ? 0x71           : 0x51              ); 
++        break;
++      case 0x13:
++        key_code = Qt::Key_R;
++        unicode  = ((!shift) ? 0x72           : 0x52              ); 
++        break;
++      case 0x1F:
++        key_code = Qt::Key_S;
++        unicode  = ((!shift) ? 0x73           : 0x53              ); 
++        break;
++      case 0x14:
++        key_code = Qt::Key_T;
++        unicode  = ((!shift) ? 0x74           : 0x54              ); 
++        break;
++      case 0x16:
++        key_code = Qt::Key_U;
++        unicode  = ((!shift) ? 0x75           : 0x55              ); 
++        break;
++      case 0x2F:
++        key_code = Qt::Key_V;
++        unicode  = ((!shift) ? 0x76           : 0x56              ); 
++        break;
++      case 0x11:
++        key_code = Qt::Key_W;
++        unicode  = ((!shift) ? 0x77           : 0x57              ); 
++        break;
++      case 0x2D:
++        key_code = Qt::Key_X;
++        unicode  = ((!shift) ? 0x78           : 0x58              ); 
++        break;
++      case 0x15:
++        key_code = Qt::Key_Y;
++        unicode  = ((!shift) ? 0x79           : 0x59              ); 
++        break;
++      case 0x2C:
++        key_code = Qt::Key_Z;
++        unicode  = ((!shift) ? 0x7A           : 0x5A              ); 
++        break;
++
++    }
++    if(shift) modifiers |= Qt::ShiftModifier;
++
++    processKeyEvent(unicode, key_code, (Qt::KeyboardModifiers)modifiers,
++        event.value!=0, false);
++    /*    
++    if(event.value!=0) {
++      beginAutoRepeat(unicode, key_code, (Qt::KeyboardModifiers)modifiers);
++    } else {
++      endAutoRepeat();
++    }
++    */
++}
++
++#endif // QT_QWS_PXA27X
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbdhandler.h opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbdhandler.h
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbdhandler.h	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27xkbdhandler.h	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,49 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#ifndef PXA27XKBDHANDLER_H
++#define PXA27XKBDHANDLER_H
++
++#ifdef QT_QWS_PXA27X
++
++#include <QObject>
++#include <QWSKeyboardHandler>
++
++class QSocketNotifier;
++class Pxa27xKbdHandler : public QObject, public QWSKeyboardHandler
++{
++    Q_OBJECT
++public:
++    Pxa27xKbdHandler();
++    ~Pxa27xKbdHandler();
++
++private:
++    QSocketNotifier *m_notify;
++    int  kbdFD;
++    bool shift;
++
++private Q_SLOTS:
++    void readKbdData();
++};
++
++#endif // QT_QWS_PXA27X
++
++#endif // PXA27XKBDHANDLER_H
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27x.pro opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27x.pro
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27x.pro	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/kbddrivers/pxa27x/pxa27x.pro	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,8 @@
++qtopia_project(embedded qtopia core plugin)
++TARGET = pxa27xkbdhandler
++
++CONFIG+=no_tr
++
++HEADERS = pxa27xkbddriverplugin.h pxa27xkbdhandler.h
++SOURCES = pxa27xkbddriverplugin.cpp pxa27xkbdhandler.cpp
++
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/mousedrivers.pro opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/mousedrivers.pro
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/mousedrivers.pro	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/mousedrivers.pro	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1 @@
++qtopia_project(subdirs)
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousedriverplugin.cpp opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousedriverplugin.cpp
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousedriverplugin.cpp	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousedriverplugin.cpp	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,54 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#include "pxa27xmousedriverplugin.h"
++#include "pxa27xmousehandler.h"
++
++#include <qtopiaglobal.h>
++
++Pxa27xMouseDriverPlugin::Pxa27xMouseDriverPlugin( QObject *parent )
++    : QMouseDriverPlugin( parent )
++{}
++
++Pxa27xMouseDriverPlugin::~Pxa27xMouseDriverPlugin()
++{}
++
++QWSMouseHandler* Pxa27xMouseDriverPlugin::create(const QString& driver, const QString&)
++{
++    qWarning("Pxa27xMouseDriverPlugin:create()");
++    return create( driver );
++}
++
++QWSMouseHandler* Pxa27xMouseDriverPlugin::create( const QString& driver)
++{
++    if( driver.toLower() == "pxa27xmousehandler" ) {
++        qWarning("Before call pxa27xMouseHandler()");
++        return new Pxa27xMouseHandler();
++    }
++    return 0;
++}
++
++QStringList Pxa27xMouseDriverPlugin::keys() const
++{
++    return QStringList() << "pxa27xmousehandler" << "pxa27x_ts";
++}
++
++QTOPIA_EXPORT_QT_PLUGIN(Pxa27xMouseDriverPlugin)
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousedriverplugin.h opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousedriverplugin.h
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousedriverplugin.h	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousedriverplugin.h	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,38 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#ifndef PXA27XMOUSEDRIVERPLUGIN_H
++#define PXA27XMOUSEDRIVERPLUGIN_H
++
++#include <QtGui/QWSMouseHandlerFactoryInterface>
++
++class Pxa27xMouseDriverPlugin : public QMouseDriverPlugin {
++    Q_OBJECT
++public:
++    Pxa27xMouseDriverPlugin( QObject *parent  = 0 );
++    ~Pxa27xMouseDriverPlugin();
++
++    QWSMouseHandler* create(const QString& driver);
++    QWSMouseHandler* create(const QString& driver, const QString& device);
++    QStringList keys()const;
++};
++
++#endif // PXA27XMOUSEDRIVERPLUGIN_H
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousehandler.cpp opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousehandler.cpp
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousehandler.cpp	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousehandler.cpp	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,177 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#include "pxa27xmousehandler.h"
++
++#ifdef QT_QWS_PXA27X
++#include <QFile>
++#include <QTextStream>
++#include <QScreen>
++#include <QSocketNotifier>
++#include <QDebug>
++
++#include <qtopialog.h>
++
++#include <string.h>
++#include <errno.h>
++#include <stdlib.h>
++#include <fcntl.h>
++#include <unistd.h>
++
++typedef struct {
++    unsigned int   dummy1;
++    unsigned int   dummy2;
++    unsigned short type;
++    unsigned short code;
++    unsigned int   value;
++} ts_packet;
++
++
++Pxa27xMouseHandler::Pxa27xMouseHandler()
++    : m_raw(false), totX(0), totY(0), nX(0), nY(0), mouseIdx(0)
++{
++    qWarning( "***Loaded Pxa27x touchscreen plugin!");
++    setObjectName( "Pxa27x Mouse Handler" );
++    openTs();
++}
++
++Pxa27xMouseHandler::~Pxa27xMouseHandler()
++{
++    closeTs();
++}
++
++void Pxa27xMouseHandler::openTs()
++{
++    if ((mouseFD = open("/dev/input/event1", O_RDONLY | O_NDELAY)) < 0) {
++      qWarning("Cannot open /dev/input/event1 (%s)", strerror(errno));
++      return;
++    } else
++      qWarning("Opened /dev/input/event1 as touchscreen input");
++
++    m_notify = new QSocketNotifier( mouseFD, QSocketNotifier::Read, this );
++    connect( m_notify, SIGNAL(activated(int)), this, SLOT(readMouseData()));
++}
++
++void Pxa27xMouseHandler::closeTs()
++{
++    if (mouseFD)
++        close(mouseFD);
++    mouseFD = 0;
++
++    delete m_notify;
++    m_notify = 0;
++    m_raw = false;
++}
++
++void Pxa27xMouseHandler::suspend()
++{
++    m_notify->setEnabled( false );
++}
++
++void Pxa27xMouseHandler::resume()
++{
++    m_notify->setEnabled( true );
++}
++
++void Pxa27xMouseHandler::readMouseData()
++{
++    if(!qt_screen)
++        return;
++
++    int     i, j, dx, dy;
++    int n=0;
++
++    do {
++      n = read(mouseFD, mouseBuf+mouseIdx, mouseBufSize-mouseIdx);
++      if(n > 0) 
++        mouseIdx += n;
++
++      ts_packet *data;
++      int idx = 0;
++
++      while (mouseIdx-idx >= (int)sizeof(ts_packet)) {
++        uchar *mb = mouseBuf+idx;
++        data = (ts_packet *) mb;
++        if(data->code == 0) {
++          // x value
++          totX = totX + data->value;
++          sx[nX] = data->value;
++          nX++;
++        } else if(data->code == 1) {
++          // y value
++          totY = totY + data->value;
++          sy[nY] = data->value;
++          nY++;
++        }
++        if(nX >= TS_SAMPLES && nY >= TS_SAMPLES) {
++          if(nX < nY) ss=nX;
++          else ss=nY;
++
++          for(i=0;i<ss-1;i++) {
++            for(j=i+1;j<ss;j++) {
++              dx = sx[i] - sx[j];
++              if(dx < 0) dx = -dx;
++              dy = sy[i] - sy[j];
++              if(dy < 0) dy = -dy;
++              if(min_x > dx) {
++                min_x = dx;
++                index_x1 = i;
++                index_x2 = j;
++              }
++              if(min_y > dy) {
++                min_y = dy;
++                index_y1 = i;
++                index_y2 = j;
++              }
++            }
++          }
++
++          QPoint pos( (sx[index_x1] + sx[index_x2])/2,
++                  (sy[index_y1] + sy[index_y2])/2);
++
++          nX=0; nY=0; totX=0; totY=0;
++          oldmouse = transform( pos );
++          if(oldmouse.x() < 0 || oldmouse.x() > 2000 ||
++             oldmouse.y() < 0 || oldmouse.y() > 2000) {
++            qLog(Input) << "*BAD Mouse sample :x=" << oldmouse.x() << ",y=" << oldmouse.y();
++            oldmouse.setX(0);
++            oldmouse.setY(0);
++          } else {  
++          qLog(Input) << "Mouse Down:x=" << oldmouse.x() << ",y=" << oldmouse.y();
++          emit mouseChanged( oldmouse, Qt::LeftButton);
++          }
++        }
++        if((data->code == 24) && (data->value == 0)) {
++          // Removed pen from screen
++          qLog(Input) << "Mouse Up  :x=" << oldmouse.x() << ",y=" << oldmouse.y();
++          emit mouseChanged( oldmouse, 0);
++          nX=0; nY=0; totX=0; totY=0;
++        }
++        idx += sizeof(ts_packet);
++      }
++      int surplus = mouseIdx - idx;
++      for (int i = 0; i < surplus; i++)
++        mouseBuf[i] = mouseBuf[idx+i];
++      mouseIdx = surplus;  
++    } while (n > 0);  
++}
++
++#endif // QT_QWS_PXA27X
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousehandler.h opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousehandler.h
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousehandler.h	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27xmousehandler.h	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,66 @@
++/****************************************************************************
++**
++** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
++**
++** This file is part of the Phone Edition of the Qtopia Toolkit.
++**
++** This software is licensed under the terms of the GNU General Public
++** License (GPL) version 2.
++**
++** See http://www.trolltech.com/gpl/ for GPL licensing information.
++**
++** Contact info@trolltech.com if any conditions of this licensing are
++** not clear to you.
++**
++**
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++****************************************************************************/
++
++#ifndef PXA27XMOUSEHANDLER_H
++#define PXA27XMOUSEHANDLER_H
++
++#define TS_SAMPLES   5
++
++#include <QtGui/QWSCalibratedMouseHandler>
++
++#ifdef QT_QWS_PXA27X
++
++class QSocketNotifier;
++class Pxa27xMouseHandler : public QObject, public QWSCalibratedMouseHandler
++{
++    Q_OBJECT
++public:
++    Pxa27xMouseHandler();
++    ~Pxa27xMouseHandler();
++
++    void calibrate( QWSPointerCalibrationData * );
++    void suspend();
++    void resume();
++
++private:
++    void openTs();
++    void closeTs();
++
++private:
++    bool m_raw : 1;
++    int  totX,totY,nX,nY;
++    int  sx[TS_SAMPLES+3], sy[TS_SAMPLES+3], ss;
++    int  index_x1, index_x2, index_y1, index_y2, min_x, min_y;
++    int  mouseFD;
++    int  mouseIdx;
++    static const int mouseBufSize = 2048;
++    uchar mouseBuf[mouseBufSize];
++    QPoint oldmouse;
++    Pxa27xMouseHandler *handler;
++    QSocketNotifier *m_notify;
++
++private Q_SLOTS:
++    void readMouseData();
++};
++
++#endif // QT_QWS_PXA27X
++
++#endif // PXA27XMOUSEHANDLER_H
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27x.pro opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27x.pro
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27x.pro	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/mousedrivers/pxa27x/pxa27x.pro	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,8 @@
++qtopia_project(embedded qtopia core plugin)
++TARGET = pxa27xmousehandler
++
++CONFIG+=no_tr
++
++HEADERS = pxa27xmousedriverplugin.h pxa27xmousehandler.h
++SOURCES = pxa27xmousedriverplugin.cpp pxa27xmousehandler.cpp
++
+diff -Naru opieII.orig/devices/oe/src/plugins/qtopiacore/qtopiacore.pro opieII/devices/oe/src/plugins/qtopiacore/qtopiacore.pro
+--- opieII.orig/devices/oe/src/plugins/qtopiacore/qtopiacore.pro	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/plugins/qtopiacore/qtopiacore.pro	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1 @@
++qtopia_project(subdirs)
+diff -Naru opieII.orig/devices/oe/src/projects.pri opieII/devices/oe/src/projects.pri
+--- opieII.orig/devices/oe/src/projects.pri	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/projects.pri	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,5 @@
++PROJECTS*=\
++    plugins/qtopiacore/kbddrivers/pxa27x\
++    plugins/qtopiacore/mousedrivers/pxa27x
++
++PROJECTS-= plugins/network
+diff -Naru opieII.orig/devices/oe/src/src.pro opieII/devices/oe/src/src.pro
+--- opieII.orig/devices/oe/src/src.pro	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/src.pro	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,2 @@
++qtopia_project(subdirs)
++SUBDIRS=$$PROJECTS
+diff -Naru opieII.orig/devices/oe/src/tree_config.pri opieII/devices/oe/src/tree_config.pri
+--- opieII.orig/devices/oe/src/tree_config.pri	1970-01-01 01:00:00.000000000 +0100
++++ opieII/devices/oe/src/tree_config.pri	2007-06-17 18:44:21.000000000 +0200
+@@ -0,0 +1,2 @@
++CONFIG+=depotProject
++CONFIG+=part_of_qtopia
+diff -Naru opieII.orig/src/3rdparty/libraries/helix/trolltech/src/build/umakecf/linux-2.2-libc6-xscale-cross-gcc41.cf opieII/src/3rdparty/libraries/helix/trolltech/src/build/umakecf/linux-2.2-libc6-xscale-cross-gcc41.cf
+--- opieII.orig/src/3rdparty/libraries/helix/trolltech/src/build/umakecf/linux-2.2-libc6-xscale-cross-gcc41.cf	1970-01-01 01:00:00.000000000 +0100
++++ opieII/src/3rdparty/libraries/helix/trolltech/src/build/umakecf/linux-2.2-libc6-xscale-cross-gcc41.cf	2007-06-17 23:45:30.000000000 +0200
+@@ -0,0 +1,83 @@
++# -*- python -*- 
++#  
++# ***** BEGIN LICENSE BLOCK *****
++# Source last modified: $Id: linux-2.2-libc6-armv4l-cross-gcc2.95.cf,v 1.5 2005/02/23 17:45:30 neotron Exp $
++# 
++# Portions Copyright (c) 1995-2004 RealNetworks, Inc. All Rights Reserved.
++# 
++# The contents of this file, and the files included with this file,
++# are subject to the current version of the RealNetworks Public
++# Source License (the "RPSL") available at
++# http://www.helixcommunity.org/content/rpsl unless you have licensed
++# the file under the current version of the RealNetworks Community
++# Source License (the "RCSL") available at
++# http://www.helixcommunity.org/content/rcsl, in which case the RCSL
++# will apply. You may also obtain the license terms directly from
++# RealNetworks.  You may not use this file except in compliance with
++# the RPSL or, if you have a valid RCSL with RealNetworks applicable
++# to this file, the RCSL.  Please see the applicable RPSL or RCSL for
++# the rights, obligations and limitations governing use of the
++# contents of the file.
++# 
++# Alternatively, the contents of this file may be used under the
++# terms of the GNU General Public License Version 2 or later (the
++# "GPL") in which case the provisions of the GPL are applicable
++# instead of those above. If you wish to allow use of your version of
++# this file only under the terms of the GPL, and not to allow others
++# to use your version of this file under the terms of either the RPSL
++# or RCSL, indicate your decision by deleting the provisions above
++# and replace them with the notice and other provisions required by
++# the GPL. If you do not delete the provisions above, a recipient may
++# use your version of this file under the terms of any one of the
++# RPSL, the RCSL or the GPL.
++# 
++# This file is part of the Helix DNA Technology. RealNetworks is the
++# developer of the Original Code and owns the copyrights in the
++# portions it created.
++# 
++# This file, and the files included with this file, is distributed
++# and made available on an 'AS IS' basis, WITHOUT WARRANTY OF ANY
++# KIND, EITHER EXPRESS OR IMPLIED, AND REALNETWORKS HEREBY DISCLAIMS
++# ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY WARRANTIES
++# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
++# ENJOYMENT OR NON-INFRINGEMENT.
++# 
++# Technology Compatibility Kit Test Suite(s) Location:
++#    http://www.helixcommunity.org/content/tck
++# 
++# Contributor(s):
++# 
++# ***** END LICENSE BLOCK *****
++# 
++##"""Linux libc6 using i386 gcc 2.95, cross-compiling for an ARM."""
++
++exec_config_file('linux-2.2-libc6-armv4l.cf') 
++
++## cross compiling tools  
++platform.cc.cmd = 'arm-angstrom-linux-gnueabi-gcc'
++platform.cxx.cmd = 'arm-angstrom-linux-gnueabi-g++'
++platform.link.xplatform = "arm-angstrom-linux-gnueabi-"
++
++## make GCC 2.95.x permissive so it won"t barf on our code
++## also, generate armV4T optimized code, and make hard-float the default ABI
++platform.cc.args["default"] = \
++    "-pipe -W -Wreturn-type -fno-exceptions " \
++    "-mcpu=xscale -mtune=xscale "
++
++platform.cxx.args["default"] = platform.cc.args["default"] + " --permissive -fno-rtti"
++
++
++## Enable compile time flags needed for rlink to work.
++if not project.BuildOption("debug") and project.IsDefined('HELIX_CONFIG_USE_RLINK'):
++    platform.cc.args["default"] = platform.cc.args["default"] + " -ffunction-sections -fdata-sections"
++    platform.cxx.args["default"] = platform.cxx.args["default"] + " -ffunction-sections -fdata-sections"
++
++## tell certain .pcf files we are using gcc. 
++project.AddDefines('__GCC__')
++
++DisableRTTIIfNecessary() 
++
++## X11 isn't really set up for cross-compiling
++project.RemoveIncludes('/usr/X11R6/include')
++project.RemoveSystemPaths('-L/usr/X11R6/lib')
++project.RemoveSystemLibraries("X11")

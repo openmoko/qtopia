@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,16 +26,6 @@
 #include "stroke.h"
 
 #include <qtopiaglobal.h>
-
-// should be internal, with class member access
-struct QIMPenSpecialKeys {
-    uint code;
-    char *name;
-    uint q23code;
-};
-
-extern const QIMPenSpecialKeys qimpen_specialKeys[];
-
 
 class QTOPIAHW_EXPORT QIMPenChar
 {
@@ -177,10 +167,8 @@ public:
 private:
     void markDeleted( const QIMPenChar & );
 
-#ifdef Q_WS_QWS
     QString userPath() const;
     QString systemPath() const;
-#endif
 
     QString csTitle;
     QString desc;

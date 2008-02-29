@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,13 +21,14 @@
 
 #include "qdrmcontent.h"
 #include <qtopialog.h>
-#include "contentlnk_p.h"
 #include <qtopiaipcadaptor.h>
 #include <QThread>
 #include <qtopiaservices.h>
 #include "drmcontent_p.h"
 #include <qmimetype.h>
+#include <QUniqueId>
 #include <QPointer>
+#include <qtopia/private/qcontentengine_p.h>
 
 #include <QAbstractFileEngineHandler>
 
@@ -120,7 +121,7 @@ void QDrmContentPrivate::rightsExpired( const QContent &content, QDrmRights::Per
         connect( this, SIGNAL(stopped()), &openContent, SLOT(renderStopped()));
 
         // Stop playback when the rights have expired.
-        connect( &openContent, SIGNAL(rightsExpired(const QDrmContent&)), this, SLOT(stop()) );
+        connect( &openContent, SIGNAL(rightsExpired(QDrmContent)), this, SLOT(stop()) );
 
         // Perform initialisation.
     }
@@ -240,8 +241,8 @@ void QDrmContent::init( QDrmRights::Permission permission, LicenseOptions option
     d->c = this;
     d->focus = 0;
 
-    connect( d   , SIGNAL(rightsExpired(const QDrmContent&)),
-             this, SIGNAL(rightsExpired(const QDrmContent&)) );
+    connect( d   , SIGNAL(rightsExpired(QDrmContent)),
+             this, SIGNAL(rightsExpired(QDrmContent)) );
 }
 
 /*!
@@ -354,7 +355,7 @@ QContent QDrmContent::content() const
  */
 bool QDrmContent::requestLicense( const QContent &content )
 {
-    qLog(DRMAgent) << "QDrmContent::requestLicense()" << content.name();
+    qLog(DRMAgent) << "QDrmContent::requestLicense()" << content;
 
     if( content.id() == QContent::InvalidId || content.drmState() == QContent::Unprotected ||
         ( content.id() == d->content.id() && d->license ) )
@@ -369,15 +370,15 @@ bool QDrmContent::requestLicense( const QContent &content )
     if( !(d->options & Activate) )
         return getLicense( content, d->permission );
 
-    QDrmContentPlugin *plugin = DrmContentPrivate::plugin( content.file() );
+    QContent c = content;
 
-    if( plugin->activate( content, d->permission, d->focus ) )
+    if( c.d->activate( d->permission, d->focus ) )
     {
-        return getLicense( content, d->permission );
+        return getLicense( c, d->permission );
     }
     else
     {
-        emit licenseDenied( content );
+        emit licenseDenied( c );
 
         return false;
     }
@@ -391,23 +392,25 @@ bool QDrmContent::requestLicense( const QContent &content )
 */
 bool QDrmContent::getLicense( const QContent &content, QDrmRights::Permission permission )
 {
-    QDrmContentLicense *license = DrmContentPrivate::requestContentLicense( content, permission, d->options );
+    QContent c = content;
+
+    QDrmContentLicense *license = c.d->requestLicense( permission, d->options );
 
     if( !license )
     {
-        emit licenseDenied( content );
+        emit licenseDenied( c );
 
         return false;
     }
 
     releaseLicense();
 
-    d->content = content;
+    d->content = c;
 
     d->license = license;
 
-    connect( d->license, SIGNAL(rightsExpired(const QContent&,QDrmRights::Permission)),
-             d         , SLOT  (rightsExpired(const QContent&,QDrmRights::Permission)) );
+    connect( d->license, SIGNAL(rightsExpired(QContent,QDrmRights::Permission)),
+             d         , SLOT  (rightsExpired(QContent,QDrmRights::Permission)) );
 
     qLog(DRMAgent) << "License Granted";
 
@@ -439,12 +442,10 @@ void QDrmContent::releaseLicense()
             license->renderStateChanged( d->content, Stopped );
 
         if( d->options & Reactivate )
-            DrmContentPrivate::reactivate( d->content, license->permission(), d->focus );
+            d->content.d->reactivate( license->permission(), d->focus );
 
         license->deleteLater();
     }
-
-    d->content = QContent();
 }
 
 /*!
@@ -506,7 +507,9 @@ void QDrmContent::renderPaused()
 */
 bool QDrmContent::activate( const QContent &content, QWidget *focus )
 {
-    DrmContentPrivate::activate( content, focus );
+    QContent c = content;
+
+    c.d->activate( QDrmRights::Unrestricted, focus );
 
     return true;
 }
@@ -518,8 +521,8 @@ bool QDrmContent::activate( const QContent &content, QWidget *focus )
 */
 bool QDrmContent::canActivate( const QContent &content )
 {
-    return QMimeType( content.type() ).application().isValid()
-        ? DrmContentPrivate::canActivate( content.file() )
+    return QMimeType::fromId( content.type() ).application().isValid()
+        ? content.d->canActivate()
         : false;
 }
 

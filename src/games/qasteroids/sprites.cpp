@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** $TROLLTECH_DUAL_LICENSE$
 **
@@ -19,8 +19,8 @@
 
 #include "sprites.h"
 #include <QGraphicsScene>
+#include <QBitmap>
 #include "view.h"
-#include <QtDebug>
 
 #include <stdlib.h>
 #include <math.h>
@@ -32,33 +32,21 @@
 
 #define BRAKE_ON_COST           4
 #define FRAG_IMAGE_COUNT       16
-#define MAX_BRAKING_FORCE 	5
-#define MAX_FIREPOWER 		5
-#define MAX_SHIELD_STRENGTH 	5
+#define MAX_BRAKING_FORCE	5
+#define MAX_FIREPOWER		5
+#define MAX_SHIELD_STRENGTH	5
 #define MAX_SHIP_SPEED          8
 #define MISSILE_SPEED          10.0
+//#define ROCK_IMAGE_COUNT        1
 #define ROCK_IMAGE_COUNT       32
-#define ROCK_SPEED_MULTIPLIER   2.5
+#define ROCK_SPEED_MULTIPLIER  10.0
+//#define ROCK_SPEED_MULTIPLIER   2.5
 #define ROTATION_RATE           2
 #define SHIELD_HIT_COST        30
-#define SHIELD_IMAGE_COUNT  	6
+#define SHIELD_IMAGE_COUNT	6
 #define SHIELD_ON_COST          1
 #define SHIP_IMAGE_COUNT       32
 #define SHIP_STEPS             64
-
-QList<QPixmap>* KShip::images_ = 0;
-QList<QPixmap>* KShield::images_ = 0;
-QList<QPixmap>* KExhaust::images_ = 0;
-QList<QPixmap>* KMissile::images_ = 0;
-QList<QPixmap>* KFragment::images_ = 0;
-QList<QPixmap>* KLargeRock::images_ = 0;
-QList<QPixmap>* KSmallRock::images_ = 0;
-QList<QPixmap>* KMediumRock::images_ = 0;
-QList<QPixmap>* KShootPowerup::images_ = 0;
-QList<QPixmap>* KBrakePowerup::images_ = 0;
-QList<QPixmap>* KEnergyPowerup::images_ = 0;
-QList<QPixmap>* KShieldPowerup::images_ = 0;
-QList<QPixmap>* KTeleportPowerup::images_ = 0;
 
 int KMissile::missiles_ = 0;
 int KMissile::shotsFired_ = 0;
@@ -77,13 +65,14 @@ KShield* KSprite::shield_ = 0;
 QGraphicsScene*	KSprite::scene_ = 0;
 KAsteroidsView*	KSprite::view_ = 0;
 
-QMap<int,QList<QPixmap> > KSprite::map_; 
+QMap<int,QList<QPixmap> > KSprite::map_;
+QMap<int,QList<KSprite::Frame> > KSprite::shapemap_;
 
 static struct
 {
-    int 	id_;
+    int	id_;
     const char* path_;
-    int 	frames_;
+    int	frames_;
 } animations_[] =
 {
 //  { ID_ROCK_LARGE,       "rock1/rock1\%1.png",    ROCK_IMAGE_COUNT },
@@ -140,10 +129,10 @@ KSprite::KSprite()
     : QGraphicsPixmapItem(0,scene()),
       dead_(false),
       current_image_(0),
-      vx_(0.0), 
-      vy_(0.0) 
+      vx_(0.0),
+      vy_(0.0),
+      frameshape(0)
 {
-    // nothing.
 }
 
 /*!
@@ -187,25 +176,15 @@ KSprite::~KSprite()
 
 /*!
   This function is called by QGraphicsScene::advance().
-  It is called twice for this item at each animation step,
+  It is called twice for each item at each animation step,
   first with \a phase = 0, and then with \a phase = 1.
 
-  ie, QGraphicsScene::advance() first calls each item's
-  advance() function with item->advance(0), then it calls
-  each item's advance() function with item->advance(1).
-
-  Phase 0 is meant to tell each item to get ready to
-  move itself. Phase 1 is when the actual move is meant
-  to occur.
-
-  This base class implementation only uses phase 1. This
-  is where the item is actually moved based on its x and
-  y velocities. If it is moved off the screen, wrap() is
-  called to make it reappear on the other side of the
-  board.
+  In phase 0, each item moves itself. In phase 1, each item
+  that is responsible for handling collisions detects its
+  collisions and handles them.
 
   Note: Each subclass of this base class must implement
-  advance() and call this function when \a phase == 1.
+  advance() and call this function when \a phase == 0.
   \internal
  */
 void
@@ -214,8 +193,6 @@ KSprite::advance(int phase)
     if (phase == 0) {
 	if (dying())
 	    markDead();
-    }
-    else if (phase == 1) {
 	if ((vx_ != 0.0) || (vy_ != 0.0)) {
 	    moveBy(vx_,vy_);
 	    wrap();
@@ -234,9 +211,32 @@ KSprite::advance(int phase)
  */
 void KSprite::advanceImage()
 {
-    current_image_ = (current_image_+1) % images().size();
-    setPixmap(images().at(current_image_));
+    prepareGeometryChange();
+    current_image_ = (current_image_+1) % frameCount();
 }
+
+const QList<KSprite::Frame>& KSprite::frames() const
+{
+    if ( !frameshape )
+        frameshape = &shapemap_[type()];
+    return *frameshape;
+}
+
+QRectF KSprite::boundingRect() const
+{
+    return frames().at(current_image_).boundingRect;
+}
+
+QPainterPath KSprite::shape() const
+{
+    return frames().at(current_image_).shape;
+}
+
+void KSprite::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidget*)
+{
+    painter->drawPixmap(0, 0, frames().at(current_image_).pixmap);
+}
+
 
 /*! \fn int KSprite::type() const
   This function returns 0 in the base class. In subclasses,
@@ -245,112 +245,101 @@ void KSprite::advanceImage()
   \internal
  */
 
-/*! \fn bool KSprite::isRock() const 
+/*! \fn bool KSprite::isRock() const
   This function returns false in the base class. In rock
   subclasses, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isLargeRock() const 
+/*! \fn bool KSprite::isLargeRock() const
   This function returns false in the base class. In the
   large rock subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isMediumRock() const 
+/*! \fn bool KSprite::isMediumRock() const
   This function returns false in the base class. In the
   medium rock subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isSmallRock() const 
+/*! \fn bool KSprite::isSmallRock() const
   This function returns false in the base class. In the
   small rock subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isShip() const 
+/*! \fn bool KSprite::isShip() const
   This function returns false in the base class. In the
   ship subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isShield() const 
+/*! \fn bool KSprite::isShield() const
   This function returns false in the base class. In the
   shield subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isMissile() const 
+/*! \fn bool KSprite::isMissile() const
   This function returns false in the base class. In the
   missile subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isFragment() const 
+/*! \fn bool KSprite::isFragment() const
   This function returns false in the base class. In the
   fragment subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isExhaust() const 
+/*! \fn bool KSprite::isExhaust() const
   This function returns false in the base class. In the
   exhaust subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isPowerup() const 
+/*! \fn bool KSprite::isPowerup() const
   This function returns false in the base class. In the
   powerup subclasses, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isEnergyPowerup() const 
+/*! \fn bool KSprite::isEnergyPowerup() const
   This function returns false in the base class. In the
   energy powerup subclass, it returns true.
   \internal
 */
 
-/*! \fn bool KSprite::isTeleportPowerup() const 
+/*! \fn bool KSprite::isTeleportPowerup() const
   This function returns false in the base class. In the
   teleport powerup subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isBrakePowerup() const 
+/*! \fn bool KSprite::isBrakePowerup() const
   This function returns false in the base class. In the
   brake powerup subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isShieldPowerup() const 
+/*! \fn bool KSprite::isShieldPowerup() const
   This function returns false in the base class. In the
   shield powerup subclass, it returns true.
   \internal
  */
 
-/*! \fn bool KSprite::isShootPowerup() const 
+/*! \fn bool KSprite::isShootPowerup() const
   This function returns false in the base class. In the
   shoot powerup subclass, it returns true.
   \internal
  */
 
-/*! \fn QList<QPixmap>& KSprite::images() const
-  In this base class, this function returns a reference to
-  an empty list. In subclasses it returns a reference to a
-  list of images for displaying the sprite. If the list
-  contains more than one image, the sprite is animated.
-  \internal
- */
-
 /*! \fn bool KSprite::apply()
   \internal
-  Returns false in this base class. In some subclasses, it
-  returns true if the sprite is to be applied, in some sense,
-  to some other object.
-
-  eg, when a \l {KPowerup} {powerup} collides with the ship,
-  the powerup's value is given to the ship.
+  Returns true if the sprite is a powerup, the powerup
+  collided with the ship, and the ship did not have its
+  shield up.
  */
 
 /*! \fn void KSprite::markApply()
@@ -371,7 +360,7 @@ void KSprite::advanceImage()
   \internal
  */
 
-/*! \fn int KSprite::imageCount() const
+/*! \fn int KSprite::frameCount() const
   Returns the number of images in the animation list.
   Always greater than or equal to 1. For sprites that
   are not animated, the value returned is always 1.
@@ -385,8 +374,8 @@ void KSprite::advanceImage()
  */
 void KSprite::setImage(int index)
 {
-    current_image_ = index % images().size();
-    setPixmap(images().at(current_image_));
+    prepareGeometryChange();
+    current_image_ = index % frameCount();
 }
 
 /*!
@@ -396,8 +385,8 @@ void KSprite::setImage(int index)
  */
 void KSprite::resetImage()
 {
+    prepareGeometryChange();
     current_image_ = 0;
-    setPixmap(images().at(0));
 }
 
 /*! \fn void KSprite::setVelocity(qreal vx, qreal vy)
@@ -450,7 +439,7 @@ KSprite::wrap()
         setPos(x(),y() - scene_->height());
     else if (tmp_y < 0)
         setPos(x(),scene_->height() + y());
-#endif    
+#endif
 }
 
 /*!
@@ -507,21 +496,28 @@ void KSprite::loadSprites()
 	    p.insert(0,pixmap);
 	}
 	map_.insert(animations_[i].id_,p);
+
+        QList<Frame> frameshape;
+        for (int f = 0; f < p.size(); ++f) {
+            QPixmap pixmap = p.at(f);
+            Frame frame;
+            frame.pixmap = pixmap;
+            QPainterPath path;
+            QBitmap m = pixmap.mask();
+            if (m.width())
+                path.addRegion(QRegion(m));
+            else
+                path.addRegion(QRect(pixmap.rect()));
+            frame.shape = path;
+            frame.boundingRect = path.controlPointRect();
+            frameshape << frame;
+        }
+	shapemap_.insert(animations_[i].id_,frameshape);
+
         i++;
     }
 }
 
-/*!
-  \internal
-  A private static function that returns a pointer to the
-  image list for a sprite of type \a id.
- */
-QList<QPixmap>*
-KSprite::images(int id)
-{
-    return &map_[id];
-}
-    
 /*!
   \internal
   Generate a random integer in the range 0..\arange -1
@@ -554,6 +550,7 @@ KSprite::scene()
     if (!scene_) {
 	scene_ = new QGraphicsScene();
 	scene_->setBackgroundBrush(QPixmap(IMG_BACKGROUND));
+	scene_->setItemIndexMethod(QGraphicsScene::NoIndex);
     }
     return scene_;
 }
@@ -587,6 +584,10 @@ KShip* KSprite::newShip()
     if (!ship_) {
 	ship_ = new KShip();
 	shield_ = new KShield();
+        ship_->resetPosition();
+        ship_->show();
+        shield_->resetPosition();
+        shield_->show();
     }
     return ship_;
 }
@@ -651,7 +652,7 @@ bool KSprite::shipKilled()
 /*! \fn bool KAgingSprite::isExpired() const
   This function returns true if the item has past its use-by
   date, ie when its current age is greater than its maximum
-  age. 
+  age.
   \internal
  */
 
@@ -688,8 +689,6 @@ KMissile::KMissile() : KAgingSprite(MAX_MISSILE_AGE)
 {
     ++shotsFired_;
     ++missiles_;
-    images_ = KSprite::images(ID_MISSILE);
-    setPixmap(images_->at(0));
 }
 
 /*!
@@ -704,35 +703,13 @@ KMissile::~KMissile()
 
 /*!
   In \a phase 0, increment the missile's age and return if
-  the missile has expired. If not, get the missile's list
-  of colliding sprites and traverse it. If a rock is found
-  in the list, mark both the rock and the missile dead and
-  return. After processing the collision list, check the
-  ship. If the ship has been marked dead, mark the missile
-  dead as well. ie, the player doesn't get credit for any
-  hits after the ship has been destroyed, except during
-  the pass when the ship gets marked dead.
+  the missile has expired. If not, move the missile based
+  on its current position and velocity. Then get the its
+  list of colliding sprites and traverse the list. When a
+  rock is found in the list, mark both the rock and the
+  missile dead and return.
 
-  In phase 1, if the missile is marked dead, delete it and
-  return. If not, move the missile in the scene and return. 
-  
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
-
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the missile is marked dead, delete it;
   \internal
  */
 void KMissile::advance(int phase)
@@ -742,8 +719,9 @@ void KMissile::advance(int phase)
 	    markDead();
 	else
 	    incrementAge();
-	if (isDead()) 
+	if (isDead())
 	    return;
+	KSprite::advance(phase);
         QList<QGraphicsItem*> hits = collidingItems();
         QList<QGraphicsItem*>::iterator i;
         for (i=hits.begin(); i!=hits.end(); ++i) {
@@ -752,16 +730,13 @@ void KMissile::advance(int phase)
 		if (sprite->isRock()) {
 		    sprite->markDead();
 		    markDead();
-		    return;
+		    break;
 		}
 	    }
         }
     }
-    else if (isDead() || dying()) {
+    else if (isDead() || dying())
 	delete this;
-	return;
-    }
-    KSprite::advance(phase);
 }
 
 /*! \class KFragment
@@ -777,8 +752,6 @@ KFragment::KFragment()
     : KAgingSprite(3)
 {
     ++count_;
-    images_ = KSprite::images(ID_FRAGMENT);
-    setPixmap(images_->at(0));
 }
 
 /*!
@@ -793,23 +766,11 @@ KFragment::~KFragment()
 }
 
 /*!
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
+  In \a phase 0, increment the fragment's age and return if
+  the fragment has expired. If not, move the fragment based
+  on its current position and velocity and advance its image.
 
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the fragment is marked dead, delete it;
   \internal
  */
 void KFragment::advance(int phase)
@@ -818,15 +779,11 @@ void KFragment::advance(int phase)
 	incrementAge();
 	if (isDead()) 
 	    return;
-    }
-    else {
-	if (isDead()) {
-	    delete this;
-	    return;
-	}
 	advanceImage();
 	KSprite::advance(phase);
     }
+    else if (isDead())
+	delete this;
 }
 
 /*!
@@ -890,7 +847,7 @@ void KRock::reset()
 void KRock::advanceImage()
 {
     if (cskip_-- <= 0) {
-	setImage((currentImage()+step_+imageCount()) % imageCount());
+	setImage((currentImage()+step_+frameCount()) % frameCount());
 	cskip_ = qAbs(skip_);
     }
 }
@@ -930,7 +887,6 @@ void KRock::createRocks(int count)
 		dy = -dy;
 		rock->setPos(5,5);
 		break;
-	    
         }
         rock->setVelocity(dx,dy);
         rock->show();
@@ -942,7 +898,7 @@ void KRock::createRocks(int count)
 
   This function is called when a large rock or a medium rock
   is shattered by a missile. It is not called for small rocks.
-  
+
   Destroy this rock because it was either hit by a missile
   fired by the ship, or it was hit by the ship itself while
   the ship's shield was up.
@@ -950,7 +906,7 @@ void KRock::createRocks(int count)
   If this rock is a large rock, remove it from the board and
   break it into 4 medium rocks. If this rock is a medium
   rock, remove it from the board and break it into four
-  small rocks. 
+  small rocks.
 
   An appropriate rockDestroyed signal is emitted so the game
   score can be updated.
@@ -986,7 +942,7 @@ void KRock::destroy()
 	dy = maxRockSpeed;
     else if (dy < -maxRockSpeed)
 	dy = -maxRockSpeed;
-    
+
     /*
       When the old rock explodes, we create four new, smaller
       rocks in its place. If the old rock is a large one, create
@@ -1002,7 +958,7 @@ void KRock::destroy()
 	    newRock = new KMediumRock();
 	else
 	    newRock = new KSmallRock();
-	
+
 	/*
 	  Each new rock is given an initial position which
 	  is offset from the old rock's last position by the
@@ -1059,11 +1015,7 @@ KShip::KShip()
       cosangle_(cos(angle_)),
       sinangle_(sin(angle_))
 {
-    images_ = KSprite::images(ID_SHIP);
-    setPixmap(images_->at(0));
     setVelocity(0.0,0.0);
-    resetPosition();
-    show();
 }
 
 /*!
@@ -1079,9 +1031,9 @@ KShip::~KShip()
   Increment the number of instant teleports avaialable and
   tell the game to update the count on the screen.
  */
-void KShip::incrementTeleportCount() 
-{ 
-    ++teleportCount_; 
+void KShip::incrementTeleportCount()
+{
+    ++teleportCount_;
     view_->markVitalsChanged();
 }
 
@@ -1089,10 +1041,10 @@ void KShip::incrementTeleportCount()
   Decrement the number of instant teleports avaialable and
   tell the game to update the count on the screen.
  */
-void KShip::decrementTeleportCount() 
-{ 
+void KShip::decrementTeleportCount()
+{
     if (teleportCount_) {
-	--teleportCount_; 
+	--teleportCount_;
 	view_->markVitalsChanged();
     }
 }
@@ -1270,23 +1222,27 @@ KShip::teleport()
 }
 
 /*!
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
+  The advance function does quite a lot for the ship sprite.
+  In \a phase 0, if the ship is marked dead, just return. If
+  not, move the ship using its current position and velocity.
+  Then get the list of all collisions with the ship and run
+  through the list.
 
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
+  If the ship collides with a rock, then if the shield is
+  up, destroy the rock. If the shiled is down (normal), mark
+  the ship dead and return.
 
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  If the ship collides with a powerup, then if the shield is
+  up, mark the powerup destroyed. If the shield is not up,
+  apply the powerup to the ship.
+
+  In phase 1, if the ship is marked dead, explode the ship,
+  delete it, and return. Otherwise, handle ship rotation,
+  breaking, ship velocity, an teleporting. also update the
+  image if the ship is rotating, and the exhaust image, if
+  the engine is on. If the shiled is up, handle its image
+  and age. Finally, in phase one, handle the firing of the
+  missiles.
   \internal
  */
 void KShip::advance(int phase)
@@ -1294,8 +1250,9 @@ void KShip::advance(int phase)
     if (phase == 0) {
 	if (dying())
 	    markDead();
-	if (isDead() || teleport_) 
+	if (isDead() || teleport_)
 	    return;
+	KSprite::advance(phase);
 	QList<QGraphicsItem*> hits = ship_->collidingItems();
 	QList<QGraphicsItem*>::Iterator i;
 	for (i=hits.begin(); i!=hits.end(); ++i) {
@@ -1317,14 +1274,13 @@ void KShip::advance(int phase)
 		     */
 		    sprite->markDead();
 		    int s = 1;
-		    if (sprite->isLargeRock()) 
+		    if (sprite->isLargeRock())
 			s = 3;
 		    else if (sprite->isMediumRock())
 			s = 2;
 		    int pl = s * (SHIELD_HIT_COST - (shield_->strength()*2));
 		    shield_->reduceStrength(s);
 		    reducePowerLevel(pl);
-		    view_->markVitalsChanged();
 		}
 		else {
 		    /*
@@ -1352,7 +1308,6 @@ void KShip::advance(int phase)
 		    sprite->markDead();
 		    return;
 		}
-		
 	    }
 	}
     }
@@ -1468,8 +1423,6 @@ void KShip::advance(int phase)
 	    }
 	    wrap();
 	}
-	else
-	    KSprite::advance(phase);
 
 	if (shield_->isUp()) {
 	    /*
@@ -1488,9 +1441,7 @@ void KShip::advance(int phase)
 	    int maxMissiles = firePower_ + 2;
 	    if (canShoot() && (KMissile::missiles() < maxMissiles)) {
 		KMissile* missile = new KMissile();
-#ifdef QTOPIA_PHONE
 		missile->setMaximumAge(12);
-#endif
 		missile->setPos(11 + x() + cosangle_ * 11,
 				11 + y() + sinangle_ * 11);
 		missile->setVelocity(dx_ + cosangle_ * MISSILE_SPEED,
@@ -1502,7 +1453,7 @@ void KShip::advance(int phase)
 		if (delay < 0)
 		    delay = 0;
 		delayShooting(delay); // delay firing next missile.
-	    } 
+	    }
 	    decrementNextShotDelay();
 	}
     }
@@ -1546,15 +1497,11 @@ void KShip::explode()
 KShield::KShield()
     : KSprite(), isUp_(true), strength_(1)
 {
-    images_ = KSprite::images(ID_SHIELD);
-    setPixmap(images_->at(0));
-    resetPosition();
-    show();
 }
 
 /*!
   The only thing the destructor does is set the static shield
-  pointer to 0. 
+  pointer to 0.
  */
 KShield::~KShield()
 {
@@ -1643,7 +1590,7 @@ void KShield::reduceStrength(int delta)
 
 /*!
   This function is only called by \l QGraphicsScene::advance().
-  
+
   The shield's position is always computed from the ship's
   position, so the shield is not moved here. Neither is the
   shield destroyed here, because the shield is meant to
@@ -1689,8 +1636,6 @@ KExhaust::KExhaust(double x, double y, double dx, double dy)
 {
     setPos(x + 2 - randDouble()*4, y + 2 - randDouble()*4);
     setVelocity(dx,dy);
-    images_ = KSprite::images(ID_EXHAUST);
-    setPixmap(images_->at(0));
 }
 
 /*!
@@ -1707,23 +1652,12 @@ KExhaust::add(double x, double y, double dx, double dy, int count)
 }
 
 /*!
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
+  In phase 0, age the exhaust and mark it dead if it has
+  expired. Also advance the exhaust image and move the
+  exhaust with the ship.
 
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the exhaust has been marked dead,
+  destroy it.
   \internal
  */
 void KExhaust::advance(int phase)
@@ -1733,17 +1667,13 @@ void KExhaust::advance(int phase)
 	    markDead();
 	else
 	    incrementAge();
-	if (isDead()) 
+	if (isDead())
 	    return;
-    }
-    else {
-	if (isDead() || dying()) {
-	    delete this;
-	    return;
-	}
 	advanceImage();
+	KSprite::advance(phase);
     }
-    KSprite::advance(phase);
+    else if (isDead() || dying())
+	delete this;
 }
 
 /*! \class KPowerup
@@ -1761,7 +1691,7 @@ void KExhaust::advance(int phase)
   screen and deleted.
  */
 
-/*! \fn KPowerup::KPowerup() 
+/*! \fn KPowerup::KPowerup()
   Constructs a powerup.
   \internal
  */
@@ -1802,28 +1732,15 @@ KPowerup* KPowerup::create()
 KEnergyPowerup::KEnergyPowerup()
     : KPowerup()
 {
-    images_ = KSprite::images(ID_ENERGY_POWERUP);
-    setPixmap(images_->at(0));
 }
 
 /*!
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
+  In phase 0, age the powerup sprite and move it
+  based on its current position and velocity.
 
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the powerup has been marked for
+  being applied to the ship, increase the ship's
+  power level.
   \internal
  */
 void KEnergyPowerup::advance(int phase)
@@ -1833,16 +1750,14 @@ void KEnergyPowerup::advance(int phase)
 	    markDead();
 	else
 	    incrementAge();
+	KSprite::advance(phase);
     }
     else {
 	if (apply() && ship_)
 	    ship_->increasePowerLevel(MAX_SHIP_POWER_LEVEL);
-	if (isDead() || dying()) {
+	if (isDead() || dying())
 	    delete this;
-	    return;
-	}
     }
-    KSprite::advance(phase);
 }
 
 /*!
@@ -1852,28 +1767,15 @@ void KEnergyPowerup::advance(int phase)
 KTeleportPowerup::KTeleportPowerup()
     : KPowerup()
 {
-    images_ = KSprite::images(ID_TELEPORT_POWERUP);
-    setPixmap(images_->at(0));
 }
 
 /*!
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
+  In phase 0, age the powerup sprite and move it
+  based on its current position and velocity.
 
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the powerup has been marked for
+  being applied to the ship, increase the ship's
+  teleport count.
   \internal
  */
 void KTeleportPowerup::advance(int phase)
@@ -1883,16 +1785,14 @@ void KTeleportPowerup::advance(int phase)
 	    markDead();
 	else
 	    incrementAge();
+	KSprite::advance(phase);
     }
     else {
 	if (apply() && ship_)
 	    ship_->incrementTeleportCount();
-	if (isDead() || dying()) {
+	if (isDead() || dying())
 	    delete this;
-	    return;
-	}
     }
-    KSprite::advance(phase);
 }
 
 /*!
@@ -1902,28 +1802,15 @@ void KTeleportPowerup::advance(int phase)
 KBrakePowerup::KBrakePowerup()
     : KPowerup()
 {
-    images_ = KSprite::images(ID_BRAKE_POWERUP);
-    setPixmap(images_->at(0));
 }
 
 /*!
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
+  In phase 0, age the powerup sprite and move it
+  based on its current position and velocity.
 
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the powerup has been marked for
+  being applied to the ship, increase the ship's
+  braking capability.
   \internal
  */
 void KBrakePowerup::advance(int phase)
@@ -1933,16 +1820,14 @@ void KBrakePowerup::advance(int phase)
 	    markDead();
 	else
 	    incrementAge();
+	KSprite::advance(phase);
     }
     else {
-	if (apply() && ship_) 
+	if (apply() && ship_)
 	    ship_->incrementBrakeForce();
-	if (isDead() || dying()) {
+	if (isDead() || dying())
 	    delete this;
-	    return;
-	}
     }
-    KSprite::advance(phase);
 }
 
 /*!
@@ -1952,28 +1837,15 @@ void KBrakePowerup::advance(int phase)
 KShieldPowerup::KShieldPowerup()
     : KPowerup()
 {
-    images_ = KSprite::images(ID_SHIELD_POWERUP);
-    setPixmap(images_->at(0));
 }
 
 /*!
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
+  In phase 0, age the powerup sprite and move it
+  based on its current position and velocity.
 
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the powerup has been marked for
+  being applied to the ship, increase the ship's
+  shield strength.
   \internal
  */
 void KShieldPowerup::advance(int phase)
@@ -1983,16 +1855,14 @@ void KShieldPowerup::advance(int phase)
 	    markDead();
 	else
 	    incrementAge();
+	KSprite::advance(phase);
     }
     else {
-	if (apply() && ship_) 
+	if (apply() && ship_)
 	    shield_->incrementStrength();
-	if (isDead() || dying()) {
+	if (isDead() || dying())
 	    delete this;
-	    return;
-	}
     }
-    KSprite::advance(phase);
 }
 
 /*!
@@ -2002,28 +1872,15 @@ void KShieldPowerup::advance(int phase)
 KShootPowerup::KShootPowerup()
     : KPowerup()
 {
-    images_ = KSprite::images(ID_SHOOT_POWERUP);
-    setPixmap(images_->at(0));
 }
 
 /*!
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
+  In phase 0, age the powerup sprite and move it
+  based on its current position and velocity.
 
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the powerup has been marked for
+  being applied to the ship, increase the ship's
+  fire power.
   \internal
  */
 void KShootPowerup::advance(int phase)
@@ -2033,16 +1890,14 @@ void KShootPowerup::advance(int phase)
 	    markDead();
 	else
 	    incrementAge();
+	KSprite::advance(phase);
     }
     else {
 	if (apply() && ship_)
 	    ship_->incrementFirePower();
-	if (isDead() || dying()) {
+	if (isDead() || dying())
 	    delete this;
-	    return;
-	}
     }
-    KSprite::advance(phase);
 }
 
 /*!
@@ -2052,36 +1907,24 @@ void KShootPowerup::advance(int phase)
 KLargeRock::KLargeRock()
     : KRock()
 {
-    images_ = KSprite::images(ID_ROCK_LARGE);
-    setPixmap(images_->at(0));
 }
 
 /*!
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
+  In phase 0, advance the rock's image and move the rock
+  according to its current poisition and velocity.
 
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the rock has been marked dead, then it
+  has collided with the ship. Break it into smaller rocks.
+  Then destroy the original rock.
   \internal
  */
 void KLargeRock::advance(int phase)
 {
     if (!isDead()) {
-	if (phase)
+	if (!phase) {
 	    KRock::advanceImage();
-	KSprite::advance(phase);
+	    KSprite::advance(phase);
+	}
     }
     if (phase && (isDead() || dying())) {
 	if (!dying())
@@ -2097,36 +1940,24 @@ void KLargeRock::advance(int phase)
 KMediumRock::KMediumRock()
     : KRock()
 {
-    images_ = KSprite::images(ID_ROCK_MEDIUM);
-    setPixmap(images_->at(0));
 }
 
 /*!
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
+  In phase 0, advance the rock's image and move the rock
+  according to its current poisition and velocity.
 
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the rock has been marked dead, then it
+  has collided with the ship. Break it into smaller rocks.
+  Then destroy the original rock.
   \internal
  */
 void KMediumRock::advance(int phase)
 {
     if (!isDead()) {
-	if (phase)
+	if (!phase) {
 	    KRock::advanceImage();
-	KSprite::advance(phase);
+	    KSprite::advance(phase);
+	}
     }
     if (phase && (isDead() || dying())) {
 	if (!dying())
@@ -2142,46 +1973,24 @@ void KMediumRock::advance(int phase)
 KSmallRock::KSmallRock()
     : KRock()
 {
-    images_ = KSprite::images(ID_ROCK_SMALL);
-    setPixmap(images_->at(0));
 }
 
 /*!
-  This function does nothing in phase 0. In phase 1, if the
-  rock is not dead, it's location and image are updated and
-  shown. If it is dead, \l {KPowerup::create()} is called to
-  randomly generate a powerup. If a powerup is generated, it
-  is given a position and velocity relative to the rock, and
-  then it is shown. After the powerup is created and shown,
-  the old rock is deleted.
+  In phase 0, advance the rock's image and move the rock
+  according to its current poisition and velocity.
 
-  Note that this function does not call \l KRock::destroy().
-  
-  This function is called twice for each animation step of
-  the game board. Each time the main timer counts down and
-  fires, the advance() function for the game's scene is
-  called. That function first calls the advance() function
-  with \a phase = 0 for each graphics item in the scene,
-  and then it calls each graphics item's advance() function
-  a second time with \a phase = 1.
-
-  Each subclass of \l KSprite can have an advance function.
-  When it is called with \a phase = 0, it should look at all
-  its collisions if appropriate and decide whether to live
-  or die and set variables accordingly for use in the next
-  call when \a phse will be 1.
-
-  The advance() function should call the base class version,
-  when \a phase = 1, to do the actual moving or destroying
-  of the item.
+  In phase 1, if the rock has been marked dead, then it
+  has collided with the ship. Destroy the rock. Sometimes
+  create a powerup in its place.
   \internal
  */
 void KSmallRock::advance(int phase)
 {
     if (!isDead()) {
-	if (phase)
+	if (!phase) {
 	    KRock::advanceImage();
-	KSprite::advance(phase);
+	    KSprite::advance(phase);
+	}
     }
     if (phase && (isDead() || dying())) {
         view_->reportRockDestroyed(10);

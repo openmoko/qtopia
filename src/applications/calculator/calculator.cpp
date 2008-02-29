@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -18,32 +18,27 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <qtopiaapplication.h>
 
-
-#ifndef QTOPIA_PHONE
-#include <QList>
-#include <QSettings>
-
-#ifdef ENABLE_SCIENCE
-#include "interfaces/advanced.h"
-#endif
-#ifdef ENABLE_FRACTION
-#include "interfaces/fraction.h"
-#endif
-#ifdef ENABLE_CONVERSION
-#include "interfaces/conversion.h"
+#ifdef QTOPIA_UNPORTED
+#   include <QList>
+#   include <QSettings>
+#   ifdef ENABLE_SCIENCE
+#      include "interfaces/advanced.h"
+#   endif
+#   ifdef ENABLE_FRACTION
+#      include "interfaces/fraction.h"
+#   endif
+#   ifdef ENABLE_CONVERSION
+#      include "interfaces/conversion.h"
+#   endif
 #endif
 
-#else
 #include <QAction>
 #include <QMenu>
-#include "interfaces/phone.h"
-#endif
-
+#include <QtopiaApplication>
 #include <QKeyEvent>
-#include <QDebug>
 
+#include "interfaces/phone.h"
 #include "interfaces/simple.h"
 #include "calculator.h"
 #include "engine.h"
@@ -78,7 +73,7 @@ Calculator::Calculator( QWidget * p, Qt::WFlags fl) : QWidget (p, fl)
         LCD,SLOT(readStack()));
 
     // Load plugins
-#ifndef QTOPIA_PHONE
+#ifdef QTOPIA_UNPORTED
     modeBox = new QComboBox(this);
     calculatorLayout->addWidget(modeBox);
     pluginStackedWidget = new QStackedWidget();
@@ -127,40 +122,45 @@ Calculator::Calculator( QWidget * p, Qt::WFlags fl) : QWidget (p, fl)
     if (!Qtopia::mousePreferred()) {
         si = new FormPhone(LCD);
         QtopiaApplication::setInputMethodHint(si, QtopiaApplication::AlwaysOff);
-        connect(si, SIGNAL( close() ), this, SLOT( close() ) );
+        connect(si, SIGNAL(close()), this, SLOT(close()) );
         calculatorLayout->addWidget(si);
         si->setFocus( );
+        si->setEditFocus( true );
         LCD->setFocusPolicy( Qt::NoFocus );
     } else {
         calculatorLayout->addWidget(new FormSimple());
     }
+#endif
 
     QMenu * cmenu = QSoftMenuBar::menuFor(this);
-    QAction * a_copy = new QAction(  QIcon( ":icon/copy" ),
-            tr( "Copy" ), this);
-    a_copy->setWhatsThis( tr("Copy the last result.") );
-    connect( a_copy, SIGNAL( triggered() ), this, SLOT( copy() ) );
-
-
     if (!Qtopia::mousePreferred()) {
         QAction * a_clear = new QAction(  QIcon( ":icon/clearall" ),
                 tr( "Clear All" ), this );
-        connect( a_clear, SIGNAL( triggered() ), si, SLOT( clearAll() ) );
+        connect( a_clear, SIGNAL(triggered()), si, SLOT(clearAll()) );
         cmenu->addAction(a_clear);
     }
+#ifndef QT_NO_CLIPBOARD
+    QAction * a_copy = new QAction(  QIcon( ":icon/copy" ),
+            tr( "Copy" ), this);
+    a_copy->setWhatsThis( tr("Copy the last result.") );
+    connect( a_copy, SIGNAL(triggered()), this, SLOT(copy()) );
     cmenu->addAction(a_copy);
-#endif // !QTOPIA_PHONE
+    QAction * a_paste = new QAction(  QIcon( ":icon/paste" ),
+            tr( "Paste" ), this);
+    a_copy->setWhatsThis( tr("Paste clipboard.") );
+    connect( a_paste, SIGNAL(triggered()), this, SLOT(paste()) );
+    cmenu->addAction(a_paste);
+#endif
 }
 
 Calculator::~Calculator()
 {
-#ifndef QTOPIA_PHONE
+#ifdef QTOPIA_UNPORTED
     if (modeBox->count() > 0 ) {
         QSettings config("Trolltech","calculator"); // No tr
         config.beginGroup("View"); // No tr
         config.setValue("lastView", modeBox->currentText() ); // No tr
     }
-
 #endif
     if ( LCD )
         delete LCD;
@@ -168,7 +168,8 @@ Calculator::~Calculator()
         delete systemEngine;
 }
 
-void Calculator::keyPressEvent(QKeyEvent *e) {
+void Calculator::keyPressEvent(QKeyEvent *e)
+{
     int key = e->key();
 
 #ifndef QT_NO_CLIPBOARD
@@ -238,10 +239,13 @@ void Calculator::keyPressEvent(QKeyEvent *e) {
     e->ignore();
 }
 
+#ifndef QT_NO_CLIPBOARD
 void Calculator::copy() {
     cb->setText(systemEngine->getDisplay());
 }
 
+
+//   for simplicity we don't use cut in the UI
 void Calculator::cut() {
     copy();
     systemEngine->softReset();
@@ -251,36 +255,13 @@ void Calculator::paste() {
     QString t = cb->text();
     if (!t.isEmpty()) {
         for (int i=0; i<t.length(); i++) {
-            switch (t[i].toLatin1()) {
-                case '=':
-                    systemEngine->evaluate();
-                    break;
-                case '+':
-                    systemEngine->pushInstruction("Add"); // No tr
-                    break;
-                case '*':
-                    systemEngine->pushInstruction("Multiply"); // No tr
-                    break;
-                case '-':
-                    systemEngine->pushInstruction("Subtract"); // No tr
-                    break;
-                case '/':
-                    systemEngine->pushInstruction("Divide"); // No tr
-                    break;
-                case '(':
-                    systemEngine->openBrace();
-                    break;
-                case ')':
-                    systemEngine->closeBrace();
-                    break;
-                default:
-                    if ( t[i].isPrint() && !t[i].isSpace() ) {
-                        systemEngine->push(t[i].toLatin1());
-                    }
+            if ( t[i].isPrint() && !t[i].isSpace() ) {
+                systemEngine->push(t[i].toLatin1());
             }
         }
     }
 }
+#endif //QT_NO_CLIPBOARD
 
 void Calculator::showEvent(QShowEvent * e)
 {

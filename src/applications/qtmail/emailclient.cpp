@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,28 +19,26 @@
 **
 ****************************************************************************/
 
-#ifdef QTOPIA_DESKTOP
-#include <qcopenvelope_qd.h>
-#else
 #include <qtopiaapplication.h>
 #include <qtopiaipcenvelope.h>
-#endif
 
 #include <qtopianamespace.h>
-#include <qmimetype.h>
 #include <qsoftmenubar.h>
 #include <qtopialog.h>
+#include <qperformancelog.h>
 
 #include "emailclient.h"
 #include "folder.h"
 #include "searchview.h"
 #include "accountlist.h"
-#include "common.h"
-#ifdef QTOPIA_PHONE
-#include "composer.h"
+#include "emailfolderlist.h"
 #include "selectfolder.h"
 #include "accountsettings.h"
-#endif
+#include "emailpropertysetter.h"
+#include <qtopia/mail/qmailaddress.h>
+#include <qtopia/mail/qmailcomposer.h>
+#include <qtopia/mail/qmailtimestamp.h>
+#include <QMailStore>
 
 #include <qapplication.h>
 #include <qmessagebox.h>
@@ -60,19 +58,53 @@
 #include <QDSData>
 #include <QtopiaApplication>
 #include <QPhoneStyle>
-#include "longstream.h"
+#include <QWapAccount>
+#include <QStack>
+#include <longstream_p.h>
+#ifndef QTOPIA_NO_SMS
+#include <QSMSMessage>
+#endif
+#include <QtopiaIpcAdaptor>
+#include <QtopiaServiceRequest>
 
 #ifndef LED_MAIL
 #define LED_MAIL 0
 #endif
 
-using namespace QtMail;
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#endif
+
+enum QueueStatus {
+    Inactive = 0,
+    Receiving = 1,
+    Sending = 2
+};
+
+// Time in ms to show new message dialog.  0 == Indefinate
+static const int NotificationVisualTimeout = 0;
+
+// Number of messages required before we use a progress indicator
+static const int MinimumForProgressIndicator = 20;
+static const int ProgressIndicatorUpdatePeriod = 500;
 
 static QIcon* pm_folder = 0;
 static QIcon* pm_trash = 0;
 
+static void registerTask(const char* name)
+{
+    qLog(Messaging) << "Registering task:" << name;
+    QtopiaApplication::instance()->registerRunningTask(QLatin1String(name));
+}
+
+static void unregisterTask(const char* name)
+{
+    qLog(Messaging) << "Unregistering task:" << name;
+    QtopiaApplication::instance()->unregisterRunningTask(QLatin1String(name));
+}
+
 //paths for qtmail, is settings, inbox, enclosures
-QString getPath(const QString& fn, bool isdir=false)
+static QString getPath(const QString& fn, bool isdir=false)
 {
     QString p = Qtopia::applicationFileName("qtmail",fn);
     if (isdir) {
@@ -126,7 +158,7 @@ public:
                 reset();
             txt = s;
             txtchanged = true;
-        repaint();
+            repaint();
         }
     }
 
@@ -140,100 +172,205 @@ private:
     bool txtchanged;
 };
 
-EmailClient::EmailClient( QWidget* parent, const QString name, Qt::WFlags fl )
-        : QMainWindow( parent, fl ), accountIdCount(0), emailHandler(0),
-        enableMessageActions(false), mb(0), fetchTimer(this),
-        showMessageType(MailAccount::SMS), autoDownloadMail(false)
+class AcknowledgmentBox : public QMessageBox
 {
+    Q_OBJECT
+
+public:
+    static void show(const QString& title, const QString& text);
+
+private:
+    AcknowledgmentBox(const QString& title, const QString& text);
+    ~AcknowledgmentBox();
+
+    virtual void keyPressEvent(QKeyEvent* event);
+
+    static const int _timeout = 3 * 1000;
+};
+
+AcknowledgmentBox::AcknowledgmentBox(const QString& title, const QString& text)
+    : QMessageBox(0)
+{
+    setWindowTitle(title);
+    setText(text);
+    setIcon(QMessageBox::Information);
+    setAttribute(Qt::WA_DeleteOnClose);
+
+    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Cancel);
+
+    QDialog::show();
+
+    QTimer::singleShot(_timeout, this, SLOT(accept()));
+}
+
+AcknowledgmentBox::~AcknowledgmentBox()
+{
+}
+
+void AcknowledgmentBox::show(const QString& title, const QString& text)
+{
+    (void)new AcknowledgmentBox(title, text);
+}
+
+void AcknowledgmentBox::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Select) {
+        event->accept();
+        accept();
+    } else {
+        QMessageBox::keyPressEvent(event);
+    }
+}
+
+// Keep track of where we are within the program
+struct UILocation 
+{
+    UILocation(QWidget* widget, int widgetId = -1, bool email = false);
+    UILocation(QWidget* widget, QMailId messageId, Folder* messageFolder, bool email);
+
+    QWidget* widget;
+    int widgetId;
+    QMailId messageId;
+    Folder* messageFolder;
+    bool email;
+
+private:
+    friend class QVector<UILocation>;
+    UILocation();
+};
+
+UILocation::UILocation()
+    : widget(0), widgetId(-1), messageFolder(0), email(false)
+{
+}
+
+UILocation::UILocation(QWidget* widget, int widgetId, bool email)
+    : widget(widget), widgetId(widgetId), messageFolder(0), email(email)
+{
+}
+
+UILocation::UILocation(QWidget* widget, QMailId messageId, Folder* messageFolder, bool email)
+    : widget(widget), widgetId(-1), messageId(messageId), messageFolder(messageFolder), email(email)
+{
+}
+
+QDebug& operator<< (QDebug& debug, const UILocation& location)
+{
+    return debug << '[' << location.widget << ':' << location.widgetId << ':' << location.messageId.toULongLong() 
+                 << ':' << location.messageFolder << ':' << location.email << ']';
+}
+
+
+static QStack<UILocation> locationStack;
+
+static void pushLocation(const UILocation& location)
+{
+    qLog(Messaging) << "pushLocation -" << locationStack.count() << ":" << location;
+    locationStack.push(location);
+}
+
+static void popLocation()
+{
+    locationStack.pop();
+    if (locationStack.count())
+        qLog(Messaging) << "popLocation -" << locationStack.count() - 1 << ":" << locationStack.top();
+    else 
+        qLog(Messaging) << "popLocation - empty";
+}
+
+static bool haveLocation()
+{
+    return !locationStack.isEmpty();
+}
+
+static const UILocation& currentLocation()
+{
+    return locationStack.top();
+}
+
+
+EmailClient::EmailClient( QWidget* parent, const QString name, Qt::WFlags fl )
+    : QMainWindow( parent, fl ), accountIdCount(0), emailHandler(0),
+    enableMessageActions(false), mb(0), fetchTimer(this),
+    showMessageType(MailAccount::SMS), autoDownloadMail(false),
+    planeMode("/UI/Profile/PlaneMode"), newMessagesBox(0),
+    messageCountUpdate("QPE/Messages/MessageCountUpdated"),
+    initialAction(None)
+{
+    qLog(Messaging) << "Creating EmailClient";
+    QPerformanceLog(appTitle.toLatin1().constData()) << " : " << "Begin emailclient constructor "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
     setObjectName( name );
-#ifdef QTOPIA_PHONE
     appTitle = tr("Messages");
-#else
-    appTitle = tr("Email");
-#endif
-
-    connect( &fetchTimer, SIGNAL(timeout()), this, SLOT( automaticFetch() ) );
     waitingForNewMessage = false;
+    newMessagesRequested = false;
     autoGetMail = false;
-
-    mailboxList = new MailboxList(this);
-    accountList = new AccountList(this, "accountList");
-
-    getPath("enclosures/", true);  //create directory enclosures
-
+    mMailboxList = 0;
+    accountList = 0;
     suspendMailCount = false;
     sending = false;
     receiving = false;
     previewingMail = false;
     mailIdCount = 1;
     allAccounts = false;
-    closeAfterWrite = false;
-    closeAfterView = false;
     closeAfterTransmissions = false;
+    closeAfterWrite = false;
     mMessageView = 0;
-    invalidId = -1;
+    mFolderView = 0;
+    mActionView = 0;
     folderId = -2;
     messageId = -3;
-    init();
-
-    sysMessagesChannel =  new QtopiaChannel("QPE/SysMessages", this);
-    connect(sysMessagesChannel, SIGNAL(received(const QString&,const QByteArray&)),
-             this, SLOT( handleSysMessages(const QString&, const QByteArray&)));
-
-    connect(folderView, SIGNAL(folderSelected(Folder*)), this, SLOT(folderSelected(Folder*)) );
-    connect(folderView, SIGNAL( emptyFolder() ), this, SLOT( emptyFolder() ) );
-
-    connect(mailboxList, SIGNAL( stringStatus(QString&) ), this,
-            SLOT( setStatusText(QString&) ) );
-
-    connect(&showMessageTimer, SIGNAL( timeout() ), this,
-            SLOT( displayRecentMessage() ));
-
-    connect(accountList, SIGNAL( checkAccount(int) ),
-            this, SLOT(selectAccount(int)) );
-
-    connect(&checkAccountTimer, SIGNAL( timeout() ),
-            this, SLOT(selectAccountTimeout()) );
-
-    queueStatus = 0;
-    
-    accountList->readAccounts();
-    createEmailHandler();
-    folderView->setupFolders(accountList );
-    readSettings();
-    initActions(); 
-
+    queueStatus = Inactive;
     nosuspend = 0;
     filesRead = false;
     showMsgList = false;
     showMsgRetryCount = 0;
+    lastSearch = 0;
 
-    QTimer::singleShot(0, this, SLOT( openFiles() ) );
+    init();
 
-    // Hook up the "Email" and "SMS" QCop service handlers.
-    new EmailService( this );
-    new SMSService( this );
+    // Hook up the QCop service handlers.
+    QtopiaAbstractService* svc;
 
-    QTimer::singleShot(0, this, SLOT( collectSysMessages() ) );
+    svc = new EmailService( this );
 
-    qLog(Messaging) << "Created EMailClient";
+#ifndef QTOPIA_NO_SMS
+    svc = new SMSService( this );
+    connect(svc, SIGNAL(newMessages(bool)), this, SLOT(newMessages(bool)));
+    connect(svc, SIGNAL(viewInbox()), this, SLOT(viewInbox()));
+#ifndef QTOPIA_NO_MMS
+    connect(svc, SIGNAL(mmsMessage(QDSActionRequest)), this, SLOT(mmsMessage(QDSActionRequest)));
+#endif
+#endif
+
+    svc = new MessagesService( this );
+    connect(svc, SIGNAL(newMessages(bool)), this, SLOT(newMessages(bool)));
+    connect(svc, SIGNAL(message(QMailId)), this, SLOT(displayMessage(QMailId)));
+
+    QTimer::singleShot(0, this, SLOT(delayedInit()) );
 }
 
 EmailClient::~EmailClient()
 {
+    // Delete any temporary files we have created
+    while (!temporaries.isEmpty())
+        temporaries.takeFirst().removeFiles();
+
     delete pm_folder;
     delete pm_trash;
     EmailListItem::deletePixmaps();
     delete emailHandler;
 
-    qLog(Messaging) << "Destroyed EMailClient";
+    qLog(Messaging) << "Destroyed EmailClient";
 }
 
 void EmailClient::openFiles()
 {
+    QPerformanceLog(appTitle.toLatin1().constData()) << " : " << "Begin openFiles: "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
     if ( filesRead ) {
-        if ( !cachedDisplayMailbox.isEmpty() )
-            displayMail(cachedDisplayMailbox, cachedDisplayMailUuid);
+        if ( cachedDisplayMailId.isValid() )
+            displayCachedMail();
 
         return;
     }
@@ -242,31 +379,21 @@ void EmailClient::openFiles()
 
     readMail();
     
-    //connect after mail has been read to speed up reading */
-    connect(mailboxList, SIGNAL( mailAdded(Email*,const QString&) ), this,
-                    SLOT( mailFromDisk(Email*,const QString&) ) );
-    connect(mailboxList, SIGNAL( mailUpdated(Email*,const QString&) ), this,
-                    SLOT( mailUpdated(Email*,const QString&) ) );
-    connect(mailboxList, SIGNAL( mailRemoved(const QUuid&,const QString&) ), this,
-                    SLOT( mailRemoved(const QUuid&,const QString&) ) );
-    connect(mailboxList,SIGNAL(mailMoved(Email*,const QString&, const QString&)),this,
-                    SLOT( mailMoved(Email*, const QString&, const QString&)));
-    connect(mailboxList, SIGNAL( externalEdit(const QString&) ), this,
-            SLOT(externalEdit(const QString&) ) );
-   
-    if ( !cachedDisplayMailbox.isEmpty() ) {
-        displayMail(cachedDisplayMailbox, cachedDisplayMailUuid);
+    if ( cachedDisplayMailId.isValid() ) {
+        displayCachedMail();
     } else {
-      //No default select for QTreeWidget
-      Folder* currentFolder = folderView->currentFolder();
-      if(!currentFolder)
-        folderView->changeToSystemFolder(InboxString);
-      else
-        folderSelected( folderView->currentFolder() );
+        //No default select for QTreeWidget
+        Folder* currentFolder = folderView()->currentFolder();
+        if(!currentFolder)
+            folderView()->changeToSystemFolder(MailboxList::InboxString);
+        else
+            folderSelected( folderView()->currentFolder() );
 
-      displayPreviousMail();
+        displayPreviousMail();
     }
 
+    QPerformanceLog(appTitle.toLatin1().constData()) << " : " << "End openFiles: "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
     qLog(Messaging) << "Mail boxes connected";
 }
 
@@ -277,145 +404,99 @@ void EmailClient::displayPreviousMail()
 
     QSettings mailconf("Trolltech","qtmail");
     mailconf.beginGroup("qtmailglobal");
-    QUuid id( mailconf.value("currentmail").toString() );
+	QMailId id(mailconf.value("currentmail").toULongLong());
     mailconf.endGroup();
-    if ( !id.isNull() ) {
-        EmailListItem *item = messageView()->getRef( id );
-        if (item) {
-            messageView()->clearSelection();
-            messageView()->setItemSelected( item, TRUE );
-            messageView()->setCurrentItem( item );
-            messageView()->scrollToItem( item );
-        }
+    if ( id.isValid() ) {
+        messageView()->setSelectedId(id);
     }
 }
 
-void EmailClient::displayMail(const QString &mailbox, const QUuid &id)
+void EmailClient::displayFolder(const QString &folder)
 {
-    EmailFolderList *box = mailboxList->mailbox(mailbox);
+    delayedInit();
+    messageView();
+    folderView()->changeToSystemFolder( folder );
+    
+    if (EmailFolderList *box = mailboxList()->mailbox(folder)) {
+        folderSelected( folderView()->currentFolder() );
+
+        if (box->mailbox() == MailboxList::InboxString) {
+            // If we just entered the Inbox, we should reset the new message count
+            if (emailHandler->newMessageCount())
+                resetNewMessages();
+        }
+    }
+
+    showMessageList();
+}
+
+void EmailClient::displayCachedMail()
+{
+    QMailMessage mail(cachedDisplayMailId, QMailMessage::Header);
+    EmailFolderList *box = mailboxList()->mailbox(mail.parentFolderId());
     if ( box ) {
-
-        folderView->changeToSystemFolder( mailbox );
-        folderSelected( folderView->currentFolder() );
-        EmailListItem *item = messageView()->getRef( id );
-
-        if ( item ) {
-            messageView()->clearSelection();
-            messageView()->setItemSelected( item, TRUE );
-            messageView()->setCurrentItem( item );
-            queryItemSelected();
-        }
+        folderView()->changeToSystemFolder( box->mailbox());
+        showViewer(cachedDisplayMailId, folderView()->currentFolder(), (mail.messageType() == QMailMessage::Email));
     }
-
-    cachedDisplayMailbox = "";
+    cachedDisplayMailId = QMailId();
 }
 
-
-void EmailClient::delayedShowMessage(MailAccount::AccountType acct, QUuid id, bool showList)
+void EmailClient::displayMessage(const QMailId &id)
 {
-    QtopiaApplication::instance()->registerRunningTask(QLatin1String("display"));
-    showMsgList = showList;
+    initialAction = EmailClient::View;
+    delayedInit();
+
+    if (!checkMailConflict(tr("Should this message be saved in Drafts before viewing the new message?"), 
+                           tr("'View Mail' message will be ignored")) ) {
+        cachedDisplayMailId = id;
+        openFiles();
+    }
+}
+
+void EmailClient::delayedShowMessage(MailAccount::AccountType acct, QMailId id, bool userRequest)
+{
+    if (initialAction != None) {
+        // Ensure we don't close while we're waiting for incoming data
+        registerTask("display");
+    }
+
+    showMsgList = false;
     showMessageType = acct;
     showMsgId = id;
-    if (showMessageType == MailAccount::SMS && !showList) {
-	waitingForNewMessage = true;
-    } else {
-	showMessageTimer.setSingleShot( true );
-	showMessageTimer.start( 700 );
-    }
+
+    newMessagesRequested = userRequest;
+    emailHandler->synchroniseClients();
 }
 
 void EmailClient::displayRecentMessage()
 {
-    if(showMessageType == MailAccount::SMS ||
-       showMessageType == MailAccount::MMS)
-    {
-        if(emailHandler->unreceivedSmsCount() > 0)
-        {
-            if(showMsgRetryCount < 10) //wait max ~ 7 seconds
-            {
-                showMessageTimer.start(700);
-                ++showMsgRetryCount;
-                return;
-            }
-        }
-    }
-    showMsgRetryCount = 0;
     qLog(Messaging) << "Displaying message";
-    QtopiaApplication::instance()->unregisterRunningTask(QLatin1String("display"));
+
+    unregisterTask("display");
     if ( checkMailConflict(
-        tr("Should this mail be saved in Drafts before viewing the new mail?"),
-        tr("View Mail message will be ignored")) )
+        tr("Should this mail be saved in Drafts before viewing the new message?"),
+        tr("'View Mail' message will be ignored")) )
         return;
     
     updateListViews();
     if (!showMsgList)
         queryItemSelected();
+    else
+        showMessageList();
 }
 
 // Ensure the folder list and message list are synchronized with the ReadMail widget
 void EmailClient::updateListViews()
 {
-    showMessageList();
-    // Required for up/down to function in message list
-    mMessageView->setEditFocus(true);
-    
-    Folder *folder = 0;
-    QListIterator<MailAccount*> it = accountList->accountIterator();
-    while ( it.hasNext() ) {
-        if ( it.next()->accountType() == showMessageType ) {
-            folder = it.peekPrevious();
-            break;
-        }
-    }
-
     openFiles();
 
-    if (!folder)
-        return;
-
-    FolderListItem *item = 0;
-    FolderListItem* top = 0;
-    for (int i = 0; i < folderView->topLevelItemCount(); ++i){
-        top = static_cast<FolderListItem*>(folderView->topLevelItem(i));
-        if(top->folder() == folder){
-            item = top;
-            break;
-        }
-        else{
-            for(int j = 0; j < top->childCount(); ++j){
-                item = static_cast<FolderListItem*>(top->child(j));
-                if(item->folder() == folder)
-                    break;
-                else
-                    item = 0;
-        }
-        if(item)
-            break;
-        }
-    }
-
-    if (!item || (item->folder() != folder))
-        return;
-
-    bool oldCloseAfterView = closeAfterView;
-    closeAfterView = false;
-    folderView->setCurrentItem( item );
-    folderSelected( folderView->currentFolder() );
+    folderView()->changeToSystemFolder(MailboxList::InboxString);
 
     if (!showMsgList) {
-        if (!showMsgId.isNull()) {
-            EmailListItem *item = messageView()->getRef(showMsgId);
-            if (item) {
-                messageView()->clearSelection();
-                messageView()->setItemSelected(item, true);
-                messageView()->setCurrentItem(item);
-                messageView()->scrollToItem(item);
-            }
+        if (showMsgId.isValid()) {
+            messageView()->setSelectedId(showMsgId);
         }
     }
-
-    closeAfterView = oldCloseAfterView;
 }
 
 bool EmailClient::cleanExit(bool force)
@@ -430,8 +511,8 @@ bool EmailClient::cleanExit(bool force)
         result = false;
     }
 
-    if (mailboxList)
-        mailboxList->writeDirtyHeaders();
+    if (!accountList)
+        return result;
 
     saveSettings();
     accountList->saveAccounts();
@@ -456,16 +537,16 @@ void EmailClient::createEmailHandler()
 {
     if(emailHandler)
         return;
-        //create the email handler
         
+    //create the email handler
      emailHandler = new EmailHandler();
         
      //connect it up
         
-     connect(emailHandler, SIGNAL(updatePopStatus(const QString&)),
-             this, SLOT(updatePopStatusLabel(const QString&)) );
-     connect(emailHandler, SIGNAL(updateSendingStatus(const QString&)),
-             this, SLOT(updateSendingStatusLabel(const QString&)) );
+     connect(emailHandler, SIGNAL(updateReceiveStatus(const Client*, QString)),
+             this, SLOT(updateReceiveStatusLabel(const Client*, QString)) );
+     connect(emailHandler, SIGNAL(updateSendStatus(const Client*, QString)),
+             this, SLOT(updateSendStatusLabel(const Client*, QString)) );
     
      connect(emailHandler, SIGNAL(mailboxSize(int)),
              this, SLOT(setTotalPopSize(int)) );
@@ -476,7 +557,10 @@ void EmailClient::createEmailHandler()
              this, SLOT(setTransferredSize(int)) );
      connect(emailHandler, SIGNAL(mailSendSize(int)),
              this, SLOT(setTotalSmtpSize(int)) );
-     connect(emailHandler, SIGNAL(mailSent(int)), this, SLOT(mailSent(int)) );
+     connect(emailHandler, SIGNAL(mailSent(int)), 
+             this, SLOT(mailSent(int)) );
+     connect(emailHandler, SIGNAL(transmissionCompleted()), 
+             this, SLOT(transmissionCompleted()) );
     
      connect(emailHandler, SIGNAL(smtpError(int,QString&)), this,
              SLOT(smtpError(int,QString&)) );
@@ -495,19 +579,26 @@ void EmailClient::createEmailHandler()
      connect(emailHandler, SIGNAL(failedList(QStringList&)), this,
              SLOT(failedList(QStringList&)) );
         
-     connect(emailHandler, SIGNAL(mailArrived(const Email&)), this,
-             SLOT(mailArrived(const Email&)) );
+     connect(emailHandler, SIGNAL(mailArrived(QMailMessage)), this,
+             SLOT(mailArrived(QMailMessage)) );
      connect(emailHandler, SIGNAL(mailTransferred(int)), this,
              SLOT(allMailArrived(int)) );
      //imap
      connect(emailHandler, SIGNAL(serverFolders()), this,
              SLOT(imapServerFolders()) );
+     connect(emailHandler, SIGNAL(nonexistentMessage(QMailId)), this,
+             SLOT(nonexistentMessage(QMailId)) );
         
+     connect(emailHandler, SIGNAL(allMessagesReceived()), this,
+             SLOT(clientsSynchronised()) );
+
      //set relevant accounts
         
      QListIterator<MailAccount*> it = accountList->accountIterator();
      while ( it.hasNext() ) {
+#if !defined(QTOPIA_NO_SMS) || !defined(QTOPIA_NO_MMS)
          MailAccount *account = it.next();
+#endif
 #ifndef QTOPIA_NO_SMS
          if ( account->accountType() == MailAccount::SMS )
              emailHandler->setSmsAccount( account );
@@ -522,17 +613,16 @@ void EmailClient::createEmailHandler()
 void EmailClient::initActions()
 {
     if (selectAccountMenu)
-	return; // Already inited
+        return; // Already inited
     
-    QWidget *widget_4 = mailboxView->widget( folderId );
-    QWidget *widget_3 = mailboxView->widget( messageId );
-    QMenu *folderContext = QSoftMenuBar::menuFor( widget_4 );
-    QMenu *messageContext = QSoftMenuBar::menuFor( widget_3 );
+    QMenu *actionContext = QSoftMenuBar::menuFor( mActionView );
+    QMenu *folderContext = QSoftMenuBar::menuFor( folderView() );
+    QMenu *messageContext = QSoftMenuBar::menuFor( messageView() );
         
     if (!pm_folder)
-	pm_folder = new QIcon(":icon/folder");
+        pm_folder = new QIcon(":icon/folder");
     if (!pm_trash)
-	pm_trash = new QIcon(":icon/trash");
+        pm_trash = new QIcon(":icon/trash");
     
     selectAccountMenu = new QMenu(mb);
     connect(selectAccountMenu, SIGNAL(triggered(QAction*)),
@@ -541,11 +631,12 @@ void EmailClient::initActions()
     getMailButton = new QAction( QIcon(":icon/getmail"), tr("Get all mail"), this );
     connect(getMailButton, SIGNAL(triggered()), this, SLOT(getAllNewMail()) );
     getMailButton->setWhatsThis( tr("Get new mail from all your accounts.") );
+    setActionVisible(getMailButton, false);
 
     cancelButton = new QAction( QIcon(":icon/reset"), tr("Cancel transfer"), this );
     connect(cancelButton, SIGNAL(triggered()), this, SLOT(cancel()) );
     cancelButton->setWhatsThis( tr("Abort all transfer of mail.") );
-    cancelButton->setVisible(false);
+    setActionVisible(cancelButton, false);
 
     movePop = new QMenu(this);
     copyPop = new QMenu(this);
@@ -555,28 +646,46 @@ void EmailClient::initActions()
             this, SLOT(copyMailItem(QAction*)));
 
     composeButton = new QAction( QIcon(":icon/new"), tr("New"), this );
-    connect(composeButton, SIGNAL(triggered()), this, SLOT( compose() ) );
-    composeButton->setWhatsThis( tr("Write a new mail.") );
+    connect(composeButton, SIGNAL(triggered()), this, SLOT(compose()) );
+    composeButton->setWhatsThis( tr("Write a new message.") );
 
+    lastSearch = new Search();
+    QSettings mailconf("Trolltech","qtmail");
+    mailconf.beginGroup("lastSearch");
+    lastSearch->readSettings( &mailconf );
+    mailconf.endGroup();
+    
     searchButton = new QAction( QIcon(":icon/find"), tr("Search"), this );
-    connect(searchButton, SIGNAL(triggered()), this, SLOT( search() ) );
-    searchButton->setWhatsThis( tr("Search for mail in your folders.") );
+    connect(searchButton, SIGNAL(triggered()), this, SLOT(search()) );
+    searchButton->setWhatsThis( tr("Search for messages in your folders.") );
 
-    settingsAction = new QAction( QIcon(":icon/settings"), tr("Account Settings..."), this );
+    settingsAction = new QAction( QIcon(":icon/settings"), tr("Account settings..."), this );
     connect(settingsAction, SIGNAL(triggered()), this, SLOT(settings()));
 
-    emptyTrashAction = new QAction(tr("Empty Trash"), this );
-    connect(emptyTrashAction, SIGNAL(triggered()), this, SLOT(emptyFolder()));
+    emptyTrashAction = new QAction(tr("Empty trash"), this );
+    connect(emptyTrashAction, SIGNAL(triggered()), this, SLOT(emptyTrashFolder()));
+    setActionVisible(emptyTrashAction, false);
 
-    moveAction = new QAction( tr("Move mail..."), this );
+    moveAction = new QAction( this );
     connect(moveAction, SIGNAL(triggered()), this, SLOT(moveMessage()));
-    copyAction = new QAction( tr("Copy mail..."), this );
+    setActionVisible(moveAction, false);
+
+    copyAction = new QAction( this );
     connect(copyAction, SIGNAL(triggered()), this, SLOT(copyMessage()));
+    setActionVisible(copyAction, false);
+
     selectAllAction = new QAction( tr("Select all"), this );
     connect(selectAllAction, SIGNAL(triggered()), this, SLOT(selectAll()));
+    setActionVisible(selectAllAction, false);
 
-    deleteMailAction = new QAction( *pm_trash, tr("Delete mail"), this );
+    deleteMailAction = new QAction( this );
+    deleteMailAction->setIcon( *pm_trash );
     connect(deleteMailAction, SIGNAL(triggered()), this, SLOT(deleteMailItem()));
+    setActionVisible(deleteMailAction, false);
+
+    actionContext->addAction( searchButton );
+    actionContext->addAction( emptyTrashAction );
+    actionContext->addAction( settingsAction );
 
     folderContext->addAction( composeButton );
     folderContext->addAction( getMailButton );
@@ -592,14 +701,76 @@ void EmailClient::initActions()
     messageContext->addAction( selectAllAction );
 
     updateAccounts();
+}
 
-    deleteMailAction->setVisible( enableMessageActions );
-    moveAction->setVisible( enableMessageActions );
-    copyAction->setVisible( enableMessageActions );
-    selectAllAction->setVisible( enableMessageActions );
+void EmailClient::updateActions()
+{
+    openFiles();
     
-    int count = mailboxList->mailbox(TrashString)->mailCount("all");
-    emptyTrashAction->setVisible(count > 0);
+    // Ensure that the actions have been initialised
+    initActions();
+
+    // Only enable empty trash action if the trash has messages in it
+    EmailFolderList *trash = mailboxList()->mailbox(MailboxList::TrashString);
+    int type = QMailMessage::AnyType;
+    if ( currentMailboxWidgetId() == actionId ) {
+        type = QMailMessage::Mms | QMailMessage::Sms | QMailMessage::System;
+    } else if (currentMailboxWidgetId() == folderId) {
+        type = QMailMessage::Email;
+    }
+    
+    int count = trash->mailCount(EmailFolderList::All, type);
+    setActionVisible(emptyTrashAction, (count > 0));
+
+    // Set the visibility for each action to whatever was last configured   
+    QMap<QAction*, bool>::iterator it = actionVisibility.begin(), end = actionVisibility.end();
+    for ( ; it != end; ++it)
+        it.key()->setVisible(it.value());
+}
+
+void EmailClient::delayedInit()
+{
+    if (accountList)
+        return; // delayedInit already done
+    
+    if (initialAction == None) {
+        // We have been launched and raised by QPE - we'll start in the actionlist
+        pushLocation(UILocation(this, actionId));
+    }
+
+    connect( &fetchTimer, SIGNAL(timeout()), this, SLOT(automaticFetch()) );
+    accountList = new AccountList(this, "accountList");
+    getPath("enclosures/", true);  //create directory enclosures
+
+    sysMessagesChannel =  new QtopiaChannel("QPE/SysMessages", this);
+    connect(sysMessagesChannel, SIGNAL(received(QString,QByteArray)),
+             this, SLOT(handleSysMessages(QString,QByteArray)));
+    
+    connect(&showMessageTimer, SIGNAL(timeout()), this,
+            SLOT(displayRecentMessage()));
+
+    connect(accountList, SIGNAL(checkAccount(int)),
+            this, SLOT(selectAccount(int)) );
+
+    connect(&checkAccountTimer, SIGNAL(timeout()),
+            this, SLOT(selectAccountTimeout()) );
+
+    connect(&planeMode, SIGNAL(contentsChanged()),
+            this, SLOT(planeModeChanged()) );
+
+    accountList->readAccounts();
+    createEmailHandler();
+    readSettings();
+
+    // Ideally would make actions functions methods and delay their
+    // creation until context menu is shown.
+    initActions(); 
+
+    folderView()->setupFolders( accountList );
+
+    QTimer::singleShot(0, this, SLOT(collectSysMessages()) );
+    QTimer::singleShot(0, this, SLOT(openFiles()) );
+    qLog(Messaging) << "Created EMailClient";
 }
 
 void EmailClient::init()
@@ -629,50 +800,34 @@ void EmailClient::init()
     mailboxView->setObjectName( "mailboxView" );
     vboxLayout->addWidget( mailboxView );
 
-    widget_3 = new QWidget( mailboxView );
-    widget_3->setObjectName( "widget_3" );
-    gridQuery = new QGridLayout(widget_3);
-    gridQuery->setMargin( 0 );
-    gridQuery->setSpacing( 0 );
+    mActionView = new ActionListView( mailboxView );
+    mActionView->setObjectName( "actionView" );
+    mActionView->setFrameStyle( QFrame::NoFrame );
+    actionId = mailboxView->addWidget( mActionView );
 
-    QWidget *widget_4 = new QWidget( mailboxView );
-    widget_4->setObjectName( "widget_4" );
-    QGridLayout *gridFolder = new QGridLayout(widget_4);
-    gridFolder->setMargin( 0 );
-    gridFolder->setSpacing( 0 );
-
-    folderView = new FolderListView(mailboxList, widget_4, "folderView");
-    connect(folderView, SIGNAL(viewMessageList()),  this, SLOT(showMessageList()) );
-    gridFolder->addWidget(folderView, 1, 1 );
-
-    folderId = mailboxView->addWidget( widget_4 );
-    messageId = mailboxView->addWidget( widget_3 );
+    connect(mActionView, SIGNAL(composeMessage()), 
+	    this, SLOT(compose()) );
+    connect(mActionView, SIGNAL(emailSelected()), 
+	    this, SLOT(showFolderList()) );
+    connect(mActionView, SIGNAL(displayFolder(QString)),
+	    this, SLOT(displayFolder(QString)) );
+    connect(mActionView, SIGNAL(currentFolderChanged(QString)),
+	    this, SLOT(currentActionViewChanged(QString)) );
 
     /* Create context menus for list of folders and messages */
-    QMenu *folderContext = QSoftMenuBar::menuFor( widget_4 );
-    QMenu *messageContext = QSoftMenuBar::menuFor( widget_3 );
+    QMenu *actionContext = QSoftMenuBar::menuFor( mActionView );
+    QMenu *folderContext = QSoftMenuBar::menuFor( folderView() );
+    QMenu *messageContext = QSoftMenuBar::menuFor( messageView() );
 
-    /*  Folder and Message View specific init not related to placement  */
-    QStringList columns;
-    columns << tr( "Folders" );
-    folderView->setColumnCount( columns.count() );
-    folderView->setHeaderLabels( columns );
-    folderView->setRootIsDecorated( false );
+    connect( actionContext, SIGNAL(aboutToShow()), this, SLOT(updateActions()) );
+    connect( folderContext, SIGNAL(aboutToShow()), this, SLOT(updateActions()) );
+    connect( messageContext, SIGNAL(aboutToShow()), this, SLOT(updateActions()) );
 
-    QHeaderView *header = folderView->header();
-    header->setMovable( false );
-    header->setClickable( false );
-
-    QAction *fvWhatsThis = QWhatsThis::createAction( folderView );
-    fvWhatsThis->setText( tr("A list of your folders.  You can tap Outbox and then tap the Messages tab to see the messages currently in the outbox.") );
-
-    folderView->header()->resizeSection( 0,
-                        QApplication::desktop()->availableGeometry().width() );
-    folderView->folderParentMenu(mb);
+    QtopiaIpcAdaptor::connect(this, SIGNAL(messageCountUpdated()),
+                              &messageCountUpdate, MESSAGE(changeValue()));
 
     progressBar = new StatusProgressBar( vbox );
     vboxLayout->addWidget( progressBar );
-
     setCentralWidget( vbox );
 
     setWindowTitle( appTitle );
@@ -685,19 +840,12 @@ void EmailClient::update()
     if ( current && messageView()->isItemSelected( current ) )
         messageView()->scrollToItem( current );
 
-    if ( currentMailboxWidgetId() == folderId ) {
-        folderView->setFocus();
-    } else if ( currentMailboxWidgetId() == messageId ) {
-        messageView()->setFocus();
-    }
-
-    mailboxList->writeDirtyHeaders();
-    mailboxList->compact();
-
     //  In case user changed status of sent/unsent or read/unread messages
-    Folder *folder = folderView->currentFolder();
-    if ( folder ) {
-        updateFolderCount( folder->mailbox() );
+    if (mFolderView) {
+        Folder *folder = folderView()->currentFolder();
+        if ( folder ) {
+            updateFolderCount( folder->mailbox() );
+        }
     }
 }
 
@@ -716,17 +864,17 @@ void EmailClient::cancel()
     to do, but we should be able to determine it
     Close event is handled by qtmailwindow, so no raise signal is necessary
 */
-void EmailClient::autosaveMail(const Email &mail)
+void EmailClient::autosaveMail(const QMailMessage& mail)
 {
-    // if uuid is null, it's a new mail
-    bool isNew = mail.uuid().isNull();
+    // if uuid is not valid, it's a new mail
+    bool isNew = !mail.id().isValid();
 
     //  Always autosave new messages to drafts folder
     if ( isNew ) {
         saveAsDraft( mail );
     } else {
         // update mail in same mailbox as it was previously stored
-        if ( mailboxList->mailbox(OutboxString)->email( mail.uuid() ) != NULL ) {
+        if ( mailboxList()->mailbox(MailboxList::OutboxString)->contains( mail.id() ) ) {
             enqueueMail( mail );
         } else {
             saveAsDraft( mail );
@@ -735,51 +883,55 @@ void EmailClient::autosaveMail(const Email &mail)
 }
 
 /*  Enqueue mail must always store the mail in the outbox   */
-void EmailClient::enqueueMail(const Email &mailIn)
+void EmailClient::enqueueMail(const QMailMessage& mailIn)
 {
-    Email mail(mailIn);
+    QMailMessage mail(mailIn);
 
-    // if uuid is null, it's a new mail
-    bool isNew = mail.uuid().isNull();
+    // if uuid is not valid , it's a new mail
+    bool isNew = !mail.id().isValid();
 
     if ( isNew ) {
         mailResponded();
 
-        mail.setUuid( mailboxList->mailbox(OutboxString)->generateUuid() );
-
-        //mail.encodeMail();
-        if ( !mailboxList->mailbox(OutboxString)->addMail(mail) ) {
-            accessError(mailboxList->mailbox(OutboxString) );
+        if ( !mailboxList()->mailbox(MailboxList::OutboxString)->addMail(mail) ) {
+            accessError(mailboxList()->mailbox(MailboxList::OutboxString) );
             return;
         }
     } else {
-
-       // mail.encodeMail();
-
         // two possibilities, mail was originally from drafts but is now enqueued, or
         // the mail was in the outbox previously as well.
-        if ( mailboxList->mailbox(DraftsString)->email( mail.uuid() ) != NULL ) {
-            mailboxList->mailbox(DraftsString)->removeMail( mail.uuid(), false );
-        }
+        
+        EmailFolderList* draftsFolder = mailboxList()->mailbox(MailboxList::DraftsString);
+        EmailFolderList* outboxFolder = mailboxList()->mailbox(MailboxList::OutboxString);
 
-        if ( !mailboxList->mailbox(OutboxString)->addMail( mail ) ) {
-            accessError( mailboxList->mailbox(OutboxString) );
+        if(draftsFolder->contains(mail.id()) )
+        {
+            if(!draftsFolder->moveMail(mail.id(),*outboxFolder))
+            {
+                moveError( *draftsFolder, *outboxFolder );
+                return;
+            }
+        }
+        //have to re-add since this updates any changes to ogl mail.
+        //TODO refactor to an explicit update when emailfolderlist is refactored.
+        if ( !mailboxList()->mailbox(MailboxList::OutboxString)->addMail( mail ) ) {
+            accessError( mailboxList()->mailbox(MailboxList::OutboxString) );
             return;
         }
     }
 
-#ifndef QTOPIA_PHONE
-    folderView->changeToSystemFolder( OutboxString );
-    showMessageList();
-#else
-    sendAllQueuedMail();
-    showFolderList();
-    folderView->setFocus();
-#endif
+    if (!closeAfterWrite)
+        restoreView();
 
-    emit raiseWidget(this, appTitle );
+    if (planeMode.value().toBool()) {
+        // Cannot send right now, in plane mode!
+        QMessageBox::information(0, 
+                                 tr("Airplane safe mode"),
+                                 tr("Saved message to Outbox. Message will be sent after exiting Airplane Safe mode."));
+    } else {
+        sendAllQueuedMail(true);
+    }
 
-#ifndef QTOPIA_DESKTOP
     if (closeAfterWrite) {
         closeAfterTransmissionsFinished();
         if (isTransmitting()) // prevents flicker
@@ -787,19 +939,17 @@ void EmailClient::enqueueMail(const Email &mailIn)
         else
             QTMailWindow::singleton()->close();
     }
-#endif
 }
 
 /*  Simple, do nothing  */
 void EmailClient::discardMail()
 {
     // Reset these in case user chose reply but discarded message
-    repliedFromUuid = QUuid();
+    repliedFromMailId = QMailId();
     repliedFlags = 0;
 
-    emit raiseWidget( this, appTitle );
+    restoreView();
 
-#ifndef QTOPIA_DESKTOP
     if (closeAfterWrite) {
         closeAfterTransmissionsFinished();
         if (isTransmitting())
@@ -807,83 +957,76 @@ void EmailClient::discardMail()
         else
             QTMailWindow::singleton()->close();
     }
-#endif
 }
 
-void EmailClient::saveAsDraft(const Email &mailIn)
+void EmailClient::saveAsDraft(const QMailMessage& mailIn)
 {
-    Email mail(mailIn);
+    QMailMessage mail(mailIn);
 
-    // if uuid is null, it's a new mail
-    bool isNew = mail.uuid().isNull();
+    // if uuid is not valid, it's a new mail
+    bool isNew = !mail.id().isValid();
 
     if ( isNew ) {
         mailResponded();
 
-        mail.setUuid( mailboxList->mailbox(DraftsString)->generateUuid() );
-
-        //mail.encodeMail();
-        if ( !mailboxList->mailbox(DraftsString)->addMail(mail) ) {
-            accessError( mailboxList->mailbox(DraftsString) );
+        if ( !mailboxList()->mailbox(MailboxList::DraftsString)->addMail(mail) ) {
+            accessError( mailboxList()->mailbox(MailboxList::DraftsString) );
             return;
         }
     } else {
 
-       // mail.encodeMail();
-
         // two possibilities, mail was originally from outbox but is now a draft, or
         // the mail was in the drafts folder previously as well.
-        if ( mailboxList->mailbox(OutboxString)->email( mail.uuid() ) != NULL ) {
-            mailboxList->mailbox(OutboxString)->removeMail( mail.uuid(), false );
+        
+        EmailFolderList* outboxFolder = mailboxList()->mailbox(MailboxList::OutboxString);
+        EmailFolderList* draftsFolder = mailboxList()->mailbox(MailboxList::DraftsString);
+        
+        if ( outboxFolder->contains( mail.id() ) ) {
+            if(!outboxFolder->moveMail(mail.id(),*draftsFolder))
+            {
+                moveError( *outboxFolder, *draftsFolder );
+                return;
+            }
         }
-
-        if ( !mailboxList->mailbox(DraftsString)->addMail( mail ) ) {
-            accessError( mailboxList->mailbox(DraftsString) );
+        //have to re-add since this updates any changes.
+        //TODO refactor to an update when emailfolderlist is refactored.
+        if( !mailboxList()->mailbox(MailboxList::DraftsString)->addMail( mail ) ) {
+            accessError( mailboxList()->mailbox(MailboxList::DraftsString) );
             return;
         }
     }
 
-    folderView->changeToSystemFolder( DraftsString );
-    showMessageList();
-
-    emit raiseWidget(this, appTitle );
+    restoreView();
 }
 
 /*  Mark a message as replied/repliedall/forwarded  */
 void EmailClient::mailResponded()
 {
-    if ( !repliedFromUuid.isNull() ) {
-        QString mailbox = InboxString;  //default search path
-        Folder *folder = folderView->currentFolder();
+    if ( repliedFromMailId.isValid() ) {
+        QString mailbox = MailboxList::InboxString;  //default search path
+        Folder *folder = folderView()->currentFolder();
         if ( folder )
             mailbox = folder->mailbox();    //could be trash, etc..
 
-        Email *mail;
-        QListIterator<Email*> it = mailboxList->mailbox( mailbox)->entryIterator();
-        while ( it.hasNext() ) {
-            mail = it.next();
-            if ( mail->uuid() == repliedFromUuid ) {
-                mail->setStatus(repliedFlags, true );
-                mail->setDirty( true );
-                break;
-            }
-        }
-
-        repliedFromUuid = QUuid();
-        repliedFlags = 0;
+        QMailMessage replyMail(repliedFromMailId,QMailMessage::Header);
+        replyMail.setStatus(replyMail.status() | repliedFlags);
+        QMailStore::instance()->updateMessage(&replyMail);
     }
+    repliedFromMailId = QMailId();
+    repliedFlags = 0;
 }
 
 /*  Find an appropriate account for the mail and format
     the mail accordingly    */
-MailAccount* EmailClient::smtpForMail(Email *mail)
+MailAccount* EmailClient::smtpForMail(QMailMessage& message)
 {
-    mail->setReplyTo( "" );
+    message.setReplyTo( QMailAddress() );
 
     /*  Let's see if we the emailAddress matches a SMTP account */
-    MailAccount *account = accountList->getSmtpRefByMail( mail->fromEmail() );
+    QMailAddress fromAddress( message.from() );
+    MailAccount *account = accountList->getSmtpRefByMail( fromAddress.address() );
     if ( account != NULL ) {
-        mail->setFromAccount( account->id() );
+        message.setFromAccount( account->id() );
         return account;
     }
 
@@ -896,9 +1039,8 @@ MailAccount* EmailClient::smtpForMail(Email *mail)
     /* No default either.  Try any and setup a reply-to */
     account = accountList->getSmtpRef();
     if ( account != NULL ) {
-        mail->setReplyTo( mail->fromEmail() );
-        qWarning( QString( mail->fromEmail() + " used as reply-to" ).toLatin1() );
-        mail->setFromAccount( account->id() );
+        message.setReplyTo( fromAddress );
+        message.setFromAccount( account->id() );
         return account;
     }
 
@@ -908,49 +1050,75 @@ MailAccount* EmailClient::smtpForMail(Email *mail)
 
 // send all messages in outbox, by looping through the outbox, sending
 // each message that belongs to the current found account
-void EmailClient::sendAllQueuedMail()
+void EmailClient::sendAllQueuedMail(bool userRequest)
 {
-    Email *mail;
-
-    bool needAccount = false;
-    QListIterator<Email*> it = mailboxList->mailbox( OutboxString )->entryIterator();
-
-    while ( it.hasNext() ) {
-        mail = it.next();
-        if ( mail->type() & MailMessage::Email )
-            needAccount = true;
-    }
-
-    if ( needAccount && !verifyAccounts(true) )
-    {
-        qWarning("Queued mail requires valid email accounts but none available.");
-
-        moveOutboxMailsToDrafts();
+    if (planeMode.value().toBool()) {
+        // Cannot send right now, in plane mode!
         return;
     }
 
-    QList<Email*> queuedMessages;
-    queuedUuids.clear();
-    smtpAccount = NULL;
+    bool verifiedAccounts = false;
+    bool haveValidAccount = false;
+    QList<QMailMessage> queuedMessages;
+    queuedMailIds.clear();
+    smtpAccount = 0;
 
-    it = mailboxList->mailbox(OutboxString)->entryIterator();
-    while ( it.hasNext() ) {
-        mail = it.next();
-        //mail not previously sent, and not unfinished, add to queue
+    EmailFolderList* outbox = mailboxList()->mailbox(MailboxList::OutboxString);
+    QMailIdList outgoingIds = outbox->messages();
 
-        if ( !mail->status(EFlag_Sent) && !mail->unfinished() && (mail->hasRecipients()) ) {
+    int outgoingCount(outgoingIds.count());
+    if (outgoingCount == 0)
+        return;
+
+    if (userRequest) {
+        // Tell the user we're responding
+        QString detail;
+        if (outgoingCount == 1) {
+            QMailMessage mail(*outgoingIds.begin(), QMailMessage::Header);
+            detail = mailType(mail);
+        } else {
+            detail = tr("%1 messages", "%1 >=2").arg(outgoingCount);
+        }
+        AcknowledgmentBox::show(tr("Sending"), tr("Sending:") + " " + detail);
+    }
+
+    foreach(QMailId id, outgoingIds)
+    {
+        QMailMessage mail(id,QMailMessage::Header);
+
+        // mail not previously sent, and has recipients defined, add to queue
+        if ( !(mail.status() & QMailMessage::Sent) 
+             && mail.hasRecipients() ) {
+
+            if (mail.messageType() == QMailMessage::Email) {
+                // Make sure we have a valid account
+                if (!verifiedAccounts) {
+                    haveValidAccount = verifyAccounts(true);
+                    verifiedAccounts = true;
+                    if (!haveValidAccount)
+                        qWarning("Queued mail requires valid email accounts but none available.");
+                }
+                if (!haveValidAccount) {
+                    // No valid account.  Move to Drafts and continue.
+                    EmailFolderList *outbox = mailboxList()->mailbox(MailboxList::OutboxString);
+                    EmailFolderList *drafts = mailboxList()->mailbox(MailboxList::DraftsString);
+                    moveMailToFolder(mail.id(), outbox, drafts);
+                    continue;
+                }
+            }
+
             /* The first mail determines which range of mails to first
                send.  As we allow use of several SMTP accounts we may
                need more than one connection, but the total number of connections
                needed will never exceed the number of SMTP accounts
             */
-            if ( smtpAccount == NULL ) {
+            if ( !smtpAccount ) {
                 smtpAccount = smtpForMail( mail );
                 queuedMessages.append(mail);
-                queuedUuids.append( mail->uuid() );
+                queuedMailIds.append( mail.id() );
             } else if ( smtpForMail(mail) == smtpAccount ) {
                 queuedMessages.append(mail);
-                queuedUuids.append( mail->uuid() );
+                queuedMailIds.append( mail.id() );
             }
         }
 
@@ -959,30 +1127,34 @@ void EmailClient::sendAllQueuedMail()
     if (queuedMessages.count() > 0) {
         emailHandler->setSmtpAccount(smtpAccount);
         sending = true;
-//      sendMailButton->setVisible(false);
-        cancelButton->setVisible(true);
+        setActionVisible(cancelButton, true);
         if (!receiving)
-            queueStatus = 3;
+            queueStatus = Sending;
 
         sendSingle = false;
         isSending(true);
-        qLog(Messaging) << "Registering transfer task";
-        QtopiaApplication::instance()->registerRunningTask(QLatin1String("transfer"));
-        emailHandler->sendMail(&queuedMessages);
+
+        registerTask("transfer");
+        emailHandler->sendMail(queuedMessages);
     } else {
         qWarning("no more messages to send");
     }
 }
 
-void EmailClient::sendSingleMail(Email *mail)
+void EmailClient::sendSingleMail(const QMailMessage& message)
 {
     if (sending) {
         qWarning("sending in progress, no action performed");
         return;
     }
 
+    if (planeMode.value().toBool()) {
+        // Cannot send right now, in plane mode!
+        return;
+    }
+
     bool needAccount = false;
-    if ( mail->type() & MailMessage::Email )
+    if ( message.messageType() == QMailMessage::Email )
         needAccount = true;
 
     if ( needAccount && !verifyAccounts(true) ) {
@@ -992,25 +1164,26 @@ void EmailClient::sendSingleMail(Email *mail)
         return;
     }
 
-    QList<Email*> queuedMessages;
-    queuedUuids.clear();
+    QList<QMailMessage> queuedMessages;
+    queuedMailIds.clear();
 
-    smtpAccount = smtpForMail( mail );
-    queuedMessages.append(mail);
-    queuedUuids.append( mail->uuid() );
+    QMailMessage sendMessage = message;
+
+    smtpAccount = smtpForMail( sendMessage);
+    queuedMessages.append(sendMessage);
+    queuedMailIds.append( sendMessage.id() );
     emailHandler->setSmtpAccount(smtpAccount);
 
     sending = true;
-//     sendMailButton->setVisible(false);
-    cancelButton->setVisible(true);
+    setActionVisible(cancelButton, true);
     if (!receiving)
-        queueStatus = 3;
+        queueStatus = Sending;
 
     sendSingle = true;
     isSending(true);
-    qLog(Messaging) << "Registering transfer task";
-    QtopiaApplication::instance()->registerRunningTask(QLatin1String("transfer"));;
-    emailHandler->sendMail(&queuedMessages);
+
+    registerTask("transfer");
+    emailHandler->sendMail(queuedMessages);
 }
 
 bool EmailClient::verifyAccounts(bool outgoing)
@@ -1023,18 +1196,12 @@ bool EmailClient::verifyAccounts(bool outgoing)
         box.exec();
         ok = false;
     } else if (outgoing && accountList->getSmtpRef() == NULL) {
-#ifdef QTOPIA_PHONE
         QMessageBox box(tr("No SMTP Server"), tr("<qt>No valid SMTP server defined.<br><br>No emails could be sent.</qt>"), QMessageBox::Warning,
-                        QMessageBox::Ok | QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton,
-                        qApp->activeWindow() );
-#else
-        QMessageBox box(tr("No SMTP Server"), tr("<qt>No valid SMTP server defined</qt>"), QMessageBox::Warning,
                         QMessageBox::Ok | QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton );
-#endif
         box.exec();
         ok = false;
     } else if ( !outgoing && mailAccount == NULL ) {
-        QMessageBox box(tr("No POP or IMAP accounts defined"), tr("<qt>Get Mail only works with POP or IMAP</qt>"), QMessageBox::Warning,
+        QMessageBox box(tr("No POP or IMAP accounts defined"), tr("<qt>Get mail only works with POP or IMAP</qt>"), QMessageBox::Warning,
                         QMessageBox::Ok | QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton );
         ok = false;
     }
@@ -1045,75 +1212,85 @@ bool EmailClient::verifyAccounts(bool outgoing)
 //some mail are obviously sent, but are all mail in the outbox sent
 void EmailClient::mailSent(int count)
 {
-    Email *mail;
+    // We are no longer sending, although we won't update the UI yet, as we
+    // may start again... moveMail depends on sending to update status correctly
+    sending = false;
 
     if (count == -1) {
-        sending = false;
-//      sendMailButton->setVisible(true);
-        cancelButton->setVisible(false);
-        isSending(false);
-        QString temp = tr("<qt>Failed to send message</qt>");
-        QMessageBox::warning(qApp->activeWindow(),tr("Sending error"),
-                             temp, tr("OK"));
-        return;
     }
+    else {
+        // Why doesn't this code check \a count?
 
-    EmailFolderList *mailbox = mailboxList->mailbox(OutboxString);
+        EmailFolderList *mailbox = mailboxList()->mailbox(MailboxList::OutboxString);
 
-    QListIterator<QUuid> qit( queuedUuids );
-    while ( qit.hasNext() ) {
-        mail = mailbox->email( qit.next() );
-        if ( mail ) {
-            mail->setStatus(EFlag_Sent, true);
-            mail->setDirty( true );
+        QListIterator<QMailId> qit( queuedMailIds );
 
-            if ( !moveMailToFolder(mail, mailbox, mailboxList->mailbox(SentString) ) )
-                break;      //no point continuing to move
-        }
-    }
-
-    if ( !sendSingle ) {
-        //loop through, if not all messages sent, start over
-        QListIterator<Email*> it = mailboxList->mailbox(OutboxString)->entryIterator();
-        while ( it.hasNext() ) {
-            mail = it.next();
-            if ( !mail->status(EFlag_Sent) ) {
-                sendAllQueuedMail();
-                return;
+        foreach(QMailId id,queuedMailIds)
+        { 
+            if ( mailbox->contains(id) ) {
+                QMailMessage mail(id,QMailMessage::Header);
+                mail.setStatus(QMailMessage::Sent,true);
+                QMailStore::instance()->updateMessage(&mail);
+                if ( !moveMailToFolder(mail.id(), mailbox, mailboxList()->mailbox(MailboxList::SentString) ) )
+                    break;      //no point continuing to move
             }
         }
+
+        if ( !sendSingle ) {
+            //loop through, if not all messages sent, start over
+            QMailIdList outgoingIds = mailboxList()->mailbox(MailboxList::OutboxString)->messages();
+            foreach(QMailId id, outgoingIds)
+            {
+                QMailMessage mail(id,QMailMessage::Header);
+                if ( !(mail.status() & QMailMessage::Sent) ) {
+                    // We are still sending
+                    sending = true;
+                    sendAllQueuedMail();
+                    return;
+                }
+            }
+        }
+
+        queuedMailIds.clear();
     }
 
-    queuedUuids.clear();
+    transmissionCompleted();
+}
+
+void EmailClient::transmissionCompleted()
+{
+    setActionVisible(cancelButton, false);
 
     sending = false;
-//     sendMailButton->setVisible(true);
-    cancelButton->setVisible(false);
     isSending(false);
 }
 
-void EmailClient::addMailToDownloadList(Email *mail)
+void EmailClient::addMailToDownloadList(const QMailMessage& mail)
 {
-    if ( mail->status(EFlag_Downloaded) || mail->fromAccount() != mailAccount->id() )
+    if ( !mailAccount )
+	return; // mail check cancelled
+    
+    if ( mail.status() & QMailMessage::Downloaded 
+         || mail.fromAccount() != mailAccount->id() )
         return;
 
-    if ( (mailAccount->maxMailSize() > -1) && (mail->size() > (uint) ( mailAccount->maxMailSize() * 1024 ) ) )
+    if ( (mailAccount->maxMailSize() > -1) && (mail.size() > static_cast<uint> ( mailAccount->maxMailSize() * 1024 ) ) )
         return;
 
     if ( mailAccount->accountType() == MailAccount::IMAP ) {
-        Mailbox *box = mailAccount->getMailboxRef( mail->fromMailbox() );
+        Mailbox *box = mailAccount->getMailboxRef( mail.fromMailbox() );
         if ( box ) {
             FolderSyncSetting fs = box->folderSync();
             if ( fs & Sync_OnlyHeaders ) {
                 return;
             } else if ( fs & Sync_OnlyNew ) {
-                if ( mail->status(EFlag_IMAP_Seen) )
+                if ( mail.status() & QMailMessage::ReadElsewhere )
                     return;
             }
         }
     }
 
-    mailDownloadList.sizeInsert(mail->serverUid(), mail->size(), mail->uuid(), mail->fromMailbox() );
+    mailDownloadList.sizeInsert(mail.serverUid(), mail.size(), mail.id(), mail.fromMailbox() );
 }
 
 void EmailClient::getNewMail()
@@ -1121,28 +1298,24 @@ void EmailClient::getNewMail()
     if ( !verifyAccounts(false) )
         return;
 
-    qLog(Messaging) << "Registering transfer task";
-    QtopiaApplication::instance()->registerRunningTask(QLatin1String("transfer"));
+    registerTask("transfer");
+
     receiving = true;
     previewingMail = true;
     updateGetMailButton(false);
-    cancelButton->setVisible(true);
+    setActionVisible(cancelButton, true);
     selectAccountMenu->setEnabled(false);
-
-    statusLabelHeader = mailAccount->accountName();
 
     //get any previous mails not downloaded and add to queue
     mailDownloadList.clear();
-    Email *mail;
-    QListIterator<Email*> it = mailboxList->mailbox(InboxString)->entryIterator();
-    while ( it.hasNext() ) {
-        mail = it.next();
-        if ( !mail->status(EFlag_Downloaded) )
+    QMailIdList incomingIds = mailboxList()->mailbox(MailboxList::InboxString)->messages(QMailMessage::Downloaded,false);
+    foreach(QMailId id, incomingIds){
+        QMailMessage mail(id,QMailMessage::Header);
             addMailToDownloadList( mail );
     }
     emailHandler->setMailAccount(mailAccount);
     if (!sending)
-        queueStatus = 1;
+        queueStatus = Receiving;
 
     quitSent = false;
     emailHandler->getMailHeaders();
@@ -1166,40 +1339,36 @@ void EmailClient::getAllNewMail()
     getNewMail();
 }
 
-void EmailClient::getSingleMail(Email *mail)
+void EmailClient::getSingleMail(const QMailMessage& message)
 {
     if (receiving) {
         QString user = mailAccount->id();
-        if ( user == mail->fromAccount() ) {
-            mailDownloadList.append(mail->serverUid(), mail->size(), mail->uuid(), mail->fromMailbox() );
+        if ( user == message.fromAccount() ) {
+            mailDownloadList.append(message.serverUid(), message.size(), message.id(), message.fromMailbox() );
             setTotalPopSize( mailDownloadList.size() );
         } else {
             qWarning("receiving in progress, no action performed");
         }
         return;
     }
-    mailAccount = accountList->getPopRefByAccount( mail->fromAccount() );
+    mailAccount = accountList->getPopRefByAccount( message.fromAccount() );
     if (mailAccount == NULL) {
-        QString temp = tr("<qt>Mail was retrieved from account %1<br>Redefine this account to get this mail</qt>").arg(mail->fromAccount()) + "</qt>";
-        QMessageBox::warning(qApp->activeWindow(),tr("Account not defined"),
-            temp, tr("OK"));
+        QString temp = tr("<qt>Mail was retrieved from account %1<br>Redefine this account to get this mail</qt>").arg(message.fromAccount()) + "</qt>";
+        QMessageBox::warning(0, tr("Account not defined"), temp, tr("OK"));
         return;
     }
 
-    qLog(Messaging) << "Registering transfer task";
-    QtopiaApplication::instance()->registerRunningTask(QLatin1String("transfer"));
+    registerTask("transfer");
 
     receiving = true;
     previewingMail = false;
     allAccounts = false;
     updateGetMailButton(false);
-    cancelButton->setVisible(true);
+    setActionVisible(cancelButton, true);
     selectAccountMenu->setEnabled(false);
 
-    statusLabelHeader = mailAccount->accountName();
-
     mailDownloadList.clear();
-    mailDownloadList.sizeInsert(mail->serverUid(), mail->size(), mail->uuid(), mail->fromMailbox() );
+    mailDownloadList.sizeInsert(message.serverUid(), message.size(), message.id(), message.fromMailbox() );
     emailHandler->setMailAccount(mailAccount);
     quitSent = false;
     setTotalPopSize( mailDownloadList.size() );
@@ -1210,30 +1379,28 @@ void EmailClient::getSingleMail(Email *mail)
 
 void EmailClient::unresolvedUidlArrived(QString &user, QStringList &list)
 {
-    Email *mail;
     QString msg = tr("<qt>%1<br>The following messages have been deleted "
                      "from the server by another email client and can not be completed:<br>").arg(user);
 
     QString mailList = "";
 
-   QListIterator<Email*> it = mailboxList->mailbox(InboxString)->entryIterator();
-   while ( it.hasNext() ) {
-        mail = it.next();
-        if ( ( !mail->status(EFlag_Downloaded) ) && (mail->fromAccount() == mailAccount->id() ) ) {
-            if ( (list.contains( mail->serverUid() ) ) ) {
-                mailList += mail->fromName() + " - "  + mail->subject() + "<br>";
+    QMailIdList accountIds = mailboxList()->mailbox(MailboxList::InboxString)->messagesFromAccount(mailAccount->id());
+    foreach(QMailId id, accountIds)
+    {
+        QMailMessage mail(id,QMailMessage::Header);
+        if (  !(mail.status() & QMailMessage::Downloaded )) { 
+            if ( (list.contains( mail.serverUid() ) ) ) {
+                QMailAddress fromAddress(mail.from());
+                mailList += fromAddress.name() + " - "  + mail.subject() + "<br>";
             }
         }
     }
 
-    QMessageBox::warning(qApp->activeWindow(),
-        tr("Unresolved mail"), msg + mailList + "</qt>", tr("OK"));
-
+    QMessageBox::warning(0, tr("Unresolved mail"), msg + mailList + "</qt>", tr("OK"));
 }
 
-void EmailClient::readReplyRequested(Email* mail)
+void EmailClient::readReplyRequested(const QMailMessage& mail)
 {
-#ifdef QTOPIA_PHONE
 # ifndef QTOPIA_NO_MMS
     QString netCfg;
     QListIterator<MailAccount*> it = accountList->accountIterator();
@@ -1244,84 +1411,75 @@ void EmailClient::readReplyRequested(Email* mail)
             break;
         }
     }
-    QSettings mmsConf(netCfg, QSettings::IniFormat);
-    mmsConf.beginGroup("MMS");
-    if (mmsConf.value("AllowDeliveryReport", "n").toString() == "y") {
+    if ( netCfg.isEmpty() )
+        return;
+
+    QWapAccount wapAccount( netCfg );
+    if ( wapAccount.mmsDeliveryReport() ) {
         QString msg(tr("<qt>Do you wish to send a Read Reply?</qt>"));
-        if (QMessageBox::information(this, tr("Multimedia Message"), msg,
-            QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-                Email rrmail;
-                rrmail.setType(MailMessage::MMS);
-                rrmail.setTo(QStringList(mail->from()));
-                rrmail.setSubject(mail->subject());
-                rrmail.setExtraHeader("X-Mms-Message-Class", "Auto");
-                rrmail.setExtraHeader("X-Mms-Delivery-Report", "No");
-                rrmail.setExtraHeader("X-Mms-Read-Reply", "No");
+        if (QMessageBox::information(0, tr("Multimedia Message"), msg,
+                                     QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+                QMailMessage rrmail;
+                rrmail.setMessageType(QMailMessage::Mms);
+                rrmail.setTo(mail.from());
+                rrmail.setSubject(mail.subject());
+                rrmail.setHeaderField("X-Mms-Message-Class", "Auto");
+                rrmail.setHeaderField("X-Mms-Delivery-Report", "No");
+                rrmail.setHeaderField("X-Mms-Read-Reply", "No");
                 QString msg = tr("Sent MMS \"%1\" was read on: %2", "%1 = subject %2 = date");
-                msg = msg.arg(mail->subject());
+                msg = msg.arg(mail.subject());
                 msg = msg.arg(QDateTime::currentDateTime().toString());
-                MailMessagePart part;
-                part.setContentType("text/plain");
-                part.setEncodedBody(msg, EightBit);
-                rrmail.addMessagePart(part);
-                rrmail.setStatus(EFlag_Outgoing | EFlag_Downloaded, true);
-                rrmail.setUuid( mailboxList->mailbox(OutboxString)->generateUuid() );
-                rrmail.encodeMail(); //TODO remove this for mms
-                if ( !mailboxList->mailbox(OutboxString)->addMail(rrmail) ) {
-                    accessError(mailboxList->mailbox(OutboxString) );
+                QMailMessagePart part;
+                QMailMessageContentType type("text/plain; charset=ISO-8859-1");
+                part.setBody(QMailMessageBody::fromData(msg, type, QMailMessageBody::EightBit));
+                rrmail.appendPart(part);
+                rrmail.setStatus(QMailMessage::Outgoing, true);
+                rrmail.setStatus(QMailMessage::Downloaded, true);
+                if ( !mailboxList()->mailbox(MailboxList::OutboxString)->addMail(rrmail) ) {
+                    accessError(mailboxList()->mailbox(MailboxList::OutboxString) );
                     return;
                 }
-                sendSingleMail(&rrmail);
+                sendSingleMail(rrmail);
             }
     }
 # endif
-#endif
     Q_UNUSED(mail);
 }
 
 /*  This function is basically here to ensure the header only
     mail is replaced so that the ListWidget remains the same */
-void EmailClient::mailUpdated(Email *entry, const QString &mailbox)
+void EmailClient::mailUpdated(const QMailId& id, const QString &mailbox)
 {
+    QMailMessage message(id,QMailMessage::Header);
     if(readMailWidget()->isVisible() )
-        readMailWidget()->mailUpdated( entry );
-    updateQuery( entry, mailbox );
+        readMailWidget()->mailUpdated( message.id() );
+    updateQuery( message, mailbox );
     updateFolderCount( mailbox );
 }
 
-void EmailClient::mailRemoved(const QUuid &uuid, const QString &mailbox)
+void EmailClient::mailRemoved(const QMailId &uuid, const QString &mailbox)
 {
-    Folder *folder = folderView->currentFolder();
+    Folder *folder = folderView()->currentFolder();
     if (!folder)
         return;
 
     if ( folder->mailbox() == mailbox ) {
-
         EmailListItem *item = messageView()->getRef( uuid );
         if ( item ) {
-            EmailListItem *newItem = item;
-            newItem = 0;
+            EmailListItem *newItem = 0;
             int row = messageView()->row( item );
             if (row > 0) //try below
-                newItem = (EmailListItem *)messageView()->item( row - 1, 0 );
+                newItem = static_cast<EmailListItem *>(messageView()->item( row - 1, 0 ));
             if (newItem == NULL) //try above
-                newItem = (EmailListItem *)messageView()->item( row + 1, 0 );
+                newItem = static_cast<EmailListItem *>(messageView()->item( row + 1, 0 ));
 
-            messageView()->removeRow( messageView()->row( item ) );
-            messageView()->setFocus();
-            if ( newItem ) {
-                messageView()->clearSelection();
-                messageView()->setItemSelected( newItem, true );
-                messageView()->setCurrentItem( newItem );
-            }
+            messageView()->removeRow( row );
+            if ( newItem )
+                messageView()->setSelectedItem( newItem );
 
-            setEnableMessageActions( (bool)messageView()->rowCount() );
-
-            if ( readMailWidget()->isVisible() ) {
-                readMailWidget()->update( messageView() );
-            }
+            messageSelectionChanged();
         } else {
-            qWarning("hmm, message already removed from view?? ");
+            qWarning("Message already removed from view??");
         }
     }
 
@@ -1329,43 +1487,39 @@ void EmailClient::mailRemoved(const QUuid &uuid, const QString &mailbox)
 }
 
 /*  Mail arrived from server, treated a bit differently than from disk */
-void EmailClient::mailArrived(const Email &m)
+void EmailClient::mailArrived(const QMailMessage& m)
 {   
     //make sure mailbox is connect at this point
     openFiles();
     
-    Email mail(m);
+    QMailMessage mail(m);
 
     {
-        QtopiaIpcEnvelope e( "QPE/TaskBar", "setLed(int,bool)" );
+        QtopiaIpcEnvelope e(QLatin1String("QPE/TaskBar"), QLatin1String("setLed(int,bool)"));
         e << LED_MAIL << true;
     }
 
     qLog(Messaging) << "Mail arrived";
 
-    // means this is the first time we encounter this mail
-    if ( mail.uuid().isNull() ) {
-        mail.setUuid( mailboxList->mailbox(InboxString)->generateUuid() );
-    }
-#if defined(QTOPIA_PHONE) && !defined(QTOPIA_NO_MMS)
-    bool readNow = false;
+#ifndef QTOPIA_NO_MMS
+    bool newMessages = false;
     bool getNow = false;
 #endif
 
     /*  Test for get-this-mail activated on mail in trash.  Replace
         mail in trash for consistency sake  */
-    if ( mail.status(EFlag_Downloaded) ) {
-        if ( mailboxList->mailbox(TrashString)->email( mail.uuid() ) ) {
-            if ( !mailboxList->mailbox(TrashString)->addMail(mail) ) {
-                accessError( mailboxList->mailbox(TrashString) );
+    if ( mail.status() & QMailMessage::Downloaded ) {
+        if ( mailboxList()->mailbox(MailboxList::TrashString)->contains( mail.id() ) ) {
+            if ( !mailboxList()->mailbox(MailboxList::TrashString)->addMail(mail) ) {
+                accessError( mailboxList()->mailbox(MailboxList::TrashString) );
             }
             return;
         }
-#if defined(QTOPIA_PHONE) && !defined(QTOPIA_NO_MMS)
-        QString mmsType = mail.header("X-Mms-Message-Type");
+#ifndef QTOPIA_NO_MMS
+        QString mmsType = mail.headerFieldText("X-Mms-Message-Type");
         if (mmsType.contains("m-delivery-ind")) {
             QString msg;
-            QString mmsStatus = mail.header("X-Mms-Status");
+            QString mmsStatus = mail.headerFieldText("X-Mms-Status");
             qLog(Messaging) << "X-MMS-Status:" << mmsStatus;
             if (mmsStatus.contains("Retrieved")) {
                 msg = tr("<qt>Multimedia message delivered to %1.</qt>");
@@ -1376,106 +1530,70 @@ void EmailClient::mailArrived(const Email &m)
             } else if (mmsStatus.contains("Expired")) {
                 msg = tr("<qt>Multimedia message to %1 expired.</qt>");
             }
-            QString to = mail.header("To");
+            QString to = mail.headerFieldText("To");
             if (to.isEmpty())
                 to = tr("Unspecified", "MMS recipient");
-            QMessageBox::information(this, tr("Multimedia Message"), msg.arg(to),
-                        QMessageBox::Yes, QMessageBox::NoButton);
+            QMessageBox::information(0, tr("Multimedia message"), msg.arg(to),
+                                     QMessageBox::Yes, QMessageBox::NoButton);
             return;
-        }
-#endif
-    } else if (!mail.header("X-Mms-Message-Type").trimmed().isEmpty()) {
-#if defined(QTOPIA_PHONE) && !defined(QTOPIA_NO_MMS)
-        static QDialog *newMMSDlg = 0;
-        static QLabel *newMMSLabel = 0;
-        static QListWidget *newMMSListBox = 0;
-        MailAccount *account = accountList->getAccountById(mail.fromAccount());
-        if (newMMSDlg) {
-            // We're already showing the new message dialog.
-            // Change to a generic message and accept this mail immediately.
-            QString msg(tr("You have new multimedia messages."));
-            newMMSLabel->setText(msg);
-            newMMSListBox->model()->removeRow(2);
-            emailHandler->acceptMail(mail);
-//            getNow = true; //XXX read from settings.
-        } else {
-            QString msg(tr("You have a new multimedia message."));
-            msg += "<p><small>";
-            if (!mail.subject().isEmpty())
-                msg += tr("Subject: <b>%1</b><br>").arg(mail.subject());
-            if (!mail.from().isEmpty())
-                msg += tr("From: %1<br>").arg(mail.from());
-            msg += tr("%1 KBytes").arg(QString::number((mail.size()+1023)/1024));
-            msg += "</small>";
-            newMMSDlg = new QDialog(this, 0);
-            newMMSDlg->setModal(true);
-            newMMSDlg->setWindowTitle(tr("New MMS"));
-            QVBoxLayout *vb = new QVBoxLayout(newMMSDlg);
-            vb->setMargin(4);
-            newMMSLabel = new QLabel(newMMSDlg);
-            newMMSLabel->setTextFormat(Qt::RichText);
-            newMMSLabel->setWordWrap(true);
-            newMMSLabel->setText(msg);
-            vb->addWidget(newMMSLabel);
-            vb->addStretch(1);
-            newMMSListBox = new QListWidget(newMMSDlg);
-            vb->addWidget(newMMSListBox);
-            newMMSListBox->addItem(tr("Read now"));
-            newMMSListBox->addItem(tr("Read later"));
-            newMMSListBox->addItem(tr("Reject message"));
-            newMMSListBox->setCurrentRow(0);
-            connect(newMMSListBox, SIGNAL(itemActivated(QListWidgetItem*)), newMMSDlg, SLOT(accept()));
-            newMMSDlg->showMaximized();
-
-            QtopiaApplication::setMenuLike(newMMSDlg, true);
-            QtopiaApplication::execDialog(newMMSDlg);
-
-            if (newMMSDlg->result() == QDialog::Accepted) {
-                if (newMMSListBox->currentRow() == 0) {
-                    // read now
-                    readNow = true;
-                } else if (newMMSListBox->currentRow() == 2) {
-                    // reject
-                    emailHandler->rejectMail(mail);
-                    delete newMMSDlg;
-                    newMMSDlg = 0;
-                    return;
-                } else {
-                    // read later
-                    QSettings mailconf("Trolltech","qtmail");
-                    mailconf.beginGroup("MMS");
-                    int count = mailconf.value("newMmsCount").toInt() + 1;
-                    mailconf.setValue("newMmsCount", count);
-                    mailconf.endGroup();
-                    QtopiaIpcEnvelope e("QPE/System", "newMmsCount(int)");
-                    e << count;
-                    if (account) {
-                        getNow = account->autoDownload();
-                    }
+        } else if (mmsType.contains("m-send-req")) {
+            if (MailAccount *account = accountList->getAccountById(mail.fromAccount())) {
+                // If the user has configured automatic download, we just retrieved this message immediately
+                if (account->autoDownload()) {
+                    unregisterTask("display");
+                    newMessages = true;
                 }
             }
-            delete newMMSDlg;
-            newMMSDlg = 0;
-            emailHandler->acceptMail(mail);
         }
+
+#endif
+    } else if (!mail.headerFieldText("X-Mms-Message-Type").trimmed().isEmpty()) {
+#ifndef QTOPIA_NO_MMS
+        // We will simply process this message, and allow the NewMessages code to 
+        // deal with the handling
+        emailHandler->acceptMail(mail);
+
+        // Update the count of new MMS messages
+        QSettings mailconf("Trolltech","qtmail");
+        mailconf.beginGroup("MMS");
+        int count = mailconf.value("newMmsCount").toInt() + 1;
+        mailconf.setValue("newMmsCount", count);
+        mailconf.endGroup();
+
+        {
+            QtopiaIpcEnvelope e("QPE/System", "newMmsCount(int)");
+            e << count;
+        }
+
+        if (MailAccount *account = accountList->getAccountById(mail.fromAccount())) {
+            // If the user has configured automatic download, we should get this message immediately
+            getNow = account->autoDownload();
+        }
+        newMessages = !getNow;
 #endif
     }
 
-    if ( !mailboxList->mailbox(InboxString)->addMail(mail) ) {
+    if ( !mailboxList()->mailbox(MailboxList::InboxString)->addMail(mail) ) {
         cancel();
-        accessError( mailboxList->mailbox(InboxString) );
+        accessError( mailboxList()->mailbox(MailboxList::InboxString) );
+    } else {
+        Q_ASSERT(mail.id().isValid());
+
+        if (mail.messageType() == QMailMessage::Sms)
+            unreadSmsIds.append(mail.id());
     }
 
-#if defined(QTOPIA_PHONE) && !defined(QTOPIA_NO_MMS)
-    if (readNow) {
-        autoDownloadMail = true;
-        delayedShowMessage(MailAccount::MMS, mail.uuid(), false);
-    } else if (getNow && !mail.status(EFlag_Downloaded)) {
-        getSingleMail(&mail);
-    } else
+#ifndef QTOPIA_NO_MMS
+    if (getNow) {
+        registerTask("display");
+        getSingleMail(mail);
+    } else if (newMessages) {
+        clientsSynchronised();
+    }
 #endif
+     
     if ( previewingMail ) {
-        addMailToDownloadList( &mail );
+        addMailToDownloadList( mail );
     }
 }
 
@@ -1500,7 +1618,6 @@ void EmailClient::allMailArrived(int)
     // all headers downloaded from server, start downloading remaining mails
     accountList->saveAccounts();
     previewingMail = false;
-    statusLabelHeader = mailAccount->accountName();
 
     setTotalPopSize( mailDownloadList.size() );
     emailHandler->setMailAccount(mailAccount);
@@ -1524,7 +1641,7 @@ void EmailClient::getNextNewMail()
 
     if ( (allAccounts) && (mailAccount != 0) ) {
         getNewMail();
-        if (queueStatus == 1) {
+        if (queueStatus == Receiving) {
             progressBar->reset();
             progressBar->setText("");
         }
@@ -1533,33 +1650,58 @@ void EmailClient::getNextNewMail()
         receiving = false;
         autoGetMail = false;
         updateGetMailButton(true);
-        cancelButton->setVisible(false);
+        setActionVisible(cancelButton, false);
         selectAccountMenu->setEnabled(true);
-        statusLabelHeader = "";
 
-        if (queueStatus == 1) {
+        if (queueStatus == Receiving) {
             progressBar->reset();
             progressBar->setText("");
         }
 
-        Folder *folder = folderView->currentFolder();
+        Folder *folder = folderView()->currentFolder();
         if ( folder )
             updateFolderCount( folder->mailbox() );
         isReceiving(false);
     }
 }
 
-void EmailClient::moveMailFront(Email *mailPtr)
+void EmailClient::moveMailFront(const QMailMessage& message)
 {
-    if ( !mailPtr->status(EFlag_Incoming) || mailPtr->status(EFlag_Downloaded) )
+    if ( !(message.status() & QMailMessage::Incoming) 
+         || (message.status() & QMailMessage::Downloaded) )
         return;
 
-    if ( (receiving) && (mailPtr->fromAccount() == mailAccount->id() ) )
-        mailDownloadList.moveFront( mailPtr->serverUid() );
+    if ( (receiving) && (message.fromAccount() == mailAccount->id() ) )
+        mailDownloadList.moveFront( message.serverUid() );
+}
+
+static EmailClient::ErrorMap smtpErrorInit()
+{
+    // Create a map of (not-yet translated) error strings - should be stored in ROM data
+    static const EmailClient::ErrorEntry map[] = 
+    {
+        { QAbstractSocket::ConnectionRefusedError, QT_TRANSLATE_NOOP( "EmailClient",  "Connection refused" ) },
+        { QAbstractSocket::RemoteHostClosedError, QT_TRANSLATE_NOOP( "EmailClient",  "Remote host closed the connection" ) },
+        { QAbstractSocket::HostNotFoundError, QT_TRANSLATE_NOOP( "EmailClient",  "Host not found" ) },
+        { QAbstractSocket::SocketAccessError, QT_TRANSLATE_NOOP( "EmailClient",  "Permission denied" ) },
+        { QAbstractSocket::SocketResourceError, QT_TRANSLATE_NOOP( "EmailClient",  "Insufficient resources" ) },
+        { QAbstractSocket::SocketTimeoutError, QT_TRANSLATE_NOOP( "EmailClient",  "Operation timed out" ) },
+        { QAbstractSocket::DatagramTooLargeError, QT_TRANSLATE_NOOP( "EmailClient",  "Datagram too large" ) },
+        { QAbstractSocket::NetworkError, QT_TRANSLATE_NOOP( "EmailClient",  "Network error" ) },
+        { QAbstractSocket::AddressInUseError, QT_TRANSLATE_NOOP( "EmailClient",  "Address in use" ) },
+        { QAbstractSocket::SocketAddressNotAvailableError, QT_TRANSLATE_NOOP( "EmailClient",  "Address not available" ) },
+        { QAbstractSocket::UnsupportedSocketOperationError, QT_TRANSLATE_NOOP( "EmailClient",  "Unsupported operation" ) },
+        { QAbstractSocket::UnknownSocketError, QT_TRANSLATE_NOOP( "EmailClient",  "Unknown error" ) },
+    };
+
+    return qMakePair( static_cast<const EmailClient::ErrorEntry*>(map), ARRAY_SIZE(map) );
 }
 
 void EmailClient::smtpError(int code, QString &msg)
 {
+    // Create a map of error text strings, once only
+    static ErrorMap errorMap(smtpErrorInit());
+
     QString temp = tr("<qt>Server: ") + smtpAccount->smtpServer() + "<br><br>";
 
     if (code == ErrUnknownResponse) {
@@ -1577,35 +1719,15 @@ void EmailClient::smtpError(int code, QString &msg)
         }
     }
 
-    if (code == QAbstractSocket::ConnectionRefusedError)
-        temp += tr( "Connection refused" );
-    if (code == QAbstractSocket::RemoteHostClosedError)
-        temp += tr( "Remote host closed the connection" );
-    if (code == QAbstractSocket::HostNotFoundError)
-        temp += tr( "Host not found" );
-    if (code == QAbstractSocket::SocketAccessError)
-        temp += tr( "Permission denied" );
-    if (code == QAbstractSocket::SocketResourceError)
-        temp += tr( "Insufficient resources" );
-    if (code == QAbstractSocket::SocketTimeoutError)
-        temp += tr( "Operation timed out" );
-    if (code == QAbstractSocket::DatagramTooLargeError)
-        temp += tr( "Datagram too large" );
-    if (code == QAbstractSocket::NetworkError)
-        temp += tr( "Network error" );
-    if (code == QAbstractSocket::AddressInUseError)
-        temp += tr( "Address in use" );
-    if (code == QAbstractSocket::SocketAddressNotAvailableError)
-        temp += tr( "Address not available" );
-    if (code == QAbstractSocket::UnsupportedSocketOperationError)
-        temp += tr( "Unsupported operation" );
-    if (code == QAbstractSocket::UnknownSocketError)
-        temp += tr( "Unknown error" );
+    qLog(Messaging) << "smtpError" << code << msg;
+
+    // Add the error text, if configured
+    appendErrorText(temp, code, errorMap);
 
     temp += "</qt>";
 
     if (code != ErrCancel) {
-        QMessageBox::warning(qApp->activeWindow(), tr("Sending error"), temp, tr("OK") );
+        QMessageBox::warning(0, tr("Sending error"), temp, tr("OK") );
         progressBar->reset();
     } else {
         progressBar->setText( tr("Aborted by user") );
@@ -1613,13 +1735,39 @@ void EmailClient::smtpError(int code, QString &msg)
 
     sending = false;
     isSending(false);
-//     sendMailButton->setVisible(true);
-    cancelButton->setVisible(false);
-    queuedUuids.clear();
+    setActionVisible(cancelButton, false);
+    queuedMailIds.clear();
+}
+
+static EmailClient::ErrorMap popErrorInit()
+{
+    // Create a map of (not-yet translated) error strings - should be stored in ROM data
+    static const EmailClient::ErrorEntry map[] = 
+    {
+        { ErrLoginFailed, QT_TRANSLATE_NOOP( "EmailClient", "Login failed. Check user name and password") },
+        { ErrFileSystemFull, QT_TRANSLATE_NOOP( "EmailClient", "Mail check failed.") },
+        { ErrNonexistentMessage, QT_TRANSLATE_NOOP( "EmailClient", "Message deleted from server.") },
+        { QAbstractSocket::ConnectionRefusedError, QT_TRANSLATE_NOOP( "EmailClient",  "Connection refused" ) },
+        { QAbstractSocket::RemoteHostClosedError, QT_TRANSLATE_NOOP( "EmailClient",  "Remote host closed the connection" ) },
+        { QAbstractSocket::HostNotFoundError, QT_TRANSLATE_NOOP( "EmailClient",  "Host not found" ) },
+        { QAbstractSocket::SocketAccessError, QT_TRANSLATE_NOOP( "EmailClient",  "Permission denied" ) },
+        { QAbstractSocket::SocketResourceError, QT_TRANSLATE_NOOP( "EmailClient",  "Insufficient resources" ) },
+        { QAbstractSocket::SocketTimeoutError, QT_TRANSLATE_NOOP( "EmailClient",  "Operation timed out" ) },
+        { QAbstractSocket::DatagramTooLargeError, QT_TRANSLATE_NOOP( "EmailClient",  "Datagram too large" ) },
+        { QAbstractSocket::NetworkError, QT_TRANSLATE_NOOP( "EmailClient",  "Network error" ) },
+        { QAbstractSocket::AddressInUseError, QT_TRANSLATE_NOOP( "EmailClient",  "Address in use" ) },
+        { QAbstractSocket::SocketAddressNotAvailableError, QT_TRANSLATE_NOOP( "EmailClient",  "Address not available" ) },
+        { QAbstractSocket::UnsupportedSocketOperationError, QT_TRANSLATE_NOOP( "EmailClient",  "Unsupported operation" ) },
+        { QAbstractSocket::UnknownSocketError, QT_TRANSLATE_NOOP( "EmailClient",  "Unknown error" ) },
+    };
+
+    return qMakePair( static_cast<const EmailClient::ErrorEntry*>(map), ARRAY_SIZE(map) );
 }
 
 void EmailClient::popError(int code, QString &msg)
 {
+    static ErrorMap errorMap(popErrorInit());
+
     QString temp = tr("<qt>Server: ") + mailAccount->mailServer() + "<br><br>";
 
     if (code == ErrUnknownResponse) {
@@ -1637,42 +1785,19 @@ void EmailClient::popError(int code, QString &msg)
         }
     }
 
-    if (code == ErrLoginFailed)
-        temp += tr("Login failed. Check user name and password");
+    // Add the error text, if configured
+    appendErrorText(temp, code, errorMap);
+
     if (code == ErrFileSystemFull)
-        temp += tr("Mail check failed.") + QLatin1String(" ") + LongStream::errorMessage();
-    if (code == QAbstractSocket::ConnectionRefusedError)
-        temp += tr( "Connection refused" );
-    if (code == QAbstractSocket::RemoteHostClosedError)
-        temp += tr( "Remote host closed the connection" );
-    if (code == QAbstractSocket::HostNotFoundError)
-        temp += tr( "Host not found" );
-    if (code == QAbstractSocket::SocketAccessError)
-        temp += tr( "Permission denied" );
-    if (code == QAbstractSocket::SocketResourceError)
-        temp += tr( "Insufficient resources" );
-    if (code == QAbstractSocket::SocketTimeoutError)
-        temp += tr( "Operation timed out" );
-    if (code == QAbstractSocket::DatagramTooLargeError)
-        temp += tr( "Datagram too large" );
-    if (code == QAbstractSocket::NetworkError)
-        temp += tr( "Network error" );
-    if (code == QAbstractSocket::AddressInUseError)
-        temp += tr( "Address in use" );
-    if (code == QAbstractSocket::SocketAddressNotAvailableError)
-        temp += tr( "Address not available" );
-    if (code == QAbstractSocket::UnsupportedSocketOperationError)
-        temp += tr( "Unsupported operation" );
-    if (code == QAbstractSocket::UnknownSocketError)
-        temp += tr( "Unknown error" );
+        temp += QLatin1String(" ") + LongStream::errorMessage();
 
     temp += "</qt>";
 
     if (code != ErrCancel) {
         if ( !autoGetMail ) {
-            QMessageBox::warning(qApp->activeWindow(), tr("Receiving error"), temp, tr("OK") );
+            QMessageBox::warning(0, tr("Receiving error"), temp, tr("OK") );
         } else {
-            progressBar->setText( tr("Automatic Fetch failed") );
+            progressBar->setText( tr("Automatic fetch failed") );
         }
     } else {
         progressBar->setText(tr("Aborted by user"));
@@ -1685,14 +1810,12 @@ void EmailClient::smsError(int code, QString &msg)
 {
     Q_UNUSED(code)
     QString temp(tr("<qt>Failed sending SMS: %1</qt>", "%1 will contain the reason for the failure"));
-    QMessageBox::warning(qApp->activeWindow(), tr("Sending error"),
-                temp.arg(msg), tr("OK") );
+    QMessageBox::warning(0, tr("Sending error"), temp.arg(msg), tr("OK") );
 
     sending = false;
     isSending(false);
-//     sendMailButton->setVisible(true);
-    cancelButton->setVisible(false);
-    queuedUuids.clear();
+    setActionVisible(cancelButton, false);
+    queuedMailIds.clear();
 }
 
 void EmailClient::mmsError(int code, QString &msg)
@@ -1701,59 +1824,66 @@ void EmailClient::mmsError(int code, QString &msg)
     Q_UNUSED(code)
     if (sending) {
         QString temp(tr("<qt>Failed sending MMS: %1</qt>", "%1 will contain the reason for the failure"));
-        QMessageBox::warning(qApp->activeWindow(), tr("Sending error"),
-                temp.arg(msg), tr("OK") );
+        QMessageBox::warning(0, tr("Sending error"), temp.arg(msg), tr("OK") );
 
         sending = false;
         isSending(false);
-//      sendMailButton->setVisible(true);
-        queuedUuids.clear();
+        queuedMailIds.clear();
     } else if (receiving) {
         QString temp(tr("<qt>Failed receiving MMS: %1</qt>", "%1 will contain the reason for the failure"));
-        QMessageBox::warning(qApp->activeWindow(), tr("Receiving error"),
+        QMessageBox::warning(0, tr("Receiving error"),
                 temp.arg(msg), tr("OK") );
         receiving = false;
         autoGetMail = false;
         isReceiving(false);
         updateGetMailButton(true);
-        cancelButton->setVisible(false);
+        setActionVisible(cancelButton, false);
         selectAccountMenu->setEnabled(true);
     }
-    cancelButton->setVisible(false);
+    setActionVisible(cancelButton, false);
 #else
     Q_UNUSED(code)
     Q_UNUSED(msg)
 #endif
 }
 
+QString EmailClient::mailType(const QMailMessage& message)
+{
+    QString key(QMailComposerFactory::defaultKey(message.messageType()));
+    if (!key.isEmpty())
+        return QMailComposerFactory::displayName(key);
+
+    return tr("Message");
+}
 
 void EmailClient::queryItemSelected()
 {
-    EmailListItem *item = (EmailListItem*) messageView()->currentItem();
+    EmailListItem *item = static_cast<EmailListItem*>(messageView()->currentItem());
     if (item == NULL)
         return;
     if (!messageView()->isItemSelected(item))
         return;
 
-    if (messageView()->currentMailbox() == DraftsString) {
-        modify(item->mail());
+    if (messageView()->currentMailbox() == MailboxList::DraftsString) {
+        QMailMessage message = QMailMessage(item->id(),QMailMessage::HeaderAndBody);
+        modify(message);
         return;
     }
-    emit raiseWidget( readMailWidget(), tr("Read mail") );
-    mReadMail->update( messageView() );
+
+    showViewer(item->id(), folderView()->currentFolder(), messageView()->showEmailsOnly());
+
     if (autoDownloadMail) {
-        if (!item->mail()->status(EFlag_Downloaded))
-            getSingleMail(item->mail());
+        QMailMessage message = QMailMessage(item->id(),QMailMessage::HeaderAndBody);
+        if (!(message.status() & QMailMessage::Downloaded))
+            getSingleMail(message);
         autoDownloadMail = false;
     }
 
     QtopiaIpcEnvelope e( "QPE/TaskBar", "setLed(int,bool)" );
     e << LED_MAIL << false;
-    
-    resetNewMailCount();
 }
 
-void EmailClient::resetNewMailCount()
+void EmailClient::resetNewMessages()
 {
     // Reading a mail resets the new mail count
     QListIterator<MailAccount*> it = accountList->accountIterator();
@@ -1765,73 +1895,153 @@ void EmailClient::resetNewMailCount()
         } else if (acc->accountType() == MailAccount::System ) {
             QSettings mailconf("Trolltech", "qtmail");
             mailconf.beginGroup("SystemMessages");
-            int count = mailconf.value("newSystemCount").toInt();
 
-            if (count) {
-            count =0;
-            mailconf.setValue("newSystemCount", count );
-            QtopiaIpcEnvelope e("QPE/System", "newSystemCount(int)");
-            e << count;
+            if (mailconf.value("newSystemCount").toInt()) {
+                mailconf.setValue("newSystemCount", 0);
+
+                QtopiaIpcEnvelope e("QPE/System", "newSystemCount(int)");
+                e << static_cast<int>(0);
             }
         }
     }
+
+    emit messageCountUpdated();
 }
 
-void EmailClient::displayNewMessage( Email *mail )
+void EmailClient::displayNewMessage( const QMailMessage& message )
 {
-    QString accountId = mail->fromAccount();
+    QString accountId = message.fromAccount();
     MailAccount *account = accountList->getAccountById( accountId );
 	
     if (waitingForNewMessage
-	&& showMessageType == MailAccount::SMS // can't handle MMS fast yet
-	&& account
-	&& account->accountType() == showMessageType) {
+	    && showMessageType == MailAccount::SMS // can't handle MMS fast yet
+	    && account
+	    && account->accountType() == showMessageType
+	    && (showServerId.isEmpty() || 
+	        (showServerId == message.serverUid().right(showServerId.length())))) {
     
-	waitingForNewMessage = false;
-	QtopiaApplication::instance()->unregisterRunningTask(QLatin1String("display"));
-	if ( checkMailConflict(
-		 tr("Should this mail be saved in Drafts before viewing the new mail?"),
-		 tr("View Mail message will be ignored")) )
-	    return;
-	
-	emit raiseWidget( readMailWidget(), tr("Read mail") );
-	mReadMail->showMail( mail );
-	showMsgId = mail->uuid();
-	
-	QTimer::singleShot( 0, this, SLOT( updateListViews() ) );
-	resetNewMailCount();
+        showServerId = QString();
+        waitingForNewMessage = false;
+
+        if ( checkMailConflict(
+             tr("Should this message be saved in Drafts before viewing the new message?"),
+             tr("'View Mail' message will be ignored")) )
+            return;
+        
+        // Return to the inbox after viewing this message
+        folderView()->changeToSystemFolder(MailboxList::InboxString);
+
+        showMsgId = message.id();
+        showViewer(showMsgId, folderView()->currentFolder(), false);
+
+        updateListViews();
+        mReadMail->viewSelectedMail( messageView() );
+        static_cast<EmailListItem *>(messageView()->currentItem())->updateState();
     }
 }
 
-void EmailClient::mailFromDisk(Email *mail, const QString &mailbox)
+void EmailClient::mailFromDisk(const QMailId& id, const QString &mailbox)
 {
     // Don't create new messageView, i.e. if showing newly arrived message
-    if (mMessageView) 
-	updateQuery( mail, mailbox );
-    updateFolderCount( mailbox );
+    if (mMessageView)  {
+        // Don't load the message details unless we need them
+        if (Folder *folder = folderView()->currentFolder()) {
+            if (folder->mailbox() == mailbox) {
+                QMailMessage message(id, QMailMessage::Header);
+                updateQuery(message, mailbox);
+            }
+        }
+    }
     
-    // check for new message here and display
-    displayNewMessage( mail );
+    updateFolderCount( mailbox );
 }
 
-void EmailClient::mailMoved(Email* m, const QString& sourceBox, const QString& destBox)
+void EmailClient::mailMoved(const QMailId& id, const QString& sourceBox, const QString& destBox)
 {
-    mailRemoved(m->uuid(),sourceBox);
-    updateQuery(m,destBox);
+    mailRemoved(id, sourceBox);
+
+    // Don't load the message details unless we need them
+    if (Folder *folder = folderView()->currentFolder()) {
+        if (folder->mailbox() == destBox) {
+            QMailMessage message(id, QMailMessage::Header);
+            updateQuery(message, destBox);
+        }
+    }
+
     updateFolderCount(destBox);
+}
+
+void EmailClient::mailMoved(const QMailIdList& list, const QString& sourceBox, const QString& destBox)
+{
+    int count(list.count());
+    bool displayProgress(count >= MinimumForProgressIndicator);
+
+    suspendMailCount = true;
+
+    if (displayProgress) {
+        QString caption;
+        if ( count == 1 )
+            caption = (tr("Moving 1 message"));
+        else
+            caption = tr("Moving %1 messages","number of messages always >=2").arg(count);
+                
+        progressBar->reset();
+        progressBar->setRange(0, count);
+        progressBar->setText(caption);
+        qApp->processEvents();
+    }
+
+    QTime time;
+    count = 0;
+    foreach (const QMailId& id, list) {
+        mailMoved(id, sourceBox, destBox);
+
+        if (displayProgress) {
+            ++count;
+
+            // We still need to process events during this loop
+            if ((count == 1) || (time.elapsed() > ProgressIndicatorUpdatePeriod)) {
+                progressBar->setValue(count);
+                time.start();
+            }
+        }
+    }
+
+    if (displayProgress) {
+        progressBar->reset();
+        progressBar->setText("");
+    }
+
+    suspendMailCount = false;
+
+    updateFolderCount(sourceBox);
+    updateFolderCount(destBox);
+    messageSelectionChanged();
 }
 
 void EmailClient::readMail()
 {
-    QTime s;
-    s.start();
+    mailboxList()->openMailboxes();
 
-    mailboxList->openMailboxes();
-
-    QStringList mboxList = mailboxList->mailboxes();
-    for (QStringList::Iterator it = mboxList.begin(); it != mboxList.end(); ++it) {
-        updateFolderCount( *it, true );
+    EmailFolderList* outbox = mailboxList()->mailbox(MailboxList::OutboxString);
+    if (outbox->mailCount(EmailFolderList::All)) {
+        // There are messages ready to be sent
+    	QTimer::singleShot( 0, this, SLOT(sendAllQueuedMail()) );
     }
+
+    countList = mailboxList()->mailboxes();
+    if (countList.count())
+    	QTimer::singleShot( 0, this, SLOT(incrementalFolderCount()) );
+}
+
+void EmailClient::incrementalFolderCount()
+{
+    if (!countList.count())
+	return;
+    updateFolderCount( countList.first(), true );
+    countList.removeFirst();
+    if (countList.count())
+	QTimer::singleShot( 0, this, SLOT(incrementalFolderCount()) );
 }
 
 void EmailClient::accessError(EmailFolderList *box)
@@ -1839,21 +2049,21 @@ void EmailClient::accessError(EmailFolderList *box)
     QString mailbox = "mailbox"; // No tr
 
     if ( box )
-        mailbox = mailboxTrName( box->mailbox() );
+        mailbox = MailboxList::mailboxTrName( box->mailbox() );
 
     QString msg = tr("<qt>Cannot access %1. Either there is insufficient space, or another program is accessing the mailbox.</qt>").arg(mailbox);
 
-    QMessageBox::critical( 0, tr("Unable to save mail"), msg );
+    QMessageBox::critical( 0, tr("Save error"), msg );
 }
 
 void EmailClient::moveError(const EmailFolderList& source, const EmailFolderList& dest)
 {
-    QString mailbox1 = mailboxTrName( source.mailbox() );
-    QString mailbox2 = mailboxTrName( dest.mailbox() );
+    QString mailbox1 = MailboxList::mailboxTrName( source.mailbox() );
+    QString mailbox2 = MailboxList::mailboxTrName( dest.mailbox() );
 
-    QString msg = tr("<qt>Cannot move mail from %1 to %2. Either there is insufficient space, or another program is accessing the mailboxes.</qt>").arg(mailbox2).arg(mailbox2);
+    QString msg = tr("<qt>Cannot move message from %1 to %2. Either there is insufficient space, or another program is accessing the folders.</qt>").arg(mailbox1).arg(mailbox2);
 
-    QMessageBox::critical( 0, tr("Unable to move mail"), msg );
+    QMessageBox::critical( 0, tr("Move error"), msg );
 }
 
 void EmailClient::readSettings()
@@ -1862,33 +2072,12 @@ void EmailClient::readSettings()
     QSettings mailconf("Trolltech","qtmail");
     mailconf.beginGroup("qtmailglobal");
 
-    folderView->readQueries("qtmailglobal", &mailconf);
-
     if (( y = mailconf.value("mailidcount", -1).toInt()) != -1) {
         mailIdCount = y;
     }
-
-    int page = mailconf.value( "currentpage", 0).toInt();
-    if (page != -1 && mailboxView) {
-        setCurrentMailboxWidget( page );
-        if ( page == 0 )
-            folderView->setFocus();
-        else
-            messageView()->setFocus();
-    }
-
     mailconf.endGroup();
 
     mailconf.beginGroup("settings");
-    QFont font;
-    if ( mailconf.value("font").toString() == "large") {
-        font.setPointSize( font.pointSize() + 4 );      // 4 larger than default
-//      messageView()->setFont( font );
-        folderView->setFont( font );
-    } else {
-//      messageView()->setFont( font );
-        folderView->setFont( font );
-    }
 
     int val = mailconf.value("interval", -1 ).toInt();
     if ( val == -1 ) {
@@ -1906,9 +2095,6 @@ bool EmailClient::saveSettings()
     mailconf.beginGroup("qtmailglobal");
     mailconf.remove("");
     mailconf.setValue("mailidcount", mailIdCount);
-
-    folderView->saveQueries("qtmailglobal", &mailconf);
-
     mailconf.endGroup();
 
     mailconf.beginGroup("qtmailglobal");
@@ -1918,14 +2104,10 @@ bool EmailClient::saveSettings()
 
     messageView()->writeConfig( &mailconf );
 
-    EmailListItem *item = (EmailListItem *) messageView()->currentItem();
+    EmailListItem *item = static_cast<EmailListItem*>(messageView()->currentItem());
     if ( item ) {
-        QUuid id;
-        Email *mail = item->mail();
-        if ( mail )
-            id = mail->uuid();
-
-        mailconf.setValue("currentmail", id.toString() );
+        QMailId id = item->id();
+        mailconf.setValue("currentmail", id.toULongLong() );
     }
 
     mailconf.endGroup();
@@ -1973,57 +2155,7 @@ void EmailClient::selectAccountTimeout()
 
 void EmailClient::editAccount(int id)
 {
-#ifndef QTOPIA_PHONE    // we use a settings dialog
-    MailAccount *newAccount;
-
-    if (id == newAccountId) {           //new account
-        newAccount = new MailAccount;
-        newAccount->setUserName( accountList->getUserName() );
-    } else {
-        newAccount = accountList->at(id);
-    }
-
-    QDialog *editAccountView;
-    EditAccount *e = new EditAccount(this, "create-new-account");
-    e->(newAccount, id == newAccountId);
-    editAccountView = (QDialog *)e;
-
-#ifdef QTOPIA_DESKTOP
-    int ret = editAccountView->exec();
-#else
-    int ret = QtopiaApplication::execDialog(editAccountView);
-#endif
-    delete editAccountView;
-
-    switch ( ret ) {
-        case QDialog::Accepted:
-            if (id == newAccountId) {
-                accountList->append(newAccount);
-            }
-
-            if ( newAccount->defaultMailServer() ) {
-                if ( accountList->defaultMailServerCount() > 1 ) {
-                    accountList->setDefaultMailServer( newAccount );
-
-                    QMessageBox::warning(qApp->activeWindow(),
-                        tr("New default account"),
-                        tr("<qt>Your previous default mail account has been unchecked</qt>"),
-                        tr("OK"));
-                }
-            }
-
-            QTimer::singleShot(0, this, SLOT( updateAccounts() ) );
-            folderView->updateAccountFolder( newAccount );
-            accountList->saveAccounts();
-            break;
-
-        case 2:
-            deleteAccount(id);
-            break;
-    }
-#else
     Q_UNUSED( id );
-#endif
 }
 
 void EmailClient::editAccount(QAction* action)
@@ -2034,49 +2166,27 @@ void EmailClient::editAccount(QAction* action)
 
 void EmailClient::deleteAccount(int id)
 {
-#ifndef QTOPIA_PHONE
-    MailAccount *newAccount;
-
-    newAccount = accountList->at(id);
-    if (newAccount) {
-        QString message = tr("<qt>Delete account: %1</qt>").arg(newAccount->accountName());
-        switch( QMessageBox::warning( this, appTitle, message,
-            tr("Yes"), tr("No"), 0,     0, 1 ) ) {
-
-            case 0:
-            {
-                folderView->deleteAccountFolder( accountList->at(id) );
-                accountList->remove(id);
-                QTimer::singleShot(0, this, SLOT( updateAccounts() ) );
-                accountList->saveAccounts();
-                break;
-            }
-            case 1: break;
-        }
-    }
-#else
     Q_UNUSED( id );
-#endif
 }
 
 void EmailClient::updateGetMailButton(bool enable)
 {
-    getMailButton->setVisible(false);
-    if (!enable)
-        return;
-  
+    bool visible(false);
+
+    if (enable) {
         // Enable send mail account if SMTP account exists
-        //sendMailButton->setVisible( accountList->getSmtpRef() );
         QListIterator<MailAccount*> it = accountList->accountIterator();
         while ( it.hasNext() ) {
             MailAccount *account = it.next();
             if ( account->accountType() < MailAccount::SMS ) {
-                // Enable send mail account if
-                // POP, IMAP, or Synchronized account exists
-                getMailButton->setVisible(true);
+                // Enable send mail account if POP, IMAP, or Synchronized account exists
+                visible = true;
+                break;
             }
         }
-     
+    }
+
+    setActionVisible(getMailButton, visible);
 }
 
 /*  Important:  If this method is called directly/indirectly from
@@ -2094,20 +2204,56 @@ void EmailClient::updateAccounts()
     // accounts has been changed, update writemailwidget if it's created
     if ( mWriteMail )
         mWriteMail->setAccountList( accountList );
+    if ( mReadMail )
+        mReadMail->setAccountList( accountList );
 }
 
 void EmailClient::messageChanged()
 {
+    if (suspendMailCount)
+        return;
+
     if (!messageView()->singleColumnMode())
         return;
 
     if ( currentMailboxWidgetId() != messageId )
         return;
 
-    EmailListItem *item = (EmailListItem*)messageView()->currentItem();
-    if (item) {
-        QString statusString = EmailListItem::dateToString( item->mail()->dateTime() );
-        setStatusText( statusString );
+    if (EmailListItem *item = static_cast<EmailListItem*>(messageView()->currentItem())) {
+        QMailMessage message(item->id(), QMailMessage::Header);
+        QString statusText( EmailListItem::dateToString( message.date().toLocalTime() ) );
+        setStatusText( statusText );
+    }
+}
+
+void EmailClient::deleteMail(const QMailStore::DeletionProperties& properties, bool deleting, EmailFolderList* srcFolder)
+{
+    static EmailFolderList* const trashFolder = mailboxList()->mailbox( MailboxList::TrashString );
+
+    MailAccount *account = accountList->getAccountById( properties.fromAccount );
+
+    if ( deleting ) {
+        // Add it to queue of mails to be deleted from server
+        if ( !properties.serverUid.isEmpty() ) {
+            if ( account && account->deleteMail() ) {
+                account->deleteMsg( properties.serverUid, properties.fromMailbox );
+            }
+        }
+
+        trashFolder->removeMail( properties.id );
+    } else {
+        if ( account ) {
+            // If the client has "deleteImmediately" set, then do so now.
+            if ( Client *client = emailHandler->clientFromAccount(account) ) {
+                if ( client->hasDeleteImmediately() )
+                    client->deleteImmediately( properties.serverUid );
+            }
+        }
+
+        // If mail is in queue for download, remove it from queue if possible
+        mailDownloadList.remove( properties.serverUid );
+
+        moveMailToFolder( properties.id, srcFolder, trashFolder );
     }
 }
 
@@ -2115,100 +2261,148 @@ void EmailClient::messageChanged()
         it is transferred to trash, and if from trash it is expunged  */
 bool EmailClient::deleteMail(EmailListItem *mailItem)
 {
-    Email *mail = mailItem->mail();
-    Folder *folder = folderView->currentFolder();
-
+    Folder *folder = folderView()->currentFolder();
     if ( folder == NULL ) {
         qWarning("No folder selected, cannot delete mail");
         return false;
     }
 
-    //if the client has "deleteImmediately" set, then do so now.
-    MailAccount *account = accountList->getAccountById( mail->fromAccount() );
-    Client *client = (account ? emailHandler->clientFromAccount(account) : 0);
-    if ( client && client->hasDeleteImmediately() ) {
-        client->deleteImmediately( mail->serverUid() );
-    }
+    EmailFolderList* srcFolder = mailboxList()->mailbox( folder->mailbox() );
 
-    // Deleting an unread mail resets the new mail count
-    if (client && !mail->status(EFlag_Read))
-        client->resetNewMailCount();
+    const bool deleting(folder->folderType() == FolderTypeSystem && 
+                        folder->mailbox() == MailboxList::TrashString);
 
-    //only request confirmation when expunging the mail from trash
-    if ( folder->folderType() == FolderTypeSystem && folder->mailbox() == TrashString )  {
-        // Add it to queue of mails to be deleted from server
-        if ( mail->status(EFlag_Incoming) ) {
-            MailAccount *account = accountList->getAccountById( mail->fromAccount() );
-            if ( account != NULL ) {
-         if ( account->deleteMail() ){
-                    account->deleteMsg( mail->serverUid(), mail->fromMailbox() );
-                }
-            }
-        }
-        mailboxList->mailbox(TrashString)->removeMail( mail->uuid(), true );
-        return true;
-    }
+    QMailMessage message(mailItem->id(), QMailMessage::Header);
 
-    //if mail is in queue for download, remove it from queue if possible
-    if ( folder->mailbox() == InboxString )  {
-        if ( (receiving) && (mail->fromAccount() == mailAccount->id() ) ) {
-            if ( !mail->status(EFlag_Downloaded) )
-                mailDownloadList.remove( mail->serverUid() );
-        }
-    }
+    QMailStore::DeletionProperties properties;
+    properties.id = message.id();
+    properties.serverUid = message.serverUid();
+    properties.fromAccount = message.fromAccount();
+    properties.fromMailbox = message.fromMailbox();
 
-    moveMailToFolder( mailItem->mail(), mailboxList->mailbox( folder->mailbox() ), mailboxList->mailbox(TrashString) );
+    deleteMail(properties, deleting, srcFolder);
 
     return true;
 }
 
-/*  Be careful using routines similar to this one.  As soon as a corresponding
-        email entry is removed, the mail cannot be swapped into memory */
-bool EmailClient::moveMailToFolder(Email *mail, EmailFolderList *source, EmailFolderList *target)
+bool EmailClient::deleteMailList(QList<EmailListItem*>& deleteList)
+{
+    Folder *folder = folderView()->currentFolder();
+    if ( folder == NULL ) {
+        qWarning("No folder selected, cannot delete mail");
+        return false;
+    }
+
+    EmailFolderList* srcFolder = mailboxList()->mailbox( folder->mailbox() );
+
+    const bool deleting(folder->folderType() == FolderTypeSystem && 
+                        folder->mailbox() == MailboxList::TrashString);
+
+    int count(deleteList.count());
+    bool displayProgress(count >= MinimumForProgressIndicator);
+
+    suspendMailCount = true;
+
+    if (displayProgress) {
+        QString caption;
+        if (deleting) {
+            if (deleteList.count() == 1 )
+                caption = tr("Deleting message");
+            else 
+                caption = tr("Deleting messages");
+        } else {
+            if ( deleteList.count() == 1 )
+                caption = tr("Moving message");
+            else
+                caption = tr("Moving messages");
+        }
+
+        progressBar->reset();
+        progressBar->setRange(0, count);
+        progressBar->setText(caption);
+        qApp->processEvents();
+    }
+
+    QMailIdList ids;
+    foreach (EmailListItem* mailItem, deleteList)
+        ids.append(mailItem->id());
+
+    QTime time;
+    count = 0;
+    foreach (const QMailStore::DeletionProperties& properties, QMailStore::instance()->deletionProperties(ids)) {
+        deleteMail(properties, deleting, srcFolder);
+
+        if (displayProgress) {
+            ++count;
+
+            // We still need to process events during this loop
+            if ((count == 1) || (time.elapsed() > ProgressIndicatorUpdatePeriod)) {
+                progressBar->setValue(count);
+                time.start();
+            }
+        }
+    }
+
+    if (displayProgress) {
+        progressBar->reset();
+        progressBar->setText("");
+    }
+
+    suspendMailCount = false;
+
+    return true;
+}
+
+bool EmailClient::moveMailToFolder(const QMailId& id, EmailFolderList *source, EmailFolderList *target)
 {
     if ( source == target )
         return false;
 
-    if(!source->moveMail(mail->uuid(),*target))
+    if(!source->moveMail(id,*target))
     {
         moveError(*source,*target);
         return false;
     }
 
-//     // Automatic swapping currently not working
-//     mail->readFromFile();
-//
-//     Email newMail = *mail;      // mail will be deleted when we call removeMail
-//
-//     if ( !target->addMail(newMail) ) {
-//         accessError( target );
-//         return false;
-//     }
-//
-//     if ( !source->removeMail( mail->uuid(), false ) ) {
-//         // Delete the copy we made
-//         target->removeMail( newMail.uuid(), false );
-//
-//         accessError( source );
-//         return false;
-//     }
+    return true;
+}
+
+bool EmailClient::moveMailListToFolder(const QMailIdList& ids, EmailFolderList *source, EmailFolderList *target)
+{
+    if (source == target)
+        return false;
+
+    if (!source->moveMailList(ids,*target))
+    {
+        moveError(*source,*target);
+        return false;
+    }
 
     return true;
 }
 
+bool EmailClient::moveMailListToFolder(QList<EmailListItem*>& moveList, EmailFolderList *source, EmailFolderList *target)
+{
+    QMailIdList ids;
+    foreach (EmailListItem* mailItem, moveList)
+        ids.append(mailItem->id());
+    return moveMailListToFolder( ids, source, target );
+}
+
+/*
 void EmailClient::showItemMenu(EmailListItem *item)
 {
     Q_UNUSED( item );
 
-    Folder *folder = folderView->currentFolder();
+    Folder *folder = folderView()->currentFolder();
 
     if ( folder == NULL )
         return;
 
     QString mailbox = folder->mailbox();
-    QStringList list = mailboxList->mailboxes();
+    QStringList list = mailboxList()->mailboxes();
     list.removeAll( mailbox );
-    list.removeAll( OutboxString );
+    list.removeAll( MailboxList::OutboxString );
 
     QMenu *popFolder = new QMenu(this);
     movePop->clear();
@@ -2217,11 +2411,12 @@ void EmailClient::showItemMenu(EmailListItem *item)
     QAction *action;
     uint pos = 0;
     for ( QStringList::Iterator it = list.begin(); it != list.end(); ++it ) {
-	if (!pm_folder)
-	    pm_folder = new QIcon(":icon/folder");
-        action = movePop->addAction(*pm_folder, mailboxTrName(*it) );
+        if (!pm_folder)
+            pm_folder = new QIcon(":icon/folder");
+
+        action = movePop->addAction(*pm_folder, MailboxList::mailboxTrName(*it) );
         moveMap.insert(action, pos);
-        action = copyPop->addAction(*pm_folder, mailboxTrName(*it) );
+        action = copyPop->addAction(*pm_folder, MailboxList::mailboxTrName(*it) );
         moveMap.insert(action, pos);
 
         pos++;
@@ -2231,77 +2426,107 @@ void EmailClient::showItemMenu(EmailListItem *item)
     popFolder->addMenu( movePop );
     popFolder->addMenu( copyPop );
     if (!pm_trash)
-	pm_trash = new QIcon(":icon/folder");
-    popFolder->addAction(*pm_trash, tr("Delete mail"), this, SLOT( deleteMailItem() ) );
+        pm_trash = new QIcon(":icon/folder");
+    popFolder->addAction(*pm_trash, tr("Delete message"), this, SLOT(deleteMailItem()) );
     popFolder->popup( QCursor::pos() );
 }
+*/
 
-//Can't delete message(s) because SIM is not detected/ready
-void EmailClient::showDeleteNotReadyWarning()
+bool EmailClient::confirmDeleteWithoutSIM(int deleteCount)
 {
-    QMessageBox::warning(qApp->activeWindow(),
-                         tr("SIM card not detected"),
-                         tr("<qt>Unable to delete SMS messages, the "
-                            "SIM card is not ready</qt>"),
-                         tr("OK"));
+    QString text;
+    if ( deleteCount == 1 )
+         text = tr("The SIM card is not ready. Do you want to delete the message without removal from the SIM card?");
+    else
+         text = tr("The SIM card is not ready. Do you want to delete the messages without removal from the SIM card?");
+
+    return (QMessageBox::warning(0,
+                                 tr("SIM not ready"),
+                                 text,
+                                 QMessageBox::Yes, 
+                                 QMessageBox::No) == QMessageBox::Yes);
 }
 
 void EmailClient::deleteMailItem()
 {
-     Folder *folder = folderView->currentFolder();
-     EmailListItem *item = 0;
-     if (!folder)
+    Folder *folder = folderView()->currentFolder();
+    if (!folder)
         return;
 
-     if ( folder->folderType() == FolderTypeSystem &&
-        folder->mailbox() == OutboxString &&
+    if ( folder->folderType() == FolderTypeSystem &&
+        folder->mailbox() == MailboxList::OutboxString &&
         sending) {
         return; //don't delete when sending
-     }
+    }
 
-     bool hasSms = false;
-     QList<EmailListItem*> deleteList;
-     for (int i = 0; i < messageView()->rowCount(); ++i) {
-       item = (EmailListItem *) messageView()->item( i, 0 );
-       if ( messageView()->isItemSelected(item) ) {
-           if (!emailHandler->smsReadyToDelete()
-               && item->mail()
-               && (item->mail()->type() == MailMessage::SMS)) {
-                hasSms = true;
-           } else {
-               deleteList.append( item );
-           }
-       }
-     }
-     if (!emailHandler->smsReadyToDelete() && hasSms)
-         showDeleteNotReadyWarning();
+    bool hasSms = false;
+    QList<EmailListItem*> deleteList;
+    for (int i = 0; i < messageView()->rowCount(); ++i) {
+        EmailListItem* item = static_cast<EmailListItem *>(messageView()->item( i, 0 ));
+        if ( messageView()->isItemSelected(item) ) {
+           deleteList.append( item );
+           hasSms |= (item->type() == QMailMessage::Sms);
+        }
+    }
 
-     if ( deleteList.isEmpty() )
-         return;
+    int deleteCount = deleteList.count();
+    if ( deleteCount == 0)
+        return;
 
-     if ( folder->folderType() == FolderTypeSystem &&
-          folder->mailbox() == TrashString ) {
-         QString prompt = tr( "the mail" );
-         if (deleteList.count() > 1)
-             prompt = tr( "the mails" );
-         if ( !Qtopia::confirmDelete( this, tr("EMail"), prompt ) )
-             return;
-     }
-     suspendMailCount = true;
-     while (!deleteList.isEmpty())
-         deleteMail( deleteList.takeFirst() );
-     suspendMailCount = false;
-     updateFolderCount(folder->mailbox());
-     updateFolderCount(TrashString);
+    const bool deleting(folder->folderType() == FolderTypeSystem && 
+                        folder->mailbox() == MailboxList::TrashString);
+
+    QString action;
+    QString actionDetails;
+    if ( deleting ) {
+        QString item;
+        if ( deleteCount == 1  )
+            item = tr("1 message");
+        else
+            item = tr("%1 messages","%1>=2 ->use plural").arg(deleteCount);
+
+        if ( !Qtopia::confirmDelete( this, tr("Email"), item ) )
+            return;
+
+        action = tr("Deleting");
+        if ( deleteCount == 1 )
+            actionDetails = tr("Deleting 1 message");
+        else
+            actionDetails = tr("Deleting %1 messages", "%1>=2 -> use plural").arg(deleteCount);
+    } else {
+        // Messages will be removed from SIM on move to Trash
+        if (!emailHandler->smsReadyToDelete() && hasSms) {
+            if (confirmDeleteWithoutSIM(deleteCount) == false)
+                return;
+        }
+
+        action = tr("Moving");
+        if (deleteCount == 1 )
+            actionDetails = tr("Moving 1 message to Trash");
+        else
+            actionDetails = tr("Moving %1 messages to Trash","%1>=2 ->use plural").arg(deleteCount);
+    }
+
+    if (deleteList.count() < MinimumForProgressIndicator) {
+        // Tell the user we're doing what they asked for
+        AcknowledgmentBox::show(action, actionDetails);
+    }
+
+    deleteMailList(deleteList);
+
+    updateFolderCount(folder->mailbox());
+    updateFolderCount(MailboxList::TrashString);
 }
 
 
 void EmailClient::moveMailItem(int index)
 {
-    Folder *folder = folderView->currentFolder();
+    Folder *folder = folderView()->currentFolder();
+    if ( folder == NULL ) 
+        return;
 
     if ( folder->folderType() == FolderTypeSystem &&
-         folder->mailbox() == OutboxString &&
+         folder->mailbox() == MailboxList::OutboxString &&
          sending) {
         return; //don't delete when sending
     }
@@ -2309,7 +2534,7 @@ void EmailClient::moveMailItem(int index)
     QList<EmailListItem*> moveList;
     EmailListItem *item = 0;
     for (int i = 0; i < messageView()->rowCount(); ++i) {
-       item = (EmailListItem *) messageView()->item( i, 0 );
+       item = static_cast<EmailListItem *>(messageView()->item( i, 0 ));
        if ( messageView()->isItemSelected( item ) )
            moveList.append( item );
     }
@@ -2318,17 +2543,13 @@ void EmailClient::moveMailItem(int index)
         return;
 
     QString mailbox = folder->mailbox();
-    QStringList list = mailboxList->mailboxes();
+    QStringList list = mailboxList()->mailboxes();
     list.removeAll( mailbox );
-    list.removeAll(OutboxString);
+    list.removeAll(MailboxList::OutboxString);
     QString target = list[index];
 
-    QListIterator<EmailListItem*> it(moveList);
-    suspendMailCount = true;
-    while ( it.hasNext() )
-        moveMailToFolder(it.next()->mail(), mailboxList->mailbox(mailbox),
-                         mailboxList->mailbox(target) );
-    suspendMailCount = false;
+    moveMailListToFolder( moveList, mailboxList()->mailbox(mailbox), mailboxList()->mailbox(target) );
+
     updateFolderCount(mailbox);
     updateFolderCount(target);
 }
@@ -2339,25 +2560,50 @@ void EmailClient::moveMailItem(QAction *action)
         moveMailItem(moveMap[action]);
 }
 
+bool EmailClient::copyMailToFolder(const QMailId& id, EmailFolderList *source, EmailFolderList *target)
+{
+    if ( source == target )
+        return false;
+
+    if (!source->copyMail(id, *target)) {
+        accessError(target);
+        return false;
+    }
+
+    return true;
+}
+
+bool EmailClient::copyMailListToFolder(QList<EmailListItem*>& copyList, EmailFolderList *source, EmailFolderList *target)
+{
+    QString caption;
+    if ( copyList.count() == 1 )
+        caption = tr("Copying message");
+    else 
+        caption = tr("Copying messages","2 or more messages");
+            
+    return foreachListElement(&EmailClient::copyMailToFolder, copyList, source, target, caption);
+}
+
 void EmailClient::copyMailItem(int index)
 {
-    Folder *folder = folderView->currentFolder();
+    Folder *folder = folderView()->currentFolder();
     QList<EmailListItem*> copyList;
     EmailListItem *item = 0;
     uint size = 0;
 
     for (int i = 0; i < messageView()->rowCount(); ++i ) {
-       item = (EmailListItem *) messageView()->item( i, 0 );
+       item = static_cast<EmailListItem *>(messageView()->item( i, 0 ));
        if ( messageView()->isItemSelected( item ) ) {
            copyList.append( item );
-           size += item->mail()->size();
+           QMailMessage message(item->id(),QMailMessage::Header);
+           size += message.size();
        }
     }
 
     if (!LongStream::freeSpace( "", size + 1024*10 )) {
         QString title( tr("Copy error") );
         QString msg( "<qt>" + tr("Storage for messages is full.<br><br>Could not copy messages.") + "</qt>" );
-        QMessageBox::warning(qApp->activeWindow(), title, msg, tr("OK") );
+        QMessageBox::warning(0, title, msg, tr("OK") );
         return;
     }
 
@@ -2365,24 +2611,16 @@ void EmailClient::copyMailItem(int index)
         return;
 
     QString mailbox = folder->mailbox();
-    QStringList list = mailboxList->mailboxes();
+    QStringList list = mailboxList()->mailboxes();
     list.removeAll( mailbox );
-    list.removeAll( OutboxString );
+    list.removeAll( MailboxList::OutboxString );
     QString target = list[index];
 
-    QListIterator<EmailListItem*> it(copyList);
-    suspendMailCount = true;
-    EmailFolderList* sourceBox = mailboxList->mailbox(mailbox);
-    EmailFolderList* targetBox = mailboxList->mailbox(target);
-    Q_ASSERT(sourceBox);
-    Q_ASSERT(targetBox);
-    while ( it.hasNext() ) {
-       Email *mail = it.next()->mail();
-       if(!sourceBox->copyMail(mail->uuid(),(*targetBox))){
-           accessError(mailboxList->mailbox(target) );
-       }
-    }
-    suspendMailCount = false;
+    EmailFolderList* sourceBox = mailboxList()->mailbox(mailbox);
+    EmailFolderList* targetBox = mailboxList()->mailbox(target);
+
+    copyMailListToFolder( copyList, sourceBox, targetBox );
+
     updateFolderCount(mailbox);
     updateFolderCount(target);
 }
@@ -2393,101 +2631,169 @@ void EmailClient::copyMailItem(QAction *action)
         copyMailItem(moveMap[action]);
 }
 
+bool EmailClient::foreachListElement(bool (EmailClient::*func)(const QMailId&, EmailFolderList*, EmailFolderList*), 
+                                     QList<EmailListItem*>& list, EmailFolderList *source, EmailFolderList *target, const QString& caption)
+{
+    bool result(true);
+
+    int count(list.count());
+    bool displayProgress(count >= MinimumForProgressIndicator);
+
+    suspendMailCount = true;
+
+    if (displayProgress) {
+        progressBar->reset();
+        progressBar->setRange(0, count);
+        progressBar->setText(caption);
+        qApp->processEvents();
+    }
+
+    QTime time;
+    count = 0;
+    foreach (EmailListItem* mailItem, list) {
+        result = ( result && (this->*func)( mailItem->id(), source, target ) );
+
+        if (displayProgress) {
+            ++count;
+
+            // We still need to process events during this loop
+            if ((count == 1) || (time.elapsed() > ProgressIndicatorUpdatePeriod)) {
+                progressBar->setValue(count);
+                time.start();
+            }
+        }
+    }
+
+    if (displayProgress) {
+        progressBar->reset();
+        progressBar->setText("");
+    }
+
+    suspendMailCount = false;
+
+    return result;
+}
+
 void EmailClient::moveMessage()
 {
-#ifdef QTOPIA_PHONE
-    Folder *folder = folderView->currentFolder();
+    Folder *folder = folderView()->currentFolder();
     if ( folder == NULL )
         return;
 
     QString mailbox = folder->mailbox();
-    QStringList list = mailboxList->mailboxes();
+    QStringList list = mailboxList()->mailboxes();
     list.removeAll( mailbox );
-    list.removeAll( OutboxString);
+    list.removeAll( MailboxList::OutboxString);
     SelectFolderDialog *selectFolderDialog = new SelectFolderDialog(list);
-#ifdef QTOPIA_DESKTOP
-    selectFolderDialog->exec();
-#else
     QtopiaApplication::execDialog( selectFolderDialog );
-#endif
+
     if (selectFolderDialog->result() &&
         selectFolderDialog->folder() != -1)
         moveMailItem( selectFolderDialog->folder() );
     delete selectFolderDialog;
-#endif
 }
 
 void EmailClient::copyMessage()
 {
-#ifdef QTOPIA_PHONE
-    Folder *folder = folderView->currentFolder();
+    Folder *folder = folderView()->currentFolder();
     if ( folder == NULL )
         return;
 
     QString mailbox = folder->mailbox();
-    QStringList list = mailboxList->mailboxes();
+    QStringList list = mailboxList()->mailboxes();
     list.removeAll( mailbox );
-    list.removeAll( OutboxString);
+    list.removeAll( MailboxList::OutboxString);
     SelectFolderDialog *selectFolderDialog = new SelectFolderDialog(list);
-#ifdef QTOPIA_DESKTOP
-    selectFolderDialog->exec();
-#else
     QtopiaApplication::execDialog( selectFolderDialog );
-#endif
+
     if (selectFolderDialog->result() &&
         selectFolderDialog->folder() != -1)
         copyMailItem( selectFolderDialog->folder() );
     delete selectFolderDialog;
-#endif
 }
 
 /* Select all messages */
 void EmailClient::selectAll()
 {
-    for (int i = 0; i < messageView()->rowCount(); ++i)
-        messageView()->setItemSelected( messageView()->item( i, 0 ), true );
+    messageView()->selectAll();
 }
 
 /*  currently only allowed for trash   */
-void EmailClient::emptyFolder()
+void EmailClient::emptyTrashFolder()
 {
-    Email *mail;
     MailAccount *account;
     EmailFolderList *folderList;
 
-    if (!folderView->currentFolder())
-        return;
-/*
-    if ( !( folder->folderType() == FolderTypeSystem && folder->mailbox() == "trash") )
-        return;
-*/
-
-    folderList = mailboxList->mailbox(TrashString);
+    int type = QMailMessage::AnyType;
+    if ( currentMailboxWidgetId() == actionId ) {
+        type = QMailMessage::Mms | QMailMessage::Sms | QMailMessage::System;
+    } else if (currentMailboxWidgetId() == folderId) {
+        type = QMailMessage::Email;
+        if (!folderView()->currentFolder())
+            return;
+    }
+    folderList = mailboxList()->mailbox(MailboxList::TrashString);
 
     QString strName = tr("all messages in the trash");
     if (Qtopia::confirmDelete(this, appTitle, strName)) {
-        QListIterator<Email*> it = folderList->entryIterator();
-        while (it.hasNext()) {
-            mail = it.next();
 
-            if (mail->status( EFlag_Incoming)) {
-                account = accountList->getAccountById(mail->fromAccount());
+        QMailIdList trashIds = folderList->messages();
+
+        int count(trashIds.count());
+        bool displayProgress(count >= MinimumForProgressIndicator);
+
+        suspendMailCount = true;
+
+        if (displayProgress) {
+            QString caption;
+            if ( count == 1 )
+                caption = (tr("Moving 1 message"));
+            else
+                caption = tr("Moving %1 messages",
+                             "number of messages always >=2").arg(count);
+                
+            progressBar->reset();
+            progressBar->setRange(0, count);
+            progressBar->setText(caption);
+            qApp->processEvents();
+        }
+        
+        QTime time;
+        count = 0;
+        
+        foreach(QMailId id, trashIds)
+        {
+            QMailMessage mail(id,QMailMessage::Header);
+            if ((mail.messageType() & type) && 
+                (mail.status() & QMailMessage::Incoming)) {
+                account = accountList->getAccountById(mail.fromAccount());
                 if (account != NULL) {
                     if (account->deleteMail())
-                        account->deleteMsg(mail->serverUid(), mail->fromMailbox());
+                        account->deleteMsg(mail.serverUid(), mail.fromMailbox());
+                }
+            }
+            if (displayProgress) {
+                ++count;
+
+                // We still need to process events during this loop
+                if ((count == 1) || 
+                    (time.elapsed() > ProgressIndicatorUpdatePeriod)) {
+                    progressBar->setValue(count);
+                    time.start();
                 }
             }
         }
+        folderList->empty(type);
+        messageView()->clear();
 
-        folderList->empty();
+        if (displayProgress) {
+            progressBar->reset();
+            progressBar->setText("");
+        }
 
-        Folder *folder = folderView->currentFolder();
-        if (folder
-            && folder->folderType() == FolderTypeSystem
-            && folder->mailbox() == TrashString)
-            messageView()->clear();
+        suspendMailCount = false;
 
-        updateFolderCount(folderList->mailbox());
+        updateFolderCount(MailboxList::TrashString);
     }
 
     update();
@@ -2495,10 +2801,10 @@ void EmailClient::emptyFolder()
 
 void EmailClient::setTotalSmtpSize(int size)
 {
-    if (queueStatus == 1 && !receiving)
-        queueStatus = 3;
+    if (queueStatus == Receiving && !receiving)
+        queueStatus = Sending;
 
-    if (queueStatus == 3) {
+    if (queueStatus == Sending) {
         progressBar->reset();
         if(size != 0)
             progressBar->setRange(0,size);
@@ -2514,10 +2820,10 @@ void EmailClient::setStatusText(QString &txt)
 
 void EmailClient::setTotalPopSize(int size)
 {
-    if (queueStatus == 3 && !sending)
-        queueStatus = 1;
+    if (queueStatus == Sending && !sending)
+        queueStatus = Receiving;
 
-    if (queueStatus == 1) {
+    if (queueStatus == Receiving) {
         progressBar->reset();
         if(size != 0)
             progressBar->setRange(0,size);
@@ -2528,12 +2834,12 @@ void EmailClient::setTotalPopSize(int size)
 
 void EmailClient::setDownloadedSize(int size)
 {
-    if (queueStatus == 3 && !sending) {
-        queueStatus = 1;
+    if (queueStatus == Sending && !sending) {
+        queueStatus = Receiving;
         setTotalPopSize(totalSize);
     }
 
-    if (queueStatus == 1) {
+    if (queueStatus == Receiving) {
         int total = progressBar->maximum();
 
         if (size > total)
@@ -2547,12 +2853,12 @@ void EmailClient::setDownloadedSize(int size)
 
 void EmailClient::setTransferredSize(int size)
 {
-    if (queueStatus == 1 && !receiving) {
-        queueStatus = 3;
+    if (queueStatus == Receiving && !receiving) {
+        queueStatus = Sending;
         setTotalSmtpSize(totalSize);
     }
 
-    if (queueStatus == 3) {
+    if (queueStatus == Sending) {
         int total = progressBar->maximum();
 
         if (size > total)
@@ -2564,67 +2870,107 @@ void EmailClient::setTransferredSize(int size)
     }
 }
 
-void EmailClient::updateQuery(Email *mail, const QString &mailbox)
+void EmailClient::updateQuery(const QMailMessage& message, const QString &mailbox)
 {
-    Folder *folder = folderView->currentFolder();
+    Folder *folder = folderView()->currentFolder();
     if (folder == NULL)
         return;
 
     if ( folder->mailbox() != mailbox )
         return;
 
-    EmailListItem *item = messageView()->getRef( mail->uuid() );
+    EmailListItem *item = messageView()->getRef( message.id() );
     if (item != NULL) {
-
-        if ( folder->matchesEmail(mail) ) {
-            item->setMail(mail);
+        if ( folder->matchesEmail(message) ) {
+            item->setId(message.id());
         } else {
             EmailListItem *newItem = item;
 
             if ( messageView()->isItemSelected(item) ) {
                 int row = messageView()->row( item );
                 if (row < messageView()->rowCount() - 1) //try below
-                    newItem = (EmailListItem *)messageView()->item(row + 1, 0);
+                    newItem = static_cast<EmailListItem *>(messageView()->item(row + 1, 0));
                 if (!newItem && row) //try above
-                    newItem = (EmailListItem *)messageView()->item(row - 1, 0);
+                    newItem = static_cast<EmailListItem *>(messageView()->item(row - 1, 0));
             } else
                 newItem = NULL;
 
             messageView()->removeRow( messageView()->row( item ) );
             if ( newItem ) {
-                messageView()->clearSelection();
-                messageView()->setItemSelected( newItem, true );
-                messageView()->setCurrentItem( newItem );
+                messageView()->setSelectedItem( newItem );
             }
-            setEnableMessageActions( (bool)messageView()->rowCount() );
-
             return;
         }
-    } else if ( folder->matchesEmail(mail) ) {
-            messageView()->treeInsert(mail);
-    }
-
-}
-
-void EmailClient::updatePopStatusLabel(const QString &txt)
-{
-    if (queueStatus == 1) {
-        progressBar->setText(statusLabelHeader + " - " + txt);
-    }
-    if (mReadMail && mReadMail->isVisible())
-        mReadMail->setProgressText(txt);
-}
-
-void EmailClient::updateSendingStatusLabel(const QString &txt)
-{
-    if (queueStatus == 3) {
-        if (smtpAccount)
-            progressBar->setText(smtpAccount->accountName() + " - " + txt);
+    } else if ( folder->matchesEmail(message) ) {
+        if(messageView()->showEmailsOnly())
+        {
+            if(message.messageType() & QMailMessage::Email)
+                messageView()->treeInsert(message.id());
+        }
         else
-            progressBar->setText(txt);
+        {
+            if(!(message.messageType()  & QMailMessage::Email))
+                messageView()->treeInsert(message.id());
+        }
+    }
+}
+
+void EmailClient::updateReceiveStatusLabel(const Client* client, const QString &txt)
+{
+    if (queueStatus == Receiving) {
+        QString status(txt);
+        if (!status.isEmpty()) {
+            if (MailAccount* account = emailHandler->accountFromClient(client)) 
+                if (!account->accountName().isEmpty())
+                    status.prepend(account->accountName().append(" - "));
+        }
+        progressBar->setText(status);
     }
     if (mReadMail && mReadMail->isVisible())
         mReadMail->setProgressText(txt);
+}
+
+void EmailClient::updateSendStatusLabel(const Client* client, const QString &txt)
+{
+    if (queueStatus == Sending) {
+        QString status(txt);
+        if (!status.isEmpty()) {
+            if (MailAccount* account = emailHandler->accountFromClient(client))
+                if (!account->accountName().isEmpty())
+                    status.prepend(account->accountName().append(" - "));
+        }
+        progressBar->setText(status);
+    }
+    if (mReadMail && mReadMail->isVisible())
+        mReadMail->setProgressText(txt);
+}
+
+void EmailClient::rebuildMoveCopyMenus(const Folder *folder)
+{
+    //  Rebuild mail move/copy menus as they don't include the currently selected folder
+    initActions();
+    movePop->clear();
+    copyPop->clear();
+    QMapIterator<QAction*, int> i(moveMap);
+    moveMap.clear();
+
+    QStringList list = mailboxList()->mailboxes();
+    QString mailbox = folder->mailbox();
+    list.removeAll( mailbox );
+    list.removeAll( MailboxList::OutboxString);
+
+    QAction *action;
+    uint pos = 0;
+    for ( QStringList::Iterator itList = list.begin(); itList != list.end(); ++itList ) {
+	if (!pm_folder)
+	    pm_folder = new QIcon(":icon/folder");
+        action = movePop->addAction(*pm_folder, MailboxList::mailboxTrName(*itList) );
+        moveMap.insert(action, pos);
+        action = copyPop->addAction(*pm_folder, MailboxList::mailboxTrName(*itList) );
+        moveMap.insert(action, pos);
+
+        pos++;
+    }
 }
 
 void EmailClient::folderSelected(Folder *folder)
@@ -2634,116 +2980,54 @@ void EmailClient::folderSelected(Folder *folder)
         if ( !folder )
             return;
 
-        QString mailbox = folder->mailbox();
-        updateFolderCount(mailbox);
+        updateFolderCount(folder->mailbox());
         return;
     }
-//    QTime stime;
-//    stime.start();
-    Email *mail;
 
-    messageView()->clear();
 
     if ( folder == NULL ) {
         return;
     }
 
-    QListIterator<Email*> it = mailboxList->mailbox(InboxString)->entryIterator();
-    int count = mailboxList->mailbox(InboxString)->mailCount("all");
-    QString mailbox = folder->mailbox();
+    QMailIdList folderIds;
 
-    if ( mailbox == InboxString ) {
-        messageView()->horizontalHeaderItem(1)->setText( tr("From") );
-    } else if ( mailbox == OutboxString ) {
-        messageView()->horizontalHeaderItem(1)->setText( tr("To") );
-    } else if ( mailbox == DraftsString ) {
-        messageView()->horizontalHeaderItem(1)->setText( tr("To") );
-    } else if ( mailbox == SentString ) {
-        messageView()->horizontalHeaderItem(1)->setText( tr("To") );
-    } else if ( mailbox == TrashString ) {
-        messageView()->horizontalHeaderItem(1)->setText( tr("From/To") );
+    unsigned int messageType;
+
+    EmailFolderList* mailFolder = mailboxList()->mailbox(folder->mailbox());
+    if(!mailFolder)
+        mailFolder = mailboxList()->mailbox(MailboxList::InboxString);
+
+    if(messageView()->showEmailsOnly())
+        messageType = QMailMessage::Email;
+    else
+        messageType = QMailMessage::Mms | QMailMessage::Sms | QMailMessage::System;
+
+    if(folder->folderType() == FolderTypeMailbox)
+    {
+        Mailbox* mailbox = static_cast<Mailbox*>(folder);
+        folderIds = mailFolder->messagesFromMailbox(mailbox->pathName(),
+                                                    messageType,
+                                                    EmailFolderList::DescendingDate);  
     }
-
-    if ( mailbox != InboxString ) {
-        if (mailboxList->mailbox(mailbox)) {
-            it = mailboxList->mailbox(mailbox)->entryIterator();
-            count = mailboxList->mailbox(mailbox)->mailCount("all");
-        }
+    else if(folder->folderType() == FolderTypeSystem)
+    {
+        folderIds = mailFolder->messages(messageType,
+                                         EmailFolderList::DescendingDate);  
     }
-
-    bool slowFolder = false;
-    Search *s = NULL;
-    if ( folder->folderType() == FolderTypeSearch )
-        s = ((SearchFolder *) folder)->search();
-    else if ( folder->folderType() == FolderTypeSystem )
-        s = ((SystemFolder *) folder)->search();
-
-    if ( s  && !s->getBody().isEmpty() ) {
-        if ( !receiving && !sending ) {
-            slowFolder = true;
-            progressBar->reset();
-            progressBar->setRange(0,100);
-            qApp->processEvents();
-        }
+    else if(folder->folderType() == FolderTypeAccount)
+    {
+        MailAccount* mailbox = static_cast<MailAccount*>(folder);
+        QMailMessageKey folderKey(QMailMessageKey::FromAccount,mailbox->id());
+        folderIds = mailFolder->messagesFromAccount(mailbox->id(),
+                                                    messageType,
+                                                    EmailFolderList::DescendingDate);  
     }
+    messageView()->treeInsert(folderIds);
 
-    int at = 0;
-
-    //order newest first
-
-    while ( it.hasNext() ) {
-        mail = it.next();
-        if (mail == NULL) {
-            qWarning("null mailptr in ListWidgetItem, should never occur");
-        } else if ( folder->matchesEmail(mail) ) {
-            messageView()->treeInsert(mail);
-        }
-
-        at++;
-        if ( slowFolder ) {
-            progressBar->setValue( at*100/count);
-        }
-    }
-
-    if ( slowFolder )
-        progressBar->reset();
-
-    //  Rebuild mail move/copy menus as they don't include the currently selected folder
-    initActions();
-    movePop->clear();
-    copyPop->clear();
-    QMapIterator<QAction*, int> i(moveMap);
-    moveMap.clear();
-
-    QStringList list = mailboxList->mailboxes();
-    list.removeAll( mailbox );
-    list.removeAll( OutboxString);
-
-    QAction *action;
-    uint pos = 0;
-    for ( QStringList::Iterator itList = list.begin(); itList != list.end(); ++itList ) {
-	if (!pm_folder)
-	    pm_folder = new QIcon(":icon/folder");
-        action = movePop->addAction(*pm_folder, mailboxTrName(*itList) );
-        moveMap.insert(action, pos);
-        action = copyPop->addAction(*pm_folder, mailboxTrName(*itList) );
-        moveMap.insert(action, pos);
-
-        pos++;
-    }
-
-    messageView()->setCurrentMailbox( mailbox );
-
-    messageView()->clearSelection();
-    if ( messageView()->item(0, 0) ) {
-       messageView()->setItemSelected( messageView()->item(0, 0), true );
-       messageView()->setCurrentItem( messageView()->item(0, 0) );
-    }
-    updateFolderCount(mailbox);
-
-    //BUG? QTableWidget does not automatically sort the table on newly appended items
-    messageView()->setByArrival(true);
-    messageView()->defineSort(0,false);
+    rebuildMoveCopyMenus(folder);
+    messageView()->setCurrentMailbox( folder->mailbox() );
+    messageView()->setSelectedRow( 0 );
+    updateFolderCount( folder->mailbox() );
 }
 
 /*  make sure that the currently displayed item in readmail is the same
@@ -2751,28 +3035,22 @@ void EmailClient::folderSelected(Folder *folder)
     If this should fail the current item will be the first  */
 void EmailClient::imapServerFolders()
 {
-    EmailListItem *item = (EmailListItem *) messageView()->currentItem();
-    QUuid selected;
+    EmailListItem *item = static_cast<EmailListItem *>(messageView()->currentItem());
+    QMailId selected;
 
     if ( item && messageView()->isItemSelected(item) )
         selected = item->id();
 
-    folderView->updateAccountFolder(mailAccount);
+    folderView()->updateAccountFolder(mailAccount);
 
-    if ( !selected.isNull() ) {
-        item = messageView()->getRef( selected );
-        if ( item ) {
-            messageView()->clearSelection();
-            messageView()->setItemSelected( item, true );
-            messageView()->setCurrentItem( item );
-        }
+    if ( selected.isValid() ) {
+        messageView()->setSelectedId( selected );
     }
 }
 
 void EmailClient::failedList(QStringList &list)
 {
-    QMessageBox::warning(qApp->activeWindow(),
-        tr("<qt>The following commands failed:<br>%1</qt>").arg(list.join("<br>")), tr("OK"));
+    QMessageBox::warning(0, tr("<qt>The following commands failed:<br>%1</qt>").arg(list.join("<br>")), tr("OK"));
     return;
 }
 
@@ -2785,34 +3063,86 @@ void EmailClient::cornerButtonClicked()
     }
 }
 
+void EmailClient::findMatchingMessages()
+{
+    folderView()->changeToSystemFolder( lastSearch->mailbox() );
+    Folder *folder = folderView()->currentFolder();
+    if (!folder)
+        return;
+    
+    QMailIdList folderIds;
+    unsigned int messageType = 0;
+    if(messageView()->showEmailsOnly())
+        messageType = QMailMessage::Email;
+    else
+        messageType = QMailMessage::Mms | QMailMessage::Sms | QMailMessage::System;
+
+    EmailFolderList* mailFolder = mailboxList()->mailbox(folder->mailbox());
+    folderIds = mailFolder->messages(messageType, EmailFolderList::DescendingDate);
+    
+    bool slowFolder = FALSE;
+    Search *s = lastSearch;
+
+    if ( s  && !s->getBody().isEmpty() ) {
+        if ( !receiving && !sending ) {
+            slowFolder = TRUE;
+            progressBar->reset();
+            progressBar->setRange(0,100);
+        }
+    }
+
+    int at = 0;
+    if (s) {
+        messageView()->clear();
+        while (at < folderIds.count()) {
+            QMailMessage mail(folderIds[at], QMailMessage::HeaderAndBody);
+        
+            if (!mail.id().isValid()) {
+                qWarning("null mailptr in listviewitem, should never occur");
+            } else if ( lastSearch->matches(mail) ) {
+                messageView()->treeInsert(mail.id());
+            }
+        
+            ++at;
+            if (slowFolder)
+                progressBar->setValue( at*100/folderIds.count() );
+        }
+    } else {
+        messageView()->treeInsert(folderIds);
+    }
+    if ( slowFolder )
+        progressBar->reset();    
+
+    rebuildMoveCopyMenus(folder);
+    messageView()->setCurrentMailbox( folder->mailbox() );
+    messageView()->setSelectedRow( 0 );
+}
+
 void EmailClient::search()
 {
     SearchView searchView(false, this, Qt::Dialog); // No tr
     searchView.setObjectName("search"); // No tr
     searchView.setModal(true);
+    searchView.setSearch( lastSearch );
 
-
-    searchView.setSearch( folderView->lastSearch() );
-
-#ifdef QTOPIA_DESKTOP
-    searchView.exec();
-#else
     QtopiaApplication::execDialog(&searchView);
-#endif
+
     if (searchView.result() == QDialog::Accepted) {
-        searchView.hide();   // in case it's a slow search
-        // disconnect and reconnect cause we don't know whether the folderChanged signal will
-        // be emitted (worst case two folder changed events)
-        disconnect(folderView, SIGNAL(folderSelected(Folder*)), this, SLOT(folderSelected(Folder*)) );
-        Search *search = searchView.getSearch();
-
-        folderView->setLastSearch( search );
-        folderView->changeToSystemFolder( LastSearchString );
-
+        // disconnect and reconnect cause we don't know whether the 
+        // folderChanged signal will be emitted (worst case two folder 
+        // changed events)
+        disconnect(folderView(), SIGNAL(folderSelected(Folder*)), 
+		   this, SLOT(folderSelected(Folder*)) );
+        lastSearch = searchView.getSearch();
+        findMatchingMessages();
         showMessageList();
+        searchView.hide();
 
-        folderSelected( folderView->currentFolder() );
-        connect(folderView, SIGNAL(folderSelected(Folder*)), this, SLOT(folderSelected(Folder*)) );
+        connect(folderView(), SIGNAL(folderSelected(Folder*)), this, SLOT(folderSelected(Folder*)) );
+        QSettings mailconf("Trolltech","qtmail");
+        mailconf.beginGroup("lastSearch");
+        lastSearch->saveSettings( &mailconf );
+        mailconf.endGroup();
     }
 }
 
@@ -2837,9 +3167,9 @@ void EmailClient::externalEdit(const QString &mailbox)
 {
     cancel();
     showEmailView();
-    folderSelected( folderView->currentFolder() );
+    folderSelected( folderView()->currentFolder() );
 
-    QString msg = mailboxTrName( mailbox ) + " "; //no tr
+    QString msg = MailboxList::mailboxTrName( mailbox ) + " "; //no tr
     msg += tr("was edited externally");
     progressBar->setText( msg );
 }
@@ -2847,68 +3177,170 @@ void EmailClient::externalEdit(const QString &mailbox)
 int EmailClient::currentMailboxWidgetId()
 {
     if (!mailboxView)
-	return -1;
+        return -1;
     return mailboxView->currentIndex();
 }
 
 void EmailClient::setCurrentMailboxWidget(int id )
 {
     if ( mailboxView && (id >= 0) ) {
-#ifdef QTOPIA_PHONE
+        int oldId = currentMailboxWidgetId();
         mailboxView->setCurrentIndex( id );
         if (id == folderId) {
-            folderView->setFocus();
-        } else {
-            messageView()->setFocus();
-            if (messageView()->currentItem())
-                messageView()->setItemSelected( messageView()->currentItem(), true );
+            if (oldId == actionId)
+                folderView()->restoreCurrentFolder();
+            messageView()->setShowEmailsOnly(true);
+        } else if (id == messageId) {
+            if (QTableWidgetItem* item = messageView()->currentItem())
+                item->setSelected(true);
+        } else if (id == actionId) {
+            if (oldId == folderId)
+                folderView()->rememberCurrentFolder();
+
+            messageView()->setShowEmailsOnly(false);
+            if (QListWidgetItem* item = mActionView->currentItem())
+                item->setSelected(true);
         }
 
-        if (closeAfterView) {
-            closeAfterTransmissionsFinished();
-            if (isTransmitting()) // prevents flicker
-                QTMailWindow::singleton()->hide();
-            else
-                QTMailWindow::singleton()->close();
+        if (mFolderView) {
+            Folder *folder = folderView()->currentFolder();
+            if (folder)
+                updateFolderCount( folder->mailbox() );
         }
-        Folder *folder = folderView->currentFolder();
-        if (folder)
-            updateFolderCount( folder->mailbox() );
-#else
-        mailboxView->setCurrentIndex( id );
-#endif
     }
-}
-
-void EmailClient::showFolderList()
-{
-    setCurrentMailboxWidget( folderId );
-}
-
-void EmailClient::showMessageList()
-{
-    setCurrentMailboxWidget( messageId );
 }
 
 void EmailClient::showEmailView()
 {
-    emit raiseWidget(this, appTitle);
     update();
+    showMessageList();
+}
+
+void EmailClient::showFolderList(bool recordLocation)
+{
+    delayedInit();
+
+    setCurrentMailboxWidget( folderId );
+    
+    // Updates the mailListView
+    folderSelected( folderView()->currentFolder() );
+    showWidget( this, tr("Email") );    
+
+    if (recordLocation) {
+        pushLocation(UILocation(this, folderId));
+    }
+}
+
+void EmailClient::showMessageList(bool emailList, bool recordLocation)
+{
+    setCurrentMailboxWidget( messageId );
+
+    if (messageView()->showEmailsOnly() != emailList) {
+        messageView()->setShowEmailsOnly(emailList);
+    }
+
+    showWidget( this, folderView()->currentFolder()->displayName() );
+    if (recordLocation) {
+        pushLocation(UILocation(this, messageId, emailList));
+    }
+}
+
+void EmailClient::showMessageList(bool recordLocation)
+{
+    showMessageList(messageView()->showEmailsOnly(), recordLocation);
+}
+
+void EmailClient::showActionList(bool recordLocation)
+{
+    setCurrentMailboxWidget( actionId );
+
+    showWidget( this, appTitle );
+    if (recordLocation) {
+        pushLocation(UILocation(this, actionId));
+    }
+}
+
+void EmailClient::showComposer(bool recordLocation)
+{
+    showWidget(mWriteMail);
+
+    if (recordLocation) {
+        pushLocation(UILocation(mWriteMail));
+    }
+}
+
+void EmailClient::showViewer(const QMailId& messageId, Folder* folder, bool email, bool recordLocation)
+{
+    if ((messageView()->showEmailsOnly() != email) ||
+        (folderView()->currentFolder() != folder)) {
+        // Update the view for this folder's situation
+        messageView()->setShowEmailsOnly(email);
+        folderView()->setCurrentFolder(folder);
+        folderSelected(folder);
+    }
+
+    messageView()->setSelectedId(messageId);
+    readMailWidget()->viewSelectedMail(messageView());
+
+    showWidget(mReadMail);
+
+    if (recordLocation) {
+        pushLocation(UILocation(mReadMail, messageId, folder, email));
+    }
+}
+
+void EmailClient::restoreView()
+{
+    if (!haveLocation()) {
+        // If we have never raised the app, we will have no locations
+        return;
+    }
+
+    popLocation();
+
+    if (!haveLocation()) {
+        // We have finished
+        closeAfterTransmissionsFinished();
+        if (isTransmitting()) // prevents flicker
+            QTMailWindow::singleton()->hide();
+        else
+            QTMailWindow::singleton()->close();
+    } else {
+        UILocation restoreLocation(currentLocation());
+
+        if (restoreLocation.widget == mWriteMail) {
+            showComposer(false);
+        } else if (restoreLocation.widget == mReadMail) {
+            showViewer(restoreLocation.messageId, restoreLocation.messageFolder, restoreLocation.email, false);
+        } else {
+            if (restoreLocation.widgetId == actionId)
+                showActionList(false);
+            else if (restoreLocation.widgetId == folderId)
+                showFolderList(false);
+            else if (restoreLocation.widgetId == messageId)
+                showMessageList(restoreLocation.email, false);
+        }
+
+        QStringList mboxList = mailboxList()->mailboxes();
+        for (QStringList::Iterator it = mboxList.begin(); it != mboxList.end(); ++it) {
+            updateFolderCount( *it, true );
+        }
+    }
 }
 
 bool EmailClient::checkMailConflict(const QString& msg1, const QString& msg2)
 {
     if ( writeMailWidget()->isVisible() ) {
         QString message = tr("<qt>You are currently editing a message:<br>%1</qt>").arg(msg1);
-        switch( QMessageBox::warning( this, tr("Messages conflict"), message,
-            tr("Yes"), tr("No"), 0, 0, 1 ) ) {
+        switch( QMessageBox::warning( 0, tr("Messages conflict"), message,
+                                      tr("Yes"), tr("No"), 0, 0, 1 ) ) {
 
             case 0:
             {
-                if ( !mWriteMail->tryAccept() ) {
-                    QMessageBox::warning(this,
-                        tr("Autosave failed"),
-                        tr("<qt>Autosave failed:<br>%1</qt>").arg(msg2));
+                if ( !mWriteMail->saveChangesOnRequest() ) {
+                    QMessageBox::warning(0, 
+                                        tr("Autosave failed"), 
+                                        tr("<qt>Autosave failed:<br>%1</qt>").arg(msg2));
                     return true;
                 }
                 break;
@@ -2919,72 +3351,23 @@ bool EmailClient::checkMailConflict(const QString& msg1, const QString& msg2)
     return false;
 }
 
-void EmailClient::writeMailAction(const QMap<QString, QString> map )
+void EmailClient::writeMailAction(const QMap<QString, QString> propertyMap )
 {
     if (isHidden() || !isVisible())
         closeAfterWrite = true;
 
     if ( checkMailConflict(
-            tr("Should it be saved in Drafts\nbefore writing this mail?"),
-            tr("Write Mail message will be ignored")) )
+            tr("Should it be saved in Drafts before writing the new message?"),
+            tr("'Write Mail' message will be ignored")) )
         return;
 
-    Email mail;
+    QMailMessage mail;
 
-    QMap<QString, QString>::ConstIterator it;
-    for( it = map.begin(); it != map.end(); ++it ) {
-        if (it.key().toLower() == "from")
-            mail.setFrom( it.value() );
-        else if (it.key().toLower() == "subject")
-            mail.setSubject( it.value() );
-        else if (it.key().toLower() == "date")
-            mail.setDateString( it.value() );
-        else if (it.key().toLower() == "to")
-            mail.setTo( QStringList( it.value() ));
-        else if (it.key().toLower() == "cc")
-            mail.setCc( QStringList( it.value() ));
-        else if (it.key().toLower() == "bcc")
-            mail.setBcc( QStringList( it.value() ));
-        else if (it.key().toLower() == "reply-to")
-            mail.setReplyTo( it.value() );
-        else if (it.key().toLower() == "message-id")
-            mail.setMessageId( it.value() );
-        else if (it.key().toLower() == "in-reply-to")
-            mail.setInReplyTo( it.value() );
-        else if (it.key().toLower() == "body")
-            mail.setPlainTextBody( it.value() );
-        else if (it.key().toLower().indexOf( "attachment" ) == 0) {
-            QString fileName = it.value();
-            MailMessagePart attachmentPart;
-            QFileInfo fi( fileName );
-            attachmentPart.setName( fi.baseName() );
-            attachmentPart.setFilename( fi.absoluteFilePath() );
-            attachmentPart.setStoredFilename( fi.absoluteFilePath() );
-            attachmentPart.setLinkFile( fi.absoluteFilePath() );
-            QMimeType mt( fi.absoluteFilePath() );
-            attachmentPart.setContentType( mt.id() );
+    // Set all the properties defined in the supplied map
+    EmailPropertySetter setter( mail );
+    setter.setProperties( propertyMap );
 
-            //don't encode attachments anymore until sending
-
-//             QFile f( fileName );
-//             if (! f.open(QIODevice::ReadOnly) )
-//             {
-//                 qWarning( ("could not open file: " + fileName).toLatin1() );
-//                 continue;
-//             }
-//             QDataStream in(&f);
-//             attachmentPart.setBody(in,Base64);
-//             f.close();
-            mail.addMessagePart( attachmentPart );
-        } else
-            mail.setExtraHeader( it.key(), it.value() );
-    }
-
-    //encode when sending
-
-    //mail.encodeMail();
-    writeMailWidget()->modify( &mail );
-    emit raiseWidget( mWriteMail, tr("Write mail") );
+    modify( mail );
 
     openFiles();
 }
@@ -2999,35 +3382,31 @@ void EmailClient::smsVCard( const QDSActionRequest& request )
 void EmailClient::writeSmsAction(const QString&, const QString& number,
                                  const QString& body, bool vcard)
 {
-#if defined(QTOPIA_PHONE) && !defined(QTOPIA_NO_SMS)
+#ifndef QTOPIA_NO_SMS
     if (isHidden() || !isVisible())
         closeAfterWrite = true;
 
     if ( checkMailConflict(
-            tr("Should this mail be saved in Drafts before writing the new mail?"),
+            tr("Should this message be saved in Drafts before writing the new message?"),
             tr("'Write SMS' message will be ignored")) )
         return;
 
-    writeMailWidget()->newMail( ComposerFactory::defaultInterface(
-                                                        MailMessage::SMS ), vcard);
+    writeMailWidget()->newMail( QMailComposerFactory::defaultKey( QMailMessage::Sms ), vcard);
     QString recipient;
     if ( number.isEmpty() )
         recipient += "";
     else
         recipient += number;
     writeMailWidget()->setSmsRecipient( recipient );
-    if (!body.isNull())
-    {
-        if(vcard)
-            writeMailWidget()->setBody(SmsClient::vCardPrefix() + body);
-        else
-            writeMailWidget()->setBody( body );
+    if (!body.isNull()) {
+        writeMailWidget()->setBody(body,
+                                    vcard ? QLatin1String("text/x-vCard")
+                                          : QLatin1String("text/plain"));
     }
     mWriteMail->setAccountList( accountList );
-    emit raiseWidget( writeMailWidget(), tr("Write mail") );
+    showComposer();
 
     openFiles();
-    writeMailWidget()->setComposerFocus();
 #else
     Q_UNUSED(number);
     Q_UNUSED(body);
@@ -3041,7 +3420,7 @@ void EmailClient::writeMailAction(const QString& name, const QString& email)
         closeAfterWrite = true;
 
     if ( checkMailConflict(
-            tr("Should this mail be saved in Drafts before writing the new mail?"),
+            tr("Should this message be saved in Drafts before writing the new message?"),
             tr("'Write Mail' message will be ignored")) )
         return;
 
@@ -3056,30 +3435,48 @@ void EmailClient::writeMailAction(const QString& name, const QString& email)
     } else if ( !email.isEmpty() ) {
         recipient = "<"+email+">";
     }
-    mWriteMail->newMail(
-#ifdef QTOPIA_PHONE
-    ComposerFactory::defaultInterface( MailMessage::Email )
-#endif
-            );
-    writeMailWidget()->setRecipient( recipient );
+
+    writeMailWidget()->newMail( QMailComposerFactory::defaultKey( QMailMessage::Email ) );
+    if ( mWriteMail->composer().isEmpty() ) { 
+        // failed to create new composer, maybe due to no email account 
+        // being present. So hide/quit qtmail.
+        if (isTransmitting()) // prevents flicker
+            QTMailWindow::singleton()->hide();
+        else
+            QTMailWindow::singleton()->close();
+        return;
+    }
+    mWriteMail->setRecipient( recipient );
     mWriteMail->setAccountList( accountList );
-    emit raiseWidget( mWriteMail, tr("Write mail") );
+    showComposer();
 
     openFiles();
-
-    // Ensure that the newly raised widget gets focus.
-    writeMailWidget()->setComposerFocus();
 }
 
 void EmailClient::emailVCard( const QDSActionRequest& request )
 {
     QtopiaApplication::instance()->showMainWidget();
 
-    // Save the VCard data to file
-    QString filename = Qtopia::tempDir() + "/email.vcard";
+    QString leafname("email");
+
+    QList<QContact> cardData( QContact::readVCard( request.requestData().data() ) );
+    if (!cardData.isEmpty()) {
+        const QContact& contact = cardData.first();
+        QString name(contact.firstName() + contact.lastName());
+        if (!name.isEmpty()) {
+            // Remove any non-word chars to ensure we have a valid filename
+            leafname = name.remove(QRegExp("\\W"));
+        }
+    }
+
+    leafname += ".vcf";
+
+    // Save the VCard data to a temporary document
+    QString filename = Qtopia::tempDir() + leafname;
     {
         QFile temp( filename );
         if ( !temp.open( QIODevice::WriteOnly ) ) {
+            qWarning() << "Unable to open path for write:" << filename;
             return;
         }
 
@@ -3087,12 +3484,37 @@ void EmailClient::emailVCard( const QDSActionRequest& request )
         temp.close();
     }
 
+    QContent doc( filename );
+    doc.setName( leafname );
+    doc.setRole( QContent::Data );
+    doc.commit();
+
+    // This needs to be removed after send
+    temporaries.append(doc);
+
     // write the Email
     writeMessageAction( QString(),
                         QString(),
+                        QStringList( doc.fileName() ),
                         QStringList(),
-                        QStringList( filename ),
-                        MailMessage::Email );
+                        QMailMessage::Email );
+
+    // Respond to the request
+    QDSActionRequest( request ).respond();
+}
+
+void EmailClient::flashSms( const QDSActionRequest& request )
+{
+#ifndef QTOPIA_NO_SMS
+    // Extract the SMS message from the request payload.
+    QByteArray data = request.requestData().data();
+    QDataStream stream( data );
+    QSMSMessage msg;
+    stream >> msg;
+
+    // Process the flash SMS message.
+    // TODO
+#endif
 
     // Respond to the request
     QDSActionRequest( request ).respond();
@@ -3105,14 +3527,8 @@ void EmailClient::collectSysMessages()
 
 void EmailClient::setEnableMessageActions( bool enabled )
 {
-    enableMessageActions = enabled;
-    if (!moveAction)
-	return; // initActions hasn't been called yet
-    
-    moveAction->setVisible( enabled );
-    copyAction->setVisible( enabled );
-    selectAllAction->setVisible( enabled );
-    deleteMailAction->setVisible( enabled );
+    if (!enabled)
+        messageSelectionChanged();
 }
 
 void EmailClient::writeMessageAction( const QString &name,
@@ -3133,7 +3549,7 @@ void EmailClient::writeMessageAction( const QString &name,
         QStringList phoneNumbers;
 
         //parse addrStr into separate phone number and email addresses
-        for( int i = 0 ; i < (int)nsAddresses.count() ; ++i )
+        for( int i = 0, n = static_cast<int>(nsAddresses.count()) ; i < n; ++i )
         {
             QString c = nsAddresses[i];
             QString rc = rawAddresses[i];
@@ -3142,7 +3558,7 @@ void EmailClient::writeMessageAction( const QString &name,
             else
             {
                 bool hasPhoneChars = false;
-                for( int j = 0 ; j < (int)c.length() ; ++j )
+                for( int j = 0, l = static_cast<int>(c.length()) ; j < l ; ++j )
                     if( c[j].isDigit() || c[j] == '+' )
                     {
                         hasPhoneChars = true;
@@ -3166,48 +3582,52 @@ void EmailClient::writeMessageAction( const QString &name,
     QStringList::ConstIterator it;
     for (it = docAttachments.begin(); it != docAttachments.end(); ++it) {
         QContent lnk(*it);
-        if (lnk.type() != "text/plain" && lnk.type() != "text/x-vCalendar"
-                && lnk.type() != "text/x-vCard")
+        if (lnk.type() != "text/plain" && lnk.type() != "text/x-vCalendar" && lnk.type() != "text/x-vCard")
             textOnly = false;
     }
     for (it = fileAttachments.begin(); it != fileAttachments.end(); ++it) {
-        QString extn = (*it).right(4);
-        if (extn != ".txt" && extn != ".vcs" && extn != ".vcf")
-            textOnly = false;
+        int index = (*it).lastIndexOf('.');
+        if (index != -1) {
+            QString extn = (*it).mid(index);
+            if (extn != ".txt" && extn != ".vcs" && extn != ".vcf")
+                textOnly = false;
+        }
     }
-#ifdef QTOPIA_PHONE
-    int diid = MailMessage::MMS;
-    if (textOnly && emails.trimmed().isEmpty() && type & MailMessage::SMS) {
+
+    QMailMessage::MessageType diid = QMailMessage::Mms;
+    if (textOnly && emails.trimmed().isEmpty() && type & QMailMessage::Sms) {
         // if we're sending plain text and have no email recipients, use SMS
-        diid = MailMessage::SMS;
-    } else if (!(type & MailMessage::MMS)) {
-        diid = 0;
-        if (type & MailMessage::Email)
-            diid = MailMessage::Email;
-        if (type & MailMessage::SMS)
-            diid |= MailMessage::SMS;
+        diid = QMailMessage::Sms;
+    } else if (!(type & QMailMessage::Mms)) {
+        diid = QMailMessage::None;
+        if (type & QMailMessage::Email)
+            diid = QMailMessage::Email;
+        if (type & QMailMessage::Sms)
+            diid = static_cast<QMailMessage::MessageType>(diid | QMailMessage::Sms);
         if (!diid)
-            diid = MailMessage::SMS;
+            diid = QMailMessage::Sms;
     }
-#else
-    Q_UNUSED(type);
-#endif
-    writeMailWidget()->newMail(
-#ifdef QTOPIA_PHONE
-            ComposerFactory::defaultInterface( diid )
-#endif
-            );
+
+    writeMailWidget()->newMail( QMailComposerFactory::defaultKey( diid ) );
+    if ( mWriteMail->composer().isEmpty() ) { 
+        // failed to create new composer, maybe due to no email account 
+        // being present. So hide/quit qtmail.
+        if (isTransmitting()) // prevents flicker
+            QTMailWindow::singleton()->hide();
+        else
+            QTMailWindow::singleton()->close();
+        return;
+    }
     writeMailWidget()->setRecipients( emails, numbers );
     mWriteMail->setAccountList( accountList );
-    emit raiseWidget( mWriteMail, tr("Write mail") );
-    for( uint i = 0 ; i < (uint)docAttachments.count() ; ++i )
-    {
+
+    for( int i = 0 ; i < docAttachments.count() ; ++i )
         mWriteMail->attach( QContent( docAttachments[i] ) );
-    }
-    for( uint i = 0 ; i < (uint)fileAttachments.count() ; ++i )
-    {
+
+    for( int i = 0 ; i < fileAttachments.count() ; ++i )
         mWriteMail->attach( fileAttachments[i] );
-    }
+
+    showComposer();
 }
 
 void EmailClient::cleanupMessages( const QDate &removalDate, int removalSize )
@@ -3215,31 +3635,23 @@ void EmailClient::cleanupMessages( const QDate &removalDate, int removalSize )
     bool closeAfterCleanup = isHidden();
 
     openFiles();
-    QStringList mboxList = mailboxList->mailboxes();
+    QStringList mboxList = mailboxList()->mailboxes();
     QStringList::Iterator it;
     for (it = mboxList.begin(); it != mboxList.end(); ++it)
     {
-        EmailFolderList *box = mailboxList->mailbox( *it );
-        QListIterator<Email*> it2( box->entryIterator() );
-        Email *mail = 0;
-        if ( it2.hasNext() )
-            mail = it2.next();
-        while ( mail ) {
-            Email *mail = it2.next();
-            QDate mailDate( mail->dateTime().date() );
-            uint mailSize( mail->size() );
-            if ((mailDate <= removalDate) && ((int)mailSize >= removalSize))
-                box->removeMail( mail->uuid(), true );
-            else
-                if ( it2.hasNext() )
-                    mail = it2.next();
-                else
-                    mail = 0;
+        EmailFolderList *box = mailboxList()->mailbox( *it );
+        QMailIdList idList = box->messages();
+        foreach(QMailId id, idList)
+        {
+            QMailMessage mail(id,QMailMessage::Header);
+            QDate mailDate( mail.date().toLocalTime().date() );
+            uint mailSize( mail.size() );
+            if ((mailDate <= removalDate) && (static_cast<int>(mailSize) >= removalSize))
+                box->removeMail( mail.id());
         }
-        mailboxList->compact();
+
     }
 
-#ifndef QTOPIA_DESKTOP
     if (closeAfterCleanup) {
         closeAfterTransmissionsFinished();
         if (isTransmitting())
@@ -3247,7 +3659,6 @@ void EmailClient::cleanupMessages( const QDate &removalDate, int removalSize )
         else
             QTMailWindow::singleton()->close();
     }
-#endif
 }
 
 WriteMail *EmailClient::writeMailWidget()
@@ -3255,16 +3666,18 @@ WriteMail *EmailClient::writeMailWidget()
     if ( !mWriteMail ) {
         mWriteMail = new WriteMail( this , "write-mail");
         if ( parentWidget()->inherits("QStackedWidget") )
-            ((QStackedWidget*)parentWidget())->addWidget(mWriteMail);
+            static_cast<QStackedWidget*>(parentWidget())->addWidget(mWriteMail);
 
-        connect(mWriteMail, SIGNAL(enqueueMail(const Email&)), this,
-                        SLOT(enqueueMail(const Email&)) );
-        connect(mWriteMail, SIGNAL( discardMail() ), this,
-                        SLOT( discardMail() ) );
-        connect(mWriteMail, SIGNAL(saveAsDraft(const Email&)), this,
-                        SLOT(saveAsDraft(const Email&)) );
-        connect(mWriteMail, SIGNAL( autosaveMail(const Email&)), this,
-                SLOT( autosaveMail(const Email&)) );
+        connect(mWriteMail, SIGNAL(enqueueMail(QMailMessage)), this,
+                SLOT(enqueueMail(QMailMessage)) );
+        connect(mWriteMail, SIGNAL(discardMail()), this,
+                SLOT(discardMail()) );
+        connect(mWriteMail, SIGNAL(saveAsDraft(QMailMessage)), this,
+                SLOT(saveAsDraft(QMailMessage)) );
+        connect(mWriteMail, SIGNAL(autosaveMail(QMailMessage)), this,
+                SLOT(autosaveMail(QMailMessage)) );
+        connect(mWriteMail, SIGNAL(noSendAccount(QMailMessage::MessageType)), this,
+                SLOT(noSendAccount(QMailMessage::MessageType)) );
 
         mWriteMail->setAccountList( accountList );
     }
@@ -3272,132 +3685,156 @@ WriteMail *EmailClient::writeMailWidget()
     return mWriteMail;
 }
 
-
 ReadMail *EmailClient::readMailWidget()
 {   
     if ( !mReadMail ) {
-        mReadMail = new ReadMail( this, "examine-mail");
+        mReadMail = new ReadMail( this, "read-mail");
         if ( parentWidget()->inherits("QStackedWidget") )
-            ((QStackedWidget*)parentWidget())->addWidget(mReadMail);
+            static_cast<QStackedWidget*>(parentWidget())->addWidget(mReadMail);
 
-        connect(mReadMail, SIGNAL(cancelView()), this, SLOT(showEmailView()) );
-        connect(mReadMail, SIGNAL(resendRequested(const Email&,int)), this,
-                SLOT(resend(const Email&,int)) );
+        connect(mReadMail, SIGNAL(cancelView()), this, SLOT(restoreView()) );
+        connect(mReadMail, SIGNAL(resendRequested(QMailMessage,int)), this,
+                SLOT(resend(QMailMessage,int)) );
 
-        connect(mReadMail, SIGNAL(modifyRequested(Email*)), this,
-                SLOT(modify(Email*)) );
+        connect(mReadMail, SIGNAL(modifyRequested(QMailMessage)),this,
+                SLOT(modify(QMailMessage)));
         connect(mReadMail, SIGNAL(removeItem(EmailListItem*)), this,
                 SLOT(deleteMailRequested(EmailListItem*)) );
-        connect(mReadMail, SIGNAL(viewingMail(Email*)), this,
-                SLOT(moveMailFront(Email*)) );
-        connect(mReadMail, SIGNAL(getMailRequested(Email*)), this,
-                SLOT(getSingleMail(Email*)) );
-        connect(mReadMail, SIGNAL(sendMailRequested(Email*)), this,
-                SLOT(sendSingleMail(Email*)) );
-        connect(mReadMail, SIGNAL( mailto(const QString&) ), this,
-                SLOT( setDocument(const QString&) ) );
-        connect(mReadMail,SIGNAL(readReplyRequested(Email*)),this,
-                SLOT(readReplyRequested(Email*)));
-        connect(mReadMail, SIGNAL(viewingMail(Email*)),
-                emailHandler, SLOT(mailRead(Email*)) );
+        connect(mReadMail, SIGNAL(viewingMail(QMailMessage)), this,
+                SLOT(moveMailFront(QMailMessage)));
+        connect(mReadMail, SIGNAL(getMailRequested(QMailMessage)),this,
+                SLOT(getSingleMail(QMailMessage)) );
+        connect(mReadMail, SIGNAL(sendMailRequested(QMailMessage)),this,
+                SLOT(sendSingleMail(QMailMessage)));
+        connect(mReadMail, SIGNAL(mailto(QString)), this,
+                SLOT(setDocument(QString)) );
+        connect(mReadMail,SIGNAL(readReplyRequested(QMailMessage)),this,
+                SLOT(readReplyRequested(QMailMessage)));
+        connect(mReadMail, SIGNAL(viewingMail(QMailMessage)),
+                emailHandler, SLOT(mailRead(QMailMessage)) );
+
+        mReadMail->setAccountList( accountList );
     }
 
     return mReadMail;
 }
 
-void EmailClient::resend(const Email &mail, int type)
+void EmailClient::resend(const QMailMessage& message, int type)
 {
-    repliedFromUuid = mail.uuid();
-    QString caption;
+    repliedFromMailId = message.id();
 
-    writeMailWidget()->reply(mail, type);
     if (type == 1) {
-        caption = tr( "Reply to mail"  );
-        repliedFlags = EFlag_Replied;
+        writeMailWidget()->setAction(WriteMail::Reply);
+        repliedFlags = QMailMessage::Replied;
     } else if (type == 2) {
-        caption = tr( "Reply to all"  );
-        repliedFlags = EFlag_RepliedAll;
+        writeMailWidget()->setAction(WriteMail::ReplyToAll);
+        repliedFlags = QMailMessage::RepliedAll;
     } else if (type == 3) {
-        caption = tr( "Forward mail"  );
-        repliedFlags = EFlag_Forwarded;
+        writeMailWidget()->setAction(WriteMail::Forward);
+        repliedFlags = QMailMessage::Forwarded;
     } else {
         return;
     }
 
-    emit raiseWidget( mWriteMail, caption );
+    writeMailWidget()->reply(message, type);
+    if ( mWriteMail->composer().isEmpty() ) { 
+        // failed to create new composer, maybe due to no email account 
+        // being present.
+        return;
+    }
+    showComposer();
 }
 
-void EmailClient::modify(Email *mail)
+void EmailClient::modify(const QMailMessage& message)
 {
-    QString caption =  tr( "Edit mail"  );
-    mail->readFromFile();
-    writeMailWidget()->modify(mail);
-    emit raiseWidget( mWriteMail, caption );
+    // Is this type editable?
+    QString key(QMailComposerFactory::defaultKey(message.messageType()));
+    if (!key.isEmpty()) {
+        writeMailWidget()->modify(message);
+        if ( mWriteMail->composer().isEmpty() ) { 
+            // failed to create new composer, maybe due to no email account 
+            // being present.
+            return;
+        }
+        showComposer();
+    } else {
+        QMessageBox::warning(0,
+                             tr("Error"),
+                             tr("Cannot edit a message of this type."),
+                             tr("OK"));
+    }
 }
 
 
 void EmailClient::compose()
 {
-    QString caption = " " + tr("Write mail");
-    emit raiseWidget( writeMailWidget(), caption );
+    delayedInit();
+
     writeMailWidget()->newMail();
+    showComposer();
 }
 
 void EmailClient::setDocument(const QString &_address)
 {
     // strip leading 'mailto:'
-    QString smsPostFix = "@sms";
     QString address = _address;
     if (address.startsWith("mailto:"))
         address = address.mid(7);
 
-    QString caption = " " + tr("Write mail");
-    if (address.right(smsPostFix.length()) == smsPostFix) {
-        int smsLen = address.length() - smsPostFix.length();
-        QString smsRecipient = address.left(smsLen);
-#ifdef QTOPIA_PHONE
-        writeMailWidget()->newMail( ComposerFactory::defaultInterface(
-                                                        MailMessage::SMS ) );
-        writeMailWidget()->setSmsRecipient(smsRecipient);
-        writeMailWidget()->setComposerFocus();
+#ifndef QTOPIA_NO_SMS
+    QMailAddress recipient(address);
+    if (recipient.isPhoneNumber()) {
+        writeMailWidget()->newMail( QMailComposerFactory::defaultKey( QMailMessage::Sms ) );
+        writeMailWidget()->setSmsRecipient(address);
+    } else
 #endif
-    } else {
-        writeMailWidget()->newMail(
-#ifdef QTOPIA_PHONE
-                ComposerFactory::defaultInterface( MailMessage::Email )
-#endif
-                );
+    {
+        writeMailWidget()->newMail( QMailComposerFactory::defaultKey( QMailMessage::Email ) );
         writeMailWidget()->setRecipient(address);
     }
-    emit raiseWidget( mWriteMail, caption );
+
+    showComposer();
 }
 
 void EmailClient::deleteMailRequested(EmailListItem *item)
 {
-    Folder *folder = folderView->currentFolder();
+    if (!item || !item->id().isValid())
+        return;
 
+    Folder *folder = folderView()->currentFolder();
     if ( folder->folderType() == FolderTypeSystem &&
-         folder->mailbox() == OutboxString &&
+         folder->mailbox() == MailboxList::OutboxString &&
          sending) {
         return; //don't delete when sending
     }
 
-    // Is the SIM card ready/detected?
-    if (!emailHandler->smsReadyToDelete()
-        && item->mail()
-        && (item->mail()->type() == MailMessage::SMS)) {
-        showDeleteNotReadyWarning();
-        return;
-    }
+    QMailMessage message(item->id(),QMailMessage::Header);
+    QString type = mailType(message);
 
-    if (folder->folderType() == FolderTypeSystem
-        && folder->mailbox() == TrashString ) {
-        if (!Qtopia::confirmDelete( this, tr("EMail"),
-                                    tr( "the mail" ) ))
+    // Is the SIM card ready/detected?
+    if ((message.messageType() == QMailMessage::Sms) && !emailHandler->smsReadyToDelete()) {
+        if (confirmDeleteWithoutSIM(1) == false)
             return;
     }
 
+    bool toTrash(true);
+    if (folder->folderType() == FolderTypeSystem
+        && folder->mailbox() == MailboxList::TrashString ) {
+        if (!Qtopia::confirmDelete( this, appTitle, type ))
+            return;
+
+        toTrash = false;
+    }
+
     deleteMail( item );
+
+    // Tell the user we're doing what they asked for
+    if (toTrash)
+        AcknowledgmentBox::show(tr("Moving"), tr("Moving to Trash: %1", "%1=Email/Message/MMS").arg(type));
+    else
+        AcknowledgmentBox::show(tr("Deleting"), tr("Deleting: %1","%1=Email/Message/MMS").arg(type));
+
+    restoreView();
 }
 
 void EmailClient::showEvent(QShowEvent* e)
@@ -3422,14 +3859,10 @@ void EmailClient::isSending(bool y)
     if (!y)
         moveOutboxMailsToDrafts();
 
-#ifndef QTOPIA_DESKTOP
     if (!isTransmitting() && closeAfterTransmissions)
         QTMailWindow::singleton()->close();
-    if (!isTransmitting()) {
-        qLog(Messaging) << "Unregistering transfer task";
-        QtopiaApplication::instance()->unregisterRunningTask(QLatin1String("transfer"));
-    }
-#endif
+    if (!isTransmitting())
+        unregisterTask("transfer");
 }
 
 void EmailClient::isReceiving(bool y)
@@ -3444,14 +3877,10 @@ void EmailClient::isReceiving(bool y)
 
     if (mReadMail)
         mReadMail->isReceiving(y);
-#ifndef QTOPIA_DESKTOP
     if (!isTransmitting() && closeAfterTransmissions)
         QTMailWindow::singleton()->close();
-    if (!isTransmitting()) {
-        qLog(Messaging) << "Unregistering transfer task";
-        QtopiaApplication::instance()->unregisterRunningTask(QLatin1String("transfer"));
-    }
-#endif
+    if (!isTransmitting())
+        unregisterTask("transfer");
 }
 
 void EmailClient::suspendOk(bool y)
@@ -3462,140 +3891,159 @@ void EmailClient::suspendOk(bool y)
 void EmailClient::moveOutboxMailsToDrafts()
 {
 //  Move any messages stuck in the outbox to the drafts folder here
-    EmailFolderList *outbox = mailboxList->mailbox(OutboxString);
-    EmailFolderList *drafts = mailboxList->mailbox(DraftsString);
-    QListIterator<Email*> mail = outbox->entryIterator();
-    while (mail.hasNext()) {
-        if ( !moveMailToFolder(mail.next(), outbox, drafts ) )
+    EmailFolderList *outbox = mailboxList()->mailbox(MailboxList::OutboxString);
+    EmailFolderList *drafts = mailboxList()->mailbox(MailboxList::DraftsString);
+    QMailIdList outboxIds = outbox->messages();
+    foreach(QMailId id,outboxIds)
+    {
+        if ( !moveMailToFolder(id,outbox, drafts ) )
             break;          //no point continuing to move
     }
 }
 
+void EmailClient::currentActionViewChanged(const QString &mailbox)
+{
+    if (mailbox.isEmpty())
+        progressBar->setText( "" );
+    else
+        updateFolderCount( mailbox );
+}
 
 void EmailClient::updateFolderCount(const QString &mailbox, bool folderListOnly)
 {
     if(suspendMailCount)
         return;
-    if (!mailboxList->mailbox(mailbox))
+
+    EmailFolderList* mb = mailboxList()->mailbox(mailbox);
+    if (!mb)
         return;
 
-    // folder list item updates
-    uint count = 0;
-    uint allCount = 0;
-    uint allNewCount = 0;
-    bool highlight = false;
+    if (!accountList)
+        return;
 
-    QString s;
+    bool nHighlight = false;
+    bool eHighlight = false;
+    IconType nIconType = AllMessages;
+    IconType eIconType = AllMessages;
+    int nType = QMailMessage::Mms | QMailMessage::Sms | QMailMessage::System;
+    int eType = QMailMessage::Email;
+    uint nAllCount = mb->mailCount(EmailFolderList::All, nType);
+    uint eAllCount = mb->mailCount(EmailFolderList::All, eType);
+    uint nAllNewCount = 0;
+    uint eAllNewCount = 0;
 
-    QColor col = Qt::blue;
-    count = mailboxList->mailbox( mailbox )->mailCount( "all"); // No tr
-    allCount = count;
-    if ( mailbox == InboxString ) {
-        int newCount = mailboxList->mailbox( mailbox )->mailCount( "new", accountList); // No tr
-        allNewCount = newCount;
-        if ( newCount ) {
-            highlight = true;
-            count = newCount;
+    if ( mailbox == MailboxList::InboxString ) {
+        nAllNewCount = mb->mailCount(EmailFolderList::New, nType);
+        eAllNewCount = mb->mailCount(EmailFolderList::New, eType, accountList);
+        if ( nAllNewCount ) {
+            nHighlight = true;
+            nIconType = UnreadMessages;
         }
-
+        if ( eAllNewCount ) {
+            eHighlight = true;
+            eIconType = UnreadMessages;
+        }
+        
+        mb->mailCount(EmailFolderList::All, eType, accountList);
         QListIterator<MailAccount*> it = accountList->accountIterator();
         while ( it.hasNext() ) {
             MailAccount *account = it.next();
-            int count = account->unreadCount();
+
+            // Update the account status
             QString countStr;
-            if ( count )
-                countStr = QString( " (%1)" ).arg( count );
-            folderView->updateAccountStatus( account, countStr, count, Qt::blue);
+            int accountCount = account->count();
+            int unreadCount = account->unreadCount();
+            if ( accountCount ) {
+                countStr = QLatin1String(" ");
+                if (unreadCount)
+                    countStr += QString("%1/%2").arg( unreadCount ).arg( accountCount );
+                else
+                    countStr += QString("%1").arg( accountCount );
+            }
+            folderView()->updateAccountStatus( account, countStr, unreadCount, NoIcon );
         }
-    } else if ( mailbox == OutboxString ) {
-        col = Qt::red;
-        int newCount = mailboxList->mailbox( mailbox )->mailCount( "unsent"); // No tr
-        if ( newCount ) {
-            highlight = true;
-            count = newCount;
+    } else {
+        nAllNewCount = mb->mailCount(EmailFolderList::New, nType);
+        if ( nAllNewCount ) {
+            nHighlight = true;
+            nIconType = UnreadMessages;
+        }
+        eAllNewCount = mb->mailCount(EmailFolderList::New, eType);
+        if ( eAllNewCount ) {
+            eHighlight = true;
+            eIconType = UnreadMessages;
         }
     }
 
-    if ( count ) {
-        s = QString(" (%1)").arg(count);
+    QString nS, eS;
+    if ( nAllCount ) {
+        if (nAllNewCount)
+            nS = QString(" %1/%2").arg( nAllNewCount ).arg( nAllCount);
+        else
+            nS = QString(" %1").arg( nAllCount);
+    }
+    if ( eAllCount ) {
+        if (eAllNewCount)
+            eS = QString(" %1/%2").arg( eAllNewCount ).arg( eAllCount);
+        else
+            eS = QString(" %1").arg( eAllCount);
     }
 
-    folderView->updateFolderStatus( mailbox, s, highlight, col);
+    // Update the status of the folder
+    folderView()->updateFolderStatus( mailbox, eS, eHighlight, NoIcon );
+    mActionView->updateFolderStatus( mailbox, nS, NoIcon );
 
-#ifdef QTOPIA_PHONE
-    if (mailbox == TrashString && emptyTrashAction) {
-        int count = mailboxList->mailbox(TrashString)->mailCount("all");
-        emptyTrashAction->setVisible(count > 0);
+    // If this is the trash folder, then it can be emptied if it has at least 1 mail
+    if (emptyTrashAction && mailbox == MailboxList::TrashString) {
+        setActionVisible( emptyTrashAction, enableMessageActions );
     }
-
-    // Update actions
-    enableMessageActions = (bool)allCount;
-    if (deleteMailAction) {
-	deleteMailAction->setVisible( enableMessageActions );
-	moveAction->setVisible( enableMessageActions );
-	copyAction->setVisible( enableMessageActions );
-	selectAllAction->setVisible( enableMessageActions );
-    } // else initActions hasn't been called yet
-#endif
 
     // statusbar updates
     if ( receiving || sending || folderListOnly )
         return;
-
-    Folder *folder = folderView->currentFolder();
-
-    if ( folder == NULL ) {
-        progressBar->setText("");
-        return;
-    }
-
+    
+    // Update status bar
     if ( currentMailboxWidgetId() == messageId ) {
         messageChanged();
         return;
     }
 
-    QString str = folder->fullName();
-    if ( (folder->folderType() == FolderTypeSystem) && ( ((SystemFolder *)folder)->systemType() == SystemTypeSearch) ) {
-        str += " - " + mailboxTrName( folder->mailbox() );
+    uint allCount = nAllCount;
+    uint allNewCount = nAllNewCount;
+    int type = nType;
+	
+    if (currentMailboxWidgetId() == folderId) {
+        allCount = eAllCount;
+        allNewCount = eAllNewCount;
+        type = eType;
     }
-
-    str += ": ";
-#ifdef QTOPIA_PHONE
-    str = "";
-#endif
-    str += QString::number( allCount ); // No tr
-    if ( mailbox == InboxString ) {
+	
+    QString str = QString::number( allCount ); // No tr
+    if (( mailbox == MailboxList::InboxString ) ||
+        ( mailbox == MailboxList::TrashString )) {
         str += " "; //no tr
-        str += tr( "(%1 new)", "%1 = number of new mails" ).arg( allNewCount );
-    } else if ( mailbox != TrashString ) {
-        int unsent = mailboxList->mailbox( mailbox )->mailCount( "unsent" );
-        int unfinished = mailboxList->mailbox( mailbox )->mailCount( "unfinished" );
+        str += tr( "(%1 new)", "%1 = number of new messages" ).arg( allNewCount );
+    } else if ( mailbox != MailboxList::SentString ) {
+        // Note, the 'unfinished' count is currently always zero...
+        int unsent = mb->mailCount(EmailFolderList::Unsent, type);
+        int unfinished = mb->mailCount(EmailFolderList::Unfinished, type);
 
         if ( unsent || unfinished ) {
-            QString strUnsent = tr("%1 unsent", "%1 = number of unsent mails" ).arg(unsent);
-            QString strUnfinished = tr("%1 unfinished", "%1 = number of unfinished mails" ).arg(unfinished);
-
-            QString fmt;
+            str += " (";
             if ( unsent ) {
-                fmt = strUnsent;
-#ifndef QTOPIA_PHONE
-                if ( unfinished )
-                    fmt += " / " + strUnfinished;
-#endif
+                str += tr("%1 unsent", "%1 = number of unsent mails" ).arg(unsent);
             } else {    //unfinished only
-                fmt = strUnfinished;
+                str += tr("%1 unfinished", "%1 = number of unfinished mails" ).arg(unfinished);
             }
-            str += " (" + fmt + ")";
+            str += ")";
         }
     } else {                    //trash folder
     }
-
     progressBar->setText( str );
 }
 
 void EmailClient::settings()
 {
-#ifdef QTOPIA_PHONE
     AccountSettings settings(accountList, this, 0, true);
     connect(&settings, SIGNAL(changedAccount(MailAccount*)),
             this, SLOT(changedAccount(MailAccount*)));
@@ -3616,70 +4064,135 @@ void EmailClient::settings()
 
     settings.showMaximized();
     QtopiaApplication::execDialog(&settings);
-    QTimer::singleShot(0, this, SLOT( updateAccounts() ) );
-#endif
+    QTimer::singleShot(0, this, SLOT(updateAccounts()) );
 }
 
 void EmailClient::changedAccount(MailAccount *account)
 {
-#ifdef QTOPIA_PHONE
     QTimer::singleShot(0, this, SLOT(updateAccounts()));
-    folderView->updateAccountFolder(account);
+    folderView()->updateAccountFolder(account);
     accountList->saveAccounts();
-#else
-    Q_UNUSED(account);
-#endif
 }
 
 void EmailClient::deleteAccount(MailAccount *account)
 {
-#ifdef QTOPIA_PHONE
-    folderView->deleteAccountFolder(account);
+    folderView()->deleteAccountFolder(account);
     accountList->remove(account);
     QTimer::singleShot(0, this, SLOT(updateAccounts()));
     accountList->saveAccounts();
-#else
-    Q_UNUSED(account);
+}
+
+FolderListView* EmailClient::folderView()
+{
+    if ( !mFolderView ) {
+        mFolderView = new FolderListView(mailboxList(), mailboxView, "folderView");
+        folderId = mailboxView->addWidget( mFolderView );
+
+        connect(mFolderView, SIGNAL(viewMessageList()), this, SLOT(showMessageList()) );
+        connect(mFolderView, SIGNAL(folderSelected(Folder*)), this, SLOT(folderSelected(Folder*)) );
+        connect(mFolderView, SIGNAL(emptyFolder()), this, SLOT(emptyTrashFolder()) );
+        connect(mFolderView, SIGNAL(finished()), this, SLOT(restoreView()) );
+        
+        /*  Folder and Message View specific init not related to placement  */
+        QStringList columns;
+        columns << tr( "Folders" );
+        mFolderView->setColumnCount( columns.count() );
+        mFolderView->setHeaderLabels( columns );
+        mFolderView->setRootIsDecorated( false );
+
+        QHeaderView *header = mFolderView->header();
+        header->setMovable( false );
+        header->setClickable( false );
+
+#ifndef QTOPIA_PHONE
+        QAction *fvWhatsThis = QWhatsThis::createAction( mFolderView );
+        fvWhatsThis->setText( tr("A list of your folders.  You can tap Outbox "
+                     "and then tap the Messages tab to see the "
+                     "messages currently in the outbox.") );
 #endif
+
+        mFolderView->header()->resizeSection( 0, QApplication::desktop()->availableGeometry().width() );
+        
+        QSettings mailconf("Trolltech","qtmail");
+        QFont font;
+        mailconf.beginGroup("settings");
+        if ( mailconf.value("font").toString() == "large") {
+            font.setPointSize( font.pointSize() + 4 );      // 4 larger than default
+        }
+        mailconf.endGroup();
+        mFolderView->setFont( font );
+
+        QTimer::singleShot(0, this, SLOT(openFiles()) );
+    }
+    return mFolderView;
 }
 
 MailListView* EmailClient::messageView()
 {
     if ( !mMessageView ) {
-        mMessageView = new MailListView(widget_3, "messageView" );
+        mMessageView = new MailListView(mailboxView, "messageView" );
         connect(mMessageView, SIGNAL(itemClicked(QTableWidgetItem*)),
                 this, SLOT(queryItemSelected()) );
-        connect(mMessageView, SIGNAL( itemPressed(EmailListItem*) ),
-                this, SLOT( showItemMenu(EmailListItem*) ) );
-        connect(mMessageView, SIGNAL( currentItemChanged(QTableWidgetItem*,QTableWidgetItem*) ),
-                this, SLOT( messageChanged() ) );
-        connect(mMessageView, SIGNAL( enableMessageActions(bool) ),
-                this, SLOT( setEnableMessageActions(bool) ) );
+        // Not sure how this is supposed to work - disable until UI is standardised:
+        /*
+        connect(mMessageView, SIGNAL(itemPressed(EmailListItem*)),
+                this, SLOT(showItemMenu(EmailListItem*)) );
+        */
+        connect(mMessageView, SIGNAL(currentItemChanged(QTableWidgetItem*,QTableWidgetItem*)),
+                this, SLOT(messageChanged()) );
+        connect(mMessageView, SIGNAL(enableMessageActions(bool)),
+                this, SLOT(setEnableMessageActions(bool)) );
+        connect(mMessageView, SIGNAL(itemSelectionChanged()),
+                this, SLOT(messageSelectionChanged()) );
+        connect(mMessageView, SIGNAL(backPressed()),
+                this, SLOT(restoreView()) );
 
-	connect(mMessageView, SIGNAL(viewFolderList()),
-		this, SLOT(showFolderList()) );
-	gridQuery->addWidget(mMessageView, 2, 2 );
+        messageId = mailboxView->addWidget(mMessageView);
 
         QSettings mailconf("Trolltech","qtmail");
         mailconf.beginGroup("qtmailglobal");
         messageView()->readConfig( &mailconf );
         mailconf.beginGroup("settings");
+
         QFont font;
         if ( mailconf.value("font").toString() == "large") {
             font.setPointSize( font.pointSize() + 4 );  // 4 larger than default
-            messageView()->setFont( font );
-        } else {
-            messageView()->setFont( font );
         }
         mailconf.endGroup();
+        mMessageView->setFont( font );
 
-        Folder* currentFolder = folderView->currentFolder();
+        Folder* currentFolder = folderView()->currentFolder();
         if (currentFolder)
-            folderSelected( folderView->currentFolder() );
+            folderSelected( folderView()->currentFolder() );
 
         displayPreviousMail();
     }
     return mMessageView;
+}
+
+MailboxList* EmailClient::mailboxList()
+{
+    if ( !mMailboxList ) {
+        mMailboxList = new MailboxList(this);
+
+        connect(mMailboxList, SIGNAL(stringStatus(QString&)), this,
+            SLOT(setStatusText(QString&)) );
+        
+        //connect after mail has been read to speed up reading */
+        connect(mMailboxList, SIGNAL(mailAdded(QMailId,QString)), 
+            this,SLOT(mailFromDisk(QMailId,QString)) );
+        connect(mMailboxList, SIGNAL(mailUpdated(QMailId,QString)), 
+            this,SLOT(mailUpdated(QMailId,QString)) );
+        connect(mMailboxList, SIGNAL(mailRemoved(QMailId,QString)), 
+            this,SLOT(mailRemoved(QMailId,QString)) );
+        connect(mMailboxList,SIGNAL(mailMoved(QMailId,QString,QString)),
+            this,SLOT(mailMoved(QMailId,QString,QString)));
+        connect(mMailboxList,SIGNAL(mailMoved(QMailIdList,QString,QString)),
+            this,SLOT(mailMoved(QMailIdList,QString,QString)));
+        connect(mMailboxList, SIGNAL(externalEdit(QString)), 
+            this,SLOT(externalEdit(QString)) );
+    }
+    return mMailboxList;
 }
 
 void EmailClient::handleSysMessages(const QString &message, const QByteArray &data)
@@ -3693,17 +4206,16 @@ void EmailClient::handleSysMessages(const QString &message, const QByteArray &da
         QString text;
         ds >>  messageId >> time >> subject >> text;
 
-        Email mail;
-        mail.setType( MailMessage::System );
-        mail.setStatus( EFlag_Downloaded, true );
-        mail.setStatus( EFlag_Incoming, true );
-        mail.setStatus( EFlag_TypeSystem, true );
-        mail.setDateTime( time );
+        QMailMessage mail;
+        mail.setMessageType( QMailMessage::System );
+        mail.setStatus( QMailMessage::Downloaded, true );
+        mail.setStatus( QMailMessage::Incoming, true );
+        mail.setDate( QMailTimeStamp( time ) );
         mail.setSubject( subject );
-        mail.setPlainTextBody( text );
+        QMailMessageContentType type( "text/plain; charset=UTF-8" );
+        mail.setBody( QMailMessageBody::fromData( text, type, QMailMessageBody::Base64 ) );
         mail.setFromAccount( "@System" );
-        mail.setFrom("System");
-        mail.encodeMail();
+        mail.setHeaderField("From", "System");
         mailArrived( mail );
 
         QtopiaIpcEnvelope e("QPE/SysMessages", "ackMessage(int)");
@@ -3711,6 +4223,289 @@ void EmailClient::handleSysMessages(const QString &message, const QByteArray &da
     }
 }
 
+void EmailClient::appendErrorText(QString& message, const int code, const ErrorMap& map)
+{
+    const ErrorEntry *it = map.first, *end = map.first + map.second; // ptr arithmetic!
+
+    for ( ; it != end; ++it)
+        if (it->code == code)
+        {
+            message += tr( it->text );
+            return;
+        }
+}
+
+void EmailClient::planeModeChanged() 
+{
+    if (planeMode.value().toBool() == false) {
+        // We have left airplane mode
+        qLog(Messaging) << "Leaving Airplane Safe Mode";
+
+        EmailFolderList* outbox = mailboxList()->mailbox(MailboxList::OutboxString);
+        if (outbox->mailCount(EmailFolderList::All)) {
+            // Send any queued messages
+            sendAllQueuedMail();
+        }
+    }
+}
+
+void EmailClient::messageSelectionChanged()
+{
+    if (!moveAction)
+        return; // initActions hasn't been called yet
+
+    if (suspendMailCount)
+        return;
+
+    uint count = messageView()->rowCount();
+    uint selected = messageView()->selectedItems().count();
+    if (selected > 0) 
+    {
+        Folder* folder = folderView()->currentFolder();
+        if (folder && (folder->folderType() == FolderTypeSystem) && (folder->mailbox() == MailboxList::TrashString)) {
+            if (selected == 1 )
+                deleteMailAction->setText(tr("Delete message"));
+            else 
+                deleteMailAction->setText(tr("Delete messages"));
+        } else {
+            deleteMailAction->setText(tr("Move to Trash"));
+        }
+        if ( selected == 1 ) {
+            moveAction->setText(tr("Move message...", ""));
+            copyAction->setText(tr("Copy message...", ""));
+        } else {
+            moveAction->setText(tr("Move messages...", ">=2 messages"));
+            copyAction->setText(tr("Copy messages...", ">=2 messages"));
+        }
+    } 
+
+    // Ensure that the per-message actions are hidden, if not usable
+    setActionVisible(selectAllAction, (count > 0 && count != selected));
+    setActionVisible(deleteMailAction, (selected != 0));
+    setActionVisible(moveAction, (selected != 0));
+    setActionVisible(copyAction, (selected != 0));
+}
+
+void EmailClient::showWidget(QWidget* widget, const QString& title)
+{
+    emit raiseWidget(widget, title);
+}
+
+void EmailClient::newMessages(bool userRequest)
+{
+    if (!QtopiaApplication::instance()->willKeepRunning()) {
+        initialAction = IncomingMessages;
+    }
+
+    delayedInit();
+    openFiles();
+    showServerId = QString::null;
+
+    delayedShowMessage(MailAccount::SMS, QMailId(), userRequest);
+}
+
+static bool lessThanByTimestamp(const QMailId& lhs, const QMailId& rhs)
+{
+    QMailMessage lhsMessage(lhs, QMailMessage::Header);
+    QMailMessage rhsMessage(rhs, QMailMessage::Header);
+
+    return (lhsMessage.date() < rhsMessage.date());
+}
+
+void EmailClient::clientsSynchronised()
+{
+    // We now have an updated incoming message count
+    emit messageCountUpdated();
+
+    // Are these new SMS messages, or were they put on the SIM by a previous phone?
+    int newSmsCount = emailHandler->unreadSmsCount();
+    if (unreadSmsIds.count() > newSmsCount) {
+        // We need to remove the n most recent
+        qSort(unreadSmsIds.begin(), unreadSmsIds.end(), lessThanByTimestamp);
+        while (newSmsCount-- > 0)
+            unreadSmsIds.removeLast();
+
+        foreach (const QMailId& id, unreadSmsIds) {
+            // This is not really a new message, mark it as read
+            QMailMessage oldMail(id, QMailMessage::Header);
+            oldMail.setStatus(QMailMessage::Read, true);
+            QMailStore::instance()->updateMessage(&oldMail);
+        }
+    }
+    unreadSmsIds.clear();
+
+    // Are we responding to a raise request from QPE?
+    bool respondingToRaise(initialAction == IncomingMessages);
+
+    int newMessageCount = emailHandler->newMessageCount();
+    if (newMessageCount != 0 || respondingToRaise) {
+        if (newMessagesRequested || newMessageCount == 0) {
+            newMessagesRequested = false;
+
+            // Just go to the next stage
+            viewNewMessages(respondingToRaise);
+
+            unregisterTask("display");
+        } else {
+            // Start the message ring
+            QtopiaServiceRequest req("Ringtone", "startMessageRingtone()");
+            req.send();
+
+            QString text(newMessageCount == 1 ? tr("A new message has arrived. Do you wish to read it now?")
+                                              : tr("%1 new messages have arrived. Do you wish to view them now?").arg(newMessageCount) );
+
+            if (newMessagesBox) {
+                // Update the text and restart the timer
+                newMessagesBox->setText(text);
+            } else {
+                // Ask the user whether to view the message(s)
+                newMessagesBox = new QMessageBox(QMessageBox::Information, tr("New message"), text, QMessageBox::Yes | QMessageBox::No);
+                connect(newMessagesBox, SIGNAL(finished(int)), this, SLOT(newMessageAction(int)));
+                QtopiaApplication::showDialog(newMessagesBox);
+
+                connect(&newMessageResponseTimer, SIGNAL(timeout()), this, SLOT(abortViewNewMessages()));
+            }
+
+            if (NotificationVisualTimeout)
+                newMessageResponseTimer.start(NotificationVisualTimeout);
+        }
+    }
+}
+
+void EmailClient::viewNewMessages(bool respondingToRaise)
+{
+    bool savedAsDraft(false);
+    int newMessageCount = emailHandler->newMessageCount();
+
+    // Having chosen to view new messages, we should reset the new message count
+    resetNewMessages();
+
+    if (!respondingToRaise) {
+        // We were already operating when this new message notification arrived; if we 
+        // are composing, we need to save as draft
+        if (mWriteMail && 
+            (QTMailWindow::singleton()->currentWidget() == mWriteMail)) {
+            savedAsDraft = mWriteMail->forcedClosure();
+        }
+    }
+
+    if (newMessageCount == 1) {
+        // Find the newest incoming message and display it
+        EmailFolderList* inbox(mailboxList()->mailbox(MailboxList::InboxString));
+
+        unsigned int messageType = QMailMessage::Sms | QMailMessage::Mms | QMailMessage::System;
+
+        QMailIdList unreadList = inbox->messages(QMailMessage::Read,
+                                                 false,
+                                                 messageType, 
+                                                 EmailFolderList::DescendingDate);
+        if(!unreadList.isEmpty())
+        {
+            // We need to change to the correct message view, to control the context menu!
+            folderView()->changeToSystemFolder(MailboxList::InboxString);
+            showViewer(unreadList.first(), folderView()->currentFolder(), false);
+        }
+    }
+    else {
+        viewInbox();
+    }
+
+    if (savedAsDraft) {
+        // The composer had a partial message, now saved as a draft
+        AcknowledgmentBox::show(tr("Saved to Drafts"), tr("Incomplete message has been saved to the Drafts folder"));
+    }
+}
+
+void EmailClient::viewInbox()
+{
+    // Show the inbox with the new messages
+    messageView()->setShowEmailsOnly(false);
+    folderView()->changeToSystemFolder(MailboxList::InboxString);
+    messageView()->setSelectedRow(0);
+
+    showMessageList();
+}
+
+void EmailClient::newMessageAction(int choice)
+{
+    newMessageResponseTimer.stop();
+
+    // Stop the message ring, if necessary
+    QtopiaServiceRequest req("Ringtone", "stopMessageRingtone()");
+    req.send();
+
+    // Are we responding to a raise request from QPE?
+    bool respondingToRaise(initialAction == IncomingMessages);
+    if (respondingToRaise) {
+        // If new messages arrive during this session, do not trigger the ringtone again
+        initialAction = None;
+    }
+
+    if (choice == QMessageBox::Yes)
+        viewNewMessages(respondingToRaise);
+
+    unregisterTask("display");
+
+    newMessagesBox->deleteLater();
+    newMessagesBox = 0;
+}
+
+void EmailClient::abortViewNewMessages()
+{
+    newMessagesBox->setResult(QMessageBox::No);
+    newMessagesBox->reject();
+}
+
+#ifndef QTOPIA_NO_MMS
+
+void EmailClient::mmsMessage(const QDSActionRequest& request)
+{
+#ifndef QTOPIA_NO_SMS
+    if (!QtopiaApplication::instance()->willKeepRunning())
+        initialAction = IncomingMessages;
+
+    delayedInit();
+
+    emailHandler->pushMmsMessage(request);
+#endif
+
+    // Respond to the request
+    QDSActionRequest( request ).respond();
+}
+
+#endif
+
+void EmailClient::noSendAccount(QMailMessage::MessageType type)
+{
+    QString key(QMailComposerFactory::defaultKey(type));
+    QString name(QMailComposerFactory::name(key));
+
+    QMessageBox::warning(0,
+                         tr("Send Error"), 
+                         tr("%1 cannot be sent, because no account has been configured to send with.","%1=MMS/Email/TextMessage").arg(name),
+                         QMessageBox::Ok);
+}
+
+void EmailClient::nonexistentMessage(const QMailId& id)
+{
+    // Mark this message as deleted
+    QMailMessage deletedMail(id, QMailMessage::Header);
+    deletedMail.setStatus(QMailMessage::Removed, true);
+    QMailStore::instance()->updateMessage(&deletedMail);
+
+    if (readMailWidget()->isVisible())
+        mReadMail->mailUpdated(id);
+
+    QMessageBox::warning(0,
+                         tr("Message deleted"), 
+                         tr("Message cannot be downloaded, because it has been deleted from the server."),
+                         QMessageBox::Ok);
+}
+
+void EmailClient::setActionVisible(QAction* action, bool visible)
+{
+    actionVisibility[action] = visible;
+}
 
 /*!
     \service EmailService Email
@@ -3736,6 +4531,9 @@ EmailService::~EmailService()
 */
 void EmailService::writeMail()
 {
+    qLog(Messaging) << "EmailService::writeMail()";
+    parent->initialAction = EmailClient::Compose;
+    parent->delayedInit();
     parent->writeMailAction(QString(),QString());
 }
 
@@ -3749,6 +4547,9 @@ void EmailService::writeMail()
 */
 void EmailService::writeMail( const QString& name, const QString& email )
 {
+    qLog(Messaging) << "EmailService::writeMail(" << name << "," << email << ")";
+    parent->initialAction = EmailClient::Compose;
+    parent->delayedInit();
     parent->writeMailAction( name, email );
 }
 
@@ -3769,6 +4570,9 @@ void EmailService::writeMessage( const QString& name, const QString& email,
                                  const QStringList& docAttachments,
                                  const QStringList& fileAttachments )
 {
+    qLog(Messaging) << "EmailService::writeMessage(" << name << "," << email << ", ... )";
+    parent->initialAction = EmailClient::Compose;
+    parent->delayedInit();
     parent->writeMessageAction( name, email, docAttachments, fileAttachments );
 }
 
@@ -3780,25 +4584,24 @@ void EmailService::writeMessage( const QString& name, const QString& email,
 */
 void EmailService::viewMail()
 {
-    parent->raise();
+    qLog(Messaging) << "EmailService::viewMail()";
+    parent->initialAction = EmailClient::View;
+    parent->delayedInit();
+    QtopiaApplication::instance()->showMainWidget();
 }
 
 /*!
     Direct the \i Email service to display the message identified by
-    \a id in \a mailbox.
+    \a id.
+    \deprecated
 
     This slot corresponds to the QCop service message
-    \c{Email::viewMail(QString,QString)}.
+    \c{Email::viewMail(QMailId)}.
 */
-void EmailService::viewMail( const QString& mailbox, const QString& id )
+void EmailService::viewMail( const QMailId& id )
 {
-    if ( ! parent->checkMailConflict(
-            tr("Should this mail be saved in Drafts before viewing the new mail?"),
-            tr("'View Mail' message will be ignored")) ) {
-        parent->cachedDisplayMailbox = mailbox;
-        parent->cachedDisplayMailUuid = QUuid( id );
-        parent->openFiles();
-    }
+    qLog(Messaging) << "EmailService::viewMail(" << id.toULongLong() << ")";
+    parent->displayMessage(id);
 }
 
 /*!
@@ -3811,9 +4614,12 @@ void EmailService::viewMail( const QString& mailbox, const QString& id )
 */
 void EmailService::emailVCard( const QString& filename, const QString& )
 {
+    qLog(Messaging) << "EmailService::emailVCard(" << filename << ", )";
+    parent->initialAction = EmailClient::Compose;
+    parent->delayedInit();
     parent->writeMessageAction( QString(), QString(), QStringList(),
                                 QStringList( filename ),
-                                MailMessage::Email);
+                                QMailMessage::Email);
 }
 
 /*!
@@ -3828,14 +4634,20 @@ void EmailService::emailVCard( const QString& filename, const QString& )
 */
 void EmailService::emailVCard( const QDSActionRequest& request )
 {
+    qLog(Messaging) << "EmailService::emailVCard( QDSActionRequest )";
+    parent->initialAction = EmailClient::Compose;
+    parent->delayedInit();
     parent->emailVCard( request );
 }
 
 /*!
     \internal
 */
-void EmailService::emailVCard( const QString&, const QString&, const QString& filename, const QString& description )
+void EmailService::emailVCard( const QString&, const QMailId&, const QString& filename, const QString& description )
 {
+    qLog(Messaging) << "EmailService::emailVCard( , ," << filename << "," << description << ")";
+    parent->initialAction = EmailClient::Compose;
+    parent->delayedInit();
     // To be removed when the SetValue service is fixed.
     emailVCard( filename, description );
 }
@@ -3844,16 +4656,20 @@ void EmailService::emailVCard( const QString&, const QString&, const QString& fi
     Direct the \i Email service to purge all messages which
     are older than the given \a date and exceed the minimal mail \a size.
     This is typically called by the cleanup wizard.
+    \deprecated
 
     This slot corresponds to the QCop service message
     \c{Email::cleanupMessages(QDate,int)}.
 */
 void EmailService::cleanupMessages( const QDate& date, int size )
 {
+    qLog(Messaging) << "EmailService::cleanupMessages(" << date << "," << size << ")";
+    parent->initialAction = EmailClient::Cleanup;
+    parent->delayedInit();
     parent->cleanupMessages( date, size );
 }
 
-#ifdef QTOPIA_PHONE
+#ifndef QTOPIA_NO_SMS
 
 /*!
     \service SMSService SMS
@@ -3879,6 +4695,9 @@ SMSService::~SMSService()
 */
 void SMSService::writeSms()
 {
+    qLog(Messaging) << "SMSService::writeSms()";
+    parent->initialAction = EmailClient::Compose;
+    parent->delayedInit();
     parent->writeSmsAction(QString(),QString());
 }
 
@@ -3892,6 +4711,9 @@ void SMSService::writeSms()
 */
 void SMSService::writeSms( const QString& name, const QString& number )
 {
+    qLog(Messaging) << "SMSService::writeSms(" << name << "," << number << ")";
+    parent->initialAction = EmailClient::Compose;
+    parent->delayedInit();
     parent->writeSmsAction( name, number );
 }
 
@@ -3908,6 +4730,9 @@ void SMSService::writeSms( const QString& name, const QString& number )
 void SMSService::writeSms( const QString& name, const QString& number,
                            const QString& filename )
 {
+    qLog(Messaging) << "SMSService::writeSms(" << name << "," << number << "," << filename << ")";
+    parent->initialAction = EmailClient::Compose;
+    parent->delayedInit();
     QFile f( filename );
     if (! f.open(QIODevice::ReadOnly) ) {
         qWarning("could not open file: %s", filename.toLatin1().constData() );
@@ -3920,26 +4745,47 @@ void SMSService::writeSms( const QString& name, const QString& number,
 }
 
 /*!
+    \fn SMSService::newMessages(bool)
+    \internal 
+*/
+
+/*!
     Show the most recently received SMS message.
+    \deprecated
+
+    Clients of this service should instead use \c{Messages::viewNewMessages()}.
 
     This slot corresponds to the QCop service message
     \c{SMS::viewSms()}.
 */
 void SMSService::viewSms()
 {
-    qLog(Messaging) << "viewSms() service requested";
-    parent->delayedShowMessage(MailAccount::SMS, QUuid(), false);
+    qLog(Messaging) << "SMSService::viewSms()";
+
+    // Although this requests SMS specifically, we currently have only the 
+    // facility to show the newest incoming message, or the combined inbox
+    emit newMessages(false);
 }
 
 /*!
+    \fn SMSService::viewInbox()
+    \internal 
+*/
+
+/*!
     Show the list of all received SMS messages.
+    \deprecated
 
     This slot corresponds to the QCop service message
     \c{SMS::viewSmsList()}.
 */
 void SMSService::viewSmsList()
 {
-    parent->delayedShowMessage(MailAccount::SMS, QUuid(), true);
+    qLog(Messaging) << "SMSService::viewSmsList";
+
+    // Although this requests SMS specifically, we currently have only the 
+    // facility to show the combined inbox
+    emit viewInbox();
 }
 
 /*!
@@ -3950,8 +4796,11 @@ void SMSService::viewSmsList()
     This slot corresponds to the QCop service message
     \c{SMS::smsVCard(QString,QString)}.
 */
-void SMSService::smsVCard( const QString& filename, const QString& )
+void SMSService::smsVCard( const QString& filename, const QString& description)
 {
+    qLog(Messaging) << "SMSService::smsVCard(" << filename << ", )";
+    parent->initialAction = EmailClient::Compose;
+    parent->delayedInit();
     QFile f( filename );
     if (! f.open(QIODevice::ReadOnly) ) {
         qWarning("could not open file: %s", filename.toLatin1().constData() );
@@ -3959,6 +4808,8 @@ void SMSService::smsVCard( const QString& filename, const QString& )
         QString body =  QString::fromLocal8Bit( f.readAll() );
         parent->writeSmsAction( QString(), QString(), body, true);
     }
+
+    Q_UNUSED(description)
 }
 
 /*!
@@ -3974,25 +4825,138 @@ void SMSService::smsVCard( const QString& filename, const QString& )
 */
 void SMSService::smsVCard( const QDSActionRequest& request )
 {
+    qLog(Messaging) << "SMSService::smsVCard( QDSActionRequest )";
+    parent->initialAction = EmailClient::View;
+    parent->delayedInit();
     parent->smsVCard( request );
 }
 
 /*!
-    \internal
+    Direct the \i SMS service to interact with the user to compose a new
+    SMS message for sending the vcard data in \a filename.  The
+    \a description argument provides an optional descriptive text message.
+    The \a channel and \a id are not used.
+
+    \deprecated
+
+    This slot corresponds to the QCop service message
+    \c{SMS::smsVCard(QString,QString,QString,QString)}.
 */
-void SMSService::viewSysSms()
+void SMSService::smsVCard( const QString& channel, const QString& id, const QString& filename, const QString& description )
 {
-    parent->delayedShowMessage(MailAccount::System, QUuid(), false);
+    qLog(Messaging) << "SMSService::smsVCard( , ," << filename << "," << description << ")";
+    parent->initialAction = EmailClient::View;
+    parent->delayedInit();
+    // To be removed when the SetValue service is fixed.
+    smsVCard( filename, description );
+
+    Q_UNUSED(channel)
+    Q_UNUSED(id)
 }
 
 /*!
-    \internal
+    \fn SMSService::mmsMessage(const QDSActionRequest&)
+    \internal 
 */
-void SMSService::smsVCard( const QString&, const QString&, const QString& filename, const QString& description )
+
+/*!
+    Direct the \i SMS services to handle the MMS push notification \a request.
+
+    This slot corresponds to a QDS service with request data containing
+    the serialization of an \c MMSMessage, and no response data.
+
+    This slot corresponds to the QCop service message
+    \c{SMS::pushMmsMessage(QDSActionRequest)}.
+*/
+void SMSService::pushMmsMessage( const QDSActionRequest& request )
 {
-    // To be removed when the SetValue service is fixed.
-    smsVCard( filename, description );
+    qLog(Messaging) << "SMSService::pushMmsMessage( QDSActionRequest )";
+
+#ifndef QTOPIA_NO_MMS
+    emit mmsMessage(request);
+#endif
 }
 
-#endif // QTOPIA_PHONE
+/*!
+    Direct the \i SMS service to process the flash SMS message
+    within \a request.
+
+    This slot corresponds to a QDS service with request data containing
+    the serialization of a QSMSMessage, and no response data.
+
+    This slot corresponds to the QCop service message
+    \c{SMS::flashSms(QDSActionRequest)}.
+*/
+void SMSService::flashSms( const QDSActionRequest& request )
+{
+    qLog(Messaging) << "SMSService::flashSms( QDSActionRequest )";
+    parent->initialAction = EmailClient::View;
+    parent->delayedInit();
+    parent->flashSms( request );
+}
+
+#endif // QTOPIA_NO_SMS
+
+/*!
+    \service MessagesService Messages
+    \brief Provides the Qtopia Messages viewing service.
+
+    The \i Messages service enables applications to request the display of messages of various types.
+*/
+
+/*! \internal */
+MessagesService::MessagesService(EmailClient* parent)
+    : QtopiaAbstractService( "Messages", parent )
+{
+    publishAll();
+}
+
+/*! \internal */
+MessagesService::~MessagesService()
+{
+}
+
+/*!
+    \fn MessagesService::newMessages(bool)
+    \internal 
+*/
+
+/*!
+    Show the newly arrived messages.  If \a userRequest is true, the request will be treated
+    as if arising from a direct user action; otherwise, the user will be requested to confirm 
+    the action before proceeding.
+
+    This slot corresponds to the QCop service message
+    \c{Messages::viewNewMessages()}.
+*/
+void MessagesService::viewNewMessages(bool userRequest)
+{
+    qLog(Messaging) << "MessagesService::viewNewMessages(" << userRequest << ")";
+
+    emit newMessages(userRequest);
+}
+
+/*!
+    \fn MessagesService::message(QMailId)
+    \internal 
+*/
+
+/*!
+    Show the message with the supplied \a id.
+
+    This slot corresponds to the QCop service message
+    \c{Messages::viewMessage(QMailId)}.
+*/
+void MessagesService::viewMessage(QMailId id)
+{
+    qLog(Messaging) << "MessagesService::viewMessage(" << id << ")";
+    if (!id.isValid()) {
+        qWarning() << "viewMessage supplied invalid id:" << id.toULongLong();
+        return;
+    }
+
+    emit message(id);
+}
+
+#include "emailclient.moc"
 

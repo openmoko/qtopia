@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QStyleOption Class Reference</title>
+  <title>Qt 4.3: QStyleOption Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QStyleOption Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QStyleOption Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QStyleOption class stores the parameters used by <a href="qstyle.html">QStyle</a> functions. <a href="#details">More...</a></p>
 <pre> #include &lt;QStyleOption&gt;</pre><p>Inherited by <a href="qstyleoptionbutton.html">QStyleOptionButton</a>, <a href="qstyleoptioncomplex.html">QStyleOptionComplex</a>, <a href="qstyleoptiondockwidget.html">QStyleOptionDockWidget</a>, <a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a>, <a href="qstyleoptionframe.html">QStyleOptionFrame</a>, <a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a>, <a href="qstyleoptionheader.html">QStyleOptionHeader</a>, <a href="qstyleoptionmenuitem.html">QStyleOptionMenuItem</a>, <a href="qstyleoptionprogressbar.html">QStyleOptionProgressBar</a>, <a href="qstyleoptionq3dockwindow.html">QStyleOptionQ3DockWindow</a>, <a href="qstyleoptionq3listviewitem.html">QStyleOptionQ3ListViewItem</a>, <a href="qstyleoptionrubberband.html">QStyleOptionRubberBand</a>, <a href="qstyleoptiontab.html">QStyleOptionTab</a>, <a href="qstyleoptiontabbarbase.html">QStyleOptionTabBarBase</a>, <a href="qstyleoptiontabwidgetframe.html">QStyleOptionTabWidgetFrame</a>, <a href="qstyleoptiontoolbar.html">QStyleOptionToolBar</a>, <a href="qstyleoptiontoolbox.html">QStyleOptionToolBox</a>, and <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a>.</p>
 <ul>
@@ -56,7 +57,7 @@
 <h2>Detailed Description</h2>
 <p>The QStyleOption class stores the parameters used by <a href="qstyle.html">QStyle</a> functions.</p>
 <p>QStyleOption and its subclasses contain all the information that <a href="qstyle.html">QStyle</a> functions need to draw a graphical element.</p>
-<p>For performance reasons, there are few member functions and the access to the member variables is direct (i.e., using the <tt>.</tt> or <tt>-&gt;</tt> operator). This low-level feel makes the structures straightforward to use and emphasizes that these are simply parameters used by the style functions.</p>
+<p>For performance reasons, there are few member functions and the access to the member variables is direct (i.e&#x2e;, using the <tt>.</tt> or <tt>-&gt;</tt> operator). This low-level feel makes the structures straightforward to use and emphasizes that these are simply parameters used by the style functions.</p>
 <p>The caller of a <a href="qstyle.html">QStyle</a> function usually creates QStyleOption objects on the stack. This combined with Qt's extensive use of <a href="shared.html#implicit-sharing">implicit sharing</a> for types such as <a href="qstring.html">QString</a>, <a href="qpalette.html">QPalette</a>, and <a href="qcolor.html">QColor</a> ensures that no memory allocation needlessly takes place.</p>
 <p>The following code snippet shows how to use a specific QStyleOption subclass to paint a push button:</p>
 <pre> void MyPushButton::paintEvent(QPaintEvent *)
@@ -98,28 +99,28 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_Button</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top"><a href="qstyleoptionbutton.html">QStyleOptionButton</a></td></tr>
-<tr><td valign="top"><tt>QStyleOption::SO_ComboBox</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top"><a href="qstyleoptioncombobox.html">QStyleOptionComboBox</a></td></tr>
+<tr><td valign="top"><tt>QStyleOption::SO_ComboBox</tt></td><td align="center" valign="top">?</td><td valign="top"><a href="qstyleoptioncombobox.html">QStyleOptionComboBox</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_Complex</tt></td><td align="center" valign="top"><tt>0xf0000</tt></td><td valign="top"><a href="qstyleoptioncomplex.html">QStyleOptionComplex</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_Default</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top"><a href="qstyleoption.html">QStyleOption</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_DockWidget</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top"><a href="qstyleoptiondockwidget.html">QStyleOptionDockWidget</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_FocusRect</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top"><a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_Frame</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top"><a href="qstyleoptionframe.html">QStyleOptionFrame</a> <a href="qstyleoptionframev2.html">QStyleOptionFrameV2</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_GraphicsItem</tt></td><td align="center" valign="top"><tt>17</tt></td><td valign="top"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></td></tr>
-<tr><td valign="top"><tt>QStyleOption::SO_GroupBox</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top"><a href="qstyleoptiongroupbox.html">QStyleOptionGroupBox</a></td></tr>
+<tr><td valign="top"><tt>QStyleOption::SO_GroupBox</tt></td><td align="center" valign="top">?</td><td valign="top"><a href="qstyleoptiongroupbox.html">QStyleOptionGroupBox</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_Header</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top"><a href="qstyleoptionheader.html">QStyleOptionHeader</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_MenuItem</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top"><a href="qstyleoptionmenuitem.html">QStyleOptionMenuItem</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_ProgressBar</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top"><a href="qstyleoptionprogressbar.html">QStyleOptionProgressBar</a> <a href="qstyleoptionprogressbarv2.html">QStyleOptionProgressBarV2</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_RubberBand</tt></td><td align="center" valign="top"><tt>15</tt></td><td valign="top"><a href="qstyleoptionrubberband.html">QStyleOptionRubberBand</a></td></tr>
-<tr><td valign="top"><tt>QStyleOption::SO_SizeGrip</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top"><a href="qstyleoptionsizegrip.html">QStyleOptionSizeGrip</a></td></tr>
-<tr><td valign="top"><tt>QStyleOption::SO_Slider</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top"><a href="qstyleoptionslider.html">QStyleOptionSlider</a></td></tr>
-<tr><td valign="top"><tt>QStyleOption::SO_SpinBox</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top"><a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a></td></tr>
+<tr><td valign="top"><tt>QStyleOption::SO_SizeGrip</tt></td><td align="center" valign="top">?</td><td valign="top"><a href="qstyleoptionsizegrip.html">QStyleOptionSizeGrip</a></td></tr>
+<tr><td valign="top"><tt>QStyleOption::SO_Slider</tt></td><td align="center" valign="top">?</td><td valign="top"><a href="qstyleoptionslider.html">QStyleOptionSlider</a></td></tr>
+<tr><td valign="top"><tt>QStyleOption::SO_SpinBox</tt></td><td align="center" valign="top">?</td><td valign="top"><a href="qstyleoptionspinbox.html">QStyleOptionSpinBox</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_Tab</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top"><a href="qstyleoptiontab.html">QStyleOptionTab</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_TabBarBase</tt></td><td align="center" valign="top"><tt>14</tt></td><td valign="top"><a href="qstyleoptiontabbarbase.html">QStyleOptionTabBarBase</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_TabWidgetFrame</tt></td><td align="center" valign="top"><tt>13</tt></td><td valign="top"><a href="qstyleoptiontabwidgetframe.html">QStyleOptionTabWidgetFrame</a></td></tr>
-<tr><td valign="top"><tt>QStyleOption::SO_TitleBar</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top"><a href="qstyleoptiontitlebar.html">QStyleOptionTitleBar</a></td></tr>
+<tr><td valign="top"><tt>QStyleOption::SO_TitleBar</tt></td><td align="center" valign="top">?</td><td valign="top"><a href="qstyleoptiontitlebar.html">QStyleOptionTitleBar</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_ToolBar</tt></td><td align="center" valign="top"><tt>16</tt></td><td valign="top"><a href="qstyleoptiontoolbar.html">QStyleOptionToolBar</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_ToolBox</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top"><a href="qstyleoptiontoolbox.html">QStyleOptionToolBox</a></td></tr>
-<tr><td valign="top"><tt>QStyleOption::SO_ToolButton</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top"><a href="qstyleoptiontoolbutton.html">QStyleOptionToolButton</a></td></tr>
+<tr><td valign="top"><tt>QStyleOption::SO_ToolButton</tt></td><td align="center" valign="top">?</td><td valign="top"><a href="qstyleoptiontoolbutton.html">QStyleOptionToolButton</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_ViewItem</tt></td><td align="center" valign="top"><tt>12</tt></td><td valign="top"><a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> (used in Interviews)</td></tr>
 </table></p>
 <p>The following values are used for custom controls:</p>
@@ -132,7 +133,7 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_Q3DockWindow</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top"><a href="qstyleoptionq3dockwindow.html">QStyleOptionQ3DockWindow</a></td></tr>
-<tr><td valign="top"><tt>QStyleOption::SO_Q3ListView</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top"><a href="qstyleoptionq3listview.html">QStyleOptionQ3ListView</a></td></tr>
+<tr><td valign="top"><tt>QStyleOption::SO_Q3ListView</tt></td><td align="center" valign="top">?</td><td valign="top"><a href="qstyleoptionq3listview.html">QStyleOptionQ3ListView</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_Q3ListViewItem</tt></td><td align="center" valign="top"><tt>11</tt></td><td valign="top"><a href="qstyleoptionq3listviewitem.html">QStyleOptionQ3ListViewItem</a></td></tr>
 </table></p>
 <p>See also <a href="qstyleoption.html#type-varx">type</a>.</p>
@@ -187,7 +188,7 @@
 <h3 class="fn"><a name="rect-var"></a><a href="qrect.html">QRect</a> QStyleOption::rect</h3>
 <p>This variable holds the area that should be used for various calculations and painting.</p>
 <p>This can have different meanings for different types of elements. For example, for a <a href="qstyle.html#ControlElement-enum">QStyle::CE_PushButton</a> element it would be the rectangle for the entire button, while for a <a href="qstyle.html#ControlElement-enum">QStyle::CE_PushButtonLabel</a> element it would be just the area for the push button label.</p>
-<p>The default value is a null rectangle, i.e. a rectangle with both the width and the height set to 0.</p>
+<p>The default value is a null rectangle, i.e&#x2e; a rectangle with both the width and the height set to 0.</p>
 <p>See also <a href="qstyleoption.html#initFrom">initFrom</a>().</p>
 <h3 class="fn"><a name="state-var"></a><a href="qstyle.html#StateFlag-enum">QStyle::State</a> QStyleOption::state</h3>
 <p>This variable holds the style flags that are used when drawing the control.</p>
@@ -228,6 +229,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

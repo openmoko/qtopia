@@ -38,11 +38,11 @@
 <li><b>uint</b> - Represents an Integer IAS attribute.</li>
 <li><b><a href="qbytearray.html">QByteArray</a></b> - Represents an octet sequence IAS attribute.</li>
 </ul>
-<p>NOTE: Under linux this function requires administrator privileges.</p>
+<p>NOTE: Under linux this function requires administrator privileges. Under windows this function has no effect and always returns an invalid value.</p>
 <p>See also <a href="qiriasdatabase.html#setAttribute">setAttribute</a>() and <a href="qiriasdatabase.html#removeAttribute">removeAttribute</a>().</p>
 <h3 class="fn"><a name="removeAttribute"></a>bool QIrIasDatabase::removeAttribute ( const <a href="qstring.html">QString</a> &amp; <i>className</i>, const <a href="qstring.html">QString</a> &amp; <i>attribName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Attempts to remove the attribute from the local IAS Database. The <i>className</i> parameter specifies the class name of the attribute. The <i>attribName</i> parameter specifies the attribute name. Returns true if the attribute could be removed, false otherwise.</p>
-<p>NOTE: Under linux this function requires administrator privileges.</p>
+<p>NOTE: Under linux this function requires administrator privileges. Under Windows this function has no effect and always returns false</p>
 <p>See also <a href="qiriasdatabase.html#setAttribute">setAttribute</a>() and <a href="qiriasdatabase.html#attribute">attribute</a>().</p>
 <h3 class="fn"><a name="setAttribute"></a>bool QIrIasDatabase::setAttribute ( const <a href="qstring.html">QString</a> &amp; <i>className</i>, const <a href="qstring.html">QString</a> &amp; <i>attribName</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>attr</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets a new attribute into the IAS Database returning true if successful; otherwise returning false. The <i>attr</i> parameter holds the attribute to be set. Attr can be of the following types:</p>
@@ -58,6 +58,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

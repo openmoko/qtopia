@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,14 +26,10 @@
 #include <QListWidget>
 
 #include <qtopiaapplication.h>
-#include <qtopialog.h>
 #include <qtopianamespace.h>
 #include <qtopianetwork.h>
 #include <qtranslatablesettings.h>
-
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 
 AddNetworkUI::AddNetworkUI(QWidget* parent, Qt::WFlags fl)
     : QDialog( parent, fl )
@@ -41,10 +37,8 @@ AddNetworkUI::AddNetworkUI(QWidget* parent, Qt::WFlags fl)
     setModal( true );
     init();
 
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this, true );
-#endif
     setObjectName("add-service");
 }
 
@@ -104,11 +98,7 @@ void AddNetworkUI::init()
             this, SLOT(updateHint()));
     connect( list, SIGNAL(itemActivated(QListWidgetItem*)),
             this, SLOT(itemSelected()) );
-#ifdef QTOPIA_PHONE
     QtopiaApplication::setMenuLike( this, true );
-#else
-
-#endif
     if (list->count())
         list->setCurrentItem( list->item(0) );
 

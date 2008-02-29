@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,7 +21,8 @@
 #ifndef MINEFIELD_H
 #define MINEFIELD_H
 
-#include <qframe.h>
+#include <QFrame>
+#include <QHash>
 
 class Mine;
 class QSettings;
@@ -49,23 +50,19 @@ public:
 
 public slots:
     void setup( int level );
-
     void showMines();
 
 signals:
     void gameOver( bool won );
-    void gameStarted();
     void mineCount( int );
+    void currentPointChanged(int x, int y);
     void newGameSelected();
-    void currentPointChanged(QPoint);
-    void debugGeometries();
-protected:
 
+protected:
     void mousePressEvent( QMouseEvent* );
     void mouseReleaseEvent( QMouseEvent* );
     void keyPressEvent( QKeyEvent* );
-    void keyReleaseEvent( QKeyEvent* );
-    void paintEvent(QPaintEvent* );
+    void paintEvent( QPaintEvent* );
 
     int getHint( int row, int col );
     void setHint( int r, int c );
@@ -77,29 +74,21 @@ protected:
     const Mine *mine( int row, int col ) const { return onBoard(row, col ) ? mines[row+numCols*col] : 0; }
 
 protected slots:
-    void cellPressed( int row, int col );
     void cellClicked( int row, int col );
-    void held();
+    void currentPointChanged();
 
 private:
-
     int findCellSize();
     void setCellSize( int );
 
-#ifdef QTOPIA_PHONE
-    bool mAlreadyHeld; // true if we've already taken action for holding down on the current key press.
-    // TODO: Investigate troubles with select button for pressing vs holding sometimes
-#endif
     State stat;
     void setState( State st );
     void placeMines();
     enum FlagAction { NoAction, FlagOn, FlagNext };
     FlagAction flagAction;
-    bool ignoreClick;
     int currRow;
     int currCol;
     int numRows, numCols;
-    bool pressed;
 
     int minecount;
     int mineguess;
@@ -107,7 +96,6 @@ private:
     int lev;
     QRect availableRect;
     int cellSize;
-    QTimer *holdTimer;
     Mine **mines;
 
     int topMargin;
@@ -115,7 +103,6 @@ private:
 
     int sizeHintX;
     int sizeHintY;
-
 };
 
 #endif // MINEFIELD_H

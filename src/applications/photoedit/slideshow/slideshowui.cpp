@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,10 +22,10 @@
 #include "slideshowui.h"
 
 #include <qthumbnail.h>
-
 #include <qpainter.h>
 #include <qcolor.h>
 #include <qfontmetrics.h>
+#include <QStyleOption>
 
 #include <QKeyEvent>
 
@@ -38,7 +38,6 @@ void SlideShowUI::setImage( const QContent& lnk )
     // Clear buffer, update image, update fitted name and update display
     image_buffer = QPixmap();
     image = lnk;
-    if( display_name ) calculateFittedName();
     update();
 }
 
@@ -50,11 +49,11 @@ void SlideShowUI::paintEvent( QPaintEvent* )
 #define SHADOW_OFFSET 1
 
     // If image not loaded, load image into buffer
-    if( image_buffer.isNull() && !image.file().isNull() ) {
+    if( image_buffer.isNull() && !image.fileName().isNull() ) {
         // Scale image to fit within the current widget dimensions
         // while keeping the original width:height ratio
         // Load scaled image to buffer
-        QThumbnail thumbnail( image.file() );
+        QThumbnail thumbnail( image.fileName() );
         image_buffer = thumbnail.pixmap( size() );
         // Update image position
         image_position.setX( ( width() - image_buffer.width() ) / 2 );
@@ -80,15 +79,28 @@ void SlideShowUI::paintEvent( QPaintEvent* )
 
     // If display name, draw fitted name onto widget
     if( display_name ) {
+        QStyleOption style;
+        style.initFrom( this );
+
+        QString name = image.name();
+
+        int x = style.direction == Qt::LeftToRight
+                ? NAME_POSX + SHADOW_OFFSET
+                : 0;
+        int y = NAME_POSY + SHADOW_OFFSET;
+        int w = width() - NAME_POSX - SHADOW_OFFSET;
+        int h = height() - y;
+
+        QRect rect( x, y, w, h );
+
+        QString elidedName = style.fontMetrics.elidedText( name, Qt::ElideRight, w );
+
         // Draw shadow
         painter.setPen( Qt::black );
-        painter.drawText( NAME_POSX + SHADOW_OFFSET,
-           painter.fontInfo().pointSize() + NAME_POSY + SHADOW_OFFSET,
-           fitted_name );
+        painter.drawText( rect, elidedName );
         // Draw fitted name
         painter.setPen( NAME_COLOR );
-        painter.drawText( NAME_POSX, painter.fontInfo().pointSize() + NAME_POSY,
-            fitted_name );
+        painter.drawText( rect.translated( -SHADOW_OFFSET, -SHADOW_OFFSET ), elidedName );
     }
 }
 
@@ -97,12 +109,8 @@ void SlideShowUI::resizeEvent( QResizeEvent* )
     // Update image position
     image_position.setX( ( width() - image_buffer.width() ) / 2 );
     image_position.setY( ( height() - image_buffer.height() ) / 2 );
-
-    // If display name, calculate fitted name
-    if( display_name ) calculateFittedName();
 }
 
-#ifdef QTOPIA_PHONE
 void SlideShowUI::keyPressEvent( QKeyEvent* e )
 {
     if( e->key() == Qt::Key_Back ) {
@@ -110,28 +118,8 @@ void SlideShowUI::keyPressEvent( QKeyEvent* e )
         e->accept();
     }
 }
-#endif
 
 void SlideShowUI::mousePressEvent( QMouseEvent* )
 {
     emit pressed();
-}
-
-void SlideShowUI::calculateFittedName()
-{
-    fitted_name = image.name();
-
-    QFontMetrics font_metrics( font() );
-    // If name is larger than the current width, reduce name
-    if( font_metrics.width( fitted_name ) > width() - NAME_POSX ) {
-        fitted_name = "...";
-        int i = 0;
-        // Add to fitted name while fitted name is less than current width
-            while( !image.name()[ i ].isNull() &&
-                font_metrics.width( fitted_name + image.name()[i] ) <
-                    width() - NAME_POSX )
-                fitted_name += image.name()[i++];
-        fitted_name.remove( 0, 3 );
-        fitted_name += "...";
-    }
 }

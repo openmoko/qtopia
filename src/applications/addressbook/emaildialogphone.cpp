@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,40 +21,45 @@
 
 #include "emaildialogphone.h"
 
-#include <QAction>
 #include <QLayout>
 #include <QPainter>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QGroupBox>
 
 #include <qsoftmenubar.h>
 #include <qtopiaapplication.h>
 
 
-EmailDialog::EmailDialog( QWidget *parent, const char *name, bool modal, Qt::WFlags fl )
-    : QDialog( parent, fl )
+EmailDialog::EmailDialog( QWidget *parent, bool readonly )
+    : QDialog( parent )
 {
-    setObjectName(name);
-    setModal(modal);
     QVBoxLayout *l = new QVBoxLayout( this );
-    mList = new EmailDialogList( this );
-    mList->setFocusPolicy( Qt::NoFocus );
+    mList = new EmailDialogList( this, readonly );
     mList->setFrameStyle( QFrame::NoFrame );
 
-    mEdit = new EmailLineEdit( this );
-
-    connect( mList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), mEdit, SLOT(currentChanged(QListWidgetItem*,QListWidgetItem*)) );
-    connect( mEdit, SIGNAL(textChanged(const QString&)), mList, SLOT(setCurrentText(const QString&)) );
-
-    connect( mEdit, SIGNAL(newEmail()), mList, SLOT(newEmail()) );
-    connect( mEdit, SIGNAL(deleteEmail()), mList, SLOT(deleteEmail()) );
-    connect( mEdit, SIGNAL(setAsDefault()), mList, SLOT(setAsDefault()) );
-    connect( mEdit, SIGNAL(moveUp()), mList, SLOT(moveUp()) );
-    connect( mEdit, SIGNAL(moveDown()), mList, SLOT(moveDown()) );
-
     l->addWidget( mList );
-    l->addWidget( mEdit );
-    mEdit->setFocus();
+    if (!readonly) {
+        mEditBox = new QGroupBox( tr("Email Address:"), this );
+        mEdit = new EmailLineEdit( mEditBox );
+        QVBoxLayout *vbox = new QVBoxLayout;
+        vbox->addWidget(mEdit);
+        mEditBox->setLayout(vbox);
+        mEditBox->hide();
+
+        connect( mList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), mEdit, SLOT(currentChanged(QListWidgetItem*,QListWidgetItem*)) );
+        connect( mEdit, SIGNAL(textChanged(QString)), mList, SLOT(setCurrentText(QString)) );
+        connect( mList, SIGNAL(editItem()), SLOT(edit()));
+        mEdit->installEventFilter(this);
+
+        connect( mEdit, SIGNAL(moveUp()), mList, SLOT(moveUp()) );
+        connect( mEdit, SIGNAL(moveDown()), mList, SLOT(moveDown()) );
+        l->addWidget( mEditBox );
+    } else {
+        connect( mList, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(accept()) );
+    }
+    mList->setFocus();
+    connect ( mList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(currentChanged(QListWidgetItem*)));
 
     setWindowState(windowState() | Qt::WindowMaximized);
 
@@ -63,6 +68,20 @@ EmailDialog::EmailDialog( QWidget *parent, const char *name, bool modal, Qt::WFl
 
 EmailDialog::~EmailDialog()
 {
+}
+
+void EmailDialog::edit()
+{
+    mEdit->selectAll();
+    mEditBox->show();
+    mEdit->setEditFocus(true);
+}
+
+bool EmailDialog::eventFilter( QObject *o, QEvent *e )
+{
+    if ( o == mEdit && e->type() == QEvent::LeaveEditFocus )
+        mEditBox->hide();
+    return false;
 }
 
 void EmailDialog::showEvent( QShowEvent *e )
@@ -86,81 +105,61 @@ QStringList EmailDialog::emails() const
     return mList->emails();
 }
 
-EmailDialogListItem::EmailDialogListItem( EmailDialogList *parent )
-    : QListWidgetItem( parent )
+QString EmailDialog::selectedEmail() const
 {
+    return mSelected;
 }
 
-EmailDialogListItem::EmailDialogListItem( EmailDialogList *parent, int after )
-    : QListWidgetItem( 0 )
+void EmailDialog::currentChanged(QListWidgetItem *current)
+{
+    if (current)
+        mSelected = current->text();
+    else
+        mSelected.clear();
+}
+
+EmailDialogListItem::EmailDialogListItem( EmailDialogList *parent, const QString& txt, int after )
+    : QListWidgetItem( txt, 0 )
 {
     parent->insertItem(after, this);
 }
 
-void EmailDialogListItem::setText( const QString &txt )
+EmailDialogList::EmailDialogList( QWidget *parent, bool ro )
+    : QListWidget( parent ), readonly(ro)
 {
-    QListWidgetItem::setText( txt );
-    listWidget()->update();
-}
+    mDefaultPix = QIcon( ":image/email" );
+    mNormalPix = QIcon();
 
-void EmailDialogListItem::setPixmap( const QPixmap &pix )
-{
-    mDefaultPix = pix;
-    listWidget()->update();
-}
-
-const QPixmap *EmailDialogListItem::pixmap() const
-{
-    return &mDefaultPix;
-}
-
-int EmailDialogListItem::width( const QListWidget *lb ) const
-{
-    return lb->viewport()->width();
-}
-
-const int mgn = 2;
-int EmailDialogListItem::height( const QListWidget *lb ) const
-{
-    QFontMetrics fm = lb->fontMetrics();
-    const int pixWidth = (mDefaultPix.width() > 0 ? mDefaultPix.width() : 24);
-    int h = qMax( mDefaultPix.height()+mgn*2,
-                                        fm.boundingRect( 0, 0, width(lb)-pixWidth-mgn,
-                                        fm.lineSpacing(), 0,
-                                        text().simplified()).height()+(mgn*2) );
-    return h;
-}
-
-void EmailDialogListItem::paint( QPainter *p )
-{
-
-    //TODO : width of pixmap shouldn't be a hardcoded value
-    const int itemWidth = width( listWidget() );
-    const int itemHeight = height( listWidget() );
-    const int w = itemWidth;
-    const int h = itemHeight-(mgn*2);
-    const int pixWidth = (mDefaultPix.width() > 0 ? mDefaultPix.width() : 24);
-    int x = 0,
-        y = 0+mgn;
-    p->drawText( x, y, w-pixWidth-mgn, h, 0, text() );
-    if( !mDefaultPix.isNull() )
-    {
-        x = w-pixWidth;
-        y = itemHeight/2 - mDefaultPix.height()/2;
-        p->drawPixmap( x, y, mDefaultPix );
-    }
-}
-
-EmailDialogList::EmailDialogList( QWidget *parent )
-    : QListWidget( parent )
-{
-    mDefaultPix = QPixmap( ":image/email" );
     mDefaultIndex = -1;
-#ifdef QTOPIA_PHONE
     if( !Qtopia::mousePreferred() )
         setEditFocus( false );
-#endif
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    connect( this, SIGNAL(itemActivated(QListWidgetItem*)), SLOT(editItem(QListWidgetItem*)) );
+    connect( this, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(updateMenus()));
+
+    QMenu *menu = QSoftMenuBar::menuFor( this );
+
+    mNewAction = menu->addAction(
+            QIcon(":icon/new"), tr("New"), this, SLOT(newEmail()) );
+    mSetDefaultAction = menu->addAction(
+            QIcon(":icon/email"), tr("Set as default"),  this, SLOT(setAsDefault()) );
+    mDeleteAction = menu->addAction(
+            QIcon(":icon/trash"), tr("Delete"), this, SLOT(deleteEmail()) );
+}
+
+void EmailDialogList::updateMenus()
+{
+    mSetDefaultAction->setVisible(currentItem() != newItemItem);
+    mDeleteAction->setVisible(currentItem() != newItemItem);
+}
+
+void EmailDialogList::editItem(QListWidgetItem* i)
+{
+    if ( i == newItemItem )
+        newEmail();
+    else
+        emit editItem();
 }
 
 void EmailDialogList::setCurrentText( const QString &t )
@@ -177,6 +176,8 @@ void EmailDialogList::setCurrentText( const QString &t )
 void EmailDialogList::setEmails( const QString &def, const QStringList &em )
 {
     clear();
+    if ( !readonly )
+        newItemItem = new QListWidgetItem( QIcon(":image/email-new"), tr("Add Email Address"), this );
     QStringList::ConstIterator it;
     mDefaultIndex = -1;
     int idxCount = 0;
@@ -187,12 +188,13 @@ void EmailDialogList::setEmails( const QString &def, const QStringList &em )
         if( emTxt.isEmpty() )
             continue;
 
-        EmailDialogListItem *newItem = new EmailDialogListItem( this, idxCount );
-        newItem->setText( emTxt );
+        EmailDialogListItem *newItem = new EmailDialogListItem( this, emTxt, idxCount );
         if( emTxt == def && mDefaultIndex == -1 )
         {
-            newItem->setPixmap( mDefaultPix );
+            newItem->setIcon( mDefaultPix );
             mDefaultIndex = idxCount;
+        } else {
+            newItem->setIcon( mNormalPix );
         }
         prevItem = newItem;
     }
@@ -200,6 +202,8 @@ void EmailDialogList::setEmails( const QString &def, const QStringList &em )
     {
         setCurrentRow( 0 );
         scrollToItem(currentItem());
+    } else if ( !readonly ) {
+        newEmail();
     }
 }
 
@@ -215,7 +219,7 @@ QStringList EmailDialogList::emails() const
     QStringList em;
     for( int i = 0 ; i < count() ; ++i )
     {
-        if( !item( i )->text().trimmed().isEmpty() )
+        if( item(i) != newItemItem && !item(i)->text().trimmed().isEmpty() )
             em += item( i )->text();
     }
     return em;
@@ -229,12 +233,14 @@ void EmailDialogList::newEmail()
 void EmailDialogList::newEmail( const QString &email )
 {
     int lastIdx = count()-1;
-    EmailDialogListItem *newItem = new EmailDialogListItem( this, lastIdx );
-    newItem->setText( (!email.isNull() ? email : tr("user@domain")) );
+    EmailDialogListItem *newItem = new EmailDialogListItem( this, email, lastIdx );
     setCurrentItem(newItem);
     scrollToItem(newItem);
-    if( lastIdx == -1 )
+    if( lastIdx == 0 )
         setAsDefault();
+    else
+        newItem->setIcon(mNormalPix);
+    emit itemActivated(newItem);
 }
 
 void EmailDialogList::deleteEmail()
@@ -265,9 +271,9 @@ void EmailDialogList::setAsDefault()
     if( currentItem() != 0 )
     {
         if( mDefaultIndex != -1 )
-            ((EmailDialogListItem *)item( mDefaultIndex ))->setPixmap( QPixmap() );
+            ((EmailDialogListItem *)item( mDefaultIndex ))->setIcon(mNormalPix);
         mDefaultIndex = currentRow();
-        ((EmailDialogListItem *)item( mDefaultIndex ))->setPixmap( mDefaultPix );
+        ((EmailDialogListItem *)item( mDefaultIndex ))->setIcon( mDefaultPix );
     }
 }
 
@@ -310,15 +316,6 @@ EmailLineEdit::EmailLineEdit( QWidget *parent, const char *name )
     : QLineEdit( parent )
 {
     setObjectName( name );
-
-    QMenu *menu = QSoftMenuBar::menuFor( this );
-
-    mNewAction = menu->addAction(
-            QIcon(":icon/new"), tr("New"), this, SIGNAL(newEmail()) );
-    mSetDefaultAction = menu->addAction(
-            QIcon(":icon/email"), tr("Set as default"),  this, SIGNAL(setAsDefault()) );
-    mDeleteAction = menu->addAction(
-            QIcon(":icon/trash"), tr("Delete"), this, SIGNAL(deleteEmail()) );
 }
 
 void EmailLineEdit::currentChanged( QListWidgetItem *current, QListWidgetItem* previous )
@@ -329,14 +326,10 @@ void EmailLineEdit::currentChanged( QListWidgetItem *current, QListWidgetItem* p
     {
         setText( current->text() );
         selectAll();
-        mSetDefaultAction->setEnabled( true );
-        mDeleteAction->setEnabled( true );
     }
     else
     {
         setText( "" );
-        mSetDefaultAction->setEnabled( false );
-        mDeleteAction->setEnabled( false );
     }
 }
 

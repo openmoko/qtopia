@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -54,7 +54,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-    QStorageMetaInfo *storageInfo() const;
+    void populateServers();
     void setServers( const QHash<QString,QString> & );
     void setServer( const QString& server );
     QStringList getServers() const;
@@ -67,21 +67,21 @@ public:
 signals:
     void targetsUpdated( const QStringList & );
     void serversUpdated( const QStringList & );
-    void infoHtml( const QString & );
     void domainUpdate( const QString & );
     void rowsRemoved(const QModelIndex&, int, int);
     void rowsAboutToBeRemoved(const QModelIndex&,int,int);
+    void serverStatus( const QString & );
+    void newlyInstalled( const QModelIndex & );
 public slots:
     void setInstallTarget( const QString & );
     void activateItem( const QModelIndex& );
     void reenableItem( const QModelIndex& );
-    void sendUpdatedText( const QModelIndex& );
     void userTargetChoice( const QString & );
-    void populateLists();
 private slots:
     void publishTargets();
     void controllerUpdate();
-    void packageInstalled( const InstallControl::PackageInfo &, bool );
+    void packageInstalled( const InstallControl::PackageInfo & );
+    void serverStatusUpdated( const QString & );
 private:
     unsigned int getParent( qint64 ) const;
     unsigned int getColumn( qint64 ) const;
@@ -93,8 +93,9 @@ private:
     AbstractPackageController *networked, *installed;
     QString currentInstallTarget;
 
-    QHash<QString,QString> activeServers;
+    QHash<QString,QString> servers;
     QHash<QString,QString> mediaNames;
+    QString activeServer;
 
 #ifndef QT_NO_SXE
     QStringList sensitiveDomains;
@@ -107,7 +108,7 @@ private:
 /////
 inline QStringList PackageModel::getServers() const
 {
-    return activeServers.keys();
+    return servers.keys();
 }
 
 // Parent can be 0 - 254, stored in leftmost 8 bits, 255 is root

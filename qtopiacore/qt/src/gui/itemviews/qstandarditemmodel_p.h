@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -53,18 +68,27 @@ public:
     inline QStandardItemPrivate()
         : model(0),
           parent(0),
-          flags(Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsEditable
-                |Qt::ItemIsDragEnabled|Qt::ItemIsDropEnabled),
           rows(0),
-          columns(0)
+          columns(0),
+          lastIndexOf(2)
         { }
     virtual ~QStandardItemPrivate();
 
-    int childIndex(int row, int column) const;
-    inline int childIndex(const QStandardItem *child) const {
-        return children.indexOf(const_cast<QStandardItem*>(child));
+    inline int childIndex(int row, int column) const {
+        if ((row < 0) || (column < 0)
+            || (row >= rowCount()) || (column >= columnCount())) {
+            return -1;
+        }
+        return (row * columnCount()) + column;
     }
-    QPair<int, int> itemPosition(const QStandardItem *item) const;
+    inline int childIndex(const QStandardItem *child) {
+        int start = qMax(0, lastIndexOf -2);
+        lastIndexOf = children.indexOf(const_cast<QStandardItem*>(child), start);
+        if (lastIndexOf == -1 && start != 0)
+            lastIndexOf = children.lastIndexOf(const_cast<QStandardItem*>(child), start);
+        return lastIndexOf;
+    }
+    QPair<int, int> position() const;
     void setChild(int row, int column, QStandardItem *item,
                   bool emitChanged = false);
     inline int rowCount() const {
@@ -106,6 +130,7 @@ public:
     const QMap<int, QVariant> itemData() const;
 
     bool insertRows(int row, int count, const QList<QStandardItem*> &items);
+    bool insertRows(int row, const QList<QStandardItem*> &items);
     bool insertColumns(int column, int count, const QList<QStandardItem*> &items);
 
     void sortChildren(int column, Qt::SortOrder order);
@@ -113,12 +138,13 @@ public:
     QStandardItemModel *model;
     QStandardItem *parent;
     QVector<QWidgetItemData> values;
-    Qt::ItemFlags flags;
     QVector<QStandardItem*> children;
     int rows;
     int columns;
 
     QStandardItem *q_ptr;
+
+    int lastIndexOf;
 };
 
 class QStandardItemModelPrivate : public QAbstractItemModelPrivate

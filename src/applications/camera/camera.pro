@@ -11,15 +11,20 @@ HEADERS = mainwindow.h \
           videocapturedevicefactory.h \
           formatconverter.h \
           bayerconverter.h \
-          phototimer.h
+          phototimer.h \
+          minsecspinbox.h\
+          yuvconverter.h
 
 SOURCES = mainwindow.cpp \
           videocaptureview.cpp \
           formatconverter.cpp \
           bayerconverter.cpp \
           main.cpp \
-          phototimer.cpp
+          phototimer.cpp \
+          minsecspinbox.cpp\
+          yuvconverter.cpp
 
+# This is documented in src/build/doc/src/deviceprofiles.qdoc
 !isEmpty(DEVICE_CONFIG_PATH) {
     DEVICE_HEADERS=$$files($$DEVICE_CONFIG_PATH/camera/*.h)
     DEVICE_SOURCES=$$files($$DEVICE_CONFIG_PATH/camera/*.cpp)
@@ -44,17 +49,21 @@ SOURCES = mainwindow.cpp \
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/camera.desktop
 desktop.path=/apps/Applications
 desktop.hint=desktop
+INSTALLS+=desktop
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=camera*
 help.hint=help
+INSTALLS+=help
 pics.files=$$QTOPIA_DEPOT_PATH/pics/camera/*
 pics.path=/pics/camera
 pics.hint=pics
+INSTALLS+=pics
 service.files=$$QTOPIA_DEPOT_PATH/services/Camera/camera
 service.path=/services/Camera
+INSTALLS+=service
 qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/Camera
 qdsservice.path=/etc/qds
-INSTALLS+=desktop help pics service qdsservice
+INSTALLS+=qdsservice
 
 # the server does this for us
 #categories.files=$$QTOPIA_DEPOT_PATH/etc/categories/camera.conf
@@ -63,4 +72,4 @@ INSTALLS+=desktop help pics service qdsservice
 #INSTALLS+=categories
 
 pkg.desc=Camera
-pkg.domain=window,msg,pim,qds,cardreader,pictures,launcher,docapi{video/*:image/*},camera
+pkg.domain=window,msg,pim,qds,cardreader,pictures,camera,doc_server,doc_write,cameraservice,launcher

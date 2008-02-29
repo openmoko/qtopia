@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -127,8 +127,8 @@ QExportedBackground::QExportedBackground(int screen, QObject *parent)
     d->screen = screen;
     if (screen >= 0 && screen < MaxScreens) {
         QtopiaChannel* sysChannel = new QtopiaChannel( "QPE/System", this );
-        connect( sysChannel, SIGNAL(received(const QString&,const QByteArray&)),
-                this, SLOT(sysMessage(const QString&,const QByteArray&)) );
+        connect( sysChannel, SIGNAL(received(QString,QByteArray)),
+                this, SLOT(sysMessage(QString,QByteArray)) );
         getPixmaps();
     }
     localInfo()->localInstance.insert(this);
@@ -146,8 +146,8 @@ QExportedBackground::QExportedBackground(QObject *parent)
     d->screen = scr;
     if (scr >= 0 && scr < MaxScreens) {
         QtopiaChannel* sysChannel = new QtopiaChannel( "QPE/System", this );
-        connect( sysChannel, SIGNAL(received(const QString&,const QByteArray&)),
-                this, SLOT(sysMessage(const QString&,const QByteArray&)) );
+        connect( sysChannel, SIGNAL(received(QString,QByteArray)),
+                this, SLOT(sysMessage(QString,QByteArray)) );
         getPixmaps();
     }
     localInfo()->localInstance.insert(this);
@@ -307,9 +307,22 @@ void QExportedBackground::setExportedBackground(const QPixmap &image, int screen
         return;
     }
 
-    colorize(*expBg.bgPm, image,
-             QApplication::palette().color(QPalette::Window), 
-             localInfo()->tintAmount);
+    // Get background color direct from settings in case style has
+    // messed with it.
+    QColor bgCol;
+    QSettings config(QLatin1String("Trolltech"),QLatin1String("qpe"));
+    config.beginGroup( QLatin1String("Appearance") );
+    QString value = config.value("Background", "#EEEEEE").toString();
+    if ( value[0] == '#' ) {
+        bgCol = QColor(value);
+        int alpha = config.value("Background_alpha", "64").toInt();
+        bgCol.setAlpha(alpha);
+    } else {
+        bgCol = QApplication::palette().color(QPalette::Window);
+    }
+
+    colorize(*expBg.bgPm, image, bgCol);
+
     *((uchar*)expBg.bgState->qwsBits()) = 1; // Set
     QtopiaIpcEnvelope e("QPE/System", "backgroundChanged()");
    
@@ -318,11 +331,13 @@ void QExportedBackground::setExportedBackground(const QPixmap &image, int screen
 }
 
 void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,
-                                   const QColor &colour, int level)
+                                   const QColor &colour)
 {
     int sr, sg, sb;
     colour.getRgb(&sr, &sg, &sb);
-    int div =level+1;
+    int level = colour.alpha();
+    int div = 255;
+    int mult = 255-level;
     QSize dataSize = qt_screen->mapToDevice(QSize(src.width(),src.height()));
     if(qt_screen->isTransformed()) {
         int rot = qt_screen->transformOrientation();
@@ -336,14 +351,17 @@ void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,
         sr = (sr << 8) & 0xF800;
         sg = (sg << 3) & 0x07e0;
         sb = sb >> 3;
+        int const_sr = sr*level;
+        int const_sg = sg*level;
+        int const_sb = sb*level;
         int count = src.qwsBytesPerLine()/2 * dataSize.height();
         ushort *sp = (ushort *)src.qwsBits();
         ushort *dp = (ushort *)dest.qwsBits();
         for (int x = 0; x < count; x++, dp++, sp++) {
             quint32 spix = *sp;
-            quint32 r = ((spix & 0xF800) + sr*level)/div;
-            quint32 g = ((spix & 0x07e0) + sg*level)/div;
-            quint32 b = ((spix & 0x001f) + sb*level)/div;
+            quint32 r = ((spix & 0x0000F800)*mult + const_sr)/div;
+            quint32 g = ((spix & 0x000007e0)*mult + const_sg)/div;
+            quint32 b = ((spix & 0x0000001f)*mult + const_sb)/div;
             *dp = (r&0xF800) | (g&0x07e0) | (b&0x001f);
         }
     } else if (src.depth() == 32 && dest.depth() == 32) {
@@ -353,9 +371,9 @@ void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,
         int const_sb = sb*level;
         for (int i = 0; i < 256; i++)
         {
-            map[i] = ((const_sr+i)/div);
-            map[i+256] = ((const_sg+i)/div);
-            map[i+512] = ((const_sb+i)/div);
+            map[i] = ((const_sr+i*mult)/div);
+            map[i+256] = ((const_sg+i*mult)/div);
+            map[i+512] = ((const_sb+i*mult)/div);
         }
         QRgb *srgb = (QRgb*)src.qwsBits();
         QRgb *drgb = (QRgb*)dest.qwsBits();
@@ -376,9 +394,9 @@ void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,
         int const_sb = sb*level;
         for (int i = 0; i < 256; i++)
         {
-            map[i] = ((const_sr+i)/div);
-            map[i+256] = ((const_sg+i)/div);
-            map[i+512] = ((const_sb+i)/div);
+            map[i] = ((const_sr+i*mult)/div);
+            map[i+256] = ((const_sg+i*mult)/div);
+            map[i+512] = ((const_sb+i*mult)/div);
         }
         QRgb *srgb = (QRgb*)src.qwsBits();
         ushort *dp = (ushort *)dest.qwsBits();

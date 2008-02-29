@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -83,7 +83,7 @@ ImageProcessor::ImageProcessor( ImageIO* iio, QObject* parent )
     zoom_factor( 1.0 )
 {
     // Clear transformations when image changes in image io
-    connect( image_io, SIGNAL( changed() ), this, SLOT( reset() ) );
+    connect( image_io, SIGNAL(changed()), this, SLOT(reset()) );
 }
 
 void ImageProcessor::crop( const QRect& rect )
@@ -188,8 +188,9 @@ QSize ImageProcessor::size() const
 
 bool ImageProcessor::isChanged() const
 {
-    return transformation_matrix != Matrix() || brightness_factor ||
-        viewport != QRect( QPoint( 0, 0 ), image_io->size() );
+    return !image_io->image().isNull() && (
+        transformation_matrix != Matrix() || brightness_factor ||
+        viewport != QRect( QPoint( 0, 0 ), image_io->size() ) );
 }
 
 void ImageProcessor::setZoom( double factor )

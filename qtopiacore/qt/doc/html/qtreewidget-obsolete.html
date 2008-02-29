@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qtreewidget.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/itemviews/qtreewidget.cpp -->
 <head>
-  <title>Qt 4.2: Obsolete Members for QTreeWidget</title>
+  <title>Qt 4.3: Obsolete Members for QTreeWidget</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -27,6 +27,14 @@
 <ul>
 <li><div class="fn"/>3 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 </ul>
+<h3>Protected Functions</h3>
+<ul>
+<li><div class="fn"/>QList&lt;QTreeWidgetItem *&gt; <b><a href="qtreewidget-obsolete.html#items">items</a></b> ( const QMimeData * <i>data</i> ) const&nbsp;&nbsp;<tt> (obsolete)</tt></li>
+</ul>
+<ul>
+<li><div class="fn"/>4 protected functions inherited from <a href="qabstractitemview.html#protected-functions">QAbstractItemView</a></li>
+<li><div class="fn"/>1 protected function inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
+</ul>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="isItemExpanded"></a>bool QTreeWidget::isItemExpanded ( const <a href="qtreewidgetitem.html">QTreeWidgetItem</a> * <i>item</i> ) const</h3>
@@ -40,6 +48,9 @@
 <p>Returns true if the <i>item</i> is selected; otherwise returns false.</p>
 <p>This function is deprecated. Use <a href="qtreewidgetitem.html#isSelected">QTreeWidgetItem::isSelected</a>() instead.</p>
 <p>See also <a href="qtreewidget.html#itemSelectionChanged">itemSelectionChanged</a>().</p>
+<h3 class="fn"><a name="items"></a><a href="qlist.html">QList</a>&lt;<a href="qtreewidgetitem.html">QTreeWidgetItem</a> *&gt; QTreeWidget::items ( const <a href="qmimedata.html">QMimeData</a> * <i>data</i> ) const&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Returns an empty list</p>
+<p>See also <a href="qtreewidget.html#mimeData">mimeData</a>().</p>
 <h3 class="fn"><a name="setItemExpanded"></a>void QTreeWidget::setItemExpanded ( const <a href="qtreewidgetitem.html">QTreeWidgetItem</a> * <i>item</i>, bool <i>expand</i> )</h3>
 <p>Sets the item referred to by <i>item</i> to either closed or opened, depending on the value of <i>expand</i>.</p>
 <p>This function is deprecated. Use <a href="qtreewidgetitem.html#setExpanded">QTreeWidgetItem::setExpanded</a>() instead.</p>
@@ -56,6 +67,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,21 +1,3 @@
-<!--#if expr="$PHONESTYLE"-->
-<!--#set var="Description" value="Desc."-->
-<!--#set var="Location" value="Loc."-->
-<!--#set var="TimeZone" value="T.Z."-->
-<!--#set var="Alarm" value="<img src=":image/datebook/audible">"-->
-<!--#set var="Repeat" value="Rept"-->
-<!--#set var="EndDate" value="Till"-->
-<!--#set var="Category" value="Cat."-->
-<!--#endif-->
-<!--#if expr="$PDASTYLE"-->
-<!--#set var="Description" value="Description"-->
-<!--#set var="Location" value="Location"-->
-<!--#set var="TimeZone" value="TimeZone"-->
-<!--#set var="Alarm" value="Alarm"-->
-<!--#set var="Repeat" value="Repeat"-->
-<!--#set var="EndDate" value="End Date"-->
-<!--#set var="Category" value="Category"-->
-<!--#endif-->
 <html>
 <head><title>Add / Edit Event</title></head>
 <body>
@@ -25,41 +7,43 @@
    <h3>Add / Edit Event</h3>
 <!--#endif -->
 <p><b>To add an event to your calendar or edit an existing event:</b></p>
-<!--#if expr="$PHONESTYLE"-->
 <ul>
-<li>Launch <b>Calendar</b> and press <img src=":icon/options"> </img> then select <b>New</b> from the menu.</li>
-<li>Use <img src=":image/help/dpad"> </img> and <img src=":icon/select"> </img> to open fields and the keypad to enter text or select from the drop-down list.</li>
-<li>Press <img src=":icon/ok"> </img> to complete a field.</li>
-<li>Press <img src=":icon/i18n/back"> </img> to save the new event and exit.</li>
+<li><b>Adding an event</b>: Launch <b>Calendar</b> and press <img src=":icon/options"><b>Options</b>, then select <b>New</b> from the menu.</li>
+<li><b>Editing an event</b>: Select the event in <b>Calendar</b> and press <img src="icon/options"><b>Options</b>, then select <b>Edit event</b> from the menu.</li>
 </ul>
-<p><b>Note: </b>Unless specified an event is allocated 1 hour in your calendar.</p>
-<!--#endif-->
-<!--#if expr="$PDASTYLE"-->
+<p>The details of an event are split over three tabs.</p>
+<p>The <b>Event</b> tab has fields for most of the details of the event, including: 
 <ul>
-<li>Tap <b>Event</b>, then <img src=":icon/new"> </img> <b>New Event</b></li>
+<li><b>Desc.</b> description shown for the event.</li>
+<li><b>Loc.</b> where the event is.</li>
+<li><b>All day event</b> select if the event covers the whole day.</li>
+<li><b>Start, End</b> date/time of start and end of event.  If the <b>All day event</b> checkbox is selected, only the start/end date of the event will be shown.  If you adjust the start time of an event, the end time will also be adjusted to keep the same event duration.  To make an event longer or shorter, first set the start time of the event, then adjust the end time.</li>
+<li><b>T.Z.</b> <a href="worldtime-timezones.html">time zone</a> where event takes place.</li>
+<li><b>Reminder</b> choose whether to have a reminder that the event will start soon.  You can choose either a silent reminder or an audible reminder, and when you want the reminder to occur. For an all day event, you can choose the time of day that the reminder should occur.</li>
 </ul>
-<p>OR</p>
+
+<p>The <b>Recurrence</b> allows you to configure how the event repeats, including: 
 <ul>
-<li>Tap <img src=":icon/new"> </img> on the toolbar.</li>
-<li>Enter the details for the new event (for a description of the fields see <a href="datebook-edit-event.html">Edit Event</a></li>
-<li>Tap <img src=":image/qpe/pda/OKButton" alt="OK"> </img> to save the event or <img src=":image/qpe/pda/CloseButton" alt="X"> </img> to discard it</li>
+<li><b>Repeat</b> choose a type of repetition (daily, weekly etc).  Depending on the type of repetition, more options may be available to customize the repetition.</li>
+<li><b>Frequency</b> choose how often the repetition will occur.  For example, a frequency of 2 and a repetition type of daily means that the event will repeat every 2 days.</li>
+<li><b>Repeat until</b> check this option and select a date if the repetitions should stop on or before a specific date.</li>
+<li><b>On these days</b> when choosing a weekly repeat, an option to choose additional days of the week to repeat on will appear.  The original event start day of the week is always selected.  This allows you to create events that will repeat on every weekday, or on any particular days you specify.</li>
+<li><b>Repeat on</b> when choosing a monthly repeat, you can specify how the day of the month is interpreted. This allows you to specify events that recur on certain days of certain weeks (for example, the first Tuesday), or a fixed day of the month (for example, the 17th of each month).</li>
 </ul>
-<p>Events can also be created quickly by tapping the date and time for a new event. When you tap a date in the Week or Month view you are switched to the Day view automatically where you can select a starting time.</p>
-<p>When using this technique the date and start time of the event are set automatically.</p>
-<p>The end time can also be set by tapping and dragging the stylus from the start to end time of the event.</p>
-<!--#endif-->
-<p><b>The fields are:</b></p>
+
+<p><b>Notes</b> this tab contains extra information about the event, including:</p>
 <ul>
-<li><b><!--#echo var="Description"-->:</b> description shown for the event.</li>
-<li><b><!--#echo var="Location"-->:</b> where the event is.</li>
-<li><b>All day:</b> tick if the event covers the whole day.</li>
-<li><b>Start, End:</b> first and last day of event.</li>
-<li><b><!--#echo var="TimeZone"-->:</b> <a href="worldtime-timezones.html">time zone</a> where event takes place.</li>
-<li><b><!--#echo var="Alarm"-->:</b> set to alarm type, and enter number of minutes before event that alarm should go off; you can't set an alarm for an all-day event.</li>
-<li><b><!--#echo var="Repeat"-->:</b> make event <a href="datebook-event-repeat.html">repeat automatically</a>.</li>
-<li><b><!--#echo var="EndDate"-->:</b> if event repeats, set when it stops; set to None for endless repeat.</li>
-<li><b><!--#echo var="Category"-->:</b> the categories this event belongs to.</li>
+<li><b>Category</b> used to group similar events. </li>
+<li><b>Notes</b> enter additional information for an event.</li>
 </ul>
-<p>See Also: <a href="datebook-event-times.html">New Event Times</a></p>
+<b>Navigating the fields:</b>
+<ul>
+<li>Use <img src=":image/help/dpad">  to and <img src=":icon/select"> <b>Select</b> to select a field.</li>
+<li>Use <img src=":icon/i18n/backspace">  to backspace and delete the text, then use the keypad to enter new text.</li>
+<li>For fields with a list of options, simply select another.</li>
+<li>Press <img src=":icon/ok"> <b>OK</b> to accept new text in a field or use <img src=":image/help/dpad">  to move to the next.</li>
+<li>Press <img src=":icon/i18n/back"> to save changes to the task and exit, or <img src=":icon/options"> <b>Options</b> then <b>Cancel</b> from the menu.</p>
+</ul>
+<p>See Also: <a href="qpe-categories.html">Category Help</a> and <a href="datebook-event-times.html">New Event Times</a></p>
 </body>
 </html>

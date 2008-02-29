@@ -46,8 +46,8 @@
 <ul>
 <li>use the predefined QPE/Application/<i>appname</i> channel in the application. For further information refer to: <a href="qtopiaapplication.html#appMessage">QtopiaApplication::appMessage</a>().</li>
 <li>create another channel and connect it to a slot using:<pre>     myChannel = new QtopiaChannel( &quot;QPE/FooBar&quot;, this );
-     connect( myChannel, SIGNAL(received(const QString&amp;,const QByteArray&amp;)),
-              this, SLOT(fooBarMessage(const QString&amp;,const QByteArray&amp;)) );</pre>
+     connect( myChannel, SIGNAL(received(QString,QByteArray)),
+              this, SLOT(fooBarMessage(QString,QByteArray)) );</pre>
 </li>
 </ul>
 <p>See also: <a href="qtopiaipc.html">Qtopia IPC</a> and <a href="services.html">Services</a>.</p>
@@ -63,6 +63,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

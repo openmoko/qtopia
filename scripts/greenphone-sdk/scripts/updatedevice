@@ -1,23 +1,41 @@
 #!/bin/sh
 
-. /opt/Qtopia/SDK/scripts/functions
+if [ -r /opt/Qtopia/SDK/scripts/functions ]; then
+    . /opt/Qtopia/SDK/scripts/functions
+    QPEVER=$(version)
+fi
 
-QPEVER=`version`
+die()
+{
+    echo -n "updatedevice failed while doing: "
+    echo $@
+    exit 1
+}
 
 prepare_device()
 {
-    ssh root@$PHONEIP 'updateqtopiahelper killqtopia'
-    ssh root@$PHONEIP 'updateqtopiahelper unmountqtopia'
-    ssh root@$PHONEIP 'gifanim /mnt/user/tools/splash.gif'
+    if ! ssh root@$PHONEIP 'cat /fs.ver' | grep '^troll v3\.[0123456789]*$' >/dev/null 2>&1; then
+        echo "Incompatible root filesystem detected.  Update Greenphone with USB Flash image."
+        echo "Refer to the Greenphone Quick Start Guide for flash instructions."
+        exit 1
+    fi
+
+    ssh root@$PHONEIP 'updateqtopiahelper killqtopia' || die prepare_device updateqtopiahelper killqtopia
+    ssh root@$PHONEIP 'updateqtopiahelper unmountqtopia' || die prepare_device updateqtopiahelper unmountqtopia
+
+    scp $TEMPDIR/flash-status-flashing.gif root@$PHONEIP:/tmp || die prepare_device scp
+
+    ssh root@$PHONEIP 'gifanim /tmp/flash-status-flashing.gif' || die prepare_device gifanim
+    ssh root@$PHONEIP 'rm -f /tmp/flash-status-flashing.gif' || die prepare_device rm
 }
 
 extract_image()
 {
-    tar -C $TEMPDIR -xzf $QTOPIA_IMAGE
+    tar -C $TEMPDIR -xzf $QTOPIA_IMAGE || die extract_image
 
     # check for flash.conf
     if [ -r $TEMPDIR/flash.conf ]; then
-        echo "USB Flash image detected.  Refer to the Greenphone Quick Start Guide for instructions."
+        echo "USB Flash image detected.  Refer to the Greenphone Quick Start Guide for flash instructions."
         exit 1
     fi
 }
@@ -26,25 +44,34 @@ upload_image()
 {
     IMAGE_SIZE=0
     for file in $TEMPDIR/*; do
-        IMAGE_SIZE=$(($IMAGE_SIZE + `stat -c %s $file`))
+        IMAGE_SIZE=$(($IMAGE_SIZE + $(stat -c %s $file)))
     done
     IMAGE_SIZE=$(( (1 + $IMAGE_SIZE / 1048576) * 1048576 ))
 
     MNTPNT=$( ssh root@$PHONEIP "updateqtopiahelper createtemp $IMAGE_SIZE" )
 
-    for i in $TEMPDIR/* ; do
-        scp $i root@$PHONEIP:$MNTPNT
-    done
+    if [ -z $MNTPNT ]; then
+        echo "Error creating temporary directory on Greenphone, aborting"
+        exit 1
+    fi
+
+    scp $TEMPDIR/* root@$PHONEIP:$MNTPNT || die upload_image
 }
 
 install_image()
 {
-    ssh root@$PHONEIP "updateqtopia --no-questions --ignore-firstrun --dont-reboot $MNTPNT"
-    ssh root@$PHONEIP "updateqtopiahelper deletetemp $MNTPNT"
-    ssh root@$PHONEIP "reboot"
+    ssh root@$PHONEIP "updateqtopia --no-questions $MNTPNT" >/dev/null
+    RESULT=$?
+    ssh root@$PHONEIP "updateqtopiahelper deletetemp $MNTPNT" || die install_image updateqtopiahelper
+
+    if [ $RESULT -ne 0 ]; then
+        sleep 60
+    fi
+    ssh root@$PHONEIP "reboot" || die install_image reboot
 }
 
-if [ $# -eq 0 ]; then
+# Find default update image
+if [ $# -eq 0 ] && [ -r /opt/Qtopia/extras/images/qtopia-greenphone-update.tar.gz ]; then
     QTOPIA_IMAGE=/opt/Qtopia/extras/images/qtopia-greenphone-update.tar.gz
 elif [ $# -eq 1 ]; then    
     case "$1" in
@@ -52,7 +79,7 @@ elif [ $# -eq 1 ]; then
             QTOPIA_IMAGE="$1"
             ;;
         *)
-            QTOPIA_IMAGE="`pwd`/$1"
+            QTOPIA_IMAGE="$(pwd)/$1"
             ;;
     esac
 else
@@ -60,19 +87,34 @@ else
     exit 1
 fi
 
-TEMPDIR=`mktemp -d /tmp/updatedevice.XXXXXX`
+# Check if network is up
+if which gph >/dev/null 2>&1; then
+    # SDK 
+    if ! gph -net; then
+        echo "Could not establish a network connection with Greenphone.  Check connection."
+        exit 1
+    fi
+else
+    # not SDK
+    if [ -z $PHONEIP ]; then
+        PHONEIP=10.10.10.20
+    fi
+
+    if ! ssh root@$PHONEIP /bin/true >/dev/null 2>&1; then
+        echo "Could not establish a network connection with Greenphone at $PHONEIP.  Check connection."
+        exit 1
+    fi
+fi
+
+TEMPDIR=$(mktemp -d /tmp/updatedevice.XXXXXX)
 trap 'rm -rf $TEMPDIR' 0
 
-if gph -net; then
-  echo "Network up, continue with flash"
-else
-  exit
-fi
+# Flash Process
 echo "Starting Flash process, please wait..."
-prepare_device
-echo "device prep stage complete."
 extract_image
 echo "extract stage complete."
+prepare_device
+echo "device prep stage complete."
 upload_image
 echo "uploading image stage complete."
 echo

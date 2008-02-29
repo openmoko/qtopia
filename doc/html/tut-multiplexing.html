@@ -48,18 +48,32 @@
 <a name="gsm-07-10-with-modified-parameters"></a>
 <h2>GSM 07.10 with Modified Parameters</h2>
 <p>Qtopia Phone has a built-in implementation of GSM 07.10 that it will use if there isn't an explicit multiplexer plug-in provided. The default parameters are GSM 07.10 in Basic mode with a frame size of 31. The vendor can change these defaults by writing a multiplexer plug-in. The following example increases the frame size to 256:</p>
-<pre>    bool FooMultiplexer::detect( QSerialIODevice *device )
+<pre>    class ModifiedGsm0710MultiplexerPlugin : public QSerialIODeviceMultiplexerPlugin
+    {
+        Q_OBJECT
+    public:
+        ModifiedGsm0710MultiplexerPlugin( QObject *parent = 0 )
+            : QSerialIODeviceMultiplexerPlugin( parent ) {}
+
+        bool detect( QSerialIODevice *device );
+        QSerialIODeviceMultiplexer *create( QSerialIODevice *device );
+    };
+
+    bool ModifiedGsm0710MultiplexerPlugin::detect( QSerialIODevice *device )
     {
         <span class="comment">// Determine if the module supports a frame size of 256.</span>
         return QGsm0710Multiplexer::cmuxChat( device, 256 );
     }
 
-    QSerialIODeviceMultiplexer *FooMultiplexer::create( QSerialIODevice *device )
+    QSerialIODeviceMultiplexer *ModifiedGsm0710MultiplexerPlugin::create
+            ( QSerialIODevice *device )
     {
         <span class="comment">// Create the GSM 07.10 multiplexer with a frame size of 256.</span>
         return new QGsm0710Multiplexer( device, 256 );
-    }</pre>
-<p>Once the plug-in has been compiled, into <tt>libfoomultiplex.so</tt> for example, the vendor can set the <tt>QTOPIA_PHONE_VENDOR</tt> environment variable to <i>foo</i> to enable the multiplexer plug-in.</p>
+    }
+
+    QTOPIA_EXPORT_PLUGIN( ModifiedGsm0710MultiplexerPlugin )</pre>
+<p>Once the plug-in has been compiled as <tt>libmodifiedgsm0710multiplex.so</tt>, the vendor can set the <tt>QTOPIA_PHONE_VENDOR</tt> environment variable to <i>modifiedgsm0710</i> to enable the multiplexer plug-in.</p>
 <a name="multiplexers-that-use-multiple-serial-ports"></a>
 <h2>Multiplexers That Use Multiple Serial Ports</h2>
 <p>Some GSM modules use multiple serial ports, one per channel. The <a href="qmultiportmultiplexer.html">QMultiPortMultiplexer</a> class can be used to support such modules. As an example, consider a module with the following serial ports:</p>
@@ -69,12 +83,23 @@
 <li><tt>/dev/mux2</tt> GPRS data channel.</li>
 </ul>
 <p>To support such a module, first set <tt>QTOPIA_PHONE_DEVICE</tt> to <tt>/dev/mux0</tt> in the <tt>custom.h</tt> file for the platform. Then the <tt>detect()</tt> and <tt>create()</tt> methods would be implemented as follows:</p>
-<pre>    bool FooMultiplexer::detect( QSerialIODevice *device )
+<pre>    class MultiPortMultiplexerPlugin : public QSerialIODeviceMultiplexerPlugin
+    {
+        Q_OBJECT
+    public:
+        MultiPortMultiplexerPlugin( QObject *parent = 0 )
+            : QSerialIODeviceMultiplexerPlugin( parent ) {}
+
+        bool detect( QSerialIODevice *device );
+        QSerialIODeviceMultiplexer *create( QSerialIODevice *device );
+    };
+
+    bool MultiPortMultiplexerPlugin::detect( QSerialIODevice * )
     {
         return true;
     }
 
-    QSerialIODeviceMultiplexer *FooMultiplexer::create( QSerialIODevice *device )
+    QSerialIODeviceMultiplexer *MultiPortMultiplexerPlugin::create( QSerialIODevice *device )
     {
         <span class="comment">// The primary AT command device, /dev/mux0, is configured</span>
         <span class="comment">// in the custom.h file as QTOPIA_PHONE_DEVICE and then passed</span>
@@ -92,7 +117,9 @@
         <span class="comment">// Add the data setup channel, which is the same as &quot;data&quot;.</span>
         mux-&gt;addChannel( &quot;datasetup&quot;, data );
         return mux;
-    }</pre>
+    }
+
+    QTOPIA_EXPORT_PLUGIN( MultiPortMultiplexerPlugin )</pre>
 <p>The first parameter to <a href="qmultiportmultiplexer.html#addChannel">QMultiPortMultiplexer::addChannel</a>() is the name of the channel that is being set. It may be one of the following standard names:</p>
 <ul>
 <li><tt>primary</tt> - primary AT command channel</li>
@@ -113,6 +140,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

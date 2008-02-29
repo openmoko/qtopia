@@ -14,53 +14,49 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Single Exec<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
-<li><a href="#benefits">Benefits</a></li>
-<li><a href="#explanation">Explanation</a></li>
+<li><a href="#costs-benefits">Costs/Benefits</a></li>
 <li><a href="#how-it-works">How it works</a></li>
 <li><a href="#issues">Issues</a></li>
 <li><a href="#building-single-exec">Building Single-exec</a></li>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>Qtopia can be compiled in a number of ways. The two most common ways are:</p>
-<ol type="1">
-<li><i>standard</i> compile - which is a fully dynamic build where each application is a separate binary run as a separate process</li>
-<li><i>single-exec</i> compile - <tt>qpe</tt> and all the applications are linked together in a single large binary, however applications are run as separate processes.</li>
-</ol>
-<a name="benefits"></a>
-<h2>Benefits</h2>
-<p>There are a number of benefits to <i>single-exec</i> as follows:</p>
+<p>By default Qtopia compiles dynamically. This allows applications to be installed but increases the minimum size and startup time. If installable applications are not required Qtopia can be built as single-exec. This uses static linking to put everything into a single multi-call binary (similar to how busybox works).</p>
+<a name="costs-benefits"></a>
+<h2>Costs/Benefits</h2>
+<p>The costs of using single-exec are:</p>
 <ul>
-<li>single large binary, is smaller in size than many separate application binaries</li>
-<li>launch times are faster when the libraries are statically linked together with the applications.</li>
+<li>Cannot install new applications except by rebuilding Qtopia.</li>
+<li>The single-exec binary is too large put on a cramfs filesystem.</li>
 </ul>
-<a name="explanation"></a>
-<h2>Explanation</h2>
-<p>The <i>single-exec</i> makes it possible to statically link all libraries to the programs without each application having a copy of all the libraries. Compiling all the applications into a single binary removes the problem of large individual application binaries and each application is run as a separate process to ensure that a single application fault does not bring down the whole system.</p>
+<p>The benefits of using single-exec are:</p>
+<ul>
+<li>The single-exec binary is smaller than the combined sizes of the dynamic binaries.</li>
+<li>The memory footprint is reduced due to the static linking.</li>
+<li>All dynamic linking costs are removed due to the static linking. This can speed up Qtopia startup time, app startup time and plugin load time.</li>
+<li>SXE is disabled which can lead to a performance gain in situations involving lots of messaging.</li>
+</ul>
 <a name="how-it-works"></a>
 <h2>How it works</h2>
-<p>When an application is started in <i>single-exec</i>, the server process is forked and the same binary is executed again, with an <tt>argv</tt> list that informs the newly created process what application it should be. This model is very similar to that used by a UNIX tool called <i>busybox</i> which morphs into different programs based on <tt>argv[0]</tt>.</p>
-<p>The size benefit of <i>single-exec</i> is derived from static linking. When the linker combines the code, it performs various size optimizations such as:</p>
+<p>Libraries are compiled statically. Plugins are compiled as static libraries. Applications are compiled as static libraries. Static global initializers are used to register the plugins with the plugin manager. They are also used to register the quicklaunch applications with quicklauncher and the non-quicklaunch applications with the server. See <a href="buildsystem/over-applications-1.html">Applications</a> for information about how applications can be launched.</p>
+<p>All of these static libraries are linked into the server creating a single binary. When the server starts it looks at <tt>argv[0]</tt> to determine which process it is.</p>
+<p>The size benefit of single-exec is derived from static linking. When the linker combines the code, it performs various size optimizations such as:</p>
 <ul>
 <li>removing inline functions that are always included inline</li>
 <li>removing redundant or dead code that is not used by any applications</li>
-<li>not including symbol tables usually needed for dynamic linking.</li>
+<li>not including symbol tables usually needed for dynamic linking</li>
 <li>no requirement for the code to be position independent code (PIC) which provides additional size and speed advantages.</li>
 </ul>
 <a name="issues"></a>
 <h2>Issues</h2>
-<p>One important thing to be aware of when building <i>single-exec</i> with additional 3rd-party components is that the symbols must not clash with those from other applications. The use of C++ namespaces would be a very good idea to avoid potential problems caused by this.</p>
+<p>One important thing to be aware of when building single-exec with additional 3rd-party components is that the symbols must not clash with those from other applications. The use of C++ namespaces would be a very good idea to avoid potential problems caused by this.</p>
 <a name="building-single-exec"></a>
 <h2>Building Single-exec</h2>
-<p>To build Qtopia as a <i>single-exec</i> binary:</p>
-<ul>
-<li>configure and build Qtopia adding <tt>-singleexec</tt> to the options passed to the Qtopia <tt>configure</tt> script.</li>
-</ul>
-<p>The result is that no application binaries or plug-ins will be generated. Instead, the <tt>qpe</tt> binary will be larger but will contain all the code that would have been in the other binaries.</p>
+<p>To build Qtopia as a single-exec binary simply pass -singleexec to configure.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

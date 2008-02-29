@@ -1,0 +1,12 @@
+#!/bin/sh
+lidsconf -A -s ${BIN} -o CAP_NET_ADMIN -j GRANT
+for i in ${UPDATE_DIR}/bin/*-network; do
+    if [ "$i" != "${UPDATE_DIR}/bin/*-network" ]; then
+        lidsconf -A -s ${BIN} -o $i -j READONLY
+    fi
+done
+for i in ${QTOPIA_DIR}/bin/*-network; do
+    if [ "$i" != "${QTOPIA_DIR}/bin/*-network" ]; then
+        lidsconf -A -s ${BIN} -o $i -j READONLY
+    fi
+done

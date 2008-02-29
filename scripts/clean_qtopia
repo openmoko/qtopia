@@ -1,6 +1,6 @@
 #!/bin/sh
 # get the paths
-if [ -f "$(dirname $0)/getpaths.sh" ]; then . "$(dirname $0)/getpaths.sh"; else echo "Could not find getpaths.sh"; exit 1; fi
+if [ -f "$(dirname $0)/../src/build/bin/getpaths.sh" ]; then . "$(dirname $0)/../src/build/bingetpaths.sh"; else echo "Could not find getpaths.sh"; exit 1; fi
 
 win32=0
 image=0

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,71 +24,44 @@
 #include <qtopia/pim/qappointmentmodel.h>
 #include <qtopia/pim/qappointment.h>
 
-#include "exceptiondialog.h"
-#include "dayview.h"
-#include "monthview.h"
 #include "appointmentdetails.h"
 #include "datebooksettings.h"
 
-#if !QTOPIA_PHONE && QTOPIA4_TODO
-# include "weekview.h"
-#endif
-
-#if !defined(QTOPIA_DESKTOP)
-# include "datebookgui.h"
-#else
-# include "datebookgui_qd.h"
-#endif
-
-#include <QStackedWidget>
-#include <QAction>
 #include <QDateTime>
-#include <QMessageBox>
 #include <QtopiaAbstractService>
 #include <QDSData>
 #include <QStack>
+#include <QMainWindow>
 
-class QAction;
 class QStackedWidget;
 class DayView;
-class WeekView;
 class MonthView;
 class QAppointment;
-class QDateTime;
-class QMessageBox;
 class ExceptionDialog;
 class AppointmentDetails;
-class QDLClient;
 class QDSActionRequest;
 class EntryDialog;
 class QCategoryDialog;
 
-class DateBook : public DateBookGui
+class DateBook : public QMainWindow
 {
     friend class AppointmentPicker;
     friend class CalendarService;
     Q_OBJECT
 
 public:
-    DateBook( QWidget *parent = 0, Qt::WFlags f = 0 );
+    DateBook( QWidget *parent = 0, Qt::WFlags f = 0);
     ~DateBook();
 
 public slots:
-    void flush();
-    void reload();
-
-    // some setting or env changed, data hasn't but how its displayed may have.
-    void updateAlarms();
-
     void selectToday();     // Select today's date without changing view
     void viewToday();       // View today's date in day view
     void viewDay();         // View currently selected date in day view
     void viewDay(const QDate& d);
-    void viewWeek();
-    void viewWeek(const QDate& d);
     void viewMonth();
     void viewMonth(const QDate& d);
     void nextView();
+    void closeView();
 
     void unfoldAllDay();
     void foldAllDay();
@@ -96,16 +69,15 @@ public slots:
     void checkToday();
 
     void showSettings();
+    void selectSources();
 
     void changeClock();
     void changeWeek(bool newDay);
 
-    void appMessage(const QString& msg, const QByteArray& data);
-
-    void newAppointment();
-    bool newAppointment(const QString &str);
-    bool newAppointment(const QDateTime &dstart, const QDateTime &dend);
-    bool newAppointment(const QDateTime &dstart, const QDateTime &dend, const QString &description, const QString &notes);
+    void newAppointment(bool useCurrentCategory = true);
+    bool newAppointment(const QString &str, bool useCurrentCategory = true);
+    bool newAppointment(const QDateTime &dstart, const QDateTime &dend, bool useCurrentCategory = true);
+    bool newAppointment(const QDateTime &dstart, const QDateTime &dend, const QString &description, const QString &notes, bool useCurrentCategory = true);
 
     void addAppointment(const QAppointment &e);
 
@@ -115,8 +87,6 @@ public slots:
 
     void removeCurrentOccurrence();
     void removeOccurrence(const QOccurrence &o);
-    void removeOccurrencesBefore();
-    void removeOccurrencesBefore(const QDate &date, bool prompt = true);
 
     void beamCurrentAppointment();
     void beamAppointment(const QAppointment &a);
@@ -125,6 +95,8 @@ public slots:
     void showAppointmentDetails();
     void showAppointmentDetails(const QOccurrence &o);
     void hideAppointmentDetails();
+
+    void showAlarms(const QDateTime &when, int warn);
 
     void showAccountSettings();
 
@@ -139,6 +111,7 @@ public slots:
 
     void updateIcons();
 
+    void appMessage(const QString &, const QByteArray &);
 signals:
     void searchNotFound();
     void searchWrapAround();
@@ -152,9 +125,6 @@ protected:
     void initDayView();
     void initMonthView();
     void initAppointmentDetails();
-#if !QTOPIA_PHONE && QTOPIA4_TODO
-    void initWeekView();
-#endif
 
     void initExceptionDialog();
     int askException(bool editMode);
@@ -170,12 +140,14 @@ protected:
 
     void raiseView(QWidget *widget);
 
+    QSet<QPimSource> addressbookSources();
+
     QDate currentDate();
     bool checkSyncing();
     QString validateAppointment(const QAppointment &a);
 
 private:
-    QDSData appointmentQDLLink( QAppointment& appointment );
+    QDSData occurrenceQDLLink( const QOccurrence& o);
     void removeAppointmentQDLLink( QAppointment& appointment );
 
     QAppointmentModel *model;
@@ -186,9 +158,6 @@ private:
     QStackedWidget *viewStack;
     QLabel *categoryLbl;
 
-#if !QTOPIA_PHONE && QTOPIA4_TODO
-    WeekView *weekView;
-#endif
     EntryDialog* editorView;
 
     QCategoryDialog *categoryDialog;
@@ -205,14 +174,28 @@ private:
     DateBookSettings::ViewType defaultView;
 
     bool syncing;
-    bool inSearch;
     bool closeAfterView;
+
     QDate lastToday; // last date that was the selected as 'Today'
     QTimer *midnightTimer;
     QTimer *updateIconsTimer;
 
     QStack<QOccurrence> prevOccurrences;
     QString beamfile;
+
+    QAction *actionMonth;
+    QAction *actionNew;
+    QAction *actionEdit;
+    QAction *actionDelete;
+    QAction *actionBeam;
+    QAction *actionToday;
+    QAction *actionSettings;
+    QAction *actionPurge;
+    QAction *actionShowAll;
+    QAction *actionHideSome;
+    QAction *actionCategory;
+    QAction *actionAccounts;
+    QAction *actionShowSources;
 };
 
 class CalendarService : public QtopiaAbstractService
@@ -238,9 +221,10 @@ public slots:
     void nextView();
     void showAppointment( const QUniqueId& uid );
     void showAppointment( const QUniqueId& uid, const QDate& date );
-    void cleanByDate( const QDate& date );
     void activateLink( const QDSActionRequest& request );
     void requestLinks( const QDSActionRequest& request );
+
+    void alarm(const QDateTime &, int);
 
 private:
     DateBook *datebook;

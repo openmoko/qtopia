@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,11 +36,19 @@
 
 //#define DEBUG_SVG_ICONENGINE
 
+#if QT_VERSION < 0x040300
 class QtopiaSvgIconPlugin : public QIconEnginePlugin
+#else
+class QtopiaSvgIconPlugin : public QIconEnginePluginV2
+#endif
 {
 public:
     QStringList keys() const;
+#if QT_VERSION < 0x040300
     QIconEngine *create(const QString &filename);
+#else
+    QIconEngineV2 *create(const QString &filename);
+#endif
 };
 
 QStringList QtopiaSvgIconPlugin::keys() const
@@ -48,7 +56,11 @@ QStringList QtopiaSvgIconPlugin::keys() const
     return QStringList() << "svg";
 }
 
+#if QT_VERSION < 0x040300
 QIconEngine *QtopiaSvgIconPlugin::create(const QString &file)
+#else
+QIconEngineV2 *QtopiaSvgIconPlugin::create(const QString &file)
+#endif
 {
     QtopiaSvgIconEngine *engine = new QtopiaSvgIconEngine();
     engine->addFile(file, QSize(), QIcon::Normal, QIcon::On);
@@ -63,7 +75,7 @@ class QtopiaSvgIconEnginePrivate : public QSharedData
 public:
     explicit QtopiaSvgIconEnginePrivate()
     {
-        render = new QSvgRenderer;
+        render = 0;
         loaded = false;
         pixmaps = 0;
     }
@@ -91,9 +103,17 @@ static inline QString createKey(const QString &filename, const QSize &size, QIco
 QtopiaSvgIconEngine::QtopiaSvgIconEngine()
     : d(new QtopiaSvgIconEnginePrivate)
 {
-
 }
 
+#if QT_VERSION >= 0x040300
+QtopiaSvgIconEngine::QtopiaSvgIconEngine(const QtopiaSvgIconEngine &other)
+    : QIconEngineV2(other), d(new QtopiaSvgIconEnginePrivate)
+{
+    d->filename = other.d->filename;
+    if (other.d->pixmaps)
+        d->pixmaps = new QMap<QString,QPixmap>(*other.d->pixmaps);
+}
+#endif
 
 QtopiaSvgIconEngine::~QtopiaSvgIconEngine()
 {
@@ -126,6 +146,7 @@ QPixmap QtopiaSvgIconEngine::pixmap(const QSize &size, QIcon::Mode mode,
     // Perhaps it has already been stored in the global cache.
     bool globalCandidate = false;
     if (size.height() == QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize)
+        || size.height() == QApplication::style()->pixelMetric(QStyle::PM_TabBarIconSize)
         || size.height() == QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize)
         || size.height() == QApplication::style()->pixelMetric(QStyle::PM_ListViewIconSize)) {
         if (QGlobalPixmapCache::find(key, pm)) {
@@ -137,6 +158,8 @@ QPixmap QtopiaSvgIconEngine::pixmap(const QSize &size, QIcon::Mode mode,
     }
 
     if (!d->loaded) {
+        if (!d->render)
+            d->render = new QSvgRenderer;
         d->render->load(d->filename);
         qLog(Resource) << "loaded svg icon" << d->filename;
         d->loaded = true;
@@ -187,7 +210,6 @@ void QtopiaSvgIconEngine::addFile(const QString &fileName, const QSize &,
         if (fileName.at(0) != QLatin1Char(':'))
             abs = QFileInfo(fileName).absoluteFilePath();
         d->filename = abs;
-//        d->render->load(abs);
     }
 }
 
@@ -196,3 +218,61 @@ void QtopiaSvgIconEngine::paint(QPainter *painter, const QRect &rect,
 {
     painter->drawPixmap(rect, pixmap(rect.size(), mode, state));
 }
+
+#if QT_VERSION >= 0x040300
+QString QtopiaSvgIconEngine::key() const
+{
+    return QLatin1String("svg");
+}
+
+QIconEngineV2 *QtopiaSvgIconEngine::clone() const
+{
+    return new QtopiaSvgIconEngine(*this);
+}
+
+bool QtopiaSvgIconEngine::read(QDataStream &in)
+{
+    QString fname;
+    int num_entries;
+
+    in >> fname;
+    d->filename = fname;
+    in >> num_entries;
+    for (int i=0; i<num_entries; ++i) {
+        if (in.atEnd()) {
+            if (d->pixmaps)
+                d->pixmaps->clear();
+            return false;
+        }
+        QString key;
+        QPixmap pixmap;
+        in >> pixmap;
+        in >> key;
+        if (!d->pixmaps)
+            d->pixmaps = new QMap<QString,QPixmap>;
+        d->pixmaps->insert(key, pixmap);
+    }
+    return true;
+}
+
+bool QtopiaSvgIconEngine::write(QDataStream &out) const
+{
+    QString fname(d->filename);
+    if (fname.at(0) == QLatin1Char(':'))
+        fname = QFileInfo(fname).absoluteFilePath();
+    out << fname;
+
+    if (d->pixmaps) {
+        out << d->pixmaps->size();
+        QMapIterator<QString,QPixmap> i(*d->pixmaps);
+        while (i.hasNext()) {
+            i.next();
+            out << i.value();
+            out << i.key();
+        }
+    } else {
+        out << int(0);
+    }
+    return true;
+}
+#endif

@@ -4,20 +4,18 @@
 
 qw_display=0
 
-PHONESKINNAME=Greenphone.skin
+PHONESKINNAME=$QPEDIR/qtopiacore/qt/tools/qvfb/Greenphone.skin
 
 echo "Using qvfb skin $PHONESKINNAME"
-
-PHONESKIN=/opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/tools/qvfb/$PHONESKINNAME
-
 
 start_qvfb()
 {
     if [ ! -e /tmp/.qtvfb_keyboard-$1 ]; then
         echo "Starting qvfb... "
-        echo "$QTDIR/bin/qvfb :$1 -skin $PHONESKIN"
+        echo "$QTDIR/bin/qvfb :$1 -skin $PHONESKINNAME"
         killall qvfb
-        qvfb -zoom .75 -qwsdisplay :$1 -skin $PHONESKIN &
+        cd /opt/Qtopia/SDK/$QPEVER/greenphone/src/tools/qt/qvfb
+        qvfb -zoom .75 -qwsdisplay :$1 -skin $PHONESKINNAME &
     fi
 }
 

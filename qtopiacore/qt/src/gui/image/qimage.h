@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -24,6 +39,7 @@
 #ifndef QIMAGE_H
 #define QIMAGE_H
 
+#include <QtGui/qtransform.h>
 #include <QtGui/qpaintdevice.h>
 #include <QtGui/qrgb.h>
 #include <QtCore/qbytearray.h>
@@ -37,6 +53,7 @@ QT_MODULE(Gui)
 class QIODevice;
 class QStringList;
 class QMatrix;
+class QTransform;
 class QVariant;
 template <class T> class QList;
 template <class T> class QVector;
@@ -53,7 +70,7 @@ public:
     QByteArray lang;
 
     bool operator< (const QImageTextKeyLang& other) const
-        { return key < other.key || key==other.key && lang < other.lang; }
+        { return key < other.key || (key==other.key && lang < other.lang); }
     bool operator== (const QImageTextKeyLang& other) const
         { return key==other.key && lang==other.lang; }
     inline bool operator!= (const QImageTextKeyLang &other) const
@@ -95,6 +112,8 @@ public:
     QImage(int width, int height, Format format);
     QImage(uchar *data, int width, int height, Format format);
     QImage(const uchar *data, int width, int height, Format format);
+    QImage(uchar *data, int width, int height, int bytesPerLine, Format format);
+    QImage(const uchar *data, int width, int height, int bytesPerLine, Format format);
 
 #ifndef QT_NO_IMAGEFORMAT_XPM
     explicit QImage(const char * const xpm[]);
@@ -174,6 +193,7 @@ public:
 #ifndef QT_NO_IMAGE_HEURISTIC_MASK
     QImage createHeuristicMask(bool clipTight = true) const;
 #endif
+    QImage createMaskFromColor(QRgb color, Qt::MaskMode mode = Qt::MaskInColor) const;
 
     inline QImage scaled(int w, int h, Qt::AspectRatioMode aspectMode = Qt::IgnoreAspectRatio,
                         Qt::TransformationMode mode = Qt::FastTransformation) const
@@ -184,6 +204,8 @@ public:
     QImage scaledToHeight(int h, Qt::TransformationMode mode = Qt::FastTransformation) const;
     QImage transformed(const QMatrix &matrix, Qt::TransformationMode mode = Qt::FastTransformation) const;
     static QMatrix trueMatrix(const QMatrix &, int w, int h);
+    QImage transformed(const QTransform &matrix, Qt::TransformationMode mode = Qt::FastTransformation) const;
+    static QTransform trueMatrix(const QTransform &, int w, int h);
     QImage mirrored(bool horizontally = false, bool vertically = true) const;
     QImage rgbSwapped() const;
     void invertPixels(InvertMode = InvertRgb);
@@ -203,6 +225,7 @@ public:
         { return fromData(reinterpret_cast<const uchar *>(data.constData()), data.size(), format); }
 
     int serialNumber() const;
+    qint64 cacheKey() const;
 
     QPaintEngine *paintEngine() const;
 
@@ -253,7 +276,7 @@ public:
         { return mirrored(horizontally, vertically); }
     QT3_SUPPORT bool create(const QSize&, int depth, int numColors=0, Endian bitOrder=IgnoreEndian);
     QT3_SUPPORT bool create(int width, int height, int depth, int numColors=0, Endian bitOrder=IgnoreEndian);
-    inline QT3_SUPPORT QImage xForm(const QMatrix &matrix) const { return transformed(matrix); }
+    inline QT3_SUPPORT QImage xForm(const QMatrix &matrix) const { return transformed(QTransform(matrix)); }
     inline QT3_SUPPORT QImage smoothScale(int w, int h, Qt::AspectRatioMode mode = Qt::IgnoreAspectRatio) const
         { return scaled(QSize(w, h), mode, Qt::SmoothTransformation); }
     inline QImage QT3_SUPPORT smoothScale(const QSize &s, Qt::AspectRatioMode mode = Qt::IgnoreAspectRatio) const
@@ -274,19 +297,17 @@ protected:
     virtual int metric(PaintDeviceMetric metric) const;
 
 private:
-#if defined(Q_WS_QWS) && !defined(QT3_SUPPORT)
-public:
-    enum Endian { BigEndian, LittleEndian, IgnoreEndian };
-private:
-    QImage(uchar *data, int w, int h, int depth, int pbl, const QRgb *colortable, int numColors, Endian bitOrder);
     friend class QWSOnScreenSurface;
-#endif
-
     QImageData *d;
 
     friend class QPixmap;
+    friend class QDetachedPixmap;
     friend Q_GUI_EXPORT qint64 qt_image_id(const QImage &image);
     friend const QVector<QRgb> *qt_image_colortable(const QImage &image);
+
+public:
+    typedef QImageData * DataPtr;
+    inline DataPtr &data_ptr() { return d; }
 };
 
 Q_DECLARE_SHARED(QImage)

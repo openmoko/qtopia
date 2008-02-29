@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -46,10 +46,10 @@ static const char * const ConfigSections[MaxQualities] = {
 
 ConfigureRecorder::ConfigureRecorder( QualitySetting *_qualities, MediaRecorderPluginList *_plugins, QWidget *parent, Qt::WFlags f )
     : QDialog( parent, f )
+    , qualities( _qualities )
+    , plugins( _plugins )
+    , quality( CustomQuality )
 {
-    qualities = _qualities;
-    plugins = _plugins;
-
     // Create the UI.
     conf = new Ui::ConfigureRecorderBase();
     conf->setupUi( this );
@@ -63,11 +63,6 @@ ConfigureRecorder::ConfigureRecorder( QualitySetting *_qualities, MediaRecorderP
         qualities[qual].mimeType = DefaultQualities[qual].mimeType;
         qualities[qual].formatTag = DefaultQualities[qual].formatTag;
     }
-#ifdef QTOPIA_PHONE
-    quality = CustomQuality;
-#else
-    quality = VoiceQuality;
-#endif
 
     // Load configuration overrides.
     loadConfig();
@@ -79,28 +74,15 @@ ConfigureRecorder::ConfigureRecorder( QualitySetting *_qualities, MediaRecorderP
     conf->sampleRate->addItem( tr("44 kHz") );
 
     // Populate the list of formats.
-    uint numPlugins;
-    uint plugin;
-    MediaRecorderEncoder *encoder;
-    QString formatName;
     if ( plugins != 0 ) {
-        numPlugins = plugins->count();
-        for ( plugin = 0; plugin < numPlugins; ++plugin ) {
-            encoder = plugins->at( plugin );
-            formatName = plugins->formatNameAt( plugin );
-            conf->format->addItem( formatName );
+        uint numPlugins = plugins->count();
+        for ( uint plugin = 0; plugin < numPlugins; ++plugin ) {
+            conf->format->addItem( plugins->formatNameAt( plugin ) );
         }
     }
 
-#ifdef QTOPIA_PHONE
-    // Don't display the quality group for the Phone Edition.
-    // It only uses the "Custom" quality setting, for simplicity.
-    conf->qualityGroup->hide();
-#endif
-
     // Group Quality settings buttons
     QButtonGroup*   qualitybuttonGroup = new QButtonGroup(this);
-
     qualitybuttonGroup->addButton(conf->voiceQuality, VoiceQuality);
     qualitybuttonGroup->addButton(conf->musicQuality, MusicQuality);
     qualitybuttonGroup->addButton(conf->cdQuality, CDQuality);
@@ -110,17 +92,16 @@ ConfigureRecorder::ConfigureRecorder( QualitySetting *_qualities, MediaRecorderP
 
     // Group channel setting buttons
     QButtonGroup*   channelButtonGroup = new QButtonGroup(this);
-
     channelButtonGroup->addButton(conf->monoChannels, 0);
     channelButtonGroup->addButton(conf->stereoChannels, 1);
 
     connect(channelButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(setChannels(int)));
 
     // Hook up interesting signals.
-    connect( conf->sampleRate, SIGNAL( activated(int) ),
-             this, SLOT( setSampleRate(int) ) );
-    connect( conf->format, SIGNAL( activated(int) ),
-             this, SLOT( setFormat(int) ) );
+    connect( conf->sampleRate, SIGNAL(activated(int)),
+             this, SLOT(setSampleRate(int)) );
+    connect( conf->format, SIGNAL(activated(int)),
+             this, SLOT(setFormat(int)) );
 }
 
 
@@ -144,19 +125,16 @@ static void copyQualities( QualitySetting *dest, QualitySetting *src, int num )
 
 void ConfigureRecorder::processPopup()
 {
-    QualitySetting savedQualities[MaxQualities];
-    int savedQuality;
-
     // Save the current quality settings, in case we have to cancel.
+    QualitySetting savedQualities[MaxQualities];
+    int savedQuality = quality;
     copyQualities( savedQualities, qualities, MaxQualities );
-    savedQuality = quality;
 
     // Update the configuration dialog's display with the current state.
     setQuality( quality );
 
     // Process the dialog.
     if ( QtopiaApplication::execDialog( this ) != QDialog::Accepted) {
-
         // Copy the saved configuration back.
         copyQualities( qualities, savedQualities, MaxQualities );
         quality = savedQuality;
@@ -169,7 +147,6 @@ void ConfigureRecorder::setQuality( int index )
     // Set the quality value.
     quality = index;
     switch ( quality ) {
-
         case VoiceQuality:
             conf->voiceQuality->setChecked( true );
             break;
@@ -196,7 +173,6 @@ void ConfigureRecorder::setQuality( int index )
 
     // Set the sample rate frequency.
     switch ( qualities[quality].frequency ) {
-
         case 8000:
             conf->sampleRate->setCurrentIndex( 0 );
             break;
@@ -235,12 +211,10 @@ void ConfigureRecorder::setSampleRate( int index )
     int frequency;
 
     switch ( index ) {
-
         case 0:     frequency = 8000; break;
         case 1:     frequency = 11025; break;
         case 2:     frequency = 22050; break;
         default:    frequency = 44100; break;
-
     }
 
     updateConfig( qualities[quality].channels, frequency,
@@ -257,51 +231,23 @@ void ConfigureRecorder::setFormat( int index )
 }
 
 
-void ConfigureRecorder::resetQuality()
-{
-    updateConfig( DefaultQualities[quality].channels,
-                  DefaultQualities[quality].frequency,
-                  DefaultQualities[quality].mimeType,
-                  DefaultQualities[quality].formatTag );
-    setQuality( quality );
-}
-
-
 void ConfigureRecorder::updateConfig( int channels, int frequency, const QString& mimeType, const QString& formatTag )
 {
-    if ( channels != qualities[quality].channels ) {
-        qualities[quality].channels = channels;
-    }
-
-    if ( frequency != qualities[quality].frequency ) {
-        qualities[quality].frequency = frequency;
-    }
-
-    if ( mimeType != qualities[quality].mimeType ) {
-        qualities[quality].mimeType = mimeType;
-    }
-
-    if ( formatTag != qualities[quality].formatTag ) {
-        qualities[quality].formatTag = formatTag;
-    }
+    qualities[quality].channels = channels;
+    qualities[quality].frequency = frequency;
+    qualities[quality].mimeType = mimeType;
+    qualities[quality].formatTag = formatTag;
 }
 
 
 void ConfigureRecorder::loadConfig()
 {
-    int qual, value;
-    QString qvalue;
-    QString svalue;
-    QString fvalue;
-    int index;
-
     QSettings cfg("Trolltech","MediaRecorder");
 
     cfg.beginGroup( "Options" );
-    qvalue = cfg.value( "Quality" ).toString();
+    QString qvalue = cfg.value( "Quality" ).toString();
 
-    for ( qual = 0; qual < MaxQualities; ++qual ) {
-
+    for ( int qual = 0; qual < MaxQualities; ++qual ) {
         if ( qvalue == ConfigSections[qual] ) {
             quality = qual;
         }
@@ -310,7 +256,7 @@ void ConfigureRecorder::loadConfig()
 
         cfg.beginGroup( ConfigSections[qual] );
 
-        value = cfg.value( "Channels" ).toInt();
+        int value = cfg.value( "Channels" ).toInt();
         if ( value == 1 || value == 2 ) {
             qualities[qual].channels = value;
         }
@@ -321,8 +267,8 @@ void ConfigureRecorder::loadConfig()
             qualities[qual].frequency = value;
         }
 
-        svalue = cfg.value( "Type" ).toString();
-        fvalue = cfg.value( "Format" ).toString();
+        QString svalue = cfg.value( "Type" ).toString();
+        QString fvalue = cfg.value( "Format" ).toString();
         if ( svalue == QString() ) {
             svalue = qualities[qual].mimeType;
         }
@@ -330,7 +276,7 @@ void ConfigureRecorder::loadConfig()
             fvalue = qualities[qual].formatTag;
         }
 
-        index = plugins->indexFromType( svalue, fvalue );
+        int index = plugins->indexFromType( svalue, fvalue );
         if( index >= 0 ) {
             qualities[qual].mimeType = plugins->at( index )->pluginMimeType();
             qualities[qual].formatTag = plugins->formatAt( index );
@@ -344,8 +290,6 @@ void ConfigureRecorder::loadConfig()
 
 void ConfigureRecorder::saveConfig()
 {
-    int qual;
-
     // Write out only what is different from the defaults, which
     // makes it easier to migrate to new versions of the app
     // that change the defaults to something better.
@@ -359,8 +303,7 @@ void ConfigureRecorder::saveConfig()
         cfg.remove( "Quality" );
     }
 
-    for ( qual = 0; qual < MaxQualities; ++qual ) {
-
+    for ( int qual = 0; qual < MaxQualities; ++qual ) {
         cfg.endGroup();
 
         cfg.beginGroup( ConfigSections[qual] );

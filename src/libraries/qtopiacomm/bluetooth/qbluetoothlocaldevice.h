@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,7 @@
 #ifndef __QBLUETOOTHLOCALDEVICE_H__
 #define __QBLUETOOTHLOCALDEVICE_H__
 
+#include <qbluetoothglobal.h>
 #include <qbluetoothnamespace.h>
 
 #include <qobject.h>
@@ -34,7 +35,7 @@ class QBluetoothLocalDevice_Private;
 class QDateTime;
 class QBluetoothAddress;
 
-template <typename T> class QBluetoothReply {
+template <typename T> class QBLUETOOTH_EXPORT QBluetoothReply {
 public:
     QBluetoothReply(const T &value) : m_isError(false), m_value(value) {}
     QBluetoothReply() : m_isError(true) {}
@@ -49,7 +50,7 @@ private:
     T m_value;
 };
 
-class QTOPIACOMM_EXPORT QBluetoothLocalDevice : public QObject
+class QBLUETOOTH_EXPORT QBluetoothLocalDevice : public QObject
 {
     Q_OBJECT
     friend class QBluetoothLocalDevice_Private;
@@ -175,7 +176,6 @@ signals:
 
 private:
     virtual void connectNotify(const char *signal);
-    virtual void disconnectNotify(const char *signal);
 
     Q_DISABLE_COPY(QBluetoothLocalDevice)
     QBluetoothLocalDevice_Private *m_data;

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -101,7 +101,7 @@ PackageModel::PackageModel( QObject* parent )
     installed = AbstractPackageController::factory( AbstractPackageController::installed, this );
 
 #ifndef QT_NO_SXE
-    QFile file( Qtopia::qtopiaDir() + QLatin1String( "/etc/default/Trolltech/PackageServers.conf" ) );
+    QFile file( Qtopia::qtopiaDir() + QLatin1String( "/etc/default/Trolltech/PackageManager.conf" ) );
 
     if( file.open( QIODevice::ReadOnly ) )
     {
@@ -125,22 +125,29 @@ PackageModel::PackageModel( QObject* parent )
     for ( int i = 0; i < rootItems.count(); i++ )
         connect( rootItems[i], SIGNAL(updated()),
                 this, SLOT(controllerUpdate()) );
-    connect( networked, SIGNAL(packageInstalled(const InstallControl::PackageInfo &,bool)),
-            installed, SLOT(addPackage(const InstallControl::PackageInfo &)) );
-    connect( networked, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&,int,int)),
-            this, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&,int,int)));
-    connect( networked, SIGNAL(rowsRemoved(const QModelIndex&,int,int)),
-            this, SIGNAL(rowsRemoved(const QModelIndex&,int,int)));
-    connect( networked, SIGNAL(packageInstalled(const InstallControl::PackageInfo &,bool)),
-            this, SLOT(packageInstalled(const InstallControl::PackageInfo &,bool)) );
-    connect( networked, SIGNAL(packageMessage(const QString &)), 
-            this, SIGNAL(infoHtml(const QString &)) );
-    connect( installed, SIGNAL(packageInstalled(const InstallControl::PackageInfo &,bool)),
-            this, SLOT(packageInstalled(const InstallControl::PackageInfo &,bool)) );
+    connect( networked, SIGNAL(packageInstalled(InstallControl::PackageInfo)),
+            installed, SLOT(addPackage(InstallControl::PackageInfo)) );
+    connect( networked, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)),
+            this, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)));
+    connect( networked, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+            this, SIGNAL(rowsRemoved(QModelIndex,int,int)));
+    connect( networked, SIGNAL(packageInstalled(InstallControl::PackageInfo)),
+            this, SLOT(packageInstalled(InstallControl::PackageInfo)) );
+    connect( networked, SIGNAL(serverStatus(QString)),
+            this, SLOT(serverStatusUpdated(QString)) );
 
     // can only have a max of 4 columns, if more are needed, change the
     // macros used for PackageModel::index(...) below
     // columnHeads << "Name" << "Size";
+    
+    QStorageMetaInfo *s = QStorageMetaInfo::instance();
+    connect( s, SIGNAL(disksChanged()),
+            this, SLOT(publishTargets()) );
+    connect( this, SIGNAL(targetsUpdated(QStringList)),
+            installed, SLOT(reloadInstalledLocations(QStringList)) );
+
+    if ( !QDir( Qtopia::packagePath() ).exists() )
+        QDir::root().mkpath( Qtopia::packagePath() );
 }
 
 PackageModel::~PackageModel()
@@ -149,48 +156,30 @@ PackageModel::~PackageModel()
         delete storage;
 }
 
-void PackageModel::populateLists()
+/*!
+  Populates the servers member variable
+  by reading the PackageServers configuration file. 
+*/
+void PackageModel::populateServers()
 {
-    QSettings serverConf( "Trolltech", "PackageServers" );
-    serverConf.clear();
-    QStringList servConfList = serverConf.childGroups();
+    QString serversFile = Qtopia::applicationFileName( "packagemanager", "ServersList.conf" );
+    QSettings *serversConf;
+    if ( !QFile::exists( serversFile ) )
+        serversConf = new QSettings( "Trolltech", "PackageManager" );
+    else
+        serversConf = new QSettings( serversFile, QSettings::NativeFormat );
+
+    QStringList servConfList = serversConf->childGroups();
     QString srvName;
     for ( int srv = 0; srv < servConfList.count(); srv++ )
     {
         srvName = servConfList[srv];
-
-#ifndef QT_NO_SXE
-        if( srvName == QLatin1String( "Sensitive" ) ||
-                srvName == QLatin1String( "Configuration" ))
-            continue;
-#endif
-
-        serverConf.beginGroup( srvName );
-        if ( serverConf.contains( "active" ) &&
-                serverConf.contains( "URL" ))
-        {
-            //qDebug() << "reading package server - name" << srvName << "url" << activeServers[srvName];
-            if ( serverConf.value( "active" ).toBool() )
-                activeServers[ srvName ] = serverConf.value( "URL" ).toString();
-        }
-        serverConf.endGroup();
+        serversConf->beginGroup( srvName );
+        if ( serversConf->contains( "URL" ) ) 
+            servers[ srvName ] = serversConf->value( "URL" ).toString();
+        
+        serversConf->endGroup();
     }
-    QStorageMetaInfo *s = storageInfo();
-    connect( s, SIGNAL(disksChanged()),
-            this, SLOT(publishTargets()) );
-    connect( this, SIGNAL(targetsUpdated(const QStringList &)),
-            installed, SLOT(reloadInstalledLocations(const QStringList &)) );
-
-    QHash<QString,QString>::const_iterator cit = activeServers.begin();
-    if ( cit != activeServers.end() ) {
-        NetworkPackageController* network =
-             qobject_cast<NetworkPackageController*>(networked);
-        if ( network != 0 )
-            network->setNetworkServer( cit.value() );
-    }
-
-    if ( !QDir( Qtopia::packagePath() ).exists() )
-        QDir::root().mkpath( Qtopia::packagePath() );
 }
 
 /*!
@@ -204,35 +193,30 @@ InstallControl *PackageModel::installControl()
     return &ic;
 }
 
-void PackageModel::setServers( const QHash<QString,QString> &updatedServers )
+void PackageModel::setServers( const QHash<QString,QString> &serverList )
 {
-    activeServers = updatedServers;
-
     NetworkPackageController* network = qobject_cast<NetworkPackageController*>(networked);
     if ( network == 0 )
         return;
-
-    QHash<QString,QString>::const_iterator cit = activeServers.begin();
-    if ( cit != activeServers.end() ) {
-        if ( network->networkServer() != cit.value() ) {
-            network->setNetworkServer( cit.value() );
-        }
-    } else {
-        network->setNetworkServer( QString() );
-    }
-
+    
+    if ( servers == serverList )
+        return;
+    servers = serverList;
     emit serversUpdated( getServers() );
 }
 
 void PackageModel::setServer( const QString& server )
 {
-    QString serverUrl = activeServers[ server ];
+    NetworkPackageController* network =
+        qobject_cast<NetworkPackageController*>(networked);
+    if ( network == 0 )
+        return;
+
+    activeServer = server;
+    QString serverUrl = servers[ server ];
     if ( serverUrl != QString() ) {
-        NetworkPackageController* network =
-             qobject_cast<NetworkPackageController*>(networked);
-        if ( network != 0 )
-            if ( network->networkServer() != serverUrl )
-                network->setNetworkServer( serverUrl );
+        if ( network->networkServer() != serverUrl )
+            network->setNetworkServer( serverUrl );
     }
 }
 
@@ -255,15 +239,8 @@ void PackageModel::activateItem( const QModelIndex &item )
     QString dataItem = data( item, Qt::DisplayRole ).toString();
 
     AbstractPackageController *c = rootItems[parent.row()];
-    c->install( item.row() );
     QString html;
-    if ( c == installed )
-        html = tr( "Uninstalling %1 ..." ).arg( dataItem );
-    else
-    {
-        html = tr( "Installing %1 ..." ).arg( dataItem );
-        emit infoHtml( html );
-    }
+    c->install( item.row() );
 }
 
 void PackageModel::reenableItem( const QModelIndex &item )
@@ -272,12 +249,7 @@ void PackageModel::reenableItem( const QModelIndex &item )
     if ( !parent.isValid() )
         return;
 
-    QString html;
-    if ( !qobject_cast<InstalledPackageController *>(installed)->reenable( item.row() ) )
-    {
-        html = tr( "Reenable unsuccessful" );
-        emit infoHtml( html );
-    }
+    qobject_cast<InstalledPackageController *>(installed)->reenable( item.row() ); 
 }
 
 
@@ -292,32 +264,8 @@ QString PackageModel::getOperation( const QModelIndex &item )
     return QString();
 }
 
-/*!
-  \internal
-  Receive notifications that an item has been selected as current in the
-  view.  Respond by sending text by emitting the infoHtml() signal
-*/
-void PackageModel::sendUpdatedText( const QModelIndex &item )
-{
-    QString html = data( item, Qt::WhatsThisRole ).toString();
-    QModelIndex parent = item.parent();
-    if ( parent.isValid() )
-    {
-        AbstractPackageController *c = rootItems[parent.row()];
-        if ( c->inherits( "NetworkPackageController" ))
-        {
-            // html is actually the domain
-            emit domainUpdate( html );
-            return;
-        }
-    }
-    
-    emit infoHtml( html );
-}
-
 void PackageModel::userTargetChoice( const QString &t )
 {
-    // qDebug() << "Setting new install destination to" << t;
     QString mediaPath = mediaNames[t];
     // See if this target contains the packagePath(), ie user has
     // changed back to using the "Internal" storage
@@ -339,22 +287,19 @@ void PackageModel::controllerUpdate()
     emit layoutChanged();
 }
 
-void PackageModel::packageInstalled( const InstallControl::PackageInfo &pkg, bool success )
+void PackageModel::packageInstalled( const InstallControl::PackageInfo &pkg )
 {
-    
-    InstalledPackageController *installed = qobject_cast<InstalledPackageController *>( sender() );
-    QString html = tr( "%1 <b>%2</b> %3", "%1 = package name, %2 = successfully/unsuccessfully, %3 = installed/uninstalled" )
-                    .arg( pkg.name )
-                    .arg( success ? tr("successfully") : tr("unsuccessfully") )
-                    .arg( installed ? tr("uninstalled") : tr("installed") ); 
-    emit infoHtml( html );
+    // the row of member variable installed is 0, hence index(0, ...); start searching from first child  
+    QModelIndexList matchList = match( this->index(0, 0).child(0,0),AbstractPackageController::Md5Sum ,QVariant(pkg.md5Sum), 1);
+    if ( matchList.size() > 0  ) 
+        emit newlyInstalled( matchList[0] );
 }
 
 void PackageModel::publishTargets()
 {
     QFileSystemFilter fsf;
     fsf.applications = QFileSystemFilter::Set;
-    QList<QFileSystem*> fl = storageInfo()->fileSystems( &fsf );
+    QList<QFileSystem*> fl = QStorageMetaInfo::instance()->fileSystems( &fsf );
     QStringList targets;
     bool installMediaValid = installControl()->installMedia().isEmpty() ? true : false;
     for ( int i = 0; i < fl.count(); i++ )
@@ -372,13 +317,6 @@ void PackageModel::publishTargets()
     }
 }
 
-Q_GLOBAL_STATIC(QStorageMetaInfo,theStorageInfo);
-
-QStorageMetaInfo *PackageModel::storageInfo() const
-{
-    return theStorageInfo();
-}
-
 /**
   Reimplemented from QAbstractDataModel::data
 */
@@ -388,16 +326,12 @@ QVariant PackageModel::data(const QModelIndex &index, int role) const
     if ( parent.isValid() )
     {
         AbstractPackageController *c = rootItems[parent.row()];
-        // qDebug() << "DATA - role:" << role << "parent row:" << parent.row() << "id:" << hex <<
-        //      ((unsigned int )(index.internalId()))
-        //      << "parent id" << ((unsigned int)(parent.internalId()));
         return c->data( index.row(), index.column(), role );
     }
     else
     {
         if ( index.row() < rootItems.count() )
         {
-            // qDebug() << "DATA - ROOT - role:" << role << "row:" << index.row();
             return rootItems[ index.row() ]->data( role );
         }
         else
@@ -432,14 +366,11 @@ QModelIndex PackageModel::index( int row, int column, const QModelIndex &parent 
         if ( row > rootItems.count() )
             return QModelIndex();
         unsigned int internalId = makeId( row, 0, INVALID_PARENT );
-        // qDebug() << "INDEX - ROOT - row:" << row << "col:" << column << "index:" << hex << internalId;
         return createIndex( row, 0, internalId );
     }
     else
     {
         unsigned int parentId = getRow( parent.internalId() );
-        // qDebug() << "INDEX - row:" << row << "col:" << column
-        //     << "parent row:" << parentId << "index:" << hex << makeId( row, column, parentId );
         return createIndex( row, column, makeId( row, column, parentId ));
     }
 }
@@ -459,12 +390,10 @@ QModelIndex PackageModel::parent( const QModelIndex &index ) const
 
     if ( thisParent == INVALID_PARENT )
     {
-        // qDebug() << "PARENT - NULL - row" << index.row() << "col:" << index.column() << "id:" << hex << (unsigned int)thisId;
         return QModelIndex();
     }
 
     unsigned int internalId = makeId( thisParent, 0, INVALID_PARENT );
-    // qDebug() << "PARENT - row:" << index.row() << "col:" << index.column() << "id:" << hex << thisId << "-> parent index:" << internalId;
     return createIndex( thisParent, 0, internalId );
 }
 
@@ -505,3 +434,8 @@ bool PackageModel::hasSensitiveDomains( const QString &domain )
     return false;
 }
 #endif
+
+void PackageModel::serverStatusUpdated(const QString &status)
+{
+    emit serverStatus( activeServer + ": " + status ); 
+}

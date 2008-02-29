@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -457,7 +457,7 @@ MMSMessage::Type MMSMessage::type() const
     if (f) {
         int t = mapToNumber(messageTypes, f->value);
         if (t >= 128 && t <= 134)
-            return (Type)t;
+            return static_cast<Type>(t);
     }
 
     return Invalid;
@@ -469,6 +469,31 @@ void MMSMessage::setType(Type t)
     const char *str = mapToString(messageTypes, t);
     if (str)
         addField("X-Mms-Message-Type", str);
+}
+
+QString MMSMessage::txnId() const
+{
+    const QWspField *f = field("X-Mms-Transaction-Id");
+    if (f)
+        return f->value;
+
+    return QString();
+}
+
+void MMSMessage::setTxnId(const QString& txnId)
+{
+    removeField("X-Mms-Transaction-Id");
+    addField("X-Mms-Transaction-Id", txnId);
+}
+
+QMailId MMSMessage::messageId() const
+{
+    return msgId;
+}
+
+void MMSMessage::setMessageId(const QMailId& id)
+{
+    msgId = id;
 }
 
 bool MMSMessage::multipartRelated() const
@@ -769,7 +794,7 @@ bool MMSHeaderCodec::encodeEnumerated(QWspPduEncoder &enc, const ValueMap *map, 
 {
     int id = mapToNumber(map, field.value);
     if (id > 0) {
-        enc.encodeOctet((quint8)id);
+        enc.encodeOctet(static_cast<quint8>(id));
     } else {
         qWarning("Cannot encode field: %s", field.name.toLatin1().constData());
         return false;
@@ -782,7 +807,7 @@ bool MMSHeaderCodec::encodeMessageClass(QWspPduEncoder &enc, const QString &str)
 {
     int id = mapToNumber(messageClassTypes, str);
     if (id > 0)
-        enc.encodeOctet((quint8)id);
+        enc.encodeOctet(static_cast<quint8>(id));
     else
         enc.encodeTokenText(str);
 

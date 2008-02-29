@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/tools/qtestlib/src/qtestcase.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/tools/qtestlib/src/qtestcase.cpp -->
 <head>
-  <title>Qt 4.2: QTest Namespace Reference</title>
+  <title>Qt 4.3: QTest Namespace Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTest Namespace Reference<br /><sup><sup>[<a href="qttest.html">QtTest</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTest Namespace Reference<br /><span class="small-subtitle">[<a href="qttest.html">QtTest</a> module]</span>
+</h1>
 <p>The QTest namespace contains all the functions and declarations that are related to the <a href="qtestlib-manual.html#qtestlib">QTestLib</a> tool. <a href="#details">More...</a></p>
 <pre> #include &lt;QTest&gt;</pre><ul>
 </ul>
@@ -50,19 +51,21 @@
 <li><div class="fn"/>int <b><a href="qtest.html#qExec">qExec</a></b> ( QObject * <i>testObject</i>, int <i>argc</i> = 0, char ** <i>argv</i> = 0 )</li>
 <li><div class="fn"/>void <b><a href="qtest.html#qSleep">qSleep</a></b> ( int <i>ms</i> )</li>
 <li><div class="fn"/>void <b><a href="qtest.html#qWait">qWait</a></b> ( int <i>ms</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toHexRepresentation">toHexRepresentation</a></b> ( const char * <i>ba</i>, int <i>length</i> )</li>
 <li><div class="fn"/>char * <b><a href="qtest.html#toString">toString</a></b> ( const T &amp; <i>value</i> )</li>
 <li><div class="fn"/>char * <b><a href="qtest.html#toString-4">toString</a></b> ( const QLatin1String &amp; <i>string</i> )</li>
 <li><div class="fn"/>char * <b><a href="qtest.html#toString-5">toString</a></b> ( const QString &amp; <i>string</i> )</li>
-<li><div class="fn"/>char * <b><a href="qtest.html#toString-6">toString</a></b> ( const QTime &amp; <i>time</i> )</li>
-<li><div class="fn"/>char * <b><a href="qtest.html#toString-7">toString</a></b> ( const QDate &amp; <i>date</i> )</li>
-<li><div class="fn"/>char * <b><a href="qtest.html#toString-8">toString</a></b> ( const QDateTime &amp; <i>dateTime</i> )</li>
-<li><div class="fn"/>char * <b><a href="qtest.html#toString-9">toString</a></b> ( const QChar &amp; <i>character</i> )</li>
-<li><div class="fn"/>char * <b><a href="qtest.html#toString-10">toString</a></b> ( const QPoint &amp; <i>point</i> )</li>
-<li><div class="fn"/>char * <b><a href="qtest.html#toString-11">toString</a></b> ( const QSize &amp; <i>size</i> )</li>
-<li><div class="fn"/>char * <b><a href="qtest.html#toString-12">toString</a></b> ( const QRect &amp; <i>rectangle</i> )</li>
-<li><div class="fn"/>char * <b><a href="qtest.html#toString-13">toString</a></b> ( const QPointF &amp; <i>point</i> )</li>
-<li><div class="fn"/>char * <b><a href="qtest.html#toString-14">toString</a></b> ( const QSizeF &amp; <i>size</i> )</li>
-<li><div class="fn"/>char * <b><a href="qtest.html#toString-15">toString</a></b> ( const QRectF &amp; <i>rectangle</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-6">toString</a></b> ( const QByteArray &amp; <i>ba</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-7">toString</a></b> ( const QTime &amp; <i>time</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-8">toString</a></b> ( const QDate &amp; <i>date</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-9">toString</a></b> ( const QDateTime &amp; <i>dateTime</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-10">toString</a></b> ( const QChar &amp; <i>character</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-11">toString</a></b> ( const QPoint &amp; <i>point</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-12">toString</a></b> ( const QSize &amp; <i>size</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-13">toString</a></b> ( const QRect &amp; <i>rectangle</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-14">toString</a></b> ( const QPointF &amp; <i>point</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-15">toString</a></b> ( const QSizeF &amp; <i>size</i> )</li>
+<li><div class="fn"/>char * <b><a href="qtest.html#toString-16">toString</a></b> ( const QRectF &amp; <i>rectangle</i> )</li>
 </ul>
 <a name="macros"></a>
 <h3>Macros</h3>
@@ -256,6 +259,9 @@
      QTest::qWait(250);</pre>
 <p>The code above will wait until the network server is responding for a maximum of about 12.5 seconds.</p>
 <p>See also <a href="qtest.html#qSleep">QTest::qSleep</a>().</p>
+<h3 class="fn"><a name="toHexRepresentation"></a>char * QTest::toHexRepresentation ( const char * <i>ba</i>, int <i>length</i> )</h3>
+<p>Returns a pointer to a string that is the string <i>ba</i> represented as a space-separated sequence of hex characters. If the input is considered too long, it is truncated. A trucation is indicated in the returned string as an ellipsis at the end.</p>
+<p><i>length</i> is the length of the string <i>ba</i>.</p>
 <h3 class="fn"><a name="toString"></a>char * QTest::toString ( const T &amp; <i>value</i> )</h3>
 <p>Returns a textual representation of <i>value</i>. This function is used by <a href="qtest.html#QCOMPARE">QCOMPARE</a>() to output verbose information in case of a test failure.</p>
 <p>You can add specializations of this function to your test to enable verbose output.</p>
@@ -279,34 +285,38 @@
 <h3 class="fn"><a name="toString-5"></a>char * QTest::toString ( const <a href="qstring.html">QString</a> &amp; <i>string</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the given <i>string</i>.</p>
-<h3 class="fn"><a name="toString-6"></a>char * QTest::toString ( const <a href="qtime.html">QTime</a> &amp; <i>time</i> )</h3>
+<h3 class="fn"><a name="toString-6"></a>char * QTest::toString ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>ba</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns a textual representation of the byte array <i>ba</i>.</p>
+<p>See also <a href="qtest.html#toHexRepresentation">QTest::toHexRepresentation</a>().</p>
+<h3 class="fn"><a name="toString-7"></a>char * QTest::toString ( const <a href="qtime.html">QTime</a> &amp; <i>time</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the given <i>time</i>.</p>
-<h3 class="fn"><a name="toString-7"></a>char * QTest::toString ( const <a href="qdate.html">QDate</a> &amp; <i>date</i> )</h3>
+<h3 class="fn"><a name="toString-8"></a>char * QTest::toString ( const <a href="qdate.html">QDate</a> &amp; <i>date</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the given <i>date</i>.</p>
-<h3 class="fn"><a name="toString-8"></a>char * QTest::toString ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dateTime</i> )</h3>
+<h3 class="fn"><a name="toString-9"></a>char * QTest::toString ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dateTime</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the date and time specified by <i>dateTime</i>.</p>
-<h3 class="fn"><a name="toString-9"></a>char * QTest::toString ( const <a href="qchar.html">QChar</a> &amp; <i>character</i> )</h3>
+<h3 class="fn"><a name="toString-10"></a>char * QTest::toString ( const <a href="qchar.html">QChar</a> &amp; <i>character</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the given <i>character</i>.</p>
-<h3 class="fn"><a name="toString-10"></a>char * QTest::toString ( const <a href="qpoint.html">QPoint</a> &amp; <i>point</i> )</h3>
+<h3 class="fn"><a name="toString-11"></a>char * QTest::toString ( const <a href="qpoint.html">QPoint</a> &amp; <i>point</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the given <i>point</i>.</p>
-<h3 class="fn"><a name="toString-11"></a>char * QTest::toString ( const <a href="qsize.html">QSize</a> &amp; <i>size</i> )</h3>
+<h3 class="fn"><a name="toString-12"></a>char * QTest::toString ( const <a href="qsize.html">QSize</a> &amp; <i>size</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the given <i>size</i>.</p>
-<h3 class="fn"><a name="toString-12"></a>char * QTest::toString ( const <a href="qrect.html">QRect</a> &amp; <i>rectangle</i> )</h3>
+<h3 class="fn"><a name="toString-13"></a>char * QTest::toString ( const <a href="qrect.html">QRect</a> &amp; <i>rectangle</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the given <i>rectangle</i>.</p>
-<h3 class="fn"><a name="toString-13"></a>char * QTest::toString ( const <a href="qpointf.html">QPointF</a> &amp; <i>point</i> )</h3>
+<h3 class="fn"><a name="toString-14"></a>char * QTest::toString ( const <a href="qpointf.html">QPointF</a> &amp; <i>point</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the given <i>point</i>.</p>
-<h3 class="fn"><a name="toString-14"></a>char * QTest::toString ( const <a href="qsizef.html">QSizeF</a> &amp; <i>size</i> )</h3>
+<h3 class="fn"><a name="toString-15"></a>char * QTest::toString ( const <a href="qsizef.html">QSizeF</a> &amp; <i>size</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the given <i>size</i>.</p>
-<h3 class="fn"><a name="toString-15"></a>char * QTest::toString ( const <a href="qrectf.html">QRectF</a> &amp; <i>rectangle</i> )</h3>
+<h3 class="fn"><a name="toString-16"></a>char * QTest::toString ( const <a href="qrectf.html">QRectF</a> &amp; <i>rectangle</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a textual representation of the given <i>rectangle</i>.</p>
 <hr />
@@ -383,10 +393,10 @@
 <p>See also <a href="qtest.html#QCOMPARE">QCOMPARE</a>().</p>
 <h3 class="fn"><a name="QTEST_APPLESS_MAIN"></a>QTEST_APPLESS_MAIN (  <i>TestClass</i> )</h3>
 <p>Implements a main() function that executes all tests in <i>TestClass</i>.</p>
-<p>Behaves like <a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>(), but doesn't instanciate a <a href="qapplication.html">QApplication</a> object. Use this macro for really simple stand-alone non-GUI tests.</p>
+<p>Behaves like <a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>(), but doesn't instantiate a <a href="qapplication.html">QApplication</a> object. Use this macro for really simple stand-alone non-GUI tests.</p>
 <p>See also <a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>().</p>
 <h3 class="fn"><a name="QTEST_MAIN"></a>QTEST_MAIN (  <i>TestClass</i> )</h3>
-<p>Implements a main() function that instanciates a <a href="qapplication.html">QApplication</a> object and the <i>TestClass</i>, and executes all tests in the order they were defined. Use this macro to build stand-alone executables.</p>
+<p>Implements a main() function that instantiates a <a href="qapplication.html">QApplication</a> object and the <i>TestClass</i>, and executes all tests in the order they were defined. Use this macro to build stand-alone executables.</p>
 <p>Example:</p>
 <pre> class TestQString: public QObject { ... };
  QTEST_MAIN(TestQString)</pre>
@@ -418,6 +428,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

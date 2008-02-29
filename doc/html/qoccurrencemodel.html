@@ -16,6 +16,7 @@
 <pre>    #include &lt;QOccurrenceModel&gt;</pre><p>Inherits <a href="qabstractitemmodel.html">QAbstractItemModel</a>.</p>
 <ul>
 <li><a href="qoccurrencemodel-members.html">List of all members, including inherited members</a></li>
+<li><a href="qoccurrencemodel-obsolete.html">Obsolete members</a></li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
@@ -28,7 +29,6 @@
 <li><div class="fn"/>QAppointment <b><a href="qoccurrencemodel.html#appointment-3">appointment</a></b> ( int <i>row</i> ) const</li>
 <li><div class="fn"/>QSet&lt;QPimSource&gt; <b><a href="qoccurrencemodel.html#availableSources">availableSources</a></b> () const</li>
 <li><div class="fn"/>QCategoryFilter <b><a href="qoccurrencemodel.html#categoryFilter">categoryFilter</a></b> () const</li>
-<li><div class="fn"/>void <b><a href="qoccurrencemodel.html#completeFetch">completeFetch</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qoccurrencemodel.html#contains">contains</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qoccurrencemodel.html#contains-2">contains</a></b> ( const QUniqueId &amp; <i>identifier</i> ) const</li>
 <li><div class="fn"/>int <b><a href="qoccurrencemodel.html#count">count</a></b> () const</li>
@@ -36,7 +36,6 @@
 <li><div class="fn"/>QAppointmentModel::DurationType <b><a href="qoccurrencemodel.html#durationType">durationType</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qoccurrencemodel.html#editable">editable</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qoccurrencemodel.html#editable-2">editable</a></b> ( const QUniqueId &amp; <i>identifier</i> ) const</li>
-<li><div class="fn"/>bool <b><a href="qoccurrencemodel.html#fetching">fetching</a></b> () const</li>
 <li><div class="fn"/>QUniqueId <b><a href="qoccurrencemodel.html#id">id</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
 <li><div class="fn"/>QModelIndex <b><a href="qoccurrencemodel.html#index">index</a></b> ( const QUniqueId &amp; <i>identifier</i> ) const</li>
 <li><div class="fn"/>QModelIndex <b><a href="qoccurrencemodel.html#index-3">index</a></b> ( const QOccurrence &amp; <i>occurrence</i> ) const</li>
@@ -65,25 +64,17 @@
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="qoccurrencemodel.html#rebuildCache">rebuildCache</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qoccurrencemodel.html#rebuildCache">rebuildCache</a></b> () const</li>
 </ul>
 <ul>
 <li><div class="fn"/>2 public slots inherited from <a href="qabstractitemmodel.html#public-slots">QAbstractItemModel</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
-<a name="signals"></a>
-<h3>Signals</h3>
-<ul>
-<li><div class="fn"/>void <b><a href="qoccurrencemodel.html#fetchCompleted">fetchCompleted</a></b> ()</li>
-</ul>
-<ul>
-<li><div class="fn"/>14 signals inherited from <a href="qabstractitemmodel.html#signals">QAbstractItemModel</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-</ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qabstractitemmodel.html#public-variables">QAbstractItemModel</a></li>
+<li><div class="fn"/>14 signals inherited from <a href="qabstractitemmodel.html#signals">QAbstractItemModel</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>15 protected functions inherited from <a href="qabstractitemmodel.html#protected-functions">QAbstractItemModel</a></li>
@@ -97,6 +88,7 @@
 <p>The QOccurrenceModel class provides access to the Calendar data.</p>
 <p>It is a descendant of <a href="qabstractitemmodel.html">QAbstractItemModel</a> so is suitable for use with the Qt View classes such as <a href="qlistview.html">QListView</a> and <a href="qtableview.html">QTableView</a>, as well as any custom developer Views.</p>
 <p>It differs from the <a href="qappointmentmodel.html">QAppointmentModel</a> in that it will show each occurrence of appointments as a separate item in the model. Since some appointments have infinite occurrences a date range must be specified to limit the total set of occurrences included in the model. Another important difference is that the values for the <a href="qappointmentmodel.html#Field-enum">QAppointmentModel::Start</a> and <a href="qappointmentmodel.html#Field-enum">QAppointmentModel::End</a> fields are converted to the current time zone of the device.</p>
+<p>See also <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QOccurrenceModel"></a>QOccurrenceModel::QOccurrenceModel ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>start</i>, const <a href="qdatetime.html">QDateTime</a> &amp; <i>end</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -118,9 +110,6 @@
 <h3 class="fn"><a name="categoryFilter"></a><a href="qcategoryfilter.html">QCategoryFilter</a> QOccurrenceModel::categoryFilter () const</h3>
 <p>Returns the category filter that occurrences are tested against for the current filter mode.</p>
 <p>See also <a href="qoccurrencemodel.html#setCategoryFilter">setCategoryFilter</a>().</p>
-<h3 class="fn"><a name="completeFetch"></a>void QOccurrenceModel::completeFetch ()</h3>
-<p>Forces the occurrence model to finish updating its internal cache now. This can be expensive and should only be called if no further modifications to appointments is expected. The occurrence model will update its cache in the next Qt event loop if this function is not called.</p>
-<p>See also <a href="qoccurrencemodel.html#fetchCompleted">fetchCompleted</a>() and <a href="qoccurrencemodel.html#fetching">fetching</a>().</p>
 <h3 class="fn"><a name="contains"></a>bool QOccurrenceModel::contains ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>Returns true if the current filter mode of the model contains <i>index</i>.</p>
 <h3 class="fn"><a name="contains-2"></a>bool QOccurrenceModel::contains ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i> ) const</h3>
@@ -141,12 +130,6 @@
 <h3 class="fn"><a name="editable-2"></a>bool QOccurrenceModel::editable ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if the appointment with the specified <i>identifier</i> can be updated or removed.</p>
-<h3 class="fn"><a name="fetchCompleted"></a>void QOccurrenceModel::fetchCompleted ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted when the occurrence model finished caching changes resulting from a change to the stored appointments.</p>
-<p>See also <a href="qoccurrencemodel.html#completeFetch">completeFetch</a>() and <a href="qoccurrencemodel.html#fetching">fetching</a>().</p>
-<h3 class="fn"><a name="fetching"></a>bool QOccurrenceModel::fetching () const</h3>
-<p>Returns true if the occurrence model has not yet updated the list of occurrence due to a change in stored appointments.</p>
-<p>See also <a href="qoccurrencemodel.html#fetchCompleted">fetchCompleted</a>() and <a href="qoccurrencemodel.html#completeFetch">completeFetch</a>().</p>
 <h3 class="fn"><a name="id"></a><a href="quniqueid.html">QUniqueId</a> QOccurrenceModel::id ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>Return the identifier for the appointment represented by the occurrence at the row specified by <i>index</i>. If index is null or out of the range of the model will return a null identifier.</p>
 <h3 class="fn"><a name="index"></a><a href="qmodelindex.html">QModelIndex</a> QOccurrenceModel::index ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i> ) const</h3>
@@ -172,10 +155,10 @@
 <p>If the range was specified by a start and a count, this will return a null date time.</p>
 <h3 class="fn"><a name="rangeStart"></a><a href="qdatetime.html">QDateTime</a> QOccurrenceModel::rangeStart () const</h3>
 <p>Returns the start of the range specified that occurrences must end at or after to be included in the model, in the local time zone.</p>
-<h3 class="fn"><a name="rebuildCache"></a>void QOccurrenceModel::rebuildCache ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="rebuildCache"></a>void QOccurrenceModel::rebuildCache () const&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Rebuilds the cache of repeating occurrences that fit within the range.</p>
 <p>Ensures any recently updates to the model will be reflected in queries against the model.</p>
-<p>This can be an expensive operation.</p>
+<p>This can be an expensive operation. As <a href="qoccurrencemodel.html">QOccurrenceModel</a> automatically rebuilds the cache when required it is recommended not to call this function explicitly as this may lead to excessive processing and a subsequent loss in application performance.</p>
 <h3 class="fn"><a name="refresh"></a>void QOccurrenceModel::refresh ()</h3>
 <p>Forces a refresh of the Occurrence data.</p>
 <h3 class="fn"><a name="rowCount"></a>int QOccurrenceModel::rowCount ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> = QModelIndex() ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -213,6 +196,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

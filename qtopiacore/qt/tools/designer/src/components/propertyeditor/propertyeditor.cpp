@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,27 +37,32 @@
 ****************************************************************************/
 
 #include "propertyeditor.h"
-#include "findicondialog_p.h"
 #include "qpropertyeditor_model_p.h"
 #include "qpropertyeditor_items_p.h"
+#include "newdynamicpropertydialog.h"
+#include "dynamicpropertysheet.h"
+#include "paletteeditorbutton.h"
+#include "graphicspropertyeditor.h"
 
 // sdk
-#include <QtDesigner/QtDesigner>
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <QtDesigner/QDesignerFormWindowManagerInterface>
 #include <QtDesigner/QExtensionManager>
-
+#include <QtDesigner/QDesignerPropertySheetExtension>
 // shared
-#include <iconloader_p.h>
-#include <qdesigner_promotedwidget_p.h>
 #include <qdesigner_utils_p.h>
-#include <qdesigner_command_p.h>
+#include <qdesigner_propertycommand_p.h>
 #include <metadatabase_p.h>
 
-#include "paletteeditorbutton.h"
-#include <QtGui/QtGui>
+#include <QtGui/QAction>
+#include <QtGui/QLineEdit>
+#include <QtGui/QMenu>
+#include <QtGui/QApplication>
+#include <QtGui/QVBoxLayout>
 
-#ifndef Q_MOC_RUN
-using namespace qdesigner_internal;
-#endif
+// ---------------------------------------------------------------------------------
+
+namespace qdesigner_internal {
 
 IProperty *PropertyEditor::createSpecialProperty(const QVariant &value, const QString &name)
 {
@@ -51,42 +71,6 @@ IProperty *PropertyEditor::createSpecialProperty(const QVariant &value, const QS
 
     return 0;
 }
-
-// ---------------------------------------------------------------------------------
-
-namespace qdesigner_internal {
-
-class IconProperty : public AbstractProperty<QIcon>
-{
-public:
-    IconProperty(QDesignerFormEditorInterface *core, const QIcon &value, const QString &name);
-
-    void setValue(const QVariant &value);
-    QString toString() const;
-    QVariant decoration() const;
-
-    QWidget *createEditor(QWidget *parent, const QObject *target, const char *receiver) const;
-    void updateEditorContents(QWidget *editor);
-    void updateValue(QWidget *editor);
-private:
-    QDesignerFormEditorInterface *m_core;
-};
-
-class PixmapProperty : public AbstractProperty<QPixmap>
-{
-public:
-    PixmapProperty(QDesignerFormEditorInterface *core, const QPixmap &pixmap, const QString &name);
-
-    void setValue(const QVariant &value);
-    QString toString() const;
-    QVariant decoration() const;
-
-    QWidget *createEditor(QWidget *parent, const QObject *target, const char *receiver) const;
-    void updateEditorContents(QWidget *editor);
-    void updateValue(QWidget *editor);
-private:
-    QDesignerFormEditorInterface *m_core;
-};
 
 class PaletteProperty : public AbstractProperty<QPalette>
 {
@@ -106,379 +90,13 @@ private:
     QWidget *m_selectedWidget;
 };
 
-// This handles editing of pixmap and icon properties
-class GraphicsPropertyEditor : public QWidget
-{
-    Q_OBJECT
-public:
-    GraphicsPropertyEditor(QDesignerFormEditorInterface *core, const QIcon &pm, QWidget *parent);
-    GraphicsPropertyEditor(QDesignerFormEditorInterface *core, const QPixmap &pixmap, QWidget *parent);
-    ~GraphicsPropertyEditor();
-
-    void setIcon(const QIcon &pm);
-    void setPixmap(const QPixmap &pm);
-    QIcon icon() const { return m_mode == Icon ? m_icon : QIcon(); }
-    QPixmap pixmap() const { return m_mode == Pixmap ? m_pixmap : QPixmap(); }
-
-signals:
-    void iconChanged(const QIcon &pm);
-    void pixmapChanged(const QPixmap &pm);
-
-private slots:
-    void showDialog();
-    void comboActivated(int idx);
-
-private:
-    void init();
-    void populateCombo();
-    int indexOfIcon(const QIcon &icon);
-    int indexOfPixmap(const QPixmap &pixmap);
-
-    enum Mode { Icon, Pixmap };
-    Mode m_mode;
-
-    QDesignerFormEditorInterface *m_core;
-    QComboBox *m_combo;
-    QToolButton *m_button;
-    QIcon m_icon;
-    QPixmap m_pixmap;
-};
-
-GraphicsPropertyEditor::~GraphicsPropertyEditor()
-{
-}
-
-void GraphicsPropertyEditor::init()
-{
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setMargin(0);
-    layout->setSpacing(0);
-
-    m_combo = new QComboBox(this);
-    m_combo->setFrame(0);
-    m_combo->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
-    m_combo->setEditable(false);
-    layout->addWidget(m_combo);
-    m_button = new QToolButton(this);
-    m_button->setIcon(createIconSet(QLatin1String("fileopen.png")));
-    m_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
-    m_button->setFixedWidth(20);
-    layout->addWidget(m_button);
-    connect(m_button, SIGNAL(clicked()), this, SLOT(showDialog()));
-    connect(m_combo, SIGNAL(activated(int)), this, SLOT(comboActivated(int)));
-
-    populateCombo();
-}
-
-void GraphicsPropertyEditor::comboActivated(int idx)
-{
-    if (m_mode == Icon) {
-        setIcon(qvariant_cast<QIcon>(m_combo->itemData(idx)));
-    } else {
-        setPixmap(qvariant_cast<QPixmap>(m_combo->itemData(idx)));
-    }
-}
-
-int GraphicsPropertyEditor::indexOfIcon(const QIcon &icon)
-{
-    if (m_mode == Pixmap)
-        return -1;
-
-    if (icon.isNull())
-        return 0;
-
-    for (int i = 1; i < m_combo->count(); ++i) {
-        if (qvariant_cast<QIcon>(m_combo->itemData(i)).serialNumber() == icon.serialNumber())
-            return i;
-    }
-
-    populateCombo();
-
-    for (int i = 1; i < m_combo->count(); ++i) {
-        if (qvariant_cast<QIcon>(m_combo->itemData(i)).serialNumber() == icon.serialNumber())
-            return i;
-    }
-
-    return -1;
-}
-
-int GraphicsPropertyEditor::indexOfPixmap(const QPixmap &pixmap)
-{
-    if (m_mode == Icon)
-        return -1;
-
-    if (pixmap.isNull())
-        return 0;
-
-    for (int i = 1; i < m_combo->count(); ++i) {
-        if (qvariant_cast<QPixmap>(m_combo->itemData(i)).serialNumber() == pixmap.serialNumber())
-            return i;
-    }
-
-    populateCombo();
-
-    for (int i = 1; i < m_combo->count(); ++i) {
-        if (qvariant_cast<QPixmap>(m_combo->itemData(i)).serialNumber() == pixmap.serialNumber())
-            return i;
-    }
-
-    return -1;
-}
-
-void GraphicsPropertyEditor::populateCombo()
-{
-    QDesignerFormWindowInterface *form = m_core->formWindowManager()->activeFormWindow();
-    if (form == 0)
-        return;
-    QStringList qrc_list = form->resourceFiles();
-
-    m_combo->clear();
-
-    QDesignerIconCacheInterface *cache = m_core->iconCache();
-    if (m_mode == Icon) {
-        m_combo->addItem(tr("<no icon>"));
-        QList<QIcon> icon_list = cache->iconList();
-        foreach (QIcon icon, icon_list) {
-            QString qrc_path = cache->iconToQrcPath(icon);
-            if (!qrc_path.isEmpty() && !qrc_list.contains(qrc_path))
-                continue;
-            m_combo->addItem(icon, QFileInfo(cache->iconToFilePath(icon)).fileName(),
-                                QVariant(icon));
-        }
-    } else {
-        m_combo->addItem(tr("<no pixmap>"));
-        QList<QPixmap> pixmap_list = cache->pixmapList();
-        foreach (QPixmap pixmap, pixmap_list) {
-            QString qrc_path = cache->iconToQrcPath(pixmap);
-            if (!qrc_path.isEmpty() && !qrc_list.contains(qrc_path))
-                continue;
-            m_combo->addItem(QIcon(pixmap),
-                                QFileInfo(cache->pixmapToFilePath(pixmap)).fileName(),
-                                QVariant(pixmap));
-        }
-    }
-    bool blocked = m_combo->blockSignals(true);
-    m_combo->setCurrentIndex(0);
-    m_combo->blockSignals(blocked);
-}
-
-GraphicsPropertyEditor::GraphicsPropertyEditor(QDesignerFormEditorInterface *core, const QIcon &pm,
-                                                QWidget *parent)
-    : QWidget(parent)
-{
-    m_mode = Icon;
-    m_core = core;
-    init();
-    setIcon(pm);
-}
-
-GraphicsPropertyEditor::GraphicsPropertyEditor(QDesignerFormEditorInterface *core, const QPixmap &pm,
-                                                QWidget *parent)
-    : QWidget(parent)
-{
-    m_mode = Pixmap;
-    m_core = core;
-    init();
-    setPixmap(pm);
-}
-
-void GraphicsPropertyEditor::showDialog()
-{
-    QDesignerFormWindowInterface *form = m_core->formWindowManager()->activeFormWindow();
-    if (form == 0)
-        return;
-
-    QString file_path;
-    QString qrc_path;
-
-    if (m_mode == Icon && !m_icon.isNull()) {
-        file_path = m_core->iconCache()->iconToFilePath(m_icon);
-        qrc_path = m_core->iconCache()->iconToQrcPath(m_icon);
-    } else if (!m_pixmap.isNull()) {
-        file_path = m_core->iconCache()->pixmapToFilePath(m_pixmap);
-        qrc_path = m_core->iconCache()->pixmapToQrcPath(m_pixmap);
-    }
-
-    FindIconDialog dialog(form, 0);
-    dialog.setPaths(qrc_path, file_path);
-    if (dialog.exec()) {
-        file_path = dialog.filePath();
-        qrc_path = dialog.qrcPath();
-        if (!file_path.isEmpty()) {
-            populateCombo();
-            if (m_mode == Icon) {
-                QIcon icon = m_core->iconCache()->nameToIcon(file_path, qrc_path);
-                populateCombo();
-                setIcon(icon);
-            } else {
-                QPixmap pixmap = m_core->iconCache()->nameToPixmap(file_path, qrc_path);
-                populateCombo();
-                setPixmap(pixmap);
-            }
-        }
-    }
-}
-
-void GraphicsPropertyEditor::setIcon(const QIcon &pm)
-{
-    if (m_mode == Pixmap)
-        return;
-
-    if (pm.isNull() && m_icon.isNull())
-        return;
-    if (pm.serialNumber() == m_icon.serialNumber())
-        return;
-
-    m_icon = pm;
-
-    bool blocked = m_combo->blockSignals(true);
-    m_combo->setCurrentIndex(indexOfIcon(m_icon));
-    m_combo->blockSignals(blocked);
-
-    emit iconChanged(m_icon);
-}
-
-void GraphicsPropertyEditor::setPixmap(const QPixmap &pm)
-{
-    if (m_mode == Icon)
-        return;
-
-    if (pm.isNull() && m_pixmap.isNull())
-        return;
-    if (pm.serialNumber() == m_pixmap.serialNumber())
-        return;
-
-    m_pixmap = pm;
-
-    bool blocked = m_combo->blockSignals(true);
-    m_combo->setCurrentIndex(indexOfPixmap(m_pixmap));
-    m_combo->blockSignals(blocked);
-
-    emit pixmapChanged(m_pixmap);
-}
-
-}  // namespace qdesigner_internal
-
-IconProperty::IconProperty(QDesignerFormEditorInterface *core, const QIcon &value, const QString &name)
-    : AbstractProperty<QIcon>(value, name)
-{
-    m_core = core;
-}
-
-void IconProperty::setValue(const QVariant &value)
-{
-    m_value = qvariant_cast<QIcon>(value);
-}
-
-QString IconProperty::toString() const
-{
-    QString path = m_core->iconCache()->iconToFilePath(m_value);
-    return QFileInfo(path).fileName();
-}
-
-QVariant IconProperty::decoration() const
-{
-    static QIcon empty_icon;
-    if (empty_icon.isNull())
-        empty_icon = QIcon(QLatin1String(":/trolltech/formeditor/images/emptyicon.png"));
-
-    if (m_value.isNull())
-        return qVariantFromValue(empty_icon);
-    return qVariantFromValue(m_value);
-}
-
-QWidget *IconProperty::createEditor(QWidget *parent, const QObject *target,
-                                        const char *receiver) const
-{
-    GraphicsPropertyEditor *editor = new GraphicsPropertyEditor(m_core, m_value, parent);
-
-    QObject::connect(editor, SIGNAL(iconChanged(QIcon)), target, receiver);
-
-    return editor;
-}
-
-void IconProperty::updateEditorContents(QWidget *editor)
-{
-    if (GraphicsPropertyEditor *ed = qobject_cast<GraphicsPropertyEditor*>(editor)) {
-        ed->setIcon(m_value);
-    }
-}
-
-void IconProperty::updateValue(QWidget *editor)
-{
-    if (GraphicsPropertyEditor *ed = qobject_cast<GraphicsPropertyEditor*>(editor)) {
-        QIcon newValue = ed->icon();
-
-        if (newValue.serialNumber() != m_value.serialNumber()) {
-            m_value = newValue;
-            setChanged(true);
-        }
-    }
-}
-
-PixmapProperty::PixmapProperty(QDesignerFormEditorInterface *core, const QPixmap &pixmap, const QString &name)
-    : AbstractProperty<QPixmap>(pixmap, name)
-{
-    m_core = core;
-}
-
-void PixmapProperty::setValue(const QVariant &value)
-{
-    m_value = qvariant_cast<QPixmap>(value);
-}
-
-QString PixmapProperty::toString() const
-{
-    QString path = m_core->iconCache()->pixmapToFilePath(m_value);
-    return QFileInfo(path).fileName();
-}
-
-QVariant PixmapProperty::decoration() const
-{
-    static QIcon empty_icon;
-    if (empty_icon.isNull())
-        empty_icon = QIcon(QLatin1String(":/trolltech/formeditor/images/emptyicon.png"));
-
-    if (m_value.isNull())
-        return qVariantFromValue(empty_icon);
-    return qVariantFromValue(QIcon(m_value));
-}
-
-QWidget *PixmapProperty::createEditor(QWidget *parent, const QObject *target, const char *receiver) const
-{
-    GraphicsPropertyEditor *editor = new GraphicsPropertyEditor(m_core, m_value, parent);
-
-    QObject::connect(editor, SIGNAL(pixmapChanged(QPixmap)), target, receiver);
-
-    return editor;
-}
-
-void PixmapProperty::updateEditorContents(QWidget *editor)
-{
-    if (GraphicsPropertyEditor *ed = qobject_cast<GraphicsPropertyEditor*>(editor)) {
-        ed->setPixmap(m_value);
-    }
-}
-
-void PixmapProperty::updateValue(QWidget *editor)
-{
-    if (GraphicsPropertyEditor *ed = qobject_cast<GraphicsPropertyEditor*>(editor)) {
-        QPixmap newValue = ed->pixmap();
-
-        if (newValue.serialNumber() != m_value.serialNumber()) {
-            m_value = newValue;
-            setChanged(true);
-        }
-    }
-}
-
 // -------------------------------------------------------------------------
 PaletteProperty::PaletteProperty(QDesignerFormEditorInterface *core, const QPalette &value, QWidget *selectedWidget,
                 const QString &name)
-    : AbstractProperty<QPalette>(value, name)
+    : AbstractProperty<QPalette>(value, name),
+      m_core(core),
+      m_selectedWidget(selectedWidget)
 {
-    m_selectedWidget = selectedWidget;
-    m_core = core;
 }
 
 void PaletteProperty::setValue(const QVariant &value)
@@ -493,7 +111,7 @@ void PaletteProperty::setValue(const QVariant &value)
                 parentPalette = m_selectedWidget->parentWidget()->palette();
         }
     }
-    uint mask = m_value.resolve();
+    const uint mask = m_value.resolve();
     m_value = m_value.resolve(parentPalette);
     m_value.resolve(mask);
 }
@@ -520,7 +138,7 @@ void PaletteProperty::updateEditorContents(QWidget *editor)
 void PaletteProperty::updateValue(QWidget *editor)
 {
     if (PaletteEditorButton *btn = qobject_cast<PaletteEditorButton*>(editor)) {
-        QPalette newValue = btn->palette();
+        const QPalette newValue = btn->palette();
 
         if (newValue.resolve() != m_value.resolve() || newValue != m_value) {
             m_value = newValue;
@@ -528,7 +146,6 @@ void PaletteProperty::updateValue(QWidget *editor)
         }
     }
 }
-
 
 // -------------------------------------------------------------------------------------
 
@@ -544,17 +161,73 @@ struct Group
     { return name == other.name; }
 };
 
-MetaDataBaseItem* PropertyEditor::metaDataBaseItem() const 
+
+// A pair <ValidationMode, bool hasComment>.
+typedef QPair<TextPropertyValidationMode, bool> StringPropertyParameters;
+
+// Return a pair of validation mode and flag indicating whether property has a comment
+// for textual properties.
+
+StringPropertyParameters textPropertyValidationMode(const QObject *object,const QString &pname,
+                                                    QVariant::Type type, bool isMainContainer)   
+{
+    if (type == QVariant::ByteArray) {
+        return StringPropertyParameters(ValidationMultiLine, false);
+    }
+    // object name - no comment
+    if (pname == QLatin1String("objectName")) {
+        const TextPropertyValidationMode vm =  isMainContainer ? ValidationObjectNameScope : ValidationObjectName;
+        return StringPropertyParameters(vm, false);
+    }
+
+    // Accessibility. Both are texts the narrator reads
+    if (pname == QLatin1String("accessibleDescription") || pname == QLatin1String("accessibleName"))
+        return StringPropertyParameters(ValidationMultiLine, true);
+
+    // Any names
+    if (pname == QLatin1String("buddy") || pname.endsWith(QLatin1String("Name")))
+        return StringPropertyParameters(ValidationObjectName, false);
+        
+    // Multi line?
+    if (pname == QLatin1String("styleSheet")) 
+        return StringPropertyParameters(ValidationStyleSheet, false);
+    
+    if (pname == QLatin1String("styleSheet")     || pname == QLatin1String("toolTip")   || 
+        pname.endsWith(QLatin1String("ToolTip")) || pname == QLatin1String("whatsThis") ||
+        pname == QLatin1String("iconText")       || pname == QLatin1String("windowIconText")  ||
+        pname == QLatin1String("html"))
+        return StringPropertyParameters(ValidationMultiLine, true);
+
+
+    // text only if not Action, LineEdit
+    if (pname == QLatin1String("text") && !(qobject_cast<const QAction *>(object) || qobject_cast<const QLineEdit *>(object)))
+        return StringPropertyParameters(ValidationMultiLine, true);
+
+    // default to single
+    return StringPropertyParameters(ValidationSingleLine, true);    
+}
+
+
+// Create a string prop with proper validation mode
+StringProperty* PropertyEditor::createStringProperty(QObject *object, const QString &pname, const QVariant &value, bool isMainContainer) const 
+{
+    const StringPropertyParameters params = textPropertyValidationMode(object, pname, value.type(), isMainContainer);
+    // Does a meta DB entry exist - add comment
+    const bool hasComment = params.second && metaDataBaseItem();
+    const QString comment = hasComment ? propertyComment(m_core, object, pname) : QString();
+    const QString stringValue = value.type() == QVariant::ByteArray ? QString::fromUtf8(value.toByteArray()) : value.toString();
+    return new StringProperty(stringValue, pname, params.first, hasComment, comment );
+}
+
+QDesignerMetaDataBaseItemInterface* PropertyEditor::metaDataBaseItem() const 
 {
     QObject *o = object();
     if (!o) 
         return 0;
-    if (QDesignerPromotedWidget *promoted = qobject_cast<QDesignerPromotedWidget*>(o))
-        o = promoted->child();
-
-    MetaDataBase* db = qobject_cast<MetaDataBase*>(core()->metaDataBase());
-    if (!db) return 0;
-    return static_cast<MetaDataBaseItem*>(db->item(o));
+    QDesignerMetaDataBaseInterface *db = core()->metaDataBase();
+    if (!db) 
+        return 0;
+    return db->item(o);
 }
 
 void PropertyEditor::createPropertySheet(PropertyCollection *root, QObject *object)
@@ -562,7 +235,6 @@ void PropertyEditor::createPropertySheet(PropertyCollection *root, QObject *obje
     QList<Group> groups;
 
     QExtensionManager *m = m_core->extensionManager();
-    QDesignerLanguageExtension *lang = qt_extension<QDesignerLanguageExtension*> (m, m_core);
 
     bool isMainContainer = false;
     if (QWidget *widget = qobject_cast<QWidget*>(object)) {
@@ -571,63 +243,28 @@ void PropertyEditor::createPropertySheet(PropertyCollection *root, QObject *obje
         }
     }
     m_prop_sheet = qobject_cast<QDesignerPropertySheetExtension*>(m->extension(object, Q_TYPEID(QDesignerPropertySheetExtension)));
-    for (int i=0; i<m_prop_sheet->count(); ++i) {
+    const int count = m_prop_sheet->count();
+    for (int i=0; i < count; ++i) {
         if (!m_prop_sheet->isVisible(i))
             continue;
 
-        QString pname = m_prop_sheet->propertyName(i);
-        QVariant value = m_prop_sheet->property(i);
+        const QString pname = m_prop_sheet->propertyName(i);
+        // Is this property redefined/hidden in a derived class?
+        // Make it appear under that category only
+        if (m_prop_sheet->indexOf(pname) != i)
+            continue;
+        const QVariant value = m_prop_sheet->property(i);
 
         IProperty *p = 0;
         if (qVariantCanConvert<FlagType>(value)) {
             FlagType f = qvariant_cast<FlagType>(value);
-
             if (pname == QLatin1String("alignment")) {
-                // ### fixme!!!
-                if (qobject_cast<QLineEdit *>(object)) {
-                    QStringList align_keys = QStringList()
-                                             << QString::fromUtf8("Qt::AlignLeft")
-                                             << QString::fromUtf8("Qt::AlignHCenter")
-                                             << QString::fromUtf8("Qt::AlignRight");
-                    QMap<QString, QVariant> align_map;
-                    foreach (QString align, align_keys) {
-                        align_map.insert(align, f.items.value(align));
-                    }
-                    p = new MapProperty(align_map, uint(f.value.toInt() & Qt::AlignHorizontal_Mask),
-                                        QLatin1String("alignment"));
-                } else {
-                    p = new AlignmentProperty(f.items, Qt::Alignment(f.value.toInt()), pname);
-                }
+                p = new AlignmentProperty(f.items, Qt::Alignment(f.value.toInt()), pname);
             } else {
-                if (lang) {
-                    QMap<QString, QVariant> items;
-                    QMapIterator<QString, QVariant> it (f.items);
-                    while (it.hasNext()) {
-                        it.next();
-                        QString id = lang->enumerator(it.key());
-                        items.insert(id, it.value());
-                    }
-                    f.items = items;
-                }
-
                 p = new FlagsProperty(f.items, f.value.toInt(), pname);
             }
         } else if (qVariantCanConvert<EnumType>(value)) {
             EnumType e = qvariant_cast<EnumType>(value);
-
-            if (lang) {
-                QMap<QString, QVariant> items;
-                QMapIterator<QString, QVariant> it (e.items);
-                e.names.clear();
-                while (it.hasNext()) {
-                    it.next();
-                    QString id = lang->enumerator(it.key());
-                    items.insert(id, it.value());
-                    e.names.append(id);
-                }
-                e.items = items;
-            }
-
             p = new MapProperty(e.items, e.value, pname, e.names);
         }
 
@@ -640,13 +277,13 @@ void PropertyEditor::createPropertySheet(PropertyCollection *root, QObject *obje
                 p = new IntProperty(value.toInt(), pname);
                 break;
             case QVariant::UInt:
-                p = new IntProperty(value.toUInt(), pname);
+                p = new UIntProperty(value.toUInt(), pname);
                 break;
             case QVariant::LongLong:
                 p = new LongLongProperty(value.toLongLong(), pname);
                 break;
             case QVariant::ULongLong:
-                p = new LongLongProperty(value.toULongLong(), pname);
+                p = new ULongLongProperty(value.toULongLong(), pname);
                 break;
             case QVariant::Double:
                 p = new DoubleProperty(value.toDouble(), pname);
@@ -658,22 +295,9 @@ void PropertyEditor::createPropertySheet(PropertyCollection *root, QObject *obje
                 p = new BoolProperty(value.toBool(), pname);
                 break;
             case QVariant::ByteArray:
-                p = new StringProperty(QString::fromUtf8(value.toByteArray()), pname);
+            case QVariant::String: 
+                p = createStringProperty(object, pname, value, isMainContainer);
                 break;
-            case QVariant::String: {
-                MetaDataBaseItem *item = metaDataBaseItem();
-                if (item && pname != QLatin1String("objectName")) {
-                    p = new StringProperty(value.toString(), pname, true, item->propertyComment(pname));
-                } else {
-                    StringProperty *sprop = new StringProperty(value.toString(), pname);
-                    p = sprop;
-
-                    if (pname == QLatin1String("objectName")) {
-                        sprop->setCheckValidObjectName(true);
-                        sprop->setAllowScope(isMainContainer);
-                    }
-                }
-            } break;
             case QVariant::Size:
                 p = new SizeProperty(value.toSize(), pname);
                 break;
@@ -720,7 +344,7 @@ void PropertyEditor::createPropertySheet(PropertyCollection *root, QObject *obje
                 p = new CursorProperty(qvariant_cast<QCursor>(value), pname);
                 break;
             case QVariant::KeySequence:
-                p = new StringProperty(qvariant_cast<QKeySequence>(value), pname);
+                p = new KeySequenceProperty(qvariant_cast<QKeySequence>(value), pname);
                 break;
             case QVariant::Palette:
                 p = new PaletteProperty(m_core, qvariant_cast<QPalette>(value),
@@ -733,7 +357,7 @@ void PropertyEditor::createPropertySheet(PropertyCollection *root, QObject *obje
                 p = new StringListProperty(qvariant_cast<QStringList>(value), pname);
                 break;
             default:
-                // ### qWarning() << "property" << pname << "with type" << value.type() << "not supported yet!";
+                // ### qDebug() << "property" << pname << "with type" << value.type() << "not supported yet!";
                 break;
             } // end switch
         }
@@ -743,7 +367,7 @@ void PropertyEditor::createPropertySheet(PropertyCollection *root, QObject *obje
             p->setChanged(m_prop_sheet->isChanged(i));
             p->setDirty(false);
 
-            QString pgroup = m_prop_sheet->propertyGroup(i);
+            const QString pgroup = m_prop_sheet->propertyGroup(i);
             int groupIndex = groups.indexOf(pgroup);
             if (groupIndex == -1) {
                 groupIndex = groups.count();
@@ -752,6 +376,7 @@ void PropertyEditor::createPropertySheet(PropertyCollection *root, QObject *obje
 
             QList<IProperty*> &groupProperties = groups[groupIndex].properties;
             groupProperties.append(p);
+            m_indexToProperty[i] = p;
         }
     }
 
@@ -763,26 +388,46 @@ void PropertyEditor::createPropertySheet(PropertyCollection *root, QObject *obje
     }
 }
 
+void PropertyEditor::updatePropertySheet()
+{
+    if (!m_prop_sheet)
+        return;
+
+    const int count = m_prop_sheet->count();
+    for (int i = 0; i < count; ++i) {
+        IndexToPropertyMap::const_iterator it = m_indexToProperty.constFind(i);
+        if (it !=  m_indexToProperty.constEnd()) {
+            IProperty *p = it.value();
+            p->setValue(m_prop_sheet->property(i));
+            m_editor->editorModel()->refresh(p);
+        }
+    }
+}
+
 PropertyEditor::PropertyEditor(QDesignerFormEditorInterface *core,
             QWidget *parent, Qt::WindowFlags flags)
-    : QDesignerPropertyEditorInterface(parent, flags),
+    : QDesignerPropertyEditor(parent, flags),
       m_core(core),
-      m_properties(0)
+      m_editor(new QPropertyEditor(this)),
+      m_properties(0),
+      m_prop_sheet(0)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
     lay->setMargin(0);
-    m_editor = new QPropertyEditor(this);
     lay->addWidget(m_editor);
-    m_prop_sheet = 0;
 
     connect(m_editor, SIGNAL(propertyChanged(IProperty*)),
-        this, SLOT(firePropertyChanged(IProperty*)));
+        this, SLOT(slotFirePropertyChanged(IProperty*)));
     connect(m_editor->editorModel(), SIGNAL(resetProperty(QString)),
-                this, SLOT(resetProperty(QString)));
+                this, SLOT(slotResetProperty(QString)));
+    connect(m_editor, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(slotCustomContextMenuRequested(QPoint)));
+
 }
 
 PropertyEditor::~PropertyEditor()
 {
+     delete m_properties;
 }
 
 bool PropertyEditor::isReadOnly() const
@@ -819,34 +464,55 @@ void PropertyEditor::setPropertyValue(const QString &name, const QVariant &value
 {
     if (isReadOnly())
         return;
+    
+    IProperty *p = propertyByName(m_editor->initialInput(), name);
+    if (!p)
+        return;
 
-    if (IProperty *p = propertyByName(m_editor->initialInput(), name)) {
-        if (p->value() != value)
-            p->setValue(value);
-
-        p->setChanged(changed);
-        p->setDirty(false);
-
-        m_editor->editorModel()->refresh(p);
-    }
+    if (p->value() != value) 
+        p->setValue(value);
+    
+    p->setChanged(changed);
+    p->setDirty(false);
+    
+    m_editor->editorModel()->refresh(p);
 }
 
-void PropertyEditor::firePropertyChanged(IProperty *p)
+void PropertyEditor::setPropertyComment(const QString &name, const QString &value)
 {
     if (isReadOnly())
         return;
 
-    if (object()) {     
-        if (p->parent() && p->propertyName() == QLatin1String("comment")) {
-            QString parentProperty = p->parent()->propertyName();
-            if (MetaDataBaseItem *item = metaDataBaseItem()) {
-                item->setPropertyComment(parentProperty, p->value().toString());
-                emit propertyChanged(parentProperty, p->parent()->value());
-            }
-            return;
-        }
+    IProperty *parent = propertyByName(m_editor->initialInput(), name);
+    if (!parent || parent->kind() != IProperty::Property_Group)
+        return;
+    
+    AbstractPropertyGroup *parentGroup = static_cast<AbstractPropertyGroup *>(parent);
+    
+    if (parentGroup->propertyCount() != 1)
+        return;
+    
+    IProperty *commentProperty = parentGroup->propertyAt(0);
+    if (commentProperty->value().toString() != value)
+        commentProperty->setValue(value);
+    
+    commentProperty->setDirty(false);
+
+    m_editor->editorModel()->refresh(commentProperty);    
+}
+
+void PropertyEditor::slotFirePropertyChanged(IProperty *p)
+{
+    if (isReadOnly() || !object())
+        return;
+
+    // Comment or property
+    if (p->parent() && p->propertyName() == QLatin1String("comment")) {
+        const QString parentProperty = p->parent()->propertyName();
+        emit propertyCommentChanged(parentProperty, p->value().toString());
+    } else {
+        emit propertyChanged(p->propertyName(), p->value());
     }
-    emit propertyChanged(p->propertyName(), p->value());
 }
 
 void PropertyEditor::clearDirty(IProperty *p)
@@ -867,14 +533,11 @@ void PropertyEditor::setObject(QObject *object)
         clearDirty(m_editor->initialInput());
 
     m_object = object;
-    if (QAction *action = qobject_cast<QAction*>(m_object)) {
-        if (action->menu())
-            m_object = action->menu();
-    }
-
     IPropertyGroup *old_properties = m_properties;
     m_properties = 0;
     m_prop_sheet = 0;
+
+    m_indexToProperty.clear();
 
     if (m_object) {
         PropertyCollection *collection = new PropertyCollection(QLatin1String("<root>"));
@@ -887,30 +550,19 @@ void PropertyEditor::setObject(QObject *object)
     delete old_properties;
 }
 
-void PropertyEditor::resetProperty(const QString &prop_name)
+void PropertyEditor::slotResetProperty(const QString &prop_name)
 {
-    int idx = m_prop_sheet->indexOf(prop_name);
-
-    if (idx == -1) {
-        qWarning("PropertyEditor::resetProperty(): no property \"%s\"",
-                    prop_name.toUtf8().constData());
-        return;
-    }
-
     QDesignerFormWindowInterface *form = m_core->formWindowManager()->activeFormWindow();
     if (form == 0) {
-        qWarning("PropertyEditor::resetProperty(): widget does not belong to any form");
+        qDebug("PropertyEditor::resetProperty(): widget does not belong to any form");
         return;
     }
-
-    ResetPropertyCommand *cmd = new ResetPropertyCommand(form);
-    cmd->init(m_object, prop_name);
-    form->commandHistory()->push(cmd);
+    emit resetProperty(prop_name);
 }
 
 QString PropertyEditor::currentPropertyName() const
 {
-    QModelIndex index = m_editor->selectionModel()->currentIndex();
+    const QModelIndex index = m_editor->selectionModel()->currentIndex();
     if (index.isValid()) {
         IProperty *property = static_cast<IProperty*>(index.internalPointer());
 
@@ -924,4 +576,59 @@ QString PropertyEditor::currentPropertyName() const
     return QString();
 }
 
-#include "propertyeditor.moc"
+void PropertyEditor::slotCustomContextMenuRequested(const QPoint &pos)
+{    
+    const QModelIndex idx = m_editor->indexAt(pos);
+    if (!idx.isValid())
+        return;
+    
+    QPropertyEditorModel *model = m_editor->editorModel();
+    IProperty *nonfake = model->privateData(idx);
+    while (nonfake != 0 && nonfake->isFake())
+        nonfake = nonfake->parent();
+
+    const QDesignerPropertySheetExtension *sheet = m_prop_sheet;
+    const QDesignerDynamicPropertySheetExtension *dynamicSheet = qt_extension<QDesignerDynamicPropertySheetExtension*>(m_core->extensionManager(), m_object);;
+    if (!sheet || !dynamicSheet)
+        return;
+
+    int index = -1;
+    const bool addEnabled = dynamicSheet->dynamicPropertiesAllowed();
+    bool insertRemoveEnabled = false;
+    if (addEnabled) {
+        if (nonfake) {
+            const int idx = sheet->indexOf(nonfake->propertyName());
+            if (dynamicSheet->isDynamicProperty(idx)) {
+                insertRemoveEnabled = true;
+                index = idx;
+            }
+        }
+    }
+
+    QMenu menu(this);
+    QAction *addAction = menu.addAction(tr("Add Dynamic Property..."));
+    addAction->setEnabled(addEnabled);
+    QAction *removeAction = menu.addAction(tr("Remove Dynamic Property"));
+    removeAction->setEnabled(insertRemoveEnabled);
+    const QAction *result = menu.exec(mapToGlobal(pos));
+
+    if (result == removeAction && nonfake) {
+        emit removeDynamicProperty(nonfake->propertyName());
+    } else if (result == addAction) {
+        NewDynamicPropertyDialog dlg(this);
+        QStringList reservedNames;
+        for (int i = 0; i < sheet->count(); i++) {
+            if (!dynamicSheet->isDynamicProperty(i) || sheet->isVisible(i))
+                reservedNames.append(sheet->propertyName(i));
+        }
+        dlg.setReservedNames(reservedNames);
+        if (dlg.exec() == QDialog::Accepted) {
+            const QString newName = dlg.propertyName();
+            const QVariant newValue = dlg.propertyValue();
+
+            emit addDynamicProperty(newName, newValue);
+        }
+    }
+}
+
+}

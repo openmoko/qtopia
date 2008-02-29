@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -216,6 +231,18 @@ void QCDEStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QPai
             bool down = opt->state & State_Sunken;
             bool on = opt->state & State_On;
             QPolygon a(INTARRLEN(pts1), pts1);
+
+            //center when rect is larger than indicator size
+            int xOffset = 0;
+            int yOffset = 0;
+            int indicatorWidth = pixelMetric(PM_ExclusiveIndicatorWidth);
+            int indicatorHeight = pixelMetric(PM_ExclusiveIndicatorWidth);
+            if (r.width() > indicatorWidth)
+                xOffset += (r.width() - indicatorWidth)/2;
+            if (r.height() > indicatorHeight)
+                yOffset += (r.height() - indicatorHeight)/2;
+            p->translate(xOffset, yOffset);
+
             a.translate(r.x(), r.y());
             QPen oldPen = p->pen();
             QBrush oldBrush = p->brush();
@@ -236,6 +263,9 @@ void QCDEStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QPai
                 p->fillRect(opt->rect, QBrush(p->background().color(), Qt::Dense5Pattern));
             p->setPen(oldPen);
             p->setBrush(oldBrush);
+
+            p->translate(-xOffset, -yOffset);
+
         } break;
     default:
         QMotifStyle::drawPrimitive(pe, opt, p, widget);
@@ -245,10 +275,10 @@ void QCDEStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QPai
 /*!\reimp*/
 QPalette QCDEStyle::standardPalette() const
 {
-    QColor background = QColor(0xb6, 0xb6, 0xcf);
-    QColor light = background.light();
-    QColor mid = background.dark(150);
-    QColor dark = background.dark();
+    QColor background(0xb6, 0xb6, 0xcf);
+    QColor light = background.lighter();
+    QColor mid = background.darker(150);
+    QColor dark = background.darker();
     QPalette palette(Qt::black, background, light, dark, mid, Qt::black, Qt::white);
     palette.setBrush(QPalette::Disabled, QPalette::WindowText, dark);
     palette.setBrush(QPalette::Disabled, QPalette::Text, dark);

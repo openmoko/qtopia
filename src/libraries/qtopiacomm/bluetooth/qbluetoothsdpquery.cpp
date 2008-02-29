@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,18 +25,16 @@
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothaddress.h>
 #include <qbluetoothnamespace.h>
-#include <qtopialog.h>
-#include <qtopianamespace.h>
 
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
-#include <qtopiacomm/private/qsdpxmlparser_p.h>
+#include "qbluetoothnamespace_p.h"
+#include "qsdpxmlparser_p.h"
 
-#include <qtdbus/qdbusconnection.h>
-#include <qtdbus/qdbusinterface.h>
-#include <qtdbus/qdbusreply.h>
-#include <qtdbus/qdbusmessage.h>
-#include <qtdbus/qdbusmetatype.h>
-#include <qtdbus/qdbusargument.h>
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusReply>
+#include <QDBusMessage>
+#include <QDBusMetaType>
+#include <QDBusArgument>
 
 #include <QList>
 #include <QString>
@@ -45,6 +43,7 @@
 #include <QStack>
 #include <QUrl>
 #include <QMetaType>
+#include <QDebug>
 
 Q_DECLARE_METATYPE(QList<uint>)
 
@@ -148,13 +147,13 @@ const QList<QBluetoothSdpRecord> &QBluetoothSdpQueryResult::services() const
 
 /*!
     Resets the results object.  This clears the service list, resets the valid flag
-    and resets the error message to null.
+    and clears the error message.
 */
 void QBluetoothSdpQueryResult::reset()
 {
     m_services.clear();
     m_valid = true;
-    m_error = QString::null;
+    m_error.clear();
 }
 
 class QBluetoothSdpQuery_Private : public QObject
@@ -185,6 +184,7 @@ public:
 public slots:
     void asyncGetHandlesReply(const QDBusMessage &msg);
     void asyncGetRecordReply(const QDBusMessage &msg);
+    void asyncGetRecordError(const QDBusError &error, const QDBusMessage &msg);
 
 private:
     void requestNextRecord();
@@ -216,14 +216,30 @@ void QBluetoothSdpQuery_Private::requestNextRecord()
     args << m_remote.toString() << m_handles[m_index];
 
     bool ret = m_iface->callWithCallback("GetRemoteServiceRecordAsXML", args, this,
-            SLOT(asyncGetRecordReply(const QDBusMessage &)));
+            SLOT(asyncGetRecordReply(QDBusMessage)),
+            SLOT(asyncGetRecordError(QDBusError,QDBusMessage)));
 
     if (!ret) {
         m_result.setError("Call failed");
-        qLog(Bluetooth) << "Couldn't call GetRemoteServiceRecordAsXML";
         emit m_parent->searchComplete(m_result);
         m_finished = true;
     }
+}
+
+void QBluetoothSdpQuery_Private::asyncGetRecordError(const QDBusError &error, const QDBusMessage &)
+{
+    if (m_cancelled) {
+        emit m_parent->searchCancelled();
+        m_finished = true;
+        return;
+    }
+
+    m_result.setError(error.message());
+#ifdef QBLUETOOTH_DEBUG
+    qDebug() << "Received an error reply from hcid:" << error;
+#endif
+    emit m_parent->searchComplete(m_result);
+    m_finished = true;
 }
 
 void QBluetoothSdpQuery_Private::asyncGetRecordReply(const QDBusMessage &msg)
@@ -236,21 +252,13 @@ void QBluetoothSdpQuery_Private::asyncGetRecordReply(const QDBusMessage &msg)
 
     QDBusReply<QString> reply(msg);
 
-    if (!reply.isValid()) {
-        m_result.setError(reply.error().message());
-        qLog(Bluetooth) << "Received an error reply from hcid:" << reply.error();
-        emit m_parent->searchComplete(m_result);
-        m_finished = true;
-        return;
-    }
-
     // Grab the result here and parse
     QSdpXmlParser parser;
     if (parser.parseRecord(reply.value().toUtf8())) {
         m_result.addService(parser.record());
     } else {
-        qLog(Bluetooth) << "Trouble parsing record:" << m_handles[m_index];
-        qLog(Bluetooth) << "The error was:" << parser.errorString();
+        qWarning() << "QBluetoothSdpQuery::Trouble parsing record:" << m_handles[m_index];
+        qWarning() << "QBluetoothSdpQuery::The error was:" << parser.errorString();
     }
 
     m_index++;
@@ -272,14 +280,6 @@ void QBluetoothSdpQuery_Private::asyncGetHandlesReply(const QDBusMessage &msg)
     }
 
     QDBusReply<QList<uint> > reply(msg);
-
-    if (!reply.isValid()) {
-        m_result.setError(reply.error().message());
-        qLog(Bluetooth) << "Received an error during service record request" << reply.error();
-        emit m_parent->searchComplete(m_result);
-        m_finished = true;
-        return;
-    }
 
     m_handles = reply.value();
 
@@ -316,14 +316,14 @@ bool QBluetoothSdpQuery_Private::haveInterface(const QString &device)
     QDBusReply<QString> reply = iface.call("FindAdapter", device);
 
     if (!reply.isValid()) {
-        qLog(Bluetooth) << "No Adapter:" << device << reply.error();
+        qWarning() << "QBluetoothSdpQuery::No Adapter:" << device << reply.error();
         return false;
     }
 
     m_iface = new QDBusInterface("org.bluez", reply.value(), "org.bluez.Adapter", dbc);
 
     if (!m_iface->isValid()) {
-        qLog(Bluetooth) << "Could not find org.bluez Adapter interface for" << device;
+        qWarning() << "Could not find org.bluez Adapter interface for" << device;
         delete m_iface;
         m_iface = 0;
         return false;
@@ -351,7 +351,8 @@ bool QBluetoothSdpQuery_Private::searchServices(const QBluetoothAddress &remote,
     args << remote.toString() << searchString;
 
     return m_iface->callWithCallback("GetRemoteServiceHandles", args, this,
-                                     SLOT(asyncGetHandlesReply(const QDBusMessage &)));
+                                     SLOT(asyncGetHandlesReply(QDBusMessage)),
+                                     SLOT(asyncGetRecordError(QDBusError,QDBusMessage)));
 }
 
 /*!
@@ -457,7 +458,7 @@ bool QBluetoothSdpQuery::searchServices(const QBluetoothAddress &remote,
 
     \code
         QBluetoothSdpQuery qsdap;
-        qsdap.searchServices(QBluetoothAddress(remote), QBluetoothLocalDevice(), 0x0100);
+        qsdap.searchServices(QBluetoothAddress(remote), QBluetoothLocalDevice(), QBluetoothSdpUuid(0x0100u));
     \endcode
 
     The searchComplete() signal will be sent once the search is finished.

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -356,7 +356,7 @@ void parseOldCommands( QApplication& app, int argc, char **argv )
 
     ParamInfo info = parseParameters( command );
 
-#ifndef QT_NO_COP
+#ifdef HAVE_QCOP
     int argIdx = 3;
     {
         QCopEnvelope env( channel, info.message );
@@ -758,8 +758,8 @@ void QCopWatcher::start( bool ok )
         for ( iter = channels.begin(); iter != channels.end(); ++iter ) {
             QCopChannel *chan = new QCopChannel( *iter, this );
             QObject::connect
-                ( chan, SIGNAL(received(const QString&,const QByteArray&)),
-                  this, SLOT(received(const QString&,const QByteArray&)) );
+                ( chan, SIGNAL(received(QString,QByteArray)),
+                  this, SLOT(received(QString,QByteArray)) );
         }
         if ( timeout >= 0 ) {
             QTimer::singleShot( timeout, this, SLOT(gotTimeout()) );
@@ -856,8 +856,8 @@ void QCopWaiter::start( bool ok )
     if ( ok ) {
         QCopChannel *chan = new QCopChannel( channel, this );
         QObject::connect
-            ( chan, SIGNAL(received(const QString&,const QByteArray&)),
-              this, SLOT(received(const QString&,const QByteArray&)) );
+            ( chan, SIGNAL(received(QString,QByteArray)),
+              this, SLOT(received(QString,QByteArray)) );
         if ( timeout >= 0 ) {
             QTimer::singleShot( timeout, this, SLOT(gotTimeout()) );
         }
@@ -916,8 +916,8 @@ void QCopQuery::start( bool ok )
         QString responseChannel = "QPE/Query/" + QUuid::createUuid().toString();
         QCopChannel *chan = new QCopChannel( responseChannel, this );
         QObject::connect
-            ( chan, SIGNAL(received(const QString&,const QByteArray&)),
-              this, SLOT(received(const QString&,const QByteArray&)) );
+            ( chan, SIGNAL(received(QString,QByteArray)),
+              this, SLOT(received(QString,QByteArray)) );
         if ( timeout >= 0 ) {
             QTimer::singleShot( timeout, this, SLOT(gotTimeout()) );
         }

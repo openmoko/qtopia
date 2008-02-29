@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,15 +36,20 @@ class QHideEvent;
 class QTOPIA_EXPORT QWaitWidget : public QDialog
 {
     Q_OBJECT
+    Q_PROPERTY(bool wasCancelled READ wasCancelled);
+    Q_PROPERTY(bool cancelEnabled WRITE setCancelEnabled);
 public:
     explicit QWaitWidget( QWidget *parent );
+
+    bool wasCancelled() const;
+
+public slots:
     void show();
     void hide();
     void setText( const QString &str );
     void setColor( const QColor &col );
     void setExpiryTime( int msec );
     void setCancelEnabled(bool enabled);
-    bool wasCancelled() const;
 
 signals:
     void cancelled();
@@ -54,12 +59,10 @@ protected:
     void keyPressEvent( QKeyEvent * );
 
 private slots:
-    void updateImage();
     void timeExpired();
 
 private:
     void reset();
-    QRgb blendRgb( QRgb, int, int, int );
 
 private:
     QWaitWidgetPrivate *d;

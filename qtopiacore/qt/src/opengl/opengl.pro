@@ -13,6 +13,7 @@ contains(QT_CONFIG, opengl):CONFIG += opengl
 
 
 HEADERS += qgl.h \
+	   qgl_p.h \
 	   qglcolormap.h \
 	   qpaintengine_opengl_p.h \
 	   qglpixelbuffer.h \
@@ -21,7 +22,8 @@ SOURCES	+= qgl.cpp \
 	   qglcolormap.cpp \
 	   qpaintengine_opengl.cpp \
 	   qglpixelbuffer.cpp \
-	   qglframebufferobject.cpp
+	   qglframebufferobject.cpp \
+           qglextensions.cpp
 x11 {
     SOURCES += qgl_x11.cpp \
 	       qglpixelbuffer_x11.cpp
@@ -43,15 +45,23 @@ win32 {
 }
 
 embedded {
-    SOURCES += qgl_qws.cpp \
-	       qglpixelbuffer_qws.cpp \
-               qttessellator.cpp
-    HEADERS += qttessellator_p.h
-     	contains(QT_CONFIG, fontconfig) {
- 		include($$QT_SOURCE_TREE/config.tests/unix/freetype/freetype.pri)
-	} else {
-	    DEFINES *= QT_NO_FREETYPE
- 	}
+    SOURCES += qegl_qws.cpp \
+               qgl_qws.cpp \
+               qglpaintdevice_qws.cpp \
+               qglpixelbuffer_qws.cpp \
+               qglscreen_qws.cpp \
+               qglwindowsurface_qws.cpp
+
+    HEADERS += qegl_qws_p.h \
+               qglpaintdevice_qws_p.h \
+               qglscreen_qws.h \
+               qglwindowsurface_qws_p.h
+
+    contains(QT_CONFIG, fontconfig) {
+        include($$QT_SOURCE_TREE/config.tests/unix/freetype/freetype.pri)
+    } else {
+       DEFINES *= QT_NO_FREETYPE
+    }
 }
 
 QMAKE_LIBS += $$QMAKE_LIBS_OPENGL

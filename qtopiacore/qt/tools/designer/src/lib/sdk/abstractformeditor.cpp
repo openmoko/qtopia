@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,8 +37,43 @@
 ****************************************************************************/
 
 #include "abstractformeditor.h"
+#include "private/qobject_p.h"
 
-#include <QtDesigner/QtDesigner>
+#include <QtDesigner/QDesignerWidgetBoxInterface>
+#include <QtDesigner/QDesignerPropertyEditorInterface>
+#include <QtDesigner/QDesignerFormWindowManagerInterface>
+#include <QtDesigner/QExtensionManager>
+#include <QtDesigner/QDesignerMetaDataBaseInterface>
+#include <QtDesigner/QDesignerWidgetDataBaseInterface>
+#include <QtDesigner/QDesignerWidgetFactoryInterface>
+#include <QtDesigner/QDesignerObjectInspectorInterface>
+#include <QtDesigner/QDesignerBrushManagerInterface>
+#include <QtDesigner/QDesignerIntegrationInterface>
+#include <QtDesigner/QDesignerIconCacheInterface>
+#include <QtDesigner/QDesignerActionEditorInterface>
+#include <pluginmanager_p.h>
+#include <QtDesigner/QDesignerPromotionInterface>
+
+class QDesignerFormEditorInterfacePrivate : public  QObjectPrivate {
+public:
+    QDesignerFormEditorInterfacePrivate() : m_pluginManager(0),m_promotion(0) {}
+
+    QPointer<QWidget> m_topLevel;
+    QPointer<QDesignerWidgetBoxInterface> m_widgetBox;
+    QPointer<QDesignerPropertyEditorInterface> m_propertyEditor;
+    QPointer<QDesignerFormWindowManagerInterface> m_formWindowManager;
+    QPointer<QExtensionManager> m_extensionManager;
+    QPointer<QDesignerMetaDataBaseInterface> m_metaDataBase;
+    QPointer<QDesignerWidgetDataBaseInterface> m_widgetDataBase;
+    QPointer<QDesignerWidgetFactoryInterface> m_widgetFactory;
+    QPointer<QDesignerObjectInspectorInterface> m_objectInspector;
+    QPointer<QDesignerBrushManagerInterface> m_brushManager;
+    QPointer<QDesignerIntegrationInterface> m_integration;
+    QPointer<QDesignerIconCacheInterface> m_iconCache;
+    QPointer<QDesignerActionEditorInterface> m_actionEditor;
+    QDesignerPluginManager *m_pluginManager;
+    QDesignerPromotionInterface *m_promotion;
+};
 
 /*!
     \class QDesignerFormEditorInterface
@@ -74,9 +124,10 @@
     Constructs a QDesignerFormEditorInterface object with the given \a
     parent.
 */
+
 QDesignerFormEditorInterface::QDesignerFormEditorInterface(QObject *parent)
-    : QObject(parent),
-      m_pluginManager(0)
+    : QObject(*(new QDesignerFormEditorInterfacePrivate), parent),
+      m_pad13(0)
 {
 }
 
@@ -93,7 +144,10 @@ QDesignerFormEditorInterface::~QDesignerFormEditorInterface()
     \sa setWidgetBox()
 */
 QDesignerWidgetBoxInterface *QDesignerFormEditorInterface::widgetBox() const
-{ return m_widgetBox; }
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_widgetBox; 
+}
 
 /*!
     Sets \QD's widget box to be the specified \a widgetBox.
@@ -101,7 +155,10 @@ QDesignerWidgetBoxInterface *QDesignerFormEditorInterface::widgetBox() const
     \sa widgetBox()
 */
 void QDesignerFormEditorInterface::setWidgetBox(QDesignerWidgetBoxInterface *widgetBox)
-{ m_widgetBox = widgetBox; }
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_widgetBox = widgetBox; 
+}
 
 /*!
     Returns an interface to \QD's property editor.
@@ -109,7 +166,10 @@ void QDesignerFormEditorInterface::setWidgetBox(QDesignerWidgetBoxInterface *wid
     \sa setPropertyEditor()
 */
 QDesignerPropertyEditorInterface *QDesignerFormEditorInterface::propertyEditor() const
-{ return m_propertyEditor; }
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_propertyEditor; 
+}
 
 /*!
     Sets \QD's property editor to be the specified \a propertyEditor.
@@ -117,7 +177,10 @@ QDesignerPropertyEditorInterface *QDesignerFormEditorInterface::propertyEditor()
     \sa propertyEditor()
 */
 void QDesignerFormEditorInterface::setPropertyEditor(QDesignerPropertyEditorInterface *propertyEditor)
-{ m_propertyEditor = propertyEditor; }
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_propertyEditor = propertyEditor; 
+}
 
 /*!
     Returns an interface to \QD's action editor.
@@ -125,7 +188,10 @@ void QDesignerFormEditorInterface::setPropertyEditor(QDesignerPropertyEditorInte
     \sa setActionEditor()
 */
 QDesignerActionEditorInterface *QDesignerFormEditorInterface::actionEditor() const
-{ return m_actionEditor; }
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_actionEditor; 
+}
 
 /*!
     Sets \QD's action editor to be the specified \a actionEditor.
@@ -133,43 +199,64 @@ QDesignerActionEditorInterface *QDesignerFormEditorInterface::actionEditor() con
     \sa actionEditor()
 */
 void QDesignerFormEditorInterface::setActionEditor(QDesignerActionEditorInterface *actionEditor)
-{ m_actionEditor = actionEditor; }
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_actionEditor = actionEditor; 
+}
 
 /*!
     Returns \QD's top-level widget.
 */
 QWidget *QDesignerFormEditorInterface::topLevel() const
-{ return m_topLevel; }
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_topLevel; 
+}
 
 /*!
     \internal
 */
 void QDesignerFormEditorInterface::setTopLevel(QWidget *topLevel)
-{ m_topLevel = topLevel; }
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_topLevel = topLevel; 
+}
 
 /*!
     Returns an interface to \QD's form window manager.
 */
 QDesignerFormWindowManagerInterface *QDesignerFormEditorInterface::formWindowManager() const
-{ return m_formWindowManager; }
+{
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_formWindowManager; 
+}
 
 /*!
     \internal
 */
 void QDesignerFormEditorInterface::setFormManager(QDesignerFormWindowManagerInterface *formWindowManager)
-{ m_formWindowManager = formWindowManager; }
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_formWindowManager = formWindowManager; 
+}
 
 /*!
     Returns an interface to \QD's extension manager.
 */
 QExtensionManager *QDesignerFormEditorInterface::extensionManager() const
-{ return m_extensionManager; }
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_extensionManager; 
+}
 
 /*!
     \internal
 */
 void QDesignerFormEditorInterface::setExtensionManager(QExtensionManager *extensionManager)
-{ m_extensionManager = extensionManager; }
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_extensionManager = extensionManager; 
+}
 
 /*!
     \internal
@@ -177,13 +264,19 @@ void QDesignerFormEditorInterface::setExtensionManager(QExtensionManager *extens
     Returns an interface to the meta database used by the form editor.
 */
 QDesignerMetaDataBaseInterface *QDesignerFormEditorInterface::metaDataBase() const
-{ return m_metaDataBase; }
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_metaDataBase; 
+}
 
 /*!
     \internal
 */
 void QDesignerFormEditorInterface::setMetaDataBase(QDesignerMetaDataBaseInterface *metaDataBase)
-{ m_metaDataBase = metaDataBase; }
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_metaDataBase = metaDataBase; 
+}
 
 /*!
     \internal
@@ -191,13 +284,43 @@ void QDesignerFormEditorInterface::setMetaDataBase(QDesignerMetaDataBaseInterfac
     Returns an interface to the widget database used by the form editor.
 */
 QDesignerWidgetDataBaseInterface *QDesignerFormEditorInterface::widgetDataBase() const
-{ return m_widgetDataBase; }
+{
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_widgetDataBase;
+}
 
 /*!
     \internal
 */
 void QDesignerFormEditorInterface::setWidgetDataBase(QDesignerWidgetDataBaseInterface *widgetDataBase)
-{ m_widgetDataBase = widgetDataBase; }
+{
+    Q_D(QDesignerFormEditorInterface);
+    d->m_widgetDataBase = widgetDataBase; 
+}
+
+/*!
+    \internal
+
+    Returns an interface to the designer promotion handler.
+*/
+
+QDesignerPromotionInterface *QDesignerFormEditorInterface::promotion() const
+{
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_promotion;
+}
+
+/*!
+    \internal
+
+    Sets the designer promotion handler.
+*/
+
+void QDesignerFormEditorInterface::setPromotion(QDesignerPromotionInterface *promotion)
+{
+    Q_D(QDesignerFormEditorInterface);
+    d->m_promotion = promotion;
+}
 
 /*!
     \internal
@@ -206,19 +329,28 @@ void QDesignerFormEditorInterface::setWidgetDataBase(QDesignerWidgetDataBaseInte
     to create widgets for the form.
 */
 QDesignerWidgetFactoryInterface *QDesignerFormEditorInterface::widgetFactory() const
-{ return m_widgetFactory; }
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_widgetFactory;
+}
 
 /*!
     \internal
 */
 void QDesignerFormEditorInterface::setWidgetFactory(QDesignerWidgetFactoryInterface *widgetFactory)
-{ m_widgetFactory = widgetFactory; }
+{
+    Q_D(QDesignerFormEditorInterface);
+    d->m_widgetFactory = widgetFactory; 
+}
 
 /*!
     Returns an interface to \QD's object inspector.
 */
 QDesignerObjectInspectorInterface *QDesignerFormEditorInterface::objectInspector() const
-{ return m_objectInspector; }
+{
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_objectInspector; 
+}
 
 /*!
     Sets \QD's object inspector to be the specified \a
@@ -227,7 +359,10 @@ QDesignerObjectInspectorInterface *QDesignerFormEditorInterface::objectInspector
     \sa objectInspector()
 */
 void QDesignerFormEditorInterface::setObjectInspector(QDesignerObjectInspectorInterface *objectInspector)
-{ m_objectInspector = objectInspector; }
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_objectInspector = objectInspector;
+}
 
 /*!
     \internal
@@ -235,13 +370,39 @@ void QDesignerFormEditorInterface::setObjectInspector(QDesignerObjectInspectorIn
     Returns an interface to the brush manager used by the palette editor.
 */
 QDesignerBrushManagerInterface *QDesignerFormEditorInterface::brushManager() const
-{ return m_brushManager; }
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_brushManager; 
+}
 
 /*!
     \internal
 */
 void QDesignerFormEditorInterface::setBrushManager(QDesignerBrushManagerInterface *brushManager)
-{ m_brushManager = brushManager; }
+{
+    Q_D(QDesignerFormEditorInterface);
+    d->m_brushManager = brushManager; 
+}
+
+/*!
+    \internal
+
+    Returns an interface to the integration.
+*/
+QDesignerIntegrationInterface *QDesignerFormEditorInterface::integration() const
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_integration; 
+}
+
+/*!
+    \internal
+*/
+void QDesignerFormEditorInterface::setIntegration(QDesignerIntegrationInterface *integration)
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_integration = integration; 
+}
 
 /*!
     \internal
@@ -250,13 +411,19 @@ void QDesignerFormEditorInterface::setBrushManager(QDesignerBrushManagerInterfac
     manage icons.
 */
 QDesignerIconCacheInterface *QDesignerFormEditorInterface::iconCache() const
-{ return m_iconCache; }
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_iconCache; 
+}
 
 /*!
     \internal
 */
 void QDesignerFormEditorInterface::setIconCache(QDesignerIconCacheInterface *cache)
-{ m_iconCache = cache; }
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_iconCache = cache; 
+}
 
 /*!
     \internal
@@ -264,7 +431,10 @@ void QDesignerFormEditorInterface::setIconCache(QDesignerIconCacheInterface *cac
     Returns the plugin manager used by the form editor.
 */
 QDesignerPluginManager *QDesignerFormEditorInterface::pluginManager() const
-{ return m_pluginManager; }
+{ 
+    Q_D(const QDesignerFormEditorInterface);
+    return d->m_pluginManager; 
+}
 
 /*!
     \internal
@@ -273,7 +443,10 @@ QDesignerPluginManager *QDesignerFormEditorInterface::pluginManager() const
     \a pluginManager.
 */
 void QDesignerFormEditorInterface::setPluginManager(QDesignerPluginManager *pluginManager)
-{ m_pluginManager = pluginManager; }
+{ 
+    Q_D(QDesignerFormEditorInterface);
+    d->m_pluginManager = pluginManager; 
+}
 
 /*!
     \internal

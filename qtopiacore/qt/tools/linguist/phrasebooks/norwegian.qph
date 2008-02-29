@@ -13,7 +13,7 @@
 </phrase>
 <phrase>
     <source>action handle</source>
-    <target>handlingshåndtak</target>
+    <target>handlingshÃ¥ndtak</target>
 </phrase>
 <phrase>
     <source>active</source>
@@ -33,11 +33,11 @@
 </phrase>
 <phrase>
     <source>adornment</source>
-    <target>verktøyselement</target>
+    <target>verktÃ¸yselement</target>
 </phrase>
 <phrase>
     <source>Always on Top</source>
-    <target>Alltid øverst</target>
+    <target>Alltid Ã¸verst</target>
 </phrase>
 <phrase>
     <source>anchor point</source>
@@ -187,7 +187,7 @@
 </phrase>
 <phrase>
     <source>destination</source>
-    <target>mål</target>
+    <target>mÃ¥l</target>
 </phrase>
 <phrase>
     <source>dialog box</source>
@@ -280,15 +280,15 @@
 </phrase>
 <phrase>
     <source>Find</source>
-    <target>Søk etter</target>
+    <target>SÃ¸k etter</target>
 </phrase>
 <phrase>
     <source>Find Next</source>
-    <target>Søk etter neste</target>
+    <target>SÃ¸k etter neste</target>
 </phrase>
 <phrase>
     <source>Find What</source>
-    <target>Søk etter</target>
+    <target>SÃ¸k etter</target>
 </phrase>
 <phrase>
     <source>folder</source>
@@ -300,7 +300,7 @@
 </phrase>
 <phrase>
     <source>font size</source>
-    <target>skriftstørrelse</target>
+    <target>skriftstÃ¸rrelse</target>
 </phrase>
 <phrase>
     <source>font style</source>
@@ -316,7 +316,7 @@
 </phrase>
 <phrase>
     <source>handle</source>
-    <target>håndtak</target>
+    <target>hÃ¥ndtak</target>
 </phrase>
 <phrase>
     <source>Help</source>
@@ -545,11 +545,11 @@
 </phrase>
 <phrase>
     <source>Open</source>
-    <target>Åpne</target>
+    <target>Ãpne</target>
 </phrase>
 <phrase>
     <source>Open With</source>
-    <target>Åpne i</target>
+    <target>Ãpne i</target>
 </phrase>
 <phrase>
     <source>option button</source>
@@ -637,7 +637,7 @@
 </phrase>
 <phrase>
     <source>portrait</source>
-    <target>stående</target>
+    <target>stÃ¥ende</target>
 </phrase>
 <phrase>
     <source>press</source>
@@ -651,11 +651,11 @@
 </phrase>
 <phrase>
     <source>primary container</source>
-    <target>primærbeholder</target>
+    <target>primÃ¦rbeholder</target>
 </phrase>
 <phrase>
     <source>primary window</source>
-    <target>primærvindu</target>
+    <target>primÃ¦rvindu</target>
 </phrase>
 <phrase>
     <source>Print</source>
@@ -709,11 +709,11 @@
 </phrase>
 <phrase>
     <source>Redo</source>
-    <target>Gjør om</target>
+    <target>GjÃ¸r om</target>
 </phrase>
 <phrase>
     <source>region selection</source>
-    <target>områdemerking</target>
+    <target>omrÃ¥demerking</target>
 </phrase>
 <phrase>
     <source>registry</source>
@@ -741,7 +741,7 @@
 </phrase>
 <phrase>
     <source>Retry</source>
-    <target>Prøv på nytt</target>
+    <target>PrÃ¸v pÃ¥ nytt</target>
 </phrase>
 <phrase>
     <source>rich-text box</source>
@@ -749,7 +749,7 @@
 </phrase>
 <phrase>
     <source>Run</source>
-    <target>Kjør</target>
+    <target>KjÃ¸r</target>
 </phrase>
 <phrase>
     <source>Save</source>
@@ -777,7 +777,7 @@
 </phrase>
 <phrase>
     <source>secondary window</source>
-    <target>sekundærvindu</target>
+    <target>sekundÃ¦rvindu</target>
 </phrase>
 <phrase>
     <source>select</source>
@@ -789,11 +789,11 @@
 </phrase>
 <phrase>
     <source>selection</source>
-    <target>merket område</target>
+    <target>merket omrÃ¥de</target>
 </phrase>
 <phrase>
     <source>selection handle</source>
-    <target>markeringshåndtak</target>
+    <target>markeringshÃ¥ndtak</target>
 </phrase>
 <phrase>
     <source>Send To</source>
@@ -845,11 +845,11 @@
 </phrase>
 <phrase>
     <source>Size</source>
-    <target>Størrelse</target>
+    <target>StÃ¸rrelse</target>
 </phrase>
 <phrase>
     <source>size grip</source>
-    <target>skaleringshåndtak</target>
+    <target>skaleringshÃ¥ndtak</target>
 </phrase>
 <phrase>
     <source>slider</source>
@@ -921,11 +921,11 @@
 </phrase>
 <phrase>
     <source>toolbar</source>
-    <target>verktøylinje</target>
+    <target>verktÃ¸ylinje</target>
 </phrase>
 <phrase>
     <source>tooltip</source>
-    <target>verktøytips</target>
+    <target>verktÃ¸ytips</target>
 </phrase>
 <phrase>
     <source>tree view control</source>
@@ -995,10 +995,7 @@
 </phrase>
 <phrase>
     <source>workspace</source>
-    <target>arbeidsområde</target>
+    <target>arbeidsomrÃ¥de</target>
 </phrase>
 <phrase>
-    <source>Yes</source>
-    <target>Ja</target>
-</phrase>
-</QPH>
+    <source>

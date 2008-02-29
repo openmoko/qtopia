@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,7 +27,6 @@
 #include <qwidget.h>
 #include <qrect.h>
 #include <qpoint.h>
-#include <qbitmap.h>
 
 class ImageUI;
 
@@ -64,10 +63,8 @@ protected:
     // Draw widget
     void paintEvent( QPaintEvent* );
 
-#ifdef QTOPIA_PHONE
     // Control region selector
     void keyPressEvent( QKeyEvent* );
-#endif
 
     // Control region selector
     void mousePressEvent( QMouseEvent* );
@@ -79,7 +76,6 @@ protected:
     void mouseMoveEvent( QMouseEvent* );
 
 private:
-#ifdef QTOPIA_PHONE
     // Only keypad mode
     // Set state label in context bar to current state
     void setStateLabel();
@@ -91,7 +87,6 @@ private:
     // Only keypad mode
     // Size region limited to widget dimensions
     void sizeBy( int dw, int dh );
-#endif
 
     ImageUI *image_ui;
 
@@ -101,7 +96,7 @@ private:
         MARK, MOVING,
         // Keypad operation
         MOVE, SIZE
-    } current_state;
+    } current_state, previous_state;
 
     QPoint region_start;
     QRect lag_area, _region;

@@ -1,4 +1,8 @@
 #include "picker.h"
+#include <QSoftMenuBar>
+#include <private/contextkeymanager_p.h>
+#include <QtopiaIpcEnvelope>
+
 #include <QPainter>
 #include <QScrollBar>
 #include <QStyleOptionFocusRect>
@@ -6,6 +10,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QPaintEvent>
+#include <QFontMetrics>
 #include <QDebug>
 
 /* hack to let us into the functions, as it has no data, cast to parent is safe */
@@ -15,7 +20,7 @@ public:
     PickerScrollBar( QWidget *parent )
 	: QScrollBar( parent ) {}
     PickerScrollBar( Qt::Orientation o, QWidget *parent )
-	: QScrollBar( o ) {}
+	: QScrollBar( o, parent ) {}
 
     void passMousePressEvent(QMouseEvent *e)
     {
@@ -37,6 +42,8 @@ Picker::Picker(QWidget *parent) :
     selRow(0), selCol(0), havePress(false)
 {
     setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+    setFrameStyle(StyledPanel | Raised);
+    setWindowTitle(QLatin1String("_allow_on_top_"));
     viewport()->setBackgroundRole( QPalette::Base );
 
     setContentsMargins(2,2,2,2);
@@ -87,8 +94,8 @@ void Picker::updateContentsSize()
     int h = desk.height() - sBarE - 2*frameWidth();
     h = qMin(desk.height()/2, h); // height is special.
 
-    bool needHScroll = contentsWidth > w;
-    bool needVScroll = contentsHeight > h;
+    bool needHScroll = contentsWidth-cWidth > w;
+    bool needVScroll = contentsHeight-cHeight > h;
 
     verticalScrollBar()->setRange(0, needVScroll ? contentsHeight-h : 0);
     horizontalScrollBar()->setRange(0, needHScroll ? contentsWidth-w : 0);
@@ -158,12 +165,27 @@ bool Picker::filterKey(int, int keycode, int,
 	}
 
 	if (oldSelRow != selRow || oldSelCol != selCol) {
-	    viewport()->update(oldSelCol*cWidth, oldSelRow*cHeight, cWidth, cHeight);
-	    viewport()->update(selCol*cWidth, selRow*cHeight, cWidth, cHeight);
-#ifdef QTOPIA4_TODO
-	    ensureVisible(selCol*cWidth+cWidth/2,
-		    selRow*cHeight+cHeight/2, cWidth/2, cHeight/2);
-#endif
+
+	    //ensureVisible(...);
+            int x = selCol*cWidth+cWidth/2;
+            int y = selRow*cHeight+cHeight/2;
+            int xmargin = cWidth/2;
+            int ymargin = cHeight/2;
+            int logicalX = QStyle::visualPos(layoutDirection(), viewport()->rect(), QPoint(x, y)).x();
+
+            if (logicalX - xmargin < horizontalScrollBar()->value()) {
+                horizontalScrollBar()->setValue(qMax(0, logicalX - xmargin));
+            } else if (logicalX > horizontalScrollBar()->value() + viewport()->width() - xmargin) {
+                horizontalScrollBar()->setValue(qMin(logicalX - viewport()->width() + xmargin, horizontalScrollBar()->maximum()));
+            }
+
+            if (y - ymargin < verticalScrollBar()->value()) {
+                verticalScrollBar()->setValue(qMax(0, y - ymargin));
+            } else if (y > verticalScrollBar()->value() + verticalScrollBar()->height() - ymargin) {
+                verticalScrollBar()->setValue(qMin(y - verticalScrollBar()->height() + ymargin, verticalScrollBar()->maximum()));
+            }
+
+            update();
 	}
     }
 
@@ -219,13 +241,13 @@ bool Picker::filterMouse(const QPoint &point, int buttons, int)
 	} else {
 	    wasMousePress = true;
 
-	    if ( vsb->isVisible() && vsb->frameGeometry().contains(lp) ) {
+	    if ( vsb->isVisible() && vsb->frameGeometry().contains(vsb->mapFrom(this, lp)) ) {
 		QMouseEvent ce(QEvent::MouseButtonRelease, vsb->mapFrom(this, lp),
 			gp, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
 
 		vsb->passMousePressEvent(&ce);
 		grabber = VScroll;
-	    } else if ( hsb->isVisible() && hsb->frameGeometry().contains(lp) ) {
+	    } else if ( hsb->isVisible() && hsb->frameGeometry().contains(hsb->mapFrom(this, lp)) ) {
 		QMouseEvent ce(QEvent::MouseButtonRelease, hsb->mapFrom(this, lp),
 			gp, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
 
@@ -295,11 +317,14 @@ void Picker::setMicroFocus( int, int y )
 {
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desk(desktop->availableGeometry());
-    if (y < desk.y()) y = desk.y()+2;
-    if (y < desk.height()/2 + 5)
-	move((desk.width()-width())/2, y+2);
-    else
-	move((desk.width()-width())/2, y-4-height());
+    if (y < desk.y())
+        y = desk.y()+2;
+    QFontMetrics fm(QApplication::font());
+    if (y < (desk.height()-fm.height())/2) {
+        move((desk.width()-width())/2, desk.y()+y+fm.height());
+    } else {
+        move((desk.width()-width())/2, desk.y()+y-2-height());
+    }
 }
 
 void Picker::drawFrame(QPainter *p)
@@ -339,7 +364,8 @@ void Picker::paintEvent(QPaintEvent* event)
     int row = cy/cHeight;
     int y = row*cHeight;
     while (y < cy+ch && row < nRows) {
-	painter.drawLine( 0, y, nCols*cWidth, y );
+        if (row != 0)
+            painter.drawLine( 0, y-cy, nCols*cWidth, y-cy);
 	for ( int i = 0; i < nCols; i++ ) {
 	    bool sel = ( row == selRow && i == selCol );
 	    // Translate painter and draw the cell
@@ -357,3 +383,31 @@ void Picker::paintEvent(QPaintEvent* event)
 	y += cHeight;
     }
 }
+
+void Picker::showEvent(QShowEvent *e)
+{
+    {
+        // Force the soft menu bar to show what we want rather than whatever
+        // the active window wants to show.
+        // Don't do this at home folks.
+        QtopiaIpcEnvelope e1( "QPE/QSoftMenuBar", "setActiveOverride(int)" );
+        e1 << int(winId());
+    }
+
+    ContextKeyManager *mgr = ContextKeyManager::instance();
+    mgr->setStandard(this, Qt::Key_Select, QSoftMenuBar::Select);
+    mgr->setStandard(this, Qt::Key_Back, QSoftMenuBar::Cancel);
+    mgr->clearLabel(this, QSoftMenuBar::menuKey());
+
+    QAbstractScrollArea::showEvent(e);
+}
+
+void Picker::hideEvent(QHideEvent *e)
+{
+    // Restore soft menu bar.
+    QtopiaIpcEnvelope e1( "QPE/QSoftMenuBar", "clearActiveOverride()" );
+    e1 << int(winId());
+
+    QAbstractScrollArea::hideEvent(e);
+}
+

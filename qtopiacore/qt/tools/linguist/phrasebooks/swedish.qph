@@ -9,12 +9,12 @@
 </phrase>
 <phrase>
     <source>accessibility</source>
-    <target>Hjälpmedel</target>
+    <target>HjÃ¤lpmedel</target>
     <definition>ikonen Accessibility</definition>
 </phrase>
 <phrase>
     <source>accessibility</source>
-    <target>tillgänglighet</target>
+    <target>tillgÃ¤nglighet</target>
 </phrase>
 <phrase>
     <source>action handle</source>
@@ -34,15 +34,15 @@
 </phrase>
 <phrase>
     <source>active window</source>
-    <target>aktivt fönster</target>
+    <target>aktivt fÃ¶nster</target>
 </phrase>
 <phrase>
     <source>adornment</source>
-    <target>fönsterfält</target>
+    <target>fÃ¶nsterfÃ¤lt</target>
 </phrase>
 <phrase>
     <source>Always on Top</source>
-    <target>Alltid överst</target>
+    <target>Alltid Ã¶verst</target>
 </phrase>
 <phrase>
     <source>anchor point</source>
@@ -50,7 +50,7 @@
 </phrase>
 <phrase>
     <source>Apply</source>
-    <target>Verkställ</target>
+    <target>VerkstÃ¤ll</target>
 </phrase>
 <phrase>
     <source>auto-exit</source>
@@ -62,7 +62,7 @@
 </phrase>
 <phrase>
     <source>automatic link</source>
-    <target>automatisk länk</target>
+    <target>automatisk lÃ¤nk</target>
 </phrase>
 <phrase>
     <source>automatic scrolling</source>
@@ -74,11 +74,11 @@
 </phrase>
 <phrase>
     <source>Back</source>
-    <target>Föregående</target>
+    <target>FÃ¶regÃ¥ende</target>
 </phrase>
 <phrase>
     <source>Browse</source>
-    <target>Bläddra</target>
+    <target>BlÃ¤ddra</target>
 </phrase>
 <phrase>
     <source>Cancel</source>
@@ -98,11 +98,11 @@
 </phrase>
 <phrase>
     <source>child window</source>
-    <target>underfönster</target>
+    <target>underfÃ¶nster</target>
 </phrase>
 <phrase>
     <source>choose</source>
-    <target>välj</target>
+    <target>vÃ¤lj</target>
 </phrase>
 <phrase>
     <source>click</source>
@@ -114,11 +114,11 @@
 </phrase>
 <phrase>
     <source>Close</source>
-    <target>Stäng</target>
+    <target>StÃ¤ng</target>
 </phrase>
 <phrase>
     <source>Close button</source>
-    <target>stängningsknapp</target>
+    <target>stÃ¤ngningsknapp</target>
 </phrase>
 <phrase>
     <source>collapse</source>
@@ -140,11 +140,11 @@
 </phrase>
 <phrase>
     <source>container</source>
-    <target>behållare</target>
+    <target>behÃ¥llare</target>
 </phrase>
 <phrase>
     <source>context-sensitive Help</source>
-    <target>sammanhangsberoende hjälp</target>
+    <target>sammanhangsberoende hjÃ¤lp</target>
 </phrase>
 <phrase>
     <source>contextual</source>
@@ -164,11 +164,11 @@
 </phrase>
 <phrase>
     <source>Create Shortcut</source>
-    <target>Skapa genväg</target>
+    <target>Skapa genvÃ¤g</target>
 </phrase>
 <phrase>
     <source>Create Shortcut Here</source>
-    <target>Skapa genväg här</target>
+    <target>Skapa genvÃ¤g hÃ¤r</target>
 </phrase>
 <phrase>
     <source>Cut</source>
@@ -192,7 +192,7 @@
 </phrase>
 <phrase>
     <source>destination</source>
-    <target>mål</target>
+    <target>mÃ¥l</target>
 </phrase>
 <phrase>
     <source>dialog box</source>
@@ -200,11 +200,11 @@
 </phrase>
 <phrase>
     <source>disability</source>
-    <target>oförmåga</target>
+    <target>ofÃ¶rmÃ¥ga</target>
 </phrase>
 <phrase>
     <source>disjoint selection</source>
-    <target>osammanhängande markering</target>
+    <target>osammanhÃ¤ngande markering</target>
 </phrase>
 <phrase>
     <source>dock</source>
@@ -216,7 +216,7 @@
 </phrase>
 <phrase>
     <source>double-click</source>
-    <target>dubbelklicka på</target>
+    <target>dubbelklicka pÃ¥</target>
 </phrase>
 <phrase>
     <source>drag</source>
@@ -224,7 +224,7 @@
 </phrase>
 <phrase>
     <source>drag-and-drop</source>
-    <target>dra och släpp</target>
+    <target>dra och slÃ¤pp</target>
 </phrase>
 <phrase>
     <source>drop-down combo box</source>
@@ -248,7 +248,7 @@
 </phrase>
 <phrase>
     <source>embedded object</source>
-    <target>inbäddat objekt</target>
+    <target>inbÃ¤ddat objekt</target>
 </phrase>
 <phrase>
     <source>Exit</source>
@@ -265,11 +265,11 @@
 </phrase>
 <phrase>
     <source>extended selection</source>
-    <target>utökad markering</target>
+    <target>utÃ¶kad markering</target>
 </phrase>
 <phrase>
     <source>extended selection list box</source>
-    <target>listruta för utökad markering</target>
+    <target>listruta fÃ¶r utÃ¶kad markering</target>
 </phrase>
 <phrase>
     <source>File</source>
@@ -282,15 +282,15 @@
 </phrase>
 <phrase>
     <source>Find</source>
-    <target>Sök</target>
+    <target>SÃ¶k</target>
 </phrase>
 <phrase>
     <source>Find Next</source>
-    <target>Sök nästa</target>
+    <target>SÃ¶k nÃ¤sta</target>
 </phrase>
 <phrase>
     <source>Find What</source>
-    <target>Sök efter</target>
+    <target>SÃ¶k efter</target>
 </phrase>
 <phrase>
     <source>folder</source>
@@ -322,11 +322,11 @@
 </phrase>
 <phrase>
     <source>Help</source>
-    <target>Hjälp</target>
+    <target>HjÃ¤lp</target>
 </phrase>
 <phrase>
     <source>Hide</source>
-    <target>Dölj</target>
+    <target>DÃ¶lj</target>
 </phrase>
 <phrase>
     <source>hierarchical selection</source>
@@ -334,7 +334,7 @@
 </phrase>
 <phrase>
     <source>hold</source>
-    <target>hålla ned</target>
+    <target>hÃ¥lla ned</target>
 </phrase>
 <phrase>
     <source>hot spot</source>
@@ -354,7 +354,7 @@
 </phrase>
 <phrase>
     <source>inactive window</source>
-    <target>inaktivt fönster</target>
+    <target>inaktivt fÃ¶nster</target>
 </phrase>
 <phrase>
     <source>input focus</source>
@@ -370,7 +370,7 @@
 </phrase>
 <phrase>
     <source>insertion point</source>
-    <target>insättningspunkt</target>
+    <target>insÃ¤ttningspunkt</target>
 </phrase>
 <phrase>
     <source>italic</source>
@@ -386,17 +386,17 @@
 </phrase>
 <phrase>
     <source>link</source>
-    <target>länk</target>
+    <target>lÃ¤nk</target>
     <definition>noun</definition>
 </phrase>
 <phrase>
     <source>link</source>
-    <target>länka</target>
+    <target>lÃ¤nka</target>
     <definition>verb</definition>
 </phrase>
 <phrase>
     <source>Link Here</source>
-    <target>Länka hit</target>
+    <target>LÃ¤nka hit</target>
 </phrase>
 <phrase>
     <source>list box</source>
@@ -409,7 +409,7 @@
 </phrase>
 <phrase>
     <source>manual link</source>
-    <target>manuell länk</target>
+    <target>manuell lÃ¤nk</target>
 </phrase>
 <phrase>
     <source>Maximize</source>
@@ -457,7 +457,7 @@
 </phrase>
 <phrase>
     <source>mixed-value</source>
-    <target>blandvärde</target>
+    <target>blandvÃ¤rde</target>
 </phrase>
 <phrase>
     <source>modal</source>
@@ -465,7 +465,7 @@
 </phrase>
 <phrase>
     <source>mode</source>
-    <target>läge</target>
+    <target>lÃ¤ge</target>
 </phrase>
 <phrase>
     <source>modeless</source>
@@ -473,7 +473,7 @@
 </phrase>
 <phrase>
     <source>modifier key</source>
-    <target>ändringstangent</target>
+    <target>Ã¤ndringstangent</target>
 </phrase>
 <phrase>
     <source>mouse</source>
@@ -493,16 +493,16 @@
 </phrase>
 <phrase>
     <source>multiple selection list box</source>
-    <target>listruta för multipel markering</target>
+    <target>listruta fÃ¶r multipel markering</target>
 </phrase>
 <phrase>
     <source>My Computer</source>
-    <target>Den här datorn</target>
+    <target>Den hÃ¤r datorn</target>
     <definition>icon</definition>
 </phrase>
 <phrase>
     <source>Network Neighborhood</source>
-    <target>Nätverket</target>
+    <target>NÃ¤tverket</target>
     <definition>icon</definition>
 </phrase>
 <phrase>
@@ -515,7 +515,7 @@
 </phrase>
 <phrase>
     <source>Next</source>
-    <target>Nästa</target>
+    <target>NÃ¤sta</target>
 </phrase>
 <phrase>
     <source>object</source>
@@ -531,27 +531,27 @@
 </phrase>
 <phrase>
     <source>OLE drag and drop</source>
-    <target>dra och släpp (OLE)</target>
+    <target>dra och slÃ¤pp (OLE)</target>
 </phrase>
 <phrase>
     <source>OLE embedded object</source>
-    <target>inbäddat objekt (OLE)</target>
+    <target>inbÃ¤ddat objekt (OLE)</target>
 </phrase>
 <phrase>
     <source>OLE linked object</source>
-    <target>länkat objekt (OLE)</target>
+    <target>lÃ¤nkat objekt (OLE)</target>
 </phrase>
 <phrase>
     <source>OLE nondefault drag and drop</source>
-    <target>utökat drag och släpp (OLE)</target>
+    <target>utÃ¶kat drag och slÃ¤pp (OLE)</target>
 </phrase>
 <phrase>
     <source>Open</source>
-    <target>Öppna</target>
+    <target>Ãppna</target>
 </phrase>
 <phrase>
     <source>Open With</source>
-    <target>Öppna med</target>
+    <target>Ãppna med</target>
 </phrase>
 <phrase>
     <source>option button</source>
@@ -571,19 +571,19 @@
 </phrase>
 <phrase>
     <source>palette window</source>
-    <target>palettfönster</target>
+    <target>palettfÃ¶nster</target>
 </phrase>
 <phrase>
     <source>pane</source>
-    <target>fönsterruta</target>
+    <target>fÃ¶nsterruta</target>
 </phrase>
 <phrase>
     <source>parent window</source>
-    <target>moderfönster</target>
+    <target>moderfÃ¶nster</target>
 </phrase>
 <phrase>
     <source>password</source>
-    <target>lösenord</target>
+    <target>lÃ¶senord</target>
 </phrase>
 <phrase>
     <source>Paste</source>
@@ -591,11 +591,11 @@
 </phrase>
 <phrase>
     <source>Paste Link</source>
-    <target>Klistra in länk</target>
+    <target>Klistra in lÃ¤nk</target>
 </phrase>
 <phrase>
     <source>Paste Shortcut</source>
-    <target>Klistra in genväg</target>
+    <target>Klistra in genvÃ¤g</target>
 </phrase>
 <phrase>
     <source>Paste Special</source>
@@ -603,7 +603,7 @@
 </phrase>
 <phrase>
     <source>path</source>
-    <target>sökväg</target>
+    <target>sÃ¶kvÃ¤g</target>
 </phrase>
 <phrase>
     <source>Pause</source>
@@ -631,29 +631,29 @@
 </phrase>
 <phrase>
     <source>pop-up window</source>
-    <target>pop up-fönster</target>
+    <target>pop up-fÃ¶nster</target>
 </phrase>
 <phrase>
     <source>portrait</source>
-    <target>stående</target>
+    <target>stÃ¥ende</target>
 </phrase>
 <phrase>
     <source>press</source>
-    <target>håll ned</target>
+    <target>hÃ¥ll ned</target>
     <definition>and hold a mouse button</definition>
 </phrase>
 <phrase>
     <source>press</source>
-    <target>tryck på</target>
+    <target>tryck pÃ¥</target>
     <definition>a key</definition>
 </phrase>
 <phrase>
     <source>primary container</source>
-    <target>primär behållare</target>
+    <target>primÃ¤r behÃ¥llare</target>
 </phrase>
 <phrase>
     <source>primary window</source>
-    <target>primärt fönster</target>
+    <target>primÃ¤rt fÃ¶nster</target>
 </phrase>
 <phrase>
     <source>Print</source>
@@ -665,7 +665,7 @@
 </phrase>
 <phrase>
     <source>progress indicator</source>
-    <target>förloppsindikator</target>
+    <target>fÃ¶rloppsindikator</target>
     <definition>control</definition>
 </phrase>
 <phrase>
@@ -686,11 +686,11 @@
 </phrase>
 <phrase>
     <source>property sheet</source>
-    <target>egenskapsförteckning</target>
+    <target>egenskapsfÃ¶rteckning</target>
 </phrase>
 <phrase>
     <source>property sheet control</source>
-    <target>kontroll i egenskapsförteckning</target>
+    <target>kontroll i egenskapsfÃ¶rteckning</target>
 </phrase>
 <phrase>
     <source>Quick View</source>
@@ -707,11 +707,11 @@
 </phrase>
 <phrase>
     <source>Redo</source>
-    <target>Gör om</target>
+    <target>GÃ¶r om</target>
 </phrase>
 <phrase>
     <source>region selection</source>
-    <target>områdesmarkering</target>
+    <target>omrÃ¥desmarkering</target>
 </phrase>
 <phrase>
     <source>registry</source>
@@ -723,23 +723,23 @@
 </phrase>
 <phrase>
     <source>Replace</source>
-    <target>Ersätt</target>
+    <target>ErsÃ¤tt</target>
 </phrase>
 <phrase>
     <source>Restore</source>
-    <target>Återställ</target>
+    <target>ÃterstÃ¤ll</target>
 </phrase>
 <phrase>
     <source>Restore button</source>
-    <target>knappen Återställ</target>
+    <target>knappen ÃterstÃ¤ll</target>
 </phrase>
 <phrase>
     <source>Resume</source>
-    <target>Fortsätt</target>
+    <target>FortsÃ¤tt</target>
 </phrase>
 <phrase>
     <source>Retry</source>
-    <target>Försök igen</target>
+    <target>FÃ¶rsÃ¶k igen</target>
 </phrase>
 <phrase>
     <source>rich-text box</source>
@@ -747,7 +747,7 @@
 </phrase>
 <phrase>
     <source>Run</source>
-    <target>Kör</target>
+    <target>KÃ¶r</target>
 </phrase>
 <phrase>
     <source>Save</source>
@@ -775,7 +775,7 @@
 </phrase>
 <phrase>
     <source>secondary window</source>
-    <target>sekundärt fönster</target>
+    <target>sekundÃ¤rt fÃ¶nster</target>
 </phrase>
 <phrase>
     <source>select</source>
@@ -799,11 +799,11 @@
 </phrase>
 <phrase>
     <source>separator</source>
-    <target>avgränsare</target>
+    <target>avgrÃ¤nsare</target>
 </phrase>
 <phrase>
     <source>Settings</source>
-    <target>Inställningar</target>
+    <target>InstÃ¤llningar</target>
 </phrase>
 <phrase>
     <source>Setup</source>
@@ -811,19 +811,19 @@
 </phrase>
 <phrase>
     <source>Setup</source>
-    <target>Inställningar</target>
+    <target>InstÃ¤llningar</target>
 </phrase>
 <phrase>
     <source>shortcut</source>
-    <target>genväg</target>
+    <target>genvÃ¤g</target>
 </phrase>
 <phrase>
     <source>shortcut button</source>
-    <target>genvägsknapp</target>
+    <target>genvÃ¤gsknapp</target>
 </phrase>
 <phrase>
     <source>shortcut icon</source>
-    <target>genvägsikon</target>
+    <target>genvÃ¤gsikon</target>
 </phrase>
 <phrase>
     <source>shortcut key</source>
@@ -843,11 +843,11 @@
 </phrase>
 <phrase>
     <source>single selection list box</source>
-    <target>listruta för enkel markering</target>
+    <target>listruta fÃ¶r enkel markering</target>
 </phrase>
 <phrase>
     <source>Size</source>
-    <target>Ändra storlek</target>
+    <target>Ãndra storlek</target>
 </phrase>
 <phrase>
     <source>Size</source>
@@ -887,7 +887,7 @@
 </phrase>
 <phrase>
     <source>status bar</source>
-    <target>statusfält</target>
+    <target>statusfÃ¤lt</target>
 </phrase>
 <phrase>
     <source>Stop</source>
@@ -899,11 +899,11 @@
 </phrase>
 <phrase>
     <source>task bar</source>
-    <target>Aktivitetsfältet</target>
+    <target>AktivitetsfÃ¤ltet</target>
 </phrase>
 <phrase>
     <source>task-oriented Help</source>
-    <target>aktivitetsberoende hjälp</target>
+    <target>aktivitetsberoende hjÃ¤lp</target>
 </phrase>
 <phrase>
     <source>template</source>
@@ -923,11 +923,11 @@
 </phrase>
 <phrase>
     <source>toggle key</source>
-    <target>växlingstangent</target>
+    <target>vÃ¤xlingstangent</target>
 </phrase>
 <phrase>
     <source>toolbar</source>
-    <target>verktygsfält</target>
+    <target>verktygsfÃ¤lt</target>
 </phrase>
 <phrase>
     <source>tooltip</source>
@@ -935,7 +935,7 @@
 </phrase>
 <phrase>
     <source>tree view control</source>
-    <target>trädkontroll</target>
+    <target>trÃ¤dkontroll</target>
 </phrase>
 <phrase>
     <source>type</source>
@@ -949,11 +949,11 @@
 </phrase>
 <phrase>
     <source>unavailable</source>
-    <target>ej tillgänglig</target>
+    <target>ej tillgÃ¤nglig</target>
 </phrase>
 <phrase>
     <source>Undo</source>
-    <target>Ångra</target>
+    <target>Ãngra</target>
 </phrase>
 <phrase>
     <source>Uninstall</source>
@@ -973,15 +973,15 @@
 </phrase>
 <phrase>
     <source>What&apos;s This?</source>
-    <target>Förklaring</target>
+    <target>FÃ¶rklaring</target>
 </phrase>
 <phrase>
     <source>Window</source>
-    <target>Fönster-meny</target>
+    <target>FÃ¶nster-meny</target>
 </phrase>
 <phrase>
     <source>window</source>
-    <target>fönster</target>
+    <target>fÃ¶nster</target>
 </phrase>
 <phrase>
     <source>Windows Explorer</source>
@@ -996,15 +996,4 @@
     <target>arbetsbok</target>
 </phrase>
 <phrase>
-    <source>workgroup</source>
-    <target>arbetsgrupp</target>
-</phrase>
-<phrase>
-    <source>workspace</source>
-    <target>arbetsyta</target>
-</phrase>
-<phrase>
-    <source>Yes</source>
-    <target>Ja</target>
-</phrase>
-</QPH>
+    <source>wo

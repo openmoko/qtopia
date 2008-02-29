@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QTaskDelegate Class Reference</h1>
 <p>The QTaskDelegate class provides drawing of <a href="qtaskmodel.html">QTaskModel</a> items (<a href="qtask.html">QTasks</a>). <a href="#details">More...</a></p>
-<pre>    #include &lt;QTaskDelegate&gt;</pre><p>Inherits <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>.</p>
+<pre>    #include &lt;QTaskDelegate&gt;</pre><p>Inherits <a href="qpimdelegate.html">QPimDelegate</a>.</p>
 <ul>
 <li><a href="qtaskdelegate-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -24,18 +24,21 @@
 <li><div class="fn"/>virtual <b><a href="qtaskdelegate.html#dtor.QTaskDelegate">~QTaskDelegate</a></b> ()</li>
 </ul>
 <ul>
+<li><div class="fn"/>2 public functions inherited from <a href="qpimdelegate.html#public-functions">QPimDelegate</a></li>
 <li><div class="fn"/>7 public functions inherited from <a href="qabstractitemdelegate.html#public-functions">QAbstractItemDelegate</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qabstractitemdelegate.html#public-slots">QAbstractItemDelegate</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>2 signals inherited from <a href="qabstractitemdelegate.html#signals">QAbstractItemDelegate</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>1 static public member inherited from <a href="qabstractitemdelegate.html#static-public-members">QAbstractItemDelegate</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>14 protected functions inherited from <a href="qpimdelegate.html#protected-functions">QPimDelegate</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 <li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
@@ -47,7 +50,7 @@
 <p>By using QTaskDelegate, applications using QTasks can achieve a consistent look and feel.</p>
 <p>The tasks are presented by rendering their <a href="qtask.html#description">description()</a> in bold text. Generally, this class will be used with a <a href="qtasklistview.html">QTaskListView</a> or other similar list view.</p>
 <p>The following image shows three <a href="qtask.html">QTask</a> objects, rendered using a QTaskDelegate and a <a href="qtasklistview.html">QTaskListView</a>:</p>
-<p align="center"><img src="images/qtaskview.png" alt="&quot;QTaskListView and QTaskDelegate&quot;" /></p><p>See also <a href="qtask.html">QTask</a>, <a href="qtasklistview.html">QTaskListView</a>, and <a href="qtaskmodel.html">QTaskModel</a>.</p>
+<p align="center"><img src="images/qtaskview.png" alt="&quot;QTaskListView and QTaskDelegate&quot;" /></p><p>See also <a href="qtask.html">QTask</a>, <a href="qtasklistview.html">QTaskListView</a>, <a href="qtaskmodel.html">QTaskModel</a>, and <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QTaskDelegate"></a>QTaskDelegate::QTaskDelegate ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -58,6 +61,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

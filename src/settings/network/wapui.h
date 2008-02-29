@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,7 +24,6 @@
 class QAction;
 class QLabel;
 class QListWidget;
-class QPushButton;
 
 #include <QWidget>
 
@@ -56,16 +55,9 @@ private:
 
     QListWidget* wapList;
     QLabel* dfltAccount;
-#ifdef QTOPIA_PHONE
     QAction* wap_add;
     QAction* wap_remove;
     QAction* wap_props;
-#else
-    QPushButton* defaultPB;
-    QPushButton* propPB;
-    QPushButton* addPB;
-    QPushButton* removePB;
-#endif
 
     friend class NetworkUI;
 };

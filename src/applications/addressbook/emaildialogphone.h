@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,33 +23,20 @@
 #define EMAILDIALOGPHONE_H
 
 #include <QListWidget>
-
-#include <qdialog.h>
-#include <qstringlist.h>
-#include <qpixmap.h>
-#include <qlineedit.h>
+#include <QDialog>
+#include <QStringList>
+#include <QPixmap>
+#include <QLineEdit>
 
 class QAction;
+class QGroupBox;
 
 class EmailDialogList;
 class EmailDialogListItem : public QListWidgetItem
 {
     friend class EmailDialogList;
 public:
-    EmailDialogListItem( EmailDialogList *parent = 0);
-    EmailDialogListItem( EmailDialogList *parent, int after );
-
-    void setPixmap( const QPixmap &pix );
-    virtual const QPixmap *pixmap() const;
-
-    virtual int width( const QListWidget *lb ) const;
-    virtual int height( const QListWidget *lb ) const;
-protected:
-    void setText( const QString &txt );
-
-    virtual void paint( QPainter *p );
-private:
-    QPixmap mDefaultPix;
+    EmailDialogListItem( EmailDialogList *parent, const QString&, int after );
 };
 
 class EmailDialogList : public QListWidget
@@ -57,12 +44,15 @@ class EmailDialogList : public QListWidget
     friend class EmailLineEdit;
     Q_OBJECT
 public:
-    EmailDialogList( QWidget *parent );
+    EmailDialogList( QWidget *parent, bool readonly );
 
     void setEmails( const QString &def, const QStringList &em );
 
     QString defaultEmail() const;
     QStringList emails() const;
+
+signals:
+    void editItem();
 
 protected slots:
     void setCurrentText( const QString &t );
@@ -70,14 +60,19 @@ protected slots:
     void newEmail( const QString &email );
     void deleteEmail();
     void setAsDefault();
+    void editItem(QListWidgetItem* i);
+    void updateMenus();
 
     void moveUp();
     void moveDown();
 
 private:
-    QPixmap mDefaultPix;
-    QPixmap mNormalPix;
+    QIcon mDefaultPix;
+    QIcon mNormalPix;
     int mDefaultIndex;
+    QAction *mSetDefaultAction, *mDeleteAction, *mNewAction;
+    bool readonly;
+    QListWidgetItem *newItemItem;
 };
 
 class EmailLineEdit : public QLineEdit
@@ -99,16 +94,13 @@ protected slots:
 
 protected:
     void keyPressEvent( QKeyEvent *ke );
-
-private:
-    QAction *mSetDefaultAction, *mDeleteAction, *mNewAction;
 };
 
 class EmailDialog : public QDialog
 {
     Q_OBJECT
 public:
-    EmailDialog( QWidget *parent, const char *name = 0, bool modal = false, Qt::WFlags fl = 0 );
+    EmailDialog( QWidget *parent, bool readonly = false);
     ~EmailDialog();
 
     void setEmails(const QString &def, const QStringList &em);
@@ -116,12 +108,20 @@ public:
     QString defaultEmail() const;
     QStringList emails() const;
 
+    QString selectedEmail() const;
 protected:
     void showEvent( QShowEvent *e );
+    bool eventFilter( QObject *o, QEvent *e );
+
+protected slots:
+    void currentChanged( QListWidgetItem* current );
+    void edit();
 
 private:
     EmailDialogList *mList;
+    QGroupBox *mEditBox;
     EmailLineEdit *mEdit;
+    QString mSelected;
 };
 
 #endif // EMAILDIALOGPHONE_H

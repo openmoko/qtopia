@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,9 +43,8 @@
 #include <GLES/gl.h>
 #include <qdirectpainter_qws.h>
 
-#include <qscreen_qws.h>
-
-#include <private/qwindowsurface_qws_p.h>
+#include <qglscreen_qws.h>
+#include <private/qglwindowsurface_qws_p.h>
 
 #endif
 #include <private/qbackingstore_p.h>
@@ -49,8 +63,15 @@
 
 #define Q_USE_QEGL
 //#define Q_USE_DIRECTPAINTER
+
+// this one for full QScreen implemented using EGL/GLES:
+//#define Q_USE_EGLWINDOWSURFACE
 #ifdef Q_USE_QEGL
 #include "qegl_qws_p.h"
+
+#ifdef Q_USE_EGLWINDOWSURFACE
+#include "private/qglwindowsurface_qws_p.h"
+#endif
 #endif
 
 /*****************************************************************************
@@ -66,27 +87,32 @@ bool QGLFormat::hasOpenGL()
 
 bool QGLFormat::hasOpenGLOverlays()
 {
+#ifdef Q_USE_EGLWINDOWSURFACE
+    return false;
+#else
     return true;
+#endif
 }
 
-#define QT_EGL_CHECK(x) \
-    if (!(x)) { \
-        EGLint err = eglGetError(); \
+#define QT_EGL_CHECK(x)                          \
+    if (!(x)) {                                  \
+        EGLint err = eglGetError();              \
         printf("egl " #x " failure %x!\n", err); \
-    } \
+    }                                            \
 
-#define QT_EGL_ERR(txt) \
-    do { \
-        EGLint err = eglGetError(); \
-        if (err != EGL_SUCCESS) \
+#define QT_EGL_ERR(txt)                         \
+    do {                                        \
+        EGLint err = eglGetError();             \
+        if (err != EGL_SUCCESS)                 \
             printf( txt " failure %x!\n", err); \
     } while (0)
 
 
 #define QT_EGL_CHECK_ATTR(attr, val)     success = eglGetConfigAttrib(dpy, config, attr, &value); \
-    if (!success || value != val) \
+    if (!success || value != val)                                       \
         return false
 
+#if defined(Q_USE_QEGL) && !defined(Q_USE_EGLWINDOWSURFACE)
 static bool checkConfig(EGLDisplay dpy, EGLConfig config, int r, int g, int b, int a)
 {
     EGLint value;
@@ -97,9 +123,17 @@ static bool checkConfig(EGLDisplay dpy, EGLConfig config, int r, int g, int b, i
     QT_EGL_CHECK_ATTR(EGL_ALPHA_SIZE, a);
     return true;
 }
+#endif
 
 bool QGLContext::chooseContext(const QGLContext* shareContext)
 {
+#ifdef Q_USE_EGLWINDOWSURFACE
+    // EGL Only works if drawable is a QGLWidget. QGLPixelBuffer not supported
+    if (device() && device()->devType() == QInternal::Widget)
+        return static_cast<QGLScreen*>(QScreen::instance())->chooseContext(this, shareContext);
+    else
+        return false;
+#else
     Q_D(QGLContext);
     d->cx = 0;
 
@@ -289,6 +323,7 @@ bool QGLContext::chooseContext(const QGLContext* shareContext)
     if (!d->surface)
         return false;
     return true;
+#endif
 }
 
 
@@ -297,10 +332,13 @@ void QGLContext::reset()
     Q_D(QGLContext);
     if (!d->valid)
         return;
+    doneCurrent();
+#ifndef Q_USE_EGLWINDOWSURFACE
     if (d->cx)
         eglDestroyContext(d->dpy, d->cx);
-    d->cx = 0;
     d->crWin = false;
+#endif
+    d->cx = 0;
     d->sharing = false;
     d->valid = false;
     d->transpColor = QColor();
@@ -316,29 +354,51 @@ void QGLContext::makeCurrent()
         return;
     }
 
+#ifndef Q_USE_EGLWINDOWSURFACE
     bool ok = eglMakeCurrent(d->dpy, d->surface, d->surface, d->cx);
     if (!ok) {
         EGLint err = eglGetError();
         qWarning("QGLContext::makeCurrent(): Failed %x.", err);
     }
     if (ok) {
+#endif
         if (!qgl_context_storage.hasLocalData() && QThread::currentThread())
             qgl_context_storage.setLocalData(new QGLThreadContext);
         if (qgl_context_storage.hasLocalData())
             qgl_context_storage.localData()->context = this;
         currentCtx = this;
+#ifndef Q_USE_EGLWINDOWSURFACE
     }
+#else
+#if 0
+    if (device()->devType() == QInternal::Widget) {
+        // EGL Only works if drawable is a QGLWidget. QGLFramebufferObject, QGLPixelBuffer not supported
+        static_cast<QGLWidget*>(device())->d_func()->wsurf->beginPaint(QRegion());
+    }
+#endif
+#endif
 }
 
 void QGLContext::doneCurrent()
 {
+#ifndef Q_USE_EGLWINDOWSURFACE
     Q_D(QGLContext);
     eglMakeCurrent(d->dpy, d->surface, d->surface, 0);
+#endif
 
     QT_EGL_ERR("QGLContext::doneCurrent");
     if (qgl_context_storage.hasLocalData())
         qgl_context_storage.localData()->context = 0;
     currentCtx = 0;
+
+#if 0
+#ifdef Q_USE_EGLWINDOWSURFACE
+    if (device()->devType() == QInternal::Widget) {
+        // EGL Only works if drawable is a QGLWidget, QGLFramebufferObject, QGLPixelBuffer not supported
+        static_cast<QGLWidget*>(device())->d_func()->wsurf->endPaint(QRegion());
+    }
+#endif
+#endif
 }
 
 
@@ -347,7 +407,15 @@ void QGLContext::swapBuffers() const
     Q_D(const QGLContext);
     if(!d->valid)
         return;
+#ifndef Q_USE_EGLWINDOWSURFACE
     eglSwapBuffers(d->dpy, d->surface);
+#else
+    if (device()->devType() == QInternal::Widget) {
+        // EGL Only works if drawable is a QGLWidget, QGLPixelBuffer not supported
+        QGLWidget *widget = static_cast<QGLWidget*>(device());
+        widget->d_func()->wsurf->flush(widget, widget->frameGeometry(), QPoint());
+    }
+#endif
     QT_EGL_ERR("QGLContext::swapBuffers");
 }
 
@@ -356,14 +424,17 @@ QColor QGLContext::overlayTransparentColor() const
     return QColor(0, 0, 0);                // Invalid color
 }
 
-uint QGLContext::colorIndex(const QColor&c) const
+uint QGLContext::colorIndex(const QColor &c) const
 {
     //### color index doesn't work on egl
+    Q_UNUSED(c);
     return 0;
 }
 
 void QGLContext::generateFontDisplayLists(const QFont & fnt, int listBase)
 {
+    Q_UNUSED(fnt);
+    Q_UNUSED(listBase);
 }
 
 void *QGLContext::getProcAddress(const QString &proc) const
@@ -475,7 +546,11 @@ void QGLWidgetPrivate::resizeHandler(const QSize &s)
     q->makeCurrent();
     if (!glcx->initialized())
         q->glInit();
+
+#ifndef Q_USE_EGLWINDOWSURFACE
     eglWaitNative(EGL_CORE_NATIVE_ENGINE);
+#endif
+
     QT_EGL_ERR("QGLWidgetPrivate::resizeHandler");
 
     q->resizeGL(s.width(), s.height());
@@ -487,6 +562,10 @@ bool QGLWidget::event(QEvent *e)
     if (e->type() == QEvent::Paint)
         return true; // We don't paint when the GL widget needs to be painted, but when the directpainter does
 #endif
+#ifdef Q_USE_EGLWINDOWSURFACE
+    return QWidget::event(e); // for EGL/GLES windowsurface do nothing in ::event()
+#else
+
 #ifndef Q_USE_DIRECTPAINTER
     if (e->type() == QEvent::Paint) {
         Q_D(QGLWidget);
@@ -518,6 +597,7 @@ bool QGLWidget::event(QEvent *e)
         }
 
     }
+#endif
 #endif
     return QWidget::event(e);
 }
@@ -580,7 +660,14 @@ void QGLWidget::setContext(QGLContext *context, const QGLContext* shareContext, 
 void QGLWidgetPrivate::init(QGLContext *context, const QGLWidget* shareWidget)
 {
     Q_Q(QGLWidget);
+
     directPainter = 0;
+
+#ifdef Q_USE_EGLWINDOWSURFACE
+    wsurf = static_cast<QWSGLWindowSurface*>(QScreen::instance()->createSurface(q));
+    q->setWindowSurface(wsurf);
+#endif
+
     initContext(context, shareWidget);
 
     if(q->isValid() && glcx->format().hasOverlay()) {

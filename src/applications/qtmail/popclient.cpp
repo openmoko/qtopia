@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,91 +20,32 @@
 ****************************************************************************/
 
 #include "popclient.h"
-#include "emailhandler.h"
-#include "common.h"
-#include "longstream.h"
+
 #include <qtopialog.h>
+
+#include "mailtransport.h"
+#include "emailhandler.h"
+#include <longstream_p.h>
 
 PopClient::PopClient()
 {
-#ifndef SMTPAUTH
-    createSocket();
-#else
-    secureSocket = 0;
-    socket = 0;
-    stream = 0;
-#endif
     receiving = false;
     headerLimit = 0;
     preview = false;
+    transport = 0;
     d = new LongStream();
 }
 
 PopClient::~PopClient()
 {
     delete d;
-    delete stream;
-    delete socket;
+    delete transport;
 }
-
-void PopClient::createSocket()
-{
-#ifdef SMTPAUTH
-    if (account->mailEncryption() != MailAccount::Encrypt_NONE) {
-        if (secureSocket)
-            return;
-        secureSocket = new QtSslSocket(QtSslSocket::Client, this);
-        secureSocket->setReadBufferSize( 65536 );
-        secureSocket->setObjectName("popClient-secure");
-        secureSocket->setPathToCACertDir(QtMail::sslCertsPath());
-        connect(secureSocket,SIGNAL(connectionVerificationDone(QtSslSocket::VerifyResult,bool,const QString&)),
-                SLOT(certCheckDone(QtSslSocket::VerifyResult,bool,const QString&)));
-        if (socket) {
-            delete stream;
-            socket->deleteLater();
-        }
-        socket = secureSocket;
-    } else {
-        if (secureSocket) {
-            secureSocket->deleteLater();
-            delete stream;
-            secureSocket = 0;
-            socket = 0;
-        }
-        if (socket)
-            return;
-        socket = new QTcpSocket(this);
-        socket->setReadBufferSize( 65536 );
-        socket->setObjectName("popClient");
-    }
-#else
-    socket = new QTcpSocket(this);
-    socket->setReadBufferSize( 65536 );
-    socket->setObjectName("popClient");
-#endif
-    connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
-            SLOT(socketError(QAbstractSocket::SocketError)));
-    connect(socket, SIGNAL(connected()), this, SLOT(connectionEstablished()));
-    connect(socket, SIGNAL(readyRead()), this, SLOT(incomingData()));
-    stream = new QTextStream(socket);
-    stream->setCodec("UTF-8");
-}
-
-#ifdef SMTPAUTH
-void PopClient::certCheckDone(QtSslSocket::VerifyResult result, bool hostnameMatch, const QString& msg)
-{
-    Q_UNUSED(hostnameMatch)
-    if(result == QtSslSocket::VerifyOk)
-        return;
-    qWarning(("SSL cert check failed: " + msg).toLatin1());
-    errorHandling(ErrLoginFailed, "");
-}
-#endif
 
 void PopClient::newConnection()
 {
     if (receiving) {
-        qWarning("socket in use, connection refused");
+        qWarning("transport in use, connection refused");
         return;
     }
 
@@ -113,10 +54,6 @@ void PopClient::newConnection()
         emit mailTransferred(0);
         return;
     }
-
-#ifdef SMTPAUTH
-    createSocket();
-#endif
 
     status = Init;
     uidlList.clear();
@@ -129,11 +66,22 @@ void PopClient::newConnection()
     newMessages = 0;
     mailDropSize = 0;
     messageCount = 0;
-    internalId = QUuid();
+    internalId = QMailId();
     deleteList.clear();
 
-    emit updateStatus(tr("DNS lookup"));
-    socket->connectToHost(account->mailServer(), account->mailPort() );
+    if (!transport) {
+        // Set up the transport
+        transport = new MailTransport("POP");
+
+        connect(transport, SIGNAL(updateStatus(QString)),
+                this, SIGNAL(updateStatus(QString)));
+        connect(transport, SIGNAL(errorOccurred(int,QString)),
+                this, SLOT(errorHandling(int,QString)));
+        connect(transport, SIGNAL(readyRead()),
+                this, SLOT(incomingData()));
+    }
+
+    transport->open(*account);
 }
 
 void PopClient::setAccount(MailAccount *_account)
@@ -163,37 +111,14 @@ void PopClient::setSelectedMails(MailList *list, bool connected)
     }
 }
 
-void PopClient::connectionEstablished()
-{
-#ifdef QTOPIA_PHONE
-    emit updateStatus(tr("Connected"));
-#else
-    emit updateStatus(tr("Connection established"));
-#endif
-#ifdef SMTPAUTH
-    if(secureSocket)
-        qLog(Messaging) << "PopClient: Secure connection established";
-#endif
-}
-
 void PopClient::errorHandling(int status, QString msg)
 {
     if ( receiving ) {
         receiving = false;
         account->setUidlList(lastUidl);
-        socket->close();
-        emit updateStatus(tr("Error occurred"));
+        transport->close();
         emit errorOccurred(status, msg);
     }
-}
-
-void PopClient::socketError(QAbstractSocket::SocketError status)
-{
-    QString msg = tr("Error occurred");
-    socket->close();
-    receiving = false;
-    emit updateStatus(tr("Error occurred"));
-    emit errorOccurred(static_cast<int>(status), msg);
 }
 
 void PopClient::quit()
@@ -206,24 +131,25 @@ void PopClient::quit()
     }
 }
 
-// new implementation, need to store uids etc..
 void PopClient::incomingData()
 {
     QString response, temp;
+    QTextStream& stream = transport->stream();
 
     if ( (status != Dele) && (status != Quit) )
-        response = socket->readLine();
+        response = transport->readLine();
 
     if (status == Init) {
         emit updateStatus(tr("Logging in"));
-        *stream << "USER " << account->mailUserName() << "\r\n" << flush;
+        stream.setCodec("UTF-8");
+        stream << "USER " << account->mailUserName() << "\r\n" << flush;
         status = Pass;
     } else if (status == Pass) {
         if (response[0] != '+') {
             errorHandling(ErrLoginFailed, "");
             return;
         }
-        *stream << "PASS " << account->mailPassword() << "\r\n" << flush;
+        stream << "PASS " << account->mailPassword() << "\r\n" << flush;
         status = Uidl;
     } else if (status == Uidl) {
         if (response[0] != '+') {
@@ -233,7 +159,7 @@ void PopClient::incomingData()
 
         status = Guidl;
         awaitingData = false;
-        *stream << "UIDL\r\n" << flush;
+        stream << "UIDL\r\n" << flush;
         return;
     } else if (status == Guidl) {           //get list of uidls
 
@@ -245,15 +171,15 @@ void PopClient::incomingData()
             }
 
             awaitingData = true;
-            if ( socket->canReadLine() ) {
-                response = socket->readLine();
+            if ( transport->canReadLine() ) {
+                response = transport->readLine();
             } else {
                 return;
             }
         }
         uidlList.append( response.mid(0, response.length() - 2) );
-        while ( socket->canReadLine() ) {
-            response = socket->readLine();
+        while ( transport->canReadLine() ) {
+            response = transport->readLine();
             uidlList.append( response.mid(0, response.length() - 2) );
         }
         if (response == ".\r\n") {
@@ -265,7 +191,7 @@ void PopClient::incomingData()
     }
 
     if (status == List) {
-        *stream << "LIST\r\n" << flush;
+        stream << "LIST\r\n" << flush;
         awaitingData = false;
         status = Size;
         return;
@@ -280,13 +206,13 @@ void PopClient::incomingData()
             }
 
             awaitingData = true;
-            if ( socket->canReadLine() )
-                response = socket->readLine();
+            if ( transport->canReadLine() )
+                response = transport->readLine();
             else return;
         }
         sizeList.append( response.mid(0, response.length() - 2) );
-        while ( socket->canReadLine() ) {
-            response = socket->readLine();
+        while ( transport->canReadLine() ) {
+            response = transport->readLine();
             sizeList.append( response.mid(0, response.length() - 2) );
         }
         if (response == ".\r\n") {
@@ -320,9 +246,9 @@ void PopClient::incomingData()
                 emit updateStatus(tr("Completing %1").arg(temp));
 
             if (!preview || mailSize <= headerLimit) {
-                *stream << "RETR " << msgNum << "\r\n" << flush;
+                stream << "RETR " << msgNum << "\r\n" << flush;
             } else {                                //only header
-                *stream << "TOP " << msgNum << " 0\r\n" << flush;
+                stream << "TOP " << msgNum << " 0\r\n" << flush;
             }
 
             status = Ignore;
@@ -337,28 +263,25 @@ void PopClient::incomingData()
             message = "";
             d->reset();
             status = Read;
-            if (!socket->canReadLine())    //sync. problems
+            if (!transport->canReadLine())    //sync. problems
                 return;
-            response = socket->readLine();
+            response = transport->readLine();
         } else errorHandling(ErrUnknownResponse, response);
     }
 
     if (status == Read) {
         message += response;
         QString rn = QString::fromLatin1( "\r\n" );
-        QString n = QString::fromLatin1( "\n" );
-        QtMail::replace( response, rn, n );
         d->append( response );
         if (d->status() == LongStream::OutOfSpace) {
             errorHandling(ErrFileSystemFull, LongStream::errorMessage( "\n" ));
             return;
         }
 
-        while ( socket->canReadLine()) {
-            response = socket->readLine();
+        while ( transport->canReadLine()) {
+            response = transport->readLine();
             message += response;
             message = message.right( 100 );
-            QtMail::replace( response, rn, n );
             d->append( response );
             if (d->status() == LongStream::OutOfSpace) {
                 errorHandling(ErrFileSystemFull, LongStream::errorMessage( "\n" ));
@@ -408,7 +331,7 @@ void PopClient::incomingData()
 
     if (status == Dele) {
         if ( awaitingData ) {
-            response = socket->readLine();
+            response = transport->readLine();
             if ( response[0] != '+' ) {
                 errorHandling(ErrUnknownResponse, response);
                 return;
@@ -429,7 +352,7 @@ void PopClient::incomingData()
             if ( !strPos.isEmpty() ) {
                 awaitingData = true;
                 qWarning(("deleting message at pos: " + strPos ).toAscii());
-                *stream << "DELE " << strPos << "\r\n" << flush;
+                stream << "DELE " << strPos << "\r\n" << flush;
             } else {
                 qWarning(("delete failed on message: " + str ).toAscii());
                 incomingData();
@@ -450,12 +373,12 @@ void PopClient::incomingData()
     if (status == Quit) {
         qWarning("quit sent");
         status = Exit;
-        *stream << "QUIT\r\n" << flush;
+        transport->stream() << "QUIT\r\n" << flush;
         return;
     }
 
     if (status == Exit) {
-        socket->close();        //close regardless
+        transport->close();        //close regardless
         receiving = false;
         emit updateStatus(tr("Communication finished"));
 
@@ -496,12 +419,12 @@ int PopClient::nextMsgServerPos()
     QString *mPtr;
 
     if (preview) {
-        if ( messageCount < (int) uniqueUidlList.count() ) {
+        if ( messageCount < uniqueUidlList.count() ) {
             const QString& it = uniqueUidlList.at(messageCount);
             messageCount++;
             thisMsg = ( it.left( it.indexOf(" ") ) ).toInt();
             msgUidl = it;
-            internalId = QUuid();
+            internalId = QMailId();
         }
     }
 
@@ -601,20 +524,31 @@ void PopClient::uidlIntegrityCheck()
 
 void PopClient::createMail()
 {
-    Email mail;
-    bool isComplete = ((!preview ) || ((preview) && (mailSize <= headerLimit)));
-    mail.setStatus(EFlag_Incoming, true );
-    mail.setUuid( internalId );
+    QMailMessage mail = QMailMessage::fromRfc2822File( d->fileName() );
+    mail.setId( internalId );
 
-    LongString ls( d->fileName(), false );
-    mail.fromRFC822( ls );
-    mail.setStatus(EFlag_Downloaded, isComplete);
+    bool isComplete = ((!preview ) || ((preview) && (mailSize <= headerLimit)));
+    mail.setStatus( QMailMessage::Incoming, true);
+    mail.setStatus( QMailMessage::Downloaded, isComplete );
+
     mail.setSize( mailSize );
     mail.setServerUid( msgUidl.mid( msgUidl.indexOf(" ") + 1, msgUidl.length() ) );
 
     mail.setFromAccount( account->id() );
-    mail.setType(MailMessage::Email);
+    mail.setMessageType(QMailMessage::Email);
     mail.setFromMailbox("");
     emit newMessage(mail);
     d->reset();
 }
+
+void PopClient::checkForNewMessages()
+{
+    // Don't implement this properly yet - emails are currently only DL'd on-demand
+    emit allMessagesReceived();
+}
+
+int PopClient::newMessageCount()
+{
+    return 0;
+}
+

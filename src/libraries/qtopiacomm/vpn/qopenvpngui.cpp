@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,12 +20,11 @@
 ****************************************************************************/
 
 #include "qopenvpngui_p.h"
-#include "qkey.h"
-
 
 #ifndef QTOPIA_NO_OPENVPN
 
 #include <QFontMetrics>
+#include <QPainter>
 #include <QSettings>
 #include <QDebug>
 
@@ -33,12 +32,13 @@
 #include <qtopiaapplication.h>
 #include <ipvalidator.h>
 
+#include <qsslcertificate.h>
+#include <qsslkey.h>
 /*!
   \internal
   \class GeneralOpenVPNPage
   \mainclass
   */
-
 GeneralOpenVPNPage::GeneralOpenVPNPage( QWidget* parent )
     : VPNConfigWidget( parent )
 {
@@ -111,26 +111,83 @@ CertificateOpenVPNPage::~CertificateOpenVPNPage()
 {
 }
 
-static QString certDescription( const QCertificate& cert )
+static QString certDescription( const QContent& c )
 {
-    if ( !cert.isValid() )
+#ifndef QT_NO_OPENSSL
+    QFile file( c.fileName() );
+    bool res = file.open(QIODevice::ReadOnly);
+    if ( !res ) 
         return CertificateOpenVPNPage::tr("Unknown certificate");
-    QKey pubKey = cert.publicKey();
-    QString result = CertificateOpenVPNPage::tr("%1 (%2, %3 bit)", "X509 (RSA, 1024 bit)");
-    result = result.arg(cert.certificateType()).arg(pubKey.algorithm()).arg(pubKey.keySize());
+        //return (c.name() + QLatin1String("<br>") + CertificateOpenVPNPage::tr("Unknown certificate"));
+
+    QSslCertificate cert( &file );
+    if ( cert.isNull() )
+        return CertificateOpenVPNPage::tr("Unknown certificate");
+        //return (c.name() + QLatin1String("<br>") + CertificateOpenVPNPage::tr("Unknown certificate"));
+    QString result = CertificateOpenVPNPage::tr("(%1, %2)", "e.g. %1=company %2=location");
+    result = result.arg( cert.issuerInfo( QSslCertificate::Organization )).
+        arg( cert.issuerInfo( QSslCertificate::LocalityName ));
     return result;
+#else
+    if ( c.isValid() )
+        return c.name();
+    else
+        return CertificateOpenVPNPage::tr("Invalid");
+#endif //QT_NO_OPENSSL
 }
 
-static QString keyDescription( const QKey& key )
+static QString keyDescription( const QContent& c )
 {
-    if ( key.type() == QKey::Unknown )
+#ifndef QT_NO_OPENSSL
+    QFile file( c.fileName() );
+    bool res = file.open(QIODevice::ReadOnly);
+    if ( !res )
+        return CertificateOpenVPNPage::tr("Unknown key");
+            
+    struct ParameterLookup {
+        QSsl::KeyAlgorithm alg;
+        QSsl::EncodingFormat enc;
+        QSsl::KeyType type;
+    }; 
+
+    static const int paramCombinations = 8;
+    static const ParameterLookup l[paramCombinations] = {
+        {QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey},
+        {QSsl::Dsa, QSsl::Pem, QSsl::PrivateKey},
+        {QSsl::Rsa, QSsl::Der, QSsl::PrivateKey},
+        {QSsl::Dsa, QSsl::Der, QSsl::PrivateKey},
+        {QSsl::Rsa, QSsl::Pem, QSsl::PublicKey},
+        {QSsl::Dsa, QSsl::Pem, QSsl::PublicKey},
+        {QSsl::Rsa, QSsl::Der, QSsl::PublicKey},
+        {QSsl::Dsa, QSsl::Der, QSsl::PublicKey},
+    }; 
+   
+    const ParameterLookup *iter = l;
+    QByteArray data = file.readAll();
+    QSslKey match;
+    for ( int i = 0; i<paramCombinations; i++ ) {
+        QSslKey k( data, iter->alg, iter->enc, iter->type );
+        if ( !k.isNull() ) {
+            match = k;
+            break;
+        }
+    }
+
+    if ( match.isNull() )
         return CertificateOpenVPNPage::tr( "Unknown key" );
-
-    QString result( CertificateOpenVPNPage::tr("%1, %2 bit", "RSA, 1024 bit") );
-    result = result.arg( key.algorithm() ).arg( key.keySize() );
+    
+    QString result( CertificateOpenVPNPage::tr("%1, %2 bit", "e.g.: RSA, 1024 bit") );
+    result = result.arg( match.algorithm() == QSsl::Rsa ? 
+            CertificateOpenVPNPage::tr("RSA") : CertificateOpenVPNPage::tr("DSA") );
+    result = result.arg( match.length() ) ;
     return result;
+#else
+    if ( c.isValid() )
+        return c.name();
+    else
+        return CertificateOpenVPNPage::tr("Invalid");
+#endif
 }
-
 
 void CertificateOpenVPNPage::init()
 {
@@ -150,23 +207,35 @@ void CertificateOpenVPNPage::init()
 
     static const short numButtons = 5;
     static const QString keys[numButtons] = { "Secret", "Certificate", "PrivKey", "CA", "TLSauth" };
-    QPushButton *const buttons[numButtons] = { ui.secretKey, ui.certKey, ui.privKey, ui.caKey, ui.authKey };
+    QToolButton *const buttons[numButtons] = { ui.secretKey, ui.certKey, ui.privKey, ui.caKey, ui.authKey };
     QLabel *const labels[numButtons] = {ui.secretLabel, ui.certLabel, ui.privLabel, ui.caLabel, ui.authLabel };
 
+    QIcon normal( ":icon/padlock");
+    QPixmap crossed( ":icon/padlock" );
+
+    QPainter p;
+    QPen pen( Qt::red );
+    pen.setWidth( 2 );
+    p.begin( &crossed );
+    p.setPen( pen );
+    p.drawLine( 0, 0, crossed.width(), crossed.height() ); 
+    p.drawLine( crossed.width(), 0, 0, crossed.height() ); 
+    p.end();
+    
     for (int i = 0; i< numButtons; ++i ) {
         temp = cfg.value( keys[i] ).toString();
+       
         QContent c( temp );
         toDocument.insert( buttons[i], c );
         if ( !c.isValid( true ) ) {
-            buttons[i]->setText( tr("Select...") );
-            labels[i]->setText( "" );
+            buttons[i]->setIcon( normal );
+            labels[i]->setText( tr("<None>", "no certificate/key selected") );
         } else {
             if ( buttons[i] == ui.certKey || buttons[i] == ui.caKey )
-                labels[i]->setText( certDescription( QCertificate( c ) ) );
+                labels[i]->setText( certDescription( c ) );
             else
-                labels[i]->setText( keyDescription( QKey( c ) ) );
-            labels[i]->resize( labels[i]->width(), labels[i]->heightForWidth( labels[i]->width() ) );
-            buttons[i]->setText( c.name() );
+                labels[i]->setText( keyDescription( c ) );
+            buttons[i]->setIcon( crossed );
         }
     }
 }
@@ -188,7 +257,7 @@ void CertificateOpenVPNPage::save()
                     doc.setCategories( doc.categories() << QLatin1String("Security key") );
                     doc.commit();
                 }
-                cfg.setValue( QLatin1String("Secret"), doc.file() );
+                cfg.setValue( QLatin1String("Secret"), doc.fileName() );
             }
             break;
         default:
@@ -200,28 +269,28 @@ void CertificateOpenVPNPage::save()
                     doc.setCategories( doc.categories()<< QLatin1String("Certificate") );
                     doc.commit();
                 }
-                cfg.setValue( QLatin1String("Certificate"), doc.file() );
+                cfg.setValue( QLatin1String("Certificate"), doc.fileName() );
 
                 doc = toDocument[ui.privKey];
                 if ( doc.isValid() ) {
                     doc.setCategories( doc.categories() << QLatin1String("Security key") );
                     doc.commit();
                 }
-                cfg.setValue( QLatin1String("PrivKey"), doc.file() );
+                cfg.setValue( QLatin1String("PrivKey"), doc.fileName() );
 
                 doc = toDocument[ui.caKey];
                 if ( doc.isValid() ) {
                     doc.setCategories( doc.categories() << QLatin1String("Certificate") );
                     doc.commit();
                 }
-                cfg.setValue( QLatin1String("CA"), doc.file() );
+                cfg.setValue( QLatin1String("CA"), doc.fileName() );
 
                 doc = toDocument[ui.authKey];
                 if ( doc.isValid() ) {
                     doc.setCategories( doc.categories() << QLatin1String("Security key") );
                     doc.commit();
                 }
-                cfg.setValue( QLatin1String("TLSauth"), doc.file() );
+                cfg.setValue( QLatin1String("TLSauth"), doc.fileName() );
             }
                 break;
     }
@@ -236,10 +305,41 @@ void CertificateOpenVPNPage::authenticationChanged( int idx )
 
 void CertificateOpenVPNPage::selectFile()
 {
-    QPushButton* b = qobject_cast<QPushButton*>(sender());
+    QToolButton* b = qobject_cast<QToolButton*>(sender());
     if ( !b )
         return;
 
+    //create icons
+    QIcon normal( ":icon/padlock");
+    QPixmap crossed( ":icon/padlock" );
+
+    QPainter p;
+    QPen pen( Qt::red );
+    pen.setWidth( 2 );
+    p.begin( &crossed );
+    p.setPen( pen );
+    p.drawLine( 0, 0, crossed.width(), crossed.height() ); 
+    p.drawLine( crossed.width(), 0, 0, crossed.height() ); 
+    p.end();
+ 
+    QMap<QToolButton*,QLabel*> btnToLabel;
+    btnToLabel.insert( ui.secretKey, ui.secretLabel );
+    btnToLabel.insert( ui.certKey, ui.certLabel );
+    btnToLabel.insert( ui.privKey, ui.privLabel );
+    btnToLabel.insert( ui.caKey, ui.caLabel );
+    btnToLabel.insert( ui.authKey, ui.authLabel );
+
+    QLabel* label = btnToLabel[b];
+ 
+    QContent doc = toDocument[b];
+    if ( doc.isValid() ) {
+        //unselect
+        toDocument.insert( b, QContent() );
+        b->setIcon( normal );
+        label->setText( tr("<None>","no certificate/key selected") );
+        return;
+    }
+    
     QDocumentSelectorDialog dlg;
     dlg.setModal( true );
 
@@ -247,12 +347,6 @@ void CertificateOpenVPNPage::selectFile()
 
     bool certificate = false;
     bool secKey = false;
-    QMap<QPushButton*,QLabel*> btnToLabel;
-    btnToLabel.insert( ui.secretKey, ui.secretLabel );
-    btnToLabel.insert( ui.certKey, ui.certLabel );
-    btnToLabel.insert( ui.privKey, ui.privLabel );
-    btnToLabel.insert( ui.caKey, ui.caLabel );
-    btnToLabel.insert( ui.authKey, ui.authLabel );
 
     if ( b == ui.certKey || b == ui.caKey )
         certificate = true;
@@ -262,36 +356,22 @@ void CertificateOpenVPNPage::selectFile()
     dlg.setFilter( QContentFilter( QContent::Document ) );
     dlg.setDefaultCategories( QStringList() << "Certificate" << "Security Key" );
 
-    QLabel* label = btnToLabel[b];
+
     if ( QtopiaApplication::execDialog( &dlg ) == QDialog::Accepted ) {
         QContent doc = dlg.selectedDocument();
 
         if ( !doc.isValid() ) {
-            btnToLabel[b]->setText("");
+            b->setIcon( normal );
+            btnToLabel[b]->setText( tr("<None>","no certificate/key selected") );
             return;
         }
 
         if ( b == ui.caKey || b == ui.certKey )
-            label->setText( certDescription( QCertificate( doc ) ) );
+            label->setText( certDescription( doc ) );
         else
-            label->setText( keyDescription( QKey( doc ) ) );
-        label->resize( label->width(), label->heightForWidth( label->width() ) );
-
-
+            label->setText( keyDescription( doc ) );
+        b->setIcon( crossed );
         toDocument.insert( b, doc );
-#if QT_VERSION >= 0x040200
-        QFont f = b->font();
-        QFontMetrics fm( b->font() );
-        b->setText( fm.elidedText(doc.name(), Qt::ElideRight, b->size().width() ) );
-#else
-        b->setText( doc.name() );
-#endif
-    } else {
-        //TODO currently there is no way of unselecting a document
-        //for now the user has to open the document selector and must press Cancel
-        //in order to unselect the document
-        b->setText(tr("Select..."));
-        label->setText("");
     }
 }
 
@@ -346,7 +426,7 @@ void OptionsOpenVPNPage::save()
     //cfg.setValue( QLatin1String("Verbosity"), ui.verbosity->value() );
     //cfg.setValue( QLatin1String("Mute"), ui.mute->value() );
 
-    cfg.setValue( QLatin1String("ConfigScript"), configScript.isValid() ? configScript.file(): QString() );
+    cfg.setValue( QLatin1String("ConfigScript"), configScript.isValid() ? configScript.fileName(): QString() );
 }
 
 void OptionsOpenVPNPage::selectConfigScript()
@@ -366,13 +446,9 @@ void OptionsOpenVPNPage::selectConfigScript()
         }
 
         configScript = doc;
-#if QT_VERSION >= 0x040200
         QFont f = ui.configFile->font();
         QFontMetrics fm( ui.configFile->font() );
         ui.configFile->setText( fm.elidedText(doc.name(), Qt::ElideRight, ui.configFile->size().width() ) );
-#else
-        ui.configFile->setText( doc.name() );
-#endif
     } else {
         //TODO currently there is no way of unselecting a document
         //for now the user has to open the document selector and must press Cancel
@@ -397,10 +473,8 @@ DeviceOpenVPNPage::DeviceOpenVPNPage( QWidget * parent )
     IPValidator* val = new IPValidator( this );
     ui.localIP->setValidator( val );
     ui.remoteIP->setValidator( val );
-#ifdef QTOPIA_PHONE
     QtopiaApplication::setInputMethodHint( ui.localIP, QLatin1String("netmask") );
     QtopiaApplication::setInputMethodHint( ui.remoteIP, QLatin1String("netmask") );
-#endif
 
     ui.device->addItem( QLatin1String("tap") ); //no tr
     ui.device->addItem( QLatin1String("tun") ); //no tr

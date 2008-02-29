@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,9 +26,7 @@
 #include "qdlwidgetclient_p.h"
 
 // Qtopia includes
-#ifdef QTOPIA_PHONE
 #include <QSoftMenuBar>
-#endif //QTOPIA_PHONE
 
 // Qt includes
 #include <QTextEdit>
@@ -82,7 +80,6 @@ QDLEditClient::~QDLEditClient()
     delete d;
 }
 
-#ifdef QTOPIA_PHONE
 /*!
     Adds an "Insert Link" action item to \a context which connects to
     QDLEditClient::requestLinks().
@@ -107,16 +104,15 @@ QMenu* QDLEditClient::setupStandardContextMenu( QMenu *context )
                                              w );
 
     QObject::connect( insertLinkAction,
-                      SIGNAL( triggered( bool ) ),
+                      SIGNAL(triggered(bool)),
                       this,
-                      SLOT( requestLinks() ) );
+                      SLOT(requestLinks()) );
 
     context->addAction( insertLinkAction );
 
     QSoftMenuBar::addMenuTo( w, context, QSoftMenuBar::AnyFocus );
     return context;
 }
-#endif
 
 /*!
     Returns true if the client object is valid; otherwise returns false. Calls to methods on an invalid

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,8 +23,6 @@
 
 #include <qsoftmenubar.h>
 #include <qtopianamespace.h>
-
-
 #include <QKeyEvent>
 
 Slider::Slider( int min, int max, int step, int value, QWidget* parent )
@@ -34,20 +32,14 @@ Slider::Slider( int min, int max, int step, int value, QWidget* parent )
     setMaximum( max );
     setPageStep( step );
     setValue( value );
-#ifdef QTOPIA_PHONE
     // Disable context menu
     QSoftMenuBar::setLabel( this, QSoftMenuBar::menuKey(), QSoftMenuBar::NoLabel );
-#endif
 }
 
-#ifdef QTOPIA_PHONE
 void Slider::keyPressEvent( QKeyEvent* e )
 {
-    if( !Qtopia::mousePreferred() ) {
-        if( e->key() == Qt::Key_Select && hasEditFocus() )
-            emit selected();
-
-    }
-    QSlider::keyPressEvent( e );
+    if( ( e->key() == Qt::Key_Select || e->key() == Qt::Key_Back ) && hasEditFocus() )
+        emit selected();
+    else
+        QSlider::keyPressEvent( e );
 }
-#endif

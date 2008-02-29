@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -60,6 +75,9 @@
 class QComboBoxListView : public QListView
 {
     Q_OBJECT
+public:
+        QComboBoxListView(QComboBox *cmb = 0) : combo(cmb){};
+
 protected:
     void resizeEvent(QResizeEvent *event)
     {
@@ -71,8 +89,36 @@ protected:
     {
         QStyleOptionViewItem option = QListView::viewOptions();
         option.showDecorationSelected = true;
+        if (combo)
+            option.font = combo->font();
         return option;
     }
+
+    void paintEvent(QPaintEvent *e)
+    {
+        if (combo) {
+            QStyleOptionComboBox opt;
+            opt.initFrom(combo);
+            opt.editable = combo->isEditable();
+            if (combo->style()->styleHint(QStyle::SH_ComboBox_Popup, &opt, combo)) {
+                //we paint the empty menu area to avoid having blank space that can happen when scrolling
+                QStyleOptionMenuItem menuOpt;
+                menuOpt.initFrom(this);
+                menuOpt.palette = palette();
+                menuOpt.state = QStyle::State_None;
+                menuOpt.checkType = QStyleOptionMenuItem::NotCheckable;
+                menuOpt.menuRect = e->rect();
+                menuOpt.maxIconWidth = 0;
+                menuOpt.tabWidth = 0;
+                QPainter p(viewport());
+                combo->style()->drawControl(QStyle::CE_MenuEmptyArea, &menuOpt, &p, this);
+            }
+        }
+        QListView::paintEvent(e);
+    }
+
+private:
+    QComboBox *combo;
 };
 
 
@@ -84,8 +130,10 @@ class QComboBoxPrivateScroller : public QWidget
 
 public:
     QComboBoxPrivateScroller(QAbstractSlider::SliderAction action, QWidget *parent)
-        : QWidget(parent), sliderAction(action) {
+        : QWidget(parent), sliderAction(action)
+    {
         setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+        setAttribute(Qt::WA_NoMousePropagation);
     }
     QSize sizeHint() const {
         return QSize(20, style()->pixelMetric(QStyle::PM_MenuScrollerHeight));
@@ -166,8 +214,10 @@ public:
     QAbstractItemView *itemView() const;
     void setItemView(QAbstractItemView *itemView);
     int spacing() const;
+    void updateTopBottomMargin();
 
     QTimer blockMouseReleaseTimer;
+    QBasicTimer adjustSizeTimer;
     QPoint initialClickPosition;
 
 public Q_SLOTS:
@@ -183,6 +233,8 @@ protected:
     void mouseReleaseEvent(QMouseEvent *e);
     void showEvent(QShowEvent *e);
     void hideEvent(QHideEvent *e);
+    void timerEvent(QTimerEvent *timerEvent);
+    void leaveEvent(QEvent *e);
     QStyleOptionComboBox comboStyleOption() const;
 
 Q_SIGNALS:
@@ -233,7 +285,6 @@ public:
     ~QComboBoxPrivate() {}
     void init();
     QComboBoxPrivateContainer* viewContainer();
-    QStyleOptionComboBox getStyleOption() const;
     void updateLineEditGeometry();
     void _q_returnPressed();
     void _q_complete();
@@ -241,9 +292,12 @@ public:
     bool contains(const QString &text, int role);
     void emitActivated(const QModelIndex&);
     void _q_emitHighlighted(const QModelIndex&);
-    void _q_emitCurrentIndexChanged(int index);
+    void _q_emitCurrentIndexChanged(const QModelIndex &index);
     void _q_modelDestroyed();
     void _q_modelReset();
+#ifdef QT_KEYPAD_NAVIGATION
+    void _q_completerActivated();
+#endif
     void _q_resetButton();
     void _q_dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     void _q_rowsAboutToBeInserted(const QModelIndex & parent, int start, int end);
@@ -256,8 +310,10 @@ public:
     QStyle::SubControl newHoverControl(const QPoint &pos);
     int computeWidthHint() const;
     QSize recomputeSizeHint(QSize &sh) const;
+    void adjustComboBoxSize();
     QString itemText(const QModelIndex &index) const;
     int itemRole() const;
+    void updateLayoutDirection();
 
     QAbstractItemModel *model;
     QLineEdit *lineEdit;
@@ -274,6 +330,7 @@ public:
     int maxVisibleItems;
     int maxCount;
     int modelColumn;
+    bool inserting;
     mutable QSize minimumSizeHint;
     mutable QSize sizeHint;
     QStyle::StateFlag arrowState;

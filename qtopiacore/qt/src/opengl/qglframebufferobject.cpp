@@ -9,17 +9,34 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
+#include "qglframebufferobject.h"
 
 #include <qdebug.h>
 #include <private/qgl_p.h>
@@ -29,223 +46,33 @@
 #include <qimage.h>
 
 // #define DEPTH_BUFFER
-
-#ifndef GL_EXT_framebuffer_object
-#define GL_INVALID_FRAMEBUFFER_OPERATION_EXT                    0x0506
-#define GL_MAX_RENDERBUFFER_SIZE_EXT                            0x84E8
-#define GL_FRAMEBUFFER_BINDING_EXT                              0x8CA6
-#define GL_RENDERBUFFER_BINDING_EXT                             0x8CA7
-#define GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_EXT               0x8CD0
-#define GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_EXT               0x8CD1
-#define GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL_EXT             0x8CD2
-#define GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE_EXT     0x8CD3
-#define GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_3D_ZOFFSET_EXT        0x8CD4
-#define GL_FRAMEBUFFER_COMPLETE_EXT                             0x8CD5
-#define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT                0x8CD6
-#define GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT        0x8CD7
-#define GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT      0x8CD8
-#define GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT                0x8CD9
-#define GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT                   0x8CDA
-#define GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT               0x8CDB
-#define GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT               0x8CDC
-#define GL_FRAMEBUFFER_UNSUPPORTED_EXT                          0x8CDD
-#define GL_MAX_COLOR_ATTACHMENTS_EXT                            0x8CDF
-#define GL_COLOR_ATTACHMENT0_EXT                                0x8CE0
-#define GL_COLOR_ATTACHMENT1_EXT                                0x8CE1
-#define GL_COLOR_ATTACHMENT2_EXT                                0x8CE2
-#define GL_COLOR_ATTACHMENT3_EXT                                0x8CE3
-#define GL_COLOR_ATTACHMENT4_EXT                                0x8CE4
-#define GL_COLOR_ATTACHMENT5_EXT                                0x8CE5
-#define GL_COLOR_ATTACHMENT6_EXT                                0x8CE6
-#define GL_COLOR_ATTACHMENT7_EXT                                0x8CE7
-#define GL_COLOR_ATTACHMENT8_EXT                                0x8CE8
-#define GL_COLOR_ATTACHMENT9_EXT                                0x8CE9
-#define GL_COLOR_ATTACHMENT10_EXT                               0x8CEA
-#define GL_COLOR_ATTACHMENT11_EXT                               0x8CEB
-#define GL_COLOR_ATTACHMENT12_EXT                               0x8CEC
-#define GL_COLOR_ATTACHMENT13_EXT                               0x8CED
-#define GL_COLOR_ATTACHMENT14_EXT                               0x8CEE
-#define GL_COLOR_ATTACHMENT15_EXT                               0x8CEF
-#define GL_DEPTH_ATTACHMENT_EXT                                 0x8D00
-#define GL_STENCIL_ATTACHMENT_EXT                               0x8D20
-#define GL_FRAMEBUFFER_EXT                                      0x8D40
-#define GL_RENDERBUFFER_EXT                                     0x8D41
-#define GL_RENDERBUFFER_WIDTH_EXT                               0x8D42
-#define GL_RENDERBUFFER_HEIGHT_EXT                              0x8D43
-#define GL_RENDERBUFFER_INTERNAL_FORMAT_EXT                     0x8D44
-#define GL_STENCIL_INDEX_EXT                                    0x8D45
-#define GL_STENCIL_INDEX1_EXT                                   0x8D46
-#define GL_STENCIL_INDEX4_EXT                                   0x8D47
-#define GL_STENCIL_INDEX8_EXT                                   0x8D48
-#define GL_STENCIL_INDEX16_EXT                                  0x8D49
-#define GL_RENDERBUFFER_RED_SIZE_EXT                            0x8D50
-#define GL_RENDERBUFFER_GREEN_SIZE_EXT                          0x8D51
-#define GL_RENDERBUFFER_BLUE_SIZE_EXT                           0x8D52
-#define GL_RENDERBUFFER_ALPHA_SIZE_EXT                          0x8D53
-#define GL_RENDERBUFFER_DEPTH_SIZE_EXT                          0x8D54
-#define GL_RENDERBUFFER_STENCIL_SIZE_EXT                        0x8D55
-#endif
-
-// ### hm. should be part of the GL 1.2 spec..
-#ifndef GL_CLAMP_TO_EDGE
-#define GL_CLAMP_TO_EDGE                  0x812F
-#endif
-
-#if defined(Q_WS_X11) || defined(Q_WS_MAC) || defined(Q_WS_QWS)
-
-#define QGL_FUNC_CONTEXT
-
-PFNGLISRENDERBUFFEREXTPROC qt_glIsRenderbufferEXT;
-PFNGLBINDRENDERBUFFEREXTPROC qt_glBindRenderbufferEXT;
-PFNGLDELETERENDERBUFFERSEXTPROC qt_glDeleteRenderbuffersEXT;
-PFNGLGENRENDERBUFFERSEXTPROC qt_glGenRenderbuffersEXT;
-PFNGLRENDERBUFFERSTORAGEEXTPROC qt_glRenderbufferStorageEXT;
-PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC qt_glGetRenderbufferParameterivEXT;
-PFNGLISFRAMEBUFFEREXTPROC qt_glIsFramebufferEXT;
-PFNGLBINDFRAMEBUFFEREXTPROC qt_glBindFramebufferEXT;
-PFNGLDELETEFRAMEBUFFERSEXTPROC qt_glDeleteFramebuffersEXT;
-PFNGLGENFRAMEBUFFERSEXTPROC qt_glGenFramebuffersEXT;
-PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC qt_glCheckFramebufferStatusEXT;
-PFNGLFRAMEBUFFERTEXTURE1DEXTPROC qt_glFramebufferTexture1DEXT;
-PFNGLFRAMEBUFFERTEXTURE2DEXTPROC qt_glFramebufferTexture2DEXT;
-PFNGLFRAMEBUFFERTEXTURE3DEXTPROC qt_glFramebufferTexture3DEXT;
-PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC qt_glFramebufferRenderbufferEXT;
-PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC qt_glGetFramebufferAttachmentParameterivEXT;
-PFNGLGENERATEMIPMAPEXTPROC qt_glGenerateMipmapEXT;
-
-#define glIsRenderbufferEXT qt_glIsRenderbufferEXT
-#define glBindRenderbufferEXT qt_glBindRenderbufferEXT
-#define glDeleteRenderbuffersEXT qt_glDeleteRenderbuffersEXT
-#define glGenRenderbuffersEXT qt_glGenRenderbuffersEXT
-#define glRenderbufferStorageEXT qt_glRenderbufferStorageEXT
-#define glGetRenderbufferParameterivEXT qt_glGetRenderbufferParameterivEXT
-#define glIsFramebufferEXT qt_glIsFramebufferEXT
-#define glBindFramebufferEXT qt_glBindFramebufferEXT
-#define glDeleteFramebuffersEXT qt_glDeleteFramebuffersEXT
-#define glGenFramebuffersEXT qt_glGenFramebuffersEXT
-#define glCheckFramebufferStatusEXT qt_glCheckFramebufferStatusEXT
-#define glFramebufferTexture1DEXT qt_glFramebufferTexture1DEXT
-#define glFramebufferTexture2DEXT qt_glFramebufferTexture2DEXT
-#define glFramebufferTexture3DEXT qt_glFramebufferTexture3DEXT
-#define glFramebufferRenderbufferEXT qt_glFramebufferRenderbufferEXT
-#define glGetFramebufferAttachmentParameterivEXT qt_glGetFramebufferAttachmentParameterivEXT
-#define glGenerateMipmapEXT qt_glGenerateMipmapEXT
-
-static bool qt_resolve_framebufferobject_extensions(QGLContext *)
-{
-    static bool resolved = false;
-    if (resolved && qt_glIsRenderbufferEXT)
-        return true;
-    else if (resolved)
-        return false;
-
-#if defined(Q_WS_X11) || defined(Q_WS_QWS)
-    QLibrary lib(QLatin1String("GL"));
-#else // Q_WS_MAC
-    QLibrary lib(QLatin1String("/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib"));
-#endif
-
-    qt_glIsRenderbufferEXT = (PFNGLISRENDERBUFFEREXTPROC) lib.resolve("glIsRenderbufferEXT");
-    qt_glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC) lib.resolve("glBindRenderbufferEXT");
-    qt_glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC) lib.resolve("glDeleteRenderbuffersEXT");
-    qt_glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC) lib.resolve("glGenRenderbuffersEXT");
-    qt_glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC) lib.resolve("glRenderbufferStorageEXT");
-    qt_glGetRenderbufferParameterivEXT =
-        (PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC) lib.resolve("glGetRenderbufferParameterivEXT");
-    qt_glIsFramebufferEXT = (PFNGLISFRAMEBUFFEREXTPROC) lib.resolve("glIsFramebufferEXT");
-    qt_glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC) lib.resolve("glBindFramebufferEXT");
-    qt_glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC) lib.resolve("glDeleteFramebuffersEXT");
-    qt_glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC) lib.resolve("glGenFramebuffersEXT");
-    qt_glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC) lib.resolve("glCheckFramebufferStatusEXT");
-    qt_glFramebufferTexture1DEXT = (PFNGLFRAMEBUFFERTEXTURE1DEXTPROC) lib.resolve("glFramebufferTexture1DEXT");
-    qt_glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) lib.resolve("glFramebufferTexture2DEXT");
-    qt_glFramebufferTexture3DEXT = (PFNGLFRAMEBUFFERTEXTURE3DEXTPROC) lib.resolve("glFramebufferTexture3DEXT");
-    qt_glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC) lib.resolve("glFramebufferRenderbufferEXT");
-    qt_glGetFramebufferAttachmentParameterivEXT =
-        (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC) lib.resolve("glGetFramebufferAttachmentParameterivEXT");
-    qt_glGenerateMipmapEXT = (PFNGLGENERATEMIPMAPEXTPROC) lib.resolve("glGenerateMipmapEXT");
-    resolved = true;
-    return qt_glIsRenderbufferEXT;
-}
-#elif defined(Q_WS_WIN)
-
 #define QGL_FUNC_CONTEXT QGLContext *ctx = d_ptr->ctx;
-
-#define glIsRenderbufferEXT ctx->d_ptr->qt_glIsRenderbufferEXT
-#define glBindRenderbufferEXT ctx->d_ptr->qt_glBindRenderbufferEXT
-#define glDeleteRenderbuffersEXT ctx->d_ptr->qt_glDeleteRenderbuffersEXT
-#define glGenRenderbuffersEXT ctx->d_ptr->qt_glGenRenderbuffersEXT
-#define glRenderbufferStorageEXT ctx->d_ptr->qt_glRenderbufferStorageEXT
-#define glGetRenderbufferParameterivEXT ctx->d_ptr->qt_glGetRenderbufferParameterivEXT
-#define glIsFramebufferEXT ctx->d_ptr->qt_glIsFramebufferEXT
-#define glBindFramebufferEXT ctx->d_ptr->qt_glBindFramebufferEXT
-#define glDeleteFramebuffersEXT ctx->d_ptr->qt_glDeleteFramebuffersEXT
-#define glGenFramebuffersEXT ctx->d_ptr->qt_glGenFramebuffersEXT
-#define glCheckFramebufferStatusEXT ctx->d_ptr->qt_glCheckFramebufferStatusEXT
-#define glFramebufferTexture1DEXT ctx->d_ptr->qt_glFramebufferTexture1DEXT
-#define glFramebufferTexture2DEXT ctx->d_ptr->qt_glFramebufferTexture2DEXT
-#define glFramebufferTexture3DEXT ctx->d_ptr->qt_glFramebufferTexture3DEXT
-#define glFramebufferRenderbufferEXT ctx->d_ptr->qt_glFramebufferRenderbufferEXT
-#define glGetFramebufferAttachmentParameterivEXT ctx->d_ptr->qt_glGetFramebufferAttachmentParameterivEXT
-#define glGenerateMipmapEXT ctx->d_ptr->qt_glGenerateMipmapEXT
-
-bool qt_resolve_framebufferobject_extensions(QGLContext *ctx)
-{
-    if (glIsRenderbufferEXT != 0)
-	return true;
-
-    if (ctx == 0) {
-	qWarning("QGLFramebufferObject: Unable to resolve framebuffer object extensions -"
-		 " make sure there is a current context when creating the framebuffer object.");
-	return false;
-    }
-
-    glIsRenderbufferEXT = (PFNGLISRENDERBUFFEREXTPROC) wglGetProcAddress("glIsRenderbufferEXT");
-    glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC) wglGetProcAddress("glBindRenderbufferEXT");
-    glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC) wglGetProcAddress("glDeleteRenderbuffersEXT");
-    glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC) wglGetProcAddress("glGenRenderbuffersEXT");
-    glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC) wglGetProcAddress("glRenderbufferStorageEXT");
-    glGetRenderbufferParameterivEXT =
-        (PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC) wglGetProcAddress("glGetRenderbufferParameterivEXT");
-    glIsFramebufferEXT = (PFNGLISFRAMEBUFFEREXTPROC) wglGetProcAddress("glIsFramebufferEXT");
-    glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC) wglGetProcAddress("glBindFramebufferEXT");
-    glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC) wglGetProcAddress("glDeleteFramebuffersEXT");
-    glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC) wglGetProcAddress("glGenFramebuffersEXT");
-    glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC) wglGetProcAddress("glCheckFramebufferStatusEXT");
-    glFramebufferTexture1DEXT = (PFNGLFRAMEBUFFERTEXTURE1DEXTPROC) wglGetProcAddress("glFramebufferTexture1DEXT");
-    glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) wglGetProcAddress("glFramebufferTexture2DEXT");
-    glFramebufferTexture3DEXT = (PFNGLFRAMEBUFFERTEXTURE3DEXTPROC) wglGetProcAddress("glFramebufferTexture3DEXT");
-    glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC) wglGetProcAddress("glFramebufferRenderbufferEXT");
-    glGetFramebufferAttachmentParameterivEXT =
-        (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC) wglGetProcAddress("glGetFramebufferAttachmentParameterivEXT");
-    glGenerateMipmapEXT = (PFNGLGENERATEMIPMAPEXTPROC) wglGetProcAddress("glGenerateMipmapEXT");
-    return glIsRenderbufferEXT;
-}
-#endif
 
 #define QT_CHECK_GLERROR()                                \
 {                                                         \
     GLenum err = glGetError();                            \
     if (err != GL_NO_ERROR) {                             \
         qDebug("[%s line %d] GL Error: %d",               \
-               __FILE__, __LINE__, err);                  \
+               __FILE__, __LINE__, (int)err);             \
     }                                                     \
 }
 
 class QGLFramebufferObjectPrivate
 {
 public:
-    QGLFramebufferObjectPrivate() : valid(false), ctx(0) {}
+    QGLFramebufferObjectPrivate() : depth_stencil_buffer(0), valid(false), ctx(0) {}
     ~QGLFramebufferObjectPrivate() {}
 
-    void init(const QSize& sz, GLenum texture_target);
+    void init(const QSize& sz, QGLFramebufferObject::Attachment attachment,
+              GLenum internal_format, GLenum texture_target);
     bool checkFramebufferStatus() const;
     GLuint texture;
     GLuint fbo;
-    GLuint depth_buffer;
+    GLuint depth_stencil_buffer;
     GLenum target;
     QSize size;
     uint valid : 1;
+    QGLFramebufferObject::Attachment fbo_attachment;
     QGLContext *ctx; // for Windows extension ptrs
 };
 
@@ -290,7 +117,8 @@ bool QGLFramebufferObjectPrivate::checkFramebufferStatus() const
     return false;
 }
 
-void QGLFramebufferObjectPrivate::init(const QSize &sz, GLenum texture_target)
+void QGLFramebufferObjectPrivate::init(const QSize &sz, QGLFramebufferObject::Attachment attachment,
+                                       GLenum texture_target, GLenum internal_format)
 {
     ctx = const_cast<QGLContext *>(QGLContext::currentContext());
     bool ext_detected = (QGLExtensions::glExtensions & QGLExtensions::FramebufferObject);
@@ -301,7 +129,7 @@ void QGLFramebufferObjectPrivate::init(const QSize &sz, GLenum texture_target)
     target = texture_target;
     // texture dimensions
 
-    glGetError(); // reset error state
+    while (glGetError() != GL_NO_ERROR) {} // reset error state
     glGenFramebuffersEXT(1, &fbo);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 
@@ -309,39 +137,73 @@ void QGLFramebufferObjectPrivate::init(const QSize &sz, GLenum texture_target)
     // init texture
     glGenTextures(1, &texture);
     glBindTexture(target, texture);
+    glTexImage2D(target, 0, internal_format, size.width(), size.height(), 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 #ifndef Q_WS_QWS
-    glTexImage2D(target, 0, GL_RGBA8, size.width(), size.height(), 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-#else
-    glTexImage2D(target, 0, GL_RGBA, size.width(), size.height(), 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-#endif
     glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
+#else
+    glTexParameterf(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#endif
     glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
                               target, texture, 0);
 
     QT_CHECK_GLERROR();
     valid = checkFramebufferStatus();
 
-#ifdef DEPTH_BUFFER
-    // depth buffer
-    glGenRenderbuffersEXT(1, &depth_buffer);
-    Q_ASSERT(!glIsRenderbufferEXT(depth_buffer));
-    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_buffer);
-    Q_ASSERT(glIsRenderbufferEXT(depth_buffer));
-    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, size.width(), size.height());
-    int i = 0;
-    glGetRenderbufferParameterivEXT(GL_RENDERBUFFER_EXT, GL_RENDERBUFFER_DEPTH_SIZE_EXT, &i);
-    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
-                                 GL_RENDERBUFFER_EXT, depth_buffer);
-
+    if (attachment == QGLFramebufferObject::CombinedDepthStencil
+        && (QGLExtensions::glExtensions & QGLExtensions::PackedDepthStencil)) {
+        // depth and stencil buffer needs another extension
+        glGenRenderbuffersEXT(1, &depth_stencil_buffer);
+        Q_ASSERT(!glIsRenderbufferEXT(depth_stencil_buffer));
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_stencil_buffer);
+        Q_ASSERT(glIsRenderbufferEXT(depth_stencil_buffer));
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH24_STENCIL8_EXT, size.width(), size.height());
+        GLint i = 0;
+        glGetRenderbufferParameterivEXT(GL_RENDERBUFFER_EXT, GL_RENDERBUFFER_DEPTH_SIZE_EXT, &i);
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, depth_stencil_buffer);
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, depth_stencil_buffer);
+        fbo_attachment = QGLFramebufferObject::CombinedDepthStencil;
+        valid = checkFramebufferStatus();
+        if (!valid)
+            glDeleteRenderbuffersEXT(1, &depth_stencil_buffer);
+    } else if (attachment == QGLFramebufferObject::Depth
+               || attachment == QGLFramebufferObject::CombinedDepthStencil)
+    {
+        glGenRenderbuffersEXT(1, &depth_stencil_buffer);
+        Q_ASSERT(!glIsRenderbufferEXT(depth_stencil_buffer));
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_stencil_buffer);
+        Q_ASSERT(glIsRenderbufferEXT(depth_stencil_buffer));
+#ifdef Q_WS_QWS
+#define GL_DEPTH_COMPONENT16 0x81A5
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, size.width(), size.height());
+#else
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, size.width(), size.height());
 #endif
+        GLint i = 0;
+        glGetRenderbufferParameterivEXT(GL_RENDERBUFFER_EXT, GL_RENDERBUFFER_DEPTH_SIZE_EXT, &i);
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, depth_stencil_buffer);
+        fbo_attachment = QGLFramebufferObject::Depth;
+        valid = checkFramebufferStatus();
+        if (!valid)
+            glDeleteRenderbuffersEXT(1, &depth_stencil_buffer);
+    } else {
+        fbo_attachment = QGLFramebufferObject::NoAttachment;
+    }
+
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-    checkFramebufferStatus();
+    if (!valid) {
+        glDeleteTextures(1, &texture);
+        glDeleteFramebuffersEXT(1, &fbo);
+    }
     QT_CHECK_GLERROR();
 }
 
@@ -402,6 +264,28 @@ void QGLFramebufferObjectPrivate::init(const QSize &sz, GLenum texture_target)
 */
 
 
+/*!
+    \enum QGLFramebufferObject::Attachment
+    \since 4.3
+
+    This enum type is used to configure the depth and stencil buffers
+    attached to the framebuffer object when it is created.
+
+    \value NoAttachment         No attachment is added to the framebuffer object. Note that the
+                                OpenGL depth and stencil tests won't work when rendering to a
+                                framebuffer object without any depth or stencil buffers.
+                                This is the default value.
+
+    \value CombinedDepthStencil If the \c GL_EXT_packed_depth_stencil extension is present,
+                                a combined depth and stencil buffer is attached.
+                                If the extension is not present, only a depth buffer is attached.
+
+    \value Depth                A depth buffer is attached to the framebuffer object.
+
+    \sa attachment()
+*/
+
+
 /*! \fn QGLFramebufferObject::QGLFramebufferObject(const QSize &size, GLenum target)
 
     Constructs an OpenGL framebuffer object and binds a 2D GL texture
@@ -411,19 +295,31 @@ void QGLFramebufferObjectPrivate::init(const QSize &sz, GLenum texture_target)
     The \a target parameter is used to specify the GL texture
     target. The default target is \c GL_TEXTURE_2D. Keep in mind that
     \c GL_TEXTURE_2D textures must have a power of 2 width and height
-    (e.g. 256x512).
+    (e.g. 256x512), unless you are using OpenGL 2.0 or higher.
+
+    By default, no depth and stencil buffers are attached. This behavior
+    can be toggled using one of the overloaded constructors.
+
+    The default internal texture format is \c GL_RGBA8.
 
     It is important that you have a current GL context set when
     creating the QGLFramebufferObject, otherwise the initialization
     will fail.
 
-    \sa size(), texture()
+    \sa size(), texture(), attachment()
 */
+
+#ifndef Q_WS_QWS
+#define DEFAULT_FORMAT GL_RGBA8
+#else
+#define DEFAULT_FORMAT GL_RGBA
+#endif
+
 QGLFramebufferObject::QGLFramebufferObject(const QSize &size, GLenum target)
     : d_ptr(new QGLFramebufferObjectPrivate)
 {
     Q_D(QGLFramebufferObject);
-    d->init(size, target);
+    d->init(size, NoAttachment, target, DEFAULT_FORMAT);
 }
 
 
@@ -438,8 +334,50 @@ QGLFramebufferObject::QGLFramebufferObject(int width, int height, GLenum target)
     : d_ptr(new QGLFramebufferObjectPrivate)
 {
     Q_D(QGLFramebufferObject);
-    d->init(QSize(width, height), target);
+    d->init(QSize(width, height), NoAttachment, target, DEFAULT_FORMAT);
 }
+
+/*! \overload
+
+    Constructs an OpenGL framebuffer object and binds a texture to the
+    buffer of the given \a width and \a height.
+
+    The \a attachment parameter describes the depth/stencil buffer
+    configuration, \a target the texture target and \a internal_format
+    the internal texture format. The default texture target is \c
+    GL_TEXTURE_2D, while the default internal format is \c GL_RGBA8.
+
+    \sa size(), texture(), attachment()
+*/
+QGLFramebufferObject::QGLFramebufferObject(int width, int height, Attachment attachment,
+                                           GLenum target, GLenum internal_format)
+    : d_ptr(new QGLFramebufferObjectPrivate)
+{
+    Q_D(QGLFramebufferObject);
+    d->init(QSize(width, height), attachment, target, internal_format);
+}
+
+/*! \overload
+
+    Constructs an OpenGL framebuffer object and binds a texture to the
+    buffer of the given \a size.
+
+    The \a attachment parameter describes the depth/stencil buffer
+    configuration, \a target the texture target and \a internal_format
+    the internal texture format. The default texture target is \c
+    GL_TEXTURE_2D, while the default internal format is \c GL_RGBA8.
+
+    \sa size(), texture(), attachment()
+*/
+QGLFramebufferObject::QGLFramebufferObject(const QSize &size, Attachment attachment,
+                                           GLenum target, GLenum internal_format)
+    : d_ptr(new QGLFramebufferObjectPrivate)
+{
+    Q_D(QGLFramebufferObject);
+    d->init(size, attachment, target, internal_format);
+}
+
+
 
 /*!
     \fn QGLFramebufferObject::~QGLFramebufferObject()
@@ -451,12 +389,14 @@ QGLFramebufferObject::~QGLFramebufferObject()
     Q_D(QGLFramebufferObject);
     QGL_FUNC_CONTEXT;
 
-    if (isValid()) {
-	glDeleteTextures(1, &d->texture);
-#ifdef DEPTH_BUFFER
-	glDeleteRenderbuffersEXT(1, &d->depth_buffer);
-#endif
-	glDeleteFramebuffersEXT(1, &d->fbo);
+    if (isValid()
+        && (d->ctx == QGLContext::currentContext()
+            || qgl_share_reg()->checkSharing(d->ctx, QGLContext::currentContext())))
+    {
+        glDeleteTextures(1, &d->texture);
+        if (d->depth_stencil_buffer)
+            glDeleteRenderbuffersEXT(1, &d->depth_stencil_buffer);
+        glDeleteFramebuffersEXT(1, &d->fbo);
     }
     delete d_ptr;
 }
@@ -491,7 +431,8 @@ bool QGLFramebufferObject::bind()
     Q_D(QGLFramebufferObject);
     QGL_FUNC_CONTEXT;
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, d->fbo);
-    return d->checkFramebufferStatus();
+    d->valid = d->checkFramebufferStatus();
+    return d->valid;
 }
 
 /*!
@@ -508,7 +449,8 @@ bool QGLFramebufferObject::release()
     Q_D(QGLFramebufferObject);
     QGL_FUNC_CONTEXT;
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-    return d->checkFramebufferStatus();
+    d->valid = d->checkFramebufferStatus();
+    return d->valid;
 }
 
 /*!
@@ -668,3 +610,17 @@ GLuint QGLFramebufferObject::handle() const
 
     \reimp
 */
+
+
+/*!
+    Returns the status of the depth and stencil buffers attached to
+    this framebuffer object.
+*/
+
+QGLFramebufferObject::Attachment QGLFramebufferObject::attachment() const
+{
+    Q_D(const QGLFramebufferObject);
+    if (d->valid)
+        return d->fbo_attachment;
+    return NoAttachment;
+}

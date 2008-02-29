@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,12 +28,8 @@
 #include "applicationlauncher.h"
 
 #include <errno.h>
-#ifndef Q_OS_WIN32
 #include <unistd.h>
 #include <sys/file.h>
-#else
-#include <stdlib.h>
-#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -56,6 +52,8 @@
 
   The QCopRouter class provides an implementation of the ApplicationIpcRouter
   for the QCop transport.  
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 QTOPIA_TASK(IpcRouter, QCopRouter);
@@ -78,12 +76,12 @@ QCopRouter::QCopRouter()
     QCopChannel *channel;
 
     channel = new QCopChannel( "QPE/Application/*", this );
-    connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
-             this, SLOT(applicationMessage(const QString&,const QByteArray&)) );
+    connect( channel, SIGNAL(received(QString,QByteArray)),
+             this, SLOT(applicationMessage(QString,QByteArray)) );
 
     channel = new QCopChannel( "QPE/Service/*", this );
-    connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
-             this, SLOT(serviceMessage(const QString&,const QByteArray&)) );
+    connect( channel, SIGNAL(received(QString,QByteArray)),
+             this, SLOT(serviceMessage(QString,QByteArray)) );
 }
 
 /*!  \internal */

@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">CellModemManager Class Reference</h1>
 <p>The CellModemManager class simplifies the initialization and monitoring of a cellular phone modem. <a href="#details">More...</a></p>
-<pre>    #include &lt;CellModemManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;CellModemManager&gt;</pre><p>Inherits <a href="qabstractcallpolicymanager.html">QAbstractCallPolicyManager</a>.</p>
 <ul>
 <li><a href="cellmodemmanager-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -35,11 +35,16 @@
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#planeModeEnabled">planeModeEnabled</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#planeModeSupported">planeModeSupported</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#profilesBlocked">profilesBlocked</a></b> ()</li>
-<li><div class="fn"/>QTelephony::RegistrationState <b><a href="cellmodemmanager.html#registrationState">registrationState</a></b> () const</li>
+<li><div class="fn"/>virtual QTelephony::RegistrationState <b><a href="cellmodemmanager.html#registrationState">registrationState</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#simToolkitAvailable">simToolkitAvailable</a></b> () const</li>
+<li><div class="fn"/>QIcon <b><a href="cellmodemmanager.html#simToolkitIdleModeIcon">simToolkitIdleModeIcon</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="cellmodemmanager.html#simToolkitIdleModeIconSelfExplanatory">simToolkitIdleModeIconSelfExplanatory</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="cellmodemmanager.html#simToolkitIdleModeText">simToolkitIdleModeText</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="cellmodemmanager.html#simToolkitMenuTitle">simToolkitMenuTitle</a></b> () const</li>
 <li><div class="fn"/>State <b><a href="cellmodemmanager.html#state">state</a></b> () const</li>
 </ul>
 <ul>
+<li><div class="fn"/>8 public functions inherited from <a href="qabstractcallpolicymanager.html#public-functions">QAbstractCallPolicyManager</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
@@ -65,6 +70,7 @@
 <li><div class="fn"/>void <b><a href="cellmodemmanager.html#stateChanged">stateChanged</a></b> ( CellModemManager::State <i>newState</i>, CellModemManager::State <i>oldState</i> )</li>
 </ul>
 <ul>
+<li><div class="fn"/>1 signal inherited from <a href="qabstractcallpolicymanager.html#signals">QAbstractCallPolicyManager</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
@@ -101,7 +107,7 @@
 <p>In addition to the C++ methods provided, the CellModemManager class also sets the following value space keys:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Key</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>/Telephony/Status/RegistrationState</tt></td><td>Set to the current registration state of the network. Possible values are &quot;None&quot;, &quot;Home&quot;, &quot;Searching&quot;, &quot;Denied&quot;, &quot;Unknown&quot; or &quot;Roaming&quot; and correspond to the values of the QTelephony::RegistrationState enumeration.</td></tr>
+<tr valign="top" class="odd"><td><tt>/Telephony/Status/RegistrationState</tt></td><td>Set to the current registration state of the network. Possible values are &quot;None&quot;, &quot;Home&quot;, &quot;Searching&quot;, &quot;Denied&quot;, &quot;Unknown&quot; or &quot;Roaming&quot; and correspond to the values of the <a href="qtelephony.html#RegistrationState-enum">QTelephony::RegistrationState</a> enumeration.</td></tr>
 <tr valign="top" class="even"><td><tt>/Telephony/Status/NetworkRegistered</tt></td><td>Set to true if the network is registered (in the home or roaming states), otherwise false.</td></tr>
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/Roaming</tt></td><td>Set to true if the network is in the roaming statem otherwise false.</td></tr>
 <tr valign="top" class="even"><td><tt>/Telephony/Status/CellLocation</tt></td><td>Set to the current cell location. This is equivalent to the value returned by the <a href="cellmodemmanager.html#cellLocation">cellLocation</a>() method.</td></tr>
@@ -110,8 +116,13 @@
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/CallDivert</tt></td><td>True if voice calls will be unconditionally diverted, false otherwise.</td></tr>
 <tr valign="top" class="even"><td><tt>/Telephony/Status/PlaneModeAvailable</tt></td><td>True if the modem supports &quot;plane mode&quot;. Possible values are &quot;Yes&quot;, &quot;No&quot; or &quot;Unknown&quot;. The &quot;Unknown&quot; value is set during modem initialization before Qtopia has determined whether the modem can support plane mode.</td></tr>
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/ModemStatus</tt></td><td>Set to the string value of the current State enumeration value.</td></tr>
-<tr valign="top" class="even"><td><tt>/Telephony/Status/SimToolkitAvailable</tt></td><td>Set to true if SIM toolkit support is available, otherwise false.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/SimToolkit/Available</tt></td><td>Set to true if SIM toolkit support is available, otherwise false.</td></tr>
+<tr valign="top" class="odd"><td><tt>/Telephony/Status/SimToolkit/IdleModeText</tt></td><td>Set to the value of the idle mode text string from the SIM toolkit application.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/SimToolkit/IdleModeIcon</tt></td><td>Set to the <a href="qicon.html">QIcon</a> to display in idle mode.</td></tr>
+<tr valign="top" class="odd"><td><tt>/Telephony/Status/SimToolkit/IdleModeIconSelfExplanatory</tt></td><td>Set to true if the idle mode icon is self-explanatory without accompanying text.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/SimToolkit/MenuTitle</tt></td><td>Set to the title of the SIM toolkit application's main menu.</td></tr>
 </table></p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="State-enum"></a>enum CellModemManager::State</h3>
@@ -155,7 +166,7 @@
 <p>A call to this method disables this functionality and setModemEnabled() must be called manually to control the modem. This method can only be called prior to <a href="cellmodemmanager.html">CellModemManager</a>'s construction.</p>
 <p>See also <a href="cellmodemmanager.html#profilesControlModem">CellModemManager::profilesControlModem</a>().</p>
 <h3 class="fn"><a name="emergencyNumbers"></a><a href="qstringlist.html">QStringList</a> CellModemManager::emergencyNumbers ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Return the list of emergency numbers. This list is currently <tt>112</tt>, <tt>911</tt>, <tt>08</tt>, and <tt>000</tt> but may change in the future.</p>
+<p>Return the list of emergency numbers. This list is currently <tt>112</tt>, <tt>911</tt>, <tt>08</tt>, <tt>000</tt>, <tt>999</tt>, <tt>110</tt>, <tt>118</tt>, and <tt>119</tt>, but may change in the future.</p>
 <h3 class="fn"><a name="networkOperator"></a><a href="qstring.html">QString</a> CellModemManager::networkOperator () const</h3>
 <p>Returns the current network operator. This call will always return an empty string unless <a href="cellmodemmanager.html">CellModemManager</a> is in the Ready state.</p>
 <h3 class="fn"><a name="networkOperatorChanged"></a>void CellModemManager::networkOperatorChanged ( const <a href="qstring.html">QString</a> &amp; <i>networkOperator</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -163,7 +174,7 @@
 <h3 class="fn"><a name="networkOperatorCountry"></a><a href="qstring.html">QString</a> CellModemManager::networkOperatorCountry () const</h3>
 <p>Returns the current network operator's country. This call will always return an empty string unless <a href="cellmodemmanager.html">CellModemManager</a> is in the Ready state.</p>
 <h3 class="fn"><a name="networkRegistered"></a>bool CellModemManager::networkRegistered () const</h3>
-<p>Returns true if a network is registered, false otherwise. A network is registered if <a href="cellmodemmanager.html#registrationState">registrationState</a>() is either QTelephony::RegistrationHome or QTelephony::RegistrationRoaming.</p>
+<p>Returns true if a network is registered, false otherwise. A network is registered if <a href="cellmodemmanager.html#registrationState">registrationState</a>() is either <a href="qtelephony.html#RegistrationState-enum">QTelephony::RegistrationHome</a> or <a href="qtelephony.html#RegistrationState-enum">QTelephony::RegistrationRoaming</a>.</p>
 <h3 class="fn"><a name="planeModeEnabled"></a>bool CellModemManager::planeModeEnabled () const</h3>
 <p>Returns true if the modem is in or is transitioning into plane mode, false otherwise. The call will return the last value set through <a href="cellmodemmanager.html#setPlaneModeEnabled">setPlaneModeEnabled</a>().</p>
 <p>As a modem takes time to respond to requests, planeModeEnabled() may not represent the true modem state. Instead, it represents the intended state of the modem once all pending operations have been performed.</p>
@@ -179,9 +190,10 @@
 <h3 class="fn"><a name="profilesControlModem"></a>bool CellModemManager::profilesControlModem ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns true if the plane mode value returned by <a href="qphoneprofilemanager.html">QPhoneProfileManager</a> will control whether the modem is enabled or disabled.</p>
 <p>See also <a href="cellmodemmanager.html#disableProfilesControlModem">disableProfilesControlModem</a>().</p>
-<h3 class="fn"><a name="registrationState"></a>QTelephony::RegistrationState CellModemManager::registrationState () const</h3>
-<p>Returns the current network registration state. This call will always return QTelephony::RegistrationNone unless <a href="cellmodemmanager.html">CellModemManager</a> is in the Ready state.</p>
-<h3 class="fn"><a name="registrationStateChanged"></a>void CellModemManager::registrationStateChanged ( QTelephony::RegistrationState <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="registrationState"></a><a href="qtelephony.html#RegistrationState-enum">QTelephony::RegistrationState</a> CellModemManager::registrationState () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Returns the current network registration state. This call will always return <a href="qtelephony.html#RegistrationState-enum">QTelephony::RegistrationNone</a> unless <a href="cellmodemmanager.html">CellModemManager</a> is in the Ready state.</p>
+<p>Reimplemented from <a href="qabstractcallpolicymanager.html#registrationState">QAbstractCallPolicyManager</a>.</p>
+<h3 class="fn"><a name="registrationStateChanged"></a>void CellModemManager::registrationStateChanged ( <a href="qtelephony.html#RegistrationState-enum">QTelephony::RegistrationState</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the network registration <i>state</i> changes.</p>
 <h3 class="fn"><a name="setPlaneModeEnabled"></a>void CellModemManager::setPlaneModeEnabled ( bool <i>enabled</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Sets the desired plane mode state to <i>enabled</i>. If <i>enabled</i> is true, the <a href="cellmodemmanager.html">CellModemManager</a> will attempt to disable the modem aerial and put it into the <a href="cellmodemmanager.html#State-enum">AerialOff</a> state. If false, the aerial will be enabled and the manager will transition into the Ready state.</p>
@@ -196,6 +208,14 @@
 <h3 class="fn"><a name="simToolkitAvailableChanged"></a>void CellModemManager::simToolkitAvailableChanged ( bool <i>available</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the state of SIM toolkit availability changes. <i>available</i> will be set to true if a sim supporting SIM toolkit applications is available, and false otherwise.</p>
 <p>See also <a href="cellmodemmanager.html#simToolkitAvailable">simToolkitAvailable</a>().</p>
+<h3 class="fn"><a name="simToolkitIdleModeIcon"></a><a href="qicon.html">QIcon</a> CellModemManager::simToolkitIdleModeIcon () const</h3>
+<p>Returns the icon to display when the system is in idle mode.</p>
+<h3 class="fn"><a name="simToolkitIdleModeIconSelfExplanatory"></a>bool CellModemManager::simToolkitIdleModeIconSelfExplanatory () const</h3>
+<p>Returns true if the idle mode icon is self-explanatory without accompanying text.</p>
+<h3 class="fn"><a name="simToolkitIdleModeText"></a><a href="qstring.html">QString</a> CellModemManager::simToolkitIdleModeText () const</h3>
+<p>Returns the text to display when the system is in idle mode.</p>
+<h3 class="fn"><a name="simToolkitMenuTitle"></a><a href="qstring.html">QString</a> CellModemManager::simToolkitMenuTitle () const</h3>
+<p>Returns the title of the SIM toolkit application's main menu.</p>
 <h3 class="fn"><a name="state"></a><a href="cellmodemmanager.html#State-enum">State</a> CellModemManager::state () const</h3>
 <p>Return the current state of the <a href="cellmodemmanager.html">CellModemManager</a> instance.</p>
 <h3 class="fn"><a name="stateChanged"></a>void CellModemManager::stateChanged ( <a href="cellmodemmanager.html#State-enum">CellModemManager::State</a> <i>newState</i>, <a href="cellmodemmanager.html#State-enum">CellModemManager::State</a> <i>oldState</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -206,6 +226,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

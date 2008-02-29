@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -45,7 +60,8 @@ class QTextBrowserPrivate : public QTextEditPrivate
     Q_DECLARE_PUBLIC(QTextBrowser)
 public:
     inline QTextBrowserPrivate()
-        : textOrSourceChanged(false), forceLoadOnSourceChange(false), openExternalLinks(false)
+        : textOrSourceChanged(false), forceLoadOnSourceChange(false), openExternalLinks(false),
+          openLinks(true)
 #ifdef QT_KEYPAD_NAVIGATION
         , lastKeypadScrollValue(-1)
 #endif
@@ -54,10 +70,17 @@ public:
     void init();
 
     struct HistoryEntry {
+        inline HistoryEntry()
+            : hpos(0), vpos(0), focusIndicatorPosition(-1),
+              focusIndicatorAnchor(-1) {}
         QUrl url;
         int hpos;
         int vpos;
+        int focusIndicatorPosition, focusIndicatorAnchor;
     };
+
+    HistoryEntry createHistoryEntry() const;
+    void restoreHistoryEntry(const HistoryEntry entry);
 
     QStack<HistoryEntry> stack;
     QStack<HistoryEntry> forwardStack;
@@ -73,6 +96,7 @@ public:
     bool forceLoadOnSourceChange;
 
     bool openExternalLinks;
+    bool openLinks;
 
 #ifndef QT_NO_CURSOR
     QCursor oldCursor;
@@ -105,7 +129,7 @@ static bool isAbsoluteFileName(const QString &name)
     return !name.isEmpty()
            && (name[0] == QLatin1Char('/')
 #if defined(Q_WS_WIN)
-               || (name[0].isLetter() && name[1] == QLatin1Char(':')) || name.startsWith("\\\\")
+               || (name[0].isLetter() && name[1] == QLatin1Char(':')) || name.startsWith(QLatin1String("\\\\"))
 #endif
                || (name[0]  == QLatin1Char(':') && name[1] == QLatin1Char('/'))
               );
@@ -141,8 +165,12 @@ QUrl QTextBrowserPrivate::resolveUrl(const QUrl &url) const
 
     // For the second case QUrl can merge "#someanchor" with "foo.html"
     // correctly to "foo.html#someanchor"
-    if (!currentURL.isRelative() || (url.hasFragment() && url.path().isEmpty()))
+    if (!(currentURL.isRelative()
+          || (currentURL.scheme() == QLatin1String("file")
+              && !isAbsoluteFileName(currentURL.toLocalFile())))
+          || (url.hasFragment() && url.path().isEmpty())) {
         return currentURL.resolved(url);
+    }
 
     // this is our last resort when current url and new url are both relative
     // we try to resolve against the current working directory in the local
@@ -161,9 +189,18 @@ void QTextBrowserPrivate::_q_activateAnchor(const QString &href)
         return;
     Q_Q(QTextBrowser);
 
-    textOrSourceChanged = false;
+#ifndef QT_NO_CURSOR
+    viewport->setCursor(oldCursor);
+#endif
 
     const QUrl url = resolveUrl(href);
+
+    if (!openLinks) {
+        emit q->anchorClicked(url);
+        return;
+    }
+
+    textOrSourceChanged = false;
 
 #ifndef QT_NO_DESKTOPSERVICES
     if (openExternalLinks
@@ -261,10 +298,10 @@ void QTextBrowserPrivate::setSource(const QUrl &url)
         home = url;
 
     if (doSetText) {
+        q->QTextEdit::setHtml(txt);
 #ifdef QT_KEYPAD_NAVIGATION
         prevFocus.movePosition(QTextCursor::Start);
 #endif
-        q->QTextEdit::setHtml(txt);
     }
 
     forceLoadOnSourceChange = false;
@@ -275,6 +312,9 @@ void QTextBrowserPrivate::setSource(const QUrl &url)
         hbar->setValue(0);
         vbar->setValue(0);
     }
+#ifdef QT_KEYPAD_NAVIGATION 
+    lastKeypadScrollValue = vbar->value(); 
+#endif 
 
 #ifndef QT_NO_CURSOR
     if (q->isVisible())
@@ -304,7 +344,16 @@ void QTextBrowserPrivate::keypadMove(bool next)
     QRectF newViewRect = QRectF(0, scrollYOffset, control->size().width(), height);
     QRectF bothViewRects = viewRect.united(newViewRect);
 
-    // First, check to see if someone has moved the scrollbars independently
+    // If we don't have a previous anchor, pretend that we had the first/last character
+    // on the screen selected.
+    if (prevFocus.isNull()) {
+        if (next)
+            prevFocus = control->cursorForPosition(QPointF(0, yOffset));
+        else
+            prevFocus = control->cursorForPosition(QPointF(control->size().width(), yOffset + height));
+    }
+
+    // First, check to see if someone has moved the scroll bars independently
     if (lastKeypadScrollValue != yOffset) {
         // Someone (user or programmatically) has moved us, so we might
         // need to start looking from the current position instead of prevFocus
@@ -338,7 +387,7 @@ void QTextBrowserPrivate::keypadMove(bool next)
             focusedPos = scrollYOffset;
             focusIt = true;
         } else {
-            // This is the "normal" case - no scrollbar adjustments, no large anchors,
+            // This is the "normal" case - no scroll bar adjustments, no large anchors,
             // and no wrapping.
             foundNextAnchor = control->findNextPrevAnchor(prevFocus, next, anchorToFocus);
         }
@@ -422,6 +471,10 @@ void QTextBrowserPrivate::keypadMove(bool next)
         }
     }
 
+    // setTextCursor ensures that the cursor is visible. save & restore
+    // the scroll bar values therefore
+    const int savedXOffset = hbar->value();
+
     // Now actually process our decision
     if (focusIt && control->setFocusToAnchor(anchorToFocus)) {
         // Save the focus for next time
@@ -430,6 +483,7 @@ void QTextBrowserPrivate::keypadMove(bool next)
         // Scroll
         vbar->setValue(focusedPos);
         lastKeypadScrollValue = focusedPos;
+        hbar->setValue(savedXOffset);
 
         // Ensure that the new selection is highlighted.
         const QString href = control->anchorAtCursor();
@@ -445,21 +499,51 @@ void QTextBrowserPrivate::keypadMove(bool next)
         QTextCursor cursor = control->textCursor();
         cursor.clearSelection();
 
-        // setTextCursor ensures that the cursor is visible. save & restore
-        // the scrollbar values therefore
-        const int savedXOffset = hbar->value();
-        const int savedYOffset = vbar->value();
-
         control->setTextCursor(cursor);
 
         hbar->setValue(savedXOffset);
-        vbar->setValue(savedYOffset);
+        vbar->setValue(scrollYOffset);
 
         emit q->highlighted(QUrl());
         emit q->highlighted(QString());
     }
 }
 #endif
+
+QTextBrowserPrivate::HistoryEntry QTextBrowserPrivate::createHistoryEntry() const
+{
+    HistoryEntry entry;
+    entry.url = q_func()->source();
+    entry.hpos = hbar->value();
+    entry.vpos = vbar->value();
+
+    const QTextCursor cursor = control->textCursor();
+    if (control->cursorIsFocusIndicator()
+        && cursor.hasSelection()) {
+
+        entry.focusIndicatorPosition = cursor.position();
+        entry.focusIndicatorAnchor = cursor.anchor();
+    }
+    return entry;
+}
+
+void QTextBrowserPrivate::restoreHistoryEntry(const HistoryEntry entry)
+{
+    setSource(entry.url);
+    hbar->setValue(entry.hpos);
+    vbar->setValue(entry.vpos);
+    if (entry.focusIndicatorAnchor != -1 && entry.focusIndicatorPosition != -1) {
+        QTextCursor cursor(control->document());
+        cursor.setPosition(entry.focusIndicatorAnchor);
+        cursor.setPosition(entry.focusIndicatorPosition, QTextCursor::KeepAnchor);
+        control->setCursorIsFocusIndicator(true);
+        control->setTextCursor(cursor);
+    }
+#ifdef QT_KEYPAD_NAVIGATION 
+    lastKeypadScrollValue = vbar->value(); 
+    prevFocus = control->textCursor(); 
+#endif 
+}
 
 /*!
     \class QTextBrowser qtextbrowser.h
@@ -634,36 +718,34 @@ void QTextBrowser::setSource(const QUrl &url)
 {
     Q_D(QTextBrowser);
 
-    int hpos = d->hbar->value();
-    int vpos = d->vbar->value();
+    const QTextBrowserPrivate::HistoryEntry historyEntry = d->createHistoryEntry();
 
     d->setSource(url);
 
     if (!url.isValid())
         return;
 
-    if (!d->stack.isEmpty() && d->stack.top().url == url) {
-        // the same url you are already watching
+    // the same url you are already watching?
+    if (!d->stack.isEmpty() && d->stack.top().url == url)
+        return;
+
+    if (!d->stack.isEmpty())
+        d->stack.top() = historyEntry;
+
+    QTextBrowserPrivate::HistoryEntry entry;
+    entry.url = url;
+    entry.hpos = 0;
+    entry.vpos = 0;
+    d->stack.push(entry);
+
+    emit backwardAvailable(d->stack.count() > 1);
+
+    if (!d->forwardStack.isEmpty() && d->forwardStack.top().url == url) {
+        d->forwardStack.pop();
+        emit forwardAvailable(d->forwardStack.count() > 0);
     } else {
-        if (!d->stack.isEmpty()) {
-            d->stack.top().hpos = hpos;
-            d->stack.top().vpos = vpos;
-        }
-        QTextBrowserPrivate::HistoryEntry entry;
-        entry.url = url;
-        entry.hpos = 0;
-        entry.vpos = 0;
-        d->stack.push(entry);
-
-        emit backwardAvailable(d->stack.count() > 1);
-
-        if (!d->forwardStack.isEmpty() && d->forwardStack.top().url == url) {
-            d->forwardStack.pop();
-            emit forwardAvailable(d->forwardStack.count() > 0);
-        } else {
-            d->forwardStack.clear();
-            emit forwardAvailable(false);
-        }
+        d->forwardStack.clear();
+        emit forwardAvailable(false);
     }
 }
 
@@ -717,9 +799,9 @@ void QTextBrowser::setSource(const QUrl &url)
     URL referred to by the anchor is passed in \a link.
 
     Note that the browser will automatically handle navigation to the
-    location specified by \a link unless you call setSource() in a slot
-    connected. This mechanism is used to override the default navigation
-    features of the browser.
+    location specified by \a link unless the openLinks property
+    is set to false or you call setSource() in a slot connected.
+    This mechanism is used to override the default navigation features of the browser.
 */
 
 /*!
@@ -734,12 +816,11 @@ void QTextBrowser::backward()
     Q_D(QTextBrowser);
     if (d->stack.count() <= 1)
         return;
-    d->forwardStack.push(d->stack.pop());
-    d->forwardStack.top().hpos = d->hbar->value();
-    d->forwardStack.top().vpos = d->vbar->value();
-    d->setSource(d->stack.top().url);
-    d->hbar->setValue(d->stack.top().hpos);
-    d->vbar->setValue(d->stack.top().vpos);
+
+    // Update the history entry
+    d->forwardStack.push(d->createHistoryEntry());
+    d->stack.pop(); // throw away the old version of the current entry
+    d->restoreHistoryEntry(d->stack.top()); // previous entry
     emit backwardAvailable(d->stack.count() > 1);
     emit forwardAvailable(true);
 }
@@ -757,13 +838,11 @@ void QTextBrowser::forward()
     if (d->forwardStack.isEmpty())
         return;
     if (!d->stack.isEmpty()) {
-        d->stack.top().hpos = d->hbar->value();
-        d->stack.top().vpos = d->vbar->value();
+        // Update the history entry
+        d->stack.top() = d->createHistoryEntry();
     }
     d->stack.push(d->forwardStack.pop());
-    setSource(d->stack.top().url);
-    d->hbar->setValue(d->stack.top().hpos);
-    d->vbar->setValue(d->stack.top().vpos);
+    d->restoreHistoryEntry(d->stack.top());
     emit backwardAvailable(true);
     emit forwardAvailable(!d->forwardStack.isEmpty());
 }
@@ -885,8 +964,8 @@ void QTextBrowser::mouseReleaseEvent(QMouseEvent *e)
 */
 void QTextBrowser::focusOutEvent(QFocusEvent *ev)
 {
-    Q_D(QTextBrowser);
 #ifndef QT_NO_CURSOR
+    Q_D(QTextBrowser);
     d->viewport->setCursor((!(d->control->textInteractionFlags() & Qt::TextEditable)) ? d->oldCursor : Qt::IBeamCursor);
 #endif
     QTextEdit::focusOutEvent(ev);
@@ -1038,6 +1117,30 @@ void QTextBrowser::setOpenExternalLinks(bool open)
 {
     Q_D(QTextBrowser);
     d->openExternalLinks = open;
+}
+
+/*!
+   \property QTextBrowser::openLinks
+   \since 4.3
+
+   This property specifies whether QTextBrowser should automatically open links the user tries to
+   activate by mouse or keyboard.
+
+   Regardless of the value of this property the anchorClicked signal is always emitted.
+
+   The default value is true.
+*/
+
+bool QTextBrowser::openLinks() const
+{
+    Q_D(const QTextBrowser);
+    return d->openLinks;
+}
+
+void QTextBrowser::setOpenLinks(bool open)
+{
+    Q_D(QTextBrowser);
+    d->openLinks = open;
 }
 
 /*! \reimp */

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,14 +24,12 @@
 #ifndef ImapClient_H
 #define ImapClient_H
 
-#include <qtcpsocket.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qobject.h>
-#include <qtextstream.h>
 #include <qlist.h>
 
-#include <quuid.h>
+
 
 #include "maillist.h"
 #include "account.h"
@@ -40,7 +38,7 @@
 
 class ImapClient: public Client
 {
-        Q_OBJECT
+    Q_OBJECT
 
 public:
     ImapClient();
@@ -49,15 +47,17 @@ public:
     void setAccount(MailAccount *_account);
     void setSelectedMails(MailList *list, bool connected);
     void quit();
+    void checkForNewMessages();
+    int newMessageCount();
 
 signals:
     void serverFolders();
-    void newMessage(const Email&);
-    void errorOccurred(int status, QString &);
-    void updateStatus(const QString &);
+    void newMessage(const QMailMessage&);
     void mailTransferred(int);
     void downloadedSize(int);
     void failedList(QStringList &);
+    void allMessagesReceived();
+    void nonexistentMessage(const QMailId& id);
 
 public slots:
     void errorHandling(int, QString msg);
@@ -65,8 +65,8 @@ public slots:
 protected slots:
     void operationDone(ImapCommand &, OperationState &);
     void mailboxListed(QString &, QString &, QString &);
-    void messageFetched(Email& mail);
-    void connectionError(int);
+    void messageFetched(QMailMessage& mail);
+    void nonexistentMessage(const QString& uid);
 
 private:
     void removeDeletedMailboxes();
@@ -87,7 +87,7 @@ private:
     QString msgUidl;
     enum transferStatus
     {
-        Init, Fetch, RFC822
+        Init, Fetch, Rfc822
     };
     enum SearchStatus
     {
@@ -101,7 +101,7 @@ private:
     bool selected;
 
     QStringList mailboxNames;
-    QUuid internalId;
+    QMailId internalId;
     QStringList uniqueUidList, unresolvedUid, delList;
     Mailbox *currentBox;
     uint atCurrentBox;

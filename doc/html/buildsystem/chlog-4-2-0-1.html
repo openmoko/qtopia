@@ -10,11 +10,11 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Changes for 4.2&#x2e;0<br /><span class="subtitle"></span>
 </h1>
 <a name="overview"></a>
-<h2>Overview</h2>
+<h3>Overview</h3>
 <p>This page describes changes to the 4.2&#x2e;0 build system.</p>
 <ul>
 <li>Environment variables are no longer required or honoured.</li>
@@ -34,7 +34,7 @@
 <li>qtopiacore projects (libraries and plugins) are installed from their directories instead of src/qt.</li>
 </ul>
 <a name="image-prefix-and-sdk-location"></a>
-<h3>image, prefix and SDK location</h3>
+<h4>image, prefix and SDK location</h4>
 <p>Qtopia 4.1 used -prefix in the same way that Qt uses it. It carried a double meaning, specifying both the image and the prefix (which is hardcoded into libQtCore.so). To work around the fact that you don't usualy want these locations to be the same on an embedded system, you could override the image location by running <tt>make install PREFIX=/somewhere/else</tt>.</p>
 <p>When building an SDK, you also had to override PREFIX so that the binaries would end up in the correct location. A significant drawback to this approach is that the build tree must have a longer path than the SDK location (because the binaries are patched to use the SDK location).</p>
 <p>To reduce confusion and to enable a smoother install process, the three locations are now specified explicitly to configure. The switches are -image, -prefix and -sdk. Specifying -image will give the same behaviour as -prefix in 4.1 because the prefix location defaults to the image location.</p>
@@ -55,6 +55,7 @@
 <tr valign="top" class="even"><td><tt>configure -sdk /sdk -image /image -prefix /prefix</tt></td><td>/sdk</td><td>/image</td><td>/prefix</td></tr>
 <tr valign="top" class="odd"><td><tt>make install IMAGE=/foo</tt></td><td><i>unchanged</i></td><td>/foo</td><td><i>unchanged</i></td></tr>
 </table></p>
+<p>See also <a href="changes.html">What's New?</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 Trolltech</td>

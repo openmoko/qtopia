@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -54,7 +69,15 @@
 #include "../drivers/sqlite2/qsql_sqlite2.h"
 #endif
 #ifdef QT_SQL_IBASE
+#undef SQL_FLOAT  // avoid clash with ODBC
+#undef SQL_DOUBLE
+#undef SQL_TIMESTAMP
+#undef SQL_TYPE_TIME
+#undef SQL_TYPE_DATE
+#undef SQL_DATE
+#define SCHAR IBASE_SCHAR  // avoid clash with ODBC (older versions of ibase.h with Firebird)
 #include "../drivers/ibase/qsql_ibase.h"
+#undef SCHAR
 #endif
 
 #include "qdebug.h"
@@ -97,6 +120,7 @@ public:
 
     mutable QReadWriteLock lock;
 };
+Q_GLOBAL_STATIC(QConnectionDict, dbDict)
 
 class QSqlDatabasePrivate
 {
@@ -129,7 +153,6 @@ public:
     static void removeDatabase(const QString& name);
     static void invalidateDb(const QSqlDatabase &db, const QString &name);
     static DriverDict &driverDict();
-    Q_GLOBAL_STATIC(QConnectionDict, dbDict)
     static void cleanConnections();
 };
 
@@ -344,7 +367,7 @@ void QSqlDatabasePrivate::disable()
     Once the parameters have been set up you can call open() to open
     the connection.
 
-    The connection defined above is a nameless connection. If is the
+    The connection defined above is a nameless connection. It is the
     default connection and can be accessed using database() later on:
 
     \skipto QSqlDatabase db =
@@ -372,7 +395,8 @@ void QSqlDatabasePrivate::disable()
     If transactions are supported, you can use transaction() to start
     a transaction, and then commit() or rollback() to complete it.
     You can find out whether transactions are supported using
-    QSqlDriver::hasFeature().
+    QSqlDriver::hasFeature(). When using transactions you must start
+    the transaction before you create your query.
 
     If an error occurred, it is given by lastError().
 
@@ -579,7 +603,7 @@ void QSqlDatabase::registerSqlDriver(const QString& name, QSqlDriverCreatorBase 
 
 bool QSqlDatabase::contains(const QString& connectionName)
 {
-    return QSqlDatabasePrivate::dbDict()->contains_ts(connectionName);
+    return dbDict()->contains_ts(connectionName);
 }
 
 /*!
@@ -591,7 +615,7 @@ bool QSqlDatabase::contains(const QString& connectionName)
 */
 QStringList QSqlDatabase::connectionNames()
 {
-    return QSqlDatabasePrivate::dbDict()->keys_ts();
+    return dbDict()->keys_ts();
 }
 
 /*!
@@ -814,7 +838,10 @@ bool QSqlDatabase::open(const QString& user, const QString& password)
 }
 
 /*!
-    Closes the database connection, freeing any resources acquired.
+    Closes the database connection, freeing any resources acquired, and
+    invalidating any existing QSqlQuery objects that are used with the
+    database.
+
     This will also affect copies of this QSqlDatabase object.
 
     \sa removeDatabase()
@@ -1200,12 +1227,18 @@ QSqlRecord QSqlDatabase::record(const QString& tablename) const
     \i
     \e none
 
-    \header \i SQLite
+    \header \i SQLite \i Interbase
     \row
 
     \i
     \list
     \i QSQLITE_BUSY_TIMEOUT
+    \endlist
+
+    \i
+    \list
+    \i ISC_DPB_LC_CTYPE
+    \i ISC_DPB_SQL_ROLE_NAME
     \endlist
 
     \endtable
@@ -1368,7 +1401,7 @@ bool QSqlDatabase::isDriverAvailable(const QString& name)
     The host name (or service name) is needed when constructing
     the QTDSDriver for creating new connections for internal
     queries. This is to prevent the simultaneous usage of several
-    QSqlQuery/\l{QSqlCursor} objects from blocking each other.
+    QSqlQuery objects from blocking each other.
 
     \warning If you add a database with the same name as an
     existing database, the new database will replace the old one.

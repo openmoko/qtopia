@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,19 +25,26 @@
 #include <qtopia/pim/qappointmentmodel.h>
 
 #include <QDate>
-#include <QLabel>
 #include <QWidget>
-#include <QScrollArea>
 
 #include "timedview.h"
 #include "appointmentlist.h"
+
+class QLabel;
+class QScrollArea;
+class QPushButton;
+
+namespace DuplicatedFromCalendarWidget 
+{
+    class QCalendarTextNavigator;
+};
 
 class DayView : public QWidget
 {
     Q_OBJECT
 
 public:
-    DayView(QWidget *parent = 0, const QCategoryFilter& c = QCategoryFilter());
+    DayView(QWidget *parent = 0, const QCategoryFilter& c = QCategoryFilter(), QSet<QPimSource> set = QSet<QPimSource>());
 
     QModelIndex currentIndex() const;
     QAppointment currentAppointment() const;
@@ -56,12 +63,17 @@ public slots:
 
     void setDaySpan( int starthour, int endhour );
 
+    void setVisibleSources(QSet<QPimSource> set);
+
     void firstTimed();
     void firstAllDay();
     void lastTimed();
     void lastAllDay();
     void nextOccurrence();
     void previousOccurrence();
+
+    void prevDay();
+    void nextDay();
 
     //void setCurrentIndex(const QModelIndex &);
     void setCurrentOccurrence(const QOccurrence &o);
@@ -76,6 +88,9 @@ public slots:
     void modelsReset();
     void categorySelected( const QCategoryFilter &c );
 
+private slots:
+    void updateView();
+
 signals:
     void removeOccurrence( const QOccurrence& );
     void editOccurrence( const QOccurrence& );
@@ -88,16 +103,20 @@ signals:
     void showDetails();
     void dateChanged();
     void selectionChanged();
+    void closeView();
 
 protected:
     void keyPressEvent(QKeyEvent *);
     void mouseReleaseEvent( QMouseEvent * event );
     bool eventFilter(QObject *o, QEvent *e);
     void resizeEvent(QResizeEvent *);
+    bool event(QEvent *event);
 
 private:
     void updateHeaderText();
     QOccurrenceModel *currentModel() const;
+
+    QPushButton *mNextDay, *mPrevDay;
 
     QLabel *mWeekdayLabel;
     QLabel *mDateLabel;
@@ -112,6 +131,10 @@ private:
 
     QUniqueId lastSelectedTimedId;
     QUniqueId lastSelectedAllDayId;
+
+    QDate targetDate;
+    QTimer *cacheDelayTimer;
+    DuplicatedFromCalendarWidget::QCalendarTextNavigator *nav;
 
     bool allDayFocus;
 };

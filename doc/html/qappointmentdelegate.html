@@ -30,6 +30,7 @@
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qabstractitemdelegate.html#public-slots">QAbstractItemDelegate</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>2 signals inherited from <a href="qabstractitemdelegate.html#signals">QAbstractItemDelegate</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
@@ -52,21 +53,21 @@
 <thead><tr valign="top" class="qt-style"><th>Role</th><th>Data Type</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td><a href="qt.html#ItemDataRole-enum">Qt::DisplayRole</a></td><td><a href="qstring.html">QString</a></td><td>Plain unformatted text drawn on the left of the icon, wrapped to any icons.</td></tr>
 <tr valign="top" class="even"><td><a href="qt.html#ItemDataRole-enum">Qt::DecorationRole</a></td><td><a href="qlist.html">QList</a>&lt;<a href="qicon.html">QIcon</a>&gt;</td><td>Optional. Drawn on the right side of the item, top-to-bottom, right-to-left</td></tr>
-<tr valign="top" class="odd"><td><a href="qt.html#ItemDataRole-enum">Qt::BackgroundColorRole</a></td><td><a href="qcolor.html">QColor</a></td><td>Background color of the item.</td></tr>
 </table></p>
 <p>The four appointments shown in the picture above have the following data in the model:</p>
 <p><table width="80 %" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>DisplayRole</th><th>DecorationRole</th><th>BackgroundColorRole</th></tr></thead>
-<tr valign="top" class="odd"><td>Status meeting</td><td>List with a single icon for recurrence</td><td>Blue</td></tr>
-<tr valign="top" class="even"><td>Lunch at Moe's</td><td>List with a single icon for a reminder</td><td>Red</td></tr>
-<tr valign="top" class="odd"><td>School play</td><td>&lt;empty list&gt;</td><td>Red</td></tr>
+<thead><tr valign="top" class="qt-style"><th>DisplayRole</th><th>DecorationRole</th></tr></thead>
+<tr valign="top" class="odd"><td>Status meeting</td><td>List with a single icon for recurrence</td></tr>
+<tr valign="top" class="even"><td>Lunch at Moe's</td><td>List with a single icon for a reminder</td></tr>
+<tr valign="top" class="odd"><td>School play</td><td>&lt;empty list&gt;</td></tr>
 <tr valign="top" class="even"><td>Oslo conf.</td><td>List with two icons:<ul>
 <li>a recurrence icon</li>
 <li>a timezone icon</li>
 </ul>
-</td><td>Red (note that this is the selected appointment, and it is rendered with the current palette's <tt>Highlight</tt> color)</td></tr>
+</td></tr>
 </table></p>
-<p>See also <a href="qappointment.html">QAppointment</a> and <a href="qappointmentmodel.html">QAppointmentModel</a>.</p>
+<p>Selected appointments are rendered with the current palette's <tt>Highlight</tt> color), while unselected appointments are rendered with the <tt>Button</tt> color.</p>
+<p>See also <a href="qappointment.html">QAppointment</a>, <a href="qappointmentmodel.html">QAppointmentModel</a>, and <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QAppointmentDelegate"></a>QAppointmentDelegate::QAppointmentDelegate ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -77,6 +78,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

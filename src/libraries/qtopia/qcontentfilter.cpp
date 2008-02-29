@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,11 +24,10 @@
 #include <QMultiHash>
 #include "drmcontent_p.h"
 #include <QtDebug>
-#include <QStorageMetaInfo>
-#include "contentlnksql_p.h"
 #include <QDir>
 #include <QMimeType>
 #include <QCategoryFilter>
+#include <qtopia/private/qcontentstore_p.h>
 
 class QContentFilterPrivate : public QSharedData
 {
@@ -181,13 +180,16 @@ public:
     \value Directory The directory the content is located in.
     \value Category The ID of a category assigned to the content.
     \value DRM The \l{QContent::DrmState}{DRM state} of the content.
-    \value Synthetic The value of a content \l{QContent::property()}{property}.  Arguments are of the form \c [group]/[key]/[value].
-    \value QtopiaType \c QtopiaType has been deprecated, use \c Role instead.
+    \value Property The value of a content \l{QContent::property()}{property}.  Arguments are of the form \c [group]/[key]/[value].
+    \value Name Filters on the the value of QContent::name().
+    \value FileName Filters on the file name of content excluding the path.
+    \value QtopiaType QtopiaType has been deprecated. Please use \c Role instead.
+    \value Synthetic The Synthetic filter type has been renamed to \c Property.
     \value Unknown Invalid filter argument.
 */
 
  /*!
-    Constructs an invalid QContentFilter which will not pass any content.
+    Constructs an invalid \c QContentFilter which will not pass any content.
 */
 QContentFilter::QContentFilter()
     : d( 0 )
@@ -198,8 +200,8 @@ QContentFilter::QContentFilter()
     Constructs a copy of the filter \a other.
 */
 QContentFilter::QContentFilter( const QContentFilter &other )
+    : d( other.d )
 {
-    *this = other;
 }
 
 /*!
@@ -215,7 +217,7 @@ QContentFilter::QContentFilter( FilterType type, const QString &argument )
 }
 
 /*!
-    Constructs a filter which passes content whose \a property matches \a value.
+    Constructs a filter which passes content whose property \a property matches \a value.
 */
 QContentFilter::QContentFilter( QContent::Property property, const QString &value )
 {
@@ -232,7 +234,7 @@ QContentFilter::QContentFilter( QContent::Property property, const QString &valu
 }
 
 /*!
-    Constructs a filter which passes content with the given content \a role.
+    Constructs a filter that passes content with the given content \a role.
 */
 QContentFilter::QContentFilter( QContent::Role role )
     : d( 0 )
@@ -253,6 +255,8 @@ QContentFilter::QContentFilter( QContent::Role role )
     case QContent::Application:
         argument = QLatin1String( "Application" );
         break;
+    case QContent::Folder:
+        argument = QLatin1String( "Folder" );
     }
 
     if( !argument.isEmpty() )
@@ -267,7 +271,7 @@ QContentFilter::QContentFilter( QContent::Role role )
 }
 
 /*!
-    Constructs a filter which passes content with the given \a mime type.
+    Constructs a filter that passes content with the given \a mime type.
 */
 QContentFilter::QContentFilter( const QMimeType &mime )
 {
@@ -279,7 +283,7 @@ QContentFilter::QContentFilter( const QMimeType &mime )
 }
 
 /*!
-    Constructs a filter which passes content matching the given category \a filter.
+    Constructs a filter that passes content matching the given category \a filter.
 */
 QContentFilter::QContentFilter( const QCategoryFilter &filter )
 {
@@ -308,14 +312,14 @@ QContentFilter::QContentFilter( const QCategoryFilter &filter )
 }
 
 /*!
-    Destroys a QContentFilter.
+    Destroys a \c QContentFilter.
 */
 QContentFilter::~QContentFilter()
 {
 }
 
 /*!
-    Copies \a other to a QContentFilter.
+    Assigns \a other to this \c QContentFilter.
 */
 QContentFilter &QContentFilter::operator =( const QContentFilter &other )
 {
@@ -325,9 +329,9 @@ QContentFilter &QContentFilter::operator =( const QContentFilter &other )
 }
 
 /*!
-    Creates a negated copy of a QContentFilter.
+    Creates a negated copy of a\c  QContentFilter.
 
-    The new filter will pass all content not passed by the existing QContentFilter.
+    The new filter will pass all content not passed by the existing \c QContentFilter.
 
     \sa negated()
 */
@@ -344,7 +348,7 @@ QContentFilter QContentFilter::operator ~() const
 }
 
 /*!
-    Creates a new QContentFilter which will pass the intersection of the existing filter
+    Returns a new \c QContentFilter which will pass the intersection of this filter
     and \a other.
 
     Combining an invalid QContentFilter and a valid one will return the valid QContentFilter.
@@ -381,7 +385,7 @@ QContentFilter QContentFilter::operator &( const QContentFilter &other ) const
 }
 
 /*!
-    Creates a new QContentFilter which will pass the union of the existing filter
+    Creates a new \c QContentFilter which will pass the union of this filter
     and \a other.
 
     Combining an invalid QContentFilter and a valid one will return the valid QContentFilter.
@@ -418,7 +422,7 @@ QContentFilter QContentFilter::operator |( const QContentFilter &other ) const
 }
 
 /*!
-    Restricts a QContentFilter to the intersection of it and another QContentFilter \a other.
+    Restricts this \c QContentFilter to the intersection of it and another \c QContentFilter \a other.
 
     If the QContentFilter is invalid, it will be assigned \a other.
 
@@ -432,7 +436,7 @@ QContentFilter &QContentFilter::operator &=( const QContentFilter &other )
 }
 
 /*!
-    Restricts a QContentFilter to the union of it and another QContentFilter \a other.
+    Restricts this \c QContentFilter to the union of it and another \c QContentFilter \a other.
 
     If the QContentFilter is invalid, it will be assigned \a other.
 
@@ -479,6 +483,58 @@ bool QContentFilter::operator !=( const QContentFilter &other ) const
                d->arguments  != other.d->arguments ||
                d->subFilters != other.d->subFilters;
     }
+}
+
+/*!
+    Constructs a content filter that filters for content with a \l{QContent::type()}{mime type} value that
+    matches \a mimeType.
+*/
+QContentFilter QContentFilter::mimeType( const QString &mimeType )
+{
+    return QContentFilter( MimeType, mimeType );
+}
+
+/*!
+    Constructs a content filter that filters for content belonging to the category with the id \a categoryId.
+*/
+QContentFilter QContentFilter::category( const QString &categoryId )
+{
+    return QContentFilter( Category, categoryId );
+}
+
+/*!
+    Constructs a content filter that filters for content with a \l{QContent::name()}{name} value that matches \a name.
+*/
+QContentFilter QContentFilter::name( const QString &name )
+{
+    return QContentFilter( Name, name );
+}
+
+/*!
+    Constructs a content filter that filters for content with a \l{QContent::fileName()}{file name} value that matches
+    \a fileName.
+*/
+QContentFilter QContentFilter::fileName( const QString &fileName )
+{
+    return QContentFilter( FileName, fileName );
+}
+
+/*!
+    Constructs a content filter that filters for content with the given \l{QContent::property()}{property} \a group and
+    \a key that matches \a value.
+ */
+QContentFilter QContentFilter::property( const QString &group, const QString &key, const QString &value )
+{
+    return QContentFilter( Synthetic, group + QLatin1Char( '/' ) + key + QLatin1Char( '/' ) + value );
+}
+
+/*!
+    Constructs a content filter that filters for content with the given \l{QContent::property()}{property} \a key and
+    no group that matches \a value.
+ */
+QContentFilter QContentFilter::property( const QString &key, const QString &value )
+{
+    return QContentFilter( Synthetic, QLatin1String( "none/" ) + key + QLatin1Char( '/' ) + value );
 }
 
 /*!
@@ -532,7 +588,10 @@ QList< QContentFilter > QContentFilter::subFilters() const
 }
 
 /*!
-    Returns true if the filter is valid.
+    Returns true if the filter is valid. A \c QContentFilter constructed with no
+    arguments is invalid.
+
+    \sa clear()
 */
 bool QContentFilter::isValid() const
 {
@@ -541,6 +600,8 @@ bool QContentFilter::isValid() const
 
 /*!
     Clears the contents of a filter, invalidating it.
+
+    \sa isValid()
 */
 void QContentFilter::clear()
 {
@@ -601,72 +662,11 @@ bool QContentFilter::test( const QContent &content ) const
 */
 QStringList QContentFilter::argumentMatches( FilterType type, const QString &scope ) const
 {
-    switch( type )
-    {
-    case MimeType:
-        return QContent::database()->mimeFilterMatches( *this, scope );
-    case Category:
-        return QContent::database()->categoryFilterMatches( *this, scope );
-    case Synthetic:
-        return QContent::database()->syntheticFilterMatches( *this, scope.section( '/', 0, 0 ), scope.section( '/', 1, 1 ) );
-    case Directory:
-    {
-        QStringList paths;
-
-        QDir dir( scope );
-
-        foreach( QFileInfo f, dir.entryInfoList( QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name ) )
-        {
-            QString path = f.absoluteFilePath();
-
-            if( QContent::database()->recordCount( *this & QContentFilter( QContentFilter::Directory, path ) ) > 0 )
-                paths.append( path );
-        }
-
-        return paths;
-    }
-    case Location:
-    {
-        QStringList paths;
-
-        if( !scope.isEmpty() )
-        {
-            QDir dir( scope );
-
-            foreach( QFileInfo f, dir.entryInfoList( QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name ) )
-            {
-                QString path = f.absoluteFilePath();
-
-                if( QContent::database()->recordCount( *this & QContentFilter( QContentFilter::Location, path ) ) > 0 )
-                    paths.append( path );
-            }
-        }
-        else
-        {
-            QStorageMetaInfo storageMetaInfo;
-
-            QFileSystemFilter fsf;
-
-            fsf.documents = QFileSystemFilter::Set;
-
-            foreach( QFileSystem *fileSystem, storageMetaInfo.fileSystems( &fsf ) )
-            {
-                QString path = fileSystem->path();
-
-                if( QContent::database()->recordCount( *this & QContentFilter( QContentFilter::Location, path ) ) > 0 )
-                    paths.append( path );
-            }
-        }
-
-        return paths;
-    }
-    default:
-        return QStringList();
-    }
+    return QContentStore::instance()->filterMatches( *this, type, scope );
 }
 
 /*!
-    Tests if a QContent object \a content passes a filter \a argument of FilterType \a type.
+    Returns true if the QContent object \a content passes the filter \a argument of FilterType \a type.
 */
 bool QContentFilter::test( const QContent &content, QContentFilter::FilterType type, const QString &argument )
 {
@@ -675,19 +675,18 @@ bool QContentFilter::test( const QContent &content, QContentFilter::FilterType t
         case MimeType:
             return QRegExp( argument, Qt::CaseInsensitive, QRegExp::Wildcard ).exactMatch( content.type() );
         case Location:
-            return content.file() == argument || content.linkFile() == argument ||
-                    content.file().startsWith( argument + '/' ) ||
-                    content.linkFile().startsWith( argument + '/' );
+            return content.fileName() == argument || content.fileName().startsWith( argument + '/' );
         case Directory:
         {
             QRegExp exp( argument, Qt::CaseSensitive, QRegExp::Wildcard  );
 
-            return exp.exactMatch( content.file() ) || exp.exactMatch( content.linkFile() );
+            return exp.exactMatch( content.fileName() );
         }
         case Role:
             return ( content.role() == QContent::Application && argument == QLatin1String("Application") ) ||
                    ( content.role() == QContent::Document    && argument == QLatin1String("Document"   ) ) ||
-                   ( content.role() == QContent::Data        && argument == QLatin1String("Data"       ) );
+                   ( content.role() == QContent::Data        && argument == QLatin1String("Data"       ) ) ||
+                   ( content.role() == QContent::Folder      && argument == QLatin1String("Folder"     ) );
         case Category:
             return content.categories().contains( argument );
         case Synthetic:
@@ -695,6 +694,12 @@ bool QContentFilter::test( const QContent &content, QContentFilter::FilterType t
                     .exactMatch( argument.section( "/", 0, 0 ) );
         case DRM:
             return content.drmState() == QContent::Protected && argument == QLatin1String( "Protected" );
+        case FileName:
+            return QRegExp( argument, Qt::CaseSensitive, QRegExp::Wildcard )
+                    .exactMatch( content.fileName().section( "/", -1 ) );
+        case Name:
+            return QRegExp( argument, Qt::CaseInsensitive, QRegExp::Wildcard )
+                    .exactMatch( content.name() );
         default:
             return true;
     }
@@ -804,6 +809,12 @@ QDebug operator <<( QDebug debug, const QContentFilter &filter )
             case QContentFilter::Synthetic:
                 debug << "Synthetic:";
                 break;
+            case QContentFilter::FileName:
+                debug << "FileName:";
+                break;
+            case QContentFilter::Name:
+                debug << "Name:";
+            break;
             case QContentFilter::Unknown:
                 debug << "Unknown:";
             }

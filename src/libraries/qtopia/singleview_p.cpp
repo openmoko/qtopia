@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,34 +22,29 @@
 #include "singleview_p.h"
 
 #include <qthumbnail.h>
-
 #include <qtopiaapplication.h>
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qsoftmenubar.h>
-#endif
-
 #include <qpainter.h>
 #include <qevent.h>
 #include <qcontent.h>
+#include <QImageReader>
 
 SingleView::SingleView( QWidget* parent, Qt::WFlags f )
     : QWidget( parent, f ), model_( 0 ), selection_( 0 )
 {
     right_pressed = false;
 
-#ifndef QTOPIA_KEYPAD_NAVIGATION
     // Enable stylus press events
     QtopiaApplication::setStylusOperation( this, QtopiaApplication::RightOnHold );
-#endif
 
     // Accept focus
     setFocusPolicy( Qt::StrongFocus );
 
     // Respond to file changes
     connect( qApp,
-        SIGNAL(contentChanged(const QContentIdList&,const QContent::ChangeType)),
+        SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
         this,
-        SLOT( contentChanged(const QContentIdList&,const QContent::ChangeType)));
+        SLOT(contentChanged(QContentIdList,QContent::ChangeType)));
 }
 
 void SingleView::setModel( QAbstractListModel* model )
@@ -68,14 +63,14 @@ void SingleView::setSelectionModel( QItemSelectionModel* selection )
 {
     // Disconnect current selection model
     if( selection_ ) {
-        disconnect( selection_, SIGNAL(currentChanged(const QModelIndex&,const QModelIndex&)),
-            this, SLOT(currentChanged(const QModelIndex&,const QModelIndex&)) );
+        disconnect( selection_, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this, SLOT(currentChanged(QModelIndex,QModelIndex)) );
     }
     selection_ = selection;
     // Connect new selection model
     if( selection_ ) {
-        connect( selection_, SIGNAL(currentChanged(const QModelIndex&,const QModelIndex&)),
-            this, SLOT(currentChanged(const QModelIndex&,const QModelIndex&)) );
+        connect( selection_, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this, SLOT(currentChanged(QModelIndex,QModelIndex)) );
     }
 }
 
@@ -115,9 +110,7 @@ void SingleView::keyPressEvent( QKeyEvent* e )
 {
     switch( e->key() ) {
     // If select key, emit select signal
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     case Qt::Key_Select:
-#endif
     case Qt::Key_Enter:
         emit selected();
         break;
@@ -136,27 +129,10 @@ void SingleView::keyPressEvent( QKeyEvent* e )
     }
 }
 
-#ifdef QTOPIA_PDA
-void SingleView::mouseReleaseEvent( QMouseEvent* e )
-{
-    // If left button clicked, emit selected
-    if( !right_pressed && e->button() == Qt::LeftButton ) emit selected();
-}
-#endif
-
 void SingleView::mousePressEvent( QMouseEvent* e )
 {
-#ifndef QTOPIA_PDA
     Q_UNUSED(e);
     emit selected();
-#else
-    right_pressed = false;
-    // If right button pressed, emit held
-    if( e->button() == Qt::RightButton ) {
-        right_pressed = true;
-        emit held( e->globalPos() );
-    }
-#endif
 }
 
 void SingleView::moveForward()
@@ -183,9 +159,36 @@ void SingleView::moveBack()
 
 QPixmap SingleView::loadThumbnail( const QString &filename, const QSize &size )
 {
-    QThumbnail thumbnail( filename );
+    QImageReader reader( filename );
 
-    return thumbnail.pixmap( size );
+    QImage image;
+
+    bool scaled = false;
+
+    if( reader.supportsOption( QImageIOHandler::Size ) && reader.supportsOption( QImageIOHandler::ScaledSize ) )
+    {
+        QSize maxSize = reader.size();
+
+        maxSize.scale( size.boundedTo( reader.size() ), Qt::KeepAspectRatio );
+
+        reader.setScaledSize( maxSize );
+
+        scaled = true;
+    }
+
+    if( reader.read( &image ) )
+    {
+        if( !scaled )
+        {
+            QSize maxSize = size.boundedTo( image.size() );
+
+            image = image.scaled( maxSize, Qt::KeepAspectRatio, Qt::FastTransformation );
+        }
+
+        return QPixmap::fromImage( image );
+    }
+    else
+        return QPixmap();
 }
 
 void SingleView::contentChanged(const QContentIdList &idList,const QContent::ChangeType changeType)

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,13 +36,8 @@
 #include <QToolButton>
 #include <QScrollArea>
 
-#ifdef QTOPIA_PHONE
 #include "ui_searchviewbasephone.h"
-#else
-#include "ui_searchviewbase.h"
-#endif
 #include "search.h"
-#include "email.h"
 #include "account.h"
 #include "emaillistitem.h"
 
@@ -59,9 +54,6 @@ public:
 public slots:
     void dateAfterChanged( const QDate & );
     void dateBeforeChanged( const QDate & );
-
-
-
 
 private:
     void init();

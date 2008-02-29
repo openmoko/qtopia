@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -44,12 +59,14 @@ void QSvgG::draw(QPainter *p)
 {
     QList<QSvgNode*>::iterator itr = m_renderers.begin();
     applyStyle(p);
-    
-    while (itr != m_renderers.end()) {
-        QSvgNode *node = *itr;
-        if (node->isVisible())
-            node->draw(p);
-        ++itr;
+
+    if (displayMode() != QSvgNode::NoneMode) {
+        while (itr != m_renderers.end()) {
+            QSvgNode *node = *itr;
+            if (node->isVisible())
+                node->draw(p);
+            ++itr;
+        }
     }
     revertStyle(p);
 }
@@ -145,61 +162,64 @@ void QSvgSwitch::draw(QPainter *p)
 {
     QList<QSvgNode*>::iterator itr = m_renderers.begin();
     applyStyle(p);
-    while (itr != m_renderers.end()) {
-        QSvgNode *node = *itr;
-        if (node->isVisible()) {
-            const QStringList &features  = node->requiredFeatures();
-            const QStringList &extensions = node->requiredExtensions();
-            const QStringList &languages = node->requiredLanguages();
-            const QStringList &formats = node->requiredFormats();
-            const QStringList &fonts = node->requiredFonts();
 
-            bool okToRender = true;
-            if (!features.isEmpty()) {
-                QStringList::const_iterator sitr = features.constBegin();
-                for (; sitr != features.constEnd(); ++sitr) {
-                    if (!m_features.contains(*sitr)) {
-                        okToRender = false;
-                        break;
+    if (displayMode() != QSvgNode::NoneMode) {
+        while (itr != m_renderers.end()) {
+            QSvgNode *node = *itr;
+            if (node->isVisible()) {
+                const QStringList &features  = node->requiredFeatures();
+                const QStringList &extensions = node->requiredExtensions();
+                const QStringList &languages = node->requiredLanguages();
+                const QStringList &formats = node->requiredFormats();
+                const QStringList &fonts = node->requiredFonts();
+
+                bool okToRender = true;
+                if (!features.isEmpty()) {
+                    QStringList::const_iterator sitr = features.constBegin();
+                    for (; sitr != features.constEnd(); ++sitr) {
+                        if (!m_features.contains(*sitr)) {
+                            okToRender = false;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (okToRender && !extensions.isEmpty()) {
-                QStringList::const_iterator sitr = extensions.constBegin();
-                for (; sitr != extensions.constEnd(); ++sitr) {
-                    if (!m_extensions.contains(*sitr)) {
-                        okToRender = false;
-                        break;
+                if (okToRender && !extensions.isEmpty()) {
+                    QStringList::const_iterator sitr = extensions.constBegin();
+                    for (; sitr != extensions.constEnd(); ++sitr) {
+                        if (!m_extensions.contains(*sitr)) {
+                            okToRender = false;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (okToRender && !languages.isEmpty()) {
-                QStringList::const_iterator sitr = languages.constBegin();
-                okToRender = false;
-                for (; sitr != languages.constEnd(); ++sitr) {
-                    if ((*sitr).startsWith(m_systemLanguagePrefix)) {
-                        okToRender = true;
-                        break;
+                if (okToRender && !languages.isEmpty()) {
+                    QStringList::const_iterator sitr = languages.constBegin();
+                    okToRender = false;
+                    for (; sitr != languages.constEnd(); ++sitr) {
+                        if ((*sitr).startsWith(m_systemLanguagePrefix)) {
+                            okToRender = true;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (okToRender && !formats.isEmpty()) {
-                okToRender = false;
-            }
+                if (okToRender && !formats.isEmpty()) {
+                    okToRender = false;
+                }
 
-            if (okToRender && !fonts.isEmpty()) {
-                okToRender = false;
-            }
+                if (okToRender && !fonts.isEmpty()) {
+                    okToRender = false;
+                }
 
-            if (okToRender) {
-                node->draw(p);
-                break;
+                if (okToRender) {
+                    node->draw(p);
+                    break;
+                }
             }
+            ++itr;
         }
-        ++itr;
     }
     revertStyle(p);
 }

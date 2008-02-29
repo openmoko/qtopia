@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -26,8 +41,14 @@
 #include "ui4.h"
 #include "uic.h"
 #include "databaseinfo.h"
+#include <QtCore/QDebug>
+#include <QtCore/QFileInfo>
+#include <QtCore/QTextStream>
 
-#include <QTextStream>
+namespace {
+    enum { debugWriteIncludes = 0 };
+    enum { warnHeaderGeneration = 0 };
+}
 
 namespace CPP {
 
@@ -45,23 +66,27 @@ static ClassInfoEntry qclass_lib_map[] = {
     { 0, 0, 0 }
 };
 
-WriteIncludes::WriteIncludes(Uic *uic)
-    : driver(uic->driver()), output(uic->output()), option(uic->option())
+WriteIncludes::WriteIncludes(Uic *uic)    :
+    m_uic(uic),
+    m_output(uic->output()),
+    m_scriptsActivated(false)
 {
-    this->uic = uic;
-
-    ClassInfoEntry *it = &qclass_lib_map[0];
-    while (it->klass != 0) {
-        m_classToHeader.insert(QLatin1String(it->klass), QLatin1String(it->module) + QLatin1String("/") + QLatin1String(it->klass));
-        m_oldHeaderToNewHeader.insert(QLatin1String(it->header), QLatin1String(it->module) + QLatin1String("/") + QLatin1String(it->klass));
-        ++it;
+    for(const ClassInfoEntry *it = &qclass_lib_map[0]; it->klass != 0;  ++it) {
+        QString newHeader = QLatin1String(it->module);
+        newHeader += QLatin1Char('/');
+        newHeader += QLatin1String(it->klass);
+        m_classToHeader.insert(QLatin1String(it->klass),         newHeader);
+        m_oldHeaderToNewHeader.insert(QLatin1String(it->header), newHeader);
     }
 }
 
 void WriteIncludes::acceptUI(DomUI *node)
 {
-    m_includes.clear();
-    m_customWidgets.clear();
+    m_scriptsActivated = false;
+    m_localIncludes.clear();
+    m_globalIncludes.clear();
+    m_knownClasses.clear();
+    m_includeBaseNames.clear();
 
     if (node->elementIncludes())
         acceptIncludes(node->elementIncludes());
@@ -75,10 +100,10 @@ void WriteIncludes::acceptUI(DomUI *node)
 
     add(QLatin1String("QButtonGroup")); // ### only if it is really necessary
 
-    if (uic->hasExternalPixmap() && uic->pixmapFunction() == QLatin1String("qPixmapFromMimeSource"))
-        add(QLatin1String("Q3Mimefactory"));
+    if (m_uic->hasExternalPixmap() && m_uic->pixmapFunction() == QLatin1String("qPixmapFromMimeSource"))
+        add(QLatin1String("Q3MimeSourceFactory"));
 
-    if (uic->databaseInfo()->connections().size()) {
+    if (m_uic->databaseInfo()->connections().size()) {
         add(QLatin1String("QSqlDatabase"));
         add(QLatin1String("Q3SqlCursor"));
         add(QLatin1String("QSqlRecord"));
@@ -87,20 +112,10 @@ void WriteIncludes::acceptUI(DomUI *node)
 
     TreeWalker::acceptUI(node);
 
-    QMapIterator<QString, bool> it(m_includes);
-    while (it.hasNext()) {
-        it.next();
+    writeHeaders(m_globalIncludes, true);
+    writeHeaders(m_localIncludes, false);
 
-        QString header = m_oldHeaderToNewHeader.value(it.key(), it.key());
-        if (header.trimmed().isEmpty())
-            continue;
-
-        if (it.value())
-            output << "#include <" << header << ">\n";
-        else
-            output << "#include \"" << header << "\"\n";
-    }
-    output << "\n";
+    m_output << QLatin1Char('\n');
 }
 
 void WriteIncludes::acceptWidget(DomWidget *node)
@@ -121,46 +136,106 @@ void WriteIncludes::acceptSpacer(DomSpacer *node)
     TreeWalker::acceptSpacer(node);
 }
 
-void WriteIncludes::add(const QString &className)
+void WriteIncludes::acceptProperty(DomProperty *node)
 {
-    if (className.isEmpty())
+    if (node->kind() == DomProperty::Date)
+        add(QLatin1String("QDate"));
+    if (node->kind() == DomProperty::Locale)
+        add(QLatin1String("QLocale"));
+    TreeWalker::acceptProperty(node);
+}
+
+void WriteIncludes::insertIncludeForClass(const QString &className, QString header, bool global)
+{
+    if (debugWriteIncludes)
+        qDebug() << "WriteIncludes::insertIncludeForClass" << className << header  << global;
+
+    do {
+        if (!header.isEmpty())
+            break;
+
+        // Known class
+        const StringMap::const_iterator it = m_classToHeader.constFind(className);
+        if (it != m_classToHeader.constEnd()) {
+            header = it.value();
+            global =  true;
+            break;
+        }
+
+        // Quick check by class name to detect includehints provided for custom widgets.
+        // Remove namespaces
+        QString lowerClassName = className.toLower();
+        static const QString namespaceSeparator = QLatin1String("::");
+        const int namespaceIndex = lowerClassName.lastIndexOf(namespaceSeparator);
+        if (namespaceIndex != -1)
+            lowerClassName.remove(0, namespaceIndex + namespaceSeparator.size());
+        if (m_includeBaseNames.contains(lowerClassName)) {
+            header.clear();
+            break;
+        }
+
+        // Last resort: Create default header
+        if (!m_uic->option().implicitIncludes)
+            break;
+        header = lowerClassName;
+        header += QLatin1String(".h");
+        if (warnHeaderGeneration) {
+            const QString msg =  QString::fromUtf8("Warning: generated header '%1' for class '%2'.").arg(header).arg(className);
+            qWarning(msg.toUtf8().constData());
+        }
+
+        global = true;
+    } while (false);
+
+    if (!header.isEmpty())
+        insertInclude(header, global);
+}
+
+void WriteIncludes::add(const QString &className, bool determineHeader, const QString &header, bool global)
+{
+    if (debugWriteIncludes)
+        qDebug() << "WriteIncludes::add" << className << header  << global;
+
+    if (className.isEmpty() || m_knownClasses.contains(className))
         return;
 
-    QString header = m_classToHeader.value(className, className.toLower() + QLatin1String(".h"));
+    m_knownClasses.insert(className);
 
     if (className == QLatin1String("Line")) { // ### hmm, deprecate me!
         add(QLatin1String("QFrame"));
-    } else if (!m_includes.contains(header) && !m_customWidgets.contains(className)) {
-        m_includes.insert(header, true);
+        return;
     }
 
-    if (uic->customWidgetsInfo()->extends(className, QLatin1String("Q3ListView"))
-            || uic->customWidgetsInfo()->extends(className, QLatin1String("Q3Table"))) {
+    if (m_uic->customWidgetsInfo()->extends(className, QLatin1String("Q3ListView"))  ||
+        m_uic->customWidgetsInfo()->extends(className, QLatin1String("Q3Table"))) {
         add(QLatin1String("Q3Header"));
     }
+    if (determineHeader)
+        insertIncludeForClass(className, header, global);
 }
 
 void WriteIncludes::acceptCustomWidget(DomCustomWidget *node)
 {
-    if (node->elementClass().isEmpty())
+    const QString className = node->elementClass();
+    if (className.isEmpty())
         return;
 
-    m_customWidgets.insert(node->elementClass(), true);
+    if (const DomScript *domScript = node->elementScript())
+        if (!domScript->text().isEmpty())
+            activateScripts();
 
-    bool global = true;
-    if (node->elementHeader() && node->elementHeader()->text().size()) {
-        global = node->elementHeader()->attributeLocation().toLower() == QLatin1String("global");
-        QString header = node->elementHeader()->text();
-        QString qtHeader = m_classToHeader.value(node->elementClass()); // check if the class is a built-in qt class
-        if (!qtHeader.isEmpty()) {
-            global = true;
-            header = qtHeader;
-        }
-        m_includes.insert(header, global);
+    if (!node->elementHeader() || node->elementHeader()->text().isEmpty()) {
+        add(className, false); // no header specified
     } else {
-        add(node->elementClass());
+        // custom header unless it is a built-in qt class
+        QString header;
+        bool global = false;
+        if (!m_classToHeader.contains(className)) {
+            global = node->elementHeader()->attributeLocation().toLower() == QLatin1String("global");
+            header = node->elementHeader()->text();
+        }
+        add(className, true, header, global);
     }
-
 }
 
 void WriteIncludes::acceptCustomWidgets(DomCustomWidgets *node)
@@ -178,7 +253,51 @@ void WriteIncludes::acceptInclude(DomInclude *node)
     bool global = true;
     if (node->hasAttributeLocation())
         global = node->attributeLocation() == QLatin1String("global");
-    m_includes.insert(node->text(), global);
+    insertInclude(node->text(), global);
+}
+void WriteIncludes::insertInclude(const QString &header, bool global)
+{
+    if (debugWriteIncludes)
+        qDebug() << "WriteIncludes::insertInclude" <<  header  << global;
+
+    OrderedSet &includes = global ?  m_globalIncludes : m_localIncludes;
+    if (includes.contains(header))
+        return;
+    // Insert. Also remember base name for quick check of suspicious custom plugins
+    includes.insert(header, false);
+    const QString lowerBaseName = QFileInfo(header).completeBaseName ().toLower();
+    m_includeBaseNames.insert(lowerBaseName);
 }
 
+void WriteIncludes::writeHeaders(const OrderedSet &headers, bool global)
+{
+    const QChar openingQuote = global ? QLatin1Char('<') : QLatin1Char('"');
+    const QChar closingQuote = global ? QLatin1Char('>') : QLatin1Char('"');
+
+    const OrderedSet::const_iterator cend = headers.constEnd();
+    for ( OrderedSet::const_iterator sit = headers.constBegin(); sit != cend; ++sit) {
+        const StringMap::const_iterator hit = m_oldHeaderToNewHeader.constFind(sit.key());
+        const bool mapped =  hit != m_oldHeaderToNewHeader.constEnd();
+        const  QString header =  mapped ? hit.value() : sit.key();
+        if (!header.trimmed().isEmpty()) {
+            m_output << "#include " << openingQuote << header << closingQuote << QLatin1Char('\n');
+        }
+    }
+}
+
+void WriteIncludes::acceptWidgetScripts(const DomScripts &scripts, DomWidget *, const  DomWidgets &)
+{
+    if (!scripts.empty()) {
+        activateScripts();
+    }
+}
+
+void WriteIncludes::activateScripts()
+{
+    if (!m_scriptsActivated) {
+        add(QLatin1String("QScriptEngine"));
+        add(QLatin1String("QDebug"));
+        m_scriptsActivated = true;
+    }
+}
 } // namespace CPP

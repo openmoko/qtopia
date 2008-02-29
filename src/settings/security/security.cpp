@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,8 +23,8 @@
 #include <qtopiaapplication.h>
 #include <qpassworddialog.h>
 #include <qtopiaipcenvelope.h>
-#ifdef QTOPIA_CELL
 #include <qsoftmenubar.h>
+#ifdef QTOPIA_CELL
 #include "phonesecurity.h"
 #endif
 
@@ -37,7 +37,6 @@
 #include <QHostAddress>
 #include <QCloseEvent>
 #include <QSettings>
-#include <QDebug>
 
 
 class WaitScreen : public QLabel
@@ -47,9 +46,7 @@ public:
     WaitScreen( QWidget *parent ) : QLabel( parent )
     {
         setText(tr("Please wait ..."));
-#ifdef QTOPIA_CELL
         QSoftMenuBar::clearLabel(this, Qt::Key_Back);
-#endif
     }
 
 public slots:
@@ -87,12 +84,12 @@ private:
 };
 
 Security::Security( QWidget* parent, Qt::WFlags fl )
-#ifdef QTOPIA_CELL
-    : QDialog( parent, fl ), mStatus(0)
-{
-#else
     : QDialog( parent, fl )
+#ifdef QTOPIA_CELL
+    , mStatus(0)
+#endif
 {
+#ifndef QTOPIA_CELL
     setModal( true );
 #endif
     setupUi( this );
@@ -105,51 +102,24 @@ Security::Security( QWidget* parent, Qt::WFlags fl )
 #else
     passcode_poweron->setChecked(cfg.value("passcode_poweron",false).toBool());
 #endif
-    cfg.endGroup();
-    cfg.beginGroup("Sync");
-    QHostAddress allowed;
-    allowed.setAddress(cfg.value("auth_peer","192.168.0.0").toString());
-    uint auth_peer = allowed.toIPv4Address();
-    int auth_peer_bits = cfg.value("auth_peer_bits",16).toInt();
-    selectNet(auth_peer,auth_peer_bits);
-    connect(syncnet, SIGNAL(editTextChanged(const QString&)),
-            this, SLOT(setSyncNet(const QString&)));
+
 #ifdef QTOPIA_CELL
-    QtopiaApplication::setInputMethodHint(syncnet,QtopiaApplication::Named,"netmask");
     phonesec = new PhoneSecurity(this);
     connect(phonesec,SIGNAL(changed(bool)),this,SLOT(phoneChanged(bool)));
     connect(phonesec,SIGNAL(locked(bool)),this,SLOT(phoneLocked(bool)));
     connect(phonesec,SIGNAL(lockDone(bool)),this,SLOT(phoneLockDone(bool)));
-
-    (void)QSoftMenuBar::menuFor(this); // just to get help
 #endif
 
-    /*
-    { cfg.endGroup(); cfg.beginGroup("Remote"); };
-    if ( telnetAvailable() )
-        telnet->setChecked(cfg.value("allow_telnet").toString());
-    else
-        telnet->hide();
-
-    if ( sshAvailable() )
-        ssh->setChecked(cfg.value("allow_ssh").toString());
-    else
-        ssh->hide();
-    */
+    (void)QSoftMenuBar::menuFor(this); // just to get help
+#ifdef QTOPIA_CELL
+    QSoftMenuBar::setCancelEnabled(this, false);
+#endif
 
     connect(changepasscode,SIGNAL(clicked()), this, SLOT(changePassCode()));
     connect(clearpasscode,SIGNAL(clicked()), this, SLOT(clearPassCode()));
-
-#ifndef QTOPIA_DESKTOP
 #ifdef QTOPIA_CELL
     connect(pinSelection, SIGNAL(activated(int)), this, SLOT(updateGUI()));
-    // XXX hide sync tab until Qtopia desktop is ported
-    TabWidget2->removeTab( 1 );
-#else
-    // Hide sync tab until Qtopia desktop is ported.
-    GroupBox1->hide();
-#endif  // QTOPIA_CELL
-#endif // QTOPIA_DESKTOP
+#endif
 
     updateGUI();
 }
@@ -274,104 +244,16 @@ void Security::done(int r)
     close();
 }
 
-void Security::selectNet(int auth_peer,int auth_peer_bits)
-{
-    QString sn;
-    if ( auth_peer_bits == 0 && auth_peer == 0 ) {
-        sn = tr("Any");
-    } else if ( auth_peer_bits == 32 && auth_peer == 0 ) {
-        sn = tr("None");
-    } else {
-        sn =
-            QString::number((auth_peer>>24)&0xff) + "."
-            + QString::number((auth_peer>>16)&0xff) + "."
-            + QString::number((auth_peer>>8)&0xff) + "."
-            + QString::number((auth_peer>>0)&0xff) + "/"
-            + QString::number(auth_peer_bits);
-    }
-    for (int i=0; i<syncnet->count(); i++) {
-        if ( sn == syncnet->itemText(i) || syncnet->itemText(i).left(sn.length()+1) == sn+" " )
-        {
-            syncnet->setCurrentIndex(i);
-            return;
-        }
-    }
-    syncnet->addItem(sn);
-    syncnet->setCurrentIndex(syncnet->count()-1);
-}
-
-bool Security::parseNet(const QString& sn,int& auth_peer,int& auth_peer_bits)
-{
-    auth_peer=0;
-    if ( sn == tr("Any") ) {
-        auth_peer = 0;
-        auth_peer_bits = 0;
-        return true;
-    } else if ( sn == tr("None") ) {
-        auth_peer = 0;
-        auth_peer_bits = 32;
-        return true;
-    } else {
-        QString a;
-        int sl = sn.indexOf('/');
-        if ( sl < 0 ) {
-            auth_peer_bits = 32;
-            a = sn;
-        } else {
-            int n=(uint)sn.indexOf(' ',sl);
-            if ( n>sl ) n-=sl;
-            auth_peer_bits = sn.mid(sl+1,(uint)n).toInt();
-            a = sn.left(sl);
-        }
-        QStringList b= a.split( QChar( '.' ));
-        if ( b.count() != 4 )
-            return false;
-        int x=1<<24;
-        auth_peer = 0;
-        for (QStringList::ConstIterator it=b.begin(); it!=b.end(); ++it) {
-            auth_peer += (*it).toInt()*x;
-            x >>= 8;
-        }
-        return x!=0 && auth_peer_bits && auth_peer;
-    }
-}
-
-void Security::setSyncNet(const QString& sn)
-{
-    int auth_peer,auth_peer_bits;
-    if ( parseNet(sn,auth_peer,auth_peer_bits) )
-        selectNet(auth_peer,auth_peer_bits);
-}
-
 void Security::applySecurity()
 {
-    if ( valid ) {
-        QSettings cfg("Trolltech","Security");
 #ifndef QTOPIA_CELL
+    if ( valid ) {        
+        QSettings cfg("Trolltech","Security");
         cfg.beginGroup("Passcode");
         cfg.setValue("passcode",passcode);
         cfg.setValue("passcode_poweron",passcode_poweron->isChecked());
-#endif
-        cfg.endGroup();
-        cfg.beginGroup("Sync");
-        int auth_peer=0;
-        int auth_peer_bits;
-        QString sn = syncnet->currentText();
-        parseNet(sn,auth_peer,auth_peer_bits);
-
-        QHostAddress allowed((quint32)auth_peer);
-        cfg.setValue("auth_peer",allowed.toString());
-        cfg.setValue("auth_peer_bits",auth_peer_bits);
-
-        /*
-        { cfg.endGroup(); cfg.beginGroup("Remote"); };
-        if ( telnetAvailable() )
-            cfg.setValue("allow_telnet",telnet->isChecked());
-        if ( sshAvailable() )
-            cfg.setValue("allow_ssh",ssh->isChecked());
-        // ### write ssh/telnet sys config files
-        */
     }
+#endif
 
     QtopiaIpcEnvelope("QPE/System", "securityChanged()");
 }
@@ -400,11 +282,11 @@ void Security::changePassCode()
                 return;
         }
         if (mismatch) {
-            new1 = enterPassCode(tr("Mismatch: Retry new PIN"), false);
+            new1 = enterPassCode(tr("Mismatch: Retry new PIN"), false, false);
         } else if (!valid) {
-            new1 = enterPassCode(tr("Invalid: Retry new PIN"), false);
+            new1 = enterPassCode(tr("Invalid: Retry new PIN"), false, false);
         } else {
-            new1 = enterPassCode(tr("Enter new passcode"), false);
+            new1 = enterPassCode(tr("Enter new PIN"), false, false);
         }
 #else
         if (mismatch) {
@@ -419,11 +301,13 @@ void Security::changePassCode()
         if ( new1.isNull() )
             return;
 
-        if (new1.isEmpty()) {
+        if (new1.length() < 4 || new1.length() > 8) {
+            // GSM 51.010, section 27.14.2 says that PIN's must be between
+            // 4 and 8 digits in length.
             valid = false;
         } else {
 #ifdef QTOPIA_CELL
-            new2 = enterPassCode(tr("Re-enter new PIN"), false);
+            new2 = enterPassCode(tr("Re-enter new PIN"), false, false);
 #else
             new2 = enterPassCode(tr("Re-enter new passcode"), true);
 #endif
@@ -454,22 +338,13 @@ void Security::clearPassCode()
     updateGUI();
 }
 
-
 QString Security::enterPassCode(const QString& prompt, bool encrypt, bool last)
 {
+#ifdef QTOPIA_CELL
+    return QPasswordDialog::getPassword(this, prompt, encrypt ? QPasswordDialog::Crypted : QPasswordDialog::Pin, last);
+#else
     return QPasswordDialog::getPassword(this, prompt, encrypt ? QPasswordDialog::Crypted : QPasswordDialog::Plain, last);
-}
-
-bool Security::telnetAvailable() const
-{
-    // ### not implemented
-    return false;
-}
-
-bool Security::sshAvailable() const
-{
-    // ### not implemented
-    return false;
+#endif
 }
 
 #include "security.moc"

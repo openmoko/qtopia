@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,6 +32,10 @@
 #include <sys/shm.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#ifndef MAP_FILE
+#  define MAP_FILE 0
+#endif
 
 class QMemoryFileData
 {
@@ -220,11 +224,8 @@ QMemoryFileData * QMemoryFile::openData (const QString &fileName, int flags,
             }
         }
 
-        if (size != 0){
-
-#if !defined(_OS_SOLARIS_)
+        if (size != 0) {
             memFlags |= MAP_FILE; // swap-backed map from file
-#endif
             block = (char*)mmap( 0, // any address
                                  size,
                                  protFlags,
@@ -244,7 +245,6 @@ QMemoryFileData * QMemoryFile::openData (const QString &fileName, int flags,
 
     return data;
 }
-
 
 /*
   \internal

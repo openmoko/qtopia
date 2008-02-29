@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -83,12 +83,28 @@ public:
     virtual bool systemShutdown();
 
     bool shutdown() const { return isShutdown; }
+    QString quicklaunchExecutable();
+
 private:
     void killAll();
     bool isShutdown;
 
+    QString mQlExecutable;
     QList<QlProcessInfo*> mQlProcesses;
 };
+
+QString QuickExeApplicationLauncherPrivate::quicklaunchExecutable()
+{
+    if(mQlExecutable.isEmpty()) {
+        QStringList rv;
+        QStringList paths = Qtopia::installPaths();
+        for(int ii = 0; mQlExecutable.isEmpty() && ii < paths.count(); ++ii)
+            if(QFile::exists(paths.at(ii) + "bin/quicklauncher"))
+                mQlExecutable = paths.at(ii) + "bin/quicklauncher";
+    }
+
+    return mQlExecutable;
+}
 
 bool QuickExeApplicationLauncherPrivate::systemRestart()
 {
@@ -186,7 +202,7 @@ bool QuickExeApplicationLauncherPrivate::createProcess() const
   \row \o Services \o None
   \endtable
 
-  The QuickExeApplicationLauncher class provides the ApplicationLauncherType
+  The QuickExeApplicationLauncher class provides the ApplicationTypeLauncher
   implementation that works with the \c {quicklauncher} executable to accelerate
   application launching.
 
@@ -234,6 +250,8 @@ bool QuickExeApplicationLauncherPrivate::createProcess() const
 
   \i {Note:} \c {quicklauncher} itself does not correctly search the install paths 
   for applications.  This functionality is planned for a future Qtopia version.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 QTOPIA_TASK(QuickExeApplicationLauncher, QuickExeApplicationLauncher);
 QTOPIA_TASK_PROVIDES(QuickExeApplicationLauncher, ApplicationTypeLauncher);
@@ -246,16 +264,15 @@ QuickExeApplicationLauncher::QuickExeApplicationLauncher()
 : d( new QuickExeApplicationLauncherPrivate )
 {
     QtopiaServerApplication::addAggregateObject(this, d);
-
     QtopiaChannel *channel = new QtopiaChannel("QPE/QuickLauncher", this);
     connect( channel,
-             SIGNAL( received( const QString&, const QByteArray&) ),
+             SIGNAL(received(QString,QByteArray)),
              this,
-             SLOT( quickLauncherChannel( const QString&, const QByteArray& ) ) );
+             SLOT(quickLauncherChannel(QString,QByteArray)) );
 
     // No point starting in less than 10secs - the server will take at least
     // that long to startup.
-    QTimer::singleShot( 10000, this, SLOT( startNewQuicklauncher() ) );
+    QTimer::singleShot( 10000, this, SLOT(startNewQuicklauncher()) );
 }
 
 /*!
@@ -272,12 +289,18 @@ bool QuickExeApplicationLauncher::canLaunch( const QString &app )
     if ( !d->ready() )
         return false;
 
+#ifdef SINGLE_EXEC
+    QPEAppMap *qpeAppMap();
+    if(qpeAppMap()->contains(app))
+        return true;
+#else
     QStringList plugins = quicklaunchPlugin(app);
     for ( int ii = 0; ii < plugins.count(); ++ii )
         if ( QFile::exists( plugins.at(ii) ) )
             return true;
 
     return false;
+#endif
 }
 
 /*! \internal */
@@ -335,10 +358,10 @@ void QuickExeApplicationLauncher::startNewQuicklauncher()
 
     process->setReadChannelMode( QProcess::ForwardedChannels );
     process->closeWriteChannel();
-    connect( process, SIGNAL( finished( int ) ),
-             this, SLOT( qlProcessExited( int ) ) );
-    connect( process, SIGNAL( error( QProcess::ProcessError ) ),
-             this, SLOT( qlProcessError( QProcess::ProcessError ) ) );
+    connect( process, SIGNAL(finished(int)),
+             this, SLOT(qlProcessExited(int)) );
+    connect( process, SIGNAL(error(QProcess::ProcessError)),
+             this, SLOT(qlProcessError(QProcess::ProcessError)) );
     d->addProcess( process );
 
     // Determine if LD_BIND_NOW was in the environment before the server started
@@ -356,7 +379,7 @@ void QuickExeApplicationLauncher::startNewQuicklauncher()
     // quicklauncher is slower and i18n issues can appear.
     ::setenv( "LD_BIND_NOW", "1", 1 );
 
-    process->start( quicklaunchExecutable() );
+    process->start( d->quicklaunchExecutable() );
     if ( ::getuid() == 0 )
         ::setpriority( PRIO_PROCESS, process->pid(), 19 );
 
@@ -380,7 +403,7 @@ void QuickExeApplicationLauncher::qlProcessExited( int )
 }
 
 /*! \internal */
-void QuickExeApplicationLauncher::qlProcessError( QProcess::ProcessError )
+void QuickExeApplicationLauncher::qlProcessError( QProcess::ProcessError error)
 {
     if ( sender() != 0 ) {
         QProcess* process
@@ -398,7 +421,7 @@ void QuickExeApplicationLauncher::respawnQuicklauncher( bool fast )
 {
     QTimer::singleShot( fast ? 1000 : 5000,
                         this,
-                        SLOT( startNewQuicklauncher() ) );
+                        SLOT(startNewQuicklauncher()) );
 }
 
 /*! \internal */
@@ -410,12 +433,6 @@ QStringList QuickExeApplicationLauncher::quicklaunchPlugin( const QString &app )
         rv.append(paths.at(ii) + "plugins/application/lib" + app + ".so");
     }
     return rv;
-}
-
-/*! \internal */
-QString QuickExeApplicationLauncher::quicklaunchExecutable()
-{
-    return Qtopia::qtopiaDir() + "bin/quicklauncher";
 }
 
 #include "quickexeapplicationlauncher.moc"

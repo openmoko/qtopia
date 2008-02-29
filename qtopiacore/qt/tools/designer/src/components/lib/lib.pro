@@ -1,16 +1,18 @@
 TEMPLATE = lib
 TARGET = QtDesignerComponents
 contains(QT_CONFIG, reduce_exports):CONFIG += hide_symbols
-CONFIG += qt depend_prl
+CONFIG += qt depend_prl no_objective_c designer
 win32|mac: CONFIG += debug_and_release
-DESTDIR = $$QT_BUILD_TREE/lib
-DLLDESTDIR = $$QT_BUILD_TREE/bin
+QTDIR_build { 
+    DESTDIR = $$QT_BUILD_TREE/lib
+    DLLDESTDIR = $$QT_BUILD_TREE/bin
+}
 
 # QtDesignerComponents uses
 DEFINES += QT_STATICPLUGIN
 
 isEmpty(QT_MAJOR_VERSION) {
-   VERSION=4.2.0
+   VERSION=4.3.0
 } else {
    VERSION=$${QT_MAJOR_VERSION}.$${QT_MINOR_VERSION}.$${QT_PATCH_VERSION}
 }

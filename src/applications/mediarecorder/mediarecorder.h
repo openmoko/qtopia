@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,7 +26,6 @@
 #include <qlist.h>
 #include <qmap.h>
 #include <qstackedwidget.h>
-#include <qpushbutton.h>
 #include <qlabel.h>
 #include <qtimer.h>
 #include <qsound.h>
@@ -34,13 +33,10 @@
 
 #include "ui_mediarecorderbase.h"
 
-class QToolBar;
 class QAction;
 class MediaRecorderPluginList;
 #ifdef QTOPIA4_TODO
 class MediaPlayerPluginList;
-#endif
-#ifdef QTOPIA4_TODO
 class AudioDevice;
 #endif
 class SampleBuffer;
@@ -97,21 +93,15 @@ private slots:
     void endSave();
     void startRecording();
     void stopRecording();
-    void recordClicked();
     void startPlaying();
     void stopPlaying();
-    void replayClicked();
-    void deleteClicked();
     void clearData();
     void processAudioData();
     void configure();
     void noPluginError();
-    void setRecordLight( bool enable );
-    void recordLightBlink();
     void audioOutputDone();
     void audioDeviceReady();
     void audioDeviceError();
-    void traySocket( const QString&, const QByteArray& );
     void documentSelected(const QContent&);
     void newSelected();
 
@@ -122,13 +112,13 @@ protected:
 public slots:
     void toggleRecording();
     void recordAudio( const QDSActionRequest& request );
+    void recordClicked();
 
 private:
     QDocumentSelector *selector;
     QWidget *contentsWidget;
     Ui::MediaRecorderBase *contents;
     ConfigureRecorder *config;
-    QToolBar *menu;
     QAction *configureAction;
     QStackedWidget *stack;
     MediaRecorderPluginList *recorderPlugins;
@@ -159,16 +149,14 @@ private:
     bool playing;
     QString lastSaved;
     QTimer *lightTimer;
-    bool recordLightState;
     QtopiaChannel *trayChannel;
     QString recordingsCategory;
     QDSActionRequest* mRecordAudioRequest;
     QualitySetting recordQuality;
     bool smallScreen;
 
-    void setContextKey( bool record );
-    void setReplayEnabled( bool flag );
-    void setDeleteEnabled( bool flag );
+    enum ContextKey { Select, Record, Stop, Play };
+    void setContextKey( ContextKey key );
 
     void switchToFileSelector();
     void switchToOther();
@@ -182,6 +170,7 @@ private:
     QWidget* getContentsWidget();
 
     int     m_position;
+    bool    m_mousePref;
 };
 
 class VoiceRecordingService : public QtopiaAbstractService

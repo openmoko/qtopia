@@ -22,7 +22,7 @@
 <ul>
 <li><div class="fn"/>enum <b><a href="qcontact.html#GenderType-enum">GenderType</a></b> { UnspecifiedGender, Male, Female }</li>
 <li><div class="fn"/>enum <b><a href="qcontact.html#Location-enum">Location</a></b> { Home, Business, Other }</li>
-<li><div class="fn"/>enum <b><a href="qcontact.html#PhoneType-enum">PhoneType</a></b> { HomePhone, HomeMobile, HomeFax, HomePager, ..., Pager }</li>
+<li><div class="fn"/>enum <b><a href="qcontact.html#PhoneType-enum">PhoneType</a></b> { HomePhone, HomeMobile, HomeFax, HomePager, ..., VOIP }</li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
@@ -43,11 +43,16 @@
 <li><div class="fn"/>QString <b><a href="qcontact.html#businessPhone">businessPhone</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#businessState">businessState</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#businessStreet">businessStreet</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qcontact.html#businessVOIP">businessVOIP</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#businessWebpage">businessWebpage</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#businessZip">businessZip</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#changePortrait">changePortrait</a></b> ( const QPixmap &amp; <i>p</i> )</li>
+<li><div class="fn"/>void <b><a href="qcontact.html#changePortrait-2">changePortrait</a></b> ( const QImage &amp; <i>image</i> )</li>
+<li><div class="fn"/>void <b><a href="qcontact.html#changePortrait-3">changePortrait</a></b> ( const QString &amp; <i>imageLocation</i>, const QRect &amp; <i>rect</i> = QRect() )</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#children">children</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qcontact.html#clearAddresses">clearAddresses</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#clearEmailList">clearEmailList</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qcontact.html#clearPhoneNumbers">clearPhoneNumbers</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#company">company</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#companyPronunciation">companyPronunciation</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#defaultEmail">defaultEmail</a></b> () const</li>
@@ -67,16 +72,18 @@
 <li><div class="fn"/>QString <b><a href="qcontact.html#homePhone">homePhone</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#homeState">homeState</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#homeStreet">homeStreet</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qcontact.html#homeVOIP">homeVOIP</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#homeWebpage">homeWebpage</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#homeZip">homeZip</a></b> () const</li>
+<li><div class="fn"/>QIcon <b><a href="qcontact.html#icon">icon</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#insertEmail">insertEmail</a></b> ( const QString &amp; <i>email</i> )</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#jobTitle">jobTitle</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#label">label</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#lastName">lastName</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#lastNamePronunciation">lastNamePronunciation</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#manager">manager</a></b> () const</li>
-<li><div class="fn"/>bool <b><a href="qcontact.html#match">match</a></b> ( const QString &amp; <i>regexp</i> ) const</li>
-<li><div class="fn"/>bool <b><a href="qcontact.html#match-2">match</a></b> ( const QRegExp &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qcontact.html#match">match</a></b> ( const QRegExp &amp; <i>expression</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qcontact.html#match-2">match</a></b> ( const QString &amp; <i>expression</i> ) const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#middleName">middleName</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#nameTitle">nameTitle</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#nickname">nickname</a></b> () const</li>
@@ -89,6 +96,7 @@
 <li><div class="fn"/>QString <b><a href="qcontact.html#profession">profession</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#removeEmail">removeEmail</a></b> ( const QString &amp; <i>email</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setAddress">setAddress</a></b> ( Location <i>location</i>, const QContactAddress &amp; <i>address</i> )</li>
+<li><div class="fn"/>void <b><a href="qcontact.html#setAddresses">setAddresses</a></b> ( const QMap&lt;Location, QContactAddress&gt; &amp; <i>addresses</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setAnniversary">setAnniversary</a></b> ( const QDate &amp; <i>date</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setAssistant">setAssistant</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setBirthday">setBirthday</a></b> ( const QDate &amp; <i>date</i> )</li>
@@ -100,6 +108,7 @@
 <li><div class="fn"/>void <b><a href="qcontact.html#setBusinessPhone">setBusinessPhone</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setBusinessState">setBusinessState</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setBusinessStreet">setBusinessStreet</a></b> ( const QString &amp; <i>str</i> )</li>
+<li><div class="fn"/>void <b><a href="qcontact.html#setBusinessVOIP">setBusinessVOIP</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setBusinessWebpage">setBusinessWebpage</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setBusinessZip">setBusinessZip</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setChildren">setChildren</a></b> ( const QString &amp; <i>str</i> )</li>
@@ -120,6 +129,7 @@
 <li><div class="fn"/>void <b><a href="qcontact.html#setHomePhone">setHomePhone</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setHomeState">setHomeState</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setHomeStreet">setHomeStreet</a></b> ( const QString &amp; <i>str</i> )</li>
+<li><div class="fn"/>void <b><a href="qcontact.html#setHomeVOIP">setHomeVOIP</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setHomeWebpage">setHomeWebpage</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setHomeZip">setHomeZip</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setJobTitle">setJobTitle</a></b> ( const QString &amp; <i>str</i> )</li>
@@ -132,6 +142,7 @@
 <li><div class="fn"/>virtual void <b><a href="qcontact.html#setNotes">setNotes</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setOffice">setOffice</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setPhoneNumber">setPhoneNumber</a></b> ( PhoneType <i>type</i>, const QString &amp; <i>str</i> )</li>
+<li><div class="fn"/>void <b><a href="qcontact.html#setPhoneNumbers">setPhoneNumbers</a></b> ( const QMap&lt;PhoneType, QString&gt; &amp; <i>numbers</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setPortraitFile">setPortraitFile</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setProfession">setProfession</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setSpouse">setSpouse</a></b> ( const QString &amp; <i>str</i> )</li>
@@ -140,31 +151,35 @@
 <li><div class="fn"/>QString <b><a href="qcontact.html#suffix">suffix</a></b> () const</li>
 <li><div class="fn"/>QPixmap <b><a href="qcontact.html#thumbnail">thumbnail</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#toRichText">toRichText</a></b> () const</li>
-<li><div class="fn"/>bool <b><a href="qcontact.html#writeVCard-2">writeVCard</a></b> ( const QString &amp; <i>filename</i> ) const</li>
-<li><div class="fn"/>void <b><a href="qcontact.html#writeVCard-3">writeVCard</a></b> ( QFile &amp; <i>file</i> ) const</li>
-<li><div class="fn"/>void <b><a href="qcontact.html#writeVCard-4">writeVCard</a></b> ( QDataStream * <i>stream</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qcontact.html#writeVCard-4">writeVCard</a></b> ( const QString &amp; <i>filename</i> ) const&nbsp;&nbsp;<tt> (deprecated)</tt></li>
+<li><div class="fn"/>void <b><a href="qcontact.html#writeVCard-5">writeVCard</a></b> ( QFile &amp; <i>file</i> ) const&nbsp;&nbsp;<tt> (deprecated)</tt></li>
+<li><div class="fn"/>void <b><a href="qcontact.html#writeVCard-6">writeVCard</a></b> ( QDataStream * <i>stream</i> ) const&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>bool <b><a href="qcontact.html#operator-not-eq">operator!=</a></b> ( const QContact &amp; <i>other</i> ) const</li>
 <li><div class="fn"/>QContact &amp; <b><a href="qcontact.html#operator-eq">operator=</a></b> ( const QContact &amp; <i>contact</i> )</li>
 <li><div class="fn"/>bool <b><a href="qcontact.html#operator-eq-eq">operator==</a></b> ( const QContact &amp; <i>other</i> ) const</li>
 </ul>
 <ul>
-<li><div class="fn"/>16 public functions inherited from <a href="qpimrecord.html#public-functions">QPimRecord</a></li>
+<li><div class="fn"/>20 public functions inherited from <a href="qpimrecord.html#public-functions">QPimRecord</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
 <li><div class="fn"/>QStringList <b><a href="qcontact.html#labelFields">labelFields</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#labelFormat">labelFormat</a></b> ()</li>
+<li><div class="fn"/>QContact <b><a href="qcontact.html#parseLabel">parseLabel</a></b> ( const QString &amp; <i>text</i>, const QContact &amp; <i>contact</i> = QContact() )</li>
 <li><div class="fn"/>QIcon <b><a href="qcontact.html#phoneIcon">phoneIcon</a></b> ( PhoneType <i>type</i> )</li>
 <li><div class="fn"/>QString <b><a href="qcontact.html#phoneIconResource">phoneIconResource</a></b> ( PhoneType <i>type</i> )</li>
 <li><div class="fn"/>QList&lt;PhoneType&gt; <b><a href="qcontact.html#phoneTypes">phoneTypes</a></b> ()</li>
 <li><div class="fn"/>QSize <b><a href="qcontact.html#portraitSize">portraitSize</a></b> ()</li>
-<li><div class="fn"/>QList&lt;QContact&gt; <b><a href="qcontact.html#readVCard">readVCard</a></b> ( const QString &amp; <i>filename</i> )</li>
-<li><div class="fn"/>QList&lt;QContact&gt; <b><a href="qcontact.html#readVCard-2">readVCard</a></b> ( const QByteArray &amp; <i>vcard</i> )</li>
-<li><div class="fn"/>QList&lt;QContact&gt; <b><a href="qcontact.html#readVCard-3">readVCard</a></b> ( VObject * <i>vobject</i> )</li>
+<li><div class="fn"/>QList&lt;QContact&gt; <b><a href="qcontact.html#readVCard">readVCard</a></b> ( QIODevice * <i>device</i> )</li>
+<li><div class="fn"/>QList&lt;QContact&gt; <b><a href="qcontact.html#readVCard-2">readVCard</a></b> ( const QString &amp; <i>filename</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
+<li><div class="fn"/>QList&lt;QContact&gt; <b><a href="qcontact.html#readVCard-3">readVCard</a></b> ( const QByteArray &amp; <i>vcard</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
+<li><div class="fn"/>QList&lt;QContact&gt; <b><a href="qcontact.html#readVCard-4">readVCard</a></b> ( VObject * <i>vobject</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontact.html#setLabelFormat">setLabelFormat</a></b> ( const QString &amp; <i>f</i> )</li>
 <li><div class="fn"/>QSize <b><a href="qcontact.html#thumbnailSize">thumbnailSize</a></b> ()</li>
-<li><div class="fn"/>bool <b><a href="qcontact.html#writeVCard">writeVCard</a></b> ( const QString &amp; <i>filename</i>, const QList&lt;QContact&gt; &amp; <i>contacts</i> )</li>
+<li><div class="fn"/>bool <b><a href="qcontact.html#writeVCard">writeVCard</a></b> ( QIODevice * <i>device</i>, const QList&lt;QContact&gt; &amp; <i>contacts</i> )</li>
+<li><div class="fn"/>bool <b><a href="qcontact.html#writeVCard-2">writeVCard</a></b> ( QIODevice * <i>device</i>, const QContact &amp; <i>contact</i> )</li>
+<li><div class="fn"/>bool <b><a href="qcontact.html#writeVCard-3">writeVCard</a></b> ( const QString &amp; <i>filename</i>, const QList&lt;QContact&gt; &amp; <i>contacts</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
@@ -176,7 +191,7 @@
 <p>The QContact class holds the data of an address book entry.</p>
 <p>This data includes information the name of the contact, phone numbers and email addresses, postal address information, and business information such as department and job title.</p>
 <p>It also allows a portrait picture (and corresponding thumbnail) to be specified, provides functions for matching a contact against a regular expression, and converting to and from vCard format.</p>
-<p>See also <a href="qcontactaddress.html">QContactAddress</a>.</p>
+<p>See also <a href="qcontactaddress.html">QContactAddress</a> and <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="GenderType-enum"></a>enum QContact::GenderType</h3>
@@ -200,17 +215,20 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QContact::HomePhone</tt></td><td align="center" valign="top"><tt>0x01</tt></td><td valign="top">A non-business land line.</td></tr>
-<tr><td valign="top"><tt>QContact::HomeMobile</tt></td><td align="center" valign="top"><tt>Mobile | HomePhone</tt></td><td valign="top">A non-business mobile phone number.</td></tr>
-<tr><td valign="top"><tt>QContact::HomeFax</tt></td><td align="center" valign="top"><tt>Fax | HomePhone</tt></td><td valign="top">A non-business fax number.</td></tr>
-<tr><td valign="top"><tt>QContact::HomePager</tt></td><td align="center" valign="top"><tt>Pager | HomePhone</tt></td><td valign="top">A non-business pager number.</td></tr>
+<tr><td valign="top"><tt>QContact::HomeMobile</tt></td><td align="center" valign="top"><tt>0x0101</tt></td><td valign="top">A non-business mobile phone number.</td></tr>
+<tr><td valign="top"><tt>QContact::HomeFax</tt></td><td align="center" valign="top"><tt>0x0201</tt></td><td valign="top">A non-business fax number.</td></tr>
+<tr><td valign="top"><tt>QContact::HomePager</tt></td><td align="center" valign="top"><tt>0x0401</tt></td><td valign="top">A non-business pager number.</td></tr>
+<tr><td valign="top"><tt>QContact::HomeVOIP</tt></td><td align="center" valign="top"><tt>0x0301</tt></td><td valign="top">A non-business VOIP URL</td></tr>
 <tr><td valign="top"><tt>QContact::BusinessPhone</tt></td><td align="center" valign="top"><tt>0x02</tt></td><td valign="top">A business land line.</td></tr>
-<tr><td valign="top"><tt>QContact::BusinessMobile</tt></td><td align="center" valign="top"><tt>Mobile | BusinessPhone</tt></td><td valign="top">A business mobile phone number.</td></tr>
-<tr><td valign="top"><tt>QContact::BusinessFax</tt></td><td align="center" valign="top"><tt>Fax | BusinessPhone</tt></td><td valign="top">A business fax number.</td></tr>
-<tr><td valign="top"><tt>QContact::BusinessPager</tt></td><td align="center" valign="top"><tt>Pager | BusinessPhone</tt></td><td valign="top">A business pager number.</td></tr>
+<tr><td valign="top"><tt>QContact::BusinessMobile</tt></td><td align="center" valign="top"><tt>0x0102</tt></td><td valign="top">A business mobile phone number.</td></tr>
+<tr><td valign="top"><tt>QContact::BusinessFax</tt></td><td align="center" valign="top"><tt>0x0202</tt></td><td valign="top">A business fax number.</td></tr>
+<tr><td valign="top"><tt>QContact::BusinessPager</tt></td><td align="center" valign="top"><tt>0x0402</tt></td><td valign="top">A business pager number.</td></tr>
+<tr><td valign="top"><tt>QContact::BusinessVOIP</tt></td><td align="center" valign="top"><tt>0x0302</tt></td><td valign="top">A business VOIP URL</td></tr>
 <tr><td valign="top"><tt>QContact::OtherPhone</tt></td><td align="center" valign="top"><tt>0x00</tt></td><td valign="top">A land line. Whether the phone number is for Home or Business use is unspecified.</td></tr>
 <tr><td valign="top"><tt>QContact::Mobile</tt></td><td align="center" valign="top"><tt>0x0100</tt></td><td valign="top">A mobile phone number. Whether the phone is for Home or Business use is unspecified.</td></tr>
 <tr><td valign="top"><tt>QContact::Fax</tt></td><td align="center" valign="top"><tt>0x0200</tt></td><td valign="top">A fax number. Whether the phone is for Home or Business use is unspecified.</td></tr>
 <tr><td valign="top"><tt>QContact::Pager</tt></td><td align="center" valign="top"><tt>0x0400</tt></td><td valign="top">A pager number. Whether the phone is for Home or Business use is unspecified.</td></tr>
+<tr><td valign="top"><tt>QContact::VOIP</tt></td><td align="center" valign="top"><tt>0x0300</tt></td><td valign="top">A VOIP URL. Whether the URL is for Home or Business use is unspecified.</td></tr>
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -225,6 +243,7 @@
 <p>See also <a href="qcontact.html#setAddress">setAddress</a>().</p>
 <h3 class="fn"><a name="addresses"></a><a href="qmap.html">QMap</a>&lt;<a href="qcontact.html#Location-enum">Location</a>, <a href="qcontactaddress.html">QContactAddress</a>&gt; QContact::addresses () const</h3>
 <p>Returns the contact's list of addresses with their types.</p>
+<p>See also <a href="qcontact.html#setAddresses">setAddresses</a>().</p>
 <h3 class="fn"><a name="anniversary"></a><a href="qdate.html">QDate</a> QContact::anniversary () const</h3>
 <p>Return the contact's anniversary date. If this has not been set, the returned date will be null.</p>
 <p>See also <a href="qcontact.html#setAnniversary">setAnniversary</a>().</p>
@@ -258,6 +277,9 @@
 <h3 class="fn"><a name="businessStreet"></a><a href="qstring.html">QString</a> QContact::businessStreet () const</h3>
 <p>Returns the business street address of the contact.</p>
 <p>See also <a href="qcontact.html#setBusinessStreet">setBusinessStreet</a>().</p>
+<h3 class="fn"><a name="businessVOIP"></a><a href="qstring.html">QString</a> QContact::businessVOIP () const</h3>
+<p>Returns the business VOIP URL of the contact.</p>
+<p>See also <a href="qcontact.html#setBusinessVOIP">setBusinessVOIP</a>().</p>
 <h3 class="fn"><a name="businessWebpage"></a><a href="qstring.html">QString</a> QContact::businessWebpage () const</h3>
 <p>Returns the business webpage of the contact.</p>
 <p>See also <a href="qcontact.html#setBusinessWebpage">setBusinessWebpage</a>().</p>
@@ -267,11 +289,23 @@
 <h3 class="fn"><a name="changePortrait"></a>void QContact::changePortrait ( const <a href="qpixmap.html">QPixmap</a> &amp; <i>p</i> )</h3>
 <p>Changes the contacts portrait to the given pixmap <i>p</i>. The pixmap is saved to the contactimages directory in the Qtopia &quot;addressbook&quot; application storage directory, and removes the file previously used as the contact's portrait. The corresponding filename will be set as the <tt>Portrait</tt> field of this contact.</p>
 <p>Note: the previous image is removed immediately, but the database will not be updated until <tt>QContactModel::updateContact</tt> is called.</p>
+<h3 class="fn"><a name="changePortrait-2"></a>void QContact::changePortrait ( const <a href="qimage.html">QImage</a> &amp; <i>image</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Changes the contacts portrait to the given <i>image</i>. The image is saved to the contactimages directory in the Qtopia &quot;addressbook&quot; application storage directory, and removes the file previously used as the contact's portrait. The corresponding filename will be set as the <tt>Portrait</tt> field of this contact.</p>
+<p>Note: the previous image is removed immediately, but the database will not be updated until <tt>QContactModel::updateContact</tt> is called.</p>
+<h3 class="fn"><a name="changePortrait-3"></a>void QContact::changePortrait ( const <a href="qstring.html">QString</a> &amp; <i>imageLocation</i>, const <a href="qrect.html">QRect</a> &amp; <i>rect</i> = QRect() )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Changes the contacts portrait to the image at the given <i>imageLocation</i>. The image is loaded, scaled and then saved to the contactimages directory in the Qtopia &quot;addressbook&quot; application storage directory. If the specified clip rectangle <i>rect</i> is not null, only the clip area of the image specified is used. The file previously used as the contact's portrait is removed. The corresponding filename will be set as the <tt>Portrait</tt> field of this contact.</p>
+<p>Note: the previous image is removed immediately, but the database will not be updated until <tt>QContactModel::updateContact</tt> is called.</p>
 <h3 class="fn"><a name="children"></a><a href="qstring.html">QString</a> QContact::children () const</h3>
 <p>Returns the children of the contact.</p>
 <p>See also <a href="qcontact.html#setChildren">setChildren</a>().</p>
+<h3 class="fn"><a name="clearAddresses"></a>void QContact::clearAddresses ()</h3>
+<p>Clears the addresses of the contact.</p>
 <h3 class="fn"><a name="clearEmailList"></a>void QContact::clearEmailList ()</h3>
 <p>Clear the email list for the contact, including the default email.</p>
+<h3 class="fn"><a name="clearPhoneNumbers"></a>void QContact::clearPhoneNumbers ()</h3>
+<p>Clears the phone number list of the contact, including the default phone number.</p>
 <h3 class="fn"><a name="company"></a><a href="qstring.html">QString</a> QContact::company () const</h3>
 <p>Returns the company for the contact.</p>
 <p>See also <a href="qcontact.html#setCompany">setCompany</a>().</p>
@@ -326,12 +360,18 @@
 <h3 class="fn"><a name="homeStreet"></a><a href="qstring.html">QString</a> QContact::homeStreet () const</h3>
 <p>Returns the home street address of the contact.</p>
 <p>See also <a href="qcontact.html#setHomeStreet">setHomeStreet</a>().</p>
+<h3 class="fn"><a name="homeVOIP"></a><a href="qstring.html">QString</a> QContact::homeVOIP () const</h3>
+<p>Returns the home VOIP URL of the contact.</p>
+<p>See also <a href="qcontact.html#setHomeVOIP">setHomeVOIP</a>().</p>
 <h3 class="fn"><a name="homeWebpage"></a><a href="qstring.html">QString</a> QContact::homeWebpage () const</h3>
 <p>Returns the home webpage of the contact.</p>
 <p>See also <a href="qcontact.html#setHomeWebpage">setHomeWebpage</a>().</p>
 <h3 class="fn"><a name="homeZip"></a><a href="qstring.html">QString</a> QContact::homeZip () const</h3>
 <p>Returns the home zip of the contact.</p>
 <p>See also <a href="qcontact.html#setHomeZip">setHomeZip</a>().</p>
+<h3 class="fn"><a name="icon"></a><a href="qicon.html">QIcon</a> QContact::icon () const</h3>
+<p>Returns the portrait of the contact as an icon. If there is no portrait set for the contact will return a default icon.</p>
+<p>See also <a href="qcontact.html#portrait">portrait</a>() and <a href="qcontact.html#thumbnailSize">thumbnailSize</a>().</p>
 <h3 class="fn"><a name="insertEmail"></a>void QContact::insertEmail ( const <a href="qstring.html">QString</a> &amp; <i>email</i> )</h3>
 <p>Adds <i>email</i> to the list of email address for the contact. If no default email is set, the default email will be set to <i>email</i>.</p>
 <h3 class="fn"><a name="jobTitle"></a><a href="qstring.html">QString</a> QContact::jobTitle () const</h3>
@@ -345,8 +385,8 @@
 <p>See also <a href="qcontact.html#labelFormat">labelFormat</a>() and <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="labelFormat"></a><a href="qstring.html">QString</a> QContact::labelFormat ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the format for contact labels.</p>
-<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be _ for a space, an identifier as from identifierKey(), or any string. The format for label will the first pattern for which all fields specified are non null for the contact.</p>
-<p>For example: <tt>LastName , _ FirstName | LastName | FirstName | Company</tt></p>
+<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be <a href="qtopiadesktop/qdautoplugin-cpp.html">_</a> for a space, an identifier as from identifierKey(), or any string. The format for label will the first pattern for which all fields specified are non null for the contact.</p>
+<p>For example: <tt>lastname , _ firstname | lastname | firstname | company</tt></p>
 <p>See also <a href="qcontact.html#setLabelFormat">setLabelFormat</a>(), <a href="qcontact.html#labelFields">labelFields</a>(), and <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="lastName"></a><a href="qstring.html">QString</a> QContact::lastName () const</h3>
 <p>Returns the last name of the contact.</p>
@@ -357,11 +397,13 @@
 <h3 class="fn"><a name="manager"></a><a href="qstring.html">QString</a> QContact::manager () const</h3>
 <p>Returns the manager of the contact.</p>
 <p>See also <a href="qcontact.html#setManager">setManager</a>().</p>
-<h3 class="fn"><a name="match"></a>bool QContact::match ( const <a href="qstring.html">QString</a> &amp; <i>regexp</i> ) const</h3>
-<p>Returns true if one of this contact's fields matches <i>regexp</i>. Otherwise returns false.</p>
-<h3 class="fn"><a name="match-2"></a>bool QContact::match ( const <a href="qregexp.html">QRegExp</a> &amp; <i>r</i> ) const</h3>
+<h3 class="fn"><a name="match"></a>bool QContact::match ( const <a href="qregexp.html">QRegExp</a> &amp; <i>expression</i> ) const</h3>
+<p>Returns true if one of this contact's fields matches the given <i>expression</i>.</p>
+<p>The function does not compare the gender, unique identifier, birthday or anniversary of the contact.</p>
+<h3 class="fn"><a name="match-2"></a>bool QContact::match ( const <a href="qstring.html">QString</a> &amp; <i>expression</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns true if one of this contact's fields matches <i>r</i>. Otherwise returns false.</p>
+<p>Returns true if one of this contact's fields matches the given <i>expression</i>.</p>
+<p>The function does not compare the gender, unique identifier, birthday or anniversary of the contact.</p>
 <h3 class="fn"><a name="middleName"></a><a href="qstring.html">QString</a> QContact::middleName () const</h3>
 <p>Returns the middle name of the contact.</p>
 <p>See also <a href="qcontact.html#setMiddleName">setMiddleName</a>().</p>
@@ -378,6 +420,10 @@
 <h3 class="fn"><a name="office"></a><a href="qstring.html">QString</a> QContact::office () const</h3>
 <p>Returns the office for the contact.</p>
 <p>See also <a href="qcontact.html#setOffice">setOffice</a>().</p>
+<h3 class="fn"><a name="parseLabel"></a>QContact QContact::parseLabel ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, const QContact &amp; <i>contact</i> = QContact() )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Parses the the <i>text</i> using contact name formatting rules and merges the information with <i>contact</i>. Returns the merged contact.</p>
+<p>Formatting rules include using () for the nick name, &quot;&quot; for pronunciation, standard name titles and suffixes as well as detecting first, middle and last name ordering, similar to the default label formatting.</p>
+<p>See also <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="phoneIcon"></a><a href="qicon.html">QIcon</a> QContact::phoneIcon ( <a href="qcontact.html#PhoneType-enum">PhoneType</a> <i>type</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns an icon representing the phone number <i>type</i>. Returns a null icon if no icon is available for the phone number type.</p>
 <p>See also <a href="qcontact.html#phoneIconResource">phoneIconResource</a>().</p>
@@ -389,11 +435,12 @@
 <p>See also <a href="qcontact.html#setPhoneNumber">setPhoneNumber</a>().</p>
 <h3 class="fn"><a name="phoneNumbers"></a><a href="qmap.html">QMap</a>&lt;<a href="qcontact.html#PhoneType-enum">PhoneType</a>, <a href="qstring.html">QString</a>&gt; QContact::phoneNumbers () const</h3>
 <p>Returns the contact's list of phone numbers and their types.</p>
+<p>See also <a href="qcontact.html#setPhoneNumbers">setPhoneNumbers</a>().</p>
 <h3 class="fn"><a name="phoneTypes"></a><a href="qlist.html">QList</a>&lt;<a href="qcontact.html#PhoneType-enum">PhoneType</a>&gt; QContact::phoneTypes ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of phone types that can be assigned as a contact phone number.</p>
 <h3 class="fn"><a name="portrait"></a><a href="qpixmap.html">QPixmap</a> QContact::portrait () const</h3>
-<p>Returns the portrait pixmap of the contact. If there is no portrait set for the contact, this will return a default pixmap based on the contact's fields.</p>
-<p>See also <a href="qcontact.html#portraitSize">portraitSize</a>().</p>
+<p>Returns the portrait of the contact as a pixmap. If there is no portrait set for the contact, this will return a default pixmap based on the contact's fields.</p>
+<p>See also <a href="qcontact.html#icon">icon</a>() and <a href="qcontact.html#portraitSize">portraitSize</a>().</p>
 <h3 class="fn"><a name="portraitFile"></a><a href="qstring.html">QString</a> QContact::portraitFile () const</h3>
 <p>Returns the path for the portrait file of the contact. This is either a resource file path (e.g&#x2e; <tt>&quot;:icon/happyface&quot;</tt>) or the name of a file that is stored in the &quot;addressbook/contactimages&quot; directory in the Qtopia application data storage directory.</p>
 <p>See also <a href="qcontact.html#setPortraitFile">setPortraitFile</a>().</p>
@@ -403,16 +450,22 @@
 <h3 class="fn"><a name="profession"></a><a href="qstring.html">QString</a> QContact::profession () const</h3>
 <p>Returns the profession of the contact.</p>
 <p>See also <a href="qcontact.html#setProfession">setProfession</a>().</p>
-<h3 class="fn"><a name="readVCard"></a><a href="qlist.html">QList</a>&lt;QContact&gt; QContact::readVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="readVCard"></a><a href="qlist.html">QList</a>&lt;QContact&gt; QContact::readVCard ( <a href="qiodevice.html">QIODevice</a> * <i>device</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Reads a list of vCards from the given <i>device</i> and returns the equivalent set of contacts.</p>
+<p>See also <a href="qcontact.html#writeVCard">writeVCard</a>().</p>
+<h3 class="fn"><a name="readVCard-2"></a><a href="qlist.html">QList</a>&lt;QContact&gt; QContact::readVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This function is deprecated.</p>
+<p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads the file specified by <i>filename</i> as a list of vCard objects and returns the list of contacts that correspond to the vCard objects.</p>
 <p>Note: the fields stored by <a href="qcontact.html">QContact</a> may not correspond exactly to the vCard data.</p>
 <p>See also <a href="qcontact.html#writeVCard">writeVCard</a>().</p>
-<h3 class="fn"><a name="readVCard-2"></a><a href="qlist.html">QList</a>&lt;QContact&gt; QContact::readVCard ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>vcard</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="readVCard-3"></a><a href="qlist.html">QList</a>&lt;QContact&gt; QContact::readVCard ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>vcard</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads the given vCard data in <i>vcard</i>, and returns the list of corresponding contacts.</p>
 <p>Note: the fields stored by <a href="qcontact.html">QContact</a> may not correspond exactly to the vCard data.</p>
 <p>See also <a href="qcontact.html#writeVCard">writeVCard</a>().</p>
-<h3 class="fn"><a name="readVCard-3"></a><a href="qlist.html">QList</a>&lt;QContact&gt; QContact::readVCard ( VObject * <i>vobject</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="readVCard-4"></a><a href="qlist.html">QList</a>&lt;QContact&gt; QContact::readVCard ( VObject * <i>vobject</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads the given vCard data in <i>vobject</i>, and returns the list of corresponding contacts.</p>
 <p>Note: the fields stored by <a href="qcontact.html">QContact</a> may not correspond exactly to the vCard data.</p>
@@ -422,6 +475,9 @@
 <h3 class="fn"><a name="setAddress"></a>void QContact::setAddress ( <a href="qcontact.html#Location-enum">Location</a> <i>location</i>, const <a href="qcontactaddress.html">QContactAddress</a> &amp; <i>address</i> )</h3>
 <p>Sets the contact's address for the given <i>location</i> to <i>address</i>. If the address is empty, this will effectively remove that <tt>Location</tt> type for this contact.</p>
 <p>See also <a href="qcontact.html#address">address</a>().</p>
+<h3 class="fn"><a name="setAddresses"></a>void QContact::setAddresses ( const <a href="qmap.html">QMap</a>&lt;<a href="qcontact.html#Location-enum">Location</a>, <a href="qcontactaddress.html">QContactAddress</a>&gt; &amp; <i>addresses</i> )</h3>
+<p>Sets the contact addresses to the given <i>addresses</i></p>
+<p>See also <a href="qcontact.html#addresses">addresses</a>().</p>
 <h3 class="fn"><a name="setAnniversary"></a>void QContact::setAnniversary ( const <a href="qdate.html">QDate</a> &amp; <i>date</i> )</h3>
 <p>Sets the contact's anniversary to <i>date</i>.</p>
 <p>See also <a href="qcontact.html#anniversary">anniversary</a>().</p>
@@ -455,6 +511,9 @@
 <h3 class="fn"><a name="setBusinessStreet"></a>void QContact::setBusinessStreet ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the business street address of the contact to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#businessStreet">businessStreet</a>().</p>
+<h3 class="fn"><a name="setBusinessVOIP"></a>void QContact::setBusinessVOIP ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
+<p>Sets the business VOIP URL of the contact to <i>str</i>. This should be in the form of a URL (e.g&#x2e; 'sip:<a href="mailto:user@sipserver">user@sipserver</a>').</p>
+<p>See also <a href="qcontact.html#businessVOIP">businessVOIP</a>().</p>
 <h3 class="fn"><a name="setBusinessWebpage"></a>void QContact::setBusinessWebpage ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the business webpage of the contact to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#businessWebpage">businessWebpage</a>().</p>
@@ -515,6 +574,9 @@
 <h3 class="fn"><a name="setHomeStreet"></a>void QContact::setHomeStreet ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the home street address of the contact to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#homeStreet">homeStreet</a>().</p>
+<h3 class="fn"><a name="setHomeVOIP"></a>void QContact::setHomeVOIP ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
+<p>Sets the home VOIP URL of the contact to <i>str</i>. This should be in the form of a URL (e.g&#x2e; 'sip:<a href="mailto:user@sipserver">user@sipserver</a>').</p>
+<p>See also <a href="qcontact.html#homeVOIP">homeVOIP</a>().</p>
 <h3 class="fn"><a name="setHomeWebpage"></a>void QContact::setHomeWebpage ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the home webpage of the contact to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#homeWebpage">homeWebpage</a>().</p>
@@ -526,8 +588,8 @@
 <p>See also <a href="qcontact.html#jobTitle">jobTitle</a>().</p>
 <h3 class="fn"><a name="setLabelFormat"></a>void QContact::setLabelFormat ( const <a href="qstring.html">QString</a> &amp; <i>f</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets the format for contact labels to that described by <i>f</i>.</p>
-<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be _ for a space, an identifier as from identifierKey(), or any string. The format used for <a href="qcontact.html#label">label</a>() will be the first pattern for which all fields specified are non null for the contact.</p>
-<p>For example: <tt>LastName , _ FirstName | LastName | FirstName | Company</tt></p>
+<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be <a href="qtopiadesktop/qdautoplugin-cpp.html">_</a> for a space, an identifier as from identifierKey(), or any string. The format used for <a href="qcontact.html#label">label</a>() will be the first pattern for which all fields specified are non null for the contact.</p>
+<p>For example: <tt>lastname , _ firstname | lastname | firstname | company</tt></p>
 <p>See also <a href="qcontact.html#labelFormat">labelFormat</a>(), <a href="qcontact.html#labelFields">labelFields</a>(), and <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="setLastName"></a>void QContact::setLastName ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the last name of the contact to <i>str</i>.</p>
@@ -558,6 +620,9 @@
 <p>Sets the phone number of type <i>type</i> to <i>str</i>.</p>
 <p>If there is no default phone number set, this will set the given number as the default phone number.</p>
 <p>See also <a href="qcontact.html#phoneNumber">phoneNumber</a>().</p>
+<h3 class="fn"><a name="setPhoneNumbers"></a>void QContact::setPhoneNumbers ( const <a href="qmap.html">QMap</a>&lt;<a href="qcontact.html#PhoneType-enum">PhoneType</a>, <a href="qstring.html">QString</a>&gt; &amp; <i>numbers</i> )</h3>
+<p>Sets the set of phone numbers of the contact to the given <i>numbers</i></p>
+<p>See also <a href="qcontact.html#phoneNumbers">phoneNumbers</a>().</p>
 <h3 class="fn"><a name="setPortraitFile"></a>void QContact::setPortraitFile ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the path for the portrait file of the contact to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#portraitFile">portraitFile</a>().</p>
@@ -581,29 +646,43 @@
 <p>If there is no portrait set for the contact, this will return a default pixmap based on the contact's fields.</p>
 <p>See also <a href="qcontact.html#thumbnailSize">thumbnailSize</a>().</p>
 <h3 class="fn"><a name="thumbnailSize"></a><a href="qsize.html">QSize</a> QContact::thumbnailSize ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the size of the thumbnail pixmap of a contact's portrait.</p>
+<p>Returns the size of the thumbnail of a contact's portrait.</p>
 <p>See also <a href="qcontact.html#thumbnail">thumbnail</a>() and <a href="qcontact.html#portraitSize">portraitSize</a>().</p>
 <h3 class="fn"><a name="toRichText"></a><a href="qstring.html">QString</a> QContact::toRichText () const</h3>
 <p>Returns a rich text formatted <a href="qstring.html">QString</a> of the <a href="qcontact.html">QContact</a>.</p>
-<h3 class="fn"><a name="writeVCard"></a>bool QContact::writeVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qlist.html">QList</a>&lt;QContact&gt; &amp; <i>contacts</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="writeVCard"></a>bool QContact::writeVCard ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, const <a href="qlist.html">QList</a>&lt;QContact&gt; &amp; <i>contacts</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Writes the given list of <i>contacts</i> to the given <i>device</i> as vCards.</p>
+<p>Returns true on success.</p>
+<p>See also <a href="qcontact.html#readVCard">readVCard</a>().</p>
+<h3 class="fn"><a name="writeVCard-2"></a>bool QContact::writeVCard ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, const QContact &amp; <i>contact</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Writes the given <i>contact</i> to the given <i>device</i> as vCards.</p>
+<p>Returns true on success.</p>
+<p>See also <a href="qcontact.html#readVCard">readVCard</a>().</p>
+<h3 class="fn"><a name="writeVCard-3"></a>bool QContact::writeVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qlist.html">QList</a>&lt;QContact&gt; &amp; <i>contacts</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This function is deprecated.</p>
+<p>This is an overloaded member function, provided for convenience.</p>
 <p>Write the list of <i>contacts</i> as vCard objects to the file specified by <i>filename</i>.</p>
 <p>Returns true on success, false on failure.</p>
 <p>See also <a href="qcontact.html#readVCard">readVCard</a>().</p>
-<h3 class="fn"><a name="writeVCard-2"></a>bool QContact::writeVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
+<h3 class="fn"><a name="writeVCard-4"></a>bool QContact::writeVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
+<p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the contact as a vCard object to the file specified by <i>filename</i>.</p>
 <p>Returns true on success, false on failure.</p>
 <p>See also <a href="qcontact.html#readVCard">readVCard</a>().</p>
-<h3 class="fn"><a name="writeVCard-3"></a>void QContact::writeVCard ( <a href="qfile.html">QFile</a> &amp; <i>file</i> ) const</h3>
+<h3 class="fn"><a name="writeVCard-5"></a>void QContact::writeVCard ( <a href="qfile.html">QFile</a> &amp; <i>file</i> ) const</h3>
+<p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the contact as a vCard object to the given <i>file</i>, which must be already open for writing.</p>
 <p>See also <a href="qcontact.html#readVCard">readVCard</a>().</p>
-<h3 class="fn"><a name="writeVCard-4"></a>void QContact::writeVCard ( <a href="qdatastream.html">QDataStream</a> * <i>stream</i> ) const</h3>
+<h3 class="fn"><a name="writeVCard-6"></a>void QContact::writeVCard ( <a href="qdatastream.html">QDataStream</a> * <i>stream</i> ) const</h3>
+<p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the contact as a vCard object to the given <i>stream</i>, which must be writable.</p>
 <p>See also <a href="qcontact.html#readVCard">readVCard</a>().</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QContact::operator!= ( const QContact &amp; <i>other</i> ) const</h3>
-<p>Returns false if <i>other</i> is identical to the contact. Otherwise return true.</p>
+<p>Returns false if <i>other</i> is identical to this contact. Otherwise return true.</p>
 <h3 class="fn"><a name="operator-eq"></a>QContact &amp; QContact::operator= ( const QContact &amp; <i>contact</i> )</h3>
 <p>Makes a copy of <i>contact</i> and assigns it to this <a href="qcontact.html">QContact</a>.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QContact::operator== ( const QContact &amp; <i>other</i> ) const</h3>
@@ -612,6 +691,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

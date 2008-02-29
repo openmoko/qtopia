@@ -4,48 +4,48 @@
 
 CONFIG += ordered
 TEMPLATE = subdirs
-isEmpty(QT_PROJECTS) {
-   #fallback defaults
-#  SUBDIRS = qmake
-   SUBDIRS += src
-   !cross_compile:SUBDIRS += tools
-   else:SUBDIRS += tools/qtestlib
-   SUBDIRS += demos examples
-} else {
-   #make sure the order makes sense
-   contains(QT_PROJECTS, tools) {
-       QT_PROJECTS -= tools
-       QT_PROJECTS = tools $$QT_PROJECTS
-   }
-   contains(QT_PROJECTS, libs) {
-       QT_PROJECTS -= libs
-       QT_PROJECTS = libs $$QT_PROJECTS
-   }
-   contains(QT_PROJECTS, qmake) {
-       QT_PROJECTS -= qmake
-       QT_PROJECTS = qmake $$QT_PROJECTS
-   }
 
-   #process the projects
-   for(PROJECT, $$list($$lower($$unique(QT_PROJECTS)))) {
-       isEqual(PROJECT, tools) {
-          !cross_compile:SUBDIRS += tools
-          else:SUBDIRS += tools/qtestlib
-       } else:isEqual(PROJECT, examples) {
-          SUBDIRS += demos examples
-       } else:isEqual(PROJECT, libs) {
-          SUBDIRS += src
-       } else:isEqual(PROJECT, qmake) {
-#         SUBDIRS += qmake
-       } else {
-          message(Unknown PROJECT: $$PROJECT)
-       }
+cross_compile: CONFIG += nostrip
+
+isEmpty(QT_BUILD_PARTS) { #defaults
+   QT_BUILD_PARTS = libs tools examples demos
+} else { #make sure the order makes sense
+   contains(QT_BUILD_PARTS, tools) {
+       QT_BUILD_PARTS -= tools
+       QT_BUILD_PARTS = tools $$QT_BUILD_PARTS
+   }
+   contains(QT_BUILD_PARTS, libs) {
+       QT_BUILD_PARTS -= libs
+       QT_BUILD_PARTS = libs $$QT_BUILD_PARTS
+   }
+   contains(QT_BUILD_PARTS, qmake) {
+       QT_BUILD_PARTS -= qmake
+       QT_BUILD_PARTS = qmake $$QT_BUILD_PARTS
    }
 }
 
+#process the projects
+for(PROJECT, $$list($$lower($$unique(QT_BUILD_PARTS)))) {
+    isEqual(PROJECT, tools) {
+       !cross_compile:SUBDIRS += tools
+       else:SUBDIRS += tools/qtestlib
+    } else:isEqual(PROJECT, examples) {
+       SUBDIRS += examples
+    } else:isEqual(PROJECT, demos) {
+       SUBDIRS += demos
+    } else:isEqual(PROJECT, libs) {
+       include(src/src.pro)
+    } else:isEqual(PROJECT, qmake) {
+#      SUBDIRS += qmake
+    } else {
+       message(Unknown PROJECT: $$PROJECT)
+    }
+}
 
+
+confclean.depends += clean
+confclean.commands =
 unix {
-  confclean.depends += clean
   confclean.commands += (cd config.tests/unix/stl && $(MAKE) distclean); \
 			(cd config.tests/unix/endian && $(MAKE) distclean); \
 			(cd config.tests/unix/ipv6 && $(MAKE) distclean); \
@@ -80,13 +80,25 @@ unix {
 			(cd config.tests/x11/sm && $(MAKE) distclean); \
 			(cd config.tests/x11/xshape && $(MAKE) distclean); \
 			(cd config.tests/x11/opengl && $(MAKE) distclean); \
- 			(cd qmake && $(MAKE) distclean); \
-			$(DEL_FILE) .qmake.cache
-  QMAKE_EXTRA_UNIX_TARGETS += confclean
-  qmakeclean.commands += (cd qmake && $(MAKE) clean)
-  QMAKE_EXTRA_UNIX_TARGETS += qmakeclean
-  CLEAN_DEPS += qmakeclean
+                        $(DEL_FILE) config.tests/.qmake.cache; \
+			$(DEL_FILE) src/core/global/qconfig.h; \
+			$(DEL_FILE) src/core/global/qconfig.cpp; \
+			$(DEL_FILE) mkspecs/qconfig.pri; \
+			$(DEL_FILE) .qmake.cache; \
+ 			(cd qmake && $(MAKE) distclean);
 }
+win32 {
+  confclean.commands += -$(DEL_FILE) src\core\global\qconfig.h $$escape_expand(\n\t) \
+			-$(DEL_FILE) src\core\global\qconfig.cpp $$escape_expand(\n\t) \
+			-$(DEL_FILE) mkspecs\qconfig.pri $$escape_expand(\n\t) \
+			-$(DEL_FILE) .qmake.cache $$escape_expand(\n\t) \
+			(cd qmake && $(MAKE) distclean)
+}
+QMAKE_EXTRA_TARGETS += confclean
+qmakeclean.commands += (cd qmake && $(MAKE) clean)
+QMAKE_EXTRA_TARGETS += qmakeclean
+CLEAN_DEPS += qmakeclean
+
 CONFIG -= qt
 
 ### installations ####
@@ -98,7 +110,7 @@ INSTALLS += htmldocs
 
 #translations
 translations.path=$$[QT_INSTALL_TRANSLATIONS]
-translations.files = $$QT_BUILD_TREE/translations/*.qm
+translations.files = $$QT_SOURCE_TREE/translations/*.qm
 INSTALLS += translations
 
 #qmake
@@ -113,7 +125,11 @@ INSTALLS += qmake
 #mkspecs
 mkspecs.path=$$[QT_INSTALL_DATA]/mkspecs
 mkspecs.files=$$QT_BUILD_TREE/mkspecs/qconfig.pri $$QT_SOURCE_TREE/mkspecs/*
-unix:mkspecs.commands = $(DEL_FILE) $(INSTALL_ROOT)$$mkspecs.path/default; $(SYMLINK) $$basename(QMAKESPEC) $(INSTALL_ROOT)$$mkspecs.path/default
+unix { 
+   DEFAULT_QMAKESPEC = $$QMAKESPEC
+   DEFAULT_QMAKESPEC ~= s,^.*mkspecs/,,g
+   mkspecs.commands += $(DEL_FILE) $(INSTALL_ROOT)$$mkspecs.path/default; $(SYMLINK) $$DEFAULT_QMAKESPEC $(INSTALL_ROOT)$$mkspecs.path/default
+}
 INSTALLS += mkspecs
 
 false:macx { #mac install location

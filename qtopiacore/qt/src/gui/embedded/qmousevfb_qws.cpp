@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,6 +43,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include <qvfbhdr.h>
 #include <qmousevfb_qws.h>
@@ -43,20 +59,22 @@ QVFbMouseHandler::QVFbMouseHandler(const QString &driver, const QString &device)
     if (device.isEmpty())
         mouseDev = QLatin1String("/dev/vmouse");
 
-    mouseFD = -1;
-    if ((mouseFD = open(mouseDev.toLatin1().constData(), O_RDWR | O_NDELAY)) < 0) {
-        qWarning("Cannot open %s (%s)", mouseDev.toLatin1().constData(),
-                strerror(errno));
-    } else {
-        // Clear pending input
-        char buf[2];
-        while (read(mouseFD, buf, 1) > 0) { }
-
-        mouseIdx = 0;
-
-        mouseNotifier = new QSocketNotifier(mouseFD, QSocketNotifier::Read, this);
-        connect(mouseNotifier, SIGNAL(activated(int)),this, SLOT(readMouseData()));
+    mouseFD = open(mouseDev.toLatin1().constData(), O_RDWR | O_NDELAY);
+    if (mouseFD == -1) {
+        perror("QVFbMouseHandler::QVFbMouseHandler");
+        qWarning("QVFbMouseHander: Unable to open device %s",
+                 qPrintable(mouseDev));
+        return;
     }
+
+    // Clear pending input
+    char buf[2];
+    while (read(mouseFD, buf, 1) > 0) { }
+
+    mouseIdx = 0;
+
+    mouseNotifier = new QSocketNotifier(mouseFD, QSocketNotifier::Read, this);
+    connect(mouseNotifier, SIGNAL(activated(int)),this, SLOT(readMouseData()));
 }
 
 QVFbMouseHandler::~QVFbMouseHandler()

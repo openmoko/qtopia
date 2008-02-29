@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,8 @@
 #include "qdrmrights.h"
 
 Q_IMPLEMENT_USER_METATYPE_ENUM( QDrmRights::Permission );
+Q_IMPLEMENT_USER_METATYPE_ENUM( QDrmRights::Permissions );
+Q_IMPLEMENT_USER_METATYPE_ENUM( QDrmRights::Status );
 
 /*!
     \class QDrmRights
@@ -184,6 +186,45 @@ QVariant QDrmRights::Constraint::attributeValue( int index ) const
 }
 
 /*!
+    \fn QDrmRights::Constraint::serialize(Stream &stream) const
+
+    Writes a QDrmRights::Constraint object to a \a stream.
+
+    \internal
+ */
+template <typename Stream> void QDrmRights::Constraint::serialize(Stream &stream) const
+{
+    if( d != 0 )
+    {
+        stream << d->name;
+        stream << d->value;
+        stream << d->attributes;
+    }
+    else
+    {
+        stream << QString();
+        stream << QVariant();
+        stream << QList< QPair< QString, QVariant > >();
+    }
+}
+
+/*!
+    \fn QDrmRights::Constraint::deserialize(Stream &stream )
+
+    Reads a QDrmRights::Constriant object from a \a stream.
+
+    \internal
+ */
+template <typename Stream> void QDrmRights::Constraint::deserialize(Stream &stream)
+{
+    d = new QDrmRightsConstraintPrivate;
+
+    stream >> d->name;
+    stream >> d->value;
+    stream >> d->attributes;
+}
+
+/*!
     \typedef QDrmRights::ConstraintList
 
     Synonym for \c{QList< QDrmRights::Constraint >}
@@ -331,3 +372,37 @@ QString QDrmRights::toString( Permission permission, Status status )
             return QString();
     }
 }
+
+/*!
+    \fn QDrmRights::serialize(Stream &stream) const
+
+    Writes a QDrmRights object to a \a stream.
+
+    \internal
+*/
+template <typename Stream> void QDrmRights::serialize(Stream &stream) const
+{
+    stream << permission();
+    stream << status();
+    stream << constraints();
+}
+
+/*!
+    \fn QDrmRights::deserialize(Stream &stream )
+
+    Reads a QDrmRights object from a \a stream.
+
+    \internal
+*/
+template <typename Stream> void QDrmRights::deserialize(Stream &stream)
+{
+    d = new QDrmRightsPrivate;
+
+    stream >> d->permission;
+    stream >> d->status;
+    stream >> d->constraints;
+}
+
+Q_IMPLEMENT_USER_METATYPE( QDrmRights );
+Q_IMPLEMENT_USER_METATYPE( QDrmRights::Constraint );
+Q_IMPLEMENT_USER_METATYPE_TYPEDEF( QDrmRightsConstraintList, QDrmRights::ConstraintList );

@@ -9,23 +9,37 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <QtCore/QHash>
-#include <QtGui/QPushButton>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QStyle>
-#include <QtGui/QVBoxLayout>
+#include <QtCore/qhash.h>
+#include <QtGui/qpushbutton.h>
+#include <QtGui/qstyle.h>
+#include <QtGui/qlayout.h>
 #include <QtGui/private/qwidget_p.h>
 
 #include "qdialogbuttonbox.h"
@@ -37,6 +51,7 @@
     layout that is appropriate to the current widget style.
 
     \ingroup application
+    \mainclass
 
     Dialogs and message boxes typically present buttons in a layout that
     conforms to the interface guidelines for that platform. Invariably,
@@ -118,7 +133,7 @@
     has an AcceptRole, RejectRole, or HelpRole, the accepted(), rejected(), or
     helpRequested() signals are emitted respectively.
 
-    if you want a specific button to be default you need to call
+    If you want a specific button to be default you need to call
     QPushButton::setDefault() on it yourself. However, if there is no default
     button set and to preserve which button is the default button across
     platforms when using the QPushButton::autoDefault property, the first push
@@ -194,8 +209,8 @@ static const int layouts[2][5][14] =
     // Qt::Horizontal
     {
         // WinLayout
-        { ResetRole, Stretch, YesRole, AcceptRole, AlternateRole, DestructiveRole, NoRole, RejectRole, ApplyRole,
-          ActionRole, HelpRole, EOL, EOL, EOL },
+        { ResetRole, Stretch, YesRole, AcceptRole, AlternateRole, DestructiveRole, NoRole, ActionRole, RejectRole, ApplyRole,
+           HelpRole, EOL, EOL, EOL },
 
         // MacLayout
         { HelpRole, ResetRole, ApplyRole, ActionRole, Stretch, DestructiveRole | Reverse,
@@ -262,6 +277,9 @@ public:
     void _q_handleButtonDestroyed();
     void _q_handleButtonClicked();
     void addButtonsToLayout(const QList<QAbstractButton *> &buttonList, bool reverse);
+    void retranslateStrings();
+    const char *standardButtonText(QDialogButtonBox::StandardButton sbutton) const;
+
 };
 
 QDialogButtonBoxPrivate::QDialogButtonBoxPrivate(Qt::Orientation orient)
@@ -283,17 +301,22 @@ void QDialogButtonBoxPrivate::initLayout()
         else
             buttonLayout = new QVBoxLayout(q);
     }
-    if (layoutPolicy == QDialogButtonBox::MacLayout)
-        buttonLayout->setSpacing(0);
-    buttonLayout->setMargin(0);
+
+	int left, top, right, bottom;
+    setLayoutItemMargins(QStyle::SE_PushButtonLayoutItem);
+	getLayoutItemMargins(&left, &top, &right, &bottom);
+    buttonLayout->setContentsMargins(-left, -top, -right, -bottom);
 
     if (!q->testAttribute(Qt::WA_WState_OwnSizePolicy)) {
-        QSizePolicy sp(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        QSizePolicy sp(QSizePolicy::Expanding, QSizePolicy::Fixed, QSizePolicy::ButtonBox);
         if (orientation == Qt::Vertical)
             sp.transpose();
         q->setSizePolicy(sp);
         q->setAttribute(Qt::WA_WState_OwnSizePolicy, false);
     }
+
+    // ### move to a real init() function
+    q->setFocusPolicy(Qt::TabFocus);
 }
 
 void QDialogButtonBoxPrivate::resetLayout()
@@ -305,7 +328,6 @@ void QDialogButtonBoxPrivate::resetLayout()
 
 void QDialogButtonBoxPrivate::addButtonsToLayout(const QList<QAbstractButton *> &buttonList,
                                                  bool reverse)
-
 {
     int start = reverse ? buttonList.count() - 1 : 0;
     int end = reverse ? -1 : buttonList.count();
@@ -321,7 +343,7 @@ void QDialogButtonBoxPrivate::addButtonsToLayout(const QList<QAbstractButton *> 
 void QDialogButtonBoxPrivate::layoutButtons()
 {
     Q_Q(QDialogButtonBox);
-    const int MacGap = 19;
+    const int MacGap = 24 - 8;	// 8 is the default gap between a widget and a spacer item
 
     for (int i = buttonLayout->count() - 1; i >= 0; --i) {
         QLayoutItem *item = buttonLayout->takeAt(i);
@@ -336,11 +358,12 @@ void QDialogButtonBoxPrivate::layoutButtons()
     static int ModalRoles[M] = { AcceptRole, RejectRole, DestructiveRole, YesRole, NoRole };
     if (tmpPolicy == QDialogButtonBox::MacLayout) {
         bool hasModalButton = false;
-        for (int i = 0; i < M; ++i)
+        for (int i = 0; i < M; ++i) {
             if (!buttonLists[ModalRoles[i]].isEmpty()) {
                 hasModalButton = true;
                 break;
             }
+        }
         if (!hasModalButton)
             tmpPolicy = 4;  // Mac modeless
     }
@@ -388,8 +411,8 @@ void QDialogButtonBoxPrivate::layoutButtons()
                     buttons to ensure that they don't get too close to
                     the help and action buttons (but only if there are
                     some buttons to the left of the destructive buttons
-                    (and the stretch, whence buttonLayout->count > 1 and
-                    not 0)).
+                    (and the stretch, whence buttonLayout->count() > 1
+                    and not 0)).
                 */
                 if (tmpPolicy == QDialogButtonBox::MacLayout
                         && !list.isEmpty() && buttonLayout->count() > 1)
@@ -444,80 +467,50 @@ QPushButton *QDialogButtonBoxPrivate::createButton(QDialogButtonBox::StandardBut
     switch (sbutton) {
     case QDialogButtonBox::Ok:
         icon = QStyle::SP_DialogOkButton;
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "OK");
         break;
     case QDialogButtonBox::Save:
         icon = QStyle::SP_DialogSaveButton;
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Save");
         break;
     case QDialogButtonBox::Open:
         icon = QStyle::SP_DialogOpenButton;
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Open");
         break;
     case QDialogButtonBox::Cancel:
         icon = QStyle::SP_DialogCancelButton;
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Cancel");
         break;
     case QDialogButtonBox::Close:
         icon = QStyle::SP_DialogCloseButton;
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Close");
         break;
     case QDialogButtonBox::Apply:
         icon = QStyle::SP_DialogApplyButton;
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Apply");
         break;
     case QDialogButtonBox::Reset:
         icon = QStyle::SP_DialogResetButton;
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Reset");
         break;
     case QDialogButtonBox::Help:
         icon = QStyle::SP_DialogHelpButton;
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Help");
         break;
     case QDialogButtonBox::Discard:
         icon = QStyle::SP_DialogDiscardButton;
-        if (layoutPolicy == QDialogButtonBox::MacLayout)
-            buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Don't Save");
-        else if (layoutPolicy == QDialogButtonBox::GnomeLayout)
-            buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Close without Saving");
-        else
-            buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Discard");
         break;
     case QDialogButtonBox::Yes:
         icon = QStyle::SP_DialogYesButton;
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "&Yes");
-        break;
-    case QDialogButtonBox::YesToAll:
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Yes to &All");
         break;
     case QDialogButtonBox::No:
         icon = QStyle::SP_DialogNoButton;
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "&No");
         break;
+    case QDialogButtonBox::YesToAll:
     case QDialogButtonBox::NoToAll:
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "N&o to All");
-        break;
     case QDialogButtonBox::SaveAll:
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Save All");
-        break;
     case QDialogButtonBox::Abort:
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Abort");
-        break;
     case QDialogButtonBox::Retry:
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Retry");
-        break;
     case QDialogButtonBox::Ignore:
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Ignore");
-        break;
     case QDialogButtonBox::RestoreDefaults:
-        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Restore Defaults");
         break;
     case QDialogButtonBox::NoButton:
+        return 0;
         ;
     }
-
-    if (!buttonText)
-        return 0;
+    buttonText = standardButtonText(sbutton);
 
     QPushButton *button = new QPushButton(QDialogButtonBox::tr(buttonText), q);
     if (q->style()->styleHint(QStyle::SH_DialogButtonBox_ButtonsHaveIcons, 0, q) && icon != 0)
@@ -550,6 +543,89 @@ void QDialogButtonBoxPrivate::createStandardButtons(QDialogButtonBox::StandardBu
     layoutButtons();
 }
 
+const char *QDialogButtonBoxPrivate::standardButtonText(QDialogButtonBox::StandardButton sbutton) const
+{
+    const char *buttonText = 0;
+    switch (sbutton) {
+    case QDialogButtonBox::Ok:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "OK");
+        break;
+    case QDialogButtonBox::Save:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Save");
+        break;
+    case QDialogButtonBox::Open:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Open");
+        break;
+    case QDialogButtonBox::Cancel:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Cancel");
+        break;
+    case QDialogButtonBox::Close:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Close");
+        break;
+    case QDialogButtonBox::Apply:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Apply");
+        break;
+    case QDialogButtonBox::Reset:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Reset");
+        break;
+    case QDialogButtonBox::Help:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Help");
+        break;
+    case QDialogButtonBox::Discard:
+        if (layoutPolicy == QDialogButtonBox::MacLayout)
+            buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Don't Save");
+        else if (layoutPolicy == QDialogButtonBox::GnomeLayout)
+            buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Close without Saving");
+        else
+            buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Discard");
+        break;
+    case QDialogButtonBox::Yes:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "&Yes");
+        break;
+    case QDialogButtonBox::YesToAll:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Yes to &All");
+        break;
+    case QDialogButtonBox::No:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "&No");
+        break;
+    case QDialogButtonBox::NoToAll:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "N&o to All");
+        break;
+    case QDialogButtonBox::SaveAll:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Save All");
+        break;
+    case QDialogButtonBox::Abort:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Abort");
+        break;
+    case QDialogButtonBox::Retry:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Retry");
+        break;
+    case QDialogButtonBox::Ignore:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Ignore");
+        break;
+    case QDialogButtonBox::RestoreDefaults:
+        buttonText = QT_TRANSLATE_NOOP("QDialogButtonBox", "Restore Defaults");
+        break;
+    case QDialogButtonBox::NoButton:
+        ;
+    } // switch
+    return buttonText;
+}
+
+void QDialogButtonBoxPrivate::retranslateStrings()
+{
+    const char *buttonText = 0;
+    QHash<QPushButton *, QDialogButtonBox::StandardButton>::iterator it =  standardButtonHash.begin();
+    while (it != standardButtonHash.end()) {
+        buttonText = standardButtonText(it.value());
+        if (buttonText) {
+            QPushButton *button = it.key();
+            button->setText(QDialogButtonBox::tr(buttonText));
+        }
+        ++it;
+    }
+}
+
 /*!
     Constructs an empty, horizontal button box with the given \a parent.
 
@@ -559,7 +635,6 @@ QDialogButtonBox::QDialogButtonBox(QWidget *parent)
     : QWidget(*new QDialogButtonBoxPrivate(Qt::Horizontal), parent, 0)
 {
     d_func()->initLayout();
-    setFocusPolicy(Qt::TabFocus);
 }
 
 /*!
@@ -571,7 +646,6 @@ QDialogButtonBox::QDialogButtonBox(Qt::Orientation orientation, QWidget *parent)
     : QWidget(*new QDialogButtonBoxPrivate(orientation), parent, 0)
 {
     d_func()->initLayout();
-    setFocusPolicy(Qt::TabFocus);
 }
 
 /*!
@@ -586,7 +660,6 @@ QDialogButtonBox::QDialogButtonBox(StandardButtons buttons, Qt::Orientation orie
 {
     d_func()->initLayout();
     d_func()->createStandardButtons(buttons);
-    setFocusPolicy(Qt::TabFocus);
 }
 
 /*!
@@ -610,9 +683,9 @@ QDialogButtonBox::~QDialogButtonBox()
     \value RejectRole Clicking the button causes the dialog to be rejected
            (e.g. Cancel).
     \value DestructiveRole Clicking the button causes a destructive change
-           (e.g. for Discarding Changes).
-    \value ActionRole Clicking the button causes changes to the elements in
-           the dialog (e.g. reset all the values or read defaults).
+           (e.g. for Discarding Changes) and closes the dialog.
+    \value ActionRole Clicking the button causes changes to the elements within
+           the dialog, without closing the dialog.
     \value HelpRole The button can be clicked to request help.
     \value YesRole The button is a "Yes"-like button.
     \value NoRole The button is a "No"-like button.
@@ -996,6 +1069,9 @@ void QDialogButtonBox::changeEvent(QEvent *event)
 
     switch (event->type()) {
     case QEvent::StyleChange:
+#ifdef Q_WS_MAC
+    case QEvent::MacSizeChange:
+#endif
         d->resetLayout();
         QWidget::changeEvent(event);
         break;
@@ -1027,6 +1103,8 @@ bool QDialogButtonBox::event(QEvent *event)
         }
         if (!hasDefault && firstAcceptButton)
             firstAcceptButton->setDefault(true);
+    }else if (event->type() == QEvent::LanguageChange) {
+        d->retranslateStrings();
     }
 
     return QWidget::event(event);

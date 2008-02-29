@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -236,6 +236,7 @@ void DialupUI::init()
     advancedPage = new AdvancedPage( knownProp );
     scroll->setWidget( advancedPage );
     tabWidget->addTab( scroll, tr("Advanced") );
+    tabWidget->setTabIcon( 3, QIcon(":icon/settings") );
 
     vBox->addWidget( tabWidget );
 #else
@@ -254,7 +255,7 @@ void DialupUI::init()
 
     item = new QListWidgetItem( tr("Proxy Settings"), options, Proxy );
     item->setTextAlignment( Qt::AlignHCenter);
-    item->setIcon(QPixmap(":icon/netsetup/proxies"));
+    item->setIcon(QIcon(":icon/netsetup/proxies"));
 
     item = new QListWidgetItem( tr("Network"), options, Dialing );
     item->setTextAlignment( Qt::AlignHCenter);
@@ -262,6 +263,7 @@ void DialupUI::init()
 
     item = new QListWidgetItem( tr("Advanced"), options, Advanced );
     item->setTextAlignment( Qt::AlignHCenter);
+    item->setIcon( QIcon(":icon/settings") );
 
 
     vb->addWidget( options );
@@ -344,6 +346,8 @@ void DialupUI::accept()
                     QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
             if ( ret > 0 )
                 stack->setCurrentIndex( ret );
+            else
+                QDialog::accept();
         }
 #ifdef QTOPIA_PHONE
     } else {
@@ -445,7 +449,8 @@ int DialupUI::writeSystemFiles()
         fc.write( st.toUtf8() );
         fc.close();
     } else {
-        qLog(Network) << "Cannot write chat file";
+        errorText = tr("Cannot write chat file");
+        qLog(Network) << "Cannot write chat file" << connectF;
         return -1;
     }
 
@@ -458,7 +463,8 @@ int DialupUI::writeSystemFiles()
             fd.write( QString("\"\" \\d+++\\d\\c OK\nATH0 OK").toUtf8() );
         fd.close();
     } else {
-        qLog(Network) << "Cannot write disconnect file";
+        qLog(Network) << "Cannot write disconnect file" << disconnectF;
+        errorText = tr("Cannot write disconnect file");
         //delete connect chat file
         fc.remove();
         return -1;
@@ -520,6 +526,8 @@ int DialupUI::writeSystemFiles()
             s << peerFile[i] << endl;
         tmpPeer.close();
     } else {
+        qLog(Network) << "Cannot write peer file" << peerFileName;
+        errorText = tr("Cannot write peer file");
         fc.remove(); //delete connect chat
         fd.remove(); //delete disconnect chat
         return -1; //cannot write peer file

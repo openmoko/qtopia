@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,55 +23,37 @@
 
 #include <QMainWindow>
 #include <QDialog>
-#include <QStringList>
 #include <QSet>
-#include <QAction>
-#include <QLineEdit>
-#include <QVBoxLayout>
-#include <QRadioButton>
-#include <QStringList>
+#include <QItemDelegate>
 
 #include <qcategorymanager.h>
 #include <qtopia/pim/qcontact.h>
 #include <qtopia/pim/qpimsource.h>
 #include <qtopiaabstractservice.h>
+#include "qtopiaserviceselector.h"
 
-#ifndef QTOPIA_PHONE
-#       ifndef AB_PDA
-#           define AB_PDA
-#       endif
-#endif
-
-#ifdef QTOPIA_PHONE
-#   include <qtopia/qsoftmenubar.h>
 #ifdef QTOPIA_CELL
 #   include <qtopiaphone/qphonebook.h>
-#endif
+class QSimInfo;
 #endif
 
-class AbLabel;
-class QPopupMenu;
-class QToolButton;
-class QLineEdit;
-class QDialog;
-class QLabel;
-class QCategorySelector;
-class QContactListView;
+class QAction;
+class QVBoxLayout;
+class QRadioButton;
 class QButtonGroup;
 class QStackedWidget;
 class QContact;
 class QContactModel;
-class QContactDelegate;
 class QUniqueId;
 class QDSData;
 class QDSActionRequest;
 class AbEditor;
 class AbFullEditor;
 class AbSimEditor;
-
-#ifdef QTOPIA_PHONE
-class QLineEditWithPreeditNotification;
-#endif
+class GroupView;
+class ContactListPane;
+class ContactDetails;
+class LoadIndicator;
 
 class AddressbookWindow : public QMainWindow
 {
@@ -87,14 +69,13 @@ protected:
     void newEntry();
     void newEntry(const QContact &cnt);
     void editEntry(const QContact &cnt);
-    void closeEvent(QCloseEvent *e);
     void keyPressEvent(QKeyEvent *);
-    void showEvent(QShowEvent *e);
-
-#ifdef QTOPIA_PHONE
-    bool eventFilter(QObject *o, QEvent *e);
-#endif
-
+    bool eventFilter(QObject *receiver, QEvent *e);
+    QString pickEmailAddress(QStringList emails);
+    int pickSpeedDialType(QStringList emails, QMap<QContact::PhoneType,QString> numbers);
+    bool updateSpeedDialPhoneServiceDescription(QtopiaServiceDescription* desc, const QContact& ent, QContact::PhoneType phoneType, bool isSms);
+    bool updateSpeedDialEmailServiceDescription(QtopiaServiceDescription* desc, const QContact& ent, const QString& emailAddress);
+    bool updateSpeedDialViewServiceDescription(QtopiaServiceDescription* desc, const QContact& ent);
 public slots:
     void appMessage(const QString &, const QByteArray &);
     void setDocument(const QString &);
@@ -105,48 +86,56 @@ public slots:
 #endif
 
 private slots:
-    void delayedInit();
+    // QAction slots
     void sendContact();
     void sendContactCat();
-    void selectClicked();
-    void slotListNew();
-    void slotListView();
-    void slotDetailView();
-    void slotListDelete();
-    void slotViewBack();
-    void slotViewEdit();
-    void slotPersonalView();
+    void deleteContact();
+    void markCurrentAsPersonal();
+    void importCurrentFromSim();
+    void exportCurrentToSim();
+    void selectSources();
+    void addToSpeedDial();
+    void configure();
+    void showPersonalView();
+    void createNewContact();
+    void previousView();
+    void groupList();
+
+    // Details pane slots
+    void callCurrentContact();
+    void textCurrentContact();
+    void emailCurrentContact();
+    void editCurrentContact();
+
+    void contactActivated(QContact);
+
+    // Misc slots
+    void delayedInit();
     void editPersonal();
     void addPhoneNumberToContact(const QString& phoneNumber);
     void createNewContact(const QString& phoneNumber);
     void setContactImage(const QString& filename);
-    void markCurrentAsPersonal();
-    void slotFind(bool);
-    void search( const QString &k );
-    void showCategory( const QCategoryFilter &);
-    void updateIcons();
-    void selectAll();
-    void configure();
-    void selectCategory();
-    void viewOpened( const QContact &entry );
-    void viewClosed();
-    void addToSpeedDial();
-    void setHighlightedLink(const QString&);
-    void selectSources();
+    void showCategory( const QString &);
+    void updateContextMenu();
+    void updateContextMenuIfDirty();
+    void setContextMenuDirty();
+    void setCurrentContact( const QContact &entry );
     void importAllFromSim();
     void exportAllToSim();
+    void currentContactSelectionChanged();
+    void loadMoreVcards();
+    void cancelLoad();
 
-    void importCurrentFromSim();
-    void exportCurrentToSim();
+    void removeContactFromCurrentGroup();
 #ifdef QTOPIA_CELL
-    void phonebookChanged( const QString& store );
+    void simInserted();
+    void simNotInserted();
+    void phoneBookUpdated(const QString&);
 #endif
+
     void setContactImage( const QDSActionRequest& request );
     void qdlActivateLink( const QDSActionRequest& request );
     void qdlRequestLinks( const QDSActionRequest& request );
-    /* simply disabled for now although this might be useful
-    void contactFilterSelected( int idx );
-    */
 
     void contactsChanged();
 
@@ -158,100 +147,111 @@ private:
 private:
     void createViewMenu();
     void createDetailedView();
+    void createGroupListView();
+    void createGroupMemberView();
+    void showCategory( const QCategoryFilter &, bool saveState);
 
     void receiveFile(const QString &filename, const QString &mimetype = QString());
 
     void readConfig();
     void writeConfig();
 
-    void showView();
+    void showDetailsView(bool saveState);
+    void showGroupListView(bool saveState);
+    void showGroupMemberView(bool saveState);
+    void showListView(bool saveState);
+
+    void saveViewState();
+    void restoreViewState();
+
+    void clearSearchBars();
 
     void showJustItem(const QUniqueId &uid);
 
+    void updateGroupNavigation();
+
+    void updateDependentAppointments(const QContact& src, AbEditor* editor);
+    void updateSpeedDialEntries(const QContact& c);
+    void removeSpeedDialEntries(const QContact& c);
+
     bool checkSyncing();
 
-    QDSData contactQDLLink( QContact& contact );
-    void removeContactQDLLink( QContact& contact );
-    void removeSpeedDial( QContact& contact );
+    QDSData contactQDLLink( const QContact& contact );
+    void removeContactQDLLink( const QContact& contact );
 
-    enum Panes
-    {
-        paneList = 0,
-        paneView,
-        paneEdit
-    };
-
-    QContactModel *contacts;
+    QContactModel *mModel;
+    QContactModel *mFilterModel;
 
     bool mCloseAfterView;
-    bool mFindMode;
     bool mHasSim;
+#ifdef QTOPIA_CELL
+    QSimInfo *mSimInfo;
+    bool mGotSimEntries;
+#endif
+
+    mutable bool mContextMenuDirty;
 
     QStackedWidget *centralView;
-    QToolBar *listTools;
-    QToolButton *deleteButton;
-    QCategorySelector *catSelect;
 
-    QWidget *listView;
-    QVBoxLayout *listViewLayout;
-    AbLabel *mView;
-    QContactListView *abList;
-
-    QToolBar *searchBar;
-    QLineEdit *searchEdit;
-    QPopupMenu *viewmenu;
+    ContactListPane *mListView;
+    GroupView *mGroupsListView;
+    ContactListPane *mGroupMemberView;
+    ContactDetails *mDetailsView;
 
     AbEditor *editor(const QUniqueId &);
     AbFullEditor *abFullEditor;
-#ifdef QTOPIA_PHONE
+#ifdef QTOPIA_CELL
     AbSimEditor *abSimEditor;
 #endif
 
     QAction *actionNew,
             *actionEdit,
             *actionTrash,
-            *actionFind,
-            *actionPersonal,
-            *actionSetPersonal,
-            *actionResetPersonal,
-            *actionSettings
-#ifdef QTOPIA_PHONE
-            , *actionShowSources,
-            *actionExportSim,
-            *actionImportSim
+            *actionPersonal;
+// group actions
+    QAction *actionShowGroups,
+            *actionAddGroup,
+            *actionRemoveGroup,
+            *actionRenameGroup,
+            *actionRemoveFromGroup,
+            *actionAddMembers;
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+    QAction *actionSetRingTone;
 #endif
-            ;
 
-    int viewMargin;
-
+    QAction *actionSetPersonal,
+            *actionResetPersonal,
+            *actionSettings,
+            *actionSend,
+            *actionSendCat,
+            *actionShowSources,
+            *actionExportSim,
+            *actionImportSim,
+            *actionSpeedDial;
 
     bool syncing;
-    bool showingPersonal;
 
-    QString sel_href;
+    QCategoryFilter mCurrentFilter;
 
-    QAction *actionSend;
-    QAction *actionSendCat;
+    QContact currentContact() const;
+    mutable QContact mCurrentContact;
+    mutable bool mCurrentContactDirty;
 
-#ifdef AB_PDA
-    QAction *actionBack;
-#endif
+    typedef struct {
+        QContact contact;
+        enum {List, Groups, GroupMembers, Details} pane;
+    } AB_State;
+    QList<AB_State> mContactViewStack;
 
-#ifdef QTOPIA_PHONE
-    QAction *actionCategory, *actionSpeedDial;
-
-    bool mToggleInternal;
-    QLabel *categoryLbl;
-
-    QLineEditWithPreeditNotification* mFindLE;
-#endif
-
-#ifdef QTOPIA_CELL
-    QLabel *mSimIndicator;
-    bool mGotSimEntries;
-#endif
-    QContact mCurrentContact;
-    QList<QContact> mContactViewStack;
+    // Incremental vCard loading
+    LoadIndicator *loadinfo;
+    enum { Start, Read, DuplicateCheck, Process, ConfirmAdd, Add, Done } loadState;
+    QList<QContact> loadedcl;
+    QList<QContact> loadednewContacts, loadedoldContacts;
+    int loadednewContactsCursor;
+    bool loadedWhenHidden;
+    QString loadingFile;
+    bool deleteLoadingFile;
 };
 
 class AbDisplaySettings : public QDialog
@@ -261,27 +261,17 @@ class AbDisplaySettings : public QDialog
 public:
     AbDisplaySettings(QWidget *parent);
 
-#ifdef QTOPIA_PHONE
     void saveFormat();
     QString format();
 
 protected:
     void keyPressEvent(QKeyEvent* e);
-/*#else
-    void setCurrentFields(const QList<int> &);
-    QValueList<int> fields() { return map->fields() }*/
-#endif
 
 private:
     QVBoxLayout* layout;
-#ifdef QTOPIA_PHONE
     QButtonGroup* bg;
-#endif
 };
 
-#ifdef QTOPIA_PHONE
-//  Included only in Qtopia Phone for now - may be useful for PDA
-//  or desktop some time down the track.
 class AbSourcesDialog : public QDialog
 {
     Q_OBJECT
@@ -306,7 +296,6 @@ private:
     QRadioButton* bothButton;
     QSet<QPimSource> availableSources;
 };
-#endif
 
 class ContactsService : public QtopiaAbstractService
 {
@@ -339,8 +328,6 @@ private:
     AddressbookWindow *parent;
 };
 
-#ifdef QTOPIA_PHONE
-
 class ContactsPhoneService : public QtopiaAbstractService
 {
     Q_OBJECT
@@ -362,7 +349,4 @@ public slots:
 private:
     AddressbookWindow *parent;
 };
-
-#endif
-
 #endif

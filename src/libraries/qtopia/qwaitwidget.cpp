@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,20 +25,121 @@
 #include <QPixmap>
 #include <QVBoxLayout>
 #include <QHideEvent>
+#include <QPainter>
+#include <QBasicTimer>
+#include <QDesktopWidget>
+#include <QImageReader>
 #include <qtopiaapplication.h>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
+
+static QRgb blendRgb( QRgb rgb, int sr, int sg, int sb )
+{
+    int tmp = ( rgb >> 16 ) & 0xff;
+    int r = ( ( sr + tmp ) / 2 );
+    tmp = ( rgb >> 8 ) & 0xff;
+    int g = ( ( sg + tmp ) / 2 );
+    tmp = rgb & 0xff;
+    int b = ( ( sb + tmp ) / 2 );
+    return qRgba( r, g, b, qAlpha( rgb ) );
+}
+
+class ClockLabel : public QWidget
+{
+    Q_OBJECT
+public:
+    ClockLabel(QWidget *parent);
+
+    void start() { timer.start(250, this); }
+    void stop() { timer.stop(); angle = 180; }
+
+    void setBlendColor(const QColor &col) { blendColor = col; loadImage(); }
+
+    QSize sizeHint() const;
+    void loadImage();
+
+protected:
+    void paintEvent(QPaintEvent *e);
+    void timerEvent(QTimerEvent *e);
+    void resizeEvent(QResizeEvent *e);
+
+private:
+    QPixmap waitIcon;
+    int angle;
+    QColor blendColor;
+    QBasicTimer timer;
+};
+
+ClockLabel::ClockLabel(QWidget *parent) : QWidget(parent), angle(180)
+{
+    setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
+}
+
+QSize ClockLabel::sizeHint() const
+{
+    QSize dsize = QApplication::desktop()->screenGeometry().size();
+    return dsize/4;
+}
+
+void ClockLabel::paintEvent(QPaintEvent *)
+{
+    QPainter p(this);
+    p.drawPixmap((width()-waitIcon.width())/2, (height()-waitIcon.height())/2,waitIcon);
+    p.setRenderHint(QPainter::Antialiasing, true);
+    p.setPen(QPen(Qt::black, 2));
+    p.translate(qreal(rect().width())/2.0, qreal(rect().height())/2.0);
+    p.rotate(angle);
+    p.drawLine(0,0,0,waitIcon.width()/2-waitIcon.width()/8);
+}
+
+void ClockLabel::resizeEvent(QResizeEvent *)
+{
+    loadImage();
+}
+
+void ClockLabel::timerEvent(QTimerEvent *e)
+{
+    if (e->timerId() == timer.timerId()) {
+        angle += 6;
+        if (angle >= 360)
+            angle = 0;
+        update();
+    }
+}
+
+void ClockLabel::loadImage()
+{
+    int imgSize = qMin(size().width(), size().height());
+    QImageReader imgReader(":image/qpe/clock");
+    imgReader.setScaledSize(QSize(imgSize, imgSize));
+    QImage img = imgReader.read();
+
+    if (blendColor.isValid()) {
+        int sr, sg, sb;
+        blendColor.getRgb( &sr, &sg, &sb );
+        if ( img.depth() == 32 ) {
+            QRgb *rgb = (QRgb *)img.bits();
+            int bytesCount = img.bytesPerLine()/sizeof(QRgb)*img.height();
+            for ( int r = 0; r < bytesCount; r++, rgb++ )
+                *rgb = blendRgb( *rgb, sr, sg, sb );
+        } else {
+            QVector<QRgb> rgb = img.colorTable();
+            for ( int r = 0; r < rgb.count(); r++ )
+                rgb[r] = blendRgb( rgb[r], sr, sg, sb );
+            img.setColorTable( rgb );
+        }
+    }
+
+    waitIcon = QPixmap::fromImage(img);
+}
+
+//===========================================================================
 
 class QWaitWidgetPrivate
 {
 public:
-    QTimer *intervalTimer;
     QLabel *textLabel;
-    QLabel *imageLabel;
+    ClockLabel *imageLabel;
     QPixmap busyPixmap;
-    int count;
-    int w, h;
     bool cancelEnabled;
     bool wasCancelled;
     int expiryTime;
@@ -95,12 +196,6 @@ QWaitWidget::QWaitWidget(QWidget *parent)
 {
     d = new QWaitWidgetPrivate;
 
-    d->count = 0;
-    d->intervalTimer = new QTimer( this );
-    d->intervalTimer->setInterval( 100 );
-    connect( d->intervalTimer, SIGNAL(timeout()),
-            this, SLOT(updateImage()) );
-
     QVBoxLayout *layout = new QVBoxLayout( this );
     layout->setMargin( 2 );
     layout->setSpacing( 2 );
@@ -108,7 +203,7 @@ QWaitWidget::QWaitWidget(QWidget *parent)
     d->textLabel = new QLabel( this );
     d->textLabel->setWordWrap( true );
     d->textLabel->setAlignment(Qt::AlignHCenter);
-    d->imageLabel = new QLabel( this );
+    d->imageLabel = new ClockLabel( this );
 
     layout->addStretch( 0 );
     layout->addWidget( d->imageLabel );
@@ -121,17 +216,17 @@ QWaitWidget::QWaitWidget(QWidget *parent)
     setModal( true );
     setWindowFlags( Qt::SplashScreen );
 
-    QColor col = QApplication::palette().color( QPalette::Active, QPalette::Highlight );
-    setColor( col );
-
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::removeMenuFrom( this, QSoftMenuBar::menuFor( this ) );
     QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::NoLabel );
     d->cancelEnabled = false;
     d->wasCancelled = false;
-#endif
     d->expiryTime = 0;
 }
+
+/*!
+    \property QWaitWidget::cancelEnabled
+    \brief indicates whether the Cancel button appears on the context menu.
+*/
 
 /*!
     Sets whether the Cancel button appears on the context menu to \a enabled.
@@ -141,7 +236,6 @@ QWaitWidget::QWaitWidget(QWidget *parent)
 */
 void QWaitWidget::setCancelEnabled(bool enabled)
 {
-#ifdef QTOPIA_PHONE
     if (enabled) {
         d->cancelEnabled = true;
         QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::Cancel );
@@ -150,8 +244,13 @@ void QWaitWidget::setCancelEnabled(bool enabled)
         d->cancelEnabled = false;
         QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::NoLabel );
     }
-#endif
 }
+
+/*!
+    \property QWaitWidget::wasCancelled
+    \brief indicates whether the widget was cancelled by the user when
+    it was last shown.
+*/
 
 /*!
     Returns whether the widget was cancelled by the user when it was last
@@ -177,7 +276,7 @@ void QWaitWidget::show()
 {
     if ( d->expiryTime != 0 )
         QTimer::singleShot( d->expiryTime, this, SLOT(timeExpired()) );
-    d->intervalTimer->start();
+    d->imageLabel->start();
     QDialog::showMaximized();
 
     d->wasCancelled = false;
@@ -190,15 +289,6 @@ void QWaitWidget::hide()
 {
     reset();
     QDialog::hide();
-}
-
-void QWaitWidget::updateImage()
-{
-    if ( d->count == 16 )
-        d->count = 0;
-    QPixmap copy = d->busyPixmap.copy( d->count * d->w, 0, d->w, d->h );
-    d->imageLabel->setPixmap( copy );
-    d->count++;
 }
 
 void QWaitWidget::timeExpired()
@@ -221,39 +311,7 @@ void QWaitWidget::setText( const QString &str )
 */
 void QWaitWidget::setColor( const QColor &col )
 {
-    int sr, sg, sb;
-    col.getRgb( &sr, &sg, &sb );
-
-    QImage img( ":image/busy" );
-
-    if ( img.depth() == 32 ) {
-        QRgb *rgb = (QRgb *)img.bits();
-        int bytesCount = img.bytesPerLine()/sizeof(QRgb)*img.height();
-        for ( int r = 0; r < bytesCount; r++, rgb++ )
-            *rgb = blendRgb( *rgb, sr, sg, sb );
-    } else {
-        QVector<QRgb> rgb = img.colorTable();
-        for ( int r = 0; r < rgb.count(); r++ )
-            rgb[r] = blendRgb( rgb[r], sr, sg, sb );
-        img.setColorTable( rgb );
-    }
-
-    d->busyPixmap = QPixmap::fromImage( img );
-    d->w = d->busyPixmap.width() / 16;
-    d->h = d->busyPixmap.height();
-
-    updateImage();
-}
-
-QRgb QWaitWidget::blendRgb( QRgb rgb, int sr, int sg, int sb )
-{
-    int tmp = ( rgb >> 16 ) & 0xff;
-    int r = ( ( sr + tmp ) / 2 );
-    tmp = ( rgb >> 8 ) & 0xff;
-    int g = ( ( sg + tmp ) / 2 );
-    tmp = rgb & 0xff;
-    int b = ( ( sb + tmp ) / 2 );
-    return qRgba( r, g, b, qAlpha( rgb ) );
+    d->imageLabel->setBlendColor(col);
 }
 
 /*!
@@ -281,9 +339,7 @@ void QWaitWidget::keyPressEvent( QKeyEvent *e )
 
 void QWaitWidget::reset()
 {
-    if ( d->intervalTimer->isActive() )
-        d->intervalTimer->stop();
-    d->count = 0;
+    d->imageLabel->stop();
 }
 
 /*!
@@ -291,3 +347,5 @@ void QWaitWidget::reset()
 
   This signal is emitted whenever the wait widget dialog is cancelled by user.
 */
+
+#include "qwaitwidget.moc"

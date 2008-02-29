@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -56,16 +71,6 @@
 
     \tableofcontents
 
-    \section1 Static Allocation
-
-    Using the static approach, the client application gets the
-    complete control over the reserved region, i.e. the affected
-    region will never be modified by the screen driver.
-
-    The reserveRegion() function attempts to reserve the given region
-    and returns the region actually reserved. The reserved region can
-    also be retrieved using the reservedRegion() function.
-
     \section1 Dynamic Allocation
 
     By instantiating a QDirectPainter object using the default
@@ -78,10 +83,24 @@
     requestedRegion() function returns the originally reserved
     region.
 
-    Note that it is straight forward to gain complete control over the
-    region when instantiating a QDirectPainter object as well. All you
-    have to do is to pass the QDirectPainter::Reserved surface flag to
-    the constructor.
+
+    \section1 Static Allocation
+
+
+    Using the static approach, the client application gets complete
+    control over the reserved region, i.e., the affected region will
+    never be modified by the screen driver.
+
+    To create a static region, pass the QDirectPainter::Reserved
+    surface flag to the constructor. After the reserved region is
+    reported through regionChanged(), the allocated region will not
+    change, unless setRegion() is called.
+
+    If QDirectPainter::ReservedSynchronous is passed to the
+    constructor, calls to setRegion() will block until the region is
+    reserved, meaning that allocatedRegion() will be available immediately.
+    Note that in the current version setRegion() will cause the application
+    event loop to be entered, potentially causing reentrancy issues.
 
     \section1 Rendering
 
@@ -124,6 +143,9 @@
 
     \value Reserved The allocated region will never change. See also
     \l {Static Allocation}.
+
+    \value ReservedSynchronous The allocated region will never change and
+    each function that changes the allocated region will be blocking.
 
     \sa reservedRegion(), allocatedRegion()
 */
@@ -168,10 +190,13 @@ class QDirectPainterPrivate : public QObjectPrivate
 {
     Q_DECLARE_PUBLIC(QDirectPainter);
 public:
+
+    QDirectPainterPrivate() : surface(0), seenRegion(false) {}
+
     ~QDirectPainterPrivate() {
         if (QPaintDevice::qwsDisplay()) { // make sure not in QApplication destructor
             qApp->d_func()->directPainters->remove(surface->windowId());
-            surface->release();
+            surface->setGeometry(QRect());
         }
         delete surface;
     }
@@ -180,11 +205,10 @@ public:
     QRegion requested_region;
 
     static QDirectPainter *staticPainter;
-    static bool seenStaticRegion;
+    bool seenRegion;
 };
 
 QDirectPainter *QDirectPainterPrivate::staticPainter = 0;
-bool QDirectPainterPrivate::seenStaticRegion = false;
 
 void qt_directpainter_region(QDirectPainter *dp, const QRegion &alloc, int type)
 {
@@ -198,10 +222,11 @@ void qt_directpainter_region(QDirectPainter *dp, const QRegion &alloc, int type)
     }
     if (type == QWSRegionEvent::Allocation) {
         d->surface->setClipRegion(r);
-        if (dp == QDirectPainterPrivate::staticPainter)
-            QDirectPainterPrivate::seenStaticRegion = true;
-        else
-            dp->regionChanged(r);
+        d->seenRegion = true;
+        if (dp != QDirectPainterPrivate::staticPainter) {
+            if (!d->surface->flushingRegionEvents) // recursion guard
+                dp->regionChanged(r);
+        }
     }
 }
 
@@ -221,9 +246,9 @@ QDirectPainter::QDirectPainter(QObject *parent, SurfaceFlag flag)
     :QObject(*new QDirectPainterPrivate, parent)
 {
     Q_D(QDirectPainter);
-    d->surface = new QWSDirectPainterSurface(true);
+    d->surface = new QWSDirectPainterSurface(true, flag);
 
-    if (flag == Reserved)
+    if (flag != NonReserved)
         d->surface->setReserved();
 
     QApplicationPrivate *ad = qApp->d_func();
@@ -290,7 +315,6 @@ void QDirectPainter::setRegion(const QRegion &region)
 {
     Q_D(QDirectPainter);
     d->requested_region = region;
-
     d->surface->setRegion(region);
 }
 
@@ -345,13 +369,17 @@ WId QDirectPainter::winId() const
     \fn void QDirectPainter::regionChanged(const QRegion &newRegion)
     \since 4.2
 
-    This function is called whenever the allocated region changes.
+    This function is called when the allocated region changes.
 
-    Note that the default implementation does nothing; reimplement
-    this function to adjust the currently running processes according
-    to the given \a newRegion.
+    This function is not called for region changes that happen while the
+    startPainting() function is executing.
 
-    \sa allocatedRegion(), {Dynamic Allocation}
+    Note that the given region, \a newRegion, is not guaranteed to be correct at the
+    time you access the display. To prevent reentrancy problems you should
+    always call startPainting() before updating the display and then use
+    allocatedRegion() to retrieve the correct region.
+
+    \sa allocatedRegion(), startPainting(), {Dynamic Allocation}
 */
 void QDirectPainter::regionChanged(const QRegion &region)
 {
@@ -362,23 +390,71 @@ void QDirectPainter::regionChanged(const QRegion &region)
     \preliminary
     \since 4.2
 
-    The current implementation does nothing.
+    Call this function before you start updating the pixels in the
+    allocated region. The hardware will be notified, if necessary,
+    that you are about to start painting operations.
+
+    Set \a lockDisplay if you want startPainting() and endPainting()
+    to lock() and unlock() the display automatically.
+
+    Note that for a NonReserved direct painter, you must call
+    allocatedRegion() after calling this function, since the allocated
+    region is only guaranteed to be correct after this function has
+    returned.
+
+    The regionChanged() function will not be called between startPainting()
+    and endPainting().
+
+    \sa endPainting(), flush()
 */
 void QDirectPainter::startPainting(bool lockDisplay)
 {
     Q_UNUSED(lockDisplay);
+
+    Q_D(QDirectPainter);
+    d->surface->beginPaint(d->surface->region());
 }
 
 /*!
     \preliminary
     \since 4.2
 
-    The current implementation does nothing.
+    Call this function when you are done updating the screen. It will
+    notify the hardware, if necessary, that your painting operations
+    have ended.
 */
 void QDirectPainter::endPainting()
 {
+    Q_D(QDirectPainter);
+    d->surface->endPaint(d->surface->region());
 }
 
+/*!
+    \preliminary
+    \since 4.3
+    \overload
+
+    This function will automatically call flush() to flush the
+    \a region to the display before notifying the hardware, if
+    necessary, that painting operations have ended.
+*/
+void QDirectPainter::endPainting(const QRegion &region)
+{
+    endPainting();
+    flush(region);
+}
+
+/*!
+    \preliminary
+    \since 4.3
+
+    Flushes the \a region onto the screen.
+*/
+void QDirectPainter::flush(const QRegion &region)
+{
+    Q_D(QDirectPainter);
+    d->surface->flush(0, region, QPoint());
+}
 
 /*!
     \since 4.2
@@ -392,7 +468,7 @@ void QDirectPainter::endPainting()
 */
 void QDirectPainter::raise()
 {
-    QWidget::qwsDisplay()->setAltitude(winId(), QWSChangeAltitudeCommand::Raise);
+    QWidget::qwsDisplay()->setAltitude(winId(),QWSChangeAltitudeCommand::Raise);
 }
 
 /*!
@@ -407,36 +483,35 @@ void QDirectPainter::raise()
 */
 void QDirectPainter::lower()
 {
-    QWidget::qwsDisplay()->setAltitude(winId(), QWSChangeAltitudeCommand::Lower);
+    QWidget::qwsDisplay()->setAltitude(winId(),QWSChangeAltitudeCommand::Lower);
 }
 
 
 /*!
     \fn QRegion QDirectPainter::reserveRegion(const QRegion &region)
 
-    Attempts to reserve the given \a region, and returns the region
-    that is actually reserved.
+    Attempts to reserve the \a region and returns the region that is
+    actually reserved.
 
     This function also releases the previously reserved region if
     any. If not released explicitly, the region will be released on
     application exit.
 
     \sa reservedRegion(), {Static Allocation}
+
+    \obsolete
+
+    Construct a QDirectPainter using QDirectPainter::ReservedSynchronous instead.
 */
 QRegion QDirectPainter::reserveRegion(const QRegion &reg)
 {
     if (!QDirectPainterPrivate::staticPainter)
-        QDirectPainterPrivate::staticPainter = new QDirectPainter(qApp, Reserved);
+        QDirectPainterPrivate::staticPainter = new QDirectPainter(qApp, ReservedSynchronous);
 
-    QWSDirectPainterSurface *surface = QDirectPainterPrivate::staticPainter->d_func()->surface;
-    surface->setRegion(reg);
+    QDirectPainter *dp = QDirectPainterPrivate::staticPainter;
+    dp->setRegion(reg);
 
-    //### slightly dirty way to do a blocking wait for the region event
-    QDirectPainterPrivate::seenStaticRegion = false;
-    while (!QDirectPainterPrivate::seenStaticRegion)
-        QApplication::processEvents();
-
-    return surface->region();
+    return dp->allocatedRegion();
 }
 
 /*!
@@ -470,12 +545,15 @@ uchar* QDirectPainter::frameBuffer()
     Returns the reserved region.
 
     \sa reserveRegion(), frameBuffer()
+
+    \obsolete
+
+    Use allocatedRegion() instead.
 */
 QRegion QDirectPainter::reservedRegion()
 {
     return QDirectPainterPrivate::staticPainter
-        ? QDirectPainterPrivate::staticPainter->d_func()->surface->clipRegion()
-        : QRegion();
+        ? QDirectPainterPrivate::staticPainter->allocatedRegion() : QRegion();
 }
 
 /*!
@@ -532,12 +610,14 @@ int QDirectPainter::linestep()
 
 
 /*!
-    Locks access to the framebuffer.
+  \warning This function is not yet implemented.
 
-    Note that calling this function will prevent all other
-    applications from working until unlock() is called.
+  Locks access to the framebuffer.
 
-    \sa unlock()
+  Note that calling this function will prevent all other
+  applications from working until unlock() is called.
+
+  \sa unlock()
 */
 void QDirectPainter::lock()
 {
@@ -545,10 +625,12 @@ void QDirectPainter::lock()
     qDebug("QDirectPainter::lock() not implemented");
 }
 /*!
-    Unlocks the lock on the framebuffer (set using the lock()
-    function), allowing other applications to access the screen.
+  \warning This function is not yet implemented.
 
-    \sa lock()
+  Unlocks the lock on the framebuffer (set using the lock()
+  function), allowing other applications to access the screen.
+
+  \sa lock()
  */
 void QDirectPainter::unlock()
 {

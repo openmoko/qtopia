@@ -1,11 +1,13 @@
 TARGET	 = qgfxvnc
 include(../../qpluginbase.pri)
 
-DESTDIR	 = $$QT_BUILD_TREE/plugins/gfxdrivers
+QTDIR_build:DESTDIR	 = $$QT_BUILD_TREE/plugins/gfxdrivers
 
 DEFINES	+= QT_QWS_VNC
 
-HEADERS		= ../../../../include/Qt/qscreenvnc_qws.h
+HEADERS = ../../../../src/gui/embedded/qscreenvnc_qws.h \
+          ../../../../src/gui/embedded/qscreenvnc_p.h
+
 SOURCES		= main.cpp \
 		  ../../../../src/gui/embedded/qscreenvnc_qws.cpp
 

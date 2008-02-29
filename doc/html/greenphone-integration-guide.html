@@ -49,83 +49,89 @@
 </td><td><img src="images//ig_kernel_splash.gif" /></td></tr>
 <thead><tr valign="top" class="qt-style"><th>Init</th><th colspan="2"></th></tr></thead>
 <tr valign="top" class="odd"><td></td><td colspan="2">The <tt>/sbin/init</tt> process controls the User Space startup sequence which is defined in the <tt>/etc/inittab</tt> file as follows:</td></tr>
-<tr valign="top" class="even"><td></td><td><tt>/etc/rc.d/rc.modules boot</tt><p>Loads filesystem modules required to mount all internal filesystems and mini SD cards containing Qtopia updates.</p>
-</td><td><img src="images//ig_loading_filesystem_modules.gif" /></td></tr>
+<tr valign="top" class="even"><td></td><td><tt>/etc/rc.d/rc.modules boot</tt><p>Loads all modules required early in the boot process. This currently includes the following</p>
+<ul>
+<li>Filesystem support: <tt>fat</tt>, <tt>nls_cp437</tt>, <tt>nls_iso8859-1</tt>, <tt>nls_utf8</tt></li>
+<li>TAT Table access: <tt>docparatable</tt></li>
+<li>Power management and battery charger: <tt>omega_pmu</tt>, <tt>omega_power</tt>, <tt>omega_poweroff</tt></li>
+</ul>
+</td><td><img src="images//ig_loading_boot_modules.png" /></td></tr>
 <tr valign="top" class="odd"><td></td><td><tt>/etc/rc.d/rc.filesystems</tt><p>Linux provides an interface into the kernel via the <tt>proc</tt> virtual filesystem. This <tt>proc</tt> virtual filesystem is mounted on <tt>/proc</tt>.</p>
 <p>The Greenphone uses temporary filesystems for storing data that does not need to be retained over reboots. Temporary filesystems are mounted and populated at this stage. The temporary filesystems used by the Greenphone include:</p>
 <ul>
-<li>tmpfs mounted on <tt>/dev</tt> and populated with the contents of <tt>/dev.tgz</tt></li>
-<li>tmpfs mounted on <tt>/var</tt> and populated with the contents of <tt>/var.tgz</tt></li>
+<li>tmpfs mounted on <tt>/dev</tt> and populated with the contents of <tt>/dev.tar.gz</tt></li>
+<li>tmpfs mounted on <tt>/var</tt> and populated with the contents of <tt>/var.tar.gz</tt></li>
 </ul>
-</td><td><img src="images//ig_mounting_virtual_filesystems.gif" /></td></tr>
+</td><td><img src="images//ig_mounting_virtual_filesystems.png" /></td></tr>
 <tr valign="top" class="even"><td></td><td><tt>/etc/rc.d/rc.filesystems</tt><p>The Greenphone contains writable file systems, which can get corrupted if the device is not shutdown correctly. All writable filesystems on the device are checked for errors and automatically repaired, if possible.</p>
-</td><td><img src="images//ig_checking_filesystems.gif" /></td></tr>
-<tr valign="top" class="odd"><td></td><td><tt>/etc/rc.d/rc.filesystems</tt><p>The internal storage of the Greenphone is divided into four block devices. The first block device <tt>/dev/tffsa</tt> is partitioned in two and contains the read-only root filesystem and Qtopia image. The three remaining block devices, <tt>/dev/tffsb</tt>, <tt>/dev/tffsc</tt> and <tt>/dev/tffsd</tt> are used for 3rd party software, system configuration data and user documents, respectively.</p>
+</td><td><img src="images//ig_checking_filesystems.png" /></td></tr>
+<tr valign="top" class="odd"><td></td><td><tt>/etc/rc.d/rc.filesystems</tt><p>The internal storage of the Greenphone is divided into four block devices. The first block device <tt>/dev/tffsa</tt> is partitioned in two and contains the read-only root filesystem and Qtopia image. The third block device, <tt>/dev/tffsc</tt>, is used to store system configuration data. The remaining two block devices, <tt>/dev/tffsb</tt> and <tt>/dev/tffsd</tt> are used for storing user documents, user settings and installed 3rd party software.</p>
 <p>These block devices are mounted at the following paths:</p>
 <ul>
 <li><tt>/dev/tffsa1</tt> on <tt>/</tt></li>
-<li><tt>/dev/tffsa2</tt> on <tt>/opt/Qtopia.rom</tt></li>
-<li><tt>/dev/tffsb</tt> on <tt>/mnt/disk2</tt></li>
-<li><tt>/dev/tffsc</tt> on <tt>/mnt/user</tt></li>
-<li><tt>/dev/tffsd</tt> on <tt>/mnt/user_local</tt></li>
+<li><tt>/dev/tffsa2</tt> on <tt>/opt/Qtopia</tt></li>
+<li><tt>/dev/tffsb</tt> on <tt>/home</tt></li>
+<li><tt>/dev/tffsc</tt> on <tt>/etc</tt></li>
+<li><tt>/dev/tffsd</tt> on <tt>/mnt/documents</tt></li>
 </ul>
-</td><td><img src="images//ig_mounting_filesystems.gif" /></td></tr>
-<tr valign="top" class="even"><td></td><td colspan="2"><tt>/etc/rc.d/rc.newrootfs</tt><p>Normally re-flashing the Greenphone will only update the kernel and the first block device. By only flashing the first block device, user data and settings are preserved during the flash operation. Updates for the block devices that are not flashed are stored in the root filesystem in compressed form. The system detects if the following directory hierarchies need to be updated:</p>
-<ul>
-<li><tt>/mnt/user</tt></li>
-<li><tt>/mnt/user/etc</tt></li>
-<li><tt>/mnt/user/tools</tt></li>
-<li><tt>/mnt/user_local</tt></li>
-<li><tt>/mnt/disk2</tt></li>
-<li><tt>/mnt/disk2/Qtopia</tt></li>
-</ul>
-<p><img src="images//ig_rebuilding_filesystems.gif" /> <img src="images//ig_rebuilding_mnt_user.gif" /> <img src="images//ig_rebuilding_mnt_user_etc.gif" /> <img src="images//ig_rebuilding_mnt_user_tools.gif" /> <img src="images//ig_rebuilding_mnt_user_local.gif" /> <img src="images//ig_rebuilding_mnt_disk2.gif" /> <img src="images//ig_rebuilding_mnt_disk2_qtopia.gif" /></p>
+</td><td><img src="images//ig_mounting_filesystems.png" /></td></tr>
+<tr valign="top" class="even"><td></td><td><tt>/etc/rc.d/rc.gadget boot</tt><p>The USB client interface on the Greenphone can be configured as either a network interface or a serial device. The USB client interface is configured as the device specified in <tt>/etc/gadget</tt>.</p>
 </td></tr>
 <tr valign="top" class="odd"><td></td><td><tt>/etc/rc.d/rc.modules</tt><p>The remaining kernel modules are loaded at this stage. This includes drivers for:</p>
 <ul>
 <li>Networking</li>
-<li>USB Client</li>
 <li>Multimedia</li>
-<li>Power Management</li>
+<li>Miscellaneous drivers</li>
+<li>SD Card</li>
 <li>Bluetooth</li>
-<li>NFS</li>
 </ul>
-</td><td><img src="images//ig_loading_modules.gif" /></td></tr>
+</td><td><img src="images//ig_loading_modules.png" /></td></tr>
+<tr valign="top" class="even"><td></td><td><tt>/etc/rc.d/rc.updateqtopia</tt><p>The Greenphone supports updating the Qtopia via an image on a miniSD card. If a miniSD card is present it is mounted and checked for a valid image.</p>
+</td><td><img src="images//ig_checking_for_qtopia_update.png" /></td></tr>
+<tr valign="top" class="odd"><td></td><td><tt>/etc/rc.d/rc.usbnet</tt><p>If the USB client interface is configured as a network interface the interface is started.</p>
+<p>The Greenphone uses <tt>inetd</tt> to start networking servers on demand. The following services are available on the Greenphone:</p>
+<ul>
+<li>telnet</li>
+<li>ssh</li>
+<li>samba</li>
+</ul>
+</td></tr>
 <tr valign="top" class="even"><td></td><td><tt>/etc/rc.d/rc.sysinit</tt><p>Miscellaneous initialization including:</p>
 <ul>
 <li>setting the system clock</li>
 <li>bringing up the loopback interface</li>
 <li>setting the hostname</li>
 </ul>
-</td><td><img src="images//ig_initializing_system.gif" /></td></tr>
+</td><td><img src="images//ig_initializing_system.png" /></td></tr>
+<tr valign="top" class="odd"><td></td><td><tt>/etc/rc.d/rc.lids first_boot</tt><p>Qtopia builds with SXE enabled benefit from kernel level Mandatory Access Controls (MACs). The Greenphone uses the LIDS security framework to implement MACs. If the kernel has LIDS support and an SXE enabled Qtopia is detected, once only initialization is performed.</p>
+</td><td><img src="images//ig_generating_lids_rules.png" /></td></tr>
+<tr valign="top" class="even"><td></td><td><tt>/etc/rc.d/rc.bootcharger</tt><p>An animated battery charging screen is displayed if it is detected that the user plugged in the wall charger or USB cable to initiate the boot sequence. The battery charging screen is displayed until the user presses and holds the <tt>Hangup</tt> key for one to continue loading Qtopia or unplugs the cable to power off the Greenphone.</p>
+</td><td><img src="images//ig_qtopia_charging.gif" /></td></tr>
 <tr valign="top" class="odd"><td></td><td><tt>/etc/rc.d/rc.lids start</tt><p>Qtopia builds with SXE enabled benefit from kernel level Mandatory Access Controls (MACs). The Greenphone uses the LIDS security framework to implement MACs. If the kernel has LIDS support and an SXE enabled Qtopia is detected, LIDS is initialized and enabled.</p>
-</td><td><img src="images//ig_starting_lids.gif" /></td></tr>
+</td><td><img src="images//ig_starting_lids.png" /></td></tr>
 <tr valign="top" class="even"><td></td><td><tt>/etc/rc.d/rc.services start</tt><p>Qtopia depends on some underlying services for certain functionality. These services include:</p>
 <ul>
-<li>Dbus</li>
-<li>Bluez</li>
+<li>D-Bus</li>
+<li>BlueZ</li>
 </ul>
-<p>Additionally networking services are also started, include:</p>
+</td><td><img src="images//ig_starting_services.png" /></td></tr>
+<tr valign="top" class="odd"><td></td><td><tt>/etc/rc.d/rc.modules debug</tt><p>Additional kernel modules that are useful for debugging are loaded at this stage. This includes drivers for:</p>
 <ul>
-<li>telnet</li>
-<li>ftp</li>
-<li>ssh</li>
-<li>samba</li>
+<li>NFS</li>
+<li>loop block device</li>
 </ul>
-<p>The following services are started directly from the <tt>/sbin/init</tt> process and are automatically respawned if they terminate:</p>
+</td><td><img src="images//ig_loading_debug_modules.png" /></td></tr>
+<tr valign="top" class="even"><td></td><td><tt>/etc/inittab</tt><p>The following services are started directly from the <tt>/sbin/init</tt> process and are automatically respawned if they terminate:</p>
 <ul>
-<li>atd</li>
 <li>syslogd</li>
+<li>klogd</li>
+<li>atd</li>
 </ul>
-</td><td><img src="images//ig_starting_services.gif" /></td></tr>
-<tr valign="top" class="odd"><td></td><td><tt>/mnt/user/etc/trolltech_startup.sh</tt><p>The Greenphone supports updating Qtopia via an image on a miniSD card. If a miniSD card is present it is mounted and checked for a valid image.</p>
-</td><td><img src="images//ig_checking_for_qtopia_update.gif" /></td></tr>
-<tr valign="top" class="even"><td></td><td><tt>/mnt/user/etc/trolltech_startup.sh</tt><p>The final stage of the startup process is to start Qtopia.</p>
-</td><td><img src="images//ig_starting_qtopia.gif" /></td></tr>
+</td></tr>
+<tr valign="top" class="odd"><td></td><td><tt>/etc/rc.d/rc.qtopia respawn</tt><p>The final stage of the startup process is to start Qtopia.</p>
+</td><td><img src="images//ig_starting_qtopia.png" /></td></tr>
 <thead><tr valign="top" class="qt-style"><th>Qtopia</th><th colspan="2"></th></tr></thead>
-<tr valign="top" class="odd"><td></td><td>Qtopia displays a battery charging screen if it detects that the user plugged in the wall charger or USB cable to initiate the boot sequence.<p>This screen is displayed until the user presses and holds the <tt>Hangup</tt> key to continue loading Qtopia or unplugs the cable to power off the device.</p>
-</td><td><img src="images//ig_qtopia_charging.gif" /></td></tr>
-<tr valign="top" class="even"><td></td><td>Qtopia displays the <a href="homescreen.html">HomeScreen</a> once it has finished loading.</td><td><img src="images//ig_qtopia_homescreen.gif" /></td></tr>
+<tr valign="top" class="even"><td></td><td>Qtopia displays the HomeScreen once it has finished loading.</td><td><img src="images//ig_qtopia_homescreen.png" /></td></tr>
 </table></p>
 <a name="shutdown-sequence"></a>
 <h3>Shutdown Sequence</h3>
@@ -134,16 +140,13 @@
 <thead><tr valign="top" class="qt-style"><th>Shutdown Stage</th><th colspan="2">Description</th></tr>
 <tr valign="top" class="qt-style"><th>Qtopia</th><th colspan="2"></th></tr></thead>
 <tr valign="top" class="odd"><td></td><td><i>User initiated shutdown:</i> The user selects 'Shutdown' or 'Reboot' from the shutdown dialog. Qtopia executes the <tt>shutdown</tt> program with the appropriate arguments.<p><i>System initiated shutdown:</i> Qtopia will automatically shutdown if it detects a critical power condition.</p>
-</td><td><img src="images//ig_qtopia_shutdown_dialog.gif" /></td></tr>
-<thead><tr valign="top" class="qt-style"><th>Shutdown</th><th colspan="2"></th></tr></thead>
-<tr valign="top" class="even"><td></td><td><tt>/mnt/user/tools/shutdown</tt><p>The <tt>Leaving Qtopia</tt> splash screen is displayed.</p>
-<p>The <tt>shutdown</tt> process signals <tt>/sbin/init</tt> to initiate system shutdown.</p>
-</td><td><img src="images//ig_leaving_qtopia.gif" /></td></tr>
+</td><td><img src="images//ig_qtopia_shutdown_dialog.png" /></td></tr>
 <thead><tr valign="top" class="qt-style"><th>Init</th><th colspan="2"></th></tr></thead>
-<tr valign="top" class="odd"><td></td><td colspan="2">The <tt>/sbin/init</tt> process controls the User Space shutdown sequence which is defined in the <tt>/etc/inittab</tt> file as follows:<ul>
+<tr valign="top" class="even"><td></td><td colspan="2">The <tt>/sbin/init</tt> process controls the User Space shutdown sequence which is defined in the <tt>/etc/inittab</tt> file as follows:<ul>
 <li><tt>/etc/rc.d/rc.lids stop</tt>: If LIDS was enabled at boot, the system switches LIDS into the SHUTDOWN state.</li>
-<li><tt>/etc/rc.d/rc.services stop</tt>: all services are stopped.</li>
-<li><tt>/sbin/init</tt>: all remaining running processes are signaled to terminate, and then forcibly killed.</li>
+<li><tt>/etc/rc.d/rc.services stop</tt>: All services are stopped.</li>
+<li><tt>/etc/rc.d/rc.sdcard</tt>: The miniSD card is unmounted.</li>
+<li><tt>/sbin/init</tt>: All remaining running processes are signaled to terminate, and then forcibly killed.</li>
 <li><tt>/sbin/init</tt>: All filesystems are unmounted or re-mounted read only.</li>
 <li><tt>/sbin/init</tt>: The kernel is signaled to power off or reboot the device.</li>
 </ul>
@@ -152,12 +155,12 @@
 <p><img src="images//ig_stopping_lids_lp.gif" /> <img src="images//ig_stopping_services_lp.gif" /> <img src="images//ig_shutting_down_system_lp.gif" /></p>
 </td></tr>
 <thead><tr valign="top" class="qt-style"><th>Power off/Reboot</th><th colspan="2"></th></tr></thead>
-<tr valign="top" class="even"><td></td><td>The system is powered-off or reset.</td><td><img src="images//ig_black_screen.gif" /></td></tr>
+<tr valign="top" class="odd"><td></td><td>The system is powered-off or reset.</td><td><img src="images//ig_black_screen.gif" /></td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

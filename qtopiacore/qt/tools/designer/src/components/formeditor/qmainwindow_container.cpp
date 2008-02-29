@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -65,20 +80,21 @@ void QMainWindowContainer::setCurrentIndex(int index)
     Q_UNUSED(index);
 }
 
-static Qt::ToolBarArea toolBarArea(QToolBar *me)
-{
-    if (QMainWindow *mw = qobject_cast<QMainWindow*>(me->parentWidget())) {
-        if (mw->layout() && mw->layout()->indexOf(me) != -1) {
-            return mw->toolBarArea(me);
-        }
+
+namespace {
+    // Pair of <area,break_before>
+    typedef QPair<Qt::ToolBarArea,bool> ToolBarData;
+    
+    ToolBarData toolBarData(QToolBar *me) {
+        const QMainWindow *mw = qobject_cast<const QMainWindow*>(me->parentWidget());
+        if (!mw || !mw->layout() ||  mw->layout()->indexOf(me) == -1)
+            return ToolBarData(Qt::TopToolBarArea,false);
+        return ToolBarData(mw->toolBarArea(me), mw->toolBarBreak(me));
     }
 
-    return Qt::TopToolBarArea;
-}
-
-static Qt::DockWidgetArea dockWidgetArea(QDockWidget *me)
+Qt::DockWidgetArea dockWidgetArea(QDockWidget *me) 
 {
-    if (QMainWindow *mw = qobject_cast<QMainWindow*>(me->parentWidget())) {
+    if (const QMainWindow *mw = qobject_cast<const QMainWindow*>(me->parentWidget())) {
         // Make sure that me is actually managed by mw, otherwise
         // QMainWindow::dockWidgetArea() will be VERY upset
         QList<QLayout*> candidates;
@@ -92,19 +108,21 @@ static Qt::DockWidgetArea dockWidgetArea(QDockWidget *me)
             }
         }
     }
-
     return Qt::LeftDockWidgetArea;
+}
 }
 
 void QMainWindowContainer::addWidget(QWidget *widget)
 {
-    // remove all the occurences of widget
+    // remove all the occurrences of widget
     m_widgets.removeAll(widget);
 
     // the
     if (QToolBar *toolBar = qobject_cast<QToolBar*>(widget)) {
         m_widgets.append(widget);
-        m_mainWindow->addToolBar(toolBarArea(toolBar), toolBar);
+        const ToolBarData data = toolBarData(toolBar);
+        m_mainWindow->addToolBar(data.first, toolBar);
+        if (data.second) m_mainWindow->insertToolBarBreak(toolBar);
         toolBar->show();
     }
 

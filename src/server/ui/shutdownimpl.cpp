@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -43,7 +43,7 @@ ShutdownImpl::ShutdownImpl( QWidget* parent, Qt::WFlags fl )
     connect( quit, SIGNAL(clicked()), this, SLOT(quitClicked()));
     connect( shut, SIGNAL(clicked()), this, SLOT(shutdownClicked()));
 
-    connect( cancel, SIGNAL(clicked()), this, SLOT(cancelClicked()) );
+//    connect( cancel, SIGNAL(clicked()), this, SLOT(cancelClicked()) );
 
     progressBar->hide();
     QtopiaApplication::hideInputMethod();
@@ -78,21 +78,21 @@ void ShutdownImpl::initiateAction()
 {
     progress = 0;
 
-    info->hide();
     progressBar->show();
     timer->start( 300 );
     timeout();
 }
 
+/*
 void ShutdownImpl::cancelClicked()
 {
     progressBar->hide();
-    info->show();
     if ( timer->isActive() )
         timer->stop();
     else
         close();
 }
+*/
 
 void ShutdownImpl::timeout()
 {

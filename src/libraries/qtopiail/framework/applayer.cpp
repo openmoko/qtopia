@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -37,7 +37,7 @@
 #include <private/qunixsocket_p.h>
 
 #ifndef QT_NO_SXE
-// Enabling SXE support breaks change notifications.  Force disable until this
+// TODO: Enabling SXE support breaks change notifications.  Force disable until this
 // has been fixed.
 #define QT_NO_SXE
 #endif
@@ -64,6 +64,31 @@
 
 // #define QVALUESPACE_DEBUG
 // #define QVALUESPACE_DEBUG_VERBOSE
+
+static inline QDataStream& operator<<(QDataStream& stream, unsigned long v)
+{
+    if (sizeof(unsigned long) == sizeof(uint)) {
+        stream << (uint)v;
+        return stream;
+    } else {
+        stream << (quint64)v;
+        return stream;
+    }
+}
+
+static inline QDataStream& operator>>(QDataStream& stream, unsigned long& v)
+{
+    if (sizeof(unsigned long) == sizeof(uint)) {
+        uint v32;
+        stream >> v32;
+        v = (unsigned long)v32;
+    } else {
+        quint64 v64;
+        stream >> v64;
+        v = (unsigned long)v64;
+    }
+    return stream;
+}
 
 static int vsmemcmp(const char * s1, int l1, const char * s2, int l2)
 {
@@ -111,8 +136,8 @@ struct VersionTable {
    Overhead: 8
  */
 struct NodeOwner {
-    unsigned int data1;
-    unsigned int data2;
+    unsigned long data1;
+    unsigned long data2;
 };
 
 
@@ -146,8 +171,8 @@ struct NodeDatum {
    Overhead: 8
 */
 struct NodeWatch {
-    unsigned int data1;
-    unsigned int data2;
+    unsigned long data1;
+    unsigned long data2;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -308,6 +333,10 @@ public:
     inline void * fromPtr(unsigned int ptr);
 
     inline QMallocPool *mallocPool() const { return pool; }
+
+    typedef void (*NodeChangeFunction)(unsigned short node, void *ctxt);
+    void setNodeChangeFunction(NodeChangeFunction, void *);
+
 private:
     static unsigned int growListSize(unsigned int currentSize);
     static unsigned int shrunkListSize(unsigned int currentSize,
@@ -360,6 +389,8 @@ private:
     char * poolMem;
     QMallocPool * pool;
     bool changed;
+    NodeChangeFunction changeFunc;
+    void * changeFuncContext;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -367,7 +398,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 FixedMemoryTree::FixedMemoryTree(void * mem, unsigned int size,
                                  bool initMemory )
-: poolMem((char *)mem), pool(0), changed(false)
+: poolMem((char *)mem), pool(0), changed(false), changeFunc(0)
 {
     Q_ASSERT(size);
     Q_ASSERT(poolMem);
@@ -523,7 +554,7 @@ unsigned short FixedMemoryTree::offsetOfSubNode(unsigned short node,
             return ii;
     }
 
-    qFatal("Unable to find sub-node %x of %x", subNode, node);
+    qFatal("ApplicationLayer: Unable to find sub-node %x of %x.  If you see this message, it is a bug.  Please contact Trolltech support.", subNode, node);
     return 0;
 }
 
@@ -1498,6 +1529,12 @@ void * FixedMemoryTree::fromPtr(unsigned int ptr)
     return (void *)(poolMem + ptr);
 }
 
+void FixedMemoryTree::setNodeChangeFunction(NodeChangeFunction func, void *ctxt)
+{
+    changeFunc = func;
+    changeFuncContext = ctxt;
+}
+
 unsigned int FixedMemoryTree::ptr(void * mem)
 {
     Q_ASSERT(mem > poolMem);
@@ -1508,6 +1545,8 @@ unsigned int FixedMemoryTree::ptr(void * mem)
 void FixedMemoryTree::bump(unsigned short node)
 {
     ++(versionTable()->entries[node].version);
+    if(changeFunc)
+        changeFunc(node, changeFuncContext);
 }
 
 Node * FixedMemoryTree::node(unsigned int entry)
@@ -1708,8 +1747,9 @@ public:
 
     static QVariant fromDatum(const NodeDatum * data);
 
-
     static ApplicationLayer * instance();
+
+    void nodeChanged(unsigned short);
 
 private slots:
     void disconnected();
@@ -1788,6 +1828,16 @@ private:
 
     unsigned int forceChangeCount;
 
+    int clientIndexShmId;
+    uchar *clientIndex;
+    void incNode(unsigned short);
+    void decNode(unsigned short);
+    QHash<unsigned short, unsigned int> m_nodeInterest;
+
+
+    unsigned int changedNodesCount;
+    unsigned short changedNodes[VERSION_TABLE_ENTRIES];
+
     // Stats memory
     unsigned long *m_statPoolSize;
     unsigned long *m_statMaxSystemBytes;
@@ -1810,18 +1860,31 @@ QVALUESPACE_AUTO_INSTALL_LAYER(ApplicationLayer);
 #define APPLAYER_ADDWATCH 5
 #define APPLAYER_REMWATCH 6
 #define APPLAYER_SYNC 7
+#define APPLAYER_SUBINDEX 8
+
+struct ApplicationLayerClient : public QPacketProtocol
+{
+    ApplicationLayerClient(QIODevice *dev, QObject *parent = 0)
+        : QPacketProtocol(dev, parent), index(0) {}
+
+    uchar *index;
+};
 
 ApplicationLayer::ApplicationLayer()
 : type(Client), layer(0), lock(0), todoTimer(0),
   nextPackId(1), lastSentId(0), lastRecvId(0), valid(false),
-  forceChangeCount(0), m_statPoolSize(0), m_statMaxSystemBytes(0), m_statSystemBytes(0),
-  m_statInuseBytes(0), m_statKeepCost(0)
+  forceChangeCount(0), clientIndexShmId(0), clientIndex(0),
+  changedNodesCount(0),
+  m_statPoolSize(0), m_statMaxSystemBytes(0), m_statSystemBytes(0),
+  m_statInuseBytes(0), m_statKeepCost(0) 
 {
     sserver = new ALServerImpl( this );
 }
 
 ApplicationLayer::~ApplicationLayer()
 {
+    if(clientIndex)
+        ::shmdt(clientIndex);
 }
 
 QString ApplicationLayer::name()
@@ -1829,10 +1892,14 @@ QString ApplicationLayer::name()
     return "Application Layer";
 }
 
+static void AppLayerNodeChanged(unsigned short, void *);
 bool ApplicationLayer::startup(Type type)
 {
     int shmId = 0;
+    int subShmId = 0;
+
     void * shmptr = 0;
+    void * subShmptr = 0;
 
     valid = false;
 
@@ -1886,18 +1953,37 @@ bool ApplicationLayer::startup(Type type)
     } else {
         shmId = ::shmget(key, APPLAYER_SIZE, 0);
         shmptr = ::shmat(shmId, 0, SHM_RDONLY);
+        subShmId = ::shmget(IPC_PRIVATE, (VERSION_TABLE_ENTRIES + 7) / 8, IPC_CREAT | 00644);
+        subShmptr = ::shmat(subShmId, 0, 0);
+        struct shmid_ds sds;
+        ::shmctl(subShmId, IPC_RMID, &sds);
+
         lock = new QSystemReadWriteLock(key, false);
     }
 
-    if(!shmptr || -1 == shmId) {
+    if(!shmptr || -1 == shmId || 
+       ((subShmId == -1 || !subShmptr) && Server != type)) {
         qFatal("ApplicationLayer: Unable to create or access shared "
                "resources.");
         return false;
     }
 
+    clientIndexShmId = subShmId;
+    clientIndex = (uchar *)subShmptr;
+    if(Client == type) {
+        QPacket mem;
+        mem << (unsigned int)0 
+            << (quint8)APPLAYER_SUBINDEX << (unsigned int)clientIndexShmId
+            << (quint8)APPLAYER_DONE;
+        (*connections.begin())->send(mem);
+    }
+
     layer = new FixedMemoryTree((char *)shmptr,
                                 APPLAYER_SIZE,
                                 (Server == type));
+    if(Server == type)
+        layer->setNodeChangeFunction(&AppLayerNodeChanged, (void *)this);
+
     this->type = type;
 
     valid = (lock != 0) && (layer != 0);
@@ -1908,6 +1994,8 @@ bool ApplicationLayer::startup(Type type)
 
 bool ApplicationLayer::restart()
 {
+    qFatal("ApplicationLayer: restart() not supported.  If you see this message, it is a bug.  Please contact Trolltech support.");
+
     // Cleanup previous init
     delete layer;
     layer = 0;
@@ -2138,9 +2226,9 @@ void ALServerImpl::incomingConnection(int socketDescriptor)
     QAuthDevice *ad = a->recvBuf( d, sock );
     ad->setRequestAnalyzer( new ALRequestAnalyzer() );
     ad->setClient(sock);
-    protocol = new QPacketProtocol(ad, this);
+    protocol = new ApplicationLayerClient(ad, this);
 #else
-    protocol = new QPacketProtocol(sock, this);
+    protocol = new ApplicationLayerClient(sock, this);
 #endif
     sock->setParent(protocol);
 
@@ -2179,9 +2267,26 @@ void ApplicationLayer::doServerTransmit()
 
     for(QSet<QPacketProtocol *>::ConstIterator iter = connections.begin();
             iter != connections.end();
-            ++iter)
-        (*iter)->send(others);
+            ++iter)  {
 
+        ApplicationLayerClient *client = 
+            (ApplicationLayerClient *)(*iter);
+        if(!client->index) {
+            (*iter)->send(others);
+        } else {
+            bool found = false;
+            for(unsigned int ii = 0;!found && ii < changedNodesCount; ++ii) {
+                if(client->index[changedNodes[ii] >> 3] & (1 << (changedNodes[ii] & 0x7))) 
+                    found = true;
+            }
+            if(found) {
+                (*iter)->send(others);
+            }
+        }
+
+    }
+
+    changedNodesCount = 0;
     doClientEmit();
 }
 
@@ -2215,7 +2320,7 @@ void ApplicationLayer::disconnected()
         qLog(ApplicationLayer) << "Removing" << protocol << "from space";
 
         NodeOwner owner;
-        owner.data1 = (unsigned int)protocol;
+        owner.data1 = (unsigned long)protocol;
         owner.data2 = 0xFFFFFFFF;
 
         connections.remove(protocol);
@@ -2231,6 +2336,18 @@ void ApplicationLayer::disconnected()
     }
 }
 
+static void AppLayerNodeChanged(unsigned short node, void *ctxt)
+{
+    ApplicationLayer *layer = (ApplicationLayer *)ctxt;
+    layer->nodeChanged(node);
+}
+
+void ApplicationLayer::nodeChanged(unsigned short node)
+{
+    if(changedNodesCount != VERSION_TABLE_ENTRIES)
+        changedNodes[changedNodesCount++] = node;
+}
+
 void ApplicationLayer::readyRead()
 {
     Q_ASSERT(sender());
@@ -2238,6 +2355,7 @@ void ApplicationLayer::readyRead()
 
     QPacket pack = protocol->read();
     if(Client == type) {
+        qLog(ApplicationLayer) << "Client" << protocol << "woken";
         if(pack.isEmpty())
             return;
 
@@ -2270,7 +2388,7 @@ void ApplicationLayer::readyRead()
                 }
                 break;
             default:
-                qFatal("Invalid message type %d received from AppLayer server",
+                qFatal("ApplicationLayer:  Invalid message type %d received from AppLayer server.  If you see this message, it is a bug.  Please contact Trolltech support.",
                        op);
                 break;
         }
@@ -2281,18 +2399,21 @@ void ApplicationLayer::readyRead()
         bool changed = false;
         bool done = false;
 
+        changedNodesCount = 0;
+
         while(!done && !pack.isEmpty()) {
             quint8 op;
             pack >> op;
+            
             switch(op) {
                 case APPLAYER_ADD:
                     {
-                        unsigned int own;
+                        unsigned long own;
                         QByteArray path;
                         QVariant value;
                         pack >> own >> path >> value;
                         NodeOwner owner;
-                        owner.data1 = (unsigned int)protocol;
+                        owner.data1 = (unsigned long)protocol;
                         owner.data2 = own;
                         changed |= doSetItem(owner, path, value);
                     }
@@ -2300,11 +2421,11 @@ void ApplicationLayer::readyRead()
 
                 case APPLAYER_REM:
                     {
-                        unsigned int own;
+                        unsigned long own;
                         QByteArray path;
                         pack >> own >> path;
                         NodeOwner owner;
-                        owner.data1 = (unsigned int)protocol;
+                        owner.data1 = (unsigned long)protocol;
                         owner.data2 = own;
                         changed |= doRemItems(owner, path);
                     }
@@ -2329,11 +2450,11 @@ void ApplicationLayer::readyRead()
 
                 case APPLAYER_ADDWATCH:
                     {
-                        unsigned int own;
+                        unsigned long own;
                         QByteArray path;
                         pack >> own >> path;
                         NodeWatch owner;
-                        owner.data1 = (unsigned int)protocol;
+                        owner.data1 = (unsigned long)protocol;
                         owner.data2 = own;
                         changed |= doSetWatch(owner, path);
                     }
@@ -2341,11 +2462,11 @@ void ApplicationLayer::readyRead()
 
                 case APPLAYER_REMWATCH:
                     {
-                        unsigned int own;
+                        unsigned long own;
                         QByteArray path;
                         pack >> own >> path;
                         NodeWatch owner;
-                        owner.data1 = (unsigned int)protocol;
+                        owner.data1 = (unsigned long)protocol;
                         owner.data2 = own;
                         changed |= doRemWatch(owner, path);
                     }
@@ -2353,6 +2474,17 @@ void ApplicationLayer::readyRead()
 
                 case APPLAYER_DONE:
                     done = true;
+                    break;
+
+                case APPLAYER_SUBINDEX:
+                    {
+                        unsigned int id;
+                        pack >> id;
+
+                        uchar *index = (uchar *)::shmat(id, 0, SHM_RDONLY);
+                        if(index) 
+                            static_cast<ApplicationLayerClient *>(protocol)->index = index;
+                    }
                     break;
 
                 default:
@@ -2366,26 +2498,10 @@ void ApplicationLayer::readyRead()
         // Send change notification
         QPacket causal;
         causal << (quint8)APPLAYER_SYNC << packId;
+        protocol->send(causal);
 
-        if(changed) {
-            QPacket others;
-            others << (quint8)APPLAYER_SYNC << (unsigned int)0;
-
-            for(QSet<QPacketProtocol *>::ConstIterator iter = connections.begin();
-                    iter != connections.end();
-                    ++iter) {
-
-                if(*iter == protocol)
-                    protocol->send(causal);
-                else
-                    (*iter)->send(others);
-            }
-
-            doClientEmit();
-        } else {
-            // Just send causal
-            protocol->send(causal);
-        }
+        if(changed) 
+            doServerTransmit();
     }
 }
 
@@ -2731,6 +2847,7 @@ bool ApplicationLayer::refreshHandle(ReadHandle * handle)
     Q_ASSERT(handle);
 
     ReadHandle old = *handle;
+    unsigned short oldNode = handle->currentNode;
 
     // Refresh handle
     if(0xFFFFFFFF == handle->currentPath) {
@@ -2739,6 +2856,7 @@ bool ApplicationLayer::refreshHandle(ReadHandle * handle)
         if(!node || node->creationId != handle->creationId) {
             // Bad news!
             clearHandle(handle);
+            oldNode = INVALID_HANDLE; // prevent double dec
         } else {
             // Super - still a true path
             handle->version = layer->version(handle->currentNode);
@@ -2752,6 +2870,7 @@ bool ApplicationLayer::refreshHandle(ReadHandle * handle)
         if(!node || node->creationId != handle->creationId) {
             // Bad news!
             clearHandle(handle);
+            oldNode = INVALID_HANDLE; // prevent double dec
         } else if(handle->version != layer->version(handle->currentNode)) {
             // Something changed - try and advance!
             const char * out = 0;
@@ -2776,19 +2895,19 @@ bool ApplicationLayer::refreshHandle(ReadHandle * handle)
         handle->currentNode = layer->findClosest(handle->path.constData(),
                                                  &out);
 
-        if(out == handle->path.constData()) {
-            // Don't bother caching root
-            handle->currentNode = INVALID_HANDLE;
-        } else {
-            Node * newNode = layer->getNode(handle->currentNode);
-            Q_ASSERT(newNode);
-            handle->version = layer->version(handle->currentNode);
-            handle->creationId = newNode->creationId;
-            if(out)
-                handle->currentPath = (out - handle->path.constData());
-            else
-                handle->currentPath = 0xFFFFFFFF;
-        }
+        Node * newNode = layer->getNode(handle->currentNode);
+        Q_ASSERT(newNode);
+        handle->version = layer->version(handle->currentNode);
+        handle->creationId = newNode->creationId;
+        if(out)
+            handle->currentPath = (out - handle->path.constData());
+        else
+            handle->currentPath = 0xFFFFFFFF;
+    }
+
+    if(handle->currentNode != oldNode) {
+        decNode(oldNode);
+        incNode(handle->currentNode);
     }
 
     bool rv = false;
@@ -2809,6 +2928,7 @@ bool ApplicationLayer::refreshHandle(ReadHandle * handle)
 void ApplicationLayer::clearHandle(ReadHandle *handle)
 {
     handle->currentPath = 0;
+    decNode(handle->currentNode);
     handle->currentNode = INVALID_HANDLE;
     handle->version = 0;
     handle->creationId = 0;
@@ -2837,6 +2957,7 @@ void ApplicationLayer::remHandle(HANDLE h)
     --rhandle->refCount;
     if(!rhandle->refCount) {
         handles.remove(rhandle->path);
+        clearHandle(rhandle);
         delete rhandle;
     }
 }
@@ -2923,7 +3044,7 @@ bool ApplicationLayer::doRemove(const QByteArray &path)
 {
     QList<NodeWatch> owners = watchers(path);
 
-    QSet<unsigned int> written;
+    QSet<unsigned long> written;
 
     for(int ii = 0; ii < owners.count(); ++ii) {
         const NodeWatch & watch = owners.at(ii);
@@ -2950,7 +3071,7 @@ bool ApplicationLayer::doWriteItem(const QByteArray &path, const QVariant &val)
 {
     QList<NodeWatch> owners = watchers(path);
 
-    QSet<unsigned int> written;
+    QSet<unsigned long> written;
 
     for(int ii = 0; ii < owners.count(); ++ii) {
         const NodeWatch & watch = owners.at(ii);
@@ -3075,7 +3196,7 @@ bool ApplicationLayer::doSetItem(NodeOwner owner, const QByteArray &path,
                                  const QVariant &val)
 {
 #ifdef QVALUESPACE_DEBUG
-    qWarning("ApplicationLayer::doSetItem( {%d, %d}, '%s', '%s' %s )",
+    qWarning("ApplicationLayer::doSetItem( {%ld, %ld}, '%s', '%s' %s )",
              owner.data1, owner.data2, path.constData(),
              val.toString().toLatin1().constData(),
              val.typeName());
@@ -3220,19 +3341,13 @@ bool ApplicationLayer::doRemItems(NodeOwner owner, const QByteArray &path)
     return rv;
 }
 
-#if defined(Q_OS_UNIX) && defined(Q_WS_QWS)
-extern int qws_display_id;
-#endif
+extern int qtopia_display_id(); // from qtopianamespace.cpp
 
 static QString qtopiaTempDir()
 {
     QString result;
 
-#if defined(Q_OS_UNIX) && defined(Q_WS_QWS)
-    result = QString("/tmp/qtopia-%1/").arg(QString::number(qws_display_id));
-#else
-    result = QDir::tempPath();
-#endif
+    result = QString("/tmp/qtopia-%1/").arg(QString::number(qtopia_display_id()));
 
     return result;
 }
@@ -3309,9 +3424,39 @@ QVariant ApplicationLayer::fromDatum(const NodeDatum * data)
                 return rv;
             }
         default:
-            qFatal("Unknown datum type");
+            qFatal("ApplicationLayer: Unknown datum type.  If you see this message, it is a bug.  Please contact Trolltech support.");
             return QVariant();
     };
+}
+
+void ApplicationLayer::incNode(unsigned short node)
+{
+    if(type == Server || node == INVALID_HANDLE)
+        return;
+
+    QHash<unsigned short, unsigned int>::Iterator iter = 
+        m_nodeInterest.find(node);
+    if(iter == m_nodeInterest.end()) {
+        clientIndex[node >> 3] |= (1 << (node & 0x7));
+        m_nodeInterest.insert(node, 1);
+    } else {
+        (*iter)++;
+    }
+}
+
+void ApplicationLayer::decNode(unsigned short node)
+{
+    if(type == Server || node == INVALID_HANDLE)
+        return;
+
+    QHash<unsigned short, unsigned int>::Iterator iter = 
+        m_nodeInterest.find(node);
+    Q_ASSERT(iter != m_nodeInterest.end());
+    (*iter)--;
+    if(!*iter) {
+        clientIndex[node >> 3] &= ~(1 << (node & 0x7));
+        m_nodeInterest.erase(iter);
+    }
 }
 
 Q_GLOBAL_STATIC(ApplicationLayer, applicationLayer);
@@ -3528,8 +3673,8 @@ QValueSpaceObject::~QValueSpaceObject()
 
     if(d->hasSet) {
         NodeOwner owner;
-        owner.data1 = (unsigned int)this;
-        owner.data2 = (unsigned int)this;
+        owner.data1 = (unsigned long)this;
+        owner.data2 = (unsigned long)this;
         if(d->path.isEmpty())
             appLayer->remItems(owner, "/");
         else
@@ -3538,8 +3683,8 @@ QValueSpaceObject::~QValueSpaceObject()
     if(d->hasWatch) {
         watchObjects()->remove(this);
         NodeWatch owner;
-        owner.data1 = (unsigned int)this;
-        owner.data2 = (unsigned int)this;
+        owner.data1 = (unsigned long)this;
+        owner.data2 = (unsigned long)this;
         if(d->path.isEmpty())
             appLayer->remWatch(owner, "/");
         else
@@ -3646,8 +3791,8 @@ void QValueSpaceObject::setAttribute(const QByteArray &attribute,
         attr.truncate(attr.length() - 1);
 
     NodeOwner owner;
-    owner.data1 = (unsigned int)this;
-    owner.data2 = (unsigned int)this;
+    owner.data1 = (unsigned long)this;
+    owner.data2 = (unsigned long)this;
 
     QByteArray path;
 
@@ -3687,8 +3832,8 @@ void QValueSpaceObject::connectNotify(const char *method)
         d->hasWatch = true;
 
         NodeWatch owner;
-        owner.data1 = (unsigned int)0;
-        owner.data2 = (unsigned int)this;
+        owner.data1 = (unsigned long)0;
+        owner.data2 = (unsigned long)this;
         if(d->path.isEmpty())
             appLayer->setWatch(owner, "/");
         else
@@ -3741,8 +3886,8 @@ void QValueSpaceObject::removeAttribute(const QByteArray &attribute)
         attr.truncate(attr.length() - 1);
 
     NodeOwner owner;
-    owner.data1 = (unsigned int)this;
-    owner.data2 = (unsigned int)this;
+    owner.data1 = (unsigned long)this;
+    owner.data2 = (unsigned long)this;
     if(attr.startsWith('/'))
         appLayer->remItems(owner, d->path + attr);
     else if(attr.isEmpty()) {

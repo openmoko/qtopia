@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -88,6 +103,9 @@
     format.setBackground(Qt::blue);
     cell.setFormat(format);
 
+    Note that the cell's row or column span cannot be changed through this function. You have
+    to use QTextTable::mergeCells and QTextTable::splitCell instead.
+
     \sa format()
 */
 void QTextTableCell::setFormat(const QTextCharFormat &format)
@@ -96,6 +114,12 @@ void QTextTableCell::setFormat(const QTextCharFormat &format)
     fmt.clearProperty(QTextFormat::ObjectIndex);
     QTextDocumentPrivate *p = table->docHandle();
     QTextDocumentPrivate::FragmentIterator frag(&p->fragmentMap(), fragment);
+
+    QTextFormatCollection *c = p->formatCollection();
+    QTextCharFormat oldFormat = c->charFormat(frag->format);
+    fmt.setTableCellRowSpan(oldFormat.tableCellRowSpan());
+    fmt.setTableCellColumnSpan(oldFormat.tableCellColumnSpan());
+
     p->setCharFormat(frag.position(), 1, fmt, QTextDocumentPrivate::SetFormatAndPreserveObjectIndices);
 }
 
@@ -470,6 +494,34 @@ void QTextTablePrivate::update() const
     a cursor within a table, and using the rowStart() and rowEnd() functions
     to obtain cursors at the start and end of each row.
 
+    Rows and columns within a QTextTable can be merged and split using
+    the mergeCells() and splitCell() functions. However, only cells that span multiple
+    rows or columns can be split. (Merging or splitting does not increase or decrease
+    the number of rows and columns.)
+    
+    \table 80%
+    \row
+        \o \inlineimage texttable-split.png Original Table
+        \o Suppose we have a 2x6 table of names and addresses. To merge both
+        columns in the first row we invoke mergeCells() with \a row = 0,
+        \a column = 0, \a numRows = 1 and \a numColumns = 2.
+        \quotefromfile snippets/textdocument-texttable/main.cpp
+        \skipto table->mergeCells
+        \printuntil );
+ 
+    \row
+        \o \inlineimage texttable-merge.png
+        \o  This gives us the following table. To split the first row of the table
+        back into two cells, we invoke the splitCell() function with \a numRows
+        and \a numCols = 1.
+        \skipto table->splitCell
+        \printuntil );
+
+    \row
+        \o \inlineimage texttable-split.png Split Table
+        \o This results in the original table.
+    \endtable
+    
     \sa QTextTableFormat
 */
 
@@ -691,7 +743,7 @@ void QTextTable::insertColumns(int pos, int num)
 
     QTextTableFormat tfmt = format();
     tfmt.setColumns(tfmt.columns()+num);
-    setFormat(tfmt);
+    QTextObject::setFormat(tfmt);
 
 //     qDebug() << "-------- end insertCols" << pos << num;
     p->endEditBlock();
@@ -806,7 +858,7 @@ void QTextTable::removeColumns(int pos, int num)
 
     QTextTableFormat tfmt = format();
     tfmt.setColumns(tfmt.columns()-num);
-    setFormat(tfmt);
+    QTextObject::setFormat(tfmt);
 
     p->endEditBlock();
 //     qDebug() << "-------- end removeCols" << pos << num;
@@ -819,6 +871,8 @@ void QTextTable::removeColumns(int pos, int num)
     into one cell. The new cell will span \a numRows rows and \a numCols columns.
     If \a numRows or \a numCols is less than the current number of rows or columns
     the cell spans then this method does nothing.
+    
+    \sa splitCell()
 */
 void QTextTable::mergeCells(int row, int column, int numRows, int numCols)
 {
@@ -866,14 +920,27 @@ void QTextTable::mergeCells(int row, int column, int numRows, int numCols)
 
     const int cellFragment = d->grid[row * d->nCols + column];
 
+    // find the position at which to insert the contents of the merged cells
+    QFragmentFindHelper helper(origCellPosition, p->fragmentMap());
+    QList<int>::Iterator it = qBinaryFind(d->cells.begin(), d->cells.end(), helper);
+    Q_ASSERT(it != d->cells.end());
+    Q_ASSERT(*it == cellFragment);
+    const int insertCellIndex = it - d->cells.begin();
+    int insertFragment = d->cells.value(insertCellIndex + 1, d->fragment_end);
+    uint insertPos = p->fragmentMap().position(insertFragment);
+
     d->blockFragmentUpdates = true;
+
+    bool rowHasText = cell.firstCursorPosition().block().length();
+    bool needsParagraph = rowHasText && colSpan == numCols;
 
     // find all cells that will be erased by the merge
     for (int r = row; r < row + numRows; ++r) {
         int firstColumn = r < row + rowSpan ? column + colSpan : column;
 
-        int firstCellIndex = -1;
-        int cellIndex;
+        // don't recompute the cell index for the first row
+        int firstCellIndex = r == row ? insertCellIndex + 1 : -1;
+        int cellIndex = firstCellIndex;
 
         for (int c = firstColumn; c < column + numCols; ++c) {
             const int fragment = d->grid[r * d->nCols + c];
@@ -907,6 +974,33 @@ void QTextTable::mergeCells(int row, int column, int numRows, int numCols)
 
             // erase the cell marker
             p->remove(pos, 1);
+
+            const int nextFragment = d->cells.value(cellIndex, d->fragment_end);
+            const uint nextPos = p->fragmentMap().position(nextFragment);
+
+            Q_ASSERT(nextPos >= pos);
+
+            // merge the contents of the cell (if not empty)
+            if (nextPos > pos) {
+                if (needsParagraph) {
+                    needsParagraph = false;
+                    QTextCursor(p, insertPos++).insertBlock();
+                    p->move(pos + 1, insertPos, nextPos - pos);
+                } else if (rowHasText) {
+                    QTextCursor(p, insertPos++).insertText(QLatin1String(" "));
+                    p->move(pos + 1, insertPos, nextPos - pos);
+                } else {
+                    p->move(pos, insertPos, nextPos - pos);
+                }
+
+                insertPos += nextPos - pos;
+                rowHasText = true;
+            }
+        }
+
+        if (rowHasText) {
+            needsParagraph = true;
+            rowHasText = false;
         }
 
         // erase cells from last row
@@ -933,6 +1027,8 @@ void QTextTable::mergeCells(int row, int column, int numRows, int numCols)
     \since 4.1
 
     Merges the cells selected by the provided \a cursor.
+    
+    \sa splitCell()
 */
 void QTextTable::mergeCells(const QTextCursor &cursor)
 {
@@ -949,6 +1045,11 @@ void QTextTable::mergeCells(const QTextCursor &cursor)
 
     Splits the specified cell at \a row and \a column into an array of multiple
     cells with dimensions specified by \a numRows and \a numCols.
+    
+    \note It is only possible to split cells that span multiple rows or columns, such as rows
+    that have been merged using mergeCells().
+    
+    \sa mergeCells()
 */
 void QTextTable::splitCell(int row, int column, int numRows, int numCols)
 {
@@ -1100,6 +1201,13 @@ QTextCursor QTextTable::rowEnd(const QTextCursor &c) const
 
     \sa format()
 */
+void QTextTable::setFormat(const QTextTableFormat &format)
+{
+    QTextTableFormat fmt = format;
+    // don't try to change the number of table columns from here
+    fmt.setColumns(columns());
+    QTextObject::setFormat(fmt);
+}
 
 /*!
     \fn QTextTableFormat QTextTable::format() const

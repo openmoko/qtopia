@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,6 +26,8 @@
 #include <QPixmap>
 #include "qabstractserverinterface.h"
 #include <qvaluespace.h>
+#include <custom.h>
+
 class QExportedBackground;
 class E1Header;
 class E1PhoneBrowser;
@@ -40,8 +42,6 @@ public:
 protected:
     virtual void paintEvent(QPaintEvent *);
     virtual void keyPressEvent(QKeyEvent *);
-    virtual void keyReleaseEvent(QKeyEvent *);
-    virtual void closeEvent(QCloseEvent *);
     virtual void mousePressEvent(QMouseEvent *);
     virtual void showEvent(QShowEvent *);
 
@@ -52,7 +52,9 @@ private slots:
 
 private:
     QPixmap m_wallpaper;
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
     QExportedBackground *m_eb;
+#endif
     E1Header *m_header;
     E1PhoneBrowser *m_browser;
     E1Dialer* m_dialer;

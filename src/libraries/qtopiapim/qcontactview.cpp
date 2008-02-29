@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include <qtopia/pim/qcontactview.h>
+#include <QTextEntryProxy>
 
 #include <QLabel>
 #include <QLayout>
@@ -31,6 +32,7 @@
 #include <QTextDocument>
 #include <QTextFrame>
 #include <QAbstractTextDocumentLayout>
+#include <QTimer>
 
 #include <QKeyEvent>
 
@@ -38,6 +40,7 @@
 #ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
 #endif
+#include <QtopiaItemDelegate>
 
 /*!
   \class QContactDelegate
@@ -112,7 +115,7 @@
     \o 48759
   \endtable
 
-  \sa QContact, QContactListView, QContactModel, QPimDelegate
+  \sa QContact, QContactListView, QContactModel, QPimDelegate, {Pim Library}
 */
 
 /*!
@@ -242,13 +245,24 @@ QSize QContactDelegate::decorationsSizeHint(const QStyleOptionViewItem& option, 
 
     // Note - this ignores the secondaryIconRole pixmap, since it is of variable size
     QSize ths = QContact::thumbnailSize();
-    return QSize(ths.width() + 2 + textSize.width(), qMax(ths.height() + 4, textSize.height()));
+    return QSize(ths.width() + 4 + textSize.width(), qMax(ths.height() + 4, textSize.height()));
 }
 
 /*!
   Destroys a QContactDelegate.
 */
 QContactDelegate::~QContactDelegate() {}
+
+
+class QContactListViewPrivate
+{
+public:
+    QContactListViewPrivate()
+        : proxy(0), searchTimer(0) {}
+
+    QTextEntryProxy *proxy;
+    QTimer *searchTimer;
+};
 
 /*!
   \class QContactListView
@@ -271,7 +285,7 @@ QContactDelegate::~QContactDelegate() {}
 
   \image qcontactview.png "List of QContacts"
 
-  \sa QContact, QContactModel, QContactDelegate
+  \sa QContact, QContactModel, QContactDelegate, {Pim Library}
 */
 
 /*!
@@ -296,6 +310,7 @@ QContactDelegate::~QContactDelegate() {}
   QContactDelegate if necessary.
 */
 
+
 /*!
   Constructs a QContactListView with the given \a parent.
 
@@ -306,10 +321,16 @@ QContactDelegate::~QContactDelegate() {}
 QContactListView::QContactListView(QWidget *parent)
     : QListView(parent)
 {
+    d = new QContactListViewPrivate();
     setItemDelegate(new QContactDelegate(this));
     setResizeMode(Adjust);
     setLayoutMode(Batched);
     setSelectionMode(QAbstractItemView::SingleSelection);
+    d->searchTimer = new QTimer(this);
+    d->searchTimer->setInterval(100);
+    d->searchTimer->setSingleShot(true);
+    connect(d->searchTimer, SIGNAL(timeout()),
+            this, SLOT(setFilterText()));
 }
 
 /*!
@@ -317,25 +338,52 @@ QContactListView::QContactListView(QWidget *parent)
 */
 QContactListView::~QContactListView()
 {
+    delete d;
+    d = 0;
+}
+
+/*!
+  Sets a QTextEntryProxy for the list view to \a proxy.  This allows the list
+  view to accept text and InputMethod events, which it will pass to \a proxy.
+  The text of the proxy is used for filtering the list of contacts in the view.
+*/
+void QContactListView::setTextEntryProxy(QTextEntryProxy *proxy)
+{
+    if(style()->inherits("QThumbStyle")) {
+        d->proxy = 0;
+        return;
+    }
+    if (d->proxy)
+        disconnect(d->proxy, SIGNAL(textChanged(QString)), d->searchTimer, SLOT(start()));
+
+    d->proxy = proxy;
+    d->proxy->setTarget(this);
+
+    if (d->proxy)
+        connect(d->proxy, SIGNAL(textChanged(QString)), d->searchTimer, SLOT(start()));
+}
+
+/*!
+  Returns the QTextEntryProxy for the list view.  If there is no QTextEntryProxy set returns
+  0.
+
+  \sa setTextEntryProxy()
+*/
+QTextEntryProxy *QContactListView::textEntryProxy() const
+{
+    return d->proxy;
 }
 
 /*!
   \overload
 
   Sets the model for the view to \a model.
-
-  Will only accept the model if it inherits or is a QContactModel.
-  If the \a model does not inherit a QContactModel, the existing
-  model will be retained.
 */
 void QContactListView::setModel( QAbstractItemModel *model )
 {
-    QContactModel *tm = qobject_cast<QContactModel *>(model);
-    if (!tm)
-        return;
     QListView::setModel(model);
     /* connect the selectionModel (which is created by setModel) */
-    connect(selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentContactChanged(const QModelIndex &)));
+    connect(selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(currentContactChanged(QModelIndex)));
 }
 
 /*!
@@ -347,10 +395,14 @@ void QContactListView::setModel( QAbstractItemModel *model )
 */
 QList<QContact> QContactListView::selectedContacts() const
 {
+    QContactModel *model = contactModel();
+    if (!model)
+        return QList<QContact>();
+
     QList<QContact> res;
-    QModelIndexList list = selectionModel()->selectedIndexes();
-    foreach(QModelIndex i, list) {
-        res.append(contactModel()->contact(i));
+    for (int i = 0; i < model->count(); ++i) {
+        if (selectionModel()->isSelected(model->index(i)))
+            res.append(model->contact(i));
     }
     return res;
 }
@@ -362,16 +414,21 @@ QList<QContact> QContactListView::selectedContacts() const
 */
 QList<QUniqueId> QContactListView::selectedContactIds() const
 {
+    QContactModel *model = contactModel();
+    if (!model)
+        return QList<QUniqueId>();
+
     QList<QUniqueId> res;
-    QModelIndexList list = selectionModel()->selectedIndexes();
-    foreach(QModelIndex i, list) {
-        res.append(contactModel()->id(i));
+    for (int i = 0; i < model->count(); ++i) {
+        if (selectionModel()->isSelected(model->index(i)))
+            res.append(model->id(i));
     }
     return res;
 }
 
-/*
-   Try to make sure we select the current item, whenever it
+/*!
+  \internal
+   Try to make sure we select the current item \a newIndex, whenever it
    changes.
    */
 void QContactListView::currentContactChanged(const QModelIndex& newIndex)
@@ -385,13 +442,38 @@ void QContactListView::currentContactChanged(const QModelIndex& newIndex)
    This code used to be necesary, but is not any more.  Binary compatibility
    requires it here, though.
 */
+
 /*!
   \reimp
 */
-void QContactListView::keyPressEvent(QKeyEvent *event)
+void QContactListView::focusInEvent(QFocusEvent *)
 {
-    // Ensure that the current item is changed.
-    QListView::keyPressEvent(event);
+    if (selectionModel() && !currentIndex().isValid()) {
+        selectionModel()->setCurrentIndex(
+            moveCursor(MoveNext, Qt::NoModifier), // first visible index
+            QItemSelectionModel::NoUpdate);
+    }
+    // Avoid unnecesary repaint
+}
+
+/*!
+  \reimp
+*/
+void QContactListView::focusOutEvent(QFocusEvent *)
+{
+    // Avoid unnecesary repaint
+}
+
+void QContactListView::setFilterText()
+{
+    QString text = d->proxy ? d->proxy->text() : QString();
+    if (contactModel()) {
+        contactModel()->setFilter(text, contactModel()->filterFlags());
+    }
+    if (text.isEmpty())
+        QSoftMenuBar::clearLabel(this, Qt::Key_Back);
+    else
+        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
 }
 
 /***************************
@@ -400,9 +482,24 @@ void QContactListView::keyPressEvent(QKeyEvent *event)
 class QContactSelectorPrivate
 {
 public:
+    QContactSelectorPrivate()
+        : view(0), mType(RejectType), mTextSelectable(false),
+        newAction(0), proxy(0), mModel(0)
+        {}
     QContactListView *view;
-    bool mNewContactSelected;
-    bool mContactSelected;
+    enum AcceptType {
+        RejectType,
+        ContactType,
+        NewType,
+        TextType
+    };
+
+    AcceptType mType;
+    bool mTextSelectable;
+
+    QAction *newAction;
+    QTextEntryProxy *proxy;
+    QContactModel *mModel;
 };
 
 /*!
@@ -419,41 +516,84 @@ public:
   create a new QContact highlighted.
 
   \image qcontactselector.png "QContactSelector with the option to create a new contact highlighted"
+
+  \sa {Pim Library}
 */
 
 /*!
-  Constructs a QContactSelector with the given \a parent.
+  Constructs a QContactSelector with parent \a parent.  If \a showCreateNew is true an action will
+  be include to allow the user to create new contacts.
 
-  If \a allowNew is true, the selector provides
-  the user an option to create a new QContact (see newContactSelected()).
-
+  \sa setCreateNewContactEnabled()
 */
-QContactSelector::QContactSelector(bool allowNew, QWidget *parent)
+QContactSelector::QContactSelector(bool showCreateNew, QWidget *parent)
     : QDialog(parent)
 {
-    d = new QContactSelectorPrivate();
-    d->mNewContactSelected = false;
-    d->mContactSelected = false;
-    setWindowTitle( tr("Select Contact") );
-    QVBoxLayout *l = new QVBoxLayout( this );
+    init();
+    setCreateNewContactEnabled(showCreateNew);
+}
+/*!
+  Contructs a QContactSelector with parent \a parent.
+*/
+QContactSelector::QContactSelector(QWidget *parent)
+    : QDialog(parent)
+{
+    init();
+}
 
-    d->view = new QContactListView( this );
-    d->view->setItemDelegate(new QContactDelegate(d->view));
+/*!
+  \internal
+  Does the work of constructing a QContactSelector
+*/
+void QContactSelector::init()
+{
+    d = new QContactSelectorPrivate();
+    setWindowTitle( tr("Select Contact") );
+    QVBoxLayout *l = new QVBoxLayout;
+    l->setMargin(0);
+    l->setSpacing(2);
+
+    d->view = new QContactListView;
+
+    if(!style()->inherits("QThumbStyle")) {
+        QtopiaApplication::setInputMethodHint(d->view, "text");
+        d->view->setAttribute(Qt::WA_InputMethodEnabled);
+    }
+    d->view->installEventFilter(this);
+    d->view->setFrameStyle(QFrame::NoFrame);
+    d->view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
     d->view->setSelectionMode( QListView::SingleSelection );
-    connect( d->view, SIGNAL(clicked(const QModelIndex&)), this, SLOT(setSelected(const QModelIndex&)) );
-    connect( d->view, SIGNAL(activated(const QModelIndex&)), this, SLOT(setSelected(const QModelIndex&)) );
+
+    connect( d->view, SIGNAL(activated(QModelIndex)), this, SLOT(setSelected(QModelIndex)) );
 
     l->addWidget( d->view );
 
-    if( allowNew )
-    {
-#ifndef QTOPIA_PHONE
-        //TODO pda
-#else
-        QMenu *menu = QSoftMenuBar::menuFor( this );
-        menu->addAction( QIcon(":icon/new"), tr("New"), this, SLOT(setNewSelected()) );
-#endif
-    }
+    if(!style()->inherits("QThumbStyle")) {
+        d->proxy = new QTextEntryProxy(this, d->view);
+        int mFindHeight = d->proxy->sizeHint().height();
+        QLabel *findIcon = new QLabel;
+        findIcon->setPixmap(QIcon(":icon/find").pixmap(mFindHeight-2, mFindHeight-2));
+        findIcon->setMargin(2);
+
+        QHBoxLayout *findLayout = new QHBoxLayout;
+        findLayout->addWidget(findIcon);
+        findLayout->addWidget(d->proxy);
+
+        l->addLayout( findLayout );
+
+        connect( d->proxy, SIGNAL(textChanged(QString)),
+             this, SLOT(filterList(QString)) );
+    } else
+        d->proxy = 0;
+
+    setLayout(l);
+
+    QMenu *menu = QSoftMenuBar::menuFor( this );
+    d->newAction = menu->addAction( QIcon(":icon/new"), tr("New"), this, SLOT(setNewSelected()) );
+    d->newAction->setVisible(false);
+
+    connect(this, SIGNAL(accepted()), this, SLOT(completed()));
 
 #ifndef QTOPIA_DESKTOP
 #ifdef QTOPIA_PHONE
@@ -463,13 +603,67 @@ QContactSelector::QContactSelector(bool allowNew, QWidget *parent)
 }
 
 /*!
+  If \a enable is true an action to create new contacts will be visible in the context menu.
+  Otherwise the action to create new contacts will be hidden.
+*/
+void QContactSelector::setCreateNewContactEnabled(bool enable)
+{
+    d->newAction->setVisible(enable);
+}
+
+/*!
+  If \a enable is true pressing select while filter text will accept the dialog even if
+  no contact from the list is selected.
+*/
+void QContactSelector::setAcceptTextEnabled(bool enable)
+{
+    d->mTextSelectable = enable;
+}
+
+/*!
+   \overload
+   Filters events if this object has been installed as an event filter for the \a watched object.
+   Returns true if the \a event is filtered. Otherwise returns false.
+*/
+bool QContactSelector::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == d->view) {
+        if (event->type() == QEvent::KeyPress) {
+            QKeyEvent *ke = (QKeyEvent *)event;
+            if (ke->key() == Qt::Key_Select && !d->view->currentIndex().isValid()) {
+                d->mType = QContactSelectorPrivate::TextType;
+                event->accept();
+                accept();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/*!
+  \internal
+   Model resets don't generate current index changed message, so
+   force the first contact to be selected.
+*/
+void QContactSelector::contactModelReset()
+{
+    /* we know our selection is invalid.. */
+    QModelIndex newSel = d->mModel->index(0,0);
+    if (newSel.isValid()) {
+        d->view->setCurrentIndex(newSel);
+        d->view->selectionModel()->setCurrentIndex(newSel, QItemSelectionModel::ClearAndSelect);
+    }
+}
+
+
+/*!
   \internal
   Accepts the dialog and indicates that a new contact should be created.
 */
 void QContactSelector::setNewSelected()
 {
-    d->mNewContactSelected = true;
-    d->mContactSelected = false;
+    d->mType = QContactSelectorPrivate::NewType;
     accept();
 }
 
@@ -479,13 +673,27 @@ void QContactSelector::setNewSelected()
 */
 void QContactSelector::setSelected(const QModelIndex& idx)
 {
-    d->mNewContactSelected = false;
     if (idx.isValid())
     {
         d->view->setCurrentIndex(idx);
-        d->mContactSelected = true;
+        d->mType = QContactSelectorPrivate::ContactType;
     }
+
+    QContactModel *m = qobject_cast<QContactModel *>(d->view->model());
+    emit contactSelected(m->contact(idx));
+
     accept();
+}
+
+/*!
+  \internal
+  Given text proxy input \a str, filter the list of contacts to those that match.
+*/
+void QContactSelector::filterList(const QString& str)
+{
+    if (d->mModel) {
+        d->mModel->setFilter(str, d->mModel->filterFlags());
+    }
 }
 
 /*!
@@ -493,7 +701,18 @@ void QContactSelector::setSelected(const QModelIndex& idx)
 */
 void QContactSelector::setModel(QContactModel *model)
 {
+    QAbstractItemModel *m = d->mModel;
+    d->mModel = model;
     d->view->setModel(model);
+    if (m != model) {
+        if (m)
+            disconnect(m, SIGNAL(modelReset()), this, SLOT(contactModelReset()));
+        if (model) {
+            if(!style()->inherits("QThumbStyle"))
+                d->mModel->setFilter(d->proxy->text(), d->mModel->filterFlags());
+            connect(model, SIGNAL(modelReset()), this, SLOT(contactModelReset()));
+        }
+    }
 }
 
 /*!
@@ -507,7 +726,7 @@ bool QContactSelector::newContactSelected() const
 {
     if (result() == Rejected)
         return false;
-    return d->mNewContactSelected;
+    return d->mType == QContactSelectorPrivate::NewType;
 }
 
 /*!
@@ -518,7 +737,16 @@ bool QContactSelector::newContactSelected() const
 */
 bool QContactSelector::contactSelected() const
 {
-    return d->mContactSelected;
+    return d->mType == QContactSelectorPrivate::ContactType;
+}
+
+/*!
+  Returns true if the dialog was accepted with filter text entered but no contact
+  selected.
+*/
+bool QContactSelector::textSelected() const
+{
+    return d->mType == QContactSelectorPrivate::TextType;
 }
 
 /*!
@@ -529,12 +757,56 @@ bool QContactSelector::contactSelected() const
 QContact QContactSelector::selectedContact() const
 {
     QContactModel *m = qobject_cast<QContactModel *>(d->view->model());
-
-    if (result() == Rejected || d->mNewContactSelected || !m || !d->view->currentIndex().isValid())
+    if (!m || d->mType != QContactSelectorPrivate::ContactType
+            || result() == Rejected || !d->view->currentIndex().isValid())
         return QContact();
 
     return m->contact(d->view->currentIndex());
 }
+
+/*!
+  Returns the text entered when the dialog was accepted.  Requires that accept on
+  text is enabled.
+
+  \sa setAcceptTextEnabled()
+*/
+QString QContactSelector::selectedText() const
+{
+    if (!textSelected() || result() == Rejected)
+        return QString();
+    if (d->view->textEntryProxy())
+        return d->view->textEntryProxy()->text();
+    else if (d->proxy)
+        return d->proxy->text();
+    return QString();
+}
+
+/*! \internal */
+void QContactSelector::completed()
+{
+    if (textSelected()) {
+        if (d->view->textEntryProxy())
+            emit textSelected(d->view->textEntryProxy()->text());
+        else if (d->proxy)
+            emit textSelected(d->proxy->text());
+    }
+}
+
+/*!
+    \fn void QContactSelector::contactSelected(const QContact& contact)
+
+    When selection of a contact occurs, this signal is emitted with the \a contact selected.
+
+    \sa selectedContact()
+*/
+
+/*!
+    \fn void QContactSelector::textSelected(const QString& text)
+
+    When the dialog is accepted with text entered, this signal is emitted with the \a text previously entered.
+
+    \sa selectedText()
+*/
 
 
 /***************************
@@ -544,14 +816,15 @@ QContact QContactSelector::selectedContact() const
 class QPhoneTypeSelectorPrivate
 {
 public:
-    QPhoneTypeSelectorPrivate(const QContact &cnt, const QString &number)
-        : mToolTip(0), mContact( cnt ), mNumber(number) {}
+    QPhoneTypeSelectorPrivate(const QContact &cnt, const QString &number, QList<QContact::PhoneType> allowedTypes)
+        : mToolTip(0), mContact( cnt ), mNumber(number), mAllowedPhoneTypes(allowedTypes) {}
 
     QLabel *mLabel, *mToolTip;
     QListWidget *mPhoneType;
     QMap<QListWidgetItem *, QContact::PhoneType> mItemToPhoneType;
     const QContact mContact;
     const QString mNumber;
+    QList<QContact::PhoneType> mAllowedPhoneTypes;
 };
 
 /*!
@@ -577,7 +850,7 @@ public:
      phone numbers for the QContact are displayed.
   \endtable
 
-  \sa QContact
+  \sa QContact, {Pim Library}
 */
 
 /*!
@@ -597,8 +870,8 @@ public:
   \o To choose a phone number type for a new phone number, pass the phone number as a string as the \a number argument.
   \endlist
 
-  In the second case, the dialog will show any existing phone numbers for the \a contact in addition to
-  the available phone number types.
+  In the second case, the dialog will show any existing phone numbers for the
+  contact in addition to the available phone number types.
 
   \sa updateContact()
 */
@@ -606,28 +879,36 @@ QPhoneTypeSelector::QPhoneTypeSelector( const QContact &contact, const QString &
         QWidget *parent )
     : QDialog( parent )
 {
-    d = new QPhoneTypeSelectorPrivate(contact, number);
-
-    setWindowTitle(tr("Phone Type"));
-
-    QVBoxLayout *l = new QVBoxLayout( this );
-    d->mLabel = new QLabel( this );
-    d->mLabel->setWordWrap( true );
-    l->addWidget(d->mLabel);
-    d->mPhoneType = new QListWidget( this );
-    l->addWidget(d->mPhoneType);
-    d->mPhoneType->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    d = new QPhoneTypeSelectorPrivate(contact, number, QList<QContact::PhoneType>());
 
     init();
+}
 
-    d->mPhoneType->setFocus();
-#ifdef QTOPIA_PHONE
-    if( !Qtopia::mousePreferred() ) {
-        if( d->mPhoneType->hasEditFocus() )
-            d->mPhoneType->setEditFocus( true );
-    }
-    QtopiaApplication::setMenuLike(this, true);
-#endif
+/*!
+  Constructs a QPhoneTypeSelector dialog with parent \a parent.
+
+  The dialog will show phone numbers and phone number types from the given \a contact.
+
+  The dialog can be used in two ways:
+  \list
+  \o To choose an existing phone number from a contact, pass an empty string as the \a number argument.
+  \o To choose a phone number type for a new phone number, pass the phone number as a string as the \a number argument.
+  \endlist
+
+  In the second case, the dialog will show any existing phone numbers for the
+  contact in addition to the available phone number types, restricted by the
+  set \a allowedTypes.  If \a allowedTypes has zero length, the entire
+  set of possible types is allowed.
+
+  \sa updateContact()
+
+ */
+QPhoneTypeSelector::QPhoneTypeSelector( const QContact &contact, const QString& number, QList<QContact::PhoneType> allowedTypes, QWidget *parent)
+    : QDialog( parent )
+{
+    d = new QPhoneTypeSelectorPrivate(contact, number, allowedTypes);
+
+    init();
 }
 
 /*!
@@ -672,15 +953,32 @@ QString QPhoneTypeSelector::selectedNumber() const
 */
 void QPhoneTypeSelector::init()
 {
+    QVBoxLayout *l = new QVBoxLayout( this );
+    l->setMargin(0);
+    l->setSpacing(0);
+    d->mLabel = new QLabel( this );
+    d->mLabel->setWordWrap( true );
+    l->addWidget(d->mLabel);
+    d->mPhoneType = new QListWidget( this );
+    d->mPhoneType->setFrameStyle(QFrame::NoFrame);
+    l->addWidget(d->mPhoneType);
+    d->mPhoneType->setItemDelegate(new QtopiaItemDelegate(this));
+    d->mPhoneType->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+
+    setWindowTitle(tr("Phone Type"));
+
     QListWidgetItem *item = 0;
 
     if (!d->mNumber.isEmpty()) //assume an empty number means we want to select a number
     {
+        bool first = true;
+
         d->mLabel->setText( "<qt>"+tr("Please select the phone type for '%1'.", "%1 = mobile number or land line number").arg( d->mNumber )+"</qt>" );
 
-        QList<QContact::PhoneType> phoneTypes = QContact::phoneTypes();
+        QList<QContact::PhoneType> phoneTypes = d->mAllowedPhoneTypes;
+        if (phoneTypes.count() == 0)
+            phoneTypes = QContact::phoneTypes();
 
-        bool first = true;
         foreach(QContact::PhoneType type, phoneTypes) {
             QString phoneNumber = d->mContact.phoneNumber(type);
             item =new QListWidgetItem(verboseIfEmpty(phoneNumber), d->mPhoneType, type);
@@ -693,12 +991,15 @@ void QPhoneTypeSelector::init()
         }
     } else {
         bool haveNumber = false;
-        d->mPhoneType->installEventFilter(this);
-        d->mLabel->setText( "<qt>"+tr("Choose phone number:")+"</qt>" );
-
         bool first = true;
-        QList<QContact::PhoneType> ptypes = QContact::phoneTypes();
-        foreach(QContact::PhoneType type, ptypes) {
+        setWindowTitle(tr("Phone Number"));
+        d->mLabel->hide();
+
+        QList<QContact::PhoneType> phoneTypes = d->mAllowedPhoneTypes;
+        if (phoneTypes.count() == 0)
+            phoneTypes = QContact::phoneTypes();
+
+        foreach(QContact::PhoneType type, phoneTypes) {
             QString number = d->mContact.phoneNumber(type);
             if (!number.isEmpty()) {
                 item = new QListWidgetItem( number, d->mPhoneType );
@@ -719,7 +1020,16 @@ void QPhoneTypeSelector::init()
             d->mToolTip->show();
         }
     }
-    connect( d->mPhoneType, SIGNAL(itemActivated(QListWidgetItem *)), this, SLOT(accept()) );
+    connect( d->mPhoneType, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(accept()) );
+
+    d->mPhoneType->setFocus();
+#ifdef QTOPIA_PHONE
+    if( !Qtopia::mousePreferred() ) {
+    if( d->mPhoneType->hasEditFocus() )
+        d->mPhoneType->setEditFocus( true );
+    }
+    QtopiaApplication::setMenuLike(this, true);
+#endif
 }
 
 /*!
@@ -748,6 +1058,246 @@ void QPhoneTypeSelector::accept()
 {
     QDialog::accept();
     QListWidgetItem *item = d->mPhoneType->currentItem();
-    if( !item )
+    if( item )
         emit selected( d->mItemToPhoneType[item] );
+}
+
+/*!
+  \reimp
+*/
+void QPhoneTypeSelector::keyPressEvent(QKeyEvent *ke)
+{
+    /* If we're choosing a number, then allow call to accept
+       the number.. it's very rare you'd want Call History to be
+       displayed, for example */
+    if (ke->key() == Qt::Key_Call && d->mNumber.isEmpty()) {
+        ke->setAccepted(true);
+        accept();
+        return;
+    }
+    QDialog::keyPressEvent(ke);
+}
+
+/*!
+  \class QContactItem
+  \mainclass
+  \module qpepim
+  \ingroup pim
+  \brief The QContactItem class provides a QStandardItem based class representing a \l QContact.
+
+  By using QContactItem (and \l QContactItemModel), views of arbitrary collections of
+  contacts can be created.  This can be useful when choosing arbitrary contacts (for
+  example, selecting recipients for a message), or when you would like to manually
+  filter a \l QContactModel.
+
+  This class is designed to operate with \l QContactDelegate.
+
+  \sa QContactItemModel, QStandardItem
+*/
+
+/*!
+  Create an empty QContactItem, with no label, portrait,
+  secondary label, or status icon.
+*/
+QContactItem::QContactItem()
+    : QStandardItem()
+{
+}
+
+/*!
+  Create a QContactItem based on the supplied \a contact and secondary label \a subLabel, and
+  secondary decoration \a statusIcon.
+
+  The \a contact's portrait will be used as the decoration for this item, and if QContactItem
+  is being rendered by \l QContactDelegate, the additional \a subLabel and \a statusIcon will
+  also be rendered.
+
+  If \a subLabel is not empty, the supplied string will be rendered with \l QContactDelegate
+  underneath the \a contact label. If \a subLabel is empty, a default value will be generated
+  from \a contact in a similar manner to QContactModel::SubLabelRole.
+
+  If it is valid, the \a statusIcon pixmap will be rendered on the trailing edge of the item.
+*/
+QContactItem::QContactItem(const QContact &contact, const QString &subLabel, const QPixmap &statusIcon)
+    : QStandardItem()
+{
+    setLabel(contact.label());
+    if (subLabel.isEmpty()) {
+        if (!contact.defaultPhoneNumber().isEmpty())
+            setSubLabel( Qt::escape(contact.defaultPhoneNumber()) );
+        if (!contact.defaultEmail().isEmpty())
+            setSubLabel( Qt::escape(contact.defaultEmail()) );
+        if (contact.label() != contact.company())
+            setSubLabel( Qt::escape(contact.company()) );
+    } else {
+        setSubLabel(subLabel);
+    }
+    setPortrait(contact.thumbnail());
+    setStatusIcon(statusIcon);
+}
+
+/*!
+  Destroys the QContactItem.
+*/
+QContactItem::~QContactItem()
+{}
+
+/*!
+  Return the contact's portrait (QContactModel::PortraitRole) as
+  a pixmap.
+
+  \sa setPortrait()
+*/
+QPixmap QContactItem::portrait() const
+{
+    return qvariant_cast<QPixmap>(data(QContactModel::PortraitRole));
+}
+
+/*!
+  Return the contact's additional status icon (QContactModel::StatusIconRole) as
+  a pixmap.
+
+  \sa setStatusIcon()
+*/
+QPixmap QContactItem::statusIcon() const
+{
+    return qvariant_cast<QPixmap>(data(QContactModel::StatusIconRole));
+}
+
+/*!
+  Set the text displayed by this item to \a text.
+  This corresponds to Qt::DisplayRole and QContactModel::LabelRole.
+
+  \sa label()
+*/
+void QContactItem::setLabel(const QString &text)
+{
+    setData(text, Qt::DisplayRole);
+    setData(text, QContactModel::LabelRole);
+}
+
+/*!
+  Set the pixmap displayed by this item to \a image.
+  This corresponds to Qt::DecorationRole and QContactModel::PortraitRole.
+
+  \sa portrait()
+*/
+void QContactItem::setPortrait(const QPixmap &image)
+{
+    setData(image, Qt::DecorationRole);
+    setData(image, QContactModel::PortraitRole);
+}
+
+/*!
+  Set the secondary label displayed by this item to \a text.
+  This corresponds to QContactModel::SubLabelRole
+
+  \sa subLabel()
+*/
+void QContactItem::setSubLabel(const QString &text)
+{
+    setData(text, QContactModel::SubLabelRole);
+}
+
+/*!
+  Set the additional status icon displayed by this item to \a image.
+  This corresponds to QContactModel::StatusIconRole and
+  Qtopia::AdditionalDecorationRole.
+
+  \sa statusIcon()
+*/
+void QContactItem::setStatusIcon(const QPixmap &image)
+{
+    setData(image, Qtopia::AdditionalDecorationRole);
+    setData(image, QContactModel::StatusIconRole);
+}
+
+/*!
+  Returns the label displayed by this item.
+  \sa setLabel(), subLabel()
+*/
+QString QContactItem::label() const
+{
+    return data(QContactModel::LabelRole).toString();
+}
+
+/*!
+  Returns the secondary label displayed by this item.
+  \sa setSubLabel(), label()
+*/
+QString QContactItem::subLabel() const
+{
+    return data(QContactModel::SubLabelRole).toString();
+}
+
+/*!
+  \class QContactItemModel
+  \mainclass
+  \module qpepim
+  \ingroup pim
+  \brief The QContactItemModel class provides a QStandardItemModel based class representing a list of \l{QContact}s.
+
+  By using QContactItemModel and (\l QContactItem), views of arbitrary collections of contacts can be
+  created.  This class provides convenience functions that operate on \l {QContact}s on top of the QStandardItemModel API.
+
+  \sa QContactItem, QStandardItemModel
+*/
+
+/*!
+  Create a QContactItemModel with the specified \a parent.
+*/
+QContactItemModel::QContactItemModel(QObject *parent)
+    : QStandardItemModel(parent)
+{
+}
+
+/*!
+  Destroys this QContactItemModel.
+*/
+QContactItemModel::~QContactItemModel()
+{
+}
+
+/*!
+  This is a convenience function.
+  Add a contact to this model.  The \a contact, \a subLabel and \a statusIcon
+  parameters are used to create a \l QContactItem, and the item is then
+  added to this model.
+
+  \sa QContactItem
+*/
+void QContactItemModel::appendRow(const QContact &contact, const QString &subLabel, const QPixmap &statusIcon)
+{
+    QContactItem *item = new QContactItem(contact, subLabel, statusIcon);
+    appendRow(item);
+}
+
+/*!
+  Returns a list of the labels of the items in this model.
+
+  This corresponds to the item's QContactModel::LabelRole data.
+
+  \sa subLabels()
+*/
+QStringList QContactItemModel::labels() const
+{
+    QStringList result;
+    for(int i = 0; i < rowCount(); ++i)
+        result.append(item(i)->data(QContactModel::LabelRole).toString());
+    return result;
+}
+
+/*!
+  Returns a list of the secondary labels of the items in this model.
+
+  This corresponds to the item's QContactModel::SubLabelRole data.
+
+  \sa labels()
+*/
+QStringList QContactItemModel::subLabels() const
+{
+    QStringList result;
+    for(int i = 0; i < rowCount(); ++i)
+        result.append(item(i)->data(QContactModel::SubLabelRole).toString());
+    return result;
 }

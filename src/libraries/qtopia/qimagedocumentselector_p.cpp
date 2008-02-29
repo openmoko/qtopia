@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,22 +25,17 @@
 
 #include <qtopiaapplication.h>
 #include <qthumbnail.h>
+#include <qsoftmenubar.h>
+#include <qcontentfilterselector.h>
 
 #include <qtopia/private/drmcontent_p.h>
-
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-#include <qsoftmenubar.h>
-#endif
 
 #include <QList>
 #include <QLayout>
 #include <QComboBox>
 #include <QImageReader>
 #include <QMenu>
-#include <QDebug>
 #include <QTimer>
-
-#include <qcontentfilterselector.h>
 
 #define DEFAULT_VIEW QImageDocumentSelector::Thumbnail
 
@@ -48,6 +43,7 @@
 
 QImageDocumentSelectorPrivate::QImageDocumentSelectorPrivate( QWidget* parent )
     : QWidget( parent )
+    , image_collection( QContentSet::Asynchronous )
     , sort_mode( QDocumentSelector::Alphabetical )
     , drm_content( QDrmRights::Display )
     , current_view( DEFAULT_VIEW )
@@ -61,31 +57,28 @@ void QImageDocumentSelectorPrivate::init()
 {
     model = new QContentSetModel(&image_collection, this);
     // Update selection and view when model changes
-    connect( model, SIGNAL(rowsInserted(const QModelIndex&,int,int)), this,
+    connect( model, SIGNAL(rowsInserted(QModelIndex,int,int)), this,
              SLOT(rowAddedSelection()) );
-    connect( model, SIGNAL(rowsInserted(const QModelIndex&,int,int)), this,
-             SLOT(raiseCurrentView()) );
-    connect( model, SIGNAL(rowsInserted(const QModelIndex&,int,int)), this,
+    connect( model, SIGNAL(rowsInserted(QModelIndex,int,int)), this,
              SIGNAL(documentsChanged()) );
-    connect( model, SIGNAL(rowsRemoved(const QModelIndex&,int,int)), this,
-             SLOT(rowRemovedSelection(const QModelIndex &, int, int)) );
-    connect( model, SIGNAL(rowsRemoved(const QModelIndex&,int,int)), this,
-             SLOT(raiseCurrentView()) );
-    connect( model, SIGNAL(rowsRemoved(const QModelIndex&,int,int)), this,
+    connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)), this,
+             SLOT(rowRemovedSelection(QModelIndex,int,int)) );
+    connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)), this,
              SIGNAL(documentsChanged()) );
 
+    connect( model, SIGNAL(updateFinished()), this, SLOT(updateFinished()) );
+
     // Initialize selection and update view when model reset
-    connect( model, SIGNAL(modelReset()), this, SLOT(raiseCurrentView()) );
     connect( model, SIGNAL(modelReset()), this, SIGNAL(documentsChanged()) );
     connect( model, SIGNAL(modelReset()), this, SLOT(resetSelection()) );
 
     // Construct widget stack
-    widget_stack = new QStackedWidget( this );
+    widget_stack = new QStackedLayout( this );
 
     // Construct single view
-    single_view = new SingleView( widget_stack );
+    single_view = new SingleView( this );
     connect( single_view, SIGNAL(selected()), this, SLOT(emitSelected()) );
-    connect( single_view, SIGNAL(held(const QPoint&)), this, SLOT(emitHeld(const QPoint&)) );
+    connect( single_view, SIGNAL(held(QPoint)), this, SLOT(emitHeld(QPoint)) );
     // Connect single view to model
     single_view->setModel( model );
 
@@ -96,15 +89,13 @@ void QImageDocumentSelectorPrivate::init()
     ThumbnailRepository *repository = new ThumbnailRepository( cache, loader, this );
 
     // Construct thumbnail view
-    thumbnail_view = new ThumbnailView( widget_stack );
-    connect( repository, SIGNAL(loaded(const ThumbnailRequest&,const QPixmap&)),
-             thumbnail_view, SLOT(repaintThumbnail(const ThumbnailRequest&)) );
+    thumbnail_view = new ThumbnailView( this );
+    connect( repository, SIGNAL(loaded(ThumbnailRequest,QPixmap)),
+             thumbnail_view, SLOT(repaintThumbnail(ThumbnailRequest)) );
     connect( thumbnail_view, SIGNAL(selected()), this, SLOT(emitSelected()) );
     thumbnail_view->setViewMode( QListView::IconMode );
     thumbnail_view->setIconSize( QSize( 64, 64 ) );
     thumbnail_view->setSpacing( 2 );
-    thumbnail_view->setLayoutMode( QListView::Batched );
-    thumbnail_view->setBatchSize( 20 );
     thumbnail_view->setUniformItemSizes( true );
 
     // Construct thumbnail delegate
@@ -127,7 +118,7 @@ void QImageDocumentSelectorPrivate::init()
     }
 
     // Construct message view
-    message_view = new QLabel( tr( "<center><p>No images found.</p></center>"), widget_stack );
+    message_view = new QLabel( tr( "<center><p>No images found.</p></center>"), this );
     message_view->setAlignment( Qt::AlignCenter );
     message_view->setWordWrap( true );
 
@@ -135,7 +126,6 @@ void QImageDocumentSelectorPrivate::init()
     widget_stack->addWidget( thumbnail_view );
     widget_stack->addWidget( message_view );
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     // Construct context menu
     QMenu *context_menu = QSoftMenuBar::menuFor( this );
 
@@ -155,58 +145,16 @@ void QImageDocumentSelectorPrivate::init()
     context_menu->addAction( QIcon( ":icon/viewcategory" ),
                              tr( "View Category..." ), this, SLOT(launchCategoryDialog()) );
 
-#else
-    // Construct view toggle buttons
-    view_toggle_group = new QButtonGroup( this );
-    view_toggle_group->setExclusive( true );
-
-    // Construct thumbnail view toggle button
-    thumbnail_view_toggle = new QToolButton( this );
-    thumbnail_view_toggle->setIcon( QIcon( ":icon/thumbnail" ) );
-    thumbnail_view_toggle->setCheckable( true );
-    thumbnail_view_toggle->toggle();
-    view_toggle_group->addButton( thumbnail_view_toggle );
-    connect( thumbnail_view_toggle, SIGNAL(clicked()), this, SLOT(setViewThumbnail()) );
-
-    // Construct single view toggle button
-    single_view_toggle = new QToolButton( this );
-    single_view_toggle->setIcon( QIcon( ":icon/single" ) );
-    single_view_toggle->setCheckable( true );
-    view_toggle_group->addButton( single_view_toggle );
-    connect( single_view_toggle, SIGNAL(clicked()), this, SLOT(setViewSingle()) );
-#endif
-
-    connect( &drm_content, SIGNAL(rightsExpired(const QDrmContent&)), this, SLOT(setViewThumbnail()) );
-
-    // Arrange widgets in layout
-    QVBoxLayout *main_layout = new QVBoxLayout( this );
-    main_layout->setMargin( 0 );
-    main_layout->setSpacing( 0 );
-    main_layout->addWidget( widget_stack, HIGH_STRETCH_FACTOR );
-#ifndef QTOPIA_KEYPAD_NAVIGATION
-    QHBoxLayout *toolbar_layout = new QHBoxLayout;
-    main_layout->addLayout( toolbar_layout );
-    toolbar_layout->addWidget( single_view_toggle );
-    toolbar_layout->addWidget( thumbnail_view_toggle );
-    toolbar_layout->addWidget( category_selector );
-#endif
+    connect( &drm_content, SIGNAL(rightsExpired(QDrmContent)), this, SLOT(setViewThumbnail()) );
 
     model->setSelectPermission( QDrmRights::Display );
 
-    // Display message view if no images visible
-    if( model->rowCount() == 0 ) {
-        // Raise message view to top of stack
-    widget_stack->setCurrentIndex( widget_stack->indexOf( message_view ) );
-    message_view->setFocus();
-    } else {
-        // Otherwise, load thumbnail view
-        widget_stack->setCurrentIndex( widget_stack->indexOf( thumbnail_view ) );
-        thumbnail_view->setFocus();
-    }
+    widget_stack->setCurrentWidget( thumbnail_view );
+    thumbnail_view->setFocus();
 
     // We need this because we're no longer getting the modelReset signal on startup. This schedules
     // the function that ensures the scrollbar is positioned at the top, after the documents have loaded.
-    QTimer::singleShot(0, this, SLOT(delayResetSelection()));
+    //QTimer::singleShot(0, this, SLOT(delayResetSelection()));
 }
 
 void QImageDocumentSelectorPrivate::setViewMode( QImageDocumentSelector::ViewMode mode )
@@ -222,9 +170,6 @@ void QImageDocumentSelectorPrivate::setViewMode( QImageDocumentSelector::ViewMod
                     drm_content.renderStarted();
 
                 widget_stack->setCurrentIndex( widget_stack->indexOf( single_view ) );
-#ifndef QTOPIA_KEYPAD_NAVIGATION
-                single_view_toggle->setChecked( true );
-#endif
             }
             break;
         case QImageDocumentSelector::Thumbnail:
@@ -236,9 +181,6 @@ void QImageDocumentSelectorPrivate::setViewMode( QImageDocumentSelector::ViewMod
 
                 widget_stack->setCurrentIndex( widget_stack->indexOf( thumbnail_view ) );
                 thumbnail_view->setFocus();
-#ifndef QTOPIA_KEYPAD_NAVIGATION
-            thumbnail_view_toggle->setChecked( true );
-#endif
             }
             break;
         }
@@ -276,19 +218,26 @@ void QImageDocumentSelectorPrivate::setSortMode( QDocumentSelector::SortMode mod
         switch( mode )
         {
         case QDocumentSelector::Alphabetical:
-            image_collection.setSortOrder( QStringList() << QLatin1String( "name" ) );
+            image_collection.setSortCriteria( QContentSortCriteria( QContentSortCriteria::Name, Qt::AscendingOrder ) );
             break;
         case QDocumentSelector::ReverseAlphabetical:
-            image_collection.setSortOrder( QStringList() << QLatin1String( "name desc" ) );
+            image_collection.setSortCriteria( QContentSortCriteria( QContentSortCriteria::Name, Qt::DescendingOrder ) );
             break;
         case QDocumentSelector::Chronological:
-            image_collection.setSortOrder( QStringList() << QLatin1String( "time" ) );
+            image_collection.setSortCriteria( QContentSortCriteria( QContentSortCriteria::LastUpdated, Qt::AscendingOrder ) );
             break;
         case QDocumentSelector::ReverseChronological:
-            image_collection.setSortOrder( QStringList() << QLatin1String( "time desc" ) );
+            image_collection.setSortCriteria( QContentSortCriteria( QContentSortCriteria::LastUpdated, Qt::DescendingOrder ) );
+            break;
+        case QDocumentSelector::SortCriteria:
             break;
         }
     }
+}
+
+void QImageDocumentSelectorPrivate::setSortCriteria( const QContentSortCriteria &sort )
+{
+    image_collection.setSortCriteria( sort );
 }
 
 void QImageDocumentSelectorPrivate::applyFilters( bool enableForce )
@@ -309,6 +258,11 @@ QContentFilter QImageDocumentSelectorPrivate::filter() const
 QDocumentSelector::SortMode QImageDocumentSelectorPrivate::sortMode() const
 {
     return sort_mode;
+}
+
+QContentSortCriteria QImageDocumentSelectorPrivate::sortCriteria() const
+{
+    return image_collection.sortCriteria();
 }
 
 QContent QImageDocumentSelectorPrivate::selectedDocument() const
@@ -457,27 +411,6 @@ void QImageDocumentSelectorPrivate::delayResetSelection()
     }
 }
 
-void QImageDocumentSelectorPrivate::raiseCurrentView()
-{
-     // If no images in collection, raise message view to top of stack
-    if( model->rowCount() == 0 ) {
-        widget_stack->setCurrentIndex( widget_stack->indexOf( message_view ) );
-    } else {
-        if( widget_stack->currentWidget() == message_view ) {
-            // Otherwise, raise current view to top of stack
-            switch( current_view )
-            {
-            case QImageDocumentSelector::Single:
-                widget_stack->setCurrentIndex( widget_stack->indexOf( single_view ) );
-                break;
-            case QImageDocumentSelector::Thumbnail:
-                widget_stack->setCurrentIndex( widget_stack->indexOf( thumbnail_view ) );
-                break;
-            }
-        }
-    }
-}
-
 void QImageDocumentSelectorPrivate::showEvent( QShowEvent *event )
 {
     if( current_view == QImageDocumentSelector::Single )
@@ -556,4 +489,15 @@ void QImageDocumentSelectorPrivate::filterDefaultCategories()
         category_filter |= QContentFilter( QContentFilter::Category, category );
 }
 
+void QImageDocumentSelectorPrivate::updateFinished()
+{
+    if( !model->rowCount() )
+    {
+        widget_stack->setCurrentWidget( message_view );
+    }
+    else if( widget_stack->currentWidget() == message_view )
+    {
+        widget_stack->setCurrentWidget( thumbnail_view );
+    }
+}
 

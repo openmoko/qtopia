@@ -17,10 +17,7 @@
 <ul><li><a href="#keypad-architecture">Keypad Architecture</a></li>
 <ul><li><a href="#default-scan-codes-for-qtopia-keys">Default Scan-codes for Qtopia Keys</a></li>
 <li><a href="#overriding-the-keyboard-handler-qtopia-keys">Overriding the Keyboard Handler Qtopia Keys</a></li>
-<li><a href="#key-behavior-in-qtopia">Key Behavior in Qtopia</a></li>
-<ul><li><a href="#keys-that-are-always-intercepted">Keys That Are Always Intercepted</a></li>
-<li><a href="#keys-that-are-sometimes-intercepted">Keys That Are Sometimes Intercepted</a></li>
-</ul>
+<li><a href="#key-interception">Key Interception</a></li>
 </ul>
 </ul>
 </ul>
@@ -32,27 +29,27 @@
 <p>For a tutorial discussing adding a keyboard driver plug-in see : <a href="tut-deviceexample.html">Tutorial: Implementing a Device Plug-in</a></p>
 <a name="default-scan-codes-for-qtopia-keys"></a>
 <h4>Default Scan-codes for Qtopia Keys</h4>
-<p>Nearly all PDAs and Phones have keys that are not found on a regular keyboard. In order for Qtopia to function correctly when installed on a device, it needs these keys to be defined. The easiest way to do this is to have the keyboard driver for the device emit the scancodes for the existing mapping for Qtopia.</p>
-<p>In addition to the normal mapping for a US-101 keyboard, the following table defines the codes that are either <i>required</i>, <i>available</i> or <i>optional</i>:</p>
+<p>Nearly all Phones and PDAs have keys that are not found on a regular computer keyboard. In order for Qtopia to function correctly when installed on a device, it needs these keys to be defined. The easiest way to do this is to have the keyboard driver for the device emit the scancodes for the existing mapping for Qtopia.</p>
+<p>In addition to the mapping for a PC US-101 keyboard, the following table defines the codes that are either <i>required</i>, <i>available</i> or <i>optional</i>:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Scancode</th><th>Qt Key Code</th><th>Description</th><th>Keypad Mode</th><th>no keypad mode</th></tr></thead>
-<tr valign="top" class="odd"><td>&quot;65&quot;</td><td>Key_Menu</td><td>Application menu key</td><td>Optional</td><td>Not Available</td></tr>
-<tr valign="top" class="even"><td>&quot;67&quot;</td><td>Key_Back</td><td>Accept/Close dialog key</td><td>Required</td><td>Not Available</td></tr>
-<tr valign="top" class="odd"><td>&quot;68&quot;</td><td>Key_Yes</td><td>Yes</td><td>Optional</td><td>Not Available</td></tr>
-<tr valign="top" class="even"><td>&quot;69&quot;</td><td>Key_No</td><td>No</td><td>Optional</td><td>Not Available</td></tr>
-<tr valign="top" class="odd"><td>&quot;87&quot;</td><td>Key_Call</td><td>Start call, accept incoming call</td><td>Optional</td><td>Not Available</td></tr>
-<tr valign="top" class="even"><td>&quot;88&quot;</td><td>Key_Hangup</td><td>End call, reject incoming call</td><td>Optional</td><td>Not Available</td></tr>
-<tr valign="top" class="odd"><td>&quot;116&quot;</td><td>Key_Select</td><td>Select menu option, checkbox, pressbutton</td><td>Required</td><td>Not Available</td></tr>
-<tr valign="top" class="even"><td>&quot;120&quot;</td><td>F31</td><td>Toggle input method</td><td>Optional</td><td>Optional</td></tr>
-<tr valign="top" class="odd"><td>&quot;121&quot;</td><td>F32</td><td>Sync device</td><td>Optional</td><td>Optional</td></tr>
-<tr valign="top" class="even"><td>&quot;122&quot;</td><td>F34</td><td>Power/Sleep</td><td>Optional</td><td>Required</td></tr>
-<tr valign="top" class="odd"><td>&quot;123&quot;</td><td>F35</td><td>Toggle backlight</td><td>Optional</td><td>Optional</td></tr>
-<tr valign="top" class="even"><td>&quot;124&quot;</td><td>Context1</td><td>First Context button</td><td>Optional</td><td>Not Available</td></tr>
-<tr valign="top" class="odd"><td>&quot;125&quot;</td><td>Context2</td><td>Second Context button</td><td>Optional</td><td>Not Available</td></tr>
-<tr valign="top" class="even"><td>&quot;126&quot;</td><td>Context3</td><td>Third Context button</td><td>Optional</td><td>Not Available</td></tr>
-<tr valign="top" class="odd"><td>&quot;127&quot;</td><td>Context4</td><td>Fourth Context button</td><td>Optional</td><td>Not Available</td></tr>
+<tr valign="top" class="odd"><td>65</td><td>Key_Menu</td><td>Application menu key</td><td>Optional</td><td>Not Available</td></tr>
+<tr valign="top" class="even"><td>67</td><td>Key_Back</td><td>Accept/Close dialog key</td><td>Required</td><td>Not Available</td></tr>
+<tr valign="top" class="odd"><td>68</td><td>Key_Yes</td><td>Yes</td><td>Optional</td><td>Not Available</td></tr>
+<tr valign="top" class="even"><td>69</td><td>Key_No</td><td>No</td><td>Optional</td><td>Not Available</td></tr>
+<tr valign="top" class="odd"><td>87</td><td>Key_Call</td><td>Start call, accept incoming call</td><td>Optional</td><td>Not Available</td></tr>
+<tr valign="top" class="even"><td>88</td><td>Key_Hangup</td><td>End call, reject incoming call</td><td>Optional</td><td>Not Available</td></tr>
+<tr valign="top" class="odd"><td>116</td><td>Key_Select</td><td>Select menu option, checkbox, pressbutton</td><td>Required</td><td>Not Available</td></tr>
+<tr valign="top" class="even"><td>120</td><td>F31</td><td>Toggle input method</td><td>Optional</td><td>Optional</td></tr>
+<tr valign="top" class="odd"><td>121</td><td>F32</td><td>Sync device</td><td>Optional</td><td>Optional</td></tr>
+<tr valign="top" class="even"><td>122</td><td>F34</td><td>Power/Sleep</td><td>Optional</td><td>Required</td></tr>
+<tr valign="top" class="odd"><td>123</td><td>F35</td><td>Toggle backlight</td><td>Optional</td><td>Optional</td></tr>
+<tr valign="top" class="even"><td>124</td><td>Context1</td><td>First Context button</td><td>Optional</td><td>Not Available</td></tr>
+<tr valign="top" class="odd"><td>125</td><td>Context2</td><td>Second Context button</td><td>Optional</td><td>Not Available</td></tr>
+<tr valign="top" class="even"><td>126</td><td>Context3</td><td>Third Context button</td><td>Optional</td><td>Not Available</td></tr>
+<tr valign="top" class="odd"><td>127</td><td>Context4</td><td>Fourth Context button</td><td>Optional</td><td>Not Available</td></tr>
 </table></p>
-<p>Two additional keys are listed below for reasons of compatibility. They do not have default mappings, and should not be used.</p>
+<p>Two additional keys are listed below for reasons of compatibility. They do not have default mappings, but should not be used for other purposes.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Qt key code</th><th>Description</th><th>Keypad Mode</th><th>No Keypad Mode</th></tr></thead>
 <tr valign="top" class="odd"><td>Key_F30</td><td>maps to space on widgets that need a select key</td><td>Not Applicable</td><td>Optional</td></tr>
@@ -70,51 +67,26 @@
 <tr valign="top" class="odd"><td><tt>Key_Down</tt></td><td>navigate to next item, or down one line.</td></tr>
 <tr valign="top" class="even"><td><tt>Key_Left</tt></td><td>navigate to previous page in Tab Widget, or left one character.</td></tr>
 <tr valign="top" class="odd"><td><tt>Key_Right</tt></td><td>navigate to next page in Tab Widget, or left one character.</td></tr>
-<tr valign="top" class="even"><td><tt>Key_Flip</tt></td><td>pressed and held while the display is <i>closed</i> (eg. Clamshell phone), released when open. Answers or hangs up calls.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_Flip</tt></td><td>pressed and held while the display is <i>closed</i> (eg. Clamshell phone), released when open. Answers calls (on release) and hangs up (on press).</td></tr>
 <tr valign="top" class="odd"><td><tt>Key_Backspace</tt></td><td>deletes character/item.</td></tr>
 </table></p>
-<p><b>Note:</b> Qtopia can operate with <tt>Key_Menu</tt> rather than <tt>Key_Contex</tt> and without:</p>
+<p><b>Note:</b> Qtopia can operate with <tt>Key_Menu</tt> rather than <tt>Key_Context1</tt> and without:</p>
 <ul>
 <li><tt>Key_Call</tt> and <tt>Key_Hangup</tt></li>
 <li><tt>Key_Left</tt> and <tt>Key_Right</tt></li>
 </ul>
-<p>Trolltech will endeavor to provide assistance for alternate device button mappings.</p>
+<p>Trolltech can to provide assistance for alternate device button mappings.</p>
 <a name="overridingscancode"></a><a name="overriding-the-keyboard-handler-qtopia-keys"></a>
 <h4>Overriding the Keyboard Handler Qtopia Keys</h4>
-<p>If your device does not already have a Qt keyboard driver or it does not emit standard scancodes then a custom Qt keyboard driver will be required.</p>
-<p>Drivers can be added by deriving from the <a href="qwsmousehandler.html">QWSMouseHandler</a> and <a href="qmousedriverplugin.html">QMouseDriverPlugin</a> classes, or the <a href="qwskeyboardhandler.html">QWSKeyboardHandler</a> and <a href="qkbddriverplugin.html">QKbdDriverPlugin</a> classes, and using Qt's plug-in mechanism. See the <a href="plugins-howto.html">How to Create Qt Plugins</a> documentation and the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example for details.</p>
-<a name="key-behavior-in-qtopia"></a>
-<h4>Key Behavior in Qtopia</h4>
-<a name="keys-that-are-always-intercepted"></a>
-<h5>Keys That Are Always Intercepted</h5>
-<p>Some keys are always intercepted before they reach an application. If a pointer device is available an application perform a keyboard grab to obtain these keys.</p>
-<ul>
-<li><tt>Key_F30</tt></li>
-<li><tt>Key_F31</tt></li>
-<li><tt>Key_F32</tt></li>
-<li><tt>Key_F33</tt></li>
-<li><tt>Key_F34</tt></li>
-<li><tt>Key_F35</tt></li>
-<li><tt>Key_NumLock</tt></li>
-<li><tt>Key_CapsLock</tt></li>
-<li><tt>Key_Menu</tt></li>
-<li><tt>Key_Call</tt></li>
-<li><tt>Key_Hangup</tt></li>
-<li><tt>Key_Flip</tt></li>
-</ul>
-<a name="keys-that-are-sometimes-intercepted"></a>
-<h5>Keys That Are Sometimes Intercepted</h5>
-<ul>
-<li><tt>Key_Escape</tt> - Rejects active dialog</li>
-<li><tt>Key_F33</tt> - Accepts active dialog</li>
-<li><tt>Key_Back</tt> - Accepts active dialog</li>
-<li><tt>Key_Context1</tt> - When behaving as <tt>Key_Menu</tt></li>
-</ul>
-<p>While the screen lock is active, for example when a SIM card PIN is required, the applications will only be allowed keys such as <tt>Key_Back</tt> and <tt>Key_No</tt>. This is to reduce the chance of anyone accessing the phone's data while the SIM-card PIN is still required.</p>
+<p>If your device does not already have a Qt keyboard driver or it does not emit standard system scancodes then a custom Qt keyboard driver will be required.</p>
+<p>Drivers can be added by deriving from the <a href="qwskeyboardhandler.html">QWSKeyboardHandler</a> and <a href="qkbddriverplugin.html">QKbdDriverPlugin</a> classes, using Qt's plug-in mechanism. See the <a href="plugins-howto.html">How to Create Qt Plugins</a> documentation and the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example for details.</p>
+<a name="key-interception"></a>
+<h4>Key Interception</h4>
+<p>Sometimes keys are intercepted by the server and so do not reach applications as key events. For example, while the screen lock is active, such as when a SIM card PIN is required, the applications will only be allowed keys such as <tt>Key_Back</tt> and <tt>Key_No</tt>. This is to reduce the chance of anyone accessing the phone's data while the SIM-card PIN is still required.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

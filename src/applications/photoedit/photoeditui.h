@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,8 +22,6 @@
 #ifndef PHOTOEDITUI_H
 #define PHOTOEDITUI_H
 
-#include "selector/selectorui.h"
-#include "editor/editorui.h"
 #include "editor/slider.h"
 #include "editor/navigator.h"
 #include "editor/regionselector.h"
@@ -41,7 +39,7 @@
 class QDSActionRequest;
 class QResizeEvent;
 class QMenu;
-class QStackedWidget;
+class QStackedLayout;
 class QImageDocumentSelector;
 
 
@@ -53,9 +51,6 @@ public:
     PhotoEditUI( QWidget* parent, Qt::WFlags f );
     ~PhotoEditUI();
 
-    // Process window deactivate events
-    bool eventFilter( QObject*, QEvent* );
-
 public slots:
     // Open image for editing
     void setDocument( const QString& lnk );
@@ -66,9 +61,6 @@ private slots:
 
     // Open given image for editing
     void processSetDocument();
-
-    // Change category and show selector
-    void processShowCategory();
 
     // Open given image for editing
     void processGetImage();
@@ -103,12 +95,6 @@ private slots:
     // Change to multi view in image selector
     void setViewThumbnail();
 
-#ifndef QTOPIA_PHONE
-    // Only Qtopia PDA
-    // Launch selector popup menu
-    void launchPopupMenu( const QContent&, const QPoint& );
-#endif
-
     // Launch slide show dialog
     void launchSlideShowDialog();
 
@@ -117,7 +103,7 @@ private slots:
 
     // Move to previous UI state
     // Enable application to be closed if no previous state exists
-    void exitCurrentUIState();
+    bool exitCurrentUIState();
 
     // Move to previous editor state
     void exitCurrentEditorState();
@@ -131,11 +117,8 @@ private slots:
     // Open currently highlighted image in image selector for editing
     void editCurrentSelection();
 
-#ifdef QTOPIA_PHONE
-    // Only Qtopia Phone
     // Ignore changes to image and exit from editor
     void cancelEdit();
-#endif
 
     // Perform crop on current image using region from region selector
     void cropImage();
@@ -160,18 +143,13 @@ private slots:
 
 protected:
     // Move to previous state, close application if no previous state exists
-    void closeEvent( QCloseEvent* );
+    void keyPressEvent( QKeyEvent * );
 
-    void resizeEvent(QResizeEvent *event);
+    void showEvent(QShowEvent *event);
 
 private:
 
     void init(bool listMode);
-
-#ifndef QTOPIA_PHONE
-    // Interrupt and conclude current state
-    void interruptCurrentState();
-#endif
 
     // Hide editor controls, clear and show editor
     void clearEditor();
@@ -188,9 +166,7 @@ private:
 
     bool only_editor, service_requested;
 
-#ifdef QTOPIA_PHONE
-    bool was_fullscreen, edit_canceled, close_ok, editor_state_changed;
-#endif
+    bool was_fullscreen, edit_canceled, editor_state_changed;
 
     QContent service_lnk;
     QCategoryFilter service_category;
@@ -202,16 +178,11 @@ private:
     QContent current_image;
     QDrmContent selector_image;
 
-#ifdef QTOPIA_PHONE
     QAction *separator_action, *properties_action, *beam_action, *print_action;
     QAction *delete_action, *edit_action, *slide_show_action;
-#else
-    SelectorUI *selector_ui;
-#endif
     QMenu *selector_menu;
     QImageDocumentSelector *image_selector;
 
-    EditorUI *editor_ui;
     RegionSelector *region_selector;
     Navigator *navigator;
     Slider *brightness_slider, *zoom_slider;
@@ -224,7 +195,7 @@ private:
     SlideShowUI *slide_show_ui;
     SlideShow *slide_show;
 
-    QStackedWidget *widget_stack;
+    QStackedLayout *widget_stack;
 
     QDSActionRequest* currEditImageRequest;
 };

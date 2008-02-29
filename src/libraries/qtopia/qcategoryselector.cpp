@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,10 +24,6 @@
 #include <qtopiaapplication.h>
 #include <qsoftmenubar.h>
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-# include <qtopia/qsoftmenubar.h>
-#endif
-
 #include <QDir>
 #include <QAction>
 #include <QMenu>
@@ -42,7 +38,7 @@
 #include <QListView>
 #include <QDesktopWidget>
 #include <QAbstractListModel>
-#include <QItemDelegate>
+#include <QtopiaItemDelegate>
 #include <QComboBox>
 #include <QListView>
 #include <QVBoxLayout>
@@ -144,7 +140,7 @@ QCategoryEditor::~QCategoryEditor()
 */
 void QCategoryEditor::accept()
 {
-    if(d->nameField->text().isEmpty())
+    if(name().isEmpty())
         reject();
     else
         QDialog::accept();
@@ -156,7 +152,7 @@ void QCategoryEditor::accept()
 */
 QString QCategoryEditor::name() const
 {
-    return d->nameField->text();
+    return d->nameField->text().simplified();
 }
 
 /*
@@ -174,7 +170,7 @@ bool QCategoryEditor::global() const
 */
 void QCategoryEditor::setName(const QString &name)
 {
-    d->nameField->setText(name);
+    d->nameField->setText(name.simplified());
 }
 
 /*
@@ -222,7 +218,7 @@ class CategoryItemList : public QAbstractListModel
 public:
     CategoryItemList(QObject *p, QCategoryManager *m, bool includeUnfiled, bool includeAll,
         bool includeEllipse)
-        : QAbstractListModel(p), allowChecks(true), mCats(m)
+        : QAbstractListModel(p), allowChecks(true), singleSelection(false), mCats(m)
     {
         generateList(includeUnfiled, includeAll, includeEllipse);
         showEllipse = includeEllipse;
@@ -244,13 +240,16 @@ public:
     bool isEllipse(int pos);
     bool isEditable(int pos) const;
     bool isGlobal(int pos) const;
-    bool setAllowChecks(bool b);
+
+    void setAllowChecks(bool b);
+    void setSingleSelection(bool b);
+
     bool isValidIndex(int pos);
     int allPos();
     int unfiledPos();
     int ellipsePos();
     void generateList(bool includeUnfiled, bool includeAll, bool includeEllipse);
-
+    void setUnfiled();
 public slots:
     void categoriesChanged();
 
@@ -258,11 +257,11 @@ private:
     void setCheck(int pos, bool check); // Private because it doesn't check that what
                                         // it is checking is valid.
 
-    QCategoryDialog::ContentFlags flags;
     bool showEllipse;
     bool showAll;
     bool showUnfiled;
     bool allowChecks;
+    bool singleSelection;
     QList<CategoryItem> list;
     QCategoryManager *mCats;
 };
@@ -277,10 +276,19 @@ void CategoryItemList::generateList(bool includeUnfiled, bool includeAll, bool i
 
     list.clear();
 
-    if ( includeUnfiled )
-        list.append(CategoryItem(CategoryItem::Unfiled));
-    if ( includeAll )
-        list.append(CategoryItem(CategoryItem::All));
+    if ( includeAll ) {
+        // if there is an all item, it is a reasonable default
+        CategoryItem i(CategoryItem::All);
+        i.isChecked = selections.isEmpty();
+        list.append(i);
+    }
+    if ( includeUnfiled ) {
+        // if there is an unfiled, but no all item, unfiled
+        // is a reasonable default
+        CategoryItem i(CategoryItem::Unfiled);
+        i.isChecked = !includeAll && selections.isEmpty();
+        list.append(i);
+    }
 
     QList<QString> ids =  mCats->categoryIds();
     foreach(QString id, ids) {
@@ -309,7 +317,7 @@ void CategoryItemList::generateList(bool includeUnfiled, bool includeAll, bool i
 void CategoryItemList::categoriesChanged()
 {
     generateList(showUnfiled, showAll, showEllipse);
-    emit reset();
+    reset();
 }
 
 int CategoryItemList::allPos()
@@ -356,10 +364,14 @@ int CategoryItemList::itemPos(const QString& id) const
     return -1;
 }
 
-bool CategoryItemList::setAllowChecks(bool b)
+void CategoryItemList::setAllowChecks(bool b)
 {
     allowChecks = b;
-    return allowChecks;
+}
+
+void CategoryItemList::setSingleSelection(bool b)
+{
+    singleSelection = b;
 }
 
 int CategoryItemList::rowCount(const QModelIndex &) const
@@ -435,10 +447,7 @@ QVariant CategoryItemList::data(const QModelIndex &index, int role) const
             case CategoryItem::Single:
             case CategoryItem::All:
             case CategoryItem::Unfiled:
-                if(allowChecks)
-                    return list[pos].isChecked;
-                else
-                    return QVariant();
+                return list[pos].isChecked ? Qt::Checked : Qt::Unchecked;
         }
     } else if (role == Qt::DecorationRole) {
         if (isGlobal(index.row()))
@@ -457,38 +466,39 @@ void CategoryItemList::toggleItem(int pos)
     switch(list[pos].t) {
         case CategoryItem::Ellipse:
             break;
-
+        case CategoryItem::Single:
+            if (!singleSelection) {
+                if (list[pos].isChecked) {
+                    setCheck(pos, false);
+                    // check if now is unfiled.
+                    if (showAll || showUnfiled) {
+                        bool allUnchecked = true;
+                        for(int i = 0; i < list.count(); ++i) {
+                            if (list[i].t == CategoryItem::Single && list[i].isChecked)
+                                allUnchecked = false;
+                        }
+                        CategoryItem::CategoryItemType type
+                            = showAll
+                            ?  CategoryItem::All
+                            : CategoryItem::Unfiled;
+                        if (allUnchecked)
+                            for(int i = 0; i < list.count(); ++i)
+                                if (list[i].t == type)
+                                    setCheck(i, true);
+                    }
+                } else {
+                    setCheck(pos, true);
+                    for(int i = 0; i < list.count(); ++i)
+                        if (list[i].t != CategoryItem::Single)
+                            setCheck(i, i == pos);
+                }
+                break;
+            }
+            // else fallthrough
         case CategoryItem::All:
         case CategoryItem::Unfiled:
             for(int i = 0; i < list.count(); ++i)
                 setCheck(i, i == pos);
-            break;
-
-        case CategoryItem::Single:
-            if (list[pos].isChecked) {
-                setCheck(pos, false);
-                // check if now is unfiled.
-                if (showAll || showUnfiled) {
-                    bool allUnchecked = true;
-                    for(int i = 0; i < list.count(); ++i) {
-                        if (list[i].t == CategoryItem::Single && list[i].isChecked)
-                            allUnchecked = false;
-                    }
-                    CategoryItem::CategoryItemType type
-                        = showAll
-                        ?  CategoryItem::All
-                        : CategoryItem::Unfiled;
-                    if (allUnchecked)
-                        for(int i = 0; i < list.count(); ++i)
-                            if (list[i].t == type)
-                                setCheck(i, true);
-                }
-            } else {
-                setCheck(pos, true);
-                for(int i = 0; i < list.count(); ++i)
-                    if (list[i].t != CategoryItem::Single)
-                        setCheck(i, i == pos);
-            }
             break;
     }
 }
@@ -499,6 +509,19 @@ void CategoryItemList::setCheck(int pos, bool check)
     {
         list[pos].isChecked = check;
         dataChanged(createIndex(pos, 0), createIndex(pos, 0));
+    }
+}
+
+void CategoryItemList::setUnfiled()
+{
+    int pos = unfiledPos();
+    if (pos != -1) {
+        if (!list[pos].isChecked)
+            toggleItem(pos);
+    } else {
+        // no unfiled.  uncheck all.
+        for (int i = 0; i < list.count(); ++i)
+            setCheck(i, false);
     }
 }
 
@@ -526,16 +549,14 @@ protected:
     }
 };
 
-
-
-class QCategoryListDelegate : public QItemDelegate
+class QCategoryListDelegate : public QtopiaItemDelegate
 {
 public:
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         QStyleOptionViewItem opt(option);
         opt.decorationPosition = QStyleOptionViewItem::Right;
-        QItemDelegate::paint(painter, opt, index);
+        QtopiaItemDelegate::paint(painter, opt, index);
     }
 };
 
@@ -589,6 +610,7 @@ public slots:
     void editCategory();
     void deleteCategory();
     void categoriesChanged();
+    void selectUnfiled();
 
 signals:
     void categoriesSelected(const QList<QString> &);
@@ -624,8 +646,14 @@ QCategorySelectData::QCategorySelectData( const QString &s,
 
     cats = new QCategoryManager(s, this);
     allOptionPresent = ((f & QCategorySelector::IncludeAll) != 0);
-    bool showEllipse = !Qtopia::mousePreferred() && type == ComboBox;
-    bool showUnfiled = ((f & QCategorySelector::IncludeUnfiled) != 0);
+
+    bool showEllipse = !Qtopia::mousePreferred() && type == ComboBox && (f & QCategorySelector::SingleSelection) != 0;
+
+    bool showUnfiled;
+    if (type == ListView)
+        showUnfiled = (f & (QCategorySelector::IncludeUnfiled | QCategorySelector::IncludeAll)) == (QCategorySelector::IncludeUnfiled | QCategorySelector::IncludeAll);
+    else
+        showUnfiled = ((f & QCategorySelector::IncludeUnfiled) != 0);
 
     //
     //  Create the widget (view), and a model to use with it.
@@ -633,6 +661,8 @@ QCategorySelectData::QCategorySelectData( const QString &s,
 
     model = new CategoryItemList(this, cats, showUnfiled, allOptionPresent, showEllipse);
     model->setAllowChecks(type == ListView);
+    model->setSingleSelection((f & QCategorySelector::SingleSelection) != 0);
+
     if( type == ListView ) {
         QVBoxLayout *vb = new QVBoxLayout(parent);
         vb->setMargin( 0 );
@@ -643,44 +673,48 @@ QCategorySelectData::QCategorySelectData( const QString &s,
         listView->setIconSize(QSize(sz,sz));
         listView->setItemDelegate(new QCategoryListDelegate());
         listView->setModel(model);
+        listView->setSelectionMode(QListView::SingleSelection);
+        listView->selectionModel()->select(
+                model->index(0, 0), QItemSelectionModel::Select);
         if (sz > listView->fontMetrics().height())
             listView->setSpacing((sz-listView->fontMetrics().height())/2);
         listView->setUniformItemSizes(true);
         vb->addWidget(listView);
 
-        connect(listView, SIGNAL(activated(const QModelIndex &)),
-            parent, SLOT(listActivated(const QModelIndex &)));
+        connect(listView, SIGNAL(activated(QModelIndex)),
+            parent, SLOT(listActivated(QModelIndex)));
 
         listView->installEventFilter(parent);
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         QMenu *contextMenu = QSoftMenuBar::menuFor(parent);
 
-        newCatAction = new QAction(QIcon(":icon/new"), tr("New"), this);
+        newCatAction = new QAction(QIcon(":icon/new"), tr("New Category"), this);
         connect(newCatAction, SIGNAL(triggered()), this, SLOT(newCategory()));
         newCatAction->setWhatsThis(tr("Create a new category."));
         contextMenu->addAction(newCatAction);
 
-        editCatAction = new QAction(QIcon(":icon/edit"), tr("Edit"), this);
+        editCatAction = new QAction(QIcon(":icon/edit"), tr("Edit Category"), this);
         connect(editCatAction, SIGNAL(triggered()), this, SLOT(editCategory()));
         editCatAction->setWhatsThis(tr("Edit the highlighted category."));
         editCatAction->setVisible(false);
         contextMenu->addAction(editCatAction);
 
-        deleteCatAction = new QAction(QIcon(":icon/trash"), tr("Delete"), this);
+        QAction *unfiledAction = new QAction(QIcon(), tr("Uncheck all"), this);
+        connect(unfiledAction, SIGNAL(triggered()), this, SLOT(selectUnfiled()));
+
+        unfiledAction->setWhatsThis(tr("Uncheck all selected categories."));
+        contextMenu->addAction(unfiledAction);
+
+
+        deleteCatAction = new QAction(QIcon(":icon/trash"), tr("Delete Category"), this);
         connect(deleteCatAction, SIGNAL(triggered()), this, SLOT(deleteCategory()));
         deleteCatAction->setWhatsThis(tr("Delete the highlighted category."));
         deleteCatAction->setVisible(false);
         contextMenu->addAction(deleteCatAction);
 
         connect(listView, SIGNAL(rowChanged(int)), this, SLOT(rowChanged(int)));
-#else
-        //  TODO: Implement Edit UI for PDA edition
-#endif
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         QSoftMenuBar::setLabel(listView, Qt::Key_Back, QSoftMenuBar::Back);
-#endif
     } else if( type == ComboBox ) {
         QHBoxLayout *hb = new QHBoxLayout(parent);
         hb->setMargin(0);
@@ -698,25 +732,26 @@ QCategorySelectData::QCategorySelectData( const QString &s,
 
         if( Qtopia::mousePreferred() )
         {
-            if( Qtopia::mousePreferred() )
-            {
-                QToolButton *eb = new QToolButton(parent);
-                hb->addWidget(eb);
-                eb->setText( "..." );
-                eb->setFocusPolicy( Qt::TabFocus );
-                eb->setFixedHeight( eb->sizeHint().height() );
-                eb->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-                connect(eb, SIGNAL(clicked()), parent, SLOT(showDialog()));
-            }
+            QToolButton *eb = new QToolButton(parent);
+            hb->addWidget(eb);
+            eb->setText( "..." );
+            eb->setFocusPolicy( Qt::TabFocus );
+            eb->setFixedHeight( eb->sizeHint().height() );
+            eb->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+            connect(eb, SIGNAL(clicked()), parent, SLOT(showDialog()));
+        } else {
+            parent->setFocusPolicy(Qt::TabFocus);
+            parent->setFocusProxy(comboBox);
         }
     } else {
         QVBoxLayout *layout = new QVBoxLayout( parent );
         layout->setMargin( 0 );
         layout->setSpacing( 0 );
         dialogButton = new  QToolButton(parent);
-        dialogButton->setFocusPolicy( Qt::TabFocus );
         dialogButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         layout->addWidget(dialogButton);
+        parent->setFocusPolicy(Qt::TabFocus);
+        parent->setFocusProxy(dialogButton);
         connect(dialogButton, SIGNAL(clicked()), parent, SLOT(showDialog()));
     }
 
@@ -808,11 +843,33 @@ void QCategorySelectData::deleteCategory()
             rowToSelect = -1;
             idToSelect = model->itemId(currentRow + 1);
             if (idToSelect.isEmpty())
-                rowToSelect = 0; // select the first row 
+                rowToSelect = 0; // select the first row
 
             cats->remove(model->itemId(currentRow));
         }
         listView->setFocus();
+    }
+}
+
+void QCategorySelectData::selectUnfiled()
+{
+    int pos = model->unfiledPos();
+
+    if( pos > -1 )
+    {
+        if( comboBox ) {
+            comboBox->setCurrentIndex( pos );
+            comboPos = pos;
+        } else if( listView ) {
+            listView->setCurrentIndex( model->index( pos, 0 ) );
+            model->setUnfiled();
+        } else if( dialogButton ) {
+            selectedCategories = QCategoryFilter( QCategoryFilter::Unfiled );
+            dialogButton->setText( QCategoryManager::unfiledLabel() );
+        }
+    } else {
+        if (listView)
+            model->setUnfiled();
     }
 }
 
@@ -896,8 +953,8 @@ QCategoryFilter::FilterType QCategorySelectData::selectedFilterType() const
     MyWidget::MyWidget()
     {
         QCategorySelector *sel = new QCategorySelector( "myappscope", QCategorySelector::Filter );
-        connect( sel, SIGNAL(filterSelected(const QCategoryFilter&)),
-                 this, SLOT(filterCategories(const QCategoryFilter&)) );
+        connect( sel, SIGNAL(filterSelected(QCategoryFilter)),
+                 this, SLOT(filterCategories(QCategoryFilter)) );
         QSettings settings("mycompany", "myapp");
         QCategoryFilter f;
         f.readConfig( settings, "filter" );
@@ -920,8 +977,8 @@ QCategoryFilter::FilterType QCategorySelectData::selectedFilterType() const
     {
         QCategorySelector *sel = new QCategorySelector( "myappscope", QCategorySelector::Editor );
         sel->selectCategories( item->categories() );
-        connect( sel, SIGNAL(categoriesSelected(const QList<QString>&)),
-                 item, SLOT(setCategories(const QList<QString>&)) );
+        connect( sel, SIGNAL(categoriesSelected(QList<QString>)),
+                 item, SLOT(setCategories(QList<QString>)) );
     }
   \endcode
 
@@ -959,6 +1016,7 @@ QCategoryFilter::FilterType QCategorySelectData::selectedFilterType() const
 
   \value IncludeAll Include the All categories option.
   \value IncludeUnfiled Include the Unfiled categories option.
+  \value SingleSelection Allow selection of a single category. The default is to allow combinations of categories.
   \value ListView Display as a list view.
   \value ComboView Display as a combo box. Note that this will encourage exclusive selection of categories.
   \value DialogView Display as a button that opens a dialog containing a list view.
@@ -1064,8 +1122,13 @@ void QCategorySelector::selectCategories(const QString &categoryids)
 */
 void QCategorySelector::selectCategories(const QStringList &categoryids)
 {
+    QStringList appliedCategories;
     if (categoryids.count() == 0)
         return selectUnfiled();
+    else if ((d->flags & SingleSelection) != 0)
+        appliedCategories.append(categoryids[0]);
+    else
+        appliedCategories = categoryids;
 
     bool wasManuallyUpdating = d->manuallyUpdating;
     d->manuallyUpdating = true;
@@ -1074,19 +1137,19 @@ void QCategorySelector::selectCategories(const QStringList &categoryids)
         CategoryItemList* list = (CategoryItemList*)d->listView->model();
 
         for(int i = 0; i < list->rowCount(); i++)
-            if((categoryids.indexOf(list->itemId(i)) > -1) != list->isChecked(i))
+            if((appliedCategories.indexOf(list->itemId(i)) > -1) != list->isChecked(i))
                 list->toggleItem(i);
     }
     else if(d->comboBox)
     {
         CategoryItemList* list = (CategoryItemList*)d->comboBox->model();
 
-        if (categoryids.count() > 1) {
+        if (appliedCategories.count() > 1) {
             // set to ellipse position.
             d->comboBox->setCurrentIndex(d->comboPos = list->ellipsePos());
-            d->comboMultiSelection = categoryids;
-        } else if (categoryids.count() == 1) {
-            QString cat = categoryids.first();
+            d->comboMultiSelection = appliedCategories;
+        } else if (appliedCategories.count() == 1) {
+            QString cat = appliedCategories.first();
             for (int i = 0; i < list->rowCount(); i++) {
                 if (cat == list->itemId(i)) {
                     d->comboBox->setCurrentIndex(d->comboPos = i);
@@ -1100,11 +1163,11 @@ void QCategorySelector::selectCategories(const QStringList &categoryids)
     }
     if( d->dialogButton )
     {
-        d->selectedCategories = QCategoryFilter( categoryids );;
-        if( categoryids.count() > 1 )
+        d->selectedCategories = QCategoryFilter( appliedCategories );;
+        if( appliedCategories.count() > 1 )
             d->dialogButton->setText( QCategoryManager::multiLabel() );
         else
-            d->dialogButton->setText( d->cats->label( categoryids.first() ) );
+            d->dialogButton->setText( d->cats->label( appliedCategories.first() ) );
     }
 
     emit categoriesSelected(selectedCategories());
@@ -1240,21 +1303,7 @@ void QCategorySelector::selectAll()
 */
 void QCategorySelector::selectUnfiled()
 {
-    int pos = d->model->unfiledPos();
-
-    if( pos > -1 )
-    {
-        if( d->comboBox ) {
-            d->comboBox->setCurrentIndex( pos );
-            d->comboPos = pos;
-        } else if( d->listView ) {
-            d->listView->setCurrentIndex( d->model->index( pos, 0 ) );
-            d->model->toggleItem( pos );
-        } else if( d->dialogButton ) {
-            d->selectedCategories = QCategoryFilter( QCategoryFilter::Unfiled );
-            d->dialogButton->setText( QCategoryManager::unfiledLabel() );
-        }
-    }
+    d->selectUnfiled();
 }
 
 /*!
@@ -1287,11 +1336,7 @@ void QCategorySelector::showDialog()
 
     }
 
-#ifndef QTOPA_DESKTOP
     if( QtopiaApplication::execDialog(&dlg) == QDialog::Accepted )
-#else
-    if( dlg.exec() == QDialog::Accepted)
-#endif
         selectCategories(dlg.selectedCategories());
 }
 
@@ -1345,6 +1390,7 @@ QCategoryDialogData::QCategoryDialogData(const QString &s,
 
   \value IncludeAll Include the All categories option.
   \value IncludeUnfiled Include the Unfiled categories option.
+  \value SingleSelection Allow selection of a single category. The default is to allow combinations of categories.
   \value Filter Alias for IncludeAll|IncludeUnfiled.
   \value Editor Alias for IncludeUnfiled.
 */
@@ -1361,14 +1407,14 @@ QCategoryDialog::QCategoryDialog(const QString &scope, ContentFlags f, QWidget *
         sf |= QCategorySelector::IncludeAll;
     if (f & IncludeUnfiled)
         sf |= QCategorySelector::IncludeUnfiled;
+    if (f & SingleSelection)
+        sf |= QCategorySelector::SingleSelection;
 
     sf |= QCategorySelector::ListView;
 
     d = new QCategoryDialogData(scope, sf, this);
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
-#endif
 
     setWindowTitle(tr("Select Category"));
 }
@@ -1381,7 +1427,6 @@ QCategoryDialog::~QCategoryDialog()
     delete d;
 }
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 /*!
   \internal
   Handles the key event \a e.
@@ -1395,7 +1440,6 @@ void QCategoryDialog::keyPressEvent(QKeyEvent* e)
     else if (e->key() == Qt::Key_Hangup)
         e->ignore();
 }
-#endif
 
 /*!
   \reimp

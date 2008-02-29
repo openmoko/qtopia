@@ -1,0 +1,6 @@
+2002-11-29  Marcel Telka  <marcel@telka.sk>
+
+	* checklist.c menubox.c textbox.c yesno.c inputbox.c util.c lxdialog.c msgbox.c colors.h dialog.h:
+		Extracted from linux kernel version 2.5.50.
+	* configure.ac, Makefile.am: Initial configuration files.
+

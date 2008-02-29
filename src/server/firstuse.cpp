@@ -1,78 +1,61 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #ifndef _MSC_VER
 # define private public
 # define protected public
 #endif
-#include <qtopia/qpeapplication.h>
+#include <qtopiaapplication.h>
 #undef private
 #undef protected
 
 #include "firstuse.h"
-#include "serverapp.h"
 #include "inputmethods.h"
 
 #include "../settings/language/languagesettings.h"
 #include "../settings/systemtime/settime.h"
 
-
-#include <qtopia/custom.h>
+#include <qtopianamespace.h>
+#include <custom.h>
 
 #if defined(QPE_NEED_CALIBRATION)
 #include "../settings/calibrate/calibrate.h"
 #endif
 
-#include <qtopia/resource.h>
-#include <qtopia/qcopenvelope_qws.h>
-#include <qtopia/config.h>
-#include <qtopia/fontmanager.h>
-#include <qtopia/timezone.h>
+#include <qtopiaipcenvelope.h>
+#include <qsettings.h>
+#include <qtimezone.h>
+
 
 #include <qfile.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
-#include <qlistview.h>
-#include <qheader.h>
+#include <qtreewidget.h>
 #include <qpainter.h>
-#include <qsimplerichtext.h>
 #include <qtimer.h>
 #include <qlayout.h>
-#if defined( Q_WS_QWS )
-# include <qgfx_qws.h>
-#endif
+#include <qheaderview.h>
+#include <qdesktopwidget.h>
+#include <qevent.h>
+#include <qtranslator.h>
 
 #include <stdlib.h>
 
@@ -80,35 +63,41 @@
 
 static FirstUse *firstUse = 0;
 
-class TzListItem : public QListViewItem
+class TzListItem : public QTreeWidgetItem
 {
 public:
-    TzListItem(QListViewItem *li, const QString &text, const QCString &id)
-	: QListViewItem(li, text), tzId(id) {}
+    TzListItem(QTreeWidgetItem *li, const QString &text, const QString &id)
+        : QTreeWidgetItem(li), tzId(id) {
+        setText(0, text);
+    }
 
-    const QCString &id() const { return tzId; }
+    const QString &id() const { return tzId; }
 
 public:
-    QCString tzId;
+    QString tzId;
 };
 
-class TzAreaListItem : public QListViewItem
+class TzAreaListItem : public QTreeWidgetItem
 {
 public:
-    TzAreaListItem(QListView *li, const QString &text)
-	: QListViewItem(li, text), childSel(FALSE) {}
+    TzAreaListItem(QTreeWidget *li, const QString &text)
+        : QTreeWidgetItem(li), childSel(false) {
+        setText(0, text);
+    }
 
-    void setChildSelected(bool s) { childSel = s; repaint(); }
+    void setChildSelected(bool s) { childSel = s; /*repaint();*/ }
 
 protected:
+#ifdef QTOPIA4_TODO
     void paintCell( QPainter *p, const QColorGroup &cg, int column, int width, int align) {
-	QColorGroup mycg(cg);
-	if (childSel) {
-	    mycg.setColor(QColorGroup::Text, cg.highlightedText());
-	    mycg.setBrush(QColorGroup::Base, cg.brush(QColorGroup::Highlight));
-	}
-	QListViewItem::paintCell(p, mycg, column, width, align);
+        QColorGroup mycg(cg);
+        if (childSel) {
+            mycg.setColor(QColorGroup::Text, cg.highlightedText());
+            mycg.setBrush(QColorGroup::Base, cg.brush(QColorGroup::Highlight));
+        }
+        QTreeWidgetItem::paintCell(p, mycg, column, width, align);
     }
+#endif
 
 public:
     bool childSel;
@@ -118,126 +107,134 @@ class TimeZoneDialog : public QDialog
 {
     Q_OBJECT
 public:
-    TimeZoneDialog(QWidget *parent=0, const char *name=0, bool modal=TRUE);
+    TimeZoneDialog(QWidget *parent=0);
 
 protected:
     void accept();
 
 protected slots:
-    void tzChanged(QListViewItem *);
-    void tzClicked(QListViewItem *, const QPoint &pos, int);
+    void tzChanged(QTreeWidgetItem *);
+    void tzClicked(QTreeWidgetItem *);
 
 private:
-    QListView *tzListView;
+    QTreeWidget *tzTreeWidget;
     TzListItem *currItem;
 };
 
-TimeZoneDialog::TimeZoneDialog(QWidget *parent, const char *name, bool modal)
-    : QDialog(parent, name, modal), currItem(0)
+TimeZoneDialog::TimeZoneDialog(QWidget *parent)
+    : QDialog(parent), currItem(0)
 {
     QVBoxLayout *vb = new QVBoxLayout(this);
-    tzListView = new QListView(this);
-    tzListView->addColumn("");
-    tzListView->header()->hide();
-    tzListView->setRootIsDecorated(TRUE);
-    connect(tzListView, SIGNAL(currentChanged(QListViewItem*)),
-	    this, SLOT(tzChanged(QListViewItem*)));
-    connect(tzListView, SIGNAL(clicked(QListViewItem*,const QPoint&,int)),
-	    this, SLOT(tzClicked(QListViewItem*,const QPoint&,int)));
-    vb->addWidget(tzListView);
+    tzTreeWidget = new QTreeWidget(this);
+    tzTreeWidget->header()->hide();
+    tzTreeWidget->setRootIsDecorated(true);
+    tzTreeWidget->setColumnCount(1);
+    vb->addWidget(tzTreeWidget);
 
     QString currTz = getenv("TZ");
-    Config config("locale");
-    config.setGroup("Location");
-    currTz = config.readEntry("Timezone", currTz);
+    QSettings config("Trolltech","locale");
+    config.beginGroup("Location");
+    currTz = config.value("Timezone", currTz).toString();
 
-    QMap<QString,QListViewItem *> areaMap;
+    QMap<QString,QTreeWidgetItem *> areaMap;
 
-    QStrList ids = TimeZone::ids();
-    QStrListIterator it(ids);
-    for (; it.current(); ++it) {
-	QCString tzId = it.current();
-	TimeZone tz(tzId);
-	QString area = qApp->translate("TimeZone", tz.area());
-	int pos = area.find('/');
-	if (pos > 0)
-	    area.truncate(pos);
-	QListViewItem *rparent = 0;
-	QMap<QString,QListViewItem *>::ConstIterator ait = areaMap.find(area);
-	if (ait == areaMap.end()) {
-	    rparent = new TzAreaListItem(tzListView, area);
-	    rparent->setSelectable(FALSE);
-	    areaMap[area] = rparent;
-	} else {
-	    rparent = *ait;
-	}
-	QString city = qApp->translate("TimeZone", tz.city());
-	TzListItem *citem = new TzListItem(rparent, city, tzId);
-	if (tzId == currTz.latin1()) {
-	    TzAreaListItem *ai;
-	    if (currItem) {
-		ai = (TzAreaListItem *)currItem->parent();
-		ai->setChildSelected(FALSE);
-	    }
-	    currItem = citem;
-	    tzListView->setCurrentItem(currItem);
-	    ai = (TzAreaListItem *)currItem->parent();
-	    ai->setChildSelected(TRUE);
-	    citem->parent()->setOpen(TRUE);
-	} else if (!currItem) {
-	    currItem = citem;
-	    tzListView->setCurrentItem(currItem);
-	    TzAreaListItem *ai = (TzAreaListItem *)currItem->parent();
-	    ai->setChildSelected(TRUE);
-	}
+    QStringList ids = QTimeZone::ids();
+    QStringList::const_iterator it;
+    for (it = ids.begin(); it != ids.end(); ++it) {
+        QString tzId = *it;
+        if (tzId.contains(QRegExp("/RC")) || tzId.contains(QRegExp("/OK"))) {
+            continue;
+        }
+        QTimeZone tz(tzId.toAscii().constData());
+        QString area = tz.area();
+        int pos = area.indexOf('/');
+        if (pos > -1) {
+            area.truncate(pos);
+            area = qApp->translate("QTimeZone", area.toAscii().constData());
+        }
+
+        QTreeWidgetItem *rparent = 0;
+        QMap<QString,QTreeWidgetItem *>::ConstIterator ait = areaMap.find(area);
+        if (ait == areaMap.end()) {
+            rparent = new TzAreaListItem(tzTreeWidget, area);
+#ifdef QTOPIA4_TODO
+            rparent->setSelectable(false);
+#endif
+            areaMap[area] = rparent;
+        } else {
+            rparent = *ait;
+        }
+        TzListItem *citem = new TzListItem(rparent, tz.city(), tzId);
+        if (tzId == currTz.toLatin1()) {
+            TzAreaListItem *ai;
+            if (currItem) {
+                ai = (TzAreaListItem *)currItem->parent();
+                ai->setChildSelected(false);
+            }
+            currItem = citem;
+            tzTreeWidget->setCurrentItem(currItem);
+            ai = (TzAreaListItem *)currItem->parent();
+            ai->setChildSelected(true);
+            tzTreeWidget->setItemExpanded(citem->parent(), true);
+        } else if (!currItem) {
+            currItem = citem;
+            tzTreeWidget->setCurrentItem(currItem);
+            TzAreaListItem *ai = (TzAreaListItem *)currItem->parent();
+            ai->setChildSelected(true);
+        }
     }
-    tzListView->sort();
+    tzTreeWidget->sortItems(0, Qt::AscendingOrder);
+//    tzTreeWidget->resizeColumnToContents(0);
+    connect(tzTreeWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
+            this, SLOT(tzChanged(QTreeWidgetItem*)));
+    connect(tzTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
+            this, SLOT(tzClicked(QTreeWidgetItem*)));
 }
 
 void TimeZoneDialog::accept()
 {
     if (currItem) {
-	qDebug("TimeZone: %s", currItem->id().data());
-	setenv("TZ", currItem->id().data(), 1);
-	Config config("locale");
-	config.setGroup("Location");
-	config.writeEntry("Timezone", QString(currItem->id().data()));
+        setenv("TZ", currItem->id().toLatin1(), 1);
+        QSettings config("Trolltech","locale");
+        config.beginGroup("Location");
+        config.setValue("Timezone", QString(currItem->id().toLatin1()));
     }
     QDialog::accept();
 }
 
-void TimeZoneDialog::tzChanged(QListViewItem *item)
+void TimeZoneDialog::tzChanged(QTreeWidgetItem *item)
 {
     TzAreaListItem *ai;
     if (item) {
-	if (item->parent()) {
-	    tzListView->setSelected(currItem, FALSE);
-	    ai = (TzAreaListItem *)currItem->parent();
-	    ai->setChildSelected(FALSE);
-	    TzListItem *tzitem = (TzListItem*)item;
-	    currItem = tzitem;
-	}
+        if (item->parent()) {
+            tzTreeWidget->setItemSelected(currItem, false);
+            ai = (TzAreaListItem *)currItem->parent();
+            ai->setChildSelected(false);
+            TzListItem *tzitem = (TzListItem*)item;
+            currItem = tzitem;
+        }
     }
-    tzListView->setSelected(currItem, TRUE);
+    tzTreeWidget->setItemSelected(currItem, true);
     ai = (TzAreaListItem *)currItem->parent();
-    ai->setChildSelected(TRUE);
+    ai->setChildSelected(true);
 }
 
-void TimeZoneDialog::tzClicked(QListViewItem *item, const QPoint &pos, int)
+void TimeZoneDialog::tzClicked(QTreeWidgetItem *item)
 {
-    if (item && !item->parent())
-	item->setOpen(!item->isOpen());
+    if (item && !item->parent()) {
+        tzTreeWidget->setItemExpanded(item, !tzTreeWidget->isItemExpanded(item));
+    }
 }
 
 static QDialog *createTimeZone(QWidget *parent) {
-    return new TimeZoneDialog(parent, 0, TRUE);
+    return new TimeZoneDialog(parent);
 }
 
 //===========================================================================
 
 static QDialog *createLanguage(QWidget *parent) {
-    LanguageSettings *dlg = new LanguageSettings(parent, 0, 0);
-    dlg->setConfirm(FALSE);
+    LanguageSettings *dlg = new LanguageSettings(parent);
+    dlg->setConfirm(false);
     return dlg;
 }
 
@@ -245,12 +242,12 @@ static void acceptLanguage(QDialog *dlg)
 {
     dlg->accept();
     if (firstUse)
-	firstUse->reloadLanguages();
+        firstUse->reloadLanguages();
 }
 
 static QDialog *createDateTime(QWidget *parent) {
-    SetDateTime *dlg = new SetDateTime(parent, 0, TRUE);
-    dlg->setTimezoneEditable(FALSE);
+    SetDateTime *dlg = new SetDateTime(parent);
+    dlg->setTimezoneEditable(false);
     return dlg;
 }
 
@@ -270,43 +267,45 @@ struct {
 }
 settingsTable[] =
 {
-    { TRUE, createLanguage, acceptLanguage, "language.qm", QT_TRANSLATE_NOOP("FirstUse", "Language"), FALSE },
-    { TRUE, createTimeZone, acceptDialog, "timezone.qm", QT_TRANSLATE_NOOP("FirstUse", "Timezone"), FALSE },
-    { TRUE, createDateTime, acceptDialog, "systemtime.qm", QT_TRANSLATE_NOOP("FirstUse", "Date/Time"), TRUE },
-    { FALSE, 0, 0, "", "", FALSE }
+    { true, createLanguage, acceptLanguage, "language.qm", QT_TRANSLATE_NOOP("FirstUse", "Language"), false },
+    { true, createTimeZone, acceptDialog, "timezone.qm", QT_TRANSLATE_NOOP("FirstUse", "Timezone"), false },
+    { true, createDateTime, acceptDialog, "systemtime.qm", QT_TRANSLATE_NOOP("FirstUse", "Date/Time"), true },
+    { false, 0, 0, "", "", false }
 };
 
 
-FirstUse::FirstUse(QWidget *parent, const char *name, WFlags f)
-    : QDialog(parent, name, TRUE, f), currDlgIdx(-1), currDlg(0),
-	needCalibrate(FALSE), needRestart(TRUE)
+FirstUse::FirstUse(QWidget *parent, Qt::WFlags f)
+    : QDialog(parent, f), currDlgIdx(-1), currDlg(0),
+        needCalibrate(false), needRestart(true)
 {
-    ServerApplication::allowRestart = FALSE;
+    ServerApplication::allowRestart = false;
     // we force our height beyound the maximum (which we set anyway)
-    QRect desk = qApp->desktop()->geometry();
-    setGeometry( 0, 0, desk.width(), desk.height() );
+    QDesktopWidget *desktop = QApplication::desktop();
+    QRect desk = desktop->screenGeometry(desktop->primaryScreen());
+    setGeometry(desk);
 
     // more hackery
     // It will be run as either the main server or as part of the main server
     QWSServer::setScreenSaverIntervals(0);
     loadPixmaps();
 
-    setFocusPolicy(NoFocus);
+    setFocusPolicy(Qt::NoFocus);
 
-    taskBar = new QWidget(0, 0, WStyle_Tool | WStyle_Customize | WStyle_StaysOnTop | WGroupLeader);
+    taskBar = new QWidget(0, (Qt::Tool | Qt::WindowStaysOnTopHint));
+    taskBar->setAttribute(Qt::WA_GroupLeader, true);
 
 #ifdef USE_INPUTMETHODS
     inputMethods = new InputMethods(taskBar);
     connect(inputMethods, SIGNAL(inputToggled(bool)),
-	    this, SLOT(calcMaxWindowRect()));
+            this, SLOT(calcMaxWindowRect()));
 #endif
 
     back = new QPushButton(tr("<< Back"), taskBar);
-    back->setFocusPolicy(NoFocus);
+    back->setFocusPolicy(Qt::NoFocus);
     connect(back, SIGNAL(clicked()), this, SLOT(previousDialog()) );
 
     next = new QPushButton(tr("Next >>"), taskBar);
-    next->setFocusPolicy(NoFocus);
+    next->setFocusPolicy(Qt::NoFocus);
     connect(next, SIGNAL(clicked()), this, SLOT(nextDialog()) );
 
     // need to set the geom to lower corner
@@ -331,20 +330,24 @@ FirstUse::FirstUse(QWidget *parent, const char *name, WFlags f)
     int titleHeight = w->geometry().y() - w->frameGeometry().y();
     delete w;
 
-    titleBar = new QLabel(0, 0, WStyle_Tool | WStyle_Customize | WStyle_StaysOnTop | WGroupLeader);
+    titleBar = new QLabel(0, (Qt::Tool |Qt::WindowStaysOnTopHint));
+    titleBar->setAttribute(Qt::WA_GroupLeader, true);
     QPalette pal = titleBar->palette();
-    pal.setBrush(QColorGroup::Background, pal.brush(QPalette::Normal, QColorGroup::Highlight));
-    pal.setColor(QColorGroup::Text, pal.color(QPalette::Normal, QColorGroup::HighlightedText));
+    pal.setBrush(QPalette::Background, pal.brush(QPalette::Normal, QPalette::Highlight));
+    pal.setColor(QPalette::Text, pal.color(QPalette::Normal, QPalette::HighlightedText));
     titleBar->setPalette(pal);
-    titleBar->setAlignment(AlignCenter);
+    titleBar->setAlignment(Qt::AlignCenter);
     titleBar->setGeometry(0, 0, desk.width(), titleHeight);
     titleBar->hide();
 
     calcMaxWindowRect();
 #if defined(QPE_NEED_CALIBRATION)
-    if ( !QFile::exists("/etc/pointercal") ) {
-	needCalibrate = TRUE;
-	grabMouse();
+    QString calFile = qgetenv("POINTERCAL_FILE");
+    if(calFile.isEmpty())
+      calFile = "/etc/pointercal";
+    if ( !QFile::exists(calFile) ) {
+        needCalibrate = true;
+        grabMouse();
     }
 #endif
     defaultFont = font();
@@ -359,7 +362,7 @@ FirstUse::~FirstUse()
 {
     delete taskBar;
     delete titleBar;
-    ServerApplication::allowRestart = TRUE;
+    ServerApplication::allowRestart = true;
     firstUse = 0;
 }
 
@@ -367,25 +370,22 @@ void FirstUse::calcMaxWindowRect()
 {
 #ifdef Q_WS_QWS
     QRect wr;
-    int displayWidth  = qApp->desktop()->width();
+    QDesktopWidget *desktop = QApplication::desktop();
+    QRect displayRect = desktop->screenGeometry(desktop->primaryScreen());
     QRect ir;
 # ifdef USE_INPUTMETHODS
     ir = inputMethods->inputRect();
 # endif
     if ( ir.isValid() ) {
-	wr.setCoords( 0, 0, displayWidth-1, ir.top()-1 );
+        wr.setCoords(displayRect.x(), displayRect.y(),
+                    displayRect.width()-1, ir.top()-1 );
     } else {
-	wr.setCoords( 0, 0, displayWidth-1,
-		qApp->desktop()->height() - controlHeight-1);
+        wr.setCoords(displayRect.x(), displayRect.y(),
+                    displayRect.width()-1,
+                    displayRect.height() - controlHeight-1);
     }
 
-#if QT_VERSION < 0x030000
-    QWSServer::setMaxWindowRect( qt_screen->mapToDevice(wr,
-		QSize(qt_screen->width(),qt_screen->height()))
-			       );
-#else
     QWSServer::setMaxWindowRect( wr );
-#endif
 #endif
 }
 
@@ -393,100 +393,99 @@ void FirstUse::calcMaxWindowRect()
 void FirstUse::nextDialog()
 {
     if (currDlg)
-	settingsTable[currDlgIdx].acceptFunc(currDlg);
-    currDlgIdx = findNextDialog(TRUE);
+        settingsTable[currDlgIdx].acceptFunc(currDlg);
+    currDlgIdx = findNextDialog(true);
 }
 
 /* accept current dialog and bring up previous */
 void FirstUse::previousDialog()
 {
     if (currDlgIdx != 0) {
-	if (currDlg)
-	    settingsTable[currDlgIdx].acceptFunc(currDlg);
-	currDlgIdx = findNextDialog(FALSE);
+        if (currDlg)
+            settingsTable[currDlgIdx].acceptFunc(currDlg);
+        currDlgIdx = findNextDialog(false);
     }
 }
 
 void FirstUse::switchDialog()
 {
     if (currDlgIdx == -1) {
-	qDebug( "Done!" );
-	Config config( "qpe" );
-	config.setGroup( "Startup" );
-	config.writeEntry( "FirstUse", FALSE );
-	config.write();
-    
-        Config cfg = Config( "WorldTime" );
-        cfg.setGroup( "TimeZones" );
-       
-        // translate the existing list of TimeZone names
-        // This is usually enforced during the startup of qpe 
+        {
+            QSettings config("Trolltech","qpe");
+            config.beginGroup( "Startup" );
+            config.setValue( "FirstUse", false );
+            config.sync();
+        }
+        QSettings cfg = QSettings( "WorldTime" );
+        cfg.beginGroup( "TimeZones" );
+
+        // translate the existing list of QTimeZone names
+        // This is usually enforced during the startup of qpe
         // (main.cpp::refreshTimeZoneConfig). However when we use
         // First use we have to do it here again to ensure a
         // translation
         int zoneIndex = 0;
-        TimeZone curZone;
+        QTimeZone curZone;
         QString zoneID;
- 
-        while (cfg.hasKey( "Zone"+ QString::number( zoneIndex ))){
-            zoneID = cfg.readEntry( "Zone" + QString::number( zoneIndex ));
-            curZone = TimeZone( zoneID );
+
+        while (cfg.contains( "Zone"+ QString::number( zoneIndex ))){
+            zoneID = cfg.value( "Zone" + QString::number( zoneIndex )).toString();
+            curZone = QTimeZone( zoneID.toAscii().constData());
             if ( !curZone.isValid() ){
-                qDebug( "initEnvironment() Invalid TimeZone %s", zoneID.latin1() );
+                qWarning( "initEnvironment() Invalid QTimeZone %s", (const char *)zoneID.toLatin1() );
                 break;
             }
-            cfg.writeEntry( "ZoneName" + QString::number( zoneIndex ), curZone.city() );
             zoneIndex++;
     }
 
-	QPixmap pix = Resource::loadPixmap("bigwait");
-	QLabel *lblWait = new QLabel(0, "wait hack!", // No tr
-		QWidget::WStyle_Customize | QWidget::WDestructiveClose |
-		QWidget::WStyle_NoBorder | QWidget::WStyle_Tool |
-		QWidget::WStyle_StaysOnTop);
-	lblWait->setPixmap( pix );
-	lblWait->setAlignment( QWidget::AlignCenter );
-	lblWait->setGeometry( qApp->desktop()->geometry() );
-	lblWait->show();
-	qApp->processEvents();
-	QTimer::singleShot( 1000, lblWait, SLOT(close()) );
-	accept();
-	ServerApplication::allowRestart = TRUE;
+        QPixmap pix(":image/bigwait");
+        QLabel *lblWait = new QLabel(0, (Qt::Tool | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint));
+        lblWait->setAttribute(Qt::WA_DeleteOnClose);
+        lblWait->setPixmap( pix );
+        lblWait->setAlignment( Qt::AlignCenter );
+        lblWait->setGeometry( this->geometry() );
+        lblWait->show();
+        qApp->processEvents();
+        QTimer::singleShot( 1000, lblWait, SLOT(close()) );
+        accept();
+        ServerApplication::allowRestart = true;
     } else {
-	updateButtons();
-	currDlg = settingsTable[currDlgIdx].createFunc(this);
-	currDlg->showMaximized();
-	currDlg->exec();
-	delete currDlg;
-	currDlg = 0;
-	QTimer::singleShot(0, this, SLOT(switchDialog()));
+        updateButtons();
+        currDlg = settingsTable[currDlgIdx].createFunc(this);
+        currDlg->showMaximized();
+        currDlg->exec();
+        delete currDlg;
+        currDlg = 0;
+        QTimer::singleShot(0, this, SLOT(switchDialog()));
     }
 }
 
 void FirstUse::reloadLanguages()
 {
     // read language from config file.  Waiting on QCop takes too long.
-    Config config("locale");
-    config.setGroup( "Language");
-    QString l = config.readEntry( "Language", "en_US");
+    QSettings config("Trolltech","locale");
+    config.beginGroup( "Language");
+    QString l = config.value( "Language", "en_US").toString();
     QString cl = getenv("LANG");
-    qWarning("language message - " + l);
+    qWarning(QString("language message - %1").arg(l).toLatin1().constData());
     // setting anyway...
     if (l.isNull() )
-	unsetenv( "LANG" );
+        unsetenv( "LANG" );
     else {
-	qWarning("and its not null");
-	setenv( "LANG", l.latin1(), 1 );
+        qWarning("and its not null");
+        setenv( "LANG", l.toLatin1(), 1 );
     }
 #ifndef QT_NO_TRANSLATION
     // clear old translators
+#ifdef QTOPIA4_TODO
 #ifndef _MSC_VER
   //### revise to allow removal of translators under MSVC
   if(qApp->translators) {
-        qApp->translators->setAutoDelete(TRUE);
+        qApp->translators->setAutoDelete(true);
         delete (qApp->translators);
         qApp->translators = 0;
     }
+#endif
 #endif
 
     const char *qmFiles[] = { "qt.qm", "qpe.qm", "libqpe.qm", "libqtopia.qm" , 0 };
@@ -495,49 +494,59 @@ void FirstUse::reloadLanguages()
     int i = 0;
     QTranslator *trans;
     while (qmFiles[i]) {
-	trans = new QTranslator(qApp);
-	QString atf = qmFiles[i];
-	QString tfn = QPEApplication::qpeDir() + "i18n/"+l+"/"+atf;
-	qWarning("loading " + tfn);
-	if ( trans->load(tfn) ) {
-	    qWarning(" installing translator");
-	    qApp->installTranslator( trans );
-	} else  {
-	    delete trans;
-	}
-	i++;
+        trans = new QTranslator(qApp);
+        QString atf = qmFiles[i];
+        QString tfn = Qtopia::qtopiaDir() + "i18n/"+l+"/"+atf;
+        qWarning(QString("loading %1").arg(tfn).toLatin1().constData());
+        if ( trans->load(tfn) ) {
+            qWarning(" installing translator");
+            qApp->installTranslator( trans );
+        } else  {
+            delete trans;
+        }
+        i++;
     }
 
     // first use dialog translation files.
     i = 0;
     while (settingsTable[i].createFunc) {
-	if (settingsTable[i].enabled && settingsTable[i].trans) {
-	    trans = new QTranslator(qApp);
-	    QString atf = settingsTable[i].trans;
-	    QString tfn = QPEApplication::qpeDir() + "i18n/"+l+"/"+atf;
-	    qWarning("loading " + tfn);
-	    if ( trans->load(tfn) ) {
-		qWarning(" installing translator");
-		qApp->installTranslator( trans );
-	    } else  {
-		delete trans;
-	    }
-	}
-	i++;
+        if (settingsTable[i].enabled && settingsTable[i].trans) {
+            trans = new QTranslator(qApp);
+            QString atf = settingsTable[i].trans;
+            QString tfn = Qtopia::qtopiaDir() + "i18n/"+l+"/"+atf;
+            qWarning(QString("loading %1").arg(tfn).toLatin1().constData());
+            if ( trans->load(tfn) ) {
+                qWarning(" installing translator");
+                qApp->installTranslator( trans );
+            } else  {
+                delete trans;
+            }
+        }
+        i++;
     }
 
     loadPixmaps();
-    //###language/font hack; should look it up somewhere
-#ifdef Q_WS_QWS
-    if ( l == "ja" || l == "zh_CN" || l == "zh_TW" || l == "ko" ) {
-	QFont fn = FontManager::unicodeFont( FontManager::Proportional );
-	qApp->setFont( fn, TRUE );
-    } else {
-	qApp->setFont( defaultFont, TRUE );
+
+    QStringList qpepaths = Qtopia::installPaths();
+    for (QStringList::Iterator qit=qpepaths.begin();
+            qit != qpepaths.end(); ++qit ) {
+        QTranslator t(0);
+        QString tfn = *qit+"i18n/";
+        if (t.load(tfn+l+"/QtopiaDefaults.qm")) {
+            QSettings fmcfg(QSettings::SystemScope, "Trolltech","qpe");
+            fmcfg.beginGroup("Font");
+            QString f = config.value( QLatin1String("FontFamily[]"), "dejavu_sans_condensed").toString());
+            f = t.translate( "QPE",  f.toAscii().constData() );
+            QFont font(f);
+            f.setPointSize(t.translate("QPE",config.value( QLatin1String("FontSize[]"), "6.4").toAscii().constData()).toDouble() );
+            qApp->setFont(font);
+        } else{ //drop back to default font
+            qApp->setFont(QFont("dejavu"));
+        }
     }
 #endif
-#endif
     updateButtons();
+
 }
 
 void FirstUse::paintEvent( QPaintEvent * )
@@ -548,16 +557,16 @@ void FirstUse::paintEvent( QPaintEvent * )
 
     QFont f = p.font();
     f.setPointSize(15);
-    f.setItalic(FALSE);
-    f.setBold(FALSE);
+    f.setItalic(false);
+    f.setBold(false);
     p.setFont(f);
 
     if ( currDlgIdx < 0 ) {
-	drawText(p, tr( "Tap anywhere on the screen to continue." ));
+        drawText(p, tr( "Tap anywhere on the screen to continue." ));
     } else if ( settingsTable[currDlgIdx].createFunc ) {
-	drawText(p, tr("Please wait, loading %1 settings.").arg(tr(settingsTable[currDlgIdx].desc)) );
+        drawText(p, tr("Please wait, loading %1 settings.").arg(tr(settingsTable[currDlgIdx].desc)) );
     } else {
-	drawText(p, tr("Please wait..."));
+        drawText(p, tr("Please wait..."));
     }
 }
 
@@ -565,38 +574,44 @@ void FirstUse::loadPixmaps()
 {
     /* create background, tr so can change image with language.
        images will likely contain text. */
-    splash.convertFromImage( Resource::loadImage("FirstUseBackground") //No tr
-	    .smoothScale( width(), height() ) );
+    splash.fromImage( QImage(":image/FirstUseBackground") //No tr
+            .scaled( width(), height() ) );
 
-    setBackgroundPixmap(splash);
+    QPalette pal = palette();
+    pal.setBrush(QPalette::Background, splash);
+    setPalette(pal);
 }
 
 void FirstUse::drawText(QPainter &p, const QString &text)
 {
     QString altered = "<CENTER>" + text + "</CENTER>";
 
-    QSimpleRichText rt(altered, p.font());
+#ifdef QTOPIA4_TODO
+    Q3SimpleRichText rt(altered, p.font());
     rt.setWidth(width() - 20);
 
     int h = (height() * 3) / 10; // start at 30%
     if (rt.height() < height() / 2)
-	h += ((height() / 2) - rt.height()) / 2;
+        h += ((height() / 2) - rt.height()) / 2;
     rt.draw(&p, 10, h, QRegion(0,0, width()-20, height()), palette());
+#else
+    p.drawText( QRect(0, 0, width()-20, height()), 0, altered );
+#endif
 }
 
 int FirstUse::findNextDialog(bool forwards)
 {
     int i;
     if (forwards) {
-	i = currDlgIdx+1;
-	while ( settingsTable[i].createFunc && !settingsTable[i].enabled )
-	    i++;
-	if ( !settingsTable[i].createFunc )
-	    i = -1;
+        i = currDlgIdx+1;
+        while ( settingsTable[i].createFunc && !settingsTable[i].enabled )
+            i++;
+        if ( !settingsTable[i].createFunc )
+            i = -1;
     } else {
-	i = currDlgIdx-1;
-	while ( i >= 0 && !settingsTable[i].enabled )
-	    i--;
+        i = currDlgIdx-1;
+        while ( i >= 0 && !settingsTable[i].enabled )
+            i--;
     }
 
     return i;
@@ -606,46 +621,46 @@ void FirstUse::updateButtons()
 {
     if ( currDlgIdx >= 0 ) {
 #ifdef USE_INPUTMETHODS
-	inputMethods->setEnabled(settingsTable[currDlgIdx].needIM);
+        inputMethods->setEnabled(settingsTable[currDlgIdx].needIM);
 #endif
-	taskBar->show();
-	titleBar->setText("<b>"+tr(settingsTable[currDlgIdx].desc)+"</b>");
-	titleBar->show();
+        taskBar->show();
+        titleBar->setText("<b>"+tr(settingsTable[currDlgIdx].desc)+"</b>");
+        titleBar->show();
     }
 
-    int i = findNextDialog(FALSE);
+    int i = findNextDialog(false);
     back->setText(tr("<< Back"));
     back->setEnabled( i >= 0 );
 
-    i = findNextDialog(TRUE);
+    i = findNextDialog(true);
     if ( i < 0)
-	next->setText(tr("Finish"));
+        next->setText(tr("Finish"));
     else
-	next->setText(tr("Next >>"));
-    next->setEnabled( TRUE );
+        next->setText(tr("Next >>"));
+    next->setEnabled( true );
 }
 
 void FirstUse::keyPressEvent( QKeyEvent *e )
 {
     // Allow cancelling at first dialog, in case display is broken.
-    if ( e->key() == Key_Escape && currDlgIdx < 0 )
-	QDialog::keyPressEvent(e);
+    if ( e->key() == Qt::Key_Escape && currDlgIdx < 0 )
+        QDialog::keyPressEvent(e);
 }
 
 void FirstUse::mouseReleaseEvent( QMouseEvent * )
 {
     if ( currDlgIdx < 0 ) {
 #if defined(QPE_NEED_CALIBRATION)
-	if ( needCalibrate ) {
-	    releaseMouse();
-	    Calibrate *cal = new Calibrate;
-	    cal->exec();
-	    delete cal;
-	}
+        if ( needCalibrate ) {
+            releaseMouse();
+            Calibrate *cal = new Calibrate;
+            cal->exec();
+            delete cal;
+        }
 #endif
-	currDlgIdx = 0;
-	currDlg = 0;
-	QTimer::singleShot(0, this, SLOT(switchDialog()));
+        currDlgIdx = 0;
+        currDlg = 0;
+        QTimer::singleShot(0, this, SLOT(switchDialog()));
     }
 }
 

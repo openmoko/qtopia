@@ -1,6 +1,6 @@
 
 DESTDIR = ../../../../bin
-QT += xml network
+QT += xml network script
 CONFIG += qt assistant
 build_all:!build_pass {
     CONFIG -= build_all
@@ -27,6 +27,8 @@ contains(CONFIG, static) {
 
 TARGET = designer
 
+include($$QT_SOURCE_TREE/tools/shared/fontpanel/fontpanel.pri)
+
 HEADERS += \
     qdesigner.h \
     qdesigner_toolwindow.h \
@@ -51,7 +53,10 @@ HEADERS += \
     extra/itemdialog.h \
     extra/oubliette.h \
     extra/oublietteplan.h \
-    extra/oublietteview.h
+    extra/oublietteview.h \
+    designer_enums.h \
+    preferencesdialog.h \
+    preferences.h
 
 SOURCES += main.cpp \
     qdesigner.cpp \
@@ -78,7 +83,12 @@ SOURCES += main.cpp \
     extra/oubliette.cpp \
     extra/oublietteplan.cpp \
     extra/oublietteresource.cpp \
-    extra/oublietteview.cpp
+    extra/oublietteresource1.cpp \
+    extra/oublietteresource2.cpp \
+    extra/oublietteresource3.cpp \
+    extra/oublietteview.cpp \
+    preferencesdialog.cpp \
+    preferences.cpp
 
 
 PRECOMPILED_HEADER=qdesigner_pch.h
@@ -87,7 +97,8 @@ FORMS += \
     newform.ui \
     plugindialog.ui \
     saveformastemplate.ui \
-    formwindowsettings.ui
+    formwindowsettings.ui \
+    preferencesdialog.ui
 
 win32 {
    RC_FILE	= designer.rc
@@ -105,3 +116,4 @@ INSTALLS += target
 include(../sharedcomponents.pri)
 
 unix:!mac:LIBS += -lm
+TRANSLATIONS = designer_de.ts

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,13 +22,13 @@
 #ifndef __QBLUETOOTHAUDIOGATEWAY_H__
 #define __QBLUETOOTHAUDIOGATEWAY_H__
 
-#include <qtopiaglobal.h>
+#include <qbluetoothglobal.h>
 #include <qtopia/comm/qcomminterface.h>
 
 class QBluetoothAddress;
 class QBluetoothRfcommSocket;
 
-class QTOPIACOMM_EXPORT QBluetoothAudioGateway : public QCommInterface
+class QBLUETOOTH_EXPORT QBluetoothAudioGateway : public QCommInterface
 {
     Q_OBJECT
 
@@ -38,13 +38,11 @@ public:
                                     QAbstractIpcInterface::Mode mode = Client );
     ~QBluetoothAudioGateway();
 
-    QByteArray audioDevice() const;
     int speakerVolume() const;
     int microphoneVolume() const;
     bool isConnected() const;
     QBluetoothAddress remotePeer() const;
     bool audioEnabled() const;
-    int audioFrequency() const;
 
 public slots:
     virtual void connect(const QBluetoothAddress &addr, int rfcomm_channel);

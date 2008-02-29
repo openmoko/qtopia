@@ -32,7 +32,8 @@ HEADERS += \
 	text/qtexttable.h \
 	text/qtextlist.h \
 	text/qsyntaxhighlighter.h \
-	text/qcssparser_p.h
+	text/qcssparser_p.h \
+	text/qtexttable_p.h
 
 SOURCES += \
 	text/qfont.cpp \
@@ -76,10 +77,12 @@ wince-* {
 
 unix:x11 {
 	HEADERS += \
-		text/qfontengine_x11_p.h
+		text/qfontengine_x11_p.h \
+		text/qfontengine_ft_p.h
 	SOURCES += \
 		text/qfont_x11.cpp \
-		text/qfontengine_x11.cpp
+		text/qfontengine_x11.cpp \
+		text/qfontengine_ft.cpp
 }
 
 !embedded:!x11:mac {
@@ -91,7 +94,16 @@ unix:x11 {
 embedded {
 	SOURCES += \
 		text/qfont_qws.cpp \
-		text/qfontengine_qws.cpp
+		text/qfontengine_qws.cpp \
+		text/qfontengine_ft.cpp \
+		text/qfontengine_qpf.cpp \
+		text/qabstractfontengine_qws.cpp
+	HEADERS += \
+		text/qfontengine_ft_p.h \
+		text/qfontengine_qpf_p.h \
+		text/qabstractfontengine_qws.h \
+		text/qabstractfontengine_p.h
+	DEFINES += QT_NO_FONTCONFIG
 }
 
 contains(QT_CONFIG, freetype) {

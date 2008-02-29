@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,14 +26,12 @@
 #include <qpointer.h>
 #include <qtopiachannel.h>
 #include <QIcon>
-#include <QCopChannel>
 #include <qtopialog.h>
 
 #include <qtimezone.h>
 #include <qtopiaapplication.h>
 #include <qpluginmanager.h>
 #include <qapplicationplugin.h>
-#include <perftest.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -82,7 +80,6 @@ static void ql_sa_sigchld_handler(int signum)
         ql_sa_old_sigchld_handler(signum);
 }
 
-#ifdef Q_OS_LINUX
 extern char **environ;
 #ifndef SPT_BUFSIZE
 #define SPT_BUFSIZE     2048
@@ -110,7 +107,6 @@ void setproctitle (const char *fmt,...) {
 
     QuickLauncher::argv0[1] = NULL;
 }
-#endif
 
 #if defined(QTOPIA_DBUS_IPC)
 // For quicklaunched apps
@@ -192,16 +188,16 @@ QuickLauncher::QuickLauncher()
 
     notifier = new QSocketNotifier(ql_deadChild_pipe[0], QSocketNotifier::Read);
     QObject::connect( notifier,
-                      SIGNAL( activated( int ) ),
+                      SIGNAL(activated(int)),
                       this,
-                      SLOT( childDied() ) );
+                      SLOT(childDied()) );
 
     // Inform application launcher that QuickLauncher is available
     QtopiaIpcEnvelope env("QPE/QuickLauncher", "available(int)");
     env << ::getpid();
 
     // Fill the child process pool
-    QTimer::singleShot( 0, this, SLOT( fillPool() ) );
+    QTimer::singleShot( 0, this, SLOT(fillPool()) );
 }
 
 void QuickLauncher::listenToChannel()
@@ -215,28 +211,28 @@ void QuickLauncher::listenToChannel()
         channel,
         MESSAGE( execute( const QStringList& ) ),
         this,
-        SLOT( execute( const QStringList& ) ),
+        SLOT(execute(QStringList)),
         QtopiaIpcAdaptor::SenderIsChannel );
 
     QtopiaIpcAdaptor::connect(
         channel,
         MESSAGE( execute( const QString& ) ),
         this,
-        SLOT( execute( const QString& ) ),
+        SLOT(execute(QString)),
         QtopiaIpcAdaptor::SenderIsChannel );
 
     QtopiaIpcAdaptor::connect(
         channel,
         MESSAGE( run( const QStringList& ) ),
         this,
-        SLOT( run( const QStringList& ) ),
+        SLOT(run(QStringList)),
         QtopiaIpcAdaptor::SenderIsChannel );
 
     QtopiaIpcAdaptor::connect(
         channel,
         MESSAGE( quit() ),
         this,
-        SLOT( quit() ),
+        SLOT(quit()),
         QtopiaIpcAdaptor::SenderIsChannel );
 }
 
@@ -256,25 +252,25 @@ void QuickLauncher::disconnectChannel()
         channel,
         MESSAGE( execute( const QStringList& ) ),
         this,
-        SLOT( execute( const QStringList& ) ) );
+        SLOT(execute(QStringList)) );
 
     QtopiaIpcAdaptor::disconnect(
         channel,
         MESSAGE( execute( const QString& ) ),
         this,
-        SLOT( execute( const QString& ) ) );
+        SLOT(execute(QString)) );
 
     QtopiaIpcAdaptor::disconnect(
         channel,
         MESSAGE( run( const QStringList& ) ),
         this,
-        SLOT( run( const QStringList& ) ) );
+        SLOT(run(QStringList)) );
 
     QtopiaIpcAdaptor::disconnect(
         channel,
         MESSAGE( quit() ),
         this,
-        SLOT( quit() ) );
+        SLOT(quit()) );
 }
 
 void QuickLauncher::reinit()
@@ -481,7 +477,7 @@ void QuickLauncher::doQuickLaunch( const QStringList& argList )
         launcherEnv << appName << pid;
     }
 
-    QTimer::singleShot( 500, this, SLOT( fillPool() ) );
+    QTimer::singleShot( 500, this, SLOT(fillPool()) );
 }
 
 void QuickLauncher::runApplication( const QStringList& argList )
@@ -504,10 +500,8 @@ void QuickLauncher::runApplication( const QStringList& argList )
     }
     myargv[myargc] = NULL;
 
-#ifdef Q_OS_LINUX
     // Change name of process
     setproctitle(myargv[0]);
-#endif
 
     connect(app, SIGNAL(lastWindowClosed()), app, SLOT(hideOrQuit()));
     app->initApp( myargc, myargv );

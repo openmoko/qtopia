@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qpalette.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qpalette.cpp -->
 <head>
-  <title>Qt 4.2: Obsolete Members for QPalette</title>
+  <title>Qt 4.3: Obsolete Members for QPalette</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -20,6 +20,7 @@
 <li><div class="fn"/><b><a href="qpalette-obsolete.html#QPalette-6">QPalette</a></b> ( const QColor &amp; <i>windowText</i>, const QColor &amp; <i>window</i>, const QColor &amp; <i>light</i>, const QColor &amp; <i>dark</i>, const QColor &amp; <i>mid</i>, const QColor &amp; <i>text</i>, const QColor &amp; <i>base</i> )&nbsp;&nbsp;<tt> (obsolete)</tt></li>
 <li><div class="fn"/>const QBrush &amp; <b><a href="qpalette-obsolete.html#background">background</a></b> () const&nbsp;&nbsp;<tt> (obsolete)</tt></li>
 <li><div class="fn"/>const QBrush &amp; <b><a href="qpalette-obsolete.html#foreground">foreground</a></b> () const&nbsp;&nbsp;<tt> (obsolete)</tt></li>
+<li><div class="fn"/>int <b><a href="qpalette-obsolete.html#serialNumber">serialNumber</a></b> () const&nbsp;&nbsp;<tt> (obsolete)</tt></li>
 </ul>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -29,10 +30,15 @@
 <p>Use <a href="qpalette.html#window">window</a>() instead.</p>
 <h3 class="fn"><a name="foreground"></a>const <a href="qbrush.html">QBrush</a> &amp; QPalette::foreground () const</h3>
 <p>Use <a href="qpalette.html#windowText">windowText</a>() instead.</p>
+<h3 class="fn"><a name="serialNumber"></a>int QPalette::serialNumber () const</h3>
+<p>Returns a number that identifies the contents of this <a href="qpalette.html">QPalette</a> object. Distinct <a href="qpalette.html">QPalette</a> objects can only have the same serial number if they refer to the same contents (but they don't have to). Also, the serial number of a <a href="qpalette.html">QPalette</a> may change during the lifetime of the object.</p>
+<p>Use <a href="qpalette.html#cacheKey">cacheKey</a>() instead.</p>
+<p><b>Warning:</b> The serial number doesn't necessarily change when the palette is altered. This means that it may be dangerous to use it as a cache key.</p>
+<p>See also <a href="qpalette.html#operator-eq-eq">operator==</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

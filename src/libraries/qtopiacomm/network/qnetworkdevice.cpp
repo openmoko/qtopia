@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -40,7 +40,8 @@ public:
     QNetworkDevicePrivate( const QString& handle, QObject* parent = 0 )
         : QObject( parent ), iface( handle ),
         error( QtopiaNetworkInterface::NoError ),
-        state( QtopiaNetworkInterface::Unknown )
+        state( QtopiaNetworkInterface::Unknown ),
+        firstTime( true )
     {
         devHash = QString::number( qHash( iface ) );
         devSpace = new QValueSpaceItem( "/Network/Interfaces/" + devHash, this );
@@ -74,23 +75,22 @@ Q_SIGNALS:
 private Q_SLOTS:
     void devStateChanged( )
     {
-        static bool firstTime = true;
         QtopiaNetworkInterface::Status newState =
             (QtopiaNetworkInterface::Status) (devSpace->value("/State", 0 ).toInt());
 
         state = newState;
         error = (QtopiaNetworkInterface::Error) ( devSpace->value("/Error", 0 ).toInt() );
-        if ( firstTime )
+        if ( firstTime ) 
             firstTime = false;
-        else {
+        else 
             emit deviceStateChanged( state, error );
-        }
     }
 
 private:
     QString devHash;
     QValueSpaceItem* devSpace;
     QValueSpaceItem* updateTrigger;
+    bool firstTime;
 };
 
 
@@ -124,14 +124,21 @@ private:
   for this application. Note that a device which has been configured to use
   an internal timeout (e.g. timeouts of dial-up connections) may still stop when 
   the timeout is triggered. 
-
-  If any network related application may stop a particular interface which has 
+ 
+  Any network related application may stop a particular interface which has 
   been started by another application. This may be necessary in use cases such as 
   when the phone receives a notification about a pending MMS. If the dial-up 
   connection is already running but the APN is not the required one for MMS download 
   the mail application may stop the dial-up connection and start another dial-up interface.
   
-  \sa QtopiaNetwork, QNetworkState
+  Since a QNetworkDevice is directly related to hardware it does not support use 
+  cases whereby e.g. an application wants to know to what WLAN the device is 
+  connected to. In order to obtain such information it is required to use 
+  QNetworkConnection which allows network identification on a much finer level of granularity.
+
+  \image netdevice-netconnection.png
+  
+  \sa QtopiaNetwork, QNetworkState, QNetworkConnection, QtopiaNetworkInterface
   \ingroup io
 */
 
@@ -145,12 +152,12 @@ QNetworkDevice::QNetworkDevice( const QString& handle, QObject* parent )
     : QObject( parent )
 {
     d = new QNetworkDevicePrivate( handle, this );
-    connect( d, SIGNAL( deviceStateChanged(QtopiaNetworkInterface::Status,bool)),
+    connect( d, SIGNAL(deviceStateChanged(QtopiaNetworkInterface::Status,bool)),
             this, SIGNAL(stateChanged(QtopiaNetworkInterface::Status,bool)) );
 }
 
 /*!
-  Deconstructs the object
+  Deconstructs the object.
   */
 QNetworkDevice::~QNetworkDevice()
 {

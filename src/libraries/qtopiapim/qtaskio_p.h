@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,17 @@
 
 #ifndef TASKIO_PRIVATE_H
 #define TASKIO_PRIVATE_H
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 #include <qvector.h>
 #include <qlist.h>
@@ -72,14 +83,6 @@ public:
     virtual bool exists(const QUniqueId &) const = 0;
     virtual bool contains(const QUniqueId &) const = 0;
     virtual int count() const = 0;
-
-#ifdef SUPPORT_SYNCML
-    virtual bool canProvideDiff() const { return false; }
-    virtual void clearJournal() {}
-    virtual QList<QUniqueId> addedTasks() const { return QList<QUniqueId>(); }
-    virtual QList<QUniqueId> modifiedTasks() const { return QList<QUniqueId>(); }
-    virtual QList<QUniqueId> deletedTasks() const { return QList<QUniqueId>(); }
-#endif
 
     // searching.  row based.
     // pda based

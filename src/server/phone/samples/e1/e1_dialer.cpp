@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -176,7 +176,7 @@ E1Dialer::E1Dialer( E1Button *b, QWidget* parent, Qt::WFlags f )
     m_input->setStyle( new QWindowsStyle );
     m_input->setFixedSize( 152, 24 );
     hlayout1->addWidget( m_input );
-    connect( m_input, SIGNAL(textChanged(const QString&)), this, SLOT(numberChanged(const QString&)) );
+    connect( m_input, SIGNAL(textChanged(QString)), this, SLOT(numberChanged(QString)) );
 
     E1Bar * backspaceBar = new E1Bar(this);
     backspaceBar->setPalette(pal);
@@ -219,21 +219,21 @@ E1Dialer::E1Dialer( E1Button *b, QWidget* parent, Qt::WFlags f )
     E1DialerButton* button = new E1DialerButton( this );
     button->setText( "1" );
     button->setFgPixmap( QPixmap(":image/samples/1" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout2->addWidget( button );
     hlayout2->addSpacing( 7 );
 
     button = new E1DialerButton( this );
     button->setText( "2" );
     button->setFgPixmap( QPixmap(":image/samples/2" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout2->addWidget( button );
     hlayout2->addSpacing( 7 );
 
     button = new E1DialerButton( this );
     button->setText( "3" );
     button->setFgPixmap( QPixmap(":image/samples/3" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout2->addWidget( button );
 
     // 4, 5, 6
@@ -245,21 +245,21 @@ E1Dialer::E1Dialer( E1Button *b, QWidget* parent, Qt::WFlags f )
     button = new E1DialerButton( this );
     button->setText( "4" );
     button->setFgPixmap( QPixmap(":image/samples/4" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout3->addWidget( button );
     hlayout3->addSpacing( 7 );
 
     button = new E1DialerButton( this );
     button->setText( "5" );
     button->setFgPixmap( QPixmap(":image/samples/5" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout3->addWidget( button );
     hlayout3->addSpacing( 7 );
 
     button = new E1DialerButton( this );
     button->setText( "6" );
     button->setFgPixmap( QPixmap(":image/samples/6" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout3->addWidget( button );
 
     // 7, 8, 9
@@ -271,21 +271,21 @@ E1Dialer::E1Dialer( E1Button *b, QWidget* parent, Qt::WFlags f )
     button = new E1DialerButton( this );
     button->setText( "7" );
     button->setFgPixmap( QPixmap(":image/samples/7" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout4->addWidget( button );
     hlayout4->addSpacing( 7 );
 
     button = new E1DialerButton( this );
     button->setText( "8" );
     button->setFgPixmap( QPixmap(":image/samples/8" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout4->addWidget( button );
     hlayout4->addSpacing( 7 );
 
     button = new E1DialerButton( this );
     button->setText( "9" );
     button->setFgPixmap( QPixmap(":image/samples/9" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout4->addWidget( button );
 
     // *, 0, hash
@@ -297,21 +297,21 @@ E1Dialer::E1Dialer( E1Button *b, QWidget* parent, Qt::WFlags f )
     button = new E1DialerButton( this );
     button->setText( "*" );
     button->setFgPixmap( QPixmap(":image/samples/star" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout5->addWidget( button );
     hlayout5->addSpacing( 7 );
 
     button = new E1DialerButton( this );
     button->setText( "0" );
     button->setFgPixmap( QPixmap(":image/samples/0" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout5->addWidget( button );
     hlayout5->addSpacing( 7 );
 
     button = new E1DialerButton( this );
     button->setText( "#" );
     button->setFgPixmap( QPixmap(":image/samples/hash" ) );
-    connect( button, SIGNAL(clicked(const QString&)), this, SLOT(buttonClicked(const QString&)) );
+    connect( button, SIGNAL(clicked(QString)), this, SLOT(buttonClicked(QString)) );
     hlayout5->addWidget( button );
 
     connect( m_textButton, SIGNAL(clicked()), this, SLOT(textButtonClicked()) );

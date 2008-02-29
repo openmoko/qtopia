@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,67 +45,98 @@
 #include "qdbusmessage.h"
 #include "qdbusmessage_p.h"
 
-struct ErrorMessageMapping
-{
-    ErrorMessageMapping();
-    QVarLengthArray<const char*, QDBusError::LastErrorType> messages;
+/*
+ * Use the following Perl script to generate the error string index list:
+===== PERL SCRIPT ====
+print "static const char errorMessages_string[] =\n";
+$counter = 0;
+$i = 0;
+while (<STDIN>) {
+    chomp;
+    print "    \"$_\\0\"\n";
+    $sizes[$i++] = $counter + 1;
+    $counter += length $_;
+}
+print "    \"\\0\";\n\nstatic const int errorMessages_indices[] = {\n    ";
+for ($j = 0; $j < $i; ++$j) {
+    printf "$sizes[$j], ";
+}
+print "0\n};\n";
+===== PERL SCRIPT ====
+ 
+ * The input data is as follows:
+other
+org.freedesktop.DBus.Error.Failed
+org.freedesktop.DBus.Error.NoMemory
+org.freedesktop.DBus.Error.ServiceUnknown
+org.freedesktop.DBus.Error.NoReply
+org.freedesktop.DBus.Error.BadAddress
+org.freedesktop.DBus.Error.NotSupported
+org.freedesktop.DBus.Error.LimitsExceeded
+org.freedesktop.DBus.Error.AccessDenied
+org.freedesktop.DBus.Error.NoServer
+org.freedesktop.DBus.Error.Timeout
+org.freedesktop.DBus.Error.NoNetwork
+org.freedesktop.DBus.Error.AddressInUse
+org.freedesktop.DBus.Error.Disconnected
+org.freedesktop.DBus.Error.InvalidArgs
+org.freedesktop.DBus.Error.UnknownMethod
+org.freedesktop.DBus.Error.TimedOut
+org.freedesktop.DBus.Error.InvalidSignature
+org.freedesktop.DBus.Error.UnknownInterface
+com.trolltech.QtDBus.Error.InternalError
+org.freedesktop.DBus.Error.UnknownObject
+*/
 
-    inline const char *get(QDBusError::ErrorType code) const
-    {
-        if (code <= QDBusError::Other || code > QDBusError::LastErrorType)
-            return messages[int(QDBusError::Other) - 1];
-        return messages[int(code) - 1];
-    }
-
-    inline QDBusError::ErrorType get(const char *name) const
-    {
-        if (!name || !*name)
-            return QDBusError::NoError;
-        for (int i = QDBusError::Other; i <= QDBusError::LastErrorType; ++i)
-            if (strcmp(name, messages[i - 1]) == 0)
-                return QDBusError::ErrorType(i);
-        return QDBusError::Other;
-    }
-};
-
+// in the same order as KnownErrors!
 static const char errorMessages_string[] =
-    // in the same order as KnownErrors!
-    "other\0"                           // Other -- shouldn't happen
-    DBUS_ERROR_FAILED "\0"              // Failed
-    DBUS_ERROR_NO_MEMORY "\0"           // NoMemory
-    DBUS_ERROR_SERVICE_UNKNOWN "\0"     // ServiceUnknown
-    DBUS_ERROR_NO_REPLY "\0"            // NoReply
-    DBUS_ERROR_BAD_ADDRESS "\0"         // BadAddress
-    DBUS_ERROR_NOT_SUPPORTED "\0"       // NotSupported
-    DBUS_ERROR_LIMITS_EXCEEDED "\0"     // LimitsExceeded
-    DBUS_ERROR_ACCESS_DENIED  "\0"      // AccessDenied
-    DBUS_ERROR_NO_SERVER "\0"           // NoServer
-    DBUS_ERROR_TIMEOUT "\0"             // Timeout
-    DBUS_ERROR_NO_NETWORK "\0"          // NoNetwork
-    DBUS_ERROR_ADDRESS_IN_USE "\0"      // AddressInUse
-    DBUS_ERROR_DISCONNECTED "\0"        // Disconnected
-    DBUS_ERROR_INVALID_ARGS "\0"        // InvalidArgs
-    DBUS_ERROR_UNKNOWN_METHOD "\0"      // UnknownMethod
-    DBUS_ERROR_TIMED_OUT "\0"           // TimedOut
-    DBUS_ERROR_INVALID_SIGNATURE "\0"   // InvalidSignature
-    "com.trolltech.QtDBus.Error.UnknownInterface\0" // UnknownInterface
-    "com.trolltech.QtDBus.Error.InternalError\0" // InternalError
+    "other\0"
+    "org.freedesktop.DBus.Error.Failed\0"
+    "org.freedesktop.DBus.Error.NoMemory\0"
+    "org.freedesktop.DBus.Error.ServiceUnknown\0"
+    "org.freedesktop.DBus.Error.NoReply\0"
+    "org.freedesktop.DBus.Error.BadAddress\0"
+    "org.freedesktop.DBus.Error.NotSupported\0"
+    "org.freedesktop.DBus.Error.LimitsExceeded\0"
+    "org.freedesktop.DBus.Error.AccessDenied\0"
+    "org.freedesktop.DBus.Error.NoServer\0"
+    "org.freedesktop.DBus.Error.Timeout\0"
+    "org.freedesktop.DBus.Error.NoNetwork\0"
+    "org.freedesktop.DBus.Error.AddressInUse\0"
+    "org.freedesktop.DBus.Error.Disconnected\0"
+    "org.freedesktop.DBus.Error.InvalidArgs\0"
+    "org.freedesktop.DBus.Error.UnknownMethod\0"
+    "org.freedesktop.DBus.Error.TimedOut\0"
+    "org.freedesktop.DBus.Error.InvalidSignature\0"
+    "org.freedesktop.DBus.Error.UnknownInterface\0"
+    "com.trolltech.QtDBus.Error.InternalError\0"
+    "org.freedesktop.DBus.Error.UnknownObject\0"
     "\0";
 
-ErrorMessageMapping::ErrorMessageMapping()
-    : messages(int(QDBusError::LastErrorType))
+static const int errorMessages_indices[] = {
+       0,    6,   40,   76,  118,  153,  191,  231,
+     273,  313,  349,  384,  421,  461,  501,  540,
+     581,  617,  661,  705,  746,    0
+};
+
+static const int errorMessages_count = sizeof errorMessages_indices /
+                                       sizeof errorMessages_indices[0];
+
+inline const char *get(QDBusError::ErrorType code)
 {
-    // create the list:
-    const char *p = errorMessages_string;
-    int i = 0;
-    while (*p) {
-        messages[i] = p;
-        p += strlen(p) + 1;
-        ++i;
-    }
+    int intcode = qBound(0, int(code) - int(QDBusError::Other), errorMessages_count);
+    return errorMessages_string + errorMessages_indices[intcode];
 }
 
-Q_GLOBAL_STATIC(ErrorMessageMapping, errorMessages)
+inline QDBusError::ErrorType get(const char *name)
+{
+    if (!name || !*name)
+        return QDBusError::NoError;
+    for (int i = 0; i < errorMessages_count; ++i)
+        if (strcmp(name, errorMessages_string + errorMessages_indices[i]) == 0)
+            return QDBusError::ErrorType(i + int(QDBusError::Other));
+    return QDBusError::Other;
+}
 
 /*!
     \class QDBusError
@@ -165,6 +211,7 @@ Q_GLOBAL_STATIC(ErrorMessageMapping, errorMessages)
     \value UnknownInterface     The interface is not known
     \value InternalError        An internal error occurred
                                 (\c com.trolltech.QtDBus.Error.InternalError)
+    \value UnknownObject        The remote object could not be found.
 
 */
 
@@ -178,7 +225,7 @@ QDBusError::QDBusError(const DBusError *error)
     if (!error || !dbus_error_is_set(error))
         return;
 
-    code = errorMessages()->get(error->name);
+    code = ::get(error->name);
     msg = QString::fromUtf8(error->message);
     nm = QString::fromUtf8(error->name);
 }
@@ -193,11 +240,9 @@ QDBusError::QDBusError(const QDBusMessage &qdmsg)
     if (qdmsg.type() != QDBusMessage::ErrorMessage)
         return;
 
-    if (qdmsg.arguments().count())
-        msg = qdmsg.arguments().at(0).toString();
-
-    code = errorMessages()->get(qdmsg.errorName().toUtf8().constData());
+    code = ::get(qdmsg.errorName().toUtf8().constData());
     nm = qdmsg.errorName();
+    msg = qdmsg.errorMessage();
 }
 
 /*!
@@ -207,7 +252,7 @@ QDBusError::QDBusError(const QDBusMessage &qdmsg)
 QDBusError::QDBusError(ErrorType error, const QString &mess)
     : code(error)
 {
-    nm = QLatin1String(errorMessages()->get(error));
+    nm = QLatin1String(::get(error));
     msg = mess;
 }
 
@@ -275,6 +320,15 @@ QString QDBusError::message() const
 bool QDBusError::isValid() const
 {
     return (code != NoError);
+}
+
+/*!
+    \since 4.3
+    Returns the error name associated with error condition \a error.
+*/
+QString QDBusError::errorString(ErrorType error)
+{
+    return QLatin1String(::get(error));
 }
 
 #ifndef QT_NO_DEBUG_STREAM

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include <stdio.h>
+#include <sys/time.h>
 #include <QLayout>
 #include <QLabel>
 #include <QPainter>
@@ -50,11 +51,7 @@ void LoadInfo::init()
     QLabel *l = new QLabel( this );
     l->setPixmap( makeLabel( Qt::red ) );
     hb->addWidget( l );
-#ifndef QTOPIA_PHONE
-    l = new QLabel(tr("Application CPU usage (%)"), this );
-#else
     l = new QLabel(tr("Application CPU (%)"), this );
-#endif
     hb->addWidget( l );
     hb->addStretch(20);
 
@@ -63,11 +60,7 @@ void LoadInfo::init()
     l = new QLabel( this );
     l->setPixmap( makeLabel( Qt::green ) );
     hb->addWidget( l, 1 );
-#ifndef QTOPIA_PHONE
-    l = new QLabel(tr("System CPU usage (%)"), this );
-#else
     l = new QLabel(tr("System CPU (%)"), this );
-#endif
     hb->addWidget( l );
     hb->addStretch(20);
     vb->addStretch(50);

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,17 +23,13 @@
 #define SECURITYINFO_H
 
 #include <QWidget>
-class QTextBrowser;
+
 class SecurityInfo : public QWidget
 {
     Q_OBJECT
 public:
     SecurityInfo( QWidget *parent = 0, Qt::WFlags f = 0 );
     ~SecurityInfo();
-
-    bool eventFilter( QObject* watched, QEvent *event );
-private:
-    QTextBrowser* infoDisplay;
 private slots:
     void init();
 };

@@ -1,18 +1,42 @@
-qtopia_project(qtopiacore)
-QTOPIACORE_CONFIG=app rpath
-qt=host
-dir=tools/$$TARGET
-depends(libraries/qt/*)
-symlink_files.commands=$$COMMAND_HEADER
-files=qvfbhdr.h qlock_p.h qlock.cpp qwssignalhandler_p.h qwssignalhandler.cpp
-for(f,files) {
-    dest=$$QT_DEPOT_PATH/tools/qvfb/$$f
-    src=$$QT_DEPOT_PATH/src/gui/embedded/$$f
-    symlink_files.commands+=\
-        rm -f $$LITERAL_QUOTE$$dest$$LITERAL_QUOTE $$LINE_SEP\
-        ln -s $$LITERAL_QUOTE$$src$$LITERAL_QUOTE $$LITERAL_QUOTE$$dest$$LITERAL_QUOTE $$LINE_SEP
+qtopia_project(desktop app)
+TARGET=qvfb
+CONFIG+=no_tr
+
+VPATH+=$$QT_DEPOT_PATH/tools/qvfb $$QT_DEPOT_PATH/src/gui/embedded
+INCLUDEPATH+=$$QT_DEPOT_PATH/tools/qvfb $$QT_DEPOT_PATH/src/gui/embedded
+
+fetch_vars_from_file($$QT_DEPOT_PATH/tools/qvfb/qvfb.pro,QVFB,FORMS,HEADERS,SOURCES,RESOURCES,INCLUDEPATH)
+FORMS=$$QVFB.FORMS
+HEADERS=$$QVFB.HEADERS
+SOURCES=$$QVFB.SOURCES
+RESOURCES=$$QVFB.RESOURCES
+INCLUDEPATH*=$$QVFB.INCLUDEPATH
+LIBS+=-lXtst
+
+commands=
+skinfiles=$$files($$QT_DEPOT_PATH/tools/qvfb/*.skin)
+for(s,skinfiles) {
+    #!exists($$s/$$tail($$s)):next()
+    !isEmpty(commands):commands+=$$LINE_SEP_VERBOSE
+    commands+=\
+        rm -f $$QPEDIR/src/tools/qt/qvfb/$$tail($$s) $$LINE_SEP_VERBOSE\
+        ln -s $$s $$QPEDIR/src/tools/qt/qvfb
 }
-symlink_files.commands+=$$DUMMY_COMMAND
-QMAKE_EXTRA_TARGETS+=symlink_files
-redirect_all.depends+=symlink_files
-qt_qmake.depends+=symlink_files
+devicedirs=$$files($$QTOPIA_DEPOT_PATH/devices/*)
+for(d,devicedirs) {
+    skinfiles=$$files($$d/*.skin)
+    for(s,skinfiles) {
+        !exists($$s/$$tail($$s)):next()
+        !isEmpty(commands):commands+=$$LINE_SEP_VERBOSE
+        commands+=\
+            rm -f $$QPEDIR/src/tools/qt/qvfb/$$tail($$s) $$LINE_SEP_VERBOSE\
+            ln -s $$s $$QPEDIR/src/tools/qt/qvfb
+    }
+}
+symlink_skins.commands=$$commands
+QMAKE_EXTRA_TARGETS+=symlink_skins
+ALL_DEPS+=symlink_skins
+
+depends(libraries/qt/opengl)
+depends(libraries/qt/gui)
+depends(libraries/qt/corelib)

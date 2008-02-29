@@ -1,8 +1,9 @@
+// -*-C++-*-
 /****************************************************************************
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,7 +25,11 @@
 #include <QFile>
 #include <QProcess>
 #include <QTimer>
+#ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
+#else
+#include <qcopchannel_x11.h>
+#endif
 #include <QValueSpaceObject>
 #include "qcoprouter.h"
 #include "qcopfile.h"
@@ -35,16 +40,20 @@
 #include <qtopiaipcenvelope.h>
 #include <qtopiaabstractservice.h>
 #include <qtopialog.h>
+#ifdef Q_WS_QWS
 #include <QWSServer>
+#endif
 #include <QContent>
 #include <QContentFilter>
 #include <QContentSet>
 #include <qtopiaservices.h> 
 #include "qperformancelog.h"
 
-#ifndef QT_NO_SXE
-#include "sandboxedprocess.h"
-#endif
+#include <fstream>
+#include <iostream>
+using namespace std;
+
+#include "oommanager.h"
 
 /*!
   \class ApplicationIpcRouter::RouteDestination
@@ -62,6 +71,8 @@
   An overview of the application launcher mechanism and the role the 
   RouteDestination plays in it is given in the documentation of the 
   ApplicationLauncher class.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
@@ -98,6 +109,8 @@
   An overview of the application launcher mechanism and the role the 
   ApplicationIpcRouter plays in it is given in the documentation of the 
   ApplicationLauncher class.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
@@ -128,6 +141,44 @@
   control a specific type of application.  An overview of the application 
   launcher mechanism is given in the documentation of the ApplicationLauncher
   class.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+ */
+
+/*!
+  \fn ApplicationTypeLauncher::~ApplicationTypeLauncher()
+
+  Destruct the ApplicationTypeLauncher instance.
+ */
+
+/*!
+  \fn ApplicationTypeLauncher::ApplicationState ApplicationTypeLauncher::applicationState(const QString &application)
+
+  Return the current state of the \a application.
+ */
+
+/*!
+  \fn bool ApplicationTypeLauncher::canLaunch(const QString &application)
+
+  Return true if this ApplicationTypeLauncher can launch the \a application.
+ */
+
+/*!
+  \fn void ApplicationTypeLauncher::launch(const QString &application)
+
+  Attempt to launch the \a application.
+ */
+
+/*!
+  \fn void ApplicationTypeLauncher::kill(const QString &application)
+
+  Kill the \a application.
+ */
+
+/*!
+  \fn QString ApplicationTypeLauncher::name()
+
+  Return a descriptive name for the ApplicationTypeLauncher type.
  */
 
 /*!
@@ -152,29 +203,6 @@
   \value Running The application is running.
  */
 
-/*!
-  \fn ApplicationTypeLauncher::ApplicationState ApplicationTypeLauncher::applicationState(const QString &application)
-
-  Returns the current \a application state.
- */
-
-/*!
-  \fn bool ApplicationTypeLauncher::canLaunch(const QString &application)
-
-  Returns true if the \a application can by launched by this launcher instance.
- */
-
-/*!
-  \fn void ApplicationTypeLauncher::launch(const QString &application)
-
-  Requests that the \a application be launched.
- */
-
-/*!
-  \fn void ApplicationTypeLauncher::kill(const QString &application)
-
-  Requests that the \a application be killed.
- */
 
 /*!
   \fn void ApplicationTypeLauncher::applicationStateChanged(const QString &application, ApplicationTypeLauncher::ApplicationState state)
@@ -217,6 +245,8 @@
   QTerminationHandler class, for example, uses a server side termination handler
   to display a more descriptive crash message when an application abnormally
   exits.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
@@ -243,17 +273,19 @@
 class LegacyLauncherService : public QtopiaAbstractService
 {
     Q_OBJECT
-public:
+
+  public:
     LegacyLauncherService( QObject *parent )
         : QtopiaAbstractService( "Launcher", parent )
         { publishAll(); }
 
-public:
+  public:
     ~LegacyLauncherService();
 
-public slots:
+  public slots:
     void execute( const QString& app );
     void execute( const QString& app, const QString& document );
+    void kill ( const QString &app );
 };
 
 /*!
@@ -277,12 +309,14 @@ public slots:
   task provides this.
 
   It is \bold essential that the QtopiaServerApplicationLauncher is the first
-  ordered ApplicationLauncherType provider.
+  ordered ApplicationTypeLauncher provider.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   */
-// define QtopiaServerApplicationLauncher
 QTOPIA_TASK(QtopiaServerApplicationLauncher, QtopiaServerApplicationLauncher);
 QTOPIA_TASK_PROVIDES(QtopiaServerApplicationLauncher, ApplicationTypeLauncher);
 
+// define QtopiaServerApplicationLauncher
 /*! \internal */
 QtopiaServerApplicationLauncher::QtopiaServerApplicationLauncher()
 {
@@ -300,20 +334,26 @@ void QtopiaServerApplicationLauncher::launch(const QString &app)
     Q_ASSERT(canLaunch(app));
 #ifndef QTOPIA_DBUS_IPC
     ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
-    if(r) r->addRoute(app, this);
+    if (r)
+	r->addRoute(app,this);
 #endif
     emit applicationStateChanged(app, Starting);
     emit applicationStateChanged(app, Running);
 }
 
-/*! \internal */
+/*!
+  \internal
+  The kill function is a noop in this subclass because the
+  server application must never be killed.
+ */
 void QtopiaServerApplicationLauncher::kill(const QString &)
 {
-    // Cannot kill the application launcher
+    // noop.
 }
 
 /*! \internal */
-QtopiaServerApplicationLauncher::ApplicationState QtopiaServerApplicationLauncher::applicationState(const QString &app)
+QtopiaServerApplicationLauncher::ApplicationState
+QtopiaServerApplicationLauncher::applicationState(const QString &app)
 {
     Q_ASSERT(canLaunch(app));
     Q_UNUSED(app);
@@ -335,38 +375,36 @@ void QtopiaServerApplicationLauncher::routeMessage(const QString &app,
 // declare ExeApplicationLauncherPrivate
 struct ExeApplicationLauncherPrivate {
     struct RunningProcess {
-        RunningProcess()
-            : proc(0) {}
-        RunningProcess(const QString &_a, QProcess *_p,
+        RunningProcess() : proc(0) { }
+        RunningProcess(const QString& _a, QProcess* _p,
                        ApplicationTypeLauncher::ApplicationState _s)
-            : app(_a), 
-            proc(_p), 
-            state(_s), 
-            pidChannelOpen( false ), 
-            m_killed(false),
-            m_pid(proc->pid()) {}
-        ~RunningProcess()
-        {
-            if(proc) {
+            : app(_a),
+	      proc(_p),
+	      state(_s),
+	      pidChannelOpen(false),
+	      m_killed(false),
+              m_pid(proc->pid()) { }
+        ~RunningProcess() {
+            if (proc) {
                 proc->disconnect();
                 proc->deleteLater();
             }
         }
 
-        void kill() {
-            if(proc){
-                proc->kill();
-                m_killed = true;
-            }
-        }
+	void kill() {
+	    if (proc) {
+		proc->kill();
+		m_killed = true;
+	    }
+	}
 
-        bool killed() const { return m_killed; }
+	bool killed() const { return m_killed; }
 
         QString app;
-        QProcess *proc;
+        QProcess* proc;
         ApplicationTypeLauncher::ApplicationState state;
         bool pidChannelOpen;
-        bool m_killed;
+	bool m_killed;
         int m_pid;
     };
 
@@ -375,6 +413,11 @@ struct ExeApplicationLauncherPrivate {
     RunningProcess *runningProcess(QProcess *);
 
     QMap<QString, RunningProcess *> m_runningProcesses;
+    /*
+      The out-of-memory manager keeps track of all the running
+      processes in terms of how killable they are.
+     */
+    OomManager	oom_manager;
 };
 
 /*!
@@ -405,88 +448,107 @@ struct ExeApplicationLauncherPrivate {
   \i The process, and thus the QProcess instance, will terminate normally when
      it is done.
   \endlist
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 // define ExeApplicationLauncher
 /*!
   Construct a new ExeApplicationLauncher instance.
-  */
+ */
 ExeApplicationLauncher::ExeApplicationLauncher()
-: d(new ExeApplicationLauncherPrivate)
+    : d(new ExeApplicationLauncherPrivate)
 {
     QtopiaChannel *channel = new QtopiaChannel("QPE/QtopiaApplication", this);
-    connect(channel, SIGNAL(received(const QString&,const QByteArray&)),
-            this, SLOT(qtopiaApplicationChannel(const QString&,const QByteArray&)));
+    connect(channel,
+	    SIGNAL(received(QString,QByteArray)),
+            this,
+	    SLOT(qtopiaApplicationChannel(QString,QByteArray)));
 
-    connect( qwsServer,
-             SIGNAL( newChannel( const QString& ) ),
-             this,
-             SLOT( newChannel( const QString& ) ) );
+#ifdef Q_WS_X11
+    QCopServer *qwsServer = QCopServer::instance();
+#endif
+    connect(qwsServer,
+            SIGNAL(newChannel(QString)),
+            this,
+            SLOT(newChannel(QString)));
 }
 
 /*!
   Destroy the ExeApplicationLauncher instance.
-  */
+ */
 ExeApplicationLauncher::~ExeApplicationLauncher()
 {
+    d->oom_manager.remove(QString("qpe"));
     delete d;
 }
 
 /*!
-  Add a new process, \a proc, for the applications \a app to the
-  ExeApplicationLauncher.  The ExeApplicationLauncher will take ownership of the
-  process.
+  Add a new process, \a proc, for the applications \a app to
+  the ExeApplicationLauncher. The ExeApplicationLauncher will
+  take ownership of the process.
   */
 void ExeApplicationLauncher::addStartingApplication(const QString &app,
                                                     QProcess *proc)
 {
-    connect(proc, SIGNAL(finished(int)),
-            this, SLOT(appExited(int)));
+    connect(proc, SIGNAL(finished(int,QProcess::ExitStatus)),
+            this, SLOT(appExited(int,QProcess::ExitStatus)));
     connect(proc, SIGNAL(error(QProcess::ProcessError)),
             this, SLOT(appError(QProcess::ProcessError)));
 
     d->m_runningProcesses.insert(app,
-                                 new ExeApplicationLauncherPrivate::RunningProcess(app, proc, Starting));
+         new ExeApplicationLauncherPrivate::RunningProcess(app,proc,Starting));
 #ifndef QTOPIA_DBUS_IPC
     ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
-    if(r) r->addRoute(app, this);
+    if (r)
+	r->addRoute(app,this);
 #endif
-    emit applicationStateChanged(app, Starting);
+    emit applicationStateChanged(app,Starting);
 }
 
 /*!
-  Returns true if \a app is already being managed by the ExeApplicationLauncher
-  (that is, addStartingApplication() has been called), otherwise returns false.
+  Returns true if \a app is already being managed by the
+  ExeApplicationLauncher (that is, addStartingApplication()
+  has been called), otherwise returns false.
   */
-bool ExeApplicationLauncher::isRunning(const QString &app)
+bool ExeApplicationLauncher::isRunning(const QString& app)
 {
     return d->m_runningProcesses.contains(app);
 }
 
 /*! \internal */
-void ExeApplicationLauncher::kill(const QString &app)
+void ExeApplicationLauncher::kill(const QString& app)
 {
-    ExeApplicationLauncherPrivate::RunningProcess *rp = d->runningProcess(app);
-    if(!rp) return;
+    ExeApplicationLauncherPrivate::RunningProcess* rp = d->runningProcess(app);
+    if (!rp)
+	return;
+    qLog(OOM) << "kill():" << app;
+    /*
+      When a process is killed, the out-of-memory manager
+      must remove it from its data structures.
+     */
+    d->oom_manager.remove(rp->app);
     rp->kill();
 }
 
 /*! \internal */
 ExeApplicationLauncher::ApplicationState
-ExeApplicationLauncher::applicationState(const QString &app)
+ExeApplicationLauncher::applicationState(const QString& app)
 {
-    ExeApplicationLauncherPrivate::RunningProcess *rp = d->runningProcess(app);
-    if(!rp) return NotRunning;
-    else return rp->state;
+    ExeApplicationLauncherPrivate::RunningProcess* rp = d->runningProcess(app);
+    if (!rp)
+	return NotRunning;
+    else
+	return rp->state;
 }
 
 /*! \internal */
-void ExeApplicationLauncher::routeMessage(const QString &app,
-                                          const QString &message,
-                                          const QByteArray &data)
+void ExeApplicationLauncher::routeMessage(const QString& app,
+                                          const QString& message,
+                                          const QByteArray& data)
 {
 #ifndef QTOPIA_DBUS_IPC
-    ExeApplicationLauncherPrivate::RunningProcess *rp = d->runningProcess(app);
+    ExeApplicationLauncherPrivate::RunningProcess* rp = d->runningProcess(app);
     Q_ASSERT(rp);
 
     QCopFile::writeQCopMessage(app, message, data);
@@ -495,34 +557,45 @@ void ExeApplicationLauncher::routeMessage(const QString &app,
 #endif
 }
 
-/*! \internal */
-void ExeApplicationLauncher::appExited(int code)
+/*!
+  \internal
+ */
+void ExeApplicationLauncher::appExited(int , QProcess::ExitStatus)
 {
-    QProcess *proc = qobject_cast<QProcess *>(sender());
+    QProcess* proc = qobject_cast<QProcess*>(sender());
     Q_ASSERT(proc);
 
-    ExeApplicationLauncherPrivate::RunningProcess *rp = d->runningProcess(proc);
+    ExeApplicationLauncherPrivate::RunningProcess* rp =
+	d->runningProcess(proc);
     Q_ASSERT(rp);
     Q_ASSERT(NotRunning != rp->state);
 
 #ifndef QTOPIA_DBUS_IPC
-    ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
-    if(r) r->remRoute(rp->app, this);
+    ApplicationIpcRouter* r = qtopiaTask<ApplicationIpcRouter>();
+    if (r)
+	r->remRoute(rp->app,this);
 #endif
 
-    if(Starting == rp->state) {
+    if (Starting == rp->state && proc->error() == QProcess::FailedToStart ) {
         rp->state = NotRunning;
         emit terminated(rp->app, FailedToStart);
         emit applicationStateChanged(rp->app, NotRunning);
-    } else {
+    }
+    else {
         rp->state = NotRunning;
-        if ( rp->killed() )
-            emit terminated( rp->app, Killed );
-        else
-            emit terminated(rp->app, Normal);
+	if (rp->killed()) 
+	    emit terminated(rp->app,Killed);
+	else
+	    emit terminated(rp->app,Normal);
         emit applicationStateChanged(rp->app, NotRunning);
     }
 
+    qLog(OOM) << "appExited():" << rp->app;
+    /*
+      When a process exits, the out-of-memory manager
+      must remove it from its data structures.
+     */
+    d->oom_manager.remove(rp->app);
     d->m_runningProcesses.remove(rp->app);
     delete rp;
 }
@@ -530,10 +603,11 @@ void ExeApplicationLauncher::appExited(int code)
 /*! \internal */
 void ExeApplicationLauncher::appError(QProcess::ProcessError error)
 {
-    QProcess *proc = qobject_cast<QProcess *>(sender());
+    QProcess* proc = qobject_cast<QProcess*>(sender());
     Q_ASSERT(proc);
 
-    ExeApplicationLauncherPrivate::RunningProcess *rp = d->runningProcess(proc);
+    ExeApplicationLauncherPrivate::RunningProcess* rp =
+	d->runningProcess(proc);
     Q_ASSERT(rp);
     Q_ASSERT(NotRunning != rp->state);
 
@@ -550,33 +624,41 @@ void ExeApplicationLauncher::appError(QProcess::ProcessError error)
     };
 
     rp->state = NotRunning;
+    /*
+      When a process dies because of an error, the
+      out-of-memory manager must remove it from its
+      data structures.
+     */
+    d->oom_manager.remove(rp->app);
     d->m_runningProcesses.remove(rp->app);
 
     {
-        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("notBusy(QString)") );
+        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"),
+                            QLatin1String("notBusy(QString)") );
         e << rp->app;
     }
 
 #ifndef QTOPIA_DBUS_IPC
     ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
-    if(r) r->remRoute(rp->app, this);
+    if (r)
+	r->remRoute(rp->app,this);
 #endif
 
 #ifndef QT_NO_SXE
     QValueSpaceItem sxeVsi( "/Sxe/killedPids", this );
     QList<QVariant> killedPids = sxeVsi.value().toList();
-    
+
     if (rp->killed() || (killedPids.contains(QVariant(rp->m_pid))))
     {
 #else
     if(rp->killed())
-    {      
+    {
 #endif
-        reason = Killed;
+	reason = Killed;
     }
 
-    emit terminated(rp->app, reason);
-    emit applicationStateChanged(rp->app, NotRunning);
+    emit terminated(rp->app,reason);
+    emit applicationStateChanged(rp->app,NotRunning);
     delete rp;
 }
 
@@ -584,16 +666,21 @@ void ExeApplicationLauncher::appError(QProcess::ProcessError error)
 void ExeApplicationLauncher::qtopiaApplicationChannel(const QString &message,
                                                       const QByteArray &data)
 {
-    if(message == "available(QString,int)") {
+    if (message == "available(QString,int)") {
         QDataStream ds(data);
         QString name;
         int pid;
         ds >> name >> pid;
         ExeApplicationLauncherPrivate::RunningProcess *rp =
             d->runningProcess(name);
-        if(rp && rp->proc->pid() == pid) {
+        if (rp && rp->proc->pid() == pid) {
             rp->state = Running;
-            emit applicationStateChanged(rp->app, Running);
+	    /*
+	      Tell the out-of-memory manager about this new
+	      process that is now running.
+	     */
+	    d->oom_manager.insert(rp->app,pid);
+            emit applicationStateChanged(rp->app,Running);
             return;
         }
     }
@@ -603,48 +690,50 @@ void ExeApplicationLauncher::qtopiaApplicationChannel(const QString &message,
 void ExeApplicationLauncher::newChannel( const QString& ch )
 {
     QString pidChannel = "QPE/pid/"; // No tr
-    if ( ch.startsWith( pidChannel ) ) {
-        int pid = ch.mid( pidChannel.count() ).toInt();
+    if (ch.startsWith(pidChannel)) {
+        int pid = ch.mid(pidChannel.count()).toInt();
         ExeApplicationLauncherPrivate::RunningProcess *rp =
-            d->runningProcess( pid );
-        if ( rp != 0 ) {
+            d->runningProcess(pid);
+        if (rp != 0) {
             rp->pidChannelOpen = true;
         }
     }
 }
 
-ExeApplicationLauncherPrivate::RunningProcess *
+ExeApplicationLauncherPrivate::RunningProcess*
 ExeApplicationLauncherPrivate::runningProcess(const QString &app)
 {
-    QMap<QString, RunningProcess *>::Iterator iter =
+    QMap<QString,RunningProcess*>::Iterator i =
         m_runningProcesses.find(app);
-    if(iter == m_runningProcesses.end())
+    if (i == m_runningProcesses.end())
         return 0;
     else
-        return *iter;
+        return *i;
 }
 
-ExeApplicationLauncherPrivate::RunningProcess *
+ExeApplicationLauncherPrivate::RunningProcess*
 ExeApplicationLauncherPrivate::runningProcess(int pid)
 {
-    for(QMap<QString, RunningProcess *>::Iterator iter = m_runningProcesses.begin();
-            iter != m_runningProcesses.end();
-            ++iter) {
-        if((*iter)->proc->pid() == pid)
-            return *iter;
-    }
+    for (QMap<QString,RunningProcess*>::Iterator i=m_runningProcesses.begin();
+	 i != m_runningProcesses.end();
+	 ++i)
+	{
+	    if ((*i)->proc->pid() == pid)
+		return *i;
+	}
     return 0;
 }
 
-ExeApplicationLauncherPrivate::RunningProcess *
+ExeApplicationLauncherPrivate::RunningProcess*
 ExeApplicationLauncherPrivate::runningProcess(QProcess *proc)
 {
-    for(QMap<QString, RunningProcess *>::Iterator iter = m_runningProcesses.begin();
-            iter != m_runningProcesses.end();
-            ++iter) {
-        if((*iter)->proc == proc)
-            return *iter;
-    }
+    for (QMap<QString,RunningProcess*>::Iterator i=m_runningProcesses.begin();
+	 i != m_runningProcesses.end();
+	 ++i)
+	{
+	    if ((*i)->proc == proc)
+		return *i;
+	}
     return 0;
 }
 
@@ -665,13 +754,15 @@ ExeApplicationLauncherPrivate::runningProcess(QProcess *proc)
   \row \o Services \o None
   \endtable
 
-  The SimpleExeApplicationLauncher class provides the ApplicationLauncherType
+  The SimpleExeApplicationLauncher class provides the ApplicationTypeLauncher
   implementation for simple, executable based applications.  It also
   (implicitly) doubles as the fallback for the QuickExeApplicationLauncher.
 
   If the application requested is an absolute path, it is run as is.  Otherwise,
   the paths returned by the Qtopia::installPaths() method are searched for
   \c {bin/<application name>}.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 QTOPIA_TASK(SimpleExeApplicationLauncher, SimpleExeApplicationLauncher);
 QTOPIA_TASK_PROVIDES(SimpleExeApplicationLauncher, ApplicationTypeLauncher);
@@ -746,16 +837,47 @@ SimpleExeApplicationLauncher::applicationExecutable(const QString &app)
 }
 
 #ifndef QT_NO_SXE
+// define SandboxedExeApplicationLauncherPrivate
+class SandboxedExeApplicationLauncherPrivate
+{
+public:
+    SandboxedExeApplicationLauncherPrivate();
+    QString rlimiterExecutable();    
+    QHash<int, unsigned long> resourceLimits;
+
+private:
+    QString m_rlimiterExecutable;
+};
+
+SandboxedExeApplicationLauncherPrivate::SandboxedExeApplicationLauncherPrivate()
+    :m_rlimiterExecutable()
+{
+}
+
+/*! \internal
+    Returns the absolute path to the rlimiter executable 
+*/
+QString SandboxedExeApplicationLauncherPrivate::rlimiterExecutable()
+{
+    if(m_rlimiterExecutable.isEmpty()) {
+        QStringList rv;
+        QStringList paths = Qtopia::installPaths();
+        for(int ii = 0; m_rlimiterExecutable.isEmpty() && ii < paths.count(); ++ii)
+            if(QFile::exists(paths.at(ii) + "bin/rlimiter"))
+                m_rlimiterExecutable = paths.at(ii) + "bin/rlimiter";
+    }
+    return m_rlimiterExecutable;
+}
+
 /*!
   \class SandboxedExeApplicationLauncher
-  \ingroup QtopiaServer::Task
   \ingroup QtopiaServer::AppLaunch
   \brief The SandboxedExeApplicationLauncher class supports launching untrusted
          downloaded application executables.
 
   \bold {Note:} This class is only relevant if SXE is enabled
 
-  The SanboxedExeApplicationLauncher class provides the ApplicationLauncherType
+  The SanboxedExeApplicationLauncher class provides the ApplicationTypeLauncher
   implementation for simple but untrusted executable based applications (which
   have been downloaded and installed via packagemanager).  The executable is run under
   sandboxed conditions to minimize the potential damage the application
@@ -764,6 +886,7 @@ SimpleExeApplicationLauncher::applicationExecutable(const QString &app)
 
   The SandboxedExeApplicationLauncher class provides the
   SanboxedExeApplicationLauncher Task.
+  It is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 QTOPIA_TASK(SandboxedExeApplicationLauncher, SandboxedExeApplicationLauncher);
@@ -774,8 +897,9 @@ QTOPIA_TASK_PROVIDES(SandboxedExeApplicationLauncher, ApplicationTypeLauncher);
   Constructs a new SandboxedExeApplicationLauncher instance.
  */
 SandboxedExeApplicationLauncher::SandboxedExeApplicationLauncher()
-: d(0)
+: d( new SandboxedExeApplicationLauncherPrivate() )
 {
+    QTimer::singleShot( 0, this, SLOT(init()) );
 }
 
 /*!
@@ -783,6 +907,82 @@ SandboxedExeApplicationLauncher::SandboxedExeApplicationLauncher()
  */
 SandboxedExeApplicationLauncher::~SandboxedExeApplicationLauncher()
 {
+    delete d;
+    d = 0;
+}
+
+/*!
+  \internal
+  Obtains the resource limits to be used, currently the only limit
+  is RLIMIT_AS. As a very rough measure, this memeory limit
+  is a proportion of the available physical memory on the device.
+*/
+void SandboxedExeApplicationLauncher::init()
+{
+    QLatin1String sxeConfName( "Sxe" );
+    QLatin1String limitsGroup( "Limits" );
+    QLatin1String maxMemRatio( "MaxMemRatio" );
+    QSettings conf( QSettings::SystemScope,"Trolltech", sxeConfName );
+    conf.beginGroup( limitsGroup );
+    bool ok = false;
+    
+    if ( conf.contains( maxMemRatio ) ) 
+    {
+        double memRatio = conf.value( maxMemRatio ).toDouble(&ok);
+        if ( !ok )
+        {
+            qFatal( "SandboxedExeApplication::init(): Could not read value of key, %s/%s from "
+                  "%s.conf.", limitsGroup.latin1(), maxMemRatio.latin1(), sxeConfName.latin1() ) ;
+        }
+        else if ( memRatio <= 0.0 )
+        {
+            qFatal( "SandboxedExeApplication::init():  Invalid config value from %s.conf. " 
+                    "The value of %s/%s must be > 0", sxeConfName.latin1(),
+                    limitsGroup.latin1(), maxMemRatio.latin1() ); 
+        }
+        
+        qLog( SXE ) << "SandboxedExeApplicationLauncher::init() " << sxeConfName + QLatin1String(".conf") 
+                    << limitsGroup << "/" << maxMemRatio << "=" << memRatio;
+    
+        QFile procFile("/proc/meminfo");
+        unsigned int memTotal; //unit is kb 
+        if ( !procFile.open( QIODevice::ReadOnly ) )
+        {
+            qFatal("SandboxedExeApplicationLauncher::init(): Could not open %s to get "
+                 "total memory available on device. ", qPrintable(procFile.fileName()) );
+        } 
+        else
+        {
+            QByteArray line;
+            bool memTotalFound = false;
+            while( !((line = procFile.readLine()).isEmpty()) )
+            {
+                if ( line.startsWith("MemTotal:") )
+                {
+                    memTotalFound = true;
+                    line = line.simplified();
+                    line = line.split(' ').at(1);  //expected line format is MemTotal:   12345 kb
+                    memTotal = line.toULong( &ok );
+                    qLog( SXE ) << "SandboxedExeApplicationLauncher::init() /proc/meminfo MemTotal =" 
+                                << memTotal << "kb";
+                    if ( !ok )
+                    {      
+                        qFatal("SandboxedExeApplicationLauncher::init(): Could not obtain "
+                            "value for total memory after reading %s", qPrintable(procFile.fileName())) ; 
+                    }
+                    break;
+                }
+            }
+            if ( !memTotalFound )
+            {
+                qFatal("SandboxedExeApplicationlauncher::init(): Could not find MemTotal field in " 
+                         "%s.", qPrintable(procFile.fileName()));  
+            }
+        }
+        d->resourceLimits[ RLIMIT_AS ] = static_cast<unsigned long>(memRatio * memTotal * 1024);
+        qLog( SXE ) << "SandboxedExeApplication::init() RLIMIT_AS=" 
+                    << d->resourceLimits[ RLIMIT_AS ];
+    }
 }
 
 /*! \internal */
@@ -791,7 +991,7 @@ bool SandboxedExeApplicationLauncher::canLaunch(const QString &app)
     // Check whether the executable exists
     QStringList exes = applicationExecutable(app);
     for(int ii = 0; ii < exes.count(); ++ii) {
-        if( QFile::symLinkTarget(exes.at(ii)).contains("__DISABLED") ) {
+        if( !QFile::exists( exes.at(ii) ) && QFile::symLinkTarget(exes.at(ii)).contains("__DISABLED") ) {
             QtopiaServiceRequest req( "SystemMessages", "showDialog(QString,QString)" );
             req << tr("Security Alert");
             QString msg = tr("<qt>This application has been <font color=\"#FF0000\">disabled</font></qt>");  
@@ -814,18 +1014,27 @@ void SandboxedExeApplicationLauncher::launch(const QString &app)
 
     Q_ASSERT(canLaunch(app));
 
-    QStringList args;
-    args.append("-noshow");
-
+    // We need to launch it
+    QProcess *proc = new QProcess(this);
+    proc->setReadChannelMode(QProcess::ForwardedChannels);
+    proc->closeWriteChannel();
+  
     QStringList exes = applicationExecutable(app);
     for(int ii = 0; ii < exes.count(); ++ii) {
         if(QFile::exists(exes.at(ii))) {
-            // We need to launch it
-            QProcess *proc = new SandboxedProcess(this);
-            proc->setReadChannelMode(QProcess::ForwardedChannels);
-            proc->closeWriteChannel();
-
-            proc->start(exes.at(ii), args);
+    
+            QStringList args; 
+            args.append( exes.at(ii) );
+            args.append( QString::number( d->resourceLimits.count() ) );
+            QHash<int, unsigned long>::const_iterator iter = d->resourceLimits.constBegin();
+            while (iter != d->resourceLimits.constEnd()) {
+               args.append( QString::number(iter.key()) );
+               args.append( QString::number(iter.value()) );
+               ++iter;
+            }
+            args.append( "-noshow" );
+            proc->setWorkingDirectory( QFile::symLinkTarget(exes.at(ii)).left( Qtopia::packagePath().length() + 32 ) );
+            proc->start( d->rlimiterExecutable(), args);
             addStartingApplication(app, proc);
             return; // Found and done
         }
@@ -872,7 +1081,7 @@ Q_GLOBAL_STATIC(BuiltinApplicationLauncherPrivate, bat);
   \row \o Services \o None
   \endtable
 
-  The BuiltinApplicationLauncher class provides the ApplicationLauncherType
+  The BuiltinApplicationLauncher class provides the ApplicationTypeLauncher
   implementation for simple applications compiled into the Qtopia Server -
   known as builtin applications.
 
@@ -890,6 +1099,8 @@ Q_GLOBAL_STATIC(BuiltinApplicationLauncherPrivate, bat);
 
   \i {Note:} Builtins may not currently implement services.  This functionality is
   planned for future versions of Qtopia.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
@@ -956,6 +1167,7 @@ void BuiltinApplicationLauncher::routeMessage(const QString &app,
     if("raise()" == msg) {
         w->showMaximized();
         w->raise();
+        w->activateWindow();
     } else if("close()" == msg) {
         w->close();
     } else if("setDocument(QString)" == msg && w->metaObject()->indexOfMethod("setDocument(QString)") != -1) {
@@ -1009,7 +1221,8 @@ BuiltinApplicationLauncher::applicationState(const QString &app)
 bool BuiltinApplicationLauncher::canLaunch(const QString &app)
 {
     BuiltinApplicationLauncherPrivate *p = bat();
-    if(!p) return false;
+    if (!p)
+	return false;
 
     return p->builtins.contains(app.toAscii());
 }
@@ -1028,26 +1241,28 @@ void BuiltinApplicationLauncher::launch(const QString &app)
         p->builtins.find(app.toAscii());
     Q_ASSERT(iter != p->builtins.end());
 
-    QWidget * wid = (*iter)();
-    if(!wid) {
+    QWidget* wid = (*iter)();
+    if (!wid) {
         // Non UI builtin
         // Starts then stops
-        p->runningApplications.insert(app, 0);
-        emit applicationStateChanged(app, Starting);
-        emit applicationStateChanged(app, Running);
+        p->runningApplications.insert(app,0);
+        emit applicationStateChanged(app,Starting);
+        emit applicationStateChanged(app,Running);
         emit terminated(app, Normal);
-        emit applicationStateChanged(app, NotRunning);
+        emit applicationStateChanged(app,NotRunning);
         p->runningApplications.remove(app);
-    } else {
+    }
+    else {
         // UI builtin
-        p->runningApplications.insert(app, wid);
-        QObject::connect(wid, SIGNAL(destroyed(QObject *)),
-                         this, SLOT(appDestroyed(QObject *)));
-        emit applicationStateChanged(app, Starting);
-        emit applicationStateChanged(app, Running);
+        p->runningApplications.insert(app,wid);
+        QObject::connect(wid, SIGNAL(destroyed(QObject*)),
+                         this, SLOT(appDestroyed(QObject*)));
+        emit applicationStateChanged(app,Starting);
+        emit applicationStateChanged(app,Running);
         ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
-        if(r) r->addRoute(app, this);
-        if(wid->isHidden())
+        if (r)
+	    r->addRoute(app, this);
+        if (wid->isHidden())
             wid->deleteLater(); // Shutdown
     }
 }
@@ -1055,11 +1270,12 @@ void BuiltinApplicationLauncher::launch(const QString &app)
 /*! \internal */
 void BuiltinApplicationLauncher::kill(const QString &app)
 {
-    BuiltinApplicationLauncherPrivate *p = bat();
-    if(!p) return;
+    BuiltinApplicationLauncherPrivate* p = bat();
+    if (!p)
+	return;
 
     QMap<QString, QWidget *>::Iterator iter = p->runningApplications.find(app);
-    if(iter != p->runningApplications.end())
+    if (iter != p->runningApplications.end())
         (*iter)->deleteLater();
 }
 
@@ -1067,12 +1283,14 @@ void BuiltinApplicationLauncher::kill(const QString &app)
 void BuiltinApplicationLauncher::install(const char *_name, BuiltinFunc func)
 {
     QByteArray name(_name);
-    if(name.isEmpty()) return;
+    if (name.isEmpty())
+	return;
 
-    BuiltinApplicationLauncherPrivate *p = bat();
-    if(!p) return;
+    BuiltinApplicationLauncherPrivate* p = bat();
+    if(!p)
+	return;
 
-    p->builtins.insert(name, func);
+    p->builtins.insert(name,func);
 }
 
 QTOPIA_TASK(BuiltinApplicationLauncher, BuiltinApplicationLauncher);
@@ -1129,7 +1347,7 @@ struct ConsoleApplicationLauncherPrivate
   \row \o Services \o None
   \endtable
 
-  The ConsoleApplicationLauncher class provides the ApplicationLauncherType 
+  The ConsoleApplicationLauncher class provides the ApplicationTypeLauncher 
   implementation for non-graphical, console applications.
 
   Any Linux executable may be a console application.  Console applications are
@@ -1142,6 +1360,8 @@ struct ConsoleApplicationLauncherPrivate
   applications.  An application is considered "Running" as soon as the 
   executable is started (as opposed to regular Qtopia applications that must
   create the QtopiaApplication object first).
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 /*!
@@ -1176,8 +1396,8 @@ ConsoleApplicationLauncher::applicationState(const QString &app)
 /*! \internal */
 bool ConsoleApplicationLauncher::canLaunch(const QString &app)
 {
-    QContent capp = QContentSet(QContent::Application).findExecutable(app);
-    if(!capp.isValid())
+    QContent capp(app,false);
+    if (capp.isNull())
         return false;
     return capp.property("ConsoleApplication") == QLatin1String("1");
 }
@@ -1200,16 +1420,15 @@ void ConsoleApplicationLauncher::launch(const QString &app)
             capp->state = Starting;
             capp->process->setReadChannelMode(QProcess::ForwardedChannels);
             capp->process->closeWriteChannel();
-            qLog(QtopiaServer) << "ConsoleApplicationLauncher: Starting"
-                               << exes.at(ii);
+            qLog(QtopiaServer) << "Starting" << exes.at(ii);
             capp->process->start(exes.at(ii));
 
             QObject::connect(capp->process, SIGNAL(started()),
                              this, SLOT(appStarted()));
             QObject::connect(capp->process, SIGNAL(finished(int)),
                              this, SLOT(appExited(int)));
-            QObject::connect(capp->process, SIGNAL(error(QProcess::ProcessError)),
-                             this, SLOT(appError(QProcess::ProcessError)));
+            QObject::connect(capp->process,SIGNAL(error(QProcess::ProcessError)),
+                             this,SLOT(appError(QProcess::ProcessError)));
 
             d->apps.insert(app, capp);
 
@@ -1284,7 +1503,8 @@ void ConsoleApplicationLauncher::appError(QProcess::ProcessError error)
 
 #ifndef QTOPIA_DBUS_IPC
     ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
-    if(r) r->remRoute(app->app, this);
+    if (r)
+	r->remRoute(app->app, this);
 #endif
 
     emit terminated(app->app, reason);
@@ -1298,7 +1518,7 @@ void ConsoleApplicationLauncher::appError(QProcess::ProcessError error)
 QStringList
 ConsoleApplicationLauncher::applicationExecutable(const QString &app)
 {
-    if ( app.startsWith( "/" )) // app is a path, not just in standard location
+    if (app.startsWith( "/" )) // app is a path, not just in standard location
         return QStringList() << app;
 
     QStringList rv;
@@ -1320,7 +1540,9 @@ void ConsoleApplicationLauncher::kill(const QString &app)
 }
 
 /*! \internal */
-void ConsoleApplicationLauncher::routeMessage(const QString &, const QString &, const QByteArray &)
+void ConsoleApplicationLauncher::routeMessage(const QString& ,
+					      const QString& ,
+					      const QByteArray& )
 {
     // Do nothing
 }
@@ -1410,46 +1632,58 @@ QTOPIA_TASK_PROVIDES(ConsoleApplicationLauncher, ApplicationTypeLauncher);
   \row \o Application Type Launchers \o ApplicationTypeLauncher \o Handles the specifics of different types of applications and launching mechanisms on behalf of the ApplicationLauncher.  Other components within the server should never need to access these instances directly.
   \row \o Application Ipc Router \o ApplicationIpcRouter \o Abstracts the IPC transport used for application messages from the ApplicationLauncher.  On reception of an application message, instructs the ApplicationLauncher to start the application and subsequently delivers messages to ApplicationTypeLauncher instances for possible transformation before delivery to the application.
   \endtable
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 // define ApplicationLauncher
 /*!
-  \internal */
+  \internal
+ */
 ApplicationLauncher::ApplicationLauncher()
-: m_chan(0), m_vso(0)
+    : m_vso(0)
 {
+    /*
+      Get the list of application launcher objects.
+     */
+    QSet<ApplicationTypeLauncher*> connected;
     m_launchers = qtopiaTasks<ApplicationTypeLauncher>();
-    for(int ii = 0; ii < m_launchers.count(); ++ii) {
-        QObject::connect(m_launchers.at(ii),
-                         SIGNAL(applicationStateChanged(const QString &, ApplicationTypeLauncher::ApplicationState)),
-                         this,
-                         SLOT(stateChanged(const QString &, ApplicationTypeLauncher::ApplicationState)));
-        QObject::connect(m_launchers.at(ii),
-                         SIGNAL(terminated(const QString &, ApplicationTypeLauncher::TerminationReason)),
-                         this,
-                         SLOT(terminated(const QString &, ApplicationTypeLauncher::TerminationReason)));
-    }
+    for (int ii = 0; ii < m_launchers.count(); ++ii) {
+	ApplicationTypeLauncher* atl = m_launchers.at(ii);
+	if (connected.contains(atl))
+	    continue;
+	connected.insert(atl);
+        QObject::connect(atl,SIGNAL(applicationStateChanged(QString,ApplicationTypeLauncher::ApplicationState)),this,SLOT(handleStateChange(QString,ApplicationTypeLauncher::ApplicationState)));
 
+        QObject::connect(atl,SIGNAL(terminated(QString,ApplicationTypeLauncher::TerminationReason)),this,SLOT(terminated(QString,ApplicationTypeLauncher::TerminationReason)));
+    }
 
     m_vso = new QValueSpaceObject("/System/Applications", this);
 
     new LegacyLauncherService(this);
+    oom_manager.insert(QString("qpe"),getpid());
+
 }
 
-void ApplicationLauncher::stateChanged(const QString &app,
-                                       ApplicationTypeLauncher::ApplicationState state)
+void
+ApplicationLauncher::handleStateChange(const QString &app,
+                              ApplicationTypeLauncher::ApplicationState state)
 {
-    if(!m_runningApps.contains(app))
+    if (!m_runningApps.contains(app))
         return; // I don't know about this app
 
-    if(ApplicationTypeLauncher::NotRunning == state) {
+    int oldBusyCount = busyApps.count();
+
+    if (ApplicationTypeLauncher::NotRunning == state) {
         m_vso->removeAttribute(app + "/Info");
         m_runningApps.remove(app);
         m_orderedApps.removeAll(app);
-        qLog(QtopiaServer) << "ApplicationLauncher::stateChanged(" << app << ", NotRunning )";
-        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("notBusy(QString)") );
+        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"),
+                            QLatin1String("notBusy(QString)") );
         e << app;
-    } else {
+        busyApps.removeAll(app);
+    }
+    else {
         if(ApplicationTypeLauncher::Starting == state)
             m_vso->setAttribute(app + "/Info/LaunchTime",
                                 QDateTime::currentDateTime());
@@ -1467,18 +1701,24 @@ void ApplicationLauncher::stateChanged(const QString &app,
                 break;
         }
 
-        if(state != ApplicationTypeLauncher::Starting)
-        {
-            QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("notBusy(QString)") );
+        if (state != ApplicationTypeLauncher::Starting) {
+            QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"),
+                                QLatin1String("notBusy(QString)") );
             e << app;
+            busyApps.removeAll(app);
+        } else {
+            busyApps.append(app);
         }
 
         m_vso->setAttribute(app + "/Info/State", stateText);
-        qLog(QtopiaServer) << "ApplicationLauncher::stateChanged(" << app << ", " << stateText << ")";
-        QPerformanceLog("QtopiaServer") << "ApplicationLauncher::stateChanged(" << app.toLatin1() << ", " << stateText << ")";
+        qLog(QtopiaServer) << "ApplicationLauncher::handleStateChanged(" << app << ", " << stateText << ")";
+        QPerformanceLog("QtopiaServer") << "ApplicationLauncher::handleStateChanged(" << app << "," << stateText << ")";
     }
 
-    emit applicationStateChanged(app, state);
+    if (busyApps.count() != oldBusyCount)
+        m_vso->setAttribute("Info/BusyCount", busyApps.count());
+
+    emit applicationStateChanged(app,state);
 }
 
 /*!
@@ -1498,7 +1738,7 @@ ApplicationLauncher::state(const QString &app) const
 {
     QMap<QString, ApplicationTypeLauncher *>::ConstIterator iter =
         m_runningApps.find(app);
-    if(iter != m_runningApps.end())
+    if (iter != m_runningApps.end())
         return (*iter)->applicationState(app);
     else
         return ApplicationTypeLauncher::NotRunning;
@@ -1507,9 +1747,10 @@ ApplicationLauncher::state(const QString &app) const
 /*!
   \fn void ApplicationLauncher::applicationTerminated(const QString &application, ApplicationTypeLauncher::TerminationReason reason, bool filtered)
 
-  Emitted whenever the \a application terminates.  \a reason will be set to the
-  termination reason.  If \a filtered is true, an ApplicationTerminationHandler
-  instance has filtered the termination.
+  Emitted whenever the \a application terminates. \a reason
+  will be set to the termination reason. If \a filtered is
+  true, an ApplicationTerminationHandler instance has filtered the
+  termination.
  */
 
 /*!
@@ -1521,12 +1762,14 @@ ApplicationLauncher::state(const QString &app) const
 /*!
   \fn void ApplicationLauncher::applicationNotFound(const QString &application)
 
-  Emitted whenever a non-existant \a application is requested to launch.  The
-  corresponding call to launch() will also return false.
+  Emitted whenever a non-existant \a application is asked to
+  launch. The corresponding call to launch() will also return
+  false.
  */
 
-void ApplicationLauncher::terminated(const QString &app,
-                                     ApplicationTypeLauncher::TerminationReason reason)
+void
+ApplicationLauncher::terminated(const QString &app,
+                           ApplicationTypeLauncher::TerminationReason reason)
 {
     m_vso->removeAttribute(app + "/Info");
     m_runningApps.remove(app);
@@ -1535,10 +1778,10 @@ void ApplicationLauncher::terminated(const QString &app,
     bool filtered = false;
     QList<ApplicationTerminationHandler *> termHandlers =
         qtopiaTasks<ApplicationTerminationHandler>();
-    for(int ii = 0; !filtered && ii < termHandlers.count(); ++ii)
+    for (int ii=0; !filtered && ii<termHandlers.count(); ++ii)
         filtered = termHandlers.at(ii)->terminated(app, reason);
 
-    if(qLogEnabled(QtopiaServer)) {
+    if (qLogEnabled(QtopiaServer)) {
         QString reasonText("Unknown");
         switch(reason) {
             case ApplicationTypeLauncher::FailedToStart:
@@ -1558,45 +1801,61 @@ void ApplicationLauncher::terminated(const QString &app,
                 break;
         }
 
-        qLog(QtopiaServer) << "ApplicationLauncher::applicationTerminated(" << app << ", " << reasonText << ", " << (filtered?"true":"false") << ")";
+        qLog(QtopiaServer) << "ApplicationLauncher::applicationTerminated("
+			   << app << ", " << reasonText << ", "
+			   << (filtered?"true":"false") << ")";
+
     }
+
+    m_vso->removeAttribute(app + "/Info");
+    QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"),
+                        QLatin1String("notBusy(QString)") );
+    e << app;
+
+    if (busyApps.removeAll(app))
+        m_vso->setAttribute("Info/BusyCount", busyApps.count());
 
     emit applicationTerminated(app, reason, filtered);
 
-    qLog(QtopiaServer) << "ApplicationLauncher::stateChanged(" << app << ", NotRunning)";
+    qLog(QtopiaServer) << "ApplicationLauncher::terminated("
+		       << app << ", NotRunning)";
     emit applicationStateChanged(app, ApplicationTypeLauncher::NotRunning);
 }
 
 /*!
-  Returns true if the application, \a app, can be launched otherwise false.
-  If this method returns true it indicates that an ApplicationLauncherType
-  instance in the system has claimed responsibility for launching the
-  application.  The actual launching process may still fail.
+  Returns true if application \a app can be launched. Returns
+  false otherwise. When true is returned, it means an instance
+  of a subclass of ApplicationTypeLauncher instance exists that
+  knows how to launch the application. The subsequent attempt
+  to launch the application may still fail.
+
+  Note that true is also returned if \a app is already running.
  */
 bool ApplicationLauncher::canLaunch(const QString &app)
 {
-    if(m_runningApps.contains(app))
+    if (m_runningApps.contains(app))
         return true;
-    for(int ii = 0; ii < m_launchers.count(); ++ii) {
-        if(m_launchers[ii]->canLaunch(app)) {
+    for (int ii = 0; ii < m_launchers.count(); ++ii) {
+        if (m_launchers[ii]->canLaunch(app))
             return true;
-        }
     }
     return false;
 }
 
 /*!
-  Attempt to launch the application, \a app.  This method returns true if the
-  application was launched and false otherwise.
+  Attempts to launch application \a app. Returns true if
+  \a app is launched successfully. Also returns true if
+  \a app is already running. Returns false if no launcher
+  can be found that knows how to launch \a app.
   */
 bool ApplicationLauncher::launch(const QString &app)
 {
-    if(m_runningApps.contains(app))
+    if (m_runningApps.contains(app))
         return true;
 
-    for(int ii = 0; ii < m_launchers.count(); ++ii) {
-        if(m_launchers[ii]->canLaunch(app)) {
-            m_runningApps.insert(app, m_launchers[ii]);
+    for (int ii=0; ii < m_launchers.count(); ++ii) {
+        if (m_launchers[ii]->canLaunch(app)) {
+            m_runningApps.insert(app,m_launchers[ii]);
             m_orderedApps.append(app);
             m_launchers[ii]->launch(app);
             return true;
@@ -1610,12 +1869,15 @@ bool ApplicationLauncher::launch(const QString &app)
 /*!
   \internal
 
-  Kill the application, \a app.  This method is currently not supported.
+  Kill the process for application \a app. This method is
+  used by the OOM handling system to prevent an actual OOM
+  state from occurring.
   */
-bool ApplicationLauncher::kill(const QString &app)
+bool ApplicationLauncher::kill(const QString& app)
 {
     for (int ii=0; ii < m_launchers.count(); ++ii) {
         if (m_launchers[ii]->canLaunch(app)) {
+            m_runningApps.insert(app,m_launchers[ii]);
             m_launchers[ii]->kill(app);
             return true;
         }
@@ -1638,6 +1900,7 @@ QTOPIA_TASK_PROVIDES(ApplicationLauncher, ApplicationLauncher);
  */
 LegacyLauncherService::~LegacyLauncherService()
 {
+    // nothing.
 }
 
 void LegacyLauncherService::execute( const QString& app )
@@ -1660,4 +1923,34 @@ void LegacyLauncherService::execute(const QString& app,
     env << document;
 }
 
+void LegacyLauncherService::kill( const QString& app )
+{
+    qLog(ApplicationLauncher) << "LegacyLauncherService: Request for kill("
+                              << app << ")";
+    ApplicationLauncher* al = qtopiaTask<ApplicationLauncher>();
+    if (al) {
+        al->kill(app);
+    }
+}
+
+/*!
+  \fn QString ConsoleApplicationLauncher::name()
+  \internal
+ */
+/*!
+  \fn QString ExeApplicationLauncher::name()
+  \internal
+ */
+/*!
+  \fn QString SimpleExeApplicationLauncher::name()
+  \internal
+ */
+/*!
+  \fn QString QtopiaServerApplicationLauncher::name()
+  \internal
+ */
+/*!
+  \fn QString BuiltinApplicationLauncher::name()
+  \internal
+ */
 #include "applicationlauncher.moc"

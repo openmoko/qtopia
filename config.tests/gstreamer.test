@@ -1,0 +1,9 @@
+#!/bin/sh
+
+type pkg-config 2>1 > /dev/null || exit 1
+pkg-config gstreamer-0.10 || exit 1
+
+echo GSTREAMER_CFLAGS=`pkg-config gstreamer-0.10 --cflags`
+echo GSTREAMER_LIBS=`pkg-config gstreamer-0.10 --libs`
+exit 0
+

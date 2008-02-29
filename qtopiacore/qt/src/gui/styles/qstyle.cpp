@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,6 +53,27 @@
 #endif
 
 #include <limits.h>
+
+static const int MaxBits = 8 * sizeof(QSizePolicy::ControlType);
+
+static int unpackControlTypes(QSizePolicy::ControlTypes controls, QSizePolicy::ControlType *array)
+{
+    if (!controls)
+        return 0;
+
+    // optimization: exactly one bit is set
+    if ((controls & (controls - 1)) == 0) {
+        array[0] = QSizePolicy::ControlType(uint(controls));
+        return 1;
+    }
+
+    int count = 0;
+    for (int i = 0; i < MaxBits; ++i) {
+        if (uint bit = (controls & (0x1 << i)))
+            array[count++] = QSizePolicy::ControlType(bit);
+    }
+    return count;
+}
 
 /*!
     \class QStyle
@@ -183,7 +219,7 @@
 
     When implementing a custom style, you cannot assume that the
     widget is a QSpinBox just because the enum value is called
-    PE_IndicatorSpinUp or PE_IndicatorSpinUp.
+    PE_IndicatorSpinUp or PE_IndicatorSpinDown.
 
     The documentation for the \l{widgets/styles}{Styles} example
     covers this topic in more detail.
@@ -247,7 +283,7 @@
     \o alignedRect() will return a logical rect aligned for the current direction
     \endlist
 
-    \sa QStyleOption, QStylePainter, {Styles Example}
+    \sa QStyleOption, QStylePainter, {Styles Example}, {Implementing Styles and Style Aware Widgets}
 */
 
 /*!
@@ -310,6 +346,11 @@ void QStyle::polish(QWidget * /* widget */)
     every polished widget whenever the style is dynamically changed;
     the former style has to unpolish its settings before the new style
     can polish them again.
+
+    Note that unpolish() will only be called if the widget is
+    destroyed.  This can cause problems in some cases, e.g, if you
+    remove a widget from the UI, cache it, and then reinsert it after
+    the style has changed; some of Qt's classes cache their widgets.
 
     \sa polish()
 */
@@ -435,7 +476,7 @@ void QStyle::drawItemText(QPainter *painter, const QRect &rect, int alignment, c
     QPen savedPen;
     if (textRole != QPalette::NoRole) {
         savedPen = painter->pen();
-        painter->setPen(pal.color(textRole));
+        painter->setPen(QPen(pal.brush(textRole), savedPen.widthF()));
     }
     if (!enabled) {
         if (styleHint(SH_DitherDisabledText)) {
@@ -545,8 +586,9 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value PE_IndicatorToolBarSeparator  The separator in a toolbar.
     \value PE_PanelToolBar  The panel for a toolbar.
     \value PE_PanelTipLabel The panel for a tip label.
-    \value PE_FrameTabBarBase The frame that is drawn for a tabbar, ususally drawn for a tabbar that isn't part of a tab widget.
+    \value PE_FrameTabBarBase The frame that is drawn for a tab bar, ususally drawn for a tab bar that isn't part of a tab widget.
     \value PE_IndicatorTabTear An indicator that a tab is partially scrolled out of the visible tab bar when there are many tabs.
+    \value PE_IndicatorColumnViewArrow An arrow in a QColumnView.
 
     \value PE_Widget  A plain QWidget.
 
@@ -576,11 +618,11 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     Note that not all primitives use all of these flags, and that the
     flags may mean different things to different items.
 
+    \value State_None
     \value State_Active
     \value State_AutoRaise
     \value State_Bottom
     \value State_Children
-    \value State_None
     \value State_DownArrow
     \value State_Editing
     \value State_Enabled
@@ -589,19 +631,22 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value State_HasFocus
     \value State_Horizontal
     \value State_Item
+    \value State_KeyboardFocusChange
+    \value State_Mini
     \value State_MouseOver
     \value State_NoChange
     \value State_Off
     \value State_On
     \value State_Open
     \value State_Raised
+    \value State_ReadOnly
     \value State_Selected
     \value State_Sibling
+    \value State_Small
     \value State_Sunken
     \value State_Top
     \value State_UpArrow
-    \value State_KeyboardFocusChange
-    \value State_ReadOnly
+    \value State_Window
     \omitvalue State_Default
 
     \sa drawPrimitive()
@@ -716,7 +761,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
 
     \value CE_Q3DockWindowEmptyArea  The empty area of a QDockWidget.
 
-    \value CE_ToolBoxTab  The toolbox's tab area.
+    \value CE_ToolBoxTab  The toolbox's tab and label within a QToolBox.
     \value CE_SizeGrip  Window resize handle; see also QSizeGrip.
 
     \value CE_Header         A header.
@@ -740,6 +785,11 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     custom values must be greater than this value.
     \value CE_ComboBoxLabel The label of a non-editable QComboBox.
     \value CE_ToolBar A toolbar like QToolBar.
+    \value CE_ToolBoxTabShape  The toolbox's tab shape.
+    \value CE_ToolBoxTabLabel  The toolbox's tab label.
+    \value CE_HeaderEmptyArea  The area of a header view where there are no header sections.
+
+    \omitvalue CE_ColumnViewGrip
 
     \sa drawControl()
 */
@@ -752,7 +802,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
 
     The \a widget argument is optional and can be used as aid in
     drawing the control. The \a option parameter is a pointer to a
-    QStyleOption object that can be casted to the correct subclass
+    QStyleOption object that can be cast to the correct subclass
     using the qstyleoption_cast() function.
 
     The table below is listing the control elements and their
@@ -773,7 +823,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \row \o \l State_Enabled \o The item is enabled.
     \row \o \l State_DownArrow \o Indicates that a scroll down arrow should be drawn.
     \row \o \l State_UpArrow \o Indicates that a scroll up arrow should be drawn
-    \row \o \l State_HasFocus \o Set if the menubar has input focus.
+    \row \o \l State_HasFocus \o Set if the menu bar has input focus.
     \row \o{1,5} \l CE_PushButton, \l CE_PushButtonBevel, \l CE_PushButtonLabel
          \o{1,5} \l QStyleOptionButton
          \o \l State_Enabled \o Set if the button is enabled.
@@ -798,8 +848,8 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \row \o{1,2} \l CE_ProgressBarContents, \l CE_ProgressBarLabel,
                  \l CE_ProgressBarGroove
          \o{1,2} \l QStyleOptionProgressBar
-         \o \l State_Enabled \o Set if the progressbar is enabled.
-    \row \o \l State_HasFocus \o Set if the progressbar has input focus.
+         \o \l State_Enabled \o Set if the progress bar is enabled.
+    \row \o \l State_HasFocus \o Set if the progress bar has input focus.
     \row \o \l CE_Header, \l CE_HeaderSection, \l CE_HeaderLabel \o \l QStyleOptionHeader \o \o
     \row \o{1,7} \l CE_ToolButtonLabel
          \o{1,7} \l QStyleOptionToolButton
@@ -833,41 +883,53 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
         with text or pixmap).
     \value SE_PushButtonFocusRect  Area for the focus rect (usually
         larger than the contents rect).
+    \value SE_PushButtonLayoutItem  Area that counts for the parent layout.
 
     \value SE_CheckBoxIndicator  Area for the state indicator (e.g., check mark).
     \value SE_CheckBoxContents  Area for the label (text or pixmap).
     \value SE_CheckBoxFocusRect  Area for the focus indicator.
     \value SE_CheckBoxClickRect  Clickable area, defaults to SE_CheckBoxFocusRect.
+    \value SE_CheckBoxLayoutItem  Area that counts for the parent layout.
+
+    \value SE_DateTimeEditLayoutItem  Area that counts for the parent layout.
 
     \value SE_RadioButtonIndicator  Area for the state indicator.
     \value SE_RadioButtonContents  Area for the label.
     \value SE_RadioButtonFocusRect  Area for the focus indicator.
     \value SE_RadioButtonClickRect  Clickable area, defaults to SE_RadioButtonFocusRect.
+    \value SE_RadioButtonLayoutItem  Area that counts for the parent layout.
 
     \value SE_ComboBoxFocusRect  Area for the focus indicator.
 
     \value SE_SliderFocusRect  Area for the focus indicator.
+    \value SE_SliderLayoutItem  Area that counts for the parent layout.
+
+    \value SE_SpinBoxLayoutItem  Area that counts for the parent layout.
 
     \value SE_Q3DockWindowHandleRect  Area for the tear-off handle.
 
     \value SE_ProgressBarGroove  Area for the groove.
     \value SE_ProgressBarContents  Area for the progress indicator.
     \value SE_ProgressBarLabel  Area for the text label.
+    \value SE_ProgressBarLayoutItem Area that counts for the parent layout.
 
-    \value SE_DialogButtonAccept  Area for a dialog's accept button.
-    \value SE_DialogButtonReject  Area for a dialog's reject button.
-    \value SE_DialogButtonApply  Area for a dialog's apply button.
-    \value SE_DialogButtonHelp  Area for a dialog's help button.
-    \value SE_DialogButtonAll  Area for a dialog's all button.
-    \value SE_DialogButtonRetry  Area for a dialog's retry button.
-    \value SE_DialogButtonAbort  Area for a dialog's abort button.
-    \value SE_DialogButtonIgnore  Area for a dialog's ignore button.
-    \value SE_DialogButtonCustom  Area for a dialog's custom widget area (in the button row).
+    \omitvalue SE_DialogButtonAccept
+    \omitvalue SE_DialogButtonReject
+    \omitvalue SE_DialogButtonApply
+    \omitvalue SE_DialogButtonHelp
+    \omitvalue SE_DialogButtonAll
+    \omitvalue SE_DialogButtonRetry
+    \omitvalue SE_DialogButtonAbort
+    \omitvalue SE_DialogButtonIgnore
+    \omitvalue SE_DialogButtonCustom
 
     \value SE_FrameContents  Area for a frame's contents.
+    \value SE_FrameLayoutItem  Area that counts for the parent layout.
 
     \value SE_HeaderArrow Area for the sort indicator for a header.
     \value SE_HeaderLabel Area for the label in a header.
+
+    \value SE_LabelLayoutItem  Area that counts for the parent layout.
 
     \value SE_LineEditContents  Area for a line edit's contents.
 
@@ -876,7 +938,11 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value SE_TabWidgetTabBar Area for the tab bar widget in a tab widget.
     \value SE_TabWidgetTabContents Area for the contents of the tab widget.
     \value SE_TabWidgetTabPane Area for the pane of a tab widget.
+    \value SE_TabWidgetLayoutItem  Area that counts for the parent layout.
+
     \value SE_ToolBoxTabContents  Area for a toolbox tab's icon and label.
+
+    \value SE_ToolButtonLayoutItem  Area that counts for the parent layout.
 
     \value SE_ViewItemCheckIndicator Area for a view item's check mark.
 
@@ -884,8 +950,21 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
 
     \value SE_TreeViewDisclosureItem Area for the actual disclosure item in a tree branch.
 
+    \value SE_DialogButtonBoxLayoutItem  Area that counts for the parent layout.
+
+    \value SE_GroupBoxLayoutItem  Area that counts for the parent layout.
+
     \value SE_CustomBase  Base value for custom sub-elements.
     Custom values must be greater than this value.
+
+    \value SE_DockWidgetFloatButton The float button of a dock
+                                    widget.
+    \value SE_DockWidgetTitleBarText The text bounds of the dock
+                                     widgets title.
+    \value SE_DockWidgetCloseButton The close button of a dock
+                                    widget.
+    \value SE_DockWidgetIcon The icon of a dock widget.
+    \value SE_ComboBoxLayoutItem Area that counts for the parent layout.
 
     \sa subElementRect()
 */
@@ -898,7 +977,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     screen coordinates.
 
     The \a widget argument is optional and can be used to aid
-    determining the area. The QStyleOption object can be casted to the
+    determining the area. The QStyleOption object can be cast to the
     appropriate type using the qstyleoption_cast() function. See the
     table below for the appropriate \a option casts:
 
@@ -936,6 +1015,9 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value CC_Q3ListView        Used for drawing the Q3ListView class.
     \value CC_GroupBox          A group box, like QGroupBox.
     \value CC_Dial              A dial, like QDial.
+    \value CC_MdiControls       The minimize, close, and normal
+                                button in the menu bar for a
+                                maximized MDI subwindow.
 
     \value CC_CustomBase Base value for custom complex controls. Custom
     values must be greater than this value.
@@ -1004,6 +1086,13 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value SC_GroupBoxCheckBox The optional check box of a group box.
     \value SC_GroupBoxContents The group box contents.
 
+    \value SC_MdiNormalButton The normal button for a MDI
+                              subwindow in the menu bar.
+    \value SC_MdiMinButton The minimize button for a MDI
+                           subwindow in the menu bar.
+    \value SC_MdiCloseButton The close button for a MDI subwindow
+                             in the menu bar.
+
     \value SC_All  Special value that matches all sub-controls.
     \omitvalue SC_Q3ListViewBranch
 
@@ -1020,7 +1109,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     drawing the control.
 
     The \a option parameter is a pointer to a QStyleOptionComplex
-    object that can be casted to the correct subclass using the
+    object that can be cast to the correct subclass using the
     qstyleoption_cast() function. Note that the \c rect member of the
     specified \a option must be in logical
     coordinates. Reimplementations of this function should use
@@ -1091,7 +1180,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     option). The rectangle is defined in screen coordinates.
 
     The \a option argument is a pointer to QStyleOptionComplex or
-    one of its subclasses, and can be casted to the appropriate type
+    one of its subclasses, and can be cast to the appropriate type
     using the qstyleoption_cast() function. See drawComplexControl()
     for details. The \a widget is optional and can contain additional
     information for the function.
@@ -1111,7 +1200,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     Note that the \a position is expressed in screen coordinates.
 
     The \a option argument is a pointer to a QStyleOptionComplex
-    object (or one of its subclasses). The object can be casted to the
+    object (or one of its subclasses). The object can be cast to the
     appropriate type using the qstyleoption_cast() function. See
     drawComplexControl() for details. The \a widget argument is
     optional and can contain additional information for the function.
@@ -1128,6 +1217,8 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
 
     \value PM_ButtonMargin  Amount of whitespace between push button
         labels and the frame.
+    \value PM_DockWidgetTitleBarButtonMargin Amount of whitespace between dock widget's
+        title bar button labels and the frame.
     \value PM_ButtonDefaultIndicator  Width of the default-button indicator frame.
     \value PM_MenuButtonIndicator  Width of the menu button indicator
         proportional to the widget height.
@@ -1139,8 +1230,22 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value PM_DefaultFrameWidth  Default frame width (usually 2).
     \value PM_SpinBoxFrameWidth  Frame width of a spin box, defaults to PM_DefaultFrameWidth.
     \value PM_ComboBoxFrameWidth Frame width of a combo box, defaults to PM_DefaultFrameWidth.
-    \value PM_MDIFrameWidth  Frame width of an MDI window.
-    \value PM_MDIMinimizedWidth  Width of a minimized MDI window.
+
+    \value PM_MDIFrameWidth  Obsolete. Use PM_MdiSubWindowFrameWidth instead.
+    \value PM_MdiSubWindowFrameWidth  Frame width of an MDI window.
+    \value PM_MDIMinimizedWidth  Obsolete. Use PM_MdiSubWindowMinimizedWidth instead.
+    \value PM_MdiSubWindowMinimizedWidth  Width of a minimized MDI window.
+
+    \value PM_LayoutLeftMargin  Default \l{QLayout::setContentsMargins()}{left margin} for a
+                                QLayout.
+    \value PM_LayoutTopMargin  Default \l{QLayout::setContentsMargins()}{top margin} for a QLayout.
+    \value PM_LayoutRightMargin  Default \l{QLayout::setContentsMargins()}{right margin} for a
+                                 QLayout.
+    \value PM_LayoutBottomMargin  Default \l{QLayout::setContentsMargins()}{bottom margin} for a
+                                  QLayout.
+    \value PM_LayoutHorizontalSpacing  Default \l{QLayout::spacing}{horizontal spacing} for a
+                                       QLayout.
+    \value PM_LayoutVerticalSpacing  Default \l{QLayout::spacing}{vertical spacing} for a QLayout.
 
     \value PM_MaximumDragDistance The maximum allowed distance between
     the mouse and a slider when dragging. Exceeding the specified
@@ -1169,10 +1274,10 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value PM_DockWidgetFrameWidth  Frame width of a dock window.
     \value PM_DockWidgetTitleMargin Margin of the dock window title.
 
-    \value PM_MenuBarPanelWidth  Frame width of a menubar, defaults to PM_DefaultFrameWidth.
-    \value PM_MenuBarItemSpacing  Spacing between menubar items.
-    \value PM_MenuBarHMargin  Spacing between menubar items and left/right of bar.
-    \value PM_MenuBarVMargin  Spacing between menubar items and top/bottom of bar.
+    \value PM_MenuBarPanelWidth  Frame width of a menu bar, defaults to PM_DefaultFrameWidth.
+    \value PM_MenuBarItemSpacing  Spacing between menu bar items.
+    \value PM_MenuBarHMargin  Spacing between menu bar items and left/right of bar.
+    \value PM_MenuBarVMargin  Spacing between menu bar items and top/bottom of bar.
 
     \value PM_ToolBarFrameWidth  Width of the frame around toolbars.
     \value PM_ToolBarHandleExtent Width of a toolbar handle in a
@@ -1186,6 +1291,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
          vertical toolbar.
 
     \value PM_TabBarTabOverlap  Number of pixels the tabs should overlap.
+        (Currently only used in styles, not inside of QTabBar)
     \value PM_TabBarTabHSpace  Extra space added to the tab width.
     \value PM_TabBarTabVSpace  Extra space added to the tab height.
     \value PM_TabBarBaseHeight  Height of the area between the tab bar
@@ -1230,10 +1336,6 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value PM_HeaderMargin The size of the margin between the sort indicator and the text.
     \value PM_SpinBoxSliderHeight The height of the optional spin box slider.
 
-    \value PM_DefaultTopLevelMargin The margin for a QProgressDialog.
-    \value PM_DefaultChildMargin The default margin for children in a layout.
-    \value PM_DefaultLayoutSpacing The spacing between the buttons in a progress dialog.
-
     \value PM_ToolBarIconSize Default tool bar icon size
     \value PM_SmallIconSize Default small icon size
     \value PM_LargeIconSize Default large icon size
@@ -1244,7 +1346,8 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value PM_ListViewIconSize The default size for icons in a list view.
 
     \value PM_ToolTipLabelFrameWidth The frame width for a tool tip label.
-    \value PM_CheckBoxLabelSpacing The spacing between a check box and its label.
+    \value PM_CheckBoxLabelSpacing The spacing between a check box indicator and its label.
+    \value PM_RadioButtonLabelSpacing The spacing between a radio button indicator and its label.
     \value PM_TabBarIconSize The default icon size for a tab bar.
     \value PM_SizeGripSize The size of a size grip.
     \value PM_MessageBoxIconSize The size of the standard icons in a message box
@@ -1252,6 +1355,20 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
 
     \value PM_CustomBase Base value for custom pixel metrics.  Custom
     values must be greater than this value.
+
+    The following values are obsolete:
+
+    \value PM_DefaultTopLevelMargin  Use PM_LayoutLeftMargin,
+                                     PM_LayoutTopMargin,
+                                     PM_LayoutRightMargin, and
+                                     PM_LayoutBottomMargin instead.
+    \value PM_DefaultChildMargin  Use PM_LayoutLeftMargin,
+                                  PM_LayoutTopMargin,
+                                  PM_LayoutRightMargin, and
+                                  PM_LayoutBottomMargin instead.
+    \value PM_DefaultLayoutSpacing  Use PM_LayoutHorizontalSpacing
+                                    and PM_LayoutVerticalSpacing
+                                    instead.
 
     \sa pixelMetric()
 */
@@ -1281,6 +1398,11 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \row \o \l PM_TabBarBaseHeight       \o \l QStyleOptionTab
     \row \o \l PM_TabBarBaseOverlap      \o \l QStyleOptionTab
     \endtable
+
+    Some pixel metrics are called from widgets and some are only called
+    internally by the style. If the metric is not called by a widget, it is the
+    discretion of the style author to make use of it.  For some styles, this
+    may not be appropriate.
 */
 
 /*!
@@ -1315,6 +1437,10 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
 
     \value CT_CustomBase  Base value for custom contents types.
     Custom values must be greater than this value.
+
+    \value CT_MdiControls The minimize, normal, and close button
+                          in the menu bar for a maximized MDI
+                          subwindow.
 
     \sa sizeFromContents()
 */
@@ -1385,7 +1511,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
         If true, when clicking a scroll bar button (SC_ScrollBarAddLine or
         SC_ScrollBarSubLine) and dragging over to the opposite button (rolling)
         will press the new button and release the old one. When it is false, the
-        original button is released and nothing happens (like a pushbutton).
+        original button is released and nothing happens (like a push button).
 
     \value SH_TabBar_Alignment  The alignment for tabs in a
         QTabWidget. Possible values are Qt::AlignLeft,
@@ -1412,7 +1538,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
         the print dialog, as done on Windows.
 
     \value SH_MainWindow_SpaceBelowMenuBar One or two pixel space between
-        the menubar and the dockarea, as done on Windows.
+        the menu bar and the dockarea, as done on Windows.
 
     \value SH_FontDialog_SelectAssociatedText Select the text in the
         line edit, or when selecting an item from the listbox, or when
@@ -1448,7 +1574,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
 
     \value SH_Menu_MouseTracking  Mouse tracking in popup menus.
 
-    \value SH_MenuBar_MouseTracking  Mouse tracking in menubars.
+    \value SH_MenuBar_MouseTracking  Mouse tracking in menu bars.
 
     \value SH_Menu_FillScreenWithScroll Whether scrolling popups
        should fill the screen as they are scrolled.
@@ -1468,7 +1594,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value SH_Q3ListViewExpand_SelectMouseType  Which type of mouse event should
         cause a list view expansion to be selected.
 
-    \value SH_TabBar_PreferNoArrows  Whether a tabbar should suggest a size
+    \value SH_TabBar_PreferNoArrows  Whether a tab bar should suggest a size
         to prevent scoll arrows.
 
     \value SH_ComboBox_Popup  Allows popups as a combobox drop-down
@@ -1492,9 +1618,9 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
         should extend to the full width of the document.
 
     \value SH_GroupBox_TextLabelVerticalAlignment  How to vertically align a
-        groupbox's text label.
+        group box's text label.
 
-    \value SH_GroupBox_TextLabelColor  How to paint a groupbox's text label.
+    \value SH_GroupBox_TextLabelColor  How to paint a group box's text label.
 
     \value SH_DialogButtons_DefaultButton  Which button gets the
         default status in a dialog's button widget.
@@ -1522,8 +1648,8 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value SH_ToolTipLabel_Opacity  An integer indicating the opacity for
     the tip label, 0 is completely transparent, 255 is completely
     opaque.
-    \value SH_DrawMenuBarSeparator  Indicates whether or not the menubar draws separators.
-    \value SH_TitleBar_ModifyNotification  Indicates if the titlebar should show
+    \value SH_DrawMenuBarSeparator  Indicates whether or not the menu bar draws separators.
+    \value SH_TitleBar_ModifyNotification  Indicates if the title bar should show
     a '*' for windows that are modified.
 
     \value SH_Button_FocusPolicy The default focus policy for buttons.
@@ -1532,8 +1658,8 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     Custom values must be greater than this value.
 
     \value SH_MenuBar_DismissOnSecondClick A boolean indicating if a menu in
-    the menubar should be dismissed when it is clicked on a second time. (Example:
-    Clicking and releasing on the File Menu in a menubar and then
+    the menu bar should be dismissed when it is clicked on a second time. (Example:
+    Clicking and releasing on the File Menu in a menu bar and then
     immediately clicking on the File Menu again.)
 
     \value SH_MessageBox_UseBorderForButtonSpacing A boolean indicating what the to
@@ -1587,14 +1713,27 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value SH_Slider_PageSetButtons Which mouse buttons cause a slider
     to page step the value.
 
-    \value SH_TabBar_ElideMode The default eliding style for a tabbar.
+    \value SH_TabBar_ElideMode The default eliding style for a tab bar.
 
     \value SH_DialogButtonLayout  Controls how buttons are laid out in a QDialogButtonBox, returns a QDialogButtonBox::ButtonLayout enum.
 
+    \value SH_WizardStyle Controls the look and feel of a QWizard. Returns a QWizard::WizardStyle enum.
+
+    \value SH_ItemView_ArrowKeysNavigateIntoChildren Controls whether the tree view will select the first child when it is exapanded and the right arrow key is pressed.
     \value SH_ComboBox_PopupFrameStyle  The frame style used when drawing a combobox popup menu.
 
     \value SH_DialogButtonBox_ButtonsHaveIcons Indicates whether or not StandardButtons in QDialogButtonBox should have icons or not.
     \value SH_ItemView_MovementWithoutUpdatingSelection The item view is able to indicate a current item without changing the selection.
+    \value SH_ToolTip_Mask The mask of a tool tip.
+
+    \value SH_FocusFrame_AboveWidget The FocusFrame is stacked above the widget that it is "focusing on".
+
+    \value SH_TextControl_FocusIndicatorTextCharFormat Specifies the text format used to highlight focused anchors in rich text
+    documents displayed for example in QTextBrowser. The format has to be a QTextCharFormat returned in the variant of the
+    QStyleHintReturnVariant return value. The QTextFormat::OutlinePen property is used for the outline and QTextFormat::BackgroundBrush
+    for the background of the highlighted area.
+
+    Used to fill any area not covered by the items.
     \omitvalue SH_UnderlineAccelerator
 
     \sa styleHint()
@@ -1641,6 +1780,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value SP_DriveCDIcon The CD icon.
     \value SP_DriveDVDIcon The DVD icon.
     \value SP_DriveNetIcon The network icon.
+    \value SP_DirHomeIcon The home directory icon.
     \value SP_DirOpenIcon The open directory icon.
     \value SP_DirClosedIcon The closed directory icon.
     \value SP_DirIcon The directory icon.
@@ -1676,10 +1816,12 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \value SP_ArrowRight Icon arrow pointing right.
     \value SP_ArrowBack Equivalent to SP_ArrowLeft when the current layout direction is Qt::LeftToRight, otherwise SP_ArrowRight.
     \value SP_ArrowForward Equivalent to SP_ArrowRight when the current layout direction is Qt::LeftToRight, otherwise SP_ArrowLeft.
+    \value SP_CommandLink Icon used to indicate a Vista style command link glyph.
+    \value SP_VistaShield Icon used to indicate UAC prompts on Windows Vista. This will return a null pixmap or icon on all other platforms.
     \value SP_CustomBase  Base value for custom standard pixmaps;
     custom values must be greater than this value.
 
-    \sa standardPixmap()
+    \sa standardPixmap() standardIcon()
 */
 
 /*###
@@ -1718,6 +1860,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \fn QPixmap QStyle::standardPixmap(StandardPixmap standardPixmap, const QStyleOption *option, \
                                        const QWidget *widget) const
 
+    \obsolete
     Returns a pixmap for the given \a standardPixmap.
 
     A standard pixmap is a pixmap that can follow some existing GUI
@@ -1725,6 +1868,10 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     extra information required when defining the appropriate
     pixmap. The \a widget argument is optional and can also be used to
     aid the determination of the pixmap.
+
+    Developers calling standardPixmap() should instead call standardIcon()
+    Developers who re-implemented standardPixmap() should instead re-implement
+    the slot standardIconImplementation().
 
     \sa standardIcon()
 */
@@ -1942,8 +2089,8 @@ QPalette QStyle::standardPalette() const
 #else
     QColor background(0xd4, 0xd0, 0xc8); // win 2000 grey
 #endif
-    QColor light(background.light());
-    QColor dark(background.dark());
+    QColor light(background.lighter());
+    QColor dark(background.darker());
     QColor mid(Qt::gray);
     QPalette palette(Qt::black, background, light, dark, mid, Qt::black, Qt::white);
     palette.setBrush(QPalette::Disabled, QPalette::WindowText, dark);
@@ -2012,7 +2159,120 @@ QIcon QStyle::standardIconImplementation(StandardPixmap standardIcon, const QSty
     return QIcon(standardPixmap(standardIcon, option, widget));
 }
 
+/*!
+    \since 4.3
+
+    Returns the spacing that should be used between \a control1 and
+    \a control2 in a layout. \a orientation specifies whether the
+    controls are laid out side by side or stacked vertically. The \a
+    option parameter can be used to pass extra information about the
+    parent widget. The \a widget parameter is optional and can also
+    be used if \a option is 0.
+
+    This function is called by the layout system. It is used only if
+    PM_LayoutHorizontalSpacing or PM_LayoutVerticalSpacing returns a
+    negative value.
+
+    For binary compatibility reasons, this function is not virtual.
+    If you want to specify custom layout spacings in a QStyle
+    subclass, implement a slot called layoutSpacingImplementation().
+    QStyle will discover the slot at run-time (using Qt's
+    \l{meta-object system}) and direct all calls to layoutSpacing()
+    to layoutSpacingImplementation().
+
+    \sa combinedLayoutSpacing(), layoutSpacingImplementation()
+*/
+int QStyle::layoutSpacing(QSizePolicy::ControlType control1, QSizePolicy::ControlType control2,
+                          Qt::Orientation orientation, const QStyleOption *option,
+                          const QWidget *widget) const
+{
+    Q_D(const QStyle);
+    if (d->layoutSpacingIndex == -1) {
+        d->layoutSpacingIndex = metaObject()->indexOfMethod(
+            "layoutSpacingImplementation(QSizePolicy::ControlType,QSizePolicy::ControlType,"
+            "Qt::Orientation,const QStyleOption*,const QWidget*)"
+            );
+    }
+    if (d->layoutSpacingIndex < 0)
+        return -1;
+    int result;
+    void *param[] = {&result, &control1, &control2, &orientation, &option, &widget};
+
+    const_cast<QStyle *>(this)->qt_metacall(QMetaObject::InvokeMetaMethod,
+                                            d->layoutSpacingIndex, param);
+    return result;
+}
+
+/*!
+    \since 4.3
+
+    Returns the spacing that should be used between \a controls1 and
+    \a controls2 in a layout. \a orientation specifies whether the
+    controls are laid out side by side or stacked vertically. The \a
+    option parameter can be used to pass extra information about the
+    parent widget. The \a widget parameter is optional and can also
+    be used if \a option is 0.
+
+    \a controls1 and \a controls2 are OR-combination of zero or more
+    \l{QSizePolicy::ControlTypes}{control types}.
+
+    This function is called by the layout system. It is used only if
+    PM_LayoutHorizontalSpacing or PM_LayoutVerticalSpacing returns a
+    negative value.
+
+    \sa layoutSpacing(), layoutSpacingImplementation()
+*/
+int QStyle::combinedLayoutSpacing(QSizePolicy::ControlTypes controls1,
+                                  QSizePolicy::ControlTypes controls2, Qt::Orientation orientation,
+                                  QStyleOption *option, QWidget *widget) const
+{
+    QSizePolicy::ControlType array1[MaxBits];
+    QSizePolicy::ControlType array2[MaxBits];
+    int count1 = unpackControlTypes(controls1, array1);
+    int count2 = unpackControlTypes(controls2, array2);
+    int result = -1;
+
+    for (int i = 0; i < count1; ++i) {
+        for (int j = 0; j < count2; ++j) {
+            int spacing = layoutSpacing(array1[i], array2[j], orientation, option, widget);
+            result = qMax(spacing, result);
+        }
+    }
+    return result;
+}
+
+/*!
+    \since 4.3
+
+    This slot is called by layoutSpacing() to determine the spacing
+    that should be used between \a control1 and \a control2 in a
+    layout. \a orientation specifies whether the controls are laid
+    out side by side or stacked vertically. The \a option parameter
+    can be used to pass extra information about the parent widget.
+    The \a widget parameter is optional and can also be used if \a
+    option is 0.
+
+    If you want to provide custom layout spacings in a QStyle
+    subclass, implement a slot called layoutSpacingImplementation()
+    in your subclass. Be aware that this slot will only be called if
+    PM_LayoutHorizontalSpacing or PM_LayoutVerticalSpacing returns a
+    negative value.
+
+    The default implementation returns -1.
+
+    \sa layoutSpacing(), combinedLayoutSpacing()
+*/
+int QStyle::layoutSpacingImplementation(QSizePolicy::ControlType /* control1 */,
+                                        QSizePolicy::ControlType /* control2 */,
+                                        Qt::Orientation /*orientation*/,
+                                        const QStyleOption * /* option */,
+                                        const QWidget * /* widget */) const
+{
+    return -1;
+}
+
 #if !defined(QT_NO_DEBUG) && !defined(QT_NO_DEBUG_STREAM)
+#include <QDebug>
 QDebug operator<<(QDebug debug, QStyle::State state)
 {
     debug << "QStyle::State(";
@@ -2036,6 +2296,7 @@ QDebug operator<<(QDebug debug, QStyle::State state)
     if (state & QStyle::State_On) states << QLatin1String("On");
     if (state & QStyle::State_Open) states << QLatin1String("Open");
     if (state & QStyle::State_Raised) states << QLatin1String("Raised");
+    if (state & QStyle::State_ReadOnly) states << QLatin1String("ReadOnly");
     if (state & QStyle::State_Selected) states << QLatin1String("Selected");
     if (state & QStyle::State_Sibling) states << QLatin1String("Sibling");
     if (state & QStyle::State_Sunken) states << QLatin1String("Sunken");

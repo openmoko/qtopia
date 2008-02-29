@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,18 +26,20 @@
 
 #include <qdialog.h>
 #include <qlist.h>
-#include "email.h"
+#include <qmap.h>
 
 class QLabel;
 class QTableWidget;
 class QTableWidgetItem;
+class QMailMessagePart;
+class QMailMessage;
 
 class ViewAtt : public QDialog
 {
     Q_OBJECT
 
 public:
-    ViewAtt(Email *mailIn, bool _inbox, QWidget *parent = 0, Qt::WFlags f = 0);
+    ViewAtt(QMailMessage *mailIn, bool _inbox, QWidget *parent = 0, Qt::WFlags f = 0);
     bool eventFilter( QObject *, QEvent * );
 
 public slots:
@@ -50,11 +52,12 @@ private slots:
 private:
     void init();
     QTableWidget *listView;
-    Email *mail;
+    QMailMessage* mail;
     bool inbox;
     QLabel* label;
     QList<QTableWidgetItem*> on;
     QList<QTableWidgetItem*> off;
+    QMap<QTableWidgetItem*,int> attachmentMap; //(tableitem,part index)
 };
 
 #endif

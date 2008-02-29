@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qdatetime.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/tools/qdatetime.cpp -->
 <head>
-  <title>Qt 4.2: Qt 3 Support Members for QDate</title>
+  <title>Qt 4.3: Qt 3 Support Members for QDate</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -17,15 +17,16 @@
 <p><ul><li><a href="qdate.html">QDate class reference</a></li></ul></p>
 <h3>Static Public Members</h3>
 <ul>
-<li><div class="fn"/>QDate <b><a href="qdate-qt3.html#currentDate">currentDate</a></b> ( Qt::TimeSpec <i>spec</i> )</li>
+<li><div class="fn"/>QDate <b><a href="qdate-qt3.html#currentDate-2">currentDate</a></b> ( Qt::TimeSpec <i>spec</i> )</li>
 <li><div class="fn"/>QString <b><a href="qdate-qt3.html#dayName">dayName</a></b> ( int <i>weekday</i> )</li>
 <li><div class="fn"/>bool <b><a href="qdate-qt3.html#leapYear">leapYear</a></b> ( int <i>year</i> )</li>
 <li><div class="fn"/>QString <b><a href="qdate-qt3.html#monthName">monthName</a></b> ( int <i>month</i> )</li>
 </ul>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="currentDate"></a>QDate QDate::currentDate ( <a href="qt.html#TimeSpec-enum">Qt::TimeSpec</a> <i>spec</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>If <i>spec</i> is <a href="qt.html#TimeSpec-enum">Qt::LocalTime</a>, use the currentDate() overload that takes no parameters instead; otherwise, use <a href="qdatetime.html#currentDateTime">QDateTime::currentDateTime</a>().</p>
+<h3 class="fn"><a name="currentDate-2"></a>QDate QDate::currentDate ( <a href="qt.html#TimeSpec-enum">Qt::TimeSpec</a> <i>spec</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>If <i>spec</i> is <a href="qt.html#TimeSpec-enum">Qt::LocalTime</a>, use the <a href="qdate.html#currentDate">currentDate</a>() overload that takes no parameters instead; otherwise, use <a href="qdatetime.html#currentDateTime">QDateTime::currentDateTime</a>().</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> QDate localDate = QDate::currentDate(Qt::LocalTime);
  QDate utcDate = QDate::currentDate(Qt::UTC);</font></pre>
@@ -43,6 +44,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

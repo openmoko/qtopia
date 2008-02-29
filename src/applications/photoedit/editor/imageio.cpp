@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,7 +26,6 @@
 #include <qfile.h>
 #include <qfileinfo.h>
 
-#include <QList>
 #include <QImageWriter>
 
 ImageIO::ImageIO( QObject* parent )
@@ -41,14 +40,68 @@ ImageIO::~ImageIO()
 
 ImageIO::Status ImageIO::load( const QContent& lnk, int levels )
 {
+    static const int maxSize = 2097152;
+    static const int maxArea = 1920000;
     _lnk = lnk;
 
-    return load( QImage( lnk.file() ), levels );
+    QImageReader reader( lnk.fileName() );
+
+    QImage image;
+
+    bool scaled = false;
+
+    if( reader.supportsOption( QImageIOHandler::Size ) )
+    {
+        QSize size = reader.size();
+
+        int area = size.width() * size.height();
+
+        if( area > maxArea )
+        {
+            if( reader.supportsOption( QImageIOHandler::ScaledSize ) )
+            {
+                size *= sqrt( qreal( maxArea ) / qreal( area ) );
+
+                reader.setScaledSize( size );
+
+                scaled = true;
+            }
+            else
+            {
+                _status = SIZE_ERROR;
+
+                return _status;
+            }
+        }
+    }
+    else if( QFileInfo( lnk.file() ).size() > maxSize )
+    {
+        _status = SIZE_ERROR;
+
+        return _status;
+    }
+
+    QByteArray format = reader.format();
+
+    if( reader.read( &image ) )
+    {
+        _status = load( image, levels );
+
+        _format = format;
+
+        if( scaled && _status == NORMAL )
+            _status = REDUCED_SIZE;
+    }
+    else
+        _status = LOAD_ERROR;
+
+    return _status;
 }
 
 ImageIO::Status ImageIO::load( const QImage& image, int levels )
 {
 #define SUPPORTED_DEPTH QImage::Format_ARGB32
+    _format = QByteArray();
 
     // Remove previously loaded image samples
     delete[] image_samples;
@@ -59,19 +112,31 @@ ImageIO::Status ImageIO::load( const QImage& image, int levels )
     if( image.isNull() ) {
         // Notify of change to image
         emit changed();
+
+        _status = LOAD_ERROR;
+
         return LOAD_ERROR;
     }
 
     // Load the original image
-    if( image.depth() == SUPPORTED_DEPTH )
+    switch( image.format() )
+    {
+    case QImage::Format_RGB32:
+    case QImage::Format_ARGB32:
         image_samples[ 0 ] = image;
-    else {
-        // Try to convert image to supported depth
-        image_samples[ 0 ] = image.convertToFormat( SUPPORTED_DEPTH );
-        if( image_samples[ 0 ].isNull() ) {
-            // Notify of change to image
-            emit changed();
-            return DEPTH_ERROR;
+        break;
+    default:
+        {
+            // Try to convert image to supported depth
+            image_samples[ 0 ] = image.convertToFormat( QImage::Format_ARGB32 );
+            if( image_samples[ 0 ].isNull() ) {
+                // Notify of change to image
+                emit changed();
+
+                _status = DEPTH_ERROR;
+
+                return DEPTH_ERROR;
+            }
         }
     }
 
@@ -87,18 +152,20 @@ ImageIO::Status ImageIO::load( const QImage& image, int levels )
     // Notify of change to image
     emit changed();
 
+    _status = NORMAL;
+
     return NORMAL;
 }
 
 bool ImageIO::isSaveSupported() const
 {
-    return QImageWriter::supportedImageFormats().contains( format() );
+    return QImageWriter::supportedImageFormats().contains( _format );
 }
 
 bool ImageIO::isReadOnly() const
 {
-    QFileInfo origFile( _lnk.file() );
-    if ( origFile.exists() && !origFile.isWritable() )
+    QFileInfo origFile( _lnk.fileName() );
+    if ( !origFile.exists() || !origFile.isWritable() || _status != NORMAL )
         return true;
 
     return false;
@@ -107,16 +174,16 @@ bool ImageIO::isReadOnly() const
 bool ImageIO::save( const QImage& image, bool overwrite )
 {
 #define DEFAULT_FORMAT "PNG"
-#define DEFAULT_EXTENSION ".png"
+#define DEFAULT_MIME_TYPE "image/png"
 
     // If saving supported, save using original format
     // Otherwise, save using default format
-    QString filename( _lnk.file() );
+    QString filename( _lnk.fileName() );
     if( isSaveSupported() ) {
         // If overwriting, save image to current file
         // Otherwise, save image as new file
         if( overwrite ) {
-            if( image.save( filename, QImageReader::imageFormat( filename ).data() ) ) {
+            if( image.save( filename, _format.constData() ) ) {
                 // Generate link changed signal to notify of change to image
                 _lnk.commit();
 
@@ -124,44 +191,51 @@ bool ImageIO::save( const QImage& image, bool overwrite )
             }
         } else {
             // Generate unique file name
-            QFileInfo file( filename );
-            QString extension( "." + file.suffix() );
-            QString new_file( filename.left(
-                filename.length() - extension.length() ) );
-            do new_file += "_new";
-            while( QFile::exists( new_file + extension ) );
-            // Create new doc link
             QContent lnk;
             // Perserve name and category
             lnk.setName( _lnk.name() );
+            lnk.setType( _lnk.type() );
+            lnk.setMedia( _lnk.media() );
             lnk.setCategories( _lnk.categories() );
             // Save image to disk
-            new_file += extension;
-            if( image.save( new_file, QImageReader::imageFormat( filename ).data() ) ) {
-                lnk.setFile( new_file );
+            QIODevice *device = lnk.open( QIODevice::WriteOnly );
+            if( device && image.save( device, _format.constData() ) ) {
+                device->close();
+                delete device;
                 lnk.commit();
+
                 return true;
+            }
+            else if( device )
+            {
+                delete device;
+
+                lnk.removeFiles();
             }
         }
     } else {
         // Generate unique file name
-        QFileInfo file( filename );
-        QString new_file( filename.left(
-            filename.length() - file.suffix().length() - 1 ) );
-        do new_file += "_new";
-        while( QFile::exists( new_file + DEFAULT_EXTENSION ) );
-        // Create new doc link
-        QContent lnk;
-        // Preserve name and category
-        lnk.setName( _lnk.name() );
-        lnk.setCategories( _lnk.categories() );
-        // Save image to disk
-        new_file += DEFAULT_EXTENSION;
-        if( image.save( new_file, DEFAULT_FORMAT ) ) {
-            lnk.setFile( new_file );
-            lnk.commit();
-            return true;
-        }
+            QContent lnk;
+            // Perserve name and category
+            lnk.setName( _lnk.name() );
+            lnk.setType( DEFAULT_MIME_TYPE );
+            lnk.setMedia( _lnk.media() );
+            lnk.setCategories( _lnk.categories() );
+            // Save image to disk
+            QIODevice *device = lnk.open( QIODevice::WriteOnly );
+            if( device && image.save( device, DEFAULT_FORMAT ) ) {
+                device->close();
+                delete device;
+                lnk.commit();
+
+                return true;
+            }
+            else if( device )
+            {
+                delete device;
+
+                lnk.removeFiles();
+            }
     }
 
     return false;

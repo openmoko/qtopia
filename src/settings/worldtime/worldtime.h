@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,6 +28,7 @@
 #include <QTimerEvent>
 #include <QPushButton>
 #include <QToolButton>
+#include <QGridLayout>
 
 #include "cityinfo.h"
 #include <qtopiaglobal.h>
@@ -61,22 +62,28 @@ public:
 
 public slots:
     void beginNewTz();
+    void beginNewTz(int);
+    void addClock();
+    void removeClock();
     void slotNewTz( const QTimeZone& zone );
-    void setZone( const int index );
+    void slotComboSetZone( const int index );
     void slotNewTzCancelled();
     void saveChanges();
     void cancelChanges();
+    void applyChange();
 
 signals:
     void timeZoneListChange();
 
 protected:
     void timerEvent( QTimerEvent* );
-
+    void keyReleaseEvent( QKeyEvent * );
+    
 private slots:
     void showTime();
     void editMode();
     void viewMode();
+    void selected();
 
 private:
     void readInTimes( void );   // a method to get information from the config
@@ -84,13 +91,24 @@ private:
     QString strRealTz;  // save the TZ var
     bool bAdded;        // a flag to indicate things have been added...
     int timerId;
-
+    int currentCombo;
+    int currentComboIndex;
+    QString currentCity;
+    int visibleZones;
+    int maxVisibleZones;
+    QGridLayout *gl;
+    int getCurrentComboIndex(int);
+    QAction *addClockAction;
+    QAction *removeClockAction;
+    void checkMenu();
+    
     // a spot to hold the time zone for each city
     QString strCityTz[CITIES];
     QList<QPushButton *> listCities;
+    QList<QComboBox *> listBoxes;    
     QList<CityInfo *> listTimes;
     QStackedWidget *mStack;
-    QComboBox *mCombo;
+//    QComboBox *mCombo;
     bool changed;
     QToolButton *tb;
     QWorldmap *frmMap;

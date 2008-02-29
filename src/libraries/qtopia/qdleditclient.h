@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,9 +26,7 @@
 #include "qdlclient.h"
 
 // Qt includes
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <QMenu>
-#endif //QTOPIA_KEYPAD_NAVIGATION
 
 // Forward class declarations
 class QDLLink;
@@ -49,9 +47,7 @@ public:
     QDLEditClient( QTextEdit *edit, const QString& name );
     virtual ~QDLEditClient();
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QMenu *setupStandardContextMenu( QMenu *context = 0 );
-#endif
 
     // Access
     bool isValid() const;

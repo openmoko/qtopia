@@ -24,7 +24,7 @@
 <li><div class="fn"/>virtual <b><a href="consoleapplicationlauncher.html#dtor.ConsoleApplicationLauncher">~ConsoleApplicationLauncher</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
+<li><div class="fn"/>5 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="applicationipcrouter-routedestination.html#public-functions">ApplicationIpcRouter::RouteDestination</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
@@ -50,9 +50,10 @@
 <tr valign="top" class="even"><td>Interfaces</td><td><a href="applicationtypelauncher.html">ApplicationTypeLauncher</a></td></tr>
 <tr valign="top" class="odd"><td>Services</td><td>None</td></tr>
 </table></p>
-<p>The ConsoleApplicationLauncher class provides the ApplicationLauncherType implementation for non-graphical, console applications.</p>
+<p>The ConsoleApplicationLauncher class provides the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> implementation for non-graphical, console applications.</p>
 <p>Any Linux executable may be a console application. Console applications are distinguished from regular, GUI applications by the &quot;ConsoleApplication&quot; property in their content description being set to &quot;1&quot;.</p>
 <p>Console applications are started whenever any application is sent to their application channel. They do not respond to any messages specifically. Qtopia does not try to manage (or understand) the life cycle of console applications. An application is considered &quot;Running&quot; as soon as the executable is started (as opposed to regular Qtopia applications that must create the <a href="qtopiaapplication.html">QtopiaApplication</a> object first).</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="ConsoleApplicationLauncher"></a>ConsoleApplicationLauncher::ConsoleApplicationLauncher ()</h3>
@@ -63,6 +64,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

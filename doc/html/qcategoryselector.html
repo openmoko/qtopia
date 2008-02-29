@@ -20,7 +20,7 @@
 <a name="public-types"></a>
 <h3>Public Types</h3>
 <ul>
-<li><div class="fn"/>enum <b><a href="qcategoryselector.html#ContentFlag-enum">ContentFlag</a></b> { IncludeAll, IncludeUnfiled, ListView, ComboView, ..., ViewMask }</li>
+<li><div class="fn"/>enum <b><a href="qcategoryselector.html#ContentFlag-enum">ContentFlag</a></b> { IncludeAll, IncludeUnfiled, SingleSelection, ListView, ..., ViewMask }</li>
 <li><div class="fn"/>flags <b><a href="qcategoryselector.html#ContentFlag-enum">ContentFlags</a></b></li>
 </ul>
 <a name="public-functions"></a>
@@ -33,7 +33,7 @@
 <li><div class="fn"/>QCategoryFilter <b><a href="qcategoryselector.html#selectedFilter">selectedFilter</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -62,7 +62,7 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>5 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
@@ -87,8 +87,8 @@
 <pre>    MyWidget::MyWidget()
     {
         QCategorySelector *sel = new QCategorySelector( &quot;myappscope&quot;, QCategorySelector::Filter );
-        connect( sel, SIGNAL(filterSelected(const QCategoryFilter&amp;)),
-                 this, SLOT(filterCategories(const QCategoryFilter&amp;)) );
+        connect( sel, SIGNAL(filterSelected(QCategoryFilter)),
+                 this, SLOT(filterCategories(QCategoryFilter)) );
         QSettings settings(&quot;mycompany&quot;, &quot;myapp&quot;);
         QCategoryFilter f;
         f.readConfig( settings, &quot;filter&quot; );
@@ -107,8 +107,8 @@
     {
         QCategorySelector *sel = new QCategorySelector( &quot;myappscope&quot;, QCategorySelector::Editor );
         sel-&gt;selectCategories( item-&gt;categories() );
-        connect( sel, SIGNAL(categoriesSelected(const QList&lt;QString&gt;&amp;)),
-                 item, SLOT(setCategories(const QList&lt;QString&gt;&amp;)) );
+        connect( sel, SIGNAL(categoriesSelected(QList&lt;QString&gt;)),
+                 item, SLOT(setCategories(QList&lt;QString&gt;)) );
     }</pre>
 <p>See also <a href="categories.html">Categories</a>.</p>
 <hr />
@@ -118,6 +118,7 @@
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QCategorySelector::IncludeAll</tt></td><td align="center" valign="top"><tt>0x04</tt></td><td valign="top">Include the All categories option.</td></tr>
 <tr><td valign="top"><tt>QCategorySelector::IncludeUnfiled</tt></td><td align="center" valign="top"><tt>0x08</tt></td><td valign="top">Include the Unfiled categories option.</td></tr>
+<tr><td valign="top"><tt>QCategorySelector::SingleSelection</tt></td><td align="center" valign="top"><tt>0x80</tt></td><td valign="top">Allow selection of a single category. The default is to allow combinations of categories.</td></tr>
 <tr><td valign="top"><tt>QCategorySelector::ListView</tt></td><td align="center" valign="top"><tt>0x10</tt></td><td valign="top">Display as a list view.</td></tr>
 <tr><td valign="top"><tt>QCategorySelector::ComboView</tt></td><td align="center" valign="top"><tt>0x20</tt></td><td valign="top">Display as a combo box. Note that this will encourage exclusive selection of categories.</td></tr>
 <tr><td valign="top"><tt>QCategorySelector::DialogView</tt></td><td align="center" valign="top"><tt>0x40</tt></td><td valign="top">Display as a button that opens a dialog containing a list view.</td></tr>
@@ -164,6 +165,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -5,16 +5,15 @@ start)
     # Device address is not actually burned into the device ROM, must be set in software
     # The address is stored in the TAT table
     # If the address is not set accordingly, run the fixbdaddr tool in devtools
-    BDADDR=`/mnt/user/tools/tat bdaddr`
+    BDADDR=$(/usr/bin/tat bdaddr)
 
     hciattach /dev/ttyS1 stlc2500 921600 noflow $BDADDR
 
     # Make sure hcid and sdpd are started afterwards
-    hcid
-    sdpd
+    hcid -s
     ;;
 stop)
-    kill $( pidof hcid sdpd hciattach ) 2>/dev/null
+    kill $( pidof hcid hciattach ) 2>/dev/null
     ;;
 *)
     echo "usage: $0 { start | stop }"

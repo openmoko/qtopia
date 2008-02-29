@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -26,8 +41,8 @@
 #include <qt_windows.h>
 #endif
 
-#include <QtGui/QPaintDevice>
-#include <QtGui/QWidget>
+#include <QtGui/qpaintdevice.h>
+#include <QtGui/qwidget.h>
 
 #include "private/qwindowsurface_raster_p.h"
 #include "private/qpaintengine_raster_p.h"
@@ -84,7 +99,7 @@ struct QRasterWindowSurfacePrivate
 };
 
 QRasterWindowSurface::QRasterWindowSurface(QWidget *window)
-    : d_ptr(new QRasterWindowSurfacePrivate)
+    : QWindowSurface(window), d_ptr(new QRasterWindowSurfacePrivate)
 {
     Q_ASSERT(window->isTopLevel());
     d_ptr->device.setWindow(window);
@@ -128,19 +143,15 @@ void QRasterWindowSurface::flush(QWidget *widget, const QRegion &rgn, const QPoi
 
 void QRasterWindowSurface::setGeometry(const QRect &rect)
 {
+    QWindowSurface::setGeometry(rect);
+
     const QSize size = static_cast<QRasterPaintEngine*>(d_ptr->device.paintEngine())->size();
     if (size == rect.size())
         return;
-    QRasterWindowSurface::release();
-}
-
-void QRasterWindowSurface::release()
-{
     static_cast<QRasterPaintEngine *>(d_ptr->device.paintEngine())->releaseBuffer();
 }
 
-
-void QRasterWindowSurface::scroll(const QRegion &area, int dx, int dy)
+bool QRasterWindowSurface::scroll(const QRegion &area, int dx, int dy)
 {
 #ifdef Q_WS_WIN
     QRect rect = area.boundingRect();
@@ -148,22 +159,19 @@ void QRasterWindowSurface::scroll(const QRegion &area, int dx, int dy)
     QRasterPaintEngine *engine = static_cast<QRasterPaintEngine *>(d_ptr->device.paintEngine());
     HDC engine_dc = engine->getDC();
     if (!engine_dc)
-        return;
+        return false;
 
     BitBlt(engine_dc, rect.x()+dx, rect.y()+dy, rect.width(), rect.height(),
            engine_dc, rect.x(), rect.y(), SRCCOPY);
 
     engine->releaseDC(engine_dc);
+
+    return true;
 #else
     Q_UNUSED(area);
     Q_UNUSED(dx);
     Q_UNUSED(dy);
+    return false;
 #endif
 }
 
-QRect QRasterWindowSurface::geometry() const
-{
-    const QPoint offset = d_ptr->device.window()->geometry().topLeft();
-    const QSize size = static_cast<QRasterPaintEngine *>(d_ptr->device.paintEngine())->size();
-    return QRect(offset, size);
-}

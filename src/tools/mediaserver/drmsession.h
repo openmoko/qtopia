@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,19 +23,23 @@
 #define __QTOPIA_MEDIASERVER_DRMSESSION_H
 
 
-#include "mediasession.h"
+#include <QObject>
+#include <QUrl>
+
+#include <qmediaserversession.h>
+
 
 namespace mediaserver
 {
 
 class DrmSessionPrivate;
 
-class DrmSession : public MediaSession
+class DrmSession : public QMediaServerSession
 {
     Q_OBJECT
 
 public:
-    DrmSession(QString const& url, MediaSession* mediaSession);
+    DrmSession(QUrl const& url, QMediaServerSession* mediaSession);
     ~DrmSession();
 
     void start();
@@ -62,6 +66,13 @@ public:
     QString domain() const;
 
     QStringList interfaces();
+
+    QString id() const;
+    QString reportData() const;
+
+private slots:
+    void licenseExpired();
+    void changeLicenseState(QtopiaMedia::State state);
 
 private:
     DrmSessionPrivate*  d;

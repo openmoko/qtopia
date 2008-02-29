@@ -13,11 +13,6 @@ SOURCES		= keyboard.cpp \
 		    keyboardimpl.cpp\
                     keyboardframe.cpp
 
-desktop.files=$$QTOPIA_DEPOT_PATH/plugins/inputmethods/qkeyboard.desktop
-desktop.path=/plugins/inputmethods/
-desktop.hint=desktop
-INSTALLS+=desktop
-
 pics.files=$${QTOPIA_DEPOT_PATH}/pics/keyboard/*
 pics.path=/pics/keyboard
 pics.hint=pics

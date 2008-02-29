@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: List of All Members for QFSFileEngine</title>
+  <title>Qt 4.3: List of All Members for QFSFileEngine</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -15,14 +15,20 @@
 <p>This is the complete list of members for <a href="qfsfileengine.html">QFSFileEngine</a>, including inherited members.</p>
 <p><table width="100%" border="0" cellpadding="0" cellspacing="0">
 <tr><td width="45%" valign="top"><ul>
+<li><div class="fn"/>class <a href="qabstractfileengine-extensionoption.html">ExtensionOption</a></li>
+<li><div class="fn"/>class <a href="qabstractfileengine-extensionreturn.html">ExtensionReturn</a></li>
+<li><div class="fn"/>enum <a href="qabstractfileengine.html#Extension-enum">Extension</a></li>
 <li><div class="fn"/>enum <a href="qabstractfileengine.html#FileFlag-enum">FileFlag</a></li>
 <li><div class="fn"/>flags <a href="qabstractfileengine.html#FileFlag-enum">FileFlags</a></li>
 <li><div class="fn"/>enum <a href="qabstractfileengine.html#FileName-enum">FileName</a></li>
 <li><div class="fn"/>enum <a href="qabstractfileengine.html#FileOwner-enum">FileOwner</a></li>
 <li><div class="fn"/>enum <a href="qabstractfileengine.html#FileTime-enum">FileTime</a></li>
+<li><div class="fn"/>typedef <a href="qabstractfileengine.html#Iterator-typedef">Iterator</a></li>
 <li><div class="fn"/><a href="qfsfileengine.html#QFSFileEngine">QFSFileEngine</a> ()</li>
 <li><div class="fn"/><a href="qfsfileengine.html#QFSFileEngine-2">QFSFileEngine</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qfsfileengine.html#dtor.QFSFileEngine">~QFSFileEngine</a> ()</li>
+<li><div class="fn"/><a href="qabstractfileengine.html#atEnd">atEnd</a> () const : bool</li>
+<li><div class="fn"/><a href="qabstractfileengine.html#beginEntryList">beginEntryList</a> ( QDir::Filters, const QStringList &amp; ) : Iterator *</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#caseSensitive">caseSensitive</a> () const : bool</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#close">close</a> () : bool</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#copy">copy</a> ( const QString &amp; ) : bool</li>
@@ -32,19 +38,19 @@
 <li><div class="fn"/><a href="qabstractfileengine.html#entryList">entryList</a> ( QDir::Filters, const QStringList &amp; ) const : QStringList</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#error">error</a> () const : QFile::FileError</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#errorString">errorString</a> () const : QString</li>
+<li><div class="fn"/><a href="qabstractfileengine.html#extension">extension</a> ( Extension, const ExtensionOption *, ExtensionReturn * ) : bool</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#fileFlags">fileFlags</a> ( FileFlags ) const : FileFlags</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#fileName">fileName</a> ( FileName ) const : QString</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#fileTime">fileTime</a> ( FileTime ) const : QDateTime</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#flush">flush</a> () : bool</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qabstractfileengine.html#handle">handle</a> () const : int</li>
 <li><div class="fn"/><a href="qfsfileengine.html#homePath">homePath</a> () : QString</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#isRelativePath">isRelativePath</a> () const : bool</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#isSequential">isSequential</a> () const : bool</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qabstractfileengine.html#link">link</a> ( const QString &amp; ) : bool</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#mkdir">mkdir</a> ( const QString &amp;, bool ) const : bool</li>
-<li><div class="fn"/><a href="qabstractfileengine.html#open">open</a> ( QIODevice::OpenMode ) : bool</li>
-<li><div class="fn"/><a href="qfsfileengine.html#open-2">open</a> ( QIODevice::OpenMode, FILE * ) : bool</li>
+<li><div class="fn"/><a href="qfsfileengine.html#open">open</a> ( QIODevice::OpenMode, FILE * ) : bool</li>
 <li><div class="fn"/><a href="qfsfileengine.html#open-3">open</a> ( QIODevice::OpenMode, int ) : bool</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#owner">owner</a> ( FileOwner ) const : QString</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#ownerId">ownerId</a> ( FileOwner ) const : uint</li>
@@ -62,6 +68,7 @@
 <li><div class="fn"/><a href="qabstractfileengine.html#setPermissions">setPermissions</a> ( uint ) : bool</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#setSize">setSize</a> ( qint64 ) : bool</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#size">size</a> () const : qint64</li>
+<li><div class="fn"/><a href="qabstractfileengine.html#supportsExtension">supportsExtension</a> ( Extension ) const : bool</li>
 <li><div class="fn"/><a href="qfsfileengine.html#tempPath">tempPath</a> () : QString</li>
 <li><div class="fn"/><a href="qabstractfileengine.html#write">write</a> ( const char *, qint64 ) : qint64</li>
 </ul>
@@ -71,6 +78,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

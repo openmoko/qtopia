@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -46,14 +46,26 @@
  *
  *******************************************************************/
 
+class TimeZoneLocation;
+class TimeZoneData;
+class TzCache;
+
 class TimeZonePrivate
 {
+    mutable TimeZoneLocation *loc;
+    mutable TimeZoneData *dat;
+    QString ident;
+
 public:
-    TimeZonePrivate( QString idLocation ) : id(idLocation)
+    TimeZonePrivate( QString idLocation ) : loc(0), dat(0), ident(idLocation)
     {
     }
 
-    QString id;
+    const QString& id() const { return ident; }
+    void setId(const QString id) { ident=id; loc=0; dat=0; }
+
+    TimeZoneLocation *location() const;
+    TimeZoneData *data() const;
 
     static QString zonePath();
     static QString zoneFile();
@@ -109,9 +121,7 @@ QString TimeZonePrivate::zonePath()
     if ( sZonePath.isNull() ) {
 #if defined(QTOPIA_ZONEINFO_PATH)
         sZonePath = QTOPIA_ZONEINFO_PATH;
-#elif defined(Q_OS_WIN32)
-        sZonePath = Qtopia::qtopiaDir() + "etc\\zoneinfo\\";
-#elif defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+#elif !defined(Q_OS_MAC)
         sZonePath = "/usr/share/zoneinfo/";
 #else
         sZonePath = Qtopia::qtopiaDir() + "etc/zoneinfo/";
@@ -142,10 +152,12 @@ public:
     TimeZoneData() : mId(0) { }
     TimeZoneData( const QString &id );
 
-    bool match( const QDateTime &t,
-        long utcOffset, bool dst,
+    bool matchAbbrev( const QDateTime &t,
         QString standardAbbrev,
         QString daylightAbbrev ) const;
+
+    bool matchTime( const QDateTime &t,
+        long utcOffset, bool isdst ) const;
 
     bool isValid() const;
     bool isDaylightSavings( const QDateTime & ) const;
@@ -155,9 +167,6 @@ public:
     QString id() const { return mId; }
     QString standardAbbreviation() const;
     QString dstAbbreviation() const;
-
-    /* for debugging purposes */
-    //void dump() const;
 
     static TimeZoneData *null;
 
@@ -190,8 +199,7 @@ private:
 
 TimeZoneData *TimeZoneData::null = new TimeZoneData();
 
-bool TimeZoneData::match( const QDateTime &c,
-                          long utcOffset, bool hasDst,
+bool TimeZoneData::matchAbbrev( const QDateTime &c,
                           QString standardAbbrev,
                           QString daylightAbbrev ) const
 {
@@ -200,20 +208,22 @@ bool TimeZoneData::match( const QDateTime &c,
 
     ttinfo transInfo = timeTypes[ findTimeTypeIndex( c, false ) ];
 
-    utcOffset *= -1;
+    if ( mDstRule )
+        return ( daylightAbbrev == abbreviations[ transInfo.abbreviationIndex ] );
 
-    if ( (utcOffset == transInfo.utcOffset) && (hasDst == mDstRule) ) {
-        // if not given abbreviation string to match, then matching
-        // on offset is the best we can do
-        if ( standardAbbrev.isEmpty() )
-            return true;
+    return ( standardAbbrev == abbreviations[ transInfo.abbreviationIndex ] );
+}
 
-        if ( hasDst )
-            return ( daylightAbbrev == abbreviations[ transInfo.abbreviationIndex ] );
-        return ( standardAbbrev == abbreviations[ transInfo.abbreviationIndex ] );
-    }
 
-    return false;
+bool TimeZoneData::matchTime( const QDateTime &c,
+                          long utcOffset, bool isdst ) const
+{
+    if ( !isValid() )
+        return false;
+
+    ttinfo transInfo = timeTypes[ findTimeTypeIndex( c, false ) ];
+
+    return transInfo.isDst == isdst && utcOffset == transInfo.utcOffset;
 }
 
 
@@ -267,7 +277,7 @@ QString TimeZoneData::standardAbbreviation() const
 
         transIndex--;
     }
-    return "";
+    return QString();
 }
 
 QString TimeZoneData::dstAbbreviation() const
@@ -282,7 +292,7 @@ QString TimeZoneData::dstAbbreviation() const
 
         transIndex--;
     }
-    return "";
+    return QString();
 }
 
 bool TimeZoneData::isDaylightSavings( const QDateTime & c ) const
@@ -293,18 +303,22 @@ bool TimeZoneData::isDaylightSavings( const QDateTime & c ) const
 
 QDateTime TimeZoneData::toUtc( const QDateTime &thisT ) const
 {
+    QDateTime dt(thisT.date(), thisT.time(), Qt::UTC);
     if ( !isValid() ) { qWarning("TimeZoneData::toUtc invalid"); return QDateTime(); }
     // find the appropriate utc time
-    int timeIndex = findTimeTypeIndex( thisT, false );
-    return thisT.addSecs( -1 * timeTypes[ timeIndex ].utcOffset );
+    int timeIndex = findTimeTypeIndex( dt, false );
+    dt = dt.addSecs( -1 * timeTypes[ timeIndex ].utcOffset );
+    dt.setTimeSpec(Qt::LocalTime);
+    return dt;
 }
 
 QDateTime TimeZoneData::fromUtc( const QDateTime &utc ) const
 {
+    QDateTime dt(utc.date(), utc.time(), Qt::UTC);
     if ( !isValid() ) { qWarning("TimeZoneData::fromUtc invalid"); return QDateTime(); }
     // convert from utc to "this" timezone
-    int timeIndex = findTimeTypeIndex( utc, true );
-    QDateTime rv = utc.addSecs( timeTypes[ timeIndex ].utcOffset );
+    int timeIndex = findTimeTypeIndex( dt, true );
+    QDateTime rv = dt.addSecs( timeTypes[ timeIndex ].utcOffset );
     rv.setTimeSpec(Qt::LocalTime);
     return rv;
 }
@@ -435,32 +449,6 @@ TimeZoneData::TimeZoneData( const QString & loc ) : mId( loc ), mDstRule( false 
     }
 }
 
-/*void TimeZoneData::dump() const
-{
-    if ( !isValid() ) {
-        qDebug("Loading failed!");
-        //return;
-    }
-
-    qDebug("TimeZoneData::dump() for %s", (const char *)(TimeZonePrivate::zonePath() + id()).toLatin1());
-    qDebug("numTransitionTimes %d numTimeTypes %d",
-           transitionTimes.count(), timeTypes.count() );
-
-    int i;
-    for ( i = 0; i < (int) transitionTimes.count(); ++i )
-        qDebug(" transitionTimes[%d] = %s\t\ttimeTypeIndex %d", i, (const char *)transitionTimes[i].time.toString().toLatin1(), transitionTimes[i].timeTypeIndex );
-
-
-    for ( i = 0; i < (int) timeTypes.count(); ++i ) {
-        ttinfo offsetInfo = timeTypes[i];
-        qDebug("time type[%d] => offset: %d isdst %d abbrev timeTypeIndex: %d abbrev %s isWall %d isTransitionLocal %d",
-               i, offsetInfo.utcOffset/(60*60), offsetInfo.isDst, offsetInfo.abbreviationIndex, (const char *)abbreviations[offsetInfo.abbreviationIndex].toAscii(),
-               (int) offsetInfo.isWallTime, (int) offsetInfo.isTransitionLocal );
-    }
-
-    qDebug("TimeZoneData::dump() for %s", (const char *)(TimeZonePrivate::zonePath() + id()).toLatin1());
-}*/
-
 /*******************************************************************
  *
  * TimeZoneLocation
@@ -486,8 +474,6 @@ public:
     QByteArray id() const;
     int distance( const TimeZoneLocation &e ) const
         { return qAbs(latitude() - e.latitude()) + qAbs(longitude() - e.longitude()); }
-
-    //void dump() const;
 
     static void load( QHash<QByteArray,TimeZoneLocation*> &store );
     static QStringList languageList();
@@ -648,18 +634,6 @@ QByteArray TimeZoneLocation::id() const
     return mId;
 }
 
-/*void TimeZoneLocation::dump() const
-{
-    if (!this) {
-        return;
-    }
-    qDebug("%s at [%d,%d]: %s",
-           (const char *)id(), mLat, mLon,
-           (const char *)mDescription.constData() );
-    qDebug("City :%s, Area: %s, Country Code %s", (const char *)city().toLatin1(), (const char *)area().toLatin1(), (const char *)countryCode().toLatin1());
-}*/
-
-
 QStringList TimeZoneLocation::languageList()
 {
     return Qtopia::languageList();
@@ -719,6 +693,8 @@ public:
     TimeZoneData *data( const QString &id );
     TimeZoneLocation *location( const QString &id );
     QStringList ids();
+    TimeZoneData *findFromMinutesEast(QDateTime t, int mineast, bool isdst);
+
 
 private:
     TzCache();
@@ -763,6 +739,17 @@ TimeZoneData *TzCache::data( const QString &id )
     return d;
 }
 
+TimeZoneData *TzCache::findFromMinutesEast(QDateTime t, int mineast, bool isdst)
+{
+    QMap<QString,TimeZoneData*>::const_iterator it = mDataDict.begin();
+    while ( it != mDataDict.end()) {
+        if ( (*it)->matchTime(t,mineast*60,isdst) )
+            return *it;
+        ++it;
+    }
+    return 0;
+}
+
 TimeZoneLocation *TzCache::location( const QString &id )
 {
     if ( id.isEmpty() )
@@ -777,6 +764,20 @@ QStringList TzCache::ids()
     foreach(QByteArray key, mLocationDict.keys())
         rv << key;
     return rv;
+}
+
+TimeZoneLocation *TimeZonePrivate::location() const
+{
+    if ( !loc )
+        loc = TzCache::instance().location( ident );
+    return loc;
+}
+
+TimeZoneData *TimeZonePrivate::data() const
+{
+    if ( !dat )
+        dat = TzCache::instance().data( ident );
+    return dat;
 }
 
 /*******************************************************************
@@ -837,7 +838,7 @@ QTimeZone::QTimeZone( const char * locId ) : d( new TimeZonePrivate( locId ) )
   Constructs a copy of the \a other QTimeZone.
 */
 QTimeZone::QTimeZone( const QTimeZone & other ) :
-    d( new TimeZonePrivate( other.d->id ) )
+    d( new TimeZonePrivate( other.d->id() ) )
 {
 }
 
@@ -854,7 +855,7 @@ QTimeZone::~QTimeZone()
 */
 void QTimeZone::setId( const char *id )
 {
-    d->id = id;
+    d->setId(id);
 }
 
 /*!
@@ -862,7 +863,7 @@ void QTimeZone::setId( const char *id )
 */
 QTimeZone &QTimeZone::operator=( const QTimeZone &from)
 {
-    d->id = from.d->id;
+    d->setId(from.d->id());
     return *this;
 }
 
@@ -871,7 +872,7 @@ QTimeZone &QTimeZone::operator=( const QTimeZone &from)
 */
 bool QTimeZone::operator==( const QTimeZone &c) const
 {
-    return (d->id == c.d->id);
+    return (d->id() == c.d->id());
 }
 
 /*!
@@ -879,23 +880,37 @@ bool QTimeZone::operator==( const QTimeZone &c) const
 */
 bool QTimeZone::operator!=( const QTimeZone &c) const
 {
-    return (d->id != c.d->id);
+    return (d->id() != c.d->id());
 }
 
-/*
-  //internal
-void QTimeZone::dump() const
+/*!
+  Returns a time zone that, at time \a t, is \a mineast minutes ahead of GMT,
+  and is observing Daylight Time according to \a isdst.
+
+  Usually, the returned timezone will be a UNIX GMT time zone offset
+  (eg. "GMT-10" for 10 hours East of GMT), however, if no such timezone
+  exists (eg. for half-hour time zones), a city time zone will be returned.
+*/
+QTimeZone QTimeZone::findFromMinutesEast(const QDateTime& t, int mineast, bool isdst)
 {
-    TzCache::instance().data( d->id )->dump();
-    TzCache::instance().location( d->id )->dump();
-}*/
+    if ( mineast % 60 == 0 ) {
+        QString s;
+        s.sprintf("Etc/GMT%+d",-mineast/60);
+        return QTimeZone(s.toLatin1().data());
+    }
+
+    // Fallback: find non-standard city
+    TimeZoneData *data = TzCache::instance().findFromMinutesEast(t,mineast,isdst);
+    return QTimeZone(data ? data->id().toLatin1().data() : 0);
+}
 
 /*!
   Return a time zone located at the UTC reference.
 */
 QTimeZone QTimeZone::utc()
 {
-    return QTimeZone("Europe/London");
+    //return QTimeZone("Europe/London");
+    return QTimeZone("UTC");
 }
 
 /*!
@@ -932,7 +947,7 @@ uint QTimeZone::toTime_t( const QDateTime &dt ) const
 */
 QDateTime QTimeZone::toUtc( const QDateTime &dt ) const
 {
-    TimeZoneData *data = TzCache::instance().data( d->id );
+    TimeZoneData *data = d->data();
     return data->toUtc( dt );
 }
 
@@ -941,7 +956,7 @@ QDateTime QTimeZone::toUtc( const QDateTime &dt ) const
 */
 QDateTime QTimeZone::fromUtc( const QDateTime &utc ) const
 {
-    TimeZoneData *data = TzCache::instance().data( d->id );
+    TimeZoneData *data = d->data();
     return data->fromUtc( utc );
 }
 
@@ -1023,24 +1038,21 @@ QTimeZone QTimeZone::current()
     if ( !currentLoc.isEmpty() )
         return QTimeZone( currentLoc.toAscii().constData() );
 
-#ifndef Q_OS_WIN32
     qWarning("QTimeZone::current Location information is not set in the QSettings file locale!");
-#endif
     // this is mainly for windows side code, in the initial case
     tzset();
     QString standardAbbrev, daylightAbbrev;
 
-#ifndef Q_OS_WIN32
     standardAbbrev = tzname[0];
     daylightAbbrev = tzname[1];
-#endif
+
     QDateTime today = QDateTime::currentDateTime();
     QStringList allIds = TzCache::instance().ids();
     foreach (QString id, allIds) {
         if (id.isEmpty())
             continue;
         TimeZoneData *data = TzCache::instance().data( id );
-        if ( data->match( today, timezone, daylight, standardAbbrev, daylightAbbrev ) ) {
+        if ( data->matchAbbrev( today, standardAbbrev, daylightAbbrev ) ) {
             currentLoc = id;
             break;
         }
@@ -1062,7 +1074,7 @@ QTimeZone QTimeZone::current()
 */
 QString QTimeZone::id() const
 {
-    return d->id;
+    return d->id();
 }
 
 /*!
@@ -1070,8 +1082,11 @@ QString QTimeZone::id() const
 */
 bool QTimeZone::isValid() const
 {
-    TimeZoneData *data = TzCache::instance().data( d->id );
-    TimeZoneLocation *loc = TzCache::instance().location( d->id );
+    TimeZoneData *data = d->data();
+    TimeZoneLocation *loc = d->location();
+
+    if (d->id() == "UTC" && data->isValid())
+        return true;
     return data->isValid() && loc && loc->isValid();
 }
 
@@ -1080,7 +1095,7 @@ bool QTimeZone::isValid() const
 */
 QString QTimeZone::dstAbbreviation() const
 {
-    TimeZoneData *data = TzCache::instance().data( d->id );
+    TimeZoneData *data = d->data();
     return data->dstAbbreviation();
 }
 
@@ -1089,8 +1104,8 @@ QString QTimeZone::dstAbbreviation() const
 */
 QString QTimeZone::standardAbbreviation() const
 {
-    TimeZoneData *data = TzCache::instance().data( d->id );
-    return data->dstAbbreviation();
+    TimeZoneData *data = d->data();
+    return data->standardAbbreviation();
 }
 
 /*!
@@ -1106,7 +1121,7 @@ QStringList QTimeZone::ids()
 */
 int QTimeZone::latitude() const
 {
-    TimeZoneLocation *loc = TzCache::instance().location( d->id );
+    TimeZoneLocation *loc = d->location();
     if ( loc )
         return loc->latitude();
     return 0;
@@ -1118,7 +1133,7 @@ int QTimeZone::latitude() const
 */
 int QTimeZone::longitude() const
 {
-    TimeZoneLocation *loc = TzCache::instance().location( d->id );
+    TimeZoneLocation *loc = d->location();
     if ( loc )
         return loc->longitude();
     return 0;
@@ -1129,7 +1144,7 @@ int QTimeZone::longitude() const
 */
 QString QTimeZone::description() const
 {
-    TimeZoneLocation *loc = TzCache::instance().location( d->id );
+    TimeZoneLocation *loc = d->location();
     if ( loc )
         return loc->description();
     return QString();
@@ -1140,18 +1155,43 @@ QString QTimeZone::description() const
 */
 QString QTimeZone::area() const
 {
-    TimeZoneLocation *loc = TzCache::instance().location( d->id );
+    TimeZoneLocation *loc = d->location();
     if ( loc )
         return loc->area();
     return QString();
 }
 
 /*!
-  Returns the translated city of this time zone, e.g. Oslo.
+  Returns either the city() for this time zone, or some other
+  string meaningful to the user (eg. "GMT+10" meaning 10 hours
+  East of GMT).
+*/
+QString QTimeZone::name() const
+{
+    if (d->id().left(7) == "Etc/GMT") {
+        // UNIX uses hours West (i.e. towards Berkeley), i.e. "behind", not "ahead".
+        // Humans use hours "ahead" (i.e. "+") of GMT/UTC.
+        bool ok;
+        int west = d->id().mid(7).toInt(&ok);
+        if (ok) {
+            QString r;
+            r.sprintf("GMT %+d",-west);
+            return r;
+        }
+    }
+    TimeZoneLocation *loc = d->location();
+    if ( loc )
+        return loc->city();
+    return d->id(); // Better than nothing.
+}
+
+/*!
+  Returns the translated city of this time zone, e.g. Oslo,
+  or a null string if no specific city is identified.
 */
 QString QTimeZone::city() const
 {
-    TimeZoneLocation *loc = TzCache::instance().location( d->id );
+    TimeZoneLocation *loc = d->location();
     if ( loc )
         return loc->city();
     return QString();
@@ -1162,10 +1202,10 @@ QString QTimeZone::city() const
 */
 QString QTimeZone::countryCode()
 {
-    TimeZoneLocation *loc = TzCache::instance().location( d->id );
+    TimeZoneLocation *loc = d->location();
     if ( loc )
         return loc->countryCode();
-    return "";
+    return QString();
 }
 
 /*!
@@ -1175,8 +1215,8 @@ QString QTimeZone::countryCode()
 */
 int QTimeZone::distance( const QTimeZone &e ) const
 {
-    TimeZoneLocation *loc = TzCache::instance().location( d->id );
-    TimeZoneLocation *comp = TzCache::instance().location( e.d->id );
+    TimeZoneLocation *loc = d->location();
+    TimeZoneLocation *comp = e.d->location();
     if ( loc && comp )
         return loc->distance( *comp );
     return 0;

@@ -7,25 +7,17 @@
    <h3>Event View</h3>
 <!--#endif -->
 <p><b>Event View</b> shows an event.</p>
-<p><b>To edit / send / delete </b> use
-<!--#if expr="$PDASTYLE"-->
-<img src=":icon/edit">
-<img src=":icon/beam">
-<img src=":icon/trash">
-<!--#endif-->
-<!--#if expr="$PHONESTYLE"-->
-<img src=":icon/options">
-<!--#endif-->
-</p>
+<p><b>To edit / send / delete:</b> use the <img src=":icon/options"><b>Options</b> menu.</p>
 <p><b>To select a link:</b>
-<!--#if expr="$PDASTYLE"-->
-click the link
-<!--#endif-->
 <!--#if expr="$TOUCH"-->
-click the link or
-<!--#endif-->
-<!--#if expr="$PHONESTYLE"-->
-scroll with <img src=":icon/up">/<img src=":icon/down"> </img> and press <img src=":icon/select"> </img> to activate the link.</p>
-<!--#endif-->
+click the link
+<!--#endif -->
+<!--#if expr="$TOUCH && $KEYPAD"-->
+or
+<!--#endif -->
+<!--#if expr="$KEYPAD"-->
+scroll with <img src=":icon/up">/<img src=":icon/down"> </img> and press <img src=":icon/select"><b>Select</b> to activate the link
+<!--#endif -->
+.</p>
 </body>
 </html>

@@ -18,7 +18,6 @@
 <a name="functions"></a>
 <h3>Functions</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="standarddevicefeatures.html#disableBatteryMonitor">disableBatteryMonitor</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="standarddevicefeatures.html#disableCameraMonitor">disableCameraMonitor</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="standarddevicefeatures.html#disableClamshellMonitor">disableClamshellMonitor</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="standarddevicefeatures.html#disableInputFeatures">disableInputFeatures</a></b> ()</li>
@@ -33,10 +32,6 @@
 <p>The documentation for each of the following methods lists both what device it monitors, as well as the expected result when the device state changes. The intent is to make the task of replicating each very simple.</p>
 <hr />
 <h2>Function Documentation</h2>
-<h3 class="fn"><a name="disableBatteryMonitor"></a>void StandardDeviceFeatures::disableBatteryMonitor ()</h3>
-<p>The battery monitor is responsible for maintaining the battery state in the value space. The values that must be maintained are:</p>
-<p><i>/Accessories/Battery/Charging</i> - true if the battery is being charged. <i>/Accessories/Battery/Charge</i> - the percentage of charge remaining (0-100). <i>/Accessories/Battery/VisualCharge</i> - the percentage to display in the user interface. This may not reflect the true percentage exactly, e.g&#x2e; a charging state is often indicated by progressively increasing the value.</p>
-<p>Invoking this method will disable the default battery monitoring.</p>
 <h3 class="fn"><a name="disableCameraMonitor"></a>void StandardDeviceFeatures::disableCameraMonitor ()</h3>
 <p>The camera monitor detects when camera are available on the device and advertises them using the <a href="qtopiafeatures.html">QtopiaFeatures</a> API as the &quot;Camera&quot; feature.</p>
 <p>Invoking this method will disable the default camera monitoring.</p>
@@ -70,6 +65,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

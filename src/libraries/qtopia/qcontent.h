@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -35,15 +35,16 @@
 #include <qtopiaipcmarshal.h>
 #include <inheritedshareddata.h>
 #include <qdrmrights.h>
+#include <QVariant>
 
 class QContentSet;
 class QContentSetModel;
-class ContentLinkPrivate;
-class ContentLinkPrivateDRM;
-class ContentLinkSql;
-class QContentSetPrivate;
 class QtopiaApplication;
 class QContentFilter;
+class QContentEngine;
+class QContentStore;
+
+typedef QContentEngine QContentPrivate;
 
 class QMimeType;
 
@@ -55,6 +56,7 @@ typedef QList<QContentId> QContentIdList;
 class QTOPIA_EXPORT QContent
 {
 public:
+
     static const QContentId InvalidId;
 
     QContent();
@@ -69,6 +71,7 @@ public:
     QContentId id() const;
     QString name() const;
     void setName(const QString& docname);
+    QString untranslatedName() const;
     QString type() const;
     void setType(const QString& doctype);
     qint64 size() const;     // can be -1 if invalid
@@ -98,7 +101,8 @@ public:
         UnknownUsage,
         Document,
         Data,
-        Application
+        Application,
+        Folder
     };
 
     typedef Role UsageMode;
@@ -108,6 +112,7 @@ public:
 
     void setRole( Role role );
 
+    QString fileName() const;
     QString comment() const;
     void setComment( const QString &commment );
     QString errorString() const;
@@ -124,6 +129,7 @@ public:
     QStringList mimeTypeIcons() const;
     QStringList mimeTypes() const;
     void setMimeTypes( const QStringList &mimeTypes );
+    void setMimeTypes( const QStringList &mimeTypes, const QStringList& mimeTypeIcons, const QList< QDrmRights::Permission >& permissions);
     void execute() const;
     void execute(const QStringList& args) const;
     QString iconName() const;
@@ -182,43 +188,53 @@ public:
 
     static QString propertyKey( Property property );
 
+    explicit QContent( QContentEngine *engine );
+
+    bool isDetached() const;
+
+    bool isNull() const;
+
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
+
+    enum DocumentSystemConnection
+    {
+        DocumentSystemDirect,
+        DocumentSystemClient
+    };
+
+    static DocumentSystemConnection documentSystemConnection();
+    static bool setDocumentSystemConnection( DocumentSystemConnection connection );
+
 protected:
-    QContent( ContentLinkPrivate *link );
     bool commit(ChangeType &change);
-private:
-    void create(QHash<QString, QVariant> result);
 
 private:
-    InheritedSharedDataPointer<ContentLinkPrivate> d;
-    void init( const QFileInfo &fi, bool store=true );
+    InheritedSharedDataPointer<QContentPrivate> d;
 
-    bool installContent( const QString &filePath = QString() );
-    bool updateContent();
-
-    static ContentLinkSql *database();
-    static void invalidate(QContentId id);
     static void updateSets(QContentId id, QContent::ChangeType c);
-    static bool isCached(QContentId id);
-    static void cache(const QContentIdList &idList);
 
-    friend class QContentSet;
-    friend class QContentSetModel;
-    friend class ContentLinkPrivate;
-    friend class ContentLinkPrivateDRM;
-    friend class ContentLinkSql;
-    friend class QContentSetPrivate;
     friend class QtopiaApplication;
-    friend class QContentFilter;
-    friend class QMimeType;
-    friend QDebug &operator<<(QDebug &debug, const QContent &content);
+    friend class QDrmContent;
+    friend class QContentStore;
+    friend QDebug operator<<(QDebug debug, const QContent &content);
 };
+
+template <> inline bool qIsDetached<QContent>(QContent &t) { return t.isDetached(); }
 
 typedef QList<QContent> QContentList;
 
+Q_DECLARE_METATYPE(QContentIdList);
+Q_DECLARE_METATYPE(QContentList);
+
+Q_DECLARE_USER_METATYPE(QContent);
 Q_DECLARE_USER_METATYPE_NO_OPERATORS(QContentId);
 Q_DECLARE_USER_METATYPE_TYPEDEF(QContentId,QContentId);
 Q_DECLARE_USER_METATYPE_TYPEDEF(QContentIdList,QContentIdList);
+Q_DECLARE_USER_METATYPE_TYPEDEF(QContentList,QContentList);
 Q_DECLARE_USER_METATYPE_ENUM(QContent::ChangeType);
+Q_DECLARE_USER_METATYPE_ENUM(QContent::Role);
+Q_DECLARE_USER_METATYPE_ENUM(QContent::DrmState);
 
 uint QTOPIA_EXPORT qHash(const QContentId &id);
 

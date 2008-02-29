@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -124,52 +124,52 @@ void QTreePageProxyModel::setSourceModel( QAbstractItemModel *model )
 
     if( oldModel )
     {
-        disconnect( oldModel, SIGNAL(columnsAboutToBeInserted(const QModelIndex&,int,int)),
-                    this    , SLOT (_columnsAboutToBeInserted(const QModelIndex&,int,int)) );
-        disconnect( oldModel, SIGNAL(columnsAboutToBeRemoved(const QModelIndex&,int,int)),
-                    this    , SLOT (_columnsAboutToBeRemoved(const QModelIndex&,int,int)) );
-        disconnect( oldModel, SIGNAL(columnsInserted(const QModelIndex&,int,int)),
-                    this    , SLOT (_columnsInserted(const QModelIndex&,int,int)) );
-        disconnect( oldModel, SIGNAL(columnsRemoved(const QModelIndex&,int,int)),
-                    this    , SLOT (_columnsRemoved(const QModelIndex&,int,int)) );
-        disconnect( oldModel, SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&)),
-                    this    , SLOT (_dataChanged(const QModelIndex&,const QModelIndex&)) );
+        disconnect( oldModel, SIGNAL(columnsAboutToBeInserted(QModelIndex,int,int)),
+                    this    , SLOT (_columnsAboutToBeInserted(QModelIndex,int,int)) );
+        disconnect( oldModel, SIGNAL(columnsAboutToBeRemoved(QModelIndex,int,int)),
+                    this    , SLOT (_columnsAboutToBeRemoved(QModelIndex,int,int)) );
+        disconnect( oldModel, SIGNAL(columnsInserted(QModelIndex,int,int)),
+                    this    , SLOT (_columnsInserted(QModelIndex,int,int)) );
+        disconnect( oldModel, SIGNAL(columnsRemoved(QModelIndex,int,int)),
+                    this    , SLOT (_columnsRemoved(QModelIndex,int,int)) );
+        disconnect( oldModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+                    this    , SLOT (_dataChanged(QModelIndex,QModelIndex)) );
         disconnect( oldModel, SIGNAL(modelReset()),
                     this    , SLOT (_modelReset()) );
-        disconnect( oldModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&,int,int)),
-                    this    , SLOT (_rowsAboutToBeInserted(const QModelIndex&,int,int)) );
-        disconnect( oldModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&,int,int)),
-                    this    , SLOT (_rowsAboutToBeRemoved(const QModelIndex&,int,int)) );
-        disconnect( oldModel, SIGNAL(rowsInserted(const QModelIndex&,int,int)),
-                    this    , SLOT (_rowsInserted(const QModelIndex&,int,int)) );
-        disconnect( oldModel, SIGNAL(rowsRemoved(const QModelIndex&,int,int)),
-                    this    , SLOT (_rowsRemoved(const QModelIndex&,int,int)) );
+        disconnect( oldModel, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)),
+                    this    , SLOT (_rowsAboutToBeInserted(QModelIndex,int,int)) );
+        disconnect( oldModel, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)),
+                    this    , SLOT (_rowsAboutToBeRemoved(QModelIndex,int,int)) );
+        disconnect( oldModel, SIGNAL(rowsInserted(QModelIndex,int,int)),
+                    this    , SLOT (_rowsInserted(QModelIndex,int,int)) );
+        disconnect( oldModel, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+                    this    , SLOT (_rowsRemoved(QModelIndex,int,int)) );
     }
 
     d->parents.clear();
 
     QAbstractProxyModel::setSourceModel( model );
 
-    connect( model, SIGNAL(columnsAboutToBeInserted(const QModelIndex&,int,int)),
-             this , SLOT (_columnsAboutToBeInserted(const QModelIndex&,int,int)) );
-    connect( model, SIGNAL(columnsAboutToBeRemoved(const QModelIndex&,int,int)),
-             this , SLOT (_columnsAboutToBeRemoved(const QModelIndex&,int,int)) );
-    connect( model, SIGNAL(columnsInserted(const QModelIndex&,int,int)),
-             this , SLOT (_columnsInserted(const QModelIndex&,int,int)) );
-    connect( model, SIGNAL(columnsRemoved(const QModelIndex&,int,int)),
-             this  , SLOT (_columnsRemoved(const QModelIndex&,int,int)) );
-    connect( model, SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&)),
-             this , SLOT (_dataChanged(const QModelIndex&,const QModelIndex&)) );
+    connect( model, SIGNAL(columnsAboutToBeInserted(QModelIndex,int,int)),
+             this , SLOT (_columnsAboutToBeInserted(QModelIndex,int,int)) );
+    connect( model, SIGNAL(columnsAboutToBeRemoved(QModelIndex,int,int)),
+             this , SLOT (_columnsAboutToBeRemoved(QModelIndex,int,int)) );
+    connect( model, SIGNAL(columnsInserted(QModelIndex,int,int)),
+             this , SLOT (_columnsInserted(QModelIndex,int,int)) );
+    connect( model, SIGNAL(columnsRemoved(QModelIndex,int,int)),
+             this  , SLOT (_columnsRemoved(QModelIndex,int,int)) );
+    connect( model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+             this , SLOT (_dataChanged(QModelIndex,QModelIndex)) );
     connect( model, SIGNAL(modelReset()),
              this , SLOT (_modelReset()) );
-    connect( model, SIGNAL(rowsAboutToBeInserted(const QModelIndex&,int,int)),
-             this , SLOT (_rowsAboutToBeInserted(const QModelIndex&,int,int)) );
-    connect( model, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&,int,int)),
-             this , SLOT (_rowsAboutToBeRemoved(const QModelIndex&,int,int)) );
-    connect( model, SIGNAL(rowsInserted(const QModelIndex&,int,int)),
-             this , SLOT (_rowsInserted(const QModelIndex&,int,int)) );
-    connect( model, SIGNAL(rowsRemoved(const QModelIndex&,int,int)),
-             this , SLOT (_rowsRemoved(const QModelIndex&,int,int)) );
+    connect( model, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)),
+             this , SLOT (_rowsAboutToBeInserted(QModelIndex,int,int)) );
+    connect( model, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)),
+             this , SLOT (_rowsAboutToBeRemoved(QModelIndex,int,int)) );
+    connect( model, SIGNAL(rowsInserted(QModelIndex,int,int)),
+             this , SLOT (_rowsInserted(QModelIndex,int,int)) );
+    connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+             this , SLOT (_rowsRemoved(QModelIndex,int,int)) );
 }
 
 /*!
@@ -603,7 +603,7 @@ static QRect textLayoutBounds(const QStyleOptionViewItemV2 &option)
     Constructs a new tree page item delegate with the given \a parent.
 */
 QTreePageItemDelegate::QTreePageItemDelegate( QObject *parent )
-    : QItemDelegate( parent )
+    : QtopiaItemDelegate( parent )
 {
 }
 
@@ -848,7 +848,12 @@ void QTreePageItemDelegate::drawArrow(QPainter *painter,
         QApplication::style()->drawPrimitive(QStyle::PE_IndicatorArrowUp, &opt, painter);
         break;
     case QTreePageProxyModel::ParentItem:
-        QApplication::style()->drawPrimitive(QStyle::PE_IndicatorArrowRight, &opt, painter);
+        QApplication::style()->drawPrimitive(
+                option.direction == Qt::LeftToRight
+                        ? QStyle::PE_IndicatorArrowRight
+                        : QStyle::PE_IndicatorArrowLeft
+                , &opt
+                , painter);
         break;
     case QTreePageProxyModel::SelectionItem:
         break;
@@ -874,16 +879,15 @@ QContentFilterView::QContentFilterView( QWidget *parent )
 {
     setFocusPolicy( Qt::StrongFocus );
     setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    setFrameStyle(QFrame::NoFrame);
 
     m_proxyModel = new QTreePageProxyModel( this );
 
-    QListView::setModel( m_proxyModel );
-
     setItemDelegate( new QTreePageItemDelegate( this ) );
 
-    connect( this, SIGNAL(activated(const QModelIndex&)), this, SLOT(indexSelected(const QModelIndex&)) );
-    connect( m_proxyModel, SIGNAL(select(const QModelIndex&)), this, SLOT(setCurrentIndex(const QModelIndex&)) );
-    connect( m_proxyModel, SIGNAL(ensureVisible(const QModelIndex&)), this, SLOT(ensureVisible(const QModelIndex&)) );
+    connect( this, SIGNAL(activated(QModelIndex)), this, SLOT(indexSelected(QModelIndex)) );
+    connect( m_proxyModel, SIGNAL(select(QModelIndex)), this, SLOT(setCurrentIndex(QModelIndex)) );
+    connect( m_proxyModel, SIGNAL(ensureVisible(QModelIndex)), this, SLOT(ensureVisible(QModelIndex)) );
 }
 
 /*!
@@ -893,16 +897,18 @@ QContentFilterView::~QContentFilterView()
 {
 }
 
-QContentFilterModel *QContentFilterView::model() const
+QContentFilterModel *QContentFilterView::filterModel() const
 {
     return m_filterModel;
 }
 
-void QContentFilterView::setModel( QContentFilterModel *model )
+void QContentFilterView::setFilterModel( QContentFilterModel *model )
 {
     m_filterModel = model;
 
     m_proxyModel->setSourceModel( model );
+
+    QListView::setModel( m_proxyModel );
 }
 
 /*!
@@ -996,7 +1002,6 @@ void QContentFilterView::ensureVisible( const QModelIndex &index )
     scrollTo( index );
 }
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 /*!
     \reimp
     Respond to the back key to back a level on the selected filter.
@@ -1036,7 +1041,6 @@ void QContentFilterView::keyPressEvent( QKeyEvent *event )
     else
         QListView::keyPressEvent( event );
 }
-#endif
 
 void QContentFilterView::focusInEvent( QFocusEvent *event )
 {
@@ -1085,7 +1089,7 @@ public:
 
     selector->setModelTemplate( artists );
 
-    connect( selector, SIGNAL(filterSelected(const QContentFilter&)), this, SLOT(filterSelected(const QContentFilter&)) );
+    connect( selector, SIGNAL(filterSelected(QContentFilter)), this, SLOT(filterSelected(QContentFilter)) );
     \endcode
 
     \sa QContentFilterModel, QContentFilterDialog
@@ -1110,7 +1114,7 @@ QContentFilterSelector::QContentFilterSelector( const QContentFilterModel::Templ
 {
     init();
 
-    d->model()->setModelTemplate( modelTemplate );
+    d->filterModel()->setModelTemplate( modelTemplate );
 }
 
 /*!
@@ -1124,7 +1128,7 @@ QContentFilterSelector::QContentFilterSelector( QContent::Property property, QCo
 {
     init();
 
-    d->model()->setModelTemplate( QContentFilterModel::Template( property, options, checked ) );
+    d->filterModel()->setModelTemplate( QContentFilterModel::Template( property, options, checked ) );
 }
 
 /*!
@@ -1138,14 +1142,14 @@ QContentFilterSelector::QContentFilterSelector( QContentFilter::FilterType type,
 {
     init();
 
-    d->model()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
+    d->filterModel()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
 }
 
 void QContentFilterSelector::init()
 {
     d = new QContentFilterSelectorPrivate( this );
 
-    d->setModel( new QContentFilterModel( this ) );
+    d->setFilterModel( new QContentFilterModel( this ) );
 
     QVBoxLayout *layout = new QVBoxLayout( this );
 
@@ -1154,7 +1158,7 @@ void QContentFilterSelector::init()
 
     layout->addWidget( d );
 
-    connect( d, SIGNAL(filterSelected(const QContentFilter&)), this, SIGNAL(filterSelected(const QContentFilter&)) );
+    connect( d, SIGNAL(filterSelected(QContentFilter)), this, SIGNAL(filterSelected(QContentFilter)) );
 
     setFocusProxy( d );
 }
@@ -1171,7 +1175,7 @@ QContentFilterSelector::~QContentFilterSelector()
  */
 QContentFilter QContentFilterSelector::filter()
 {
-    return d->model()->baseFilter();
+    return d->filterModel()->baseFilter();
 }
 
 /*!
@@ -1179,7 +1183,7 @@ QContentFilter QContentFilterSelector::filter()
  */
 void QContentFilterSelector::setFilter( const QContentFilter &filter )
 {
-    d->model()->setBaseFilter( filter );
+    d->filterModel()->setBaseFilter( filter );
 }
 
 /*!
@@ -1187,7 +1191,7 @@ void QContentFilterSelector::setFilter( const QContentFilter &filter )
  */
 QContentFilterModel::Template QContentFilterSelector::modelTemplate() const
 {
-    return d->model()->modelTemplate();
+    return d->filterModel()->modelTemplate();
 }
 
 /*!
@@ -1195,7 +1199,7 @@ QContentFilterModel::Template QContentFilterSelector::modelTemplate() const
  */
 void QContentFilterSelector::setModelTemplate( const QContentFilterModel::Template &modelTemplate )
 {
-    d->model()->setModelTemplate( modelTemplate );
+    d->filterModel()->setModelTemplate( modelTemplate );
 }
 
 /*!
@@ -1205,7 +1209,7 @@ void QContentFilterSelector::setModelTemplate( const QContentFilterModel::Templa
  */
 void QContentFilterSelector::setModelTemplate( QContent::Property property, QContentFilterModel::TemplateOptions options, const QStringList &checked )
 {
-    d->model()->setModelTemplate( QContentFilterModel::Template( property, options, checked ) );
+    d->filterModel()->setModelTemplate( QContentFilterModel::Template( property, options, checked ) );
 }
 
 /*!
@@ -1216,7 +1220,7 @@ void QContentFilterSelector::setModelTemplate( QContent::Property property, QCon
  */
 void QContentFilterSelector::setModelTemplate( QContentFilter::FilterType type, const QString &scope, QContentFilterModel::TemplateOptions options, const QStringList &checked )
 {
-    d->model()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
+    d->filterModel()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
 }
 
 /*!
@@ -1328,7 +1332,7 @@ QContentFilterDialog::QContentFilterDialog( const QContentFilterModel::Template 
 {
     init();
 
-    d->model()->setModelTemplate( modelTemplate );
+    d->filterModel()->setModelTemplate( modelTemplate );
 }
 
 /*!
@@ -1342,7 +1346,7 @@ QContentFilterDialog::QContentFilterDialog( QContent::Property property, QConten
 {
     init();
 
-    d->model()->setModelTemplate( QContentFilterModel::Template( property, options, checked ) );
+    d->filterModel()->setModelTemplate( QContentFilterModel::Template( property, options, checked ) );
 }
 
 /*!
@@ -1356,7 +1360,7 @@ QContentFilterDialog::QContentFilterDialog( QContentFilter::FilterType type, con
 {
     init();
 
-    d->model()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
+    d->filterModel()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
 }
 
 /*!
@@ -1366,7 +1370,7 @@ void QContentFilterDialog::init()
 {
     d = new QContentFilterDialogPrivate( this );
 
-    d->setModel( new QContentFilterModel( this ) );
+    d->setFilterModel( new QContentFilterModel( this ) );
 
     QVBoxLayout *layout = new QVBoxLayout( this );
 
@@ -1375,7 +1379,7 @@ void QContentFilterDialog::init()
 
     layout->addWidget( d );
 
-    connect( d, SIGNAL(filterSelected(const QContentFilter&)), this, SLOT(filterSelected(const QContentFilter&)) );
+    connect( d, SIGNAL(filterSelected(QContentFilter)), this, SLOT(filterSelected(QContentFilter)) );
 
     setFocusProxy( d );
 }
@@ -1392,7 +1396,7 @@ QContentFilterDialog::~QContentFilterDialog()
  */
 QContentFilter QContentFilterDialog::filter()
 {
-    return d->model()->baseFilter();
+    return d->filterModel()->baseFilter();
 }
 
 /*!
@@ -1400,7 +1404,7 @@ QContentFilter QContentFilterDialog::filter()
  */
 void QContentFilterDialog::setFilter( const QContentFilter &filter )
 {
-    d->model()->setBaseFilter( filter );
+    d->filterModel()->setBaseFilter( filter );
 }
 
 /*!
@@ -1408,7 +1412,7 @@ void QContentFilterDialog::setFilter( const QContentFilter &filter )
  */
 QContentFilterModel::Template QContentFilterDialog::modelTemplate() const
 {
-    return d->model()->modelTemplate();
+    return d->filterModel()->modelTemplate();
 }
 
 /*!
@@ -1416,7 +1420,7 @@ QContentFilterModel::Template QContentFilterDialog::modelTemplate() const
  */
 void QContentFilterDialog::setModelTemplate( const QContentFilterModel::Template &modelTemplate )
 {
-    d->model()->setModelTemplate( modelTemplate );
+    d->filterModel()->setModelTemplate( modelTemplate );
 }
 
 /*!
@@ -1426,7 +1430,7 @@ void QContentFilterDialog::setModelTemplate( const QContentFilterModel::Template
  */
 void QContentFilterDialog::setModelTemplate( QContent::Property property, QContentFilterModel::TemplateOptions options, const QStringList &checked )
 {
-    d->model()->setModelTemplate( QContentFilterModel::Template( property, options, checked ) );
+    d->filterModel()->setModelTemplate( QContentFilterModel::Template( property, options, checked ) );
 }
 
 /*!
@@ -1437,7 +1441,7 @@ void QContentFilterDialog::setModelTemplate( QContent::Property property, QConte
  */
 void QContentFilterDialog::setModelTemplate( QContentFilter::FilterType type, const QString &scope, QContentFilterModel::TemplateOptions options, const QStringList &checked )
 {
-    d->model()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
+    d->filterModel()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
 }
 
 /*!

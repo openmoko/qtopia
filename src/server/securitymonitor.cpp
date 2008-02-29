@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -31,6 +31,7 @@
     The SXE monitor process responds to security policy breaches.
 
     The SecurityMonitorTask class provides the \c {SecurityMonitor} task.
+    It is part of the Qtopia server and cannot be used by other Qtopia applications.
 */    
     
 /*!
@@ -41,9 +42,7 @@ SecurityMonitorTask::SecurityMonitorTask()
 {
 #ifndef QT_NO_SXE
     isShutdown = false;
-    // No point starting in less than 10secs - the server will take at least
-    // that long to startup.
-    QTimer::singleShot(10000, this, SLOT(startNewSxeMonitor()));
+    QTimer::singleShot(0, this, SLOT(startNewSxeMonitor()));
 #endif
 }
 
@@ -100,7 +99,9 @@ void SecurityMonitorTask::startNewSxeMonitor()
             this, SLOT(sxeMonitorProcessError(QProcess::ProcessError)));
     connect(m_sxeMonitorProcess, SIGNAL(finished(int)),
             this, SLOT(sxeMonitorProcessExited(int)));
+    qobject_cast<QtopiaApplication *>(qApp)->processEvents();
     m_sxeMonitorProcess->start(sxemonitorExecutable());
+    qobject_cast<QtopiaApplication *>(qApp)->processEvents();
 }
 
 QString SecurityMonitorTask::sxemonitorExecutable()
@@ -110,6 +111,7 @@ QString SecurityMonitorTask::sxemonitorExecutable()
 
 void SecurityMonitorTask::sxeMonitorProcessError(QProcess::ProcessError e)
 {
+
     switch(e)
     {
         case QProcess::FailedToStart:   qWarning() << "SxeMonitor Process failed to start"; break;
@@ -121,17 +123,36 @@ void SecurityMonitorTask::sxeMonitorProcessError(QProcess::ProcessError e)
     }
     m_sxeMonitorProcess->disconnect();
     m_sxeMonitorProcess->deleteLater();
-    startNewSxeMonitor();
+    if ( isShutdown )
+        return;
+
+    static int retry=0;
+    retry++;
+
+    //try restart sxemonitor if it goes down however
+    //on the third retry wait 30mins, so as to not lock up the phone
+    //with continual sxemonitor restarts.  Sxemonitor however should
+    //never go down.
+    if ( retry == 3)
+    {
+        QTimer::singleShot(1800000, this, SLOT(startNewSxeMonitor()));
+        retry=0;
+        qWarning( "Restarting of sxemonitor daemon has failed several times!!" );
+    }
+    else
+        QTimer::singleShot( 0, this, SLOT(startNewSxeMonitor()));
 
 }
 
 void SecurityMonitorTask::sxeMonitorProcessExited( int e )
 {
+    if ( isShutdown )
+        return;
     qWarning() << "SxeMonitor Process has prematurely exited, exit code: " << e;
 
     m_sxeMonitorProcess->disconnect();
     m_sxeMonitorProcess->deleteLater();
-    startNewSxeMonitor();
+    QTimer::singleShot( 300000, this, SLOT(startNewSxeMonitor()));
 }
 
 #endif

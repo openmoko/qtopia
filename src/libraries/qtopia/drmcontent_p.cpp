@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -62,42 +62,17 @@ QPixmap DRMThumbnailLoader::loadThumbnail( const QString &filename, const QSize 
 }
 
 DrmContentPluginManager::DrmContentPluginManager()
-     : m_manager( QLatin1String( "drmagent" ) )
+    : m_agentManager( 0 )
+    , m_contentManager( 0 )
 {
-    QStringList pluginNames = m_manager.list();
-
-    foreach( QString pluginName, pluginNames )
-    {
-        qLog(DRMAgent) << "Load Plugin" << pluginName;
-
-        QObject *object = m_manager.instance( pluginName );
-
-        QDrmAgentPlugin *agent = qobject_cast< QDrmAgentPlugin * >( object );
-
-        if( agent )
-        {
-            QDrmContentPlugin *plugin = agent->createDrmContentPlugin();
-
-            QStringList keys = plugin->keys();
-
-            foreach( QString key, keys )
-            {
-                qLog(DRMAgent) << "Key" << key;
-
-                if( !m_pluginMap.contains( key ) )
-                    m_pluginMap[ key ] = plugin;
-                else
-                    qWarning() << "Multiple DRM plugins with a common key";
-            }
-
-            m_plugins.append( plugin );
-        }
-    }
 }
 
 DrmContentPluginManager::~DrmContentPluginManager()
 {
     qDeleteAll( m_plugins );
+
+    delete m_agentManager;
+    delete m_contentManager;
 }
 
 QDrmContentPlugin *DrmContentPluginManager::plugin( const QString &filePath ) const
@@ -123,6 +98,72 @@ DrmContentPluginManager *DrmContentPluginManager::instance()
         instance = new DrmContentPluginManager;
 
     return instance;
+}
+
+void DrmContentPluginManager::load()
+{
+    if( m_agentManager )
+        return;
+
+    m_agentManager = new QPluginManager( QLatin1String( "drmagent" ) );
+
+    QStringList pluginNames = m_agentManager->list();
+
+    foreach( QString pluginName, pluginNames )
+    {
+        qLog(DRMAgent) << "Load Plugin" << pluginName;
+
+        QObject *object = m_agentManager->instance( pluginName );
+
+        QDrmAgentPlugin *agent = qobject_cast< QDrmAgentPlugin * >( object );
+
+        if( agent )
+        {
+            QDrmContentPlugin *plugin = agent->createDrmContentPlugin();
+
+            QStringList keys = plugin->keys();
+
+            foreach( QString key, keys )
+            {
+                qLog(DRMAgent) << "Key" << key;
+
+                if( !m_pluginMap.contains( key ) )
+                    m_pluginMap[ key ] = plugin;
+                else
+                    qWarning() << "Multiple DRM plugins with a common key";
+            }
+
+            m_plugins.append( plugin );
+        }
+    }
+
+    m_contentManager = new QPluginManager( QLatin1String( "drmcontent" ) );
+
+    pluginNames = m_contentManager->list();
+
+    foreach( QString pluginName, pluginNames )
+    {
+        qLog(DRMAgent) << "Load Plugin" << pluginName;
+
+        QObject *object = m_contentManager->instance( pluginName );
+
+        QDrmContentPlugin *plugin = qobject_cast< QDrmContentPlugin * >( object );
+
+        if( plugin )
+        {
+            QStringList keys = plugin->keys();
+
+            foreach( QString key, keys )
+            {
+                qLog(DRMAgent) << "Key" << key;
+
+                if( !m_pluginMap.contains( key ) )
+                    m_pluginMap[ key ] = plugin;
+                else
+                    qWarning() << "Multiple DRM plugins with a common key";
+            }
+        }
+    }
 }
 
 /*!
@@ -160,22 +201,33 @@ QPixmap DrmContentPrivate::drmIcon( int size )
     return overlay;
 }
 
+QPixmap DrmContentPrivate::drmIconInvalid( int size )
+{
+    QPixmap overlay;
+#ifndef QTOPIA_NO_CACHE_PIXMAPS
+    QString id = QLatin1String("_QPE_Global_Drm_lock_invalid_") + QString::number( size );
+    if( !QPixmapCache::find( id, overlay ) )
+    {
+#endif
+        QString path = size <= 16 ? QLatin1String(":image/drm/Drm_lock_invalid_16") : QLatin1String(":image/drm/Drm_lock_invalid");
+
+        overlay = QPixmap( path ).scaled( size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+#ifndef QTOPIA_NO_CACHE_PIXMAPS
+        QPixmapCache::insert( id, overlay );
+    }
+#endif
+    return overlay;
+}
+
 QPixmap DrmContentPrivate::compositeDrmIcon( const QPixmap &base, int size, bool validRights )
 {
     QPixmap pm = base;
-    QPixmap overlay = drmIcon( size );
+    QPixmap overlay = validRights ? drmIcon( size ) : drmIconInvalid( size );
 
     if( !pm.isNull() && ! overlay.isNull() )
     {
         QPainter painter( &pm );
-
-        if( !validRights )
-        {
-            painter.setPen( Qt::NoPen );
-            painter.setBrush( QBrush( QColor( 127, 127, 127, 127 ) ) );
-
-            painter.drawRect( pm.rect() );
-        }
 
         QSize diff = base.size() - overlay.size();
 
@@ -209,7 +261,7 @@ QDrmRights DrmContentPrivate::getRights( const QString &filePath, QDrmRights::Pe
 
 QDrmContentLicense *DrmContentPrivate::requestContentLicense( const QContent &content, QDrmRights::Permission permission, QDrmContent::LicenseOptions options )
 {
-    QDrmContentPlugin *p = plugin( content.file() );
+    QDrmContentPlugin *p = plugin( content.fileName() );
 
     return p ? p->requestContentLicense( content, permission, options ) : 0;
 }
@@ -218,11 +270,11 @@ bool DrmContentPrivate::activate( const QContent &content, QDrmRights::Permissio
 {
     if( content.permissions() == QDrmRights::Unrestricted )
         return true;
-    else if( content.permissions() & permission )
+    else if( (content.permissions() & permission) == permission )
         return true;
     else
     {
-        QDrmContentPlugin *p = plugin( content.file() );
+        QDrmContentPlugin *p = plugin( content.fileName() );
 
         return p ? p->activate( content, permission, focus ) : false;
     }
@@ -230,7 +282,7 @@ bool DrmContentPrivate::activate( const QContent &content, QDrmRights::Permissio
 
 void DrmContentPrivate::reactivate( const QContent &content, QDrmRights::Permission permission, QWidget *focus )
 {
-    QDrmContentPlugin *p = plugin( content.file() );
+    QDrmContentPlugin *p = plugin( content.fileName() );
 
     if( p )
         p->reactivate( content, permission, focus );
@@ -252,7 +304,7 @@ bool DrmContentPrivate::canActivate( const QString &filePath )
 
 void DrmContentPrivate::activate( const QContent &content, QWidget *focus )
 {
-    QDrmContentPlugin *p = plugin( content.file() );
+    QDrmContentPlugin *p = plugin( content.fileName() );
 
     if( p )
         p->activate( content, focus );
@@ -281,7 +333,7 @@ bool DrmContentPrivate::installContent( const QString &filePath, QContent *conte
 
 bool DrmContentPrivate::updateContent( QContent *content )
 {
-    QDrmContentPlugin *p = plugin( content->file() );
+    QDrmContentPlugin *p = plugin( content->fileName() );
 
     return p ? p->updateContent( content ) : false;
 }

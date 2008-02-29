@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,17 +22,29 @@
 #ifndef CONTEXTKEYMANAGER_H
 #define CONTEXTKEYMANAGER_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <qtopiaapplication.h>
 #include <qsoftmenubar.h>
 
 #include <qmap.h>
 #include <qlist.h>
 
-class ContextKeyManager : public QObject
+class QAbstractSoftKeyLabelHelper;
+
+class QTOPIA_EXPORT ContextKeyManager : public QObject
 {
     Q_OBJECT
 public:
-    ContextKeyManager();
 
     void updateContextLabels();
     QWidget *findTargetWidget(QWidget *w, int key, bool modal);
@@ -83,6 +95,15 @@ public:
     void setStandard(QWidget *w, int key, QSoftMenuBar::StandardLabel label);
     void clearLabel(QWidget *w, int key);
     void setLabelType(QSoftMenuBar::LabelType);
+    QSoftMenuBar::LabelType labelType() const { return lType; }
+
+    void setContextKeyHelper(QWidget* w, QAbstractSoftKeyLabelHelper* helper);
+    void setContextKeyHelper(const QString& className, QAbstractSoftKeyLabelHelper* helper);
+    void clearContextKeyHelper(QWidget* w);
+    void clearContextKeyHelper(QString& className);
+    QAbstractSoftKeyLabelHelper* findHelper(QWidget* w);
+    QAbstractSoftKeyLabelHelper* findHelper(QString className);
+    QAbstractSoftKeyLabelHelper* findClassHelper(QWidget* w);
 
     static ContextKeyManager *instance();
     static QString standardText(QSoftMenuBar::StandardLabel label);
@@ -95,14 +116,18 @@ private slots:
     void updateLabelsForFocused();
 
 private:
+    ContextKeyManager();
     bool updateContextLabel(QWidget *w, bool modal, int key);
+    void setupStandardSoftKeyHelpers();
 
 private:
     QList<ClassModalState> contextClass;
     QMap<QWidget*,KeyMap> contextWidget;
+    QMap<QWidget*,QAbstractSoftKeyLabelHelper*> helperMap;
+    QMap<QString,QAbstractSoftKeyLabelHelper*> helperClassMap;
     QList<int> buttons;
     QTimer *timer;
-    QSoftMenuBar::LabelType labelType;
+    QSoftMenuBar::LabelType lType;
 };
 
 #endif

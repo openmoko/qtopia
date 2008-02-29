@@ -23,9 +23,7 @@
 <ul>
 <li><div class="fn"/><b><a href="qbluetoothaudiogateway.html#QBluetoothAudioGateway">QBluetoothAudioGateway</a></b> ( const QString &amp; <i>service</i> = QString(), QObject * <i>parent</i> = 0, QAbstractIpcInterface::Mode <i>mode</i> = Client )</li>
 <li><div class="fn"/><b><a href="qbluetoothaudiogateway.html#dtor.QBluetoothAudioGateway">~QBluetoothAudioGateway</a></b> ()</li>
-<li><div class="fn"/>QByteArray <b><a href="qbluetoothaudiogateway.html#audioDevice">audioDevice</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qbluetoothaudiogateway.html#audioEnabled">audioEnabled</a></b> () const</li>
-<li><div class="fn"/>int <b><a href="qbluetoothaudiogateway.html#audioFrequency">audioFrequency</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qbluetoothaudiogateway.html#isConnected">isConnected</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qbluetoothaudiogateway.html#microphoneVolume">microphoneVolume</a></b> () const</li>
 <li><div class="fn"/>QBluetoothAddress <b><a href="qbluetoothaudiogateway.html#remotePeer">remotePeer</a></b> () const</li>
@@ -88,16 +86,9 @@
 <p>See also <a href="qabstractipcinterfacegroup.html#supports">QAbstractIpcInterfaceGroup::supports</a>().</p>
 <h3 class="fn"><a name="dtor.QBluetoothAudioGateway"></a>QBluetoothAudioGateway::~QBluetoothAudioGateway ()</h3>
 <p>Destroys the audio gateway.</p>
-<h3 class="fn"><a name="audioDevice"></a><a href="qbytearray.html">QByteArray</a> QBluetoothAudioGateway::audioDevice () const</h3>
-<p>Returns the audio device associated with this gateway. This is implementation dependent. The default implementation returns an alsa hwid string.</p>
-<p><b>NOTE:</b> This function is not intended to be used. It might be removed in future versions of Qtopia.</p>
 <h3 class="fn"><a name="audioEnabled"></a>bool QBluetoothAudioGateway::audioEnabled () const</h3>
 <p>Returns whether the voice data information is being passed to the device. This is true once an SCO connection has been established between the remote device (headset) and the audio gateway. All audio information should now be routed over the device associated with this audio gateway.</p>
 <p>See also <a href="qbluetoothaudiogateway.html#isConnected">isConnected</a>() and <a href="qbluetoothaudiogateway.html#remotePeer">remotePeer</a>().</p>
-<h3 class="fn"><a name="audioFrequency"></a>int QBluetoothAudioGateway::audioFrequency () const</h3>
-<p>Returns the audio frequency currently being used by the device.</p>
-<p><b>NOTE:</b> This function is not intended to be used. It might be removed in future versions of Qtopia.</p>
-<p>See also <a href="qbluetoothaudiogateway.html#audioDevice">audioDevice</a>().</p>
 <h3 class="fn"><a name="audioStateChanged"></a>void QBluetoothAudioGateway::audioStateChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever the state of the audio data stream has changed. E.g&#x2e; the audio stream (SCO connection) has been disconnected or connected. Use <a href="qbluetoothaudiogateway.html#audioEnabled">audioEnabled</a>() to find out the state of the audio stream.</p>
 <p>See also <a href="qbluetoothaudiogateway.html#audioEnabled">audioEnabled</a>().</p>
@@ -109,7 +100,7 @@
 <p>Asks the Audio Gateway to establish an SCO data connection with the currently connected peer. All audio data should now be routed to the associated audio device.</p>
 <p>See also <a href="qbluetoothaudiogateway.html#releaseAudio">releaseAudio</a>().</p>
 <h3 class="fn"><a name="connectResult"></a>void QBluetoothAudioGateway::connectResult ( bool <i>success</i>, const <a href="qstring.html">QString</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is sent after the connect method has been called on the Audio Gateway object. The <i>success</i> parameter is true if the connection succeded, and false otherwise. If the connection failed, the <i>msg</i> parameter holds the error string.</p>
+<p>This signal is sent after the connect method has been called on the Audio Gateway object. The <i>success</i> parameter is true if the connection succeeded, and false otherwise. If the connection failed, the <i>msg</i> parameter holds the error string.</p>
 <p>See also <a href="qbluetoothaudiogateway.html#connect">connect</a>().</p>
 <h3 class="fn"><a name="disconnect"></a>void QBluetoothAudioGateway::disconnect ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Disconnect the currently active client from the Audio Gateway. The <a href="qbluetoothaudiogateway.html#headsetDisconnected">headsetDisconnected</a>() signal will be sent once the headset is <a href="qabstractipcinterface.html#disconnected">disconnected</a>().</p>
@@ -151,6 +142,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

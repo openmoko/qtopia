@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -39,26 +54,26 @@
 #include <math.h>
 
 QMMapViewProtocol::QMMapViewProtocol(int displayid, const QSize &s,
-        int d, QObject *parent)
+                                     int d, QObject *parent)
     : QVFbViewProtocol(displayid, parent), hdr(0), dataCache(0)
 {
-    int actualdepth=d;
+    int actualdepth = d;
 
-    switch ( d ) {
-	case 12:
-	    actualdepth=16;
-	    break;
-	case 1:
-	case 4:
-	case 8:
-	case 16:
-        case 18:
-	case 24:
-	case 32:
-	    break;
+    switch (d) {
+    case 12:
+        actualdepth=16;
+        break;
+    case 1:
+    case 4:
+    case 8:
+    case 16:
+    case 18:
+    case 24:
+    case 32:
+        break;
 
-	default:
-	    qFatal( "Unsupported bit depth %d\n", d );
+    default:
+        qFatal("Unsupported bit depth %d\n", d);
     }
 
     fileName = QString("/tmp/.qtvfb_map-%1").arg(displayid);
@@ -71,12 +86,12 @@ QMMapViewProtocol::QMMapViewProtocol(int displayid, const QSize &s,
     mh = new QVFbMouseLinuxTP(displayid);
 
     int bpl;
-    if ( d == 1 )
-	bpl = (w*d+7)/8;
-    else if ( d == 18 )
-        bpl = ((w*24+31)/32)*4;
+    if (d == 1)
+	bpl = (w *d + 7) / 8;
+    else if (d == 18)
+        bpl = ((w * 24 + 31) / 32) * 4;
     else
-	bpl = ((w*actualdepth+31)/32)*4;
+	bpl = ((w * actualdepth + 31) / 32) * 4;
 
     displaySize = bpl * h;
 
@@ -97,7 +112,7 @@ QMMapViewProtocol::QMMapViewProtocol(int displayid, const QSize &s,
     } else {
         // might need to do something about size?
         data = (unsigned char *)mmap(NULL, dataSize, PROT_WRITE | PROT_READ,
-                MAP_SHARED, fd, 0);
+                                     MAP_SHARED, fd, 0);
         if (data == MAP_FAILED)
             data = (unsigned char *)-1;
     }
@@ -120,15 +135,15 @@ QMMapViewProtocol::QMMapViewProtocol(int displayid, const QSize &s,
     hdr->dataoffset = data_offset_value;
     hdr->update = QRect();
 
-    mRefreshTimer = new QTimer( this );
-    connect( mRefreshTimer, SIGNAL(timeout()), this, SLOT(flushChanges()) );
+    mRefreshTimer = new QTimer(this);
+    connect(mRefreshTimer, SIGNAL(timeout()), this, SLOT(flushChanges()));
 }
 
 QMMapViewProtocol::~QMMapViewProtocol()
 {
-    munmap( (char *)hdr, dataSize );
-    ::close( fd );
-    unlink( fileName.toLocal8Bit().constData() );
+    munmap((char *)hdr, dataSize);
+    ::close(fd);
+    unlink(fileName.toLocal8Bit().constData());
     free(dataCache);
     delete kh;
     delete mh;
@@ -163,7 +178,7 @@ QVector<QRgb> QMMapViewProtocol::clut() const
 {
     QVector<QRgb> vector(hdr->numcols);
     for (int i=0; i < hdr->numcols; ++i)
-        vector[i]=hdr->clut[i];
+        vector[i] = hdr->clut[i];
 
     return vector;
 }

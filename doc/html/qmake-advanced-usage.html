@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: qmake Advanced Usage</title>
+  <title>Qt 4.3: qmake Advanced Usage</title>
   <link rel="prev" href="qmake-platform-notes.html" />
   <link rel="contents" href="qmake-manual.html" />
   <link rel="next" href="qmake-precompiledheaders.html" />
@@ -19,7 +19,8 @@
 [<a href="qmake-manual.html">Contents</a>]
 [Next: <a href="qmake-precompiledheaders.html">Using Precompiled Headers</a>]
 </p>
-<h1 align="center">qmake Advanced Usage<br /><small></small></h1>
+<h1 align="center">qmake Advanced Usage<br /><span class="subtitle"></span>
+</h1>
 <p>Many <tt>qmake</tt> project files simply describe the sources and header files used by the project, using a list of <tt>name = value</tt> and <tt>name += value</tt> definitions. <tt>qmake</tt> also provides other operators, functions, and scopes that can be used to process the information supplied in variable declarations. These advanced features allow Makefiles to be generated for multiple platforms from a single project file.</p>
 <ul><li><a href="#operators">Operators</a></li>
 <li><a href="#scopes">Scopes</a></li>
@@ -202,7 +203,6 @@
 <ol type="1">
 <li>In a directory listed in the <tt>QMAKEFEATURES</tt> environment variable; this contains a colon-separated list of directories.</li>
 <li>In a directory listed in the <tt>QMAKEFEATURES</tt> property variable; this contains a colon-spearated list of directories.</li>
-<li>In a features directory beneath the project's root directory (where the <tt>.qmake.cache</tt> file is generated).</li>
 <li>In a features directory residing within a <tt>mkspecs</tt> directory. <tt>mkspecs</tt> directories can be located beneath any of the directories listed in the <tt>QMAKEPATH</tt> environment variable (a colon-separated list of directories). (<tt>$QMAKEPATH/mkspecs/&lt;features&gt;</tt>)</li>
 <li>In a features directory residing beneath the directory provided by the <tt>QMAKESPEC</tt> environment variable. (<tt>$QMAKESPEC/&lt;features&gt;</tt>)</li>
 <li>In a features directory residing in the <tt>data_install/mkspecs</tt> directory. (<tt>data_install/mkspecs/&lt;features&gt;</tt>)</li>
@@ -225,6 +225,7 @@
 <li><tt>data_install/mkspecs/features/unix/myfeatures.prf</tt> and <tt>data_install/mkspecs/features/myfeatures.prf</tt></li>
 <li><tt>$QMAKESPEC/../features/unix/myfeatures.prf</tt> and <tt>$QMAKESPEC/../features/myfeatures.prf</tt></li>
 </ol>
+<p><b>Note:</b> The <tt>.prf</tt> files must have names in lower case.</p>
 <p>
 [Previous: <a href="qmake-platform-notes.html">qmake Platform Notes</a>]
 [<a href="qmake-manual.html">Contents</a>]
@@ -234,6 +235,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

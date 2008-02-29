@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/kernel/qmetaobject.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/kernel/qmetaobject.cpp -->
 <head>
-  <title>Qt 4.2: QMetaObject Class Reference</title>
+  <title>Qt 4.3: QMetaObject Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QMetaObject Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QMetaObject Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QMetaObject class contains meta-information about Qt objects. <a href="#details">More...</a></p>
 <pre> #include &lt;QMetaObject&gt;</pre><ul>
 <li><a href="qmetaobject-members.html">List of all members, including inherited members</a></li>
@@ -100,7 +101,7 @@
 <p>Returns the number of items of class information in this class.</p>
 <p>See also <a href="qmetaobject.html#classInfo">classInfo</a>(), <a href="qmetaobject.html#classInfoOffset">classInfoOffset</a>(), and <a href="qmetaobject.html#indexOfClassInfo">indexOfClassInfo</a>().</p>
 <h3 class="fn"><a name="classInfoOffset"></a>int QMetaObject::classInfoOffset () const</h3>
-<p>Returns the class information offset for this class; i.e. the index position of this class's first class information item.</p>
+<p>Returns the class information offset for this class; i.e&#x2e; the index position of this class's first class information item.</p>
 <p>If the class has no superclasses with class information, the offset is 0; otherwise the offset is the sum of all the class information items in the class's superclasses.</p>
 <p>See also <a href="qmetaobject.html#classInfo">classInfo</a>(), <a href="qmetaobject.html#classInfoCount">classInfoCount</a>(), and <a href="qmetaobject.html#indexOfClassInfo">indexOfClassInfo</a>().</p>
 <h3 class="fn"><a name="className"></a>const char * QMetaObject::className () const</h3>
@@ -119,7 +120,7 @@
 <p>Returns the number of enumerators in this class.</p>
 <p>See also <a href="qmetaobject.html#enumerator">enumerator</a>(), <a href="qmetaobject.html#enumeratorOffset">enumeratorOffset</a>(), and <a href="qmetaobject.html#indexOfEnumerator">indexOfEnumerator</a>().</p>
 <h3 class="fn"><a name="enumeratorOffset"></a>int QMetaObject::enumeratorOffset () const</h3>
-<p>Returns the enumerator offset for this class; i.e. the index position of this class's first enumerator.</p>
+<p>Returns the enumerator offset for this class; i.e&#x2e; the index position of this class's first enumerator.</p>
 <p>If the class has no superclasses with enumerators, the offset is 0; otherwise the offset is the sum of all the enumerators in the class's superclasses.</p>
 <p>See also <a href="qmetaobject.html#enumerator">enumerator</a>(), <a href="qmetaobject.html#enumeratorCount">enumeratorCount</a>(), and <a href="qmetaobject.html#indexOfEnumerator">indexOfEnumerator</a>().</p>
 <h3 class="fn"><a name="indexOfClassInfo"></a>int QMetaObject::indexOfClassInfo ( const char * <i>name</i> ) const</h3>
@@ -185,7 +186,7 @@
 <p>Returns the number of methods in this class. These include ordinary methods, signals, and slots.</p>
 <p>See also <a href="qmetaobject.html#method">method</a>(), <a href="qmetaobject.html#methodOffset">methodOffset</a>(), and <a href="qmetaobject.html#indexOfMethod">indexOfMethod</a>().</p>
 <h3 class="fn"><a name="methodOffset"></a>int QMetaObject::methodOffset () const</h3>
-<p>Returns the method offset for this class; i.e. the index position of this class's first member function.</p>
+<p>Returns the method offset for this class; i.e&#x2e; the index position of this class's first member function.</p>
 <p>The offset is the sum of all the methods in the class's superclasses (which is always positive since <a href="qobject.html">QObject</a> has the deleteLater() slot and a destroyed() signal).</p>
 <p>See also <a href="qmetaobject.html#method">method</a>(), <a href="qmetaobject.html#methodCount">methodCount</a>(), and <a href="qmetaobject.html#indexOfMethod">indexOfMethod</a>().</p>
 <h3 class="fn"><a name="normalizedSignature"></a><a href="qbytearray.html">QByteArray</a> QMetaObject::normalizedSignature ( const char * <i>method</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -207,7 +208,7 @@
 <p>Returns the number of properties in this class.</p>
 <p>See also <a href="qmetaobject.html#property">property</a>(), <a href="qmetaobject.html#propertyOffset">propertyOffset</a>(), and <a href="qmetaobject.html#indexOfProperty">indexOfProperty</a>().</p>
 <h3 class="fn"><a name="propertyOffset"></a>int QMetaObject::propertyOffset () const</h3>
-<p>Returns the property offset for this class; i.e. the index position of this class's first property.</p>
+<p>Returns the property offset for this class; i.e&#x2e; the index position of this class's first property.</p>
 <p>The offset is the sum of all the properties in the class's superclasses (which is always positive since <a href="qobject.html">QObject</a> has the name() property).</p>
 <p>See also <a href="qmetaobject.html#property">property</a>(), <a href="qmetaobject.html#propertyCount">propertyCount</a>(), and <a href="qmetaobject.html#indexOfProperty">indexOfProperty</a>().</p>
 <h3 class="fn"><a name="superClass"></a>const QMetaObject * QMetaObject::superClass () const</h3>
@@ -229,6 +230,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

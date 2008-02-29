@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qstandarditemmodel.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/itemviews/qstandarditemmodel.cpp -->
 <head>
-  <title>Qt 4.2: QStandardItem Class Reference</title>
+  <title>Qt 4.3: QStandardItem Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QStandardItem Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QStandardItem Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QStandardItem class provides an item for use with the <a href="qstandarditemmodel.html">QStandardItemModel</a> class. <a href="#details">More...</a></p>
 <pre> #include &lt;QStandardItem&gt;</pre><p>This class was introduced in Qt 4.2.</p>
 <ul>
@@ -36,6 +37,7 @@
 <li><div class="fn"/>void <b><a href="qstandarditem.html#appendColumn">appendColumn</a></b> ( const QList&lt;QStandardItem *&gt; &amp; <i>items</i> )</li>
 <li><div class="fn"/>void <b><a href="qstandarditem.html#appendRow">appendRow</a></b> ( const QList&lt;QStandardItem *&gt; &amp; <i>items</i> )</li>
 <li><div class="fn"/>void <b><a href="qstandarditem.html#appendRow-2">appendRow</a></b> ( QStandardItem * <i>item</i> )</li>
+<li><div class="fn"/>void <b><a href="qstandarditem.html#appendRows">appendRows</a></b> ( const QList&lt;QStandardItem *&gt; &amp; <i>items</i> )</li>
 <li><div class="fn"/>QBrush <b><a href="qstandarditem.html#background">background</a></b> () const</li>
 <li><div class="fn"/>Qt::CheckState <b><a href="qstandarditem.html#checkState">checkState</a></b> () const</li>
 <li><div class="fn"/>QStandardItem * <b><a href="qstandarditem.html#child">child</a></b> ( int <i>row</i>, int <i>column</i> = 0 ) const</li>
@@ -53,7 +55,8 @@
 <li><div class="fn"/>void <b><a href="qstandarditem.html#insertColumns">insertColumns</a></b> ( int <i>column</i>, int <i>count</i> )</li>
 <li><div class="fn"/>void <b><a href="qstandarditem.html#insertRow">insertRow</a></b> ( int <i>row</i>, const QList&lt;QStandardItem *&gt; &amp; <i>items</i> )</li>
 <li><div class="fn"/>void <b><a href="qstandarditem.html#insertRow-2">insertRow</a></b> ( int <i>row</i>, QStandardItem * <i>item</i> )</li>
-<li><div class="fn"/>void <b><a href="qstandarditem.html#insertRows">insertRows</a></b> ( int <i>row</i>, int <i>count</i> )</li>
+<li><div class="fn"/>void <b><a href="qstandarditem.html#insertRows">insertRows</a></b> ( int <i>row</i>, const QList&lt;QStandardItem *&gt; &amp; <i>items</i> )</li>
+<li><div class="fn"/>void <b><a href="qstandarditem.html#insertRows-2">insertRows</a></b> ( int <i>row</i>, int <i>count</i> )</li>
 <li><div class="fn"/>bool <b><a href="qstandarditem.html#isCheckable">isCheckable</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qstandarditem.html#isDragEnabled">isDragEnabled</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qstandarditem.html#isDropEnabled">isDropEnabled</a></b> () const</li>
@@ -119,8 +122,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qstandarditem.html#operator-lt-lt-72">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QStandardItem &amp; <i>item</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qstandarditem.html#operator-gt-gt-41">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QStandardItem &amp; <i>item</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qstandarditem.html#operator-lt-lt-66">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QStandardItem &amp; <i>item</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qstandarditem.html#operator-gt-gt-40">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QStandardItem &amp; <i>item</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -170,11 +173,11 @@
 <p>Destructs the item. This causes the item's children to be destructed as well.</p>
 <h3 class="fn"><a name="accessibleDescription"></a><a href="qstring.html">QString</a> QStandardItem::accessibleDescription () const</h3>
 <p>Returns the item's accessible description.</p>
-<p>The accessible description is used by assistive technologies (i.e. for users who cannot use conventional means of interaction).</p>
+<p>The accessible description is used by assistive technologies (i.e&#x2e; for users who cannot use conventional means of interaction).</p>
 <p>See also <a href="qstandarditem.html#setAccessibleDescription">setAccessibleDescription</a>() and <a href="qstandarditem.html#accessibleText">accessibleText</a>().</p>
 <h3 class="fn"><a name="accessibleText"></a><a href="qstring.html">QString</a> QStandardItem::accessibleText () const</h3>
 <p>Returns the item's accessible text.</p>
-<p>The accessible text is used by assistive technologies (i.e. for users who cannot use conventional means of interaction).</p>
+<p>The accessible text is used by assistive technologies (i.e&#x2e; for users who cannot use conventional means of interaction).</p>
 <p>See also <a href="qstandarditem.html#setAccessibleText">setAccessibleText</a>() and <a href="qstandarditem.html#accessibleDescription">accessibleDescription</a>().</p>
 <h3 class="fn"><a name="appendColumn"></a>void QStandardItem::appendColumn ( const <a href="qlist.html">QList</a>&lt;QStandardItem *&gt; &amp; <i>items</i> )</h3>
 <p>Appends a column containing <i>items</i>. If necessary, the row count is increased to the size of <i>items</i>.</p>
@@ -186,6 +189,9 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Appends a row containing <i>item</i>.</p>
 <p>When building a list or a tree that has only one column, this function provides a convenient way to append a single new item.</p>
+<h3 class="fn"><a name="appendRows"></a>void QStandardItem::appendRows ( const <a href="qlist.html">QList</a>&lt;QStandardItem *&gt; &amp; <i>items</i> )</h3>
+<p>Appends rows containing <i>items</i>. The column count will not change.</p>
+<p>See also <a href="qstandarditem.html#insertRow">insertRow</a>().</p>
 <h3 class="fn"><a name="background"></a><a href="qbrush.html">QBrush</a> QStandardItem::background () const</h3>
 <p>Returns the brush used to render the item's background.</p>
 <p>See also <a href="qstandarditem.html#foreground">foreground</a>() and <a href="qstandarditem.html#setBackground">setBackground</a>().</p>
@@ -217,7 +223,7 @@
 <p>Returns the font used to render the item's text.</p>
 <p>See also <a href="qstandarditem.html#setFont">setFont</a>().</p>
 <h3 class="fn"><a name="foreground"></a><a href="qbrush.html">QBrush</a> QStandardItem::foreground () const</h3>
-<p>Returns the brush used to render the item's foreground (e.g. text).</p>
+<p>Returns the brush used to render the item's foreground (e.g&#x2e; text).</p>
 <p>See also <a href="qstandarditem.html#setForeground">setForeground</a>() and <a href="qstandarditem.html#background">background</a>().</p>
 <h3 class="fn"><a name="hasChildren"></a>bool QStandardItem::hasChildren () const</h3>
 <p>Returns true if this item has any children; otherwise returns false.</p>
@@ -227,7 +233,7 @@
 <p>See also <a href="qstandarditem.html#setIcon">setIcon</a>() and <a href="qabstractitemview.html#iconSize-prop">iconSize</a>.</p>
 <h3 class="fn"><a name="index"></a><a href="qmodelindex.html">QModelIndex</a> QStandardItem::index () const</h3>
 <p>Returns the <a href="qmodelindex.html">QModelIndex</a> associated with this item.</p>
-<p>When you need to invoke item functionality in a <a href="qmodelindex.html">QModelIndex</a>-based API (e.g. <a href="qabstractitemview.html">QAbstractItemView</a>), you can call this function to obtain an index that corresponds to the item's location in the model.</p>
+<p>When you need to invoke item functionality in a <a href="qmodelindex.html">QModelIndex</a>-based API (e.g&#x2e; <a href="qabstractitemview.html">QAbstractItemView</a>), you can call this function to obtain an index that corresponds to the item's location in the model.</p>
 <p>If the item is not associated with a model, an invalid <a href="qmodelindex.html">QModelIndex</a> is returned.</p>
 <p>See also <a href="qstandarditem.html#model">model</a>() and <a href="qstandarditemmodel.html#itemFromIndex">QStandardItemModel::itemFromIndex</a>().</p>
 <h3 class="fn"><a name="insertColumn"></a>void QStandardItem::insertColumn ( int <i>column</i>, const <a href="qlist.html">QList</a>&lt;QStandardItem *&gt; &amp; <i>items</i> )</h3>
@@ -243,7 +249,11 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Inserts a row at <i>row</i> containing <i>item</i>.</p>
 <p>When building a list or a tree that has only one column, this function provides a convenient way to insert a single new item.</p>
-<h3 class="fn"><a name="insertRows"></a>void QStandardItem::insertRows ( int <i>row</i>, int <i>count</i> )</h3>
+<h3 class="fn"><a name="insertRows"></a>void QStandardItem::insertRows ( int <i>row</i>, const <a href="qlist.html">QList</a>&lt;QStandardItem *&gt; &amp; <i>items</i> )</h3>
+<p>Inserts <i>items</i> at <i>row</i>. The column count wont be changed.</p>
+<p>See also <a href="qstandarditem.html#insertRow">insertRow</a>() and <a href="qstandarditem.html#insertColumn">insertColumn</a>().</p>
+<h3 class="fn"><a name="insertRows-2"></a>void QStandardItem::insertRows ( int <i>row</i>, int <i>count</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
 <p>Inserts <i>count</i> rows of child items at row <i>row</i>.</p>
 <p>See also <a href="qstandarditem.html#insertRow">insertRow</a>() and <a href="qstandarditem.html#insertColumns">insertColumns</a>().</p>
 <h3 class="fn"><a name="isCheckable"></a>bool QStandardItem::isCheckable () const</h3>
@@ -307,11 +317,11 @@
 <p>See also <a href="qstandarditem.html#setRowCount">setRowCount</a>() and <a href="qstandarditem.html#columnCount">columnCount</a>().</p>
 <h3 class="fn"><a name="setAccessibleDescription"></a>void QStandardItem::setAccessibleDescription ( const <a href="qstring.html">QString</a> &amp; <i>accessibleDescription</i> )</h3>
 <p>Sets the item's accessible description to the string specified by <i>accessibleDescription</i>.</p>
-<p>The accessible description is used by assistive technologies (i.e. for users who cannot use conventional means of interaction).</p>
+<p>The accessible description is used by assistive technologies (i.e&#x2e; for users who cannot use conventional means of interaction).</p>
 <p>See also <a href="qstandarditem.html#accessibleDescription">accessibleDescription</a>() and <a href="qstandarditem.html#setAccessibleText">setAccessibleText</a>().</p>
 <h3 class="fn"><a name="setAccessibleText"></a>void QStandardItem::setAccessibleText ( const <a href="qstring.html">QString</a> &amp; <i>accessibleText</i> )</h3>
 <p>Sets the item's accessible text to the string specified by <i>accessibleText</i>.</p>
-<p>The accessible text is used by assistive technologies (i.e. for users who cannot use conventional means of interaction).</p>
+<p>The accessible text is used by assistive technologies (i.e&#x2e; for users who cannot use conventional means of interaction).</p>
 <p>See also <a href="qstandarditem.html#accessibleText">accessibleText</a>() and <a href="qstandarditem.html#setAccessibleDescription">setAccessibleDescription</a>().</p>
 <h3 class="fn"><a name="setBackground"></a>void QStandardItem::setBackground ( const <a href="qbrush.html">QBrush</a> &amp; <i>brush</i> )</h3>
 <p>Sets the item's background brush to the specified <i>brush</i>.</p>
@@ -349,7 +359,7 @@
 <p>See also <a href="qstandarditem.html#isEditable">isEditable</a>() and <a href="qstandarditem.html#setFlags">setFlags</a>().</p>
 <h3 class="fn"><a name="setEnabled"></a>void QStandardItem::setEnabled ( bool <i>enabled</i> )</h3>
 <p>Sets whether the item is enabled. If <i>enabled</i> is true, the item is enabled, meaning that the user can interact with the item; if <i>enabled</i> is false, the user cannot interact with the item.</p>
-<p>This flag takes presedence over the other item flags; e.g. if an item is not enabled, it cannot be selected by the user, even if the <a href="qt.html#ItemFlag-enum">Qt::ItemIsSelectable</a> flag has been set.</p>
+<p>This flag takes presedence over the other item flags; e.g&#x2e; if an item is not enabled, it cannot be selected by the user, even if the <a href="qt.html#ItemFlag-enum">Qt::ItemIsSelectable</a> flag has been set.</p>
 <p>See also <a href="qstandarditem.html#isEnabled">isEnabled</a>(), <a href="qt.html#ItemFlag-enum">Qt::ItemIsEnabled</a>, and <a href="qstandarditem.html#setFlags">setFlags</a>().</p>
 <h3 class="fn"><a name="setFlags"></a>void QStandardItem::setFlags ( <a href="qt.html#ItemFlag-enum">Qt::ItemFlags</a> <i>flags</i> )</h3>
 <p>Sets the item flags for the item to <i>flags</i>.</p>
@@ -359,7 +369,7 @@
 <p>Sets the font used to display the item's text to the given <i>font</i>.</p>
 <p>See also <a href="qstandarditem.html#font">font</a>(), <a href="qstandarditem.html#setText">setText</a>(), and <a href="qstandarditem.html#setForeground">setForeground</a>().</p>
 <h3 class="fn"><a name="setForeground"></a>void QStandardItem::setForeground ( const <a href="qbrush.html">QBrush</a> &amp; <i>brush</i> )</h3>
-<p>Sets the brush used to display the item's foreground (e.g. text) to the given <i>brush</i>.</p>
+<p>Sets the brush used to display the item's foreground (e.g&#x2e; text) to the given <i>brush</i>.</p>
 <p>See also <a href="qstandarditem.html#foreground">foreground</a>(), <a href="qstandarditem.html#setBackground">setBackground</a>(), and <a href="qstandarditem.html#setFont">setFont</a>().</p>
 <h3 class="fn"><a name="setIcon"></a>void QStandardItem::setIcon ( const <a href="qicon.html">QIcon</a> &amp; <i>icon</i> )</h3>
 <p>Sets the item's icon to the <i>icon</i> specified.</p>
@@ -439,13 +449,13 @@
 <p>This function is useful when reimplementing <a href="qstandarditem.html#clone">clone</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-72"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QStandardItem &amp; <i>item</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-66"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QStandardItem &amp; <i>item</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the <a href="qstandarditem.html">QStandardItem</a> <i>item</i> to stream <i>out</i>.</p>
 <p>This operator uses <a href="qstandarditem.html#write">QStandardItem::write</a>().</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-41"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QStandardItem &amp; <i>item</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-40"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QStandardItem &amp; <i>item</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a <a href="qstandarditem.html">QStandardItem</a> from stream <i>in</i> into <i>item</i>.</p>
 <p>This operator uses <a href="qstandarditem.html#read">QStandardItem::read</a>().</p>
@@ -455,6 +465,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

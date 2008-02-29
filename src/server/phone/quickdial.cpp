@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -43,16 +43,20 @@ class QuickDialModel : public CallContactModel
 public:
     QuickDialModel( QCallList& callList, QObject *parent = 0 );
 
+    void setWildcardNumberActive(bool);
+    bool wildcardNumberActive() const;
+
 public slots:
     void refresh();
     void populate();
 
 private:
     QContactModel *clm;
+    bool wcActive;
 };
 
 // declare QuickDialContactView
-class QuickDialContactView : public CallContactView
+class QuickDialContactView : public CallContactListView
 {
     Q_OBJECT
 public:
@@ -66,22 +70,39 @@ signals:
 };
 
 QuickDialContactView::QuickDialContactView(QWidget *parent)
-    : CallContactView(parent)
+    : CallContactListView(parent)
 {
-    connect( this, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedNumber(const QModelIndex&)) );
-    connect( this, SIGNAL(clicked(const QModelIndex&)), this, SLOT(selectedNumber(const QModelIndex&)) );
+    connect( this, SIGNAL(activated(QModelIndex)), this, SLOT(selectedNumber(QModelIndex)) );
+    connect( this, SIGNAL(clicked(QModelIndex)), this, SLOT(selectedNumber(QModelIndex)) );
 }
 
 void QuickDialContactView::selectedNumber(const QModelIndex& idx)
 {
     /* sub view instead if QContact */
     CallContactItem* cci = cclm->itemAt(idx);
-    if (cci && cci->type() == CallContactItem::Contact) {
-        /* should be able to select from list of numbers */
+    if (cci && !cci->contactID().isNull()) {
+        /* should be able to select from list of numbers , if there is more than one */
         /* open dialog listing phone numbers of selected contact */
-        QPhoneTypeSelector s(cci->contact(), QString());
-        if (QtopiaApplication::execDialog(&s))
-            emit numberSelected(s.selectedNumber(), QUniqueId());
+
+        QContact ent = cci->contact();
+
+        QMap<QContact::PhoneType, QString> numbers = ent.phoneNumbers();
+
+#if !defined(QTOPIA_VOIP)
+        // If we don't have VOIP, we can't dial VOIP numbers
+        numbers.remove(QContact::HomeVOIP);
+        numbers.remove(QContact::BusinessVOIP);
+        numbers.remove(QContact::VOIP);
+#endif
+
+        if (numbers.count() == 1) {
+            QMap<QContact::PhoneType, QString>::iterator it = numbers.begin();
+            emit numberSelected(it.value(), ent.uid());
+        } else {
+            QPhoneTypeSelector s(ent, QString());
+            if (QtopiaApplication::execDialog(&s) && !s.selectedNumber().isEmpty())
+                emit numberSelected(s.selectedNumber(), ent.uid());
+        }
     } else {
         emit numberSelected(cci->number(), QUniqueId());
     }
@@ -90,8 +111,21 @@ void QuickDialContactView::selectedNumber(const QModelIndex& idx)
 //---------------------------------------------------------------------------
 
 QuickDialModel::QuickDialModel( QCallList& callList, QObject *parent )
-    : CallContactModel( callList, parent ), clm(0)
+    : CallContactModel( callList, parent ), clm(0), wcActive(false)
 {
+}
+
+void QuickDialModel::setWildcardNumberActive(bool b)
+{
+    if (wcActive == b)
+        return;
+    wcActive = b;
+    refresh();
+}
+
+bool QuickDialModel::wildcardNumberActive() const
+{
+    return wcActive;
 }
 
 void QuickDialModel::refresh()
@@ -99,6 +133,11 @@ void QuickDialModel::refresh()
     if (filter().isEmpty()) {
         CallContactModel::resetModel(); //delete existing items
         CallContactModel::refresh(); //reread CallListItems
+        return;
+    }
+
+    if (wcActive) {
+        populate();
         return;
     }
 
@@ -149,25 +188,27 @@ void QuickDialModel::populate()
 
     int numMatchingEntries = 0; //limit number of entries in list
     int index = 0;
-    QUniqueId cntid = clm->id(index++);
-    while (!cntid.isNull())
-    {
-        QCallListItem clItem;
-        CallContactItem* newItem = 0;
+    if (!wcActive) {
+        QUniqueId cntid = clm->id(index++);
+        while (!cntid.isNull())
+        {
+            QCallListItem clItem;
+            CallContactItem* newItem = 0;
 
-        // assumed matched by label...
-        newItem = new CallContactItem(CallContactItem::Contact, clItem, this);
-        newItem->setContact(clm, cntid);
-        callContactItems.append(newItem);
+            // assumed matched by label...
+            newItem = new CallContactItem(clItem, this);
+            newItem->setContact(clm, cntid);
+            callContactItems.append(newItem);
 
-        numMatchingEntries++;
+            numMatchingEntries++;
 
-        /* should only sow enough to fit on the screen,
-           although perhaps have a way of searching out the rest
-           later.  Scrolling through 3000+ item != quick */
-        if (numMatchingEntries > 20)
-            break;
-        cntid = clm->id(index++);
+            /* should only sow enough to fit on the screen,
+               although perhaps have a way of searching out the rest
+               later.  Scrolling through 3000+ item != quick */
+            if (numMatchingEntries > 20)
+                break;
+            cntid = clm->id(index++);
+        }
     }
 
     //create remaining calllist items
@@ -177,23 +218,11 @@ void QuickDialModel::populate()
             if( clItem.isNull() )
                 continue;
 
-            QCallListItem::CallType st = clItem.type();
-
             QString number = clItem.number();
             if( filStr.isEmpty() || (filLen >= 3 &&
                             (QPhoneNumber::matchPrefix( clItem.number(), filStr ) != 0)) )
             {
-                CallContactItem::Types qdType;
-                if( st == QCallListItem::Dialed )
-                   qdType = CallContactItem::DialedNumber;
-                else if( st == QCallListItem::Received )
-                   qdType = CallContactItem::ReceivedCall;
-                else if( st == QCallListItem::Missed )
-                   qdType = CallContactItem::MissedCall;
-                else
-                   continue;
-
-                CallContactItem *newItem = new CallContactItem(qdType, clItem, this);
+                CallContactItem *newItem = new CallContactItem(clItem, this);
                 callContactItems.append(newItem);
             }
         }
@@ -209,6 +238,7 @@ void QuickDialModel::populate()
   \ingroup QtopiaServer::PhoneUI
 
   This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+  It is part of the Qtopia server and cannot be used by other Qtopia applications.
 
   \sa QAbstractServerInterface, QAbstractDialerScreen
   */
@@ -229,6 +259,7 @@ PhoneQuickDialerScreen::PhoneQuickDialerScreen( QWidget *parent, Qt::WFlags fl )
 {
     QCallList &callList = DialerControl::instance()->callList();
     QVBoxLayout *l = new QVBoxLayout( this );
+    l->setContentsMargins(0, 0, 0, 0);
 
     mNumberDS = new NumberDisplay( this );
     l->addWidget(mNumberDS);
@@ -245,26 +276,26 @@ PhoneQuickDialerScreen::PhoneQuickDialerScreen( QWidget *parent, Qt::WFlags fl )
     mDialList->setItemDelegate( delegate );
 
     QItemSelectionModel * sm = mDialList->selectionModel();
-    connect( sm, SIGNAL(currentChanged(const QModelIndex&,const QModelIndex&)),
-        mDialList, SLOT(updateMenu(const QModelIndex&, const QModelIndex&)) );
+    connect( sm, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+        mDialList, SLOT(updateMenu()) );
 
-    connect( mNumberDS, SIGNAL(numberChanged(const QString&)), this,
-                                                    SLOT(rejectEmpty(const QString&)) );
-    connect( mNumberDS, SIGNAL(numberChanged(const QString&)), mDialModel,
-                                                    SLOT(setFilter(const QString&)) );
-    connect( mNumberDS, SIGNAL(speedDialed(const QString&)), this,
-                                    SIGNAL(speedDial(const QString&)) );
-    connect( mNumberDS, SIGNAL(numberSelected(const QString&)), this,
-                                    SLOT(selectedNumber(const QString&)) );
+    connect( mNumberDS, SIGNAL(numberChanged(QString)), this,
+                                                    SLOT(rejectEmpty(QString)) );
+    connect( mNumberDS, SIGNAL(numberChanged(QString)), mDialModel,
+                                                    SLOT(setFilter(QString)) );
+    connect( mNumberDS, SIGNAL(speedDialed(QString)), this,
+                                    SIGNAL(speedDial(QString)) );
+    connect( mNumberDS, SIGNAL(numberSelected(QString)), this,
+                                    SLOT(selectedNumber(QString)) );
     connect( mNumberDS, SIGNAL(hangupActivated()), this, SLOT(close()) );
 
-    connect( this, SIGNAL(numberSelected(const QString&, const QUniqueId&)), this,
-                                            SIGNAL(requestDial(const QString&, const QUniqueId&)) );
+    connect( this, SIGNAL(numberSelected(QString,QUniqueId)), this,
+                                            SIGNAL(requestDial(QString,QUniqueId)) );
 
-    connect( mDialList, SIGNAL(requestedDial(const QString&, const QUniqueId&)), mDialList,
-                                    SIGNAL(numberSelected(const QString&, const QUniqueId&)) );
-    connect( mDialList, SIGNAL(numberSelected(const QString&, const QUniqueId&)), this,
-                                    SLOT(selectedNumber(const QString&, const QUniqueId)) );
+    connect( mDialList, SIGNAL(requestedDial(QString,QUniqueId)), mDialList,
+                                    SIGNAL(numberSelected(QString,QUniqueId)) );
+    connect( mDialList, SIGNAL(numberSelected(QString,QUniqueId)), this,
+                                    SLOT(selectedNumber(QString,QUniqueId)) );
     connect( mDialList, SIGNAL(hangupActivated()), this, SLOT(close()) );
     setWindowTitle( tr("Quick Dial") );
 
@@ -313,11 +344,16 @@ void PhoneQuickDialerScreen::selectedNumber( const QString &num, const QUniqueId
     if ( filtered ) {
         mNumber = QString();
         close();
-        return;
+    } else if (num.contains(QChar('d'), Qt::CaseInsensitive) &&
+               !num.contains(QChar(':')) && !num.contains(QChar('@'))) {
+        mDialModel->setWildcardNumberActive(true);
+        mNumberDS->setWildcardNumber(num);
+        mNumberDS->setFocus();
+    } else {
+        mNumber = num;
+        close();
+        emit numberSelected( mNumber, cnt );
     }
-    mNumber = num;
-    close();
-    emit numberSelected( mNumber, cnt );
 }
 
 /*! \internal */
@@ -408,17 +444,20 @@ bool PhoneQuickDialerScreen::eventFilter( QObject *o, QEvent *e )
 /*! \reimp */
 void PhoneQuickDialerScreen::reset()
 {
-    mNumberDS->setNumber("");
+    mNumberDS->clear();
     mNumberDS->setFocus();
+    mDialModel->setWildcardNumberActive(false);
     mNumber = QString();
+    mDialList->setCurrentIndex(QModelIndex());
+    mDialList->scrollToTop();
 }
 
 /*! \internal */
 void PhoneQuickDialerScreen::rejectEmpty( const QString &t )
 {
-    if( t.isEmpty() && !isVisible() )
+    if( t.isEmpty() && !isVisible() ) {
         close();
-    else {
+     } else {
         // Fitler special GSM key sequences that act immediately (e.g. *#06#).
         bool filtered = false;
         emit filterKeys( t, filtered );

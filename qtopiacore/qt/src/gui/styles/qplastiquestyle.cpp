@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,6 +45,7 @@ static const bool AnimateBusyProgressBar = true;
 static const bool AnimateProgressBar = false;
 // #define QPlastique_MaskButtons
 static const int ProgressBarFps = 25;
+static const int blueFrameWidth =  2;  // with of line edit focus frame
 
 #include "qwindowsstyle_p.h"
 #include <qapplication.h>
@@ -69,6 +85,7 @@ static const int ProgressBarFps = 25;
 #include <qfileinfo.h>
 #include <qsettings.h>
 #include <qdir.h>
+#include <qvarlengtharray.h>
 #include <limits.h>
 
 // from windows style
@@ -486,7 +503,7 @@ static void qBrushSetAlphaF(QBrush *brush, qreal alpha)
         // Modify the texture - ridiculously expensive.
         QPixmap texture = brush->texture();
         QPixmap pixmap;
-        QString name = QString("qbrushtexture-alpha-%1-%2").arg(alpha).arg(texture.serialNumber());
+        QString name = QString::fromLatin1("qbrushtexture-alpha-%1-%2").arg(alpha).arg(texture.cacheKey());
         if (UsePixmapCache && !QPixmapCache::find(name, pixmap)) {
             QImage image = texture.toImage();
             QRgb *rgb = reinterpret_cast<QRgb *>(image.bits());
@@ -512,12 +529,12 @@ static void qBrushSetAlphaF(QBrush *brush, qreal alpha)
 static QBrush qBrushLight(QBrush brush, int light)
 {
     if (const QGradient *gradient = brush.gradient()) {
-        // Use the gradient. Call QColor::light() on all color stops.
+        // Use the gradient. Call QColor::lighter() on all color stops.
         QGradientStops stops = gradient->stops();
         QMutableVectorIterator<QGradientStop> it(stops);
         while (it.hasNext()) {
             it.next();
-            it.setValue(QPair<qreal, QColor>(it.value().first, it.value().second.light(light)));
+            it.setValue(QPair<qreal, QColor>(it.value().first, it.value().second.lighter(light)));
         }
 
         switch (gradient->type()) {
@@ -547,7 +564,7 @@ static QBrush qBrushLight(QBrush brush, int light)
         // Modify the texture - ridiculously expensive.
         QPixmap texture = brush.texture();
         QPixmap pixmap;
-        QString name = QString("qbrushtexture-light-%1-%2").arg(light).arg(texture.serialNumber());
+        QString name = QString::fromLatin1("qbrushtexture-light-%1-%2").arg(light).arg(texture.cacheKey());
         if (UsePixmapCache && !QPixmapCache::find(name, pixmap)) {
             QImage image = texture.toImage();
             QRgb *rgb = reinterpret_cast<QRgb *>(image.bits());
@@ -555,7 +572,7 @@ static QBrush qBrushLight(QBrush brush, int light)
             QColor tmpColor;
             while (pixels--) {
                 tmpColor.setRgb(*rgb);
-                *rgb++ = tmpColor.light(light).rgba();
+                *rgb++ = tmpColor.lighter(light).rgba();
             }
             pixmap = QPixmap::fromImage(image);
             QPixmapCache::insert(name, pixmap);
@@ -563,7 +580,7 @@ static QBrush qBrushLight(QBrush brush, int light)
         brush.setTexture(pixmap);
     } else {
         // Use the color
-        brush.setColor(brush.color().light(light));
+        brush.setColor(brush.color().lighter(light));
     }
     return brush;
 }
@@ -571,12 +588,12 @@ static QBrush qBrushLight(QBrush brush, int light)
 static QBrush qBrushDark(QBrush brush, int dark)
 {
     if (const QGradient *gradient = brush.gradient()) {
-        // Use the gradient. Call QColor::dark() on all color stops.
+        // Use the gradient. Call QColor::darker() on all color stops.
         QGradientStops stops = gradient->stops();
         QMutableVectorIterator<QGradientStop> it(stops);
         while (it.hasNext()) {
             it.next();
-            it.setValue(QPair<qreal, QColor>(it.value().first, it.value().second.dark(dark)));
+            it.setValue(QPair<qreal, QColor>(it.value().first, it.value().second.darker(dark)));
         }
 
         switch (gradient->type()) {
@@ -606,7 +623,7 @@ static QBrush qBrushDark(QBrush brush, int dark)
         // Modify the texture - ridiculously expensive.
         QPixmap texture = brush.texture();
         QPixmap pixmap;
-        QString name = QString("qbrushtexture-dark-%1-%2").arg(dark).arg(brush.texture().serialNumber());
+        QString name = QString::fromLatin1("qbrushtexture-dark-%1-%2").arg(dark).arg(brush.texture().cacheKey());
         if (UsePixmapCache && !QPixmapCache::find(name, pixmap)) {
             QImage image = texture.toImage();
             QRgb *rgb = reinterpret_cast<QRgb *>(image.bits());
@@ -614,7 +631,7 @@ static QBrush qBrushDark(QBrush brush, int dark)
             QColor tmpColor;
             while (pixels--) {
                 tmpColor.setRgb(*rgb);
-                *rgb++ = tmpColor.dark(dark).rgba();
+                *rgb++ = tmpColor.darker(dark).rgba();
             }
             pixmap = QPixmap::fromImage(image);
             QPixmapCache::insert(name, pixmap);
@@ -622,7 +639,7 @@ static QBrush qBrushDark(QBrush brush, int dark)
         brush.setTexture(pixmap);
     } else {
         // Use the color
-        brush.setColor(brush.color().dark(dark));
+        brush.setColor(brush.color().darker(dark));
     }
     return brush;
 }
@@ -672,38 +689,46 @@ static void qt_plastique_draw_frame(QPainter *painter, const QRect &rect, const 
         }
     }
 
+    QLine lines[4];
+    QPoint points[8];
+
     // Opaque corner lines
     painter->setPen(QPen(border, 0));
-    painter->drawLine(rect.left() + 2, rect.top(), rect.right() - 2, rect.top());
-    painter->drawLine(rect.left() + 2, rect.bottom(), rect.right() - 2, rect.bottom());
-    painter->drawLine(rect.left(), rect.top() + 2, rect.left(), rect.bottom() - 2);
-    painter->drawLine(rect.right(), rect.top() + 2, rect.right(), rect.bottom() - 2);
+    lines[0] = QLine(rect.left() + 2, rect.top(), rect.right() - 2, rect.top());
+    lines[1] = QLine(rect.left() + 2, rect.bottom(), rect.right() - 2, rect.bottom());
+    lines[2] = QLine(rect.left(), rect.top() + 2, rect.left(), rect.bottom() - 2);
+    lines[3] = QLine(rect.right(), rect.top() + 2, rect.right(), rect.bottom() - 2);
+    painter->drawLines(lines, 4);
 
     // Opaque corner dots
-    painter->drawPoint(rect.left() + 1, rect.top() + 1);
-    painter->drawPoint(rect.left() + 1, rect.bottom() - 1);
-    painter->drawPoint(rect.right() - 1, rect.top() + 1);
-    painter->drawPoint(rect.right() - 1, rect.bottom() - 1);
+    points[0] = QPoint(rect.left() + 1, rect.top() + 1);
+    points[1] = QPoint(rect.left() + 1, rect.bottom() - 1);
+    points[2] = QPoint(rect.right() - 1, rect.top() + 1);
+    points[3] = QPoint(rect.right() - 1, rect.bottom() - 1);
+    painter->drawPoints(points, 4);
 
     // Shaded corner dots
     painter->setPen(QPen(corner, 0));
-    painter->drawPoint(rect.left(), rect.top() + 1);
-    painter->drawPoint(rect.left(), rect.bottom() - 1);
-    painter->drawPoint(rect.left() + 1, rect.top());
-    painter->drawPoint(rect.left() + 1, rect.bottom());
-    painter->drawPoint(rect.right(), rect.top() + 1);
-    painter->drawPoint(rect.right(), rect.bottom() - 1);
-    painter->drawPoint(rect.right() - 1, rect.top());
-    painter->drawPoint(rect.right() - 1, rect.bottom());
+    points[0] = QPoint(rect.left(), rect.top() + 1);
+    points[1] = QPoint(rect.left(), rect.bottom() - 1);
+    points[2] = QPoint(rect.left() + 1, rect.top());
+    points[3] = QPoint(rect.left() + 1, rect.bottom());
+    points[4] = QPoint(rect.right(), rect.top() + 1);
+    points[5] = QPoint(rect.right(), rect.bottom() - 1);
+    points[6] = QPoint(rect.right() - 1, rect.top());
+    points[7] = QPoint(rect.right() - 1, rect.bottom());
+    painter->drawPoints(points, 8);
 
     // Shadows
     if (shadow != QFrame::Plain) {
         painter->setPen(QPen(innerTopLeft, 0));
-        painter->drawLine(rect.left() + 2, rect.top() + 1, rect.right() - 2, rect.top() + 1);
-        painter->drawLine(rect.left() + 1, rect.top() + 2, rect.left() + 1, rect.bottom() - 2);
+        lines[0] = QLine(rect.left() + 2, rect.top() + 1, rect.right() - 2, rect.top() + 1);
+        lines[1] = QLine(rect.left() + 1, rect.top() + 2, rect.left() + 1, rect.bottom() - 2);
+        painter->drawLines(lines, 2);
         painter->setPen(QPen(innerBottomRight, 0));
-        painter->drawLine(rect.left() + 2, rect.bottom() - 1, rect.right() - 2, rect.bottom() - 1);
-        painter->drawLine(rect.right() - 1, rect.top() + 2, rect.right() - 1, rect.bottom() - 2);
+        lines[0] = QLine(rect.left() + 2, rect.bottom() - 1, rect.right() - 2, rect.bottom() - 1);
+        lines[1] = QLine(rect.right() - 1, rect.top() + 2, rect.right() - 1, rect.bottom() - 2);
+        painter->drawLines(lines, 2);
     }
 
     painter->setPen(oldPen);
@@ -723,9 +748,9 @@ static QString uniqueName(const QString &key, const QStyleOption *option, const 
 {
     QString tmp;
     const QStyleOptionComplex *complexOption = qstyleoption_cast<const QStyleOptionComplex *>(option);
-    tmp.sprintf("%s-%d-%d-%d-%dx%d", key.toLatin1().constData(), uint(option->state),
-                complexOption ? uint(complexOption->activeSubControls) : uint(0),
-                option->palette.serialNumber(), size.width(), size.height());
+    tmp.sprintf("%s-%d-%d-%d-%lld-%dx%d", key.toLatin1().constData(), uint(option->state),
+                option->direction, complexOption ? uint(complexOption->activeSubControls) : uint(0),
+                option->palette.cacheKey(), size.width(), size.height());
     return tmp;
 }
 
@@ -757,9 +782,9 @@ static void qt_plastique_drawFrame(QPainter *painter, const QStyleOption *option
     QRect rect = option->rect;
     QPen oldPen = painter->pen();
 
-    QColor borderColor = option->palette.background().color().dark(178);
-    QColor gradientStartColor = option->palette.button().color().light(104);
-    QColor gradientStopColor = option->palette.button().color().dark(105);
+    QColor borderColor = option->palette.background().color().darker(178);
+    QColor gradientStartColor = option->palette.button().color().lighter(104);
+    QColor gradientStopColor = option->palette.button().color().darker(105);
     QColor alphaCornerColor;
     if (widget) {
         // ### backgroundrole/foregroundrole should be part of the style option
@@ -768,41 +793,53 @@ static void qt_plastique_drawFrame(QPainter *painter, const QStyleOption *option
         alphaCornerColor = mergedColors(option->palette.background().color(), borderColor);
     }
 
+    QLine lines[4];
+    QPoint points[8];
+
     // outline / border
     painter->setPen(borderColor);
-    painter->drawLine(rect.left() + 2, rect.top(), rect.right() - 2, rect.top());
-    painter->drawLine(rect.left() + 2, rect.bottom(), rect.right() - 2, rect.bottom());
-    painter->drawLine(rect.left(), rect.top() + 2, rect.left(), rect.bottom() - 2);
-    painter->drawLine(rect.right(), rect.top() + 2, rect.right(), rect.bottom() - 2);
-    painter->drawPoint(rect.left() + 1, rect.top() + 1);
-    painter->drawPoint(rect.right() - 1, rect.top() + 1);
-    painter->drawPoint(rect.left() + 1, rect.bottom() - 1);
-    painter->drawPoint(rect.right() - 1, rect.bottom() - 1);
+    lines[0] = QLine(rect.left() + 2, rect.top(), rect.right() - 2, rect.top());
+    lines[1] = QLine(rect.left() + 2, rect.bottom(), rect.right() - 2, rect.bottom());
+    lines[2] = QLine(rect.left(), rect.top() + 2, rect.left(), rect.bottom() - 2);
+    lines[3] = QLine(rect.right(), rect.top() + 2, rect.right(), rect.bottom() - 2);
+    painter->drawLines(lines, 4);
+
+    points[0] = QPoint(rect.left() + 1, rect.top() + 1);
+    points[1] = QPoint(rect.right() - 1, rect.top() + 1);
+    points[2] = QPoint(rect.left() + 1, rect.bottom() - 1);
+    points[3] = QPoint(rect.right() - 1, rect.bottom() - 1);
+    painter->drawPoints(points, 4);
 
     painter->setPen(alphaCornerColor);
-    painter->drawPoint(rect.left() + 1, rect.top());
-    painter->drawPoint(rect.right() - 1, rect.top());
-    painter->drawPoint(rect.left() + 1, rect.bottom());
-    painter->drawPoint(rect.right() - 1, rect.bottom());
-    painter->drawPoint(rect.left(), rect.top() + 1);
-    painter->drawPoint(rect.right(), rect.top() + 1);
-    painter->drawPoint(rect.left(), rect.bottom() - 1);
-    painter->drawPoint(rect.right(), rect.bottom() - 1);
+
+    points[0] = QPoint(rect.left() + 1, rect.top());
+    points[1] = QPoint(rect.right() - 1, rect.top());
+    points[2] = QPoint(rect.left() + 1, rect.bottom());
+    points[3] = QPoint(rect.right() - 1, rect.bottom());
+    points[4] = QPoint(rect.left(), rect.top() + 1);
+    points[5] = QPoint(rect.right(), rect.top() + 1);
+    points[6] = QPoint(rect.left(), rect.bottom() - 1);
+    points[7] = QPoint(rect.right(), rect.bottom() - 1);
+    painter->drawPoints(points, 8);
 
     // inner border
     if ((option->state & QStyle::State_Sunken) || (option->state & QStyle::State_On))
-        painter->setPen(option->palette.button().color().dark(118));
+        painter->setPen(option->palette.button().color().darker(118));
     else
         painter->setPen(gradientStartColor);
-    painter->drawLine(rect.left() + 2, rect.top() + 1, rect.right() - 2, option->rect.top() + 1);
-    painter->drawLine(rect.left() + 1, rect.top() + 2, rect.left() + 1, option->rect.bottom() - 2);
+
+    lines[0] = QLine(rect.left() + 2, rect.top() + 1, rect.right() - 2, option->rect.top() + 1);
+    lines[1] = QLine(rect.left() + 1, rect.top() + 2, rect.left() + 1, option->rect.bottom() - 2);
+    painter->drawLines(lines, 2);
 
     if ((option->state & QStyle::State_Sunken) || (option->state & QStyle::State_On))
-        painter->setPen(option->palette.button().color().dark(110));
+        painter->setPen(option->palette.button().color().darker(110));
     else
-        painter->setPen(gradientStopColor.dark(102));
-    painter->drawLine(rect.left() + 2, rect.bottom() - 1, rect.right() - 2, rect.bottom() - 1);
-    painter->drawLine(rect.right() - 1, rect.top() + 2, rect.right() - 1, rect.bottom() - 2);
+        painter->setPen(gradientStopColor.darker(102));
+
+    lines[0] = QLine(rect.left() + 2, rect.bottom() - 1, rect.right() - 2, rect.bottom() - 1);
+    lines[1] = QLine(rect.right() - 1, rect.top() + 2, rect.right() - 1, rect.bottom() - 2);
+    painter->drawLines(lines, 2);
 
     painter->setPen(oldPen);
 }
@@ -813,19 +850,19 @@ static void qt_plastique_drawShadedPanel(QPainter *painter, const QStyleOption *
     QRect rect = option->rect;
     QPen oldPen = painter->pen();
 
-    QColor gradientStartColor = option->palette.button().color().light(104);
-    QColor gradientStopColor = option->palette.button().color().dark(105);
+    QColor gradientStartColor = option->palette.button().color().lighter(104);
+    QColor gradientStopColor = option->palette.button().color().darker(105);
 
     // gradient fill
     if ((option->state & QStyle::State_Enabled) || !(option->state & QStyle::State_AutoRaise)) {
         if ((option->state & QStyle::State_Sunken) || (option->state & QStyle::State_On)) {
             qt_plastique_draw_gradient(painter, rect.adjusted(1, 1, -1, -1),
-                                       option->palette.button().color().dark(114),
-                                       option->palette.button().color().dark(106));
+                                       option->palette.button().color().darker(114),
+                                       option->palette.button().color().darker(106));
         } else {
             qt_plastique_draw_gradient(painter, rect.adjusted(1, 1, -1, -1),
-                                       base ? option->palette.background().color().light(105) : gradientStartColor,
-                                       base ? option->palette.background().color().dark(102) : gradientStopColor);
+                                       base ? option->palette.background().color().lighter(105) : gradientStartColor,
+                                       base ? option->palette.background().color().darker(102) : gradientStopColor);
         }
     }
 
@@ -861,14 +898,20 @@ static void qt_plastique_draw_mdibutton(QPainter *painter, const QStyleOptionTit
         mdiButtonBorderColor = (hover || sunken) ? QColor(0x838383) : QColor(0x5e5e5e);
     }
     painter->setPen(QPen(mdiButtonBorderColor, 1));
-    painter->drawLine(tmp.left() + 2, tmp.top(), tmp.right() - 2, tmp.top());
-    painter->drawLine(tmp.left() + 2, tmp.bottom(), tmp.right() - 2, tmp.bottom());
-    painter->drawLine(tmp.left(), tmp.top() + 2, tmp.left(), tmp.bottom() - 2);
-    painter->drawLine(tmp.right(), tmp.top() + 2, tmp.right(), tmp.bottom() - 2);
-    painter->drawPoint(tmp.left() + 1, tmp.top() + 1);
-    painter->drawPoint(tmp.right() - 1, tmp.top() + 1);
-    painter->drawPoint(tmp.left() + 1, tmp.bottom() - 1);
-    painter->drawPoint(tmp.right() - 1, tmp.bottom() - 1);
+
+    const QLine lines[4] = {
+        QLine(tmp.left() + 2, tmp.top(), tmp.right() - 2, tmp.top()),
+        QLine(tmp.left() + 2, tmp.bottom(), tmp.right() - 2, tmp.bottom()),
+        QLine(tmp.left(), tmp.top() + 2, tmp.left(), tmp.bottom() - 2),
+        QLine(tmp.right(), tmp.top() + 2, tmp.right(), tmp.bottom() - 2) };
+    painter->drawLines(lines, 4);
+
+    const QPoint points[4] = {
+        QPoint(tmp.left() + 1, tmp.top() + 1),
+        QPoint(tmp.right() - 1, tmp.top() + 1),
+        QPoint(tmp.left() + 1, tmp.bottom() - 1),
+        QPoint(tmp.right() - 1, tmp.bottom() - 1) };
+    painter->drawPoints(points, 4);
 }
 
 #ifndef QT_NO_DOCKWIDGET
@@ -909,7 +952,7 @@ static void qt_plastique_draw_handle(QPainter *painter, const QStyleOption *opti
                                      const QRect &rect, Qt::Orientation orientation,
                                      const QWidget *widget)
 {
-    QColor borderColor = option->palette.background().color().dark(178);
+    QColor borderColor = option->palette.background().color().darker(178);
     QColor alphaCornerColor;
     if (widget) {
         // ### backgroundrole/foregroundrole should be part of the style option
@@ -1009,15 +1052,15 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
 {
     Q_ASSERT(option);
 
-    QColor borderColor = option->palette.background().color().dark(178);
-    QColor gradientStartColor = option->palette.button().color().light(104);
-    QColor gradientStopColor = option->palette.button().color().dark(105);
-    QColor baseGradientStartColor = option->palette.base().color().dark(101);
-    QColor baseGradientStopColor = option->palette.base().color().dark(106);
-    QColor highlightedGradientStartColor = option->palette.button().color().light(101);
+    QColor borderColor = option->palette.background().color().darker(178);
+    QColor gradientStartColor = option->palette.button().color().lighter(104);
+    QColor gradientStopColor = option->palette.button().color().darker(105);
+    QColor baseGradientStartColor = option->palette.base().color().darker(101);
+    QColor baseGradientStopColor = option->palette.base().color().darker(106);
+    QColor highlightedGradientStartColor = option->palette.button().color().lighter(101);
     QColor highlightedGradientStopColor = mergedColors(option->palette.button().color(), option->palette.highlight().color(), 85);
     QColor highlightedBaseGradientStartColor = option->palette.base().color();
-    QColor highlightedBaseGradientStopColor = mergedColors(option->palette.base().color().dark(105), option->palette.highlight().color(), 70);
+    QColor highlightedBaseGradientStopColor = mergedColors(option->palette.base().color().darker(105), option->palette.highlight().color(), 70);
     QColor highlightedDarkInnerBorderColor = mergedColors(option->palette.button().color(), option->palette.highlight().color(), 35);
     QColor highlightedLightInnerBorderColor = mergedColors(option->palette.button().color(), option->palette.highlight().color(), 58);
     QColor alphaCornerColor;
@@ -1030,41 +1073,50 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
     QColor alphaInnerColor = mergedColors(highlightedLightInnerBorderColor, gradientStartColor);
     QColor alphaInnerColorNoHover = mergedColors(borderColor, gradientStartColor);
     QColor alphaTextColor = mergedColors(option->palette.background().color(), option->palette.text().color());
-    QColor alphaLightTextColor = mergedColors(option->palette.background().color().light(250), option->palette.text().color().light(250));
-    QColor lightShadow = option->palette.button().color().light(105);
-    QColor shadowGradientStartColor = option->palette.button().color().dark(115);
+    QColor alphaLightTextColor = mergedColors(option->palette.background().color().lighter(250), option->palette.text().color().lighter(250));
+    QColor lightShadow = option->palette.button().color().lighter(105);
+    QColor shadowGradientStartColor = option->palette.button().color().darker(115);
     QColor shadow = shadowGradientStartColor;
 
     switch (element) {
     case PE_IndicatorButtonDropDown:
         drawPrimitive(PE_PanelButtonTool, option, painter, widget);
         break;
-    case PE_FrameDefaultButton:
+    case PE_FrameDefaultButton: {
         if (!(option->state & QStyle::State_Enabled))
             break;
         painter->setPen(QPen(QColor(0, 0, 0, 127), 0));
-        painter->drawLine(option->rect.left() + 2, option->rect.top(),
-                          option->rect.right() - 2, option->rect.top());
-        painter->drawLine(option->rect.left() + 2, option->rect.bottom(),
-                          option->rect.right() - 2, option->rect.bottom());
-        painter->drawLine(option->rect.left(), option->rect.top() + 2,
-                          option->rect.left(), option->rect.bottom() - 2);
-        painter->drawLine(option->rect.right(), option->rect.top() + 2,
-                          option->rect.right(), option->rect.bottom() - 2);
-        painter->drawPoint(option->rect.left() + 1, option->rect.top() + 1);
-        painter->drawPoint(option->rect.right() - 1, option->rect.top() + 1);
-        painter->drawPoint(option->rect.left() + 1, option->rect.bottom() - 1);
-        painter->drawPoint(option->rect.right() - 1, option->rect.bottom() - 1);
+        const QLine lines[4] = {
+            QLine(option->rect.left() + 2, option->rect.top(),
+                  option->rect.right() - 2, option->rect.top()),
+            QLine(option->rect.left() + 2, option->rect.bottom(),
+                  option->rect.right() - 2, option->rect.bottom()),
+            QLine(option->rect.left(), option->rect.top() + 2,
+                  option->rect.left(), option->rect.bottom() - 2),
+            QLine(option->rect.right(), option->rect.top() + 2,
+                  option->rect.right(), option->rect.bottom() - 2) };
+        painter->drawLines(lines, 4);
+
+        QPoint points[8];
+        points[0] = QPoint(option->rect.left() + 1, option->rect.top() + 1);
+        points[1] = QPoint(option->rect.right() - 1, option->rect.top() + 1);
+        points[2] = QPoint(option->rect.left() + 1, option->rect.bottom() - 1);
+        points[3] = QPoint(option->rect.right() - 1, option->rect.bottom() - 1);
+        painter->drawPoints(points, 4);
+
         painter->setPen(QPen(QColor(0, 0, 0, 63), 0));
-        painter->drawPoint(option->rect.left() + 1, option->rect.top());
-        painter->drawPoint(option->rect.right() - 1, option->rect.top());
-        painter->drawPoint(option->rect.left(), option->rect.top() + 1);
-        painter->drawPoint(option->rect.right(), option->rect.top() + 1);
-        painter->drawPoint(option->rect.left() + 1, option->rect.bottom());
-        painter->drawPoint(option->rect.right() - 1, option->rect.bottom());
-        painter->drawPoint(option->rect.left(), option->rect.bottom() - 1);
-        painter->drawPoint(option->rect.right(), option->rect.bottom() - 1);
+        points[0] = QPoint(option->rect.left() + 1, option->rect.top());
+        points[1] = QPoint(option->rect.right() - 1, option->rect.top());
+        points[2] = QPoint(option->rect.left(), option->rect.top() + 1);
+        points[3] = QPoint(option->rect.right(), option->rect.top() + 1);
+        points[4] = QPoint(option->rect.left() + 1, option->rect.bottom());
+        points[5] = QPoint(option->rect.right() - 1, option->rect.bottom());
+        points[6] = QPoint(option->rect.left(), option->rect.bottom() - 1);
+        points[7] = QPoint(option->rect.right(), option->rect.bottom() - 1);
+        painter->drawPoints(points, 8);
+
         break;
+    }
 #ifndef QT_NO_TABWIDGET
     case PE_FrameTabWidget:
         if (const QStyleOptionTabWidgetFrame *twf = qstyleoption_cast<const QStyleOptionTabWidgetFrame *>(option)) {
@@ -1123,7 +1175,11 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
             QBrush border = option->palette.shadow();
             qBrushSetAlphaF(&border, 0.4);
             painter->setPen(QPen(border, 0));
-            painter->drawLine(topLine);
+
+            QVarLengthArray<QLine, 4> lines;
+            QVarLengthArray<QPoint, 8> points;
+
+            lines.append(topLine);
 
             // Inner border
             QLine innerLeftLine = QLine(leftLine.p1() + QPoint(1, 0), leftLine.p2() + QPoint(1, 0));
@@ -1145,37 +1201,51 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
             QPoint leftTopInnerCorner1 = QPoint(leftLine.p1() - QPoint(0, 1));
             QPoint leftTopInnerCorner2 = QPoint(topLine.p1() - QPoint(1, 0));
 
-            painter->drawLine(leftLine);
-            painter->drawLine(rightLine);
-            painter->drawLine(bottomLine);
-            painter->drawPoint(leftBottomOuterCorner);
-            painter->drawPoint(rightBottomOuterCorner);
-            painter->drawPoint(rightTopOuterCorner);
-            painter->drawPoint(leftTopOuterCorner);
+            lines.append(leftLine);
+            lines.append(rightLine);
+            lines.append(bottomLine);
+
+            painter->drawLines(lines.constData(), lines.size());
+            lines.clear();
+
+            points.append(leftBottomOuterCorner);
+            points.append(rightBottomOuterCorner);
+            points.append(rightTopOuterCorner);
+            points.append(leftTopOuterCorner);
+
+            painter->drawPoints(points.constData(), points.size());
+            points.clear();
 
             QBrush innerTopLeft = option->palette.shadow();
             qBrushSetAlphaF(&innerTopLeft, 0.075);
             painter->setPen(QPen(innerTopLeft, 0));
-            painter->drawLine(innerLeftLine);
-            painter->drawLine(innerTopLine);
+
+            lines.append(innerLeftLine);
+            lines.append(innerTopLine);
+            painter->drawLines(lines.constData(), lines.size());
+            lines.clear();
 
             QBrush innerBottomRight = option->palette.shadow();
             qBrushSetAlphaF(&innerBottomRight, 0.23);
             painter->setPen(QPen(innerBottomRight, 0));
-            painter->drawLine(innerRightLine);
-            painter->drawLine(innerBottomLine);
+            lines.append(innerRightLine);
+            lines.append(innerBottomLine);
+            painter->drawLines(lines.constData(), lines.size());
+            lines.clear();
 
             QBrush corner = option->palette.shadow();
             qBrushSetAlphaF(&corner, 0.25);
             painter->setPen(QPen(corner, 0));
-            painter->drawPoint(leftBottomInnerCorner1);
-            painter->drawPoint(leftBottomInnerCorner2);
-            painter->drawPoint(rightBottomInnerCorner1);
-            painter->drawPoint(rightBottomInnerCorner2);
-            painter->drawPoint(rightTopInnerCorner1);
-            painter->drawPoint(rightTopInnerCorner2);
-            painter->drawPoint(leftTopInnerCorner1);
-            painter->drawPoint(leftTopInnerCorner2);
+            points.append(leftBottomInnerCorner1);
+            points.append(leftBottomInnerCorner2);
+            points.append(rightBottomInnerCorner1);
+            points.append(rightBottomInnerCorner2);
+            points.append(rightTopInnerCorner1);
+            points.append(rightTopInnerCorner2);
+            points.append(leftTopInnerCorner1);
+            points.append(leftTopInnerCorner2);
+            painter->drawPoints(points.constData(), points.size());
+            points.clear();
 
             painter->restore();
         }
@@ -1276,14 +1346,17 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
             painter->fillRect(filledRect.adjusted(1, 1, -1, -1), baseBrush);
 
             painter->setPen(QPen(baseBrush, 0));
-            painter->drawLine(filledRect.left(), filledRect.top() + 1,
-                              filledRect.left(), filledRect.bottom() - 1);
-            painter->drawLine(filledRect.right(), filledRect.top() + 1,
-                              filledRect.right(), filledRect.bottom() - 1);
-            painter->drawLine(filledRect.left() + 1, filledRect.top(),
-                              filledRect.right() - 1, filledRect.top());
-            painter->drawLine(filledRect.left() + 1, filledRect.bottom(),
-                              filledRect.right() - 1, filledRect.bottom());
+            const QLine lines[4] = {
+                QLine(filledRect.left(), filledRect.top() + 1,
+                      filledRect.left(), filledRect.bottom() - 1),
+                QLine(filledRect.right(), filledRect.top() + 1,
+                      filledRect.right(), filledRect.bottom() - 1),
+                QLine(filledRect.left() + 1, filledRect.top(),
+                      filledRect.right() - 1, filledRect.top()),
+                QLine(filledRect.left() + 1, filledRect.bottom(),
+                      filledRect.right() - 1, filledRect.bottom()) };
+            painter->drawLines(lines, 4);
+
             if (lineEdit->lineWidth != 0)
                 qt_plastique_draw_frame(painter, option->rect, option, QFrame::Sunken);
 
@@ -1299,10 +1372,12 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
         painter->setPen(borderColor);
         painter->drawRect(option->rect.adjusted(0, 0, -1, -1));
         painter->setPen(alphaCornerColor);
-        painter->drawPoint(option->rect.topLeft());
-        painter->drawPoint(option->rect.topRight());
-        painter->drawPoint(option->rect.bottomLeft());
-        painter->drawPoint(option->rect.bottomRight());
+        const QPoint points[4] = {
+            QPoint(option->rect.topLeft()),
+            QPoint(option->rect.topRight()),
+            QPoint(option->rect.bottomLeft()),
+            QPoint(option->rect.bottomRight()) };
+        painter->drawPoints(points, 4);
         painter->setPen(oldPen);
         break;
     }
@@ -1326,7 +1401,7 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
             painter->drawLine(option->rect.bottomLeft(), option->rect.bottomRight());
         else
             painter->drawLine(option->rect.topRight(), option->rect.bottomRight());
-        painter->setPen(option->palette.background().color().light(104));
+        painter->setPen(option->palette.background().color().lighter(104));
         if ((option->state & State_Horizontal) == 0)
             painter->drawLine(option->rect.topLeft(), option->rect.topRight());
         else
@@ -1349,11 +1424,11 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
                 painter->setPen(alphaCornerColor);
                 painter->drawLine(option->rect.left(), option->rect.bottom(),
                                   option->rect.right(), option->rect.bottom());
-                painter->setPen(option->palette.background().color().light(104));
+                painter->setPen(option->palette.background().color().lighter(104));
                 painter->drawLine(option->rect.left(), option->rect.top(),
                                   option->rect.right(), option->rect.top());
             } else {
-                painter->setPen(option->palette.background().color().light(104));
+                painter->setPen(option->palette.background().color().lighter(104));
                 painter->drawLine(option->rect.left(), option->rect.top(),
                                   option->rect.left(), option->rect.bottom());
                 painter->setPen(alphaCornerColor);
@@ -1449,7 +1524,7 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
             bool defaultButton = (button->features & (QStyleOptionButton::DefaultButton
                                                       | QStyleOptionButton::AutoDefaultButton));
 
-            BEGIN_PLASTIQUE_PIXMAPCACHE(QString("pushbutton-%1").arg(defaultButton))
+            BEGIN_PLASTIQUE_PIXMAPCACHE(QString::fromLatin1("pushbutton-%1").arg(defaultButton))
 
             QPen oldPen = p->pen();
             bool hover = (button->state & State_Enabled) && (button->state & State_MouseOver);
@@ -1487,33 +1562,33 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
             } else {
                 // Generate gradients
                 QLinearGradient buttonGradient(rect.topLeft(), rect.bottomLeft());
-                buttonGradient.setColorAt(0.0, buttonBrush.color().light(104));
-                buttonGradient.setColorAt(1.0, buttonBrush.color().dark(110));
+                buttonGradient.setColorAt(0.0, buttonBrush.color().lighter(104));
+                buttonGradient.setColorAt(1.0, buttonBrush.color().darker(110));
                 buttonGradientBrush = QBrush(buttonGradient);
 
                 QLinearGradient buttonGradient2(rect.topLeft(), rect.bottomLeft());
-                buttonGradient2.setColorAt(0.0, buttonBrush.color().dark(113));
-                buttonGradient2.setColorAt(1.0, buttonBrush.color().dark(103));
+                buttonGradient2.setColorAt(0.0, buttonBrush.color().darker(113));
+                buttonGradient2.setColorAt(1.0, buttonBrush.color().darker(103));
                 sunkenButtonGradientBrush = QBrush(buttonGradient2);
 
                 QLinearGradient buttonGradient3(rect.topLeft(), rect.bottomLeft());
-                buttonGradient3.setColorAt(0.0, buttonBrush.color().light(105));
+                buttonGradient3.setColorAt(0.0, buttonBrush.color().lighter(105));
                 buttonGradient3.setColorAt(1.0, buttonBrush.color());
                 leftLineGradientBrush = QBrush(buttonGradient3);
 
                 QLinearGradient buttonGradient4(rect.topLeft(), rect.bottomLeft());
                 buttonGradient4.setColorAt(0.0, buttonBrush.color());
-                buttonGradient4.setColorAt(1.0, buttonBrush.color().dark(110));
+                buttonGradient4.setColorAt(1.0, buttonBrush.color().darker(110));
                 rightLineGradientBrush = QBrush(buttonGradient4);
 
                 QLinearGradient buttonGradient5(rect.topLeft(), rect.bottomLeft());
-                buttonGradient5.setColorAt(0.0, buttonBrush.color().dark(113));
-                buttonGradient5.setColorAt(1.0, buttonBrush.color().dark(107));
+                buttonGradient5.setColorAt(0.0, buttonBrush.color().darker(113));
+                buttonGradient5.setColorAt(1.0, buttonBrush.color().darker(107));
                 sunkenLeftLineGradientBrush = QBrush(buttonGradient5);
 
                 QLinearGradient buttonGradient6(rect.topLeft(), rect.bottomLeft());
-                buttonGradient6.setColorAt(0.0, buttonBrush.color().dark(108));
-                buttonGradient6.setColorAt(1.0, buttonBrush.color().dark(103));
+                buttonGradient6.setColorAt(0.0, buttonBrush.color().darker(108));
+                buttonGradient6.setColorAt(1.0, buttonBrush.color().darker(103));
                 sunkenRightLineGradientBrush = QBrush(buttonGradient6);
             }
 
@@ -1552,25 +1627,32 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
                 QBrush hoverOuter = hover;
                 qBrushSetAlphaF(&hoverOuter, 0.7);
 
+                QLine lines[2];
+
                 p->setPen(QPen(hover, 0));
-                p->drawLine(rect.left() + 2, rect.top(), rect.right() - 2, rect.top());
-                p->drawLine(rect.left() + 2, rect.bottom(), rect.right() - 2, rect.bottom());
+
+                lines[0] = QLine(rect.left() + 2, rect.top(), rect.right() - 2, rect.top());
+                lines[1] = QLine(rect.left() + 2, rect.bottom(), rect.right() - 2, rect.bottom());
+                p->drawLines(lines, 2);
 
                 p->setPen(QPen(hoverOuter, 0));
-                p->drawLine(rect.left() + 1, rect.top() + 1, rect.right() - 1, rect.top() + 1);
-                p->drawLine(rect.left() + 1, rect.bottom() - 1, rect.right() - 1, rect.bottom() - 1);
+                lines[0] = QLine(rect.left() + 1, rect.top() + 1, rect.right() - 1, rect.top() + 1);
+                lines[1] = QLine(rect.left() + 1, rect.bottom() - 1, rect.right() - 1, rect.bottom() - 1);
+                p->drawLines(lines, 2);
 
                 QBrush hoverInner = hover;
                 qBrushSetAlphaF(&hoverInner, 0.45);
                 p->setPen(QPen(hoverInner, 0));
-                p->drawLine(rect.left() + 1, rect.top() + 2, rect.right() - 1, rect.top() + 2);
-                p->drawLine(rect.left() + 1, rect.bottom() - 2, rect.right() - 1, rect.bottom() - 2);
+                lines[0] = QLine(rect.left() + 1, rect.top() + 2, rect.right() - 1, rect.top() + 2);
+                lines[1] = QLine(rect.left() + 1, rect.bottom() - 2, rect.right() - 1, rect.bottom() - 2);
+                p->drawLines(lines, 2);
 
                 QBrush hoverSide = hover;
                 qBrushSetAlphaF(&hoverSide, 0.075);
                 p->setPen(QPen(hoverSide, 0));
-                p->drawLine(rect.left() + 1, rect.top() + 2, rect.left() + 1, rect.bottom() - 2);
-                p->drawLine(rect.right() - 1, rect.top() + 2, rect.right() - 1, rect.bottom() - 2);
+                lines[0] = QLine(rect.left() + 1, rect.top() + 2, rect.left() + 1, rect.bottom() - 2);
+                lines[1] = QLine(rect.right() - 1, rect.top() + 2, rect.right() - 1, rect.bottom() - 2);
+                p->drawLines(lines, 2);
             }
 
             p->setPen(oldPen);
@@ -1588,25 +1670,27 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
             QBrush border = option->palette.shadow();
             qBrushSetAlphaF(&border, 0.4);
             p->setPen(QPen(border, 0));
-            p->drawLine(rect.left() + 1, rect.top(), rect.right() - 1, rect.top());
-            p->drawLine(rect.left() + 1, rect.bottom(), rect.right() - 1, rect.bottom());
-            p->drawLine(rect.left(), rect.top() + 1, rect.left(), rect.bottom() - 1);
-            p->drawLine(rect.right(), rect.top() + 1, rect.right(), rect.bottom() - 1);
+            const QLine lines[4] = {
+                QLine(rect.left() + 1, rect.top(), rect.right() - 1, rect.top()),
+                QLine(rect.left() + 1, rect.bottom(), rect.right() - 1, rect.bottom()),
+                QLine(rect.left(), rect.top() + 1, rect.left(), rect.bottom() - 1),
+                QLine(rect.right(), rect.top() + 1, rect.right(), rect.bottom() - 1) };
+            p->drawLines(lines, 4);
 
             QBrush corner = option->palette.shadow();
             qBrushSetAlphaF(&corner, 0.2);
             p->setPen(QPen(corner, 0));
-            p->drawPoint(rect.topLeft());
-            p->drawPoint(rect.topRight());
-            p->drawPoint(rect.bottomLeft());
-            p->drawPoint(rect.bottomRight());
+            const QPoint points[4] = {
+                rect.topLeft(), rect.topRight(),
+                rect.bottomLeft(), rect.bottomRight() };
+            p->drawPoints(points, 4);
 
             // Fill
             QBrush baseBrush = qMapBrushToRect(button->palette.base(), rect);
             if (!baseBrush.gradient() && baseBrush.texture().isNull()) {
                 QLinearGradient gradient(rect.center().x(), rect.top(), rect.center().x(), rect.bottom());
                 gradient.setColorAt(0, baseBrush.color());
-                gradient.setColorAt(1, baseBrush.color().dark(105));
+                gradient.setColorAt(1, baseBrush.color().darker(105));
                 baseBrush = gradient;
             }
             p->fillRect(rect.adjusted(1, 1, -1, -1), baseBrush);
@@ -1639,8 +1723,10 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
                 else if (unchanged)
                     qBrushSetAlphaF(&pointBrush, 0.3);
                 p->setPen(QPen(pointBrush, 3));
-                p->drawLine(rect.left() + 4, rect.top() + 4, rect.right() - 3, rect.bottom() - 3);
-                p->drawLine(rect.right() - 3, rect.top() + 4, rect.left() + 4, rect.bottom() - 3);
+                const QLine lines[2] = {
+                    QLine(rect.left() + 4, rect.top() + 4, rect.right() - 3, rect.bottom() - 3),
+                    QLine(rect.right() - 3, rect.top() + 4, rect.left() + 4, rect.bottom() - 3) };
+                p->drawLines(lines, 2);
             }
 
             p->restore();
@@ -1663,7 +1749,7 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
             if (!baseBrush.gradient() && baseBrush.texture().isNull()) {
                 QLinearGradient gradient(rect.center().x(), rect.top(), rect.center().x(), rect.bottom());
                 gradient.setColorAt(0, baseBrush.color());
-                gradient.setColorAt(1, baseBrush.color().dark(105));
+                gradient.setColorAt(1, baseBrush.color().darker(105));
                 baseBrush = gradient;
             }
             p->setBrush(baseBrush);
@@ -1732,61 +1818,71 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
         // Frame and rounded corners
         painter->setPen(mergedColors(palette.highlight().color(), Qt::black, 50));
 
+        QLine lines[3];
+        QPoint points[4];
+
         // bottom border line
-        painter->drawLine(option->rect.left() + 1, option->rect.bottom(), option->rect.right() - 1, option->rect.bottom());
+        lines[0] = QLine(option->rect.left() + 1, option->rect.bottom(), option->rect.right() - 1, option->rect.bottom());
 
         // bottom left and right side border lines
-        painter->drawLine(option->rect.left(), titleBarStop, option->rect.left(), option->rect.bottom() - 1);
-        painter->drawLine(option->rect.right(), titleBarStop, option->rect.right(), option->rect.bottom() - 1);
-        painter->drawPoint(option->rect.left() + 1, option->rect.bottom() - 1);
-        painter->drawPoint(option->rect.right() - 1, option->rect.bottom() - 1);
+        lines[1] = QLine(option->rect.left(), titleBarStop, option->rect.left(), option->rect.bottom() - 1);
+        lines[2] = QLine(option->rect.right(), titleBarStop, option->rect.right(), option->rect.bottom() - 1);
+        painter->drawLines(lines, 3);
+        points[0] = QPoint(option->rect.left() + 1, option->rect.bottom() - 1);
+        points[1] = QPoint(option->rect.right() - 1, option->rect.bottom() - 1);
+        painter->drawPoints(points, 2);
 
 #ifdef QT3_SUPPORT
         if (widget && widget->inherits("Q3DockWindow")) {
             // also draw the frame on the title bar
-            painter->drawLine(option->rect.left() + 1, option->rect.top(),
-                              option->rect.right() - 1, option->rect.top());
-            painter->drawLine(option->rect.left(), option->rect.top() + 1,
-                              option->rect.left(), titleBarStop);
-            painter->drawLine(option->rect.right(), option->rect.top() + 1,
-                              option->rect.right(), titleBarStop);
+            lines[0] = QLine(option->rect.left() + 1, option->rect.top(),
+                             option->rect.right() - 1, option->rect.top());
+            lines[1] = QLine(option->rect.left(), option->rect.top() + 1,
+                             option->rect.left(), titleBarStop);
+            lines[2] = QLine(option->rect.right(), option->rect.top() + 1,
+                             option->rect.right(), titleBarStop);
+            painter->drawLines(lines, 3);
         }
 #endif
 
         // alpha corners
         painter->setPen(mergedColors(palette.highlight().color(), palette.background().color(), 55));
-        painter->drawPoint(option->rect.left() + 2, option->rect.bottom() - 1);
-        painter->drawPoint(option->rect.left() + 1, option->rect.bottom() - 2);
-        painter->drawPoint(option->rect.right() - 2, option->rect.bottom() - 1);
-        painter->drawPoint(option->rect.right() - 1, option->rect.bottom() - 2);
+        points[0] = QPoint(option->rect.left() + 2, option->rect.bottom() - 1);
+        points[1] = QPoint(option->rect.left() + 1, option->rect.bottom() - 2);
+        points[2] = QPoint(option->rect.right() - 2, option->rect.bottom() - 1);
+        points[3] = QPoint(option->rect.right() - 1, option->rect.bottom() - 2);
+        painter->drawPoints(points, 4);
 
 #ifdef QT3_SUPPORT
         if (widget && widget->inherits("Q3DockWindow")) {
             // also draw the frame on the title bar
-            painter->drawPoint(option->rect.topLeft());
-            painter->drawPoint(option->rect.topRight());
+            points[0] = option->rect.topLeft();
+            points[1] = option->rect.topRight();
+            painter->drawPoints(points, 2);
         }
 #endif
 
         // upper and lower left inner
-        painter->setPen(active ? mergedColors(palette.highlight().color(), palette.background().color()) : palette.background().color().dark(120));
+        painter->setPen(active ? mergedColors(palette.highlight().color(), palette.background().color()) : palette.background().color().darker(120));
         painter->drawLine(option->rect.left() + 1, titleBarStop, option->rect.left() + 1, option->rect.bottom() - 2);
 
 #ifdef QT3_SUPPORT
         if (widget && widget->inherits("Q3DockWindow")) {
             // also draw the frame on the title bar
-            painter->drawLine(option->rect.left() + 1, option->rect.top() + 1,
-                              option->rect.left() + 1, titleBarStop);
-            painter->drawLine(option->rect.right() - 1, option->rect.top() + 1,
-                              option->rect.right() - 1, titleBarStop);
-            painter->drawLine(option->rect.left() + 1, option->rect.top() + 1,
-                              option->rect.right() - 1, option->rect.top() + 1);
+            lines[0] = QLine(option->rect.left() + 1, option->rect.top() + 1,
+                             option->rect.left() + 1, titleBarStop);
+            lines[1] = QLine(option->rect.right() - 1, option->rect.top() + 1,
+                             option->rect.right() - 1, titleBarStop);
+            lines[2] = QLine(option->rect.left() + 1, option->rect.top() + 1,
+                             option->rect.right() - 1, option->rect.top() + 1);
+            painter->drawLines(lines, 3);
         }
 #endif
 
-        painter->setPen(active ? mergedColors(palette.highlight().color(), palette.background().color(), 57) : palette.background().color().dark(130));
-        painter->drawLine(option->rect.right() - 1, titleBarStop, option->rect.right() - 1, option->rect.bottom() - 2);
-        painter->drawLine(option->rect.left() + 1, option->rect.bottom() - 1, option->rect.right() - 1, option->rect.bottom() - 1);
+        painter->setPen(active ? mergedColors(palette.highlight().color(), palette.background().color(), 57) : palette.background().color().darker(130));
+        lines[0] = QLine(option->rect.right() - 1, titleBarStop, option->rect.right() - 1, option->rect.bottom() - 2);
+        lines[1] = QLine(option->rect.left() + 1, option->rect.bottom() - 1, option->rect.right() - 1, option->rect.bottom() - 1);
+        painter->drawLines(lines, 2);
 
         painter->restore();
     }
@@ -1816,20 +1912,27 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
             // border
             QRect fullRect(center.x() - 4, center.y() - 4, 9, 9);
             painter->setPen(borderColor);
-            painter->drawLine(fullRect.left() + 1, fullRect.top(),
-                              fullRect.right() - 1, fullRect.top());
-            painter->drawLine(fullRect.left() + 1, fullRect.bottom(),
-                              fullRect.right() - 1, fullRect.bottom());
-            painter->drawLine(fullRect.left(), fullRect.top() + 1,
-                              fullRect.left(), fullRect.bottom() - 1);
-            painter->drawLine(fullRect.right(), fullRect.top() + 1,
-                              fullRect.right(), fullRect.bottom() - 1);
+
+            const QLine lines[4] = {
+                QLine(fullRect.left() + 1, fullRect.top(),
+                      fullRect.right() - 1, fullRect.top()),
+                QLine(fullRect.left() + 1, fullRect.bottom(),
+                      fullRect.right() - 1, fullRect.bottom()),
+                QLine(fullRect.left(), fullRect.top() + 1,
+                      fullRect.left(), fullRect.bottom() - 1),
+                QLine(fullRect.right(), fullRect.top() + 1,
+                      fullRect.right(), fullRect.bottom() - 1) };
+            painter->drawLines(lines, 4);
+
             // "antialiased" corners
             painter->setPen(alphaCornerColor);
-            painter->drawPoint(fullRect.topLeft());
-            painter->drawPoint(fullRect.topRight());
-            painter->drawPoint(fullRect.bottomLeft());
-            painter->drawPoint(fullRect.bottomRight());
+            const QPoint points[4] = {
+                fullRect.topLeft(),
+                fullRect.topRight(),
+                fullRect.bottomLeft(),
+                fullRect.bottomRight() };
+            painter->drawPoints(points, 4);
+
             // fill
             QRect adjustedRect = fullRect;
             QRect gradientRect(adjustedRect.left() + 1, adjustedRect.top() + 1,
@@ -1858,7 +1961,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                                   QPainter *painter, const QWidget *widget) const
 {
     Q_D(const QPlastiqueStyle);
-    QColor borderColor = option->palette.background().color().dark(178);
+    QColor borderColor = option->palette.background().color().darker(178);
     QColor alphaCornerColor;
     if (widget) {
         // ### backgroundrole/foregroundrole should be part of the style option
@@ -1868,17 +1971,17 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
     }
     QColor alphaTextColor = mergedColors(option->palette.background().color(), option->palette.text().color());
 
-    QColor gradientStartColor = option->palette.button().color().light(104);
-    QColor gradientStopColor = option->palette.button().color().dark(105);
+    QColor gradientStartColor = option->palette.button().color().lighter(104);
+    QColor gradientStopColor = option->palette.button().color().darker(105);
 
-    QColor shadowGradientStartColor = option->palette.button().color().dark(115);
-    QColor shadowGradientStopColor = option->palette.button().color().dark(120);
+    QColor shadowGradientStartColor = option->palette.button().color().darker(115);
+    QColor shadowGradientStopColor = option->palette.button().color().darker(120);
 
-    QColor highlightedGradientStartColor = option->palette.button().color().light(101);
+    QColor highlightedGradientStartColor = option->palette.button().color().lighter(101);
     QColor highlightedGradientStopColor = mergedColors(option->palette.button().color(), option->palette.highlight().color(), 85);
 
-    QColor lightShadowGradientStartColor = highlightedGradientStartColor.light(105);
-    QColor lightShadowGradientStopColor = highlightedGradientStopColor.light(105);
+    QColor lightShadowGradientStartColor = highlightedGradientStartColor.lighter(105);
+    QColor lightShadowGradientStopColor = highlightedGradientStopColor.lighter(105);
 
     QColor highlightedDarkInnerBorderColor = mergedColors(option->palette.button().color(), option->palette.highlight().color(), 35);
     QColor highlightedLightInnerBorderColor = mergedColors(option->palette.button().color(), option->palette.highlight().color(), 58);
@@ -2099,14 +2202,16 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
 
                                 // Connect to the base
                                 painter->setPen(QPen(option->palette.window(), 0));
-                                painter->drawPoint(rightLine.p2() + vectorDown);
-                                painter->drawPoint(rightLine.p2() + vectorDown + vectorDown);
-                                painter->drawPoint(rightLine.p2() + vectorDown + vectorDown + vectorRight);
+                                QVarLengthArray<QPoint, 6> points;
+                                points.append(rightLine.p2() + vectorDown);
+                                points.append(rightLine.p2() + vectorDown + vectorDown);
+                                points.append(rightLine.p2() + vectorDown + vectorDown + vectorRight);
                                 if (tab->position != QStyleOptionTab::Beginning) {
-                                    painter->drawPoint(leftLine.p2() + vectorDown);
-                                    painter->drawPoint(leftLine.p2() + vectorDown + vectorDown);
-                                    painter->drawPoint(leftLine.p2() + vectorDown + vectorDown + vectorLeft);
+                                    points.append(leftLine.p2() + vectorDown);
+                                    points.append(leftLine.p2() + vectorDown + vectorDown);
+                                    points.append(leftLine.p2() + vectorDown + vectorDown + vectorLeft);
                                 }
+                                painter->drawPoints(points.constData(), points.size());
                             } else {
                                 QBrush buttonGradientBrush;
                                 QBrush buttonBrush = qMapBrushToRect(option->palette.button(), fillRect);
@@ -2115,8 +2220,8 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                                 } else {
                                     // Generate gradients
                                     QLinearGradient buttonGradient(fillRect.topLeft(), fillRect.bottomLeft());
-                                    buttonGradient.setColorAt(0.0, buttonBrush.color().light(104));
-                                    buttonGradient.setColorAt(1.0, buttonBrush.color().dark(110));
+                                    buttonGradient.setColorAt(0.0, buttonBrush.color().lighter(104));
+                                    buttonGradient.setColorAt(1.0, buttonBrush.color().darker(110));
                                     buttonGradientBrush = QBrush(buttonGradient);
                                 }
 
@@ -2131,9 +2236,16 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     QPoint bottomLeftConnectToBase = leftLine.p2() + vectorLeft + vectorDown;
 
                     painter->setPen(QPen(border, 0));
-                    painter->drawLine(topLine);
+
+                    QVarLengthArray<QLine, 3> lines;
+                    QVarLengthArray<QPoint, 7> points;
+
+                    lines.append(topLine);
 
                     if (mouseOver) {
+                        painter->drawLines(lines.constData(), lines.count());
+                        lines.clear();
+
                         QLine secondHoverLine = QLine(topLine.p1() + vectorDown * 2 + vectorLeft, topLine.p2() + vectorDown * 2 + vectorRight);
                         painter->setPen(highlightedLightInnerBorderColor);
                         painter->drawLine(secondHoverLine);
@@ -2141,34 +2253,43 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
 
                     if (mouseOver)
                         painter->setPen(QPen(border, 0));
+
                     if (!previousSelected)
-                        painter->drawLine(leftLine);
+                        lines.append(leftLine);
                     if (atEnd || selected) {
-                        painter->drawLine(rightLine);
-                        painter->drawPoint(rightCornerDot);
+                        lines.append(rightLine);
+                        points.append(rightCornerDot);
                     }
                     if (atBeginning || selected)
-                        painter->drawPoint(leftCornerDot);
+                        points.append(leftCornerDot);
                     if (selected) {
-                        painter->drawPoint(bottomRightConnectToBase);
-                        painter->drawPoint(bottomLeftConnectToBase);
+                        points.append(bottomRightConnectToBase);
+                        points.append(bottomLeftConnectToBase);
+                    }
+                    if (lines.size() > 0) {
+                        painter->drawLines(lines.constData(), lines.size());
+                        lines.clear();
+                    }
+                    if (points.size() > 0) {
+                        painter->drawPoints(points.constData(), points.size());
+                        points.clear();
                     }
 
                     // Antialiasing
                     painter->setPen(QPen(corner, 0));
                     if (atBeginning || selected)
-                        painter->drawPoint(topLine.p1() + vectorLeft);
+                        points.append(topLine.p1() + vectorLeft);
                     if (!previousSelected)
-                        painter->drawPoint(leftLine.p1() + vectorUp);
+                        points.append(leftLine.p1() + vectorUp);
                     if (atEnd || selected) {
-                        painter->drawPoint(topLine.p2() + vectorRight);
-                        painter->drawPoint(rightLine.p1() + vectorUp);
+                        points.append(topLine.p2() + vectorRight);
+                        points.append(rightLine.p1() + vectorUp);
                     }
 
                     if (selected) {
-                        painter->drawPoint(bottomRightConnectToBase + vectorLeft);
+                        points.append(bottomRightConnectToBase + vectorLeft);
                         if (!atBeginning) {
-                            painter->drawPoint(bottomLeftConnectToBase + vectorRight);
+                            points.append(bottomLeftConnectToBase + vectorRight);
 
                             if (((tab->position == QStyleOptionTab::Beginning) || onlyTab) && leftCornerWidget) {
                                 // A special case: When the first tab is selected and
@@ -2176,9 +2297,13 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                                 // to connect to the base
                                 QPoint p1 = bottomLeftConnectToBase + vectorDown;
 
-                                painter->drawPoint(p1);
+                                points.append(p1);
                             }
                         }
+                    }
+                    if (points.size() > 0) {
+                        painter->drawPoints(points.constData(), points.size());
+                        points.clear();
                     }
 
                     // Inner border
@@ -2209,7 +2334,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                             leftLineGradientBrush = qBrushLight(buttonBrush, 105);
                         } else {
                             QLinearGradient buttonGradient3(rect.topLeft(), rect.bottomLeft());
-                            buttonGradient3.setColorAt(0.0, buttonBrush.color().light(105));
+                            buttonGradient3.setColorAt(0.0, buttonBrush.color().lighter(105));
                             buttonGradient3.setColorAt(1.0, buttonBrush.color());
                             leftLineGradientBrush = QBrush(buttonGradient3);
                         }
@@ -2236,7 +2361,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                             } else {
                                 QLinearGradient buttonGradient4(rect.topLeft(), rect.bottomLeft());
                                 buttonGradient4.setColorAt(0.0, buttonBrush.color());
-                                buttonGradient4.setColorAt(1.0, buttonBrush.color().dark(110));
+                                buttonGradient4.setColorAt(1.0, buttonBrush.color().darker(110));
                                 rightLineGradientBrush = QBrush(buttonGradient4);
                             }
 
@@ -2324,32 +2449,40 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
             QRect rect = bar->rect;
             QPen oldPen = painter->pen();
 
+            QLine lines[4];
+
             // outline
             painter->setPen(borderColor);
-            painter->drawLine(rect.left() + 2, rect.top(), rect.right() - 2, rect.top());
-            painter->drawLine(rect.left() + 2, rect.bottom(), rect.right() - 2, rect.bottom());
-            painter->drawLine(rect.left(), rect.top() + 2, rect.left(), rect.bottom() - 2);
-            painter->drawLine(rect.right(), rect.top() + 2, rect.right(), rect.bottom() - 2);
-            painter->drawPoint(rect.left() + 1, rect.top() + 1);
-            painter->drawPoint(rect.right() - 1, rect.top() + 1);
-            painter->drawPoint(rect.left() + 1, rect.bottom() - 1);
-            painter->drawPoint(rect.right() - 1, rect.bottom() - 1);
+            lines[0] = QLine(rect.left() + 2, rect.top(), rect.right() - 2, rect.top());
+            lines[1] = QLine(rect.left() + 2, rect.bottom(), rect.right() - 2, rect.bottom());
+            lines[2] = QLine(rect.left(), rect.top() + 2, rect.left(), rect.bottom() - 2);
+            lines[3] = QLine(rect.right(), rect.top() + 2, rect.right(), rect.bottom() - 2);
+            painter->drawLines(lines, 4);
+
+            QPoint points[8];
+            points[0] = QPoint(rect.left() + 1, rect.top() + 1);
+            points[1] = QPoint(rect.right() - 1, rect.top() + 1);
+            points[2] = QPoint(rect.left() + 1, rect.bottom() - 1);
+            points[3] = QPoint(rect.right() - 1, rect.bottom() - 1);
+            painter->drawPoints(points, 4);
 
             // alpha corners
             painter->setPen(alphaCornerColor);
-            painter->drawPoint(rect.left(), rect.top() + 1);
-            painter->drawPoint(rect.left() + 1, rect.top());
-            painter->drawPoint(rect.right(), rect.top() + 1);
-            painter->drawPoint(rect.right() - 1, rect.top());
-            painter->drawPoint(rect.left(), rect.bottom() - 1);
-            painter->drawPoint(rect.left() + 1, rect.bottom());
-            painter->drawPoint(rect.right(), rect.bottom() - 1);
-            painter->drawPoint(rect.right() - 1, rect.bottom());
+            points[0] = QPoint(rect.left(), rect.top() + 1);
+            points[1] = QPoint(rect.left() + 1, rect.top());
+            points[2] = QPoint(rect.right(), rect.top() + 1);
+            points[3] = QPoint(rect.right() - 1, rect.top());
+            points[4] = QPoint(rect.left(), rect.bottom() - 1);
+            points[5] = QPoint(rect.left() + 1, rect.bottom());
+            points[6] = QPoint(rect.right(), rect.bottom() - 1);
+            points[7] = QPoint(rect.right() - 1, rect.bottom());
+            painter->drawPoints(points, 8);
 
             // inner outline, north-west
-            painter->setPen(gradientStartColor.dark(105));
-            painter->drawLine(rect.left() + 2, rect.top() + 1, rect.right() - 2, rect.top() + 1);
-            painter->drawLine(rect.left() + 1, rect.top() + 2, rect.left() + 1, rect.bottom() - 2);
+            painter->setPen(gradientStartColor.darker(105));
+            lines[0] = QLine(rect.left() + 2, rect.top() + 1, rect.right() - 2, rect.top() + 1);
+            lines[1] = QLine(rect.left() + 1, rect.top() + 2, rect.left() + 1, rect.bottom() - 2);
+            painter->drawLines(lines, 2);
 
             // base of the groove
             painter->setPen(QPen());
@@ -2388,7 +2521,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
 
             if (vertical) {
                 rect = QRect(rect.left(), rect.top(), rect.height(), rect.width()); // flip width and height
-                QMatrix m;
+                QTransform m;
                 if (bottomToTop) {
                     m.translate(0.0, rect.width());
                     m.rotate(-90);
@@ -2396,10 +2529,11 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     m.translate(rect.height(), 0.0);
                     m.rotate(90);
                 }
-                painter->setMatrix(m);
+                painter->setTransform(m);
             }
 
-            int progressIndicatorPos = int(((bar->progress - bar->minimum) / double(bar->maximum - bar->minimum)) * rect.width());
+            double vc6_workaround = ((bar->progress - qint64(bar->minimum)) / double(qint64(bar->maximum) - qint64(bar->minimum))) * rect.width();
+            int progressIndicatorPos = int(vc6_workaround);
 
             bool flip = (!vertical && (((bar->direction == Qt::RightToLeft) && !inverted)
                                        || ((bar->direction == Qt::LeftToRight) && inverted))) || (vertical && ((!inverted && !bottomToTop) || (inverted && bottomToTop)));
@@ -2455,17 +2589,17 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
             // same rendering code for both orientations.
             if (vertical) {
                 rect = QRect(rect.left(), rect.top(), rect.height(), rect.width()); // flip width and height
-                QMatrix m;
+                QTransform m;
                 m.translate(rect.height()-1, 0);
                 m.rotate(90.0);
-                painter->setMatrix(m);
+                painter->setTransform(m);
             }
 
             int maxWidth = rect.width() - 4;
             int minWidth = 4;
-            int progress = qMax(bar->progress, bar->minimum); // workaround for bug in QProgressBar
-            int width = indeterminate ? maxWidth : qMax(int((((progress - bar->minimum))
-                                                             / double(bar->maximum - bar->minimum)) * maxWidth), minWidth);
+            qint64 progress = qMax<qint64>(bar->progress, bar->minimum); // workaround for bug in QProgressBar
+            double vc6_workaround = ((progress - qint64(bar->minimum)) / double(qint64(bar->maximum) - qint64(bar->minimum))) * maxWidth;
+            int width = indeterminate ? maxWidth : qMax(int(vc6_workaround), minWidth);
             bool reverse = (!vertical && (bar->direction == Qt::RightToLeft)) || vertical;
             if (inverted)
                 reverse = !reverse;
@@ -2488,92 +2622,105 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
 
             // outline
             painter->setPen(highlightedDarkInnerBorderColor);
+
+            QVarLengthArray<QLine, 4> lines;
+            QVarLengthArray<QPoint, 8> points;
             if (!reverse) {
                 if (width == minWidth) {
-                    painter->drawPoint(progressBar.left() + 1, progressBar.top());
-                    painter->drawPoint(progressBar.left() + 1, progressBar.bottom());
+                    points.append(QPoint(progressBar.left() + 1, progressBar.top()));
+                    points.append(QPoint(progressBar.left() + 1, progressBar.bottom()));
                 } else {
                     if (indeterminate) {
-                        painter->drawLine(progressBar.left() + 2, progressBar.top(),
-                                          progressBar.right() - 2, progressBar.top());
-                        painter->drawLine(progressBar.left() + 2, progressBar.bottom(),
-                                          progressBar.right() - 2, progressBar.bottom());
+                        lines.append(QLine(progressBar.left() + 2, progressBar.top(),
+                                           progressBar.right() - 2, progressBar.top()));
+                        lines.append(QLine(progressBar.left() + 2, progressBar.bottom(),
+                                           progressBar.right() - 2, progressBar.bottom()));
                     } else {
-                        painter->drawLine(progressBar.left() + 1, progressBar.top(),
-                                          progressBar.right() - 2, progressBar.top());
-                        painter->drawLine(progressBar.left() + 1, progressBar.bottom(),
-                                          progressBar.right() - 2, progressBar.bottom());
+                        lines.append(QLine(progressBar.left() + 1, progressBar.top(),
+                                           progressBar.right() - 2, progressBar.top()));
+                        lines.append(QLine(progressBar.left() + 1, progressBar.bottom(),
+                                           progressBar.right() - 2, progressBar.bottom()));
                     }
                 }
 
                 if (indeterminate) {
-                    painter->drawLine(progressBar.left(), progressBar.top() + 2,
-                                      progressBar.left(), progressBar.bottom() - 2);
+                    lines.append(QLine(progressBar.left(), progressBar.top() + 2,
+                                       progressBar.left(), progressBar.bottom() - 2));
                 } else {
-                    painter->drawLine(progressBar.left(), progressBar.top() + 1,
-                                      progressBar.left(), progressBar.bottom() - 1);
+                    lines.append(QLine(progressBar.left(), progressBar.top() + 1,
+                                       progressBar.left(), progressBar.bottom() - 1));
                 }
-                painter->drawLine(progressBar.right(), progressBar.top() + 2,
-                                  progressBar.right(), progressBar.bottom() - 2);
+                lines.append(QLine(progressBar.right(), progressBar.top() + 2,
+                                   progressBar.right(), progressBar.bottom() - 2));
             } else {
                 if (width == minWidth) {
-                    painter->drawPoint(progressBar.right() - 1, progressBar.top());
-                    painter->drawPoint(progressBar.right() - 1, progressBar.bottom());
+                    points.append(QPoint(progressBar.right() - 1, progressBar.top()));
+                    points.append(QPoint(progressBar.right() - 1, progressBar.bottom()));
                 } else {
                     if (indeterminate) {
-                        painter->drawLine(progressBar.right() - 2, progressBar.top(),
-                                          progressBar.left() + 2, progressBar.top());
-                        painter->drawLine(progressBar.right() - 2, progressBar.bottom(),
-                                          progressBar.left() + 2, progressBar.bottom());
+                        lines.append(QLine(progressBar.right() - 2, progressBar.top(),
+                                           progressBar.left() + 2, progressBar.top()));
+                        lines.append(QLine(progressBar.right() - 2, progressBar.bottom(),
+                                           progressBar.left() + 2, progressBar.bottom()));
                     } else {
-                        painter->drawLine(progressBar.right() - 1, progressBar.top(),
-                                          progressBar.left() + 2, progressBar.top());
-                        painter->drawLine(progressBar.right() - 1, progressBar.bottom(),
-                                          progressBar.left() + 2, progressBar.bottom());
+                        lines.append(QLine(progressBar.right() - 1, progressBar.top(),
+                                           progressBar.left() + 2, progressBar.top()));
+                        lines.append(QLine(progressBar.right() - 1, progressBar.bottom(),
+                                           progressBar.left() + 2, progressBar.bottom()));
                     }
                 }
                 if (indeterminate) {
-                    painter->drawLine(progressBar.right(), progressBar.top() + 2,
-                                      progressBar.right(), progressBar.bottom() - 2);
+                    lines.append(QLine(progressBar.right(), progressBar.top() + 2,
+                                       progressBar.right(), progressBar.bottom() - 2));
                 } else {
-                    painter->drawLine(progressBar.right(), progressBar.top() + 1,
-                                      progressBar.right(), progressBar.bottom() - 1);
+                    lines.append(QLine(progressBar.right(), progressBar.top() + 1,
+                                       progressBar.right(), progressBar.bottom() - 1));
                 }
-                painter->drawLine(progressBar.left(), progressBar.top() + 2,
-                                  progressBar.left(), progressBar.bottom() - 2);
+                lines.append(QLine(progressBar.left(), progressBar.top() + 2,
+                                   progressBar.left(), progressBar.bottom() - 2));
             }
+
+            if (points.size() > 0) {
+                painter->drawPoints(points.constData(), points.size());
+                points.clear();
+            }
+            painter->drawLines(lines.constData(), lines.size());
+            lines.clear();
 
             // alpha corners
             painter->setPen(alphaInnerColor);
             if (!reverse) {
                 if (indeterminate) {
-                    painter->drawPoint(progressBar.left() + 1, progressBar.top());
-                    painter->drawPoint(progressBar.left(), progressBar.top() + 1);
-                    painter->drawPoint(progressBar.left() + 1, progressBar.bottom());
-                    painter->drawPoint(progressBar.left(), progressBar.bottom() - 1);
+                    points.append(QPoint(progressBar.left() + 1, progressBar.top()));
+                    points.append(QPoint(progressBar.left(), progressBar.top() + 1));
+                    points.append(QPoint(progressBar.left() + 1, progressBar.bottom()));
+                    points.append(QPoint(progressBar.left(), progressBar.bottom() - 1));
                 } else {
-                    painter->drawPoint(progressBar.left(), progressBar.top());
-                    painter->drawPoint(progressBar.left(), progressBar.bottom());
+                    points.append(QPoint(progressBar.left(), progressBar.top()));
+                    points.append(QPoint(progressBar.left(), progressBar.bottom()));
                 }
-                painter->drawPoint(progressBar.right() - 1, progressBar.top());
-                painter->drawPoint(progressBar.right(), progressBar.top() + 1);
-                painter->drawPoint(progressBar.right() - 1, progressBar.bottom());
-                painter->drawPoint(progressBar.right(), progressBar.bottom() - 1);
+                points.append(QPoint(progressBar.right() - 1, progressBar.top()));
+                points.append(QPoint(progressBar.right(), progressBar.top() + 1));
+                points.append(QPoint(progressBar.right() - 1, progressBar.bottom()));
+                points.append(QPoint(progressBar.right(), progressBar.bottom() - 1));
             } else {
                 if (indeterminate) {
-                    painter->drawPoint(progressBar.right() - 1, progressBar.top());
-                    painter->drawPoint(progressBar.right(), progressBar.top() + 1);
-                    painter->drawPoint(progressBar.right() - 1, progressBar.bottom());
-                    painter->drawPoint(progressBar.right(), progressBar.bottom() - 1);
+                    points.append(QPoint(progressBar.right() - 1, progressBar.top()));
+                    points.append(QPoint(progressBar.right(), progressBar.top() + 1));
+                    points.append(QPoint(progressBar.right() - 1, progressBar.bottom()));
+                    points.append(QPoint(progressBar.right(), progressBar.bottom() - 1));
                 } else {
-                    painter->drawPoint(progressBar.right(), progressBar.top());
-                    painter->drawPoint(progressBar.right(), progressBar.bottom());
+                    points.append(QPoint(progressBar.right(), progressBar.top()));
+                    points.append(QPoint(progressBar.right(), progressBar.bottom()));
                 }
-                painter->drawPoint(progressBar.left() + 1, progressBar.top());
-                painter->drawPoint(progressBar.left(), progressBar.top() + 1);
-                painter->drawPoint(progressBar.left() + 1, progressBar.bottom());
-                painter->drawPoint(progressBar.left(), progressBar.bottom() - 1);
+                points.append(QPoint(progressBar.left() + 1, progressBar.top()));
+                points.append(QPoint(progressBar.left(), progressBar.top() + 1));
+                points.append(QPoint(progressBar.left() + 1, progressBar.bottom()));
+                points.append(QPoint(progressBar.left(), progressBar.bottom() - 1));
             }
+
+            painter->drawPoints(points.constData(), points.size());
+            points.clear();
 
             // contents
             painter->setPen(QPen());
@@ -2595,17 +2742,19 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     QColor lineColor = option->palette.highlight().color();
                     if (flip) {
                         flip = false;
-                        rectColor = rectColor.light(105);
-                        lineColor = lineColor.light(105);
+                        rectColor = rectColor.lighter(105);
+                        lineColor = lineColor.lighter(105);
                     } else {
                         flip = true;
                     }
 
                     cachePainter.setPen(lineColor);
-                    cachePainter.drawLine(pixmapRect.left() + leftEdge - 1, pixmapRect.top(),
-                                          pixmapRect.left() + leftEdge + 9, pixmapRect.top());
-                    cachePainter.drawLine(pixmapRect.left() + leftEdge - 1, pixmapRect.bottom(),
-                                          pixmapRect.left() + leftEdge + 9, pixmapRect.bottom());
+                    const QLine cacheLines[2] = {
+                        QLine(pixmapRect.left() + leftEdge - 1, pixmapRect.top(),
+                              pixmapRect.left() + leftEdge + 9, pixmapRect.top()),
+                        QLine(pixmapRect.left() + leftEdge - 1, pixmapRect.bottom(),
+                              pixmapRect.left() + leftEdge + 9, pixmapRect.bottom()) };
+                    cachePainter.drawLines(cacheLines, 2);
                     cachePainter.fillRect(QRect(pixmapRect.left() + leftEdge, pixmapRect.top(),
                                                 10, pixmapRect.height()), rectColor);
 
@@ -2637,7 +2786,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
         // Draws the header in tables.
         if (const QStyleOptionHeader *header = qstyleoption_cast<const QStyleOptionHeader *>(option)) {
             QPixmap cache;
-            QString pixmapName = uniqueName("headersection", option, option->rect.size());
+            QString pixmapName = uniqueName(QLatin1String("headersection"), option, option->rect.size());
             pixmapName += QLatin1String("-") + QString::number(int(header->position));
             pixmapName += QLatin1String("-") + QString::number(int(header->orientation));
 
@@ -2649,11 +2798,11 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
 
                 bool sunken = (header->state & State_Enabled) && (header->state & State_Sunken);
 
-                QColor headerGradientStart = sunken ? option->palette.background().color().dark(114) : gradientStartColor;
-                QColor headerGradientStop = sunken ? option->palette.background().color().dark(106) : gradientStopColor;
+                QColor headerGradientStart = sunken ? option->palette.background().color().darker(114) : gradientStartColor;
+                QColor headerGradientStop = sunken ? option->palette.background().color().darker(106) : gradientStopColor;
 
-                QColor lightLine = sunken ? option->palette.background().color().dark(118) : gradientStartColor;
-                QColor darkLine = sunken ? option->palette.background().color().dark(110) : gradientStopColor.dark(105);
+                QColor lightLine = sunken ? option->palette.background().color().darker(118) : gradientStartColor;
+                QColor darkLine = sunken ? option->palette.background().color().darker(110) : gradientStopColor.darker(105);
 
                 qt_plastique_draw_gradient(&cachePainter, pixmapRect,
                                            headerGradientStart, headerGradientStop);
@@ -2661,22 +2810,29 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                 cachePainter.setPen(borderColor);
                 cachePainter.drawRect(pixmapRect.adjusted(0, 0, -1, -1));
                 cachePainter.setPen(alphaCornerColor);
-                cachePainter.drawPoint(pixmapRect.topLeft());
-                cachePainter.drawPoint(pixmapRect.topRight());
-                cachePainter.drawPoint(pixmapRect.bottomLeft());
-                cachePainter.drawPoint(pixmapRect.bottomRight());
+
+                const QPoint points[4] = {
+                    pixmapRect.topLeft(), pixmapRect.topRight(),
+                    pixmapRect.bottomLeft(), pixmapRect.bottomRight() };
+                cachePainter.drawPoints(points, 4);
+
+                QLine lines[2];
 
                 // inner lines
                 cachePainter.setPen(lightLine);
-                cachePainter.drawLine(pixmapRect.left() + 2, pixmapRect.top() + 1,
-                                      pixmapRect.right() - 2, pixmapRect.top() + 1);
-                cachePainter.drawLine(pixmapRect.left() + 1, pixmapRect.top() + 2,
-                                      pixmapRect.left() + 1, pixmapRect.bottom() - 2);
+                lines[0] = QLine(pixmapRect.left() + 2, pixmapRect.top() + 1,
+                                 pixmapRect.right() - 2, pixmapRect.top() + 1);
+                lines[1] = QLine(pixmapRect.left() + 1, pixmapRect.top() + 2,
+                                 pixmapRect.left() + 1, pixmapRect.bottom() - 2);
+                cachePainter.drawLines(lines, 2);
+
                 cachePainter.setPen(darkLine);
-                cachePainter.drawLine(pixmapRect.left() + 2, pixmapRect.bottom() - 1,
-                                      pixmapRect.right() - 2, pixmapRect.bottom() - 1);
-                cachePainter.drawLine(pixmapRect.right() - 1, pixmapRect.bottom() - 2,
-                                      pixmapRect.right() - 1, pixmapRect.top() + 2);
+                lines[0] = QLine(pixmapRect.left() + 2, pixmapRect.bottom() - 1,
+                                 pixmapRect.right() - 2, pixmapRect.bottom() - 1);
+                lines[1] = QLine(pixmapRect.right() - 1, pixmapRect.bottom() - 2,
+                                 pixmapRect.right() - 1, pixmapRect.top() + 2);
+                cachePainter.drawLines(lines, 2);
+
                 cachePainter.end();
                 if (UsePixmapCache)
                     QPixmapCache::insert(pixmapName, cache);
@@ -2692,7 +2848,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
             painter->save();
 
             if (menuItem->menuItemType == QStyleOptionMenuItem::Separator) {
-                painter->fillRect(menuItem->rect, option->palette.background().color().light(103));
+                painter->fillRect(menuItem->rect, option->palette.background().color().lighter(103));
 
                 int w = 0;
                 if (!menuItem->text.isEmpty()) {
@@ -2719,15 +2875,15 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
 
             if (selected && enabled) {
                 qt_plastique_draw_gradient(painter, menuItem->rect,
-                                           option->palette.highlight().color().light(105),
-                                           option->palette.highlight().color().dark(110));
+                                           option->palette.highlight().color().lighter(105),
+                                           option->palette.highlight().color().darker(110));
 
-                painter->setPen(option->palette.highlight().color().light(110));
+                painter->setPen(option->palette.highlight().color().lighter(110));
                 painter->drawLine(option->rect.topLeft(), option->rect.topRight());
-                painter->setPen(option->palette.highlight().color().dark(115));
+                painter->setPen(option->palette.highlight().color().darker(115));
                 painter->drawLine(option->rect.bottomLeft(), option->rect.bottomRight());
             } else {
-                painter->fillRect(option->rect, option->palette.background().color().light(103));
+                painter->fillRect(option->rect, option->palette.background().color().lighter(103));
             }
 
             // Check
@@ -2885,12 +3041,12 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                 if (option->state & QStyle::State_Enabled) {
                     if ((option->state & QStyle::State_Sunken) || (option->state & QStyle::State_On)) {
                         qt_plastique_draw_gradient(&cachePainter, rect.adjusted(1, 1, -1, -1),
-                                                   option->palette.button().color().dark(114),
-                                                   option->palette.button().color().dark(106));
+                                                   option->palette.button().color().darker(114),
+                                                   option->palette.button().color().darker(106));
                     } else {
                         qt_plastique_draw_gradient(&cachePainter, rect.adjusted(1, 1, -1, -1),
-                                                   option->palette.background().color().light(105),
-                                                   option->palette.background().color().dark(102));
+                                                   option->palette.background().color().lighter(105),
+                                                   option->palette.background().color().darker(102));
                     }
                 }
 
@@ -2898,25 +3054,32 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                 cachePainter.setPen(borderColor);
                 cachePainter.drawRect(rect.adjusted(0, 0, -1, -1));
                 cachePainter.setPen(alphaCornerColor);
-                cachePainter.drawPoint(rect.topLeft());
-                cachePainter.drawPoint(rect.topRight());
-                cachePainter.drawPoint(rect.bottomLeft());
-                cachePainter.drawPoint(rect.bottomRight());
+
+                const QPoint points[4] = {
+                    rect.topLeft(),
+                    rect.topRight(),
+                    rect.bottomLeft(),
+                    rect.bottomRight() };
+                cachePainter.drawPoints(points, 4);
 
                 // inner border
                 if ((option->state & QStyle::State_Sunken) || (option->state & QStyle::State_On))
-                    cachePainter.setPen(option->palette.button().color().dark(118));
+                    cachePainter.setPen(option->palette.button().color().darker(118));
                 else
                     cachePainter.setPen(gradientStartColor);
-                cachePainter.drawLine(rect.left() + 1, rect.top() + 1, rect.right() - 1, rect.top() + 1);
-                cachePainter.drawLine(rect.left() + 1, rect.top() + 2, rect.left() + 1, rect.bottom() - 2);
+
+                QLine lines[2];
+                lines[0] = QLine(rect.left() + 1, rect.top() + 1, rect.right() - 1, rect.top() + 1);
+                lines[1] = QLine(rect.left() + 1, rect.top() + 2, rect.left() + 1, rect.bottom() - 2);
+                cachePainter.drawLines(lines, 2);
 
                 if ((option->state & QStyle::State_Sunken) || (option->state & QStyle::State_On))
-                    cachePainter.setPen(option->palette.button().color().dark(114));
+                    cachePainter.setPen(option->palette.button().color().darker(114));
                 else
-                    cachePainter.setPen(gradientStopColor.dark(102));
-                cachePainter.drawLine(rect.left() + 1, rect.bottom() - 1, rect.right() - 1, rect.bottom() - 1);
-                cachePainter.drawLine(rect.right() - 1, rect.top() + 1, rect.right() - 1, rect.bottom() - 2);
+                    cachePainter.setPen(gradientStopColor.darker(102));
+                lines[0] = QLine(rect.left() + 1, rect.bottom() - 1, rect.right() - 1, rect.bottom() - 1);
+                lines[1] = QLine(rect.right() - 1, rect.top() + 1, rect.right() - 1, rect.bottom() - 2);
+                cachePainter.drawLines(lines, 2);
                 cachePainter.end();
                 if (UsePixmapCache)
                     QPixmapCache::insert(pixmapName, cache);
@@ -2927,9 +3090,23 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
         }
         QCommonStyle::drawControl(element, option, painter, widget);
         break;
+
+#ifndef QT_NO_MAINWINDOW
+    case CE_MenuBarEmptyArea:
+        if (widget && qobject_cast<const QMainWindow *>(widget->parentWidget())) {
+            painter->fillRect(option->rect, option->palette.window());
+            QPen oldPen = painter->pen();
+            painter->setPen(QPen(option->palette.dark().color()));
+            painter->drawLine(option->rect.bottomLeft(), option->rect.bottomRight());
+            painter->setPen(oldPen);
+        }
+        break;
+#endif // QT_NO_MAINWINDOW
+
 #endif // QT_NO_MENUBAR
+
 #ifndef QT_NO_TOOLBOX
-    case CE_ToolBoxTab:
+    case CE_ToolBoxTabShape:
         if (const QStyleOptionToolBox *toolBox = qstyleoption_cast<const QStyleOptionToolBox *>(option)) {
             painter->save();
 
@@ -2937,53 +3114,44 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
             int diag = toolBox->rect.height() - 2;
 
             // The essential points
-            QPoint rightMost(toolBox->rect.right(), toolBox->rect.bottom() - 2);
-            QPoint rightEdge(toolBox->rect.right() - width / 10, toolBox->rect.bottom() - 2);
-            QPoint leftEdge(toolBox->rect.right() - width / 10 - diag, toolBox->rect.top());
-            QPoint leftMost(toolBox->rect.left(), toolBox->rect.top());
+            QPoint rightMost;
+            QPoint rightEdge;
+            QPoint leftEdge;
+            QPoint leftMost;
+            QPoint leftOne;
+            QPoint rightOne;
             QPoint upOne(0, -1);
             QPoint downOne(0, 1);
-            QPoint leftOne(-1, 0);
-            QPoint rightOne(1, 0);
 
-            // The upper path
-            QPainterPath upperPath(rightMost + rightOne);
-            upperPath.lineTo(rightEdge);
-            upperPath.lineTo(leftEdge);
-            upperPath.lineTo(leftMost + leftOne);
-            upperPath.lineTo(toolBox->rect.topLeft() + leftOne + upOne);
-            upperPath.lineTo(toolBox->rect.topRight() + rightOne + upOne);
-            upperPath.lineTo(rightMost + rightOne);
+            if (toolBox->direction != Qt::RightToLeft) {
+                rightMost = QPoint(toolBox->rect.right(), toolBox->rect.bottom() - 2);
+                rightEdge = QPoint(toolBox->rect.right() - width / 10, toolBox->rect.bottom() - 2);
+                leftEdge = QPoint(toolBox->rect.right() - width / 10 - diag, toolBox->rect.top());
+                leftMost = QPoint(toolBox->rect.left(), toolBox->rect.top());
+                leftOne = QPoint(-1, 0);
+                rightOne = QPoint(1, 0);
+            } else {
+                rightMost = QPoint(toolBox->rect.left(), toolBox->rect.bottom() - 2);
+                rightEdge = QPoint(toolBox->rect.left() + width / 10, toolBox->rect.bottom() - 2);
+                leftEdge = QPoint(toolBox->rect.left() + width / 10 + diag, toolBox->rect.top());
+                leftMost = QPoint(toolBox->rect.right(), toolBox->rect.top());
+                leftOne = QPoint(1, 0);
+                rightOne = QPoint(-1, 0);
+            }
 
-            // The lower path
-            QPainterPath lowerPath(rightMost + rightOne);
-            lowerPath.lineTo(rightEdge);
-            lowerPath.lineTo(leftEdge);
-            lowerPath.lineTo(leftMost + leftOne);
-            lowerPath.lineTo(toolBox->rect.bottomLeft() + leftOne + downOne);
-            lowerPath.lineTo(toolBox->rect.bottomRight() + rightOne + downOne);
-            lowerPath.lineTo(rightMost);
-
-            //painter->fillRect(option->rect, toolBox->palette.base());
-
-            // Fill the tab
-            // if (toolBox->selectedPosition == QStyleOptionToolBox::PreviousIsSelected) {
-            //    painter->fillPath(upperPath, toolBox->palette.base());
-            //    painter->fillPath(lowerPath, toolBox->palette.background());
-            // } else {
-            //    painter->fillPath(upperPath, toolBox->palette.background());
-            //    painter->fillPath(lowerPath, toolBox->palette.base());
-            // }
+            QLine lines[3];
 
             // Draw the outline
             painter->setPen(borderColor);
-            painter->drawLine(rightMost, rightEdge);
-            painter->drawLine(rightEdge + leftOne, leftEdge);
-            painter->drawLine(leftEdge + leftOne, leftMost);
+            lines[0] = QLine(rightMost, rightEdge);
+            lines[1] = QLine(rightEdge + leftOne, leftEdge);
+            lines[2] = QLine(leftEdge + leftOne, leftMost);
+            painter->drawLines(lines, 3);
             painter->setPen(toolBox->palette.base().color());
-            painter->drawLine(rightMost + downOne, rightEdge + downOne);
-            painter->drawLine(rightEdge + leftOne + downOne, leftEdge + downOne);
-            painter->drawLine(leftEdge + leftOne + downOne, leftMost + downOne);
+            lines[0] = QLine(rightMost + downOne, rightEdge + downOne);
+            lines[1] = QLine(rightEdge + leftOne + downOne, leftEdge + downOne);
+            lines[2] = QLine(leftEdge + leftOne + downOne, leftMost + downOne);
+            painter->drawLines(lines, 3);
 
             painter->restore();
         }
@@ -3011,11 +3179,33 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
         if (const QStyleOptionDockWidget *dockWidget = qstyleoption_cast<const QStyleOptionDockWidget *>(option)) {
             painter->save();
 
+            const QStyleOptionDockWidgetV2 *v2
+                = qstyleoption_cast<const QStyleOptionDockWidgetV2*>(dockWidget);
+            bool verticalTitleBar = v2 == 0 ? false : v2->verticalTitleBar;
+
             // Find text width and title rect
             int textWidth = option->fontMetrics.width(dockWidget->title);
             int margin = 4;
-            QRect titleRect = visualRect(dockWidget->direction, dockWidget->rect,
-                                         dockWidget->rect.adjusted(margin, 0, -margin * 2 - 26, 0));
+            QRect titleRect = subElementRect(SE_DockWidgetTitleBarText, option, widget);
+            QRect rect = dockWidget->rect;
+
+            if (verticalTitleBar) {
+                QRect r = rect;
+                QSize s = r.size();
+                s.transpose();
+                r.setSize(s);
+
+                titleRect = QRect(r.left() + rect.bottom()
+                                    - titleRect.bottom(),
+                                r.top() + titleRect.left() - rect.left(),
+                                titleRect.height(), titleRect.width());
+
+                painter->translate(r.left(), r.top() + r.width());
+                painter->rotate(-90);
+                painter->translate(-r.left(), -r.top());
+
+                rect = r;
+            }
 
             // Chop and insert ellide into title if text is too wide
             QString title = elliditide(dockWidget->title, dockWidget->fontMetrics, titleRect, &textWidth);
@@ -3032,17 +3222,17 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
 #ifdef QT3_SUPPORT
                 // Q3DockWindow doesn't need space for buttons
                 if (widget && widget->inherits("Q3DockWindowTitleBar")) {
-                    r = dockWidget->rect;
+                    r = rect;
                 } else
 #endif
                     r.setRect(titleRect.left(), titleRect.top(), titleRect.width(), titleRect.bottom());
-                int nchunks = (r.width() / handle.width()) - 1;
-                int indent = (r.width() - (nchunks * handle.width())) / 2;
-                for (int i = 0; i < nchunks; ++i) {
-                    painter->drawImage(QPoint(r.left() + indent + i * handle.width(),
-                                              r.center().y() - handle.height() / 2),
-                                       handle);
-                }
+                    int nchunks = (r.width() / handle.width()) - 1;
+                    int indent = (r.width() - (nchunks * handle.width())) / 2;
+                    for (int i = 0; i < nchunks; ++i) {
+                        painter->drawImage(QPoint(r.left() + indent + i * handle.width(),
+                                                r.center().y() - handle.height() / 2),
+                                        handle);
+                    }
             } else {
                 // Handle pattern to the left of the title
                 QRect leftSide(titleRect.left(), titleRect.top(),
@@ -3050,8 +3240,10 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                 int nchunks = leftSide.width() / handle.width();
                 int indent = (leftSide.width() - (nchunks * handle.width())) / 2;
                 for (int i = 0; i < nchunks; ++i) {
-                    painter->drawImage(QPoint(leftSide.left() + indent + i * handle.width(),
-                                              leftSide.center().y() - handle.height() / 2),
+                    painter->drawImage(QPoint(leftSide.left() + indent
+                                                + i * handle.width(),
+                                              leftSide.center().y()
+                                                - handle.height() / 2),
                                        handle);
                 }
 
@@ -3071,10 +3263,13 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
             font.setPointSize(font.pointSize() - 1);
             painter->setFont(font);
             painter->setPen(dockWidget->palette.text().color());
-            painter->drawText(titleRect, title, QTextOption(Qt::AlignHCenter | Qt::AlignVCenter));
+            painter->drawText(titleRect,
+                              int(Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextShowMnemonic),
+                              title);
 
             painter->restore();
         }
+
         break;
 #endif // QT_NO_DOCKWIDGET
 #ifndef QT_NO_TOOLBAR
@@ -3089,7 +3284,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     // The end and onlyone top toolbar lines draw a double
                     // line at the bottom to blend with the central
                     // widget.
-                    painter->setPen(option->palette.background().color().light(104));
+                    painter->setPen(option->palette.background().color().lighter(104));
                     painter->drawLine(option->rect.bottomLeft(), option->rect.bottomRight());
                     painter->setPen(alphaCornerColor);
                     painter->drawLine(option->rect.left(), option->rect.bottom() - 1,
@@ -3100,40 +3295,40 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     painter->drawLine(option->rect.bottomLeft(), option->rect.bottomRight());
                 }
                 // All top toolbar lines draw a light line at the top.
-                painter->setPen(option->palette.background().color().light(104));
+                painter->setPen(option->palette.background().color().lighter(104));
                 painter->drawLine(option->rect.topLeft(), option->rect.topRight());
             } else if (toolBar->toolBarArea == Qt::BottomToolBarArea) {
                 if (toolBar->positionOfLine == QStyleOptionToolBar::End
                     || toolBar->positionOfLine == QStyleOptionToolBar::Middle) {
-                    // The end and middle bottom toolbar lines draw a dark
+                    // The end and middle bottom tool bar lines draw a dark
                     // line at the bottom.
                     painter->setPen(alphaCornerColor);
                     painter->drawLine(option->rect.bottomLeft(), option->rect.bottomRight());
                 }
                 if (toolBar->positionOfLine == QStyleOptionToolBar::Beginning
                     || toolBar->positionOfLine == QStyleOptionToolBar::OnlyOne) {
-                    // The beginning and onlyone toolbar lines draw a
+                    // The beginning and only one tool bar lines draw a
                     // double line at the bottom to blend with the
-                    // statusbar.
+                    // status bar.
                     // ### The styleoption could contain whether the
-                    // mainwindow has a menubar and a statusbar, and
-                    // possibly dockwidgets.
+                    // main window has a menu bar and a status bar, and
+                    // possibly dock widgets.
                     painter->setPen(alphaCornerColor);
                     painter->drawLine(option->rect.left(), option->rect.bottom() - 1,
                                       option->rect.right(), option->rect.bottom() - 1);
-                    painter->setPen(option->palette.background().color().light(104));
+                    painter->setPen(option->palette.background().color().lighter(104));
                     painter->drawLine(option->rect.bottomLeft(), option->rect.bottomRight());
                 }
                 if (toolBar->positionOfLine == QStyleOptionToolBar::End) {
                     painter->setPen(alphaCornerColor);
                     painter->drawLine(option->rect.topLeft(), option->rect.topRight());
-                    painter->setPen(option->palette.background().color().light(104));
+                    painter->setPen(option->palette.background().color().lighter(104));
                     painter->drawLine(option->rect.left(), option->rect.top() + 1,
                                       option->rect.right(), option->rect.top() + 1);
 
                 } else {
                     // All other bottom toolbars draw a light line at the top.
-                    painter->setPen(option->palette.background().color().light(104));
+                    painter->setPen(option->palette.background().color().lighter(104));
                     painter->drawLine(option->rect.topLeft(), option->rect.topRight());
                 }
             }
@@ -3142,7 +3337,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     || toolBar->positionOfLine == QStyleOptionToolBar::End) {
                     // The middle and left end toolbar lines draw a light
                     // line to the left.
-                    painter->setPen(option->palette.background().color().light(104));
+                    painter->setPen(option->palette.background().color().lighter(104));
                     painter->drawLine(option->rect.topLeft(), option->rect.bottomLeft());
                 }
                 if (toolBar->positionOfLine == QStyleOptionToolBar::End) {
@@ -3150,7 +3345,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     painter->setPen(alphaCornerColor);
                     painter->drawLine(option->rect.right() - 1, option->rect.top(),
                                       option->rect.right() - 1, option->rect.bottom());
-                    painter->setPen(option->palette.background().color().light(104));
+                    painter->setPen(option->palette.background().color().lighter(104));
                     painter->drawLine(option->rect.topRight(), option->rect.bottomRight());
                 } else {
                     // All other left toolbar lines draw a dark line to the right
@@ -3171,12 +3366,12 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     painter->setPen(alphaCornerColor);
                     painter->drawLine(option->rect.topLeft(), option->rect.bottomLeft());
                     // And a light line next to it
-                    painter->setPen(option->palette.background().color().light(104));
+                    painter->setPen(option->palette.background().color().lighter(104));
                     painter->drawLine(option->rect.left() + 1, option->rect.top(),
                                       option->rect.left() + 1, option->rect.bottom());
                 } else {
                     // Other right toolbars draw a light line on its left edge
-                    painter->setPen(option->palette.background().color().light(104));
+                    painter->setPen(option->palette.background().color().lighter(104));
                     painter->drawLine(option->rect.topLeft(), option->rect.bottomLeft());
                 }
             }
@@ -3209,7 +3404,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                         gradient.setColorAt(0, gradientStopColor);
                         gradient.setColorAt(1, gradientStopColor);
                     } else {
-                        gradient.setColorAt(0, gradientStartColor.light(105));
+                        gradient.setColorAt(0, gradientStartColor.lighter(105));
                         gradient.setColorAt(1, gradientStopColor);
                     }
                     addLinePainter.fillRect(pixmapRect.left() + 2, pixmapRect.top() + 2,
@@ -3230,7 +3425,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     addButton.setColor(3, gradientStopColor.rgba());
                     addButton.setColor(4, gradientStopColor.rgba());
                 } else {
-                    addButton.setColor(3, gradientStartColor.light(105).rgba());
+                    addButton.setColor(3, gradientStartColor.lighter(105).rgba());
                     addButton.setColor(4, gradientStopColor.rgba());
                 }
                 addButton.setColor(5, scrollBar->palette.text().color().rgba());
@@ -3241,20 +3436,16 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     QImage arrow(reverse ? qt_scrollbar_button_arrow_left : qt_scrollbar_button_arrow_right);
                     arrow.setColor(1, scrollBar->palette.foreground().color().rgba());
 
-                    if ((scrollBar->activeSubControls & SC_ScrollBarAddLine) && sunken) {
-                        addLinePainter.drawImage(QPoint(pixmapRect.left() + 7, pixmapRect.top() + 5), arrow);
-                    } else {
-                        addLinePainter.drawImage(QPoint(pixmapRect.left() + 6, pixmapRect.top() + 4), arrow);
-                    }
+                    if ((scrollBar->activeSubControls & SC_ScrollBarAddLine) && sunken)
+                        addLinePainter.translate(1, 1);
+                    addLinePainter.drawImage(QPoint(pixmapRect.center().x() - 2, pixmapRect.center().y() - 3), arrow);
                 } else {
                     QImage arrow(qt_scrollbar_button_arrow_down);
                     arrow.setColor(1, scrollBar->palette.foreground().color().rgba());
 
-                    if ((scrollBar->activeSubControls & SC_ScrollBarAddLine) && sunken) {
-                        addLinePainter.drawImage(QPoint(pixmapRect.left() + 5, pixmapRect.top() + 7), arrow);
-                    } else {
-                        addLinePainter.drawImage(QPoint(pixmapRect.left() + 4, pixmapRect.top() + 6), arrow);
-                    }
+                    if ((scrollBar->activeSubControls & SC_ScrollBarAddLine) && sunken)
+                        addLinePainter.translate(1, 1);
+                    addLinePainter.drawImage(QPoint(pixmapRect.center().x() - 3, pixmapRect.center().y() - 2), arrow);
                 }
                 addLinePainter.end();
                 if (UsePixmapCache)
@@ -3279,10 +3470,10 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                 cache.fill(option->palette.background().color());
                 QPainter groovePainter(&cache);
                 QRect pixmapRect = QRect(0, 0, option->rect.width(), option->rect.height());
-                QColor color = scrollBar->palette.base().color().dark(sunken ? 125 : 100);
+                QColor color = scrollBar->palette.base().color().darker(sunken ? 125 : 100);
                 groovePainter.fillRect(pixmapRect, QBrush(color, Qt::Dense4Pattern));
 
-                QColor edgeColor = scrollBar->palette.base().color().dark(125);
+                QColor edgeColor = scrollBar->palette.base().color().darker(125);
                 if (horizontal) {
                     groovePainter.setBrushOrigin(1, 0);
                     groovePainter.fillRect(QRect(pixmapRect.topLeft(), QSize(pixmapRect.width(), 1)),
@@ -3314,15 +3505,14 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
             bool sunken = scrollBar->state & State_Sunken;
 
             // The SubLine (up/left) buttons
-            int scrollBarExtent = pixelMetric(PM_ScrollBarExtent, option, widget);
             QRect button1;
             QRect button2;
             if (horizontal) {
-                button1.setRect(scrollBarSubLine.left(), scrollBarSubLine.top(), 16, scrollBarExtent);
-                button2.setRect(scrollBarSubLine.right() - 15, scrollBarSubLine.top(), 16, scrollBarExtent);
+                button1.setRect(scrollBarSubLine.left(), scrollBarSubLine.top(), 16, scrollBarSubLine.height());
+                button2.setRect(scrollBarSubLine.right() - 15, scrollBarSubLine.top(), 16, scrollBarSubLine.height());
             } else {
-                button1.setRect(scrollBarSubLine.left(), scrollBarSubLine.top(), scrollBarExtent, 16);
-                button2.setRect(scrollBarSubLine.left(), scrollBarSubLine.bottom() - 15, scrollBarExtent, 16);
+                button1.setRect(scrollBarSubLine.left(), scrollBarSubLine.top(), scrollBarSubLine.width(), 16);
+                button2.setRect(scrollBarSubLine.left(), scrollBarSubLine.bottom() - 15, scrollBarSubLine.width(), 16);
             }
 
             QString subLinePixmapName = uniqueName(QLatin1String("scrollbar_subline"), option, button1.size());
@@ -3346,7 +3536,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                         qt_plastique_draw_gradient(&subLinePainter,
                                                    QRect(pixmapRect.left() + 2, pixmapRect.top() + 2,
                                                          pixmapRect.right() - 3, pixmapRect.bottom() - 3),
-                                                   gradientStartColor.light(105),
+                                                   gradientStartColor.lighter(105),
                                                    gradientStopColor);
                     }
                 }
@@ -3364,7 +3554,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     subButton.setColor(3, gradientStopColor.rgba());
                     subButton.setColor(4, gradientStopColor.rgba());
                 } else {
-                    subButton.setColor(3, gradientStartColor.light(105).rgba());
+                    subButton.setColor(3, gradientStartColor.lighter(105).rgba());
                     subButton.setColor(4, gradientStopColor.rgba());
                 }
                 subButton.setColor(5, scrollBar->palette.text().color().rgba());
@@ -3375,20 +3565,16 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     QImage arrow(reverse ? qt_scrollbar_button_arrow_right : qt_scrollbar_button_arrow_left);
                     arrow.setColor(1, scrollBar->palette.foreground().color().rgba());
 
-                    if ((scrollBar->activeSubControls & SC_ScrollBarSubLine) && sunken) {
-                        subLinePainter.drawImage(QPoint(pixmapRect.left() + 6, pixmapRect.top() + 5), arrow);
-                    } else {
-                        subLinePainter.drawImage(QPoint(pixmapRect.left() + 5, pixmapRect.top() + 4), arrow);
-                    }
+                    if ((scrollBar->activeSubControls & SC_ScrollBarSubLine) && sunken)
+                        subLinePainter.translate(1, 1);
+                    subLinePainter.drawImage(QPoint(pixmapRect.center().x() - 2, pixmapRect.center().y() - 3), arrow);
                 } else {
                     QImage arrow(qt_scrollbar_button_arrow_up);
                     arrow.setColor(1, scrollBar->palette.foreground().color().rgba());
 
-                    if ((scrollBar->activeSubControls & SC_ScrollBarSubLine) && sunken) {
-                        subLinePainter.drawImage(QPoint(pixmapRect.left() + 5, pixmapRect.top() + 7), arrow);
-                    } else {
-                        subLinePainter.drawImage(QPoint(pixmapRect.left() + 4, pixmapRect.top() + 6), arrow);
-                    }
+                    if ((scrollBar->activeSubControls & SC_ScrollBarSubLine) && sunken)
+                        subLinePainter.translate(1, 1);
+                    subLinePainter.drawImage(QPoint(pixmapRect.center().x() - 3, pixmapRect.center().y() - 2), arrow);
                 }
                 subLinePainter.end();
                 if (UsePixmapCache)
@@ -3421,10 +3607,10 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                         QLinearGradient gradient(pixmapRect.center().x(), pixmapRect.top(),
                                                  pixmapRect.center().x(), pixmapRect.bottom());
                         if (sunken) {
-                            gradient.setColorAt(0, gradientStartColor.light(110));
-                            gradient.setColorAt(1, gradientStopColor.light(105));
+                            gradient.setColorAt(0, gradientStartColor.lighter(110));
+                            gradient.setColorAt(1, gradientStopColor.lighter(105));
                         } else {
-                            gradient.setColorAt(0, gradientStartColor.light(105));
+                            gradient.setColorAt(0, gradientStartColor.lighter(105));
                             gradient.setColorAt(1, gradientStopColor);
                         }
                         sliderPainter.fillRect(pixmapRect.adjusted(2, 2, -2, -2), gradient);
@@ -3435,22 +3621,27 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                     sliderPainter.setPen(borderColor);
                     sliderPainter.drawRect(pixmapRect.adjusted(0, 0, -1, -1));
                     sliderPainter.setPen(alphaCornerColor);
-                    sliderPainter.drawPoint(pixmapRect.left(), pixmapRect.top());
-                    sliderPainter.drawPoint(pixmapRect.left(), pixmapRect.bottom());
-                    sliderPainter.drawPoint(pixmapRect.right(), pixmapRect.top());
-                    sliderPainter.drawPoint(pixmapRect.right(), pixmapRect.bottom());
+                    QPoint points[4] = {
+                        QPoint(pixmapRect.left(), pixmapRect.top()),
+                        QPoint(pixmapRect.left(), pixmapRect.bottom()),
+                        QPoint(pixmapRect.right(), pixmapRect.top()),
+                        QPoint(pixmapRect.right(), pixmapRect.bottom()) };
+                    sliderPainter.drawPoints(points, 4);
 
-                    sliderPainter.setPen(sunken ? gradientStartColor.light(110) : gradientStartColor.light(105));
-                    sliderPainter.drawLine(pixmapRect.left() + 1, pixmapRect.top() + 1,
-                                           pixmapRect.right() - 1, pixmapRect.top() + 1);
-                    sliderPainter.drawLine(pixmapRect.left() + 1, pixmapRect.top() + 2,
-                                           pixmapRect.left() + 1, pixmapRect.bottom() - 2);
+                    QLine lines[2];
+                    sliderPainter.setPen(sunken ? gradientStartColor.lighter(110) : gradientStartColor.lighter(105));
+                    lines[0] = QLine(pixmapRect.left() + 1, pixmapRect.top() + 1,
+                                     pixmapRect.right() - 1, pixmapRect.top() + 1);
+                    lines[1] = QLine(pixmapRect.left() + 1, pixmapRect.top() + 2,
+                                     pixmapRect.left() + 1, pixmapRect.bottom() - 2);
+                    sliderPainter.drawLines(lines, 2);
 
-                    sliderPainter.setPen(sunken ? gradientStopColor.light(105) : gradientStopColor);
-                    sliderPainter.drawLine(pixmapRect.left() + 1, pixmapRect.bottom() - 1,
-                                           pixmapRect.right() - 1, pixmapRect.bottom() - 1);
-                    sliderPainter.drawLine(pixmapRect.right() - 1, pixmapRect.top() + 2,
-                                           pixmapRect.right() - 1, pixmapRect.bottom() - 1);
+                    sliderPainter.setPen(sunken ? gradientStopColor.lighter(105) : gradientStopColor);
+                    lines[0] = QLine(pixmapRect.left() + 1, pixmapRect.bottom() - 1,
+                                     pixmapRect.right() - 1, pixmapRect.bottom() - 1);
+                    lines[1] = QLine(pixmapRect.right() - 1, pixmapRect.top() + 2,
+                                     pixmapRect.right() - 1, pixmapRect.bottom() - 1);
+                    sliderPainter.drawLines(lines, 2);
 
                     int sliderMinLength = pixelMetric(PM_ScrollBarSliderMin, scrollBar, widget);
                     if ((horizontal && scrollBar->rect.width() > sliderMinLength)
@@ -3458,7 +3649,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
                         QImage pattern(horizontal ? qt_scrollbar_slider_pattern_horizontal
                                        : qt_scrollbar_slider_pattern_vertical);
                         pattern.setColor(1, alphaCornerColor.rgba());
-                        pattern.setColor(2, (sunken ? gradientStartColor.light(110) : gradientStartColor.light(105)).rgba());
+                        pattern.setColor(2, (sunken ? gradientStartColor.lighter(110) : gradientStartColor.lighter(105)).rgba());
 
                         if (horizontal) {
                             sliderPainter.drawImage(pixmapRect.center().x() - pattern.width() / 2 + 1,
@@ -3533,7 +3724,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
 void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOptionComplex *option,
                                          QPainter *painter, const QWidget *widget) const
 {
-    QColor borderColor = option->palette.background().color().dark(178);
+    QColor borderColor = option->palette.background().color().darker(178);
     QColor alphaCornerColor;
    if (widget) {
         // ### backgroundrole/foregroundrole should be part of the style option
@@ -3541,9 +3732,9 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
     } else {
         alphaCornerColor = mergedColors(option->palette.background().color(), borderColor);
     }
-    QColor gradientStartColor = option->palette.button().color().light(104);
-    QColor gradientStopColor = option->palette.button().color().dark(105);
-    QColor highlightedGradientStartColor = option->palette.button().color().light(101);
+    QColor gradientStartColor = option->palette.button().color().lighter(104);
+    QColor gradientStopColor = option->palette.button().color().darker(105);
+    QColor highlightedGradientStartColor = option->palette.button().color().lighter(101);
     QColor highlightedGradientStopColor = mergedColors(option->palette.button().color(), option->palette.highlight().color(), 85);
     QColor highlightedDarkInnerBorderColor = mergedColors(option->palette.button().color(), option->palette.highlight().color(), 35);
     QColor highlightedLightInnerBorderColor = mergedColors(option->palette.button().color(), option->palette.highlight().color(), 58);
@@ -3579,34 +3770,44 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                     // draw groove
                     if (horizontal) {
                         groovePainter.setPen(borderColor);
-                        groovePainter.drawLine(pixmapRect.left() + 1, pixmapRect.top(),
-                                               pixmapRect.right() - 1, pixmapRect.top());
-                        groovePainter.drawLine(pixmapRect.left() + 1, pixmapRect.bottom(),
-                                               pixmapRect.right() - 1, pixmapRect.bottom());
-                        groovePainter.drawLine(pixmapRect.left(), pixmapRect.top() + 1,
-                                               pixmapRect.left(), pixmapRect.bottom() - 1);
-                        groovePainter.drawLine(pixmapRect.right(), pixmapRect.top() + 1,
-                                               pixmapRect.right(), pixmapRect.bottom() - 1);
+                        const QLine lines[4] = {
+                            QLine(pixmapRect.left() + 1, pixmapRect.top(),
+                                  pixmapRect.right() - 1, pixmapRect.top()),
+                            QLine(pixmapRect.left() + 1, pixmapRect.bottom(),
+                                  pixmapRect.right() - 1, pixmapRect.bottom()),
+                            QLine(pixmapRect.left(), pixmapRect.top() + 1,
+                                  pixmapRect.left(), pixmapRect.bottom() - 1),
+                            QLine(pixmapRect.right(), pixmapRect.top() + 1,
+                                  pixmapRect.right(), pixmapRect.bottom() - 1) };
+                        groovePainter.drawLines(lines, 4);
+
                         groovePainter.setPen(alphaCornerColor);
-                        groovePainter.drawPoint(pixmapRect.left(), pixmapRect.top());
-                        groovePainter.drawPoint(pixmapRect.left(), pixmapRect.bottom());
-                        groovePainter.drawPoint(pixmapRect.right(), pixmapRect.top());
-                        groovePainter.drawPoint(pixmapRect.right(), pixmapRect.bottom());
+                        const QPoint points[4] = {
+                            QPoint(pixmapRect.left(), pixmapRect.top()),
+                            QPoint(pixmapRect.left(), pixmapRect.bottom()),
+                            QPoint(pixmapRect.right(), pixmapRect.top()),
+                            QPoint(pixmapRect.right(), pixmapRect.bottom()) };
+                        groovePainter.drawPoints(points, 4);
                     } else {
                         groovePainter.setPen(borderColor);
-                        groovePainter.drawLine(pixmapRect.left() + 1, pixmapRect.top(),
-                                               pixmapRect.right() - 1, pixmapRect.top());
-                        groovePainter.drawLine(pixmapRect.left() + 1, pixmapRect.bottom(),
-                                               pixmapRect.right() - 1, pixmapRect.bottom());
-                        groovePainter.drawLine(pixmapRect.left(), pixmapRect.top() + 1,
-                                               pixmapRect.left(), pixmapRect.bottom() - 1);
-                        groovePainter.drawLine(pixmapRect.right(), pixmapRect.top() + 1,
-                                               pixmapRect.right(), pixmapRect.bottom() - 1);
+                        const QLine lines[4] = {
+                            QLine(pixmapRect.left() + 1, pixmapRect.top(),
+                                  pixmapRect.right() - 1, pixmapRect.top()),
+                            QLine(pixmapRect.left() + 1, pixmapRect.bottom(),
+                                  pixmapRect.right() - 1, pixmapRect.bottom()),
+                            QLine(pixmapRect.left(), pixmapRect.top() + 1,
+                                  pixmapRect.left(), pixmapRect.bottom() - 1),
+                            QLine(pixmapRect.right(), pixmapRect.top() + 1,
+                                  pixmapRect.right(), pixmapRect.bottom() - 1) };
+                        groovePainter.drawLines(lines, 4);
+
                         groovePainter.setPen(alphaCornerColor);
-                        groovePainter.drawPoint(pixmapRect.left(), pixmapRect.top());
-                        groovePainter.drawPoint(pixmapRect.right(), pixmapRect.top());
-                        groovePainter.drawPoint(pixmapRect.left(), pixmapRect.bottom());
-                        groovePainter.drawPoint(pixmapRect.right(), pixmapRect.bottom());
+                        const QPoint points[4] = {
+                            QPoint(pixmapRect.left(), pixmapRect.top()),
+                            QPoint(pixmapRect.right(), pixmapRect.top()),
+                            QPoint(pixmapRect.left(), pixmapRect.bottom()),
+                            QPoint(pixmapRect.right(), pixmapRect.bottom()) };
+                        groovePainter.drawPoints(points, 4);
                     }
                     groovePainter.end();
                     if (UsePixmapCache)
@@ -3651,8 +3852,8 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                             QLinearGradient gradient(pixmapRect.center().x(), pixmapRect.top(),
                                                      pixmapRect.center().x(), pixmapRect.bottom());
                             if ((option->activeSubControls & SC_SliderHandle) && (option->state & State_Sunken)) {
-                                gradient.setColorAt(0, gradientStartColor.light(110));
-                                gradient.setColorAt(1, gradientStopColor.light(110));
+                                gradient.setColorAt(0, gradientStartColor.lighter(110));
+                                gradient.setColorAt(1, gradientStopColor.lighter(110));
                             } else {
                                 gradient.setColorAt(0, gradientStartColor);
                                 gradient.setColorAt(1, gradientStopColor);
@@ -3739,6 +3940,7 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
 
                 int v = slider->minimum;
                 int len = pixelMetric(PM_SliderLength, slider, widget);
+                QVarLengthArray<QLine, 32> lines;
                 while (v <= slider->maximum) {
                     int pos = sliderPositionFromValue(slider->minimum, slider->maximum,
                                                       v, (horizontal
@@ -3750,26 +3952,31 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
 
                     if (horizontal) {
                         if (ticksAbove) {
-                            painter->drawLine(pos, slider->rect.top() + extra,
-                                pos, slider->rect.top() + tickSize);
+                            lines.append(QLine(pos, slider->rect.top() + extra,
+                                               pos, slider->rect.top() + tickSize));
                         }
                         if (ticksBelow) {
-                            painter->drawLine(pos, slider->rect.bottom() - extra,
-                                              pos, slider->rect.bottom() - tickSize);
+                            lines.append(QLine(pos, slider->rect.bottom() - extra,
+                                               pos, slider->rect.bottom() - tickSize));
                         }
                     } else {
                         if (ticksAbove) {
-                            painter->drawLine(slider->rect.left() + extra, pos,
-                                              slider->rect.left() + tickSize, pos);
+                            lines.append(QLine(slider->rect.left() + extra, pos,
+                                               slider->rect.left() + tickSize, pos));
                         }
                         if (ticksBelow) {
-                            painter->drawLine(slider->rect.right() - extra, pos,
-                                              slider->rect.right() - tickSize, pos);
+                            lines.append(QLine(slider->rect.right() - extra, pos,
+                                               slider->rect.right() - tickSize, pos));
                         }
                     }
 
-                    v += interval;
+                    // in the case where maximum is max int
+                    int nextInterval = v + interval;
+                    if (nextInterval < v)
+                        break;
+                    v = nextInterval;
                 }
+                painter->drawLines(lines.constData(), lines.size());
                 painter->setPen(oldPen);
             }
         }
@@ -3794,54 +4001,70 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
             QBrush border = qMapBrushToRect(option->palette.shadow(), buttonRect);
             qBrushSetAlphaF(&border, 0.4);
 
+            QVarLengthArray<QPoint, 4> points;
+
             // Touchups for missing pixels in the line edit corners
             painter->setPen(QPen(corner, 0));
             if (!reverse) {
-                painter->drawPoint(buttonRect.left() - 1, buttonRect.top() + 1);
-                painter->drawPoint(buttonRect.left() - 1, buttonRect.bottom() - 1);
-                painter->drawPoint(buttonRect.left(), buttonRect.top() + 1);
-                painter->drawPoint(buttonRect.left(), buttonRect.bottom() - 1);
+                points.append(QPoint(buttonRect.left() - 1, buttonRect.top() + 1));
+                points.append(QPoint(buttonRect.left() - 1, buttonRect.bottom() - 1));
+                points.append(QPoint(buttonRect.left(), buttonRect.top() + 1));
+                points.append(QPoint(buttonRect.left(), buttonRect.bottom() - 1));
             } else {
-                painter->drawPoint(buttonRect.right() + 1, buttonRect.top() + 1);
-                painter->drawPoint(buttonRect.right() + 1, buttonRect.bottom() - 1);
-                painter->drawPoint(buttonRect.right(), buttonRect.top() + 1);
-                painter->drawPoint(buttonRect.right(), buttonRect.bottom() - 1);
+                points.append(QPoint(buttonRect.right() + 1, buttonRect.top() + 1));
+                points.append(QPoint(buttonRect.right() + 1, buttonRect.bottom() - 1));
+                points.append(QPoint(buttonRect.right(), buttonRect.top() + 1));
+                points.append(QPoint(buttonRect.right(), buttonRect.bottom() - 1));
             }
+            painter->drawPoints(points.constData(), points.size());
+            points.clear();
             painter->setPen(QPen(border, 0));
             if (!reverse) {
-                painter->drawPoint(buttonRect.left() - 1, buttonRect.top());
-                painter->drawPoint(buttonRect.left() - 1, buttonRect.bottom());
+                points.append(QPoint(buttonRect.left() - 1, buttonRect.top()));
+                points.append(QPoint(buttonRect.left() - 1, buttonRect.bottom()));
             } else {
-                painter->drawPoint(buttonRect.right() + 1, buttonRect.top());
-                painter->drawPoint(buttonRect.right() + 1, buttonRect.bottom());
+                points.append(QPoint(buttonRect.right() + 1, buttonRect.top()));
+                points.append(QPoint(buttonRect.right() + 1, buttonRect.bottom()));
             }
 
             // Button outlines
             if (!reverse) {
-                painter->drawLine(upRect.left(), upRect.top(), upRect.right() - 2, upRect.top());
-                painter->drawLine(upRect.left() + 1, upRect.bottom(), upRect.right() - 1, upRect.bottom());
-                painter->drawLine(downRect.left(), downRect.bottom(), downRect.right() - 2, downRect.bottom());
-                painter->drawLine(buttonRect.right(), buttonRect.top() + 2, buttonRect.right(), buttonRect.bottom() - 2);
-                painter->drawPoint(upRect.right() - 1, upRect.top() + 1);
-                painter->drawPoint(downRect.right() - 1, downRect.bottom() - 1);
+                const QLine lines[4] = {
+                    QLine(upRect.left(), upRect.top(), upRect.right() - 2, upRect.top()),
+                    QLine(upRect.left() + 1, upRect.bottom(), upRect.right() - 1, upRect.bottom()),
+                    QLine(downRect.left(), downRect.bottom(), downRect.right() - 2, downRect.bottom()),
+                    QLine(buttonRect.right(), buttonRect.top() + 2, buttonRect.right(), buttonRect.bottom() - 2) };
+                painter->drawLines(lines, 4);
+
+                points.append(QPoint(upRect.right() - 1, upRect.top() + 1));
+                points.append(QPoint(downRect.right() - 1, downRect.bottom() - 1));
+                painter->drawPoints(points.constData(), points.size());
+                points.clear();
                 painter->setPen(QPen(corner, 0));
-                painter->drawPoint(upRect.right() - 1, upRect.top());
-                painter->drawPoint(upRect.right(), upRect.top() + 1);
-                painter->drawPoint(upRect.right(), downRect.bottom() - 1);
-                painter->drawPoint(upRect.right() - 1, downRect.bottom());
+                points.append(QPoint(upRect.right() - 1, upRect.top()));
+                points.append(QPoint(upRect.right(), upRect.top() + 1));
+                points.append(QPoint(upRect.right(), downRect.bottom() - 1));
+                points.append(QPoint(upRect.right() - 1, downRect.bottom()));
             } else {
-                painter->drawLine(upRect.right(), upRect.top(), upRect.left() + 2, upRect.top());
-                painter->drawLine(upRect.right() - 1, upRect.bottom(), upRect.left() + 1, upRect.bottom());
-                painter->drawLine(downRect.right(), downRect.bottom(), downRect.left() + 2, downRect.bottom());
-                painter->drawLine(buttonRect.left(), buttonRect.top() + 2, buttonRect.left(), buttonRect.bottom() - 2);
-                painter->drawPoint(upRect.left() + 1, upRect.top() + 1);
-                painter->drawPoint(downRect.left() + 1, downRect.bottom() - 1);
+                const QLine lines[4] = {
+                    QLine(upRect.right(), upRect.top(), upRect.left() + 2, upRect.top()),
+                    QLine(upRect.right() - 1, upRect.bottom(), upRect.left() + 1, upRect.bottom()),
+                    QLine(downRect.right(), downRect.bottom(), downRect.left() + 2, downRect.bottom()),
+                    QLine(buttonRect.left(), buttonRect.top() + 2, buttonRect.left(), buttonRect.bottom() - 2) };
+                painter->drawLines(lines, 4);
+
+                points.append(QPoint(upRect.left() + 1, upRect.top() + 1));
+                points.append(QPoint(downRect.left() + 1, downRect.bottom() - 1));
+                painter->drawPoints(points.constData(), points.size());
+                points.clear();
                 painter->setPen(QPen(corner, 0));
-                painter->drawPoint(upRect.left() + 1, upRect.top());
-                painter->drawPoint(upRect.left(), upRect.top() + 1);
-                painter->drawPoint(upRect.left(), downRect.bottom() - 1);
-                painter->drawPoint(upRect.left() + 1, downRect.bottom());
+                points.append(QPoint(upRect.left() + 1, upRect.top()));
+                points.append(QPoint(upRect.left(), upRect.top() + 1));
+                points.append(QPoint(upRect.left(), downRect.bottom() - 1));
+                points.append(QPoint(upRect.left() + 1, downRect.bottom()));
             }
+            painter->drawPoints(points.constData(), points.size());
+            points.clear();
 
             // Button colors
             QBrush buttonGradientBrush;
@@ -3861,33 +4084,33 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
             } else {
                 // Generate gradients
                 QLinearGradient buttonGradient(buttonRect.topLeft(), buttonRect.bottomLeft());
-                buttonGradient.setColorAt(0.0, buttonBrush.color().light(104));
-                buttonGradient.setColorAt(1.0, buttonBrush.color().dark(110));
+                buttonGradient.setColorAt(0.0, buttonBrush.color().lighter(104));
+                buttonGradient.setColorAt(1.0, buttonBrush.color().darker(110));
                 buttonGradientBrush = QBrush(buttonGradient);
 
                 QLinearGradient buttonGradient2(buttonRect.topLeft(), buttonRect.bottomLeft());
-                buttonGradient2.setColorAt(0.0, buttonBrush.color().dark(113));
-               buttonGradient2.setColorAt(1.0, buttonBrush.color().dark(103));
+                buttonGradient2.setColorAt(0.0, buttonBrush.color().darker(113));
+               buttonGradient2.setColorAt(1.0, buttonBrush.color().darker(103));
                 sunkenButtonGradientBrush = QBrush(buttonGradient2);
 
                 QLinearGradient buttonGradient3(buttonRect.topLeft(), buttonRect.bottomLeft());
-                buttonGradient3.setColorAt(0.0, buttonBrush.color().light(105));
+                buttonGradient3.setColorAt(0.0, buttonBrush.color().lighter(105));
                 buttonGradient3.setColorAt(1.0, buttonBrush.color());
                 leftLineGradientBrush = QBrush(buttonGradient3);
 
                 QLinearGradient buttonGradient4(buttonRect.topLeft(), buttonRect.bottomLeft());
                 buttonGradient4.setColorAt(0.0, buttonBrush.color());
-                buttonGradient4.setColorAt(1.0, buttonBrush.color().dark(110));
+                buttonGradient4.setColorAt(1.0, buttonBrush.color().darker(110));
                 rightLineGradientBrush = QBrush(buttonGradient4);
 
                 QLinearGradient buttonGradient5(buttonRect.topLeft(), buttonRect.bottomLeft());
-                buttonGradient5.setColorAt(0.0, buttonBrush.color().dark(113));
-                buttonGradient5.setColorAt(1.0, buttonBrush.color().dark(107));
+                buttonGradient5.setColorAt(0.0, buttonBrush.color().darker(113));
+                buttonGradient5.setColorAt(1.0, buttonBrush.color().darker(107));
                 sunkenLeftLineGradientBrush = QBrush(buttonGradient5);
 
                 QLinearGradient buttonGradient6(buttonRect.topLeft(), buttonRect.bottomLeft());
-                buttonGradient6.setColorAt(0.0, buttonBrush.color().dark(108));
-                buttonGradient6.setColorAt(1.0, buttonBrush.color().dark(103));
+                buttonGradient6.setColorAt(0.0, buttonBrush.color().darker(108));
+                buttonGradient6.setColorAt(1.0, buttonBrush.color().darker(103));
                 sunkenRightLineGradientBrush = QBrush(buttonGradient6);
             }
 
@@ -4028,9 +4251,11 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                     QRect upArrowRect(upRect.center().x() - 3 + offset, upRect.center().y() - 2 + offset, 7, 4);
                     centerX = upArrowRect.center().x();
                     painter->drawPoint(centerX, upArrowRect.top());
-                    painter->drawLine(centerX - 1, upArrowRect.top() + 1, centerX + 1, upArrowRect.top() + 1);
-                    painter->drawLine(centerX - 2, upArrowRect.top() + 2, centerX + 2, upArrowRect.top() + 2);
-                    painter->drawLine(centerX - 3, upArrowRect.top() + 3, centerX + 3, upArrowRect.top() + 3);
+                    const QLine lines[3] = {
+                        QLine(centerX - 1, upArrowRect.top() + 1, centerX + 1, upArrowRect.top() + 1),
+                        QLine(centerX - 2, upArrowRect.top() + 2, centerX + 2, upArrowRect.top() + 2),
+                        QLine(centerX - 3, upArrowRect.top() + 3, centerX + 3, upArrowRect.top() + 3) };
+                    painter->drawLines(lines, 3);
                 }
                 if (spinBox->subControls & SC_SpinBoxDown) {
                     // ...........
@@ -4042,9 +4267,11 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                     offset = downSunken ? 1 : 0;
                     QRect downArrowRect(downRect.center().x() - 3 + offset, downRect.center().y() - 2 + offset + 1, 7, 4);
                     centerX = downArrowRect.center().x();
-                    painter->drawLine(centerX - 3, downArrowRect.top(), centerX + 3, downArrowRect.top());
-                    painter->drawLine(centerX - 2, downArrowRect.top() + 1, centerX + 2, downArrowRect.top() + 1);
-                    painter->drawLine(centerX - 1, downArrowRect.top() + 2, centerX + 1, downArrowRect.top() + 2);
+                    const QLine lines[3] = {
+                        QLine(centerX - 3, downArrowRect.top(), centerX + 3, downArrowRect.top()),
+                        QLine(centerX - 2, downArrowRect.top() + 1, centerX + 2, downArrowRect.top() + 1),
+                        QLine(centerX - 1, downArrowRect.top() + 2, centerX + 1, downArrowRect.top() + 2) };
+                    painter->drawLines(lines, 3);
                     painter->drawPoint(centerX, downArrowRect.top() + 3);
                 }
             }
@@ -4054,6 +4281,7 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                     QStyleOptionFrame frameOpt;
                     frameOpt.initFrom(lineEdit);
                     frameOpt.rect = subControlRect(CC_SpinBox, spinBox, SC_SpinBoxEditField, widget);
+                    frameOpt.rect.adjust(-blueFrameWidth, -blueFrameWidth, blueFrameWidth, blueFrameWidth);
                     frameOpt.lineWidth = pixelMetric(QStyle::PM_DefaultFrameWidth);
                     frameOpt.midLineWidth = 0;
                     frameOpt.state |= QStyle::State_Sunken;
@@ -4068,7 +4296,7 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
 #ifndef QT_NO_COMBOBOX
     case CC_ComboBox:
         if (const QStyleOptionComboBox *comboBox = qstyleoption_cast<const QStyleOptionComboBox *>(option)) {
-            bool sunken = (comboBox->state & (State_Sunken | State_On));
+            bool sunken = comboBox->state & State_On; // play dead if combobox has no items
             bool reverse = comboBox->direction == Qt::RightToLeft;
             int menuButtonWidth = 16;
             int xoffset = sunken ? (reverse ? -1 : 1) : 0;
@@ -4098,33 +4326,33 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                 } else {
                     // Generate gradients
                     QLinearGradient buttonGradient(option->rect.topLeft(), option->rect.bottomLeft());
-                    buttonGradient.setColorAt(0.0, button.color().light(104));
-                    buttonGradient.setColorAt(1.0, button.color().dark(110));
+                    buttonGradient.setColorAt(0.0, button.color().lighter(104));
+                    buttonGradient.setColorAt(1.0, button.color().darker(110));
                     buttonGradientBrush = QBrush(buttonGradient);
 
                     QLinearGradient buttonGradient2(option->rect.topLeft(), option->rect.bottomLeft());
-                    buttonGradient2.setColorAt(0.0, button.color().dark(113));
-                    buttonGradient2.setColorAt(1.0, button.color().dark(103));
+                    buttonGradient2.setColorAt(0.0, button.color().darker(113));
+                    buttonGradient2.setColorAt(1.0, button.color().darker(103));
                     sunkenButtonGradientBrush = QBrush(buttonGradient2);
 
                     QLinearGradient buttonGradient3(option->rect.topLeft(), option->rect.bottomLeft());
-                    buttonGradient3.setColorAt(0.0, button.color().light(105));
+                    buttonGradient3.setColorAt(0.0, button.color().lighter(105));
                     buttonGradient3.setColorAt(1.0, button.color());
                     leftLineGradientBrush = QBrush(buttonGradient3);
 
                     QLinearGradient buttonGradient4(option->rect.topLeft(), option->rect.bottomLeft());
                     buttonGradient4.setColorAt(0.0, button.color());
-                    buttonGradient4.setColorAt(1.0, button.color().dark(110));
+                    buttonGradient4.setColorAt(1.0, button.color().darker(110));
                     rightLineGradientBrush = QBrush(buttonGradient4);
 
                     QLinearGradient buttonGradient5(option->rect.topLeft(), option->rect.bottomLeft());
-                    buttonGradient5.setColorAt(0.0, button.color().dark(113));
-                    buttonGradient5.setColorAt(1.0, button.color().dark(107));
+                    buttonGradient5.setColorAt(0.0, button.color().darker(113));
+                    buttonGradient5.setColorAt(1.0, button.color().darker(107));
                     sunkenLeftLineGradientBrush = QBrush(buttonGradient5);
 
                     QLinearGradient buttonGradient6(option->rect.topLeft(), option->rect.bottomLeft());
-                    buttonGradient6.setColorAt(0.0, button.color().dark(108));
-                    buttonGradient6.setColorAt(1.0, button.color().dark(103));
+                    buttonGradient6.setColorAt(0.0, button.color().darker(108));
+                    buttonGradient6.setColorAt(1.0, button.color().darker(103));
                     sunkenRightLineGradientBrush = QBrush(buttonGradient6);
                 }
 
@@ -4141,63 +4369,91 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                 qBrushSetAlphaF(&corner, 0.25);
                 painter->setPen(QPen(corner, 0));
                 if (!reverse) {
-                    painter->drawPoint(buttonRect.left() - 1, buttonRect.top() + 1);
-                    painter->drawPoint(buttonRect.left() - 1, buttonRect.bottom() - 1);
-                    painter->drawPoint(buttonRect.left(), buttonRect.top() + 1);
-                    painter->drawPoint(buttonRect.left(), buttonRect.bottom() - 1);
+                    const QPoint points[4] = {
+                        QPoint(buttonRect.left() - 1, buttonRect.top() + 1),
+                        QPoint(buttonRect.left() - 1, buttonRect.bottom() - 1),
+                        QPoint(buttonRect.left(), buttonRect.top() + 1),
+                        QPoint(buttonRect.left(), buttonRect.bottom() - 1) };
+                    painter->drawPoints(points, 4);
                 } else {
-                    painter->drawPoint(buttonRect.right() + 1, buttonRect.top() + 1);
-                    painter->drawPoint(buttonRect.right() + 1, buttonRect.bottom() - 1);
-                    painter->drawPoint(buttonRect.right(), buttonRect.top() + 1);
-                    painter->drawPoint(buttonRect.right(), buttonRect.bottom() - 1);
+                    const QPoint points[4] = {
+                        QPoint(buttonRect.right() + 1, buttonRect.top() + 1),
+                        QPoint(buttonRect.right() + 1, buttonRect.bottom() - 1),
+                        QPoint(buttonRect.right(), buttonRect.top() + 1),
+                        QPoint(buttonRect.right(), buttonRect.bottom() - 1) };
+                    painter->drawPoints(points, 4);
                 }
 
                 QBrush border = qMapBrushToRect(option->palette.shadow(), buttonRect);
                 qBrushSetAlphaF(&border, 0.4);
                 painter->setPen(QPen(border, 0));
                 if (!reverse) {
-                    painter->drawPoint(buttonRect.left() - 1, buttonRect.top());
-                    painter->drawPoint(buttonRect.left() - 1, buttonRect.bottom());
+                    const QPoint points[2] = {
+                        QPoint(buttonRect.left() - 1, buttonRect.top()),
+                        QPoint(buttonRect.left() - 1, buttonRect.bottom()) };
+                    painter->drawPoints(points, 2);
                 } else {
-                    painter->drawPoint(buttonRect.right() + 1, buttonRect.top());
-                    painter->drawPoint(buttonRect.right() + 1, buttonRect.bottom());
+                    const QPoint points[2] = {
+                        QPoint(buttonRect.right() + 1, buttonRect.top()),
+                        QPoint(buttonRect.right() + 1, buttonRect.bottom()) };
+                    painter->drawPoints(points, 2);
                 }
 
                 // Outline the button border
                 if (!reverse) {
-                    painter->drawLine(buttonRect.left(), buttonRect.top(),
-                                      buttonRect.right() - 2, buttonRect.top());
-                    painter->drawLine(buttonRect.right(), buttonRect.top() + 2,
-                                      buttonRect.right(), buttonRect.bottom() - 2);
-                    painter->drawLine(buttonRect.left(), buttonRect.bottom(),
-                                      buttonRect.right() - 2, buttonRect.bottom());
-                    painter->drawPoint(buttonRect.right() - 1, buttonRect.top() + 1);
-                    painter->drawPoint(buttonRect.right() - 1, buttonRect.bottom() - 1);
+                    const QLine lines[3] = {
+                        QLine(buttonRect.left(), buttonRect.top(),
+                              buttonRect.right() - 2, buttonRect.top()),
+                        QLine(buttonRect.right(), buttonRect.top() + 2,
+                              buttonRect.right(), buttonRect.bottom() - 2),
+                        QLine(buttonRect.left(), buttonRect.bottom(),
+                              buttonRect.right() - 2, buttonRect.bottom()) };
+                    painter->drawLines(lines, 3);
+                    {
+                        const QPoint points[2] = {
+                            QPoint(buttonRect.right() - 1, buttonRect.top() + 1),
+                            QPoint(buttonRect.right() - 1, buttonRect.bottom() - 1) };
+                        painter->drawPoints(points, 2);
+                    }
 
                     QBrush corner = qMapBrushToRect(option->palette.shadow(), buttonRect);
                     qBrushSetAlphaF(&corner, 0.16);
                     painter->setPen(QPen(corner, 0));
-                    painter->drawPoint(buttonRect.right() - 1, buttonRect.top());
-                    painter->drawPoint(buttonRect.right() - 1, buttonRect.bottom());
-                    painter->drawPoint(buttonRect.right(), buttonRect.top() + 1);
-                    painter->drawPoint(buttonRect.right(), buttonRect.bottom() - 1);
+                    {
+                        const QPoint points[4] = {
+                            QPoint(buttonRect.right() - 1, buttonRect.top()),
+                            QPoint(buttonRect.right() - 1, buttonRect.bottom()),
+                            QPoint(buttonRect.right(), buttonRect.top() + 1),
+                            QPoint(buttonRect.right(), buttonRect.bottom() - 1) };
+                        painter->drawPoints(points, 4);
+                    }
                 } else {
-                    painter->drawLine(buttonRect.right(), buttonRect.top(),
-                                      buttonRect.left() + 2, buttonRect.top());
-                    painter->drawLine(buttonRect.left(), buttonRect.top() + 2,
-                                      buttonRect.left(), buttonRect.bottom() - 2);
-                    painter->drawLine(buttonRect.right(), buttonRect.bottom(),
-                                      buttonRect.left() + 2, buttonRect.bottom());
-                    painter->drawPoint(buttonRect.left() + 1, buttonRect.top() + 1);
-                    painter->drawPoint(buttonRect.left() + 1, buttonRect.bottom() - 1);
+                    const QLine lines[3] = {
+                        QLine(buttonRect.right(), buttonRect.top(),
+                              buttonRect.left() + 2, buttonRect.top()),
+                        QLine(buttonRect.left(), buttonRect.top() + 2,
+                              buttonRect.left(), buttonRect.bottom() - 2),
+                        QLine(buttonRect.right(), buttonRect.bottom(),
+                              buttonRect.left() + 2, buttonRect.bottom()) };
+                    painter->drawLines(lines, 3);
+                    {
+                        const QPoint points[2] = {
+                            QPoint(buttonRect.left() + 1, buttonRect.top() + 1),
+                            QPoint(buttonRect.left() + 1, buttonRect.bottom() - 1) };
+                        painter->drawPoints(points, 2);
+                    }
 
                     QBrush corner = qMapBrushToRect(option->palette.shadow(), buttonRect);
                     qBrushSetAlphaF(&corner, 0.16);
                     painter->setPen(QPen(corner, 0));
-                    painter->drawPoint(buttonRect.left() + 1, buttonRect.top());
-                    painter->drawPoint(buttonRect.left() + 1, buttonRect.bottom());
-                    painter->drawPoint(buttonRect.left(), buttonRect.top() + 1);
-                    painter->drawPoint(buttonRect.left(), buttonRect.bottom() - 1);
+                    {
+                        const QPoint points[4] = {
+                            QPoint(buttonRect.left() + 1, buttonRect.top()),
+                            QPoint(buttonRect.left() + 1, buttonRect.bottom()),
+                            QPoint(buttonRect.left(), buttonRect.top() + 1),
+                            QPoint(buttonRect.left(), buttonRect.bottom() - 1) };
+                        painter->drawPoints(points, 4);
+                    }
                 }
 
                 QRect fillRect = buttonRect.adjusted(2, 2, -2, -2);
@@ -4253,6 +4509,9 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                 // Start with a standard panel button fill
                 QStyleOptionButton buttonOption;
                 buttonOption.QStyleOption::operator=(*comboBox);
+                if (!sunken) {
+                    buttonOption.state &= ~State_Sunken;
+                }
                 drawPrimitive(PE_PanelButtonCommand, &buttonOption, painter, widget);
 
                 // Draw the menu button separator line
@@ -4274,11 +4533,13 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
             QRect arrowRect((left + right) / 2 - 3 + xoffset,
                             rect.center().y() - 1 + yoffset, 7, 4);
             painter->setPen(QPen(qMapBrushToRect(option->palette.buttonText(), rect), 0));
-            painter->drawLine(arrowRect.topLeft(), arrowRect.topRight());
-            painter->drawLine(arrowRect.left() + 1, arrowRect.top() + 1,
-                              arrowRect.right() - 1, arrowRect.top() + 1);
-            painter->drawLine(arrowRect.left() + 2, arrowRect.top() + 2,
-                              arrowRect.right() - 2, arrowRect.top() + 2);
+            const QLine lines[3] = {
+                QLine(arrowRect.topLeft(), arrowRect.topRight()),
+                QLine(arrowRect.left() + 1, arrowRect.top() + 1,
+                      arrowRect.right() - 1, arrowRect.top() + 1),
+                QLine(arrowRect.left() + 2, arrowRect.top() + 2,
+                      arrowRect.right() - 2, arrowRect.top() + 2) };
+            painter->drawLines(lines, 3);
             painter->drawPoint(arrowRect.center().x(), arrowRect.bottom());
 
             // Draw the focus rect
@@ -4300,6 +4561,7 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                     if (QLineEdit *lineedit = qFindChild<QLineEdit *>(widget))
                         frameOpt.initFrom(lineedit);
                     frameOpt.rect = subControlRect(CC_ComboBox, option, SC_ComboBoxEditField, widget);
+                    frameOpt.rect.adjust(-blueFrameWidth, -blueFrameWidth, blueFrameWidth, blueFrameWidth);
                     frameOpt.lineWidth = pixelMetric(QStyle::PM_DefaultFrameWidth);
                     frameOpt.midLineWidth = 0;
                     frameOpt.state |= QStyle::State_Sunken;
@@ -4313,17 +4575,6 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
 #endif // QT_NO_COMBOBOX
     case CC_TitleBar:
         if (const QStyleOptionTitleBar *titleBar = qstyleoption_cast<const QStyleOptionTitleBar *>(option)) {
-#ifdef QT3_SUPPORT
-            if (widget && widget->inherits("Q3DockWindowTitleBar")) {
-                // Redirect Q3DockWindow to CE_DockWidgetTitle
-                QStyleOptionDockWidget dockOption;
-                dockOption.QStyleOption::operator=(*titleBar);
-                // Fixup palette distortion
-                dockOption.palette = QPalette();
-                drawControl(CE_DockWidgetTitle, &dockOption, painter, widget);
-                break;
-            }
-#endif
             painter->save();
             bool active = (titleBar->titleBarState & State_Active);
             QRect fullRect = titleBar->rect;
@@ -4340,78 +4591,108 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
             QColor textColor(active ? 0x282e40 : 0x282e40);
             QColor textAlphaColor(active ? 0x3f4862 : 0x3f4862);
 
-            // Fill titlebar gradient
-            qt_plastique_draw_gradient(painter, option->rect.adjusted(1, 1, -1, 0),
-                                       titleBarGradientStart,
-                                       titleBarGradientStop);
+#ifdef  QT3_SUPPORT
+            if (widget && widget->inherits("Q3DockWindowTitleBar")) {
+                QStyleOptionDockWidgetV2 dockwidget;
+                dockwidget.QStyleOption::operator=(*option);
+                dockwidget.title = titleBar->text;
+                drawControl(CE_DockWidgetTitle, &dockwidget, painter, widget);
+            } else 
+#endif // QT3_SUPPORT
 
-            // Frame and rounded corners
-            painter->setPen(titleBarFrameBorder);
+            {
+                // Fill title bar gradient
+                qt_plastique_draw_gradient(painter, option->rect.adjusted(1, 1, -1, 0),
+                                           titleBarGradientStart,
+                                           titleBarGradientStop);
 
-            // top border line
-            painter->drawLine(fullRect.left() + 2, fullRect.top(), fullRect.right() - 2, fullRect.top());
-            painter->drawLine(fullRect.left(), fullRect.top() + 2, fullRect.left(), fullRect.bottom());
-            painter->drawLine(fullRect.right(), fullRect.top() + 2, fullRect.right(), fullRect.bottom());
-            painter->drawPoint(fullRect.left() + 1, fullRect.top() + 1);
-            painter->drawPoint(fullRect.right() - 1, fullRect.top() + 1);
-
-            // alpha corners
-            painter->setPen(titleBarAlphaCorner);
-            painter->drawPoint(fullRect.left() + 2, fullRect.top() + 1);
-            painter->drawPoint(fullRect.left() + 1, fullRect.top() + 2);
-            painter->drawPoint(fullRect.right() - 2, fullRect.top() + 1);
-            painter->drawPoint(fullRect.right() - 1, fullRect.top() + 2);
-
-            // inner top line
-            painter->setPen(titleBarInnerTopLine);
-            painter->drawLine(fullRect.left() + 3, fullRect.top() + 1, fullRect.right() - 3, fullRect.top() + 1);
-
-            // inner inner top line
-            painter->setPen(titleBarInnerInnerTopLine);
-            painter->drawLine(fullRect.left() + 2, fullRect.top() + 2, fullRect.right() - 2, fullRect.top() + 2);
-
-            // left and right inner
-            painter->setPen(leftCorner);
-            painter->drawLine(fullRect.left() + 1, fullRect.top() + 3, fullRect.left() + 1, fullRect.bottom());
-            painter->setPen(rightCorner);
-            painter->drawLine(fullRect.right() - 1, fullRect.top() + 3, fullRect.right() - 1, fullRect.bottom());
-
-            if (titleBar->titleBarState & Qt::WindowMinimized) {
+                // Frame and rounded corners
                 painter->setPen(titleBarFrameBorder);
-                painter->drawLine(fullRect.left() + 2, fullRect.bottom(), fullRect.right() - 2, fullRect.bottom());
-                painter->drawPoint(fullRect.left() + 1, fullRect.bottom() - 1);
-                painter->drawPoint(fullRect.right() - 1, fullRect.bottom() - 1);
-                painter->setPen(rightCorner);
-                painter->drawLine(fullRect.left() + 2, fullRect.bottom() - 1, fullRect.right() - 2, fullRect.bottom() - 1);
+
+                // top border line
+                {
+                    const QLine lines[3] = {
+                        QLine(fullRect.left() + 2, fullRect.top(), fullRect.right() - 2, fullRect.top()),
+                        QLine(fullRect.left(), fullRect.top() + 2, fullRect.left(), fullRect.bottom()),
+                        QLine(fullRect.right(), fullRect.top() + 2, fullRect.right(), fullRect.bottom()) };
+                    painter->drawLines(lines, 3);
+                    const QPoint points[2] = {
+                        QPoint(fullRect.left() + 1, fullRect.top() + 1),
+                        QPoint(fullRect.right() - 1, fullRect.top() + 1) };
+                    painter->drawPoints(points, 2);
+                }
+
+                // alpha corners
                 painter->setPen(titleBarAlphaCorner);
-                painter->drawPoint(fullRect.left() + 1, fullRect.bottom() - 2);
-                painter->drawPoint(fullRect.left() + 2, fullRect.bottom() - 1);
-                painter->drawPoint(fullRect.right() - 1, fullRect.bottom() - 2);
-                painter->drawPoint(fullRect.right() - 2, fullRect.bottom() - 1);
+                {
+                    const QPoint points[4] = {
+                        QPoint(fullRect.left() + 2, fullRect.top() + 1),
+                        QPoint(fullRect.left() + 1, fullRect.top() + 2),
+                        QPoint(fullRect.right() - 2, fullRect.top() + 1),
+                        QPoint(fullRect.right() - 1, fullRect.top() + 2) };
+                    painter->drawPoints(points, 4);
+                }
+
+                // inner top line
+                painter->setPen(titleBarInnerTopLine);
+                painter->drawLine(fullRect.left() + 3, fullRect.top() + 1, fullRect.right() - 3, fullRect.top() + 1);
+
+                // inner inner top line
+                painter->setPen(titleBarInnerInnerTopLine);
+                painter->drawLine(fullRect.left() + 2, fullRect.top() + 2, fullRect.right() - 2, fullRect.top() + 2);
+
+                // left and right inner
+                painter->setPen(leftCorner);
+                painter->drawLine(fullRect.left() + 1, fullRect.top() + 3, fullRect.left() + 1, fullRect.bottom());
+                painter->setPen(rightCorner);
+                painter->drawLine(fullRect.right() - 1, fullRect.top() + 3, fullRect.right() - 1, fullRect.bottom());
+
+                if (titleBar->titleBarState & Qt::WindowMinimized) {
+                    painter->setPen(titleBarFrameBorder);
+                    painter->drawLine(fullRect.left() + 2, fullRect.bottom(), fullRect.right() - 2, fullRect.bottom());
+                    {
+                        const QPoint points[2] = {
+                            QPoint(fullRect.left() + 1, fullRect.bottom() - 1),
+                            QPoint(fullRect.right() - 1, fullRect.bottom() - 1) };
+                        painter->drawPoints(points, 2);
+                    }
+                    painter->setPen(rightCorner);
+                    painter->drawLine(fullRect.left() + 2, fullRect.bottom() - 1, fullRect.right() - 2, fullRect.bottom() - 1);
+                    painter->setPen(titleBarAlphaCorner);
+                    {
+                        const QPoint points[4] = {
+                            QPoint(fullRect.left() + 1, fullRect.bottom() - 2),
+                            QPoint(fullRect.left() + 2, fullRect.bottom() - 1),
+                            QPoint(fullRect.right() - 1, fullRect.bottom() - 2),
+                            QPoint(fullRect.right() - 2, fullRect.bottom() - 1) };
+                        painter->drawPoints(points, 4);
+                    }
+                }
+                // draw title
+                QRect textRect = subControlRect(CC_TitleBar, titleBar, SC_TitleBarLabel, widget);
+
+                QFont font = painter->font();
+                font.setBold(true);
+                painter->setFont(font);
+                painter->setPen(titleBar->palette.text().color());
+
+                // Attempt to align left if there is not enough room for the title
+                // text. Otherwise, align center. QWorkspace does elliding for us,
+                // and it doesn't know about the bold title, so we need to work
+                // around some of the width mismatches.
+                bool tooWide = (QFontMetrics(font).width(titleBar->text) > textRect.width());
+                QTextOption option((tooWide ? Qt::AlignLeft : Qt::AlignHCenter) | Qt::AlignVCenter);
+                option.setWrapMode(QTextOption::NoWrap);
+
+                painter->drawText(textRect.adjusted(1, 1, 1, 1), titleBar->text, option);
+                painter->setPen(titleBar->palette.highlightedText().color());
+                painter->drawText(textRect, titleBar->text, option);
             }
-
-            // draw title
-            QRect textRect = subControlRect(CC_TitleBar, titleBar, SC_TitleBarLabel, widget);
-
-            QFont font = painter->font();
-            font.setBold(true);
-            painter->setFont(font);
-            painter->setPen(titleBar->palette.text().color());
-
-            // Attempt to align left if there is not enough room for the title
-            // text. Otherwise, align center. QWorkspace does elliding for us,
-            // and it doesn't know about the bold title, so we need to work
-            // around some of the width mismatches.
-            bool tooWide = (QFontMetrics(font).width(titleBar->text) > textRect.width());
-            QTextOption option((tooWide ? Qt::AlignLeft : Qt::AlignHCenter) | Qt::AlignVCenter);
-            option.setWrapMode(QTextOption::NoWrap);
-
-            painter->drawText(textRect.adjusted(1, 1, 1, 1), titleBar->text, option);
-            painter->setPen(titleBar->palette.highlightedText().color());
-            painter->drawText(textRect, titleBar->text, option);
-
+            
             // min button
-            if ((titleBar->subControls & SC_TitleBarMinButton) && (titleBar->titleBarFlags & Qt::WindowMinimizeButtonHint)) {
+            if ((titleBar->subControls & SC_TitleBarMinButton)
+                    && (titleBar->titleBarFlags & Qt::WindowMinimizeButtonHint)
+                    && !(titleBar->titleBarState & Qt::WindowMinimized)) {
                 bool hover = (titleBar->activeSubControls & SC_TitleBarMinButton) && (titleBar->state & State_MouseOver);
                 bool sunken = (titleBar->activeSubControls & SC_TitleBarMinButton) && (titleBar->state & State_Sunken);
 
@@ -4425,19 +4706,37 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                                         minButtonRect.width() - xoffset * 2, minButtonRect.height() - yoffset * 2);
 
                 painter->setPen(textColor);
-                painter->drawLine(minButtonIconRect.center().x() - 2, minButtonIconRect.center().y() + 3,
-                                  minButtonIconRect.center().x() + 3, minButtonIconRect.center().y() + 3);
-                painter->drawLine(minButtonIconRect.center().x() - 2, minButtonIconRect.center().y() + 4,
-                                  minButtonIconRect.center().x() + 3, minButtonIconRect.center().y() + 4);
+                {
+                    const QLine lines[2] = {
+                        QLine(minButtonIconRect.center().x() - 2,
+                              minButtonIconRect.center().y() + 3,
+                              minButtonIconRect.center().x() + 3,
+                              minButtonIconRect.center().y() + 3),
+                        QLine(minButtonIconRect.center().x() - 2,
+                              minButtonIconRect.center().y() + 4,
+                              minButtonIconRect.center().x() + 3,
+                              minButtonIconRect.center().y() + 4) };
+                    painter->drawLines(lines, 2);
+                }
                 painter->setPen(textAlphaColor);
-                painter->drawLine(minButtonIconRect.center().x() - 3, minButtonIconRect.center().y() + 3,
-                                  minButtonIconRect.center().x() - 3, minButtonIconRect.center().y() + 4);
-                painter->drawLine(minButtonIconRect.center().x() + 4, minButtonIconRect.center().y() + 3,
-                                  minButtonIconRect.center().x() + 4, minButtonIconRect.center().y() + 4);
+                {
+                    const QLine lines[2] = {
+                        QLine(minButtonIconRect.center().x() - 3,
+                              minButtonIconRect.center().y() + 3,
+                              minButtonIconRect.center().x() - 3,
+                              minButtonIconRect.center().y() + 4),
+                        QLine(minButtonIconRect.center().x() + 4,
+                              minButtonIconRect.center().y() + 3,
+                              minButtonIconRect.center().x() + 4,
+                              minButtonIconRect.center().y() + 4) };
+                    painter->drawLines(lines, 2);
+                }
             }
 
             // max button
-            if ((titleBar->subControls & SC_TitleBarMaxButton) && (titleBar->titleBarFlags & Qt::WindowMaximizeButtonHint)) {
+            if ((titleBar->subControls & SC_TitleBarMaxButton)
+                    && (titleBar->titleBarFlags & Qt::WindowMaximizeButtonHint)
+                    && !(titleBar->titleBarState & Qt::WindowMaximized)) {
                 bool hover = (titleBar->activeSubControls & SC_TitleBarMaxButton) && (titleBar->state & State_MouseOver);
                 bool sunken = (titleBar->activeSubControls & SC_TitleBarMaxButton) && (titleBar->state & State_Sunken);
 
@@ -4455,14 +4754,14 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                 painter->drawLine(maxButtonIconRect.left() + 1, maxButtonIconRect.top() + 1,
                                   maxButtonIconRect.right() - 1, maxButtonIconRect.top() + 1);
                 painter->setPen(textAlphaColor);
-                painter->drawPoint(maxButtonIconRect.topLeft());
-                painter->drawPoint(maxButtonIconRect.topRight());
-                painter->drawPoint(maxButtonIconRect.bottomLeft());
-                painter->drawPoint(maxButtonIconRect.bottomRight());
+                const QPoint points[4] = {
+                    maxButtonIconRect.topLeft(), maxButtonIconRect.topRight(),
+                    maxButtonIconRect.bottomLeft(), maxButtonIconRect.bottomRight() };
+                painter->drawPoints(points, 4);
             }
 
             // close button
-            if (titleBar->subControls & SC_TitleBarCloseButton) {
+            if (titleBar->subControls & SC_TitleBarCloseButton && titleBar->titleBarFlags & Qt::WindowSystemMenuHint) {
                 bool hover = (titleBar->activeSubControls & SC_TitleBarCloseButton) && (titleBar->state & State_MouseOver);
                 bool sunken = (titleBar->activeSubControls & SC_TitleBarCloseButton) && (titleBar->state & State_Sunken);
 
@@ -4476,24 +4775,31 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                                     closeButtonRect.width() - xoffset * 2, closeButtonRect.height() - yoffset * 2);
 
                 painter->setPen(textAlphaColor);
-                painter->drawLine(closeIconRect.left() + 1, closeIconRect.top(),
-                                  closeIconRect.right(), closeIconRect.bottom() - 1);
-                painter->drawLine(closeIconRect.left(), closeIconRect.top() + 1,
-                                  closeIconRect.right() - 1, closeIconRect.bottom());
-                painter->drawLine(closeIconRect.right() - 1, closeIconRect.top(),
-                                  closeIconRect.left(), closeIconRect.bottom() - 1);
-                painter->drawLine(closeIconRect.right(), closeIconRect.top() + 1,
-                                  closeIconRect.left() + 1, closeIconRect.bottom());
-                painter->drawPoint(closeIconRect.topLeft());
-                painter->drawPoint(closeIconRect.topRight());
-                painter->drawPoint(closeIconRect.bottomLeft());
-                painter->drawPoint(closeIconRect.bottomRight());
-
+                {
+                    const QLine lines[4] = {
+                        QLine(closeIconRect.left() + 1, closeIconRect.top(),
+                              closeIconRect.right(), closeIconRect.bottom() - 1),
+                        QLine(closeIconRect.left(), closeIconRect.top() + 1,
+                              closeIconRect.right() - 1, closeIconRect.bottom()),
+                        QLine(closeIconRect.right() - 1, closeIconRect.top(),
+                              closeIconRect.left(), closeIconRect.bottom() - 1),
+                        QLine(closeIconRect.right(), closeIconRect.top() + 1,
+                              closeIconRect.left() + 1, closeIconRect.bottom()) };
+                    painter->drawLines(lines, 4);
+                    const QPoint points[4] = {
+                        closeIconRect.topLeft(), closeIconRect.topRight(),
+                        closeIconRect.bottomLeft(), closeIconRect.bottomRight() };
+                    painter->drawPoints(points, 4);
+                }
                 painter->setPen(textColor);
-                painter->drawLine(closeIconRect.left() + 1, closeIconRect.top() + 1,
-                                  closeIconRect.right() - 1, closeIconRect.bottom() - 1);
-                painter->drawLine(closeIconRect.left() + 1, closeIconRect.bottom() - 1,
-                                  closeIconRect.right() - 1, closeIconRect.top() + 1);
+                {
+                    const QLine lines[2] = {
+                        QLine(closeIconRect.left() + 1, closeIconRect.top() + 1,
+                              closeIconRect.right() - 1, closeIconRect.bottom() - 1),
+                        QLine(closeIconRect.left() + 1, closeIconRect.bottom() - 1,
+                              closeIconRect.right() - 1, closeIconRect.top() + 1) };
+                    painter->drawLines(lines, 2);
+                }
             }
 
             // normalize button
@@ -4519,10 +4825,12 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                 painter->drawLine(frontWindowRect.left() + 1, frontWindowRect.top() + 1,
                                   frontWindowRect.right() - 1, frontWindowRect.top() + 1);
                 painter->setPen(textAlphaColor);
-                painter->drawPoint(frontWindowRect.topLeft());
-                painter->drawPoint(frontWindowRect.topRight());
-                painter->drawPoint(frontWindowRect.bottomLeft());
-                painter->drawPoint(frontWindowRect.bottomRight());
+                {
+                    const QPoint points[4] = {
+                        frontWindowRect.topLeft(), frontWindowRect.topRight(),
+                        frontWindowRect.bottomLeft(), frontWindowRect.bottomRight() };
+                    painter->drawPoints(points, 4);
+                }
 
                 QRect backWindowRect = normalButtonIconRect.adjusted(3, 0, 0, -3);
                 QRegion clipRegion = backWindowRect;
@@ -4534,10 +4842,12 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                 painter->drawLine(backWindowRect.left() + 1, backWindowRect.top() + 1,
                                   backWindowRect.right() - 1, backWindowRect.top() + 1);
                 painter->setPen(textAlphaColor);
-                painter->drawPoint(backWindowRect.topLeft());
-                painter->drawPoint(backWindowRect.topRight());
-                painter->drawPoint(backWindowRect.bottomLeft());
-                painter->drawPoint(backWindowRect.bottomRight());
+                {
+                    const QPoint points[4] = {
+                        backWindowRect.topLeft(), backWindowRect.topRight(),
+                        backWindowRect.bottomLeft(), backWindowRect.bottomRight() };
+                    painter->drawPoints(points, 4);
+                }
                 painter->restore();
             }
 
@@ -4697,7 +5007,6 @@ QSize QPlastiqueStyle::sizeFromContents(ContentsType type, const QStyleOption *o
     case CT_SpinBox:
         // Make sure the size is odd
         newSize.setHeight(sizeFromContents(CT_LineEdit, option, size, widget).height());
-        newSize.rheight() += 4;
         newSize.rheight() -= (1 - newSize.rheight() & 1);
         break;
 #endif
@@ -4747,10 +5056,17 @@ QRect QPlastiqueStyle::subElementRect(SubElement element, const QStyleOption *op
     case SE_ProgressBarGroove:
         return option->rect;
 #endif // QT_NO_PROGRESSBAR
-    default:
-        rect = visualRect(option->direction, option->rect,
-                          QWindowsStyle::subElementRect(element, option, widget));
+    case SE_GroupBoxLayoutItem:
+        rect = option->rect;
+        if (const QStyleOptionGroupBox *groupBoxOpt =
+                qstyleoption_cast<const QStyleOptionGroupBox *>(option)) {
+            if (groupBoxOpt->subControls & (QStyle::SC_GroupBoxCheckBox
+                                            | QStyle::SC_GroupBoxLabel))
+                rect.setTop(rect.top() + 2);    // eat the top margin a little bit
+        }
         break;
+    default:
+        return QWindowsStyle::subElementRect(element, option, widget);
     }
 
     return visualRect(option->direction, option->rect, rect);
@@ -4851,47 +5167,47 @@ QRect QPlastiqueStyle::subControlRect(ComplexControl control, const QStyleOption
             switch (subControl) {
             case SC_ScrollBarSubLine: // top/left button
                 if (scrollBar->orientation == Qt::Horizontal) {
-                    rect.setRect(scrollBarRect.left(), scrollBarRect.top(), scrollBarRect.width() - 16, scrollBarExtent);
+                    rect.setRect(scrollBarRect.left(), scrollBarRect.top(), scrollBarRect.width() - scrollBarExtent, scrollBarRect.height());
                 } else {
-                    rect.setRect(scrollBarRect.left(), scrollBarRect.top(), scrollBarExtent, scrollBarRect.height() - 16);
+                    rect.setRect(scrollBarRect.left(), scrollBarRect.top(), scrollBarRect.width(), scrollBarRect.height() - scrollBarExtent);
                 }
                 break;
             case SC_ScrollBarAddLine: // bottom/right button
                 if (scrollBar->orientation == Qt::Horizontal) {
-                    rect.setRect(scrollBarRect.right() - 15, scrollBarRect.top(), 16, scrollBarExtent);
+                    rect.setRect(scrollBarRect.right() - 15, scrollBarRect.top(), scrollBarExtent, scrollBarRect.height());
                 } else {
-                    rect.setRect(scrollBarRect.left(), scrollBarRect.bottom() - 15, scrollBarExtent, 16);
+                    rect.setRect(scrollBarRect.left(), scrollBarRect.bottom() - 15, scrollBarRect.width(), scrollBarExtent);
                 }
                 break;
             case SC_ScrollBarSubPage:
                 if (scrollBar->orientation == Qt::Horizontal) {
-                    rect.setRect(scrollBarRect.left() + 16, scrollBarRect.top(),
-                                 sliderStart - (scrollBarRect.left() + 16), scrollBarExtent);
+                    rect.setRect(scrollBarRect.left() + scrollBarExtent, scrollBarRect.top(),
+                                 sliderStart - (scrollBarRect.left() + scrollBarExtent), scrollBarRect.height());
                 } else {
-                    rect.setRect(scrollBarRect.left(), scrollBarRect.top() + 16,
-                                 scrollBarExtent, sliderStart - (scrollBarRect.left() + 16));
+                    rect.setRect(scrollBarRect.left(), scrollBarRect.top() + scrollBarExtent,
+                                 scrollBarRect.width(), sliderStart - (scrollBarRect.left() + scrollBarExtent));
                 }
                 break;
             case SC_ScrollBarAddPage:
                 if (scrollBar->orientation == Qt::Horizontal)
                     rect.setRect(sliderStart + sliderLength, 0,
-                                 sliderMaxLength - sliderStart - sliderLength + 16, scrollBarExtent);
+                                 sliderMaxLength - sliderStart - sliderLength + scrollBarExtent, scrollBarRect.height());
                 else
                     rect.setRect(0, sliderStart + sliderLength,
-                                 scrollBarExtent, sliderMaxLength - sliderStart - sliderLength + 16);
+                                 scrollBarRect.width(), sliderMaxLength - sliderStart - sliderLength + scrollBarExtent);
                 break;
             case SC_ScrollBarGroove:
                 if (scrollBar->orientation == Qt::Horizontal) {
-                    rect = scrollBarRect.adjusted(16, 0, -32, 0);
+                    rect = scrollBarRect.adjusted(scrollBarExtent, 0, -2 * scrollBarExtent, 0);
                 } else {
-                    rect = scrollBarRect.adjusted(0, 16, 0, -32);
+                    rect = scrollBarRect.adjusted(0, scrollBarExtent, 0, -2 * scrollBarExtent);
                 }
                 break;
             case SC_ScrollBarSlider:
                 if (scrollBar->orientation == Qt::Horizontal) {
-                    rect.setRect(sliderStart, 0, sliderLength, scrollBarExtent);
+                    rect.setRect(sliderStart, 0, sliderLength, scrollBarRect.height());
                 } else {
-                    rect.setRect(0, sliderStart, scrollBarExtent, sliderLength);
+                    rect.setRect(0, sliderStart, scrollBarRect.width(), sliderLength);
                 }
                 break;
             default:
@@ -4907,17 +5223,26 @@ QRect QPlastiqueStyle::subControlRect(ComplexControl control, const QStyleOption
             int center = spinBox->rect.height() / 2;
             switch (subControl) {
             case SC_SpinBoxUp:
+                if (spinBox->buttonSymbols == QAbstractSpinBox::NoButtons)
+                    return QRect();
                 rect = visualRect(spinBox->direction, spinBox->rect, rect);
                 rect.setRect(spinBox->rect.right() - 16, spinBox->rect.top(), 17, center + 1);
                 rect = visualRect(spinBox->direction, spinBox->rect, rect);
                 break;
             case SC_SpinBoxDown:
+                if (spinBox->buttonSymbols == QAbstractSpinBox::NoButtons)
+                    return QRect();
                 rect = visualRect(spinBox->direction, spinBox->rect, rect);
                 rect.setRect(spinBox->rect.right() - 16, center, 17, spinBox->rect.height() - center);
                 rect = visualRect(spinBox->direction, spinBox->rect, rect);
                 break;
             case SC_SpinBoxEditField:
-                rect = spinBox->rect.adjusted(0, 0, -16, 0);
+                if (spinBox->buttonSymbols != QAbstractSpinBox::NoButtons) {
+                    rect = spinBox->rect.adjusted(0, 0, -16, 0);
+                } else {
+                    rect = spinBox->rect;
+                }
+                rect.adjust(blueFrameWidth, blueFrameWidth, -blueFrameWidth, -blueFrameWidth);
                 rect = visualRect(spinBox->direction, spinBox->rect, rect);
                 break;
             default:
@@ -4941,7 +5266,7 @@ QRect QPlastiqueStyle::subControlRect(ComplexControl control, const QStyleOption
                 rect = visualRect(option->direction, option->rect, rect);
 
                 if (box->editable) {
-                    rect = box->rect;
+                    rect = box->rect.adjusted(blueFrameWidth, blueFrameWidth, -blueFrameWidth, -blueFrameWidth);
                     rect.setRight(rect.right() - 16); // Overlaps the combobox button by 2 pixels
                 } else {
                     rect.setRect(option->rect.left() + frameWidth, option->rect.top() + frameWidth,
@@ -5082,6 +5407,9 @@ int QPlastiqueStyle::styleHint(StyleHint hint, const QStyleOption *option, const
     case SH_TitleBar_NoBorder:
         ret = 1;
         break;
+    case SH_TitleBar_AutoRaise:
+        ret = 1;
+        break;
     case SH_ItemView_ShowDecorationSelected:
         ret = true;
         break;
@@ -5096,7 +5424,13 @@ int QPlastiqueStyle::styleHint(StyleHint hint, const QStyleOption *option, const
         ret = QDialogButtonBox::KdeLayout;
         break;
     case SH_MessageBox_TextInteractionFlags:
-        ret = Qt::TextBrowserInteraction;
+        ret = Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse;
+        break;
+    case SH_LineEdit_PasswordCharacter:
+        ret = QCommonStyle::styleHint(hint, option, widget, returnData);
+        break;
+    case SH_ItemView_ArrowKeysNavigateIntoChildren:
+        ret = true;
         break;
     default:
         ret = QWindowsStyle::styleHint(hint, option, widget, returnData);
@@ -5258,14 +5592,14 @@ int QPlastiqueStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
         }
         break;
 #endif // QT_NO_TABBAR
-    case PM_MDIFrameWidth:
+    case PM_MdiSubWindowFrameWidth:
         ret = 4;
         break;
     case PM_TitleBarHeight:
 #ifdef QT3_SUPPORT
         if (widget && widget->inherits("Q3DockWindowTitleBar")) {
-            // Q3DockWindow has smaller titlebars than QDockWidget
-            ret = qMax(widget->fontMetrics().lineSpacing(), 16);
+            // Q3DockWindow has smaller title bars than QDockWidget
+            ret = qMax(widget->fontMetrics().lineSpacing(), 20);
         } else
 #endif
         ret = qMax(widget ? widget->fontMetrics().lineSpacing() :
@@ -5274,7 +5608,28 @@ int QPlastiqueStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
     case PM_MaximumDragDistance:
         return -1;
     case PM_DockWidgetTitleMargin:
-        return 0;
+        return 2;
+    case PM_LayoutHorizontalSpacing:
+    case PM_LayoutVerticalSpacing:
+        return -1;  // rely on layoutHorizontalSpacing()
+    case PM_LayoutLeftMargin:
+    case PM_LayoutTopMargin:
+    case PM_LayoutRightMargin:
+    case PM_LayoutBottomMargin:
+        {
+            bool isWindow = false;
+            if (option) {
+                isWindow = (option->state & State_Window);
+            } else if (widget) {
+                isWindow = widget->isWindow();
+            }
+
+            if (isWindow) {
+                ret = 11;
+            } else {
+                ret = 9;
+            }
+        }
     default:
         break;
     }
@@ -5299,7 +5654,7 @@ QPalette QPlastiqueStyle::standardPalette() const
     palette.setBrush(QPalette::Disabled, QPalette::BrightText, QColor(QRgb(0xffffffff)));
     palette.setBrush(QPalette::Disabled, QPalette::ButtonText, QColor(QRgb(0xff808080)));
     palette.setBrush(QPalette::Disabled, QPalette::Base, QColor(QRgb(0xffefefef)));
-    palette.setBrush(QPalette::Disabled, QPalette::AlternateBase, palette.color(QPalette::Disabled, QPalette::Base).dark(110));
+    palette.setBrush(QPalette::Disabled, QPalette::AlternateBase, palette.color(QPalette::Disabled, QPalette::Base).darker(110));
     palette.setBrush(QPalette::Disabled, QPalette::Window, QColor(QRgb(0xffefefef)));
     palette.setBrush(QPalette::Disabled, QPalette::Shadow, QColor(QRgb(0xff000000)));
     palette.setBrush(QPalette::Disabled, QPalette::Highlight, QColor(QRgb(0xff567594)));
@@ -5316,7 +5671,7 @@ QPalette QPlastiqueStyle::standardPalette() const
     palette.setBrush(QPalette::Active, QPalette::BrightText, QColor(QRgb(0xffffffff)));
     palette.setBrush(QPalette::Active, QPalette::ButtonText, QColor(QRgb(0xff000000)));
     palette.setBrush(QPalette::Active, QPalette::Base, QColor(QRgb(0xffffffff)));
-    palette.setBrush(QPalette::Active, QPalette::AlternateBase, palette.color(QPalette::Active, QPalette::Base).dark(110));
+    palette.setBrush(QPalette::Active, QPalette::AlternateBase, palette.color(QPalette::Active, QPalette::Base).darker(110));
     palette.setBrush(QPalette::Active, QPalette::Window, QColor(QRgb(0xffefefef)));
     palette.setBrush(QPalette::Active, QPalette::Shadow, QColor(QRgb(0xff000000)));
     palette.setBrush(QPalette::Active, QPalette::Highlight, QColor(QRgb(0xff678db2)));
@@ -5333,7 +5688,7 @@ QPalette QPlastiqueStyle::standardPalette() const
     palette.setBrush(QPalette::Inactive, QPalette::BrightText, QColor(QRgb(0xffffffff)));
     palette.setBrush(QPalette::Inactive, QPalette::ButtonText, QColor(QRgb(0xff000000)));
     palette.setBrush(QPalette::Inactive, QPalette::Base, QColor(QRgb(0xffffffff)));
-    palette.setBrush(QPalette::Inactive, QPalette::AlternateBase, palette.color(QPalette::Inactive, QPalette::Base).dark(110));
+    palette.setBrush(QPalette::Inactive, QPalette::AlternateBase, palette.color(QPalette::Inactive, QPalette::Base).darker(110));
     palette.setBrush(QPalette::Inactive, QPalette::Window, QColor(QRgb(0xffefefef)));
     palette.setBrush(QPalette::Inactive, QPalette::Shadow, QColor(QRgb(0xff000000)));
     palette.setBrush(QPalette::Inactive, QPalette::Highlight, QColor(QRgb(0xff678db2)));
@@ -5468,7 +5823,7 @@ void QPlastiqueStyle::unpolish(QWidget *widget)
 #ifdef Q_WS_X11
 static QString kdeHome()
 {
-    QString home = qgetenv("KDEHOME");
+    QString home = QString::fromLocal8Bit(qgetenv("KDEHOME"));
     if (home.isEmpty())
         home = QDir::homePath() + QLatin1String("/.kde");
     return home;
@@ -5483,14 +5838,14 @@ void QPlastiqueStyle::polish(QApplication *app)
 #ifdef Q_WS_X11
     Q_D(QPlastiqueStyle);
 
-    QString dataDirs = QLatin1String(getenv("XDG_DATA_DIRS"));
+    QString dataDirs = QString::fromLocal8Bit(getenv("XDG_DATA_DIRS"));
 
     if (dataDirs.isEmpty())
-        dataDirs = "/usr/local/share/:/usr/share/";
+        dataDirs = QLatin1String("/usr/local/share/:/usr/share/");
 
-    dataDirs += ":" + kdeHome() + "/share";
+    dataDirs += QLatin1Char(':') + kdeHome() + QLatin1String("/share");
 
-    d->iconDirs = dataDirs.split(":");
+    d->iconDirs = dataDirs.split(QLatin1Char(':'));
 #endif
     QWindowsStyle::polish(app);
 }
@@ -5501,7 +5856,7 @@ void QPlastiqueStyle::polish(QApplication *app)
 void QPlastiqueStyle::polish(QPalette &pal)
 {
     QWindowsStyle::polish(pal);
-    pal.setBrush(QPalette::AlternateBase, pal.base().color().dark(110));
+    pal.setBrush(QPalette::AlternateBase, pal.base().color().darker(110));
 #ifdef Q_WS_MAC
     pal.setBrush(QPalette::Shadow, Qt::black);
 #endif
@@ -5520,13 +5875,13 @@ void QPlastiqueStylePrivate::lookupIconTheme() const
 #ifdef Q_WS_X11
     if (!themeName.isEmpty())
         return;
-    QFileInfo fileInfo("/usr/share/icons/default.kde");
+    QFileInfo fileInfo(QLatin1String("/usr/share/icons/default.kde"));
     QDir dir(fileInfo.canonicalFilePath());
-    QString defaultTheme = fileInfo.exists() ? dir.dirName() : "crystalsvg";
+    QString defaultTheme = fileInfo.exists() ? dir.dirName() : QString::fromLatin1("crystalsvg");
 
     QSettings settings(kdeHome() + QLatin1String("/share/config/kdeglobals"), QSettings::IniFormat);
-    settings.beginGroup("Icons");
-    themeName = settings.value("Theme", defaultTheme).toString();
+    settings.beginGroup(QLatin1String("Icons"));
+    themeName = settings.value(QLatin1String("Theme"), defaultTheme).toString();
     /*
     // This can be enabled if there are bug reports that this doesn't cover all cases (which it doesn't)
     QProcess kreadconfig;
@@ -5550,16 +5905,21 @@ Q_D(const QPlastiqueStyle);
 
     QPixmap pixmap;
     switch (standardIcon) {
+    case SP_ComputerIcon:
+        icon.addPixmap(d->findIcon(32, QLatin1String("system.png")));
+        break;
+    case SP_DirHomeIcon:
+        icon.addPixmap(d->findIcon(32, QLatin1String("folder_home.png")));
+        break;
     case SP_DirClosedIcon:
     case SP_DirIcon:
-        pixmap = d->findIcon(32, QLatin1String("folder.png"));
-        if (!pixmap.isNull())
-            icon.addPixmap(pixmap);
+        icon.addPixmap(d->findIcon(32, QLatin1String("folder.png")));
+        break;
+    case SP_DriveHDIcon:
+        icon.addPixmap(d->findIcon(32, QLatin1String("hdd_unmount.png")));
         break;
     case SP_FileIcon:
-        pixmap = d->findIcon(32, QLatin1String("empty.png"));
-        if (!pixmap.isNull())
-            icon.addPixmap(pixmap);
+        icon.addPixmap(d->findIcon(32, QLatin1String("empty.png")));
         break;
     case SP_FileLinkIcon:
         pixmap = d->findIcon(32, QLatin1String("link_overlay.png"));
@@ -5590,10 +5950,10 @@ Q_D(const QPlastiqueStyle);
 }
 
 /*!
- \reimp
- */
+    \reimp
+*/
 QPixmap QPlastiqueStyle::standardPixmap(StandardPixmap standardPixmap, const QStyleOption *opt,
-                                      const QWidget *widget) const
+                                        const QWidget *widget) const
 {
     Q_D(const QPlastiqueStyle);
     QPixmap pixmap;
@@ -5602,6 +5962,13 @@ QPixmap QPlastiqueStyle::standardPixmap(StandardPixmap standardPixmap, const QSt
     d->lookupIconTheme();
 #ifndef QT_NO_IMAGEFORMAT_XPM
     switch (standardPixmap) {
+    case SP_DirHomeIcon:
+        {
+            pixmap = d->findIcon(16, QLatin1String("folder_home.png"));
+            if (!pixmap.isNull())
+                return pixmap;
+            break;
+        }
     case SP_MessageBoxInformation:
         {
             pixmap = d->findIcon(32, QLatin1String("messagebox_info.png"));
@@ -5789,6 +6156,65 @@ QPixmap QPlastiqueStyle::standardPixmap(StandardPixmap standardPixmap, const QSt
     return QWindowsStyle::standardPixmap(standardPixmap, opt, widget);
 }
 
+// this works as long as we have at most 16 different control types
+#define CT1(c) CT2(c, c)
+#define CT2(c1, c2) (((uint)c1 << 16) | (uint)c2)
+
+/*!
+    \internal
+*/
+int QPlastiqueStyle::layoutSpacingImplementation(QSizePolicy::ControlType control1,
+                                                 QSizePolicy::ControlType control2,
+                                                 Qt::Orientation orientation,
+                                                 const QStyleOption * /* option */,
+                                                 const QWidget * /* widget */) const
+{
+    const int ButtonMask = QSizePolicy::ButtonBox | QSizePolicy::PushButton;
+
+    if (control2 == QSizePolicy::ButtonBox)
+        return 11;
+
+    if ((control1 | control2) & ButtonMask)
+        return (orientation == Qt::Horizontal) ? 10 : 9;
+
+    switch (CT2(control1, control2)) {
+    case CT1(QSizePolicy::Label):
+    case CT2(QSizePolicy::Label, QSizePolicy::DefaultType):
+    case CT2(QSizePolicy::Label, QSizePolicy::CheckBox):
+    case CT2(QSizePolicy::Label, QSizePolicy::ComboBox):
+    case CT2(QSizePolicy::Label, QSizePolicy::LineEdit):
+    case CT2(QSizePolicy::Label, QSizePolicy::RadioButton):
+    case CT2(QSizePolicy::Label, QSizePolicy::Slider):
+    case CT2(QSizePolicy::Label, QSizePolicy::SpinBox):
+    case CT2(QSizePolicy::Label, QSizePolicy::ToolButton):
+        return 5;
+    case CT2(QSizePolicy::CheckBox, QSizePolicy::RadioButton):
+    case CT2(QSizePolicy::RadioButton, QSizePolicy::CheckBox):
+    case CT1(QSizePolicy::CheckBox):
+        if (orientation == Qt::Vertical)
+            return 2;
+    case CT1(QSizePolicy::RadioButton):
+        if (orientation == Qt::Vertical)
+            return 1;
+    }
+
+    if (orientation == Qt::Horizontal
+            && (control2 & (QSizePolicy::CheckBox | QSizePolicy::RadioButton)))
+        return 8;
+
+    if ((control1 | control2) & (QSizePolicy::Frame
+                                 | QSizePolicy::GroupBox
+                                 | QSizePolicy::TabWidget)) {
+        return 11;
+    }
+
+    if ((control1 | control2) & (QSizePolicy::Line | QSizePolicy::Slider
+                                 | QSizePolicy::LineEdit | QSizePolicy::ComboBox
+                                 | QSizePolicy::SpinBox))
+        return 7;
+
+    return 6;
+}
 
 /*!
     \reimp

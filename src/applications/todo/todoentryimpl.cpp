@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,240 +20,390 @@
 ****************************************************************************/
 
 #include "todoentryimpl.h"
-
-#include <qtopiaapplication.h>
+#include "recurrencedetails.h"
+#include "reminderpicker.h"
+#include "qtopiatabwidget.h"
 
 #include <qtopia/pim/qtask.h>
-#include <qtimestring.h>
-#include <qcalendarwidget.h>
 #include <QDL>
 #include <QDLEditClient>
-#if !defined(QTOPIA_PHONE)
-#include <pixmapdisplay.h>
-#endif
-
-#include <qmessagebox.h>
-#include <qtoolbutton.h>
-#include <qcombobox.h>
-#include <qcheckbox.h>
-#include <qlineedit.h>
-#include <qlabel.h>
-#include <qtimer.h>
-#include <qspinbox.h>
-#include <qtabwidget.h>
-#include <qapplication.h>
+#include <QTextEdit>
+#include <QTabWidget>
 #include <qlayout.h>
-#include <qsoftmenubar.h>
 #include <QScrollArea>
+#include "qformlayout.h"
+#include <QLineEdit>
+#include <QGroupBox>
+#include <QSpinBox>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QDateEdit>
+#include "todocategoryselector.h"
+#include <QDebug>
+#include <QPushButton>
+#include <QtopiaApplication>
+#include <QAppointmentModel>
+#include <QStackedLayout>
+#include <QLabel>
 
 TaskDialog::TaskDialog( const QTask& task, QWidget *parent,
         Qt::WFlags fl )
-    : QDialog( parent, fl
-#ifdef QTOPIA_DESKTOP
-    | WStyle_Customize | WStyle_DialogBorder | WStyle_Title
-#endif
-    ),
-      todo( task ), sv(0)
+    : QDialog( parent, fl), todo( task ),
+    inputNotes(0), inputNotesQC(0),
+    dueCheck(0), startedCheck(0), completedCheck(0),
+    dueEdit(0), startedEdit(0), completedEdit(0),
+    inputDescription(0), comboPriority(0), comboStatus(0),
+    spinComplete(0), comboCategory(0), recurDetails(0), reminderPicker(0),
+    recurStack(0), recurControls(0)
 {
+    QUniqueId id = todo.dependentChildrenOfType(QString("duedate")).value(0);
+
+    newTask = false;
+
+    // grab the reminder defaults from Datebook
+    bool setAlarm = true;
+
+    {
+        QSettings config("Trolltech","DateBook");
+        config.beginGroup("Main");
+        defaultReminderTime = QTime(config.value("startviewtime", 8).toInt(), 0);
+        setAlarm = config.value("alarmpreset").toBool();
+    }
+
+    if (!id.isNull()) {
+        QAppointmentModel am;
+        todoAppt = am.appointment(id);
+    } else {
+        todoAppt.setAlarm(-(defaultReminderTime.hour() * 60 + defaultReminderTime.minute()), setAlarm ? QAppointment::Audible : QAppointment::NoAlarm);
+    }
+
     init();
-
-    todo.setCategories( task.categories() );
-
-    inputDescription->setText( task.description() );
-    comboPriority->setCurrentIndex( task.priority() - 1 );
-    if ( task.isCompleted() )
-        comboStatus->setCurrentIndex( 2 );
-    else
-        comboStatus->setCurrentIndex( task.status() );
-
-    spinComplete->setValue( task.percentCompleted() );
-
-    dueCheck->setChecked( task.hasDueDate() );
-    if ( task.hasDueDate() )
-        dueEdit->setDate( task.dueDate() );
-
-    QDate date = task.startedDate();
-    if ( !date.isNull() ) {
-        startedCheck->setChecked(true);
-        startedEdit->setDate( date );
-    } else {
-        startedCheck->setChecked(false);
-    }
-
-    date = task.completedDate();
-    if ( !date.isNull() ) {
-        completedCheck->setChecked(true);
-        completedEdit->setDate( date );
-    } else {
-        completedCheck->setChecked(false);
-    }
-
-    inputNotes->setHtml( task.notes() );
-    QDL::loadLinks( task.customField( QDL::CLIENT_DATA_KEY ),
-                    QDL::clients( inputNotes ) );
-    inputNotesQC->verifyLinks();
-
-    // set up enabled/disabled logic
-    updateFromTask();
 }
 
 /*
- *  Constructs a TaskDialog which is a child of 'parent', with the
- *  name 'name' and widget flags set to 'f'
+ *  Constructs a TaskDialog to create a new task.  The dialog
+ *  will be a child of 'parent', with the widget flags set to 'f'.
+ *  The initial task categories are set from 'categories'.
+ *
+ *  The default reminder settings will be obtained from the
+ *  datebook settings.
  *
  *  The dialog will by default be modeless, unless you set 'modal' to
  *  true to construct a modal dialog.
  */
-TaskDialog::TaskDialog( QWidget* parent,  Qt::WFlags fl )
-    : QDialog( parent, fl
-#ifdef QTOPIA_DESKTOP
-    | WStyle_Customize | WStyle_DialogBorder | WStyle_Title
-#endif
-    )
+TaskDialog::TaskDialog(QList<QString> categories, QWidget* parent,  Qt::WFlags fl )
+    : QDialog( parent, fl),
+    inputNotes(0), inputNotesQC(0),
+    dueCheck(0), startedCheck(0), completedCheck(0),
+    dueEdit(0), startedEdit(0), completedEdit(0),
+    inputDescription(0), comboPriority(0), comboStatus(0),
+    spinComplete(0), comboCategory(0), recurDetails(0), reminderPicker(0),
+    recurStack(0), recurControls(0)
 {
-    init();
+    todo.setCategories(categories);
 
-    // set up enabled/disabled logic
-    updateFromTask();
+    newTask = true;
+    // Since this is a new task, grab the reminder defaults from Datebook
+    {
+        QSettings config("Trolltech","DateBook");
+        config.beginGroup("Main");
+        defaultReminderTime = QTime(config.value("startviewtime", 8).toInt(), 0);
+        todoAppt.setAlarm(-(config.value("startviewtime", 8).toInt() * 60), config.value("alarmpreset").toBool() ? QAppointment::Audible : QAppointment::NoAlarm);
+    }
+
+    /* may have to set up the 'empty' task. */
+    init();
 }
 
 void TaskDialog::init()
 {
-    buttonclose = false;
-
-    //resize( 273, 300 );
     setWindowTitle( tr( "New Task" ) );
-    QGridLayout *gl = new QGridLayout( this );
-    gl->setSpacing( 3 );
-    gl->setMargin( 0 );
 
-    QTabWidget *tw = new QTabWidget( this );
-    gl->addWidget(tw, 0, 0, 0, 2);
-    //
-    // QtopiaDesktop uses cancel and ok buttons for this dialog.
-    //
-#ifdef QTOPIA_DESKTOP
-    QPushButton *buttonCancel = new QPushButton( this, "buttonCancel" );
-    buttonCancel->setText( tr( "Cancel" ) );
+    QVBoxLayout *vl = new QVBoxLayout;
+    QtopiaTabWidget *tw = new QtopiaTabWidget;
 
-    gl->addWidget( buttonCancel, 1, 2 );
+    vl->setSpacing( 3 );
+    vl->setMargin( 0 );
 
-    QPushButton *buttonOk = new QPushButton( this, "buttonOk" );
-    buttonOk->setText( tr( "OK" ) );
+    vl->addWidget(tw);
 
-    gl->addWidget( buttonOk, 1, 1 );
-    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-    gl->addItem( spacer, 1, 0 );
-#endif // QTOPIA_DESKTOP
+    // connected here, in case delayed loading is disabled.
+    connect(tw, SIGNAL(prepareTab(int,QScrollArea*)), this, SLOT(initTab(int,QScrollArea*)));
 
-    QWidget *noteTab = new QWidget( this );
-    QGridLayout *noteLayout = new QGridLayout( noteTab );
-    inputNotes = new QTextEdit( noteTab );
-    int rowCount = 0;
-    inputNotesQC = new QDLEditClient( inputNotes, "qdlnotes" );
-#ifdef QTOPIA_PHONE
-    inputNotesQC->setupStandardContextMenu();
-#else
-    PixmapDisplay *linkButton = new PixmapDisplay( noteTab );
-    linkButton->setPixmap(
-        QIcon( ":icon/qdllink" ).pixmap(
-            QStyle::PixelMetric(QStyle::PM_SmallIconSize), true ) );
-    connect( linkButton, SIGNAL(clicked()), inputNotesWC, SLOT(requestLink()) );
-    noteLayout->addWidget( linkButton, rowCount++, 0, Qt::AlignRight );
-    linkButton->setFocusPolicy( Qt::NoFocus );
-#endif
-    noteLayout->addWidget( inputNotes, rowCount++, 0 );
+    tw->addTab(QIcon(":icon/TodoList"), tr("Task"));
+    tw->addTab(QIcon(":icon/day"), tr("Progress"));
+    tw->addTab(QIcon(":icon/repeat"), tr("Recurrence"));
+    tw->addTab(QIcon(":icon/addressbook/notes"), tr("Notes"));
 
-#ifndef QTOPIA_DESKTOP
-    sv = new QScrollArea(this);
-    sv->setWidgetResizable(true);
-    sv->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    sv->setFocusPolicy(Qt::NoFocus);
-    sv->setFrameStyle(QFrame::NoFrame);
-    sv->viewport()->installEventFilter(this);
+    setLayout(vl);
+}
 
-    QWidget* taskDetail = new QWidget(sv);
+void TaskDialog::initTab(int index, QScrollArea *parent)
+{
+    switch(index)
+    {
+        case 0:
+            initTaskTab(parent);
+            break;
+        case 1:
+            initProgressTab(parent);
+            break;
+        case 2:
+            initRecurrenceTab(parent);
+            break;
+        case 3:
+            initNotesTab(parent);
+            break;
+    }
+}
 
-    Ui::NewTaskDetail::setupUi(taskDetail);
-    sv->setWidget(taskDetail);
-    sv->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    sv->setFrameStyle(QFrame::NoFrame);
-    //taskdetail = new Ui::NewTaskDetail(sv->viewport());
-    //sv->addChild(taskdetail);
+void TaskDialog::initTaskTab(QScrollArea *scrollArea)
+{
+    /* construct */
+    QWidget* taskDetail = new QWidget(scrollArea);
+    QFormLayout *fl = new QFormLayout;
 
-    tw->addTab(sv, tr("Task"));
-#else
-    QWidget *tv = new QWidget(tw);
-    Ui::NewTaskDetail::setupUi(tv);
-    tw->addTab( tv, tr("Task") );
-#endif
-    tw->addTab( noteTab, tr("Notes"));
+    inputDescription = new QLineEdit;
 
-#ifdef QTOPIA_DESKTOP
-    setTabOrder(comboCategory, buttonOk);
-    setTabOrder(buttonOk, buttonCancel);
-    buttonOk->setDefault(true);
+    comboPriority = new QComboBox;
+    comboPriority->addItem(tr("1 - Very High"));
+    comboPriority->addItem(tr("2 - High"));
+    comboPriority->addItem(tr("3 - Normal"));
+    comboPriority->addItem(tr("4 - Low"));
+    comboPriority->addItem(tr("5 - Very Low"));
 
-    connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
-    connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
-#endif // QTOPIA_DESKTOP
+    dueCheck = new QGroupBox;
+    dueCheck->setCheckable(true);
+    dueCheck->setTitle(tr("Due:"));
+    QFormLayout *duelayout = new QFormLayout;
+    dueEdit = new QDateEdit;
+    duelayout->addRow(tr("Due:"), dueEdit);
+    reminderPicker = new ReminderPicker(this, duelayout);
+    dueCheck->setLayout(duelayout);
 
-    connect( startedEdit, SIGNAL( dateChanged(const QDate&) ),
-             this, SLOT( startDateChanged(const QDate&) ) );
-    connect( completedEdit, SIGNAL( dateChanged(const QDate&) ),
-             this, SLOT( endDateChanged(const QDate&) ) );
+    fl->addRow(tr("Desc."), inputDescription);
+    fl->addRow(tr("Priority"), comboPriority);
+    fl->addRow(dueCheck);
 
+    taskDetail->setLayout(fl);
+
+    /* initialize */
+    inputDescription->setText(todo.description());
+    comboPriority->setCurrentIndex( todo.priority() - 1 );
+    if (!todo.dueDate().isNull()) {
+        dueCheck->setChecked(true);
+        dueEdit->setDate(todo.dueDate());
+    } else {
+        dueCheck->setChecked(true);
+        dueEdit->setDate(QDate::currentDate());
+    }
+
+    reminderPicker->setDefaultAllDayReminderTime(defaultReminderTime);
+    reminderPicker->setAllDay(true);
+    reminderPicker->setReminderType(todoAppt.alarm());
+    if (!newTask)
+        reminderPicker->setReminderMinutes(todoAppt.alarmDelay());
+
+    /* connect */
+    connect( dueEdit, SIGNAL(dateChanged(QDate)),
+            this, SLOT(dueDateChanged(QDate)) );
+    connect( dueCheck, SIGNAL(toggled(bool)),
+            this, SLOT(dueDateChecked(bool)) );
+
+    scrollArea->setWidget(taskDetail);
+    taskDetail->setFocusPolicy(Qt::NoFocus);
+}
+
+void TaskDialog::initProgressTab(QScrollArea *scrollArea)
+{
+    /* construct */
+    QWidget *progressDetail = new QWidget(scrollArea);
+    QFormLayout *fl = new QFormLayout;
+
+    comboStatus = new QComboBox;
+    comboStatus->addItem(tr("Not Started"));
+    comboStatus->addItem(tr("In Progress"));
+    comboStatus->addItem(tr("Completed"));
+    comboStatus->addItem(tr("Waiting"));
+    comboStatus->addItem(tr("Deferred"));
+
+    spinComplete = new QSpinBox;
+    spinComplete->setMinimum(0);
+    spinComplete->setMaximum(100);
+    spinComplete->setSuffix(tr("%"));
+
+    startedCheck = new QGroupBox;
+    startedCheck->setCheckable(true);
+    startedCheck->setTitle(tr("Started:"));
+
+    completedCheck = new QGroupBox;
+    completedCheck->setCheckable(true);
+    completedCheck->setTitle(tr("Completed:"));
+
+    startedEdit = new QDateEdit;
+    completedEdit = new QDateEdit;
+
+    QVBoxLayout *vl = new QVBoxLayout();
+    vl->addWidget(startedEdit);
+    startedCheck->setLayout(vl);
+
+    vl = new QVBoxLayout();
+    vl->addWidget(completedEdit);
+    completedCheck->setLayout(vl);
+
+    fl->addRow(tr("Status"), comboStatus);
+    fl->addRow(tr("Progress"), spinComplete);
+    fl->addRow(startedCheck);
+    fl->addRow(completedCheck);
+
+    progressDetail->setLayout(fl);
+
+    /* initialize */
     QDate current = QDate::currentDate();
+    comboStatus->setCurrentIndex( todo.status() );
 
-    dueEdit->setDate( current );
-    startedEdit->setDate( QDate() );
-    completedEdit->setDate( current );
+    spinComplete->setValue(todo.percentCompleted());
 
+    if ( !todo.startedDate().isNull() ) {
+        startedCheck->setChecked(true);
+        startedEdit->setDate(todo.startedDate());
+    } else {
+        startedCheck->setChecked(false);
+        startedEdit->setDate(current);
+    }
+
+    if ( todo.isCompleted() ) {
+        completedCheck->setChecked(true);
+        completedEdit->setDate(todo.completedDate());
+    } else {
+        completedCheck->setChecked(false);
+        completedEdit->setDate(current);
+    }
+
+    /* connect */
+    connect( startedEdit, SIGNAL(dateChanged(QDate)),
+             this, SLOT(startDateChanged(QDate)) );
+    connect( completedEdit, SIGNAL(dateChanged(QDate)),
+             this, SLOT(endDateChanged(QDate)) );
+    connect( comboStatus, SIGNAL(activated(int)),
+            this, SLOT(statusChanged(int)) );
+    connect( startedCheck, SIGNAL(toggled(bool)),
+            this, SLOT(startDateChecked(bool)) );
+    connect( completedCheck, SIGNAL(toggled(bool)),
+            this, SLOT(endDateChecked(bool)) );
+    connect( spinComplete, SIGNAL(valueChanged(int)),
+            this, SLOT(percentChanged(int)) );
+
+    scrollArea->setWidget(progressDetail);
+    progressDetail->setFocusPolicy(Qt::NoFocus);
+}
+
+void TaskDialog::initRecurrenceTab(QScrollArea *scrollArea)
+{
+    /* construct */
+    QWidget *recurrenceDetail = new QWidget(scrollArea);
+    recurStack = new QStackedLayout;
+
+    recurControls = new QWidget();
+    // todoAppt passed in non-const
+    recurDetails = new RecurrenceDetails(todoAppt);
+    QFormLayout *fl = new QFormLayout();
+    recurDetails->initGui(fl);
+    recurControls->setLayout(fl);
+
+    QLabel *noRecurLabel = new QLabel(tr("Add a due date to this task to allow recurrence."));
+    noRecurLabel->setWordWrap(true);
+    noRecurLabel->setFocusPolicy(Qt::StrongFocus);
+
+    recurStack->addWidget(recurControls);
+    recurStack->addWidget(noRecurLabel);
+
+    recurrenceDetail->setLayout(recurStack);
+
+    /* init */
+    recurStack->setCurrentIndex(todo.hasDueDate() ? 0 : 1);
+    recurDetails->updateUI();
+
+    /* connect - no connections */
+
+    scrollArea->setWidget(recurrenceDetail);
+    recurrenceDetail->setFocusPolicy(Qt::NoFocus);
+}
+
+void TaskDialog::initNotesTab(QScrollArea *scrollArea)
+{
+    /* construct */
+    QWidget* noteDetail = new QWidget(scrollArea);
+    QFormLayout *fl = new QFormLayout;
+
+    inputNotes = new QTextEdit( );
+    inputNotes->setLineWrapMode( QTextEdit::WidgetWidth );
+    QFontMetrics fmTxtNote( inputNotes->font() );
+    inputNotes->setFixedHeight( fmTxtNote.height() * 5 );
+
+    inputNotesQC = new QDLEditClient( inputNotes, "qdlnotes" );
+    inputNotesQC->setupStandardContextMenu();
+
+    comboCategory = new TodoCategorySelector;
+
+    fl->addRow(tr("Notes"), inputNotes);
+    fl->addRow(tr("Category"), comboCategory);
+
+    noteDetail->setLayout(fl);
+
+    /* init */
     comboCategory->selectCategories(todo.categories());
+    inputNotes->setHtml( todo.notes() );
+    QDL::loadLinks( todo.customField( QDL::CLIENT_DATA_KEY ),
+                    QDL::clients( inputNotes ) );
+    inputNotesQC->verifyLinks();
 
-    connect( comboStatus, SIGNAL( activated(int) ), this, SLOT( statusChanged(int) ) );
-
-    connect( startedCheck, SIGNAL( toggled(bool) ), this, SLOT( startDateChecked() ) );
-    connect( completedCheck, SIGNAL( toggled(bool) ), this, SLOT( endDateChecked() ) );
-    connect( spinComplete, SIGNAL( valueChanged(int) ), this, SLOT( percentChanged(int) ) );
-
-    inputDescription->setFocus();
-
-    resize( 300, 300 );
-#ifdef QTOPIA_DESKTOP
-    setMaximumSize( sizeHint()*2 );
-#endif
+    /* connect - no connections */
+    scrollArea->setWidget(noteDetail);
+    noteDetail->setFocusPolicy(Qt::NoFocus);
 }
 
-bool TaskDialog::eventFilter( QObject *receiver, QEvent *event )
+void TaskDialog::startDateChecked(bool checked)
 {
-    if( sv && sv->widget() && receiver == sv->viewport() && event->type() == QEvent::Resize )
-        sv->widget()->setFixedWidth( sv->viewport()->width() );
-    return false;
-}
-
-void TaskDialog::startDateChecked()
-{
-    if (startedCheck->isChecked())
+    if (checked) {
         todo.setStartedDate(startedEdit->date());
-    else
+    } else {
         todo.setStartedDate(QDate());
+    }
     updateFromTask();
 }
 
-void TaskDialog::endDateChecked()
+void TaskDialog::endDateChecked(bool checked)
 {
-    if (completedCheck->isChecked())
+    if (checked)
         todo.setCompletedDate(completedEdit->date());
     else
         todo.setCompletedDate(QDate());
     updateFromTask();
 }
 
+void TaskDialog::dueDateChecked(bool checked)
+{
+    if (checked)
+        todo.setDueDate(dueEdit->date());
+    else
+        todo.setDueDate(QDate());
+    updateFromTask();
+}
+
 void TaskDialog::percentChanged(int percent)
 {
+    int oldpercent = todo.percentCompleted();
     todo.setPercentCompleted(percent);
-    updateFromTask();
+
+    // Try to avoid doing a lot of computation here.
+    // only update when we make a transition that is meaningful
+    // (e.g. 0 to non zero, or 100 to non 100)
+    // so that people who like to spin non stop can do so..
+    // The date controls don't call updateFromTask when they change..
+    if (!spinComplete->hasEditFocus() || oldpercent == 0 || oldpercent == 100 || percent == 0 || percent == 100) {
+        updateFromTask();
+    }
 }
 
 void TaskDialog::statusChanged(int status)
@@ -269,29 +419,44 @@ void TaskDialog::updateFromTask()
     QDate sDate = todo.startedDate();
     QDate cDate = todo.completedDate();
 
-    spinComplete->blockSignals(true);
-    startedCheck->blockSignals(true);
-    completedCheck->blockSignals(true);
-    startedEdit->blockSignals(true);
-    completedEdit->blockSignals(true);
-    comboStatus->blockSignals(true);
+    if (spinComplete) {
+        // implies the others in this if statement as on the
+        // same tab
+        spinComplete->blockSignals(true);
+        startedCheck->blockSignals(true);
+        completedCheck->blockSignals(true);
+        startedEdit->blockSignals(true);
+        completedEdit->blockSignals(true);
+        comboStatus->blockSignals(true);
 
-    spinComplete->setValue(p);
-    comboStatus->setCurrentIndex(s);
-    startedCheck->setChecked(sDate.isValid());
-    completedCheck->setChecked(cDate.isValid());
-    if (sDate.isValid())
-        startedEdit->setDate(sDate);
-    if (cDate.isValid())
-        completedEdit->setDate(cDate);
+        spinComplete->setValue(p);
+        comboStatus->setCurrentIndex(s);
+        startedCheck->setChecked(sDate.isValid());
+        completedCheck->setChecked(cDate.isValid());
 
-    spinComplete->blockSignals(false);
-    startedCheck->blockSignals(false);
-    completedCheck->blockSignals(false);
-    startedEdit->blockSignals(false);
-    completedEdit->blockSignals(false);
-    comboStatus->blockSignals(false);
+        if (sDate.isValid())
+            startedEdit->setDate(sDate);
+        if (cDate.isValid())
+            completedEdit->setDate(cDate);
 
+        spinComplete->blockSignals(false);
+        startedCheck->blockSignals(false);
+        completedCheck->blockSignals(false);
+        startedEdit->blockSignals(false);
+        completedEdit->blockSignals(false);
+        comboStatus->blockSignals(false);
+    }
+
+    if (recurStack)
+        recurStack->setCurrentIndex(todo.dueDate().isValid() ? 0 : 1);
+    if (recurDetails)
+        recurDetails->updateUI();
+    if(reminderPicker) {
+        reminderPicker->setAllDay(true);
+        reminderPicker->setReminderType(todoAppt.alarm());
+        if (!newTask)
+            reminderPicker->setReminderMinutes(todoAppt.alarmDelay());
+    }
 }
 
 /*
@@ -299,7 +464,6 @@ void TaskDialog::updateFromTask()
  */
 TaskDialog::~TaskDialog()
 {
-    // no need to delete child widgets, Qt does it all for us
 }
 
 void TaskDialog::startDateChanged( const QDate& date )
@@ -314,108 +478,82 @@ void TaskDialog::endDateChanged( const QDate& date )
         startedEdit->setDate( date );
 }
 
+void TaskDialog::dueDateChanged( const QDate& date )
+{
+    todo.setDueDate(date);
+    if (recurDetails)
+        recurDetails->updateAppointment();
+    todoAppt.setStart(QDateTime(todo.dueDate()));
+    todoAppt.setEnd(QDateTime(todo.dueDate()));
+    todoAppt.setAllDay(true);
+
+    updateFromTask();
+}
+
 /*!
 */
 
 const QTask &TaskDialog::todoEntry() const
 {
-    todo.setDescription( inputDescription->text() );
-    todo.setPriority( (QTask::Priority) (comboPriority->currentIndex() + 1) );
-    todo.setStatus(comboStatus->currentIndex());
-    todo.setPercentCompleted(spinComplete->value());
+    /* task tab */
+    if (inputDescription) {
+        todo.setDescription( inputDescription->text() );
+        todo.setPriority( (QTask::Priority) (comboPriority->currentIndex() + 1) );
+        if (dueCheck->isChecked())
+            todo.setDueDate( dueEdit->date() );
+        else
+            todo.clearDueDate();
+    }
 
-    if (dueCheck->isChecked())
-        todo.setDueDate( dueEdit->date() );
-    else
-        todo.clearDueDate();
+    /* progress tab */
+    if (spinComplete) {
+        todo.setStatus(comboStatus->currentIndex());
+        todo.setPercentCompleted(spinComplete->value());
 
-    if (startedCheck->isChecked())
-        todo.setStartedDate( startedEdit->date() );
-    else
-        todo.setStartedDate( QDate() );
+        if (startedCheck->isChecked())
+            todo.setStartedDate( startedEdit->date() );
+        else
+            todo.setStartedDate( QDate() );
 
-    if (completedCheck->isChecked())
-        todo.setCompletedDate( completedEdit->date() );
-    else
-        todo.setCompletedDate( QDate() );
+        if (completedCheck->isChecked())
+            todo.setCompletedDate( completedEdit->date() );
+        else
+            todo.setCompletedDate( QDate() );
+    }
 
-    todo.setCategories( comboCategory->selectedCategories() );
+    /* recurrence tab */
 
-    /* changing to plain text until we have a more efficient import export format */
-    if (inputNotes->toPlainText().simplified().isEmpty())
-        todo.setNotes(QString());
-    else
-        todo.setNotes( inputNotes->toHtml() );
-    // XXX should load links here
-    QString links;
-    QDL::saveLinks( links, QDL::clients( inputNotes ) );
-    todo.setCustomField( QDL::CLIENT_DATA_KEY, links );
+    /* notes tab */
+    if (inputNotes) {
+        todo.setCategories( comboCategory->selectedCategories() );
+
+        /* changing to plain text until we have a more efficient import export format */
+        if (inputNotes->toPlainText().simplified().isEmpty())
+            todo.setNotes(QString());
+        else
+            todo.setNotes( inputNotes->toHtml() );
+        // XXX should load links here
+        QString links;
+        QDL::saveLinks( links, QDL::clients( inputNotes ) );
+        todo.setCustomField( QDL::CLIENT_DATA_KEY, links );
+    }
 
     return todo;
 }
 
-void TaskDialog::show()
+const QAppointment &TaskDialog::todoAppointment() const
 {
-    buttonclose = false;
-    QDialog::show();
-}
-
-/*!
-
-*/
-void TaskDialog::closeEvent(QCloseEvent *e)
-{
-#ifdef QTOPIA_DESKTOP
-    QTask old(todo);
-    if ( !buttonclose && old.toRichText() != todoEntry().toRichText() ) {
-        QString message = tr("Discard changes?");
-        switch( QMessageBox::warning(this, tr("Tasks"), message,
-                QMessageBox::Yes, QMessageBox::No) ) {
-
-            case QMessageBox::Yes:
-                QDialog::closeEvent(e);
-            break;
-            case QMessageBox::No:
-                e->ignore();
-                todo = old;
-            break;
-        }
-    } else
-        QDialog::closeEvent(e);
-#else
-    QDialog::closeEvent(e);
-#endif
-}
-
-void TaskDialog::reject()
-{
-    buttonclose = true;
-    QDialog::reject();
+    if (recurDetails)
+        recurDetails->updateAppointment();
+    if (reminderPicker)
+        todoAppt.setAlarm(reminderPicker->reminderMinutes(), reminderPicker->reminderType());
+    return todoAppt;
 }
 
 void TaskDialog::accept()
 {
-    buttonclose = true;
+    emit taskEditAccepted(todoEntry(), todoAppointment());
     QDialog::accept();
 }
 
 
-#ifdef QTOPIA_DESKTOP
-
-QCategorySelector *TaskDialog::categorySelect()
-{
-    return comboCategory;
-}
-
-void TaskDialog::updateCategories()
-{
-    if ( !comboCategory )
-        return;
-
-    connect( this, SIGNAL( categoriesChanged() ),
-             comboCategory, SLOT( categoriesChanged() ) );
-    emit categoriesChanged();
-    disconnect( this, SIGNAL( categoriesChanged() ),
-                comboCategory, SLOT( categoriesChanged() ) );
-}
-#endif

@@ -22,7 +22,7 @@
 <ul>
 <li><div class="fn"/>void <b><a href="calendarservice.html#activateLink">activateLink</a></b> ( const QDSActionRequest &amp; <i>request</i> )</li>
 <li><div class="fn"/>void <b><a href="calendarservice.html#addAppointment">addAppointment</a></b> ( const QAppointment &amp; <i>appointment</i> )</li>
-<li><div class="fn"/>void <b><a href="calendarservice.html#cleanByDate">cleanByDate</a></b> ( const QDate &amp; <i>date</i> )</li>
+<li><div class="fn"/>void <b><a href="calendarservice.html#alarm">alarm</a></b> ( const QDateTime &amp; <i>time</i>, int <i>delay</i> )</li>
 <li><div class="fn"/>void <b><a href="calendarservice.html#newAppointment">newAppointment</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="calendarservice.html#newAppointment-2">newAppointment</a></b> ( const QDateTime &amp; <i>start</i>, const QDateTime &amp; <i>end</i>, const QString &amp; <i>description</i>, const QString &amp; <i>notes</i> )</li>
 <li><div class="fn"/>void <b><a href="calendarservice.html#nextView">nextView</a></b> ()</li>
@@ -62,9 +62,8 @@
 <h3 class="fn"><a name="addAppointment"></a>void CalendarService::addAppointment ( const <a href="qappointment.html">QAppointment</a> &amp; <i>appointment</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Add the specified <i>appointment</i> to the calendar. The request will be ignored if the system is currently syncing.</p>
 <p>This slot corresponds to the QCop service message <tt>Calendar::addAppointment(QAppointment)</tt>.</p>
-<h3 class="fn"><a name="cleanByDate"></a>void CalendarService::cleanByDate ( const <a href="qdate.html">QDate</a> &amp; <i>date</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Allow the system cleanup wizard to recover some space. The <i>date</i> to clean from is a hint only. The calendar program should only remove appointments and occurrences where doing so will save space.</p>
-<p>This slot corresponds to the QCop service message <tt>Calendar::cleanByDate(QDate)</tt>.</p>
+<h3 class="fn"><a name="alarm"></a>void CalendarService::alarm ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>time</i>, int <i>delay</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Activates the alarm dialog for appointments with alarms occurring at the given <i>time</i>. The specified <i>delay</i> indicates how many minutes before the start of the appointment that the alarm has been activated.</p>
 <h3 class="fn"><a name="newAppointment"></a>void CalendarService::newAppointment ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Open a dialog so the user can create a new appointment. Default values are used.</p>
 <p>This slot corresponds to the QCop service message <tt>Calendar::newAppointment()</tt>.</p>
@@ -99,6 +98,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

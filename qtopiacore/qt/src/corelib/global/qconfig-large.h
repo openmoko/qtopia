@@ -9,27 +9,42 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-// Dialogs
+/* Dialogs */
+#ifndef QT_NO_FILEDIALOG
+#  define QT_NO_FILEDIALOG
+#endif
 #ifndef QT_NO_FONTDIALOG
 #  define QT_NO_FONTDIALOG
 #endif
 #ifndef QT_NO_INPUTDIALOG
 #  define QT_NO_INPUTDIALOG
-#endif
-#ifndef QT_NO_FILEDIALOG
-#  define QT_NO_FILEDIALOG
 #endif
 #ifndef QT_NO_PRINTDIALOG
 #  define QT_NO_PRINTDIALOG
@@ -38,12 +53,12 @@
 #  define QT_NO_PROGRESSDIALOG
 #endif
 
-// Fonts
+/* Fonts */
 #ifndef QT_NO_QWS_QPF
 #  define QT_NO_QWS_QPF
 #endif
 
-// Images
+/* Images */
 #ifndef QT_NO_IMAGEFORMAT_BMP
 #  define QT_NO_IMAGEFORMAT_BMP
 #endif
@@ -51,7 +66,7 @@
 #  define QT_NO_IMAGEFORMAT_PPM
 #endif
 
-// Internationalization
+/* Internationalization */
 #ifndef QT_NO_CODECS
 #  define QT_NO_CODECS
 #endif
@@ -62,7 +77,7 @@
 #  define QT_NO_TRANSLATION_UTF8
 #endif
 
-// ItemViews
+/* ItemViews */
 #ifndef QT_NO_TABLEVIEW
 #  define QT_NO_TABLEVIEW
 #endif
@@ -70,7 +85,7 @@
 #  define QT_NO_TREEVIEW
 #endif
 
-// Kernel
+/* Kernel */
 #ifndef QT_NO_CLIPBOARD
 #  define QT_NO_CLIPBOARD
 #endif
@@ -87,7 +102,7 @@
 #  define QT_NO_SOUND
 #endif
 
-// Networking
+/* Networking */
 #ifndef QT_NO_HOSTINFO
 #  define QT_NO_HOSTINFO
 #endif
@@ -104,7 +119,7 @@
 #  define QT_NO_FTP
 #endif
 
-// Painting
+/* Painting */
 #ifndef QT_NO_COLORNAMES
 #  define QT_NO_COLORNAMES
 #endif
@@ -114,21 +129,33 @@
 #ifndef QT_NO_PRINTER
 #  define QT_NO_PRINTER
 #endif
+#ifndef QT_NO_CUPS
+#  define QT_NO_CUPS
+#endif
 
-// Qtopia Core
+/* Qtopia Core */
 #ifndef QT_NO_QWS_SOUNDSERVER
 #  define QT_NO_QWS_SOUNDSERVER
 #endif
 
-// Styles
+/* Styles */
 #ifndef QT_NO_STYLE_MOTIF
 #  define QT_NO_STYLE_MOTIF
 #endif
 #ifndef QT_NO_STYLE_CDE
 #  define QT_NO_STYLE_CDE
 #endif
+#ifndef QT_NO_STYLE_STYLESHEET
+#  define QT_NO_STYLE_STYLESHEET
+#endif
 
-// Widgets
+/* Widgets */
+#ifndef QT_NO_CALENDARWIDGET
+#  define QT_NO_CALENDARWIDGET
+#endif
+#ifndef QT_NO_DATETIMEEDIT
+#  define QT_NO_DATETIMEEDIT
+#endif
 #ifndef QT_NO_WORKSPACE
 #  define QT_NO_WORKSPACE
 #endif

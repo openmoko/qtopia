@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,44 +27,48 @@
 #include <qtablewidget.h>
 #include <qitemdelegate.h>
 #include <qtopia/pim/qcontactmodel.h>
-
-#include "email.h"
+#include <QMailId>
+#include <QMailMessage>
 
 class MailListView;
 class QFont;
 class QPixmap;
 class QObject;
 class QPainter;
+class QMailAddress;
 
 class EmailListItem: public QTableWidgetItem
 {
 public:
-    EmailListItem(MailListView *parent, Email *mailIn, int col);
+    EmailListItem(MailListView *parent, const QMailId& id, int col);
     virtual ~EmailListItem();
 
-    Email* mail();
-    void setMail(Email *newMail);
-    QUuid id();
+    QMailId id() const;
+    void setId(const QMailId& id);
+
     QPixmap *pixmap() { return typePm; }
     virtual bool operator<(const QTableWidgetItem &other) const;
-
-    QString key(int c) const;
 
     bool stateUpdated() { return columnsSet; }
     void updateState();
     static void deletePixmaps();
     static QString dateToString( QDateTime dateTime );
+    QString cachedName() const;
+    void setCachedName(const QString&);
+
+    QMailMessage::MessageType type() const;
 
 protected:
     void setColumns();
 
 private:
-    Email *_mail;
-    MailListView *parentView;
+    QMailId mId;
     bool columnsSet;
     QPixmap *typePm;
     bool alt;
     int mCol;
+    QString mCachedName;
+    QMailMessage::MessageType messageType;
 };
 
 class EmailListItemDelegate : public QItemDelegate
@@ -75,7 +79,8 @@ public:
     EmailListItemDelegate(MailListView *parent = 0);
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const;
-
+private:
+    QString nameString(const QMailAddress& address) const;
 private:
     MailListView *mParent;
 };

@@ -21,7 +21,7 @@
 <h3>Public Functions</h3>
 <ul>
 <li><div class="fn"/><b><a href="qhardwaremanager.html#QHardwareManager">QHardwareManager</a></b> ( const QString &amp; <i>interface</i>, QObject * <i>parent</i> = 0 )</li>
-<li><div class="fn"/><b><a href="qhardwaremanager.html#dtor.QHardwareManager">~QHardwareManager</a></b> ()</li>
+<li><div class="fn"/>virtual <b><a href="qhardwaremanager.html#dtor.QHardwareManager">~QHardwareManager</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qhardwaremanager.html#interface">interface</a></b> () const</li>
 <li><div class="fn"/>QStringList <b><a href="qhardwaremanager.html#providers">providers</a></b> () const</li>
 </ul>
@@ -62,25 +62,29 @@
 <p>The QHardwareManager class finds available accessory providers for a given hardware interface.</p>
 <p>QHardwareManager is part of the <a href="syscust-accessories.html">Qtopia Accessory System</a>, which provides information about the available hardware accessories.</p>
 <p>A QHardwareMonitor can be used to monitor the availability of a given type of hardware accessory, providing a list of providers through <a href="qhardwaremanager.html#providers">providers</a>() and emitting signals <a href="qhardwaremanager.html#providerAdded">providerAdded</a>() and <a href="qhardwaremanager.html#providerRemoved">providerRemoved</a>() when that list changes. The type of hardware accessory monitored is given as a parameter to constructing the QHardwareMonitor.</p>
-<p>The following example detects whenever a new battery accessory becomes available:</p>
-<pre>    QHardwareManager* manager = new QHardwareManager(&quot;QBatteryAccessory&quot;);
-    connect( manager, SIGNAL(providerAdded(const QString&amp;)),
-        this, SLOT(newBatteryAdded(const QString&amp;)));</pre>
+<p>The following example responds whenever a new <a href="qsignalsource.html">QSignalSource</a> becomes available:</p>
+<pre>    QHardwareManager* manager = new QHardwareManager( &quot;QSignalSource&quot; );
+    connect( manager, SIGNAL(providerAdded(QString)),
+        this, SLOT(newBatteryAdded(QString)));</pre>
 <p>The types of hardware accessories are the names of the accessory classes which implement the accessories. Any class that is subclassing <a href="qhardwareinterface.html">QHardwareInterface</a> is considered to be a Qtopia accessory.</p>
-<p>See also <a href="qhardwareinterface.html">QHardwareInterface</a>, <a href="qbatteryaccessory.html">QBatteryAccessory</a>, <a href="qsignalsource.html">QSignalSource</a>, and <a href="qvibrateaccessory.html">QVibrateAccessory</a>.</p>
+<p>See also <a href="qhardwareinterface.html">QHardwareInterface</a>, <a href="qpowersource.html">QPowerSource</a>, <a href="qsignalsource.html">QSignalSource</a>, and <a href="qvibrateaccessory.html">QVibrateAccessory</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QHardwareManager"></a>QHardwareManager::QHardwareManager ( const <a href="qstring.html">QString</a> &amp; <i>interface</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Creates a <a href="qhardwaremanager.html">QHardwareManager</a> object and attaches it to <i>parent</i>. <i>interface</i> is the name/type of the accessory that this object is monitoring.</p>
-<p>The following code assumes that Qtopia is running on a device which exposes the battery level via the internal modem.</p>
-<pre>    QHardwareManager manager( &quot;QBatteryAccessory&quot; );
+<p>Creates a <a href="qhardwaremanager.html">QHardwareManager</a> object and attaches it to <i>parent</i>. <i>interface</i> is the name of the accessory interface that this object is monitoring.</p>
+<p>The following code assumes that Qtopia is running on a device that has a modem as power source (for more details see <a href="qpowerstatus.html">QPowerStatus</a> and <a href="qpowersource.html">QPowerSource</a>).</p>
+<pre>    QHardwareManager manager( &quot;QPowerSource&quot; );
     QStringList providers = manager.providers();
-    providers.contains( &quot;modem&quot; );  <span class="comment">//always true</span></pre>
+
+<span class="comment">    //Qtopia always has a virtual power source with id DefaultBattery</span>
+    providers.contains( &quot;DefaultBattery&quot; ); <span class="comment">//always true</span>
+    providers.contains( &quot;modem&quot; ); <span class="comment">//true</span></pre>
 <p>Another way to achieve the same as the above example would be:</p>
-<pre>    QStringList providers = QHardwareManager::providers&lt;QBatteryAccessory&gt;();
-    providers.contains( &quot;modem&quot; );  <span class="comment">//always true</span></pre>
-<h3 class="fn"><a name="dtor.QHardwareManager"></a>QHardwareManager::~QHardwareManager ()</h3>
-<p>Destroys this object.</p>
+<pre>    QStringList providers = QHardwareManager::providers&lt;QPowerSource&gt;();
+    providers.contains( &quot;DefaultBattery&quot; ); <span class="comment">//always true</span>
+    providers.contains( &quot;modem&quot; ); <span class="comment">//true</span></pre>
+<h3 class="fn"><a name="dtor.QHardwareManager"></a>QHardwareManager::~QHardwareManager ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Destroys the <a href="qhardwaremanager.html">QHardwareManager</a> object.</p>
 <h3 class="fn"><a name="interface"></a><a href="qstring.html">QString</a> QHardwareManager::interface () const</h3>
 <p>Returns the interface that this object is monitoring.</p>
 <h3 class="fn"><a name="providerAdded"></a>void QHardwareManager::providerAdded ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -88,15 +92,15 @@
 <h3 class="fn"><a name="providerRemoved"></a>void QHardwareManager::providerRemoved ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when provider <i>id</i> is removed.</p>
 <h3 class="fn"><a name="providers"></a><a href="qstringlist.html">QStringList</a> QHardwareManager::providers () const</h3>
-<p>Returns the list of providers that support the interface that this object was initialized with.</p>
+<p>Returns a list of providers that support the interface that this object was initialized with.</p>
 <h3 class="fn"><a name="providers-2"></a><a href="qstringlist.html">QStringList</a> QHardwareManager::providers ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns a list of providers that support the given interface of type <tt>T</tt>. The following example demonstrates how to get the list of providers which support the <a href="qbatteryaccessory.html">QBatteryAccessory</a> interface:</p>
-<pre>    QStringList providers = QHardwareManager::providers&lt;QBatteryAccessory&gt;();</pre>
+<p>Returns a list of providers which support the given interface of type <tt>T</tt>. The following example demonstrates how to get the list of providers that supports the <a href="qpowersource.html">QPowerSource</a> interface.</p>
+<pre>    QStringList providers = QHardwareManager::providers&lt;QPowerSource&gt;();</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

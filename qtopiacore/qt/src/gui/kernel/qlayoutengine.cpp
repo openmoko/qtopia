@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -55,54 +70,68 @@ static inline int fRound(Fixed i) {
   interval (relative to parentWidget topLeft).
 */
 void qGeomCalc(QVector<QLayoutStruct> &chain, int start, int count,
-                         int pos, int space, int spacer)
+               int pos, int space, int spacer)
 {
     int cHint = 0;
     int cMin = 0;
     int cMax = 0;
     int sumStretch = 0;
-    int spacerCount = 0;
+    int sumSpacing = 0;
 
     bool wannaGrow = false; // anyone who really wants to grow?
     //    bool canShrink = false; // anyone who could be persuaded to shrink?
 
     bool allEmptyNonstretch = true;
+    int pendingSpacing = -1;
+    int spacerCount = 0;
     int i;
+
     for (i = start; i < start + count; i++) {
-        chain[i].done = false;
-        cHint += chain[i].smartSizeHint();
-        cMin += chain[i].minimumSize;
-        cMax += chain[i].maximumSize;
-        sumStretch += chain[i].stretch;
-        if (!chain[i].empty)
-            spacerCount++;
-        wannaGrow = wannaGrow || chain[i].expansive || chain[i].stretch > 0;
-        allEmptyNonstretch = allEmptyNonstretch && !wannaGrow && chain[i].empty;
+        QLayoutStruct *data = &chain[i];
+
+        data->done = false;
+        cHint += data->smartSizeHint();
+        cMin += data->minimumSize;
+        cMax += data->maximumSize;
+        sumStretch += data->stretch;
+        if (!data->empty) {
+            /*
+                Using pendingSpacing, we ensure that the spacing for the last
+                (non-empty) item is ignored.
+            */
+            if (pendingSpacing >= 0) {
+                sumSpacing += pendingSpacing;
+                ++spacerCount;
+            }
+            pendingSpacing = data->effectiveSpacer(spacer);
+        }
+        wannaGrow = wannaGrow || data->expansive || data->stretch > 0;
+        allEmptyNonstretch = allEmptyNonstretch && !wannaGrow && data->empty;
     }
 
     int extraspace = 0;
-    if (spacerCount)
-        spacerCount--; // only spacers between things
 
-    if (space < cMin + spacerCount * spacer) {
+    if (space < cMin + sumSpacing) {
         /*
           Less space than minimumSize; take from the biggest first
         */
 
-        int minSize =  cMin + spacerCount * spacer;
+        int minSize = cMin + sumSpacing;
 
-        //shrink the spacers proportionally
-        spacer = minSize > 0 ? (spacer * space) / minSize : 0;
+        // shrink the spacers proportionally
+        if (spacer >= 0) {
+            spacer = minSize > 0 ? spacer * space / minSize : 0;
+            sumSpacing = spacer * spacerCount;
+        }
 
         QList<int> list;
 
-        for (i = start; i < start+count; i++) {
-            list << chain[i].minimumSize;
-        }
+        for (i = start; i < start + count; i++)
+            list << chain.at(i).minimumSize;
 
         qSort(list);
 
-        int space_left = space - spacerCount*spacer;
+        int space_left = space - sumSpacing;
 
         int sum = 0;
         int idx = 0;
@@ -118,13 +147,28 @@ void qGeomCalc(QVector<QLayoutStruct> &chain, int start, int count,
         int deficit = space_used - space_left;
 
         int items = count - idx;
-        int maxval = current - deficit/items;
+        /*
+         * If we truncate all items to "current", we would get "deficit" too many pixels. Therefore, we have to remove
+         * deficit/items from each item bigger than maxval. The actual value to remove is deficitPerItem + remainder/items
+         * "rest" is the accumulated error from using integer arithmetic.
+        */
+        int deficitPerItem = deficit/items;
+        int remainder = deficit % items;
+        int maxval = current - deficitPerItem;
 
-        for (i = start; i < start+count; i++) {
-            chain[i].size = qMin(chain[i].minimumSize, maxval);
-            chain[i].done = true;
+        int rest = 0;
+        for (i = start; i < start + count; i++) {
+            int maxv = maxval;
+            rest += remainder;
+            if (rest >= items) {
+                maxv--;
+                rest-=items;
+            }
+            QLayoutStruct *data = &chain[i];
+            data->size = qMin(data->minimumSize, maxv);
+            data->done = true;
         }
-    } else if (space < cHint + spacerCount*spacer) {
+    } else if (space < cHint + sumSpacing) {
         /*
           Less space than smartSizeHint(), but more than minimumSize.
           Currently take space equally from each, as in Qt 2.x.
@@ -132,17 +176,18 @@ void qGeomCalc(QVector<QLayoutStruct> &chain, int start, int count,
           items.
         */
         int n = count;
-        int space_left = space - spacerCount*spacer;
+        int space_left = space - sumSpacing;
         int overdraft = cHint - space_left;
 
         // first give to the fixed ones:
         for (i = start; i < start + count; i++) {
-            if (!chain[i].done
-                 && chain[i].minimumSize >= chain[i].smartSizeHint()) {
-                chain[i].size = chain[i].smartSizeHint();
-                chain[i].done = true;
-                space_left -= chain[i].smartSizeHint();
-                // sumStretch -= chain[i].stretch;
+            QLayoutStruct *data = &chain[i];
+            if (!data->done
+                 && data->minimumSize >= data->smartSizeHint()) {
+                data->size = data->smartSizeHint();
+                data->done = true;
+                space_left -= data->smartSizeHint();
+                // sumStretch -= data->stretch;
                 n--;
             }
         }
@@ -153,22 +198,22 @@ void qGeomCalc(QVector<QLayoutStruct> &chain, int start, int count,
             Fixed fp_w = 0;
 
             for (i = start; i < start+count; i++) {
-                if (chain[i].done)
+                QLayoutStruct *data = &chain[i];
+                if (data->done)
                     continue;
                 // if (sumStretch <= 0)
                 fp_w += fp_over / n;
                 // else
-                //    fp_w += (fp_over * chain[i].stretch) / sumStretch;
+                //    fp_w += (fp_over * data->stretch) / sumStretch;
                 int w = fRound(fp_w);
-                chain[i].size = chain[i].smartSizeHint() - w;
+                data->size = data->smartSizeHint() - w;
                 fp_w -= toFixed(w); // give the difference to the next
-                if (chain[i].size < chain[i].minimumSize) {
-                    chain[i].done = true;
-                    chain[i].size = chain[i].minimumSize;
+                if (data->size < data->minimumSize) {
+                    data->done = true;
+                    data->size = data->minimumSize;
                     finished = false;
-                    overdraft -= (chain[i].smartSizeHint()
-                                   - chain[i].minimumSize);
-                    // sumStretch -= chain[i].stretch;
+                    overdraft -= data->smartSizeHint() - data->minimumSize;
+                    // sumStretch -= data->stretch;
                     n--;
                     break;
                 }
@@ -176,18 +221,19 @@ void qGeomCalc(QVector<QLayoutStruct> &chain, int start, int count,
         }
     } else { // extra space
         int n = count;
-        int space_left = space - spacerCount*spacer;
+        int space_left = space - sumSpacing;
         // first give to the fixed ones, and handle non-expansiveness
         for (i = start; i < start + count; i++) {
-            if (!chain[i].done
-                && (chain[i].maximumSize <= chain[i].smartSizeHint()
-                    || (wannaGrow && !chain[i].expansive && chain[i].stretch == 0)
-                    || (!allEmptyNonstretch && chain[i].empty &&
-                        !chain[i].expansive && chain[i].stretch == 0))) {
-                chain[i].size = chain[i].smartSizeHint();
-                chain[i].done = true;
-                space_left -= chain[i].size;
-                sumStretch -= chain[i].stretch;
+            QLayoutStruct *data = &chain[i];
+            if (!data->done
+                && (data->maximumSize <= data->smartSizeHint()
+                    || (wannaGrow && !data->expansive && data->stretch == 0)
+                    || (!allEmptyNonstretch && data->empty &&
+                        !data->expansive && data->stretch == 0))) {
+                data->size = data->smartSizeHint();
+                data->done = true;
+                space_left -= data->size;
+                sumStretch -= data->stretch;
                 n--;
             }
         }
@@ -208,45 +254,46 @@ void qGeomCalc(QVector<QLayoutStruct> &chain, int start, int count,
             surplus = deficit = 0;
             Fixed fp_space = toFixed(space_left);
             Fixed fp_w = 0;
-            for (i = start; i < start+count; i++) {
-                if (chain[i].done)
+            for (i = start; i < start + count; i++) {
+                QLayoutStruct *data = &chain[i];
+                if (data->done)
                     continue;
                 extraspace = 0;
                 if (sumStretch <= 0)
                     fp_w += fp_space / n;
                 else
-                    fp_w += (fp_space * chain[i].stretch) / sumStretch;
+                    fp_w += (fp_space * data->stretch) / sumStretch;
                 int w = fRound(fp_w);
-                chain[i].size = w;
+                data->size = w;
                 fp_w -= toFixed(w); // give the difference to the next
-                if (w < chain[i].smartSizeHint()) {
-                    deficit +=  chain[i].smartSizeHint() - w;
-                } else if (w > chain[i].maximumSize) {
-                    surplus += w - chain[i].maximumSize;
+                if (w < data->smartSizeHint()) {
+                    deficit +=  data->smartSizeHint() - w;
+                } else if (w > data->maximumSize) {
+                    surplus += w - data->maximumSize;
                 }
             }
             if (deficit > 0 && surplus <= deficit) {
                 // give to the ones that have too little
                 for (i = start; i < start+count; i++) {
-                    if (!chain[i].done &&
-                         chain[i].size < chain[i].smartSizeHint()) {
-                        chain[i].size = chain[i].smartSizeHint();
-                        chain[i].done = true;
-                        space_left -= chain[i].smartSizeHint();
-                        sumStretch -= chain[i].stretch;
+                    QLayoutStruct *data = &chain[i];
+                    if (!data->done && data->size < data->smartSizeHint()) {
+                        data->size = data->smartSizeHint();
+                        data->done = true;
+                        space_left -= data->smartSizeHint();
+                        sumStretch -= data->stretch;
                         n--;
                     }
                 }
             }
             if (surplus > 0 && surplus >= deficit) {
                 // take from the ones that have too much
-                for (i = start; i < start+count; i++) {
-                    if (!chain[i].done &&
-                         chain[i].size > chain[i].maximumSize) {
-                        chain[i].size = chain[i].maximumSize;
-                        chain[i].done = true;
-                        space_left -= chain[i].maximumSize;
-                        sumStretch -= chain[i].stretch;
+                for (i = start; i < start + count; i++) {
+                    QLayoutStruct *data = &chain[i];
+                    if (!data->done && data->size > data->maximumSize) {
+                        data->size = data->maximumSize;
+                        data->done = true;
+                        space_left -= data->maximumSize;
+                        sumStretch -= data->stretch;
                         n--;
                     }
                 }
@@ -265,79 +312,86 @@ void qGeomCalc(QVector<QLayoutStruct> &chain, int start, int count,
     int extra = extraspace / (spacerCount + 2);
     int p = pos + extra;
     for (i = start; i < start+count; i++) {
-        chain[i].pos = p;
-        p = p + chain[i].size;
-        if (!chain[i].empty)
-            p += spacer+extra;
+        QLayoutStruct *data = &chain[i];
+        data->pos = p;
+        p += data->size;
+        if (!data->empty)
+            p += data->effectiveSpacer(spacer) + extra;
     }
 
-
 #ifdef QLAYOUT_EXTRA_DEBUG
-    qDebug() << "qGeomCalc" << "start" << start <<  "count" << count <<  "pos" << pos <<  "space" << space <<  "spacer" << spacer;
-    for (i = start; i < start + count; i++) {
-        qDebug() << i << ":" << chain[i].minimumSize << chain[i].smartSizeHint() << chain[i].maximumSize
-                 << "stretch" << chain[i].stretch << "empty" << chain[i].empty << "expansive" << chain[i].expansive;
+    qDebug() << "qGeomCalc" << "start" << start <<  "count" << count <<  "pos" << pos
+             <<  "space" << space <<  "spacer" << spacer;
+    for (i = start; i < start + count; ++i) {
+        qDebug() << i << ":" << chain[i].minimumSize << chain[i].smartSizeHint()
+                 << chain[i].maximumSize << "stretch" << chain[i].stretch
+                 << "empty" << chain[i].empty << "expansive" << chain[i].expansive
+                 << "spacing" << chain[i].spacing;
         qDebug() << "result pos" << chain[i].pos << "size" << chain[i].size;
     }
 #endif
 }
 
-Q_GUI_EXPORT QSize qSmartMinSize(const QWidgetItem *i)
+Q_GUI_EXPORT QSize qSmartMinSize(const QSize &sizeHint, const QSize &minSizeHint,
+                                 const QSize &minSize, const QSize &maxSize,
+                                 const QSizePolicy &sizePolicy)
 {
-    QWidget *w = ((QWidgetItem *)i)->widget();
-
     QSize s(0, 0);
-    QSize msh(w->minimumSizeHint());
-    QSize sh(w->sizeHint());
 
-    if (w->sizePolicy().horizontalPolicy() != QSizePolicy::Ignored) {
-        if (w->sizePolicy().horizontalPolicy() & QSizePolicy::ShrinkFlag)
-            s.setWidth(msh.width());
+    if (sizePolicy.horizontalPolicy() != QSizePolicy::Ignored) {
+        if (sizePolicy.horizontalPolicy() & QSizePolicy::ShrinkFlag)
+            s.setWidth(minSizeHint.width());
         else
-            s.setWidth(qMax(sh.width(), msh.width()));
+            s.setWidth(qMax(sizeHint.width(), minSizeHint.width()));
     }
 
-    if (w->sizePolicy().verticalPolicy() != QSizePolicy::Ignored) {
-        if (w->sizePolicy().verticalPolicy() & QSizePolicy::ShrinkFlag) {
-            s.setHeight(msh.height());
+    if (sizePolicy.verticalPolicy() != QSizePolicy::Ignored) {
+        if (sizePolicy.verticalPolicy() & QSizePolicy::ShrinkFlag) {
+            s.setHeight(minSizeHint.height());
         } else {
-            s.setHeight(qMax(sh.height(), msh.height()));
+            s.setHeight(qMax(sizeHint.height(), minSizeHint.height()));
         }
     }
 
-    s = s.boundedTo(w->maximumSize());
-    QSize min = w->minimumSize();
-    if (min.width() > 0)
-        s.setWidth(min.width());
-    if (min.height() > 0)
-        s.setHeight(min.height());
+    s = s.boundedTo(maxSize);
+    if (minSize.width() > 0)
+        s.setWidth(minSize.width());
+    if (minSize.height() > 0)
+        s.setHeight(minSize.height());
 
     return s.expandedTo(QSize(0,0));
 }
 
-Q_GUI_EXPORT QSize qSmartMinSize(const QWidget *w)
+Q_GUI_EXPORT QSize qSmartMinSize(const QWidgetItem *i)
 {
-    QWidgetItem item(const_cast<QWidget *>(w));
-    return qSmartMinSize(&item);
+    QWidget *w = ((QWidgetItem *)i)->widget();
+    return qSmartMinSize(w->sizeHint(), w->minimumSizeHint(),
+                            w->minimumSize(), w->maximumSize(),
+                            w->sizePolicy());
 }
 
-Q_GUI_EXPORT QSize qSmartMaxSize(const QWidgetItem *i, Qt::Alignment align)
+Q_GUI_EXPORT QSize qSmartMinSize(const QWidget *w)
 {
-    QWidget *w = ((QWidgetItem*)i)->widget();
+    return qSmartMinSize(w->sizeHint(), w->minimumSizeHint(),
+                            w->minimumSize(), w->maximumSize(),
+                            w->sizePolicy());
+}
+
+Q_GUI_EXPORT QSize qSmartMaxSize(const QSize &sizeHint,
+                                 const QSize &minSize, const QSize &maxSize,
+                                 const QSizePolicy &sizePolicy, Qt::Alignment align)
+{
     if (align & Qt::AlignHorizontal_Mask && align & Qt::AlignVertical_Mask)
         return QSize(QLAYOUTSIZE_MAX, QLAYOUTSIZE_MAX);
-    QSize s = w->maximumSize();
-
-    QSize sh = w->sizeHint().expandedTo(w->minimumSizeHint());
+    QSize s = maxSize;
+    QSize hint = sizeHint.expandedTo(minSize);
     if (s.width() == QWIDGETSIZE_MAX && !(align & Qt::AlignHorizontal_Mask))
-        if (!(w->sizePolicy().horizontalPolicy() & QSizePolicy::GrowFlag) && sh.width() != -1)
-            s.setWidth(sh.width());
+        if (!(sizePolicy.horizontalPolicy() & QSizePolicy::GrowFlag) )
+            s.setWidth(hint.width());
 
     if (s.height() == QWIDGETSIZE_MAX && !(align & Qt::AlignVertical_Mask))
-        if (!(w->sizePolicy().verticalPolicy() & QSizePolicy::GrowFlag) && sh.height() != -1)
-            s.setHeight(sh.height());
-
-    s = s.expandedTo(w->minimumSize());
+        if (!(sizePolicy.verticalPolicy() & QSizePolicy::GrowFlag) )
+            s.setHeight(hint.height());
 
     if (align & Qt::AlignHorizontal_Mask)
         s.setWidth(QLAYOUTSIZE_MAX);
@@ -346,9 +400,30 @@ Q_GUI_EXPORT QSize qSmartMaxSize(const QWidgetItem *i, Qt::Alignment align)
     return s;
 }
 
-Q_GUI_EXPORT QSize qSmartMaxSize(const QWidget *w, Qt::Alignment align)
+Q_GUI_EXPORT QSize qSmartMaxSize(const QWidgetItem *i, Qt::Alignment align)
 {
-    QWidgetItem item(const_cast<QWidget *>(w));
-    return qSmartMaxSize(&item, align);
+    QWidget *w = ((QWidgetItem*)i)->widget();
+
+    return qSmartMaxSize(w->sizeHint().expandedTo(w->minimumSizeHint()), w->minimumSize(), w->maximumSize(),
+                            w->sizePolicy(), align);
 }
 
+Q_GUI_EXPORT QSize qSmartMaxSize(const QWidget *w, Qt::Alignment align)
+{
+    return qSmartMaxSize(w->sizeHint().expandedTo(w->minimumSizeHint()), w->minimumSize(), w->maximumSize(),
+                            w->sizePolicy(), align);
+}
+
+
+int qSmartSpacing(const QLayout *layout, QStyle::PixelMetric pm)
+{
+    QObject *parent = layout->parent();
+    if (!parent) {
+        return -1;
+    } else if (parent->isWidgetType()) {
+        QWidget *pw = static_cast<QWidget *>(parent);
+        return pw->style()->pixelMetric(pm, 0, pw);
+    } else {
+        return static_cast<QLayout *>(parent)->spacing();
+    }
+}

@@ -1,12 +1,18 @@
---- helix/src/audio/device/platform/unix/audlinux_alsa.cpp	Tue Apr  4 05:42:02 2006
-+++ helix/src/audio/device/platform/unix/audlinux_alsa.cpp	Tue Apr  4 05:42:02 2006
-@@ -1121,7 +1121,8 @@
- 
-         case SND_PCM_STATE_DRAINING:
-         case SND_PCM_STATE_SUSPENDED:
--        case SND_PCM_STATE_DISCONNECTED:
-+	// SND_PCM_STATE_DISCONNECTED is not in older alsa libraries.
-+        //case SND_PCM_STATE_DISCONNECTED:
-             HX_ASSERT(!"Not reached");
-             break;            
-         }
+--- helix/src/audio/device/hxaudev.cpp	Tue Sep 18 06:05:11 2007
++++ helix/src/audio/device/hxaudev.cpp	Tue Sep 18 06:05:11 2007
+@@ -248,8 +248,13 @@
+     
+ #if defined(_LINUX) ||  defined(_FREEBSD) || defined(_NETBSD)
+     UINT16 nSoundDriver = kOSS;
+-    ReadPrefUINT16(z_pIHXPrefs, "SoundDriver", nSoundDriver );
+-    
++    HX_RESULT hxcr = ReadPrefUINT16(z_pIHXPrefs, "SoundDriver", nSoundDriver );
++
++#if defined(HELIX_FEATURE_ALSA)
++    if (hxcr == HXR_FAILED)     // if haven't overridden in prefs make alsa default
++        nSoundDriver = kALSA;
++#endif
++
+ #if defined(HELIX_FEATURE_USOUND)
+     //Only use USound if it is available. If it isn't, drop to
+     //OSS for now.

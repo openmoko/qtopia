@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -45,7 +60,14 @@ struct Q_CORE_EXPORT QVectorData
     QBasicAtomic ref;
     int alloc;
     int size;
+#if defined(Q_OS_SOLARIS) && defined(Q_CC_GNU) && defined(__LP64__) && defined(QT_BOOTSTRAPPED)
+    // workaround for bug in gcc 3.4.2
+    uint sharable;
+    uint capacity;
+#else
     uint sharable : 1;
+    uint capacity : 1;
+#endif
 
     static QVectorData shared_null;
     static QVectorData *malloc(int sizeofTypedData, int size, int sizeofT, QVectorData *init);
@@ -58,7 +80,14 @@ struct QVectorTypedData
     QBasicAtomic ref;
     int alloc;
     int size;
+#if defined(Q_OS_SOLARIS) && defined(Q_CC_GNU) && defined(__LP64__) && defined(QT_BOOTSTRAPPED)
+    // workaround for bug in gcc 3.4.2
+    uint sharable;
+    uint capacity;
+#else
     uint sharable : 1;
+    uint capacity : 1;
+#endif
     T array[1];
 };
 
@@ -86,7 +115,7 @@ public:
 
     inline int capacity() const { return d->alloc; }
     void reserve(int size);
-    inline void squeeze() { realloc(d->size, d->size); }
+    inline void squeeze() { realloc(d->size, d->size); d->capacity = 0; }
 
     inline void detach() { if (d->ref != 1) detach_helper(); }
     inline bool isDetached() const { return d->ref == 1; }
@@ -131,7 +160,7 @@ public:
         inline T &operator*() const { return *i; }
         inline T *operator->() const { return i; }
         inline T &operator[](int j) const { return *(i + j); }
-        inline bool operator==(const iterator &o) const { qDebug("1"); return i == o.i; }
+        inline bool operator==(const iterator &o) const { return i == o.i; }
         inline bool operator!=(const iterator &o) const { return i != o.i; }
         inline bool operator<(const iterator& other) const { return i < other.i; }
         inline bool operator<=(const iterator& other) const { return i <= other.i; }
@@ -165,7 +194,7 @@ public:
         inline const T &operator*() const { return *i; }
         inline const T *operator->() const { return i; }
         inline const T &operator[](int j) const { return *(i + j); }
-        inline bool operator==(const const_iterator &o) const { qDebug("3"); return i == o.i; }
+        inline bool operator==(const const_iterator &o) const { return i == o.i; }
         inline bool operator!=(const const_iterator &o) const { return i != o.i; }
         inline bool operator<(const const_iterator& other) const { return i < other.i; }
         inline bool operator<=(const const_iterator& other) const { return i <= other.i; }
@@ -268,10 +297,10 @@ void QVector<T>::detach_helper()
 { realloc(d->size, d->alloc); }
 template <typename T>
 void QVector<T>::reserve(int asize)
-{ if (asize > d->alloc) realloc(d->size, asize); }
+{ if (asize > d->alloc) realloc(d->size, asize); d->capacity = 1; }
 template <typename T>
 void QVector<T>::resize(int asize)
-{ realloc(asize, (asize > d->alloc || (asize < d->size && asize < (d->alloc >> 1))) ?
+{ realloc(asize, (asize > d->alloc || (!d->capacity && asize < d->size && asize < (d->alloc >> 1))) ?
           QVectorData::grow(sizeof(Data), asize, sizeof(T), QTypeInfo<T>::isStatic)
           : d->alloc); }
 template <typename T>
@@ -343,6 +372,7 @@ QVector<T>::QVector(int asize)
     d->ref.init(1);
     d->alloc = d->size = asize;
     d->sharable = true;
+    d->capacity = false;
     if (QTypeInfo<T>::isComplex) {
         T* b = d->array;
         T* i = d->array + d->size;
@@ -360,6 +390,7 @@ QVector<T>::QVector(int asize, const T &t)
     d->ref.init(1);
     d->alloc = d->size = asize;
     d->sharable = true;
+    d->capacity = false;
     T* i = d->array + d->size;
     while (i != d->array)
         new (--i) T(t);
@@ -400,6 +431,7 @@ void QVector<T>::realloc(int asize, int aalloc)
     }
 
     if (aalloc != d->alloc || d->ref != 1) {
+
         // (re)allocate memory
         if (QTypeInfo<T>::isStatic) {
             x.p = malloc(aalloc);
@@ -417,11 +449,12 @@ void QVector<T>::realloc(int asize, int aalloc)
                     i = d->array + asize;
                 }
             }
-            x.p = p =
-                  static_cast<QVectorData *>(qRealloc(p, sizeof(Data) + (aalloc - 1) * sizeof(T)));
+            x.p = p = static_cast<QVectorData *>(qRealloc(p, sizeof(Data) + (aalloc - 1) * sizeof(T)));
         }
         x.d->ref.init(1);
         x.d->sharable = true;
+        x.d->capacity = d->capacity;
+
     }
     if (QTypeInfo<T>::isComplex) {
         if (asize < d->size) {
@@ -471,17 +504,22 @@ Q_OUTOFLINE_TEMPLATE T QVector<T>::value(int i, const T &defaultValue) const
 template <typename T>
 void QVector<T>::append(const T &t)
 {
-    const T copy(t);
-    if (d->ref != 1 || d->size + 1 > d->alloc)
+    if (d->ref != 1 || d->size + 1 > d->alloc) {
+        const T copy(t);
         realloc(d->size, QVectorData::grow(sizeof(Data), d->size + 1, sizeof(T),
                                            QTypeInfo<T>::isStatic));
-    if (QTypeInfo<T>::isComplex)
-        new (d->array + d->size) T(copy);
-    else
-        d->array[d->size] = copy;
+        if (QTypeInfo<T>::isComplex)
+            new (d->array + d->size) T(copy);
+        else
+            d->array[d->size] = copy;
+    } else {
+        if (QTypeInfo<T>::isComplex)
+            new (d->array + d->size) T(t);
+        else
+            d->array[d->size] = t;
+    }
     ++d->size;
 }
-
 
 template <typename T>
 Q_TYPENAME QVector<T>::iterator QVector<T>::insert(iterator before, size_type n, const T &t)
@@ -693,7 +731,7 @@ Q_DECLARE_SEQUENTIAL_ITERATOR(Vector)
 Q_DECLARE_MUTABLE_SEQUENTIAL_ITERATOR(Vector)
 
 /*
-   ### Fix for Qt 5
+   ### Qt 5:
    ### This needs to be removed for next releases of Qt. It is a workaround for vc++ because
    ### Qt exports QPolygon and QPolygonF that inherit QVector<QPoint> and
    ### QVector<QPointF> respectively.

@@ -156,11 +156,11 @@
 </phrase>
 <phrase>
     <source>Copy</source>
-    <target>Kopiëren</target>
+    <target>KopiÃ«ren</target>
 </phrase>
 <phrase>
     <source>Copy here</source>
-    <target>Hierheen kopiëren</target>
+    <target>Hierheen kopiÃ«ren</target>
 </phrase>
 <phrase>
     <source>Create Shortcut</source>
@@ -339,7 +339,7 @@
 </phrase>
 <phrase>
     <source>hierarchical selection</source>
-    <target>hiërarchische selectie</target>
+    <target>hiÃ«rarchische selectie</target>
 </phrase>
 <phrase>
     <source>hold</source>
@@ -826,7 +826,7 @@
 </phrase>
 <phrase>
     <source>Send To</source>
-    <target>Kopiëren naar</target>
+    <target>KopiÃ«ren naar</target>
 </phrase>
 <phrase>
     <source>separator</source>
@@ -931,7 +931,7 @@
 </phrase>
 <phrase>
     <source>task-oriented Help</source>
-    <target>taakgeoriënteerde Help</target>
+    <target>taakgeoriÃ«nteerde Help</target>
 </phrase>
 <phrase>
     <source>template</source>
@@ -1040,5 +1040,4 @@
 <phrase>
     <source>Yes</source>
     <target>Ja</target>
-</phrase>
-</QPH>
+</phras

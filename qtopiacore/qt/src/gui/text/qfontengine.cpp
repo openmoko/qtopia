@@ -9,18 +9,34 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
+#include <qdebug.h>
 #include <private/qfontengine_p.h>
 
 #include "qbitmap.h"
@@ -28,9 +44,21 @@
 #include "qpainterpath.h"
 #include "qvarlengtharray.h"
 #include <private/qpdf_p.h>
+#include <private/qmath_p.h>
+#include <qendian.h>
 
-#include <math.h>
-
+QFontEngine::QFontEngine()
+    : QObject()
+{
+    ref = 0;
+    cache_count = 0;
+    fsType = 0;
+#if defined(Q_WS_WIN)
+    script_cache = 0;
+    cmap = 0;
+#endif
+    symbol = false;
+}
 
 #ifndef Q_WS_WIN
 QFontEngine::~QFontEngine()
@@ -61,7 +89,7 @@ QFixed QFontEngine::xHeight() const
     QGlyphLayout glyphs[8];
     int nglyphs = 7;
     QChar x((ushort)'x');
-    stringToCMap(&x, 1, glyphs, &nglyphs, 0);
+    stringToCMap(&x, 1, glyphs, &nglyphs, QTextEngine::GlyphIndicesOnly);
 
     glyph_metrics_t bb = const_cast<QFontEngine *>(this)->boundingBox(glyphs[0].glyph);
     return bb.height;
@@ -72,14 +100,14 @@ QFixed QFontEngine::averageCharWidth() const
     QGlyphLayout glyphs[8];
     int nglyphs = 7;
     QChar x((ushort)'x');
-    stringToCMap(&x, 1, glyphs, &nglyphs, 0);
+    stringToCMap(&x, 1, glyphs, &nglyphs, QTextEngine::GlyphIndicesOnly);
 
     glyph_metrics_t bb = const_cast<QFontEngine *>(this)->boundingBox(glyphs[0].glyph);
     return bb.xoff;
 }
 
 
-void QFontEngine::getGlyphPositions(const QGlyphLayout *glyphs, int nglyphs, const QMatrix &matrix, QTextItem::RenderFlags flags,
+void QFontEngine::getGlyphPositions(const QGlyphLayout *glyphs, int nglyphs, const QTransform &matrix, QTextItem::RenderFlags flags,
                                     QVarLengthArray<glyph_t> &glyphs_out, QVarLengthArray<QFixedPoint> &positions)
 {
     QFixed xpos;
@@ -158,31 +186,66 @@ void QFontEngine::getGlyphPositions(const QGlyphLayout *glyphs, int nglyphs, con
         positions.resize(nglyphs);
         glyphs_out.resize(nglyphs);
         int i = 0;
-        while (i < nglyphs) {
-            if (glyphs[i].attributes.dontPrint) {
+        if (!transform) {
+            while (i < nglyphs) {
+                if (!glyphs[i].attributes.dontPrint) {
+                    positions[current].x = xpos + glyphs[i].offset.x;
+                    positions[current].y = ypos + glyphs[i].offset.y;
+                    glyphs_out[current] = glyphs[i].glyph;
+                    xpos += glyphs[i].advance.x + QFixed::fromFixed(glyphs[i].space_18d6);
+                    ypos += glyphs[i].advance.y;
+                    ++current;
+                }
                 ++i;
-                continue;
             }
-            QFixed gpos_x = xpos + glyphs[i].offset.x;
-            QFixed gpos_y = ypos + glyphs[i].offset.y;
-            if (transform) {
-                QPointF gpos(gpos_x.toReal(), gpos_y.toReal());
-                gpos = gpos * matrix;
-                gpos_x = QFixed::fromReal(gpos.x());
-                gpos_y = QFixed::fromReal(gpos.y());
+        } else {
+            positions.resize(nglyphs);
+            glyphs_out.resize(nglyphs);
+            int i = 0;
+            while (i < nglyphs) {
+                if (!glyphs[i].attributes.dontPrint) {
+                    QFixed gpos_x = xpos + glyphs[i].offset.x;
+                    QFixed gpos_y = ypos + glyphs[i].offset.y;
+                    QPointF gpos(gpos_x.toReal(), gpos_y.toReal());
+                    gpos = gpos * matrix;
+                    positions[current].x = QFixed::fromReal(gpos.x());
+                    positions[current].y = QFixed::fromReal(gpos.y());
+                    glyphs_out[current] = glyphs[i].glyph;
+                    xpos += glyphs[i].advance.x + QFixed::fromFixed(glyphs[i].space_18d6);
+                    ypos += glyphs[i].advance.y;
+                    ++current;
+                }
+                ++i;
             }
-            positions[current].x = gpos_x;
-            positions[current].y = gpos_y;
-            glyphs_out[current] = glyphs[i].glyph;
-            xpos += glyphs[i].advance.x + QFixed::fromFixed(glyphs[i].space_18d6);
-            ypos += glyphs[i].advance.y;
-            ++i;
-            ++current;
         }
     }
     positions.resize(current);
     glyphs_out.resize(current);
     Q_ASSERT(positions.size() == glyphs_out.size());
+}
+
+
+glyph_metrics_t QFontEngine::tightBoundingBox(const QGlyphLayout *glyphs, int numGlyphs)
+{
+    glyph_metrics_t overall;
+
+    QFixed ymax = 0;
+    QFixed xmax = 0;
+    for (int i = 0; i < numGlyphs; i++) {
+        glyph_metrics_t bb = boundingBox(glyphs[i].glyph);
+        QFixed x = overall.xoff + glyphs[i].offset.x + bb.x;
+        QFixed y = overall.yoff + glyphs[i].offset.y + bb.y;
+        overall.x = qMin(overall.x, x);
+        overall.y = qMin(overall.y, y);
+        xmax = qMax(xmax, x + bb.width);
+        ymax = qMax(ymax, y + bb.height);
+        overall.xoff += bb.xoff;
+        overall.yoff += bb.yoff;
+    }
+    overall.height = qMax(overall.height, ymax - overall.y);
+    overall.width = xmax - overall.x;
+
+    return overall;
 }
 
 
@@ -194,7 +257,7 @@ void QFontEngine::addOutlineToPath(qreal x, qreal y, const QGlyphLayout *glyphs,
 
     QVarLengthArray<QFixedPoint> positions;
     QVarLengthArray<glyph_t> positioned_glyphs;
-    QMatrix matrix;
+    QTransform matrix;
     matrix.translate(x, y);
     getGlyphPositions(glyphs, numGlyphs, matrix, flags, positioned_glyphs, positions);
     addGlyphsToPath(positioned_glyphs.data(), positions.data(), positioned_glyphs.size(), path, flags);
@@ -357,10 +420,10 @@ void QFontEngine::addGlyphsToPath(glyph_t *glyphs, QFixedPoint *positions, int n
 QImage QFontEngine::alphaMapForGlyph(glyph_t glyph)
 {
     glyph_metrics_t gm = boundingBox(glyph);
-    int glyph_x = int(floor(gm.x.toReal()));
-    int glyph_y = int(floor(gm.y.toReal()));
-    int glyph_width = int(ceil((gm.x + gm.width).toReal())) -  glyph_x + 2;
-    int glyph_height = int(ceil((gm.y + gm.height).toReal())) - glyph_y + 2;
+    int glyph_x = qFloor(gm.x.toReal());
+    int glyph_y = qFloor(gm.y.toReal());
+    int glyph_width = qCeil((gm.x + gm.width).toReal()) -  glyph_x;
+    int glyph_height = qCeil((gm.y + gm.height).toReal()) - glyph_y;
 
     if (glyph_width <= 0 || glyph_height <= 0)
         return QImage();
@@ -368,7 +431,7 @@ QImage QFontEngine::alphaMapForGlyph(glyph_t glyph)
     pt.x = 0;
     pt.y = -glyph_y; // the baseline
     QPainterPath path;
-    QImage im(glyph_width + glyph_x, glyph_height, QImage::Format_ARGB32_Premultiplied);
+    QImage im(glyph_width + qAbs(glyph_x) + 4, glyph_height, QImage::Format_ARGB32_Premultiplied);
     im.fill(Qt::transparent);
     QPainter p(&im);
     p.setRenderHint(QPainter::Antialiasing);
@@ -392,6 +455,10 @@ QImage QFontEngine::alphaMapForGlyph(glyph_t glyph)
     }
 
     return indexed;
+}
+
+void QFontEngine::removeGlyphFromCache(glyph_t)
+{
 }
 
 QFontEngine::Properties QFontEngine::properties() const
@@ -428,6 +495,284 @@ void QFontEngine::getUnscaledGlyph(glyph_t glyph, QPainterPath *path, glyph_metr
     addGlyphsToPath(&glyph, &p, 1, path, QFlag(0));
 }
 
+#if defined(Q_WS_WIN) || defined(Q_WS_X11) || defined(Q_WS_QWS)
+static inline QFixed kerning(int left, int right, const QFontEngine::KernPair *pairs, int numPairs)
+{
+    uint left_right = (left << 16) + right;
+
+    left = 0, right = numPairs - 1;
+    while (left <= right) {
+        int middle = left + ( ( right - left ) >> 1 );
+
+	if(pairs[middle].left_right == left_right)
+            return pairs[middle].adjust;
+
+        if (pairs[middle].left_right < left_right)
+            left = middle + 1;
+        else
+            right = middle - 1;
+    }
+    return 0;
+}
+
+void QFontEngine::doKerning(int num_glyphs, QGlyphLayout *glyphs, QTextEngine::ShaperFlags flags) const
+{
+    int numPairs = kerning_pairs.size();
+    if(!numPairs)
+        return;
+
+    const KernPair *pairs = kerning_pairs.constData();
+
+    if(flags & QTextEngine::DesignMetrics) {
+        for(int i = 0; i < num_glyphs - 1; ++i)
+            glyphs[i].advance.x += kerning(glyphs[i].glyph, glyphs[i+1].glyph , pairs, numPairs);
+    } else {
+        for(int i = 0; i < num_glyphs - 1; ++i)
+            glyphs[i].advance.x += qRound(kerning(glyphs[i].glyph, glyphs[i+1].glyph , pairs, numPairs));
+    }
+}
+
+static inline bool operator<(const QFontEngine::KernPair &p1, const QFontEngine::KernPair &p2)
+{
+    return p1.left_right < p2.left_right;
+}
+
+void QFontEngine::loadKerningPairs(QFixed scalingFactor)
+{
+    kerning_pairs.clear();
+
+    QByteArray tab = getSfntTable(MAKE_TAG('k', 'e', 'r', 'n'));
+    if (tab.isEmpty())
+        return;
+
+    const uchar *table = reinterpret_cast<const uchar *>(tab.constData());
+
+    unsigned short version = qFromBigEndian<quint16>(table);
+    if (version != 0) {
+//        qDebug("wrong version");
+       return;
+    }
+
+    unsigned short numTables = qFromBigEndian<quint16>(table + 2);
+    {
+        int offset = 4;
+        for(int i = 0; i < numTables; ++i) {
+            if (offset + 6 > tab.size()) {
+//                qDebug("offset out of bounds");
+                goto end;
+            }
+            const uchar *header = table + offset;
+
+            ushort version = qFromBigEndian<quint16>(header);
+            ushort length = qFromBigEndian<quint16>(header+2);
+            ushort coverage = qFromBigEndian<quint16>(header+4);
+//            qDebug("subtable: version=%d, coverage=%x",version, coverage);
+            if(version == 0 && coverage == 0x0001) {
+                if (offset + length > tab.size()) {
+//                    qDebug("length ouf ot bounds");
+                    goto end;
+                }
+                const uchar *data = table + offset + 6;
+
+                ushort nPairs = qFromBigEndian<quint16>(data);
+                if(nPairs * 6 + 8 > length - 6) {
+//                    qDebug("corrupt table!");
+                    // corrupt table
+                    goto end;
+                }
+
+                int off = 8;
+                for(int i = 0; i < nPairs; ++i) {
+                    QFontEngine::KernPair p;
+                    p.left_right = (((uint)qFromBigEndian<quint16>(data+off)) << 16) + qFromBigEndian<quint16>(data+off+2);
+                    p.adjust = QFixed(((int)(short)qFromBigEndian<quint16>(data+off+4))) / scalingFactor;
+                    kerning_pairs.append(p);
+                    off += 6;
+                }
+            }
+            offset += length;
+        }
+    }
+end:
+    qSort(kerning_pairs);
+//    for (int i = 0; i < kerning_pairs.count(); ++i)
+//        qDebug() << "i" << i << "left_right" << hex << kerning_pairs.at(i).left_right;
+}
+
+#else
+void QFontEngine::doKerning(int, QGlyphLayout *, QTextEngine::ShaperFlags) const
+{
+}
+#endif
+
+int QFontEngine::glyphCount() const
+{
+    QByteArray maxpTable = getSfntTable(MAKE_TAG('m', 'a', 'x', 'p'));
+    if (maxpTable.size() < 6)
+        return 0;
+    return qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(maxpTable.constData() + 4));
+}
+
+const uchar *QFontEngine::getCMap(const uchar *table, uint tableSize, bool *isSymbolFont, int *cmapSize)
+{
+    const uchar *header = table;
+    if (tableSize < 4)
+        return 0;
+
+    const uchar *endPtr = table + tableSize;
+
+    // version check
+    if (qFromBigEndian<quint16>(header) != 0)
+        return 0;
+
+    unsigned short numTables = qFromBigEndian<quint16>(header + 2);
+    const uchar *maps = table + 4;
+    if (maps + 8 * numTables > endPtr)
+        return 0;
+
+    int tableToUse = -1;
+    int score = 0;
+    for (int n = 0; n < numTables; ++n) {
+        const quint16 platformId = qFromBigEndian<quint16>(maps + 8 * n);
+        const quint16 platformSpecificId = qFromBigEndian<quint16>(maps + 8 * n + 2);
+        switch (platformId) {
+        case 0: // Unicode
+            if (score < 4 &&
+                (platformSpecificId == 0 ||
+                 platformSpecificId == 2 ||
+                 platformSpecificId == 3)) {
+                tableToUse = n;
+                score = 4;
+            } else if (score < 3 && platformSpecificId == 1) {
+                tableToUse = n;
+                score = 3;
+	    }
+            break;
+        case 1: // Apple
+            if (score < 2 && platformSpecificId == 0) { // Apple Roman
+                tableToUse = n;
+                score = 2;
+            }
+            break;
+        case 3: // Microsoft
+            switch (platformSpecificId) {
+            case 0:
+                if (score < 1) {
+                    tableToUse = n;
+                    score = 1;
+                }
+                break;
+            case 1:
+                if (score < 5) {
+                    tableToUse = n;
+                    score = 5;
+                }
+                break;
+            case 0xa:
+                if (score < 6) {
+                    tableToUse = n;
+                    score = 6;
+                }
+                break;
+            default:
+                break;
+            }
+        default:
+            break;
+        }
+    }
+    if(tableToUse < 0)
+        return 0;
+    *isSymbolFont = (score == 1);
+
+    unsigned int unicode_table = qFromBigEndian<quint32>(maps + 8*tableToUse + 4);
+
+    if (!unicode_table || unicode_table + 8 > tableSize)
+        return 0;
+
+    // get the header of the unicode table
+    header = table + unicode_table;
+
+    unsigned short format = qFromBigEndian<quint16>(header);
+    unsigned int length;
+    if(format < 8)
+        length = qFromBigEndian<quint16>(header + 2);
+    else
+        length = qFromBigEndian<quint32>(header + 4);
+
+    if (table + unicode_table + length > endPtr)
+        return 0;
+    *cmapSize = length;
+    return table + unicode_table;
+}
+
+quint32 QFontEngine::getTrueTypeGlyphIndex(const uchar *cmap, uint unicode)
+{
+    unsigned short format = qFromBigEndian<quint16>(cmap);
+    if (format == 0) {
+        if (unicode < 256)
+            return (int) *(cmap+6+unicode);
+    } else if (format == 4) {
+        /* some fonts come with invalid cmap tables, where the last segment
+           specified end = start = rangeoffset = 0xffff, delta = 0x0001
+           Since 0xffff is never a valid Unicode char anyway, we just get rid of the issue
+           by returning 0 for 0xffff
+        */
+        if(unicode >= 0xffff)
+            return 0;
+        quint16 segCountX2 = qFromBigEndian<quint16>(cmap + 6);
+        const unsigned char *ends = cmap + 14;
+        quint16 endIndex = 0;
+        int i = 0;
+        for (; i < segCountX2/2 && (endIndex = qFromBigEndian<quint16>(ends + 2*i)) < unicode; i++);
+
+        const unsigned char *idx = ends + segCountX2 + 2 + 2*i;
+        quint16 startIndex = qFromBigEndian<quint16>(idx);
+
+        if (startIndex > unicode)
+            return 0;
+
+        idx += segCountX2;
+        qint16 idDelta = (qint16)qFromBigEndian<quint16>(idx);
+        idx += segCountX2;
+        quint16 idRangeoffset_t = (quint16)qFromBigEndian<quint16>(idx);
+
+        quint16 glyphIndex;
+        if (idRangeoffset_t) {
+            quint16 id = qFromBigEndian<quint16>(idRangeoffset_t + 2*(unicode - startIndex) + idx);
+            if (id)
+                glyphIndex = (idDelta + id) % 0x10000;
+            else
+                glyphIndex = 0;
+        } else {
+            glyphIndex = (idDelta + unicode) % 0x10000;
+        }
+        return glyphIndex;
+    } else if (format == 12) {
+        quint32 nGroups = qFromBigEndian<quint32>(cmap + 12);
+
+        cmap += 16; // move to start of groups
+
+        int left = 0, right = nGroups - 1;
+        while (left <= right) {
+            int middle = left + ( ( right - left ) >> 1 );
+
+            quint32 startCharCode = qFromBigEndian<quint32>(cmap + 12*middle);
+            if(unicode < startCharCode)
+                right = middle - 1;
+            else {
+                quint32 endCharCode = qFromBigEndian<quint32>(cmap + 12*middle + 4);
+                if(unicode <= endCharCode)
+                    return qFromBigEndian<quint32>(cmap + 12*middle + 8) + unicode - startCharCode;
+                left = middle + 1;
+            }
+        }
+    } else {
+        qDebug("cmap table of format %d not implemented", format);
+    }
+
+    return 0;
+}
 
 // ------------------------------------------------------------------
 // The box font engine
@@ -482,7 +827,7 @@ void QFontEngineBox::addOutlineToPath(qreal x, qreal y, const QGlyphLayout *glyp
 
     QVarLengthArray<QFixedPoint> positions;
     QVarLengthArray<glyph_t> positioned_glyphs;
-    QMatrix matrix;
+    QTransform matrix;
     matrix.translate(x, y);
     getGlyphPositions(glyphs, numGlyphs, matrix, flags, positioned_glyphs, positions);
     addGlyphsToPath(positioned_glyphs.data(), positions.data(), positioned_glyphs.size(), path, flags);
@@ -502,14 +847,33 @@ glyph_metrics_t QFontEngineBox::boundingBox(const QGlyphLayout *, int numGlyphs)
     return overall;
 }
 
-#if !defined(Q_WS_X11) && !defined(Q_WS_WIN) && !defined(Q_WS_MAC)
-void QFontEngineBox::draw(QPaintEngine *p, qreal x, qreal y, const QTextItemInt &si)
+#if defined(Q_WS_QWS)
+void QFontEngineBox::draw(QPaintEngine *p, qreal x, qreal y, const QTextItemInt &ti)
 {
-    Q_UNUSED(p);
-    Q_UNUSED(x);
-    Q_UNUSED(y);
-    Q_UNUSED(si);
-    //qDebug("QFontEngineBox::draw(%d, %d, numglyphs=%d", x, y, numGlyphs);
+    if (!ti.num_glyphs)
+        return;
+
+    int size = qRound(ascent());
+    QSize s(size - 3, size - 3);
+
+    QVarLengthArray<QFixedPoint> positions;
+    QVarLengthArray<glyph_t> glyphs;
+    QTransform matrix;
+    matrix.translate(x, y - size);
+    ti.fontEngine->getGlyphPositions(ti.glyphs, ti.num_glyphs, matrix, ti.flags, glyphs, positions);
+    if (glyphs.size() == 0)
+        return;
+
+
+    QPainter *painter = p->painter();
+    painter->save();
+    painter->setBrush(Qt::NoBrush);
+    QPen pen = painter->pen();
+    pen.setWidthF(lineThickness().toReal());
+    painter->setPen(pen);
+    for (int k = 0; k < positions.size(); k++)
+        painter->drawRect(QRectF(positions[k].toPointF(), s));
+    painter->restore();
 }
 #endif
 
@@ -606,6 +970,7 @@ bool QFontEngineMulti::stringToCMap(const QChar *str, int len,
         bool surrogate = (str[i].unicode() >= 0xd800 && str[i].unicode() < 0xdc00 && i < len-1
                           && str[i+1].unicode() >= 0xdc00 && str[i+1].unicode() < 0xe000);
         if (glyphs[glyph_pos].glyph == 0) {
+            QGlyphLayout tmp = glyphs[glyph_pos];
             for (int x = 1; x < engines.size(); ++x) {
                 QFontEngine *engine = engines.at(x);
                 if (!engine) {
@@ -625,6 +990,9 @@ bool QFontEngineMulti::stringToCMap(const QChar *str, int len,
                     break;
                 }
             }
+            // ensure we use metrics from the 1st font when we use the fallback image.
+            if (!glyphs[glyph_pos].glyph)
+                glyphs[glyph_pos] = tmp;
         }
         if (surrogate)
             ++i;
@@ -909,9 +1277,9 @@ bool QFontEngineMulti::canRender(const QChar *string, int len)
 
     QVarLengthArray<QGlyphLayout, 256> glyphs(len);
     int nglyphs = len;
-    if (stringToCMap(string, len, glyphs.data(), &nglyphs, 0) == false) {
+    if (stringToCMap(string, len, glyphs.data(), &nglyphs, QTextEngine::GlyphIndicesOnly) == false) {
         glyphs.resize(nglyphs);
-        stringToCMap(string, len, glyphs.data(), &nglyphs, 0);
+        stringToCMap(string, len, glyphs.data(), &nglyphs, QTextEngine::GlyphIndicesOnly);
     }
 
     bool allExist = true;

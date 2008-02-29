@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -59,22 +74,6 @@
     QImageReader can read. QImageReader supports all built-in image
     formats, in addition to any image format plugins that support
     reading.
-
-    \legalese
-    Qt supports GIF reading if it is configured that way during
-    installation. If it is, we are required to state that "The
-    Graphics Interchange Format(c) is the Copyright property of
-    CompuServe Incorporated. GIF(sm) is a Service Mark property of
-    CompuServe Incorporated."
-
-    \warning If you are in a country that recognizes software patents
-    and in which Unisys holds a patent on LZW compression and/or
-    decompression and you want to use GIF, Unisys may require you to
-    license that technology. Such countries include Canada, Japan,
-    the US, France, Germany, Italy and the UK.
-
-    GIF support may be removed completely in a future version of Qt.
-    We recommend using the MNG or PNG format.
 
     \sa QImageWriter, QImageIOHandler, QImageIOPlugin
 */
@@ -202,8 +201,8 @@ static QImageIOHandler *createReadHandler(QIODevice *device, const QByteArray &f
              << keys.size() << "plugins available: " << keys;
 #endif
 
-    int suffixPluginIndex = -1;
 #ifndef QT_NO_LIBRARY
+    int suffixPluginIndex = -1;
     if (device && format.isEmpty()) {
         // if there's no format, see if \a device is a file, and if so, find
         // the file suffix and find support for that format among our plugins.
@@ -213,7 +212,7 @@ static QImageIOHandler *createReadHandler(QIODevice *device, const QByteArray &f
             qDebug() << "QImageReader::createReadHandler: device is a file:" << file->fileName();
 #endif
             if (!(suffix = QFileInfo(file->fileName()).suffix().toLower().toLatin1()).isEmpty()) {
-                int index = keys.indexOf(suffix);
+                int index = keys.indexOf(QString::fromLatin1(suffix));
                 if (index != -1) {
 #ifdef QIMAGEREADER_DEBUG
                     qDebug() << "QImageReader::createReadHandler: suffix recognized; the"
@@ -233,7 +232,7 @@ static QImageIOHandler *createReadHandler(QIODevice *device, const QByteArray &f
         // check if the plugin that claims support for this format can load
         // from this device with this format.
         const qint64 pos = device ? device->pos() : 0;
-        QImageIOPlugin *plugin = qobject_cast<QImageIOPlugin *>(l->instance(suffix));
+        QImageIOPlugin *plugin = qobject_cast<QImageIOPlugin *>(l->instance(QString::fromLatin1(suffix)));
         if (plugin && plugin->capabilities(device, testFormat) & QImageIOPlugin::CanRead) {
             handler = plugin->create(device, testFormat);
 #ifdef QIMAGEREADER_DEBUG
@@ -606,7 +605,11 @@ void QImageReader::setFormat(const QByteArray &format)
         // reader.format() == "png"
     \endcode
 
-    \sa setFormat()
+    If the reader cannot read any image from the device (e.g., there is no
+    image there, or the image has already been read), or if the format is
+    unsupported, this function returns an empty QByteArray().
+
+    \sa setFormat(), supportedImageFormats()
 */
 QByteArray QImageReader::format() const
 {
@@ -1250,6 +1253,7 @@ QByteArray QImageReader::imageFormat(QIODevice *device)
     \row    \o PBM    \o Portable Bitmap
     \row    \o PGM    \o Portable Graymap
     \row    \o PPM    \o Portable Pixmap
+    \row    \o TIFF   \o Tagged Image File Format
     \row    \o XBM    \o X11 Bitmap
     \row    \o XPM    \o X11 Pixmap
     \endtable

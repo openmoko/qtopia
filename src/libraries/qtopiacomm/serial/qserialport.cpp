@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,7 +25,6 @@
 #include <qsocketnotifier.h>
 #include <qtimer.h>
 
-#ifndef Q_OS_WIN32
 #include <termios.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -42,7 +41,6 @@
 #include <arpa/inet.h>
 #define USE_POSIX_SYSCALLS  1
 #define USE_TERMIOS         1
-#endif
 
 
 class QSerialPortPrivate
@@ -135,6 +133,17 @@ QSerialPort::~QSerialPort()
 {
     close();
     delete d;
+}
+
+/*!
+    Returns the operating system file descriptor for this serial port,
+    or -1 if the port is currently closed.
+
+    \since 4.3
+*/
+int QSerialPort::fd() const
+{
+    return d->fd;
 }
 
 /*!
@@ -681,12 +690,9 @@ QProcess *QSerialPort::run( const QStringList& arguments,
                               bool addPPPdOptions )
 {
     if ( addPPPdOptions && d->isTty ) {
-        // Bail out if we are already running a process on this device.
-        if ( !isOpen() )
-            return 0;
-
-        // Close the serial device before handing it off to the child process.
-        close();
+        // Make sure we aren't using the device before handing it off to pppd.
+        if ( isOpen() )
+            close();
 
         // Build a new argument list for pppd, with the device name in place.
         QStringList newargs;

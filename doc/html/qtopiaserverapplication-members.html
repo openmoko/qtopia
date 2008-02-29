@@ -24,6 +24,7 @@
 <li><div class="fn"/>enum <a href="qtopiaapplication.html#PowerConstraint-enum">PowerConstraint</a></li>
 <li><div class="fn"/>enum <a href="qtopiaserverapplication.html#ShutdownType-enum">ShutdownType</a></li>
 <li><div class="fn"/>enum <a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a></li>
+<li><div class="fn"/>enum <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerRole</a></li>
 <li><div class="fn"/>enum <a href="qapplication.html#Type-enum">Type</a></li>
 <li><div class="fn"/><a href="qapplication.html#CustomColors-var">CustomColors</a> : </li>
 <li><div class="fn"/><a href="qapplication.html#NormalColors-var">NormalColors</a> : </li>
@@ -34,6 +35,7 @@
 <li><div class="fn"/><a href="qapplication.html#activeWindow">activeWindow</a> ()</li>
 <li><div class="fn"/><a href="qtopiaserverapplication.html#addAggregateObject">addAggregateObject</a> ( QObject *, QObject * )</li>
 <li><div class="fn"/><a href="qcoreapplication.html#addLibraryPath">addLibraryPath</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qapplication.html#alert">alert</a> ( QWidget *, int )</li>
 <li><div class="fn"/><a href="qapplication.html#allWidgets">allWidgets</a> ()</li>
 <li><div class="fn"/><a href="qtopiaapplication.html#appMessage">appMessage</a> ( const QString &amp;, const QByteArray &amp; )</li>
 <li><div class="fn"/><a href="qcoreapplication.html#applicationDirPath">applicationDirPath</a> ()</li>
@@ -98,7 +100,6 @@
 <li><div class="fn"/><a href="qapplication.html#font-3">font</a> ( const char * )</li>
 <li><div class="fn"/><a href="qapplication.html#fontMetrics">fontMetrics</a> ()</li>
 <li><div class="fn"/><a href="qapplication.html#globalStrut">globalStrut</a> ()</li>
-<li><div class="fn"/><a href="qtopiaapplication.html#grabKeyboard">grabKeyboard</a> ()</li>
 <li><div class="fn"/><a href="qapplication.html#hasGlobalMouseTracking">hasGlobalMouseTracking</a> ()</li>
 <li><div class="fn"/><a href="qcoreapplication.html#hasPendingEvents">hasPendingEvents</a> ()</li>
 <li><div class="fn"/><a href="qtopiaapplication.html#hideInputMethod">hideInputMethod</a> ()</li>
@@ -150,9 +151,10 @@
 <li><div class="fn"/><a href="qapplication.html#palette">palette</a> ()</li>
 <li><div class="fn"/><a href="qapplication.html#palette-2">palette</a> ( const QWidget * )</li>
 <li><div class="fn"/><a href="qapplication.html#palette-3">palette</a> ( const char * )</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qobject.html#parent">parent</a> () const</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qcoreapplication.html#postEvent">postEvent</a> ( QObject *, QEvent * )</li>
+<li><div class="fn"/><a href="qcoreapplication.html#postEvent-2">postEvent</a> ( QObject *, QEvent *, int )</li>
 <li><div class="fn"/><a href="qcoreapplication.html#processEvents">processEvents</a> ( QEventLoop::ProcessEventsFlags )</li>
 <li><div class="fn"/><a href="qcoreapplication.html#processEvents-2">processEvents</a> ( QEventLoop::ProcessEventsFlags, int )</li>
 <li><div class="fn"/><a href="qcoreapplication.html#processOneEvent">processOneEvent</a> ()</li>
@@ -171,6 +173,7 @@
 <li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qcoreapplication.html#removeLibraryPath">removeLibraryPath</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcoreapplication.html#removePostedEvents">removePostedEvents</a> ( QObject * )</li>
+<li><div class="fn"/><a href="qcoreapplication.html#removePostedEvents-2">removePostedEvents</a> ( QObject *, int )</li>
 <li><div class="fn"/><a href="qtopiaserverapplication.html#removeQWSEventFilter">removeQWSEventFilter</a> ( QWSEventFilter * )</li>
 <li><div class="fn"/><a href="qcoreapplication.html#removeTranslator">removeTranslator</a> ( QTranslator * )</li>
 <li><div class="fn"/><a href="qtopiaapplication.html#resetContent">resetContent</a> ()</li>
@@ -226,6 +229,7 @@
 <li><div class="fn"/><a href="qapplication.html#setStyle-2">setStyle</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qapplication.html#setStyleSheet">setStyleSheet</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qtopiaapplication.html#setStylusOperation">setStylusOperation</a> ( QWidget *, StylusMode )</li>
+<li><div class="fn"/><a href="qtopiaapplication.html#setSxeAuthorizerRole">setSxeAuthorizerRole</a> ( SxeAuthorizerRole )</li>
 <li><div class="fn"/><a href="qapplication.html#setWheelScrollLines">setWheelScrollLines</a> ( int )</li>
 <li><div class="fn"/><a href="qapplication.html#setWinStyleHighlightColor">setWinStyleHighlightColor</a> ( const QColor &amp; )</li>
 <li><div class="fn"/><a href="qapplication.html#setWindowIcon">setWindowIcon</a> ( const QIcon &amp; )</li>
@@ -248,6 +252,7 @@
 <li><div class="fn"/><a href="qapplication.html#style">style</a> ()</li>
 <li><div class="fn"/><a href="qapplication.html#styleSheet">styleSheet</a> () const</li>
 <li><div class="fn"/><a href="qtopiaapplication.html#stylusOperation">stylusOperation</a> ( QWidget * ) : StylusMode</li>
+<li><div class="fn"/><a href="qtopiaapplication.html#sxeAuthorizerRole">sxeAuthorizerRole</a> () const : SxeAuthorizerRole</li>
 <li><div class="fn"/><a href="qapplication.html#syncX">syncX</a> ()</li>
 <li><div class="fn"/><a href="qtopiaserverapplication.html#taskConfigFile">taskConfigFile</a> () : QString</li>
 <li><div class="fn"/><a href="qtopiaserverapplication.html#taskValueSpaceObject">taskValueSpaceObject</a> ( const QByteArray &amp; ) : QByteArray</li>
@@ -265,7 +270,6 @@
 <li><div class="fn"/><a href="qcoreapplication.html#translate-2">translate</a> ( const char *, const char *, const char *, Encoding )</li>
 <li><div class="fn"/><a href="qcoreapplication.html#tryLock">tryLock</a> ()</li>
 <li><div class="fn"/><a href="qapplication.html#type">type</a> ()</li>
-<li><div class="fn"/><a href="qtopiaapplication.html#ungrabKeyboard">ungrabKeyboard</a> ()</li>
 <li><div class="fn"/><a href="qcoreapplication.html#unlock">unlock</a> ( bool )</li>
 <li><div class="fn"/><a href="qtopiaapplication.html#unregisterRunningTask">unregisterRunningTask</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qtopiaapplication.html#unregisterRunningTask-2">unregisterRunningTask</a> ( QObject * )</li>
@@ -290,6 +294,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

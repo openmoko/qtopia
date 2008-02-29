@@ -5,14 +5,17 @@ CONFIG+=no_tr singleexec_main
 SOURCES	= \
     main.cpp \
     migrateengine.cpp\
-    qtopiapim/pimmigrate.cpp
+    qtopiapim/pimmigrate.cpp\
+    qtopiaphone/phonemigrate.cpp
 
 HEADERS  = \
     migrateengine.h\
-    qtopiapim/pimmigrate.h
+    qtopiapim/pimmigrate.h\
+    qtopiaphone/phonemigrate.h
 
 RESOURCES+=\
-    qtopiapim/pimmigrate.qrc
+    qtopiapim/pimmigrate.qrc\
+    qtopiaphone/phonemigrate.qrc
 
 !enable_singleexec {
     RESOURCES+=\
@@ -21,7 +24,7 @@ RESOURCES+=\
 }
 
 depends(libraries/qtopia)
-depends(libraries/qtopiapim)
+depends(libraries/qtopiabase)
 depends(3rdparty/libraries/sqlite)
 
 pkg.desc=Database upgrade migration utility

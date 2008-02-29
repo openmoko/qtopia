@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,7 +20,9 @@
 ****************************************************************************/
 
 #include "phonethemeview.h"
-#include "homescreen.h"
+#include "phonelauncher.h"
+#include "homescreencontrol.h"
+#include "homescreenwidgets.h"
 #include <qtopiaservices.h>
 #include <qtopianamespace.h>
 #include <qvaluespace.h>
@@ -104,37 +106,14 @@ Q_GLOBAL_STATIC(PhoneThemedViewMonitor, phoneThemedViewMonitor);
     \o Shows dialer
   \endtable
 
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
-
-struct PhoneKeyDescription
-{
-    const char *name;
-    int key;
-    int ascii;
-    const char *text;
-};
-
-PhoneKeyDescription keyMap[] = {
-    {"zero", Qt::Key_0, '0', "0"}, // no tr
-    {"one", Qt::Key_1, '1', "1"}, // no tr
-    {"two", Qt::Key_2, '2', "2"}, // no tr
-    {"three", Qt::Key_3, '3', "3"}, // no tr
-    {"four", Qt::Key_4, '4', "4"}, // no tr
-    {"five", Qt::Key_5, '5', "5"}, // no tr
-    {"six", Qt::Key_6, '6', "6"}, // no tr
-    {"seven", Qt::Key_7, '7', "7"}, // no tr
-    {"eight", Qt::Key_8, '8', "8"}, // no tr
-    {"nine", Qt::Key_9, '9', "9"}, // no tr
-    {"hash", Qt::Key_NumberSign, '#', "#"}, // no tr
-    {"star", Qt::Key_Asterisk, '*', "*"}, // no tr
-    {0, 0, 0, 0}
-};
 
 PhoneThemedView::PhoneThemedView(QWidget *parent, Qt::WFlags f)
 : ThemedView(parent, f)
 {
-    QObject::connect(this, SIGNAL(itemClicked(ThemeItem *)),
-                     this, SLOT(myItemClicked(ThemeItem *)));
+    QObject::connect(this, SIGNAL(itemClicked(ThemeItem*)),
+                     this, SLOT(myItemClicked(ThemeItem*)));
     m_themedViews.insert(this);
     phoneThemedViewMonitor()->add(this);
 }
@@ -144,19 +123,29 @@ PhoneThemedView::~PhoneThemedView()
     m_themedViews.remove(this);
 }
 
+QWidget *PhoneThemedView::newWidget(ThemeWidgetItem *input, const QString &name)
+{
+    Q_UNUSED(input);
+
+    // First check if the theme widget is a homescreen widget
+    QWidget* widget = HomeScreenWidgets::create(name, this);
+    if (widget != 0)
+        return widget;
+    return 0;
+}
+
 void PhoneThemedView::myItemClicked(ThemeItem *item)
 {
     if( !item->isInteractive() )
         return;
-
     QString in = item->itemName();
     if( in == "messages" ) {
-        ///TODO : should open inbox?
-        QtopiaServiceRequest e( "SMS", "viewSms()" );
+        QtopiaServiceRequest e( "Messages", "viewNewMessages(bool)" );
+        e << true;
         e.send();
     } else if( in == "calls" ) {
 #ifdef QTOPIA_PHONEUI
-        HomeScreen::getInstancePtr()->showCallHistory(true, QString());
+        HomeScreenControl::instance()->homeScreen()->showCallHistory(true, QString());
 #endif
     } else if( in == "roaming" || in == "signal" ) {
         QContent app( QtopiaService::app( "CallNetworks" ));
@@ -181,26 +170,7 @@ void PhoneThemedView::myItemClicked(ThemeItem *item)
     } else if( in == "profile" ) {
         QtopiaServiceRequest e( "RingProfiles", "showRingProfiles()" );
         e.send();
-    } else if( in == "dialer" ) {
-        QtopiaServiceRequest e( "Dialer", "showDialer(QString)" );
-        e << QString();
-        e.send();
-    } else if( in == "mainmenu" ) {
-#ifdef QTOPIA4_TODO
-        QtopiaApplication::sendEvent( this, new QKeyEvent( QEvent::KeyPress, Qt::Key_Select, Qt::Key_Select, Qt::NoButton ) );
-#endif
     }
-
-#if 0
-    int i = 0;
-    while (keyMap[i].name != 0) {
-        if (in == keyMap[i].name) {
-            PhoneLock::instance()->preProcessLocked(keyMap[i].key, keyMap[i].ascii, true);
-            break;
-        }
-        ++i;
-    }
-#endif
 }
 
 QSet<PhoneThemedView *> PhoneThemedView::themedViews()
@@ -213,8 +183,8 @@ PhoneThemedViewMonitor::PhoneThemedViewMonitor()
 : QObject(0),
   sysChannel("QPE/System")
 {
-    QObject::connect(&sysChannel, SIGNAL(received(const QString&,const QByteArray&)),
-                     this, SLOT(sysMessage(const QString&,const QByteArray&)));
+    QObject::connect(&sysChannel, SIGNAL(received(QString,QByteArray)),
+                     this, SLOT(sysMessage(QString,QByteArray)));
 }
 
 void PhoneThemedViewMonitor::add(PhoneThemedView *)

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -49,19 +64,19 @@
 struct QShortcutEntry
 {
     QShortcutEntry()
-        : keyseq(0), context(Qt::WindowShortcut), enabled(false), id(0), autorepeat(1), owner(0)
+        : keyseq(0), context(Qt::WindowShortcut), enabled(false), autorepeat(1), id(0), owner(0)
     {}
 
     QShortcutEntry(const QKeySequence &k)
-        : keyseq(k), context(Qt::WindowShortcut), enabled(false), id(0), autorepeat(1), owner(0)
+        : keyseq(k), context(Qt::WindowShortcut), enabled(false), autorepeat(1), id(0), owner(0)
     {}
 
     QShortcutEntry(QObject *o, const QKeySequence &k, Qt::ShortcutContext c, int i)
-        : keyseq(k), context(c), enabled(true), id(i), autorepeat(1), owner(o)
+        : keyseq(k), context(c), enabled(true), autorepeat(1), id(i), owner(o)
     {}
 
     QShortcutEntry(QObject *o, const QKeySequence &k, Qt::ShortcutContext c, int i, bool a)
-        : keyseq(k), context(c), enabled(true), id(i), autorepeat(a), owner(o)
+        : keyseq(k), context(c), enabled(true), autorepeat(a), id(i), owner(o)
     {}
 
     bool operator<(const QShortcutEntry &f) const
@@ -70,8 +85,8 @@ struct QShortcutEntry
     QKeySequence keyseq;
     Qt::ShortcutContext context;
     bool enabled : 1;
-    signed int id : 31;
     bool autorepeat : 1;
+    signed int id;
     QObject *owner;
 };
 
@@ -112,6 +127,7 @@ public:
     int ambigCount;                             // Index of last enabled ambiguous dispatch
     QKeySequence::SequenceMatch currentState;
     QVector<QKeySequence> currentSequences;     // Sequence for the current state
+    QVector<QKeySequence> newEntries;
     QKeySequence prevSequence;                  // Sequence for the previous identical match
     QVector<const QShortcutEntry*> identicals;  // Last identical matches
 };
@@ -159,7 +175,7 @@ int QShortcutMap::addShortcut(QObject *owner, const QKeySequence &key, Qt::Short
 
 /*! \internal
     Removes a shortcut from the global map.
-    If \a owner is 0, all entries in the map with the keysequence specified
+    If \a owner is 0, all entries in the map with the key sequence specified
     is removed. If \a key is null, all sequences for \a owner is removed from
     the map. If \a id is 0, any identical \a key sequences owned by \a owner
     are removed.
@@ -206,7 +222,7 @@ int QShortcutMap::removeShortcut(int id, QObject *owner, const QKeySequence &key
 
 /*! \internal
     Changes the enable state of a shortcut to \a enable.
-    If \a owner is 0, all entries in the map with the keysequence specified
+    If \a owner is 0, all entries in the map with the key sequence specified
     is removed. If \a key is null, all sequences for \a owner is removed from
     the map. If \a id is 0, any identical \a key sequences owned by \a owner
     are changed.
@@ -244,7 +260,7 @@ int QShortcutMap::setShortcutEnabled(bool enable, int id, QObject *owner, const 
 
 /*! \internal
     Changes the auto repeat state of a shortcut to \a enable.
-    If \a owner is 0, all entries in the map with the keysequence specified
+    If \a owner is 0, all entries in the map with the key sequence specified
     is removed. If \a key is null, all sequences for \a owner is removed from
     the map. If \a id is 0, any identical \a key sequences owned by \a owner
     are changed.
@@ -372,15 +388,6 @@ QKeySequence::SequenceMatch QShortcutMap::nextState(QKeyEvent *e)
             QKeyEvent pe = QKeyEvent(e->type(), Qt::Key_Tab, e->modifiers(), e->text());
             result = find(&pe);
         }
-#if 0
-        // ### This is not needed anymore, kill it when qkeymapper is done...
-        // If still no result, try removing the Shift modifier
-        if (result == QKeySequence::NoMatch) {
-            QKeyEvent pe = QKeyEvent(e->type(), e->key(),
-                                     e->modifiers()&~Qt::ShiftModifier, e->text());
-            result = find(&pe);
-        }
-#endif
     }
 
     // Should we eat this key press?
@@ -411,14 +418,13 @@ QKeySequence::SequenceMatch QShortcutMap::find(QKeyEvent *e)
     if (!d->sequences.count())
         return QKeySequence::NoMatch;
 
-    static QVector<QKeySequence> newEntries;
-    createNewSequences(e, newEntries);
+    createNewSequences(e, d->newEntries);
 #if defined(DEBUG_QSHORTCUTMAP)
-    qDebug() << "Possible shortcut keysequences:" << newEntries;
+    qDebug() << "Possible shortcut key sequences:" << d->newEntries;
 #endif
 
     // Should never happen
-    if (newEntries == d->currentSequences) {
+    if (d->newEntries == d->currentSequences) {
         Q_ASSERT_X(e->key() != Qt::Key_unknown || e->text().length(),
                    "QShortcutMap::find", "New sequence to find identical to previous");
         return QKeySequence::NoMatch;
@@ -431,8 +437,8 @@ QKeySequence::SequenceMatch QShortcutMap::find(QKeyEvent *e)
     bool identicalDisabledFound = false;
     QVector<QKeySequence> okEntries;
     int result = QKeySequence::NoMatch;
-    for (int i = newEntries.count()-1; i >= 0 ; --i) {
-        QShortcutEntry entry(newEntries.at(i)); // needed for searching
+    for (int i = d->newEntries.count()-1; i >= 0 ; --i) {
+        QShortcutEntry entry(d->newEntries.at(i)); // needed for searching
         QList<QShortcutEntry>::ConstIterator itEnd = d->sequences.constEnd();
         QList<QShortcutEntry>::ConstIterator it =
              qLowerBound(d->sequences.constBegin(), itEnd, entry);
@@ -470,13 +476,13 @@ QKeySequence::SequenceMatch QShortcutMap::find(QKeyEvent *e)
         if (oneKSResult > result) {
             okEntries.clear();
 #if defined(DEBUG_QSHORTCUTMAP)
-            qDebug() << "Found better match (" << newEntries << "), clearing keysequence list";
+            qDebug() << "Found better match (" << d->newEntries << "), clearing key sequence list";
 #endif
         }
         if (oneKSResult && oneKSResult >= result) {
-            okEntries << newEntries.at(i);
+            okEntries << d->newEntries.at(i);
 #if defined(DEBUG_QSHORTCUTMAP)
-            qDebug() << "Added ok keysequence" << newEntries;
+            qDebug() << "Added ok key sequence" << d->newEntries;
 #endif
         }
     }
@@ -509,6 +515,7 @@ QKeySequence::SequenceMatch QShortcutMap::find(QKeyEvent *e)
 void QShortcutMap::clearSequence(QVector<QKeySequence> &ksl)
 {
     ksl.clear();
+    d_func()->newEntries.clear();
 }
 
 /*! \internal

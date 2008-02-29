@@ -1,1 +1,1 @@
-Dummy library used to make dependencies clearer.
+Stub library used to link against the system/toolchain DBUS library.

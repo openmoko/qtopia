@@ -5,7 +5,6 @@
 #include <qtopiaapplication.h>
 
 #include <qapplication.h>
-#include <qwsdisplay_qws.h>
 #include <qtimer.h>
 #include <qstyle.h>
 #include <QPainter>
@@ -45,7 +44,6 @@ SymbolPicker::SymbolPicker(QWidget *parent)
 
     QFont fnt(font());
     int cw=0;
-    int tw;
     do {
 	if ( cw ) // not first time round
 	    fnt.setPointSize(fnt.pointSize()-2);
@@ -55,17 +53,13 @@ SymbolPicker::SymbolPicker(QWidget *parent)
 	    int w = fm.width(chars[i]);
 	    if ( w > cw ) cw = w;
 	}
-	tw = (cw+2)*charsPerRow;
-//	tw += style()->scrollBarExtent().width();
-//	tw += frameWidth() * 2;
-    } while ( /*tw > qApp->desktop()->width() &&*/ fnt.pointSize() > 6 );
+    } while ( fnt.pointSize() > 6 );
 
     setFont(fnt);
 
     QFontMetrics fm( font() );
-    setCellHeight( fm.lineSpacing() + 3 );
-//    setCellWidth( qMin(cw+1, qApp->desktop()->width() / (charsPerRow+1) ));
-//    verticalScrollBar()->setLineStep(cellHeight());
+    setCellHeight( fm.lineSpacing() + 1 );
+    setCellWidth( cw + 2 );
 
     setNumRows((chars.length()+charsPerRow-1)/charsPerRow);
 

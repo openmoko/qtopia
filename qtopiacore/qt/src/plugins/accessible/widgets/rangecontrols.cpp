@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -31,6 +46,9 @@
 #include <qstyleoption.h>
 #include <qdebug.h>
 #include <qglobal.h>
+#include <QDoubleSpinBox>
+#include <QDial>
+#include <private/qmath_p.h>
 
 #ifndef QT_NO_ACCESSIBILITY
 extern QString Q_GUI_EXPORT qt_accStripAmp(const QString &text);
@@ -42,54 +60,34 @@ extern QStyleOptionSlider Q_GUI_EXPORT qt_qsliderStyleOption(QSlider *slider);
 #endif
 
 #ifndef QT_NO_SPINBOX
-/*!
-  \class QAccessibleSpinBox qaccessiblewidget.h
-  \brief The QAccessibleSpinBox class implements the QAccessibleInterface for spinbox widgets.
-  \internal
-
-  \ingroup accessibility
-*/
-
-/*!
-    \enum QAccessibleSpinBox::SpinBoxElements
-
-    This enum identifies the components of the spin box.
-
-    \value SpinBoxSelf The spin box as a whole
-    \value Editor The line edit sub-widget.
-    \value ValueUp The up sub-widget (i.e. the up arrow or + button)
-    \value ValueDown The down sub-widget (i.e. the down arrow or - button)
-*/
-
-/*!
-  Constructs a QAccessibleSpinWidget object for \a w.
-*/
-QAccessibleSpinBox::QAccessibleSpinBox(QWidget *w)
-: QAccessibleWidget(w, SpinBox)
+QAccessibleAbstractSpinBox::QAccessibleAbstractSpinBox(QWidget *w)
+: QAccessibleWidgetEx(w, SpinBox)
 {
-    Q_ASSERT(spinBox());
-    addControllingSignal("valueChanged(int)");
-    addControllingSignal("valueChanged(QString)");
+    Q_ASSERT(abstractSpinBox());
 }
 
 /*!
-    Returns the underlying QSpinBox.
+    Returns the underlying QAbstractSpinBox.
 */
-QSpinBox *QAccessibleSpinBox::spinBox() const
+QAbstractSpinBox *QAccessibleAbstractSpinBox::abstractSpinBox() const
 {
-    return qobject_cast<QSpinBox*>(object());
+    return qobject_cast<QAbstractSpinBox*>(object());
 }
 
 /*! \reimp */
-int QAccessibleSpinBox::childCount() const
+int QAccessibleAbstractSpinBox::childCount() const
 {
+    if (!abstractSpinBox()->isVisible())
+        return 0;
     return ValueDown;
 }
 
 /*! \reimp */
-QRect QAccessibleSpinBox::rect(int child) const
+QRect QAccessibleAbstractSpinBox::rect(int child) const
 {
     QRect rect;
+    if (!abstractSpinBox()->isVisible())
+        return rect;
     QStyleOptionSpinBox so;
     so.rect = widget()->rect();
     switch(child) {
@@ -114,7 +112,7 @@ QRect QAccessibleSpinBox::rect(int child) const
 }
 
 /*! \reimp */
-int QAccessibleSpinBox::navigate(RelationFlag rel, int entry, QAccessibleInterface **target) const
+int QAccessibleAbstractSpinBox::navigate(RelationFlag rel, int entry, QAccessibleInterface **target) const
 {
     *target = 0;
 
@@ -132,12 +130,14 @@ int QAccessibleSpinBox::navigate(RelationFlag rel, int entry, QAccessibleInterfa
     default:
         break;
     }
-    return QAccessibleWidget::navigate(rel, entry, target);
+    return QAccessibleWidgetEx::navigate(rel, entry, target);
 }
 
 /*! \reimp */
-QString QAccessibleSpinBox::text(Text t, int child) const
+QString QAccessibleAbstractSpinBox::text(Text t, int child) const
 {
+    if (!abstractSpinBox()->isVisible())
+        return QString();
     switch (t) {
     case Name:
         switch (child) {
@@ -149,16 +149,16 @@ QString QAccessibleSpinBox::text(Text t, int child) const
         break;
     case Value:
         if (child == Editor || child == SpinBoxSelf)
-            return spinBox()->text();
+            return abstractSpinBox()->text();
         break;
     default:
         break;
     }
-    return QAccessibleWidget::text(t, 0);
+    return QAccessibleWidgetEx::text(t, 0);
 }
 
 /*! \reimp */
-QAccessible::Role QAccessibleSpinBox::role(int child) const
+QAccessible::Role QAccessibleAbstractSpinBox::role(int child) const
 {
     switch(child) {
     case Editor:
@@ -169,13 +169,115 @@ QAccessible::Role QAccessibleSpinBox::role(int child) const
     default:
         break;
     }
-    return QAccessibleWidget::role(child);
+    return QAccessibleWidgetEx::role(child);
+}
+
+/*! \reimp */
+bool QAccessibleAbstractSpinBox::doAction(int action, int child, const QVariantList &params)
+{
+    if (!widget()->isEnabled())
+        return false;
+
+    if (action == Press) {
+        switch(child) {
+        case ValueUp:
+            abstractSpinBox()->stepUp();
+            return true;
+        case ValueDown:
+            abstractSpinBox()->stepDown();
+            return true;
+        default:
+            break;
+        }
+    }
+    return QAccessibleWidgetEx::doAction(action, 0, params);
+}
+
+QVariant QAccessibleAbstractSpinBox::currentValue()
+{
+    QVariant result = abstractSpinBox()->property("value");
+    QVariant::Type type = result.type();
+
+    // IA2 only allows numeric types
+    if (type == QVariant::Int || type == QVariant::UInt || type == QVariant::LongLong
+        || type == QVariant::ULongLong || type == QVariant::Double)
+        return result;
+
+    return QVariant();
+}
+
+void QAccessibleAbstractSpinBox::setCurrentValue(const QVariant &value)
+{
+    abstractSpinBox()->setProperty("setValue", value);
+}
+
+QVariant QAccessibleAbstractSpinBox::maximumValue()
+{
+    return abstractSpinBox()->property("maximum");
+}
+
+QVariant QAccessibleAbstractSpinBox::minimumValue()
+{
+    return abstractSpinBox()->property("minimum");
+}
+
+QVariant QAccessibleAbstractSpinBox::invokeMethodEx(Method method, int child, const QVariantList &params)
+{
+    switch (method) {
+    case ListSupportedMethods: {
+        QSet<QAccessible::Method> set;
+        set << ListSupportedMethods;
+        return qVariantFromValue(set | qvariant_cast<QSet<QAccessible::Method> >(
+                    QAccessibleWidgetEx::invokeMethodEx(method, child, params)));
+    }
+    default:
+        return QAccessibleWidgetEx::invokeMethodEx(method, child, params);
+    }
+}
+
+
+/*!
+  \class QAccessibleSpinBox qaccessiblewidget.h
+  \brief The QAccessibleSpinBox class implements the QAccessibleInterface for spinbox widgets.
+  \internal
+
+  \ingroup accessibility
+*/
+
+/*!
+    \enum QAccessibleAbstractSpinBox::SpinBoxElements
+
+    This enum identifies the components of the spin box.
+
+    \value SpinBoxSelf The spin box as a whole
+    \value Editor The line edit sub-widget.
+    \value ValueUp The up sub-widget (i.e. the up arrow or + button)
+    \value ValueDown The down sub-widget (i.e. the down arrow or - button)
+*/
+
+/*!
+  Constructs a QAccessibleSpinWidget object for \a w.
+*/
+QAccessibleSpinBox::QAccessibleSpinBox(QWidget *w)
+: QAccessibleAbstractSpinBox(w)
+{
+    Q_ASSERT(spinBox());
+    addControllingSignal(QLatin1String("valueChanged(int)"));
+    addControllingSignal(QLatin1String("valueChanged(QString)"));
+}
+
+/*!
+    Returns the underlying QSpinBox.
+*/
+QSpinBox *QAccessibleSpinBox::spinBox() const
+{
+    return qobject_cast<QSpinBox*>(object());
 }
 
 /*! \reimp */
 QAccessible::State QAccessibleSpinBox::state(int child) const
 {
-    State state = QAccessibleWidget::state(child);
+    State state = QAccessibleAbstractSpinBox::state(child);
     switch(child) {
     case ValueUp:
         if (spinBox()->value() >= spinBox()->maximum())
@@ -192,28 +294,167 @@ QAccessible::State QAccessibleSpinBox::state(int child) const
 }
 
 /*! \reimp */
-bool QAccessibleSpinBox::doAction(int action, int /*child*/, const QVariantList &params)
+bool QAccessibleSpinBox::doAction(int action, int child, const QVariantList &params)
 {
     if (!widget()->isEnabled())
         return false;
 
-/* // ### vohi - what's that code?
-    if (action == Press) switch(child) {
+    if (action == Press) {
+        switch(child) {
+        case ValueUp:
+            if (spinBox()->value() >= spinBox()->maximum())
+                return false;
+            spinBox()->stepUp();
+            return true;
+        case ValueDown:
+            if (spinBox()->value() <= spinBox()->minimum())
+                return false;
+            spinBox()->stepDown();
+            return true;
+        default:
+            break;
+        }
+    }
+    return QAccessibleAbstractSpinBox::doAction(action, 0, params);
+}
+
+// ================================== QAccessibleDoubleSpinBox ==================================
+QAccessibleDoubleSpinBox::QAccessibleDoubleSpinBox(QWidget *widget)
+    : QAccessibleWidgetEx(widget, SpinBox)
+{
+    Q_ASSERT(qobject_cast<QDoubleSpinBox *>(widget));
+    addControllingSignal(QLatin1String("valueChanged(double)"));
+    addControllingSignal(QLatin1String("valueChanged(QString)"));
+}
+
+/*!
+    Returns the underlying QDoubleSpinBox.
+*/
+QDoubleSpinBox *QAccessibleDoubleSpinBox::doubleSpinBox() const
+{
+    return static_cast<QDoubleSpinBox*>(object());
+}
+
+/*! \reimp */
+int QAccessibleDoubleSpinBox::childCount() const
+{
+    if (!doubleSpinBox()->isVisible())
+        return 0;
+    return ValueDown;
+}
+
+/*! \reimp */
+QRect QAccessibleDoubleSpinBox::rect(int child) const
+{
+    QRect rect;
+    if (!doubleSpinBox()->isVisible())
+        return rect;
+    QStyleOptionSpinBox spinBoxOption;
+    spinBoxOption.initFrom(doubleSpinBox());
+    switch (child) {
+    case Editor:
+        rect = doubleSpinBox()->style()->subControlRect(QStyle::CC_SpinBox, &spinBoxOption,
+                                                 QStyle::SC_SpinBoxEditField, doubleSpinBox());
+        break;
     case ValueUp:
-        if (spinBox()->value() >= spinBox()->maxValue())
-            return false;
-        spinBox()->stepUp();
-        return true;
+        rect = doubleSpinBox()->style()->subControlRect(QStyle::CC_SpinBox, &spinBoxOption,
+                                                 QStyle::SC_SpinBoxUp, doubleSpinBox());
+        break;
     case ValueDown:
-        if (spinBox()->value() <= spinBox()->minValue())
-            return false;
-        spinBox()->stepDown();
-        return true;
+        rect = doubleSpinBox()->style()->subControlRect(QStyle::CC_SpinBox, &spinBoxOption,
+                                                 QStyle::SC_SpinBoxDown, doubleSpinBox());
+        break;
+    default:
+        rect = spinBoxOption.rect;
+        break;
+    }
+    const QPoint globalPos = doubleSpinBox()->mapToGlobal(QPoint(0, 0));
+    return QRect(globalPos.x() + rect.x(), globalPos.y() + rect.y(), rect.width(), rect.height());
+}
+
+/*! \reimp */
+int QAccessibleDoubleSpinBox::navigate(RelationFlag relation, int entry, QAccessibleInterface **target) const
+{
+    if (entry <= 0)
+        return QAccessibleWidgetEx::navigate(relation, entry, target);
+
+    *target = 0;
+    switch (relation) {
+    case Child:
+        return entry <= childCount() ? entry : -1;
+    case QAccessible::Left:
+        return (entry == ValueUp || entry == ValueDown) ? Editor : -1;
+    case QAccessible::Right:
+        return entry == Editor ? ValueUp : -1;
+    case QAccessible::Up:
+        return entry == ValueDown ? ValueUp : -1;
+    case QAccessible::Down:
+        return entry == ValueUp ? ValueDown : -1;
     default:
         break;
     }
-    */
-    return QAccessibleWidget::doAction(action, 0, params);
+    return QAccessibleWidgetEx::navigate(relation, entry, target);
+}
+
+QVariant QAccessibleDoubleSpinBox::invokeMethodEx(QAccessible::Method, int, const QVariantList &)
+{
+    return QVariant();
+}
+
+/*! \reimp */
+QString QAccessibleDoubleSpinBox::text(Text textType, int child) const
+{
+    if (!doubleSpinBox()->isVisible())
+        return QString();
+    switch (textType) {
+    case Name:
+        if (child == ValueUp)
+            return QDoubleSpinBox::tr("More");
+        else if (child == ValueDown)
+            return QDoubleSpinBox::tr("Less");
+        break;
+    case Value:
+        if (child == Editor || child == SpinBoxSelf)
+            return doubleSpinBox()->textFromValue(doubleSpinBox()->value());
+        break;
+    default:
+        break;
+    }
+    return QAccessibleWidgetEx::text(textType, 0);
+}
+
+/*! \reimp */
+QAccessible::Role QAccessibleDoubleSpinBox::role(int child) const
+{
+    switch (child) {
+    case Editor:
+        return EditableText;
+    case ValueUp:
+    case ValueDown:
+        return PushButton;
+    default:
+        break;
+    }
+    return QAccessibleWidgetEx::role(child);
+}
+
+/*! \reimp */
+QAccessible::State QAccessibleDoubleSpinBox::state(int child) const
+{
+    State state = QAccessibleWidgetEx::state(child);
+    switch (child) {
+    case ValueUp:
+        if (doubleSpinBox()->value() >= doubleSpinBox()->maximum())
+            state |= Unavailable;
+        break;
+    case ValueDown:
+        if (doubleSpinBox()->value() <= doubleSpinBox()->minimum())
+            state |= Unavailable;
+        break;
+    default:
+        break;
+    }
+    return state;
 }
 #endif // QT_NO_SPINBOX
 
@@ -241,13 +482,13 @@ bool QAccessibleSpinBox::doAction(int action, int /*child*/, const QVariantList 
 
 /*!
   Constructs a QAccessibleScrollBar object for \a w.
-  \a name is propagated to the QAccessibleWidget constructor.
+  \a name is propagated to the QAccessibleWidgetEx constructor.
 */
-QAccessibleScrollBar::QAccessibleScrollBar(QWidget *w, const QString &name)
-: QAccessibleWidget(w, ScrollBar, name)
+QAccessibleScrollBar::QAccessibleScrollBar(QWidget *w)
+: QAccessibleAbstractSlider(w, ScrollBar)
 {
     Q_ASSERT(scrollBar());
-    addControllingSignal("valueChanged(int)");
+    addControllingSignal(QLatin1String("valueChanged(int)"));
 }
 
 /*! Returns the scroll bar. */
@@ -259,6 +500,9 @@ QScrollBar *QAccessibleScrollBar::scrollBar() const
 /*! \reimp */
 QRect QAccessibleScrollBar::rect(int child) const
 {
+    if (!scrollBar()->isVisible())
+        return QRect();
+
     QStyle::SubControl subControl;
     switch (child) {
     case LineUp:
@@ -277,13 +521,12 @@ QRect QAccessibleScrollBar::rect(int child) const
         subControl = QStyle::SC_ScrollBarAddLine;
         break;
     default:
-        return QAccessibleWidget::rect(child);
+        return QAccessibleAbstractSlider::rect(child);
     }
 
     const QStyleOptionSlider option = qt_qscrollbarStyleOption(scrollBar());
     const QRect rect = scrollBar()->style()->subControlRect(QStyle::CC_ScrollBar, &option,
                                                        subControl, scrollBar());
-
     const QPoint tp = scrollBar()->mapToGlobal(QPoint(0,0));
     return QRect(tp.x() + rect.x(), tp.y() + rect.y(), rect.width(), rect.height());
 }
@@ -291,12 +534,16 @@ QRect QAccessibleScrollBar::rect(int child) const
 /*! \reimp */
 int QAccessibleScrollBar::childCount() const
 {
+    if (!scrollBar()->isVisible())
+        return 0;
     return LineDown;
 }
 
 /*! \reimp */
-QString        QAccessibleScrollBar::text(Text t, int child) const
+QString QAccessibleScrollBar::text(Text t, int child) const
 {
+    if (!scrollBar()->isVisible())
+        return QString();
     switch (t) {
     case Value:
         if (!child || child == Position)
@@ -319,7 +566,7 @@ QString        QAccessibleScrollBar::text(Text t, int child) const
     default:
         break;
     }
-    return QAccessibleWidget::text(t, child);
+    return QAccessibleAbstractSlider::text(t, child);
 }
 
 /*! \reimp */
@@ -341,7 +588,7 @@ QAccessible::Role QAccessibleScrollBar::role(int child) const
 /*! \reimp */
 QAccessible::State QAccessibleScrollBar::state(int child) const
 {
-    const State parentState = QAccessibleWidget::state(0);
+    const State parentState = QAccessibleAbstractSlider::state(0);
 
     if (child == 0)
         return parentState;
@@ -369,28 +616,6 @@ QAccessible::State QAccessibleScrollBar::state(int child) const
 
     return state;
 }
-
-/*! \reimp */
-bool QAccessibleScrollBar::doAction(int /*action*/, int /*child*/, const QVariantList &/*params*/)
-{
-/*
-    if (action == Press) switch (child) {
-    case LineUp:
-        scrollBar()->subtractLine();
-        return true;
-    case PageUp:
-        scrollBar()->subtractPage();
-        return true;
-    case PageDown:
-        scrollBar()->addPage();
-        return true;
-    case LineDown:
-        scrollBar()->addLine();
-        return true;
-    }
-*/
-    return false;
-}
 #endif // QT_NO_SCROLLBAR
 
 #ifndef QT_NO_SLIDER
@@ -415,13 +640,13 @@ bool QAccessibleScrollBar::doAction(int /*action*/, int /*child*/, const QVarian
 
 /*!
   Constructs a QAccessibleScrollBar object for \a w.
-  \a name is propagated to the QAccessibleWidget constructor.
+  \a name is propagated to the QAccessibleWidgetEx constructor.
 */
-QAccessibleSlider::QAccessibleSlider(QWidget *w, const QString &name)
-: QAccessibleWidget(w, Slider, name)
+QAccessibleSlider::QAccessibleSlider(QWidget *w)
+: QAccessibleAbstractSlider(w)
 {
     Q_ASSERT(slider());
-    addControllingSignal("valueChanged(int)");
+    addControllingSignal(QLatin1String("valueChanged(int)"));
 }
 
 /*! Returns the slider. */
@@ -434,6 +659,8 @@ QSlider *QAccessibleSlider::slider() const
 QRect QAccessibleSlider::rect(int child) const
 {
     QRect rect;
+    if (!slider()->isVisible())
+        return rect;
     const QStyleOptionSlider option = qt_qsliderStyleOption(slider());
     QRect srect = slider()->style()->subControlRect(QStyle::CC_Slider, &option,
                                                     QStyle::SC_SliderHandle, slider());
@@ -455,7 +682,7 @@ QRect QAccessibleSlider::rect(int child) const
             rect = QRect(srect.x() + srect.width(), 0, slider()->width() - srect.x() - srect.width(), slider()->height());
         break;
     default:
-        return QAccessibleWidget::rect(child);
+        return QAccessibleAbstractSlider::rect(child);
     }
 
     QPoint tp = slider()->mapToGlobal(QPoint(0,0));
@@ -465,12 +692,16 @@ QRect QAccessibleSlider::rect(int child) const
 /*! \reimp */
 int QAccessibleSlider::childCount() const
 {
+    if (!slider()->isVisible())
+        return 0;
     return PageRight;
 }
 
 /*! \reimp */
-QString        QAccessibleSlider::text(Text t, int child) const
+QString QAccessibleSlider::text(Text t, int child) const
 {
+    if (!slider()->isVisible())
+        return QString();
     switch (t) {
     case Value:
         if (!child || child == 2)
@@ -491,7 +722,7 @@ QString        QAccessibleSlider::text(Text t, int child) const
     default:
         break;
     }
-    return QAccessibleWidget::text(t, child);
+    return QAccessibleAbstractSlider::text(t, child);
 }
 
 /*! \reimp */
@@ -511,7 +742,7 @@ QAccessible::Role QAccessibleSlider::role(int child) const
 /*! \reimp */
 QAccessible::State QAccessibleSlider::state(int child) const
 {
-    const State parentState = QAccessibleWidget::state(0);
+    const State parentState = QAccessibleAbstractSlider::state(0);
 
     if (child == 0)
         return parentState;
@@ -562,45 +793,191 @@ int QAccessibleSlider::defaultAction(int /*child*/) const
 /*! \internal */
 QString QAccessibleSlider::actionText(int /*action*/, Text /*t*/, int /*child*/) const
 {
-    return QString("");
+    return QString(QLatin1String(""));
 }
 
-/*! \reimp */
-bool QAccessibleSlider::doAction(int /*action*/, int /*child*/, const QVariantList &/*params*/)
+QAccessibleAbstractSlider::QAccessibleAbstractSlider(QWidget *w, Role r)
+    : QAccessibleWidgetEx(w, r)
 {
-/*
-    switch(child) {
-    case SliderSelf:
-        if (action == SetFocus) {
-            slider()->setFocus();
-            return true;
-        }
-        break;
-    case PageLeft:
-        if (action == Press) {
-            slider()->subtractPage();
-            return true;
-        }
-        break;
-    case Position:
-        if (action == Increase) {
-            slider()->addLine();
-            return true;
-        } else if (action == Decrease) {
-            slider()->subtractLine();
-            return true;
-        }
-        break;
-    case PageRight:
-        if (action == Press) {
-            slider()->addPage();
-            return true;
-        }
-        break;
+    Q_ASSERT(qobject_cast<QAbstractSlider *>(w));
+}
+
+QVariant QAccessibleAbstractSlider::invokeMethodEx(Method method, int child, const QVariantList &params)
+{
+    switch (method) {
+    case ListSupportedMethods: {
+        QSet<QAccessible::Method> set;
+        set << ListSupportedMethods;
+        return qVariantFromValue(set | qvariant_cast<QSet<QAccessible::Method> >(
+                    QAccessibleWidgetEx::invokeMethodEx(method, child, params)));
     }
-*/
-    return false;
+    default:
+        return QAccessibleWidgetEx::invokeMethodEx(method, child, params);
+    }
+}
+
+QVariant QAccessibleAbstractSlider::currentValue()
+{
+    return abstractSlider()->value();
+}
+
+void QAccessibleAbstractSlider::setCurrentValue(const QVariant &value)
+{
+    abstractSlider()->setValue(value.toInt());
+}
+
+QVariant QAccessibleAbstractSlider::maximumValue()
+{
+    return abstractSlider()->maximum();
+}
+
+QVariant QAccessibleAbstractSlider::minimumValue()
+{
+    return abstractSlider()->minimum();
+}
+
+QAbstractSlider *QAccessibleAbstractSlider::abstractSlider() const
+{
+    return static_cast<QAbstractSlider *>(object());
 }
 
 #endif // QT_NO_SLIDER
+
+#ifndef QT_NO_DIAL
+// ======================================= QAccessibleDial ======================================
+QAccessibleDial::QAccessibleDial(QWidget *widget)
+    : QAccessibleWidgetEx(widget, Dial)
+{
+    Q_ASSERT(qobject_cast<QDial *>(widget));
+    addControllingSignal(QLatin1String("valueChanged(int)"));
+}
+
+QRect QAccessibleDial::rect(int child) const
+{
+    QRect rect;
+    if (!dial()->isVisible())
+        return rect;
+    switch (child) {
+    case Self:
+        return QAccessibleWidgetEx::rect(child);
+    case SpeedoMeter: {
+        // Mixture from qcommonstyle.cpp (focus rect).
+        int width = dial()->width();
+        int height = dial()->height();
+        qreal radius = qMin(width, height) / 2.0;
+        qreal delta = radius / 6.0;
+        qreal dx = delta + (width - 2 * radius) / 2.0;
+        qreal dy = delta + (height - 2 * radius) / 2.0;
+        rect = QRect(int(dx), int(dy), int(radius * 2 - 2 * delta), int(radius * 2 - 2 * delta));
+        if (dial()->notchesVisible()) {
+            rect.translate(int(-radius / 6), int(-radius / 6));
+            rect.setWidth(rect.width() + int(radius / 3));
+            rect.setHeight(rect.height() + int(radius / 3));
+        }
+        break;
+    }
+    case SliderHandle: {
+        // Mixture from qcommonstyle.cpp and qdial.cpp.
+        int sliderValue = !dial()->invertedAppearance() ? dial()->value()
+                                                        : (dial()->maximum() - dial()->value());
+        qreal angle = 0;
+        if (dial()->maximum() == dial()->minimum()) {
+            angle = Q_PI / 2;
+        } else if (dial()->wrapping()) {
+            angle = Q_PI * 3 / 2 - (sliderValue - dial()->minimum()) * 2 * Q_PI
+                    / (dial()->maximum() - dial()->minimum());
+        } else {
+            angle = (Q_PI * 8 - (sliderValue - dial()->minimum()) * 10 * Q_PI
+                    / (dial()->maximum() - dial()->minimum())) / 6;
+        }
+
+        int width = dial()->rect().width();
+        int height = dial()->rect().height();
+        int radius = qMin(width, height) / 2;
+        int xc = width / 2;
+        int yc = height / 2;
+        int bigLineSize = radius / 6;
+        if (bigLineSize < 4)
+            bigLineSize = 4;
+        if (bigLineSize > radius / 2)
+            bigLineSize = radius / 2;
+        int len = radius - bigLineSize - 5;
+        if (len < 5)
+            len = 5;
+        int back = len / 2;
+
+        QPolygonF arrow(3);
+        arrow[0] = QPointF(0.5 + xc + len * qCos(angle),
+                           0.5 + yc - len * qSin(angle));
+        arrow[1] = QPointF(0.5 + xc + back * qCos(angle + Q_PI * 5 / 6),
+                           0.5 + yc - back * qSin(angle + Q_PI * 5 / 6));
+        arrow[2] = QPointF(0.5 + xc + back * qCos(angle - Q_PI * 5 / 6),
+                           0.5 + yc - back * qSin(angle - Q_PI * 5 / 6));
+        rect = arrow.boundingRect().toRect();
+        break;
+    }
+    default:
+        return QRect();
+    }
+
+    QPoint globalPos = dial()->mapToGlobal(QPoint(0,0));
+    return QRect(globalPos.x() + rect.x(), globalPos.y() + rect.y(), rect.width(), rect.height());
+}
+
+int QAccessibleDial::childCount() const
+{
+    if (!dial()->isVisible())
+        return 0;
+    return SliderHandle;
+}
+
+QString QAccessibleDial::text(Text textType, int child) const
+{
+    if (!dial()->isVisible())
+        return QString();
+    if (textType == Value && child >= Self && child <= SliderHandle)
+        return QString::number(dial()->value());
+    if (textType == Name) {
+        switch (child) {
+        case Self:
+            if (!widget()->accessibleName().isEmpty())
+                return widget()->accessibleName();
+            return QDial::tr("QDial");
+        case SpeedoMeter:
+            return QDial::tr("SpeedoMeter");
+        case SliderHandle:
+            return QDial::tr("SliderHandle");
+        }
+    }
+    return QAccessibleWidgetEx::text(textType, child);
+}
+
+QAccessible::Role QAccessibleDial::role(int child) const
+{
+    if (child == SpeedoMeter)
+        return Slider;
+    else if (child == SliderHandle)
+        return Indicator;
+    return QAccessibleWidgetEx::role(child);
+}
+
+QAccessible::State QAccessibleDial::state(int child) const
+{
+    const State parentState = QAccessibleWidgetEx::state(0);
+    if (child == SliderHandle)
+        return parentState | HotTracked;
+    return parentState;
+}
+
+QVariant QAccessibleDial::invokeMethodEx(Method, int, const QVariantList &)
+{
+    return QVariant();
+}
+
+QDial *QAccessibleDial::dial() const
+{
+    return static_cast<QDial*>(object());
+}
+#endif // QT_NO_DIAL
+
 #endif // QT_NO_ACCESSIBILITY

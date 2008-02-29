@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,10 +20,17 @@
 ****************************************************************************/
 
 #include <qirnamespace.h>
+
+#if defined(Q_OS_LINUX)
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <linux/types.h>
 #include <linux/irda.h>
+#elif defined(Q_OS_WIN32)
+#include <winsock2.h>
+#define _WIN32_WINDOWS
+#include <AF_Irda.h>
+#endif
 
 #include <QByteArray>
 #include <QString>
@@ -67,6 +74,7 @@ using namespace QIr;
 */
 QByteArray QIr::convert_charset_to_string(int set)
 {
+#if defined(Q_OS_LINUX)
     switch (set) {
         case CS_ASCII:
             return "ASCII";
@@ -94,8 +102,40 @@ QByteArray QIr::convert_charset_to_string(int set)
             qWarning("Charset not found!");
             return QByteArray();
     };
+#elif defined(Q_OS_WIN32)
+    switch (set) {
+        case LmCharSetASCII:
+            return "ASCII";
+        case LmCharSetISO_8859_1:
+            return "ISO-8859-1";
+        case LmCharSetISO_8859_2:
+            return "ISO-8859-2";
+        case LmCharSetISO_8859_3:
+            return "ISO-8859-3";
+        case LmCharSetISO_8859_4:
+            return "ISO-8859-4";
+        case LmCharSetISO_8859_5:
+            return "ISO-8859-5";
+        case LmCharSetISO_8859_6:
+            return "ISO-8859-6";
+        case LmCharSetISO_8859_7:
+            return "ISO-8859-7";
+        case LmCharSetISO_8859_8:
+            return "ISO-8859-8";
+        case LmCharSetISO_8859_9:
+            return "ISO-8859-9";
+        case LmCharSetUNICODE:
+            return "UTF-16";
+        default:
+            qWarning("Charset not found!");
+            return QByteArray();
+    };
+#else
+	return QByteArray();
+#endif
 }
 
+#if defined(Q_OS_LINUX)
 QVariant convert_ias_entry(struct irda_ias_set &entry)
 {
     // Class name and attrib name are always in ASCII
@@ -141,6 +181,74 @@ QVariant convert_ias_entry(struct irda_ias_set &entry)
             return QVariant();
     };
 }
+#endif
+
+#if defined(Q_OS_WIN32)
+QVariant convert_ias_entry(IAS_SET &entry)
+{
+    // Class name and attrib name are always in ASCII
+    QString className = QString::fromAscii(entry.irdaClassName);
+    QString attribName = QString::fromAscii(entry.irdaAttribName);
+    switch (entry.irdaAttribType) {
+        case IAS_ATTRIB_STR:
+        {
+            QByteArray value(reinterpret_cast<const char *>(entry.irdaAttribute.irdaAttribUsrStr.UsrStr),
+                             entry.irdaAttribute.irdaAttribUsrStr.Len);
+            int charset = entry.irdaAttribute.irdaAttribUsrStr.CharSet;
+
+            QString val;
+
+            if (charset == LmCharSetASCII) {
+                val = QString::fromAscii(value.constData());
+            }
+            else if (charset == LmCharSetISO_8859_1) {
+                val = QString::fromLatin1(value.constData());
+            }
+            else {
+                QByteArray codecName = convert_charset_to_string(charset);
+                QTextCodec *codec = QTextCodec::codecForName(codecName);
+                val = codec->toUnicode(value);
+            }
+
+            return QVariant::fromValue(val);
+        }
+
+        case IAS_ATTRIB_INT:
+        {
+            return QVariant::fromValue(static_cast<uint>(entry.irdaAttribute.irdaAttribInt));
+        }
+
+        case IAS_ATTRIB_OCTETSEQ:
+        {
+            QByteArray value(reinterpret_cast<const char *>(entry.irdaAttribute.irdaAttribOctetSeq.OctetSeq),
+                             entry.irdaAttribute.irdaAttribOctetSeq.Len);
+            return QVariant::fromValue(value);
+        }
+
+        default:
+            return QVariant();
+    };
+}
+#endif
+
+#if defined(Q_OS_WIN32)
+// Windows defines its own set of hints, but not as many as we'd like
+#define HINT_PNP		1
+#define HINT_PDA		2
+#define HINT_COMPUTER		4
+#define HINT_PRINTER		8
+#define HINT_MODEM		16
+#define HINT_FAX		32
+#define HINT_LAN		64
+#define HINT_EXTENSION	128
+
+#define HINT_TELEPHONY			1
+#define HINT_FILE_SERVER		2
+#define HINT_COMM			4
+#define HINT_MESSAGE			8
+#define HINT_HTTP			16
+#define HINT_OBEX			32
+#endif
 
 void convert_to_hints(QIr::DeviceClasses classes, unsigned char hints[])
 {

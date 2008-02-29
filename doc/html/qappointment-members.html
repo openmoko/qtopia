@@ -36,15 +36,19 @@
 <li><div class="fn"/><a href="qpimrecord.html#customFields">customFields</a> () const : QMap&lt;QString, QString&gt;</li>
 <li><div class="fn"/><a href="qappointment.html#customFieldsRef">customFieldsRef</a> () : QMap&lt;QString, QString&gt; &amp;</li>
 <li><div class="fn"/><a href="qappointment.html#customFieldsRef-2">customFieldsRef</a> () const : const QMap&lt;QString, QString&gt; &amp;</li>
+<li><div class="fn"/><a href="qpimrecord.html#dependentChildren">dependentChildren</a> () const : QMap&lt;QString, QUniqueId&gt;</li>
+<li><div class="fn"/><a href="qpimrecord.html#dependentChildrenOfType">dependentChildrenOfType</a> ( const QString &amp; ) const : QList&lt;QUniqueId&gt;</li>
 <li><div class="fn"/><a href="qappointment.html#description">description</a> () const : QString</li>
 <li><div class="fn"/><a href="qappointment.html#end">end</a> () const : QDateTime</li>
 <li><div class="fn"/><a href="qappointment.html#endInCurrentTZ">endInCurrentTZ</a> () const : QDateTime</li>
+<li><div class="fn"/><a href="qappointment.html#exceptionDate">exceptionDate</a> () const : QDate</li>
 <li><div class="fn"/><a href="qappointment.html#exceptionParent">exceptionParent</a> () const : QUniqueId</li>
 <li><div class="fn"/><a href="qappointment.html#exceptions">exceptions</a> () const : QList&lt;Exception&gt;</li>
 <li><div class="fn"/><a href="qappointment.html#firstOccurrence">firstOccurrence</a> () const : QOccurrence</li>
 <li><div class="fn"/><a href="qappointment.html#frequency">frequency</a> () const : int</li>
 <li><div class="fn"/><a href="qappointment.html#fromDateDay">fromDateDay</a> ( int ) : WeekFlag</li>
 <li><div class="fn"/><a href="qappointment.html#hasAlarm">hasAlarm</a> () const : bool</li>
+<li><div class="fn"/><a href="qappointment.html#hasExceptions">hasExceptions</a> () const : bool</li>
 <li><div class="fn"/><a href="qappointment.html#hasRepeat">hasRepeat</a> () const : bool</li>
 <li><div class="fn"/><a href="qappointment.html#isAllDay">isAllDay</a> () const : bool</li>
 <li><div class="fn"/><a href="qappointment.html#isException">isException</a> () const : bool</li>
@@ -52,20 +56,24 @@
 <li><div class="fn"/><a href="qappointment.html#location">location</a> () const : QString</li>
 <li><div class="fn"/><a href="qappointment.html#nextOccurrence">nextOccurrence</a> ( const QDate &amp; ) const : QOccurrence</li>
 <li><div class="fn"/><a href="qappointment.html#notes">notes</a> () const : QString</li>
+<li><div class="fn"/><a href="qpimrecord.html#parentDependency">parentDependency</a> () const : QUniqueId</li>
+<li><div class="fn"/><a href="qpimrecord.html#parentDependencyType">parentDependencyType</a> () const : QString</li>
 <li><div class="fn"/><a href="qpimrecord.html#pruneDeadCategories">pruneDeadCategories</a> ( const QList&lt;QString&gt; &amp; ) : bool</li>
-<li><div class="fn"/><a href="qappointment.html#readVCalendar">readVCalendar</a> ( const QString &amp; ) : QList&lt;QAppointment&gt;</li>
-<li><div class="fn"/><a href="qappointment.html#readVCalendar-2">readVCalendar</a> ( const QByteArray &amp; ) : QList&lt;QAppointment&gt;</li>
+<li><div class="fn"/><a href="qappointment.html#readVCalendar">readVCalendar</a> ( QIODevice * ) : QList&lt;QAppointment&gt;</li>
+<li><div class="fn"/><a href="qappointment.html#readVCalendar-2">readVCalendar</a> ( const QString &amp; ) : QList&lt;QAppointment&gt;</li>
+<li><div class="fn"/><a href="qappointment.html#readVCalendar-3">readVCalendar</a> ( const QByteArray &amp; ) : QList&lt;QAppointment&gt;</li>
 <li><div class="fn"/><a href="qappointment.html#readVCalendarData">readVCalendarData</a> ( const char *, unsigned long ) : QList&lt;QAppointment&gt;</li>
 <li><div class="fn"/><a href="qpimrecord.html#reassignCategoryId">reassignCategoryId</a> ( const QString &amp;, const QString &amp; )</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qpimrecord.html#removeCustomField">removeCustomField</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qappointment.html#repeatForever">repeatForever</a> () const : bool</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qappointment.html#repeatOnWeekDay">repeatOnWeekDay</a> ( int ) const : bool</li>
 <li><div class="fn"/><a href="qappointment.html#repeatRule">repeatRule</a> () const : RepeatRule</li>
 <li><div class="fn"/><a href="qappointment.html#repeatUntil">repeatUntil</a> () const : QDate</li>
 <li><div class="fn"/><a href="qappointment.html#repeatUntilInCurrentTZ">repeatUntilInCurrentTZ</a> () const : QDate</li>
 <li><div class="fn"/><a href="qappointment.html#setAlarm">setAlarm</a> ( int, AlarmFlags )</li>
 <li><div class="fn"/><a href="qappointment.html#setAllDay">setAllDay</a> ( bool )</li>
+<li><div class="fn"/><a href="qappointment.html#setAsException">setAsException</a> ( const QUniqueId &amp;, const QDate &amp; )</li>
 <li><div class="fn"/><a href="qpimrecord.html#setCategories">setCategories</a> ( const QList&lt;QString&gt; &amp; )</li>
 <li><div class="fn"/><a href="qpimrecord.html#setCategories-2">setCategories</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qpimrecord.html#setCustomField">setCustomField</a> ( const QString &amp;, const QString &amp; )</li>
@@ -96,11 +104,13 @@
 <li><div class="fn"/><a href="qappointment.html#uidRef-2">uidRef</a> () const : const QUniqueId &amp;</li>
 <li><div class="fn"/><a href="qappointment.html#weekFlags">weekFlags</a> () const : WeekFlags</li>
 <li><div class="fn"/><a href="qappointment.html#weekOffset">weekOffset</a> () const : int</li>
-<li><div class="fn"/><a href="qappointment.html#writeVCalendar">writeVCalendar</a> ( const QString &amp;, const QList&lt;QAppointment&gt; &amp; )</li>
-<li><div class="fn"/><a href="qappointment.html#writeVCalendar-2">writeVCalendar</a> ( const QString &amp;, const QAppointment &amp; )</li>
-<li><div class="fn"/><a href="qappointment.html#writeVCalendar-3">writeVCalendar</a> ( const QString &amp; ) const</li>
-<li><div class="fn"/><a href="qappointment.html#writeVCalendar-4">writeVCalendar</a> ( QFile &amp; ) const</li>
-<li><div class="fn"/><a href="qappointment.html#writeVCalendar-5">writeVCalendar</a> ( QDataStream * ) const</li>
+<li><div class="fn"/><a href="qappointment.html#writeVCalendar">writeVCalendar</a> ( QIODevice *, const QList&lt;QAppointment&gt; &amp; ) : bool</li>
+<li><div class="fn"/><a href="qappointment.html#writeVCalendar-2">writeVCalendar</a> ( QIODevice *, const QAppointment &amp; ) : bool</li>
+<li><div class="fn"/><a href="qappointment.html#writeVCalendar-3">writeVCalendar</a> ( const QString &amp;, const QList&lt;QAppointment&gt; &amp; )</li>
+<li><div class="fn"/><a href="qappointment.html#writeVCalendar-4">writeVCalendar</a> ( const QString &amp;, const QAppointment &amp; )</li>
+<li><div class="fn"/><a href="qappointment.html#writeVCalendar-5">writeVCalendar</a> ( const QString &amp; ) const</li>
+<li><div class="fn"/><a href="qappointment.html#writeVCalendar-6">writeVCalendar</a> ( QFile &amp; ) const</li>
+<li><div class="fn"/><a href="qappointment.html#writeVCalendar-7">writeVCalendar</a> ( QDataStream * ) const</li>
 <li><div class="fn"/><a href="qappointment.html#operator-not-eq">operator!=</a> ( const QAppointment &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qappointment.html#operator-eq">operator=</a> ( const QAppointment &amp; ) : QAppointment &amp;</li>
 <li><div class="fn"/><a href="qappointment.html#operator-eq-eq">operator==</a> ( const QAppointment &amp; ) const : bool</li>
@@ -111,6 +121,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

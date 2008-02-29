@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/model-view-programming.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/model-view-programming.qdoc -->
 <head>
-  <title>Qt 4.2: Delegate Classes</title>
+  <title>Qt 4.3: Delegate Classes</title>
   <link rel="prev" href="model-view-selection.html" />
   <link rel="contents" href="model-view-programming.html" />
   <link rel="next" href="model-view-convenience.html" />
@@ -20,7 +20,8 @@
 [<a href="model-view-programming.html">Contents</a>]
 [Next: <a href="model-view-convenience.html">Item View Convenience Classes</a>]
 </p>
-<h1 align="center">Delegate Classes<br /><small></small></h1>
+<h1 align="center">Delegate Classes<br /><span class="subtitle"></span>
+</h1>
 <ul><li><a href="#concepts">Concepts</a></li>
 <li><a href="#using-an-existing-delegate">Using an Existing Delegate</a></li>
 <li><a href="#a-simple-delegate">A Simple Delegate</a></li>
@@ -99,7 +100,7 @@
      spinBox-&gt;interpretText();
      int value = spinBox-&gt;value();
 
-     model-&gt;setData(index, value);
+     model-&gt;setData(index, value, Qt::EditRole);
  }</pre>
 <p>Since the view manages the editor widgets for the delegate, we only need to update the model with the contents of the editor supplied. In this case, we ensure that the spin box is up-to-date, and update the model with the value it contains using the index specified.</p>
 <p>The standard <a href="qitemdelegate.html">QItemDelegate</a> class informs the view when it has finished editing by emitting the <a href="qabstractitemdelegate.html#closeEditor">closeEditor()</a> signal. The view ensures that the editor widget is closed and destroyed. In this example, we only provide simple editing facilities, so we need never emit this signal.</p>
@@ -128,6 +129,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

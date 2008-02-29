@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,7 +26,11 @@
 #include "e1_dialer.h"
 #include "e1_bar.h"
 #include "phone/themecontrol.h"
+#ifdef Q_WS_X11
+#include <qcopchannel_x11.h>
+#else
 #include <qcopchannel_qws.h>
+#endif
 #include <QTimerEvent>
 #include <QDebug>
 #include "phone/dialerservice.h"
@@ -86,17 +90,17 @@ E1Telephony::E1Telephony(QWidget *parent)
                      this, SLOT(slideToCallscreen()));
 //    ThemeControl::instance()->registerThemedView( m_dialer, "Dialer" );
 
-    QObject::connect(m_dialer, SIGNAL(sendNumber(const QString &)),
-                     m_callscreen, SLOT(sendNumber(const QString &)));
+    QObject::connect(m_dialer, SIGNAL(sendNumber(QString)),
+                     m_callscreen, SLOT(sendNumber(QString)));
 
     // Listen to header channel
     QCopChannel* channel = new QCopChannel( "QPE/E1", this );
-    connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
-             this, SLOT(message(const QString&,const QByteArray&)) );
+    connect( channel, SIGNAL(received(QString,QByteArray)),
+             this, SLOT(message(QString,QByteArray)) );
 
     E1DialerServiceProxy *proxy = new E1DialerServiceProxy(this);
-    QObject::connect(proxy, SIGNAL(doShowDialer(const QString &)),
-                     this, SLOT(doShowDialer(const QString &)));
+    QObject::connect(proxy, SIGNAL(doShowDialer(QString)),
+                     this, SLOT(doShowDialer(QString)));
 }
 
 void E1Telephony::showEvent(QShowEvent *)

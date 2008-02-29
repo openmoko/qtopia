@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QItemDelegate Class Reference</title>
+  <title>Qt 4.3: QItemDelegate Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QItemDelegate Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QItemDelegate Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QItemDelegate class provides display and editing facilities for data items from a model. <a href="#details">More...</a></p>
 <pre> #include &lt;QItemDelegate&gt;</pre><p>Inherits <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>.</p>
 <p>Inherited by <a href="qsqlrelationaldelegate.html">QSqlRelationalDelegate</a>.</p>
@@ -61,6 +62,7 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
+<li><div class="fn"/>1 public slot inherited from <a href="qabstractitemdelegate.html#public-slots">QAbstractItemDelegate</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>2 signals inherited from <a href="qabstractitemdelegate.html#signals">QAbstractItemDelegate</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
@@ -73,9 +75,16 @@
 <p>QItemDelegate can be used to provide custom display features and editor widgets for item views based on <a href="qabstractitemview.html">QAbstractItemView</a> subclasses. Using a delegate for this purpose allows the display and editing mechanisms to be customized and developed independently from the model and view.</p>
 <p>The QItemDelegate class is one of the <a href="model-view.html">Model/View Classes</a> and is part of Qt's <a href="model-view-programming.html">model/view framework</a>.</p>
 <p>When displaying items from a custom model in a standard view, it is often sufficient to simply ensure that the model returns appropriate data for each of the <a href="qt.html#ItemDataRole-enum">roles</a> that determine the appearance of items in views. The default delegate used by Qt's standard views uses this role information to display items in most of the common forms expected by users. However, it is sometimes necessary to have even more control over the appearance of items than the default delegate can provide.</p>
-<p>This class provides default implementations of the functions for painting item data in a view, and editing data obtained from a model. Default implementations of the <a href="qitemdelegate.html#paint">paint</a>() and <a href="qitemdelegate.html#sizeHint">sizeHint</a>() virtual functions, defined in <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>, are provided to ensure that the delegate implements the correct basic behavior expected by views. You can reimplement these functions in subclasses to customize the appearance of items.</p>
-<p>Delegates can be used to manipulate item data in two complementary ways: by processing events in the normal manner, or by implementing a custom editor widget. The item delegate takes the approach of providing a widget for editing purposes that can be supplied to QAbstractItemView::setDelegate() or the equivalent function in subclasses of <a href="qabstractitemview.html">QAbstractItemView</a>.</p>
-<p>Only the standard editing functions for widget-based delegates are reimplemented here: editor() returns the widget used to change data from the model; <a href="qitemdelegate.html#setEditorData">setEditorData</a>() provides the widget with data to manipulate; <a href="qitemdelegate.html#updateEditorGeometry">updateEditorGeometry</a>() ensures that the editor is displayed correctly with respect to the item view; <a href="qitemdelegate.html#setModelData">setModelData</a>() returns the updated data to the model; releaseEditor() indicates that the user has completed editing the data, and that the editor widget can be destroyed.</p>
+<p>This class provides default implementations of the functions for painting item data in a view and editing data from item models. Default implementations of the <a href="qitemdelegate.html#paint">paint</a>() and <a href="qitemdelegate.html#sizeHint">sizeHint</a>() virtual functions, defined in <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>, are provided to ensure that the delegate implements the correct basic behavior expected by views. You can reimplement these functions in subclasses to customize the appearance of items.</p>
+<p>When editing data in an item view, QItemDelegate provides an editor widget, which is a widget that is placed on top of the view while editing takes place. Editors are created with a <a href="qitemeditorfactory.html">QItemEditorFactory</a>; a default static instance provided by <a href="qitemeditorfactory.html">QItemEditorFactory</a> is installed on all item delagates. You can set a custom factory using <a href="qitemdelegate.html#setItemEditorFactory">setItemEditorFactory</a>() or set a new default factory with <a href="qitemeditorfactory.html#setDefaultFactory">QItemEditorFactory::setDefaultFactory</a>(). It is the data stored in the item model with the <a href="qt.html#ItemDataRole-enum">Qt::EditRole</a> that is edited.</p>
+<p>Only the standard editing functions for widget-based delegates are reimplemented here:</p>
+<ul>
+<li><a href="qitemdelegate.html#createEditor">createEditor</a>() returns the widget used to change data from the model and can be reimplemented to customize editing behavior.</li>
+<li><a href="qitemdelegate.html#setEditorData">setEditorData</a>() provides the widget with data to manipulate.</li>
+<li><a href="qitemdelegate.html#updateEditorGeometry">updateEditorGeometry</a>() ensures that the editor is displayed correctly with respect to the item view.</li>
+<li><a href="qitemdelegate.html#setModelData">setModelData</a>() returns updated data to the model.</li>
+</ul>
+<p>The <a href="qabstractitemdelegate.html#closeEditor">closeEditor</a>() signal indicates that the user has completed editing the data, and that the editor widget can be destroyed.</p>
 <a name="standard-roles-and-data-types"></a>
 <h3>Standard Roles and Data Types</h3>
 <p>The default delegate used by the standard views supplied with Qt associates each standard role (defined by <a href="qt.html#ItemDataRole-enum">Qt::ItemDataRole</a>) with certain data types. Models that return data in these types can influence the appearance of the delegate as described in the following table.</p>
@@ -96,14 +105,14 @@
 <p>If the default delegate does not allow the level of customization that you need, either for display purposes or for editing data, it is possible to subclass QItemDelegate to implement the desired behavior.</p>
 <a name="subclassing"></a>
 <h3>Subclassing</h3>
-<p>When subclassing QItemDelegate to create a delegate that displays items using a custom renderer, it is important to ensure that the delegate can render items suitably for all the required states; e.g. selected, disabled, checked. The documentation for the <a href="qitemdelegate.html#paint">paint</a>() function contains some hints to show how this can be achieved.</p>
-<p>Custom editing features for can be added by subclassing QItemDelegate and reimplementing <a href="qitemdelegate.html#createEditor">createEditor</a>(), <a href="qitemdelegate.html#setEditorData">setEditorData</a>(), <a href="qitemdelegate.html#setModelData">setModelData</a>(), and <a href="qitemdelegate.html#updateEditorGeometry">updateEditorGeometry</a>(). This process is described in the <a href="itemviews-spinboxdelegate.html">Spin Box Delegate example</a>.</p>
+<p>When subclassing QItemDelegate to create a delegate that displays items using a custom renderer, it is important to ensure that the delegate can render items suitably for all the required states; e.g&#x2e; selected, disabled, checked. The documentation for the <a href="qitemdelegate.html#paint">paint</a>() function contains some hints to show how this can be achieved.</p>
+<p>You can provide custom editors by using a <a href="qitemeditorfactory.html">QItemEditorFactory</a>. The <a href="itemviews-coloreditorfactory.html">Color Editor Factory Example</a> shows how a custom editor can be made available to delegates with the default item editor factory. This way, there is no need to subclass QItemDelegate. An alternative is to reimplement <a href="qitemdelegate.html#createEditor">createEditor</a>(), <a href="qitemdelegate.html#setEditorData">setEditorData</a>(), <a href="qitemdelegate.html#setModelData">setModelData</a>(), and <a href="qitemdelegate.html#updateEditorGeometry">updateEditorGeometry</a>(). This process is described in the <a href="itemviews-spinboxdelegate.html">Spin Box Delegate example</a>.</p>
 <p>See also <a href="model-view-delegate.html">Delegate Classes</a>, <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>, <a href="itemviews-spinboxdelegate.html">Spin Box Delegate Example</a>, <a href="tools-settingseditor.html">Settings Editor Example</a>, and <a href="widgets-icons.html">Icons Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="clipping-prop"></a>clipping : bool</h3>
 <p>This property holds if the delegate should clip the paint events.</p>
-<p>This property will set the paint clip to the size of the item. The default value is off. It is useful for cases such as when images are larger then the size of the item.</p>
+<p>This property will set the paint clip to the size of the item. The default value is on. It is useful for cases such as when images are larger then the size of the item.</p>
 <p>This property was introduced in Qt 4.2.</p>
 <p>Access functions:</p>
 <ul>
@@ -185,7 +194,7 @@
 <p>See also <a href="qmetaproperty.html#isUser">QMetaProperty::isUser</a>().</p>
 <h3 class="fn"><a name="sizeHint"></a><a href="qsize.html">QSize</a> QItemDelegate::sizeHint ( const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the size needed by the delegate to display the item specified by <i>index</i>, taking into account the style information provided by <i>option</i>.</p>
-<p>When reimplementing this function, note that in case of text items, <a href="qitemdelegate.html">QItemDelegate</a> adds a margin (i.e. 2 * <a href="qstyle.html#PixelMetric-enum">QStyle::PM_FocusFrameHMargin</a>) to the length of the text.</p>
+<p>When reimplementing this function, note that in case of text items, <a href="qitemdelegate.html">QItemDelegate</a> adds a margin (i.e&#x2e; 2 * <a href="qstyle.html#PixelMetric-enum">QStyle::PM_FocusFrameHMargin</a>) to the length of the text.</p>
 <p>Reimplemented from <a href="qabstractitemdelegate.html#sizeHint">QAbstractItemDelegate</a>.</p>
 <h3 class="fn"><a name="updateEditorGeometry"></a>void QItemDelegate::updateEditorGeometry ( <a href="qwidget.html">QWidget</a> * <i>editor</i>, const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Updates the <i>editor</i> for the item specified by <i>index</i> according to the style <i>option</i> given.</p>
@@ -194,6 +203,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

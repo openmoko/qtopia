@@ -7,33 +7,21 @@
    <h3>Sending Contacts</h3>
 <!--#endif -->
 <p>Contact details can be sent from one device to another in different ways, i.e. via
-<!--#if expr="$PHONESTYLE"-->
-SMS
+<!--#if expr="$TELEPHONY"-->
+SMS,
 <!--#endif-->
-<!--#if expr="$PDASTYLE"-->
-infra-red
-<!--#endif-->
-.</p>
+Bluetooth or infra-red.</p>
 <p><b>To Send a Contact Entry:</b></p>
 <ul>
-<!--#if expr="$PDASTYLE"-->
-<li>Select the name of the contact to send.</li>
-<li>Tap <b>Contact</b>, then <img src=":icon/beam"> </img> <b>Send</b>.</li>
-<!--#endif-->
-<!--#if expr="$PHONESTYLE"-->
 <li>View the contact to send. (See <a href="addressbook-viewing.html">Viewing Contacts</a>)</li>
-<li>Press <img src=":icon/options"> </img> and select <b>Send</b> from the menu.</li>
-<!--#endif-->
+<li>Press <img src=":icon/options"><b>Options</b> and select <b>Send</b> from the menu.</li>
 <li>Select the method to send the contact, i.e.
-<!--#if expr="$PHONESTYLE"-->
-SMS
+<!--#if expr="$TELEPHONY"-->
+SMS,
 <!--#endif-->
-<!--#if expr="$PDASTYLE"-->
-infra-red
-<!--#endif-->
-.</li>
+Bluetooth or infra-red.</li>
 </ul>
-<p>An electronic <a href="addressbook-businesscard.html">Business Card</a> can also be transmitted quickly and easily from one device to another using the <b>Business Card</b> feature.</p>
+<p>An electronic <b>Business Card</b> can also be transmitted quickly and easily from one device to another using the <a href="addressbook-businesscard.html">Business Card</a> feature.</p>
 <!--#if expr="$INFRARED"-->
 <p>See Also: <a href="beaming.html">Beaming</a></p>
 <!--#endif-->

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,8 +21,7 @@
 
 #include <qbluetoothaddress.h>
 #include <qbluetoothremotedevice.h>
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
-#include <qbluetoothaddress.h>
+#include "qbluetoothnamespace_p.h"
 
 #include <QStringList>
 
@@ -38,6 +37,7 @@ public:
     QBluetooth::DeviceMajor m_dev_major;
     quint8 m_dev_minor;
     QBluetooth::ServiceClasses m_service_classes;
+    int m_rssi;
 };
 
 /*!
@@ -77,6 +77,7 @@ QBluetoothRemoteDevice::QBluetoothRemoteDevice(const QBluetoothAddress &address)
     m_data->m_version = "1.0";
     m_data->m_dev_major = QBluetooth::Uncategorized;
     m_data->m_dev_minor = 0;
+    m_data->m_rssi = 0;
 }
 
 /*!
@@ -88,6 +89,7 @@ QBluetoothRemoteDevice::QBluetoothRemoteDevice(const QBluetoothAddress &address)
         \o \a revision defines the manufacturer specific revision of the device
         \o \a manufacturer defines the manufacturer string
         \o \a company defines the company producing the device
+        \o \a rssi defines the Receiver Signal Strength (Indicator)
         \o \a devMajor defines the major device number
         \o \a devMinor defines the minor device number
         \o \a serviceClasses defines the bitmap of all device classes associated with this device.
@@ -99,6 +101,7 @@ QBluetoothRemoteDevice::QBluetoothRemoteDevice(const QBluetoothAddress &address,
                                                const QString &revision,
                                                const QString &manufacturer,
                                                const QString &company,
+                                               int rssi,
                                                QBluetooth::DeviceMajor devMajor,
                                                quint8 devMinor,
                                                QBluetooth::ServiceClasses serviceClasses)
@@ -113,6 +116,7 @@ QBluetoothRemoteDevice::QBluetoothRemoteDevice(const QBluetoothAddress &address,
     m_data->m_dev_major = devMajor;
     m_data->m_dev_minor = devMinor;
     m_data->m_service_classes = serviceClasses;
+    m_data->m_rssi = rssi;
 }
 
 /*!
@@ -302,6 +306,26 @@ QString QBluetoothRemoteDevice::company() const
 void QBluetoothRemoteDevice::setCompany(const QString &company)
 {
     m_data->m_company = company;
+}
+
+/*!
+    Returns the RSSI (Receiver Signal Strength Indicator) of the remote
+    device at the time of the last device discovery.
+*/
+int QBluetoothRemoteDevice::rssi() const
+{
+    return m_data->m_rssi;
+}
+
+
+/*!
+    Sets the RSSI (Receiver Signal Strength Indicator) of the remote
+    device \a rssi. This should be the RSSI of the device at the time
+    of the last discovery.
+*/
+void QBluetoothRemoteDevice::setRssi(int rssi)
+{
+    m_data->m_rssi = rssi;
 }
 
 /*!

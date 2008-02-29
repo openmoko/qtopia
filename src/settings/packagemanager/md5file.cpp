@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,11 +24,13 @@
 
 Md5File::Md5File( QObject *parent )
     : QFile( parent )
+    , m_hash( QCryptographicHash::Md5 )
 {
 }
 
 Md5File::Md5File( const QString &fileName, QObject *parent )
     : QFile( fileName, parent )
+    , m_hash( QCryptographicHash::Md5 )
 {
 }
 
@@ -41,7 +43,7 @@ bool Md5File::open( OpenMode mode )
 {
     if( QFile::open( mode ) )
     {
-        MD5Init( &m_context);
+        m_hash.reset();
 
         return true;
     }
@@ -53,34 +55,12 @@ void Md5File::close()
 {
     QFile::close();
 
-    uchar digest[ 17 ];
-
-    MD5Final( digest, &m_context );
-
-    QByteArray md5Sum;
-
-    md5Sum.resize( 32 );
-    char *hexData = md5Sum.data();
-
-    for (int i = 0; i < 16; ++i) {
-        int j = (digest[i] >> 4) & 0xf;
-        if (j <= 9)
-            hexData[i*2] = (j + '0');
-        else
-            hexData[i*2] = (j + 'a' - 10);
-        j = digest[i] & 0xf;
-        if (j <= 9)
-            hexData[i*2+1] = (j + '0');
-        else
-            hexData[i*2+1] = (j + 'a' - 10);
-    }
-
-    m_md5Sum = md5Sum;
+    m_md5Sum = m_hash.result().toHex();
 }
 
 qint64 Md5File::writeData( const char *data, qint64 maxSize )
 {
-    MD5Update( &m_context, reinterpret_cast< const md5byte * >( data ), maxSize );
+    m_hash.addData( data, maxSize );
 
     return QFile::writeData( data, maxSize );
 }

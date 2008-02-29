@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,12 +26,10 @@
 #include <QPushButton>
 #include <qcontent.h>
 
-#ifndef QTOPIA_DESKTOP
-# ifdef MEDIA_SERVER
+#ifdef MEDIA_SERVER
 class QSoundControl;
-# else
+#else
 class QWSSoundClient;
-# endif
 #endif
 
 class RingToneLink;
@@ -40,7 +38,7 @@ class RingToneSelect : public QListWidget
 {
     Q_OBJECT
 public:
-    RingToneSelect(QWidget *parent);
+    RingToneSelect(QWidget *parent, bool video = false);
     ~RingToneSelect();
 
     void setAllowNone(bool b);
@@ -54,6 +52,7 @@ public:
     void stopSound();
     void setVolume( const int vol ) { volume = vol; volumeSet = true; }
     void playCurrentSound();
+    bool isFinished();
 
 signals:
     void selected(const QContent &);
@@ -70,6 +69,9 @@ private slots:
     void startHoverTimer(int);
     void hoverTimeout();
     void playDone();
+#ifndef MEDIA_SERVER
+    void soundCompleted(int);
+#endif
 
 private:
     // should also make a bunch of QListWidget functions private.
@@ -85,11 +87,13 @@ private:
     int customCount;
     int volume;
     bool volumeSet;
-# ifdef MEDIA_SERVER
+    bool m_video;
+#ifdef MEDIA_SERVER
     QSoundControl *scontrol;
-# else
+#else
     QWSSoundClient *sclient;
-# endif
+    bool soundFinished;
+#endif
     QTimer *stimer;
     bool aNone;
     int m_currentItem;
@@ -112,13 +116,18 @@ public:
     bool allowNone() const;
     void setVolume( const int vol ) { rtl->setVolume( vol ); }
     void stopSound() { rtl->stopSound(); }
+    bool isFinished() { return rtl->isFinished(); }
+    void playCurrentSound() { rtl->setCurrentTone( mTone ); rtl->playCurrentSound(); }
+    void setVideoSelector( bool b );
+
+signals:
+    void selected(const QContent &);
 
 protected slots:
     void selectTone();
-    void playCurrentSound() { rtl->setCurrentTone( mTone ); rtl->playCurrentSound(); }
 
 private:
-    void init();
+    void init( bool video = false );
 
     QContent mTone;
     RingToneSelect *rtl;

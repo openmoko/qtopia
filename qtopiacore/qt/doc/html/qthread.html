@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/thread/qthread.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/thread/qthread.cpp -->
 <head>
-  <title>Qt 4.2: QThread Class Reference</title>
+  <title>Qt 4.3: QThread Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QThread Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QThread Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QThread class provides platform-independent threads. <a href="#details">More...</a></p>
 <pre> #include &lt;QThread&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -66,6 +67,7 @@
 <ul>
 <li><div class="fn"/>QThread * <b><a href="qthread.html#currentThread">currentThread</a></b> ()</li>
 <li><div class="fn"/>Qt::HANDLE <b><a href="qthread.html#currentThreadId">currentThreadId</a></b> ()</li>
+<li><div class="fn"/>int <b><a href="qthread.html#idealThreadCount">idealThreadCount</a></b> ()</li>
 </ul>
 <ul>
 <li><div class="fn"/>5 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
@@ -139,7 +141,7 @@
 <p>See also <a href="qthread.html#start">start</a>().</p>
 <h3 class="fn"><a name="dtor.QThread"></a>QThread::~QThread ()</h3>
 <p>Destroys the thread.</p>
-<p>Note that deleting a <a href="qthread.html">QThread</a> object will not stop the execution of the thread it represents. Deleting a running <a href="qthread.html">QThread</a> (i.e. <a href="qthread.html#isFinished">isFinished</a>() returns false) will probably result in a program crash. You can <a href="qthread.html#wait">wait</a>() on a thread to make sure that it has finished.</p>
+<p>Note that deleting a <a href="qthread.html">QThread</a> object will not stop the execution of the thread it represents. Deleting a running <a href="qthread.html">QThread</a> (i.e&#x2e; <a href="qthread.html#isFinished">isFinished</a>() returns false) will probably result in a program crash. You can <a href="qthread.html#wait">wait</a>() on a thread to make sure that it has finished.</p>
 <h3 class="fn"><a name="currentThread"></a>QThread * QThread::currentThread ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a pointer to a <a href="qthread.html">QThread</a> which represents the currently executing thread.</p>
 <h3 class="fn"><a name="currentThreadId"></a><a href="qt.html#HANDLE-typedef">Qt::HANDLE</a> QThread::currentThreadId ()&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -159,6 +161,8 @@
 <h3 class="fn"><a name="finished"></a>void QThread::finished ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the thread has finished executing.</p>
 <p>See also <a href="qthread.html#started">started</a>() and <a href="qthread.html#terminated">terminated</a>().</p>
+<h3 class="fn"><a name="idealThreadCount"></a>int QThread::idealThreadCount ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the ideal number of threads that can be run on the system. This is done querying the number of processor cores, both real and logical, in the system. This function returns -1 if the number of processor cores could not be detected.</p>
 <h3 class="fn"><a name="isFinished"></a>bool QThread::isFinished () const</h3>
 <p>Returns true is the thread is finished; otherwise returns false.</p>
 <p>See also <a href="qthread.html#isRunning">isRunning</a>().</p>
@@ -191,7 +195,7 @@
 <h3 class="fn"><a name="setTerminationEnabled"></a>void QThread::setTerminationEnabled ( bool <i>enabled</i> = true )&nbsp;&nbsp;<tt> [static protected]</tt></h3>
 <p>Enables or disables termination of the current thread based on the <i>enabled</i> parameter. The thread must have been started by <a href="qthread.html">QThread</a>.</p>
 <p>When <i>enabled</i> is false, termination is disabled. Future calls to <a href="qthread.html#terminate">QThread::terminate</a>() will return immediately without effect. Instead, the termination is deferred until termination is enabled.</p>
-<p>When <i>enabled</i> is true, termination is enabled. Future calls to <a href="qthread.html#terminate">QThread::terminate</a>() will terminate the thread normally. If termination has been deferred (i.e. <a href="qthread.html#terminate">QThread::terminate</a>() was called with termination disabled), this function will terminate the calling thread <i>immediately</i>. Note that this function will not return in this case.</p>
+<p>When <i>enabled</i> is true, termination is enabled. Future calls to <a href="qthread.html#terminate">QThread::terminate</a>() will terminate the thread normally. If termination has been deferred (i.e&#x2e; <a href="qthread.html#terminate">QThread::terminate</a>() was called with termination disabled), this function will terminate the calling thread <i>immediately</i>. Note that this function will not return in this case.</p>
 <p>See also <a href="qthread.html#terminate">terminate</a>().</p>
 <h3 class="fn"><a name="sleep"></a>void QThread::sleep ( unsigned long <i>secs</i> )&nbsp;&nbsp;<tt> [static protected]</tt></h3>
 <p>Forces the current thread to sleep for <i>secs</i> seconds.</p>
@@ -220,7 +224,7 @@
 <h3 class="fn"><a name="wait"></a>bool QThread::wait ( unsigned long <i>time</i> = ULONG_MAX )</h3>
 <p>Blocks the thread until either of these conditions is met:</p>
 <ul>
-<li>The thread associated with this <a href="qthread.html">QThread</a> object has finished execution (i.e. when it returns from <a href="qthread.html#run">run</a>()). This function will return true if the thread has finished. It also returns true if the thread has not been started yet.</li>
+<li>The thread associated with this <a href="qthread.html">QThread</a> object has finished execution (i.e&#x2e; when it returns from <a href="qthread.html#run">run</a>()). This function will return true if the thread has finished. It also returns true if the thread has not been started yet.</li>
 <li><i>time</i> milliseconds has elapsed. If <i>time</i> is ULONG_MAX (the default), then the wait will never timeout (the thread must return from <a href="qthread.html#run">run</a>()). This function will return false if the wait timed out.</li>
 </ul>
 <p>This provides similar functionality to the POSIX <tt>pthread_join()</tt> function.</p>
@@ -236,6 +240,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

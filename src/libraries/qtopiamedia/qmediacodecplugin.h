@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,16 +22,17 @@
 #ifndef __QTOPIA_MEDIASERVER_MEDIACODECPLUGIN_H
 #define __QTOPIA_MEDIASERVER_MEDIACODECPLUGIN_H
 
-#include <qstringlist.h>
+#include <QStringList>
 
+#include <qtopiaglobal.h>
 
 class QMediaEncoder;
 class QMediaDecoder;
 
-class QMediaCodecPlugin
+class QTOPIAMEDIA_EXPORT QMediaCodecPlugin
 {
 public:
-    virtual ~QMediaCodecPlugin() {}
+    virtual ~QMediaCodecPlugin();
 
     virtual QString name() const = 0;
     virtual QString comment() const = 0;

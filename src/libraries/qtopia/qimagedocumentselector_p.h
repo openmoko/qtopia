@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,14 +22,22 @@
 #ifndef QIMAGEDOCUMENTSELECTOR_P_H
 #define QIMAGEDOCUMENTSELECTOR_P_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include "qimagedocumentselector.h"
 #include "thumbnailview_p.h"
 
 #include <qcontent.h>
-
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qsoftmenubar.h>
-#endif
 
 #include <QWidget>
 #include <QString>
@@ -37,9 +45,7 @@
 #include <QPixmap>
 #include <QPoint>
 #include <QLabel>
-#include <QToolButton>
-#include <QButtonGroup>
-#include <QStackedWidget>
+#include <QStackedLayout>
 #include <QDrmContent>
 
 class QContentFilterDialog;
@@ -67,6 +73,9 @@ public:
     void setSortMode( QDocumentSelector::SortMode, bool force = false );
     QDocumentSelector::SortMode sortMode() const;
 
+    void setSortCriteria( const QContentSortCriteria &sort );
+    QContentSortCriteria sortCriteria() const;
+
     // Return current selected document
     QContent selectedDocument() const;
     // Return list of currently visible images
@@ -83,7 +92,6 @@ public:
 
     void setMandatoryPermissions( QDrmRights::Permissions permissions );
     QDrmRights::Permissions mandatoryPermissions() const;
-
 
 public slots:
     void setFocus();
@@ -118,13 +126,11 @@ private slots:
     // Initialize selection
     void resetSelection();
 
-    // Raise current view to top of stack
-    void raiseCurrentView();
-
     void delayResetSelection();
 
-protected:
+    void updateFinished();
 
+protected:
     void showEvent( QShowEvent *event );
     void hideEvent( QHideEvent *event );
 
@@ -140,11 +146,6 @@ private:
     QDrmContent drm_content;
 
     QImageDocumentSelector::ViewMode current_view;
-#ifndef QTOPIA_KEYPAD_NAVIGATION
-    QToolButton *single_view_toggle;
-    QToolButton *thumbnail_view_toggle;
-    QButtonGroup *view_toggle_group;
-#endif
 
     // Only Qtopia Phone
     QContentFilterDialog *category_dialog;
@@ -153,7 +154,7 @@ private:
     QStringList filtered_default_categories;
     bool        default_categories_dirty;
 
-    QStackedWidget *widget_stack;
+    QStackedLayout *widget_stack;
 
     SingleView *single_view;
     ThumbnailView *thumbnail_view;

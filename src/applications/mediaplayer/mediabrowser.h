@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,13 +28,17 @@
 #include <private/requesthandler_p.h>
 #include <private/menumodel_p.h>
 #include <private/menuview_p.h>
+#include <private/activitymonitor_p.h>
 
 class TitleBar;
 class PlaylistMenuModel;
 class ItemDelegate;
-class PaletteBlend;
+class CustomView;
+class AnimationDirector;
+class HelpDirector;
 class IndexHistory;
 class ActionGroup;
+class Playlist;
 
 class MediaBrowser : public QWidget
 {
@@ -48,27 +52,43 @@ public:
     bool hasBack() const;
     void goBack();
 
+    // QWidget
+    bool eventFilter( QObject* o, QEvent* e );
+
 public slots:
     void setMediaContent( QMediaContent* content );
 
 private slots:
     void executeSelectedAction( const QModelIndex& index );
     void executeHeldAction( const QModelIndex& index );
+    void executeHeldLongAction( const QModelIndex& index );
 
     void removePlaylistItem();
     void clearPlaylist();
 
     void savePlaylist();
 
+    void generateMyShuffle();
+    void resetMyShuffle();
+
+    // ### HACK
+    void enableNowPlaying();
+
+    void directCurrentChange();
+    void directSelectRelease();
+
+    void executeShowPlayerRequest();
+
 private:
     RequestHandler *m_requesthandler;
 
-    MenuView *m_view;
+    CustomView *m_view;
     MenuStack *m_stack;
 
+    AnimationDirector *m_director;
+    HelpDirector *m_helpdirector;
+
     ItemDelegate *m_delegate;
-    PaletteBlend *m_paletteblend;
-    QTimeLine *m_timeline;
 
     IndexHistory *m_history;
 
@@ -77,8 +97,15 @@ private:
 
     ActionGroup *m_removegroup;
     ActionGroup *m_savegroup;
+    ActionGroup *m_resetgroup;
 
     TitleBar *m_titlebar;
+
+    Playlist *m_playlist;
+    bool m_hasnowplaying;
+
+    ActivityMonitor *m_browsermonitor;
+    bool m_focused;
 };
 
 #endif // MEDIABROWSER_H

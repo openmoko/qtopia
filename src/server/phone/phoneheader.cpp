@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,6 +23,7 @@
 #include "inputmethods.h"
 #include <QTimer>
 #include "windowmanagement.h"
+#include "qtopiaserverapplication.h"
 #include <qscreen_qws.h>
 
 /*!
@@ -30,7 +31,7 @@
   \ingroup QtopiaServer::PhoneUI
   \brief The PhoneHeader class provides a dockable, themeable phone header.
 
-  This class is part of the Qtopia server.
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
@@ -40,11 +41,18 @@ PhoneHeader::PhoneHeader(QWidget *parent)
     : PhoneThemedView(parent, Qt::FramelessWindowHint | Qt::Tool |
                               Qt::WindowStaysOnTopHint)
 {
+    setWindowTitle("_decoration_");
     inputMethods = new InputMethods(this, InputMethods::Any);
 }
 
 /*! \internal */
 void PhoneHeader::themeLoaded(const QString &)
+{
+    QTimer::singleShot(0, this, SLOT(updateIM()));
+}
+
+/*! \internal */
+void PhoneHeader::updateIM()
 {
     QList<ThemeItem*> items = findItems("inputmethod", ThemedView::Widget);
     QList<ThemeItem*>::ConstIterator it;

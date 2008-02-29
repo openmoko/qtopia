@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt Tutorial 5 - Building Blocks</title>
+  <title>Qt 4.3: Qt Tutorial 5 - Building Blocks</title>
   <link rel="prev" href="tutorial-t4.html" />
   <link rel="contents" href="tutorial.html" />
   <link rel="next" href="tutorial-t6.html" />
@@ -19,7 +19,8 @@
 [<a href="tutorial.html">Qt Tutorial</a>]
 [Next: <a href="tutorial-t6.html">Chapter 6</a>]
 </p>
-<h1 align="center">Qt Tutorial 5 - Building Blocks<br /><small></small></h1>
+<h1 align="center">Qt Tutorial 5 - Building Blocks<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="tutorial-t5-main-cpp.html">tutorial/t5/main.cpp</a></li>
@@ -76,8 +77,9 @@
  {
  public:
      MyWidget(QWidget *parent = 0);
- };</pre>
-<a name="constructor"></a><pre> MyWidget::MyWidget(QWidget *parent)
+ };
+
+ MyWidget::MyWidget(QWidget *parent)
      : QWidget(parent)
  {
      QPushButton *quit = new QPushButton(tr(&quot;Quit&quot;));
@@ -102,8 +104,8 @@
      layout-&gt;addWidget(slider);
      setLayout(layout);</pre>
 <p><tt>MyWidget</tt> now uses a <a href="qvboxlayout.html">QVBoxLayout</a> to manage the geometry of its child widgets. For that reason, we don't need to specify the screen coordinates for each widget like we did in Chapter 4. In addition, using a layout ensures that the child widgets are resized when the window is resized. Then we add the <tt>quit</tt>, <tt>lcd</tt> and <tt>slider</tt> widgets to the layout using <a href="qboxlayout.html#addWidget">QBoxLayout::addWidget</a>().</p>
-<p>The <a href="qwidget.html#setLayout">QWidget::setLayout</a>() function installs the layout on <tt>MyWidget</tt>. This makes the layout a child widget of <tt>MyWidget</tt> so we don't have to worry about deleting it; it will be deleted together with <tt>MyWidget</tt>. Also, the call to <a href="qwidget.html#setLayout">QWidget::setLayout</a>() automatically reparents the widgets in the layout so that they are children of <tt>MyWidget</tt>. Because of this, we didn't need to specify <tt>this</tt> as the parent for the <tt>quit</tt>, <tt>lcd</tt> and <tt>slider</tt> widgets.</p>
-<p>In Qt, widgets are either children of other widgets (e.g. <tt>this</tt>), or they have no parent. A widget can be <i>added</i> to a layout, in which case the layout becomes responsible for managing the geometry of that widget, but the layout can never act as a parent itself. Indeed, <a href="qwidget.html">QWidget</a>'s constructor takes a <a href="qwidget.html">QWidget</a> pointer for the parent, and <a href="qlayout.html">QLayout</a> doesn't inherit from <a href="qwidget.html">QWidget</a>.</p>
+<p>The <a href="qwidget.html#setLayout">QWidget::setLayout</a>() function installs the layout on <tt>MyWidget</tt>. This makes the layout a child of <tt>MyWidget</tt> so we don't have to worry about deleting it; the parent-child relationship ensures that it will be deleted together with <tt>MyWidget</tt>. Also, the call to <a href="qwidget.html#setLayout">QWidget::setLayout</a>() automatically reparents the widgets in the layout so that they are children of <tt>MyWidget</tt>. Because of this, we didn't need to specify <tt>this</tt> as the parent for the <tt>quit</tt>, <tt>lcd</tt> and <tt>slider</tt> widgets.</p>
+<p>In Qt, widgets are either children of other widgets (e.g&#x2e; <tt>this</tt>), or they have no parent. A widget can be <i>added</i> to a layout, in which case the layout becomes responsible for managing the geometry of that widget, but the layout can never act as a parent itself. Indeed, <a href="qwidget.html">QWidget</a>'s constructor takes a <a href="qwidget.html">QWidget</a> pointer for the parent, and <a href="qlayout.html">QLayout</a> doesn't inherit from <a href="qwidget.html">QWidget</a>.</p>
 <a name="running-the-application"></a>
 <h2>Running the Application</h2>
 <p>The LCD number reflects everything you do to the slider, and the widget handles resizing well. Notice that the LCD number widget changes in size when the window is resized (because it can), but the others stay about the same (because otherwise they would look strange).</p>
@@ -122,6 +124,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

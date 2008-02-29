@@ -1,0 +1,6 @@
+* test headset audiostate
+* switch to "2007.2" EABI
+* multiplex
+* fix suspend/resume in regards to modem junk on resume
+* power off bt on suspend... power on bt resume
+* access the sd card, which is not really removable

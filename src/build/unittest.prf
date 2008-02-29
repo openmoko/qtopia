@@ -1,0 +1,48 @@
+# Don't use the incremental linking you used for building Qt, since this is
+# bound for trouble.
+#QMAKE_INCREMENTAL=
+
+DEFINES+=QTOPIA_TEST
+
+!qtopiadesktop {
+    CONFIG*=console no_sxe_test
+    INCLUDEPATH*=$$QT_DEPOT_PATH/tests \
+                 $$QTOPIA_DEPOT_PATH/tests
+    DEFINES*=QTOPIATEST_SRCDIR=$$LITERAL_ESCAPED_QUOTE$$SRCDIR$$LITERAL_ESCAPED_QUOTE
+    #CONFIG+=no_quicklaunch no_tr
+
+    win32-msvc:QMAKE_LFLAGS_DEBUG 	+= /NODEFAULTLIB:libc
+    win32-msvc:QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcd
+
+    win32-msvc:QMAKE_CFLAGS_DEBUG	-= -Zi
+    win32-msvc:QMAKE_CFLAGS_DEBUG	+= -Zd
+    win32-msvc:QMAKE_CXXFLAGS_DEBUG	-= -Zi
+    win32-msvc:QMAKE_CXXFLAGS_DEBUG	+= -Zd
+
+    win32-msvc:QMAKE_CFLAGS		+= -GX
+    win32-msvc:QMAKE_CXXFLAGS	+= -GX
+
+    #mac:QT         += network sql
+
+    # Install to /tests to we don't clobber anything in Qtopia
+    target.path=$$resdir/tests/$$QTOPIA_ID
+
+    # Run the test (ignore errors so that all the tests can run)
+    test.commands=$$COMMAND_HEADER\
+        export QPEHOME=\$\$(mktemp -d /tmp/qtopia_maketest_XXXXXX);\
+        $$QPEDIR/bin/runqtopia -exec $$LITERAL_SQUOTE$(INSTALL_ROOT)/tests/$$QTOPIA_ID/$$TARGET -qws $(ARGS)$$LITERAL_SQUOTE;\
+        rm -rf \$\$QPEHOME
+    test.depends+=install
+    QMAKE_EXTRA_TARGETS+=test
+} else {
+    # Install to / so it will run
+    target.path=/
+
+    # Run the test (ignore errors so that all the tests can run)
+    test.commands=$$COMMAND_HEADER\
+        $$fixpath($(INSTALL_ROOT)/$$TARGET)
+    test.depends+=install
+    QMAKE_EXTRA_TARGETS+=test
+
+    CONFIG+=no_batch
+}

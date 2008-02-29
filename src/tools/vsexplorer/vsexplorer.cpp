@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -54,6 +54,13 @@ static bool terminateRequested = false;
 Q_DECLARE_USER_METATYPE_NO_OPERATORS(QList<int>);
 Q_IMPLEMENT_USER_METATYPE_NO_OPERATORS(QList<int>);
 #endif
+
+#ifdef QTOPIA_BLUETOOTH
+//include this header for meta type information on conversion 
+//from QBluetoothAddress to QVariant and vice versa
+#include <QBluetoothAddress>
+#endif
+
 
 //needed to dump QPhoneRfFunctinality::Level in qtopiaphone/qphonerffunctionality.h
 //we don't include the header as we want to avoid that vsexplorer depends on the phone library.
@@ -350,10 +357,10 @@ void VSExplorer::watch(const QByteArray &path)
     }
     QValueSpaceObject * newObject = new QValueSpaceObject(path);
     watchers.insert(newObject);
-    QObject::connect(newObject, SIGNAL(itemRemove(const QByteArray &)),
-                     this, SLOT(removed(const QByteArray &)));
-    QObject::connect(newObject, SIGNAL(itemSetValue(const QByteArray &, const QVariant &)),
-                     this, SLOT(written(const QByteArray &, const QVariant &)));
+    QObject::connect(newObject, SIGNAL(itemRemove(QByteArray)),
+                     this, SLOT(removed(QByteArray)));
+    QObject::connect(newObject, SIGNAL(itemSetValue(QByteArray,QVariant)),
+                     this, SLOT(written(QByteArray,QVariant)));
 }
 
 void VSExplorer::unwatch(const QByteArray &path)
@@ -808,8 +815,8 @@ int MAIN_FUNC(int argc, char ** argv)
         LineInput li;
 
 
-        QObject::connect(&li, SIGNAL(line(const QString&)),
-                         vse, SLOT(processLine(const QString&)));
+        QObject::connect(&li, SIGNAL(line(QString)),
+                         vse, SLOT(processLine(QString)));
 
         int rv = app.exec();
         delete vse;

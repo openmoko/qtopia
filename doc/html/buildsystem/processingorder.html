@@ -10,7 +10,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Processing Order<br /><span class="subtitle"></span>
 </h1>
 <p>Libraries must be processed before other projects that link to them. When qmake processes a library it creates a .prl file. When a project links to a library, qmake reads the .prl file. If the .prf file does not exist, qmake will guess at the contents which can cause problems. The dependency system should be enough to prevent this from happening but to be sure, configure runs make syncqtopia which ensures all of the library directories are processed.</p>

@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    PSNames module implementation (body).                                */
 /*                                                                         */
-/*  Copyright 1996-2001, 2002, 2003, 2005, 2006 by                         */
+/*  Copyright 1996-2001, 2002, 2003, 2005, 2006, 2007 by                   */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -97,7 +97,7 @@
     }
 
     /* If the name begins with `u', followed by four to six uppercase */
-    /* hexadicimal digits, it is a hard-coded unicode character code. */
+    /* hexadecimal digits, it is a hard-coded unicode character code. */
     if ( glyph_name[0] == 'u' )
     {
       FT_Int       count;
@@ -182,11 +182,12 @@
 
   /* Build a table that maps Unicode values to glyph indices. */
   static FT_Error
-  ps_unicodes_init( FT_Memory          memory,
-                    PS_Unicodes        table,
-                    FT_UInt            num_glyphs,
-                    PS_Glyph_NameFunc  get_glyph_name,
-                    FT_Pointer         glyph_data )
+  ps_unicodes_init( FT_Memory             memory,
+                    PS_Unicodes           table,
+                    FT_UInt               num_glyphs,
+                    PS_GetGlyphNameFunc   get_glyph_name,
+                    PS_FreeGlyphNameFunc  free_glyph_name,
+                    FT_Pointer            glyph_data )
   {
     FT_Error  error;
 
@@ -220,6 +221,9 @@
             map->glyph_index = n;
             map++;
           }
+
+          if ( free_glyph_name )
+            free_glyph_name( glyph_data, gname );
         }
       }
 

@@ -37,19 +37,21 @@
 <li><div class="fn"/>void <b><a href="qdocumentselectordialog.html#setMandatoryPermissions">setMandatoryPermissions</a></b> ( QDrmRights::Permissions <i>permissions</i> )</li>
 <li><div class="fn"/>void <b><a href="qdocumentselectordialog.html#setOptions">setOptions</a></b> ( QDocumentSelector::Options <i>options</i> )</li>
 <li><div class="fn"/>void <b><a href="qdocumentselectordialog.html#setSelectPermission">setSelectPermission</a></b> ( QDrmRights::Permission <i>permission</i> )</li>
+<li><div class="fn"/>void <b><a href="qdocumentselectordialog.html#setSortCriteria">setSortCriteria</a></b> ( const QContentSortCriteria &amp; <i>sort</i> )</li>
 <li><div class="fn"/>void <b><a href="qdocumentselectordialog.html#setSortMode">setSortMode</a></b> ( QDocumentSelector::SortMode <i>mode</i> )</li>
+<li><div class="fn"/>QContentSortCriteria <b><a href="qdocumentselectordialog.html#sortCriteria">sortCriteria</a></b> () const</li>
 <li><div class="fn"/>QDocumentSelector::SortMode <b><a href="qdocumentselectordialog.html#sortMode">sortMode</a></b> () const</li>
 </ul>
 <ul>
 <li><div class="fn"/>9 public functions inherited from <a href="qdialog.html#public-functions">QDialog</a></li>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>2 properties inherited from <a href="qdialog.html#properties">QDialog</a></li>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>5 public slots inherited from <a href="qdialog.html#public-slots">QDialog</a></li>
 <li><div class="fn"/>20 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
@@ -117,11 +119,14 @@
 <p>See also <a href="qdocumentselectordialog.html#newSelected">newSelected</a>() and <a href="qdocumentselectordialog.html#documents">documents</a>().</p>
 <h3 class="fn"><a name="setDefaultCategories"></a>void QDocumentSelectorDialog::setDefaultCategories ( const <a href="qstringlist.html">QStringList</a> &amp; <i>categories</i> )</h3>
 <p>Sets the <i>categories</i> checked by default in the document selector's category filter dialog.</p>
-<p>If a supplied category does not match those available in the category filter dialog, the document selector will not be filtered on that category. Upon invocation this function will set the default checked categories within the category filter dialog and filter according to the supplied <i>categories</i> <b>Note:</b> Once the dialog has been shown once, this function no longer has any effect.</p>
+<p>The categories displayed in a document selector's category filter dialog are restricted to categories assigned to documents that would appear in the document selector with no categories checked. If a default category does not match any visible in the category filter dialog it will be ignored.</p>
+<p>Setting a default category will filter the visible documents by that category (assuming there are documents belonging to that category) but the user is able to remove the filtering by unchecking the category in the filter dialog. To apply a filter that cannot be removed use <a href="qdocumentselectordialog.html#setFilter">setFilter</a>() instead.</p>
+<p><b>Note:</b> Once the dialog has been shown once, this function no longer has any effect.</p>
 <p>Filtering according to <i>categories</i> is applied after the filter defined by <a href="qdocumentselectordialog.html#filter">filter</a>().</p>
 <p>See also <a href="qdocumentselectordialog.html#defaultCategories">defaultCategories</a>(), <a href="qdocumentselectordialog.html#filter">filter</a>(), <a href="qdocumentselectordialog.html#setFilter">setFilter</a>(), and <a href="categories.html">Categories</a>.</p>
 <h3 class="fn"><a name="setFilter"></a>void QDocumentSelectorDialog::setFilter ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i> )</h3>
 <p>Sets the <i>filter</i> which defines the subset of content on the device the user can select from.</p>
+<p>The document list is filtered when control returns to the event loop.</p>
 <p>See also <a href="qdocumentselectordialog.html#filter">filter</a>() and <a href="qcontentset.html#filter">QContentSet::filter</a>().</p>
 <h3 class="fn"><a name="setMandatoryPermissions"></a>void QDocumentSelectorDialog::setMandatoryPermissions ( <a href="qdrmrights.html#Permission-enum">QDrmRights::Permissions</a> <i>permissions</i> )</h3>
 <p>Sets the <i>permissions</i> a document must have in order to be choosable from the document selector.</p>
@@ -134,19 +139,29 @@
 <h3 class="fn"><a name="setSelectPermission"></a>void QDocumentSelectorDialog::setSelectPermission ( <a href="qdrmrights.html#Permission-enum">QDrmRights::Permission</a> <i>permission</i> )</h3>
 <p>Sets the <i>permission</i> a document should give in order to be choosable. The permissions effectively specify the intended usage for that document.</p>
 <p>If a document does not have provide the given <i>permission</i>, the document selector will try to activate and thus acquire permissions for the document. If the document cannot be activated with that <i>permission</i>, it will not be choosable from the list and visual indication of this is given.</p>
-<p>If the <i>permission</i> is <a href="qdrmrights.html#Permission-enum">QDrmRights::InvalidPermission</a> the default permissions for the document is used.</p>
+<p>If the <i>permission</i> is <a href="qdrmrights.html#Permission-enum">QDrmRights::InvalidPermission</a> the default permission for the document is used.</p>
 <p>See also <a href="qdocumentselectordialog.html#selectPermission">selectPermission</a>(), <a href="qdocumentselectordialog.html#setMandatoryPermissions">setMandatoryPermissions</a>(), and <a href="qdocumentselectordialog.html#mandatoryPermissions">mandatoryPermissions</a>().</p>
+<h3 class="fn"><a name="setSortCriteria"></a>void QDocumentSelectorDialog::setSortCriteria ( const <a href="qcontentsortcriteria.html">QContentSortCriteria</a> &amp; <i>sort</i> )</h3>
+<p>Sets the document <i>sort</i> criteria.</p>
+<p>This will set the document selector sort mode to SortCriteria.</p>
+<p>The document list is sorted when control returns to the event loop.</p>
+<p>See also <a href="qdocumentselectordialog.html#sortCriteria">sortCriteria</a>() and <a href="qdocumentselectordialog.html#setSortMode">setSortMode</a>().</p>
 <h3 class="fn"><a name="setSortMode"></a>void QDocumentSelectorDialog::setSortMode ( <a href="qdocumentselector.html#SortMode-enum">QDocumentSelector::SortMode</a> <i>mode</i> )</h3>
 <p>Sets the document sort <i>mode</i>.</p>
 <p>The default mode is <a href="qdocumentselector.html#SortMode-enum">QDocumentSelector::Alphabetical</a>.</p>
-<p>See also <a href="qdocumentselectordialog.html#sortMode">sortMode</a>().</p>
+<p>Setting the sort mode to SortCriteria will not change the sorting of the documents.</p>
+<p>See also <a href="qdocumentselectordialog.html#sortMode">sortMode</a>() and <a href="qdocumentselectordialog.html#setSortCriteria">setSortCriteria</a>().</p>
+<h3 class="fn"><a name="sortCriteria"></a><a href="qcontentsortcriteria.html">QContentSortCriteria</a> QDocumentSelectorDialog::sortCriteria () const</h3>
+<p>Returns the current document sort criteria.</p>
+<p>See also <a href="qdocumentselectordialog.html#setSortCriteria">setSortCriteria</a>().</p>
 <h3 class="fn"><a name="sortMode"></a><a href="qdocumentselector.html#SortMode-enum">QDocumentSelector::SortMode</a> QDocumentSelectorDialog::sortMode () const</h3>
 <p>Returns the current document sort mode.</p>
-<p>See also <a href="qdocumentselectordialog.html#setSortMode">setSortMode</a>().</p>
+<p>If the sort mode is SortCriteria <a href="qdocumentselectordialog.html#sortCriteria">sortCriteria</a>() must be queried to get the actual document sorting.</p>
+<p>See also <a href="qdocumentselectordialog.html#setSortMode">setSortMode</a>() and <a href="qdocumentselectordialog.html#sortCriteria">sortCriteria</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

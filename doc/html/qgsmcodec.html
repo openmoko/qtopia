@@ -54,13 +54,13 @@
 <p>The QGsmCodec class represents the text codec for the GSM 7-bit encoding of Latin-1</p>
 <p>The GSM specifications for SMS use a compact 7-bit encoding to represent Latin-1 characters, compared to the more usual 8-bit ISO-8859-1 encoding used on many computer systems.</p>
 <p>The QGsmCodec class enables conversion back and forth between the GSM encoding and the normal Unicode encoding used by Qtopia.</p>
-<p>Application programs will rarely need to use this class, because the QSMSMessage class automatically converts between 7-bit and Unicode encodings as necessary.</p>
+<p>Application programs will rarely need to use this class, because the <a href="qsmsmessage.html">QSMSMessage</a> class automatically converts between 7-bit and Unicode encodings as necessary.</p>
 <p>If an application program does need to use this class, it should call <a href="qatutils.html#codec">QAtUtils::codec</a>() to obtain an instance of the codec. Constructing QGsmCodec objects directly is not recommended, due to how <a href="qtextcodec.html">QTextCodec</a> registers and deregisters codec implementations.</p>
 <p>The following example converts the <tt>input</tt> string into the compact 7-bit encoding within <tt>output</tt>.</p>
 <pre>    QString input = &quot;...&quot;;
     QByteArray output = QAtUtils::codec(&quot;gsm&quot;)-&gt;fromUnicode(input);</pre>
 <p>This codec implementation conforms to 3GPP TS 03.38 and 3GPP TS 07.05, including the extension tables from 3GPP TS 03.38.</p>
-<p>See also QSMSMessage and <a href="qatutils.html#codec">QAtUtils::codec</a>().</p>
+<p>See also <a href="qsmsmessage.html">QSMSMessage</a> and <a href="qatutils.html#codec">QAtUtils::codec</a>().</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QGsmCodec"></a>QGsmCodec::QGsmCodec ( bool <i>noLoss</i> = false )</h3>
@@ -101,6 +101,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

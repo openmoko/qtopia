@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -57,7 +57,10 @@
 #include <QTranslatableSettings>
 #include <QtopiaInputMethod>
 #include <QList>
+#include <QPainter>
+#include <QApplication>
 
+static InputMethods* m_instance = 0;
 /*
   Slightly hacky: We use WStyle_Tool as a flag to say "this widget
   belongs to the IM system, so clicking it should not cause a reset".
@@ -80,6 +83,8 @@ public:
   \class InputMethodSelector
   \ingroup QtopiaServer::InputMethods
 
+  //TODO
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 
   */
 
@@ -93,7 +98,7 @@ InputMethodSelector::InputMethodSelector(QWidget *parent)
     hb->setMargin(0);
     hb->setSpacing(0);
 
-    pop = new QMenu( 0 );
+    pop = new QMenu( this );
     pop->setFocusPolicy( Qt::NoFocus ); //don't reset IM
 
     mButtonStack = new QStackedWidget;
@@ -107,6 +112,7 @@ InputMethodSelector::InputMethodSelector(QWidget *parent)
 
     mButton->setFocusPolicy(Qt::NoFocus);
     mButton->setCheckable( true );
+    mButton->setChecked( true );
     mButton->setAutoRaise( true );
     int sz = style()->pixelMetric(QStyle::PM_SmallIconSize);
     mButton->setIconSize(QSize(sz,sz));
@@ -116,12 +122,13 @@ InputMethodSelector::InputMethodSelector(QWidget *parent)
 
     mButton->setBackgroundRole(QPalette::Button);
 
-    mChoice = new QToolButton;
+    mChoice = new QToolButton(this);
     hb->addWidget(mChoice);
 
     mChoice->setBackgroundRole(QPalette::Button);
-    mChoice->setIcon( QPixmap(":image/qpe/tri") );
-    mChoice->setFixedWidth( 13 );
+    mChoice->setIcon( generatePixmap() );
+    int dpi = QApplication::desktop()->screen()->logicalDpiY();
+    mChoice->setFixedWidth( qRound(7.0 * dpi / 100.0) );    // 7 pixels on a 100dpi screen
     mChoice->setAutoRaise( true );
     connect( mChoice, SIGNAL(clicked()), this, SLOT(showList()) );
     mChoice->hide();// until more than one.
@@ -130,7 +137,13 @@ InputMethodSelector::InputMethodSelector(QWidget *parent)
 
     QTranslatableSettings cfg(Qtopia::defaultButtonsFile(), QSettings::IniFormat); // No tr
     cfg.beginGroup("InputMethods");
+
     defaultIM = cfg.value("DefaultIM").toString(); // No tr
+
+    // Add sensible defaults:
+    if (defaultIM.isEmpty() && !Qtopia::mousePreferred())
+        defaultIM = "Phone Keys"; // No tr
+
     qLog(Input) << "Default IM is "<< defaultIM;
 }
 
@@ -145,14 +158,14 @@ InputMethodSelector::~InputMethodSelector()
 
 /*!
     Add \a im to this InputMethodSelector.
-    
-    If this is the first or the default input method, this will 
+
+    If this is the first or the default input method, this will
     cause it to become the current input method and become active.
-    
+
     If this is the second input method added, this will activate
-    the drop-down input-method selection \l QToolButton, making 
+    the drop-down input-method selection \l QToolButton, making
     the input methods available to users via the drop-down input method list.
-    
+
     Subsequent input methods added with this function are also added to this list.
 */
 // before, need to set libName, iface, style.
@@ -161,8 +174,8 @@ void InputMethodSelector::add(QtopiaInputMethod *im)
     /* should check if im has a statusWidget()  */
     list.append(im);
 
-    if (mCurrent == 0 || im->name() == defaultIM) {
-        if( im->name() == defaultIM )
+    if (mCurrent == 0 || im->identifier() == defaultIM) {
+        if( im->identifier() == defaultIM )
             qLog(Input) << "Found defaultIM "<< defaultIM << ", activating";
         mCurrent = list[list.count()-1];
         emit activated(mCurrent);
@@ -202,6 +215,25 @@ void InputMethodSelector::updateStatusIcon()
         mButton->setIcon(QIcon());
         mButtonStack->setCurrentWidget(mButton);
     }
+}
+
+QPixmap InputMethodSelector::generatePixmap() const
+{
+    int dpi = QApplication::desktop()->screen()->logicalDpiY();
+    int w = qRound(4.5 * dpi / 100.0);
+    int h = qRound(3.5 * dpi / 100.0);
+    
+    QPixmap triangle(w,h);
+    triangle.fill(Qt::transparent);
+    QPainter painter(&triangle);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QPolygon poly;
+    poly << QPoint(0,0) << QPoint(w/2,h) << QPoint(w,0);
+    painter.setPen(QApplication::palette().color(QPalette::ButtonText));
+    painter.setBrush(QApplication::palette().buttonText());
+    painter.drawPolygon(poly);
+    painter.end();
+    return triangle;
 }
 
 /*!
@@ -259,6 +291,7 @@ void InputMethodSelector::setInputMethod(QtopiaInputMethod *method)
         mCurrent = method;
         emit activated(mCurrent);
         updateStatusIcon();
+        mButton->setChecked( true );
     }
     activateCurrent(true);
 }
@@ -290,8 +323,8 @@ void InputMethodSelector::setNextInputMethod()
             setInputMethod(*i);
             return;
         };
-    }; 
-    
+    };
+
     setInputMethod(list.first());
 }
 
@@ -317,30 +350,35 @@ void InputMethodSelector::activateCurrent( bool on )
 {
     if (mCurrent) {
         QWidget *w = mCurrent->inputWidget();
-        qLog(Input) << (on?"activating":"deactivating") << "input method" << (uint)mCurrent << ", with widget" << w;
+        qLog(Input) << (on?"activating":"deactivating") << "input method" << (ulong)mCurrent << ", with widget" << w;
         if ( on ) {
             updateIMMenuAction(true);
             if (w) {
                 mCurrent->reset();
                 // HACK... Make the texteditor fit with all input methods
                 // Input methods should also never use more than about 40% of the screen
+                if(w->sizeHint().height() <= 0 || w->sizeHint().width() <= 0)
+                    qLog(Input) << "Input Method Widget " << w->metaObject()->className() << " has sizeHint() with null height or width, and will not be visible";
                 int height = qMin( w->sizeHint().height(), 134 );
 
                 QDesktopWidget *desktop = QApplication::desktop();
                 w->resize(desktop->screenGeometry(desktop->primaryScreen()).width(), height );
 
-                mButton->setChecked(true);
-                w->show();
-
-                //Add menu item:
-                emit inputWidgetShown( on );
+                if(mButton->isChecked()) {
+                    if (mCurrent->properties() & QtopiaInputMethod::DockedInputWidget)
+                        WindowManagement::showDockedWindow(w);
+                    else
+                        w->show();
+                    emit inputWidgetShown( on );
+                };
             };
-            // should be emitted if the screen is changing sizes.
-        } else { // on == false
+        } else {
             updateIMMenuAction(false);
             if(w) {
-                mButton->setChecked(false);
-                w->hide();
+                if (mCurrent->properties() & QtopiaInputMethod::DockedInputWidget)
+                    WindowManagement::hideDockedWindow(w);
+                else
+                    w->hide();
                 emit inputWidgetShown( on );
             };
         }
@@ -417,7 +455,7 @@ void InputMethodSelector::setInputMethod(const QString &name)
 /*!
     A helper function for supporting input method menu QActions.
     Removes the current IM's QAction from all menus.
-    If \a addToMenu is true, adds the QAction to the 
+    If \a addToMenu is true, adds the QAction to the
     current focus widgets Menu.
 */
 void InputMethodSelector::updateIMMenuAction(bool addToMenu)
@@ -433,22 +471,22 @@ void InputMethodSelector::updateIMMenuAction(bool addToMenu)
 
     if( addToMenu ){
         QList<QIMActionDescription*> actionDescriptionList  = mCurrent->menuDescription();
-        
+
         if(count() > 1)
         {
             actionDescriptionList.append(new QIMActionDescription(InputMethods::NextInputMethod, tr("Change Input Method"),QString(":icon/rotate")));
         }
 
         if(!actionDescriptionList.isEmpty()){
-            QList<QVariant> IMMenu;
-            qLog(Input) << "Building IMMenu";
+            QList<QVariant> imMenu;
+            qLog(Input) << "Building imMenu";
             for(QList<QIMActionDescription*>::const_iterator i = actionDescriptionList.begin(); i != actionDescriptionList.end(); ++i) {
-                IMMenu.append(QVariant::fromValue(**i));
+                imMenu.append(QVariant::fromValue(**i));
                 delete *i;
             };
 
             qLog(Input) << "Adding valuespace Entry";
-            m_menuVS.setAttribute("MenuItem", QVariant(IMMenu));
+            m_menuVS.setAttribute("MenuItem", QVariant(imMenu));
             m_IMMenuActionAdded = true;
         };
     };
@@ -477,6 +515,8 @@ void InputMethodSelector::showChoice( bool on)
     It is very closely related to the \l InputMethodService and \l InputMethodSelector classes.
 
     InputMethods is primarily resposible for loading input method plugins and maintaining the hints set for different widgets. It also acts on the messages from the \l InputMethodService, either taking direct action or passing them on to the  \l InputMethodSelector.
+    
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 /*!
@@ -484,10 +524,18 @@ void InputMethodSelector::showChoice( bool on)
 */
 InputMethods::InputMethods( QWidget *parent, IMType t ) :
     QWidget( parent ),
-    loader(0), type(t), currentIM(0), lastActiveWindow(0), m_IMVisibleVS("/UI/IMVisible"), m_IMVisible(false)
+    loader(0), type(t),
+#ifdef Q_WS_QWS
+    currentIM(0),
+#endif
+    lastActiveWindow(0), m_IMVisibleVS("/UI/IMVisible"), m_IMVisible(false)
 {
     // Start up the input method service via \l{Qtopia IPC Layer}{IPC}.
     new InputMethodService( this );
+    if(!m_instance)
+        m_instance = this;
+    else
+        qWarning("Multiple InputMethods instantiated");
 
     //overrideWindowFlags(Qt::Tool);
     setObjectName("InputMethods");
@@ -500,17 +548,20 @@ InputMethods::InputMethods( QWidget *parent, IMType t ) :
     hbox->addWidget(selector);
 
 
-    connect(selector, SIGNAL(activated(QtopiaInputMethod *)),
-            this, SLOT(choose(QtopiaInputMethod *)));
+    connect(selector, SIGNAL(activated(QtopiaInputMethod*)),
+            this, SLOT(choose(QtopiaInputMethod*)));
 
     connect(selector, SIGNAL(inputWidgetShown(bool)),
             this, SIGNAL(inputToggled(bool)));
 
     loadInputMethods();
 
-    connect( qwsServer, SIGNAL(windowEvent(QWSWindow *, QWSServer::WindowEvent)),
-            this, SLOT(updateHintMap(QWSWindow *, QWSServer::WindowEvent)));
+#ifdef Q_WS_QWS
+    connect( qwsServer, SIGNAL(windowEvent(QWSWindow*,QWSServer::WindowEvent)),
+            this, SLOT(updateHintMap(QWSWindow*,QWSServer::WindowEvent)));
+#endif
 
+    setVisible(false);
     // might also add own win id since wouldn't have been added at start up.
 }
 
@@ -533,7 +584,19 @@ InputMethods::~InputMethods()
 }
 
 /*!
-    \enum InputMethods::IMType 
+    Returns the instance of the InputMethods object used by the server.
+*/
+InputMethods* InputMethods::instance()
+{
+    if(m_instance)
+        return m_instance;
+
+    return m_instance=new InputMethods;
+
+}
+
+/*!
+    \enum InputMethods::IMType
     This enum describes which types of input an input method processes.
     \value Any    The input method can process both mouse and keypad input
     \value Mouse    The input method processes mouse or pointer input.
@@ -541,7 +604,7 @@ InputMethods::~InputMethods()
 */
 
 /*!
-    \enum InputMethods::SystemMenuItemId 
+    \enum InputMethods::SystemMenuItemId
     This enum defines values that input method menu items can return to activate system actions based for these menu items.
     \value  NextInputMethod This value results in the input method being changed to the next input method in alphabetic order.
     \value ChangeInputMethod    This value causes the input method selection menu to be shown, and to recieve keyboard focus, facilitating changing input methods with the keyboard.
@@ -589,10 +652,23 @@ void InputMethods::activateMenuItem(int v)
         setNextInputMethod();
         return;
     }
-    
+
     // pass to current input method
     selector->current()->menuActionActivated(v);
 }
+
+/*!
+    Set system-wide description for allowable inputmethods to the given \a type.
+    \i {Note}: Triggers a reloading of all inputmethod plugins
+*/
+
+void InputMethods::setType(IMType type)
+{
+    if(type != this->type){
+        this->type=type;
+        loadInputMethods();
+    };
+};
 
 void InputMethods::resetStates()
 {
@@ -602,7 +678,7 @@ void InputMethods::resetStates()
 }
 
 /*!
-    returns the geometry of the current input methods input widget, or an empty \l QRect if there is no current input method, or no input widget for the current input method.
+    Returns the geometry of the current input methods input widget, or an empty \l QRect if there is no current input method, or no input widget for the current input method.
 */
 QRect InputMethods::inputRect() const
 {
@@ -619,10 +695,12 @@ QRect InputMethods::inputRect() const
 */
 void InputMethods::unloadInputMethods()
 {
+#ifdef Q_WS_QWS
     if (currentIM) {
         QWSServer::setCurrentInputMethod( 0 );
         currentIM = 0;
     }
+#endif
     if ( loader ) {
         selector->clear();
         ifaceList.clear();
@@ -658,17 +736,17 @@ void InputMethods::loadInputMethods()
 
     foreach ( QString name, loader->list() ) {
         qLog(Input) << "Loading IM: "<<name;
-        QObject *instance = loader->instance(name);
-        if ( !instance ){
-            qLog(Input) << "Missing loader instance";
+        QObject *loaderInstance = loader->instance(name);
+        if ( !loaderInstance ){
+            qLog(Input) << "Missing loader loaderInstance";
             continue;
         }
-        QtopiaInputMethod *plugin = qobject_cast<QtopiaInputMethod*>(instance);
+        QtopiaInputMethod *plugin = qobject_cast<QtopiaInputMethod*>(loaderInstance);
         if ( plugin ) {
             bool require_keypad = plugin->testProperty(QtopiaInputMethod::RequireKeypad);
             bool require_mouse = plugin->testProperty(QtopiaInputMethod::RequireMouse);
             if (type == Keypad && require_mouse || type == Mouse && require_keypad) {
-                delete instance;
+                delete loaderInstance;
             } else {
                 QWidget *w = plugin->inputWidget();
                 if (w) {
@@ -682,11 +760,11 @@ void InputMethods::loadInputMethods()
                     }
                 }
                 selector->add(plugin);
-                ifaceList.append(instance);
+                ifaceList.append(loaderInstance);
+                connect(plugin, SIGNAL(stateChanged()), this, SLOT(updateIMVisibility()));
             }
-            connect(plugin, SIGNAL(stateChanged()), this, SLOT(updateIMVisibility()));
         } else {
-            delete instance;
+            delete loaderInstance;
         }
     }
 
@@ -703,9 +781,7 @@ void InputMethods::loadInputMethods()
     // and the any?
 #endif
 
-
-
-
+#ifdef Q_WS_QWS
     if ( selector->current()) {
         //keyBased->show?
         QtopiaInputMethod *imethod = selector->current();
@@ -714,6 +790,7 @@ void InputMethods::loadInputMethods()
     } else {
         currentIM = 0;
     }
+#endif
 
     updateIMVisibility();
     selector->blockSignals(false);
@@ -723,7 +800,8 @@ void InputMethods::updateIMVisibility()
 {
     // hide... negates chance to interact with non input widget input methods...
     // Should never be true? True for only certain states?
-    bool imvisible = false;
+    bool imVisible = false;
+    bool choiceVisible = selector->count() > 1;
 
     // Only show the selector if there are at least 2 input methods,
     // and the current window has some kind of input hint.
@@ -732,27 +810,37 @@ void InputMethods::updateIMVisibility()
 
     //the logic is:
     //bool shouldHideSelector=false;
-    //if(selector->count()<2) shouldHideSelector = true;
     //if(hintMap[lastActiveWindow] == "") shouldHideSelector = true;
     //if(c && c->testProperty(QtopiaInputMethod::InteractiveIcon))  shouldHideSelector = false;  //this one might be wrong
-    if (((selector->count() < 2)
-                || !lastActiveWindow
+    if (( !lastActiveWindow
                 || !hintMap.contains(lastActiveWindow)
-                || hintMap[lastActiveWindow] == "")
+                || hintMap[lastActiveWindow].isEmpty())
             && (!selector->current() || !selector->current()->testProperty(QtopiaInputMethod::InteractiveIcon))) {
-        selector->showChoice( false );
-
+        // imVisible = false;
     }
     else {
-        selector->showChoice( true );
-        imvisible = true;
-   }
+        imVisible = true;
+    }
 
-    if( imvisible != m_IMVisible ) {
-        m_IMVisibleVS.setAttribute( "", QVariant(imvisible));
-        m_IMVisible = imvisible;
-        selector->activateCurrent(imvisible);
-        emit visibilityChanged(imvisible);
+    // To avoid double paints, update the choice widgets visibility before the
+    // selector if the selector is being shown, and afterwards if the selector
+    // is being hidden, whether or not the selectors visibility is actually
+    //changing.
+    if(imVisible) {
+        // If the selector is visible, or about to become so, show 
+        // the choice widget immediately.
+        selector->showChoice( choiceVisible );
+    };
+
+    if( imVisible != m_IMVisible ) {
+        m_IMVisibleVS.setAttribute( "", QVariant(imVisible));
+        m_IMVisible = imVisible;
+        selector->activateCurrent(imVisible);
+        emit visibilityChanged(imVisible);
+    }
+
+    if(!imVisible) {
+        selector->showChoice( choiceVisible );
     }
     selector->refreshIMMenuAction();
 
@@ -760,6 +848,7 @@ void InputMethods::updateIMVisibility()
 
 void InputMethods::choose(QtopiaInputMethod* imethod)
 {
+#ifdef Q_WS_QWS
     if ( imethod ) {
         currentIM = imethod->inputModifier();
         QWSServer::setCurrentInputMethod( currentIM );
@@ -767,11 +856,14 @@ void InputMethods::choose(QtopiaInputMethod* imethod)
         QWSServer::setCurrentInputMethod( 0 );
         currentIM = 0;
     }
+#else
+    Q_UNUSED(imethod);
+#endif
 }
 
 /*!
     Sets the input hint for the current input method for widget \a wid.  \a h is the hint for the input method, according to \l QtopiaApplication::InputMethodHint.  The \a password flag sets password mode, indicating that input should be hidden after being entered, and defaults to false.
-    This values are recorded for when this widget gains focus in the future, and if \a wid refers to the last active widget, the hint is forwared to the current input method immediately.
+    This value is recorded for when this widget gains focus in the future, and if \a wid refers to the last active widget, the hint is forwarded to the current input method immediately.
 */
 void InputMethods::inputMethodHint( int h, int wid, bool password)
 {
@@ -789,6 +881,9 @@ void InputMethods::inputMethodHint( int h, int wid, bool password)
                 break;
             case (int)QtopiaApplication::Text:
                 hintMap[wid] = "text";
+                break;
+            case (int)QtopiaApplication::ProperNouns:
+                hintMap[wid] = "propernouns";
                 break;
             default:
                 hintMap[wid] = QString();
@@ -841,7 +936,8 @@ void InputMethods::inputMethodPasswordHint(bool passwordFlag, int wid)
     if(!passwordFlag && stringindex!=-1)
     {
         hintMap[wid].remove("password");
-        if(hintMap[wid].at(stringindex-1)==' ')
+
+        if(stringindex > 0 && hintMap[wid].at(stringindex-1)==' ')
             hintMap[wid].remove(stringindex-1,1);
 
     } else if (passwordFlag && stringindex == -1)
@@ -851,6 +947,8 @@ void InputMethods::inputMethodPasswordHint(bool passwordFlag, int wid)
     if (wid && wid == lastActiveWindow)
         updateHint(wid);
 }
+
+#ifdef Q_WS_QWS
 
 void InputMethods::updateHintMap(QWSWindow *w, QWSServer::WindowEvent e)
 {
@@ -875,6 +973,8 @@ void InputMethods::updateHintMap(QWSWindow *w, QWSServer::WindowEvent e)
         updateHint(lastActiveWindow);
     }
 }
+
+#endif // Q_WS_QWS
 
 /* TODO: Also... if hint null, don't just set the hint, remove the IM/GM
    Not a problem now, (well behaved plugins) but should be done for
@@ -906,7 +1006,7 @@ QString InputMethods::currentShown() const
 }
 
 /*!
-    Returns true if the input method selector is visible, false otherwise.  
+    Returns true if the input method selector is visible, false otherwise.
     This indicates the visibility of the widget used to change input methods, not the drop-down menu itself.  In Qtopia, this widget is only visible if at least 2 input methods have been loaded, and the widget with focus accepts text input.
     \sa InputMethodSelector::isVisible(), InputMethodSelector::count()
 */
@@ -1068,9 +1168,9 @@ void InputMethodService::setInputMethod(const QString &inputMethodName)
     \internal
     Loads all input method plugins.  If any input method plugins have already been loaded, this function does nothing.
     As input method plugins are loaded automatically on startup, this will generally only be of any use after calling \l unloadInputMethods, which should never be used on a device.
-    Use 
-    \code 
-        $QPEDIR/src/tools/qcop/qcop send "QPE/InputMethod" "loadInputMethods()" 
+    Use
+    \code
+        $QPEDIR/src/tools/qcop/qcop send "QPE/InputMethod" "loadInputMethods()"
     \endcode
     \sa unloadinputMethods(), InputMethods::unloadInputMethods()
 */

@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: List of All Members for QTreeWidgetItem</title>
+  <title>Qt 4.3: List of All Members for QTreeWidgetItem</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -15,6 +15,7 @@
 <p>This is the complete list of members for <a href="qtreewidgetitem.html">QTreeWidgetItem</a>, including inherited members.</p>
 <p><table width="100%" border="0" cellpadding="0" cellspacing="0">
 <tr><td width="45%" valign="top"><ul>
+<li><div class="fn"/>enum <a href="qtreewidgetitem.html#ChildIndicatorPolicy-enum">ChildIndicatorPolicy</a></li>
 <li><div class="fn"/>enum <a href="qtreewidgetitem.html#ItemType-enum">ItemType</a></li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#QTreeWidgetItem">QTreeWidgetItem</a> ( int )</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#QTreeWidgetItem-2">QTreeWidgetItem</a> ( const QStringList &amp;, int )</li>
@@ -32,6 +33,7 @@
 <li><div class="fn"/><a href="qtreewidgetitem.html#checkState">checkState</a> ( int ) const : Qt::CheckState</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#child">child</a> ( int ) const : QTreeWidgetItem *</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#childCount">childCount</a> () const : int</li>
+<li><div class="fn"/><a href="qtreewidgetitem.html#childIndicatorPolicy">childIndicatorPolicy</a> () const : QTreeWidgetItem::ChildIndicatorPolicy</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#clone">clone</a> () const : QTreeWidgetItem *</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#columnCount">columnCount</a> () const : int</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#data">data</a> ( int, int ) const : QVariant</li>
@@ -42,16 +44,22 @@
 <li><div class="fn"/><a href="qtreewidgetitem.html#indexOfChild">indexOfChild</a> ( QTreeWidgetItem * ) const : int</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#insertChild">insertChild</a> ( int, QTreeWidgetItem * )</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#insertChildren">insertChildren</a> ( int, const QList&lt;QTreeWidgetItem *&gt; &amp; )</li>
+<li><div class="fn"/><a href="qtreewidgetitem.html#isDisabled">isDisabled</a> () const : bool</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#isExpanded">isExpanded</a> () const : bool</li>
+<li><div class="fn"/><a href="qtreewidgetitem.html#isFirstColumnSpanned">isFirstColumnSpanned</a> () const : bool</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#isHidden">isHidden</a> () const : bool</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#isSelected">isSelected</a> () const : bool</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#parent">parent</a> () const : QTreeWidgetItem *</li>
 </ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qtreewidgetitem.html#read">read</a> ( QDataStream &amp; )</li>
+<li><div class="fn"/><a href="qtreewidgetitem.html#removeChild">removeChild</a> ( QTreeWidgetItem * )</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#setBackground">setBackground</a> ( int, const QBrush &amp; )</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#setCheckState">setCheckState</a> ( int, Qt::CheckState )</li>
+<li><div class="fn"/><a href="qtreewidgetitem.html#setChildIndicatorPolicy">setChildIndicatorPolicy</a> ( QTreeWidgetItem::ChildIndicatorPolicy )</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#setData">setData</a> ( int, int, const QVariant &amp; )</li>
+<li><div class="fn"/><a href="qtreewidgetitem.html#setDisabled">setDisabled</a> ( bool )</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#setExpanded">setExpanded</a> ( bool )</li>
+<li><div class="fn"/><a href="qtreewidgetitem.html#setFirstColumnSpanned">setFirstColumnSpanned</a> ( bool )</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#setFlags">setFlags</a> ( Qt::ItemFlags )</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#setFont">setFont</a> ( int, const QFont &amp; )</li>
 <li><div class="fn"/><a href="qtreewidgetitem.html#setForeground">setForeground</a> ( int, const QBrush &amp; )</li>
@@ -85,6 +93,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -37,14 +37,12 @@
 #include <QPointer>
 
 #include <stdlib.h>
-#ifndef Q_OS_WIN32
-# include <sys/stat.h>
-# include <sys/types.h>
-# include <fcntl.h>
-# include <unistd.h>
-# include <signal.h>
-# include <dirent.h>
-#endif
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <signal.h>
+#include <dirent.h>
 
 // Qtopia can try to disabled broken plugins automatically
 // on an individual basis. This has performance implications.
@@ -111,17 +109,12 @@ static QString configFilename( const QString &name )
 
     QDir dir = (homeDirPath + "/Settings");
     if ( !dir.exists() ) {
-#ifndef Q_OS_WIN32
         mkdir(dir.path().toLocal8Bit(),0700);
-#else
-        dir.mkdir(dir.path());
-#endif
     }
 
     return dir.path() + "/" + name + ".conf";
 }
 
-#ifndef Q_OS_WIN32
 static bool lockFile( QFile &f )
 {
     if (!f.isOpen())
@@ -151,20 +144,6 @@ static bool unlockFile( QFile &f )
 
     return (::fcntl(f.handle(), F_SETLK, &fileLock) == 0);
 }
-
-#else
-
-static bool lockFile( QFile &f )
-{
-    return f.isOpen();
-}
-
-static bool unlockFile( QFile & /*f*/ )
-{
-    return true;
-}
-
-#endif
 
 static const char *cfgName()
 {
@@ -319,11 +298,7 @@ QObject *QPluginManager::instance( const QString &name )
     QString libFile;
     QStringList qpepaths = Qtopia::installPaths();
     for (QStringList::ConstIterator qit = qpepaths.begin(); qit!=qpepaths.end(); ++qit) {
-#ifndef Q_OS_WIN32
         libFile = *qit + "plugins/" + d->type + "/lib" + lname + ".so";
-#else
-        libFile = *qit + "plugins/" + d->type + "/" + lname + ".dll";
-#endif
         if ( QFile::exists(libFile) )
             break;
     }
@@ -339,7 +314,7 @@ QObject *QPluginManager::instance( const QString &name )
         setEnabled( name, false );
 #endif
     if ( (iface = lib->instance()) ) {
-        loaded(iface, lib, name);
+        loaded(iface, lib, lname);
     } else {
         pluginLibraryManagerInstance()->derefLibrary( lib );
     }
@@ -380,7 +355,6 @@ void QPluginManager::initType()
     for (QStringList::ConstIterator qit = qpepaths.begin(); qit!=qpepaths.end(); ++qit) {
         QString path = *qit + "plugins/";
         path += d->type;
-#ifndef Q_OS_WIN32
         DIR *dir = opendir( path.toLatin1() );
         if ( !dir )
             continue;
@@ -394,10 +368,6 @@ void QPluginManager::initType()
             }
         }
         closedir(dir);
-#else
-        QDir dir (path, "*.dll");
-        QStringList list = dir.entryList();
-#endif
 
         bool safeMode = false;
 
@@ -497,16 +467,11 @@ bool QPluginManager::inSafeMode()
 QString QPluginManager::stripSystem( const QString &libFile ) const
 {
     QString name = libFile;
-#ifndef Q_OS_WIN32
     if ( libFile.lastIndexOf(".so") == (int)libFile.length()-3 ) {
         name = libFile.left( libFile.length()-3 );
         if ( name.indexOf( "lib" ) == 0 )
             name = name.mid( 3 );
     }
-#else
-    if ( libFile.lastIndexOf(".dll") == (int)libFile.length()-4 )
-        name = libFile.left( libFile.length()-4 );
-#endif
 
     return name;
 }
@@ -515,11 +480,7 @@ void QPluginManager::loaded( QObject *iface, QPluginLoader *lib, QString name )
 {
     d->interfaces.insert( iface, lib );
     connect(iface, SIGNAL(destroyed()), this, SLOT(instanceDestroyed()));
-#ifndef Q_OS_WIN32
     QString type = QLatin1String("/lib") + name + QLatin1String(".qm");
-#else
-    QString type = QLatin1Char('/') + name + QLatin1String(".qm");
-#endif
     QStringList langs = languageList();
     QStringList qpepaths = Qtopia::installPaths();
     for (QStringList::ConstIterator qit = qpepaths.begin(); qit!=qpepaths.end(); ++qit) {
@@ -539,9 +500,8 @@ void QPluginManager::loaded( QObject *iface, QPluginLoader *lib, QString name )
 
 #ifndef SINGLE_EXEC
 //===========================================================================
-// Only compile this once under Win32 and single process
-#if !(defined(Q_OS_WIN32) && defined(PLUGINLOADER_INTERN)) && \
-    !(defined(SINGLE_EXEC) && defined(PLUGINLOADER_INTERN)) && \
+// Only compile this under single process
+#if !(defined(SINGLE_EXEC) && defined(PLUGINLOADER_INTERN)) && \
     !(defined(QPE_NO_COMPAT) && defined(PLUGINLOADER_INTERN))
 
 PluginLibraryManager::PluginLibraryManager() : QObject( qApp )

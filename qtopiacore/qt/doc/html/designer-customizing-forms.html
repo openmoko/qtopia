@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/designer-manual.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/designer-manual.qdoc -->
 <head>
-  <title>Qt 4.2: Customizing Qt Designer Forms</title>
+  <title>Qt 4.3: Customizing Qt Designer Forms</title>
   <link rel="prev" href="designer-resources.html" />
   <link rel="contents" href="designer-manual.html" />
   <link rel="next" href="designer-using-custom-widgets.html" />
@@ -20,20 +20,21 @@
 [<a href="designer-manual.html">Contents</a>]
 [Next: <a href="designer-using-custom-widgets.html">Using Custom Widgets with Qt Designer</a>]
 </p>
-<h1 align="center">Customizing Qt Designer Forms<br /><small></small></h1>
-<p align="center"><img src="images/designer-form-settings.png" /></p><p>When saving a form in <i>Qt Designer</i>, it is stored as an <tt>.ui</tt> file. Several form settings, for example the margin and spacing for the default layout, are stored along with the form's components. These settings are used when the <a href="uic.html#uic">uic</a> generates the form's C++ code. For more information on how to use forms in your application, see the <a href="designer-manual.html#using-forms-and-components">Using Forms and Components</a> section.</p>
+<h1 align="center">Customizing Qt Designer Forms<br /><span class="subtitle"></span>
+</h1>
+<p align="center"><img src="images/designer-form-settings.png" /></p><p>When saving a form in <i>Qt Designer</i>, it is stored as an <tt>.ui</tt> file. Several form settings, for example the grid settings or the margin and spacing for the default layout, are stored along with the form's components. These settings are used when the <a href="uic.html#uic">uic</a> generates the form's C++ code. For more information on how to use forms in your application, see the <a href="designer-manual.html#using-forms-and-components">Using Forms and Components</a> section.</p>
 <a name="modifying-the-form-settings"></a>
 <h2>Modifying the Form Settings</h2>
-<p>To modify the form settings, open the <b>Form</b> menu and select <b>Form Settings...</b></p>
+<p>To modify the form settings, open the <b>Form</b> menu and select <b>Form Settings..&#x2e;</b></p>
 <p>In the forms settings dialog you can specify the <b>Author</b> of the form.</p>
 <p>You can also alter the margin and spacing properties for the form's default layout (<b>Layout Default</b>). These default layout properties will be replaced by the corresponding <b>Layout Function</b>, if the function is specified, when <tt>uic</tt> generates code for the form. The form settings dialog lets you specify functions for both the margin and the spacing.</p>
 <a name="layoutfunction"></a><p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/designer-form-layoutfunction.png" /></td><td><b>Layout Function</b><p>The default layout properties will be replaced by the corresponding <b>Layout Function</b>, when <tt>uic</tt> generates code for the form.</p>
 <p>This is useful when different environments requires different layouts for the same form.</p>
-<p>To specify layout functions for the form's margin and spacing, check the <b>Layout Function</b> groupbox to enable the line edits.</p>
+<p>To specify layout functions for the form's margin and spacing, check the <b>Layout Function</b> group box to enable the line edits.</p>
 </td></tr>
 </table></p>
-<p>You can also specify the form's <b>Include Hints</b>; i.e. provide a list of the header files which then will be included in the form window's associated <tt>.ui</tt> file. Header files may be local, i.e. relative to the project's directory, <tt>&quot;mywidget.h&quot;</tt>, or global, i.e. part of Qt or the compilers standard libraries: <tt>&lt;QtGui/QWidget&gt;</tt>.</p>
+<p>You can also specify the form's <b>Include Hints</b>; i.e&#x2e; provide a list of the header files which then will be included in the form window's associated <tt>.ui</tt> file. Header files may be local, i.e&#x2e; relative to the project's directory, <tt>&quot;mywidget.h&quot;</tt>, or global, i.e&#x2e; part of Qt or the compilers standard libraries: <tt>&lt;QtGui/QWidget&gt;</tt>.</p>
 <p>Finally, you can specify the function used to load pixmaps into the form window (the <b>Pixmap Function</b>).</p>
 <p>
 [Previous: <a href="designer-resources.html">Editing Resources with Qt Designer</a>]
@@ -44,6 +45,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

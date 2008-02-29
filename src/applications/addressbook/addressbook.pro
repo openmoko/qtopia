@@ -4,74 +4,100 @@ CONFIG+=qtopia_main
 
 HEADERS+=\
     abeditor.h\
-    imagesourcedialog.h\
-    ablabel.h\
+    contactdetails.h\
     contactsource.h\
-    addressbook.h
+    contactdocument.h\
+    contactbrowser.h\
+    contactmessagehistorylist.h\
+    contactoverview.h\
+    contactlistpane.h\
+    addressbook.h\
+    groupview.h\
+    emaildialogphone.h
 
 SOURCES+=\
     abeditor.cpp\
-    imagesourcedialog.cpp\
-    ablabel.cpp\
+    contactdetails.cpp\
     addressbook.cpp\
     contactsource.cpp\
-    main.cpp
+    groupview.cpp\
+    contactdocument.cpp\
+    contactmessagehistorylist.cpp\
+    contactbrowser.cpp\
+    contactoverview.cpp\
+    contactlistpane.cpp\
+    emaildialogphone.cpp\
+    main.cpp\
 
-phone {
-    !free_package|free_plus_binaries:depends(libraries/qtopiaphone)
+FORMS += actiondialog.ui
 
-    SOURCES += emaildialogphone.cpp
-    HEADERS += emaildialogphone.h
-} else {
-    FORMS += emaildlg.ui
-    HEADERS += emaildlgimpl.h
-    SOURCES += emaildlgimpl.cpp
-}
+depends(libraries/qtopiaphone)
 
-enable_cell {
+enable_cell|enable_voip {
     !enable_singleexec {
         SOURCES += ../../settings/ringprofile/ringtoneeditor.cpp
         HEADERS += ../../settings/ringprofile/ringtoneeditor.h
     }
+    HEADERS += contactcallhistorylist.h
+    SOURCES += contactcallhistorylist.cpp
+}
+
+!enable_singleexec {
+    SOURCES += ../todo/reminderpicker.cpp ../todo/qdelayedscrollarea.cpp
+    HEADERS += ../todo/reminderpicker.h ../todo/qdelayedscrollarea.h
 }
 
 TRANSLATABLES += emaildialogphone.cpp \
                     emaildialogphone.h \
-                    emaildlg.ui \
-                    emaildlgimpl.h \
-                    emaildlgimpl.cpp \
+                    actiondialog.ui \
                     ../../settings/ringprofile/ringtoneeditor.cpp \
                     ../../settings/ringprofile/ringtoneeditor.h 
 
 depends(libraries/qtopiapim)
+depends(libraries/qtopiamail)
 
 service.files=$$QTOPIA_DEPOT_PATH/services/Contacts/addressbook
 service.path=/services/Contacts
+INSTALLS+=service
+
 receiveservice.files=$$QTOPIA_DEPOT_PATH/services/Receive/text/x-vcard/addressbook
 receiveservice.path=/services/Receive/text/x-vcard/
+INSTALLS+=receiveservice
+
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/addressbook.desktop
 desktop.path=/apps/Applications
 desktop.hint=desktop
+INSTALLS+=desktop
+
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=addressbook*
 help.hint=help
+INSTALLS+=help
+
 pics.files=$$QTOPIA_DEPOT_PATH/pics/addressbook/*
 pics.path=/pics/addressbook
 pics.hint=pics
+INSTALLS+=pics
+
 im.files=named_addressbook-*.conf
 im.path=/etc/im/pkim
-phoneservice.files=$$QTOPIA_DEPOT_PATH/services/ContactsPhone/addressbook
-phoneservice.path=/services/ContactsPhone
+INSTALLS+=im
+
 qdlservice.files=$$QTOPIA_DEPOT_PATH/services/QDL/addressbook
 qdlservice.path=/services/QDL
 qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/Contacts
 qdsservice.path=/etc/qds
-qdsphoneservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/ContactsPhone
-qdsphoneservice.path=/etc/qds
-INSTALLS+=service receiveservice desktop help pics im qdlservice qdsservice
+INSTALLS+=qdsservice
+
 enable_cell {
-    INSTALLS+=phoneservice qdsphoneservice
+    phoneservice.files=$$QTOPIA_DEPOT_PATH/services/ContactsPhone/addressbook
+    phoneservice.path=/services/ContactsPhone
+    INSTALLS+=phoneservice
+
+    qdsphoneservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/ContactsPhone
+    qdsphoneservice.path=/etc/qds
+    INSTALLS+=qdsphoneservice
 }
 
 pkg.desc=Contacts for Qtopia.
-pkg.domain=pim,window,qdl,qds,beaming,phonecomm,pictures,msg,docapi,cardreader,camera,pictures,mediarecorder
+pkg.domain=pim,alarm,window,qdl,qds,beaming,bluetooth,phonecomm,pictures,msg,cardreader,camera,pictures,mediarecorder,doc_server,doc_write,mediasession,profiles,callhistory

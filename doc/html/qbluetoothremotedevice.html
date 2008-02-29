@@ -20,7 +20,7 @@
 <h3>Public Functions</h3>
 <ul>
 <li><div class="fn"/><b><a href="qbluetoothremotedevice.html#QBluetoothRemoteDevice">QBluetoothRemoteDevice</a></b> ( const QBluetoothAddress &amp; <i>address</i> )</li>
-<li><div class="fn"/><b><a href="qbluetoothremotedevice.html#QBluetoothRemoteDevice-2">QBluetoothRemoteDevice</a></b> ( const QBluetoothAddress &amp; <i>address</i>, const QString &amp; <i>name</i>, const QString &amp; <i>version</i>, const QString &amp; <i>revision</i>, const QString &amp; <i>manufacturer</i>, const QString &amp; <i>company</i>, QBluetooth::DeviceMajor <i>devMajor</i>, quint8 <i>devMinor</i>, QBluetooth::ServiceClasses <i>serviceClasses</i> )</li>
+<li><div class="fn"/><b><a href="qbluetoothremotedevice.html#QBluetoothRemoteDevice-2">QBluetoothRemoteDevice</a></b> ( const QBluetoothAddress &amp; <i>address</i>, const QString &amp; <i>name</i>, const QString &amp; <i>version</i>, const QString &amp; <i>revision</i>, const QString &amp; <i>manufacturer</i>, const QString &amp; <i>company</i>, int <i>rssi</i>, QBluetooth::DeviceMajor <i>devMajor</i>, quint8 <i>devMinor</i>, QBluetooth::ServiceClasses <i>serviceClasses</i> )</li>
 <li><div class="fn"/><b><a href="qbluetoothremotedevice.html#QBluetoothRemoteDevice-3">QBluetoothRemoteDevice</a></b> ( const QBluetoothRemoteDevice &amp; <i>other</i> )</li>
 <li><div class="fn"/><b><a href="qbluetoothremotedevice.html#dtor.QBluetoothRemoteDevice">~QBluetoothRemoteDevice</a></b> ()</li>
 <li><div class="fn"/>QBluetoothAddress <b><a href="qbluetoothremotedevice.html#address">address</a></b> () const</li>
@@ -32,6 +32,7 @@
 <li><div class="fn"/>QString <b><a href="qbluetoothremotedevice.html#manufacturer">manufacturer</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qbluetoothremotedevice.html#name">name</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qbluetoothremotedevice.html#revision">revision</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qbluetoothremotedevice.html#rssi">rssi</a></b> () const</li>
 <li><div class="fn"/>QBluetooth::ServiceClasses <b><a href="qbluetoothremotedevice.html#serviceClasses">serviceClasses</a></b> () const</li>
 <li><div class="fn"/>QStringList <b><a href="qbluetoothremotedevice.html#serviceClassesAsString">serviceClassesAsString</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qbluetoothremotedevice.html#setCompany">setCompany</a></b> ( const QString &amp; <i>company</i> )</li>
@@ -40,6 +41,7 @@
 <li><div class="fn"/>void <b><a href="qbluetoothremotedevice.html#setManufacturer">setManufacturer</a></b> ( const QString &amp; <i>manufacturer</i> )</li>
 <li><div class="fn"/>void <b><a href="qbluetoothremotedevice.html#setName">setName</a></b> ( const QString &amp; <i>name</i> )</li>
 <li><div class="fn"/>void <b><a href="qbluetoothremotedevice.html#setRevision">setRevision</a></b> ( const QString &amp; <i>revision</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothremotedevice.html#setRssi">setRssi</a></b> ( int <i>rssi</i> )</li>
 <li><div class="fn"/>void <b><a href="qbluetoothremotedevice.html#setServiceClasses">setServiceClasses</a></b> ( QBluetooth::ServiceClasses <i>serviceClasses</i> )</li>
 <li><div class="fn"/>void <b><a href="qbluetoothremotedevice.html#setVersion">setVersion</a></b> ( const QString &amp; <i>version</i> )</li>
 <li><div class="fn"/>QString <b><a href="qbluetoothremotedevice.html#version">version</a></b> () const</li>
@@ -58,7 +60,7 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QBluetoothRemoteDevice"></a>QBluetoothRemoteDevice::QBluetoothRemoteDevice ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>address</i> )</h3>
 <p>Constructs a new <a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a> object. The attributes are given default values. The <i>address</i> parameter defines the address of the remote device.</p>
-<h3 class="fn"><a name="QBluetoothRemoteDevice-2"></a>QBluetoothRemoteDevice::QBluetoothRemoteDevice ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>address</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>version</i>, const <a href="qstring.html">QString</a> &amp; <i>revision</i>, const <a href="qstring.html">QString</a> &amp; <i>manufacturer</i>, const <a href="qstring.html">QString</a> &amp; <i>company</i>, <a href="qbluetooth.html#DeviceMajor-enum">QBluetooth::DeviceMajor</a> <i>devMajor</i>, quint8 <i>devMinor</i>, <a href="qbluetooth.html#ServiceClass-enum">QBluetooth::ServiceClasses</a> <i>serviceClasses</i> )</h3>
+<h3 class="fn"><a name="QBluetoothRemoteDevice-2"></a>QBluetoothRemoteDevice::QBluetoothRemoteDevice ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>address</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>version</i>, const <a href="qstring.html">QString</a> &amp; <i>revision</i>, const <a href="qstring.html">QString</a> &amp; <i>manufacturer</i>, const <a href="qstring.html">QString</a> &amp; <i>company</i>, int <i>rssi</i>, <a href="qbluetooth.html#DeviceMajor-enum">QBluetooth::DeviceMajor</a> <i>devMajor</i>, quint8 <i>devMinor</i>, <a href="qbluetooth.html#ServiceClass-enum">QBluetooth::ServiceClasses</a> <i>serviceClasses</i> )</h3>
 <p>Constructs a new <a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a> object.</p>
 <ul>
 <li><i>address</i> defines the address of the remote device.</li>
@@ -67,6 +69,7 @@
 <li><i>revision</i> defines the manufacturer specific revision of the device</li>
 <li><i>manufacturer</i> defines the manufacturer string</li>
 <li><i>company</i> defines the company producing the device</li>
+<li><i>rssi</i> defines the Receiver Signal Strength (Indicator)</li>
 <li><i>devMajor</i> defines the major device number</li>
 <li><i>devMinor</i> defines the minor device number</li>
 <li><i>serviceClasses</i> defines the bitmap of all device classes associated with this device.</li>
@@ -103,6 +106,9 @@
 <h3 class="fn"><a name="revision"></a><a href="qstring.html">QString</a> QBluetoothRemoteDevice::revision () const</h3>
 <p>Returns the revision of the remote bluetooth device. This is generally manufacturer specific information. If the revision is unknown, a null string is returned.</p>
 <p>See also <a href="qbluetoothremotedevice.html#setRevision">setRevision</a>().</p>
+<h3 class="fn"><a name="rssi"></a>int QBluetoothRemoteDevice::rssi () const</h3>
+<p>Returns the RSSI (Receiver Signal Strength Indicator) of the remote device at the time of the last device discovery.</p>
+<p>See also <a href="qbluetoothremotedevice.html#setRssi">setRssi</a>().</p>
 <h3 class="fn"><a name="serviceClasses"></a><a href="qbluetooth.html#ServiceClass-enum">QBluetooth::ServiceClasses</a> QBluetoothRemoteDevice::serviceClasses () const</h3>
 <p>Returns the service classes for the remote device.</p>
 <p>See also <a href="qbluetoothremotedevice.html#serviceClassesAsString">serviceClassesAsString</a>() and <a href="qbluetoothremotedevice.html#setServiceClasses">setServiceClasses</a>().</p>
@@ -131,6 +137,9 @@
 <h3 class="fn"><a name="setRevision"></a>void QBluetoothRemoteDevice::setRevision ( const <a href="qstring.html">QString</a> &amp; <i>revision</i> )</h3>
 <p>Sets the revision attribute of the remote device to <i>revision</i>. Clients should not need to use this function.</p>
 <p>See also <a href="qbluetoothremotedevice.html#revision">revision</a>().</p>
+<h3 class="fn"><a name="setRssi"></a>void QBluetoothRemoteDevice::setRssi ( int <i>rssi</i> )</h3>
+<p>Sets the RSSI (Receiver Signal Strength Indicator) of the remote device <i>rssi</i>. This should be the RSSI of the device at the time of the last discovery.</p>
+<p>See also <a href="qbluetoothremotedevice.html#rssi">rssi</a>().</p>
 <h3 class="fn"><a name="setServiceClasses"></a>void QBluetoothRemoteDevice::setServiceClasses ( <a href="qbluetooth.html#ServiceClass-enum">QBluetooth::ServiceClasses</a> <i>serviceClasses</i> )</h3>
 <p>Sets the service classes attribute of the remote device to <i>serviceClasses</i>.</p>
 <p>In general, you should not need to use this function.</p>
@@ -154,6 +163,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

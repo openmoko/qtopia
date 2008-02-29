@@ -250,6 +250,7 @@ install()
                                     echo "WIRELESS_WPA_PSK=''";
                                 fi
                                 echo "WIRELESS_WPA_PSK=$1" >> $TMP_FILE;
+                                shift; #we ignore AES,TKIP parameter, SuSE doesn't need it
                                 
                                 #for completeness addedd
                                 echo "WIRELESS_DEFAULT_KEY='0'">> $TMP_FILE;

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -91,20 +91,24 @@ void MediaStyle::drawControl( ControlElement ce, const QStyleOption *opt, QPaint
                         m_barbuffer = generate_progress_bar( color, color.dark( 150 ), rect.size() );
                     }
 
-                    p->setCompositionMode( QPainter::CompositionMode_Source ); // ### Cheat
+                    if( p->paintEngine()->hasFeature( QPaintEngine::PorterDuff ) ) {
+                        p->setCompositionMode( QPainter::CompositionMode_Source ); // ### Cheat
+                    }
                     p->drawPixmap( progress, m_barbuffer );
-                    p->drawPixmap( QRect( QPoint( progress.right() + 1, rect.top() ),
+                    p->drawPixmap( QRect( QPoint( progress.right() + 1, rect.top() + 1 ),
                         QPoint( rect.right() - 1, rect.bottom() - 1 ) ), m_groovebuffer );
                 }
             } else {
-                p->setCompositionMode( QPainter::CompositionMode_Source ); // ### Cheat
+                if( p->paintEngine()->hasFeature( QPaintEngine::PorterDuff ) ) {
+                    p->setCompositionMode( QPainter::CompositionMode_Source ); // ### Cheat
+                }
                 p->drawPixmap( rect.adjusted( 1, 1, -1, -1 ), m_groovebuffer );
             }
         }
         }
         break;
     default:
-        QWindowsStyle::drawControl( ce, opt, p, widget );
+        QCommonStyle::drawControl( ce, opt, p, widget );
         break;
     }
 }
@@ -119,5 +123,5 @@ int MediaStyle::pixelMetric( PixelMetric pm, const QStyleOption *opt, const QWid
         return 1;
     }
 
-    return QWindowsStyle::pixelMetric( pm, opt, widget );
+    return QCommonStyle::pixelMetric( pm, opt, widget );
 }

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -37,6 +37,8 @@
 #include <QHBoxLayout>
 #include <QBuffer>
 #include <QDebug>
+#include <QTemporaryFile>
+#include <qdrmcontent.h>
 
 
 //---------------------------------------------------------------------------
@@ -76,7 +78,7 @@ SmilMediaParam *SmilMedia::findParameter(const QString &name)
 //---------------------------------------------------------------------------
 
 SmilText::SmilText(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
-    : SmilMedia(sys, p, n, atts), textColor(Qt::black), waiting(false)
+    : SmilMedia(sys, p, n, atts), waiting(false)
 {
     source = atts.value("src");
 }
@@ -115,6 +117,13 @@ void SmilText::paint(QPainter *p)
 {
     SmilMedia::paint(p);
     if (vis) {
+        if (!textColor.isValid()) {
+            // Ensure the text color has sufficient contrast with the background
+            int r, g, b;
+            backgroundColor().getRgb(&r, &g, &b);
+            textColor = (((r + g + b) / 3) > 128 ? Qt::black : Qt::white);
+        }
+
         QPen oldPen = p->pen();
         p->setPen(textColor);
         p->drawText(rect(), Qt::AlignLeft|Qt::AlignTop|Qt::TextWrapAnywhere, text);
@@ -138,10 +147,11 @@ public:
     SmilSystem *sys;
     QMovie *movie;
     QRect rect;
+    QDrmContent *drm;
 };
 
 ImgPrivate::ImgPrivate(SmilSystem *s, const QRect &r)
-    : QObject(), sys(s), movie(0), rect(r)
+    : QObject(), sys(s), movie(0), rect(r), drm( 0 )
 {
 }
 
@@ -166,8 +176,10 @@ SmilImg::SmilImg(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAt
 SmilImg::~SmilImg()
 {
     sys->transferServer()->endData(this, source);
-    if (d)
+    if (d) {
         delete d->movie;
+        delete d->drm;
+    }
     delete d;
 }
 
@@ -199,31 +211,75 @@ void SmilImg::setState(State s)
                 break;
         }
     }
+    if (d && d->drm) {
+        switch (s) {
+            case Startup:
+            case Active:
+                d->drm->renderStarted();
+                break;
+            case Idle:
+                d->drm->renderPaused();
+                break;
+            case End:
+                d->drm->renderStopped();
+            default:
+                break;
+        }
+    }
 }
 
 void SmilImg::setData(const QByteArray &data, const QString &type)
 {
-    char head[7];
-    memcpy(head, data.data(), qMin(6, data.size()));
-    head[6] = '\0';
+    if (type == QLatin1String("application/vnd.oma.drm.content")
+       || type == QLatin1String("application/vnd.oma.drm.dcf")) {
+        QTemporaryFile file( QDir::tempPath() + QLatin1String("/qt_temp.XXXXXX.dcf" ) );
 
-    if (QString(head) == "GIF89a") {
-        d = new ImgPrivate(sys, rect());
-        QByteArray _data( data );
-        QBuffer* buf = new QBuffer(&_data,d);
-        d->movie = new QMovie(buf);
-        d->movie->setPaused(true);
-        QObject::connect(d->movie, SIGNAL(updated(const QRect&)), d, SLOT(update(const QRect&)));
-        QObject::connect(d->movie, SIGNAL(stateChanged(QMovie::MovieState)), d, SLOT(status(QMovie::MovieState)));
+        if (file.open()) {
+            file.write( data );
+            file.flush();
+
+            QContent content(QDir::temp().filePath(file.fileName()));
+            if (content.type() != QLatin1String("application/vnd.oma.drm.content")
+               && type != QLatin1String("application/vnd.oma.drm.dcf")) {
+                QDrmContent *drm = new QDrmContent(QDrmRights::Display);
+                QIODevice *device = 0;
+
+                if (drm->requestLicense(content) && (device = content.open(QIODevice::ReadOnly)) != 0) {
+                    setData( device->readAll(), content.type() );
+                    delete device;
+                    if (!d)
+                        d = new ImgPrivate(sys, rect());
+                    d->drm = drm;
+                } else {
+                    delete drm;
+                }
+            }
+            file.close();
+            content.removeFiles();
+        }
     } else {
-        QImage img;
-        img.loadFromData(data);
-        img = img.scaled(rect().size(), Qt::KeepAspectRatio);
-        pix = QPixmap::fromImage(img);
+        char head[7];
+        memcpy(head, data.data(), qMin(6, data.size()));
+        head[6] = '\0';
+
+        if (QString(head) == "GIF89a") {
+            d = new ImgPrivate(sys, rect());
+            QByteArray _data( data );
+            QBuffer* buf = new QBuffer(&_data,d);
+            d->movie = new QMovie(buf);
+            d->movie->setPaused(true);
+            QObject::connect(d->movie, SIGNAL(updated(QRect)), d, SLOT(update(QRect)));
+            QObject::connect(d->movie, SIGNAL(stateChanged(QMovie::MovieState)), d, SLOT(status(QMovie::MovieState)));
+        } else {
+            QImage img;
+            img.loadFromData(data);
+            img = img.scaled(rect().size(), Qt::KeepAspectRatio);
+            pix = QPixmap::fromImage(img);
+        }
+        waiting = false;
+        sys->transferServer()->endData(this, source);
+        SmilMedia::setData(data, type);
     }
-    waiting = false;
-    sys->transferServer()->endData(this, source);
-    SmilMedia::setData(data, type);
 }
 
 Duration SmilImg::implicitDuration()
@@ -278,24 +334,32 @@ AudioPlayer::~AudioPlayer()
 
 void AudioPlayer::play(const QByteArray &data, const QString &type)
 {
+    const QString lcType(type.toLower());
+
     stop();
     QString ext;
-    if (type == "audio/amr") {
+    if (lcType == "audio/amr") {
         ext = ".amr";
-    } else if (type == "audio/x-wav") {
+    } else if (lcType == "audio/x-wav" || lcType == "audio/wav") {
         ext = ".wav";
-    } else if (type == "audio/mpeg") {
+    } else if (lcType == "audio/mpeg") {
         ext = ".mp3";
+    } else if (lcType == QLatin1String("application/vnd.oma.drm.content")) {
+        ext = QLatin1String(".dcf");
     } else {
         // guess
         char buf[7];
         memcpy(buf, data.data(), qMin(6, data.size()));
         buf[6] = '\0';
-        QString head(buf);
-        if (head == "#!AMR") {
+
+        QByteArray head(buf);
+        if (head.startsWith("#!AMR")) {
             ext = ".amr";
-        } else if (head == "RIFF") {
+        } else if (head.startsWith("RIFF")) {
             ext = ".wav";
+        } else if (head.startsWith("ID3\003")) {
+            // We don't know this is MP3, but we may as well try
+            ext = ".mp3";
         }
     }
 
@@ -310,6 +374,8 @@ void AudioPlayer::play(const QByteArray &data, const QString &type)
             soundControl = new QSoundControl(new QSound(audioFile));
             soundControl->sound()->play();
         }
+    } else {
+        qWarning() << "Unknown audio type:" << lcType;
     }
 }
 

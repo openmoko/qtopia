@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -33,6 +48,7 @@
 #include <QUrl>
 #include <QTextCodec>
 #include <ctype.h>
+#include <QTextDocument>
 
 struct Term {
     Term() : frequency(-1) {}
@@ -132,7 +148,7 @@ void Index::setupDocumentList()
     QStringList lst = d.entryList(filters);
     QStringList::ConstIterator it = lst.constBegin();
     for ( ; it != lst.constEnd(); ++it )
-        docList.append( "file:" + docPath + QLatin1String("/") + *it );
+        docList.append( QLatin1String("file:") + docPath + QLatin1String("/") + *it );
 }
 
 void Index::insertInDict( const QString &str, int docNum )
@@ -159,12 +175,12 @@ QString Index::getCharsetForDocument(QFile *file)
     QString contents = s.readAll();
 
     QString encoding;
-    int start = contents.indexOf("<meta", 0, Qt::CaseInsensitive);
+    int start = contents.indexOf(QLatin1String("<meta"), 0, Qt::CaseInsensitive);
     if (start > 0) {
-        int end = contents.indexOf(">", start);
+        int end = contents.indexOf(QLatin1String(">"), start);
         QString meta = contents.mid(start+5, end-start);
         meta = meta.toLower();
-        QRegExp r("charset=([^\"\\s]+)");
+        QRegExp r(QLatin1String("charset=([^\"\\s]+)"));
         if (r.indexIn(meta) != -1) {
             encoding = r.cap(1);        
         }
@@ -172,7 +188,7 @@ QString Index::getCharsetForDocument(QFile *file)
 
     file->seek(0);
     if (encoding.isEmpty())
-        return "utf-8";
+        return QLatin1String("utf-8");
     return encoding;
 }
 
@@ -180,7 +196,7 @@ void Index::parseDocument( const QString &filename, int docNum )
 {
     QFile file( filename );
     if ( !file.open(QFile::ReadOnly) ) {
-        qWarning( (QLatin1String("can not open file ") + filename).toAscii().constData() );
+        qWarning( "can not open file %s", qPrintable(filename) );
         return;
     }
 
@@ -346,9 +362,13 @@ QString Index::getDocumentTitle( const QString &fullFileName )
 {
     QUrl url(fullFileName);
     QString fileName = url.toLocalFile();
+
+    if (documentTitleCache.contains(fileName))
+        return documentTitleCache.value(fileName);
+
     QFile file( fileName );
     if ( !file.open( QFile::ReadOnly ) ) {
-        qWarning( (QLatin1String("cannot open file ") + fileName).toAscii().constData() );
+        qWarning( "cannot open file %s", qPrintable(fileName) );
         return fileName;
     }
     QTextStream s( &file );
@@ -357,7 +377,16 @@ QString Index::getDocumentTitle( const QString &fullFileName )
     int start = text.indexOf(QLatin1String("<title>"), 0, Qt::CaseInsensitive) + 7;
     int end = text.indexOf(QLatin1String("</title>"), 0, Qt::CaseInsensitive);
 
-    QString title = ( end - start <= 0 ? tr("Untitled") : text.mid( start, end - start ) );
+    QString title = tr("Untitled");
+    if (end - start > 0) {
+        title = text.mid(start, end - start);
+        if (Qt::mightBeRichText(title)) {
+            QTextDocument doc;
+            doc.setHtml(title);
+            title = doc.toPlainText();
+        }
+    }
+    documentTitleCache.insert(fileName, title);
     return title;
 }
 
@@ -469,7 +498,7 @@ bool Index::searchForPattern( const QStringList &patterns, const QStringList &wo
     QString fName = url.toLocalFile();
     QFile file( fName );
     if ( !file.open( QFile::ReadOnly ) ) {
-        qWarning( (QLatin1String("cannot open file ") + fName).toAscii().constData() );
+        qWarning( "cannot open file %s", qPrintable(fName) );
         return false;
     }
 

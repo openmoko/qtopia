@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,15 +24,15 @@
 #include <QSettings>
 #include <QString>
 #include <QPixmapCache>
+#ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
+#endif
 #include <QRegExp>
 #include <stdlib.h>
 #include "qtopiaserverapplication.h"
 #include <qtopialog.h>
 
-#if defined(Q_OS_UNIX) && defined(Q_WS_QWS)
 extern int qws_display_id;
-#endif
 
 /*!
   \class EnvironmentSetupTask
@@ -44,6 +44,7 @@ extern int qws_display_id;
   the system.
 
   The EnvironmentSetupTask class provides the \c {EnvironmentSetup} task.
+  It is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*! \internal */
@@ -80,6 +81,7 @@ void EnvironmentSetupTask::initEnvironment()
        Multi: LinuxFb:mmHeight57:0 LinxFb:offset=0,320:1 :0  -- multi-screen device
     */
 
+#ifdef Q_WS_QWS
     // Start with QWS_DISPLAY
     QString qws_display = getenv("QWS_DISPLAY");
     // -display overrides QWS_DISPLAY
@@ -110,12 +112,15 @@ void EnvironmentSetupTask::initEnvironment()
 
     qLog(QtopiaServer) << "QWS_DISPLAY" << qws_display;
     setenv( "QWS_DISPLAY", qws_display.toLocal8Bit().constData(), 1 );
+#endif
 
     // We know we'll have lots of cached pixmaps due to App/DocLnks
     QPixmapCache::setCacheLimit(512);
 
+#ifdef Q_WS_QWS
     //Turn off green screen frame buffer init
     QWSServer::setBackground(Qt::NoBrush);
+#endif
 
     // Set other, miscellaneous environment
     QSettings env(Qtopia::defaultButtonsFile(), QSettings::IniFormat);
@@ -126,8 +131,16 @@ void EnvironmentSetupTask::initEnvironment()
         // QWS_DISPLAY is handled above
         if ( key == "QWS_DISPLAY" ) continue;
         QString value = env.value(key).toString();
-        setenv(key.toAscii().constData(), value.toAscii().constData(), 1);
+        if ( qgetenv(key.toAscii().constData()).count() == 0 )
+            setenv(key.toAscii().constData(), value.toAscii().constData(), 1);
     }
+
+    // The default timeout (5 seconds) is too short for Qtopia because the server
+    // needs to launch processes while it is starting up (and blocking the event loop).
+    // Use a 30 second timeout instead so that the processes do not die prematurely.
+    QString qws_connection_timeout = getenv("QWS_CONNECTION_TIMEOUT");
+    if ( qws_connection_timeout.isEmpty() )
+        setenv("QWS_CONNECTION_TIMEOUT", "30", 1);
 
     // Ensure the selected theme is present, pick an available one if it isn't.
     validateTheme();

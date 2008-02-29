@@ -25,13 +25,15 @@
 <tr valign="top" class="even"><th><a href="qmediacontentplayer.html">QMediaContentPlayer</a></th><td>Used to immediately, without further intervention, play media</td></tr>
 <tr valign="top" class="odd"><th><a href="qmediacontrol.html">QMediaControl</a></th><td>Used to manipulate a media resource in the Qtopia media system</td></tr>
 <tr valign="top" class="even"><th><a href="qmediacontrolnotifier.html">QMediaControlNotifier</a></th><td>Watches a media content object for the availability of a given media control</td></tr>
-<tr valign="top" class="odd"><th><a href="qmediahandle.html">QMediaHandle</a></th><td>Used to refer to an activated media content within Qtopia's Media System</td></tr>
+<tr valign="top" class="odd"><th><a href="qmediadecoder.html">QMediaDecoder</a></th><td>Abstraction for decoders written for Qtopia's media engine</td></tr>
 <tr valign="top" class="even"><th><a href="qmediahelixsettingscontrol.html">QMediaHelixSettingsControl</a></th><td>Used to alter settings of the helix engine</td></tr>
 <tr valign="top" class="odd"><th><a href="qmediaprogresslabel.html">QMediaProgressLabel</a></th><td>Displays the current progress of a playing media content as a text label</td></tr>
 <tr valign="top" class="even"><th><a href="qmediaprogresswidget.html">QMediaProgressWidget</a></th><td>Displays the current progress of a playing media content as a progress bar</td></tr>
 <tr valign="top" class="odd"><th><a href="qmediaseekwidget.html">QMediaSeekWidget</a></th><td>Allows the user to seek within a media content object</td></tr>
-<tr valign="top" class="even"><th><a href="qmediastatelabel.html">QMediaStateLabel</a></th><td>Displays icons for the various states of media playback</td></tr>
-<tr valign="top" class="odd"><th><a href="qmediavideocontrol.html">QMediaVideoControl</a></th><td>Interface to videos playing through the Qtopia Media System</td></tr>
+<tr valign="top" class="even"><th><a href="qmediasessionbuilder.html">QMediaSessionBuilder</a></th><td>Base class to be used by Media Engines which need to create sessions within the Media Server</td></tr>
+<tr valign="top" class="odd"><th><a href="qmediastatelabel.html">QMediaStateLabel</a></th><td>Displays icons for the various states of media playback</td></tr>
+<tr valign="top" class="even"><th><a href="qmediavideocontrol.html">QMediaVideoControl</a></th><td>Interface to videos playing through the Qtopia Media System</td></tr>
+<tr valign="top" class="odd"><th><a href="qmediavideocontrolserver.html">QMediaVideoControlServer</a></th><td>Used by Media Engines to inform clients that video is available for the associated media session</td></tr>
 <tr valign="top" class="even"><th><a href="qmediavolumelabel.html">QMediaVolumeLabel</a></th><td>Displays icons for the various levels of volume</td></tr>
 <tr valign="top" class="odd"><th><a href="qmediavolumewidget.html">QMediaVolumeWidget</a></th><td>Displays the current volume level of a media content object as a progress bar</td></tr>
 <tr valign="top" class="even"><th><a href="qsoundcontrol.html">QSoundControl</a></th><td>Extends the functionality of the QSound class</td></tr>
@@ -76,54 +78,57 @@
 <tr valign="top" class="even"><th><a href="qgraphicsscenehoverevent.html">QGraphicsSceneHoverEvent</a></th><td>Hover events in the graphics view framework</td></tr>
 <tr valign="top" class="odd"><th><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></th><td>Mouse events in the graphics view framework</td></tr>
 <tr valign="top" class="even"><th><a href="qgraphicsscenewheelevent.html">QGraphicsSceneWheelEvent</a></th><td>Wheel events in the graphics view framework</td></tr>
-<tr valign="top" class="odd"><th><a href="qgraphicssimpletextitem.html">QGraphicsSimpleTextItem</a></th><td>Text item that you can add to a QGraphicsScene</td></tr>
+<tr valign="top" class="odd"><th><a href="qgraphicssimpletextitem.html">QGraphicsSimpleTextItem</a></th><td>Simple text path item that you can add to a QGraphicsScene</td></tr>
 <tr valign="top" class="even"><th><a href="qgraphicssvgitem.html">QGraphicsSvgItem</a></th><td>QGraphicsItem that can be used to render the contents of SVG files</td></tr>
 <tr valign="top" class="odd"><th><a href="qgraphicstextitem.html">QGraphicsTextItem</a></th><td>Text item that you can add to a QGraphicsScene to display formatted text</td></tr>
 <tr valign="top" class="even"><th><a href="qgraphicsview.html">QGraphicsView</a></th><td>Widget for displaying the contents of a QGraphicsScene</td></tr>
 <tr valign="top" class="odd"><th><a href="qicon.html">QIcon</a></th><td>Scalable icons in different modes and states</td></tr>
 <tr valign="top" class="even"><th><a href="qiconengine.html">QIconEngine</a></th><td>Abstract base class for QIcon renderers</td></tr>
-<tr valign="top" class="odd"><th><a href="qimage.html">QImage</a></th><td>Hardware-independent image representation that allows direct access to the pixel data, and can be used as a paint device</td></tr>
-<tr valign="top" class="even"><th><a href="qimagereader.html">QImageReader</a></th><td>Format independent interface for reading images from files or other devices</td></tr>
-<tr valign="top" class="odd"><th><a href="qimagewriter.html">QImageWriter</a></th><td>Format independent interface for writing images to files or other devices</td></tr>
-<tr valign="top" class="even"><th><a href="qline.html">QLine</a></th><td>Two-dimensional vector using integer precision</td></tr>
-<tr valign="top" class="odd"><th><a href="qlinef.html">QLineF</a></th><td>Two-dimensional vector using floating point precision</td></tr>
-<tr valign="top" class="even"><th><a href="qlineargradient.html">QLinearGradient</a></th><td>Used in combination with QBrush to specify a linear gradient brush</td></tr>
-<tr valign="top" class="odd"><th><a href="qmatrix.html">QMatrix</a></th><td>2D transformations of a coordinate system</td></tr>
-<tr valign="top" class="even"><th><a href="qmovie.html">QMovie</a></th><td>Convenience class for playing movies with QImageReader</td></tr>
-<tr valign="top" class="odd"><th><a href="qpaintdevice.html">QPaintDevice</a></th><td>The base class of objects that can be painted</td></tr>
-<tr valign="top" class="even"><th><a href="qpaintengine.html">QPaintEngine</a></th><td>Abstract definition of how QPainter draws to a given device on a given platform</td></tr>
-<tr valign="top" class="odd"><th><a href="qpainter.html">QPainter</a></th><td>Performs low-level painting on widgets and other paint devices</td></tr>
-<tr valign="top" class="even"><th><a href="qpainterpath.html">QPainterPath</a></th><td>Container for painting operations, enabling graphical shapes to be constructed and reused</td></tr>
-<tr valign="top" class="odd"><th><a href="qpainterpathstroker.html">QPainterPathStroker</a></th><td>Used to generate fillable outlines for a given painter path</td></tr>
-<tr valign="top" class="even"><th><a href="qpalette.html">QPalette</a></th><td>Color groups for each widget state</td></tr>
-<tr valign="top" class="odd"><th><a href="qpen.html">QPen</a></th><td>Defines how a QPainter should draw lines and outlines of shapes</td></tr>
-<tr valign="top" class="even"><th><a href="qpicture.html">QPicture</a></th><td>Paint device that records and replays QPainter commands</td></tr>
-<tr valign="top" class="odd"><th><a href="qpictureio.html">QPictureIO</a></th><td>Parameters for loading and saving pictures</td></tr>
-<tr valign="top" class="even"><th><a href="qpixmap.html">QPixmap</a></th><td>Off-screen image representation that can be used as a paint device</td></tr>
-<tr valign="top" class="odd"><th><a href="qpixmapcache.html">QPixmapCache</a></th><td>Application-wide cache for pixmaps</td></tr>
-<tr valign="top" class="even"><th><a href="qpoint.html">QPoint</a></th><td>Defines a point in the plane using integer precision</td></tr>
-<tr valign="top" class="odd"><th><a href="qpointf.html">QPointF</a></th><td>Defines a point in the plane using floating point precision</td></tr>
-<tr valign="top" class="even"><th><a href="qpolygon.html">QPolygon</a></th><td>Vector of points using integer precision</td></tr>
-<tr valign="top" class="odd"><th><a href="qpolygonf.html">QPolygonF</a></th><td>Vector of points using floating point precision</td></tr>
-<tr valign="top" class="even"><th><a href="qprintengine.html">QPrintEngine</a></th><td>Defines an interface for how QPrinter interacts with a given printing subsystem</td></tr>
-<tr valign="top" class="odd"><th><a href="qprinter.html">QPrinter</a></th><td>Paint device that paints on a printer</td></tr>
-<tr valign="top" class="even"><th><a href="qradialgradient.html">QRadialGradient</a></th><td>Used in combination with QBrush to specify a radial gradient brush</td></tr>
-<tr valign="top" class="odd"><th><a href="qrect.html">QRect</a></th><td>Defines a rectangle in the plane using integer precision</td></tr>
-<tr valign="top" class="even"><th><a href="qrectf.html">QRectF</a></th><td>Defines a rectangle in the plane using floating point precision</td></tr>
-<tr valign="top" class="odd"><th><a href="qregion.html">QRegion</a></th><td>Clip region for a painter</td></tr>
-<tr valign="top" class="even"><th><a href="qsize.html">QSize</a></th><td>Defines the size of a two-dimensional object using integer point precision</td></tr>
-<tr valign="top" class="odd"><th><a href="qsizef.html">QSizeF</a></th><td>Defines the size of a two-dimensional object using floating point precision</td></tr>
-<tr valign="top" class="even"><th><a href="qsound.html">QSound</a></th><td>Access to the platform audio facilities</td></tr>
-<tr valign="top" class="odd"><th><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></th><td>Used to describe the parameters needed to draw a QGraphicsItem</td></tr>
-<tr valign="top" class="even"><th><a href="qstylepainter.html">QStylePainter</a></th><td>Convenience class for drawing QStyle elements inside a widget</td></tr>
+<tr valign="top" class="odd"><th><a href="qiconenginev2.html">QIconEngineV2</a></th><td>Abstract base class for QIcon renderers</td></tr>
+<tr valign="top" class="even"><th><a href="qimage.html">QImage</a></th><td>Hardware-independent image representation that allows direct access to the pixel data, and can be used as a paint device</td></tr>
+<tr valign="top" class="odd"><th><a href="qimagereader.html">QImageReader</a></th><td>Format independent interface for reading images from files or other devices</td></tr>
+<tr valign="top" class="even"><th><a href="qimagewriter.html">QImageWriter</a></th><td>Format independent interface for writing images to files or other devices</td></tr>
+<tr valign="top" class="odd"><th><a href="qline.html">QLine</a></th><td>Two-dimensional vector using integer precision</td></tr>
+<tr valign="top" class="even"><th><a href="qlinef.html">QLineF</a></th><td>Two-dimensional vector using floating point precision</td></tr>
+<tr valign="top" class="odd"><th><a href="qlineargradient.html">QLinearGradient</a></th><td>Used in combination with QBrush to specify a linear gradient brush</td></tr>
+<tr valign="top" class="even"><th><a href="qmatrix.html">QMatrix</a></th><td>2D transformations of a coordinate system</td></tr>
+<tr valign="top" class="odd"><th><a href="qmovie.html">QMovie</a></th><td>Convenience class for playing movies with QImageReader</td></tr>
+<tr valign="top" class="even"><th><a href="qpaintdevice.html">QPaintDevice</a></th><td>The base class of objects that can be painted</td></tr>
+<tr valign="top" class="odd"><th><a href="qpaintengine.html">QPaintEngine</a></th><td>Abstract definition of how QPainter draws to a given device on a given platform</td></tr>
+<tr valign="top" class="even"><th><a href="qpainter.html">QPainter</a></th><td>Performs low-level painting on widgets and other paint devices</td></tr>
+<tr valign="top" class="odd"><th><a href="qpainterpath.html">QPainterPath</a></th><td>Container for painting operations, enabling graphical shapes to be constructed and reused</td></tr>
+<tr valign="top" class="even"><th><a href="qpainterpathstroker.html">QPainterPathStroker</a></th><td>Used to generate fillable outlines for a given painter path</td></tr>
+<tr valign="top" class="odd"><th><a href="qpalette.html">QPalette</a></th><td>Color groups for each widget state</td></tr>
+<tr valign="top" class="even"><th><a href="qpen.html">QPen</a></th><td>Defines how a QPainter should draw lines and outlines of shapes</td></tr>
+<tr valign="top" class="odd"><th><a href="qpicture.html">QPicture</a></th><td>Paint device that records and replays QPainter commands</td></tr>
+<tr valign="top" class="even"><th><a href="qpictureio.html">QPictureIO</a></th><td>Parameters for loading and saving pictures</td></tr>
+<tr valign="top" class="odd"><th><a href="qpixmap.html">QPixmap</a></th><td>Off-screen image representation that can be used as a paint device</td></tr>
+<tr valign="top" class="even"><th><a href="qpixmapcache.html">QPixmapCache</a></th><td>Application-wide cache for pixmaps</td></tr>
+<tr valign="top" class="odd"><th><a href="qpoint.html">QPoint</a></th><td>Defines a point in the plane using integer precision</td></tr>
+<tr valign="top" class="even"><th><a href="qpointf.html">QPointF</a></th><td>Defines a point in the plane using floating point precision</td></tr>
+<tr valign="top" class="odd"><th><a href="qpolygon.html">QPolygon</a></th><td>Vector of points using integer precision</td></tr>
+<tr valign="top" class="even"><th><a href="qpolygonf.html">QPolygonF</a></th><td>Vector of points using floating point precision</td></tr>
+<tr valign="top" class="odd"><th><a href="qprintengine.html">QPrintEngine</a></th><td>Defines an interface for how QPrinter interacts with a given printing subsystem</td></tr>
+<tr valign="top" class="even"><th><a href="qprinter.html">QPrinter</a></th><td>Paint device that paints on a printer</td></tr>
+<tr valign="top" class="odd"><th><a href="qradialgradient.html">QRadialGradient</a></th><td>Used in combination with QBrush to specify a radial gradient brush</td></tr>
+<tr valign="top" class="even"><th><a href="qrect.html">QRect</a></th><td>Defines a rectangle in the plane using integer precision</td></tr>
+<tr valign="top" class="odd"><th><a href="qrectf.html">QRectF</a></th><td>Defines a rectangle in the plane using floating point precision</td></tr>
+<tr valign="top" class="even"><th><a href="qregion.html">QRegion</a></th><td>Clip region for a painter</td></tr>
+<tr valign="top" class="odd"><th><a href="qsize.html">QSize</a></th><td>Defines the size of a two-dimensional object using integer point precision</td></tr>
+<tr valign="top" class="even"><th><a href="qsizef.html">QSizeF</a></th><td>Defines the size of a two-dimensional object using floating point precision</td></tr>
+<tr valign="top" class="odd"><th><a href="qsound.html">QSound</a></th><td>Access to the platform audio facilities</td></tr>
+<tr valign="top" class="even"><th><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></th><td>Used to describe the parameters needed to draw a QGraphicsItem</td></tr>
+<tr valign="top" class="odd"><th><a href="qstylepainter.html">QStylePainter</a></th><td>Convenience class for drawing QStyle elements inside a widget</td></tr>
+<tr valign="top" class="even"><th><a href="qsvggenerator.html">QSvgGenerator</a></th><td>Paint device that is used to create SVG drawings</td></tr>
 <tr valign="top" class="odd"><th><a href="qsvgrenderer.html">QSvgRenderer</a></th><td>Used to draw the contents of SVG files onto paint devices</td></tr>
 <tr valign="top" class="even"><th><a href="qsvgwidget.html">QSvgWidget</a></th><td>Widget that is used to display the contents of Scalable Vector Graphics (SVG) files</td></tr>
 <tr valign="top" class="odd"><th><a href="qtimeline.html">QTimeLine</a></th><td>Timeline for controlling animations</td></tr>
+<tr valign="top" class="even"><th><a href="qtransform.html">QTransform</a></th><td>2D transformations of a coordinate system</td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

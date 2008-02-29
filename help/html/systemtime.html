@@ -1,24 +1,26 @@
 <html>
 <head><title>Date / Time</title></head>
 <body>
+<!--#include file="device-name.html"-->
 <!--#if expr="$USERGUIDE"-->
    <h2>Setting Date/Time</h2>
 <!--#else-->
    <h3>Date/Time</h3>
 <!--#endif-->
 <p><img src=":image/systemtime/DateTime"></p>
-<p>The <b>Date/Time</b> application is used to set the local <a href="worldtime-timezones.html">time zone</a>, and the current <a href="systemtime-settime.html">time</a> and <a href="systemtime-setdate.html">date</a> for your device.</p>
-<p><b>TZ:</b> set the current <a href="worldtime-timezones.html">time zone.</a></p>
-<p><b>Time, Date:</b> set the current local time and date.</p>
-<p><b>Time format:</b> choose either 12-hour (1 pm) or 24-hour (13:00) time format.</p>
-<p><b>Week starts:</b> start day for the weeks in the Calendar month view.</p>
-<p><b>Date format:</b> check Date display on this screen to see effect.</p>
-<!--#if expr="$PDASTYLE"-->
-<p><b>To quickly access these settings:</b></p>
-<ul>
-<li>Tap the digital clock in the lower right corner of the screen</li>
-<li>Tap <b>Set Time</b> in the pop-up menu that appears.</li>
+<p>The <b>Date/Time</b> application is used to set the local <a href="worldtime-timezones.html">time zone</a>, and the current <a href="systemtime-settime.html">time</a> and <a href="systemtime-setdate.html">date</a> for your <!--#echo var="device-name" -->.</p>
+<b>Time</b> tab</p><ul>
+<li><b>Automatic</b>: the time zone, time, and date are updated
+        from the phone network, where available. This setting can
+        be <b>On</b>, <b>Off</b>, or it can <b>Ask</b> what you want to do whenever the time or zone changes.
+<li><b>Time Zone</b>: set the current <a href="worldtime-timezones.html">time zone.</a></p>
+<li><b>Time, Date</b>: set the current local time and date.</p>
 </ul>
-<!--#endif-->
+<b>Format</b> tab</p><ul>
+<li><b>Time format</b>: choose either 12-hour (1 pm) or 24-hour (13:00) time format.</p>
+<li><b>Week starts</b>: start day for the weeks in the Calendar month view.</p>
+<li><b>Date format</b>: choose either the format standard for your chosen input language,
+                or one of the other listed formats.</p>
+</ul>
 </body>
 </html>

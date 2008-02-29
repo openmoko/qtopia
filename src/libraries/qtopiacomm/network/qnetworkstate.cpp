@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -115,8 +115,8 @@ private:
   The defaultGatewayChanged() signal is emitted when the default route changes. The default 
   WAP configuration is returned via defaultWapAccount().
 
-  \sa QtopiaNetwork, QNetworkDevice
   \ingroup io
+  \sa QtopiaNetwork, QNetworkDevice, QNetworkConnection
 */
 
 /*!
@@ -128,8 +128,8 @@ QNetworkState::QNetworkState( QObject* parent )
     d = new QNetworkStatePrivate( this );
     connect( d, SIGNAL(connected()), this, SIGNAL(connected()) );
     connect( d, SIGNAL(disconnected()), this, SIGNAL(disconnected()) );
-    connect( d, SIGNAL(defaultGatewayChanged(const QString&)),
-             this, SLOT(gatewayChanged(const QString&)) );
+    connect( d, SIGNAL(defaultGatewayChanged(QString)),
+             this, SLOT(gatewayChanged(QString)) );
 }
 
 /*!
@@ -182,7 +182,18 @@ QtopiaNetwork::Type QNetworkState::deviceType( const QString& devHandle )
 
 /*!
   Returns the default WAP account. If no default account has been set this function returns
-  an empty string.
+  an empty string. The returned account can be accessed via QWapAccount.
+
+  \code
+    QNetworkState state;
+    QString wapConf = state.defaultWapAccount();
+    if ( !wapConf.isEmpty() ) {
+        QWapAccount acc( state.defaultWapAccount() );
+        QString name = acc.name();  //returns user visibile name
+    }
+  \endcode
+
+  \sa QWapAccount
 */
 QString QNetworkState::defaultWapAccount() const
 {

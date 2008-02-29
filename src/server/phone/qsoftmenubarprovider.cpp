@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,9 +26,9 @@
 #include <QDebug>
 #include <Qtopia>
 #include <QPixmapCache>
-#include <qwindowsystem_qws.h>
 #include <QStyle>
 #include <QApplication>
+#include <QSet>
 #include <QtopiaChannel>
 
 #include <QSoftMenuBar>
@@ -36,13 +36,17 @@
 // declare QSoftMenuBarProviderPrivate
 struct QSoftMenuBarProviderPrivate
 {
-    QSoftMenuBarProviderPrivate() : activeWin(-1), blockUpdates(false) {}
+    QSoftMenuBarProviderPrivate()
+        : activeWin(-1), blockUpdates(false), activeOverride(-1) {}
 
     QList<QSoftMenuBarProvider::MenuButton> buttons;
+    QList<QSoftMenuBarProvider::MenuButton> overrideButtons;
     int activeWin;
     bool blockUpdates;
 
     int keyToIdx(int key) const;
+
+    int activeOverride;
 };
 
 // define QSoftMenuBarProviderPrivate
@@ -79,6 +83,8 @@ struct QSoftMenuBarProvider::MenuButtonPrivate : public QSharedData
 
   QSoftMenuBarProvider::MenuButton instances can only be created and returned
   from a QSoftMenuBarProvider instance.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 // define QSoftMenuBarProvider::MenuButton
 
@@ -157,6 +163,11 @@ QPixmap QSoftMenuBarProvider::MenuButton::pixmap() const
         QPixmap pix;
         if(!QPixmapCache::find(d->pixName, pix)) {
             pix = QIcon(":icon/"+d->pixName).pixmap(QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize));
+
+            // pixName might be a absolute path to a file
+            // e.g. simapp stores sim icons in temp directory.
+            if (pix.isNull())
+                pix = QIcon(d->pixName).pixmap(QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize));
             QPixmapCache::insert(d->pixName, pix);
         }
         d->pix = pix;
@@ -236,6 +247,8 @@ QString QSoftMenuBarProvider::MenuButton::pixmapName() const
 
   Valid key entries are those understood by the QKeySequence class.  The
   QSoftMenuBarProvider class will only respond to keys configured in this way.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 // define QSoftMenuBarProvider
@@ -249,8 +262,8 @@ QSoftMenuBarProvider::QSoftMenuBarProvider(QObject *parent)
 
     QtopiaChannel *channel = new QtopiaChannel("QPE/QSoftMenuBar", this);
     QObject::connect(channel,
-                     SIGNAL(received(const QString&,const QByteArray&)),
-                     this, SLOT(message(const QString&,const QByteArray&)));
+                     SIGNAL(received(QString,QByteArray)),
+                     this, SLOT(message(QString,QByteArray)));
 
     QSettings cfg(Qtopia::defaultButtonsFile(), QSettings::IniFormat);
     cfg.beginGroup("SoftKeys");
@@ -263,6 +276,10 @@ QSoftMenuBarProvider::QSoftMenuBarProvider(QObject *parent)
         button.d->index = ii;
         button.d->key = key;
         d->buttons.append(button);
+
+        MenuButton obutton(button);
+        obutton.d->index = -1;
+        d->overrideButtons.append(obutton);
     }
     cfg.endGroup();
 
@@ -275,9 +292,13 @@ QSoftMenuBarProvider::QSoftMenuBarProvider(QObject *parent)
         d->buttons.swap( backIdx, menuIdx );
     }
 
+    // setup override buttons
+    for(int ii = 0; ii < buttonCount; ++ii) {
+    }
+
     WindowManagement *man = new WindowManagement(this);
-    QObject::connect(man, SIGNAL(windowActive(QString,QRect,QWSWindow *)),
-                     this, SLOT(activeChanged(QString,QRect,QWSWindow *)));
+    QObject::connect(man, SIGNAL(windowActive(QString,QRect,WId)),
+                     this, SLOT(activeChanged(QString,QRect,WId)));
 }
 
 /*!
@@ -304,6 +325,8 @@ int QSoftMenuBarProvider::keyCount() const
 QSoftMenuBarProvider::MenuButton QSoftMenuBarProvider::key(int index) const
 {
     Q_ASSERT(index < keyCount());
+    if (d->activeOverride != -1 && d->overrideButtons.at(index).d->index != -1)
+        return d->overrideButtons.at(index);
     return d->buttons.at(index);
 }
 
@@ -324,14 +347,19 @@ void QSoftMenuBarProvider::message(const QString &msg, const QByteArray &data)
         int win;
         QString label;
         stream >> win;
-        if(win == d->activeWin) {
+        bool isActive = win == d->activeWin;
+        if(isActive || (d->activeOverride != -1 && d->activeOverride == win)) {
             stream >> btn;
             stream >> label;
 
             int idx = d->keyToIdx(btn);
             if(-1 != idx) {
                 QSoftMenuBarProvider::MenuButtonPrivate *btn = d->buttons[idx].d;
-                if (btn->text != label || !btn->pixName.isEmpty()) {
+                if (!isActive) {
+                    btn = d->overrideButtons[idx].d;
+                    btn->index = idx;
+                }
+                if (btn->text != label || !btn->pixName.isEmpty() || !isActive) {
                     btn->text = label;
                     btn->pix = QPixmap();
                     btn->pixName = QString();
@@ -346,14 +374,19 @@ void QSoftMenuBarProvider::message(const QString &msg, const QByteArray &data)
         int win;
         QString label;
         stream >> win;
-        if(win == d->activeWin) {
+        bool isActive = win == d->activeWin;
+        if(isActive || (d->activeOverride != -1 && d->activeOverride == win)) {
             stream >> btn;
             stream >> label;
 
             int idx = d->keyToIdx(btn);
             if(-1 != idx) {
                 QSoftMenuBarProvider::MenuButtonPrivate *btn = d->buttons[idx].d;
-                if (!btn->text.isEmpty() || btn->pixName != label) {
+                if (!isActive) {
+                    btn = d->overrideButtons[idx].d;
+                    btn->index = idx;
+                }
+                if (!btn->text.isEmpty() || btn->pixName != label || !isActive) {
                     btn->text = QString();
                     btn->pix = QPixmap();
                     btn->pixName = label;
@@ -367,13 +400,18 @@ void QSoftMenuBarProvider::message(const QString &msg, const QByteArray &data)
         int btn;
         int win;
         stream >> win;
-        if(win == d->activeWin) {
+        bool isActive = win == d->activeWin;
+        if(isActive || (d->activeOverride != -1 && d->activeOverride == win)) {
             stream >> btn;
 
             int idx = d->keyToIdx(btn);
             if(-1 != idx) {
                 QSoftMenuBarProvider::MenuButtonPrivate *btn = d->buttons[idx].d;
-                if (!btn->text.isEmpty() || !btn->pixName.isEmpty()) {
+                if (!isActive) {
+                    btn = d->overrideButtons[idx].d;
+                    btn->index = idx;
+                }
+                if (!btn->text.isEmpty() || !btn->pixName.isEmpty() || !isActive) {
                     btn->text = QString();
                     btn->pix = QPixmap();
                     btn->pixName = QString();
@@ -396,13 +434,31 @@ void QSoftMenuBarProvider::message(const QString &msg, const QByteArray &data)
         } else {
             d->blockUpdates = block;
         }
+    } else if (msg == "setActiveOverride(int)") {
+        // Overrides allow us to set labels for a window that is not
+        // active.  Not for use by client applications.
+        int overrideId;
+        stream >> overrideId;
+        d->activeOverride = overrideId;
+    } else if (msg == "clearActiveOverride()") {
+        d->activeOverride = -1;
+        for(int ii = 0; ii < keyCount(); ++ii) {
+            QSoftMenuBarProvider::MenuButtonPrivate *btn = d->overrideButtons[ii].d;
+            bool changed = btn->index != -1;
+            btn->index = -1;
+            btn->text = QString();
+            btn->pix = QPixmap();
+            btn->pixName = QString();
+            if (changed && !d->blockUpdates)
+                emit keyChanged(key(ii));
+        }
     }
 }
 
 /*!  \internal */
-void QSoftMenuBarProvider::activeChanged(const QString &, const QRect &, QWSWindow *win)
+void QSoftMenuBarProvider::activeChanged(const QString &, const QRect &, WId win)
 {
-    d->activeWin = win->winId();
+    d->activeWin = win;
 }
 
 /*!

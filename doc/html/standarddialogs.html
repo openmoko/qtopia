@@ -18,12 +18,12 @@
 <a name="functions"></a>
 <h3>Functions</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="standarddialogs.html#disableCriticalMemoryPopup">disableCriticalMemoryPopup</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="standarddialogs.html#disableDefaultCrashDialog">disableDefaultCrashDialog</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="standarddialogs.html#disablePowerAlertDialog">disablePowerAlertDialog</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="standarddialogs.html#disablePreloadCrashDialog">disablePreloadCrashDialog</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="standarddialogs.html#disableShutdownDialog">disableShutdownDialog</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="standarddialogs.html#disableTerminationHandlerDialog">disableTerminationHandlerDialog</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="standarddialogs.html#disableVolumeDialog">disableVolumeDialog</a></b> ()</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -34,19 +34,14 @@
 <p>The documentation for each of the following methods lists both what the dialog it disables is, as well as the system behaviour to which it responds. The intent is to make the task of replicating each very simple.</p>
 <hr />
 <h2>Function Documentation</h2>
-<h3 class="fn"><a name="disableCriticalMemoryPopup"></a>void StandardDialogs::disableCriticalMemoryPopup ()</h3>
-<p>The critical memory popup dialog appears whenever the memory available to the device becomes dangerously low. The default implementation is a standard <a href="qmessagebox.html">QMessageBox</a> alerting the user to close any unnecessary applications.</p>
-<p>The dialog appears 20 seconds after the <a href="memorymonitor.html#memoryState">MemoryMonitor::memoryState</a>() becomes <a href="memorymonitor.html#MemState-enum">MemoryMonitor::MemVeryLow</a>. The 20 second delay is an attempt to prevent the dialog from exacerbating the situation.</p>
-<p>Invoking this method will disable the default critical memory popup.</p>
 <h3 class="fn"><a name="disableDefaultCrashDialog"></a>void StandardDialogs::disableDefaultCrashDialog ()</h3>
 <p>The default crash handler dialog appears whenever an unfiltered application crash occurs. An application crash may be filtered by the <a href="applicationterminationhandler.html">ApplicationTerminationHandler</a> interface. The default implementation is a standard <a href="qmessagebox.html">QMessageBox</a> alerting the user to the name of the crashed application.</p>
 <p>The dialog appears whenever the <a href="applicationlauncher.html#applicationTerminated">ApplicationLauncher::applicationTerminated</a>() signal is emitted with the filtered parameter set to false.</p>
 <p>Invoking this method will disable the default crash dialog.</p>
 <h3 class="fn"><a name="disablePowerAlertDialog"></a>void StandardDialogs::disablePowerAlertDialog ()</h3>
 <p>The power alert dialog appears whenever the device battery runs low. The default implementation is a standard <a href="qmessagebox.html">QMessageBox</a> alerting the user to the low power situation.</p>
-<p>The dialog appears:</p>
-<p><i>Immediately</i> when the <a href="qpowerstatus.html#batteryStatus">QPowerStatus::batteryStatus</a>() is reported as Critical. <i>30</i> seconds after the <a href="qpowerstatus.html#backupBatteryStatus">QPowerStatus::backupBatteryStatus</a>() is reported as VeryLow. <i>60</i> seconds after the <a href="qpowerstatus.html#batteryStatus">QPowerStatus::batteryStatus</a>() is reported as VeryLow.</p>
-<p>The dialog will be redisplayed every five minutes until the power state changes or a higher priority (as listed) case occurs. The default implementation uses the <a href="qpowerstatusmanager.html">QPowerStatusManager</a> to determine this information.</p>
+<p>The dialog appears when the battery level is very low or critical. The dialog will be redisplayed every five minutes until the power state improves or the device is placed on a charger. The default implementation uses the <a href="qpowerstatus.html">QPowerStatus</a> to determine this information.</p>
+<p>The period at which the power alert dialog redisplays can be configured by setting the <tt>PowerAlertDialog/DisplayPeriod</tt> value to the period in seconds in the <tt>Trolltech\HardwareAccessories</tt> configuration file. By default this value is 300 seconds (5 minutes). Setting it to 0 disables the power alert dialog.</p>
 <p>Invoking this method will disable the power alert dialog.</p>
 <h3 class="fn"><a name="disablePreloadCrashDialog"></a>void StandardDialogs::disablePreloadCrashDialog ()</h3>
 <p>The preload crash dialog appears whenever a preloaded application crashes. The default implementation is a standard <a href="qmessagebox.html">QMessageBox</a> alerting the user to the name of the crashed application, and informing them that it has been removed from the preload list.</p>
@@ -60,10 +55,13 @@
 <p>Applications can install custom termination messages using the <a href="qterminationhandler.html">QTerminationHandler</a> class. The default implementation displays a standard <a href="qmessagebox.html">QMessageBox</a> alerting th euser to the termination and the specified reason.</p>
 <p>The dialog appears whenever the <a href="qterminationhandlerprovider.html">QTerminationHandlerProvider</a> class emits the <a href="qterminationhandlerprovider.html#applicationTerminated">QTerminationHandlerProvider::applicationTerminated</a>() signal.</p>
 <p>Invoking this method will disable the default termination handler dialog.</p>
+<h3 class="fn"><a name="disableVolumeDialog"></a>void StandardDialogs::disableVolumeDialog ()</h3>
+<p>The volume dialog provides users the feedback on volume changes.</p>
+<p>The volume dialog appears in response to the MediaServicesTask::volumeChanged() signal.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

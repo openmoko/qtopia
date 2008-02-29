@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -40,7 +55,6 @@ class QDialog;
 class QLabel;
 class QMenu;
 class QAssistantClient;
-template <typename T> class QList;
 class QIcon;
 
 class TrPreviewTool;
@@ -106,6 +120,8 @@ private slots:
     void closePhraseBook(QAction *action);
     void editPhraseBook(QAction *action);
     void printPhraseBook(QAction *action);
+    void openAltSource();
+    void resetAltSource();
     void manual();
     void revertSorting();
     void about();
@@ -116,6 +132,7 @@ private slots:
     bool maybeSave();
     void updateCaption();
     void showNewCurrent(const QModelIndex &current, const QModelIndex &old);
+    void showMessages(const QModelIndex &index);
     
     // To synchronize from the contextmodel to the MetaTranslator...
     // Operates on the selected item
@@ -165,6 +182,7 @@ private:
     bool openPhraseBook(const QString &name);
     bool phraseBooksContains(QString name);
     bool savePhraseBook(QString &name, const PhraseBook &pb);
+    void openAltSource(const QString &name);
     void updateProgress();
     void updatePhraseDict();
     PhraseBook getPhrases(const QString &source);
@@ -178,6 +196,7 @@ private:
     QAssistantClient *ac;
     MessagesTreeView *tv;
     MessageModel *cmdl;
+    MessageModel *altTranslatorModel;
     QTreeView *stv;
     QTreeView *ptv;
     PhraseModel *pmdl;

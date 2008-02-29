@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -35,8 +50,14 @@
 
 static int menuBarHeightForWidth(QWidget *menubar, int w)
 {
-    if (menubar && !menubar->isHidden() && !menubar->isWindow())
-        return menubar->heightForWidth(qMax(w, menubar->minimumWidth()));
+    if (menubar && !menubar->isHidden() && !menubar->isWindow()) {
+        int result = menubar->heightForWidth(qMax(w, menubar->minimumWidth()));
+        if (result != -1)
+            return result;
+        result = menubar->sizeHint().height();
+        if (result != -1)
+            return result;
+    }
     return 0;
 }
 
@@ -104,8 +125,8 @@ QLayout::QLayout()
 QLayout::QLayout(QLayoutPrivate &dd, QLayout *lay, QWidget *w)
     : QObject(dd, lay ? static_cast<QObject*>(lay) : static_cast<QObject*>(w))
 {
-   Q_D(QLayout);
-     if (lay) {
+    Q_D(QLayout);
+    if (lay) {
         lay->addItem(this);
     } else if (w) {
         if (w->layout()) {
@@ -123,14 +144,28 @@ QLayout::QLayout(QLayoutPrivate &dd, QLayout *lay, QWidget *w)
 }
 
 QLayoutPrivate::QLayoutPrivate()
-    : QObjectPrivate(), insideSpacing(-1), outsideBorder(-1), topLevel(false), enabled(true),
-      activated(true), autoNewChild(false), constraint(QLayout::SetDefaultConstraint)
-      , menubar(0)
+    : QObjectPrivate(), insideSpacing(-1), userLeftMargin(-1), userTopMargin(-1), userRightMargin(-1),
+      userBottomMargin(-1), topLevel(false), enabled(true), activated(true), autoNewChild(false),
+      constraint(QLayout::SetDefaultConstraint), menubar(0)
 {
 }
 
+void QLayoutPrivate::getMargin(int *result, int userMargin, QStyle::PixelMetric pm) const
+{
+    if (!result)
+        return;
 
-
+    Q_Q(const QLayout);
+    if (userMargin >= 0) {
+        *result = userMargin;
+    } else if (!topLevel) {
+        *result = 0;
+    } else if (QWidget *pw = q->parentWidget()) {
+        *result = pw->style()->pixelMetric(pm, 0, pw);
+    } else {
+        *result = 0;
+    }
+}
 
 #ifdef QT3_SUPPORT
 /*!
@@ -152,8 +187,8 @@ QLayout::QLayout(QWidget *parent, int margin, int spacing, const char *name)
     : QObject(*new QLayoutPrivate,parent)
 {
     Q_D(QLayout);
-     setObjectName(QString::fromAscii(name));
-    d->outsideBorder = margin;
+    setObjectName(QString::fromAscii(name));
+    setMargin(margin);
     if (spacing < 0)
         d->insideSpacing = margin;
     else
@@ -226,8 +261,14 @@ bool QLayout::autoAdd() const { Q_D(const QLayout); return d->autoNewChild; }
     Implemented in subclasses to add an \a item. How it is added is
     specific to each subclass.
 
-    The ownership of \a item is transferred to the layout, and it's
+    This function is not usually called in application code. To add a widget
+    to a layout, use the addWidget() function; to add a child layout, use the
+    addLayout() function provided by the relevant QLayout subclass.
+
+    \bold{Note:} The ownership of \a item is transferred to the layout, and it's
     the layout's responsibility to delete it.
+
+    \sa addWidget(), QBoxLayout::addLayout(), QGridLayout::addLayout()
 */
 
 /*!
@@ -287,6 +328,14 @@ bool QLayout::setAlignment(QLayout *l, Qt::Alignment alignment)
 }
 
 /*!
+    \fn void QLayout::setAlignment(Qt::Alignment alignment)
+
+    Sets the alignment of this item to \a alignment.
+
+    \sa QLayoutItem::setAlignment()
+*/
+
+/*!
     \fn bool QLayout::isTopLevel() const
 
     Returns true if this layout is a top-level layout, i.e. not a
@@ -296,58 +345,146 @@ bool QLayout::setAlignment(QLayout *l, Qt::Alignment alignment)
 /*!
     \property QLayout::margin
     \brief the width of the outside border of the layout
+    \obsolete
 
-    The margin default is provided by the style. The default margin
-    most Qt styles specify is 9 for child widgets and 11 for windows.
+    Use setContentsMargins() and getContentsMargins() instead.
 
-    \sa spacing
+    \sa contentsRect(), spacing
 */
+
+/*!
+    \obsolete
+*/
+int QLayout::margin() const
+{
+    int left, top, right, bottom;
+    getContentsMargins(&left, &top, &right, &bottom);
+    if (left == top && top == right && right == bottom) {
+        return left;
+    } else {
+        return -1;
+    }
+}
 
 /*!
     \property QLayout::spacing
     \brief the spacing between widgets inside the layout
 
-    The default value is -1, which signifies that the layout's
-    spacing is inherited from the parent layout, or from the style
-    settings for the parent widget.
+    If no value is explicitly set, the layout's spacing is inherited
+    from the parent layout, or from the style settings for the parent
+    widget.
 
-    \sa margin
+    For QGridLayout, it is possible to set different horizontal and
+    vertical spacings using \l{QGridLayout::}{setHorizontalSpacing()}
+    and \l{QGridLayout::}{setVerticalSpacing()}. In that case,
+    spacing() returns -1.
+
+    \sa contentsRect(), getContentsMargins(), QStyle::layoutSpacing(),
+        QStyle::pixelMetric()
 */
-
-int QLayout::margin() const
-{
-    Q_D(const QLayout);
-    if ( d->outsideBorder >= 0 )
-        return d->outsideBorder;
-    if (!d->topLevel)
-        return 0;
-    QWidget *pw = parentWidget();
-    if (pw)
-        return pw->style()->pixelMetric(
-            (pw->isWindow() || (pw->windowType() == Qt::SubWindow))
-            ? QStyle::PM_DefaultTopLevelMargin
-            : QStyle::PM_DefaultChildMargin
-            );
-    return 0;
-}
-
 
 int QLayout::spacing() const
 {
-    Q_D(const QLayout);
-    if (d->insideSpacing >=0) {
-        return d->insideSpacing;
-    } else if (d->topLevel) {
-        QWidget *pw = parentWidget();
-        if (pw)
-            return pw->style()->pixelMetric(QStyle::PM_DefaultLayoutSpacing);
-        else
-            return QApplication::style()->pixelMetric(QStyle::PM_DefaultLayoutSpacing);
-    } else if (parent()) {
-        return static_cast<QLayout*>(parent())->spacing();
+    if (const QBoxLayout* boxlayout = qobject_cast<const QBoxLayout*>(this)) {
+        return boxlayout->spacing();
+    } else if (const QGridLayout* gridlayout = qobject_cast<const QGridLayout*>(this)) {
+        return gridlayout->spacing();
     } else {
-        return -1; //this is a layout that hasn't been inserted yet
+        Q_D(const QLayout);
+        if (d->insideSpacing >=0) {
+            return d->insideSpacing;
+        } else {
+            // arbitrarily prefer horizontal spacing to vertical spacing
+            return qSmartSpacing(this, QStyle::PM_LayoutHorizontalSpacing);
+        }
     }
+}
+
+/*!
+    \obsolete
+*/
+void QLayout::setMargin(int margin)
+{
+    setContentsMargins(margin, margin, margin, margin);
+}
+
+void QLayout::setSpacing(int spacing)
+{
+    if (QBoxLayout* boxlayout = qobject_cast<QBoxLayout*>(this)) {
+        boxlayout->setSpacing(spacing);
+    } else if (QGridLayout* gridlayout = qobject_cast<QGridLayout*>(this)) {
+        gridlayout->setSpacing(spacing);
+    } else {
+        Q_D(QLayout);
+        d->insideSpacing = spacing;
+        invalidate();
+    }
+}
+
+/*!
+    \since 4.3
+
+    Sets the \a left, \a top, \a right, and \a bottom margins to use
+    around the layout.
+
+    By default, QLayout uses the values provided by the style. On
+    most platforms, the margin is 11 pixels in all directions.
+
+    \sa getContentsMargins(), QStyle::pixelMetric(),
+        {QStyle::}{PM_LayoutLeftMargin},
+        {QStyle::}{PM_LayoutTopMargin},
+        {QStyle::}{PM_LayoutRightMargin},
+        {QStyle::}{PM_LayoutBottomMargin}
+*/
+void QLayout::setContentsMargins(int left, int top, int right, int bottom)
+{
+    Q_D(QLayout);
+    d->userLeftMargin = left;
+    d->userTopMargin = top;
+    d->userRightMargin = right;
+    d->userBottomMargin = bottom;
+    invalidate();
+}
+
+/*!
+    \since 4.3
+
+    Extracts the left, top, right, and bottom margins used around the
+    layout, and assigns them to *\a left, *\a top, *\a right, and *\a
+    bottom (unless they are null pointers).
+
+    By default, QLayout uses the values provided by the style. On
+    most platforms, the margin is 11 pixels in all directions.
+
+    \sa setContentsMargins(), QStyle::pixelMetric(),
+        {QStyle::}{PM_LayoutLeftMargin},
+        {QStyle::}{PM_LayoutTopMargin},
+        {QStyle::}{PM_LayoutRightMargin},
+        {QStyle::}{PM_LayoutBottomMargin}
+*/
+void QLayout::getContentsMargins(int *left, int *top, int *right, int *bottom) const
+{
+    Q_D(const QLayout);
+    d->getMargin(left, d->userLeftMargin, QStyle::PM_LayoutLeftMargin);
+    d->getMargin(top, d->userTopMargin, QStyle::PM_LayoutTopMargin);
+    d->getMargin(right, d->userRightMargin, QStyle::PM_LayoutRightMargin);
+    d->getMargin(bottom, d->userBottomMargin, QStyle::PM_LayoutBottomMargin);
+}
+
+/*!
+    \since 4.3
+
+    Returns the layout's geometry() rectangle, but taking into account the
+    contents margins.
+
+    \sa setContentsMargins(), getContentsMargins()
+*/
+QRect QLayout::contentsRect() const
+{
+    Q_D(const QLayout);
+    int left, top, right, bottom;
+    getContentsMargins(&left, &top, &right, &bottom);
+    return d->rect.adjusted(+left, +top, -right, -bottom);
 }
 
 #ifdef QT3_SUPPORT
@@ -357,21 +494,6 @@ bool QLayout::isTopLevel() const
     return d->topLevel;
 }
 #endif
-
-void QLayout::setMargin(int margin)
-{
-    Q_D(QLayout);
-    d->outsideBorder = margin;
-    invalidate();
-}
-
-
-void QLayout::setSpacing(int spacing)
-{
-    Q_D(QLayout);
-    d->insideSpacing = spacing;
-    invalidate();
-}
 
 /*!
     Returns the parent widget of this layout, or 0 if this layout is
@@ -744,6 +866,7 @@ void QLayoutPrivate::reparentChildWidgets(QWidget *mw)
         menubar->setParent(mw);
     }
 #endif
+    bool mwVisible = mw && mw->isVisible();
     for (int i = 0; i < n; ++i) {
         QLayoutItem *item = q->itemAt(i);
         if (QWidget *w = item->widget()) {
@@ -754,8 +877,11 @@ void QLayoutPrivate::reparentChildWidgets(QWidget *mw)
                          w->metaObject()->className(), w->objectName().toLocal8Bit().data());
             }
 #endif
+            bool needShow = mwVisible && !(w->isHidden() && w->testAttribute(Qt::WA_WState_ExplicitShowHide));
             if (pw != mw)
                 w->setParent(mw);
+            if (needShow)
+                QMetaObject::invokeMethod(w, "_q_showIfNotHidden", Qt::QueuedConnection); //show later
         } else if (QLayout *l = item->layout()) {
             l->d_func()->reparentChildWidgets(mw);
         }
@@ -962,7 +1088,8 @@ void QLayout::update()
     Redoes the layout for parentWidget() if necessary.
 
     You should generally not need to call this because it is
-    automatically called at the most appropriate times.
+    automatically called at the most appropriate times. It returns
+    true if the layout was redone.
 
     \sa update(), QWidget::updateGeometry()
 */
@@ -1128,7 +1255,6 @@ int QLayout::indexOf(QWidget *widget) const
     return -1;
 }
 
-
 /*!
     \enum QLayout::SizeConstraint
 
@@ -1240,6 +1366,9 @@ QRect QLayout::alignmentRect(const QRect &r) const
     Removes the widget \a widget from the layout. After this call, it
     is the caller's responsibility to give the widget a reasonable
     geometry or to put the widget back into a layout.
+    
+    \bold{Note:} The ownership of \a widget remains the same as
+    when it was added.
 
     \sa removeItem(), QWidget::setGeometry(), addWidget()
 */
@@ -1365,6 +1494,37 @@ QSize QLayout::closestAcceptableSize(const QWidget *widget, const QSize &size)
     Use sizeConstraint() instead.
 */
 
+void QSizePolicy::setControlType(ControlType type)
+{
+    /*
+        The control type is a flag type, with values 0x1, 0x2, 0x4, 0x8, 0x10,
+        etc. In memory, we pack it onto the available bits (CTSize) in
+        setControlType(), and unpack it here.
+
+        Example:
+
+            0x00000001 maps to 0x00000000
+            0x00000002 maps to 0x00000200
+            0x00000004 maps to 0x00000400
+            0x00000008 maps to 0x00000600
+            etc.
+    */
+
+    int i = 0;
+    while (true) {
+        if (type & (0x1 << i)) {
+            data = (data & ~CTMask) | (i << CTShift);
+            return;
+        }
+        ++i;
+    }
+}
+
+QSizePolicy::ControlType QSizePolicy::controlType() const
+{
+    return QSizePolicy::ControlType(0x1 << ((data & CTMask) >> CTShift));
+}
+
 #ifndef QT_NO_DATASTREAM
 /*!
     \relates QSizePolicy
@@ -1376,8 +1536,7 @@ QSize QLayout::closestAcceptableSize(const QWidget *widget, const QSize &size)
 */
 QDataStream &operator<<(QDataStream &stream, const QSizePolicy &policy)
 {
-    stream << policy.data;
-    return stream;
+    return stream << policy.data;
 }
 
 /*!
@@ -1390,8 +1549,8 @@ QDataStream &operator<<(QDataStream &stream, const QSizePolicy &policy)
 */
 QDataStream &operator>>(QDataStream &stream, QSizePolicy &policy)
 {
-    stream >> policy.data;
-    return stream;
+    return stream >> policy.data;
 }
+
 #endif
 

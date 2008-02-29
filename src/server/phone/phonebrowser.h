@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -51,6 +51,7 @@ public:
     virtual void reset();
     virtual void resetToView(const QString &);
     virtual void showView(const QString &);
+    virtual QString currentView() const;
 
     bool isDone() const;
 protected:
@@ -184,12 +185,22 @@ class RunningAppsLauncherView : public LauncherView
 Q_OBJECT
 public:
     RunningAppsLauncherView(QWidget * = 0);
+    ~RunningAppsLauncherView();
 
 private slots:
     void applicationStateChanged();
+    void receivedLauncherServiceMessage(const QString &msg, const QByteArray &args);
+    void activatedHomeItem();
 
 private:
+    QString itemActivationIpcMessage(int itemId);
+    void addDynamicLauncherItem(int id, const QString &name, const QString &iconPath);
+    void removeDynamicLauncherItem(int id);
+
+    static const QString LAUNCH_MSG_PREFIX;
     UIApplicationMonitor monitor;
+    QtopiaChannel *m_channel;
+    QHash<QString, QContent *> m_dynamicallyAddedItems;
 };
 
 class PhoneBrowserScreen : public QAbstractBrowserScreen
@@ -208,6 +219,7 @@ protected:
 
 private:
     PhoneBrowserStack *m_stack;
+    QHash<QString, QContent*> m_dynamicallyAddedItems;
 };
 
 #endif // _PHONEBROWSER_H_

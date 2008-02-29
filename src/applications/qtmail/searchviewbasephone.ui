@@ -58,7 +58,7 @@
            <string>Include only mails before this date.</string>
           </property>
           <property name="text" >
-           <string>Before</string>
+           <string comment="Before 20th of July" >Before</string>
           </property>
          </widget>
         </item>
@@ -75,7 +75,7 @@
            <string>Include only mails after this date.</string>
           </property>
           <property name="text" >
-           <string>After</string>
+           <string comment="e.g. After 20th of July" >After</string>
           </property>
          </widget>
         </item>

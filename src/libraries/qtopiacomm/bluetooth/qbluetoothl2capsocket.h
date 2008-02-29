@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,11 +22,11 @@
 #ifndef __QBLUETOOTHL2CAPSOCKET_H__
 #define __QBLUETOOTHL2CAPSOCKET_H__
 
-#include <qtopia/comm/qbluetoothabstractsocket.h>
+#include <qbluetoothabstractsocket.h>
 
 class QBluetoothL2CapSocketPrivate;
 
-class QTOPIACOMM_EXPORT QBluetoothL2CapSocket : public QBluetoothAbstractSocket
+class QBLUETOOTH_EXPORT QBluetoothL2CapSocket : public QBluetoothAbstractSocket
 {
 public:
     explicit QBluetoothL2CapSocket(QObject *parent = 0);

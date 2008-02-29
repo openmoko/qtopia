@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/util/qcompleter.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/util/qcompleter.cpp -->
 <head>
-  <title>Qt 4.2: QCompleter Class Reference</title>
+  <title>Qt 4.3: QCompleter Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,8 +12,9 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QCompleter Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
-<p>The QCompleter class provides completions based on a item model. <a href="#details">More...</a></p>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QCompleter Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
+<p>The QCompleter class provides completions based on an item model. <a href="#details">More...</a></p>
 <pre> #include &lt;QCompleter&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <p>This class was introduced in Qt 4.2.</p>
 <ul>
@@ -32,10 +33,11 @@
 <li><div class="fn"/><b><a href="qcompleter.html#caseSensitivity-prop">caseSensitivity</a></b> : Qt::CaseSensitivity</li>
 <li><div class="fn"/><b><a href="qcompleter.html#completionColumn-prop">completionColumn</a></b> : int</li>
 <li><div class="fn"/><b><a href="qcompleter.html#completionMode-prop">completionMode</a></b> : CompletionMode</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><b><a href="qcompleter.html#completionPrefix-prop">completionPrefix</a></b> : QString</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><b><a href="qcompleter.html#completionRole-prop">completionRole</a></b> : int</li>
 <li><div class="fn"/><b><a href="qcompleter.html#modelSorting-prop">modelSorting</a></b> : ModelSorting</li>
+<li><div class="fn"/><b><a href="qcompleter.html#wrapAround-prop">wrapAround</a></b> : bool</li>
 </ul>
 </td></tr>
 </table></p>
@@ -74,6 +76,7 @@
 <li><div class="fn"/>void <b><a href="qcompleter.html#setWidget">setWidget</a></b> ( QWidget * <i>widget</i> )</li>
 <li><div class="fn"/>virtual QStringList <b><a href="qcompleter.html#splitPath">splitPath</a></b> ( const QString &amp; <i>path</i> ) const</li>
 <li><div class="fn"/>QWidget * <b><a href="qcompleter.html#widget">widget</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qcompleter.html#wrapAround-prop">wrapAround</a></b> () const</li>
 </ul>
 <ul>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
@@ -83,6 +86,7 @@
 <ul>
 <li><div class="fn"/>void <b><a href="qcompleter.html#complete">complete</a></b> ( const QRect &amp; <i>rect</i> = QRect() )</li>
 <li><div class="fn"/>void <b><a href="qcompleter.html#completionPrefix-prop">setCompletionPrefix</a></b> ( const QString &amp; <i>prefix</i> )</li>
+<li><div class="fn"/>void <b><a href="qcompleter.html#wrapAround-prop">setWrapAround</a></b> ( bool <i>wrap</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
@@ -106,7 +110,7 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QCompleter class provides completions based on a item model.</p>
+<p>The QCompleter class provides completions based on an item model.</p>
 <p>You can use QCompleter to provide auto completions in any Qt widget, such as <a href="qlineedit.html">QLineEdit</a> and <a href="qcombobox.html">QComboBox</a>. When the user starts typing a word, QCompleter suggests possible ways of completing the word, based on a word list. The word list is provided as a <a href="qabstractitemmodel.html">QAbstractItemModel</a>. (For simple applications, where the word list is static, you can pass a <a href="qstringlist.html">QStringList</a> to QCompleter's constructor.)</p>
 <ul><li><a href="#basic-usage">Basic Usage</a></li>
 <li><a href="#iterating-through-completions">Iterating Through Completions</a></li>
@@ -128,7 +132,7 @@
 <pre> QCompleter *completer = new QCompleter(this);
  completer-&gt;setModel(new QDirModel(completer));
  lineEdit-&gt;setCompleter(completer);</pre>
-<p>To set the model on which QCompleter should operate, call <a href="qcompleter.html#setModel">setModel</a>(). By default, QCompleter will attempt to match the <a href="qcompleter.html#completionPrefix-prop">completion prefix</a> (i.e., the word that the user has started typing) against the <a href="qt.html#ItemDataRole-enum">Qt::EditRole</a> data stored in column 0 in the model case sensitively. This can be changed using <a href="qcompleter.html#completionRole-prop">setCompletionRole</a>(), <a href="qcompleter.html#completionColumn-prop">setCompletionColumn</a>(), and <a href="qcompleter.html#caseSensitivity-prop">setCaseSensitivity</a>().</p>
+<p>To set the model on which QCompleter should operate, call <a href="qcompleter.html#setModel">setModel</a>(). By default, QCompleter will attempt to match the <a href="qcompleter.html#completionPrefix-prop">completion prefix</a> (i.e&#x2e;, the word that the user has started typing) against the <a href="qt.html#ItemDataRole-enum">Qt::EditRole</a> data stored in column 0 in the model case sensitively. This can be changed using <a href="qcompleter.html#completionRole-prop">setCompletionRole</a>(), <a href="qcompleter.html#completionColumn-prop">setCompletionColumn</a>(), and <a href="qcompleter.html#caseSensitivity-prop">setCaseSensitivity</a>().</p>
 <p>If the model is sorted on the column and role that are used for completion, you can call <a href="qcompleter.html#modelSorting-prop">setModelSorting</a>() with either <a href="qcompleter.html#ModelSorting-enum">QCompleter::CaseSensitivelySortedModel</a> or <a href="qcompleter.html#ModelSorting-enum">QCompleter::CaseInsensitivelySortedModel</a> as the argument. On large models, this can lead to significant performance improvements, because QCompleter can then use binary search instead of linear search.</p>
 <p>The model can be a <a href="qabstractlistmodel.html">list model</a>, a <a href="qabstracttablemodel.html">table model</a>, or a <a href="qabstractitemmodel.html">tree model</a>. Completion on tree models is slightly more involved and is covered in the <a href="#handling-tree-models">Handling Tree Models</a> section below.</p>
 <p>The <a href="qcompleter.html#completionMode-prop">completionMode</a>() determines the mode used to provide completions to the user.</p>
@@ -218,6 +222,7 @@
 <p>This property holds the way the model is sorted.</p>
 <p>By default, no assumptions are made about the order of the items in the model that provides the completions.</p>
 <p>If the model's data for the <a href="qcompleter.html#completionColumn-prop">completionColumn</a>() and <a href="qcompleter.html#completionRole-prop">completionRole</a>() is sorted in ascending order, you can set this property to <a href="qcompleter.html#ModelSorting-enum">CaseSensitivelySortedModel</a> or <a href="qcompleter.html#ModelSorting-enum">CaseInsensitivelySortedModel</a>. On large models, this can lead to significant performance improvements because the completer object can then use a binary search algorithm instead of linear search algorithm.</p>
+<p>The sort order (i.e ascending or descending order) of the model is determined dynamically by inspecting the contents of the model.</p>
 <p><b>Note:</b> The performance improvements described above cannot take place when the completer's <a href="qcompleter.html#caseSensitivity-prop">caseSensitivity</a> is different to the case sensitivity used by the model's when sorting.</p>
 <p>Access functions:</p>
 <ul>
@@ -225,6 +230,15 @@
 <li><div class="fn"/><b>void setModelSorting ( ModelSorting <i>sorting</i> )</b></li>
 </ul>
 <p>See also <a href="qcompleter.html#caseSensitivity-prop">setCaseSensitivity</a>() and <a href="qcompleter.html#ModelSorting-enum">QCompleter::ModelSorting</a>.</p>
+<h3 class="fn"><a name="wrapAround-prop"></a>wrapAround : bool</h3>
+<p>This property holds the completions wrap around when navigating through items.</p>
+<p>The default is true.</p>
+<p>This property was introduced in Qt 4.3.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool wrapAround () const</b></li>
+<li><div class="fn"/><b>void setWrapAround ( bool <i>wrap</i> )</b></li>
+</ul>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QCompleter"></a>QCompleter::QCompleter ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -300,6 +314,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -48,21 +48,37 @@ public:
     inline InheritedSharedDataPointer(const InheritedSharedDataPointer<T> &o) : d(o.d) { if (d) d->ref.ref(); }
     inline InheritedSharedDataPointer<T> & operator=(const InheritedSharedDataPointer<T> &o) {
         if (o.d != d) {
+#if QT_VERSION < 0x040400
             T *x = o.d;
             if (x) x->ref.ref();
             x = qAtomicSetPtr(&d, x);
             if (x && !x->ref.deref())
                 delete x;
+#else
+            if (o.d)
+                o.d->ref.ref();
+            if (d && !d->ref.deref())
+                delete d;
+            d = o.d;
+#endif
         }
         return *this;
     }
     inline InheritedSharedDataPointer &operator=(T *o) {
         if (o != d) {
+#if QT_VERSION < 0x040400
             T *x = o;
             if (x) x->ref.ref();
             x = qAtomicSetPtr(&d, x);
             if (x && !x->ref.deref())
                 delete x;
+#else
+            if (o)
+                o->ref.ref();
+            if (d && !d->ref.deref())
+                delete d;
+            d = o;
+#endif
         }
         return *this;
     }
@@ -84,9 +100,15 @@ Q_OUTOFLINE_TEMPLATE void InheritedSharedDataPointer<T>::detach_helper()
 {
     T *x = d->createCopy();
     x->ref.ref();
+#if QT_VERSION < 0x040400
     x = qAtomicSetPtr(&d, x);
     if (!x->ref.deref())
         delete x;
+#else
+    if (!d->ref.deref())
+        delete d;
+    d = x;
+#endif
 }
 
 #endif

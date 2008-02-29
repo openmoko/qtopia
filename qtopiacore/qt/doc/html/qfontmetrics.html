@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/text/qfontmetrics.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/text/qfontmetrics.cpp -->
 <head>
-  <title>Qt 4.2: QFontMetrics Class Reference</title>
+  <title>Qt 4.3: QFontMetrics Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QFontMetrics Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QFontMetrics Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QFontMetrics class provides font metrics information. <a href="#details">More...</a></p>
 <pre> #include &lt;QFontMetrics&gt;</pre><ul>
 <li><a href="qfontmetrics-members.html">List of all members, including inherited members</a></li>
@@ -47,6 +48,7 @@
 <li><div class="fn"/>int <b><a href="qfontmetrics.html#rightBearing">rightBearing</a></b> ( QChar <i>ch</i> ) const</li>
 <li><div class="fn"/>QSize <b><a href="qfontmetrics.html#size">size</a></b> ( int <i>flags</i>, const QString &amp; <i>text</i>, int <i>tabStops</i> = 0, int * <i>tabArray</i> = 0 ) const</li>
 <li><div class="fn"/>int <b><a href="qfontmetrics.html#strikeOutPos">strikeOutPos</a></b> () const</li>
+<li><div class="fn"/>QRect <b><a href="qfontmetrics.html#tightBoundingRect">tightBoundingRect</a></b> ( const QString &amp; <i>text</i> ) const</li>
 <li><div class="fn"/>int <b><a href="qfontmetrics.html#underlinePos">underlinePos</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qfontmetrics.html#width">width</a></b> ( const QString &amp; <i>text</i>, int <i>len</i> = -1 ) const</li>
 <li><div class="fn"/>int <b><a href="qfontmetrics.html#width-2">width</a></b> ( QChar <i>ch</i> ) const</li>
@@ -63,7 +65,7 @@
 <p>The QFontMetrics class provides font metrics information.</p>
 <p>QFontMetrics functions calculate the size of characters and strings for a given font. There are three ways you can create a QFontMetrics object:</p>
 <ol type="1">
-<li>Calling the QFontMetrics constructor with a <a href="qfont.html">QFont</a> creates a font metrics object for a screen-compatible font, i.e. the font cannot be a printer font. If the font is changed later, the font metrics object is <i>not</i> updated.<p>(Note: If you use a printer font the values returned may be inaccurate. Printer fonts are not always accessible so the nearest screen font is used if a printer font is supplied.)</p>
+<li>Calling the QFontMetrics constructor with a <a href="qfont.html">QFont</a> creates a font metrics object for a screen-compatible font, i.e&#x2e; the font cannot be a printer font. If the font is changed later, the font metrics object is <i>not</i> updated.<p>(Note: If you use a printer font the values returned may be inaccurate. Printer fonts are not always accessible so the nearest screen font is used if a printer font is supplied.)</p>
 </li>
 <li><a href="qwidget.html#fontMetrics">QWidget::fontMetrics</a>() returns the font metrics for a widget's font. This is equivalent to QFontMetrics(widget-&gt;font()). If the widget's font is changed later, the font metrics object is <i>not</i> updated.</li>
 <li><a href="qpainter.html#fontMetrics">QPainter::fontMetrics</a>() returns the font metrics for a painter's current font. If the painter's font is changed later, the font metrics object is <i>not</i> updated.</li>
@@ -96,25 +98,25 @@
 <p>Destroys the font metrics object and frees all allocated resources.</p>
 <h3 class="fn"><a name="ascent"></a>int QFontMetrics::ascent () const</h3>
 <p>Returns the ascent of the font.</p>
-<p>The ascent of a font is the distance from the baseline to the highest position characters extend to. In practice, some font designers break this rule, e.g. when they put more than one accent on top of a character, or to accommodate an unusual character in an exotic language, so it is possible (though rare) that this value will be too small.</p>
+<p>The ascent of a font is the distance from the baseline to the highest position characters extend to. In practice, some font designers break this rule, e.g&#x2e; when they put more than one accent on top of a character, or to accommodate an unusual character in an exotic language, so it is possible (though rare) that this value will be too small.</p>
 <p>See also <a href="qfontmetrics.html#descent">descent</a>().</p>
 <h3 class="fn"><a name="averageCharWidth"></a>int QFontMetrics::averageCharWidth () const</h3>
 <p>Returns the average width of glyphs in the font.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <h3 class="fn"><a name="boundingRect"></a><a href="qrect.html">QRect</a> QFontMetrics::boundingRect ( <a href="qchar.html">QChar</a> <i>ch</i> ) const</h3>
-<p>Returns the rectangle that is covered by ink if character <i>ch</i> where to be drawn at the origin of the coordinate system.</p>
-<p>Note that the bounding rectangle may extend to the left of (0, 0), e.g. for italicized fonts, and that the text output may cover <i>all</i> pixels in the bounding rectangle. For a space character the rectangle will usually be empty.</p>
+<p>Returns the rectangle that is covered by ink if character <i>ch</i> were to be drawn at the origin of the coordinate system.</p>
+<p>Note that the bounding rectangle may extend to the left of (0, 0), e.g&#x2e; for italicized fonts, and that the text output may cover <i>all</i> pixels in the bounding rectangle. For a space character the rectangle will usually be empty.</p>
 <p>Note that the rectangle usually extends both above and below the base line.</p>
 <p><b>Warning:</b> The width of the returned rectangle is not the advance width of the character. Use boundingRect(const <a href="qstring.html">QString</a> &amp;) or <a href="qfontmetrics.html#width">width</a>() instead.</p>
 <p>See also <a href="qfontmetrics.html#width">width</a>().</p>
 <h3 class="fn"><a name="boundingRect-2"></a><a href="qrect.html">QRect</a> QFontMetrics::boundingRect ( const <a href="qstring.html">QString</a> &amp; <i>text</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the bounding rectangle of the characters in the string specified by <i>text</i>. The bounding rectangle always covers at least the set of pixels the text would cover if drawn at (0, 0).</p>
-<p>Note that the bounding rectangle may extend to the left of (0, 0), e.g. for italicized fonts, and that the width of the returned rectangle might be different than what the <a href="qfontmetrics.html#width">width</a>() method returns.</p>
+<p>Note that the bounding rectangle may extend to the left of (0, 0), e.g&#x2e; for italicized fonts, and that the width of the returned rectangle might be different than what the <a href="qfontmetrics.html#width">width</a>() method returns.</p>
 <p>If you want to know the advance width of the string (to layout a set of strings next to each other), use <a href="qfontmetrics.html#width">width</a>() instead.</p>
 <p>Newline characters are processed as normal characters, <i>not</i> as linebreaks.</p>
 <p>The height of the bounding rectangle is at least as large as the value returned by <a href="qfontmetrics.html#height">height</a>().</p>
-<p>See also <a href="qfontmetrics.html#width">width</a>(), <a href="qfontmetrics.html#height">height</a>(), and <a href="qpainter.html#boundingRect">QPainter::boundingRect</a>().</p>
+<p>See also <a href="qfontmetrics.html#width">width</a>(), <a href="qfontmetrics.html#height">height</a>(), <a href="qpainter.html#boundingRect">QPainter::boundingRect</a>(), and <a href="qfontmetrics.html#tightBoundingRect">tightBoundingRect</a>().</p>
 <h3 class="fn"><a name="boundingRect-5"></a><a href="qrect.html">QRect</a> QFontMetrics::boundingRect ( int <i>x</i>, int <i>y</i>, int <i>width</i>, int <i>height</i>, int <i>flags</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, int <i>tabStops</i> = 0, int * <i>tabArray</i> = 0 ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the bounding rectangle for the given <i>text</i> within the rectangle specified by the <i>x</i> and <i>y</i> coordinates, <i>width</i>, and <i>height</i>.</p>
@@ -134,28 +136,28 @@
 <li><a href="qt.html#AlignmentFlag-enum">Qt::AlignCenter</a> (== <tt>Qt::AlignHCenter | Qt::AlignVCenter</tt>)</li>
 <li><a href="qt.html#TextFlag-enum">Qt::TextSingleLine</a> ignores newline characters in the text.</li>
 <li><a href="qt.html#TextFlag-enum">Qt::TextExpandTabs</a> expands tabs (see below)</li>
-<li><a href="qt.html#TextFlag-enum">Qt::TextShowMnemonic</a> interprets &quot;&amp;amp;x&quot; as <u>x</u>, i.e. underlined.</li>
-<li>Qt::TextWordBreak breaks the text to fit the rectangle.</li>
+<li><a href="qt.html#TextFlag-enum">Qt::TextShowMnemonic</a> interprets &quot;&amp;amp;x&quot; as <u>x</u>, i.e&#x2e; underlined.</li>
+<li><a href="qt.html#TextFlag-enum">Qt::TextWordWrap</a> breaks the text to fit the rectangle.</li>
 </ul>
 <p><a href="qt.html#Orientation-enum">Qt::Horizontal</a> alignment defaults to <a href="qt.html#AlignmentFlag-enum">Qt::AlignLeft</a> and vertical alignment defaults to <a href="qt.html#AlignmentFlag-enum">Qt::AlignTop</a>.</p>
 <p>If several of the horizontal or several of the vertical alignment flags are set, the resulting alignment is undefined.</p>
 <p>If <a href="qt.html#TextFlag-enum">Qt::TextExpandTabs</a> is set in <i>flags</i>, then: if <i>tabArray</i> is non-null, it specifies a 0-terminated sequence of pixel-positions for tabs; otherwise if <i>tabStops</i> is non-zero, it is used as the tab spacing (in pixels).</p>
-<p>Note that the bounding rectangle may extend to the left of (0, 0), e.g. for italicized fonts, and that the text output may cover <i>all</i> pixels in the bounding rectangle.</p>
+<p>Note that the bounding rectangle may extend to the left of (0, 0), e.g&#x2e; for italicized fonts, and that the text output may cover <i>all</i> pixels in the bounding rectangle.</p>
 <p>Newline characters are processed as linebreaks.</p>
 <p>Despite the different actual character heights, the heights of the bounding rectangles of &quot;Yes&quot; and &quot;yes&quot; are the same.</p>
 <p>The bounding rectangle returned by this function is somewhat larger than that calculated by the simpler <a href="qfontmetrics.html#boundingRect">boundingRect</a>() function. This function uses the <a href="qfontmetrics.html#minLeftBearing">maximum left</a> and <a href="qfontmetrics.html#minRightBearing">right</a> font bearings as is necessary for multi-line text to align correctly. Also, fontHeight() and <a href="qfontmetrics.html#lineSpacing">lineSpacing</a>() are used to calculate the height, rather than individual character heights.</p>
 <p>See also <a href="qfontmetrics.html#width">width</a>(), <a href="qpainter.html#boundingRect">QPainter::boundingRect</a>(), and <a href="qt.html#AlignmentFlag-enum">Qt::Alignment</a>.</p>
 <h3 class="fn"><a name="charWidth"></a>int QFontMetrics::charWidth ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, int <i>pos</i> ) const</h3>
 <p>Returns the width of the character at position <i>pos</i> in the string <i>text</i>.</p>
-<p>The whole string is needed, as the glyph drawn may change depending on the context (the letter before and after the current one) for some languages (e.g. Arabic).</p>
+<p>The whole string is needed, as the glyph drawn may change depending on the context (the letter before and after the current one) for some languages (e.g&#x2e; Arabic).</p>
 <p>This function also takes non spacing marks and ligatures into account.</p>
 <h3 class="fn"><a name="descent"></a>int QFontMetrics::descent () const</h3>
 <p>Returns the descent of the font.</p>
-<p>The descent is the distance from the base line to the lowest point characters extend to. (Note that this is different from X, which adds 1 pixel.) In practice, some font designers break this rule, e.g. to accommodate an unusual character in an exotic language, so it is possible (though rare) that this value will be too small.</p>
+<p>The descent is the distance from the base line to the lowest point characters extend to. In practice, some font designers break this rule, e.g&#x2e; to accommodate an unusual character in an exotic language, so it is possible (though rare) that this value will be too small.</p>
 <p>See also <a href="qfontmetrics.html#ascent">ascent</a>().</p>
 <h3 class="fn"><a name="elidedText"></a><a href="qstring.html">QString</a> QFontMetrics::elidedText ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qt.html#TextElideMode-enum">Qt::TextElideMode</a> <i>mode</i>, int <i>width</i>, int <i>flags</i> = 0 ) const</h3>
-<p>If the string <i>text</i> is wider than <i>width</i>, returns an elided version of the string (i.e., a string with &quot;...&quot; in it). Otherwise, returns the original string.</p>
-<p>The <i>mode</i> parameter specifies whether the text is elided on the left (e.g., &quot;...tech&quot;), in the middle (e.g., &quot;Tr...ch&quot;), or on the right (e.g., &quot;Trol...&quot;).</p>
+<p>If the string <i>text</i> is wider than <i>width</i>, returns an elided version of the string (i.e&#x2e;, a string with &quot;..&#x2e;&quot; in it). Otherwise, returns the original string.</p>
+<p>The <i>mode</i> parameter specifies whether the text is elided on the left (e.g&#x2e;, &quot;..&#x2e;tech&quot;), in the middle (e.g&#x2e;, &quot;Tr..&#x2e;ch&quot;), or on the right (e.g&#x2e;, &quot;Trol..&#x2e;&quot;).</p>
 <p>The <i>width</i> is specified in pixels, not characters.</p>
 <p>The <i>flags</i> argument is optional and currently only supports <a href="qt.html#TextFlag-enum">Qt::TextShowMnemonic</a> as value.</p>
 <p>This function was introduced in Qt 4.2.</p>
@@ -207,7 +209,7 @@
 <ul>
 <li><a href="qt.html#TextFlag-enum">Qt::TextSingleLine</a> ignores newline characters.</li>
 <li><a href="qt.html#TextFlag-enum">Qt::TextExpandTabs</a> expands tabs (see below)</li>
-<li><a href="qt.html#TextFlag-enum">Qt::TextShowMnemonic</a> interprets &quot;&amp;amp;x&quot; as <u>x</u>, i.e. underlined.</li>
+<li><a href="qt.html#TextFlag-enum">Qt::TextShowMnemonic</a> interprets &quot;&amp;amp;x&quot; as <u>x</u>, i.e&#x2e; underlined.</li>
 <li>Qt::TextWordBreak breaks the text to fit the rectangle.</li>
 </ul>
 <p>If <a href="qt.html#TextFlag-enum">Qt::TextExpandTabs</a> is set in <i>flags</i>, then: if <i>tabArray</i> is non-null, it specifies a 0-terminated sequence of pixel-positions for tabs; otherwise if <i>tabStops</i> is non-zero, it is used as the tab spacing (in pixels).</p>
@@ -217,6 +219,14 @@
 <h3 class="fn"><a name="strikeOutPos"></a>int QFontMetrics::strikeOutPos () const</h3>
 <p>Returns the distance from the base line to where the strikeout line should be drawn.</p>
 <p>See also <a href="qfontmetrics.html#underlinePos">underlinePos</a>(), <a href="qfontmetrics.html#overlinePos">overlinePos</a>(), and <a href="qfontmetrics.html#lineWidth">lineWidth</a>().</p>
+<h3 class="fn"><a name="tightBoundingRect"></a><a href="qrect.html">QRect</a> QFontMetrics::tightBoundingRect ( const <a href="qstring.html">QString</a> &amp; <i>text</i> ) const</h3>
+<p>Returns a tight bounding rectangle around the characters in the string specified by <i>text</i>. The bounding rectangle always covers at least the set of pixels the text would cover if drawn at (0, 0).</p>
+<p>Note that the bounding rectangle may extend to the left of (0, 0), e.g&#x2e; for italicized fonts, and that the width of the returned rectangle might be different than what the <a href="qfontmetrics.html#width">width</a>() method returns.</p>
+<p>If you want to know the advance width of the string (to layout a set of strings next to each other), use <a href="qfontmetrics.html#width">width</a>() instead.</p>
+<p>Newline characters are processed as normal characters, <i>not</i> as linebreaks.</p>
+<p><b>Warning:</b> Calling this method is very slow on Windows.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qfontmetrics.html#width">width</a>(), <a href="qfontmetrics.html#height">height</a>(), and <a href="qfontmetrics.html#boundingRect">boundingRect</a>().</p>
 <h3 class="fn"><a name="underlinePos"></a>int QFontMetrics::underlinePos () const</h3>
 <p>Returns the distance from the base line to where an underscore should be drawn.</p>
 <p>See also <a href="qfontmetrics.html#overlinePos">overlinePos</a>(), <a href="qfontmetrics.html#strikeOutPos">strikeOutPos</a>(), and <a href="qfontmetrics.html#lineWidth">lineWidth</a>().</p>
@@ -281,6 +291,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

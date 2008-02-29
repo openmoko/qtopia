@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,37 +25,26 @@
 // Local includes
 #include "qabstractipcinterfacegroupmanager.h"
 
-// ============================================================================
-//
-// QHardwareManager
-//
-// ============================================================================
-
-struct QHardwareManagerPrivate;
-
+class QHardwareManagerPrivate;
 class QTOPIA_EXPORT QHardwareManager : public QAbstractIpcInterfaceGroupManager
 {
     Q_OBJECT
 public:
-    explicit QHardwareManager(const QString& interface, QObject *parent = 0 );
-    ~QHardwareManager();
+    explicit QHardwareManager( const QString& interface, QObject *parent = 0 );
+    virtual ~QHardwareManager();
 
     QString interface() const;
     QStringList providers() const;
 
     template <typename T> static QStringList providers()
     {
-        QAbstractIpcInterfaceGroupManager man("/Hardware/Accessories");
+        QAbstractIpcInterfaceGroupManager man( "/Hardware/Accessories" );
         return man.supports<T>();
     }
 
 signals:
     void providerAdded( const QString& id );
     void providerRemoved( const QString& id );
-
-private slots:
-    void changed();
-
 private:
     QHardwareManagerPrivate* d;
 };

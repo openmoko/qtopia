@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,11 +20,13 @@
 ****************************************************************************/
 
 #include "appointmentdetails.h"
+#include "../todo/reminderpicker.h"
 
 #include <qtopianamespace.h>
 #include <qtimestring.h>
 #include <qtopia/pim/qappointment.h>
-
+#include <QAppointmentModel>
+#include <QPimContext>
 #include <QDL>
 #include <QDLBrowserClient>
 #include <QStyle>
@@ -35,10 +37,8 @@ AppointmentDetails::AppointmentDetails( QWidget *parent )
 :   QDLBrowserClient( parent, "editnote" ),
     previousDetails( 0 ), mIconsLoaded(false)
 {
-#ifdef QTOPIA_PHONE
     setFrameStyle(NoFrame);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-#endif
 }
 
 void AppointmentDetails::init( const QOccurrence &occurrence )
@@ -73,7 +73,7 @@ void AppointmentDetails::keyPressEvent( QKeyEvent *e )
     switch ( e->key() ) {
         case Qt::Key_Space:
         case Qt::Key_Return:
-            // PHONE back is handled in DateBook::closeEvent()
+        case Qt::Key_Back:
             emit done();
             break;
         default:
@@ -179,8 +179,15 @@ QString AppointmentDetails::createPreviewText( const QOccurrence &o )
     QAppointment ev = o.appointment();
     QString text;
     QDate today = QDate::currentDate();
-
     loadLinks( ev.customField( QDL::CLIENT_DATA_KEY ) );
+
+    QAppointmentModel am;
+    QPimContext *ctx = am.context(ev.uid());
+    if (ctx) {
+        text += QLatin1String("<img style=\"float: right;\" src=\"contexticon\">");
+        int iconMetric = style()->pixelMetric(QStyle::PM_SmallIconSize);
+        document()->addResource(QTextDocument::ImageResource, QUrl("contexticon"), ctx->icon().pixmap(iconMetric));
+    }
 
     if ( ev.hasRepeat() )
         text += QLatin1String("<img style=\"float: right;\" src=\"repeaticon\">");
@@ -207,17 +214,12 @@ QString AppointmentDetails::createPreviewText( const QOccurrence &o )
     text += "</b>";
 
     if ( !ev.location().isEmpty() )
-        text += "<br><b>" + tr("Where: ") + "</b>" + Qt::escape(ev.location());
+        text += "<br><b>" + tr("Where:") + " </b>" + Qt::escape(ev.location());
 
-    text += "<br><b>When: </b>" + formatDateTimes(o, today);
+    text += "<br><b>" + tr("When:")+ " </b>" + formatDateTimes(o, today);
 
     if ( ev.hasAlarm() ) {
-        text += "<br><b>" + tr("Reminder: ") + "</b>" +
-            tr("%1 minutes before (%2)", "eg. 5 minutes before (Audible/Silent)")
-                .arg(ev.alarmDelay())
-                .arg(ev.alarm() == QAppointment::Visible ?
-                        tr("Silent", "eg. 5 minutes before (Silent)") :
-                        tr("Audible", "eg. 5 minutes before (Audible)"));
+        text += "<br><b>" + tr("Reminder:") + " </b>" + ReminderPicker::formatReminder(ev.isAllDay(), ev.alarm(), ev.alarmDelay());
     }
     if ( ev.hasRepeat() ) {
         QString word;
@@ -276,7 +278,7 @@ QString AppointmentDetails::createPreviewText( const QOccurrence &o )
             else
                 word = tr("every year");
 
-        text += "<br><b>" + tr("Repeat: ") + "</b>";
+        text += "<br><b>" + tr("Repeat:") + " </b>";
         if ( ev.frequency() > 1 )
             word = word.arg( ev.frequency() );
 
@@ -294,7 +296,7 @@ QString AppointmentDetails::createPreviewText( const QOccurrence &o )
 
     if ( !ev.notes().isEmpty() ) {
         QString txt = ev.notes();
-        text += "<br><b>" + tr("Notes: ") + "</b>" + txt; // txt is already formatted html
+        text += "<br><b>" + tr("Notes:") + " </b>" + txt; // txt is already formatted html
     }
 
     return text;

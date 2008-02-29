@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -114,25 +129,6 @@ static bool optimize_layout = false;
 
 static Q3CleanupHandler<QPixmap> qiv_cleanup_pixmap;
 
-#if !defined(Q_WS_X11)
-static void createSelectionPixmap(const QColorGroup &cg)
-{
-    QBitmap m(2, 2);
-    m.fill(Qt::color1);
-    QPainter p(&m);
-    p.setPen(Qt::color0);
-    for (int j = 0; j < 2; ++j) {
-        p.drawPoint(j % 2, j);
-    }
-    p.end();
-
-    qiv_selection = new QPixmap(2, 2);
-    qiv_cleanup_pixmap.add(&qiv_selection);
-    qiv_selection->fill(Qt::color0);
-    qiv_selection->setMask(m);
-    qiv_selection->fill(cg.highlight());
-}
-#endif
 
 static QPixmap *get_qiv_buffer_pixmap(const QSize &s)
 {
@@ -599,21 +595,21 @@ const char* Q3IconDrag::format(int i) const
 
 QByteArray Q3IconDrag::encodedData(const char* mime) const
 {
-    if (d->items.size() <= 0 || QString(mime) !=
-         "application/x-qiconlist")
+    if (d->items.size() <= 0 || QString::fromLatin1(mime) !=
+         QString::fromLatin1("application/x-qiconlist"))
         return QByteArray();
 
     QLinkedList<Q3IconDragDataItem>::ConstIterator it = d->items.begin();
     QString s;
     for (; it != d->items.end(); ++it) {
-        QString k("%1$@@$%2$@@$%3$@@$%4$@@$%5$@@$%6$@@$%7$@@$%8$@@$");
+        QString k(QLatin1String("%1$@@$%2$@@$%3$@@$%4$@@$%5$@@$%6$@@$%7$@@$%8$@@$"));
         k = k.arg((*it).item.pixmapRect().x()).arg(
             (*it).item.pixmapRect().y()).arg((*it).item.pixmapRect().width()).
             arg((*it).item.pixmapRect().height()).arg(
                 (*it).item.textRect().x()).arg((*it).item.textRect().y()).
             arg((*it).item.textRect().width()).arg(
                 (*it).item.textRect().height());
-        k += QString((*it).data.data()) + "$@@$";
+        k += QString(QLatin1String((*it).data.data())) + QLatin1String("$@@$");
         s += k;
     }
 
@@ -647,10 +643,10 @@ bool Q3IconDragPrivate::decode(QMimeSource* e, QLinkedList<Q3IconDragDataItem> &
     if (ba.size()) {
         lst.clear();
         // #### unicode clean????
-        QString s = ba;
+        QString s = QString::fromLatin1(ba);
         Q3IconDragDataItem item;
         QRect ir, tr;
-        QStringList l = QStringList::split("$@@$", s);
+        QStringList l = QStringList::split(QLatin1String("$@@$"), s);
 
         int i = 0;
         QStringList::Iterator it = l.begin();
@@ -1457,7 +1453,8 @@ void Q3IconViewItem::repaint()
 
 /*!
     Moves the item to position (\a x, \a y) in the icon view (these
-    are contents coordinates).
+    are contents coordinates). Returns true if the item is moved.
+    Returns false if the item is already at the specified position.
 */
 
 bool Q3IconViewItem::move(int x, int y)
@@ -1836,8 +1833,8 @@ void Q3IconViewItem::calcRect(const QString &text_)
 
     tw = r.width();
     th = r.height();
-    if (tw < view->d->fm->width("X"))
-        tw = view->d->fm->width("X");
+    if (tw < view->d->fm->width(QLatin1String("X")))
+        tw = view->d->fm->width(QLatin1String("X"));
 
     itemTextRect.setWidth(tw);
     itemTextRect.setHeight(th);
@@ -2113,12 +2110,12 @@ void Q3IconViewItem::calcTmpText()
         return;
     }
 
-    tmpText = "...";
+    tmpText = QLatin1String("...");
     int i = 0;
     while (view->d->fm->width(tmpText + itemText[i]) < w)
         tmpText += itemText[i++];
     tmpText.remove((uint)0, 3);
-    tmpText += "...";
+    tmpText += QLatin1String("...");
 }
 
 /*! \internal */
@@ -2382,10 +2379,10 @@ void Q3IconViewItem::checkRect()
     the view runs out of space.
 
     \value LeftToRight  Items which don't fit into the view go further
-    down (you get a vertical scrollbar)
+    down (you get a vertical scroll bar)
 
     \value TopToBottom  Items which don't fit into the view go further
-    right (you get a horizontal scrollbar)
+    right (you get a horizontal scroll bar)
 */
 
 /*!
@@ -3411,7 +3408,7 @@ void Q3IconView::arrangeItemsInGrid(bool update)
         doAgain = visibleWidth() != vw;
     if (d->arrangement == TopToBottom)
         doAgain = visibleHeight() != vh;
-    if (doAgain) // in the case that the visibleExtend changed because of the resizeContents (scrollbar show/hide), redo layout again
+    if (doAgain) // in the case that the visibleExtend changed because of the resizeContents (scroll bar show/hide), redo layout again
         arrangeItemsInGrid(false);
     if (ue)
         viewport()->setUpdatesEnabled(true);

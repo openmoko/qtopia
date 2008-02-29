@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,7 +37,9 @@
 ****************************************************************************/
 
 #include "qfsfileengine_p.h"
+#include "qfsfileengine_iterator_p.h"
 #include "qdatetime.h"
+#include "qdiriterator.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -40,7 +57,11 @@
 #  ifndef S_ISSOCK
 #    define S_ISSOCK(x) false
 #  endif
+#  ifndef INVALID_FILE_ATTRIBUTES
+#    define INVALID_FILE_ATTRIBUTES (DWORD (-1))
+#  endif
 #endif
+
 
 /*! \class QFSFileEngine
     \brief The QFSFileEngine class implements Qt's default file engine.
@@ -64,19 +85,30 @@
 //**************** QFSFileEnginePrivate
 QFSFileEnginePrivate::QFSFileEnginePrivate() : QAbstractFileEnginePrivate()
 {
-    sequential = 0;
+    init();
+}
+
+/*!
+    \internal
+*/
+void QFSFileEnginePrivate::init()
+{
+    is_sequential = 0;
     tried_stat = 0;
 #ifdef Q_OS_UNIX
     need_lstat = 1;
     is_link = 0;
 #endif
-    is_readonly = 0;
+    openMode = QIODevice::NotOpen;
     fd = -1;
     fh = 0;
     lastIOCommand = IOFlushCommand;
     lastFlushFailed = false;
     closeFileHandle = false;
-    init();
+#ifdef Q_OS_WIN
+    fileAttrib = INVALID_FILE_ATTRIBUTES;
+    fileHandle = INVALID_HANDLE_VALUE;
+#endif
 }
 
 /*!
@@ -85,7 +117,8 @@ QFSFileEnginePrivate::QFSFileEnginePrivate() : QAbstractFileEnginePrivate()
 QFSFileEngine::QFSFileEngine(const QString &file) : QAbstractFileEngine(*new QFSFileEnginePrivate)
 {
     Q_D(QFSFileEngine);
-    d->file = QFSFileEnginePrivate::fixToQtSlashes(file);
+    d->filePath = QDir::fromNativeSeparators(file);
+    d->nativeInitFileName();
 }
 
 /*!
@@ -130,222 +163,145 @@ QFSFileEngine::~QFSFileEngine()
 void QFSFileEngine::setFileName(const QString &file)
 {
     Q_D(QFSFileEngine);
-    d->file = QFSFileEnginePrivate::fixToQtSlashes(file);
-    d->tried_stat = 0;
-}
-
-static QByteArray openModeToFopenMode(QIODevice::OpenMode flags, const QString &fileName = QString())
-{
-    QByteArray mode;
-    if ((flags & QIODevice::ReadOnly) && !(flags & QIODevice::Truncate)) {
-        mode = "rb";
-        if (flags & QIODevice::WriteOnly) {
-            if (!fileName.isEmpty() &&QFile::exists(fileName))
-                mode = "rb+";
-            else
-                mode = "wb+";
-        }
-    } else if (flags & QIODevice::WriteOnly) {
-        mode = "wb";
-        if (flags & QIODevice::ReadOnly)
-            mode += "+";
-    }
-    if (flags & QIODevice::Append) {
-        mode = "ab";
-        if (flags & QIODevice::ReadOnly)
-            mode += "+";
-    }
-    return mode;
+    d->init();
+    d->filePath = QDir::fromNativeSeparators(file);
+    d->nativeInitFileName();
 }
 
 /*!
     \reimp
 */
-bool QFSFileEngine::open(QIODevice::OpenMode flags)
+bool QFSFileEngine::open(QIODevice::OpenMode openMode)
 {
     Q_D(QFSFileEngine);
-    d->lastFlushFailed = false;
-
-    if (d->file.isEmpty()) {
+    if (d->filePath.isEmpty()) {
         qWarning("QFSFileEngine::open: No file name specified");
         setError(QFile::OpenError, QLatin1String("No file name specified"));
         return false;
     }
 
-    if (flags & QFile::Append)
-        flags |= QFile::WriteOnly;
+    // Append implies WriteOnly.
+    if (openMode & QFile::Append)
+        openMode |= QFile::WriteOnly;
 
-#ifdef Q_OS_WIN
-    if (d->file.startsWith("//./")) {
-#endif
-    do {
-#if defined(Q_OS_WIN) && defined(_MSC_VER) && _MSC_VER >= 1400
-        d->fh = 0;
-        fopen_s(&d->fh, QFile::encodeName(QDir::toNativeSeparators(d->file)).constData(),
-                         openModeToFopenMode(flags, d->file).constData());
-#else
-        d->fh = QT_FOPEN(QFile::encodeName(QDir::toNativeSeparators(d->file)).constData(),
-                         openModeToFopenMode(flags, d->file).constData());
-#endif
-    } while (!d->fh && errno == EINTR);
-    if (!d->fh) {
-        setError(errno == EMFILE ? QFile::ResourceError : QFile::OpenError,
-                 qt_error_string(int(errno)));
-        return false;
-    }
+    // WriteOnly implies Truncate if neither ReadOnly nor Append are sent.
+    if ((openMode & QFile::WriteOnly) && !(openMode & (QFile::ReadOnly | QFile::Append)))
+        openMode |= QFile::Truncate;
 
-    if ((flags & QIODevice::WriteOnly) == 0)
-        d->is_readonly = 1;
+    d->openMode = openMode;
+    d->lastFlushFailed = false;
+    d->tried_stat = 0;
+    d->fh = 0;
+    d->fd = -1;
 
-    if (flags & QIODevice::Unbuffered)
-        setvbuf(d->fh, 0, _IONBF, 0);
-
-    if (flags & QIODevice::Append) {
-        int ret;
-        do {
-            ret = QT_FSEEK(d->fh, 0, SEEK_END);
-        } while (ret == -1 && errno == EINTR);
-    }
-
-    d->closeFileHandle = true;
-    d->fd = QT_FILENO(d->fh);
-
-    QT_STATBUF st;
-    if (QT_FSTAT(QT_FILENO(d->fh), &st) != 0)
-#ifdef Q_OS_UNIX
-        return false;
-#endif
-    d->sequential = S_ISCHR(st.st_mode) || S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode);
-    return true;
-
-#ifdef Q_OS_WIN
-    } else {
-#endif
-
-    int oflags = QT_OPEN_RDONLY;
-    if ((flags & QFile::ReadWrite) == QFile::ReadWrite) {
-        oflags = QT_OPEN_RDWR | QT_OPEN_CREAT;
-    } else if (flags & QFile::WriteOnly) {
-        oflags = QT_OPEN_WRONLY | QT_OPEN_CREAT;
-    }
-
-    if (flags & QFile::Append) {
-        oflags |= QT_OPEN_APPEND;
-    } else if (flags & QFile::WriteOnly) {
-        if ((flags & QFile::Truncate) || !(flags & QFile::ReadOnly))
-            oflags |= QT_OPEN_TRUNC;
-    }
-
-#if defined(Q_OS_MSDOS) || defined(Q_OS_WIN32) || defined(Q_OS_OS2)
-    oflags |= QT_OPEN_BINARY; // we handle all text translations our self.
-#endif
-
-    d->fd = d->sysOpen(d->file, oflags);
-    if(d->fd != -1) {
-        // Before appending, seek to the end of the file to allow
-        // at() to return the correct position before ::write()
-        //  has been called.
-        if (flags & QFile::Append)
-            QT_LSEEK(d->fd, 0, SEEK_END);
-
-        d->closeFileHandle = true;
-        d->sequential = 0;
-        struct stat st;
-        ::fstat(d->fd, &st);
-        if ((st.st_mode & S_IFMT) != S_IFREG)
-            d->sequential = 1;
-        return true;
-    }
-    setError(errno == EMFILE ? QFile::ResourceError : QFile::OpenError, qt_error_string(errno));
-    return false;
-
-#ifdef Q_OS_WIN
-    }
-#endif
+    return d->nativeOpen(openMode);
 }
 
 /*!
-    Opens the file descriptor \a fd to the file engine, using the open mode \a
-    flags.
+    Opens the file handle \a fh in \a openMode mode. Returns true on
+    success; otherwise returns false.
 */
-bool QFSFileEngine::open(QIODevice::OpenMode flags, int fd)
+bool QFSFileEngine::open(QIODevice::OpenMode openMode, FILE *fh)
 {
     Q_D(QFSFileEngine);
+
+    // Append implies WriteOnly.
+    if (openMode & QFile::Append)
+        openMode |= QFile::WriteOnly;
+
+    // WriteOnly implies Truncate if neither ReadOnly nor Append are sent.
+    if ((openMode & QFile::WriteOnly) && !(openMode & (QFile::ReadOnly | QFile::Append)))
+        openMode |= QFile::Truncate;
+
+    d->openMode = openMode;
     d->lastFlushFailed = false;
-
     d->closeFileHandle = false;
-#ifdef Q_OS_UNIX
-    d->fh = fdopen(fd, openModeToFopenMode(flags).constData());
-    if (!d->fh) {
-        setError(errno == EMFILE ? QFile::ResourceError : QFile::OpenError,
-                 qt_error_string(int(errno)));
-        return false;
-    }
+    d->nativeFilePath.clear();
+    d->filePath.clear();
+    d->tried_stat = 0;
+    d->fd = -1;
 
-    if ((flags & QIODevice::WriteOnly) == 0)
-        d->is_readonly = 1;
-
-    if (flags & QIODevice::Unbuffered)
-        setvbuf(d->fh, 0, _IONBF, 0);
-
-    if (flags & QIODevice::Append) {
-        int ret;
-        do {
-            ret = QT_FSEEK(d->fh, 0, SEEK_END);
-        } while (ret == -1 && errno == EINTR);
-    }
-
-    d->fd = QT_FILENO(d->fh);
-
-    QT_STATBUF st;
-    if (QT_FSTAT(QT_FILENO(d->fh), &st) != 0)
-        return false;
-    d->sequential = S_ISCHR(st.st_mode) || S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode);
-    return true;
-#else
-    Q_UNUSED(flags);
-    d->fd = fd;
-    if(d->fd != -1) {
-        d->sequential = 0;
-        struct stat st;
-        ::fstat(d->fd, &st);
-        if ((st.st_mode & QT_STAT_MASK) != QT_STAT_REG || !fd) //stdin is non seekable
-            d->sequential = 1;
-        return true;
-    }
-    return false;
-#endif
+    return d->openFh(openMode, fh);
 }
 
 /*!
     Opens the file handle \a fh using the open mode \a flags.
 */
-bool QFSFileEngine::open(QIODevice::OpenMode flags, FILE *fh)
+bool QFSFileEnginePrivate::openFh(QIODevice::OpenMode openMode, FILE *fh)
+{
+    Q_Q(QFSFileEngine);
+    this->fh = fh;
+    fd = -1;
+
+    // Seek to the end when in Append mode.
+    if (openMode & QIODevice::Append) {
+        int ret;
+        do {
+            ret = QT_FSEEK(fh, 0, SEEK_END);
+        } while (ret == -1 && errno == EINTR);
+
+        if (ret == -1) {
+            q->setError(errno == EMFILE ? QFile::ResourceError : QFile::OpenError,
+                        qt_error_string(int(errno)));
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/*!
+    Opens the file descriptor \a fd in \a openMode mode. Returns true
+    on success; otherwise returns false.
+*/
+bool QFSFileEngine::open(QIODevice::OpenMode openMode, int fd)
 {
     Q_D(QFSFileEngine);
+
+    // Append implies WriteOnly.
+    if (openMode & QFile::Append)
+        openMode |= QFile::WriteOnly;
+
+    // WriteOnly implies Truncate if neither ReadOnly nor Append are sent.
+    if ((openMode & QFile::WriteOnly) && !(openMode & (QFile::ReadOnly | QFile::Append)))
+        openMode |= QFile::Truncate;
+
     d->lastFlushFailed = false;
-
-    Q_UNUSED(flags);
-    d->fh = fh;
-    d->fd = QT_FILENO(fh);
-    QT_STATBUF st;
-    if (QT_FSTAT(QT_FILENO(fh), &st) != 0)
-        return false;
-#ifdef Q_OS_WIN32
-    HANDLE hnd = (HANDLE)_get_osfhandle(d->fd);
-    if (hnd == INVALID_HANDLE_VALUE)
-        return false;
-
-    DWORD ftype = ::GetFileType(hnd);
-    d->sequential = ftype == FILE_TYPE_CHAR || ftype == FILE_TYPE_PIPE;
-#else
-    d->sequential = S_ISCHR(st.st_mode) || S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode);
-#endif
     d->closeFileHandle = false;
-#ifdef Q_OS_UNIX
-    if ((flags & QIODevice::WriteOnly) == 0)
-        d->is_readonly = 1;
-#endif
+    d->nativeFilePath.clear();
+    d->filePath.clear();
+    d->fh = 0;
+    d->fd = -1;
+    d->tried_stat = 0;
+
+    return d->openFd(openMode, fd);
+}
+
+
+/*!
+    Opens the file descriptor \a fd to the file engine, using the open mode \a
+    flags.
+*/
+bool QFSFileEnginePrivate::openFd(QIODevice::OpenMode openMode, int fd)
+{
+    Q_Q(QFSFileEngine);
+    this->fd = fd;
+    fh = 0;
+
+    // Seek to the end when in Append mode.
+    if (openMode & QFile::Append) {
+        int ret;
+        do {
+            ret = QT_LSEEK(fd, 0, SEEK_END);
+        } while (ret == -1 && errno == EINTR);
+
+        if (ret == -1) {
+            q->setError(errno == EMFILE ? QFile::ResourceError : QFile::OpenError,
+                        qt_error_string(int(errno)));
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -355,40 +311,53 @@ bool QFSFileEngine::open(QIODevice::OpenMode flags, FILE *fh)
 bool QFSFileEngine::close()
 {
     Q_D(QFSFileEngine);
+    d->openMode = QIODevice::NotOpen;
+    return d->nativeClose();
+}
 
-    bool flushed = !d->lastFlushFailed && flush();
-
-    d->tried_stat = 0;
-    if (d->fh) {
-        bool closed = true;
-        if (d->closeFileHandle) {
-            int ret;
-            do {
-                ret = fclose(d->fh);
-            } while (ret == EOF && errno == EINTR);
-            closed = (ret == 0);
-        }
-        d->fh = 0;
-        d->fd = -1;
-        return flushed && closed;
-    }
-
-    if (d->fd == -1)
+/*!
+    \internal
+*/
+bool QFSFileEnginePrivate::closeFdFh()
+{
+    Q_Q(QFSFileEngine);
+    if (fd == -1 && !fh)
         return false;
 
-    int ret;
-    if (d->closeFileHandle) {
+    // Flush the file if it's buffered, and if the last flush didn't fail.
+    bool flushed = !fh || (!lastFlushFailed && q->flush());
+    bool closed = true;
+    tried_stat = 0;
+
+    // Close the file if we created the handle.
+    if (closeFileHandle) {
+        int ret;
         do {
-            ret = QT_CLOSE(d->fd);
+            if (fh) {
+                // Close buffered file.
+                ret = fclose(fh) != 0 ? -1 : 0;
+            } else {
+                // Close unbuffered file.
+                ret = QT_CLOSE(fd);
+            }
         } while (ret == -1 && errno == EINTR);
-    } else {
-        ret = 0;
+
+        // We must reset these guys regardless; calling close again after a
+        // failed close causes crashes on some systems.
+        fh = 0;
+        fd = -1;
+        closed = (ret == 0);
     }
-    d->fd = -1;
-    if (ret == -1) {
-        setError(QFile::UnspecifiedError, qt_error_string(errno));
+
+    // Report errors.
+    if (!flushed || !closed) {
+        if (flushed) {
+            // If not flushed, we want the flush error to fall through.
+            q->setError(QFile::UnspecifiedError, qt_error_string(errno));
+        }
         return false;
     }
+
     return true;
 }
 
@@ -398,39 +367,34 @@ bool QFSFileEngine::close()
 bool QFSFileEngine::flush()
 {
     Q_D(QFSFileEngine);
-#ifdef Q_OS_UNIX
-    if (d->is_readonly)
+    if ((d->openMode & QIODevice::WriteOnly) == 0) {
+        // Nothing in the write buffers, so flush succeeds in doing
+        // nothing.
         return true;
-#endif
+    }
+    return d->nativeFlush();
+}
 
-    d->ungetchBuffer.clear();
-    if (d->lastFlushFailed)
+/*!
+    \internal
+*/
+bool QFSFileEnginePrivate::flushFh()
+{
+    Q_Q(QFSFileEngine);
+
+    // Never try to flush again if the last flush failed. Otherwise you can
+    // get crashes on some systems (AIX).
+    if (lastFlushFailed)
         return false;
 
-    if (!d->fh) {
-        // There's no write buffer when using an fd.
-        return d->fd != -1;
-    }
+    int ret = fflush(fh);
 
-#ifdef Q_OS_WIN
-    QT_FPOS_T pos;
-    int gotPos = QT_FGETPOS(d->fh, &pos);
-#endif
-    int ret = fflush(d->fh);
-    d->lastFlushFailed = (ret != 0);
+    lastFlushFailed = (ret != 0);
+    lastIOCommand = QFSFileEnginePrivate::IOFlushCommand;
 
-#ifdef Q_OS_WIN
-    if (gotPos == 0) {
-        int ret;
-        do {
-            ret = QT_FSETPOS(d->fh, &pos);
-        } while (ret == -1 && errno == EINTR);
-    }
-#endif
-    d->lastIOCommand = QFSFileEnginePrivate::IOFlushCommand;
     if (ret != 0) {
-        setError(errno == ENOSPC ? QFile::ResourceError : QFile::WriteError,
-                 qt_error_string(errno));
+        q->setError(errno == ENOSPC ? QFile::ResourceError : QFile::WriteError,
+                    qt_error_string(errno));
         return false;
     }
     return true;
@@ -439,111 +403,196 @@ bool QFSFileEngine::flush()
 /*!
     \reimp
 */
-qint64 QFSFileEngine::read(char *data, qint64 len)
+qint64 QFSFileEngine::size() const
+{
+    Q_D(const QFSFileEngine);
+    return d->nativeSize();
+}
+
+/*!
+    \internal
+*/
+qint64 QFSFileEnginePrivate::sizeFdFh() const
+{
+    Q_Q(const QFSFileEngine);
+    // ### Fix this function, it should not stat unless the file is closed.
+    QT_STATBUF st;
+    int ret = 0;
+    const_cast<QFSFileEngine *>(q)->flush();
+    if (fh && nativeFilePath.isEmpty()) {
+        // Buffered stdlib mode.
+        // ### This should really be an ftell
+        ret = QT_FSTAT(QT_FILENO(fh), &st);
+    } else if (fd == -1) {
+        // Stateless stat.
+        ret = QT_STAT(nativeFilePath.constData(), &st);
+    } else {
+        // Unbuffered stdio mode.
+        ret = QT_FSTAT(fd, &st);
+    }
+    if (ret == -1)
+        return 0;
+    return st.st_size;
+}
+
+/*!
+    \reimp
+*/
+qint64 QFSFileEngine::pos() const
+{
+    Q_D(const QFSFileEngine);
+    return d->nativePos();
+}
+
+/*!
+    \internal
+*/
+qint64 QFSFileEnginePrivate::posFdFh() const
+{
+    if (fh)
+        return qint64(QT_FTELL(fh));
+    return QT_LSEEK(fd, 0, SEEK_CUR);
+}
+
+/*!
+    \reimp
+*/
+bool QFSFileEngine::seek(qint64 pos)
+{
+    Q_D(QFSFileEngine);
+    return d->nativeSeek(pos);
+}
+
+/*!
+    \internal
+*/
+bool QFSFileEnginePrivate::seekFdFh(qint64 pos)
+{
+    Q_Q(QFSFileEngine);
+
+    // On Windows' stdlib implementation, the results of calling fread and
+    // fwrite are undefined if not called either in sequence, or if preceded
+    // with a call to fflush().
+    if (lastIOCommand != QFSFileEnginePrivate::IOFlushCommand && !q->flush())
+        return false;
+
+    if (fh) {
+        // Buffered stdlib mode.
+        int ret;
+        do {
+            ret = QT_FSEEK(fh, QT_OFF_T(pos), SEEK_SET);
+        } while (ret == -1 && errno == EINTR);
+
+        if (ret == -1) {
+            q->setError(QFile::ReadError, qt_error_string(int(errno)));
+            return false;
+        }
+    } else {
+        // Unbuffered stdio mode.
+        if (QT_LSEEK(fd, pos, SEEK_SET) == -1) {
+            qWarning("QFile::at: Cannot set file position %lld", pos);
+            q->setError(QFile::PositionError, qt_error_string(errno));
+            return false;
+        }
+    }
+    return true;
+}
+
+/*!
+    \reimp
+*/
+int QFSFileEngine::handle() const
+{
+    Q_D(const QFSFileEngine);
+    return d->nativeHandle();
+}
+
+/*!
+    \reimp
+*/
+qint64 QFSFileEngine::read(char *data, qint64 maxlen)
 {
     Q_D(QFSFileEngine);
 
-    if (d->fh) {
-        if (d->lastIOCommand != QFSFileEnginePrivate::IOReadCommand) {
-            flush();
-            d->lastIOCommand = QFSFileEnginePrivate::IOReadCommand;
-        }
+    // On Windows' stdlib implementation, the results of calling fread and
+    // fwrite are undefined if not called either in sequence, or if preceded
+    // with a call to fflush().
+    if (d->lastIOCommand != QFSFileEnginePrivate::IOReadCommand) {
+        flush();
+        d->lastIOCommand = QFSFileEnginePrivate::IOReadCommand;
+    }
 
-        size_t readBytes = 0;
-#ifdef Q_OS_UNIX
-        if (d->sequential) {
-            int oldFlags = fcntl(fileno(d->fh), F_GETFL);
+    return d->nativeRead(data, maxlen);
+}
 
-            for (int i = 0; i < 2; ++i) {
-                // Make the underlying file descriptor non-blocking
-                int v = 1;
-                if ((oldFlags & O_NONBLOCK) == 0)
-                    fcntl(fileno(d->fh), F_SETFL, oldFlags | O_NONBLOCK, &v, sizeof(v));
+/*!
+    \internal
+*/
+qint64 QFSFileEnginePrivate::readFdFh(char *data, qint64 len)
+{
+    Q_Q(QFSFileEngine);
 
-                size_t read = 0;
-                do {
-                    read = fread(data + readBytes, 1, size_t(len - readBytes), d->fh);
-                } while (read == 0 && !feof(d->fh) && errno == EINTR);
-                if (read > 0) {
-                    readBytes += read;
-                    break;
-                } else {
-                    if (readBytes)
-                        break;
-                    readBytes = read;
-                }
+    // Buffered stdlib mode.
+    if (fh) {
+        qint64 readBytes = 0;
+        qint64 read = 0;
+        int retry = 0;
 
-                // Restore the blocking state of the underlying socket
-                if ((oldFlags & O_NONBLOCK) == 0) {
-                    int v = 1;
-                    fcntl(fileno(d->fh), F_SETFL, oldFlags, &v, sizeof(v));
-                    if (readBytes == 0) {
-                        int readByte = 0;
-                        do {
-                            readByte = fgetc(d->fh);
-                        } while (readByte == -1 && errno == EINTR);
-                        if (readByte != -1) {
-                            *data = uchar(readByte);
-                            readBytes += 1;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            }
-            if ((oldFlags & O_NONBLOCK) == 0) {
-                int v = 1;
-                fcntl(fileno(d->fh), F_SETFL, oldFlags, &v, sizeof(v));
-            }
-        } else
-#endif
+        // Read in blocks of 4k to avoid platform limitations (Windows
+        // commonly bails out if you read or write too large blocks at once).
+        qint64 bytesToRead;
         do {
-            readBytes = fread(data, 1, size_t(len), d->fh);
-        } while (readBytes == 0 && !feof(d->fh) && errno == EINTR);
-        qint64 ret = qint64(readBytes);
-        if (ret == 0) {
-            setError(QFile::ReadError, qt_error_string(int(errno)));
-            if (!feof(d->fh))
-                ret = -1;
+            if (retry == 1)
+                retry = 2;
+
+            bytesToRead = qMin<qint64>(4096, len - read);
+            do {
+                readBytes = fread(data + read, 1, size_t(bytesToRead), fh);
+            } while (readBytes == 0 && !feof(fh) && errno == EINTR);
+
+            if (readBytes > 0) {
+                read += readBytes;
+            } else if (!retry && feof(fh)) {
+                // Synchronize and try again (just once though).
+                if (++retry == 1)
+                    QT_FSEEK(fh, QT_FTELL(fh), SEEK_SET);
+            }
+        } while (retry == 1 || (readBytes == bytesToRead && read < len));
+
+        // Return the number of bytes read, or if nothing was read, return -1
+        // if an error occurred, or 0 if we detected EOF.
+        if (read == 0) {
+            q->setError(QFile::ReadError, qt_error_string(int(errno)));
+            if (!feof(fh))
+                read = -1;
         }
-        return ret;
+        return read;
     }
 
+    // Unbuffered stdio mode.
     qint64 ret = 0;
-    if (!d->ungetchBuffer.isEmpty()) {
-        qint64 l = d->ungetchBuffer.size();
-        while(ret < l) {
-            *data = d->ungetchBuffer.at(l - ret - 1);
-            data++;
-            ret++;
-        }
-        d->ungetchBuffer.resize(l - ret);
-        len -= ret;
-    }
-    if(len && ret != len) {
+    if (len) {
         int result;
         qint64 read = 0;
+
+        // Read in blocks of 4k to avoid platform limitations (Windows
+        // commonly bails out if you read or write too large blocks at once).
         do {
-            qint64 bytesToRead = len - read;
-#ifdef Q_OS_WIN
-            // Reading on Windows fails with ERROR_NO_SYSTEM_RESOURCES
-            // when the chunks are too large, so we limit the block
-            // size to 4MB.
-            const qint64 MaxBlockSize = 4 * 1024 * 1024;
-            bytesToRead = qMin(bytesToRead, MaxBlockSize);
-#endif
+            qint64 bytesToRead = qMin<qint64>(4096, len - read);
             do {
-                result = QT_READ(d->fd, data + read, int(bytesToRead));
+                result = QT_READ(fd, data + read, int(bytesToRead));
             } while (result == -1 && errno == EINTR);
             if (result > 0)
                 read += result;
         } while (result > 0 && read < len);
+
+        // Return the number of bytes read, or if nothing was read, return -1
+        // if an error occurred.
         if (read > 0) {
             ret += read;
         } else {
-            if (!ret)
-                ret = -1;
-            setError(QFile::ReadError, qt_error_string(errno));
+            ret = -1;
+            q->setError(QFile::ReadError, qt_error_string(errno));
         }
     }
     return ret;
@@ -555,25 +604,50 @@ qint64 QFSFileEngine::read(char *data, qint64 len)
 qint64 QFSFileEngine::readLine(char *data, qint64 maxlen)
 {
     Q_D(QFSFileEngine);
-    if (!d->fh)
-        return QAbstractFileEngine::readLine(data, maxlen);
 
+    // On Windows' stdlib implementation, the results of calling fread and
+    // fwrite are undefined if not called either in sequence, or if preceded
+    // with a call to fflush().
     if (d->lastIOCommand != QFSFileEnginePrivate::IOReadCommand) {
         flush();
         d->lastIOCommand = QFSFileEnginePrivate::IOReadCommand;
     }
-    if (feof(d->fh))
-        return 0;
+
+    return d->nativeReadLine(data, maxlen);
+}
+
+/*!
+    \internal
+*/
+qint64 QFSFileEnginePrivate::readLineFdFh(char *data, qint64 maxlen)
+{
+    Q_Q(QFSFileEngine);
+    if (!fh)
+        return q->QAbstractFileEngine::readLine(data, maxlen);
+
+    QT_OFF_T oldPos = 0;
+#ifdef Q_OS_WIN
+    bool seq = q->isSequential();
+    if (!seq)
+#endif
+        oldPos = QT_FTELL(fh);
 
     // QIODevice::readLine() passes maxlen - 1 to QFile::readLineData()
     // because it has made space for the '\0' at the end of data.  But fgets
     // does the same, so we'd get two '\0' at the end - passing maxlen + 1
     // solves this.
-    if (!fgets(data, int(maxlen + 1), d->fh)) {
-        setError(QFile::ReadError, qt_error_string(int(errno)));
+    if (!fgets(data, int(maxlen + 1), fh)) {
+        q->setError(QFile::ReadError, qt_error_string(int(errno)));
         return 0;
     }
-    return qstrlen(data);
+
+#ifdef Q_OS_WIN
+    if (seq)
+        return qstrlen(data);
+#endif
+
+    qint64 lineLength = QT_FTELL(fh) - oldPos;
+    return lineLength > 0 ? lineLength : qstrlen(data);
 }
 
 /*!
@@ -583,83 +657,53 @@ qint64 QFSFileEngine::write(const char *data, qint64 len)
 {
     Q_D(QFSFileEngine);
 
-    if (d->fh) {
-        if (d->lastIOCommand != QFSFileEnginePrivate::IOWriteCommand) {
-            flush();
-            d->lastIOCommand = QFSFileEnginePrivate::IOWriteCommand;
-        }
+    // On Windows' stdlib implementation, the results of calling fread and
+    // fwrite are undefined if not called either in sequence, or if preceded
+    // with a call to fflush().
+    if (d->lastIOCommand != QFSFileEnginePrivate::IOWriteCommand) {
+        flush();
+        d->lastIOCommand = QFSFileEnginePrivate::IOWriteCommand;
     }
 
+    return d->nativeWrite(data, len);
+}
+
+/*!
+    \internal
+*/
+qint64 QFSFileEnginePrivate::writeFdFh(const char *data, qint64 len)
+{
+    Q_Q(QFSFileEngine);
     qint64 result;
     qint64 written = 0;
-#ifdef Q_OS_WIN
-    qint64 posbefore;
-    if (!d->sequential) {
-        posbefore = pos();
-        if (posbefore == -1) {
-            setError(QFile::WriteError, qt_error_string(errno));
-            return qint64(-1);
-        }
-    }
-#endif
+
     do {
-        qint64 bytesToWrite = len - written;
-#ifdef Q_OS_WIN
-        // Writing on Windows fails with ERROR_NO_SYSTEM_RESOURCES
-        // when the chunks are too large, so we limit the block size
-        // to 4MB.
-        const qint64 MaxChunkSize = 4 * 1024 * 1024;
-        bytesToWrite = qMin<qint64>(bytesToWrite, MaxChunkSize);
-#endif
-        if (d->fh) {
+        // Write blocks of 4k to avoid platform limitations (Windows commonly
+        // bails out if you read or write too large blocks at once).
+        qint64 bytesToWrite = qMin<qint64>(4096, len - written);
+        if (fh) {
             do {
-                result = qint64(fwrite(data + written, 1, size_t(bytesToWrite), d->fh));
+                // Buffered stdlib mode.
+                result = qint64(fwrite(data + written, 1, size_t(bytesToWrite), fh));
             } while (result == 0 && errno == EINTR);
             if (bytesToWrite > 0 && result == 0)
                 result = -1;
         } else {
             do {
-                result = QT_WRITE(d->fd, data + written, bytesToWrite);
+                // Unbuffered stdio mode.
+                result = QT_WRITE(fd, data + written, bytesToWrite);
             } while (result == -1 && errno == EINTR);
         }
         if (result > 0)
             written += qint64(result);
-    } while (written < len && ((result > 0 || (result == 0 && errno == EINTR))));
+    } while (written < len && result > 0);
 
-#ifdef Q_OS_WIN
-    if (!d->sequential) {
-        qint64 currentpos = pos();
-        if (currentpos == -1) {
-            result = -1;
-        } else {
-            written = currentpos - posbefore;
-        }
-    }
-#endif
+    // If we read anything, return that with success. Otherwise, set an error,
+    // and return the last return value.
     if (result > 0)
         return written;
-    setError(errno == ENOSPC ? QFile::ResourceError : QFile::WriteError, qt_error_string(errno));
-    return qint64(result);
-}
-
-/*!
-    \reimp
-*/
-qint64 QFSFileEngine::pos() const
-{
-    Q_D(const QFSFileEngine);
-    if (d->fh)
-        return qint64(QT_FTELL(d->fh));
-    return QT_LSEEK(d->fd, 0, SEEK_CUR);
-}
-
-/*!
-    \reimp
-*/
-int QFSFileEngine::handle() const
-{
-    Q_D(const QFSFileEngine);
-    return d->fd;
+    q->setError(errno == ENOSPC ? QFile::ResourceError : QFile::WriteError, qt_error_string(errno));
+    return result;
 }
 
 /*!
@@ -667,9 +711,7 @@ int QFSFileEngine::handle() const
 */
 QAbstractFileEngine::Iterator *QFSFileEngine::beginEntryList(QDir::Filters filters, const QStringList &filterNames)
 {
-    Q_UNUSED(filters);
-    Q_UNUSED(filterNames);
-    return 0;
+    return new QFSFileEngineIterator(filters, filterNames);
 }
 
 /*!
@@ -681,33 +723,11 @@ QAbstractFileEngine::Iterator *QFSFileEngine::endEntryList()
 }
 
 /*!
-    \reimp
+    \internal
 */
-bool QFSFileEngine::seek(qint64 pos)
+QStringList QFSFileEngine::entryList(QDir::Filters filters, const QStringList &filterNames) const
 {
-    Q_D(QFSFileEngine);
-    if (d->lastIOCommand != QFSFileEnginePrivate::IOFlushCommand && !flush())
-        return false;
-
-    if (d->fh) {
-        int ret;
-        do {
-            ret = QT_FSEEK(d->fh, QT_OFF_T(pos), SEEK_SET);
-        } while (ret == -1 && errno == EINTR);
-        if (ret == -1) {
-            setError(QFile::ReadError, qt_error_string(int(errno)));
-            return false;
-        }
-        return true;
-    }
-
-    if(QT_LSEEK(d->fd, pos, SEEK_SET) == -1) {
-        qWarning("QFile::at: Cannot set file position %lld", pos);
-        setError(QFile::PositionError, qt_error_string(errno));
-        return false;
-    }
-    d->ungetchBuffer.clear();
-    return true;
+    return QAbstractFileEngine::entryList(filters, filterNames);
 }
 
 /*!
@@ -716,7 +736,25 @@ bool QFSFileEngine::seek(qint64 pos)
 bool QFSFileEngine::isSequential() const
 {
     Q_D(const QFSFileEngine);
-    return d->sequential;
+    if (d->is_sequential == 0)
+        d->is_sequential = d->nativeIsSequential() ? 1 : 2;
+    return d->is_sequential == 1;
+}
+
+/*!
+    \internal
+*/
+bool QFSFileEnginePrivate::isSequentialFdFh() const
+{
+    if (!tried_stat)
+        doStat();
+    if (could_stat) {
+#ifdef Q_OS_UNIX
+        return (st.st_mode & S_IFMT) != S_IFREG;
+        // ### WINDOWS!
+#endif
+    }
+    return true;
 }
 
 /*!
@@ -724,7 +762,10 @@ bool QFSFileEngine::isSequential() const
 */
 bool QFSFileEngine::extension(Extension extension, const ExtensionOption *option, ExtensionReturn *output)
 {
-    Q_UNUSED(extension);
+    Q_D(QFSFileEngine);
+    if (extension == AtEndExtension && d->fh && isSequential())
+        return feof(d->fh);
+
     Q_UNUSED(option);
     Q_UNUSED(output);
     return false;
@@ -735,6 +776,12 @@ bool QFSFileEngine::extension(Extension extension, const ExtensionOption *option
 */
 bool QFSFileEngine::supportsExtension(Extension extension) const
 {
-    Q_UNUSED(extension);
+    Q_D(const QFSFileEngine);
+    if (extension == AtEndExtension && d->fh && isSequential())
+        return true;
+    if (extension == FastReadLineExtension && d->fh)
+        return true;
+    if (extension == FastReadLineExtension && d->fd != -1 && isSequential())
+        return true;
     return false;
 }

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,20 +20,21 @@
 ****************************************************************************/
 
 #include "todotable.h"
-#include "taskdelegate.h"
+#include "qtaskview.h"
 #include <QItemSelectionModel>
-#include <QDebug>
 #include <QKeyEvent>
+#include <QPainter>
 #include "qsoftmenubar.h"
 
 TodoTable::TodoTable(QWidget *parent)
     : QListView(parent)
 {
-    TaskDelegate* delegate = new TaskDelegate(this);
-    setItemDelegate(delegate);
+    setFrameStyle(QFrame::NoFrame);
+    setItemDelegate(new QTaskDelegate(this));
     setLayoutMode(Batched);
     setBatchSize(10);
-    connect(this, SIGNAL(activated(const QModelIndex&)), this, SLOT(showTask(const QModelIndex&)));
+    setUniformItemSizes(true);
+    connect(this, SIGNAL(activated(QModelIndex)), this, SLOT(showTask(QModelIndex)));
 }
 
 TodoTable::~TodoTable() {}
@@ -119,6 +120,23 @@ QList<QUniqueId> TodoTable::selectedTaskIds() const
             res.append(id);
     }
     return res;
+}
+
+void TodoTable::paintEvent(QPaintEvent *pe)
+{
+    QListView::paintEvent(pe);
+    QTaskModel *tm = taskModel();
+    if (tm->rowCount() == 0) {
+        QWidget *vp = viewport();
+        QPainter p(vp);
+        if (tm->categoryFilter().acceptAll()) {
+            p.drawText(0, 0, vp->width(), vp->height(), Qt::AlignCenter,
+                   tr("No tasks"));
+        } else {
+            p.drawText(0, 0, vp->width(), vp->height(), Qt::AlignCenter,
+                   tr("No matching tasks"));
+        }
+    }
 }
 
 void TodoTable::keyPressEvent(QKeyEvent *e)

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,21 +30,11 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QVBoxLayout>
-#include <QDebug>
 
 ContactSourceDialog::ContactSourceDialog(QWidget *parent)
-    : QDialog(parent), contactModel(0)
+    : QPimSourceDialog(parent), contactModel(0)
 {
     setWindowTitle(tr("Show Contacts From", "e.g. Show Contacts From Phone/SIM Card"));
-
-    view = new QListView;
-    view->setSelectionMode(QAbstractItemView::SingleSelection);
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(view);
-    setLayout(layout);
-
-    model = new QPimSourceModel(this);
-    view->setModel(model);
 
     QMenu* contextMenu = QSoftMenuBar::menuFor(this);
     QAction *actionCopyFromSim = new QAction(QIcon(":icon/sync"), tr("Import from SIM"), this);
@@ -65,29 +55,27 @@ ContactSourceDialog::~ContactSourceDialog()
 {
 }
 
-void ContactSourceDialog::setContactModel(QContactModel *m)
+void ContactSourceDialog::setPimModel(QPimModel *m)
 {
-    contactModel = m;
-    model->setContexts(contactModel->contexts());
-    model->setCheckedSources(contactModel->visibleSources());
+    contactModel = qobject_cast<QContactModel*>(m);
+    Q_ASSERT(contactModel);
+    QPimSourceDialog::setPimModel(m);
 }
 
 void ContactSourceDialog::importActiveSim()
 {
-    contactModel->mirrorAll(contactModel->simSource(), contactModel->phoneSource());
+    if(contactModel)
+        contactModel->mirrorAll(contactModel->simSource(), contactModel->defaultSource());
 }
 
 void ContactSourceDialog::exportActiveSim()
 {
-    if (!contactModel->mirrorAll(contactModel->phoneSource(), contactModel->simSource())) {
-        QMessageBox::warning(this, tr("Contacts"),
+    if (contactModel) {
+        if (!contactModel->mirrorAll(contactModel->defaultSource(), contactModel->simSource())) {
+            QMessageBox::warning(this, tr("Contacts"),
                 tr("<qt>Could not export contacts to SIM Card.  Please ensure sufficient"
                     " space is available on SIM Card.</qt>"));
+        }
     }
 }
 
-void ContactSourceDialog::accept()
-{
-    contactModel->setVisibleSources(model->checkedSources());
-    QDialog::accept();
-}

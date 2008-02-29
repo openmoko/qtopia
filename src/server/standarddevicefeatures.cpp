@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,41 +22,19 @@
 #include "standarddevicefeatures.h"
 #include "qtopiaserverapplication.h"
 #include "phone/cameramonitor.h"
+#include "qtopiainputevents.h"
 
 #include <qvaluespace.h>
 
-#include <qwindowsystem_qws.h>
 #include <QDebug>
 #include <QtopiaFeatures>
-#include <QBatteryAccessory>
 #include <QPowerStatus>
+#include <QtopiaTimer>
 
-static bool batteryMonitor = true;
 static bool cameraMonitor = true;
 static bool clamFlipKeyMonitor = true;
 static bool uiTimeValues = true;
 static bool inputFeatures = true;
-
-class BatteryMonitorPrivate;
-class BatteryMonitor : public QObject
-{
-    Q_OBJECT
-
-public:
-    BatteryMonitor(QObject *p);
-    virtual ~BatteryMonitor();
-
-    int value() const;
-    bool charging() const;
-
-signals:
-    void valueChanged(int);
-    void chargingChanged(bool);
-
-private:
-    BatteryMonitorPrivate *d;
-    Q_DISABLE_COPY(BatteryMonitor);
-};
 
 class TimeControl : public QObject
 {
@@ -64,29 +42,22 @@ Q_OBJECT
 public:
     TimeControl(QObject *parent = 0);
 
-    void setSlowUpdate(bool);
-
-protected:
-    virtual void timerEvent(QTimerEvent *);
-
 private slots:
     void doTimeTick();
     void dateFormatChanged();
     void clockChanged(bool);
 
 private:
+    QtopiaTimer *m_timer;
     QValueSpaceObject timeValueSpace;
-    bool m_slowUpdates;
-    int m_timeId;
 };
 
-class StandardDeviceFeaturesImpl : public QObject, public QWSServer::KeyboardFilter
+class StandardDeviceFeaturesImpl : public QObject, public QtopiaKeyboardFilter
 {
     Q_OBJECT
 public:
     StandardDeviceFeaturesImpl(QObject *parent=0);
 
-    void disableBatteryMonitor();
     void disableCameraMonitor();
     void disableClamshellMonitor();
     void disableUITimeValues();
@@ -95,11 +66,7 @@ public:
     bool filter(int unicode, int keycode, int modifiers, bool press,
                 bool autoRepeat);
 
-private slots:
-    void backlightChanged();
-
 private:
-    BatteryMonitor *battery;
     CameraMonitor *camera;
     QValueSpaceItem *backlightVsi;
     QValueSpaceObject *clamshellVso;
@@ -110,14 +77,9 @@ private:
 static StandardDeviceFeaturesImpl *sdfi = 0;
 
 StandardDeviceFeaturesImpl::StandardDeviceFeaturesImpl(QObject *parent)
-: QObject(parent), battery(0), camera(0), clamshellVso(0), time(0), clamOpen(true)
+: QObject(parent), camera(0), clamshellVso(0), time(0), clamOpen(true)
 {
     sdfi = this;
-
-    if (batteryMonitor) {
-        // BatteryMonitor keeps the value space updated correctly
-        battery = new BatteryMonitor(this);
-    }
 
     if (cameraMonitor) {
         // CameraMonitor keeps the camera QtopiaFeatures upto date
@@ -125,13 +87,10 @@ StandardDeviceFeaturesImpl::StandardDeviceFeaturesImpl(QObject *parent)
     }
 
     if (clamFlipKeyMonitor) {
-        qwsServer->addKeyboardFilter(this);
+        QtopiaInputEvents::addKeyboardFilter(this);
         clamshellVso = new QValueSpaceObject("/Hardware/Devices");
         clamshellVso->setAttribute("ClamshellOpen", clamOpen);
     }
-
-    backlightVsi = new QValueSpaceItem("/Hardware/Display/0", this);
-    connect(backlightVsi, SIGNAL(contentsChanged()), this, SLOT(backlightChanged()));
 
     if(uiTimeValues)
         time = new TimeControl(this);
@@ -162,12 +121,6 @@ void StandardDeviceFeaturesImpl::disableUITimeValues()
     time = 0;
 }
 
-void StandardDeviceFeaturesImpl::disableBatteryMonitor()
-{
-    delete battery;
-    battery = 0;
-}
-
 
 void StandardDeviceFeaturesImpl::disableCameraMonitor()
 {
@@ -179,10 +132,6 @@ void StandardDeviceFeaturesImpl::disableClamshellMonitor()
 {
     delete clamshellVso;
     clamshellVso = 0;
-}
-
-void StandardDeviceFeaturesImpl::backlightChanged()
-{
 }
 
 bool StandardDeviceFeaturesImpl::filter(int unicode, int keycode,
@@ -222,27 +171,6 @@ QTOPIA_TASK(StandardDeviceFeatures, StandardDeviceFeaturesImpl);
   device it monitors, as well as the expected result when the device state
   changes.  The intent is to make the task of replicating each very simple.
  */
-
-/*!
-  The battery monitor is responsible for maintaining the battery state in the
-  value space.  The values that must be maintained are:
-
-  \list
-  \i /Accessories/Battery/Charging - true if the battery is being charged.
-  \i /Accessories/Battery/Charge - the percentage of charge remaining (0-100).
-  \i /Accessories/Battery/VisualCharge - the percentage to display in the
-     user interface.  This may not reflect the true percentage exactly, e.g.
-     a charging state is often indicated by progressively increasing the
-     value.
-  \endlist
-
-  Invoking this method will disable the default battery monitoring.
- */
-void StandardDeviceFeatures::disableBatteryMonitor()
-{
-    batteryMonitor = false;
-    if (sdfi) sdfi->disableBatteryMonitor();
-}
 
 /*!
   The camera monitor detects when camera are available on the device and
@@ -332,43 +260,15 @@ void StandardDeviceFeatures::disableInputFeatures()
     inputFeatures = false;
 }
 
-void TimeControl::setSlowUpdate(bool updates)
-{
-    m_slowUpdates = updates;
-    if (m_timeId)
-        killTimer(m_timeId);
-    m_timeId = startTimer( 5000 );
-}
-
-void TimeControl::timerEvent(QTimerEvent *)
-{
-    doTimeTick();
-}
-
 void TimeControl::doTimeTick()
 {
-    static bool sameMinute = false;
-    QTime now = QDateTime::currentDateTime().time();
-    if ( m_slowUpdates) {
-        if ( sameMinute ){ // update time shortly after minute changes
-            if ( m_timeId )
-                killTimer( m_timeId );
-            m_timeId = startTimer( 60000 );
-            sameMinute = false;
-        }
-        else {
-            int tdelta = 60 - now.second();
-            if ( tdelta < 55) {
-                if ( m_timeId )
-                    killTimer( m_timeId );
-                m_timeId = startTimer( (tdelta+1)*1000 );
-                sameMinute = true;
-            }
-        }
-    }
-
     clockChanged(QTimeString::currentAMPM());
     dateFormatChanged();
+
+    m_timer->stop();
+    QTime time = QTime::currentTime();
+    m_timer->start((60 - time.second()) * 1000 + 500, 
+                   QtopiaTimer::PauseWhenInactive);
 }
 
 void TimeControl::dateFormatChanged()
@@ -386,148 +286,14 @@ void TimeControl::clockChanged(bool)
 }
 
 TimeControl::TimeControl(QObject *parent)
-: QObject(parent), timeValueSpace("/UI/DisplayTime"), m_slowUpdates(false),
-  m_timeId(0)
+: QObject(parent), m_timer(0), timeValueSpace("/UI/DisplayTime")
 {
-    setSlowUpdate( true );
-    timerEvent(0);
+    m_timer = new QtopiaTimer(this);
+    QObject::connect(m_timer, SIGNAL(timeout()), this, SLOT(doTimeTick()));
+    doTimeTick();
     QObject::connect(qApp, SIGNAL(timeChanged()), this, SLOT(doTimeTick()));
     QObject::connect(qApp, SIGNAL(dateFormatChanged()), this, SLOT(dateFormatChanged()));
     QObject::connect(qApp, SIGNAL(clockChanged(bool)), this, SLOT(clockChanged(bool)));
 }
 
-//#define QTOPIA_ATCBC_BATTERY
-
-// declare BatteryMonitorPrivate
-class BatteryMonitorPrivate : public QObject
-{
-Q_OBJECT
-public:
-    BatteryMonitorPrivate(QObject *parent);
-    //void setUpdateTimer(int duration);
-
-signals:
-    void valueChanged(int);
-    void chargingChanged(bool);
-
-private slots:
-#ifdef QTOPIA_ATCBC_BATTERY
-    void queryResult( QPhoneLine::QueryType type, const QString& value );
-#endif
-    void chargeModified();
-    void chargingModified();
-
-private:
-    int chargeId;
-    int updateId;
-    bool initialUpdate;
-    int duration;
-
-    QBatteryAccessory* battery;
-#ifdef QTOPIA_ATCBC_BATTERY
-    QPhoneLine *line;
-#endif
-    QPowerStatus ps;
-
-    QValueSpaceObject vso;
-
-public:
-    bool charging;
-    int actualPercent;
-    int percent;
-};
-
-// define BatteryMonitorPrivate
-BatteryMonitorPrivate::BatteryMonitorPrivate(QObject *p)
-: QObject(p), chargeId(0), initialUpdate(true),
-  duration(10000), vso("/Accessories/Battery"),
-  charging(true), actualPercent(-1), percent(-1)
-{
-    battery = new QBatteryAccessory("modem", this );
-    connect( battery, SIGNAL(chargeModified()), this, SLOT(chargeModified()) );
-    connect( battery, SIGNAL(chargingModified()), this, SLOT(chargingModified()) );
-
-    vso.setAttribute("Charging", charging);
-    vso.setAttribute("Charge", actualPercent);
-    vso.setAttribute("VisualCharge", actualPercent);
-
-    chargeModified();
-    chargingModified();
-}
-
-void BatteryMonitorPrivate::chargeModified()
-{
-    if(battery->charge() != actualPercent) {
-        actualPercent = battery->charge();
-        vso.setAttribute("Charge", actualPercent);
-        vso.setAttribute("VisualCharge", actualPercent);
-        emit valueChanged(actualPercent);
-    }
-}
-
-void BatteryMonitorPrivate::chargingModified()
-{
-    if ( battery->charging() != charging ) {
-        charging = battery->charging();
-        vso.setAttribute("Charging", charging);
-        emit chargingChanged(charging);
-    }
-}
-
-// define BatteryMonitor
-
-/*
-  \class BatteryMonitor
-  \brief The BatteryMonitor class updates the value space with the current
-         battery value.
-
-  In addition to the signals and slots, this class also exports the following
-  value space items:
-
-  \table
-  \header
-    \o ValueSpace item
-    \o Value
-  \row
-    \o \c {/Accessories/Battery/Charge}
-    \o BatteryMonitor::value()
-  \row
-    \o \c {/Accessories/Battery/Charging}
-    \o BatteryMonitor::charging()
-  \endtable
-
- */
-BatteryMonitor::BatteryMonitor(QObject *p)
-: QObject(p)
-{
-    d = new BatteryMonitorPrivate(this);
-    QObject::connect(d, SIGNAL(valueChanged(int)),
-                     this, SIGNAL(valueChanged(int)));
-    QObject::connect(d, SIGNAL(chargingChanged(bool)),
-                     this, SIGNAL(chargingChanged(bool)));
-}
-
-BatteryMonitor::~BatteryMonitor()
-{
-}
-
-/*!
-  Default \a duration is 10000 milliseconds.
- */
-/*void BatteryMonitor::setUpdateTimer(int duration)
-{
-    Q_ASSERT(duration > 0);
-    d->setUpdateTimer(duration);
-}*/
-
-
-int BatteryMonitor::value() const
-{
-    return d->actualPercent;
-}
-
-bool BatteryMonitor::charging() const
-{
-    return d->charging;
-}
 #include "standarddevicefeatures.moc"

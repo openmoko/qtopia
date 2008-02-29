@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -60,7 +60,7 @@ public:
 
     uint refocusDelay() const;
     int minimumFramePeriod() const;
-
+    
 private:
 
     void setupCamera();
@@ -68,6 +68,8 @@ private:
     void calcPhotoSizes();
     void beginCapture();
     void endCapture();
+
+    bool enumerateFormats();
 
     int                 m_fd;
     int                 m_imageBufferLength;
@@ -77,6 +79,9 @@ private:
     QImage              *m_currentImage;
     QMap<QSize, unsigned int>   m_imageTypes;
     FormatConverter     *m_converter;
+    QList<v4l2_fmtdesc> m_supportedFormats;
+
+
 };
 
 }   // ns camera

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,6 +29,8 @@ class ReceivedFilesModel;
 class QModelIndex;
 class ReceivedFile;
 class QTableView;
+class QCloseEvent;
+class RunningApplicationsViewItem;
 
 class ReceiveWindow : public QMainWindow
 {
@@ -39,21 +41,26 @@ public:
     ~ReceiveWindow();
 
 public slots:
-    void receiveInitiated(int id, const QString &filename, const QString &mime);
+    void receiveInitiated(int id, const QString &filename, const QString &mime, const QString &description);
     void sendInitiated(int id, const QString &filename, const QString &mime);
     void progress(int id, qint64 bytes, qint64 total);
     void completed(int id, bool error);
 
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private slots:
-    void fileSelected(const QModelIndex &index);
+    void showWindow();
+    void saveFile(int index);
 
 private:
-    void handleSupportedFormatRecv(int id, const QString &filename, const QString &mime);
+    void handleSupportedFormatRecv(int id, const QString &filename, const QString &mime, const QString &description);
     bool handleSupportedFormatComplete(int id, bool error);
 
     QTableView *m_files;
     ReceivedFilesModel *m_model;
     QList<ReceivedFile> m_list;
+    RunningApplicationsViewItem *m_runningAppsItem;
 };
 
 #endif

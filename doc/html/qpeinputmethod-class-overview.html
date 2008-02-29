@@ -28,26 +28,27 @@
 <li>The Input Method Manager - <a href="inputmethods.html">InputMethods</a></li>
 </ol>
 <p>Every input method plugin must implement the <a href="qtopiainputmethod.html">QtopiaInputMethod</a> interface. This is the minimum set of behaviours for any Qtopia input method, providing information to the system about the input method and some basic channels of communication with the system (like menu items).</p>
-<p>Many input methods will need some of the more advanced behaviours available through <a href="qwsinputmethod.html">QWSInputMethod</a>. This class is used for filtering and modifying keyEvents and mouseEvents, and also provides preedit string related behaviours for in-place input methods.</p>
+<p>Most input methods will need some of the more advanced behaviours available through <a href="qwsinputmethod.html">QWSInputMethod</a>. This class is used for filtering and modifying keyEvents and mouseEvents, and also provides preedit string related behaviours for in-place input methods.</p>
 <a name="qwsinputmethod"></a>
 <h3>QWSInputMethod</h3>
-<p>This is the Qtopia Core class for input methods. It provides the API required for</p>
+<p>This is the Qtopia Core class for input methods. It provides the API required for many input-related things, including a very high priority event filter and functions to create input method events, as well as key and mouse events should they be required.</p>
+<p>For a detailed description, see <a href="qwsinputmethod.html">QWSInputMethod</a></p>
 <a name="qtopiainputmethod"></a>
 <h3>QtopiaInputMethod</h3>
 <p>This is the starting point for any input method for Qtopia. Derive from this class, and implement all the pure virtual functions and the input method is ready to be made and installed.</p>
-<p><a href="qtopiainputmethod.html">QtopiaInputMethod</a> simplifies the process of building a plugin for Qtopia down to a simple. It defines several core comunicative functions that</p>
+<p><a href="qtopiainputmethod.html">QtopiaInputMethod</a> simplifies the process of building a plugin for Qtopia down to implementing a simple interface. It defines several core comunicative functions used by the Qtopia server to determine behaviour and appearance, and allows the resulting binary to be installed by simply dropping it into the image/plugins/inputmethods directory, where qtopia will find and load it at run time, and add it to the input method menu.</p>
 <p>For a detailed description, see <a href="qtopiainputmethod.html">QtopiaInputMethod</a></p>
 <a name="server-side"></a>
 <h3>Server-side</h3>
 <p>Input method developers should not need to modify these classes, but it may help to appreciate how they work.</p>
 <p>The Input Method Manager is comprised of several parts, but primarily turns input methods on and off appropriately. It also coordinates multiple input methods. <a href="inputmethods.html">InputMethods</a> is the primary class on the server side. It handles loading of plugins, and showing/hiding and activation/deactivation of the current input method.</p>
-<p>The <a href="inputmethodselector.html">InputMethodSelector</a> encompasses most of the functionality that is visible to the user. It is the actual widget that is made visible to the user as a pop-up menu, allowing selection between installed input methods. It also responsible for resizing the desktop for docked input methods, and handling the current input methods soft-key menu items.</p>
-<p><a href="inputmethodservice.html">InputMethodService</a> simply receives IPC messages and relays them to the <a href="inputmethods.html">InputMethods</a> object, it does no processing itself.</p>
+<p>The <a href="inputmethodselector.html">InputMethodSelector</a> encompasses most of the functionality that is visible to the user. It is the actual widget that is made visible to the user as a pop-up menu, allowing selection between installed input methods. It is also responsible for docking widgets on behalf of input methods (causing the space available for applications to be reduced), and handling the current input methods soft-key menu items.</p>
+<p><a href="inputmethodservice.html">InputMethodService</a> receives and interprets IPC messages and relays them to the <a href="inputmethods.html">InputMethods</a> object, it does no processing itself.</p>
 <p>For more detailed information on these specific classes, see <a href="inputmethodservice.html">InputMethodService</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

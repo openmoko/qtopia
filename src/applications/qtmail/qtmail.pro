@@ -2,156 +2,95 @@ qtopia_project(qtopia app)
 TARGET=qtmail
 CONFIG+=qtopia_main
 
-phone:contains(PROJECTS,libraries/qtopiasmil):CONFIG+=enable_mms
-PHONE_FORMS_MMS = mmseditaccountbase.ui
-PHONE_FORMS = editaccountbasephone.ui searchviewbasephone.ui
+enable_modem:contains(PROJECTS,libraries/qtopiasmil):CONFIG+=enable_mms
+else:DEFINES+=QTOPIA_NO_SMS QTOPIA_NO_MMS
 
-phoneoff=0
-!enable_modem:phoneoff=1
-free_package:!free_plus_binaries:phoneoff=1
-equals(phoneoff,1) {
-    CONFIG-=enable_mms
-    DEFINES+=QTOPIA_NO_SMS
-}
+FORMS_MMS = mmseditaccountbase.ui
+FORMS = editaccountbasephone.ui searchviewbasephone.ui
 
-enable_mms:PHONE_FORMS += $$PHONE_FORMS_MMS
-PDA_FORMS   = editaccountbase.ui searchviewbase.ui writemailbase.ui
-
-phone {
-    FORMS += $$PHONE_FORMS
-} else {
-    FORMS += $$PDA_FORMS
-}
+enable_mms:FORMS += $$FORMS_MMS
 
 HEADERS+=\
+    account.h\
+    accountlist.h\
+    accountsettings.h\
+    actionlistview.h\
+    addresslist.h\
+    client.h\
+    detailspage.h\
+    editaccount.h\
     emailclient.h\
+    emailfolderlist.h\
     emailhandler.h\
     emaillistitem.h\
-    emailfolderlist.h\
-    popclient.h\
-    readmail.h\
-    smtpclient.h\
-    writemail.h\
-    viewatt.h\
-    addatt.h\
-    editaccount.h\
-    maillist.h\
-    searchview.h\
-    search.h\
-    maillistview.h\
-    email.h\
-    account.h\
-    imapclient.h\
+    emailpropertysetter.h\
     folder.h\
     folderlistview.h\
-    accountlist.h\
+    imapclient.h\
     imapprotocol.h\
+    maillist.h\
+    maillistview.h\
+    mailtransport.h\
+    popclient.h\
     qtmailwindow.h\
-    common.h\
-    client.h\
-    qtmailgui.h
+    readmail.h\
+    search.h\
+    searchview.h\
+    selectfolder.h\
+    smsclient.h\
+    smsdecoder.h\
+    smtpclient.h\
+    viewatt.h\
+    writemail.h
 
 SOURCES+=\
+    account.cpp\
+    accountlist.cpp\
+    accountsettings.cpp\
+    actionlistview.cpp\
+    addresslist.cpp\
+    client.cpp\
+    detailspage.cpp\
+    editaccount.cpp\
     emailclient.cpp\
+    emailfolderlist.cpp\
     emailhandler.cpp\
     emaillistitem.cpp\
-    emailfolderlist.cpp\
-    popclient.cpp\
-    readmail.cpp\
-    smtpclient.cpp\
-    writemail.cpp\
-    viewatt.cpp\
-    addatt.cpp\
-    editaccount.cpp\
-    maillist.cpp\
-    searchview.cpp\
-    search.cpp\
-    maillistview.cpp\
-    email.cpp\
-    account.cpp\
-    imapclient.cpp\
+    emailpropertysetter.cpp\
     folder.cpp\
     folderlistview.cpp\
-    accountlist.cpp\
+    imapclient.cpp\
     imapprotocol.cpp\
+    maillist.cpp\
+    maillistview.cpp\
+    mailtransport.cpp\
+    main.cpp\
+    popclient.cpp\
     qtmailwindow.cpp\
-    common.cpp\
-    client.cpp\
-    qtmailgui.cpp\
-    main.cpp
-
-PHONE_SOURCES=\
+    readmail.cpp\
+    search.cpp\
+    searchview.cpp\
+    selectfolder.cpp\
     smsclient.cpp\
-    audiosource.cpp\
     smsdecoder.cpp\
-    accountsettings.cpp\
-    genericcomposer.cpp\
-    detailspage.cpp\
-    composer.cpp\
-    emailcomposer.cpp\
-    templatetext.cpp\
-    selectfolder.cpp
+    smtpclient.cpp\
+    viewatt.cpp\
+    writemail.cpp
 
 MMS_SOURCES=\
     mmsclient.cpp\
     mmscomms.cpp\
-    mmscomposer.cpp\
     mmseditaccount.cpp\
     mmsmessage.cpp
-                    
-PHONE_HEADERS=\
-    smsclient.h\
-    audiosource.h\
-    smsdecoder.h\
-    accountsettings.h\
-    addattdialogphone.h\
-    genericcomposer.h\
-    detailspage.h\
-    composer.h\
-    emailcomposer.h\
-    templatetext.h\
-    selectfolder.h
 
 MMS_HEADERS=\
     mmsclient.h\
     mmscomms.h\
-    mmscomposer.h\
     mmseditaccount.h\
     mmsmessage.h
 
-enable_mms:PHONE_HEADERS+=$$MMS_HEADERS
-enable_mms:PHONE_SOURCES+=$$MMS_SOURCES
-
-!enable_singleexec {
-    PHONE_HEADERS+=\
-        ../addressbook/imagesourcedialog.h \
-        ../mediarecorder/audioparameters.h
-    PHONE_SOURCES+=\
-        ../addressbook/imagesourcedialog.cpp \
-        ../mediarecorder/audioparameters.cpp
-}
-enable_singleexec:!contains(PROJECTS,applications/addressbook) {
-    PHONE_HEADERS+=\
-        ../addressbook/imagesourcedialog.h \
-        ../mediarecorder/audioparameters.h
-    PHONE_SOURCES+=\
-        ../addressbook/imagesourcedialog.cpp \
-        ../mediarecorder/audioparameters.cpp
-}
-
-PDA_SOURCES=\
-    pdacomposer.cpp
-PDA_HEADERS=\
-    addattdialogpda.h\
-    pdacomposer.h
-
-phone {
-    SOURCES+=$$PHONE_SOURCES
-    HEADERS+=$$PHONE_HEADERS
-} else {
-    SOURCES+=$$PDA_SOURCES
-    HEADERS+=$$PDA_HEADERS
-}
+enable_mms:HEADERS+=$$MMS_HEADERS
+enable_mms:SOURCES+=$$MMS_SOURCES
 
 enable_mms {
 # To enable HTTP MMS comms:
@@ -163,53 +102,47 @@ enable_mms {
     DEFINES+=MMSCOMMS_HTTP
 }
 
-TRANSLATABLES +=    $$PHONE_HEADERS\
-                    $$PHONE_SOURCES\
-                    $$PDA_HEADERS\
-                    $$PDA_SOURCES\
+TRANSLATABLES +=    $$HEADERS\
+                    $$SOURCES\
                     $$MMS_HEADERS\
                     $$MMS_SOURCES\
-                    $$PHONE_FORMS\
-                    $$PDA_FORMS\
-                    $$PHONE_FORMS_MMS\
+                    $$FORMS\
+                    $$FORMS_MMS\
                     $$MMSCOMMS_HEADERS\
                     $$MMSCOMMS_SOURCES
 
-enable_ssl {
-    DEFINES+=SMTPAUTH
-}
-
 depends(libraries/qtopiamail)
 depends(libraries/qtopiapim)
-enable_mms:depends(libraries/qtopiasmil)
-else:DEFINES+=QTOPIA_NO_MMS
 
 pics.files=$$QTOPIA_DEPOT_PATH/pics/qtmail/*
 pics.path=/pics/qtmail
 pics.hint=pics
+INSTALLS+=pics
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/qtmail.desktop
 desktop.path=/apps/Applications
 desktop.hint=desktop
+INSTALLS+=desktop
 emailservice.files=$$QTOPIA_DEPOT_PATH/services/Email/qtmail
 emailservice.path=/services/Email
+INSTALLS+=emailservice
 qdsemailservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/Email
 qdsemailservice.path=/etc/qds
+INSTALLS+=qdsemailservice
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=qtmail*
 help.hint=help
-INSTALLS+=pics desktop emailservice qdsemailservice help
+INSTALLS+=help
 
-phone {
-    smsservice.files=$$QTOPIA_DEPOT_PATH/services/SMS/qtmail
-    smsservice.path=/services/SMS
-    messageservice.files=$$QTOPIA_DEPOT_PATH/services/Messages/qtmail
-    messageservice.path=/services/Messages
-    qdssmsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/SMS
-    qdssmsservice.path=/etc/qds
-
-    INSTALLS+=messageservice smsservice qdssmsservice
-}
+smsservice.files=$$QTOPIA_DEPOT_PATH/services/SMS/qtmail
+smsservice.path=/services/SMS
+INSTALLS+=smsservice
+messageservice.files=$$QTOPIA_DEPOT_PATH/services/Messages/qtmail
+messageservice.path=/services/Messages
+INSTALLS+=messageservice
+qdssmsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/SMS
+qdssmsservice.path=/etc/qds
+INSTALLS+=qdssmsservice
 
 pkg.name=qpe-mail
 pkg.desc=Messaging application for Qtopia.
-pkg.domain=window,docapi,qds,msg,phonecomm,cardreader,camera,pictures,alarm,mediarecorder,pim,screensaver,net,drm,print
+pkg.domain=window,qds,msg,phonecomm,cardreader,camera,pictures,alarm,mediarecorder,pim,net,drm,print,doc_server,doc_write,mediasession,phonecomm,launcher

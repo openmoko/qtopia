@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,9 +26,11 @@
 #include "mediabrowser.h"
 
 #include <qmediatools.h>
+#include <private/keyhold_p.h>
 #include <private/requesthandler_p.h>
 
 #include <qtopiaapplication.h>
+#include <qsoftmenubar.h>
 
 #ifndef NO_NICE
 #include <unistd.h>
@@ -40,6 +42,7 @@ public:
     struct Context
     {
         MediaPlayer *mediaplayer;
+        PlayerControl *control;
     };
 
     MediaServiceRequestHandler( const Context& context, RequestHandler* handler = 0 )
@@ -84,6 +87,18 @@ void MediaServiceRequestHandler::execute( ServiceRequest* request )
         delete request;
         }
         break;
+    case ServiceRequest::PlayNow:
+        {
+        PlayNowRequest *req = (PlayNowRequest*)request;
+        PlaylistCue *playlistcue = qobject_cast<PlaylistCue*>(m_context.mediaplayer->playlist());
+        if( playlistcue ) {
+            playlistcue->playNow( req->playlist() );
+            m_context.control->setState( PlayerControl::Playing );
+        }
+
+        delete request;
+        }
+        break;
     case ServiceRequest::ShowPlayer:
         {
         m_context.mediaplayer->setPlayerVisible( true );
@@ -97,15 +112,19 @@ void MediaServiceRequestHandler::execute( ServiceRequest* request )
     }
 }
 
+static const int KEY_BACK_HOLD = Qt::Key_unknown + Qt::Key_Back;
+
 MediaPlayer::MediaPlayer( QWidget* parent, Qt::WFlags f ):
     QWidget( parent, f ),
     m_playerwidget( 0 ),
     m_closeonback( false ),
+    m_acceptclose( false ),
     m_playlist( 0 )
 {
     setWindowTitle( tr( "Media Player" ) );
 
     m_layout = new QVBoxLayout;
+    m_layout->setContentsMargins(0, 0, 0, 0);
 
     m_playercontrol = new PlayerControl( this );
 
@@ -113,12 +132,18 @@ MediaPlayer::MediaPlayer( QWidget* parent, Qt::WFlags f ):
 
     m_layout->addWidget( m_playerwidget );
 
-    MediaServiceRequestHandler::Context requestcontext = { this };
+    MediaServiceRequestHandler::Context requestcontext = { this, m_playercontrol };
     m_requesthandler = new MediaServiceRequestHandler( requestcontext );
 
     m_playlist = new BasicPlaylist( QStringList() );
 
     m_mediabrowser = new MediaBrowser( m_playercontrol, m_requesthandler );
+
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+#ifndef NO_HELIX
+    QSoftMenuBar::menuFor( m_mediabrowser )->addAction( m_playerwidget->settingsAction() );
+#endif
+#endif
 
     m_mediabrowser->setCurrentPlaylist( m_playlist );
     m_playerwidget->setPlaylist( m_playlist );
@@ -134,6 +159,10 @@ MediaPlayer::MediaPlayer( QWidget* parent, Qt::WFlags f ):
     context->addObject( m_playerwidget );
     context->addObject( m_mediabrowser );
 
+    new KeyHold( Qt::Key_Back, KEY_BACK_HOLD, 500, this, this );
+
+    QtopiaApplication::instance()->registerRunningTask( "Media Player", this );
+
     // Initialize volume
     QSettings config( "Trolltech", "MediaPlayer" );
     int volume = config.value( "Volume", 50 ).toInt();
@@ -148,6 +177,11 @@ MediaPlayer::MediaPlayer( QWidget* parent, Qt::WFlags f ):
 #endif
 }
 
+MediaPlayer::~MediaPlayer()
+{
+    delete m_playlist;
+}
+
 void MediaPlayer::setPlaylist( Playlist* playlist )
 {
     if( playlist != m_playlist ) {
@@ -159,12 +193,20 @@ void MediaPlayer::setPlaylist( Playlist* playlist )
         m_playlist = playlist;
 
         // Connect to new playlist
-        connect( m_playlist, SIGNAL(playingChanged(const QModelIndex&)),
-            this, SLOT(playingChanged(const QModelIndex&)) );
+        connect( m_playlist, SIGNAL(playingChanged(QModelIndex)),
+            this, SLOT(playingChanged(QModelIndex)) );
     }
 
-    setPlayerVisible( true );
-    m_playercontrol->setState( PlayerControl::Playing );
+    // Launch playlist if playing index is valid
+    if( m_playlist->playing().isValid() ) {
+        setPlayerVisible( true );
+        m_playercontrol->setState( PlayerControl::Playing );
+    }
+}
+
+bool MediaPlayer::isPlayerVisible() const
+{
+    return m_playerwidget->isVisible();
 }
 
 void MediaPlayer::setPlayerVisible( bool visible )
@@ -224,31 +266,73 @@ void MediaPlayer::playingChanged( const QModelIndex& index )
     }
 }
 
-void MediaPlayer::closeEvent( QCloseEvent* e )
+void MediaPlayer::keyPressEvent( QKeyEvent* e )
 {
-    if( !m_closeonback ) {
-        if( m_playerwidget->isVisible() ) {
-            setPlayerVisible( false );
-            e->ignore();
-        } else if( m_mediabrowser->hasBack() ) {
-            m_mediabrowser->goBack();
-            e->ignore();
-        } else if( m_playercontrol->state() != PlayerControl::Stopped ) {
-            // Hide if player active
-            hide();
-            e->ignore();
-        } else {
-            m_closeonback = true;
+    switch( e->key() )
+    {
+    case Qt::Key_Back:
+        if( !m_closeonback ) {
+            if( isPlayerVisible() ) {
+                setPlayerVisible( false );
+            } else if( m_mediabrowser->hasBack() ) {
+                m_mediabrowser->goBack();
+            } else if( m_playercontrol->state() != PlayerControl::Stopped ) {
+                // Hide if player active
+                hide();
+            } else {
+                m_closeonback = true;
+            }
         }
+
+        if( m_closeonback ) {
+            m_acceptclose = true;
+            m_playercontrol->close();
+        }
+        break;
+    case KEY_BACK_HOLD:
+        if( isPlayerVisible() ) {
+            setPlayerVisible( false );
+        }
+
+        // Return to main menu
+        while( m_mediabrowser->hasBack() ) {
+            m_mediabrowser->goBack();
+        }
+        break;
+
+    case Qt::Key_Hangup:
+        if (m_playercontrol->state() != PlayerControl::Stopped)
+            hide();
+        else
+        {
+            m_acceptclose = true;
+            m_playercontrol->close();
+        }
+        break;
+
+    default:
+        // Ignore
+        break;
     }
 
-    if( m_closeonback ) {
+    e->ignore();
+}
+
+void MediaPlayer::closeEvent( QCloseEvent* e )
+{
+    if( m_acceptclose ) {
         QtopiaApplication::instance()->unregisterRunningTask( this );
+        e->accept();
 
         // Save volume settings
         QSettings config( "Trolltech", "MediaPlayer" );
         config.setValue( "Volume", m_playercontrol->volume() );
     } else {
-        QtopiaApplication::instance()->registerRunningTask( "Media Player", this );
+        // ### FIXME Ensure focused widget always has edit focus
+        focusWidget()->setEditFocus( true );
+
+        e->ignore();
     }
 }
+
+

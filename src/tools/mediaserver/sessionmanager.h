@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,47 +22,45 @@
 #ifndef __QTOPIA_MEDIASERVER_SESSIONMANAGER_H
 #define __QTOPIA_MEDIASERVER_SESSIONMANAGER_H
 
-#include <qobject.h>
+#include <QObject>
 
 #include <qtopiamedia/media.h>
+
+
+// pre
+class QMediaSessionRequest;
+class QMediaServerSession;
+
 
 namespace mediaserver
 {
 
-class MediaEngine;
-class MediaSession;
-
-
 class SessionManagerSession;
+
 class SessionManagerPrivate;
 
 class SessionManager : public QObject
 {
     Q_OBJECT
-
     friend class SessionManagerSession;
+    friend class SessionManagerPrivate;
 
 public:
-    SessionManager(MediaEngine* mediaEngine);
     ~SessionManager();
 
-    MediaSession* manageSession(MediaSession* mediaSession);
-    void releaseSession(MediaSession* mediaSession);
+    QMediaServerSession* createSession(QMediaSessionRequest const& sessionRequest);
+    void destroySession(QMediaServerSession* mediaSession);
 
-    void activeDomainChanged();
+    static SessionManager* instance();
 
-    void setVolume(int volume);
-    void increaseVolume(int increment);
-    void decreaseVolume(int decrement);
-    void setMuted(bool mute);
-
-private slots:
-    void rescheduleSessions();
+signals:
+    void activeSessionCountChanged(int);
 
 private:
-    bool canStart(MediaSession* mediaSession);
-    void sessionPlaying(MediaSession* mediaSession);
-    void sessionStopped(MediaSession* mediaSession);
+    SessionManager();
+
+    bool sessionCanStart(SessionManagerSession* session);
+    void sessionStopped(SessionManagerSession* session);
 
     SessionManagerPrivate*  d;
 };
@@ -71,3 +69,4 @@ private:
 }   // ns mediaserver
 
 #endif  // __QTOPIA_MEDIASERVER_SESSIONMANAGER_H
+

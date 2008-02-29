@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,10 +26,9 @@
 #include <qspeeddial.h>
 #include <qtranslatablesettings.h>
 #include <qtopiaipcenvelope.h>
-#include <Qt>
+#include <QtopiaItemDelegate>
 #include <QDialog>
 #include <QDateTimeEdit>
-#include <QLayout>
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
@@ -39,116 +38,75 @@
 #include <QAction>
 #include <QTabWidget>
 #include <QMessageBox>
-#include <QPainter>
-#include <QShortcut>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
+#include <QLayout>
 #include <QGroupBox>
 #include <QScrollArea>
 #include <QToolButton>
+#include <QPushButton>
 #include <QSlider>
-#include <qsoundqss_qws.h>
-#include <qdocumentselector.h>
-#ifdef QTOPIA_PHONE
-# include <qtopia/qsoftmenubar.h>
-#include <QDesktopWidget>
+#include <qsoftmenubar.h>
 #include <QKeyEvent>
-#endif
+#include <QDrmContentPlugin>
 
-#include <assert.h>
-
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
 #include "ringtoneeditor.h"
+#endif
 
 static QIcon *note = 0;
 static QIcon *systemowned = 0;
 
-ProfileEditDialog::ProfileEditDialog(QWidget *parent, bool isnew)
-    : QDialog(parent), settingTab(0), isActive(false), mIsModified(false),
-    deleteDays(false), isNew(isnew), editVolume(false)
+ProfileEditDialog::ProfileEditDialog(QWidget *parent, bool isNew)
+    : QDialog(parent), settingTab(0), isActive(false), isLoading(false),
+    deleteDays(false), editVolume(false)
 {
-    init();
-
-    connect( profileName, SIGNAL(textChanged(const QString &)), this, SLOT(updateState()) );
-    connect( masterVolume, SIGNAL(valueChanged(int)), this, SLOT(updateState()) );
-    connect( masterVolume, SIGNAL(valueChanged(int)), ringTone, SLOT(playCurrentSound()) );
-    connect( vibrateAlert, SIGNAL(toggled(bool)), this, SLOT(updateState()) );
-    connect( ringType, SIGNAL(activated(int)), this, SLOT(updateState()) );
-    connect( messageType, SIGNAL(activated(int)), this, SLOT(updateState()) );
-    connect( messageAlertDuration, SIGNAL(valueChanged(int)), this, SLOT(updateState()) );
-    connect( autoAnswer, SIGNAL(toggled(bool)), this, SLOT(updateState()) );
-    connect( autoActivation, SIGNAL(toggled(bool)), this, SLOT(updateState()) );
-    connect( autoActivation, SIGNAL(toggled(bool)), this, SLOT(enableEditSchedule(bool)) );
-    connect( editSchedule, SIGNAL(clicked()), this, SLOT(updateState()) );
-    connect( ringTone, SIGNAL(clicked()), this, SLOT(updateState()) );
-    connect( messageTone, SIGNAL(clicked()), this, SLOT(updateState()) );
-    connect( actionView, SIGNAL(triggered()), this, SLOT(viewSetting()) );
-    connect( actionDelete, SIGNAL(triggered()), this, SLOT(deleteSetting()) );
-    connect( editSchedule, SIGNAL(clicked()), this, SLOT(showEditScheduleDialog()) );
-    connect( actionCapture, SIGNAL(triggered()), this, SLOT(pullSettingStatus()) );
-#ifdef QTOPIA_PHONE
-    connect( tabWidget, SIGNAL(currentChanged(int)), this, SLOT(setSoftMenu(int)) );
-    connect( tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)) );
-#endif
-}
-
-ProfileEditDialog::~ProfileEditDialog()
-{
-    if ( deleteDays )
-        delete [] days;
-}
-
-void ProfileEditDialog::init()
-{
-    if ( isNew )
-        setObjectName( "new" );
-    else
-        setObjectName( "edit" );
+    setObjectName( isNew ? "new" : "edit" );
 
     tabWidget = new QTabWidget( this );
 
     // construct info tab
     infoTab = new QWidget( tabWidget );
-#ifdef QTOPIA_DEPOT
-    infoTab->setMaximumWidth( qApp->desktop()->width() - 10 );
-#endif
 
     infoLayout = new QGridLayout();
     infoLayout->setSpacing( 6 );
     infoLayout->setMargin( 6 );
     infoLayout->setColumnStretch(1, 1);
 
-    lblName = new QLabel( tr( "Name" ), infoTab );
-    infoLayout->addWidget( lblName, 0, 0 );
+    QLabel *label = new QLabel( tr( "Name" ), infoTab );
+    infoLayout->addWidget( label, 0, 0 );
 
     profileName = new QLineEdit( infoTab );
     profileName->setEnabled( false );
+    label->setBuddy(profileName);
     profileLabel = new QLabel( QString(), infoTab );
     QFontMetrics fm = profileLabel->fontMetrics();
     profileLabel->setMaximumHeight( fm.height() );
 
-    lblVolume = new QLabel( tr( "Volume" ), infoTab );
-    infoLayout->addWidget( lblVolume, 1, 0 );
+    label = new QLabel( tr( "Volume" ), infoTab );
+    infoLayout->addWidget( label, 1, 0 );
 
     masterVolume = new QSlider( Qt::Horizontal, infoTab );
+    label->setBuddy(masterVolume);
     masterVolume->setMinimum( 0 );
     masterVolume->setMaximum( 5 );
     masterVolume->setTickPosition( QSlider::TicksBelow );
     masterVolume->setTickInterval( 1 );
     masterVolume->setSingleStep( 1 );
-    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
-    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
     infoLayout->addWidget( masterVolume, 1, 1 );
 
-    infoTabLayout = new QVBoxLayout( infoTab );
+    QVBoxLayout *infoTabLayout = new QVBoxLayout( infoTab );
     infoTabLayout->setSpacing( 6 );
     infoTabLayout->setMargin( 6 );
     infoTabLayout->addLayout( infoLayout );
 
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
     autoAnswer = new QCheckBox( tr( "Auto Answer" ), infoTab );
     infoTabLayout->addWidget( autoAnswer );
 
     vibrateAlert = new QCheckBox( tr( "Vibrate active" ), infoTab );
     infoTabLayout->addWidget( vibrateAlert );
+#else
+    infoTabLayout->addStretch(0);
+#endif
 
     autoActivation = new QCheckBox( tr( "Auto Activation" ), infoTab );
     infoTabLayout->addWidget( autoActivation );
@@ -156,12 +114,6 @@ void ProfileEditDialog::init()
     editSchedule = new QPushButton( tr( "Edit" ), infoTab );
     editSchedule->setEnabled( false );
     infoTabLayout->addWidget( editSchedule );
-
-#if !defined (QTOPIA_CELL) && !defined (QTOPIA_VOIP)
-    autoAnswer->setVisible( false );
-    vibrateAlert->setVisible( false );
-    infoTabLayout->addStretch(0);
-#endif
 
     QScrollArea *scrollArea1 = new QScrollArea();
     scrollArea1->setFocusPolicy(Qt::NoFocus);
@@ -172,59 +124,72 @@ void ProfileEditDialog::init()
 
     tabWidget->addTab( scrollArea1, tr( "Profile" ) );
 
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
     // construct tone tab
     toneTab = new QWidget( tabWidget );
-    toneTabLayout = new QVBoxLayout( toneTab );
+    QVBoxLayout *toneTabLayout = new QVBoxLayout( toneTab );
 
     // ring tone group box
-    ringToneGroup = new QGroupBox( tr( "Ring tone" ), toneTab );
-    ringToneLayout = new QGridLayout( ringToneGroup );
-    ringToneLayout->setMargin( 2 );
+    QGroupBox *ringToneGroup = new QGroupBox( tr( "Ring tone" ), toneTab );
+    QGridLayout *ringToneLayout = new QGridLayout( ringToneGroup );
 
-    lblAlert1 = new QLabel( tr( "Alert" ), ringToneGroup );
-    ringToneLayout->addWidget( lblAlert1, 0, 0 );
-
-    lblTone1 = new QLabel( tr( "Tone" ), ringToneGroup );
-    ringToneLayout->addWidget( lblTone1, 1, 0 );
+    label = new QLabel( tr( "Alert" ), ringToneGroup );
+    ringToneLayout->addWidget( label, 0, 0 );
 
     ringType = new QComboBox( ringToneGroup );
+    label->setBuddy(ringType);
     ringType->addItem( tr( "Off" ) );
     ringType->addItem( tr( "Once" ) );
     ringType->addItem( tr( "Continuous" ) );
     ringType->addItem( tr( "Ascending" ) );
     ringToneLayout->addWidget( ringType, 0, 1 );
 
+    label = new QLabel( tr( "Tone" ), ringToneGroup );
+    ringToneLayout->addWidget( label, 1, 0 );
     ringTone = new RingToneButton( ringToneGroup );
+    label->setBuddy(ringTone);
     ringToneLayout->addWidget( ringTone, 1, 1 );
+
+    connect( ringTone, SIGNAL(selected(QContent)),
+            this, SLOT(toneSelected(QContent)) );
+
+    label = new QLabel( tr( "Video Tone" ), ringToneGroup );
+    ringToneLayout->addWidget( label, 2, 0 );
+    videoTone = new RingToneButton( ringToneGroup );
+    label->setBuddy(videoTone);
+    videoTone->setVideoSelector( true );
+    ringToneLayout->addWidget( videoTone, 2, 1 );
+
+    connect( videoTone, SIGNAL(selected(QContent)),
+            this, SLOT(toneSelected(QContent)) );
 
     toneTabLayout->addWidget( ringToneGroup );
 
     // message tone group box
-    messageToneGroup = new QGroupBox( tr( "Message tone" ), toneTab );
-    messageToneLayout = new QGridLayout( messageToneGroup );
-    messageToneLayout->setMargin( 2 );
+    QGroupBox *messageToneGroup = new QGroupBox( tr( "Message tone" ), toneTab );
+    QGridLayout *messageToneLayout = new QGridLayout( messageToneGroup );
 
-    lblAlert2 = new QLabel( tr( "Alert" ), messageToneGroup );
-    messageToneLayout->addWidget( lblAlert2, 0, 0 );
-
-    lblTone2 = new QLabel( tr( "Duration" ), messageToneGroup );
-    messageToneLayout->addWidget( lblTone2, 1, 0 );
-
-    lblTone2 = new QLabel( tr( "Tone" ), messageToneGroup );
-    messageToneLayout->addWidget( lblTone2, 2, 0 );
-
+    label = new QLabel( tr( "Alert" ), messageToneGroup );
+    messageToneLayout->addWidget( label, 0, 0 );
     messageType = new QComboBox( messageToneGroup );
+    label->setBuddy(messageType);
     messageType->addItem( tr( "Off" ) );
     messageType->addItem( tr( "Once" ) );
     messageType->addItem( tr( "Continuous" ) );
     messageType->addItem( tr( "Ascending" ) );
     messageToneLayout->addWidget( messageType, 0, 1 );
 
+    label = new QLabel( tr( "Duration" ), messageToneGroup );
+    messageToneLayout->addWidget( label, 1, 0 );
     messageAlertDuration = new QSpinBox( messageToneGroup );
+    label->setBuddy(messageAlertDuration);
     messageAlertDuration->setSuffix( tr( "s", "seconds" ) );
     messageToneLayout->addWidget( messageAlertDuration, 1, 1 );
 
+    label = new QLabel( tr( "Tone" ), messageToneGroup );
+    messageToneLayout->addWidget( label, 2, 0 );
     messageTone = new RingToneButton( messageToneGroup );
+    label->setBuddy(messageTone);
     messageToneLayout->addWidget( messageTone, 2, 1 );
 
     toneTabLayout->addWidget( messageToneGroup );
@@ -236,24 +201,23 @@ void ProfileEditDialog::init()
     scrollArea2->setWidget( toneTab );
     scrollArea2->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
 
-#if defined (QTOPIA_CELL) || defined (QTOPIA_VOIP)
     tabWidget->addTab( scrollArea2, tr( "Tones" ) );
 #endif
 
     // properties tab
     settingTab =  new QWidget( tabWidget );
-    settingLayout = new QVBoxLayout( settingTab );
+    QVBoxLayout *settingLayout = new QVBoxLayout( settingTab );
     settingListWidget = new QListWidget( settingTab );
-    settingListWidget->installEventFilter( this );
+    settingListWidget->setFrameStyle(QFrame::NoFrame);
+    settingLayout->setMargin(0);
     settingLayout->addWidget( settingListWidget );
     tabWidget->addTab( settingTab, tr( "Properties" ) );
 
-#ifdef QTOPIA_PHONE
-    contextMenu = QSoftMenuBar::menuFor( this );
-#endif
-    actionView = new QAction( QIcon( ":icon/edit" ), tr( "View/Edit" ), this );
-    actionDelete = new QAction( QIcon( ":icon/trash" ), tr( "Delete" ), this );
-    actionCapture = new QAction( QIcon( ":icon/settings" ), tr("Capture properties"), this );
+    QMenu *contextMenu = QSoftMenuBar::menuFor( this );
+    actionView = contextMenu->addAction( QIcon( ":icon/edit" ), tr( "View/Edit" ) );
+    actionDelete = contextMenu->addAction( QIcon( ":icon/trash" ), tr( "Delete" ) );
+    actionCapture = contextMenu->addAction( QIcon( ":icon/settings" ), tr("Capture properties") );
+    setSoftMenu(0);
 
     // setup main layout
     QVBoxLayout *vLayout = new QVBoxLayout( this );
@@ -261,18 +225,35 @@ void ProfileEditDialog::init()
     vLayout->setSpacing( 0 );
     vLayout->addWidget( tabWidget );
 
-#ifdef QTOPIA_PHONE
-    profileName->installEventFilter( this );
     masterVolume->installEventFilter( this );
-    autoAnswer->installEventFilter( this );
-    vibrateAlert->installEventFilter( this );
-    autoActivation->installEventFilter( this );
-    editSchedule->installEventFilter( this );
-    ringType->installEventFilter( this );
-    ringTone->installEventFilter( this );
-    messageType->installEventFilter( this );
-    messageTone->installEventFilter( this );
+
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+    connect( profileName, SIGNAL(textChanged(QString)), this, SLOT(updateState()) );
+    connect( masterVolume, SIGNAL(valueChanged(int)), this, SLOT(updateState()) );
+    connect( vibrateAlert, SIGNAL(toggled(bool)), this, SLOT(updateState()) );
+    connect( autoAnswer, SIGNAL(toggled(bool)), this, SLOT(updateState()) );
+    connect( autoActivation, SIGNAL(toggled(bool)), this, SLOT(updateState()) );
+    connect( editSchedule, SIGNAL(clicked()), this, SLOT(updateState()) );
+    connect( ringType, SIGNAL(activated(int)), this, SLOT(updateState()) );
+    connect( ringTone, SIGNAL(clicked()), this, SLOT(updateState()) );
+    connect( videoTone, SIGNAL(clicked()), this, SLOT(updateState()) );
+    connect( messageType, SIGNAL(activated(int)), this, SLOT(updateState()) );
+    connect( messageAlertDuration, SIGNAL(valueChanged(int)), this, SLOT(updateState()) );
+    connect( messageTone, SIGNAL(clicked()), this, SLOT(updateState()) );
 #endif
+    connect( actionView, SIGNAL(triggered()), this, SLOT(viewSetting()) );
+    connect( actionDelete, SIGNAL(triggered()), this, SLOT(deleteSetting()) );
+    connect( actionCapture, SIGNAL(triggered()), this, SLOT(pullSettingStatus()) );
+    connect( autoActivation, SIGNAL(toggled(bool)), this, SLOT(enableEditSchedule(bool)) );
+    connect( editSchedule, SIGNAL(clicked()), this, SLOT(showEditScheduleDialog()) );
+    connect( tabWidget, SIGNAL(currentChanged(int)), this, SLOT(setSoftMenu(int)) );
+    connect( tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)) );
+}
+
+ProfileEditDialog::~ProfileEditDialog()
+{
+    if ( deleteDays )
+        delete [] days;
 }
 
 void ProfileEditDialog::setProfile(PhoneProfileItem *pItem)
@@ -298,21 +279,27 @@ void ProfileEditDialog::setPhoneProfile()
         profileName->setFocus();
     }
     masterVolume->setValue((int)p.volume());
-    mvOrigValue = masterVolume->value();
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
     vibrateAlert->setChecked(p.vibrate());
+    autoAnswer->setChecked(p.autoAnswer());
     ringType->setCurrentIndex((int)p.callAlert());
+    // if none of the tone is valid use the system tone.
+    if ( !p.callTone().isValid() && !p.videoTone().isValid() )
+        ringTone->setTone(p.systemCallTone());
+    else {
+        ringTone->setTone(p.callTone());
+        videoTone->setTone(p.videoTone());
+    }
     messageType->setCurrentIndex((int)p.msgAlert());
     messageAlertDuration->setValue(p.msgAlertDuration()/1000);
-    autoAnswer->setChecked(p.autoAnswer());
-    ringTone->setTone(p.callTone());
     messageTone->setTone(p.messageTone());
-    tabWidget->setCurrentIndex(0);
 
     ringTone->setEnabled(ringType->currentIndex() != 0 && masterVolume->value() != 0);
     messageTone->setEnabled(messageType->currentIndex() != 0 && masterVolume->value() != 0);
     messageAlertDuration->setEnabled(messageType->currentIndex() != 0 && messageType->currentIndex() != 1 );
+#endif
 
-    mIsModified = false;
+    tabWidget->setCurrentIndex(0);
 }
 
 void ProfileEditDialog::setSettings()
@@ -344,67 +331,77 @@ void ProfileEditDialog::setSchedule()
 void ProfileEditDialog::accept()
 {
     // apply changes.
-    QString pName;
-    if ( profileName->isEnabled() )
-        pName = profileName->text();
-    else
-        pName = profileLabel->text();
+    QString pName = profileName->isEnabled() ? profileName->text() : profileLabel->text();
     profile->profile().setName(!pName.isEmpty() ? pName : tr( "Custom" ));
 
     profile->profile().setIsSystemProfile(!profileName->isEnabled());
     profile->profile().setVolume(masterVolume->value());
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
     profile->profile().setVibrate(vibrateAlert->isChecked());
+    profile->profile().setAutoAnswer(autoAnswer->isChecked());
     profile->profile().setCallAlert((QPhoneProfile::AlertType)ringType->currentIndex());
+    profile->profile().setCallTone(ringTone->tone());
+    profile->profile().setVideoTone(videoTone->tone());
     profile->profile().setMsgAlert((QPhoneProfile::AlertType)messageType->currentIndex());
     profile->profile().setMsgAlertDuration(messageAlertDuration->value() * 1000);
-    profile->profile().setAutoAnswer(autoAnswer->isChecked());
-    profile->profile().setCallTone(ringTone->tone());
     profile->profile().setMessageTone(messageTone->tone());
+#endif
     profile->profile().setSchedule( schedule );
     profile->profile().setApplicationSettings( settings );
 
     QDialog::accept();
 }
 
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
 void ProfileEditDialog::updateState()
 {
-    mIsModified = true;
-    // also
     int volumeIndex = masterVolume->value();
     ringTone->setEnabled(ringType->currentIndex() != 0 && volumeIndex != 0);
+    videoTone->setEnabled(ringType->currentIndex() != 0);
     messageTone->setEnabled(messageType->currentIndex() != 0 && volumeIndex != 0);
     messageAlertDuration->setEnabled(messageType->currentIndex() != 0 && messageType->currentIndex() != 1);
     // set the current volume to be used in preview
     QObject *obj = sender();
     if ( obj == masterVolume ) {
         ringTone->setVolume( volumeIndex );
+        videoTone->setVolume( volumeIndex );
         messageTone->setVolume( volumeIndex );
     }
-    if ( obj == ringTone )
+    if ( obj == ringTone ) {
         ringTone->setVolume( volumeIndex );
-    if ( obj == messageTone )
+    } else if ( obj == videoTone ) {
+        videoTone->setVolume( volumeIndex );
+    } else if ( obj == messageTone )
         messageTone->setVolume( volumeIndex );
 }
 
-#ifdef QTOPIA_PHONE
-void ProfileEditDialog::setSoftMenu( int tab )
+void ProfileEditDialog::toneSelected( const QContent& tone )
 {
-    if ( tab != 2 ) {
-        contextMenu->removeAction( actionView );
-        contextMenu->removeAction( actionDelete );
-        contextMenu->removeAction( actionCapture );
-    } else {
-        if ( settingListWidget->count() > 0 ) {
-            contextMenu->addAction( actionView );
-            contextMenu->addAction( actionDelete );
-        } else {
-            contextMenu->removeAction( actionView );
-            contextMenu->removeAction( actionDelete );
-        }
-        contextMenu->addAction( actionCapture );
-    }
+    // mutually exclusive
+    if ( sender() == ringTone && tone.isValid() )
+        videoTone->setTone( QContent() );
+    else if ( sender() == videoTone && tone.isValid() )
+        ringTone->setTone( QContent() );
 }
 #endif
+
+void ProfileEditDialog::setSoftMenu( int tab )
+{
+    if ( tab != tabWidget->indexOf(settingTab) ) {
+        actionView->setVisible(false);
+        actionDelete->setVisible(false);
+        actionCapture->setVisible(false);
+    } else {
+        if ( settingListWidget->count() > 0 ) {
+            actionView->setVisible(true);
+            actionDelete->setVisible(true);
+        } else {
+            actionView->setVisible(false);
+            actionDelete->setVisible(false);
+        }
+        actionCapture->setVisible(true);
+    }
+}
 
 void ProfileEditDialog::viewSetting()
 {
@@ -434,9 +431,7 @@ void ProfileEditDialog::deleteSetting()
     settings.remove( (settingListWidget->item(row))->data(Qt::UserRole).toString() );
 
     delete settingListWidget->takeItem( settingListWidget->currentRow() );
-#ifdef QTOPIA_PHONE
     setSoftMenu( tabWidget->currentIndex() );
-#endif
 }
 
 void ProfileEditDialog::showEditScheduleDialog()
@@ -465,11 +460,11 @@ void ProfileEditDialog::initDialog( QDialog *dlg )
     dlg->setObjectName( "auto-on" );
     dlg->setModal( true );
     dlg->setWindowTitle( tr( "Set Day and Time" ) );
-    scheduleVLayout = new QVBoxLayout( dlg );
+    QVBoxLayout *scheduleVLayout = new QVBoxLayout( dlg );
     scheduleVLayout->setMargin( 10 );
     scheduleVLayout->setSpacing( 10 );
-    scheduleHLayout1 = new QHBoxLayout();
-    scheduleHLayout2 = new QHBoxLayout();
+    QHBoxLayout *scheduleHLayout1 = new QHBoxLayout();
+    QHBoxLayout *scheduleHLayout2 = new QHBoxLayout();
 
     days = new QToolButton * [7];
     deleteDays = true;
@@ -482,10 +477,9 @@ void ProfileEditDialog::initDialog( QDialog *dlg )
         days[i]->setFocusPolicy( Qt::StrongFocus );
         days[i]->setText( QTimeString::nameOfWeekDay( i + 1, QTimeString::Short ) );
     }
-    lblTime = new QLabel( tr( "Time" ), dlg );
     time = new QTimeEdit( );
     time->setTime(QTime(8,0));
-    scheduleHLayout2->addWidget( lblTime );
+    scheduleHLayout2->addWidget( new QLabel( tr( "Time" ), dlg ) );
     scheduleHLayout2->addWidget( time );
 
     scheduleVLayout->addLayout( scheduleHLayout1 );
@@ -522,130 +516,100 @@ void ProfileEditDialog::processSchedule()
     }
 }
 
-#ifdef QTOPIA_PHONE
 void ProfileEditDialog::tabChanged( int index )
 {
-    if ( index == 0 ) {
+    if ( index == tabWidget->indexOf(infoTab) ) {
         if ( profileName->isEnabled() )
             profileName->setFocus();
         else
             masterVolume->setFocus();
-    } else if ( index == 1 ) {
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+    } else if ( index == tabWidget->indexOf(toneTab) ) {
         ringType->setFocus();
-    } else if ( index == 2 ) {
+#endif
+    } else if ( index == tabWidget->indexOf(settingTab) ) {
         settingListWidget->setFocus();
     }
-    if ( editVolume ) {
-        editVolume = !editVolume;
-        masterVolume->setEditFocus(false);
-        QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
-        QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+    if ( !ringTone->isFinished() )
         ringTone->stopSound();
-    }
+    else if ( !videoTone->isFinished() )
+        videoTone->stopSound();
+#endif
 }
 
-bool ProfileEditDialog::eventFilter( QObject *o, QEvent *e )
+bool ProfileEditDialog::eventFilter( QObject *, QEvent *e )
 {
     if ( e->type() == QEvent::KeyPress ) {
         QKeyEvent *ke = (QKeyEvent*) e;
-        int currentIndex = tabWidget->currentIndex();
-        int count = tabWidget->count();
-        bool rtl = QtopiaApplication::layoutDirection() == Qt::RightToLeft;
         switch ( ke->key() ) {
             case Qt::Key_Select:
-                if ( o == masterVolume ) {
-                    editVolume = !editVolume;
-                    masterVolume->setEditFocus(!masterVolume->hasEditFocus());
-                }
-                if ( editVolume ) {
-                    mvOrigValue = masterVolume->value();
-                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::EndEdit);
-                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::RevertEdit);
-                } else {
-                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
-                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
+                editVolume = !editVolume;
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+                if ( !editVolume ) {
                     ringTone->stopSound();
+                    videoTone->stopSound();
                 }
+#endif
                 return false;
-                break;
-            case Qt::Key_Up:
-            case Qt::Key_Down:
-                if ( o == masterVolume && editVolume ) {
-                    editVolume = false;
-                    masterVolume->setEditFocus(false);
-                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
-                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
-                    ringTone->stopSound();
-                }
-                return false;
-                break;
-            case Qt::Key_Left:
-                if ( editVolume )
-                    return false;
-
-                if ( o == profileName && profileName->hasEditFocus() )
-                    return false;
-                if ( !rtl && currentIndex > 0 )
-                    --currentIndex;
-                else if ( rtl && currentIndex < count - 1 )
-                    ++currentIndex;
-                tabWidget->setCurrentIndex( currentIndex );
-                return true;
-                break;
-            case Qt::Key_Right:
-                if ( editVolume )
-                    return false;
-
-                if ( o == profileName && profileName->hasEditFocus() )
-                    return false;
-                if ( !rtl && currentIndex < count - 1 )
-                    ++currentIndex;
-                else if ( rtl && currentIndex > 0 )
-                    --currentIndex;
-                tabWidget->setCurrentIndex( currentIndex );
-                return true;
                 break;
             case Qt::Key_Back:
-                if (o == masterVolume) {
-                    if ( editVolume ) {
-                        editVolume = false;
-                        masterVolume->setEditFocus(false);
-                        masterVolume->setValue(mvOrigValue);
-                        QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
-                        QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
-                        e->accept();
-                    } else {
-                        e->ignore();
-                    }
-                    return true;
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+                if ( !ringTone->isFinished() ) {
+                    ringTone->stopSound();
+                } else if ( !videoTone->isFinished() ) {
+                    videoTone->stopSound();
                 }
-                
-                if ( o != profileName ) {
-                    e->ignore();
-                    return true;
+#endif
+                if ( editVolume ) {
+                    editVolume = false;
                 }
+                return false;
                 break;
         }
-    } else if ( e->type() == QEvent::MouseButtonPress ) {
-        editVolume = o == masterVolume;
-        masterVolume->setEditFocus(editVolume);
-        if ( !editVolume ) {
-            ringTone->stopSound();
-            QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
-            QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
-        } else {
-            mvOrigValue = masterVolume->value();
-            QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::EndEdit);
-            QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::RevertEdit);
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+    } else if ( e->type() == QEvent::KeyRelease ) {
+        QKeyEvent *ke = (QKeyEvent*) e;
+        // play current ringtone at the master volume
+        switch ( ke->key() ) {
+            case Qt::Key_Left:
+            case Qt::Key_Right:
+                if ( editVolume ) {
+                    if ( ringTone->tone().isValid() )
+                        ringTone->playCurrentSound();
+                    else if ( videoTone->tone().isValid() )
+                        videoTone->playCurrentSound();
+                }
+                return false;
+                break;
         }
-        return false;
-    } else if ( e->type() == QEvent::FocusIn ) {
-        if ( tabWidget->currentWidget() == settingTab )
-            settingListWidget->setEditFocus( true );
-    }
-    return false;
-}
 #endif
+    } else if ( e->type() == QEvent::MouseButtonPress ) {
+        masterVolume->setEditFocus( true );
+        editVolume = true;
+        return false;
+    } else if ( e->type() == QEvent::MouseButtonRelease ) {
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+        if ( ringTone->tone().isValid() )
+            ringTone->playCurrentSound();
+        else if ( videoTone->tone().isValid() )
+            videoTone->playCurrentSound();
+#endif
+        return false;
+    } else if ( e->type() == QEvent::FocusOut ) {
+        if ( editVolume ) {
+            editVolume = false;
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+            if ( !ringTone->isFinished() ) {
+                ringTone->stopSound();
+            } else if ( !videoTone->isFinished() ) {
+                videoTone->stopSound();
+            }
+#endif
+        }
+    }
+   return false;
+}
 
 void ProfileEditDialog::pullSettingStatus()
 {
@@ -711,17 +675,18 @@ void ProfileEditDialog::addSetting( const QPhoneProfile::Setting s )
     if ( settingListWidget->currentRow() < 0 )
         settingListWidget->setCurrentRow( 0 );
 
-#ifdef QTOPIA_PHONE
     setSoftMenu( tabWidget->currentIndex() );
-#endif
 }
 
 bool ProfileEditDialog::event(QEvent *e)
 {
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
     if ( e->type() == QEvent::WindowDeactivate ) {
         ringTone->stopSound();
+        videoTone->stopSound();
         messageTone->stopSound();
     }
+#endif
     return QDialog::event(e);
 }
 
@@ -763,6 +728,10 @@ public:
     ActiveProfileDisplay( const QString &label, QWidget *parent, const char *name = 0 );
     void setText( const QString &txt );
     void setPlaneMode( bool p, bool a );
+
+protected:
+    void showEvent( QShowEvent *e );
+
 private:
     void init();
     QPixmap notePix;
@@ -793,15 +762,19 @@ void ActiveProfileDisplay::init()
     textLA = new QLabel( this );
     textLA->setMargin( 0 );
     planePix = new QLabel( this );
+    planePix->setMargin( 0 );
     planePix->setAlignment(Qt::AlignRight);
     planeLabel = new QLabel( this );
     planeLabel->setMargin( 0 );
     l->setColumnStretch(1, 100);
-    l->addWidget( pixLA, 0, 0 );
+    l->addWidget( pixLA, 0, 0, Qt::AlignHCenter );
     l->addWidget( textLA, 0, 1 );
-    l->addWidget( planePix, 1, 0 );
+    l->addWidget( planePix, 1, 0, Qt::AlignHCenter );
     l->addWidget( planeLabel, 1, 1 );
-    pixLA->setPixmap( QPixmap( ":icon/Note" ) );
+    QPixmap pm( ":icon/Note" );
+    pixLA->setPixmap( pm.scaled( qApp->style()->pixelMetric(QStyle::PM_SmallIconSize),
+                    qApp->style()->pixelMetric(QStyle::PM_SmallIconSize),
+                    Qt::KeepAspectRatio ) );
 }
 
 void ActiveProfileDisplay::setText( const QString &txt )
@@ -815,12 +788,21 @@ void ActiveProfileDisplay::setText( const QString &txt )
 void ActiveProfileDisplay::setPlaneMode(bool p, bool avail)
 {
     if (avail) {
+        QPixmap pm( ":icon/aeroplane" );
         planeLabel->setText(p ? tr("Airplane Safe Mode") : QString());
-        planePix->setPixmap(p ? QPixmap(":icon/aeroplane") : QPixmap());
+        planePix->setPixmap(p ? pm.scaled( qApp->style()->pixelMetric(QStyle::PM_SmallIconSize),
+                    qApp->style()->pixelMetric(QStyle::PM_SmallIconSize),
+                    Qt::KeepAspectRatio ) : QPixmap());
     } else {
         planeLabel->hide();
         planePix->hide();
     }
+}
+
+void ActiveProfileDisplay::showEvent( QShowEvent *e )
+{
+    QWidget::showEvent( e );
+    setFixedHeight( sizeHint().height() );
 }
 
 //===========================================================================
@@ -845,6 +827,7 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
     l->setMargin(2);
     l->setSpacing(2);
     itemlist = new QListWidget(this);
+    itemlist->setItemDelegate(new QtopiaItemDelegate);
     itemlist->setSelectionMode(QAbstractItemView::SingleSelection);
     itemlist->setFrameStyle(QFrame::NoFrame);
     itemlist->setSpacing(1);
@@ -858,13 +841,13 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
     activeDisplay->setPlaneMode(profMan.planeMode(), profMan.planeModeAvailable());
 #endif
 
-    connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
-            this, SLOT(appMessage(const QString&,const QByteArray&)) );
+    connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
+            this, SLOT(appMessage(QString,QByteArray)) );
 
     new ProfilesService( this );
 
     actionNew = new QAction( QIcon( ":icon/new" ), tr( "New" ), this );
-    connect( actionNew, SIGNAL(triggered()), this, SLOT( createNewProfile() ) );
+    connect( actionNew, SIGNAL(triggered()), this, SLOT(createNewProfile()) );
     actionNew->setWhatsThis( tr("Enter a new profile.") );
 
     actionEdit = new QAction( QIcon( ":icon/edit" ), tr("Edit" ), this );
@@ -872,7 +855,7 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
 
     actionRemove = new QAction( QIcon( ":icon/trash" ), tr( "Delete" ), this );
     actionRemove->setWhatsThis( tr("Delete the selected profile.") );
-    connect( actionRemove, SIGNAL(triggered()), this, SLOT( removeCurrentProfile() ) );
+    connect( actionRemove, SIGNAL(triggered()), this, SLOT(removeCurrentProfile()) );
     actionRemove->setEnabled(false);
 
     actionActivate = new QAction( *note, tr("Activate"), this );
@@ -890,8 +873,7 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
     actionPlane->setVisible(profMan.planeModeAvailable());
 #endif
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    contextMenu = QSoftMenuBar::menuFor(this);
+    QMenu *contextMenu = QSoftMenuBar::menuFor(this);
     contextMenu->addAction(actionNew);
     contextMenu->addAction(actionEdit);
     contextMenu->addAction(actionRemove);
@@ -903,15 +885,17 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
         contextMenu->insertSeparator(actionSpeedDial);
     contextMenu->addAction(actionPlane);
 #endif
-#endif
 
     connect(itemlist, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(activateProfileAndClose(QListWidgetItem*)));
     connect(itemlist, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(updateIcons()));
+    updateIcons();
 
     if (itemlist->count() > 0 && itemlist->currentRow() == -1 )
         itemlist->setItemSelected(itemlist->item(0), true);
 
     setWindowTitle( tr("Profiles") );
+
+    QDrmContentPlugin::initialize();
 }
 
 ProfileSelect::~ProfileSelect()
@@ -961,10 +945,8 @@ void ProfileSelect::addToSpeedDial()
         QPhoneProfile p = pItem->profile();
         QtopiaServiceRequest req("Profiles","setProfile(int)");
         req << p.id();
-#ifdef QTOPIA_PHONE
         p.setSpeedDialInput(QSpeedDial::addWithDialog(p.name(), "Note", req, this));
         profMan.saveProfile(p);
-#endif
     }
 }
 
@@ -1019,7 +1001,8 @@ void ProfileSelect::setActiveProfile( PhoneProfileItem *pItem, bool force )
         bool prevPlaneMode = profMan.planeMode();
 #endif
 
-        profMan.activateProfile(activeProfile?activeProfile->profile().id():-1);
+        if ( !isLoading )
+            profMan.activateProfile(activeProfile?activeProfile->profile().id():-1);
         QFont f;
         f.setBold( true );
         activeProfile->setFont( f );
@@ -1035,7 +1018,7 @@ void ProfileSelect::setActiveProfile( PhoneProfileItem *pItem, bool force )
             if ( prevActiveProfile->profile().planeMode()
                 && !activeProfile->profile().planeMode() ) {
                 if ( QMessageBox::warning( this, tr( "Airplane Mode" ),
-                        tr( "<qt>Do you wish to stay in Airplane Safe Mode.</qt>" ),
+                        tr( "<qt>Do you wish to stay in Airplane Safe Mode?</qt>" ),
                         QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes )
                     setPlaneMode( true );
                 else
@@ -1254,6 +1237,7 @@ void ProfileSelect::appMessage(const QString &msg, const QByteArray &data)
 {
     // XXX - move to QDS
     if (msg == "SettingsManager::pushSettingStatus(QString,QString,QString)") {
+        hide();
         QDataStream ds(data);
         ds >> appName;
         ds >> appTitle;
@@ -1339,6 +1323,5 @@ void ProfilesService::setProfile( int id )
 {
     parent->activateProfile(id);
 }
-
 
 #include "ringprofile.moc"

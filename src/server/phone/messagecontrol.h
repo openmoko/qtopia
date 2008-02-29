@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,8 +24,11 @@
 
 #include <QObject>
 #include <qvaluespace.h>
+#ifdef QTOPIA_CELL
 #include <qsmsreader.h>
+#endif
 #include <qtopiaipcenvelope.h>
+#include <QtopiaIpcAdaptor>
 class QString;
 
 class QCommServiceManager;
@@ -38,11 +41,12 @@ public:
 
     int messageCount() const;
     bool smsFull() const;
+    QString lastSmsId() const;
 
 signals:
     void messageCount(int, bool, bool, bool);
-    void newMessage(const QString &type, const QString &from,
-                    const QString &subject);
+    void newMessage(const QString &type, const QString &from, const QString &subject);
+    void smsMemoryFull(bool);
     void messageRejected();
 
 private slots:
@@ -50,15 +54,20 @@ private slots:
     void telephonyServicesChanged();
     void sysMessage(const QString& message, const QByteArray&);
     void smsMemoryFullChanged();
+    void messageCountChanged();
 
 private:
     QValueSpaceObject phoneValueSpace;
-    QValueSpaceItem smsMemoryFull;
+    QValueSpaceItem smsMemFull;
     void doNewCount(bool write=true, bool fromSystem=false, bool notify=true);
     MessageControl();
     QCommServiceManager *mgr;
+#ifdef QTOPIA_CELL
     QSMSReader *smsreq;
+#endif
+    QtopiaIpcAdaptor *messageCountUpdate;
     QtopiaChannel channel;
+    QString smsId;
 
     int smsCount;
     int mmsCount;

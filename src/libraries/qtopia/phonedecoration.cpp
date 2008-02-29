@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -169,9 +169,9 @@ void DecorationBorderData::read(QSettings &cfg, const QString &base, const QStri
     QString val = cfg.value(name+"Pixmap").toString();
     if (val.isEmpty())
         return;
-    if (colorize) {
+    QString cv = cfg.value(name+"Color").toString();
+    if (colorize || !cv.isEmpty()) {
         QColor col = QApplication::palette().color(QPalette::Active, QPalette::Highlight);
-        QString cv = cfg.value(name+"Color").toString();
         if (!cv.isEmpty()) {
             int role = parseColor(cv, col);
             col = getColor(QApplication::palette(), role, col);
@@ -186,16 +186,16 @@ void DecorationBorderData::read(QSettings &cfg, const QString &base, const QStri
         pix = QPixmap(":image/"+base+val);
     }
 
-    QStringList offlist = cfg.value(name+"Offsets").toString().split( ',');
+    QStringList offlist = cfg.value(name+"Offsets").toString().split(',', QString::SkipEmptyParts);
     offs[0] = 0;
     if (offlist.count()) {
         for (int i = 0; i < (int)offlist.count() && i < 3; i++)
             offs[i+1] = offlist[i].toInt();
     } else {
         offs[1] = 0;
-        offs[2] = pix.width();
+        offs[2] = (orient == Qt::Vertical ? pix.height() : pix.width());
     }
-    offs[3] = pix.width();
+    offs[3] = (orient == Qt::Vertical ? pix.height() : pix.width());
 
     QBitmap mask = pix.hasAlphaChannel() ? QBitmap() : pix.mask();
     val = cfg.value(name+"Mask").toString();
@@ -574,9 +574,16 @@ void PhoneDecoration::drawArea( Area a, QPainter *p, const WindowData *wd ) cons
                 else
                     p->setPen(d->data(wd).textColor(wd->palette));
                 QRect tr = d->data(wd).titleTextRect(r.width());
+
+                static const Qt::TextElideMode elideMode(QtopiaApplication::isLeftToRight() ? Qt::ElideRight : Qt::ElideLeft);
+
+                // Elide the text if it won't fit within the title bar width
+                QFontMetrics metrics(f);
+                QString renderText(metrics.elidedText(wd->caption, elideMode, tr.width()));
+
                 p->drawText( r.left()+tr.left(), r.top()-th+tr.top(),
-                                tr.width(), tr.height(),
-                        d->data(wd).titleTextAlignment(), wd->caption );
+                             tr.width(), tr.height(),
+                             d->data(wd).titleTextAlignment(), renderText );
             }
             break;
         default:
@@ -667,8 +674,9 @@ void PhoneDecoration::drawStretch(QPainter *p, const QRect &r, const DecorationB
         int h = r.height() - o[1] - (o[3]-o[2]);
         int y = 0;
         if (ss) {
-            for (; y < h-ss; y+=ss)
+            for (; y < h-ss; y+=ss) {
                 p->drawPixmap(r.x(), r.y()+o[1]+y, data->pix, 0, o[1], w, ss);
+            }
         }
         p->drawPixmap(r.x(), r.y()+o[1]+y, data->pix, 0, o[1], w, h-y);
         p->drawPixmap(r.x(), r.y()+r.height()-(o[3]-o[2]), data->pix, 0, o[2], w, o[3]-o[2]);

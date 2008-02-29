@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: The Scribe Classes</title>
+  <title>Qt 4.3: The Scribe Classes</title>
   <link rel="prev" href="qt4-arthur.html" />
   <link rel="contents" href="qt4-intro.html" />
   <link rel="next" href="qt4-mainwindow.html" />
@@ -19,7 +19,8 @@
 [<a href="qt4-intro.html">Home</a>]
 [Next: <a href="qt4-mainwindow.html">The Qt 4 Main Window Classes</a>]
 </p>
-<h1 align="center">The Scribe Classes<br /><small></small></h1>
+<h1 align="center">The Scribe Classes<br /><span class="subtitle"></span>
+</h1>
 <a name="scribe"></a><p>Scribe introduces a set of text layout classes to Qt 4. These classes replace the old rich text engine found in Qt 3, and provide new features for processing and laying out both plain and rich text.</p>
 <ul><li><a href="#overview-of-scribe">Overview of Scribe</a></li>
 <ul><li><a href="#the-document-interface">The Document Interface</a></li>
@@ -125,7 +126,7 @@
 <p>The above example demonstrates how simple it is to quickly generate new rich text documents using a minimum amount of code. Although we have generated a crude fixed-pitch calendar to avoid quoting too much code, Scribe provides much more sophisticated layout and formatting features.</p>
 <a name="plain-text-layout"></a>
 <h3>Plain Text Layout</h3>
-<p>Sometimes it is important to be able to format plain text within an irregularly-shaped region, perhaps when rendering a custom widget, for example. Scribe provides generic features to help developers perform word-wrapping and layout tasks without the need to create a document first.</p>
+<p>Sometimes it is important to be able to format plain text within an irregularly-shaped region, perhaps when rendering a custom widget, for example. Scribe provides generic features, such as those provided by the <a href="qtextlayout.html">QTextLayout</a> class, to help developers perform word-wrapping and layout tasks without the need to create a document first.</p>
 <p align="center"><img src="images/plaintext-layout.png" /></p><p>Formatting and drawing a paragraph of plain text is straightforward. The example below will lay out a paragraph of text, using a single font, around the right hand edge of a circle.</p>
 <pre>     QTextLayout textLayout(text, font);
      qreal margin = 10;
@@ -204,6 +205,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

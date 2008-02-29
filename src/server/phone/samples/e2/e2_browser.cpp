@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -108,7 +108,7 @@ QObject* E2BrowserStack::createView(const QString &category)
 
 void E2BrowserStack::busy(const QContent &content)
 {
-    emit launched(content.file());
+    emit launched(content.fileName());
 }
 
 void E2BrowserStack::raiseView(const QString &category, bool)
@@ -188,13 +188,13 @@ E2BrowserScreen::E2BrowserScreen(QWidget *parent, Qt::WFlags flags)
     catMenu->addItem("All");
     catMenu->addSeparator();
 
-    QCategoryManager man("Applications", this);
-    QStringList cats = man.categoryIds();
-    for(int ii = 0; ii < cats.count(); ++ii) {
-        const QString & cat = cats.at(ii);
-        if(!man.isGlobal(cat)) {
-            m_categories.append(cat);
-            m_categoryNames.append(man.label(cat));
+    QContentSet contentSet( (QContentFilter( QContent::Folder ) & QContentFilter::category( "MainApplications" )) );
+    QContentSetModel model(&contentSet);
+    for(int ii = 0; ii < model.rowCount(); ++ii) {
+        QContent c = model.content( ii );
+        if( c.type().startsWith( QLatin1String( "Folder/" ) ) ) {
+            m_categories.append(c.type().mid( 7 ));
+            m_categoryNames.append(c.name());
             catMenu->addItem(m_categoryNames.last());
         }
     }

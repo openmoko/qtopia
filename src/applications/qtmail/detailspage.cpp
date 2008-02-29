@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include "detailspage.h"
+#include "addresslist.h"
 
 #include <qsoftmenubar.h>
 #include <qtopiaapplication.h>
@@ -41,256 +42,184 @@
 #include <qdesktopwidget.h>
 #include <qevent.h>
 #include <QScrollArea>
-//#include <qwhatsthis.h>
+#include <QTimer>
 
-#include "composer.h"
-
-static QStringList splitAddresses(const QString& txt)
+class DetailsLineEdit : public QLineEdit
 {
-    // only separates them ( use parseContact to fetch email/name )
-    QStringList out, list = txt.split(',');
-    QString str;
+    Q_OBJECT
+public:
+    DetailsLineEdit(QWidget *parent = 0);
 
-    for (QStringList::Iterator it = list.begin(); it != list.end(); ++it) {
-        str = (*it).trimmed();
-        if ( !str.isEmpty() ) {
-            out.append( str );
-        }
-    }
-    return out;
+signals:
+    void send();
+    void done();
+
+protected:
+    void focusInEvent(QFocusEvent *);
+    void keyPressEvent(QKeyEvent *);
+    void inputMethodEvent(QInputMethodEvent *e);
+
+protected slots:
+    virtual void updateMenuBar(const QString &text);
+};
+
+DetailsLineEdit::DetailsLineEdit(QWidget *parent)
+    : QLineEdit(parent)
+{
+    connect(this, SIGNAL(textChanged(QString)),
+            this, SLOT(updateMenuBar(QString)));
 }
 
-DetailsPage::DetailsPage( QWidget *parent, const char *name )
-    : QWidget( parent ), m_type( -1 )
+void DetailsLineEdit::focusInEvent(QFocusEvent *e)
 {
-    m_ignoreFocus = true;
-    setObjectName( name );
-    QIcon abicon(":icon/addressbook/AddressBook");
-    QMenu *menu = QSoftMenuBar::menuFor( this );
-    if( !Qtopia::mousePreferred() )
-    {
-        menu->addAction( abicon, tr("From Contacts", "Find recipient's phone number or email address from Contacts application"),
-                         this, SLOT(editRecipients()) );
-        menu->addSeparator();
-        menu->addAction( QIcon(":icon/copy"), tr("Copy"),
-                         this, SLOT(copy()) );
-        menu->addAction( QIcon(":icon/paste"), tr("Paste"),
-                         this, SLOT(paste()) );
-    }
-
-    const int margin = 2;
-    setMaximumWidth( qApp->desktop()->width() - 2 * margin );
-    QGridLayout *l = new QGridLayout( this );
-    int rowCount = 0;
-
-    m_toFieldLabel = new QLabel( this );
-    m_toFieldLabel->setText( tr( "To" ) );
-    m_toBox = new QHBoxLayout( );
-    m_toField = new QLineEdit( this );
-    m_toBox->addWidget( m_toField );
-    connect( m_toField, SIGNAL(textChanged(const QString&)), this, SIGNAL(recipientsChanged()) );
-    l->addWidget( m_toFieldLabel, rowCount, 0 );
-    QSoftMenuBar::addMenuTo(m_toField, menu);
-
-#ifdef QTOPIA_PHONE
-    m_toPicker = 0;
-    if( Qtopia::mousePreferred() )
-    {
-        m_toPicker = new QToolButton( this );
-        m_toBox->addWidget( m_toPicker );
-        m_toPicker->setText( tr( "..." ) );
-        //QWhatsThis::add(  m_toPicker, tr( "Select recipients from the addressbook." ) );
-        m_toPicker->setIcon( abicon );
-        connect( m_toPicker, SIGNAL(clicked()), this, SLOT(editRecipients()) );
-    }
-#endif
-    l->addLayout( m_toBox, rowCount, 2 );
-    ++rowCount;
-
-    m_ccFieldLabel = new QLabel( this );
-    m_ccFieldLabel->setText( tr( "CC" ) );
-    m_ccBox = new QHBoxLayout( );
-    m_ccField = new QLineEdit( this );
-    m_ccBox->addWidget( m_ccField );
-    connect( m_ccField, SIGNAL(textChanged(const QString&)), this, SIGNAL(recipientsChanged()) );
-    l->addWidget( m_ccFieldLabel, rowCount, 0 );
-    QSoftMenuBar::addMenuTo( m_ccField, menu );
-
-#ifdef QTOPIA_PHONE
-    m_ccPicker = 0;
-    if( Qtopia::mousePreferred() )
-    {
-        m_ccPicker = new QToolButton( this );
-        m_ccBox->addWidget( m_ccPicker );
-        m_ccPicker->setText( tr( "..." ) );
-        m_ccPicker->setIcon( abicon );
-        connect( m_ccPicker, SIGNAL(clicked()), this, SLOT(editRecipients()) );
-        //QWhatsThis::add( m_ccPicker, tr( "Select carbon copies from the addressbook." ) );
-    }
-#endif
-    l->addLayout( m_ccBox, rowCount, 2 );
-    ++rowCount;
-
-    m_bccFieldLabel = new QLabel( this );
-    m_bccFieldLabel->setText( tr( "BCC" ) );
-    m_bccBox = new QHBoxLayout( );
-    m_bccField = new QLineEdit( this );
-    m_bccBox->addWidget( m_bccField );
-    connect( m_bccField, SIGNAL(textChanged(const QString&)), this, SIGNAL(recipientsChanged()) );
-    l->addWidget( m_bccFieldLabel, rowCount, 0 );
-#ifdef QTOPIA_PHONE
-    m_bccPicker = 0;
-    if( Qtopia::mousePreferred() )
-    {
-        m_bccPicker = new QToolButton( this );
-        m_bccBox->addWidget( m_bccPicker );
-        m_bccPicker->setEnabled( true );
-        m_bccPicker->setText( tr( "..." ) );
-        m_bccPicker->setIcon( abicon );
-        connect( m_bccPicker, SIGNAL(clicked()), this, SLOT(editRecipients()) );
-    ////QWhatsThis::add(  m_bccPicker, tr( "Select blind carbon copies from the addressbook." ) );
-    }
-#endif
-    l->addLayout( m_bccBox, rowCount, 2 );
-    ++rowCount;
-    QSoftMenuBar::addMenuTo( m_bccField, menu );
-
-    m_subjectFieldLabel = new QLabel( this );
-    m_subjectFieldLabel->setText( tr( "Subject" ) );
-    m_subjectField = new QLineEdit( this );
-    l->addWidget( m_subjectFieldLabel, rowCount, 0 );
-    l->addWidget( m_subjectField, rowCount, 2 );
-    ++rowCount;
-    QSoftMenuBar::addMenuTo( m_subjectField, menu );
-
-    m_deliveryReportField = new QCheckBox( tr("Delivery Report"), this );
-    l->addWidget( m_deliveryReportField, rowCount, 0, 1, 3, Qt::AlignLeft );
-    ++rowCount;
-
-    m_readReplyField = new QCheckBox( tr("Read Reply"), this );
-    l->addWidget( m_readReplyField, rowCount, 0, 1, 3, Qt::AlignLeft );
-    ++rowCount;
-
-    m_fromFieldLabel = new QLabel( this );
-    m_fromFieldLabel->setEnabled( true );
-    m_fromFieldLabel->setText( tr( "From" ) );
-    m_fromField = new QComboBox( this );
-    m_fromField->setEditFocus( false );
-    m_fromField->setEnabled( true );
-    m_fromField->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum )); // Why not automatic?
-    //QWhatsThis::add(  m_fromField, tr( "Select the from address used for this mail." ) );
-    l->addWidget( m_fromFieldLabel, rowCount, 0 );
-    l->addWidget( m_fromField, rowCount, 2 );
-    ++rowCount;
-    QSoftMenuBar::addMenuTo( m_fromField, menu );
-
-    QSpacerItem* spacer1 = new QSpacerItem( 4, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-    l->addItem( spacer1, rowCount, 1 );
-    ++rowCount;
-
-    QList<QWidget*> tabOrderList;
-
-    tabOrderList.append( m_toField );
-#ifdef QTOPIA_PHONE
-    if( Qtopia::mousePreferred() )
-#endif
-        if (m_toPicker)
-            tabOrderList.append( m_toPicker );
-    tabOrderList.append( m_ccField );
-#ifdef QTOPIA_PHONE
-    if( Qtopia::mousePreferred() )
-#endif
-        if (m_ccPicker)
-            tabOrderList.append( m_ccPicker );
-    tabOrderList.append( m_bccField );
-#ifdef QTOPIA_PHONE
-    if( Qtopia::mousePreferred() )
-#endif
-        if (m_bccPicker)
-            tabOrderList.append( m_bccPicker );
-    tabOrderList.append( m_subjectField );
-    tabOrderList.append( m_fromField );
-
-    QListIterator<QWidget*> it( tabOrderList );
-    QWidget *prev = 0;
-    QWidget *next;
-    while ( it.hasNext() ) {
-        next = it.next();
-        if ( prev )
-            setTabOrder( prev, next );
-        prev = next;
-    }
-    m_toField->installEventFilter(this);
-    m_ccField->installEventFilter(this);
-    m_bccField->installEventFilter(this);
+    QLineEdit::focusInEvent(e);
+    setEditFocus(true);
+    updateMenuBar(text());
 }
 
-void DetailsPage::editRecipients()
+void DetailsLineEdit::keyPressEvent(QKeyEvent *e)
 {
-    QLineEdit *le = 0;
-#ifdef QTOPIA_PHONE
-    if( Qtopia::mousePreferred() )
-    {
-        if( sender() == m_toPicker )
-            le = m_toField;
-        else if( sender() == m_ccPicker )
-            le = m_ccField;
-        else if( sender() == m_bccPicker )
-            le = m_bccField;
-    }
-    else
-    {
-        QWidget *w = focusWidget();
-        if( w && w->inherits("QLineEdit") )
-            le = (QLineEdit *)w;
-    }
-#endif
-    if( !le )
-    {
-        qWarning("DetailsPage::editRecipients: Couldn't find line edit for recipients.");
-        return;
-    }
+    static const bool keypadAbsent(style()->inherits("QThumbStyle"));
 
-    // Use the contactselector for now
-    QContactSelector picker( false, this );
-    QContactModel *model = new QContactModel( this );
-
-    QSettings config( "Trolltech", "Contacts" );
-
-    // load SIM/No SIM settings.
-    config.beginGroup( "default" );
-    if (config.contains("SelectedSources/size")) {
-        int count = config.beginReadArray("SelectedSources");
-        QSet<QPimSource> set;
-        for(int i = 0; i < count; ++i) {
-            config.setArrayIndex(i);
-            QPimSource s;
-            s.context = QUuid(config.value("context").toString());
-            s.identity = config.value("identity").toString();
-            set.insert(s);
+    if (keypadAbsent) {
+        if (e->key() == Qt::Key_Back) {
+            if (text().isEmpty())
+                emit done();
+            else
+                emit send();
+        } else {
+            QLineEdit::keyPressEvent(e);
         }
-        config.endArray();
-        model->setVisibleSources(set);
-    }
-
-    if( m_allowPhoneNumbers )
-        model->setFilter( "", QContactModel::ContainsPhoneNumber );
-    else // m_allowEmails
-        model->setFilter( "", QContactModel::ContainsEmail );
-    picker.setModel( model );
-
-    int r = QtopiaApplication::execDialog( &picker );
-    if ( r == QDialog::Accepted && picker.contactSelected() ) {
-        QString newText;
-        if( m_allowPhoneNumbers )
-            newText = picker.selectedContact().defaultPhoneNumber();
-        else //  m_allowEmails
-            newText = picker.selectedContact().defaultEmail();
-        if ( le->text().trimmed().isEmpty() )
-            le->setText( newText );
+    } else {
+        if (e->key() == Qt::Key_Select)
+            emit send();
+        else if (e->key() == Qt::Key_Back && text().isEmpty())
+            emit done();
         else
-            le->setText( le->text()  + ", " + newText );
+            QLineEdit::keyPressEvent(e);
     }
+}
+
+void DetailsLineEdit::inputMethodEvent(QInputMethodEvent *e)
+{
+    QLineEdit::inputMethodEvent(e);
+    updateMenuBar(text() + e->preeditString());
+}
+
+void DetailsLineEdit::updateMenuBar(const QString &text)
+{
+    static const bool keypadAbsent(style()->inherits("QThumbStyle"));
+
+    if (keypadAbsent) {
+        if (text.isEmpty())
+            QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Cancel, QSoftMenuBar::EditFocus);
+        else
+            QSoftMenuBar::setLabel(this, Qt::Key_Back, ":icon/qtmail/enqueue", tr("Send"));
+    } else {
+        QSoftMenuBar::setLabel(this, Qt::Key_Select, ":icon/qtmail/enqueue", tr("Send"));
+
+        if (text.isEmpty())
+            QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::RevertEdit, QSoftMenuBar::EditFocus);
+        else
+            QSoftMenuBar::clearLabel(this, Qt::Key_Back);
+    }
+}
+
+//===========================================================================
+
+class RecipientEdit : public DetailsLineEdit
+{
+    Q_OBJECT
+public:
+    RecipientEdit(QWidget *parent = 0);
+    ~RecipientEdit();
+
+    void setPhoneNumbersAllowed(bool allow) {
+        m_allowPhoneNumbers = allow;
+    }
+    void setEmailAllowed(bool allow) {
+        m_allowEmails = allow;
+    }
+    void setMultipleAllowed(bool allow) {
+        m_allowMultiple = allow;
+    }
+
+public slots:
+    void editRecipients();
+
+protected:
+    virtual void keyPressEvent(QKeyEvent *);
+
+protected slots:
+    virtual void updateMenuBar(const QString &text);
+    void recipientsChanged();
+    void updateRecipients(int);
+
+private:
+    bool m_allowPhoneNumbers;
+    bool m_allowEmails;
+    bool m_allowMultiple;
+    AddressPicker* m_picker;
+    QDialog* m_pickerDialog;
+};
+
+RecipientEdit::RecipientEdit(QWidget *parent)
+    : DetailsLineEdit(parent), m_allowPhoneNumbers(false),
+      m_allowEmails(false), m_allowMultiple(false),
+      m_picker(0), m_pickerDialog(0)
+{
+}
+
+RecipientEdit::~RecipientEdit()
+{
+    delete m_pickerDialog;
+}
+
+void RecipientEdit::updateRecipients(int r)
+{
+    if (r == QDialog::Accepted)
+        setText(m_picker->addressList().join(", "));
+}
+
+void RecipientEdit::recipientsChanged()
+{
+    if (m_picker->addressList().isEmpty() || !m_allowMultiple)
+        m_pickerDialog->accept();
+    else
+        m_pickerDialog->setWindowTitle(tr("Recipients"));
+}
+
+void RecipientEdit::editRecipients()
+{
+    if (m_picker == 0) {
+        m_picker = new AddressPicker;
+        connect(m_picker, SIGNAL(selectionChanged()),
+                this, SLOT(recipientsChanged()));
+
+        if (m_allowPhoneNumbers && !m_allowEmails)
+            m_picker->setFilterFlags(QContactModel::ContainsPhoneNumber);
+        else if (m_allowEmails && !m_allowPhoneNumbers)
+            m_picker->setFilterFlags(QContactModel::ContainsEmail);
+        else 
+            m_picker->resetFilterFlags();
+
+        m_pickerDialog = new QDialog;
+
+        QVBoxLayout *vbl = new QVBoxLayout;
+        vbl->addWidget(m_picker);
+        m_pickerDialog->setLayout(vbl);
+
+        connect(m_pickerDialog, SIGNAL(finished(int)), 
+                this, SLOT(updateRecipients(int)));
+    }
+
+    m_pickerDialog->showMaximized();
+    QtopiaApplication::showDialog(m_pickerDialog);
+
+    if (m_picker->isEmpty())
+        m_picker->addAddress();
+    else
+        m_pickerDialog->setWindowTitle(tr("Recipients"));
 
 #ifdef QTOPIA4_TODO
     QList<QContact::ContactFields> fields;
@@ -330,9 +259,226 @@ void DetailsPage::editRecipients()
 #endif
 }
 
+void RecipientEdit::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Select && text().isEmpty())
+        editRecipients();
+    else
+        DetailsLineEdit::keyPressEvent(e);
+}
+
+void RecipientEdit::updateMenuBar(const QString &text)
+{
+    static const bool keypadAbsent(style()->inherits("QThumbStyle"));
+
+    if (keypadAbsent) {
+        if (text.isEmpty())
+            QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Cancel, QSoftMenuBar::EditFocus);
+        else
+            QSoftMenuBar::setLabel(this, Qt::Key_Back, ":icon/qtmail/enqueue", tr("Send"));
+    } else {
+        if (text.isEmpty()) {
+            QSoftMenuBar::setLabel(this, Qt::Key_Select, ":icon/addressbook/AddressBook", tr("Search"));
+            QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::RevertEdit, QSoftMenuBar::EditFocus);
+        } else {
+            QSoftMenuBar::setLabel(this, Qt::Key_Select, ":icon/qtmail/enqueue", tr("Send"));
+            QSoftMenuBar::clearLabel(this, Qt::Key_Back);
+        }
+    }
+}
+
+
+class RecipientSelectorButton : public QToolButton
+{
+    Q_OBJECT
+
+public:
+    RecipientSelectorButton(QWidget *parent, QLayout *layout, RecipientEdit *sibling);
+
+private:
+    static QIcon s_icon;
+};
+
+QIcon RecipientSelectorButton::s_icon(":icon/addressbook/AddressBook");
+
+RecipientSelectorButton::RecipientSelectorButton(QWidget *parent, QLayout *layout, RecipientEdit* sibling)
+    : QToolButton(parent)
+{
+    setFocusPolicy( Qt::NoFocus );
+    setText( tr( "..." ) );
+    setIcon( s_icon );
+
+    connect( this, SIGNAL(clicked()), sibling, SLOT(setFocus()) );
+    connect( this, SIGNAL(clicked()), sibling, SLOT(editRecipients()) );
+
+    layout->addWidget( this );
+}
+
+
+//===========================================================================
+
+
+static const int MaximumDefaultSubjectLength = 40;
+
+DetailsPage::DetailsPage( QWidget *parent, const char *name )
+    : QWidget( parent ), m_type( -1 )
+{
+    m_ignoreFocus = true;
+    setObjectName( name );
+    QIcon abicon(":icon/addressbook/AddressBook");
+    QMenu *menu = QSoftMenuBar::menuFor( this );
+    if( !Qtopia::mousePreferred() )
+    {
+        menu->addAction( abicon, tr("From contacts", "Find recipient's phone number or email address from Contacts application"),
+                         this, SLOT(editRecipients()) );
+        menu->addSeparator();
+#ifndef QT_NO_CLIPBOARD	
+        menu->addAction( QIcon(":icon/copy"), tr("Copy"),
+                         this, SLOT(copy()) );
+        menu->addAction( QIcon(":icon/paste"), tr("Paste"),
+                         this, SLOT(paste()) );
+#endif
+    }
+
+    const int margin = 2;
+    setMaximumWidth( qApp->desktop()->width() - 2 * margin );
+    QGridLayout *l = new QGridLayout( this );
+    int rowCount = 0;
+
+    m_toFieldLabel = new QLabel( this );
+    m_toFieldLabel->setText( tr( "To" ) );
+    m_toBox = new QHBoxLayout( );
+    m_toField = new RecipientEdit( this );
+    m_toBox->addWidget( m_toField );
+    m_toFieldLabel->setBuddy(m_toField);
+    connect( m_toField, SIGNAL(textChanged(QString)), this, SIGNAL(changed()) );
+    connect( m_toField, SIGNAL(send()), this, SIGNAL(sendMessage()) );
+    connect( m_toField, SIGNAL(done()), this, SIGNAL(cancel()) );
+    l->addWidget( m_toFieldLabel, rowCount, 0 );
+    QSoftMenuBar::addMenuTo(m_toField, menu);
+
+    m_toPicker = ( Qtopia::mousePreferred() ? new RecipientSelectorButton(this, m_toBox, m_toField) : 0 );
+    l->addLayout( m_toBox, rowCount, 2 );
+    ++rowCount;
+
+    m_ccFieldLabel = new QLabel( this );
+    m_ccFieldLabel->setText( tr( "CC" ) );
+    m_ccBox = new QHBoxLayout( );
+    m_ccField = new RecipientEdit( this );
+    m_ccBox->addWidget( m_ccField );
+    m_ccFieldLabel->setBuddy(m_ccField);
+    connect( m_ccField, SIGNAL(textChanged(QString)), this, SIGNAL(changed()) );
+    connect( m_ccField, SIGNAL(send()), this, SIGNAL(sendMessage()) );
+    connect( m_ccField, SIGNAL(done()), this, SIGNAL(cancel()) );
+    l->addWidget( m_ccFieldLabel, rowCount, 0 );
+    QSoftMenuBar::addMenuTo( m_ccField, menu );
+
+    m_ccPicker = ( Qtopia::mousePreferred() ? new RecipientSelectorButton(this, m_ccBox, m_ccField) : 0 );
+    l->addLayout( m_ccBox, rowCount, 2 );
+    ++rowCount;
+
+    m_bccFieldLabel = new QLabel( this );
+    m_bccFieldLabel->setText( tr( "BCC" ) );
+    m_bccBox = new QHBoxLayout( );
+    m_bccField = new RecipientEdit( this );
+    m_bccBox->addWidget( m_bccField );
+    m_bccFieldLabel->setBuddy(m_bccField);
+    connect( m_bccField, SIGNAL(textChanged(QString)), this, SIGNAL(changed()) );
+    connect( m_bccField, SIGNAL(send()), this, SIGNAL(sendMessage()) );
+    connect( m_bccField, SIGNAL(done()), this, SIGNAL(cancel()) );
+    l->addWidget( m_bccFieldLabel, rowCount, 0 );
+    QSoftMenuBar::addMenuTo( m_bccField, menu );
+
+    m_bccPicker = ( Qtopia::mousePreferred() ? new RecipientSelectorButton(this, m_bccBox, m_bccField) : 0 );
+    l->addLayout( m_bccBox, rowCount, 2 );
+    ++rowCount;
+
+    m_subjectFieldLabel = new QLabel( this );
+    m_subjectFieldLabel->setText( tr( "Subject" ) );
+    m_subjectField = new DetailsLineEdit( this );
+    m_subjectFieldLabel->setBuddy(m_subjectField);
+    connect( m_subjectField, SIGNAL(textChanged(QString)), this, SIGNAL(changed()) );
+    connect( m_subjectField, SIGNAL(send()), this, SIGNAL(sendMessage()) );
+    connect( m_subjectField, SIGNAL(done()), this, SIGNAL(cancel()) );
+    l->addWidget( m_subjectFieldLabel, rowCount, 0 );
+    l->addWidget( m_subjectField, rowCount, 2 );
+    ++rowCount;
+    QSoftMenuBar::addMenuTo( m_subjectField, menu );
+
+    m_deliveryReportField = new QCheckBox( tr("Delivery report"), this );
+    l->addWidget( m_deliveryReportField, rowCount, 0, 1, 3, Qt::AlignLeft );
+    ++rowCount;
+
+    m_readReplyField = new QCheckBox( tr("Read reply"), this );
+    l->addWidget( m_readReplyField, rowCount, 0, 1, 3, Qt::AlignLeft );
+    ++rowCount;
+
+    m_fromFieldLabel = new QLabel( this );
+    m_fromFieldLabel->setEnabled( true );
+    m_fromFieldLabel->setText( tr( "From" ) );
+    m_fromField = new QComboBox( this );
+    m_fromFieldLabel->setBuddy(m_fromField);
+    m_fromField->setEnabled( true );
+    m_fromField->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum )); // Why not automatic?
+    connect( m_fromField, SIGNAL(activated(int)), this, SIGNAL(changed()) );
+    l->addWidget( m_fromFieldLabel, rowCount, 0 );
+    l->addWidget( m_fromField, rowCount, 2 );
+    ++rowCount;
+    QSoftMenuBar::addMenuTo( m_fromField, menu );
+
+    QSpacerItem* spacer1 = new QSpacerItem( 4, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
+    l->addItem( spacer1, rowCount, 1 );
+    ++rowCount;
+
+    QList<QWidget*> tabOrderList;
+
+    tabOrderList.append( m_toField );
+    if( Qtopia::mousePreferred() && m_toPicker)
+        tabOrderList.append( m_toPicker );
+    tabOrderList.append( m_ccField );
+    if( Qtopia::mousePreferred() && m_ccPicker)
+        tabOrderList.append( m_ccPicker );
+    tabOrderList.append( m_bccField );
+    if( Qtopia::mousePreferred() && m_bccPicker)
+        tabOrderList.append( m_bccPicker );
+    tabOrderList.append( m_subjectField );
+    tabOrderList.append( m_fromField );
+
+    QListIterator<QWidget*> it( tabOrderList );
+    QWidget *prev = 0;
+    QWidget *next;
+    while ( it.hasNext() ) {
+        next = it.next();
+        if ( prev )
+            setTabOrder( prev, next );
+        prev = next;
+    }
+}
+
+void DetailsPage::editRecipients()
+{
+    RecipientEdit *edit = 0;
+    if (Qtopia::mousePreferred()) {
+        if( sender() == m_toPicker )
+            edit = m_toField;
+        else if( sender() == m_ccPicker )
+            edit = m_ccField;
+        else if( sender() == m_bccPicker )
+            edit = m_bccField;
+    } else {
+        QWidget *w = focusWidget();
+        if( w && w->inherits("RecipientEdit") )
+            edit = static_cast<RecipientEdit *>(w);
+    }
+    if (edit)
+        edit->editRecipients();
+    else
+        qWarning("DetailsPage::editRecipients: Couldn't find line edit for recipients.");
+}
+
 void DetailsPage::setType( int t )
 {
-    int imHint = QtopiaApplication::Normal;
+    QtopiaApplication::InputMethodHint imHint = QtopiaApplication::Normal;
     if( m_type != t )
     {
         m_allowPhoneNumbers = false;
@@ -352,8 +498,8 @@ void DetailsPage::setType( int t )
         m_fromFieldLabel->hide();
         m_readReplyField->hide();
         m_deliveryReportField->hide();
-        // composer interface can be mms OR ems OR sms AND/OR email
-        if( t == MailMessage::MMS )
+
+        if( t == QMailMessage::Mms )
         {
             m_allowPhoneNumbers = true;
             m_allowEmails = true;
@@ -370,90 +516,112 @@ void DetailsPage::setType( int t )
             m_readReplyField->show();
             m_deliveryReportField->show();
         }
-        else if( t == MailMessage::EMS )
+        else if( t == QMailMessage::Sms )
         {
             m_allowPhoneNumbers = true;
+
         }
-        else
+        else if( t == QMailMessage::Email )
         {
-            if( t & MailMessage::SMS )
-            {
-                m_allowPhoneNumbers = true;
-            }
-            if( t & MailMessage::Email )
-            {
-                m_allowEmails = true;
-                if( t == MailMessage::Email )
-                { // only allowed if explicitly email
-                    m_ccFieldLabel->show();
-                    m_ccField->show();
-                    if (m_ccPicker)
-                        m_ccPicker->show();
-                    m_bccFieldLabel->show();
-                    m_bccField->show();
-                    if (m_bccPicker)
-                        m_bccPicker->show();
-                    m_subjectField->show();
-                    m_subjectFieldLabel->show();
-                    m_fromField->show();
-                    m_fromFieldLabel->show();
-                }
+            m_allowEmails = true;
+            m_ccFieldLabel->show();
+            m_ccField->show();
+            if (m_ccPicker)
+                m_ccPicker->show();
+            m_bccFieldLabel->show();
+            m_bccField->show();
+            if (m_bccPicker)
+                m_bccPicker->show();
+            m_subjectField->show();
+            m_subjectFieldLabel->show();
+            if (m_fromField->count() >= 2) {
+                m_fromField->show();
+                m_fromFieldLabel->show();
             }
         }
+
         if( m_allowPhoneNumbers )
             imHint = QtopiaApplication::PhoneNumber;
         else if( m_allowEmails )
             imHint = QtopiaApplication::Words;
 
-        QtopiaApplication::setInputMethodHint( m_toField,
-                                        (QtopiaApplication::InputMethodHint)imHint );
-        QtopiaApplication::setInputMethodHint( m_ccField,
-                                        (QtopiaApplication::InputMethodHint)imHint );
-        QtopiaApplication::setInputMethodHint( m_bccField,
-                                        (QtopiaApplication::InputMethodHint)imHint );
+        foreach (RecipientEdit* field, (QList<RecipientEdit*>() << m_toField << m_ccField << m_bccField)) {
+            QtopiaApplication::setInputMethodHint( field, imHint);
+
+            field->setMultipleAllowed(true);
+            field->setPhoneNumbersAllowed(m_allowPhoneNumbers);
+            field->setEmailAllowed(m_allowEmails);
+        }
     }
-    m_toField->setFocus();
+
     layout()->activate();
 }
 
-void DetailsPage::getDetails( MailMessage &mail )
+void DetailsPage::getDetails( QMailMessage &mail )
 {
-    mail.setTo( QStringList( to() ) );
-    mail.setCc( QStringList( cc() ) );
-    mail.setBcc( QStringList( bcc() ) );
+    mail.setTo( QList<QMailAddress>() << QMailAddress( to() ) );
+    mail.setCc( QList<QMailAddress>() << QMailAddress( cc() ) );
+    mail.setBcc( QList<QMailAddress>() << QMailAddress( bcc() ) );
     mail.setSubject( subject() );
-    if( mail.subject().isEmpty() ) {
-        if ( (m_type & MailMessage::Email) ||
-             mail.plainTextBody().trimmed().isEmpty() )
-            mail.setSubject( tr("(no subject)") );
-        else
-            mail.setSubject( mail.plainTextBody() );
+    if( mail.subject().isEmpty() || (m_type & QMailMessage::Sms) ) {
+        QString subjectText;
+        if ( (m_type == QMailMessage::Email) || !mail.hasBody() ) {
+            subjectText = tr("(no subject)");
+        } else {
+            if (mail.contentType().content().toLower() == "text/x-vcard") {
+                // Much nicer to create a readable subject rather than show vcard data.
+                QList<QContact> contacts = QContact::readVCard(mail.body().data(QMailMessageBody::Decoded));
+                if ( contacts.count() == 0 ) {
+                    // Invalid VCard data, so just show raw data
+                } else if ( contacts.count() == 1 ) {
+                    QString name = tr( "vCard describing %1", "%1 = Person's name" );
+                    QContact& contact = contacts[0];
+                    if ( !contact.nickname().isEmpty() ) {
+                        subjectText = name.arg( contact.nickname() );
+                    } else if ( !contact.firstName().isEmpty() && !contact.lastName().isEmpty() ) {
+                        subjectText = name.arg( contact.firstName() + " " + contact.lastName() );
+                    } else if ( !contact.firstName().isEmpty() ) {
+                        subjectText = name.arg( contact.firstName() );
+                    } else {
+                        subjectText = tr( "vCard describing a contact" );
+                    }
+                } else if ( contacts.count() > 1 ) {
+                    subjectText = tr( "vCard describing multiple contacts" );
+                }
+            } 
+            if (subjectText.isEmpty()) {
+                subjectText = mail.body().data();
+                if (subjectText.length() > MaximumDefaultSubjectLength) {
+                    // No point having a huge subject.
+                    subjectText = subjectText.left(MaximumDefaultSubjectLength) + QLatin1String("...");
+                }
+            }
+        }
+        mail.setSubject(subjectText);
     }
-    mail.setFrom( from() );
-    if( m_type == MailMessage::MMS ) {
+    mail.setFrom( QMailAddress( from() ) );
+    if( m_type == QMailMessage::Mms ) {
         if ( m_deliveryReportField->isChecked() )
-            mail.setExtraHeader( "X-Mms-Delivery-Report", "Yes" );
+            mail.setHeaderField( "X-Mms-Delivery-Report", "Yes" );
         if ( m_readReplyField->isChecked() )
-            mail.setExtraHeader( "X-Mms-Read-Reply", "Yes" );
+            mail.setHeaderField( "X-Mms-Read-Reply", "Yes" );
     }
-    if( m_type & MailMessage::SMS ) {
+    if( m_type & QMailMessage::Sms ) {
         // For the time being limit sending SMS messages so that they can
         // only be sent to phone numbers and not email addresses
         QString number = to();
         QString n;
         QStringList numbers;
-        uint posn;
-        uint ch;
-        for ( posn = 0; posn < (uint)number.length(); ++posn ) {
-            ch = number[posn].unicode();
+        for ( int posn = 0, len = number.length(); posn < len; ++posn ) {
+            uint ch = number[posn].unicode();
             if ( ch >= '0' && ch <= '9' ) {
-                n += (QChar)ch;
+                n += QChar(ch);
             } else if ( ch == '+' || ch == '#' || ch == '*' ) {
-                n += (QChar)ch;
+                n += QChar(ch);
             } else if ( ch == '-' || ch == '(' || ch == ')' ) {
-                n += (QChar)ch;
+                n += QChar(ch);
             } else if ( ch == ' ' ) {
-                n += (QChar)ch;
+                n += QChar(ch);
             } else if ( ch == ',' ) {
                 if (!n.isEmpty())
                     numbers.append( n );
@@ -462,7 +630,7 @@ void DetailsPage::getDetails( MailMessage &mail )
         }
         if (!n.isEmpty())
             numbers.append( n );
-        mail.setTo( numbers );
+        mail.setTo( QMailAddress::fromStringList( numbers ) );
     }
 }
 
@@ -500,8 +668,6 @@ void DetailsPage::setTo( const QString &a_to )
 
 QString DetailsPage::to() const
 {
-    // TODO : only include addresses according to allow flags
-    QStringList list = splitAddresses( m_toField->text() );
     return m_toField->text();
 }
 
@@ -522,8 +688,8 @@ QString DetailsPage::from() const
 
 void DetailsPage::setFrom( const QString &from )
 {
-    int i;
-    for( i = 0 ; i < (int)m_fromField->count() ; ++i )
+    int i = 0;
+    for( const int n = static_cast<int>(m_fromField->count()) ; i < n; ++i )
     {
         if( m_fromField->itemText( i ) == from )
         {
@@ -542,28 +708,36 @@ void DetailsPage::setFromFields( const QStringList &from )
 {
     m_fromField->clear();
     m_fromField->addItems( from );
+    if (m_fromField->count() < 2) {
+        m_fromField->hide();
+        m_fromFieldLabel->hide();
+    }
 }
 
 void DetailsPage::copy()
 {
+#ifndef QT_NO_CLIPBOARD	
     QWidget *fw = focusWidget();
     if( !fw )
         return;
     if( fw->inherits( "QLineEdit" ) )
-        ((QLineEdit*)(fw))->copy();
+        static_cast<QLineEdit*>(fw)->copy();
     else if( fw->inherits( "QTextEdit" ) )
-        ((QTextEdit*)(fw))->copy();
+        static_cast<QTextEdit*>(fw)->copy();
+#endif
 }
 
 void DetailsPage::paste()
 {
+#ifndef QT_NO_CLIPBOARD	
     QWidget *fw = focusWidget();
     if( !fw )
         return;
     if( fw->inherits( "QLineEdit" ) )
-        ((QLineEdit*)(fw))->paste();
+        static_cast<QLineEdit*>(fw)->paste();
     else if( fw->inherits( "QTextEdit" ))
-        ((QTextEdit*)(focusWidget()))->paste();
+        static_cast<QTextEdit*>(fw)->paste();
+#endif
 }
 
 void DetailsPage::clear()
@@ -576,27 +750,4 @@ void DetailsPage::clear()
     // don't clear from fields
 }
 
-bool DetailsPage::eventFilter(QObject* obj, QEvent* event)
-{
-    if (((obj == m_toField) || (obj == m_ccField) || (obj == m_bccField))
-        && (event->type() == QEvent::KeyPress)
-        && (qobject_cast<QLineEdit *>(obj)->text().isEmpty())) {
-        QKeyEvent *keyEvent = (QKeyEvent*)event;
-        if (keyEvent->key() == Qt::Key_Select) {
-            editRecipients();
-            return true;
-        }
-        return false;
-    } else if (obj == m_toField) {
-        if (event->type() == QEvent::EnterEditFocus && m_ignoreFocus) {
-            if(!m_toField->text().isEmpty())
-                m_toField->setEditFocus(false);
-            m_ignoreFocus = false;
-            return true;
-        }
-        return false;
-    } else {
-        return QWidget::eventFilter(obj, event);
-    }
-}
-
+#include "detailspage.moc"

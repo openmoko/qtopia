@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,48 +22,41 @@
 #define ABEDITOR_H
 
 #include <qtopia/pim/qcontact.h>
+#include <qtopia/pim/qappointment.h>
 #include <qtopia/pim/qcontactmodel.h>
+#include <qtopia/qcontent.h>
 
 #include <QDialog>
 #include <QList>
 #include <QMap>
 #include <QString>
 #include <QStringList>
-#include <QComboBox>
 #include <QPixmap>
-#include <QPushButton>
 #include <QLineEdit>
-
-#ifdef QTOPIA_CELL
-#include "../../settings/ringprofile/ringtoneeditor.h"
-#endif
 
 class QIconSelector;
 class QVBoxLayout;
 class QShowEvent;
 class QKeyEvent;
-class QPaintEvent;
-class QLineEdit;
 class QCheckBox;
 class QLabel;
 class QComboBox;
-class QRadioButton;
-class QButtonGroup;
 class QHBox;
 class QTabWidget;
 class QToolButton;
+class QPushButton;
 class QCategorySelector;
 class QDateEdit;
 class QGroupBox;
 class QTextEdit;
-class AbDetailEditor;
 class QGridLayout;
 class QAction;
 class QScrollArea;
-#ifdef QTOPIA_PHONE
-class QMenu;
-#endif
 class QDLEditClient;
+class RingToneButton;
+class ReminderPicker;
+class GroupView;
+class QCategoryManager;
 
 //-----------------------------------------------------------------------
 
@@ -112,12 +105,11 @@ signals:
     void numberChanged(const QString&);
     void fieldChanged(const QString&,const PhoneFieldType&);
 protected:
-   QLineEdit *numberLE;
+    QLineEdit *numberLE;
 
     QIconSelector *typeIS;
 
 private:
-
     QList<PhoneFieldType> mTypes;
 };
 
@@ -182,12 +174,9 @@ public:
     void setFields( const QMap<QContactModel::Field, QString> &f );
     QMap<QContactModel::Field, QString> fields() const;
 
-public slots:
 protected slots:
     void accept();
 protected:
-    bool eventFilter( QObject *receiver, QEvent *event );
-
     virtual const QMap<QContactModel::Field, QString> displayNames() const;
 
     QMap<QContactModel::Field, QString> myFields;
@@ -274,15 +263,15 @@ public:
 
     virtual bool isEmpty() const = 0;
 
-    virtual void setEntry(const QContact &entry, bool newEntry = false) = 0;
+    virtual void setEntry(const QContact &entry, bool newEntry) = 0;
 
     virtual bool imageModified() const { return false; }
 
-protected:
-#ifdef QTOPIA_PHONE
-    void keyPressEvent(QKeyEvent *e);
-#endif
+    virtual QAppointment::AlarmFlags anniversaryReminder() {return QAppointment::NoAlarm;}
+    virtual int anniversaryReminderDelay() {return 0;}
 
+    virtual QAppointment::AlarmFlags birthdayReminder() {return QAppointment::NoAlarm;}
+    virtual int birthdayReminderDelay() {return 0;}
 };
 
 class QDelayedScrollArea;
@@ -301,19 +290,23 @@ public:
 
     bool imageModified() const;
 
-    void setEntry(const QContact &entry, bool newEntry = false);
+    void setEntry(const QContact &entry, bool newEntry);
 
-    bool eventFilter(QObject *sender, QEvent *e);
+    virtual QAppointment::AlarmFlags anniversaryReminder() {updateAppts(); return anniversaryAppt.alarm();}
+    virtual int anniversaryReminderDelay() {updateAppts(); return anniversaryAppt.alarmDelay();}
 
-signals:
-    void categoriesChanged(); // for Qtopia Desktop only
+    virtual QAppointment::AlarmFlags birthdayReminder() {updateAppts(); return birthdayAppt.alarm();}
+    virtual int birthdayReminderDelay() {updateAppts(); return birthdayAppt.alarmDelay();}
 
 protected slots:
     void editPhoto();
 
+    void editGroups();
+
+    void updateContextMenu();
+
     void showSpecWidgets( bool s );
     void catCheckBoxChanged( bool b );
-    void categorySelectChanged(const QList<QString>& cats);
 
     //Communication between Contact tab and details on other tabs
 
@@ -327,6 +320,8 @@ protected slots:
     void editEmails();
     void prepareTab(int);
 
+    void toneSelected( const QContent &tone );
+
 protected:
     void closeEvent(QCloseEvent *e);
     void showEvent( QShowEvent *e );
@@ -334,7 +329,6 @@ protected:
 private:
     void init();
     void initMainUI();
-
 
     void setupTabs();
 
@@ -351,11 +345,15 @@ private:
 
     void contactFromFields(QContact &);
 
+    void updateGroupButton();
+
+    void updateAppts();
+
 private:
     bool mImageModified;
     bool mNewEntry;
 
-    QPixmap mContactImage;
+    QContent mContactImage;
 
     QContact ent;
     QTextEdit *txtNote;
@@ -366,7 +364,7 @@ private:
     QTextEdit *summary;
 
     PhoneFieldType  mHPType, mHMType, mHFType, mBPType, mBMType,
-                    mBFType, mBPAType;
+                    mBFType, mBPAType, mHVType, mBVType;
 
     bool lastUpdateInternal;
 
@@ -382,7 +380,7 @@ private:
 
     AbstractName *abName;
     QLineEdit *phoneLE, *mobileLE;
-    QCategorySelector *cmbCat;
+    QPushButton *catPB;
     QComboBox *genderCombo;
     QCheckBox *categoryCB;
     QLineEdit *emailLE;
@@ -392,10 +390,6 @@ private:
     QGroupBox *bdayCheck;
     QGroupBox *anniversaryCheck;
     QHBox *ehb;
-
-#ifdef QTOPIA_VOIP
-    QLineEdit *voipIdLE;
-#endif
 
     //
     //  Widgets specific to the contact type
@@ -416,25 +410,41 @@ private:
     QLineEdit *homePhoneLE, *homeFaxLE, *homeMobileLE, *homeWebPageLE,
               *spouseLE, *anniversaryLE, *childrenLE;
 
+#if defined(QTOPIA_VOIP)
+    QLineEdit *busVoipLE, *homeVoipLE;
+#endif
+
     QTextEdit *busStreetME, *homeStreetME;
     QLineEdit *busCityLE, *busStateLE, *busZipLE, *busCountryLE,
               *homeCityLE, *homeStateLE, *homeZipLE, *homeCountryLE;
 
+    ReminderPicker *anniversaryRP, *birthdayRP;
+    QAppointment anniversaryAppt, birthdayAppt;
+
     QToolButton *photoPB;
     PhoneFieldManager *phoneMan;
 
-#ifdef QTOPIA_PHONE
     QAction *actionEmailDetails;
-#endif
-#ifdef QTOPIA_CELL
-    RingToneButton *editTonePB;
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+    RingToneButton *editTonePB, *editVideoTonePB;
 #endif
     QWidget *wOtherTab;
     QWidget *wBusinessTab;
     QWidget *wPersonalTab;
+    GroupView *mGroupPicker;
+    QCategoryManager *mCatMan;
+    QStringList mGroupList;
+    QDialog *mGroupDialog;
+
+    QAction* actionAddGroup;
+    QAction* actionRemoveGroup;
+    QAction* actionRenameGroup;
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+    QAction* actionSetRingTone;
+#endif
 };
 
-#ifdef QTOPIA_PHONE
+#ifdef QTOPIA_CELL
 class AbSimEditor : public AbEditor
 {
     Q_OBJECT
@@ -448,7 +458,7 @@ public:
 
     bool isEmpty() const;
 
-    void setEntry(const QContact &entry, bool newEntry = false);
+    void setEntry(const QContact &entry, bool newEntry);
 
 protected slots:
     void accept();

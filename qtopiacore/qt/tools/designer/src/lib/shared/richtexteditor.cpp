@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -40,6 +55,7 @@ TRANSLATOR qdesigner_internal::RichTextEditorDialog
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QPushButton>
+#include <QtGui/QDialogButtonBox>
 
 #include <QtCore/qdebug.h>
 
@@ -115,7 +131,7 @@ RichTextEditorToolBar::RichTextEditorToolBar(RichTextEditor *editor,
 
     m_bold_action = createCheckableAction(createIconSet(QLatin1String("textbold.png")),
             tr("Bold"), editor, SLOT(setFontBold(bool)), this);
-    m_bold_action->setShortcut(tr("CTRL+b"));
+    m_bold_action->setShortcut(tr("CTRL+B"));
     addAction(m_bold_action);
 
     m_italic_action = createCheckableAction(createIconSet(QLatin1String("textitalic.png")),
@@ -312,7 +328,7 @@ RichTextEditorDialog::RichTextEditorDialog(QWidget *parent)
     : QDialog(parent)
 {
     setWindowTitle(tr("Edit text"));
-
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(1);
     m_editor = new RichTextEditor(this);
@@ -321,17 +337,17 @@ RichTextEditorDialog::RichTextEditorDialog(QWidget *parent)
     layout->addWidget(tool_bar);
     layout->addWidget(m_editor);
 
-    QHBoxLayout *layout2 = new QHBoxLayout;
-    layout->addLayout(layout2);
-
-    layout2->addStretch();
-    QPushButton *cancel_button = new QPushButton(tr("&Cancel"), this);
-    connect(cancel_button, SIGNAL(clicked()), this, SLOT(reject()));
-    QPushButton *ok_button = new QPushButton(tr("&OK"), this);
-    connect(ok_button, SIGNAL(clicked()), this, SLOT(accept()));
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                                        | QDialogButtonBox::Cancel, Qt::Horizontal,
+                                                       this);
+    QPushButton *ok_button = buttonBox->button(QDialogButtonBox::Ok);
+    ok_button->setText(tr("&OK"));
     ok_button->setDefault(true);
-    layout2->addWidget(ok_button);
-    layout2->addWidget(cancel_button);
+    buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("&Cancel"));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+
+    layout->addWidget(buttonBox);
 }
 
 RichTextEditor *RichTextEditorDialog::editor()

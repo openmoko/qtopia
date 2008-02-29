@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,35 +49,52 @@ class BrushManagerProxyPrivate
 {
     BrushManagerProxy *q_ptr;
     Q_DECLARE_PUBLIC(BrushManagerProxy)
+
 public:
+    BrushManagerProxyPrivate(BrushManagerProxy *bp, QDesignerFormEditorInterface *core);
     void brushAdded(const QString &name, const QBrush &brush);
     void brushRemoved(const QString &name);
     QString uniqueBrushFileName(const QString &brushName) const;
 
-    QtBrushManager *theManager;
-    QString theBrushFolder;
-    QDesignerFormEditorInterface *theCore;
-    QMap<QString, QString> theFileToBrush;
-    QMap<QString, QString> theBrushToFile;
+    QtBrushManager *m_Manager;
+    QString m_designerFolder;
+    const QString  m_BrushFolder;
+    QString m_BrushPath;
+    QDesignerFormEditorInterface *m_Core;
+    QMap<QString, QString> m_FileToBrush;
+    QMap<QString, QString> m_BrushToFile;
 };
 
+BrushManagerProxyPrivate::BrushManagerProxyPrivate(BrushManagerProxy *bp, QDesignerFormEditorInterface *core) :
+    q_ptr(bp),
+    m_Manager(0),
+    m_BrushFolder(QLatin1String("brushes")),
+    m_Core(core)
+{
+    m_designerFolder = QDir::homePath();
+    m_designerFolder += QDir::separator();
+    m_designerFolder += QLatin1String(".designer");
+    m_BrushPath = m_designerFolder;
+    m_BrushPath += QDir::separator();
+    m_BrushPath += m_BrushFolder;
+}
 }  // namespace qdesigner_internal
 
 using namespace qdesigner_internal;
 
 void BrushManagerProxyPrivate::brushAdded(const QString &name, const QBrush &brush)
 {
-    QString filename = uniqueBrushFileName(name);
+    const QString filename = uniqueBrushFileName(name);
 
-    QDir designerDir(QDir::homePath() + QDir::separator() + QLatin1String(".designer"));
-    if (!designerDir.exists(QLatin1String("brushes")))
-        designerDir.mkdir(QLatin1String("brushes"));
+    QDir designerDir(m_designerFolder);
+    if (!designerDir.exists(m_BrushFolder))
+        designerDir.mkdir(m_BrushFolder);
 
-    QFile file(theBrushFolder + QDir::separator() +filename);
+    QFile file(m_BrushPath + QDir::separator() +filename);
     if (!file.open(QIODevice::WriteOnly))
         return;
 
-    QSimpleResource resource(theCore);
+    QSimpleResource resource(m_Core);
 
     DomBrush *dom = resource.saveBrush(brush);
     QDomDocument doc;
@@ -74,28 +106,33 @@ void BrushManagerProxyPrivate::brushAdded(const QString &name, const QBrush &bru
 
     file.close();
 
-    theFileToBrush[filename] = name;
-    theBrushToFile[name] = filename;
+    m_FileToBrush[filename] = name;
+    m_BrushToFile[name] = filename;
 
     delete dom;
 }
 
 void BrushManagerProxyPrivate::brushRemoved(const QString &name)
 {
-    QDir brushDir(theBrushFolder);
+    QDir brushDir(m_BrushPath);
 
-    QString filename = theBrushToFile[name];
+    QString filename = m_BrushToFile[name];
     brushDir.remove(filename);
-    theBrushToFile.remove(name);
-    theFileToBrush.remove(filename);
+    m_BrushToFile.remove(name);
+    m_FileToBrush.remove(filename);
 }
 
 QString BrushManagerProxyPrivate::uniqueBrushFileName(const QString &brushName) const
 {
-    QString filename = brushName.toLower() + QLatin1String(".br");
+    const  QString extension = QLatin1String(".br");
+    QString filename = brushName.toLower();
+    filename += extension;
     int i = 0;
-    while (theFileToBrush.contains(filename))
-        filename = brushName.toLower() + QString::number(++i) + QLatin1String(".br");
+    while (m_FileToBrush.contains(filename)) {
+        filename = brushName.toLower();
+        filename += QString::number(++i);
+        filename += extension;
+    }
     return filename;
 }
 
@@ -103,16 +140,7 @@ QString BrushManagerProxyPrivate::uniqueBrushFileName(const QString &brushName) 
 BrushManagerProxy::BrushManagerProxy(QDesignerFormEditorInterface *core, QObject *parent)
     : QObject(parent)
 {
-    d_ptr = new BrushManagerProxyPrivate;
-    d_ptr->q_ptr = this;
-
-    d_ptr->theManager = 0;
-    d_ptr->theBrushFolder = QDir::homePath()
-                    + QDir::separator()
-                    + QLatin1String(".designer")
-                    + QDir::separator()
-                    + QLatin1String("brushes");
-    d_ptr->theCore = core;
+    d_ptr = new BrushManagerProxyPrivate(this, core);
 }
 
 BrushManagerProxy::~BrushManagerProxy()
@@ -122,33 +150,37 @@ BrushManagerProxy::~BrushManagerProxy()
 
 void BrushManagerProxy::setBrushManager(QtBrushManager *manager)
 {
-    if (d_ptr->theManager == manager)
+    if (d_ptr->m_Manager == manager)
         return;
 
-    if (d_ptr->theManager) {
-        disconnect(d_ptr->theManager, SIGNAL(brushAdded(const QString &, const QBrush &)),
+    if (d_ptr->m_Manager) {
+        disconnect(d_ptr->m_Manager, SIGNAL(brushAdded(const QString &, const QBrush &)),
                     this, SLOT(brushAdded(const QString &, const QBrush &)));
-        disconnect(d_ptr->theManager, SIGNAL(brushRemoved(const QString &)),
+        disconnect(d_ptr->m_Manager, SIGNAL(brushRemoved(const QString &)),
                     this, SLOT(brushRemoved(const QString &)));
     }
 
-    d_ptr->theManager = manager;
+    d_ptr->m_Manager = manager;
 
-    if (!d_ptr->theManager)
+    if (!d_ptr->m_Manager)
         return;
 
     // clear the manager
-    QMap<QString, QBrush> brushes = d_ptr->theManager->brushes();
+    QMap<QString, QBrush> brushes = d_ptr->m_Manager->brushes();
     QMap<QString, QBrush>::ConstIterator it = brushes.constBegin();
     while (it != brushes.constEnd()) {
         QString name = it.key();
-        d_ptr->theManager->removeBrush(name);
+        d_ptr->m_Manager->removeBrush(name);
 
         it++;
     }
 
     // fill up the manager from compiled resources or from brush folder here
-    QDir brushDir(d_ptr->theBrushFolder);
+    const QString nameAttribute = QLatin1String("name");
+    const QString brush = QLatin1String("brush");
+    const QString description = QLatin1String("description");
+
+    QDir brushDir(d_ptr->m_BrushPath);
     bool customBrushesExist = brushDir.exists();
     if (customBrushesExist) {
         // load brushes from brush folder
@@ -158,7 +190,7 @@ void BrushManagerProxy::setBrushManager(QtBrushManager *manager)
         QFileInfoList infos = brushDir.entryInfoList(nameFilters);
         QListIterator<QFileInfo> it(infos);
         while (it.hasNext()) {
-            QFileInfo fi = it.next();
+            const QFileInfo fi = it.next();
 
             QFile file(fi.absoluteFilePath());
             if (file.open(QIODevice::ReadOnly)) {
@@ -168,27 +200,27 @@ void BrushManagerProxy::setBrushManager(QtBrushManager *manager)
                 if (doc.setContent(contents)) {
                     QDomElement domElement = doc.documentElement();
 
-                    QString name = domElement.attribute(QLatin1String("name"));
+                    QString name = domElement.attribute(nameAttribute);
                     QString filename = fi.fileName();
 
-                    QSimpleResource resource(d_ptr->theCore);
+                    QSimpleResource resource(d_ptr->m_Core);
 
-                    QDomElement brushElement = domElement.firstChildElement(QLatin1String("brush"));
+                    QDomElement brushElement = domElement.firstChildElement(brush);
                     DomBrush dom;
                     dom.read(brushElement);
                     QBrush br = resource.setupBrush(&dom);
 
-                    d_ptr->theManager->addBrush(name, br);
-                    d_ptr->theFileToBrush[filename] = name;
-                    d_ptr->theBrushToFile[name] = filename;
+                    d_ptr->m_Manager->addBrush(name, br);
+                    d_ptr->m_FileToBrush[filename] = name;
+                    d_ptr->m_BrushToFile[name] = filename;
                 }
             }
         }
     }
 
-    connect(d_ptr->theManager, SIGNAL(brushAdded(const QString &, const QBrush &)),
+    connect(d_ptr->m_Manager, SIGNAL(brushAdded(const QString &, const QBrush &)),
             this, SLOT(brushAdded(const QString &, const QBrush &)));
-    connect(d_ptr->theManager, SIGNAL(brushRemoved(const QString &)),
+    connect(d_ptr->m_Manager, SIGNAL(brushRemoved(const QString &)),
             this, SLOT(brushRemoved(const QString &)));
 
     if (!customBrushesExist) {
@@ -201,20 +233,20 @@ void BrushManagerProxy::setBrushManager(QtBrushManager *manager)
             if (doc.setContent(contents)) {
                 QDomElement domElement = doc.documentElement();
 
-                QDomElement descElement = domElement.firstChildElement(QLatin1String("description"));
+                QDomElement descElement = domElement.firstChildElement(description);
                 while (!descElement.isNull()) {
-                    QString name = descElement.attribute(QLatin1String("name"));
+                    QString name = descElement.attribute(nameAttribute);
 
-                    QSimpleResource resource(d_ptr->theCore);
+                    QSimpleResource resource(d_ptr->m_Core);
 
-                    QDomElement brushElement = descElement.firstChildElement(QLatin1String("brush"));
+                    QDomElement brushElement = descElement.firstChildElement(brush);
                     DomBrush dom;
                     dom.read(brushElement);
                     QBrush br = resource.setupBrush(&dom);
 
-                    d_ptr->theManager->addBrush(name, br);
+                    d_ptr->m_Manager->addBrush(name, br);
 
-                    descElement = descElement.nextSiblingElement(QLatin1String("description"));
+                    descElement = descElement.nextSiblingElement(description);
                 }
             }
         }

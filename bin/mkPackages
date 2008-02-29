@@ -50,7 +50,7 @@ else
     fi
 
     ipf=${URL#http://}
-    ip=${ipf%/*}
+    ip=${ipf%%/*}
     if [ -z $ip ]; then
         die "URL looked wrong: $URL"
     fi
@@ -89,7 +89,7 @@ function buildpkg()
         fi;
     done;
     if [ -z "$oldflag" ]; then \
-        file_size=$(ls -l $pkg | awk '{print $5}')
+        file_size=$(du -b $pkg | awk '{print $1}')
         md5sum=$(md5sum $pkg | awk '{print $1}')
         # Take pains to make variable value sed-safe
         sed_safe_pkg=`echo $filename | sed -e 's/\\//\\\\\\//g'`
@@ -113,10 +113,10 @@ if [ -z $URL ]; then
     done >> $pkg_dir/packages.list
 else
     for pkg in $allpackages; do
-        fname=`basename $pkg`
+        fname=`basename $pkg .qpk`
         rm -f $pkg_dir/$fname.qpd
         echo "Building $pkg_dir/$fname.qpd";
         buildpkg $pkg >> $pkg_dir/$fname.qpd
-        echo "URL: $URL/$fname" >> $pkg_dir/$fname.qpd
+        echo "URL: $URL/$fname.qpk" >> $pkg_dir/$fname.qpd
     done;
 fi

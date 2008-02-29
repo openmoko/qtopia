@@ -18,8 +18,8 @@
 <h2>Calibration</h2>
 <p>Qtopia contains built-in support for calibration but it is disabled by default on almost all platforms. To enable calibration support:</p>
 <ol type="1">
-<li>Use a touch screen pointer driver that supports calibration, such as the <tt>TPanel</tt> driver.</li>
-<li>Add the <tt>QPE_NEED_CALIBRATION</tt> definition to the device-specific header for the build.<p>This definition will add the <tt>Calibrate</tt> application to the devices settings list and enable calibration in the <tt>First Use</tt> application in the PDA edition. It can be omitted if neither is desirable.</p>
+<li>Use a touch screen pointer driver that supports calibration, such as the <tt>TPanel</tt> driver.<p>This configuration will add the <tt>Recalibrate</tt> application to the devices settings list.</p>
+<p>A working /etc/pointercal must be shipped with any touchscreen device, as calibrate no longer runs at first use.</p>
 </li>
 <li>To support a calibrated touch screen, <tt>PrimaryInput=Touchscreen</tt> must included in the <tt>[Device]</tt> group of the <tt>defaultbuttons.conf</tt> see <a href="buildsystem/over-device-profiles-1.html">Device Profiles</a></li>
 </ol>
@@ -29,6 +29,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

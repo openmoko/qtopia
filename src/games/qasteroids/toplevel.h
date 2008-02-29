@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** $TROLLTECH_DUAL_LICENSE$
 **
@@ -27,13 +27,10 @@
 
 #include "view.h"
 
-#ifdef QTOPIA_PHONE
-# include <qtopia/qsoftmenubar.h>
-#endif
-
 class KALedMeter;
 class QLCDNumber;
 class QHBoxLayout;
+class QMenu;
 
 class KAstTopLevel : public QMainWindow
 {
@@ -54,7 +51,7 @@ class KAstTopLevel : public QMainWindow
     QWidget* buildBottomRow(QWidget* parent);
     KAsteroidsView* buildAsteroidsView(QWidget* parent);
     QPalette buildPalette();
-    bool eventConsumed(QKeyEvent* e) const; 
+    bool eventConsumed(QKeyEvent* e) const;
     void populateRocks();
     void populatePowerups();
 
@@ -90,20 +87,20 @@ class KAstTopLevel : public QMainWindow
     QSound missileFired;
 
     bool	gameEnded_;
-    int 	shipCount_;
-    int 	score_;
-    int 	currentLevel_;
+    int	shipCount_;
+    int	score_;
+    int	currentLevel_;
 
-    enum Action { 
-	Launch, 
-	Thrust, 
-	RotateLeft, 
-	RotateRight, 
-	Shoot, 
+    enum Action {
+	Launch,
+	Thrust,
+	RotateLeft,
+	RotateRight,
+	Shoot,
 	Teleport,
-	Brake, 
-	Shield, 
-	Pause, 
+	Brake,
+	Shield,
+	Pause,
 	NewGame,
 	Populate_Powerups,
 	Populate_Rocks
@@ -111,9 +108,7 @@ class KAstTopLevel : public QMainWindow
 
     QMap<int,Action>    actions_;
 
-#ifdef QTOPIA_PHONE
     QMenu*              contextMenu_;
-#endif
 };
 
 #endif

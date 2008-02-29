@@ -5,8 +5,6 @@ BLUETOOTH_HEADERS+=\
     qbluetoothaddress.h\
     qbluetoothlocaldevice.h\
     qbluetoothlocaldevicemanager.h\
-    qbluetoothobexserver.h\
-    qbluetoothobexsocket.h\
     qbluetoothnamespace.h\
     qbluetoothpasskeyagent.h\
     qbluetoothpasskeyrequest.h\
@@ -27,14 +25,13 @@ BLUETOOTH_HEADERS+=\
     qbluetoothaudiogateway.h \
     qbluetoothl2capsocket.h \
     qbluetoothl2capserver.h \
-    qbluetoothl2capdatagramsocket.h
+    qbluetoothl2capdatagramsocket.h \
+    qbluetoothglobal.h
 
 BLUETOOTH_SOURCES+=\
     qbluetoothaddress.cpp\
     qbluetoothlocaldevice.cpp\
     qbluetoothlocaldevicemanager.cpp\
-    qbluetoothobexserver.cpp\
-    qbluetoothobexsocket.cpp\
     qbluetoothnamespace.cpp\
     qbluetoothpasskeyagent.cpp\
     qbluetoothpasskeyrequest.cpp\
@@ -48,28 +45,30 @@ BLUETOOTH_SOURCES+=\
     qbluetoothsdpquery.cpp\
     qbluetoothsdprecord.cpp\
     qbluetoothsdpuuid.cpp\
+    qbluetoothremotedeviceselector.cpp \
     qbluetoothremotedevicedialog.cpp\
     qbluetoothrfcommserialport.cpp \
     qbluetoothabstractservice.cpp \
     qbluetoothservicecontroller.cpp \
     qbluetoothaudiogateway.cpp \
-    qbluetoothpairingagent.cpp \
-    remotedevicepropertiesdialog.cpp \
     qsdpxmlparser.cpp \
     qsdpxmlgenerator.cpp \
     qbluetoothl2capsocket.cpp \
     qbluetoothl2capserver.cpp \
-    qbluetoothl2capdatagramsocket.cpp
+    qbluetoothl2capdatagramsocket.cpp \
 
 BLUETOOTH_PRIVATE_HEADERS+=\
     qbluetoothnamespace_p.h\
     qbluetoothremotedevicedialog_p.h \
-    qbluetoothpairingagent_p.h \
-    remotedevicepropertiesdialog_p.h \
+    qbluetoothremotedeviceselector_p.h \
     qsdpxmlparser_p.h \
     qsdpxmlgenerator_p.h \
-    qbluetoothabstractsocket_p.h
+    qbluetoothabstractsocket_p.h \
+    qbluetoothabstractserver_p.h
 
+unix {
+    BLUETOOTH_SOURCES += qbluetoothsocketengine_unix.cpp
+}
 
 sdk_bluetooth_headers.files=$$BLUETOOTH_HEADERS
 sdk_bluetooth_headers.path=/include/qtopia/comm

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,7 +25,7 @@
 
 #include <qbuffer.h>
 #include <qsmsmessage.h>
-#include <qtopia/mail/mailmessage.h>
+#include <qtopia/mail/qmailmessage.h>
 #include <qwbxmlreader.h>
 #include <qotareader.h>
 #include <qwsppdu.h>
@@ -112,11 +112,10 @@ SMSMultipartDecoder::~SMSMultipartDecoder()
 #define SMS_MULTI_RESERVED          0x05
 #define SMS_MULTI_SCREEN_SAVER      0x06
 
-void SMSMultipartDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
+void SMSMultipartDecoder::decode( QMailMessage& mail, const QSMSMessage& msg )
 {
     QByteArray data = msg.applicationData();
-    uint posn;
-    uint type, len, index;
+    int posn, type, len, index;
     QByteArray part;
     QString text;
 
@@ -126,21 +125,22 @@ void SMSMultipartDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
 
     // Process each of the parts in turn.
     posn = 1;
-    while ( (int)( posn + 3 ) <= data.size() ) {
+    while ( ( posn + 3 ) <= data.size() ) {
         type = data[posn] & 0xFF;
         len = ((data[posn + 1] & 0xFF) << 8) | (data[posn + 2] & 0xFF);
-        if ( (int)( posn + 3 + len ) > data.size() ) {
+        if ( ( posn + 3 + len ) > data.size() ) {
             qWarning("invalid sms multipart message length");
             break;
         }
         part.resize(len);
         memcpy( part.data(), data.data() + posn + 3, len );
         text = QString();
+
         switch ( type ) {
 
             case SMS_MULTI_TEXT_LATIN1:
             {
-                text = QString::fromLatin1( part.data(), (int)len );
+                text = QString::fromLatin1( part.data(), len );
             }
             break;
 
@@ -148,45 +148,40 @@ void SMSMultipartDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
             case SMS_MULTI_PROFILE_NAME:
             {
                 for ( index = 0; (index + 1) < len; index += 2 ) {
-                    text += (QChar)(((part.data()[index] & 0xFF) << 8) |
-                                    (part.data()[index + 1] & 0xFF));
+                    text += QChar(((part.data()[index] & 0xFF) << 8) |
+                                   (part.data()[index + 1] & 0xFF));
                 }
             }
             break;
 
             case SMS_MULTI_RING_TONE:
             {
-                MailMessagePart mpart;
-                mpart.setContentType( "audio/x-ota-ringtone" );
-                mpart.setEncodedBody
-                    ( MailMessage::encodeBase64( part ), Base64 );
-                mail.addMessagePart( mpart );
+                QMailMessagePart mpart;
+                QMailMessageContentType type( "audio/x-ota-ringtone" );
+                mpart.setBody( QMailMessageBody::fromData( part, type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding ) );
+                mail.appendPart( mpart );
             }
             break;
 
             case SMS_MULTI_OTA_BITMAP:
             case SMS_MULTI_SCREEN_SAVER:
             {
-                MailMessagePart mpart;
-                mpart.setContentType( "image/x-ota-bitmap" );
-                mpart.setEncodedBody
-                    ( MailMessage::encodeBase64( part ), Base64 );
-                mail.addMessagePart( mpart );
+                QMailMessagePart mpart;
+                QMailMessageContentType type( "image/x-ota-bitmap" );
+                mpart.setBody( QMailMessageBody::fromData( part, type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding ) );
+                mail.appendPart( mpart );
             }
             break;
 
             default:
-                qWarning("unknown sms multipart message type %x", (int)type);
+                qWarning("unknown sms multipart message type %x", type );
                 break;
         }
         if ( !text.isNull() ) {
-            QByteArray toUtf8 = text.toUtf8();
-            QByteArray array(toUtf8.length(),0);
-            memcpy( array.data(), toUtf8.data(), toUtf8.length() );
-            MailMessagePart mpart;
-            mpart.setContentType( "text/plain; charset=utf-8" );
-            mpart.setEncodedBody( MailMessage::encodeQuotedPrintable( array ), QuotedPrintable );
-            mail.addMessagePart( mpart );
+            QMailMessagePart mpart;
+            QMailMessageContentType type( "text/plain; charset=UTF-8" );
+            mpart.setBody( QMailMessageBody::fromData( text, type, QMailMessageBody::QuotedPrintable ) );
+            mail.appendPart( mpart );
         }
         posn += len + 3;
     }
@@ -201,7 +196,7 @@ SMSLogoDecoder::~SMSLogoDecoder()
 {
 }
 
-void SMSLogoDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
+void SMSLogoDecoder::decode( QMailMessage& mail, const QSMSMessage& msg )
 {
     QByteArray data = msg.applicationData();
     uint start;
@@ -211,7 +206,7 @@ void SMSLogoDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
     if ( operatorHeader ) {
 
         // Check the header and version number.
-      if ( data.size() <= 4 || data[0] != ((char)0x30) )
+      if ( data.size() <= 4 || data[0] != static_cast<char>(0x30) )
             return;
 
         // Extract the MCC and MNC, which are stored in BCD,
@@ -236,14 +231,14 @@ void SMSLogoDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
         // Skip a line feed at the end of the header if one is present
         // (it may be omitted if the bitmap is large).
         start = 4;
-    if ( data.size() > (int)start && data[start] == (char)0x0A ) {
+    if ( data.size() > static_cast<int>(start) && data[start] == static_cast<char>(0x0A) ) {
             ++start;
         }
 
     } else {
 
         // Check the CLI header size and contents.
-      if ( data.size() <= 1 || data[0] != (char)0x30 )
+      if ( data.size() <= 1 || data[0] != static_cast<char>(0x30) )
             return;
         start = 1;
         mcc = 0;
@@ -255,17 +250,20 @@ void SMSLogoDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
     QByteArray bitmap;
     bitmap.resize( data.size() - start );
     memcpy( bitmap.data(), data.data() + start, data.size() - start );
-    MailMessagePart mpart;
+
+    QByteArray content;
     if ( !mcc && !mnc ) {
-        mpart.setContentType( "image/x-ota-bitmap" );
+        content = "image/x-ota-bitmap";
     } else {
-        mpart.setContentType( "image/x-ota-bitmap; mcc=" +
-                              QString::number( mcc ) + "; mnc=" +
-                              QString::number( mnc ) );
+        content = QByteArray( "image/x-ota-bitmap; mcc=" ) +
+                  QByteArray::number( mcc ) + "; mnc=" +
+                  QByteArray::number( mnc );
     }
-    mpart.setEncodedBody
-        ( MailMessage::encodeBase64( bitmap ), Base64 );
-    mail.addMessagePart( mpart );
+
+    QMailMessagePart mpart;
+    QMailMessageContentType type( content );
+    mpart.setBody( QMailMessageBody::fromData( bitmap, type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding ) );
+    mail.appendPart( mpart );
 }
 
 SMSWbXmlDecoder::SMSWbXmlDecoder( QWbXmlReader *reader, const QString& mimeType, bool pushHeader )
@@ -280,7 +278,7 @@ SMSWbXmlDecoder::~SMSWbXmlDecoder()
     delete reader;
 }
 
-void SMSWbXmlDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
+void SMSWbXmlDecoder::decode( QMailMessage& mail, const QSMSMessage& msg )
 {
     QString xml;
     if ( !pushHeader ) {
@@ -293,11 +291,11 @@ void SMSWbXmlDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
         QWspPush push = decoder.decodePush();
         xml = reader->toXml( push.data() );
     }
-    MailMessagePart mpart;
-    QByteArray toUtf8 = xml.toUtf8();
-    mpart.setContentType( mimeType );
-    mpart.setEncodedBody( toUtf8, EightBit );
-    mail.addMessagePart( mpart );
+
+    QMailMessagePart mpart;
+    QMailMessageContentType type( mimeType.toLatin1() );
+    mpart.setBody( QMailMessageBody::fromData( xml, type, QMailMessageBody::EightBit ) );
+    mail.appendPart( mpart );
 }
 
 SMSWapPushDecoder::SMSWapPushDecoder()
@@ -308,9 +306,9 @@ SMSWapPushDecoder::~SMSWapPushDecoder()
 {
 }
 
-void SMSWapPushDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
+void SMSWapPushDecoder::decode( QMailMessage& mail, const QSMSMessage& msg )
 {
-    MailMessagePart mpart;
+    QMailMessagePart mpart;
 
     // Decode the push header.
     QByteArray data = msg.applicationData();
@@ -327,18 +325,17 @@ void SMSWapPushDecoder::decode( MailMessage& mail, const QSMSMessage& msg )
         QWbXmlReader *reader = new QOtaReader( QOtaReader::Wap );
         xml = reader->toXml( push.data() );
         delete reader;
-        QByteArray toUtf8 = xml.toUtf8();
-        mpart.setContentType( "text/vnd.wap.connectivity-xml" );
-        mpart.setEncodedBody( toUtf8, EightBit );
-        mail.addMessagePart( mpart );
+
+        QMailMessageContentType type( "text/vnd.wap.connectivity-xml; charset=UTF-8" );
+        mpart.setBody( QMailMessageBody::fromData( xml, type, QMailMessageBody::EightBit ) );
+        mail.appendPart( mpart );
         return;
     }
 
     // Add the contents of the push message as a body part.
-    mpart.setContentType( mimeType );
-    mpart.setEncodedBody
-        ( MailMessage::encodeBase64( push.data() ), Base64 );
-    mail.addMessagePart( mpart );
+    QMailMessageContentType type( mimeType.toLatin1() );
+    mpart.setBody( QMailMessageBody::fromData( push.data(), type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding ) );
+    mail.appendPart( mpart );
 }
 
 // "Enhanced Messaging Service" formatter, according to GSM 23.040.
@@ -545,17 +542,17 @@ void EmsFormatter::flushParts( const QString& text, bool final )
     EmsPart *part;
 
     // Output parts that are interspersed with the text.
-    for ( posn = 0; posn < (uint)text.length(); ++posn ) {
+    for ( posn = 0; posn < static_cast<uint>(text.length()); ++posn ) {
         part = _parts;
         while ( part != 0 ) {
-            if ( (uint)part->start() == posn ) {
+            if ( part->start() == posn ) {
                 if ( last < posn ) {
                     addQuotedText( text, last, posn );
                     last = posn;
                 }
                 part->startFormat( *this );
             }
-            if ( (uint)( part->start() + part->length() ) == posn ) {
+            if ( ( part->start() + part->length() ) == posn ) {
                 if ( last < posn ) {
                     addQuotedText( text, last, posn );
                     last = posn;
@@ -567,7 +564,7 @@ void EmsFormatter::flushParts( const QString& text, bool final )
     }
 
     // Output the remaining text.
-    if ( last < (uint)text.length() ) {
+    if ( last < static_cast<uint>(text.length()) ) {
         addQuotedText( text, last, text.length() );
         last = text.length();
     }
@@ -575,7 +572,7 @@ void EmsFormatter::flushParts( const QString& text, bool final )
     // Output any parts that appear after the end of the text.
     part = _parts;
     while ( part != 0 ) {
-        if ( (uint)part->start() >= last ) {
+        if ( part->start() >= last ) {
             part->startFormat( *this );
             part->endFormat( *this );
         }
@@ -722,7 +719,7 @@ static const char * const predefinedImages[15] = {
     "devil"                 // No tr
 };
 
-void SMSDecoder::formatMessage( MailMessage& mail, const QSMSMessage& msg )
+void SMSDecoder::formatMessage( QMailMessage& mail, const QSMSMessage& msg )
 {
     QList<QSMSMessagePart> parts = msg.parts();
     uint part;
@@ -733,7 +730,7 @@ void SMSDecoder::formatMessage( MailMessage& mail, const QSMSMessage& msg )
     EmsFormatter formatter;
     QString id;
 
-    for ( part = 0; part < (uint)parts.count(); ++part ) {
+    for ( part = 0; part < static_cast<uint>(parts.count()); ++part ) {
         if ( parts[part].isText() ) {
 
             // Process the parts that relate to this text part.
@@ -756,12 +753,11 @@ void SMSDecoder::formatMessage( MailMessage& mail, const QSMSMessage& msg )
                 id = "part" + QString::number( partNum ) + "@local";
                 emsPart->setSource( "cid:" + id );
                 formatter.addPart( emsPart );
-                MailMessagePart mpart;
-                mpart.setContentType( mimeType );
+                QMailMessagePart mpart;
                 mpart.setContentID( "<" + id + ">" );
-                mpart.setEncodedBody
-                   ( MailMessage::encodeBase64( parts[part].data() ), Base64 );
-                mail.addMessagePart( mpart );
+                QMailMessageContentType type( mimeType.toLatin1() );
+                mpart.setBody( QMailMessageBody::fromData( parts[part].data(), type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding ) );
+                mail.appendPart( mpart );
                 ++partNum;
 
             } else if ( mimeType == "application/x-qtopia-sms-10" ) {
@@ -780,8 +776,7 @@ void SMSDecoder::formatMessage( MailMessage& mail, const QSMSMessage& msg )
                     formatter.addPart( emsPart );
                 }
 
-            } else if ( mimeType ==
-                            "application/x-qtopia-predefined-animation" ) {
+            } else if ( mimeType == "application/x-qtopia-predefined-animation" ) {
 
                 // EMS predefined animation.
                 if ( parts[part].data().count() > 0 ) {
@@ -805,32 +800,36 @@ void SMSDecoder::formatMessage( MailMessage& mail, const QSMSMessage& msg )
                 emsPart->setSource( "cid:" + id );
                 emsPart->setName( QObject::tr("Attachment: ") + mimeType );
                 formatter.addPart( emsPart );
-                MailMessagePart mpart;
-                mpart.setContentType( mimeType );
-                mpart.setContentID( "<" + id + ">" );
-                mpart.setEncodedBody
-                   ( MailMessage::encodeBase64( parts[part].data() ), Base64 );
-                mpart.setName( "part" + QString::number( partNum ) );
-                mail.addMessagePart( mpart );
-                ++partNum;
 
+                QMailMessageContentType type( mimeType.toLatin1() );
+                type.setName( QByteArray( "part" ) + QByteArray::number( partNum ) );
+
+                QMailMessageContentDisposition disposition( QMailMessageContentDisposition::Inline );
+
+                QMailMessagePart mpart;
+                mpart.setContentID( "<" + id + ">" );
+                mpart.setContentDisposition( disposition );
+                mpart.setBody( QMailMessageBody::fromData( parts[part].data(), type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding ) );
+
+                mail.appendPart( mpart );
+                ++partNum;
             }
         }
     }
 
+    // TODO: is it reasonable to use QP instead of B64 here?
+
     // Flush the remaining parts and get the resultant text/html.
     formatter.flushParts( "", true );
-    if ( formatter.text().length() != 0 ) {
-        MailMessagePart htmlPart;
-        QByteArray toUtf8 = formatter.text().toUtf8();
-        QByteArray array(toUtf8.length(),0);
-        memcpy( array.data(), toUtf8.data(), toUtf8.length() );
-        htmlPart.setContentType( "text/html; charset=utf-8" );
-        htmlPart.setEncodedBody
-            ( MailMessage::encodeQuotedPrintable( array ),
-              QuotedPrintable );
-        mail.setMultipartRelated( true );
-        mail.prependMessagePart( htmlPart );
+    if ( !formatter.text().isEmpty() ) {
+        QMailMessagePart htmlPart;
+        QMailMessageContentType type( "text/html; charset=UTF-8" );
+        htmlPart.setBody( QMailMessageBody::fromData( formatter.text(), type, QMailMessageBody::QuotedPrintable ) );
+        mail.setMultipartType( QMailMessage::MultipartRelated );
+        mail.prependPart( htmlPart );
+    }
+    else if ( parts.count() > 1 ) {
+        mail.setMultipartType( QMailMessage::MultipartMixed );
     }
 
     // If we saw a WDP datagram, then we need to process it now.
@@ -838,33 +837,24 @@ void SMSDecoder::formatMessage( MailMessage& mail, const QSMSMessage& msg )
         int port = msg.destinationPort();
         QString type = SMSDecoder::mimeTypeForPort( port );
         SMSDecoder *decoder;
-        MailMessagePart mpart;
+        QMailMessagePart mpart;
         if ( !type.isNull() ) {
             // We know the MIME type for this port number.
-            mpart.setContentType( type );
-            if ( type.startsWith( "text/" ) ) {
-                mpart.setEncodedBody
-                    ( MailMessage::encodeQuotedPrintable
-                            ( msg.applicationData() ),
-                      QuotedPrintable );
-            } else {
-                mpart.setEncodedBody
-                    ( MailMessage::encodeBase64( msg.applicationData() ),
-                      Base64 );
-            }
-            mail.addMessagePart( mpart );
+            QMailMessageContentType contentType( type.toLatin1() );
+            QMailMessageBody::TransferEncoding encoding = 
+                ( contentType.type().toLower() == "text" ? QMailMessageBody::QuotedPrintable 
+                                                         : QMailMessageBody::Base64 );
+            mpart.setBody( QMailMessageBody::fromData( msg.applicationData(), contentType, encoding, QMailMessageBody::RequiresEncoding ) );
+            mail.appendPart( mpart );
         } else if ( ( decoder = SMSDecoder::decoder( port ) ) != 0 ) {
             // Use the decoder to turn the datagram into something useful.
             decoder->decode( mail, msg );
             delete decoder;
         } else {
             // We don't know what to do with this kind of datagram.
-            mpart.setContentType
-                ( "application/x-smsapp-" + QString::number( port ) );
-            mpart.setEncodedBody
-                ( MailMessage::encodeBase64( msg.applicationData() ),
-                  Base64 );
-            mail.addMessagePart( mpart );
+            QMailMessageContentType contentType( QByteArray("application/x-smsapp-") + QByteArray::number( port ) );
+            mpart.setBody( QMailMessageBody::fromData( msg.applicationData(), contentType, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding ) );
+            mail.appendPart( mpart );
         }
     }
 }

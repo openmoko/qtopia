@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QInputContext Class Reference</title>
+  <title>Qt 4.3: QInputContext Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QInputContext Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QInputContext Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QInputContext class abstracts the input method dependent data and composing state. <a href="#details">More...</a></p>
 <pre> #include &lt;QInputContext&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -105,7 +106,7 @@
 <p>The state is automatically being tracked through <a href="qinputcontext.html#sendEvent">sendEvent</a>().</p>
 <p>See also <a href="qinputcontext.html#sendEvent">sendEvent</a>().</p>
 <h3 class="fn"><a name="language"></a><a href="qstring.html">QString</a> QInputContext::language ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>This function must be implemented in any subclasses to return a language code (e.g. &quot;zh_CN&quot;, &quot;zh_TW&quot;, &quot;zh_HK&quot;, &quot;ja&quot;, &quot;ko&quot;, ...) of the input context. If the input context can handle multiple languages, return the currently used one. The name has to be consistent with QInputContextPlugin::language().</p>
+<p>This function must be implemented in any subclasses to return a language code (e.g&#x2e; &quot;zh_CN&quot;, &quot;zh_TW&quot;, &quot;zh_HK&quot;, &quot;ja&quot;, &quot;ko&quot;, ..&#x2e;) of the input context. If the input context can handle multiple languages, return the currently used one. The name has to be consistent with QInputContextPlugin::language().</p>
 <p>This information will be used by language tagging feature in <a href="qinputmethodevent.html">QInputMethodEvent</a>. It is required to distinguish unified han characters correctly. It enables proper font and character code handling. Suppose CJK-awared multilingual web browser (that automatically modifies fonts in CJK-mixed text) and XML editor (that automatically inserts lang attr).</p>
 <h3 class="fn"><a name="mouseHandler"></a>void QInputContext::mouseHandler ( int <i>x</i>, <a href="qmouseevent.html">QMouseEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This function can be reimplemented in a subclass to handle mouse press, release, double-click, and move events within the preedit text. You can use the function to implement mouse-oriented user interface such as text selection or popup menu for candidate selection.</p>
@@ -118,7 +119,7 @@
 <p>You must not send any <a href="qinputmethodevent.html">QInputMethodEvent</a> except empty InputMethodEnd event using QInputContext::reset() at reimplemented reset(). It will break input state consistency.</p>
 <h3 class="fn"><a name="sendEvent"></a>void QInputContext::sendEvent ( const <a href="qinputmethodevent.html">QInputMethodEvent</a> &amp; <i>event</i> )</h3>
 <p>Sends an input method event specified by <i>event</i> to the current focus widget. Implementations of <a href="qinputcontext.html">QInputContext</a> should call this method to send the generated input method events and not <a href="qcoreapplication.html#sendEvent">QApplication::sendEvent</a>(), as the events might have to get dispatched to a different application on some platforms.</p>
-<p>Some complex input methods route the handling to several child contexts (e.g. to enable language switching). To account for this, <a href="qinputcontext.html">QInputContext</a> will check if the parent object is a <a href="qinputcontext.html">QInputContext</a>. If yes, it will call the parents sendEvent() implementation instead of sending the event directly.</p>
+<p>Some complex input methods route the handling to several child contexts (e.g&#x2e; to enable language switching). To account for this, <a href="qinputcontext.html">QInputContext</a> will check if the parent object is a <a href="qinputcontext.html">QInputContext</a>. If yes, it will call the parents sendEvent() implementation instead of sending the event directly.</p>
 <p>See also <a href="qinputmethodevent.html">QInputMethodEvent</a>.</p>
 <h3 class="fn"><a name="standardFormat"></a><a href="qtextformat.html">QTextFormat</a> QInputContext::standardFormat ( <a href="qinputcontext.html#StandardFormat-enum">StandardFormat</a> <i>s</i> ) const</h3>
 <p>Returns a <a href="qtextformat.html">QTextFormat</a> object that specifies the format for component <i>s</i>.</p>
@@ -136,6 +137,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

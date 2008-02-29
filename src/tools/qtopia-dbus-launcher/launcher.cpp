@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -53,7 +53,7 @@ void Launcher::startup(const QString &app)
                          "com.trolltech.qtopia.DBusLauncher", // Interface
                          "launched",                          // Name
                          this,
-                         SLOT(handleSignalReceived(const QString &, const QDBusMessage &)));
+                         SLOT(handleSignalReceived(QString,QDBusMessage)));
 
     QDBusMessage message =
             QDBusMessage::methodCall("com.trolltech.qtopia.DBusLauncher",
@@ -62,11 +62,9 @@ void Launcher::startup(const QString &app)
                                      "launch", dbc);
     message << app;
 
-    qDebug() << "Sending message: " << message;
-
     bool ret = dbc.send(message);
     if (!ret)
-        qDebug("Unable to send message: %s", dbc.lastError().message().toAscii().constData());
+        fprintf(stderr, "Unable to send message: %s", dbc.lastError().message().toAscii().constData());
 
     m_app = app;
 }

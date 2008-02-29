@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -147,8 +147,8 @@ QString QPhoneProfile::Setting::data() const
   \code
         SomeApplication::SomeApplication()
         {
-            connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
-                this, SLOT(receive(const QString&,const QByteArray&)) );
+            connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
+                this, SLOT(receive(QString,QByteArray)) );
             ...
         }
 
@@ -243,12 +243,13 @@ public:
     int mMsgAlertDuration;
     bool mAutoAnswer;
     QContent mCallTone;
+    QContent mVideoTone;
     QContent mMessageTone;
     bool mPlaneMode;
     QString mIcon;
     QPhoneProfile::Settings mSettings;
     QPhoneProfile::Schedule mSchedule;
-    QString mAccessory;
+    QString mAudioProfile;
     QString mSpeedDialInput;
 };
 
@@ -264,13 +265,14 @@ QPhoneProfilePrivate &QPhoneProfilePrivate::operator=(const QPhoneProfilePrivate
     mMsgAlertDuration = o.mMsgAlertDuration;
     mAutoAnswer = o.mAutoAnswer;
     mCallTone = o.mCallTone;
+    mVideoTone = o.mVideoTone;
     mMessageTone = o.mMessageTone;
     mPlaneMode = o.mPlaneMode;
     mIcon = o.mIcon;
     mSaveId = o.mSaveId;
     mSettings = o.mSettings;
     mSchedule = o.mSchedule;
-    mAccessory = o.mAccessory;
+    mAudioProfile = o.mAudioProfile;
     mSpeedDialInput = o.mSpeedDialInput;
 
     return *this;
@@ -294,10 +296,10 @@ QPhoneProfilePrivate &QPhoneProfilePrivate::operator=(const QPhoneProfilePrivate
   QPhoneProfileManager::activateProfile() method.
   Alternatively a profile may be set to auto-activate at certain times,
   controlled through by QPhoneProfile::schedule(),
-  or when a phone hardware accessory
-  is attached by QPhoneProfile::setAccessory().
+  or when a phone audio profile
+  is attached by QPhoneProfile::setAudioProfile().
   For example, a profile can be automatically activated
-  when hands-free hardware accessory is enabled.
+  when Bluetooth hands-free is enabled. 
 
   \sa QPhoneProfile::Schedule, QHardwareInterface
 
@@ -310,7 +312,7 @@ QPhoneProfilePrivate &QPhoneProfilePrivate::operator=(const QPhoneProfilePrivate
 
   Applications that wish to add their settings to a profile can use SettingsManagerService.
 
-  \sa QPhoneProfileManager, SettingsManagerService, SettingsService
+  \sa QPhoneProfileManager, QPhoneProfileProvider, SettingsManagerService, SettingsService
 
   \ingroup io
  */
@@ -325,10 +327,11 @@ static const QString cMsgA("MsgAlert"); // no tr
 static const QString cMsgADuration("MsgAlertDuration");
 static const QString cAutoAnswer("AutoAnswer"); // no tr
 static const QString cCallTone("RingTone"); // no tr
+static const QString cVideoTone("VideoTone"); // no tr
 static const QString cMessageTone("MessageTone"); // no tr
 static const QString cPlaneMode("PlaneMode"); // no tr
 static const QString cIcon("Icon"); // no tr
-static const QString cAccessory("Accessory"); // no tr
+static const QString cAudioProfile("AudioProfile"); // no tr
 static const QString cSpeedDialInput("SpeedDialInput");
 static const QString cDescription("Description"); // no tr
 static const QString cData("Data"); // no tr
@@ -422,6 +425,7 @@ bool QPhoneProfile::operator==(const QPhoneProfile &o) const
            d->mMsgAlertDuration == o.d->mMsgAlertDuration &&
            d->mAutoAnswer == o.d->mAutoAnswer &&
            d->mCallTone == o.d->mCallTone &&
+           d->mVideoTone == o.d->mVideoTone &&
            d->mMessageTone == o.d->mMessageTone &&
            d->mPlaneMode == o.d->mPlaneMode &&
            d->mIcon == o.d->mIcon &&
@@ -544,6 +548,14 @@ QContent QPhoneProfile::systemCallTone() const
 }
 
 /*!
+  Returns the video ring tone to use for incoming calls.
+*/
+QContent QPhoneProfile::videoTone() const
+{
+    return d->mVideoTone;
+}
+
+/*!
   Returns the default ring tone to use for incoming messages.
  */
 QContent QPhoneProfile::messageTone() const
@@ -613,12 +625,14 @@ int QPhoneProfile::id() const
 }
 
 /*!
-  Returns the accessory on which this profile should auto activate if applicable;
+  Returns the audio profile on which this profile should auto activate if applicable;
   otherwise returns an empty string.
+
+  \sa QAudioStateInfo
  */
-QString QPhoneProfile::accessory() const
+QString QPhoneProfile::audioProfile() const
 {
-    return d->mAccessory;
+    return d->mAudioProfile;
 }
 
 /*!
@@ -741,13 +755,22 @@ void QPhoneProfile::setSchedule(const Schedule &schedule)
   \fn void QPhoneProfile::setCallTone(const QContent &tone)
 
   Sets the incoming call \a tone.
+
+  \sa setVideoTone()
   */
 void QPhoneProfile::setCallTone(const QContent &l)
 {
-    if (l.fileKnown())
-        d->mCallTone = l;
-    else
-        d->mCallTone = systemCallTone();
+    d->mCallTone = l;
+}
+
+/*!
+  Sets the incoming video ring \a tone.
+
+  \sa setCallTone()
+*/
+void QPhoneProfile::setVideoTone(const QContent &tone)
+{
+    d->mVideoTone = tone;
 }
 
 /*!
@@ -757,18 +780,24 @@ void QPhoneProfile::setCallTone(const QContent &l)
  */
 void QPhoneProfile::setMessageTone(const QContent &l)
 {
-    if (l.fileKnown())
-        d->mMessageTone = l;
-    else
-        d->mMessageTone = systemMessageTone();
+    d->mMessageTone = l;
 }
 
 /*!
-  Sets the auto activation \a accessory.
+  Sets the auto activation \a audioProfile. A phone profile
+  is activated if
+  \code
+    QPhoneProfile profile;
+    QAudioStateConfiguration config;
+    QAudioStateInfo info = config.currentState();
+    info.profile() == profile.audioProfile() //must be true
+  \endcode
+
+  \sa QAudioStateConfiguration, QAudioStateInfo
  */
-void QPhoneProfile::setAccessory(const QString &accessory)
+void QPhoneProfile::setAudioProfile(const QString &audioProfile)
 {
-    d->mAccessory = accessory;
+    d->mAudioProfile = audioProfile;
 }
 
 /*!
@@ -795,14 +824,17 @@ void QPhoneProfile::read(QTranslatableSettings &c)
     setAutoAnswer(c.value(cAutoAnswer).toBool());
     setPlaneMode(c.value(cPlaneMode).toBool());
     setIcon(c.value(cIcon).toString());
-    setAccessory(c.value(cAccessory).toString());
+    setAudioProfile(c.value(cAudioProfile).toString());
     setSpeedDialInput(c.value(cSpeedDialInput).toString());
 
     QContent link = QContent(c.value(cCallTone).toString());
     if (link.fileKnown())
         d->mCallTone = link;
-    else
-       d->mCallTone = systemCallTone();
+
+    link = QContent(c.value(cVideoTone).toString());
+    if (link.fileKnown())
+        d->mVideoTone = link;
+
     link = QContent(c.value(cMessageTone).toString());
     if (link.fileKnown())
         d->mMessageTone = link;
@@ -865,11 +897,13 @@ void QPhoneProfile::write(QSettings &c) const
     c.setValue(cAutoAnswer, autoAnswer());
     c.setValue(cPlaneMode, planeMode());
     c.setValue(cIcon, icon());
-    c.setValue(cAccessory, accessory());
+    c.setValue(cAudioProfile, audioProfile());
     c.setValue(cSpeedDialInput, speedDialInput());
 
     if ( d->mCallTone.fileKnown() )
         c.setValue(cCallTone, d->mCallTone.file());
+    if ( d->mVideoTone.fileKnown() )
+        c.setValue(cVideoTone, d->mVideoTone.file());
     if ( d->mMessageTone.fileKnown() )
         c.setValue(cMessageTone, d->mMessageTone.file());
 
@@ -1170,7 +1204,7 @@ public:
 
   To activate a profile manually use the QPhoneProfileManager::activateProfile() method.
 
-  \sa QPhoneProfile
+  \sa QPhoneProfile, QPhoneProfileProvider
 
   \ingroup io
  */
@@ -1522,11 +1556,13 @@ void QPhoneProfileManager::sync()
     }
 
     bool oldPlaneMode = planeMode();
-    QPhoneProfileManagerPrivate old(*d);
+    QPhoneProfileManagerPrivate::Profiles oldProfiles = d->m_profiles;
+    int oldSelected = d->m_selected;
+
     loadConfig();
 
     // Work out what changed
-    bool activeChanged = old.m_selected != d->m_selected;
+    bool activeChanged = oldSelected != d->m_selected;
     bool hasPlaneModeChanged = oldPlaneMode != planeMode();
 
     QList<QPhoneProfile> added;
@@ -1534,9 +1570,9 @@ void QPhoneProfileManager::sync()
 
     for(QPhoneProfileManagerPrivate::Profiles::ConstIterator iter = d->m_profiles.begin(); iter != d->m_profiles.end(); ++iter) {
 
-        QPhoneProfileManagerPrivate::Profiles::Iterator olditer = old.m_profiles.find(iter.key());
+        QPhoneProfileManagerPrivate::Profiles::Iterator olditer = oldProfiles.find(iter.key());
 
-        if(olditer == old.m_profiles.end()) {
+        if(olditer == oldProfiles.end()) {
             added.append(*iter);
         } else if(*olditer != *iter) {
             if(iter->id() == d->m_selected)
@@ -1544,11 +1580,11 @@ void QPhoneProfileManager::sync()
             changed.append(*iter);
         }
 
-        old.m_profiles.erase(olditer);
+        oldProfiles.erase(olditer);
     }
 
 
-    for(QPhoneProfileManagerPrivate::Profiles::ConstIterator iter = old.m_profiles.begin(); iter != old.m_profiles.end(); ++iter) {
+    for(QPhoneProfileManagerPrivate::Profiles::ConstIterator iter = oldProfiles.begin(); iter != oldProfiles.end(); ++iter) {
         emit profileRemoved(*iter);
     }
 

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,6 +26,8 @@
 #include "bookmarkmodel.h"
 #include "helppreprocessor.h"
 
+#include <QAction>
+#include <QMenu>
 #include <QLabel>
 #include <QModelIndex>
 #include <QAbstractItemView>
@@ -33,11 +35,7 @@
 #include <QString>
 #include <QList>
 #include <QVBoxLayout>
-#include <QToolBar>
-#include <QMenuBar>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 #include <QItemSelection>
 
 
@@ -106,7 +104,7 @@ void BookmarksUI::init()
     listUI->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     // The Delete menu item gets enabled/disabled, depending on whether or not anything is selected.
-    connect(listUI->selectionModel(),SIGNAL(selectionChanged(const QItemSelection &,const QItemSelection &)),
+    connect(listUI->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this,SLOT(selectionChanged()));
     // When the Select button is activated, this object is notified and the Url for the
     // current Bookmark is displayed.
@@ -117,10 +115,6 @@ void BookmarksUI::init()
     connect(listUI,SIGNAL(displayModeChanged(bool)),this,SLOT(handleDisplayModeChanged(bool)));
 
     layout->addWidget(listUI);
-
-#ifdef QTOPIA4_TODO
-    setToolBarsMovable( false );
-#endif
 
     // Set up the context menu, with its Delete option.
     deleteAction = new QAction(QIcon(":icon/trash"), tr("Delete Bookmark(s)"), this);
@@ -135,25 +129,11 @@ void BookmarksUI::init()
     reorganiseAction->setCheckable(true);
     connect(reorganiseAction,SIGNAL(triggered(bool)),this,SLOT(setReorganise(bool)));
 
-#ifdef QTOPIA_PHONE
     // Recreate context menu without the Help option.
     contextMenu = QSoftMenuBar::menuFor(this);
     QSoftMenuBar::setHelpEnabled( this, false );
     contextMenu->addAction(deleteAction);
     contextMenu->addAction(reorganiseAction);
-#else
-    QToolBar* toolbar = new QToolBar(this);
-    addToolBar(toolbar);
-#ifdef QTOPIA4_TODO
-    toolbar->setHorizontalStretchable( true );
-#endif
-    QMenuBar *menu = new QMenuBar( toolbar );
-    toolbar->addWidget(menu);
-    toolbar = new QToolBar( this );
-    addToolBar(toolbar);
-    toolbar->addAction(deleteAction);
-    toolbar->addAction(reorganiseAction);
-#endif
 
     // Load in the data, if any.
     //load();

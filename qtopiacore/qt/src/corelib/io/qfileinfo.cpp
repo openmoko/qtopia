@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -50,7 +65,7 @@ public:
     QDateTime &getFileTime(QAbstractFileEngine::FileTime) const;
     QString getFileName(QAbstractFileEngine::FileName) const;
 
-    enum { CachedFileFlags=0x01, CachedLinkTypeFlag=0x02,
+    enum { CachedFileFlags=0x01, CachedLinkTypeFlag=0x02, CachedBundleTypeFlag=0x04,
            CachedMTime=0x10, CachedCTime=0x20, CachedATime=0x40,
            CachedSize =0x08 };
     struct Data {
@@ -183,14 +198,17 @@ QFileInfoPrivate::getFileName(QAbstractFileEngine::FileName name) const
 uint
 QFileInfoPrivate::getFileFlags(QAbstractFileEngine::FileFlags request) const
 {
-    // we split the testing for LinkType and the rest because, in order to
-    // determine if a file is a symlink or not, we have to lstat(). If we're not
-    // interested in that information, we might as well avoid one extra syscall.
+    // We split the testing into tests for for LinkType, BundleType and the rest.
+    // In order to determine if a file is a symlink or not, we have to lstat(). 
+    // If we're not interested in that information, we might as well avoid one 
+    // extra syscall. Bundle detecton on Mac can be slow, expecially on network
+    // paths, so we separate out that as well.
 
     QAbstractFileEngine::FileFlags flags;
     if (!data->getCachedFlag(CachedFileFlags)) {
         QAbstractFileEngine::FileFlags req = QAbstractFileEngine::FileInfoAll;
         req &= (~QAbstractFileEngine::LinkType);
+        req &= (~QAbstractFileEngine::BundleType);
 
         flags = data->fileEngine->fileFlags(req);
         data->setCachedFlag(CachedFileFlags);
@@ -209,6 +227,18 @@ QFileInfoPrivate::getFileFlags(QAbstractFileEngine::FileFlags request) const
             flags |= linkflag;
         }
     }
+
+    if (request & QAbstractFileEngine::BundleType) {
+        if (!data->getCachedFlag(CachedBundleTypeFlag)) {
+            QAbstractFileEngine::FileFlags bundleflag;
+            bundleflag = data->fileEngine->fileFlags(QAbstractFileEngine::BundleType);
+
+            data->setCachedFlag(CachedBundleTypeFlag);
+            data->fileFlags |= uint(bundleflag);
+            flags |= bundleflag;
+        }
+    }
+
     // no else branch
     // if we had it cached, it was caught in the previous else branch
 
@@ -280,9 +310,11 @@ QDateTime
     ends with a slash '/' as a directory (e.g., "C:/WINDOWS/"), and
     those without a trailing slash (e.g., "C:/WINDOWS/hosts.txt")
     are treated as files.
+
+    \note To speed up performance, QFileInfo caches information about the
+    file. 
     
-    To speed up performance, QFileInfo caches information about the
-    file. Because files can be changed by other users or programs, or
+    Because files can be changed by other users or programs, or
     even by other parts of the same program, there is a function that
     refreshes the file information: refresh(). If you want to switch
     off a QFileInfo's caching and force it to access the file system
@@ -788,6 +820,31 @@ QFileInfo::fileName() const
 }
 
 /*!
+    \since 4.3
+    Returns the name of the bundle.
+
+    On Mac OS X this returns the proper localized name for a bundle if the
+    path isBundle(). On all other platforms an empty QString is returned.
+
+    Example:
+    \code
+        QFileInfo fi("/Applications/Safari.app");
+        QString bundle = fi.bundleName();                // name = "Safari"
+    \endcode
+
+    \sa isBundle(), filePath(), baseName(), extension()
+*/
+
+QString
+QFileInfo::bundleName() const
+{
+    Q_D(const QFileInfo);
+    if(!d->data->fileEngine)
+        return QLatin1String("");
+    return d->getFileName(QAbstractFileEngine::BundleName);
+}
+
+/*!
     Returns the base name of the file without the path.
 
     The base name consists of all characters in the file up to (but
@@ -991,6 +1048,9 @@ QFileInfo::isExecutable() const
 
 /*!
     Returns true if this is a `hidden' file; otherwise returns false.
+
+    \bold{Note:} This function returns true for the special entries
+    "." and ".." on Unix, even though QDir::entryList threats them as shown.
 */
 bool
 QFileInfo::isHidden() const
@@ -1006,7 +1066,7 @@ QFileInfo::isHidden() const
     link to a file. Returns false if the
     object points to something which isn't a file, such as a directory.
 
-    \sa isDir(), isSymLink()
+    \sa isDir(), isSymLink(), isBundle()
 */
 
 bool
@@ -1022,7 +1082,7 @@ QFileInfo::isFile() const
     Returns true if this object points to a directory or to a symbolic
     link to a directory; otherwise returns false.
 
-    \sa isFile(), isSymLink()
+    \sa isFile(), isSymLink(), isBundle()
 */
 
 bool
@@ -1032,6 +1092,24 @@ QFileInfo::isDir() const
     if(!d->data->fileEngine)
         return false;
     return d->getFileFlags(QAbstractFileEngine::DirectoryType);
+}
+
+
+/*!
+    \since 4.3
+    Returns true if this object points to a bundle or to a symbolic
+    link to a bundle on Mac OS X; otherwise returns false.
+
+    \sa isDir(), isSymLink(), isFile()
+*/
+
+bool
+QFileInfo::isBundle() const
+{
+    Q_D(const QFileInfo);
+    if(!d->data->fileEngine)
+        return false;
+    return d->getFileFlags(QAbstractFileEngine::BundleType);
 }
 
 /*!

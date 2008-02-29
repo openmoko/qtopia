@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,8 +24,8 @@
 
 #include <QSignalSourceProvider>
 
+class QHardwareManager;
 class QSignalSource;
-class QValueSpaceItem;
 class DefaultSignal : public QSignalSourceProvider
 {
 Q_OBJECT
@@ -33,7 +33,7 @@ public:
     DefaultSignal(QObject *parent = 0);
 
 private slots:
-    void accessoryAdded();
+    void accessoryAdded( const QString& newAccessory );
     
     void pAvailabilityChanged(QSignalSource::Availability);
     void pSignalStrengthChanged(int);
@@ -44,7 +44,7 @@ private:
 
     QString m_primary;
     QSignalSource *m_signalSource;
-    QValueSpaceItem* m_signalSourceVS;
+    QHardwareManager *m_accessories;
 };
 
 #endif //_DEFAULTSIGNAL_H

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,6 +45,9 @@
 #include <QDir>
 #include <QFileInfo>
 
+// transform \r\n into \n
+// \r into \n (os9 style)
+// backslash-newlines into newlines
 static QByteArray cleaned(const QByteArray &input)
 {
     QByteArray result;
@@ -52,14 +70,31 @@ static QByteArray cleaned(const QByteArray &input)
             do ++data; while (*data && is_space(*data));
         }
         while (*data) {
-            if (*data == '\\' && *(data+1) == '\n') {
-                ++newlines;
-                data += 2;
-                continue;
+            // handle \\\n, \\\r\n and \\\r
+            if (*data == '\\') {
+                if (*(data + 1) == '\r') {
+                    ++data;
+                }
+                if (*data && (*(data + 1) == '\n' || (*data) == '\r')) {
+                    ++newlines;
+                    data += 1;
+                    if (*data != '\r')
+                        data += 1;
+                    continue;
+                }
+            } else if (*data == '\r' && *(data + 1) == '\n') { // reduce \r\n to \n
+                ++data;
             }
-            *output = *data;
+
+            char ch = *data;
+            if (ch == '\r') // os9: replace \r with \n
+                ch = '\n';
+            *output = ch;
             ++output;
+
             if (*data == '\n') {
+                // output additional newlines to keep the correct line-numbering
+                // for the lines following the backslash-newline sequence(s)
                 while (newlines) {
                     *output = '\n';
                     ++output;
@@ -683,7 +718,7 @@ int PP_Expression::primary_expression()
         test(PP_RPAREN);
     } else {
         next();
-        value = QString(lexem()).toInt(0, 0);
+        value = lexem().toInt(0, 0);
     }
     return value;
 }
@@ -733,8 +768,20 @@ void Preprocessor::preprocess(const QByteArray &filename, Symbols &preprocessed)
             QFileInfo fi;
             if (local)
                 fi.setFile(QFileInfo(QString::fromLocal8Bit(filename)).dir(), QString::fromLocal8Bit(include));
-            for (int j = 0; j < Preprocessor::includes.size() && !fi.exists(); ++j)
-                fi.setFile(QString::fromLocal8Bit(Preprocessor::includes.at(j)), QString::fromLocal8Bit(include));
+            for (int j = 0; j < Preprocessor::includes.size() && !fi.exists(); ++j) {
+                const IncludePath &p = Preprocessor::includes.at(j);
+                if (p.isFrameworkPath) {
+                    const int slashPos = include.indexOf('/');
+                    if (slashPos == -1)
+                        continue;
+                    QByteArray frameworkCandidate = include.left(slashPos);
+                    frameworkCandidate.append(".framework/Headers/");
+                    fi.setFile(QString::fromLocal8Bit(p.path + "/" + frameworkCandidate), QString::fromLocal8Bit(include.mid(slashPos + 1)));
+                } else {
+                    fi.setFile(QString::fromLocal8Bit(p.path), QString::fromLocal8Bit(include));
+                }
+            }
+
             if (!fi.exists() || fi.isDir())
                 continue;
             include = fi.filePath().toLocal8Bit();
@@ -744,7 +791,7 @@ void Preprocessor::preprocess(const QByteArray &filename, Symbols &preprocessed)
             Preprocessor::preprocessedIncludes.insert(include);
 
             QFile file(QString::fromLocal8Bit(include));
-            if (!file.open(QFile::ReadOnly|QFile::Text))
+            if (!file.open(QFile::ReadOnly))
                 continue;
 
             QByteArray input = file.readAll();
@@ -851,7 +898,7 @@ void Preprocessor::preprocess(const QByteArray &filename, Symbols &preprocessed)
 Symbols Preprocessor::preprocessed(const QByteArray &filename, FILE *file)
 {
     QFile qfile;
-    qfile.open(file, QFile::ReadOnly|QFile::Text);
+    qfile.open(file, QFile::ReadOnly);
     QByteArray input = qfile.readAll();
     if (input.isEmpty())
         return symbols;

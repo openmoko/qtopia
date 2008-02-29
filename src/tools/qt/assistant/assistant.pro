@@ -2,7 +2,6 @@ qtopia_project(qtopiacore)
 QTOPIACORE_CONFIG=app rpath ignore_errors no_symlink
 qt=host
 dir=tools/$$TARGET
-depends(libraries/qt/*)
 
 unix:build_dqt {
     link_qtopia_docs.commands=$$COMMAND_HEADER\
@@ -18,3 +17,7 @@ unix:build_dqt {
     }
 }
 
+depends(libraries/qt/xml)
+depends(libraries/qt/gui)
+depends(libraries/qt/network)
+depends(libraries/qt/corelib)

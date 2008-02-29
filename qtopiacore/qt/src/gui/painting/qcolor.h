@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -149,7 +164,9 @@ public:
     static QColor fromCmykF(qreal c, qreal m, qreal y, qreal k, qreal a = 1.0);
 
     QColor light(int f = 150) const;
+    QColor lighter(int f = 150) const;
     QColor dark(int f = 200) const;
+    QColor darker(int f = 200) const;
 
     QColor &operator=(const QColor &);
     QColor &operator=(Qt::GlobalColor color);
@@ -158,6 +175,11 @@ public:
     bool operator!=(const QColor &c) const;
 
     operator QVariant() const;
+
+#ifdef Q_WS_X11
+    static bool allowX11ColorNames();
+    static void setAllowX11ColorNames(bool enabled);
+#endif
 
 #ifdef QT3_SUPPORT
     inline QT3_SUPPORT_CONSTRUCTOR QColor(int x, int y, int z, Spec colorSpec)
@@ -234,6 +256,12 @@ inline QColor::QColor(const QColor &acolor)
 
 inline bool QColor::isValid() const
 { return cspec != Invalid; }
+
+inline QColor QColor::lighter(int f) const 
+{ return light(f); }
+
+inline QColor QColor::darker(int f) const 
+{ return dark(f); }
 
 QT_END_HEADER
 

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -71,61 +71,50 @@ public:
 };
 
 EditAccount::EditAccount( QWidget* parent, const char* name, Qt::WFlags fl )
-  : QDialog(parent, fl)
+    : QDialog(parent, fl)
+    , tabWidget(0)
 {
-#if defined(QTOPIA_PHONE)
-    tabWidget =0;
-#endif
     setupUi(this);
 
     //connect custom slots
     connect(ToolButton2,SIGNAL(clicked()),SLOT(sigPressed()));
     connect(accountType,SIGNAL(activated(int)),SLOT(typeChanged(int)));
     connect(authentication,SIGNAL(activated(int)),SLOT(authChanged(int)));
-    connect(emailInput,SIGNAL(textChanged(const QString&)),SLOT(emailModified()));
+    connect(emailInput,SIGNAL(textChanged(QString)),SLOT(emailModified()));
     //connect(mailboxButton,SIGNAL(clicked()),SLOT(configureFolders()));
 
     setObjectName(name);
     emailTyped = false;
 
-#ifdef QTOPIA_PHONE
-    int imHint = QtopiaApplication::Number;
-    QtopiaApplication::setInputMethodHint(mailPortInput,
-                                          (QtopiaApplication::InputMethodHint)imHint );
-    QtopiaApplication::setInputMethodHint(smtpPortInput,
-                                          (QtopiaApplication::InputMethodHint)imHint );
-#endif
+    QtopiaApplication::InputMethodHint imHint = QtopiaApplication::Number;
+    QtopiaApplication::setInputMethodHint(mailPortInput, imHint);
+    QtopiaApplication::setInputMethodHint(smtpPortInput, imHint);
 
-#ifdef QTOPIA_PHONE
     // Too easy to mistype numbers in phone mode
     mailPasswInput->installEventFilter( this );
     accountNameInput->installEventFilter( this );
     defaultMailCheckBox->installEventFilter( this );
     installEventFilter(this);
     mailboxButton->hide();
-#endif
     PortValidator *pv = new PortValidator(this);
     mailPortInput->setValidator(pv);
     smtpPortInput->setValidator(pv);
-#ifndef SMTPAUTH
-        encryption->hide();
-        authentication->hide();
-        lblEncryption->hide();
-        lblAuthentication->hide();
-        lblSmtpUsername->hide();
-        lblSmtpPassword->hide();
-        smtpUsernameInput->hide();
-        smtpPasswordInput->hide();
+#ifdef QT_NO_OPENSSL
+    encryption->hide();
+    authentication->hide();
+    lblEncryption->hide();
+    lblAuthentication->hide();
+    lblSmtpUsername->hide();
+    lblSmtpPassword->hide();
+    smtpUsernameInput->hide();
+    smtpPasswordInput->hide();
     encryptionCheckBox->hide();
 #endif
     typeChanged(1);
-#if defined(QTOPIA_PHONE)
     createTabbedView();
-#endif
     setLayoutDirection( qApp->layoutDirection() );
     mailPasswInput->setEchoMode(QLineEdit::PasswordEchoOnEdit);
     smtpPasswordInput->setEchoMode(QLineEdit::PasswordEchoOnEdit);
-
 }
 
 void EditAccount::setAccount(MailAccount *in, bool newOne)
@@ -142,7 +131,7 @@ void EditAccount::setAccount(MailAccount *in, bool newOne)
         syncCheckBox->setChecked(true);
         mailPortInput->setText("110");
         smtpPortInput->setText("25");
-#ifdef SMTPAUTH
+#ifndef QT_NO_OPENSSL
         smtpUsernameInput->setText("");
         smtpPasswordInput->setText("");
         encryption->setCurrentIndex(0);
@@ -151,7 +140,7 @@ void EditAccount::setAccount(MailAccount *in, bool newOne)
         smtpPasswordInput->setEnabled(false);
     encryptionCheckBox->setChecked(false);
 #endif
-        setWindowTitle( tr("Create New Account", "translation not longer than English") );
+        setWindowTitle( tr("Create new account", "translation not longer than English") );
 
         typeChanged( 0 );
     } else {
@@ -185,21 +174,19 @@ void EditAccount::setAccount(MailAccount *in, bool newOne)
         mailPortInput->setText( QString::number( account->mailPort() ) );
         smtpPortInput->setText( QString::number( account->smtpPort() ) );
         defaultMailCheckBox->setChecked( account->defaultMailServer() );
-#ifdef SMTPAUTH
+#ifndef QT_NO_OPENSSL
         smtpUsernameInput->setText(account->smtpUsername());
         smtpPasswordInput->setText(account->smtpPassword());
         authentication->setCurrentIndex(static_cast<int>(account->smtpAuthentication()));
         encryption->setCurrentIndex(static_cast<int>(account->smtpEncryption()));
         smtpUsernameInput->setEnabled(authentication->currentIndex() != 0);
         smtpPasswordInput->setEnabled(authentication->currentIndex() != 0);
-    encryptionCheckBox->setChecked(account->mailEncryption() != MailAccount::Encrypt_NONE);
+        encryptionCheckBox->setChecked(account->mailEncryption() != MailAccount::Encrypt_NONE);
 #endif
     }
 
     nameInput->setText( account->userName() );
 }
-
-#ifdef QTOPIA_PHONE
 
 void EditAccount::createTabbedView()
 {
@@ -266,7 +253,6 @@ bool EditAccount::eventFilter( QObject* o, QEvent *e )
     }
     return QDialog::eventFilter(o,e);
 }
-#endif
 
 //TODO fix, unused code, slot inaccessible since button not visible on form
 
@@ -279,7 +265,7 @@ bool EditAccount::eventFilter( QObject* o, QEvent *e )
 void EditAccount::sigPressed()
 {
     if ( sigCheckBox->isChecked() ) {
-      SigEntry sigEntry(this, "sigEntry", (Qt::WFlags)1);
+      SigEntry sigEntry(this, "sigEntry", static_cast<Qt::WFlags>(1));
 
         if ( sig.isEmpty() ) {
             sigEntry.setEntry( "~~\n" + nameInput->text() );
@@ -287,7 +273,7 @@ void EditAccount::sigPressed()
             sigEntry.setEntry( sig );
         }
 
-        if ( sigEntry.exec() == QDialog::Accepted) {
+        if ( QtopiaApplication::execDialog(&sigEntry) == QDialog::Accepted) {
             sig = sigEntry.entry();
         }
     }
@@ -311,11 +297,7 @@ void EditAccount::authChanged(int index)
 
 void EditAccount::typeChanged(int)
 {
-#ifdef QTOPIA_PHONE
     if ( accountType->currentText() == tr("Sync") ) {
-#else
-    if ( accountType->currentText() == tr("Synchronized") ) {
-#endif
         imapSettings->hide();
         syncCheckBox->hide();
 
@@ -453,7 +435,7 @@ void EditAccount::accept()
         account->setAccountName( name );
     }
 
-#ifdef SMTPAUTH
+#ifndef QT_NO_OPENSSL
         account->setSmtpUsername(smtpUsernameInput->text());
         account->setSmtpPassword(smtpPasswordInput->text());
         account->setSmtpAuthentication(static_cast<MailAccount::AuthType>(authentication->currentIndex()));
@@ -476,7 +458,6 @@ SigEntry::SigEntry(QWidget *parent, const char *name, Qt::WFlags fl )
     QGridLayout *grid = new QGridLayout(this);
     input = new QTextEdit(this);
     grid->addWidget(input, 0, 0);
-    resize(180, 100);
 }
 
 // /*  class MailboxView    */
@@ -485,15 +466,15 @@ SigEntry::SigEntry(QWidget *parent, const char *name, Qt::WFlags fl )
 // {
 //     setObjectName(name);
 //     pop = new QMenu(this);
-//     connect(pop, SIGNAL( triggered(QAction*) ), this,
-//      SLOT( changeMessageSettings(QAction*) ) );
+//     connect(pop, SIGNAL(triggered(QAction*)), this,
+//      SLOT(changeMessageSettings(QAction*)) );
 //
 //     pop->addAction( tr("All"));
 //     pop->addAction( tr("Only recent"));
 //     pop->addAction( tr("None (only headers)"));
 //
-//     connect( &menuTimer, SIGNAL( timeout() ), SLOT( showMessageOptions() ) );
-//     connect( this, SIGNAL( itemChanged() ), SLOT( cancelMenuTimer() ) );
+//     connect( &menuTimer, SIGNAL(timeout()), SLOT(showMessageOptions()) );
+//     connect( this, SIGNAL(itemChanged()), SLOT(cancelMenuTimer()) );
 // }
 //
 // void MailboxView::changeMessageSettings(QAction* id)
@@ -558,14 +539,14 @@ SigEntry::SigEntry(QWidget *parent, const char *name, Qt::WFlags fl )
 //
 //     what = QWhatsThis::createAction(button);
 //     what->setText(tr("Select all mailboxes in your account."));
-//     connect(button, SIGNAL( clicked() ), this, SLOT( selectAll() ) );
+//     connect(button, SIGNAL(clicked()), this, SLOT(selectAll()) );
 //     grid->addWidget(button, 1, 0);
 //
 //     button = new QPushButton( tr("Deselect all"), this);
 //
 //     what = QWhatsThis::createAction(button);
 //     what->setText(tr("Deselect all mailboxes in your account."));
-//     connect(button, SIGNAL( clicked() ), this, SLOT( clearAll() ) );
+//     connect(button, SIGNAL(clicked()), this, SLOT(clearAll()) );
 //     grid->addWidget(button, 1, 1);
 //
 //     QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
@@ -574,7 +555,7 @@ SigEntry::SigEntry(QWidget *parent, const char *name, Qt::WFlags fl )
 //     button = new QPushButton( tr("Change message type"), this );
 //     what = QWhatsThis::createAction(button);
 //     what->setText(tr("Choose the message types you want to download for the selected mailbox."));
-//     connect(button, SIGNAL(clicked() ), this, SLOT( itemSelected() ) );
+//     connect(button, SIGNAL(clicked()), this, SLOT(itemSelected()) );
 //     grid->addWidget(button, 1, 3);
 //
 //     Mailbox *box;

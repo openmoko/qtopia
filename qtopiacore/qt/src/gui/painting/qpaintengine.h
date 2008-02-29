@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -85,6 +100,8 @@ public:
         BrushStroke               = 0x00000800, // Can render brush based pens
         ConstantOpacity           = 0x00001000, // Can render at constant opacity
         MaskedBrush               = 0x00002000, // Can fill with textures that has an alpha channel or mask
+        PerspectiveTransform      = 0x00004000, // Can do perspective transformations
+        BlendModes                = 0x00008000, // Can do extended Porter&Duff composition
         PaintOutsidePaintEvent    = 0x20000000, // Engine is capable of painting outside paint events
         /*                          0x10000000, // Used for emulating
                                     QGradient::StretchToDevice,
@@ -183,6 +200,7 @@ public:
         Picture,
         SVG,
         Raster,
+	Direct3D,
 
         User = 50,    // first user type id
         MaxUser = 100 // last user type id
@@ -224,6 +242,7 @@ private:
     friend class QFontEngineFT;
 #endif
 #ifndef QT_NO_QWS_QPF
+    friend class QFontEngineQPF1;
     friend class QFontEngineQPF;
 #endif
     friend class QPSPrintEngine;
@@ -232,6 +251,7 @@ private:
 #ifdef Q_WS_QWS
     friend class QtopiaPrintEngine;
     friend class QtopiaPrintEnginePrivate;
+    friend class QProxyFontEngine;
 #endif
     friend class QPainter;
     friend class QPainterPrivate;
@@ -254,6 +274,7 @@ public:
     Qt::BGMode backgroundMode() const;
     QFont font() const;
     QMatrix matrix() const;
+    QTransform transform() const;
 
     Qt::ClipOperation clipOperation() const;
     QRegion clipRegion() const;
@@ -266,11 +287,15 @@ public:
 
     QPainter *painter() const;
 
+    bool brushNeedsResolving() const;
+    bool penNeedsResolving() const;
+
 protected:
     friend class QPaintEngine;
     friend class QPainter;
     friend class QPainterPrivate;
-
+    friend class QMacPrintEnginePrivate;    
+    
     QPaintEngine::DirtyFlags dirtyFlags;
 };
 

@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QVariant Class Reference</title>
+  <title>Qt 4.3: QVariant Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QVariant Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QVariant Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QVariant class acts like a union for the most common Qt data types. <a href="#details">More...</a></p>
 <pre> #include &lt;QVariant&gt;</pre><p>Inherited by <a href="qdbusvariant.html">QDBusVariant</a>.</p>
 <ul>
@@ -37,7 +38,7 @@
 <li><div class="fn"/><b><a href="qvariant.html#QVariant-9">QVariant</a></b> ( qulonglong <i>val</i> )</li>
 <li><div class="fn"/><b><a href="qvariant.html#QVariant-10">QVariant</a></b> ( bool <i>val</i> )</li>
 <li><div class="fn"/><b><a href="qvariant.html#QVariant-11">QVariant</a></b> ( double <i>val</i> )</li>
-<li><div class="fn"/>QT_ASCII_CAST_WARN_CONSTRUCTOR <b><a href="qvariant.html#QVariant-12">QVariant</a></b> ( const char * <i>val</i> )</li>
+<li><div class="fn"/><b><a href="qvariant.html#QVariant-12">QVariant</a></b> ( const char * <i>val</i> )</li>
 <li><div class="fn"/><b><a href="qvariant.html#QVariant-13">QVariant</a></b> ( const QByteArray &amp; <i>val</i> )</li>
 <li><div class="fn"/><b><a href="qvariant.html#QVariant-14">QVariant</a></b> ( const QBitArray &amp; <i>val</i> )</li>
 <li><div class="fn"/><b><a href="qvariant.html#QVariant-15">QVariant</a></b> ( const QString &amp; <i>val</i> )</li>
@@ -129,8 +130,8 @@
 <h2>Detailed Description</h2>
 <p>The QVariant class acts like a union for the most common Qt data types.</p>
 <p>Because C++ forbids unions from including types that have non-default constructors or destructors, most interesting Qt classes cannot be used in unions. Without QVariant, this would be a problem for <a href="qobject.html#property">QObject::property</a>() and for database work, etc.</p>
-<p>A QVariant object holds a single value of a single <a href="qvariant.html#type">type</a>() at a time. (Some <a href="qvariant.html#type">type</a>()s are multi-valued, for example a string list.) You can find out what type, T, the variant holds, convert it to a different type using <a href="qvariant.html#convert">convert</a>(), get its value using one of the toT() functions (e.g., <a href="qvariant.html#toSize">toSize</a>()) and check whether the type can be converted to a particular type using <a href="qvariant.html#canConvert">canConvert</a>().</p>
-<p>The methods named toT() (e.g., <a href="qvariant.html#toInt">toInt</a>(), <a href="qvariant.html#toString">toString</a>()) are const. If you ask for the stored type, they return a copy of the stored object. If you ask for a type that can be generated from the stored type, toT() copies and converts and leaves the object itself unchanged. If you ask for a type that cannot be generated from the stored type, the result depends on the type; see the function documentation for details.</p>
+<p>A QVariant object holds a single value of a single <a href="qvariant.html#type">type</a>() at a time. (Some <a href="qvariant.html#type">type</a>()s are multi-valued, for example a string list.) You can find out what type, T, the variant holds, convert it to a different type using <a href="qvariant.html#convert">convert</a>(), get its value using one of the toT() functions (e.g&#x2e;, <a href="qvariant.html#toSize">toSize</a>()) and check whether the type can be converted to a particular type using <a href="qvariant.html#canConvert">canConvert</a>().</p>
+<p>The methods named toT() (e.g&#x2e;, <a href="qvariant.html#toInt">toInt</a>(), <a href="qvariant.html#toString">toString</a>()) are const. If you ask for the stored type, they return a copy of the stored object. If you ask for a type that can be generated from the stored type, toT() copies and converts and leaves the object itself unchanged. If you ask for a type that cannot be generated from the stored type, the result depends on the type; see the function documentation for details.</p>
 <p>Here is some example code to demonstrate the use of QVariant:</p>
 <pre> QDataStream out(...);
  QVariant v(123);                <span class="comment">// The variant now contains an int</span>
@@ -163,9 +164,13 @@
 <pre> QVariant variant;
  ...
  QColor color = variant.value&lt;QColor&gt;();</pre>
-<p>The inverse conversion (e.g., from <a href="qcolor.html">QColor</a> to QVariant) is automatic for all data types supported by QVariant, including GUI-related types:</p>
+<p>The inverse conversion (e.g&#x2e;, from <a href="qcolor.html">QColor</a> to QVariant) is automatic for all data types supported by QVariant, including GUI-related types:</p>
 <pre> QColor color = palette().background().color();
  QVariant variant = color;</pre>
+<a name="using-canconvert-and-convert-consecutively"></a>
+<h3>Using canConvert() and convert() Consecutively</h3>
+<p>When using <a href="qvariant.html#canConvert">canConvert</a>() and <a href="qvariant.html#convert">convert</a>() consecutively, it is possible for <a href="qvariant.html#canConvert">canConvert</a>() to return true, but <a href="qvariant.html#convert">convert</a>() to return false. This is typically because <a href="qvariant.html#canConvert">canConvert</a>() only reports the general ability of QVariant to convert between types given suitable data; it is still possible to supply data which cannot actually be converted.</p>
+<p>For example, <a href="qvariant.html#canConvert">canConvert</a>() would return true when called on a variant containing a string because, in principle, QVariant is able to convert strings of numbers to integers. However, if the string contains non-numeric characters, it cannot be converted to an integer, and any attempt to convert it will fail. Hence, it is important to have both functions return true for a successful conversion.</p>
 <p>See also <a href="qmetatype.html">QMetaType</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -197,6 +202,7 @@
 <tr><td valign="top"><tt>QVariant::LongLong</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">a <a href="qtglobal.html#qlonglong-typedef">qlonglong</a></td></tr>
 <tr><td valign="top"><tt>QVariant::Map</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">a <a href="qvariant.html#QVariantMap-typedef">QVariantMap</a></td></tr>
 <tr><td valign="top"><tt>QVariant::Matrix</tt></td><td align="center" valign="top"><tt>80</tt></td><td valign="top">a <a href="qmatrix.html">QMatrix</a></td></tr>
+<tr><td valign="top"><tt>QVariant::Transform</tt></td><td align="center" valign="top"><tt>81</tt></td><td valign="top">a <a href="qtransform.html">QTransform</a></td></tr>
 <tr><td valign="top"><tt>QVariant::Palette</tt></td><td align="center" valign="top"><tt>68</tt></td><td valign="top">a <a href="qpalette.html">QPalette</a></td></tr>
 <tr><td valign="top"><tt>QVariant::Pen</tt></td><td align="center" valign="top"><tt>77</tt></td><td valign="top">a <a href="qpen.html">QPen</a></td></tr>
 <tr><td valign="top"><tt>QVariant::Pixmap</tt></td><td align="center" valign="top"><tt>65</tt></td><td valign="top">a <a href="qpixmap.html">QPixmap</a></td></tr>
@@ -248,7 +254,7 @@
 <p>Constructs a new variant with a boolean value, <i>val</i>. The integer argument is a dummy, necessary for compatibility with some compilers.</p>
 <h3 class="fn"><a name="QVariant-11"></a>QVariant::QVariant ( double <i>val</i> )</h3>
 <p>Constructs a new variant with a floating point value, <i>val</i>.</p>
-<h3 class="fn"><a name="QVariant-12"></a>QT_ASCII_CAST_WARN_CONSTRUCTOR QVariant::QVariant ( const char * <i>val</i> )</h3>
+<h3 class="fn"><a name="QVariant-12"></a>QVariant::QVariant ( const char * <i>val</i> )</h3>
 <p>Constructs a new variant with a string value of <i>val</i>. The variant creates a deep copy of <i>val</i>, using the encoding set by <a href="qtextcodec.html#setCodecForCStrings">QTextCodec::setCodecForCStrings</a>().</p>
 <p>You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when you compile your applications.</p>
 <p>See also <a href="qtextcodec.html#setCodecForCStrings">QTextCodec::setCodecForCStrings</a>().</p>
@@ -305,7 +311,7 @@
 <p>Destroys the <a href="qvariant.html">QVariant</a> and the contained object.</p>
 <p>Note that subclasses that reimplement <a href="qvariant.html#clear">clear</a>() should reimplement the destructor to call <a href="qvariant.html#clear">clear</a>(). This destructor calls <a href="qvariant.html#clear">clear</a>(), but because it is the destructor, <a href="qvariant.html#clear">QVariant::clear</a>() is called rather than a subclass's <a href="qvariant.html#clear">clear</a>().</p>
 <h3 class="fn"><a name="canConvert"></a>bool QVariant::canConvert ( <a href="qvariant.html#Type-enum">Type</a> <i>t</i> ) const</h3>
-<p>Returns true if the variant's type can be cast to the requested type, <i>t</i>. Such casting is done automatically when calling the <a href="qvariant.html#toInt">toInt</a>(), <a href="qvariant.html#toBool">toBool</a>(), ... methods.</p>
+<p>Returns true if the variant's type can be cast to the requested type, <i>t</i>. Such casting is done automatically when calling the <a href="qvariant.html#toInt">toInt</a>(), <a href="qvariant.html#toBool">toBool</a>(), ..&#x2e; methods.</p>
 <p>The following casts are done automatically:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Type</th><th>Automatically Cast To</th></tr></thead>
@@ -349,7 +355,7 @@
 <h3 class="fn"><a name="clear"></a>void QVariant::clear ()</h3>
 <p>Convert this variant to type Invalid and free up any resources used.</p>
 <h3 class="fn"><a name="convert"></a>bool QVariant::convert ( <a href="qvariant.html#Type-enum">Type</a> <i>t</i> )</h3>
-<p>Casts the variant to the requested type. If the cast cannot be done, the variant is set to the default value of the requested type (e.g. an empty string if the requested type <i>t</i> is <a href="qvariant.html#Type-enum">QVariant::String</a>, an empty point array if the requested type <i>t</i> is <a href="qvariant.html#Type-enum">QVariant::Polygon</a>, etc). Returns true if the current type of the variant was successfully cast; otherwise returns false.</p>
+<p>Casts the variant to the requested type. If the cast cannot be done, the variant is set to the default value of the requested type (e.g&#x2e; an empty string if the requested type <i>t</i> is <a href="qvariant.html#Type-enum">QVariant::String</a>, an empty point array if the requested type <i>t</i> is <a href="qvariant.html#Type-enum">QVariant::Polygon</a>, etc). Returns true if the current type of the variant was successfully cast; otherwise returns false.</p>
 <p>See also <a href="qvariant.html#canConvert">canConvert</a>().</p>
 <h3 class="fn"><a name="fromValue"></a>QVariant QVariant::fromValue ( const T &amp; <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a <a href="qvariant.html">QVariant</a> containing a copy of <i>value</i>. Behaves exactly like <a href="qvariant.html#setValue">setValue</a>() otherwise.</p>
@@ -404,7 +410,7 @@
 <p>If the <a href="qvariant.html#type">type</a>() is <a href="qvariant.html#Type-enum">String</a>, an invalid date/time will be returned if the string cannot be parsed as a <a href="qt.html#DateFormat-enum">Qt::ISODate</a> format date/time.</p>
 <p>See also <a href="qvariant.html#canConvert">canConvert</a>() and <a href="qvariant.html#convert">convert</a>().</p>
 <h3 class="fn"><a name="toDouble"></a>double QVariant::toDouble ( bool * <i>ok</i> = 0 ) const</h3>
-<p>Returns the variant as a double if the variant has <a href="qvariant.html#type">type</a>() <a href="qvariant.html#Type-enum">Double</a>, <a href="qvariant.html#Type-enum">Bool</a>, <a href="qvariant.html#Type-enum">ByteArray</a>, <a href="qvariant.html#Type-enum">Int</a>, <a href="qvariant.html#Type-enum">LongLong</a>, <a href="qvariant.html#Type-enum">String</a>, <a href="qvariant.html#Type-enum">UInt</a>, or <a href="qvariant.html#Type-enum">ULongLong</a>; otherwise returns 0.0.</p>
+<p>Returns the variant as a double if the variant has <a href="qvariant.html#type">type</a>() <a href="qvariant.html#Type-enum">Double</a>, <a href="qvariant.html#Type-enum">Bool</a>, <a href="qvariant.html#Type-enum">ByteArray</a>, <a href="qvariant.html#Type-enum">Int</a>, <a href="qvariant.html#Type-enum">LongLong</a>, <a href="qvariant.html#Type-enum">String</a>, <a href="qvariant.html#Type-enum">UInt</a>, or <a href="qvariant.html#Type-enum">ULongLong</a>; otherwise returns 0.0&#x2e;</p>
 <p>If <i>ok</i> is non-null: <tt>*</tt><i>ok</i> is set to true if the value could be converted to a double; otherwise <tt>*</tt><i>ok</i> is set to false.</p>
 <p>See also <a href="qvariant.html#canConvert">canConvert</a>() and <a href="qvariant.html#convert">convert</a>().</p>
 <h3 class="fn"><a name="toInt"></a>int QVariant::toInt ( bool * <i>ok</i> = 0 ) const</h3>
@@ -596,6 +602,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

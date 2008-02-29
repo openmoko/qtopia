@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,15 +24,15 @@
 
 
 #include <qobject.h>
-#include <qwindowsystem_qws.h>
+#include "qtopiainputevents.h"
 
 
 class AudioVolumeManager;
-
+class QValueSpaceItem;
 
 class MediaKeyService :
     public QObject,
-    public QWSServer::KeyboardFilter
+    public QtopiaKeyboardFilter
 {
     Q_OBJECT
 
@@ -42,16 +42,25 @@ public:
     MediaKeyService(AudioVolumeManager* avm);
     ~MediaKeyService();
 
+    void setVolume(bool up);
+
+signals:
+    void volumeChanged(bool up);
+
 private:
     bool filter(int unicode, int keycode, int modifiers,
                 bool press, bool autoRepeat);
 
     void timerEvent(QTimerEvent* timerEvent);
 
+    bool keyLocked();
+
     int                 m_increment;
     int                 m_repeatTimerId;
     int                 m_repeatKeyCode;
     AudioVolumeManager* m_avm;
+    bool                m_keyLocked;
+    QValueSpaceItem*    m_vs;
 };
 
 #endif  // __QTOPIA_SERVER_MEDIA_MEDIAKEYSERVICE_H

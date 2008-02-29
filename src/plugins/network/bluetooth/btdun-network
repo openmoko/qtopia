@@ -19,10 +19,10 @@ PPPD="/usr/sbin/pppd";
 print_debug()
 {
     if [ $DEBUG -eq 1 ]; then
-        echo "PPP: $1";
+        echo "DUN: $1";
     fi
     if [ $LOG -eq 1 ]; then
-        echo "PPP: $1" >> $LOG_FILE;
+        echo "DUN: $1" >> $LOG_FILE;
     fi
 }
 

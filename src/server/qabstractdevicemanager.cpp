@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -172,6 +172,7 @@ void DeviceConnection::stateChanged()
             m_data->closeSession(m_id);
         }
 
+        m_data->removeConnection(m_id);
         deleteLater();
     }
 }
@@ -272,14 +273,16 @@ QAbstractCommDeviceManager_Private::QAbstractCommDeviceManager_Private(QAbstract
     f.close();
 
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(timeout()));
-    connect(m_parent, SIGNAL(upStatus(bool, const QString &)),
-            this, SLOT(upStatus(bool, const QString &)), Qt::QueuedConnection);
-    connect(m_parent, SIGNAL(downStatus(bool, const QString &)),
-            this, SLOT(downStatus(bool, const QString &)), Qt::QueuedConnection);
+    connect(m_parent, SIGNAL(upStatus(bool,QString)),
+            this, SLOT(upStatus(bool,QString)), Qt::QueuedConnection);
+    connect(m_parent, SIGNAL(downStatus(bool,QString)),
+            this, SLOT(downStatus(bool,QString)), Qt::QueuedConnection);
 }
 
 QAbstractCommDeviceManager_Private::~QAbstractCommDeviceManager_Private()
 {
+    stop();
+
     if (m_server)
         delete m_server;
 
@@ -820,6 +823,11 @@ void QAbstractCommDeviceManager_Private::stop()
     m_timer.stop();
     m_server->close();
     m_sessions.clear();
+
+    foreach (DeviceConnection *conn, m_conns) {
+        delete conn;
+    }
+
     m_conns.clear();
 
     if (m_valueSpace) {
@@ -863,6 +871,7 @@ void QAbstractCommDeviceManager_Private::closeAllSessions()
     the device is brought up automatically.  Once all sessions are closed, the device
     can be brought down automatically if required to conserve power.
 
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
     \sa QCommDeviceSession, QCommDeviceController
  */
 

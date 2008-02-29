@@ -1,0 +1,4 @@
+These files are for building qtopia-phone in the OpenEmbedded build system, using a local overlay.
+http://openembedded.org
+
+The Makefile is based off of the openmoko makefile.

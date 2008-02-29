@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,7 +24,6 @@
 
 #include <QGraphicsRectItem>
 #include <QPixmap>
-#include <QSvgRenderer>
 
 class QGraphicsScene;
 class QMovie;
@@ -32,7 +31,7 @@ class QPainter;
 class QStyleOptionGraphicsItem;
 class QContent;
 class Animator;
-
+class Renderer;
 
 class GridItem : public QGraphicsRectItem
 {
@@ -52,33 +51,35 @@ public:
 
     void paint(QPainter *painter,const QStyleOptionGraphicsItem *option,QWidget *widget);
 
-    QContent *getContent() const { return content; }
+    QContent *content() const { return mContent; }
 
     void setContent(QContent *);
 
-    int getRow() const { return row; }
+    int row() const { return mRow; }
 
-    int getColumn() const { return col; }
+    int column() const { return mCol; }
 
     const QPixmap &basicPic() const { return basicPixmap; }
 
     const QPixmap &selectedPic() const;
 
-    QSvgRenderer *getSvgRenderer();
+    Renderer *renderer();
 
-    QRectF getSelectedRenderingBounds();
+    QRectF selectedRenderingBounds();
 
-    QMovie *movie() const { return selectedMovie; }
+    QMovie *movie() const { return mSelectedMovie; }
 
-    Animator *getSelectedAnimator() const { return selectedAnimator; }
+    Animator *selectedAnimator() const { return mSelectedAnimator; }
 
-    Animator *getSelectedBackgroundAnimator() const { return selectedBackgroundAnimator; }
+    Animator *selectedBackgroundAnimator() const { return mSelectedBackgroundAnimator; }
 
     void updateImages();
 
-    int getSelectedImageSize() const;
+    int selectedImageSize() const;
 
-    int getBasicImageSize() const;
+    int basicImageSize() const;
+
+    void paletteChanged();
 
 private:
 
@@ -99,39 +100,39 @@ private:
     GridItem & operator=(const GridItem &);
 
     // Creates on demand the bounding infomration for the SVG renderer.
-    QRectF getRenderingBounds();
+    QRectF renderingBounds();
 
     // Contains information used to create the images/movie for this item.
-    QContent *content;
+    QContent *mContent;
 
     // This item's row index.
-    int row;
+    int mRow;
     // This item's column index;
-    int col;
+    int mCol;
     // The total number of rows in the grid in which this object belongs.
     int totalRows;
     // The total number of columns in the grid in which this object belongs.
     int totalCols;
 
-    // Calculated in getSelectedImageSize()
-    int selectedImageSize;
+    // Calculated in selectedImageSize()
+    int mSelectedImageSize;
 
-    QSvgRenderer renderer;
-    QRectF renderingBounds;
+    Renderer *mRenderer;
+    QRectF mRenderingBounds;
 
     // Pixmap used to draw this item.
     QPixmap basicPixmap;
     // Pixmap used to draw SelectedItem when it is positioned over this GridItem object.
-    QPixmap selectedPixmap;
+    QPixmap mSelectedPixmap;
 
     // Movie object used to animate the SelectedItem when it is positoned over this GridItem object.
-    QMovie *selectedMovie;
-    // Animator object used to manually animate the SelectedItem when it is positioned over this GridItem
+    QMovie *mSelectedMovie;
+    // Animator object used to codedly animate the SelectedItem when it is positioned over this GridItem
     // object, if selectedMovie is not available.
-    Animator *selectedAnimator;
+    Animator *mSelectedAnimator;
     // When selectedAnimator is running, it may or may not have an animated background to go
     // with it.
-    Animator *selectedBackgroundAnimator;
+    Animator *mSelectedBackgroundAnimator;
     // Determines whether or not this object should search for a movie file for animation.
     bool loadMovie;
 };

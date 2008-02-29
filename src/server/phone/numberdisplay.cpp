@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -245,6 +245,8 @@ NumberDisplay::NumberDisplay( QWidget *parent )
     mFontSizes += 14;
     mFontSizes += 11;
     mFontSizes += 8;
+    mFontSizes += 6;
+    mFontSizes += 4;
 
     QFont f = font();
     f.setBold( true );
@@ -259,8 +261,8 @@ NumberDisplay::NumberDisplay( QWidget *parent )
         if( cw > mLargestCharWidth )
             mLargestCharWidth = cw;
     }
-    connect(this, SIGNAL(numberChanged(const QString&)), this,
-            SLOT(enableAction(const QString&)));
+    connect(this, SIGNAL(numberChanged(QString)), this,
+            SLOT(enableAction(QString)));
 
     tap = new NumberDisplayMultiTap(this);
     QObject::connect(tap, SIGNAL(composeKey(QChar)),
@@ -315,23 +317,32 @@ void NumberDisplay::appendNumber( const QString &numbers, bool speedDial )
     }
 
     delayEmitNumberChanged = false;
-    QString origNumber = number();
 
-    mNumber += numbers.left(numbers.count() - 1);
+    if (!mWildcardNumber.isEmpty()) {
+        // ensure we are not already over length
+        if (mWildcardNumber.count(QLatin1Char('D')) <= mNumber.length()) {
+            return;
+        }
+    }
+
+    QString newNumber = mNumber;
+
+    newNumber += numbers.left(numbers.count() - 1);
     QChar lastChar = numbers.at(numbers.count() - 1);
 
     if(speedDial) {
         if(!tap->processKeyPressEvent(lastChar)) {
-            if((int)number().length() <= SPEEDDIAL_MAXDIGITS) {
+            if(mWildcardNumber.isEmpty() && (int)newNumber.length() <= SPEEDDIAL_MAXDIGITS) {
                 tid_speeddial = startTimer(SPEEDDIAL_TIMEOUT);
             }
-            mNumber.append(lastChar);
+            newNumber.append(lastChar);
         }
     } else {
-        mNumber.append(lastChar);
+        newNumber.append(lastChar);
     }
 
-    if(number() != origNumber) {
+    if(newNumber != mNumber) {
+        mNumber = newNumber;
         update();
         // if we are waiting for a release to stop speeddial, delay sending
         // numberChanged() until keyRelease, otherwise the long processing
@@ -340,11 +351,52 @@ void NumberDisplay::appendNumber( const QString &numbers, bool speedDial )
         if (tid_speeddial)
             delayEmitNumberChanged = true;
         else
-            emit numberChanged( number() );
+            emit numberChanged( mNumber );
     }
 }
 
 void NumberDisplay::setNumber( const QString &n )
+{
+    mNumber = n;
+    processNumberChange();
+}
+
+QString NumberDisplay::number() const
+{
+    if (!mWildcardNumber.isEmpty()) {
+        QString n = mWildcardNumber;
+        foreach (QChar c, mNumber) {
+            int i = n.indexOf(QLatin1Char('D'));
+            if (i != -1)
+                n.replace(i, 1, c);
+        }
+        n.remove(QLatin1Char('D'));
+        return n;
+    }
+    return mNumber;
+}
+
+QString NumberDisplay::wildcardNumber() const
+{
+    return mWildcardNumber;
+}
+
+void NumberDisplay::setWildcardNumber(const QString &n)
+{
+    mNumber.clear();
+    mWildcardNumber = n;
+    mWildcardNumber.replace(QLatin1Char('d'), QLatin1Char('D'));
+    processNumberChange();
+}
+
+void NumberDisplay::clear()
+{
+    mNumber.clear();
+    mWildcardNumber.clear();
+    processNumberChange();
+}
+
+void NumberDisplay::processNumberChange()
 {
     if ( tid_speeddial > 0 ) {
         killTimer(tid_speeddial);
@@ -352,15 +404,9 @@ void NumberDisplay::setNumber( const QString &n )
     delayEmitNumberChanged = false;
     tap->reset();
     tid_speeddial = 0;
-    mNumber = n;
     composeKey = QChar();
     repaint();
     emit numberChanged( number() );
-}
-
-QString NumberDisplay::number() const
-{
-    return mNumber;
 }
 
 QSize NumberDisplay::sizeHint() const
@@ -387,11 +433,15 @@ void NumberDisplay::paintEvent( QPaintEvent *e )
 
     int x = 0, y = 0, w = width(), h = height();
 
-    QBrush bg = palette().brush( (hasFocus() ? QPalette::Highlight : QPalette::Background) );
-    p.fillRect( x, y, w, h, bg );
-
     p.save();
+
     QPen pen = p.pen();
+    p.setRenderHint(QPainter::Antialiasing);
+    QBrush bg = palette().brush( (hasFocus() ? QPalette::Highlight : QPalette::Background) );
+    p.setPen(Qt::NoPen);
+    p.setBrush(bg);
+    p.drawRoundRect(x,y,w,h,800/w,800/h);
+
     if( hasFocus() )
         pen.setColor( palette().color( QPalette::HighlightedText ) );
     else
@@ -402,7 +452,10 @@ void NumberDisplay::paintEvent( QPaintEvent *e )
     y += mgn;
     w -= (mgn*2);
     h -= (mgn*2);
-    p.drawRect( x, y, w, h );
+
+    p.setBrush(Qt::NoBrush);
+    p.drawRoundRect(x,y,w,h,800/w,800/h);
+
     p.restore();
 
     x += mgn;
@@ -412,38 +465,56 @@ void NumberDisplay::paintEvent( QPaintEvent *e )
 
     QFont f = font();
     f.setBold( true );
-    QString n = mNumber;
-    if(!composeKey.isNull()) {
-        n.append("<u>");
-        n.append(composeKey);
-        n.append("</u>");
-    }
 
-    int size = 0;
-    while( size < mFontSizes.count() )
-    {
-        f.setPointSize( mFontSizes[size] );
-        p.setFont( f );
-        QRect br = p.boundingRect( x, y, w, h, 0, n );
-        //we want the largest point size that will fit.
-        if( !(br.width() >= w) && !(br.height() >= h ) )
-            break;
-        ++size;
+    QString n;
+    QString composeString;
+    composeString.append(QLatin1String("<u>"));
+    composeString.append(composeKey);
+    composeString.append("</u>");
+    if (!mWildcardNumber.isEmpty()) {
+        n = mWildcardNumber;
+        foreach (QChar c, mNumber) {
+            int i = n.indexOf(QLatin1Char('D'));
+            if (i != -1)
+                n.replace(i, 1, c);
+        }
+        if (!composeKey.isNull()) {
+            int i = n.indexOf(QLatin1Char('D'));
+            if (i != -1)
+                n.replace(i, 1, composeString);
+        }
+        // replace remainging with tr'd string
+        n.replace(QLatin1Char('D'), tr("?", "place holder for wildcard numbers in fixed dialing.  eg. 2468?? needs to be completed with two extra digits"));
+    } else {
+        n = mNumber;
+        if(!composeKey.isNull()) {
+            n.append(composeString);
+        }
     }
 
     QTextDocument doc;
     doc.setHtml( n );
-    doc.setDefaultFont( p.font() );
     doc.setPageSize( QSizeF( w, INT_MAX ) );
+
+    int fontSize = 0;
+    while( fontSize < mFontSizes.count() )
+    {
+        f.setPointSize( mFontSizes[fontSize] );
+        doc.setDefaultFont( f );
+        QSize size = doc.documentLayout()->documentSize().toSize();
+        //we want the largest point size that will fit.
+        if( size.width() <= w && size.height() <= h )
+            break;
+        ++fontSize;
+    }
+
     QAbstractTextDocumentLayout::PaintContext ctx;
     ctx.palette = palette();
     ctx.palette.setColor( QPalette::Text, (hasFocus() ? ctx.palette.color( QPalette::HighlightedText ) : ctx.palette.color( QPalette::Text )) );
     ctx.palette.setBrush( QPalette::Background, bg );
-    p.save();
     p.translate( x, y );
     p.setClipRect( QRectF( 0, 0, w, h ) );
     doc.documentLayout()->draw( &p, ctx );
-    p.restore();
 }
 
 void NumberDisplay::keyReleaseEvent( QKeyEvent *e )
@@ -453,8 +524,8 @@ void NumberDisplay::keyReleaseEvent( QKeyEvent *e )
         emit numberChanged(number());
     }
 
-    if(!e->isAutoRepeat())
-        tap->processKeyReleaseEvent(QChar(e->key()));
+    if(!e->isAutoRepeat() && e->text().length())
+        tap->processKeyReleaseEvent(e->text()[0]);
 
     if ( !e->isAutoRepeat() && tid_speeddial ) {
         killTimer(tid_speeddial);
@@ -468,8 +539,8 @@ void NumberDisplay::timerEvent( QTimerEvent *e )
         killTimer(tid_speeddial);
         tid_speeddial = 0;
         delayEmitNumberChanged = false;
-        if ( (int)number().length() <= SPEEDDIAL_MAXDIGITS )
-            emit speedDialed(number());
+        if ( mWildcardNumber.isEmpty() && (int)mNumber.length() <= SPEEDDIAL_MAXDIGITS )
+            emit speedDialed(mNumber);
     }
 }
 
@@ -481,7 +552,7 @@ void NumberDisplay::keyPressEvent( QKeyEvent *e )
     }
 
     int key = e->key();
-    if(tap->processKeyPressEvent(QChar(key))) {
+    if(e->text().length() && tap->processKeyPressEvent(e->text()[0])) {
         e->accept();
         return;
     }
@@ -574,10 +645,16 @@ void NumberDisplay::keyPressEvent( QKeyEvent *e )
         case Qt::Key_Select:
         {
             QString num = number();
-            if( !num.isEmpty() )
-                emit numberSelected( num );
-            else
+            if( !num.isEmpty() ) {
+                if (!mWildcardNumber.isEmpty() && mWildcardNumber.count(QLatin1Char('D')) != mNumber.length()) {
+                    QAbstractMessageBox::information(this, tr("Incomplete number"),
+                            tr("Phone number must be completed before dialing"));
+                } else {
+                    emit numberSelected( num );
+                }
+            } else {
                 emit hangupActivated();
+            }
             break;
         }
         case Qt::Key_Hangup:
@@ -596,8 +673,11 @@ void NumberDisplay::keyPressEvent( QKeyEvent *e )
 
 void NumberDisplay::backspace()
 {
-    setNumber( mNumber.left( mNumber.length()-1 ) );
-    if( mNumber.isEmpty() )
+    if (composeKey.isNull())
+        setNumber( mNumber.left( mNumber.length()-1 ) );
+    else
+        processNumberChange();  // Clear compose key only.
+    if( mNumber.isEmpty() && mWildcardNumber.isEmpty() )
         emit hangupActivated();
 }
 

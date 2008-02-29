@@ -24,6 +24,7 @@ QTOPIAPIM_HEADERS+=\
     qtaskview.h\
     qpimsource.h\
     qpimsourcemodel.h\
+    qpimsourcedialog.h\
     qpimdelegate.h\
     qphonenumber.h
 
@@ -37,16 +38,20 @@ QTOPIAPIM_PRIVATE_HEADERS+=\
     qappointmentsqlio_p.h\
     qcontactio_p.h\
     qpimsqlio_p.h\
+    qpreparedquery_p.h\
     qrecordio_p.h\
     qtasksqlio_p.h\
     qcontactsqlio_p.h\
-    qrecordiomerge_p.h
+    qrecordiomerge_p.h\
+    qdependentcontexts_p.h\
+    qpimdependencylist_p.h
 
 QTOPIAPIM_SOURCES+=\
     qannotator.cpp\
     vcc_yacc.cpp\
     vobject.cpp\
     qsqlpimtablemodel.cpp\
+    qpreparedquery.cpp\
     qpimrecord.cpp\
     qtaskio.cpp\
     qcontactio.cpp\
@@ -68,14 +73,17 @@ QTOPIAPIM_SOURCES+=\
     qcontactsqlio.cpp\
     qrecordiomerge.cpp\
     qpimsourcemodel.cpp\
+    qpimsourcedialog.cpp\
     qphonenumber.cpp\
-    qpimdelegate.cpp
+    qpimdelegate.cpp\
+    qdependentcontexts.cpp\
+    qpimdependencylist.cpp
 
-enable_ssl {
-    QTOPIAPIM_PRIVATE_HEADERS+=qgooglecontext_p.h
-    QTOPIAPIM_SOURCES+=qgooglecontext.cpp
-    DEFINES+=GOOGLE_CALENDAR_CONTEXT
-}
+
+
+QTOPIAPIM_PRIVATE_HEADERS+=qgooglecontext_p.h
+QTOPIAPIM_SOURCES+=qgooglecontext.cpp
+DEFINES+=GOOGLE_CALENDAR_CONTEXT
 
 enable_cell {
     QTOPIAPIM_PRIVATE_HEADERS+=qsimcontext_p.h
@@ -94,15 +102,17 @@ resolve_include()
 sdk_qtopiapim_headers.files=$${QTOPIAPIM_HEADERS}
 sdk_qtopiapim_headers.path=/include/qtopia/pim
 sdk_qtopiapim_headers.hint=sdk headers
+INSTALLS+=sdk_qtopiapim_headers
 
 sdk_qtopiapim_private_headers.files=$${QTOPIAPIM_PRIVATE_HEADERS}
 sdk_qtopiapim_private_headers.path=/include/qtopia/pim/private
 sdk_qtopiapim_private_headers.hint=sdk headers
+INSTALLS+=sdk_qtopiapim_private_headers
 
 pkg_qtopiapim_settings.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/Contacts.conf
 pkg_qtopiapim_settings.path=/etc/default/Trolltech
+INSTALLS+=pkg_qtopiapim_settings
 
-INSTALLS+=sdk_qtopiapim_headers sdk_qtopiapim_private_headers pkg_qtopiapim_settings
 
 pkg.desc=PIM Data access library
 pkg.domain=libs

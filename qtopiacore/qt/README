@@ -1,12 +1,12 @@
-This is Qtopia Core (Qt for embedded Linux) version 4.2.3.
+This is Qtopia Core (Qt for embedded Linux) version 4.3.2.
 
-Qt is a comprehensive cross-platform C++ application framework. Qt 4.2
+Qt is a comprehensive cross-platform C++ application framework. Qt 4.3
 introduces new features and many improvements over the 3.x series. See
-http://doc.trolltech.com/4.2/qt4-intro.html for details.
+http://doc.trolltech.com/4.3/qt4-intro.html for details.
 
 The Qt 4.x series is not binary compatible or source compatible with
 the 3.x series. For more information on porting from Qt 3 to Qt 4, see
-http://doc.trolltech.com/4.2/porting4.html.
+http://doc.trolltech.com/4.3/porting4.html.
 
 
 INSTALLING Qt
@@ -89,7 +89,7 @@ Console Edition licensees may use the classes contained in the QtCore,
 QtNetwork, QtSql and QtXml modules.
 
 For a full listing of the contents of each module, please refer to 
-http://doc.trolltech.com/4.2/modules.html.
+http://doc.trolltech.com/4.3/modules.html.
 
 
 HOW TO REPORT A BUG

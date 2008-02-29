@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -49,26 +64,65 @@
 
     \ingroup abstractwidgets
 
-    QAbstractScrollArea is a low-level abstraction of a scrolling area. It gives
-    you full control of the scroll bars, at the cost of simplicity. In
-    most cases, using a QScrollArea is preferable.
+    QAbstractScrollArea is a low-level abstraction of a scrolling
+    area. The area provides a central widget called the viewport, in
+    which the contents of the area is to be scrolled (i.e, the
+    visible parts of the contents are rendered in the viewport). 
 
-    QAbstractScrollArea's central child widget is the scrolling area itself,
-    called viewport(). The viewport widget uses all available
-    space. Next to the viewport is a vertical scroll bar (accessible
-    with verticalScrollBar()), and below a horizontal scroll bar
-    (accessible with horizontalScrollBar()). Each scroll bar can be
-    either visible or hidden, depending on the scroll bar's policy
-    (see \l verticalScrollBarPolicy and \l horizontalScrollBarPolicy).
-    When a scroll bar is hidden, the viewport expands in order to
-    cover all available space. When a scroll bar becomes visible
-    again, the viewport shrinks in order to make room for the scroll
-    bar.
+    Next to the viewport is a vertical scroll bar, and below is a
+    horizontal scroll bar. When all of the area contents fits in the
+    viewport, each scroll bar can be either visible or hidden
+    depending on the scroll bar's Qt::ScrollBarPolicy. When a scroll
+    bar is hidden, the viewport expands in order to cover all
+    available space. When a scroll bar becomes visible again, the
+    viewport shrinks in order to make room for the scroll bar.
+
+    It is possible to reserve a margin area around the viewport, see
+    setViewportMargins(). The feature is mostly used to place a
+    QHeaderView widget above or beside the scrolling area. Subclasses
+    of QAbstractScrollArea should implement margins.
+
+    When inheriting QAbstractScrollArea, you need to do the
+    following:
+
+    \list
+        \o Control the scroll bars by setting their
+           range, value, page step, and tracking their
+           movements.
+        \o Draw the contents of the area in the viewport according
+           to the values of the scroll bars.
+        \o Handle events received by the viewport in
+           viewportEvent() - notably resize events.
+    \endlist
 
     With a scroll bar policy of Qt::ScrollBarAsNeeded (the default),
-    QAbstractScrollArea shows scroll bars when those provide a non-zero
-    scrolling range, and hides them otherwise. You control the range
-    of each scroll bar with QAbstractSlider::setRange().
+    QAbstractScrollArea shows scroll bars when they provide a non-zero
+    scrolling range, and hides them otherwise.
+
+    The scroll bars and viewport should be updated whenever the viewport
+    receives a resize event or the size of the contents changes.
+    The viewport also needs to be updated when the scroll bars
+    values change. The initial values of the scroll bars are often
+    set when the area receives new contents. 
+
+    We give a simple example, in which we have implemented a scroll area
+    that can scroll any QWidget. We make the widget a child of the
+    viewport; this way, we do not have to calculate which part of
+    the widget to draw but can simply move the widget with
+    QWidget::move(). When the area contents or the viewport size
+    changes, we do the following: 
+
+    \quotefromfile snippets/myscrollarea.cpp
+    \skipto areaSize
+    \printto /^\}/
+
+    When the scroll bars change value, we need to update the widget
+    position, i.e., find the part of the widget that is to be drawn in
+    the viewport:
+
+    \quotefromfile snippets/myscrollarea.cpp
+    \skipto hvalue
+    \printto /^\}/
 
     In order to track scroll bar movements, reimplement the virtual
     function scrollContentsBy(). In order to fine-tune scrolling
@@ -76,18 +130,21 @@
     QAbstractSlider::actionTriggered() signal and adjust the \l
     QAbstractSlider::sliderPosition as you wish.
 
-    It is possible to reserve a margin area around the viewport, see
-    setViewportMargins(). The feature is mostly used to place a
-    QHeaderView widget above or beside the scrolling area.
+    For convenience, QAbstractScrollArea makes all viewport events
+    available in the virtual viewportEvent() handler. QWidget's
+    specialized handlers are remapped to viewport events in the cases
+    where this makes sense. The remapped specialized handlers are:
+    paintEvent(), mousePressEvent(), mouseReleaseEvent(),
+    mouseDoubleClickEvent(), mouseMoveEvent(), wheelEvent(),
+    dragEnterEvent(), dragMoveEvent(), dragLeaveEvent(), dropEvent(),
+    contextMenuEvent(),  and resizeEvent().
 
-    For convenience, QAbstractScrollArea makes all viewport events available in
-    the virtual viewportEvent() handler.  QWidget's specialized
-    handlers are remapped to viewport events in the cases where this
-    makes sense. The remapped specialized handlers are: paintEvent(),
-    mousePressEvent(), mouseReleaseEvent(), mouseDoubleClickEvent(),
-    mouseMoveEvent(), wheelEvent(), dragEnterEvent(), dragMoveEvent(),
-    dragLeaveEvent(), dropEvent(), contextMenuEvent().  and
-    resizeEvent().
+    QScrollArea, which inherits QAbstractScrollArea, provides smooth
+    scrolling for any QWidget (i.e., the widget is scrolled pixel by
+    pixel). You only need to subclass QAbstractScrollArea if you need
+    more specialized behavior. This is, for instance, true if the
+    entire contents of the area is not suitable for being drawn on a
+    QWidget or if you do not want smooth scrolling.
 
     \sa QScrollArea
 */
@@ -203,12 +260,14 @@ void QAbstractScrollAreaPrivate::init()
 {
     Q_Q(QAbstractScrollArea);
     scrollBarContainers[Qt::Horizontal] = new QAbstractScrollAreaScrollBarContainer(Qt::Horizontal, q);
+    scrollBarContainers[Qt::Horizontal]->setObjectName(QLatin1String("qt_scrollarea_hcontainer"));
     hbar = scrollBarContainers[Qt::Horizontal]->scrollBar;
     hbar->setRange(0,0);
     scrollBarContainers[Qt::Horizontal]->setVisible(false);
     QObject::connect(hbar, SIGNAL(valueChanged(int)), q, SLOT(_q_hslide(int)));
     QObject::connect(hbar, SIGNAL(rangeChanged(int,int)), q, SLOT(_q_showOrHideScrollBars()), Qt::QueuedConnection);
     scrollBarContainers[Qt::Vertical] = new QAbstractScrollAreaScrollBarContainer(Qt::Vertical, q);
+    scrollBarContainers[Qt::Vertical]->setObjectName(QLatin1String("qt_scrollarea_vcontainer"));
     vbar = scrollBarContainers[Qt::Vertical]->scrollBar;
     vbar->setRange(0,0);
     scrollBarContainers[Qt::Vertical]->setVisible(false);
@@ -269,11 +328,11 @@ void QAbstractScrollAreaPrivate::layoutChildren()
         hasMacReverseSizeGrip = (hasMacSizeGrip == false && (offset.manhattanLength() < hsbExt));
     }
 
-    // Use small scroll bars for tool windows, if the window has a native size grip.
+    // Use small scroll bars for tool windows, to match the native size grip.
     const QMacStyle::WidgetSizePolicy hpolicy = QMacStyle::widgetSizePolicy(hbar);
     const QMacStyle::WidgetSizePolicy vpolicy = QMacStyle::widgetSizePolicy(vbar);
     const Qt::WindowType windowType = window->windowType();
-    if (windowType == Qt::Tool && (hasMacSizeGrip || hasMacReverseSizeGrip)) {
+    if (windowType == Qt::Tool) {
         if (hpolicy != QMacStyle::SizeSmall)
             QMacStyle::setWidgetSizePolicy(hbar, QMacStyle::SizeSmall);
         if (vpolicy != QMacStyle::SizeSmall)
@@ -364,16 +423,16 @@ void QAbstractScrollAreaPrivate::layoutChildren()
     scrollBarContainers[Qt::Horizontal]->setVisible(needh);
     scrollBarContainers[Qt::Vertical]->setVisible(needv);
 
-    // Existing code expect to have to account for reverse mode when calling
-    // setViewportMargins(), so we undo that here to preserve the behavior.
-    // ### Qt 5: Consider changing the behavior.
-    if (QApplication::isRightToLeft())
+    if (q->isRightToLeft())
         viewportRect.adjust(right, top, -left, -bottom);
     else
         viewportRect.adjust(left, top, -right, -bottom);
 
     viewport->setGeometry(QStyle::visualRect(opt.direction, opt.rect, viewportRect)); // resize the viewport last
 }
+
+// ### Fix for 4.4, talk to Bjoern E or Girish.
+void QAbstractScrollAreaPrivate::scrollBarPolicyChanged(Qt::Orientation, Qt::ScrollBarPolicy) {}
 
 /*!
     \internal
@@ -492,9 +551,12 @@ Qt::ScrollBarPolicy QAbstractScrollArea::verticalScrollBarPolicy() const
 void QAbstractScrollArea::setVerticalScrollBarPolicy(Qt::ScrollBarPolicy policy)
 {
     Q_D(QAbstractScrollArea);
+    const Qt::ScrollBarPolicy oldPolicy = d->vbarpolicy;
     d->vbarpolicy = policy;
     if (isVisible())
         d->layoutChildren();
+    if (oldPolicy != d->vbarpolicy)
+        d->scrollBarPolicyChanged(Qt::Vertical, d->vbarpolicy);
 }
 
 
@@ -550,9 +612,12 @@ Qt::ScrollBarPolicy QAbstractScrollArea::horizontalScrollBarPolicy() const
 void QAbstractScrollArea::setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy policy)
 {
     Q_D(QAbstractScrollArea);
+    const Qt::ScrollBarPolicy oldPolicy = d->hbarpolicy;
     d->hbarpolicy = policy;
     if (isVisible())
         d->layoutChildren();
+    if (oldPolicy != d->hbarpolicy)
+        d->scrollBarPolicyChanged(Qt::Horizontal, d->hbarpolicy);
 }
 
 /*!
@@ -731,6 +796,11 @@ QWidgetList QAbstractScrollArea::scrollBarWidgets(Qt::Alignment alignment)
     spreadsheets with "locked" rows and columns. The marginal space is
     is left blank; put widgets in the unused area.
 
+    Note that this function is frequently called by QTreeView and
+    QTableView, so margins must be implemented by QAbstractScrollArea
+    subclasses. Also, if the subclasses are to be used in item views,
+    they should not call this function. 
+
     By default all margins are zero.
 
 */
@@ -804,6 +874,8 @@ bool QAbstractScrollArea::event(QEvent *e)
 #endif
         return false;
     case QEvent::StyleChange:
+    case QEvent::LayoutDirectionChange:
+    case QEvent::ApplicationLayoutDirectionChange:
         d->layoutChildren();
         // fall through
     default:
@@ -883,8 +955,7 @@ void QAbstractScrollArea::resizeEvent(QResizeEvent *)
     This event handler can be reimplemented in a subclass to receive
     paint events (passed in \a event), for the viewport() widget.
 
-    Note: If you open a painter, make sure to open it on the
-    viewport().
+    \note If you open a painter, make sure to open it on the viewport().
 
     \sa QWidget::paintEvent()
 */
@@ -986,6 +1057,12 @@ void QAbstractScrollArea::keyPressEvent(QKeyEvent * e)
         d->vbar->triggerAction(QScrollBar::SliderPageStepAdd);
 #endif
     } else {
+#ifdef QT_KEYPAD_NAVIGATION
+        if (QApplication::keypadNavigationEnabled() && !hasEditFocus()) {
+            e->ignore();
+            return;
+        }
+#endif
         switch (e->key()) {
         case Qt::Key_Up:
             d->vbar->triggerAction(QScrollBar::SliderSingleStepSub);
@@ -994,9 +1071,25 @@ void QAbstractScrollArea::keyPressEvent(QKeyEvent * e)
             d->vbar->triggerAction(QScrollBar::SliderSingleStepAdd);
             break;
         case Qt::Key_Left:
+#ifdef QT_KEYPAD_NAVIGATION
+        if (QApplication::keypadNavigationEnabled() && hasEditFocus()
+            && (!d->hbar->isVisible() || d->hbar->value() == d->hbar->minimum())) {
+            //if we aren't using the hbar or we are already at the leftmost point ignore
+            e->ignore();
+            return;
+        }
+#endif
             d->hbar->triggerAction(QScrollBar::SliderSingleStepSub);
             break;
         case Qt::Key_Right:
+#ifdef QT_KEYPAD_NAVIGATION
+        if (QApplication::keypadNavigationEnabled() && hasEditFocus()
+            && (!d->hbar->isVisible() || d->hbar->value() == d->hbar->maximum())) {
+            //if we aren't using the hbar or we are already at the rightmost point ignore
+            e->ignore();
+            return;
+        }
+#endif
             d->hbar->triggerAction(QScrollBar::SliderSingleStepAdd);
             break;
         default:

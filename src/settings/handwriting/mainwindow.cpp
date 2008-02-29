@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,21 +22,13 @@
 #include "charsetedit.h"
 #include "ui_gprefbase.h"
 #include <qtopiaapplication.h>
-#include <qsettings.h>
 #include <qtopiaipcenvelope.h>
 #include <qsoftmenubar.h>
 #include <qdir.h>
-#include <qaction.h>
-#include <qtoolbutton.h>
 #include <qlayout.h>
-#include <qslider.h>
-#include <qcheckbox.h>
 #include <qmessagebox.h>
-#include <qcombobox.h>
-#include <qlabel.h>
 #include <qtreewidget.h>
 #include <qheaderview.h>
-#include <qdebug.h>
 
 class ProfileItem : public QObject, public QTreeWidgetItem
 {
@@ -105,8 +97,9 @@ QIMPenProfileEdit::QIMPenProfileEdit(QWidget *parent, Qt::WFlags f)
     setObjectName( "handwriting" );
 
     QVBoxLayout *vbox = new QVBoxLayout(this);
+    vbox->setContentsMargins(0, 0, 0, 0);
     lv = new QTreeWidget(this);
-    // lv->setFrameStyle(QFrame::NoFrame);
+    lv->setFrameStyle(QFrame::NoFrame);
     // lv->addColumn("");
     lv->setColumnCount( 1 );
     lv->header()->hide();
@@ -116,10 +109,8 @@ QIMPenProfileEdit::QIMPenProfileEdit(QWidget *parent, Qt::WFlags f)
     loadProfiles();
     // lv->resizeColumnToContents( 0 );
 
-    connect(lv, SIGNAL(itemActivated(QTreeWidgetItem*, int )), this, SLOT(editItem(QTreeWidgetItem*)));
-#ifdef QTOPIA_PHONE
+    connect(lv, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(editItem(QTreeWidgetItem*)));
     QSoftMenuBar::menuFor( this );
-#endif
 }
 
 QIMPenProfileEdit::~QIMPenProfileEdit()
@@ -164,10 +155,10 @@ bool QIMPenProfileEdit::loadProfiles()
             const QString &sit = it.next();
             ProfileItem *si = new ProfileItem(pi, prof->title(sit), prof->charSet(sit));
             Q_UNUSED( si );
-            // connect(si, SIGNAL(selected(QTreeWidgetItem *)), this, SLOT(editItem(QTreeWidgetItem *)));
+            // connect(si, SIGNAL(selected(QTreeWidgetItem*)), this, SLOT(editItem(QTreeWidgetItem*)));
         }
         lv->expandItem( pi );
-        // connect(pi, SIGNAL(selected(QTreeWidgetItem *)), this, SLOT(editItem(QTreeWidgetItem *)));
+        // connect(pi, SIGNAL(selected(QTreeWidgetItem*)), this, SLOT(editItem(QTreeWidgetItem*)));
     }
 
     /*

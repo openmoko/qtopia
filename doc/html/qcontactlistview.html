@@ -28,25 +28,27 @@
 <li><div class="fn"/>QList&lt;QUniqueId&gt; <b><a href="qcontactlistview.html#selectedContactIds">selectedContactIds</a></b> () const</li>
 <li><div class="fn"/>QList&lt;QContact&gt; <b><a href="qcontactlistview.html#selectedContacts">selectedContacts</a></b> () const</li>
 <li><div class="fn"/>virtual void <b><a href="qcontactlistview.html#setModel">setModel</a></b> ( QAbstractItemModel * <i>model</i> )</li>
+<li><div class="fn"/>void <b><a href="qcontactlistview.html#setTextEntryProxy">setTextEntryProxy</a></b> ( QTextEntryProxy * <i>proxy</i> )</li>
+<li><div class="fn"/>QTextEntryProxy * <b><a href="qcontactlistview.html#textEntryProxy">textEntryProxy</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>27 public functions inherited from <a href="qlistview.html#public-functions">QListView</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qlistview.html#public-functions">QListView</a></li>
 <li><div class="fn"/>52 public functions inherited from <a href="qabstractitemview.html#public-functions">QAbstractItemView</a></li>
 <li><div class="fn"/>15 public functions inherited from <a href="qabstractscrollarea.html#public-functions">QAbstractScrollArea</a></li>
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>12 properties inherited from <a href="qlistview.html#properties">QListView</a></li>
+<li><div class="fn"/>13 properties inherited from <a href="qlistview.html#properties">QListView</a></li>
 <li><div class="fn"/>14 properties inherited from <a href="qabstractitemview.html#properties">QAbstractItemView</a></li>
 <li><div class="fn"/>2 properties inherited from <a href="qabstractscrollarea.html#properties">QAbstractScrollArea</a></li>
 <li><div class="fn"/>6 properties inherited from <a href="qframe.html#properties">QFrame</a></li>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>8 public slots inherited from <a href="qabstractitemview.html#public-slots">QAbstractItemView</a></li>
+<li><div class="fn"/>9 public slots inherited from <a href="qabstractitemview.html#public-slots">QAbstractItemView</a></li>
 <li><div class="fn"/>20 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qlistview.html#signals">QListView</a></li>
@@ -77,7 +79,7 @@
 <p>The convenience functions provided by QContactListView include functions for interpreting the view's model, delegate and current item as the corresponding <a href="qcontactmodel.html">QContactModel</a>, <a href="qcontactdelegate.html">QContactDelegate</a> and <a href="qcontact.html">QContact</a> objects. In addition, QContactListView enforces using a <a href="qcontactmodel.html">QContactModel</a> (or a derivative) as the model.</p>
 <p>Upon construction, QContactListView automatically sets itself to use a <a href="qcontactdelegate.html">QContactDelegate</a> for drawing, sets <tt>Batch</tt> layout mode (<a href="qlistview.html#setLayoutMode">setLayoutMode</a>()), and sets the resize mode to <tt>Adjust</tt> (<a href="qlistview.html#setResizeMode">setResizeMode</a>()).</p>
 <p>The following image displays a QContactListView, using the default <a href="qcontactdelegate.html">QContactDelegate</a> to render QContacts from a <a href="qcontactmodel.html">QContactModel</a>.</p>
-<p align="center"><img src="images/qcontactview.png" alt="&quot;List of QContacts&quot;" /></p><p>See also <a href="qcontact.html">QContact</a>, <a href="qcontactmodel.html">QContactModel</a>, and <a href="qcontactdelegate.html">QContactDelegate</a>.</p>
+<p align="center"><img src="images/qcontactview.png" alt="&quot;List of QContacts&quot;" /></p><p>See also <a href="qcontact.html">QContact</a>, <a href="qcontactmodel.html">QContactModel</a>, <a href="qcontactdelegate.html">QContactDelegate</a>, and <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QContactListView"></a>QContactListView::QContactListView ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
@@ -99,12 +101,17 @@
 <p>See also <a href="qcontactlistview.html#selectedContactIds">selectedContactIds</a>().</p>
 <h3 class="fn"><a name="setModel"></a>void QContactListView::setModel ( <a href="qabstractitemmodel.html">QAbstractItemModel</a> * <i>model</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sets the model for the view to <i>model</i>.</p>
-<p>Will only accept the model if it inherits or is a <a href="qcontactmodel.html">QContactModel</a>. If the <i>model</i> does not inherit a <a href="qcontactmodel.html">QContactModel</a>, the existing model will be retained.</p>
 <p>Reimplemented from <a href="qabstractitemview.html#setModel">QAbstractItemView</a>.</p>
+<h3 class="fn"><a name="setTextEntryProxy"></a>void QContactListView::setTextEntryProxy ( <a href="qtextentryproxy.html">QTextEntryProxy</a> * <i>proxy</i> )</h3>
+<p>Sets a <a href="qtextentryproxy.html">QTextEntryProxy</a> for the list view to <i>proxy</i>. This allows the list view to accept text and InputMethod events, which it will pass to <i>proxy</i>. The text of the proxy is used for filtering the list of contacts in the view.</p>
+<p>See also <a href="qcontactlistview.html#textEntryProxy">textEntryProxy</a>().</p>
+<h3 class="fn"><a name="textEntryProxy"></a><a href="qtextentryproxy.html">QTextEntryProxy</a> * QContactListView::textEntryProxy () const</h3>
+<p>Returns the <a href="qtextentryproxy.html">QTextEntryProxy</a> for the list view. If there is no <a href="qtextentryproxy.html">QTextEntryProxy</a> set returns 0.</p>
+<p>See also <a href="qcontactlistview.html#setTextEntryProxy">setTextEntryProxy</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

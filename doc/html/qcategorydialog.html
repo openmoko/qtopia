@@ -20,7 +20,7 @@
 <a name="public-types"></a>
 <h3>Public Types</h3>
 <ul>
-<li><div class="fn"/>enum <b><a href="qcategorydialog.html#ContentFlag-enum">ContentFlag</a></b> { IncludeAll, IncludeUnfiled, Filter, Editor }</li>
+<li><div class="fn"/>enum <b><a href="qcategorydialog.html#ContentFlag-enum">ContentFlag</a></b> { IncludeAll, IncludeUnfiled, SingleSelection, Filter, Editor }</li>
 <li><div class="fn"/>flags <b><a href="qcategorydialog.html#ContentFlag-enum">ContentFlags</a></b></li>
 </ul>
 <a name="public-functions"></a>
@@ -35,7 +35,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>9 public functions inherited from <a href="qdialog.html#public-functions">QDialog</a></li>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -56,7 +56,7 @@
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>2 properties inherited from <a href="qdialog.html#properties">QDialog</a></li>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>3 signals inherited from <a href="qdialog.html#signals">QDialog</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
@@ -86,6 +86,7 @@
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QCategoryDialog::IncludeAll</tt></td><td align="center" valign="top"><tt>0x04</tt></td><td valign="top">Include the All categories option.</td></tr>
 <tr><td valign="top"><tt>QCategoryDialog::IncludeUnfiled</tt></td><td align="center" valign="top"><tt>0x08</tt></td><td valign="top">Include the Unfiled categories option.</td></tr>
+<tr><td valign="top"><tt>QCategoryDialog::SingleSelection</tt></td><td align="center" valign="top"><tt>0x80</tt></td><td valign="top">Allow selection of a single category. The default is to allow combinations of categories.</td></tr>
 <tr><td valign="top"><tt>QCategoryDialog::Filter</tt></td><td align="center" valign="top"><tt>IncludeAll | IncludeUnfiled</tt></td><td valign="top">Alias for IncludeAll|IncludeUnfiled.</td></tr>
 <tr><td valign="top"><tt>QCategoryDialog::Editor</tt></td><td align="center" valign="top"><tt>IncludeUnfiled</tt></td><td valign="top">Alias for IncludeUnfiled.</td></tr>
 </table></p>
@@ -123,6 +124,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,7 @@
 
 #include "devicebuttontask.h"
 #include "pressholdgate.h"
+#include "qtopiapowermanager.h"
 #include <QtopiaApplication>
 #include <QDeviceButtonManager>
 #include <qtopiaipcenvelope.h>
@@ -45,6 +46,7 @@
   and QDeviceButtonManager APIs.  The DeviceButtonTask will issue the actions
   for all configured button mappings without a specified context.
 
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   \sa QDeviceButton, QDeviceButtonManager
  */
 
@@ -56,8 +58,8 @@ DeviceButtonTask::DeviceButtonTask()
     vs = new QValueSpaceItem( "/UI", this );
     ph = new PressHoldGate(this);
     ph->setHardFilter(true);
-    connect(ph,SIGNAL(activate(int,bool)),this,SLOT(doActivate(int,bool)));
-    QWSServer::addKeyboardFilter(this);
+    connect(ph,SIGNAL(activate(int,bool,bool)),this,SLOT(doActivate(int,bool,bool)));
+    QtopiaInputEvents::addKeyboardFilter(this);
 }
 
 /*! \internal */
@@ -65,11 +67,11 @@ bool DeviceButtonTask::filter(int, int keycode, int modifiers,
                               bool press, bool autoRepeat)
 {
     if(!modifiers) {
-        if( !keyLocked() && !((QtopiaApplication*)qApp)->keyboardGrabbed()) {
+        if( !keyLocked() ) {
             // First check to see if QDeviceButtonManager knows something
             // about this button:
             if ( ph->filterDeviceButton(keycode,press,autoRepeat) ) {
-                QWSServer::screenSaverActivate(false);
+                QtopiaPowerManager::setActive(false);
                 return true;
             }
         }
@@ -87,20 +89,29 @@ bool DeviceButtonTask::filter(int, int keycode, int modifiers,
 /*! \internal */
 bool DeviceButtonTask::keyLocked()
 {
-    return vs->value( "KeyLock" ).toBool();
+    return vs->value( "KeyLock" ).toBool() || vs->value( "SimLock" ).toBool();
 }
 
 /*! \internal */
-void DeviceButtonTask::doActivate(int keycode, bool held)
+void DeviceButtonTask::doActivate(int keycode, bool held, bool isPressed)
 {
     const QDeviceButton* button =
         QDeviceButtonManager::instance().buttonForKeycode(keycode);
     if ( button ) {
         QtopiaServiceRequest sr;
-        if ( held ) {
-            sr = button->heldAction();
-        } else {
-            sr = button->pressedAction();
+        if (isPressed)
+        {
+            if ( held ) {
+                sr = button->heldAction();
+            } else {
+                sr = button->pressedAction();
+            }
+        }
+        else
+        {
+            sr = button->releasedAction();
+            if (!sr.isNull())
+                sr << held;
         }
 
         // A button with no action defined, will return a null
@@ -111,16 +122,19 @@ void DeviceButtonTask::doActivate(int keycode, bool held)
             sr.send();
         }
 
-        emit activated(keycode, held);
+        emit activated(keycode, held, isPressed);
     }
 }
 
 /*!
-  \fn void DeviceButtonTask::activated(int keycode, bool wasHeld)
+  \fn void DeviceButtonTask::activated(int keycode, bool wasHeld, bool isPressed)
 
   Emitted whenever the special-function button \a keycode was pressed.
   \a wasHeld will be true if the button was held and false if the button was
   pressed.
+
+  \a isPressed is true if the button is still depressed, or false if the signal
+  was generated on the release of the button.
 
   This signal will be emitted \bold after the button action has been performed.
  */

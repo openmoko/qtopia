@@ -1,0 +1,10 @@
+2002-12-03  Marcek Telka  <marcel@telka.sk>
+
+	Version 0.1 released.
+
+2002-12-02  Marcel Telka  <marcel@telka.sk>
+
+	* Makefile.am: Added initial build framework for srcconf.
+	* autogen.sh: Ditto.
+	* configure.ac: Ditto.
+

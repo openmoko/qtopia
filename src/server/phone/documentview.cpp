@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,7 +26,6 @@
 #include <QDocumentPropertiesWidget>
 #include <QVBoxLayout>
 #include <QListWidget>
-#include <QMimeType>
 #include <QDrmContent>
 #include <QtopiaApplication>
 #include <QMenu>
@@ -38,6 +37,7 @@
 #include "qabstractmessagebox.h"
 #include <qtopiaservices.h>
 #include <QContentFilterDialog>
+#include <QTextEntryProxy>
 
 ////////////////////////////////////////////////////////////////
 //
@@ -65,10 +65,18 @@ DocumentLauncherView::DocumentLauncherView(QWidget* parent, Qt::WFlags fl)
     deleteMsg(0), propDlg(0), rightMenu(0), actionBeam(0), actionRightsIssuer(0),
     typeDlg(0), categoryLbl(0), categoryDlg(0)
 {
-    QMenu * softMenu = QSoftMenuBar::menuFor(this);
+    init();
+}
+
+void DocumentLauncherView::init() {
+    softMenu = new QMenu(this);
+    
+    QSoftMenuBar::addMenuTo(this, softMenu);
+    
     rightMenu = new QMenu(this);
 
     actionProps = new QAction( QIcon(":icon/info"), tr("Properties..."), this );
+    actionProps->setEnabled(false);
     QObject::connect(actionProps, SIGNAL(triggered()),
                      this, SLOT(propertiesDoc()));
     softMenu->addAction(actionProps);
@@ -76,12 +84,14 @@ DocumentLauncherView::DocumentLauncherView(QWidget* parent, Qt::WFlags fl)
 
     if (QtopiaSendVia::isFileSupported()) {
         actionBeam = new QAction( QIcon(":icon/beam"), tr("Send"), this );
+        actionBeam->setEnabled( false );
         QObject::connect(actionBeam, SIGNAL(triggered()), this, SLOT(beamDoc()));
         softMenu->addAction(actionBeam);
         rightMenu->addAction(actionBeam);
     }
 
     actionDelete = new QAction( QIcon(":icon/trash"), tr("Delete..."), this );
+    actionDelete->setEnabled(false);
     connect(actionDelete, SIGNAL(triggered()), this, SLOT(deleteDoc()));
     softMenu->addAction(actionDelete);
     rightMenu->addAction(actionDelete);
@@ -94,6 +104,7 @@ DocumentLauncherView::DocumentLauncherView(QWidget* parent, Qt::WFlags fl)
     rightMenu->addAction(actionRightsIssuer);
 
     separatorAction = softMenu->addSeparator();
+    separatorAction->setEnabled(false);
 
     QAction *a = new QAction( tr("View Type..."), this );
     connect(a, SIGNAL(triggered()), this, SLOT(selectDocsType()));
@@ -109,7 +120,7 @@ DocumentLauncherView::DocumentLauncherView(QWidget* parent, Qt::WFlags fl)
 
     categoryLbl = new QLabel(this);
     layout()->addWidget(categoryLbl);
-    categoryLbl->hide();
+    categoryLbl->hide();// TODO: ifdef
 
     scanningBar = new QLabeledProgressBar(this);
     layout()->addWidget(scanningBar);
@@ -131,16 +142,34 @@ DocumentLauncherView::DocumentLauncherView(QWidget* parent, Qt::WFlags fl)
     connect(this, SIGNAL(rightPressed(QContent)),
             this, SLOT(launcherRightPressed(QContent)));
 
-    connect( icons, SIGNAL(currentIndexChanged(const QModelIndex&,const QModelIndex&)),
-             this, SLOT(currentChanged(const QModelIndex&,const QModelIndex&)) );
+    connect( icons, SIGNAL(currentIndexChanged(QModelIndex,QModelIndex)),
+             this, SLOT(currentChanged(QModelIndex,QModelIndex)) );
 
     QContentFilter filter( QContent::Document );
 
     setFilter(filter);
     setViewMode(QListView::ListMode);
-    contentSetChanged();
-    connect(contentSet, SIGNAL(changed()), this, SLOT(contentSetChanged()));
-    connect(contentSet, SIGNAL(changed(const QContentIdList &, QContent::ChangeType)), this, SLOT(contentSetChanged()));
+    if (!style()->inherits("QThumbStyle")) {
+        textEntry = new QTextEntryProxy(this, icons);
+
+        int mFindHeight = textEntry->sizeHint().height();
+        findIcon = new QLabel;
+        findIcon->setPixmap(QIcon(":icon/find").pixmap(mFindHeight-2, mFindHeight-2));
+        findIcon->setMargin(2);
+        findIcon->setFocusPolicy(Qt::NoFocus);
+
+        findLayout = new QHBoxLayout;
+        findLayout->addWidget(findIcon);
+        findLayout->addWidget(textEntry);
+        qobject_cast<QVBoxLayout*>(layout())->addLayout(findLayout);
+        textEntry->hide();
+        findIcon->hide();
+
+        connect(textEntry, SIGNAL(textChanged(QString)), this, SLOT(textEntrytextChanged(QString)));
+        QtopiaApplication::setInputMethodHint(icons, "text");
+        icons->setAttribute(Qt::WA_InputMethodEnabled);
+    }
+    QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
 }
 
 DocumentLauncherView::~DocumentLauncherView()
@@ -175,7 +204,7 @@ void DocumentLauncherView::beamDoc()
 void DocumentLauncherView::deleteDocWorker()
 {
     deleteLnk.removeFiles();
-    if (QFile::exists(deleteLnk.file())) {
+    if (QFile::exists(deleteLnk.fileName())) {
         if(deleteMsg)
             delete deleteMsg;
         deleteMsg = QAbstractMessageBox::messageBox( this, tr("Delete"),
@@ -219,7 +248,7 @@ void DocumentLauncherView::propertiesDoc()
             delete propDlg;
         propDlg = new QDocumentPropertiesDialog(propLnk, this);
         propDlg->setObjectName("document-properties");
-        QtopiaApplication::showDialog(propDlg);
+        propDlg->showMaximized();
     }
 }
 
@@ -232,19 +261,46 @@ void DocumentLauncherView::openRightsIssuerURL()
 
 void DocumentLauncherView::currentChanged( const QModelIndex &current, const QModelIndex &previous )
 {
-    QContent currentContent = model->content( current );
-    QContent previousContent = model->content( previous );
+    if( current.isValid() && !previous.isValid() )
+    {
+        actionProps->setEnabled(true);
+        actionDelete->setEnabled(true);
+        separatorAction->setEnabled(true);
 
-    bool pDistribute = previousContent.permissions() & QDrmRights::Distribute;
-    bool cDistribute = currentContent.permissions() & QDrmRights::Distribute;
+        QContent content = model->content( current );
 
-    bool pActivate = QDrmContent::canActivate( previousContent );
-    bool cActivate = QDrmContent::canActivate( currentContent );
+        if( actionBeam && content.permissions() & QDrmRights::Distribute )
+            actionBeam->setEnabled( true );
+        if( actionRightsIssuer && QDrmContent::canActivate( content ) )
+            actionRightsIssuer->setVisible( true );
 
-    if( actionBeam && pDistribute != cDistribute )
-        actionBeam->setEnabled( cDistribute );
-    if( actionRightsIssuer && pActivate != cActivate )
-        actionRightsIssuer->setVisible( cActivate );
+        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
+    }
+    else if( !current.isValid() && previous.isValid() )
+    {
+        actionProps->setEnabled(false);
+        actionDelete->setEnabled(false);
+        separatorAction->setEnabled(false);
+
+        if( actionBeam )
+            actionBeam->setEnabled(false);
+        if( actionRightsIssuer )
+            actionRightsIssuer->setVisible( false );
+
+        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
+    }
+    else
+    {
+        QContent content = model->content( current );
+
+        bool distribute = content.permissions() & QDrmRights::Distribute;
+        bool activate = QDrmContent::canActivate( content );
+
+        if( actionBeam && actionBeam->isEnabled() != distribute )
+            actionBeam->setEnabled( distribute );
+        if( actionRightsIssuer && actionRightsIssuer->isVisible() != activate )
+            actionRightsIssuer->setVisible( activate );
+    }
 }
 
 void DocumentLauncherView::selectDocsType()
@@ -272,6 +328,7 @@ void DocumentLauncherView::selectDocsType()
 
         typeDlg = new QContentFilterDialog( typePage, this );
 
+        typeDlg->setWindowTitle( tr( "View Type" ) );
         typeDlg->setFilter( mainFilter );
     }
 
@@ -303,6 +360,8 @@ void DocumentLauncherView::selectDocsCategory()
 
         categoryDlg = new QContentFilterDialog( categoryPage, this );
 
+
+        categoryDlg->setWindowTitle( tr( "View Category" ) );
         categoryDlg->setFilter( mainFilter );
     }
 
@@ -318,31 +377,6 @@ void DocumentLauncherView::selectDocsCategory()
     {
         categoryLbl->setText( tr("Category: %1").arg( label ) );
         categoryLbl->show();
-    }
-}
-
-void DocumentLauncherView::contentSetChanged()
-{
-    if (contentSet->count()) {
-        if (!actionProps->isEnabled())
-            actionProps->setEnabled(true);
-        if (!actionDelete->isEnabled())
-            actionDelete->setEnabled(true);
-        if (actionBeam && !actionBeam->isEnabled())
-            actionBeam->setEnabled(true);
-        separatorAction->setEnabled(true);
-        if (!actionRightsIssuer->isEnabled())
-            actionRightsIssuer->setEnabled(true);
-        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
-    }
-    else {
-        actionProps->setEnabled(false);
-        actionDelete->setEnabled(false);
-        if (actionBeam)
-            actionBeam->setEnabled(false);
-        separatorAction->setEnabled(false);
-        actionRightsIssuer->setEnabled(false);
-        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
     }
 }
 
@@ -379,5 +413,26 @@ void DocumentLauncherView::updateScanningStatus()
             QMetaObject::invokeMethod(scanningBarUpdateTimer, "start", Qt::AutoConnection);
     }
 }
+
+void DocumentLauncherView::textEntrytextChanged(const QString &text)
+{
+    if(text.length() == 0)
+    {
+        setAuxiliaryFilter( QContentFilter() );
+        if (!style()->inherits("QThumbStyle")) {
+            textEntry->hide();
+            findIcon->hide();
+        }
+    }
+    else
+    {
+        setAuxiliaryFilter( QContentFilter(QContentFilter::Name, '*'+text+'*') );
+        if (!style()->inherits("QThumbStyle")) {
+            findIcon->show();
+            textEntry->show();
+        }
+    }
+}
+
 
 #include "documentview.moc"

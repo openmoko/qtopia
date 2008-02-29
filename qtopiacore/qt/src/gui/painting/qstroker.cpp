@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,6 +40,7 @@
 #include "private/qbezier_p.h"
 #include "private/qmath_p.h"
 #include "qline.h"
+#include "qtransform.h"
 
 // #define QPP_STROKE_DEBUG
 
@@ -211,7 +227,7 @@ void QStrokerOps::end()
 
     \sa begin()
 */
-void QStrokerOps::strokePath(const QPainterPath &path, void *customData, const QMatrix &matrix)
+void QStrokerOps::strokePath(const QPainterPath &path, void *customData, const QTransform &matrix)
 {
     if (path.isEmpty())
         return;
@@ -282,7 +298,7 @@ void QStrokerOps::strokePath(const QPainterPath &path, void *customData, const Q
 */
 
 void QStrokerOps::strokePolygon(const QPointF *points, int pointCount, bool implicit_close,
-                                void *data, const QMatrix &matrix)
+                                void *data, const QTransform &matrix)
 {
     if (!pointCount)
         return;
@@ -312,7 +328,7 @@ void QStrokerOps::strokePolygon(const QPointF *points, int pointCount, bool impl
     rect. The \a matrix is used to transform the coordinates before
     they enter the stroker.
 */
-void QStrokerOps::strokeEllipse(const QRectF &rect, void *data, const QMatrix &matrix)
+void QStrokerOps::strokeEllipse(const QRectF &rect, void *data, const QTransform &matrix)
 {
     int count = 0;
     QPointF pts[12];
@@ -445,19 +461,21 @@ void QStroker::joinPoints(qfixed focal_x, qfixed focal_y, const QLineF &nextLine
 
             // If we are on the inside, do the short cut...
             QLineF shortCut(prevLine.p2(), nextLine.p1());
-            if (type == QLineF::BoundedIntersection
-                || prevLine.angle(shortCut) > 90) {
+            qreal angle = prevLine.angle(shortCut);
+            if (type == QLineF::BoundedIntersection || (angle > 90 && !qFuzzyCompare(angle, (qreal)90))) {
                 emitLineTo(qt_real_to_fixed(nextLine.x1()), qt_real_to_fixed(nextLine.y1()));
                 return;
             }
             QLineF miterLine(QPointF(qt_fixed_to_real(m_back1X),
                                      qt_fixed_to_real(m_back1Y)), isect);
-            if (miterLine.length() > appliedMiterLimit) {
-                miterLine.setLength(appliedMiterLimit);
+            if (type == QLineF::NoIntersection || miterLine.length() > appliedMiterLimit) {
+                QLineF l1(prevLine);
+                l1.setLength(appliedMiterLimit);
+                l1.translate(prevLine.dx(), prevLine.dy());
                 QLineF l2(nextLine);
                 l2.setLength(appliedMiterLimit);
                 l2.translate(-l2.dx(), -l2.dy());
-                emitLineTo(qt_real_to_fixed(miterLine.x2()), qt_real_to_fixed(miterLine.y2()));
+                emitLineTo(qt_real_to_fixed(l1.x2()), qt_real_to_fixed(l1.y2()));
                 emitLineTo(qt_real_to_fixed(l2.x1()), qt_real_to_fixed(l2.y1()));
                 emitLineTo(qt_real_to_fixed(nextLine.x1()), qt_real_to_fixed(nextLine.y1()));
             } else {
@@ -482,7 +500,8 @@ void QStroker::joinPoints(qfixed focal_x, qfixed focal_y, const QLineF &nextLine
             qfixed offset = m_strokeWidth / 2;
 
             QLineF shortCut(prevLine.p2(), nextLine.p1());
-            if (type == QLineF::BoundedIntersection || prevLine.angle(shortCut) > 90) {
+            qreal angle = prevLine.angle(shortCut);
+            if (type == QLineF::BoundedIntersection || (angle > 90 && !qFuzzyCompare(angle, (qreal)90))) {
                 emitLineTo(qt_real_to_fixed(nextLine.x1()), qt_real_to_fixed(nextLine.y1()));
                 return;
             }
@@ -658,21 +677,22 @@ template <class Iterator> bool qt_stroke_side(Iterator *it,
 
             if (count) {
                 // If we are starting a new subpath, move to correct starting point
+                QLineF tangent = offsetCurves[0].startTangent();
                 if (first) {
                     QPointF pt = offsetCurves[0].pt1();
                     if (capFirst) {
                         stroker->joinPoints(prev.x, prev.y,
-                                            QLineF(pt, offsetCurves[0].pt2()),
+                                            tangent,
                                             stroker->capStyleMode());
                     } else {
                         stroker->emitMoveTo(qt_real_to_fixed(pt.x()),
                                             qt_real_to_fixed(pt.y()));
                     }
-                    *startTangent = QLineF(offsetCurves[0].pt1(), offsetCurves[0].pt2());
+                    *startTangent = tangent;
                     first = false;
                 } else {
                     stroker->joinPoints(prev.x, prev.y,
-                                        QLineF(offsetCurves[0].pt1(), offsetCurves[0].pt2()),
+                                        tangent,
                                         stroker->joinStyleMode());
                 }
 
@@ -726,8 +746,8 @@ QPointF qt_curves_for_arc(const QRectF &rect, qreal startAngle, qreal sweepLengt
     Q_ASSERT(curves);
 
 #ifndef QT_NO_DEBUG
-    if (qIsNan(rect.x()) || qIsNan(rect.y()) || qIsNan(rect.width()) || qIsNan(rect.height())
-        || qIsNan(startAngle) || qIsNan(sweepLength))
+    if (qt_is_nan(rect.x()) || qt_is_nan(rect.y()) || qt_is_nan(rect.width()) || qt_is_nan(rect.height())
+        || qt_is_nan(startAngle) || qt_is_nan(sweepLength))
         qWarning("QPainterPath::arcTo: Adding arc where a parameter is NaN, results are undefined");
 #endif
     *point_count = 0;
@@ -781,7 +801,7 @@ QPointF qt_curves_for_arc(const QRectF &rect, qreal startAngle, qreal sweepLengt
     qreal b = rect.height() / 2.0;
 
     qreal absSweepLength = (sweepLength < 0 ? -sweepLength : sweepLength);
-    int iterations = (int)ceil((absSweepLength) / 90.0);
+    int iterations = qCeil((absSweepLength) / qreal(90.0));
 
     QPointF first_point;
 
@@ -839,7 +859,7 @@ QPointF qt_curves_for_arc(const QRectF &rect, qreal startAngle, qreal sweepLengt
  * QDashStroker members
  */
 QDashStroker::QDashStroker(QStroker *stroker)
-    : m_stroker(stroker)
+    : m_stroker(stroker), m_dashOffset(0)
 {
 
 }
@@ -877,8 +897,15 @@ void QDashStroker::processCurrentSubpath()
 {
     int dashCount = qMin(m_dashPattern.size(), 32);
     qfixed dashes[32];
-    for (int i=0; i<dashCount; ++i)
-        dashes[i] = m_dashPattern.at(i) * m_stroker->strokeWidth();
+
+    qreal sumLength = 0;
+    for (int i=0; i<dashCount; ++i) {
+        dashes[i] = qMax(m_dashPattern.at(i), qreal(0)) * m_stroker->strokeWidth();
+        sumLength += dashes[i];
+    }
+
+    if (qFuzzyCompare(sumLength, qreal(0)))
+        return;
 
     Q_ASSERT(dashes);
     Q_ASSERT(dashCount > 0);
@@ -888,7 +915,15 @@ void QDashStroker::processCurrentSubpath()
     int idash = 0; // Index to current dash
     qreal pos = 0; // The position on the curve, 0 <= pos <= path.length
     qreal elen = 0; // element length
-    qreal doffset = 0;
+    qreal doffset = m_dashOffset * m_stroker->strokeWidth();
+
+    // make sure doffset is in range [0..sumLength)
+    doffset -= qFloor(doffset / sumLength) * sumLength;
+
+    while (doffset >= dashes[idash]) {
+        doffset -= dashes[idash];
+        idash = (idash + 1) % dashCount;
+    }
 
     qreal estart = 0; // The elements starting position
     qreal estop = 0; // The element stop position
@@ -911,6 +946,7 @@ void QDashStroker::processCurrentSubpath()
     qfixed2d clip_br = { qt_real_to_fixed(m_clip_rect.right()) + padding ,
                          qt_real_to_fixed(m_clip_rect.bottom()) + padding };
 
+    bool hasMoveTo = false;
     while (it.hasNext()) {
         QStrokerOps::Element e = it.next();
 
@@ -952,8 +988,10 @@ void QDashStroker::processCurrentSubpath()
                 // from a previous element and should only
                 // continue the current dash, without starting a
                 // new subpath.
-                if (!has_offset)
+                if (!has_offset || !hasMoveTo) {
                     m_stroker->moveTo(move_to_pos.x, move_to_pos.y);
+                    hasMoveTo = true;
+                }
 
                 if (!clipping
                     // if move_to is inside...

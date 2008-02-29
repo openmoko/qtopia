@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -112,7 +112,6 @@ public:
     bool showOnNearest() const;
     WeekFlags weekFlags() const;
     bool isAllDay() const;
-    QUniqueId exceptionParent() const;
 
     void setDescription( const QString &s );
     void setLocation( const QString &s );
@@ -122,7 +121,6 @@ public:
     void setTimeZone( const QTimeZone & );
     void setWeekFlags(WeekFlags);
     void setAllDay(bool enable = true);
-    void setExceptionParent( const QUniqueId &id );
 
     void setAlarm( int minutes, AlarmFlags );
     void clearAlarm();
@@ -143,6 +141,12 @@ public:
     QDateTime startInCurrentTZ( ) const;
     QDateTime endInCurrentTZ( ) const;
 
+    void setExceptionParent( const QUniqueId &id );
+    void setAsException(const QUniqueId &parent, const QDate &date);
+    QUniqueId exceptionParent() const;
+    QDate exceptionDate() const;
+
+    bool hasExceptions() const { return exceptions().count() != 0; }
     QList<Exception> exceptions() const;
     void setExceptions(const QList<Exception> &);
     void clearExceptions();
@@ -151,13 +155,16 @@ public:
     QOccurrence nextOccurrence(const QDate &from) const;
     QOccurrence firstOccurrence() const;
 
+    static bool writeVCalendar( QIODevice *, const QList<QAppointment> & );
+    static bool writeVCalendar( QIODevice *, const QAppointment & );
+    static QList<QAppointment> readVCalendar( QIODevice * );
+
+    /* deprecated - keep for source compatibility */
     static void writeVCalendar( const QString &, const QList<QAppointment> & );
     static void writeVCalendar( const QString &, const QAppointment & );
-
     void writeVCalendar( const QString &filename ) const;
     void writeVCalendar( QFile &file ) const;
     void writeVCalendar( QDataStream *stream ) const;
-
     static QList<QAppointment> readVCalendar( const QString & );
     static QList<QAppointment> readVCalendarData( const char *, unsigned long );
     static QList<QAppointment> readVCalendar( const QByteArray &vcard );
@@ -178,6 +185,7 @@ protected:
 private:
     static QList<QAppointment> readVCalendarData( VObject * );
     QDate p_nextOccurrence(const QDate &from) const;
+    bool p_weekFlagsActive() const;
 
     void init(const QDateTime &, const QDateTime &);
 

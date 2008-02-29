@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -43,15 +58,14 @@
 #include <QtCore/QPointer>
 #include <QtCore/QMimeData>
 
-class QTimer;
-class QToolButton;
-class QLineEdit;
-
 class QDesignerFormWindowInterface;
 class QDesignerActionProviderExtension;
-class QDesignerMenuBar;
+
+class QLineEdit;
+class QMimeData;
 
 namespace qdesigner_internal {
+class PromotionTaskMenu;
 
 class SpecialMenuAction: public QAction
 {
@@ -85,7 +99,7 @@ public:
     void moveDown();
 
 private slots:
-    void slotRemoveSelectedAction();
+    void deleteMenu();
     void slotRemoveMenuBar();
 
 protected:
@@ -109,8 +123,8 @@ protected:
 
     void startDrag(const QPoint &pos);
 
-    QAction *actionMimeData(const QMimeData *mimeData) const;
-    bool checkAction(QAction *action) const;
+    enum ActionDragCheck { NoActionDrag, ActionDragOnSubMenu, AcceptActionDrag };
+    ActionDragCheck checkAction(QAction *action) const;
 
     void adjustIndicator(const QPoint &pos);
     int findAction(const QPoint &pos) const;
@@ -128,16 +142,16 @@ protected:
     void leaveEditMode(LeaveEditMode mode);
     void showLineEdit();
 
-    void deleteMenu();
     void showMenu(int index = -1);
     void hideMenu(int index = -1);
 
-    QAction *createAction(const QString &objectName);
     QAction *safeActionAt(int index) const;
 
     bool swap(int a, int b);
 
 private:
+    void updateCurrentAction(bool selectAction);
+
     QAction *m_addMenu;
     QPointer<QMenu> m_activeMenu;
     QPoint m_startPosition;
@@ -147,6 +161,7 @@ private:
     bool m_dragging;
     int m_lastMenuActionIndex;
     QPointer<QWidget> m_lastFocusWidget;
+    qdesigner_internal::PromotionTaskMenu* m_promotionTaskMenu;
 };
 
 #endif // QDESIGNER_MENUBAR_H

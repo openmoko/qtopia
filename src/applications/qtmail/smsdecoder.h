@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,7 +26,7 @@
 #include <qstring.h>
 
 class QSMSMessage;
-class MailMessage;
+class QMailMessage;
 class QWbXmlReader;
 
 class SMSDecoder
@@ -45,10 +45,10 @@ public:
 
     // Decode the contents of an SMS message into a mail message,
     // according to the rules of a port number handler.
-    virtual void decode( MailMessage& mail, const QSMSMessage& msg ) = 0;
+    virtual void decode( QMailMessage& mail, const QSMSMessage& msg ) = 0;
 
     // Format all of the body parts in an SMS message.
-    static void formatMessage( MailMessage& mail, const QSMSMessage& msg );
+    static void formatMessage( QMailMessage& mail, const QSMSMessage& msg );
 
 };
 
@@ -58,7 +58,7 @@ public:
     SMSMultipartDecoder();
     virtual ~SMSMultipartDecoder();
 
-    virtual void decode( MailMessage& mail, const QSMSMessage& msg );
+    virtual void decode( QMailMessage& mail, const QSMSMessage& msg );
 };
 
 class SMSLogoDecoder : public SMSDecoder
@@ -67,7 +67,7 @@ public:
     SMSLogoDecoder( bool operatorHeader );
     virtual ~SMSLogoDecoder();
 
-    virtual void decode( MailMessage& mail, const QSMSMessage& msg );
+    virtual void decode( QMailMessage& mail, const QSMSMessage& msg );
 private:
     bool operatorHeader;
 };
@@ -78,7 +78,7 @@ public:
     SMSWbXmlDecoder( QWbXmlReader *reader, const QString& mimeType, bool pushHeader );
     virtual ~SMSWbXmlDecoder();
 
-    virtual void decode( MailMessage& mail, const QSMSMessage& msg );
+    virtual void decode( QMailMessage& mail, const QSMSMessage& msg );
 private:
     QWbXmlReader *reader;
     QString mimeType;
@@ -91,7 +91,7 @@ public:
     SMSWapPushDecoder();
     virtual ~SMSWapPushDecoder();
 
-    virtual void decode( MailMessage& mail, const QSMSMessage& msg );
+    virtual void decode( QMailMessage& mail, const QSMSMessage& msg );
 };
 
 #endif // QTOPIA_NO_SMS

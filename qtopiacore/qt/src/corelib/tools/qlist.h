@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -51,7 +66,8 @@ struct Q_CORE_EXPORT QListData {
     };
     enum { DataHeaderSize = sizeof(Data) - sizeof(void *) };
 
-    Data *detach();
+    Data *detach(); // remove in 5.0
+    Data *detach2();
     void realloc(int alloc);
     static Data shared_null;
     Data *d;
@@ -485,6 +501,7 @@ Q_OUTOFLINE_TEMPLATE T QList<T>::value(int i) const
     }
     return reinterpret_cast<Node *>(p.at(i))->t();
 }
+
 template<typename T>
 Q_OUTOFLINE_TEMPLATE T QList<T>::value(int i, const T& defaultValue) const
 {
@@ -494,13 +511,9 @@ Q_OUTOFLINE_TEMPLATE T QList<T>::value(int i, const T& defaultValue) const
 template <typename T>
 Q_OUTOFLINE_TEMPLATE void QList<T>::detach_helper()
 {
-    QListData::Data *x = p.d;
-    // keep an extra reference to original data, we need it during node_copy()
     Node *n = reinterpret_cast<Node *>(p.begin());
-    x->ref.ref();
-    (void) p.detach();
+    QListData::Data *x = p.detach2();
     node_copy(reinterpret_cast<Node *>(p.begin()), reinterpret_cast<Node *>(p.end()), n);
-    // drop the extra ref
     if (!x->ref.deref())
         free(x);
 }

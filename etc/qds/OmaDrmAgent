@@ -20,10 +20,10 @@ ResponseDataType=
 Attributes="drm;handle;push;x-wap.application:drm.ou"
 Description[]=Installs an OMA DRM v1 WBXML rights object.
 [handleProtectedRightsObject]
-RequestDataType=application/vnd.oma.drm.rights+wbxml
+RequestDataType=application/vnd.oma.drm.ro+xml
 ResponseDataType=
 Attributes="drm;handle;push;x-wap.application:drm.ou"
-Description[]=Installs an OMA DRM v1 WBXML rights object.
+Description[]=Installs an OMA DRM v2 protected rights object.
 [handleRoapPdu]
 RequestDataType=application/vnd.oma.drm.roap-pdu+xml
 ResponseDataType=

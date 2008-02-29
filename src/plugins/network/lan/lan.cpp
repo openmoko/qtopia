@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,7 @@
 #include "lan.h"
 #include "config.h"
 #include "roamingmonitor.h"
+#include "wlanregistrationprovider.h"
 
 #include <errno.h>
 #include <net/if.h>
@@ -48,7 +49,7 @@ static void map_cleanup()
 LanImpl::LanImpl( const QString& confFile)
     : configIface(0), ifaceStatus(Unknown)
 #ifndef NO_WIRELESS_LAN
-    , roaming( 0 )
+    , roaming( 0 ), wlanRegProvider( 0 )
 #endif
     , netSpace( 0 ), delayedGatewayInstall( false )
 {
@@ -138,6 +139,9 @@ void LanImpl::initialize()
     if ( t & QtopiaNetwork::WirelessLAN ) {
         roaming = new RoamingMonitor( configIface, this );
         connect( roaming, SIGNAL(changeNetwork()), this, SLOT(reconnectWLAN()) );
+
+        wlanRegProvider = new WlanRegistrationProvider( QString::number(qHash(configIface->configFile())), this );
+        wlanRegProvider->initialize();
     }
 #endif
 }
@@ -340,7 +344,7 @@ bool LanImpl::start( const QVariant options )
             // ###    [-authmode <open|shared> -multikey <defaultKey> <key1> <key2> <key3> <key4>]
             // ###    [-authmode <open|shared> -phrase <passphrase> ]
             // ###    [-authmode <none> -nokey ]
-            // ###    [-authmode <WPA-PSK> <password> ]
+            // ###    [-authmode <WPA-PSK> <password> <AES|TKIP>
             // ###    [-authmode <WPA-EAP> <TTLS|PEAP> <client cert> <server cert> ]
             // ###    [-authmode <WPA-EAP> <TLS> <identity> <password> ]
             // ###    [-keylength <128|64> ]
@@ -361,6 +365,9 @@ bool LanImpl::start( const QVariant options )
             if ( !temp.isEmpty() ) {
                 params << "-essid";
                 params << Qtopia::shellQuote(temp);
+                if ( t & QtopiaNetwork::WirelessLAN ) {
+                    wlanRegProvider->setAccessPoint( temp );
+                }
             }
 
             params << "-ap";
@@ -411,18 +418,25 @@ bool LanImpl::start( const QVariant options )
                 params << "-nokey";
             } else if ( encryptMode == QLatin1String("WPA-PSK") ) {
                 params << Qtopia::shellQuote(prop.value(keyPrefix+QLatin1String("PRIV_GENSTR"), QLatin1String("")).toString());
+                params << prop.value(keyPrefix+QLatin1String("PSKAlgorithm"), QLatin1String("TKIP")).toString();
             } else if ( encryptMode == QLatin1String("WPA-EAP") ) {
-               temp = prop.value(keyPrefix+QLatin1String("WPAEnterprise"), QLatin1String("TLS")).toString();
-               params << temp;
-               if ( temp == QLatin1String("TLS") ) {
-                   params << prop.value(keyPrefix+QLatin1String("Identity")).toString();
-                   params << prop.value(keyPrefix+QLatin1String("IdentityPassword")).toString();
+                temp = prop.value(keyPrefix+QLatin1String("WPAEnterprise"), QLatin1String("TLS")).toString();
+                params << temp;
+                if ( temp == QLatin1String("TLS") ) {
+                    params << prop.value(keyPrefix+QLatin1String("EAPIdentity")).toString();
+                    params << prop.value(keyPrefix+QLatin1String("EAPClientKeyPassword")).toString();
+                    params << prop.value(keyPrefix+QLatin1String("EAPClientKey")).toString();
+                    params << prop.value(keyPrefix+QLatin1String("EAPClientCert")).toString();
+                    params << prop.value(keyPrefix+QLatin1String("EAPServerCert")).toString();
                } else if ( temp == QLatin1String("TTLS") || temp == QLatin1String("PEAP") ) {
-                   params << prop.value(keyPrefix+QLatin1String("ClientCert")).toString();
-                   params << prop.value(keyPrefix+QLatin1String("ServerCert")).toString();
+                    params << prop.value(keyPrefix+QLatin1String("EAPIdentity")).toString();
+                    params << prop.value(keyPrefix+QLatin1String("EAPIdentityPassword")).toString();
+                    params << prop.value(keyPrefix+QLatin1String("EAPServerCert")).toString();
+                    params << prop.value(keyPrefix+QLatin1String("EAPAuthentication")).toString();
+                    params << prop.value(keyPrefix+QLatin1String("EAPAnonIdentity")).toString();
                } else {
-                   qLog(Network) << QLatin1String("Unknown encryption algorithm for WPA Enterprise");
-                   return false;
+                    qLog(Network) << QLatin1String("Unknown encryption algorithm for WPA Enterprise");
+                    return false;
                }
             } else {
                 qLog(Network) << QLatin1String("Invalid encryption for WLAN:") << encryptMode;
@@ -473,6 +487,12 @@ bool LanImpl::stop()
             return true;
     }
 
+#ifndef NO_WIRELESS_LAN
+    if ( type() & QtopiaNetwork::WirelessLAN ) {
+        wlanRegProvider->setAccessPoint();
+        wlanRegProvider->notifyClients();
+    }
+#endif
     // ### stop eth0
     QStringList args;
     args << "stop";
@@ -732,9 +752,11 @@ void LanImpl::updateTrigger( QtopiaNetworkInterface::Error code, const QString& 
 
 void LanImpl::reconnectWLAN()
 {
+#ifndef NO_WIRELESS_LAN
     qLog(Network) << "Reconnecting WLAN on interface" << device();device();
     stop();
     start( QVariant() );
+#endif
 }
 
 void LanImpl::updateState()
@@ -756,4 +778,12 @@ void LanImpl::updateState()
             delayedGatewayInstall = false;
         } // else { //wait until we are online }
     }
+#ifndef NO_WIRELESS_LAN
+    QtopiaNetwork::Type t = type();
+    if ( t & QtopiaNetwork::WirelessLAN 
+            && ifaceStatus == QtopiaNetworkInterface::Up )
+    {
+        wlanRegProvider->notifyClients();
+    }
+#endif
 }

@@ -448,7 +448,12 @@ int OBEX_CustomDataFeed(obex_t *self, uint8_t *inputbuf, int actual)
 	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail(inputbuf != NULL, -1);
 
-	return obex_data_indication(self, inputbuf, actual);
+	int before = self->rx_msg->data_size;
+	int ret = obex_data_indication(self, inputbuf, actual);
+	if (ret <= 0)
+		return 0;
+
+	return (ret - before);
 }
 
 

@@ -30,6 +30,8 @@ SOURCES = src/common.c \
             src/tables.c \
             src/timidity.c
 
+DEFINES+=LITTLE_ENDIAN
+
 pkg.desc=Timidity MIDI library
 pkg.domain=lib
 

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -53,12 +53,7 @@
 #include <QDataStream>
 #include <QByteArray>
 #include <QDesktopWidget>
-
-#ifdef QTOPIA_PHONE
 #include <QMenu>
-#else
-#include <QToolBar>
-#endif
 
 #include <stdlib.h>
 
@@ -72,6 +67,8 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
     QMainWindow(parent, f),
     snapRequest( 0 ),
     videoOnSecondary(false),
+    m_photoContentSet( QContentSet::Asynchronous ),
+    m_photoModel( 0 ),
     m_contextMenuActive(false)
 {
     setWindowTitle(tr("Camera"));
@@ -81,11 +78,6 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
     camera = new Ui::CameraBase();
     camera->setupUi(cameraWidget);
     setCentralWidget(cameraWidget);
-
-    connect(qApp,
-            SIGNAL(contentChanged(const QContentIdList&,QContent::ChangeType)),
-            this,
-            SLOT(contentChanged(const QContentIdList&,QContent::ChangeType)));
 
     camcat = QLatin1String("Camera");
     // Ensure the Camera system categoy exists
@@ -127,7 +119,7 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
         picViewIcon = QIcon( QLatin1String( ":icon/view" ));
     a_pview = new QAction( picViewIcon, tr( "View pictures" ), this );
 
-    connect( a_pview, SIGNAL( triggered() ), this, SLOT( viewPictures() ) );
+    connect( a_pview, SIGNAL(triggered()), this, SLOT(viewPictures()) );
 
     if ( video_supported ) {
         // If video_supported is ever not a constant false then ensure
@@ -135,45 +127,27 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
         if ( a.isValid() )
         {
             a_vview = new QAction( QIcon(":image/"+a.iconName()), QString("%1...").arg(a.name()), this );
-            connect( a_vview, SIGNAL( triggered() ), this, SLOT( viewVideos() ) );
+            connect( a_vview, SIGNAL(triggered()), this, SLOT(viewVideos()) );
         }
     } else {
         a_vview = 0;
     }
 
     a_timer = new QAction( QIcon( ":icon/wait" ) , tr("Timer"), this );
-    connect( a_timer, SIGNAL( triggered() ), this, SLOT( takePhotoTimer() ) );
+    connect( a_timer, SIGNAL(triggered()), this, SLOT(takePhotoTimer()) );
 
     a_settings = new QAction( QIcon( ":icon/settings" ) , tr("Settings..."), this );
-    connect( a_settings, SIGNAL( triggered() ), this, SLOT( doSettings() ) );
+    connect( a_settings, SIGNAL(triggered()), this, SLOT(doSettings()) );
 
     a_th_edit = new QAction( QIcon(":icon/edit"), tr("Edit"), this );
-    connect( a_th_edit, SIGNAL( triggered() ), this, SLOT( editThumb() ) );
+    connect( a_th_edit, SIGNAL(triggered()), this, SLOT(editThumb()) );
     a_th_del = new QAction( QIcon(":icon/trash"), tr("Delete"), this );
-    connect( a_th_del, SIGNAL( triggered() ), this, SLOT( delThumb() ) );
+    connect( a_th_del, SIGNAL(triggered()), this, SLOT(delThumb()) );
     a_th_add = new QAction( QIcon(":image/addressbook/AddressBook"), tr("Save to Contact..."), this );
-    connect( a_th_add, SIGNAL( triggered() ), this, SLOT( moveToContact() ) );
+    connect( a_th_add, SIGNAL(triggered()), this, SLOT(moveToContact()) );
     a_send = new QAction( QIcon( ":icon/beam" ), tr("Send to Contact..."), this );
-    connect( a_send, SIGNAL( triggered() ), this, SLOT( sendFile() ) );
+    connect( a_send, SIGNAL(triggered()), this, SLOT(sendFile()) );
 
-#ifndef QTOPIA_PHONE
-    // Create Toolbars
-    QToolBar *bar = new QToolBar( this );
-    //bar->setHorizontalStretchable( true ); // TODO: what's the new version?
-    bar->setMovable( false );
-
-    addToolBar( bar );
-
-    bar->addAction( a_pview );
-    if ( video_supported )
-        bar->addAction( a_vview );
-    bar->addAction( a_th_edit );
-    bar->addAction( a_th_del );
-    bar->addAction( a_th_add );
-    bar->addAction( a_timer );
-    bar->addAction( a_send );
-    bar->addAction( a_settings );
-#else
     QMenu *contextMenu = QSoftMenuBar::menuFor(this);
     contextMenu->addAction( a_pview );
     if ( video_supported )
@@ -189,7 +163,6 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
             this, SLOT(contextMenuAboutToHide()));
     connect(contextMenu, SIGNAL(aboutToShow()),
             this, SLOT(contextMenuAboutToShow()));
-#endif
 
     installEventFilter(camera->photo);
     installEventFilter(camera->video);
@@ -233,10 +206,10 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
     vframerate = cfg.value("framerate",settings->video_framerate->value()).toInt();
 
     for (int i=0; i<(int)photo_size.count(); i++) {
-        settings->photo_size->addItem(QString("%1 x %2").arg(photo_size[i].width()).arg(photo_size[i].height()));
+        settings->photo_size->addItem(tr("%1 x %2","picture size e.g. 640 x 480").arg(photo_size[i].width()).arg(photo_size[i].height()));
     }
     for (int i=0; i<(int)video_size.count(); i++) {
-        settings->video_size->addItem(QString("%1 x %2").arg(video_size[i].width()).arg(video_size[i].height()));
+        settings->video_size->addItem(tr("%1 x %2","picture size e.g. 640 x 480").arg(video_size[i].width()).arg(video_size[i].height()));
     }
 
     namehint=0;
@@ -260,16 +233,22 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
         }
     }
 
-#ifdef Q_WS_QWS
+    m_photoContentSet.setCriteria( QContentFilter( QContent::Document )
+            & QContentFilter::category( QLatin1String( "Camera" ) )
+            & QContentFilter::mimeType( QLatin1String( "image/jpeg" ) ) );
+
+    m_photoContentSet.setSortCriteria( QContentSortCriteria( QContentSortCriteria::LastUpdated, Qt::DescendingOrder ) );
+
+    m_photoModel = new QContentSetModel( &m_photoContentSet, this );
+
+    connect( m_photoModel, SIGNAL(updateFinished()), this, SLOT(loadThumbs()) );
+
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Disable);
-#endif
 }
 
 CameraMainWindow::~CameraMainWindow()
 {
-#ifdef Q_WS_QWS
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
-#endif
 }
 
 void CameraMainWindow::resizeEvent(QResizeEvent*)
@@ -278,7 +257,7 @@ void CameraMainWindow::resizeEvent(QResizeEvent*)
     thumbh = thumbw*3/4;
     camera->thumbs->setFixedHeight(thumbh+thmarg*2);
 
-    loadThumbs();
+    loadThumbs( true );
 }
 
 bool CameraMainWindow::event(QEvent* e)
@@ -298,7 +277,6 @@ bool CameraMainWindow::eventFilter(QObject* o, QEvent* e)
     if ( e->type() == QEvent::KeyPress ) {
         QKeyEvent *ke = (QKeyEvent*)e;
 
-#if QTOPIA_PHONE
         if (!ke->isAutoRepeat()) {
             if (ke->key() == Qt::Key_1) {
                 takePhoto();
@@ -308,7 +286,14 @@ bool CameraMainWindow::eventFilter(QObject* o, QEvent* e)
                 return true;
             }
         }
-#endif
+        if (ke->key() == Qt::Key_4)
+        {
+           camera->videocaptureview->zoomOut();
+        }
+        if (ke->key() == Qt::Key_6)
+        {
+           camera->videocaptureview->zoomIn();
+        }
         if ( ke->key() == Qt::Key_Up ) {
             camera->photo->setFocus();
             return true;
@@ -375,7 +360,7 @@ void CameraMainWindow::updateActions()
     a_pview->setVisible(p);
     if ( video_supported )
         a_vview->setVisible(v);
-    a_settings->setVisible(p || v);
+    //a_settings->setVisible(p || v);
     bool th=!p && !v;
     if ( th ) {
         int i;
@@ -410,15 +395,13 @@ void CameraMainWindow::viewVideos()
 void CameraMainWindow::doSettings()
 {
     bool v = video_supported;
-#ifdef QTOPIA_PHONE
     bool p;
     p = a_pview->isEnabled();
     v = v && a_vview && a_vview->isVisible();
-    if (p)
+    if (true||p)
         settings->photo->show();
     else
         settings->photo->hide();
-#endif
     if (v)
         settings->video->show();
     else
@@ -466,29 +449,25 @@ void CameraMainWindow::confirmSettings()
     preview();
 }
 
-void CameraMainWindow::loadThumbs()
+void CameraMainWindow::loadThumbs( bool resized )
 {
-    QContentSet     set;
+    int i = 0;
 
-    set.addCriteria(QContentFilter::Category, camcat, QContentFilter::And);
-    set.addCriteria(QContentFilter::MimeType, "image/jpeg", QContentFilter::And);
-
-    set.setSortOrder(QStringList("time desc"));
-
-    QContentSetModel    model(&set);
-
-    for (int i = 0; i < nthumb; ++i)
+    for (; i < nthumb && i < m_photoModel->rowCount(); ++i)
     {
-        QPixmap pm;
+        QContent content = m_photoModel->content(i);
+        if (resized || picturefile[i].id() != content.id() || picturefile[i].lastUpdated() != content.lastUpdated()) {
+            picturefile[i] = content;
 
-        if (i < model.rowCount()) {
-            picturefile[i] = model.content(i);
-
-            pm = QThumbnail(picturefile[i].file()).pixmap(QSize(thumbw, thumbh));
+            thumb[i]->setIcon(QThumbnail(picturefile[i].fileName()).pixmap(QSize(thumbw, thumbh)));
+            thumb[i]->setEnabled(true);
         }
+    }
 
-        thumb[i]->setIcon(pm);
-        thumb[i]->setEnabled(!pm.isNull());
+    for (; i < nthumb; ++i) {
+        picturefile[i] = QContent();
+        thumb[i]->setIcon(QIcon());
+        thumb[i]->setEnabled(false);
     }
 
     if ( cur_thumb >= 0 )
@@ -497,7 +476,7 @@ void CameraMainWindow::loadThumbs()
     if ( !camera->videocaptureview->available() ) {
         camera->photo->setEnabled(false);
         camera->video->setEnabled(false);
-        if (model.rowCount() == 0) {
+        if (m_photoModel->rowCount() == 0) {
             thumb[0]->setEnabled(false);
         } else {
             thumb[0]->setFocus();
@@ -518,11 +497,26 @@ void CameraMainWindow::delThumb(int th)
         case QMessageBox::Yes:
             picturefile[th].removeFiles();
 
+            for (int i = th; i < nthumb - 1; ++i ) {
+                picturefile[i] = picturefile[i+1];
+                thumb[i]->setIcon(thumb[i+1]->icon());
+                thumb[i]->setEnabled(thumb[i+1]->isEnabled());
+            }
+
+            if (m_photoModel->rowCount() > nthumb) {
+                picturefile[nthumb-1] = m_photoModel->content(nthumb);
+                thumb[nthumb-1]->setIcon(QThumbnail(picturefile[nthumb-1].fileName()).pixmap(QSize(thumbw, thumbh)));
+                thumb[nthumb-1]->setEnabled(true);
+            } else {
+                picturefile[nthumb-1] = QContent();
+                thumb[nthumb-1]->setIcon(QIcon());
+                thumb[nthumb-1]->setEnabled(false);
+            }
+
             // Rhys Hack - if we have just deleted the last image and there
             // is no camera connected, then exit the application.  This
             // avoids a focus problem where it is impossible to exit with
             // the back button due to the focus being in a stupid place.
-            loadThumbs();
             if ( !camera->videocaptureview->available() &&
                  !(thumb[0]->isEnabled()) ) {
                 close();
@@ -561,7 +555,7 @@ void CameraMainWindow::takePhotoTimer()
                                             dialog->number(),
                                             dialog->interval(),
                                             this );
-        connect( timer, SIGNAL( takePhoto() ), this, SLOT( takePhotoNow() ) );
+        connect( timer, SIGNAL(takePhoto()), this, SLOT(takePhotoNow()) );
         timer->show();
     }
 
@@ -627,16 +621,33 @@ void CameraMainWindow::takePhotoNow()
                 .arg(QTimeString::localYMD(QDate::currentDate(),QTimeString::Short)));
         f.setMedia( settings->location->installationPath() );
 
-        c.append( camcat );
+        c.append(camcat);
         f.setCategories(c);
 
-        QImage  temp = img.convertToFormat(QImage::Format_RGB32);
+        QIODevice*  contentDevice = f.open(QIODevice::WriteOnly);
 
-        temp.save(f.file(),"JPEG",pquality);
+        if (contentDevice != 0)
+        {
+            QImage  temp = img.convertToFormat(QImage::Format_RGB32);
 
-        f.commit();
+            temp.save(contentDevice, "JPEG", pquality);
 
-        pushThumb(f,img);
+            contentDevice->close();
+
+            f.commit();
+
+            pushThumb(f, img);
+        }
+        else
+        {
+            QString errorText = f.errorString();
+            if (errorText.isEmpty())
+                errorText = tr("Unknown error");
+
+            QMessageBox::warning(0,
+                                 tr("Error saving photo"),
+                                 tr("Could not save photo: %1").arg(errorText));
+        }
     }
 
     preview();
@@ -650,9 +661,7 @@ void CameraMainWindow::setSnapMode(bool snapMode)
         camera->video->hide();
 
         // in snapshot mode, change back to "cancel taking a photo"
-#ifdef QTOPIA_PHONE
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Cancel);
-#endif
     } else {
 
         camera->thumbs->show();
@@ -663,9 +672,7 @@ void CameraMainWindow::setSnapMode(bool snapMode)
             camera->video->hide();
 
         // normal back button
-#ifdef QTOPIA_PHONE
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
-#endif
     }
 }
 
@@ -704,7 +711,7 @@ void CameraMainWindow::selectThumb(int i)
 {
     cur_thumb = i;
     if ( i >= 0 ) {
-        QImage img( picturefile[i].file() );
+        QImage img( picturefile[i].fileName() );
         camera->videocaptureview->setStill(img);
         thumb[i]->setFocus();
     } else {
@@ -720,13 +727,13 @@ void CameraMainWindow::moveToContact()
 {
     /*if ( cur_thumb >= 0 ) {
         QtopiaServiceRequest e("Contacts","setContactImage(QString)");
-        e << picturefile[cur_thumb].file();
+        e << picturefile[cur_thumb].fileName();
         e.send();
     }*/
 
     if ( cur_thumb >= 0 ) {
         // Find a suitable QDS service
-        QDSServices services( QString( "image/x-qpixmap" ) );
+        QDSServices services( QString( "image/jpeg" ) );
 
         // Select the first service to create the action (assuming there
         // is only be one address book type application on the device)
@@ -736,15 +743,8 @@ void CameraMainWindow::moveToContact()
             return;
         }
 
-        // Create a data object to encapsulate the picture, and send it using
-        // the action.
-        QByteArray pixArray;
-        {
-            QDataStream stream( &pixArray, QIODevice::WriteOnly );
-            QPixmap pix( picturefile[cur_thumb].file() );
-            stream << pix;
-        }
-        QDSData pixData( pixArray, QMimeType( "image/x-qpixmap" ) );
+        QFile pixFile(picturefile[cur_thumb].fileName());
+        QDSData pixData(pixFile, QMimeType( "image/jpeg" ) );
 
         if ( action.exec( pixData ) != QDSAction::Complete ) {
             qWarning( "Camera unable to set contact image" );
@@ -761,11 +761,6 @@ void CameraMainWindow::delThumb()
             selectThumb(cur_thumb-1);
         delThumb(d);
     }
-}
-
-void CameraMainWindow::contentChanged(const QContentIdList&, QContent::ChangeType)
-{
-    loadThumbs();
 }
 
 void CameraMainWindow::getImage( const QDSActionRequest& request )
@@ -803,7 +798,7 @@ void CameraMainWindow::sendFile()
 {
     if ( cur_thumb >= 0) {
         //copy file
-        QFile input(picturefile[cur_thumb].file());
+        QFile input(picturefile[cur_thumb].fileName());
         if(!input.open(QIODevice::ReadOnly)){
             return; //error
         }

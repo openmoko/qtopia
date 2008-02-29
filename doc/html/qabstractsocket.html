@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QAbstractSocket Class Reference</title>
+  <title>Qt 4.3: QAbstractSocket Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QAbstractSocket Class Reference<br /><sup><sup>[<a href="qtnetwork.html">QtNetwork</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QAbstractSocket Class Reference<br /><span class="small-subtitle">[<a href="qtnetwork.html">QtNetwork</a> module]</span>
+</h1>
 <p>The QAbstractSocket class provides the base functionality common to all socket types. <a href="#details">More...</a></p>
 <pre> #include &lt;QAbstractSocket&gt;</pre><p>Inherits <a href="qiodevice.html">QIODevice</a>.</p>
 <p>Inherited by <a href="qtcpsocket.html">QTcpSocket</a> and <a href="qudpsocket.html">QUdpSocket</a>.</p>
@@ -59,6 +60,7 @@
 <li><div class="fn"/>SocketState <b><a href="qabstractsocket.html#state">state</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qabstractsocket.html#waitForConnected">waitForConnected</a></b> ( int <i>msecs</i> = 30000 )</li>
 <li><div class="fn"/>bool <b><a href="qabstractsocket.html#waitForDisconnected">waitForDisconnected</a></b> ( int <i>msecs</i> = 30000 )</li>
+<li><div class="fn"/>virtual bool <b><a href="qabstractsocket.html#waitForReadyRead">waitForReadyRead</a></b> ( int <i>msecs</i> = 30000 )</li>
 </ul>
 <ul>
 <li><div class="fn"/>32 public functions inherited from <a href="qiodevice.html#public-functions">QIODevice</a></li>
@@ -71,6 +73,7 @@
 <li><div class="fn"/>void <b><a href="qabstractsocket.html#disconnected">disconnected</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qabstractsocket.html#error-2">error</a></b> ( QAbstractSocket::SocketError <i>socketError</i> )</li>
 <li><div class="fn"/>void <b><a href="qabstractsocket.html#hostFound">hostFound</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qabstractsocket.html#proxyAuthenticationRequired">proxyAuthenticationRequired</a></b> ( const QNetworkProxy &amp; <i>proxy</i>, QAuthenticator * <i>authenticator</i> )</li>
 <li><div class="fn"/>void <b><a href="qabstractsocket.html#stateChanged">stateChanged</a></b> ( QAbstractSocket::SocketState <i>socketState</i> )</li>
 </ul>
 <ul>
@@ -123,7 +126,7 @@
 <p>QAbstractSocket provides a set of functions that suspend the calling thread until certain signals are emitted. These functions can be used to implement blocking sockets:</p>
 <ul>
 <li><a href="qabstractsocket.html#waitForConnected">waitForConnected</a>() blocks until a connection has been established.</li>
-<li><a href="qiodevice.html#waitForReadyRead">waitForReadyRead</a>() blocks until new data is available for reading.</li>
+<li><a href="qabstractsocket.html#waitForReadyRead">waitForReadyRead</a>() blocks until new data is available for reading.</li>
 <li><a href="qiodevice.html#waitForBytesWritten">waitForBytesWritten</a>() blocks until one payload of data has been written to the socket.</li>
 <li><a href="qabstractsocket.html#waitForDisconnected">waitForDisconnected</a>() blocks until the connection has closed.</li>
 </ul>
@@ -160,18 +163,20 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QAbstractSocket::ConnectionRefusedError</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The connection was refused by the peer (or timed out).</td></tr>
-<tr><td valign="top"><tt>QAbstractSocket::RemoteHostClosedError</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.</td></tr>
+<tr><td valign="top"><tt>QAbstractSocket::RemoteHostClosedError</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The remote host closed the connection. Note that the client socket (i.e&#x2e;, this socket) will be closed after the remote close notification has been sent.</td></tr>
 <tr><td valign="top"><tt>QAbstractSocket::HostNotFoundError</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The host address was not found.</td></tr>
 <tr><td valign="top"><tt>QAbstractSocket::SocketAccessError</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The socket operation failed because the application lacked the required privileges.</td></tr>
-<tr><td valign="top"><tt>QAbstractSocket::SocketResourceError</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The local system ran out of resources (e.g., too many sockets).</td></tr>
+<tr><td valign="top"><tt>QAbstractSocket::SocketResourceError</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The local system ran out of resources (e.g&#x2e;, too many sockets).</td></tr>
 <tr><td valign="top"><tt>QAbstractSocket::SocketTimeoutError</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">The socket operation timed out.</td></tr>
 <tr><td valign="top"><tt>QAbstractSocket::DatagramTooLargeError</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">The datagram was larger than the operating system's limit (which can be as low as 8192 bytes).</td></tr>
-<tr><td valign="top"><tt>QAbstractSocket::NetworkError</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">An error occurred with the network (e.g., the network cable was accidentally plugged out).</td></tr>
+<tr><td valign="top"><tt>QAbstractSocket::NetworkError</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">An error occurred with the network (e.g&#x2e;, the network cable was accidentally plugged out).</td></tr>
 <tr><td valign="top"><tt>QAbstractSocket::AddressInUseError</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">The address specified to <a href="qudpsocket.html#bind">QUdpSocket::bind</a>() is already in use and was set to be exclusive.</td></tr>
 <tr><td valign="top"><tt>QAbstractSocket::SocketAddressNotAvailableError</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">The address specified to <a href="qudpsocket.html#bind">QUdpSocket::bind</a>() does not belong to the host.</td></tr>
-<tr><td valign="top"><tt>QAbstractSocket::UnsupportedSocketOperationError</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">The requested socket operation is not supported by the local operating system (e.g., lack of IPv6 support).</td></tr>
+<tr><td valign="top"><tt>QAbstractSocket::UnsupportedSocketOperationError</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">The requested socket operation is not supported by the local operating system (e.g&#x2e;, lack of IPv6 support).</td></tr>
+<tr><td valign="top"><tt>QAbstractSocket::ProxyAuthenticationRequiredError</tt></td><td align="center" valign="top"><tt>12</tt></td><td valign="top">The socket is using a proxy, and the proxy requires authentication.</td></tr>
 <tr><td valign="top"><tt>QAbstractSocket::UnknownSocketError</tt></td><td align="center" valign="top"><tt>-1</tt></td><td valign="top">An unidentified error occurred.</td></tr>
 </table></p>
+<p>Used by QAbstractSocketEngine only, this error indicates that the last operation could not complete.</p>
 <p>See also <a href="qabstractsocket.html#error">QAbstractSocket::error</a>().</p>
 <h3 class="fn"><a name="SocketState-enum"></a>enum QAbstractSocket::SocketState</h3>
 <p>This enum describes the different states in which a socket can be.</p>
@@ -225,7 +230,7 @@
 <p>Attempts to make a connection to <i>hostName</i> on the given <i>port</i>.</p>
 <p>The socket is opened in the given <i>openMode</i> and first enters <a href="qabstractsocket.html#SocketState-enum">HostLookupState</a>, then performs a host name lookup of <i>hostName</i>. If the lookup succeeds, <a href="qabstractsocket.html#hostFound">hostFound</a>() is emitted and <a href="qabstractsocket.html">QAbstractSocket</a> enters <a href="qabstractsocket.html#SocketState-enum">ConnectingState</a>. It then attempts to connect to the address or addresses returned by the lookup. Finally, if a connection is established, <a href="qabstractsocket.html">QAbstractSocket</a> enters <a href="qabstractsocket.html#SocketState-enum">ConnectedState</a> and emits <a href="qabstractsocket.html#connected">connected</a>().</p>
 <p>At any point, the socket can emit <a href="qabstractsocket.html#error">error</a>() to signal that an error occurred.</p>
-<p><i>hostName</i> may be an IP address in string form (e.g., &quot;43.195.83.32&quot;), or it may be a host name (e.g., &quot;www.trolltech.com&quot;). <a href="qabstractsocket.html">QAbstractSocket</a> will do a lookup only if required. <i>port</i> is in native byte order.</p>
+<p><i>hostName</i> may be an IP address in string form (e.g&#x2e;, &quot;43.195.83.32&quot;), or it may be a host name (e.g&#x2e;, &quot;www.trolltech.com&quot;). <a href="qabstractsocket.html">QAbstractSocket</a> will do a lookup only if required. <i>port</i> is in native byte order.</p>
 <p>See also <a href="qabstractsocket.html#state">state</a>(), <a href="qabstractsocket.html#peerName">peerName</a>(), <a href="qabstractsocket.html#peerAddress">peerAddress</a>(), <a href="qabstractsocket.html#peerPort">peerPort</a>(), and <a href="qabstractsocket.html#waitForConnected">waitForConnected</a>().</p>
 <h3 class="fn"><a name="connectToHost-2"></a>void QAbstractSocket::connectToHost ( const <a href="qhostaddress.html">QHostAddress</a> &amp; <i>address</i>, <a href="qtglobal.html#quint16-typedef">quint16</a> <i>port</i>, <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a> <i>openMode</i> = ReadWrite )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -252,6 +257,7 @@
 <h3 class="fn"><a name="error-2"></a>void QAbstractSocket::error ( <a href="qabstractsocket.html#SocketError-enum">QAbstractSocket::SocketError</a> <i>socketError</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This signal is emitted after an error occurred. The <i>socketError</i> parameter describes the type of error that occurred.</p>
+<p><a href="qabstractsocket.html#SocketError-enum">QAbstractSocket::SocketError</a> is not a registered metatype, so for queued connections, you will have to register it with Q_REGISTER_METATYPE.</p>
 <p>See also <a href="qabstractsocket.html#error">error</a>() and <a href="qiodevice.html#errorString">errorString</a>().</p>
 <h3 class="fn"><a name="flush"></a>bool QAbstractSocket::flush ()</h3>
 <p>This function writes as much as possible from the internal write buffer to the underlying network socket, without blocking. If any data was written, this function returns true; otherwise false is returned.</p>
@@ -266,7 +272,7 @@
 <p>See also <a href="qabstractsocket.html#state">state</a>().</p>
 <h3 class="fn"><a name="localAddress"></a><a href="qhostaddress.html">QHostAddress</a> QAbstractSocket::localAddress () const</h3>
 <p>Returns the host address of the local socket if available; otherwise returns <a href="qhostaddress.html#SpecialAddress-enum">QHostAddress::Null</a>.</p>
-<p>This is normally the main IP address of the host, but can be <a href="qhostaddress.html#SpecialAddress-enum">QHostAddress::LocalHost</a> (127.0.0.1) for connections to the local host.</p>
+<p>This is normally the main IP address of the host, but can be <a href="qhostaddress.html#SpecialAddress-enum">QHostAddress::LocalHost</a> (127.0&#x2e;0&#x2e;1) for connections to the local host.</p>
 <p>See also <a href="qabstractsocket.html#localPort">localPort</a>(), <a href="qabstractsocket.html#peerAddress">peerAddress</a>(), and <a href="qabstractsocket.html#setLocalAddress">setLocalAddress</a>().</p>
 <h3 class="fn"><a name="localPort"></a><a href="qtglobal.html#quint16-typedef">quint16</a> QAbstractSocket::localPort () const</h3>
 <p>Returns the host port number (in native byte order) of the local socket if available; otherwise returns 0.</p>
@@ -284,6 +290,11 @@
 <p>Returns the network proxy for this socket. By default <a href="qnetworkproxy.html#ProxyType-enum">QNetworkProxy::DefaultProxy</a> is used.</p>
 <p>This function was introduced in Qt 4.1.</p>
 <p>See also <a href="qabstractsocket.html#setProxy">setProxy</a>() and <a href="qnetworkproxy.html">QNetworkProxy</a>.</p>
+<h3 class="fn"><a name="proxyAuthenticationRequired"></a>void QAbstractSocket::proxyAuthenticationRequired ( const <a href="qnetworkproxy.html">QNetworkProxy</a> &amp; <i>proxy</i>, <a href="qauthenticator.html">QAuthenticator</a> * <i>authenticator</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal can be emitted when a <i>proxy</i> that requires authentication is used. The <i>authenticator</i> object can then be filled in with the required details to allow authentication and continue the connection.</p>
+<p><b>Note:</b> It is not possible to use a QueuedConnection to connect to this signal, as the connection will fail if the authenticator has not been filled in with new information when the signal returns.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qauthenticator.html">QAuthenticator</a> and <a href="qnetworkproxy.html">QNetworkProxy</a>.</p>
 <h3 class="fn"><a name="readBufferSize"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QAbstractSocket::readBufferSize () const</h3>
 <p>Returns the size of the internal read buffer. This limits the amount of data that the client can receive before you call <a href="qiodevice.html#read">read</a>() or <a href="qiodevice.html#readAll">readAll</a>().</p>
 <p>A read buffer size of 0 (the default) means that the buffer has no size limit, ensuring that no data is lost.</p>
@@ -291,13 +302,13 @@
 <h3 class="fn"><a name="setLocalAddress"></a>void QAbstractSocket::setLocalAddress ( const <a href="qhostaddress.html">QHostAddress</a> &amp; <i>address</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Sets the address on the local side of a connection to <i>address</i>.</p>
 <p>You can call this function in a subclass of <a href="qabstractsocket.html">QAbstractSocket</a> to change the return value of the <a href="qabstractsocket.html#localAddress">localAddress</a>() function after a connection has been established. This feature is commonly used by proxy connections for virtual connection settings.</p>
-<p>Note that this function does not bind the local address of the socket prior to a connection (e.g., <a href="qudpsocket.html#bind">QUdpSocket::bind</a>()).</p>
+<p>Note that this function does not bind the local address of the socket prior to a connection (e.g&#x2e;, <a href="qudpsocket.html#bind">QUdpSocket::bind</a>()).</p>
 <p>This function was introduced in Qt 4.1.</p>
 <p>See also <a href="qabstractsocket.html#localAddress">localAddress</a>(), <a href="qabstractsocket.html#setLocalPort">setLocalPort</a>(), and <a href="qabstractsocket.html#setPeerAddress">setPeerAddress</a>().</p>
 <h3 class="fn"><a name="setLocalPort"></a>void QAbstractSocket::setLocalPort ( <a href="qtglobal.html#quint16-typedef">quint16</a> <i>port</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Sets the port on the local side of a connection to <i>port</i>.</p>
 <p>You can call this function in a subclass of <a href="qabstractsocket.html">QAbstractSocket</a> to change the return value of the <a href="qabstractsocket.html#localPort">localPort</a>() function after a connection has been established. This feature is commonly used by proxy connections for virtual connection settings.</p>
-<p>Note that this function does not bind the local port of the socket prior to a connection (e.g., <a href="qudpsocket.html#bind">QUdpSocket::bind</a>()).</p>
+<p>Note that this function does not bind the local port of the socket prior to a connection (e.g&#x2e;, <a href="qudpsocket.html#bind">QUdpSocket::bind</a>()).</p>
 <p>This function was introduced in Qt 4.1.</p>
 <p>See also <a href="qabstractsocket.html#localPort">localPort</a>(), <a href="qabstractsocket.html#localAddress">localAddress</a>(), <a href="qabstractsocket.html#setLocalAddress">setLocalAddress</a>(), and <a href="qabstractsocket.html#setPeerPort">setPeerPort</a>().</p>
 <h3 class="fn"><a name="setPeerAddress"></a>void QAbstractSocket::setPeerAddress ( const <a href="qhostaddress.html">QHostAddress</a> &amp; <i>address</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
@@ -324,7 +335,7 @@
 <h3 class="fn"><a name="setReadBufferSize"></a>void QAbstractSocket::setReadBufferSize ( <a href="qtglobal.html#qint64-typedef">qint64</a> <i>size</i> )</h3>
 <p>Sets the size of <a href="qabstractsocket.html">QAbstractSocket</a>'s internal read buffer to be <i>size</i> bytes.</p>
 <p>If the buffer size is limited to a certain size, <a href="qabstractsocket.html">QAbstractSocket</a> won't buffer more than this size of data. Exceptionally, a buffer size of 0 means that the read buffer is unlimited and all incoming data is buffered. This is the default.</p>
-<p>This option is useful if you only read the data at certain points in time (e.g., in a real-time streaming application) or if you want to protect your socket against receiving too much data, which may eventually cause your application to run out of memory.</p>
+<p>This option is useful if you only read the data at certain points in time (e.g&#x2e;, in a real-time streaming application) or if you want to protect your socket against receiving too much data, which may eventually cause your application to run out of memory.</p>
 <p>Only <a href="qtcpsocket.html">QTcpSocket</a> uses <a href="qabstractsocket.html">QAbstractSocket</a>'s internal buffer; <a href="qudpsocket.html">QUdpSocket</a> does not use any buffering at all, but rather relies on the implicit buffering provided by the operating system. Because of this, calling this function on <a href="qudpsocket.html">QUdpSocket</a> has no effect.</p>
 <p>See also <a href="qabstractsocket.html#readBufferSize">readBufferSize</a>() and <a href="qiodevice.html#read">read</a>().</p>
 <h3 class="fn"><a name="setSocketDescriptor"></a>bool QAbstractSocket::setSocketDescriptor ( int <i>socketDescriptor</i>, <a href="qabstractsocket.html#SocketState-enum">SocketState</a> <i>socketState</i> = ConnectedState, <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a> <i>openMode</i> = ReadWrite )</h3>
@@ -350,6 +361,7 @@
 <p>See also <a href="qabstractsocket.html#error">error</a>().</p>
 <h3 class="fn"><a name="stateChanged"></a>void QAbstractSocket::stateChanged ( <a href="qabstractsocket.html#SocketState-enum">QAbstractSocket::SocketState</a> <i>socketState</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever <a href="qabstractsocket.html">QAbstractSocket</a>'s state changes. The <i>socketState</i> parameter is the new state.</p>
+<p><a href="qabstractsocket.html#SocketState-enum">QAbstractSocket::SocketState</a> is not a registered metatype, so for queued connections, you will have to register it with Q_REGISTER_METATYPE.</p>
 <p>See also <a href="qabstractsocket.html#state">state</a>().</p>
 <h3 class="fn"><a name="waitForConnected"></a>bool QAbstractSocket::waitForConnected ( int <i>msecs</i> = 30000 )</h3>
 <p>Waits until the socket is connected, up to <i>msecs</i> milliseconds. If the connection has been established, this function returns true; otherwise it returns false. In the case where it returns false, you can call <a href="qabstractsocket.html#error">error</a>() to determine the cause of the error.</p>
@@ -363,10 +375,16 @@
 <p>Waits until the socket has disconnected, up to <i>msecs</i> milliseconds. If the connection has been disconnected, this function returns true; otherwise it returns false. In the case where it returns false, you can call <a href="qabstractsocket.html#error">error</a>() to determine the cause of the error.</p>
 <p>The following example waits up to one second for a connection to be closed:</p>
 <pre> socket-&gt;disconnectFromHost();
- if (socket-&gt;waitForDisconnected(1000))
-     qDebug(&quot;Disconnected!&quot;);</pre>
+     if (socket-&gt;state() == QAbstractSocket::UnconnectedState ||
+         socket-&gt;waitForDisconnected(1000))
+         qDebug(&quot;Disconnected!&quot;);</pre>
 <p>If msecs is -1, this function will not time out.</p>
 <p>See also <a href="qabstractsocket.html#disconnectFromHost">disconnectFromHost</a>() and <a href="qabstractsocket.html#close">close</a>().</p>
+<h3 class="fn"><a name="waitForReadyRead"></a>bool QAbstractSocket::waitForReadyRead ( int <i>msecs</i> = 30000 )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>This function blocks until data is available for reading and the <a href="qiodevice.html#readyRead">readyRead()</a> signal has been emitted. The function will timeout after <i>msecs</i> milliseconds; the default timeout is 3000 milliseconds.</p>
+<p>The function returns true if data is available for reading; otherwise it returns false (if an error occurred or the operation timed out).</p>
+<p>Reimplemented from <a href="qiodevice.html#waitForReadyRead">QIODevice</a>.</p>
+<p>See also <a href="qiodevice.html#waitForBytesWritten">waitForBytesWritten</a>().</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Error-enum"></a>enum QAbstractSocket::Error</h3>
@@ -401,7 +419,7 @@
 <p>Use <a href="qabstractsocket.html#socketDescriptor">socketDescriptor</a>() instead.</p>
 <p>See also <a href="qabstractsocket-qt3.html#setSocket">setSocket</a>().</p>
 <h3 class="fn"><a name="waitForMore"></a><a href="qtglobal.html#qulonglong-typedef">qulonglong</a> QAbstractSocket::waitForMore ( int <i>msecs</i>, bool * <i>timeout</i> = 0 ) const</h3>
-<p>Use <a href="qiodevice.html#waitForReadyRead">waitForReadyRead</a>() instead.</p>
+<p>Use <a href="qabstractsocket.html#waitForReadyRead">waitForReadyRead</a>() instead.</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> bool timeout;
  Q_ULONG numBytes = socket-&gt;waitForMore(30000, &amp;timeout);</font></pre>
@@ -410,11 +428,11 @@
  if (socket-&gt;waitForReadyRead(msecs))
      numBytes = socket-&gt;bytesAvailable();
  bool timeout = (error() == QAbstractSocket::SocketTimeoutError);</pre>
-<p>See also <a href="qiodevice.html#waitForReadyRead">waitForReadyRead</a>(), <a href="qabstractsocket.html#bytesAvailable">bytesAvailable</a>(), <a href="qabstractsocket.html#error">error</a>(), and <a href="qabstractsocket.html#SocketError-enum">SocketTimeoutError</a>.</p>
+<p>See also <a href="qabstractsocket.html#waitForReadyRead">waitForReadyRead</a>(), <a href="qabstractsocket.html#bytesAvailable">bytesAvailable</a>(), <a href="qabstractsocket.html#error">error</a>(), and <a href="qabstractsocket.html#SocketError-enum">SocketTimeoutError</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

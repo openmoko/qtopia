@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -164,6 +179,10 @@ QClipboard::~QClipboard()
 
     This signal is emitted when the clipboard data is changed.
 
+    On Mac OS X and with Qt version 4.3 or higher, clipboard
+    changes made by other applications will only be detected
+    when the application is activated.
+
     \sa findBufferChanged(), selectionChanged(), changed()
 */
 
@@ -184,6 +203,9 @@ QClipboard::~QClipboard()
     This signal is emitted when the find buffer is changed. This only
     applies to Mac OS X.
 
+    With Qt version 4.3 or higher, clipboard changes made by other
+    applications will only be detected when the application is activated.
+
     \sa dataChanged(), selectionChanged(), changed()
 */
 
@@ -192,7 +214,7 @@ QClipboard::~QClipboard()
     \keyword clipboard mode
 
     This enum type is used to control which part of the system clipboard is
-    used by QClipboard::data(), QClipboard::setData() and related functions.
+    used by QClipboard::mimeData(), QClipboard::setMimeData() and related functions.
 
     \value Clipboard  indicates that data should be stored and retrieved from
     the global clipboard.
@@ -200,7 +222,7 @@ QClipboard::~QClipboard()
     \value Selection  indicates that data should be stored and retrieved from
     the global mouse selection. Support for \c Selection is provided only on 
     systems with a global mouse selection (e.g. X11).
-    
+
     \value FindBuffer indicates that data should be stored and retrieved from
     the Find buffer. This mode is used for holding search strings on Mac OS X.
 
@@ -232,7 +254,7 @@ QClipboard::~QClipboard()
 
     Common values for \a subtype are "plain" and "html".
 
-    \sa setText(), data()
+    \sa setText(), mimeData()
 */
 QString QClipboard::text(QString &subtype, Mode mode) const
 {
@@ -269,7 +291,7 @@ QString QClipboard::text(QString &subtype, Mode mode) const
     mouse selection. If \a mode is QClipboard::FindBuffer, the
     text is retrieved from the search string buffer.
 
-    \sa setText(), data()
+    \sa setText(), mimeData()
 */
 QString QClipboard::text(Mode mode) const
 {
@@ -287,7 +309,7 @@ QString QClipboard::text(Mode mode) const
     mouse selection. If \a mode is QClipboard::FindBuffer, the
     text is stored in the search string buffer.
 
-    \sa text(), setData()
+    \sa text(), setMimeData()
 */
 void QClipboard::setText(const QString &text, Mode mode)
 {
@@ -307,7 +329,7 @@ void QClipboard::setText(const QString &text, Mode mode)
     QClipboard::Selection, the image is retrieved from the global
     mouse selection. 
 
-    \sa setImage() pixmap() data(), QImage::isNull()
+    \sa setImage() pixmap() mimeData(), QImage::isNull()
 */
 QImage QClipboard::image(Mode mode) const
 {
@@ -334,7 +356,7 @@ QImage QClipboard::image(Mode mode) const
         clipboard->setMimeData(data, mode);
     \endcode
 
-    \sa image(), setPixmap() setData()
+    \sa image(), setPixmap() setMimeData()
 */
 void QClipboard::setImage(const QImage &image, Mode mode)
 {
@@ -356,7 +378,7 @@ void QClipboard::setImage(const QImage &image, Mode mode)
     QClipboard::Selection, the pixmap is retrieved from the global
     mouse selection.
 
-    \sa setPixmap() image() data() QPixmap::convertFromImage()
+    \sa setPixmap() image() mimeData() QPixmap::convertFromImage()
 */
 QPixmap QClipboard::pixmap(Mode mode) const
 {
@@ -375,7 +397,7 @@ QPixmap QClipboard::pixmap(Mode mode) const
     QClipboard::Selection, the pixmap is stored in the global
     mouse selection.
 
-    \sa pixmap() setImage() setData()
+    \sa pixmap() setImage() setMimeData()
 */
 void QClipboard::setPixmap(const QPixmap &pixmap, Mode mode)
 {
@@ -409,7 +431,7 @@ void QClipboard::setPixmap(const QPixmap &pixmap, Mode mode)
 
     Sets the clipboard data to \a src. Ownership of the data is
     transferred to the clipboard. If you want to remove the data
-    either call clear() or call setData() again with new data.
+    either call clear() or call setMimeData() again with new data.
 
     The \a mode argument is used to control which part of the system
     clipboard is used.  If \a mode is QClipboard::Clipboard, the
@@ -421,10 +443,11 @@ void QClipboard::setPixmap(const QPixmap &pixmap, Mode mode)
     The setText(), setImage() and setPixmap() functions are simpler
     wrappers for setting text, image and pixmap data respectively.
 
-    \sa data()
+    \sa mimeData()
 */
 
-/*! \fn void QClipboard::clear(Mode mode)
+/*! 
+    \fn void QClipboard::clear(Mode mode)
     Clear the clipboard contents.
 
     The \a mode argument is used to control which part of the system
@@ -524,19 +547,22 @@ bool QClipboard::ownsFindBuffer() const
     return ownsMode(FindBuffer);
 }
 
-/*! \internal
+/*! 
+    \internal
     \fn bool QClipboard::supportsMode(Mode mode) const;
     Returns true if the clipboard supports the clipboard mode speacified by \a mode;
     otherwise returns false.
 */
 
-/*! \internal
+/*! 
+    \internal
     \fn bool QClipboard::ownsMode(Mode mode) const;
     Returns true if the clipboard supports the clipboard data speacified by \a mode;
     otherwise returns false.
 */
 
-/*! \internal
+/*! 
+    \internal
     Emits the appropriate changed signal for \a mode.
 */
 void QClipboard::emitChanged(Mode mode)

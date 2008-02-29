@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -39,8 +39,11 @@ public:
         Directory,      // directory name
         Category,       // category string from category subsystem
         DRM,            // drm permissions
-        Synthetic,      // synthetic attributes eg mtime, event
+        Property,      // synthetic attributes eg mtime, event
+        FileName,
+        Name,
         QtopiaType = Role,
+        Synthetic = Property,
         Unknown=100     // probable error
     };
 
@@ -93,6 +96,13 @@ public:
 
     template <typename Stream> void serialize(Stream &stream) const;
     template <typename Stream> void deserialize(Stream &stream);
+
+    static QContentFilter mimeType( const QString &mimeType );
+    static QContentFilter category( const QString &categoryId );
+    static QContentFilter name( const QString &name );
+    static QContentFilter fileName( const QString &fileName );
+    static QContentFilter property( const QString &group, const QString &key, const QString &value );
+    static QContentFilter property( const QString &key, const QString &value );
 
 private:
     QSharedDataPointer< QContentFilterPrivate > d;

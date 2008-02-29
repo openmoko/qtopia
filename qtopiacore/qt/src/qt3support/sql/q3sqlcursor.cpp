@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -73,7 +88,7 @@ QString qOrderByClause(const QSqlIndex & i, const QString& prefix = QString())
     int k = i.count();
     if(k == 0)
         return QString();
-    str = " order by " + i.toString(prefix);
+    str = QLatin1String(" order by ") + i.toString(prefix);
     return str;
 }
 
@@ -82,12 +97,12 @@ QString qWhereClause(const QString& prefix, QSqlField* field, const QSqlDriver* 
     QString f;
     if (field && driver) {
         if (!prefix.isEmpty())
-            f += prefix + QString(".");
+            f += prefix + QLatin1Char('.');
         f += field->name();
         if (field->isNull()) {
-            f += " IS NULL";
+            f += QLatin1String(" IS NULL");
         } else {
-            f += " = " + driver->formatValue(field);
+            f += QLatin1String(" = ") + driver->formatValue(field);
         }
     }
     return f;
@@ -96,7 +111,7 @@ QString qWhereClause(const QString& prefix, QSqlField* field, const QSqlDriver* 
 QString qWhereClause(QSqlRecord* rec, const QString& prefix, const QString& sep,
                       const QSqlDriver* driver)
 {
-    static QString blank(" ");
+    static QString blank(QLatin1Char(' '));
     QString filter;
     bool separator = false;
     for (int j = 0; j < rec->count(); ++j) {
@@ -433,15 +448,15 @@ QString Q3SqlCursor::name() const
 QString Q3SqlCursor::toString(const QString& prefix, const QString& sep) const
 {
     QString pflist;
-    QString pfix =  prefix.isEmpty() ? prefix : prefix + ".";
+    QString pfix =  prefix.isEmpty() ? prefix : prefix + QLatin1Char('.');
     bool comma = false;
 
     for (int i = 0; i < count(); ++i) {
         const QString fname = fieldName(i);
         if (isGenerated(i)) {
             if(comma)
-                pflist += sep + " ";
-            pflist += pfix + fname;
+                pflist += sep + QLatin1Char(' ');
+            pflist += pfix + driver()->escapeIdentifier(fname, QSqlDriver::FieldName);
             comma = true;
         }
     }
@@ -653,18 +668,18 @@ QSqlIndex Q3SqlCursor::index(const QString& fieldName) const
 
 bool Q3SqlCursor::select(const QString & filter, const QSqlIndex & sort)
 {
-    QString fieldList = toString(d->nm);
+    QString fieldList(toString(d->nm));
     if (fieldList.isEmpty())
         return false;
-    QString str= "select " + fieldList;
-    str += " from " + d->nm;
+    QString str(QLatin1String("select ") + fieldList);
+    str += QLatin1String(" from ") + d->nm;
     if (!filter.isEmpty()) {
         d->ftr = filter;
-        str += " where " + filter;
+        str += QLatin1String(" where ") + filter;
     } else
         d->ftr = QString();
     if (sort.count() > 0)
-        str += " order by " + sort.toString(d->nm);
+        str += QLatin1String(" order by ") + sort.toString(d->nm);
     d->srt = sort;
     return exec(str);
 }
@@ -739,7 +754,7 @@ bool Q3SqlCursor::select(const QSqlIndex& sort)
 
 bool Q3SqlCursor::select(const QSqlIndex & filter, const QSqlIndex & sort)
 {
-    return select(toString(filter, this, d->nm, "=", "and"), sort);
+    return select(toString(filter, this, d->nm, QString(QLatin1Char('=')), QLatin1String("and")), sort);
 }
 
 /*!
@@ -910,10 +925,10 @@ QString Q3SqlCursor::toString(const QString& prefix, QSqlField* field, const QSt
 {
     QString f;
     if (field && driver()) {
-        f = (prefix.length() > 0 ? prefix + QString(".") : QString()) + field->name();
-        f += " " + fieldSep + " ";
+        f = (prefix.length() > 0 ? prefix + QLatin1Char('.') : QString()) + field->name();
+        f += QLatin1Char(' ') + fieldSep + QLatin1Char(' ');
         if (field->isNull()) {
-            f += "NULL";
+            f += QLatin1String("NULL");
         } else {
             f += driver()->formatValue(field);
         }
@@ -934,7 +949,7 @@ QString Q3SqlCursor::toString(const QString& prefix, QSqlField* field, const QSt
 QString Q3SqlCursor::toString(QSqlRecord* rec, const QString& prefix, const QString& fieldSep,
                               const QString& sep) const
 {
-    static QString blank(" ");
+    static QString blank(QLatin1Char(' '));
     QString filter;
     bool separator = false;
     for (int j = 0; j < count(); ++j) {
@@ -971,7 +986,7 @@ QString Q3SqlCursor::toString(const QSqlIndex& i, QSqlRecord* rec, const QString
     for(int j = 0; j < i.count(); ++j){
         if (rec->isGenerated(j)) {
             if(separator) {
-                filter += " " + sep + " " ;
+                filter += QLatin1Char(' ') + sep + QLatin1Char(' ') ;
             }
             QString fn = i.fieldName(j);
             QSqlField f = rec->field(fn);
@@ -1032,11 +1047,11 @@ int Q3SqlCursor::insert(bool invalidate)
             QSqlField f = d->editBuffer.field(j);
             if (d->editBuffer.isGenerated(j)) {
                 if (comma) {
-                    fList += ",";
-                    vList += ",";
+                    fList += QLatin1Char(',');
+                    vList += QLatin1Char(',');
                 }
-                fList += f.name();
-                vList += (oraStyle == true) ? ":f" + QString::number(cnt) : QString("?");
+                fList += driver()->escapeIdentifier(f.name(), QSqlDriver::FieldName);
+                vList += (oraStyle == true) ? QLatin1String(":f") + QString::number(cnt) : QString(QLatin1Char('?'));
                 cnt++;
                 comma = true;
             }
@@ -1045,17 +1060,20 @@ int Q3SqlCursor::insert(bool invalidate)
             return 0;
         }
         QString str;
-        str.append("insert into ").append(name()).append(" (").append(fList).append(") values (").append(vList). append (")");
+        str.append(QLatin1String("insert into ")).append(name())
+           .append(QLatin1String(" (")).append(fList)
+           .append(QLatin1String(") values (")).append(vList). append(QLatin1Char(')'));
+
         return applyPrepared(str, invalidate);
     } else {
         for(int j = 0; j < k; ++j) {
             QSqlField f = d->editBuffer.field(j);
             if (d->editBuffer.isGenerated(j)) {
                 if (comma) {
-                    fList += ",";
-                    vList += ",";
+                    fList += QLatin1Char(',');
+                    vList += QLatin1Char(',');
                 }
-                fList += f.name();
+                fList += driver()->escapeIdentifier(f.name(), QSqlDriver::FieldName);
                 vList += driver()->formatValue(&f);
                 comma = true;
             }
@@ -1066,7 +1084,8 @@ int Q3SqlCursor::insert(bool invalidate)
             return 0;
         }
         QString str;
-        str.append("insert into ").append(name()).append(" (").append(fList).append(") values (").append(vList). append (")");
+        str.append(QLatin1String("insert into ")).append(name()).append(QLatin1String(" ("))
+           .append(fList).append(QLatin1String(") values (")).append(vList). append (QLatin1String(")"));
         return apply(str, invalidate);
     }
 }
@@ -1113,9 +1132,9 @@ QSqlRecord* Q3SqlCursor::primeUpdate()
     QSqlRecord* buf = editBuffer(true);
     QSqlIndex idx = primaryIndex(false);
     if (!idx.isEmpty())
-        d->editIndex = toString(idx, buf, d->nm, "=", "and");
+        d->editIndex = toString(idx, buf, d->nm, QString(QLatin1Char('=')), QLatin1String("and"));
     else
-        d->editIndex = qWhereClause(buf, d->nm, "and", driver());
+        d->editIndex = qWhereClause(buf, d->nm, QLatin1String("and"), driver());
     return buf;
 }
 
@@ -1238,9 +1257,9 @@ int Q3SqlCursor::update(const QString & filter, bool invalidate)
             QSqlField f = d->editBuffer.field(j);
             if (d->editBuffer.isGenerated(j)) {
                 if (comma) {
-                    fList += ",";
+                    fList += QLatin1Char(',');
                 }
-                fList += f.name() + " = " + (oraStyle == true ? ":f" + QString::number(cnt) : QString("?"));
+                fList += f.name() + QLatin1String(" = ") + (oraStyle == true ? QLatin1String(":f") + QString::number(cnt) : QString(QLatin1Char('?')));
                 cnt++;
                 comma = true;
             }
@@ -1248,16 +1267,16 @@ int Q3SqlCursor::update(const QString & filter, bool invalidate)
         if (!comma) {
             return 0;
         }
-        QString str = "update " + name() + " set " + fList;
+        QString str(QLatin1String("update ") + name() + QLatin1String(" set ") + fList);
         if (filter.length()) {
-            str+= " where " + filter;
+            str+= QLatin1String(" where ") + filter;
         }
         return applyPrepared(str, invalidate);
     } else {
-        QString str = "update " + name();
-        str += " set " + toString(&d->editBuffer, QString(), "=", ",");
+        QString str = QLatin1String("update ") + name();
+        str += QLatin1String(" set ") + toString(&d->editBuffer, QString(), QString(QLatin1Char('=')), QString(QLatin1Char(',')));
         if (filter.length()) {
-            str+= " where " + filter;
+            str+= QLatin1String(" where ") + filter;
         }
         return apply(str, invalidate);
     }
@@ -1300,8 +1319,8 @@ int Q3SqlCursor::del(bool invalidate)
 {
     QSqlIndex idx = primaryIndex(false);
     if (idx.isEmpty())
-        return del(qWhereClause(&d->editBuffer, d->nm, "and", driver()), invalidate);
-    return del(toString(primaryIndex(), &d->editBuffer, d->nm, "=", "and"), invalidate);
+        return del(qWhereClause(&d->editBuffer, d->nm, QLatin1String("and"), driver()), invalidate);
+    return del(toString(primaryIndex(), &d->editBuffer, d->nm, QString(QLatin1Char('=')), QLatin1String("and")), invalidate);
 }
 
 /*!
@@ -1325,9 +1344,9 @@ int Q3SqlCursor::del(const QString & filter, bool invalidate)
         return 0;
     int k = count();
     if(k == 0) return 0;
-    QString str = "delete from " + name();
+    QString str = QLatin1String("delete from ") + name();
     if (filter.length())
-        str+= " where " + filter;
+        str+= QLatin1String(" where ") + filter;
     return apply(str, invalidate);
 }
 

@@ -25,50 +25,62 @@
 <h2>Prerequisites</h2>
 <p>The following are the minimum requirements to use Teambuilder to build Qtopia:</p>
 <ol type="1">
-<li>makefile: <tt>/opt/teambuilder/bin/make</tt> as follows:<pre>    #!/bin/sh
+<li><tt>/opt/teambuilder/bin/make</tt> contains the following:<pre>    #!/bin/sh
     export TEAMBUILDER_COMPRESS=0
-    if [ &quot;$TEAMBUILDER&quot; = 0 ]
-    then
-    /usr/bin/make &quot;$@&quot;
+    if [ &quot;$TEAMBUILDER&quot; = 0 ]; then
+        /usr/bin/make &quot;$@&quot;
     else
-    /usr/bin/make -j15 &quot;$@&quot;
+        /usr/bin/make -j15 &quot;$@&quot;
     fi</pre>
 </li>
+<li>Entries for your toolchains have been added to <tt>/etc/tbdaemon.conf</tt>.</li>
 </ol>
 <a name="teambuilder-example"></a>
 <h2>Teambuilder Example</h2>
-<p>The following example is for the Zaurus using an Embedix toolchain.</p>
+<p>The following example demonstrates how to configure Teambuilder to use the Embedix toolchain for the Zaurus.</p>
 <ol type="1">
-<li>Set path to compilers and Teambuilder using:<pre>    export PATH=/opt/teambuilder/bin:/opt/Embedix/tools/bin:$PATH</pre>
+<li>Set path to compilers and Teambuilder.<pre>    export PATH=/opt/teambuilder/bin:/opt/Embedix/tools/bin:$PATH</pre>
 </li>
-<li>Activate and configure Teambuilder using:<pre>    export TEAMBUILDER=1
+<li>Set up Teambuilder environment.<pre>    export TEAMBUILDER=1
     export TEAMBUILDER_CC_VERSION=&quot;arm-linux-*:2.95*;*:3.3*&quot;</pre>
 </li>
-<li>Entries in <tt>/etc/tbdaemon.conf</tt> for the toolchains.</li>
 </ol>
-<p>Variable used to activate and configure Teambuilder are described in the following table:</p>
+<p>The following table describes how Teambuilder is affected by the environment variables.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Variable</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>TEAMBUILDER</tt></td><td>used to add the <tt>-j</tt> option to <tt>make</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>TEAMBUILDER</tt></td><td>Use the <tt>-j</tt> option when invoking <tt>make</tt>.</td></tr>
 <tr valign="top" class="even"><td><tt>TEAMBUILDER_CC_VERSION</tt></td><td><ul>
-<li>if <tt>arm-linux-*</tt> use the first compiler that matches version 2.95* (for example, Embedix toolchain for Zaurus)</li>
-<li>if other, that is, <tt>gcc</tt> or <tt>g++</tt> use first compiler that matches version 3.3* (your desktop).</li>
+<li>If <tt>arm-linux-*</tt> use the first compiler that matches version 2.95* (for example, Embedix toolchain for Zaurus).</li>
+<li>For any other compiler use the first compiler that matches version 3.3* (desktop).</li>
 </ul>
 </td></tr>
 </table></p>
 <a name="using-the-teambuilder-system-variable"></a>
 <h2>Using the TEAMBUILDER_SYSTEM Variable</h2>
-<p>The following is an example of using the TEAMBUILDER_SYSTEM variable for an <tt>arm9tdmi</tt> device.</p>
-<pre>    export TEAMBUILDER_SYSTEM-&quot;arm:9tdmi&quot;
-                       &lt;* labels the compiler for use by teambuilder on other machines *&gt;
-    export TEAMBUILDER_CC_VERSION=&quot;arm-linux-*:3.3.3;*:3.3*&quot;
-                       &lt;* requests that \c arm-linux-gcc programs use the matching \c gcc Version 3.3.3 otherwise use Version 3.3&gt;
-    export PATH=/opt/teambuilder/bin:/opt/toolchains/arm9tdmi/arm-linux/gcc-3.3.3-glibc-2.3.2/bin:$PATH
-                       &lt;* Sets \c PATH so the compiler can be found after Teambuilder&gt;</pre>
+<p>The following example demonstrates the use of <tt>TEAMBUILDER_SYSTEM</tt> environment variable to select the compiler for a specific target platform.</p>
+<ol type="1">
+<li>Set path to compilers and Teambuilder.<pre>    export PATH=/opt/teambuilder/bin:/opt/toolchains/arm9tdmi/arm-linux/gcc-3.3.3-glibc-2.3.2/bin:$PATH</pre>
+</li>
+<li>Set up Teambuilder environment.<pre>    export TEAMBUILDER=1
+    export TEAMBUILDER_SYSTEM=&quot;arm:9tdmi&quot;
+    export TEAMBUILDER_CC_VERSION=&quot;arm-linux-*:3.3.3;*:3.3*&quot;</pre>
+</li>
+</ol>
+<p>The following table describes how Teambuilder is affected by the environment variables.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Variable</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>TEAMBUILDER</tt></td><td>Use the <tt>-j</tt> option when invoking <tt>make</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>TEAMBUILDER_SYSTEM</tt></td><td>Selects a compiler with the specified label on other machines. Matches compilers tagged with <tt>[arm:9tdmi]</tt> in <tt>/etc/tbdaemon.conf</tt>.</td></tr>
+<tr valign="top" class="odd"><td><tt>TEAMBUILDER_CC_VERSION</tt></td><td><ul>
+<li>If <tt>arm-linux-*</tt> use the first compiler that maches version 3.3&#x2e;3&#x2e;</li>
+<li>For any other compiler use the first compiler that matches version 3.3*.</li>
+</ul>
+</td></tr>
+</table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

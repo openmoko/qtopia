@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,10 +20,7 @@
 ****************************************************************************/
 
 #include <qapplication.h>
-#include <qinputdialog.h>
 #include <qpainter.h>
-#include <qfile.h>
-#include <qdatastream.h>
 #include <qtimer.h>
 #include <qtopia/mstroke/char.h>
 #include "pensettingswidget.h"
@@ -62,7 +59,7 @@ QIMPenSettingsWidget::QIMPenSettingsWidget( QWidget *parent, const char *name )
     setBackgroundColor( qApp->palette().color( QPalette::Active,
                                                QPalette::Base ) );
                                                */
-    strokeColor = Qt::black;
+    strokeColor = palette().color(QPalette::Text);
     setFixedHeight( 75 );
 }
 
@@ -118,14 +115,13 @@ void QIMPenSettingsWidget::greyStroke()
     if ( st )
        strokeRect = st->boundingRect();
     r |= strokeRect;
-    QColor oldCol = strokeColor;
-    strokeColor = Qt::gray;
+    strokeColor.setAlpha(128);
     if ( !r.isNull() ) {
         r.moveTopLeft( r.topLeft() - QPoint( 2, 2 ));
         r.setSize( r.size() + QSize( 4, 4 ) );
         repaint( r );
     }
-    strokeColor = oldCol;
+    strokeColor.setAlpha(255);
 }
 
 /*
@@ -394,7 +390,7 @@ void QIMPenSettingsWidget::paintEvent( QPaintEvent * )
     paint.drawLine( 0, y, width(), y );
     paint.setPen( Qt::gray );
 
-    paint.setPen( Qt::black );
+    paint.setPen( strokeColor );
     // paint.setBrush( Qt::black );
     foreach ( QRect r, penMoves )
     {
@@ -437,7 +433,7 @@ void QIMPenSettingsWidget::paintEvent( QPaintEvent * )
         off = p - outputChar->startingPoint();
     } else if ( mode == Waiting ) {
         stk = &strokes;
-        strokeColor = Qt::gray;
+        strokeColor.setAlpha(128);
     }
 
     if ( stk && !stk->isEmpty() ) {
@@ -455,7 +451,7 @@ void QIMPenSettingsWidget::paintEvent( QPaintEvent * )
             }
             ++it;
             if (( it == stk->end() ) && mode == Waiting )
-                strokeColor = Qt::black;
+                strokeColor.setAlpha(255);
         }
     }
 

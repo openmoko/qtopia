@@ -8,7 +8,7 @@ use File::Find;
 use File::stat;
 use Cwd;
 use File::Basename;
-use lib ( dirname($0) );
+use lib ( dirname($0)."/../src/build/bin" );
 use Qtopia::Paths;
 use Qtopia::Vars;
 use Qtopia::Opt;
@@ -27,11 +27,14 @@ Qtopia::Opt::read_config_cache();
 
 use constant DEBUG => 0;
 
+# Ugly hack used to let helix have it's .pro file built before we have Qtopia Core.
+if ( exists($ENV{HOST_QMAKE}) && defined($ENV{HOST_QMAKE}) && $ENV{HOST_QMAKE} == 1 )
+{
+    $TARGET_QMAKE = $HOST_QMAKE;
+}
+
 # This holds a cache of the info we need from all the .pro files we look at.
 my %proFileInfo;
-
-# This is where the build system "magic" lives
-my $QMAKEFEATURES = fixpath("$depotpath/src/build");
 
 # A bug in qmake means that Qtopia Core tests can't find the feature files.
 # Work around it by forcing the correct location to be searched.
@@ -39,13 +42,11 @@ $ENV{QMAKEPATH} = "$qt_depot_path";
 
 my $topProFile;
 
+my @ARGV_SAVE = @ARGV;
 my @CONFIG;
-if ( @ARGV && $ARGV[0] =~ /-(release|debug)/ ) {
+if ( @ARGV && $ARGV[0] =~ /-(release|debug|silent)/ ) {
     shift(@ARGV);
     push(@CONFIG, "CONFIG+=$1");
-    if ( $1 eq "debug" ) {
-        push(@CONFIG, "CONFIG+=nostrip");
-    }
 }
 
 if ( @ARGV && $ARGV[0] eq "-makemakefile" ) {
@@ -59,6 +60,57 @@ if ( @ARGV && $ARGV[0] eq "-makemakefile" ) {
 if ( @ARGV && $ARGV[0] eq "-project" ) {
     shift(@ARGV);
     makeProject(@ARGV);
+    exit 0;
+}
+
+if ( @ARGV && $ARGV[0] eq "-multi-build" ) {
+    shift(@ARGV);
+    my $cwd = getcwd();
+    rmrf("$cwd/multi-build");
+    mkpath("$cwd/multi-build");
+    my %builddir;
+    my @ordered;
+    while ( @ARGV && $ARGV[0] =~ /(.*):(.*)/ ) {
+        my $config = $1;
+        my $qpe_dir = $2;
+        shift(@ARGV);
+        print "CONFIG $config : QPEDIR $qpe_dir\n";
+        push(@ordered, $config);
+        my $build_dir = "$cwd/multi-build/$config";
+        $builddir{$config} = $build_dir;
+        mkpath($build_dir);
+        chdir $build_dir;
+        system("ln -sf $cwd/* .");
+        # This is required for older versions of Qtopia
+        $ENV{QPEDIR} = $qpe_dir;
+        system("$qpe_dir/bin/qtopiamake", @CONFIG);
+        print "\n";
+    }
+    if ( ! @ordered ) {
+        die "You must specify configurations with -multi-build.\neg. qtopiamake -multi-build cfg1:/path1 cfg2:/path2\n";
+    }
+    open OUT, ">$cwd/Makefile" or die "Can't write $cwd/Makefile";
+    print OUT "# This file was created by the following command:\n";
+    my $cmd = "$0 ".join(" ", @ARGV_SAVE);
+    print OUT "# $cmd\n";
+    my @targets = qw(all install packages clean);
+    for my $target ( @targets ) {
+        print OUT "$target:\n";
+        for ( @ordered ) {
+            print OUT "\t\@\$(MAKE) -C $builddir{$_} \$\@\n";
+        }
+    }
+    print OUT "qmake:\n".
+              "\t$cmd\n";
+    for ( @ordered ) {
+        print OUT "\t\@\$(MAKE) -C $builddir{$_} \$\@\n";
+    }
+    push(@targets, "qmake");
+    print OUT "distclean:\n".
+              "\trm -rf multi-build Makefile\n";
+    push(@targets, "distclean");
+    print OUT ".PHONY: ".join(" ", @targets)."\n";
+    close OUT;
     exit 0;
 }
 
@@ -80,6 +132,7 @@ my @clean_ignore_files = ( "$uQPEDIR/image",
                            "re,($uDQTDIR|$uQTEDIR|$uqt_depot_path)/src/3rdparty/zlib/win32/Makefile\..*,",
                            "re,($uDQTDIR|$uQTEDIR|$uqt_depot_path)/.*/Makefile.(am|in),",
                            "re,($uDQTDIR|$uQTEDIR|$uqt_depot_path)/util/.*/Makefile,",
+                           "$uQPEDIR/src/qtopiadesktop/dist",
                        );
 
 my @clean_remove_files = (
@@ -97,10 +150,18 @@ if ( @ARGV && $ARGV[0] eq "-clean" ) {
     exit 0;
 }
 
+if ( @ARGV && $ARGV[0] eq "-no-clean" ) {
+    shift(@ARGV);
+    opt("clean") = 0;
+}
+
 # For a normal qtopiamake run, leave Qt/QtopiaCore and config.tests
 push(@clean_ignore_files, "$uQPEDIR/qtopiacore/qt",
+                          "$uqt_depot_path",
                           "$uQPEDIR/qtopiacore/host",
+                          "$uDQTDIR",
                           "$uQPEDIR/qtopiacore/target",
+                          "$uQTEDIR",
                           "$uQPEDIR/config.tests" );
 
 my @projectRoots;
@@ -110,7 +171,6 @@ if ( @ARGV && $ARGV[0] eq "-projectroots" ) {
 }
 
 my $in_tree = 0;
-# FIXME allow 'qtopiamake foo.pro'
 if ( !@projectRoots ) {
     if ( @ARGV && -f $ARGV[0] ) {
         $topProFile = $ARGV[0];
@@ -187,7 +247,7 @@ for my $root ( keys %proFileInfo ) {
         my $cachefile = $proFile;
         $cachefile =~ s/\Q$depotpath\E/$QPEDIR/;
         $cachefile .= ".cache";
-        open OUT, ">$cachefile" or die "Can't write $cachefile\n";
+        open OUT, ">$cachefile" or die "Can't write $cachefile";
         for my $var ( keys %{$proFileInfo{$root}->{$proFile}} ) {
             if ( keys %{$proFileInfo{$root}->{$proFile}->{$var}} ) {
                 print OUT "$var=".join(" ", keys %{$proFileInfo{$root}->{$proFile}->{$var}})."\n";
@@ -215,6 +275,10 @@ sub clean_tree
                 my $ignore = 0;
                 if ( $ign_file =~ /^re(.)(.*)(.)$/ && $1 eq $3 ) {
                     my $re = $2;
+                    if ( $re =~ /\\/ ) {
+                        warn "Can't process ``$re'' because it's got a \\ in it!";
+                        next;
+                    }
                     if ( $file =~ $re ) {
                         $ignore = 1;
                     }
@@ -285,7 +349,7 @@ sub init_root
 
     # Setup the .qmake.cache file
     mkpath($dir);
-    open CACHE_FILE, ">$dir/.qmake.cache" or die "Can't open ".fixpath("$dir/.qmake.cache")."\n";
+    open CACHE_FILE, ">$dir/.qmake.cache" or die "Can't write ".fixpath("$dir/.qmake.cache");
     print CACHE_FILE "QPEDIR=$QPEDIR\n";
     print CACHE_FILE "exists(\$\$QPEDIR/src/build/trace_on):message(.qmake.cache)\n";
     print CACHE_FILE "PROCESSED_PRI+=qmake_cache\n";
@@ -374,7 +438,7 @@ sub processProFile
 
     # Fix srcDir
     my $srcDir = dirname($proFile);
-    chdir $srcDir or die "Can't enter $srcDir\n";
+    chdir $srcDir or die "Can't enter $srcDir";
 
     # Fix, create and go to targetDir
     my $targetDir = $srcDir;
@@ -405,26 +469,44 @@ sub processProFile
     }
 
     if ( !defined($prohash) ) {
-        die "ERROR: Cannot locate .qmake.cache for $proFile.\n".
+        die "ERROR: Can't locate .qmake.cache for $proFile.\n".
             "       Did you run configure?\n";
     }
 
-    my $qmake_cmd = (opt("qmake_debug")?(fixpath("$depotpath/scripts/rungdb")." "):"").
-                    fixpath("$DQTDIR/bin/qmake")." -o ".fixpath("$targetDir/Makefile.target");
-
     # Check if we are building a "desktop" or "embedded" project.
     my $qtdir;
+    my $qmake;
+    my $spec;
     my $CONFIG = $proFileInfo{$projectRoot}->{$proFile}->{CONFIG};
     if ( !opt("edition") or $$CONFIG{part_of_qtopiadesktop} || $$CONFIG{desktop} ) {
-	$qmake_cmd .= " -spec ".opt("platform", "absolute");
+        $spec = opt("platform", "absolute");
+        $qmake = $HOST_QMAKE;
         $qtdir = $DQTDIR;
     } else {
-	$qmake_cmd .= " -spec ".opt("xplatform", "absolute");
+        $spec = opt("xplatform", "absolute");
+        $qmake = $TARGET_QMAKE;
         $qtdir = $QTEDIR;
     }
-    $qmake_cmd .= " SRCDIR=".dirname($proFile);
+    my $QTOPIA_ID = $targetDir;
+    $QTOPIA_ID =~ s/^\Q$projectRoot\E//;
+    $QTOPIA_ID =~ s/^[\\\/]//;
+    $QTOPIA_ID =~ s/\\/\//g;
+    my $qmake_cmd = (opt("qmake_debug")?(fixpath("$depotpath/scripts/rungdb")." "):"").
+                    $qmake." -o ".fixpath("$targetDir/Makefile.target").
+                    " -spec $spec".
+                    " SRCDIR=".dirname($proFile).
+                    " QTOPIA_ID=$QTOPIA_ID";
     if ( @CONFIG ) {
         $qmake_cmd .= " \"".join("\" \"", @CONFIG)."\"";
+    }
+
+    # This file ensures that dependencies are correctly created between headers in a library
+    # and code in that library. It is changed when headers are installed and this change
+    # causes qmake to parse the .pro file again, this time seeing the newly-installed headers.
+    if ( $$CONFIG{syncqtopia} ) {
+        open OUT, ">$targetDir/syncqtopia.pri" or die "Can't write $targetDir/syncqtopia.pri";
+        print OUT "\n";
+        close OUT;
     }
 
     if ( $run_qmake ) {
@@ -461,7 +543,8 @@ sub makeMakefile
     # Because when the Makefile.target is built correctly it will include them and it's better
     # not to require re-configuring just because a Makefile.target was rebuilt.
     my @targets = qw(all install install_target packages lupdate sdk cleaninstall cinstall syncqtopia
-                     first_syncqtopia test checkp4 remove_target relink printdependrules qmake_check);
+                     first_syncqtopia checkp4 remove_target relink printdependrules qmake_check
+                     test listtests);
     if ( configopt("depot") ) {
         push(@targets, "auto_docs");
     }
@@ -527,27 +610,40 @@ sub makeMakefile
 	close TMAKE;
     }
 
+    my @QMAKEFEATURES;
+    # Device features/overrides
+    if ( opt("device") ) {
+        push(@QMAKEFEATURES, fixpath(opt("device", "config_path")."/features"));
+    }
+    # Project root features
     my $projrootfeatures = fixpath("$projectRoot/features");
     $projrootfeatures =~ s/^\Q$QPEDIR\E/$depotpath/;
+    if ( -d $projrootfeatures ) {
+        push(@QMAKEFEATURES, $projrootfeatures)
+    }
+    # Build system features
+    push(@QMAKEFEATURES, fixpath("$depotpath/src/build"));
+
     my ( $make_prefix, $make_suffix, $checksetvar, $MAKE, $MAKE_F, $PRINT_DIR );
     # Platform-dependant stuff
     if ( $isWindows ) {
         $make_prefix = fixpath("$QPEDIR/bin/runwithvars")." ".
-                       "QMAKEFEATURES=".((-d $projrootfeatures)?"$projrootfeatures;":"")."$QMAKEFEATURES ".
+                       "QMAKEFEATURES=".join(";", @QMAKEFEATURES)." ".
                        "QTDIR=$qtdir ".
                        "INSTALL_ROOT=\$($prefixname) IMAGE=\$(IMAGE) DIMAGE=\$(DIMAGE) SDKROOT=\$(SDKROOT) ".
-                       "PROJECT_ROOT=$projectRoot";
+                       "PROJECT_ROOT=$projectRoot ".
+                       "PATH=\"".fixpath("$qtdir/bin").";\%PATH\%\"";
         $make_suffix = "QTDIR=$qtdir INSTALL_ROOT=\$($prefixname) ".
                        "MAKEFILE=Makefile".($$PROJECT_TYPE{subdirs}?"":".target")." ".
-                       "'D=\$(D)'";
+                       "\"D=\$(D)\"";
         $checksetvar = sub { return "!ifndef ".$_[0]."\n".$_[0]."=".$_[1]."\n!endif\n"; };
         $MAKE        = "\$(MAKE) /nologo";
         $MAKE_F      = "/f";
         $PRINT_DIR   = "\n\t";
     } else {
-        $make_prefix = fixpath("$QPEDIR/bin/runwithvars.sh")." ".
+        $make_prefix = fixpath("$QPEDIR/src/build/bin/runwithvars.sh")." ".
                        (opt("device")?"DEVICE_CONFIG_PATH=".opt("device", "config_path")." ":"").
-                       "QMAKEFEATURES=".((-d $projrootfeatures)?"$projrootfeatures:":"")."$QMAKEFEATURES ".
+                       "QMAKEFEATURES=".join(":", @QMAKEFEATURES)." ".
                        "QTDIR=$qtdir ".
                        "INSTALL_ROOT=\$($prefixname) IMAGE=\$(IMAGE) DIMAGE=\$(DIMAGE) SDKROOT=\$(SDKROOT) ".
                        "PROJECT_ROOT=$projectRoot";
@@ -596,7 +692,7 @@ sub makeMakefile
             $contents .= $WRAPPER;
         } elsif ( $target eq "sdk" ) {
             my $sdk = '@'.&$build('check_$@');
-            $sdk =~ s/(INSTALL_ROOT=\$\()[^)]+(\))/$1SDKROOT$2/g;
+            $sdk =~ s/(INSTALL_ROOT=)(\$\()[^)]+(\))/$1\$\(SDKSANDBOX\)$2SDKROOT$3/g;
             $contents .= $sdk;
         } else {
             $contents .= $BUILD;
@@ -621,14 +717,36 @@ sub makeMakefile
 
     # The rule to (re)create Makefile and Makefile.target
     # For syncqtopia projects, also call "make syncqtopia" so that the include directory is correctly populated
-    $contents .= "regenerate:".$PRINT_DIR.(opt("silent")?"":"\@echo $qmake_cmd $proFile\n\t").
-                 "\@$make_prefix $QPEDIR/bin/qtopiamake -makemakefile \"$proFile\"";
+    $contents .= "regenerate:".$PRINT_DIR.("").
+                 "$make_prefix ".
+                 # the server runs $MAKE in a system() call so it needs this environment variable set
+                 "MAKE=\$(MAKE) ".
+                 fixpath("$QPEDIR/bin/qtopiamake")." -makemakefile \"".fixpath($proFile)."\"";
     if ( @CONFIG ) {
         $contents .= " \"".join("\" \"", @CONFIG)."\"";
     }
-    $contents .= "\n".
-                 ($$CONFIG{syncqtopia}?"\t\@$make_prefix $MAKE $MAKE_F Makefile.target ".($fastmake?"first_":"")."syncqtopia $make_suffix\n":"").
-                 ($$PROJECT_TYPE{subdirs}?"":"\t\@$make_prefix $MAKE $MAKE_F Makefile.target \$\@ $make_suffix\n");
+    $contents .= "\n";
+    if ( $$CONFIG{syncqtopia} ) {
+        $contents .= "\t\@$make_prefix $MAKE $MAKE_F Makefile.target ".($fastmake?"first_":"")."syncqtopia $make_suffix\n";
+    }
+    if ( !$$CONFIG{subdirs} ) {
+        if ( $$CONFIG{syncqtopia} ) {
+            # Running make -f Makefile.target regenerate will cause Makefile.target to be rebuilt
+            # because singleexec.pri is newer than it. This seems to be a feature of make because
+            # there is no explicit dependency in Makefile.target.
+            # Letting Makefile.target's rebuild rule will fail in some cases so force it to build
+            # now with our rule that works correctly.
+            $contents .= "\t\@$make_prefix ".
+                         # the server runs $MAKE in a system() call so it needs this environment variable set
+                         "MAKE=\$(MAKE) ".
+                         fixpath("$QPEDIR/bin/qtopiamake")." -makemakefile \"".fixpath($proFile)."\"";
+            if ( @CONFIG ) {
+                $contents .= " \"".join("\" \"", @CONFIG)."\"";
+            }
+            $contents .= "\n";
+        }
+        $contents .= "\t\@$make_prefix $MAKE $MAKE_F Makefile.target \$\@ $make_suffix\n";
+    }
 
     # The rule to (re)create Makefile and Makefile.target for all subdirectories
     $contents .= "regenerate_all: regenerate\n".
@@ -643,13 +761,16 @@ sub makeMakefile
     # Some gmake stuff
     if ( !$isWindows ) {
         $contents .= ".PHONY: ".join(" ", @targets, @extra_targets)."\n";
+    } else {
+        # nmake can do this... just not as elegantly
+        $contents .= join(" ", @targets, @extra_targets).": FORCE\nFORCE:";
     }
 
     # We have the contents, now write it
     if ( -f $redmake ) {
-	unlink $redmake or die "I can't unlink $redmake: $!\n";
+	unlink $redmake or die "I can't unlink $redmake: $!";
     }
-    open REDMAKE, ">".$redmake or die "Unable to write to $redmake: $!\n";
+    open REDMAKE, ">".$redmake or die "Unable to write to $redmake: $!";
     print REDMAKE $contents;
     close REDMAKE;
 
@@ -659,19 +780,21 @@ sub makeMakefile
         #     $depotpath/src/libraries/qtopia2 -> $QPEDIR/src/libraries/qtopia
         $contents = <<END;
 define RULE
-\@+QPEDIR=\$(QTOPIA_BUILD_TREE);\\
+\@+QPEDIR=\$(QTOPIA_BUILD);\\
+if [ -z "\$\$QPEDIR" ]; then\\
+    QPEDIR=\$(QTOPIA_BUILD_TREE);\\
+fi;\\
 if [ -z "\$\$QPEDIR" ]; then\\
     QPEDIR=\$(QPEDIR);\\
 fi;\\
 if [ -z "\$\$QPEDIR" ]; then\\
-    echo "ERROR: You must set QTOPIA_BUILD_TREE if you want to use depot hopping.";\\
+    echo "ERROR: You must set QTOPIA_BUILD if you want to use depot hopping.";\\
     echo "When this file was created, the Qtopia build tree was:";\\
     echo "    $QPEDIR";\\
     exit 1;\\
 fi;\\
 QPEDIR=`cd \$\$QPEDIR; /bin/pwd | sed 's/\\/\$\$//'`;\\
 shadowdir=`echo \$\$PWD | perl -ne 's,$depotpath,'\$\$QPEDIR',;\\
-                                    s,/src/libraries/([^\\d]+)\\d?,/src/libraries/\$\$1,;\\
                                     print'`;\\
 if [ "\$\$shadowdir" != "\$\$PWD" -a -d "\$\$shadowdir" ]; then\\
     cd "\$\$shadowdir";\\
@@ -694,13 +817,13 @@ END
 
         $redmake =~ s/^\Q$QPEDIR\E/$depotpath/;
         if ( -f $redmake ) {
-            unlink $redmake or warn "I can't unlink $redmake: $!\n";
+            unlink $redmake or warn "I can't unlink $redmake: $!";
         }
         if ( open REDMAKE, ">".$redmake ) {
             print REDMAKE $contents;
             close REDMAKE;
         } else {
-            warn "Unable to write to $redmake: $!\n";
+            warn "Unable to write to $redmake: $!";
         }
     }
 }
@@ -736,8 +859,8 @@ sub makeProject
     my $name = basename($cwd);
 
     # get qmake to do the heavy lifting
-    system("$QTEDIR/bin/qmake -project");
-    open IN, "$name.pro" or die "Can't open $name.pro\n";
+    system("$HOST_QMAKE -project");
+    open IN, "$name.pro" or die "Can't read $name.pro";
     my @data = <IN>;
     close IN;
     unlink "$name.pro";
@@ -777,7 +900,7 @@ sub makeProject
     @found = glob("*.pro");
 
     # write out the .pro file
-    open OUT, ">$name.pro" or die "Can't write $name.pro\n";
+    open OUT, ">$name.pro" or die "Can't write $name.pro";
     print OUT "qtopia_project($type app)\n";
     print OUT "TARGET=$name\n";
     if ( $qtopia_main ) {

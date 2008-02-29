@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/richtext.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/richtext.qdoc -->
 <head>
-  <title>Qt 4.2: Supported HTML Subset</title>
+  <title>Qt 4.3: Supported HTML Subset</title>
   <link rel="prev" href="richtext-common-tasks.html" />
   <link rel="contents" href="richtext.html" />
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -18,7 +18,8 @@
 [Previous: <a href="richtext-common-tasks.html">Common Rich Text Editing Tasks</a>]
 [<a href="richtext.html">Contents</a>]
 </p>
-<h1 align="center">Supported HTML Subset<br /><small></small></h1>
+<h1 align="center">Supported HTML Subset<br /><span class="subtitle"></span>
+</h1>
 <p>The following table lists the HTML tags supported by Qt's <a href="richtext.html">rich text</a> engine:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Tag</th><th>Description</th><th>Comment</th></tr></thead>
@@ -100,6 +101,8 @@
 <li><tt>bgcolor</tt> (Qt <a href="qcolor.html#setNamedColor">color names</a> or <tt>#RRGGBB</tt>)</li>
 <li><tt>colspan</tt></li>
 <li><tt>rowspan</tt></li>
+<li><tt>align</tt> (<tt>left</tt>, <tt>right</tt>, <tt>center</tt>, <tt>justify</tt>)</li>
+<li><tt>valign</tt> (<tt>top</tt>, <tt>middle</tt>, <tt>bottom</tt>)</li>
 </ul>
 <a name="css-properties"></a>
 <h2>CSS Properties</h2>
@@ -121,7 +124,9 @@
 <tr valign="top" class="odd"><td><tt>margin-bottom</tt></td><td>&lt;length&gt;px</td><td>Bottom paragraph margin in pixels</td></tr>
 <tr valign="top" class="even"><td><tt>margin-left</tt></td><td>&lt;length&gt;px</td><td>Left paragraph margin in pixels</td></tr>
 <tr valign="top" class="odd"><td><tt>margin-right</tt></td><td>&lt;length&gt;px</td><td>Right paragraph margin in pixels</td></tr>
-<tr valign="top" class="even"><td><tt>vertical-align</tt></td><td>baseline | sub | super</td><td>Vertical text alignment</td></tr>
+<tr valign="top" class="even"><td><tt>vertical-align</tt></td><td>baseline | sub | super | middle | top | bottom</td><td>Vertical text alignment. For vertical alignment in text table cells only middle, top, and bottom apply.</td></tr>
+<tr valign="top" class="odd"><td><tt>border-color</tt></td><td>&lt;color&gt;</td><td>Border color for text tables.</td></tr>
+<tr valign="top" class="even"><td><tt>border-style</tt></td><td>none | dotted | dashed | dot-dash | dot-dot-dash | solid | double | groove | ridge | inset | outset</td><td>Border style for text tables.</td></tr>
 <tr valign="top" class="odd"><td><tt>background</tt></td><td>[ &lt;'background-color'&gt; || &lt;'background-image'&gt; ]</td><td>Background shorthand property</td></tr>
 <tr valign="top" class="even"><td><tt>page-break-before</tt></td><td>[ auto | always ]</td><td>Make it possible to enforce a page break before the paragraph/table</td></tr>
 <tr valign="top" class="odd"><td><tt>page-break-after</tt></td><td>[ auto | always ]</td><td>Make it possible to enforce a page break after the paragraph/table</td></tr>
@@ -137,6 +142,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,7 +21,6 @@
 
 #include "accounteditor.h"
 #include "googleaccount.h"
-#include "qsoftmenubar.h"
 
 #include <QListWidget>
 #include <QListWidgetItem>
@@ -36,8 +35,13 @@
 #include <QTimer>
 #include <QtopiaApplication>
 #include <QKeyEvent>
-
+#include <QPimDelegate>
+#include <QPainter>
+#include <QtopiaItemDelegate>
 #include <qtopia/pim/private/qgooglecontext_p.h>
+
+#ifndef QT_NO_OPENSSL
+
 
 class AccountWidgetItem : public QListWidgetItem
 {
@@ -46,9 +50,13 @@ public:
     AccountWidgetItem(const QPimSource &source, QGoogleCalendarContext *context, QListWidget *parent = 0)
         : QListWidgetItem(context->icon(),
                 context->name(source.identity).isEmpty()
-                    ? source.identity : context->name(source.identity),
+                    ? context->email(source.identity) : context->name(source.identity),
                 parent)
-        , mSource(source), mContext(context) {}
+        , mSource(source), mContext(context)
+        {
+            if (!context->name(source.identity).isEmpty())
+                setData(EmailRole, context->email(source.identity));
+        }
 
     AccountWidgetItem(QPimContext *context, QListWidget *parent = 0)
         : QListWidgetItem(context->icon(), context->title(), parent)
@@ -56,29 +64,128 @@ public:
 
     ~AccountWidgetItem() {}
 
+    void updateText()
+    {
+        QGoogleCalendarContext *gcal = qobject_cast<QGoogleCalendarContext*>(mContext);
+        if (gcal) {
+            QString name = gcal->name(mSource.identity);
+            QString email = gcal->email(mSource.identity);
+            if (name.isEmpty()) {
+                setText(email);
+                setData(EmailRole, QVariant());
+            } else {
+                setText(name);
+                setData(EmailRole, email);
+            }
+        }
+    }
+
     QPimSource source() const { return mSource; }
     QPimContext *context() const { return mContext; }
+
+    enum {EmailRole = Qt::UserRole};
 
 private:
     const QPimSource mSource;
     QPimContext *mContext;
 };
 
+
+class AccountDelegate : public QPimDelegate
+{
+    Q_OBJECT;
+
+public:
+    AccountDelegate(QObject *parent);
+    virtual ~AccountDelegate();
+protected:
+    QList<StringPair> subTexts ( const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    int subTextsCountHint ( const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    void drawDecorations(QPainter* p, bool rtl, const QStyleOptionViewItem &option, const QModelIndex& index,
+        QList<QRect>& leadingFloats, QList<QRect>& trailingFloats) const;
+    QSize decorationsSizeHint(const QStyleOptionViewItem& option, const QModelIndex& index, const QSize& s) const;
+
+protected:
+    QSize mPrimarySize;
+};
+
+AccountDelegate::AccountDelegate(QObject *parent)
+    : QPimDelegate(parent)
+{
+    int dim = qApp->style()->pixelMetric(QStyle::PM_ListViewIconSize);
+    mPrimarySize = QSize(dim,dim);
+}
+
+AccountDelegate::~AccountDelegate()
+{
+
+}
+
+int AccountDelegate::subTextsCountHint(const QStyleOptionViewItem&, const QModelIndex&) const
+{
+    // Always one line of subtexts
+    return 1;
+}
+
+QList<StringPair> AccountDelegate::subTexts(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    Q_UNUSED(option);
+
+    QList< StringPair > subTexts;
+    QString email = index.model()->data(index, AccountWidgetItem::EmailRole).toString();
+    if (!email.isEmpty())
+        subTexts.append(qMakePair(QString(), email));
+    return subTexts;
+}
+
+void AccountDelegate::drawDecorations(QPainter* p, bool rtl, const QStyleOptionViewItem &option, const QModelIndex& index,
+        QList<QRect>& leadingFloats, QList<QRect>& ) const
+{
+    Q_UNUSED(option);
+
+    QIcon pi = qvariant_cast<QIcon>(index.model()->data(index, Qt::DecorationRole));
+    QRect drawRect = option.rect;
+    QPoint drawOffset;
+
+    // draw the primary icon
+    // 8px padding, 4 on either side
+    if (rtl)
+        drawRect.setLeft(drawRect.right() - mPrimarySize.width() - 8);
+    else
+        drawRect.setRight(mPrimarySize.width() + 8);
+
+    drawOffset = QPoint(drawRect.left() + ((drawRect.width() - mPrimarySize.width())/2), drawRect.top() + ((drawRect.height() - mPrimarySize.height()) / 2));
+    p->drawPixmap(drawOffset, pi.pixmap(mPrimarySize));
+
+    leadingFloats.append(drawRect);
+}
+
+QSize AccountDelegate::decorationsSizeHint(const QStyleOptionViewItem& option, const QModelIndex& index, const QSize& s) const
+{
+    Q_UNUSED(option);
+    Q_UNUSED(index);
+    return QSize(mPrimarySize.width() + s.width(), qMax(mPrimarySize.height() + 2, s.height()));
+}
+
 AccountEditor::AccountEditor( QWidget *parent )
     : QWidget(parent)
         , mModel(0)
 {
     mChoices = new QListWidget;
+    mChoices->setItemDelegate(new AccountDelegate(mChoices));
+    mChoices->setFrameStyle(QFrame::NoFrame);
     mProgress = new QProgressBar;
 
     QVBoxLayout *vbl = new QVBoxLayout(this);
+    vbl->setMargin(0);
     vbl->addWidget(mChoices);
     vbl->addWidget(mProgress);
 
     setLayout(vbl);
 
-    connect(mChoices, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem* )),
-                this, SLOT(currentAccountChanged(QListWidgetItem *)));
+    connect(mChoices, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+                this, SLOT(currentAccountChanged(QListWidgetItem*)));
+    connect(mChoices, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(editCurrentAccount()));
     mChoices->installEventFilter(this);
 
     actionAdd = new QAction(QIcon(":icon/new"), tr("Add Account"), this);
@@ -150,21 +257,64 @@ void AccountEditor::setModel(QAppointmentModel *model)
     foreach(QPimContext *c, mModel->contexts()) {
         QGoogleCalendarContext *gcal = qobject_cast<QGoogleCalendarContext *>(c);
         if (gcal) {
-            connect(gcal, SIGNAL(syncProgressChanged(int, int)), this, SLOT(updateProgress()));
-            connect(gcal, SIGNAL(finishedSyncing()), progressHideTimer, SLOT(start()));
+            connect(gcal, SIGNAL(syncProgressChanged(int,int)), this, SLOT(updateProgress()));
+            connect(gcal, SIGNAL(syncStatusChanged(QString,int)),
+                    this, SLOT(processSyncStatus(QString,int)));
         }
     }
     populate();
     updateActions();
 }
 
+void AccountEditor::updateAccountName(const QString& account)
+{
+    // Find the item with this account
+    for (int i=0; i < mChoices->count(); i++) {
+        AccountWidgetItem *item = (AccountWidgetItem*)mChoices->item(i);
+
+        if (item && item->source().identity == account) {
+            item->updateText();
+            mChoices->update();
+            break;
+        }
+    }
+}
+
+void AccountEditor::processSyncStatus(const QString &account, int status)
+{
+    QObject *s = sender();
+    QGoogleCalendarContext *gcal = qobject_cast<QGoogleCalendarContext *>(s);
+    if (gcal) {
+        switch (status)
+        {
+            case QGoogleCalendarContext::NotStarted:
+            case QGoogleCalendarContext::InProgress:
+                break; // ignore
+            case QGoogleCalendarContext::Completed:
+                updateAccountName(account);
+                progressHideTimer->start();
+                break;
+            default:
+                // error.
+                QMessageBox::critical(this, tr("Sync Error"),
+                        tr("An error occurred syncing account %1. %2", "1 is account name, 2 is a status message from the synced context").arg(account).arg(gcal->statusMessage(status)));
+                hideProgressBar();
+                break;
+        }
+    }
+}
+
+
+
 void AccountEditor::addAccount()
 {
     QListWidget *accountTypes = new QListWidget;
+    accountTypes->setItemDelegate(new AccountDelegate(accountTypes));
+    accountTypes->setFrameStyle(QFrame::NoFrame);
     QDialog diag;
     QVBoxLayout *vl = new QVBoxLayout;
     vl->addWidget(accountTypes);
-    vl->setMargin(7);
+    vl->setMargin(0);
     diag.setWindowTitle(tr("Account Type", "window title"));
     diag.setLayout(vl);
 
@@ -180,7 +330,7 @@ void AccountEditor::addAccount()
     if (accountTypes->currentItem())
         accountTypes->currentItem()->setSelected(true);
 
-    connect(accountTypes, SIGNAL(itemActivated(QListWidgetItem *)), &diag, SLOT(accept()));
+    connect(accountTypes, SIGNAL(itemActivated(QListWidgetItem*)), &diag, SLOT(accept()));
 
     // and make this a menu like dialog so we can cancel
     QtopiaApplication::setMenuLike(&diag, true);
@@ -192,9 +342,11 @@ void AccountEditor::addAccount()
             QGoogleCalendarContext *gcal = qobject_cast<QGoogleCalendarContext *>(item->context());
             if (gcal) {
                 GoogleAccount gdiag;
+                gdiag.setObjectName("google-account");
                 if (QtopiaApplication::execDialog(&gdiag)) {
-                    gcal->addAccount(gdiag.email(), gdiag.password());
-                    gcal->setFeedType(gdiag.email(), gdiag.feedType());
+                    QString account = gcal->addAccount(gdiag.email(), gdiag.password());
+                    gcal->setName(account, gdiag.name());
+                    gcal->setFeedType(account, gdiag.feedType());
                 }
             }
         }
@@ -208,15 +360,33 @@ void AccountEditor::removeCurrentAccount()
     AccountWidgetItem *item = (AccountWidgetItem *)mChoices->currentItem();
     if (!item)
         return;
-    QGoogleCalendarContext *gcal;
-    gcal = qobject_cast<QGoogleCalendarContext *>(item->context());
+
+    QString id = item->source().identity;
+    QGoogleCalendarContext *gcal = qobject_cast<QGoogleCalendarContext *>(item->context());
+
     if (gcal) {
-        gcal->removeAccount(item->source().identity);
-        mChoices->takeItem(mChoices->row(item));
-        delete item;
+        if (!gcal->name(id).isEmpty())
+            id = gcal->name(id);
+        else
+            id = gcal->email(id);
     }
-    populate();
-    updateActions();
+
+    if (Qtopia::confirmDelete(this, tr("Delete Account"), id)) {
+        int row = mChoices->currentRow();
+        if (gcal) {
+            gcal->removeAccount(item->source().identity);
+            mChoices->takeItem(mChoices->row(item));
+            delete item;
+        }
+        populate();
+        if (row >= mChoices->count())
+            row = mChoices->count() - 1;
+        if (row >= 0)
+            mChoices->setCurrentRow(row);
+        if (mChoices->currentItem())
+            mChoices->currentItem()->setSelected(true);
+        updateActions();
+    }
 }
 
 void AccountEditor::editCurrentAccount()
@@ -228,19 +398,23 @@ void AccountEditor::editCurrentAccount()
     gcal = qobject_cast<QGoogleCalendarContext *>(item->context());
     if (gcal) {
         GoogleAccount diag;
+        diag.setObjectName("google-account");
         QString account = item->source().identity;
-        diag.setEmail(account);
+        QString oldEmail = gcal->email(account);
+        QGoogleCalendarContext::FeedType oldFeedType = gcal->feedType(account);
+        diag.setEmail(oldEmail);
         diag.setPassword(gcal->password(account));
         diag.setName(gcal->name(account));
         diag.setFeedType(gcal->feedType(account));
         if (QtopiaApplication::execDialog( &diag )) {
-            if (account != diag.email()) {
+            if (oldEmail != diag.email() || oldFeedType != diag.feedType()) {
                 gcal->removeAccount(account);
-                gcal->addAccount(diag.email(), diag.password());
+                account = gcal->addAccount(diag.email(), diag.password());
             } else {
-                gcal->setPassword(diag.email(), diag.password());
+                gcal->setPassword(account, diag.password());
             }
-            gcal->setFeedType(diag.email(), diag.feedType());
+            gcal->setName(account, diag.name());
+            gcal->setFeedType(account, diag.feedType());
         }
     }
     populate();
@@ -387,3 +561,6 @@ void AccountEditor::populate()
         }
     }
 }
+
+#include "accounteditor.moc"
+#endif

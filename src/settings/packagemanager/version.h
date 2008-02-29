@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,6 +23,14 @@
 #define VERSION_H
 
 #include <qstring.h>
+
+#include <custom-qtopia.h>
+#ifndef QTOPIA_COMPATIBLE_DEVICES
+#warning  QTOPIA_COMPATIBLE_DEVICES not defined in device specific custom.h \
+           setting value to "Unknown" 
+#define QTOPIA_COMPATIBLE_DEVICES "Unknown"
+#endif
+
 
 class Version
 {
@@ -101,6 +109,14 @@ public:
     static bool checkVersionLists( const QString &verList1, const QString &verList2 );
 private:
     static bool checkVersionItems( const QString &verItem1, const QString &verItem2 );
+};
+
+class DeviceUtil
+{
+    public:
+        static bool checkDeviceLists( const QString &devList1, const QString &devList2 );
+        static QString compatibleDevices();
+
 };
 
 #endif

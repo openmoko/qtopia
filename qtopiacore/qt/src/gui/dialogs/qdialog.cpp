@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -41,6 +56,10 @@
 #include "qt_windows.h"
 #elif defined(Q_WS_X11)
 #  include "../kernel/qt_x11_p.h"
+#endif
+
+#ifndef SPI_GETSNAPTODEFBUTTON
+#  define SPI_GETSNAPTODEFBUTTON  95
 #endif
 
 /*!
@@ -76,11 +95,17 @@
     \section1 Modal Dialogs
 
     A \bold{modal} dialog is a dialog that blocks input to other
-    visible windows in the same application. Users must finish
-    interacting with the dialog and close it before they can access
-    any other window in the application. Dialogs that are used to
+    visible windows in the same application. Dialogs that are used to
     request a file name from the user or that are used to set
-    application preferences are usually modal.
+    application preferences are usually modal. Dialogs can be
+    \l{Qt::ApplicationModal}{application modal} (the default) or
+    \l{Qt::WindowModal}{window modal}.
+
+    When an application modal dialog is opened, the user must finish
+    interacting with the dialog and close it before they can access
+    any other window in the application. Window modal dialogs only
+    block access to the window associated with the dialog, allowing
+    the user to continue to use other windows in an application.
 
     The most common way to display a modal dialog is to call its
     exec() function. When the user closes the dialog, exec() will
@@ -156,13 +181,17 @@
 
     A modal dialog:
 
-    \quotefunction snippets/dialogs/dialogs.cpp void EditorWindow::countWords()
+    \quotefromfile snippets/dialogs/dialogs.cpp
+    \skipto void EditorWindow::countWords()
+    \printuntil /^\}/
 
     A modeless dialog:
 
-    \quotefunction snippets/dialogs/dialogs.cpp void EditorWindow::find()
+    \quotefromfile snippets/dialogs/dialogs.cpp
+    \skipto void EditorWindow::find()
+    \printuntil /^\}/
 
-    \sa QDialogButtonBox, QTabDialog, QWidget, QProgressDialog,
+    \sa QDialogButtonBox, QTabWidget, QWidget, QProgressDialog,
         {fowler}{GUI Design Handbook: Dialogs, Standard}, {Extension Example},
         {Standard Dialogs Example}
 */
@@ -269,7 +298,7 @@ void QDialogPrivate::setDefault(QPushButton *pushButton)
 
 /*!
   \internal
-  This function sets the default default pushbutton to \a pushButton.
+  This function sets the default default push button to \a pushButton.
   This function is called by QPushButton::setDefault().
 */
 void QDialogPrivate::setMainDefault(QPushButton *pushButton)
@@ -365,10 +394,14 @@ void QDialog::setResult(int r)
     blocking until the user closes it. The function returns a \l
     DialogCode result.
 
-    Users cannot interact with any other window in the same
-    application until they close the dialog.
+    If the dialog is \l{Qt::ApplicationModal}{application modal}, users cannot
+    interact with any other window in the same application until they close
+    the dialog. If the dialog is \l{Qt::ApplicationModal}{window modal}, only
+    interaction with the parent window is blocked while the dialog is open.
 
-  \sa show(), result()
+    By default, the dialog is application modal.
+
+    \sa show(), result(), setWindowModality()
 */
 
 int QDialog::exec()
@@ -390,7 +423,10 @@ int QDialog::exec()
 
     QEventLoop eventLoop;
     d->eventLoop = &eventLoop;
+    QPointer<QDialog> guard = this;
     (void) eventLoop.exec();
+    if (guard.isNull())
+        return QDialog::Rejected;
     d->eventLoop = 0;
 
     setAttribute(Qt::WA_ShowModal, wasShowModal);
@@ -599,7 +635,7 @@ void QDialog::setVisible(bool visible)
 {
     Q_D(QDialog);
     if (visible) {
-        if (isVisible())
+        if (testAttribute(Qt::WA_WState_ExplicitShowHide) && !testAttribute(Qt::WA_WState_Hidden))
             return;
 
 #ifdef Q_OS_TEMP
@@ -656,7 +692,7 @@ void QDialog::setVisible(bool visible)
 #endif
 
     } else {
-        if (!isVisible())
+        if (testAttribute(Qt::WA_WState_ExplicitShowHide) && testAttribute(Qt::WA_WState_Hidden))
             return;
 
 #ifndef QT_NO_ACCESSIBILITY
@@ -669,6 +705,16 @@ void QDialog::setVisible(bool visible)
         if (d->eventLoop)
             d->eventLoop->exit();
     }
+#ifdef Q_WS_WIN
+    if (d->mainDef && isActiveWindow()) {
+        BOOL snapToDefault = false;
+        if ( QT_WA_INLINE( SystemParametersInfo(SPI_GETSNAPTODEFBUTTON, 0, &snapToDefault, 0) ,
+                           SystemParametersInfoA(SPI_GETSNAPTODEFBUTTON, 0, &snapToDefault, 0) )) {
+            if (snapToDefault)
+                QCursor::setPos(d->mainDef->mapToGlobal(d->mainDef->rect().center()));
+        }
+    }
+#endif
 }
 
 /*!\reimp */
@@ -687,11 +733,8 @@ void QDialog::showEvent(QShowEvent *event)
 void QDialog::adjustPosition(QWidget* w)
 {
 #ifdef Q_WS_X11
-    // defined in qapplication_x11.cpp
-    extern bool qt_net_supports(Atom atom);
-
     // if the WM advertises that it will place the windows properly for us, let it do it :)
-    if (qt_net_supports(ATOM(_NET_WM_FULL_PLACEMENT)))
+    if (X11->isSupportedByWM(ATOM(_NET_WM_FULL_PLACEMENT)))
         return;
 #endif
 
@@ -888,6 +931,11 @@ void QDialog::showExtension(bool showIt)
             setFixedSize(w, height() + s.height());
         }
         d->extension->show();
+#ifndef QT_NO_SIZEGRIP
+        const bool sizeGripEnabled = isSizeGripEnabled();
+        setSizeGripEnabled(false);
+        d->sizeGripEnabled = sizeGripEnabled;
+#endif
     } else {
         d->extension->hide();
         // workaround for CDE window manager that won't shrink with (-1,-1)
@@ -896,6 +944,9 @@ void QDialog::showExtension(bool showIt)
         resize(d->size);
         if (layout())
             layout()->setEnabled(true);
+#ifndef QT_NO_SIZEGRIP
+        setSizeGripEnabled(d->sizeGripEnabled);
+#endif
     }
 }
 
@@ -968,6 +1019,11 @@ void QDialog::setSizeGripEnabled(bool enabled)
     Q_UNUSED(enabled);
 #else
     Q_D(QDialog);
+#ifndef QT_NO_SIZEGRIP
+    d->sizeGripEnabled = enabled;
+    if (enabled && d->doShowExtension)
+        return;
+#endif
     if (!enabled != !d->resizer) {
         if (enabled) {
             d->resizer = new QSizeGrip(this);

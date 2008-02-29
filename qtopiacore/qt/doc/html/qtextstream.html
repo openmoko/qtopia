@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/io/qtextstream.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/io/qtextstream.cpp -->
 <head>
-  <title>Qt 4.2: QTextStream Class Reference</title>
+  <title>Qt 4.3: QTextStream Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTextStream Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTextStream Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QTextStream class provides a convenient interface for reading and writing text. <a href="#details">More...</a></p>
 <pre> #include &lt;QTextStream&gt;</pre><p>Inherited by <a href="qtextistream.html">QTextIStream</a> and <a href="qtextostream.html">QTextOStream</a>.</p>
 <p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
@@ -226,7 +227,7 @@
 <tr><td valign="top"><tt>QTextStream::ForcePoint</tt></td><td align="center" valign="top"><tt>0x2</tt></td><td valign="top">Always put the decimal separator in numbers, even if there are no decimals.</td></tr>
 <tr><td valign="top"><tt>QTextStream::ForceSign</tt></td><td align="center" valign="top"><tt>0x4</tt></td><td valign="top">Always put the sign in numbers, even for positive numbers.</td></tr>
 <tr><td valign="top"><tt>QTextStream::UppercaseBase</tt></td><td align="center" valign="top"><tt>0x8</tt></td><td valign="top">Use uppercase versions of base prefixes (&quot;0X&quot;, &quot;0B&quot;).</td></tr>
-<tr><td valign="top"><tt>QTextStream::UppercaseDigits</tt></td><td align="center" valign="top"><tt>0x10</tt></td><td valign="top">Use uppercare letters for expressing digits 10 to 35 instead of lowercase.</td></tr>
+<tr><td valign="top"><tt>QTextStream::UppercaseDigits</tt></td><td align="center" valign="top"><tt>0x10</tt></td><td valign="top">Use uppercase letters for expressing digits 10 to 35 instead of lowercase.</td></tr>
 </table></p>
 <p>The NumberFlags type is a typedef for <a href="qflags.html">QFlags</a>&lt;NumberFlag&gt;. It stores an OR combination of NumberFlag values.</p>
 <p>See also <a href="qtextstream.html#setNumberFlags">setNumberFlags</a>().</p>
@@ -314,7 +315,7 @@
 <p>Returns the current pad character.</p>
 <p>See also <a href="qtextstream.html#setPadChar">setPadChar</a>() and <a href="qtextstream.html#setFieldWidth">setFieldWidth</a>().</p>
 <h3 class="fn"><a name="pos"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QTextStream::pos () const</h3>
-<p>Returns the device position corresponding to the current position of the stream, or -1 if an error occurs (e.g., if there is no device or string, or if there's a device error).</p>
+<p>Returns the device position corresponding to the current position of the stream, or -1 if an error occurs (e.g&#x2e;, if there is no device or string, or if there's a device error).</p>
 <p>Because <a href="qtextstream.html">QTextStream</a> is buffered, this function may have to seek the device to reconstruct a valid device position. This operation can be expensive, so you may want to avoid calling this function in a tight loop.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qtextstream.html#seek">seek</a>().</p>
@@ -363,6 +364,7 @@
 <p>See also <a href="qtextcodec.html#codecForName">QTextCodec::codecForName</a>().</p>
 <h3 class="fn"><a name="setDevice"></a>void QTextStream::setDevice ( <a href="qiodevice.html">QIODevice</a> * <i>device</i> )</h3>
 <p>Sets the current device to <i>device</i>. If a device has already been assigned, <a href="qtextstream.html">QTextStream</a> will call <a href="qtextstream.html#flush">flush</a>() before the old device is replaced.</p>
+<p><b>Note:</b> This function resets the codec to the default codec, <a href="qtextcodec.html#codecForLocale">QTextCodec::codecForLocale</a>().</p>
 <p>See also <a href="qtextstream.html#device">device</a>() and <a href="qtextstream.html#setString">setString</a>().</p>
 <h3 class="fn"><a name="setFieldAlignment"></a>void QTextStream::setFieldAlignment ( <a href="qtextstream.html#FieldAlignment-enum">FieldAlignment</a> <i>mode</i> )</h3>
 <p>Sets the field alignment to <i>mode</i>. When used together with <a href="qtextstream.html#setFieldWidth">setFieldWidth</a>(), this function allows you to generate formatted output with text aligned to the left, to the right or center aligned.</p>
@@ -377,7 +379,7 @@
 <p>Sets the base of integers to <i>base</i>, both for reading and for generating numbers. <i>base</i> can be either 2 (binary), 8 (octal), 10 (decimal) or 16 (hexadecimal). If <i>base</i> is 0, <a href="qtextstream.html">QTextStream</a> will attempt to detect the base by inspecting the data on the stream. When generating numbers, <a href="qtextstream.html">QTextStream</a> assumes base is 10 unless the base has been set explicitly.</p>
 <p>See also <a href="qtextstream.html#integerBase">integerBase</a>(), <a href="qstring.html#number">QString::number</a>(), and <a href="qtextstream.html#setNumberFlags">setNumberFlags</a>().</p>
 <h3 class="fn"><a name="setNumberFlags"></a>void QTextStream::setNumberFlags ( <a href="qtextstream.html#NumberFlag-enum">NumberFlags</a> <i>flags</i> )</h3>
-<p>Sets the current number flags to <i>flags</i>. <i>flags</i> is a set of flags from the <a href="qtextstream.html#NumberFlag-enum">NumberFlag</a> enum, and describes options for formatting generated code (e.g., whether or not to always write the base or sign of a number).</p>
+<p>Sets the current number flags to <i>flags</i>. <i>flags</i> is a set of flags from the <a href="qtextstream.html#NumberFlag-enum">NumberFlag</a> enum, and describes options for formatting generated code (e.g&#x2e;, whether or not to always write the base or sign of a number).</p>
 <p>See also <a href="qtextstream.html#numberFlags">numberFlags</a>(), <a href="qtextstream.html#setIntegerBase">setIntegerBase</a>(), and <a href="qtextstream.html#setRealNumberNotation">setRealNumberNotation</a>().</p>
 <h3 class="fn"><a name="setPadChar"></a>void QTextStream::setPadChar ( <a href="qchar.html">QChar</a> <i>ch</i> )</h3>
 <p>Sets the pad character to <i>ch</i>. The default value is the ASCII space character (' '), or <a href="qchar.html">QChar</a>(0x20). This character is used to fill in the space in fields when generating text.</p>
@@ -476,7 +478,7 @@
 <p>Whitespace is <i>not</i> skipped.</p>
 <h3 class="fn"><a name="operator-gt-gt-2"></a>QTextStream &amp; QTextStream::operator&gt;&gt; ( signed short &amp; <i>i</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Reads an integer from the stream and stores it in <i>i</i>, then returns a reference to the <a href="qtextstream.html">QTextStream</a>. The number is casted to the correct type before it is stored. If no number was detected on the stream, <i>i</i> is set to 0.</p>
+<p>Reads an integer from the stream and stores it in <i>i</i>, then returns a reference to the <a href="qtextstream.html">QTextStream</a>. The number is cast to the correct type before it is stored. If no number was detected on the stream, <i>i</i> is set to 0.</p>
 <p>By default, <a href="qtextstream.html">QTextStream</a> will attempt to detect the base of the number using the following rules:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Prefix</th><th>Base</th></tr></thead>
@@ -490,11 +492,12 @@
 <p>Leading whitespace is skipped.</p>
 <h3 class="fn"><a name="operator-gt-gt-3"></a>QTextStream &amp; QTextStream::operator&gt;&gt; ( float &amp; <i>f</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Reads a real number from the stream and stores it in <i>f</i>, then returns a reference to the <a href="qtextstream.html">QTextStream</a>. The number is casted to the correct type. If no real number is detect on the stream, <i>f</i> is set to 0.0.</p>
+<p>Reads a real number from the stream and stores it in <i>f</i>, then returns a reference to the <a href="qtextstream.html">QTextStream</a>. The number is cast to the correct type. If no real number is detect on the stream, <i>f</i> is set to 0.0&#x2e;</p>
+<p>As a special exception, <a href="qtextstream.html">QTextStream</a> allows the strings &quot;nan&quot; and &quot;inf&quot; to represent NAN and INF floats or doubles.</p>
 <p>Leading whitespace is skipped.</p>
 <h3 class="fn"><a name="operator-gt-gt-4"></a>QTextStream &amp; QTextStream::operator&gt;&gt; ( <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Reads a word from the stream and stores it in <i>str</i>, then returns a reference to the stream. Words are separated by whitespace (i.e., all characters for which <a href="qchar.html#isSpace">QChar::isSpace</a>() returns true).</p>
+<p>Reads a word from the stream and stores it in <i>str</i>, then returns a reference to the stream. Words are separated by whitespace (i.e&#x2e;, all characters for which <a href="qchar.html#isSpace">QChar::isSpace</a>() returns true).</p>
 <p>Leading whitespace is skipped.</p>
 <h3 class="fn"><a name="operator-gt-gt-5"></a>QTextStream &amp; QTextStream::operator&gt;&gt; ( char &amp; <i>c</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -698,6 +701,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

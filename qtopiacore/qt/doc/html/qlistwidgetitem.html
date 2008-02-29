@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qlistwidget.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/itemviews/qlistwidget.cpp -->
 <head>
-  <title>Qt 4.2: QListWidgetItem Class Reference</title>
+  <title>Qt 4.3: QListWidgetItem Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QListWidgetItem Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QListWidgetItem Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QListWidgetItem class provides an item for use with the <a href="qlistwidget.html">QListWidget</a> item view class. <a href="#details">More...</a></p>
 <pre> #include &lt;QListWidgetItem&gt;</pre><ul>
 <li><a href="qlistwidgetitem-members.html">List of all members, including inherited members</a></li>
@@ -72,8 +73,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qlistwidgetitem.html#operator-lt-lt-71">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QListWidgetItem &amp; <i>item</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qlistwidgetitem.html#operator-gt-gt-40">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QListWidgetItem &amp; <i>item</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qlistwidgetitem.html#operator-lt-lt-65">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QListWidgetItem &amp; <i>item</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qlistwidgetitem.html#operator-gt-gt-39">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QListWidgetItem &amp; <i>item</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -86,7 +87,7 @@
 <p>They can also be created without a parent widget, and later inserted into a list (see <a href="qlistwidget.html#insertItem">QListWidget::insertItem</a>()).</p>
 <p>List items are typically used to display <a href="qlistwidgetitem.html#text">text</a>() and an <a href="qlistwidgetitem.html#icon">icon</a>(). These are set with the <a href="qlistwidgetitem.html#setText">setText</a>() and <a href="qlistwidgetitem.html#setIcon">setIcon</a>() functions. The appearance of the text can be customized with <a href="qlistwidgetitem.html#setFont">setFont</a>(), <a href="qlistwidgetitem.html#setForeground">setForeground</a>(), and <a href="qlistwidgetitem.html#setBackground">setBackground</a>(). Text in list items can be aligned using the <a href="qlistwidgetitem.html#setTextAlignment">setTextAlignment</a>() function. Tooltips, status tips and &quot;What's This?&quot; help can be added to list items with <a href="qlistwidgetitem.html#setToolTip">setToolTip</a>(), <a href="qlistwidgetitem.html#setStatusTip">setStatusTip</a>(), and <a href="qlistwidgetitem.html#setWhatsThis">setWhatsThis</a>().</p>
 <p>By default, items are enabled, selectable, checkable, and can be the source of a drag and drop operation. Each item's flags can be changed by calling <a href="qlistwidgetitem.html#setFlags">setFlags</a>() with the appropriate value (see <a href="qt.html#ItemFlag-enum">Qt::ItemFlags</a>). Checkable items can be checked, unchecked and partially checked with the <a href="qlistwidgetitem.html#setCheckState">setCheckState</a>() function. The corresponding <a href="qlistwidgetitem.html#checkState">checkState</a>() function indicates what check state the item currently has.</p>
-<p>The isItemHidden() function can be used to determine whether the item is hidden. Items can be hidden with setItemHidden().</p>
+<p>The <a href="qlistwidgetitem.html#isHidden">isHidden</a>() function can be used to determine whether the item is hidden. Items can be hidden with <a href="qlistwidgetitem.html#setHidden">setHidden</a>().</p>
 <a name="subclassing"></a>
 <h3>Subclassing</h3>
 <p>When subclassing QListWidgetItem to provide custom items, it is possible to define new types for them so that they can be distinguished from standard items. The constructors for subclasses that require this feature need to call the base class constructor with a new type value equal to or greater than <a href="qlistwidgetitem.html#ItemType-enum">UserType</a>.</p>
@@ -139,7 +140,7 @@
 <p>Returns the font used to display this list item's text.</p>
 <p>See also <a href="qlistwidgetitem.html#setFont">setFont</a>().</p>
 <h3 class="fn"><a name="foreground"></a><a href="qbrush.html">QBrush</a> QListWidgetItem::foreground () const</h3>
-<p>Returns the brush used to display the list item's foreground (e.g. text).</p>
+<p>Returns the brush used to display the list item's foreground (e.g&#x2e; text).</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qlistwidgetitem.html#setForeground">setForeground</a>() and <a href="qlistwidgetitem.html#background">background</a>().</p>
 <h3 class="fn"><a name="icon"></a><a href="qicon.html">QIcon</a> QListWidgetItem::icon () const</h3>
@@ -240,12 +241,12 @@
 <p>See also <a href="qlistwidgetitem.html#data">data</a>() and <a href="qlistwidgetitem.html#flags">flags</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-71"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QListWidgetItem &amp; <i>item</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-65"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QListWidgetItem &amp; <i>item</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the list widget item <i>item</i> to stream <i>out</i>.</p>
 <p>This operator uses <a href="qlistwidgetitem.html#write">QListWidgetItem::write</a>().</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-40"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QListWidgetItem &amp; <i>item</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-39"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QListWidgetItem &amp; <i>item</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a list widget item from stream <i>in</i> into <i>item</i>.</p>
 <p>This operator uses <a href="qlistwidgetitem.html#read">QListWidgetItem::read</a>().</p>
@@ -254,6 +255,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

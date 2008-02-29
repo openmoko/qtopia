@@ -2,7 +2,7 @@
 **
 ** Copyright ( C ) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,15 +29,11 @@
 #include <QSet>
 
 
-class QTOPIACOMM_EXPORT QBluetoothRemoteDeviceDialogFilter
+class QBLUETOOTH_EXPORT QBluetoothRemoteDeviceDialogFilter
 {
 public:
     QBluetoothRemoteDeviceDialogFilter();
-    QBluetoothRemoteDeviceDialogFilter( const QBluetoothRemoteDeviceDialogFilter &other );
     virtual ~QBluetoothRemoteDeviceDialogFilter();
-
-    QBluetoothRemoteDeviceDialogFilter &operator=( const QBluetoothRemoteDeviceDialogFilter &other );
-    bool operator==( const QBluetoothRemoteDeviceDialogFilter &other );
 
     void setAcceptedDeviceMajors( const QSet<QBluetooth::DeviceMajor> &deviceMajors );
     QSet<QBluetooth::DeviceMajor> acceptedDeviceMajors() const;
@@ -50,13 +46,16 @@ public:
 protected:
     QSet<QBluetooth::DeviceMajor> m_deviceMajors;
     QBluetooth::ServiceClasses m_serviceClasses;
+
+private:
+    Q_DISABLE_COPY(QBluetoothRemoteDeviceDialogFilter);
 };
 
 
 class QBluetoothRemoteDeviceDialogPrivate;
 class QActionEvent;
 
-class QTOPIACOMM_EXPORT QBluetoothRemoteDeviceDialog : public QDialog
+class QBLUETOOTH_EXPORT QBluetoothRemoteDeviceDialog : public QDialog
 {
     friend class QBluetoothRemoteDeviceDialogPrivate;
     Q_OBJECT
@@ -64,7 +63,7 @@ class QTOPIACOMM_EXPORT QBluetoothRemoteDeviceDialog : public QDialog
 public:
     explicit QBluetoothRemoteDeviceDialog( QWidget *parent = 0,
                                            Qt::WFlags flags = 0 );
-    explicit QBluetoothRemoteDeviceDialog( bool showPairedAndFavorites,
+    explicit QBluetoothRemoteDeviceDialog( QBluetoothLocalDevice *local = 0,
                                            QWidget *parent = 0,
                                            Qt::WFlags flags = 0 );
     virtual ~QBluetoothRemoteDeviceDialog();
@@ -72,15 +71,13 @@ public:
     static QBluetoothAddress getRemoteDevice(
             QWidget *parent = 0,
             QSet<QBluetooth::SDPProfile> profiles = QSet<QBluetooth::SDPProfile>(),
-            const QBluetoothRemoteDeviceDialogFilter &filter =
-                    QBluetoothRemoteDeviceDialogFilter(),
-            bool showPairedAndFavorites = true );
+            QBluetoothRemoteDeviceDialogFilter *filter = 0);
 
     void setValidationProfiles( QSet<QBluetooth::SDPProfile> profiles );
     QSet<QBluetooth::SDPProfile> validationProfiles() const;
 
-    void setFilter( const QBluetoothRemoteDeviceDialogFilter &filter );
-    QBluetoothRemoteDeviceDialogFilter filter() const;
+    void setFilter( QBluetoothRemoteDeviceDialogFilter *filter );
+    QBluetoothRemoteDeviceDialogFilter *filter() const;
 
     QBluetoothAddress selectedDevice() const;
 

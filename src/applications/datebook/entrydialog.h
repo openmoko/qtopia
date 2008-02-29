@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,98 +21,72 @@
 #ifndef ENTRYDIALOG_H
 #define ENTRYDIALOG_H
 
-#ifdef QTOPIA_PHONE
-#include "ui_entrydetails_phone.h"
-#else
-#include "ui_entrydetails.h"
-#endif
-
 #include <qtopia/pim/qappointment.h>
 
 #include <QDateTime>
 #include <QDialog>
-#include <QScrollArea>
 
 class QTextEdit;
-class AppointmentDetails;
 class QTabWidget;
 class EntryDetails;
 class QDLEditClient;
+class QScrollArea;
+class DateBookCategorySelector;
+class RecurrenceDetails;
+class ReminderPicker;
+class QLabel;
+class QLineEdit;
+class QCheckBox;
+class QDateEdit;
+class QTimeEdit;
+class QTimeZoneSelector;
 
 class EntryDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    EntryDialog( bool startOnMonday, const QDateTime &start, const QDateTime &end,
-                 QWidget *parent = 0, Qt::WFlags f = 0 );
-    EntryDialog( bool startOnMonday, const QAppointment &appointment,
+    EntryDialog( bool startOnMonday, const QAppointment &appointment, const QTime& defaultAllDayTime,
                  QWidget *parent = 0, Qt::WFlags f = 0 );
     ~EntryDialog();
 
     QAppointment appointment( const bool includeQdlLinks = true);
 
-#ifdef QTOPIA_DESKTOP
-    const EntryDetails *entryDetails() { return entry; }
-#endif
-
-signals:
-    void categorymanagerChanged();
-
-public slots:
+private slots:
     void updateStartDateTime();
     void updateStartTime();
     void updateEndDateTime();
     void updateEndTime();
-    void editCustomRepeat();
     void setWeekStartsMonday( bool );
-    void configureTimeZones();
-
-    void turnOnAlarm();
-    void checkAlarmSpin( int );
-
-    void checkRepeatDate( bool );
-
-    void updateCategories();
-    void showSummary();
-
-#ifndef QTOPIA_DESKTOP
-protected:
-    bool eventFilter( QObject *receiver, QEvent *event );
-#endif
-
-private slots:
-    void setRepeatRule(int);
-    void setEndDate(const QDate &);
-    void tabChanged( QWidget *tab );
+    void updateTimeUI();
+    void initTab(int, QScrollArea *);
 
 private:
     void init();
-    void setDates( const QDateTime& s, const QDateTime& e );
-    void setRepeatLabel();
-    void accept();
+    void initEventDetails(QScrollArea *);
+    void initRepeatDetails(QScrollArea *);
+    void initNoteDetails(QScrollArea *);
 
-#ifndef QTOPIA_DESKTOP
-    QScrollArea *scrollArea;
-#endif
+
+    void setDates( const QDateTime& s, const QDateTime& e );
+    void accept();
 
     QAppointment mAppointment;
     QAppointment mOrigAppointment;
     bool startWeekOnMonday;
-    EntryDetails *entry;
+    QTime allDayReminder;
+    DateBookCategorySelector *comboCategory;
+    RecurrenceDetails *recurDetails;
+    ReminderPicker *reminderPicker;
     QTextEdit *editNote;
     QDLEditClient *editnoteQC;
-    AppointmentDetails *appointmentDetails;
-    QTabWidget *tw;
-};
 
-// ====================================================================
-
-class EntryDetails : public QWidget, public Ui::EntryDetailsBase
-{
-public:
-    EntryDetails( QWidget *parent );
-    virtual ~EntryDetails();
+    QLineEdit *mDescription, *mLocation;
+    QCheckBox *checkAllDay;
+    QDateEdit *startDate, *endDate;
+    QTimeEdit *startTime, *endTime;
+    QLabel *startTimeLabel, *endTimeLabel;
+    QTimeZoneSelector *timezone;
 };
 
 #endif // ENTRYDIALOG_H

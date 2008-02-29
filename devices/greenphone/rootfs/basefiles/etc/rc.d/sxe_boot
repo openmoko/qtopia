@@ -12,13 +12,19 @@
 # Change this value for install location
 export QTOPIA_DIR=/opt/Qtopia
 
+# Change this value for install location
+export UPDATE_DIR=/home/Updates
+
+# Change this value for install location
+export SXE_DATABASE=$UPDATE_DIR/etc/sxe
+
 # This should be correct for base scripts, change if not
 export BASE_DIR=/etc/lids
 
 # Other scripts called need to be able to find the lidsconf/lidsadm binaries
-# This should never need to be changed, as this location is hard-coded into
-# the lids kernel module.
-export PATH=/sbin
+# from /sbin. This should never need to be changed, as this location is hard-coded
+# into the lids kernel module.
+export PATH=/sbin:/bin
 
 # Zero out any rules currently in force
 lidsconf -Z
@@ -36,5 +42,5 @@ $QTOPIA_DIR/etc/sxe_qtopia/sxe_qtopia
 #/bin/cp -fp $QTOPIA_DIR/etc/sxe_qtopia/*.cap /etc/lids/.
 
 # Run the qtopia SXE domain scripts
-$QTOPIA_DIR.rom/bin/sxe_policy_runner $QTOPIA_DIR:$QTOPIA_DIR.rom
+$QTOPIA_DIR/bin/sxe_policy_runner $UPDATE_DIR:$QTOPIA_DIR $QTOPIA_DIR
 

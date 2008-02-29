@@ -10,14 +10,28 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Device Profiles<br /><span class="subtitle"></span>
 </h1>
 <p>Device profiles are a way to minimize the hassle of configuring for a device. A single directory contains all of the configuration information necessary to build for the device.</p>
 <p>Profiles live in the devices directory in the source tree. They are activated by running <tt>configure -device foo</tt>.</p>
 <p>There are a number of features. They are described by the file that implements them.</p>
+<ul><li><a href="#configure">configure</a></li>
+<li><a href="#environment">environment</a></li>
+<li><a href="#mkspecs">mkspecs</a></li>
+<li><a href="#custom-h-custom-cpp">custom.h/custom.cpp</a></li>
+<li><a href="#defaultbuttons-conf">defaultbuttons.conf</a></li>
+<li><a href="#config-pri">config.pri</a></li>
+<li><a href="#projects-pri">projects.pri</a></li>
+<li><a href="#custom-pri">custom.pri</a></li>
+<li><a href="#src">src</a></li>
+<li><a href="#qconfig-h">qconfig.h</a></li>
+<li><a href="#help">help</a></li>
+<li><a href="#override-addition-directories">override/addition directories</a></li>
+<li><a href="#limitations">Limitations</a></li>
+</ul>
 <a name="configure"></a>
-<h2>configure</h2>
+<h3>configure</h3>
 <p>The single most annoying thing about compiling for a new device is that usually lots of configure arguments are required. These must be communicated to anyone wanting to compile for the device. A device profile can have a file named configure that specifies configure arguments.</p>
 <p>When you run <tt>configure [args1] -device foo [args2]</tt> configure checks for <tt>&lt;source&gt;/devices/foo/configure</tt> and if it's found, configure re-launches itself with <tt>-device foo</tt> replaced by the contents of the file.</p>
 <p>Here's a sample configure file (note that whitespace is interpreted by the shell so the newlines are not relevant).</p>
@@ -42,40 +56,68 @@
 </li>
 </ul>
 <a name="environment"></a>
-<h2>environment</h2>
+<h3>environment</h3>
 <p>This script (if it exists) is sourced before re-running configure and before Makefile calls Makefile.target. The suggested use is to setup paths to an appropriate cross compiler. The DEVICE_CONFIG_PATH variable is set to the path of the device profile so that you can locate files inside the device directory.</p>
 <a name="mkspecs"></a>
-<h2>mkspecs</h2>
+<h3>mkspecs</h3>
 <p>Since a typical behavior of the configure file is to set -xplatform it is useful to have a platform spec for the device. Device profiles can contain a mkspecs directory that is checked for -platform and -xplatform spec files. This is so that you do not have to modify the Qt depot in order to ensure your device can be built (though it is possible to move a spec file to Qt without having to modify the configure line).</p>
 <p>For example, the mydev spec files are in it's configuration directory.</p>
 <pre>    devices/mydev/mkspecs/qws/linux-mydev-g++/qmake.conf
     devices/mydev/mkspecs/qws/linux-mydev-g++/qplatformdefs.h</pre>
 <p>There are mkspecs that ship with Qtopia Core. They are in <tt>qtopiacore/qt/mkspecs/qws</tt>. You should copy one that is similar to your device (eg. linux-arm-g++) and modify it to suit. Things to check are the name of the compiler, the compiler flags (especially optimization flags). You may also want the mkspec to specify a define that you can use to enable device-specific code in Qtopia Core and Qtopia.</p>
 <a name="custom-h-custom-cpp"></a>
-<h2>custom.h/custom.cpp</h2>
-<p>Since these files are tied to a device it is useful to have them in the device profile. If these files are not present configure will look in the traditional location, <tt>&lt;source&gt;/src/libraries/qtopia/custom-&lt;xplatform&gt;.(h|cpp)</tt>. See <a href="../syscust-hardware.html">Hardware Configuration</a> for more information about custom.h&#x2e;</p>
+<h3>custom.h/custom.cpp</h3>
+<p>Since these files are tied to a device it is useful to have them in the device profile. If these files are not present configure will look in the traditional location, <tt>&lt;source&gt;/src/libraries/qtopia/custom-&lt;xplatform&gt;.(h|cpp)</tt>. See <a href="../custom-h.html">&lt;custom.h&gt;</a> for more information about these files.</p>
+<p>For reference implementations of these files, the existing files found in <tt>&lt;source&gt;/devices/&lt;device&gt;/custom.*</tt> and <tt>&lt;source&gt;/src/libraries/qtopiabase/custom-&lt;xplatform&gt;.*</tt> may be of assistance.</p>
 <a name="defaultbuttons-conf"></a>
-<h2>defaultbuttons.conf</h2>
-<p>Every device needs a suitable defaultbuttons.conf. Use of this file onl* happens if -defaultbuttons is not passed to configure. See <a href="../syscust-keypadbutt.html">Keypad Button Behavior</a> for a description of defaultbuttons.conf.</p>
+<h3>defaultbuttons.conf</h3>
+<p>Every device needs a suitable defaultbuttons.conf. Use of this file only happens if -defaultbuttons is not passed to configure. See <a href="../syscust-keypadbutt.html">Keypad Button Behavior</a> for a description of defaultbuttons.conf.</p>
 <a name="config-pri"></a>
-<h2>config.pri</h2>
+<h3>config.pri</h3>
 <p>Configuration tweaks can be done here. This is read just after the configure-generated config.pri, before each .pro file is read.</p>
 <a name="projects-pri"></a>
-<h2>projects.pri</h2>
+<h3>projects.pri</h3>
 <p>This is for enabling and disabling projects as appropriate for the device. This is processed after general.pri and commercial.pri but before custom.pri and local.pri so that the user can still override the projects.</p>
+<a name="custom-pri"></a>
+<h3>custom.pri</h3>
+<p>If present, this file overrides <tt>&lt;source&gt;/src/custom.pri</tt>. It can include the contents of that file by using the following command.</p>
+<pre>    include($$QTOPIA_DEPOT_PATH/src/custom.pri)
+    # disable one of the custom projects
+    PROJECTS-=applications/customapp</pre>
 <a name="src"></a>
-<h2>src</h2>
-<p>If the src directory exists, it is added as a project root (<tt>configure -build &lt;source&gt;/devices/foo/src</tt>). It is recommended to mimic the Qtopia source tree layout for ease of reference.</p>
+<h3>src</h3>
+<p>If the src directory exists, it is added as a project tree (ie. <tt>configure -build &lt;source&gt;/devices/foo/src</tt>). It is recommended to mimic the Qtopia source tree layout for ease of reference. See <a href="over-project-trees-1.html">Project Trees</a> for information about project trees.</p>
 <a name="qconfig-h"></a>
-<h2>qconfig.h</h2>
+<h3>qconfig.h</h3>
 <p>This file overrides the use of qconfig-qpe.h&#x2e; It can define all it's own things or it can <tt>#include &quot;qconfig-qpe.h&quot;</tt> and override settings (watch out for dependencies if you do this though!).</p>
+<a name="help"></a>
+<h3>help</h3>
+<p>This directory is used to provide device-specific help file overrides. It can only be used to override files in <tt>&lt;source&gt;/help</tt>.</p>
+<a name="override-addition-directories"></a>
+<h3>override/addition directories</h3>
+<p>There are a number of projects in Qtopia that use files from the device profile in preference to or in addition to other files.</p>
+<p>A number of files can be placed into a device profile to override the original one.</p>
+<ul>
+<li>etc/default/Trolltech/StartupFlags.conf</li>
+<li>etc/default/Trolltech/qpe.conf</li>
+<li>etc/default/Trolltech/Sxe.conf</li>
+<li>etc/default/Trolltech/PackageServers.conf</li>
+<li>etc/Tasks.cfg</li>
+<li>etc/sxe_qtopia/sxe_qtopia</li>
+<li>etc/sxe_qtopia/sxe_sandbox</li>
+<li>etc/sxe_qtopia/sxe_unsandbox</li>
+<li>etc/sxe_domains/*</li>
+</ul>
+<p>The server will use <tt>server/scomisc.cpp</tt> instead of it's own <tt>bluetooth/scomisc.cpp</tt>. It will also include <tt>server/*.h</tt> and <tt>server/*.cpp</tt>.</p>
+<p>The camera will disable it's built-in drivers if <tt>camera/*.cpp</tt> exists. It also pulls in <tt>camera/*.h</tt>.</p>
 <a name="limitations"></a>
-<h2>Limitations</h2>
+<h3>Limitations</h3>
 <p>Device profiles do not currently help you with the following items.</p>
 <ul>
 <li>Applying device-specific patches to existing sources.</li>
 <li>Device-specific files for helix.</li>
 </ul>
+<p>See also <a href="overviews.html">Overviews</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 Trolltech</td>

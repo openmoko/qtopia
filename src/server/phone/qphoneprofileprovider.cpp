@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,8 @@
 ****************************************************************************/
 
 #include "qphoneprofileprovider.h"
+#include <QAudioStateConfiguration>
+#include <QAudioStateInfo>
 #include <QPhoneProfile>
 #include <QPhoneProfileManager>
 #include <QValueSpaceObject>
@@ -31,29 +33,28 @@ class QPhoneProfileProviderPrivate
 {
 public:
     QPhoneProfileProviderPrivate()
-    : manager(0), profile(0), accessories(0), preAccessorySelected(-1) {}
+    : manager(0), profile(0), preAudioProfileSelected(-1) {}
 
     QPhoneProfileManager *manager;
     QValueSpaceObject *profile;
-    QValueSpaceItem *accessories;
+    QAudioStateConfiguration *audioState;
 
-    int preAccessorySelected;
+    int preAudioProfileSelected;
 };
 
 /*!
   \class QPhoneProfileProvider
-  \ingroup QtopiaServer
+  \ingroup QtopiaServer::Task
   \brief The QPhoneProfileProvider class provides the backend functionality for
          phone profiles.
 
   The QPhoneProfileProvider class provides the auto activation portion of the
   profile system.  Profiles may be auto activated at a specific time, controlled
   through the QPhoneProfile::schedule() value, or whenever the
-  QPhoneProfile::accessory() accessory is present.
+  QPhoneProfile::audioProfile() profile is active.
 
   Currently the QPhoneProfileProvider class checks the
-  \c {/Hardware/Accessories/<accessory name>/Present} value space key to
-  determine whether a given accessory is available.
+  QAudioStateConfiguration to obtain updates about audio states.
 
   Additionally, the QPhoneProfileProvider class sets the following value space
   keys to values dictated by the currently active profile:
@@ -67,6 +68,9 @@ public:
   \endtable
 
   The QPhoneProfileProvider provides the \c {PhoneProfiles} task.
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+
+  \sa QPhoneProfile, QPhoneProfileManager
  */
 
 // define QPhoneProfileProvider
@@ -75,8 +79,8 @@ QPhoneProfileProvider::QPhoneProfileProvider(QObject *parent)
 : QObject(parent), d(new QPhoneProfileProviderPrivate)
 {
     d->manager = new QPhoneProfileManager(this);
+    d->audioState = new QAudioStateConfiguration(this);
     d->profile = new QValueSpaceObject("/UI/Profile", this);
-    d->accessories = new QValueSpaceItem("/Hardware/Accessories", this);
 
     QObject::connect(d->manager, SIGNAL(profileUpdated(QPhoneProfile)),
                      this, SLOT(scheduleActivation()));
@@ -88,19 +92,18 @@ QPhoneProfileProvider::QPhoneProfileProvider(QObject *parent)
                      this, SLOT(activeChanged()));
     QObject::connect(d->manager, SIGNAL(planeModeChanged(bool)),
                      this, SLOT(activeChanged()));
-    QObject::connect(d->accessories, SIGNAL(contentsChanged()),
-                     this, SLOT(accessoriesChanged()));
+    QObject::connect(d->audioState, SIGNAL(currentStateChanged(QAudioStateInfo,QAudio::AudioCapability)),
+                     this, SLOT(audioProfileChanged()));
     QObject::connect(d->manager, SIGNAL(profileUpdated(QPhoneProfile)),
-                     this, SLOT(accessoriesChanged()));
+                     this, SLOT(audioProfileChanged()));
     QObject::connect(d->manager, SIGNAL(profileAdded(QPhoneProfile)),
-                     this, SLOT(accessoriesChanged()));
+                     this, SLOT(audioProfileChanged()));
     QObject::connect(QtopiaApplication::instance(),
                      SIGNAL(appMessage(QString,QByteArray)),
                      this,
                      SLOT(appMessage(QString,QByteArray)));
 
     activeChanged();
-    accessoriesChanged();
 }
 
 /*! \internal */
@@ -175,24 +178,28 @@ void QPhoneProfileProvider::scheduleActivation()
         Qtopia::deleteAlarm(QDateTime(), "QPE/Application/" + QtopiaApplication::applicationName(), "activateProfile(QDateTime,int)", id);
 }
 
-void QPhoneProfileProvider::accessoriesChanged()
+void QPhoneProfileProvider::audioProfileChanged()
 {
-    // Check whether active profile matches accessories.  In the case of
-    // accessory clash (two profiles depending on the same accessory) we should
+    // Check whether active phone profile matches audio profile.  In the case of
+    // audio profile clash (two profiles depending on the same audioprofile) we should
     // avoid switching between the two.
     QPhoneProfile activeProfile = d->manager->activeProfile();
-    if(!activeProfile.accessory().isEmpty() &&
-       d->accessories->value(activeProfile.accessory() + "/Present", false).toBool())
+    
+    if(!activeProfile.audioProfile().isEmpty() &&
+       d->audioState->currentState().profile() == activeProfile.audioProfile() )
         return;
 
     // See if any of the available profiles match
     QList<QPhoneProfile> profiles = d->manager->profiles();
     for(int ii = 0; ii < profiles.count(); ++ii) {
-        if(!profiles.at(ii).accessory().isEmpty() &&
-           d->accessories->value(profiles.at(ii).accessory() + "/Present", false).toBool()) {
+        if(!profiles.at(ii).audioProfile().isEmpty() &&
+           d->audioState->currentState().profile() == profiles.at(ii).audioProfile() ) { 
 
-            if(-1 == d->preAccessorySelected)
-                d->preAccessorySelected = d->manager->activeProfile().id();
+            if(-1 == d->preAudioProfileSelected)
+                d->preAudioProfileSelected = d->manager->activeProfile().id();
+
+            qLog(Support) << "Auto activation of profile " << profiles.at(ii).name() 
+                          << profiles.at(ii).audioProfile();
 
             d->manager->activateProfile(profiles.at(ii).id());
             return;
@@ -200,12 +207,12 @@ void QPhoneProfileProvider::accessoriesChanged()
         }
     }
 
-    // Nothing - revert to the preaccessory profile
-    if(-1 != d->preAccessorySelected) {
-        QPhoneProfile preAccessory = d->manager->profile(d->preAccessorySelected);
-        d->preAccessorySelected = -1;
-        if(preAccessory.id() != -1) {
-            d->manager->activateProfile(preAccessory.id());
+    // Nothing - revert to the preaudio profile
+    if(-1 != d->preAudioProfileSelected) {
+        QPhoneProfile preAudioProfile = d->manager->profile(d->preAudioProfileSelected);
+        d->preAudioProfileSelected = -1;
+        if(preAudioProfile.id() != -1) {
+            d->manager->activateProfile(preAudioProfile.id());
         } else {
             // Try default
             QPhoneProfile general = d->manager->profile(1);

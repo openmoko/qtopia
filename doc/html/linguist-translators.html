@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt Linguist Manual: Translators</title>
+  <title>Qt 4.3: Qt Linguist Manual: Translators</title>
   <link rel="prev" href="linguist-manager.html" />
   <link rel="contents" href="linguist-manual.html" />
   <link rel="next" href="linguist-programmers.html" />
@@ -19,26 +19,27 @@
 [<a href="linguist-manual.html">Contents</a>]
 [Next: <a href="linguist-programmers.html">Qt Linguist Manual: Programmers</a>]
 </p>
-<h1 align="center">Qt Linguist Manual: Translators<br /><small></small></h1>
+<h1 align="center">Qt Linguist Manual: Translators<br /><span class="subtitle"></span>
+</h1>
 <p align="center"><img src="images/linguist-linguist.png" /></p><p>Linguist Main Window</p>
 <a name="the-one-minute-guide-to-using-qt-linguist"></a>
 <h2>The One Minute Guide to Using Qt Linguist</h2>
-<p><i>Qt Linguist</i> is a tool for adding translations to Qt applications. It introduces the concept of a translation &quot;context&quot; which means a group of phrases that appear together on the screen e.g. in the same menu or dialog.</p>
+<p><i>Qt Linguist</i> is a tool for adding translations to Qt applications. It introduces the concept of a translation &quot;context&quot; which means a group of phrases that appear together on the screen e.g&#x2e; in the same menu or dialog.</p>
 <p>To start, run <i>Qt Linguist</i>, either from the taskbar menu, or by double clicking the desktop icon, or type <tt>linguist</tt> (followed by <b>Enter</b>) at the command line. Once <i>Qt Linguist</i> has started choose <b>File|Open</b> from the menu bar and select a <tt>.ts</tt> translation source file to work on.</p>
 <p><i>Qt Linguist</i>'s main window is divided into four main areas. The left hand side contains the Context list, the top right is the Source text area, the middle right is the translation area and the bottom right is the phrases and guesses area. We'll describe them in detail later.</p>
 <p>Click on one of the contexts in the context list (left hand side) and then click on one of the phrases that appears in the Source text area (top right). The phrase will be copied into the translation area (middle right). Click under the word 'Translation' and type in the translation. Click <b>Ctrl+Enter</b> (Done &amp; Next) to confirm that you have completed the translation and to move on to the next phrase that requires translation.</p>
-<p>The cycle of entering a translation then pressing <b>Ctrl+Enter</b> can be repeated until all the translations are done or until you finish the session. Linguist will attempt to fill the &quot;phrases and guesses&quot; area with possible translations from any open phrase books and any previous translations. Each has a keyboard shortcut, e.g. <b>Ctrl+1</b>, <b>Ctrl+2</b>, etc., which you can use to copy the guess into the Translation area. (Mouse users can double click a phrase or guess to move it into the Translation area.) At the end of the session choose <b>File|Save</b> from the menu bar and then <b>File|Exit</b> to quit.</p>
+<p>The cycle of entering a translation then pressing <b>Ctrl+Enter</b> can be repeated until all the translations are done or until you finish the session. Linguist will attempt to fill the &quot;phrases and guesses&quot; area with possible translations from any open phrase books and any previous translations. Each has a keyboard shortcut, e.g&#x2e; <b>Ctrl+1</b>, <b>Ctrl+2</b>, etc., which you can use to copy the guess into the Translation area. (Mouse users can double click a phrase or guess to move it into the Translation area.) At the end of the session choose <b>File|Save</b> from the menu bar and then <b>File|Exit</b> to quit.</p>
 <a name="qt-linguist-s-main-window"></a>
 <h2>Qt Linguist's Main Window</h2>
 <a name="context-list"></a>
 <h3>Context List</h3>
-<p>This appears at the left hand side of the main window by default. The first column, 'Done', identifies whether or not the translations for the context have been done. A tick indicates that all the translations have been done and are valid. A question mark indicates that one or more translations have not been done or have failed validation. The second column, 'Context' is the name of the context in which the translation phrases appear. The third column, 'Items' shows two numbers, the first is the number of translations that have been done, and the second is the number of phrases that are in the context; if the numbers are equal then all the translations have been done. Note that a greyed out tick indicates an obsolete translation, i.e. a phrase that was translated in a previous version of the application but which does not occur in the new version.</p>
+<p>This appears at the left hand side of the main window by default. The first column, 'Done', identifies whether or not the translations for the context have been done. A tick indicates that all the translations have been done and are valid. A question mark indicates that one or more translations have not been done or have failed validation. The second column, 'Context' is the name of the context in which the translation phrases appear. The third column, 'Items' shows two numbers, the first is the number of translations that have been done, and the second is the number of phrases that are in the context; if the numbers are equal then all the translations have been done. Note that a greyed out tick indicates an obsolete translation, i.e&#x2e; a phrase that was translated in a previous version of the application but which does not occur in the new version.</p>
 <p>The contexts are ordered alphabetically. The phrases within each context are in the order in which they appear in the source program and this may not be the order in which they are shown on screen.</p>
 <p>The Context List is a dockable window so it can be dragged to another position in the main window, or dragged out of the main window to be a window in its own right. If you move the Context List, <i>Qt Linguist</i> will remember its position and restore it whenever you start the program.</p>
 <a name="source-text-area"></a>
 <h3>Source Text Area</h3>
 <p>This appears at the top right of the main window by default. The first column, 'Done', signifies the status of the translation. A tick indicates that the phrase has been translated and passed validation. A question mark indicates that the translation has not been done. An exclamation mark indicates that the translation has failed validation. The second column 'Source text' shows the text that must be translated. The third column shows the translation.</p>
-<p><i>Qt Linguist</i> provides three kinds of validation: accelerator, punctuation and phrase. If the source text contains an accelerator i.e. an ampersand, '&amp;' and the translated text does not contain an ampersand the translation will fail the accelerator validation. Similarly, if the source text ends with a particular punctuation mark, e.g. '?', '!' or '.' and the translation ends with a different punctuation mark the translation will fail the punctuation validation. If the source text has a translation in one of the open phrase books that differs from the translation used the translation will fail phrase validation. (See <a href="#validation">Validation</a>.)</p>
+<p><i>Qt Linguist</i> provides three kinds of validation: accelerator, punctuation and phrase. If the source text contains an accelerator i.e&#x2e; an ampersand, '&amp;' and the translated text does not contain an ampersand the translation will fail the accelerator validation. Similarly, if the source text ends with a particular punctuation mark, e.g&#x2e; '?', '!' or '.' and the translation ends with a different punctuation mark the translation will fail the punctuation validation. If the source text has a translation in one of the open phrase books that differs from the translation used the translation will fail phrase validation. (See <a href="#validation">Validation</a>.)</p>
 <p>The Source Text Area is a dockable window.</p>
 <a name="translation-area"></a>
 <h3>Translation Area</h3>
@@ -59,12 +60,12 @@
 <a name="changing-keyboard-accelerators"></a>
 <h3>Changing Keyboard Accelerators</h3>
 <p>A keyboard accelerator is a key combination that when pressed will cause an application to perform an action. Keyboard accelerators normally come in two forms: Alt key and Ctrl key accelerators.</p>
-<p>Alt key accelerators are used for menus and buttons. The underlining signifies that pressing the Alt key with the underlined letter is the same as clicking the menu item with the mouse. For example, most applications have a <i>File</i> menu with the &quot;F&quot; in the word &quot;file&quot; underlined. In these applications the file menu can be invoked either by clicking the word &quot;File&quot; on the menu bar or by pressing Alt+F. The accelerator key which is underlined is signified by preceeding it with an ampersand, e.g. <i>&amp;File</i>. If a source phrase appears with an ampersand in it then the translation should also contain an ampersand, preferably in front of the same letter. The meaning of Alt key accelerators can be determined from the phrase in which the ampersand is embedded. The translator may need to change the letter used with the Alt key, e.g. if the translated phrase does not contain the original accelerator letter. Conflicts with other keys, i.e. having two Alt key accelerators using the same letter in the same context, must be avoided. Note that some Alt key accelerators, usually those on the menu bar, may apply in other contexts.</p>
-<p>Ctrl key accelerators can exist independently of any visual control. They are often used to invoke actions in menus that would otherwise take several keystrokes or mouse clicks. They may also be used to perform actions that do not appear in any menu or on any button. For example, most applications that have a <i>File</i> menu have a submenu item called <i>New</i>. In many applications this will appear as &quot;<u>N</u>ew Ctrl+N&quot;. This menu option could be invoked by clicking <i>File</i> then clicking <i>New</i> with the mouse. Or you could press Alt+F then press N since these letters are underlined. But the same thing can be achieved simply by pressing <b>Ctrl+N</b>. Accelerators that use the Ctrl key are shown literally in the source text, e.g. <b>Ctrl+Enter</b>. Ctrl key accelerators have no phrase so the translator must rely on the programmer to add a &quot;comment&quot; which appears in the top right hand pane. This comment should explain what action the Ctrl key accelerator performs. Ideally Ctrl key accelerators are translated simply by copying them by choosing the <i>Begin from Source</i> entry in the <b>Translation</b> menu. However in some cases the letter will not make sense in the target language and must be changed. Whatever letter (or digit) is chosen, the translation should always be in the form &quot;Ctrl+&quot; followed by the letter or digit in upper case. As with Alt key accelerators, if the translator changes the key it must not conflict with any other Ctrl key accelerator.</p>
+<p>Alt key accelerators are used for menus and buttons. The underlining signifies that pressing the Alt key with the underlined letter is the same as clicking the menu item with the mouse. For example, most applications have a <i>File</i> menu with the &quot;F&quot; in the word &quot;file&quot; underlined. In these applications the file menu can be invoked either by clicking the word &quot;File&quot; on the menu bar or by pressing Alt+F. The accelerator key which is underlined is signified by preceeding it with an ampersand, e.g&#x2e; <i>&amp;File</i>. If a source phrase appears with an ampersand in it then the translation should also contain an ampersand, preferably in front of the same letter. The meaning of Alt key accelerators can be determined from the phrase in which the ampersand is embedded. The translator may need to change the letter used with the Alt key, e.g&#x2e; if the translated phrase does not contain the original accelerator letter. Conflicts with other keys, i.e&#x2e; having two Alt key accelerators using the same letter in the same context, must be avoided. Note that some Alt key accelerators, usually those on the menu bar, may apply in other contexts.</p>
+<p>Ctrl key accelerators can exist independently of any visual control. They are often used to invoke actions in menus that would otherwise take several keystrokes or mouse clicks. They may also be used to perform actions that do not appear in any menu or on any button. For example, most applications that have a <i>File</i> menu have a submenu item called <i>New</i>. In many applications this will appear as &quot;<u>N</u>ew Ctrl+N&quot;. This menu option could be invoked by clicking <i>File</i> then clicking <i>New</i> with the mouse. Or you could press Alt+F then press N since these letters are underlined. But the same thing can be achieved simply by pressing <b>Ctrl+N</b>. Accelerators that use the Ctrl key are shown literally in the source text, e.g&#x2e; <b>Ctrl+Enter</b>. Ctrl key accelerators have no phrase so the translator must rely on the programmer to add a &quot;comment&quot; which appears in the top right hand pane. This comment should explain what action the Ctrl key accelerator performs. Ideally Ctrl key accelerators are translated simply by copying them by choosing the <i>Begin from Source</i> entry in the <b>Translation</b> menu. However in some cases the letter will not make sense in the target language and must be changed. Whatever letter (or digit) is chosen, the translation should always be in the form &quot;Ctrl+&quot; followed by the letter or digit in upper case. As with Alt key accelerators, if the translator changes the key it must not conflict with any other Ctrl key accelerator.</p>
 <p>Later versions of <i>Qt Linguist</i> are expected to help the translator avoid accelerator conflicts.</p>
 <a name="dealing-with-phrases-that-contain-variables"></a>
 <h3>Dealing with Phrases That Contain Variables</h3>
-<p>Some phrases contain variables. Variables are placeholders for items of text that are filled in at runtime. They are signified in the source text with a percent sign followed by a digit, e.g. <i>After processing file %1, file %2 is next in line</i>. In this example, <tt>%1</tt> will be replaced at runtime with the name of the first file to be processed and <tt>%2</tt> with the name of the next file to be processed. In the translated version the variables must still appear. For example a German translation might reverse the phrases, e.g. <i>Datei %2 wird bearbeitet, wenn Datei %1 fertig ist</i>. Note that both variables are still used but their order has changed. The order in which variables appear does not matter; <tt>%1</tt> will always be replaced by the same text at runtime no matter where it appears in the source text or translation and similarly <tt>%2</tt>, etc.</p>
+<p>Some phrases contain variables. Variables are placeholders for items of text that are filled in at runtime. They are signified in the source text with a percent sign followed by a digit, e.g&#x2e; <i>After processing file %1, file %2 is next in line</i>. In this example, <tt>%1</tt> will be replaced at runtime with the name of the first file to be processed and <tt>%2</tt> with the name of the next file to be processed. In the translated version the variables must still appear. For example a German translation might reverse the phrases, e.g&#x2e; <i>Datei %2 wird bearbeitet, wenn Datei %1 fertig ist</i>. Note that both variables are still used but their order has changed. The order in which variables appear does not matter; <tt>%1</tt> will always be replaced by the same text at runtime no matter where it appears in the source text or translation and similarly <tt>%2</tt>, etc.</p>
 <a name="reusing-translations"></a>
 <h3>Reusing Translations</h3>
 <p>If the translated text is similar to the source text, choose the <i>Begin from Source</i> entry in the <b>Translation</b> menu (press <b>Ctrl+B</b>) which will copy the source text into the translation area.</p>
@@ -84,7 +85,7 @@
 <p><i>Qt Linguist</i> provides three kinds of validation on translated phrases.</p>
 <ol type="1">
 <li><i>Accelerator validation</i> detects translated phrases that do not have an ampersand when the source phrase does and vice versa.</li>
-<li><i>Punctuation validation</i> detects differences in the terminating punctuation between source and translated phrases when this may be significant, e.g. warns if the source phrase ends with an ellipsis, exclamation mark or question mark, and the translated phrase doesn't and vice versa.</li>
+<li><i>Punctuation validation</i> detects differences in the terminating punctuation between source and translated phrases when this may be significant, e.g&#x2e; warns if the source phrase ends with an ellipsis, exclamation mark or question mark, and the translated phrase doesn't and vice versa.</li>
 <li><i>Phrases validation</i> detects source phrases that are also in the phrase book but whose translation differs from that given in the phrase book.</li>
 </ol>
 <p>Validation may be switched on or off from the menu bar's Validation item or using the toolbar buttons. Phrases that fail validation are marked with a question mark in the source text pane. If you switch validation off and then switch it on later, <i>Qt Linguist</i> will recheck all phrases and mark any that fail validation.</p>
@@ -105,11 +106,11 @@
 <p align="center"><img src="images/linguist-menubar.png" /></p><p>Menu Bar</p>
 <ul>
 <li><i>File</i><ul>
-<li><i>Open... Ctrl+O</i> <br /> pops up an open file dialog from which a translation source <tt>.ts</tt> file can be chosen.</li>
+<li><i>Open..&#x2e; Ctrl+O</i> <br /> pops up an open file dialog from which a translation source <tt>.ts</tt> file can be chosen.</li>
 <li><i>Save Ctrl+S</i> <br /> saves the current translation source <tt>.ts</tt> file.</li>
-<li><i>Save As...</i> <br /> pops up a save as file dialog so that the current translation source <tt>.ts</tt> file may be saved with a different name and/or put in a different location.</li>
-<li><i>Release...</i> <br /> pops up a save as file dialog. The filename entered will be a Qt message <tt>.qm</tt> file of the translation based on the current translation source file. The release manager's command line tool <a href="linguist-manager.html#lrelease">lrelease</a> performs the same function on <i>all</i> of an application's translation source files.</li>
-<li><i>Print... Ctrl+P</i> <br /> pops up a print dialog. If you click OK the translation source and the translations will be printed.</li>
+<li><i>Save As..&#x2e;</i> <br /> pops up a save as file dialog so that the current translation source <tt>.ts</tt> file may be saved with a different name and/or put in a different location.</li>
+<li><i>Release..&#x2e;</i> <br /> pops up a save as file dialog. The filename entered will be a Qt message <tt>.qm</tt> file of the translation based on the current translation source file. The release manager's command line tool <a href="linguist-manager.html#lrelease">lrelease</a> performs the same function on <i>all</i> of an application's translation source files.</li>
+<li><i>Print..&#x2e; Ctrl+P</i> <br /> pops up a print dialog. If you click OK the translation source and the translations will be printed.</li>
 <li><i>Recently opened files</i> <br /> shows the <tt>.ts</tt> files that have been opened recently, click one to open it.</li>
 <li><i>Exit Ctrl+Q</i> <br /> closes <i>Qt Linguist</i>.</li>
 </ul>
@@ -121,7 +122,7 @@
 <li><i>Copy Ctrl+C</i> <br /> copies the highlighted text in the translation pane to the clipboard.</li>
 <li><i>Paste Ctrl+V</i> <br /> pastes the clipboard text into the translation pane.</li>
 <li><i>Select All Ctrl+A</i> <br /> selects all the text in the translation pane ready for copying or deleting.</li>
-<li><i>Find... Ctrl+F</i> <br /> pops up the <a href="#the-find-dialog">Find dialog</a>. When the dialog pops up enter the text to be found and click the <i>Find Next</i> button. Source phrases, translations and comments may be searched.</li>
+<li><i>Find..&#x2e; Ctrl+F</i> <br /> pops up the <a href="#the-find-dialog">Find dialog</a>. When the dialog pops up enter the text to be found and click the <i>Find Next</i> button. Source phrases, translations and comments may be searched.</li>
 <li><i>Find Next F3</i> <br /> finds the next occurrence of the text that was last entered in the Find dialog.</li>
 </ul>
 </li>
@@ -136,16 +137,16 @@
 </li>
 <li><i>Validation</i> (See the <a href="#validation">Validation</a> section)<ul>
 <li><i>Accelerators</i> <br /> toggles validation on or off for Alt accelerators.</li>
-<li><i>Ending Punctuation</i> <br /> switches validation on or off for phrase ending punctuation, e.g. ellipsis, exclamation mark, question mark, etc.</li>
+<li><i>Ending Punctuation</i> <br /> switches validation on or off for phrase ending punctuation, e.g&#x2e; ellipsis, exclamation mark, question mark, etc.</li>
 <li><i>Phrase Matches</i> <br /> sets validation on or off for matching against translations that are in the current phrase book.</li>
 </ul>
 </li>
 <li><i>Phrase</i> (See the section <a href="#creating-and-using-phrase-books">Creating and Using Phrase Books</a> for details.)<ul>
-<li><i>New Phrase Book... Ctrl+N</i> <br /> pops up a save as file dialog. You must enter a filename to be used for the phrase book and save the file. Once saved you should open the phrase book to begin using it.</li>
-<li><i>Open Phrase Book... Ctrl+H</i> <br /> pops up an open file dialog. Find and choose a phrase book to open.</li>
+<li><i>New Phrase Book..&#x2e; Ctrl+N</i> <br /> pops up a save as file dialog. You must enter a filename to be used for the phrase book and save the file. Once saved you should open the phrase book to begin using it.</li>
+<li><i>Open Phrase Book..&#x2e; Ctrl+H</i> <br /> pops up an open file dialog. Find and choose a phrase book to open.</li>
 <li><i>Close Phrase Book</i> <br /> closes the current phrase book. This will stop any further phrase validation taking place. The same effect can be achieved by switching off phrase validation using the Validation menu or the phrase toolbar button.</li>
-<li><i>Edit Phrase Book...</i> <br /> pops up the <a href="#the-phrase-dialog">phrase book dialog</a> where you can add, edit or delete phrases.</li>
-<li><i>Print Phrase Book...</i> <br /> pops up a print dialog. If you click OK the phrase book will be printed.</li>
+<li><i>Edit Phrase Book..&#x2e;</i> <br /> pops up the <a href="#the-phrase-dialog">phrase book dialog</a> where you can add, edit or delete phrases.</li>
+<li><i>Print Phrase Book..&#x2e;</i> <br /> pops up a print dialog. If you click OK the phrase book will be printed.</li>
 </ul>
 </li>
 <li><i>View</i><ul>
@@ -197,6 +198,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,13 +20,49 @@
 ****************************************************************************/
 
 #include "googleaccount.h"
+#include <QtopiaApplication>
+#ifndef QT_NO_OPENSSL
+
+#include <QFormLayout>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QLabel>
 
 GoogleAccount::GoogleAccount( QWidget *parent )
     : QDialog( parent )
 {
-    setupUi(this);
-    nameLabel->hide();
-    nameText->hide();
+    QFormLayout *fl = new QFormLayout();
+
+    emailText = new QLineEdit();
+
+    nameText = new QLineEdit();
+
+    passwordText = new QLineEdit();
+    passwordText->setEchoMode(QLineEdit::PasswordEchoOnEdit);
+
+    nameLabel = new QLabel();
+    nameLabel->setText(tr("Name"));
+    nameLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    nameLabel->setBuddy(nameText);
+
+    accessCombo = new QComboBox();
+    accessCombo->addItems(QStringList() <<
+            tr("Private Full") <<
+            tr("Public Full") <<
+            tr("Public Free/Busy"));
+
+    fl->addRow(nameLabel, nameText);
+    fl->addRow(tr("Email"), emailText);
+    fl->addRow(tr("Password"), passwordText);
+    fl->addRow(tr("Access:", "Type of access to google account"), accessCombo);
+
+    // Hmm
+    fl->addItem(new QSpacerItem(225, 141, QSizePolicy::Minimum, QSizePolicy::Expanding));
+
+    setWindowTitle(tr("Google Account"));
+
+    setLayout(fl);
+    QtopiaApplication::setInputMethodHint(emailText, "email");
 }
 
 GoogleAccount::~GoogleAccount() {}
@@ -39,6 +75,11 @@ QString GoogleAccount::email() const
 QString GoogleAccount::password() const
 {
     return passwordText->text();
+}
+
+QString GoogleAccount::name() const
+{
+    return nameText->text();
 }
 
 QGoogleCalendarContext::FeedType GoogleAccount::feedType() const
@@ -59,13 +100,6 @@ void GoogleAccount::setPassword(const QString &password)
 void GoogleAccount::setName(const QString &name)
 {
     nameText->setText(name);
-    if (name.isEmpty()) {
-        nameText->hide();
-        nameLabel->hide();
-    } else {
-        nameText->show();
-        nameLabel->show();
-    }
 }
 
 void GoogleAccount::setFeedType(QGoogleCalendarContext::FeedType type)
@@ -103,3 +137,4 @@ void GoogleAccount::accept()
 
     QDialog::accept();
 }
+#endif

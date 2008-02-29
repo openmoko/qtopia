@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -96,7 +111,8 @@ public:
         ChildAdded = 68,                        // new child widget
         ChildPolished = 69,                     // polished child widget
 #ifdef QT3_SUPPORT
-        ChildInserted = 70,                     // compatibility posted insert
+        ChildInsertedRequest = 67,              // send ChildInserted compatibility events to receiver
+        ChildInserted = 70,                     // compatibility child inserted
         LayoutHint = 72,                        // compatibility relayout request
 #endif
         ChildRemoved = 71,                      // deleted child widget
@@ -164,8 +180,10 @@ public:
 #endif
         ToolBarChange = 120,                    // toolbar visibility toggled
 
-        ApplicationActivated = 121,             // application has been changed to active
-        ApplicationDeactivated = 122,           // application has been changed to inactive
+        ApplicationActivate = 121,              // application has been changed to active
+        ApplicationActivated = ApplicationActivate, // deprecated
+        ApplicationDeactivate = 122,            // application has been changed to inactive
+        ApplicationDeactivated = ApplicationDeactivate, // deprecated
 
         QueryWhatsThis = 123,                   // query what's this widget help
         EnterWhatsThisMode = 124,
@@ -214,6 +232,18 @@ public:
 
         TabletEnterProximity = 171,
         TabletLeaveProximity = 172,
+
+        NonClientAreaMouseMove = 173,
+        NonClientAreaMouseButtonPress = 174,
+        NonClientAreaMouseButtonRelease = 175,
+        NonClientAreaMouseButtonDblClick = 176,
+
+        MacSizeChange = 177,                    // when the Qt::WA_Mac{Normal,Small,Mini}Size changes
+
+        ContentsRectChange = 178,               // sent by QWidget::setContentsMargins (internal)
+
+        MacGLWindowChange = 179,                // Internal! the window of the GLWidget has changed
+
         User = 1000,                            // first user event id
         MaxUser = 65535                         // last user event id
     };

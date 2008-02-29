@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -53,6 +68,13 @@ class QPainterPath;
 class QTextEngine;
 struct QGlyphLayout;
 
+#define MAKE_TAG(ch1, ch2, ch3, ch4) (\
+    (((quint32)(ch1)) << 24) | \
+    (((quint32)(ch2)) << 16) | \
+    (((quint32)(ch3)) << 8) | \
+    ((quint32)(ch4)) \
+   )
+
 class Q_GUI_EXPORT QFontEngine : public QObject
 {
     Q_OBJECT
@@ -72,20 +94,13 @@ public:
 
         // Trolltech QWS types
         Freetype,
-        QPF,
+        QPF1,
+        QPF2,
+        Proxy,
         TestFontEngine = 0x1000
     };
 
-    inline QFontEngine() : QObject(0) {
-        ref = 0;
-        cache_count = 0;
-        fsType = 0;
-#if defined(Q_WS_WIN)
-        script_cache = 0;
-        cmap = 0;
-#endif
-        symbol = false;
-    }
+    QFontEngine();
     virtual ~QFontEngine();
 
     // all of these are in unscaled metrics if the engine supports uncsaled metrics,
@@ -125,22 +140,24 @@ public:
 
     virtual QOpenType *openType() const { return 0; }
     virtual void recalcAdvances(int , QGlyphLayout *, QTextEngine::ShaperFlags) const {}
-    virtual void doKerning(int , QGlyphLayout *, QTextEngine::ShaperFlags) const {}
+    virtual void doKerning(int , QGlyphLayout *, QTextEngine::ShaperFlags) const;
 
 #if !defined(Q_WS_X11) && !defined(Q_WS_WIN) && !defined(Q_WS_MAC)
     virtual void draw(QPaintEngine *p, qreal x, qreal y, const QTextItemInt &si) = 0;
 #endif
     virtual void addGlyphsToPath(glyph_t *glyphs, QFixedPoint *positions, int nglyphs,
                                  QPainterPath *path, QTextItem::RenderFlags flags);
-    void getGlyphPositions(const QGlyphLayout *glyphs, int nglyphs, const QMatrix &matrix, QTextItem::RenderFlags flags,
+    void getGlyphPositions(const QGlyphLayout *glyphs, int nglyphs, const QTransform &matrix, QTextItem::RenderFlags flags,
                            QVarLengthArray<glyph_t> &glyphs_out, QVarLengthArray<QFixedPoint> &positions);
 
     virtual void addOutlineToPath(qreal, qreal, const QGlyphLayout *, int, QPainterPath *, QTextItem::RenderFlags flags);
     void addBitmapFontToPath(qreal x, qreal y, const QGlyphLayout *, int, QPainterPath *, QTextItem::RenderFlags);
     virtual QImage alphaMapForGlyph(glyph_t);
+    virtual void removeGlyphFromCache(glyph_t);
 
     virtual glyph_metrics_t boundingBox(const QGlyphLayout *glyphs, int numGlyphs) = 0;
     virtual glyph_metrics_t boundingBox(glyph_t glyph) = 0;
+    glyph_metrics_t tightBoundingBox(const QGlyphLayout *glyphs, int numGlyphs);
 
     virtual QFixed ascent() const = 0;
     virtual QFixed descent() const = 0;
@@ -161,12 +178,17 @@ public:
 
     virtual Type type() const = 0;
 
+    virtual int glyphCount() const;
+
+    static const uchar *getCMap(const uchar *table, uint tableSize, bool *isSymbolFont, int *cmapSize);
+    static quint32 getTrueTypeGlyphIndex(const uchar *cmap, uint unicode);
+
     QAtomic     ref;
     QFontDef fontDef;
     uint cache_cost; // amount of mem used in kb by the font
     int cache_count;
     uint fsType : 16;
-    uint symbol : 1;
+    bool symbol;
 
 #ifdef Q_WS_WIN
     int getGlyphIndexes(const QChar *ch, int numChars, QGlyphLayout *glyphs, bool mirrored) const;
@@ -183,15 +205,11 @@ public:
         TEXTMETRICA        a;
     } tm;
     int                lw;
-    unsigned char *cmap;
+    const unsigned char *cmap;
+    QByteArray cmapTable;
     void *script_cache;
     qreal lbearing;
     qreal rbearing;
-    struct KernPair {
-        uint left_right;
-        QFixed adjust;
-    };
-    QVector<KernPair> kerning_pairs;
     QFixed designToDevice;
     int unitsPerEm;
     QFixed x_height;
@@ -199,6 +217,14 @@ public:
     mutable int synthesized_flags;
     mutable QFixed lineWidth;
 #endif // Q_WS_WIN
+#if defined(Q_WS_WIN) || defined(Q_WS_X11) || defined(Q_WS_QWS)
+    struct KernPair {
+        uint left_right;
+        QFixed adjust;
+    };
+    QVector<KernPair> kerning_pairs;
+    void loadKerningPairs(QFixed scalingFactor);
+#endif
 };
 
 inline bool operator ==(const QFontEngine::FaceId &f1, const QFontEngine::FaceId &f2)
@@ -216,78 +242,15 @@ class QGlyph;
 
 #if defined(Q_WS_QWS)
 
-#ifndef QT_NO_FREETYPE
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
-class QFontEngineFT : public QFontEngine
-{
-public:
-    QFontEngineFT(const QFontDef&, FT_Face face, bool antialiased = true);
-   ~QFontEngineFT();
-    FT_Face handle() const;
-
-    QFontEngine::FaceId faceId() const { return face_id; }
-    QFontEngine::Properties properties() const;
-    void getUnscaledGlyph(glyph_t glyph, QPainterPath *path, glyph_metrics_t *metrics);
-    QByteArray getSfntTable(uint tag) const;
-    int synthesized() const;
-
-    QOpenType *openType() const;
-    void recalcAdvances(int len, QGlyphLayout *glyphs, QTextEngine::ShaperFlags flags) const;
-
-    /* returns 0 as glyph index for non existant glyphs */
-    bool stringToCMap(const QChar *str, int len, QGlyphLayout *glyphs, int *nglyphs, QTextEngine::ShaperFlags flags) const;
-
-    void draw(QPaintEngine *p, qreal x, qreal y, const QTextItemInt &si);
-    void addOutlineToPath(qreal x, qreal y, const QGlyphLayout *glyphs, int numGlyphs, QPainterPath *path, QTextItem::RenderFlags flags);
-    void addGlyphsToPath(glyph_t *glyphs, QFixedPoint *positions, int numGlyphs,
-                         QPainterPath *path, QTextItem::RenderFlags flags);
-    void doKerning(int , QGlyphLayout *, QTextEngine::ShaperFlags) const;
-
-    glyph_metrics_t boundingBox(const QGlyphLayout *glyphs, int numGlyphs);
-    glyph_metrics_t boundingBox(glyph_t glyph);
-
-    QFixed ascent() const;
-    QFixed descent() const;
-    QFixed leading() const;
-    QFixed xHeight() const;
-
-    qreal maxCharWidth() const;
-    qreal minLeftBearing() const;
-    qreal minRightBearing() const;
-    QFixed underlinePosition() const;
-    QFixed lineThickness() const;
-
-    Type type() const;
-
-    bool canRender(const QChar *string, int len);
-    inline const char *name() const { return 0; }
-    inline bool drawAsOutline() const { return outline_drawing; }
-
-    FT_Face face;
-    bool smooth;
-    bool outline_drawing;
-    QGlyph **rendered_glyphs;
-    QOpenType *_openType;
-    enum { cmapCacheSize = 0x200 };
-    mutable glyph_t cmapCache[cmapCacheSize];
-
-    FaceId face_id;
-    friend class QFontDatabase;
-    static FT_Library ft_library;
-};
-#endif // QT_NO_FREETYPE
-
 #ifndef QT_NO_QWS_QPF
 
-class QFontEngineQPFData;
+class QFontEngineQPF1Data;
 
-class QFontEngineQPF : public QFontEngine
+class QFontEngineQPF1 : public QFontEngine
 {
 public:
-    QFontEngineQPF(const QFontDef&, const QString &fn);
-   ~QFontEngineQPF();
+    QFontEngineQPF1(const QFontDef&, const QString &fn);
+   ~QFontEngineQPF1();
 
     bool stringToCMap(const QChar *str, int len, QGlyphLayout *glyphs, int *nglyphs, QTextEngine::ShaperFlags flags) const;
 
@@ -312,7 +275,7 @@ public:
     inline const char *name() const { return 0; }
 
 
-    QFontEngineQPFData *d;
+    QFontEngineQPF1Data *d;
 };
 #endif // QT_NO_QWS_QPF
 
@@ -415,7 +378,7 @@ class QFontEngineMac : public QFontEngine
 {
     friend class QFontEngineMacMulti;
 public:
-    QFontEngineMac(ATSUStyle baseStyle, FMFont font, const QFontDef &def, QFontEngineMacMulti *multiEngine = 0);
+    QFontEngineMac(ATSUStyle baseStyle, ATSUFontID fontID, const QFontDef &def, QFontEngineMacMulti *multiEngine = 0);
     virtual ~QFontEngineMac();
 
     virtual bool stringToCMap(const QChar *str, int len, QGlyphLayout *glyphs, int *nglyphs, QTextEngine::ShaperFlags flags) const;
@@ -450,21 +413,22 @@ public:
     virtual QImage alphaMapForGlyph(glyph_t);
 
 private:
-    FMFont fmFont;
+    ATSUFontID fontID;
     QCFType<CGFontRef> cgFont;
     ATSUStyle style;
     int synthesisFlags;
     mutable QGlyphLayout kashidaGlyph;
     QFontEngineMacMulti *multiEngine;
-    mutable unsigned char *cmap;
+    mutable const unsigned char *cmap;
     mutable bool symbolCMap;
+    mutable QByteArray cmapTable;
 };
 
 class QFontEngineMacMulti : public QFontEngineMulti
 {
     friend class QFontEngineMac;
 public:
-    QFontEngineMacMulti(const ATSFontFamilyRef &family, const QFontDef &fontDef, bool kerning);
+    QFontEngineMacMulti(const ATSFontFamilyRef &atsFamily, const ATSFontRef &atsFontRef, const QFontDef &fontDef, bool kerning);
     virtual ~QFontEngineMacMulti();
 
     virtual bool stringToCMap(const QChar *str, int len, QGlyphLayout *glyphs, int *nglyphs, QTextEngine::ShaperFlags flags) const;
@@ -478,7 +442,7 @@ public:
 
     bool canRender(const QChar *string, int len);
 
-    inline ATSFontFamilyRef fontFamilyRef() const { return familyref; }
+    inline ATSUFontID macFontID() const { return fontID; }
 
 protected:
     virtual void loadEngine(int at);
@@ -487,20 +451,22 @@ private:
     inline const QFontEngineMac *engineAt(int i) const
     { return static_cast<const QFontEngineMac *>(engines.at(i)); }
 
-    int fontIndexForFMFont(FMFont font) const;
+    bool stringToCMapInternal(const QChar *str, int len, QGlyphLayout *glyphs, int *nglyphs, QTextEngine::ShaperFlags flags,
+                              QShaperItem *shaperItem) const;
 
-    ATSFontFamilyRef familyref;
+    int fontIndexForFontID(ATSUFontID id) const;
+
+    ATSUFontID fontID;
     uint kerning : 1;
 
     mutable ATSUTextLayout textLayout;
     mutable ATSUStyle style;
+    CGAffineTransform transform;
 };
 
 #endif
 
-#if defined(Q_WS_X11)
-#  include "private/qfontengine_x11_p.h"
-#elif defined(Q_WS_WIN)
+#if defined(Q_WS_WIN)
 #  include "private/qfontengine_win_p.h"
 #endif
 

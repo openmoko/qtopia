@@ -1,7 +1,4 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>MMSBase</class>
  <widget class="QWidget" name="MMSBase" >
   <property name="geometry" >
@@ -27,6 +24,9 @@
      <property name="text" >
       <string>MMS server (MMSC):</string>
      </property>
+     <property name="buddy" >
+      <cstring>mms</cstring>
+     </property>
     </widget>
    </item>
    <item>
@@ -50,9 +50,45 @@
       <number>6</number>
      </property>
      <item>
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>Port:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>mmsPort</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="mmsPort" >
+       <property name="specialValueText" >
+        <string>default</string>
+       </property>
+       <property name="correctionMode" >
+        <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+       </property>
+       <property name="maximum" >
+        <number>65535</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
       <widget class="QLabel" name="expiry_label" >
        <property name="text" >
         <string>MMS expiry:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>expiry</cstring>
        </property>
       </widget>
      </item>
@@ -73,6 +109,9 @@
       <widget class="QLabel" name="visibility_label" >
        <property name="text" >
         <string>Sender visibility:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>visibility</cstring>
        </property>
       </widget>
      </item>
@@ -119,7 +158,7 @@
      </property>
      <property name="sizeHint" >
       <size>
-       <width>0</width>
+       <width>2</width>
        <height>201</height>
       </size>
      </property>
@@ -127,7 +166,6 @@
    </item>
   </layout>
  </widget>
- <pixmapfunction></pixmapfunction>
  <resources/>
  <connections/>
 </ui>

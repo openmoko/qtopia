@@ -14,7 +14,6 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Graphic Designer's Reference<br /><span class="subtitle"></span>
 </h1>
 <ul><li><a href="#qtopia-startup">Qtopia Startup</a></li>
-<li><a href="#splash-screen">Splash Screen</a></li>
 <li><a href="#themes">Themes</a></li>
 <ul><li><a href="#title-bar">Title Bar</a></li>
 <li><a href="#context-bar">Context Bar</a></li>
@@ -26,17 +25,6 @@
 <li><a href="#fantasy-theme-example-exploded">Fantasy theme example - Exploded</a></li>
 <li><a href="#examples-actual-screenshots">Examples - Actual screenshots</a></li>
 <li><a href="#tips">Tips</a></li>
-</ul>
-</ul>
-<li><a href="#launcher">Launcher</a></li>
-<ul><li><a href="#main-menu">Main Menu</a></li>
-<ul><li><a href="#example">Example</a></li>
-<li><a href="#animated-icons">Animated Icons</a></li>
-<li><a href="#icons-48x48-32x32-and-16x16">Icons (48x48, 32x32 and 16x16)</a></li>
-</ul>
-<li><a href="#sub-main-menu">Sub Main Menu</a></li>
-<ul><li><a href="#example">Example</a></li>
-<li><a href="#icons-32x32-and-16x16">Icons (32x32 and 16x16)</a></li>
 </ul>
 </ul>
 <li><a href="#system">System</a></li>
@@ -54,19 +42,6 @@
 </ul>
 <a name="qtopia-startup"></a>
 <h2>Qtopia Startup</h2>
-<a name="splash-screen"></a>
-<h2>Splash Screen</h2>
-<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><ul>
-<li>Qtopia can play a start up animation.</li>
-<li>It plays full-screen while Qtopia boots.</li>
-<li>The length of time to boot varies between 6s to 15s.</li>
-<li>The animation should be able to loop.</li>
-<li>A lower frame rate is advised to reduce slowing startup (less than 10 fps) and save space (smaller file).</li>
-<li>GIF format is okay.</li>
-</ul>
-</td><td><p align="center"><img src="images/splashscreen.png" /></p></td></tr>
-</table></p>
 <a name="themes"></a>
 <h2>Themes</h2>
 <p>Qtopia has various themable elements</p>
@@ -115,38 +90,6 @@
 <li>You can use a full 32-bit palette for the images.</li>
 <li>We recommend saving the images in PNG format instead of as GIF.</li>
 </ul>
-<a name="launcher"></a>
-<h2>Launcher</h2>
-<a name="main-menu"></a>
-<h3>Main Menu</h3>
-<a name="example"></a>
-<h4>Example</h4>
-<p align="center"><img src="images/launcher-mainmenu.png" /></p><a name="animated-icons"></a>
-<h4>Animated Icons</h4>
-<ul>
-<li>Icons are presented in a grid to correspond to the keys on a keypad phone.</li>
-<li>We use MNG format for animations.</li>
-<li>If this is a problem to provide, the next best solution is to create each frame as separate PNG images (under Linux there are tools to easily turn the separate images in to an MNG file).</li>
-<li>GIF animations can also be converted to MNG using tools on Linux if needed (however the GIF format will reduce the palette to 256 colors).</li>
-<li>Animated icons are 48x48 pixels large.</li>
-</ul>
-<a name="icons-48x48-32x32-and-16x16"></a>
-<h4>Icons (48x48, 32x32 and 16x16)</h4>
-<p align="center"><img src="images/launcher-mainmenu-icons.png" /></p><ul>
-<li>Normally up to 12 icons will be selected for the main menu. The size will be 48x48.</li>
-<li>The 16x16 version is for display in the sub-menus if the icon is duplicated there.</li>
-<li>The 32x32 version is for PDAs or scaling to 16x16 if no 16x16 icon is provided.</li>
-</ul>
-<a name="sub-main-menu"></a>
-<h3>Sub Main Menu</h3>
-<a name="example"></a>
-<h4>Example</h4>
-<p align="center"><img src="images/launcher-submenu-example.png" /></p><a name="icons-32x32-and-16x16"></a>
-<h4>Icons (32x32 and 16x16)</h4>
-<p align="center"><img src="images/launcher-submenu-icons.png" /></p><ul>
-<li>For Qtopia on mobile phones, usually the icons will only be used at 16x16. The 32x32 would be for PDAs or scaling to 16x16 if no 16x16 icon is provided.</li>
-<li>Note that some of the 16x16 versions are not just scaled down versions of the larger icon, they are redesigned for the smaller size.</li>
-</ul>
 <a name="system"></a>
 <h2>System</h2>
 <a name="notification-images-32x32-custom"></a>
@@ -182,6 +125,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

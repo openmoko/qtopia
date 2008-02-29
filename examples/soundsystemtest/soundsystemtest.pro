@@ -1,6 +1,5 @@
-qtopia_project(qtopia app) # see buildsystem.html for more project keywords
+qtopia_project(external app)
 TARGET=soundsystemtest
-CONFIG+=no_tr
 SOURCES=main.cpp
 
 pkg.name=soundsystemtest

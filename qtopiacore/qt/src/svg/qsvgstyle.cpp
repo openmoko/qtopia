@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -23,6 +38,7 @@
 
 #include "qsvgstyle_p.h"
 #include "qsvgfont_p.h"
+#include "qsvggraphics_p.h"
 #include "qsvgnode_p.h"
 #include "qsvgtinydocument_p.h"
 
@@ -52,13 +68,36 @@ void QSvgQualityStyle::revert(QPainter *)
 }
 
 QSvgFillStyle::QSvgFillStyle(const QBrush &brush, bool fromColor)
-    : m_fill(brush), m_fromColor(fromColor)
+    : m_fill(brush), m_fromColor(fromColor), m_fillRuleSet(false)
 {
 }
 
-void QSvgFillStyle::apply(QPainter *p, const QRectF &, QSvgNode *)
+void QSvgFillStyle::setFillRule(Qt::FillRule f)
+{
+    m_fillRuleSet = true;
+    m_fillRule = f;
+}
+
+static void recursivelySetFill(QSvgNode *node, Qt::FillRule f)
+{
+    if (node->type() == QSvgNode::PATH) {
+        QSvgPath *path = static_cast<QSvgPath*>(node);
+        path->qpath()->setFillRule(f);
+    } else if (node->type() == QSvgNode::G) {
+        QList<QSvgNode*> renderers = static_cast<QSvgG*>(node)->renderers();
+        foreach(QSvgNode *n, renderers) {
+            recursivelySetFill(n, f);
+        }
+    }
+}
+void QSvgFillStyle::apply(QPainter *p, const QRectF &, QSvgNode *node)
 {
     m_oldFill = p->brush();
+
+    if (m_fillRuleSet) {
+        recursivelySetFill(node, m_fillRule);
+        m_fillRuleSet = false;//set it only on the first run
+    }
     p->setBrush(m_fill);
 }
 
@@ -168,7 +207,7 @@ void QSvgGradientStyle::apply(QPainter *p, const QRectF &rect, QSvgNode *)
     if (!m_link.isEmpty()) {
         resolveStops();
     }
-    
+
     m_oldFill = p->brush();
 
     //resolving stop colors
@@ -192,13 +231,14 @@ void QSvgGradientStyle::apply(QPainter *p, const QRectF &rect, QSvgNode *)
         if (m_gradient->type() == QGradient::LinearGradient) {
             QLinearGradient *grad = (QLinearGradient*)(m_gradient);
             qreal xs, ys, xf, yf;
-            xs = rect.x();
-            ys = rect.y();
-            xf = (rect.x()+rect.width())  * grad->finalStop().x();
-            yf = (rect.y()+rect.height()) * grad->finalStop().y();
+            xs = rect.x() +  rect.width()  * grad->start().x();
+            ys = rect.y() +  rect.height() * grad->start().y();
+            xf =  rect.x() + rect.width()  * grad->finalStop().x();
+            yf =  rect.y() + rect.height() * grad->finalStop().y();
             QLinearGradient gradient(xs, ys,
                                      xf, yf);
             gradient.setStops(m_gradient->stops());
+            gradient.setSpread(m_gradient->spread());
             brush = QBrush(gradient);
         } else {
             QRadialGradient *grad = (QRadialGradient*)m_gradient;
@@ -217,15 +257,16 @@ void QSvgGradientStyle::apply(QPainter *p, const QRectF &rect, QSvgNode *)
             QRadialGradient gradient(cx, cy,
                                      r, fx, fy);
             gradient.setStops(m_gradient->stops());
+            gradient.setSpread(m_gradient->spread());
             brush = QBrush(gradient);
         }
     } else {
         brush = QBrush(*m_gradient);
     }
-    
+
     if (!m_matrix.isIdentity())
         brush.setMatrix(m_matrix);
-    
+
     p->setBrush(brush);
 }
 
@@ -301,10 +342,32 @@ QSvgStyleProperty::Type QSvgTransformStyle::type() const
     return TRANSFORM;
 }
 
+
+QSvgCompOpStyle::QSvgCompOpStyle(QPainter::CompositionMode mode)
+    : m_mode(mode)
+{
+    
+}
+
+void QSvgCompOpStyle::apply(QPainter *p, const QRectF &, QSvgNode *)
+{
+    m_oldMode = p->compositionMode();
+    p->setCompositionMode(m_mode);
+}
+
+void QSvgCompOpStyle::revert(QPainter *p)
+{
+    p->setCompositionMode(m_oldMode);
+}
+
+QSvgStyleProperty::Type QSvgCompOpStyle::type() const
+{
+    return COMP_OP;
+}
+
 QSvgStyle::~QSvgStyle()
 {
 }
-
 
 void QSvgStyle::apply(QPainter *p, const QRectF &rect, QSvgNode *node)
 {
@@ -356,6 +419,10 @@ void QSvgStyle::apply(QPainter *p, const QRectF &rect, QSvgNode *node)
 
     if (opacity) {
         opacity->apply(p, rect, node);
+    }
+
+    if (compop) {
+        compop->apply(p, rect, node);
     }
 }
 
@@ -411,6 +478,10 @@ void QSvgStyle::revert(QPainter *p)
 
     if (opacity) {
         opacity->revert(p);
+    }
+
+    if (compop) {
+        compop->revert(p);
     }
 }
 
@@ -723,7 +794,7 @@ void QSvgFontStyle::setTextAnchor(const QString &anchor)
 QSvgOpacityStyle::QSvgOpacityStyle(qreal opacity)
     : m_opacity(opacity)
 {
-    
+
 }
 
 void QSvgOpacityStyle::apply(QPainter *p, const QRectF &, QSvgNode *)

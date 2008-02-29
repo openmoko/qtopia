@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,26 +26,22 @@
 #include <qsettings.h>
 #include <qtimestring.h>
 #include <qtopianamespace.h>
-
-#ifdef QTOPIA_PHONE
-# include <qtopia/qsoftmenubar.h>
-#endif
-
 #include <qlabel.h>
-#include <qtoolbutton.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
 #include <qcheckbox.h>
-#include <qcombobox.h>
-#include <qgroupbox.h>
 #include <qlayout.h>
-#include <qlineedit.h>
 #include <qtimer.h>
-#include <qdesktopwidget.h>
-#include <QKeyEvent>
+#include <QDateTimeEdit>
+#include <QSoundControl>
+
+#ifdef Q_WS_X11
+#include <qcopchannel_x11.h>
+#else
+#include <qcopchannel_qws.h>
+#endif
 
 static const int magic_daily = 2292922;
 static const int magic_countdown = 2292923;
+
 
 #if 0
 static void toggleScreenSaver( bool on )
@@ -54,29 +50,29 @@ static void toggleScreenSaver( bool on )
 }
 #endif
 
-class MySpinBox : public QSpinBox
+static void setRingPriority(bool v)
 {
-public:
-    QLineEdit *editor() const {
-        return lineEdit();
-    }
-};
+    
+    QByteArray data;
+    {
+        QDataStream  stream(&data, QIODevice::WriteOnly);
+        stream << ((v)?QSoundControl::RingTone : QSoundControl::Default);
+    }    
+    QCopChannel::send("QPE/MediaServer","setPriority(int)", data);
+
+} 
+
+
 
 Alarm::Alarm( QWidget * parent, Qt::WFlags f )
-    : QWidget( parent, f ), init(false) // No tr
+    : QWidget( parent, f ), init(false), m_changedPriority(false) // No tr
 {
     setupUi(this);
     alarmDlg = 0;
     alarmDlgLabel = 0;
-    dayBtn = new QToolButton * [7];
 
     ampm = QTimeString::currentAMPM();
-    onMonday = Qtopia::weekStartsOnMonday();
-
-    applyAlarmTimer = new QTimer( this );
-    applyAlarmTimer->setSingleShot(true);
-    connect( applyAlarmTimer, SIGNAL(timeout()),
-        this, SLOT(applyDailyAlarm()) );
+    weekStartsMonday = Qtopia::weekStartsOnMonday();
 
     alarmt = new QTimer( this );
     connect( alarmt, SIGNAL(timeout()), SLOT(alarmTimeout()) );
@@ -84,200 +80,79 @@ Alarm::Alarm( QWidget * parent, Qt::WFlags f )
     connect( qApp, SIGNAL(timeChanged()), SLOT(applyDailyAlarm()) );
     connect( qApp, SIGNAL(clockChanged(bool)), this, SLOT(changeClock(bool)) );
 
-    connect( dailyHour, SIGNAL(valueChanged(int)), this, SLOT(scheduleApplyDailyAlarm()) );
-    connect( dailyAmPm, SIGNAL(activated(int)), this, SLOT(setDailyAmPm(int)) );
-    connect( dailyEnabled, SIGNAL(toggled(bool)), this, SLOT(enableDaily(bool)) );
-
-    dailyMinute->installEventFilter( this );
+    connect( alarmEnabled, SIGNAL(toggled(bool)), this, SLOT(setDailyEnabled(bool)) );
+    connect( changeAlarmDaysButton, SIGNAL(clicked()), this, SLOT(changeAlarmDays()) );
 
     QSettings cConfig("Trolltech","Clock"); // No tr
     cConfig.beginGroup( "Daily Alarm" );
 
-    QTimeString::Length len = QTimeString::Short;
-    int approxSize = QFontMetrics(QFont()).width(" Wed ") * 7;
-    QDesktopWidget *desktop = QApplication::desktop();
-    if (desktop->availableGeometry(desktop->screenNumber(this)).width() > approxSize )
-        len = QTimeString::Medium;
-
-    int i;
-    QVBoxLayout *vb = new QVBoxLayout( daysFrame );
-    QHBoxLayout *weekdayBox = new QHBoxLayout();
-    weekdayBox->setSpacing( 4 );
-    weekdayBox->setMargin( 0 );
-    weekdayBox->addStretch();
-    QHBoxLayout *weekendBox = new QHBoxLayout();
-    weekendBox->setSpacing( 4 );
-    weekendBox->setMargin( 0 );
-    weekendBox->addStretch();
-    for ( i = 0; i < 7; i++ ) {
-        dayBtn[i] = new QToolButton( daysFrame );
-        if ( i < 5 )
-            weekdayBox->addWidget( dayBtn[i] );
-        else
-            weekendBox->addWidget( dayBtn[i] );
-        dayBtn[i]->setCheckable( true );
-        dayBtn[i]->setChecked( true );
-        dayBtn[i]->setFocusPolicy( Qt::StrongFocus );
-        connect( dayBtn[i], SIGNAL(toggled(bool)), this, SLOT(scheduleApplyDailyAlarm()) );
+    QStringList exclDays = cConfig.value( "ExcludeDays").toStringList();
+    for (int i=Qt::Monday; i<=Qt::Sunday; i++) {
+        daysSettings.insert(i, !exclDays.contains(QString::number(i)));
     }
-
-    weekdayBox->addStretch();
-    weekendBox->addStretch();
-    vb->addLayout( weekdayBox );
-    vb->addLayout( weekendBox );
-
-    for ( i = 0; i < 7; i++ )
-        dayBtn[dayBtnIdx(i+1)]->setText( QTimeString::nameOfWeekDay(i + 1, len) );
-
-    QStringList exclDays = cConfig.value( "ExcludeDays").toString().split( ',' );
-    QStringList::Iterator it;
-    for ( it = exclDays.begin(); it != exclDays.end(); ++it ) {
-        int d = (*it).toInt();
-        if ( d >= 1 && d <= 7 )
-            dayBtn[dayBtnIdx(d)]->setChecked( false );
-    }
+    resetAlarmDaysText();
 
     initEnabled = cConfig.value("Enabled", false).toBool();
-    dailyEnabled->setChecked( initEnabled );
+    alarmEnabled->setChecked( initEnabled );
     int m = cConfig.value( "Minute", 0 ).toInt();
-    dailyMinute->setValue( m );
-    dailyMinute->setPrefix( m <= 9 ? "0" : "" );
     int h = cConfig.value( "Hour", 7 ).toInt();
-    if ( ampm ) {
-        if (h > 12) {
-            h -= 12;
-            dailyAmPm->setCurrentIndex( 1 );
-        }
-        if (h == 0) h = 12;
-        dailyHour->setMinimum( 1 );
-        dailyHour->setMaximum( 12 );
-    } else {
-        dailyAmPm->hide();
-    }
-    dailyHour->setValue( h );
 
-    connect( ((MySpinBox*)dailyHour)->editor(), SIGNAL(textChanged(const QString&)),
-            this, SLOT(dailyEdited()) );
-    connect( ((MySpinBox*)dailyMinute)->editor(), SIGNAL(textChanged(const QString&)),
-            this, SLOT(dailyEdited()) );
+    if (ampm)
+        alarmTimeEdit->setDisplayFormat("h:mm ap");
+    else
+        alarmTimeEdit->setDisplayFormat("hh:mm");
+    alarmTimeEdit->setTime( QTime( h, m ) );
+
+    connect( alarmTimeEdit, SIGNAL(editingFinished()), this, SLOT(applyDailyAlarm())) ;
+
+    alarmDaysEdit->installEventFilter(this);
 
     init = true;
 }
 
 Alarm::~Alarm()
 {
-    applyDailyAlarm();
-    delete [] dayBtn;
-}
-
-bool Alarm::isValid() const
-{
-    return !dailyEnabled->isChecked() || validDaysSelected();
 }
 
 void Alarm::changeClock( bool a )
 {
+    //change display format (whether or not we want am/pm)
     if ( ampm != a ) {
-        int minute = dailyMinute->value();
-        int hour = dailyHour->value();
-        if ( ampm ) {
-            if (hour == 12)
-                hour = 0;
-            if (dailyAmPm->currentIndex() == 1 )
-                hour += 12;
-            dailyHour->setMinimum( 0 );
-            dailyHour->setMaximum( 23 );
-            dailyAmPm->hide();
-        } else {
-            if (hour > 12) {
-                hour -= 12;
-                dailyAmPm->setCurrentIndex( 1 );
-            }
-            if (hour == 0) hour = 12;
-            dailyHour->setMinimum( 1 );
-            dailyHour->setMaximum( 12 );
-            dailyAmPm->show();
-        }
-        dailyMinute->setValue( minute );
-        dailyHour->setValue( hour );
+        ampm = a;
+        if (ampm)
+            alarmTimeEdit->setDisplayFormat("h:mm ap");
+        else
+            alarmTimeEdit->setDisplayFormat("hh:mm");
     }
-    ampm = a;
-}
-
-void Alarm::setDailyAmPm(int)
-{
-    scheduleApplyDailyAlarm();
-}
-
-bool Alarm::eventFilter( QObject* watched, QEvent* event )
-{
-    if ( watched == dailyMinute )
-    {
-        if ( event->type() == QEvent::FocusOut )
-            dailyMinute->setPrefix( dailyMinute->value() <= 9 ? "0" : "" );
-        else if ( event->type() == QEvent::FocusIn )
-            dailyMinute->setPrefix( "" );
-    }
-    return false;
-}
-
-void Alarm::dailyEdited()
-{
-    if ( spinBoxValid(dailyMinute) && spinBoxValid(dailyHour) )
-        scheduleApplyDailyAlarm();
-    else
-        applyAlarmTimer->stop();
-}
-
-void Alarm::enableDaily( bool )
-{
-    scheduleApplyDailyAlarm();
 }
 
 void Alarm::triggerAlarm(const QDateTime &when, int type)
 {
     QTime theTime( when.time() );
     if ( type == magic_daily ) {
-        QString msg = tr("<b>Daily Alarm:</b><p>");
-        QString ts;
-        if ( ampm ) {
-            bool pm = false;
-            int h = theTime.hour();
-            if (h > 12) {
-                h -= 12;
-                pm = true;
-            }
-            if (h == 0) h = 12;
-            ts.sprintf( "%02d:%02d %s", h, theTime.minute(), pm?"PM":"AM" );
-        } else {
-            ts.sprintf( "%02d:%02d", theTime.hour(), theTime.minute() );
-        }
-        msg += ts;
+        QString ts = QTimeString::localHM(theTime);
+        QString msg = ts + "\n" + tr( "(Daily Alarm)" );
+        m_changedPriority = true;
+        setRingPriority(true);
         Qtopia::soundAlarm();
         alarmCount = 0;
-        alarmt->start( 5000 );
+        alarmt->start( 2000 );
         if ( !alarmDlg ) {
-            alarmDlg = new QDialog( this,
-                    Qt::WindowStaysOnTopHint | Qt::WindowTitleHint );
-
+            alarmDlg = new QDialog( this );
             alarmDlg->setWindowTitle( tr("Clock") );
             QVBoxLayout *vb = new QVBoxLayout(alarmDlg);
             vb->setMargin(6);
-            QHBoxLayout *hb = new QHBoxLayout( alarmDlg );
-            vb->addLayout(hb);
+            vb->addStretch(1);
             QLabel *l = new QLabel( alarmDlg );
-            QPixmap pm(":image/alarmbell");
+            QIcon icon(":icon/alarmbell");
+            QPixmap pm = icon.pixmap(icon.actualSize(QSize(100,100)));
             l->setPixmap(pm);
-            l->setFixedWidth(pm.width());
-            hb->addWidget(l);
+            l->setAlignment( Qt::AlignCenter );
+            vb->addWidget(l);
             alarmDlgLabel = new QLabel( msg, alarmDlg );
             alarmDlgLabel->setAlignment( Qt::AlignCenter );
-            hb->addWidget(alarmDlgLabel);
-#ifndef QTOPIA_PHONE
-            QPushButton *cmdOk = new QPushButton( tr("OK"), alarmDlg );
-            vb->addWidget(cmdOk);
-            connect( cmdOk, SIGNAL(clicked()), alarmDlg, SLOT(accept()) );
-#endif
+            vb->addWidget(alarmDlgLabel);
+            vb->addStretch(1);
         } else {
             alarmDlgLabel->setText(msg);
         }
@@ -287,6 +162,10 @@ void Alarm::triggerAlarm(const QDateTime &when, int type)
         if ( !alarmDlg->isVisible() ) {
             QtopiaApplication::execDialog(alarmDlg);
             alarmt->stop();
+            if(m_changedPriority) {
+                setRingPriority(false);
+                m_changedPriority = false;
+            }    
         }
     } else if ( type == magic_countdown ) {
         // countdown
@@ -296,16 +175,24 @@ void Alarm::triggerAlarm(const QDateTime &when, int type)
 
 void Alarm::setDailyEnabled(bool enableDaily)
 {
-    dailyEnabled->setChecked( enableDaily );
+    alarmEnabled->setChecked( enableDaily );
     applyDailyAlarm();
 }
 
 void Alarm::alarmTimeout()
 {
-    if ( alarmCount < 10 ) {
+    if ( alarmCount < 20 ) {
+        if (!m_changedPriority) {
+            setRingPriority(true);
+            m_changedPriority = true;
+        }    
         Qtopia::soundAlarm();
         alarmCount++;
     } else {
+        if (m_changedPriority) {
+            setRingPriority(false);
+            m_changedPriority = false;
+        }    
         alarmCount = 0;
         alarmt->stop();
     }
@@ -318,7 +205,8 @@ QDateTime Alarm::nextAlarm( int h, int m )
     QDateTime when( now.date(), at );
     int count = 0;
     int dow = when.date().dayOfWeek();
-    while ( when < now || !dayBtn[dayBtnIdx(dow)]->isChecked() ) {
+
+    while ( when < now || daysSettings[dow] == false ) {
         when = when.addDays( 1 );
         dow = when.date().dayOfWeek();
         if ( ++count > 7 )
@@ -328,51 +216,26 @@ QDateTime Alarm::nextAlarm( int h, int m )
     return when;
 }
 
-int Alarm::dayBtnIdx( int d ) const
-{
-    if ( onMonday )
-        return d-1;
-    else if ( d == 7 )
-        return 0;
-    else
-        return d;
-}
-
-void Alarm::scheduleApplyDailyAlarm()
-{
-    applyAlarmTimer->start( 5000 );
-}
-
 void Alarm::applyDailyAlarm()
 {
     if ( !init )
         return;
-    applyAlarmTimer->stop();
-    int minute = dailyMinute->value();
-    int hour = dailyHour->value();
-    if ( ampm ) {
-        if (hour == 12)
-            hour = 0;
-        if (dailyAmPm->currentIndex() == 1 )
-            hour += 12;
-    }
+
+    int minute = alarmTimeEdit->time().minute();
+    int hour = alarmTimeEdit->time().hour();
 
     QSettings config("Trolltech","Clock");
     config.beginGroup( "Daily Alarm" );
     config.setValue( "Hour", hour );
     config.setValue( "Minute", minute );
 
-    bool enableDaily = dailyEnabled->isChecked();
+    bool enableDaily = alarmEnabled->isChecked();
     config.setValue( "Enabled", enableDaily );
 
-    QString exclDays;
-    int exclCount = 0;
-    for ( int i = 1; i <= 7; i++ ) {
-        if ( !dayBtn[dayBtnIdx(i)]->isChecked() ) {
-            if ( !exclDays.isEmpty() )
-                exclDays += ",";
-            exclDays += QString::number( i );
-            exclCount++;
+    QStringList exclDays;
+    for (int i=1; i<=7; i++) {
+        if ( !daysSettings.value(i, false) ) {
+            exclDays << QString::number( i );
         }
     }
     config.setValue( "ExcludeDays", exclDays );
@@ -386,80 +249,125 @@ void Alarm::applyDailyAlarm()
 
     Qtopia::deleteAlarm(QDateTime(), "QPE/Application/clock",
             "alarm(QDateTime,int)", magic_daily);
-    if ( dailyEnabled->isChecked() && exclCount < 7 ) {
+    if ( alarmEnabled->isChecked() && exclDays.size() < 7 ) {
         QDateTime when = nextAlarm( hour, minute );
         Qtopia::addAlarm(when, "QPE/Application/clock",
                             "alarm(QDateTime,int)", magic_daily);
     }
 }
 
-bool Alarm::validDaysSelected(void) const
+bool Alarm::eventFilter(QObject *o, QEvent *e)
 {
-    for ( int i = 1; i <= 7; i++ ) {
-        if ( dayBtn[dayBtnIdx(i)]->isChecked() ) {
+    if (o == alarmDaysEdit) {
+        if (e->type() == QEvent::MouseButtonRelease) {
+            changeAlarmDays();
             return true;
+        } else if (e->type() == QEvent::Resize) {
+            resetAlarmDaysText();
         }
     }
     return false;
 }
 
-bool Alarm::spinBoxValid( QSpinBox *sb )
+QString Alarm::getAlarmDaysText() const
 {
-    bool valid = true;
-    QString tv = sb->text();
-    for ( int i = 0; i < tv.length(); i++ ) {
-        if ( !tv[0].isDigit() )
-            valid = false;
+    int day;
+
+    QList<int> alarmDays;
+    for (day=Qt::Monday; day<=Qt::Sunday; day++) {
+        if (daysSettings[day])
+            alarmDays << day;
     }
-    bool ok = false;
-    int v = tv.toInt( &ok );
-    if ( !ok )
-        valid = false;
-    if ( v < sb->minimum() || v > sb->maximum() )
-        valid = false;
 
-    return valid;
-}
+    int alarmDaysCount = alarmDays.size();
+    if (alarmDaysCount == 7) {
+        return tr("Every day");
 
-#ifdef QTOPIA_PHONE
+    } else if (alarmDaysCount == 5 &&
+                alarmDays[0] == Qt::Monday &&
+                alarmDays.last() == Qt::Friday) {
 
-void Alarm::keyPressEvent(QKeyEvent *ke)
-{
-    int i;
-    switch(ke->key()) {
-        case Qt::Key_Left:
-            {
-                // move back in days if possible
-                // first find out which has focuse.
-                QWidget *fw = focusWidget();
+        return tr("Weekdays");
 
-                for (i = 1; i < 7; i++) {
-                    if (dayBtn[i] == fw) {
-                        dayBtn[i-1]->setFocus();
-                        break;
-                    }
-                }
-                ke->accept();
-                break;
+    } else if (alarmDaysCount == 2 &&
+                alarmDays[0] == Qt::Saturday &&
+                alarmDays[1] == Qt::Sunday) {
+
+        return tr("Weekends");
+
+    } else {
+        if (alarmDaysCount == 0)
+            return QLatin1String("");
+
+        QStringList dayStrings;
+        if (alarmDaysCount == 1) {
+            return QTimeString::nameOfWeekDay(alarmDays[0],
+                        QTimeString::Long);
+        } else {
+            for (day=0; day<alarmDaysCount; day++) {
+                dayStrings << QTimeString::nameOfWeekDay(alarmDays[day],
+                        QTimeString::Medium);
             }
-        case Qt::Key_Right:
-            {
-                // move forward in days if possible
-                // first find out which has focuse.
-                QWidget *fw = focusWidget();
-
-                for (i = 0; i < 6; i++) {
-                    if (dayBtn[i] == fw) {
-                        dayBtn[i+1]->setFocus();
-                        break;
-                    }
-                }
-                ke->accept();
-                break;
-            }
-    default:
-        ke->ignore();
+            // move Sunday to front if necessary
+            if (!weekStartsMonday && alarmDays.last() == Qt::Sunday)
+                dayStrings.insert(0, dayStrings.takeLast());
+            return dayStrings.join(", ");
+        }
     }
 }
 
-#endif
+void Alarm::resetAlarmDaysText()
+{
+    QFontMetrics fm(alarmDaysEdit->font());
+    alarmDaysEdit->setText(fm.elidedText(getAlarmDaysText(), Qt::ElideRight, alarmDaysEdit->width()));
+    alarmDaysEdit->home(false);
+}
+
+void Alarm::changeAlarmDays()
+{
+    int day;
+    QDialog dlg;
+    QVBoxLayout layout;
+
+    QHash<int, QCheckBox *> checkboxes;
+    QCheckBox *c;
+    for (day=Qt::Monday; day<=Qt::Sunday; day++) {
+        c = new QCheckBox(QTimeString::nameOfWeekDay(day, QTimeString::Long));
+        c->setChecked(daysSettings[day]);
+        checkboxes.insert(day, c);
+
+        if (day == Qt::Sunday && !weekStartsMonday)
+            layout.insertWidget(0, c);
+        else
+            layout.addWidget(c);
+    }
+
+    layout.setSpacing(9);
+    layout.setMargin(6);
+    dlg.setLayout(&layout);
+    dlg.setWindowTitle(tr("Set alarm days"));
+
+    if (QtopiaApplication::execDialog(&dlg) == QDialog::Accepted) {
+        bool foundChecked = false;
+        for (day=Qt::Monday; day<=Qt::Sunday; day++) {
+            if (checkboxes[day]->isChecked()) {
+                foundChecked = true;
+                break;
+            }
+        }
+
+        // don't change previous alarm daysSettings if nothing has been checked
+        // and the alarm is going to be disabled
+        if (foundChecked) {
+            for (day=Qt::Monday; day<=Qt::Sunday; day++)
+                daysSettings[day] = checkboxes[day]->isChecked();
+        }
+
+        // if no daysSettings have been set, disable the alarm
+        setDailyEnabled(foundChecked);
+        resetAlarmDaysText();
+    }
+}
+
+
+#include "alarm.moc"

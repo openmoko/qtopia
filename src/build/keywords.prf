@@ -3,7 +3,9 @@
 ###
 ### NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
 ###
-### This code must match the logic found in bin/Qtopia/BlackMagic.pm
+### This code is read by src/build/bin/Qtopia/BlackMagic.pm
+### Do not put any complicated instructions in here
+### or they will bork the parser.
 ###
 ### NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
 ###
@@ -24,7 +26,7 @@ PROJECT_KEYWORDS*=lib
 # Plugins
 keyword.plugin.commands+=\
     "TEMPLATE=lib"\
-    "CONFIG*=plugin"
+    "CONFIG*=plugin link_test"
 PROJECT_KEYWORDS*=plugin
 
 # Subdirectories
@@ -71,13 +73,34 @@ keyword.qtopiacore.commands+=\
     "CONFIG+=qtopiacore"
 PROJECT_KEYWORDS*=qtopiacore
 
-# Qtopia project (for external projects)
+# Qtopia project
 keyword.qtopia.commands+=\
     "CONFIG+=qtopia part_of_qtopia"
 PROJECT_KEYWORDS*=qtopia
 
-# Qtopia Desktop project (for external projects)
+# Qtopia Sync Agent project
 keyword.qtopiadesktop.commands+=\
     "CONFIG+=qtopiadesktop part_of_qtopiadesktop"
 PROJECT_KEYWORDS*=qtopiadesktop
+
+# A theme is almost the same as a stub but it now has i18n
+keyword.theme.commands+=\
+    "CONFIG*=stub no_target no_dest"\
+    "CONFIG-=qt"\
+    "CONFIG-=qtopia"\
+    "CONFIG-=qtopiadesktop"
+PROJECT_KEYWORDS+=theme
+
+# An automated testcase
+keyword.unittest.equiv=qtopia core app
+keyword.unittest.commands=\
+    "CONFIG+=no_tr no_quicklaunch unittest"\
+    "CONFIG-=enable_singleexec"
+PROJECT_KEYWORDS+=unittest
+
+# A GUI testcase
+keyword.systemtest.equiv=desktop app
+keyword.systemtest.commands=\
+    "CONFIG+=systemtest"
+PROJECT_KEYWORDS+=systemtest
 

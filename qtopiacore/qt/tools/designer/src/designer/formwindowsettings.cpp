@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,18 +37,24 @@
 ****************************************************************************/
 
 #include "formwindowsettings.h"
-#include <QtDesigner/QtDesigner>
+#include <formwindowbase_p.h>
 #include <QtGui/QStyle>
 
-FormWindowSettings::FormWindowSettings(QDesignerFormWindowInterface *parent)
-    : QDialog(parent), m_formWindow(parent)
+FormWindowSettings::FormWindowSettings(QDesignerFormWindowInterface *parent) :
+    QDialog(parent),
+    m_formWindow(qobject_cast<qdesigner_internal::FormWindowBase*>(parent))
 {
+    Q_ASSERT(m_formWindow);
     ui.setupUi(this);
+    ui.gridPanel->setCheckable(true);
+    ui.gridPanel->setResetButtonVisible(false);
+
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     int defaultMargin = INT_MIN, defaultSpacing = INT_MIN;
-    formWindow()->layoutDefault(&defaultMargin, &defaultSpacing);
+    m_formWindow->layoutDefault(&defaultMargin, &defaultSpacing);
 
-    QStyle *style = formWindow()->style();
+    QStyle *style = m_formWindow->style();
     ui.defaultMarginSpinBox->setValue(style->pixelMetric(QStyle::PM_DefaultChildMargin, 0));
     ui.defaultSpacingSpinBox->setValue(style->pixelMetric(QStyle::PM_DefaultLayoutSpacing, 0));
 
@@ -50,7 +71,7 @@ FormWindowSettings::FormWindowSettings(QDesignerFormWindowInterface *parent)
     }
 
     QString marginFunction, spacingFunction;
-    formWindow()->layoutFunction(&marginFunction, &spacingFunction);
+    m_formWindow->layoutFunction(&marginFunction, &spacingFunction);
     if (!marginFunction.isEmpty() || !spacingFunction.isEmpty()) {
         ui.layoutFunctionGroupBox->setChecked(true);
         ui.marginFunctionLineEdit->setText(marginFunction);
@@ -59,51 +80,52 @@ FormWindowSettings::FormWindowSettings(QDesignerFormWindowInterface *parent)
         ui.layoutFunctionGroupBox->setChecked(false);
     }
 
-    QString pixFunction = formWindow()->pixmapFunction();
+    const QString pixFunction = m_formWindow->pixmapFunction();
     ui.pixmapFunctionGroupBox->setChecked(!pixFunction.isEmpty());
     ui.pixmapFunctionLineEdit->setText(pixFunction);
 
-    ui.authorLineEdit->setText(formWindow()->author());
+    ui.authorLineEdit->setText(m_formWindow->author());
 
-    foreach (QString includeHint, formWindow()->includeHints()) {
+    foreach (QString includeHint, m_formWindow->includeHints()) {
         if (includeHint.isEmpty())
             continue;
 
         ui.includeHintsTextEdit->append(includeHint);
     }
-}
 
-FormWindowSettings::~FormWindowSettings()
-{
-}
-
-QDesignerFormWindowInterface *FormWindowSettings::formWindow() const
-{
-    return m_formWindow;
+    const bool hasFormGrid = m_formWindow->hasFormGrid();
+    ui.gridPanel->setChecked(hasFormGrid);
+    ui.gridPanel->setGrid(hasFormGrid ? m_formWindow->designerGrid() : qdesigner_internal::FormWindowBase::defaultDesignerGrid());
 }
 
 void FormWindowSettings::accept()
 {
-    formWindow()->setAuthor(ui.authorLineEdit->text());
+    m_formWindow->setAuthor(ui.authorLineEdit->text());
 
     if (ui.pixmapFunctionGroupBox->isChecked())
-        formWindow()->setPixmapFunction(ui.pixmapFunctionLineEdit->text());
+        m_formWindow->setPixmapFunction(ui.pixmapFunctionLineEdit->text());
     else
-        formWindow()->setPixmapFunction(QString());
+        m_formWindow->setPixmapFunction(QString());
 
     if (ui.layoutDefaultGroupBox->isChecked())
-        formWindow()->setLayoutDefault(ui.defaultMarginSpinBox->value(), ui.defaultSpacingSpinBox->value());
+        m_formWindow->setLayoutDefault(ui.defaultMarginSpinBox->value(), ui.defaultSpacingSpinBox->value());
     else
-        formWindow()->setLayoutDefault(INT_MIN, INT_MIN);
+        m_formWindow->setLayoutDefault(INT_MIN, INT_MIN);
 
     if (ui.layoutFunctionGroupBox->isChecked())
-        formWindow()->setLayoutFunction(ui.marginFunctionLineEdit->text(), ui.spacingFunctionLineEdit->text());
+        m_formWindow->setLayoutFunction(ui.marginFunctionLineEdit->text(), ui.spacingFunctionLineEdit->text());
     else
-        formWindow()->setLayoutFunction(QString(), QString());
+        m_formWindow->setLayoutFunction(QString(), QString());
 
-    formWindow()->setIncludeHints(ui.includeHintsTextEdit->toPlainText().split(QLatin1String("\n")));
+    m_formWindow->setIncludeHints(ui.includeHintsTextEdit->toPlainText().split(QString(QLatin1Char('\n'))));
 
-    formWindow()->setDirty(true);
+    const bool hadFormGrid = m_formWindow->hasFormGrid();
+    const bool wantsFormGrid = ui.gridPanel->isChecked();
+    m_formWindow->setHasFormGrid(wantsFormGrid);
+    if (wantsFormGrid || hadFormGrid != wantsFormGrid)
+        m_formWindow->setDesignerGrid(wantsFormGrid ? ui.gridPanel->grid() : qdesigner_internal::FormWindowBase::defaultDesignerGrid());
+
+    m_formWindow->setDirty(true);
 
     QDialog::accept();
 }

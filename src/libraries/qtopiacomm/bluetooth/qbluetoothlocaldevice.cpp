@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,8 +21,7 @@
 
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothremotedevice.h>
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
-#include <qtopialog.h>
+#include "qbluetoothnamespace_p.h"
 #include <qbluetoothlocaldevicemanager.h>
 #include <qbluetoothaddress.h>
 
@@ -31,11 +30,11 @@
 #include <QDateTime>
 #include <qglobal.h>
 
-#include <qtdbus/qdbusargument.h>
-#include <qtdbus/qdbusconnection.h>
-#include <qtdbus/qdbusinterface.h>
-#include <qtdbus/qdbusreply.h>
-#include <qtdbus/qdbusmessage.h>
+#include <QDBusArgument>
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusReply>
+#include <QDBusMessage>
 
 #include <stdio.h>
 #include <string.h>
@@ -98,7 +97,23 @@
     Convenience method, same as value()
 */
 
-#define REMOTE_DEVICE_DISCOVERED 1
+enum __q__signals_enum {
+    REMOTE_DEVICE_DISCOVERED = 1,
+    NAME_CHANGED,
+    REMOTE_ALIAS_CHANGED,
+    REMOTE_ALIAS_CLEARED,
+    REMOTE_DEVICE_CONNECTED,
+    REMOTE_DEVICE_DISCONNECTED,
+    REMOTE_DEVICE_DISCONNECT_REQUEST,
+    BONDING_CREATED,
+    BONDING_REMOVED,
+    REMOTE_NAME_UPDATED,
+    REMOTE_NAME_FAILED,
+    REMOTE_CLASS_UPDATED,
+    REMOTE_DEVICE_DISAPPEARED,
+    DISCOVERABLE_TIMEOUT_CHANGED,
+    MODE_CHANGED
+};
 
 class QBluetoothLocalDevice_Private : public QObject
 {
@@ -125,13 +140,16 @@ public:
     QBluetoothLocalDevice::Error m_error;
     QString m_errorString;
     QList<QBluetoothRemoteDevice> m_discovered;
+    QSet<int> m_sigSet;
+    uint m_discovTo;
 
     void requestSignal(int signal);
-    void releaseSignal(int signal);
 
 public slots:
     void modeChanged(const QString &mode);
+    void asyncModeChange(const QDBusMessage &msg);
     void asyncReply(const QDBusMessage &msg);
+    void asyncErrorReply(const QDBusError &error, const QDBusMessage &msg);
     void cancelScanReply(const QDBusMessage  &msg);
 
     void remoteDeviceConnected(const QString &dev);
@@ -145,7 +163,7 @@ public slots:
     void remoteAliasChanged(const QString &addr, const QString &alias);
     void remoteAliasRemoved(const QString &addr);
 
-    void createBondingReply(const QBluetoothAddress &addr, const QDBusMessage &msg);
+    void createBondingError(const QBluetoothAddress &addr, const QDBusError &error);
     void bondingCreated(const QString &addr);
     void bondingRemoved(const QString &addr);
 
@@ -153,7 +171,6 @@ public slots:
     void remoteNameFailed(const QString &addr);
     void remoteClassUpdated(const QString &addr, uint cls);
     void disconnectRemoteDeviceRequested(const QString &addr);
-
 };
 
 class PairingCancelledProxy : public QObject
@@ -166,6 +183,7 @@ public:
 
 public slots:
     void createBondingReply(const QDBusMessage &msg);
+    void createBondingError(const QDBusError &error, const QDBusMessage &msg);
 
 public:
     QBluetoothLocalDevice_Private *m_parent;
@@ -179,48 +197,104 @@ PairingCancelledProxy::PairingCancelledProxy(const QBluetoothAddress &addr,
 
 }
 
-void PairingCancelledProxy::createBondingReply(const QDBusMessage &msg)
+void PairingCancelledProxy::createBondingReply(const QDBusMessage &)
 {
-    m_parent->createBondingReply(m_addr, msg);
-    delete this;
+    deleteLater();
+}
+
+void PairingCancelledProxy::createBondingError(const QDBusError &error, const QDBusMessage &)
+{
+    m_parent->createBondingError(m_addr, error);
+    deleteLater();
 }
 
 void QBluetoothLocalDevice_Private::requestSignal(int signal)
 {
-    if (!m_iface->isValid()) {
+    if (!m_iface || !m_iface->isValid()) {
+        qWarning("Trying to connect a signal of an invalid QBluetoothLocalDevice instance!");
         return;
     }
 
-    QDBusConnection dbc = QDBusConnection::systemBus();
+    if (m_sigSet.contains(signal))
+        return;
+
+    m_sigSet.insert(signal);
+
+    QDBusConnection dbc =
+#ifdef QTOPIA_TEST
+        QDBusConnection::sessionBus();
+#else
+        QDBusConnection::systemBus();
+#endif
     QString service = m_iface->service();
     QString path = m_iface->path();
     QString interface = m_iface->interface();
 
     switch(signal) {
         case REMOTE_DEVICE_DISCOVERED:
+            dbc.connect(service, path, interface, "DiscoveryStarted",
+                        this, SLOT(discoveryStarted()));
+            dbc.connect(service, path, interface, "DiscoveryCompleted",
+                        this, SLOT(discoveryCompleted()));
             dbc.connect(service, path, interface, "RemoteDeviceFound",
-                this, SLOT(remoteDeviceFound(const QString &, uint, short)));
+                this, SLOT(remoteDeviceFound(QString,uint,short)));
             break;
-        default:
+        case NAME_CHANGED:
+            dbc.connect(service, path, interface, "NameChanged",
+                m_parent, SIGNAL(nameChanged(QString)));
             break;
-    }
-}
-
-void QBluetoothLocalDevice_Private::releaseSignal(int signal)
-{
-    if (!m_iface->isValid()) {
-        return;
-    }
-
-    QDBusConnection dbc = QDBusConnection::systemBus();
-    QString service = m_iface->service();
-    QString path = m_iface->path();
-    QString interface = m_iface->interface();
-
-    switch(signal) {
-        case REMOTE_DEVICE_DISCOVERED:
-            dbc.disconnect(service, path, interface, "RemoteDeviceFound",
-                           this, SLOT(remoteDeviceFound(const QString &, uint, short)));
+        case REMOTE_ALIAS_CHANGED:
+            dbc.connect(service, path, interface, "RemoteAliasChanged",
+                this,
+                SLOT(remoteAliasChanged(QString,QString)));
+            break;
+        case REMOTE_ALIAS_CLEARED:
+            dbc.connect(service, path, interface, "RemoteAliasCleared",
+                this, SLOT(remoteAliasRemoved(QString)));
+            break;
+        case REMOTE_DEVICE_CONNECTED:
+            dbc.connect(service, path, interface, "RemoteDeviceConnected",
+                this, SLOT(remoteDeviceConnected(QString)));
+            break;
+        case REMOTE_DEVICE_DISCONNECTED:
+            dbc.connect(service, path, interface, "RemoteDeviceDisconnected",
+                this, SLOT(remoteDeviceDisconnected(QString)));
+            break;
+        case REMOTE_DEVICE_DISCONNECT_REQUEST:
+            dbc.connect(service, path, interface, "RemoteDeviceDisconnectRequested",
+                this, SLOT(disconnectRemoteDeviceRequested(QString)));
+            break;
+        case BONDING_CREATED:
+            dbc.connect(service, path, interface, "BondingCreated",
+                this, SLOT(bondingCreated(QString)));
+            break;
+        case BONDING_REMOVED:
+            dbc.connect(service, path, interface, "BondingRemoved",
+                this, SLOT(bondingRemoved(QString)));
+            break;
+        case REMOTE_NAME_UPDATED:
+            dbc.connect(service, path, interface, "RemoteNameUpdated",
+                this, SLOT(remoteNameUpdated(QString,QString)));
+            break;
+        case REMOTE_NAME_FAILED:
+            dbc.connect(service, path, interface, "RemoteNameFailed",
+                this, SLOT(remoteNameFailed(QString)));
+            break;
+        case REMOTE_CLASS_UPDATED:
+            dbc.connect(service, path, interface, "RemoteClassUpdated",
+                this, SLOT(remoteClassUpdated(QString,uint)));
+            break;
+        case REMOTE_DEVICE_DISAPPEARED:
+            dbc.connect(service, path, interface, "RemoteDeviceDisappeared",
+                this, SLOT(remoteDeviceDisappeared(QString)));
+            break;
+        case DISCOVERABLE_TIMEOUT_CHANGED:
+            dbc.connect(service, path, interface, "DiscoverableTimeoutChanged",
+                m_parent, SIGNAL(discoverableTimeoutChanged(uint)));
+            break;
+        case MODE_CHANGED:
+            dbc.connect(service, path, interface, "ModeChanged",
+                this, SLOT(modeChanged(QString)));
             break;
         default:
             break;
@@ -229,7 +303,12 @@ void QBluetoothLocalDevice_Private::releaseSignal(int signal)
 
 void QBluetoothLocalDevice_Private::init(const QString &str)
 {
-    QDBusConnection dbc = QDBusConnection::systemBus();
+    QDBusConnection dbc =
+#ifdef QTOPIA_TEST
+        QDBusConnection::sessionBus();
+#else
+        QDBusConnection::systemBus();
+#endif
     QDBusInterface iface("org.bluez", "/org/bluez",
                          "org.bluez.Manager", dbc);
     if (!iface.isValid()) {
@@ -249,7 +328,7 @@ void QBluetoothLocalDevice_Private::init(const QString &str)
                                  dbc);
 
     if (!m_iface->isValid()) {
-        qLog(Bluetooth) << "Could not find org.bluez Adapter interface for" << m_devname;
+        qWarning() << "Could not find org.bluez Adapter interface for" << m_devname;
         delete m_iface;
         m_iface = 0;
         return;
@@ -268,46 +347,6 @@ void QBluetoothLocalDevice_Private::init(const QString &str)
     m_addr = QBluetoothAddress(reply.value());
 
     m_valid = true;
-
-    dbc.connect(service, path, interface, "NameChanged",
-                m_parent, SIGNAL(nameChanged(const QString &)));
-    dbc.connect(service, path, interface, "ModeChanged",
-                this, SLOT(modeChanged(const QString &)));
-    dbc.connect(service, path, interface, "DiscoverableTimeoutChanged",
-                m_parent, SIGNAL(discoverableTimeoutChanged(uint)));
-
-    dbc.connect(service, path, interface, "RemoteDeviceConnected",
-                this, SLOT(remoteDeviceConnected(const QString &)));
-    dbc.connect(service, path, interface, "RemoteDeviceDisconnected",
-                this, SLOT(remoteDeviceDisconnected(const QString &)));
-
-    dbc.connect(service, path, interface, "DiscoveryStarted",
-                this, SLOT(discoveryStarted()));
-    dbc.connect(service, path, interface, "DiscoveryCompleted",
-                this, SLOT(discoveryCompleted()));
-    dbc.connect(service, path, interface, "RemoteDeviceDisappeared",
-                this, SLOT(remoteDeviceDisappeared(const QString &)));
-
-    dbc.connect(service, path, interface, "RemoteAliasChanged",
-                this,
-                SLOT(remoteAliasChanged(const QString &, const QString &)));
-    dbc.connect(service, path, interface, "RemoteAliasCleared",
-                this, SLOT(remoteAliasRemoved(const QString &)));
-
-    dbc.connect(service, path, interface, "BondingCreated",
-                this, SLOT(bondingCreated(const QString &)));
-    dbc.connect(service, path, interface, "BondingRemoved",
-                this, SLOT(bondingRemoved(const QString &)));
-
-    dbc.connect(service, path, interface, "RemoteNameUpdated",
-                this, SLOT(remoteNameUpdated(const QString &, const QString &)));
-    dbc.connect(service, path, interface, "RemoteNameFailed",
-                this, SLOT(remoteNameFailed(const QString &)));
-    dbc.connect(service, path, interface, "RemoteClassUpdated",
-                this, SLOT(remoteClassUpdated(const QString &, uint)));
-
-    dbc.connect(service, path, interface, "RemoteDeviceDisconnectRequested",
-                this, SLOT(disconnectRemoteDeviceRequested(const QString &)));
 }
 
 QBluetoothLocalDevice_Private::QBluetoothLocalDevice_Private(
@@ -364,7 +403,9 @@ static bluez_error_mapping bluez_errors[] = {
 QBluetoothLocalDevice::Error QBluetoothLocalDevice_Private::handleError(const QDBusError &error)
 {
     m_error = QBluetoothLocalDevice::UnknownError;
-    qLog(Bluetooth) << "Decoding error:" << error;
+#ifdef QBLUETOOTH_DEBUG
+    qDebug() << "Decoding error:" << error;
+#endif
 
     int i = 0;
     while (bluez_errors[i].name) {
@@ -400,13 +441,20 @@ void QBluetoothLocalDevice_Private::modeChanged(const QString &mode)
     }
 }
 
-void QBluetoothLocalDevice_Private::asyncReply(const QDBusMessage &msg)
+void QBluetoothLocalDevice_Private::asyncReply(const QDBusMessage &)
 {
     // On a success, the signal should have been emitted already
-    if (msg.type() != QDBusMessage::ErrorMessage)
-        return;
+}
 
-    emitError(QDBusError(msg));
+void QBluetoothLocalDevice_Private::asyncModeChange(const QDBusMessage &)
+{
+    QDBusReply<void> reply = m_iface->call("SetDiscoverableTimeout",
+            QVariant::fromValue(m_discovTo));
+}
+
+void QBluetoothLocalDevice_Private::asyncErrorReply(const QDBusError &error, const QDBusMessage &)
+{
+    emitError(error);
 }
 
 void QBluetoothLocalDevice_Private::cancelScanReply(const QDBusMessage &msg)
@@ -489,12 +537,16 @@ void QBluetoothLocalDevice_Private::remoteDeviceFound(const QString &addr,
 
     for (int i = 0; i < m_discovered.size(); i++) {
         if (m_discovered[i].address() == a) {
-            qLog(Bluetooth) << "RemoteDeviceFound: " << addr << cls << rssi << "[filtered]";
+#ifdef QBLUETOOTH_DEBUG
+            qDebug() << "RemoteDeviceFound: " << addr << cls << rssi << "[filtered]";
+#endif
             return;
         }
     }
 
-    qLog(Bluetooth) << "RemoteDeviceFound: " << addr << cls << rssi;
+#ifdef QBLUETOOTH_DEBUG
+    qDebug() << "RemoteDeviceFound: " << addr << cls << rssi;
+#endif
 
     QString version;
     QString revision;
@@ -529,11 +581,13 @@ void QBluetoothLocalDevice_Private::remoteDeviceFound(const QString &addr,
         name = reply.value();
     }
 
-    qLog(Bluetooth) << "Got Name:" << name << "Version:" << version << "Revision:" <<
+#ifdef QBLUETOOTH_DEBUG
+    qDebug() << "Got Name:" << name << "Version:" << version << "Revision:" <<
             revision << "Manufacturer:" << manufacturer << "Company:" << company;
+#endif
 
     QBluetoothRemoteDevice dev(a, name, version, revision,
-                               manufacturer, company,
+                               manufacturer, company, rssi,
                                major_to_device_major(major),
                                minor, QBluetooth::ServiceClasses(service));
     m_discovered.push_back(dev);
@@ -549,15 +603,10 @@ void QBluetoothLocalDevice_Private::discoveryCompleted()
     m_discovered.clear();
 }
 
-void QBluetoothLocalDevice_Private::createBondingReply(const QBluetoothAddress &addr,
-        const QDBusMessage &msg)
+void QBluetoothLocalDevice_Private::createBondingError(const QBluetoothAddress &addr,
+        const QDBusError &error)
 {
-    // BondingCreated signal should be sent
-    if (msg.type() != QDBusMessage::ErrorMessage) {
-        return;
-    }
-
-    handleError(QDBusError(msg));
+    handleError(error);
     emit m_parent->pairingFailed(addr);
 }
 
@@ -733,22 +782,68 @@ void QBluetoothLocalDevice::connectNotify(const char *signal)
 {
     QByteArray sig(signal);
 
-    if ((sig == QMetaObject::normalizedSignature(SIGNAL(remoteDeviceFound(const QBluetoothRemoteDevice &)))) ||
-        (sig == QMetaObject::normalizedSignature(SIGNAL(remoteDevicesFound(const QList<QBluetoothRemoteDevice> &))))) {
+    if ((sig == QMetaObject::normalizedSignature(SIGNAL(remoteDeviceFound(QBluetoothRemoteDevice)))) ||
+        (sig == QMetaObject::normalizedSignature(SIGNAL(remoteDevicesFound(QList<QBluetoothRemoteDevice>)))) ||
+        (sig == QMetaObject::normalizedSignature(SIGNAL(discoveryStarted()))) ||
+        (sig == QMetaObject::normalizedSignature(SIGNAL(discoveryCompleted())))
+       ) {
         m_data->requestSignal(REMOTE_DEVICE_DISCOVERED);
     }
-}
 
-/*!
-    \internal
-*/
-void QBluetoothLocalDevice::disconnectNotify(const char *signal)
-{
-    QByteArray sig(signal);
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(nameChanged(QString)))) {
+        m_data->requestSignal(NAME_CHANGED);
+    }
 
-    if ((sig == QMetaObject::normalizedSignature(SIGNAL(remoteDeviceFound(const QBluetoothRemoteDevice &)))) ||
-        (sig == QMetaObject::normalizedSignature(SIGNAL(remoteDevicesFound(const QList<QBluetoothRemoteDevice> &))))) {
-        m_data->releaseSignal(REMOTE_DEVICE_DISCOVERED);
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(remoteAliasChanged(QBluetoothAddress,QString)))) {
+        m_data->requestSignal(REMOTE_ALIAS_CHANGED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(remoteAliasRemoved(QBluetoothAddress)))) {
+        m_data->requestSignal(REMOTE_ALIAS_CLEARED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(remoteDeviceConnected(QBluetoothAddress)))) {
+        m_data->requestSignal(REMOTE_DEVICE_CONNECTED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(remoteDeviceDisconnected(QBluetoothAddress)))) {
+        m_data->requestSignal(REMOTE_DEVICE_DISCONNECTED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(remoteDeviceDisconnectRequested(QBluetoothAddress)))) {
+        m_data->requestSignal(REMOTE_DEVICE_DISCONNECT_REQUEST);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(pairingCreated(QBluetoothAddress)))) {
+        m_data->requestSignal(BONDING_CREATED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(pairingRemoved(QBluetoothAddress)))) {
+        m_data->requestSignal(BONDING_REMOVED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(remoteNameUpdated(QBluetoothAddress,QString)))) {
+        m_data->requestSignal(REMOTE_NAME_UPDATED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(remoteNameFailed(QBluetoothAddress)))) {
+        m_data->requestSignal(REMOTE_NAME_FAILED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(remoteClassUpdated(QBluetoothAddress,QBluetooth::DeviceMajor,quint8,QBluetooth::ServiceClasses)))) {
+        m_data->requestSignal(REMOTE_CLASS_UPDATED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(remoteDeviceDisappeared(QBluetoothAddress)))) {
+        m_data->requestSignal(REMOTE_DEVICE_DISAPPEARED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(discoverableTimeoutChanged(uint)))) {
+        m_data->requestSignal(DISCOVERABLE_TIMEOUT_CHANGED);
+    }
+
+    else if (sig == QMetaObject::normalizedSignature(SIGNAL(stateChanged(QBluetoothLocalDevice::State)))) {
+        m_data->requestSignal(MODE_CHANGED);
     }
 }
 
@@ -947,18 +1042,14 @@ bool QBluetoothLocalDevice::setDiscoverable(uint timeout)
         return false;
     }
 
-    QDBusReply<void> reply = m_data->m_iface->call("SetDiscoverableTimeout",
-            QVariant::fromValue(timeout));
-    if (!reply.isValid()) {
-        m_data->handleError(reply.error());
-        return false;
-    }
+    m_data->m_discovTo = timeout;
 
     QList<QVariant> args;
     args << QString("discoverable");
 
-    return m_data->m_iface->callWithCallback("SetMode", args,
-            m_data, SLOT(asyncReply(const QDBusMessage &)));
+    return m_data->m_iface->callWithCallback("SetMode", args, m_data,
+                                             SLOT(asyncModeChange(QDBusMessage)),
+                                             SLOT(asyncErrorReply(QDBusError,QDBusMessage)));
 }
 
 /*!
@@ -1025,8 +1116,9 @@ bool QBluetoothLocalDevice::setConnectable()
     QList<QVariant> args;
     args << QString("connectable");
 
-    return m_data->m_iface->callWithCallback("SetMode", args,
-            m_data, SLOT(asyncReply(const QDBusMessage &)));
+    return m_data->m_iface->callWithCallback("SetMode", args, m_data,
+                                             SLOT(asyncReply(QDBusMessage)),
+                                             SLOT(asyncErrorReply(QDBusError,QDBusMessage)));
 }
 
 /*!
@@ -1069,8 +1161,9 @@ bool QBluetoothLocalDevice::turnOff()
     QList<QVariant> args;
     args << QString("off");
 
-    return m_data->m_iface->callWithCallback("SetMode", args,
-            m_data, SLOT(asyncReply(const QDBusMessage &)));
+    return m_data->m_iface->callWithCallback("SetMode", args, m_data,
+                                             SLOT(asyncReply(QDBusMessage)),
+                                             SLOT(asyncErrorReply(QDBusError,QDBusMessage)));
 }
 
 /*!
@@ -1187,8 +1280,9 @@ bool QBluetoothLocalDevice::cancelDiscovery()
 
     QList<QVariant> args;
 
-    return m_data->m_iface->callWithCallback("CancelDiscovery", args,
-            m_data, SLOT(asyncReply(const QDBusMessage &)));
+    return m_data->m_iface->callWithCallback("CancelDiscovery", args, m_data,
+                                             SLOT(asyncReply(QDBusMessage)),
+                                             SLOT(asyncErrorReply(QDBusError,QDBusMessage)));
 }
 
 /*!
@@ -1331,8 +1425,9 @@ bool QBluetoothLocalDevice::requestPairing(const QBluetoothAddress &addr)
 
     PairingCancelledProxy *proxy = new PairingCancelledProxy(addr, m_data);
 
-    return m_data->m_iface->callWithCallback("CreateBonding", args,
-            proxy, SLOT(createBondingReply(const QDBusMessage &)));
+    return m_data->m_iface->callWithCallback("CreateBonding", args, proxy,
+                                             SLOT(createBondingReply(QDBusMessage)),
+                                             SLOT(createBondingError(QDBusError,QDBusMessage)));
 }
 
 /*!
@@ -1353,8 +1448,9 @@ bool QBluetoothLocalDevice::removePairing(const QBluetoothAddress &addr)
     QList<QVariant> args;
     args << addr.toString();
 
-    return m_data->m_iface->callWithCallback("RemoveBonding", args,
-            m_data, SLOT(asyncReply(const QDBusMessage &)));
+    return m_data->m_iface->callWithCallback("RemoveBonding", args, m_data,
+                                             SLOT(asyncReply(QDBusMessage)),
+                                             SLOT(asyncErrorReply(QDBusError,QDBusMessage)));
 }
 
 /*!
@@ -1437,8 +1533,9 @@ bool QBluetoothLocalDevice::cancelPairing(const QBluetoothAddress &addr)
     QList<QVariant> args;
     args << addr.toString();
 
-    return m_data->m_iface->callWithCallback("CancelBondingProcess", args,
-            m_data, SLOT(asyncReply(const QDBusMessage &)));
+    return m_data->m_iface->callWithCallback("CancelBondingProcess", args, m_data,
+                                             SLOT(asyncReply(QDBusMessage)),
+                                             SLOT(asyncErrorReply(QDBusError,QDBusMessage)));
 }
 
 /*!
@@ -1516,7 +1613,7 @@ bool QBluetoothLocalDevice::removeRemoteAlias(const QBluetoothAddress &addr)
 /*!
     Enables or Disables the Periodic Discovery Mode according to \a enabled.
     When in Periodic Discovery Mode the device will periodically run a device inquiry
-    and report the results.  Returns true if the mode change operation succeded,
+    and report the results.  Returns true if the mode change operation succeeded,
     and false otherwise.
 
     \sa isPeriodicDiscoveryEnabled()
@@ -1583,7 +1680,7 @@ QBluetoothReply<uchar> QBluetoothLocalDevice::pinCodeLength(const QBluetoothAddr
     remote bluetooth device at address \a addr.  This call will most likely require system
     administrator privileges.  The actual disconnection will happen several seconds later.
     First the remoteDeviceDisconnectRequested signal will be sent.  This method returns
-    true if the disconnectRemoteDevice request succeded, and false otherwise.
+    true if the disconnectRemoteDevice request succeeded, and false otherwise.
 
     \sa remoteDeviceDisconnectRequested()
 */

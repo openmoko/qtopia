@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,6 +27,9 @@
 #include <QListWidget>
 #include "phonethemeview.h"
 #include <QPhoneCall>
+#ifdef QTOPIA_CELL
+#include <QSimControlEvent>
+#endif
 
 class DialerControl;
 class QMenu;
@@ -38,8 +41,11 @@ class CallItemModel;
 class SecondaryCallScreen;
 class ThemeListModel;
 class CallAudioHandler;
+class QAudioStateConfiguration;
+class QPhoneCall;
 
-class CallScreen;
+class QSimToolkit;
+class QAbstractMessageBox;
 
 class CallScreen : public PhoneThemedView
 {
@@ -56,7 +62,6 @@ public:
     int heldCallCount() const { return holdCount; }
     bool incomingCall() const { return incoming; }
     bool inMultiCall() const { return activeCount > 1 || holdCount > 1; }
-
 
 signals:
     void acceptIncoming();
@@ -85,6 +90,7 @@ protected:
     void closeEvent(QCloseEvent *);
     bool eventFilter(QObject *, QEvent *);
     void hideEvent( QHideEvent * );
+    void mouseReleaseEvent(QMouseEvent *);
 
 private slots:
     void updateAll();
@@ -94,6 +100,23 @@ private slots:
     void themeItemClicked(ThemeItem*);
     void actionGsmSelected();
     void updateLabels();
+    void setVideoWidget();
+    void deleteVideoWidget();
+    void initializeAudioConf();
+#ifdef QTOPIA_CELL
+    void simControlEvent(const QSimControlEvent &);
+#endif
+    void grabMouse();
+    void releaseMouse();
+    void muteRingSelected();
+    void callConnected(const QPhoneCall &);
+    void callDropped(const QPhoneCall &);
+    void callIncoming(const QPhoneCall &);
+    void callDialing(const QPhoneCall &);
+    void showProgressDlg();
+    void hideProgressDlg();
+    void interactionDelayTimeout();
+    void rejectModalDialog();
 
 private:
     void clearDtmfDigits(bool clearOneChar = false);
@@ -102,6 +125,7 @@ private:
     int callListHeight() const;
     bool dialNumbers(const QString & numbers);
     void setGsmMenuItem();
+    void setItemActive(const QString &name, bool active);
 
 private:
     QString dtmfActiveCall;
@@ -130,7 +154,15 @@ private:
     QTimer* gsmActionTimer;
     SecondaryCallScreen *secondaryCallScreen;
     ThemeListModel* m_model;
-	CallAudioHandler* m_callAudioHandler;
+    CallAudioHandler* m_callAudioHandler;
+    QWidget* videoWidget;
+    QAudioStateConfiguration *m_audioConf;
+#ifdef QTOPIA_CELL
+    QSimToolkit *simToolkit;
+#endif
+    QAbstractMessageBox *simMsgBox;
+    bool showWaitDlg;
+    QTimer *symbolTimer;
 };
 
 #endif

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,7 +20,6 @@
 ****************************************************************************/
 
 #include "qmimetype.h"
-#include "contentlnksql_p.h"
 #include <qtopiaglobal.h>
 #include <qcontent.h>
 #include <qcontentset.h>
@@ -43,164 +42,16 @@
 #include <QSettings>
 #include <QtGlobal>
 #include <qtopialog.h>
-#include <QtopiaService>
+#include <qtopia/private/qmimetypedata_p.h>
+#include <qtopia/private/qcontentstore_p.h>
 
 #include "drmcontent_p.h"
 
-#ifdef Q_OS_UNIX
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#endif
 
-class QMimeTypeAppManager : public QObject
-{
-    Q_OBJECT
-public:
-    QMimeTypeAppManager() : QObject() {
-        updateApplications();
-    }
-
-    void updateApplications()
-    {
-        QTimer::singleShot(1, this, SLOT(init()));
-    }
-
-private slots:
-    void appsChanged(const QContentIdList &cids, QContent::ChangeType ct) {
-        if (ct == QContent::Added) {
-            foreach (QContentId cid, cids)
-                QMimeType::registerApp(QContent(cid));
-        } else {
-            QMimeType::updateApplications();
-        }
-    }
-    void appsChanged()
-    {
-        QMimeType::updateApplications();
-    }
-    
-    void init()
-    {
-        apps = new QContentSet(QContentFilter(QContent::Application), this);
-        connect(apps, SIGNAL(changed(const QContentIdList&,QContent::ChangeType)),
-            this, SLOT(appsChanged(const QContentIdList&,QContent::ChangeType)));
-        connect(apps, SIGNAL(changed()), this, SLOT(appsChanged()));
-    }
-
-private:
-    QContentSet *apps;
-};
-
-Q_GLOBAL_STATIC(QMimeTypeAppManager, appManager);
-
-class QMimeTypeData {
-public:
-    QMimeTypeData(const QString& i) :
-        id(i)
-    {
-    }
-    QString id;
-    QString extension;
-    QContentList apps;
-    QStringList icons;
-    QList<QDrmRights::Permission> permissions;
-
-    ~QMimeTypeData()
-    {
-    }
-
-    const QString &description()
-    {
-#ifndef QTOPIA_CONTENT_INSTALLER
-        if ( desc.isEmpty() )
-            desc = QtopiaApplication::tr("%1 document").arg(apps.last().name());
-#endif
-        return desc;
-    }
-
-    const QIcon &icon( QMimeType::IconType type )
-    {
-        switch( type )
-        {
-            case QMimeType::DrmValid:
-            {
-                if ( drmValidIcon.isNull() )
-                    loadPixmaps( type );
-                return drmValidIcon;
-            }
-            case QMimeType::DrmInvalid:
-            {
-                if ( drmInvalidIcon.isNull() )
-                    loadPixmaps( type );
-                return drmInvalidIcon;
-            }
-            default:    // QMimeType::Default. Not explicit as compiler will warn about not all
-            {           // code paths returning a value.
-                if ( icn.isNull() )
-                    loadPixmaps( type );
-                return icn;
-            }
-        }
-    }
-
-private:
-    void loadPixmaps( QMimeType::IconType type )
-    {
-        if ( icons.count() ) {
-            QString icon = icons.first();
-            QContent content = apps.first();
-
-            int smallSize = qApp->style()->pixelMetric(QStyle::PM_ListViewIconSize);
-            int bigSize   = qApp->style()->pixelMetric(QStyle::PM_LargeIconSize);
-
-            if ( icon.isNull() ) {
-                icn = content.icon();
-
-                if( type == QMimeType::DrmValid )
-                    drmValidIcon = DrmContentPrivate::createIcon( icn, smallSize, bigSize, true );
-                else if( type == QMimeType::DrmInvalid )
-                    drmInvalidIcon = DrmContentPrivate::createIcon( icn, smallSize, bigSize, false );
-            } else {
-                icn = QIcon(QLatin1String(":icon/") + icon);
-                switch( type )
-                {
-                    case QMimeType::DrmValid:
-                        drmValidIcon = DrmContentPrivate::createIcon( icn, smallSize, bigSize, true );
-                        break;
-                    case QMimeType::DrmInvalid:
-                        drmInvalidIcon = DrmContentPrivate::createIcon( icn, smallSize, bigSize, false );
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
-    QIcon icn;
-    QIcon drmValidIcon;
-    QIcon drmInvalidIcon;
-    QString desc;
-};
-
-class QMimeType::Private : public QHash<QString,QMimeTypeData*> {
-public:
-    Private() {}
-    ~Private()
-    {   // implement "autoDelete"
-        QStringList keylist = keys();
-        foreach ( QString k, keylist )
-        {
-            delete take( k );
-        }
-    }
-
-    // ...
-};
-
-
-QMimeType::Private* QMimeType::d=0;
 typedef QHash<QString, QString> typeForType;
 Q_GLOBAL_STATIC(typeForType, typeFor);
 typedef QHash<QString, QStringList> extForType;
@@ -210,19 +61,9 @@ Q_GLOBAL_STATIC(loadedTimesType, loadedTimes);
 
 QMutex QMimeType::staticsGuardMutex(QMutex::Recursive);
 
-QMimeType::Private& QMimeType::data()
-{
-    QMutexLocker staticsGuard(&staticsGuardMutex);
-    if ( !d ) {
-        d = new Private;
-        static bool setCleanup = false;
-        if ( !setCleanup ) {
-            qAddPostRoutine( QMimeType::clear );
-            setCleanup = true;
-        }
-    }
-    return *d;
-}
+typedef QCache<QString,QMimeTypeData> QMimeTypeDataCache;
+
+Q_GLOBAL_STATIC(QMimeTypeDataCache,mimeTypeDataCache);
 
 /*!
     \class QMimeType
@@ -243,6 +84,13 @@ QMimeType::Private& QMimeType::data()
     \value DrmValid The icon is displayed for drm protected content with current valid rights.
     \value DrmInvalid The icon is displayed for drm protected content with no current valid rights.
 */
+
+/*!
+    Constructs a null QMimeType.
+*/
+QMimeType::QMimeType()
+{
+}
 
 /*!
     Constructs a QMimeType object. If the parameter \a ext_or_id is a MIME type, it
@@ -271,6 +119,105 @@ QMimeType::QMimeType( const QContent& lnk )
 }
 
 /*!
+    Constructs a copy of the QMimeType \a other.
+*/
+QMimeType::QMimeType( const QMimeType &other )
+    : mimeId( other.mimeId )
+{
+}
+
+/*!
+    Assigns the value of the QMimeType \a other to a mime type.
+*/
+QMimeType &QMimeType::operator =( const QMimeType &other )
+{
+    mimeId = other.mimeId;
+
+    return *this;
+}
+
+/*!
+    Compares the mime type with the QMimeType \a other and returns true if they are equal.
+*/
+bool QMimeType::operator ==( const QMimeType &other ) const
+{
+    return mimeId == other.mimeId;
+}
+
+/*!
+    Constructs a QMimeType from the mime type ID string \a mimeId.
+
+    This does not perform any validation of the mime type ID, if validation is required consider using the QMimeType() constructor
+    instead.
+*/
+QMimeType QMimeType::fromId( const QString &mimeId )
+{
+    QMimeType type;
+
+    type.mimeId = mimeId;
+
+    return type;
+}
+
+/*!
+    Constructs a QMimeType from a file \a extension.
+*/
+QMimeType QMimeType::fromExtension( const QString &extension )
+{
+    if(loadedTimes()->count() == 0)
+        loadExtensions();
+
+    QMimeType type;
+
+    type.mimeId = typeFor()->value( extension.toLower() );
+
+    return type;
+}
+
+/*!
+    Constructs a QMimeType from a \a fileName.
+*/
+QMimeType QMimeType::fromFileName( const QString &fileName )
+{
+    QMimeType type;
+
+    int slashIndex = fileName.lastIndexOf( QLatin1Char( '/' ) );
+
+    int dotIndex = fileName.lastIndexOf( QLatin1Char( '.' ) );
+
+    if( dotIndex > slashIndex )
+    {
+        if(loadedTimes()->count() == 0)
+            loadExtensions();
+        QString extension = fileName.mid( dotIndex + 1 ).toLower();
+
+        type.mimeId = typeFor()->value( extension );
+    }
+
+    if( type.mimeId.isEmpty() )
+    {
+        const char elfMagic[] = { '\177', 'E', 'L', 'F', '\0' };
+
+        QFile ef( fileName );
+
+        if ( ef.size() > 5 && ef.open( QIODevice::ReadOnly ) && ef.peek(5) == elfMagic)  // try to find from magic
+            type.mimeId = QLatin1String("application/x-executable");  // could be a shared library or an exe
+        else
+            type.mimeId = QLatin1String("application/octet-stream");
+    }
+
+    return type;
+}
+
+/*!
+    Returns true if the QMimeType is null.
+*/
+bool QMimeType::isNull() const
+{
+    return mimeId.isEmpty();
+}
+
+/*!
     Returns the MIME type identifier. eg. image/jpeg
 */
 QString QMimeType::id() const
@@ -284,8 +231,11 @@ QString QMimeType::id() const
 */
 QString QMimeType::description() const
 {
-    QMimeTypeData* mtd = data(mimeId);
-    return mtd ? mtd->description() : QString::null;
+#ifndef QTOPIA_CONTENT_INSTALLER
+    return QtopiaApplication::tr("%1 document").arg( data(mimeId).defaultApplication().name() );
+#else
+    return QString();
+#endif
 }
 
 /*!
@@ -293,9 +243,21 @@ QString QMimeType::description() const
 */
 QIcon QMimeType::icon( IconType iconType ) const
 {
-    QMimeTypeData* mtd = data(mimeId);
+    Q_UNUSED( iconType );
 
-    return mtd ? mtd->icon( iconType ) : QIcon();
+    QMimeTypeData mtd = data(mimeId);
+
+    switch( iconType )
+    {
+    case Default:
+        return mtd.icon( mtd.defaultApplication() );
+    case DrmValid:
+        return mtd.validDrmIcon( mtd.defaultApplication() );
+    case DrmInvalid:
+        return mtd.invalidDrmIcon( mtd.defaultApplication() );
+    default:
+        return QIcon();
+    }
 }
 
 
@@ -307,7 +269,7 @@ QString QMimeType::extension() const
     QStringList exts = extensions();
     if (exts.count())
         return extensions().first();
-    return QString::null;
+    return QString();
 }
 
 /*!
@@ -315,11 +277,10 @@ QString QMimeType::extension() const
 */
 QStringList QMimeType::extensions() const
 {
-    loadExtensions();
-    QHash<QString,QStringList>::const_iterator it = extFor()->find(mimeId);
-    if (it != extFor()->end())
-        return *it;
-    return QStringList();
+    if(loadedTimes()->count() == 0)
+        loadExtensions();
+
+    return extFor()->value(mimeId);
 }
 
 /*!
@@ -328,8 +289,7 @@ QStringList QMimeType::extensions() const
 */
 QContentList QMimeType::applications() const
 {
-    QMimeTypeData* mtd = data(mimeId);
-    return mtd ? mtd->apps : QContentList();
+    return applicationsFor(*this);
 }
 
 /*!
@@ -340,8 +300,7 @@ QContentList QMimeType::applications() const
 */
 QContent QMimeType::application() const
 {
-    QMimeTypeData* mtd = data(mimeId);
-    return mtd ? mtd->apps.last() : QContent();
+    return defaultApplicationFor(*this);
 }
 
 /*!
@@ -351,8 +310,9 @@ QContent QMimeType::application() const
 */
 QDrmRights::Permission QMimeType::permission() const
 {
-    QMimeTypeData* mtd = data(mimeId);
-    return mtd && !mtd->permissions.isEmpty() ? mtd->permissions.first() : QDrmRights::Unrestricted;
+    QMimeTypeData mtd = data(mimeId);
+
+    return mtd.permission( mtd.defaultApplication() );
 }
 
 /*!
@@ -361,72 +321,7 @@ QDrmRights::Permission QMimeType::permission() const
 */
 QList< QDrmRights::Permission > QMimeType::permissions() const
 {
-    QMimeTypeData* mtd = data(mimeId);
-    return mtd ? mtd->permissions : QList< QDrmRights::Permission >();
-}
-
-/*!
-    \internal
-    Registers an application to the MIME system. It does this by querying QContent::mimeTypes()
-    to find out which applications it wishes to register support for.
-*/
-void QMimeType::registerApp( const QContent& lnk )
-{
-    QMutexLocker staticsGuard(&staticsGuardMutex);
-    QStringList list = lnk.mimeTypes();
-    QStringList icons = lnk.mimeTypeIcons();
-    QList< QDrmRights::Permission > permissions = lnk.mimeTypePermissions();
-    int index = 0;
-    foreach (QString type, list) {
-        if( type.isEmpty() )
-            continue;
-
-        QMimeTypeData* cur = NULL;
-
-        if( data().contains( type ) )
-            cur = data()[ type ];
-
-        if( !cur )
-        {
-            cur = new QMimeTypeData( type );
-            data().insert( type, cur );
-            cur->apps.append( lnk );
-            cur->permissions.append( index < permissions.count() ? permissions[ index ] : QDrmRights::Unrestricted );
-            cur->icons.append( index < icons.count() ? icons[ index ] : QString() );
-        }
-        else if( cur->apps.count() )
-        {
-            if( type.right(2)==QLatin1String("/*") )
-                type.truncate( type.length()-2 );
-            QSettings binding( QLatin1String("Trolltech"), QtopiaService::binding( QLatin1String("Open/") + type ) );
-            QString def;
-            if( binding.status()==QSettings::NoError )
-            {
-                binding.beginGroup(QLatin1String("Service"));
-                def = binding.value(QLatin1String("default")).toString();
-            }
-            if( lnk.executableName() == def )
-            {
-                cur->apps.prepend( lnk );
-                cur->permissions.prepend( index < permissions.count() ? permissions[ index ] : QDrmRights::Unrestricted );
-                cur->icons.prepend( index < icons.count() ? icons[ index ] : QString() );
-            }
-            else
-            {
-                cur->apps.append( lnk );
-                cur->permissions.append( index < permissions.count() ? permissions[ index ] : QDrmRights::Unrestricted );
-                cur->icons.append( index < icons.count() ? icons[ index ] : QString() );
-            }
-        }
-        else
-        {
-            cur->apps.append( lnk );
-            cur->permissions.append( index < permissions.count() ? permissions[ index ] : QDrmRights::Unrestricted );
-            cur->icons.append( index < icons.count() ? icons[ index ] : QString() );
-        }
-
-        index++;
-    }
+    return QList< QDrmRights::Permission >();
 }
 
 /*!
@@ -436,11 +331,10 @@ void QMimeType::registerApp( const QContent& lnk )
 void QMimeType::clear()
 {
     QMutexLocker staticsGuard(&staticsGuardMutex);
-    delete d;
-    d = 0;
     extFor()->clear();
     typeFor()->clear();
     loadedTimes()->clear();
+    mimeTypeDataCache()->clear();
 }
 
 /*!
@@ -451,19 +345,22 @@ void QMimeType::loadExtensions()
 {
     QStringList paths;
     paths << QLatin1String("/") << Qtopia::installPaths();
+    const int CheckIntervalSeconds = 60 * 10;
 
     const QString etcMimeTypesConst = QLatin1String("etc/mime.types");
 
-    QMutexLocker staticsGuard(&staticsGuardMutex);
     QFileInfo fi;
     foreach(QString path, paths)
     {
-        QString file = path+etcMimeTypesConst;
-        fi.setFile(file);
-        if(!loadedTimes()->contains(path) || (fi.exists() && fi.created() > loadedTimes()->value(path)))
+        QString file = QDir::cleanPath(path+etcMimeTypesConst);
+        if(!loadedTimes()->contains(path) || loadedTimes()->value(path).secsTo(QDateTime::currentDateTime()) > CheckIntervalSeconds)
         {
-            loadExtensions(file);
-            loadedTimes()->insert(path, fi.created());
+            fi.setFile(file);
+            if(fi.exists() && fi.created() > loadedTimes()->value(path))
+            {
+                loadExtensions(file);
+                loadedTimes()->insert(path, fi.created());
+            }
         }
     }
 }
@@ -510,33 +407,30 @@ void QMimeType::loadExtensions(const QString& filename)
     QFile file(filename);
     if ( file.open(QIODevice::ReadOnly) ) {
         char line[1024];
-        int posn;
-        QStringList newexts, exts;
-        QString ext, id;
+
         while (file.readLine(line, sizeof(line)) >= 0) {
             if (line[0] == '\0' || line[0] == '#')
                 continue;
-            posn = 0;
-            id = nextString(line, posn);
+            int posn = 0;
+            QString id = nextString(line, posn);
             if ( id.isEmpty() )
                 continue;
             id = id.toLower();
-            if(extFor()->contains(id))
-            exts = extFor()->value(id);
-            else
-                exts.clear();
-            ext = nextString(line, posn);
-            newexts.clear();
-            while(!ext.isEmpty()) {
-                exts.removeAll(ext);
-                if ( !newexts.contains(ext) )
-                    newexts.append(ext);
-                typeFor()->insert(ext, id);
-                ext = nextString(line, posn);
+
+            QStringList exts = extFor()->value(id);
+
+            for( QString ext = nextString( line, posn ); !ext.isEmpty(); ext = nextString(line, posn).toLower() )
+            {
+                if( !exts.contains( ext ) )
+                {
+                    exts.append( ext );
+
+                    typeFor()->insert(ext, id);
+                }
             }
-            if(!newexts.isEmpty())
-                extFor()->insert(id, exts + newexts);
+            (*extFor())[ id ] = exts;
         }
+        // todo: update the database view, and send out a signal about notifying the doc system of mimetype updates.
     }
 }
 
@@ -550,13 +444,9 @@ void QMimeType::init( const QString& ext_or_id )
     if (ext_or_id.isEmpty())
         return;
 
-    loadExtensions();
-    initializeAppManager();
-    QFile ef( ext_or_id );
+    if(loadedTimes()->count() == 0)
+        loadExtensions();
     QString mime_sep = QLatin1String("/");
-#ifdef Q_OS_WIN32
-    mime_sep = QLatin1String(":");
-#endif
     // either it doesnt have exactly one mime-separator, or it has
     // a path separator at the beginning
     bool doesntLookLikeMimeString =
@@ -568,28 +458,16 @@ void QMimeType::init( const QString& ext_or_id )
     QHash<QString,QStringList>::const_iterator it = extFor()->find(lwrExtOrId);
     if ( it != extFor()->end() ) {
         mimeId = lwrExtOrId;
-    } else if ( doesntLookLikeMimeString || ef.exists() )
-    {
+    } else if( ext_or_id.startsWith( "Service/" ) || ext_or_id.startsWith( "Ipc/" ) || ext_or_id.startsWith( "Folder/" ) ) {
+        mimeId = ext_or_id;
+    } else if ( doesntLookLikeMimeString || QFile(ext_or_id).exists() ) {
+        QFile ef(ext_or_id);
         int dot = ext_or_id.lastIndexOf('.');
         QString ext = dot >= 0 ? ext_or_id.mid(dot+1) : ext_or_id;
         mimeId = typeFor()->value(ext.toLower());
-#ifdef Q_OS_UNIX
-        if ( mimeId.isNull() && ef.exists() )  // try to find from magic
-        {
-            char buf[ 10 ];
-            int fd = ::open( ef.fileName().toLocal8Bit().constData(), O_RDONLY );
-            (void)::read( fd, buf, 10 );
-            ::close( fd );
-            const char elfMagic[] = { '\177', 'E', 'L', 'F', '\0' };
-            const char *mptr = elfMagic;
-            int e;
-            for ( e = 0; e < 4; e++, mptr++ )
-                if ( *mptr != buf[e] )
-                    break;
-            if ( e == 4 )
-                mimeId = QLatin1String("application/x-executable");  // could be a shared library or an exe
-        }
-#endif
+        const char elfMagic[] = { '\177', 'E', 'L', 'F', '\0' };
+        if ( mimeId.isNull() && ef.exists() && ef.size() > 5 && ef.open(QIODevice::ReadOnly) && ef.peek(5) == elfMagic)  // try to find from magic
+            mimeId = QLatin1String("application/x-executable");  // could be a shared library or an exe
         if ( mimeId.isNull() )
             mimeId = QLatin1String("application/octet-stream");
     }
@@ -597,40 +475,48 @@ void QMimeType::init( const QString& ext_or_id )
     {
         mimeId = lwrExtOrId;
     }
-    if ( !d )
-        updateApplications();
 }
 
 /*!
     \internal
-    Accessor for the internal singleton.
+    Accessor for the internal singleton, returns the QMimeTypeData associated with the MIME type \a id.
 */
-QMimeTypeData* QMimeType::data(const QString& id)
+QMimeTypeData QMimeType::data(const QString& id)
 {
     QMutexLocker staticsGuard(&staticsGuardMutex);
-    QMimeTypeData* mtd = NULL;
-    if ( !d )
-        updateApplications();
-    if (data().contains(id)) {
-        mtd = data()[id];
-    } else {
-        int s = id.indexOf('/');
-        QString idw = id.left(s)+QLatin1String("/*");
-        if (data().contains(idw))
-            mtd = data()[idw];
-    }
-    return mtd;
-}
 
-/*!
-    \obsolete
-    Returns a Qtopia folder containing application definitions.
-    This function is used to help port functionality from Qtopia2/Qtopia 4.1 applications
-    that relied upon this information.
-*/
-QString QMimeType::appsFolderName()
-{
-    return Qtopia::qtopiaDir() + QLatin1String("apps");
+    QMimeTypeData data;
+
+    if( mimeTypeDataCache()->contains( id ) )
+    {
+        data = *mimeTypeDataCache()->object( id );
+    }
+    else
+    {
+        data = QContentStore::instance()->mimeTypeFromId( id );
+
+        if( !data.id().isEmpty() )
+            mimeTypeDataCache()->insert( id, new QMimeTypeData( data ) );
+    }
+
+    if( data.applications().count() == 0 )
+    {
+        QString majorType = id.left( id.indexOf( '/' ) ) + QLatin1String( "/*" );
+
+        if( mimeTypeDataCache()->contains( majorType ) )
+        {
+            data = *mimeTypeDataCache()->object( majorType );
+        }
+        else
+        {
+            data = QContentStore::instance()->mimeTypeFromId( majorType );
+
+            if( !data.id().isEmpty() )
+                mimeTypeDataCache()->insert( majorType, new QMimeTypeData( data ) );
+        }
+    }
+
+    return data;
 }
 
 /*!
@@ -640,85 +526,80 @@ QString QMimeType::appsFolderName()
 void QMimeType::updateApplications()
 {
     QMutexLocker staticsGuard(&staticsGuardMutex);
-    initializeAppManager();
 
-    QList< ContentLinkSql::MimeData > mimeData = QContent::database()->getMimeData();
-
-    foreach( ContentLinkSql::MimeData mime, mimeData )
-    {
-        QStringList types = mime.mimeTypes.split( ';' );
-        QStringList icons = mime.icons.split( ';' );
-        QList< QDrmRights::Permission > permissions = ContentLinkPrivate::extractPermissions( mime.permissions );
-
-        int index = 0;
-
-        foreach( QString type, types )
-        {
-            if( type.isEmpty() )
-                continue;
-
-            QMimeTypeData* cur = NULL;
-
-            if( data().contains( type ) )
-                cur = data()[ type ];
-
-            QContent app( mime.cid );
-
-            if ( !cur )
-            {
-                cur = new QMimeTypeData( type );
-                data().insert( type, cur );
-                cur->apps.append( app );
-                cur->permissions.append( index < permissions.count() ? permissions[ index ] : QDrmRights::Unrestricted );
-                cur->icons.append( index < icons.count() ? icons[ index ] : QString() );
-            }
-            else if( cur->apps.count() )
-            {
-                if( type.right(2)==QLatin1String("/*") )
-                    type.truncate( type.length()-2 );
-                QSettings binding( QLatin1String("Trolltech"), QtopiaService::binding( QLatin1String("Open/") + type ) );
-                QString def;
-                if( binding.status()==QSettings::NoError )
-                {
-                    binding.beginGroup(QLatin1String("Service"));
-                    def = binding.value(QLatin1String("default")).toString();
-                }
-                if( app.executableName() == def )
-                {
-                    cur->apps.prepend( app );
-                    cur->permissions.prepend( index < permissions.count() ? permissions[ index ] : QDrmRights::Unrestricted );
-                    cur->icons.prepend( index < icons.count() ? icons[ index ] : QString() );
-                }
-                else
-                {
-                    cur->apps.append( app );
-                    cur->permissions.append( index < permissions.count() ? permissions[ index ] : QDrmRights::Unrestricted );
-                    cur->icons.append( index < icons.count() ? icons[ index ] : QString() );
-                }
-            }
-            else
-            {
-                cur->apps.append( app );
-                cur->permissions.append( index < permissions.count() ? permissions[ index ] : QDrmRights::Unrestricted );
-                cur->icons.append( index < icons.count() ? icons[ index ] : QString() );
-            }
-
-            index++;
-        }
-    }
+    mimeTypeDataCache()->clear();
 }
 
 /*!
-    \internal
-    Makes sure the internal singleton appmanager data structure is created.
+    Adds an association to the system between a \a mimeType and an \a application, with \a icon and \a permission.
 */
-
-void QMimeType::initializeAppManager()
+void QMimeType::addAssociation(const QString& mimeType, const QString& application, const QString& icon, QDrmRights::Permission permission)
 {
-    QMimeTypeAppManager *appMan = appManager();
-    if(appMan == NULL)
-        // should never hit the below, simply there for if we go fubar, and to stop optimising out the call
-        qLog(DocAPI) << "MimeType App Manager initialisation failed";
+    QContentStore::instance()->addAssociation( mimeType, application, icon, permission );
+    if( mimeTypeDataCache()->contains( mimeType ) )
+        mimeTypeDataCache()->remove( mimeType );
+}
+
+/*!
+    Removes an association from the system between a \a mimeType and an \a application.
+*/
+void QMimeType::removeAssociation(const QString& mimeType, const QString& application)
+{
+    QContentStore::instance()->removeAssociation( mimeType, application );
+    if( mimeTypeDataCache()->contains( mimeType ) )
+        mimeTypeDataCache()->remove( mimeType );
+}
+
+/*!
+    Returns a list of applications that have registered associations with the mimetype of the \a content object.
+*/
+QContentList QMimeType::applicationsFor(const QContent& content)
+{
+    QContentList result(data(content.type()).applications());
+    if(content.type().contains('/'))
+        result += data(content.type().section('/', 0, 0) + "/*").applications();
+    return result;
+}
+
+/*!
+    Returns a list of applications that have registered associations with the \a mimeType.
+*/
+QContentList QMimeType::applicationsFor(const QMimeType& mimeType)
+{
+    QContentList result(data(mimeType.id()).applications());
+    if(mimeType.id().contains('/'))
+        result += data(mimeType.id().section('/', 0, 0) + "/*").applications();
+    return result;
+}
+
+/*!
+    Returns the system marked default from the list of applications that have registered associations with the mimetype of the \a content object.
+*/
+QContent QMimeType::defaultApplicationFor(const QContent& content)
+{
+    if(data(content.type()).defaultApplication().id() == QContent::InvalidId && applicationsFor(content).count() != 0)
+        setDefaultApplicationFor(content.type(), applicationsFor(content).at(0));
+    return data(content.type()).defaultApplication();
+}
+
+/*!
+    Returns the system marked default from the list of applications that have registered associations with the \a mimeType.
+*/
+QContent QMimeType::defaultApplicationFor(const QMimeType& mimeType)
+{
+    if(data(mimeType.id()).defaultApplication().id() == QContent::InvalidId && applicationsFor(mimeType).count() != 0)
+        setDefaultApplicationFor(mimeType.id(), applicationsFor(mimeType).at(0));
+    return data(mimeType.id()).defaultApplication();
+}
+
+/*!
+    Set the system marked default from the list of applications that have registered associations with the \a mimeType to the \a content object.
+*/
+void QMimeType::setDefaultApplicationFor(const QString& mimeType, const QContent& content)
+{
+    QContentStore::instance()->setDefaultApplicationFor( mimeType, content.fileName() );
+    if( mimeTypeDataCache()->contains( mimeType ) )
+        mimeTypeDataCache()->remove( mimeType );
 }
 
 #include "qmimetype.moc"

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -498,13 +498,13 @@ bool QtopiaIpcAdaptor::connectRemoteToLocal
         QString chan = receiveChannel( d->channelName );
         if ( chan.isEmpty() ) {
             QObject::connect
-                ( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
-                this, SLOT(received(const QString&,const QByteArray&)) );
+                ( qApp, SIGNAL(appMessage(QString,QByteArray)),
+                this, SLOT(received(QString,QByteArray)) );
         } else {
             QtopiaChannel *channel = new QtopiaChannel( chan, this );
             QObject::connect
-                ( channel, SIGNAL(received(const QString&,const QByteArray&)),
-                  this, SLOT(received(const QString&,const QByteArray&)) );
+                ( channel, SIGNAL(received(QString,QByteArray)),
+                  this, SLOT(received(QString,QByteArray)) );
         }
         d->connected = true;
     }
@@ -572,6 +572,7 @@ void QtopiaIpcAdaptor::send( const QStringList& channels,
     \mainclass
     \ingroup ipc
     \brief The QtopiaIpcSendEnvelope class provides a mechanism to send Qtopia IPC messages with an argument number of arguments.
+    \mainclass
 
     This class operates in a similar fashion to QtopiaIpcEnvelope.
     The most common way to use this class is to call QtopiaIpcAdaptor::send(),

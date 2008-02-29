@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,20 +20,22 @@
 ****************************************************************************/
 
 #include <qfile.h>
-// #include <qtl.h>
 #include <math.h>
 #include <limits.h>
 #include <errno.h>
 #include <qdatastream.h>
-#ifdef Q_WS_QWS
 #include <qtopiaapplication.h>
-#else
-#include <qapplication.h>
-#endif
-#include "combining.h"
+#include "combining_p.h"
 #include "char.h"
 
 #define QIMPEN_MATCH_THRESHOLD      200000
+
+// should be internal, with class member access
+struct QIMPenSpecialKeys {
+    uint code;
+    char *name;
+    uint q23code;
+};
 
 // fortunately there is as yet no collision between old Qt 2.3 key codes, and Qt 4.x key codes.
 const QIMPenSpecialKeys qimpen_specialKeys[] = {
@@ -682,7 +684,6 @@ void QIMPenCharSet::setFilename( const QString &fn )
     }
 }
 
-#ifdef Q_WS_QWS
 /*!
     Returns the complete path to the system file that will be loaded by load(), including the current filename.
     \sa userPath(), load(), filename()
@@ -702,7 +703,6 @@ QString QIMPenCharSet::userPath() const
 {
     return Qtopia::applicationFileName("qimpen",userFilename); // no tr
 }
-#endif
 
 /*!
   Load a character set from file \a fn, checking both system and user directories.  Returns true if at least one file is opened with no errors.  If there characters in both the user and system files, entries in the user file override those in the system file.
@@ -714,7 +714,6 @@ bool QIMPenCharSet::load( const QString &fn )
         setFilename( fn );
 
     bool ok = false;
-#ifdef Q_WS_QWS
     for (int isUser = 0; isUser < 2; ++isUser) {
         QString path;
 
@@ -722,9 +721,6 @@ bool QIMPenCharSet::load( const QString &fn )
             path = userPath();
         else
             path = systemPath();
-#else
-        QString path = fn;
-#endif
 
         QFile file( path );
         if ( file.open( QIODevice::ReadOnly ) ) {
@@ -751,18 +747,14 @@ bool QIMPenCharSet::load( const QString &fn )
             while ( !ds.atEnd() && file.error() == QFile::NoError ) {
                 QIMPenChar *pc = new QIMPenChar;
                 ds >> *pc;
-#ifdef Q_WS_QWS
                 if ( isUser == 1 )
-#endif
                     markDeleted( *pc ); // override system
                 addChar( pc );
             }
             if ( file.error() == QFile::NoError )
                 ok = true;
         }
-#ifdef Q_WS_QWS
     }
-#endif
 
     return ok;
 }
@@ -775,11 +767,7 @@ bool QIMPenCharSet::save( ) const
     bool ok = false;
 
     // in 4.0 format, store keys as strings and use Global::stringToKey or equiv.
-#ifdef Q_WS_QWS
     QString fn = userPath();
-#else
-    QString fn = userFilename;
-#endif
     QString tmpFn = fn + ".new"; // no tr
     QFile file( tmpFn );
     if ( file.open( QIODevice::WriteOnly|QIODevice::Unbuffered ) ) {
@@ -792,14 +780,10 @@ bool QIMPenCharSet::save( ) const
         QIMPenCharIterator ci = chars.constBegin();
         for ( ; ci != chars.constEnd(); ++ci ) {
             QIMPenChar *pc = *ci;
-#ifdef Q_WS_QWS
             // only save user char's, not system char's.
             if ( !pc->testFlag( QIMPenChar::System ) ) {
                 ds << *pc;
             }
-#else
-                ds << *pc;
-#endif
             if ( file.error() != QFile::NoError )
                 break;
         }

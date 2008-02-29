@@ -28,6 +28,7 @@
 <li><a href="#resource">Resource</a></li>
 <li><a href="#config">Config</a></li>
 <li><a href="#vscrollview">VScrollView</a></li>
+<li><a href="#grabkeyboard-and-ungrabkeyboard">grabKeyboard() and ungrabKeyboard()</a></li>
 </ul>
 <a name="basic-conversions"></a>
 <h2>Basic Conversions</h2>
@@ -231,10 +232,23 @@
         sa-&gt;setWidget(view);
         sa-&gt;setWidgetResizable(true);
         <span class="comment">// add children to view.</span></pre>
+<a name="grabkeyboard-and-ungrabkeyboard"></a>
+<h2>grabKeyboard() and ungrabKeyboard()</h2>
+<p>QtopiaApplication::grabKeyboard() and QtopiaApplication::ungrabKeyboard()</p>
+<p>The documentation use to say:</p>
+<pre>    Grabs the physical keyboard keys, e.g. the application's launching
+    keys. Instead of launching applications when these keys are pressed
+    the signals emitted are sent to this application instead. Some games
+    programs take over the launch keys in this way to make interaction
+    easier.
+
+    Under Qtopia Phone Edition this function does nothing. It is not
+    possible to grab the keyboard under Qtopia Phone Edition.</pre>
+<p>Any calls to these methods can be safely removed. They did nothing since the PDA edition code was taken away when &quot;#ifdef QTOPIA_PHONE&quot; was removed.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

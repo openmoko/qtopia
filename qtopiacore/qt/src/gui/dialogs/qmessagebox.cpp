@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,6 +43,7 @@
 #include <QtGui/qdialogbuttonbox.h>
 #include "private/qlabel_p.h"
 #include <QtCore/qlist.h>
+#include <QtCore/qdebug.h>
 #include <QtGui/qstyle.h>
 #include <QtGui/qstyleoption.h>
 #include <QtGui/qgridlayout.h>
@@ -40,9 +56,9 @@
 #include <QtGui/qtextedit.h>
 #include <QtGui/qmenu.h>
 #include "qdialog_p.h"
-#include <QDebug>
 #include <QtGui/qfont.h>
 #include <QtGui/qfontmetrics.h>
+#include <QtGui/qclipboard.h>
 
 enum Button { Old_Ok = 1, Old_Cancel = 2, Old_Yes = 3, Old_No = 4, Old_Abort = 5, Old_Retry = 6,
               Old_Ignore = 7, Old_YesAll = 8, Old_NoAll = 9, Old_ButtonMask = 0xFF,
@@ -59,7 +75,9 @@ public:
         TextEdit(QWidget *parent=0) : QTextEdit(parent) { }
         void contextMenuEvent(QContextMenuEvent * e)
         {
-#ifndef QT_NO_CONTEXTMENU
+#ifdef QT_NO_CONTEXTMENU
+            Q_UNUSED(e);
+#else
             QMenu *menu = createStandardContextMenu();
             menu->exec(e->globalPos());
             delete menu;
@@ -194,6 +212,7 @@ public:
     void detectEscapeButton();
     void updateSize();
     int layoutMinimumWidth();
+    void retranslateStrings();
 
     static int showOldMessageBox(QWidget *parent, QMessageBox::Icon icon,
                                  const QString &title, const QString &text,
@@ -236,34 +255,6 @@ void QMessageBoxPrivate::init(const QString &title, const QString &text)
 
     if (!translatedTextAboutQt) {
         translatedTextAboutQt = new QString;
-
-#if defined(QT_NON_COMMERCIAL)
-    QT_NC_MSGBOX
-#else
-        *translatedTextAboutQt = QMessageBox::tr(
-            "<h3>About Qt</h3>"
-            "%1<p>Qt is a C++ toolkit for cross-platform "
-            "application development.</p>"
-            "<p>Qt provides single-source "
-            "portability across MS&nbsp;Windows, Mac&nbsp;OS&nbsp;X, "
-            "Linux, and all major commercial Unix variants. Qt is also"
-            " available for embedded devices as Qtopia Core.</p>"
-            "<p>Qt is a Trolltech product. See "
-            "<a href=\"http://www.trolltech.com/qt/\">www.trolltech.com/qt/</a> for more information.</p>"
-           )
-#if QT_EDITION != QT_EDITION_OPENSOURCE
-           .arg(QMessageBox::tr("<p>This program uses Qt version %1.</p>"))
-#else
-           .arg(QMessageBox::tr("<p>This program uses Qt Open Source Edition version %1.</p>"
-                   "<p>Qt Open Source Edition is intended for the development "
-                   "of Open Source applications. You need a commercial Qt "
-                   "license for development of proprietary (closed source) "
-                   "applications.</p>"
-                   "<p>Please see <a href=\"http://www.trolltech.com/company/model/\">www.trolltech.com/company/model/</a> "
-                   "for an overview of Qt licensing.</p>"))
-#endif
-           .arg(QLatin1String(QT_VERSION_STR));
-#endif
     }
 
     label = new QLabel;
@@ -272,7 +263,7 @@ void QMessageBoxPrivate::init(const QString &title, const QString &text)
     label->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     label->setOpenExternalLinks(true);
 #if defined(Q_WS_MAC)
-    label->setContentsMargins(16, 0, 0, 10);
+    label->setContentsMargins(16, 0, 0, 8);
 #elif !defined(Q_WS_QWS)
     label->setContentsMargins(2, 0, 0, 0);
     label->setIndent(9);
@@ -297,12 +288,13 @@ void QMessageBoxPrivate::init(const QString &title, const QString &text)
 #else
     grid->setMargin(0);
     grid->setSpacing(0);
-    buttonBox->layout()->setMargin(0);
-    q->setContentsMargins(24, 15, 18, 12);
+    q->setContentsMargins(24, 15, 24, 20);
     grid->addWidget(iconLabel, 0, 0, 2, 1, Qt::AlignTop | Qt::AlignLeft);
     grid->addWidget(label, 0, 1, 1, 1);
     // -- leave space for information label --
-    grid->addWidget(buttonBox, 2, 1, 1, 1);
+    grid->setRowStretch(1, 100);
+    grid->setRowMinimumHeight(2, 10);
+    grid->addWidget(buttonBox, 3, 1, 1, 1);
 #endif
 
     grid->setSizeConstraint(QLayout::SetNoConstraint);
@@ -319,6 +311,7 @@ void QMessageBoxPrivate::init(const QString &title, const QString &text)
     f.setBold(true);
     label->setFont(f);
 #endif
+    retranslateStrings();
 }
 
 int QMessageBoxPrivate::layoutMinimumWidth()
@@ -333,6 +326,9 @@ void QMessageBoxPrivate::updateSize()
 {
     Q_Q(QMessageBox);
 
+    if (!q->isVisible())
+        return;
+
     QSize screenSize = QApplication::desktop()->availableGeometry(QCursor::pos()).size();
 #ifdef Q_WS_QWS
     // the width of the screen, less the window border.
@@ -343,7 +339,7 @@ void QMessageBoxPrivate::updateSize()
 #ifdef Q_WS_MAC
     int softLimit = qMin(screenSize.width()/2, 420);
 #elif defined(Q_WS_QWS)
-    int softLimit = hardLimit;
+    int softLimit = qMin(hardLimit, 500);
 #else
     // note: ideally on windows, hard and soft limits but it breaks compat
     int softLimit = qMin(screenSize.width()/2, 500);
@@ -361,8 +357,11 @@ void QMessageBoxPrivate::updateSize()
 
         if (width > hardLimit) {
             label->d_func()->ensureTextControl();
-            if (QTextControl *control = label->d_func()->control)
-                control->setWordWrapMode(QTextOption::WrapAnywhere);
+            if (QTextControl *control = label->d_func()->control) {
+                QTextOption opt = control->document()->defaultTextOption();
+                opt.setWrapMode(QTextOption::WrapAnywhere);
+                control->document()->setDefaultTextOption(opt);
+            }
             width = hardLimit;
         }
     }
@@ -371,8 +370,11 @@ void QMessageBoxPrivate::updateSize()
         label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
         if (layoutMinimumWidth() > hardLimit) { // longest word is really big, so wrap anywhere
             informativeLabel->d_func()->ensureTextControl();
-            if (QTextControl *control = informativeLabel->d_func()->control)
-                control->setWordWrapMode(QTextOption::WrapAnywhere);
+            if (QTextControl *control = informativeLabel->d_func()->control) {
+                QTextOption opt = control->document()->defaultTextOption();
+                opt.setWrapMode(QTextOption::WrapAnywhere);
+                control->document()->setDefaultTextOption(opt);
+            }
         }
         QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         policy.setHeightForWidth(label->wordWrap());
@@ -391,6 +393,7 @@ void QMessageBoxPrivate::updateSize()
                      ? q->layout()->totalHeightForWidth(width)
                      : q->layout()->totalMinimumSize().height();
     q->setFixedSize(width, height);
+    QCoreApplication::removePostedEvents(q, QEvent::LayoutRequest);
 }
 
 static int oldButton(int button)
@@ -436,14 +439,8 @@ void QMessageBoxPrivate::_q_buttonClicked(QAbstractButton *button)
 #ifndef QT_NO_TEXTEDIT
     if (detailsButton && detailsText && button == detailsButton) {
         detailsButton->setText(detailsText->isHidden() ? detailsText->label(HideLabel) : detailsText->label(ShowLabel));
-#if defined(Q_OS_UNIX) && !defined(Q_WS_MAC) 
-        q->layout()->setEnabled(false);
-#endif
         detailsText->setHidden(!detailsText->isHidden());
         updateSize();
-#if defined(Q_OS_UNIX) && !defined(Q_WS_MAC)
-        q->layout()->setEnabled(true);
-#endif
     } else
 #endif
     {
@@ -724,8 +721,10 @@ void QMessageBox::addButton(QAbstractButton *button, ButtonRole role)
 */
 QPushButton *QMessageBox::addButton(const QString& text, ButtonRole role)
 {
+    Q_D(QMessageBox);
     QPushButton *pushButton = new QPushButton(text);
     addButton(pushButton, role);
+    d->updateSize();
     return pushButton;
 }
 
@@ -763,6 +762,7 @@ void QMessageBox::removeButton(QAbstractButton *button)
     if (d->defaultButton == button)
         d->defaultButton = 0;
     d->buttonBox->removeButton(button);
+    d->updateSize();
 }
 
 /*!
@@ -785,6 +785,7 @@ void QMessageBox::setStandardButtons(StandardButtons buttons)
     if (!buttonList.contains(d->defaultButton))
         d->defaultButton = 0;
     d->autoAddOkButton = false;
+    d->updateSize();
 }
 
 QMessageBox::StandardButtons QMessageBox::standardButtons() const
@@ -862,6 +863,19 @@ void QMessageBox::setEscapeButton(QAbstractButton *button)
         d->escapeButton = button;
 }
 
+/*!
+    \since 4.3
+
+    Sets the buttons that gets activated when the \key Escape key is
+    pressed to \a button.
+
+    \sa addButton(), clickedButton()
+*/
+void QMessageBox::setEscapeButton(QMessageBox::StandardButton button)
+{
+    Q_D(QMessageBox);
+    setEscapeButton(d->buttonBox->button(QDialogButtonBox::StandardButton(button)));
+}
 
 void QMessageBoxPrivate::detectEscapeButton()
 {
@@ -957,6 +971,20 @@ void QMessageBox::setDefaultButton(QPushButton *button)
     d->defaultButton = button;
     button->setDefault(true);
     button->setFocus();
+}
+
+/*!
+    \since 4.3
+
+    Sets the message box's \l{QPushButton::setDefault()}{default button}
+    to \a button.
+
+    \sa addButton(), QPushButton::setDefault()
+*/
+void QMessageBox::setDefaultButton(QMessageBox::StandardButton button)
+{
+    Q_D(QMessageBox);
+    setDefaultButton(d->buttonBox->button(QDialogButtonBox::StandardButton(button)));
 }
 
 /*!
@@ -1062,7 +1090,7 @@ void QMessageBox::setIconPixmap(const QPixmap &pixmap)
 {
     Q_D(QMessageBox);
     d->iconLabel->setPixmap(pixmap);
-    d->iconLabel->setFixedSize(d->iconLabel->sizeHint());
+    d->updateSize();
     d->icon = NoIcon;
 }
 
@@ -1089,6 +1117,26 @@ void QMessageBox::setTextFormat(Qt::TextFormat format)
     d->label->setTextFormat(format);
     d->label->setWordWrap(format == Qt::RichText
                     || (format == Qt::AutoText && Qt::mightBeRichText(d->label->text())));
+    d->updateSize();
+}
+
+/*!
+    \reimp
+*/
+bool QMessageBox::event(QEvent *e)
+{
+    bool result =QDialog::event(e);
+    switch (e->type()) {
+        case QEvent::LayoutRequest:
+            d_func()->updateSize();
+            break;
+        case QEvent::LanguageChange:
+            d_func()->retranslateStrings();
+            break;
+        default:
+            break;
+    }
+    return result;
 }
 
 /*!
@@ -1167,6 +1215,29 @@ void QMessageBox::keyPressEvent(QKeyEvent *e)
             }
             return;
         }
+
+#ifdef Q_OS_WIN
+        if (e == QKeySequence::Copy) {
+            QString separator = QString::fromLatin1("---------------------------\n");
+            QString textToCopy = separator;
+            separator.prepend(QLatin1String("\n"));
+            textToCopy += windowTitle() + separator; // title
+            textToCopy += d->label->text() + separator; // text
+
+            if (d->informativeLabel)
+                textToCopy += d->informativeLabel->text() + separator;
+
+            QString buttonTexts;
+            QList<QAbstractButton *> buttons = d->buttonBox->buttons();
+            for (int i = 0; i < buttons.count(); i++) {
+                buttonTexts += buttons[i]->text() + QLatin1String("   ");
+            }
+            textToCopy += buttonTexts + separator;
+
+            qApp->clipboard()->setText(textToCopy);
+            return;
+        }
+#endif
 
 #ifndef QT_NO_SHORTCUT
     if (!(e->modifiers() & Qt::AltModifier)) {
@@ -1388,8 +1459,8 @@ void QMessageBox::about(QWidget *parent, const QString &title,
     and centered over \a parent (if \a parent is not 0). The message
     includes the version number of Qt being used by the application.
 
-    This is useful for inclusion in the Help menu of an application.
-    See the examples/menu/menu.cpp example.
+    This is useful for inclusion in the \gui Help menu of an application,
+    as shown in the \l{mainwindows/menus}{Menus} example.
 
     QApplication provides this functionality as a slot.
 
@@ -1557,6 +1628,43 @@ int QMessageBoxPrivate::showOldMessageBox(QWidget *parent, QMessageBox::Icon ico
     messageBox.setEscapeButton(buttonList.value(escapeButtonNumber));
 
     return messageBox.exec();
+}
+
+void QMessageBoxPrivate::retranslateStrings()
+{
+#ifndef QT_NO_TEXTEDIT
+    if (detailsButton)
+        detailsButton->setText(detailsText->isHidden() ? detailsText->label(HideLabel) : detailsText->label(ShowLabel));
+#endif
+
+#if defined(QT_NON_COMMERCIAL)
+    QT_NC_MSGBOX
+#else
+    *translatedTextAboutQt = QMessageBox::tr(
+        "<h3>About Qt</h3>"
+        "%1<p>Qt is a C++ toolkit for cross-platform "
+        "application development.</p>"
+        "<p>Qt provides single-source "
+        "portability across MS&nbsp;Windows, Mac&nbsp;OS&nbsp;X, "
+        "Linux, and all major commercial Unix variants. Qt is also"
+        " available for embedded devices as Qtopia Core.</p>"
+        "<p>Qt is a Trolltech product. See "
+        "<a href=\"http://www.trolltech.com/qt/\">www.trolltech.com/qt/</a> for more information.</p>"
+       )
+#if QT_EDITION != QT_EDITION_OPENSOURCE
+       .arg(QMessageBox::tr("<p>This program uses Qt version %1.</p>"))
+#else
+       .arg(QMessageBox::tr("<p>This program uses Qt Open Source Edition version %1.</p>"
+               "<p>Qt Open Source Edition is intended for the development "
+               "of Open Source applications. You need a commercial Qt "
+               "license for development of proprietary (closed source) "
+               "applications.</p>"
+               "<p>Please see <a href=\"http://www.trolltech.com/company/model/\">www.trolltech.com/company/model/</a> "
+               "for an overview of Qt licensing.</p>"))
+#endif
+       .arg(QLatin1String(QT_VERSION_STR));
+#endif
+
 }
 
 /*!
@@ -2062,7 +2170,7 @@ void QMessageBox::setInformativeText(const QString &text)
         QLabel *label = new QLabel;
         label->setObjectName(QLatin1String("qt_msgbox_informativelabel"));
         label->setTextInteractionFlags(Qt::TextInteractionFlags(style()->styleHint(QStyle::SH_MessageBox_TextInteractionFlags, 0, this)));
-        label->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+        label->setAlignment(Qt::AlignTop | Qt::AlignLeft);
         label->setOpenExternalLinks(true);
         label->setWordWrap(true);
 #ifndef Q_WS_MAC
@@ -2070,7 +2178,7 @@ void QMessageBox::setInformativeText(const QString &text)
         label->setContentsMargins(2, 0, 0, 6);
         label->setIndent(9);
 #else
-        label->setContentsMargins(16, 0, 0, 10);
+        label->setContentsMargins(16, 0, 0, 0);
         // apply a smaller font the information label on the mac
         extern QHash<QByteArray, QFont> *qt_app_fonts_hash();
         label->setFont(qt_app_fonts_hash()->value("QTipLabel"));
@@ -2122,6 +2230,7 @@ void QMessageBox::setWindowModality(Qt::WindowModality windowModality)
         setParent(parentWidget(), Qt::Sheet);
     else
         setParent(parentWidget(), Qt::Dialog);
+    setDefaultButton(d_func()->defaultButton);
 }
 
 #ifdef QT3_SUPPORT

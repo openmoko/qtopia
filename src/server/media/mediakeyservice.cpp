@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,9 @@
 
 #include "audiovolumemanager.h"
 #include "mediakeyservice.h"
+#include "qtopiapowermanager.h"
+#include <qevent.h>
+#include <QValueSpaceItem>
 
 
 MediaKeyService::MediaKeyService(AudioVolumeManager* avm):
@@ -30,7 +33,8 @@ MediaKeyService::MediaKeyService(AudioVolumeManager* avm):
     m_repeatKeyCode(-1),
     m_avm(avm)
 {
-    QWSServer::addKeyboardFilter(this);
+    m_vs = new QValueSpaceItem("/UI", this);
+    QtopiaInputEvents::addKeyboardFilter(this);
 }
 
 MediaKeyService::~MediaKeyService()
@@ -47,19 +51,19 @@ bool MediaKeyService::filter
  bool autoRepeat
 )
 {
-//    qDebug() << "MediaKeyService::filter" << unicode << keycode << modifiers << press << autoRepeat;
-
     Q_UNUSED(unicode);
     Q_UNUSED(modifiers);
 
     bool    rc = false;
+
+    if (keyLocked())
+        return rc;
 
     // TODO: Configurable key/function matching
     if (keycode == Qt::Key_VolumeUp || keycode == Qt::Key_VolumeDown)
     {
         if (m_repeatKeyCode != -1 && autoRepeat)
         {
-//            qDebug() << "snaffling key due to autoRepeat";
             rc = true;
         }
         else
@@ -70,7 +74,6 @@ bool MediaKeyService::filter
             {
                 if (autoRepeat)
                 {
-//                    qDebug() << "starting auto repeat timer";
                     m_repeatKeyCode = keycode;
                     m_repeatTimerId = startTimer(200);
                 }
@@ -82,10 +85,12 @@ bool MediaKeyService::filter
                         {
                         case Qt::Key_VolumeUp:
                             m_avm->increaseVolume(m_increment);
+                            emit volumeChanged(true);
                             break;
 
                         case Qt::Key_VolumeDown:
                             m_avm->decreaseVolume(m_increment);
+                            emit volumeChanged(false);
                             break;
                         }
                     }
@@ -93,7 +98,6 @@ bool MediaKeyService::filter
                     {
                         if (m_repeatKeyCode != -1)
                         {
-//                            qDebug() << "killing autorepeat timer";
                             killTimer(m_repeatTimerId);
                             m_repeatKeyCode = -1;
                             m_repeatTimerId = -1;
@@ -105,6 +109,9 @@ bool MediaKeyService::filter
         }
     }
 
+    if (rc)
+        QtopiaPowerManager::setActive(false);
+
     return rc;
 }
 
@@ -112,16 +119,16 @@ void MediaKeyService::timerEvent(QTimerEvent* timerEvent)
 {
     if (m_repeatTimerId == timerEvent->timerId())
     {
-//        qDebug() << "timeEvent()" << m_repeatKeyCode;
-
         switch (m_repeatKeyCode)
         {
         case Qt::Key_VolumeUp:
             m_avm->increaseVolume(m_increment);
+            emit volumeChanged(true);
             break;
 
         case Qt::Key_VolumeDown:
             m_avm->decreaseVolume(m_increment);
+            emit volumeChanged(false);
             break;
         }
 
@@ -129,4 +136,17 @@ void MediaKeyService::timerEvent(QTimerEvent* timerEvent)
     }
 }
 
+/*! \internal */
+bool MediaKeyService::keyLocked()
+{
+    return m_vs->value("KeyLock").toBool() || m_vs->value("SimLock").toBool();
+}
+
+void MediaKeyService::setVolume(bool up)
+{
+    if ( up )
+        m_avm->increaseVolume(m_increment);
+    else
+        m_avm->decreaseVolume(m_increment);
+}
 

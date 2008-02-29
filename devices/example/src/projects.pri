@@ -1,6 +1,7 @@
 PROJECTS*=\
     plugins/qtopiacore/kbddrivers/example\
-    plugins/qtopiacore/mousedrivers/example
+    plugins/qtopiacore/mousedrivers/example \
+    plugins/qtopiacore/gfxdrivers/example
 
 enable_modem {
     for(p,PHONEVENDORS) {

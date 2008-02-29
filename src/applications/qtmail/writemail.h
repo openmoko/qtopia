@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,95 +23,64 @@
 #define WRITEMAIL_H
 
 #include <QMainWindow>
-#include <QAction>
-#include <QLabel>
-#include <QToolButton>
-#include <QLayout>
-#include <QLineEdit>
-#include <QTextEdit>
-#include <QListView>
-#include <QComboBox>
-#include <QSize>
-#include <QStringList>
-#include <QList>
-#include <QListWidget>
-//#include <qtopia/pim/private/contactfieldselector_p.h>
+#include <QString>
+#include <QMailMessage>
 
-#include "email.h"
-#include "addatt.h"
-#ifdef QTOPIA_PHONE
-#include "composer.h"
-#else
-#include "pdacomposer.h"
-#endif
+class QAction;
+class QContent;
+class QMailComposerInterface;
+class QStackedWidget;
 
 class AccountList;
-class FileSelector;
-class QLineEdit;
-class QStackedWidget;
-class QHBox;
-#ifdef QTOPIA_PHONE
 class DetailsPage;
-#endif
-
-class SelectListWidget : public QListWidget
-{
-    Q_OBJECT
-
-public:
-    SelectListWidget( QDialog* parent );
-
-    bool keyBackPressed();
-
-protected:
-    void keyPressEvent(QKeyEvent *e);
-
-private:
-    QDialog *mParent;
-    bool mKeyBackPressed;
-};
+class SelectListWidget;
 
 class WriteMail : public QMainWindow
 {
     Q_OBJECT
 
 public:
+    enum ComposeAction { Create = 0, Reply = 1, ReplyToAll = 2, Forward = 3 };
+
     WriteMail( QWidget* parent, const char* name, Qt::WFlags fl = 0 );
     ~WriteMail();
-    void reply(const Email &, int type);
-    void modify(Email *previousMail);
+    void reply(const QMailMessage& replyMail, int type);
+    void modify(const QMailMessage& previousMessage);
     void setRecipients(const QString &emails, const QString &numbers);
     void setRecipient(const QString &recipient);
-    bool hasRecipients() const;
-    void setBody(const QString &text);
+    bool readyToSend() const;
+    void setBody(const QString &text, const QString &type);
     bool hasContent();
-#ifdef QTOPIA_PHONE
+#ifndef QTOPIA_NO_SMS
     void setSmsRecipient(const QString &recipient);
 #endif
     void setAccountList(AccountList *list);
 
-#ifdef QTOPIA_PHONE
-    void setComposer( const QString &id );
-    void setComposerFocus();
     QString composer() const;
-#endif
+    void setComposer( const QString &id );
 
     bool isComplete() const;
     bool changed() const;
-#ifdef QTOPIA_PHONE
-    bool keyPressAccepted();
-#endif
+    bool canClose();
+
+    void setAction(ComposeAction action);
+
+    bool forcedClosure();
 
 public slots:
-    bool tryAccept();
+    bool saveChangesOnRequest();
     void reset();
     void discard();
+    bool draft();
+    void composerSelected(const QString &key);
+    void selectionCanceled();
 
 signals:
-    void autosaveMail(const Email &);
-    void saveAsDraft(const Email &);
-    void enqueueMail(const Email &);
+    void autosaveMail(const QMailMessage&);
+    void saveAsDraft(const QMailMessage&);
+    void enqueueMail(const QMailMessage&);
     void discardMail();
+    void noSendAccount(QMailMessage::MessageType);
 
 public slots:
     void newMail( const QString &cmpsr = QString(), bool detailsOnly = false );
@@ -125,46 +94,36 @@ protected slots:
     void detailsStage();
     void sendStage();
 
-    void updateUI();
-    bool selectComposer();
     void enqueue();
-    void draft();
 
     void messageChanged();
-
-protected:
-    void keyPressEvent(QKeyEvent *);
+    void detailsChanged();
 
 private:
+    bool largeAttachments();
+    uint largeAttachmentsLimit() const;
+
     bool buildMail();
     void init();
-    Email mail;
 
-#ifdef QTOPIA_PHONE
-    ComposerInterface
-#else
-    PDAComposer
-#endif
-    *m_composerInterface;
+    QMailMessage mail;
 
-#ifdef QTOPIA_PHONE
+    QMailComposerInterface *m_composerInterface;
+
     QWidget *m_composerWidget;
     DetailsPage *m_detailsPage;
     QAction *m_previousAction;
-#else
-    QAction *m_ccAction, *m_bccAction, *m_fromAction, *m_wrapAction;
-#endif
     QAction *m_cancelAction, *m_draftAction;
 
     QStackedWidget* widgetStack;
 
     QMainWindow *m_mainWindow;
     AccountList *accountList;
-#ifdef QTOPIA_PHONE
-    bool keyEventAccepted;
-#endif
     bool hasMessageChanged;
     bool _detailsOnly;
+    ComposeAction _action;
+    QWidget *_selectComposer;
+    SelectListWidget *_composerList;
 };
 
 #endif // WRITEMAIL_H

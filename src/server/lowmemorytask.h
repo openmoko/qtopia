@@ -1,8 +1,9 @@
+// -*-C++-*-
 /****************************************************************************
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,20 +25,37 @@
 
 #include "memorymonitor.h"
 #include "applicationlauncher.h"
+#include "oommanager.h"
 
 class LowMemoryTask : public QObject
 {
-Q_OBJECT
-public:
+    Q_OBJECT
+
+  public:
     LowMemoryTask();
     virtual ~LowMemoryTask();
 
-private slots:
-    void memoryStateChanged(MemoryMonitor::MemState newState);
-    void applicationStateChanged(const QString &, ApplicationTypeLauncher::ApplicationState);
+  signals:
+    void showWarning(const QString &title, const QString &text);
 
-private:
-    QString *m_lastStartedApp;
+  private:
+    void handleCriticalMemory();
+    void handleVeryLowMemory();
+    void handleLowMemory();
+    bool kill(const QString& proc);
+    bool quit(const QString& proc);
+    int quitIfInvisible(const QMap<QString,int>& procs);
+    QString selectProcess();
+
+  private slots:
+    void avoidOutOfMemory(MemoryMonitor::MemState newState);
+
+  private:
+    MemoryMonitor::MemState 	m_state;
+    MemoryMonitor::MemState 	m_prevState;
+    OomManager			m_oomManager;
 };
+ 
+QTOPIA_TASK_INTERFACE(LowMemoryTask);
 
 #endif // _LOWMEMORYTASK_H_

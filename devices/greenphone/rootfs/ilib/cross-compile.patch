@@ -29,8 +29,8 @@ diff -Nur diff/Ilib-1.1.9/clients/ifont2h/Makefile Ilib-1.1.9/clients/ifont2h/Ma
  ifont2h: ifont2h.o
 diff -Nur diff/Ilib-1.1.9/lib/Makefile Ilib-1.1.9/lib/Makefile
 --- diff/Ilib-1.1.9/lib/Makefile	2004-10-26 07:26:47.000000000 +1000
-+++ Ilib-1.1.9/lib/Makefile	2007-03-22 07:59:00.000000000 +1000
-@@ -76,7 +76,7 @@
++++ Ilib-1.1.9/lib/Makefile	2007-06-04 15:48:40.000000000 +1000
+@@ -76,7 +80,7 @@
  	  $(RANLIB) $(ILIB);
  
  ${SILIB}: ${ILIBSOBJS} ${HTML}

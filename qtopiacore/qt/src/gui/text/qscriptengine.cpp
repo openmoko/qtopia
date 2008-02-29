@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -252,7 +267,7 @@ static void heuristicSetGlyphAttributes(QShaperItem *item, const QChar *uc, int 
     glyphs[0].attributes.dontPrint = (!symbolFont && uc[0].unicode() == 0x00ad) || qIsControlChar(uc[0].unicode());
 
     int pos = 0;
-    int lastCat = QUnicodeTables::category(uc[0]);
+    int lastCat = QChar::category(uc[0].unicode());
     for (int i = 1; i < length; ++i) {
         if (logClusters[i] == pos)
             // same glyph
@@ -356,7 +371,7 @@ static const QOpenType::Features basic_features[] = {
 static bool basic_shape(QShaperItem *item)
 {
 
-#ifndef QT_NO_OPENTYPE
+#if !defined(QT_NO_OPENTYPE) && !defined(Q_WS_QWS)
     const int availableGlyphs = item->num_glyphs;
 #endif
 
@@ -365,7 +380,8 @@ static bool basic_shape(QShaperItem *item)
         return false;
     heuristicSetGlyphAttributes(item);
 
-#ifndef QT_NO_OPENTYPE
+    // disable open type shaping for simple scripts on embedded, as it's computationally rahter expensive
+#if !defined(QT_NO_OPENTYPE) && !defined(Q_WS_QWS)
     QOpenType *openType = item->font->openType();
     if (!openType && item->font->type() == QFontEngine::Multi) {
         openType = static_cast<QFontEngineMulti *>(item->font)->engine(0)->openType();
@@ -441,7 +457,7 @@ static bool hebrew_shape(QShaperItem *item)
         Rafe = 0x5bf
     };
     unsigned short chars[512];
-    QChar *shapedChars = item->length > 256 ? (QChar *)::malloc(2*item->length * sizeof(QChar)) : (QChar *)chars;
+    QChar *shapedChars = item->length > 256 ? (QChar *)::malloc(2*item->length * sizeof(QChar)) : (QChar *)(void *)chars;
 
     const QChar *uc = item->string->unicode() + item->from;
     unsigned short *logClusters = item->log_clusters;
@@ -517,7 +533,7 @@ static bool hebrew_shape(QShaperItem *item)
         }
         if (!shaped) {
             shapedChars[slen] = uc[i];
-            if (QUnicodeTables::category(uc[i]) != QChar::Mark_NonSpacing) {
+            if (QChar::category(uc[i].unicode()) != QChar::Mark_NonSpacing) {
                 glyphs[slen].attributes.clusterStart = true;
                 glyphs[slen].attributes.mark = false;
                 glyphs[slen].attributes.combiningClass = 0;
@@ -526,7 +542,7 @@ static bool hebrew_shape(QShaperItem *item)
             } else {
                 glyphs[slen].attributes.clusterStart = false;
                 glyphs[slen].attributes.mark = true;
-                glyphs[slen].attributes.combiningClass = QUnicodeTables::combiningClass(uc[i]);
+                glyphs[slen].attributes.combiningClass = QChar::combiningClass(uc[i].unicode());
             }
             ++slen;
         }
@@ -749,7 +765,7 @@ static inline ArabicGroup arabicGroup(unsigned short uc)
         return (ArabicGroup) arabic_group[uc-0x600];
     else if (uc == 0x200d)
         return Center;
-    else if (QUnicodeTables::category(uc) == QChar::Separator_Space)
+    else if (QChar::category(uc) == QChar::Separator_Space)
         return ArabicSpace;
     else
         return ArabicNone;
@@ -1314,7 +1330,7 @@ static inline const QChar prevChar(const QString *str, int pos)
     pos--;
     const QChar *ch = str->unicode() + pos;
     while(pos > -1) {
-        if(QUnicodeTables::category(*ch) != QChar::Mark_NonSpacing)
+        if(QChar::category(ch->unicode()) != QChar::Mark_NonSpacing)
             return *ch;
         pos--;
         ch--;
@@ -1329,7 +1345,7 @@ static inline const QChar nextChar(const QString *str, int pos)
     const QChar *ch = str->unicode() + pos;
     while(pos < len) {
         //qDebug("rightChar: %d isLetter=%d, joining=%d", pos, ch.isLetter(), ch.joining());
-        if(QUnicodeTables::category(*ch) != QChar::Mark_NonSpacing)
+        if(QChar::category(ch->unicode()) != QChar::Mark_NonSpacing)
             return *ch;
         // assume it's a transparent char, this might not be 100% correct
         pos++;
@@ -1379,7 +1395,7 @@ static void shapedString(const QString *uc, int from, int len, QChar *shapeBuffe
                     goto skip;
             }
             if (reverse)
-                *data = QUnicodeTables::mirroredChar(*ch);
+                *data = QChar::mirroredChar(ch->unicode());
             else
                 *data = *ch;
         } else {
@@ -1425,7 +1441,7 @@ static void shapedString(const QString *uc, int from, int len, QChar *shapeBuffe
         }
         // ##### Fixme
         //glyphs[gpos].attributes.zeroWidth = zeroWidth;
-        if (QUnicodeTables::category(*ch) == QChar::Mark_NonSpacing) {
+        if (QChar::category(ch->unicode()) == QChar::Mark_NonSpacing) {
             glyphs[gpos].attributes.mark = true;
 //             qDebug("glyph %d (char %d) is mark!", gpos, i);
         } else {
@@ -1433,7 +1449,7 @@ static void shapedString(const QString *uc, int from, int len, QChar *shapeBuffe
             clusterStart = data - shapeBuffer;
         }
         glyphs[gpos].attributes.clusterStart = !glyphs[gpos].attributes.mark;
-        glyphs[gpos].attributes.combiningClass = QUnicodeTables::combiningClass(*ch);
+        glyphs[gpos].attributes.combiningClass = QChar::combiningClass(ch->unicode());
         glyphs[gpos].attributes.justification = properties[i].justification;
 //         qDebug("data[%d] = %x (from %x)", gpos, (uint)data->unicode(), ch->unicode());
         data++;
@@ -1531,6 +1547,8 @@ static bool arabicSyriacOpenTypeShape(QOpenType *openType, QShaperItem *item, bo
             apply[i] |= IsolProperty|MediProperty|InitProperty;
         else if (properties[i].shape == XInitial)
             apply[i] |= IsolProperty|MediProperty|FinaProperty;
+
+        item->glyphs[i].attributes.justification = properties[i].justification;
     }
 
     if (!openType->shape(item, apply.data())) {
@@ -1651,7 +1669,7 @@ enum Form {
 static const unsigned char indicForms[0xe00-0x900] = {
     // Devangari
     Invalid, VowelMark, VowelMark, VowelMark,
-    Invalid, IndependentVowel, IndependentVowel, IndependentVowel,
+    IndependentVowel, IndependentVowel, IndependentVowel, IndependentVowel,
     IndependentVowel, IndependentVowel, IndependentVowel, IndependentVowel,
     IndependentVowel, IndependentVowel, IndependentVowel, IndependentVowel,
 
@@ -1687,8 +1705,8 @@ static const unsigned char indicForms[0xe00-0x900] = {
 
     Other, Other, Other, Other,
     Other, Other, Other, Other,
-    Other, Other, Other, Other,
-    Other, Other, Other, Other,
+    Other, Other, Other, Consonant,
+    Consonant, Consonant /* ??? */, Consonant, Consonant,
 
     // Bengali
     Invalid, VowelMark, VowelMark, VowelMark,
@@ -1732,7 +1750,7 @@ static const unsigned char indicForms[0xe00-0x900] = {
     Other, Other, Other, Other,
 
     // Gurmukhi
-    Invalid, Invalid, VowelMark, Invalid,
+    Invalid, VowelMark, VowelMark, VowelMark,
     Invalid, IndependentVowel, IndependentVowel, IndependentVowel,
     IndependentVowel, IndependentVowel, IndependentVowel, Invalid,
     Invalid, Invalid, Invalid, IndependentVowel,
@@ -1767,7 +1785,7 @@ static const unsigned char indicForms[0xe00-0x900] = {
     Other, Other, Other, Other,
     Other, Other, Other, Other,
 
-    StressMark, StressMark, Other, Other,
+    StressMark, StressMark, Consonant, Consonant,
     Other, Other, Other, Other,
     Other, Other, Other, Other,
     Other, Other, Other, Other,
@@ -1776,7 +1794,7 @@ static const unsigned char indicForms[0xe00-0x900] = {
     Invalid, VowelMark, VowelMark, VowelMark,
     Invalid, IndependentVowel, IndependentVowel, IndependentVowel,
     IndependentVowel, IndependentVowel, IndependentVowel, IndependentVowel,
-    Invalid, IndependentVowel, Invalid, IndependentVowel,
+    IndependentVowel, IndependentVowel, Invalid, IndependentVowel,
 
     IndependentVowel, IndependentVowel, Invalid, IndependentVowel,
     IndependentVowel, Consonant, Consonant, Consonant,
@@ -1803,7 +1821,7 @@ static const unsigned char indicForms[0xe00-0x900] = {
     UnknownForm, UnknownForm, UnknownForm, UnknownForm,
     UnknownForm, UnknownForm, UnknownForm, UnknownForm,
 
-    Other, Other, Other, Other,
+    IndependentVowel, IndependentVowel, VowelMark, VowelMark,
     Other, Other, Other, Other,
     Other, Other, Other, Other,
     Other, Other, Other, Other,
@@ -1830,7 +1848,7 @@ static const unsigned char indicForms[0xe00-0x900] = {
     Consonant, Consonant, Consonant, Consonant,
 
     Consonant, Invalid, Consonant, Consonant,
-    Invalid, Invalid, Consonant, Consonant,
+    Invalid, Consonant, Consonant, Consonant,
     Consonant, Consonant, UnknownForm, UnknownForm,
     Nukta, Other, Matra, Matra,
 
@@ -1849,7 +1867,7 @@ static const unsigned char indicForms[0xe00-0x900] = {
     Other, Other, Other, Other,
     Other, Other, Other, Other,
 
-    Other, Other, Other, Other,
+    Other, Consonant, Other, Other,
     Other, Other, Other, Other,
     Other, Other, Other, Other,
     Other, Other, Other, Other,
@@ -1871,7 +1889,7 @@ static const unsigned char indicForms[0xe00-0x900] = {
     Invalid, Invalid, Consonant, Consonant,
 
     Consonant, Consonant, Consonant, Consonant,
-    Consonant, Consonant, Invalid, Consonant,
+    Consonant, Consonant, Consonant, Consonant,
     Consonant, Consonant, UnknownForm, UnknownForm,
     Invalid, Invalid, Matra, Matra,
 
@@ -1955,7 +1973,7 @@ static const unsigned char indicForms[0xe00-0x900] = {
     Consonant, Consonant, Consonant, Consonant,
     Invalid, Consonant, Consonant, Consonant,
     Consonant, Consonant, UnknownForm, UnknownForm,
-    Invalid, Invalid, Matra, Matra,
+    Nukta, Other, Matra, Matra,
 
     Matra, Matra, Matra, Matra,
     Matra, Invalid, Matra, Matra,
@@ -1967,7 +1985,7 @@ static const unsigned char indicForms[0xe00-0x900] = {
     Invalid, Invalid, Invalid, Invalid,
     Invalid, Invalid, Consonant, Invalid,
 
-    IndependentVowel, IndependentVowel, Invalid, Invalid,
+    IndependentVowel, IndependentVowel, VowelMark, VowelMark,
     Invalid, Invalid, Other, Other,
     Other, Other, Other, Other,
     Other, Other, Other, Other,
@@ -2157,7 +2175,7 @@ static const unsigned char indicPosition[0xe00-0x900] = {
     None, None, None, None,
 
     // Gurmukhi
-    None, None, Above, None,
+    None, Above, Above, Post,
     None, None, None, None,
     None, None, None, None,
     None, None, None, None,
@@ -2228,7 +2246,7 @@ static const unsigned char indicPosition[0xe00-0x900] = {
     None, None, None, None,
     None, None, None, None,
 
-    None, None, None, None,
+    None, None, Below, Below,
     None, None, None, None,
     None, None, None, None,
     None, None, None, None,
@@ -2267,14 +2285,14 @@ static const unsigned char indicPosition[0xe00-0x900] = {
     None, None, None, None,
     None, None, Above, Post,
     None, None, None, None,
-    None, None, None, None,
+    None, None, None, Post,
 
     None, None, None, None,
     None, None, None, None,
     None, None, None, None,
     None, None, None, None,
 
-    None, None, None, None,
+    None, Below, None, None,
     None, None, None, None,
     None, None, None, None,
     None, None, None, None,
@@ -2392,7 +2410,7 @@ static const unsigned char indicPosition[0xe00-0x900] = {
     None, None, None, None,
     None, None, Below, None,
 
-    None, None, None, None,
+    None, None, Below, Below,
     None, None, None, None,
     None, None, None, None,
     None, None, None, None,
@@ -2677,7 +2695,7 @@ static inline void splitMatra(unsigned short *reordered, int matra, int &len, in
     while (split[0] < matra_uc)
         split += 3;
 
-    assert(*split == matra_uc);
+    Q_ASSERT(*split == matra_uc);
     ++split;
 
     if (indic_position(*split) == Pre) {
@@ -3282,6 +3300,7 @@ static bool indic_shape_syllable(QOpenType *openType, QShaperItem *item, bool in
 
    We return syllable boundaries on invalid combinations aswell
 */
+#if !defined(Q_WS_WIN)
 static int indic_nextSyllableBoundary(int script, const QString &s, int start, int end, bool *invalid)
 {
     *invalid = false;
@@ -3363,6 +3382,7 @@ static int indic_nextSyllableBoundary(int script, const QString &s, int start, i
  finish:
     return pos+start;
 }
+#endif
 
 #if defined(Q_WS_X11) || defined(Q_WS_QWS)
 
@@ -3416,6 +3436,7 @@ static bool indic_shape(QShaperItem *item)
 }
 #endif
 
+#if !defined(Q_WS_WIN)
 static void indic_attributes(int script, const QString &text, int from, int len, QCharAttributes *attributes)
 {
     int end = from + len;
@@ -3434,11 +3455,12 @@ static void indic_attributes(int script, const QString &text, int from, int len,
             ++uc;
             ++i;
         }
-        assert(i == boundary);
+        Q_ASSERT(i == boundary);
     }
 
 
 }
+#endif
 
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -3451,6 +3473,7 @@ static void indic_attributes(int script, const QString &text, int from, int len,
 #include <qlibrary.h>
 
 
+#if defined(Q_WS_X11) || defined(Q_WS_QWS) || defined(Q_WS_MAC)
 static void thaiWordBreaks(const QChar *string, const int len, QCharAttributes *attributes)
 {
 #ifdef QT_NO_TEXTCODEC
@@ -3484,25 +3507,29 @@ static void thaiWordBreaks(const QChar *string, const int len, QCharAttributes *
         numbreaks = th_brk(cstr.data(),break_positions, numbreaks);
     }
 
-    attributes[0].softBreak = true;
-    for (int i = 1; i < len; ++i)
-        attributes[i].softBreak = false;
+    for (int i = 0; i < len - 1; ++i)
+        attributes[i].lineBreakType = QCharAttributes::NoBreak;
 
-    for (int i = 0; i < numbreaks; ++i)
-        attributes[break_positions[i]].softBreak = true;
+    for (int i = 0; i < numbreaks; ++i) {
+        if (break_positions[i] > 0)
+            attributes[break_positions[i]-1].lineBreakType = QCharAttributes::Break;
+    }
 
     if (break_positions != brp)
         delete [] break_positions;
 #endif // QT_NO_TEXTCODEC
 }
+#endif
 
 
+#if !defined(Q_WS_WIN)
 static void thai_attributes( int script, const QString &text, int from, int len, QCharAttributes *attributes )
 {
     Q_UNUSED(script);
     Q_ASSERT(script == QUnicodeTables::Thai);
     thaiWordBreaks(text.unicode() + from, len, attributes);
 }
+#endif
 
 
 
@@ -3640,6 +3667,7 @@ static bool tibetan_shape_syllable(QOpenType *openType, QShaperItem *item, bool 
 #endif
 
 
+#if defined(Q_WS_X11) || defined(Q_WS_QWS) || defined(Q_WS_MAC)
 static int tibetan_nextSyllableBoundary(const QString &s, int start, int end, bool *invalid)
 {
     const QChar *uc = s.unicode() + start;
@@ -3683,6 +3711,7 @@ finish:
     *invalid = false;
     return start+pos;
 }
+#endif
 
 #if defined(Q_WS_X11) || defined(Q_WS_QWS)
 static bool tibetan_shape(QShaperItem *item)
@@ -3727,6 +3756,7 @@ static bool tibetan_shape(QShaperItem *item)
 }
 #endif
 
+#if !defined(Q_WS_WIN)
 static void tibetan_attributes(int script, const QString &text, int from, int len, QCharAttributes *attributes)
 {
     Q_UNUSED(script);
@@ -3748,9 +3778,10 @@ static void tibetan_attributes(int script, const QString &text, int from, int le
             ++uc;
             ++i;
         }
-        assert(i == boundary);
+        Q_ASSERT(i == boundary);
     }
 }
+#endif
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 //
@@ -4086,7 +4117,7 @@ static bool khmer_shape_syllable(QOpenType *openType, QShaperItem *item)
 #endif
     // according to the specs this is the max length one can get
     // ### the real value should be smaller
-    assert(item->length < 13);
+    Q_ASSERT(item->length < 13);
 
     KHDEBUG("syllable from %d len %d, str='%s'", item->from, item->length,
 	    item->string->mid(item->from, item->length).toUtf8().data());
@@ -4263,7 +4294,7 @@ static bool khmer_shape_syllable(QOpenType *openType, QShaperItem *item)
 #ifndef QT_NO_OPENTYPE
     const int availableGlyphs = item->num_glyphs;
 #endif
-    if (!item->font->stringToCMap((const QChar *)reordered, len, item->glyphs, &item->num_glyphs, QFlag(item->flags)))
+    if (!item->font->stringToCMap((const QChar *)(const void *)reordered, len, item->glyphs, &item->num_glyphs, QFlag(item->flags)))
         return false;
 
     KHDEBUG("after shaping: len=%d", len);
@@ -4313,7 +4344,7 @@ static bool khmer_shape_syllable(QOpenType *openType, QShaperItem *item)
 
 static bool khmer_shape(QShaperItem *item)
 {
-    assert(item->script == QUnicodeTables::Khmer);
+    Q_ASSERT(item->script == QUnicodeTables::Khmer);
 
 #ifndef QT_NO_OPENTYPE
     QOpenType *openType = item->font->openType();
@@ -4361,6 +4392,7 @@ static bool khmer_shape(QShaperItem *item)
 }
 #endif
 
+#if !defined(Q_WS_WIN)
 static void khmer_attributes( int script, const QString &text, int from, int len, QCharAttributes *attributes )
 {
     Q_UNUSED(script);
@@ -4382,9 +4414,10 @@ static void khmer_attributes( int script, const QString &text, int from, int len
 	    ++uc;
 	    ++i;
 	}
-	assert( i == boundary );
+	Q_ASSERT( i == boundary );
     }
 }
+#endif
 
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -4615,6 +4648,7 @@ static const QOpenType::Features myanmar_features[] = {
 // This means that we can keep the logical order apart from having to
 // move the pre vowel, medial ra and kinzi
 
+#if defined(Q_WS_X11) || defined(Q_WS_QWS)
 static bool myanmar_shape_syllable(QOpenType *openType, QShaperItem *item, bool invalid)
 {
 #ifndef QT_NO_OPENTYPE
@@ -4769,7 +4803,7 @@ static bool myanmar_shape_syllable(QOpenType *openType, QShaperItem *item, bool 
 #ifndef QT_NO_OPENTYPE
     const int availableGlyphs = item->num_glyphs;
 #endif
-    if (!item->font->stringToCMap((const QChar *)reordered, len, item->glyphs, &item->num_glyphs, QFlag(item->flags)))
+    if (!item->font->stringToCMap((const QChar *)(const void *)reordered, len, item->glyphs, &item->num_glyphs, QFlag(item->flags)))
         return false;
 
     MMDEBUG("after shaping: len=%d", len);
@@ -4821,7 +4855,9 @@ static bool myanmar_shape_syllable(QOpenType *openType, QShaperItem *item, bool 
     item->glyphs[0].attributes.clusterStart = true;
     return true;
 }
+#endif
 
+#if defined(Q_WS_X11) || defined(Q_WS_QWS)
 static bool myanmar_shape(QShaperItem *item)
 {
     Q_ASSERT(item->script == QUnicodeTables::Myanmar);
@@ -4871,7 +4907,9 @@ static bool myanmar_shape(QShaperItem *item)
     item->num_glyphs = first_glyph;
     return true;
 }
+#endif
 
+#if defined(Q_WS_X11) || defined(Q_WS_QWS)
 static void myanmar_attributes(int script, const QString &text, int from, int len, QCharAttributes *attributes)
 {
     Q_UNUSED(script);
@@ -4885,7 +4923,8 @@ static void myanmar_attributes(int script, const QString &text, int from, int le
 	int boundary = myanmar_nextSyllableBoundary(text, from+i, end, &invalid) - from;
 
 	attributes[i].charStop = true;
-        attributes[i].softBreak = true;
+        if (from || i)
+            attributes[i-1].lineBreakType = QCharAttributes::Break;
 
 	if (boundary > len-1)
             boundary = len;
@@ -4898,6 +4937,7 @@ static void myanmar_attributes(int script, const QString &text, int from, int le
 	Q_ASSERT(i == boundary);
     }
 }
+#endif
 
 #endif
 // --------------------------------------------------------------------------------------------------------------------------------------------
@@ -4957,6 +4997,7 @@ enum HangulType {
     X
 };
 
+#if defined(Q_WS_X11) || defined(Q_WS_QWS)
 static inline HangulType hangul_type(unsigned short uc) {
     if (uc > Hangul_SBase && uc < Hangul_SBase + Hangul_SCount)
         return hangul_isLV(uc) ? LV : LVT;
@@ -5004,6 +5045,7 @@ static int hangul_nextSyllableBoundary(const QString &s, int start, int end)
  finish:
     return start+pos;
 }
+#endif
 
 #ifndef QT_NO_OPENTYPE
 static const QOpenType::Features hangul_features [] = {
@@ -5139,30 +5181,6 @@ static bool hangul_shape(QShaperItem *item)
 }
 #endif
 
-static void hangul_attributes(int script, const QString &text, int from, int len, QCharAttributes *attributes)
-{
-    Q_UNUSED(script);
-
-    int end = from + len;
-    const QChar *uc = text.unicode() + from;
-    attributes += from;
-    int i = 0;
-    while (i < len) {
-        int boundary = hangul_nextSyllableBoundary(text, from+i, end) - from;
-
-        attributes[i].charStop = true;
-
-        if (boundary > len-1) boundary = len;
-        i++;
-        while (i < boundary) {
-            attributes[i].charStop = false;
-            ++uc;
-            ++i;
-        }
-        assert(i == boundary);
-    }
-}
-
 #if defined(Q_WS_X11) || defined(Q_WS_QWS)
 
 const q_scriptEngine qt_scriptEngines[] = {
@@ -5213,7 +5231,7 @@ const q_scriptEngine qt_scriptEngines[] = {
     // Georgian
     { basic_shape, 0 },
     // Hangul
-    { hangul_shape, hangul_attributes },
+    { hangul_shape, 0 },
     // Ogham
     { basic_shape, 0 },
     // Runic
@@ -5371,7 +5389,7 @@ const q_scriptEngine qt_scriptEngines[] = {
     // Georgian
     { mac_shape, 0 },
     // Hangul
-    { mac_shape, hangul_attributes },
+    { mac_shape, 0 },
     // Ogham
     { mac_shape, 0 },
     // Runic

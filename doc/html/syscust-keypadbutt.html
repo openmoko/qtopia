@@ -19,6 +19,7 @@
 <li><a href="#phone-buttons">Phone Buttons</a></li>
 <li><a href="#input-methods">Input Methods</a></li>
 <li><a href="#phone-softkey-definition">Phone SoftKey Definition</a></li>
+<li><a href="#usual-key-meanings">Usual Key Meanings</a></li>
 </ul>
 </ul>
 <a name="keypad-button-behavior"></a>
@@ -28,7 +29,7 @@
 <p>See the existing files, especially the generic file, for guidance.</p>
 <a name="user-definable-button-mappings"></a>
 <h3>User Definable Button Mappings</h3>
-<p>Button Mappings are what maps the hard buttons on a device to application shortcuts in Qtopia. For example a calendar button that brings up todays schedule, or a button to beam your business card.</p>
+<p>Button Mappings map the hard buttons on a device to application actions. For example a calendar button that brings up todays schedule, or a button to beam your business card.</p>
 <p>The description of the buttons should be included in <tt>defaultbuttons.conf</tt> on the device, or <tt>defaultbuttons-&lt;platform&gt;.conf</tt> if in the build tree.</p>
 <p>An example of what this may look like:</p>
 <pre>    [Button]
@@ -133,17 +134,16 @@
 <p>For each button listed in <tt>Buttons</tt>, define:</p>
 <ul>
 <li>Tap<tt>X</tt> - the action to do when key <tt>X</tt> is pressed and released. This is either:<ul>
-<li><tt>'</tt> <i>text</i> - insert character from <i>text</i>.</li>
-<li><tt>&quot;</tt> <i>text</i> - insert character from <i>text</i>, while showing all options.</li>
+<li><tt>'</tt><i>text</i> - insert character from <i>text</i>.</li>
+<li><tt>&quot;\\&quot;</tt><i>textc{&quot;}</i> - insert character from <i>text</i>, while showing all options.</li>
 <li>space - insert a space.</li>
 <li>symbol - popup symbol selector.</li>
 <li>modify - choose between alternatives.</li>
-<li>shift - toggle upper/lowercase.</li>
 <li>mode - change mode or language.</li>
-<li>changeim - change input method.</li>
+<li>shift - toggle upper/lowercase.</li>
 </ul>
 </li>
-<li>Hold<tt>X</tt> - the action to do when key <tt>X</tt> is held down. This is the same as for Tap, except <tt>&quot;</tt> <i>text</i> is not supported.</li>
+<li>Hold<tt>X</tt> - the action to do when key <tt>X</tt> is held down. This is the same as for Tap, except <tt>&quot;\\&quot;</tt><i>textc{&quot;}</i> is not supported.</li>
 </ul>
 <p>Character insertions where the first character is punctuation are treated specially. The details of the special treatment are internal.</p>
 <p>Timing behavior for phone buttons are handled by the ButtonTimings section of the file.</p>
@@ -170,10 +170,50 @@
     Key0=Context1
     Key1=Select
     Key2=Back</pre>
+<a name="usual-key-meanings"></a>
+<h3>Usual Key Meanings</h3>
+<p>This section describes the usual key meanings that Qtopia uses, across many different device categories. If your device has a similar key, it is recommended that you choose the mapping in this list.</p>
+<p>The following keys are handled specially in the source code, and should be mapped exactly as listed here:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Key</th><th>Usual meaning</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>Key_Context1</tt></td><td>Left soft key on the soft menu bar.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_Select</tt></td><td>Center soft key on the soft menu bar.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_Back</tt></td><td>Right soft key on the soft menu bar.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_Context2</tt>, <tt>Key_Context3</tt>, <tt>Key_Context4</tt></td><td>Other soft keys on the soft menu bar.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_Call</tt></td><td>Key to place a phone call (green key on mobile phones).</td></tr>
+<tr valign="top" class="even"><td><tt>Key_Hangup</tt></td><td>Key to hang up a phone call (red key on mobile phones). This key is usually also the power on/off key when held down.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_Up</tt>, <tt>Key_Down</tt>, <tt>Key_Left</tt>, <tt>Key_Right</tt></td><td>Directional movement keys.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_VolumeUp</tt>, <tt>Key_VolumeDown</tt></td><td>Adjust the volume of the currently playing media or the current phone call.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_Flip</tt></td><td>Key that is sent whenever a flip phone is opened or closed. A key release event should be sent when the flip is opened, and a key press event sent when the flip is closed.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F27</tt></td><td>Handset cradle on desk phones. A key release event should be sent when the handset is picked up, and a key press event should be sent when the handset is replaced in the cradle.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F28</tt></td><td>Key on the headphones, which indicates whether to accept the incoming call or hang up the current call.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F29</tt></td><td>Lock key, for locking/unlocking the keypad.</td></tr>
+</table></p>
+<p>The following table indicates special functions that are usually handled in the <tt>defaultbuttons.conf</tt> file rather than in the source code. Keys that only appear in <tt>defaultbuttons.conf</tt> can be mapped to any function key, but the following mappings are recommended for consistency across device types:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Key</th><th>Usual meaning</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>Key_F4</tt></td><td>Camera key, for launching the camera program, or taking a picture if the camera program is currently active.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F5</tt></td><td>Headset key, for transfering audio to the headset.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F6</tt></td><td>Speakerphone key, for transfering audio to the speakerphone.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F7</tt></td><td>Multitask, showing running tasks in the task manager.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F8</tt></td><td>Multitask, switching between the running applications.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F9</tt></td><td>Launch the Datebook application.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F10</tt></td><td>Launch the Contacts application.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F11</tt></td><td>Launch the Todo application.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F12</tt></td><td>Return to the home screen.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F13</tt></td><td>Launch the Messages application.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F14</tt></td><td>Voice mail key.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F15</tt></td><td>Transfer key.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F16</tt></td><td>Options key.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F17</tt></td><td>Conference key.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F18</tt></td><td>Intercom key.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F19</tt></td><td>Redial key.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F20</tt></td><td>Hold key.</td></tr>
+</table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

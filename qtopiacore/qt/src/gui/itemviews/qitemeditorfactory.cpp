@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,6 +47,7 @@
 #include <qlineedit.h>
 #include <qspinbox.h>
 #include <limits.h>
+#include <float.h>
 #include <qcoreapplication.h>
 #include <qdebug.h>
 
@@ -55,6 +71,20 @@ private:
 
 #endif // QT_NO_LINEEDIT
 
+#ifndef QT_NO_COMBOBOX
+
+class QBooleanComboBox : public QComboBox
+{
+    Q_OBJECT
+    Q_PROPERTY(bool value READ value WRITE setValue USER true)
+
+public:
+    QBooleanComboBox(QWidget *parent);
+    void setValue(bool);
+    bool value() const;
+};
+
+#endif // QT_NO_COMBOBOX
 
 /*!
     \class QItemEditorFactory
@@ -63,11 +93,18 @@ private:
     \since 4.2
     \ingroup model-view
 
-    When editing the data shown by an item delegate, the QItemDelegate responsible
-    requests an editor widget from its item editor factory by calling the
-    createEditor() function. The default factory is provided by this class, but it
-    is possible to implement subclasses that provide specialized editing behavior,
-    such as row or column-specific editors, or editors for certain types of data.
+    When editing data in an item view, editors are created and
+    displayed by a delegate. QItemDelegate, which is the delegate by
+    default installed on Qt's item views, uses a QItemEditorFactory to
+    create editors for it. A default unique instance provided by
+    QItemEditorFactory is used by all item delegates.  If you set a
+    new default factory with setDefaultFactory(), the new factory will
+    be used by existing and new delegates.
+
+    A factory keeps a collection of QItemEditorCreatorBase
+    instances, which are specialized editors that produce editors
+    for one particular QVariant data type (All Qt models store
+    their data in \l{QVariant}s).
 
     \section1 Standard Editing Widgets
 
@@ -75,6 +112,7 @@ private:
     types. These are created whenever a delegate needs to provide an editor for
     data supplied by a model. The following table shows the relationship between
     types and the standard editors provided.
+
     \table
     \header \o Type \o Editor Widget
     \row    \o bool \o QComboBox
@@ -88,10 +126,9 @@ private:
     \row    \o QTime \o QTimeEdit
     \endtable
 
-    Additional editors can be registered for use with both standard and custom
-    delegates with the registerEditor() function.
+    Additional editors can be registered with the registerEditor() function. 
 
-    \sa QItemDelegate, {Model/View Programming}
+    \sa QItemDelegate, {Model/View Programming}, {Color Editor Factory Example}
 */
 
 /*!
@@ -152,8 +189,6 @@ void QItemEditorFactory::registerEditor(QVariant::Type type, QItemEditorCreatorB
 
 class QDefaultItemEditorFactory : public QItemEditorFactory
 {
-    Q_DECLARE_TR_FUNCTIONS(QDefaultItemEditorFactory)
-
 public:
     inline QDefaultItemEditorFactory() {}
     QWidget *createEditor(QVariant::Type type, QWidget *parent) const;
@@ -165,10 +200,8 @@ QWidget *QDefaultItemEditorFactory::createEditor(QVariant::Type type, QWidget *p
     switch (type) {
 #ifndef QT_NO_COMBOBOX
     case QVariant::Bool: {
-        QComboBox *cb = new QComboBox(parent);
+        QBooleanComboBox *cb = new QBooleanComboBox(parent);
         cb->setFrame(false);
-        cb->addItem(QObject::tr("False"));
-        cb->addItem(QObject::tr("True"));
         return cb; }
 #endif
 #ifndef QT_NO_SPINBOX
@@ -204,6 +237,8 @@ QWidget *QDefaultItemEditorFactory::createEditor(QVariant::Type type, QWidget *p
     case QVariant::Double: {
         QDoubleSpinBox *sb = new QDoubleSpinBox(parent);
         sb->setFrame(false);
+        sb->setMinimum(-DBL_MAX);
+        sb->setMaximum(DBL_MAX);
         return sb; }
 #endif
 #ifndef QT_NO_LINEEDIT
@@ -271,6 +306,7 @@ const QItemEditorFactory *QItemEditorFactory::defaultFactory()
 
 /*!
     Sets the default item editor factory to the given \a factory.
+    Both new and existing delegates will use the new factory.
 
     \sa defaultFactory()
 */
@@ -288,15 +324,32 @@ void QItemEditorFactory::setDefaultFactory(QItemEditorFactory *factory)
     \since 4.2
     \ingroup model-view
 
-    Item editor creators are specialized widget factories that provide editor widgets
-    for specific types of item data. QItemEditorFactory finds the appropriate factory
-    for editors using a QVariant-based scheme to associate data types with editor
-    creators.
+    QItemEditorCreatorBase objects are specialized widget factories that
+    provide editor widgets for one particular QVariant data type. They
+    are used by QItemEditorFactory to create editors for
+    \l{QItemDelegate}s. Creator bases must be registered with
+    QItemEditorFactory::registerEditor().
+
+    An editor should provide a user property for the data it edits.
+    QItemDelagates can then access the property using Qt's
+    \l{Meta-Object System}{meta-object system} to set and retrieve the
+    editing data. A property is set as the user property with the USER
+    keyword:
+
+    \code
+        Q_PROPERTY(QColor color READ color WRITE setColor USER true)
+    \endcode
+
+    If the editor does not provide a user property, it must return the
+    name of the property from valuePropertyName(); delegates will then
+    use the name to access the property. If a user property exists,
+    item delegates will not call valuePropertyName().
 
     QStandardItemEditorCreator is a convenience template class that can be used
     to register widgets without the need to subclass QItemEditorCreatorBase.
 
-    \sa QStandardItemEditorCreator, QItemEditorFactory, {Model/View Programming}
+    \sa QStandardItemEditorCreator, QItemEditorFactory,
+    {Model/View Programming}, {Color Editor Factory Example}
 */
 
 /*!
@@ -336,7 +389,61 @@ void QItemEditorFactory::setDefaultFactory(QItemEditorFactory *factory)
     \sa QMetaObject::userProperty(), QItemEditorFactory::registerEditor()
 */
 
-/*! 
+/*!
+    \class QItemEditorCreator
+    \brief The QItemEditorCreator class makes it possible to create
+	   item editor creator bases without subclassing
+	   QItemEditorCreatorBase.
+
+    \since 4.2
+    \ingroup model-view
+
+    QItemEditorCreator is a convenience template class. It uses
+    the template class to create editors for QItemEditorFactory.
+    This way, it is not necessary to subclass
+    QItemEditorCreatorBase.
+
+    \code
+    QItemEditorCreator<MyEditor> *itemCreator =
+        new QItemEditorCreator<MyEditor>("myProperty");
+
+    QItemEditorFactory *factory = new QItemEditorFactory;
+    \endcode
+
+    The constructor takes the name of the property that contains the
+    editing data. QItemDelegate can then access the property by name
+    when it sets and retrieves editing data. Only use this class if
+    your editor does not define a user property (using the USER
+    keyword in the Q_PROPERTY macro).  If the widget has a user
+    property, you should use QStandardItemEditorCreator instead.
+
+    \sa QItemEditorCreatorBase, QStandardItemEditorCreator,
+	QItemEditorFactory, {Color Editor Factory Example}
+*/
+
+/*!
+    \fn QItemEditorCreator::QItemEditorCreator(const QByteArray &valuePropertyName)
+
+    Constructs an editor creator object using \a valuePropertyName
+    as the name of the property to be used for editing. The
+    property name is used by QItemDelegate when setting and
+    getting editor data.
+
+    Note that the \a valuePropertyName is only used if the editor
+    widget does not have a user property defined.
+*/
+
+/*!
+    \fn QWidget *QItemEditorCreator::createWidget(QWidget *parent) const
+    \reimp
+*/
+
+/*!
+    \fn QByteArray QItemEditorCreator::valuePropertyName() const
+    \reimp
+*/
+
+/*!
     \class QStandardItemEditorCreator
 
     \brief The QStandardItemEditorCreator class provides the
@@ -361,7 +468,18 @@ void QItemEditorFactory::setDefaultFactory(QItemEditorFactory *factory)
     QItemDelegate::setItemEditorFactory() makes sure that all values of type
     QVariant::DateTime will be edited in \c{MyFancyDateTimeEdit}.
 
-    \sa QItemEditorCreatorBase, QItemEditorFactory, QItemDelegate
+    The editor must provide a user property that will contain the
+    editing data. The property is used by \l{QItemDelegate}s to set
+    and retrieve the data (using Qt's \l{Meta-Object
+    System}{meta-object system}). You set the user property with
+    the USER keyword:
+
+    \code
+	Q_PROPERTY(QColor color READ color WRITE setColor USER true)	
+    \endcode
+
+    \sa QItemEditorCreatorBase, QItemEditorCreator,
+	QItemEditorFactory, QItemDelegate, {Color Editor Factory Example}
 */
 
 /*!
@@ -412,8 +530,31 @@ void QExpandingLineEdit::resizeToContents()
     }
 }
 
-#include "qitemeditorfactory.moc"
-
 #endif // QT_NO_LINEEDIT
+
+#ifndef QT_NO_COMBOBOX
+
+QBooleanComboBox::QBooleanComboBox(QWidget *parent)
+    : QComboBox(parent)
+{
+    addItem(QComboBox::tr("False"));
+    addItem(QComboBox::tr("True"));
+}
+
+void QBooleanComboBox::setValue(bool value)
+{
+    setCurrentIndex(value ? 1 : 0);
+}
+
+bool QBooleanComboBox::value() const
+{
+    return (currentIndex() == 1);
+}
+
+#endif // QT_NO_COMBOBOX
+
+#if !defined(QT_NO_LINEEDIT) || !defined(QT_NO_COMBOBOX)
+#include "qitemeditorfactory.moc"
+#endif
 
 #endif // QT_NO_ITEMVIEWS

@@ -1,0 +1,2 @@
+#!/bin/sh
+lidsconf -A POSTBOOT -s ${BIN} -o CAP_SYS_NICE -j GRANT

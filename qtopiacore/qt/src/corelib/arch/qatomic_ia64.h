@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -110,14 +125,58 @@ inline int q_atomic_test_and_set_ptr(volatile void *ptr, void *expected, void *n
     return ret == expected;
 }
 
-#  else // !Q_CC_GNU
+#elif defined Q_CC_HPACC
+
+#include <ia64/sys/inline.h>
+
+#define FENCE (_Asm_fence)(_UP_CALL_FENCE | _UP_SYS_FENCE | _DOWN_CALL_FENCE | _DOWN_SYS_FENCE)
+
+inline int q_atomic_test_and_set_acquire_int(volatile int *ptr, int expected, int newval)
+{
+    _Asm_mov_to_ar((_Asm_app_reg)_AREG_CCV, (unsigned)expected, FENCE);
+    int ret = _Asm_cmpxchg((_Asm_sz)_SZ_W, (_Asm_sem)_SEM_ACQ,
+                           ptr, (unsigned)newval, (_Asm_ldhint)_LDHINT_NONE);
+    return ret == expected;
+}
+
+inline int q_atomic_test_and_set_release_int(volatile int *ptr, int expected, int newval)
+{
+    _Asm_mov_to_ar((_Asm_app_reg)_AREG_CCV, (unsigned)expected, FENCE);
+    int ret = _Asm_cmpxchg((_Asm_sz)_SZ_W, (_Asm_sem)_SEM_REL,
+                           ptr, newval, (_Asm_ldhint)_LDHINT_NONE);
+    return ret == expected;
+}
+
+inline int q_atomic_test_and_set_int(volatile int *ptr, int expected, int newval)
+{
+    _Asm_mov_to_ar((_Asm_app_reg)_AREG_CCV, (unsigned)expected, FENCE);
+    int ret = _Asm_cmpxchg((_Asm_sz)_SZ_W, (_Asm_sem)_SEM_ACQ,
+                           ptr, (unsigned)newval, (_Asm_ldhint)_LDHINT_NONE);
+    return ret == expected;
+}
+
+inline int q_atomic_test_and_set_ptr(volatile void *ptr, void *expected, void *newval)
+{
+#ifndef __LP64__
+    _Asm_mov_to_ar((_Asm_app_reg)_AREG_CCV, (quint32)expected, FENCE);
+    void *ret = (void *)_Asm_cmpxchg((_Asm_sz)_SZ_W, (_Asm_sem)_SEM_ACQ,
+                                     ptr, (quint32)newval, (_Asm_ldhint)_LDHINT_NONE);
+#else
+    _Asm_mov_to_ar((_Asm_app_reg)_AREG_CCV, (quint64)expected, FENCE);
+    void *ret = (void *)_Asm_cmpxchg((_Asm_sz)_SZ_D, (_Asm_sem)_SEM_ACQ,
+                                     ptr, (quint64)newval, (_Asm_ldhint)_LDHINT_NONE);
+#endif
+    return ret == expected;
+}
+
+#else
 
 extern "C" {
     Q_CORE_EXPORT int q_atomic_test_and_set_int(volatile int *ptr, int expected, int newval);
     Q_CORE_EXPORT int q_atomic_test_and_set_ptr(volatile void *ptr, void *expected, void *newval);
 } // extern "C"
 
-#  endif // Q_CC_GNU
+#endif
 
 inline int q_atomic_increment(volatile int * const ptr)
 {
@@ -160,6 +219,39 @@ inline void *q_atomic_set_ptr(volatile void *ptr, void *newval)
 }
 
 #endif // Q_CC_INTEL
+
+inline int q_atomic_fetch_and_add_int(volatile int *ptr, int value)
+{
+    register int originalValue;
+    for (;;) {
+        originalValue = *ptr;
+        if (q_atomic_test_and_set_int(ptr, originalValue, originalValue + value))
+            break;
+    }
+    return originalValue;
+}
+
+inline int q_atomic_fetch_and_add_acquire_int(volatile int *ptr, int value)
+{
+    register int originalValue;
+    for (;;) {
+        originalValue = *ptr;
+        if (q_atomic_test_and_set_acquire_int(ptr, originalValue, originalValue + value))
+            break;
+    }
+    return originalValue;
+}
+
+inline int q_atomic_fetch_and_add_release_int(volatile int *ptr, int value)
+{
+    register int originalValue;
+    for (;;) {
+        originalValue = *ptr;
+        if (q_atomic_test_and_set_release_int(ptr, originalValue, originalValue + value))
+            break;
+    }
+    return originalValue;
+}
 
 QT_END_HEADER
 

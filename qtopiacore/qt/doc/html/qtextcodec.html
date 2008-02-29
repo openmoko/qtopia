@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/codecs/qtextcodec.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/codecs/qtextcodec.cpp -->
 <head>
-  <title>Qt 4.2: QTextCodec Class Reference</title>
+  <title>Qt 4.3: QTextCodec Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTextCodec Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTextCodec Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QTextCodec class provides conversions between text encodings. <a href="#details">More...</a></p>
 <pre> #include &lt;QTextCodec&gt;</pre><p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>, except <a href="qtextcodec.html#setCodecForTr">setCodecForTr</a>(), <a href="qtextcodec.html#setCodecForCStrings">setCodecForCStrings</a>(), <a href="qtextcodec.html#QTextCodec">QTextCodec</a>(), and <a href="qtextcodec.html#dtor.QTextCodec">~QTextCodec</a>().</p>
 <ul>
@@ -150,7 +151,7 @@
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QTextCodec"></a>QTextCodec::QTextCodec ()&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>Constructs a <a href="qtextcodec.html">QTextCodec</a>, and gives it the highest precedence. The <a href="qtextcodec.html">QTextCodec</a> should always be constructed on the heap (i.e. with <tt>new</tt>). Qt takes ownership and will delete it when the application terminates.</p>
+<p>Constructs a <a href="qtextcodec.html">QTextCodec</a>, and gives it the highest precedence. The <a href="qtextcodec.html">QTextCodec</a> should always be constructed on the heap (i.e&#x2e; with <tt>new</tt>). Qt takes ownership and will delete it when the application terminates.</p>
 <p><b>Warning:</b> This function is not <a href="threads.html#reentrant">reentrant</a>.</p>
 <h3 class="fn"><a name="dtor.QTextCodec"></a>QTextCodec::~QTextCodec ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Destroys the <a href="qtextcodec.html">QTextCodec</a>. Note that you should not delete codecs yourself: once created they become Qt's responsibility.</p>
@@ -254,7 +255,7 @@
 <h3 class="fn"><a name="fromUnicode-3"></a><a href="qbytearray.html">QByteArray</a> QTextCodec::fromUnicode ( const <a href="qstring.html">QString</a> &amp; <i>uc</i>, int &amp; <i>lenInOut</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <h3 class="fn"><a name="locale"></a>const char * QTextCodec::locale ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns a string representing the current language and sublanguage, e.g. &quot;pt&quot; for Portuguese, or &quot;pt_br&quot; for Portuguese/Brazil.</p>
+<p>Returns a string representing the current language and sublanguage, e.g&#x2e; &quot;pt&quot; for Portuguese, or &quot;pt_br&quot; for Portuguese/Brazil.</p>
 <p>See also <a href="qlocale.html">QLocale</a>.</p>
 <h3 class="fn"><a name="mimeName"></a><a href="qbytearray.html">QByteArray</a> QTextCodec::mimeName () const</h3>
 <p>Use <a href="qtextcodec.html#name">name</a>() instead.</p>
@@ -265,6 +266,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

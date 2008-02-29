@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/xml/qdom.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/xml/qdom.cpp -->
 <head>
-  <title>Qt 4.2: QDomElement Class Reference</title>
+  <title>Qt 4.3: QDomElement Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDomElement Class Reference<br /><sup><sup>[<a href="qtxml.html">QtXml</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDomElement Class Reference<br /><span class="small-subtitle">[<a href="qtxml.html">QtXml</a> module]</span>
+</h1>
 <p>The QDomElement class represents one element in the DOM tree. <a href="#details">More...</a></p>
 <pre> #include &lt;QDomElement&gt;</pre><p>Inherits <a href="qdomnode.html">QDomNode</a>.</p>
 <p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
@@ -58,19 +59,19 @@
 <li><div class="fn"/>QDomElement &amp; <b><a href="qdomelement.html#operator-eq">operator=</a></b> ( const QDomElement &amp; <i>x</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>65 public functions inherited from <a href="qdomnode.html#public-functions">QDomNode</a></li>
+<li><div class="fn"/>66 public functions inherited from <a href="qdomnode.html#public-functions">QDomNode</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The QDomElement class represents one element in the DOM tree.</p>
 <p>Elements have a <a href="qdomelement.html#tagName">tagName</a>() and zero or more attributes associated with them. The tag name can be changed with <a href="qdomelement.html#setTagName">setTagName</a>().</p>
-<p>Element attributes are represented by <a href="qdomattr.html">QDomAttr</a> objects that can be queried using the <a href="qdomelement.html#attributex">attribute</a>() and <a href="qdomelement.html#attributeNode">attributeNode</a>() functions. You can set attributes with the <a href="qdomelement.html#setAttribute">setAttribute</a>() and <a href="qdomelement.html#setAttributeNode">setAttributeNode</a>() functions. Attributes can be removed with <a href="qdomelement.html#removeAttribute">removeAttribute</a>(). There are namespace-aware equivalents to these functions, i.e. <a href="qdomelement.html#setAttributeNS">setAttributeNS</a>(), <a href="qdomelement.html#setAttributeNodeNS">setAttributeNodeNS</a>() and <a href="qdomelement.html#removeAttributeNS">removeAttributeNS</a>().</p>
-<p>If you want to access the text of a node use <a href="qdomelement.html#text">text</a>(), e.g.</p>
+<p>Element attributes are represented by <a href="qdomattr.html">QDomAttr</a> objects that can be queried using the <a href="qdomelement.html#attributex">attribute</a>() and <a href="qdomelement.html#attributeNode">attributeNode</a>() functions. You can set attributes with the <a href="qdomelement.html#setAttribute">setAttribute</a>() and <a href="qdomelement.html#setAttributeNode">setAttributeNode</a>() functions. Attributes can be removed with <a href="qdomelement.html#removeAttribute">removeAttribute</a>(). There are namespace-aware equivalents to these functions, i.e&#x2e; <a href="qdomelement.html#setAttributeNS">setAttributeNS</a>(), <a href="qdomelement.html#setAttributeNodeNS">setAttributeNodeNS</a>() and <a href="qdomelement.html#removeAttributeNS">removeAttributeNS</a>().</p>
+<p>If you want to access the text of a node use <a href="qdomelement.html#text">text</a>(), e.g&#x2e;</p>
 <pre> QDomElement e = <span class="comment">//...</span>
 <span class="comment"> //...</span>
  QString s = e.text()</pre>
-<p>The <a href="qdomelement.html#text">text</a>() function operates recursively to find the text (since not all elements contain text). If you want to find all the text in all of a node's children, iterate over the children looking for <a href="qdomtext.html">QDomText</a> nodes, e.g.</p>
+<p>The <a href="qdomelement.html#text">text</a>() function operates recursively to find the text (since not all elements contain text). If you want to find all the text in all of a node's children, iterate over the children looking for <a href="qdomtext.html">QDomText</a> nodes, e.g&#x2e;</p>
 <pre> QString text;
  QDomElement element = doc.documentElement();
  for(QDomNode n = element.firstChild(); !n.isNull(); n = n.nextSibling())
@@ -119,6 +120,8 @@
 <p>See also <a href="qdomelement.html#elementsByTagName">elementsByTagName</a>() and <a href="qdomdocument.html#elementsByTagNameNS">QDomDocument::elementsByTagNameNS</a>().</p>
 <h3 class="fn"><a name="hasAttribute"></a>bool QDomElement::hasAttribute ( const <a href="qstring.html">QString</a> &amp; <i>name</i> ) const</h3>
 <p>Returns true if this element has an attribute called <i>name</i>; otherwise returns false.</p>
+<p><b>Note:</b> This function does not take the presence of namespaces into account. As a result, the specified name will be tested against fully-qualified attribute names that include any namespace prefixes that may be present.</p>
+<p>Use <a href="qdomelement.html#hasAttributeNS">hasAttributeNS</a>() to explicitly test for attributes with specific namespaces and names.</p>
 <h3 class="fn"><a name="hasAttributeNS"></a>bool QDomElement::hasAttributeNS ( const <a href="qstring.html">QString</a> &amp; <i>nsURI</i>, const <a href="qstring.html">QString</a> &amp; <i>localName</i> ) const</h3>
 <p>Returns true if this element has an attribute with the local name <i>localName</i> and the namespace URI <i>nsURI</i>; otherwise returns false.</p>
 <h3 class="fn"><a name="nodeType"></a><a href="qdomnode.html#NodeType-enum">QDomNode::NodeType</a> QDomElement::nodeType () const</h3>
@@ -191,6 +194,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

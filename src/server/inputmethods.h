@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,11 +24,14 @@
 
 #include <qwidget.h>
 #include <qlist.h>
+#ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
+#endif
 #include <inputmethodinterface.h>
 #include <qtopiaipcadaptor.h>
-
 #include <qvaluespace.h>
+
+#include <QPixmap>
 
 class QToolButton;
 class QPluginManager;
@@ -81,6 +84,7 @@ private slots:
 
 private:
     void updateStatusIcon();
+    QPixmap generatePixmap() const;
 
     QToolButton *mChoice;
     QStackedWidget *mButtonStack;
@@ -101,9 +105,11 @@ class InputMethods : public QWidget
 public:
     enum IMType { Any=0, Mouse=1, Keypad=2 };
     enum SystemMenuItemId { NextInputMethod =-2, ChangeInputMethod =-3};
-
-    InputMethods( QWidget *, IMType=Any );
+    
+    InputMethods( QWidget *parent =0, IMType=Any );
     ~InputMethods();
+
+    static InputMethods* instance();
 
     QRect inputRect() const;
     bool shown() const;
@@ -122,6 +128,8 @@ public slots:
     void hideInputMethod();
     void setNextInputMethod();
     void changeInputMethod();
+    void setType(IMType t);
+
 signals:
     void inputToggled( bool on );
     void visibilityChanged( bool visible);
@@ -136,7 +144,9 @@ private slots:
 
     void updateIMVisibility();
 
+#ifdef Q_WS_QWS
     void updateHintMap(QWSWindow *, QWSServer::WindowEvent);
+#endif
 
 private:
     void updateHint(int);
@@ -147,7 +157,9 @@ private:
     QPluginManager *loader;
     IMType type;
 
+#ifdef Q_WS_QWS
     QWSInputMethod *currentIM;
+#endif
     QMap<int, QString> hintMap;
     QMap<int, bool> restrictMap;
     int lastActiveWindow;
@@ -160,7 +172,7 @@ class InputMethodService : public QtopiaIpcAdaptor
 {
     Q_OBJECT
 public:
-    InputMethodService( InputMethods *parent );
+    explicit InputMethodService( InputMethods *parent );
     ~InputMethodService();
 
 public slots:

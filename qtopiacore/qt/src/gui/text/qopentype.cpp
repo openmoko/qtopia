@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -23,7 +38,10 @@
 
 #include "qdebug.h"
 #include "qopentype_p.h"
-#include "qfontengine_p.h"
+#include "qfontengine_ft_p.h"
+#if defined(Q_WS_QWS) && !defined(QT_NO_QWS_QPF2)
+#include "qfontengine_qpf_p.h"
+#endif
 #include "qscriptengine_p.h"
 
 #ifndef QT_NO_OPENTYPE
@@ -127,6 +145,7 @@ enum { NumOTScripts = sizeof(ot_scripts)/sizeof(OTScripts) };
 
 QOpenType::QOpenType(QFontEngine *fe, FT_Face _face)
     : fontEngine(fe), face(_face), gdef(0), gsub(0), gpos(0), current_script(0xffffffff)
+    , allocated(0)
 {
     Q_ASSERT(NumOTScripts == (int)QUnicodeTables::ScriptCount);
 
@@ -135,6 +154,7 @@ QOpenType::QOpenType(QFontEngine *fe, FT_Face _face)
     tmpLogClusters = 0;
 
     kerning_feature_selected = false;
+    glyphs_substituted = false;
 
     FT_Error error;
     if ((error = HB_Load_GDEF_Table(face, &gdef))) {
@@ -179,7 +199,7 @@ QOpenType::~QOpenType()
 
 bool QOpenType::checkScript(unsigned int script)
 {
-    assert(script < QUnicodeTables::ScriptCount);
+    Q_ASSERT(script < QUnicodeTables::ScriptCount);
 
     uint tag = ot_scripts[script].tag;
     int requirements = ot_scripts[script].flags;
@@ -221,7 +241,8 @@ void QOpenType::selectScript(QShaperItem *item, unsigned int script, const Featu
     if (current_script == script && kerning_feature_selected == item->kerning_enabled)
         return;
 
-    assert(script < QUnicodeTables::ScriptCount);
+    has_features = false;
+    Q_ASSERT(script < QUnicodeTables::ScriptCount);
     // find script in our list of supported scripts.
     uint tag = ot_scripts[script].tag;
 
@@ -248,6 +269,7 @@ void QOpenType::selectScript(QShaperItem *item, unsigned int script, const Featu
                 if (!error) {
                     DEBUG("  adding feature %s", tag_to_string(features->tag));
                     HB_GSUB_Add_Feature(gsub, feature_index, features->property);
+                    has_features = true;
                 }
                 ++features;
             }
@@ -289,8 +311,10 @@ void QOpenType::selectScript(QShaperItem *item, unsigned int script, const Featu
                         kerning_feature_selected = true;
                     }
                     error = HB_GPOS_Select_Feature(gpos, *feature_tag_list, script_index, 0xffff, &feature_index);
-                    if (!error)
+                    if (!error) {
                         HB_GPOS_Add_Feature(gpos, feature_index, PositioningProperties);
+                        has_features = true;
+                    }
                     ++feature_tag_list;
                 }
                 FT_Memory memory = gpos->memory;
@@ -307,12 +331,18 @@ extern void qt_heuristicPosition(QShaperItem *item);
 
 bool QOpenType::shape(QShaperItem *item, const unsigned int *properties)
 {
+    if (!has_features)
+        return true;
+
     length = item->num_glyphs;
 
     hb_buffer_clear(hb_buffer);
 
-    tmpAttributes = (QGlyphLayout::Attributes *) realloc(tmpAttributes, length*sizeof(QGlyphLayout::Attributes));
-    tmpLogClusters = (unsigned int *) realloc(tmpLogClusters, length*sizeof(unsigned int));
+    if (allocated < length) {
+        tmpAttributes = (QGlyphLayout::Attributes *) realloc(tmpAttributes, length*sizeof(QGlyphLayout::Attributes));
+        tmpLogClusters = (unsigned int *) realloc(tmpLogClusters, length*sizeof(unsigned int));
+        allocated = length;
+    }
     for (int i = 0; i < length; ++i) {
         hb_buffer_add_glyph(hb_buffer, item->glyphs[i].glyph, properties ? properties[i] : 0, i);
         tmpAttributes[i] = item->glyphs[i].attributes;
@@ -330,12 +360,15 @@ bool QOpenType::shape(QShaperItem *item, const unsigned int *properties)
 //     dump_string(hb_buffer);
 #endif
 
+    // ### FT_LOAD_NO_HINTING might give problems here, see comment about MingLiu in qfontengine_ft.cpp
     loadFlags = item->flags & QTextEngine::DesignMetrics ? FT_LOAD_NO_HINTING : FT_LOAD_DEFAULT;
 
+    glyphs_substituted = false;
     if (gsub) {
         uint error = HB_GSUB_Apply_String(gsub, hb_buffer);
         if (error && error != HB_Err_Not_Covered)
             return false;
+        glyphs_substituted = (error != HB_Err_Not_Covered);
     }
 
 #ifdef OT_DEBUG
@@ -354,18 +387,46 @@ bool QOpenType::shape(QShaperItem *item, const unsigned int *properties)
 
 bool QOpenType::positionAndAdd(QShaperItem *item, int availableGlyphs, bool doLogClusters)
 {
+    if (!has_features)
+        return true;
+
+    bool glyphs_positioned = false;
     if (gpos) {
-#ifdef Q_WS_X11
-        Q_ASSERT(fontEngine->type() == QFontEngine::Freetype);
-        face = static_cast<QFontEngineFT *>(fontEngine)->lockFace();
+        switch (fontEngine->type()) {
+#ifndef QT_NO_FREETYPE
+        case QFontEngine::Freetype:
+            face = static_cast<QFontEngineFT *>(fontEngine)->lockFace();
+            break;
 #endif
+#if defined(Q_WS_QWS) && !defined(QT_NO_QWS_QPF2) && !defined(QT_NO_FREETYPE)
+        case QFontEngine::QPF2:
+            face = static_cast<QFontEngineQPF *>(fontEngine)->lockFace();
+            break;
+#endif
+        default:
+            Q_ASSERT(false);
+        }
         memset(hb_buffer->positions, 0, hb_buffer->in_length*sizeof(HB_PositionRec));
         // #### check that passing "false,false" is correct
-        HB_GPOS_Apply_String(face, gpos, loadFlags, hb_buffer, false, false);
-#ifdef Q_WS_X11
-        static_cast<QFontEngineFT *>(fontEngine)->unlockFace();
+        glyphs_positioned = HB_GPOS_Apply_String(face, gpos, loadFlags, hb_buffer, false, false) != HB_Err_Not_Covered;
+        switch (fontEngine->type()) {
+        case QFontEngine::Freetype:
+#ifndef QT_NO_FREETYPE
+            static_cast<QFontEngineFT *>(fontEngine)->unlockFace();
+            break;
 #endif
+#if defined(Q_WS_QWS) && !defined(QT_NO_QWS_QPF2) && !defined(QT_NO_FREETYPE)
+        case QFontEngine::QPF2:
+            static_cast<QFontEngineQPF *>(fontEngine)->unlockFace();
+            break;
+#endif
+        default:
+            break;
+        }
     }
+
+    if (!glyphs_substituted && !glyphs_positioned)
+        return true; // nothing to do for us
 
     // make sure we have enough space to write everything back
     if (availableGlyphs < (int)hb_buffer->in_length) {
@@ -405,10 +466,11 @@ bool QOpenType::positionAndAdd(QShaperItem *item, int availableGlyphs, bool doLo
 
     // calulate the advances for the shaped glyphs
 //     DEBUG("unpositioned: ");
-    item->font->recalcAdvances(item->num_glyphs, glyphs, QFlag(item->flags));
+    if (glyphs_substituted)
+        item->font->recalcAdvances(item->num_glyphs, glyphs, QFlag(item->flags));
 
     // positioning code:
-    if (gpos) {
+    if (gpos && glyphs_positioned) {
         HB_Position positions = hb_buffer->positions;
 
 //         DEBUG("positioned glyphs:");
@@ -419,14 +481,20 @@ bool QOpenType::positionAndAdd(QShaperItem *item, int availableGlyphs, bool doLo
 //                    (int)(positions[i].x_pos >> 6), (int)(positions[i].y_pos >> 6),
 //                    positions[i].back, positions[i].new_advance);
             // ###### fix the case where we have y advances. How do we handle this in Uniscribe?????
+            QFixed xValue = QFixed::fromFixed(item->flags & QTextEngine::RightToLeft
+                                              ? -positions[i].x_advance : positions[i].x_advance);
+            QFixed yValue = QFixed::fromFixed(-positions[i].y_advance);
+            if (!(item->flags & QTextEngine::DesignMetrics)) {
+                xValue = xValue.round();
+                yValue = yValue.round();
+            }
+
             if (positions[i].new_advance) {
-                glyphs[i].advance.x = QFixed::fromFixed(item->flags & QTextEngine::RightToLeft
-                                          ? -positions[i].x_advance : positions[i].x_advance);
-                glyphs[i].advance.y = QFixed::fromFixed(-positions[i].y_advance);
+                glyphs[i].advance.x = xValue;
+                glyphs[i].advance.y = yValue;
             } else {
-                glyphs[i].advance.x += QFixed::fromFixed(item->flags & QTextEngine::RightToLeft
-                                           ? -positions[i].x_advance : positions[i].x_advance);
-                glyphs[i].advance.y -= QFixed::fromFixed(positions[i].y_advance);
+                glyphs[i].advance.x += xValue;
+                glyphs[i].advance.y += yValue;
             }
 
             int back = 0;

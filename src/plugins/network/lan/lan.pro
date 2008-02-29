@@ -2,7 +2,6 @@ qtopia_project(qtopia plugin)
 TARGET=lan
 
 depends(libraries/qtopiacomm/network)
-!enable_qtopiabase:depends(libraries/qtopiail)
 
 # Packaged by settings/network
 CONFIG+=no_pkg
@@ -19,7 +18,8 @@ HEADERS	    = lanplugin.h \
               wirelessscan.h \
               roamingconfig.h \
               roamingmonitor.h \
-              wnet.h
+              wnet.h\
+              wlanregistrationprovider.h
                 
 SOURCES	    = lanplugin.cpp \
               lan.cpp \
@@ -29,7 +29,8 @@ SOURCES	    = lanplugin.cpp \
               wirelessscan.cpp \
               roamingconfig.cpp \
               roamingmonitor.cpp \
-              wnet.cpp
+              wnet.cpp\
+              wlanregistrationprovider.cpp
 
 conf.files	= $$QTOPIA_DEPOT_PATH/etc/network/lan.conf \
                   $$QTOPIA_DEPOT_PATH/etc/network/lan-pcmcia.conf \
@@ -47,9 +48,10 @@ INSTALLS +=bin
 pics.files	= $$QTOPIA_DEPOT_PATH/pics/Network/lan/* 
 pics.path	= /pics/Network/lan
 pics.hint=pics
+INSTALLS+=pics
 
 icons.files     = $$QTOPIA_DEPOT_PATH/pics/Network/icons/*
 icons.path      = /pics/Network/icons
 icons.hint=pics
-INSTALLS	+= pics icons
+INSTALLS+=icons
 

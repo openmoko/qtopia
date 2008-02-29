@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -46,6 +61,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <qdebug.h>
+#include <time.h>
 
 #if defined(Q_OS_LINUX) && !defined(__UCLIBC__)
 #    include <fenv.h>
@@ -53,7 +69,7 @@
 
 #if !defined(QT_QLOCALE_NEEDS_VOLATILE)
 #  if defined(Q_CC_GNU)
-#    if  __GNUC__ == 4 && __GNUC_MINOR__ == 0
+#    if  __GNUC__ == 4
 #      define QT_QLOCALE_NEEDS_VOLATILE
 #    elif defined(Q_OS_WIN)
 #      define QT_QLOCALE_NEEDS_VOLATILE
@@ -81,13 +97,13 @@
 #define CONVERSION_BUFF_SIZE 255
 
 #ifndef QT_QLOCALE_USES_FCVT
-static char *qdtoa(double d, int mode, int ndigits, int *decpt,
-                        int *sign, char **rve, char **digits_str);
 static char *_qdtoa( NEEDS_VOLATILE double d, int mode, int ndigits, int *decpt,
                         int *sign, char **rve, char **digits_str);
-static double qstrtod(const char *s00, char const **se, bool *ok);
 #endif
-static qlonglong qstrtoll(const char *nptr, const char **endptr, register int base, bool *ok);
+Q_CORE_EXPORT char *qdtoa(double d, int mode, int ndigits, int *decpt,
+                        int *sign, char **rve, char **digits_str);
+Q_CORE_EXPORT double qstrtod(const char *s00, char const **se, bool *ok);
+Q_CORE_EXPORT qlonglong qstrtoll(const char *nptr, const char **endptr, register int base, bool *ok);
 static qulonglong qstrtoull(const char *nptr, const char **endptr, register int base, bool *ok);
 
 /******************************************************************************
@@ -96,20 +112,29 @@ static qulonglong qstrtoull(const char *nptr, const char **endptr, register int 
 
 #include "qlocale_data_p.h"
 
+// Assumes that code is a
+// QChar code[3];
+// If the code is two-digit the third digit must be 0
 static QLocale::Language codeToLanguage(const QChar *code)
 {
     ushort uc1 = code[0].unicode();
     ushort uc2 = code[1].unicode();
+    ushort uc3 = code[2].unicode();
+
+    if (uc1 == 'n' && uc2 == 'o' && uc3 == 0)
+        uc2 = 'b';
 
     const unsigned char *c = language_code_list;
-    for (; *c != 0; c += 2) {
-        if (uc1 == c[0] && uc2 == c[1])
-            return QLocale::Language((c - language_code_list)/2);
+    for (; *c != 0; c += 3) {
+        if (uc1 == c[0] && uc2 == c[1] && uc3 == c[2])
+            return QLocale::Language((c - language_code_list)/3);
     }
 
     return QLocale::C;
 }
 
+// Assumes that code is a
+// QChar code[2];
 static QLocale::Country codeToCountry(const QChar *code)
 {
     ushort uc1 = code[0].unicode();
@@ -129,11 +154,16 @@ static QString languageToCode(QLocale::Language language)
     if (language == QLocale::C)
         return QLatin1String("C");
 
+    const unsigned char *c = language_code_list + 3*(uint(language));
+
     QString code;
-    code.resize(2);
-    const unsigned char *c = language_code_list + 2*(uint(language));
+    code.resize(c[2] == 0 ? 2 : 3);
+
     code[0] = ushort(c[0]);
     code[1] = ushort(c[1]);
+    if (c[2] != 0)
+        code[2] = ushort(c[2]);
+
     return code;
 }
 
@@ -178,48 +208,75 @@ static const QLocalePrivate *findLocale(QLocale::Language language, QLocale::Cou
     return locale_data + idx;
 }
 
+static bool splitLocaleName(const QString &name, QChar *lang_begin, QChar *cntry_begin)
+{
+    for (int i = 0; i < 3; ++i)
+        lang_begin[i] = 0;
+    for (int i = 0; i < 2; ++i)
+        cntry_begin[i] = 0;
+
+    int l = name.length();
+
+    QChar *lang = lang_begin;
+    QChar *cntry = cntry_begin;
+
+    int state = 0;
+    const QChar *uc = name.unicode();
+    for (int i = 0; i < l; ++i) {
+        if (uc->unicode() == '.' || uc->unicode() == '@')
+            break;
+
+        switch (state) {
+            case 0:
+                // parsing language
+                if (uc->unicode() == '_') {
+                    state = 1;
+                    break;
+                }
+                if (lang - lang_begin == 3)
+                    return false;
+                if (uc->unicode() < 'a' || uc->unicode() > 'z')
+                    return false;
+
+                *lang = *uc;
+                ++lang;
+                break;
+            case 1:
+                // parsing country
+                if (cntry - cntry_begin == 2) {
+                    cntry_begin[0] = 0;
+                    break;
+                }
+
+                *cntry = *uc;
+                ++cntry;
+                break;
+        }
+
+        ++uc;
+    }
+
+    int lang_len = lang - lang_begin;
+
+    return lang_len == 2 || lang_len == 3;
+}
+
 static void getLangAndCountry(const QString &name, QLocale::Language &lang, QLocale::Country &cntry)
 {
     lang = QLocale::C;
     cntry = QLocale::AnyCountry;
 
-    uint l = name.length();
+    QChar lang_code[3];
+    QChar cntry_code[2];
+    if (!splitLocaleName(name, lang_code, cntry_code))
+        return;
 
-    do {
-        if (l < 2)
-            break;
+    lang = codeToLanguage(lang_code);
+    if (lang == QLocale::C)
+        return;
 
-        const QChar *uc = name.unicode();
-        if (l > 2
-                && uc[2] != QLatin1Char('_')
-                && uc[2] != QLatin1Char('.')
-                && uc[2] != QLatin1Char('@'))
-            break;
-
-        QChar lang_code[2];
-        lang_code[0] = uc[0];
-        lang_code[1] = uc[1];
-        // CLDR has changed the code for Bokmal from "no" to "nb". We want to support
-        // both, but we have no alias mechanism in the database.
-        if (lang_code[0] == QLatin1Char('n') && lang_code[1] == QLatin1Char('b'))
-            lang_code[1] = QLatin1Char('o');
-        lang = codeToLanguage(lang_code);
-        if (lang == QLocale::C)
-            break;
-
-        if (l == 2 || uc[2] == QLatin1Char('.') || uc[2] == QLatin1Char('@'))
-            break;
-
-        // we have uc[2] == '_'
-        if (l < 5)
-            break;
-
-        if (l > 5 && uc[5] != QLatin1Char('.') && uc[5] != QLatin1Char('@'))
-            break;
-
-        cntry = codeToCountry(uc + 3);
-    } while (false);
-
+    if (cntry_code[0].unicode() != 0)
+        cntry = codeToCountry(cntry_code);
 }
 
 static const QLocalePrivate *findLocale(const QString &name)
@@ -274,6 +331,7 @@ static int repeatCount(const QString &s, int i)
 }
 
 static const QLocalePrivate *default_lp = 0;
+static uint default_number_options = 0;
 
 #ifndef QT_NO_SYSTEMLOCALE
 static QByteArray envVarLocale()
@@ -376,7 +434,7 @@ QByteArray getWinLocaleName(LCID id = LOCALE_USER_DEFAULT)
 
 Q_CORE_EXPORT QLocale qt_localeFromLCID(LCID id)
 {
-    return QLocale(getWinLocaleName(id));
+    return QLocale(QString::fromLatin1(getWinLocaleName(id)));
 }
 
 static QString winToQtFormat(const QString &sys_fmt)
@@ -385,12 +443,12 @@ static QString winToQtFormat(const QString &sys_fmt)
     int i = 0;
 
     while (i < sys_fmt.size()) {
-        if (sys_fmt.at(i).unicode() == '\'') {
+        if (sys_fmt.at(i).unicode() == QLatin1Char('\'')) {
             QString text = readEscapedFormatString(sys_fmt, &i);
             if (text == QLatin1String("'"))
                 result += QLatin1String("''");
             else
-                result += QChar('\'') + text + QChar('\'');
+                result += QLatin1Char('\'') + text + QLatin1Char('\'');
             continue;
         }
 
@@ -536,7 +594,7 @@ static QString winMonthName(int month, bool short_format)
 
 QLocale QSystemLocale::fallbackLocale() const
 {
-    return QLocale(getWinLocaleName());
+    return QLocale(QString::fromLatin1(getWinLocaleName()));
 }
 
 QVariant QSystemLocale::query(QueryType type, QVariant in = QVariant()) const
@@ -588,7 +646,7 @@ QVariant QSystemLocale::query(QueryType type, QVariant in = QVariant()) const
 
     case LanguageId:
     case CountryId: {
-        QString locale = getWinLocaleName();
+        QString locale = QString::fromLatin1(getWinLocaleName());
         QLocale::Language lang;
         QLocale::Country cntry;
         getLangAndCountry(locale, lang, cntry);
@@ -840,7 +898,7 @@ static QByteArray getMacLocaleName()
     if (result.isEmpty()) {
         QCFType<CFLocaleRef> l = CFLocaleCopyCurrent();
         CFStringRef locale = CFLocaleGetIdentifier(l);
-        result = QCFString::toQString(locale).toLatin1();
+        result = QCFString::toQString(locale).toUtf8();
     }
     return result;
 }
@@ -948,7 +1006,7 @@ static QString macToQtFormat(const QString &sys_fmt)
             if (text == QLatin1String("'"))
                 result += QLatin1String("''");
             else
-                result += QChar('\'') + text + QChar('\'');
+                result += QLatin1Char('\'') + text + QLatin1Char('\'');
             continue;
         }
 
@@ -1039,7 +1097,7 @@ static QString getCFLocaleValue(CFStringRef key)
 
 QLocale QSystemLocale::fallbackLocale() const
 {
-    return QLocale(getMacLocaleName());
+    return QLocale(QString::fromUtf8(getMacLocaleName().constData()));
 }
 
 QVariant QSystemLocale::query(QueryType type, QVariant in = QVariant()) const
@@ -1201,30 +1259,31 @@ static const QSystemLocale *systemLocale()
 
 void QLocalePrivate::updateSystemPrivate()
 {
+    const QSystemLocale *sys_locale = systemLocale();
     if (!system_lp)
         system_lp = new QLocalePrivate;
-    *system_lp = *_systemLocale->fallbackLocale().d();
+    *system_lp = *sys_locale->fallbackLocale().d();
 
-    QVariant res = _systemLocale->query(QSystemLocale::LanguageId, QVariant());
+    QVariant res = sys_locale->query(QSystemLocale::LanguageId, QVariant());
     if (!res.isNull())
         system_lp->m_language_id = res.toInt();
-    res = _systemLocale->query(QSystemLocale::CountryId, QVariant());
+    res = sys_locale->query(QSystemLocale::CountryId, QVariant());
     if (!res.isNull())
         system_lp->m_country_id = res.toInt();
 
-    res = _systemLocale->query(QSystemLocale::DecimalPoint, QVariant());
+    res = sys_locale->query(QSystemLocale::DecimalPoint, QVariant());
     if (!res.isNull())
         system_lp->m_decimal = res.toString().at(0).unicode();
 
-    res = _systemLocale->query(QSystemLocale::GroupSeparator, QVariant());
+    res = sys_locale->query(QSystemLocale::GroupSeparator, QVariant());
     if (!res.isNull())
         system_lp->m_group = res.toString().at(0).unicode();
 
-    res = _systemLocale->query(QSystemLocale::ZeroDigit, QVariant());
+    res = sys_locale->query(QSystemLocale::ZeroDigit, QVariant());
     if (!res.isNull())
         system_lp->m_zero = res.toString().at(0).unicode();
 
-    res = _systemLocale->query(QSystemLocale::NegativeSign, QVariant());
+    res = sys_locale->query(QSystemLocale::NegativeSign, QVariant());
     if (!res.isNull())
         system_lp->m_minus = res.toString().at(0).unicode();
 }
@@ -1234,10 +1293,9 @@ static const QLocalePrivate *systemPrivate()
 {
 #ifndef QT_NO_SYSTEMLOCALE
     // copy over the information from the fallback locale and modify
-    if (!system_lp || system_lp->m_language_id == 0) {
-        (void) systemLocale();
+    if (!system_lp || system_lp->m_language_id == 0)
         QLocalePrivate::updateSystemPrivate();
-    }
+
     return system_lp;
 #else
     return locale_data;
@@ -1495,7 +1553,9 @@ QDataStream &operator>>(QDataStream &ds, QLocale &l)
     \value NauruLanguage
     \value Nepali
     \value Norwegian
-    \value Nynorsk
+    \value NorwegianBokmal
+    \value Nynorsk Obsolete, please use NorwegianNynorsk
+    \value NorwegianNynorsk
     \value Occitan
     \value Oriya
     \value Pashto
@@ -1551,6 +1611,30 @@ QDataStream &operator>>(QDataStream &ds, QLocale &l)
     \value Yoruba
     \value Zhuang
     \value Zulu
+    \value Bosnian
+    \value Divehi
+    \value Manx
+    \value Cornish
+    \value Akan
+    \value Konkani
+    \value Ga
+    \value Igbo
+    \value Kamba
+    \value Syriac
+    \value Blin
+    \value Geez
+    \value Koro
+    \value Sidamo
+    \value Atsam
+    \value Tigre
+    \value Jju
+    \value Friulian
+    \value Venda
+    \value Ewe
+    \value Walamo
+    \value Hawaiian
+    \value Tyap
+    \value Chewa
     \omitvalue LastLanguage
 
     \sa language()
@@ -1947,7 +2031,7 @@ QLocale::QLocale(const QString &name)
 QLocale::QLocale()
 {
     ::setDataPointer(&v, defaultPrivate());
-    ::setNumberOptions(&v, 0);
+    ::setNumberOptions(&v, default_number_options);
 }
 
 /*!
@@ -1974,11 +2058,13 @@ QLocale::QLocale(Language language, Country country)
     const QLocalePrivate *d = findLocale(language, country);
 
     // If not found, should default to system
-    if (d->languageId() == QLocale::C && language != QLocale::C)
-        d = defaultPrivate();
-
-    ::setDataPointer(&v, d);
-    ::setNumberOptions(&v, 0);
+    if (d->languageId() == QLocale::C && language != QLocale::C) {
+        ::setDataPointer(&v, defaultPrivate());
+        ::setNumberOptions(&v, default_number_options);
+    } else {
+        ::setDataPointer(&v, d);
+        ::setNumberOptions(&v, 0);
+    }
 }
 
 /*!
@@ -2048,6 +2134,7 @@ QLocale::NumberOptions QLocale::numberOptions() const
 void QLocale::setDefault(const QLocale &locale)
 {
     default_lp = locale.d();
+    default_number_options = locale.numberOptions();
 }
 
 /*!
@@ -2405,6 +2492,8 @@ QString QLocale::toString(qulonglong i) const
 QString QLocale::toString(const QDate &date, const QString &format) const
 {
     QString result;
+    if (!date.isValid())
+        return result;
 
     int i = 0;
     while (i < format.size()) {
@@ -2492,6 +2581,9 @@ QString QLocale::toString(const QDate &date, const QString &format) const
 */
 QString QLocale::toString(const QDate &date, FormatType format) const
 {
+    if (!date.isValid())
+        return QString();
+
 #ifndef QT_NO_SYSTEMLOCALE
     if (d() == systemPrivate()) {
         QVariant res = systemLocale()->query(format == ShortFormat
@@ -2553,6 +2645,8 @@ static QString timeZone()
 QString QLocale::toString(const QTime &time, const QString &format) const
 {
     QString result;
+    if (!time.isValid())
+        return result;
 
     int hour12 = time.hour();
     enum { AM, PM } am_pm = AM;
@@ -2696,6 +2790,9 @@ QString QLocale::toString(const QTime &time, const QString &format) const
 */
 QString QLocale::toString(const QTime &time, FormatType format) const
 {
+    if (!time.isValid())
+        return QString();
+
 #ifndef QT_NO_SYSTEMLOCALE
     if (d() == systemPrivate()) {
         QVariant res = systemLocale()->query(format == ShortFormat
@@ -2890,9 +2987,8 @@ QString QLocale::toString(double i, char f, int prec) const
 /*!
     Returns a QLocale object initialized to the system locale.
 
-    On Windows and Mac, this locale will use system functions to format dates and
-    strings. It will therefore reflect customizations made by the user
-    in the control panel.
+    On Windows and Mac, this locale will use the decimal/grouping characters and date/time
+    formats specified in the system configuration panel.
 
     \sa QTextCodec::locale() c()
 */
@@ -2901,6 +2997,35 @@ QLocale QLocale::system()
 {
     QLocale result(C);
     setDataPointer(&result.v, systemPrivate());
+    return result;
+}
+
+/*!
+    \since 4.3
+
+    Returns the list of countries that have entires for \a language in Qt's locale
+    database. If the result is an empty list, then \a language is not represented in
+    Qt's locale database.
+*/
+QList<QLocale::Country> QLocale::countriesForLanguage(Language language)
+{
+    QList<Country> result;
+
+    unsigned language_id = language;
+    uint idx = locale_index[language_id];
+
+    if (language == C) {
+        result << AnyCountry;
+        return result;
+    }
+
+    const QLocalePrivate *d = locale_data + idx;
+
+    while (d->languageId() == language_id) {
+        result << static_cast<Country>(d->countryId());
+        ++d;
+    }
+
     return result;
 }
 
@@ -3138,11 +3263,15 @@ static QString &exponentForm(QString &digits, int decpt, uint precision,
 static bool isZero(double d)
 {
     uchar *ch = (uchar *)&d;
+#ifdef QT_ARMFPA
+        return !(ch[3] & 0x7F || ch[2] || ch[1] || ch[0] || ch[7] || ch[6] || ch[5] || ch[4]);
+#else
     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
         return !(ch[0] & 0x7F || ch[1] || ch[2] || ch[3] || ch[4] || ch[5] || ch[6] || ch[7]);
     } else {
         return !(ch[7] & 0x7F || ch[6] || ch[5] || ch[4] || ch[3] || ch[2] || ch[1] || ch[0]);
     }
+#endif
 }
 
 QString QLocalePrivate::doubleToString(double d,
@@ -3161,11 +3290,11 @@ QString QLocalePrivate::doubleToString(double d,
     QString num_str;
 
     // Detect special numbers (nan, +/-inf)
-    if (qIsInf(d)) {
+    if (qt_is_inf(d)) {
         num_str = QString::fromLatin1("inf");
         special_number = true;
         negative = d < 0;
-    } else if (qIsNan(d)) {
+    } else if (qt_is_nan(d)) {
         num_str = QString::fromLatin1("nan");
         special_number = true;
     }
@@ -3450,7 +3579,7 @@ static bool removeGroupSeparators(QLocalePrivate::CharBuff *num)
         if (c == ',') {
             if (i == 0 || data[i - 1] < '0' || data[i - 1] > '9')
                 return false;
-            if (i == l || data[i + 1] < '0' || data[i + 1] > '9')
+            if (i == l - 1 || data[i + 1] < '0' || data[i + 1] > '9')
                 return false;
             ++group_cnt;
         }
@@ -3522,9 +3651,6 @@ bool QLocalePrivate::numberToCLocale(const QString &num,
     const QChar *uc = num.unicode();
     int l = num.length();
     int idx = 0;
-    const QChar _zero = zero();
-    const ushort zeroUnicode = _zero.unicode();
-    const ushort tenUnicode = zeroUnicode + 10;
 
     // Skip whitespace
     while (idx < l && uc[idx].isSpace())
@@ -3535,35 +3661,22 @@ bool QLocalePrivate::numberToCLocale(const QString &num,
     const QChar _group = group();
 
     while (idx < l) {
-        char out;
         const QChar &in = uc[idx];
 
-        if (in.unicode() >= zeroUnicode && in.unicode() < tenUnicode)
-            out = '0' + in.unicode() - zeroUnicode;
-        else if (in == plus())
-            out = '+';
-        else if (in == minus())
-            out = '-';
-        else if (in == decimal())
-            out = '.';
-        else if (in == group())
-            out = ',';
-        // In several languages group() is the char 0xA0, which looks like a space.
-        // People use a regular space instead of it and complain it doesn't work.
-        else if (_group.unicode() == 0xA0 && in.unicode() == ' ')
-            out = ',';
-        else if (in == exponential() || in == exponential().toUpper())
-            out = 'e';
-        else if (in == list())
-            out = ';';
-        else if (in == percent())
-            out = '%';
-        else if (in.unicode() >= 'A' && in.unicode() <= 'Z')
-            out = in.toLower().toLatin1();
-        else if (in.unicode() >= 'a' && in.unicode() <= 'z')
-            out = in.toLatin1();
-        else
-            break;
+        char out = digitToCLocale(in);
+        if (out == 0) {
+            if (in == list())
+                out = ';';
+            else if (in == percent())
+                out = '%';
+            // for handling base-x numbers
+            else if (in.unicode() >= 'A' && in.unicode() <= 'Z')
+                out = in.toLower().toLatin1();
+            else if (in.unicode() >= 'a' && in.unicode() <= 'z')
+                out = in.toLatin1();
+            else
+                break;
+        }
 
         result->append(out);
 
@@ -3583,6 +3696,92 @@ bool QLocalePrivate::numberToCLocale(const QString &num,
             && !removeGroupSeparators(result))
         return false;
 
+
+    return true;
+}
+
+bool QLocalePrivate::validateChars(const QString &str, NumberMode numMode, QByteArray *buff,
+                                    int decDigits) const
+{
+    buff->clear();
+    buff->reserve(str.length());
+
+    const bool scientific = numMode == DoubleScientificMode;
+    bool lastWasE = false;
+    int eCnt = 0;
+    int decPointCnt = 0;
+    bool dec = false;
+    int decDigitCnt = 0;
+
+    for (int i = 0; i < str.length(); ++i) {
+        char c = digitToCLocale(str.at(i));
+
+        if (c >= '0' && c <= '9') {
+            if (numMode != IntegerMode) {
+                // If a double has too many digits after decpt, it shall be Invalid.
+                if (dec && decDigits != -1 && decDigits < ++decDigitCnt)
+                    return false;
+            }
+        } else {
+            switch (c) {
+                case '.':
+                    if (numMode == IntegerMode) {
+                        // If an integer has a decimal point, it shall be Invalid.
+                        return false;
+                    } else {
+                        // If a double has more than one decimal point, it shall be Invalid.
+                        if (++decPointCnt > 1)
+                            return false;
+#if 0
+                        // If a double with no decimal digits has a decimal point, it shall be
+                        // Invalid.
+                        if (decDigits == 0)
+                            return false;
+#endif                  // On second thoughts, it shall be Valid.
+
+                        dec = true;
+                    }
+                    break;
+
+                case '+':
+                case '-':
+                    if (scientific) {
+                        // If a scientific has a sign that's not at the beginning or after
+                        // an 'e', it shall be Invalid.
+                        if (i != 0 && !lastWasE)
+                            return false;
+                    } else {
+                        // If a non-scientific has a sign that's not at the beginning,
+                        // it shall be Invalid.
+                        if (i != 0)
+                            return false;
+                    }
+                    break;
+
+                case ',':
+                    return false;
+
+                case 'e':
+                    if (scientific) {
+                        // If a scientific has more than one 'e', it shall be Invalid.
+                        if (++eCnt > 1)
+                            return false;
+                        dec = false;
+                    } else {
+                        // If a non-scientific has an 'e', it shall be Invalid.
+                        return false;
+                    }
+                    break;
+
+                default:
+                    // If it's not a valid digit, it shall be Invalid.
+                    return false;
+            }
+        }
+
+        lastWasE = c == 'e';
+        buff->append(c);
+    }
 
     return true;
 }
@@ -3627,53 +3826,97 @@ qulonglong QLocalePrivate::stringToUnsLongLong(const QString &number, int base,
 }
 
 
-double QLocalePrivate::bytearrayToDouble(const char *num, bool *ok)
+double QLocalePrivate::bytearrayToDouble(const char *num, bool *ok, bool *overflow)
 {
     if (ok != 0)
         *ok = true;
+    if (overflow != 0)
+        *overflow = false;
 
-    if (qstrcmp(num, "nan") == 0)
-        return Q_SNAN;
-
-    if (qstrcmp(num, "+inf") == 0 || qstrcmp(num, "inf") == 0)
-        return Q_INFINITY;
-
-    if (qstrcmp(num, "-inf") == 0)
-        return -Q_INFINITY;
-
-    bool _ok;
-#ifdef QT_QLOCALE_USES_FCVT
-    char *endptr;
-    double d = strtod(num, &endptr);
-    _ok = true;
-#else
-    const char *endptr;
-    double d = qstrtod(num, &endptr, &_ok);
-#endif
-
-    if (!_ok || *endptr != '\0') {
+    if (*num == '\0') {
         if (ok != 0)
             *ok = false;
         return 0.0;
     }
-    else
-        return d;
+
+    if (qstrcmp(num, "nan") == 0)
+        return qt_snan();
+
+    if (qstrcmp(num, "+inf") == 0 || qstrcmp(num, "inf") == 0)
+        return qt_inf();
+
+    if (qstrcmp(num, "-inf") == 0)
+        return -qt_inf();
+
+    bool _ok;
+    const char *endptr;
+    double d = qstrtod(num, &endptr, &_ok);
+
+    if (!_ok) {
+        // the only way strtod can fail with *endptr != '\0' on a non-empty
+        // input string is overflow
+        if (ok != 0)
+            *ok = false;
+        if (overflow != 0)
+            *overflow = *endptr != '\0';
+        return 0.0;
+    }
+
+    if (*endptr != '\0') {
+        // we stopped at a non-digit character after converting some digits
+        if (ok != 0)
+            *ok = false;
+        if (overflow != 0)
+            *overflow = false;
+        return 0.0;
+    }
+
+    if (ok != 0)
+        *ok = true;
+    if (overflow != 0)
+        *overflow = false;
+    return d;
 }
 
-qlonglong QLocalePrivate::bytearrayToLongLong(const char *num, int base, bool *ok)
+qlonglong QLocalePrivate::bytearrayToLongLong(const char *num, int base, bool *ok, bool *overflow)
 {
     bool _ok;
     const char *endptr;
-    qlonglong l = qstrtoll(num, &endptr, base, &_ok);
 
-    if (!_ok || *endptr != '\0') {
+    if (*num == '\0') {
         if (ok != 0)
             *ok = false;
+        if (overflow != 0)
+            *overflow = false;
+        return 0;
+    }
+
+    qlonglong l = qstrtoll(num, &endptr, base, &_ok);
+
+    if (!_ok) {
+        if (ok != 0)
+            *ok = false;
+        if (overflow != 0) {
+            // the only way qstrtoll can fail with *endptr != '\0' on a non-empty
+            // input string is overflow
+            *overflow = *endptr != '\0';
+        }
+        return 0;
+    }
+
+    if (*endptr != '\0') {
+        // we stopped at a non-digit character after converting some digits
+        if (ok != 0)
+            *ok = false;
+        if (overflow != 0)
+            *overflow = false;
         return 0;
     }
 
     if (ok != 0)
         *ok = true;
+    if (overflow != 0)
+        *overflow = false;
     return l;
 }
 
@@ -3817,16 +4060,13 @@ static qulonglong qstrtoull(const char *nptr, const char **endptr, register int 
  * Ignores `locale' stuff.  Assumes that the upper and lower case
  * alphabets and digits are each contiguous.
  */
-static qlonglong qstrtoll(const char *nptr, const char **endptr, register int base, bool *ok)
+Q_CORE_EXPORT qlonglong qstrtoll(const char *nptr, const char **endptr, register int base, bool *ok)
 {
     register const char *s;
     register qulonglong acc;
     register unsigned char c;
     register qulonglong qbase, cutoff;
     register int neg, any, cutlim;
-
-    if (ok != 0)
-        *ok = true;
 
     /*
      * Skip white space and pick up leading +/- sign if any.
@@ -3903,7 +4143,11 @@ static qlonglong qstrtoll(const char *nptr, const char **endptr, register int ba
         acc = (~acc) + 1;
     }
     if (endptr != 0)
-        *endptr = (any ? s - 1 : nptr);
+        *endptr = (any >= 0 ? s - 1 : nptr);
+
+    if (ok != 0)
+        *ok = any > 0;
+
     return acc;
 }
 
@@ -4033,7 +4277,7 @@ __RCSID("$NetBSD: strtod.c,v 1.26 1998/02/03 18:44:21 perry Exp $");
 #error Exactly one of IEEE_BIG_OR_LITTLE_ENDIAN, VAX, or IBM should be defined.
 #endif
 
-static inline ULong getWord0(const NEEDS_VOLATILE double x)
+static inline ULong _getWord0(const NEEDS_VOLATILE double x)
 {
     const NEEDS_VOLATILE uchar *ptr = reinterpret_cast<const NEEDS_VOLATILE uchar *>(&x);
     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
@@ -4043,7 +4287,7 @@ static inline ULong getWord0(const NEEDS_VOLATILE double x)
     }
 }
 
-static inline void setWord0(NEEDS_VOLATILE double *x, ULong l)
+static inline void _setWord0(NEEDS_VOLATILE double *x, ULong l)
 {
     NEEDS_VOLATILE uchar *ptr = reinterpret_cast<NEEDS_VOLATILE uchar *>(x);
     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
@@ -4059,7 +4303,7 @@ static inline void setWord0(NEEDS_VOLATILE double *x, ULong l)
     }
 }
 
-static inline ULong getWord1(const NEEDS_VOLATILE double x)
+static inline ULong _getWord1(const NEEDS_VOLATILE double x)
 {
     const NEEDS_VOLATILE uchar *ptr = reinterpret_cast<const NEEDS_VOLATILE uchar *>(&x);
     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
@@ -4068,7 +4312,7 @@ static inline ULong getWord1(const NEEDS_VOLATILE double x)
         return (ptr[3]<<24) + (ptr[2]<<16) + (ptr[1]<<8) + ptr[0];
     }
 }
-static inline void setWord1(NEEDS_VOLATILE double *x, ULong l)
+static inline void _setWord1(NEEDS_VOLATILE double *x, ULong l)
 {
     NEEDS_VOLATILE uchar *ptr = reinterpret_cast<uchar NEEDS_VOLATILE *>(x);
     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
@@ -4082,6 +4326,42 @@ static inline void setWord1(NEEDS_VOLATILE double *x, ULong l)
         ptr[1] = uchar(l>>8);
         ptr[0] = uchar(l);
     }
+}
+
+static inline ULong getWord0(const NEEDS_VOLATILE double x)
+{
+#ifdef QT_ARMFPA
+    return _getWord1(x);
+#else
+    return _getWord0(x);
+#endif
+}
+
+static inline void setWord0(NEEDS_VOLATILE double *x, ULong l)
+{
+#ifdef QT_ARMFPA
+    _setWord1(x, l);
+#else
+    _setWord0(x, l);
+#endif
+}
+
+static inline ULong getWord1(const NEEDS_VOLATILE double x)
+{
+#ifdef QT_ARMFPA
+    return _getWord0(x);
+#else
+    return _getWord1(x);
+#endif
+}
+
+static inline void setWord1(NEEDS_VOLATILE double *x, ULong l)
+{
+#ifdef QT_ARMFPA
+    _setWord0(x, l);
+#else
+    _setWord1(x, l);
+#endif
 }
 
 static inline void Storeinc(ULong *&a, const ULong &b, const ULong &c)
@@ -4939,7 +5219,7 @@ static const double tinytens[] = { 1e-16, 1e-32 };
 */
 static double g_double_zero = 0.0;
 
-static double qstrtod(const char *s00, const char **se, bool *ok)
+Q_CORE_EXPORT double qstrtod(const char *s00, const char **se, bool *ok)
 {
     int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign,
         e, e1, esign, i, j, k, nd, nd0, nf, nz, nz0, sign;
@@ -5633,7 +5913,7 @@ static int quorem(Bigint *b, Bigint *S)
 /* This actually sometimes returns a pointer to a string literal
    cast to a char*. Do NOT try to modify the return value. */
 
-static char *qdtoa ( double d, int mode, int ndigits, int *decpt, int *sign, char **rve, char **resultp)
+Q_CORE_EXPORT char *qdtoa ( double d, int mode, int ndigits, int *decpt, int *sign, char **rve, char **resultp)
 {
     // Some values of the floating-point control word can cause _qdtoa to crash with an underflow.
     // We set a safe value here.
@@ -6278,5 +6558,24 @@ static char *_qdtoa( NEEDS_VOLATILE double d, int mode, int ndigits, int *decpt,
         *rve = s;
     return s0;
 }
+#else
+// NOT thread safe!
+Q_CORE_EXPORT char *qdtoa( double d, int mode, int ndigits, int *decpt, int *sign, char **rve, char **resultp)
+{
+    if(rve)
+      *rve = 0;
+    if(resultp)
+      *resultp = 0;
+    if (mode == 3)
+        return fcvt(d, ndigits, decpt, sign);
+    return ecvt(d, ndigits, decpt, sign);
+}
 
+Q_CORE_EXPORT double qstrtod(const char *s00, const char **se, bool *ok)
+{
+    double ret = strtod((char*)s00, (char**)se);
+    if(ok)
+        *ok = true; // the result will be that we don't report underflow in this case
+    return ret;
+}
 #endif // QT_QLOCALE_USES_FCVT

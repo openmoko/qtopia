@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -18,11 +18,11 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <qstring.h>
+
+#include <QString>
 
 #include "doubledata.h"
 #include "engine.h"
-#include <QDebug>
 
 // Data type
 DoubleData::DoubleData(): Data() {};
@@ -72,7 +72,7 @@ void DoubleData::set(double d) {
     }
 
     formattedOutput = roundDigits(formattedOutput, 12);
-   
+
     if ( formattedOutput.at( 11 ) == QChar('.') && formattedOutput.at(12) != QChar('0') )
         systemEngine->setError( eSurpassLimits );
     formattedOutput.truncate(12);
@@ -130,11 +130,9 @@ bool DoubleData::push(char c, bool commit) {
             dbl = tmp;
         }
     }
-    else {
-        //qDebug("Wrong character pushed");
-    }
     return ok;
 }
+
 bool DoubleData::del() {
     if (!edited)
         return true;
@@ -157,6 +155,7 @@ bool DoubleData::del() {
     }
     return false;
 }
+
 void DoubleData::clear() {
     dbl = 0;
     formattedOutput.truncate(0);

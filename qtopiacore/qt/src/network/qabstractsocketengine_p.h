@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,8 +53,19 @@
 #include "QtNetwork/qhostaddress.h"
 #include "QtNetwork/qabstractsocket.h"
 #include "private/qobject_p.h"
+class QAuthenticator;
 
 class QAbstractSocketEnginePrivate;
+
+
+class QAbstractSocketEngineReceiver {
+public:
+    virtual ~QAbstractSocketEngineReceiver(){}
+    virtual void readNotification()= 0;
+    virtual void writeNotification()= 0;
+    virtual void exceptionNotification()= 0;
+    virtual void proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *authenticator)= 0;
+};
 
 class Q_AUTOTEST_EXPORT QAbstractSocketEngine : public QObject
 {
@@ -116,11 +142,14 @@ public:
     virtual bool isExceptionNotificationEnabled() const = 0;
     virtual void setExceptionNotificationEnabled(bool enable) = 0;
 
-Q_SIGNALS:
+public Q_SLOTS:
     void readNotification();
     void writeNotification();
     void exceptionNotification();
+    void proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *authenticator);
 
+public:
+    void setReceiver(QAbstractSocketEngineReceiver *receiver);
 protected:
     QAbstractSocketEngine(QAbstractSocketEnginePrivate &dd, QObject* parent = 0);
 
@@ -154,6 +183,7 @@ public:
     quint16 localPort;
     QHostAddress peerAddress;
     quint16 peerPort;
+    QAbstractSocketEngineReceiver *receiver;
 };
 
 

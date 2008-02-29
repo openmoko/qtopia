@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -24,6 +39,16 @@
 /*
 TRANSLATOR qdesigner_internal::ConnectionModel
 */
+
+#include "signalsloteditorwindow.h"
+#include "signalsloteditor_p.h"
+#include "signalsloteditor.h"
+#include "qdesigner_integration_p.h"
+
+#include <iconloader_p.h>
+#include <QtDesigner/QDesignerFormWindowInterface>
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <QtDesigner/QDesignerFormWindowManagerInterface>
 
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QDebug>
@@ -36,14 +61,6 @@ TRANSLATOR qdesigner_internal::ConnectionModel
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QToolButton>
 #include <QtGui/QMessageBox>
-
-#include <iconloader_p.h>
-
-#include <abstractformeditor.h>
-#include <abstractformwindowmanager.h>
-#include "signalsloteditorwindow.h"
-#include "signalsloteditor_p.h"
-#include "signalsloteditor.h"
 
 namespace qdesigner_internal {
 
@@ -71,29 +88,25 @@ ConnectionModel::ConnectionModel(SignalSlotEditor *editor, QObject *parent)
 QVariant ConnectionModel::headerData(int section, Qt::Orientation orientation,
                                         int role) const
 {
-    QVariant result;
+    if (orientation == Qt::Vertical || role != Qt::DisplayRole)
+        return QVariant();
 
-    if (orientation == Qt::Vertical)
-        return result;
-    if (role != Qt::DisplayRole)
-        return result;
+    static const QVariant senderTitle = tr("Sender");
+    static const QVariant signalTitle = tr("Signal");
+    static const QVariant receiverTitle = tr("Receiver");
+    static const QVariant slotTitle = tr("Slot");
 
     switch (section) {
-        case 0:
-            result = tr("Sender");
-            break;
-        case 1:
-            result = tr("Signal");
-            break;
-        case 2:
-            result = tr("Receiver");
-            break;
-        case 3:
-            result = tr("Slot");
-            break;
+    case 0:
+        return senderTitle;
+    case 1:
+        return signalTitle;
+    case 2:
+        return receiverTitle;
+    case 3:
+        return slotTitle;
     }
-
-    return result;
+    return  QVariant();
 }
 
 QModelIndex ConnectionModel::index(int row, int column,
@@ -148,37 +161,40 @@ QVariant ConnectionModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    SignalSlotConnection *con
-        = static_cast<SignalSlotConnection*>(m_editor->connection(index.row()));
+    const SignalSlotConnection *con = static_cast<SignalSlotConnection*>(m_editor->connection(index.row()));
     Q_ASSERT(con != 0);
+
+    static const QVariant senderDefault = tr("<sender>");
+    static const QVariant signalDefault = tr("<signal>");
+    static const QVariant receiverDefault = tr("<receiver>");
+    static const QVariant slotDefault = tr("<slot>");
 
     switch (index.column()) {
         case 0: {
-            QString sender = con->sender();
+            const QString sender = con->sender();
             if (sender.isEmpty())
-                sender = tr("<sender>");
+                return senderDefault;
             return sender;
         }
         case 1: {
-            QString signal = con->signal();
+            const QString signal = con->signal();
             if (signal.isEmpty())
-                signal = tr("<signal>");
+                return signalDefault;
             return signal;
         }
         case 2: {
-            QString receiver = con->receiver();
+            const QString receiver = con->receiver();
             if (receiver.isEmpty())
-                receiver = tr("<receiver>");
+                return receiverDefault;
             return receiver;
         }
         case 3: {
-            QString slot = con->slot();
+            const QString slot = con->slot();
             if (slot.isEmpty())
-                slot = tr("<slot>");
+                return slotDefault;
             return slot;
         }
     }
-
     return QVariant();
 }
 
@@ -251,7 +267,7 @@ Qt::ItemFlags ConnectionModel::flags(const QModelIndex&) const
 
 void ConnectionModel::connectionChanged(Connection *con)
 {
-    int idx = m_editor->indexOfConnection(con);
+    const int idx = m_editor->indexOfConnection(con);
     SignalSlotConnection *changedCon = static_cast<SignalSlotConnection*>(m_editor->connection(idx));
     SignalSlotConnection *c = 0;
     for (int i=0; i<m_editor->connectionCount(); ++i) {
@@ -259,11 +275,22 @@ void ConnectionModel::connectionChanged(Connection *con)
             continue;
         c = static_cast<SignalSlotConnection*>(m_editor->connection(i));
         if (c->sender() == changedCon->sender() && c->signal() == changedCon->signal()
-            && c->receiver() == changedCon->receiver() && c->slot() == changedCon->slot())
-            QMessageBox::warning(m_editor->parentWidget(), tr("Signal and Slot Editor"),
-                tr("The connection already exists!"));
+            && c->receiver() == changedCon->receiver() && c->slot() == changedCon->slot()) {
+                QMessageBox::warning(m_editor->parentWidget(), tr("Signal and Slot Editor"),
+                    tr("The connection already exists!<br>SENDER(%1), SIGNAL(%2), RECEIVER(%3), SLOT(%4)")
+                    .arg(changedCon->sender())
+                    .arg(changedCon->signal())
+                    .arg(changedCon->receiver())
+                    .arg(changedCon->slot()));
+                break;
+        }
     }
     emit dataChanged(createIndex(idx, 0), createIndex(idx, 3));
+}
+
+void ConnectionModel::updateAll()
+{
+    emit dataChanged(index(0, 0), index(rowCount(), columnCount()));
 }
 
 /*******************************************************************************
@@ -318,7 +345,7 @@ InlineEditorModel::InlineEditorModel(int rows, int cols, QObject *parent)
 
 void InlineEditorModel::addTitle(const QString &title)
 {
-    int cnt = rowCount();
+    const int cnt = rowCount();
     insertRows(cnt, 1);
     QModelIndex cat_idx = index(cnt, 0);
     setData(cat_idx, title + QLatin1Char(':'), Qt::DisplayRole);
@@ -338,7 +365,7 @@ bool InlineEditorModel::isTitle(int idx) const
 
 void InlineEditorModel::addText(const QString &text)
 {
-    int cnt = rowCount();
+    const int cnt = rowCount();
     insertRows(cnt, 1);
     setData(index(cnt, 0), text, Qt::DisplayRole);
 }
@@ -363,7 +390,7 @@ Qt::ItemFlags InlineEditorModel::flags(const QModelIndex &index) const
 
 int InlineEditorModel::findText(const QString &text) const
 {
-    int cnt = rowCount();
+    const int cnt = rowCount();
     for (int i = 0; i < cnt; ++i) {
         QModelIndex idx = index(i, 0);
         if (data(idx, Qt::UserRole).toInt() == TITLE_ITEM)
@@ -531,6 +558,7 @@ SignalSlotEditorWindow::SignalSlotEditorWindow(QDesignerFormEditorInterface *cor
     m_view->setEditTriggers(QAbstractItemView::DoubleClicked
                                 | QAbstractItemView::EditKeyPressed);
     m_view->setRootIsDecorated(false);
+    m_view->setTextElideMode (Qt::ElideMiddle);
     connect(m_view, SIGNAL(activated(QModelIndex)), this, SLOT(updateUi()));
 
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -557,11 +585,14 @@ SignalSlotEditorWindow::SignalSlotEditorWindow(QDesignerFormEditorInterface *cor
                 this, SLOT(setActiveFormWindow(QDesignerFormWindowInterface*)));
 
     updateUi();
+
+    m_core = core;
 }
 
 void SignalSlotEditorWindow::setActiveFormWindow(QDesignerFormWindowInterface *form)
 {
     m_view->setModel(0);
+    QDesignerIntegration *integration = qobject_cast<QDesignerIntegration *>(m_core->integration());
 
     if (!m_editor.isNull()) {
         disconnect(m_view->selectionModel(),
@@ -569,6 +600,10 @@ void SignalSlotEditorWindow::setActiveFormWindow(QDesignerFormWindowInterface *f
                     this, SLOT(updateEditorSelection(QModelIndex)));
         disconnect(m_editor, SIGNAL(connectionSelected(Connection*)),
                     this, SLOT(updateDialogSelection(Connection*)));
+        if (integration) {
+            disconnect(integration, SIGNAL(objectNameChanged(QDesignerFormWindowInterface *, QObject *, const QString &)),
+                    this, SLOT(objectNameChanged(QDesignerFormWindowInterface *, QObject *, const QString &)));
+        }
     }
 
     m_editor = qFindChild<SignalSlotEditor*>(form);
@@ -585,6 +620,10 @@ void SignalSlotEditorWindow::setActiveFormWindow(QDesignerFormWindowInterface *f
                 this, SLOT(updateEditorSelection(QModelIndex)));
         connect(m_editor, SIGNAL(connectionSelected(Connection*)),
                 this, SLOT(updateDialogSelection(Connection*)));
+        if (integration) {
+            connect(integration, SIGNAL(objectNameChanged(QDesignerFormWindowInterface *, QObject *, const QString &)),
+                    this, SLOT(objectNameChanged(QDesignerFormWindowInterface *, QObject *, const QString &)));
+        }
     }
 
     updateUi();
@@ -626,6 +665,14 @@ void SignalSlotEditorWindow::updateEditorSelection(const QModelIndex &index)
     m_handling_selection_change = false;
 
     updateUi();
+}
+
+void SignalSlotEditorWindow::objectNameChanged(QDesignerFormWindowInterface *, QObject *, const QString &)
+{
+    if (m_editor && m_editor->model()) {
+        ConnectionModel *model = qobject_cast<ConnectionModel*>(m_editor->model());
+        model->updateAll();
+    }
 }
 
 void SignalSlotEditorWindow::addConnection()

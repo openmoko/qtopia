@@ -2,138 +2,163 @@ qtopia_project(qtopia app)
 TARGET=qpe
 
 CONFIG+=enable_phone_ui
+
+!enable_singleexec {
+    # This allows plugins to access symbols in the server.
+    # qtopiatest uses this.
+    QMAKE_LFLAGS*=-Wl,--export-dynamic
+}
+enable_singleexec:qtopiatest {
+    CONFIG += qtestlib
+}
 # CONFIG += enable_tests
 
 # DEFINES += QTOPIA_PHONEUI
 
-qtopia_performance_test {
-    SERVER_HEADERS+=performancetest.h
-    SERVER_SOURCES+=performancetest.cpp
-}
-
 SERVER_FORMS+=\
-    ui/shutdown.ui
+    ui/shutdown.ui \
+    ui/volume.ui
 
 SERVER_HEADERS+=\
     qabstractserverinterface.h \
-    windowmanagement.h \
-    inputmethods.h \
     systemsuspend.h \
     ui/shutdownimpl.h \
-    inputdevicesettings.h \
+    ui/volumeimpl.h \
     launcherview.h\
     qcoprouter.h\
     dbusrouter.h\
     alertservicetask.h\
-    qtopiapowermanager.h\
-    powermanagertask.h\
-    qtopiapowermanagerservice.h\
-    virtualkeyboardservice.h \
-    lowmemorytask.h \
     qabstractdevicemanager.h\
     applicationmonitor.h\
-    ui/desktoppoweralerter.h \
     storagemonitor.h \
     qtopiaserverapplication.h \
     environmentsetuptask.h \
     memorymonitor.h \
-    ui/criticalmemorypopup.h \
     ui/standarddialogs.h \
+    ui/delayedwaitdialog.h \
     testmemorymonitor.h \
-    devicebuttontask.h \
     pressholdgate.h \
     genericmemorymonitor.h \
-    keyclick.h \
     applicationlauncher.h \
+    oommanager.h \
     qterminationhandlerprovider.h \
     qcopfile.h \
     networkserver.h \
     startupapps.h \
     timemonitor.h \
+    timeupdateservice.h \
     qdeviceindicatorsprovider.h \
     shutdownsplash.h \
-    screenclick.h \
-    vpnmanager.h \
-    qkeyboardlock.h \
-    standarddevicefeatures.h \
     contentsetlauncherview.h \
     stabmonitortask.h \
     defaultsignal.h \
-    dbmigratetask.h
+    dbmigratetask.h \
+    defaultbattery.h\
+    apmbattery.h\
+    obexservicemanager.h \
+    keyclick.h \
+    devicebuttontask.h \
+    inputmethods.h \
+    inputdevicesettings.h \
+    lowmemorytask.h \
+    windowmanagement.h \
+    virtualkeyboardservice.h \
+    qtopiapowermanager.h\
+    qtopiapowermanagerservice.h \
+    standarddevicefeatures.h \
+    qtopiainputevents.h \
+    waitindicator.h
 
 SERVER_SOURCES+=\
     main.cpp \
     qabstractserverinterface.cpp \
-    windowmanagement.cpp \
     systemsuspend.cpp \
     systemsuspendtasks.cpp \
-    inputmethods.cpp \
     ui/shutdownimpl.cpp \
-    inputdevicesettings.cpp \
+    ui/volumeimpl.cpp \
     launcherview.cpp\
     qcoprouter.cpp\
     dbusrouter.cpp\
     alertservicetask.cpp \
-    qtopiapowermanager.cpp\
-    powermanagertask.cpp\
-    qtopiapowermanagerservice.cpp \
-    virtualkeyboardservice.cpp \
-    lowmemorytask.cpp \
     qabstractdevicemanager.cpp \
     applicationmonitor.cpp \
-    ui/desktoppoweralerter.cpp \
     storagemonitor.cpp \
     qtopiaserverapplication.cpp \
     environmentsetuptask.cpp \
     memorymonitor.cpp \
-    ui/criticalmemorypopup.cpp \
     ui/standarddialogs.cpp \
+    ui/delayedwaitdialog.cpp \
     testmemorymonitor.cpp \
-    devicebuttontask.cpp \
     pressholdgate.cpp \
     genericmemorymonitor.cpp \
-    keyclick.cpp \
     applicationlauncher.cpp \
+    oommanager.cpp \
     qterminationhandlerprovider.cpp \
     qcopfile.cpp \
-    screenclick.cpp \
     networkserver.cpp \
     shutdownsplash.cpp \
     startupapps.cpp \
     timemonitor.cpp \
+    timeupdateservice.cpp \
     qdeviceindicatorsprovider.cpp \
     simplebuiltins.cpp \
-    qkeyboardlock.cpp \
-    vpnmanager.cpp \
-    standarddevicefeatures.cpp \
     contentsetlauncherview.cpp \
+    defaultbattery.cpp\
+    apmbattery.cpp\
+    qdsynctask.cpp\
+    obexservicemanager.cpp\
     dbmigratetask.cpp \
     stabmonitortask.cpp \
     applicationshutdowntask.cpp \
-    defaultsignal.cpp
+    defaultsignal.cpp \
+    keyclick.cpp \
+    devicebuttontask.cpp \
+    inputmethods.cpp \
+    inputdevicesettings.cpp \
+    lowmemorytask.cpp \
+    virtualkeyboardservice.cpp \
+    qtopiapowermanager.cpp\
+    qtopiapowermanagerservice.cpp \
+    standarddevicefeatures.cpp \
+    waitindicator.cpp
 
-build_helix {
-    DEFINES+=MEDIA_SERVER_PATH=$${LITERAL_ESCAPED_QUOTE}bin/mediaserver$$LITERAL_ESCAPED_QUOTE
+enable_vpn {
+    SERVER_HEADERS+=vpnmanager.h
+    SERVER_SOURCES+=vpnmanager.cpp
 }
 
-!build_helix {
-    DEFINES+=MEDIA_SERVER_PATH=$${LITERAL_ESCAPED_QUOTE}bin/qss$$LITERAL_ESCAPED_QUOTE
-}
+!x11 {
+    SERVER_HEADERS+=\
+        screenclick.h \
+        qkeyboardlock.h
+    SERVER_SOURCES+=\
+        screenclick.cpp \
+        qkeyboardlock.cpp \
+        windowmanagement.cpp \
+        qtopiainputevents.cpp
+} else {
+    SERVER_SOURCES+=\
+        windowmanagement_x11.cpp \
+        qtopiainputevents_x11.cpp
 
-SERVER_HEADERS+=obexservicemanager.h
-SERVER_SOURCES+=obexservicemanager.cpp
+    LIBS += -lXtst
+}
 
 equals(LAUNCH_METHOD,quicklaunch) {
     SERVER_SOURCES+=quickexeapplicationlauncher.cpp
     SERVER_HEADERS+=quickexeapplicationlauncher.h
 }
 
-SXE_HEADERS=qsxemangle.h securitymonitor.h sandboxedprocess.h
-SXE_SOURCES=qsxemangle.cpp securitymonitor.cpp sandboxedprocess.cpp
+SXE_HEADERS=securitymonitor.h 
+SXE_SOURCES=securitymonitor.cpp 
+enable_cell {
+    SXE_HEADERS+=qsxemangle.h
+    SXE_SOURCES+=qsxemangle.cpp
+}
 
 TRANSLATABLES+=$$SXE_HEADERS $$SXE_SOURCES
 
-phone:enable_cell:enable_sxe {
+enable_sxe {
     SERVER_HEADERS+=$$SXE_HEADERS
     SERVER_SOURCES+=$$SXE_SOURCES
 }
@@ -145,64 +170,58 @@ TRANSLATABLES+=$$DOCAPI_HEADERS $$DOCAPI_SOURCES
 SERVER_HEADERS+=$$DOCAPI_HEADERS
 SERVER_SOURCES+=$$DOCAPI_SOURCES
 
-VPATH+=$$QTOPIA_DEPOT_PATH/src/settings/language
-LANGUAGE_FORMS=languagesettingsbase.ui
-LANGUAGE_HEADERS=langmodel.h languagesettings.h
-LANGUAGE_SOURCES=langmodel.cpp language.cpp
-TRANSLATABLES+=$$LANGUAGE_FORMS $$LANGUAGE_HEADERS $$LANGUAGE_SOURCES
-
-VPATH+=$$QTOPIA_DEPOT_PATH/src/settings/systemtime
-SYSTEMTIME_HEADERS=settime.h
-SYSTEMTIME_SOURCES=settime.cpp
-TRANSLATABES+=$$SYSTEMTIME_HEADERS $$SYSTEMTIME_SOURCES
-
-!phone {
-    !enable_singleexec|!contains(PROJECTS,settings/language) {
-        SERVER_FORMS+=$$LANGUAGE_FORMS
-        SERVER_HEADERS+=$$LANGUAGE_HEADERS
-        SERVER_SOURCES+=$$LANGUAGE_SOURCES
-    }
-    !enable_singleexec|!contains(PROJECTS,settings/systemtime) {
-        SERVER_HEADERS+=$$SYSTEMTIME_HEADERS
-        SERVER_SOURCES+=$$SYSTEMTIME_SOURCES
-    }
-}
-
 VPATH+=$$QTOPIA_DEPOT_PATH/src/settings/calibrate
 INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/settings/calibrate
 CALIBRATE_HEADERS=calibrate.h
 CALIBRATE_SOURCES=calibrate.cpp
 
-HEADERS+=$$CALIBRATE_HEADERS
-SOURCES+=$$CALIBRATE_SOURCES
+!x11 {
+    HEADERS+=$$CALIBRATE_HEADERS
+    SOURCES+=$$CALIBRATE_SOURCES
+}
 
-BLUETOOTH_HEADERS=audiomanager.h \
-                  bluetooth/bluetoothservicemanager.h \
+VPATH+=$$QTOPIA_DEPOT_PATH/src/applications/simapp
+INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/applications/simapp
+SIMAPP_HEADERS=simapp.h simicons.h simwidgets.h
+SIMAPP_SOURCES=simapp.cpp simicons.cpp simwidgets.cpp
+
+enable_cell {
+    HEADERS+=$$SIMAPP_HEADERS
+    SOURCES+=$$SIMAPP_SOURCES
+}
+
+BLUETOOTH_HEADERS=bluetooth/bluetoothservicemanager.h \
 		  bluetooth/btpinhelper.h \
                   bluetooth/btpowerservice.h \
                   bluetooth/hs/btheadsettask.h \
                   bluetooth/hs/qbluetoothhsagserver_p.h \
                   bluetooth/hs/qbluetoothhsservice_p.h \
-                  bluetooth/scomisc_p.h
+                  bluetooth/scomisc_p.h \
+                  bluetooth/btaudiovolumemanager_p.h \
+                  bluetooth/ftp/btftpservice.h
 
-BLUETOOTH_SOURCES=audiomanager.cpp \
-                  bluetooth/bluetoothservicemanager.cpp \
+BLUETOOTH_SOURCES=bluetooth/bluetoothservicemanager.cpp \
                   bluetooth/btpinhelper.cpp \
                   bluetooth/btpowerservice.cpp \
                   bluetooth/hs/btheadsettask.cpp \
                   bluetooth/hs/qbluetoothhsagserver.cpp \
-                  bluetooth/hs/qbluetoothhsservice.cpp
+                  bluetooth/hs/qbluetoothhsservice.cpp \
+                  bluetooth/btaudiovolumemanager.cpp \
+                  bluetooth/ftp/btftpservice.cpp
 
+# This is documented in src/build/doc/src/deviceprofiles.qdoc
 isEmpty(DEVICE_CONFIG_PATH)|!exists($$DEVICE_CONFIG_PATH/server/scomisc.cpp) {
     BLUETOOTH_SOURCES+=bluetooth/scomisc.cpp
 }
 
 BLUETOOTH_PHONE_HEADERS+=bluetooth/dun/btdialupservice.h \
+                  bluetooth/bluetoothserialportservice.h \
                   bluetooth/hf/bthandsfreetask.h \
                   bluetooth/hf/qbluetoothhfagserver_p.h \
                   bluetooth/hf/qbluetoothhfservice_p.h
 
 BLUETOOTH_PHONE_SOURCES+=bluetooth/dun/btdialupservice.cpp \
+                         bluetooth/bluetoothserialportservice.cpp \
                   bluetooth/hf/bthandsfreetask.cpp \
                   bluetooth/hf/qbluetoothhfagserver.cpp \
                   bluetooth/hf/qbluetoothhfservice.cpp
@@ -214,34 +233,6 @@ INFRARED_HEADERS=irpowerservice.h
 INFRARED_SOURCES=irpowerservice.cpp
 
 TRANSLATABLES+=$$INFRARED_HEADERS $$INFRARED_SOURCES
-
-PDA_HEADERS=\
-    pda/launcher.h\
-    pda/appicons.h\
-    pda/launchertab.h\
-    pda/wait.h \
-    pda/taskbar.h\
-    pda/runningappbar.h\
-    pda/systray.h\
-    pda/startmenu.h\
-    pda/firstuse.h
-PDA_SOURCES=\
-    pda/launcher.cpp\
-    pda/appicons.cpp\
-    pda/launchertab.cpp\
-    pda/wait.cpp \
-    pda/taskbar.cpp\
-    pda/runningappbar.cpp\
-    pda/systray.cpp\
-    pda/startmenu.cpp\
-    pda/firstuse.cpp
-TRANSLATABLES=$$PDA_HEADERS $$PDA_SOURCES
-
-# Platform Edition uses the PDA files
-pda {
-    HEADERS+=$$PDA_HEADERS
-    SOURCES+=$$PDA_SOURCES
-}
 
 #begin media
 MEDIA_HEADERS=\
@@ -260,15 +251,22 @@ HEADERS+=$$MEDIA_HEADERS
 SOURCES+=$$MEDIA_SOURCES
 #end media
 
+UNPORTED_HEADERS=firstuse.h
+UNPORTED_SOURCES=firstuse.cpp
+
 PHONE_HEADERS=\
     phone/contextlabel.h \
     phone/themecontrol.h \
     phone/documentview.h \
     phone/phonebrowser.h \
+    phone/runningapplicationsviewitem.h \
     phone/cameramonitor.h \
     phone/alarmcontrol.h \
     phone/phonethemeview.h \
-    phone/homescreen.h \
+    phone/homescreencontrol.h \
+    phone/qabstracthomescreen.h \
+    phone/themedhomescreen.h \
+    phone/themebackground_p.h \
     phone/qphoneprofileprovider.h \
     phone/messagebox.h \
     phone/phoneheader.h\
@@ -282,7 +280,10 @@ PHONE_HEADERS=\
     phone/secondarythemeddisplay.h \
     phone/receivewindow.h \
     phone/homescreenwidgets.h \
-    phone/phonepowermanager.h
+    phone/phonepowermanager.h \
+    phone/gprsmonitor.h \
+    phone/qabstractthemewidgetfactory.h \
+    phone/touchscreenlockdlg.h
 
 TELEPHONY_HEADERS=\
     phone/externalaccess.h \
@@ -299,7 +300,10 @@ TELEPHONY_HEADERS=\
     phone/qabstractdialerscreen.h\
     phone/phoneserver.h \
     phone/ringcontrol.h\
-    phone/servercontactmodel.h
+    phone/ringtoneservice.h\
+    phone/servercontactmodel.h \
+    phone/qabstractcallpolicymanager.h \
+    phone/videoringtone.h
 
 PHONE_SOURCES=\
     phone/contextlabel.cpp \
@@ -307,10 +311,13 @@ PHONE_SOURCES=\
     phone/themecontrol.cpp \
     phone/documentview.cpp \
     phone/phonebrowser.cpp \
+    phone/runningapplicationsviewitem.cpp \
     phone/cameramonitor.cpp \
     phone/alarmcontrol.cpp \
     phone/phonethemeview.cpp \
-    phone/homescreen.cpp \
+    phone/qabstracthomescreen.cpp \
+    phone/themedhomescreen.cpp \
+    phone/themebackground_p.cpp \
     phone/qphoneprofileprovider.cpp \
     phone/messagebox.cpp \
     phone/phoneheader.cpp\
@@ -322,7 +329,9 @@ PHONE_SOURCES=\
     phone/secondarythemeddisplay.cpp \
     phone/phonepowermanager.cpp \
     phone/receivewindow.cpp \
-    phone/homescreenwidgets.cpp
+    phone/homescreenwidgets.cpp \
+    phone/gprsmonitor.cpp \
+    phone/touchscreenlockdlg.cpp
 
 TELEPHONY_SOURCES=\
     phone/externalaccess.cpp \
@@ -337,8 +346,11 @@ TELEPHONY_SOURCES=\
     phone/dialer.cpp \
     phone/dialerservice.cpp \
     phone/ringcontrol.cpp\
+    phone/ringtoneservice.cpp\
     phone/phoneserver.cpp \
-    phone/servercontactmodel.cpp
+    phone/servercontactmodel.cpp \
+    phone/qabstractcallpolicymanager.cpp \
+    phone/videoringtone.cpp
 
 enable_modem {
     PHONE_HEADERS+=phone/cellmodemmanager.h\
@@ -356,10 +368,21 @@ enable_modem {
 enable_voip {
     PHONE_HEADERS+=\
         phone/phoneservervoipsocket.h\
-        phone/voipmanager.h
+        phone/voipmanager.h\
+        phone/asteriskmanager.h
     PHONE_SOURCES+=\
         phone/phoneservervoipsocket.cpp\
-        phone/voipmanager.cpp
+        phone/voipmanager.cpp\
+        phone/asteriskmanager.cpp
+}
+
+enable_hierarchicaldocumentview {
+    PHONE_HEADERS+=\
+        phone/hierarchicaldocumentview.h
+    PHONE_SOURCES+=\
+        phone/hierarchicaldocumentview.cpp
+        
+    DEFINES+=ENABLE_HIERARCHICAL_DOCUMENT_VIEW
 }
 
 PHONE_UI_SOURCES=\
@@ -376,7 +399,8 @@ PHONE_UI_SOURCES=\
     phone/ui/zoomer_p.cpp \
     phone/ui/shearer_p.cpp \
     phone/ui/rotator_p.cpp \
-    phone/ui/radialbackground_p.cpp
+    phone/ui/radialbackground_p.cpp \
+    phone/ui/renderer.cpp
 
 
 PHONE_UI_HEADERS=\
@@ -393,7 +417,8 @@ PHONE_UI_HEADERS=\
     phone/ui/zoomer_p.h \
     phone/ui/shearer_p.h \
     phone/ui/rotator_p.h \
-    phone/ui/radialbackground_p.h
+    phone/ui/radialbackground_p.h \
+    phone/ui/renderer.h
 
 enable_phone_ui {
     HEADERS+=$$PHONE_UI_HEADERS
@@ -435,7 +460,12 @@ enable_modem:enable_cell {
         phone/samples/e2/e2_callscreen.cpp\
         phone/samples/e2/e2_dialer.cpp\
         phone/samples/e2/e2_browser.cpp\
-        phone/samples/e2/e2_telephonybar.cpp
+        phone/samples/e2/e2_telephonybar.cpp\
+        phone/samples/e3/e3_phonebrowser.cpp\
+        phone/samples/e3/e3_launcher.cpp\
+        phone/samples/e3/e3_today.cpp\
+        phone/samples/e3/e3_navipane.cpp\
+        phone/samples/e3/e3_clock.cpp
 
     SAMPLES_HEADERS+=\
         phone/samples/e1/e1_bar.h\
@@ -462,21 +492,32 @@ enable_modem:enable_cell {
         phone/samples/e2/e2_browser.h\
         phone/samples/e2/e2_taskmanager.h\
         phone/samples/e2/e2_telephonybar.h\
-        phone/samples/e2/e2_colors.h
+        phone/samples/e2/e2_colors.h\
+        phone/samples/e3/e3_phonebrowser.h\
+        phone/samples/e3/e3_launcher.h\
+        phone/samples/e3/e3_today.h\
+        phone/samples/e3/e3_navipane.h\
+        phone/samples/e3/e3_clock.h
+
+samples_settings.files=\
+    $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/E3.conf
+samples_settings.path=/etc/default/Trolltech
+INSTALLS+=samples_settings
 }
-
-samplespics.files=$$QTOPIA_DEPOT_PATH/pics/samples/*
-samplespics.path=/pics/samples
-samplespics.hint=pics
-
-samplesprofilepics.files=$$QTOPIA_DEPOT_PATH/pics/profiles/*
-samplesprofilepics.path=/pics/profiles
-samplesprofilepics.hint=pics
 
 enable_samples {
     HEADERS+=$$SAMPLES_HEADERS
     SOURCES+=$$SAMPLES_SOURCES
-    INSTALLS+=samplespics samplesprofilepics
+
+    samplespics.files=$$QTOPIA_DEPOT_PATH/pics/samples/*
+    samplespics.path=/pics/samples
+    samplespics.hint=pics
+    INSTALLS+=samplespics
+
+    samplesprofilepics.files=$$QTOPIA_DEPOT_PATH/pics/profiles/*
+    samplesprofilepics.path=/pics/profiles
+    samplesprofilepics.hint=pics
+    INSTALLS+=samplesprofilepics
 }
 
 TESTS_SOURCES += test/cellmodemmanagertest.cpp
@@ -489,52 +530,51 @@ enable_tests {
 
 TRANSLATABLES+=$$PHONE_HEADERS $$PHONE_SOURCES
 
-phone {
-    enable_bluetooth {
-        PHONE_HEADERS+=$$BLUETOOTH_HEADERS
-        PHONE_SOURCES+=$$BLUETOOTH_SOURCES
-    }
-    enable_infrared {
-        PHONE_HEADERS+=$$INFRARED_HEADERS
-        PHONE_SOURCES+=$$INFRARED_SOURCES
-    }
-
-    # This is necessary for Handsfree / Headset to work
-    equals(QTOPIA_SOUND_SYSTEM,alsa) {
-    	depends(3rdparty/libraries/alsa)
-    	DEFINES+=HAVE_ALSA
-    }
-
-    HEADERS+=$$PHONE_HEADERS
-    SOURCES+=$$PHONE_SOURCES
-    # phone ui
-    !free_package|free_plus_binaries {
-        HEADERS+=$$TELEPHONY_HEADERS
-        DEFINES+=QTOPIA_PHONEUI
-        SOURCES+=$$TELEPHONY_SOURCES
-        enable_bluetooth {
-            HEADERS+=$$BLUETOOTH_PHONE_HEADERS
-            SOURCES+=$$BLUETOOTH_PHONE_SOURCES
-        }
-        depends(libraries/qtopiaphone)
-    }
-    depends(libraries/qtopiapim)
-    !enable_qtopiabase:depends(libraries/qtopiail)
-    depends(3rdparty/libraries/openobex)
-    depends(libraries/qtopiacomm)
-
-    enable_modem {
-        depends(libraries/qtopiaphonemodem)
-    }
+enable_bluetooth {
+    PHONE_HEADERS+=$$BLUETOOTH_HEADERS
+    PHONE_SOURCES+=$$BLUETOOTH_SOURCES
+}
+enable_infrared {
+    PHONE_HEADERS+=$$INFRARED_HEADERS
+    PHONE_SOURCES+=$$INFRARED_SOURCES
 }
 
-qtopiatest {
-    depends(libraries/qtopiatest/qtesttools/target)
-    depends(libraries/qtopiatest/qtopiasystemtestslave)
-    depends(libraries/qtopiatest/qtopiaservertestslave)
-    depends(libraries/qtopiatest/qtestslave)
+# This is necessary for Handsfree / Headset to work
+equals(QTOPIA_SOUND_SYSTEM,alsa) {
+    depends(3rdparty/libraries/alsa)
+    DEFINES+=HAVE_ALSA
 }
 
+isEmpty(DEVICE_CONFIG_PATH) {
+    PHONE_HEADERS+=phone/dummyvolumeservice.h
+    PHONE_SOURCES+=phone/dummyvolumeservice.cpp
+}
+
+HEADERS+=$$PHONE_HEADERS
+SOURCES+=$$PHONE_SOURCES
+
+# phone ui
+HEADERS+=$$TELEPHONY_HEADERS
+DEFINES+=QTOPIA_PHONEUI
+SOURCES+=$$TELEPHONY_SOURCES
+enable_bluetooth {
+    HEADERS+=$$BLUETOOTH_PHONE_HEADERS
+    SOURCES+=$$BLUETOOTH_PHONE_SOURCES
+}
+depends(libraries/qtopiaphone)
+depends(libraries/qtopiapim)
+depends(3rdparty/libraries/openobex)
+depends(libraries/qtopiacomm)
+enable_qtopiamedia {
+    depends(libraries/qtopiamedia)
+}
+depends(libraries/qtopiaaudio)
+
+enable_modem {
+    depends(libraries/qtopiaphonemodem)
+}
+
+# This is documented in src/build/doc/src/deviceprofiles.qdoc
 !isEmpty(DEVICE_CONFIG_PATH) {
     SERVER_HEADERS+=$$files($$DEVICE_CONFIG_PATH/server/*.h)
     SERVER_SOURCES+=$$files($$DEVICE_CONFIG_PATH/server/*.cpp)
@@ -548,10 +588,15 @@ drmagent {
     archivesdesktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/archives.desktop
     archivesdesktop.path=/apps/Applications
     archivesdesktop.hint=desktop
+    INSTALLS+=archivesdesktop
     archiveshelp.source=$$QTOPIA_DEPOT_PATH/help
     archiveshelp.files=qpe-archives*
     archiveshelp.hint=help
-    INSTALLS+=archivesdesktop archiveshelp
+    INSTALLS+=archiveshelp
+    archivespics.files=$$QTOPIA_DEPOT_PATH/pics/archives/*
+    archivespics.path=/pics/archives
+    archivespics.hint=pics
+    INSTALLS+=archivespics
 }
 
 FORMS+=$$SERVER_FORMS
@@ -568,13 +613,8 @@ sdk_calibrate_headers.path=/src/settings/calibrate
 sdk_calibrate_headers.hint=sdk
 INSTALLS+=sdk_calibrate_headers
 
-phone {
-    sdk_edn_headers.files=$$PHONE_HEADERS
-    sdk_edn_headers.path=/src/server/phone
-} else {
-    sdk_edn_headers.files=$$PDA_HEADERS
-    sdk_edn_headers.path=/src/server/pda
-}
+sdk_edn_headers.files=$$PHONE_HEADERS
+sdk_edn_headers.path=/src/server/phone
 sdk_edn_headers.hint=sdk
 INSTALLS+=sdk_edn_headers
 
@@ -585,12 +625,12 @@ bins.path=/bin
 bins.hint=script
 INSTALLS+=bins
 
-taskmanagerdesktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/TaskManager.desktop
+taskmanagerdesktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/taskmanager.desktop
 taskmanagerdesktop.path=/apps/Settings
 taskmanagerdesktop.hint=desktop
 INSTALLS+=taskmanagerdesktop
 
-calibratedesktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/Calibrate.desktop
+calibratedesktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/calibrate.desktop
 calibratedesktop.path=/apps/Settings
 calibratedesktop.hint=desktop
 INSTALLS+=calibratedesktop
@@ -610,6 +650,10 @@ INSTALLS+=contentsetviewservice
 alertservice.files=$$QTOPIA_DEPOT_PATH/services/Alert/qpe
 alertservice.path=/services/Alert
 INSTALLS+=alertservice
+
+timeupdateservice.files=$$QTOPIA_DEPOT_PATH/services/TimeUpdate/qpe
+timeupdateservice.path=/services/TimeUpdate
+INSTALLS+=timeupdateservice
 
 qtopiapowermanager.files=$$QTOPIA_DEPOT_PATH/services/QtopiaPowerManager/qpe
 qtopiapowermanager.path=/services/QtopiaPowerManager
@@ -638,16 +682,33 @@ pics.path=/pics/qpe
 pics.hint=pics
 INSTALLS+=pics
 
-wallpaperpics.files=$$QTOPIA_DEPOT_PATH/pics/wallpaper/*.png
-wallpaperpics.path=/pics/wallpaper
-wallpaperpics.hint=content nct
-wallpaperpics.categories=SystemWallpapers
-wallpaperpics.trtarget=QtopiaWallpapers
-INSTALLS+=wallpaperpics
+# Wallpapers no longer used.
+#wallpaperpics.files=$$QTOPIA_DEPOT_PATH/pics/wallpaper/*.png
+#wallpaperpics.path=/pics/wallpaper
+#wallpaperpics.hint=content nct
+#wallpaperpics.categories=SystemWallpapers
+#wallpaperpics.trtarget=QtopiaWallpapers
+#INSTALLS+=wallpaperpics
+
+enable_cell {
+    sdk_simapp_headers.files=$$SIMAPP_HEADERS
+    sdk_simapp_headers.path=/src/applications/simapp
+    sdk_simapp_headers.hint=sdk
+    INSTALLS+=sdk_simapp_headers
+
+    simappdesktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/simapp.desktop
+    simappdesktop.path=/apps/Applications
+    simappdesktop.hint=desktop
+    INSTALLS+=simappdesktop
+
+    simapppics.files=$$QTOPIA_DEPOT_PATH/pics/simapp/*
+    simapppics.path=/pics/simapp
+    simapppics.hint=pics
+    INSTALLS+=simapppics
+}
 
 settings.files=\
     $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/locale.conf\
-    $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/FontMap.conf\
     $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/ServerWidgets.conf\
     $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/Security.conf\
     $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/IniValueSpace.conf\
@@ -660,17 +721,9 @@ settings.path=/etc/default/Trolltech
 INSTALLS+=settings
 
 # qpe.conf gets modified for Free builds
+!isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/default/Trolltech/qpe.conf):qpe_conf.files=$$DEVICE_CONFIG_PATH/etc/default/Trolltech/qpe.conf
+else:qpe_conf.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/qpe.conf
 qpe_conf.path=/etc/default/Trolltech
-qpe_conf.commands=$$COMMAND_HEADER\
-    rm -f $(INSTALL_ROOT)$$qpe_conf.path/qpe.conf $$LINE_SEP\
-    cat $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/qpe.conf
-free_package:!free_plus_binaries {
-    # Free build (ie. non-phone) defaults to smart theme
-    qpe_conf.commands+=\
-        | sed 's/qtopia\.conf/smart\.conf/'
-}
-qpe_conf.commands+=\
-    > $(INSTALL_ROOT)$$qpe_conf.path/qpe.conf
 INSTALLS+=qpe_conf
 
 !enable_singleexec {
@@ -697,6 +750,8 @@ servicedefs.files=$$files($$QTOPIA_DEPOT_PATH/services/*.service)
     servicedefs.files -= $$QTOPIA_DEPOT_PATH/services/CallForwarding.service
     servicedefs.files -= $$QTOPIA_DEPOT_PATH/services/CallNetworks.service
     servicedefs.files -= $$QTOPIA_DEPOT_PATH/services/Dialer.service
+    servicedefs.files -= $$QTOPIA_DEPOT_PATH/services/SimApp.service
+    servicedefs.files -= $$QTOPIA_DEPOT_PATH/services/Ringtone.service
 }
 !drmagent {
     servicedefs.files -= $$QTOPIA_DEPOT_PATH/services/OmaDrmAgent.service
@@ -713,6 +768,8 @@ help.files=\
     document*\
     device*\
     appservices.html\
+    simapp.html\
+    callhistory.html\
     calibrat*
 help.hint=help
 INSTALLS+=help
@@ -721,6 +778,7 @@ beam.files=$$QTOPIA_DEPOT_PATH/etc/beam
 beam.path=/etc
 INSTALLS+=beam
 
+# This is documented in src/build/doc/src/deviceprofiles.qdoc
 !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/Tasks.cfg) {
     tasks.files=$$DEVICE_CONFIG_PATH/etc/Tasks.cfg
 } else {
@@ -763,94 +821,69 @@ enable_bluetooth {
     INSTALLS+=btservices
 }
 
-phone {
-    phonepics.files=$$QTOPIA_DEPOT_PATH/pics/qpe/phone/*
-    phonepics.path=/pics/qpe/phone
-    phonepics.hint=pics
-    INSTALLS+=phonepics
+phonepics.files=$$QTOPIA_DEPOT_PATH/pics/qpe/phone/*
+phonepics.path=/pics/qpe/phone
+phonepics.hint=pics
+INSTALLS+=phonepics
 
-    globalphonepics.files=$$QTOPIA_DEPOT_PATH/pics/phone/*
-    globalphonepics.path=/pics/phone
-    globalphonepics.hint=pics
-    INSTALLS+=globalphonepics
+globalphonepics.files=$$QTOPIA_DEPOT_PATH/pics/phone/*
+globalphonepics.path=/pics/phone
+globalphonepics.hint=pics
+INSTALLS+=globalphonepics
 
-    settings.files+=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/PhoneProfile.conf
+settings.files+=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/PhoneProfile.conf
 
-    defaultalerts.files=$$QTOPIA_DEPOT_PATH/etc/SystemRingTones/*.wav
-    defaultalerts.path=/etc/SystemRingTones
-    defaultalerts.hint=content nct
-    defaultalerts.categories=SystemRingTones
-    defaultalerts.trtarget=QtopiaRingTones
-    INSTALLS+=defaultalerts
+defaultalerts.files=$$QTOPIA_DEPOT_PATH/etc/SystemRingTones/*.wav
+defaultalerts.path=/etc/SystemRingTones
+defaultalerts.hint=content nct
+defaultalerts.categories=SystemRingtones
+defaultalerts.trtarget=QtopiaRingTones
+INSTALLS+=defaultalerts
 
-    !free_package|free_plus_binaries {
-        callhistorydesktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/callhistory.desktop
-        callhistorydesktop.path=/apps/Applications
-        callhistorydesktop.hint=desktop
-        INSTALLS+=callhistorydesktop
+callhistorydesktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/callhistory.desktop
+callhistorydesktop.path=/apps/Applications
+callhistorydesktop.hint=desktop
+INSTALLS+=callhistorydesktop
 
-        callhistorypics.files=$$QTOPIA_DEPOT_PATH/pics/callhistory/*
-        callhistorypics.path=/pics/callhistory
-        callhistorypics.hint=pics
-        INSTALLS+=callhistorypics
+callhistorypics.files=$$QTOPIA_DEPOT_PATH/pics/callhistory/*
+callhistorypics.path=/pics/callhistory
+callhistorypics.hint=pics
+INSTALLS+=callhistorypics
 
-        callhistoryservice.files=$$QTOPIA_DEPOT_PATH/services/callhistory/qpe
-        callhistoryservice.path=/services/callhistory
-        INSTALLS+=callhistoryservice
-    }
+callhistoryservice.files=$$QTOPIA_DEPOT_PATH/services/CallHistory/qpe
+callhistoryservice.path=/services/CallHistory
+INSTALLS+=callhistoryservice
 
-    taskmanagerservice.files=$$QTOPIA_DEPOT_PATH/services/TaskManager/qpe
-    taskmanagerservice.path=/services/TaskManager
-    INSTALLS+=taskmanagerservice
+taskmanagerservice.files=$$QTOPIA_DEPOT_PATH/services/TaskManager/qpe
+taskmanagerservice.path=/services/TaskManager
+INSTALLS+=taskmanagerservice
 
-    defaulttheme.files=$$QTOPIA_DEPOT_PATH/etc/themes/default/*
-    defaulttheme.path=/etc/themes/default
-    INSTALLS+=defaulttheme
+defaulttheme.files=$$QTOPIA_DEPOT_PATH/etc/themes/default/*
+defaulttheme.path=/etc/themes/default
+INSTALLS+=defaulttheme
 
-    defaultpics.files=$$QTOPIA_DEPOT_PATH/pics/themes/default*
-    defaultpics.path=/pics/themes
-    defaultpics.hint=pics
-    INSTALLS+=defaultpics
+defaultpics.files=$$QTOPIA_DEPOT_PATH/pics/themes/default*
+defaultpics.path=/pics/themes
+defaultpics.hint=pics
+INSTALLS+=defaultpics
 
-    !free_package|free_plus_binaries {
-        dialerservice.files=$$QTOPIA_DEPOT_PATH/services/Dialer/qpe
-        dialerservice.path=/services/Dialer
-        INSTALLS+=dialerservice
-    }
+dialerservice.files=$$QTOPIA_DEPOT_PATH/services/Dialer/qpe
+dialerservice.path=/services/Dialer
+INSTALLS+=dialerservice
 
-    ANIMFILE=$$QTOPIA_DEPOT_PATH/pics/qpe/splash/$${QTOPIA_DISP_WIDTH}x$${QTOPIA_DISP_HEIGHT}/splash.gif
-    exists($$ANIMFILE) {
-        splash.files=$$ANIMFILE
-    } else {
-        # Fall-back un-animated
-        splash.files=$$QTOPIA_DEPOT_PATH/src/server/splash.png
-    }
-    splash.path=/pics/qpe
-    INSTALLS+=splash
+ringtoneservice.files=$$QTOPIA_DEPOT_PATH/services/Ringtone/qpe
+ringtoneservice.path=/services/Ringtone
+INSTALLS+=ringtoneservice
+
+ANIMFILE=$$QTOPIA_DEPOT_PATH/pics/qpe/splash/$${QTOPIA_DISP_WIDTH}x$${QTOPIA_DISP_HEIGHT}/splash.gif
+exists($$ANIMFILE) {
+    splash.files=$$ANIMFILE
 } else {
-    shutdown.files=$$QTOPIA_DEPOT_PATH/services/shutdown/shutdown
-    shutdown.path=/services/shutdown
-    INSTALLS+=shutdown
-
-    pdapics.files=$$QTOPIA_DEPOT_PATH/pics/qpe/pda/*
-    pdapics.path=/pics/qpe/pda
-    pdapics.hint=pics
-    INSTALLS+=pdapics
-
-    !enable_singleexec {
-        applets.files=$$QTOPIA_DEPOT_PATH/plugins/applets/.directory
-        applets.path=/plugins/applets
-        INSTALLS+=applets
-    }
-
-    help.files+=\
-	categor*\
-	about*\
-	backuprestore.html\
-	beaming.html\
-	sync.html\
-	popup-calendar.html
+    # Fall-back un-animated
+    splash.files=$$QTOPIA_DEPOT_PATH/src/server/splash.png
 }
+splash.path=/pics/qpe
+INSTALLS+=splash
 
 enable_sxe {
     security.path=/etc
@@ -861,8 +894,9 @@ enable_sxe {
         mkdir -p $(INSTALL_ROOT)/etc/sxe_qtopia $$LINE_SEP\
         mkdir -p $(INSTALL_ROOT)/etc/sxe_domains $$LINE_SEP
 
-    SXE_SCRIPTS=sxe_qtopia sxe_sandbox sxe_unsandbox
+    SXE_SCRIPTS=sxe_qtopia sxe_sandbox sxe_unsandbox sxe_reloadconf
     for(file,SXE_SCRIPTS) {
+        # This is documented in src/build/doc/src/deviceprofiles.qdoc
         !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/sxe_qtopia/$$file) {
             security.commands+=\
                 install -m 0500 -c $$DEVICE_CONFIG_PATH/etc/sxe_qtopia/$$file $(INSTALL_ROOT)/etc/sxe_qtopia $$LINE_SEP
@@ -875,15 +909,17 @@ enable_sxe {
     security.commands+=\
         install -m 0500 -c $$QTOPIA_DEPOT_PATH/etc/sxe_domains/* $(INSTALL_ROOT)/etc/sxe_domains $$LINE_SEP
 
+    # This is documented in src/build/doc/src/deviceprofiles.qdoc
     !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/sxe_domains) {
         security.commands+=\
             install -m 0500 -c $$DEVICE_CONFIG_PATH/etc/sxe_domains/* $(INSTALL_ROOT)/etc/sxe_domains $$LINE_SEP
     }
             
-    !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/default/Trolltech/SxeMonitor.conf) {
-        settings.files+=$$DEVICE_CONFIG_PATH/etc/default/Trolltech/SxeMonitor.conf
+    # This is documented in src/build/doc/src/deviceprofiles.qdoc
+    !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/default/Trolltech/Sxe.conf) {
+        settings.files+=$$DEVICE_CONFIG_PATH/etc/default/Trolltech/Sxe.conf
     } else {
-        settings.files+=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/SxeMonitor.conf
+        settings.files+=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/Sxe.conf
     }
 
     INSTALLS+=security
@@ -923,7 +959,7 @@ EXTRA_TS_FILES=\
 # lupdate for "global" stuff
 nct_lupdate.commands=$$COMMAND_HEADER\
     cd $$PWD;\
-    $$QPEDIR/bin/nct_lupdate\
+    $$QBS_BIN/nct_lupdate\
         -nowarn\
         -depot\
         $$LITERAL_QUOTE$$QTOPIA_DEPOT_PATH$$LITERAL_QUOTE\
@@ -953,7 +989,7 @@ QMAKE_EXTRA_TARGETS+=nct_lupdate
 
 pkg.name=qpe-taskbar
 pkg.desc=Launcher for QPE
-pkg.domain=base,launcher,policy,syslog,prefix
+pkg.domain=base,launcher,quicklauncher,key_manager,modem,policy,prefix,directvideo,directaudio,nice,kill,tmp_write,datetime,rfcomm,netadmin,clock
 
 # FIXME THIS SHOULD NOT BE HERE!!!
 dep(INCLUDEPATH+=$$PWD)
@@ -1001,7 +1037,7 @@ enable_singleexec {
     QMAKE_EXTRA_TARGETS+=qpe
 
     ipatchqt.commands=$$COMMAND_HEADER\
-        $$fixpath($$QPEDIR/bin/patchqt) $$fixpath($(INSTALL_ROOT)/bin/qpe) $$QTOPIA_PREFIX
+        $$fixpath($$QBS_BIN/patchqt) $$fixpath($(INSTALL_ROOT)/bin/qpe) $$QTOPIA_PREFIX
     ipatchqt.CONFIG=no_path
     ipatchqt.depends=install_target
     INSTALLS+=ipatchqt

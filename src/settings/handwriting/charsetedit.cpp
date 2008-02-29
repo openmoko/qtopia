@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,23 +25,7 @@
 
 #include <qlabel.h>
 #include <qlineedit.h>
-#include <qpushbutton.h>
 #include <qlayout.h>
-#include <qpixmap.h>
-#include <qbuttongroup.h>
-#include <qslider.h>
-#include <qtabwidget.h>
-#include <qdir.h>
-#include <qmessagebox.h>
-#include <qcombobox.h>
-#include <qapplication.h>
-#include <qaction.h>
-#include <qtoolbutton.h>
-#include <qmenubar.h>
-#include <qlayout.h>
-#include <QDebug>
-
-#include <qsoftmenubar.h>
 #include <qtopiaapplication.h>
 
 QIMPenInputCharDlg::QIMPenInputCharDlg( QWidget *parent, const char *name,
@@ -72,30 +56,13 @@ QIMPenInputCharDlg::QIMPenInputCharDlg( QWidget *parent, const char *name,
 
     vb->addItem(hb);
 
-#ifndef Q_WS_QWS
-    hb = new QHBoxLayout();
-    vb->addLayout( hb );
-
-    QPushButton *pb = new QPushButton( tr("OK"), this );
-    connect( pb, SIGNAL(clicked()), SLOT(accept()));
-    hb->addWidget( pb );
-    pb = new QPushButton( tr("Cancel"), this );
-    connect( pb, SIGNAL(clicked()), SLOT(reject()));
-    hb->addWidget( pb );
-#endif
-
     u = new UniSelect(this);
     vb->addWidget(u);
 
-    connect(u, SIGNAL(selected(const QString &)),
-            currentChar, SLOT(setText(const QString &)));
+    connect(u, SIGNAL(selected(QString)),
+            currentChar, SLOT(setText(QString)));
     connect(u, SIGNAL(selected(uint)),
             this, SLOT(setCharacter(uint)));
-
-#ifndef QTOPIA_PHONE
-    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-    vb->addItem( spacer );
-#endif
 
     u->setFocus();
     addSpecial( isFS );
@@ -227,13 +194,21 @@ void CharSetEdit::init()
     matchCount = 0;
     matchIndex = 0;
     inputChar = new QIMPenChar();
+    
+    newCharBtn->setIcon(QIcon(":icon/new_character"));
+    delCharBtn->setIcon(QIcon(":icon/trash"));
+    resetCharBtn->setIcon(QIcon(":icon/systemowned"));
+    prevBtn->setIcon(QIcon(":icon/up"));
+    nextBtn->setIcon(QIcon(":icon/down"));
+    addBtn->setIcon(QIcon(":icon/new_stroke"));
+    removeBtn->setIcon(QIcon(":icon/trash"));
 
     connect( newCharBtn, SIGNAL(clicked()), this, SLOT(addChar())) ;
     connect( delCharBtn, SIGNAL(clicked()), this, SLOT(removeChar())) ;
     connect( resetCharBtn, SIGNAL(clicked()), this, SLOT(resetMatches())) ;
 
-    connect( charList, SIGNAL(currentItemChanged ( QListWidgetItem *, QListWidgetItem *)),
-            SLOT(selectItemCode(QListWidgetItem *, QListWidgetItem *)) );
+    connect( charList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+            SLOT(selectItemCode(QListWidgetItem*,QListWidgetItem*)) );
 
     pw->setFixedHeight( 75 );
     connect( pw, SIGNAL(stroke(QIMPenStroke*)),

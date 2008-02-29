@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,9 +40,9 @@
 #include "qtools_p.h"
 #include <string.h>
 
-QVectorData QVectorData::shared_null = { Q_ATOMIC_INIT(1), 0, 0, true };
+QVectorData QVectorData::shared_null = { Q_ATOMIC_INIT(1), 0, 0, true, false };
 
-QVectorData* QVectorData::malloc(int sizeofTypedData, int size, int sizeofT, QVectorData* init)
+QVectorData *QVectorData::malloc(int sizeofTypedData, int size, int sizeofT, QVectorData *init)
 {
     QVectorData* p = (QVectorData *)qMalloc(sizeofTypedData + (size - 1) * sizeofT);
     ::memcpy(p, init, sizeofTypedData + (qMin(size, init->alloc) - 1) * sizeofT);
@@ -41,7 +56,7 @@ int QVectorData::grow(int sizeofTypedData, int size, int sizeofT, bool excessive
     return qAllocMore(size * sizeofT, sizeofTypedData - sizeofT) / sizeofT;
 }
 
-/*! 
+/*!
     \class QVector
     \brief The QVector class is a template class that provides a dynamic array.
 
@@ -68,10 +83,12 @@ int QVectorData::grow(int sizeofTypedData, int size, int sizeofT, bool excessive
     \i If you need a real linked list, with guarantees of \l{constant
        time} insertions in the middle of the list and iterators to
        items rather than indexes, use QLinkedList.
-    \i If you want the items to occupy adjacent memory positions,
-       use QVector.
+    \i If you want the items to occupy adjacent memory positions, or
+       if your items are larger than a pointer and you want to avoid
+       the overhead of allocating them on the heap individually at
+       insertion time, then use QVector.
     \i If you want a low-level variable-size array, QVarLengthArray
-    may be sufficient.
+       may be sufficient.
     \endlist
 
     Here's an example of a QVector that stores integers and a QVector

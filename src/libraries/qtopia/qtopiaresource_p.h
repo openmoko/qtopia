@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,17 @@
 #ifndef QTOPIA_RESOURCE_H
 #define QTOPIA_RESOURCE_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <qabstractfileengine.h>
 #include <qtopiaglobal.h>
 #include <QMap>
@@ -37,7 +48,7 @@ public:
     static int fontHeightToIconSize( const int fontHeight );
 
 private:
-    void appendSearchDirs(QStringList& dirs, const QString& dir, const QString& subdir) const;
+    void appendSearchDirs(QList<QByteArray> &dirs, const QString& dir, const char *subdir) const;
 
 #if QT_VERSION >= 0x040300
     QAbstractFileEngine *findArchivedResourceFile(const QString &path) const;
@@ -51,9 +62,9 @@ private:
     QString findDiskSound(const QString &path) const;
     QString findDiskImage(const QString &path, const QString& _subdir) const;
 
-    mutable QStringList imagedirs;
-    mutable QStringList sounddirs;
-    mutable QStringList iconpath;
+    mutable QList<QByteArray> imagedirs;
+    mutable QList<QByteArray> sounddirs;
+    mutable QList<QByteArray> iconpath;
 };
 
 #endif

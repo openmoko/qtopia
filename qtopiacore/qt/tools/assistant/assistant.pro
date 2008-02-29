@@ -1,3 +1,5 @@
+include($$QT_SOURCE_TREE/tools/shared/fontpanel/fontpanel.pri)
+
 TEMPLATE = app
 LANGUAGE = C++
 TARGET = assistant
@@ -29,7 +31,8 @@ SOURCES += main.cpp \
         config.cpp \
         helpdialog.cpp \
         mainwindow.cpp \
-        tabbedbrowser.cpp
+        tabbedbrowser.cpp \
+        fontsettingsdialog.cpp
 
 HEADERS += helpwindow.h \
         topicchooser.h \
@@ -39,7 +42,8 @@ HEADERS += helpwindow.h \
         helpdialog.h \
         mainwindow.h \
         tabbedbrowser.h \
-        config.h
+        config.h \
+        fontsettingsdialog.h
 
 RESOURCES += assistant.qrc
 
@@ -61,13 +65,7 @@ mac {
 target.path=$$[QT_INSTALL_BINS]
 INSTALLS += target
 
-#assistanttranslations.files = *.qm
-#assistanttranslations.path = $$[QT_INSTALL_TRANSLATIONS]
-#INSTALLS += assistanttranslations
-
-TRANSLATIONS        = assistant_de.ts \
-                  assistant_fr.ts
-
+TRANSLATIONS = assistant_de.ts
 
 unix:!contains(QT_CONFIG, zlib):LIBS += -lz
 

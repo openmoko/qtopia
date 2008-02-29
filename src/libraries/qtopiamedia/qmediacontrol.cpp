@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,95 +19,41 @@
 **
 ****************************************************************************/
 
-#include <quuid.h>
-#include <qtopialog.h>
-#include <qabstractipcinterface.h>
 #include <qtopiaservices.h>
+
+#include "qmediaabstractcontrol.h"
+#include "qmediacontent.h"
 
 #include "qmediacontrol.h"
 
 
 // {{{ QMediaControlPrivate
-class QMediaControlPrivate : public QAbstractIpcInterface
+class QMediaControlPrivate : public QMediaAbstractControl
 {
     Q_OBJECT
 
 public:
-    QMediaControlPrivate(QUuid const& _id):
-        QAbstractIpcInterface("/MediaServer", QMediaControl::name(), _id.toString()),
-        id(_id)
-    {
-    }
+    QMediaControlPrivate(QMediaContent* mediaContent);
+    ~QMediaControlPrivate();
 
-    ~QMediaControlPrivate()
-    {
-    }
+    QtopiaMedia::State playerState() const;
 
-    QtopiaMedia::State playerState() const
-    {
-        return static_cast<QtopiaMedia::State>(value(QLatin1String("playerState")).toUInt());
-    }
+    quint32 length() const;
+    quint32 position() const;
 
-    quint32 length() const
-    {
-        return static_cast<quint32>(value(QLatin1String("length")).toUInt());
-    }
+    bool isMuted();
+    int volume() const;
 
-    quint32 position() const
-    {
-        return static_cast<quint32>(value(QLatin1String("position")).toUInt());
-    }
-
-    bool isMuted()
-    {
-        return value(QLatin1String("muted")).toBool();
-    }
-
-    int volume() const
-    {
-        return value(QLatin1String("volume")).toInt();
-    }
-
-    QString errorString() const
-    {
-        return value(QLatin1String("errorString")).toString();
-    }
-
-    QStringList interfaces() const
-    {
-        return value(QLatin1String("interfaces")).toStringList();
-    }
+    QString errorString() const;
 
 public slots:
-    void start()
-    {
-        invoke(SLOT(start()));
-    }
+    void start();
+    void pause();
+    void stop();
+    void seek(quint32 ms);
 
-    void pause()
-    {
-        invoke(SLOT(pause()));
-    }
-
-    void stop()
-    {
-        invoke(SLOT(stop()));
-    }
-
-    void seek(quint32 ms)
-    {
-         invoke(SLOT(seek(quint32)), ms);
-    }
-
-    void setVolume(int volume)
-    {
-        invoke(SLOT(setVolume(int)), volume);
-    }
-
-    void setMuted(bool mute)
-    {
-        invoke(SLOT(setMuted(bool)), mute);
-    }
+    void setVolume(int volume);
+    void setMuted(bool mute);
 
 signals:
     void playerStateChanged(QtopiaMedia::State state);
@@ -115,12 +61,78 @@ signals:
     void lengthChanged(quint32 ms);
     void volumeChanged(int volume);
     void volumeMuted(bool muted);
-    void controlAvailable(const QString& control);
-    void controlUnavailable(const QString& control);
-
-public:
-    QUuid id;
 };
+
+QMediaControlPrivate::QMediaControlPrivate(QMediaContent* mediaContent):
+    QMediaAbstractControl(mediaContent, QMediaControl::name())
+{
+    proxyAll();
+}
+
+QMediaControlPrivate::~QMediaControlPrivate()
+{
+}
+
+QtopiaMedia::State QMediaControlPrivate::playerState() const
+{
+    return static_cast<QtopiaMedia::State>(value(QLatin1String("playerState")).toUInt());
+}
+
+quint32 QMediaControlPrivate::length() const
+{
+    return static_cast<quint32>(value(QLatin1String("length")).toUInt());
+}
+
+quint32 QMediaControlPrivate::position() const
+{
+    return static_cast<quint32>(value(QLatin1String("position")).toUInt());
+}
+
+bool QMediaControlPrivate::isMuted()
+{
+    return value(QLatin1String("muted")).toBool();
+}
+
+int QMediaControlPrivate::volume() const
+{
+    return value(QLatin1String("volume")).toInt();
+}
+
+QString QMediaControlPrivate::errorString() const
+{
+    return value(QLatin1String("errorString")).toString();
+}
+
+//public slots:
+void QMediaControlPrivate::start()
+{
+    forward(SLOT(start()));
+}
+
+void QMediaControlPrivate::pause()
+{
+    forward(SLOT(pause()));
+}
+
+void QMediaControlPrivate::stop()
+{
+    forward(SLOT(stop()));
+}
+
+void QMediaControlPrivate::seek(quint32 ms)
+{
+    forward(SLOT(seek(quint32)), QMediaAbstractControl::SlotArgs() << ms);
+}
+
+void QMediaControlPrivate::setVolume(int volume)
+{
+    forward(SLOT(setVolume(int)), QMediaAbstractControl::SlotArgs() << volume);
+}
+
+void QMediaControlPrivate::setMuted(bool mute)
+{
+    forward(SLOT(setMuted(bool)), QMediaAbstractControl::SlotArgs() << mute);
+}
 // }}}
 
 
@@ -139,20 +151,18 @@ public:
 /*!
     Construct a QMediaControl.
 
-    The QMediaControl needs to be constructed with a valid QMediaHandle
-    obtained from a QMediaContent instance. The QMediaControl can be
-    constructed only after the QMediaContent instance has signaled that it is
-    available via the QMediaContenet::controlAvailable signal.
+    Construct a QMediaControl for controlling \a mediaContent. The
+    QMediaControl can be constructed only after the \a mediaContent instance has
+    signaled that it is available via the QMediaContent::controlAvailable()
+    signal.
 
-    The \a mediaHandle parameter is the handle of the media content for which
-    the control is being constructed
-    The \a parent is the Parent QObject.
+    \sa QMediaContent::controlAvailable()
 */
 
-QMediaControl::QMediaControl(QMediaHandle const& mediaHandle, QObject* parent):
-    QObject(parent)
+QMediaControl::QMediaControl(QMediaContent* mediaContent):
+    QObject(mediaContent)
 {
-    d = new QMediaControlPrivate(mediaHandle.id());
+    d = new QMediaControlPrivate(mediaContent);
 
     connect(d, SIGNAL(playerStateChanged(QtopiaMedia::State)),
             this, SIGNAL(playerStateChanged(QtopiaMedia::State)));
@@ -169,11 +179,8 @@ QMediaControl::QMediaControl(QMediaHandle const& mediaHandle, QObject* parent):
     connect(d, SIGNAL(volumeMuted(bool)),
             this, SIGNAL(volumeMuted(bool)));
 
-    connect(d, SIGNAL(controlAvailable(const QString&)),
-            this, SIGNAL(controlAvailable(const QString&)));
-
-    connect(d, SIGNAL(controlUnavailable(const QString&)),
-            this, SIGNAL(controlUnavailable(const QString&)));
+    connect(d, SIGNAL(valid()), this, SIGNAL(valid()));
+    connect(d, SIGNAL(invalid()), this, SIGNAL(invalid()));
 }
 
 /*!
@@ -182,7 +189,6 @@ QMediaControl::QMediaControl(QMediaHandle const& mediaHandle, QObject* parent):
 
 QMediaControl::~QMediaControl()
 {
-    delete d;
 }
 
 /*!
@@ -255,7 +261,7 @@ int QMediaControl::volume() const
 }
 
 /*!
-    When an error occurs, indicated by the QtopiaMedia::Errpr state,
+    When an error occurs, indicated by the QtopiaMedia::Error state,
     this function will return a QString with appropriate information
     regarding the error.
 */
@@ -266,30 +272,12 @@ QString QMediaControl::errorString() const
 }
 
 /*!
-    Return a list of Controls that this Media supports.
-*/
-
-QStringList QMediaControl::controls() const
-{
-    return d->interfaces();
-}
-
-/*!
-    Return the handle of the media content that this control is manipulating.
-*/
-
-QMediaHandle QMediaControl::handle() const
-{
-    return QMediaHandle(d->id);
-}
-
-/*!
     Returns the name of this control.
 */
 
 QString QMediaControl::name()
 {
-    return "MediaControl";
+    return "Basic";
 }
 
 
@@ -333,6 +321,18 @@ void QMediaControl::seek(quint32 ms)
 }
 
 /*!
+    \fn void QMediaControl::valid();
+
+    Signal that is emitted when the control is valid and available for use.
+*/
+
+/*!
+    \fn void QMediaControl::invalid();
+
+    Signal that is emitted when the control is invalid and no longer available for use.
+*/
+
+/*!
     \fn QMediaControl::playerStateChanged(QtopiaMedia::State state);
 
     Signals a change in the state of the media content. The new state
@@ -369,18 +369,6 @@ void QMediaControl::seek(quint32 ms)
 
     Signals if the media content has been muted or not. The \a muted paramter
     is true when muted, false when not.
-*/
-
-/*!
-    \fn QMediaControl::controlAvailable(const QString& control);
-
-    Signals that a control with identity \a control is available in the system.
-*/
-
-/*!
-    \fn QMediaControl::controlUnavailable(const QString& control);
-
-    Signals that a control with identity \a control is no longer available in the system.
 */
 
 // }}}

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,27 +22,17 @@
 #include "wapui.h"
 #include "addwapui.h"
 
-#include <QDebug>
 #include <QFile>
 #include <QLabel>
 #include <QLayout>
 #include <QListWidget>
 #include <QWidget>
 
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
-
 #include <qtopianamespace.h>
 #include <qtopiaipcadaptor.h>
-
-#ifdef QTOPIA_PHONE
 #include <QAction>
 #include <QMenu>
-#else
-#include <QPushButton>
-#endif
-
 
 WapUI::WapUI( QWidget* parent, Qt::WFlags fl)
     : QWidget( parent, fl )
@@ -83,14 +73,13 @@ void WapUI::init()
     connect( wapList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
             this, SLOT(updateActions()));
 
-#ifdef QTOPIA_PHONE
     connect( wapList, SIGNAL(itemActivated(QListWidgetItem*)),
             this, SLOT(selectDefaultWAP()));
 
     QMenu *contextMenu = QSoftMenuBar::menuFor( this );
 
     wap_add = new QAction( QIcon(":icon/new"), tr("New"), this );
-    connect( wap_add, SIGNAL( triggered(bool) ), this, SLOT( addWap() ) );
+    connect( wap_add, SIGNAL(triggered(bool)), this, SLOT(addWap()) );
     contextMenu->addAction(wap_add);
 
     wap_remove = new QAction( QIcon(":icon/trash"), tr("Delete"), this );
@@ -100,32 +89,6 @@ void WapUI::init()
     wap_props = new QAction( QIcon(":icon/settings"), tr("Properties..."), this );
     connect( wap_props, SIGNAL(triggered(bool)), this, SLOT(doWap()) );
     contextMenu->addAction(wap_props);
-
-#else
-    QGridLayout* grid = new QGridLayout();
-    vb->addItem( grid );
-    grid->setSpacing( 4 );
-    grid->setMargin( 4 );
-
-    defaultPB = new QPushButton( tr("Default"), this );
-    connect( defaultPB, SIGNAL(clicked()), this, SLOT(selectDefaultWAP()) );
-    grid->addWidget( defaultPB, 0, 0 );
-
-    propPB = new QPushButton( tr("Properties..."), this );
-    propPB->setIcon( QIcon(":icon/settings") );
-    connect( propPB, SIGNAL(clicked()), this, SLOT(doWap()));
-    grid->addWidget( propPB, 0, 1 );
-
-    addPB = new QPushButton( tr("New..."), this );
-    addPB->setIcon( QIcon(":icon/new") );
-    connect( addPB, SIGNAL(clicked()), this, SLOT(addWap()));
-    grid->addWidget( addPB, 1, 0 );
-
-    removePB = new QPushButton( tr("Delete"), this );
-    removePB->setIcon( QIcon(":icon/trash") );
-    connect( removePB, SIGNAL(clicked()), this, SLOT(removeWap()));
-    grid->addWidget( removePB, 1, 1 );
-#endif
 
     loadConfigs();
     updateActions();
@@ -185,40 +148,22 @@ void WapUI::loadConfigs()
 void WapUI::updateActions()
 {
     if ( !wapList->count() || wapList->currentRow() < 0 ) {
-#ifdef QTOPIA_PHONE
         wap_remove->setEnabled( false );
         wap_remove->setVisible( false );
         wap_props->setEnabled( false );
         wap_props->setVisible( false );
-#else
-        propPB->setEnabled( false );
-        removePB->setEnabled( false );
-        defaultPB->setEnabled( false );
-#endif
     } else {
         QListWidgetItem* item = wapList->currentItem();
         if ( !item ) {
-#ifdef QTOPIA_PHONE
             wap_remove->setEnabled( false );
             wap_remove->setVisible( false );
             wap_props->setEnabled( false );
             wap_props->setVisible( false );
-#else
-            propPB->setEnabled( false );
-            defaultPB->setEnabled( false );
-            removePB->setEnabled( false );
-#endif
         } else {
-#ifdef QTOPIA_PHONE
             wap_remove->setEnabled( true );
             wap_remove->setVisible( true );
             wap_props->setEnabled( true );
             wap_props->setVisible( true );
-#else
-            removePB->setEnabled( true );
-            defaultPB->setEnabled( true );
-            propPB->setEnabled( true );
-#endif
         }
     }
 }

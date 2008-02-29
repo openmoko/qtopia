@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QSyntaxHighlighter Class Reference</title>
+  <title>Qt 4.3: QSyntaxHighlighter Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QSyntaxHighlighter Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QSyntaxHighlighter Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QSyntaxHighlighter class allows you to define syntax highlighting rules, and in addition you can use the class to query a document's current formatting or user data. <a href="#details">More...</a></p>
 <pre> #include &lt;QSyntaxHighlighter&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <p>This class was introduced in Qt 4.1.</p>
@@ -71,7 +72,7 @@
 <p>When you create an instance of your QSyntaxHighlighter subclass, pass it the <a href="qtextedit.html">QTextEdit</a> or <a href="qtextdocument.html">QTextDocument</a> that you want the syntax highlighting to be applied to. For example:</p>
 <pre> QTextEdit *editor = new QTextEdit;
  MyHighlighter *highlighter = new MyHighlighter(editor-&gt;document());</pre>
-<p>After this your <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>() function will be called automatically whenever necessary. Use your <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>() function to apply formatting (e.g. setting the font and color) to the text that is passed to it. QSyntaxHighlighter provides the <a href="qsyntaxhighlighter.html#setFormat">setFormat</a>() function which applies a given <a href="qtextcharformat.html">QTextCharFormat</a> on the current text block. For example:</p>
+<p>After this your <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>() function will be called automatically whenever necessary. Use your <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>() function to apply formatting (e.g&#x2e; setting the font and color) to the text that is passed to it. QSyntaxHighlighter provides the <a href="qsyntaxhighlighter.html#setFormat">setFormat</a>() function which applies a given <a href="qtextcharformat.html">QTextCharFormat</a> on the current text block. For example:</p>
 <pre> void MyHighlighter::highlightBlock(const QString &amp;text)
  {
      QTextCharFormat myClassFormat;
@@ -87,7 +88,7 @@
          index = text.indexOf(expression, index + length);
       }
   }</pre>
-<p>Some syntaxes can have constructs that span several text blocks. For example, a C++ syntax highlighter should be able to cope with <tt>/</tt><tt>*...*</tt><tt>/</tt> multiline comments. To deal with these cases it is necessary to know the end state of the previous text block (e.g. &quot;in comment&quot;).</p>
+<p>Some syntaxes can have constructs that span several text blocks. For example, a C++ syntax highlighter should be able to cope with <tt>/</tt><tt>*...*</tt><tt>/</tt> multiline comments. To deal with these cases it is necessary to know the end state of the previous text block (e.g&#x2e; &quot;in comment&quot;).</p>
 <p>Inside your <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>() implementation you can query the end state of the previous text block using the <a href="qsyntaxhighlighter.html#previousBlockState">previousBlockState</a>() function. After parsing the block you can save the last state using <a href="qsyntaxhighlighter.html#setCurrentBlockState">setCurrentBlockState</a>().</p>
 <p>The <a href="qsyntaxhighlighter.html#currentBlockState">currentBlockState</a>() and <a href="qsyntaxhighlighter.html#previousBlockState">previousBlockState</a>() functions return an int value. If no state is set, the returned value is -1. You can designate any other value to identify any given state using the <a href="qsyntaxhighlighter.html#setCurrentBlockState">setCurrentBlockState</a>() function. Once the state is set the <a href="qtextblock.html">QTextBlock</a> keeps that value until it is set set again or until the corresponding paragraph of text is deleted.</p>
 <p>For example, if you're writing a simple C++ syntax highlighter, you might designate 1 to signify &quot;in comment&quot;:</p>
@@ -143,7 +144,7 @@
 <p>Returns the format at <i>position</i> inside the syntax highlighter's current text block.</p>
 <p>See also <a href="qsyntaxhighlighter.html#setFormat">setFormat</a>().</p>
 <h3 class="fn"><a name="highlightBlock"></a>void QSyntaxHighlighter::highlightBlock ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
-<p>Highlights the given text block. This function is called when necessary by the rich text engine, i.e. on text blocks which have changed.</p>
+<p>Highlights the given text block. This function is called when necessary by the rich text engine, i.e&#x2e; on text blocks which have changed.</p>
 <p>To provide your own syntax highlighting, you must subclass <a href="qsyntaxhighlighter.html">QSyntaxHighlighter</a> and reimplement highlightBlock(). In your reimplementation you should parse the block's <i>text</i> and call <a href="qsyntaxhighlighter.html#setFormat">setFormat</a>() as often as necessary to apply any font and color changes that you require. For example:</p>
 <pre> void MyHighlighter::highlightBlock(const QString &amp;text)
  {
@@ -160,7 +161,7 @@
          index = text.indexOf(expression, index + length);
       }
   }</pre>
-<p>Some syntaxes can have constructs that span several text blocks. For example, a C++ syntax highlighter should be able to cope with <tt>/</tt><tt>*...*</tt><tt>/</tt> multiline comments. To deal with these cases it is necessary to know the end state of the previous text block (e.g. &quot;in comment&quot;).</p>
+<p>Some syntaxes can have constructs that span several text blocks. For example, a C++ syntax highlighter should be able to cope with <tt>/</tt><tt>*...*</tt><tt>/</tt> multiline comments. To deal with these cases it is necessary to know the end state of the previous text block (e.g&#x2e; &quot;in comment&quot;).</p>
 <p>Inside your highlightBlock() implementation you can query the end state of the previous text block using the <a href="qsyntaxhighlighter.html#previousBlockState">previousBlockState</a>() function. After parsing the block you can save the last state using <a href="qsyntaxhighlighter.html#setCurrentBlockState">setCurrentBlockState</a>().</p>
 <p>The <a href="qsyntaxhighlighter.html#currentBlockState">currentBlockState</a>() and <a href="qsyntaxhighlighter.html#previousBlockState">previousBlockState</a>() functions return an int value. If no state is set, the returned value is -1. You can designate any other value to identify any given state using the <a href="qsyntaxhighlighter.html#setCurrentBlockState">setCurrentBlockState</a>() function. Once the state is set the <a href="qtextblock.html">QTextBlock</a> keeps that value until it is set set again or until the corresponding paragraph of text gets deleted.</p>
 <p>For example, if you're writing a simple C++ syntax highlighter, you might designate 1 to signify &quot;in comment&quot;. For a text block that ended in the middle of a comment you'd set 1 using setCurrentBlockState, and for other paragraphs you'd set 0. In your parsing code if the return value of <a href="qsyntaxhighlighter.html#previousBlockState">previousBlockState</a>() is 1, you would highlight the text as a C++ comment until you reached the closing <tt>*</tt><tt>/</tt>.</p>
@@ -175,7 +176,7 @@
 <p>Sets the state of the current text block to <i>newState</i>.</p>
 <p>See also <a href="qsyntaxhighlighter.html#currentBlockState">currentBlockState</a>() and <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>().</p>
 <h3 class="fn"><a name="setCurrentBlockUserData"></a>void QSyntaxHighlighter::setCurrentBlockUserData ( <a href="qtextblockuserdata.html">QTextBlockUserData</a> * <i>data</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>Attaches the given <i>data</i> to the current text block. The ownership is passed to the underlying text document, i.e. the provided <a href="qtextblockuserdata.html">QTextBlockUserData</a> object will be deleted if the corresponding text block gets deleted.</p>
+<p>Attaches the given <i>data</i> to the current text block. The ownership is passed to the underlying text document, i.e&#x2e; the provided <a href="qtextblockuserdata.html">QTextBlockUserData</a> object will be deleted if the corresponding text block gets deleted.</p>
 <p><a href="qtextblockuserdata.html">QTextBlockUserData</a> can be used to store custom settings. In the case of syntax highlighting, it is in particular interesting as cache storage for information that you may figure out while parsing the paragraph's text.</p>
 <p>For example while parsing the text, you can keep track of parenthesis characters that you encounter ('{[(' and the like), and store their relative position and the actual <a href="qchar.html">QChar</a> in a simple class derived from <a href="qtextblockuserdata.html">QTextBlockUserData</a>:</p>
 <pre> struct ParenthesisInfo
@@ -195,23 +196,23 @@
 <p>Installs the syntax highlighter on the given <a href="qtextdocument.html">QTextDocument</a> <i>doc</i>. A <a href="qsyntaxhighlighter.html">QSyntaxHighlighter</a> can only be used with one document at a time.</p>
 <p>See also <a href="qsyntaxhighlighter.html#document">document</a>().</p>
 <h3 class="fn"><a name="setFormat"></a>void QSyntaxHighlighter::setFormat ( int <i>start</i>, int <i>count</i>, const <a href="qtextcharformat.html">QTextCharFormat</a> &amp; <i>format</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>This function is applied to the syntax highlighter's current text block (i.e. the text that is passed to the <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>() function).</p>
+<p>This function is applied to the syntax highlighter's current text block (i.e&#x2e; the text that is passed to the <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>() function).</p>
 <p>The specified <i>format</i> is applied to the text from the <i>start</i> position for a length of <i>count</i> characters (if <i>count</i> is 0, nothing is done). The formatting properties set in <i>format</i> are merged at display time with the formatting information stored directly in the document, for example as previously set with <a href="qtextcursor.html">QTextCursor</a>'s functions. Note that the document itself remains unmodified by the format set through this function.</p>
 <p>See also <a href="qsyntaxhighlighter.html#format">format</a>() and <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>().</p>
 <h3 class="fn"><a name="setFormat-2"></a>void QSyntaxHighlighter::setFormat ( int <i>start</i>, int <i>count</i>, const <a href="qcolor.html">QColor</a> &amp; <i>color</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>The specified <i>color</i> is applied to the current text block from the <i>start</i> position for a length of <i>count</i> characters.</p>
-<p>The other attributes of the current text block, e.g. the font and background color, are reset to default values.</p>
+<p>The other attributes of the current text block, e.g&#x2e; the font and background color, are reset to default values.</p>
 <p>See also <a href="qsyntaxhighlighter.html#format">format</a>() and <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>().</p>
 <h3 class="fn"><a name="setFormat-3"></a>void QSyntaxHighlighter::setFormat ( int <i>start</i>, int <i>count</i>, const <a href="qfont.html">QFont</a> &amp; <i>font</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>The specified <i>font</i> is applied to the current text block from the <i>start</i> position for a length of <i>count</i> characters.</p>
-<p>The other attributes of the current text block, e.g. the font and background color, are reset to default values.</p>
+<p>The other attributes of the current text block, e.g&#x2e; the font and background color, are reset to default values.</p>
 <p>See also <a href="qsyntaxhighlighter.html#format">format</a>() and <a href="qsyntaxhighlighter.html#highlightBlock">highlightBlock</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

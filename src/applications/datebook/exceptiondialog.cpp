@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -43,12 +43,7 @@ int ExceptionDialog::exec(bool editMode)
     } else {
         lblMessage->setText(tr("<qt>This appointment is part of a series. Select the part of the series you want to delete below.</qt>"));
     }
-#ifdef QTOPIA_PHONE
-    int ret = QtopiaApplication::execDialog( this );
-#else
-    int ret = QDialog::exec();
-#endif
-    if (!ret)
+    if (!QtopiaApplication::execDialog( this ))
         return 0;
 
     if (checkSelected->isChecked())

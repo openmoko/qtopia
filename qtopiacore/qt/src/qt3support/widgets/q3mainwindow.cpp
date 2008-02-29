@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -700,7 +715,7 @@ Q3MainWindow::Q3MainWindow(QWidget * parent, const char * name, Qt::WindowFlags 
     : QWidget(*new Q3MainWindowPrivate, parent, f)
 {
     Q_D(Q3MainWindow);
-    setObjectName(name);
+    setObjectName(QLatin1String(name));
 #ifdef Q_WS_MAC
     d->opaque = true;
 #else
@@ -770,7 +785,7 @@ QMenuBar * Q3MainWindow::menuBar() const
         b = static_cast<QMenuBar *>(l.at(0));
     } else {
         b = new QMenuBar((Q3MainWindow *)this);
-        b->setObjectName("automatic menu bar");
+        b->setObjectName(QLatin1String("automatic menu bar"));
         b->show();
     }
     d->mb = b;
@@ -1983,7 +1998,7 @@ Q3PopupMenu *Q3MainWindow::createDockWindowMenu(DockWindows dockWindows) const
         return 0;
 
     Q3PopupMenu *menu = new Q3PopupMenu((Q3MainWindow*)this);
-    menu->setObjectName("qt_customize_menu");
+    menu->setObjectName(QLatin1String("qt_customize_menu"));
     d->dockWindowModes.replace( menu, dockWindows );
     menu->setCheckable(true);
     connect( menu, SIGNAL(aboutToShow()), this, SLOT(menuAboutToShow()) );
@@ -2022,6 +2037,7 @@ void Q3MainWindow::menuAboutToShow()
                 QString label = dw->windowTitle();
                 if (!label.isEmpty()) {
                     QAction *act = menu->addAction(label);
+                    act->setCheckable(true);
                     act->setChecked(dw->isVisible());
                     QObject::connect(act, SIGNAL(triggered()), dw, SLOT(toggleVisible()));
                     empty = false;
@@ -2345,16 +2361,16 @@ static void loadDockArea(const QStringList &names, Q3DockArea *a, Qt::Dock dl, Q
         QChar c;
         for (int i = 0; i < (int)s.length(); ++i) {
             c = s[i];
-            if (state == Pre && c == '[') {
+            if (state == Pre && c == QLatin1Char('[')) {
                 state++;
                 continue;
             }
-            if (c == ',' &&
+            if (c == QLatin1Char(',') &&
                  (state == Name || state == X || state == Y || state == Width || state == Height)) {
                 state++;
                 continue;
             }
-            if (state == Visible && c == ']') {
+            if (state == Visible && c == QLatin1Char(']')) {
                 for (int i = 0; i < l.size(); ++i) {
                     Q3DockWindow *dw = l.at(i);
                     if (QString(dw->windowTitle()) == name) {
@@ -2370,7 +2386,7 @@ static void loadDockArea(const QStringList &names, Q3DockArea *a, Qt::Dock dl, Q
                     }
                 }
 
-                name = x = y = w = h = visible = "";
+                name = x = y = w = h = visible = QLatin1String("");
 
                 state = Pre;
                 continue;
@@ -2410,18 +2426,18 @@ QTextStream &operator>>(QTextStream &ts, Q3MainWindow &mainWindow)
     QList<Q3DockWindow *> l = mainWindow.dockWindows();
 
     QString s = ts.readLine();
-    QStringList names = s.split(',');
+    QStringList names = s.split(QLatin1Char(','));
     loadDockArea(names, 0, Qt::DockMinimized, l, &mainWindow, ts);
 
     s = ts.readLine();
-    names = s.split(',');
+    names = s.split(QLatin1Char(','));
     loadDockArea(names, 0, Qt::DockTornOff, l, &mainWindow, ts);
 
     int i = 0;
     Q3DockArea *areas[] = { mainWindow.topDock(), mainWindow.bottomDock(), mainWindow.rightDock(), mainWindow.leftDock() };
     for (int dl = (int)Qt::DockTop; dl != (int)Qt::DockMinimized; ++dl, ++i) {
         s = ts.readLine();
-        names = s.split(',');
+        names = s.split(QLatin1Char(','));
         loadDockArea(names, areas[i], (Qt::Dock)dl, l, &mainWindow, ts);
     }
     return ts;

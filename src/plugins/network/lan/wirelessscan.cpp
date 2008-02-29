@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,25 +29,21 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <QAction>
-#endif
 #include <QApplication>
 #include <QDialog>
 #include <QHeaderView>
 #include <QLabel>
 #include <QListWidget>
 #include <QMenu>
-#include <QPushButton>
 #include <QSettings>
 #include <QTimer>
 #include <QVBoxLayout>
+#include <QKeyEvent>
 
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qsoftmenubar.h>
-#endif
 #include <qnetworkdevice.h>
 
 
@@ -480,8 +476,11 @@ void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_
         memcpy( (char*) iwp, data, IW_EV_LCP_LEN );
 
         //an empty event?
-        if ( iwevent.len <= IW_EV_LCP_LEN )
-            return;
+        if ( iwevent.len <= IW_EV_LCP_LEN ) {
+            //current event is too small => ignore it and continue with next
+            data += iwevent.len;
+            continue;
+        }
 
         unsigned char * value = data + IW_EV_LCP_LEN;
         iwp = (char*)iwp + IW_EV_LCP_LEN;
@@ -593,8 +592,19 @@ void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_
             case  SIOCSIWRATE:              /* set default bit rate (bps) */
                 break;
             case  SIOCGIWRATE:              /* get default bit rate (bps) */
-                memcpy( iwp, value, IW_EV_PARAM_LEN-IW_EV_LCP_LEN );
-                net.setData( WirelessNetwork::BitRate, QString::number( iwevent.u.bitrate.value ) );
+                {
+                    memcpy( iwp, value, IW_EV_PARAM_LEN-IW_EV_LCP_LEN ); //to be consistent
+                    struct iw_param param;
+                    const unsigned char * const end = (unsigned char*) (data +iwevent.len);
+                    int maxTransfer = 0;
+                    while ( value + IW_EV_PARAM_LEN-IW_EV_LCP_LEN <= end )
+                    {
+                        memcpy( &param, value, IW_EV_PARAM_LEN-IW_EV_LCP_LEN );
+                        maxTransfer = qMax( maxTransfer, param.value );
+                        value += (IW_EV_PARAM_LEN-IW_EV_LCP_LEN);
+                    }
+                    net.setData( WirelessNetwork::BitRate, maxTransfer );
+                }
                 break;
             //case  SIOCSIWRTS:               /* set RTS/CTS threshold (bytes) */
             //case  SIOCGIWRTS:               /* get RTS/CTS threshold (bytes) */
@@ -725,7 +735,48 @@ void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_
 #endif
             //case  IWEVREGISTERED:
             //case  IWEVEXPIRED:
-            //case  IWEVGENIE:
+#if WIRELESS_EXT > 17
+            case  IWEVGENIE:
+                //we don't use this data yet (no need) but the package logic is there already.
+                {
+                    unsigned char * payload;
+                    if ( weVersion > 18 ) {
+                        //the pointer in iw_point is omitted
+                        memcpy( iwp+IW_EV_POINT_OFF, value, sizeof(struct iw_point)-IW_EV_POINT_OFF );
+                        payload = value + sizeof(struct iw_point) - IW_EV_POINT_OFF;
+                    } else {
+                        memcpy( iwp, value, sizeof(struct iw_point) );
+                        payload = value + sizeof(struct iw_point);
+                    }
+                  
+                    //payload structure from iwlist.c 
+                    int len = iwevent.u.data.length;
+                    /*package structure (each package minimum of 2 bytes): 
+                        - payload[0] -> 0xdd (WPA1 or other)
+                                        ->
+                                     -> 0x30 (WPA2)
+                        - payload[1] -> length of subsequent additional data
+                      */
+                    while ( &(payload[2]) <= data + iwevent.len) 
+                    {
+
+                        switch( payload[0] )
+                        {
+                            case 0xdd:
+                                //qDebug() << "WPA1?";
+                                //we cannot be sure yet that this is WPA2. for details see wireless tools.
+                                break;
+                            case 0x30:
+                                //qDebug() << "WPA2";
+                                break;
+                            default:
+                                break;
+                        }
+                        payload += 2 + payload[1];
+                    }
+                }
+                break;
+#endif
             //case  IWEVMICHAELMICFAILURE:
             //case  IWEVASSOCREQIE:
             //case  IWEVASSOCRESPIE:
@@ -740,8 +791,10 @@ void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_
         entries.append( net );
 
     if ( qLogEnabled(Network) ) {
-    foreach(WirelessNetwork n, entries )
-        qLog(Network) << "#### Found" << n.data(WirelessNetwork::ESSID) << n.data(WirelessNetwork::AP) << n.data(WirelessNetwork::Security).toString();
+        foreach(WirelessNetwork n, entries ) {
+            qLog(Network) << "#### Found" << n.data(WirelessNetwork::ESSID) << n.data(WirelessNetwork::AP) << n.data(WirelessNetwork::Security).toString();
+            //net.dump();
+        }
     }
 #else
     Q_UNUSED(data);
@@ -792,11 +845,7 @@ private:
     QListWidget* list;
     QList<WirelessNetwork> nets;
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QAction* filterHidden;
-#else
-    QCheckBox* filterHidden;
-#endif
 };
 
 /**************************************************************************************/
@@ -813,10 +862,21 @@ static const int EncryptPassphraseRole = Qt::UserRole + 8;
 static const int EncryptKeyRole = Qt::UserRole + 9;
 static const int SelectedEncryptKeyRole = Qt::UserRole + 10;
 static const int NickNameRole = Qt::UserRole + 11;
+static const int UuidRole = Qt::UserRole + 12;
+static const int EAPAnonIdentityRole = Qt::UserRole + 13;
+static const int EAPAuthenticationRole = Qt::UserRole + 14;
+static const int EAPClientCertRole = Qt::UserRole + 15;
+static const int EAPClientKeyRole = Qt::UserRole + 16;
+static const int EAPClientKeyPasswordRole = Qt::UserRole + 17;
+static const int EAPIdentityRole = Qt::UserRole + 18;
+static const int EAPIdentityPasswordRole = Qt::UserRole + 19;
+static const int EAPServerCertRole = Qt::UserRole + 20;
+static const int PSKAlgorithmRole = Qt::UserRole + 21;
+static const int WPAEnterpriseRole = Qt::UserRole + 22;
 
 WSearchPage::WSearchPage( const QString& c, QWidget* parent, Qt::WFlags flags )
     : QWidget( parent, flags ), config( c ), scanEngine( 0 ), state( QtopiaNetworkInterface::Unknown ),
-        isShiftMode( false ), isRestart( false )
+        currentSelection( 0 ), isRestart( false )
 {
     initUI();
     loadKnownNetworks();
@@ -864,13 +924,13 @@ void WSearchPage::initUI()
     knownNetworks->setAlternatingRowColors( true );
     knownNetworks->setSelectionBehavior( QAbstractItemView::SelectRows );
     knownNetworks->setEditTriggers( QAbstractItemView::NoEditTriggers );
-    connect( knownNetworks, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
-            this, SLOT(updateActions(QListWidgetItem*,QListWidgetItem*)) );
-    connect( knownNetworks, SIGNAL(itemActivated(QListWidgetItem*)),
-            this, SLOT(changePriority(QListWidgetItem*)) );
     vbox->addWidget( knownNetworks );
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
+    connect( knownNetworks, SIGNAL(itemActivated(QListWidgetItem*)),
+        this, SLOT(changePriority(QListWidgetItem*)) );
+
+    knownNetworks->installEventFilter( this );
+
     QMenu* menu = QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled ( this, true );
     scanAction = new QAction( QIcon(":icon/Network/lan/WLAN-demand"), tr("Rescan"), this ) ;
@@ -890,20 +950,6 @@ void WSearchPage::initUI()
     menu->addAction( deleteAction );
     deleteAction->setVisible( false );
     connect( deleteAction, SIGNAL(triggered()), this, SLOT(deleteNetwork()) );
-#else
-    //TODO PDA UI
-    QHBoxLayout* hbox = new QHBoxLayout;
-    vbox->addLayout( hbox );
-
-    refreshPB = new QPushButton;
-    refreshPB->setText( tr("Refresh") );
-    hbox->addWidget( refreshPB );
-
-    connectPB = new QPushButton;
-    connectPB->setText( tr("Connect" ) );
-    hbox->addWidget( connectPB );
-    connect( connectPB, SIGNAL(clicked(bool)), this, SLOT(connectToNetwork()) );
-#endif
 }
 
 
@@ -936,9 +982,9 @@ void WSearchPage::loadKnownNetworks()
     for ( int i= 0; i < size; i++ ) {
         cfg.setArrayIndex( i );
         QString essid = cfg.value("ESSID").toString();
-        QString speed = cfg.value("BitRate").toString();
+        QString speed = cfg.value("BitRate", "0").toString();
         QString itemText = essid;
-        if ( !speed.isEmpty() && speed != "0" )
+        if ( speed != "0" )
             itemText += " ("+speed+" "+ tr("Mb/s" , "Megabit per seconds")+")" ;
         item = new QListWidgetItem( itemText, knownNetworks );
         item->setData( MacAddressRole, cfg.value("AccessPoint").toString() );
@@ -950,6 +996,16 @@ void WSearchPage::loadKnownNetworks()
         item->setData( EncryptionRole, cfg.value("Encryption", QString("open") ).toString() );
         item->setData( EncryptKeyLengthRole, cfg.value("KeyLength", 128 ).toInt() );
         item->setData( EncryptPassphraseRole, cfg.value("PRIV_GENSTR").toString() );
+        item->setData( PSKAlgorithmRole, cfg.value("PSKAlgorithm", "TKIP").toString() );
+        item->setData( WPAEnterpriseRole, cfg.value("WPAEnterprise", "TLS").toString() );
+        item->setData( EAPAnonIdentityRole, cfg.value("EAPAnonIdentity").toString() );
+        item->setData( EAPAuthenticationRole, cfg.value("EAPAuthentication","Any").toString() );
+        item->setData( EAPClientCertRole, cfg.value("EAPClientCert").toString() );
+        item->setData( EAPClientKeyRole, cfg.value("EAPClientKey").toString() );
+        item->setData( EAPClientKeyPasswordRole, cfg.value("EAPClientKeyPassword").toString() );
+        item->setData( EAPIdentityRole, cfg.value("EAPIdentity").toString() );
+        item->setData( EAPIdentityPasswordRole, cfg.value("EAPIdentityPassword").toString() );
+        item->setData( EAPServerCertRole, cfg.value("EAPServerCert").toString() );
         QString key1 = cfg.value( "WirelessKey_1" ).toString();
         QString key2 = cfg.value( "WirelessKey_2" ).toString();
         QString key3 = cfg.value( "WirelessKey_3" ).toString();
@@ -957,6 +1013,7 @@ void WSearchPage::loadKnownNetworks()
         item->setData( EncryptKeyRole, QString("%1@%2@%3@%4").arg(key1).arg(key2).arg(key3).arg(key4) );
         item->setData( SelectedEncryptKeyRole, cfg.value("SelectedKey", "PP").toString() );
         item->setData( NickNameRole, cfg.value("Nickname").toString() );
+        item->setData( UuidRole, cfg.value("Uuid").toString() );
     }
 
     cfg.endArray();
@@ -1024,8 +1081,8 @@ void WSearchPage::stateChanged(QtopiaNetworkInterface::Status newState, bool /*e
                 //if that's the case attempt to connect;
                 isRestart = false;
                 connectToNetwork();
+                break;
             }
-            break;
         default:
             currentNetwork->setText( tr("Connection state:\n<center><b>not connected</b></center>") );
             return;
@@ -1103,6 +1160,29 @@ void WSearchPage::saveKnownNetworks() {
                 cfg.setValue("WirelessKey_"+QString::number(j+1), keys[j] );
 
             cfg.setValue("Nickname", item->data( NickNameRole ).toString() );
+            
+            v = item->data( UuidRole );
+            if ( v.isValid() ) {
+                cfg.setValue( "Uuid", item->data( UuidRole ).toString() );
+            } else {
+                //new WLAN
+                QUuid uid = QUuid::createUuid(); 
+                cfg.setValue( "Uuid", uid.toString() );
+            }
+
+            cfg.setValue( "EAPAnonIdentity", item->data(EAPAnonIdentityRole).toString() );
+            v = item->data( EAPAuthenticationRole );
+            cfg.setValue( "EAPAuthentication", v.isValid() ? v : QLatin1String("Any" ) );
+            cfg.setValue( "EAPClientCert", item->data( EAPClientCertRole ) );
+            cfg.setValue( "EAPClientKey", item->data( EAPClientKeyRole ) );
+            cfg.setValue( "EAPClientKeyPassword", item->data( EAPClientKeyPasswordRole ) );
+            cfg.setValue( "EAPIdentity", item->data( EAPIdentityRole ) );
+            cfg.setValue( "EAPIdentityPassword", item->data( EAPIdentityPasswordRole ) );
+            cfg.setValue( "EAPServerCert", item->data( EAPServerCertRole ));
+            v = item->data( PSKAlgorithmRole );
+            cfg.setValue( "PSKAlgorithm", v.isValid() ? v.toString(): QLatin1String("TKIP" ) );
+            v = item->data( WPAEnterpriseRole );
+            cfg.setValue( "WPAEnterprise", v.isValid() ? v.toString() : QLatin1String("TLS") );
         }
         cfg.endArray();
     }
@@ -1122,11 +1202,7 @@ void WSearchPage::attachToInterface( const QString& ifaceName )
         qLog(Network) << "Using network scanner on interface" << ifaceName;
         scanEngine = new WirelessScan( ifaceName, this );
         connect( scanEngine, SIGNAL(scanningFinished()), this, SLOT(updateConnectivity()) );
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         connect( scanAction, SIGNAL(triggered()), scanEngine, SLOT(startScanning()) );
-#else
-        connect( refreshPB, SIGNAL(clicked(bool)), scanEngine, SLOT(startScanning()) );
-#endif
 
         //do we support network scanning?
         struct iw_range range;
@@ -1134,20 +1210,10 @@ void WSearchPage::attachToInterface( const QString& ifaceName )
         scanEngine->rangeInfo( &range, &weVersion);
         qLog(Network) << "Wireless extension version" << weVersion << "detected";
         if ( weVersion >= 14 ) { //WE v14 introduced SIOCSIWSCAN and friends
-#ifdef QTOPIA_KEYPAD_NAVIGATION
             scanAction->setVisible( true );
-#else
-            connectPB->setEnabled( true );
-            refreshPB->setEnabled( true );
-#endif
             QTimer::singleShot( 1, scanEngine, SLOT(startScanning()) );
         } else {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
             scanAction->setVisible( false );
-#else
-            connectPB->setEnabled( false );
-            refreshPB->setEnabled( false );
-#endif
         }
     }
 }
@@ -1155,16 +1221,12 @@ void WSearchPage::attachToInterface( const QString& ifaceName )
 /*!
   \internal
 
-  Update actions and/or pushbuttons.
+  Update actions.
   */
 void WSearchPage::updateActions(QListWidgetItem* cur, QListWidgetItem* /*prev*/)
 {
-    if ( isShiftMode )
-        return;
     //update all actions/buttons
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     deleteAction->setVisible( cur );
-#endif
 
     if ( !cur || !scanEngine)
         return;
@@ -1173,11 +1235,7 @@ void WSearchPage::updateActions(QListWidgetItem* cur, QListWidgetItem* /*prev*/)
 
     QString curAP = scanEngine->currentAccessPoint();
     bool connectEnabled = isOnline && !(curAP == cur->data( MacAddressRole ).toString()) ;
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     connectAction->setVisible( connectEnabled );
-#else
-    //TODO
-#endif
 }
 
 /*!
@@ -1304,7 +1362,7 @@ void WSearchPage::updateKnownNetworkList( const WirelessNetwork& record, QListWi
         item->setIcon( QIcon(qualityToImage( record.data(WirelessNetwork::Signal).toString(), securedNet )) );
 
     bool ok;
-    int rate = record.data(WirelessNetwork::BitRate).toString().toInt( &ok );
+    int rate = record.data(WirelessNetwork::BitRate).toInt( &ok );
     if ( ok ) {
         item->setData( BitRateRole, QString::number(rate/1e6) );
     }
@@ -1321,9 +1379,12 @@ void WSearchPage::updateKnownNetworkList( const WirelessNetwork& record, QListWi
         item->setData( ModeRole, "Managed" );
 
     item->setData( OnlineStateRole, true );
-    item->setText( item->data(ESSIDRole).toString() + " (" +
-            item->data(BitRateRole).toString() + " " +
-            tr("Mb/s" , "Megabit per seconds")+")" );
+    if ( rate > 0 )
+        item->setText( item->data(ESSIDRole).toString() + " (" +
+                item->data(BitRateRole).toString() + " " +
+                tr("Mb/s" , "Megabit per seconds")+")" );
+    else
+        item->setText( item->data(ESSIDRole).toString() );
     knownNetworks->setSelectionMode( QAbstractItemView::SingleSelection );
 }
 
@@ -1442,49 +1503,66 @@ void WSearchPage::updateConnectivity()
 
 void WSearchPage::changePriority( QListWidgetItem* item )
 {
-    if ( !item  || knownNetworks->count()<=1 )
+    if ( !item )
         return;
-
-    static QListWidgetItem* marker = 0;
-    if ( !isShiftMode ) {
-        marker = item;
-        descr->setText( tr("Moving %1").arg(marker->text()) );
-    } else if ( marker ) {
-        int oldRow = knownNetworks->row( marker );
-        int newRow = knownNetworks->row( item );
-        if ( oldRow > newRow ) {
-            knownNetworks->takeItem( oldRow );
-            knownNetworks->insertItem( newRow, marker );
-        } else if ( oldRow < newRow ) {
-            knownNetworks->takeItem( oldRow );
-            knownNetworks->insertItem( newRow+1, marker );
-        }
-        knownNetworks->setCurrentItem( marker );
+    if ( !currentSelection ) {
+        descr->setText( tr("Moving %1", "%1=essid").arg(item->text()) );
+        QFont f = item->font();
+        f.setBold( true );
+        item->setFont( f );
+        currentSelection = item;
+        QSoftMenuBar::setLabel( knownNetworks, Qt::Key_Back, QSoftMenuBar::NoLabel );
+        QSoftMenuBar::setLabel( knownNetworks, Qt::Key_Back, QSoftMenuBar::NoLabel );
+    }else if ( item == currentSelection ) {
         descr->setText( tr("Network priority:") );
+        QFont f = item->font();
+        f.setBold( false );
+        currentSelection->setFont( f );
+        currentSelection = 0;
+        QSoftMenuBar::setLabel( knownNetworks, Qt::Key_Back, QSoftMenuBar::Back );
     }
 
-    if ( marker ) {
-        QFont f = marker->font();
-        f.setBold( !isShiftMode );
-        marker->setFont( f );
+    connectAction->setVisible( !currentSelection );
+    scanAction->setVisible( !currentSelection );
+    environmentAction->setVisible( !currentSelection );
+    deleteAction->setVisible( !currentSelection );
+}
+    
+bool WSearchPage::eventFilter( QObject* watched, QEvent* event )
+{
+    if ( watched == knownNetworks && 
+            0 != currentSelection )
+    {
+        if ( event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease ) {
+            QKeyEvent *ke = static_cast<QKeyEvent*>(event);
+
+            if ( event->type() == QEvent::KeyRelease &&  //ignore releases if key is one we watch out for
+                    (ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down || ke->key()==Qt::Key_Back) )
+                return true;
+
+            int row = knownNetworks->currentRow();
+            if ( ke->key() == Qt::Key_Up ) {
+                if ( row > 0 ) //top row cannot move further up
+                {
+                    knownNetworks->takeItem( row );
+                    knownNetworks->insertItem( row-1, currentSelection );
+                    knownNetworks->setCurrentRow( row-1 );
+                }
+                return true;
+            } else if ( ke->key() == Qt::Key_Down ) {
+                if ( row < knownNetworks->count()-1 ) { //bottom row cannot move further down
+                    knownNetworks->takeItem( row );
+                    knownNetworks->insertItem( row+1, currentSelection );
+                    knownNetworks->setCurrentRow( row+1 );
+                    
+                }
+                return true;
+            } else if ( ke->key() == Qt::Key_Back ) {
+                return true; //ignore back for as long as we have a selection
+            }
+        }
     }
-
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    connectAction->setVisible( isShiftMode );
-    scanAction->setVisible( isShiftMode );
-    environmentAction->setVisible( isShiftMode );
-    deleteAction->setVisible( isShiftMode );
-#else
-    connectPB->setEnabled( isShiftMode );
-    refreshPB->setEnabled( isShiftMode );
-#endif
-
-
-    if ( isShiftMode ) {
-        marker = 0;
-        updateActions( knownNetworks->currentItem(), 0 );
-    }
-    isShiftMode = !isShiftMode;
+    return false;
 }
 /**************************************************************************************/
 
@@ -1515,7 +1593,6 @@ void ChooseNetworkUI::init()
     list->setAlternatingRowColors( true );
     vbox->addWidget( list );
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QMenu* menu = QSoftMenuBar::menuFor( this );
 
     filterHidden = new QAction( tr("Show hidden networks"), this );
@@ -1523,12 +1600,6 @@ void ChooseNetworkUI::init()
     filterHidden->setChecked( false );
     menu->addAction( filterHidden );
     connect( filterHidden, SIGNAL(toggled(bool)), this, SLOT(updateView()) );
-#else
-    filterHidden = new QCheckBox( tr("Show hidden networks"), this );
-    filterHidden->setCheckState( Qt::Unchecked );
-    vBox->addWidget( filterHidden );
-    connect( filterHidden, SIGNAL(toggled(bool)), this, SLOT(updateView()) );
-#endif
 
     connect( list, SIGNAL(itemActivated(QListWidgetItem*)),
             this, SLOT(wlanSelected()) );
@@ -1560,11 +1631,7 @@ void ChooseNetworkUI::updateView()
 {
     list->clear();
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     const bool showHidden = filterHidden->isChecked();
-#else
-    const bool showHidden = (filterHidden->checkState() == Qt::Checked);
-#endif
 
     QListWidgetItem* item;
     if ( !nets.count() )
@@ -1607,8 +1674,8 @@ void ChooseNetworkUI::updateView()
             item->setIcon( QIcon(qualityToImage( net.data(WirelessNetwork::Signal).toString(), securedNet )) );
 
         bool ok;
-        int rate = net.data(WirelessNetwork::BitRate).toString().toInt( &ok );
-        if ( ok ) {
+        int rate = net.data(WirelessNetwork::BitRate).toInt( &ok );
+        if ( ok && rate>0 ) {
             essid += QLatin1String("    ");
             essid += QString::number(rate/1e6) + QLatin1String(" ") + tr("Mb/s" , "Megabit per seconds");
         }

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -81,6 +81,7 @@ public:
     QList<QString> labels(const QList<QString> &) const;
     QIcon icon(const QString &) const;
     QString iconFile(const QString &) const;
+    QString ringTone(const QString &) const;
 
     static QString unfiledLabel();
     static QString allLabel();
@@ -99,6 +100,7 @@ public:
     bool remove( const QString &id );
     bool setLabel( const QString &id, const QString &trLabel );
     bool setIcon( const QString &id, const QString &icon );
+    bool setRingTone( const QString &id, const QString &fileName );
 
     bool contains(const QString &id) const;
     bool containsLabel(const QString &trLabel, bool forceGlobal=false) const;
@@ -114,13 +116,6 @@ private slots:
     void reloadCategories();
 
 private:
-    static void diff(
-            const QMap<QString,QString> &orig,
-            const QMap<QString,QString> &current,
-            QList<QString> &added,
-            QList<QString> &removed,
-            QList<QString> &updated);
-
     QCategoryManagerData *d;
 };
 

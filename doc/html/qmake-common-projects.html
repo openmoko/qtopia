@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: qmake Common Projects</title>
+  <title>Qt 4.3: qmake Common Projects</title>
   <link rel="prev" href="qmake-tutorial.html" />
   <link rel="contents" href="qmake-manual.html" />
   <link rel="next" href="qmake-using.html" />
@@ -19,7 +19,8 @@
 [<a href="qmake-manual.html">Contents</a>]
 [Next: <a href="qmake-using.html">Using qmake</a>]
 </p>
-<h1 align="center">qmake Common Projects<br /><small></small></h1>
+<h1 align="center">qmake Common Projects<br /><span class="subtitle"></span>
+</h1>
 <p>This chapter describes how to set up <tt>qmake</tt> project files for three common project types that are based on Qt. Although all kinds of projects use many of the same variables, each of them use project-specific variables to customize output files.</p>
 <p>Platform-specific variables are not described here; we refer the reader to the <a href="deployment.html">Deploying Qt Applications</a> document for information on issues such as <a href="deployment-mac.html#architecture-dependencies">building universal binaries for Mac OS X</a> and <a href="deployment-windows.html#visual-studio-2005">handling Visual Studio manifest files</a>.</p>
 <ul><li><a href="#building-an-application">Building an Application</a></li>
@@ -71,7 +72,7 @@
  SOURCES += main.cpp
  DEFINES += QT_DLL
  CONFIG  += qt warn_on release</pre>
-<p>For items that are single valued, e.g. the template or the destination directory, we use &quot;=&quot;; but for multi-valued items we use &quot;+=&quot; to <i>add</i> to the existing items of that type. Using &quot;=&quot; replaces the item's value with the new value, for example if we wrote <tt>DEFINES=QT_DLL</tt>, all other definitions would be deleted.</p>
+<p>For items that are single valued, e.g&#x2e; the template or the destination directory, we use &quot;=&quot;; but for multi-valued items we use &quot;+=&quot; to <i>add</i> to the existing items of that type. Using &quot;=&quot; replaces the item's value with the new value, for example if we wrote <tt>DEFINES=QT_DLL</tt>, all other definitions would be deleted.</p>
 <a name="library"></a><a name="building-a-library"></a>
 <h2>Building a Library</h2>
 <a name="the-lib-template"></a>
@@ -85,19 +86,19 @@
 <tr valign="top" class="odd"><td>plugin</td><td>The library is a plugin; this also enables the dll option.</td></tr>
 </table></p>
 <ul>
-<li>VERSION - The version number of the target library, for example, 2.3.1.</li>
+<li>VERSION - The version number of the target library, for example, 2.3&#x2e;1&#x2e;</li>
 </ul>
 <a name="plugin"></a><a name="building-a-plugin"></a>
 <h2>Building a Plugin</h2>
 <p>Plugins are built using the <tt>lib</tt> template, as described in the previous section. This tells <tt>qmake</tt> to generate a Makefile for the project that will build a plugin in a suitable form for each platform, usually in the form of a library. As with ordinary libraries, the <tt>VERSION</tt> variable is used to specify information about the plugin.</p>
 <ul>
-<li>VERSION - The version number of the target library, for example, 2.3.1.</li>
+<li>VERSION - The version number of the target library, for example, 2.3&#x2e;1&#x2e;</li>
 </ul>
 <a name="building-a-qt-designer-plugin"></a>
 <h3>Building a Qt Designer Plugin</h3>
 <p><i>Qt Designer</i> plugins are built using a specific set of configuration settings that depend on the way Qt was configured for your system. For convenience, these settings can be enabled by adding <tt>designer</tt> to the project's <tt>CONFIG</tt> variable. For example:</p>
 <pre> CONFIG      += designer plugin debug_and_release</pre>
-<p>See the <a href="examples.html#qt-designer-examples">Qt Designer examples</a> for more examples of plugin-based projects.</p>
+<p>See the <a href="examples.html#qt-designer">Qt Designer examples</a> for more examples of plugin-based projects.</p>
 <a name="building-and-installing-in-debug-and-release-modes"></a>
 <h2>Building and Installing in Debug and Release Modes</h2>
 <p>Sometimes, it is necessary to build a project in both debug and release modes. Although the <tt>CONFIG</tt> variable can hold both <tt>debug</tt> and <tt>release</tt> options, the <tt>debug</tt> option overrides the <tt>release</tt> option.</p>
@@ -137,6 +138,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

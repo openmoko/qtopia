@@ -14,7 +14,7 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">ThemedView Class Reference</h1>
 <p>The ThemedView widget constructs, manages and displays themed views in Qtopia. <a href="#details">More...</a></p>
 <pre>    #include &lt;ThemedView&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
-<p>Inherited by <a href="callscreen.html">CallScreen</a>, <a href="contextlabel.html">ContextLabel</a>, <a href="homescreen.html">HomeScreen</a>, and <a href="phoneheader.html">PhoneHeader</a>.</p>
+<p>Inherited by <a href="callscreen.html">CallScreen</a>, <a href="contextlabel.html">ContextLabel</a>, and <a href="phoneheader.html">PhoneHeader</a>.</p>
 <ul>
 <li><a href="themedview-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -47,7 +47,7 @@
 <li><div class="fn"/>QString <b><a href="themedview.html#themeName">themeName</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -57,6 +57,7 @@
 <li><div class="fn"/>void <b><a href="themedview.html#itemClicked">itemClicked</a></b> ( ThemeItem * <i>item</i> )</li>
 <li><div class="fn"/>void <b><a href="themedview.html#itemPressed">itemPressed</a></b> ( ThemeItem * <i>item</i> )</li>
 <li><div class="fn"/>void <b><a href="themedview.html#itemReleased">itemReleased</a></b> ( ThemeItem * <i>item</i> )</li>
+<li><div class="fn"/>void <b><a href="themedview.html#loaded">loaded</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="themedview.html#visibilityChanged">visibilityChanged</a></b> ( ThemeItem * <i>item</i>, bool <i>visible</i> )</li>
 </ul>
 <ul>
@@ -77,7 +78,7 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>20 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
@@ -161,6 +162,8 @@
 <p>Lays out <i>item</i> an of its children.</p>
 <h3 class="fn"><a name="loadSource"></a>bool ThemedView::loadSource ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i> = QString() )</h3>
 <p>Loads the themed view XML specified by <i>fileName</i>. If <i>fileName</i> is empty (the default) but <a href="themedview.html#setSourceFile">ThemedView::setSourceFile</a>() has been called, the <i>fileName</i> value from that call will be used. Returns true if a source was successfully loaded, otherwise returns false.</p>
+<h3 class="fn"><a name="loaded"></a>void ThemedView::loaded ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Emitted when the theme is successfully loaded.</p>
 <h3 class="fn"><a name="newWidget"></a><a href="qwidget.html">QWidget</a> * ThemedView::newWidget ( <a href="themewidgetitem.html">ThemeWidgetItem</a> * <i>item</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Called by the <a href="themewidgetitem.html">ThemeWidgetItem</a> <i>item</i> when it wishes to construct the widget corresponding to the specified <i>name</i>. <i>name</i> is the name attribute from the themed view XML. This function must be overriden by subclasses for themed views that have a <a href="themewidgetitem.html">ThemeWidgetItem</a> in them. The default implementation always returns 0.</p>
 <p>See also <a href="themewidgetitem.html">ThemeWidgetItem</a>.</p>
@@ -194,6 +197,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

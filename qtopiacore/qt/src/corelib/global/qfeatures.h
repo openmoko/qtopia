@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -101,6 +116,12 @@
 
 // QNetworkProxy
 //#define QT_NO_NETWORKPROXY
+
+// Qt::WA_PaintOnScreen
+//#define QT_NO_PAINTONSCREEN
+
+// Painting Debug Utilities
+//#define QT_NO_PAINT_DEBUG
 
 // QPicture
 //#define QT_NO_PICTURE
@@ -231,6 +252,11 @@
 // QWheelEvent
 //#define QT_NO_WHEELEVENT
 
+// Accessibility
+#if !defined(QT_NO_ACCESSIBILITY) && (defined(QT_NO_PROPERTIES))
+#define QT_NO_ACCESSIBILITY
+#endif
+
 // QButtonGroup
 #if !defined(QT_NO_BUTTONGROUP) && (defined(QT_NO_GROUPBOX))
 #define QT_NO_BUTTONGROUP
@@ -311,6 +337,11 @@
 #define QT_NO_QWS_MANAGER
 #endif
 
+// Qt Prerendered Font Format 2
+#if !defined(QT_NO_QWS_QPF2) && (defined(QT_NO_QWS_QPF))
+#define QT_NO_QWS_QPF2
+#endif
+
 // QScrollBar
 #if !defined(QT_NO_SCROLLBAR) && (defined(QT_NO_SLIDER))
 #define QT_NO_SCROLLBAR
@@ -354,6 +385,11 @@
 // QUndoStack
 #if !defined(QT_NO_UNDOSTACK) && (defined(QT_NO_UNDOCOMMAND))
 #define QT_NO_UNDOSTACK
+#endif
+
+// QWizard
+#if !defined(QT_NO_WIZARD) && (defined(QT_NO_PROPERTIES))
+#define QT_NO_WIZARD
 #endif
 
 // Context menu
@@ -406,6 +442,11 @@
 #define QT_NO_GRAPHICSVIEW
 #endif
 
+// QMdiArea
+#if !defined(QT_NO_MDIAREA) && (defined(QT_NO_SCROLLAREA))
+#define QT_NO_MDIAREA
+#endif
+
 // QSpinBox
 #if !defined(QT_NO_SPINBOX) && (defined(QT_NO_SPINWIDGET) || defined(QT_NO_LINEEDIT) || defined(QT_NO_VALIDATOR))
 #define QT_NO_SPINBOX
@@ -421,24 +462,19 @@
 #define QT_NO_STYLE_PLASTIQUE
 #endif
 
+// QWindowsVistaStyle
+#if !defined(QT_NO_STYLE_WINDOWSVISTA) && (defined(QT_NO_STYLE_WINDOWS) || defined(QT_NO_STYLE_WINDOWSXP))
+#define QT_NO_STYLE_WINDOWSVISTA
+#endif
+
 // QTabBar
 #if !defined(QT_NO_TABBAR) && (defined(QT_NO_TOOLBUTTON))
 #define QT_NO_TABBAR
 #endif
 
-// QTextEdit
-#if !defined(QT_NO_TEXTEDIT) && (defined(QT_NO_SCROLLAREA))
-#define QT_NO_TEXTEDIT
-#endif
-
 // QUndoGroup
 #if !defined(QT_NO_UNDOGROUP) && (defined(QT_NO_UNDOCOMMAND) || defined(QT_NO_UNDOSTACK))
 #define QT_NO_UNDOGROUP
-#endif
-
-// QErrorMessage
-#if !defined(QT_NO_ERRORMESSAGE) && (defined(QT_NO_TEXTEDIT))
-#define QT_NO_ERRORMESSAGE
 #endif
 
 // The Model/View Framework
@@ -451,9 +487,9 @@
 #define QT_NO_QWS_SOUNDSERVER
 #endif
 
-// QSyntaxHighlighter
-#if !defined(QT_NO_SYNTAXHIGHLIGHTER) && (defined(QT_NO_TEXTEDIT))
-#define QT_NO_SYNTAXHIGHLIGHTER
+// QtScript
+#if !defined(QT_NO_SCRIPT) && (defined(QT_NO_TEXTDATE) || defined(QT_NO_DATESTRING) || defined(QT_NO_PROPERTIES))
+#define QT_NO_SCRIPT
 #endif
 
 // Q3TabDialog
@@ -461,14 +497,14 @@
 #define QT_NO_TABDIALOG
 #endif
 
-// QTextBrowser
-#if !defined(QT_NO_TEXTBROWSER) && (defined(QT_NO_TEXTEDIT))
-#define QT_NO_TEXTBROWSER
-#endif
-
 // QTextCodecPlugin
 #if !defined(QT_NO_TEXTCODECPLUGIN) && (defined(QT_NO_TEXTCODEC) || defined(QT_NO_LIBRARY))
 #define QT_NO_TEXTCODECPLUGIN
+#endif
+
+// QTextEdit
+#if !defined(QT_NO_TEXTEDIT) && (defined(QT_NO_SCROLLAREA) || defined(QT_NO_PROPERTIES))
+#define QT_NO_TEXTEDIT
 #endif
 
 // QWhatsThis
@@ -481,14 +517,14 @@
 #define QT_NO_CUPS
 #endif
 
-// QDataWidgetMapper
-#if !defined(QT_NO_DATAWIDGETMAPPER) && (defined(QT_NO_ITEMVIEWS))
-#define QT_NO_DATAWIDGETMAPPER
-#endif
-
 // QDirModel
 #if !defined(QT_NO_DIRMODEL) && (defined(QT_NO_ITEMVIEWS))
 #define QT_NO_DIRMODEL
+#endif
+
+// QErrorMessage
+#if !defined(QT_NO_ERRORMESSAGE) && (defined(QT_NO_TEXTEDIT))
+#define QT_NO_ERRORMESSAGE
 #endif
 
 // QListView
@@ -516,6 +552,11 @@
 #define QT_NO_STRINGLISTMODEL
 #endif
 
+// QSyntaxHighlighter
+#if !defined(QT_NO_SYNTAXHIGHLIGHTER) && (defined(QT_NO_TEXTEDIT))
+#define QT_NO_SYNTAXHIGHLIGHTER
+#endif
+
 // QTableView
 #if !defined(QT_NO_TABLEVIEW) && (defined(QT_NO_ITEMVIEWS))
 #define QT_NO_TABLEVIEW
@@ -524,6 +565,11 @@
 // QTabWidget
 #if !defined(QT_NO_TABWIDGET) && (defined(QT_NO_TABBAR) || defined(QT_NO_STACKEDWIDGET))
 #define QT_NO_TABWIDGET
+#endif
+
+// QTextBrowser
+#if !defined(QT_NO_TEXTBROWSER) && (defined(QT_NO_TEXTEDIT))
+#define QT_NO_TEXTBROWSER
 #endif
 
 // QTreeView
@@ -536,9 +582,19 @@
 #define QT_NO_COLORDIALOG
 #endif
 
+// QColumnView
+#if !defined(QT_NO_COLUMNVIEW) && (defined(QT_NO_LISTVIEW))
+#define QT_NO_COLUMNVIEW
+#endif
+
 // QCompleter
 #if !defined(QT_NO_COMPLETER) && (defined(QT_NO_PROXYMODEL))
 #define QT_NO_COMPLETER
+#endif
+
+// QDataWidgetMapper
+#if !defined(QT_NO_DATAWIDGETMAPPER) && (defined(QT_NO_ITEMVIEWS) || defined(QT_NO_PROPERTIES))
+#define QT_NO_DATAWIDGETMAPPER
 #endif
 
 // QListWidget
@@ -571,14 +627,14 @@
 #define QT_NO_TOOLBAR
 #endif
 
+// QToolBox
+#if !defined(QT_NO_TOOLBOX) && (defined(QT_NO_ICON) || defined(QT_NO_TOOLBUTTON) || defined(QT_NO_SCROLLAREA))
+#define QT_NO_TOOLBOX
+#endif
+
 // QDockwidget
 #if !defined(QT_NO_DOCKWIDGET) && (defined(QT_NO_RUBBERBAND) || defined(QT_NO_MAINWINDOW))
 #define QT_NO_DOCKWIDGET
-#endif
-
-// QToolBox
-#if !defined(QT_NO_TOOLBOX) && (defined(QT_NO_ICON) || defined(QT_NO_TOOLTIP) || defined(QT_NO_TOOLBUTTON) || defined(QT_NO_SCROLLAREA))
-#define QT_NO_TOOLBOX
 #endif
 
 // QUndoView
@@ -627,7 +683,7 @@
 #endif
 
 // QFileDialog
-#if !defined(QT_NO_FILEDIALOG) && (defined(QT_NO_DIRMODEL) || defined(QT_NO_TREEVIEW) || defined(QT_NO_COMBOBOX) || defined(QT_NO_TOOLBUTTON) || defined(QT_NO_BUTTONGROUP))
+#if !defined(QT_NO_FILEDIALOG) && (defined(QT_NO_DIRMODEL) || defined(QT_NO_TREEVIEW) || defined(QT_NO_COMBOBOX) || defined(QT_NO_TOOLBUTTON) || defined(QT_NO_BUTTONGROUP) || defined(QT_NO_TOOLTIP) || defined(QT_NO_SPLITTER) || defined(QT_NO_STACKEDWIDGET) || defined(QT_NO_FILESYSTEMWATCHER))
 #define QT_NO_FILEDIALOG
 #endif
 

@@ -8,7 +8,7 @@ DESTDIR = ../../../../lib
 DLLDESTDIR = ../../../../bin
 
 isEmpty(QT_MAJOR_VERSION) {
-   VERSION=4.2.0
+   VERSION=4.3.0
 } else {
    VERSION=$${QT_MAJOR_VERSION}.$${QT_MINOR_VERSION}.$${QT_PATCH_VERSION}
 }
@@ -35,6 +35,7 @@ HEADERS_PRI = $$QT_BUILD_TREE/include/QtDesigner/headers.pri
 include($$HEADERS_PRI)|clear(HEADERS_PRI)
 
 #mac frameworks
+mac:CONFIG += explicitlib
 mac:!static:contains(QT_CONFIG, qt_framework) {
    QMAKE_FRAMEWORK_BUNDLE_NAME = $$TARGET
    CONFIG += lib_bundle qt_no_framework_direct_includes qt_framework

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,11 +19,12 @@
 **
 ****************************************************************************/
 
-#if defined(QTOPIA_PHONE) && !defined(SPEEDDIAL_H)
+#ifndef SPEEDDIAL_H
 #define SPEEDDIAL_H
 
 #include <qtopiaserviceselector.h>
 #include <QListView>
+#include <QList>
 
 class QSpeedDial;
 class QSpeedDialListPrivate;
@@ -71,7 +72,7 @@ protected:
 private slots:
     void select(const QModelIndex& index);
     void click(const QModelIndex& index);
-    void selectionChanged();
+    void sendRowChanged();
 
 private:
     void init(const QString&);
@@ -90,6 +91,8 @@ public:
     static QString addWithDialog(const QString& label, const QString& icon,
         const QtopiaServiceRequest& action, QWidget* parent);
 
+    static QList<QString> assignedInputs();
+    static QList<QString> possibleInputs();
     static QtopiaServiceDescription* find(const QString& input);
     static void remove(const QString& input);
     static void set(const QString& input, const QtopiaServiceDescription&);

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,7 +22,7 @@
 #include "media.h"
 #include "qmediacontent.h"
 #include "qmediacontrol.h"
-#include "qmediacontentplayer.h"
+#include "qmediacontentplayer_p.h"
 
 
 // {{{ QMediaContentPlayerPrivate
@@ -53,7 +53,7 @@ public slots:
     {
         if (controlName == QMediaControl::name())
         {
-            m_mediaControl = new QMediaControl(m_mediaContent->handle(), 0);
+            m_mediaControl = new QMediaControl(m_mediaContent);
 
             connect(m_mediaControl, SIGNAL(playerStateChanged(QtopiaMedia::State)),
                     this, SLOT(playerStateChanged(QtopiaMedia::State)));

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,7 +22,7 @@
 #include "cellmodemmanager.h"
 #include "callhistory.h"
 #include "callscreen.h"
-#include "homescreen.h"
+#include "phonelauncher.h"
 #include "quickdial.h"
 #include "dialer.h"
 #include "messagebox.h"
@@ -30,6 +30,7 @@
 #include "dialerservice.h"
 #include "phoneserver.h"
 #include "qperformancelog.h"
+#include "simapp.h"
 
 #include <qtopialog.h>
 #include <qspeeddial.h>
@@ -37,7 +38,6 @@
 #include <qtopiaservices.h>
 #include <qsoftmenubar.h>
 #include <qtopiaipcenvelope.h>
-#include <qsimtoolkit.h>
 #include <qcellbroadcast.h>
 #include <qsiminfo.h>
 #include <qcallsettings.h>
@@ -54,12 +54,15 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QTranslatableSettings>
+#include <QContact>
+#include <QCallList>
+#include <QCallListItem>
+#include <QPowerStatus>
 #include "messagecontrol.h"
+#include "servercontactmodel.h"
 
 static bool profilesControlModem = true;
 static bool cellModemManagerInstance = false;
-
-#define SIM_MISSING_TIMEOUT 5000
 
 // declare CellModemManagerPrivate
 class CellModemManagerPrivate
@@ -71,8 +74,8 @@ public:
       m_pinManager(0), m_regState(QTelephony::RegistrationNone),
       m_status(0), m_autoRegisterTimer(0), m_profiles(0),
       m_profilesBlocked(false), m_callForwarding(0),
-      m_callForwardingEnabled(false), m_simToolkitAvailable(false), m_cbs(0),
-      m_rfFunc(0), m_simMissingTimer(0), m_emergencyPhoneBook(0) {}
+      m_callForwardingEnabled(false), m_cbs(0),
+      m_rfFunc(0), m_phoneBook(0) {}
 
     CellModemManager::State m_state;
     QNetworkRegistration *m_netReg;
@@ -89,11 +92,10 @@ public:
     bool m_profilesBlocked;
     QCallForwarding *m_callForwarding;
     bool m_callForwardingEnabled;
-    bool m_simToolkitAvailable;
     QCellBroadcast *m_cbs;
     QPhoneRfFunctionality *m_rfFunc;
-    QTimer *m_simMissingTimer;
-    QPhoneBook *m_emergencyPhoneBook;
+    QPhoneBook *m_phoneBook;
+    QString m_simIdentity;
 };
 
 /*!
@@ -135,8 +137,14 @@ public:
   \row \o \c {/Telephony/Status/CallDivert} \o True if voice calls will be unconditionally diverted, false otherwise.
   \row \o \c {/Telephony/Status/PlaneModeAvailable} \o True if the modem supports "plane mode".  Possible values are "Yes", "No" or "Unknown".  The "Unknown" value is set during modem initialization before Qtopia has determined whether the modem can support plane mode.
   \row \o \c {/Telephony/Status/ModemStatus} \o Set to the string value of the current State enumeration value.
-  \row \o \c {/Telephony/Status/SimToolkitAvailable} \o Set to true if SIM toolkit support is available, otherwise false.
+  \row \o \c {/Telephony/Status/SimToolkit/Available} \o Set to true if SIM toolkit support is available, otherwise false.
+  \row \o \c {/Telephony/Status/SimToolkit/IdleModeText} \o Set to the value of the idle mode text string from the SIM toolkit application.
+  \row \o \c {/Telephony/Status/SimToolkit/IdleModeIcon} \o Set to the QIcon to display in idle mode.
+  \row \o \c {/Telephony/Status/SimToolkit/IdleModeIconSelfExplanatory} \o Set to true if the idle mode icon is self-explanatory without accompanying text.
+  \row \o \c {/Telephony/Status/SimToolkit/MenuTitle} \o Set to the title of the SIM toolkit application's main menu.
   \endtable
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
@@ -196,13 +204,19 @@ public:
   instance of CellModemManager may be constructed.
  */
 CellModemManager::CellModemManager(QObject *parent)
-: QObject(parent), d(new CellModemManagerPrivate)
+: QAbstractCallPolicyManager(parent), d(new CellModemManagerPrivate)
 {
     Q_ASSERT(!cellModemManagerInstance);
     cellModemManagerInstance = true;
 
     d->m_status = new QValueSpaceObject("/Telephony/Status", this);
     d->m_status->setAttribute("ModemStatus", "Initializing");
+
+    QValueSpaceItem *simToolkitAvailable;
+    simToolkitAvailable = new QValueSpaceItem
+            ("/Telephony/Status/SimToolkit/Available", this);
+    connect(simToolkitAvailable, SIGNAL(contentsChanged()),
+            this, SLOT(simToolkitAvailableChange()));
 
     // Check for modem
     QServiceChecker checker("modem");
@@ -218,6 +232,10 @@ CellModemManager::CellModemManager(QObject *parent)
                      this, SLOT(registrationStateChanged()));
     QObject::connect(d->m_netReg, SIGNAL(currentOperatorChanged()),
                      this, SLOT(currentOperatorChanged()));
+
+    // Rename signal for QAbstractCallPolicyManager.
+    QObject::connect(this, SIGNAL(registrationStateChanged(QTelephony::RegistrationState)),
+                     this, SIGNAL(registrationChanged(QTelephony::RegistrationState)));
 
     d->m_pinManager = new QPinManager("modem", this);
     QObject::connect(d->m_pinManager,
@@ -242,11 +260,10 @@ CellModemManager::CellModemManager(QObject *parent)
     QSimInfo *simInfo = new QSimInfo( "modem", this );
     connect( simInfo, SIGNAL(removed()), this, SLOT(simRemoved()) );
     connect( simInfo, SIGNAL(inserted()), this, SLOT(simInserted()) );
-    QSimToolkit *simToolkit = new QSimToolkit( QString(), this );
-    connect(simToolkit,
-            SIGNAL(command(const QSimCommand&)),
-            this,
-            SLOT(simCommand(const QSimCommand&)));
+
+    // Create the "SIM Applications" instance, to handle commands that
+    // may occur outside of a regular session.  e.g. SetupIdleModeText.
+    SimApp::instance();
 
     if(::profilesControlModem) {
         d->m_profiles = new QPhoneProfileManager(this);
@@ -520,14 +537,19 @@ public:
         append("112");      // GSM 02.30, Europe
         append("911");      // GSM 02.30, US and Canada
         append("08");       // GSM 02.30, Mexico
-        append("000");      // Australia
+        append("000");      // GSM 22.101, Australia
+        append("999");      // GSM 22.101, United Kingdom
+        append("110");      // GSM 22.101
+        append("118");      // GSM 22.101
+        append("119");      // GSM 22.101
     }
 };
 Q_GLOBAL_STATIC(EmergencyNumberList, emergencyNumbers);
 
 /*!
   Return the list of emergency numbers.  This list is currently \c {112},
-  \c {911}, \c {08}, and \c {000} but may change in the future.
+  \c {911}, \c {08}, \c {000}, \c {999}, \c {110}, \c {118}, and \c {119},
+  but may change in the future.
  */
 QStringList CellModemManager::emergencyNumbers()
 {
@@ -590,39 +612,46 @@ void CellModemManager::doInitialize()
 {
     Q_ASSERT(state() == Initializing);
 
+    QSimInfo *simInfo = new QSimInfo( QString(), this );
+    connect( simInfo, SIGNAL(notInserted()), this, SLOT(simNotInserted()) );
+
     if(d->m_pinManager->available()) {
         d->m_pinManager->querySimPinStatus();
-        if(!d->m_simMissingTimer) {
-            d->m_simMissingTimer = new QTimer(this);
-            QObject::connect(d->m_simMissingTimer, SIGNAL(timeout()),
-                             this, SLOT(simMissingTimeout()));
-        }
-        d->m_simMissingTimer->start(SIM_MISSING_TIMEOUT);
     } else {
         // Pin support is not available
         doInitialize2();
     }
 }
 
-void CellModemManager::simMissingTimeout()
+void CellModemManager::simNotInserted()
 {
-    Q_ASSERT(Initializing == state());
+    Q_ASSERT(Initializing == state() || SIMMissing == state());
 
-    d->m_simMissingTimer->stop();
     doStateChanged(SIMMissing);
 }
 
 void CellModemManager::fetchEmergencyNumbers()
 {
-    if ( !d->m_emergencyPhoneBook ) {
-        d->m_emergencyPhoneBook = new QPhoneBook( "modem", this ); // No tr
+    if ( d->m_phoneBook ) {
         connect
-            ( d->m_emergencyPhoneBook,
+            ( d->m_phoneBook,
               SIGNAL(entries(QString,QList<QPhoneBookEntry>)),
               this,
               SLOT(emergencyNumbersFetched(QString,QList<QPhoneBookEntry>)) );
     }
-    d->m_emergencyPhoneBook->getEntries( "EN" );    // No tr
+    d->m_phoneBook->getEntries( "EN" );    // No tr
+}
+
+void CellModemManager::fetchCallHistory()
+{
+    if ( d->m_phoneBook ) {
+        connect( d->m_phoneBook, SIGNAL(entries(QString,QList<QPhoneBookEntry>)),
+            this, SLOT(callHistoryEntriesFetched(QString,QList<QPhoneBookEntry>)) );
+        d->m_phoneBook->getEntries( "DC" ); // Dialed calls
+        d->m_phoneBook->getEntries( "LD" ); // Last dialed numbers
+        d->m_phoneBook->getEntries( "MC" ); // Missed calls
+        d->m_phoneBook->getEntries( "RC" ); // Received calls
+    }
 }
 
 void CellModemManager::emergencyNumbersFetched
@@ -639,7 +668,40 @@ void CellModemManager::emergencyNumbersFetched
     }
 }
 
-void CellModemManager::pinStatus(const QString& type, 
+void CellModemManager::callHistoryEntriesFetched
+    ( const QString& store, const QList<QPhoneBookEntry>& list )
+{
+    QCallListItem::CallType type;
+    if ( store == "DC" || store == "LD" )
+        type = QCallListItem::Dialed;
+    else if ( store == "MC" )
+        type = QCallListItem::Missed;
+    else if ( store == "RC" )
+        type = QCallListItem::Received;
+    else
+        return;
+
+    QCallList &callList = DialerControl::instance()->callList();
+
+    QStringList numberList;
+    foreach ( QPhoneBookEntry entry, list ) {
+        if ( !numberList.contains( entry.number() ) )
+            numberList.append( entry.number() );
+    }
+
+    foreach ( QString number, numberList ) {
+        QContact contact = ServerContactModel::instance()->matchPhoneNumber( number );
+        QCallListItem item( type, number );
+        callList.record( item );
+    }
+
+    if ( store == "RC" ) { // no need to read phone books anymore.
+        disconnect( d->m_phoneBook, SIGNAL(entries(QString,QList<QPhoneBookEntry>)),
+            this, SLOT(callHistoryEntriesFetched(QString,QList<QPhoneBookEntry>)) );
+    }
+}
+
+void CellModemManager::pinStatus(const QString& type,
                                    QPinManager::Status status,
                                    const QPinOptions&)
 {
@@ -649,17 +711,20 @@ void CellModemManager::pinStatus(const QString& type,
         return;
 
     if(type == "SIM PIN" || type == "SIM PUK" || type == "READY") {
-        d->m_simMissingTimer->stop();
         if(SIMMissing == state())
             doStateChanged(Initializing);
     }
 
     // We only expect SIM PIN in Initializing and Verifying states.
-    Q_ASSERT(type != "SIM PIN" || state() == Initializing ||
-             state() == VerifyingSIMPin);
+    // Can also see it in the Ready state when the user changes the pin
+    // after entering a PUK.
+    Q_ASSERT(type != "SIM PIN" || state() == Initializing || state() == Ready ||
+             state() == VerifyingSIMPin || state() == VerifyingSIMPuk ||
+             state() == Initializing2);
     // We only expect SIM PUK during Initializing, VerifyingSIMPin,
-    // or VerifyingSIMPuk.
-    Q_ASSERT(type != "SIM PUK" || state() == Initializing ||
+    // or VerifyingSIMPuk.  Note: it can also happen when the user
+    // enters **05*PUK*PIN*PIN during the Ready state.
+    Q_ASSERT(type != "SIM PUK" || state() == Initializing || state() == Ready ||
              state() == VerifyingSIMPin || state() == VerifyingSIMPuk);
     // In states Waiting and Verifying we only ever expect to
     // receive the SIM PIN or SIM_PUK pins
@@ -722,30 +787,44 @@ void CellModemManager::setNotReadyStatus()
     updateStatus();
 }
 
-void CellModemManager::simCommand(const QSimCommand &cmd)
+void CellModemManager::simInserted()
 {
-    if(cmd.type() == QSimCommand::SetupMainMenu) {
-        if(!d->m_simToolkitAvailable) {
-            d->m_simToolkitAvailable = true;
-            emit simToolkitAvailableChanged(true);
-            updateStatus();
-        }
+    if ( !d->m_phoneBook ) {
+        d->m_phoneBook = new QPhoneBook( "modem", this ); // No tr
+        connect( d->m_phoneBook, SIGNAL(ready()),
+                this, SLOT(readPhoneBooks()) );
     }
 }
 
-void CellModemManager::simInserted()
+void CellModemManager::readPhoneBooks()
 {
-    // Arrange for the emergency number phone book to be read upon insert.
-    QTimer::singleShot( 1000, this, SLOT(fetchEmergencyNumbers()) );
+    // Arrange for the emergency number phone book to be read when SIM is ready.
+    fetchEmergencyNumbers();
+
+    QSimInfo simInfo( "modem", this );
+    // if it is not a new sim. do not need to read SIM phone books for call history.
+    if ( simInfo.identity() == d->m_simIdentity )
+        return;
+
+    d->m_simIdentity = simInfo.identity();
+
+    // record new sim identity
+    QSettings cfg("Trolltech", "Phone");
+    cfg.beginGroup("SIM");
+    cfg.setValue("Identity", d->m_simIdentity);
+
+    // Read SIM phone books for last dialed, missed, received calls
+    fetchCallHistory();
 }
 
 void CellModemManager::simRemoved()
 {
-    if(d->m_simToolkitAvailable) {
-        d->m_simToolkitAvailable = false;
-        emit simToolkitAvailableChanged(false);
-        updateStatus();
-    }
+    // Nothing to do here at present.
+}
+
+void CellModemManager::simToolkitAvailableChange()
+{
+    emit simToolkitAvailableChanged(simToolkitAvailable());
 }
 
 void CellModemManager::setReadyStatus()
@@ -795,9 +874,8 @@ void CellModemManager::updateStatus()
     d->m_status->setAttribute("OperatorName", networkOperator());
     d->m_status->setAttribute("OperatorCountry", networkOperatorCountry());
     d->m_status->setAttribute("CallDivert", callForwardingEnabled());
-    d->m_status->setAttribute("SimToolkitAvailable", simToolkitAvailable());
-    d->m_status->setAttribute("CellModemAvailable", cellModemAvailable());
     d->m_status->setAttribute("PlaneModeAvailable", planeModeSupported()?"Yes":"No");
+    d->m_status->setAttribute("CellModem/Available", cellModemAvailable());
 }
 
 void CellModemManager::autoRegisterTimeout()
@@ -844,10 +922,7 @@ void CellModemManager::tryDoReady()
         return;
 
     if(QTelephony::RegistrationNone != d->m_regState) {
-        if(QPhoneRfFunctionality::Full != d->m_rfFunc->level()) {
-            // Phonesim triggers this potential bug
-            qWarning("CellModemManager: BUG! Cannot be registered when the aerial is off!");
-        } else {
+        if(QPhoneRfFunctionality::Full == d->m_rfFunc->level()) {
             doStateChanged(Ready);
             setReadyStatus();
             doAutoRegister();
@@ -872,7 +947,10 @@ void CellModemManager::tryDoAerialOff()
 void CellModemManager::doAutoRegister()
 {
     if(Ready == state()) {
-        if(d->m_regState != QTelephony::RegistrationHome &&
+        if(d->m_regState == QTelephony::RegistrationSearching) {
+            // Don't initiate auto-registration if the device is already
+            // searching for a network.
+        } else if(d->m_regState != QTelephony::RegistrationHome &&
            d->m_regState != QTelephony::RegistrationRoaming) {
             d->m_netReg->setCurrentOperator(QTelephony::OperatorModeAutomatic);
             startAutoRegisterTimer();
@@ -905,6 +983,126 @@ void CellModemManager::currentOperatorChanged()
         emit networkOperatorChanged(d->m_operator);
         updateStatus();
     }
+}
+
+/*!
+    \reimp
+*/
+QString CellModemManager::callType() const
+{
+    return "Voice";     // No tr
+}
+
+/*!
+    \reimp
+*/
+QString CellModemManager::trCallType() const
+{
+    return tr("GSM");
+}
+
+/*!
+    \reimp
+*/
+QString CellModemManager::callTypeIcon() const
+{
+    return "antenna";   // No tr
+}
+
+/*!
+    \reimp
+*/
+QAbstractCallPolicyManager::CallHandling CellModemManager::handling
+        (const QString& number)
+{
+    // Cannot handle if in plane mode.
+    if (planeModeEnabled())
+        return CannotHandle;
+
+    // Emergency numbers must be handled by us, regardless of network reg.
+    if (emergencyNumbers().contains(number))
+        return MustHandle;
+
+    // Cannot handle URI's that contain '@' or ':'.
+    if (number.contains(QChar('@')) || number.contains(QChar(':')))
+        return CannotHandle;
+
+    // If no network registration, then cannot handle at this time.
+    if (!networkRegistered())
+        return CannotHandle;
+
+    // Assume that this is a number that we can dial.
+    return CanHandle;
+}
+
+/*!
+    \reimp
+*/
+bool CellModemManager::isAvailable(const QString& number)
+{
+    // No way to detect presence, so just assume that all numbers
+    // that got through handling() are available for dialing.
+    Q_UNUSED(number);
+    return true;
+}
+
+/*!
+    \reimp
+*/
+QString CellModemManager::registrationMessage() const
+{
+    QString cellMsg;
+
+    switch (registrationState()) {
+        case QTelephony::RegistrationNone:
+            if (!cellModemAvailable()) {
+                cellMsg = tr("No modem");
+            } else if (planeModeEnabled()) {
+                cellMsg = tr("Airplane safe mode");
+            } else if (state() == SIMMissing) {
+                cellMsg = tr("Missing SIM");
+            } else {
+                cellMsg = tr("No network");
+            }
+            break;
+        case QTelephony::RegistrationHome:
+            // Nothing - this is the normal state
+            break;
+        case QTelephony::RegistrationSearching:
+            cellMsg = tr("Searching for network");
+            break;
+        case QTelephony::RegistrationDenied:
+            cellMsg = tr("Network registration denied");
+            break;
+        case QTelephony::RegistrationUnknown:
+            //We can't do calls anyway
+            cellMsg = tr("No network");
+            break;
+        case QTelephony::RegistrationRoaming:
+            // ### probably want to beep/show message to let user know.
+            break;
+    }
+
+    return cellMsg;
+}
+
+/*!
+    \reimp
+*/
+QString CellModemManager::registrationIcon() const
+{
+    QString pix(":image/antenna");
+
+    switch (registrationState()) {
+        case QTelephony::RegistrationNone:
+            if (cellModemAvailable() && planeModeEnabled())
+                pix = ":image/aeroplane";
+            break;
+        default:
+            break;
+    }
+
+    return pix;
 }
 
 /*!
@@ -961,7 +1159,8 @@ QString CellModemManager::cellLocation() const
  */
 bool CellModemManager::simToolkitAvailable() const
 {
-    return d->m_simToolkitAvailable;
+    QValueSpaceItem item( "/Telephony/Status/SimToolkit" );
+    return item.value( "Available" ).toBool();
 }
 
 /*!
@@ -970,6 +1169,43 @@ bool CellModemManager::simToolkitAvailable() const
 bool CellModemManager::cellModemAvailable() const
 {
     return d->m_state != NoCellModem;
+}
+
+/*!
+  Returns the text to display when the system is in idle mode.
+ */
+QString CellModemManager::simToolkitIdleModeText() const
+{
+    QValueSpaceItem item( "/Telephony/Status/SimToolkit" );
+    return item.value( "IdleModeText" ).toString();
+}
+
+/*!
+  Returns the icon to display when the system is in idle mode.
+ */
+QIcon CellModemManager::simToolkitIdleModeIcon() const
+{
+    QValueSpaceItem item( "/Telephony/Status/SimToolkit" );
+    return qVariantValue<QIcon>(item.value( "IdleModeIcon" ));
+}
+
+/*!
+  Returns true if the idle mode icon is self-explanatory without
+  accompanying text.
+ */
+bool CellModemManager::simToolkitIdleModeIconSelfExplanatory() const
+{
+    QValueSpaceItem item( "/Telephony/Status/SimToolkit" );
+    return item.value( "IdleModeIconSelfExplanatory" ).toBool();
+}
+
+/*!
+  Returns the title of the SIM toolkit application's main menu.
+ */
+QString CellModemManager::simToolkitMenuTitle() const
+{
+    QValueSpaceItem item( "/Telephony/Status/SimToolkit" );
+    return item.value( "MenuTitle" ).toString();
 }
 
 /*!
@@ -1060,6 +1296,9 @@ void CellModemManager::setCallerIdRestriction()
         QCallSettings callSettings;
         callSettings.setCallerIdRestriction( (QCallSettings::CallerIdRestriction)choice );
     }
+    cfg.endGroup();
+    cfg.beginGroup("SIM");
+    d->m_simIdentity = cfg.value("Identity").toString();
 }
 
 void CellModemManager::doStateChanged(State newState)
@@ -1068,7 +1307,7 @@ void CellModemManager::doStateChanged(State newState)
                        << stateToString(state()) << "to"
                        << stateToString(newState);
     QPerformanceLog("QtopiaServer") << "CellModemManager: State changed from"
-                      << stateToString(state()).toLatin1() << " to " << stateToString(newState).toLatin1();
+                      << stateToString(state()) << "to" << stateToString(newState);
 
     // We assert on an impossible state transition
     Q_ASSERT(state() != Initializing ||
@@ -1108,10 +1347,12 @@ void CellModemManager::doStateChanged(State newState)
 
     Q_ASSERT(state() != Initializing2 ||
              newState == Ready ||
+             newState == Initializing2 ||
              newState == AerialOff ||
              newState == FailureReset);
 
     Q_ASSERT(state() != SIMMissing ||
+             newState == SIMMissing ||
              newState == Initializing ||
              newState == FailureReset);
 
@@ -1123,6 +1364,8 @@ void CellModemManager::doStateChanged(State newState)
              newState == FailureReset);
 
     Q_ASSERT(state() != Ready ||
+             newState == WaitingSIMPuk ||
+             newState == Initializing2 ||
              newState == AerialOff ||
              newState == FailureReset);
 
@@ -1134,4 +1377,5 @@ void CellModemManager::doStateChanged(State newState)
 
 QTOPIA_TASK(CellModem, CellModemManager);
 QTOPIA_TASK_PROVIDES(CellModem, CellModemManager);
+QTOPIA_TASK_PROVIDES(CellModem, QAbstractCallPolicyManager);
 

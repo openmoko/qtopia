@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt 3 Support Members for QPainter</title>
+  <title>Qt 4.3: Qt 3 Support Members for QPainter</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -280,16 +280,16 @@
 <pre> QPainter painter(this);
  qreal y = painter.worldMatrix().dy();</pre>
 <h3 class="fn"><a name="xForm"></a><a href="qpoint.html">QPoint</a> QPainter::xForm ( const <a href="qpoint.html">QPoint</a> &amp; <i>point</i> ) const</h3>
-<p>Use <i>point</i> * <a href="qpainter.html#combinedMatrix">combinedMatrix</a>() instead.</p>
+<p>Use <a href="qpainter.html#combinedTransform">combinedTransform</a>() instead.</p>
 <h3 class="fn"><a name="xForm-2"></a><a href="qrect.html">QRect</a> QPainter::xForm ( const <a href="qrect.html">QRect</a> &amp; <i>rectangle</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <i>rectangle</i> * <a href="qpainter.html#combinedMatrix">combinedMatrix</a>() instead.</p>
+<p>Use <a href="qpainter.html#combinedTransform">combinedTransform</a>() instead of this function and call mapRect() on the result to obtain a <a href="qrect.html">QRect</a>.</p>
 <h3 class="fn"><a name="xForm-3"></a><a href="qpolygon.html">QPolygon</a> QPainter::xForm ( const <a href="qpolygon.html">QPolygon</a> &amp; <i>polygon</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <i>polygon</i> * <a href="qpainter.html#combinedMatrix">combinedMatrix</a>() instead.</p>
+<p>Use <a href="qpainter.html#combinedTransform">combinedTransform</a>() instead.</p>
 <h3 class="fn"><a name="xForm-4"></a><a href="qpolygon.html">QPolygon</a> QPainter::xForm ( const <a href="qpolygon.html">QPolygon</a> &amp; <i>polygon</i>, int <i>index</i>, int <i>count</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qpainter.html#combinedMatrix">combinedMatrix</a>() combined with <a href="qvector.html#mid">QPolygon::mid</a>() instead.</p>
+<p>Use <a href="qpainter.html#combinedTransform">combinedTransform</a>() combined with <a href="qvector.html#mid">QPolygon::mid</a>() instead.</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> QPainter painter(this);
  QPolygon transformed = painter.xForm(polygon, index, count)</font></pre>
@@ -297,7 +297,7 @@
 <pre> QPainter painter(this);
  QPolygon transformed = polygon.mid(index, count) * painter.combinedMatrix();</pre>
 <h3 class="fn"><a name="xFormDev"></a><a href="qpoint.html">QPoint</a> QPainter::xFormDev ( const <a href="qpoint.html">QPoint</a> &amp; <i>point</i> ) const</h3>
-<p>Use <a href="qpainter.html#combinedMatrix">combinedMatrix</a>() combined with <a href="qmatrix.html#inverted">QMatrix::inverted</a>() instead.</p>
+<p>Use <a href="qpainter.html#combinedTransform">combinedTransform</a>() combined with <a href="qmatrix.html#inverted">QMatrix::inverted</a>() instead.</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> QPainter painter(this);
  QPoint transformed = painter.xFormDev(point);</font></pre>
@@ -335,6 +335,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

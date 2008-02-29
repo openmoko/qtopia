@@ -13,9 +13,11 @@ HEADERS         = ../shared/metatranslator.h \
                   ../shared/proparser.h \
                   ../shared/profileevaluator.h \
                   ../shared/proparserutils.h \
-                  ../shared/simtexth.h
+                  ../shared/simtexth.h \
+                  ../shared/xliff.h
 
 SOURCES         = fetchtr.cpp \
+                  fetchtrjava.cpp \
                   main.cpp \
                   merge.cpp \
                   numberh.cpp \
@@ -24,7 +26,8 @@ SOURCES         = fetchtr.cpp \
                   ../shared/translator.cpp \
                   ../shared/proparser.cpp \
                   ../shared/profileevaluator.cpp \
-                  ../shared/simtexth.cpp
+                  ../shared/simtexth.cpp \
+                  ../shared/xliff.cpp
 
 PROPARSERPATH = ../shared
 INCLUDEPATH += $$PROPARSERPATH

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,8 +22,6 @@
 #if defined(__GNUC__) && (__GNUC__ > 2)
 #define QPE_USE_MALLOC_FOR_NEW
 #endif
-
-#define QPE_DEFAULT_TODAY_MODE "Daily"
 
 // The serial device for AT command access to the phone
 // hardware:
@@ -48,3 +46,11 @@
 // Extended Wireless LAN support (scanning and active reconnection) requires Wireless extension v14+ and will only be enabled if the
 // device supports WE v14+
 //#define NO_WIRELESS_LAN
+
+// Defines devices whose packages are compatible with this device,
+// by convention the first device listed is this device.
+#define QTOPIA_COMPATIBLE_DEVICES "Desktop"
+
+#ifndef V4L_VIDEO_DEVICE
+#define V4L_VIDEO_DEVICE            "/dev/video"
+#endif

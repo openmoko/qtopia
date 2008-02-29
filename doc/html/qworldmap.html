@@ -32,14 +32,16 @@
 <ul>
 <li><div class="fn"/>15 public functions inherited from <a href="qabstractscrollarea.html#public-functions">QAbstractScrollArea</a></li>
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
 <ul>
+<li><div class="fn"/>void <b><a href="qworldmap.html#select">select</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qworldmap.html#selectNewZone">selectNewZone</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qworldmap.html#setContinuousSelect">setContinuousSelect</a></b> ( const bool <i>selectMode</i> = false )</li>
 <li><div class="fn"/>void <b><a href="qworldmap.html#setDaylight">setDaylight</a></b> ( const bool <i>show</i> )</li>
 <li><div class="fn"/>void <b><a href="qworldmap.html#setReadOnly">setReadOnly</a></b> ( const bool <i>readOnly</i> = true )</li>
 <li><div class="fn"/>void <b><a href="qworldmap.html#setZone">setZone</a></b> ( const QTimeZone &amp; <i>zone</i> )</li>
@@ -53,6 +55,7 @@
 <a name="signals"></a>
 <h3>Signals</h3>
 <ul>
+<li><div class="fn"/>void <b><a href="qworldmap.html#buttonSelected">buttonSelected</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qworldmap.html#newZone">newZone</a></b> ( const QTimeZone &amp; <i>zone</i> )</li>
 <li><div class="fn"/>void <b><a href="qworldmap.html#selectZoneCanceled">selectZoneCanceled</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qworldmap.html#selecting">selecting</a></b> ()</li>
@@ -65,7 +68,7 @@
 <ul>
 <li><div class="fn"/>2 properties inherited from <a href="qabstractscrollarea.html#properties">QAbstractScrollArea</a></li>
 <li><div class="fn"/>6 properties inherited from <a href="qframe.html#properties">QFrame</a></li>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>5 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
@@ -92,6 +95,8 @@
 <p>Creates a world map widget and attaches it to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QWorldmap"></a>QWorldmap::~QWorldmap ()</h3>
 <p>Destroys this world map.</p>
+<h3 class="fn"><a name="buttonSelected"></a>void QWorldmap::buttonSelected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signal that is emitted when the user selects a new time zone via the slect button used in touchscreen mode.</p>
 <h3 class="fn"><a name="heightForWidth"></a>int QWorldmap::heightForWidth ( int <i>w</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Determines the height of the widget for a given width <i>w</i>.</p>
 <p>Reimplemented from <a href="qwidget.html#heightForWidth">QWidget</a>.</p>
@@ -106,12 +111,17 @@
 <p>See also <a href="qworldmap.html#toggleZoom">QWorldmap::toggleZoom</a>().</p>
 <h3 class="fn"><a name="newZone"></a>void QWorldmap::newZone ( const <a href="qtimezone.html">QTimeZone</a> &amp; <i>zone</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the new <i>zone</i> is selected from the map</p>
+<h3 class="fn"><a name="select"></a>void QWorldmap::select ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Button select slot - touchscreen only.</p>
 <h3 class="fn"><a name="selectNewZone"></a>void QWorldmap::selectNewZone ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Puts the widget into time zone selection mode.</p>
 <h3 class="fn"><a name="selectZoneCanceled"></a>void QWorldmap::selectZoneCanceled ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when zone selection is canceled.</p>
 <h3 class="fn"><a name="selecting"></a>void QWorldmap::selecting ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the widget enters zone selection mode</p>
+<h3 class="fn"><a name="setContinuousSelect"></a>void QWorldmap::setContinuousSelect ( const bool <i>selectMode</i> = false )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Sets the widget into continous time zone selection mode <i>selectMode</i></p>
+<p>touchscreen only.</p>
 <h3 class="fn"><a name="setDaylight"></a>void QWorldmap::setDaylight ( const bool <i>show</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Displays the daylight on the map if <i>show</i> is true.</p>
 <p>See also <a href="qworldmap.html#isDaylight">QWorldmap::isDaylight</a>().</p>
@@ -134,6 +144,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

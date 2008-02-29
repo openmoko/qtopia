@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,11 +40,13 @@
 #define QACCESSIBLE_H
 
 #include <QtCore/qglobal.h>
-#include <QtGui/qevent.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qrect.h>
+#include <QtCore/qset.h>
 #include <QtCore/qvector.h>
 #include <QtCore/qvariant.h>
+#include <QtGui/qcolor.h>
+#include <QtGui/qevent.h>
 
 QT_BEGIN_HEADER
 
@@ -245,9 +262,11 @@ public:
     };
 
     enum Method {
-        ListSupportedMethods    = 0,
-        SetCursorPosition       = 1,
-        GetCursorPosition       = 2
+        ListSupportedMethods      = 0,
+        SetCursorPosition         = 1,
+        GetCursorPosition         = 2,
+        ForegroundColor           = 3,
+        BackgroundColor           = 4
     };
 
     typedef QAccessibleInterface*(*InterfaceFactory)(const QString &key, QObject*);
@@ -274,6 +293,25 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAccessible::State)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAccessible::Relation)
+
+namespace QAccessible2
+{
+    enum InterfaceType
+    {
+        TextInterface,
+        EditableTextInterface,
+        ValueInterface,
+        TableInterface
+    };
+}
+
+class QAccessible2Interface;
+class QAccessibleTextInterface;
+class QAccessibleEditableTextInterface;
+class QAccessibleValueInterface;
+class QAccessibleTableInterface;
+
+Q_DECLARE_METATYPE(QSet<QAccessible::Method>)
 
 class Q_GUI_EXPORT QAccessibleInterface : public QAccessible
 {
@@ -309,6 +347,30 @@ public:
 
     QVariant invokeMethod(Method method, int child = 0,
                           const QVariantList &params = QVariantList());
+
+    inline QSet<Method> supportedMethods()
+    { return qvariant_cast<QSet<Method> >(invokeMethod(ListSupportedMethods)); }
+
+    inline QColor foregroundColor()
+    { return qvariant_cast<QColor>(invokeMethod(ForegroundColor)); }
+
+    inline QColor backgroundColor()
+    { return qvariant_cast<QColor>(invokeMethod(BackgroundColor)); }
+
+    inline QAccessibleTextInterface *textInterface()
+    { return reinterpret_cast<QAccessibleTextInterface *>(cast_helper(QAccessible2::TextInterface)); }
+
+    inline QAccessibleEditableTextInterface *editableTextInterface()
+    { return reinterpret_cast<QAccessibleEditableTextInterface *>(cast_helper(QAccessible2::EditableTextInterface)); }
+
+    inline QAccessibleValueInterface *valueInterface()
+    { return reinterpret_cast<QAccessibleValueInterface *>(cast_helper(QAccessible2::ValueInterface)); }
+
+    inline QAccessibleTableInterface *tableInterface()
+    { return reinterpret_cast<QAccessibleTableInterface *>(cast_helper(QAccessible2::TableInterface)); }
+
+private:
+    QAccessible2Interface *cast_helper(QAccessible2::InterfaceType);
 };
 
 class Q_GUI_EXPORT QAccessibleInterfaceEx: public QAccessibleInterface
@@ -316,11 +378,12 @@ class Q_GUI_EXPORT QAccessibleInterfaceEx: public QAccessibleInterface
 public:
     virtual QVariant invokeMethodEx(Method method, int child, const QVariantList &params) = 0;
     virtual QVariant virtual_hook(const QVariant &data);
+    virtual QAccessible2Interface *interface_cast(QAccessible2::InterfaceType)
+    { return 0; }
 };
 
 #define QAccessibleInterface_iid "com.trolltech.Qt.QAccessibleInterface"
 Q_DECLARE_INTERFACE(QAccessibleInterface, QAccessibleInterface_iid)
-
 
 class Q_GUI_EXPORT QAccessibleEvent : public QEvent
 {

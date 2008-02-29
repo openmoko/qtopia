@@ -1,30 +1,31 @@
 <html>
-<head><title>Writing Email</title></head>
+<head><title>Writing Messages</title></head>
 <body>
-<h3>Writing Email</h3>
-<!--#if expr="$PDASTYLE"-->
-<p>This dialog is invoked by tapping <img src=":icon/qtmail/reply"> </img> to reply, or <img src=":icon/new"> </img> to create a new email.</p>
-<ul>
-<li>Enter the email address.</li>
-<li>Tap the <b>Subject</b> field and enter a subject.</li>
-<li>Enter the text of the message in the empty area below the <b>Subject</b> field.</li>
-<li>Tap the <b>From</b> field to select another account (only applicable if you have more than one account).</li>
-<li>Tap <img src=":icon/qtmail/sendmail"> </img> in the main view to send all the email in the <b>Outbox</b>. All mails that were successfully sent will be automatically moved to the <b>Sent</b> folder.</li>
-</ul>
-<p>The <b>Field</b> menu is used to select which fields are automatically available.
-The default settings display <b>To</b>, <b>Subject</b> and <b>CC</b> fields. If you seldom use a <b>CC</b> field you can choose to hide it by de-selecting it in the <b>Field</b> menu. Similarly you can set whether the <b>BCC</b> and <b>From</b> field should normally be displayed. The <b>From</b> field displays which outgoing account this message belongs to.</p>
+<h3>Writing Messages</h3>
+<p>Begin composing by selecting <b>New message</b> from the folder list, or press <img src=":icon/options"><b>Options</b> while viewing a message list, and select <b>New</b>.</p>
+<p>Select the type of message you wish to compose from the list of options.</p>
+<h3>Composing</h3>
+<p><b>SMS</b>: the total number of characters remaining and the number of SMS messages to be sent is displayed in the top right of the display.</p>
+<p><b>Email</b>: to add attachments to your message, see <a href="qtmail-attachments.html">Message Attachments</a>.</p>
+<p><b>MMS</b>: see <a href="qtmail-composing-mms.html">Composing MMS Messages</a>.</p>
+<h3>Message Details</h3>
+<p>After entering the text of your message, press <img src=":icon/i18n/next"></img> to move to the details page.</p>
+<p>To return to editing the message contents, press <img src=":icon/options"><b>Options</b> while viewing a message list, and select <b>Previous</b>.</p>
+<!--#if expr="$TELEPHONY"-->
+<p>Message details fields:</p>
+<p><b>To:</b> enter the phone number or email address you wish to send to.</p>
+<!--#else-->
+<p><b>To:</b> enter the email address you wish to send to.</p>
 <!--#endif-->
-
-<!--#if expr="$PHONESTYLE"-->
-<p>Composing a message uses several pages. Press <img src=":icon/ok">, then <img src=":icon/i18n/next"> </img> at each step to move to the next page.</p>
-<p><b>To delete message:</b> choose <b>Cancel</b> from the menu.</p>
-<p><b>To store message to work on it later:</b> choose <b>Save in Drafts</b> from the menu.</p>
-<p><b>Body:</b> enter the text for the message, then press <img src=":icon/ok"> </img> to confirm.</p>
-<p><b>SMS:</b> enter the mobile number if it is an SMS.</p>
-<p><b>To:</b> enter the email address if it is an email.</p>
-<p><b>CC, BCC:</b> send copies to others by adding them in as CC, or as BCC to hide their numbers from the main recipient.</p>
-<p><b>Attachments:</b> you can attach one or more files to an email.</p>
-<!--#endif-->
+<p>If you select <img src=":icon/addressbook/AddressBook"></img>, you can select multiple phone numbers or email addresses from your Contacts list.</p>
+<p><b>CC:</b> send copies to others by adding their number or address.</p>
+<p><b>BCC:</b> send copies to others, and hide their addresses from the main recipient.</p>
+<p><b>Subject:</b> for MMS and email messages, you may enter a subject line.</p>
+<h3>Sending Messages</h3>
+<p>After entering one or more recipients, simply press <img src=":icon/select"><b>Select</b> to send your message.</p>
+<p>If sending is succesful, the message will be placed in your <b>Sent</b> folder. Otherwise, it will remain in your <b>Outbox</b> folder until it can be sent.</p>
+<p>If you are not yet ready to send your message, you can save it to edit later by pressing <img src=":icon/options"><b>Options</b> and selecting <b>Save in drafts</b>.</p>
+<p>To abandon the message completely, press <img src=":icon/options"><b>Options</b> and select <b>Cancel</b>.</p>
 <p>See Also: <a href="qpe-symbolpicker.html">Symbol Picker</a></p>
 </body>
 </html>

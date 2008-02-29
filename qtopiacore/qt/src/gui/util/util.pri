@@ -2,16 +2,24 @@
 
 HEADERS += \
         util/qsystemtrayicon.h \
-		util/qcompleter.h \
-		util/qcompleter_p.h \
-                util/qdesktopservices.h \
-                util/qsystemtrayicon_p.h
-		
+        util/qcompleter.h \
+        util/qcompleter_p.h \
+        util/qdesktopservices.h \
+        util/qsystemtrayicon_p.h \
+        util/qundogroup.h \
+        util/qundostack.h \
+        util/qundostack_p.h \
+        util/qundoview.h
+
 SOURCES += \
         util/qsystemtrayicon.cpp \
-		util/qcompleter.cpp \
-                util/qdesktopservices.cpp
-		
+        util/qcompleter.cpp \
+        util/qdesktopservices.cpp \
+        util/qundogroup.cpp \
+        util/qundostack.cpp \
+        util/qundoview.cpp
+
+
 win32 {
 		SOURCES += \
 				util/qsystemtrayicon_win.cpp

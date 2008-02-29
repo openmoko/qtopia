@@ -21,6 +21,7 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
+<li><div class="fn"/>virtual QPimSource <b><a href="qpimcontext.html#defaultSource">defaultSource</a></b> () const = 0</li>
 <li><div class="fn"/>virtual QString <b><a href="qpimcontext.html#description">description</a></b> () const = 0</li>
 <li><div class="fn"/>virtual bool <b><a href="qpimcontext.html#editable">editable</a></b> () const</li>
 <li><div class="fn"/>virtual bool <b><a href="qpimcontext.html#editable-2">editable</a></b> ( const QUniqueId &amp; <i>id</i> ) const</li>
@@ -61,26 +62,30 @@
 <h2>Detailed Description</h2>
 <p>The QPimContext class represents a storage context of PIM data.</p>
 <p>This includes storage such as SIM Card contacts or data stored on the device in Qtopia's native format. The class can be used to perform operations that relate to a specific context of PIM data.</p>
-<p>QPimContext should not be subclassed directly. Instead, one of the data type specific contexts should be used. These are <a href="qcontactcontext.html">QContactContext</a>, <a href="qtaskcontext.html">QTaskContext</a> and <a href="qappointmentcontext.html">QAppointmentContext</a>.</p>
+<p>QPimContext should not be instantiated directly. Instead, one of the data type specific contexts should be used. These are <a href="qcontactcontext.html">QContactContext</a>, <a href="qtaskcontext.html">QTaskContext</a> and <a href="qappointmentcontext.html">QAppointmentContext</a>.</p>
 <p>Currently there is no way for applications to implement their own contexts. This feature is being considered for future versions of Qtopia.</p>
-<p>Generally, it is easier to use a <a href="qpimmodel.html">QPimModel</a> to access QPimRecords.</p>
-<p>See also <a href="qpimrecord.html">QPimRecord</a>, <a href="qpimsource.html">QPimSource</a>, and <a href="qpimmodel.html">QPimModel</a>.</p>
+<p>See also <a href="qappointmentmodel.html">QAppointmentModel</a>, <a href="qcontactmodel.html">QContactModel</a>, <a href="qtaskmodel.html">QTaskModel</a>, and <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QPimContext"></a>QPimContext::QPimContext ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Constructs a <a href="qpimcontext.html">QPimContext</a> with parent <i>parent</i>.</p>
+<h3 class="fn"><a name="defaultSource"></a><a href="qpimsource.html">QPimSource</a> QPimContext::defaultSource () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Returns the default PIM data source that is controlled by this context.</p>
+<p>If there is no default PIM data source returns a null source.</p>
 <h3 class="fn"><a name="description"></a><a href="qstring.html">QString</a> QPimContext::description () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Returns text describing the PIM context, suitable for displaying to the user.</p>
+<p>Returns text describing the PIM context, in a format suitable for displaying to the user.</p>
 <h3 class="fn"><a name="editable"></a>bool QPimContext::editable () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns true if any PIM records stored by the context can be edited The default implementation returns false.</p>
+<p>Returns true if any PIM records stored by the context can be edited. The default implementation returns false.</p>
 <h3 class="fn"><a name="editable-2"></a>bool QPimContext::editable ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns whether the PIM record identified by <i>id</i> can be edited by this context, otherwise returns false.</p>
+<p>Returns true if the PIM record identified by <i>id</i> can be edited by this context, otherwise false.</p>
 <h3 class="fn"><a name="exists"></a>bool QPimContext::exists ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns true if the PIM record identified by <i>id</i> exists in a PIM data source controlled by this context. Otherwise returns false.</p>
+<p>See also <a href="qpimcontext.html#source">source</a>().</p>
 <h3 class="fn"><a name="exists-2"></a>bool QPimContext::exists ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if the contact identified by <i>id</i> exists in the PIM data <i>source</i> and the <i>source</i> is controlled by this context. Otherwise returns false.</p>
+<p>See also <a href="qpimcontext.html#source">source</a>().</p>
 <h3 class="fn"><a name="icon"></a><a href="qicon.html">QIcon</a> QPimContext::icon () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns an icon associated with the context. The default implementation returns a null icon.</p>
 <h3 class="fn"><a name="id"></a><a href="quuid.html">QUuid</a> QPimContext::id () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
@@ -89,14 +94,15 @@
 <p>Filters the model that created this context to only show records for the sources that are contained in <i>visible</i>. Does not affect data from other contexts.</p>
 <p>See also <a href="qpimcontext.html#visibleSources">visibleSources</a>().</p>
 <h3 class="fn"><a name="source"></a><a href="qpimsource.html">QPimSource</a> QPimContext::source ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Provided that the PIM record identified by <i>id</i> exists for this context, returns the PIM data source where the record is stored. Otherwise returns a null PIM data source.</p>
+<p>Returns the PIM data source identified by <i>id</i> where the record is stored, if it exists. Returns a null PIM data source if there is no record for <i>id</i>.</p>
+<p>See also <a href="qpimcontext.html#exists">exists</a>().</p>
 <h3 class="fn"><a name="sources"></a><a href="qset.html">QSet</a>&lt;<a href="qpimsource.html">QPimSource</a>&gt; QPimContext::sources () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the list of PIM data sources that are controlled by this context.</p>
 <h3 class="fn"><a name="title"></a><a href="qstring.html">QString</a> QPimContext::title () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Returns the title of the PIM context, suitable for displaying to the user.</p>
+<p>Returns the title of the PIM context, in a format suitable for displaying to the user.</p>
 <h3 class="fn"><a name="title-2"></a><a href="qstring.html">QString</a> QPimContext::title ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns the title of the PIM data <i>source</i>, suitable for displaying to the user. By default returns the title for the context.</p>
+<p>Returns the title of the PIM data <i>source</i>, in a format suitable for displaying to the user. Returns the title for the context by default.</p>
 <h3 class="fn"><a name="visibleSources"></a><a href="qset.html">QSet</a>&lt;<a href="qpimsource.html">QPimSource</a>&gt; QPimContext::visibleSources () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the set of PIM data sources that are controlled by this context and are visible in the model that created the context.</p>
 <p>See also <a href="qpimcontext.html#setVisibleSources">setVisibleSources</a>().</p>
@@ -104,6 +110,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

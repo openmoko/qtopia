@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,16 +24,16 @@
 
 #include <QFile>
 #include <QTextStream>
-#include <QtDebug>
 #include <qtopialog.h>
 
 /**
   Base constructor
 */
-PackageInformationReader::PackageInformationReader()
+PackageInformationReader::PackageInformationReader( InstallControl::PackageInfo::Source src )
     : isError( false )
     , hasContent( false )
     , accumulatingFullDesc( false )
+    , source( src )
 {
     reset();
 }
@@ -44,10 +44,12 @@ PackageInformationReader::PackageInformationReader()
 
   Set isError == true if the information format is wrong.
 */
-PackageInformationReader::PackageInformationReader( QTextStream &ts )
+PackageInformationReader::PackageInformationReader( QTextStream &ts, 
+                                                    InstallControl::PackageInfo::Source src )
     : isError( false )
     , hasContent( false )
     , accumulatingFullDesc( false )
+    , source( src )
 {
     reset();
     while (!ts.atEnd())
@@ -55,6 +57,9 @@ PackageInformationReader::PackageInformationReader( QTextStream &ts )
         QString line = ts.readLine();
         readLine( line );
     }
+    
+    if ( !pkg.isComplete(source, &error) )
+        isError = true;
 }
 
 /**
@@ -63,12 +68,14 @@ PackageInformationReader::PackageInformationReader( QTextStream &ts )
 
   Set isError == true if the information format is wrong.
 */
-PackageInformationReader::PackageInformationReader(const QString& fName)
+PackageInformationReader::PackageInformationReader( const QString& fName,
+                                                    InstallControl::PackageInfo::Source src )
     : isError( false )
     , hasContent( false )
     , accumulatingFullDesc( false )
+    , source( src )
 {
-    PackageInformationReader();
+    reset();
     QString fileName( fName );
     // open file for reading
     QFile file(fileName);
@@ -77,7 +84,6 @@ PackageInformationReader::PackageInformationReader(const QString& fName)
         //assumption that control file has md5 in it's full filename, use as default name
         int pos = fileName.lastIndexOf( "/" );
         pkg.name = fileName.mid( pos + 1, 32 ); //32 chars is length of md5 digest
-        pkg.status = (InstallControl::InstallStatus)( InstallControl::PartlyInstalled | InstallControl::Error );
         pkg.description = fileName + " does not exist";
         isError = true;
         qLog( Package ) << pkg.description;
@@ -93,15 +99,13 @@ PackageInformationReader::PackageInformationReader(const QString& fName)
 
         readLine( line );
     }
-    if ( !pkg.isComplete( true ) )
-    {
-        pkg.status = (InstallControl::InstallStatus)( InstallControl::PartlyInstalled | InstallControl::Error );
+    if ( !pkg.isComplete(source, &error) )
         isError = true;
-    }
 }
 
 void PackageInformationReader::reset()
 {
+    pkg.name = QString::null;
     pkg.description = QString::null;
     pkg.fullDescription = QString::null;
     pkg.size = QString::null;
@@ -110,9 +114,12 @@ void PackageInformationReader::reset()
     pkg.packageFile = QString::null;
     pkg.version = QString::null;
     pkg.trust = QString::null;
-    pkg.files.clear();
+    pkg.files.clear(); //pkg.files is deprecated
     pkg.url = QString();
     pkg.qtopiaVersion = QString::null;
+    pkg.devices = QString::null;
+    pkg.installedSize = QString::null;
+    pkg.type = QString::null;
     error = QString::null;
     isError = false;
     hasContent = false;
@@ -120,7 +127,7 @@ void PackageInformationReader::reset()
 
 void PackageInformationReader::checkCompleted()
 {
-    if ( hasContent && pkg.isComplete() )
+    if ( hasContent && pkg.isComplete(source) )
     {
         emit packageComplete();
         reset();
@@ -151,7 +158,6 @@ void PackageInformationReader::readLine( const QString &line )
     if ( colon == -1 )
     {
         pkg.name = "corrupted";  // NO TR
-        pkg.status =  (InstallControl::InstallStatus)( pkg.status | InstallControl::Error );
         error = "No colon in package information"; // NO TR
         isError = true;
         return;
@@ -212,7 +218,7 @@ void PackageInformationReader::readLine( const QString &line )
         if ( !pkg.version.isEmpty() ) hasContent = true;
     }
     else if ( lineStr.startsWith( QLatin1String( "Files:" ), Qt::CaseInsensitive ))
-    {
+    {//Files field is deprecated
         QString fileList = lineStr.mid( colon ).trimmed();
         pkg.files = fileList.split( QLatin1String( " " ), QString::SkipEmptyParts );
         if ( !pkg.files.isEmpty() ) hasContent = true;
@@ -226,6 +232,21 @@ void PackageInformationReader::readLine( const QString &line )
     {
         pkg.qtopiaVersion = lineStr.mid( colon ).trimmed();
         if ( !pkg.qtopiaVersion.isEmpty() ) hasContent = true;
+    }
+    else if ( lineStr.startsWith( QLatin1String( "Devices:" ), Qt::CaseInsensitive ))
+    {
+        pkg.devices = lineStr.mid( colon ).trimmed();
+        if ( !pkg.devices.isEmpty() ) hasContent = true;
+    }
+    else if ( lineStr.startsWith( QLatin1String( "Installed-Size: " ), Qt::CaseInsensitive ))
+    {
+        pkg.installedSize = lineStr.mid( colon ).trimmed();
+        if ( !pkg.installedSize.isEmpty() ) hasContent = true;
+    }
+    else if ( lineStr.startsWith( QLatin1String( "Type: " ), Qt::CaseInsensitive ))
+    {
+        pkg.type = lineStr.mid( colon ).trimmed();
+        if ( !pkg.type.isEmpty() ) hasContent = true;
     }
     else
     {

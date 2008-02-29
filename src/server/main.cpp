@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,12 +19,10 @@
 **
 ****************************************************************************/
 
-#include "pda/taskbar.h"
 #include "qabstractserverinterface.h"
 
-#ifdef QTOPIA_PDA
-#include "pda/launcher.h"
-#include "pda/firstuse.h"
+#ifdef QTOPIA_UNPORTED
+#include "firstuse.h"
 #endif
 
 #include <qtopiaapplication.h>
@@ -34,26 +32,24 @@
 #include <qfile.h>
 #include <qdir.h>
 #include <qimagereader.h>
-#include <qscreen_qws.h>
 #include <qsettings.h>
 #ifdef Q_WS_QWS
+#include <qscreen_qws.h>
 #include <qwindowsystem_qws.h>
 #endif
+#include "qtopiainputevents.h"
 #include <qtopiaipcenvelope.h>
 #include <qtopianamespace.h>
 #include <qtopialog.h>
 #include <qbootsourceaccessory.h>
 
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
-#ifndef Q_OS_WIN32
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#else
-#include <process.h>
-#endif
 
 #include <QPainter>
 #include <QThread>
@@ -61,12 +57,9 @@
 
 #include <QImageIOHandler>
 
-#include <perftest.h>
-
 QSXE_APP_KEY
 
 #include "qtopiaserverapplication.h"
-#include "pressholdgate.h"
 
 #include <QDesktopWidget>
 #include <QLibraryInfo>
@@ -148,7 +141,7 @@ static void initKeyboard()
     QString layout = config.value( "Layout", "us101" ).toString();
 }
 
-#ifdef QTOPIA_PDA
+#ifdef QTOPIA_UNPORTED
 static bool firstUse()
 {
     bool needFirstUse = false;
@@ -290,6 +283,10 @@ public:
     void timerEvent(QTimerEvent*)
     {
         if ( rep ) {
+            // showMaximized() doesn't work for frameless windows.
+            QDesktopWidget *desktop = QApplication::desktop();
+            QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
+            rep->setGeometry(desktopRect);
             rep->show();
             hide();
             rep->lower();
@@ -306,12 +303,13 @@ private:
 };
 #endif
 
-class BootCharger : public ThemedView, public QWSServer::KeyboardFilter {
+class BootCharger : public ThemedView, public QtopiaKeyboardFilter
+{
     Q_OBJECT
 public:
     BootCharger() :
         ThemedView(),
-        vsoCharging("/Accessories/Battery/Charging")
+        vsoCharging("/Hardware/Accessories/QPowerSource/DefaultBattery/Charging")
     {
         QSettings qpeCfg("Trolltech", "qpe");
         qpeCfg.beginGroup("Appearance");
@@ -334,49 +332,64 @@ public:
 
         connect(&vsoCharging, SIGNAL(contentsChanged()), SLOT(chargingStateChanged()));
 
-        ph = new PressHoldGate(this);
-        connect(ph, SIGNAL(activate(int,bool)), this, SLOT(doActivate(int,bool)));
-        QWSServer::addKeyboardFilter(this);
+        QtopiaInputEvents::addKeyboardFilter(this);
     }
 
     virtual bool filter(int, int keycode, int modifiers, bool press, bool autoRepeat)
     {
-        // Test if the hangup key is being held
-        if (keycode == Qt::Key_Hangup && !autoRepeat && !modifiers)
-            ph->filterKey(Qt::Key_Hangup, press, false, true);
+        //any key press will cause a start
+        switch ( keycode ) {
+            case Qt::Key_0:
+            case Qt::Key_1:
+            case Qt::Key_2:
+            case Qt::Key_3:
+            case Qt::Key_4:
+            case Qt::Key_5:
+            case Qt::Key_6:
+            case Qt::Key_7:
+            case Qt::Key_8:
+            case Qt::Key_9:
+            case Qt::Key_Hangup:
+            case Qt::Key_Context1:
+            case Qt::Key_Back:
+            case Qt::Key_Select:
+            case Qt::Key_Asterisk:
+            case Qt::Key_NumberSign:
+            case Qt::Key_Left:
+            case Qt::Key_Right:
+            case Qt::Key_Up:
+            case Qt::Key_Down:
+                if (!autoRepeat && !modifiers && press) 
+                    doActivate();
+                break;
+            default:
+                break;
+        }
 
         return true;
-    }
-
-    bool charging()
-    {
-        return vsoCharging.value().toBool();
     }
 
 signals:
     void finished();
 
 private slots:
-    void doActivate(int keycode, bool held)
+    void doActivate()
     {
-        if (keycode == Qt::Key_Hangup && held) {
-            ThemeItem *item = findItem("battery", ThemedView::Item);
-            if (item)
-                item->setActive(false);
+        ThemeItem *item = findItem("battery", ThemedView::Item);
+        if (item)
+            item->setActive(false);
 
-            item = findItem("loading", ThemedView::Item);
-            if (item)
-                item->setActive(true);
+        item = findItem("loading", ThemedView::Item);
+        if (item)
+            item->setActive(true);
 
-            repaint();
-
-            emit finished();
-        }
+        repaint();
+        emit finished();
     }
 
     void chargingStateChanged()
     {
-        if (!vsoCharging.value().toBool()) {
+        if (!vsoCharging.value(QByteArray(), false).toBool()) {
             ThemeItem *item = findItem("battery", ThemedView::Item);
             if (item)
                 item->setActive(false);
@@ -393,7 +406,6 @@ private slots:
 
 private:
     QValueSpaceItem vsoCharging;
-    PressHoldGate *ph;
 };
 
 void Qtopia_initAlarmServer(); // from qalarmserver.cpp
@@ -407,21 +419,23 @@ void Qtopia_initAlarmServer(); // from qalarmserver.cpp
 //
 int initApplication( int argc, char ** argv )
 {
+    QPerformanceLog("QtopiaServer") << QPerformanceLog::Begin << "initApplication";
+
     if(!QtopiaServerApplication::startup(argc, argv, QList<QByteArray>() << "prestartup"))
         qFatal("Unable to initialize task subsystem.  Please check '%s' exists and its content is valid.", QtopiaServerApplication::taskConfigFile().toLatin1().constData());
 
-    QPerformanceLog("QtopiaServer") << "Adjusting time zone";
+    QPerformanceLog("QtopiaServer") << QPerformanceLog::Begin << "adjusting time zone";
     QTime t = QTime::currentTime();
     refreshTimeZoneConfig();
     QPerformanceLog::adjustTimezone(t);
-    QPerformanceLog("QtopiaServer") << "Time zone adjusted";
+    QPerformanceLog("QtopiaServer") << QPerformanceLog::End << "adjusting time zone";
 
     initKeyboard();
     QPerformanceLog("QtopiaServer") << "Keyboard initialisation";
 
     const QByteArray warmBootFile = "/tmp/warm-boot";
     if ( !QFile::exists( warmBootFile ) &&
-         QValueSpaceItem("/Accessories/Battery/Charging").value().toBool() ) {
+         QValueSpaceItem("/Hardware/Accessories/QPowerSource/DefaultBattery/Charging", false).value().toBool() ) {
 
         QBootSourceAccessory bsa;
         if (bsa.bootSource() == QBootSourceAccessory::Charger) {
@@ -432,8 +446,11 @@ int initApplication( int argc, char ** argv )
             QEventLoop eventloop;
             eventloop.connect(bootCharger, SIGNAL(finished()), SLOT(quit()));
             eventloop.exec();
-
-            delete bootCharger;
+           
+            //remove bootcharger from keyboard filter list 
+            //removeKeyboardFilter() deletes the pointer to a keyboard filter
+            //this happens to be the above bootcharger object (see qwindowsystem_qws.cpp)
+            QtopiaInputEvents::removeKeyboardFilter();
         }
     }
     QFile warmBootMarker(warmBootFile);
@@ -450,14 +467,11 @@ int initApplication( int argc, char ** argv )
         qFatal("Unable to initialize task subsystem.  Please check '%s' exists and its content is valid.", QtopiaServerApplication::taskConfigFile().toLatin1().constData());
 
 
-#if 0 // FIXME first use is broken. just disable it for now
-    // Don't use first use under Windows
-# if defined(Q_OS_UNIX)
+#ifdef QTOPIA_UNPORTED // FIXME first use is broken. just disable it for now
     if ( firstUse() ) {
         a.restart();
         return 0;
     }
-# endif
 #endif
 
     // Load and show UI
@@ -467,30 +481,33 @@ int initApplication( int argc, char ** argv )
 #if defined(QTOPIA_ANIMATED_SPLASH)
     splash->setReplacement(interface);
 #else
-    if(interface)
+    if(interface) {
+        // showMaximized() doesn't work for frameless windows.
+        QDesktopWidget *desktop = QApplication::desktop();
+        QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
+        interface->setGeometry(desktopRect);
         interface->show();
+    }
 #endif
     QPerformanceLog("QtopiaServer") << "Display the server";
 
     Qtopia_initAlarmServer();
     QPerformanceLog("QtopiaServer") << "AlarmServer startup";
 
-    QPerformanceLog("QtopiaServer") << "Entering event loop";
+    QPerformanceLog("QtopiaServer") << (QPerformanceLog::Begin|QPerformanceLog::EventLoop);
 
 //    int rv =  a.exec();
     //Can't do this either, exec is static int rv =  qApp->exec();
     int rv = static_cast<QtopiaApplication *>(qApp)->exec();
 
     qLog(QtopiaServer) << "exiting...";
-    QPerformanceLog("QtopiaServer") << "Event loop exited";
+    QPerformanceLog("QtopiaServer") << (QPerformanceLog::End|QPerformanceLog::EventLoop);
 
     delete interface;
 
-    QPerformanceLog("QtopiaServer") << "Leaving initApplication";
+    QPerformanceLog("QtopiaServer") << QPerformanceLog::End << "initApplication";
     return rv;
 }
-
-#ifndef Q_OS_WIN32
 
 static void check_prefix()
 {
@@ -545,19 +562,23 @@ int main( int argc, char ** argv )
 int main( int argc, char ** argv )
 {
     check_prefix();
+
 #endif // SINGLE_EXEC
-    QPerformanceLog("QtopiaServer") << "Starting qpe main";
+    setpgrp();  // New process group
+
+    QPerformanceLog("QtopiaServer") << QPerformanceLog::Begin << "qpe main";
 
     signal( SIGCHLD, SIG_IGN );
 
-    const QByteArray restartFile = "/tmp/restart-qtopia";
+    QByteArray restartFile = qgetenv("QTOPIA_RESTART_FILE");
+    if ( restartFile.isEmpty() )
+        restartFile = "/tmp/restart-qtopia";
     QFile restartMarker(restartFile);
     restartMarker.open( QIODevice::Append | QIODevice::Truncate );
     restartMarker.close();
 
     int retVal = initApplication( argc, argv );
 
-#ifdef Q_WS_QWS
     // Have we been asked to restart?
     if(!(QtopiaServerApplication::shutdownType() == QtopiaServerApplication::RestartDesktop)) {
         //we assume that the calling script is running
@@ -567,32 +588,31 @@ int main( int argc, char ** argv )
         if ( QFile::exists( restartFile ) )
             QFile::remove( restartFile );
     }
-#endif
 
     // Kill them. Kill them all.
-    setpgid( getpid(), getppid() );
-    killpg( getpid(), SIGTERM );
-    Qtopia::sleep( 1 );
-    killpg( getpid(), SIGKILL );
+    // Place ourselves in parent process group and kill all those in the
+    // created process group
+    pid_t parentGroup = getpgid(getppid());
+    pid_t qpeGroup = getpgid(0);
 
-    QPerformanceLog("QtopiaServer") << "Exiting qpe main";
-    return retVal;
-}
-#else // WIN32
+    if (setpgid(0, parentGroup) != 0)
+        qWarning("Failed to set process group %s", strerror(errno));
+    else
+    {
+        // Ask first
+        if (killpg(qpeGroup, SIGTERM ) != 0)
+            qWarning("Unable to send SIGTERM %s", strerror(errno));
 
-int main( int argc, char ** argv )
-{
-    int retVal = initApplication( argc, argv );
+        Qtopia::sleep(1);
 
-    if ( DesktopApplication::doRestart ) {
-        qLog(QtopiaServer) << "Trying to restart";
-        execl( (Qtopia::qtopiaDir()+"bin\\qpe").toLatin1(), "qpe", 0 );
+        // Die
+        if (killpg(qpeGroup, SIGKILL ) != 0)
+            qWarning("Unable to send SIGKILL %s", strerror(errno));
     }
 
+    QPerformanceLog("QtopiaServer") << QPerformanceLog::End << "qpe main";
     return retVal;
 }
-
-#endif // WIN32
 
 #include "main.moc"
 

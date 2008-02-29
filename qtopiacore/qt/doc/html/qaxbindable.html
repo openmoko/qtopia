@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/activeqt/control/qaxbindable.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/activeqt/control/qaxbindable.cpp -->
 <head>
-  <title>Qt 4.2: QAxBindable Class Reference</title>
+  <title>Qt 4.3: QAxBindable Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QAxBindable Class Reference<br /><sup><sup>[<a href="qaxserver.html">QAxServer</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QAxBindable Class Reference<br /><span class="small-subtitle">[<a href="qaxserver.html">QAxServer</a> module]</span>
+</h1>
 <p>The QAxBindable class provides an interface between a <a href="qwidget.html">QWidget</a> and an ActiveX client. <a href="#details">More...</a></p>
 <pre> #include &lt;QAxBindable&gt;</pre><ul>
 <li><a href="qaxbindable-members.html">List of all members, including inherited members</a></li>
@@ -75,10 +76,11 @@
 <p>If the COM object supports a MIME type then this function is called to initialize the COM object from the data <i>source</i> in <i>format</i>. You have to open <i>source</i> for reading before you can read from it.</p>
 <p>Returns true to indicate success. If the function returns false, then <a href="activeqt.html#activeqt">ActiveQt</a> will process the data by setting the properties through the meta object system.</p>
 <p>If you reimplement this function you also have to implement <a href="qaxbindable.html#writeData">writeData</a>(). The default implementation does nothing and returns false.</p>
+<p><b>Warning:</b> ActiveX controls embedded in HTML can use either the <tt>type</tt> and <tt>data</tt> attribute of the <tt>object</tt> tag to read data, or use a list of <tt>param</tt> tags to initialize properties. If <tt>param</tt> tags are used, then Internet Explorer will ignore the <tt>data</tt> attribute, and readData will not be called.</p>
 <p>This function was introduced in Qt 4.1.</p>
 <p>See also <a href="qaxbindable.html#writeData">writeData</a>().</p>
 <h3 class="fn"><a name="reportError"></a>void QAxBindable::reportError ( int <i>code</i>, const <a href="qstring.html">QString</a> &amp; <i>src</i>, const <a href="qstring.html">QString</a> &amp; <i>desc</i>, const <a href="qstring.html">QString</a> &amp; <i>context</i> = QString() )</h3>
-<p>Reports an error to the client application. <i>code</i> is a control-defined error code. <i>desc</i> is a human-readable description of the error intended for the application user. <i>src</i> is the name of the source for the error, typically the ActiveX server name. <i>context</i> can be the location of a help file with more information about the error. If <i>context</i> ends with a number in brackets, e.g. [12], this number will be interpreted as the context ID in the help file.</p>
+<p>Reports an error to the client application. <i>code</i> is a control-defined error code. <i>desc</i> is a human-readable description of the error intended for the application user. <i>src</i> is the name of the source for the error, typically the ActiveX server name. <i>context</i> can be the location of a help file with more information about the error. If <i>context</i> ends with a number in brackets, e.g&#x2e; [12], this number will be interpreted as the context ID in the help file.</p>
 <h3 class="fn"><a name="requestPropertyChange"></a>bool QAxBindable::requestPropertyChange ( const char * <i>property</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Call this function to request permission to change the property <i>property</i> from the client that is hosting this ActiveX control. Returns true if the client allows the change; otherwise returns false.</p>
 <p>This function is usually called first in the write function for <i>property</i>, and writing is abandoned if the function returns false.</p>
@@ -102,6 +104,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

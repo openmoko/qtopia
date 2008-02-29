@@ -20,11 +20,11 @@
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="emailservice.html#cleanupMessages">cleanupMessages</a></b> ( const QDate &amp; <i>date</i>, int <i>size</i> )</li>
+<li><div class="fn"/>void <b><a href="emailservice.html#cleanupMessages">cleanupMessages</a></b> ( const QDate &amp; <i>date</i>, int <i>size</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>void <b><a href="emailservice.html#emailVCard">emailVCard</a></b> ( const QString &amp; <i>filename</i>, const QString &amp; <i>description</i> )</li>
 <li><div class="fn"/>void <b><a href="emailservice.html#emailVCard-3">emailVCard</a></b> ( const QDSActionRequest &amp; <i>request</i> )</li>
 <li><div class="fn"/>void <b><a href="emailservice.html#viewMail">viewMail</a></b> ()</li>
-<li><div class="fn"/>void <b><a href="emailservice.html#viewMail-2">viewMail</a></b> ( const QString &amp; <i>mailbox</i>, const QString &amp; <i>id</i> )</li>
+<li><div class="fn"/>void <b><a href="emailservice.html#viewMail-2">viewMail</a></b> ( const QMailId &amp; <i>id</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>void <b><a href="emailservice.html#writeMail">writeMail</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="emailservice.html#writeMail-2">writeMail</a></b> ( const QString &amp; <i>name</i>, const QString &amp; <i>email</i> )</li>
 <li><div class="fn"/>void <b><a href="emailservice.html#writeMessage">writeMessage</a></b> ( const QString &amp; <i>name</i>, const QString &amp; <i>email</i>, const QStringList &amp; <i>docAttachments</i>, const QStringList &amp; <i>fileAttachments</i> )</li>
@@ -52,6 +52,7 @@
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="cleanupMessages"></a>void EmailService::cleanupMessages ( const <a href="qdate.html">QDate</a> &amp; <i>date</i>, int <i>size</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This function is deprecated.</p>
 <p>Direct the <i>Email</i> service to purge all messages which are older than the given <i>date</i> and exceed the minimal mail <i>size</i>. This is typically called by the cleanup wizard.</p>
 <p>This slot corresponds to the QCop service message <tt>Email::cleanupMessages(QDate,int)</tt>.</p>
 <h3 class="fn"><a name="emailVCard"></a>void EmailService::emailVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -65,10 +66,11 @@
 <h3 class="fn"><a name="viewMail"></a>void EmailService::viewMail ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Direct the <i>Email</i> service to display the user's message boxes.</p>
 <p>This slot corresponds to the QCop service message <tt>Email::viewMail()</tt>.</p>
-<h3 class="fn"><a name="viewMail-2"></a>void EmailService::viewMail ( const <a href="qstring.html">QString</a> &amp; <i>mailbox</i>, const <a href="qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="viewMail-2"></a>void EmailService::viewMail ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Direct the <i>Email</i> service to display the message identified by <i>id</i> in <i>mailbox</i>.</p>
-<p>This slot corresponds to the QCop service message <tt>Email::viewMail(QString,QString)</tt>.</p>
+<p>Direct the <i>Email</i> service to display the message identified by <i>id</i>.</p>
+<p>This slot corresponds to the QCop service message <tt>Email::viewMail(QMailId)</tt>.</p>
 <h3 class="fn"><a name="writeMail"></a>void EmailService::writeMail ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Direct the <i>Email</i> service to interact with the user to compose a new e-mail message, and then, if confirmed by the user, send the message.</p>
 <p>This slot corresponds to the QCop service message <tt>Email::writeMail()</tt>.</p>
@@ -84,6 +86,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,29 +22,23 @@
 #ifndef CONTACTSOURCE_H
 #define CONTACTSOURCE_H
 
-#include <QDialog>
+#include "qpimsourcedialog.h"
 
 class QContactModel;
-class QPimSourceModel;
-class QListView;
-class ContactSourceDialog : public QDialog
+class ContactSourceDialog : public QPimSourceDialog
 {
     Q_OBJECT
 public:
     ContactSourceDialog(QWidget *parent = 0);
     ~ContactSourceDialog();
 
-    void setContactModel(QContactModel *);
+    void setPimModel(QPimModel *);
 
 private slots:
     void importActiveSim();
     void exportActiveSim();
 
 private:
-    void accept();
-
     QContactModel *contactModel;
-    QListView *view;
-    QPimSourceModel *model;
 };
 #endif//CONTACTSOURCE_H

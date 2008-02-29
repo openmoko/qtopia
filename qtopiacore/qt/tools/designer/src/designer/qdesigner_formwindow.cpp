@@ -9,45 +9,68 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include "qdesigner_actions.h"
 #include "qdesigner_formwindow.h"
+#include "qdesigner_actions.h"
 #include "qdesigner_workbench.h"
 #include "qdesigner_settings.h"
 
 // sdk
-#include <QtDesigner/QtDesigner>
-
-// shared
-#include <QtGui/QUndoCommand>
-#include <qdesigner_command_p.h>
+#include <QtDesigner/QDesignerFormWindowInterface>
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <QtDesigner/QDesignerPropertySheetExtension>
+#include <QtDesigner/QDesignerPropertyEditorInterface>
+#include <QtDesigner/QDesignerFormWindowManagerInterface>
+#include <QtDesigner/QDesignerTaskMenuExtension>
+#include <QtDesigner/QExtensionManager>
 
 #include <QtCore/QEvent>
 #include <QtCore/QFile>
 #include <QtCore/QTimer>
-#include <QtCore/qdebug.h>
 
 #include <QtGui/QAction>
 #include <QtGui/QCloseEvent>
 #include <QtGui/QFileDialog>
 #include <QtGui/QMessageBox>
+#include <QtGui/QPushButton>
+#include <QtGui/QVBoxLayout>
+#include <QtGui/QUndoCommand>
+#include <QtGui/QWindowStateChangeEvent>
+
 
 QDesignerFormWindow::QDesignerFormWindow(QDesignerFormWindowInterface *editor, QDesignerWorkbench *workbench, QWidget *parent, Qt::WindowFlags flags)
-    : QMainWindow(parent, flags),
+    : QWidget(parent, flags),
       m_editor(editor),
       m_workbench(workbench),
-      initialized(false)
+      m_action(new QAction(this)),
+      m_initialized(false),
+      m_windowTitleInitialized(false)
 {
     Q_ASSERT(workbench);
 
@@ -59,20 +82,36 @@ QDesignerFormWindow::QDesignerFormWindow(QDesignerFormWindowInterface *editor, Q
         m_editor = workbench->core()->formWindowManager()->createFormWindow(this);
     }
 
-    setCentralWidget(m_editor);
+    QVBoxLayout *l = new QVBoxLayout(this);
+    l->setMargin(0);
+    l->addWidget(m_editor);
 
-    m_action = new QAction(this);
     m_action->setCheckable(true);
 
     connect(m_editor->commandHistory(), SIGNAL(indexChanged(int)), this, SLOT(updateChanged()));
-    connect(m_editor, SIGNAL(fileNameChanged(QString)), this, SLOT(updateWindowTitle(QString)));
     connect(m_editor, SIGNAL(geometryChanged()), this, SLOT(geometryChanged()));
+    connect(m_editor, SIGNAL(activated(QWidget *)), this, SLOT(widgetActivated(QWidget *)));
 }
 
 QDesignerFormWindow::~QDesignerFormWindow()
 {
     if (workbench())
         workbench()->removeFormWindow(this);
+}
+
+void QDesignerFormWindow::widgetActivated(QWidget *widget)
+{
+    if (const QDesignerTaskMenuExtension *taskMenu = qt_extension<QDesignerTaskMenuExtension*>(m_editor->core()->extensionManager(), widget)) {
+        QAction *action = taskMenu->preferredEditAction();
+        if (!action) {
+            const QList<QAction *> actions = taskMenu->taskActions();
+            if (!actions.isEmpty())
+                action = actions.first();
+        }
+        if (action) {
+            QTimer::singleShot(0, action, SIGNAL(triggered()));
+        }
+    }
 }
 
 QAction *QDesignerFormWindow::action() const
@@ -83,27 +122,35 @@ QAction *QDesignerFormWindow::action() const
 void QDesignerFormWindow::changeEvent(QEvent *e)
 {
     switch (e->type()) {
-        case QEvent::ActivationChange: {
-            if (isActiveWindow()) {
-                m_action->setChecked(true);
-                // ### raise();
-            }
-        } break;
         case QEvent::WindowTitleChange:
-            m_action->setText(windowTitle().replace(QLatin1String("[*]"), ""));
+            m_action->setText(windowTitle().remove(QLatin1String("[*]")));
             break;
         case QEvent::WindowIconChange:
             m_action->setIcon(windowIcon());
             break;
+    case QEvent::WindowStateChange: {
+        const  QWindowStateChangeEvent *wsce =  static_cast<const QWindowStateChangeEvent *>(e);
+        const bool wasMinimized = Qt::WindowMinimized & wsce->oldState();
+        const bool isMinimizedNow = isMinimized();
+        if (wasMinimized != isMinimizedNow )
+            emit minimizationStateChanged(m_editor, isMinimizedNow);
+    }
+        break;
         default:
             break;
     }
-    QMainWindow::changeEvent(e);
+    QWidget::changeEvent(e);
 }
 
 QRect QDesignerFormWindow::geometryHint() const
 {
-    return QRect(0, 0, 400, 300);
+    const QPoint point(0, 0);
+    // If we have a container, we want to be just as big.
+    // QMdiSubWindow attempts to resize its children to sizeHint() when switching user interface modes.
+    if (QWidget *mainContainer = m_editor->mainContainer())
+        return QRect(point, mainContainer->size());
+
+    return QRect(point, sizeHint());
 }
 
 QDesignerFormWindowInterface *QDesignerFormWindow::editor() const
@@ -116,26 +163,72 @@ QDesignerWorkbench *QDesignerFormWindow::workbench() const
     return m_workbench;
 }
 
-void QDesignerFormWindow::updateWindowTitle(const QString &fileName)
-{    
-    QString fn = QFileInfo(fileName).fileName();
-
-    if (fn.isEmpty()) {
-        // Try to preserve its "untitled" number.
-        QRegExp rx(QLatin1String("unnamed( (\\d+))?"));
-
-        if (rx.indexIn(windowTitle()) != -1) {
-            fn = rx.cap(0);
-        } else {
-            fn = QLatin1String("untitled");
+void QDesignerFormWindow::firstShow()
+{
+    // Set up handling of file name changes and set initial title.
+    if (!m_windowTitleInitialized) {
+        m_windowTitleInitialized = true;
+        if (m_editor) {
+            connect(m_editor, SIGNAL(fileNameChanged(QString)), this, SLOT(updateWindowTitle(QString)));
+            updateWindowTitle(m_editor->fileName());
         }
     }
+    show();
+}
 
-    if (QWidget *mc = m_editor->mainContainer()) {
-        setWindowIcon(mc->windowIcon());
-        setWindowTitle(tr("%1 - %2[*]").arg(mc->windowTitle()).arg(fn));
+int QDesignerFormWindow::getNumberOfUntitledWindows() const
+{
+    const int totalWindows = m_workbench->formWindowCount();
+    if (!totalWindows)
+        return 0;
+
+    int maxUntitled = 0;
+    // Find the number of untitled windows excluding ourselves.
+    // Do not fall for 'untitled.ui', match with modified place holder.
+    // This will cause some problems with i18n, but for now I need the string to be "static"
+    QRegExp rx(QLatin1String("untitled( (\\d+))?\\[\\*\\]"));
+    for (int i = 0; i < totalWindows; ++i) {
+        QDesignerFormWindow *fw =  m_workbench->formWindow(i);
+        if (fw != this) {
+            const QString title = m_workbench->formWindow(i)->windowTitle();
+            if (rx.indexIn(title) != -1) {
+                if (maxUntitled == 0)
+                    ++maxUntitled;
+                if (rx.numCaptures() > 1) {
+                    const QString numberCapture = rx.cap(2);
+                    if (!numberCapture.isEmpty())
+                        maxUntitled = qMax(numberCapture.toInt(), maxUntitled);
+                }
+            }
+        }
+    }
+    return maxUntitled;
+}
+
+void QDesignerFormWindow::updateWindowTitle(const QString &fileName)
+{
+    if (!m_windowTitleInitialized) {
+        m_windowTitleInitialized = true;
+        if (m_editor)
+            connect(m_editor, SIGNAL(fileNameChanged(QString)), this, SLOT(updateWindowTitle(QString)));
+    }
+
+    QString fileNameTitle;
+    if (fileName.isEmpty()) {
+        fileNameTitle = QLatin1String("untitled");
+        if (const int maxUntitled = getNumberOfUntitledWindows()) {
+            fileNameTitle += QLatin1Char(' ');
+            fileNameTitle += QString::number(maxUntitled + 1);
+        }
     } else {
-        setWindowTitle(fn);
+        fileNameTitle = QFileInfo(fileName).fileName();
+    }
+
+    if (const QWidget *mc = m_editor->mainContainer()) {
+        setWindowIcon(mc->windowIcon());
+        setWindowTitle(tr("%1 - %2[*]").arg(mc->windowTitle()).arg(fileNameTitle));
+    } else {
+        setWindowTitle(fileNameTitle);
     }
 }
 
@@ -143,22 +236,21 @@ void QDesignerFormWindow::closeEvent(QCloseEvent *ev)
 {
     if (m_editor->isDirty()) {
         raise();
-        QMessageBox box(tr("Save Form?"),
-                tr("Do you want to save the changes you made to \"%1\" before closing?")
-                .arg(m_editor->fileName().isEmpty() ? action()->text() : m_editor->fileName()),
-                QMessageBox::Information,
-                QMessageBox::Yes | QMessageBox::Default, QMessageBox::No,
-                QMessageBox::Cancel | QMessageBox::Escape, m_editor, Qt::Sheet);
-        box.setButtonText(QMessageBox::Yes, m_editor->fileName().isEmpty() ? tr("Save...") : tr("Save"));
-        box.setButtonText(QMessageBox::No, tr("Don't Save"));
+        QMessageBox box(QMessageBox::Information, tr("Save Form?"),
+                tr("Do you want to save the changes to this document before closing?"),
+                QMessageBox::Discard | QMessageBox::Cancel | QMessageBox::Save, m_editor);
+        box.setInformativeText(tr("If you don't save, your changes will be lost."));
+        box.setWindowModality(Qt::WindowModal);
+        static_cast<QPushButton *>(box.button(QMessageBox::Save))->setDefault(true);
+
         switch (box.exec()) {
-            case QMessageBox::Yes: {
+            case QMessageBox::Save: {
                 bool ok = workbench()->saveForm(m_editor);
                 ev->setAccepted(ok);
                 m_editor->setDirty(!ok);
                 break;
             }
-            case QMessageBox::No:
+            case QMessageBox::Discard:
                 m_editor->setDirty(false); // Not really necessary, but stops problems if we get close again.
                 ev->accept();
                 break;
@@ -167,38 +259,33 @@ void QDesignerFormWindow::closeEvent(QCloseEvent *ev)
                 break;
         }
     }
-
-    if (m_workbench->core()->formWindowManager()->formWindowCount() == 1 && ev->isAccepted()
-            && QDesignerSettings().showNewFormOnStartup())
-        QTimer::singleShot(200, m_workbench->actionManager(), SLOT(createForm()));  // Use timer in case we are quitting.
 }
 
 void QDesignerFormWindow::updateChanged()
 {
-    setWindowModified(m_editor->isDirty());
-    updateWindowTitle(m_editor->fileName());
+    // Sometimes called after form window destruction.
+    if (m_editor) {
+        setWindowModified(m_editor->isDirty());
+        updateWindowTitle(m_editor->fileName());
+    }
 }
 
 void QDesignerFormWindow::resizeEvent(QResizeEvent *rev)
 {
-    if(initialized) {
+    if(m_initialized) {
         m_editor->setDirty(true);
         setWindowModified(true);
     }
 
-    initialized = true;
-    QMainWindow::resizeEvent(rev);
-
-    // update the maincontainer on resize
-    m_editor->mainContainer()->raise();
-    m_editor->mainContainer()->update();
+    m_initialized = true;
+    QWidget::resizeEvent(rev);
 }
 
 void QDesignerFormWindow::geometryChanged()
 {
     if(QObject *object = m_editor->core()->propertyEditor()->object()) {
-        QDesignerPropertySheetExtension *sheet = 
+        QDesignerPropertySheetExtension *sheet =
             qt_extension<QDesignerPropertySheetExtension*>(m_editor->core()->extensionManager(), object);
-        m_editor->core()->propertyEditor()->setPropertyValue("geometry", sheet->property(sheet->indexOf("geometry")));
+        m_editor->core()->propertyEditor()->setPropertyValue(QLatin1String("geometry"), sheet->property(sheet->indexOf(QLatin1String("geometry"))));
     }
 }

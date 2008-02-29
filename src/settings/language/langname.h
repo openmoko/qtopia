@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,10 +19,9 @@
 **
 ****************************************************************************/
 
-// Also used by Words and QtopiaDesktop
+// Also used by Words, Date & Time
 #include <stdlib.h>
 #include <QTranslator>
-#include <QVariant>
 
 #include <qtopialog.h>
 #include <qtopianamespace.h>
@@ -59,45 +58,33 @@ static QString languageName(const QString& id, QFont* font, bool* rightToLeft)
             if ( langName.isEmpty() )
                 langName = conf.value( QLatin1String("Name") ).toString();
 
-#ifndef QTOPIA_DESKTOP
             if ( font ) {
                 // OK, we have the language, now find the normal
                 // font to use for that language...
                 //don't use QFontMetric::inFont() as it increases startup time by 10%
-                int iptsz=font->pointSize();
                 QTranslator t(0);
-                QString filename = tfn+id+"/QtopiaDefaults.qm";
+                QString filename = tfn + id + "/QtopiaDefaults.qm";
+                QSettings qpeconfig(QSettings::SystemScope, QLatin1String("Trolltech"), QLatin1String("qpe"));
+                qpeconfig.beginGroup("Font");
                 if (t.load(filename)) {
-                    QSettings fmcfg(QSettings::SystemScope, QLatin1String("Trolltech"), QLatin1String("FontMap"));
-                    fmcfg.beginGroup(QLatin1String("Map"));
-                    QString fonts[3];
-                    int size[3];
-                    QString bf;
-                    QStringList fs;
-                    for ( int i=0; i<3; ++i ) {
-                        bf = fmcfg.value( "Font"+QString::number(i)+"[]" ).toString();
-                        QString tr = t.translate("FontMap",bf.toLatin1().constData());
-                        if ( !tr.isEmpty() )
-                            bf = tr;
-                        fs = bf.split(",");
-                        fonts[i] = fs[1];
-                        size[i] = fs[2].toInt();
-                    }
-                    int i;
-                    for ( i=0; i<3 && size[i] < iptsz; ++i ) ;
-                    if ( i == 3 )
-                        *font = QFont( fonts[2], size[2] );
-                    else
-                        *font = QFont( fonts[i], size[i] );
+                    QString trFamily = t.translate("QPE", qpeconfig.value(QLatin1String("FontFamily[]")).toString().toAscii().constData());
+                    QString trSize = t.translate("QPE", qpeconfig.value(QLatin1String("FontSize[]")).toString().toAscii().constData());
+
+                    QFont f(trFamily);
+                    if (!trSize.isEmpty())
+                        f.setPointSizeF(trSize.toDouble());
+                    *font = f;
                 } else {
                     //if we cannot find qm file it must be en_US or
                     //none specified for id -> keep dejavu
+                    double size = qpeconfig.value(QLatin1String("FontSize[]")).toDouble();
+
+                    QFont f(font->family());
+                    f.setPointSizeF(size);
+                    *font = f;
                     qLog( I18n ) << "Using default font" << font->family() << "for" << id;
                 }
             }
-#else
-            (void)font;
-#endif
             return langName;
         }
     }

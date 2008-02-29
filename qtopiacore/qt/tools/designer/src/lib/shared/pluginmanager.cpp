@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,6 +37,7 @@
 ****************************************************************************/
 
 #include "pluginmanager_p.h"
+#include "qdesigner_utils_p.h"
 
 #include <QtDesigner/QDesignerFormEditorInterface>
 #include <QtDesigner/QDesignerCustomWidgetInterface>
@@ -37,7 +53,7 @@
 
 static QStringList unique(const QStringList &lst)
 {
-    QSet<QString> s = QSet<QString>::fromList(lst);
+    const QSet<QString> s = QSet<QString>::fromList(lst);
     return s.toList();
 }
 
@@ -45,16 +61,23 @@ QStringList QDesignerPluginManager::defaultPluginPaths() const
 {
     QStringList result;
 
-    QStringList path_list = QCoreApplication::libraryPaths();
-    foreach (const QString &path, path_list)
-        result.append(path + QDir::separator() + QLatin1String("designer"));
+    const QStringList path_list = QCoreApplication::libraryPaths();
 
-    result.append(QDir::homePath()
-                    + QDir::separator()
-                    + QLatin1String(".designer")
-                    + QDir::separator()
-                    + QLatin1String("plugins"));
+    const QString designer = QLatin1String("designer");
+    foreach (const QString &path, path_list) {
+        QString libPath = path;
+        libPath += QDir::separator();
+        libPath += designer;
+        result.append(libPath);
+    }
 
+    QString homeLibPath = QDir::homePath();
+    homeLibPath += QDir::separator();
+    homeLibPath += QLatin1String(".designer");
+    homeLibPath += QDir::separator();
+    homeLibPath += QLatin1String("plugins");
+
+    result.append(homeLibPath);
     return result;
 }
 
@@ -117,6 +140,16 @@ QStringList QDesignerPluginManager::disabledPlugins() const
     return m_disabledPlugins;
 }
 
+QStringList QDesignerPluginManager::failedPlugins() const
+{
+    return m_failedPlugins.keys();
+}
+
+QString QDesignerPluginManager::failureReason(const QString &pluginName) const
+{
+    return m_failedPlugins.value(pluginName);
+}
+
 QStringList QDesignerPluginManager::registeredPlugins() const
 {
     return m_registeredPlugins;
@@ -143,6 +176,17 @@ void QDesignerPluginManager::updateRegisteredPlugins()
         registerPath(path);
 }
 
+bool QDesignerPluginManager::registerNewPlugins()
+{
+    const int before = m_registeredPlugins.size();
+    foreach (QString path,  m_pluginPaths)
+        registerPath(path);
+    const bool newPluginsFound = m_registeredPlugins.size() > before;
+    if (newPluginsFound)
+        ensureInitialized();
+    return newPluginsFound;
+}
+
 void QDesignerPluginManager::registerPath(const QString &path)
 {
     QStringList candidates = findPlugins(path);
@@ -159,15 +203,16 @@ void QDesignerPluginManager::registerPlugin(const QString &plugin)
         return;
 
     QPluginLoader loader(plugin);
-    if (loader.load())
+    if (loader.isLoaded() || loader.load()) {
         m_registeredPlugins += plugin;
-    if (!loader.isLoaded()) {
-        qWarning("QDesignerPluginManager: failed to load plugin\n"
-                 " - pluginName='%s'\n"
-                 " - error='%s'\n",
-                 qPrintable(plugin),
-                 qPrintable(loader.errorString()));
+        FailedPluginMap::iterator fit = m_failedPlugins.find(plugin);
+        if (fit != m_failedPlugins.end())
+            m_failedPlugins.erase(fit);
+        return;
     }
+
+    const QString errorMessage = loader.errorString();
+    m_failedPlugins.insert(plugin, errorMessage);
 }
 
 bool QDesignerPluginManager::syncSettings()

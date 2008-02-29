@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -103,16 +118,6 @@ Q_GLOBAL_STATIC(QHostInfoAgent, agent)
 */
 
 static QBasicAtomic idCounter = Q_ATOMIC_INIT(1);
-static int qt_qhostinfo_newid()
-{
-    register int id;
-    for (;;) {
-        id = idCounter;
-        if (idCounter.testAndSet(id, id + 1))
-            break;
-    }
-    return id;
-}
 
 /*!
     Looks up the IP address(es) associated with host name \a name, and
@@ -185,7 +190,7 @@ int QHostInfo::lookupHost(const QString &name, QObject *receiver,
     QHostInfoResult *result = new QHostInfoResult;
     QObject::connect(result, SIGNAL(resultsReady(QHostInfo)),
                      receiver, member);
-    int id = result->lookupId = ::qt_qhostinfo_newid();
+    int id = result->lookupId = ::idCounter.fetchAndAdd(1);
     agent->addHostName(lookup, result);
 
 #if !defined QT_NO_THREAD
@@ -242,6 +247,9 @@ QHostInfo QHostInfo::fromName(const QString &name)
 void QHostInfoAgent::run()
 {
 #ifndef QT_NO_THREAD
+    // Dont' allow thread termination during event delivery, but allow it
+    // during the actual blocking host lookup stage.
+    setTerminationEnabled(false);
     forever
 #endif
     {
@@ -253,8 +261,12 @@ void QHostInfoAgent::run()
             QMutexLocker locker(&mutex);
             if (!quit && queries.isEmpty())
                 cond.wait(&mutex);
-            if (quit)
+            if (quit) {
+                // Reset the quit variable in case QCoreApplication is
+                // destroyed and recreated.
+                quit = false;
                 break;
+            }
 	    if (queries.isEmpty())
 		continue;
 #else
@@ -270,7 +282,18 @@ void QHostInfoAgent::run()
                query->hostName.toLatin1().constData());
 #endif
 
+#ifndef QT_NO_THREAD
+        // Start query - allow termination at this point, but not outside. We
+        // don't want to all termination during event delivery, but we don't
+        // want the lookup to prevent the app from quitting (the agent
+        // destructor terminates the thread).
+        setTerminationEnabled(true);
+#endif
         QHostInfo info = fromName(query->hostName);
+#ifndef QT_NO_THREAD
+        setTerminationEnabled(false);
+#endif
+
         int id = query->object->lookupId;
         info.setLookupId(id);
         if (pendingQueryId == id)

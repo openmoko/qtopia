@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -75,8 +75,7 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 #include <stdlib.h>
 
 #include <QSettings>
-#include <QFile>
-#include <QDataStream>
+#include <QIODevice>
 #include <QString>
 #include "vobject_p.h"
 #include <string.h>
@@ -1379,8 +1378,8 @@ void writeVObject(FILE *fp, VObject *o)
 
 /**/
 
-void writeProp(QDataStream *stream, VObject *o);
-void writeVObject_(QDataStream *stream, VObject *o)
+void writeProp(QIODevice *device, VObject *o);
+void writeVObject_(QIODevice *device, VObject *o)
 {
     if(NAME_OF(o))
     {
@@ -1391,66 +1390,66 @@ void writeVObject_(QDataStream *stream, VObject *o)
         {
             VObjectIterator t;
             const char *begin = NAME_OF(o);
-            stream->writeRawData( "BEGIN:", 6 );
-            stream->writeRawData( begin, strlen( begin ) );
-            stream->writeRawData( "\n", 1 );
+            device->write( "BEGIN:", 6 );
+            device->write( begin, strlen( begin ) );
+            device->write( "\n", 1 );
 
             initPropIterator(&t,o);
             while (moreIteration(&t))
             {
                 VObject *eachProp = nextVObject(&t);
-                writeProp(stream, eachProp);
+                writeProp(device, eachProp);
             }
 
-            stream->writeRawData( "END:", 4 );
-            stream->writeRawData( begin, strlen( begin ) );
-            stream->writeRawData( "\n\n", 2 );
+            device->write( "END:", 4 );
+            device->write( begin, strlen( begin ) );
+            device->write( "\n\n", 2 );
         }
     }
 }
 
-void writeVObject(QDataStream *stream, VObject *o)
+void writeVObject(QIODevice *device, VObject *o)
 {
     initVObjectEncoding();
 
-    writeVObject_(stream, o);
+    writeVObject_(device, o);
 }
 
-void _writeGroup(QDataStream *stream, VObject *o)
+void _writeGroup(QIODevice *device, VObject *o)
 {
     if( o )
     {
-        _writeGroup( stream, isAPropertyOf( o, VCGroupingProp ) );
+        _writeGroup( device, isAPropertyOf( o, VCGroupingProp ) );
         const char *value = STRINGZ_VALUE_OF(o);
-        stream->writeRawData( value, strlen( value ) );
-        stream->writeRawData( ".", 1 );
+        device->write( value, strlen( value ) );
+        device->write( ".", 1 );
     }
 }
 
-void writeGroup(QDataStream *stream, VObject *o)
+void writeGroup(QIODevice *device, VObject *o)
 {
-    _writeGroup(stream, isAPropertyOf( o, VCGroupingProp ) );
+    _writeGroup(device, isAPropertyOf( o, VCGroupingProp ) );
     const char *value = NAME_OF(o);
-    stream->writeRawData( value, strlen( value ) );
+    device->write( value, strlen( value ) );
 }
 
-void writeEncoding(QDataStream *stream)
+void writeEncoding(QIODevice *device)
 {
     if( vobj_enc_s )
     {
-        stream->writeRawData( ";", 1 );
-        stream->writeRawData( VCEncodingProp, strlen( VCEncodingProp ) );
-        stream->writeRawData( "=", 1 );
-        stream->writeRawData( vobj_enc_s, strlen( vobj_enc_s ) );
+        device->write( ";", 1 );
+        device->write( VCEncodingProp, strlen( VCEncodingProp ) );
+        device->write( "=", 1 );
+        device->write( vobj_enc_s, strlen( vobj_enc_s ) );
     }
 
-    stream->writeRawData( ";", 1 );
-    stream->writeRawData( VCCharSetProp, strlen( VCCharSetProp ) );
-    stream->writeRawData( "=", 1 );
-    stream->writeRawData( vobj_cs, strlen( vobj_cs ) );
+    device->write( ";", 1 );
+    device->write( VCCharSetProp, strlen( VCCharSetProp ) );
+    device->write( "=", 1 );
+    device->write( vobj_cs, strlen( vobj_cs ) );
 }
 
-static int writeBase64(QDataStream *stream, unsigned char *s, long len)
+static int writeBase64(QIODevice *device, unsigned char *s, long len)
 {
     long cur = 0;
     int i, numQuads = 0;
@@ -1487,17 +1486,17 @@ static int writeBase64(QDataStream *stream, unsigned char *s, long len)
         }
         // now output 'quad' with appropriate whitespace and line ending
         if( numQuads == 0 )
-            stream->writeRawData( "    ", 4 );
-        stream->writeRawData( quad, numQuads);
+            device->write( "    ", 4 );
+        device->write( quad, numQuads);
         if( ( cur >= len ) || ( numQuads == MAXQUADS - 1 ) )
-            stream->writeRawData( "\n", 1 );
+            device->write( "\n", 1 );
         numQuads = (numQuads + 1) % MAXQUADS;
     }
 
     return 1;
 }
 
-static void writeEncString(QDataStream *stream, const char *s, bool nosemi)
+static void writeEncString(QIODevice *device, const char *s, bool nosemi)
 {
     /*
         only A-Z, 0-9 and
@@ -1522,8 +1521,8 @@ static void writeEncString(QDataStream *stream, const char *s, bool nosemi)
             while (*p)
             {
                 if ( *p == '\n' || nosemi && ( *p == '\\' || *p == ';' ) )
-                    stream->writeRawData( "\\", 1 );
-                stream->writeRawData( p, 1 );
+                    device->write( "\\", 1 );
+                device->write( p, 1 );
                 p++;
             }
             break;
@@ -1533,65 +1532,65 @@ static void writeEncString(QDataStream *stream, const char *s, bool nosemi)
             {
                 const char *rep = qpReplaceChar(*p);
                 if (rep)
-                    stream->writeRawData( rep, strlen( rep ) );
+                    device->write( rep, strlen( rep ) );
                 else if ( *p == ';' && nosemi )
-                    stream->writeRawData( "=3B", 3 );
+                    device->write( "=3B", 3 );
                 else if ( *p == ' ' )
                 {
                     if ( !p[1] || p[1] == '\n' ) // RFC 1521
-                        stream->writeRawData( "=20", 3 );
+                        device->write( "=20", 3 );
                     else
-                        stream->writeRawData( p, 1 );
+                        device->write( p, 1 );
                 }
                 else
-                    stream->writeRawData( p, 1 );
+                    device->write( p, 1 );
                 p++;
             }
             break;
 
         case Base64:
-            writeBase64(stream, (unsigned char*)p, strlen(p));
-            stream->writeRawData( "\n", 1 );
+            writeBase64(device, (unsigned char*)p, strlen(p));
+            device->write( "\n", 1 );
             break;
     }
 }
 
-static void writeValue(QDataStream *stream, VObject *o, unsigned long size, bool nosemi)
+static void writeValue(QIODevice *device, VObject *o, unsigned long size, bool nosemi)
 {
     if(o == 0) return;
     switch (VALUE_TYPE(o))
     {
         case VCVT_STRINGZ:
-            writeEncString(stream, STRINGZ_VALUE_OF(o), nosemi);
+            writeEncString(device, STRINGZ_VALUE_OF(o), nosemi);
             break;
 
         case VCVT_UINT:
             {
                 QString val = QString::number( INTEGER_VALUE_OF(o) );
-                stream->writeRawData( (const char*)val.toLatin1(), val.length() );
+                device->write( (const char*)val.toLatin1(), val.length() );
                 break;
             }
 
         case VCVT_ULONG:
             {
                 QString val = QString::number( LONG_VALUE_OF(o) );
-                stream->writeRawData( (const char*)val.toLatin1(), val.length() );
+                device->write( (const char*)val.toLatin1(), val.length() );
                 break;
             }
 
         case VCVT_RAW:
-            stream->writeRawData( "\n", 1 );
-            writeBase64(stream,(unsigned char*)(ANY_VALUE_OF(o)),size);
+            device->write( "\n", 1 );
+            writeBase64(device,(unsigned char*)(ANY_VALUE_OF(o)),size);
             break;
 
         case VCVT_VOBJECT:
-            stream->writeRawData( "\n", 1 );
-            writeVObject_(stream, VOBJECT_VALUE_OF(o));
+            device->write( "\n", 1 );
+            writeVObject_(device, VOBJECT_VALUE_OF(o));
             break;
     }
 }
 
-static void writeAttrValue(QDataStream *stream, VObject *o)
+static void writeAttrValue(QIODevice *device, VObject *o)
 {
     if( NAME_OF( o ) )
     {
@@ -1601,23 +1600,23 @@ static void writeAttrValue(QDataStream *stream, VObject *o)
             return;
 
         if( includesUnprintable( o, true ) )
-            writeEncoding( stream );
+            writeEncoding( device );
 
-        stream->writeRawData( ";", 1 );
+        device->write( ";", 1 );
         const char *name = NAME_OF(o);
-        stream->writeRawData( name, strlen( name ) );
+        device->write( name, strlen( name ) );
     }
     else
-        stream->writeRawData( ";", 1 );
+        device->write( ";", 1 );
 
     if( VALUE_TYPE( o ) )
     {
-        stream->writeRawData( "=", 1 );
-        writeValue(stream,o,0,true);
+        device->write( "=", 1 );
+        writeValue(device,o,0,true);
     }
 }
 
-void writeProp(QDataStream *stream, VObject *o)
+void writeProp(QIODevice *device, VObject *o)
 {
     if( NAME_OF( o ) )
     {
@@ -1627,14 +1626,14 @@ void writeProp(QDataStream *stream, VObject *o)
         pi = lookupPropInfo(NAME_OF(o));
         if( pi && ( ( pi->flags & PD_BEGIN ) != 0 ) )
         {
-            writeVObject_( stream, o );
+            writeVObject_( device, o );
             return;
         }
 
         if( isAPropertyOf( o, VCGroupingProp ) )
-            writeGroup( stream, o );
+            writeGroup( device, o );
         else
-            stream->writeRawData( NAME_OF(o), strlen( NAME_OF(o) ) );
+            device->write( NAME_OF(o), strlen( NAME_OF(o) ) );
 
         if( pi )
             fields_ = pi->fields;
@@ -1646,7 +1645,7 @@ void writeProp(QDataStream *stream, VObject *o)
             VObject *eachProp = nextVObject( &t );
             s = NAME_OF( eachProp );
             if( qstricmp( VCGroupingProp, s ) && !inList( fields_, s ) )
-                writeAttrValue( stream, eachProp );
+                writeAttrValue( device, eachProp );
         }
 
         if (fields_)
@@ -1666,9 +1665,9 @@ void writeProp(QDataStream *stream, VObject *o)
             fields = fields_;
 
             if ( !printable )
-                writeEncoding(stream);
+                writeEncoding(device);
 
-            stream->writeRawData( ":", 1 );
+            device->write( ":", 1 );
             while (*fields)
             {
                 VObject *t = isAPropertyOf(o,*fields);
@@ -1679,10 +1678,10 @@ void writeProp(QDataStream *stream, VObject *o)
             fields = fields_;
             for (i=0;i<n;i++)
             {
-                writeValue(stream, isAPropertyOf(o, *fields), 0, true);
+                writeValue(device, isAPropertyOf(o, *fields), 0, true);
                 fields++;
                 if( i < ( n - 1 ) )
-                    stream->writeRawData( ";", 1 );
+                    device->write( ";", 1 );
             }
         }
     }
@@ -1691,17 +1690,17 @@ void writeProp(QDataStream *stream, VObject *o)
     if (VALUE_TYPE(o))
     {
         if( includesUnprintable(o,false) )
-            writeEncoding(stream);
+            writeEncoding(device);
 
         unsigned long size = 0;
         VObject *p = isAPropertyOf(o, VCDataSizeProp);
         if (p) size = LONG_VALUE_OF(p);
 
-        stream->writeRawData( ":", 1 );
-        writeValue(stream, o, size, false);
+        device->write( ":", 1 );
+        writeValue(device, o, size, false);
     }
 
-    stream->writeRawData( "\n", 1 );
+    device->write( "\n", 1 );
 }
 
 /**/

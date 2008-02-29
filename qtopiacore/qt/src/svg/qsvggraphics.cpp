@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,6 +53,13 @@ void QSvgAnimation::draw(QPainter *)
     qWarning("<animation> no implemented");
 }
 
+static inline QRectF boundsOnStroke(const QPainterPath &path, qreal width)
+{
+    QPainterPathStroker stroker;
+    stroker.setWidth(width);
+    QPainterPath stroke = stroker.createStroke(path);
+    return stroke.boundingRect();
+}
 
 QSvgCircle::QSvgCircle(QSvgNode *parent, const QRectF &rect)
     : QSvgNode(parent), m_bounds(rect)
@@ -47,7 +69,14 @@ QSvgCircle::QSvgCircle(QSvgNode *parent, const QRectF &rect)
 
 QRectF QSvgCircle::bounds() const
 {
-    return m_bounds;
+    qreal sw = strokeWidth();
+    if (qFuzzyCompare(sw, 0))
+        return m_bounds;
+    else {
+        QPainterPath path;
+        path.addRect(m_bounds);
+        return boundsOnStroke(path, sw);
+    }
 }
 
 void QSvgCircle::draw(QPainter *p)
@@ -77,7 +106,14 @@ QSvgEllipse::QSvgEllipse(QSvgNode *parent, const QRectF &rect)
 
 QRectF QSvgEllipse::bounds() const
 {
-    return m_bounds;
+    qreal sw = strokeWidth();
+    if (qFuzzyCompare(sw, 0))
+        return m_bounds;
+    else {
+        QPainterPath path;
+        path.addEllipse(m_bounds);
+        return boundsOnStroke(path, sw);
+    }
 }
 
 void QSvgEllipse::draw(QPainter *p)
@@ -135,7 +171,12 @@ void QSvgPath::draw(QPainter *p)
 
 QRectF QSvgPath::bounds() const
 {
-    return m_cachedBounds;
+    qreal sw = strokeWidth();
+    if (qFuzzyCompare(sw, 0))
+        return m_cachedBounds;
+    else {
+        return boundsOnStroke(m_path, sw);
+    }
 }
 
 QSvgPolygon::QSvgPolygon(QSvgNode *parent, const QPolygonF &poly)
@@ -146,7 +187,14 @@ QSvgPolygon::QSvgPolygon(QSvgNode *parent, const QPolygonF &poly)
 
 QRectF QSvgPolygon::bounds() const
 {
-    return m_poly.boundingRect();
+    qreal sw = strokeWidth();
+    if (qFuzzyCompare(sw, 0))
+        return m_poly.boundingRect();
+    else {
+        QPainterPath path;
+        path.addPolygon(m_poly);
+        return boundsOnStroke(path, sw);
+    }
 }
 
 void QSvgPolygon::draw(QPainter *p)
@@ -184,7 +232,14 @@ QSvgRect::QSvgRect(QSvgNode *node, const QRectF &rect, int rx, int ry)
 
 QRectF QSvgRect::bounds() const
 {
-    return m_rect;
+    qreal sw = strokeWidth();
+    if (qFuzzyCompare(sw, 0))
+        return m_rect;
+    else {
+        QPainterPath path;
+        path.addRect(m_rect);
+        return boundsOnStroke(path, sw);
+    }
 }
 
 void QSvgRect::draw(QPainter *p)
@@ -443,12 +498,24 @@ QRectF QSvgUse::transformedBounds(const QMatrix &mat) const
 
 QRectF QSvgPolyline::bounds() const
 {
-    return m_poly.boundingRect();
+    qreal sw = strokeWidth();
+    if (qFuzzyCompare(sw, 0))
+        return m_poly.boundingRect();
+    else {
+        QPainterPath path;
+        path.addPolygon(m_poly);
+        return boundsOnStroke(path, sw);
+    }
 }
 
 QRectF QSvgArc::bounds() const
 {
-    return m_cachedBounds;
+    qreal sw = strokeWidth();
+    if (qFuzzyCompare(sw, 0))
+        return m_cachedBounds;
+    else {
+        return boundsOnStroke(cubic, sw);
+    }
 }
 
 QRectF QSvgImage::bounds() const
@@ -458,11 +525,18 @@ QRectF QSvgImage::bounds() const
 
 QRectF QSvgLine::bounds() const
 {
-    qreal minX = qMin(m_bounds.x1(), m_bounds.x2());
-    qreal minY = qMin(m_bounds.y1(), m_bounds.y2());
-    qreal maxX = qMax(m_bounds.x1(), m_bounds.x2());
-    qreal maxY = qMax(m_bounds.y1(), m_bounds.y2());
-    
-    return QRectF(minX, minY, maxX-minX, maxY-minY);
+    qreal sw = strokeWidth();
+    if (qFuzzyCompare(sw, 0)) {
+        qreal minX = qMin(m_bounds.x1(), m_bounds.x2());
+        qreal minY = qMin(m_bounds.y1(), m_bounds.y2());
+        qreal maxX = qMax(m_bounds.x1(), m_bounds.x2());
+        qreal maxY = qMax(m_bounds.y1(), m_bounds.y2());
+        return QRectF(minX, minY, maxX-minX, maxY-minY);
+    } else {
+        QPainterPath path;
+        path.moveTo(m_bounds.x1(), m_bounds.y1());
+        path.lineTo(m_bounds.x2(), m_bounds.y2());
+        return boundsOnStroke(path, sw);
+    }
 }
 

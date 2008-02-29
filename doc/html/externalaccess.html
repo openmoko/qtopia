@@ -41,13 +41,14 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The ExternalAccess class starts the modem emulator on a serial port to allow external access via a serial cable.</p>
-<p>Many modern phones have an external serial interface, which is used to connect to a computer for the purposes of data calls, FAX transmissions, or synchronization with desktop applications. The <a href="syscust-gsm.html#modem-emulator">Modem Emulator</a> assists with supporting such interfaces.</p>
+<p>Many modern phones have an external serial interface, which is used to connect to a computer for the purposes of data calls, FAX transmissions, or synchronization with desktop applications. The <a href="modem-emulator.html">Modem Emulator</a> assists with supporting such interfaces.</p>
 <p>To enable the modem emulator to use an external serial interface, the <tt>Phone.conf</tt> file should be placed under the <tt>etc/default/Trolltech</tt> directory on the vendor system, with contents such as the following:</p>
 <pre>    [SerialDevices]
     ExternalAccessDevice=/dev/ttyS1:115200</pre>
 <p>where <tt>/dev/ttyS1</tt> should be replaced with the name of the serial device to listen to, and <tt>115200</tt> should be replaced with the desired baud rate.</p>
 <p>If this option is configured, the modem emulator will be launched automatically once the phone server has been initialized. If this option is not configured, then the modem emulator will only be launched when other components in the system request it (for example, Bluetooth hands-free kits).</p>
-<p>See also <a href="syscust-gsm.html#modem-emulator">Modem Emulator</a>.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
+<p>See also <a href="modem-emulator.html">Modem Emulator</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="ExternalAccess"></a>ExternalAccess::ExternalAccess ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -58,6 +59,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

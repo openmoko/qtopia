@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,14 +26,23 @@
 #include <qnetworkregistration.h>
 #include <qpresence.h>
 #include <qcommservicemanager.h>
+#include "qabstractcallpolicymanager.h"
 
 class VoIPManagerPrivate;
 
-class VoIPManager : public QObject
+class VoIPManager : public QAbstractCallPolicyManager
 {
     Q_OBJECT
 public:
+    VoIPManager(QObject *parent=0);
     static VoIPManager * instance();
+
+    QString callType() const;
+    QString trCallType() const;
+    QString callTypeIcon() const;
+    QAbstractCallPolicyManager::CallHandling handling(const QString& number);
+    QString registrationMessage() const;
+    QString registrationIcon() const;
 
     QTelephony::RegistrationState registrationState() const;
     QPresence::Status localPresence() const;
@@ -41,7 +50,6 @@ public:
     bool isAvailable(const QString &uri);
 
 signals:
-    void registrationChanged(QTelephony::RegistrationState);
     void localPresenceChanged(QPresence::Status);
     void monitoredPresenceChanged(const QString&, bool available);
 
@@ -50,13 +58,15 @@ private slots:
     void localPresenceChanged();
     void monitoredPresence(const QString&, QPresence::Status);
     void servicesChanged();
+    void hideMessageTimeout();
 
 private:
-    VoIPManager();
     VoIPManagerPrivate *d;
 
     void serviceStarted();
     void serviceStopped();
 };
+
+QTOPIA_TASK_INTERFACE(VoIPManager);
 
 #endif // _VOIPMANAGER_H_

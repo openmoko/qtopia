@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,6 +40,12 @@
 #include "qcache.h"
 #include "qobject.h"
 #include "qdebug.h"
+
+#ifdef Q_OS_WIN
+#include "qpaintengine.h"
+#include <private/qimage_p.h>
+#include <private/qpixmap_p.h>
+#endif
 
 /*!
     \class QPixmapCache
@@ -64,13 +85,27 @@
 
 static int cache_limit = 1024;                        // 1024 KB cache limit
 
-class QPMCache : public QObject, public QCache<int, QPixmap>
+class QDetachedPixmap : public QPixmap
+{
+public:
+    QDetachedPixmap(const QPixmap &pix) : QPixmap(pix)
+    {
+#ifdef Q_OS_WIN
+        if (data->image.d->paintEngine && !data->image.d->paintEngine->isActive()) {
+            delete data->image.d->paintEngine;
+            data->image.d->paintEngine = 0;
+        }
+#endif
+    }
+};
+
+class QPMCache : public QObject, public QCache<qint64, QDetachedPixmap>
 {
     Q_OBJECT
 public:
     QPMCache()
         : QObject(0),
-          QCache<int, QPixmap>(cache_limit * 1024),
+          QCache<qint64, QDetachedPixmap>(cache_limit * 1024),
           id(0), ps(0), t(false) { }
     ~QPMCache() { }
 
@@ -81,7 +116,7 @@ public:
     QPixmap *object(const QString &key) const;
 
 private:
-    QHash<QString, int> serialNumbers;
+    QHash<QString, qint64> cacheKeys;
     int id;
     int ps;
     bool t;
@@ -107,15 +142,14 @@ void QPMCache::timerEvent(QTimerEvent *)
     setMaxCost(mc);
     ps = totalCost();
 
-    QHash<QString,int>::iterator it = serialNumbers.begin();
-    while (it != serialNumbers.end()) {
+    QHash<QString, qint64>::iterator it = cacheKeys.begin();
+    while (it != cacheKeys.end()) {
         if (!contains(it.value())) {
-            it = serialNumbers.erase(it);
-        }
-        else
+            it = cacheKeys.erase(it);
+        } else {
             ++it;
+        }
     }
-
 
     if (!size()) {
         killTimer(id);
@@ -129,20 +163,20 @@ void QPMCache::timerEvent(QTimerEvent *)
 
 QPixmap *QPMCache::object(const QString &key) const
 {
-    return QCache<int,QPixmap>::object(serialNumbers.value(key, -1));
+    return QCache<qint64, QDetachedPixmap>::object(cacheKeys.value(key, -1));
 }
 
 
 bool QPMCache::insert(const QString& key, const QPixmap &pixmap, int cost)
 {
-    int serialNumber = pixmap.serialNumber();
-    if (contains(serialNumber)) {
-        serialNumbers.insert(key, serialNumber);
+    qint64 cacheKey = pixmap.cacheKey();
+    if (QCache<qint64, QDetachedPixmap>::object(cacheKey)) {
+        cacheKeys.insert(key, cacheKey);
         return true;
     }
-    bool success = QCache<int, QPixmap>::insert(serialNumber, new QPixmap(pixmap), cost);
+    bool success = QCache<qint64, QDetachedPixmap>::insert(cacheKey, new QDetachedPixmap(pixmap), cost);
     if (success) {
-        serialNumbers.insert(key, serialNumber);
+        cacheKeys.insert(key, cacheKey);
         if (!id) {
             id = startTimer(30000);
             t = false;
@@ -153,9 +187,9 @@ bool QPMCache::insert(const QString& key, const QPixmap &pixmap, int cost)
 
 bool QPMCache::remove(const QString &key)
 {
-    int serialNumber = serialNumbers.value(key, -1);
-    serialNumbers.remove(key);
-    return QCache<int, QPixmap>::remove(serialNumber);
+    qint64 cacheKey = cacheKeys.value(key, -1);
+    cacheKeys.remove(key);
+    return QCache<qint64, QDetachedPixmap>::remove(cacheKey);
 }
 
 Q_GLOBAL_STATIC(QPMCache, pm_cache)

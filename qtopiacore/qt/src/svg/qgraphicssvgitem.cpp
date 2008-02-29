@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,7 +53,7 @@ public:
     Q_DECLARE_PUBLIC(QGraphicsSvgItem)
 
     QGraphicsSvgItemPrivate()
-        : renderer(0), maximumCacheSize(1024, 768), shared(false), 
+        : renderer(0), maximumCacheSize(1024, 768), shared(false),
           dirty(true), cached(true)
     {
     }
@@ -110,7 +125,7 @@ public:
     black->setElementId(QLatin1String("black_joker"));
 
     red->setSharedRenderer(renderer);
-    red->setElementId(QLatin1String("black_joker"));
+    red->setElementId(QLatin1String("red_joker"));
     \endcode
 
     Size of the item can be set via the setSize() method or via
@@ -165,12 +180,72 @@ QRectF QGraphicsSvgItem::boundingRect() const
 }
 
 /*!
+    \internal
+
+    Highlights \a item as selected.
+
+    NOTE: This function is a duplicate of qt_graphicsItem_highlightSelected() in qgraphicsitem.cpp!
+*/
+static void qt_graphicsItem_highlightSelected(
+    QGraphicsItem *item, QPainter *painter, const QStyleOptionGraphicsItem *option)
+{
+    const QRectF murect = painter->transform().mapRect(QRectF(0, 0, 1, 1));
+    if (qFuzzyCompare(qMax(murect.width(), murect.height()), qreal(0.0)))
+        return;
+
+    const QRectF mbrect = painter->transform().mapRect(item->boundingRect());
+    if (qMin(mbrect.width(), mbrect.height()) < qreal(1.0))
+        return;
+
+    qreal itemPenWidth;
+    switch (item->type()) {
+        case QGraphicsEllipseItem::Type:
+            itemPenWidth = static_cast<QGraphicsEllipseItem *>(item)->pen().widthF();
+            break;
+        case QGraphicsPathItem::Type:
+            itemPenWidth = static_cast<QGraphicsPathItem *>(item)->pen().widthF();
+            break;
+        case QGraphicsPolygonItem::Type:
+            itemPenWidth = static_cast<QGraphicsPolygonItem *>(item)->pen().widthF();
+            break;
+        case QGraphicsRectItem::Type:
+            itemPenWidth = static_cast<QGraphicsRectItem *>(item)->pen().widthF();
+            break;
+        case QGraphicsSimpleTextItem::Type:
+            itemPenWidth = static_cast<QGraphicsSimpleTextItem *>(item)->pen().widthF();
+            break;
+        case QGraphicsLineItem::Type:
+            itemPenWidth = static_cast<QGraphicsLineItem *>(item)->pen().widthF();
+            break;
+        default:
+            itemPenWidth = 1.0;
+    }
+    const qreal pad = itemPenWidth / 2;
+
+    const qreal penWidth = 0; // cosmetic pen
+
+    const QColor fgcolor = option->palette.windowText().color();
+    const QColor bgcolor( // ensure good contrast against fgcolor
+        fgcolor.red()   > 127 ? 0 : 255,
+        fgcolor.green() > 127 ? 0 : 255,
+        fgcolor.blue()  > 127 ? 0 : 255);
+
+    painter->setPen(QPen(bgcolor, penWidth, Qt::SolidLine));
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(item->boundingRect().adjusted(pad, pad, -pad, -pad));
+
+    painter->setPen(QPen(option->palette.windowText(), 0, Qt::DashLine));
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(item->boundingRect().adjusted(pad, pad, -pad, -pad));
+}
+
+/*!
     \reimp
 */
 void QGraphicsSvgItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                              QWidget *widget)
 {
-    Q_UNUSED(option);
+//    Q_UNUSED(option);
     Q_UNUSED(widget);
 
     Q_D(QGraphicsSvgItem);
@@ -179,18 +254,21 @@ void QGraphicsSvgItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
     QMatrix m = painter->worldMatrix();
     QRect deviceRect = m.mapRect(d->boundingRect).toRect();
-    
+
     if (!d->cached ||
-        deviceRect.size().width() > d->maximumCacheSize.width() || 
+        deviceRect.size().width() > d->maximumCacheSize.width() ||
         deviceRect.size().height() > d->maximumCacheSize.height()) {
         if (d->elemId.isEmpty())
             d->renderer->render(painter, d->boundingRect);
         else
             d->renderer->render(painter, d->elemId, d->boundingRect);
+
+        if (option->state & QStyle::State_Selected)
+            qt_graphicsItem_highlightSelected(this, painter, option);
         return;
     }
 
-    QString uniqueId = QString("%1_%2_%3_%4_%5").arg((long)this)
+    QString uniqueId = QString::fromLatin1("%1_%2_%3_%4_%5").arg((long)this)
                        .arg(m.m11()).arg(m.m12()).arg(m.m21()).arg(m.m22());
 
     QPixmap pix;
@@ -225,8 +303,15 @@ void QGraphicsSvgItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         d->dirty = false;
     }
 
+    const QTransform xformSave = painter->transform();
+
     painter->setWorldMatrix(QMatrix());
     painter->drawPixmap(viewPoint, pix);
+
+    if (option->state & QStyle::State_Selected) {
+        painter->setTransform(xformSave);
+        qt_graphicsItem_highlightSelected(this, painter, option);
+    }
 }
 
 /*!

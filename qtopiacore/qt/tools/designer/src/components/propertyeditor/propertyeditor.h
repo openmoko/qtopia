@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -26,18 +41,18 @@
 
 #include "propertyeditor_global.h"
 #include "qpropertyeditor.h"
-
-#include <QtDesigner/QtDesigner>
+#include <qdesigner_propertyeditor_p.h>
 
 #include <QtCore/QPointer>
 
 class DomProperty;
+class QDesignerMetaDataBaseItemInterface;
 class QDesignerPropertySheetExtension;
 
 namespace qdesigner_internal {
-    class MetaDataBaseItem;
+class StringProperty;
 
-class QT_PROPERTYEDITOR_EXPORT PropertyEditor: public QDesignerPropertyEditorInterface
+class QT_PROPERTYEDITOR_EXPORT PropertyEditor: public QDesignerPropertyEditor
 {
     Q_OBJECT
 public:
@@ -49,16 +64,20 @@ public:
     virtual bool isReadOnly() const;
     virtual void setReadOnly(bool readOnly);
     virtual void setPropertyValue(const QString &name, const QVariant &value, bool changed = true);
+    virtual void setPropertyComment(const QString &name, const QString &value);
+    virtual void updatePropertySheet();
+
     virtual void setObject(QObject *object);
 
     virtual QObject *object() const
     { return m_object; }
 
     virtual QString currentPropertyName() const;
-
+    
 private slots:
-    void firePropertyChanged(IProperty *property);
-    void resetProperty(const QString &prop_name);
+    void slotFirePropertyChanged(IProperty *property);
+    void slotResetProperty(const QString &prop_name);
+    void slotCustomContextMenuRequested(const QPoint &pos);
 
 private:
     IProperty *propertyByName(IProperty *p, const QString &name);
@@ -67,13 +86,16 @@ private:
     static IProperty *createSpecialProperty(const QVariant &value, const QString &name);
 
 private:
-    MetaDataBaseItem *metaDataBaseItem() const;
-                
+    QDesignerMetaDataBaseItemInterface *metaDataBaseItem() const;
+    StringProperty* createStringProperty(QObject *object, const QString &pname, const QVariant &value, bool isMainContainer) const;
+  
     QDesignerFormEditorInterface *m_core;
     QPropertyEditor *m_editor;
     IPropertyGroup *m_properties;
     QDesignerPropertySheetExtension *m_prop_sheet;
     QPointer<QObject> m_object;
+    typedef QMap<int, IProperty *> IndexToPropertyMap;
+    IndexToPropertyMap m_indexToProperty;
 };
 
 }  // namespace qdesigner_internal

@@ -24,6 +24,7 @@ SOURCES        += finddialog.cpp \
         printout.cpp \
         trwindow.cpp \
         messagestreeview.cpp \
+        ../shared/xliff.cpp \
         ../shared/simtexth.cpp \
 	../shared/metatranslator.cpp \
 	../shared/translator.cpp
@@ -40,6 +41,7 @@ HEADERS        += finddialog.h \
         printout.h \
         trwindow.h \
         messagestreeview.h \
+        ../shared/xliff.h \
         ../shared/simtexth.h \
         ../shared/metatranslator.h \
 	../shared/translator.h

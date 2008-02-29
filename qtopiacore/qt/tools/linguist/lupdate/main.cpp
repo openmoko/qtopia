@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,6 +45,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTextStream>
+#include <QCoreApplication>
 
 #include <errno.h>
 #include <string.h>
@@ -38,6 +54,10 @@
 // defined in fetchtr.cpp
 extern void fetchtr_cpp( const char *fileName, MetaTranslator *tor,
                          const char *defaultContext, bool mustExist, const QByteArray &codecForSource );
+
+extern void fetchtr_java( const char *fileName, MetaTranslator *tor,
+			  const char *defaultContext, bool mustExist, const QByteArray &codecForSource );
+
 extern void fetchtr_ui( const char *fileName, MetaTranslator *tor,
                         const char *defaultContext, bool mustExist );
 
@@ -79,8 +99,10 @@ static void updateTsFiles( const MetaTranslator& fetchedTor,
         MetaTranslator tor;
         MetaTranslator out;
         tor.load( *t );
-        if ( !codecForTr.isEmpty() )
+        if ( !codecForTr.isEmpty() ) {
+            out.setCodec( codecForTr.toLatin1() );
             tor.setCodec( codecForTr.toLatin1() );
+        }
         if ( verbose )
             fprintf( stderr, "Updating '%s'...\n", fn.toLatin1().constData() );
  
@@ -124,7 +146,9 @@ void recursiveFileInfoList(const QDir &dir, const QStringList &nameFilters, QDir
 
 int main( int argc, char **argv )
 {
-    QString defaultContext = "@default";
+    QCoreApplication app(argc, argv);   
+    
+    QString defaultContext = QLatin1String("@default");
     MetaTranslator fetchedTor;
     QByteArray codecForTr;
     QByteArray codecForSource;
@@ -183,7 +207,7 @@ int main( int argc, char **argv )
         QString fullText;
 
         if ( standardSyntax && !metTsFlag ) {
-            QFile f( argv[i] );
+            QFile f( QString::fromLatin1(argv[i]) );
             if ( !f.open(QIODevice::ReadOnly) ) {
 #if defined(_MSC_VER) && _MSC_VER >= 1400
 				char buf[100];
@@ -203,10 +227,11 @@ int main( int argc, char **argv )
 		codecForSource.clear();
 
         if (metTsFlag) {
-            if ( QString(argv[i]).endsWith(".ts", Qt::CaseInsensitive) ) {
-                QFileInfo fi( argv[i] );
+            if ( QString::fromLatin1(argv[i]).endsWith(QLatin1String(".ts"), Qt::CaseInsensitive) 
+                || QString::fromLatin1(argv[i]).endsWith(QLatin1String(".xlf"), Qt::CaseInsensitive)) {
+                QFileInfo fi( QString::fromLatin1(argv[i]) );
                 if ( !fi.exists() || fi.isWritable() ) {
-                    tsFileNames.append( QFileInfo(argv[i]).absoluteFilePath() );
+                    tsFileNames.append( QFileInfo(QString::fromLatin1(argv[i])).absoluteFilePath() );
                 } else {
                     fprintf( stderr,
                              "lupdate warning: For some reason, I cannot"
@@ -215,26 +240,26 @@ int main( int argc, char **argv )
                 }
             } else {
                 fprintf( stderr,
-                         "lupdate error: File '%s' lacks .ts extension\n",
+                         "lupdate error: File '%s' lacks .ts or .xlf extension\n",
                          argv[i] );
             }
-        } else if (QString(argv[i]).endsWith(".pro", Qt::CaseInsensitive)) {
+        } else if (QString::fromLatin1(argv[i]).endsWith(QLatin1String(".pro"), Qt::CaseInsensitive)) {
             proFiles << QLatin1String(argv[i]);
         } else {
-            QFileInfo fi(argv[i]);
+            QFileInfo fi(QString::fromLatin1(argv[i]));
             if (fi.isDir()) {
                 if ( verbose ) fprintf(stderr, "Scanning directory '%s'...\n", argv[i]);
                 QDir dir = QDir(fi.filePath());
                 if (extensionsNameFilters.isEmpty()) {
                     extensions = extensions.trimmed();
                     // Remove the potential dot in front of each extension
-                    if (extensions.startsWith('.'))
+                    if (extensions.startsWith(QLatin1Char('.')))
                         extensions.remove(0,1);
-                    extensions.replace(",.", ",");
+                    extensions.replace(QLatin1String(",."), QLatin1String(","));
 
                     extensions.insert(0, QLatin1String("*."));
-                    extensions.replace(',', QLatin1String(",*."));
-                    extensionsNameFilters = extensions.split(',');
+                    extensions.replace(QLatin1Char(','), QLatin1String(",*."));
+                    extensionsNameFilters = extensions.split(QLatin1Char(','));
                 }
                 QDir::Filters filters = QDir::Files | QDir::NoSymLinks;
                 QFileInfoList fileinfolist;
@@ -244,14 +269,14 @@ int main( int argc, char **argv )
                 QDir baseDir(oldDir);
                 for (ii = fileinfolist.begin(); ii != fileinfolist.end(); ++ii) {
                     // Make sure the path separator is stored with '/' in the ts file
-                    fn = ii->canonicalFilePath().replace('\\','/');
+                    fn = ii->canonicalFilePath().replace(QLatin1Char('\\'),QLatin1Char('/'));
 #ifdef LINGUIST_DEBUG
                     fprintf(stderr, "%s\n", fn.data());
 #endif
                     sourceFiles << fn;
                 }
             }else{
-                sourceFiles << fi.canonicalFilePath().replace('\\','/');
+                sourceFiles << fi.canonicalFilePath().replace(QLatin1Char('\\'),QLatin1Char('/'));
             }            
         }
     }   //for
@@ -276,6 +301,7 @@ int main( int argc, char **argv )
             QStringList tmp = variables.value("CODECFORTR");
             if (!tmp.isEmpty()) {
                 codecForTr = tmp.first().toAscii();
+                fetchedTor.setCodecForTr(codecForTr.constData());
             }
             tmp = variables.value("CODECFORSRC");
             if (!tmp.isEmpty()) {
@@ -289,12 +315,15 @@ int main( int argc, char **argv )
 #ifdef LINGUIST_DEBUG
             qDebug() << "  " << (*it);
 #endif
-            if ( (*it).endsWith(QLatin1String(".ui"), Qt::CaseInsensitive) ) {
+	    if ( (*it).endsWith(QLatin1String(".java"), Qt::CaseInsensitive) ) {
+	        fetchtr_java( (*it).toAscii(), &fetchedTor, defaultContext.toAscii(), true, codecForSource );
+	    }
+            else if ( (*it).endsWith(QLatin1String(".ui"), Qt::CaseInsensitive) ) {
 #ifdef LINGUIST_DEBUG
                 qDebug() << "  " << (*it) + ".h";
 #endif
                 fetchtr_ui( (*it).toAscii(), &fetchedTor, defaultContext.toAscii(), true );
-                fetchtr_cpp( QString((*it) + ".h").toAscii(), &fetchedTor,
+                fetchtr_cpp( QString((*it) + QLatin1String(".h")).toAscii(), &fetchedTor,
                              defaultContext.toAscii(), false, codecForSource );
             }else{
                 fetchtr_cpp( (*it).toAscii(), &fetchedTor, defaultContext.toAscii(), true, codecForSource );
@@ -305,7 +334,7 @@ int main( int argc, char **argv )
         
         QDir::setCurrent( oldDir );
         if ( tsFiles.count() > 0) {
-            updateTsFiles( fetchedTor, tsFiles, codecForTr, noObsolete, verbose );
+            updateTsFiles( fetchedTor, tsFiles, QString::fromLatin1(codecForTr.constData()), noObsolete, verbose );
         }
         firstPass = false;
     }

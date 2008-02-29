@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,15 +27,24 @@
 #include <qcontentfilter.h>
 
 #include <QAbstractListModel>
+#include <QContentSortCriteria>
 
 class DirectoryScanner;
 class QContentSetModel;
-class QContentSetPrivate;
+class QContentSetEngine;
+
+typedef QContentSetEngine QContentSetPrivate;
 
 class QTOPIA_EXPORT QContentSet : public QObject
 {
     Q_OBJECT
 public:
+
+    enum UpdateMode
+    {
+        Asynchronous,
+        Synchronous
+    };
 
     explicit QContentSet( QObject *parent = 0 );
     explicit QContentSet( const QContentFilter &, QObject *parent = 0 );
@@ -43,7 +52,14 @@ public:
     QContentSet( QContentFilter::FilterType, const QString&, QObject *parent = 0 );
     QContentSet( QContentFilter::FilterType, const QString&, const QStringList &, QObject *parent = 0 );
     QContentSet( const QContentSet &, QObject *parent = 0 );
+
+    QContentSet( UpdateMode mode, QObject *parent = 0 );
+    QContentSet( const QContentFilter &, UpdateMode mode, QObject *parent = 0 );
+    QContentSet( const QContentFilter &, const QContentSortCriteria &, UpdateMode mode, QObject *parent = 0 );
+
     virtual ~QContentSet();
+
+    UpdateMode updateMode() const;
 
     enum Priority { LowPriority, NormalPriority, HighPriority };
     static void scan( const QString &path, Priority priority=NormalPriority );
@@ -60,6 +76,9 @@ public:
 
     QContentList items() const;
     QContentIdList itemIds() const;
+
+    QContent content( int index ) const;
+    QContentId contentId( int index ) const;
 
     bool isEmpty() const;
     void appendFrom( QContentSet& other );
@@ -80,6 +99,9 @@ public:
     void setSortOrder( const QStringList &sortOrder );
     QStringList sortOrder() const;
 
+    void setSortCriteria( const QContentSortCriteria &criteria );
+    QContentSortCriteria sortCriteria() const;
+
     template <typename Stream> void serialize(Stream &stream) const;
     template <typename Stream> void deserialize(Stream &stream);
 
@@ -99,23 +121,14 @@ signals:
 protected:
     void timerEvent(QTimerEvent *e);
 
-private slots:
-    void contentChanged(const QContentIdList &, QContent::ChangeType);
-    void refreshRequested();
-
 private:
     friend class QContent;
     friend class ContentLinkPrivate;
     friend class QContentSetModel;
-    friend class QContentSetPrivate;
     friend class DirectoryScanner;
     friend class QtopiaSql;
 
     void init();
-    bool sync( bool resort = false );
-    void updateImplicits( const QContentIdList &implicits );
-    bool removeId(QContentId id);
-    void refreshAll();
 
     QContentSetPrivate *d;
 };
@@ -143,6 +156,12 @@ public:
     void setMandatoryPermissions( QDrmRights::Permissions permissions );
     QDrmRights::Permissions mandatoryPermissions() const;
 
+    bool updateInProgress() const;
+
+signals:
+    void updateStarted();
+    void updateFinished();
+
 private slots:
     void beginInsertContent( int start, int end );
     void endInsertContent();
@@ -163,6 +182,7 @@ private:
 };
 
 Q_DECLARE_USER_METATYPE(QContentSet);
+Q_DECLARE_USER_METATYPE_ENUM(QContentSet::UpdateMode);
 
 QTOPIA_EXPORT QDataStream &operator <<( QDataStream &ds, const QContentSet &set );
 QTOPIA_EXPORT QDataStream &operator >>( QDataStream &ds, QContentSet &set );

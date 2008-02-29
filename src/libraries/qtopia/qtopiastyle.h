@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -40,7 +40,9 @@ public:
                       const QWidget *widget = 0, QStyleHintReturn* returnData = 0) const;
     virtual QPixmap standardPixmap(StandardPixmap standardPixmap,
                     const QStyleOption *option=0, const QWidget *widget=0) const;
-    virtual void setTheme(const QString& themeconfig);
+
+    static void drawRoundRect(QPainter *p, const QRect &r, int xRnd, int yRnd);
+    static void drawRoundRect(QPainter *p, const QRectF &r, int xRnd, int yRnd);
 
 protected:
     QtopiaStylePrivate *d;

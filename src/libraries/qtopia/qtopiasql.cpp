@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,37 +19,24 @@
 **
 ****************************************************************************/
 
-#include <QSqlDatabase>
-#include <QSqlDriver>
-#include <QSqlQuery>
-#include <QSqlError>
-#include <QSqlRecord>
-#include <QFile>
-#include <QSettings>
-#include <QTextStream>
+#include <QtopiaSql>
+#include <qtopia/private/qtopiasql_p.h>
+#include <qtopialog.h>
+#include <qtopianamespace.h>
+#include <QDir>
 #include <QTextCodec>
-#include <QThread>
-#include <QThreadStorage>
-#include <QMutex>
-#include <QTemporaryFile>
-#include <QContentSet>
+#include <QSqlQuery>
+#include <QSqlDriver>
+#include <QSqlRecord>
+#include <QtopiaIpcEnvelope>
+#include <qtopia/private/qcontent_p.h>
 #ifndef QTOPIA_CONTENT_INSTALLER
 #include <QDSServiceInfo>
 #include <QDSAction>
 #endif
-#include <qtopiasql.h>
-#include <qtopianamespace.h>
-#ifndef QTOPIA_CONTENT_INSTALLER
-#include <qtopiaapplication.h>
-#endif
-#include <qpluginmanager.h>
-#include <qtopialog.h>
-#include <qstorage.h>
-#include <qtopia/private/qcontent_p.h>
-#include <QtopiaIpcEnvelope>
-#ifdef Q_OS_UNIX
 #include <unistd.h>
-#endif
+#include <QTextCodec>
+#include <string.h>
 
 // Set this to control number of backups files rotated on upgrading
 // database.  If set to 0 no backups are made - thus import of old data is
@@ -60,211 +47,15 @@
 // #define Q_USE_MIMER
 // #define Q_USE_MYSQL
 
-// FIXME this should work on Windows too
-#ifndef Q_OS_WIN32
 #define USE_LOCALE_AWARE
+
+#ifndef QTOPIA_HOST
+#if defined(Q_WS_QWS)
+#include <qwsdisplay_qws.h>
+#elif defined(Q_WS_X11)
+#include <qx11info_x11.h>
 #endif
-
-#ifdef USE_LOCALE_AWARE
-#ifdef Q_USE_SQLITE
-#include <qsql_sqlite.h>
-#include <sqlite3.h>
-#endif //Q_USE_SQLITE
 #endif
-
-class QtopiaSqlPrivate : public QObject {
-    Q_OBJECT
-public:
-    QtopiaSqlPrivate();
-    ~QtopiaSqlPrivate() {}
-
-    QString databaseFile( const QString &path );
-private:
-    QString type;
-    QString name;
-    QString user;
-    QString password;
-    QString hostname;
-    static QSqlDatabase *defaultConn;
-    static QHash<QtopiaDatabaseId, QSqlDatabase> masterAttachedConns;
-    static QHash<QtopiaDatabaseId, QString> dbPaths;
-    static QThreadStorage<QHash<QtopiaDatabaseId, QSqlDatabase> *> dbs;
-    static QThreadStorage<QHash<QtopiaDatabaseId, QString> *> connectionNames;
-    static QMutex guardMutex;
-    QStorageMetaInfo smi;
-    static quint32 conId;
-    void installSorting( QSqlDatabase &db);
-    friend class QtopiaSql;
-private slots:
-    void disksChanged ();
-    void threadTerminated();
-    void cardMessage(const QString &message,const QByteArray &data);
-};
-
-QtopiaSqlPrivate *QtopiaSql::d = 0;
-QSqlDatabase *QtopiaSqlPrivate::defaultConn = 0;
-QThreadStorage<QHash<QtopiaDatabaseId, QSqlDatabase> *> QtopiaSqlPrivate::dbs;
-QHash<QtopiaDatabaseId, QSqlDatabase> QtopiaSqlPrivate::masterAttachedConns;
-QHash<QtopiaDatabaseId, QString> QtopiaSqlPrivate::dbPaths;
-QThreadStorage<QHash<QtopiaDatabaseId, QString> *> QtopiaSqlPrivate::connectionNames;
-QMutex QtopiaSqlPrivate::guardMutex(QMutex::Recursive);
-quint32 QtopiaSqlPrivate::conId = 0;
-
-QtopiaSqlPrivate::QtopiaSqlPrivate ()
-{
-#ifndef QTOPIA_CONTENT_INSTALLER
-    if ( qApp->type() == QApplication::GuiServer ) {
-        // The server handles mtab updates differently
-        QtopiaChannel *channel = new QtopiaChannel( "QPE/Card", this );
-        connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
-                 this, SLOT(cardMessage(const QString&,const QByteArray&)) );
-    } else {
-        connect(&smi, SIGNAL(disksChanged()), this, SLOT(disksChanged()));
-    }
-#endif
-}
-
-void QtopiaSqlPrivate::cardMessage(const QString &message,const QByteArray &)
-{
-    // The mtab has changed. Manually update our filesystems and then handle this before
-    // passing the message on to other processes.
-    if ( message == "mtabChanged()" ) {
-        smi.update();
-        disksChanged();
-        QtopiaIpcEnvelope("QPE/QStorage", "updateStorage()");
-    }
-}
-
-void QtopiaSqlPrivate::disksChanged ()
-{
-#ifndef QTOPIA_CONTENT_INSTALLER
-    // update the "databases" array after rescanning QStorageMetaInfo
-    qLog(Sql) << "disks changed... update database info";
-    QFileSystemFilter f;
-    f.content = QFileSystemFilter::Set;
-    foreach ( const QFileSystem *fs, smi.fileSystems(&f, false) ) {
-        // Have I seen this database already?
-        if ( fs->isConnected() && QtopiaSql::databaseIdForPath(fs->path()) == 0 && fs->contentDatabase()) {
-            // qLog(Sql) << "fs->path() =" << fs->path() << "fs->isRemovable() =" << fs->isRemovable() << "fs->isWritable() =" << fs->isWritable();
-            if ( !fs->isRemovable() && fs->isWritable() ) {
-                // Simple case, just attach normally
-                QtopiaSql::attachDB(fs->path());
-            } else {
-                QString dbPath = databaseFile(fs->path());
-                bool dbExists = QFile::exists(dbPath);
-                // If we're not writeable use a temporary file (sqlite can't open read-only files)
-                bool useTemp = !fs->isWritable();
-                // If we're removable, test that the file can be opened.
-                // Read-only SD cards still show as writeable.
-                if ( fs->isRemovable() ) {
-                    // try and write the database.
-                    QString tmpfilename=fs->path()+QLatin1String("/.qtopia_write_test");
-                    if(QFile::exists(tmpfilename))
-                        QFile::remove(tmpfilename);
-                    QTemporaryFile tmpfile(tmpfilename);
-                    if( !tmpfile.open() ) {
-                        qLog(Sql) << "test file open failed";
-                        useTemp = true;
-                    }
-                    else if( !tmpfile.write("test", 4) == 4 || !tmpfile.flush() ) {
-                        qLog(Sql) << "test file write failed";
-                        useTemp = true;
-                    }
-                }
-                // qLog(Sql) << "dbExists =" << dbExists << "useTemp =" << useTemp;
-                if ( useTemp ) {
-                    QString origPath = dbPath;
-
-                    // Use a file in /tmp (we know it's writeable)
-                    // This is "unique" by path and lets apps share read-only databases
-                    QString path = QDir::cleanPath(Qtopia::tempDir()+fs->path());
-                    QDir().mkpath(path);    // ensure the path exists
-                    dbPath = databaseFile(path);
-
-                    // Copy the database (if it exists at the source and not at the dest)
-                    // The server does this before any other apps get a chance to notice this file
-                    if ( dbExists && qApp->type() == QApplication::GuiServer ) {
-                        // If it already exists, unlink it (just in case anyone has it open)
-                        if ( QFileInfo(dbPath).exists() ) {
-                            QFile::remove(dbPath);
-                        }
-                        if( !QFile::copy(origPath, dbPath) ) {
-                            QFile::remove(dbPath);
-                            continue;
-                        }
-                    }
-                }
-
-                // Finally, attach to the database
-                qLog(Sql) << "Attaching database" << dbPath << "for path" << fs->path();
-                QtopiaSql::attachDB(fs->path(), dbPath);
-            }
-            // Tell ContentServer to scan for documents (if this location contains them)
-            if ( qApp->type() == QApplication::GuiServer && fs->documents() )
-                QContentSet::scan(fs->path());
-        } else if ( !fs->isConnected() && !fs->prevPath().isEmpty() ) {
-            // Better late than never... detach this database now
-            qLog(Sql) << "Detaching database for path" << fs->prevPath();
-            QtopiaSql::detachDB(fs->prevPath());
-        }
-    }
-#endif
-}
-
-void QtopiaSqlPrivate::threadTerminated()
-{
-    QThread *senderThread=qobject_cast<QThread *>(sender());
-    if (senderThread != QThread::currentThread())
-    {
-        qWarning() << "Terminated not called from current thread!!";
-        QObject::disconnect(senderThread, SIGNAL(finished()), this, SLOT(threadTerminated()));
-        QObject::disconnect(senderThread, SIGNAL(terminated()), this, SLOT(threadTerminated()));
-        return;
-    }
-    //qLog(Sql) << "thread Terminated call for thread:" << QThread::currentThreadId();
-    if (QtopiaSqlPrivate::dbs.hasLocalData())
-        QtopiaSqlPrivate::dbs.localData()->clear();
-    if (QtopiaSqlPrivate::connectionNames.hasLocalData())
-    {
-        foreach(QString conname, *QtopiaSqlPrivate::connectionNames.localData())
-            QSqlDatabase::removeDatabase(conname);
-        QtopiaSqlPrivate::connectionNames.setLocalData(NULL);
-    }
-    QObject::disconnect(senderThread, SIGNAL(finished()), this, SLOT(threadTerminated()));
-    QObject::disconnect(senderThread, SIGNAL(terminated()), this, SLOT(threadTerminated()));
-}
-
-QString QtopiaSqlPrivate::databaseFile(const QString &path)
-{
-    QString file = QDir::cleanPath(path+QLatin1String("/")+QFileInfo(name).fileName());
-    return file;
-}
-
-void QtopiaSqlPrivate::installSorting( QSqlDatabase &db)
-{
-#if defined(Q_USE_SQLITE) && defined(USE_LOCALE_AWARE)
-        int sqliteLocaleAwareCompare(void *, int ll, const void *l, int rl, const void *r);
-        QVariant v = db.driver()->handle();
-        if (v.isValid() && strcmp(v.typeName(), "sqlite3*") == 0) {
-            // v.data() returns a pointer to the handle
-            sqlite3 *handle = *static_cast<sqlite3 **>(v.data());
-            if (handle != 0) { // check that it is not NULL
-                int result = sqlite3_create_collation(
-                        handle,
-                        "localeAwareCompare",
-                        SQLITE_UTF16, // ANY would be nice, but we only encode in 16 anyway.
-                        0,
-                        sqliteLocaleAwareCompare);
-                if (result != SQLITE_OK)
-                    qLog(Sql) << "Could not add string collation function: " << result;
-            } else {
-                qLog(Sql) << "Could not get sqlite handle";
-            }
-        } else {
-            qLog(Sql) << "handle variant returned typename " << v.typeName();
-        }
-#endif
-}
 
 /*!
   \class QtopiaSql
@@ -294,30 +85,22 @@ void QtopiaSqlPrivate::installSorting( QSqlDatabase &db)
   The attachDB() methods use the underlying database implementation specific method for
   creating queries across seperate databases.  In SQLITE this method is the ATTACH statement,
   but an equivalent method is used for other implementations.
+
+  This documentation should be read and understood in conjunction with the \l {Database Policy}
+  and the \l {Database Specification}
 */
-    static QSqlDatabase &database(const QtopiaDatabaseId& id);
-    static const QList<QSqlDatabase> databases();
-    static bool isDatabase(const QString &path);
-    static QString databasePathForId(const QtopiaDatabaseId& id);
-
-    static QString escapeString(const QString &input);
-    static QSqlDatabase applicationSpecificDatabase(const QString &appname);
-    static bool ensureTableExists(const QString &table, QSqlDatabase &db );
-    static bool ensureTableExists(const QStringList &, QSqlDatabase& );
-
-    static void logQuery(const QSqlQuery &q);
 
 /*!
   Opens the main system database, if it is not already open.
 */
 void QtopiaSql::openDatabase()
 {
-    initPrivate();
-    if (!QtopiaSqlPrivate::defaultConn) {
-        QtopiaSqlPrivate::defaultConn = connectDatabase(QLatin1String(QSqlDatabase::defaultConnection));
-        init(*QtopiaSqlPrivate::defaultConn);
-        QtopiaSqlPrivate::masterAttachedConns[0] = *QtopiaSqlPrivate::defaultConn;
-        d->disksChanged();
+    if (!d()->defaultConn) {
+        d()->defaultConn = connectDatabase(QLatin1String(QSqlDatabase::defaultConnection));
+        init(*d()->defaultConn);
+        d()->masterAttachedConns[0] = *d()->defaultConn;
+        d()->dbs[QThread::currentThreadId()].insert(0, *d()->defaultConn);
+        d()->disksChanged();
     }
 }
 
@@ -326,8 +109,8 @@ void QtopiaSql::openDatabase()
 */
 void QtopiaSql::closeDatabase()
 {
-    delete QtopiaSqlPrivate::defaultConn;
-    QtopiaSqlPrivate::defaultConn = 0;
+    delete d()->defaultConn;
+    d()->defaultConn = 0;
 }
 
 /*!
@@ -347,10 +130,21 @@ void QtopiaSql::closeDatabase()
 // textcodec->fromUnicode direct, along with strcoll.
 int sqliteLocaleAwareCompare(void *, int ll, const void *l, int rl, const void *r)
 {
-    QString left = QString::fromUtf16((const ushort *)l, ll/2);
-    QString right = QString::fromUtf16((const ushort *)r, rl/2);
-    //qLog(Sql) << "comparing:" << left << "with" << right << "result" << QString::localeAwareCompare(left, right);
-    return QString::localeAwareCompare(left, right);
+    QTextCodec *codec = QTextCodec::codecForLocale();
+
+    if( codec )
+    {
+        return strcoll(
+                codec->fromUnicode( static_cast< const QChar * >( l ), ll / 2 ).constData(),
+                codec->fromUnicode( static_cast< const QChar * >( r ), rl / 2 ).constData() );
+    }
+    else
+    {   // Fall back on a regular comparison if there is no local codec.
+        QString left = QString::fromUtf16((const ushort *)l, ll/2);
+        QString right = QString::fromUtf16((const ushort *)r, rl/2);
+
+        return left.compare( right );
+    }
 }
 
 int QtopiaSql::stringCompare(const QString &l, const QString &r)
@@ -421,14 +215,14 @@ QSqlDatabase *QtopiaSql::connectDatabase(const QString &connName)
     qLog(Sql) << "Trying to connect database with connection name:" << connName;
     loadConfig();
 
-    QSqlDatabase *db = new QSqlDatabase(QSqlDatabase::addDatabase(d->type, connName));
-    db->setDatabaseName(d->name);
-    db->setUserName(d->user);
-    db->setHostName(d->hostname);
-    db->setPassword(d->password);
+    QSqlDatabase *db = new QSqlDatabase(QSqlDatabase::addDatabase(d()->type, connName));
+    db->setDatabaseName(d()->name);
+    db->setUserName(d()->user);
+    db->setHostName(d()->hostname);
+    db->setPassword(d()->password);
     if (!db->open())
     {
-        qWarning() << "Could not connect" << d->name << db->lastError().text();
+        qWarning() << "Could not connect" << d()->name << db->lastError().text();
         delete db;
         return NULL;
     }
@@ -448,7 +242,7 @@ void QtopiaSql::init(QSqlDatabase &db, bool force)
     Q_UNUSED(db);   // used to be used, may be used again in the future.
     static bool doneInit = false;
     if (!doneInit || force) {
-        d->installSorting(db);
+        d()->installSorting(db);
         doneInit = true;
 
     }
@@ -461,10 +255,9 @@ void QtopiaSql::init(QSqlDatabase &db, bool force)
 */
 void QtopiaSql::loadConfig(const QString &type, const QString &name, const QString &user)
 {
-    initPrivate();
-    d->type = type;
-    d->name = name;
-    d->user = user;
+    d()->type = type;
+    d()->name = name;
+    d()->user = user;
     closeDatabase();
     openDatabase();
 }
@@ -472,37 +265,37 @@ void QtopiaSql::loadConfig(const QString &type, const QString &name, const QStri
 void QtopiaSql::loadConfig()
 {
 #ifdef Q_USE_SQLITE
-    // Qtopia desktop top
-    if (d && d->type.isEmpty())
+    if (d()->type.isEmpty())
     {
-        d->type = QLatin1String("QSQLITE");
-        d->name = Qtopia::applicationFileName(QLatin1String("Qtopia"), QLatin1String("qtopia_db.sqlite"));
+        QString dir = Qtopia::homePath() + QLatin1String( "/Applications" );
+        if( !QFile::exists( dir ) && !QDir().mkdir( dir ) )
+            qFatal( "Cannot write to %s", dir.toLatin1().constData() );
+
+        dir += QLatin1String( "/Qtopia" );
+        if( !QFile::exists( dir ) && !QDir().mkdir( dir ) )
+            qFatal( "Cannot write to %s", dir.toLatin1().constData() );
+
+        d()->type = QLatin1String("QSQLITE");
+        d()->name = dir + QLatin1String( "/qtopia_db.sqlite" );
     }
 #endif
 #ifdef Q_USE_MIMER
-    d->type = QLatin1String("QODBC");
-    d->name = QLatin1String("qtopia");
-    d->user = QLatin1String("SYSADM");
-    d->password = QLatin1String("lfer64"); // ok, not so good
-    d->hostname = QLatin1String("10.1.1.22");
-    //d->port = 1360;
+    d()->type = QLatin1String("QODBC");
+    d()->name = QLatin1String("qtopia");
+    d()->user = QLatin1String("SYSADM");
+    d()->password = QLatin1String("lfer64"); // ok, not so good
+    d()->hostname = QLatin1String("10.1.1.22");
+    //d()->port = 1360;
 #endif
 #ifdef Q_USE_MYSQL
-    d->type = QLatin1String("QMYSQL");
-    d->name = QLatin1String("qtopia");
-    d->user = QLatin1String("root");
+    d()->type = QLatin1String("QMYSQL");
+    d()->name = QLatin1String("qtopia");
+    d()->user = QLatin1String("root");
 #endif
 }
 
 void QtopiaSql::saveConfig()
 {
-}
-
-void QtopiaSql::initPrivate()
-{
-    QMutexLocker guard(&QtopiaSqlPrivate::guardMutex);
-    if (!d)
-        d = new QtopiaSqlPrivate;
 }
 
 /*!
@@ -615,34 +408,32 @@ QSqlError QtopiaSql::exec(QSqlQuery &query, QSqlDatabase& db, bool inTransaction
   */
 QSqlDatabase &QtopiaSql::database(const QtopiaDatabaseId& id)
 {
-    QMutexLocker guard(&QtopiaSqlPrivate::guardMutex);
-    if (!QtopiaSqlPrivate::dbs.hasLocalData()) {
+    QMutexLocker guard(&d()->guardMutex);
+    if (!d()->dbs.contains(QThread::currentThreadId())) {
         QtopiaSql::openDatabase();
-        QtopiaSqlPrivate::dbs.setLocalData(new QHash<QtopiaDatabaseId, QSqlDatabase>);
-        QtopiaSqlPrivate::connectionNames.setLocalData(new QHash<QtopiaDatabaseId, QString>);
-        QObject::connect(QThread::currentThread(), SIGNAL(finished()), d, SLOT(threadTerminated()), Qt::DirectConnection);
-        QObject::connect(QThread::currentThread(), SIGNAL(terminated()), d, SLOT(threadTerminated()), Qt::DirectConnection);
+        QObject::connect(QThread::currentThread(), SIGNAL(finished()), d(), SLOT(threadTerminated()), Qt::DirectConnection);
+        QObject::connect(QThread::currentThread(), SIGNAL(terminated()), d(), SLOT(threadTerminated()), Qt::DirectConnection);
     }
-    QHash<QtopiaDatabaseId, QSqlDatabase> *dbs=QtopiaSqlPrivate::dbs.localData();
-    if (!QtopiaSqlPrivate::masterAttachedConns.contains(id) && dbs->contains(id))
+    QHash<QtopiaDatabaseId, QSqlDatabase> &dbs=d()->dbs[QThread::currentThreadId()];
+    if (!isValidDatabaseId(id) && dbs.contains(id))
     {
         // remove the connection, it's stale.
         qWarning() << "Stale database handle, returning the system database instead";
-        dbs->remove(id);
+        dbs.remove(id);
         return database(0);
     }
-    else if(!QtopiaSqlPrivate::masterAttachedConns.contains(id))
+    else if(!isValidDatabaseId(id))
     {
         qWarning() << "Database handle doesnt exist in the master list, returning the system database";
         if(id == 0)
             qFatal("Should not be requesting the system database from this location in the code");
         return database(0);
     }
-    else if (!dbs->contains(id))
+    else if (!dbs.contains(id))
     {
-        QString connName = QString("QtopiaSqlDB%1").arg(QtopiaSqlPrivate::conId++);
+        QString connName = QString("QtopiaSqlDB%1").arg(d()->conId++);
         // copy the masterAttachedCons version, and register the connname in the list
-        QSqlDatabase &from=QtopiaSqlPrivate::masterAttachedConns[id];
+        QSqlDatabase &from=d()->masterAttachedConns[id];
         QSqlDatabase db=QSqlDatabase::addDatabase(from.driverName(), connName);
         db.setDatabaseName(from.databaseName());
         db.setUserName(from.userName());
@@ -651,17 +442,17 @@ QSqlDatabase &QtopiaSql::database(const QtopiaDatabaseId& id)
         db.setPort(from.port());
         db.setConnectOptions(from.connectOptions());
         db.open();
-        d->installSorting(db);
+        d()->installSorting(db);
         QSqlQuery xsql( db );
 #if defined(Q_USE_SQLITE)
         xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
         xsql.exec(QLatin1String("PRAGMA temp_store = memory"));
 #endif
-        dbs->insert(id, db);
-        QtopiaSqlPrivate::connectionNames.localData()->insert(id, connName);
+        dbs.insert(id, db);
+        d()->connectionNames[QThread::currentThreadId()].insert(id, connName);
     }
 
-    return (*dbs)[id];
+    return dbs[id];
 }
 
 /*!
@@ -686,31 +477,29 @@ QString QtopiaSql::escapeString(const QString &input)
 void QtopiaSql::attachDB(const QString& path, const QString& dbPath)
 {
     qLog(Sql) << "Attaching database for path" << path << "with the db located at" << dbPath;
-    QMutexLocker guard(&QtopiaSqlPrivate::guardMutex);
+    QMutexLocker guard(&d()->guardMutex);
     // add database to default connections list.
-    if(path.isEmpty() || dbPath.isEmpty() || QtopiaSqlPrivate::defaultConn == NULL || dbPath == QtopiaSqlPrivate::defaultConn->databaseName())
+    if(path.isEmpty() || dbPath.isEmpty() || d()->defaultConn == NULL || dbPath == d()->defaultConn->databaseName())
         return;
     QtopiaDatabaseId dbid = databaseIdForDatabasePath(dbPath);
-    if(!QtopiaSqlPrivate::masterAttachedConns.contains(dbid))
+    if(!isValidDatabaseId(dbid))
     {
-        if (!QtopiaSqlPrivate::dbs.hasLocalData()) {
-            QMutexLocker guard(&QtopiaSqlPrivate::guardMutex);
-            QtopiaSqlPrivate::dbs.setLocalData(new QHash<QtopiaDatabaseId, QSqlDatabase>);
-            QtopiaSqlPrivate::connectionNames.setLocalData(new QHash<QtopiaDatabaseId, QString>);
-            QObject::connect(QThread::currentThread(), SIGNAL(finished()), d, SLOT(threadTerminated()), Qt::DirectConnection);
-            QObject::connect(QThread::currentThread(), SIGNAL(terminated()), d, SLOT(threadTerminated()), Qt::DirectConnection);
-        }
-
 #ifndef QTOPIA_CONTENT_INSTALLER
+
+#if defined(Q_WS_QWS)
+        const QFileSystem *fs = qt_fbdpy ? QStorageMetaInfo::instance()->fileSystemOf( path ) : 0;
+#elif defined(Q_WS_X11)
+        const QFileSystem *fs = QX11Info::display() ? QStorageMetaInfo::instance()->fileSystemOf( path ) : 0;
+#endif
         // ensure the database has the correct definition
-        if ( qApp->type() == QApplication::GuiServer)
+        if ( qApp->type() == QApplication::GuiServer && fs && fs->isRemovable() )
         {
             static QMutex mutex;
             QMutexLocker lock(&mutex);
             qLog(Sql) << QDateTime::currentDateTime () << "before doMigrate service call";
             QDSServiceInfo service( "doMigrate", "DBMigrationEngine" );
             QDSAction action( service );
-            QDSData request(dbPath, QMimeType("text/x-dbm-qstring"));
+            QDSData request(dbPath, QMimeType::fromId("text/x-dbm-qstring"));
             int rcode = action.exec(request);
             if ( /*rcode != QDSAction::Complete && */rcode != QDSAction::CompleteData) {
                 qWarning() << QDateTime::currentDateTime () << "Couldn't use QDS service doMigrate from DBMigrationEngine, not attaching database"  << dbPath << "\nError:" << action.errorMessage();
@@ -727,37 +516,39 @@ void QtopiaSql::attachDB(const QString& path, const QString& dbPath)
         }
 #endif
 
-        QString connName = QString("QtopiaSqlDB%1").arg(QtopiaSqlPrivate::conId++);
+        if (!d()->dbs.contains(QThread::currentThreadId())) {
+            QObject::connect(QThread::currentThread(), SIGNAL(finished()), d(), SLOT(threadTerminated()), Qt::DirectConnection);
+            QObject::connect(QThread::currentThread(), SIGNAL(terminated()), d(), SLOT(threadTerminated()), Qt::DirectConnection);
+        }
+
+        QString connName = QString("QtopiaSqlDB%1").arg(d()->conId++);
         // copy the masterAttachedCons version, and register the connname in the list
-        QHash<QtopiaDatabaseId, QSqlDatabase> *dbs=QtopiaSqlPrivate::dbs.localData();
-        QSqlDatabase db=QSqlDatabase::addDatabase(d->type, connName);
-        dbs->insert(dbid, db);
+        QSqlDatabase db=QSqlDatabase::addDatabase(d()->type, connName);
+        d()->dbs[QThread::currentThreadId()].insert(dbid, db);
         db.setDatabaseName(dbPath);
-        db.setUserName(d->user);
-        db.setPassword(d->password);
-        db.setHostName(d->hostname);
+        db.setUserName(d()->user);
+        db.setPassword(d()->password);
+        db.setHostName(d()->hostname);
         if(!db.open())
         {
             qLog(Sql) << "!! Failed to open database:" << dbPath << db.lastError();
             return;
         }
 
-        d->installSorting(db);
-
+        d()->installSorting(db);
         QSqlQuery xsql( db );
         xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
         xsql.exec(QLatin1String("PRAGMA temp_store = memory"));
         // Once temp_store is "memory" the temp_store_directory has no effect
         // xsql.exec(QLatin1String("PRAGMA temp_store_directory = '/tmp';"));
-        QtopiaSqlPrivate::connectionNames.localData()->insert(dbid, connName);
-        QtopiaSqlPrivate::dbPaths.insert(dbid, path);
-        QtopiaSqlPrivate::masterAttachedConns.insert(dbid, db);
+        d()->connectionNames[QThread::currentThreadId()].insert(dbid, connName);
+        d()->dbPaths.insert(dbid, path);
+        d()->masterAttachedConns.insert(dbid, db);
         QtopiaSql::init(db, true);
         if ( qApp->type() == QApplication::GuiServer )
             QtopiaIpcEnvelope se("QPE/System", "resetContent()");
-#ifndef QTOPIA_CONTENT_INSTALLER
-        else
-            QContentUpdateManager::instance()->requestRefresh();
+#if !defined(QTOPIA_CONTENT_INSTALLER) && !defined(QTOPIA_TEST)
+        QContentUpdateManager::instance()->requestRefresh();
 #endif
     }
     else
@@ -775,7 +566,7 @@ void QtopiaSql::attachDB(const QString& path, const QString& dbPath)
 */
 void QtopiaSql::attachDB(const QString& path)
 {
-    QtopiaSql::attachDB(path, d->databaseFile(path));
+    QtopiaSql::attachDB(path, d()->databaseFile(path));
 }
 
 /*!
@@ -790,35 +581,42 @@ void QtopiaSql::attachDB(const QString& path)
 void QtopiaSql::detachDB(const QString& path)
 {
     qLog(Sql) << "Detaching database at" << path;
-    QMutexLocker guard(&QtopiaSqlPrivate::guardMutex);
+    QMutexLocker guard(&d()->guardMutex);
     QtopiaDatabaseId dbid = databaseIdForPath(path);
-    if(QtopiaSqlPrivate::dbPaths.contains(dbid) && dbid != 0)
+    if(d()->dbPaths.contains(dbid) && dbid != 0)
     {
-        QString dbPath=QtopiaSqlPrivate::masterAttachedConns[dbid].databaseName();
-        QtopiaSqlPrivate::masterAttachedConns.remove(dbid);
-        QtopiaSqlPrivate::dbPaths.remove(dbid);
-        if(QtopiaSqlPrivate::dbs.hasLocalData())
-            QtopiaSqlPrivate::dbs.localData()->remove(dbid);
-        if(QtopiaSqlPrivate::connectionNames.hasLocalData())
+        QString dbPath=d()->masterAttachedConns[dbid].databaseName();
+        d()->masterAttachedConns.remove(dbid);
+        d()->dbPaths.remove(dbid);
+
+        QHash<QtopiaDatabaseId, QSqlDatabase> hash;
+        foreach(hash, d()->dbs)
         {
-            QSqlDatabase::removeDatabase(QtopiaSqlPrivate::connectionNames.localData()->value(dbid));
-            QtopiaSqlPrivate::connectionNames.localData()->remove(dbid);
+            if(hash.keys().contains(dbid))
+            {
+                hash.take(dbid).close();
+            }
+        }
+        
+        QHash<QtopiaDatabaseId, QString> hash2;
+        foreach(hash2, d()->connectionNames)
+        {
+            if(hash2.keys().contains(dbid))
+            {
+                QSqlDatabase::removeDatabase(hash2.take(dbid));
+            }
         }
         // todo: if database itself is located in the temp directory, then delete it.
         if(dbPath.startsWith(Qtopia::tempDir())) {
             QFile::remove(dbPath);
-#ifdef Q_OS_UNIX
             sync();
-#endif
-            
         }
+
         if ( qApp->type() == QApplication::GuiServer )
             QtopiaIpcEnvelope se("QPE/System", "resetContent()");
-#ifndef QTOPIA_CONTENT_INSTALLER
-        else
-            QContentUpdateManager::instance()->requestRefresh();
+#if !defined(QTOPIA_CONTENT_INSTALLER) && !defined(QTOPIA_TEST)
+        QContentUpdateManager::instance()->requestRefresh();
 #endif
-        // todo: tell the scanner which dbs to invalidate...
     }
     else
         qLog(Sql) << "tried to detach an invalid database path mapping:" << path;
@@ -831,10 +629,11 @@ const QList<QSqlDatabase> QtopiaSql::databases()
 {
     openDatabase();
 
+    QList<QSqlDatabase> result;
     database(0);    // to force at least one entry to be loaded (0 being the system database of course).
     foreach(QtopiaDatabaseId id, QtopiaSql::databaseIds())
-        database(id);
-    return QtopiaSqlPrivate::dbs.localData()->values();
+        result.append(database(id));
+    return result;
 }
 
 /*!
@@ -847,7 +646,7 @@ QtopiaDatabaseId QtopiaSql::databaseIdForPath(const QString& path)
 {
     openDatabase();
 
-    for(QHash<QtopiaDatabaseId, QString>::iterator i=QtopiaSqlPrivate::dbPaths.begin(); i != QtopiaSqlPrivate::dbPaths.end(); i++)
+    for(QHash<QtopiaDatabaseId, QString>::iterator i=d()->dbPaths.begin(); i != d()->dbPaths.end(); i++)
     {
         if(i.value() != QLatin1String("/"))
             if (i.key() != 0 && path.startsWith(i.value()))
@@ -882,7 +681,7 @@ const QList<QtopiaDatabaseId> QtopiaSql::databaseIds()
 {
     openDatabase();
 
-    return QtopiaSqlPrivate::masterAttachedConns.keys().toSet().toList();
+    return d()->masterAttachedConns.keys().toSet().toList();
 }
 
 /*!
@@ -908,7 +707,7 @@ bool QtopiaSql::isDatabase(const QString &path)
     openDatabase();
 
     qLog(Sql) << "QtopiaSql::isDatabase("<< path << ")";
-    foreach(const QSqlDatabase &db, QtopiaSqlPrivate::masterAttachedConns)
+    foreach(const QSqlDatabase &db, d()->masterAttachedConns)
     {
         qLog(Sql) << "db.databaseName:" << db.databaseName();
         if(path == db.databaseName() || path == db.databaseName() + QLatin1String("-journal"))
@@ -926,8 +725,8 @@ QString QtopiaSql::databasePathForId(const QtopiaDatabaseId& id)
     openDatabase();
 
     QString result;
-    if(id != 0 && QtopiaSqlPrivate::dbPaths.contains(id))
-        result = QtopiaSqlPrivate::dbPaths.value(id);
+    if(id != 0 && d()->dbPaths.contains(id))
+        result = d()->dbPaths.value(id);
     return result;
 }
 
@@ -944,25 +743,26 @@ void QtopiaSql::logQuery(const QSqlQuery &q)
             qLog(Sql) << "   params:" << q.boundValues();
     }
 }
-
 /*!
   Return a QSqlDatabase object for the database specific to the application
   given by \a appname
+  Note: You are responsible for calling QSqlDatabase::removeDatabase once you are finished
+  with the connection.
 */
 QSqlDatabase QtopiaSql::applicationSpecificDatabase(const QString &appname)
 {
     QSqlDatabase db;
 #ifdef Q_USE_SQLITE
     openDatabase();
-    QString connName = QString("QtopiaSqlDB%1").arg(QtopiaSqlPrivate::conId++);
+    QString connName = QString("QtopiaSqlDB%1").arg(d()->conId++);
     // copy the masterAttachedCons version, and register the connname in the list
-    db=QSqlDatabase::addDatabase(d->type, connName);
+    db=QSqlDatabase::addDatabase(d()->type, connName);
     db.setDatabaseName(Qtopia::applicationFileName(appname, QLatin1String("qtopia_db.sqlite")));
-    db.setUserName(d->user);
-    db.setPassword(d->password);
-    db.setHostName(d->hostname);
+    db.setUserName(d()->user);
+    db.setPassword(d()->password);
+    db.setHostName(d()->hostname);
     db.open();
-    d->installSorting(db);
+    d()->installSorting(db);
     QSqlQuery xsql( db );
     xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
     xsql.exec(QLatin1String("PRAGMA temp_store = memory"));
@@ -990,7 +790,7 @@ bool QtopiaSql::ensureTableExists(const QString &tableName, QSqlDatabase &db )
     qLog(Sql) << QDateTime::currentDateTime () << "before ensureTableExists service call";
     QDSServiceInfo service( "ensureTableExists", "DBMigrationEngine" );
     QDSAction action( service );
-    QDSData request(tableName, QMimeType("text/x-dbm-qstring"));
+    QDSData request(tableName, QMimeType::fromId("text/x-dbm-qstring"));
     QFile data(QLatin1String(":/QtopiaSql/") + db.driverName() + QLatin1String("/") + tableName);
     if (!data.open(QIODevice::ReadOnly))
     {
@@ -1053,4 +853,84 @@ bool QtopiaSql::ensureTableExists(const QStringList &tableNames, QSqlDatabase&db
     return true;
 }
 
-#include "qtopiasql.moc"
+/*!
+  Returns true if the database \a id is a valid open database in the system.
+*/
+bool QtopiaSql::isValidDatabaseId(const QtopiaDatabaseId& id)
+{
+    return d()->masterAttachedConns.contains(id);
+}
+// Created as a function-local static to delete a QGlobalStatic<T>
+template <typename T>
+class QGlobalInstanceDeleter
+{
+public:
+    T *globalStatic;
+    QGlobalInstanceDeleter(T *_globalStatic)
+        : globalStatic(_globalStatic)
+    { }
+
+    inline ~QGlobalInstanceDeleter()
+    {
+        delete globalStatic;
+        globalStatic = 0;
+    }
+};
+
+#if QT_VERSION < 0x040400
+
+#define Q_INSTANCE_HELPER_WITH_ARGS(CLASSNAME, ARGS) \
+    { \
+        static CLASSNAME *this_##CLASSNAME = NULL; \
+        CLASSNAME *x = new CLASSNAME ARGS; \
+        if(!q_atomic_test_and_set_ptr(&this_##CLASSNAME, NULL, x)) \
+            delete x; \
+        else \
+            static QGlobalInstanceDeleter<CLASSNAME> cleanup(this_##CLASSNAME); \
+        return this_##CLASSNAME; \
+    }
+
+#else
+
+#define Q_INSTANCE_HELPER_WITH_ARGS(CLASSNAME, ARGS) \
+    { \
+        static QAtomicPointer<CLASSNAME> this_##CLASSNAME = NULL; \
+        CLASSNAME *x = new CLASSNAME ARGS; \
+        if(!this_##CLASSNAME.testAndSetOrdered(NULL, x)) \
+            delete x; \
+        else \
+            static QGlobalInstanceDeleter<CLASSNAME> cleanup(this_##CLASSNAME); \
+        return this_##CLASSNAME; \
+    }
+
+#endif
+
+#define Q_INSTANCE_HELPER(CLASSNAME) \
+    Q_INSTANCE_HELPER_WITH_ARGS(CLASSNAME, ())
+
+/*!
+  Returns a pointer to the singleton object of QtopiaSql. This is the preferred method of accessing the QtopiaSql class.
+*/
+QtopiaSql *QtopiaSql::instance()
+{
+    Q_INSTANCE_HELPER(QtopiaSql);
+}
+
+/*!
+  Do not use this constructor to create a qtopiasql object. Please use \l instance() instead.
+*/
+QtopiaSql::QtopiaSql()
+{
+}
+
+QtopiaSqlPrivate *QtopiaSql::d()
+{
+    return QtopiaSqlPrivate::instance();
+}
+
+void QtopiaSql::connectDiskChannel()
+{
+#ifndef QTOPIA_HOST
+    d()->connectDiskChannel();
+#endif
+}

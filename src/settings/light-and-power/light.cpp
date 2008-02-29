@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,27 +21,17 @@
 #include "light.h"
 
 #include <qtopiaapplication.h>
-
 #include <custom.h>
 #include <qtopiaipcenvelope.h>
 #include <qtopiaservices.h>
-
 #include <QDebug>
 #include <QLayout>
 #include <QScrollArea>
 #include <QSettings>
 #include <QTabWidget>
-
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
 #include <QMenu>
 #include <QAction>
-#include <QTimer>
-#endif
-
-static const int S_PER_MIN = 60; // 60 seconds per minute
-
-extern int qpe_sysBrightnessSteps();
 
 LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     : QDialog( parent, fl), isStatusView( false )
@@ -50,14 +40,15 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     QVBoxLayout * baseLayout = new QVBoxLayout( this );
     baseLayout->setMargin( 0 );
 
-#ifdef QTOPIA_PHONE
-    QTabWidget *tabWidget = new QTabWidget( this );
-    baseLayout->addWidget( tabWidget );
-    QScrollArea *sView = new QScrollArea(0);
+    QWidget * container = new QWidget();
+
+    QScrollArea *sView = new QScrollArea;
     sView->setFocusPolicy(Qt::NoFocus);
     sView->setFrameStyle(QFrame::NoFrame);
+    sView->setWidget( container );
+    sView->setWidgetResizable( true );
     sView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    QWidget * container = new QWidget();
+
     QVBoxLayout *lightLayout = new QVBoxLayout(container);
     lightLayout->setMargin( 0 );
     b = new LightSettingsContainer();
@@ -66,67 +57,24 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     QtopiaApplication::setInputMethodHint( b->interval_suspend, QtopiaApplication::AlwaysOff );
 
     lightLayout->addWidget(b);
-    sView->setWidget( container );
-    sView->setWidgetResizable( true );
-    baseLayout->addWidget(sView);
-    tabWidget->addTab( sView, tr("Power Saving"));
 
-    sView = new QScrollArea(0);
-    sView->setFocusPolicy(Qt::NoFocus);
-    sView->setFrameStyle(QFrame::NoFrame);
-    sView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    QWidget *displayWidget = new QWidget();
-    QVBoxLayout *displayLayout = new QVBoxLayout( displayWidget );
-    displayLayout->setMargin( 0 );
-    d = new DisplaySettingsContainer(displayWidget);
-    displayLayout->addWidget(d);
-    QtopiaApplication::setInputMethodHint( d->interval_home, QtopiaApplication::AlwaysOff );
-    sView->setWidget( displayWidget );
-    sView->setWidgetResizable( true );
-    tabWidget->addTab( sView, tr("Security") );
+    baseLayout->addWidget(sView);
 
     // add context menu to push its status to Profiles
     contextMenu = QSoftMenuBar::menuFor( this );
     QAction* actionCapture = new QAction( QIcon( ":icon/Note" ), tr( "Add to profile" ), this );
     contextMenu->addAction( actionCapture );
     connect( actionCapture, SIGNAL(triggered()), this, SLOT(pushSettingStatus()) );
-    connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
-        this, SLOT(receive(const QString&,const QByteArray&)) );
+    connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
+        this, SLOT(receive(QString,QByteArray)) );
 
-#else
-    QScrollArea *sView = new QScrollArea( this );
-    sView->setFocusPolicy(Qt::NoFocus);
-    sView->setFrameStyle(QFrame::NoFrame);
-    baseLayout->addWidget(sView);
-    QWidget * container = new QWidget;
-    QVBoxLayout *lightLayout = new QVBoxLayout(container);
-    lightLayout->setMargin( 2 );
-    b = new LightSettingsContainer(container);
-    lightLayout->addWidget(b);
-    sView->setWidget(container);
-    sView->setWidgetResizable( true );
-#endif
-
-    connect( b->screensaver_dim, SIGNAL(stateChanged(int)), this, SLOT(updateEditBoxes()) );
-    connect( b->screensaver_lightoff, SIGNAL(stateChanged(int)), this, SLOT(updateEditBoxes()) );
-    connect( b->screensaver_suspend, SIGNAL(stateChanged(int)), this, SLOT(updateEditBoxes()) );
     connect( b->interval_dim, SIGNAL(valueChanged(int)), this, SLOT(updateLightOffMinValue(int)) );
-
-    connect( d->display_home, SIGNAL(stateChanged(int)), this, SLOT(updateEditBoxes()) );
     connect( b->interval_dim, SIGNAL(valueChanged(int)), this, SLOT(updateSuspendMinValue(int)) );
     connect( b->interval_lightoff, SIGNAL(valueChanged(int)), this, SLOT(updateSuspendMinValue(int)) );
-    connect( d->interval_home, SIGNAL(valueChanged(int)), this, SLOT(updateSuspendMinValue(int)) );
 
-    b->powerSource = new QButtonGroup(this);
-    b->powerSource->addButton(b->batteryButton);
-    b->powerSource->addButton(b->externalButton);
-    b->powerSource->setExclusive( true );
-    b->batteryButton->setChecked( true );
+    b->officon->setPixmap(QPixmap(":image/off").scaled(24, 24, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    b->brighticon->setPixmap(QPixmap(":image/Light").scaled(24, 24, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
-    b->officon->setPixmap(QPixmap(":image/light-off"));
-    b->brighticon->setPixmap(QPixmap(":image/light-on"));
-
-#ifdef QTOPIA_PHONE
     QSettings hwConfig("Trolltech", "Hardware");
     hwConfig.beginGroup("PowerManagement");
     batteryMode.canSuspend = hwConfig.value("CanSuspend", false).toBool();
@@ -136,27 +84,11 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     b->notnetworkedsuspend->hide();
 
     if (batteryMode.canSuspend || externalMode.canSuspend) {
-        b->screensaver_suspend->setEnabled(true);
+        b->interval_suspend->setEnabled(true);
     } else {
-        b->screensaver_suspend->hide();
         b->interval_suspend->hide();
+        b->label_suspend->hide();
     }
-
-    b->biginfo->hide();
-    if (Qtopia::mousePreferred())
-        d->autoPhoneLock->hide();
-#else
-    batteryMode.canSuspend = true;
-    externalMode.canSuspend = false;
-
-    b->screensaver_suspend->setEnabled(true);
-    if (!QPowerStatusManager::APMEnabled()) {
-        b->powerSourceGroupBox->hide();
-        b->notnetworkedsuspend->hide();
-        b->screensaver_suspend->hide();
-        b->interval_suspend->hide();
-    }
-#endif
 
     QSettings config("Trolltech","qpe");
 
@@ -164,7 +96,7 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     batteryMode.intervalDim = config.value( "Interval_Dim", 20 ).toInt();
     batteryMode.intervalLightOff = config.value("Interval_LightOff", 30).toInt();
     batteryMode.intervalSuspend = config.value("Interval", 60).toInt();
-    batteryMode.initbright = config.value("Brightness", 255).toInt();
+    batteryMode.initbright = config.value("Brightness",  qpe_sysBrightnessSteps()).toInt();
     batteryMode.dim = config.value("Dim", true).toBool();
     batteryMode.lightoff = config.value("LightOff", false).toBool();
     batteryMode.suspend = config.value("Suspend", true).toBool();
@@ -175,7 +107,7 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     externalMode.intervalDim = config.value( "Interval_Dim", 20 ).toInt();
     externalMode.intervalLightOff = config.value("Interval_LightOff", 30).toInt();
     externalMode.intervalSuspend = config.value("Interval", 240).toInt();
-    externalMode.initbright = config.value("Brightness", 255).toInt();
+    externalMode.initbright = config.value("Brightness",  qpe_sysBrightnessSteps()).toInt();
     externalMode.dim = config.value("Dim", true).toBool();
     externalMode.lightoff = config.value("LightOff", false).toBool();   //default to leave on
     externalMode.suspend = config.value("Suspend", true).toBool();
@@ -189,28 +121,18 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     b->brightness->setTickInterval( qMax(1,maxbright/16) );
     b->brightness->setSingleStep( qMax(1,maxbright/16) );
     b->brightness->setPageStep( qMax(1,maxbright/16) );
-
+    
     currentMode = &batteryMode;
-
-#ifdef QTOPIA_PHONE
-    config.beginGroup("HomeScreen");
-    showHomeScreen = config.value("ShowHomeScreen", false).toBool();
-    intervalShowHomeScreen = config.value("Interval_HomeScreen", 300 ).toInt();
-    if (!Qtopia::mousePreferred())
-        keyLock = config.value("AutoKeyLock", "Disabled").toString();
-    config.endGroup();
-    connect( d->display_home, SIGNAL(stateChanged(int)),
-            this, SLOT(backToHomeScreenClicked(int)) );
-#endif
-
     applyMode();
 
-    powerStatus = QPowerStatusManager::readStatus();
-    connect(b->powerSource, SIGNAL(buttonClicked(QAbstractButton*)),
-            this, SLOT(powerTypeClicked(QAbstractButton*)));
-    if ( powerStatus.acStatus() == QPowerStatus::Online ) {
-        b->externalButton->setChecked(true);
-        powerTypeClicked(b->externalButton);
+    //trigger first update of spinboxes minima
+    updateLightOffMinValue( b->interval_dim->value() );
+    updateSuspendMinValue( b->interval_dim->value() );
+
+    connect(b->powerSource, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(powerTypeChanged(int)));
+    if ( powerStatus.wallStatus() == QPowerStatus::Available ) {
+        b->powerSource->setCurrentIndex(1);
     }
 
     initbright = currentMode->initbright;
@@ -218,8 +140,8 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     connect(b->brightness, SIGNAL(valueChanged(int)), this, SLOT(applyBrightness()));
 
     QtopiaChannel *channel = new QtopiaChannel("Qtopia/PowerStatus", this);
-    connect(channel, SIGNAL(received(const QString&, const QByteArray&)),
-            this, SLOT(sysMessage(const QString&, const QByteArray&)));
+    connect(channel, SIGNAL(received(QString,QByteArray)),
+            this, SLOT(sysMessage(QString,QByteArray)));    
 }
 
 LightSettings::~LightSettings()
@@ -247,14 +169,11 @@ void LightSettings::accept()
         qApp->focusWidget()->clearFocus();
 
     if ( isStatusView ) {
-#ifdef QTOPIA_PHONE
         if ( isFromActiveProfile )
             saveConfig();
         pushSettingStatus();
-#endif
     } else {
         saveConfig();
-#ifdef QTOPIA_PHONE
         // if the current profile has power management item
         // update the details with the new setting
         QSettings cfg( "Trolltech", "PhoneProfile" );
@@ -265,7 +184,6 @@ void LightSettings::accept()
         QString settings = cfg.value( "SettingList" ).toString();
         if ( settings.contains( "light-and-power" ) )
             pushSettingStatus();
-#endif
     }
     QDialog::accept();
     close();
@@ -274,11 +192,10 @@ void LightSettings::accept()
 void LightSettings::saveConfig()
 {
     // safe call, always one selected.
-    powerTypeClicked( b->powerSource->checkedButton() );
+    powerTypeChanged( b->powerSource->currentIndex() );
 
     // Set settings for current power source
-    powerStatus = QPowerStatusManager::readStatus();
-    if ( powerStatus.acStatus() == QPowerStatus::Online )
+    if ( powerStatus.wallStatus() == QPowerStatus::Available )
         currentMode = &externalMode;
     else
         currentMode = &batteryMode;
@@ -293,38 +210,12 @@ void LightSettings::saveConfig()
 
     int i_dim =      (currentMode->dim ? currentMode->intervalDim : 0);
     int i_lightoff = (currentMode->lightoff ? currentMode->intervalLightOff : 0);
-    int i_suspend =  ((currentMode->canSuspend &&
-                       currentMode->suspend) ? currentMode->intervalSuspend : 0);
-
-#ifdef QTOPIA_PHONE
-    showHomeScreen = d->display_home->isChecked();
-    intervalShowHomeScreen = d->interval_home->value() * S_PER_MIN;
-
-    QSettings config("Trolltech","qpe");
-    config.beginGroup( "HomeScreen" );
-    config.setValue( "ShowHomeScreen", showHomeScreen );
-    config.setValue( "Interval_HomeScreen", intervalShowHomeScreen );
-
-    if (!Qtopia::mousePreferred()) {
-        if (d->autoPhoneLock->isChecked())
-            keyLock = "Enabled";  //no tr
-        else
-            keyLock = "Disabled"; //no tr
-
-        config.setValue( "AutoKeyLock", keyLock );
-    }
-    config.endGroup();
-#endif
+    int i_suspend =  (currentMode->suspend ? currentMode->intervalSuspend : 0);
 
     set_fl(currentMode->initbright);
 
     QtopiaServiceRequest e("QtopiaPowerManager", "setIntervals(int,int,int)" );
-#ifndef QTOPIA_PHONE
     e << i_dim << i_lightoff << i_suspend;
-#else
-    e << i_dim << i_lightoff << intervalShowHomeScreen;
-    Q_UNUSED(i_suspend)
-#endif
     e.send();
 }
 
@@ -342,65 +233,49 @@ void LightSettings::writeMode(QSettings &config, PowerMode *mode)
         config.setValue( "Interval", 0 );
         config.setValue( "Suspend", false );
     }
-#ifndef QTOPIA_PHONE
-    config.setValue( "NetworkedSuspend", mode->networkedsuspend );
-#endif
 }
 
 void LightSettings::applyMode()
 {
     b->interval_dim->setValue( currentMode->intervalDim );
+    if ( !currentMode->dim )
+        b->interval_dim->setMinimum( currentMode->intervalDim );
     b->interval_lightoff->setValue( currentMode->intervalLightOff );
+    if ( !currentMode->lightoff )
+        b->interval_lightoff->setMinimum( currentMode->intervalLightOff );
     b->interval_suspend->setValue( currentMode->intervalSuspend );
-    int v = currentMode->initbright;
-    b->brightness->setValue( (b->brightness->maximum()*v+128)/255 );
+    if ( !currentMode->suspend || !currentMode->canSuspend )
+        b->interval_suspend->setMinimum( currentMode->intervalSuspend );
 
-    b->screensaver_dim->setChecked( currentMode->dim );
-    b->screensaver_lightoff->setChecked( currentMode->lightoff );
-    b->screensaver_suspend->setEnabled( currentMode->canSuspend );
-    b->screensaver_suspend->setChecked( currentMode->canSuspend && currentMode->suspend );
+    b->brightness->setValue( currentMode->initbright);
+    b->interval_suspend->setEnabled( currentMode->canSuspend );
     b->notnetworkedsuspend->setChecked( !currentMode->networkedsuspend );
-#ifdef QTOPIA_PHONE
-    d->display_home->setChecked( showHomeScreen );
-    backToHomeScreenClicked( d->display_home->checkState() );
-    d->interval_home->setValue( intervalShowHomeScreen / S_PER_MIN );
 
-    if (!Qtopia::mousePreferred()) {
-        if (keyLock == "Disabled") //no tr
-            d->autoPhoneLock->setChecked( false );
-        else if (keyLock == "Enabled") //no tr
-            d->autoPhoneLock->setChecked(true);
-        else
-            qWarning("Unknown locking type");
-    }
-#endif
+
 }
 
 void LightSettings::applyBrightness()
 {
     // slot called, but we haven't changed the powerMode values yet
-    int v = b->brightness->value();
-    currentMode->initbright = (v*255+b->brightness->maximum()/2)/b->brightness->maximum();
-
+    currentMode->initbright = (  b->brightness->value() );
     set_fl(currentMode->initbright);
 }
 
-void LightSettings::powerTypeClicked(QAbstractButton * selected)
+void LightSettings::powerTypeChanged(int index)
 {
     PowerMode *newMode = &batteryMode;
 
-    if ( selected == b->externalButton )
+    if ( index == 1 )
         newMode = &externalMode;
 
     /*  store everytime (so we can store from accept)   */
     currentMode->intervalDim = b->interval_dim->value();
     currentMode->intervalLightOff = b->interval_lightoff->value();
     currentMode->intervalSuspend = b->interval_suspend->value();
-    int v = b->brightness->value();
-    currentMode->initbright = (v*255+b->brightness->maximum()/2)/b->brightness->maximum();
-    currentMode->dim = b->screensaver_dim->isChecked();
-    currentMode->lightoff = b->screensaver_lightoff->isChecked();
-    currentMode->suspend = b->screensaver_suspend->isChecked();
+    currentMode->initbright = ( b->brightness->value() );
+    currentMode->dim = (b->interval_dim->value() != b->interval_dim->minimum());
+    currentMode->lightoff = (b->interval_lightoff->value() != b->interval_lightoff->minimum());
+    currentMode->suspend = (b->interval_suspend->value() != b->interval_suspend->minimum());
     currentMode->networkedsuspend = !b->notnetworkedsuspend->isChecked();
 
     /*  Radio buttons toggled   */
@@ -419,15 +294,9 @@ void LightSettings::sysMessage(const QString& msg, const QByteArray& data)
         currentMode->initbright = bright;
 
         b->brightness->disconnect();
-        b->brightness->setValue( (b->brightness->maximum()*bright+128)/255 );
+        b->brightness->setValue( bright);
         connect(b->brightness, SIGNAL(valueChanged(int)), this, SLOT(applyBrightness()));
     }
-}
-
-#ifdef QTOPIA_PHONE
-void LightSettings::backToHomeScreenClicked( int state )
-{
-    d->home_details->setEnabled( state == Qt::Checked );
 }
 
 void LightSettings::pushSettingStatus()
@@ -449,14 +318,11 @@ QString LightSettings::status()
 {
     // capture current status
     QString result;
-    result = QString::number( b->screensaver_dim->isChecked() ) + ",";
+    result = QString::number( (b->interval_dim->value() != b->interval_dim->maximum()) ) + ",";
     result += QString::number( b->interval_dim->value() ) + ",";
-    result += QString::number( b->screensaver_lightoff->isChecked() ) + ",";
+    result += QString::number( (b->interval_lightoff->value() != b->interval_lightoff->maximum()) ) + ",";
     result += QString::number( b->interval_lightoff->value() ) + ",";
     result += QString::number( b->brightness->value() ) + ",";
-    result += QString::number( d->display_home->isChecked() ) + ",";
-    result += QString::number( d->interval_home->value() ) + ",";
-    result += QString::number( d->autoPhoneLock->isChecked() ) + ",";
     return result;
 }
 
@@ -469,9 +335,6 @@ void LightSettings::setStatus( QString details )
     currentMode->lightoff = sl.at( 2 ).toInt();
     currentMode->intervalLightOff = sl.at( 3 ).toInt();
     currentMode->initbright = sl.at( 4 ).toInt();
-    showHomeScreen = sl.at( 5 ).toInt();
-    intervalShowHomeScreen = sl.at( 6 ).toInt();
-    keyLock = ( sl.at( 7 ).toInt() ? "Enabled" : "Disabled" );
     applyMode();
 }
 
@@ -482,10 +345,8 @@ void LightSettings::receive( const QString& msg, const QByteArray& data )
         // must show widget to keep running
         QtopiaApplication::instance()->showMainWidget();
         isStatusView = true;
-#ifdef QTOPIA_PHONE
         QSoftMenuBar::removeMenuFrom( this, contextMenu );
         delete contextMenu;
-#endif
         QString details;
         ds >> isFromActiveProfile;
         ds >> details;
@@ -502,46 +363,41 @@ void LightSettings::receive( const QString& msg, const QByteArray& data )
     } else if ( msg == "Settings::activateDefault()" ) {
         PowerMode mode;
         batteryMode = mode;
-        showHomeScreen = false;
-        intervalShowHomeScreen = 10;
-        keyLock = "Disabled";
         applyMode();
         saveConfig();
         hide();
     }
 }
-#endif
-void LightSettings::updateEditBoxes()
-{
-    b->interval_dim->setEnabled( b->screensaver_dim->isChecked() );
-    b->interval_lightoff->setEnabled( b->screensaver_lightoff->isChecked() );
-    b->interval_suspend->setEnabled( b->screensaver_suspend->isChecked() );
 
-    updateSuspendMinValue(10);
-}
-
-void LightSettings::updateLightOffMinValue( int dimValue )
+void LightSettings::updateLightOffMinValue( int )
 {
-    b->interval_lightoff->setMinimum( dimValue + 10 );
-    if ( b->interval_lightoff->value() <= dimValue )
-        b->interval_lightoff->setValue( dimValue + 10 );
+    int minValue = 10;
+    
+    if ( b->interval_dim->value() != b->interval_dim->minimum() ) {
+        minValue = qMax(minValue, b->interval_dim->value());
+    }
+    
+    bool wasSuspendMin = (b->interval_lightoff->value() == b->interval_lightoff->minimum());
+    b->interval_lightoff->setMinimum( minValue - 10 );
+    if ( wasSuspendMin ) 
+        b->interval_lightoff->setValue( minValue - 10  );
+    else if ( b->interval_lightoff->value() < minValue )
+        b->interval_lightoff->setValue( minValue );
 }
 
 void LightSettings::updateSuspendMinValue( int )
 {
     int minValue = 10;
 
-    if ( b->screensaver_dim->isChecked() )
+    if ( b->interval_dim->value() != b->interval_dim->minimum() )
         minValue = qMax(minValue, b->interval_dim->value());
-    if ( b->screensaver_lightoff->isChecked() )
+    if ( b->interval_lightoff->value() != b->interval_lightoff->minimum() )
         minValue = qMax(minValue, b->interval_lightoff->value());
-#ifdef QTOPIA_PHONE
-    if ( d->display_home->isChecked() )
-        minValue = qMax(minValue, d->interval_home->value() * S_PER_MIN);
-#endif
 
-    b->interval_suspend->setMinimum( minValue );
-    if ( b->interval_suspend->value() <= minValue )
+    bool wasSuspendMin = (b->interval_suspend->value() == b->interval_suspend->minimum());
+    b->interval_suspend->setMinimum( minValue - 10 );
+    if ( wasSuspendMin ) 
+        b->interval_suspend->setValue( minValue - 10  );
+    else if ( b->interval_suspend->value() < minValue )
         b->interval_suspend->setValue( minValue );
 }
-

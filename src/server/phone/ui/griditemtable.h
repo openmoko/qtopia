@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -38,13 +38,13 @@ public:
 
     bool add(GridItem *);
 
-    GridItem *getItem(int row,int col) const;
+    GridItem *item(int row,int col) const;
 
-    GridItem *getItem(const Key &) const;
+    GridItem *item(const Key &) const;
 
-    int getTopRow() const { return topRow; }
+    int topRow() const { return mTopRow; }
 
-    int getTopColumn() const { return topColumn; }
+    int topColumn() const { return mTopColumn; }
 
 
 private:
@@ -53,8 +53,8 @@ private:
     // the first value (row). If that ties, a comparison is made using the second value (column).
     QMap<Key,GridItem *> map;
 
-    int topRow;
-    int topColumn;
+    int mTopRow;
+    int mTopColumn;
 };
 
 #endif

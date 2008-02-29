@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,14 +30,24 @@
 #include <qfile.h>
 #include <qtextstream.h>
 
-#include <qtopia/mail/emailfolderaccess.h>
-#include <qtopia/mail/mailmessage.h>
-#include "email.h"
+#include <qtopiaglobal.h>
+#include <QMailMessage>
+#include <QMailFolder>
+#include <QMailMessageKey>
+#include <QMailMessageSortKey>
 
 class EmailFolderList;
 class AccountList;
 
-class MailboxList : public QObject
+enum IconType
+{
+    NoIcon = 0,
+    AllMessages = 1,
+    UnreadMessages = 2,
+    UnsentMessages = 3
+};
+
+class QTOPIAMAIL_EXPORT MailboxList : public QObject
 {
     Q_OBJECT
 
@@ -46,75 +56,104 @@ public:
     ~MailboxList();
 
     void openMailboxes();
-    void writeDirtyHeaders();
-    void compact();
 
     QStringList mailboxes() const;
     EmailFolderList* mailbox(const QString &name) const;
+    EmailFolderList* mailbox(const QMailId& mailFolderId) const;
+
+    // Identifier strings not visible to user
+    static const char* InboxString;
+    static const char* OutboxString;
+    static const char* DraftsString;
+    static const char* SentString;
+    static const char* TrashString;
+    static const char* LastSearchString;
+
+    // Get the translated name for a mailbox
+    static QString mailboxTrName( const QString &s );
+
+    // Get the translated header text for a mailbox
+    static QString mailboxTrHeader( const QString &s );
+
+    // Get an icon for mailbox.
+    static QIcon mailboxIcon( const QString &s );
 
 signals:
     void externalEdit(const QString &);
-    void mailAdded(Email *, const QString &);
-    void mailUpdated(Email *, const QString &);
-    void mailRemoved(const QUuid &, const QString &);
-    void mailMoved(Email*, const QString&, const QString&);
+    void mailAdded(const QMailId& id, const QString &);
+    void mailUpdated(const QMailId& id, const QString &);
+    void mailRemoved(const QMailId &, const QString &);
+    void mailMoved(const QMailId& id, const QString&, const QString&);
+    void mailMoved(const QMailIdList& list, const QString&, const QString&);
     void stringStatus(QString &);
 
 private:
     QList<EmailFolderList*> _mailboxes;
 };
 
-class EmailFolderList : public QObject
+class QTOPIAMAIL_EXPORT EmailFolderList : public QObject
 {
     Q_OBJECT
 
 public:
+    enum MailType { All, New, Unsent, Unfinished };
+    enum SortOrder { Submission, AscendingDate, DescendingDate };
+
     EmailFolderList(QString mailbox, QObject *parent=0);
     ~EmailFolderList();
 
     void openMailbox();
-    bool addMail(const Email &mail);
-    bool removeMail(QUuid id, bool expunge);
-    bool moveMail(const QUuid& id, EmailFolderList& dest);
-    bool copyMail(const QUuid& id, EmailFolderList& dest);
-    bool empty();
-    void writeDirtyHeaders();
-    void compact();
+    bool addMail(QMailMessage &mail);
+    bool removeMail(QMailId id);
+    bool moveMail(const QMailId& id, EmailFolderList& dest);
+    bool copyMail(const QMailId& id, EmailFolderList& dest);
+    bool empty(int type = QMailMessage::AnyType);
 
-    QString mailbox() const { return e->mailbox(); };
+    bool moveMailList(const QMailIdList& list, EmailFolderList& dest);
 
-    QListIterator<Email*> entryIterator();
-    Email* email(QUuid id);
+    QString mailbox() const;
+    QMailFolder mailFolder() const;
 
-    // If accountList is set then as a side effect the unread count
-    // for all accounts is updated by this call.
-    uint mailCount(const QString &type, AccountList *accountList = 0);
+    QMailIdList messages(unsigned int type = QMailMessage::AnyType, 
+                         const SortOrder& order = Submission ) const;
 
-    QUuid generateUuid();
+    QMailIdList messages(const QMailMessage::Status& status, 
+                         bool contains,
+                         unsigned int type = QMailMessage::AnyType,
+                         const SortOrder& order = Submission ) const;
 
-    bool swapMailIn(Email *);
+    QMailIdList messagesFromMailbox(const QString& mailbox, 
+                                    unsigned int type = QMailMessage::AnyType,
+                                    const SortOrder& order = Submission ) const;
+
+    QMailIdList messagesFromAccount(const QString& account, 
+                                    unsigned int type = QMailMessage::AnyType,
+                                    const SortOrder& order = Submission ) const;
+
+    bool contains(const QMailId& id) const;
+
+    // If accountList is set and type is New then as a side effect 
+    // the unread count for all accounts is updated by this call.
+    uint mailCount(MailType status, 
+		   int type = QMailMessage::AnyType,
+		   AccountList *accountList = 0);
 
 signals:
     void externalEdit(const QString &);
-    void mailAdded(Email *, const QString &);
-    void mailUpdated(Email *, const QString &);
-    void mailRemoved(const QUuid &, const QString &);
-    void mailMoved(Email*, const QString&, const QString&);
+    void mailAdded(const QMailId& id, const QString &);
+    void mailUpdated(const QMailId& id, const QString &);
+    void mailRemoved(const QMailId& id, const QString &);
+    void mailMoved(const QMailId& id, const QString&, const QString&);
+    void mailMoved(const QMailIdList& list, const QString&, const QString&);
     void stringStatus(QString &);
 
 protected slots:
     void externalChange();
 
-    bool swapMailOut();
-
 private:
-   Email *emailRef(QUuid id);
-
-private:
-    QList<Email*> entryList;
-    uint MaxMem;
-    EmailFolderAccess *e;
-    int _addOrder;
+    QString mMailbox;
+    QMailFolder mFolder;
+    QMailMessageKey mParentFolderKey;
 };
 
 #endif

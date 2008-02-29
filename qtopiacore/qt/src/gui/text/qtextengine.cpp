@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -214,12 +229,12 @@ static bool bidiItemize(QTextEngine *engine, bool rightToLeft)
     if (!length)
         return hasBidi;
 
-    const QChar *unicode = engine->layoutData->string.unicode();
+    const ushort *unicode = (const ushort *)engine->layoutData->string.unicode();
     int current = 0;
 
     QChar::Direction dir = rightToLeft ? QChar::DirR : QChar::DirL;
     QBidiStatus status;
-    QChar::Direction sdir = QUnicodeTables::direction(*unicode);
+    QChar::Direction sdir = QChar::direction(*unicode);
     if (sdir != QChar::DirL && sdir != QChar::DirR && sdir != QChar::DirEN && sdir != QChar::DirAN)
 	sdir = QChar::DirON;
     else
@@ -237,7 +252,7 @@ static bool bidiItemize(QTextEngine *engine, bool rightToLeft)
         if (current == (int)length)
             dirCurrent = control.basicDirection();
         else
-            dirCurrent = QUnicodeTables::direction(unicode[current]);
+            dirCurrent = QChar::direction(unicode[current]);
 
 #if (BIDI_DEBUG >= 2)
         cout << "pos=" << current << " dir=" << directions[dir]
@@ -309,7 +324,7 @@ static bool bidiItemize(QTextEngine *engine, bool rightToLeft)
                 case QChar::DirAN:
                     if (eor >= 0) {
                         appendItems(engine, sor, eor, control, dir);
-                        dir = eor < length ? QUnicodeTables::direction(unicode[eor]) : control.basicDirection();
+                        dir = eor < length ? QChar::direction(unicode[eor]) : control.basicDirection();
                         status.eor = dir;
                     } else {
                         eor = current; status.eor = dir;
@@ -334,7 +349,7 @@ static bool bidiItemize(QTextEngine *engine, bool rightToLeft)
                             }
                             eor = current - 1;
                             appendItems(engine, sor, eor, control, dir);
-                            dir = eor < length ? QUnicodeTables::direction(unicode[eor]) : control.basicDirection();
+                            dir = eor < length ? QChar::direction(unicode[eor]) : control.basicDirection();
                             status.eor = dir;
                         } else {
                             if(status.eor != QChar::DirL) {
@@ -689,146 +704,184 @@ void QTextEngine::bidiReorder(int numItems, const quint8 *levels, int *visualOrd
    places they shouldn't be allowed. The following changes were thus
    made in comparison to the Unicode reference:
 
-   CL->AL from Dbk to Ibk
-   CL->PR from Dbk to Ibk
-   EX->AL from Dbk to Ibk
-   IS->AL from Dbk to Ibk
-   PO->AL from Dbk to Ibk
-   SY->AL from Dbk to Ibk
-   SY->PO from Dbk to Ibk
-   SY->PR from Dbk to Ibk
-   SY->OP from Dbk to Ibk
-   Al->OP from Dbk to Ibk
-   AL->HY from Dbk to Ibk
-   AL->PR from Dbk to Ibk
-   AL->PO from Dbk to Ibk
-   PR->PR from Dbk to Ibk
-   PO->PO from Dbk to Ibk
-   PR->PO from Dbk to Ibk
-   PO->PR from Dbk to Ibk
-   HY->PO from Dbk to Ibk
-   HY->PR from Dbk to Ibk
-   HY->OP from Dbk to Ibk
-   PO->OP from Dbk to Ibk
-   NU->EX from Dbk to Ibk
-   NU->PR from Dbk to Ibk
-   PO->NU from Dbk to Ibk
-   EX->PO from Dbk to Ibk
+   EX->AL from DB to IB
+   SY->AL from DB to IB
+   SY->PO from DB to IB
+   SY->PR from DB to IB
+   SY->OP from DB to IB
+   AL->PR from DB to IB
+   AL->PO from DB to IB
+   PR->PR from DB to IB
+   PO->PO from DB to IB
+   PR->PO from DB to IB
+   PO->PR from DB to IB
+   HY->PO from DB to IB
+   HY->PR from DB to IB
+   HY->OP from DB to IB
+   NU->EX from PB to IB
+   EX->PO from DB to IB
 */
 
-enum break_action {
-    Dbk, // Direct break
-    Ibk, // Indirect break; only allowed if space between the two chars
-    Pbk // Prohibited break; no break allowed even if space between chars
-};
-
 // The following line break classes are not treated by the table:
-// SA, BK, CR, LF, SG, CB, SP
-static const quint8 breakTable[QUnicodeTables::LineBreak_CM+1][QUnicodeTables::LineBreak_CM+1] =
-{
-    // OP,  CL,  QU,  GL, NS,  EX,  SY,  IS,  PR,  PO,  NU,  AL,  ID,  IN,  HY,  BA,  BB,  B2,  ZW,  CM
-    { Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk, Pbk }, // OP
-    { Dbk, Pbk, Ibk, Pbk, Pbk, Pbk, Pbk, Pbk, Ibk, Ibk, Dbk, Ibk, Dbk, Dbk, Ibk, Ibk, Pbk, Pbk, Pbk, Pbk }, // CL
-    { Pbk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Pbk, Pbk }, // QU
-    { Ibk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Pbk, Pbk }, // GL
-    { Dbk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Ibk, Ibk, Dbk, Dbk, Pbk, Ibk }, // NS
-    { Dbk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Dbk, Ibk, Ibk, Ibk, Dbk, Dbk, Ibk, Ibk, Dbk, Dbk, Pbk, Ibk }, // EX
-    { Ibk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Ibk, Ibk, Ibk, Ibk, Dbk, Dbk, Ibk, Ibk, Dbk, Dbk, Pbk, Ibk }, // SY
-    { Dbk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Dbk, Dbk, Ibk, Ibk, Dbk, Dbk, Ibk, Ibk, Dbk, Dbk, Pbk, Ibk }, // IS
-    { Ibk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Ibk, Ibk, Ibk, Ibk, Ibk, Dbk, Ibk, Ibk, Dbk, Dbk, Pbk, Pbk }, // PR
-    { Ibk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Ibk, Ibk, Ibk, Ibk, Dbk, Dbk, Ibk, Ibk, Dbk, Dbk, Pbk, Ibk }, // PO
-    { Dbk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Ibk, Ibk, Ibk, Ibk, Dbk, Ibk, Ibk, Ibk, Dbk, Dbk, Pbk, Pbk }, // NU
-    { Ibk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Ibk, Ibk, Ibk, Ibk, Dbk, Ibk, Ibk, Ibk, Dbk, Dbk, Pbk, Pbk }, // AL
-    { Dbk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Dbk, Ibk, Dbk, Dbk, Dbk, Ibk, Ibk, Ibk, Dbk, Dbk, Pbk, Ibk }, // ID
-    { Dbk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Dbk, Dbk, Dbk, Dbk, Dbk, Ibk, Ibk, Ibk, Dbk, Dbk, Pbk, Ibk }, // IN
-    { Ibk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Ibk, Ibk, Ibk, Ibk, Dbk, Dbk, Ibk, Ibk, Dbk, Dbk, Pbk, Ibk }, // HY
-    { Dbk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Ibk, Ibk, Dbk, Dbk, Pbk, Ibk }, // BA
-    { Ibk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Ibk, Pbk, Ibk }, // BB
-    { Dbk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Ibk, Ibk, Dbk, Pbk, Pbk, Ibk }, // B2
-    { Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Dbk, Pbk, Ibk }, // ZW
-    { Dbk, Pbk, Ibk, Pbk, Ibk, Pbk, Pbk, Pbk, Dbk, Ibk, Dbk, Dbk, Dbk, Ibk, Ibk, Ibk, Dbk, Dbk, Pbk, Pbk }  // CM
-};
+//  AI, BK, CB, CR, LF, NL, SA, SG, SP, XX
 
-// set the soft break flag at every possible line breaking point. This needs correct clustering information.
-static void calcLineBreaks(const QString &str, QCharAttributes *charAttributes)
+enum break_class {
+    // the first 4 values have to agree with the enum in QCharAttributes
+    ProhibitedBreak,            // PB in table
+    DirectBreak,                // DB in table
+    IndirectBreak,              // IB in table
+    CombiningIndirectBreak,     // CI in table
+    CombiningProhibitedBreak,   // CP in table
+};
+#define DB DirectBreak
+#define IB IndirectBreak
+#define CI CombiningIndirectBreak
+#define CP CombiningProhibitedBreak
+#define PB ProhibitedBreak
+
+static const quint8 breakTable[QUnicodeTables::LineBreak_JT+1][QUnicodeTables::LineBreak_JT+1] =
 {
-    int len = str.length();
+/*          OP  CL  QU  GL  NS  EX  SY  IS  PR  PO  NU  AL  ID  IN  HY  BA  BB  B2  ZW  CM  WJ  H2  H3  JL  JV  JT */
+/* OP */ { PB, PB, PB, PB, PB, PB, PB, PB, PB, PB, PB, PB, PB, PB, PB, PB, PB, PB, PB, CP, PB, PB, PB, PB, PB, PB },
+/* CL */ { DB, PB, IB, IB, PB, PB, PB, PB, IB, IB, IB, IB, DB, DB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* QU */ { PB, PB, IB, IB, IB, PB, PB, PB, IB, IB, IB, IB, IB, IB, IB, IB, IB, IB, PB, CI, PB, IB, IB, IB, IB, IB },
+/* GL */ { IB, PB, IB, IB, IB, PB, PB, PB, IB, IB, IB, IB, IB, IB, IB, IB, IB, IB, PB, CI, PB, IB, IB, IB, IB, IB },
+/* NS */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, DB, DB, DB, DB, DB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* EX */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, IB, DB, IB, DB, DB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* SY */ { IB, PB, IB, IB, IB, PB, PB, PB, IB, IB, IB, IB, DB, DB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* IS */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, DB, IB, IB, DB, DB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* PR */ { IB, PB, IB, IB, IB, PB, PB, PB, IB, IB, IB, IB, IB, DB, IB, IB, DB, DB, PB, CI, PB, IB, IB, IB, IB, IB },
+/* PO */ { IB, PB, IB, IB, IB, PB, PB, PB, IB, IB, IB, IB, DB, DB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* NU */ { IB, PB, IB, IB, IB, IB, PB, PB, IB, IB, IB, IB, DB, IB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* AL */ { IB, PB, IB, IB, IB, PB, PB, PB, IB, IB, IB, IB, DB, IB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* ID */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, IB, DB, DB, DB, IB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* IN */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, DB, DB, DB, DB, IB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* HY */ { IB, PB, IB, IB, IB, PB, PB, PB, IB, IB, IB, DB, DB, DB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* BA */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, DB, DB, DB, DB, DB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* BB */ { IB, PB, IB, IB, IB, PB, PB, PB, IB, IB, IB, IB, IB, IB, IB, IB, IB, IB, PB, CI, PB, IB, IB, IB, IB, IB },
+/* B2 */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, DB, DB, DB, DB, DB, IB, IB, DB, PB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* ZW */ { DB, DB, DB, DB, DB, DB, DB, DB, DB, DB, DB, DB, DB, DB, DB, DB, DB, DB, PB, DB, DB, DB, DB, DB, DB, DB },
+/* CM */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, DB, IB, IB, DB, IB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, DB },
+/* WJ */ { IB, PB, IB, IB, IB, PB, PB, PB, IB, IB, IB, IB, IB, IB, IB, IB, IB, IB, PB, CI, PB, IB, IB, IB, IB, IB },
+/* H2 */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, IB, DB, DB, DB, IB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, IB, IB },
+/* H3 */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, IB, DB, DB, DB, IB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, IB },
+/* JL */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, IB, DB, DB, DB, IB, IB, IB, DB, DB, PB, CI, PB, IB, IB, IB, IB, DB },
+/* JV */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, IB, DB, DB, DB, IB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, IB, IB },
+/* JT */ { DB, PB, IB, IB, IB, PB, PB, PB, DB, IB, DB, DB, DB, IB, IB, IB, DB, DB, PB, CI, PB, DB, DB, DB, DB, IB }
+};
+#undef DB
+#undef IB
+#undef CI
+#undef CP
+#undef PB
+
+
+static void calcLineBreaks(const QString &string, QCharAttributes *charAttributes)
+{
+    int len = string.length();
     if (!len)
         return;
 
-    const QChar *uc = str.unicode();
+    const QChar *uc = string.unicode();
+    // ##### can this fail if the first char is a surrogate?
     const QUnicodeTables::Properties *prop = QUnicodeTables::properties(uc->unicode());
-    int cls = prop->line_break_class;
-    if (cls >= QUnicodeTables::LineBreak_CM)
-        cls = QUnicodeTables::LineBreak_ID;
 
-    charAttributes[0].softBreak = false;
+    int cls = prop->line_break_class;
+    // handle case where input starts with an LF
+    if (cls == QUnicodeTables::LineBreak_LF)
+        cls = QUnicodeTables::LineBreak_BK;
+
     charAttributes[0].whiteSpace = (cls == QUnicodeTables::LineBreak_SP || cls == QUnicodeTables::LineBreak_BK);
     charAttributes[0].charStop = true;
-    charAttributes[0].category = prop->category;
 
+    int lcls = cls;
     for (int i = 1; i < len; ++i) {
-        prop = QUnicodeTables::properties(uc[i].unicode());
-        int ncls = prop->line_break_class;
-        int category = prop->category;
-        if (category == QChar::Mark_NonSpacing)
-            goto nsm;
-
-        if (category == QChar::Other_Surrogate) {
-            // char stop only on first pair
-            if (uc[i-1].unicode() >= 0xd800 && uc[i-1].unicode() < 0xdc00
-                && uc[i].unicode() >= 0xdc00 && uc[i].unicode() < 0xe000)
-                goto nsm;
-            // ### correctly handle second surrogate
-        }
-
-        if (ncls == QUnicodeTables::LineBreak_SP || ncls == QUnicodeTables::LineBreak_BK) {
-            charAttributes[i].softBreak = false;
-            charAttributes[i].whiteSpace = true;
-            charAttributes[i].charStop = true;
-            charAttributes[i].category = QChar::Separator_Space;
-            cls = ncls;
-            continue;
-        }
-
-
-	if (cls == QUnicodeTables::LineBreak_SA && ncls == QUnicodeTables::LineBreak_SA) {
-            // two complex chars (thai or lao), thai_attributes might override, but here
-            // we do a best guess
-            charAttributes[i].softBreak = true;
-            charAttributes[i].whiteSpace = false;
-            charAttributes[i].charStop = true;
-            charAttributes[i].category = QChar::Separator_Space;
-            cls = ncls;
-            continue;
-        }
-        {
-	    int tcls = ncls;
-	    if (tcls >= QUnicodeTables::LineBreak_SA)
-		tcls = QUnicodeTables::LineBreak_ID;
-	    if (cls >= QUnicodeTables::LineBreak_SA)
-		cls = QUnicodeTables::LineBreak_ID;
-
-	    bool softBreak;
-	    int brk = breakTable[cls][tcls];
-	    if (brk == Ibk)
-		softBreak = (cls == QUnicodeTables::LineBreak_SP);
-	    else
-		softBreak = (brk == Dbk);
-//        qDebug("char = %c %04x, cls=%d, ncls=%d, brk=%d soft=%d", uc[i].cell(), uc[i].unicode(), cls, ncls, brk, charAttributes[i].softBreak);
-	    charAttributes[i].softBreak = softBreak;
-	    charAttributes[i].whiteSpace = false;
-	    charAttributes[i].charStop = true;
-	    charAttributes[i].category = category;
-	    cls = ncls;
-	}
-        continue;
-    nsm:
-        charAttributes[i].softBreak = false;
         charAttributes[i].whiteSpace = false;
-        charAttributes[i].charStop = false;
-        charAttributes[i].category = QChar::Mark_NonSpacing;
+        charAttributes[i].charStop = true;
+
+        prop = QUnicodeTables::properties(uc[i].unicode());
+
+        int ncls = prop->line_break_class;
+        // handle surrogates
+        if (ncls == QUnicodeTables::LineBreak_SG) {
+            if (uc[i].isHighSurrogate() && i < len - 1 && uc[i+1].isLowSurrogate()) {
+                continue;
+            } else if (uc[i].isLowSurrogate() && uc[i-1].isHighSurrogate()) {
+                uint code = QChar::surrogateToUcs4(uc[i-1].unicode(), uc[i].unicode());
+                prop = QUnicodeTables::properties(code);
+                ncls = prop->line_break_class;
+                charAttributes[i].charStop = false;
+            } else {
+                ncls = QUnicodeTables::LineBreak_AL;
+            }
+        }
+
+        // set white space and char stop flag
+        if (ncls >= QUnicodeTables::LineBreak_SP)
+            charAttributes[i].whiteSpace = true;
+        if (ncls == QUnicodeTables::LineBreak_CM)
+            charAttributes[i].charStop = false;
+
+        QCharAttributes::LineBreakType lineBreakType = QCharAttributes::NoBreak;
+        if (cls >= QUnicodeTables::LineBreak_LF) {
+            lineBreakType = QCharAttributes::ForcedBreak;
+        } else if(cls == QUnicodeTables::LineBreak_CR) {
+            lineBreakType = (ncls == QUnicodeTables::LineBreak_LF) ? QCharAttributes::NoBreak : QCharAttributes::ForcedBreak;
+        }
+
+        if (ncls == QUnicodeTables::LineBreak_SP)
+            goto next_no_cls_update;
+        if (ncls >= QUnicodeTables::LineBreak_CR)
+            goto next;
+
+        // two complex chars (thai or lao), thai_attributes might override, but here we do a best guess
+	if (cls == QUnicodeTables::LineBreak_SA && ncls == QUnicodeTables::LineBreak_SA) {
+            lineBreakType = QCharAttributes::Break;
+            goto next;
+        }
+
+        {
+            int tcls = ncls;
+            if (tcls >= QUnicodeTables::LineBreak_SA)
+                tcls = QUnicodeTables::LineBreak_ID;
+            if (cls >= QUnicodeTables::LineBreak_SA)
+                cls = QUnicodeTables::LineBreak_ID;
+
+            int brk = breakTable[cls][tcls];
+            switch (brk) {
+            case DirectBreak:
+                lineBreakType = QCharAttributes::Break;
+                if (uc[i-1].unicode() == 0xad) // soft hyphen
+                    lineBreakType = QCharAttributes::SoftHyphen;
+                break;
+            case IndirectBreak:
+                lineBreakType = (lcls == QUnicodeTables::LineBreak_SP) ? QCharAttributes::Break : QCharAttributes::NoBreak;
+                break;
+            case CombiningIndirectBreak:
+                lineBreakType = QCharAttributes::NoBreak;
+                if (lcls == QUnicodeTables::LineBreak_SP){
+                    if (i > 1)
+                        charAttributes[i-2].lineBreakType = QCharAttributes::Break;
+                } else {
+                    goto next_no_cls_update;
+                }
+                break;
+            case CombiningProhibitedBreak:
+                lineBreakType = QCharAttributes::NoBreak;
+                if (lcls != QUnicodeTables::LineBreak_SP)
+                    goto next_no_cls_update;
+            case ProhibitedBreak:
+            default:
+                break;
+            }
+        }
+    next:
+        cls = ncls;
+    next_no_cls_update:
+        lcls = ncls;
+        charAttributes[i-1].lineBreakType = lineBreakType;
     }
+    charAttributes[len-1].lineBreakType = QCharAttributes::ForcedBreak;
 }
 
 #if defined(Q_WS_X11) || defined (Q_WS_QWS)
@@ -847,6 +900,7 @@ static void init(QTextEngine *e)
 #endif
     e->ignoreBidi = false;
     e->cacheGlyphs = false;
+    e->forceJustification = false;
 
     e->layoutData = 0;
 
@@ -956,13 +1010,28 @@ void QTextEngine::itemize() const
     if (layoutData->string.length() == 0)
         return;
 
-    if (!ignoreBidi) {
+    bool ignore = ignoreBidi;
+    if (!ignore && option.textDirection() == Qt::LeftToRight) {
+        ignore = true;
+        const QChar *start = layoutData->string.unicode();
+        const QChar * const end = start + layoutData->string.length();
+        while (start < end) {
+            if (start->unicode() >= 0x590) {
+                ignore = false;
+                break;
+            }
+            ++start;
+        }
+    }
+    
+    if (!ignore) {
         layoutData->hasBidi = bidiItemize(const_cast<QTextEngine *>(this), (option.textDirection() == Qt::RightToLeft));
     } else {
         QBidiControl control(false);
         int start = 0;
         int stop = layoutData->string.length() - 1;
         appendItems(const_cast<QTextEngine *>(this), start, stop, control, QChar::DirL);
+        layoutData->hasBidi = false;
     }
 
     addRequiredBoundaries();
@@ -1095,6 +1164,57 @@ glyph_metrics_t QTextEngine::boundingBox(int from,  int len) const
     return gm;
 }
 
+glyph_metrics_t QTextEngine::tightBoundingBox(int from,  int len) const
+{
+    itemize();
+
+    glyph_metrics_t gm;
+
+    for (int i = 0; i < layoutData->items.size(); i++) {
+        const QScriptItem *si = layoutData->items.constData() + i;
+        int pos = si->position;
+        int ilen = length(i);
+        if (pos > from + len)
+            break;
+        if (pos + len > from) {
+            if (!si->num_glyphs)
+                shape(i);
+            unsigned short *logClusters = this->logClusters(si);
+            QGlyphLayout *glyphs = this->glyphs(si);
+
+            // do the simple thing for now and give the first glyph in a cluster the full width, all other ones 0.
+            int charFrom = from - pos;
+            if (charFrom < 0)
+                charFrom = 0;
+            int glyphStart = logClusters[charFrom];
+            if (charFrom > 0 && logClusters[charFrom-1] == glyphStart)
+                while (charFrom < ilen && logClusters[charFrom] == glyphStart)
+                    charFrom++;
+            if (charFrom < ilen) {
+                glyphStart = logClusters[charFrom];
+                int charEnd = from + len - 1 - pos;
+                if (charEnd >= ilen)
+                    charEnd = ilen-1;
+                int glyphEnd = logClusters[charEnd];
+                while (charEnd < ilen && logClusters[charEnd] == glyphEnd)
+                    charEnd++;
+                glyphEnd = (charEnd == ilen) ? si->num_glyphs : logClusters[charEnd];
+                if (glyphStart <= glyphEnd ) {
+                    QFontEngine *fe = fontEngine(*si);
+                    glyph_metrics_t m = fe->tightBoundingBox(glyphs+glyphStart, glyphEnd-glyphStart);
+                    gm.x = qMin(gm.x, m.x + gm.xoff);
+                    gm.y = qMin(gm.y, m.y + gm.yoff);
+                    gm.width = qMax(gm.width, m.width+gm.xoff);
+                    gm.height = qMax(gm.height, m.height+gm.yoff);
+                    gm.xoff += m.xoff;
+                    gm.yoff += m.yoff;
+                }
+            }
+        }
+    }
+    return gm;
+}
+
 QFont QTextEngine::font(const QScriptItem &si) const
 {
     if (!hasFormats())
@@ -1111,8 +1231,13 @@ QFont QTextEngine::font(const QScriptItem &si) const
         font = font.resolve(fnt);
     }
 
-    if (f.verticalAlignment() != QTextCharFormat::AlignNormal)
-        font.setPointSize((font.pointSize() * 2) / 3);
+    QTextCharFormat::VerticalAlignment valign = f.verticalAlignment();
+    if (valign == QTextCharFormat::AlignSuperScript || valign == QTextCharFormat::AlignSubScript) {
+        if (font.pointSize() != -1)
+            font.setPointSize((font.pointSize() * 2) / 3);
+        else
+            font.setPixelSize((font.pixelSize() * 2) / 3);
+    }
 
     return font;
 }
@@ -1152,8 +1277,12 @@ QFontEngine *QTextEngine::fontEngine(const QScriptItem &si, QFixed *ascent, QFix
         if (engine->type() == QFontEngine::Box)
             engine = font.d->engineForScript(QUnicodeTables::Common);
 #endif
-        if (f.verticalAlignment() != QTextCharFormat::AlignNormal) {
-            font.setPointSize((font.pointSize() * 2) / 3);
+        QTextCharFormat::VerticalAlignment valign = f.verticalAlignment();
+        if (valign == QTextCharFormat::AlignSuperScript || valign == QTextCharFormat::AlignSubScript) {
+            if (font.pointSize() != -1)
+                font.setPointSize((font.pointSize() * 2) / 3);
+            else
+                font.setPixelSize((font.pixelSize() * 2) / 3);
             scaledEngine = font.d->engineForScript(script);
 #if defined(Q_WS_WIN)
             if (scaledEngine->type() == QFontEngine::Box)
@@ -1218,8 +1347,8 @@ void QTextEngine::justify(const QScriptLine &line)
 
     itemize();
 
-    if (line.from + (int)line.length == layoutData->string.length()
-        || layoutData->string.at(line.from + line.length - 1) == QChar::LineSeparator)
+    if (!forceJustification && (line.from + (int)line.length == layoutData->string.length()
+        || layoutData->string.at(line.from + line.length - 1) == QChar::LineSeparator))
         return;
 
     // justify line
@@ -1356,6 +1485,7 @@ void QTextEngine::justify(const QScriptLine &line)
                 ++n;
         }
 //          qDebug("number of points for justification type %d: %d", type, n);
+
 
         if (!n)
             continue;
@@ -1638,7 +1768,7 @@ QString QTextEngine::elidedText(Qt::TextElideMode mode, const QFixed &width, int
                     QCharAttributes *attributes = const_cast<QCharAttributes *>(this->attributes());
                     attributes[i + 1].charStop = false;
                     attributes[i + 1].whiteSpace = false;
-                    attributes[i + 1].softBreak = false;
+                    attributes[i + 1].lineBreakType = QCharAttributes::NoBreak;
                     if (i < end - 1
                             && layoutData->string.at(i + 1) == QLatin1Char('&'))
                         ++i;
@@ -1696,11 +1826,7 @@ QString QTextEngine::elidedText(Qt::TextElideMode mode, const QFixed &width, int
             pos = nextBreak;
 
             ++nextBreak;
-            while (nextBreak < layoutData->string.length()
-                   && !attributes[nextBreak].charStop
-                   && !attributes[nextBreak].softBreak
-                   && !attributes[nextBreak].whiteSpace
-                  )
+            while (nextBreak < layoutData->string.length() && !attributes[nextBreak].charStop)
                 ++nextBreak;
 
             currentWidth += this->width(pos, nextBreak - pos);
@@ -1717,11 +1843,7 @@ QString QTextEngine::elidedText(Qt::TextElideMode mode, const QFixed &width, int
             pos = nextBreak;
 
             --nextBreak;
-            while (nextBreak > 0
-                   && !attributes[nextBreak].charStop
-                   && !attributes[nextBreak].softBreak
-                   && !attributes[nextBreak].whiteSpace
-                  )
+            while (nextBreak > 0 && !attributes[nextBreak].charStop)
                 --nextBreak;
 
             currentWidth += this->width(nextBreak, pos - nextBreak);
@@ -1744,19 +1866,11 @@ QString QTextEngine::elidedText(Qt::TextElideMode mode, const QFixed &width, int
             rightPos = nextRightBreak;
 
             ++nextLeftBreak;
-            while (nextLeftBreak < layoutData->string.length()
-                   && !attributes[nextLeftBreak].charStop
-                   && !attributes[nextLeftBreak].softBreak
-                   && !attributes[nextLeftBreak].whiteSpace
-                  )
+            while (nextLeftBreak < layoutData->string.length() && !attributes[nextLeftBreak].charStop)
                 ++nextLeftBreak;
 
             --nextRightBreak;
-            while (nextRightBreak > 0
-                   && !attributes[nextRightBreak].charStop
-                   && !attributes[nextRightBreak].softBreak
-                   && !attributes[nextRightBreak].whiteSpace
-                  )
+            while (nextRightBreak > 0 && !attributes[nextRightBreak].charStop)
                 --nextRightBreak;
 
             leftWidth += this->width(leftPos, nextLeftBreak - leftPos);
@@ -1820,6 +1934,8 @@ void QTextEngine::splitItem(int item, int pos) const
 //     qDebug("split at position %d itempos=%d", pos, item);
 }
 
+extern int qt_defaultDpiX();
+
 QFixed QTextEngine::nextTab(const QScriptItem *si, QFixed x) const
 {
     // #### should work for alignright and righttoleft
@@ -1827,16 +1943,27 @@ QFixed QTextEngine::nextTab(const QScriptItem *si, QFixed x) const
         option.textDirection() != Qt::LeftToRight)
         return x + si->width;
 
+    QFixed dpiScale = 1;
+    if (block.docHandle() && block.docHandle()->layout()) {
+        QPaintDevice *pdev = block.docHandle()->layout()->paintDevice();
+        if (pdev)
+            dpiScale = QFixed::fromReal(pdev->logicalDpiX() / qreal(qt_defaultDpiX()));
+    } else {
+        dpiScale = QFixed::fromReal(fnt.d->dpi / qreal(qt_defaultDpiX()));
+    }
+
     QList<qreal> tabArray = option.tabArray();
     if (!tabArray.isEmpty()) {
         for (int i = 0; i < tabArray.size(); ++i) {
-            if (tabArray.at(i) > x.toReal())
-                return QFixed::fromReal(tabArray.at(i));
+            QFixed tab = QFixed::fromReal(tabArray.at(i)) * dpiScale;
+            if (tab > x)
+                return tab;
         }
     }
     QFixed tab = QFixed::fromReal(option.tabStop());
     if (tab <= 0)
         tab = 80; // default
+    tab *= dpiScale;
     return ((x / tab).truncate() + 1) * tab;
 }
 
@@ -1867,7 +1994,9 @@ QStackTextEngine::QStackTextEngine(const QString &string, const QFont &f)
     layoutData = &_layoutData;
 }
 
-void QTextItemInt::initFontAttributes(const QScriptItem &si, QFont *font, const QTextCharFormat &format)
+QTextItemInt::QTextItemInt(const QScriptItem &si, QFont *font, const QTextCharFormat &format)
+    : justified(false), underlineStyle(QTextCharFormat::NoUnderline), num_chars(0), chars(0),
+      logClusters(0), f(0), glyphs(0), num_glyphs(0), fontEngine(0)
 {
     // explicitly initialize flags so that initFontAttributes can be called
     // multiple times on the same TextItem

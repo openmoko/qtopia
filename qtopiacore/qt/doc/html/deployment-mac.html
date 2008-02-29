@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/deployment.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/deployment.qdoc -->
 <head>
-  <title>Qt 4.2: Deploying an Application on Qt/Mac</title>
+  <title>Qt 4.3: Deploying an Application on Qt/Mac</title>
   <link rel="contents" href="deployment.html" />
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
@@ -16,7 +16,8 @@
 <td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><p>
 [<a href="deployment.html">Deploying Qt Applications</a>]
 </p>
-<h1 align="center">Deploying an Application on Qt/Mac<br /><small></small></h1>
+<h1 align="center">Deploying an Application on Qt/Mac<br /><span class="subtitle"></span>
+</h1>
 <p>This documentation will describe how to create a bundle, and how to make sure that the application will find the resources it needs at run-time. We will demonstrate the procedures in terms of deploying the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> application that is provided in Qt's examples directory.</p>
 <ul><li><a href="#the-bundle">The Bundle</a></li>
 <li><a href="#xcode">Xcode</a></li>
@@ -137,7 +138,7 @@
          (compatibility version 1.0.0, current version 92.0.0)
  /usr/lib/libSystem.B.dylib
          (compatibility version 1.0.0, current version 88.0.0)</pre>
-<p>For the Qt frameworks, the first line (i.e. <tt>path/to/Qt/lib/QtGui.framework/Versions/4.0/QtGui (compatibility version 4.0.0, current version 4.0.1)</tt>) becomes the framework's identification name which is used by the dynamic linker (<tt>dyld</tt>).</p>
+<p>For the Qt frameworks, the first line (i.e&#x2e; <tt>path/to/Qt/lib/QtGui.framework/Versions/4.0/QtGui (compatibility version 4.0.0, current version 4.0.1)</tt>) becomes the framework's identification name which is used by the dynamic linker (<tt>dyld</tt>).</p>
 <p>But when you are deploying the application, your users may not have the Qt frameworks installed in the specified location. For that reason, you must either provide the frameworks in an agreed upon location, or store the frameworks in the bundle itself. Regardless of which solution you choose, you must make sure that the frameworks return the proper identification name for themselves, and that the application will look for these names. Luckily we can control this with the <tt>install_name_tool</tt> command-line tool.</p>
 <p>The <tt>install_name_tool</tt> works in two modes, <tt>-id</tt> and <tt>-change</tt>. The <tt>-id</tt> mode is for libraries and frameworks, and allows us to specify a new identification name. We use the <tt>-change</tt> mode to change the paths in the application.</p>
 <p>Let's test this out by copying the Qt frameworks into the Plug &amp; Paint bundle. Looking at <tt>otool</tt>'s output for the bundle, we can see that we must copy both the <a href="qtcore.html">QtCore</a> and <a href="qtgui.html">QtGui</a> frameworks into the bundle. We will assume that we are in the directory where we built the bundle.</p>
@@ -259,14 +260,14 @@
 <p>Since the linker is set to be compatible with all OS X version, you have to change the <tt>MACOSX_DEPLOYMENT_TARGET</tt> environment variable to get weak linking to work for your application. You can add:</p>
 <pre> QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.3</pre>
 <p>to your .pro file and qmake will take care of this for you.</p>
-<p>However, there is a bit of a wrinkle to keep in mind when your are deploying. Mac OS X 10.4 (&quot;Tiger&quot;) ships GCC 4.0 as its default compiler. This is also the GCC compiler we use for building the binary Qt package. If you use GCC 4.0 to build your application, it will link against a dynamic libstdc++ that is only available on Mac OS X 10.4 and Mac OS X 10.3.9. The application will refuse to run on older versions of the operating system.</p>
+<p>However, there is a bit of a wrinkle to keep in mind when your are deploying. Mac OS X 10.4 (&quot;Tiger&quot;) ships GCC 4.0 as its default compiler. This is also the GCC compiler we use for building the binary Qt package. If you use GCC 4.0 to build your application, it will link against a dynamic libstdc++ that is only available on Mac OS X 10.4 and Mac OS X 10.3&#x2e;9&#x2e; The application will refuse to run on older versions of the operating system.</p>
 <p>For more information about C++ runtime environment, see <a href="http://developer.apple.com/documentation/DeveloperTools/Conceptual/CppRuntimeEnv/index.html">Apple's Developer Website</a></p>
-<p>If you want to deploy to versions of Mac OS X earlier than 10.3.9, you must build with GCC 3.3 which is the default on Mac OS X 10.3. GCC 3.3 is also available on the Mac OS X 10.4 &quot;Xcode Tools&quot; CD and as a download for earlier versions of Mac OS X from Apple (<a href="https://connect.apple.com/">connect.apple.com</a>). You can use Apple's <tt>gcc_select(1)</tt> command line tool to switch the default complier on your system.</p>
+<p>If you want to deploy to versions of Mac OS X earlier than 10.3&#x2e;9, you must build with GCC 3.3 which is the default on Mac OS X 10.3&#x2e; GCC 3.3 is also available on the Mac OS X 10.4 &quot;Xcode Tools&quot; CD and as a download for earlier versions of Mac OS X from Apple (<a href="https://connect.apple.com/">connect.apple.com</a>). You can use Apple's <tt>gcc_select(1)</tt> command line tool to switch the default complier on your system.</p>
 <a name="architecture-dependencies"></a>
 <h3>Architecture Dependencies</h3>
-<p>The Qt/Mac libraries, tools, and examples can be built &quot;universal&quot; (i.e. they run natively on both Intel and PowerPC machines). This is accomplished by passing <tt>-universal</tt> on the <tt>configure</tt> line of the source package, and requires that you use GCC 4.0.x. On PowerPC hardware you will need to pass the universal SDK as a command line argument to the Qt configure command. For example:</p>
+<p>The Qt/Mac libraries, tools, and examples can be built &quot;universal&quot; (i.e&#x2e; they run natively on both Intel and PowerPC machines). This is accomplished by passing <tt>-universal</tt> on the <tt>configure</tt> line of the source package, and requires that you use GCC 4.0&#x2e;x&#x2e; On PowerPC hardware you will need to pass the universal SDK as a command line argument to the Qt configure command. For example:</p>
 <pre>      ./configure (other arguments) -universal -sdk /Developer/SDKs/MacOSX10.4u.sdk</pre>
-<p>From 4.1.1 the Qt binary package is already universal.</p>
+<p>From 4.1&#x2e;1 the Qt binary package is already universal.</p>
 <p>If you want to create a binary that runs on older versions of PowerPC and x86, it is possible to build Qt for the PowerPC using GCC 3.3, and for x86 one using GCC 4.0, and use Apple's <tt>lipo(1)</tt> tool to stitch them together. This is beyond the scope of this document and is not something we have tried, but Apple documents it on their <a href="http://developer.apple.com/documentation">developer website</a>.</p>
 <p>Once you have a universal Qt, <i>qmake</i> will generate makefiles that will build for its host architecture by default. If you want to build for a specific architecture, you can control this with the <tt>CONFIG</tt> line in your <tt>.pro</tt> file. Use <tt>CONFIG+=ppc</tt> for PowerPC, and <tt>CONFIG+=x86</tt> for x86. If you desire both, simply add both to the <tt>CONFIG</tt> line. PowerPC users also need an SDK. For example:</p>
 <pre>     QMAKE_MAC_SDK=/Developer/SDKs/MacOSX10.4u.sdk
@@ -279,6 +280,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -166,12 +181,6 @@ void QPrinterPrivate::createDefaultEngines()
   If you want to abort the print job, abort() will try its best to
   stop printing. It may cancel the entire job or just part of it.
 
-  \omit
-  If your current locale converts "," to ".", you will need to set
-  a locale that doesn't do this (e.g. the "C" locale) before using
-  QPrinter.
-  \endomit
-
   Since QPrinter can print to any QPrintEngine subclass, it is possible to
   extend printing support to cover new types of printing subsystem by
   subclassing QPrintEngine and reimplementing its interface.
@@ -212,6 +221,13 @@ void QPrinterPrivate::createDefaultEngines()
     \value HighResolution On Windows, sets the printer resolution to that
     defined for the printer in use. For PostScript printing, sets the
     resolution of the PostScript driver to 1200 dpi.
+
+    \note When rendering text on a QPrinter device, it is important
+    to realize that the size of text, when specified in points, is
+    independent of the resolution specified for the device itself.
+    Therefore, it may be useful to specify the font size in pixels
+    when combining text with graphics to ensure that their relative
+    sizes are what you expect.
 */
 
 /*!
@@ -337,19 +353,20 @@ void QPrinterPrivate::createDefaultEngines()
 
   \warning This is currently only implemented for Windows.
 
-  \value OnlyOne
-  \value Lower
-  \value Middle
-  \value Manual
+  \value Auto
+  \value Cassette
   \value Envelope
   \value EnvelopeManual
-  \value Auto
+  \value FormSource
+  \value LargeCapacity
+  \value LargeFormat
+  \value Lower
+  \value MaxPageSource
+  \value Middle
+  \value Manual
+  \value OnlyOne
   \value Tractor
   \value SmallFormat
-  \value LargeFormat
-  \value LargeCapacity
-  \value Cassette
-  \value FormSource
 */
 
 /*
@@ -396,6 +413,7 @@ QPrinter::QPrinter(PrinterMode mode)
     d->printerMode = mode;
     d->outputFormat = QPrinter::NativeFormat;
     d->createDefaultEngines();
+
 #if !defined(QT_NO_CUPS) && !defined(QT_NO_LIBRARY)
     if (QCUPSSupport::cupsVersion() >= 10200 && QCUPSSupport().currentPPD()) {
         setOutputFormat(QPrinter::PdfFormat);
@@ -543,11 +561,11 @@ void QPrinter::setPrinterName(const QString &name)
 
 #if defined(Q_OS_UNIX) && !defined(QT_NO_CUPS)
     if(d->use_default_engine
-       && d->outputFormat == QPrinter::NativeFormat) {
-       if (QCUPSSupport::cupsVersion() >= 10200
-           && QCUPSSupport::printerHasPPD(name.toLocal8Bit().constData()))
+        && d->outputFormat == QPrinter::NativeFormat) {
+        if (QCUPSSupport::cupsVersion() >= 10200
+            && QCUPSSupport::printerHasPPD(name.toLocal8Bit().constData()))
             setOutputFormat(QPrinter::PdfFormat);
-       else
+        else
             setOutputFormat(QPrinter::PostScriptFormat);
         d->outputFormat = QPrinter::NativeFormat;
     }
@@ -738,8 +756,10 @@ QPrinter::Orientation QPrinter::orientation() const
   The printer driver reads this setting and prints using the
   specified orientation.
 
-  On Windows and Mac OS X, this option can be changed while printing and will
+  On Windows, this option can be changed while printing and will
   take effect from the next call to newPage().
+
+  On Mac OS X, changing the orientation during a print job has no effect.
 
   \sa orientation()
 */
@@ -1216,52 +1236,6 @@ bool QPrinter::abort()
     return d->printEngine->abort();
 }
 
-#if 0
-/*!
-  \fn int QPrinter::minPage() const
-
-  Returns the min-page setting, i.e. the lowest page number a user
-  is allowed to choose. The default value is 0 which signifies 'any
-  page'.
-
-  \sa maxPage(), setMinMax() setFromTo()
-*/
-
-/*!
-  \fn int QPrinter::maxPage() const
-
-  Returns the max-page setting. A user can't choose a higher page
-  number than maxPage() when they select a print range. The default
-  value is 0 which signifies the last page (up to a maximum of
-  9999).
-
-  \sa minPage(), setMinMax() setFromTo()
-*/
-
-/*!
-  Sets the min-page and max-page settings to \a minPage and \a
-  maxPage respectively.
-
-  The min-page and max-page restrict the from-page and to-page
-  settings. When the printer setup dialog appears, the user cannot
-  select a from page or a to page that are outside the range
-  specified by min and max pages.
-
-  \sa minPage(), maxPage(), setFromTo(), setup()
-*/
-
-void QPrinter::setMinMax(int minPage, int maxPage)
-{
-    min_pg = minPage;
-    max_pg = maxPage;
-    if (from_pg == 0 || from_pg < minPage)
-	from_pg = minPage;
-    if (to_pg == 0 || to_pg > maxPage)
-	to_pg = maxPage;
-}
-
-#endif
-
 /*!
     Returns the current state of the printer. This may not always be
     accurate (for example if the printer doesn't have the capability
@@ -1339,6 +1313,31 @@ void QPrinter::releaseDC(HDC hdc) const
     Q_D(const QPrinter);
     d->printEngine->releasePrinterDC(hdc);
 }
+
+/*!
+    Returns the supported paper sizes for this printer.
+
+    The values will be either a value that matches an entry in the
+    QPrinter::PaperSource enum or a driver spesific value. The driver
+    spesific values are greater than the constant DMBIN_USER declared
+    in wingdi.h.
+
+    \warning This function is only available in windows.
+*/
+
+QList<QPrinter::PaperSource> QPrinter::supportedPaperSources() const
+{
+    Q_D(const QPrinter);
+    QVariant v = d->printEngine->property(QPrintEngine::PPK_PaperSources);
+
+    QList<QVariant> variant_list = v.toList();
+    QList<QPrinter::PaperSource> int_list;
+    for (int i=0; i<variant_list.size(); ++i)
+        int_list << (QPrinter::PaperSource) variant_list.at(i).toInt();
+
+    return int_list;
+}
+
 #endif
 
 /*!
@@ -1401,13 +1400,8 @@ void QPrinter::setPrinterSelectionOption(const QString &option)
 
 int QPrinter::fromPage() const
 {
-#if !defined(QT_NO_PRINTDIALOG)
     Q_D(const QPrinter);
-    d->ensurePrintDialog();
-    return d->printDialog->fromPage();
-#else
-    return 0;
-#endif
+    return d->fromPage;
 }
 
 /*!
@@ -1426,13 +1420,8 @@ int QPrinter::fromPage() const
 
 int QPrinter::toPage() const
 {
-#if !defined(QT_NO_PRINTDIALOG)
     Q_D(const QPrinter);
-    d->ensurePrintDialog();
-    return d->printDialog->toPage();
-#else
-    return 0;
-#endif
+    return d->toPage;
 }
 
 /*!
@@ -1454,18 +1443,19 @@ int QPrinter::toPage() const
 
 void QPrinter::setFromTo(int from, int to)
 {
-#if !defined(QT_NO_PRINTDIALOG)
     Q_D(QPrinter);
-    d->ensurePrintDialog();
-    d->printDialog->setFromTo(from, to);
-#else
-    Q_UNUSED(from);
-    Q_UNUSED(to);
-#endif
+    Q_ASSERT_X(from <= to, "QPrinter::setFromTo",
+               "'from' must be less than or equal to 'to'");
+    d->fromPage = from;
+    d->toPage = to;
+
+    if (d->minPage == 0 && d->maxPage == 0) {
+        d->minPage = 1;
+        d->maxPage = to;
+        d->options |= QAbstractPrintDialog::PrintPageRange;
+    }
 }
 
-
-#ifndef QT_NO_PRINTDIALOG
 /*!
     \since 4.1
 
@@ -1474,8 +1464,7 @@ void QPrinter::setFromTo(int from, int to)
 void QPrinter::setPrintRange( PrintRange range )
 {
     Q_D(QPrinter);
-    d->ensurePrintDialog();
-    d->printDialog->setPrintRange(QPrintDialog::PrintRange(range));
+    d->printRange = QAbstractPrintDialog::PrintRange(range);
 }
 
 /*!
@@ -1490,10 +1479,8 @@ void QPrinter::setPrintRange( PrintRange range )
 QPrinter::PrintRange QPrinter::printRange() const
 {
     Q_D(const QPrinter);
-    d->ensurePrintDialog();
-    return PrintRange(d->printDialog->printRange());
+    return PrintRange(d->printRange);
 }
-#endif // QT_NO_PRINTDIALOG
 
 #if defined(QT3_SUPPORT)
 
@@ -1507,14 +1494,11 @@ void QPrinter::setOutputToFile(bool f)
     }
 }
 
-bool qt_compat_QPrinter_printSetup(QPrinter *, QPrinterPrivate *pd, QWidget *parent)
+bool qt_compat_QPrinter_printSetup(QPrinter *printer, QPrinterPrivate *pd, QWidget *parent)
 {
-    pd->ensurePrintDialog();
-
-    if (parent)
-        pd->printDialog->setParent(parent, pd->printDialog->windowFlags());
-
-    return pd->printDialog->exec() != 0;
+    Q_UNUSED(pd);
+    QPrintDialog dlg(printer, parent);
+    return dlg.exec() != 0;
 }
 
 
@@ -1575,8 +1559,7 @@ bool QPrinter::setup(QWidget *parent)
 int QPrinter::minPage() const
 {
     Q_D(const QPrinter);
-    d->ensurePrintDialog();
-    return d->printDialog->minPage();
+    return d->minPage;
 }
 
 /*!
@@ -1585,8 +1568,7 @@ int QPrinter::minPage() const
 int QPrinter::maxPage() const
 {
     Q_D(const QPrinter);
-    d->ensurePrintDialog();
-    return d_func()->printDialog->maxPage();
+    return d->maxPage;
 }
 
 /*!
@@ -1595,8 +1577,11 @@ int QPrinter::maxPage() const
 void QPrinter::setMinMax( int minPage, int maxPage )
 {
     Q_D(QPrinter);
-    d->ensurePrintDialog();
-    d->printDialog->setMinMax(minPage, maxPage);
+    Q_ASSERT_X(minPage <= maxPage, "QPrinter::setMinMax",
+               "'min' must be less than or equal to 'max'");
+    d->minPage = minPage;
+    d->maxPage = maxPage;
+    d->options |= QPrintDialog::PrintPageRange;
 }
 
 /*!
@@ -1611,8 +1596,7 @@ void QPrinter::setMinMax( int minPage, int maxPage )
 bool QPrinter::collateCopiesEnabled() const
 {
     Q_D(const QPrinter);
-    d->ensurePrintDialog();
-    return d->printDialog->isOptionEnabled(QPrintDialog::PrintCollateCopies);
+    return (d->options & QPrintDialog::PrintCollateCopies);
 }
 
 /*!
@@ -1625,13 +1609,10 @@ void QPrinter::setCollateCopiesEnabled(bool enable)
 {
     Q_D(QPrinter);
 
-    d->ensurePrintDialog();
-    QPrintDialog::PrintDialogOptions opt = d->printDialog->enabledOptions();
     if (enable)
-        opt |= QPrintDialog::PrintCollateCopies;
+        d->options |= QPrintDialog::PrintCollateCopies;
     else
-        opt &= ~QPrintDialog::PrintCollateCopies;
-    d->printDialog->setEnabledOptions(opt);
+        d->options &= ~QPrintDialog::PrintCollateCopies;
 }
 
 /*!
@@ -1640,13 +1621,10 @@ void QPrinter::setCollateCopiesEnabled(bool enable)
 void QPrinter::setOptionEnabled( PrinterOption option, bool enable )
 {
     Q_D(QPrinter);
-    d->ensurePrintDialog();
-    QPrintDialog::PrintDialogOptions opt = d->printDialog->enabledOptions();
     if (enable)
-        opt |= QPrintDialog::PrintDialogOption(1 << option);
+        d->options |= QPrintDialog::PrintDialogOption(1 << option);
     else
-        opt &= ~QPrintDialog::PrintDialogOption(1 << option);
-    d->printDialog->setEnabledOptions(opt);
+        d->options &= ~QPrintDialog::PrintDialogOption(1 << option);
 }
 
 /*!
@@ -1655,9 +1633,7 @@ void QPrinter::setOptionEnabled( PrinterOption option, bool enable )
 bool QPrinter::isOptionEnabled( PrinterOption option ) const
 {
     Q_D(const QPrinter);
-
-    d->ensurePrintDialog();
-    return d->printDialog->isOptionEnabled(QPrintDialog::PrintDialogOption(option));
+    return (d->options & QPrintDialog::PrintDialogOption(option));
 }
 
 #endif // QT3_SUPPORT
@@ -1721,6 +1697,8 @@ bool QPrinter::isOptionEnabled( PrinterOption option ) const
     \value PPK_PaperRect A QRect specifying the paper rectangle.
 
     \value PPK_PaperSource Specifies a QPrinter::PaperSource value.
+
+    \value PPK_PaperSources Specifies more than one QPrinter::PaperSource value.
 
     \value PPK_PrinterName A string specifying the name of the printer.
 

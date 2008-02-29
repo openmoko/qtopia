@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -46,6 +61,11 @@
 
 #ifndef XK_ISO_Left_Tab
 #define XK_ISO_Left_Tab 0xFE20
+#endif
+
+//#define QX11EMBED_DEBUG
+#ifdef QX11EMBED_DEBUG
+#include <qdebug.h>
 #endif
 
 /*!
@@ -186,12 +206,6 @@
 
     This signal is emitted by the container when the client widget
     closes.
-*/
-
-/*!
-    \fn QX11EmbedWidget::Error QX11EmbedWidget::error() const
-
-    Returns the last error that occurred.
 */
 
 /*!
@@ -395,6 +409,52 @@ static bool x11EventFilter(void *message, long *result)
 	return false;
 }
 
+//
+struct functorData
+{
+    Window id, rootWindow;
+    bool clearedWmState;
+    bool reparentedToRoot;
+};
+
+static Bool functor(Display *display, XEvent *event, XPointer arg)
+{
+    functorData *data = (functorData *) arg;
+
+    if (!data->reparentedToRoot && event->type == ReparentNotify
+        && event->xreparent.window == data->id
+        && event->xreparent.parent == data->rootWindow) {
+        data->reparentedToRoot = true;
+        return true;
+    }
+
+    if (!data->clearedWmState
+        && event->type == PropertyNotify
+        && event->xproperty.window == data->id
+        && event->xproperty.atom == ATOM(WM_STATE)) {
+	if (event->xproperty.state == PropertyDelete) {
+            data->clearedWmState = true;
+            return true;
+        }
+
+	Atom ret;
+	int format, status;
+	unsigned char *retval;
+	unsigned long nitems, after;
+	status = XGetWindowProperty(display, data->id, ATOM(WM_STATE), 0, 2, False, ATOM(WM_STATE),
+				    &ret, &format, &nitems, &after, &retval );
+	if (status == Success && ret == ATOM(WM_STATE) && format == 32 && nitems > 0) {
+            long *state = (long *)retval;
+	    if (state[0] == WithdrawnState) {
+                data->clearedWmState = true;
+		return true;
+            }
+	}
+    }
+
+    return false;
+}
+
 class QX11EmbedWidgetPrivate : public QWidgetPrivate
 {
     Q_DECLARE_PUBLIC(QX11EmbedWidget)
@@ -451,12 +511,17 @@ QX11EmbedWidget::QX11EmbedWidget(QWidget *parent)
 
     unsigned int data[] = {XEMBED_VERSION, XEMBED_MAPPED};
     XChangeProperty(x11Info().display(), internalWinId(), _XEMBED_INFO,
-                    XA_CARDINAL, 32, PropModeReplace,
+                    _XEMBED_INFO, 32, PropModeReplace,
                     (unsigned char*) data, 2);
 
     setFocusPolicy(Qt::StrongFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QApplication::instance()->installEventFilter(this);
+
+#ifdef QX11EMBED_DEBUG
+    qDebug() << "QX11EmbedWidget::QX11EmbedWidget: constructed client"
+             << (void *)this << "with winId" << winId();
+#endif
 }
 
 /*!
@@ -468,12 +533,29 @@ QX11EmbedWidget::~QX11EmbedWidget()
 {
     Q_D(QX11EmbedWidget);
     if (d->container) {
+#ifdef QX11EMBED_DEBUG
+        qDebug() << "QX11EmbedWidget::~QX11EmbedWidget: unmapping"
+                 << (void *)this << "with winId" << winId()
+                 << "from container with winId" << d->container;
+#endif
         XUnmapWindow(x11Info().display(), internalWinId());
         XReparentWindow(x11Info().display(), internalWinId(), x11Info().appRootWindow(), 0, 0);
     }
+
+#ifdef QX11EMBED_DEBUG
+    qDebug() << "QX11EmbedWidget::~QX11EmbedWidget: destructed client"
+             << (void *)this << "with winId" << winId();
+#endif
 }
 
-QX11EmbedWidget::Error QX11EmbedWidget::error() const {
+/*!
+    Returns the type of error that occurred last. This is the same error code
+    that is emitted by the error() signal.
+
+    \sa Error
+*/
+QX11EmbedWidget::Error QX11EmbedWidget::error() const
+{
     return d_func()->lastError;
 }
 
@@ -487,6 +569,12 @@ QX11EmbedWidget::Error QX11EmbedWidget::error() const {
 void QX11EmbedWidget::embedInto(WId id)
 {
     Q_D(QX11EmbedWidget);
+#ifdef QX11EMBED_DEBUG
+    qDebug() << "QX11EmbedWidget::embedInto: embedding client"
+             << (void *)this << "with winId" << winId() << "into container"
+             << id;
+#endif
+
     d->container = id;
     switch (XReparentWindow(x11Info().display(), internalWinId(), d->container, 0, 0)) {
     case BadWindow:
@@ -714,15 +802,31 @@ bool QX11EmbedWidget::x11Event(XEvent *event)
     Q_D(QX11EmbedWidget);
     switch (event->type) {
     case DestroyNotify:
+#ifdef QX11EMBED_DEBUG
+        qDebug() << "QX11EmbedWidget::x11Event: client"
+                 << (void *)this << "with winId" << winId()
+                 << "received a DestroyNotify";
+#endif
         // If the container window is destroyed, we signal this to the user.
+        d->container = 0;
         emit containerClosed();
         break;
     case ReparentNotify:
+#ifdef QX11EMBED_DEBUG
+        qDebug() << "QX11EmbedWidget::x11Event: client"
+                 << (void *)this << "with winId" << winId()
+                 << "received a ReparentNotify to"
+                 << ((event->xreparent.parent == x11Info().appRootWindow())
+                     ? QString::fromLatin1("root") : QString::number(event->xreparent.parent));
+#endif
         // If the container shuts down, we will be reparented to the
         // root window. We must also consider the case that we may be
         // reparented from one container to another.
         if (event->xreparent.parent == x11Info().appRootWindow()) {
-            emit containerClosed();
+            if (((QHackWidget *)this)->topData()->embedded) {
+                d->container = 0;
+                emit containerClosed();
+            }
             return true;
         } else {
             d->container = event->xreparent.parent;
@@ -744,7 +848,7 @@ bool QX11EmbedWidget::x11Event(XEvent *event)
             unsigned long bytes_after_return;
             unsigned char *prop_return = 0;
             if (XGetWindowProperty(x11Info().display(), internalWinId(), _XEMBED_INFO, 0, 2,
-                                   false, XA_CARDINAL, &actual_type_return,
+                                   false, _XEMBED_INFO, &actual_type_return,
                                    &actual_format_return, &nitems_return,
                                    &bytes_after_return, &prop_return) == Success) {
                 if (nitems_return > 1) {
@@ -800,6 +904,11 @@ bool QX11EmbedWidget::x11Event(XEvent *event)
             }
                 break;
             case XEMBED_EMBEDDED_NOTIFY: {
+#ifdef QX11EMBED_DEBUG
+                qDebug() << "QX11EmbedWidget::x11Event: client"
+                         << (void *)this << "with winId" << winId()
+                         << "received an XEMBED EMBEDDED NOTIFY message";
+#endif
                 // In this message's l[2] we have the max version
                 // supported by both the client and the
                 // container. QX11EmbedWidget does not use this field.
@@ -928,6 +1037,7 @@ public:
         client = 0;
         focusProxy = 0;
         clientIsXEmbed = false;
+        xgrab = false;
     }
 
     bool isEmbedded() const;
@@ -999,11 +1109,19 @@ QX11EmbedContainer::QX11EmbedContainer(QWidget *parent)
                  | StructureNotifyMask
                  | SubstructureNotifyMask);
 
+    // Make sure our new event mask takes effect as soon as possible.
+    XFlush(x11Info().display());
+
     // Move input to our focusProxy if this widget is active, and not
     // shaded by a modal dialog (in which case isActiveWindow() would
     // still return true, but where we must not move input focus).
     if (qApp->activeWindow() == window() && !d->isEmbedded())
 	d->moveInputToProxy();
+
+#ifdef QX11EMBED_DEBUG
+    qDebug() << "QX11EmbedContainer::QX11EmbedContainer: constructed container"
+             << (void *)this << "with winId" << winId();
+#endif
 }
 
 /*!
@@ -1114,7 +1232,7 @@ void QX11EmbedContainer::embedClient(WId id)
 	d->emitError(InvalidWindowID);
 	return;
     }
-    XSelectInput(x11Info().display(), id, attrib.your_event_mask | PropertyChangeMask);
+    XSelectInput(x11Info().display(), id, attrib.your_event_mask | PropertyChangeMask | StructureNotifyMask);
     XUngrabServer(x11Info().display());
 
     // Put the window into WithdrawnState
@@ -1123,7 +1241,7 @@ void QX11EmbedContainer::embedClient(WId id)
 
     /*
       Wait for notification from the window manager that the window is
-      not in withdrawn state.  According to the ICCCM section 4.1.3.1,
+      in withdrawn state.  According to the ICCCM section 4.1.3.1,
       we should wait for the WM_STATE property to either be deleted or
       set to WithdrawnState.
 
@@ -1132,34 +1250,26 @@ void QX11EmbedContainer::embedClient(WId id)
     */
     QTime t;
     t.start();
-    for (;;) {
+
+    functorData data;
+    data.id = id;
+    data.rootWindow = attrib.root;
+    data.clearedWmState = false;
+    data.reparentedToRoot = false;
+
+    do {
 	if (t.elapsed() > 500) // time-out after 500 ms
 	    break;
 
 	XEvent event;
-	if (!XCheckTypedWindowEvent(x11Info().display(), id, PropertyNotify, &event)) {
+	if (!XCheckIfEvent(x11Info().display(), &event, functor, (XPointer) &data)) {
 	    XSync(x11Info().display(), False);
-	    continue;
-	}
-	if (event.xproperty.atom != ATOM(WM_STATE)) {
-	    qApp->x11ProcessEvent(&event);
+            usleep(50000);
 	    continue;
 	}
 
-	if (event.xproperty.state == PropertyDelete)
-	    break;
-
-	Atom ret;
-	int format, status;
-	long *state;
-	unsigned long nitems, after;
-	status = XGetWindowProperty(x11Info().display(), id, ATOM(WM_STATE), 0, 2, False, ATOM(WM_STATE),
-				    &ret, &format, &nitems, &after, (unsigned char **) &state );
-	if (status == Success && ret == ATOM(WM_STATE) && format == 32 && nitems > 0) {
-	    if (state[0] == WithdrawnState)
-		break;
-	}
-    }
+        qApp->x11ProcessEvent(&event);
+    } while (!data.clearedWmState || !data.reparentedToRoot);
 
     // restore the event mask
     XSelectInput(x11Info().display(), id, attrib.your_event_mask);
@@ -1473,7 +1583,7 @@ void QX11EmbedContainer::showEvent(QShowEvent *)
     Q_D(QX11EmbedContainer);
     if (d->client) {
 	unsigned int data[] = {XEMBED_VERSION, XEMBED_MAPPED};
-	XChangeProperty(x11Info().display(), d->client, _XEMBED_INFO, XA_CARDINAL, 32,
+	XChangeProperty(x11Info().display(), d->client, _XEMBED_INFO, _XEMBED_INFO, 32,
 			PropModeReplace, (unsigned char *) data, 2);
     }
 }
@@ -1490,7 +1600,7 @@ void QX11EmbedContainer::hideEvent(QHideEvent *)
     if (d->client) {
 	unsigned int data[] = {XEMBED_VERSION, XEMBED_MAPPED};
 
-	XChangeProperty(x11Info().display(), d->client, _XEMBED_INFO, XA_CARDINAL, 32,
+	XChangeProperty(x11Info().display(), d->client, _XEMBED_INFO, _XEMBED_INFO, 32,
 			PropModeReplace, (unsigned char *) data, 2);
     }
 }
@@ -1565,7 +1675,7 @@ void QX11EmbedContainerPrivate::acceptClient(WId window)
 
     // XEmbed clients have an _XEMBED_INFO property in which we can
     // fetch the version
-    if (XGetWindowProperty(q->x11Info().display(), client, _XEMBED_INFO, 0, 2, false, XA_CARDINAL,
+    if (XGetWindowProperty(q->x11Info().display(), client, _XEMBED_INFO, 0, 2, false, _XEMBED_INFO,
 			   &actual_type_return, &actual_format_return, &nitems_return,
 			   &bytes_after_return, &prop_return) == Success) {
 
@@ -1607,8 +1717,10 @@ void QX11EmbedContainerPrivate::acceptClient(WId window)
     XMapWindow(q->x11Info().display(), client);
 
     // Resize it, but no smaller than its minimum size hint.
-    XResizeWindow(q->x11Info().display(), client,
-                  qMax(q->width(), size.min_width), qMax(q->height(), size.min_height));
+    XResizeWindow(q->x11Info().display(),
+                  client,
+                  qMax(q->width(), wmMinimumSizeHint.width()),
+                  qMax(q->height(), wmMinimumSizeHint.height()));
     q->update();
 
     // Not mentioned in the protocol is that if the container

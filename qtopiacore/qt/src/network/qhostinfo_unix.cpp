@@ -9,23 +9,44 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
+//#define QHOSTINFO_DEBUG
+
+static const int RESOLVER_TIMEOUT = 2000;
+
 #include "qplatformdefs.h"
 
 #include "qhostinfo_p.h"
 #include "qiodevice.h"
 #include <qbytearray.h>
+#include <qlibrary.h>
+#include <private/qmutexpool_p.h>
 
 extern "C" {
 #include <netdb.h>
@@ -42,8 +63,21 @@ Q_GLOBAL_STATIC(QMutex, getHostByNameMutex)
 # define QT_SOCKOPTLEN_T QT_SOCKLEN_T
 #endif
 
-//#define QHOSTINFO_DEBUG
-    
+typedef int (*res_init_proto)(void);
+static res_init_proto local_res_init = 0;
+
+static void resolveLibrary()
+{
+#ifndef QT_NO_LIBRARY
+    QLibrary lib(QLatin1String("resolv"));
+    if (!lib.load())
+        return;
+    local_res_init = res_init_proto(lib.resolve("__res_init"));
+    if (!local_res_init)
+        local_res_init = res_init_proto(lib.resolve("res_init"));
+#endif
+}
+
 QHostInfo QHostInfoAgent::fromName(const QString &hostName)
 {
     QHostInfo results;
@@ -53,6 +87,22 @@ QHostInfo QHostInfoAgent::fromName(const QString &hostName)
     qDebug("QHostInfoAgent::fromName(%s) looking up...",
            hostName.toLatin1().constData());
 #endif
+
+    // Load res_init on demand.
+    static volatile bool triedResolve = false;
+    if (!triedResolve) {
+#ifndef QT_NO_THREAD
+        QMutexLocker locker(QMutexPool::globalInstanceGet(&local_res_init));
+#endif
+        if (!triedResolve) {
+            resolveLibrary();
+            triedResolve = true;
+        }
+    }
+
+    // If res_init is available, poll it.
+    if (local_res_init)
+        local_res_init();
 
     QHostAddress address;
     if (address.setAddress(hostName)) {
@@ -81,12 +131,12 @@ QHostInfo QHostInfoAgent::fromName(const QString &hostName)
             memcpy(sa6.sin6_addr.s6_addr, address.toIPv6Address().c, sizeof(sa6.sin6_addr.s6_addr));
         }
 #endif
-        
+
         char hbuf[NI_MAXHOST];
         if (!sa || getnameinfo(sa, saSize, hbuf, sizeof(hbuf), 0, 0, 0) != 0) {
             results.setError(QHostInfo::HostNotFound);
             results.setErrorString(tr("Host not found"));
-            return results;            
+            return results;
         }
         results.setHostName(QString::fromLatin1(hbuf));
 #else
@@ -95,12 +145,12 @@ QHostInfo QHostInfoAgent::fromName(const QString &hostName)
         if (!ent) {
             results.setError(QHostInfo::HostNotFound);
             results.setErrorString(tr("Host not found"));
-            return results;            
+            return results;
         }
         results.setHostName(QString::fromLatin1(ent->h_name));
 #endif
     }
-    
+
 #if !defined (QT_NO_GETADDRINFO)
     // Call getaddrinfo, and place all IPv4 addresses at the start and
     // the IPv6 addresses at the end of the address list in results.
@@ -128,16 +178,18 @@ QHostInfo QHostInfoAgent::fromName(const QString &hostName)
                     addresses.append(addr);
             }
 #endif
-            else {
-                results.setError(QHostInfo::UnknownError);
-                results.setErrorString(tr("Unknown address type"));
-                break;
-            }
             node = node->ai_next;
         }
+        if (addresses.isEmpty() && node == 0) {
+            // Reached the end of the list, but no addresses were found; this
+            // means the list contains one or more unknown address types.
+            results.setError(QHostInfo::UnknownError);
+            results.setErrorString(tr("Unknown address type"));
+        }
+
         results.setAddresses(addresses);
         freeaddrinfo(res);
-    } else if (result == EAI_NONAME 
+    } else if (result == EAI_NONAME
                || result ==  EAI_FAIL
                || result ==  EAI_FAIL
 #ifdef EAI_NODATA

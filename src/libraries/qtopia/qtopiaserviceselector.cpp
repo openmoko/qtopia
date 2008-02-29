@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,63 +32,191 @@
 #include <qexpressionevaluator.h>
 #include <qcontentset.h>
 
+class QtopiaServiceDescriptionPrivate {
+public:
+    QtopiaServiceDescriptionPrivate() {}
+    QtopiaServiceDescriptionPrivate(const QtopiaServiceRequest& req,
+            const QString& label, const QString& icon,
+            const QMap<QString, QVariant>& goop)
+        : _request(req), _label(label), _icon(icon), _goop(goop) {}
+    QtopiaServiceRequest _request;
+    QString _label;
+    QString _icon;
+    QMap<QString, QVariant> _goop;
+};
+
 /*!
   \class QtopiaServiceDescription
   \mainclass
   \brief The QtopiaServiceDescription class describes a service request in user terms.
 
   This data includes what action to undertake when activated, and a display name
-  and icon.
+  and icon.  It can also include extra information about the request that is not
+  present in the request itself.
 
   \ingroup ipc
   \sa QtopiaServiceSelector, QtopiaServiceRequest
 */
 
-/*! \fn QtopiaServiceDescription::QtopiaServiceDescription()
-  Constructs an empty QtopiaServiceDescription .
+/*!
+  Constructs an empty QtopiaServiceDescription.
 */
+QtopiaServiceDescription::QtopiaServiceDescription()
+    : d(new QtopiaServiceDescriptionPrivate())
+{
+}
 
-/*! \fn QtopiaServiceDescription::QtopiaServiceDescription( QtopiaServiceRequest r, QString l, QString ic )
-  Constructs a QtopiaServiceDescription, which describes an action called \a l, with the
-  display icon found in the file specified by \a ic, which initiates
-  QtopiaServiceRequest \a r when activated.
+/*!
+  Constructs a QtopiaServiceDescription, which describes an action called \a label, with the
+  display icon found in the file specified by \a icon, which initiates
+  QtopiaServiceRequest \a request when activated.  The optional properties in the constructed
+  object are initialized from \a optionalProperties.
 */
+QtopiaServiceDescription::QtopiaServiceDescription(const QtopiaServiceRequest& request, const QString& label,
+        const QString& icon, const QVariantMap& optionalProperties)
+    : d(new QtopiaServiceDescriptionPrivate(request, label, icon, optionalProperties))
+{
+}
 
-/*! \fn QtopiaServiceRequest QtopiaServiceDescription::request() const
+/*!
+  Create a copy of \a other.
+*/
+QtopiaServiceDescription::QtopiaServiceDescription(const QtopiaServiceDescription& other)
+    : d(new QtopiaServiceDescriptionPrivate(other.d->_request, other.d->_label, other.d->_icon, other.d->_goop))
+{
+}
+
+/*!
+  Assign \a other to this object.
+*/
+QtopiaServiceDescription& QtopiaServiceDescription::operator=(const QtopiaServiceDescription& other)
+{
+    if (&other != this) {
+        d->_request = other.d->_request;
+        d->_label = other.d->_label;
+        d->_icon = other.d->_icon;
+        d->_goop = other.d->_goop;
+    }
+    return *this;
+}
+
+/*!
+  Destroys this QtopiaServiceDescription.
+*/
+QtopiaServiceDescription::~QtopiaServiceDescription()
+{
+    delete d;
+}
+
+/*!
   Returns the QtopiaServiceRequest described.
 
   \sa setRequest()
 */
+QtopiaServiceRequest QtopiaServiceDescription::request() const
+{
+    return d->_request;
+}
 
-/*! \fn QString QtopiaServiceDescription::label() const
+/*!
   Returns the display label describing the request.
 
   \sa setLabel()
 */
+QString QtopiaServiceDescription::label() const
+{
+    return d->_label;
+}
 
-/*! \fn QString QtopiaServiceDescription::iconName() const
+/*!
   Returns the icon name describing the request.
 
   \sa setIconName()
 */
+QString QtopiaServiceDescription::iconName() const
+{
+    return d->_icon;
+}
 
-/*! \fn void QtopiaServiceDescription::setRequest(const QtopiaServiceRequest& r)
-  Sets the request to \a r.
+/*!
+  Sets the request to \a request.
 
   \sa request()
 */
+void QtopiaServiceDescription::setRequest(const QtopiaServiceRequest& request)
+{
+    d->_request = request;
+}
 
-/*! \fn void QtopiaServiceDescription::setLabel(const QString& l)
-  Sets the display label to \a l.
+/*!
+  Sets the display label to \a label.
 
   \sa label()
 */
+void QtopiaServiceDescription::setLabel(const QString& label)
+{
+    d->_label = label;
+}
 
-/*! \fn void QtopiaServiceDescription::setIconName(const QString& i)
-  Sets the display icon to \a i.
+/*!
+  Sets the display icon to \a iconName.
 
   \sa iconName()
 */
+void QtopiaServiceDescription::setIconName(const QString& iconName)
+{
+    d->_icon = iconName;
+}
+
+/*!
+  Returns an optional property with the given \a name that describes the service request.
+
+  \sa setOptionalProperty(), removeOptionalProperty()
+*/
+QVariant QtopiaServiceDescription::optionalProperty(const QString& name) const
+{
+    return d->_goop.value(name);
+}
+
+/*!
+  Sets an optional property describing this service request with the given \a name and \a value.
+
+  \sa removeOptionalProperty(), optionalProperty()
+*/
+void QtopiaServiceDescription::setOptionalProperty(const QString& name, const QVariant& value)
+{
+    d->_goop.insert(name, value);
+}
+
+/*!
+  Removes any optional properties with the given \a name describing this service request.
+
+  \sa setOptionalProperty(), optionalProperty()
+*/
+void QtopiaServiceDescription::removeOptionalProperty(const QString& name)
+{
+    d->_goop.remove(name);
+}
+
+/*!
+  Returns the entire collection of optional properties describing this service request.
+
+  \sa setOptionalProperties()
+*/
+QVariantMap QtopiaServiceDescription::optionalProperties() const
+{
+    return d->_goop;
+}
+
+/*!
+  Sets the entire collection of optional properties describing this service request to \a properties.
+
+  \sa optionalProperties()
+*/
+void QtopiaServiceDescription::setOptionalProperties(QVariantMap properties)
+{
+    d->_goop = properties;
+}
 
 /*!
   \class QtopiaServiceSelector
@@ -133,10 +261,6 @@ QtopiaServiceSelector::QtopiaServiceSelector(QWidget* parent) : QDialog(parent)
     populateActionsList();
 
     connect(actionlist, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(selectAction(QListWidgetItem*)));
-
-#ifdef QTOPIA_PHONE
-    //QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Cancel);
-#endif
 }
 
 /*!
@@ -365,5 +489,4 @@ void QtopiaServiceSelector::keyPressEvent(QKeyEvent* e)
         if(actionlist->currentItem())
             selectAction(actionlist->currentRow());
 }
-
 

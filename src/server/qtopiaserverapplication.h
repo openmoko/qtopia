@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,12 +25,7 @@
 #include <qtopiaapplication.h>
 #include <QList>
 class QWSEvent;
-
-#ifdef QTOPIA_TEST
-class QtopiaTestServerSocket;
-class QtopiaServerTestSlave;
-class TestEventFilter;
-#endif
+class QValueSpaceObject;
 
 class QtopiaServerApplication : public QtopiaApplication
 {
@@ -44,6 +39,7 @@ public:
     ~QtopiaServerApplication();
     static QtopiaServerApplication *instance();
 
+#ifdef Q_WS_QWS
     // Event filtering
     class QWSEventFilter {
     public:
@@ -53,6 +49,8 @@ public:
     };
     void installQWSEventFilter(QWSEventFilter *);
     void removeQWSEventFilter(QWSEventFilter *);
+    bool notify( QObject*, QEvent* );
+#endif
 
     // Tasks
     static bool startup(int &argc, char **argv, const QList<QByteArray> &startupGroups);
@@ -88,20 +86,21 @@ protected:
     virtual void shutdown();
     virtual void restart();
 
+#ifdef Q_WS_QWS
     bool qwsEventFilter( QWSEvent * );
+#endif
+
+private slots:
+    void serverWidgetVsChanged();
 
 private:
     static void _shutdown(ShutdownType);
+#ifdef Q_WS_QWS
     QList<QWSEventFilter *> m_filters;
-    static QtopiaServerApplication *m_instance;
-#ifdef QTOPIA_TEST
-    friend class QtopiaTestServerSocket;
-    friend class TestEventFilter;
-    friend class StandardDialogsImpl;
-    QtopiaTestServerSocket *m_serverSocket;
-    QtopiaServerTestSlave *m_serverSlave;
-    TestEventFilter *m_testFilter;
 #endif
+    static QtopiaServerApplication *m_instance;
+    QByteArray mainWidgetName;
+    QValueSpaceObject* serverWidget_vso;
 };
 
 template<class T>

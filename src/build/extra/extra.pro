@@ -24,20 +24,12 @@ unix {
         $$QPEDIR/bin/qdawggen\
         $$QPEDIR/bin/content_installer\
         $$QPEDIR/bin/sxe_installer\
-        $$QTOPIA_DEPOT_PATH/bin/Qtopia\
-        $$QTOPIA_DEPOT_PATH/bin/Hash\
-        $$QTOPIA_DEPOT_PATH/bin/installhelp\
-        $$QTOPIA_DEPOT_PATH/bin/installpic\
-        $$QTOPIA_DEPOT_PATH/bin/linstall\
-        $$QTOPIA_DEPOT_PATH/bin/mkpkg\
-        $$QTOPIA_DEPOT_PATH/bin/nct_lupdate\
-        $$QTOPIA_DEPOT_PATH/bin/patchqt\
-        $$QTOPIA_DEPOT_PATH/bin/printdot\
+        $$QPEDIR/bin/qvfb\
+        $$QTOPIA_DEPOT_PATH/bin/assistant\
         $$QTOPIA_DEPOT_PATH/bin/qtopiamake\
-        $$QTOPIA_DEPOT_PATH/bin/runwithvars.sh\
-        $$QTOPIA_DEPOT_PATH/bin/syncqtopia\
-        $$QTOPIA_DEPOT_PATH/bin/write_config_pri\
-        $$QTOPIA_DEPOT_PATH/bin/assistant
+        $$QTOPIA_DEPOT_PATH/bin/runqtopia\
+        $$QTOPIA_DEPOT_PATH/bin/dumpsec.pl\
+        $$QTOPIA_DEPOT_PATH/bin/mkPackages
     bins.path=/bin
     bins.hint=sdk
     INSTALLS+=bins
@@ -47,16 +39,6 @@ unix {
     phonesim.path=/src/tools/phonesim
     phonesim.hint=sdk
     INSTALLS+=phonesim
-
-    scripts.files=\
-        $$QTOPIA_DEPOT_PATH/scripts/runqvfb\
-        $$QTOPIA_DEPOT_PATH/scripts/runqpe\
-        $$QTOPIA_DEPOT_PATH/scripts/runqtopia\
-        $$QTOPIA_DEPOT_PATH/scripts/getpaths.sh\
-        $$QTOPIA_DEPOT_PATH/scripts/dumpsec.pl
-    scripts.path=/scripts
-    scripts.hint=sdk
-    INSTALLS+=scripts
 
     build.files=\
         $$QTOPIA_DEPOT_PATH/src/build
@@ -125,7 +107,6 @@ unix {
         $$DQTDIR/bin/moc\
         $$DQTDIR/bin/uic\
         $$DQTDIR/bin/rcc\
-        $$QPEDIR/bin/qvfb\
         $$DQTDIR/bin/assistant\
         $$DQTDIR/bin/designer\
         $$DQTDIR/bin/linguist\
@@ -146,8 +127,8 @@ unix {
 
     dqtbinsyms.commands=$$COMMAND_HEADER\
         # Symlink these binaries somewhere useful ($QPEDIR/bin)
-        for file in qvfb designer linguist lrelease lupdate; do\
-            ln -sf $(INSTALL_ROOT)/qtopiacore/host/bin/\$$file $(INSTALL_ROOT)/bin/\$$file;\
+        for file in designer linguist lrelease lupdate; do\
+            ln -sf $$QTOPIA_SDKROOT/qtopiacore/host/bin/\$$file $(INSTALL_ROOT)/bin/\$$file;\
         done
     dqtbinsyms.path=/bin
     dqtbinsyms.hint=sdk
@@ -158,22 +139,31 @@ unix {
     mkspecs.hint=sdk
     INSTALLS+=mkspecs
 
+    mkspecs_host_qconfig.files=$$DQTDIR/mkspecs/qconfig.pri
+    mkspecs_host_qconfig.path=/qtopiacore/host/mkspecs
+    mkspecs_host_qconfig.hint=sdk
+    INSTALLS+=mkspecs_host_qconfig
+
+    mkspecs_target_qconfig.files=$$QTEDIR/mkspecs/qconfig.pri
+    mkspecs_target_qconfig.path=/qtopiacore/target/mkspecs
+    mkspecs_target_qconfig.hint=sdk
+    INSTALLS+=mkspecs_target_qconfig
+
     mkspecs_symlinks.commands=$$COMMAND_HEADER\
-        mkdir -p $(INSTALL_ROOT)/qtopiacore/host/mkspecs $$LINE_SEP\
-        mkdir -p $(INSTALL_ROOT)/qtopiacore/target/mkspecs $$LINE_SEP_VERBOSE\
-        ln -sf $(INSTALL_ROOT)/qtopiacore/qt/mkspecs $(INSTALL_ROOT)/qtopiacore/host/mkspecs $$LINE_SEP_VERBOSE\
-        ln -sf $(INSTALL_ROOT)/qtopiacore/qt/mkspecs $(INSTALL_ROOT)/qtopiacore/target/mkspecs
+        ln -sf $$QTOPIA_SDKROOT/qtopiacore/qt/mkspecs/* $(INSTALL_ROOT)/qtopiacore/host/mkspecs $$LINE_SEP\
+        ln -sf $$QTOPIA_SDKROOT/qtopiacore/qt/mkspecs/* $(INSTALL_ROOT)/qtopiacore/target/mkspecs
+    !isEmpty(PLATFORM_SDK):mkspecs_symlinks.commands+=$$LINE_SEP\
+        ln -sf $$QTOPIA_SDKROOT$$PLATFORM_SDK $(INSTALL_ROOT)/qtopiacore/host/mkspecs/default
+    !isEmpty(XPLATFORM_SDK):mkspecs_symlinks.commands+=$$LINE_SEP\
+        ln -sf $$QTOPIA_SDKROOT$$XPLATFORM_SDK $(INSTALL_ROOT)/qtopiacore/target/mkspecs/default
     mkspecs_symlinks.CONFIG=no_path
     mkspecs_symlinks.hint=sdk
+    mkspecs_symlinks.depends+=install_mkspecs install_mkspecs_host_qconfig install_mkspecs_target_qconfig
     INSTALLS+=mkspecs_symlinks
 
-    qvfbmk.files=$$DQTDIR/tools/qvfb/Makefile*
-    qvfbmk.path=/qtopiacore/host/tools/qvfb
-    qvfbmk.hint=sdk
-    INSTALLS+=qvfbmk
-
-    qvfbskins.files=$$QT_DEPOT_PATH/tools/qvfb/*.skin
-    qvfbskins.path=/qtopiacore/qt/tools/qvfb
+    qvfbskins.path=/src/tools/qt/qvfb
+    qvfbskins.commands=$$COMMAND_HEADER\
+        cp -RL $$QPEDIR/src/tools/qt/qvfb/*.skin $(INSTALL_ROOT)$$qvfbskins.path
     qvfbskins.hint=sdk
     INSTALLS+=qvfbskins
 
@@ -187,10 +177,9 @@ unix {
     qte_qmakecache.hint=sdk
     INSTALLS+=qte_qmakecache
 
+    qtdocs.path=/qtopiacore/qt/doc
     qtdocs.commands=$$COMMAND_HEADER\
-        rm -rf $(INSTALL_ROOT)/qtopiacore/qt/doc $$LINE_SEP\
-        ln -s $(INSTALL_ROOT)/doc $(INSTALL_ROOT)/qtopiacore/qt/doc
-    qtdocs.path=/qtopiacore/qt
+        cp -Rf $$QT_DEPOT_PATH/doc/html $(INSTALL_ROOT)/$$qtdocs.path
     qtdocs.hint=sdk
     INSTALLS+=qtdocs
 
@@ -201,9 +190,9 @@ unix {
 
     qtdocsyms.commands=$$COMMAND_HEADER\
         mkdir -p $(INSTALL_ROOT)/qtopiacore/target $$LINE_SEP\
-        ln -sf $(INSTALL_ROOT)/qtopiacore/qt/doc $(INSTALL_ROOT)/qtopiacore/target/doc $$LINE_SEP\
+        ln -sf $$QTOPIA_SDKROOT/qtopiacore/qt/doc $(INSTALL_ROOT)/qtopiacore/target/doc $$LINE_SEP\
         mkdir -p $(INSTALL_ROOT)/qtopiacore/host $$LINE_SEP\
-        ln -sf $(INSTALL_ROOT)/qtopiacore/qt/doc $(INSTALL_ROOT)/qtopiacore/host/doc
+        ln -sf $$QTOPIA_SDKROOT/qtopiacore/qt/doc $(INSTALL_ROOT)/qtopiacore/host/doc
     qtdocsyms.CONFIG=no_path
     qtdocsyms.hint=sdk
     INSTALLS+=qtdocsyms
@@ -228,8 +217,8 @@ unix {
     # fix up the config.cache file and then generate a new config.pri
     configpri.commands=$$COMMAND_HEADER\
         echo Fixing paths $$LINE_SEP\
-        $$QTOPIA_DEPOT_PATH/bin/sdkcache $(INSTALL_ROOT) $$LINE_SEP\
-        $(INSTALL_ROOT)/bin/write_config_pri
+        $$QPEDIR/src/build/bin/sdkcache $$QTOPIA_SDKROOT $(INSTALL_ROOT) $$LINE_SEP\
+        $(INSTALL_ROOT)/src/build/bin/write_config_pri -sdk $(INSTALL_ROOT)
     configpri.path=/src
     configpri.hint=sdk
     configpri.depends=

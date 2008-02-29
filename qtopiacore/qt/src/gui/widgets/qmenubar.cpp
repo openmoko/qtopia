@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -65,7 +80,7 @@ QMenuBarExtension::QMenuBarExtension(QWidget *parent)
 #ifndef QT_NO_MENU
     setPopupMode(QToolButton::InstantPopup);
 #endif
-    setIcon(style()->standardPixmap(QStyle::SP_ToolBarHorizontalExtensionButton));
+    setIcon(style()->standardIcon(QStyle::SP_ToolBarHorizontalExtensionButton));
 }
 
 QSize QMenuBarExtension::sizeHint() const
@@ -85,23 +100,43 @@ QAction *QMenuBarPrivate::actionAt(QPoint p) const
     return 0;
 }
 
+QRect QMenuBarPrivate::menuRect(bool extVisible) const
+{
+    Q_Q(const QMenuBar);
+
+    int hmargin = q->style()->pixelMetric(QStyle::PM_MenuBarPanelWidth, 0, q);
+    QRect result = q->rect();
+    result.adjust(hmargin, 0, -hmargin, 0);
+
+    if (extVisible) {
+        if (q->layoutDirection() == Qt::RightToLeft)
+            result.setLeft(result.left() + extension->sizeHint().width());
+        else
+            result.setWidth(result.width() - extension->sizeHint().width());
+    }
+
+    if (leftWidget && leftWidget->isVisible()) {
+        QSize sz = leftWidget->sizeHint();
+        if (q->layoutDirection() == Qt::RightToLeft)
+            result.setRight(result.right() - sz.width());
+        else
+            result.setLeft(result.left() + sz.width());
+    }
+
+    if (rightWidget && rightWidget->isVisible()) {
+        QSize sz = rightWidget->sizeHint();
+        if (q->layoutDirection() == Qt::RightToLeft)
+            result.setLeft(result.left() + sz.width());
+        else
+            result.setRight(result.right() - sz.width());
+    }
+
+    return result;
+}
+
 bool QMenuBarPrivate::isVisible(QAction *action)
 {
-    Q_Q(QMenuBar);
-
-    if (!extension->isHidden()) {
-        int hmargin = q->style()->pixelMetric(QStyle::PM_MenuBarPanelWidth, 0, q);
-        QRect menuRect = q->rect();
-        if (QApplication::layoutDirection() == Qt::RightToLeft)
-            menuRect.setLeft(menuRect.left() + extension->width() + hmargin);
-        else
-            menuRect.setWidth(menuRect.width() - extension->width() - hmargin);
-        if (menuRect.contains(actionRect(action)))
-            return true;
-        else
-            return false;
-     }
-     return true;
+    return !hiddenActions.contains(action);
 }
 
 void QMenuBarPrivate::updateGeometries()
@@ -120,7 +155,7 @@ void QMenuBarPrivate::updateGeometries()
             QSize sz = leftWidget->sizeHint();
             q_width -= sz.width();
             q_start = sz.width();
-            QPoint pos(hmargin, vmargin);
+            QPoint pos(hmargin, (q->height() - leftWidget->height()) / 2);
             QRect vRect = QStyle::visualRect(q->layoutDirection(), q->rect(), QRect(pos, sz));
             leftWidget->setGeometry(vRect);
         }
@@ -154,18 +189,27 @@ void QMenuBarPrivate::updateGeometries()
 #endif
     itemsDirty = false;
 
-    QList<QAction *> hiddenActions;
-    int hmargin = q->style()->pixelMetric(QStyle::PM_MenuBarPanelWidth, 0, q);
-    QRect menuRect = q->rect();
-    if (!extension->isHidden() && (menuRect.width() < q->sizeHint().width())) {
-        if (QApplication::layoutDirection() == Qt::RightToLeft)
-            menuRect.setLeft(menuRect.left() + extension->width() + hmargin);
-        else
-            menuRect.setWidth(menuRect.width() - extension->width() - hmargin);
+    hiddenActions.clear();
+    //this is the menu rectangle without any extension
+    QRect menuRect = this->menuRect(false);
+
+    //we try to see if the actions will fit there
+    bool hasHiddenActions = false;
+    foreach(QAction *action, actionList) {
+        if (!menuRect.contains(actionRect(action))) {
+            hasHiddenActions = true;
+            break;
+        }
     }
-    for (int i = 0; i < actionList.count(); ++i) {
-        if (!menuRect.contains(actionRect(actionList.at(i))))
-            hiddenActions.append(actionList.at(i));
+
+    //...and if not, determine the ones that fit on the menu with the extension visible
+    if (hasHiddenActions) {
+        menuRect = this->menuRect(true);
+        foreach(QAction *action, actionList) {
+            if (!menuRect.contains(actionRect(action))) {
+                hiddenActions.append(action);
+            }
+        }
     }
 
     if (hiddenActions.count() > 0) {
@@ -178,9 +222,9 @@ void QMenuBarPrivate::updateGeometries()
         pop->addActions(hiddenActions);
 
         int vmargin = q->style()->pixelMetric(QStyle::PM_MenuBarVMargin, 0, q);
-        int x = QApplication::layoutDirection() == Qt::RightToLeft
-                ? hmargin
-                : q->width() - extension->sizeHint().width() - hmargin;
+        int x = q->layoutDirection() == Qt::RightToLeft
+                ? menuRect.left() - extension->sizeHint().width() + 1
+                : menuRect.right();
         extension->setGeometry(x, vmargin, extension->sizeHint().width(), menuRect.height() - vmargin*2);
         extension->show();
     } else {
@@ -233,7 +277,7 @@ void QMenuBarPrivate::setKeyboardMode(bool b)
 void QMenuBarPrivate::popupAction(QAction *action, bool activateFirst)
 {
     Q_Q(QMenuBar);
-    if(!action || !action->menu())
+    if(!action || !action->menu() || closePopupMode)
         return;
     popupState = true;
     if (action->isEnabled() && action->menu()->isEnabled()) {
@@ -245,10 +289,28 @@ void QMenuBarPrivate::popupAction(QAction *action, bool activateFirst)
         QRect adjustedActionRect = actionRect(action);
         QPoint pos(q->mapToGlobal(QPoint(adjustedActionRect.left(), adjustedActionRect.bottom() + 1)));
         QSize popup_size = activeMenu->sizeHint();
-        if(q->isRightToLeft())
-            pos.setX(pos.x()-(popup_size.width()-adjustedActionRect.width()));
 
         QRect screenRect = QApplication::desktop()->screenGeometry(pos);
+
+        const bool fitUp = (q->mapToGlobal(adjustedActionRect.topLeft()).y() >= popup_size.height());
+        const bool fitDown = (pos.y() + popup_size.height() <= screenRect.bottom());
+        const int actionWidth = adjustedActionRect.width();
+
+        if (!fitUp && !fitDown) { //we should shift the menu
+            bool shouldShiftToRight = !q->isRightToLeft();
+            if (q->isRightToLeft() && popup_size.width() > pos.x())
+                shouldShiftToRight = true;
+            else if (actionWidth + popup_size.width() + pos.x() > screenRect.right())
+                shouldShiftToRight = false;
+
+            if (shouldShiftToRight)
+                pos.rx() += actionWidth;
+            else
+                pos.rx() -= popup_size.width();
+        } else if (q->isRightToLeft()) {
+            pos.setX(pos.x()-(popup_size.width() - actionWidth));
+        }
+
         if(pos.x() < screenRect.x()) {
             pos.setX(screenRect.x());
         } else {
@@ -258,13 +320,24 @@ void QMenuBarPrivate::popupAction(QAction *action, bool activateFirst)
 
         }
 
-        if(!defaultPopDown || (pos.y() + popup_size.height() > screenRect.bottom()))
+        if(!defaultPopDown || (fitUp && !fitDown))
             pos.setY(qMax(screenRect.y(), q->mapToGlobal(QPoint(0, adjustedActionRect.top()-popup_size.height())).y()));
         activeMenu->popup(pos);
         if(activateFirst)
             activeMenu->d_func()->setFirstActionActive();
     }
     q->update(actionRect(action));
+}
+
+bool QMenuBarPrivate::closeActiveMenu()
+{
+    if(activeMenu) {
+        QMenu *menu = activeMenu;
+        activeMenu = 0;
+        menu->hide();
+        return true;
+    }
+    return false;
 }
 
 void QMenuBarPrivate::setCurrentAction(QAction *action, bool popup, bool activateFirst)
@@ -275,14 +348,9 @@ void QMenuBarPrivate::setCurrentAction(QAction *action, bool popup, bool activat
     doChildEffects = (popup && !activeMenu);
     Q_Q(QMenuBar);
     QWidget *fw = 0;
-    if(activeMenu) {
-        QMenu *menu = activeMenu;
-        activeMenu = NULL;
-        if (popup) {
-            fw = q->window()->focusWidget();
-            q->setFocus(Qt::NoFocusReason);
-        }
-        menu->hide();
+    if(closeActiveMenu() && popup) {
+        fw = q->window()->focusWidget();
+        q->setFocus(Qt::NoFocusReason);
     }
     if(currentAction)
         q->update(actionRect(currentAction));
@@ -292,7 +360,9 @@ void QMenuBarPrivate::setCurrentAction(QAction *action, bool popup, bool activat
     QAction *previousAction = currentAction;
 #endif
     currentAction = action;
-    if(action) {
+    if (fw)
+        fw->setFocus(Qt::NoFocusReason);
+    if (action) {
         activateAction(action, QAction::Hover);
         if(popup)
             popupAction(action, activateFirst);
@@ -304,10 +374,6 @@ void QMenuBarPrivate::setCurrentAction(QAction *action, bool popup, bool activat
         QApplication::sendEvent(q, &tip);
 #endif
     }
-
-
-    if (fw)
-        fw->setFocus(Qt::NoFocusReason);
 }
 
 void QMenuBarPrivate::calcActionRects(int max_width, int start, QMap<QAction*, QRect> &actionRects, QList<QAction*> &actionList) const
@@ -362,7 +428,8 @@ void QMenuBarPrivate::calcActionRects(int max_width, int start, QMap<QAction*, Q
         }
 
         //let the style modify the above size..
-        QStyleOptionMenuItem opt = getStyleOption(action);
+        QStyleOptionMenuItem opt;
+        q->initStyleOption(&opt, action);
         sz = q->style()->sizeFromContents(QStyle::CT_MenuBarItem, &opt, sz, q);
 
         if(!sz.isEmpty()) {
@@ -441,37 +508,52 @@ void QMenuBarPrivate::_q_actionHovered()
     Q_Q(QMenuBar);
     if (QAction *action = qobject_cast<QAction *>(q->sender())) {
         emit q->hovered(action);
+#ifndef QT_NO_ACCESSIBILITY
+        if (QAccessible::isActive()) {
+            QList<QAction*> actions = q->actions();
+            int actionIndex = actions.indexOf(action);
+            ++actionIndex;
+            QAccessible::updateAccessibility(q, actionIndex, QAccessible::Focus);
+            QAccessible::updateAccessibility(q, actionIndex, QAccessible::Selection);
+        }
+#endif //QT_NO_ACCESSIBILITY
 #ifdef QT3_SUPPORT
         emit q->highlighted(q->findIdForAction(action));
 #endif
     }
 }
 
+/*!
+    Initialize \a option with the values from the menu bar and information from \a action. This method
+    is useful for subclasses when they need a QStyleOptionMenuItem, but don't want
+    to fill in all the information themselves.
 
-QStyleOptionMenuItem QMenuBarPrivate::getStyleOption(const QAction *action) const
+    \sa QStyleOption::initFrom() QMenu::initStyleOption()
+*/
+void QMenuBar::initStyleOption(QStyleOptionMenuItem *option, const QAction *action) const
 {
-    Q_Q(const QMenuBar);
-    QStyleOptionMenuItem opt;
-    opt.palette = q->palette();
-    opt.state = QStyle::State_None;
-    if (q->isEnabled() && action->isEnabled())
-        opt.state |= QStyle::State_Enabled;
+    if (!option || !action)
+        return;
+    Q_D(const QMenuBar);
+    option->palette = palette();
+    option->state = QStyle::State_None;
+    if (isEnabled() && action->isEnabled())
+        option->state |= QStyle::State_Enabled;
     else
-        opt.palette.setCurrentColorGroup(QPalette::Disabled);
-    opt.fontMetrics = q->fontMetrics();
-    if (currentAction && currentAction == action) {
-        opt.state |= QStyle::State_Selected;
-        if (popupState && !closePopupMode)
-            opt.state |= QStyle::State_Sunken;
+        option->palette.setCurrentColorGroup(QPalette::Disabled);
+    option->fontMetrics = fontMetrics();
+    if (d->currentAction && d->currentAction == action) {
+        option->state |= QStyle::State_Selected;
+        if (d->popupState && !d->closePopupMode)
+            option->state |= QStyle::State_Sunken;
     }
-    if (q->hasFocus() || currentAction)
-        opt.state |= QStyle::State_HasFocus;
-    opt.menuRect = q->rect();
-    opt.menuItemType = QStyleOptionMenuItem::Normal;
-    opt.checkType = QStyleOptionMenuItem::NotCheckable;
-    opt.text = action->text();
-    opt.icon = action->icon();
-    return opt;
+    if (hasFocus() || d->currentAction)
+        option->state |= QStyle::State_HasFocus;
+    option->menuRect = rect();
+    option->menuItemType = QStyleOptionMenuItem::Normal;
+    option->checkType = QStyleOptionMenuItem::NotCheckable;
+    option->text = action->text();
+    option->icon = action->icon();
 }
 
 /*!
@@ -533,23 +615,23 @@ QStyleOptionMenuItem QMenuBarPrivate::getStyleOption(const QAction *action) cons
     pressed.
 
     \table
-    \row \o \inlineimage plastique-menubar.png A menubar shown in the Plastique widget style.
+    \row \o \inlineimage plastique-menubar.png A menu bar shown in the Plastique widget style.
     \o The \l{QPlastiqueStyle}{Plastique widget style}, like most other styles,
     handles the \gui{Help} menu in the same way as it handles any other menu.
-    \row \o \inlineimage motif-menubar.png A menubar shown in the Motif widget style.
+    \row \o \inlineimage motif-menubar.png A menu bar shown in the Motif widget style.
     \o The \l{QMotifStyle}{Motif widget style} treats \gui{Help} menus in a
     special way, placing them at right-hand end of the menu bar.
     \endtable
 
     \section1 QMenuBar on Qt/Mac
 
-    QMenuBar on Qt/Mac is a wrapper for using the system-wide menubar.
-    If you have multiple menubars in one dialog the outermost menubar
+    QMenuBar on Qt/Mac is a wrapper for using the system-wide menu bar.
+    If you have multiple menu bars in one dialog the outermost menu bar
     (normally inside a widget with widget flag Qt::Window) will
-    be used for the system-wide menubar.
+    be used for the system-wide menu bar.
 
-    Qt/Mac also provides a menubar merging feature to make QMenuBar
-    conform more closely to accepted Mac OS X menubar layout. The
+    Qt/Mac also provides a menu bar merging feature to make QMenuBar
+    conform more closely to accepted Mac OS X menu bar layout. The
     merging functionality is based on string matching the title of a
     QMenu entry. These strings are translated (using QObject::tr()) in
     the "QMenuBar" context. If an entry is moved its slots will still
@@ -574,11 +656,11 @@ QStyleOptionMenuItem QMenuBarPrivate::getStyleOption(const QAction *action) cons
     You can override this behavior by using the QAction::menuRole() property.
 
     If you wish to make all windows in a Mac application share the
-    same menubar, you need to create a menu bar that does not have a
-    parent. The menubar is created like this:
+    same menu bar, you need to create a menu bar that does not have a
+    parent. The menu bar is created like this:
 
     \code
-	QMenuBar *menuBar = new QMenuBar(0);
+        QMenuBar *menuBar = new QMenuBar(0);
     \endcode
 
     \bold{Note:} The text used for the application name in the menu bar is
@@ -588,7 +670,7 @@ QStyleOptionMenuItem QMenuBarPrivate::getStyleOption(const QAction *action) cons
     \section1 Examples
 
     The \l{mainwindows/menus}{Menus} example shows how to use QMenuBar and QMenu.
-    The other \l{Qt Examples#Main Window Examples}{main window application examples}
+    The other \l{Qt Examples#Main Windows}{main window application examples}
     also provide menus using these classes.
 
     \sa QMenu, QShortcut, QAction,
@@ -608,7 +690,6 @@ void QMenuBarPrivate::init()
         q->hide();
 #endif
     q->setBackgroundRole(QPalette::Button);
-    q->setAutoFillBackground(true);
     oldWindow = oldParent = 0;
 #ifdef QT3_SUPPORT
     doAutoResize = false;
@@ -683,13 +764,13 @@ QAction *QMenuBar::addAction(const QString &text)
 QAction *QMenuBar::addAction(const QString &text, const QObject *receiver, const char* member)
 {
     QAction *ret = new QAction(text, this);
-    QObject::connect(ret, SIGNAL(triggered()), receiver, member);
+    QObject::connect(ret, SIGNAL(triggered(bool)), receiver, member);
     addAction(ret);
     return ret;
 }
 
 /*!
-  Appends a new QMenu with \a title to the menubar. The menubar
+  Appends a new QMenu with \a title to the menu bar. The menu bar
   takes ownership of the menu. Returns the new menu.
 
   \sa QWidget::addAction() QMenu::menuAction()
@@ -702,7 +783,7 @@ QMenu *QMenuBar::addMenu(const QString &title)
 }
 
 /*!
-  Appends a new QMenu with \a icon and \a title to the menubar. The menubar
+  Appends a new QMenu with \a icon and \a title to the menu bar. The menu bar
   takes ownership of the menu. Returns the new menu.
 
   \sa QWidget::addAction() QMenu::menuAction()
@@ -716,7 +797,7 @@ QMenu *QMenuBar::addMenu(const QIcon &icon, const QString &title)
 }
 
 /*!
-  Appends \a menu to the menubar. Returns the menu's menuAction().
+  Appends \a menu to the menu bar. Returns the menu's menuAction().
 
   \sa QWidget::addAction() QMenu::menuAction()
 */
@@ -741,7 +822,7 @@ QAction *QMenuBar::addSeparator()
 /*!
     This convenience function creates a new separator action, i.e. an
     action with QAction::isSeparator() returning true. The function inserts
-    the newly created action into this menubar's list of actions before
+    the newly created action into this menu bar's list of actions before
     action \a before and returns it.
 
     \sa QWidget::insertAction(), addSeparator()
@@ -854,7 +935,8 @@ void QMenuBar::paintEvent(QPaintEvent *e)
             continue;
 
         emptyArea -= adjustedActionRect;
-        QStyleOptionMenuItem opt = d->getStyleOption(action);
+        QStyleOptionMenuItem opt;
+        initStyleOption(&opt, action);
         opt.rect = adjustedActionRect;
         p.setClipRect(adjustedActionRect);
         style()->drawControl(QStyle::CE_MenuBarItem, &opt, &p, this);
@@ -890,6 +972,19 @@ void QMenuBar::paintEvent(QPaintEvent *e)
 /*!
   \reimp
 */
+void QMenuBar::setVisible(bool visible)
+{
+#ifdef Q_WS_MAC
+    Q_D(QMenuBar);
+    if(d->mac_menubar)
+        return;
+#endif
+    QWidget::setVisible(visible);
+}
+
+/*!
+  \reimp
+*/
 void QMenuBar::mousePressEvent(QMouseEvent *e)
 {
     Q_D(QMenuBar);
@@ -909,8 +1004,11 @@ void QMenuBar::mousePressEvent(QMouseEvent *e)
     d->mouseDown = true;
 
     if(d->currentAction == action && d->popupState) {
+        d->closeActiveMenu();
+#ifdef Q_WS_WIN
         if((d->closePopupMode = style()->styleHint(QStyle::SH_MenuBar_DismissOnSecondClick)))
             update(d->actionRect(action));
+#endif
     } else {
         d->setCurrentAction(action, true);
     }
@@ -1158,6 +1256,11 @@ void QMenuBarPrivate::handleReparent()
 
     oldParent = newParent;
     oldWindow = newWindow;
+
+#ifdef Q_WS_MAC
+    macDestroyMenuBar();
+    macCreateMenuBar(newParent);
+#endif
 }
 
 #ifdef QT3_SUPPORT
@@ -1613,8 +1716,9 @@ QWidget *QMenuBar::cornerWidget(Qt::Corner corner) const
 /*!
     \fn void QMenuBar::triggered(QAction *action)
 
-    This signal is emitted when a menu action is selected; \a action
-    is the action that caused the event to be sent.
+    This signal is emitted when an action in a menu belonging to this menubar
+    is triggered as a result of a mouse click; \a action is the action that
+    caused the signal to be emitted.
 
     Normally, you connect each menu action to a single slot using
     QAction::triggered(), but sometimes you will want to connect
@@ -1659,7 +1763,7 @@ int QMenuBar::insertAny(const QIcon *icon, const QString *text, const QObject *r
     if(shortcut)
         act->setShortcut(*shortcut);
     if(receiver && member)
-        QObject::connect(act, SIGNAL(triggered()), receiver, member);
+        QObject::connect(act, SIGNAL(triggered(bool)), receiver, member);
     if(index == -1 || index >= actions().count())
         addAction(act);
     else
@@ -1737,6 +1841,15 @@ int QMenuBar::findIdForAction(QAction *act) const
     \value Never
     \value InWindowsStyle
 
+*/
+
+/*!
+    \fn void QMenuBar::addAction(QAction *action)
+    \overload
+
+    Appends the action \a action to the menu bar's list of actions.
+
+    \sa QMenu::addAction(), QWidget::addAction()
 */
 
 /*!

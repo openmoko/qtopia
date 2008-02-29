@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -37,22 +37,12 @@ class CallContactItem : public QObject
 {
 Q_OBJECT
 public:
-    enum Types {
-        Contact,
-        DialedNumber,
-        ReceivedCall,
-        MissedCall
-    };
+    static QCallList::ListType stateToType( QCallListItem::CallType st );
+    static QPixmap typePixmap( QCallListItem::CallType type );
 
-    static CallContactItem::Types stateToType( QCallListItem::CallType st );
-    static QPixmap typePixmap( CallContactItem::Types type );
-
-    CallContactItem( CallContactItem::Types t,
-            QCallListItem clItem, QObject * parent = 0);
-
+    CallContactItem( QCallListItem clItem, QObject * parent = 0 );
 
     QContactModel::Field fieldType() const;
-    CallContactItem::Types type() const;
 
     void setContact( const QContact& cnt, const QString& phoneNumber);
     void setContact( const QContactModel *m, const QUniqueId &);
@@ -71,8 +61,6 @@ public:
 private:
     QContactModel::Field contactNumberToFieldType(const QString& number) const;
     QString fieldTypeToContactDetail() const;
-
-    CallContactItem::Types mType;
 
     mutable QContactModel::Field mFieldType;
     mutable QContact mContact;
@@ -105,6 +93,9 @@ public:
 public slots:
     void setFilter(const QString& filter);
 
+signals:
+    void filtered(const QString& filter);
+
 protected:
     QList<CallContactItem*> callContactItems;
     QCallList &mCallList;
@@ -125,12 +116,12 @@ public:
     QFont secondaryFont(const QStyleOptionViewItem& o, const QModelIndex& idx) const;
 };
 
-class CallContactView : public QListView
+class CallContactListView : public QListView
 {
     Q_OBJECT
 public:
-    CallContactView(QWidget * parent = 0);
-    ~CallContactView();
+    CallContactListView(QWidget * parent = 0);
+    ~CallContactListView();
 
     void setModel(QAbstractItemModel* model);
     QString number() const
@@ -146,7 +137,9 @@ public slots:
     void addItemToContact();
     void openContact();
     void sendMessageToItem();
-    virtual void updateMenu(const QModelIndex& current, const QModelIndex& previous);
+    void showRelatedCalls();
+    void showAllCalls();
+    virtual void updateMenu();
 
     virtual void reset();
 
@@ -164,6 +157,7 @@ protected:
     QAction *mOpenContact;
     QAction *mAddContact;
     QAction *mSendMessage;
+    QAction *mRelatedCalls, *mAllCalls;
     PhoneMessageBox *addContactMsg;
 
     QString mNumber;

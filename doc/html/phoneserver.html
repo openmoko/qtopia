@@ -43,9 +43,10 @@
 <p>The PhoneServer class represents the central dispatch server for phone requests.</p>
 <p>Typical phone hardware only allows one process to access the AT command stream at any one time. Because of this, Qtopia Phone multiplexes multiple process' requests through the phone server, which is the only process that may access the actual hardware.</p>
 <p>The Qtopia phone server is responsible for starting all telephony services, including those for GSM, VoIP, and other network types.</p>
-<p>At start up, the Qtopia phone server sends a <tt>start()</tt> message to all applications that are registered as implementing the Telephony service. This is the usual method for starting VoIP and third-party telephony services.</p>
-<p>If Qtopia is configured with the <tt>QTOPIA_MODEM</tt> flag, it will also start the default built-in AT command handler for the <tt>modem</tt> service using QModemService::createVendorSpecific(). If Qtopia is not configured with this flag, then the <tt>modem</tt> service is either not required, or will be provided by a third-party telephony service implementation.</p>
-<p>See also QTelephonyService and QModemService.</p>
+<p>At start up, the Qtopia phone server sends a <tt>start()</tt> message to all applications that are registered as implementing the <a href="telephonyservice.html">Telephony</a> service. This is the usual method for starting VoIP and third-party telephony services.</p>
+<p>If Qtopia is configured with the <tt>QTOPIA_MODEM</tt> flag, it will also start the default built-in AT command handler for the <tt>modem</tt> service using <a href="qmodemservice.html#createVendorSpecific">QModemService::createVendorSpecific</a>(). If Qtopia is not configured with this flag, then the <tt>modem</tt> service is either not required, or will be provided by a third-party telephony service implementation.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
+<p>See also <a href="qtelephonyservice.html">QTelephonyService</a> and <a href="qmodemservice.html">QModemService</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="PhoneServer"></a>PhoneServer::PhoneServer ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -56,6 +57,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

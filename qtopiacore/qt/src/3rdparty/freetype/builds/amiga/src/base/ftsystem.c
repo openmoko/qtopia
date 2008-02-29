@@ -4,8 +4,8 @@
 /*                                                                         */
 /*    Amiga-specific FreeType low-level system interface (body).           */
 /*                                                                         */
-/*  Copyright 1996-2001, 2002, 2005, 2006 by                               */
-/*  David Turner, Robert Wilhelm, Werner Lemberg and Detlef Würkner.       */
+/*  Copyright 1996-2001, 2002, 2005, 2006, 2007 by                         */
+/*  David Turner, Robert Wilhelm, Werner Lemberg and Detlef WÃ¼rkner.       */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
 /*  modified, and distributed under the terms of the FreeType project      */
@@ -26,14 +26,14 @@
 
   /*************************************************************************/
   /*                                                                       */
-  /* Maintained by Detlef Würkner <TetiSoft@apg.lahn.de>                   */
+  /* Maintained by Detlef WÃ¼rkner <TetiSoft@apg.lahn.de>                   */
   /*                                                                       */
   /* Based on the original ftsystem.c,                                     */
   /* modified to avoid fopen(), fclose(), fread(), fseek(), ftell(),       */
   /* malloc(), realloc(), and free().                                      */
   /*                                                                       */
   /* Those C library functions are often not thread-safe or cant be        */
-  /* used in a shared Amiga library. If thats not a problem for you,       */
+  /* used in a shared Amiga library. If that's not a problem for you,       */
   /* you can of course use the default ftsystem.c with C library calls     */
   /* instead.                                                              */
   /*                                                                       */
@@ -457,7 +457,7 @@ Free_VecPooled( APTR  poolHeader,
 
   extern void
   ft_mem_debug_done( FT_Memory  memory );
-  
+
 #endif
 
 
@@ -493,7 +493,7 @@ Free_VecPooled( APTR  poolHeader,
         memory->free    = ft_free;
 #ifdef FT_DEBUG_MEMORY
         ft_mem_debug_init( memory );
-#endif    
+#endif
       }
     }
 
@@ -508,7 +508,7 @@ Free_VecPooled( APTR  poolHeader,
   {
 #ifdef FT_DEBUG_MEMORY
     ft_mem_debug_done( memory );
-#endif  
+#endif
 
     DeletePool( memory->user );
     FreeVec( memory );
@@ -519,4 +519,4 @@ Local Variables:
 coding: latin-1
 End:
 */
-/* END */
+/* END *

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -217,7 +217,7 @@ public:
         private slots:
             void activate()
             {
-                control = new QMediaControl( notifier->content()->handle() );
+                control = new QMediaControl( notifier->content() );
             }
 
             void deactivate()
@@ -315,12 +315,14 @@ void QMediaControlNotifier::setMediaContent( QMediaContent* content )
 
     m_content = content;
 
-    connect( m_content, SIGNAL(controlAvailable(const QString&)),
-        this, SLOT(evaluate()) );
-    connect( m_content, SIGNAL(controlUnavailable(const QString&)),
-        this, SLOT(evaluate()) );
+    if (m_content) {
+        connect( m_content, SIGNAL(controlAvailable(QString)),
+            this, SLOT(evaluate()) );
+        connect( m_content, SIGNAL(controlUnavailable(QString)),
+            this, SLOT(evaluate()) );
 
-    evaluate();
+        evaluate();
+    }
 }
 
 void QMediaControlNotifier::evaluate()
@@ -338,33 +340,4 @@ void QMediaControlNotifier::evaluate()
             emit valid();
         }
     }
-}
-
-KeyFilter::KeyFilter( QObject* subject, QObject* target, QObject* parent )
-    : QObject( parent ), m_target( target )
-{
-    subject->installEventFilter( this );
-}
-
-void KeyFilter::addKey( int key )
-{
-    m_keys.insert( key );
-}
-
-bool KeyFilter::eventFilter( QObject*, QEvent* e )
-{
-    // Guard against recursion
-    static QEvent* d = 0;
-
-    if( e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease ) {
-        QKeyEvent *ke = (QKeyEvent*)e;
-        if( d != e && !ke->isAutoRepeat() && m_keys.contains( ke->key() ) ) {
-            QKeyEvent event = QKeyEvent( e->type(), ke->key(), Qt::NoModifier );
-            QCoreApplication::sendEvent( m_target, d = &event );
-            d = 0;
-            return true;
-        }
-    }
-
-    return false;
 }

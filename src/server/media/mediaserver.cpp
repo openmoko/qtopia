@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,89 +20,125 @@
 ****************************************************************************/
 
 #include <QProcess>
-#include <Qtopia>
 #include <QTimer>
+#include <Qtopia>
 #include <qtopialog.h>
-#include <qcopchannel_qws.h>
+
 
 #include "mediaserver.h"
 
-MediaServerControlTask::MediaServerControlTask()
-: m_soundserver(0), m_qssTimerId(-1), m_shutdown(false),
-  m_shutdownCompleted(false)
+
+class MediaServerControlTaskPrivate
 {
+public:
+    QProcess*               soundserver;
+    int                     qssTimerId;
+    bool                    shutdown;
+    bool                    shutdownCompleted;
+    ApplicationLauncher*    appLauncher;
+};
+
+
+/*!
+    \class MediaServerControlTask
+    \ingroup QtopiaServer::Task
+
+    \brief The MediaServerControlTask class provides a launcher for the Media Server.
+
+    This task launches QSS or Qtopia's Media Server process and maintains this
+    process throughout the life of Qtopia. If the media process exists
+    prematurely it will be restarted. QSS is launched using QProcess and
+    Qtopia's mediaserver is launched by sending an application channel message
+    to the mediaserver.
+
+    This class is part of the Qtopia server and cannot be used by other Qtopia
+    applications.
+*/
+
+
+/*!
+    \internal
+    Construct a task to launch the configured mediaserver.
+*/
+
+#define MEDIASERVER_IMAGE "mediaserver"
+
+MediaServerControlTask::MediaServerControlTask():
+    d(new MediaServerControlTaskPrivate)
+{
+    d->soundserver = 0;
+    d->qssTimerId = 0;
+    d->shutdown = false;
+    d->shutdownCompleted = false;
+
 #ifdef MEDIA_SERVER
-    QCopChannel::send( "QPE/Application/mediaserver", "execute()" );
+    d->appLauncher = qtopiaTask<ApplicationLauncher>();
+
+    connect(d->appLauncher, SIGNAL(applicationTerminated(QString,ApplicationTypeLauncher::TerminationReason,bool)),
+            this, SLOT(applicationTerminated(QString,ApplicationTypeLauncher::TerminationReason,bool)));
+
+    d->appLauncher->launch(MEDIASERVER_IMAGE);
 #else
-    // Gives system 5 seconds to start up (on PDA it needs that much time)
-    m_qssTimerId = startTimer(5000);
+    d->qssTimerId = startTimer(5000);
 #endif
 }
 
+/*!
+    \internal
+*/
+
 void MediaServerControlTask::timerEvent(QTimerEvent *e)
 {
-    if ( e->timerId() == m_qssTimerId ) {
-        if(!m_soundserver) {
-            m_soundserver = new QProcess(this);
-            connect(m_soundserver, SIGNAL(finished(int)),
-                    this, SLOT(soundServerExited()));
-            connect(m_soundserver, SIGNAL(readyReadStandardOutput()),
-                    this, SLOT(soundServerReadyStdout()));
-            connect(m_soundserver, SIGNAL(readyReadStandardError()),
-                    this, SLOT(soundServerReadyStderr()));
-        }
-        m_soundserver->start(Qtopia::qtopiaDir() + MEDIA_SERVER_PATH);
+    if (e->timerId() == d->qssTimerId)
+    {
+        if (!d->soundserver)
+        {
+            d->soundserver = new QProcess(this);
+            d->soundserver->setProcessChannelMode(QProcess::ForwardedChannels);
+            d->soundserver->closeWriteChannel();
 
-        killTimer(m_qssTimerId);
-        m_qssTimerId = 0;
+            connect(d->soundserver, SIGNAL(finished(int)), this, SLOT(soundServerExited()));
+        }
+
+        d->soundserver->start(Qtopia::qtopiaDir() + "bin/mediaserver");
+
+        killTimer(d->qssTimerId);
+        d->qssTimerId = 0;
     }
-    QObject::timerEvent(e);
 }
 
 void MediaServerControlTask::soundServerExited()
 {
-    if (!m_qssTimerId && !m_shutdown)
-        m_qssTimerId = startTimer(5000);
+    if (!d->qssTimerId && !d->shutdown)
+        d->qssTimerId = startTimer(5000);
 
-    Q_ASSERT(m_soundserver);
-    m_soundserver->disconnect();
-    m_soundserver->deleteLater();
-    m_soundserver = 0;
+    Q_ASSERT(d->soundserver);
 
-    if(m_shutdown) {
-        m_shutdownCompleted = true;
+    d->soundserver->disconnect();
+    d->soundserver->deleteLater();
+    d->soundserver = 0;
+
+    if (d->shutdown)
+    {
+        d->shutdownCompleted = true;
+
         emit proceed();
     }
 }
 
-void MediaServerControlTask::soundServerReadyStdout()
-{
-    m_soundserver->setReadChannel(QProcess::StandardOutput);
-    while (m_soundserver->canReadLine())
-    {
-        QByteArray  line = m_soundserver->readLine();
 
-        line.chop(int(line.endsWith("\r\n")) + int(line.endsWith('\n')));
-        //qDebug() << "SS:stdout:" << line;
-    }
-}
-
-void MediaServerControlTask::soundServerReadyStderr()
-{
-    m_soundserver->setReadChannel(QProcess::StandardError);
-    while (m_soundserver->canReadLine())
-    {
-        QByteArray  line = m_soundserver->readLine();
-
-        line.chop(int(line.endsWith("\r\n")) + int(line.endsWith('\n')));
-        //qDebug() << "SS:stderr:" << line;
-    }
-}
+/*!
+    \internal
+*/
 
 bool MediaServerControlTask::systemRestart()
 {
     return doShutdown();
 }
+
+/*!
+    \internal
+*/
 
 bool MediaServerControlTask::systemShutdown()
 {
@@ -111,30 +147,55 @@ bool MediaServerControlTask::systemShutdown()
 
 void MediaServerControlTask::killtimeout()
 {
-    Q_ASSERT(m_shutdown);
-    if(m_shutdownCompleted)
-        return;
-    qLog(Media) << "Sound server process did not terminate during shutdown.";
-    m_soundserver->disconnect();
-    m_soundserver->deleteLater();
-    m_soundserver = 0;
-    m_shutdownCompleted = true;
-    emit proceed();
+    Q_ASSERT(d->shutdown);
+
+    if (!d->shutdownCompleted)
+    {
+        qLog(Media) << "Sound server process did not terminate during shutdown.";
+
+        d->soundserver->disconnect();
+        d->soundserver->deleteLater();
+        d->soundserver = 0;
+        d->shutdownCompleted = true;
+
+        emit proceed();
+    }
 }
+
+void MediaServerControlTask::applicationTerminated(QString const& name, ApplicationTypeLauncher::TerminationReason, bool)
+{
+    if (name == MEDIASERVER_IMAGE)
+    {
+        if (d->shutdown)
+            emit proceed();
+        else
+            d->appLauncher->launch(MEDIASERVER_IMAGE);
+    }
+}
+
 
 bool MediaServerControlTask::doShutdown()
 {
-    Q_ASSERT(!m_shutdown);
-    m_shutdown = true;
+    Q_ASSERT(!d->shutdown);
 
-    if(m_soundserver) {
-        m_soundserver->kill();
+    d->shutdown = true;
+
+#ifdef MEDIA_SERVER
+    d->appLauncher->kill(MEDIASERVER_IMAGE);
+    return false;
+#else
+    if (d->soundserver)
+    {
+        d->soundserver->kill();
         QTimer::singleShot(1000, this, SLOT(killtimeout()));
         return false;
-    } else {
-        m_shutdownCompleted = true;
+    }
+    else
+    {
+        d->shutdownCompleted = true;
         return true;
     }
+#endif
 }
 
 QTOPIA_TASK(MediaServer, MediaServerControlTask);

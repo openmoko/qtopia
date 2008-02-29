@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,6 +23,7 @@
 #include "qtopianetworkinterface.h"
 
 #include <QCoreApplication>
+#include <QDebug>
 #include <QSettings>
 
 #include <qvaluespace.h>
@@ -77,6 +78,7 @@
   \list
     \o QNetworkState - very generic connectivity information related to Qtopia
     \o QNetworkDevice - specific information about the state of a particular hardware device
+    \o QNetworkConnection - information beyond the device level such as the remote partner
   \endlist
 
   \sa QtopiaNetworkServer
@@ -94,6 +96,8 @@
   \value GPRS The connection is established via GPRS/UMTS/EDGE.
   \value Bluetooth The network is based on Bluetooth.
   \value Hidden This interface is hidden from the user.
+  \value Custom This network plugin must exactly match the network configuration. For more details
+                see QtopiaNetworkFactoryIface::customID().
   \value Any A place holder for any arbitrary network type.
 
   These sub types are used in conjunction with QtopiaNetwork::GPRS and
@@ -108,13 +112,15 @@
   These sub types specify the type of the external device which is used to
   establish the connection.
 
-   \value PCMCIA The network device is an attached PCMCIA card
+   \value PCMCIA The network device is an attached PCMCIA card.
 
   These sub types are used in conjunction with QtopiaNetwork::Bluetooth only.
 
   \value BluetoothDUN The network connection is established via a local bluetooth
             device. The remote Bluetooth device acts as Internet gateway as specified
             by the Dial-up Networking Profile (DNP).
+  \value BluetoothPAN This value is reserved for future use in Qtopia.
+
 */
 
 /*!
@@ -286,11 +292,16 @@ QtopiaNetwork::Type QtopiaNetwork::toType(const QString& handle)
         QByteArray a = cfg.value("Bluetooth/Profile").toByteArray();
         if ( a == "DUN" )
             t |= QtopiaNetwork::BluetoothDUN;
+        else if ( a == "PAN" )
+            t |= QtopiaNetwork::BluetoothPAN;
     }
 
     if ( cfg.value("Info/Visibility").toByteArray() == "hidden" ) {
         t |= QtopiaNetwork::Hidden;
     }
+
+    if ( !cfg.value("Info/CustomID").toByteArray().isEmpty() )
+        t |= QtopiaNetwork::Custom;
 
     return t;
 }
@@ -336,6 +347,13 @@ QStringList QtopiaNetwork::availableNetworkConfigs( QtopiaNetwork::Type type,
     return resultList;
 }
 
+static QByteArray customID4Config( const QString& handle )
+{
+    QSettings cfg( handle, QSettings::IniFormat );
+    cfg.sync();
+    return cfg.value("Info/CustomID", QByteArray()).toByteArray();
+}
+
 static QHash<QString,QPointer<QtopiaNetworkInterface> > *loadedIfaces = 0;
 static QHash<int,QtopiaNetworkFactoryIface*> *knownPlugins = 0;
 static QPluginManager *pmanager = 0;
@@ -357,6 +375,13 @@ static void cleanup()
 /*!
      Loads the appropriate network plug-in for the interface with \a handle; or 
      0 if no suitable plug-in can be found.
+
+     Only use this function if you intend to configure the returned QtopiaNetworkInterface
+     via QtopiaNetworkInterface::configuration(). Any other use may trigger
+     undesired behaviour whereby the loaded network interface instance may
+     overshadow the instance created by the QtopiaNetworkServer. For more details
+     see the QtopiaNetworkInterface general class documentation.
+
 */
 QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handle)
 {
@@ -388,10 +413,11 @@ QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handl
             //qLog(Network) << "QN::loadPlugin() : interface already in cache, returning instance";
         } else {
             //qLog(Network) << "QN::loadPlugin() : interface deleted, removing bogus reference";
-            loadedIfaces->remove( handle ); //instance has been deleted already
+            loadedIfaces->remove( handle ); //instance has been deleted 
         }
     }
 
+    const QByteArray customID = customID4Config( handle );
     if ( !impl )
     {
         Type t = toType(handle);
@@ -400,8 +426,19 @@ QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handl
         foreach ( int key, knownPlugins->keys() )
         {
             if ( (key & t)==t ) {
-               found = key;
-               break;
+                if ( (t & QtopiaNetwork::Custom) ) {
+                    QByteArray id = knownPlugins->value( key )->customID();
+                    if (  id == customID )
+                    {
+                        found = key;
+                        break;
+                    }
+                } else if ( key & QtopiaNetwork::Custom ) {
+                    continue;
+                } else {
+                    found = key;
+                    break;
+                }
             }
         }
 
@@ -422,8 +459,16 @@ QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handl
                 plugin = qobject_cast<QtopiaNetworkFactoryIface*>(instance);
                 if ( plugin && ((plugin->type() & t) == t) )
                 {
+                    if ( t & QtopiaNetwork::Custom ) {
+                        if ( plugin->customID() != customID )
+                            continue;
+                    } else if ( plugin->type() & QtopiaNetwork::Custom ) {
+                        continue;
+                    }
                     qLog(Network) << "QN::loadPLugin() : plugin found,"
-                                  << "loaded and new interface instanciated";
+                                  << "loaded and new interface instanciated " ;
+                    if ( qLogEnabled(Network) && t & QtopiaNetwork::Custom )
+                        qLog(Network) << "Using custom id: " << customID;
                     knownPlugins->insert( plugin->type(), plugin );
                     impl = plugin->network( handle );
                     loadedIfaces->insert( handle, impl );
@@ -433,7 +478,7 @@ QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handl
         }
     }
     if (!impl)
-        qLog(Network) << "QN::loadPlugin(): no suitable plugin found";
+        qLog(Network) << "QN::loadPlugin(): no suitable plugin found for ->" << handle << customID;
     return impl;
 #else
     return 0;

@@ -1,0 +1,8 @@
+#!/bin/sh
+for f in /dev/fb?; do
+    lidsconf -A -s ${BIN} -o $f -j WRITE
+done
+for f in /dev/video?; do
+    lidsconf -A -s ${BIN} -o $f -j WRITE
+done
+

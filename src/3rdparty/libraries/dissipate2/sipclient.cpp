@@ -657,8 +657,8 @@ void SipClient::parseMessage( QString fullmessage )
 			if( curmessage->getHeaderData( SipHeader::Expires).toInt() > 0 ) {
 				member->timerStart( curmessage->getHeaderData( SipHeader::Expires).toInt() * 1000 );
 			}
-			connect( member, SIGNAL( statusUpdated( SipCallMember * ) ),
-				this, SLOT( callMemberUpdated() ) );
+			connect( member, SIGNAL(statusUpdated(SipCallMember*)),
+				this, SLOT(callMemberUpdated()) );
 			member->getCall()->setCallStatus( SipCall::callInProgress );
 			incomingSubscribe( member, sendSubscribe );
 		}

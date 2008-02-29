@@ -9,17 +9,37 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
+
+#include "connectionedit_p.h"
+
+#include <QtDesigner/abstractformwindow.h>
 
 #include <QtGui/QPainter>
 #include <QtGui/QPaintEvent>
@@ -27,23 +47,16 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QMatrix>
 #include <QtGui/QApplication>
-#include <QtGui/qevent.h>
 
-#include <QtCore/qdebug.h>
+#include <QtCore/QMultiMap>
 
-#include <QtDesigner/abstractformwindow.h>
-
-#include "connectionedit_p.h"
-
-#define BG_ALPHA                32
-#define LINE_PROXIMITY_RADIUS   3
-#define LOOP_MARGIN             20
-#define VLABEL_MARGIN            1
-#define HLABEL_MARGIN            3
-#define GROUND_W                20
-#define GROUND_H                25
-
-namespace qdesigner_internal {
+static const int BG_ALPHA =              32;
+static const int LINE_PROXIMITY_RADIUS =  3;
+static const int LOOP_MARGIN  =          20;
+static const int VLABEL_MARGIN =          1;
+static const int HLABEL_MARGIN =          3;
+static const int GROUND_W =              20;
+static const int GROUND_H =              25;
 
 /*******************************************************************************
 ** Tools
@@ -61,14 +74,14 @@ static QRect expand(const QRect &r, int i)
 
 static QRect endPointRect(const QPoint &pos)
 {
-    QRect r(pos + QPoint(-LINE_PROXIMITY_RADIUS, -LINE_PROXIMITY_RADIUS),
-            QSize(2*LINE_PROXIMITY_RADIUS, 2*LINE_PROXIMITY_RADIUS));
+    const QRect r(pos + QPoint(-LINE_PROXIMITY_RADIUS, -LINE_PROXIMITY_RADIUS),
+                  QSize(2*LINE_PROXIMITY_RADIUS, 2*LINE_PROXIMITY_RADIUS));
     return r;
 }
 
 static void paintGround(QPainter *p, QRect r)
 {
-    QPoint mid = r.center();
+    const QPoint mid = r.center();
     p->drawLine(mid.x(), r.top(), mid.x(), mid.y());
     p->drawLine(r.left(), mid.y(), r.right(), mid.y());
     int y = r.top() + 4*r.height()/6;
@@ -82,17 +95,17 @@ static void paintGround(QPainter *p, QRect r)
 
 static void paintEndPoint(QPainter *p, const QPoint &pos)
 {
-    QRect r(pos + QPoint(-LINE_PROXIMITY_RADIUS, -LINE_PROXIMITY_RADIUS),
-            QSize(2*LINE_PROXIMITY_RADIUS, 2*LINE_PROXIMITY_RADIUS));
+    const QRect r(pos + QPoint(-LINE_PROXIMITY_RADIUS, -LINE_PROXIMITY_RADIUS),
+                  QSize(2*LINE_PROXIMITY_RADIUS, 2*LINE_PROXIMITY_RADIUS));
     p->fillRect(fixRect(r), p->pen().color());
 }
 
-static CETypes::LineDir classifyLine(const QPoint &p1, const QPoint &p2)
+static qdesigner_internal::CETypes::LineDir classifyLine(const QPoint &p1, const QPoint &p2)
 {
     if (p1.x() == p2.x())
-        return p1.y() < p2.y() ? CETypes::DownDir : CETypes::UpDir;
+        return p1.y() < p2.y() ? qdesigner_internal::CETypes::DownDir : qdesigner_internal::CETypes::UpDir;
     Q_ASSERT(p1.y() == p2.y());
-    return p1.x() < p2.x() ? CETypes::RightDir : CETypes::LeftDir;
+    return p1.x() < p2.x() ? qdesigner_internal::CETypes::RightDir : qdesigner_internal::CETypes::LeftDir;
 }
 
 static QPoint pointInsideRect(const QRect &r, QPoint p)
@@ -109,6 +122,8 @@ static QPoint pointInsideRect(const QRect &r, QPoint p)
 
     return p;
 }
+
+namespace qdesigner_internal {
 
 /*******************************************************************************
 ** Commands
@@ -132,7 +147,7 @@ void AddConnectionCommand::redo()
 
 void AddConnectionCommand::undo()
 {
-    int idx = edit()->indexOfConnection(m_con);
+    const int idx = edit()->indexOfConnection(m_con);
     emit edit()->aboutToRemoveConnection(m_con);
     edit()->setSelected(m_con, false);
     m_con->update();
@@ -153,23 +168,25 @@ public:
     virtual void undo();
 private:
     Connection *m_con;
-    QPoint m_old_source_pos, m_old_target_pos,
-            m_new_source_pos, m_new_target_pos;
+    const QPoint m_old_source_pos;
+    const QPoint m_old_target_pos;
+    const QPoint m_new_source_pos;
+    const QPoint m_new_target_pos;
 };
 
 AdjustConnectionCommand::AdjustConnectionCommand(ConnectionEdit *edit, Connection *con,
                                                     const QPoint &old_source_pos,
                                                     const QPoint &old_target_pos,
                                                     const QPoint &new_source_pos,
-                                                    const QPoint &new_target_pos)
-    : CECommand(edit)
+                                                    const QPoint &new_target_pos) :
+    CECommand(edit),
+    m_con(con),
+    m_old_source_pos(old_source_pos),
+    m_old_target_pos(old_target_pos),
+    m_new_source_pos(new_source_pos),
+    m_new_target_pos(new_target_pos)
 {
     setText(QApplication::translate("Command", "Adjust connection"));
-    m_con = con;
-    m_old_source_pos = old_source_pos;
-    m_old_target_pos = old_target_pos;
-    m_new_source_pos = new_source_pos;
-    m_new_target_pos = new_target_pos;
 }
 
 void AdjustConnectionCommand::undo()
@@ -194,7 +211,7 @@ DeleteConnectionsCommand::DeleteConnectionsCommand(ConnectionEdit *edit,
 void DeleteConnectionsCommand::redo()
 {
     foreach (Connection *con, m_con_list) {
-        int idx = edit()->indexOfConnection(con);
+        const int idx = edit()->indexOfConnection(con);
         emit edit()->aboutToRemoveConnection(con);
         Q_ASSERT(edit()->m_con_list.contains(con));
         edit()->setSelected(con, false);
@@ -226,21 +243,21 @@ public:
     virtual void undo();
 private:
     Connection *m_con;
-    EndPoint::Type m_type;
+    const EndPoint::Type m_type;
     QObject *m_old_widget, *m_new_widget;
-    QPoint m_old_pos, m_new_pos;
+    const QPoint m_old_pos;
+    QPoint m_new_pos;
 };
 
 SetEndPointCommand::SetEndPointCommand(ConnectionEdit *edit, Connection *con,
-                                        EndPoint::Type type, QObject *object)
-    : CECommand(edit)
+                                        EndPoint::Type type, QObject *object) :
+    CECommand(edit),
+    m_con(con),
+    m_type(type),
+    m_old_widget(con->object(type)),
+    m_new_widget(object),
+    m_old_pos(con->endPointPos(type))
 {
-    m_con = con;
-    m_type = type;
-    m_old_widget = con->object(type);
-    m_old_pos = con->endPointPos(type);
-    m_new_widget = object;
-
     if (QWidget *widget = qobject_cast<QWidget*>(object)) {
         m_new_pos = edit->widgetRect(widget).center();
     }
@@ -267,26 +284,25 @@ void SetEndPointCommand::undo()
 ** Connection
 */
 
-Connection::Connection(ConnectionEdit *edit)
+Connection::Connection(ConnectionEdit *edit) :
+    m_source_pos(QPoint(-1, -1)),
+    m_target_pos(QPoint(-1, -1)),
+    m_source(0),
+    m_target(0),
+    m_edit(edit),
+    m_visible(true)
 {
-    m_edit = edit;
-    m_source = 0;
-    m_target = 0;
-    m_visible = true;
 
-    m_source_pos = QPoint(-1, -1);
-    m_target_pos = QPoint(-1, -1);
 }
 
-Connection::Connection(ConnectionEdit *edit, QObject *source, QObject *target)
+Connection::Connection(ConnectionEdit *edit, QObject *source, QObject *target) :
+    m_source_pos(QPoint(-1, -1)),
+    m_target_pos(QPoint(-1, -1)),
+    m_source(source),
+    m_target(target),
+    m_edit(edit),
+    m_visible(true)
 {
-    m_edit = edit;
-    m_source = source;
-    m_target = target;
-    m_visible = true;
-
-    m_source_pos = QPoint(-1, -1);
-    m_target_pos = QPoint(-1, -1);
 }
 
 void Connection::setVisible(bool b)
@@ -347,8 +363,7 @@ static QPoint lineEntryPos(const QPoint &p1, const QPoint &p2, const QRect &rect
 {
     QPoint result;
 
-    CETypes::LineDir dir = classifyLine(p1, p2);
-    switch (dir) {
+    switch (classifyLine(p1, p2)) {
         case CETypes::UpDir:
             result = QPoint(p1.x(), rect.bottom());
             break;
@@ -370,8 +385,7 @@ static QPolygonF arrowHead(const QPoint &p1, const QPoint &p2)
 {
     QPolygonF result;
 
-    CETypes::LineDir dir = classifyLine(p1, p2);
-    switch (dir) {
+    switch (classifyLine(p1, p2)) {
         case CETypes::UpDir:
             result.append(p2 + QPoint(0, 1));
             result.append(p2 + QPoint(LINE_PROXIMITY_RADIUS, LINE_PROXIMITY_RADIUS*2 + 1));
@@ -432,13 +446,13 @@ static bool pointAboveLine(const QPoint &l1, const QPoint &l2, const QPoint &p)
 
 void Connection::updateKneeList()
 {
-    LineDir old_source_label_dir = labelDir(EndPoint::Source);
-    LineDir old_target_label_dir = labelDir(EndPoint::Target);
+    const LineDir old_source_label_dir = labelDir(EndPoint::Source);
+    const LineDir old_target_label_dir = labelDir(EndPoint::Target);
 
     QPoint s = endPointPos(EndPoint::Source);
     QPoint t = endPointPos(EndPoint::Target);
-    QRect sr = m_source_rect;
-    QRect tr = m_target_rect;
+    const QRect sr = m_source_rect;
+    const QRect tr = m_target_rect;
 
     m_knee_list.clear();
     m_arrow_head.clear();
@@ -446,7 +460,7 @@ void Connection::updateKneeList()
     if (m_source == 0 || s == QPoint(-1, -1) || t == QPoint(-1, -1))
         return;
 
-    QRect r = sr | tr;
+    const QRect r = sr | tr;
 
     m_knee_list.append(s);
     if (m_target == 0) {
@@ -467,7 +481,7 @@ void Connection::updateKneeList()
         We find out which edge of the outer rectangle is closest to the target
         point, and make a loop which exits and re-enters through that edge.
 */
-        LineDir dir = closestEdge(t, tr);
+        const LineDir dir = closestEdge(t, tr);
         switch (dir) {
             case UpDir:
                 m_knee_list.append(QPoint(s.x(), r.top() - LOOP_MARGIN));
@@ -503,12 +517,12 @@ void Connection::updateKneeList()
 */
                 if (m_edit->state() == ConnectionEdit::Dragging) {
                     if (m_edit->m_drag_end_point.type == EndPoint::Source) {
-                        QPoint p(t.x(), s.y());
+                        const QPoint p(t.x(), s.y());
                         m_knee_list.append(p);
                         if (tr.contains(p))
                             t = m_target_pos = p;
                     } else {
-                        QPoint p(s.x(), t.y());
+                        const QPoint p(s.x(), t.y());
                         m_knee_list.append(p);
                         if (sr.contains(p))
                             s = m_source_pos = p;
@@ -544,12 +558,12 @@ void Connection::updateKneeList()
 */
                 if (m_edit->state() == ConnectionEdit::Dragging) {
                     if (m_edit->m_drag_end_point.type == EndPoint::Source) {
-                        QPoint p(s.x(), t.y());
+                        const QPoint p(s.x(), t.y());
                         m_knee_list.append(p);
                         if (tr.contains(p))
                             t = m_target_pos = p;
                     } else {
-                        QPoint p(t.x(), s.y());
+                        const QPoint p(t.x(), s.y());
                         m_knee_list.append(p);
                         if (sr.contains(p))
                             s = m_source_pos = p;
@@ -614,8 +628,8 @@ void Connection::updateKneeList()
 
     trimLine();
 
-    LineDir new_source_label_dir = labelDir(EndPoint::Source);
-    LineDir new_target_label_dir = labelDir(EndPoint::Target);
+    const LineDir new_source_label_dir = labelDir(EndPoint::Source);
+    const LineDir new_target_label_dir = labelDir(EndPoint::Target);
     if (new_source_label_dir != old_source_label_dir)
         updatePixmap(EndPoint::Source);
     if (new_target_label_dir != old_target_label_dir)
@@ -630,8 +644,8 @@ void Connection::trimLine()
     if (cnt < 2)
         return;
 
-    QRect sr = m_source_rect;
-    QRect tr = m_target_rect;
+    const QRect sr = m_source_rect;
+    const QRect tr = m_target_rect;
 
     if (sr.contains(m_knee_list.at(1)))
         m_knee_list.removeFirst();
@@ -693,8 +707,8 @@ void Connection::setTarget(QObject *target, const QPoint &pos)
 
 static QRect lineRect(const QPoint &a, const QPoint &b)
 {
-    QPoint c(qMin(a.x(), b.x()), qMin(a.y(), b.y()));
-    QPoint d(qMax(a.x(), b.x()), qMax(a.y(), b.y()));
+    const QPoint c(qMin(a.x(), b.x()), qMin(a.y(), b.y()));
+    const QPoint d(qMax(a.x(), b.x()), qMax(a.y(), b.y()));
 
     QRect result(c, d);
     return expand(result, LINE_PROXIMITY_RADIUS);
@@ -707,7 +721,7 @@ QRect Connection::groundRect() const
     if (m_knee_list.isEmpty())
         return QRect();
 
-    QPoint p = m_knee_list.last();
+    const QPoint p = m_knee_list.last();
     return QRect(p.x() - GROUND_W/2, p.y(), GROUND_W, GROUND_H);
 }
 
@@ -770,17 +784,17 @@ QRect Connection::endPointRect(EndPoint::Type type) const
 {
     if (type == EndPoint::Source) {
         if (m_source_pos != QPoint(-1, -1))
-            return qdesigner_internal::endPointRect(m_source_pos);
+            return ::endPointRect(m_source_pos);
     } else {
         if (m_target_pos != QPoint(-1, -1))
-            return qdesigner_internal::endPointRect(m_target_pos);
+            return ::endPointRect(m_target_pos);
     }
     return QRect();
 }
 
 CETypes::LineDir Connection::labelDir(EndPoint::Type type) const
 {
-    int cnt = m_knee_list.size();
+    const int cnt = m_knee_list.size();
     if (cnt < 2)
         return RightDir;
 
@@ -800,14 +814,14 @@ CETypes::LineDir Connection::labelDir(EndPoint::Type type) const
 
 QRect Connection::labelRect(EndPoint::Type type) const
 {
-    int cnt = m_knee_list.size();
+    const int cnt = m_knee_list.size();
     if (cnt < 2)
         return QRect();
-    QString text = label(type);
+    const QString text = label(type);
     if (text.isEmpty())
         return QRect();
 
-    QSize size = labelPixmap(type).size();
+    const QSize size = labelPixmap(type).size();
     QPoint p1, p2;
     if (type == EndPoint::Source) {
         p1 = m_knee_list.at(0);
@@ -816,7 +830,7 @@ QRect Connection::labelRect(EndPoint::Type type) const
         p1 = m_knee_list.at(cnt - 1);
         p2 = m_knee_list.at(cnt - 2);
     }
-    LineDir dir = classifyLine(p1, p2);
+    const LineDir dir = classifyLine(p1, p2);
 
     QRect result;
     switch (dir) {
@@ -853,23 +867,26 @@ void Connection::setLabel(EndPoint::Type type, const QString &text)
 void Connection::updatePixmap(EndPoint::Type type)
 {
     QPixmap *pm = type == EndPoint::Source ? &m_source_label_pm : &m_target_label_pm;
-    *pm = QPixmap();
 
-    QString text = label(type);
-    if (text.isEmpty())
+    const QString text = label(type);
+    if (text.isEmpty()) {
+        *pm = QPixmap();
         return;
+    }
 
-    QFontMetrics fm = m_edit->fontMetrics();
-    QSize size = fm.size(Qt::TextSingleLine, text) + QSize(HLABEL_MARGIN*2, VLABEL_MARGIN*2);
+    const QFontMetrics fm = m_edit->fontMetrics();
+    const QSize size = fm.size(Qt::TextSingleLine, text) + QSize(HLABEL_MARGIN*2, VLABEL_MARGIN*2);
     *pm = QPixmap(size);
-    pm->fill(m_edit->palette().color(QPalette::Normal, QPalette::Base));
+    QColor color = m_edit->palette().color(QPalette::Normal, QPalette::Base);
+    color.setAlpha(190);
+    pm->fill(color);
 
     QPainter p(pm);
     p.setPen(m_edit->palette().color(QPalette::Normal, QPalette::Text));
     p.drawText(-fm.leftBearing(text.at(0)) + HLABEL_MARGIN, fm.ascent() + VLABEL_MARGIN, text);
     p.end();
 
-    LineDir dir = labelDir(type);
+    const LineDir dir = labelDir(type);
 
     if (dir == DownDir)
         *pm = pm->transformed(QMatrix(0.0, -1.0, 1.0, 0.0, 0.0, 0.0));
@@ -880,7 +897,7 @@ void Connection::checkWidgets()
     bool changed = false;
 
     if (QWidget *sourceWidget = qobject_cast<QWidget*>(m_source)) {
-        QRect r = m_edit->widgetRect(sourceWidget);
+        const QRect r = m_edit->widgetRect(sourceWidget);
         if (r != m_source_rect) {
             if (m_source_pos != QPoint(-1, -1) && !r.contains(m_source_pos)) {
                 QPoint offset = m_source_pos - m_source_rect.topLeft();
@@ -894,11 +911,11 @@ void Connection::checkWidgets()
     }
 
     if (QWidget *targetWidget = qobject_cast<QWidget*>(m_target)) {
-        QRect r = m_edit->widgetRect(targetWidget);
+        const QRect r = m_edit->widgetRect(targetWidget);
         if (r != m_target_rect) {
             if (m_target_pos != QPoint(-1, -1) && !r.contains(m_target_pos)) {
-                QPoint offset = m_target_pos - m_target_rect.topLeft();
-                QPoint old_pos = m_target_pos;
+                const QPoint offset = m_target_pos - m_target_rect.topLeft();
+                const QPoint old_pos = m_target_pos;
                 m_target_pos = pointInsideRect(r, r.topLeft() + offset);
             }
             m_edit->update(m_target_rect);
@@ -918,23 +935,27 @@ void Connection::checkWidgets()
 ** ConnectionEdit
 */
 
-ConnectionEdit::ConnectionEdit(QWidget *parent, QDesignerFormWindowInterface *form)
-    : QWidget(parent)
+ConnectionEdit::ConnectionEdit(QWidget *parent, QDesignerFormWindowInterface *form) :
+    QWidget(parent),
+    m_bg_widget(0),
+    m_undo_stack(form->commandHistory()),
+    m_enable_update_background(false),
+    m_tmp_con(0),
+    m_start_connection_on_drag(true),
+    m_widget_under_mouse(0),
+    m_inactive_color(Qt::blue),
+    m_active_color(Qt::red)
 {
-    m_bg_widget = 0;
-    m_widget_under_mouse = 0;
-    m_tmp_con = 0;
-    m_start_connection_on_drag = true;
-    m_enable_update_background = false;
-    m_undo_stack = form->commandHistory();
-    m_active_color = Qt::red;
-    m_inactive_color = Qt::blue;
     setAttribute(Qt::WA_MouseTracking, true);
     setFocusPolicy(Qt::ClickFocus);
 
     connect(form, SIGNAL(widgetRemoved(QWidget*)), this, SLOT(widgetRemoved(QWidget*)));
 }
 
+ConnectionEdit::~ConnectionEdit()
+{
+    qDeleteAll(m_con_list);
+}
 
 void ConnectionEdit::clear()
 {
@@ -965,6 +986,7 @@ void ConnectionEdit::enableUpdateBackground(bool enable)
 
 void ConnectionEdit::updateBackground()
 {
+    // Might happen while reloading a form.
     if (m_bg_widget == 0)
         return;
 
@@ -1015,10 +1037,10 @@ void ConnectionEdit::paintLabel(QPainter *p, EndPoint::Type type, Connection *co
     if (con->label(type).isEmpty())
         return;
 
-    bool heavy = selected(con) || con == m_tmp_con;
+    const bool heavy = selected(con) || con == m_tmp_con;
     p->setPen(heavy ? m_active_color : m_inactive_color);
     p->setBrush(Qt::NoBrush);
-    QRect r = con->labelRect(type);
+    const QRect r = con->labelRect(type);
     p->drawPixmap(r.topLeft(), con->labelPixmap(type));
     p->drawRect(fixRect(r));
 }
@@ -1030,12 +1052,12 @@ void ConnectionEdit::paintConnection(QPainter *p, Connection *con,
     QWidget *source = con->widget(EndPoint::Source);
     QWidget *target = con->widget(EndPoint::Target);
 
-    bool heavy = selected(con) || con == m_tmp_con;
+    const bool heavy = selected(con) || con == m_tmp_con;
     WidgetSet *set = heavy ? heavy_highlight_set : light_highlight_set;
     p->setPen(heavy ? m_active_color : m_inactive_color);
     con->paint(p);
 
-    if (source != 0)
+    if (source != 0 && source != m_bg_widget)
         set->insert(source, source);
 
     if (target != 0 && target != m_bg_widget)
@@ -1118,9 +1140,13 @@ void ConnectionEdit::mousePressEvent(QMouseEvent *e)
 {
     e->accept();
 
-    Connection *con_under_mouse = connectionAt(e->pos());
-    m_start_connection_on_drag = false;
+    // Prefer a non-background widget over the connection,
+    // otherwise, widgets covered by the connection labels cannot be accessed
+    Connection *con_under_mouse = 0;
+    if (!m_widget_under_mouse || m_widget_under_mouse == m_bg_widget)
+        con_under_mouse = connectionAt(e->pos());
 
+    m_start_connection_on_drag = false;
     switch (state()) {
         case Connecting:
             if (e->button() == Qt::RightButton)
@@ -1196,10 +1222,14 @@ void ConnectionEdit::mouseReleaseEvent(QMouseEvent *e)
 void ConnectionEdit::findObjectsUnderMouse(const QPoint &pos)
 {
     Connection *con_under_mouse = connectionAt(pos);
-    QWidget *w = con_under_mouse != 0 ? 0 : widgetAt(pos);
 
-    if (state() != Connecting && w == m_bg_widget)
+    QWidget *w = widgetAt(pos);
+    // Prefer a non-background widget over the connection,
+    // otherwise, widgets covered by the connection labels cannot be accessed
+    if (w == m_bg_widget && con_under_mouse)
         w = 0;
+    else
+        con_under_mouse = 0;
 
     if (w != m_widget_under_mouse) {
         if (!m_widget_under_mouse.isNull())
@@ -1209,7 +1239,7 @@ void ConnectionEdit::findObjectsUnderMouse(const QPoint &pos)
             update(widgetRect(m_widget_under_mouse));
     }
 
-    EndPoint hs = endPointAt(pos);
+    const EndPoint hs = endPointAt(pos);
     if (hs != m_end_point_under_mouse) {
         if (m_end_point_under_mouse.isNull())
             setCursor(Qt::PointingHandCursor);
@@ -1222,7 +1252,6 @@ void ConnectionEdit::findObjectsUnderMouse(const QPoint &pos)
 void ConnectionEdit::mouseMoveEvent(QMouseEvent *e)
 {
     findObjectsUnderMouse(e->pos());
-
     switch (state()) {
         case Connecting:
             continueConnection(m_widget_under_mouse, e->pos());
@@ -1284,6 +1313,7 @@ void ConnectionEdit::endConnection(QWidget *target, const QPoint &pos)
         new_con->setEndPoint(EndPoint::Source, source, m_tmp_con->endPointPos(EndPoint::Source));
         new_con->setEndPoint(EndPoint::Target, target, m_tmp_con->endPointPos(EndPoint::Target));
         m_undo_stack->push(new AddConnectionCommand(this, new_con));
+        emit connectionChanged(new_con);
     }
 
     delete m_tmp_con;
@@ -1370,8 +1400,8 @@ CETypes::EndPoint ConnectionEdit::endPointAt(const QPoint &pos) const
     foreach (Connection *con, m_con_list) {
         if (!selected(con))
             continue;
-        QRect sr = con->endPointRect(EndPoint::Source);
-        QRect tr = con->endPointRect(EndPoint::Target);
+        const QRect sr = con->endPointRect(EndPoint::Source);
+        const QRect tr = con->endPointRect(EndPoint::Target);
 
         if (sr.contains(pos))
             return EndPoint(con, EndPoint::Source);
@@ -1402,8 +1432,8 @@ void ConnectionEdit::endDrag(const QPoint &pos)
     adjustHotSopt(m_drag_end_point, pos);
 
     Connection *con = m_drag_end_point.con;
-    QPoint new_source_pos = con->endPointPos(EndPoint::Source);
-    QPoint new_target_pos = con->endPointPos(EndPoint::Target);
+    const QPoint new_source_pos = con->endPointPos(EndPoint::Source);
+    const QPoint new_target_pos = con->endPointPos(EndPoint::Target);
     m_undo_stack->push(new AdjustConnectionCommand(this, con, m_old_source_pos, m_old_target_pos,
                                                     new_source_pos, new_target_pos));
 

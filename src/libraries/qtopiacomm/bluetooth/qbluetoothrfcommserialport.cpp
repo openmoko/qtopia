@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,8 +20,8 @@
 ****************************************************************************/
 
 #include "qbluetoothrfcommserialport.h"
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
-#include <qtopiacomm/qbluetoothlocaldevice.h>
+#include "qbluetoothnamespace_p.h"
+#include <qbluetoothlocaldevice.h>
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
@@ -37,8 +37,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QString>
-
-#include <qtopialog.h>
+#include <QApplication>
 
 static bool release_dev_with_socket(int id, int socket)
 {
@@ -251,7 +250,9 @@ bool QBluetoothRfcommSerialPortPrivate::initiateConnect(const QBluetoothAddress 
 
 void QBluetoothRfcommSerialPortPrivate::setupTtyRetry()
 {
-    qLog(Bluetooth) << "m_cancelled: " << m_cancelled << "m_retries:" << m_retries;
+#ifdef QBLUETOOTH_DEBUG
+    qDebug() << "m_cancelled: " << m_cancelled << "m_retries:" << m_retries;
+#endif
     if (m_cancelled || (m_retries == MAX_RETRIES)) {
         m_timer->stop();
         QBluetoothRfcommSerialPort::releaseDevice(m_id);
@@ -262,7 +263,6 @@ void QBluetoothRfcommSerialPortPrivate::setupTtyRetry()
             m_parent->setError(QBluetoothRfcommSerialPort::ConnectionCancelled);
         } else {
             m_parent->setError(QBluetoothRfcommSerialPort::CreationError);
-            qLog(Bluetooth) << "Serial port created successfully, but could not be opened on /dev";
         }
 
         emit m_parent->error(m_error);
@@ -272,11 +272,15 @@ void QBluetoothRfcommSerialPortPrivate::setupTtyRetry()
     char devname[MAXPATHLEN];
     snprintf(devname, MAXPATHLEN - 1, "/dev/rfcomm%d", m_id);
     if ((m_fd = open(devname, O_RDONLY | O_NOCTTY)) < 0) {
-        qLog(Bluetooth) << "Opening" << devname << strerror(errno);
+#ifdef QBLUETOOTH_DEBUG
+        qDebug() << "Opening" << devname << strerror(errno);
+#endif
         snprintf(devname, MAXPATHLEN-1, "/dev/bluetooth/rfcomm/%d", m_id);
         m_fd = open(devname, O_RDONLY | O_NOCTTY);
-        if ( qLogEnabled(Bluetooth) && m_fd < 0 )
-            qLog(Bluetooth) << "Opening" << devname << strerror(errno);
+#ifdef QBLUETOOTH_DEBUG
+        if ( m_fd < 0 )
+            qDebug() << "Opening" << devname << strerror(errno);
+#endif
     }
 
     m_retries++;
@@ -304,7 +308,9 @@ void QBluetoothRfcommSerialPortPrivate::setupTty()
     m_socket = 0;
 
     if ( m_id < 0 ) {
-        qLog(Bluetooth) << "RfcommSerialPortPrivate::setupTty(): " << strerror(errno);
+#ifdef QBLUETOOTH_DEBUG
+        qDebug() << "RfcommSerialPortPrivate::setupTty(): " << strerror(errno);
+#endif
         m_parent->setError(QBluetoothRfcommSerialPort::CreationError);
 
         emit m_parent->error(m_error);
@@ -315,7 +321,9 @@ void QBluetoothRfcommSerialPortPrivate::setupTty()
     setupTtyRetry();
 
     if (m_fd == -1) {
-        qLog(Bluetooth) << "Going into delayed open";
+#ifdef QBLUETOOTH_DEBUG
+        qDebug() << "Going into delayed open";
+#endif
         m_openInProgress = true;
         m_timer->start(OPEN_TIME);
     }
@@ -329,7 +337,9 @@ void QBluetoothRfcommSerialPortPrivate::error(QBluetoothAbstractSocket::SocketEr
 
 void QBluetoothRfcommSerialPortPrivate::stateChanged(QBluetoothAbstractSocket::SocketState socketState)
 {
-    qLog(Bluetooth) << "stateChanged" << socketState;
+#ifdef QBLUETOOTH_DEBUG
+    qDebug() << "stateChanged" << socketState;
+#endif
     switch (socketState) {
         case QBluetoothRfcommSocket::ConnectingState:
             break;
@@ -515,7 +525,7 @@ QBluetoothRfcommSerialPort::QBluetoothRfcommSerialPort(QBluetoothRfcommSocket* s
 
     d->m_id = create_rfcomm_tty(socket);
     if ( d->m_id < 0 ) {
-        qLog(Bluetooth) << "RfcommSerialPort::copyConstructor( socket ): " << strerror(errno);
+        qWarning() << "RfcommSerialPort::copyConstructor( socket ): " << strerror(errno);
         setError(QBluetoothRfcommSerialPort::CreationError);
         return;
     }
@@ -544,7 +554,7 @@ QBluetoothRfcommSerialPort::QBluetoothRfcommSerialPort(QBluetoothRfcommSocket* s
     } while ((d->m_fd < 0) && (started.msecsTo(now) < 1000));
 
     if (d->m_fd < 0) {
-        qLog(Bluetooth) << "RFCOMM Tty created successfully, but no /dev entry found!";
+        qWarning() << "RFCOMM Tty created successfully, but no /dev entry found!";
         release_dev_with_socket(d->m_id, socket->socketDescriptor());
         d->m_id = -1;
 
@@ -670,23 +680,23 @@ void QBluetoothRfcommSerialPort::setError(QBluetoothRfcommSerialPort::Error erro
             break;
 
         case SocketNotConnected:
-            d->m_errorString = QLatin1String(QT_TRANSLATE_NOOP("QBluetoothRfcommSerialPort", "Socket is not connected"));
+            d->m_errorString = qApp->translate("QBluetoothRfcommSerialPort", "Socket is not connected");
             break;
 
         case ConnectionFailed:
-            d->m_errorString = QLatin1String(QT_TRANSLATE_NOOP("QBluetoothRfcommSerialPort", "Connection failed"));
+            d->m_errorString = qApp->translate("QBluetoothRfcommSerialPort", "Connection failed");
             break;
 
         case ConnectionCancelled:
-            d->m_errorString = QLatin1String(QT_TRANSLATE_NOOP("QBluetoothRfcommSerialPort", "Connection cancelled"));
+            d->m_errorString = qApp->translate("QBluetoothRfcommSerialPort", "Connection cancelled");
             break;
 
         case CreationError:
-            d->m_errorString = QLatin1String(QT_TRANSLATE_NOOP("QBluetoothRfcommSerialPort", "Serial port could not be created"));
+            d->m_errorString = qApp->translate("QBluetoothRfcommSerialPort", "Serial port could not be created");
             break;
 
         default:
-            d->m_errorString = QLatin1String(QT_TRANSLATE_NOOP("QBluetoothRfcommSerialPort", "Unknown error"));
+            d->m_errorString = qApp->translate("QBluetoothRfcommSerialPort", "Unknown error");
             break;
     };
 }

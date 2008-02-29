@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -164,7 +179,7 @@ QVFbScreen::~QVFbScreen()
 
 bool QVFbScreen::connect(const QString &displaySpec)
 {
-    QStringList displayArgs = displaySpec.split(':');
+    QStringList displayArgs = displaySpec.split(QLatin1Char(':'));
     if (displayArgs.contains(QLatin1String("Gray")))
         grayscale = true;
 
@@ -190,24 +205,62 @@ bool QVFbScreen::connect(const QString &displaySpec)
     dw = w = d_ptr->hdr->width;
     dh = h = d_ptr->hdr->height;
     d = d_ptr->hdr->depth;
+
+    switch (d) {
+    case 1:
+        setPixelFormat(QImage::Format_Mono);
+        break;
+    case 8:
+        setPixelFormat(QImage::Format_Indexed8);
+        break;
+    case 16:
+        setPixelFormat(QImage::Format_RGB16);
+        break;
+    case 32:
+        setPixelFormat(QImage::Format_ARGB32_Premultiplied);
+        break;
+    }
+
     lstep = d_ptr->hdr->linestep;
 
     // Handle display physical size spec.
-    QRegExp mmWidthRx("mmWidth=?(\\d+)");
-    int dimIdxW = displayArgs.indexOf(mmWidthRx);
-    QRegExp mmHeightRx("mmHeight=?(\\d+)");
-    int dimIdxH = displayArgs.indexOf(mmHeightRx);
+    int dimIdxW = -1;
+    int dimIdxH = -1;
+    for (int i = 0; i < displayArgs.size(); ++i) {
+        if (displayArgs.at(i).startsWith(QLatin1String("mmWidth"))) {
+            dimIdxW = i;
+            break;
+        }
+    }
+    for (int i = 0; i < displayArgs.size(); ++i) {
+        if (displayArgs.at(i).startsWith(QLatin1String("mmHeight"))) {
+            dimIdxH = i;
+            break;
+        }
+    }
     if (dimIdxW >= 0) {
-        mmWidthRx.exactMatch(displayArgs.at(dimIdxW));
-        physWidth = mmWidthRx.cap(1).toInt();
-        if (dimIdxH < 0)
-            physHeight = dh*physWidth/dw;
+        bool ok;
+        int pos = 7;
+        if (displayArgs.at(dimIdxW).at(pos) == QLatin1Char('='))
+            ++pos;
+        int pw = displayArgs.at(dimIdxW).mid(pos).toInt(&ok);
+        if (ok) {
+            physWidth = pw;
+            if (dimIdxH < 0)
+                physHeight = dh*physWidth/dw;
+        }
     }
     if (dimIdxH >= 0) {
-        mmHeightRx.exactMatch(displayArgs.at(dimIdxH));
-        physHeight = mmHeightRx.cap(1).toInt();
-        if (dimIdxW < 0)
-            physWidth = dw*physHeight/dh;
+        bool ok;
+        int pos = 8;
+        if (displayArgs.at(dimIdxH).at(pos) == QLatin1Char('='))
+            ++pos;
+        int ph = displayArgs.at(dimIdxH).mid(pos).toInt(&ok);
+        if (ok) {
+            physHeight = ph;
+            if (dimIdxW < 0)
+                physWidth = dw*physHeight/dh;
+        }
     }
     if (dimIdxW < 0 && dimIdxH < 0) {
         const int dpi = 72;
@@ -216,7 +269,7 @@ bool QVFbScreen::connect(const QString &displaySpec)
     }
 
     qDebug("Connected to VFB server %s: %d x %d x %d %dx%dmm (%dx%ddpi)", displaySpec.toLatin1().data(),
-        w, h, d, physWidth, physHeight, int(dw*25.4/physWidth), int(dh*25.4/physHeight) );
+        w, h, d, physWidth, physHeight, qRound(dw*25.4/physWidth), qRound(dh*25.4/physHeight) );
 
     size = lstep * h;
     mapsize = size;
@@ -224,15 +277,19 @@ bool QVFbScreen::connect(const QString &displaySpec)
     memcpy(screenclut, d_ptr->hdr->clut, sizeof(QRgb) * screencols);
 
     if (qApp->type() == QApplication::GuiServer) {
-        const QString mouseDev = QString(QT_VFB_MOUSE_PIPE).arg(displayId);
-        d_ptr->mouse = QMouseDriverFactory::create("QVFbMouse", mouseDev);
+        const QString mouseDev = QString(QLatin1String(QT_VFB_MOUSE_PIPE))
+                                 .arg(displayId);
+        d_ptr->mouse = QMouseDriverFactory::create(QLatin1String("QVFbMouse"),
+                                                   mouseDev);
         qwsServer->setDefaultMouse("None");
         if (d_ptr->mouse)
             d_ptr->mouse->setScreen(this);
 
-        const QString keyboardDev = QString(QT_VFB_KEYBOARD_PIPE).arg(displayId);
+        const QString keyboardDev = QString(QLatin1String(QT_VFB_KEYBOARD_PIPE))
+                                    .arg(displayId);
 #ifndef QT_NO_QWS_KEYBOARD
-        d_ptr->keyboard = QKbdDriverFactory::create("QVFbKbd", keyboardDev);
+        d_ptr->keyboard = QKbdDriverFactory::create(QLatin1String("QVFbKbd"),
+                                                    keyboardDev);
         qwsServer->setDefaultKeyboard("None");
 #endif
 

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -49,7 +64,8 @@ class Q_GUI_EXPORT QListView : public QAbstractItemView
     Q_PROPERTY(int modelColumn READ modelColumn WRITE setModelColumn)
     Q_PROPERTY(bool uniformItemSizes READ uniformItemSizes WRITE setUniformItemSizes)
     Q_PROPERTY(int batchSize READ batchSize WRITE setBatchSize)
-    Q_PROPERTY(bool wordWrap READ wordWrap WRITE setWordWrap) 
+    Q_PROPERTY(bool wordWrap READ wordWrap WRITE setWordWrap)
+    Q_PROPERTY(bool selectionRectVisible READ isSelectionRectVisible WRITE setSelectionRectVisible)
 
 public:
     enum Movement { Static, Free, Snap };
@@ -101,6 +117,9 @@ public:
 
     void setWordWrap(bool on);
     bool wordWrap() const;
+
+    void setSelectionRectVisible(bool show);
+    bool isSelectionRectVisible() const;
 
     QRect visualRect(const QModelIndex &index) const;
     void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible);
@@ -159,7 +178,13 @@ protected:
 
     bool isIndexHidden(const QModelIndex &index) const;
 
+    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void currentChanged(const QModelIndex &current, const QModelIndex &previous);
+
 private:
+    friend class QAccessibleItemView;
+    int visualIndex(const QModelIndex &index) const;
+
     Q_DECLARE_PRIVATE(QListView)
     Q_DISABLE_COPY(QListView)
 };

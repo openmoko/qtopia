@@ -220,7 +220,7 @@
 <p>Returns the system device name of this device. This is of the form <b>hciX</b>.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#address">address</a>().</p>
 <h3 class="fn"><a name="disconnectRemoteDevice"></a>bool QBluetoothLocalDevice::disconnectRemoteDevice ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )</h3>
-<p>Requests the Bluetooth device to disconnect the underlying low level connection to the remote bluetooth device at address <i>addr</i>. This call will most likely require system administrator privileges. The actual disconnection will happen several seconds later. First the remoteDeviceDisconnectRequested signal will be sent. This method returns true if the disconnectRemoteDevice request succeded, and false otherwise.</p>
+<p>Requests the Bluetooth device to disconnect the underlying low level connection to the remote bluetooth device at address <i>addr</i>. This call will most likely require system administrator privileges. The actual disconnection will happen several seconds later. First the remoteDeviceDisconnectRequested signal will be sent. This method returns true if the disconnectRemoteDevice request succeeded, and false otherwise.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#remoteDeviceDisconnectRequested">remoteDeviceDisconnectRequested</a>().</p>
 <h3 class="fn"><a name="discoverRemoteDevices"></a>bool QBluetoothLocalDevice::discoverRemoteDevices ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Requests the local device to scan for all discoverable devices in the vicinity. Returns true if the device is not already discovering and the process was started successfully. Returns false on error, setting error accordingly.</p>
@@ -359,7 +359,7 @@
 <p>Sets the human readable name of this device to <i>name</i>. Returns true if the call succeeded, and false otherwise. In addition, nameChanged signal will be sent once the name has been changed.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#name">name</a>() and <a href="qbluetoothlocaldevice.html#nameChanged">nameChanged</a>().</p>
 <h3 class="fn"><a name="setPeriodicDiscoveryEnabled"></a>bool QBluetoothLocalDevice::setPeriodicDiscoveryEnabled ( bool <i>enabled</i> )</h3>
-<p>Enables or Disables the Periodic Discovery Mode according to <i>enabled</i>. When in Periodic Discovery Mode the device will periodically run a device inquiry and report the results. Returns true if the mode change operation succeded, and false otherwise.</p>
+<p>Enables or Disables the Periodic Discovery Mode according to <i>enabled</i>. When in Periodic Discovery Mode the device will periodically run a device inquiry and report the results. Returns true if the mode change operation succeeded, and false otherwise.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#isPeriodicDiscoveryEnabled">isPeriodicDiscoveryEnabled</a>().</p>
 <h3 class="fn"><a name="setRemoteAlias"></a>bool QBluetoothLocalDevice::setRemoteAlias ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i>, const <a href="qstring.html">QString</a> &amp; <i>alias</i> )</h3>
 <p>Sets the alias for a remote device given by <i>addr</i> to alias <i>alias</i>. Returns true if the alias could be set, and false otherwise.</p>
@@ -382,6 +382,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

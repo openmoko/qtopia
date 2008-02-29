@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -144,13 +159,13 @@ static QImage richTextImageLoader(const QString &name, const QString &context)
 Q3MimeSourceFactory::Q3MimeSourceFactory() :
     d(new Q3MimeSourceFactoryData)
 {
-    addFilePath(":/qt/q3mimesourcefactory/"); //to get from the resources
+    addFilePath(QLatin1String(":/qt/q3mimesourcefactory/")); //to get from the resources
     // add some reasonable defaults
-    setExtensionType("htm", "text/html;charset=iso8859-1");
-    setExtensionType("html", "text/html;charset=iso8859-1");
-    setExtensionType("txt", "text/plain");
-    setExtensionType("xml", "text/xml;charset=UTF-8");
-    setExtensionType("jpg", "image/jpeg"); // support misspelled jpeg files
+    setExtensionType(QLatin1String("htm"), "text/html;charset=iso8859-1");
+    setExtensionType(QLatin1String("html"), "text/html;charset=iso8859-1");
+    setExtensionType(QLatin1String("txt"), "text/plain");
+    setExtensionType(QLatin1String("xml"), "text/xml;charset=UTF-8");
+    setExtensionType(QLatin1String("jpg"), "image/jpeg"); // support misspelled jpeg files
 }
 
 /*!
@@ -258,9 +273,9 @@ const QMimeSource *Q3MimeSourceFactory::data(const QString& abs_name) const
     if (abs_name.isEmpty())
         return r;
     QStringList::Iterator it;
-    if (abs_name[0] == '/'
+    if (abs_name[0] == QLatin1Char('/')
 #ifdef Q_WS_WIN
-            || (abs_name[0].isLetter() && abs_name[1] == ':') || abs_name.startsWith("\\\\")
+            || (abs_name[0].isLetter() && abs_name[1] == QLatin1Char(':')) || abs_name.startsWith(QLatin1String("\\\\"))
 #endif
    )
     {
@@ -270,8 +285,8 @@ const QMimeSource *Q3MimeSourceFactory::data(const QString& abs_name) const
     else { // check list of paths
         for (it = d->path.begin(); !r && it != d->path.end(); ++it) {
             QString filename = *it;
-            if (filename[(int)filename.length()-1] != '/')
-                filename += '/';
+            if (filename[(int)filename.length()-1] != QLatin1Char('/'))
+                filename += QLatin1Char('/');
             filename += abs_name;
             r = dataInternal(filename, d->extensions);
         }
@@ -346,7 +361,7 @@ void Q3MimeSourceFactory::addFilePath(const QString& p)
 */
 void Q3MimeSourceFactory::setExtensionType(const QString& ext, const char* mimetype)
 {
-    d->extensions.insert(ext, mimetype);
+    d->extensions.insert(ext, QLatin1String(mimetype));
 }
 
 /*!
@@ -358,9 +373,9 @@ void Q3MimeSourceFactory::setExtensionType(const QString& ext, const char* mimet
 QString Q3MimeSourceFactory::makeAbsolute(const QString& abs_or_rel_name, const QString& context) const
 {
     if (context.isNull() ||
-         !(context[0] == '/'
+         !(context[0] == QLatin1Char('/')
 #ifdef Q_WS_WIN
-         || (context[0].isLetter() && context[1] == ':')
+         || (context[0].isLetter() && context[1] == QLatin1Char(':'))
 #endif
           ))
         return abs_or_rel_name;

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -75,6 +75,8 @@ public:
     (phone) and the Bluetooth Audio headset.  This class
     implements the Bluetooth Headset Audio Gateway as defined
     in the Headset Bluetooth Profile specification.
+  
+    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 */
 
 /*!
@@ -313,7 +315,14 @@ void QBluetoothHeadsetService::disconnect()
         m_data->m_client->disconnect();
     }
 
-    if (m_data->m_client &&
+    else if (m_data->m_client &&
+             m_data->m_client->state() == QBluetoothRfcommSocket::ConnectingState) {
+        m_data->m_connectInProgress = false;
+        m_data->m_disconnectInProgress = true;
+        m_data->m_client->disconnect();
+    }
+
+    else if (m_data->m_client &&
         m_data->m_client->state() == QBluetoothRfcommSocket::ClosingState) {
         m_data->m_disconnectInProgress = true;
     }
@@ -608,13 +617,13 @@ void QBluetoothHeadsetService::newConnection()
 /*!
     \internal
 */
-void QBluetoothHeadsetService::error(QBluetoothAbstractSocket::SocketError)
+void QBluetoothHeadsetService::error(QBluetoothAbstractSocket::SocketError error)
 {
     if (m_data->m_connectInProgress) {
         return;
     }
 
-    qWarning("Unknown error occrred in headset service");
+    qWarning("Unknown error occrred in headset service: %d", error);
 }
 
 /*!
@@ -747,6 +756,8 @@ public:
     implementation of the QBluetoothAudioGateway interface
     which forwards all calls to the implementation object,
     which is passed in the constructor.
+  
+    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 */
 
 /*!
@@ -762,10 +773,10 @@ QBluetoothHeadsetCommInterface::QBluetoothHeadsetCommInterface(const QByteArray 
     m_data->m_gatewayServer = new QBluetoothHeadsetAudioGatewayServer(this, audioDev,
             parent->name());
 
-    QObject::connect(parent, SIGNAL(connectResult(bool, const QString &)),
-                     SIGNAL(connectResult(bool, const QString &)));
-    QObject::connect(parent, SIGNAL(newConnection(const QBluetoothAddress &)),
-                     SIGNAL(newConnection(const QBluetoothAddress &)));
+    QObject::connect(parent, SIGNAL(connectResult(bool,QString)),
+                     SIGNAL(connectResult(bool,QString)));
+    QObject::connect(parent, SIGNAL(newConnection(QBluetoothAddress)),
+                     SIGNAL(newConnection(QBluetoothAddress)));
     QObject::connect(parent, SIGNAL(disconnected()),
                      SIGNAL(disconnected()));
     QObject::connect(parent, SIGNAL(speakerVolumeChanged()),

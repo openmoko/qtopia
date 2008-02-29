@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,47 +19,71 @@
 **
 ****************************************************************************/
 
-#include <qstringlist.h>
+#include "qmediaabstractcontrol.h"
+#include "private/mediaserverproxy_p.h"
+#include "qmediacontentplayer_p.h"
 
-#include "private/mediaserverproxy.h"
-#include "qmediacontrol.h"
 #include "qmediacontent.h"
 
 using namespace mlp;
+
+
+// {{{ MediaSession
+class MediaSession : public QMediaAbstractControl
+{
+    Q_OBJECT
+
+public:
+    MediaSession(QMediaContent* content);
+
+    QStringList controls() const;
+
+signals:
+    void controlAvailable(const QString& name);
+    void controlUnavailable(const QString& name);
+};
+
+MediaSession::MediaSession(QMediaContent* content):
+    QMediaAbstractControl(content, "Session")
+{
+    proxyAll();
+}
+
+QStringList MediaSession::controls() const
+{
+    return value("controls").toStringList();
+}
+// }}}
 
 
 // {{{ QMediaContentPrivate
 class QMediaContentPrivate : public MediaServerCallback
 {
 public:
-    QUuid               id;
-    QMediaContent*      mediaContent;
+    QMediaHandle        handle;
+    QMediaContent*      content;
     QString             domain;
-    QMediaControl*      control;
+    MediaSession*       session;
 
-    void mediaReady(int key, QUuid const& mediaId)
+    void mediaReady()
     {
-        Q_UNUSED(key);
+        session = new MediaSession(content);
 
-        id = mediaId;
-
-        control = new QMediaControl(QMediaHandle(id), mediaContent);
-        QObject::connect( control, SIGNAL(controlAvailable(const QString&)),
-            mediaContent, SIGNAL(controlAvailable(const QString&)) );
-        QObject::connect( control, SIGNAL(controlUnavailable(const QString&)),
-            mediaContent, SIGNAL(controlUnavailable(const QString&)) );
-
-        foreach (QString const& controlName, control->controls())
+        foreach (QString const& controlName, session->controls())
         {
-            mediaContent->controlAvailable(controlName);
+            content->controlAvailable(controlName);
         }
+
+        QObject::connect(session, SIGNAL(controlAvailable(QString)),
+                         content, SIGNAL(controlAvailable(QString)));
+
+        QObject::connect(session, SIGNAL(controlUnavailable(QString)),
+                         content, SIGNAL(controlUnavailable(QString)));
     }
 
-    void mediaError(int key, QString const& errorString)
+    void mediaError(QString const& errorString)
     {
-        Q_UNUSED(key);
-
-        mediaContent->mediaError(errorString);
+        content->mediaError(errorString);
     }
 };
 // }}}
@@ -91,19 +115,19 @@ public:
     {
         QContent        beep = findBeepSound();
 
-        m_mediaContent = new QMediaContent(mediaContent(beep));
+        m_mediaContent = new QMediaContent(beep);
 
         connect(mediaContent, SIGNAL(controlAvailable(QString)),
                 this, SLOT(mediaControlAvailable(QString)));
     }
 
-    void mediaControlAvailable(QString const& id)
+    void mediaControlAvailable(QString const& id) 
     {
         if (id == QMediaControl::name())
         {
             // The basic media control is available, all media content
             // will have this control available.
-            m_mediaControl = new QMediaControl(m_mediaContent.handle());
+            m_mediaControl = new QMediaControl(m_mediaContent);
 
             // Now do something play/get length
             m_mediaControl->start();
@@ -133,27 +157,11 @@ QMediaContent::QMediaContent
     QObject(parent),
     d(new QMediaContentPrivate)
 {
-    d->mediaContent = this;
+    d->content = this;
     d->domain = domain;
-    d->control = 0;
+    d->session = 0;
 
-    MediaServerProxy::instance()->prepareContent(d, d->domain, url.toString());
-}
-
-QMediaContent::QMediaContent
-(
- QString const&    url,
- QString const& domain,
- QObject*       parent
-):
-    QObject(parent),
-    d(new QMediaContentPrivate)
-{
-    d->mediaContent = this;
-    d->domain = domain;
-    d->control = 0;
-
-    MediaServerProxy::instance()->prepareContent(d, d->domain, url);
+    d->handle = MediaServerProxy::instance()->prepareContent(d, d->domain, url);
 }
 
 /*!
@@ -176,18 +184,18 @@ QMediaContent::QMediaContent
     QObject(parent),
     d(new QMediaContentPrivate)
 {
-    d->mediaContent = this;
+    d->content = this;
     d->domain = domain;
-    d->control = 0;
+    d->session = 0;
 
-    QString url = content.file();
+    QString url = content.fileName();
 
     if (content.drmState() == QContent::Protected)
         url.prepend("qtopia://");
     else
         url.prepend("file://");
 
-    MediaServerProxy::instance()->prepareContent(d, d->domain, url);
+    d->handle = MediaServerProxy::instance()->prepareContent(d, d->domain, url);
 }
 
 /*!
@@ -196,8 +204,8 @@ QMediaContent::QMediaContent
 
 QMediaContent::~QMediaContent()
 {
-    if (!d->id.isNull())
-        MediaServerProxy::instance()->destroySession(d->id);
+    if (d->session != 0)
+        MediaServerProxy::instance()->destroySession(d->handle);
 
     delete d;
 }
@@ -211,7 +219,7 @@ QMediaContent::~QMediaContent()
 
 QMediaHandle QMediaContent::handle() const
 {
-    return QMediaHandle(d->id);
+    return d->handle;
 }
 
 /*!
@@ -221,8 +229,8 @@ QMediaHandle QMediaContent::handle() const
 
 QStringList QMediaContent::controls() const
 {
-    if (d->control)
-        return d->control->controls();
+    if (d->session != 0)
+        return d->session->controls();
 
     return QStringList();
 }
@@ -245,4 +253,65 @@ QStringList QMediaContent::controls() const
     Signals that there was an error trying to access a piece of media content.
     Details of the error are contained in the \a mediaError parameter.
 */
+
+
+/*!
+    Returns a list of Mime Types handled by the Qtopia Media system.
+*/
+
+QStringList QMediaContent::supportedMimeTypes()
+{
+    QStringList         rc;
+    MediaServerProxy*   proxy = MediaServerProxy::instance();
+
+    foreach (QString const& engine, proxy->simpleProviderTags())
+    {
+        rc += proxy->simpleMimeTypesForProvider(engine);
+    }
+
+    return rc;
+}
+
+/*!
+    Returns a list of URI schemes that can be used in combination with the \a
+    mimeType.
+*/
+
+QStringList QMediaContent::supportedUriSchemes(QString const& mimeType)
+{
+    QStringList         rc;
+    MediaServerProxy*   proxy = MediaServerProxy::instance();
+
+    foreach (QString const& engine, proxy->simpleProviderTags())
+    {
+        if (proxy->simpleMimeTypesForProvider(engine).contains(mimeType))
+        {
+            rc += proxy->simpleUriSchemesForProvider(engine);
+        }
+    }
+
+    return rc;
+}
+
+/*!
+    Play immediately, and to the end, the content specified by \a url in the
+    media \a domain.
+*/
+
+void QMediaContent::playContent(QUrl const& url, QString const& domain)
+{
+    new QMediaContentPlayer(url, domain);
+}
+
+/*!
+    Play immediately, and to the end, the content specified by \a content in
+    the media \a domain.
+*/
+
+void QMediaContent::playContent(QContent const& content, QString const& domain)
+{
+    new QMediaContentPlayer(content, domain);
+}
+
+#include "qmediacontent.moc"
 

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,7 +22,7 @@
 #include "defaultsignal.h"
 #include <QSettings>
 #include <QSignalSource>
-#include <QValueSpaceItem>
+#include <QHardwareManager>
 #include "qtopiaserverapplication.h"
 
 /*! 
@@ -36,12 +36,13 @@
    "DefaultSignal".
 
    The Signal to proxy can be manually configured by setting the 
-   \c {SignalSources/DefaultSignalSource} key in the \c {Trolltech/SignalStatus}
+   \c {SignalSources/DefaultSignalSource} key in the \c {Trolltech/HardwareAccessories}
    configuration file.  If this setting is missing, the DefaultSignal class 
    will proxy the first available signal source of type modem. If Qtopia is configured
    without a modem the first wlan signal source that becomes available will be used.
 
    The DefaultSignal class provides the \c {DefaultSignal} task.
+   It is part of the Qtopia server and cannot be used by other Qtopia applications.
   */
 
 /*!
@@ -49,14 +50,19 @@
   */
 DefaultSignal::DefaultSignal(QObject *parent)
 : QSignalSourceProvider(QLatin1String("virtual"), QLatin1String("DefaultSignal"), parent),
-  m_signalSource(0), m_signalSourceVS(0)
+  m_signalSource(0), m_accessories(0)
 {
-    QSettings cfg(QLatin1String("Trolltech"), QLatin1String("SignalStatus"));
-    m_primary = cfg.value("SignalSources/DefaultSignalSource").toString();
+    QSettings cfg(QLatin1String("Trolltech"), QLatin1String("HardwareAccessories"));
+    m_primary = cfg.value(QLatin1String("SignalSources/DefaultSignalSource")).toString();
 
     if(m_primary.isEmpty()) {
-        m_signalSourceVS = new QValueSpaceItem( QLatin1String("/Hardware/Accessories/QSignalSource") );
-        connect( m_signalSourceVS, SIGNAL(contentsChanged()), this, SLOT(accessoryAdded()) );
+        // No configured default, use first signal
+        m_accessories = new QHardwareManager(QLatin1String("QSignalSource"), this);
+        QObject::connect(m_accessories, SIGNAL(providerAdded(QString)),
+                         this, SLOT(accessoryAdded(QString)));
+        QStringList accs = m_accessories->providers();
+        for(int ii = 0; m_accessories && ii < accs.count(); ++ii)
+            accessoryAdded(accs.at(ii));
     } else {
         m_signalSource = new QSignalSource(m_primary);
         initSignalSource();
@@ -82,29 +88,22 @@ void DefaultSignal::initSignalSource()
     QObject::connect(m_signalSource, SIGNAL(signalStrengthChanged(int)), this, SLOT(pSignalStrengthChanged(int)));
 }
 
-void DefaultSignal::accessoryAdded()
+void DefaultSignal::accessoryAdded( const QString& acc )
 {
-    QList<QString> signalSources = m_signalSourceVS->subPaths();
-    
-    for(int i = 0; m_signalSourceVS && i < signalSources.count(); i++) {
-        QSignalSource *ps = new QSignalSource(signalSources.at(i));
-        if ( ps->availability() == QSignalSource::Invalid ) {
-            return;
-        }
+    QSignalSource *ps = new QSignalSource(acc);
 #if QTOPIA_CELL
-        if ( ps->type() == QLatin1String("modem") ) {
+    if ( ps->type() == QLatin1String("modem") ) {
 #elif QTOPIA_VOIP
-        if ( ps->type() == QLatin1String("wlan") ) {
+    if ( ps->type() == QLatin1String("wlan") ) {
 #else
-        if ( ps->type() != QLatin1String("virtual") ) {
+    if ( ps->type() != QLatin1String("virtual") ) {
 #endif
-            m_signalSource = ps;
-            m_signalSourceVS->disconnect();
-            m_signalSourceVS->deleteLater();
-            m_signalSourceVS = 0;
-            initSignalSource();
-            syncSignalSource();
-        }
+        m_signalSource = ps;
+        m_accessories->disconnect();
+        m_accessories->deleteLater();
+        m_accessories = 0;
+        initSignalSource();
+        syncSignalSource();
     }
 }
 

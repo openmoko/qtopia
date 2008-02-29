@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,6 +28,7 @@
 #include <QMap>
 
 class ThemedView;
+class QAbstractThemeWidgetFactory;
 
 class ThemeControl : public QObject
 {
@@ -42,12 +43,15 @@ public:
 
     void refresh();
 
+    void setThemeWidgetFactory(QAbstractThemeWidgetFactory *);
+
 signals:
     void themeChanging();
     void themeChanged();
 
 private:
     void doTheme(ThemedView *, const QString &);
+    void doThemeWidgets(ThemedView *view);
 
     ThemeControl();
 
@@ -58,6 +62,8 @@ private:
 
     QMap<QString, QString> m_themeFiles;
     QList<QPair<ThemedView *, QString> > m_themes;
+
+    QAbstractThemeWidgetFactory *m_widgetFactory;
 };
 
 #endif // _THEMECONTROL_H_

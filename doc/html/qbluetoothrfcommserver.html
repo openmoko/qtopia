@@ -51,7 +51,6 @@
 <h2>Detailed Description</h2>
 <p>The QBluetoothRfcommServer class represents an RFCOMM server socket.</p>
 <p>This class makes it possible to accept incoming RFCOMM connections. You can specify the address and the RFCOMM channel to listen on.</p>
-<p><b>NOTE:</b> If you are implementing an OBEX based service, you should use the <a href="qbluetoothobexserver.html">QBluetoothObexServer</a> instead.</p>
 <p>Call <a href="qbluetoothrfcommserver.html#listen">listen</a>() to make the server listen for new connections. The <a href="qbluetoothabstractserver.html#newConnection">newConnection</a>() signal will be emmited each time a client connects to the server.</p>
 <p>Security options controlling the authentication and encryption of the Bluetooth link on the socket can be specified at any time by calling <a href="qbluetoothrfcommserver.html#setSecurityOptions">setSecurityOptions</a>(). Currently this will only affect all future connections, not connections which are active or pending.</p>
 <p>Call <a href="qbluetoothabstractserver.html#nextPendingConnection">nextPendingConnection</a>() to accept the pending client connection.</p>
@@ -91,6 +90,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

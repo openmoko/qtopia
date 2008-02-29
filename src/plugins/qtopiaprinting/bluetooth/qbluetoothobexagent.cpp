@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,8 +27,8 @@
 #include <qwaitwidget.h>
 #include <qbluetoothlocaldevice.h>
 #include <qobexpushclient.h>
-#include <qbluetoothobexsocket.h>
 #include <qbluetoothlocaldevicemanager.h>
+#include <qbluetoothrfcommsocket.h>
 #include <QTextStream>
 
 using namespace QBluetooth;
@@ -90,8 +90,8 @@ QBluetoothObexAgent::QBluetoothObexAgent( const QBluetoothRemoteDevice &remoteDe
     d->m_waitWidget = new QWaitWidget( 0 );
     d->m_waitWidget->setText( tr( "Searching..." ) );
 
-    connect( &d->m_sdap, SIGNAL(searchComplete(const QBluetoothSdpQueryResult&)),
-            this, SLOT(searchComplete(const QBluetoothSdpQueryResult&)) );
+    connect( &d->m_sdap, SIGNAL(searchComplete(QBluetoothSdpQueryResult)),
+            this, SLOT(searchComplete(QBluetoothSdpQueryResult)) );
 }
 
 /*!
@@ -146,7 +146,7 @@ void QBluetoothObexAgent::send( const QContent &content )
     if ( inProgress() )
         return;
 
-    d->m_fileName = content.file();
+    d->m_fileName = content.fileName();
     QMimeType mime( content );
     d->m_mimeType = mime.id();
     startSearch();
@@ -243,12 +243,19 @@ void QBluetoothObexAgent::searchComplete( const QBluetoothSdpQueryResult &result
             int channel = QBluetoothSdpRecord::rfcommChannel(service);
 
             // RFCOMM Connection
-            QBluetoothObexSocket *socket = new QBluetoothObexSocket( d->m_remoteDevice->address(), channel,
-                    d->m_localDevice->address() );
+            QBluetoothRfcommSocket *rfcommSocket = new QBluetoothRfcommSocket;
+            if (!rfcommSocket->connect(d->m_localDevice->address(), d->m_remoteDevice->address(), channel)) {
+                delete rfcommSocket;
+                QMessageBox::critical( 0, tr( "Bluetooth error" ),
+                    tr( "<qt>Bluetooth connection error" ));
+                emit done( true );
+                return;
+            }
 
             // OBEX connect
-            d->m_sender = new QObexPushClient( socket, 0 );
-            connect( d->m_sender, SIGNAL(progress(qint64,qint64)),
+            d->m_sender = new QObexPushClient( rfcommSocket, this );
+            rfcommSocket->setParent(d->m_sender); // socket is only needed for this client
+            connect( d->m_sender, SIGNAL(dataTransferProgress(qint64,qint64)),
                     this, SLOT(progress(qint64,qint64)) );
             connect( d->m_sender, SIGNAL(done(bool)),
                     this, SIGNAL(done(bool)) );
@@ -257,9 +264,8 @@ void QBluetoothObexAgent::searchComplete( const QBluetoothSdpQueryResult &result
                         this, SLOT(deleteLater()) );
             }
 
-            // auto delete the push client and socket when it's done
+            // auto delete the push client when it's done
             connect(d->m_sender, SIGNAL(done(bool)), d->m_sender, SLOT(deleteLater()));
-            connect(d->m_sender, SIGNAL(destroyed()), socket, SLOT(deleteLater()));
 
             d->m_sender->connect();
 

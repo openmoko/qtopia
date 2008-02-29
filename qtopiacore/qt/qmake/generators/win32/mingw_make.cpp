@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,9 +43,21 @@
 #include <stdlib.h>
 #include <time.h>
 
-
 MingwMakefileGenerator::MingwMakefileGenerator() : Win32MakefileGenerator(), init_flag(false)
 {
+    if (Option::shellPath.isEmpty())
+        quote = "\"";
+    else
+        quote = "'";
+}
+
+bool MingwMakefileGenerator::isWindowsShell() const
+{
+#ifdef Q_OS_WIN
+    return Option::shellPath.isEmpty();
+#else
+    return Win32MakefileGenerator::isWindowsShell();
+#endif
 }
 
 bool MingwMakefileGenerator::findLibraries()
@@ -85,6 +112,18 @@ bool MingwMakefileGenerator::writeMakefile(QTextStream &t)
 
     if(project->first("TEMPLATE") == "app" ||
        project->first("TEMPLATE") == "lib") {
+        if(Option::mkfile::do_stub_makefile) {
+            t << "QMAKE    = "        << (project->isEmpty("QMAKE_QMAKE") ? QString("qmake") : var("QMAKE_QMAKE")) << endl;
+            QStringList &qut = project->values("QMAKE_EXTRA_TARGETS");
+            for(QStringList::ConstIterator it = qut.begin(); it != qut.end(); ++it)
+                t << *it << " ";
+            t << "first all clean install distclean uninstall: qmake" << endl
+              << "qmake_all:" << endl;
+            writeMakeQmake(t);
+            if(project->isEmpty("QMAKE_NOFORCE"))
+                t << "FORCE:" << endl << endl;
+            return true;
+        }
         writeMingwParts(t);
         return MakefileGenerator::writeMakefile(t);
     }
@@ -189,11 +228,11 @@ void MingwMakefileGenerator::init()
     processVars();
 
     if (!project->values("RES_FILE").isEmpty()) {
-        project->values("QMAKE_LIBS") += project->values("RES_FILE");
+        project->values("QMAKE_LIBS") += escapeFilePaths(project->values("RES_FILE"));
     }
 
     // LIBS defined in Profile comes first for gcc
-    project->values("QMAKE_LIBS") += project->values("LIBS");
+    project->values("QMAKE_LIBS") += escapeFilePaths(project->values("LIBS"));
 
     QString targetfilename = project->values("TARGET").first();
     QStringList &configs = project->values("CONFIG");
@@ -219,7 +258,7 @@ void MingwMakefileGenerator::init()
     // precomp
     if (!project->first("PRECOMPILED_HEADER").isEmpty()
         && project->isActiveConfig("precompile_header")) {
-        QString preCompHeader = var("OBJECTS_DIR")
+        QString preCompHeader = var("PRECOMPILED_DIR")
 		         + QFileInfo(project->first("PRECOMPILED_HEADER")).fileName();
 	preCompHeaderOut = preCompHeader + ".gch";
 	project->values("QMAKE_CLEAN").append(preCompHeaderOut + Option::dir_sep + "c");
@@ -246,7 +285,7 @@ void MingwMakefileGenerator::init()
 
 void MingwMakefileGenerator::fixTargetExt()
 {
-    if (project->isActiveConfig("staticlib")) {
+    if (project->isActiveConfig("staticlib") && project->first("TEMPLATE") == "lib") {
         project->values("TARGET_EXT").append(".a");
         project->values("QMAKE_LFLAGS").append("-static");
         project->values("TARGET").first() =  "lib" + project->first("TARGET");
@@ -255,9 +294,24 @@ void MingwMakefileGenerator::fixTargetExt()
     }
 }
 
+void MingwMakefileGenerator::writeIncPart(QTextStream &t)
+{
+    t << "INCPATH       = ";
+
+    QStringList &incs = project->values("INCLUDEPATH");
+    for(QStringList::Iterator incit = incs.begin(); incit != incs.end(); ++incit) {
+        QString inc = (*incit);
+        inc.replace(QRegExp("\\\\$"), "");
+        inc.replace(QRegExp("\""), "");
+        t << "-I" << quote << inc << quote << " ";
+    }
+    t << "-I" << quote << specdir() << quote
+      << endl;
+}
+
 void MingwMakefileGenerator::writeLibsPart(QTextStream &t)
 {
-    if(project->isActiveConfig("staticlib")) {
+    if(project->isActiveConfig("staticlib") && project->first("TEMPLATE") == "lib") {
         t << "LIB        =        " << var("QMAKE_LIB") << endl;
     } else {
         t << "LINK        =        " << var("QMAKE_LINK") << endl;
@@ -269,11 +323,19 @@ void MingwMakefileGenerator::writeLibsPart(QTextStream &t)
     }
 }
 
+void MingwMakefileGenerator::writeLibDirPart(QTextStream &t)
+{
+    QStringList libDirs = project->values("QMAKE_LIBDIR");
+    for (int i = 0; i < libDirs.size(); ++i)
+        libDirs[i].remove("\"");
+    t << valGlue(libDirs,"-L"+quote,quote+" -L" +quote,quote) << " ";
+}
+
 void MingwMakefileGenerator::writeObjectsPart(QTextStream &t)
 {
     if (project->values("OBJECTS").count() < var("QMAKE_LINK_OBJECT_MAX").toInt()) {
         objectsLinkLine = "$(OBJECTS)";
-    } else if (project->isActiveConfig("staticlib")) {
+    } else if (project->isActiveConfig("staticlib") && project->first("TEMPLATE") == "lib") {
 	QString ar_script_file = var("QMAKE_LINK_OBJECT_SCRIPT") + "." + var("TARGET");
 	if (!var("BUILD_NAME").isEmpty()) {
 	    ar_script_file += "." + var("BUILD_NAME");
@@ -298,7 +360,7 @@ void MingwMakefileGenerator::writeBuildRulesPart(QTextStream &t)
     t << "$(DESTDIR_TARGET): " << var("PRE_TARGETDEPS") << " $(OBJECTS) " << var("POST_TARGETDEPS");
     if(!project->isEmpty("QMAKE_PRE_LINK"))
         t << "\n\t" <<var("QMAKE_PRE_LINK");
-    if(project->isActiveConfig("staticlib")) {
+    if(project->isActiveConfig("staticlib") && project->first("TEMPLATE") == "lib") {
 	if (project->values("OBJECTS").count() < var("QMAKE_LINK_OBJECT_MAX").toInt()) {
             t << "\n\t" << "$(LIB) \"$(DESTDIR_TARGET)\" " << objectsLinkLine << " " ;
         } else {
@@ -314,10 +376,11 @@ void MingwMakefileGenerator::writeBuildRulesPart(QTextStream &t)
 
 void MingwMakefileGenerator::writeRcFilePart(QTextStream &t)
 {
-    if (!project->values("RC_FILE").isEmpty()) {
-        t << var("RES_FILE") << ": " << var("RC_FILE") << "\n\t"
-          << var("QMAKE_RC") << " -i " << var("RC_FILE") << " -o " << var("RES_FILE") << " --include-dir="
-          << fileInfo(var("RC_FILE")).path() << endl << endl;
+    const QString rc_file = fileFixify(project->first("RC_FILE"));
+    if (!rc_file.isEmpty()) {
+        t << var("RES_FILE") << ": " << rc_file << "\n\t"
+          << var("QMAKE_RC") << " -i " << rc_file << " -o " << var("RES_FILE") 
+	  << " --include-dir=" << fileInfo(rc_file).path() << endl << endl;
     }
 }
 

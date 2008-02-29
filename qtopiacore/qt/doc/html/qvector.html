@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qvector.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/tools/qvector.cpp -->
 <head>
-  <title>Qt 4.2: QVector Class Reference</title>
+  <title>Qt 4.3: QVector Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,9 +12,10 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QVector Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QVector Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QVector class is a template class that provides a dynamic array. <a href="#details">More...</a></p>
-<pre> #include &lt;QVector&gt;</pre><p>Inherited by <a href="qpolygon.html">QPolygon</a>, <a href="qpolygonf.html">QPolygonF</a>, and <a href="qstack.html">QStack</a>.</p>
+<pre> #include &lt;QVector&gt;</pre><p>Inherited by <a href="qpolygon.html">QPolygon</a>, <a href="qpolygonf.html">QPolygonF</a>, <a href="qstack.html">QStack</a>, and <a href="qxmlstreamattributes.html">QXmlStreamAttributes</a>.</p>
 <p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
 <ul>
 <li><a href="qvector-members.html">List of all members, including inherited members</a></li>
@@ -126,7 +127,7 @@
 <ul>
 <li>For most purposes, <a href="qlist.html">QList</a> is the right class to use. Operations like <a href="qvector.html#prepend">prepend</a>() and <a href="qvector.html#insert">insert</a>() are usually faster than with QVector because of the way <a href="qlist.html">QList</a> stores its items in memory (see <a href="containers.html#algorithmic-complexity">Algorithmic Complexity</a> for details), and its index-based API is more convenient than <a href="qlinkedlist.html">QLinkedList</a>'s iterator-based API. It also expands to less code in your executable.</li>
 <li>If you need a real linked list, with guarantees of <a href="containers.html#constant-time">constant time</a> insertions in the middle of the list and iterators to items rather than indexes, use <a href="qlinkedlist.html">QLinkedList</a>.</li>
-<li>If you want the items to occupy adjacent memory positions, use QVector.</li>
+<li>If you want the items to occupy adjacent memory positions, or if your items are larger than a pointer and you want to avoid the overhead of allocating them on the heap individually at insertion time, then use QVector.</li>
 <li>If you want a low-level variable-size array, <a href="qvarlengtharray.html">QVarLengthArray</a> may be sufficient.</li>
 </ul>
 <p>Here's an example of a QVector that stores integers and a QVector that stores <a href="qstring.html">QString</a> values:</p>
@@ -219,7 +220,7 @@
 <p>See also <a href="qvector.html#operator-lt-lt">operator&lt;&lt;</a>(), <a href="qvector.html#prepend">prepend</a>(), and <a href="qvector.html#insert">insert</a>().</p>
 <h3 class="fn"><a name="at"></a>const T &amp; QVector::at ( int <i>i</i> ) const</h3>
 <p>Returns the item at index position <i>i</i> in the vector.</p>
-<p><i>i</i> must be a valid index position in the vector (i.e., 0 &lt;= <i>i</i> &lt; <a href="qvector.html#size">size</a>()).</p>
+<p><i>i</i> must be a valid index position in the vector (i.e&#x2e;, 0 &lt;= <i>i</i> &lt; <a href="qvector.html#size">size</a>()).</p>
 <p>See also <a href="qvector.html#value">value</a>() and <a href="qvector.html#operator-5b-5d">operator[]</a>().</p>
 <h3 class="fn"><a name="back"></a><a href="qvector.html#reference-typedef">reference</a> QVector::back ()</h3>
 <p>This function is provided for STL compatibility. It is equivalent to <a href="qvector.html#last">last</a>().</p>
@@ -404,7 +405,7 @@
 <p>See also <a href="qvector.html#insert">insert</a>(), <a href="qvector.html#replace">replace</a>(), and <a href="qvector.html#fill">fill</a>().</p>
 <h3 class="fn"><a name="replace"></a>void QVector::replace ( int <i>i</i>, const T &amp; <i>value</i> )</h3>
 <p>Replaces the item at index position <i>i</i> with <i>value</i>.</p>
-<p><i>i</i> must be a valid index position in the vector (i.e., 0 &lt;= <i>i</i> &lt; <a href="qvector.html#size">size</a>()).</p>
+<p><i>i</i> must be a valid index position in the vector (i.e&#x2e;, 0 &lt;= <i>i</i> &lt; <a href="qvector.html#size">size</a>()).</p>
 <p>See also <a href="qvector.html#operator-5b-5d">operator[]</a>() and <a href="qvector.html#remove">remove</a>().</p>
 <h3 class="fn"><a name="reserve"></a>void QVector::reserve ( int <i>size</i> )</h3>
 <p>Attempts to allocate memory for at least <i>size</i> elements. If you know in advance how large the vector will be, you can call this function, and if you call <a href="qvector.html#resize">resize</a>() often you are likely to get better performance. If <i>size</i> is an underestimate, the worst that will happen is that the <a href="qvector.html">QVector</a> will be a bit slower.</p>
@@ -473,7 +474,7 @@
 <p>See also <a href="qvector.html#operator-not-eq">operator!=</a>().</p>
 <h3 class="fn"><a name="operator-5b-5d"></a>T &amp; QVector::operator[] ( int <i>i</i> )</h3>
 <p>Returns the item at index position <i>i</i> as a modifiable reference.</p>
-<p><i>i</i> must be a valid index position in the vector (i.e., 0 &lt;= <i>i</i> &lt; <a href="qvector.html#size">size</a>()).</p>
+<p><i>i</i> must be a valid index position in the vector (i.e&#x2e;, 0 &lt;= <i>i</i> &lt; <a href="qvector.html#size">size</a>()).</p>
 <p>See also <a href="qvector.html#at">at</a>() and <a href="qvector.html#value">value</a>().</p>
 <h3 class="fn"><a name="operator-5b-5d-2"></a>const T &amp; QVector::operator[] ( int <i>i</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -494,6 +495,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

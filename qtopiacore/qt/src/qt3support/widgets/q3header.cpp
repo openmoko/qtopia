@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -967,6 +982,7 @@ void Q3Header::setLabel(int section, const QIcon& icon,
 {
     if (section < 0 || section >= count())
         return;
+    delete d->icons[section];
     d->icons[section] = new QIcon(icon);
     setLabel(section, s, size);
 }
@@ -1114,11 +1130,11 @@ QSize Q3Header::sectionSizeHint(int section, const QFontMetrics& fm) const
     QRect bound;
     QString label = d->labels[section];
     if (!label.isNull() || d->nullStringLabels.testBit(section)) {
-        int lines = label.count('\n') + 1;
+        int lines = label.count(QLatin1Char('\n')) + 1;
         int w = 0;
         if (lines > 1) {
             bound.setHeight(fm.height() + fm.lineSpacing() * (lines - 1));
-            QStringList list = label.split('\n');
+            QStringList list = label.split(QLatin1Char('\n'));
             for (int i=0; i < list.count(); ++i) {
                 int tmpw = fm.width(list.at(i));
                 w = QMAX(w, tmpw);
@@ -1263,7 +1279,7 @@ QSize Q3Header::sizeHint() const
         for (int i = 0; i < count(); i++)
             width += d->sizes[i];
     } else {
-        width = fm.width(' ');
+        width = fm.width(QLatin1Char(' '));
         height = 0;
         width = qMax(width, d->height);
         for (int i = 0; i < count(); i++)
@@ -1378,6 +1394,8 @@ void Q3Header::setCellSize(int section, int s)
     d->sizes[section] = s;
     if (updatesEnabled())
         calculatePositions();
+    else
+        d->positionsDirty = true;
 }
 
 
@@ -1468,7 +1486,7 @@ void Q3Header::paintSection(QPainter *p, int index, const QRect& fr)
     opt.rect = fr;
 
     if (section < 0) {
-        style()->drawControl(QStyle::CE_HeaderSection, &opt, p, this);
+        style()->drawControl(QStyle::CE_Header, &opt, p, this);
         return;
     }
 
@@ -1487,28 +1505,18 @@ void Q3Header::paintSection(QPainter *p, int index, const QRect& fr)
         opt.state |= QStyle::State_Raised;
     p->setBrushOrigin(fr.topLeft());
     if (d->clicks[section]) {
-        style()->drawControl(QStyle::CE_HeaderSection, &opt, p, this);
+        style()->drawControl(QStyle::CE_Header, &opt, p, this);
     } else {
         p->save();
         p->setClipRect(fr); // hack to keep styles working
-        opt.rect.setRect(fr.x() - 2, fr.y() - 2, fr.width() + 4, fr.height() + 4);
-        style()->drawControl(QStyle::CE_HeaderSection, &opt, p, this);
+        opt.rect.setRect(fr.x() + 1, fr.y(), fr.width(), fr.height());
+        style()->drawControl(QStyle::CE_Header, &opt, p, this);
         if (orient == Qt::Horizontal) {
             p->setPen(palette().color(QPalette::Mid));
-            p->drawLine(fr.x(), fr.y() + fr.height() - 1,
+            p->drawLine(fr.x() - 1, fr.y() + fr.height() - 1,
                          fr.x() + fr.width() - 1, fr.y() + fr.height() - 1);
             p->drawLine(fr.x() + fr.width() - 1, fr.y(),
                          fr.x() + fr.width() - 1, fr.y() + fr.height() - 1);
-            p->setPen(palette().color(QPalette::Light));
-            if (index > 0)
-                p->drawLine(fr.x(), fr.y(), fr.x(), fr.y() + fr.height() - 1);
-            if (index == count() - 1) {
-                p->drawLine(fr.x() + fr.width() - 1, fr.y(),
-                             fr.x() + fr.width() - 1, fr.y() + fr.height() - 1);
-                p->setPen(palette().color(QPalette::Mid));
-                p->drawLine(fr.x() + fr.width() - 2, fr.y(),
-                             fr.x() + fr.width() - 2, fr.y() + fr.height() - 1);
-            }
         } else {
             p->setPen(palette().color(QPalette::Mid));
             p->drawLine(fr.x() + width() - 1, fr.y(),
@@ -1528,8 +1536,6 @@ void Q3Header::paintSection(QPainter *p, int index, const QRect& fr)
         }
         p->restore();
     }
-
-    paintSectionLabel(p, index, fr);
 }
 
 /*!
@@ -2026,7 +2032,7 @@ void Q3Header::changeEvent(QEvent *ev)
 {
     if(ev->type() == QEvent::FontChange) {
         QFontMetrics fm = fontMetrics();
-        d->height = (orient == Qt::Horizontal) ? fm.lineSpacing() + 6 : fm.width(' ');
+        d->height = (orient == Qt::Horizontal) ? fm.lineSpacing() + 6 : fm.width(QLatin1Char(' '));
     }
     QWidget::changeEvent(ev);
 }

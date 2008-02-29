@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -751,9 +751,9 @@ void DNotifyFileMonitor::refresh(int fd)
 
         directory.dirMonitor = new QFileMonitor(path);
         QObject::connect(directory.dirMonitor,
-                SIGNAL(fileChanged(const QString &)),
+                SIGNAL(fileChanged(QString)),
                 this,
-                SLOT(directoryChanged(const QString &)));
+                SLOT(directoryChanged(QString)));
 
         m_waitingPaths.insert(m_waitingPathFd++, directory);
         Directory d = directory;
@@ -873,9 +873,9 @@ bool DNotifyFileMonitor::install(QFileMonitorPrivate * p)
             // The directory doesn't exist.  We must monitor for its creation.
             directory.dirMonitor = new QFileMonitor(path);
             QObject::connect(directory.dirMonitor,
-                             SIGNAL(fileChanged(const QString &)),
+                             SIGNAL(fileChanged(QString)),
                              this,
-                             SLOT(directoryChanged(const QString &)));
+                             SLOT(directoryChanged(QString)));
             fd = m_waitingPathFd++;
         }
 
@@ -1056,8 +1056,8 @@ void INotifyFileMonitor::activated()
         Q_ASSERT(!diter->dirMonitor);
         diter->dirMonitor = new QFileMonitor(diter->path);
         QObject::connect(diter->dirMonitor,
-                         SIGNAL(fileChanged(const QString &)),
-                         this, SLOT(directoryChanged(const QString &)));
+                         SIGNAL(fileChanged(QString)),
+                         this, SLOT(directoryChanged(QString)));
         m_waitingPaths.insert(m_waitingPathFd++, *diter);
         QList<QFileMonitorPrivate *> monitors;
         for(QMap<QByteArray, Directory::File>::ConstIterator fiter =
@@ -1156,8 +1156,8 @@ bool INotifyFileMonitor::install(QFileMonitorPrivate *p)
             d.dirMonitor = new QFileMonitor(path);
             m_waitingPaths.insert(m_waitingPathFd++, d);
             QObject::connect(d.dirMonitor,
-                             SIGNAL(fileChanged(const QString &)),
-                             this, SLOT(directoryChanged(const QString &)));
+                             SIGNAL(fileChanged(QString)),
+                             this, SLOT(directoryChanged(QString)));
         }
     } else {
         // Attempt to locate file

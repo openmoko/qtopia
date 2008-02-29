@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,11 +27,14 @@
 
 #include <media.h>
 
+
+class QMediaServerSession;
+
+
 namespace mediaserver
 {
 
-class MediaEngine;
-class MediaSession;
+class SessionManager;
 
 
 class QSoundPlayer : public QObject
@@ -39,10 +42,10 @@ class QSoundPlayer : public QObject
     Q_OBJECT
 
 public:
-    QSoundPlayer(MediaEngine* mediaEngine, QUuid const& id);
+    QSoundPlayer(QUuid const& id, SessionManager* sessionManager);
     ~QSoundPlayer();
 
-    void open(QString const& url);
+    void open(QString const& filePath);
     void setVolume(int volume);
     void setPriority(int priority);
     void play();
@@ -53,19 +56,20 @@ private slots:
 
 private:
     QUuid           m_id;
-    MediaSession*   m_mediaSession;
-    MediaEngine*    m_mediaEngine;
+    QString         m_domain;
+    SessionManager* m_sessionManager;
+    QMediaServerSession*  m_mediaSession;
 };
 
 
-class QSoundProvider: public QtopiaIpcAdaptor
+class QSoundProvider : public QtopiaIpcAdaptor
 {
     Q_OBJECT
 
     typedef QMap<QUuid, QSoundPlayer*>  PlayerMap;
 
 public:
-    QSoundProvider(MediaEngine* engine);
+    QSoundProvider(SessionManager* sessionManager);
     ~QSoundProvider();
 
 public slots:
@@ -91,9 +95,10 @@ private:
     QSoundPlayer* player(QUuid const& id);
 
     PlayerMap       m_playerMap;
-    MediaEngine*    m_mediaEngine;
+    SessionManager* m_sessionManager;
 };
 
 }   // ns mediaserver
 
 #endif  // __QTOPIA_MEDIASERVER_QSOUNDPROVIDER_H
+

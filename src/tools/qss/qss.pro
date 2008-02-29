@@ -1,5 +1,5 @@
 qtopia_project(qtopia app)
-TARGET=qss
+TARGET=mediaserver
 CONFIG+=no_tr singleexec_main
 
 SOURCES=main.cpp

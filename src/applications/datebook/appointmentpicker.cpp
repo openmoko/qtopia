@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,32 +25,30 @@
 #include "monthview.h"
 
 #include <qtopia/pim/qappointment.h>
-#include <qtopiaapplication.h>
 
-
-#include <qaction.h>
-#include <qlayout.h>
+#include <QAction>
+#include <QVBoxLayout>
 #include <QStackedWidget>
+#include <QtopiaApplication>
+#include <QSoftMenuBar>
 
-
-AppointmentPicker::AppointmentPicker( DateBook *db, QWidget *parent, Qt::WFlags f )
+AppointmentPicker::AppointmentPicker( DateBook *db, QSet<QPimSource> sources, QWidget *parent, Qt::WFlags f )
     : QDialog( parent, f ),
-    datebook( db )
+    datebook( db ),
+    mSources(sources)
 {
     setWindowTitle( tr("Appointment Picker") );
     setWindowIcon( QPixmap( ":image/AppointmentPicker" ) );
 
-    QAction *actionNextView = new QAction( this );
-    connect( actionNextView, SIGNAL( triggered() ), this, SLOT( nextView() ) );
-    actionNextView->setShortcut(Qt::Key_Asterisk);
-
     views = new QStackedWidget( this );
     QVBoxLayout *layout = new QVBoxLayout( this );
     layout->addWidget( views );
+    layout->setMargin(0);
 
     dayView = 0;
     monthView = 0;
 
+    QtopiaApplication::setMenuLike(this, true);
     lastToday = QDate::currentDate();
     viewMonth( lastToday );
 }
@@ -90,6 +88,11 @@ void AppointmentPicker::viewMonth( const QDate& dt)
     views->setCurrentIndex( views->indexOf( monthView ) );
 }
 
+void AppointmentPicker::viewMonthAgain()
+{
+    viewMonth(dayView->currentDate());
+}
+
 bool AppointmentPicker::appointmentSelected() const
 {
     if (views->currentWidget() && views->currentWidget() == dayView) {
@@ -117,24 +120,28 @@ QDate AppointmentPicker::currentDate()
 void AppointmentPicker::initDay()
 {
     if ( !dayView ) {
-        dayView = new DayView;
+        dayView = new DayView(0, QCategoryFilter(), mSources);
         views->addWidget( dayView );
         dayView->setDaySpan( datebook->startTime, 17 );
-
+        QSoftMenuBar::setLabel(dayView, Qt::Key_Back, QSoftMenuBar::Back);
         connect( dayView, SIGNAL(showDetails()),
                 this, SLOT(accept()) );
+        connect( dayView, SIGNAL(closeView()),
+                this, SLOT(viewMonthAgain()) );
     }
 }
 
 void AppointmentPicker::initMonth()
 {
     if ( !monthView ) {
-        monthView = new MonthView;
+        monthView = new MonthView(0, QCategoryFilter(), mSources);
         monthView->setHorizontalHeaderFormat(QCalendarWidget::SingleLetterDayNames);
+        QSoftMenuBar::setLabel(monthView, Qt::Key_Back, QSoftMenuBar::Cancel);
         // TODO monthView->setMargin(0);
         views->addWidget( monthView );
-        connect( monthView, SIGNAL( activated(const QDate&) ),
-             this, SLOT( viewDay(const QDate&) ) );
+        connect( monthView, SIGNAL(activated(QDate)),
+             this, SLOT(viewDay(QDate)) );
+        connect( monthView, SIGNAL(closeView()), this, SLOT(reject()));
     }
 }
 

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,7 +29,7 @@ E1CallHistory::E1CallHistory( QWidget* parent )
 {
    E1CallHistorySelector* selector = new E1CallHistorySelector( this );
    setContentsWidget( selector );
-   connect( selector, SIGNAL(selected(const E1CallHistory::Type&)), this, SLOT(typeSelected(const E1CallHistory::Type&)) );
+   connect( selector, SIGNAL(selected(E1CallHistory::Type)), this, SLOT(typeSelected(E1CallHistory::Type)) );
 }
 
 void E1CallHistory::typeSelected(const E1CallHistory::Type& t)

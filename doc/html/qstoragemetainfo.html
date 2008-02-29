@@ -37,6 +37,7 @@
 <h3>Public Slots</h3>
 <ul>
 <li><div class="fn"/>void <b><a href="qstoragemetainfo.html#update">update</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qstoragemetainfo.html#update-2">update</a></b> ( QString &amp; <i>mountpoint</i>, bool <i>connected</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
@@ -99,13 +100,16 @@
 <p>Includes the same information as <a href="qstoragemetainfo.html#cardInfoString">QStorageMetaInfo::cardInfoString</a>() and the path where documents can be installed</p>
 <p>See also <a href="qstoragemetainfo.html#cardInfoString">cardInfoString</a>().</p>
 <h3 class="fn"><a name="instance"></a>QStorageMetaInfo * QStorageMetaInfo::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns a pointer to a static instance of <a href="qstoragemetainfo.html">QStorageMetaInfo</a>.</p>
+<p>Singleton accessor for an application wide <a href="qstoragemetainfo.html">QStorageMetaInfo</a>. This is the preferred means for creating a <a href="qstoragemetainfo.html">QStorageMetaInfo</a> object.</p>
 <h3 class="fn"><a name="update"></a>void QStorageMetaInfo::update ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Updates the mount and free space information for each mount point. This function is automatically called when a mount point is mounted or unmounted.</p>
+<h3 class="fn"><a name="update-2"></a>void QStorageMetaInfo::update ( <a href="qstring.html">QString</a> &amp; <i>mountpoint</i>, bool <i>connected</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Update the system mounted at <i>mountpoint</i>, marking whether it is <i>connected</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

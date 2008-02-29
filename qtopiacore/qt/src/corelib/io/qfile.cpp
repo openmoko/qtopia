@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,6 +37,7 @@
 ****************************************************************************/
 
 #include "qplatformdefs.h"
+#include "qdebug.h"
 #include "qfile.h"
 #include "qfsfileengine.h"
 #include "qtemporaryfile.h"
@@ -29,20 +45,21 @@
 #include "qfileinfo.h"
 #include "private/qiodevice_p.h"
 #include "private/qfile_p.h"
-#include "private/qunicodetables_p.h"
 #if defined(QT_BUILD_CORE_LIB)
 # include "qcoreapplication.h"
 #endif
 
 #include <errno.h>
 
+static const int QFILE_WRITEBUFFER_SIZE = 16384;
+
 static QByteArray locale_encode(const QString &f)
 {
 #ifndef Q_OS_DARWIN
     return f.toLocal8Bit();
 #else
-    // Mac always expects UTF-8
-    return f.toUtf8();
+    // Mac always expects UTF-8... and decomposed...
+    return f.normalized(QString::NormalizationForm_D).toUtf8();
 #endif
 }
 
@@ -51,8 +68,8 @@ static QString locale_decode(const QByteArray &f)
 #ifndef Q_OS_DARWIN
     return QString::fromLocal8Bit(f);
 #else
-    // Mac always expects UTF-8
-    return QUnicodeTables::normalize(QString::fromUtf8(f), QString::NormalizationForm_C);
+    // Mac always gives us UTF-8 and decomposed, we want that composed...
+    return QString::fromUtf8(f).normalized(QString::NormalizationForm_C);
 #endif
 }
 
@@ -61,7 +78,8 @@ QFile::EncoderFn QFilePrivate::encoder = locale_encode;
 QFile::DecoderFn QFilePrivate::decoder = locale_decode;
 
 QFilePrivate::QFilePrivate()
-    : fileEngine(0), error(QFile::NoError)
+    : fileEngine(0), lastWasWrite(false),
+      writeBuffer(QFILE_WRITEBUFFER_SIZE), error(QFile::NoError)
 {
 }
 
@@ -89,6 +107,18 @@ QFilePrivate::openExternalFile(int flags, FILE *fh)
     fe->setFileName(fileName);
     fileEngine = fe;
     return fe->open(QIODevice::OpenMode(flags), fh);
+}
+
+inline bool QFilePrivate::ensureFlushed() const
+{
+    // This function ensures that the write buffer has been flushed (const
+    // because certain const functions need to call it.
+    if (lastWasWrite) {
+        const_cast<QFilePrivate *>(this)->lastWasWrite = false;
+        if (!const_cast<QFile *>(q_func())->flush())
+            return false;
+    }
+    return true;
 }
 
 void
@@ -147,6 +177,8 @@ QFilePrivate::setError(QFile::FileError err, int errNum)
     using seek(). If you've reached the end of the file, atEnd()
     returns true.
 
+    \section1 Reading Files Directly
+
     The following example reads a text file line by line:
 
     \quotefromfile snippets/file/file.cpp
@@ -158,6 +190,8 @@ QFilePrivate::setError(QFile::FileError err, int errNum)
     Windows-style line terminators ("\\r\\n") into C++-style
     terminators ("\\n"). By default, QFile assumes binary, i.e. it
     doesn't perform any conversion on the bytes stored in the file.
+
+    \section1 Using Streams to Read Files
 
     The next example uses QTextStream to read a text file
     line by line:
@@ -204,6 +238,13 @@ QFilePrivate::setError(QFile::FileError err, int errNum)
     \skipto readRegularEmptyFile_snippet
     \skipto QFile
     \printto /^\}/
+
+    \section1 Signals
+
+    Unlike other QIODevice implementations, such as QTcpSocket, QFile does not
+    emit the aboutToClose(), bytesWritten(), or readyRead() signals. This
+    implementation detail means that QFile is not suitable for reading and
+    writing certain types of files, such as device files on Unix platforms.
 
     \sa QTextStream, QDataStream, QFileInfo, QDir, {The Qt Resource System}
 */
@@ -375,7 +416,8 @@ QFile::setFileName(const QString &name)
 {
     Q_D(QFile);
     if (isOpen()) {
-        qWarning("QFile::setFileName: File is already opened");
+        qWarning("QFile::setFileName: File (%s) is already opened",
+                 qPrintable(fileName()));
         close();
     }
     if(d->fileEngine) { //get a new file engine later
@@ -688,10 +730,17 @@ QFile::rename(const QString &oldName, const QString &newName)
 }
 
 /*!
-    Creates a link named \a linkName that points to the file currently specified by fileName().
-    What a link is depends on the underlying filesystem
-    (be it a shortcut on Windows or a symbolic link on Unix). Returns
-    true if successful; otherwise returns false.
+
+    Creates a link named \a linkName that points to the file currently specified by
+    fileName().  What a link is depends on the underlying filesystem (be it a
+    shortcut on Windows or a symbolic link on Unix). Returns true if successful;
+    otherwise returns false.
+
+    This function will not overwrite an already existing entity in the file system;
+    in this case, \c link() will return false and set \l{QFile::}{error()} to
+    return \l{QFile::}{RenameError}.    
+
+    \note To create a valid link on Windows, \a linkName must have a \c{.lnk} file extension.
 
     \sa setFileName()
 */
@@ -781,10 +830,12 @@ QFile::copy(const QString &newName)
                 }
                 if (!error) {
                     char block[4096];
+                    qint64 totalRead = 0;
                     while(!atEnd()) {
                         qint64 in = read(block, sizeof(block));
-                        if(in == -1)
+                        if (in <= 0)
                             break;
+                        totalRead += in;
                         if(in != out.write(block, in)) {
                             d->setError(QFile::CopyError, QLatin1String("Failure to write block"));
                             error = true;
@@ -792,6 +843,11 @@ QFile::copy(const QString &newName)
                         }
                     }
 
+                    if (totalRead != size()) {
+                        // Unable to read from the source. The error string is
+                        // already set from read().
+                        error = true;
+                    }
                     if (!error && !out.rename(newName)) {
                         error = true;
                         QString errorMessage = QLatin1String("Cannot create %1 for output");
@@ -844,19 +900,27 @@ bool QFile::isSequential() const
 }
 
 /*!
-    Opens the file using OpenMode \a mode.
+    Opens the file using OpenMode \a mode, returning true if successful;
+    otherwise false.
 
     The \a mode must be QIODevice::ReadOnly, QIODevice::WriteOnly, or
     QIODevice::ReadWrite. It may also have additional flags, such as
     QIODevice::Text and QIODevice::Unbuffered.
 
-    \sa QIODevice::OpenMode
+    \note In \l{QIODevice::}{WriteOnly} or \l{QIODevice::}{ReadWrite}
+    mode, if the relevant file does not already exist, this function
+    will try to create a new file before opening it.
+
+    \note Because of limitations in the native API, QFile ignores the
+    Unbuffered flag on Windows.
+
+    \sa QIODevice::OpenMode, setFileName()
 */
 bool QFile::open(OpenMode mode)
 {
     Q_D(QFile);
     if (isOpen()) {
-        qWarning("QFile::open: File already open");
+        qWarning("QFile::open: File (%s) already open", qPrintable(fileName()));
         return false;
     }
     if (mode & Append)
@@ -919,13 +983,19 @@ bool QFile::open(OpenMode mode)
     CONFIG += console
     \endcode
 
+    \note On Windows, \a fh must be opened in binary mode (i.e., the mode
+    string must contain 'b', as in "rb" or "wb") when accessing files and
+    other random-access devices. Qt will translate the end-of-line characters
+    if you pass QIODevice::Text to \a mode. Sequential devices, such as stdin
+    and stdout, are unaffected by this limitation.
+
     \sa close(), {qmake Variable Reference#CONFIG}{qmake Variable Reference}
 */
 bool QFile::open(FILE *fh, OpenMode mode)
 {
     Q_D(QFile);
     if (isOpen()) {
-        qWarning("QFile::open: File already open");
+        qWarning("QFile::open: File (%s) already open", qPrintable(fileName()));
         return false;
     }
     if (mode & Append)
@@ -978,7 +1048,7 @@ bool QFile::open(int fd, OpenMode mode)
 {
     Q_D(QFile);
     if (isOpen()) {
-        qWarning("QFile::open: File already open");
+        qWarning("QFile::open: File (%s) already open", qPrintable(fileName()));
         return false;
     }
     if (mode & Append)
@@ -1046,6 +1116,8 @@ bool
 QFile::resize(qint64 sz)
 {
     Q_D(QFile);
+    if (!d->ensureFlushed())
+        return false;
     if (isOpen() && fileEngine()->pos() > sz)
         seek(sz);
     if(fileEngine()->setSize(sz)) {
@@ -1132,6 +1204,14 @@ QFile::setPermissions(const QString &fileName, Permissions permissions)
     return QFile(fileName).setPermissions(permissions);
 }
 
+static inline qint64 _qfile_writeData(QAbstractFileEngine *engine, QRingBuffer *buffer)
+{
+    qint64 ret = engine->write(buffer->readPointer(), buffer->size());
+    if (ret > 0)
+        buffer->free(ret);
+    return ret;
+}
+
 /*!
     Flushes any buffered data to the file. Returns true if successful;
     otherwise returns false.
@@ -1141,6 +1221,17 @@ bool
 QFile::flush()
 {
     Q_D(QFile);
+    if (!d->writeBuffer.isEmpty()) {
+        if (!_qfile_writeData(d->fileEngine ? d->fileEngine : fileEngine(),
+                              &d->writeBuffer)) {
+            QFile::FileError err = fileEngine()->error();
+            if(err == QFile::UnspecifiedError)
+                err = QFile::WriteError;
+            d->setError(err, fileEngine()->errorString());
+            return false;
+        }
+    }
+
     if (!fileEngine()->flush()) {
         QFile::FileError err = fileEngine()->error();
         if(err == QFile::UnspecifiedError)
@@ -1161,6 +1252,7 @@ QFile::close()
     Q_D(QFile);
     if(!isOpen())
         return;
+    flush();
     QIODevice::close();
 
     unsetError();
@@ -1178,6 +1270,9 @@ QFile::close()
 
 qint64 QFile::size() const
 {
+    Q_D(const QFile);
+    if (!d->ensureFlushed())
+        return 0;
     return fileEngine()->size();
 }
 
@@ -1202,9 +1297,27 @@ qint64 QFile::pos() const
 
 bool QFile::atEnd() const
 {
+    Q_D(const QFile);
+
     if (!isOpen())
         return true;
-    return QIODevice::atEnd() || (isSequential() && bytesAvailable() == 0);
+
+    if (!d->ensureFlushed())
+        return false;
+
+    // If there's buffered data left, we're not at the end.
+    if (!d->buffer.isEmpty())
+        return false;
+
+    // If the file engine knows best, say what it says.
+    if (fileEngine()->supportsExtension(QAbstractFileEngine::AtEndExtension)) {
+        // Check if the file engine supports AtEndExtension, and if it does,
+        // check if the file engine claims to be at the end.
+        return fileEngine()->atEnd();
+    }
+
+    // Fall back to checking how much is available (will stat files).
+    return bytesAvailable() == 0;
 }
 
 /*!
@@ -1218,6 +1331,9 @@ bool QFile::seek(qint64 off)
         qWarning("QFile::seek: IODevice is not open");
         return false;
     }
+
+    if (!d->ensureFlushed())
+        return false;
 
     if (!fileEngine()->seek(off) || !QIODevice::seek(off)) {
         QFile::FileError err = fileEngine()->error();
@@ -1235,7 +1351,16 @@ bool QFile::seek(qint64 off)
 */
 qint64 QFile::readLineData(char *data, qint64 maxlen)
 {
-    return fileEngine()->readLine(data, maxlen);
+    Q_D(QFile);
+    if (!d->ensureFlushed())
+        return -1;
+
+    if (fileEngine()->supportsExtension(QAbstractFileEngine::FastReadLineExtension))
+        return fileEngine()->readLine(data, maxlen);
+
+    // Fall back to QIODevice's readLine implementation if the engine
+    // cannot do it faster.
+    return QIODevice::readLineData(data, maxlen);
 }
 
 /*!
@@ -1246,6 +1371,8 @@ qint64 QFile::readData(char *data, qint64 len)
 {
     Q_D(QFile);
     d->error = NoError;
+    if (!d->ensureFlushed())
+        return -1;
 
     qint64 ret = -1;
     qint64 read = fileEngine()->read(data, len);
@@ -1262,6 +1389,62 @@ qint64 QFile::readData(char *data, qint64 len)
 }
 
 /*!
+    \internal
+*/
+bool QFilePrivate::putCharHelper(char c)
+{
+#ifdef QT_NO_QOBJECT
+    return QIODevicePrivate::putCharHelper(c);
+#else
+
+    // Cutoff for code that doesn't only touch the buffer.
+    int writeBufferSize = writeBuffer.size();
+    if ((openMode & QIODevice::Unbuffered) || writeBufferSize + 1 >= QFILE_WRITEBUFFER_SIZE
+#ifdef Q_OS_WIN
+        || ((openMode & QIODevice::Text) && c == '\n' && writeBufferSize + 2 >= QFILE_WRITEBUFFER_SIZE)
+#endif
+        ) {
+        return QIODevicePrivate::putCharHelper(c);
+    }
+
+    if (!(openMode & QIODevice::WriteOnly)) {
+        if (openMode == QIODevice::NotOpen)
+            qWarning("QIODevice::putChar: Closed device");
+        else
+            qWarning("QIODevice::putChar: ReadOnly device");
+        return false;
+    }
+
+    // Make sure the device is positioned correctly.
+    const bool sequential = isSequential();
+    if (pos != devicePos && !sequential && !q_func()->seek(pos))
+        return false;
+
+    lastWasWrite = true;
+
+    int len = 1;
+#ifdef Q_OS_WIN
+    if ((openMode & QIODevice::Text) && c == '\n') {
+        ++len;
+        *writeBuffer.reserve(1) = '\r';
+    }
+#endif
+
+    // Write to buffer.
+    *writeBuffer.reserve(1) = c;
+
+    if (!sequential) {
+        pos += len;
+        devicePos += len;
+        if (!buffer.isEmpty())
+            buffer.skip(len);
+    }
+
+    return true;
+#endif
+}
+
+/*!
   \reimp
 */
 
@@ -1270,16 +1453,36 @@ QFile::writeData(const char *data, qint64 len)
 {
     Q_D(QFile);
     d->error = NoError;
+    d->lastWasWrite = true;
+    bool buffered = !(d->openMode & Unbuffered);
 
-    QAbstractFileEngine *fe = d->fileEngine ? d->fileEngine : fileEngine();
-    qint64 ret = fe->write(data, len);
-    if(ret < 0) {
-        QFile::FileError err = fileEngine()->error();
-        if(err == QFile::UnspecifiedError)
-            err = QFile::WriteError;
-        d->setError(err, fileEngine()->errorString());
+    // Flush buffered data if this read will overflow.
+    if (buffered && (d->writeBuffer.size() + len) > QFILE_WRITEBUFFER_SIZE) {
+        if (!flush())
+            return -1;
     }
-    return ret;
+
+    // Write directly to the engine if the block size is larger than
+    // the write buffer size.
+    if (!buffered || len > QFILE_WRITEBUFFER_SIZE) {
+        QAbstractFileEngine *fe = d->fileEngine ? d->fileEngine : fileEngine();
+        qint64 ret = fe->write(data, len);
+        if(ret < 0) {
+            QFile::FileError err = fileEngine()->error();
+            if(err == QFile::UnspecifiedError)
+                err = QFile::WriteError;
+            d->setError(err, fileEngine()->errorString());
+        }
+        return ret;
+    }
+
+    // Write to the buffer.
+    char *writePointer = d->writeBuffer.reserve(len);
+    if (len == 1)
+        *writePointer = *data;
+    else
+        ::memcpy(writePointer, data, len);
+    return len;
 }
 
 /*!

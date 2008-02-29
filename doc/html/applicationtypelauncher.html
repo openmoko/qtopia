@@ -27,10 +27,12 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
+<li><div class="fn"/>virtual <b><a href="applicationtypelauncher.html#dtor.ApplicationTypeLauncher">~ApplicationTypeLauncher</a></b> ()</li>
 <li><div class="fn"/>virtual ApplicationState <b><a href="applicationtypelauncher.html#applicationState">applicationState</a></b> ( const QString &amp; <i>application</i> ) = 0</li>
 <li><div class="fn"/>virtual bool <b><a href="applicationtypelauncher.html#canLaunch">canLaunch</a></b> ( const QString &amp; <i>application</i> ) = 0</li>
 <li><div class="fn"/>virtual void <b><a href="applicationtypelauncher.html#kill">kill</a></b> ( const QString &amp; <i>application</i> ) = 0</li>
 <li><div class="fn"/>virtual void <b><a href="applicationtypelauncher.html#launch">launch</a></b> ( const QString &amp; <i>application</i> ) = 0</li>
+<li><div class="fn"/>virtual QString <b><a href="applicationtypelauncher.html#name">name</a></b> () = 0</li>
 </ul>
 <ul>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
@@ -60,6 +62,7 @@
 <p>The ApplicationTypeLauncher class provides an interface to control a particular application type in the system.</p>
 <p>The ApplicationTypeLauncher provides a Qtopia Server Task interface. Qtopia Server Tasks are documented in full in the <a href="qtopiaserverapplication.html">QtopiaServerApplication</a> class documentation.</p>
 <p>ApplicationTypeLauncher implementers are used by the <a href="applicationlauncher.html">ApplicationLauncher</a> to control a specific type of application. An overview of the application launcher mechanism is given in the documentation of the <a href="applicationlauncher.html">ApplicationLauncher</a> class.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="ApplicationState-enum"></a>enum ApplicationTypeLauncher::ApplicationState</h3>
@@ -82,22 +85,26 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="dtor.ApplicationTypeLauncher"></a>ApplicationTypeLauncher::~ApplicationTypeLauncher ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Destruct the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> instance.</p>
 <h3 class="fn"><a name="applicationState"></a><a href="applicationtypelauncher.html#ApplicationState-enum">ApplicationState</a> ApplicationTypeLauncher::applicationState ( const <a href="qstring.html">QString</a> &amp; <i>application</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Returns the current <i>application</i> state.</p>
+<p>Return the current state of the <i>application</i>.</p>
 <h3 class="fn"><a name="applicationStateChanged"></a>void ApplicationTypeLauncher::applicationStateChanged ( const <a href="qstring.html">QString</a> &amp; <i>application</i>, <a href="applicationtypelauncher.html#ApplicationState-enum">ApplicationTypeLauncher::ApplicationState</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the <i>application</i> state changes. <i>state</i> will be the application's new state.</p>
 <h3 class="fn"><a name="canLaunch"></a>bool ApplicationTypeLauncher::canLaunch ( const <a href="qstring.html">QString</a> &amp; <i>application</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Returns true if the <i>application</i> can by launched by this launcher instance.</p>
+<p>Return true if this <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> can launch the <i>application</i>.</p>
 <h3 class="fn"><a name="kill"></a>void ApplicationTypeLauncher::kill ( const <a href="qstring.html">QString</a> &amp; <i>application</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Requests that the <i>application</i> be killed.</p>
+<p>Kill the <i>application</i>.</p>
 <h3 class="fn"><a name="launch"></a>void ApplicationTypeLauncher::launch ( const <a href="qstring.html">QString</a> &amp; <i>application</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Requests that the <i>application</i> be launched.</p>
+<p>Attempt to launch the <i>application</i>.</p>
+<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> ApplicationTypeLauncher::name ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Return a descriptive name for the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> type.</p>
 <h3 class="fn"><a name="terminated"></a>void ApplicationTypeLauncher::terminated ( const <a href="qstring.html">QString</a> &amp; <i>application</i>, <a href="applicationtypelauncher.html#TerminationReason-enum">ApplicationTypeLauncher::TerminationReason</a> <i>reason</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the <i>application</i> terminates. <i>reason</i> represents the cause of the termination.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

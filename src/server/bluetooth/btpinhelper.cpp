@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,6 +28,8 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QSettings>
+#include <QTimer>
+#include <QValueSpaceItem>
 
 #include <qpassworddialog.h>
 #include <qtopiaipcenvelope.h>
@@ -37,14 +39,15 @@
 #include <qtopialog.h>
 
 /*!
-    \class BTPinHelper
+    \class BluetoothPasskeyAgentTask
     \ingroup QtopiaServer::Task::Bluetooth
-    \brief The BTPinHelper class provides a default passkey agent for performing Bluetooth passkey authentications.
+    \brief The BluetoothPasskeyAgentTask class provides a default passkey agent for performing Bluetooth passkey authentications.
 
-    The BTPinHelper class implements a Qtopia global passkey agent.  The
+    The BluetoothPasskeyAgentTask class implements a Qtopia global passkey agent.  The
     internal implementation uses the QPasswordDialog to ask the user for
     the passkey.
 
+    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
     \sa QBluetoothPasskeyAgent
  */
 
@@ -117,4 +120,38 @@ void BTPinHelper::release()
 
 }
 
-QTOPIA_TASK(DefaultBluetoothPassKeyAgent, BTPinHelper);
+/*!
+    Constructs a new BluetoothPasskeyAgentTask class.  The QObject parent is given
+    by \a parent.
+ */
+BluetoothPasskeyAgentTask::BluetoothPasskeyAgentTask(QObject* parent)
+    : QObject( parent )
+{
+    //we start this once the GUI is up and running
+    serverWidgetVsi = new QValueSpaceItem("/System/ServerWidgets/Initialized", this);
+    connect( serverWidgetVsi, SIGNAL(contentsChanged()), this, SLOT(delayedAgentStart()) );
+    delayedAgentStart(); //in case its visible already
+}
+
+/*!
+  \internal
+  */
+void BluetoothPasskeyAgentTask::delayedAgentStart()
+{
+    if ( serverWidgetVsi && serverWidgetVsi->value( QByteArray(), false ).toBool() ) {
+        serverWidgetVsi->disconnect();
+        serverWidgetVsi->deleteLater();
+        serverWidgetVsi = 0;
+        QTimer::singleShot( 5000, this, SLOT(activateAgent()) );
+    }
+}
+
+/*!
+  \internal
+  */
+void BluetoothPasskeyAgentTask::activateAgent()
+{
+    new BTPinHelper( this );
+}
+
+QTOPIA_TASK(DefaultBluetoothPassKeyAgent, BluetoothPasskeyAgentTask);

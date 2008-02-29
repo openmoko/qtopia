@@ -1,7 +1,4 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>WirelessBase</class>
  <widget class="QWidget" name="WirelessBase" >
   <property name="geometry" >
@@ -100,8 +97,19 @@
       </item>
       <item>
        <widget class="QLabel" name="essid_label" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>1</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text" >
          <string>Network name (ESSID):</string>
+        </property>
+        <property name="wordWrap" >
+         <bool>true</bool>
         </property>
         <property name="buddy" >
          <cstring>essid</cstring>
@@ -113,8 +121,19 @@
       </item>
       <item>
        <widget class="QLabel" name="ap_label" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>1</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text" >
          <string>Access Point:</string>
+        </property>
+        <property name="wordWrap" >
+         <bool>true</bool>
         </property>
         <property name="buddy" >
          <cstring>ap</cstring>
@@ -126,8 +145,19 @@
       </item>
       <item>
        <widget class="QLabel" name="nickname_label" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>1</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text" >
          <string>Nickname:</string>
+        </property>
+        <property name="wordWrap" >
+         <bool>true</bool>
         </property>
         <property name="buddy" >
          <cstring>nickname</cstring>
@@ -296,7 +326,6 @@
    </item>
   </layout>
  </widget>
- <pixmapfunction></pixmapfunction>
  <tabstops>
   <tabstop>netSelector</tabstop>
   <tabstop>mode</tabstop>

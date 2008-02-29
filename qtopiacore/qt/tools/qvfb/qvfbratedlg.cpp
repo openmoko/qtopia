@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -27,16 +42,16 @@
 #include <qslider.h>
 #include <QPushButton>
 
-QVFbRateDialog::QVFbRateDialog( int rate, QWidget *parent )
-    : QDialog( parent )
+QVFbRateDialog::QVFbRateDialog(int rate, QWidget *parent)
+    : QDialog(parent)
 {
     oldRate = rate;
 
-    QVBoxLayout *tl = new QVBoxLayout( this );
-    tl->setMargin( 5 );
+    QVBoxLayout *tl = new QVBoxLayout(this);
+    tl->setMargin(5);
 
-    QLabel *label = new QLabel( "Target frame rate:", this );
-    tl->addWidget( label );
+    QLabel *label = new QLabel("Target frame rate:", this);
+    tl->addWidget(label);
 
     QHBoxLayout *hl = new QHBoxLayout();
     tl->addItem(hl);
@@ -45,32 +60,32 @@ QVFbRateDialog::QVFbRateDialog( int rate, QWidget *parent )
     rateSlider->setMaximum(100);
     rateSlider->setPageStep(10);
     rateSlider->setValue(rate);
-    hl->addWidget( rateSlider );
-    connect( rateSlider, SIGNAL(valueChanged(int)), this, SLOT(rateChanged(int)) );
-    rateLabel = new QLabel( QString( "%1fps" ).arg(rate), this );
-    hl->addWidget( rateLabel );
+    hl->addWidget(rateSlider);
+    connect(rateSlider, SIGNAL(valueChanged(int)), this, SLOT(rateChanged(int)));
+    rateLabel = new QLabel(QString("%1fps").arg(rate), this);
+    hl->addWidget(rateLabel);
 
     hl = new QHBoxLayout();
     tl->addItem(hl);
-    QPushButton *pb = new QPushButton( "OK", this );
-    connect( pb, SIGNAL(clicked()), this, SLOT(ok()) );
-    hl->addWidget( pb );
-    pb = new QPushButton( "Cancel", this );
-    connect( pb, SIGNAL(clicked()), this, SLOT(cancel()) );
-    hl->addWidget( pb );
+    QPushButton *pb = new QPushButton("OK", this);
+    connect(pb, SIGNAL(clicked()), this, SLOT(ok()));
+    hl->addWidget(pb);
+    pb = new QPushButton("Cancel", this);
+    connect(pb, SIGNAL(clicked()), this, SLOT(cancel()));
+    hl->addWidget(pb);
 }
 
-void QVFbRateDialog::rateChanged( int r )
+void QVFbRateDialog::rateChanged(int r)
 {
-    if ( rateSlider->value() != r )
-	rateSlider->setValue( r );
-    rateLabel->setText( QString( "%1fps" ).arg(r) );
+    if (rateSlider->value() != r)
+	rateSlider->setValue(r);
+    rateLabel->setText(QString("%1fps").arg(r));
     emit updateRate(r);
 }
 
 void QVFbRateDialog::cancel()
 {
-    rateChanged( oldRate );
+    rateChanged(oldRate);
     reject();
 }
 

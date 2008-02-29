@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Simple Text Viewer Example</title>
+  <title>Qt 4.3: Simple Text Viewer Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Simple Text Viewer Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Simple Text Viewer Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="assistant-simpletextviewer-findfiledialog-cpp.html">assistant/simpletextviewer/findfiledialog.cpp</a></li>
@@ -34,7 +35,7 @@
 <h2>MainWindow Class Definition</h2>
 <p align="center"><img src="images/simpletextviewer-mainwindow.png" /></p><p>The <tt>MainWindow</tt> class provides the main application window with two menus: The <b>File</b> menu lets the user open and view an existing file while the <b>Help</b> menu provides information about the application and about Qt, and lets the user open Qt Assistant displaying the application's documentation. Here is the relevant parts of the <tt>MainWindow</tt> class definition:</p>
 <pre>     QAssistantClient *assistantClient;</pre>
-<p>To use Qt Assistant as an application's help tool, we must provide the application with a <a href="qassistantclient.html">QAssistantClient</a> object. An instance of the <a href="qassistantclient.html">QAssistantClient</a> class enables the application to open or close Qt Assistant whenever it is required. The object only interacts with the particular Qt Assistant instance associated with it (i.e. it is a one to one relationship between a <a href="qassistantclient.html">QAssistantClient</a> object and an instance of the Qt Assistant application).</p>
+<p>To use Qt Assistant as an application's help tool, we must provide the application with a <a href="qassistantclient.html">QAssistantClient</a> object. An instance of the <a href="qassistantclient.html">QAssistantClient</a> class enables the application to open or close Qt Assistant whenever it is required. The object only interacts with the particular Qt Assistant instance associated with it (i.e&#x2e; it is a one to one relationship between a <a href="qassistantclient.html">QAssistantClient</a> object and an instance of the Qt Assistant application).</p>
 <p>Note that the <a href="qassistantclient.html">QAssistantClient</a> class is not included in the Qt library. To use it you must add <tt>CONFIG += assistant</tt> to your pro file.</p>
 <pre>     void initializeAssistant();</pre>
 <p>We declare the private <tt>initializeAssistant()</tt> function to create and initialize the application's <a href="qassistantclient.html">QAssistantClient</a> object. It is a convenience function used when constructing the main window widget.</p>
@@ -136,7 +137,7 @@
      dialog.exec();
  }</pre>
 <p>When the user choose the <b>Open</b> entry in the <b>File</b> menu, it triggers the <tt>open()</tt> slot which will pop up a find file dialog. We have two options of providing help during the dialog's execution: We can either create a new <a href="qassistantclient.html">QAssistantClient</a> object within the dialog, or pass the current object to its constructor. By choosing the latter solution, we delimit the number of running Qt Assistant instances to one.</p>
-<p>Along with the <a href="qassistantclient.html">QAssistantClient</a> object, we also pass the current <a href="qtextedit.html">QTextEdit</a> object to the <tt>FindFileDialog</tt> contructor to be able to display the selected file. Then we call the newly created dialog's <a href="qdialog.html#exec">exec()</a> function, showing the dialog as a <a href="qdialog.html#modal-dialogs">modal dialog</a> (i.e. blocking until the user closes the dialog).</p>
+<p>Along with the <a href="qassistantclient.html">QAssistantClient</a> object, we also pass the current <a href="qtextedit.html">QTextEdit</a> object to the <tt>FindFileDialog</tt> contructor to be able to display the selected file. Then we call the newly created dialog's <a href="qdialog.html#exec">exec()</a> function, showing the dialog as a <a href="qdialog.html#modal-dialogs">modal dialog</a> (i.e&#x2e; blocking until the user closes the dialog).</p>
 <pre> void MainWindow::closeEvent(QCloseEvent *)
  {
      if (assistantClient)
@@ -209,6 +210,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

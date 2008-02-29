@@ -7,4 +7,4 @@ MOC_DIR=
 OBJECTS_DIR=
 UI_HEADERS_DIR=
 CONFIG-=separate_debug_info
-
+CONFIG-=embed_manifest_exe

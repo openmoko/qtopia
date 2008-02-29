@@ -1,0 +1,3 @@
+#!/bin/sh
+mkdir -p $HOME/application/QDSDataStore
+lidsconf -A POSTBOOT -s ${BIN} -o $HOME/application/QDSDataStore -j WRITE 

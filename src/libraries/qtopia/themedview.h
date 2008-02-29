@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,7 +19,6 @@
 **
 ****************************************************************************/
 
-#ifdef QTOPIA_PHONE
 #ifndef THEMEDVIEW_H
 #define THEMEDVIEW_H
 
@@ -68,6 +67,7 @@ public:
     virtual ~ThemeItem();
 
     virtual void setActive(bool active);
+    void setVisible(bool visible);
     bool active() const;
     bool transient() const;
 
@@ -141,7 +141,6 @@ protected:
 
 
 protected:
-    void setVisible(bool visible);
     void setDataExpression(bool b);
     bool isDataExpression() const;
 
@@ -183,6 +182,7 @@ protected:
     virtual void layout();
 
 private:
+    QRectF calcPageGeometry(const QSize &defSize) const;
     void applyMask();
 
 private:
@@ -247,12 +247,6 @@ class ThemeTemplateInstanceItem;
 class QTOPIA_EXPORT ThemeTemplateItem : public ThemeItem
 {
     friend class ThemeFactory;
-private:
-    enum BinaryMarker {
-        Start,
-        Chars,
-        End
-    };
 
 public:
     ThemeTemplateItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
@@ -263,10 +257,7 @@ public:
     ThemeTemplateInstanceItem* createInstance(const QString &uid);
 
 private:
-
-    bool startElement(const QString &qName, const ThemeAttributes &atts);
-    bool endElement();
-    bool characters(const QString &str);
+    void setData(const QString &data);
     ThemeTemplateItemPrivate* d;
 };
 
@@ -390,6 +381,7 @@ protected:
     void setVerticalScale( bool enable );
     bool horizontalScale() const;
     bool verticalScale() const;
+    bool replaceColor(QImage &image, const QColor &before, const QColor &after);
 
 private:
     QPixmap scalePixmap( const QPixmap &pix, int width, int height );
@@ -480,6 +472,8 @@ protected:
 private:
     void createImage( const QString &key, const QString &filename, const QString &col,
                 const QString &alpha, ThemeItem::State st = ThemeItem::Default );
+    void updateImage(const QString &key, ThemeItem::State st);
+
     ThemeStatusItemPrivate* d;
 };
 
@@ -492,6 +486,7 @@ public:
 
     void setImage(const QPixmap &pixmap, ThemeItem::State state = ThemeItem::Default);
     QPixmap image(ThemeItem::State state = ThemeItem::Default) const;
+    void updateDefaultImage();
 
     int rtti() const;
 
@@ -598,6 +593,7 @@ signals:
     void itemReleased(ThemeItem *);
     void itemClicked(ThemeItem *);
     void visibilityChanged(ThemeItem *, bool);
+    void loaded();
 
 protected:
 
@@ -677,6 +673,7 @@ private:
 struct ThemeListModelPrivate;
 class QTOPIA_EXPORT ThemeListModel : public QAbstractListModel
 {
+    Q_OBJECT
 public:
     // operates on a constructed list in the valuespace
     ThemeListModel(QObject *parent, ThemeListItem *li, ThemedView *view);
@@ -705,5 +702,4 @@ private:
     ThemeListModelPrivate *d;
 };
 
-#endif
 #endif

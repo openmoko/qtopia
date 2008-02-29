@@ -26,7 +26,7 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="inputmethods.html#InputMethods">InputMethods</a></b> ( QWidget * <i>parent</i>, IMType <i>t</i> = Any )</li>
+<li><div class="fn"/><b><a href="inputmethods.html#InputMethods">InputMethods</a></b> ( QWidget * <i>parent</i> = 0, IMType <i>t</i> = Any )</li>
 <li><div class="fn"/><b><a href="inputmethods.html#dtor.InputMethods">~InputMethods</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="inputmethods.html#activateMenuItem">activateMenuItem</a></b> ( int <i>v</i> )</li>
 <li><div class="fn"/>QString <b><a href="inputmethods.html#currentShown">currentShown</a></b> () const</li>
@@ -37,7 +37,7 @@
 <li><div class="fn"/>void <b><a href="inputmethods.html#unloadInputMethods">unloadInputMethods</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -50,6 +50,7 @@
 <li><div class="fn"/>void <b><a href="inputmethods.html#inputMethodHint-2">inputMethodHint</a></b> ( const QString &amp; <i>h</i>, int <i>wid</i> )</li>
 <li><div class="fn"/>void <b><a href="inputmethods.html#inputMethodPasswordHint">inputMethodPasswordHint</a></b> ( bool <i>passwordFlag</i>, int <i>wid</i> )</li>
 <li><div class="fn"/>void <b><a href="inputmethods.html#setNextInputMethod">setNextInputMethod</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="inputmethods.html#setType">setType</a></b> ( IMType <i>type</i> )</li>
 <li><div class="fn"/>void <b><a href="inputmethods.html#showInputMethod">showInputMethod</a></b> ( const QString &amp; <i>name</i> )</li>
 <li><div class="fn"/>void <b><a href="inputmethods.html#showInputMethod-2">showInputMethod</a></b> ()</li>
 </ul>
@@ -67,14 +68,21 @@
 <li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
-<h3>Additional Inherited Members</h3>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
 <ul>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>InputMethods * <b><a href="inputmethods.html#instance">instance</a></b> ()</li>
+</ul>
+<ul>
 <li><div class="fn"/>5 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>13 static public members inherited from <a href="qpaintdevice.html#static-public-members">QPaintDevice</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>39 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
@@ -89,6 +97,7 @@
 <p>The InputMethods class provides an implementation of Qtopia server input method handling.</p>
 <p>InputMethods is the core class for the Qtopia servers input method handling. It is very closely related to the <a href="inputmethodservice.html">InputMethodService</a> and <a href="inputmethodselector.html">InputMethodSelector</a> classes.</p>
 <p>InputMethods is primarily resposible for loading input method plugins and maintaining the hints set for different widgets. It also acts on the messages from the <a href="inputmethodservice.html">InputMethodService</a>, either taking direct action or passing them on to the <a href="inputmethodselector.html">InputMethodSelector</a>.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="IMType-enum"></a>enum InputMethods::IMType</h3>
@@ -108,7 +117,7 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="InputMethods"></a>InputMethods::InputMethods ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, <a href="inputmethods.html#IMType-enum">IMType</a> <i>t</i> = Any )</h3>
+<h3 class="fn"><a name="InputMethods"></a>InputMethods::InputMethods ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="inputmethods.html#IMType-enum">IMType</a> <i>t</i> = Any )</h3>
 <p>Create a new <a href="inputmethods.html">InputMethods</a> object with <i>parent</i> that handles input according to <i>t</i>.</p>
 <h3 class="fn"><a name="dtor.InputMethods"></a>InputMethods::~InputMethods ()</h3>
 <p>Unloads all input methods.</p>
@@ -124,7 +133,7 @@
 <h3 class="fn"><a name="hideInputMethod"></a>void InputMethods::hideInputMethod ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Deactivates and hides the current input method.</p>
 <h3 class="fn"><a name="inputMethodHint"></a>void InputMethods::inputMethodHint ( int <i>h</i>, int <i>wid</i>, bool <i>password</i> = false )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Sets the input hint for the current input method for widget <i>wid</i>. <i>h</i> is the hint for the input method, according to <a href="qtopiaapplication.html#InputMethodHint-enum">QtopiaApplication::InputMethodHint</a>. The <i>password</i> flag sets password mode, indicating that input should be hidden after being entered, and defaults to false. This values are recorded for when this widget gains focus in the future, and if <i>wid</i> refers to the last active widget, the hint is forwared to the current input method immediately.</p>
+<p>Sets the input hint for the current input method for widget <i>wid</i>. <i>h</i> is the hint for the input method, according to <a href="qtopiaapplication.html#InputMethodHint-enum">QtopiaApplication::InputMethodHint</a>. The <i>password</i> flag sets password mode, indicating that input should be hidden after being entered, and defaults to false. This value is recorded for when this widget gains focus in the future, and if <i>wid</i> refers to the last active widget, the hint is forwarded to the current input method immediately.</p>
 <h3 class="fn"><a name="inputMethodHint-2"></a>void InputMethods::inputMethodHint ( const <a href="qstring.html">QString</a> &amp; <i>h</i>, int <i>wid</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sets the input hint for widget <i>wid</i>, according to the hint <i>h</i>. This information is recorded for this widget should it gain focus, and if <i>wid</i> refers to the last active window, the hint is immediately forwarded to the current input method.</p>
@@ -132,9 +141,11 @@
 <p>Sets the password hint for <i>wid</i> to <i>passwordFlag</i>, provided an input hint has previously been set for that widget. If no hint has been set for that widget previously, this function does nothing.</p>
 <p>See also <a href="inputmethods.html#inputMethodHint">inputMethodHint</a>().</p>
 <h3 class="fn"><a name="inputRect"></a><a href="qrect.html">QRect</a> InputMethods::inputRect () const</h3>
-<p>returns the geometry of the current input methods input widget, or an empty <a href="qrect.html">QRect</a> if there is no current input method, or no input widget for the current input method.</p>
+<p>Returns the geometry of the current input methods input widget, or an empty <a href="qrect.html">QRect</a> if there is no current input method, or no input widget for the current input method.</p>
 <h3 class="fn"><a name="inputToggled"></a>void InputMethods::inputToggled ( bool <i>on</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Connect to this signal to recieve notifications of changes in the state of input methods. <i>on</i> describes whether the input methods have just turned on (true), or off (false).</p>
+<h3 class="fn"><a name="instance"></a>InputMethods * InputMethods::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the instance of the <a href="inputmethods.html">InputMethods</a> object used by the server.</p>
 <h3 class="fn"><a name="loadInputMethods"></a>void InputMethods::loadInputMethods ()</h3>
 <p>Creates a <a href="qpluginmanager.html">QPluginManager</a> for input methods to load input method plugins out of the <tt>plugins/inputmethods</tt> directory.</p>
 <p>If <a href="inputmethods.html">InputMethods</a> already has a <a href="qpluginmanager.html">QPluginManager</a>, this function does nothing.</p>
@@ -143,6 +154,8 @@
 <p>See also <a href="qwidget.html#isVisible">InputMethodSelector::isVisible</a>() and <a href="inputmethodselector.html#count">InputMethodSelector::count</a>().</p>
 <h3 class="fn"><a name="setNextInputMethod"></a>void InputMethods::setNextInputMethod ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Cycle to the next input method.</p>
+<h3 class="fn"><a name="setType"></a>void InputMethods::setType ( <a href="inputmethods.html#IMType-enum">IMType</a> <i>type</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Set system-wide description for allowable inputmethods to the given <i>type</i>. <i>Note</i>: Triggers a reloading of all inputmethod plugins</p>
 <h3 class="fn"><a name="showInputMethod"></a>void InputMethods::showInputMethod ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Selects the the input method named <i>name</i>, if it exists, and activates and shows it. If the named input method does not exist, this function activates the current input method.</p>
 <h3 class="fn"><a name="showInputMethod-2"></a>void InputMethods::showInputMethod ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -158,6 +171,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

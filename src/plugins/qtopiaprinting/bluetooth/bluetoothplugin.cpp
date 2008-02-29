@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -41,11 +41,15 @@ public:
     BluetoothPrinterPluginPrivate() : m_session(0) {
         m_localDevice = 0;
         m_agent = 0;
+        m_deviceDialogFilter = 0;
     }
 
     ~BluetoothPrinterPluginPrivate() {
         delete m_localDevice;
         m_localDevice = 0;
+
+        delete m_deviceDialogFilter;
+        m_deviceDialogFilter = 0;
     }
 
     bool isAvailable() {
@@ -126,7 +130,7 @@ public:
     }
 
     QBluetoothLocalDevice *m_localDevice;
-    QBluetoothRemoteDeviceDialogFilter m_deviceDialogFilter;
+    QBluetoothRemoteDeviceDialogFilter *m_deviceDialogFilter;
     QSet<SDPProfile> m_deviceSelectorProfiles;
     QBluetoothObexAgent *m_agent;
     QCommDeviceSession *m_session;
@@ -156,10 +160,13 @@ private:
         }
 
         // show only imaging devices with object push profile
-        QSet<QBluetooth::DeviceMajor> devMajors;
-        devMajors.insert( Imaging );
-        m_deviceDialogFilter.setAcceptedDeviceMajors( devMajors );
-        m_deviceSelectorProfiles.insert( ObjectPushProfile );
+        if ( !m_deviceDialogFilter ) {
+            m_deviceDialogFilter = new QBluetoothRemoteDeviceDialogFilter;
+            QSet<QBluetooth::DeviceMajor> devMajors;
+            devMajors.insert( Imaging );
+            m_deviceDialogFilter->setAcceptedDeviceMajors( devMajors );
+            m_deviceSelectorProfiles.insert( ObjectPushProfile );
+        }
     }
 };
 

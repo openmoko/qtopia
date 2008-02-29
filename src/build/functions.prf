@@ -215,7 +215,7 @@ defineTest(qtopia_project) {
     ###
     ### NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
     ###
-    ### This code must match the logic found in bin/Qtopia/BlackMagic.pm
+    ### This code must match the logic found in src/build/bin/Qtopia/BlackMagic.pm
     ###
     ### NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
     ###
@@ -263,11 +263,15 @@ defineReplace(resolveqt) {
     else:equals(1,xml):return(QtXml)
     else:equals(1,sql):return(QtSql)
     else:equals(1,svg):return(QtSvg)
+    else:equals(1,script):return(QtScript)
     else:equals(1,opengl):return(QtOpenGL)
     else:equals(1,qtestlib):return(QtTest)
     else:equals(1,winmain):return(qtmain)
     else:equals(1,control):return(QAxServer)
     else:equals(1,container):return(QAxContainer)
+    else:equals(1,script):return(QtScript)
+    else:equals(1,qt3support):return(Qt3Support)
+    else:equals(1,uitools):return(QtUiTools)
     else:error(functions.prf: Unknown QT value $$1)
 }
 
@@ -330,36 +334,59 @@ defineTest(compare_vars) {
     }
 }
 
-# Read a variable from a cache file.
-defineTest(cachedinfo) {
-    cache=$$1
-    cache~=s,$$QTOPIA_DEPOT_PATH,$$QPEDIR,q
-    cache=$${cache}.cache
+# Read variables from a file
+defineTest(fetch_vars_from_file) {
+    file=$$1
+    namespace=$$2
 
-    #message(comparing $$1 to $$tail($$cache))
-
-    first=1
+    count=0
     for(a,ARGS) {
-        equals(first,1) {
-            first=0
+        equals(count,0) {
+            count=1
+            next()
+        }
+        equals(count,1) {
+            count=2
             next()
         }
         eval($${a}=)
     }
 
-    eval(include(\$$cache))
+    eval(include(\$$file))
 
+    count=0
+    for(a,ARGS) {
+        equals(count,0) {
+            count=1
+            next()
+        }
+        equals(count,1) {
+            count=2
+            next()
+        }
+        eval($${namespace}.$${a}=$$eval($$a))
+        export($${namespace}.$$a)
+    }
+}
+
+# Read variables from a cache file.
+defineTest(cachedinfo) {
+    cache=$$1
+    cache~=s,$$QTOPIA_DEPOT_PATH,$$QPEDIR,q
+    cache=$${cache}.cache
+
+    variables=
     first=1
     for(a,ARGS) {
         equals(first,1) {
             first=0
             next()
         }
-        eval(cache.$${a}=$$eval($$a))
-        export(cache.$$a)
-        #eval(real.$$a=\$$fromfile(\$$1,\$$a))
-        #compare_vars(cache.$$a,real.$$a)
+        variables+=$$a
     }
+
+    variables=$$join(variables,",")
+    eval(fetch_vars_from_file(\$$cache,cache,$$variables))
 }
 
 # Take a variable and "resolve" it's files the same way qmake does (ie. look in the output dir then the source dir)
@@ -387,8 +414,18 @@ defineTest(resolveRelativeFiles) {
             }
         }
         equals(found,1):next()
-        # Finally check for files specified with absolute paths
+        # Check for files specified with absolute paths
         files=$$files($$i)
+        for(f,files) {
+            exists($$f) {
+                found=1
+                out+=$$f
+            }
+        }
+        equals(found,1):next()
+        # Finally check for files specified with absolute paths and no wildcards
+        # needed because /foo/bar/.directory fails the above check for some reason
+        files=$$i
         for(f,files) {
             exists($$f) {
                 found=1
@@ -437,6 +474,16 @@ defineTest(createHeader) {
     export($${c}.depends)
     export(QMAKE_EXTRA_COMPILERS)
     export(ALL_DEPS)
+}
+
+# Add something to CFLAGS and CXXFLAGS
+defineTest(addCFlags) {
+    QTOPIA_ADD_CFLAGS+=$$1
+    export(QTOPIA_ADD_CFLAGS)
+    QMAKE_CFLAGS+=$$1
+    export(QMAKE_CFLAGS)
+    QMAKE_CXXFLAGS+=$$1
+    export(QMAKE_CXXFLAGS)
 }
 
 # Create a raw Makefile dependency

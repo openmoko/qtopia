@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Modem Emulator - Supplementary Services</title>
+  <link rel="prev" href="modememulator-network.html" />
+  <link rel="next" href="modememulator-gprs.html" />
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><p>
+[Previous: <a href="modememulator-network.html">Modem Emulator - Network</a>]
+[Next: <a href="modememulator-gprs.html">Modem Emulator - GPRS</a>]
+</p>
+<h1 align="center">Modem Emulator - Supplementary Services<br /><span class="subtitle"></span>
+</h1>
+<p>The AT commands in this section are used for accessing GSM supplementary services such as call waiting, caller-id, etc.</p>
+<p><b>AT+CCWA Call Waiting</b></p>
+<p>The <tt>AT+CCWA</tt> command allows control of the Call Waiting supplementary service according to 3GPP TS 22.083.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CCWA=[&lt;n&gt;[,&lt;mode&gt;[,&lt;class&gt;]]]</tt></td><td>when <tt>&lt;mode&gt;</tt>=2 and command successful:<pre>    +CCWA: &lt;status&gt;,&lt;class1&gt;
+    +CCWA: &lt;status&gt;,&lt;class2&gt;
+    ...</pre>
+</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CCWA?</tt></td><td><tt>+CCWA: &lt;n&gt;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CCWA=?</tt></td><td><tt>+CCWA: (0,1)</tt></td></tr>
+</table></p>
+<p>Activation, deactivation, and status query are supported. When querying the status of a network service (<tt>&lt;mode&gt;</tt>=2) the response line for the &quot;not active&quot; case (<tt>&lt;status&gt;</tt>=0) should be returned only if the service is not active for any <tt>&lt;class&gt;</tt>.</p>
+<p>Parameter <tt>&lt;n&gt;</tt> is used to disable/enable the presentation of an unsolicited result code <tt>+CCWA: &lt;number&gt;,&lt;type&gt;,&lt;class&gt;,[&lt;alpha&gt;][,&lt;CLI validity&gt;[,&lt;subaddr&gt;,&lt;satype&gt;[,&lt;priority&gt;]]]</tt> to the TE when the call waiting service is enabled.</p>
+<p>Test command returns the supported unsolicited presentation values.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td><tt>&lt;n&gt;</tt></td><td>Unsolicited presentation status value.<ul>
+<li>0 Disable</li>
+<li>1 Enable</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;mode&gt;</tt></td><td>Mode of call waiting operation to perform.<ul>
+<li>0 Disable call waiting</li>
+<li>1 Enable call waiting</li>
+<li>2 Query status</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;class&gt;</tt></td><td>Sum of integers representing a class of information (default 7).<ul>
+<li>1 voice (telephony)</li>
+<li>2 data (refers to all bearer services)</li>
+<li>4 fax</li>
+<li>8 short message service</li>
+<li>16 data circuit sync</li>
+<li>32 data circuit async</li>
+<li>64 dedicated packet access</li>
+<li>128 dedicated PAD access</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;status&gt;</tt></td><td><ul>
+<li>0 not active</li>
+<li>1 active</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;number&gt;</tt></td><td>String type phone number of calling address in format specified by <tt>&lt;type&gt;</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;type&gt;</tt></td><td>Type of address octet in integer format (refer 3GPP TS 24.008).</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;alpha&gt;</tt></td><td>String indicating the name of a phonebook entry corresponding to <tt>&lt;number&gt;</tt>. Usually this is empty.</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;CLI validity&gt;</tt></td><td><ul>
+<li>0 CLI valid</li>
+<li>1 CLI has been withheld by the originator</li>
+<li>2 CLI is not available due to interworking problems or limitations of originating network.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;subaddr&gt;</tt></td><td>String type subaddress of format specified by <tt>&lt;satype&gt;</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;satype&gt;</tt></td><td>Type of subaddress octet in integer format (refer 3GPP TS 24.008).</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;priority&gt;</tt></td><td>Digit indicating eMLPP priority level of incoming call (refer 3GPP TS 22.067).</td></tr>
+</table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+CLIP Calling line identification presentation</b></p>
+<p>The <tt>AT+CLIP</tt> command allows control of the calling line identification presentation supplementary service.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CLIP=[&lt;n&gt;]</tt></td><td><tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CLIP?</tt></td><td><tt>+CLIP: &lt;n&gt;,&lt;m&gt;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CLIP=?</tt></td><td><tt>+CLIP: (0,1)</tt></td></tr>
+</table></p>
+<p>Set command enables or disables the presentation of the CLI at the TE. It has no effect on the execution of the supplementary service in the network. When <tt>&lt;n&gt;</tt> is 1, the unsolicited response <tt>+CLIP: &lt;number&gt;,&lt;type&gt;[,&lt;subaddr&gt;,&lt;satype&gt;[,[&lt;alpha&gt;][,&lt;CLI validitity&gt;]]</tt> is sent to the TE after every <tt>RING</tt> or <tt>+CRING</tt> response.</p>
+<p>Read command gives the status of <tt>&lt;n&gt;</tt>, plus the provision status of the CLIP service (<tt>&lt;m&gt;</tt>).</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td><tt>&lt;n&gt;</tt></td><td>Unsolicited presentation status value.<ul>
+<li>0 Disable</li>
+<li>1 Enable</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;m&gt;</tt></td><td>Provision status of CLIP in the network:<ul>
+<li>0 CLIP not provisioned</li>
+<li>1 CLIP provisioned</li>
+<li>2 unknown (e.g&#x2e; no network, etc.)</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;number&gt;</tt></td><td>String type phone number of calling address in format specified by <tt>&lt;type&gt;</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;type&gt;</tt></td><td>Type of address octet in integer format (refer 3GPP TS 24.008).</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;subaddr&gt;</tt></td><td>String type subaddress of format specified by <tt>&lt;satype&gt;</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;satype&gt;</tt></td><td>Type of subaddress octet in integer format (refer 3GPP TS 24.008).</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;alpha&gt;</tt></td><td>String indicating the name of a phonebook entry corresponding to <tt>&lt;number&gt;</tt>. Usually this is empty.</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;CLI validity&gt;</tt></td><td><ul>
+<li>0 CLI valid</li>
+<li>1 CLI has been withheld by the originator</li>
+<li>2 CLI is not available due to interworking problems or limitations of originating network.</li>
+</ul>
+</td></tr>
+</table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
+<p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
+</table></p>
+<p>
+[Previous: <a href="modememulator-network.html">Modem Emulator - Network</a>]
+[Next: <a href="modememulator-gprs.html">Modem Emulator - GPRS</a>]
+</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+</tr></table></div></address></body>
+</html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,13 +21,17 @@
 #ifndef GOOGLEACCOUNT_H
 #define GOOGLEACCOUNT_H
 
-#include "ui_googleaccount.h"
 #include <QDialog>
 #include <QString>
 
+class QComboBox;
+class QLineEdit;
+class QLabel;
+
 #include <qtopia/pim/private/qgooglecontext_p.h>
 
-class GoogleAccount : public QDialog, public Ui::GoogleAccount
+#ifndef QT_NO_OPENSSL
+class GoogleAccount : public QDialog
 {
     Q_OBJECT
 public:
@@ -41,9 +45,17 @@ public:
 
     void accept();
 
+    QString name() const;
     QString email() const;
     QString password() const;
     QGoogleCalendarContext::FeedType feedType() const;
-};
 
+private:
+    QLineEdit *emailText;
+    QLineEdit *nameText;
+    QLineEdit *passwordText;
+    QLabel *nameLabel;
+    QComboBox *accessCombo;
+};
+#endif // QT_NO_OPENSSL
 #endif // GOOGLEACCOUNT_H

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -58,12 +73,12 @@
     \list 1
     \i Create a QTabWidget.
     \i Create a QWidget for each of the pages in the tab dialog, but
-       do not specify a parent widget - the tab widget will reparent
-       the page widget later.
-    \i Insert children into the page widget, set up geometry management
-    for it and use addTab() (or insertTab()) to set up a tab with an
-    optional keyboard shortcut.
-    \i Connect to the signals and slots.
+       do not specify parent widgets for them.
+    \i Insert child widgets into the page widget, using layouts to
+       position them as normal.
+    \i Call addTab() or insertTab() to put the page widgets into the
+       tab widget, giving each tab a suitable label with an optional
+       keyboard shortcut.
     \endlist
 
     The position of the tabs is defined by \l tabPosition, their shape
@@ -79,7 +94,8 @@
     or setCurrentIndex() to show a particular page.
 
     You can change a tab's text and icon using setTabText() or
-    setTabIcon(). A tab can be removed with removeTab().
+    setTabIcon(). A tab and its associated page can be removed with
+    removeTab().
 
     Each tab is either enabled or disabled at any given time (see
     setTabEnabled()). If a tab is enabled, the tab text is drawn
@@ -126,8 +142,9 @@
     \enum QTabWidget::TabShape
 
     This enum type defines the shape of the tabs:
-    \value Rounded  rounded look (normal)
-    \value Triangular  triangular look
+    \value Rounded  The tabs are drawn with a rounded look. This is the default
+                    shape.
+    \value Triangular  The tabs are drawn with a triangular look.
 */
 
 /*!
@@ -152,6 +169,7 @@
 class QTabWidgetPrivate : public QWidgetPrivate
 {
     Q_DECLARE_PUBLIC(QTabWidget)
+
 public:
     QTabWidgetPrivate();
     ~QTabWidgetPrivate();
@@ -159,7 +177,6 @@ public:
     void _q_showTab(int);
     void _q_removeTab(int);
     void init();
-    QStyleOptionTabWidgetFrame getStyleOption() const;
 
     QTabBar *tabs;
     QStackedWidget *stack;
@@ -184,9 +201,13 @@ QTabWidgetPrivate::~QTabWidgetPrivate()
 void QTabWidgetPrivate::init()
 {
     Q_Q(QTabWidget);
+
     stack = new QStackedWidget(q);
     stack->setObjectName(QLatin1String("qt_tabwidget_stackedwidget"));
     stack->setLineWidth(0);
+    // hack so that QMacStyle::layoutSpacing() can detect tab widget pages
+    stack->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred, QSizePolicy::TabWidget));
+
     QObject::connect(stack, SIGNAL(widgetRemoved(int)), q, SLOT(_q_removeTab(int)));
     QTabBar *tabBar = new QTabBar(q);
     tabBar->setObjectName(QLatin1String("qt_tabwidget_tabbar"));
@@ -197,51 +218,68 @@ void QTabWidgetPrivate::init()
     pos = QTabWidget::South;
 #endif
 
-    q->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    q->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding, 
+                                 QSizePolicy::TabWidget));
+#ifdef QT_KEYPAD_NAVIGATION
+    if (QApplication::keypadNavigationEnabled())
+        q->setFocusPolicy(Qt::NoFocus);
+    else
+#endif
     q->setFocusPolicy(Qt::TabFocus);
     q->setFocusProxy(tabs);
 }
 
-QStyleOptionTabWidgetFrame QTabWidgetPrivate::getStyleOption() const
+/*!
+    Initialize \a option with the values from this QTabWidget. This method is useful
+    for subclasses when they need a QStyleOptionTabWidgetFrame, but don't want to fill
+    in all the information themselves.
+
+    \sa QStyleOption::initFrom() QTabBar::initStyleOption()
+*/
+void QTabWidget::initStyleOption(QStyleOptionTabWidgetFrame *option) const
 {
-    Q_Q(const QTabWidget);
-    QStyleOptionTabWidgetFrame option;
-    option.init(q);
+    if (!option)
+        return;
 
-    int exth = q->style()->pixelMetric(QStyle::PM_TabBarBaseHeight, 0, q);
-    QSize t(0, stack->frameWidth());
-    if (tabs->isVisibleTo(const_cast<QTabWidget *>(q)))
-        t = tabs->sizeHint();
+    Q_D(const QTabWidget);
+    option->initFrom(this);
 
-    if (rightCornerWidget)
-        option.rightCornerWidgetSize
-            = rightCornerWidget->sizeHint().boundedTo(t - QSize(exth, exth));
+    int exth = style()->pixelMetric(QStyle::PM_TabBarBaseHeight, 0, this);
+    QSize t(0, d->stack->frameWidth());
+    if (d->tabs->isVisibleTo(const_cast<QTabWidget *>(this)))
+        t = d->tabs->sizeHint();
+
+    if (d->rightCornerWidget)
+        option->rightCornerWidgetSize
+            = d->rightCornerWidget->sizeHint().boundedTo(t - QSize(exth, exth));
     else
-        option.rightCornerWidgetSize = QSize(0, 0);
+        option->rightCornerWidgetSize = QSize(0, 0);
 
-    if (leftCornerWidget)
-        option.leftCornerWidgetSize
-            = leftCornerWidget->sizeHint().boundedTo(t - QSize(exth, exth));
+    if (d->leftCornerWidget)
+        option->leftCornerWidgetSize
+                            = d->leftCornerWidget->sizeHint().boundedTo(t - QSize(exth, exth));
     else
-        option.leftCornerWidgetSize = QSize(0, 0);
+        option->leftCornerWidgetSize = QSize(0, 0);
 
-    switch (pos) {
+    switch (d->pos) {
     case QTabWidget::North:
-        option.shape = shape == QTabWidget::Rounded ? QTabBar::RoundedNorth : QTabBar::TriangularNorth;
+        option->shape = d->shape == QTabWidget::Rounded ? QTabBar::RoundedNorth
+                                                        : QTabBar::TriangularNorth;
         break;
     case QTabWidget::South:
-        option.shape = shape == QTabWidget::Rounded ? QTabBar::RoundedSouth : QTabBar::TriangularSouth;
+        option->shape = d->shape == QTabWidget::Rounded ? QTabBar::RoundedSouth
+                                                        : QTabBar::TriangularSouth;
         break;
     case QTabWidget::West:
-        option.shape = shape == QTabWidget::Rounded ? QTabBar::RoundedWest : QTabBar::TriangularWest;
+        option->shape = d->shape == QTabWidget::Rounded ? QTabBar::RoundedWest
+                                                        : QTabBar::TriangularWest;
         break;
     case QTabWidget::East:
-        option.shape = shape == QTabWidget::Rounded ? QTabBar::RoundedEast : QTabBar::TriangularEast;
+        option->shape = d->shape == QTabWidget::Rounded ? QTabBar::RoundedEast
+                                                        : QTabBar::TriangularEast;
         break;
     }
-    option.tabBarSize = t;
-
-    return option;
+    option->tabBarSize = t;
 }
 
 /*!
@@ -276,16 +314,17 @@ QTabWidget::~QTabWidget()
 }
 
 /*!
-    Adds another tab and page to the tab view.
+    \fn int QTabWidget::addTab(QWidget *page, const QString &label)
 
-    The new page is \a child; the tab's label is \a label.
+    Adds a tab with the given \a page and \a label to the tab widget,
+    and returns the index of the tab in the tab bar.
 
     If the tab's \a label contains an ampersand, the letter following
     the ampersand is used as a shortcut for the tab, e.g. if the
     label is "Bro\&wse" then Alt+W becomes a shortcut which will
     move the focus to this tab.
 
-    If you call addTab() after show(), the layout system will try
+    \note If you call addTab() after show(), the layout system will try
     to adjust to the changes in it's widgets hierarchy and may cause
     flicker. To prevent this, you can set the QWidget::updatesEnabled
     property to false prior to changes; remember to set the property
@@ -301,9 +340,11 @@ int QTabWidget::addTab(QWidget *child, const QString &label)
 
 
 /*!
+    \fn int QTabWidget::addTab(QWidget *page, const QIcon &icon, const QString &label)
     \overload
 
-    Adds another tab and page to the tab view.
+    Adds a tab with the given \a page, \a icon, and \a label to the tab
+    widget, and returns the index of the tab in the tab bar.
 
     This function is the same as addTab(), but with an additional \a
     icon.
@@ -315,15 +356,14 @@ int QTabWidget::addTab(QWidget *child, const QIcon& icon, const QString &label)
 
 
 /*!
-    \fn int QTabWidget::insertTab(int index, QWidget *widget, const QString &label)
+    \fn int QTabWidget::insertTab(int index, QWidget *page, const QString &label)
 
-    Inserts another tab and page to the tab view.
+    Inserts a tab with the given \a label and \a page into the tab
+    widget at the specified \a index, and returns the index of the
+    inserted tab in the tab bar.
 
-    The given \a widget is the new page, and the tab's label is
-    specified by \a label. Note the difference between the widget name
-    and the tab label: The name is internal to the program and
-    invariant, whereas the label is shown on-screen and may vary
-    according to language and other factors.
+    The label is displayed in the tab and may vary in appearance depending
+    on the configuration of the tab widget.
 
     If the tab's \a label contains an ampersand, the letter following
     the ampersand is used as a shortcut for the tab, e.g. if the
@@ -338,7 +378,7 @@ int QTabWidget::addTab(QWidget *child, const QIcon& icon, const QString &label)
     less than or equal to the current index will increment the current
     index, but keep the current page.
 
-    If you call insertTab() after show(), the layout system will try
+    \note If you call insertTab() after show(), the layout system will try
     to adjust to the changes in it's widgets hierarchy and may cause
     flicker. To prevent this, you can set the QWidget::updatesEnabled
     property to false prior to changes; remember to set the property
@@ -354,10 +394,12 @@ int QTabWidget::insertTab(int index, QWidget *w, const QString &label)
 
 
 /*!
-    \fn int QTabWidget::insertTab(int index, QWidget *widget, const QIcon& icon, const QString &label)
+    \fn int QTabWidget::insertTab(int index, QWidget *page, const QIcon& icon, const QString &label)
     \overload
 
-    Inserts another tab and page to the tab view.
+    Inserts a tab with the given \a label, \a page, and \a icon into
+    the tab widget at the specified \a index, and returns the index of the
+    inserted tab in the tab bar.
 
     This function is the same as insertTab(), but with an additional
     \a icon.
@@ -417,7 +459,7 @@ void QTabWidget::setTabIcon(int index, const QIcon &icon)
 }
 
 /*!
-    Returns the label text for the tab on the page at position \a index.
+    Returns the icon for the tab on the page at position \a index.
 */
 
 QIcon QTabWidget::tabIcon(int index) const
@@ -462,24 +504,40 @@ void QTabWidget::setTabEnabled(int index, bool enable)
   \fn void QTabWidget::setCornerWidget(QWidget *widget, Qt::Corner corner)
 
   Sets the given \a widget to be shown in the specified \a corner of the
-  tab widget.
+  tab widget. The geometry of the widget is determined based on the widget's
+  sizeHint() and the style().
 
   Only the horizontal element of the \a corner will be used.
+
+  Passing 0 shows no widget in the corner.
+
+  Any previously set corner widget is hidden.
+
+  All widgets set here will be deleted by the tab widget when it is
+  destroyed unless you separately reparent the widget after setting
+  some other corner widget (or 0).
 
   Note: Corner widgets are designed for \l North and \l South tab positions;
   other orientations are known to not work properly.
 
   \sa cornerWidget(), setTabPosition()
 */
-void QTabWidget::setCornerWidget(QWidget * w, Qt::Corner corner)
+void QTabWidget::setCornerWidget(QWidget * widget, Qt::Corner corner)
 {
     Q_D(QTabWidget);
-    if (!w)
-        return;
-    if ((uint)corner & 1)
-        d->rightCornerWidget = w;
-    else
-        d->leftCornerWidget = w;
+    if (widget && widget->parentWidget() != this)
+        widget->setParent(this);
+
+    if (corner & Qt::TopRightCorner) {
+        if (d->rightCornerWidget)
+            d->rightCornerWidget->hide();
+        d->rightCornerWidget = widget;
+    } else {
+        if (d->leftCornerWidget)
+            d->leftCornerWidget->hide();
+        d->leftCornerWidget = widget;
+    }
+    setUpLayout();
 }
 
 /*!
@@ -488,14 +546,16 @@ void QTabWidget::setCornerWidget(QWidget * w, Qt::Corner corner)
 QWidget * QTabWidget::cornerWidget(Qt::Corner corner) const
 {
     Q_D(const QTabWidget);
-    if ((uint)corner & 1)
+    if (corner & Qt::TopRightCorner)
         return d->rightCornerWidget;
     return d->leftCornerWidget;
 }
 
 /*!
-   Removes the page at position \a index from this stack of
-   widgets. Does not delete the page widget.
+   Removes the tab at position \a index from this stack of widgets.
+   The page widget itself is not deleted.
+
+   \sa addTab(), insertTab()
 */
 void QTabWidget::removeTab(int index)
 {
@@ -643,11 +703,16 @@ void QTabWidget::setUpLayout(bool onlyCheck)
     if (onlyCheck && !d->dirty)
         return; // nothing to do
 
+    QStyleOptionTabWidgetFrame option;
+    initStyleOption(&option);
+
+    // this must be done immediately, because QWidgetItem relies on it (even if !isVisible())
+    d->setLayoutItemMargins(QStyle::SE_TabWidgetLayoutItem, &option);
+
     if (!isVisible()) {
         d->dirty = true;
         return; // we'll do it later
     }
-    QStyleOptionTabWidgetFrame option = d->getStyleOption();
 
     QRect tabRect = style()->subElementRect(QStyle::SE_TabWidgetTabBar, &option, this);
     d->panelRect = style()->subElementRect(QStyle::SE_TabWidgetTabPane, &option, this);
@@ -831,7 +896,11 @@ bool QTabWidget::event(QEvent *ev)
  */
 void QTabWidget::changeEvent(QEvent *ev)
 {
-    if(ev->type() == QEvent::StyleChange)
+    if (ev->type() == QEvent::StyleChange
+#ifdef Q_WS_MAC
+            || ev->type() == QEvent::MacSizeChange
+#endif
+            )
         setUpLayout();
     QWidget::changeEvent(ev);
 }
@@ -843,19 +912,39 @@ void QTabWidget::changeEvent(QEvent *ev)
 void QTabWidget::keyPressEvent(QKeyEvent *e)
 {
     Q_D(QTabWidget);
-    if ((e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) &&
-        count() > 1 && e->modifiers() & Qt::ControlModifier) {
+    if (((e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) &&
+          count() > 1 && e->modifiers() & Qt::ControlModifier)
+#ifdef QT_KEYPAD_NAVIGATION
+          || QApplication::keypadNavigationEnabled() && (e->key() == Qt::Key_Left || e->key() == Qt::Key_Right) && count() > 1
+#endif
+       ) {
+        int pageCount = d->tabs->count();
         int page = currentIndex();
-        if (e->key() == Qt::Key_Backtab || e->modifiers() & Qt::ShiftModifier) {
-            page--;
-            if (page < 0)
+        int dx = (e->key() == Qt::Key_Backtab || e->modifiers() & Qt::ShiftModifier) ? -1 : 1;
+#ifdef QT_KEYPAD_NAVIGATION
+        if (QApplication::keypadNavigationEnabled() && (e->key() == Qt::Key_Left || e->key() == Qt::Key_Right))
+            dx = e->key() == (isRightToLeft() ? Qt::Key_Right : Qt::Key_Left) ? -1 : 1;
+#endif
+        for (int pass = 0; pass < pageCount; ++pass) {
+            page+=dx;
+            if (page < 0
+#ifdef QT_KEYPAD_NAVIGATION
+                && !e->isAutoRepeat()
+#endif
+               ) {
                 page = count() - 1;
-        } else {
-            page++;
-            if (page >= count())
+            } else if (page >= pageCount
+#ifdef QT_KEYPAD_NAVIGATION
+                       && !e->isAutoRepeat()
+#endif
+                      ) {
                 page = 0;
+            }
+            if (d->tabs->isTabEnabled(page)) {
+                setCurrentIndex(page);
+                break;
+            }
         }
-        setCurrentIndex(page);
         if (!qApp->focusWidget())
             d->tabs->setFocus();
     } else {
@@ -966,7 +1055,7 @@ void QTabWidget::paintEvent(QPaintEvent *)
     Q_D(QTabWidget);
     QStylePainter p(this);
     QStyleOptionTabWidgetFrame opt;
-    opt = d->getStyleOption();
+    initStyleOption(&opt);
     opt.rect = d->panelRect;
     p.drawPrimitive(QStyle::PE_FrameTabWidget, opt);
 }
@@ -976,7 +1065,9 @@ void QTabWidget::paintEvent(QPaintEvent *)
     \brief The size for icons in the tab bar
     \since 4.2
 
-    The default value is style-dependent.
+    The default value is style-dependent. This is the maximum size
+    that the icons will have. Icons are not scaled up if they are of
+    smaller size.
 
     \sa QTabBar::iconSize
 */
@@ -1033,6 +1124,17 @@ bool QTabWidget::usesScrollButtons() const
 void QTabWidget::setUsesScrollButtons(bool useButtons)
 {
     d_func()->tabs->setUsesScrollButtons(useButtons);
+}
+
+/*!
+    Removes all the pages, but does not delete them. Calling this function
+    is equivalent to calling removeTab() until the tab widget is empty.
+*/
+void QTabWidget::clear()
+{
+    // ### optimize by introduce QStackedLayout::clear()
+    while (count())
+        removeTab(0);
 }
 
 /*!

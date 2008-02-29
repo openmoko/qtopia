@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -51,15 +51,15 @@ public:
 
     bool addItem(GridItem *);
 
-    GridItem *getCurrent() const;
+    GridItem *current() const;
 
-    GridItem *getItem(int row,int column) const;
+    GridItem *item(int row,int column) const;
 
     void setCurrent(int row,int column,bool animate = true);
 
     void setCurrent(GridItem *gridItem,bool animate = true);
 
-    QObject *getConnector() const;
+    QObject *connector() const;
 
     void setActive(bool isActive);
 
@@ -88,9 +88,13 @@ public:
 
     void resetAnimation();
 
+    void paletteChanged();
+
 protected:
 
     void keyPressEvent(QKeyEvent *event);
+
+    void keyReleaseEvent(QKeyEvent *event);
 
 private:
 
@@ -99,11 +103,11 @@ private:
 
     typedef enum{NotAnimating,Animating,AnimationPending} AnimationState;
 
-    // Get manual animations to run for 3 seconds.
+    // Get coded animations to run for 1.5 seconds.
     // TODO: make this configurable.
-    static const int ANIMATION_TIME = 3000;
+    static const int ANIMATION_TIME = 1500;
 
-    static const int ANIMATION_DELAY_INTERVAL = 100;
+    static const int ANIMATION_DELAY_INTERVAL = 200;
 
     // Colour used to blend images during painting when the SelectedItem is 'active'.
     const QColor highlightColor;
@@ -130,11 +134,11 @@ private:
 
     void stopAnimation();
 
-    QSize getSelectedSize(GridItem *item) const;
+    QSize selectedSize(GridItem *item) const;
 
-    QPoint getPos(GridItem *) const;
+    QPoint pos(GridItem *) const;
 
-    QRect getGeometry(GridItem *) const;
+    QRect geometry(GridItem *) const;
 
     void drawBackground(QPainter *);
 
@@ -144,11 +148,11 @@ private:
 
     static void blendColor(QImage &img,QColor color);
 
-    qreal getXDrift();
-    qreal getYDrift();
+    qreal xDrift();
+    qreal yDrift();
 
     // Provides the signals/slots mechanism for this object.
-    SelectedItemConnector *connector;
+    SelectedItemConnector *mConnector;
 
     // The background image - created on demand.
     QPixmap *background;
@@ -160,7 +164,7 @@ private:
     int margin;
 
     // The dimensions of this item.
-    mutable QSize selectedSize;
+    mutable QSize mSelectedSize;
 
     // Table of all items. Note that the scene is responsible for deleting the items.
     GridItemTable table;
@@ -178,6 +182,8 @@ private:
 
     // When true, the SelectedItem is drawn differently. False by default.
     bool active;
+    // Used by keyPressEvent(...) and keyReleaseEvent(...).
+    bool pressed;
 
     // Used to move the SelectedItem from the current GridItem object to a destination object.
     // The amount of time it takes to move an item is determine by the ctor's 'slideTimeInterval'
@@ -185,7 +191,7 @@ private:
     // slots.
     QTimeLine *moveTimeLine;
 
-    // Used to manually animate SVG items. (If a movie is available, it will be used to do the
+    // Used to codedly animate SVG items. (If a movie is available, it will be used to do the
     // animation instead.)
     QTimeLine *playTimeLine;
 
@@ -193,7 +199,7 @@ private:
     // across from the current GridItem object to a neighbour in the grid.
     int slideTimeInterval;
 
-    // Used during manual animations, i.e. in response to a playTimeLine signal.
+    // Used during coded animations, i.e. in response to a playTimeLine signal.
     // This will be a value in the range [0,100].
     int animationStage;
 
@@ -217,8 +223,8 @@ private:
     // shift to the right; at the start of the move its x position is
     // originalXPosition + xDrift, while at the end of the
     // move its x position is originalXPosition.
-    qreal xDrift;
-    qreal yDrift;
+    qreal mXDrift;
+    qreal mYDrift;
 };
 
 #endif

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,9 +24,12 @@
 #include <QSettings>
 #include <QTextCodec>
 #include <QTextStream>
+#include <QStyle>
 
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
+
+#include <QDebug>
 
 /*
    Supports very basic SSI
@@ -51,22 +54,19 @@ HelpPreProcessor::HelpPreProcessor( const QString &file, int maxrecurs )
     replace["INFRARED"]="1";
 #endif
 
-#ifdef QTOPIA_PHONE
-    replace["PHONESTYLE"]="1";
-    if ( Qtopia::mousePreferred() )
+    if (QApplication::style()->inherits("QThumbStyle"))
+        replace["FINGER"]="1";
+    else if ( Qtopia::mousePreferred() )
         replace["TOUCH"]="1";
     else
         replace["KEYPAD"]="1";
     if ( Qtopia::hasKey( Qt::Key_Flip ) )
         replace["FLIP"]="1";
-#else
-    replace["PDASTYLE"]="1";
-#endif
 }
 
 QString HelpPreProcessor::text()
 {
-    return parse("device-keys.html")+parse(mFile);
+    return parse(mFile);
 }
 
 QString HelpPreProcessor::parse(const QString& filename)
@@ -95,7 +95,7 @@ QString HelpPreProcessor::parse(const QString& filename)
 
     QRegExp tagAny( "<!--#" );
     QRegExp tagIf( "<!--#if\\s+expr=\"\\$([^\"]*)\"\\s*-->" );
-    QRegExp tagElif( "<!--#elif\\s+expr=\"\\$([^\"]*)\"\\s*-->" );
+    QRegExp tagElif( "<!--#elif\\s+expr=\"\\$([^\"]*)\"\\s*-->" ); // not supported
     QRegExp tagElse( "<!--#else\\s*-->" );
     QRegExp tagEndif( "<!--#endif\\s*-->" );
     QRegExp tagSet( "<!--#set\\s+var=\"([^\"]*)\"\\s*value=\"([^\"]*)\"\\s*-->" );

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,12 +29,11 @@
 #include <QListWidget>
 #include <QStringList>
 #include <QLabel>
-
 #include <qtopianamespace.h>
-
+#include <qtopia/qsoftmenubar.h>
 #include <qirlocaldevice.h>
 
-static int AUTO_QUIT_TIME = 650; // or 0 if auto-quitting is confusing.
+static int AUTO_QUIT_TIME = 0; // or 0 if auto-quitting is confusing.
 
 Beaming::Beaming( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl ), state( -1 ), protocol( -1 )
@@ -52,9 +51,7 @@ Beaming::Beaming( QWidget* parent, Qt::WFlags fl )
         label->setWordWrap(true);
         vbl->addWidget(label);
         this->setLayout(vbl);
-#ifdef QTOPIA_PHONE
         showMaximized();
-#endif
         return;
     }
 
@@ -100,10 +97,8 @@ Beaming::Beaming( QWidget* parent, Qt::WFlags fl )
         connect(lb,SIGNAL(itemActivated(QListWidgetItem*)),this,SLOT(chooseProtocol(QListWidgetItem*)));
     }
 
-#ifdef QTOPIA_PHONE
     // add context menu for help
-    contextMenu = QSoftMenuBar::menuFor( this );
-#endif
+    QSoftMenuBar::menuFor( this );
 
     this->setLayout(vbl);
 }
@@ -118,10 +113,8 @@ void Beaming::chooseState(int c)
 void Beaming::chooseProtocol(QListWidgetItem *item)
 {
     protocol = lb->row( item );
-#ifdef QTOPIA_PHONE
     if( !Qtopia::mousePreferred() )
         lb->setEditFocus(false);
-#endif
 }
 
 Beaming::~Beaming()

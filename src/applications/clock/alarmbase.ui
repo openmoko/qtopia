@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>235</width>
-    <height>404</height>
+    <width>245</width>
+    <height>299</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -14,131 +14,102 @@
   </property>
   <layout class="QVBoxLayout" >
    <property name="margin" >
-    <number>4</number>
+    <number>9</number>
    </property>
    <property name="spacing" >
-    <number>4</number>
+    <number>6</number>
    </property>
    <item>
-    <widget class="QCheckBox" name="dailyEnabled" >
+    <widget class="QCheckBox" name="alarmEnabled" >
      <property name="whatsThis" >
       <string>Check to enable the daily alarm</string>
      </property>
      <property name="text" >
-      <string>Enabled</string>
+      <string comment="Activate Alarm" >Alarm on</string>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="enabled" >
+      <bool>false</bool>
      </property>
-     <property name="spacing" >
-      <number>6</number>
+     <property name="title" >
+      <string/>
      </property>
-     <item>
-      <widget class="QSpinBox" name="dailyHour" >
-       <property name="minimumSize" >
-        <size>
-         <width>35</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="whatsThis" >
-        <string>Set the hour the alarm will sound.</string>
-       </property>
-       <property name="wrapping" >
-        <bool>true</bool>
-       </property>
-       <property name="maximum" >
-        <number>23</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="TextLabel2" >
-       <property name="sizePolicy" >
-        <sizepolicy>
-         <hsizetype>4</hsizetype>
-         <vsizetype>1</vsizetype>
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize" >
-        <size>
-         <width>5</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text" >
-        <string>:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="dailyMinute" >
-       <property name="minimumSize" >
-        <size>
-         <width>35</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="whatsThis" >
-        <string>Set the minute the alarm will sound.</string>
-       </property>
-       <property name="wrapping" >
-        <bool>true</bool>
-       </property>
-       <property name="maximum" >
-        <number>59</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="dailyAmPm" >
-       <property name="minimumSize" >
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <item>
+     <layout class="QGridLayout" >
+      <property name="margin" >
+       <number>9</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item row="0" column="0" >
+       <widget class="QLabel" name="label" >
         <property name="text" >
-         <string>AM</string>
+         <string>Time:</string>
         </property>
-       </item>
-       <item>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="buddy" >
+         <cstring>alarmTimeEdit</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="2" >
+       <widget class="QTimeEdit" name="alarmTimeEdit" />
+      </item>
+      <item row="1" column="0" >
+       <widget class="QLabel" name="TextLabel1" >
         <property name="text" >
-         <string>PM</string>
+         <string>Days:</string>
         </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QWidget" native="1" name="widget" >
-       <property name="sizePolicy" >
-        <sizepolicy>
-         <hsizetype>5</hsizetype>
-         <vsizetype>1</vsizetype>
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QLabel" name="TextLabel1" >
-     <property name="text" >
-      <string>Days:</string>
-     </property>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="3" >
+       <widget class="QLineEdit" name="alarmDaysEdit" >
+        <property name="focusPolicy" >
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="readOnly" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2" >
+       <widget class="QPushButton" name="changeAlarmDaysButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text" >
+         <string>Change...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </widget>
-   </item>
-   <item>
-    <widget class="QFrame" name="daysFrame" />
    </item>
    <item>
     <spacer>
@@ -147,8 +118,8 @@
      </property>
      <property name="sizeHint" >
       <size>
-       <width>20</width>
-       <height>40</height>
+       <width>227</width>
+       <height>71</height>
       </size>
      </property>
     </spacer>
@@ -156,5 +127,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>alarmEnabled</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>groupBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>48</x>
+     <y>19</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>84</x>
+     <y>47</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

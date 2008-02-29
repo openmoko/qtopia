@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -358,20 +373,10 @@ bool QTranslator::load(const QString & filename, const QString & directory,
     d->clear();
 
     QString prefix;
-
-    const int l = filename.size();
-    if (!((l > 0 && filename[0] == QLatin1Char('/'))
-#ifdef Q_WS_WIN
-          || (l >= 2 && filename[0].isLetter() && filename[1] == QLatin1Char(':'))
-          || (l >= 1 && filename[0] == QLatin1Char('\\'))
-#endif
-            )) {
+    if (QFileInfo(filename).isRelative()) { 
         prefix = directory;
-    }
-
-    if (prefix.length()) {
-        if (prefix[int(prefix.length()-1)] != QLatin1Char('/'))
-            prefix += QLatin1Char('/');
+	if (prefix.length() && !prefix.endsWith(QLatin1Char('/')))
+	    prefix += QLatin1Char('/');
     }
 
     QString fname = filename;
@@ -429,8 +434,8 @@ bool QTranslator::load(const QString & filename, const QString & directory,
 #endif
             );
     if (fd >= 0) {
-        struct stat st;
-        if (!fstat(fd, &st)) {
+        QT_STATBUF st;
+        if (!QT_FSTAT(fd, &st)) {
             char *ptr;
             ptr = reinterpret_cast<char *>(
                 mmap(0, st.st_size,             // any address, whole file
@@ -739,6 +744,9 @@ void QTranslatorPrivate::clear()
     Returns the translation for the key (\a context, \a sourceText,
     \a comment). If none is found, also tries (\a context, \a
     sourceText, ""). If that still fails, returns an empty string.
+
+    If you need to programatically insert translations in to a
+    QTranslator, this function can be reimplemented.
 
     \sa load()
 */

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -40,6 +40,7 @@ struct entry_table
 int read_bdaddr(int fd)
 {
     char bdaddr[6];
+
     if (ioctl(fd, DOCPTGETBTMACADDR, bdaddr) < 0) {
         return 1;
     }
@@ -70,7 +71,56 @@ int write_bdaddr(int fd, const char *value)
     return 0;
 }
 
+int read_localmac(int fd)
+{
+    char bdaddr[6];
+
+    memset(bdaddr, 0, 6);
+
+    ioctl(fd, DOCPTGETBTMACADDR, bdaddr);
+
+    if (bdaddr[0] == 0x00 && bdaddr[1] == 0x19 && bdaddr[2] == 0x65) {
+        // Use the bluetooth MAC address but set the locally administered bit
+        // Third bit used to for local / remote side of USB.
+        bdaddr[0] |= 0x06;
+
+        fprintf(stdout, "%02X:%02X:%02X:%02X:%02X:%02X\n", bdaddr[0], bdaddr[1], bdaddr[2],
+                bdaddr[3], bdaddr[4], bdaddr[5]);
+    } else {
+        // detected invalid address, use kernel default
+        fprintf(stdout, "40:00:01:00:00:01\n");
+    }
+
+    return 0;
+}
+
+int read_remotemac(int fd)
+{
+    char bdaddr[6];
+
+    memset(bdaddr, 0, 6);
+
+    ioctl(fd, DOCPTGETBTMACADDR, bdaddr);
+
+    if (bdaddr[0] == 0x00 && bdaddr[1] == 0x19 && bdaddr[2] == 0x65) {
+        // Use the bluetooth MAC address but set the locally administered bit
+        // Third bit used to for local / remote side of USB.
+        bdaddr[0] |= 0x02;
+        bdaddr[0] &= 0xfb;
+
+        fprintf(stdout, "%02X:%02X:%02X:%02X:%02X:%02X\n", bdaddr[0], bdaddr[1], bdaddr[2],
+                bdaddr[3], bdaddr[4], bdaddr[5]);
+    } else {
+        // detected invalid address, use kernel default
+        fprintf(stdout, "40:00:02:00:00:01\n");
+    }
+
+    return 0;
+}
+
 struct entry_table entries[] = { {"bdaddr", "Get/Set Bluetooth Address", read_bdaddr, write_bdaddr},
+                                 {"localmac", "Get local Ethernet Address", read_localmac, 0},
+                                 {"remotemac", "Get remote Ethernet Address", read_remotemac, 0},
                                  {0, 0, 0, 0}
                                };
 

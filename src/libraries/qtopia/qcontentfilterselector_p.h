@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,10 +22,21 @@
 #ifndef QCONTENTFILTERSELECTORPRIVATE_H
 #define QCONTENTFILTERSELECTORPRIVATE_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <QAbstractProxyModel>
 #include <qcontentfiltermodel.h>
 #include <QListView>
-#include <QItemDelegate>
+#include <QtopiaItemDelegate>
 
 class QTreePageProxyModelPrivate;
 
@@ -122,8 +133,8 @@ public:
     QContentFilter checkedFilter( const QModelIndex &parent = QModelIndex() ) const;
     QString checkedLabel() const;
 
-    QContentFilterModel *model() const;
-    void setModel( QContentFilterModel *model );
+    QContentFilterModel *filterModel() const;
+    void setFilterModel( QContentFilterModel *model );
 
 signals:
     void filterSelected( const QContentFilter &filter );
@@ -134,9 +145,7 @@ private slots:
 
 
 protected:
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     void keyPressEvent( QKeyEvent *e );
-#endif
     void focusInEvent( QFocusEvent *e );
 
 private:
@@ -144,7 +153,7 @@ private:
     QContentFilterModel *m_filterModel;
 };
 
-class QTreePageItemDelegate : public QItemDelegate
+class QTreePageItemDelegate : public QtopiaItemDelegate
 {
 public:
     explicit QTreePageItemDelegate( QObject *parent = 0 );

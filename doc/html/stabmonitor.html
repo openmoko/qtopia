@@ -49,6 +49,7 @@
 <p>These files are maintained by the cardmgr application. When a new PCMCIA card is plugged into the system one of the above files is edited to reflect the changed state of the PCMCIA sub system. Most systems only have one of the above files. The StabMonitor task sends the <tt>stabChanged()</tt> message on the <tt>QPE/Card</tt> channel in order to notify Qtopia about the change.</p>
 <p>If the target device doesn't support PCMCIA or has a different mechanism for stab change notifications the StabMonitor task can be disabled and alternative arrangements have to be provided.</p>
 <p>This task is a replacement for the SysFileMonitor class in earlier versions of Qtopia (before Qtopia 4.2&#x2e;2). The old SysFileMonitor used active polling to detect stab changes which was very inefficient.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="StabMonitor"></a>StabMonitor::StabMonitor ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -57,6 +58,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

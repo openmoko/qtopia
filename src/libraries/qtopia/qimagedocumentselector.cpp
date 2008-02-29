@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -86,8 +86,8 @@
     QImageDocumentSelector *selector = new QImageDocumentSelector( this );
     selector->setThumbnailSize( QSize( 100, 100 ) );
 
-    connect( selector, SIGNAL(documentSelected(const QContent&)),
-        this, SLOT(openImage(const QContent&)) );
+    connect( selector, SIGNAL(documentSelected(QContent)),
+        this, SLOT(openImage(QContent)) );
   \endcode
 
   QImageDocumentSelector is often the first widget seen in a \l {Qtopia - Main Document Widget}{document-oriented application }. When used
@@ -102,15 +102,11 @@
 
 #include <qtopiaapplication.h>
 #include <qtopianamespace.h>
-
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qsoftmenubar.h>
-#endif
-
 #include <qdrmcontent.h>
-
 #include <QLayout>
 #include <QDesktopWidget>
+#include <QMenu>
 
 /*!
   Construct an image document selector widget with the given \a parent.
@@ -125,18 +121,16 @@ QImageDocumentSelector::QImageDocumentSelector( QWidget* parent )
     d = new QImageDocumentSelectorPrivate( this );
     layout->addWidget( d );
 
-    connect( d, SIGNAL(documentSelected(const QContent&)),
-             this, SIGNAL(documentSelected(const QContent&)) );
-    connect( d, SIGNAL(documentHeld(const QContent&,const QPoint&)),
-        this, SIGNAL(documentHeld(const QContent&,const QPoint&)) );
+    connect( d, SIGNAL(documentSelected(QContent)),
+             this, SIGNAL(documentSelected(QContent)) );
+    connect( d, SIGNAL(documentHeld(QContent,QPoint)),
+        this, SIGNAL(documentHeld(QContent,QPoint)) );
 
     connect( d, SIGNAL(documentsChanged()), this, SIGNAL(documentsChanged()) );
 
     setFocusProxy( d );
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QSoftMenuBar::addMenuTo( this, QSoftMenuBar::menuFor( d ) );
-#endif
 }
 
 /*!
@@ -266,6 +260,26 @@ QDocumentSelector::SortMode QImageDocumentSelector::sortMode() const
 void QImageDocumentSelector::setSortMode( QDocumentSelector::SortMode sortMode )
 {
     d->setSortMode( sortMode );
+}
+
+/*!
+    Returns the current document sort criteria.
+*/
+QContentSortCriteria QImageDocumentSelector::sortCriteria() const
+{
+    return d->sortCriteria();
+}
+
+/*!
+    Sets the document \a sort criteria.
+
+    This will set the document selector sort mode to SortCriteria.
+
+    \sa setSortMode()
+*/
+void QImageDocumentSelector::setSortCriteria( const QContentSortCriteria &sort )
+{
+    d->setSortCriteria( sort );
 }
 
 /*! \internal */
@@ -451,29 +465,27 @@ void QImageDocumentSelectorDialog::init()
 {
     setWindowTitle( tr( "Select Image" ) );
     QVBoxLayout *vb = new QVBoxLayout( this );
+    vb->setContentsMargins(0, 0, 0, 0);
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    connect( selector, SIGNAL(documentSelected(const QContent&)), this, SLOT(accept()) );
+    connect( selector, SIGNAL(documentSelected(QContent)), this, SLOT(accept()) );
     connect( selector, SIGNAL(documentsChanged()), this, SLOT(setContextBar()) );
-#else
-    connect( selector, SIGNAL(documentSelected(const QContent&)),
-             this, SLOT(setViewSingle()) );
-#endif
 
     vb->addWidget( selector );
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     // Set thumbnail view
     selector->setViewMode( QImageDocumentSelector::Thumbnail );
-    QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::Cancel );
+
+    QAction *viewAction = new QAction( QIcon( ":icon/view" ), tr( "View" ), this );
+    connect( viewAction, SIGNAL(triggered()), this, SLOT(viewImage()) );
+    QMenu *menu = QSoftMenuBar::menuFor( selector );
+    menu->actions().count() ? menu->insertAction(menu->actions().at(0), viewAction)
+                    : menu->addAction(viewAction);
+    QSoftMenuBar::addMenuTo( this, menu );
+
     setContextBar();
-#endif
 
     setModal( true );
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QtopiaApplication::setMenuLike( this, true );
-    QSoftMenuBar::addMenuTo( this, QSoftMenuBar::menuFor( selector ) );
-#endif
 }
 
 /*!
@@ -568,49 +580,54 @@ void QImageDocumentSelectorDialog::setSortMode( QDocumentSelector::SortMode sort
     selector->setSortMode( sortMode );
 }
 
+/*!
+    Returns the current document sort criteria.
+*/
+QContentSortCriteria QImageDocumentSelectorDialog::sortCriteria() const
+{
+    return selector->sortCriteria();
+}
+
+/*!
+    Sets the document \a sort criteria.
+
+    This will set the document selector sort mode to SortCriteria.
+
+    \sa setSortMode()
+*/
+void QImageDocumentSelectorDialog::setSortCriteria( const QContentSortCriteria &sort )
+{
+    selector->setSortCriteria( sort );
+}
+
 /*! \internal */
 void QImageDocumentSelectorDialog::accept()
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    // If thumbnail view, switch to single view
-    // Otherwise, accept
-    if( selector->viewMode() == QImageDocumentSelector::Thumbnail && selector->documents().count() )
-    {
-        selector->setViewMode( QImageDocumentSelector::Single );
-        setContextBar();
-    }
-    else {
-#endif
-        QDialog::accept();
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    }
-#endif
+    QDialog::accept();
 }
 
 /*! \internal */
 void QImageDocumentSelectorDialog::reject()
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     // If single view, switch to thumbnail view
     // Otherwise, reject
     if( selector->viewMode() == QImageDocumentSelector::Single && selector->documents().count() ) {
         selector->setViewMode( QImageDocumentSelector::Thumbnail );
         setContextBar();
-    } else {
-#endif
+    } else
         QDialog::reject();
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    }
-#endif
 }
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 void QImageDocumentSelectorDialog::setContextBar()
 {
     bool hasImages = selector->documents().count();
+    QMenu *menu = QSoftMenuBar::menuFor( selector );
     switch( selector->viewMode() )
     {
     case QImageDocumentSelector::Single:
+        if (menu->actions().count())
+            menu->actions().at(0)->setVisible(false);   //warning: assumes "view" is first item
+        QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::Back );
         if( hasImages ) {
             QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Ok );
         } else {
@@ -618,22 +635,23 @@ void QImageDocumentSelectorDialog::setContextBar()
         }
         break;
     case QImageDocumentSelector::Thumbnail:
+        if (menu->actions().count())
+            menu->actions().at(0)->setVisible(true);   //warning: assumes "view" is first item
+        QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::Cancel );
         if( hasImages ) {
-            QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::View );
+            QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Ok );
         } else {
             QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::NoLabel );
         }
         break;
     }
 }
-#endif
 
-#ifdef QTOPIA_PDA
-void QImageDocumentSelectorDialog::setViewSingle()
+void QImageDocumentSelectorDialog::viewImage()
 {
     selector->setViewMode( QImageDocumentSelector::Single );
+    setContextBar();
 }
-#endif
 
 /*!
     Sets the \a categories checked by default in the document selector's category filter dialog.

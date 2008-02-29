@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -38,14 +38,34 @@
     \o converting an alphabetic telephone number into the equivalent numeric number
     \endlist
 
+
+  \sa {Pim Library}
 */
+
+
+/*
+   Helper function for deciding if something is a URL (does it have a protocol, mostly)
+*/
+static bool isNumberURL(const QString& number)
+{
+    // Does this look like a URL?
+    int colonIdx = number.indexOf(':');
+    // If it isn't the first or last character, guess that it is a URI
+    // (we don't create a QUrl here)
+    if (colonIdx > 0 && colonIdx < number.length() - 1)
+        return true;
+    return false;
+}
 
 /*!
     Strip the given \a number down to remove non-digit and non-dialing characters.
+    If \a number seems to be a URI, this function will return the original value.
 */
-
 QString QPhoneNumber::stripNumber( const QString& number )
 {
+    if (isNumberURL(number))
+        return number; // XXX we could strip non RFC compliant characters, I guess
+
     QString n = "";
     int posn;
     uint ch;
@@ -90,9 +110,7 @@ typedef struct
 
 // This list was derived from a combination of the codes in the
 // back of the Telstra White Pages, and the local area code prefixes
-// at "http://kropla.com/dialcode.htm". As a list of facts, they are
-// not copyrightable.
-
+// at "http://kropla.com/dialcode.htm".
 
 static IDDRule const rules[] = {
     {"Afghanistan",              93,    2,  0,   0,   1},
@@ -102,7 +120,7 @@ static IDDRule const rules[] = {
     {"Angola",                  244,    1,  0,   0,   1},
     {"Anguilla",               1264,    0,  0,   1,   1},
     {"Antarctica",              672,    2,  0,  -1,   1},
-    {"Antigua amd Barbuda",    1268,    0,  0,   1,   1},
+    {"Antigua and Barbuda",    1268,    0,  0,   1,   1},
     {"Argentina",                42,    3,  2,   0,   1},
     {"Armenia",                 374,    1,  0,   8,   1},
     {"Aruba",                   297,    0,  0,  -1,   1},
@@ -186,7 +204,7 @@ static IDDRule const rules[] = {
     {"Grenada",                1473,    0,  0,   1,   1},
     {"Guadeloupe",              590,    0,  0,  -1,   1},
     {"Guam",                   1671,    0,  0,   1,   1},
-    {"Guantanomo Bay",         5399,    0,  0,   0,   1},
+    {"Guantanamo Bay",         5399,    0,  0,   0,   1},
     {"Guatemala",               502,    0,  0,   0,   1},
     {"Guinea Bissau",           245,    0,  0,  -1,   1},
     {"Guinea Republic",         224,    0,  0,   0,   1},
@@ -481,10 +499,15 @@ static void splitNumber( const QString& _number,
 /*!
   Returns the local component of the phone \a number.  In the
   case of countries with variable length area codes this may
-  only return the end of the local number.
+  only return the end of the local number.  In the case of
+  URLs (for example 'sip:user@voipserver'), the original
+  URL is returned.
 */
 QString QPhoneNumber::localNumber( const QString &number)
 {
+    if (isNumberURL(number))
+        return number;
+
     QString n, c, a, l1, l2;
 
     n = stripNumber(number);
@@ -501,13 +524,37 @@ QString QPhoneNumber::localNumber( const QString &number)
     to which they match.  Returns zero for no match, or increasing positive
     values for the "quality" of the match between the values.
 
-    Both numbers should be in numeric (not alphanumeric) form.
+    Both numbers should be in numeric (not alphanumeric) form, unless they
+    are URLs.  URLs are just compared strictly for equality.  If one argument
+    appears to be a URL, and the other does not appear to be one, then the
+    non protocol part of the URL argument will be compared strictly against the
+    other argument.
 
     \sa resolveLetters()
 */
 
 int QPhoneNumber::matchNumbers( const QString& num1, const QString& num2 )
 {
+    bool is1Url = isNumberURL(num1);
+    bool is2Url = isNumberURL(num2);
+
+    if (is1Url && is2Url) {
+        if (num1 == num2)
+            return 100;
+        else
+            return 0;
+    } else if (is1Url || is2Url) {
+        // Strip off the protocol part
+        QString u1 = is1Url ? num1.mid(num1.indexOf(':') + 1) : num1;
+        QString u2 = is2Url ? num2.mid(num2.indexOf(':') + 1) : num2;
+
+        if (u1 == u2)
+            return 5;
+        else
+            return 0;
+    }
+
+    // Non URL case
     QString n1 = stripNumber( num1 );
     QString n2 = stripNumber( num2 );
     QString countryCode1;
@@ -584,16 +631,33 @@ int QPhoneNumber::matchNumbers( const QString& num1, const QString& num2 )
 
 /*!
     Returns whether the given number \a num appears to start with the given \a prefix.
-    The \a prefix will be tested against \a num with and without area code or international
-    prefixes.
 
-    Both numbers should be in numeric (not alphanumeric) form.
+    For a URL argument \a num, if the \a prefix argument is also a URL, a strict prefix
+    match will be performed.  If only one of the arguments is a URL, the non protocol part
+    of the URL will be strictly against the other argument.
+
+    For non URL arguments, the \a prefix will be tested against \a num with and without
+    area code or international prefixes.  Both numbers should be in numeric (not alphanumeric) form.
 
     \sa resolveLetters()
 */
 
 bool QPhoneNumber::matchPrefix( const QString& num, const QString& prefix )
 {
+    bool is1Url = isNumberURL(num);
+    bool is2Url = isNumberURL(prefix);
+
+    if (is1Url && is2Url) {
+        return num.startsWith(prefix);
+    } else if (is1Url || is2Url) {
+        // Strip off the protocol part
+        QString u1 = is1Url ? num.mid(num.indexOf(':') + 1) : num;
+        QString u2 = is2Url ? prefix.mid(prefix.indexOf(':') + 1) : prefix;
+
+        return u1.startsWith(u2);
+    }
+
+    // Non URL case
     QString n = stripNumber( num );
     QString p = stripNumber( prefix );
     QString countryCode1;
@@ -644,6 +708,9 @@ bool QPhoneNumber::matchPrefix( const QString& num, const QString& prefix )
     Convert an alphanumeric phone \a number into a regular phone number.
     e.g. \c{1-800-HEY-PHIL} becomes \c{1-800-439-7445}.
 
+    If a URL is passed to this function (e.g. 'sip:user@sipserver'), the
+    original value is returned.
+
     Certain letters are not converted into numbers, because they
     can be used to control the way a number is dialed.  These letters
     are lower case \c p, \c w and \c x, which insert pauses
@@ -657,6 +724,8 @@ bool QPhoneNumber::matchPrefix( const QString& num, const QString& prefix )
 
 QString QPhoneNumber::resolveLetters( const QString& number )
 {
+    if (isNumberURL(number))
+        return number;
     static char const letterDigits[] = "22233344455566677778889999";
     QString n = "";
     int posn;

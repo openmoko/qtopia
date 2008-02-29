@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -42,17 +42,20 @@ public:
     QPixmap pixmap() const;
     QtopiaServiceRequest pressedAction() const;
     QtopiaServiceRequest heldAction() const;
-    bool pressedActionMappable() const { return m_PressedActionMapable; }
-    bool heldActionMappable() const { return m_HeldActionMapable; }
-
+    QtopiaServiceRequest releasedAction() const;
+    bool pressedActionMappable() const { return m_PressedActionMappable; }
+    bool heldActionMappable() const { return m_HeldActionMappable; }
+    bool releasedActionMappable() const { return m_releasedActionMappable; }
     void setKeycode(int keycode);
     void setContext(const QString& context);
     void setUserText(const QString& text);
     void setPixmap(const QString& pmn);
-    void setPressedAction(const QtopiaServiceRequest& qcopMessage);
-    void setHeldAction(const QtopiaServiceRequest& qcopMessage);
+    void setPressedAction(const QtopiaServiceRequest& action);
+    void setHeldAction(const QtopiaServiceRequest& action);
+    void setReleasedAction(const QtopiaServiceRequest& action);
     void setPressedActionMappable(bool);
     void setHeldActionMappable(bool);
+    void setReleasedActionMappable(bool);
     bool operator==(const QDeviceButton &e) const;
 
 private:
@@ -63,8 +66,10 @@ private:
     QString m_Context;
     QtopiaServiceRequest m_PressedAction;
     QtopiaServiceRequest m_HeldAction;
-    bool m_PressedActionMapable;
-    bool m_HeldActionMapable;
+    QtopiaServiceRequest m_releasedAction;
+    bool m_PressedActionMappable;
+    bool m_HeldActionMappable;
+    bool m_releasedActionMappable;
 };
 
 #define QTOPIA_DEFINED_DEVICEBUTTON

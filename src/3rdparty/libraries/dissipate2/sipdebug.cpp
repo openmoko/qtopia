@@ -11,7 +11,7 @@ static int debugEnabled(void)
     if ( debugMode == -1 ) {
         QSettings config( "Trolltech", "Log" );
         config.beginGroup( "Sip" );
-        debugMode = ( config.value( "Enabled", 0 ).toInt() != 0 );
+        debugMode = config.value( "Enabled", false ).toBool();
     }
     return debugMode;
 }

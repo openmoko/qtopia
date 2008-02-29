@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE QDOCINDEX>
+<INDEX title="Qtopia Sync Agent Documentation" version="" url="http://doc.trolltech.com/qtopia/qtopiadesktop" >
+ <namespace threadsafety="unspecified" access="public" location="" href="" module="" name="" >
+  <class threadsafety="unspecified" access="public" location="center.h" href="centerinterface.html" bases="" module="" name="CenterInterface" >
+   <function threadsafety="unspecified" access="public" location="center.h" meta="plain" virtual="pure" overload="false" href="centerinterface.html#currentDevice" name="currentDevice" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="center.h" meta="plain" virtual="pure" overload="false" href="centerinterface.html#linkPlugins" name="linkPlugins" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="center.h" meta="plain" virtual="pure" overload="false" href="centerinterface.html#devicePlugins" name="devicePlugins" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="center.h" meta="plain" virtual="pure" overload="false" href="centerinterface.html#getPlugin" name="getPlugin" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="id" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="center.h" meta="plain" virtual="pure" overload="false" href="centerinterface.html#syncObject" name="syncObject" const="false" static="false" />
+  </class>
+  <class threadsafety="unspecified" access="public" location="desktopsettings.h" href="desktopsettings.html" bases="QSettings" module="" name="DesktopSettings" >
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="constructor" virtual="non" overload="false" href="desktopsettings.html#DesktopSettings" name="DesktopSettings" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="section" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="destructor" virtual="impure" overload="false" href="desktopsettings.html#~DesktopSettings" name="~DesktopSettings" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="plain" virtual="non" overload="false" href="desktopsettings.html#debugMode" name="debugMode" const="false" static="true" />
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="plain" virtual="non" overload="false" href="desktopsettings.html#promptOnQuit" name="promptOnQuit" const="false" static="true" />
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="plain" virtual="non" overload="false" href="desktopsettings.html#currentPlugin" name="currentPlugin" const="false" static="true" />
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="plain" virtual="non" overload="false" href="desktopsettings.html#defaultPlugin" name="defaultPlugin" const="false" static="true" />
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="plain" virtual="non" overload="false" href="desktopsettings.html#installedDir" name="installedDir" const="false" static="true" />
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="plain" virtual="non" overload="false" href="desktopsettings.html#homePath" name="homePath" const="false" static="true" />
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="plain" virtual="non" overload="false" href="desktopsettings.html#systemLanguage" name="systemLanguage" const="false" static="true" />
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="plain" virtual="non" overload="false" href="desktopsettings.html#languages" name="languages" const="false" static="true" />
+   <function threadsafety="unspecified" access="public" location="desktopsettings.h" meta="plain" virtual="non" overload="false" href="desktopsettings.html#loadTranslations" name="loadTranslations" const="false" static="true" >
+    <parameter right="" left="const QString &amp;" name="file" />
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+  </class>
+  <class threadsafety="unspecified" access="public" location="qdplugin.h" href="qdpluginfactory.html" bases="QObject" module="" name="QDPluginFactory" >
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="constructor" virtual="non" overload="false" href="qdpluginfactory.html#QDPluginFactory" name="QDPluginFactory" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="destructor" virtual="impure" overload="false" href="qdpluginfactory.html#~QDPluginFactory" name="~QDPluginFactory" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdpluginfactory.html#executableName" name="executableName" const="true" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdpluginfactory.html#keys" name="keys" const="true" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdpluginfactory.html#create" name="create" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="key" />
+   </function>
+  </class>
+  <class threadsafety="unspecified" access="public" location="qdplugin.h" href="qdplugin.html" bases="QObject" module="" name="QDPlugin" >
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="constructor" virtual="non" overload="false" href="qdplugin.html#QDPlugin" name="QDPlugin" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="destructor" virtual="impure" overload="false" href="qdplugin.html#~QDPlugin" name="~QDPlugin" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="non" overload="false" href="qdplugin.html#centerInterface" name="centerInterface" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdplugin.html#id" name="id" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdplugin.html#displayName" name="displayName" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="impure" overload="false" href="qdplugin.html#init" name="init" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="non" overload="false" href="qdplugin.html#lock" name="lock" const="false" static="false" >
+    <parameter right="" left="QDPlugin *" name="plugin" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="non" overload="false" href="qdplugin.html#unlock" name="unlock" const="false" static="false" >
+    <parameter right="" left="QDPlugin *" name="plugin" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="non" overload="false" href="qdplugin.html#locked" name="locked" const="true" static="false" />
+   <variable threadsafety="unspecified" access="protected" location="qdplugin.h" href="qdplugin.html#d-var" name="d" />
+  </class>
+  <class threadsafety="unspecified" access="public" location="qdplugin.h" href="qdappplugin.html" bases="QDPlugin" module="" name="QDAppPlugin" >
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="constructor" virtual="non" overload="false" href="qdappplugin.html#QDAppPlugin" name="QDAppPlugin" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="destructor" virtual="impure" overload="false" href="qdappplugin.html#~QDAppPlugin" name="~QDAppPlugin" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdappplugin.html#icon" name="icon" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdappplugin.html#initApp" name="initApp" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="impure" overload="false" href="qdappplugin.html#initSettings" name="initSettings" const="false" static="false" />
+  </class>
+  <class threadsafety="unspecified" access="public" location="qdplugin.h" href="qdlinkplugin.html" bases="QDPlugin" module="" name="QDLinkPlugin" >
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="constructor" virtual="non" overload="false" href="qdlinkplugin.html#QDLinkPlugin" name="QDLinkPlugin" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="destructor" virtual="impure" overload="false" href="qdlinkplugin.html#~QDLinkPlugin" name="~QDLinkPlugin" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdlinkplugin.html#tryConnect" name="tryConnect" const="false" static="false" >
+    <parameter right="" left="QDConPlugin *" name="connection" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdlinkplugin.html#stop" name="stop" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="impure" overload="false" href="qdlinkplugin.html#ping_interval" name="ping_interval" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="impure" overload="false" href="qdlinkplugin.html#send_ack" name="send_ack" const="false" static="false" />
+   <enum threadsafety="unspecified" access="public" location="qdplugin.h" href="qdlinkplugin.html#State-enum" name="State" >
+    <value value="0" name="Up" />
+    <value value="1" name="Down" />
+   </enum>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdlinkplugin.html#setState" name="setState" const="false" static="false" >
+    <parameter right="" left="QDLinkPlugin *" name="plugin" />
+    <parameter right="" left="int" name="state" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="non" overload="false" href="qdlinkplugin.html#socket" name="socket" const="false" static="false" />
+   <function threadsafety="unspecified" access="protected" location="qdplugin.h" meta="plain" virtual="non" overload="false" href="qdlinkplugin.html#setupSocket" name="setupSocket" const="false" static="false" >
+    <parameter right="" left="QIODevice *" name="device" />
+   </function>
+  </class>
+  <class threadsafety="unspecified" access="public" location="qdplugin.h" href="qdconplugin.html" bases="QDPlugin" module="" name="QDConPlugin" >
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="constructor" virtual="non" overload="false" href="qdconplugin.html#QDConPlugin" name="QDConPlugin" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="destructor" virtual="impure" overload="false" href="qdconplugin.html#~QDConPlugin" name="~QDConPlugin" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdconplugin.html#port" name="port" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdconplugin.html#conProperty" name="conProperty" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="key" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdconplugin.html#device" name="device" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdconplugin.html#claim" name="claim" const="false" static="false" >
+    <parameter right="" left="QDDevPlugin *" name="dev" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdconplugin.html#connected" name="connected" const="false" static="false" >
+    <parameter right="" left="QDDevPlugin *" name="dev" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdconplugin.html#tryConnect" name="tryConnect" const="false" static="false" >
+    <parameter right="" left="QDLinkPlugin *" name="link" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdconplugin.html#stop" name="stop" const="false" static="false" />
+   <enum threadsafety="unspecified" access="public" location="qdplugin.h" href="qdconplugin.html#State-enum" name="State" >
+    <value value="0" name="Connected" />
+    <value value="1" name="Disconnected" />
+    <value value="2" name="Connecting" />
+    <value value="3" name="Matching" />
+   </enum>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdconplugin.html#setState" name="setState" const="false" static="false" >
+    <parameter right="" left="QDConPlugin *" name="plugin" />
+    <parameter right="" left="int" name="state" />
+   </function>
+  </class>
+  <class threadsafety="unspecified" access="public" location="qdplugin.h" href="qddevplugin.html" bases="QDPlugin" module="" name="QDDevPlugin" >
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="constructor" virtual="non" overload="false" href="qddevplugin.html#QDDevPlugin" name="QDDevPlugin" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="destructor" virtual="impure" overload="false" href="qddevplugin.html#~QDDevPlugin" name="~QDDevPlugin" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qddevplugin.html#model" name="model" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qddevplugin.html#system" name="system" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qddevplugin.html#version" name="version" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qddevplugin.html#versionString" name="versionString" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qddevplugin.html#icon" name="icon" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qddevplugin.html#probe" name="probe" const="false" static="false" >
+    <parameter right="" left="QDConPlugin *" name="con" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qddevplugin.html#disassociate" name="disassociate" const="false" static="false" >
+    <parameter right="" left="QDConPlugin *" name="con" />
+   </function>
+  </class>
+  <class threadsafety="unspecified" access="public" location="qdplugin.h" href="qdsyncplugin.html" bases="QDPlugin" module="" name="QDSyncPlugin" >
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="constructor" virtual="non" overload="false" href="qdsyncplugin.html#QDSyncPlugin" name="QDSyncPlugin" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="destructor" virtual="impure" overload="false" href="qdsyncplugin.html#~QDSyncPlugin" name="~QDSyncPlugin" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdsyncplugin.html#dataset" name="dataset" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="impure" overload="false" href="qdsyncplugin.html#referenceSchema" name="referenceSchema" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="impure" overload="false" href="qdsyncplugin.html#prepareForSync" name="prepareForSync" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="impure" overload="false" href="qdsyncplugin.html#finishSync" name="finishSync" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdsyncplugin.html#readyForSync" name="readyForSync" const="false" static="false" >
+    <parameter right="" left="bool" name="ready" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdsyncplugin.html#finishedSync" name="finishedSync" const="false" static="false" />
+  </class>
+  <class threadsafety="unspecified" access="public" location="qdplugin.h" href="qdclientsyncplugin.html" bases="QDSyncPlugin" module="" name="QDClientSyncPlugin" >
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="constructor" virtual="non" overload="false" href="qdclientsyncplugin.html#QDClientSyncPlugin" name="QDClientSyncPlugin" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="destructor" virtual="impure" overload="false" href="qdclientsyncplugin.html#~QDClientSyncPlugin" name="~QDClientSyncPlugin" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#serverSyncRequest" name="serverSyncRequest" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="source" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#serverIdentity" name="serverIdentity" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="server" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#serverVersion" name="serverVersion" const="false" static="false" >
+    <parameter right="" left="int" name="major" />
+    <parameter right="" left="int" name="minor" />
+    <parameter right="" left="int" name="patch" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#serverSyncAnchors" name="serverSyncAnchors" const="false" static="false" >
+    <parameter right="" left="const QDateTime &amp;" name="serverLastSync" />
+    <parameter right="" left="const QDateTime &amp;" name="serverNextSync" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#createServerRecord" name="createServerRecord" const="false" static="false" >
+    <parameter right="" left="const QByteArray &amp;" name="record" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#replaceServerRecord" name="replaceServerRecord" const="false" static="false" >
+    <parameter right="" left="const QByteArray &amp;" name="record" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#removeServerRecord" name="removeServerRecord" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="serverId" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#requestTwoWaySync" name="requestTwoWaySync" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#requestSlowSync" name="requestSlowSync" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#serverError" name="serverError" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="slot" virtual="pure" overload="false" href="qdclientsyncplugin.html#serverEnd" name="serverEnd" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdclientsyncplugin.html#clientSyncRequest" name="clientSyncRequest" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="source" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdclientsyncplugin.html#clientIdentity" name="clientIdentity" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="id" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdclientsyncplugin.html#clientVersion" name="clientVersion" const="false" static="false" >
+    <parameter right="" left="int" name="major" />
+    <parameter right="" left="int" name="minor" />
+    <parameter right="" left="int" name="patch" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdclientsyncplugin.html#clientSyncAnchors" name="clientSyncAnchors" const="false" static="false" >
+    <parameter right="" left="const QDateTime &amp;" name="clientLastSync" />
+    <parameter right="" left="const QDateTime &amp;" name="clientNextSync" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdclientsyncplugin.html#createClientRecord" name="createClientRecord" const="false" static="false" >
+    <parameter right="" left="const QByteArray &amp;" name="record" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdclientsyncplugin.html#replaceClientRecord" name="replaceClientRecord" const="false" static="false" >
+    <parameter right="" left="const QByteArray &amp;" name="record" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdclientsyncplugin.html#removeClientRecord" name="removeClientRecord" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="clientId" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdclientsyncplugin.html#mapId" name="mapId" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="serverId" />
+    <parameter right="" left="const QString &amp;" name="clientId" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdclientsyncplugin.html#clientError" name="clientError" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdclientsyncplugin.html#clientEnd" name="clientEnd" const="false" static="false" />
+  </class>
+  <class threadsafety="unspecified" access="public" location="qdplugin.h" href="qdserversyncplugin.html" bases="QDSyncPlugin" module="" name="QDServerSyncPlugin" >
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="constructor" virtual="non" overload="false" href="qdserversyncplugin.html#QDServerSyncPlugin" name="QDServerSyncPlugin" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="destructor" virtual="impure" overload="false" href="qdserversyncplugin.html#~QDServerSyncPlugin" name="~QDServerSyncPlugin" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdserversyncplugin.html#performSync" name="performSync" const="false" static="false" >
+    <parameter right="" left="const QDateTime &amp;" name="timestamp" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdserversyncplugin.html#createClientRecord" name="createClientRecord" const="false" static="false" >
+    <parameter right="" left="const QByteArray &amp;" name="record" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdserversyncplugin.html#replaceClientRecord" name="replaceClientRecord" const="false" static="false" >
+    <parameter right="" left="const QByteArray &amp;" name="record" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="plain" virtual="pure" overload="false" href="qdserversyncplugin.html#removeClientRecord" name="removeClientRecord" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="identifier" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdserversyncplugin.html#mappedId" name="mappedId" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="serverId" />
+    <parameter right="" left="const QString &amp;" name="clientId" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdserversyncplugin.html#createServerRecord" name="createServerRecord" const="false" static="false" >
+    <parameter right="" left="const QByteArray &amp;" name="record" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdserversyncplugin.html#replaceServerRecord" name="replaceServerRecord" const="false" static="false" >
+    <parameter right="" left="const QByteArray &amp;" name="record" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdserversyncplugin.html#removeServerRecord" name="removeServerRecord" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="identifier" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdplugin.h" meta="signal" virtual="non" overload="false" href="qdserversyncplugin.html#serverChangesCompleted" name="serverChangesCompleted" const="false" static="false" />
+  </class>
+  <typedef threadsafety="unspecified" access="public" location="qdplugindefs.h" href="qdplugindefs.h#QDPluginList-typedef" name="QDPluginList" />
+  <typedef threadsafety="unspecified" access="public" location="qdplugindefs.h" href="qdplugindefs.h#QDAppPluginList-typedef" name="QDAppPluginList" />
+  <typedef threadsafety="unspecified" access="public" location="qdplugindefs.h" href="qdplugindefs.h#QDConPluginList-typedef" name="QDConPluginList" />
+  <typedef threadsafety="unspecified" access="public" location="qdplugindefs.h" href="qdplugindefs.h#QDDevPluginList-typedef" name="QDDevPluginList" />
+  <typedef threadsafety="unspecified" access="public" location="qdplugindefs.h" href="qdplugindefs.h#QDLinkPluginList-typedef" name="QDLinkPluginList" />
+  <typedef threadsafety="unspecified" access="public" location="qdplugindefs.h" href="qdplugindefs.h#QDSyncPluginList-typedef" name="QDSyncPluginList" />
+  <function threadsafety="unspecified" relates="&lt;qtopiadesktoplog.h>" access="public" location="qtopiadesktoplog.cpp" meta="plain" virtual="non" overload="false" href="qtopiadesktoplog.h#qtopiadesktopLogEnabled" name="qtopiadesktopLogEnabled" const="false" static="false" >
+   <parameter right="" left="const char *" name="category" />
+  </function>
+  <class threadsafety="unspecified" access="public" location="qtsingleapplication.h" href="qtsingleapplication.html" bases="QApplication" module="" name="QtSingleApplication" >
+   <function threadsafety="unspecified" access="public" location="qtsingleapplication.h" meta="constructor" virtual="non" overload="false" href="qtsingleapplication.html#QtSingleApplication" name="QtSingleApplication" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="id" />
+    <parameter right="" left="int &amp;" name="argc" />
+    <parameter right="" left="char **" name="argv" />
+    <parameter right="" left="Type" name="type" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qtsingleapplication.h" meta="destructor" virtual="non" overload="false" href="qtsingleapplication.html#~QtSingleApplication" name="~QtSingleApplication" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qtsingleapplication_x11.cpp" meta="plain" virtual="non" overload="false" href="qtsingleapplication.html#isRunning" name="isRunning" const="true" static="false" />
+   <function threadsafety="unspecified" access="public" location="qtsingleapplication.h" meta="plain" virtual="non" overload="false" href="qtsingleapplication.html#id" name="id" const="true" static="false" />
+   <function threadsafety="unspecified" access="public" location="qtsingleapplication_x11.cpp" meta="plain" virtual="non" overload="false" href="qtsingleapplication.html#initialize" name="initialize" const="false" static="false" >
+    <parameter right="" left="bool" name="activate" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qtsingleapplication_x11.cpp" meta="slot" virtual="non" overload="false" href="qtsingleapplication.html#sendMessage" name="sendMessage" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="message" />
+    <parameter right="" left="int" name="timeout" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qtsingleapplication.h" meta="slot" virtual="impure" overload="false" href="qtsingleapplication.html#activateMainWidget" name="activateMainWidget" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qtsingleapplication.h" meta="signal" virtual="non" overload="false" href="qtsingleapplication.html#messageReceived" name="messageReceived" const="false" static="false" >
+    <parameter right="" left="const QString &amp;" name="message" />
+   </function>
+  </class>
+  <class threadsafety="unspecified" access="public" location="trayicon.h" href="trayicon.html" bases="QObject" module="" name="TrayIcon" >
+   <function threadsafety="unspecified" access="public" location="trayicon.h" meta="constructor" virtual="non" overload="false" href="trayicon.html#TrayIcon" name="TrayIcon" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="trayicon.h" meta="destructor" virtual="impure" overload="false" href="trayicon.html#~TrayIcon" name="~TrayIcon" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="trayicon.h" meta="plain" virtual="non" overload="false" href="trayicon.html#installed" name="installed" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="trayicon.h" meta="plain" virtual="non" overload="false" href="trayicon.html#show" name="show" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="trayicon.h" meta="plain" virtual="non" overload="false" href="trayicon.html#hide" name="hide" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="trayicon.h" meta="signal" virtual="non" overload="false" href="trayicon.html#clicked" name="clicked" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="trayicon.h" meta="signal" virtual="non" overload="false" href="trayicon.html#sync" name="sync" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="trayicon.h" meta="signal" virtual="non" overload="false" href="trayicon.html#quit" name="quit" const="false" static="false" />
+  </class>
+  <class threadsafety="unspecified" access="public" location="qdthread.h" href="qdthread.html" bases="QThread" module="" name="QDThread" >
+   <function threadsafety="unspecified" access="public" location="qdthread.h" meta="constructor" virtual="non" overload="false" href="qdthread.html#QDThread" name="QDThread" const="false" static="false" >
+    <parameter right="" left="QObject *" name="parent" />
+   </function>
+   <function threadsafety="unspecified" access="public" location="qdthread.h" meta="destructor" virtual="impure" overload="false" href="qdthread.html#~QDThread" name="~QDThread" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdthread.h" meta="plain" virtual="non" overload="false" href="qdthread.html#init" name="init" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdthread.h" meta="plain" virtual="non" overload="false" href="qdthread.html#start" name="start" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdthread.h" meta="plain" virtual="impure" overload="false" href="qdthread.html#t_init" name="t_init" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdthread.h" meta="plain" virtual="impure" overload="false" href="qdthread.html#t_run" name="t_run" const="false" static="false" />
+   <function threadsafety="unspecified" access="public" location="qdthread.h" meta="plain" virtual="impure" overload="false" href="qdthread.html#t_quit" name="t_quit" const="false" static="false" />
+  </class>
+  <page title="Building Qtopia Sync Agent" access="public" location="build.qdocpp" subtype="page" fulltitle="Building Qtopia Sync Agent" href="overbuildingqtopiasyncagent1.html" name="over_Building Qtopia Sync Agent_1.html" subtitle="" >
+   <contents title="Requirements" name="requirements" />
+   <contents title="Setup" name="setup" />
+   <contents title="Build" name="build" />
+   <contents title="Execute Unit Tests" name="execute-unit-tests" />
+   <contents title="Running" name="running" />
+   <contents title="Deployment" name="deployment" />
+  </page>
+  <page title="Changes for 4.3.0" access="public" location="changes_430.qdocpp" subtype="page" fulltitle="Changes for 4.3.0" href="chlog4.3.01.html" name="chlog_4.3.0_1.html" subtitle="" >
+   <contents title="Overview" name="overview" />
+   <contents title="Known issues" name="known-issues" />
+  </page>
+  <page title="Datasets Overview" access="public" location="datasets.qdocpp" subtype="page" fulltitle="Datasets Overview" href="overdatasetsoverview1.html" name="over_Datasets Overview_1.html" subtitle="" />
+  <page title="Datasets" access="public" location="datasets.qdocpp" subtype="group" fulltitle="Datasets" href="datasets" name="datasets" subtitle="" />
+  <page title="calendar Dataset" access="public" location="datasets.qdocpp" subtype="page" fulltitle="calendar Dataset" href="datasetcalendar1.html" name="dataset_calendar_1.html" subtitle="" />
+  <page title="" access="public" location="datasets.qdocpp" subtype="header" fulltitle="src/tools/qdsync/appointment.xml" href="srctoolsqdsyncappointment.xml" name="src/tools/qdsync/appointment.xml" subtitle="" />
+  <page title="" access="public" location="datasets.qdocpp" subtype="header" fulltitle="src/tools/qdsync/appointment.xsd" href="srctoolsqdsyncappointment.xsd" name="src/tools/qdsync/appointment.xsd" subtitle="" />
+  <page title="contacts Dataset" access="public" location="datasets.qdocpp" subtype="page" fulltitle="contacts Dataset" href="datasetcontacts1.html" name="dataset_contacts_1.html" subtitle="" />
+  <page title="" access="public" location="datasets.qdocpp" subtype="header" fulltitle="src/tools/qdsync/contact.xml" href="srctoolsqdsynccontact.xml" name="src/tools/qdsync/contact.xml" subtitle="" />
+  <page title="" access="public" location="datasets.qdocpp" subtype="header" fulltitle="src/tools/qdsync/contact.xsd" href="srctoolsqdsynccontact.xsd" name="src/tools/qdsync/contact.xsd" subtitle="" />
+  <page title="tasks Dataset" access="public" location="datasets.qdocpp" subtype="page" fulltitle="tasks Dataset" href="datasettasks1.html" name="dataset_tasks_1.html" subtitle="" />
+  <page title="" access="public" location="datasets.qdocpp" subtype="header" fulltitle="src/tools/qdsync/task.xml" href="srctoolsqdsynctask.xml" name="src/tools/qdsync/task.xml" subtitle="" />
+  <page title="" access="public" location="datasets.qdocpp" subtype="header" fulltitle="src/tools/qdsync/task.xsd" href="srctoolsqdsynctask.xsd" name="src/tools/qdsync/task.xsd" subtitle="" />
+  <page title="Qtopia Sync Agent Documentation" access="public" location="index.qdocpp" subtype="page" fulltitle="Qtopia Sync Agent Documentation" href="index.html" name="index.html" subtitle="" />
+  <page title="Classes" access="public" location="index.qdocpp" subtype="page" fulltitle="Classes" href="classes.html" name="classes.html" subtitle="" />
+  <page title="Headers" access="public" location="index.qdocpp" subtype="group" fulltitle="Headers" href="headers" name="headers" subtitle="" />
+  <page title="Examples" access="public" location="index.qdocpp" subtype="page" fulltitle="Examples" href="examples.html" name="examples.html" subtitle="" />
+  <page title="Overviews" access="public" location="index.qdocpp" subtype="group" fulltitle="Overviews" href="overviews" name="overviews" subtitle="" >
+   <contents title="Overview" name="overview" />
+   <contents title="Overviews" name="overviews" />
+  </page>
+  <page title="What's new?" access="public" location="index.qdocpp" subtype="group" fulltitle="What's new?" href="changes" name="changes" subtitle="" >
+   <contents title="Overview" name="overview" />
+   <contents title="Releases" name="releases" />
+  </page>
+  <page title="Qtopia Sync Agent Plugins" access="public" location="plugins.qdocpp" subtype="page" fulltitle="Qtopia Sync Agent Plugins" href="overqtopiasyncagentplugins1.html" name="over_Qtopia Sync Agent Plugins_1.html" subtitle="" >
+   <contents title="Overview" name="overview" />
+   <contents title="Implementing a plugin" name="implementing-a-plugin" />
+  </page>
+  <page title="&lt;qdplugindefs.h>" access="public" location="qdplugin.qdocpp" subtype="header" fulltitle="&lt;qdplugindefs.h> - &lt;qdplugindefs.h>" href="qdplugindefs.h" name="&lt;qdplugindefs.h>" subtitle="" />
+  <function threadsafety="unspecified" relates="&lt;qdplugindefs.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="qdplugindefs.h#QD_REGISTER_PLUGIN" name="QD_REGISTER_PLUGIN" const="false" static="false" >
+   <parameter right="" left="" name="CLASS" />
+  </function>
+  <function threadsafety="unspecified" relates="&lt;qdplugindefs.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="qdplugindefs.h#QD_EXPORT_PLUGIN" name="QD_EXPORT_PLUGIN" const="false" static="false" >
+   <parameter right="" left="" name="CLASS" />
+  </function>
+  <function threadsafety="unspecified" relates="&lt;qdplugindefs.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="qdplugindefs.h#QD_CONSTRUCT_PLUGIN" name="QD_CONSTRUCT_PLUGIN" const="false" static="false" >
+   <parameter right="" left="" name="CLASS" />
+   <parameter right="" left="" name="PARENT" />
+  </function>
+  <page title="" access="public" location="qdplugin.qdocpp" subtype="header" fulltitle="qdautoplugin.cpp" href="qdautoplugin.cpp" name="qdautoplugin.cpp" subtitle="" />
+  <page title="qdsync Protocol" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="qdsync Protocol" href="overqdsyncprotocol1.html" name="over_qdsync Protocol_1.html" subtitle="" >
+   <contents title="Overview" name="overview" />
+   <contents title="State Machine" name="state-machine" />
+  </page>
+  <page title="qdsync Protocol Commands" access="public" location="qdsyncprotocol.qdocpp" subtype="group" fulltitle="qdsync Protocol Commands" href="qdsynccommands" name="qdsync_commands" subtitle="" />
+  <page title="220" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="220" href="qdsync2201.html" name="qdsync_220_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="USER" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="USER" href="qdsyncuser1.html" name="qdsync_USER_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="530" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="530" href="qdsync5301.html" name="qdsync_530_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="331" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="331" href="qdsync3311.html" name="qdsync_331_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="PASS" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="PASS" href="qdsyncpass1.html" name="qdsync_PASS_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="230" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="230" href="qdsync2301.html" name="qdsync_230_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="CALL" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="CALL" href="qdsynccall1.html" name="qdsync_CALL_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="CALLB" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="CALLB" href="qdsynccallb1.html" name="qdsync_CALLB_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="500" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="500" href="qdsync5001.html" name="qdsync_500_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="599" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="599" href="qdsync5991.html" name="qdsync_599_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="502" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="502" href="qdsync5021.html" name="qdsync_502_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="200" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="200" href="qdsync2001.html" name="qdsync_200_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="QUIT" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="QUIT" href="qdsyncquit1.html" name="qdsync_QUIT_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="211" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="211" href="qdsync2111.html" name="qdsync_211_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="HELPER_INIT" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="HELPER_INIT" href="qdsynchelperinit1.html" name="qdsync_HELPER_INIT_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="HELPER_PING" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="HELPER_PING" href="qdsynchelperping1.html" name="qdsync_HELPER_PING_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="HELPER_ACK" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="HELPER_ACK" href="qdsynchelperack1.html" name="qdsync_HELPER_ACK_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="HELPER_QUIT" access="public" location="qdsyncprotocol.qdocpp" subtype="page" fulltitle="HELPER_QUIT" href="qdsynchelperquit1.html" name="qdsync_HELPER_QUIT_1.html" subtitle="" >
+   <contents title="Usage" name="usage" />
+   <contents title="Description" name="description" />
+  </page>
+  <page title="&lt;qlog.h>" access="public" location="qlog.qdocpp" subtype="header" fulltitle="&lt;qlog.h> - &lt;qlog.h>" href="qlog.h" name="&lt;qlog.h>" subtitle="" />
+  <function threadsafety="unspecified" relates="&lt;qlog.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="qlog.h#qLog" name="qLog" const="false" static="false" >
+   <parameter right="" left="" name="CATEGORY" />
+  </function>
+  <function threadsafety="unspecified" relates="&lt;qlog.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="true" href="qlog.h#qLog-2" name="qLog" const="false" static="false" />
+  <function threadsafety="unspecified" relates="&lt;qlog.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="qlog.h#QLOG_UNCATEGORIZED" name="QLOG_UNCATEGORIZED" const="false" static="false" />
+  <function threadsafety="unspecified" relates="&lt;qlog.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="qlog.h#QLOG_ENABLE" name="QLOG_ENABLE" const="false" static="false" >
+   <parameter right="" left="" name="CATEGORY" />
+  </function>
+  <function threadsafety="unspecified" relates="&lt;qlog.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="qlog.h#QLOG_OPTION" name="QLOG_OPTION" const="false" static="false" >
+   <parameter right="" left="" name="CATEGORY" />
+   <parameter right="" left="" name="FUNCTION" />
+  </function>
+  <page title="&lt;qtopiadesktoplog.h>" access="public" location="qtopiadesktoplog.cpp" subtype="header" fulltitle="&lt;qtopiadesktoplog.h> - &lt;qtopiadesktoplog.h>" href="qtopiadesktoplog.h" name="&lt;qtopiadesktoplog.h>" subtitle="" />
+  <function threadsafety="unspecified" relates="&lt;qtopiadesktoplog.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="qtopiadesktoplog.h#QDLOG_OPTION" name="QDLOG_OPTION" const="false" static="false" >
+   <parameter right="" left="" name="CATEGORY" />
+  </function>
+  <page title="&lt;trace.h>" access="public" location="trace.cpp" subtype="header" fulltitle="&lt;trace.h> - &lt;trace.h>" href="trace.h" name="&lt;trace.h>" subtitle="" />
+  <function threadsafety="unspecified" relates="&lt;trace.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="trace.h#TRACE" name="TRACE" const="false" static="false" >
+   <parameter right="" left="" name="CATEGORY" />
+  </function>
+  <function threadsafety="unspecified" relates="&lt;trace.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="trace.h#LOG" name="LOG" const="false" static="false" />
+  <function threadsafety="unspecified" relates="&lt;trace.h>" access="public" location="" meta="macrowithparams" virtual="non" overload="false" href="trace.h#WARNING" name="WARNING" const="false" static="false" />
+ </namespace>
+</INDEX>

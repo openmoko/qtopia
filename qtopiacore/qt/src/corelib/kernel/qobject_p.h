@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -77,6 +92,15 @@ public:
     QObjectPrivate(int version = QObjectPrivateVersion);
     virtual ~QObjectPrivate();
 
+#ifdef QT3_SUPPORT
+    QList<QObject *> pendingChildInsertedEvents;
+    void sendPendingChildInsertedEvents();
+    void removePendingChildInsertedEvents(QObject *child);
+#else
+    // preserve binary compatibility with code compiled without Qt 3 support
+    QList<QObject *> unused;
+#endif
+
     // id of the thread that owns the object
     QThreadData *threadData;
     void moveToThread_helper();
@@ -112,17 +136,19 @@ public:
         QList<QVariant> propertyValues;
     };
     ExtraData *extraData;
+    mutable quint32 connectedSignals;
 
     QString objectName;
 };
 
+class QSemaphore;
 class Q_CORE_EXPORT QMetaCallEvent : public QEvent
 {
 public:
     QMetaCallEvent(int id, const QObject *sender = 0,
-                   int nargs = 0, int *types = 0, void **args = 0);
+                   int nargs = 0, int *types = 0, void **args = 0, QSemaphore *semaphore = 0);
     QMetaCallEvent(int id, const QObject *sender, int idFrom, int idTo,
-                   int nargs = 0, int *types = 0, void **args = 0);
+                   int nargs = 0, int *types = 0, void **args = 0, QSemaphore *semaphore = 0);
     ~QMetaCallEvent();
 
     inline int id() const { return id_; }
@@ -130,6 +156,8 @@ public:
     inline int signalIdStart() const { return idFrom_; }
     inline int signalIdEnd() const { return idTo_; }
     inline void **args() const { return args_; }
+
+    virtual int placeMetaCall(QObject *object);
 
 private:
     int id_;
@@ -139,6 +167,7 @@ private:
     int nargs_;
     int *types_;
     void **args_;
+    QSemaphore *semaphore_;
 };
 
 class Q_CORE_EXPORT QBoolBlocker

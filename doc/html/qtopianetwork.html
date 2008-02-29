@@ -20,7 +20,7 @@
 <h3>Public Types</h3>
 <ul>
 <li><div class="fn"/>flags <b><a href="qtopianetwork.html#TypeFlag-enum">Type</a></b></li>
-<li><div class="fn"/>enum <b><a href="qtopianetwork.html#TypeFlag-enum">TypeFlag</a></b> { LAN, WirelessLAN, Dialup, GPRS, ..., BluetoothDUN }</li>
+<li><div class="fn"/>enum <b><a href="qtopianetwork.html#TypeFlag-enum">TypeFlag</a></b> { LAN, WirelessLAN, Dialup, GPRS, ..., BluetoothPAN }</li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -54,6 +54,7 @@
 <ul>
 <li><a href="qnetworkstate.html">QNetworkState</a> - very generic connectivity information related to Qtopia</li>
 <li><a href="qnetworkdevice.html">QNetworkDevice</a> - specific information about the state of a particular hardware device</li>
+<li><a href="qnetworkconnection.html">QNetworkConnection</a> - information beyond the device level such as the remote partner</li>
 </ul>
 <p>See also <a href="qtopianetworkserver.html">QtopiaNetworkServer</a>.</p>
 <hr />
@@ -68,6 +69,7 @@
 <tr><td valign="top"><tt>QtopiaNetwork::GPRS</tt></td><td align="center" valign="top"><tt>0x00000008</tt></td><td valign="top">The connection is established via GPRS/UMTS/EDGE.</td></tr>
 <tr><td valign="top"><tt>QtopiaNetwork::Bluetooth</tt></td><td align="center" valign="top"><tt>0x00001000</tt></td><td valign="top">The network is based on Bluetooth.</td></tr>
 <tr><td valign="top"><tt>QtopiaNetwork::Hidden</tt></td><td align="center" valign="top"><tt>0x10000000</tt></td><td valign="top">This interface is hidden from the user.</td></tr>
+<tr><td valign="top"><tt>QtopiaNetwork::Custom</tt></td><td align="center" valign="top"><tt>0x20000000</tt></td><td valign="top">This network plugin must exactly match the network configuration. For more details see <a href="qtopianetworkfactoryiface.html#customID">QtopiaNetworkFactoryIface::customID</a>().</td></tr>
 <tr><td valign="top"><tt>QtopiaNetwork::Any</tt></td><td align="center" valign="top"><tt>0x00000000</tt></td><td valign="top">A place holder for any arbitrary network type.</td></tr>
 </table></p>
 <p>These sub types are used in conjunction with QtopiaNetwork::GPRS and QtopiaNetwork::Dialup only:</p>
@@ -79,12 +81,13 @@
 <p>These sub types specify the type of the external device which is used to establish the connection.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QtopiaNetwork::PCMCIA</tt></td><td align="center" valign="top"><tt>0x00000040</tt></td><td valign="top">The network device is an attached PCMCIA card</td></tr>
+<tr><td valign="top"><tt>QtopiaNetwork::PCMCIA</tt></td><td align="center" valign="top"><tt>0x00000040</tt></td><td valign="top">The network device is an attached PCMCIA card.</td></tr>
 </table></p>
 <p>These sub types are used in conjunction with QtopiaNetwork::Bluetooth only.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QtopiaNetwork::BluetoothDUN</tt></td><td align="center" valign="top"><tt>0X00002000</tt></td><td valign="top">The network connection is established via a local bluetooth device. The remote Bluetooth device acts as Internet gateway as specified by the Dial-up Networking Profile (DNP).</td></tr>
+<tr><td valign="top"><tt>QtopiaNetwork::BluetoothPAN</tt></td><td align="center" valign="top"><tt>0x00004000</tt></td><td valign="top">This value is reserved for future use in Qtopia.</td></tr>
 </table></p>
 <p>The Type type is a typedef for <a href="qflags.html">QFlags</a>&lt;TypeFlag&gt;. It stores an OR combination of TypeFlag values.</p>
 <hr />
@@ -95,6 +98,7 @@
 <p>If <i>type</i> is set to <tt>QtopiaNetwork::Any</tt> it returns all known NetworkInterfaces. If <i>path</i> is empty the lookup will take place in <a href="qtopianetwork.html#settingsDir">settingsDir</a>().</p>
 <h3 class="fn"><a name="loadPlugin"></a><a href="qpointer.html">QPointer</a>&lt;<a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a>&gt; QtopiaNetwork::loadPlugin ( const <a href="qstring.html">QString</a> &amp; <i>handle</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Loads the appropriate network plug-in for the interface with <i>handle</i>; or 0 if no suitable plug-in can be found.</p>
+<p>Only use this function if you intend to configure the returned <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a> via <a href="qtopianetworkinterface.html#configuration">QtopiaNetworkInterface::configuration</a>(). Any other use may trigger undesired behaviour whereby the loaded network interface instance may overshadow the instance created by the <a href="qtopianetworkserver.html">QtopiaNetworkServer</a>. For more details see the <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a> general class documentation.</p>
 <h3 class="fn"><a name="online"></a>bool QtopiaNetwork::online ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns true if any known network interface is online/connected. This can be used to check the general connectivity status of the Qtopia environment. A device is considered to be online if it is in the state <tt>QtopiaNetwork::Up</tt>, <tt>QtopiaNetwork::Demand</tt> or <tt>QtopiaNetwork::Pending</tt>.</p>
 <p>More detailed state updates on a per device base can be obtained by using <a href="qnetworkdevice.html">QNetworkDevice</a> and overal state change notifications across all network devices are provided by <a href="qnetworkstate.html">QNetworkState</a>.</p>
@@ -115,6 +119,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

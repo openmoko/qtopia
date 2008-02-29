@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,14 +26,14 @@
 #include <qglobal.h>
 #include <QString>
 
-#include <qtopiaglobal.h>
+#include <qirglobal.h>
 #include <qirnamespace.h>
 
 class QIrIasAttribute;
 class QIrLocalDevice_Private;
 class QIrRemoteDevice;
 
-class QTOPIACOMM_EXPORT QIrLocalDevice : public QObject
+class QIR_EXPORT QIrLocalDevice : public QObject
 {
     Q_OBJECT
 

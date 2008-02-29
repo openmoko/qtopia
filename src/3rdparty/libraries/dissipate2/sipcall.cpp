@@ -26,7 +26,7 @@ SipCallMember::SipCallMember( SipCall *parent, const SipUri &uri )
 	parent->addMember( this );
 	timer = new QTimer( this );
 	timer->setSingleShot( true );
-	connect( timer, SIGNAL( timeout() ), this, SLOT( call_timeout() ) );
+	connect( timer, SIGNAL(timeout()), this, SLOT(call_timeout()) );
 }
 
 SipCallMember::~SipCallMember( void )
@@ -88,7 +88,7 @@ void SipCallMember::sendRequestSubscribe( QString username, QString password )
 		} else {
 			authstate = authState_AuthenticationTrying;
 		}
-		connect( local, SIGNAL( statusUpdated() ), this, SLOT( localStatusUpdated() ) );
+		connect( local, SIGNAL(statusUpdated()), this, SLOT(localStatusUpdated()) );
 	}
 }
 
@@ -204,7 +204,7 @@ void SipCallMember::sendRequestNotify( QString username, QString password )
 		} else {
 			authstate = authState_AuthenticationTrying;
 		}
-		connect( local, SIGNAL( statusUpdated() ), this, SLOT( localStatusUpdated() ) );
+		connect( local, SIGNAL(statusUpdated()), this, SLOT(localStatusUpdated()) );
 	}
 }
 
@@ -319,7 +319,7 @@ void SipCallMember::sendRequestMessage( QString username, QString password )
 		} else {
 			authstate = authState_AuthenticationTrying;
 		}
-		connect( local, SIGNAL( statusUpdated() ), this, SLOT( localStatusUpdated() ) );
+		connect( local, SIGNAL(statusUpdated()), this, SLOT(localStatusUpdated()) );
 	}
 }
 
@@ -405,7 +405,7 @@ void SipCallMember::sendRequestInvite( QString username, QString password )
 		} else {
 			authstate = authState_AuthenticationTrying;
 		}
-		connect( local, SIGNAL( statusUpdated() ), this, SLOT( localStatusUpdated() ) );
+		connect( local, SIGNAL(statusUpdated()), this, SLOT(localStatusUpdated()) );
 	}
 }
 
@@ -532,7 +532,7 @@ void SipCallMember::requestDisconnect( void )
 	statusdesc = tr("Disconnecting");
 	local = call->newRequest( this, Sip::BYE );
 	if( local ) {
-		connect( local, SIGNAL( statusUpdated() ), this, SLOT( localStatusUpdated() ) );
+		connect( local, SIGNAL(statusUpdated()), this, SLOT(localStatusUpdated()) );
 	}
 }
 
@@ -543,12 +543,12 @@ void SipCallMember::requestTransfer( const SipUri &transferto,
 	state = state_Disconnecting;
 	statusdesc = tr("Transfering");
 	local = call->newRequest( this, Sip::REFER, body, bodytype, transferto );
-	connect( local, SIGNAL( statusUpdated() ), this, SLOT( localStatusUpdated() ) );
+	connect( local, SIGNAL(statusUpdated()), this, SLOT(localStatusUpdated()) );
 	state = state_Disconnecting;
 	statusdesc = tr("Disconnecting");
 	local = call->newRequest( this, Sip::BYE );
 	if( local ) {
-		connect( local, SIGNAL( statusUpdated() ), this, SLOT( localStatusUpdated() ) );
+		connect( local, SIGNAL(statusUpdated()), this, SLOT(localStatusUpdated()) );
 	}
 	statusUpdated( this );
 }
@@ -561,7 +561,7 @@ void SipCallMember::requestOptions( const QString &body, const MimeContentType &
 	}
 	statusdesc = tr("Querying options");
 	local = call->newRequest( this, Sip::OPTIONS, body, bodytype );
-	connect( local, SIGNAL( statusUpdated() ), this, SLOT( localStatusUpdated() ) );
+	connect( local, SIGNAL(statusUpdated()), this, SLOT(localStatusUpdated()) );
 	statusUpdated( this );
 }
 
@@ -635,7 +635,7 @@ void SipCallMember::incomingTransaction( SipTransaction *newtrans )
 	MimeContentType mtype;
 	remote = newtrans;
 	if( remote->getRequest()->getMethod() == Sip::INVITE ) {
-		connect( remote, SIGNAL( statusUpdated() ), this, SLOT( remoteStatusUpdated() ) );
+		connect( remote, SIGNAL(statusUpdated()), this, SLOT(remoteStatusUpdated()) );
 		if( state == state_Disconnected ) {
 			state = state_RequestingInvite;
 			statusdesc = "Invitation received";

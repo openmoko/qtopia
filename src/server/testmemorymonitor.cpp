@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,6 +26,7 @@
 /*!
   \class TestMemoryMonitor
   \ingroup QtopiaServer::Task
+  \ingroup QtopiaServer::Memory
   \brief The TestMemoryMonitor class provides an instrumented implementation of MemoryMonitor for testing.
 
   The TestMemoryMonitorTask provides a Qtopia Server Task.  Qtopia Server 
@@ -60,20 +61,24 @@
 
   The TestMemoryMonitor task will fail if it is started before the value space
   is initialized.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*! \internal */
 TestMemoryMonitor::TestMemoryMonitor()
-: m_vso(0), m_memstate(MemNormal), m_lastDateTime(QDateTime::currentDateTime())
+    : m_vso(0),
+      m_memstate(MemNormal),
+      m_lastDateTime(QDateTime::currentDateTime())
 {
     QByteArray vsoPath = QtopiaServerApplication::taskValueSpaceObject("TestMemoryMonitor");
     Q_ASSERT(!vsoPath.isEmpty());
 
     m_vso = new QValueSpaceObject(vsoPath, this);
     QObject::connect(m_vso,
-                     SIGNAL(itemSetValue(const QByteArray &, const QVariant &)),
+                     SIGNAL(itemSetValue(QByteArray,QVariant)),
                      this,
-                     SLOT(setValue(const QByteArray &, const QVariant &)));
+                     SLOT(setValue(QByteArray,QVariant)));
 
     refresh();
 }
@@ -93,16 +98,21 @@ unsigned int TestMemoryMonitor::timeInState() const
 /*! \internal */
 void TestMemoryMonitor::setValue(const QByteArray &name, const QVariant &value)
 {
-    if("/MemoryLevel" == name) {
+    if ("/MemoryLevel" == name) {
         QByteArray state = value.toByteArray();
         MemState newState = m_memstate;
-        if("Unknown" == state) newState = MemUnknown;
-        else if("Critical" == state) newState = MemCritical;
-        else if("VeryLow" == state) newState = MemVeryLow;
-        else if("Low" == state) newState = MemLow;
-        else if("Normal" == state) newState = MemNormal;
+        if ("Unknown" == state)
+	    newState = MemUnknown;
+        else if ("Critical" == state)
+	    newState = MemCritical;
+        else if ("VeryLow" == state)
+	    newState = MemVeryLow;
+        else if ("Low" == state)
+	    newState = MemLow;
+        else if ("Normal" == state)
+	    newState = MemNormal;
 
-        if(newState != m_memstate) {
+        if (newState != m_memstate) {
             m_memstate = newState;
             m_lastDateTime = QDateTime::currentDateTime();
             refresh();
@@ -116,11 +126,21 @@ void TestMemoryMonitor::refresh()
 {
     QByteArray state;
     switch(m_memstate) {
-        case MemUnknown: state = "Unknown"; break;
-        case MemCritical: state = "Critical"; break;
-        case MemVeryLow: state = "VeryLow"; break;
-        case MemLow: state = "Low"; break;
-        case MemNormal: state = "Normal"; break;
+        case MemUnknown:
+	    state = "Unknown";
+	    break;
+        case MemCritical:
+	    state = "Critical";
+	    break;
+        case MemVeryLow:
+	    state = "VeryLow";
+	    break;
+        case MemLow:
+	    state = "Low";
+	    break;
+        case MemNormal:
+	    state = "Normal";
+	    break;
     };
 
     m_vso->setAttribute("MemoryLevel", state);

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,12 +22,12 @@
 #include "animator_p.h"
 #include "selecteditem.h"
 #include "griditem.h"
+#include "renderer.h"
 
 #include <QPainter>
 #include <QPixmap>
 #include <QImage>
 #include <QGraphicsRectItem>
-#include <QSvgRenderer>
 #include <QDebug>
 
 
@@ -38,13 +38,14 @@ static const qreal gradientWidth = 0.1;
   \internal
   \class Animator
 
-  \brief Animator is the superclass of all the objects that can manually animate icons
-  within the PhoneLauncherView.
+  \brief Animator is the superclass of all the objects that animate icons within the PhoneLauncherView.
 
   \mainclass An animation is generally controlled by a timeline, or similar. At each step
   during the timeline's life cycle, the animate(...) method should be called. This method
   will know how to transform a SelectedItem's representation, and has the option of
   calling Animator's draw(QPainter *,SelectedItem *,int width,int height).
+
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 
@@ -76,9 +77,9 @@ void Animator::draw(QPainter *painter,SelectedItem *item,int w,int h)
     // Get the GridItem object that is currently associated with the SelectedItem, and
     // find out whether we have a valid renderer we can use to draw it, or whether we
     // must use the pixmap.
-    GridItem *currentItem = item->getCurrent();
+    GridItem *currentItem = item->current();
     if ( currentItem ) {
-        QSvgRenderer *renderer = currentItem->getSvgRenderer();
+        Renderer *renderer = currentItem->renderer();
         if ( renderer ) {
             draw(painter,renderer,item,w,h);
             return;
@@ -134,10 +135,10 @@ void Animator::draw(QPainter *painter,const QPixmap &pixmap,QGraphicsRectItem *i
 
 /*!
   \internal
-  \fn void Animator::draw(QPainter *painter,QSvgRenderer *renderer,QGraphicsRectItem *item,int width,int height)
+  \fn void Animator::draw(QPainter *painter,Renderer *renderer,QGraphicsRectItem *item,int width,int height)
    Draws the SelectedItem for the given width and height, using the renderer.
 */
-void Animator::draw(QPainter *painter,QSvgRenderer *renderer,QGraphicsRectItem *item,int w,int h)
+void Animator::draw(QPainter *painter,Renderer *renderer,QGraphicsRectItem *item,int w,int h)
 {
     // If what we want to draw is going to be too large for the graphical item, we will
     // need to temporarily enlarge the graphical item, so that the drawing will display
@@ -145,29 +146,42 @@ void Animator::draw(QPainter *painter,QSvgRenderer *renderer,QGraphicsRectItem *
     qreal oldWidth = item->rect().width();
     qreal oldHeight = item->rect().height();
     if ( w > oldWidth || h > oldHeight ) {
-        QRectF bounds = getRenderingBounds(item,w,h);
+        QRectF bounds = renderingBounds(item,w,h);
         item->setRect(QRectF(item->rect().x()-1,item->rect().y()-1,w+2,h+2));
         renderer->render(painter,bounds);
         // After drawing, put the grahical item's dimensions back the way they were.
         item->setRect(QRectF(item->rect().x()+1,item->rect().y()+1,oldWidth,oldHeight));
     } else {
-        QRectF bounds = getRenderingBounds(item,w,h);
+        QRectF bounds = renderingBounds(item,w,h);
         renderer->render(painter,bounds);
     }
 }
 
 /*!
   \internal
-  \fn QRectF Animator::getRenderingBounds(QGraphicsRectItem *item,int width,int height)
+  \fn QRectF Animator::renderingBounds(QGraphicsRectItem *item,int width,int height)
   Returns the geometry for the renderer, i.e. position, width and height.
 */
-QRectF Animator::getRenderingBounds(QGraphicsRectItem *item,int w,int h)
+QRectF Animator::renderingBounds(QGraphicsRectItem *item,int w,int h)
 {
     // Position the image in the middle of the drawing area.
     qreal x = item->rect().x();
     qreal y = item->rect().y();
     x += (item->rect().width() - w)/2;
     y += (item->rect().height() - h)/2;
+
+    { // TODO: this is a workaround. not casting to ints at 
+      // higher levels (GridItem, SelectedItem, etc) would be better solution.
+        GridItem *currentItem = ((SelectedItem*)item)->current();
+        if ( !currentItem ) {
+            return QRectF();
+        }
+        int imageSize = currentItem->selectedImageSize();
+        qreal xoffset = (static_cast<int>(item->rect().width()) - imageSize)/2 - (item->rect().width() - imageSize)/2;
+        qreal yoffset = (static_cast<int>(item->rect().height()) - imageSize)/2 - (item->rect().height() - imageSize)/2;
+        x += xoffset;
+        y += yoffset;
+    }
 
     return QRectF(x,y,w,h);
 }

@@ -24,6 +24,7 @@ strip_install()
 
     for i in "$@"; do
         cp -a $src/$i $dest/$i
+        [ -f $dest/$i ] && chmod u+w $dest/$i
         [ -f $dest/$i ] && $CROSS_PREFIX-strip --strip-$stripwhat $dest/$i
     done
 }
@@ -115,10 +116,6 @@ clean_package()
         rm -rf $PPP
         rm -f $STAMPDIR/$PPP.buildstamp
         ;;
-    fbv)
-        rm -rf $FBV
-        rm -f $STAMPDIR/$FBV.buildstamp
-        ;;
     samba)
         rm -rf $SAMBA
         rm -rf host/$SAMBA
@@ -140,9 +137,14 @@ clean_package()
         rm -rf getkeycode
         rm -f $STAMPDIR/getkeycode.buildstamp
         ;;
+    bootcharger)
+        rm -rf bootcharger
+        rm -f $STAMPDIR/bootcharger.buildstamp
+        ;;
     prelink)
         rm -rf $LIBELF
         rm -rf $PRELINK
+        rm -f $STAMPDIR/$LIBELF.buildstamp
         rm -f $STAMPDIR/$PRELINK.buildstamp
         ;;
     dropbear)
@@ -193,6 +195,22 @@ clean_package()
         rm -rf $LIDS
         rm -f $STAMPDIR/$LIDS.buildstamp
         ;;
+    popt)
+        rm -rf $POPT
+        rm -f $STAMPDIR/$POPT.buildstamp
+        ;;
+    raid)
+        rm -rf $RAID
+        rm -f $STAMPDIR/$RAID.buildstamp
+        ;;
+    openssl)
+        rm -rf $OPENSSL
+        rm -f $STAMPDIR/$OPENSSL.buildstamp
+        ;;
+    bootchart)
+        rm -rf $BOOTCHART
+        rm -f $STAMPDIR/$BOOTCHART.buildstamp
+        ;;
     basefiles)
         ;;
     *)
@@ -204,139 +222,101 @@ clean_package()
 download_package()
 {
     echo "Downloading $1"
-    CUR_DIR=`pwd`
-#    echo "current directory "$CUR_DIR
+    CUR_DIR=$(pwd)
+
     cd $DOWNLOAD_DIR
     case $1 in
     toolchain)
-        if [ "$OWNTOOLCHAIN" = "1" ]; then
-        cd $CUR_DIR
-		  return 0
+        if [ "$OWNTOOLCHAIN" != "1" ]; then
+            wget -nc $VERBOSITY $PACKAGE_LOCATION/$CROSSTOOL.tar.gz || die "downloading toolchain/$CROSSTOOL"
+            for file in $BINUTILS $GCCSTRAP $GCC $GDB $GLIBC $LINUXTHREADS $LINUX; do
+                wget -nc $VERBOSITY $PACKAGE_LOCATION/$file.tar.bz2 || die "downloading toolchain/$file"
+            done
 		fi
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$CROSSTOOL.tar.gz || die "downloading toolchain/$CROSSTOOL"
-        for file in $BINUTILS $GCCSTRAP $GCC $GDB $GLIBC $LINUXTHREADS $LINUX; do
-            wget -nc $VERBOSITY $PACKAGE_LOCATION/$file.tar.bz2 || die "downloading toolchain/$file"
-        done
-    
-    cd $CUR_DIR
         ;;
     busybox-secure|busybox)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$BUSYBOX.tar.bz2 || die "downloading $BUSYBOX"
-    
-    cd $CUR_DIR
         ;;
     libungif)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$LIBUNGIF.tar.bz2 || die "downloading $LIBUNGIF"
-    
-    cd $CUR_DIR
         ;;
     ilib)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$ILIB-min.tar.gz || die "downloading $ILIB"
-    
-    cd $CUR_DIR
         ;;
     dosfstools)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$DOSFSTOOLS.src.tar.gz || die "downloading $DOSFSTOOLS"
-    
-    cd $CUR_DIR
         ;;
     strace)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$STRACE.tar.bz2 || die "downloading $STRACE"
-    
-    cd $CUR_DIR
         ;;
     ppp)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$PPP.tar.gz || die "downloading $PPP"
-    
-    cd $CUR_DIR
-        ;;
-    fbv)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$FBV.tar.gz || die "downloading $FBV"
-    
-    cd $CUR_DIR
         ;;
     samba)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$SAMBA.tar.gz || die "downloading $SAMBA"
-    
-    cd $CUR_DIR
         ;;
     sxetools)
-    cd $CUR_DIR
         ;;
     armioctl)
-    cd $CUR_DIR
         ;;
     tat)
-    cd $CUR_DIR
         ;;
     getkeycode)
-    cd $CUR_DIR
+        ;;
+    bootcharger)
         ;;
     prelink)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$LIBELF.tar.gz || die "downloading prelink/$LIBELF"
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$PRELINK.orig.tar.gz || die "downloading $PRELINK"
-    
-    cd $CUR_DIR
         ;;
     dropbear)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$DROPBEAR.tar.gz || die "downloading $DROPBEAR"
-    
-    cd $CUR_DIR
         ;;
     expat)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$EXPAT.tar.gz || die "downloading $EXPAT"
-    
-    cd $CUR_DIR
         ;;
     dbus)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$DBUS.tar.gz || die "downloading $DBUS"
-    
-    cd $CUR_DIR
         ;;
     bluez-libs)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZLIBS.tar.gz || die "downloading $BLUEZLIBS"
-    
-    cd $CUR_DIR
         ;;
     bluez-utils)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZUTILS.tar.gz || die "downloading $BLUEZUTILS"
-    
-    cd $CUR_DIR
         ;;
     bluez-hcidump)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZHCIDUMP.tar.gz || die "downloading $BLUEZHCIDUMP"
-    
-    cd $CUR_DIR
         ;;
     bluez-firmware)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZFIRMWARE.tar.gz || die "downloading $BLUEZFIRMWARE"
-    
-    cd $CUR_DIR
         ;;
     wireless-tools)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$WIRELESSTOOLS.tar.gz || die "downloading $WIRELESSTOOLS"
-    
-    cd $CUR_DIR
         ;;
     wpa_supplicant)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$WPASUPPLICANT.tar.gz || die "downloading $WPASUPPLICANT"
-    
-    cd $CUR_DIR
         ;;
     initrd)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$BUSYBOX.tar.bz2 || die "downloading $BUSYBOX"
-    
-    cd $CUR_DIR
         ;;
     linux)
         [ -n "$KERNEL_SOURCE_PATH" ] || die "kernel source path not defined."
         [ -d "$KERNEL_SOURCE_PATH" ] || die "kernel source path ($KERNEL_SOURCE_PATH) does not exist or is not a directory."
-    cd $CUR_DIR
+        ;;
+    popt)
+        wget -nc $VERBOSITY $PACKAGE_LOCATION/$POPT.tar.gz || die "downloading $POPT"
+        ;;
+    raid)
+        wget -nc $VERBOSITY $PACKAGE_LOCATION/$RAID.tar.gz || die "downloading $LIDS"
         ;;
     lids)
         wget -nc $VERBOSITY $PACKAGE_LOCATION/$LIDS.tar.gz || die "downloading $LIDS"
-    
-    cd $CUR_DIR
+        ;;
+    openssl)
+        wget -nc $VERBOSITY $PACKAGE_LOCATION/$OPENSSL.tar.gz || die "downloading $OPENSSL"
+        ;;
+    bootchart)
+        wget -nc $VERBOSITY $PACKAGE_LOCATION/$BOOTCHART.tar.bz2 || die "downloading $PACKAGE_LOCATION/$BOOTCHART.tar.bz2"
         ;;
     basefiles)
         ;;
@@ -344,6 +324,7 @@ download_package()
         die "Unknown package $1"
         ;;
     esac
+    cd $CUR_DIR
 }
 
 build_package()
@@ -498,22 +479,6 @@ build_package()
 
         touch $STAMPDIR/$PPP.buildstamp
         ;;
-    fbv)
-        source_changed $STAMPDIR/$FBV.buildstamp || return 0
-        
-        rm -rf $ROOTFS_BUILD_PATH/$FBV
-
-        tar -xzf $DOWNLOAD_DIR/$FBV.tar.gz || die "fbv extract"
-
-        cd $ROOTFS_BUILD_PATH/$FBV
-        ./configure --prefix=/usr --without-libjpeg \
-                                  --without-libpng \
-                                  --without-bmp || die "fbv configure"
-        make CC=$CROSS_PREFIX-gcc >$LOGFILE 2>&1 || die "fbv build"
-        cd ..
-
-        touch $STAMPDIR/$FBV.buildstamp
-        ;;
     samba)
         source_changed $ROOTFS_SOURCE_PATH/samba $STAMPDIR/$SAMBA.buildstamp || return 0
 
@@ -549,7 +514,7 @@ build_package()
         rm -rf $ROOTFS_BUILD_PATH/sxetools
 
         mkdir $ROOTFS_BUILD_PATH/sxetools
-        for f in `ls $QTOPIA_SOURCE_PATH/src/tools/sxe_tools/test/*`; do
+        for f in $QTOPIA_SOURCE_PATH/src/tools/sxe_tools/test/*; do
             cp $f sxetools/. || die "sxe tools extract"
         done
 
@@ -601,6 +566,20 @@ build"
         cd ..
 
         touch $STAMPDIR/getkeycode.buildstamp
+        ;;
+    bootcharger)
+        source_changed $ROOTFS_SOURCE_PATH/bootcharger $STAMPDIR/bootcharger.buildstamp || return 0
+
+        rm -rf $ROOTFS_BUILD_PATH/bootcharger
+
+        mkdir $ROOTFS_BUILD_PATH/bootcharger
+        cp $ROOTFS_SOURCE_PATH/bootcharger/* bootcharger/ || die "bootcharger extract"
+
+        cd $ROOTFS_BUILD_PATH/bootcharger
+        CC=$CROSS_PREFIX-gcc CFLAGS=-I$ROOTFS_SOURCE_PATH/../include make -e >$LOGFILE 2>&1 || die "bootcharger build"
+        cd ..
+
+        touch $STAMPDIR/bootcharger.buildstamp
         ;;
     prelink)
         if source_changed $STAMPDIR/$LIBELF.buildstamp; then
@@ -654,13 +633,19 @@ build"
         touch $STAMPDIR/$PRELINK.buildstamp
         ;;
     dropbear)
-        source_changed $STAMPDIR/$DROPBEAR.buildstamp || return 0
+        source_changed $ROOTFS_SOURCE_PATH/dropbear $STAMPDIR/$DROPBEAR.buildstamp || return 0
 
         rm -rf $ROOTFS_BUILD_PATH/$DROPBEAR
 
         tar -xzf $DOWNLOAD_DIR/$DROPBEAR.tar.gz || die "dropbear extract"
 
         cd $ROOTFS_BUILD_PATH/$DROPBEAR
+        for file in $ROOTFS_SOURCE_PATH/dropbear/*.patch; do
+            if [ "$file" != '$ROOTFS_SOURCE_PATH/dropbear/*.patch' ]; then
+                patch < $file
+            fi
+        done
+
         ./configure --host=$CROSS_PREFIX --prefix=/usr --disable-zlib --disable-lastlog >$LOGFILE 2>&1 || die "dropbear configure"
         if [ -f $ROOTFS_SOURCE_PATH/dropbear/options.h ]; then
             cp $ROOTFS_SOURCE_PATH/dropbear/options.h .
@@ -744,15 +729,18 @@ build"
         export CFLAGS="-I$ROOTFS_BUILD_PATH/$EXPAT/lib"
         export LDFLAGS="-L$ROOTFS_BUILD_PATH/$EXPAT/.libs"
 
-        # Apply hciattach patch for the greenphone
-        cd tools
-        patch < $QTOPIA_SOURCE_PATH/devices/greenphone/rootfs/bluez/hciattach.patch
+        # Apply devdown fix for the greenphone
+        cd hcid
+        patch < $QTOPIA_SOURCE_PATH/devices/greenphone/rootfs/bluez/find_adapter.patch
         cd ..
 
         ./configure --host=$CROSS_PREFIX --prefix=/usr --sysconfdir=/etc \
-                    --localstatedir=/mnt/user \
+                    --localstatedir=/etc/bluetooth \
                     --enable-test --enable-expat \
                     --disable-glib --disable-obex --disable-alsa \
+                    --disable-hal --disable-usb --disable-gstreamer \
+                    --disable-serial --disable-network --disable-sync \
+                    --disable-echo --disable-sdpd --disable-hidd \
                     --disable-bccmd --disable-avctrl --disable-hid2hci \
                     --disable-dfutool --without-cups >/dev/null 2>/dev/null ||
             die "bluez-utils configure"
@@ -815,14 +803,14 @@ build"
         touch $STAMPDIR/$WIRELESSTOOLS.buildstamp
         ;;
     wpa_supplicant)
-        source_changed $STAMPDIR/$WPASUPPLICANT.buildstamp || return 0
+        source_changed $ROOTFS_SOURCE_PATH/wpa_supplicant $STAMPDIR/$WPASUPPLICANT.buildstamp || return 0
 
         rm -rf $STAMPDIR/$WPASUPPLICANT.buildstamp
 
         tar -xzf $DOWNLOAD_DIR/$WPASUPPLICANT.tar.gz || die "wpa_supplicant extract"
 
         cd $ROOTFS_BUILD_PATH/$WPASUPPLICANT
-        cp $ROOTFS_SOURCE_PATH/wpa_supplicant/config .config ||
+        cp -f $ROOTFS_SOURCE_PATH/wpa_supplicant/config .config ||
             die "wpa_supplicant configure"
         make >$LOGFILE 2>&1 || die "wpa_supplicant build"
         cd ..
@@ -873,9 +861,14 @@ build"
         touch $STAMPDIR/initrd.buildstamp
         ;;
     linux)
+        CONFIG_PATH=arch/arm/def-configs/greenphone
+
         if [ $OPTION_DEVEL -eq 0 ]; then
             source_changed "$ROOTFS_SOURCE_PATH/linux" $STAMPDIR/$GPH_LINUX.buildstamp ||
-            source_changed "$KERNEL_SOURCE_PATH" $STAMPDIR/$GPH_LINUX.buildstamp || return 0
+            source_changed "$KERNEL_SOURCE_PATH" $STAMPDIR/$GPH_LINUX.buildstamp ||
+            { [ $CONFIG_BOOTCHART -eq 1 ] && ! grep -q bootchart $ROOTFS_BUILD_PATH/$GPH_LINUX/$CONFIG_PATH; } ||
+            { [ $CONFIG_BOOTCHART -eq 0 ] && grep -q bootchart $ROOTFS_BUILD_PATH/$GPH_LINUX/$CONFIG_PATH; } ||
+            return 0
         fi
 
         if [ $OPTION_DEVEL -eq 0 ]; then
@@ -907,14 +900,24 @@ build"
 
         cd $ROOTFS_BUILD_PATH/$GPH_LINUX
 
-#        if [ $OPTION_DEVEL -eq 0 ]; then
-#            # Only apply patches if not in DEVEL mode
-#            chmod -R u+w .
-#            for i in $ROOTFS_SOURCE_PATH/linux/*.patch; do
-#                patch -l -p 1 < $i || die "linux patch"
-#            done
-#        fi
+        if [ $CONFIG_BOOTCHART -eq 1 ] && ! grep -q bootchart $CONFIG_PATH; then
+            sed -r -e 's|^(CONFIG_CMDLINE="[^"]+)"|\1 init=/sbin/bootchartd"|' -i $CONFIG_PATH || die "set init=bootchartd"
+        fi
+        if [ $CONFIG_BOOTCHART -eq 0 ] && grep -q bootchart $CONFIG_PATH; then
+            sed -r -e '/^CONFIG_CMDLINE/ s| init=/sbin/bootchartd||' -i $CONFIG_PATH || die "remove init=bootchartd"
+        fi
 
+
+if [ $CONFIG_LIDS -eq 1 ]; then
+
+        if [ $OPTION_DEVEL -eq 0 ]; then
+            # Only apply patches if not in DEVEL mode
+            chmod -R u+w .
+            for i in $ROOTFS_SOURCE_PATH/linux/*.patch; do
+                patch -l -p 1 < $i || die "linux patch"
+            done
+        fi
+fi
         if [ -e $ROOTFS_BUILD_PATH/$INITRD_FILENAME ]; then
             chmod u+w init/initrd.bin
             cp $ROOTFS_BUILD_PATH/$INITRD_FILENAME init/initrd.bin ||
@@ -953,7 +956,7 @@ build"
         ;;
 
     lids)
-if [ ! -z $CONFIG_LIDS ]; then
+				if [ $CONFIG_LIDS -eq 1 ]; then
         # only build lids if kernel has lids support
         [ -r $ROOTFS_BUILD_PATH/$GPH_LINUX/kernel/lids.c ] || return 0
 
@@ -999,6 +1002,78 @@ if [ ! -z $CONFIG_LIDS ]; then
         touch $STAMPDIR/$LIDS.buildstamp
 fi
         ;;
+   popt)
+        source_changed $STAMPDIR/$POPT.buildstamp || return 0
+
+        rm -rf $ROOTFS_BUILD_PATH/$POPT
+
+        tar -xzf $DOWNLOAD_DIR/$POPT.tar.gz || die "popt extract"
+
+        cd $ROOTFS_BUILD_PATH/$POPT
+        ./configure --host=$CROSS_PREFIX --enable-static --prefix=/usr || die "popt configure"
+        make  || die" popt build"
+        touch $STAMPDIR/$POPT.buildstamp
+				;;
+		raid)
+        source_changed $STAMPDIR/$RAID.buildstamp || return 0
+
+        rm -rf $ROOTFS_BUILD_PATH/$RAID
+
+        tar -xzf $DOWNLOAD_DIR/$RAID.tar.gz || die "raid extract"
+
+        cd $ROOTFS_BUILD_PATH/$RAID
+
+        for i in $ROOTFS_SOURCE_PATH/raid/*.diff; do
+             patch -l -p 1 < $i || die "linux patch"
+         done
+        
+ CPPFLAGS="-I$ROOTFS_BUILD_PATH/$POPT" ./configure --host=$CROSS_PREFIX --prefix=/usr  LDFLAGS="-L$ROOTFS_BUILD_PATH/$POPT/.libs" || die "raid configure"
+# sleep 4
+        make >$LOGFILE 2>&1 || die "raid build"
+        touch $STAMPDIR/$RAID.buildstamp
+
+						;;		
+    openssl)
+        source_changed $STAMPDIR/$OPENSSL.buildstamp || return 0
+
+        # build target version
+        rm -rf $ROOTFS_BUILD_PATH/$OPENSSL
+
+        tar -xzf $DOWNLOAD_DIR/$OPENSSL.tar.gz || die "openssl extract"
+
+        cd $ROOTFS_BUILD_PATH/$OPENSSL
+        ./Configure --prefix=/usr -DL_ENDIAN shared linux-generic32
+        make CC=arm-linux-gcc || die "openssl build"
+        cd ..
+
+        # build host version
+        rm -rf host/$OPENSSL
+
+        mkdir -p host
+        tar -xzf $DOWNLOAD_DIR/$OPENSSL.tar.gz -C host || die "openssl host extract"
+
+        cd host/$OPENSSL
+        ./config --prefix=/usr || die "openssl host configure"
+        make || die "openssl host build"
+        cd ../..
+
+        touch $STAMPDIR/$OPENSSL.buildstamp
+        ;;
+    bootchart)
+        source_changed $ROOTFS_SOURCE_PATH/bootchart $STAMPDIR/$BOOTCHART.buildstamp || return 0
+
+        rm -rf $ROOTFS_BUILD_PATH/$BOOTCHART
+
+        tar -xjf $DOWNLOAD_DIR/$BOOTCHART.tar.bz2 || die "bootchart extract"
+
+        cd $ROOTFS_BUILD_PATH/$BOOTCHART
+
+        for i in $ROOTFS_SOURCE_PATH/bootchart/*.patch; do
+            patch -p 1 < $i || die "bootchart patch"
+        done
+
+        touch $STAMPDIR/$BOOTCHART.buildstamp
+        ;;
     basefiles)
         ;;
     *)
@@ -1013,7 +1088,6 @@ install_package()
 
     case $1 in
     toolchain)
-
     	if [ "$OWNTOOLCHAIN" = "1" ]; then
         TOOLCHAIN_ROOT=$TOOLCHAIN_PATH/$CROSS_PREFIX
 			else
@@ -1040,11 +1114,24 @@ install_package()
     busybox-secure)
         cd $ROOTFS_BUILD_PATH/$BUSYBOX-secure
         make install PREFIX=$ROOTFS_IMAGE_DIR >$LOGFILE 2>&1
+
+        # remove symlink to busybox-secure shell
+        rm -f $ROOTFS_IMAGE_DIR/bin/sh
+        rm -f $ROOTFS_IMAGE_DIR/bin/ash
+
+        cat > $ROOTFS_IMAGE_DIR/sbin/sh-secure <<EOF
+#!/bin/sh
+
+[ -r /etc/profile ] && . /etc/profile
+exec /sbin/busybox-secure sh "\$@"
+
+EOF
+        chmod a+x $ROOTFS_IMAGE_DIR/sbin/sh-secure
         cd ..
         ;;
     busybox)
         cd $ROOTFS_BUILD_PATH/$BUSYBOX
-        make install PREFIX=$ROOTFS_IMAGE_DIR >$LOGFILE 2>&1
+        make install linkopts="-s" INSTALL_OPTS=--noclobber PREFIX=$ROOTFS_IMAGE_DIR >$LOGFILE 2>&1
         cd ..
         ;;
     libungif)
@@ -1060,8 +1147,9 @@ install_package()
     dosfstools)
         cd $ROOTFS_BUILD_PATH/$DOSFSTOOLS
         strip_install all dosfsck $ROOTFS_IMAGE_DIR/sbin dosfsck
-        strip_install all mkdosfs $ROOTFS_IMAGE_DIR/sbin mkdosfs
         ln -s dosfsck $ROOTFS_IMAGE_DIR/sbin/fsck.vfat
+        strip_install all mkdosfs $ROOTFS_IMAGE_DIR/sbin mkdosfs
+        ln -s mkdosfs $ROOTFS_IMAGE_DIR/sbin/mkfs.vfat
         cd ..
         ;;
     strace)
@@ -1075,13 +1163,10 @@ install_package()
         strip_install all pppstats $ROOTFS_IMAGE_DIR/usr/bin pppstats
         strip_install all chat $ROOTFS_IMAGE_DIR/usr/sbin chat
         strip_install all pppd $ROOTFS_IMAGE_DIR/usr/sbin pppd
-        install etc.ppp $USERFS_IMAGE_DIR/etc/ppp chap-secrets options pap-secrets
-        mkdir -p $USERFS_IMAGE_DIR/etc/ppp/peers
-        ln -sf /mnt/user/etc/ppp $ROOTFS_IMAGE_DIR/etc/ppp
+        install etc.ppp $ROOTFS_IMAGE_DIR/etc/ppp chap-secrets options pap-secrets
+        mkdir -p $ROOTFS_IMAGE_DIR/etc/ppp/peers
+        mkdir -p $ROOTFS_IMAGE_DIR/etc
         cd ..
-        ;;
-    fbv)
-        strip_install all $FBV $ROOTFS_IMAGE_DIR/usr/bin fbv
         ;;
     samba)
         cd $ROOTFS_BUILD_PATH/$SAMBA/source
@@ -1093,9 +1178,9 @@ install_package()
 
         strip_install all bin $ROOTFS_IMAGE_DIR/usr/local/samba/bin smbd nmbd
 
-        mkdir -p $USERFS_IMAGE_DIR/etc/samba
+        mkdir -p $ROOTFS_IMAGE_DIR/etc/samba
         mkdir -p $ROOTFS_IMAGE_DIR/usr/local/samba/private
-        ln -sf /mnt/user/etc/samba/secrets.tdb $ROOTFS_IMAGE_DIR/usr/local/samba/private/secrets.tdb
+        ln -sf /etc/samba/secrets.tdb $ROOTFS_IMAGE_DIR/usr/local/samba/private/secrets.tdb
         cd ../..
 
         cd host/$SAMBA/source
@@ -1103,16 +1188,25 @@ install_package()
         cd ../../..
         ;;
     sxetools)
-        strip_install all sxetools $USERFS_IMAGE_DIR/tools proc_keys sandboxed
+        strip_install all sxetools $ROOTFS_IMAGE_DIR/usr/bin proc_keys sandboxed suid
+        # these two binaries are identical (the same file) but will get different lids rules
+        cp $ROOTFS_IMAGE_DIR/usr/bin/suid $ROOTFS_IMAGE_DIR/usr/bin/suid2
+        # create some arbitrary text in a test file
+        mkdir -p $ROOTFS_IMAGE_DIR/etc/sxetools
+        cal > $ROOTFS_IMAGE_DIR/etc/sxetools/test_text
         ;;
     armioctl)
-        strip_install all armioctl $USERFS_IMAGE_DIR/tools arm_ioctl
+        strip_install all armioctl $ROOTFS_IMAGE_DIR/usr/bin arm_ioctl
         ;;
     tat)
-        strip_install all tat $USERFS_IMAGE_DIR/tools tat
+        strip_install all tat $ROOTFS_IMAGE_DIR/usr/bin tat
         ;;
     getkeycode)
         strip_install all getkeycode $ROOTFS_IMAGE_DIR/bin getkeycode
+        ;;
+    bootcharger)
+        strip_install all bootcharger $ROOTFS_IMAGE_DIR/usr/bin bootcharger
+        install bootcharger $ROOTFS_IMAGE_DIR/usr/share/bootcharger charging.gif fully_charged.gif powering_off.gif
         ;;
     prelink)
         strip_install all $PRELINK/src $ROOTFS_IMAGE_DIR/usr/sbin prelink
@@ -1127,7 +1221,7 @@ install_package()
         ln -sf ../sbin/dropbearmulti $ROOTFS_IMAGE_DIR/usr/bin/dbclient
         ln -sf ../sbin/dropbearmulti $ROOTFS_IMAGE_DIR/usr/bin/scp
 
-        mkdir -p $USERFS_IMAGE_DIR/etc/dropbear
+        mkdir -p $ROOTFS_IMAGE_DIR/etc/dropbear
         ;;
     expat)
         cd $ROOTFS_BUILD_PATH/$EXPAT
@@ -1148,21 +1242,22 @@ install_package()
         ;;
     bluez-libs)
         cd $ROOTFS_BUILD_PATH/$BLUEZLIBS
-        strip_install unneeded src/.libs $ROOTFS_IMAGE_DIR/usr/lib libbluetooth.so.2 libbluetooth.so.2.5.0
+        strip_install unneeded src/.libs $ROOTFS_IMAGE_DIR/usr/lib libbluetooth.so.2 libbluetooth.so.2.8.5
         cd ..
         ;;
     bluez-utils)
         cd $ROOTFS_BUILD_PATH/$BLUEZUTILS
         make DESTDIR=`pwd`/.install install >$LOGFILE 2>&1
 
-        mkdir -p $ROOTFS_IMAGE_DIR/var/lib/bluetooth
+        mkdir -p $ROOTFS_IMAGE_DIR/etc/bluetooth/lib
 
-        install .install/etc/bluetooth $ROOTFS_IMAGE_DIR/etc/bluetooth hcid.conf rfcomm.conf
         install .install/etc/dbus-1/system.d $ROOTFS_IMAGE_DIR/etc/dbus-1/system.d bluetooth.conf
-        strip_install all .install/usr/bin $ROOTFS_IMAGE_DIR/usr/bin ciptool dund hcitool hidd l2ping pand rfcomm sdptool
-        strip_install all .install/usr/sbin $ROOTFS_IMAGE_DIR/usr/sbin hciattach hciconfig hcid sdpd
+        strip_install all .install/usr/bin $ROOTFS_IMAGE_DIR/usr/bin ciptool dund hcitool l2ping pand rfcomm sdptool
+        strip_install all .install/usr/sbin $ROOTFS_IMAGE_DIR/usr/sbin hciattach hciconfig hcid
         strip_install all test/.libs $ROOTFS_IMAGE_DIR/usr/sbin bdaddr
         cd ..
+
+        cp -a $QTOPIA_SOURCE_PATH/devices/greenphone/rootfs/bluez/hcid.conf $ROOTFS_IMAGE_DIR/etc/bluetooth/hcid.conf || die "Couldn't copy greenphone hcid.conf"
         ;;
     bluez-hcidump)
         cd $ROOTFS_BUILD_PATH/$BLUEZHCIDUMP
@@ -1172,9 +1267,8 @@ install_package()
     bluez-firmware)
         cd $ROOTFS_BUILD_PATH/$BLUEZFIRMWARE
         install st $ROOTFS_IMAGE_DIR/usr/lib/firmware STLC2500_R4_00_03.ptc STLC2500_R4_00_06.ssf STLC2500_R4_02_02_WLAN.ssf STLC2500_R4_02_04.ptc
+        mkdir -p $ROOTFS_IMAGE_DIR/lib
         ln -sf /usr/lib/firmware $ROOTFS_IMAGE_DIR/lib/firmware
-        ln -sf STLC2500_R4_02_02_WLAN.ssf $ROOTFS_IMAGE_DIR/usr/lib/firmware/STLC2500_R0_01_02.ssf
-        ln -sf STLC2500_R4_02_04.ptc $ROOTFS_IMAGE_DIR/usr/lib/firmware/STLC2500_R0_01_04.ptc
         cd ..
         ;;
     wireless-tools)
@@ -1210,8 +1304,8 @@ install_package()
         cd ..
         ;;
     lids)
-if [ ! -z $CONFIG_LIDS ]; then
-        [ -r $LIDS.buildstamp ] || return 0
+			 if [ $CONFIG_LIDS -eq 1 ]; then
+        [ -r $STAMPDIR/$LIDS.buildstamp ] || return 0
 
         cd $ROOTFS_BUILD_PATH/$LIDS/lidstools-0.5.6/src
 
@@ -1235,9 +1329,9 @@ if [ ! -z $CONFIG_LIDS ]; then
         LIDS_PASSWORD=greenphone
         echo -n -e "$LIDS_PASSWORD\n$LIDS_PASSWORD\n" | sudo chroot `pwd`/.install /sbin/lidsconf -P >/dev/null 2>&1 || die "sudo failed at line $LINENO"
         mkdir -p $ROOTFS_IMAGE_DIR/etc/lids
-        mkdir -p $USERFS_IMAGE_DIR/etc/lids
+        #AJM USER LIDS mkdir -p $USERFS_IMAGE_DIR/etc/lids
         echo "$LIDS_PASSWORD" > $ROOTFS_IMAGE_DIR/etc/lids/lids.secret
-        echo "$LIDS_PASSWORD" > $USERFS_IMAGE_DIR/etc/lids/lids.secret
+        #AJM USER LIDS echo "$LIDS_PASSWORD" > $USERFS_IMAGE_DIR/etc/lids/lids.secret
 
         mkdir -p $ROOTFS_IMAGE_DIR/etc/lids
         # all capabilities enabled at BOOT
@@ -1245,16 +1339,56 @@ if [ ! -z $CONFIG_LIDS ]; then
 
         install ../example $ROOTFS_IMAGE_DIR/etc/lids lids.ini lids{,.postboot,.shutdown}.cap
         install .install/etc/lids $ROOTFS_IMAGE_DIR/etc/lids lids.pw
-        install .install/etc/lids $USERFS_IMAGE_DIR/etc/lids lids.pw
+        #AJM USER LIDS install .install/etc/lids $USERFS_IMAGE_DIR/etc/lids lids.pw
         # No ACLs defined in ro root partition
         touch $ROOTFS_IMAGE_DIR/etc/lids/lids{,.boot,.postboot,.shutdown}.conf
 
         cd ../../..
 fi
         ;;
+		popt)
+        cd $ROOTFS_BUILD_PATH/$POPT
+        strip_install unneeded .libs $ROOTFS_IMAGE_DIR/usr/lib libpopt.so libpopt.so.0 libpopt.so.0.0.0
+        cd ..
+				;;
+    openssl)
+        cd $ROOTFS_BUILD_PATH/$OPENSSL
+        make INSTALL_PREFIX=$(pwd)/.install install >/dev/null 2>/dev/null
+        strip_install unneeded .install/usr/lib $ROOTFS_IMAGE_DIR/usr/lib libcrypto.so libcrypto.so.0.9.8
+        strip_install unneeded .install/usr/lib $ROOTFS_IMAGE_DIR/usr/lib libssl.so libssl.so.0.9.8
+        for file in $(find .install/usr/lib/engines -printf '%P\n'); do
+            strip_install unneeded .install/usr/lib/engines $ROOTFS_IMAGE_DIR/usr/lib/engines $file
+        done
+        install .install/usr/ssl $ROOTFS_IMAGE_DIR/usr/ssl openssl.cnf
+        cd ..
+        
+        mkdir -p $ROOTFS_IMAGE_DIR/usr/ssl/certs
+        cp $ROOTFS_BUILD_PATH/host/$OPENSSL/certs/*.0 $ROOTFS_IMAGE_DIR/usr/ssl/certs
+
+        ;;
+    bootchart)
+        cd $ROOTFS_BUILD_PATH/$BOOTCHART
+
+        install script $ROOTFS_IMAGE_DIR/sbin bootchartd
+        install script $ROOTFS_IMAGE_DIR/etc  bootchartd.conf
+
+        install /dev/null $ROOTFS_IMAGE_DIR/var/tmp/bootchart
+
+        ;;
     basefiles)
         install_basefiles || die "Basefiles install"
         ;;
+		raid)
+        cd $ROOTFS_BUILD_PATH/$RAID
+        strip_install all $ROOTFS_BUILD_PATH/$RAID  $ROOTFS_IMAGE_DIR/bin lsraid
+        strip_install all $ROOTFS_BUILD_PATH/$RAID  $ROOTFS_IMAGE_DIR/bin mkraid
+        strip_install all $ROOTFS_BUILD_PATH/$RAID  $ROOTFS_IMAGE_DIR/bin raidstart
+        strip_install all $ROOTFS_BUILD_PATH/$RAID  $ROOTFS_IMAGE_DIR/bin raidreconf
+				sudo cp  $ROOTFS_SOURCE_PATH/raid/raidtab $ROOTFS_IMAGE_DIR/etc
+				sudo cp -v $ROOTFS_SOURCE_PATH/raid/fstab $ROOTFS_IMAGE_DIR/etc
+				sudo cp -v $ROOTFS_SOURCE_PATH/raid/rc.filesystems $ROOTFS_IMAGE_DIR/etc/rc.d
+        cd ..
+				 ;;
     *)
         die "Unknown package $package"
         ;;
@@ -1264,18 +1398,42 @@ fi
 install_basefiles()
 {
     cd $ROOTFS_IMAGE_DIR
-    mkdir -p mnt/disk2 mnt/nfs mnt/sd mnt/user mnt/user_local
-    mkdir -p proc opt/Qtopia.rom
-    mkdir -p lib/modules etc
-    mkdir -p var var/log var/lock/subsys var/mnt var/run var/spool/at var/tmp
 
-    ln -s /mnt/disk2/Qtopia opt/Qtopia
-    ln -s Qtopia opt/Qtopia.user
+    # Create FHS standard directories
+    mkdir -p bin dev etc lib media mnt opt proc sbin usr var home
+
+    # SD card mount point
+    mkdir -p media/sdcard
+
+    # Mount points for user data
+    mkdir -p home
+    mkdir -p mnt/documents
+
+    # Qtopia
+    mkdir -p opt/Qtopia
+
+    # Writable /etc
+    mkdir etc/resolvconf
+
+    # Kernel modules
+    mkdir -p lib/modules
+
+    # Various temporary mount points for debugging
+    mkdir -p mnt/nfs mnt/loop mnt/other
+
+    # Populate /var and /tmp
+    mkdir -p var var/log var/lock/subsys var/mnt var/run var/spool/at var/tmp
     ln -s var/tmp tmp
 
+    # Directory for Beep Science DRM database
+    mkdir -p etc/bscidrm2
 
     # Create minimal /dev
-    mkdir -p $ROOTFS_IMAGE_DIR/dev
+    # The real /dev will be a tmpfs and populated with the contents of
+    # /dev.tar.gz on boot.  This is required as CRAMFS shares inode #1
+    # between all empty directories, char, block, pipe, and sock inodes.
+    # This is not compatible with LIDS which uses block device and inode
+    # information in ACLs.
     cd $ROOTFS_IMAGE_DIR/dev
 
     sudo mknod initctl p || die "sudo failed at line $LINENO"
@@ -1309,11 +1467,10 @@ install_basefiles()
     sudo mknod mmca1 b 241 1 || die "sudo failed at line $LINENO"
     sudo mknod mmca2 b 241 2 || die "sudo failed at line $LINENO"
 
-
-    # Create full /dev
+    # Create complete /dev
     cd $DEVFS_IMAGE_DIR
 
-    mkdir -p pts
+    mkdir pts
 
     sudo mknod initctl p || die "sudo failed at line $LINENO"
 
@@ -1459,48 +1616,23 @@ install_basefiles()
     sudo mknod tffsd  b 100 96 || die "sudo failed at line $LINENO"
     sudo ln -s tffsa1 root || die "sudo failed at line $LINENO"
 
+    if [ $CONFIG_RAID -eq 1 ]; then
+        sudo mknod md0 b 9 0  || die "sudo failed at line $LINENO"
+    fi
+
     # Install oui.txt required for Bluetooth
     cd $ROOTFS_IMAGE_DIR
-    mkdir -p usr/share/misc/
-    cd $ROOTFS_IMAGE_DIR/usr/share/misc
-    wget -nc $VERBOSITY http://standards.ieee.org/regauth/oui/oui.txt
+    wget -P usr/share/misc -nc $VERBOSITY http://standards.ieee.org/regauth/oui/oui.txt
 
     # Greenphone base files
     files=`find $ROOTFS_SOURCE_PATH/basefiles -mindepth 1 -maxdepth 1 2>/dev/null`
     for i in $files; do
-        if [ `basename $i` != "mnt" ]; then
-            sudo cp -a $i $ROOTFS_IMAGE_DIR || die "sudo failed at line $LINENO"
-        fi
+        sudo cp -a $i $ROOTFS_IMAGE_DIR || die "sudo failed at line $LINENO"
     done
     ln -s . $ROOTFS_IMAGE_DIR/lib/modules/2.4.19-rmk7-pxa2-greenphone
 
-    files=`find $ROOTFS_SOURCE_PATH/basefiles/mnt -mindepth 1 -maxdepth 1 -name user -prune -o -print 2>/dev/null`
-    for i in $files; do
-        sudo cp -a $i $ROOTFS_IMAGE_DIR/mnt || die "sudo failed at line $LINENO"
-    done
-
-    files=`find $ROOTFS_SOURCE_PATH/basefiles/mnt/user -mindepth 1 -maxdepth 1 2>/dev/null`
-    for i in $files; do
-        sudo cp -a $i $USERFS_IMAGE_DIR || die "sudo failed at line $LINENO"
-    done
-
-
-    # Setup default home directory
-    mkdir -p $ROOTFS_IMAGE_DIR/mnt/disk2/home
-    ln -s /mnt/user_local $ROOTFS_IMAGE_DIR/mnt/disk2/home/Documents
-
-
-    # Setup symlink between /mnt/user/etc and /etc
-    mkdir -p $USERFS_IMAGE_DIR/etc/resolvconf
-    files=`find $USERFS_IMAGE_DIR/etc -mindepth 1 -maxdepth 1 2>/dev/null`
-    for i in $files; do
-        if [ ! -L $ROOTFS_IMAGE_DIR/etc/`basename $i` ] &&
-           [ ! -e $ROOTFS_IMAGE_DIR/etc/`basename $i` ]; then
-            sudo ln -s /mnt/user/etc/`basename $i` $ROOTFS_IMAGE_DIR/etc || die "sudo failed at line $LINENO"
-        fi
-    done
+    # Setup symlinks in /etc
     sudo ln -s /proc/mounts $ROOTFS_IMAGE_DIR/etc/mtab || die "sudo failed at line $LINENO"
-    sudo ln -s /mnt/user/etc/resolv.conf $ROOTFS_IMAGE_DIR/etc || die "sudo failed at line $LINENO"
 
     cd ..
 }
@@ -1508,54 +1640,30 @@ install_basefiles()
 create_default_tgzs()
 {
     echo "Creating default tarballs"
-    sudo chown -R root.root $USERFS_IMAGE_DIR/* || die "chown $USERFS_IMAGE_DIR" || die "sudo failed at line $LINENO"
-
-    cd $USERFS_IMAGE_DIR || die "cd $USERFS_IMAGE_DIR"
-    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/user_default.tgz etc fs.ver || die "sudo failed at line $LINENO"
-    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/user_tools.tgz tools || die "sudo failed at line $LINENO"
 
     cd $DEVFS_IMAGE_DIR || die "cd $DEVFS_IMAGE_DIR"
-    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/dev.tgz * || die "sudo failed at line $LINENO"
+    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/dev.tar.gz * || die "sudo failed at line $LINENO"
 
     cd $ROOTFS_IMAGE_DIR/var || die "cd $ROOTFS_IMAGE_DIR/var"
-    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/var.tgz * || die "sudo failed at line $LINENO"
-
-    cd $ROOTFS_IMAGE_DIR/mnt/disk2/home || die "cd $ROOTFS_IMAGE_DIR/mnt/disk2/home"
-    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/home_default.tgz . || die "sudo failed at line $LINENO"
+    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/var.tar.gz * || die "sudo failed at line $LINENO"
 
     cd $ROOTFS_BUILD_PATH
 }
 
 make_rootfs_image()
 {
-    echo "Creating rootfs image"
+    echo "Creating intermediate root filesystem image"
 
-    MNTPNT=`mktemp -d rootfs.XXXXXX`
-    [ -d $MNTPNT ] || die "Could not create temporary directory"
+    rm -f $ROOTFS_BUILD_PATH/$ROOTFS_FILENAME
 
-    rm -f $ROOTFS_FILENAME
-    dd if=/dev/zero of=$ROOTFS_FILENAME bs=1 count=0 seek=44040192 2>/dev/null
-    /sbin/mkfs.ext2 -F $ROOTFS_FILENAME >/dev/null 2>&1
-    sudo mount -t ext2 -o loop $ROOTFS_FILENAME $MNTPNT || die "sudo failed at line $LINENO"
-
-    sudo mkdir -p $MNTPNT/var || die "sudo failed at line $LINENO"
-
-    files=`find $ROOTFS_IMAGE_DIR -mindepth 1 -maxdepth 1 2>/dev/null`
-    for i in $files; do
-        if [ `basename $i` != "var" ]; then
-            sudo cp -a $i $MNTPNT || die "sudo failed at line $LINENO"
-            sudo chown -R root.root $MNTPNT/`basename $i` || die "sudo failed at line $LINENO"
-        fi
-    done
-
-    sudo umount $MNTPNT || die "sudo failed at line $LINENO"
-    rmdir $MNTPNT
+    cd $ROOTFS_IMAGE_DIR
+    sudo tar --owner=0 --group=0 -czf $ROOTFS_BUILD_PATH/$ROOTFS_FILENAME * || die "sudo failed at line $LINENO"
 }
 
 
 usage()
 {
-    echo -e "Usage: `basename $0` [--clean] [--build] [--install] [--image] [--packages=<package list>] [--qtopia-source <path>] [--source-url <url>]"
+    echo -e "Usage: `basename $0` [--clean] [--build] [--install] [--image] [--packages=<package list>] [--source-url <url>]"
     echo -e "If no options are specified defaults to --build --install --images\n" \
             "   --clean          Clean build directory.\n" \
             "   --build          Build packages, only if not previously built.\n" \
@@ -1565,7 +1673,6 @@ usage()
             "   --interactive    Start an interactive shell on error.\n" \
             "   --develmode      Enable devel mode. When enabled some things are done differently. This mode is NOT suppoted.\n" \
             "   --config-linux   Run \"make menuconfig\" when building Linux.\n" \
-            "   --qtopia-source  Location of Qtopia source tree.\n" \
             "   --kernel-source  Location of Linux kernel source tree.\n" \
             "   --source-url     Location to download source packages from.\n" \
             "   --stampdir       path to build stamps directory.\n" \
@@ -1573,10 +1680,14 @@ usage()
             "   --cross-prefix   Cross toolchain prefix.\n" \
             "   --toolchain-path Path to pre built toolchain.\n" \
             "   --verbose        Use verbose download.\n" \
-            "   --source-url     Location to download source packages from.\n\n" \
+            "   --download-dir   Location to download source packages to.\n" \
+            "   --no-lids        Do not use lids.\n" \
+            "   --raid           Use software raid.\n" \
+            "   --bootchart      Use bootchartd as init process (requires kernel recompile).\n\n" \
             "Available packages:\n" \
             "$ALL_PACKAGES\n\n" \
-            "Running without any options will build a rootfs image.\n"
+            "Running without any options will build a rootfs image.\n\n" \
+            "Using $QTOPIA_SOURCE_PATH as Qtopia source path.  Override with QTOPIA_DEPOT_PATH environment variable if required.\n"
 }
 
 . `dirname $0`/functions
@@ -1593,38 +1704,34 @@ OWNTOOLCHAIN=0
 DOWNLOAD_DIR=$PWD
 STAMPDIR=$PWD
 BUILDDIR=
+CONFIG_LIDS=1
+CONFIG_RAID=0
+CONFIG_BOOTCHART=0
 
 TOOLCHAIN_PATH="/opt/toolchains/greenphone/gcc-4.1.1-glibc-2.3.6/arm-linux"
 CROSS_PREFIX="arm-linux"
 
-if [ -z $QTOPIA_DEPOT_PATH ] ; then
-		QTOPIA_SOURCE_PATH=$PWD
+if [ -z $QTOPIA_DEPOT_PATH ]; then
+    QTOPIA_SOURCE_PATH=$(dirname $(dirname $(readlink -f $0)))
 else
-		QTOPIA_SOURCE_PATH=$QTOPIA_DEPOT_PATH
+    QTOPIA_SOURCE_PATH=$QTOPIA_DEPOT_PATH
 fi
 
 # The order that some of these packages are built in is important.
 ALL_PACKAGES="toolchain busybox-secure busybox"
-ALL_PACKAGES="$ALL_PACKAGES libungif ilib fbv"
+ALL_PACKAGES="$ALL_PACKAGES libungif ilib"
 ALL_PACKAGES="$ALL_PACKAGES dosfstools"
-ALL_PACKAGES="$ALL_PACKAGES ppp sxetools armioctl tat getkeycode"
+ALL_PACKAGES="$ALL_PACKAGES ppp"
+ALL_PACKAGES="$ALL_PACKAGES sxetools armioctl tat getkeycode bootcharger"
+ALL_PACKAGES="$ALL_PACKAGES openssl"
 ALL_PACKAGES="$ALL_PACKAGES dropbear"
 ALL_PACKAGES="$ALL_PACKAGES samba"
-ALL_PACKAGES="$ALL_PACKAGES strace prelink"
+ALL_PACKAGES="$ALL_PACKAGES strace prelink bootchart"
 ALL_PACKAGES="$ALL_PACKAGES expat dbus"
 ALL_PACKAGES="$ALL_PACKAGES bluez-libs bluez-utils bluez-hcidump bluez-firmware"
 ALL_PACKAGES="$ALL_PACKAGES wireless-tools wpa_supplicant"
 ALL_PACKAGES="$ALL_PACKAGES initrd linux"
-if [ ! -z $CONFIG_LIDS ]; then
-ALL_PACKAGES="$ALL_PACKAGES lids"
-fi
-ALL_PACKAGES="$ALL_PACKAGES basefiles"
 PACKAGES=$ALL_PACKAGES
-
-#if [ $# -eq 0 ]; then
-#    usage
-#    exit 0
-# fi
 
 while [ $# -ne 0 ]; do
     case $1 in
@@ -1645,7 +1752,14 @@ while [ $# -ne 0 ]; do
             DEFAULT_OPTIONS=0
             ;;
         --packages=*)
+            PACKAGES_ORDERED=""
             PACKAGES=`echo ${1#--packages=} | tr ',' ' '`
+            for p in $ALL_PACKAGES; do
+                if echo "$PACKAGES" | grep $p 2>&1 >/dev/null; then
+                    PACKAGES_ORDERED="$PACKAGES_ORDERED $p"
+                fi
+            done
+            PACKAGES=$PACKAGES_ORDERED
             ;;
         --develmode)
             OPTION_DEVEL=1
@@ -1658,16 +1772,6 @@ while [ $# -ne 0 ]; do
         --config-linux)
             OPTION_CONFIG_LINUX=1
             DEFAULT_OPTIONS=0
-            ;;
-        --qtopia-source)
-            if [ $# -ge 2 ]; then
-                QTOPIA_SOURCE_PATH="$2"
-                shift 1
-            else
-                echo "$1 requires an argument"
-                usage
-                exit 1
-            fi
             ;;
         --kernel-source)
             if [ $# -ge 2 ]; then
@@ -1715,6 +1819,18 @@ while [ $# -ne 0 ]; do
         --verbose)
 						VERBOSITY=1
 						;;  
+        --bootchart)
+						CONFIG_BOOTCHART=1
+						;;
+        --no-lids)
+						CONFIG_LIDS=0
+						;;
+        --raid)
+						CONFIG_RAID=1
+# kernel is too big with lids and raid
+						CONFIG_LIDS=0
+            OPTION_CONFIG_LINUX=1
+						;;
         --help)
             usage
             exit 0
@@ -1727,6 +1843,16 @@ while [ $# -ne 0 ]; do
     esac
     shift
 done
+
+if [ $CONFIG_LIDS -eq 1 ]; then
+    echo "build with lids"
+    PACKAGES="$PACKAGES lids"
+fi
+PACKAGES="$PACKAGES basefiles"
+if [ $CONFIG_RAID -eq 1 ]; then
+    echo "build with raid"
+    PACKAGES="$PACKAGES popt raid"
+fi
 
 # Default options if non specified
 if [ $DEFAULT_OPTIONS -eq 1 ]; then
@@ -1771,14 +1897,13 @@ echo >$LOGFILE
 
 # Define locations where images will be built
 ROOTFS_IMAGE_DIR=$ROOTFS_BUILD_PATH/rootfs
-USERFS_IMAGE_DIR=$ROOTFS_BUILD_PATH/userfs
 DEVFS_IMAGE_DIR=$ROOTFS_BUILD_PATH/devfs
 
 # Outputs of this script
-ROOTFS_FILENAME=greenphone_rootfs.ext2
-KERNEL_FILENAME=greenphone_kernel
+ROOTFS_FILENAME=greenphone-rootfs.tar.gz
+KERNEL_FILENAME=greenphone-kernel
 KERNEL_SIZELIMIT=1048576
-INITRD_FILENAME=greenphone_initrd
+INITRD_FILENAME=greenphone-initrd
 
 # toolchain
 CROSSTOOL=crosstool-0.42
@@ -1796,7 +1921,6 @@ LINUX=linux-2.4.19
 BUSYBOX=busybox-1.2.1
 LIBUNGIF=libungif-4.1.4
 ILIB=Ilib-1.1.9
-FBV=fbv-1.0b
 DOSFSTOOLS=dosfstools-2.11
 STRACE=strace-4.5.14
 PPP=ppp-2.4.3
@@ -1805,14 +1929,18 @@ LIBELF=libelf-0.8.6
 PRELINK=prelink-0.0.20060712
 EXPAT=expat-2.0.0
 DBUS=dbus-1.0.2
-BLUEZLIBS=bluez-libs-3.9
-BLUEZUTILS=bluez-utils-3.9
+BLUEZLIBS=bluez-libs-3.19
+BLUEZUTILS=bluez-utils-3.19
 BLUEZHCIDUMP=bluez-hcidump-1.34
 BLUEZFIRMWARE=bluez-firmware-1.2
 WIRELESSTOOLS=wireless_tools.28
-WPASUPPLICANT=wpa_supplicant-0.4.9
+WPASUPPLICANT=wpa_supplicant-0.5.7
 LIDS=lids-1.2.2-2.4.28
 DROPBEAR=dropbear-0.48.1
+POPT=popt-1.10.4
+RAID=raidtools-1.00.3
+OPENSSL=openssl-0.9.8e
+BOOTCHART=bootchart-0.9
 
 # package built from the depot
 GPH_LINUX=linux
@@ -1823,7 +1951,6 @@ if [ $OPTION_CLEAN -eq 1 ]; then
     done
 
     sudo rm -rf $ROOTFS_IMAGE_DIR || die "sudo failed at line $LINENO"
-    sudo rm -rf $USERFS_IMAGE_DIR || die "sudo failed at line $LINENO"
     sudo rm -rf $DEVFS_IMAGE_DIR || die "sudo failed at line $LINENO"
     [ -d host ] && rmdir --ignore-fail-on-non-empty host
 
@@ -1835,8 +1962,8 @@ if [ $OPTION_BUILD -eq 1 ]; then
     done
 fi
 if [ $OPTION_INSTALL -eq 1 ]; then
-    sudo rm -rf $ROOTFS_IMAGE_DIR $USERFS_IMAGE_DIR $DEVFS_IMAGE_DIR || die "sudo failed at line $LINENO"
-    mkdir -p $ROOTFS_IMAGE_DIR $USERFS_IMAGE_DIR $DEVFS_IMAGE_DIR
+    sudo rm -rf $ROOTFS_IMAGE_DIR $DEVFS_IMAGE_DIR || die "sudo failed at line $LINENO"
+    mkdir -p $ROOTFS_IMAGE_DIR $DEVFS_IMAGE_DIR
     rm -rf $ROOTFS_BUILD_PATH/junk
 
     for package in $PACKAGES; do
@@ -1845,7 +1972,7 @@ if [ $OPTION_INSTALL -eq 1 ]; then
 fi
 
 if [ $OPTION_IMAGE -eq 1 ]; then
-    if [ -d $USERFS_IMAGE_DIR -a -d $DEVFS_IMAGE_DIR -a -d $ROOTFS_IMAGE_DIR ]; then
+    if [ -d $ROOTFS_IMAGE_DIR -a -d $DEVFS_IMAGE_DIR ]; then
         create_default_tgzs
 
         make_rootfs_image

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -41,6 +41,18 @@ struct QMetaTypeRegister
     static int registerType() { return 1; }
 };
 
+#if QT_VERSION < 0x040400
+#define _QATOMIC_ONCE() \
+    static QAtomic once; \
+    if ( once.exchange(1) ) \
+        return 1
+#else
+#define _QATOMIC_ONCE() \
+    static QAtomicInt once; \
+    if ( once.fetchAndStoreOrdered(1) ) \
+        return 1
+#endif
+
 #if defined(QTOPIA_DBUS_IPC)
 #define Q_DECLARE_USER_METATYPE_NO_OPERATORS(TYPE) \
     Q_DECLARE_METATYPE(TYPE) \
@@ -49,11 +61,9 @@ struct QMetaTypeRegister
     { \
         static int registerType() \
         { \
-            static QAtomic once; \
-            if ( once.exchange(1) ) \
-                return 1; \
-            int id = qMetaTypeId( ( TYPE *)0 ); \
-            if ( id >= (int)QMetaType::User ) {\
+            _QATOMIC_ONCE(); \
+            int id = qMetaTypeId( reinterpret_cast<TYPE *>(0) ); \
+            if ( id >= static_cast<int>(QMetaType::User) ) {\
                 qRegisterMetaTypeStreamOperators< TYPE >( #TYPE ); \
                 qDBusRegisterMetaType< TYPE >(); \
             } \
@@ -69,11 +79,9 @@ struct QMetaTypeRegister
     { \
         static int registerType() \
         { \
-            static QAtomic once; \
-            if ( once.exchange(1) ) \
-                return 1; \
-            int id = qMetaTypeId( ( TYPE *)0 ); \
-            if ( id >= (int)QMetaType::User ) \
+            _QATOMIC_ONCE(); \
+            int id = qMetaTypeId( reinterpret_cast<TYPE *>(0) ); \
+            if ( id >= static_cast<int>(QMetaType::User) ) \
                 qRegisterMetaTypeStreamOperators< TYPE >( #TYPE ); \
             return 1; \
         } \
@@ -104,9 +112,7 @@ struct QMetaTypeRegister
     }; \
     template<> struct QMetaTypeRegister##TAG< TYPE > { \
         static int registerType() { \
-            static QAtomic once; \
-            if ( once.exchange(1) ) \
-                return 1; \
+            _QATOMIC_ONCE(); \
             int id = qRegisterMetaType< TYPE >( #TYPE ); \
             qRegisterMetaTypeStreamOperators< TYPE >( #TYPE ); \
             void (*mf)(QDBusArgument &, const TYPE *) = qDBusMarshallHelper<TYPE>; \
@@ -127,9 +133,7 @@ struct QMetaTypeRegister
     }; \
     template<> struct QMetaTypeRegister##TAG< TYPE > { \
         static int registerType() { \
-            static QAtomic once; \
-            if ( once.exchange(1) ) \
-                return 1; \
+            _QATOMIC_ONCE(); \
             qRegisterMetaType< TYPE >( #TYPE ); \
             qRegisterMetaTypeStreamOperators< TYPE >( #TYPE ); \
             return 1; \
@@ -196,26 +200,26 @@ struct QMetaTypeRegister
 #define Q_IMPLEMENT_USER_METATYPE_ENUM(TYPE)    \
     QTOPIABASE_EXPORT QDataStream& operator<<( QDataStream& stream, const TYPE &v ) \
     { \
-        stream << (qint32)v; \
+        stream << static_cast<qint32>(v); \
         return stream; \
     } \
     QTOPIABASE_EXPORT QDataStream& operator>>( QDataStream& stream, TYPE& v ) \
     { \
         qint32 _v; \
         stream >> _v; \
-        v = (TYPE)_v; \
+        v = static_cast<TYPE>(_v); \
         return stream; \
     } \
     QTOPIABASE_EXPORT QDBusArgument &operator<<(QDBusArgument &a, TYPE v) \
     { \
-        a << (qint32)v; \
+        a << static_cast<qint32>(v); \
         return a; \
     } \
     QTOPIABASE_EXPORT const QDBusArgument &operator>>(const QDBusArgument &a, TYPE &v) \
     { \
         qint32 _v; \
         a >> _v; \
-        v = (TYPE)_v; \
+        v = static_cast<TYPE>(_v); \
         return a; \
     } \
     Q_IMPLEMENT_USER_METATYPE_NO_OPERATORS(TYPE)
@@ -223,14 +227,14 @@ struct QMetaTypeRegister
 #define Q_IMPLEMENT_USER_METATYPE_ENUM(TYPE)    \
     QDataStream& operator<<( QDataStream& stream, const TYPE &v ) \
     { \
-        stream << (qint32)v; \
+        stream << static_cast<qint32>(v); \
         return stream; \
     } \
     QDataStream& operator>>( QDataStream& stream, TYPE& v ) \
     { \
         qint32 _v; \
         stream >> _v; \
-        v = (TYPE)_v; \
+        v = static_cast<TYPE>(_v); \
         return stream; \
     } \
     Q_IMPLEMENT_USER_METATYPE_NO_OPERATORS(TYPE)

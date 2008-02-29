@@ -62,23 +62,22 @@
 <h2>Detailed Description</h2>
 <p>The QSignalSource class provides access to information about signal sources on devices.</p>
 <p>Signal sources are accessories that provide radio signal details to Qtopia. A signal source could be an internal modem monitoring the GSM/3G network signal or a wireless LAN interface on VoIP devices as indicated by <a href="qsignalsource.html#type">type</a>(). QSignalSource allows applications to query the availability through <a href="qsignalsource.html#availability">availability</a>(), the signal level through <a href="qsignalsource.html#signalStrength">signalStrength</a>() and emits signals <a href="qsignalsource.html#availabilityChanged">availabilityChanged</a>() and <a href="qsignalsource.html#signalStrengthChanged">signalStrengthChanged</a>() when those values change.</p>
-<p>In addition to the above hardware related signal sources Qtopia provides a virtual default signal source. This default source is selected from the list of available QSignalSource providers. The selection may be configured in the <tt>Trolltech/SignalStatus</tt> configuration file. The following keys apply:</p>
+<p>In addition to the above hardware related signal sources Qtopia provides a virtual default signal source. This default source is selected from the list of available QSignalSource providers. The selection may be configured in the <tt>Trolltech/HardwareAccessories</tt> configuration file. The following keys apply:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>key</th><th>Decription</th></tr></thead>
 <tr valign="top" class="odd"><td>SignalSources/DefaultSignalSource</td><td>Name (ID) of the QSignalSource to use as the default signal source.</td></tr>
 </table></p>
-<p>If the default signal source is not explicitly configured via the configuration file above the modem signal source is preferred over a WLAN signal source. If there are several signal sources of the same type the first signal source that is created will be used. If the default signal source is configured, but the specified provider does not exist, then QSignalSource becomes invalid. The default signal is provided by the <a href="defaultsignal.html">DefaultSignal</a> server task.</p>
+<p>If the default signal source is not explicitly configured via the configuration file above a modem signal source is preferred over a WLAN signal source. If there are several signal sources of the same type the first signal source that is created will be used. If the default signal source is configured, but the specified provider does not exist, then QSignalSource becomes invalid. The default signal is provided by the <a href="defaultsignal.html">DefaultSignal</a> server task.</p>
 <p>A specific QSignalSource can be selected as shown in the following example:</p>
-<pre>    QString requestedType = &quot;wlan&quot;;
-    QHardwareManager man( &quot;QSignalSource&quot; );
-    QStringList providers = man.providers();
+<pre>    QSignalSource* src = 0;
+    QHardwareManager* manager = new QHardwareManager(&quot;QSignalSource&quot;, this);
+    QStringList providers = man-&gt;providers();
 
-    QSignalSource* src = 0;
 <span class="comment">    //find a WLAN signal source</span>
     foreach( QString signalSourceId, providers )
     {
         src = new QSignalSource( signalSourceId, this );
-        if ( src-&gt;type() == requestedType ) {
+        if ( src-&gt;type() == &quot;wlan&quot; ) {
             break;
         } else {
             delete src;
@@ -110,7 +109,7 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QSignalSource"></a>QSignalSource::QSignalSource ( const <a href="qstring.html">QString</a> &amp; <i>id</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new signal source for provider <i>id</i> with the specified <i>parent</i>.</p>
-<p>If <i>id</i> is not passed, this class will use the default signal source.</p>
+<p>If <i>id</i> is empty, this class will use the default signal source.</p>
 <h3 class="fn"><a name="dtor.QSignalSource"></a>QSignalSource::~QSignalSource ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="qsignalsource.html">QSignalSource</a>.</p>
 <h3 class="fn"><a name="availability"></a><a href="qsignalsource.html#Availability-enum">Availability</a> QSignalSource::availability () const</h3>
@@ -127,6 +126,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

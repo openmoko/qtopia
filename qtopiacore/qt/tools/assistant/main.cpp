@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -50,6 +65,35 @@
 #if !defined(QT_NO_DBUS) && defined(Q_OS_UNIX)
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusAbstractAdaptor>
+#include <QtDBus/QDBusObjectPath>
+#include "tabbedbrowser.h"
+
+class HelpWindowAdaptor : public QDBusAbstractAdaptor
+{
+    Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "com.trolltech.Assistant.HelpWindow")
+
+    Q_PROPERTY(QString source READ source WRITE setSource)
+
+public:
+    HelpWindowAdaptor(HelpWindow *w) : QDBusAbstractAdaptor(w), helpWindow(w)
+    {
+        setAutoRelaySignals(true);
+    }
+
+public Q_SLOTS:
+    inline QString source() const { return helpWindow->source().toString(); }
+    inline void setSource(const QString &src) { helpWindow->setSource(src); }
+
+    inline void clearHistory() { helpWindow->clearHistory(); }
+    inline void backward() { helpWindow->backward(); }
+    inline void forward() { helpWindow->forward(); }
+    inline void reload() { helpWindow->reload(); }
+    inline void home() { helpWindow->home(); }
+
+private:
+    HelpWindow *helpWindow;
+};
 
 class AssistantAdaptor : public QDBusAbstractAdaptor
 {
@@ -60,16 +104,50 @@ public:
     AssistantAdaptor(MainWindow *mw) : QDBusAbstractAdaptor(mw), mw(mw)
     {
         QDBusConnection connection = QDBusConnection::sessionBus();
-        connection.registerService("com.trolltech.Assistant");
-        connection.registerObject("/Assistant", mw);
+        connection.registerService(QLatin1String("com.trolltech.Assistant"));
+        connection.registerObject(QLatin1String("/Assistant"), mw);
     }
 
 public slots:
     void showLink(const QString &link) { mw->showLink(link); }
+    QDBusObjectPath createNewTab();
+    QDBusObjectPath currentTab();
 
 private:
+    QDBusObjectPath pathForBrowser(HelpWindow *window);
     MainWindow *mw;
 };
+
+QDBusObjectPath AssistantAdaptor::createNewTab()
+{
+    HelpWindow *window = mw->browsers()->newBackgroundTab();
+    return pathForBrowser(window);
+}
+
+QDBusObjectPath AssistantAdaptor::currentTab()
+{
+    HelpWindow *window = mw->browsers()->currentBrowser();
+    return pathForBrowser(window);
+}
+
+QDBusObjectPath AssistantAdaptor::pathForBrowser(HelpWindow *window)
+{
+    int index = mw->browsers()->browsers().indexOf(window);
+    if (index == -1)
+        return QDBusObjectPath();
+
+    QString name(QLatin1String("/Assistant/Tabs/"));
+    name += QString::number(index);
+    QDBusObjectPath path(name);
+
+    if (!window->findChild<HelpWindowAdaptor *>()) {
+        (void)new HelpWindowAdaptor(window);
+        QDBusConnection::sessionBus().registerObject(name, window);
+    }
+
+    return path;
+}
+
 #endif // QT_NO_DBUS
 
 class AssistantSocket : public QTcpSocket
@@ -118,7 +196,7 @@ void AssistantSocket::readClient()
 {
     QString link = QString();
     while ( canReadLine() )
-        link = readLine();
+        link = QLatin1String(readLine());
     if ( !link.isNull() ) {
         link = link.replace(QLatin1String("\n"), QLatin1String(""));
         link = link.replace(QLatin1String("\r"), QLatin1String(""));
@@ -176,8 +254,8 @@ int main( int argc, char ** argv )
     }
 #endif
     QApplication a(argc, argv, withGUI);
-    a.setOrganizationName("Trolltech");
-    a.setApplicationName("Assistant");
+    a.setOrganizationName(QLatin1String("Trolltech"));
+    a.setApplicationName(QLatin1String("Assistant"));
 
     QString resourceDir;
     AssistantServer *as = 0;
@@ -235,7 +313,7 @@ int main( int argc, char ** argv )
                 QString contentFile = QString::fromLocal8Bit(argv[i+i]);
                 QStringList entries;
 #ifdef Q_WS_WIN
-                contentFile.replace('\\', '/');
+                contentFile.replace(QLatin1Char('\\'), QLatin1Char('/'));
                 entries = profile->docs.filter(contentFile, Qt::CaseInsensitive);
 #else
                 entries = profile->docs.filter(contentFile);
@@ -258,7 +336,7 @@ int main( int argc, char ** argv )
                     c->save();
                 }
                 return 0;
-            } else if ( QString( argv[i] ).toLower() == "-docpath" ) {
+            } else if ( QString( QLatin1String(argv[i]) ).toLower() == QLatin1String("-docpath") ) {
                 INDEX_CHECK( "Missing path!" );
                 QDir dir(QString::fromLocal8Bit(argv[i+1]));
                 if ( dir.exists() ) {
@@ -350,15 +428,19 @@ int main( int argc, char ** argv )
     new AssistantAdaptor(mw);
 #endif // QT_NO_DBUS
 
+    FontSettings settings = conf->fontSettings();
+    if (mw->font() != settings.windowFont)
+        a.setFont(settings.windowFont, "QWidget");
+
     mw->show();
 
-    if ( !file.isEmpty() ) {
+    if (!file.isEmpty())
         mw->showLink( MainWindow::urlifyFileName(file) );
-    } else if ( file.isEmpty() )
+    else if (file.isEmpty())
         mw->showLinks( links );
 
     a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );
-
+    
     int appExec = a.exec();
     delete (MainWindow*)mw;
     return appExec;

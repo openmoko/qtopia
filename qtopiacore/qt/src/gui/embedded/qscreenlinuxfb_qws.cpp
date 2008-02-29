@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -27,6 +42,7 @@
 //#include "qmemorymanager_qws.h"
 #include "qwsdisplay_qws.h"
 #include "qpixmap.h"
+#include <private/qwssignalhandler_p.h>
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -57,10 +73,10 @@ extern int qws_client_id;
 
 //#define DEBUG_CACHE
 
-class QLinuxFbScreenPrivate
+class QLinuxFbScreenPrivate : public QObject
 {
 public:
-    Q_GLOBAL_STATIC(QLinuxFbScreenPrivate, instance);
+    QLinuxFbScreenPrivate();
     ~QLinuxFbScreenPrivate();
 
     void openTty();
@@ -72,22 +88,23 @@ public:
     int startupd;
 
     bool doGraphicsMode;
+#ifdef QT_QWS_DEPTH_GENERIC
+    bool doGenericColors;
+#endif
     int ttyfd;
     long oldKdMode;
     QString ttyDevice;
     QString displaySpec;
-
-private:
-    QLinuxFbScreenPrivate();
-    void installSignalHandler();
-    static void signalHandler(int signum);
-    QMap<int, sighandler_t> oldHandlers;
 };
 
 QLinuxFbScreenPrivate::QLinuxFbScreenPrivate()
-    : fd(-1), doGraphicsMode(true), ttyfd(-1), oldKdMode(KD_TEXT)
+    : fd(-1), doGraphicsMode(true),
+#ifdef QT_QWS_DEPTH_GENERIC
+      doGenericColors(false),
+#endif
+      ttyfd(-1), oldKdMode(KD_TEXT)
 {
-    installSignalHandler();
+    QWSSignalHandler::instance()->addObject(this);
 }
 
 QLinuxFbScreenPrivate::~QLinuxFbScreenPrivate()
@@ -144,27 +161,6 @@ void QLinuxFbScreenPrivate::closeTty()
     ttyfd = -1;
 }
 
-void QLinuxFbScreenPrivate::installSignalHandler()
-{
-    const int signums[] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
-                            SIGSEGV, SIGTERM, SIGBUS };
-    const int n = sizeof(signums)/sizeof(int);
-
-    for (int i = 0; i < n; ++i) {
-        int signum = signums[i];
-        sighandler_t old = signal(signum, signalHandler);
-        oldHandlers[signum] = (old == SIG_ERR ? SIG_DFL : old);
-    }
-}
-
-void QLinuxFbScreenPrivate::signalHandler(int signum)
-{
-    QLinuxFbScreenPrivate *d_ptr = instance();
-    signal(signum, d_ptr->oldHandlers[signum]);
-    d_ptr->closeTty();
-    raise(signum);
-}
-
 /*!
     \internal
 
@@ -218,7 +214,7 @@ void QLinuxFbScreenPrivate::signalHandler(int signum)
 */
 
 QLinuxFbScreen::QLinuxFbScreen(int display_id)
-    : QScreen(display_id), d_ptr(QLinuxFbScreenPrivate::instance())
+    : QScreen(display_id), d_ptr(new QLinuxFbScreenPrivate)
 {
     canaccel=false;
     clearCacheFunc = &clearCache;
@@ -248,12 +244,26 @@ bool QLinuxFbScreen::connect(const QString &displaySpec)
 {
     d_ptr->displaySpec = displaySpec;
 
-    const QStringList args = displaySpec.split(":");
-    if (args.contains("nographicsmodeswitch"))
+    const QStringList args = displaySpec.split(QLatin1Char(':'));
+
+    if (args.contains(QLatin1String("nographicsmodeswitch")))
         d_ptr->doGraphicsMode = false;
-    QRegExp ttyRegExp("tty=(.*)");
+
+#ifdef QT_QWS_DEPTH_GENERIC
+    if (args.contains(QLatin1String("genericcolors")))
+        d_ptr->doGenericColors = true;
+#endif
+
+    QRegExp ttyRegExp(QLatin1String("tty=(.*)"));
     if (args.indexOf(ttyRegExp) != -1)
         d_ptr->ttyDevice = ttyRegExp.cap(1);
+
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+#ifndef QT_QWS_FRAMEBUFFER_LITTLE_ENDIAN
+    if (args.contains(QLatin1String("littleendian")))
+#endif
+        QScreen::setFrameBufferLittleEndian(true);
+#endif
 
     // Check for explicitly specified device
     const int len = 8; // "/dev/fbx"
@@ -265,14 +275,16 @@ bool QLinuxFbScreen::connect(const QString &displaySpec)
     else
         dev = QLatin1String("/dev/fb0");
 
-    d_ptr->fd = open(dev.toLatin1().constData(), O_RDWR);
+    if (access(dev.toLatin1().constData(), R_OK|W_OK) == 0)
+        d_ptr->fd = open(dev.toLatin1().constData(), O_RDWR);
     if (d_ptr->fd == -1) {
         if (QApplication::type() == QApplication::GuiServer) {
             perror("QScreenLinuxFb::connect");
             qCritical("Error opening framebuffer device %s", qPrintable(dev));
             return false;
         }
-        d_ptr->fd = open(dev.toLatin1().constData(), O_RDONLY);
+        if (access(dev.toLatin1().constData(), R_OK) == 0)
+            d_ptr->fd = open(dev.toLatin1().constData(), O_RDONLY);
     }
 
     fb_fix_screeninfo finfo;
@@ -326,11 +338,13 @@ bool QLinuxFbScreen::connect(const QString &displaySpec)
         dh = h = 240;
     }
 
+    setPixelFormat(vinfo);
+
     // Handle display physical size spec.
-    QStringList displayArgs = displaySpec.split(':');
-    QRegExp mmWidthRx("mmWidth=?(\\d+)");
+    QStringList displayArgs = displaySpec.split(QLatin1Char(':'));
+    QRegExp mmWidthRx(QLatin1String("mmWidth=?(\\d+)"));
     int dimIdxW = displayArgs.indexOf(mmWidthRx);
-    QRegExp mmHeightRx("mmHeight=?(\\d+)");
+    QRegExp mmHeightRx(QLatin1String("mmHeight=?(\\d+)"));
     int dimIdxH = displayArgs.indexOf(mmHeightRx);
     if (dimIdxW >= 0) {
         mmWidthRx.exactMatch(displayArgs.at(dimIdxW));
@@ -454,7 +468,8 @@ bool QLinuxFbScreen::connect(const QString &displaySpec)
 void QLinuxFbScreen::disconnect()
 {
     data -= dataoffset;
-    munmap((char*)data,mapsize);
+    if (data)
+        munmap((char*)data,mapsize);
     close(d_ptr->fd);
 }
 
@@ -705,6 +720,18 @@ bool QLinuxFbScreen::initDevice()
     shared->clipright=0xffffffff;
     shared->clipbottom=0xffffffff;
     shared->rop=0xffffffff;
+
+#ifdef QT_QWS_DEPTH_GENERIC
+    if (pixelFormat() == QImage::Format_Invalid && screencols == 0
+        && d_ptr->doGenericColors)
+    {
+        qt_set_generic_blit(this, vinfo.bits_per_pixel,
+                            vinfo.red.length, vinfo.green.length,
+                            vinfo.blue.length, vinfo.transp.length,
+                            vinfo.red.offset, vinfo.green.offset,
+                            vinfo.blue.offset, vinfo.transp.offset);
+    }
+#endif
 
 #ifndef QT_NO_QWS_CURSOR
     QScreenCursor::initSoftwareCursor();
@@ -1172,6 +1199,45 @@ void QLinuxFbScreen::blank(bool on)
 #endif
 #endif
 #endif
+}
+
+void QLinuxFbScreen::setPixelFormat(struct fb_var_screeninfo info)
+{
+    const fb_bitfield rgba[4] = { info.red, info.green,
+                                  info.blue, info.transp };
+
+    QImage::Format format = QImage::Format_Invalid;
+
+
+    // TODO: big endian
+
+    switch (d) {
+    case 32: {
+        const fb_bitfield argb8888[4] = {{16, 8, 0}, {8, 8, 0},
+                                         {0, 8, 0}, {24, 8, 0}};
+        if (memcmp(rgba, argb8888, 4 * sizeof(fb_bitfield)) == 0)
+            format = QImage::Format_ARGB32;
+        else if (memcmp(rgba, argb8888, 3 * sizeof(fb_bitfield)) == 0)
+            format = QImage::Format_RGB32;
+        break;
+    }
+    case 16: {
+        const fb_bitfield rgb565[4] = {{11, 5, 0}, {5, 6, 0},
+                                       {0, 5, 0}, {0, 0, 0}};
+        if (memcmp(rgba, rgb565, 3 * sizeof(fb_bitfield)) == 0)
+            format = QImage::Format_RGB16;
+        break;
+    }
+    case 8:
+        break;
+    case 1:
+        format = QImage::Format_Mono; //###: LSB???
+        break;
+    default:
+        break;
+    }
+
+    QScreen::setPixelFormat(format);
 }
 
 #endif // QT_NO_QWS_LINUXFB

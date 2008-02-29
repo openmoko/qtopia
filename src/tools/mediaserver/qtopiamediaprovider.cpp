@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,14 +19,19 @@
 **
 ****************************************************************************/
 
-#include <qtopiaipcenvelope.h>
+#include <QMap>
+#include <QUrl>
+#include <QtopiaIpcEnvelope>
 #include <qtopialog.h>
 #include <media.h>
 
-#include "mediaserver.h"
-#include "mediaengine.h"
-#include "mediasession.h"
+#include <QMediaServerSession>
+
 #include "mediacontrolserver.h"
+#include "mediacontentserver.h"
+#include "sessionmanager.h"
+
+#include "qmediahandle_p.h"
 
 #include "qtopiamediaprovider.h"
 
@@ -34,168 +39,72 @@
 namespace mediaserver
 {
 
-QtopiaMediaProvider::QtopiaMediaProvider(MediaEngine* mediaEngine):
+struct Session
+{
+    Session(MediaContentServer* contentServer,
+            MediaControlServer* controlServer):
+        content(contentServer),
+        control(controlServer)
+    {
+    }
+
+    MediaContentServer* content;
+    MediaControlServer* control;
+};
+
+typedef QMap<QUuid, Session>   SessionMap;
+
+
+class QtopiaMediaProviderPrivate
+{
+public:
+    SessionManager*   sessionManager;
+    SessionMap        sessionMap;
+};
+
+QtopiaMediaProvider::QtopiaMediaProvider(SessionManager* sessionManager):
     QtopiaAbstractService(QTOPIA_MEDIASERVER_CHANNEL),
-    m_mediaEngine(mediaEngine)
+    d(new QtopiaMediaProviderPrivate)
 {
     qLog(Media) << "QtopiaMediaProvider starting";
+
+    d->sessionManager = sessionManager;
 
     publishAll();
 }
 
 QtopiaMediaProvider::~QtopiaMediaProvider()
 {
-}
-
-void QtopiaMediaProvider::createContentSession
-(
- QString const& responseChannel,
- QUuid const&   id,
- QString const& domain,
- QString const& url,
- QString const& command
-)
-{
-    qLog(Media) << "QtopiaMediaProvider::createContentSession()" <<
-                responseChannel << id << domain << url << command;
-
-    MediaSession* mediaSession = m_mediaEngine->createSession(id, url);
-
-    if (mediaSession != 0)
-    {
-        mediaSession->setDomain(domain);
-
-        // Wrap in control object
-        MediaControlServer* mediaControlServer = new MediaControlServer(mediaSession,
-                                                                        id.toString());
-        m_sessionMap.insert(id, mediaControlServer);
-
-        if (command == "play")
-        {
-            mediaControlServer->start();
-        }
-
-        QtopiaIpcEnvelope   e(responseChannel, "sessionCreated(QUuid)");
-        e << id;
-    }
-    else
-    {
-        QtopiaIpcEnvelope   e(responseChannel, "sessionError(QUuid,QString)");
-        e << id << "none";
-    }
-}
-
-
-void QtopiaMediaProvider::createDecodeSession
-(
- QString const&         responseChannel,
- QUuid const&           id,
- QString const&         domain,
- QString const&         url,
- QMediaCodecRep const&  codec,
- QMediaDeviceRep const& device
-)
-{
-    qLog(Media) << "QtopiaMediaProvider::createDecodeSession(HalfDuplex)" <<
-                responseChannel << id << domain << url;
-
-    MediaSession* mediaSession = m_mediaEngine->createDecodeSession(id,
-                                                                    url,
-                                                                    codec,
-                                                                    device);
-
-    if (mediaSession != 0)
-    {
-        mediaSession->setDomain(domain);
-
-        // Wrap in control object
-        MediaControlServer* mediaControlServer = new MediaControlServer(mediaSession,
-                                                                        id.toString());
-        m_sessionMap.insert(id, mediaControlServer);
-
-        QtopiaIpcEnvelope   e(responseChannel, "sessionCreated(QUuid)");
-        e << id;
-    }
-    else
-    {
-        QtopiaIpcEnvelope   e(responseChannel, "sessionError(QUuid,QString)");
-        e << id << "none";
-    }
-}
-
-void QtopiaMediaProvider::createEncodeSession
-(
- QString const&         responseChannel,
- QUuid const&           id,
- QString const&         domain,
- QString const&         url,
- QMediaCodecRep const&  codec,
- QMediaDeviceRep const& device
-)
-{
-    Q_UNUSED(domain);
-
-    qLog(Media) << "QtopiaMediaProvider::createSession(HalfDuplex)" <<
-                responseChannel << id << domain << url;
-
-    MediaSession* mediaSession = m_mediaEngine->createEncodeSession(id, url,
-                                                                     codec,
-                                                                     device);
-
-    if (mediaSession != 0)
-    {
-        // Wrap in control object
-        MediaControlServer* mediaControlServer = new MediaControlServer(mediaSession,
-                                                                        id.toString());
-        m_sessionMap.insert(id, mediaControlServer);
-
-        QtopiaIpcEnvelope   e(responseChannel, "sessionCreated(QUuid)");
-        e << id;
-    }
-    else
-    {
-        QtopiaIpcEnvelope   e(responseChannel, "sessionError(QUuid,QString)");
-        e << id << "none";
-    }
+    delete d;
 }
 
 void QtopiaMediaProvider::createSession
 (
  QString const& responseChannel,
- QUuid const& id,
- QString const& domain,
- QMediaCodecRep const& codec,
- QMediaDeviceRep const& inputSink,
- QMediaDeviceRep const& outputSink,
- QMediaDeviceRep const& inputSource,
- QMediaDeviceRep const& outputSource
+ QMediaSessionRequest const& request
 )
 {
-    Q_UNUSED(domain);
+    qLog(Media) << "QtopiaMediaProvider::createSession()" << request.id() << request.domain() << request.type();
 
-    qLog(Media) << "QtopiaMediaProvider::createSession(FullDuplex)" <<
-                responseChannel << id << domain;
-
-    MediaSession* mediaSession = m_mediaEngine->createSession(id, codec,
-                                                                inputSink,
-                                                                outputSink,
-                                                                inputSource,
-                                                                outputSource);
+    QMediaServerSession*    mediaSession = d->sessionManager->createSession(request);
 
     if (mediaSession != 0)
     {
-        // Wrap in control object
-        MediaControlServer* mediaControlServer = new MediaControlServer(mediaSession,
-                                                                        id.toString());
-        m_sessionMap.insert(id, mediaControlServer);
+        // Wrap in Media API content & control objects
+        MediaContentServer* contentServer = new MediaContentServer(mediaSession,
+                                                                   QMediaHandle(request.id()));
+        MediaControlServer* controlServer = new MediaControlServer(mediaSession,
+                                                                   QMediaHandle(request.id()));
+
+        d->sessionMap.insert(request.id(), Session(contentServer, controlServer));
 
         QtopiaIpcEnvelope   e(responseChannel, "sessionCreated(QUuid)");
-        e << id;
+        e << request.id();
     }
     else
     {
         QtopiaIpcEnvelope   e(responseChannel, "sessionError(QUuid,QString)");
-        e << id << "none";
+        e << request.id() << tr("The media system is not configured to handle this request");
     }
 }
 
@@ -203,17 +112,20 @@ void QtopiaMediaProvider::destroySession(QUuid const& id)
 {
     qLog(Media) << "QtopiaMediaProvider::destroySession()" << id;
 
-    SessionMap::iterator it = m_sessionMap.find(id);
+    SessionMap::iterator it = d->sessionMap.find(id);
 
-    if (it != m_sessionMap.end())
+    if (it != d->sessionMap.end())
     {
-        MediaControlServer* mediaControlServer = *it;
+        Session&    session = *it;
 
-        m_mediaEngine->destroySession(mediaControlServer->mediaSession());
-        delete mediaControlServer;
+        d->sessionManager->destroySession(session.control->mediaSession());
 
-        m_sessionMap.erase(it);
+        delete session.content;
+        delete session.control;
+
+        d->sessionMap.erase(it);
     }
 }
 
 }   // ns mediaserver
+

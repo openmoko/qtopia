@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,6 +29,7 @@ class QGsm0710MultiplexerPrivate;
 class QTOPIACOMM_EXPORT QGsm0710Multiplexer : public QSerialIODeviceMultiplexer
 {
     Q_OBJECT
+    friend class QGsm0710MultiplexerPrivate;
     friend class QGsm0710MultiplexerChannel;
     friend class QGsm0710MultiplexerServer;
 public:
@@ -56,7 +57,6 @@ private:
                          int frameSize, bool advanced,
                          QObject *parent, bool server );
 
-    bool packet( int channel, int type, const char *data, uint len );
     void terminate();
     void open( int channel );
     void close( int channel );

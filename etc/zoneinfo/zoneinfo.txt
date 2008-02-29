@@ -8,6 +8,9 @@ glibc version of the toolchain.
 QTOPIA_ZONEINFO_PATH environmental variable to where the zoneinfo directory exists.
 
 - More information about zoneinfo can be found here:
+ The tz home page
+ http://www.twinsun.com/tz/tz-link.htm
+
  http://en.wikipedia.org/wiki/Zoneinfo
 
 - To update with a new version of zoneinfo here:
@@ -20,3 +23,5 @@ QTOPIA_ZONEINFO_PATH environmental variable to where the zoneinfo directory exis
   + Copy the $HOME/tzdir/etc/zoneinfo directory contents to this directory, 
 or where they will exist on your system.
   + Estimated size 2M
+  + version 2007h
+  

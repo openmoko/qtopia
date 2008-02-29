@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -49,23 +49,25 @@ ClockMain::ClockMain(QWidget *parent, Qt::WFlags f)
 
     tabWidget = new QTabWidget(this);
     layout->addWidget(tabWidget);
+    layout->setContentsMargins(0, 0, 0, 0);
     clock = new Clock(tabWidget);
+    clock->setFocusPolicy(Qt::TabFocus);    //allows left/right to switch to other tabs
     stopWatch = new StopWatch(tabWidget);
     alarm = new Alarm(tabWidget);
 
     // Add each widget to the tabbed widget, and save the index for each so that
     // we can refer to it later.
     clockIndex = tabWidget->addTab(clock, tr("Clock"));
-    stopwatchIndex = tabWidget->addTab(stopWatch, tr("Stop Watch"));
     alarmIndex = tabWidget->addTab(alarm, tr("Alarm"));
+    stopwatchIndex = tabWidget->addTab(stopWatch, tr("Stopwatch"));
 
     contextMenu = QSoftMenuBar::menuFor(this);
     QAction *action = contextMenu->addAction(tr("Set Time..."));
     connect(action, SIGNAL(triggered()), this, SLOT(setTime()));
 
 
-    connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
-            this, SLOT(appMessage(const QString&,const QByteArray&)) );
+    connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
+            this, SLOT(appMessage(QString,QByteArray)) );
     new ClockService(this);
     new AlarmService(this);
 
@@ -80,11 +82,13 @@ ClockMain::~ClockMain()
 void ClockMain::showClock()
 {
     tabWidget->setCurrentIndex(clockIndex);
+    QtopiaApplication::instance()->showMainWidget();
 }
 
 void ClockMain::editAlarm()
 {
     tabWidget->setCurrentIndex(alarmIndex);
+    QtopiaApplication::instance()->showMainWidget();
 }
 
 void ClockMain::setDailyEnabled( bool enable )
@@ -100,16 +104,6 @@ void ClockMain::appMessage( const QString &msg, const QByteArray &data )
         int t;
         ds >> when >> t;
         alarm->triggerAlarm(when, t);
-    }
-}
-
-void ClockMain::closeEvent( QCloseEvent *e )
-{
-    if (!alarm->isValid()) {
-        QMessageBox::warning(this, tr("Select Day"),
-            tr("<qt>Daily alarm requires at least one day to be selected.</qt>"));
-    } else {
-        QWidget::closeEvent(e);
     }
 }
 
@@ -144,7 +138,7 @@ ClockService::~ClockService()
 {
 }
 
-/*!
+/*!checkboxes[i]->isChecked()
     Instruct the \i Clock service to pop up the clock on the
     user's display.
 

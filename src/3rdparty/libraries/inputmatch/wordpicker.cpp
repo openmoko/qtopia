@@ -4,7 +4,6 @@
 #include <qsettings.h>
 #include <qtopiaapplication.h>
 #include <qapplication.h>
-#include <qwsdisplay_qws.h>
 #include <qtimer.h>
 #include <qstyle.h>
 #include <QPainter>

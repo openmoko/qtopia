@@ -22,7 +22,7 @@
    <item>
     <widget class="QGroupBox" name="fraView" >
      <property name="title" >
-      <string>View Settings</string>
+      <string>View</string>
      </property>
      <layout class="QVBoxLayout" >
       <property name="margin" >
@@ -43,6 +43,9 @@
          <widget class="QLabel" name="lblDefView" >
           <property name="text" >
            <string>Default view</string>
+          </property>
+          <property name="buddy" >
+           <cstring>cmbDefaultView</cstring>
           </property>
          </widget>
         </item>
@@ -75,6 +78,9 @@
           <property name="text" >
            <string>Day starts at</string>
           </property>
+          <property name="buddy" >
+           <cstring>spinStart</cstring>
+          </property>
          </widget>
         </item>
         <item>
@@ -96,7 +102,7 @@
        <widget class="QWidget" native="1" name="widCompress" >
         <layout class="QVBoxLayout" >
          <property name="margin" >
-          <number>0</number>
+          <number>9</number>
          </property>
          <property name="spacing" >
           <number>0</number>
@@ -127,11 +133,11 @@
    <item>
     <widget class="QGroupBox" name="fraAlarm" >
      <property name="title" >
-      <string>Alarm Settings</string>
+      <string>Alarm</string>
      </property>
      <layout class="QVBoxLayout" >
       <property name="margin" >
-       <number>3</number>
+       <number>9</number>
       </property>
       <property name="spacing" >
        <number>6</number>
@@ -139,7 +145,7 @@
       <item>
        <layout class="QHBoxLayout" >
         <property name="margin" >
-         <number>3</number>
+         <number>0</number>
         </property>
         <property name="spacing" >
          <number>3</number>

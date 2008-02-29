@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -204,14 +219,14 @@ QVariant QMimeDataPrivate::retrieveTypedData(const QString &format, QVariant::Ty
     \code
         void MyWidget::dragEnterEvent(QDragEnterEvent *event)
         {
-            if (event->mimeData()->hasUrl())
-                event->acceptProposedEvent();
+            if (event->mimeData()->hasUrls())
+                event->acceptProposedAction();
         }
 
         void MyWidget::dropEvent(QDropEvent *event)
         {
-            if (event->mimeData()->hasUrl()) {
-                QUrl url = event->mimeData()->url();
+            if (event->mimeData()->hasUrls()) {
+                QUrl url = event->mimeData()->urls();
                 ...
             }
         }
@@ -251,8 +266,34 @@ QVariant QMimeDataPrivate::retrieveTypedData(const QString &format, QVariant::Ty
         \endcode
     \endlist
 
+    \section1 Platform-Specific MIME Types
+
+    On Windows, formats() will also return custom formats available
+    in the MIME data, using the \c{x-qt-windows-mime} subtype to
+    indicate that they represent data in non-standard formats.
+    The formats will take the following form:
+
+    \code
+    application/x-qt-windows-mime;value="<custom type>"
+    \endcode
+
+    The following are examples of custom MIME types:
+
+    \code
+    application/x-qt-windows-mime;value="FileGroupDescriptor"
+    application/x-qt-windows-mime;value="FileContents"
+    \endcode
+
+    The \c value declaration of each format describes the way in which the
+    data is encoded.
+
+    On Windows, the MIME format does not always map directly to the
+    clipboard formats. Qt provides QWindowsMime to map clipboard
+    formats to open-standard MIME formats. Similarly, the
+    QMacPasteboardMime maps MIME to Mac flavors.
+
     \sa QClipboard, QDragEnterEvent, QDragMoveEvent, QDropEvent, QDrag,
-        {Drag and Drop}
+        QWindowsMime, QMacPasteboardMime, {Drag and Drop}
 */
 
 /*!
@@ -457,7 +498,7 @@ bool QMimeData::hasImage() const
 
     A QVariant is used because QMimeData belongs to the \l QtCore
     library, whereas QColor belongs to \l QtGui. To convert the
-    QVariant to a QImage, simply use qvariant_cast(). For example:
+    QVariant to a QColor, simply use qvariant_cast(). For example:
 
     \code
         if (event->mimeData()->hasColor()) {

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,12 +37,14 @@
 ****************************************************************************/
 
 #include "rcc.h"
-#include <QFile>
-#include <QDateTime>
-#include <QByteArray>
-#include <QDir>
-#include <QStack>
-#include <QDomDocument>
+#include <qdebug.h>
+#include <qfile.h>
+#include <qdatetime.h>
+#include <qbytearray.h>
+#include <qdir.h>
+#include <qdiriterator.h>
+#include <qstack.h>
+#include <qdom.h>
 
 static bool qt_rcc_write_number(FILE *out, quint32 number, int width, RCCResourceLibrary::Format format)
 {
@@ -67,10 +84,10 @@ bool RCCFileInfo::writeDataInfo(FILE *out, RCCResourceLibrary::Format format)
     //some info
     if(format == RCCResourceLibrary::C_Code) {
         if(language != QLocale::C)
-            fprintf(out, "  // %s [%d::%d]\n  ", resourceName().toLatin1().constData(),
+            fprintf(out, "  // %s [%d::%d]\n  ", resourceName().toLocal8Bit().constData(),
                     country, language);
         else
-            fprintf(out, "  // %s\n  ", resourceName().toLatin1().constData());
+            fprintf(out, "  // %s\n  ", resourceName().toLocal8Bit().constData());
     }
 
     //pointer data
@@ -127,7 +144,7 @@ qint64 RCCFileInfo::writeDataBlob(FILE *out, qint64 offset, RCCResourceLibrary::
     //find the data to be written
     QFile file(fileInfo.absoluteFilePath());
     if (!file.open(QFile::ReadOnly)) {
-        fprintf(stderr, "Couldn't open %s\n", fileInfo.absoluteFilePath().toLatin1().constData());
+        fprintf(stderr, "Couldn't open %s\n", fileInfo.absoluteFilePath().toLocal8Bit().constData());
         return false;
     }
     QByteArray data = file.readAll();
@@ -147,7 +164,7 @@ qint64 RCCFileInfo::writeDataBlob(FILE *out, qint64 offset, RCCResourceLibrary::
 
     //some info
     if(format == RCCResourceLibrary::C_Code)
-        fprintf(out, "  // %s\n  ", fileInfo.absoluteFilePath().toLatin1().constData());
+        fprintf(out, "  // %s\n  ", fileInfo.absoluteFilePath().toLocal8Bit().constData());
 
     //write the length
     qt_rcc_write_number(out, data.size(), 4, format);
@@ -179,7 +196,7 @@ qint64 RCCFileInfo::writeDataName(FILE *out, qint64 offset, RCCResourceLibrary::
 
     //some info
     if(format == RCCResourceLibrary::C_Code)
-        fprintf(out, "  // %s\n  ", name.toLatin1().constData());
+        fprintf(out, "  // %s\n  ", name.toLocal8Bit().constData());
 
     //write the length
     qt_rcc_write_number(out, name.length(), 2, format);
@@ -219,28 +236,30 @@ RCCResourceLibrary::~RCCResourceLibrary()
 bool RCCResourceLibrary::interpretResourceFile(QIODevice *inputDevice, QString fname, QString currentPath, bool ignoreErrors)
 {
     if (!currentPath.isEmpty() && !currentPath.endsWith(QLatin1String("/")))
-        currentPath += '/';
+        currentPath += QLatin1Char('/');
 
     QDomDocument document;
     {
         QString errorMsg;
-        int errorLine, errorColumn;
+        int errorLine = 0, errorColumn = 0;
         if(!document.setContent(inputDevice, &errorMsg, &errorLine, &errorColumn)) {
             if(ignoreErrors)
                 return true;
-            fprintf(stderr, "RCC Parse Error:%s:%d:%d [%s]\n", fname.toLatin1().constData(),
-                    errorLine, errorColumn, errorMsg.toLatin1().constData());
+            fprintf(stderr, "RCC Parse Error: '%s' Line:%d Column:%d [%s]\n",
+                    qPrintable(fname), errorLine, errorColumn,
+                    qPrintable(errorMsg));
             return false;
         }
     }
-    for(QDomElement root = document.firstChild().toElement(); !root.isNull();
-        root = root.nextSibling().toElement()) {
-        if (root.tagName() != QLatin1String(TAG_RCC))
-            continue;
 
-        for (QDomElement child = root.firstChild().toElement(); !child.isNull();
-             child = child.nextSibling().toElement()) {
-            if (child.tagName() == QLatin1String(TAG_RESOURCE)) {
+    QDomElement root = document.firstChildElement(TAG_RCC).toElement();
+    if (!root.isNull() && root.tagName() == QLatin1String(TAG_RCC)) {
+        for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
+            if (!node.isElement())
+                continue;
+
+            QDomElement child = node.toElement();
+            if (!child.isNull() && child.tagName() == QLatin1String(TAG_RESOURCE)) {
                 QLocale::Language language = QLocale::c().language();
                 QLocale::Country country = QLocale::c().country();
 
@@ -260,12 +279,12 @@ bool RCCResourceLibrary::interpretResourceFile(QIODevice *inputDevice, QString f
                 if (child.hasAttribute(ATTRIBUTE_PREFIX))
                     prefix = child.attribute(ATTRIBUTE_PREFIX);
                 if (!prefix.startsWith(QLatin1String("/")))
-                    prefix.prepend('/');
-                if (!prefix.endsWith(QLatin1String("/")))
-                    prefix += '/';
+                    prefix.prepend(QLatin1Char('/'));
+                if (!prefix.endsWith(QLatin1Char('/')))
+                    prefix += QLatin1Char('/');
 
                 for (QDomNode res = child.firstChild(); !res.isNull(); res = res.nextSibling()) {
-                    if (res.toElement().tagName() == QLatin1String(TAG_FILE)) {
+                    if (res.isElement() && res.toElement().tagName() == QLatin1String(TAG_FILE)) {
 
                         QString fileName(res.firstChild().toText().data());
                         if (ignoreErrors && fileName.isEmpty())
@@ -289,7 +308,7 @@ bool RCCResourceLibrary::interpretResourceFile(QIODevice *inputDevice, QString f
                             compressLevel = 0;
 
                         alias = QDir::cleanPath(alias);
-                        while (alias.startsWith("../"))
+                        while (alias.startsWith(QLatin1String("../")))
                             alias.remove(0, 3);
                         alias = QDir::cleanPath(mResourceRoot) + prefix + alias;
 
@@ -300,10 +319,10 @@ bool RCCResourceLibrary::interpretResourceFile(QIODevice *inputDevice, QString f
                         if (!file.exists()) {
                             if(ignoreErrors)
                                 continue;
-                            fprintf(stderr, "RCC: Error: Cannot find file '%s'\n", fileName.toLatin1().constData());
+                            fprintf(stderr, "RCC: Error: Cannot find file '%s'\n", qPrintable(fileName));
                             return false;
                         } else if (file.isFile()) {
-                            addFile(alias, RCCFileInfo(alias.section('/', -1), file, language, country,
+                            addFile(alias, RCCFileInfo(alias.section(QLatin1Char('/'), -1), file, language, country,
                                                        RCCFileInfo::NoFlags, compressLevel, compressThreshold));
                         } else {
                             QDir dir;
@@ -316,13 +335,14 @@ bool RCCResourceLibrary::interpretResourceFile(QIODevice *inputDevice, QString f
                                     alias = alias.left(alias.length()-file.fileName().length());
                             }
                             if (!alias.endsWith(QLatin1String("/")))
-                                alias += '/';
-                            QFileInfoList children = dir.entryInfoList();
-                            for(int i = 0; i < children.size(); ++i) {
-                                if(children[i].fileName() != QLatin1String(".") &&
-                                   children[i].fileName() != QLatin1String(".."))
-                                    addFile(alias + children[i].fileName(),
-                                            RCCFileInfo(children[i].fileName(), children[i], language, country,
+                                alias += QLatin1Char('/');
+                            QDirIterator it(dir, QDirIterator::FollowSymlinks|QDirIterator::Subdirectories);
+                            while(it.hasNext()) {
+                                it.next();
+                                QFileInfo child(it.fileInfo());
+                                if(child.fileName() != QLatin1String(".") && child.fileName() != QLatin1String(".."))
+                                    addFile(alias + child.fileName(),
+                                            RCCFileInfo(child.fileName(), child, language, country,
                                                         RCCFileInfo::NoFlags, compressLevel, compressThreshold));
                             }
                         }
@@ -331,10 +351,8 @@ bool RCCResourceLibrary::interpretResourceFile(QIODevice *inputDevice, QString f
             }
         }
     }
-    if(!ignoreErrors && this->root == 0) {
+    if(!ignoreErrors && this->root == 0)
         fprintf(stderr, "RCC: Warning: No resources in resource description.\n");
-        return false;
-    }
     return true;
 }
 
@@ -342,16 +360,18 @@ bool RCCResourceLibrary::addFile(const QString &alias, const RCCFileInfo &file)
 {
     if (file.fileInfo.size() > 0xffffffff) {
         fprintf(stderr, "File too big: %s",
-                file.fileInfo.absoluteFilePath().toLatin1().constData());
+                qPrintable(file.fileInfo.absoluteFilePath()));
         return false;
     }
     if(!root)
-        root = new RCCFileInfo("", QFileInfo(), QLocale::C, QLocale::AnyCountry, RCCFileInfo::Directory);
+        root = new RCCFileInfo(QLatin1String(""), QFileInfo(), QLocale::C, QLocale::AnyCountry, RCCFileInfo::Directory);
 
     RCCFileInfo *parent = root;
-    const QStringList nodes = alias.split('/');
+    const QStringList nodes = alias.split(QLatin1Char('/'));
     for(int i = 1; i < nodes.size()-1; ++i) {
         const QString node = nodes.at(i);
+        if(node.isEmpty())
+            continue;
         if(!parent->children.contains(node)) {
             RCCFileInfo *s = new RCCFileInfo(node, QFileInfo(), QLocale::C, QLocale::AnyCountry, RCCFileInfo::Directory);
             s->parent = parent;
@@ -377,24 +397,24 @@ bool RCCResourceLibrary::readFiles(bool ignoreErrors)
     for (int i=0; i<mFileNames.size(); ++i) {
         QFile fileIn;
         QString fname = mFileNames.at(i), pwd;
-        if(fname == "-") {
-            fname = "(stdin)";
+        if(fname == QLatin1String("-")) {
+            fname = QLatin1String("(stdin)");
             pwd = QDir::currentPath();
             fileIn.setFileName(fname);
             if (!fileIn.open(stdin, QIODevice::ReadOnly)) {
-                fprintf(stderr, "Unable to open file: %s\n", fname.toLatin1().constData());
+                fprintf(stderr, "Unable to open file: %s\n", qPrintable(fname));
                 return false;
             }
         } else {
             pwd = QFileInfo(fname).path();
             fileIn.setFileName(fname);
             if (!fileIn.open(QIODevice::ReadOnly)) {
-                fprintf(stderr, "Unable to open file: %s\n", fname.toLatin1().constData());
+                fprintf(stderr, "Unable to open file: %s\n", qPrintable(fname));
                 return false;
             }
         }
         if (mVerbose)
-            fprintf(stderr, "Interpreting %s\n", fname.toLatin1().constData());
+            fprintf(stderr, "Interpreting %s\n", qPrintable(fname));
 
         if (!interpretResourceFile(&fileIn, fname, pwd, ignoreErrors))
             return false;
@@ -434,17 +454,19 @@ bool RCCResourceLibrary::output(FILE *out)
         fprintf(stderr, "Couldn't write header\n");
         return false;
     }
-    if (!writeDataBlobs(out)) {
-        fprintf(stderr, "Couldn't write data blob\n");
-        return false;
-    }
-    if (!writeDataNames(out)) {
-        fprintf(stderr, "Couldn't write file names\n");
-        return false;
-    }
-    if (!writeDataStructure(out)) {
-        fprintf(stderr, "Couldn't write data tree\n");
-        return false;
+    if(this->root) {
+        if (!writeDataBlobs(out)) {
+            fprintf(stderr, "Couldn't write data blob\n");
+            return false;
+        }
+        if (!writeDataNames(out)) {
+            fprintf(stderr, "Couldn't write file names\n");
+            return false;
+        }
+        if (!writeDataStructure(out)) {
+            fprintf(stderr, "Couldn't write data tree\n");
+            return false;
+        }
     }
     if (!writeInitializer(out)) {
         fprintf(stderr, "Couldn't write footer\n");
@@ -460,7 +482,7 @@ RCCResourceLibrary::writeHeader(FILE *out)
         fprintf(out, "/****************************************************************************\n");
         fprintf(out, "** Resource object code\n");
         fprintf(out, "**\n");
-        fprintf(out, "** Created: %s\n", QDateTime::currentDateTime().toString().toLatin1().constData());
+        fprintf(out, "** Created: %s\n", qPrintable(QDateTime::currentDateTime().toString()));
         fprintf(out, "**      by: The Resource Compiler for Qt version %s\n", QT_VERSION_STR);
         fprintf(out, "**\n");
         fprintf(out, "** WARNING! All changes made in this file will be lost!\n");
@@ -609,16 +631,18 @@ RCCResourceLibrary::writeInitializer(FILE *out)
     if(mFormat == C_Code) {
         QString initName = mInitName;
         if(!initName.isEmpty()) {
-            initName.prepend("_");
-            initName.replace(QRegExp("[^a-zA-Z0-9_]"), "_");
+            initName.prepend(QLatin1Char('_'));
+            initName.replace(QRegExp(QLatin1String("[^a-zA-Z0-9_]")), QLatin1String("_"));
         }
 
         //init
         fprintf(out, "int qInitResources%s()\n{\n", initName.toLatin1().constData());
-        fprintf(out, "    extern bool qRegisterResourceData(int, const unsigned char *, "
-                "const unsigned char *, const unsigned char *);\n");
-        fprintf(out, "    qRegisterResourceData(0x01, qt_resource_struct, "
-                     "qt_resource_name, qt_resource_data);\n");
+        if(this->root) {
+            fprintf(out, "    extern bool qRegisterResourceData(int, const unsigned char *, "
+                    "const unsigned char *, const unsigned char *);\n");
+            fprintf(out, "    qRegisterResourceData(0x01, qt_resource_struct, "
+                    "qt_resource_name, qt_resource_data);\n");
+        }
         fprintf(out, "    return 1;\n");
         fprintf(out, "}\n");
         fprintf(out, "Q_CONSTRUCTOR_FUNCTION(qInitResources%s)\n",
@@ -626,10 +650,12 @@ RCCResourceLibrary::writeInitializer(FILE *out)
 
         //cleanup
         fprintf(out, "int qCleanupResources%s()\n{\n", initName.toLatin1().constData());
-        fprintf(out, "    extern bool qUnregisterResourceData(int, const unsigned char *, "
-                "const unsigned char *, const unsigned char *);\n");
-        fprintf(out, "    qUnregisterResourceData(0x01, qt_resource_struct, "
-                     "qt_resource_name, qt_resource_data);\n");
+        if(this->root) {
+            fprintf(out, "    extern bool qUnregisterResourceData(int, const unsigned char *, "
+                    "const unsigned char *, const unsigned char *);\n");
+            fprintf(out, "    qUnregisterResourceData(0x01, qt_resource_struct, "
+                    "qt_resource_name, qt_resource_data);\n");
+        }
         fprintf(out, "    return 1;\n");
         fprintf(out, "}\n");
         fprintf(out, "Q_DESTRUCTOR_FUNCTION(qCleanupResources%s)\n",

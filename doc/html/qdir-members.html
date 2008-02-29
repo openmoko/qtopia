@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: List of All Members for QDir</title>
+  <title>Qt 4.3: List of All Members for QDir</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -27,7 +27,7 @@
 <li><div class="fn"/><a href="qdir.html#dtor.QDir">~QDir</a> ()</li>
 <li><div class="fn"/><a href="qdir.html#absoluteFilePath">absoluteFilePath</a> ( const QString &amp; ) const : QString</li>
 <li><div class="fn"/><a href="qdir.html#absolutePath">absolutePath</a> () const : QString</li>
-<li><div class="fn"/><a href="qdir.html#addResourceSearchPath">addResourceSearchPath</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qdir.html#addSearchPath">addSearchPath</a> ( const QString &amp;, const QString &amp; )</li>
 <li><div class="fn"/><a href="qdir.html#canonicalPath">canonicalPath</a> () const : QString</li>
 <li><div class="fn"/><a href="qdir.html#cd">cd</a> ( const QString &amp; ) : bool</li>
 <li><div class="fn"/><a href="qdir.html#cdUp">cdUp</a> () : bool</li>
@@ -50,8 +50,8 @@
 <li><div class="fn"/><a href="qdir.html#homePath">homePath</a> () : QString</li>
 <li><div class="fn"/><a href="qdir.html#isAbsolute">isAbsolute</a> () const : bool</li>
 <li><div class="fn"/><a href="qdir.html#isAbsolutePath">isAbsolutePath</a> ( const QString &amp; ) : bool</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qdir.html#isReadable">isReadable</a> () const : bool</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qdir.html#isRelative">isRelative</a> () const : bool</li>
 <li><div class="fn"/><a href="qdir.html#isRelativePath">isRelativePath</a> ( const QString &amp; ) : bool</li>
 <li><div class="fn"/><a href="qdir.html#isRoot">isRoot</a> () const : bool</li>
@@ -70,11 +70,13 @@
 <li><div class="fn"/><a href="qdir.html#rmpath">rmpath</a> ( const QString &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qdir.html#root">root</a> () : QDir</li>
 <li><div class="fn"/><a href="qdir.html#rootPath">rootPath</a> () : QString</li>
+<li><div class="fn"/><a href="qdir.html#searchPaths">searchPaths</a> ( const QString &amp; ) : QStringList</li>
 <li><div class="fn"/><a href="qdir.html#separator">separator</a> () : QChar</li>
 <li><div class="fn"/><a href="qdir.html#setCurrent">setCurrent</a> ( const QString &amp; ) : bool</li>
 <li><div class="fn"/><a href="qdir.html#setFilter">setFilter</a> ( Filters )</li>
 <li><div class="fn"/><a href="qdir.html#setNameFilters">setNameFilters</a> ( const QStringList &amp; )</li>
 <li><div class="fn"/><a href="qdir.html#setPath">setPath</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qdir.html#setSearchPaths">setSearchPaths</a> ( const QString &amp;, const QStringList &amp; )</li>
 <li><div class="fn"/><a href="qdir.html#setSorting">setSorting</a> ( SortFlags )</li>
 <li><div class="fn"/><a href="qdir.html#sorting">sorting</a> () const : SortFlags</li>
 <li><div class="fn"/><a href="qdir.html#temp">temp</a> () : QDir</li>
@@ -91,6 +93,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -14,7 +14,7 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">ExeApplicationLauncher Class Reference</h1>
 <p>The ExeApplicationLauncher class simplifies implementing <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> for process based applications. <a href="#details">More...</a></p>
 <pre>    #include &lt;ExeApplicationLauncher&gt;</pre><p>Inherits <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> and <a href="applicationipcrouter-routedestination.html">ApplicationIpcRouter::RouteDestination</a>.</p>
-<p>Inherited by <a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a>, <a href="sandboxedexeapplicationlauncher.html">SandboxedExeApplicationLauncher</a>, and <a href="simpleexeapplicationlauncher.html">SimpleExeApplicationLauncher</a>.</p>
+<p>Inherited by <a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a> and <a href="simpleexeapplicationlauncher.html">SimpleExeApplicationLauncher</a>.</p>
 <ul>
 <li><a href="exeapplicationlauncher-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -25,7 +25,7 @@
 <li><div class="fn"/>virtual <b><a href="exeapplicationlauncher.html#dtor.ExeApplicationLauncher">~ExeApplicationLauncher</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
+<li><div class="fn"/>5 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="applicationipcrouter-routedestination.html#public-functions">ApplicationIpcRouter::RouteDestination</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
@@ -57,6 +57,7 @@
 <p>Many application types are just different ways of starting a <a href="qtopiaapplication.html">QtopiaApplication</a> application. For example, the <a href="simpleexeapplicationlauncher.html">SimpleExeApplicationLauncher</a> and the <a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a> types both start external processes that instantiate a <a href="qtopiaapplication.html">QtopiaApplication</a> instance. The ExeApplicationLauncher encapsulates the commonality between these types of application launchers.</p>
 <p>It is the responsibility of derived classes to respond to the <a href="applicationtypelauncher.html#canLaunch">canLaunch</a>() and <a href="applicationtypelauncher.html#launch">launch</a>() methods of the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> interface. Once the derived class has brung a process to the state where it is launching, it should call <a href="exeapplicationlauncher.html#addStartingApplication">addStartingApplication</a>() to pass ownership of the process to the ExeApplicationLauncher. The ExeApplicationLauncher class operates under the following assumptions:</p>
 <p><i>The</i> application will send an <tt>available(QString,int)</tt> message to the <tt>QPE/QtopiaApplication</tt> channel when it has completed startup. <i>The</i> process, and thus the <a href="qprocess.html">QProcess</a> instance, will terminate normally when it is done.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="ExeApplicationLauncher"></a>ExeApplicationLauncher::ExeApplicationLauncher ()</h3>
@@ -71,6 +72,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

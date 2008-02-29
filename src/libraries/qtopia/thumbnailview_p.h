@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,19 +22,31 @@
 #ifndef THUMBNAILVIEW_P_H
 #define THUMBNAILVIEW_P_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <qlistwidget.h>
 #include <qitemdelegate.h>
 #include <qqueue.h>
 #include <qtimer.h>
 
+#include <QDateTime>
 #include <QItemDelegate>
 #include <QCache>
 
 class ThumbnailRequest
 {
 public:
-    ThumbnailRequest( const QModelIndex& index, const QString& filename, const QSize& size )
-        : index_( index ), filename_( filename ), size_( size )
+    ThumbnailRequest( const QModelIndex& index, const QString& filename, const QSize& size, const QDateTime &time )
+        : index_( index ), filename_( filename ), size_( size ), time_( time )
     { }
 
     QModelIndex index() const { return index_; }
@@ -43,10 +55,13 @@ public:
 
     QSize size() const { return size_; }
 
+    QDateTime time() const { return time_; }
+
 private:
     QPersistentModelIndex index_;
     QString filename_;
     QSize size_;
+    QDateTime time_;
 };
 
 class ThumbnailCache : public QObject
@@ -63,6 +78,8 @@ public:
 
     // Return thumbnail if in cache
     QPixmap retrieve( const ThumbnailRequest& request );
+
+    bool contains( const ThumbnailRequest &request ) const;
 
 private:
     static QString key( const ThumbnailRequest& request );

@@ -47,6 +47,7 @@ DECLARE_WIDGET(QStatusBar, "")
 DECLARE_WIDGET(QDialogButtonBox, "")
 DECLARE_WIDGET(QFontComboBox, "")
 DECLARE_WIDGET(QCalendarWidget, "")
+DECLARE_WIDGET(QColumnView, "")
 
 DECLARE_WIDGET_1(QGraphicsView, "")
 

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -73,9 +88,9 @@ void merge( const MetaTranslator *tor, const MetaTranslator *virginTor, MetaTran
                     // Do not just accept it if its on the same line number, but different source text.
                     // Also check if the texts are more or less similar before we consider them to represent the same message...
                     // ### The QString() cast is evil
-                    if (getSimilarityScore(QString(m.sourceText()), mv.sourceText()) >= textSimilarityThreshold) {
+                    if (getSimilarityScore(QLatin1String(m.sourceText()), mv.sourceText()) >= textSimilarityThreshold) {
                         // It is just slightly modified, assume that it is the same string
-                        m = MetaTranslatorMessage(m.context(), mv.sourceText(), m.comment(), m.fileName(), m.lineNumber(), m.translations());
+                        m = MetaTranslatorMessage(m.context(), mv.sourceText(), m.comment(), m.fileName(), m.lineNumber(), m.translations(), mv.utf8());
                         m.setPlural(mv.isPlural());
 
                         // Mark it as unfinished. (Since the source text was changed it might require re-translating...)
@@ -137,7 +152,7 @@ void merge( const MetaTranslator *tor, const MetaTranslator *virginTor, MetaTran
         if (!found) {
             MetaTranslatorMessage m = tor->find(mv.context(), mv.comment(), mv.fileName(), mv.lineNumber());
             if (!m.isNull()) {
-                if (getSimilarityScore(QString(m.sourceText()), mv.sourceText()) >= textSimilarityThreshold) {
+                if (getSimilarityScore(QLatin1String(m.sourceText()), mv.sourceText()) >= textSimilarityThreshold) {
                     found = true;
                 }
             } else {

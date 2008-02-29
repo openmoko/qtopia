@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -119,8 +119,8 @@ QDeviceButtonManager& QDeviceButtonManager::instance()
 QDeviceButtonManager::QDeviceButtonManager() : QObject( qApp )
 {
   QtopiaChannel *channel = new QtopiaChannel( "QPE/System", this );
-  connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
-           this, SLOT(received(const QString&,const QByteArray&)) );
+  connect( channel, SIGNAL(received(QString,QByteArray)),
+           this, SLOT(received(QString,QByteArray)) );
   loadButtons();
 }
 
@@ -202,6 +202,22 @@ void QDeviceButtonManager::remapHeldAction(int button_index, const QtopiaService
     QtopiaIpcEnvelope("QPE/System", "deviceButtonMappingChanged()");
 }
 
+/*!
+ Reassigns the released action for \a button_index to \a action.
+ */
+void QDeviceButtonManager::remapReleasedAction(int button_index, const QtopiaServiceRequest& action)
+{
+    QDeviceButton& button = *m_Buttons[button_index];
+    button.setReleasedAction(action);
+    QSettings buttonFile("Trolltech","ButtonSettings");
+    buttonFile.beginGroup("Button" + QString::number(button_index));
+    buttonFile.setValue("ReleasedActionService", (const char*)button.releasedAction().service().toAscii());
+    buttonFile.setValue("ReleasedActionMessage", (const char*)button.releasedAction().message().toAscii());
+    buttonFile.setValue("ReleasedActionArgs", QtopiaServiceRequest::serializeArguments(action));
+    buttonFile.endGroup();
+    QtopiaIpcEnvelope("QPE/System", "deviceButtonMappingChanged()");
+}
+
 void QDeviceButtonManager::loadButtonSettings(QTranslatableSettings& buttonFile, bool local, bool factory)
 {
     if (buttonFile.status()!=QSettings::NoError)
@@ -244,6 +260,18 @@ void QDeviceButtonManager::loadButtonSettings(QTranslatableSettings& buttonFile,
                 b->setHeldAction(heldAction);
             }
 
+            if (buttonFile.contains("ReleasedActionService")) {
+                QtopiaServiceRequest releaseAction(buttonFile.value("ReleasedActionService").toString().toLatin1(),
+                                                    buttonFile.value("ReleasedActionMessage").toString().toLatin1());
+                QByteArray tempArray = buttonFile.value("ReleasedActionArgs").toByteArray();
+
+                if (!tempArray.isEmpty()) {
+                    QtopiaServiceRequest::deserializeArguments(releaseAction, tempArray);
+                }
+
+                b->setReleasedAction(releaseAction);
+            }
+
             if ( !local ) {
                 // non-variable values
                 b->setKeycode(QKeySequence(buttonFile.value("Key").toString()));
@@ -251,6 +279,7 @@ void QDeviceButtonManager::loadButtonSettings(QTranslatableSettings& buttonFile,
                 b->setPixmap(QString("Button/%1").arg(i));
                 b->setPressedActionMappable(buttonFile.value("PressedActionMappable",true).toBool());
                 b->setHeldActionMappable(buttonFile.value("HeldActionMappable",true).toBool());
+                b->setReleasedActionMappable(buttonFile.value("ReleasedActionMappable", true).toBool());
                 b->setContext(buttonFile.value("Context").toString());
             }
         }

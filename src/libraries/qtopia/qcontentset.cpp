@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,248 +20,46 @@
 ****************************************************************************/
 #include <qcontentset.h>
 #include <private/contentserverinterface_p.h>
-#include <private/contentlnksql_p.h>
-#include <private/drmcontent_p.h>
 
 #include <qtopiasql.h>
-#include <qmimetype.h>
 #include <qstorage.h>
 #include <qtopiaipcenvelope.h>
+#include <qtopianamespace.h>
 #ifndef QTOPIA_CONTENT_INSTALLER
 #include <qtopiaapplication.h>
 #endif
 #include <qtopialog.h>
 #include <qtopiaipcadaptor.h>
 #include <private/qcontent_p.h>
+#include <qtopia/private/qcontentstore_p.h>
+#include <qtopia/private/qcontentsetengine_p.h>
 
-/*
-  \class QContentSetPrivate
-  \internal
-  QContentSetPrivate is a helper class for QContentSet
-
-  \c explicitLinks contains a list of pointers to \c QContent objects
-  which have been explicitly added to the set, for example, using QContentSet::add()
-
-  If no objects have been explicitly added this list will be empty.
-
-  \c implicitLinks contains a list of identifiers which point to records of objects
-  which are matches for the current filter set.
-
-  The implicitLinks list is updated whenever:
-  \list
-      \o the filter expression changes
-      \o the database changes (see below).
-  \endlist
-
-  The contents of the set is the union of the above two lists.
-
-  If an explicitly added object matches the filter, it is added to the
-  \c implicitList, and the pointer is stored in the cache.  In this case the
-  explicit list is not updated.
-
-  If the nth object in the set is requested, the count is started from
-  zero at the beginning of the explicit list and then into the implicit list.
-  Note: It is possible for the explicit list to be of length zero.
-
-  The following conditions hold:
-  \list
-  \o If the object is found in the explicit list a pointer to a valid object
-  is obtained.
-  \o If the object is found in the implicit list, the cache is
-  checked by record number, failing a cache hit:
-     \list
-     \o a new object is constructed based on the record number
-     \o the new object is stored in the cache and returned.
-     \endlist
-  \o The application maintains a pointer to it and requests it to update
-  itself by calling \c updateIfMatch(...) when the QApplication::contentChanged()
-  signal is received.
-  \endlist
-*/
-class QContentSetPrivate
+class NullQContentSetEngine : public QContentSetEngine
 {
 public:
-    QContentSetPrivate();
-    QContentSetPrivate( const QContentSetPrivate & copy );
-    ~QContentSetPrivate();
-    bool contains( const QContent & ) const;
-    void addCriteria( const QContentFilter &QContentFilter, QContentFilter::Operand operand );
-    void addCriteria( const QContentFilter::FilterType&, const QString& filter, QContentFilter::Operand operand  );
-    void clearFilter();
-    void add( QContent * );
-    void remove( QContent * );
-    void installContent();
-    void uninstallContent();
-    void clear();
-    QContentSetPrivate &operator=( const QContentSetPrivate &rhs );
+    NullQContentSetEngine()
+        : QContentSetEngine( QContentFilter(), QContentSortCriteria(), QContentSet::Synchronous )
+    {
+    }
 
-    static QMutex mutex;
-private:
-    QContentFilter currentFilter;
-    QStringList currentSortOrder;
-    QContentList explicitLinks;
-    QContentIdList implicitLinks;
-    QContentSet *q;
-    bool implicitLinksNeedsFlush;
-    QBasicTimer syncTimer;
+    virtual bool isEmpty() const{ return true; }
 
-    friend class QContentSet;
-    friend class QContentSetModel;
-    friend class ContentServer;
+    virtual void insertContent( const QContent & ){}
+    virtual void removeContent( const QContent & ){}
+
+    virtual void clear(){}
+
+    virtual bool contains( const QContent & ) const{ return false; }
+
+protected:
+    virtual void filterChanged( const QContentFilter & ){}
+    virtual void sortCriteriaChanged( const QContentSortCriteria & ){}
+
+    virtual QContentList values( int, int ){ return QContentList(); }
+    virtual int valueCount() const{ return 0; }
 };
 
-QMutex QContentSetPrivate::mutex(QMutex::Recursive);
-
-/*
-    \class FilteredLessThanFunctor
-    \internal
-    FilteredLessThanFunctor is a private functor class to allow qSort to be used to sort QContent objects into
-    order based upon the filter sort criteria supplied in the constructor.
-*/
-class FilteredLessThanFunctor
-{
-public:
-    FilteredLessThanFunctor(const QStringList &sorts);
-    bool operator()(const QContent&, const QContent&);
-private:
-    typedef int (*Comparison)(const QContent& left, const QContent& right);
-    QList<Comparison> filterSet;
-    static int nameCompare(const QContent& left, const QContent& right);
-    static int nameCompareDescending(const QContent& left, const QContent& right);
-    static int typeCompare(const QContent& left, const QContent& right);
-    static int typeCompareDescending(const QContent& left, const QContent& right);
-    static int sizeCompare(const QContent& left, const QContent& right);
-    static int sizeCompareDescending(const QContent& left, const QContent& right);
-    static int fileCompare(const QContent& left, const QContent& right);
-    static int fileCompareDescending(const QContent& left, const QContent& right);
-    static int timeCompare(const QContent& left, const QContent& right);
-    static int timeCompareDescending(const QContent& left, const QContent& right);
-
-    void init(const QStringList &sorts);
-};
-
-FilteredLessThanFunctor::FilteredLessThanFunctor(const QStringList &sorts)
-{
-    init(sorts);
-}
-
-void FilteredLessThanFunctor::init(const QStringList &sorts)
-{
-    QListIterator<QString> sortList(sorts);
-    sortList.toBack();
-    while(sortList.hasPrevious())
-    {
-        QString field=sortList.previous().toLower();
-        bool descending=field.endsWith(" desc");
-        if (descending)
-            field.chop(5);
-        if(field == "name")
-        {
-            if(descending)
-                filterSet.append(nameCompareDescending);
-            else
-                filterSet.append(nameCompare);
-        }
-        else if(field == "type")
-        {
-            if(descending)
-                filterSet.append(typeCompareDescending);
-            else
-                filterSet.append(typeCompare);
-        }
-        else if(field == "size")
-        {
-            if(descending)
-                filterSet.append(sizeCompareDescending);
-            else
-                filterSet.append(sizeCompare);
-        }
-        else if(field == "file")
-        {
-            if(descending)
-                filterSet.append(fileCompareDescending);
-            else
-                filterSet.append(fileCompare);
-        }
-        else if(field == "time")
-        {
-            if(descending)
-                filterSet.append(timeCompareDescending);
-            else
-                filterSet.append(timeCompare);
-        }
-    }
-}
-
-bool FilteredLessThanFunctor::operator()(const QContent &s1, const QContent &s2)
-{
-    //return s1.toLower() < s2.toLower();
-    foreach(Comparison function, filterSet)
-    {
-        int result=(*function)(s1, s2);
-        if(result > 0)
-            return true;
-        else if(result < 0)
-            return false;
-        // else it's equal, so keep checking
-    }
-    return false;   // if we get here, assume false, all else being equal
-}
-
-int FilteredLessThanFunctor::nameCompare(const QContent& left, const QContent& right)
-{
-    return QString::compare(left.name(), right.name());
-}
-
-int FilteredLessThanFunctor::nameCompareDescending(const QContent& left, const QContent& right)
-{
-    return nameCompare(right, left);
-}
-
-int FilteredLessThanFunctor::typeCompare(const QContent& left, const QContent& right)
-{
-    return QString::compare(left.type(), right.type());
-}
-
-int FilteredLessThanFunctor::typeCompareDescending(const QContent& left, const QContent& right)
-{
-    return typeCompare(right, left);
-}
-
-int FilteredLessThanFunctor::sizeCompare(const QContent& left, const QContent& right)
-{
-    return (left.size() > right.size()) ? 1 : (left.size() < right.size() ? -1 : 0);
-}
-
-int FilteredLessThanFunctor::sizeCompareDescending(const QContent& left, const QContent& right)
-{
-    return sizeCompare(right, left);
-}
-
-int FilteredLessThanFunctor::fileCompare(const QContent& left, const QContent& right)
-{
-    if(left.linkFileKnown() && right.linkFileKnown())
-        return QString::compare(left.linkFile(), right.linkFile());
-    else if(left.fileKnown() && right.fileKnown())
-        return QString::compare(left.file(), right.file());
-    else
-        return 0;
-}
-
-int FilteredLessThanFunctor::fileCompareDescending(const QContent& left, const QContent& right)
-{
-    return fileCompare(right, left);
-}
-
-int FilteredLessThanFunctor::timeCompare(const QContent& left, const QContent& right)
-{
-    return (left.lastUpdated() > right.lastUpdated()) ? 1 : (left.lastUpdated() < right.lastUpdated() ? -1 : 0);
-}
-
-int FilteredLessThanFunctor::timeCompareDescending(const QContent& left, const QContent& right)
-{
-    return timeCompare(right, left);
-}
+Q_GLOBAL_STATIC(NullQContentSetEngine,nullQContentSetEngine);
 
 ////////////////////////////////////////////////////////////////
 //
@@ -275,42 +73,78 @@ int FilteredLessThanFunctor::timeCompareDescending(const QContent& left, const Q
 */
 
 /*!
-  \class QContentSet
-  \mainclass
-  \brief The QContentSet class represents a set of QContent objects.
+    \class QContentSet
+    \mainclass
+    \brief The QContentSet class represents a filtered view of all content on a device.
 
-  When building GUI elements representing a collection of QContent
-  objects perform the following:
-  \list
-    \o create a new QContentSet with a suitable filter.
-    \o create a QContentSetModel to display in the GUI using \l {model-view-programming.html}{Model/View classes}.
-  \endlist
-  Example:
-  \code
-  QContentSet set(QContentFilter::Role, "Document");
-  QContentSetModel model(&set);
-  \endcode
+    The content that appears in a QContentSet is defined by a applying a filtering
+    criteria to the set with setCriteria().  Any content in the backing store that
+    passes the filtering criteria is included in the set, if no filtering criteria
+    is applied the set is empty.  By default content in a set is sorted by name, an
+    alternative sort order can be specified with setSortCriteria().
 
-  As the model is automatically kept up-to-date, this is preferable method of accessing a
-  list of QContent objects
+    \section1 Asynchronous and Synchronous updates
 
-  The set is synchronized so that the data is as up-to-date as
-  possible when new storage media (such as CF or SD cards) are inserted
-  or removed, or when other applications change content files.
+    QContentSets are synchronized with the backing store; if content is added, removed,
+    or modified in a way affecting its inclusion in a QContentSet the QContentSet will
+    be updated to reflect that change.  A QContentSet can be made to update its content
+    asynchronously or synchronously, the content is updated the same whether caused by
+    external events or changing the filtering or sorting criteria.
 
-  The mechanism for this synchronization is as follows:
-  \list
-    \o Accesses and changes to the metadata backing store must be via the QContent API.
-    \o If customizing Qtopia, directly altering the backing store, for example via direct
-        SQL statements, is not supported.
-    \o When a QContentSet object is created it opens a QCopChannel listener on the QContent
-        channel internally.
-    \o If a call to the API changes one or more metadata records, a message is sent on the
-        QContent channel containing a datastream of all the record numbers affected.
-    \o If a QContentSet receives a message on the QCopChannel reflecting a change in a
-        record held in the set, or it makes a change to such a record itself, then the
-        \l {QContentSet::}{changed()} signal is emitted.
-  \endlist
+    Updates to an asynchronous content set are performed in an background thread which
+    is started from the event loop when a change to the filtering or sorting criteria
+    has been identified or a change notification has been received.  As the update is
+    performed pairs of contentAboutToBeRemoved()/contentRemoved() and
+    contentAboutToBeInserted()/contentInserted() signals are emitted to indicate
+    where changes to the content set have occurred, these signals are synchronized
+    to the event loop of the QContentSet's thread so within an event the count() of
+    a QContentSet will not change.
+
+    Synchronous QContentSets simply reset the contents of the set when there is a
+    possible change in the content.  Changing the filtering or sorting criteria
+    will trigger a deferred update of the content set which occur either when control
+    returns to the event loop or count() is called.  This allows a number of changes
+    to be accumulated before updating the set.
+
+    Generally for persisted QContentSets such those used in document selectors the
+    asynchronous update mode should be preferred, while the synchronous mode is
+    more suited for one off queries.
+
+    \section1 Explicit content
+
+    In addition to the filtered content a QContentSet has an internal list of explicitly
+    maintained content.  Content added to a set explicitly is included in the visible
+    set irregardless of whether it passes the filtering criteria and does not have to be
+    committed to the backing store.  The contents of this internal list are managed with
+    the add() and remove() methods.
+
+    \section1 Example: Iterating over a set of user audio recordings sorted by most recently modified.
+
+    \code
+    QContentSet contentSet;
+
+    // Filter for documents with the mime type 'audio/wav' in the 'Recordings' category.
+    contentSet.setCriteria( QContentFilter( Document ) );
+    contentSet.addCriteria( QContentFilter::mimeType( "audio/wav" ), QContentFilter::And );
+    contentSet.addCriteria( QContentFilter::category( "Recordings" ), QContentFilter::And );
+
+    // Sort by modified date in descending order.
+    contentSet.setSortCriteria( QContentSortCriteria(
+            QContentSortCriteria::LastModified,
+            Qt::DescendingOrder ) );
+
+    for( int i = 0; i < contentSet.count(); i++ )
+    {
+        QContent content = contentSet.content( i );
+        ...
+    }
+    \endcode
+
+    \section1 Tutorials
+
+    For an example of setting the filtering criteria of a QContentSet see the \l {Tutorial: Content
+    Filtering} {Content Filtering } tutorial and for an example of listening for changes in a
+    QContentSet see the \l { Tutorial: Listening for Content Changes} {Change Listener} tutorial.
 
   \ingroup content
 */
@@ -327,101 +161,204 @@ int FilteredLessThanFunctor::timeCompareDescending(const QContent& left, const Q
 */
 
 /*!
-  Constructs a new unfiltered QContentSet with the specified \a parent.
+    \enum QContentSet::UpdateMode
+
+    Indicates whether the contents of a content set should be updated synchronously or asynchronously.
+
+    \value Synchronous Update the content set in the current thread of execution.
+    \value Asynchronous Update the content set in a background thread.
+*/
+
+/*!
+    Constructs a new unfiltered QContentSet with the specified \a parent.
+
+    The QContentSet can be populated with content from the backing store by specifying a
+    filtering criteria with setCriteria() or addCriteria().
+
+    \sa setCriteria(), addCriteria(), setSortCriteria()
 */
 QContentSet::QContentSet( QObject *parent )
     : QObject( parent )
 {
+    d = QContentStore::instance()->contentSet( QContentFilter(), QContentSortCriteria(QContentSortCriteria::Name, Qt::AscendingOrder), Synchronous );
+
     init();
-    sync();
 }
 
 /*!
-  Constructs a new QContentSet with the specified \a parent, containing all records
-  from the backing store which match the filters listed in \a catFilters.
+    Constructs a new QContentSet with the specified \a parent containing all content
+    from the backing store which matches the filtering \a criteria.
+
+    \sa addCriteria(), setSortCriteria()
  */
-QContentSet::QContentSet( const QContentFilter &catFilters, QObject *parent )
+QContentSet::QContentSet( const QContentFilter &criteria, QObject *parent )
     : QObject( parent )
 {
+    d = QContentStore::instance()->contentSet( criteria, QContentSortCriteria(QContentSortCriteria::Name, Qt::AscendingOrder), Synchronous );
+
     init();
-    d->currentFilter = catFilters;
-    sync();
 }
 
 
 /*!
-  Constructs a new QContentSet with the specified \a parent, containing all records
-  from the backing store which match the filters listed in \a catFilters
-  sorted by \a sortOrder.
+    Constructs a new QContentSet with the specified \a parent containing all content
+    from the backing store which matches the filtering \a criteria and is sorted by
+    \a sortOrder.
+
+    \deprecated
+
+    \bold {Note:} The use of a QStringList to specify the sort order is deprecated, use a
+    QContentSortCriteria instead.
+
+    \sa addCriteria(), setSortOrder()
  */
-QContentSet::QContentSet( const QContentFilter &catFilters, const QStringList &sortOrder, QObject *parent )
+QContentSet::QContentSet( const QContentFilter &criteria, const QStringList &sortOrder, QObject *parent )
     : QObject( parent )
 {
+    d = QContentStore::instance()->contentSet( criteria, QContentSetEngine::convertSortOrder( sortOrder ), Synchronous );
+
     init();
-    d->currentFilter = catFilters;
-    d->currentSortOrder = sortOrder;
-    sync();
 }
 
 
 /*!
-  Constructs a new QContentSet with the specified \a parent, containing all records
-  from \a original.
+    Constructs a new QContentSet with the specified \a parent, containing all content
+    from \a original.
 */
 QContentSet::QContentSet( const QContentSet &original, QObject *parent)
     : QObject( parent )
 {
+    d = QContentStore::instance()->contentSet( original.filter(), QContentSortCriteria(QContentSortCriteria::Name, Qt::AscendingOrder), Synchronous );
+
     init();
-    *d = *original.d;
-    d->q = this;
-    sync();
 }
 
 /*!
-    Constructs a new QContentSet with the specified \a parent, containing all records
-    from the backing store which match the filtering criteria specified by \a tag and \a filter.
- */
+    Constructs a new QContentSet with the specified \a parent containing all content
+    from the backing store which matches the \a tag filtering criteria \a filter.
 
+    \sa addCriteria(), setSortCriteria()
+ */
 QContentSet::QContentSet( QContentFilter::FilterType tag, const QString& filter, QObject *parent )
     : QObject( parent )
 {
+    d = QContentStore::instance()->contentSet( QContentFilter( tag, filter ), QContentSortCriteria(QContentSortCriteria::Name, Qt::AscendingOrder), Synchronous );
+
     init();
-    d->currentFilter = QContentFilter( tag, filter );
-    sync();
 }
 
 
 /*!
-    Constructs a new QContentSet with the specified \a parent, containing all records
-    from the backing store which match the filtering criteria specified by \a tag and \a filter
-    and sorted by \a sortOrder.
- */
+    Constructs a new QContentSet with the specified \a parent containing all content
+    from the backing store which matches the \a tag filtering criteria \a filter and
+    is sorted by \a sortOrder.
 
+    \bold Example: Construct a QContentSet containing wave files sorted by most recently modified.
+    \code
+    QContentSet contentSet(
+        QContentFilter::MimeType, "audio/wav",
+        "time desc" );
+    \endcode
+
+    \bold {Note:} The use of a QStringList to specify the sort order is deprecated, use a
+    QContentSortCriteria instead.
+
+    \deprecated
+
+    \sa addCriteria(), setSortOrder()
+*/
 QContentSet::QContentSet( QContentFilter::FilterType tag, const QString& filter, const QStringList &sortOrder, QObject *parent )
     : QObject( parent )
 {
+    d = QContentStore::instance()->contentSet( QContentFilter( tag, filter ), QContentSetEngine::convertSortOrder( sortOrder ), Synchronous );
+
     init();
-    d->currentFilter = QContentFilter( tag, filter );
-    d->currentSortOrder = sortOrder;
-    sync();
+}
+
+/*!
+    Constructs an unfiltered QContentSet with the specified \a parent and update \a mode.
+
+    The QContentSet can be populated with content from the backing store by specifying a
+    filtering criteria with setCriteria() or addCriteria().
+
+    \sa setCriteria(), addCriteria(), setSortCriteria()
+*/
+QContentSet::QContentSet( UpdateMode mode, QObject *parent )
+    : QObject( parent )
+{
+    d = QContentStore::instance()->contentSet( QContentFilter(), QContentSortCriteria(QContentSortCriteria::Name, Qt::AscendingOrder), mode );
+
+    init();
+}
+
+/*!
+    Constructs a QContentSet with the specified \a parent and update \a mode containing all
+    content from the backing store which matches the filtering \a criteria.
+
+    \sa addCriteria(), setSortCriteria()
+*/
+QContentSet::QContentSet( const QContentFilter &criteria, UpdateMode mode, QObject *parent )
+    : QObject( parent )
+{
+    d = QContentStore::instance()->contentSet( criteria, QContentSortCriteria(QContentSortCriteria::Name, Qt::AscendingOrder), mode );
+
+    init();
+}
+
+/*!
+    Constructs a QContentSet with the specified \a parent and update \a mode containing all
+    content from the backing store which matches the filtering \a criteria and is sorted by
+    \a sort.
+
+    \bold Example: Construct an asynchronous QContentSet containing wave files sorted by most recently modified.
+    \code
+    QContentSet contentSet(
+        QContentFilter::mimeType( "audio/wav" )
+        QContentSortCriteria( QContentSortCriteria::LastUpdated, Qt::DescendingOrder )
+        QContentSet::Asynchronous );
+    \endcode
+
+    \sa addCriteria()
+*/
+QContentSet::QContentSet( const QContentFilter &criteria, const QContentSortCriteria &sort, UpdateMode mode, QObject *parent )
+    : QObject( parent )
+{
+    d = QContentStore::instance()->contentSet( criteria, sort, mode );
+
+    init();
 }
 
 /*!
     \internal
-    offload common initiliastion functionality.
+    offload common initialization functionality.
 */
 void QContentSet::init()
 {
-    d = new QContentSetPrivate;
-    d->q = this;
-#ifndef QTOPIA_CONTENT_INSTALLER
-    connect(qApp, SIGNAL(contentChanged(const QContentIdList&,QContent::ChangeType)),
-            this, SLOT(contentChanged(const QContentIdList&,QContent::ChangeType)));
-    connect(QContentUpdateManager::instance(), SIGNAL(refreshRequested()),
-            this, SLOT(refreshRequested()));
-    connect(qApp, SIGNAL(resetContent()),
-            this, SLOT(refreshRequested()));
-#endif
+    if( d )
+    {
+        d->setParent( this );
+
+        connect( d  , SIGNAL(contentAboutToBeRemoved(int,int)),
+                this, SIGNAL(contentAboutToBeRemoved(int,int)) );
+        connect( d  , SIGNAL(contentAboutToBeInserted(int,int)),
+                this, SIGNAL(contentAboutToBeInserted(int,int)) );
+        connect( d  , SIGNAL(contentChanged(int,int)),
+                this, SIGNAL(contentChanged(int,int)) );
+        connect( d  , SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
+                this, SIGNAL(changed(QContentIdList,QContent::ChangeType)) );
+        connect( d  , SIGNAL(contentRemoved()),
+                this, SIGNAL(contentRemoved()) );
+        connect( d  , SIGNAL(contentInserted()),
+                this, SIGNAL(contentInserted()) );
+        connect( d  , SIGNAL(contentChanged()),
+                this, SIGNAL(changed()) );
+    }
+    else
+    {
+        qWarning() << "No content set engine constructed";
+
+        d = nullQContentSetEngine();
+    }
 }
 
 /*!
@@ -429,17 +366,38 @@ void QContentSet::init()
 */
 QContentSet::~QContentSet()
 {
+    delete d;
 }
 
 /*!
-    Scan for added/removed content in \a path with the specified \a priority.
-    Directories will be scanned recusively in a background thread located in the
-    server process.
+    Sets the sort \a criteria used to order the set.
+*/
+void QContentSet::setSortCriteria( const QContentSortCriteria &criteria )
+{
+    d->setSortCriteria( criteria );
+}
+
+/*!
+    Returns the sort criteria used to order the set.
+*/
+QContentSortCriteria QContentSet::sortCriteria() const
+{
+    return d->sortCriteria();
+}
+
+/*!
+    Initiates a document scan of a \a path and its sub-directories looking for documents
+    that have been added, removed, or modified to bring the backing store's view of the
+    path up to date with the file system.
+
+    Scans are performed threaded in a server process, the scan \a priority sets the run
+    priority of the scanner threads.  A higher priority scan will finish sooner but may
+    reduce the device responsiveness.
 */
 void QContentSet::scan( const QString &path, Priority priority )
 {
     QtopiaIpcAdaptor qo(QLatin1String("QPE/DocAPI"));
-    qo.send(SIGNAL(scanPath(const QString&,int)), path, priority);
+    qo.send(SIGNAL(scanPath(QString,int)), path, priority);
 }
 
 /*!
@@ -453,11 +411,11 @@ void QContentSet::findDocuments(QContentSet* folder, const QString &mimefilter)
         d.addCriteria(QContentFilter::MimeType, mimefilter, QContentFilter::Or);
     d.addCriteria(QContentFilter::Role, QLatin1String("Document"), QContentFilter::And);
     folder->appendFrom(d);
-    QStorageMetaInfo storage;
+    QStorageMetaInfo *storage=QStorageMetaInfo::instance();
     QFileSystemFilter fsf;
     fsf.documents = QFileSystemFilter::Set;
     fsf.removable = QFileSystemFilter::Set;
-    foreach ( QFileSystem *fs, storage.fileSystems(&fsf) ) {
+    foreach ( QFileSystem *fs, storage->fileSystems(&fsf) ) {
         QContentSet ide;
         ide.setCriteria(QContentFilter::Location, fs->path());
         ide.addCriteria(QContentFilter::MimeType, mimefilter, QContentFilter::And );
@@ -466,7 +424,7 @@ void QContentSet::findDocuments(QContentSet* folder, const QString &mimefilter)
 }
 
 /*!
-  Return true if the set contains the object \a content, that is:
+  Returns true if the set contains the object \a content, that is:
   \list
   \o if it has been explicitly added
   \o if it matches the filter expression.
@@ -476,149 +434,140 @@ void QContentSet::findDocuments(QContentSet* folder, const QString &mimefilter)
 */
 bool QContentSet::contains( const QContent &content ) const
 {
-    const_cast<QContentSet *>(this)->sync();
-
-    if ( d->explicitLinks.contains( content ))
-        return true;
-    if ( d->implicitLinks.contains( content.id() ))
-        return true;
-    return false;
+    return d->contains( content );
 }
 
 /*!
-  Explicitly add the QContent object \a content to this set but not to the backing store.
-  \l contains() is called first to test if the content already exists in
-  the set, and does not add it if it is already present.
-
-  If using this method and \l {QContentSet::}{remove()}, a filter expression is not used
-  for these items. This is useful for building up a set of QContent objects to display
-  or to perform bulk operations upon, such as moving to a new location.
-
-  If a filter expression is used and the object added matches it, this method is
-  effectively a null operation - although it will update the internal cache.
+    Adds \a content to an explicitly maintained internal list of content.  Items in
+    this list appear in the content set irregardless of whether they match the filtering
+    criteria.
 
   \sa remove(), contains(), clear()
 */
 
 void QContentSet::add( const QContent &content )
 {
-    if ( ! contains( content ))
-    {
-        emit aboutToSort();
-
-            d->explicitLinks.append( content );
-
-        if( !d->currentSortOrder.isEmpty() )
-            qSort(d->explicitLinks.begin(), d->explicitLinks.end(), FilteredLessThanFunctor(d->currentSortOrder));
-
-        emit sorted();
-    }
-    emit changed( QContentIdList() << content.id(), QContent::Added );
+    d->insertContent( content );
 }
 
 /*!
-  Remove the QContent object \a cl from this set. This does not remove the
-  object from the backing store.  This is useful for trimming down a set
-  of QContent objects to display to the user, or perform bulk operations
-  on such as moving to a new location.
-
-  The method cannot remove an object that matches the filter expression, if one is
-  set.
+    Removes \a content from an explicitly maintained internal list of content.  Items in
+    this list appear in the content set irregardless of whether they match the filtering
+    criteria.
 
   \sa add(), contains(), clear()
 */
-void QContentSet::remove( const QContent &cl )
+void QContentSet::remove( const QContent &content )
 {
-    if ( d->explicitLinks.contains( cl ))
-    {
-        emit aboutToSort();
-
-        d->explicitLinks.removeAll( cl );
-
-        emit sorted();
-     }
-     emit changed(QContentIdList() << cl.id(), QContent::Removed );
+    d->removeContent( content );
 }
 
 /*!
-    Remove all filters and explicitly added QContent objects from this set.
-    \sa add(), remove(), contains()
+    Removes the filtering criteria, and all explicitly added content from the set.
+
+    This will remove all content from the set.
+
+    \sa add(), remove(), contains(), setCriteria(), addCriteria(), clearFilter()
 */
 void QContentSet::clear()
 {
     d->clear();
-    d->syncTimer.start(0, this);
-    emit changed();
 }
 
 /*!
-  Store the meta information objects into the backing store, and create a file on the
-  file system if the content type is appropriate.
+  This method does nothing and is only retained for binary compatibility.
+
   \sa uninstallContent()
+
+  \internal
 */
 void QContentSet::installContent()
 {
-    d->installContent();
 }
 
 /*!
-  Remove the meta information objects in this set from the backing store,
-  and remove any files from the file system if the content type is appropriate.
-  In the case of DRM controlled files this will also remove any rights objects.
+  This method does nothing and is only retained for binary compatibility.
 
   \sa installContent()
+
+  \internal
 */
 void QContentSet::uninstallContent()
 {
-    d->uninstallContent();
 }
 
 /*!
-  Return a QContentList of items in this set.
+    Return a QContentList of items in this set.
 
-  This is a relatively expensive operation, and generally should not be used unless it is
-  known that only a few items will be returned.
+    This is a relatively expensive operation, and generally should not be used unless it is
+    known that only a few items will be returned.
 
-  It is also a snapshot of the currently known items in the list,
-  which has a possibility of going out of date immediately after it is obtained.
+    It is also a snapshot of the currently known items in the list,
+    which has a possibility of going out of date immediately after it is obtained.
 
-  When considering use of this method first examine the process of
-  retrieving a pointer to the internal model and using a
-  \l {model-view-programming.html}{Model/View} solution.
+    Instead of using this method consider iterating over the set directly instead.
 
-  \sa QContentSetModel, itemIds()
+    \code
+    for( int i = 0; i < contentSet.count(); i++ )
+    {
+        QContent content = contentSet.content( i );
+        ...
+    }
+    \endcode
+
+    \sa QContentSetModel, itemIds()
 */
 QContentList QContentSet::items() const
 {
     QContentList l;
-    QContentSetModel csModel(this);
-    for( int i = 0; i < csModel.rowCount(); ++i )
-        l.append( csModel.content( i ) );
+    for( int i = 0; i < count(); ++i )
+        l.append( content( i ) );
     return l;
 }
 
 /*!
-  Return a QContentIdList of content Ids in this set.
+    Return a QContentIdList of content IDs in this set.
 
-  This is a relatively expensive operation, and generally should not be used unless it is
-  known that only a few items will be returned.
+    This is a relatively expensive operation, and generally should not be used unless it is
+    known that only a few items will be returned.
 
-  It is also a snapshot of the currently known items in the list,
-  which has a possibility of going out of date immediately after it is obtained.
+    It is also a snapshot of the currently known items in the list,
+    which has a possibility of going out of date immediately after it is obtained.
 
-  When considering use of this method first examine the process of
-  retrieving a pointer to the internal model and using a
-  \l {model-view-programming.html}{Model/View} solution.
+    Instead of using this method consider iterating over the set directly instead.
 
-  \sa QContentSetModel, items()
+    \code
+    for( int i = 0; i < contentSet.count(); i++ )
+    {
+        QContentId contentId = contentSet.contentId( i );
+        ...
+    }
+    \endcode
+
+    \sa QContentSetModel, items()
 */
 QContentIdList QContentSet::itemIds() const
 {
     QContentIdList l;
-    QContentSetModel csModel(this);
-    for( int i = 0; i < csModel.rowCount(); ++i )
-        l.append( csModel.contentId( i ) );
+    for( int i = 0; i < count(); ++i )
+        l.append( contentId( i ) );
     return l;
+}
+
+/*!
+    Returns the QContent at \a index in a set.
+*/
+QContent QContentSet::content( int index ) const
+{
+    return d->content( index );
+}
+
+/*!
+    Returns the ID of the QContent at \a index in a set.
+*/
+QContentId QContentSet::contentId( int index ) const
+{
+    return d->contentId( index );
 }
 
 /*!
@@ -665,6 +614,12 @@ QContentIdList QContentSet::itemIds() const
 
     This signal is emitted when content items between the \a start and \a end indexes
     are about to be removed.
+
+    Content may be removed from a set as a result of the filtering criteria changing, a QContent
+    being explicitly removed from the set, a QContent being deleted from the device, or attributes
+    of a QContent changing so that it no longer matches the filtering criteria.
+
+    \sa contentRemoved()
 */
 
 /*!
@@ -672,6 +627,8 @@ QContentIdList QContentSet::itemIds() const
 
     This signal is emitted when the content removal indicated by contentAboutToBeRemoved()
     has been completed.
+
+    \sa contentAboutToBeRemoved()
 */
 
 /*!
@@ -679,6 +636,12 @@ QContentIdList QContentSet::itemIds() const
 
     This signal is emitted when content items are about to be inserted between the \a start
     and \a end indexes.
+
+    Content may be inserted into a set a result of the filtering criteria changing, a QContent
+    being explicitly added to the set, a new QContent being created on the device, or attributes
+    of a QContent changing so that it matches the filtering criteria.
+
+    \sa contentInserted()
 */
 
 /*!
@@ -686,49 +649,29 @@ QContentIdList QContentSet::itemIds() const
 
     This signal is emitted when the content insertion indicated by contentAboutToBeInserted()
     has been completed.
-*/
 
-/*!
-    \internal
-    Check the internal explicit list, and if \a id is contained, remove it from there.
+    \sa contentAboutToBeInserted()
 */
-bool QContentSet::removeId(QContentId id)
-{
-    QMutexLocker lock(&d->mutex);
-    int idx = d->implicitLinks.indexOf(id);
-    if (idx >= 0) {
-        emit contentAboutToBeRemoved( idx, idx );
-        d->implicitLinks.removeAt(idx);
-        emit contentRemoved();
-        qLog(DocAPI) << id << "Removed from set";
-        emit changed(QContentIdList() << id, QContent::Removed);
-        return true;
-    }
-
-    return false;
-}
 
 /*!
     Returns true if this set is empty.
 */
 bool QContentSet::isEmpty() const
 {
-    const_cast<QContentSet *>(this)->sync();
-    return d ? d->explicitLinks.isEmpty() && d->implicitLinks.isEmpty() : true;
+    return d->isEmpty();
 }
 
 /*!
     Appends the contents of \a other to this QContentSet.
-    Currently it appends them as explicit items to the current QContenSet, in the future,
+    Currently it appends them as explicit items to the current QContentSet, in the future,
     it will concatenate the two filter sets to create a new aggregate filter set.
 */
 void QContentSet::appendFrom( QContentSet& other )
 {
     // QTOPIA_DOCAPI_TODO when moving to combinatorial filtering, add "other"s filter set or'd with the overall original filter set
-    QContentSetModel othermodel(&other);
-    for (int i=0; i< othermodel.rowCount(); i++)
+    for (int i=0; i< other.count(); i++)
     {
-        add(othermodel.content(i));
+        add(other.content(i));
     }
 }
 
@@ -737,8 +680,7 @@ void QContentSet::appendFrom( QContentSet& other )
 */
 int QContentSet::count() const
 {
-    const_cast<QContentSet *>(this)->sync();
-    return d->explicitLinks.count() + d->implicitLinks.count();
+    return d->count();
 }
 
 /*!
@@ -748,10 +690,9 @@ int QContentSet::count() const
 */
 QContent QContentSet::findExecutable( const QString& exec ) const
 {
-    QContentSetModel csModel(this);
-    for (int i=0; i< csModel.rowCount(); i++)
-        if (csModel.content(i).executableName() == exec)
-            return csModel.content(i);
+    for (int i=0; i< count(); i++)
+        if (content(i).executableName() == exec)
+            return content(i);
     return QContent();
 }
 
@@ -774,12 +715,11 @@ QContent QContentSet::findFileName( const QString& filename ) const
 {
     Q_ASSERT( !filename.contains( QDir::separator() ));
 
-    QContentSetModel csModel(this);
     QString fn = filename;
     fn.prepend( QDir::separator() );
-    for (int i=0; i< csModel.rowCount(); i++)
-        if (csModel.content(i).file().endsWith( fn ))
-            return csModel.content(i);
+    for (int i=0; i< count(); i++)
+        if (content(i).fileName().endsWith( fn ))
+            return content(i);
     return QContent();
 }
 
@@ -790,15 +730,12 @@ QContent QContentSet::findFileName( const QString& filename ) const
 
     For documents the type is the document's MIME type, or application/octet-stream
     if the file type is unknown.
-
 */
-
 QStringList QContentSet::types() const
 {
     QStringList result;
-    QContentSetModel csModel(this);
-    for (int i=0; i<csModel.rowCount(); i++) {
-        const QContent& item=csModel.content(i);
+    for (int i=0; i<count(); i++) {
+        const QContent item=content(i);
         if (!result.contains(item.type()))
             result.append(item.type());
     }
@@ -812,184 +749,157 @@ QStringList QContentSet::types() const
 */
 QContentSet &QContentSet::operator=(const QContentSet& contentset)
 {
-    *d = *contentset.d;
-    d->q = this;
-    sync();
-    emit changed();
+    d->setFilter( contentset.filter() );
+    d->setSortCriteria( contentset.sortCriteria() );
+
     return *this;
 }
 
 /*!
-    \internal
-    This slot is hooked up to the QtopiaApplication::contentChanged() signal to enable
-    notification to this contentset of modifications to the the content system.
+    Returns the update mode of the content set; either Synchronous or Asynchronous.
 */
-
-void QContentSet::contentChanged(const QContentIdList &ids, QContent::ChangeType ct)
+QContentSet::UpdateMode QContentSet::updateMode() const
 {
-    if( ct == QContent::Removed )
-    {
-        QContentIdList removedList;
-        foreach( QContentId id, ids )
-        {
-            int index = d->implicitLinks.indexOf( id );
-
-            if( index != -1 )
-            {
-                emit contentAboutToBeRemoved( index, index );
-                d->implicitLinks.removeAt( index );
-                emit contentRemoved();
-                removedList.append(id);
-            }
-
-            for( index = 0; index < d->explicitLinks.count(); index++ )
-            {
-                if( d->explicitLinks[ index ].id() == id )
-                {
-                    int row = d->implicitLinks.count() + index;
-
-                    emit contentAboutToBeRemoved( row, row );
-                    d->explicitLinks.removeAt( index );
-                    index--;
-                    emit contentRemoved();
-                    removedList.append(id);
-                }
-            }
-        }
-        if(removedList.count() != 0)
-        {
-            emit changed(removedList, ct);
-        }
-    }
-    else
-    {
-        d->implicitLinksNeedsFlush = true;
-        sync();
-
-        if( ct == QContent::Updated )
-        {
-            int start;
-            for( start = 0; start < d->implicitLinks.count(); start++ )
-            {
-                if( ids.contains( d->implicitLinks[ start ] ) )
-                {
-                    int end;
-                    for( end = start + 1; end < d->implicitLinks.count() && ids.contains( d->implicitLinks[ end ] ); end++ );
-
-                    emit contentChanged( start, end - 1 );
-                }
-            }
-            for( start = 0; start < d->explicitLinks.count(); start++ )
-            {
-                if( ids.contains( d->explicitLinks[ start ].id() ) )
-                {
-                    int end;
-                    for( end = start + 1; end < d->explicitLinks.count() && ids.contains( d->explicitLinks[ end ].id() ); end++ );
-
-                    emit contentChanged( d->implicitLinks.count() + start, d->implicitLinks.count() + end - 1 );
-                }
-            }
-        }
-        QContentIdList changedList;
-        foreach( QContentId id, ids )
-        {
-            if(d->implicitLinks.indexOf( id ) != -1)
-                changedList.append(id);
-            else
-                for( int index = 0; index < d->explicitLinks.count(); index++ )
-                    if( d->explicitLinks[ index ].id() == id )
-                        changedList.append(id);
-        }
-        if(changedList.count() != 0)
-        {
-            emit changed(changedList, ct);
-        }
-
-    }
+    return d->updateMode();
 }
 
 /*!
-  Clears the current filter expression on the set
+  Clears the content set's current filtering criteria.  This will remove all filtered content from the
+  set but leave content that was explicitly added.
+
+  \sa filter(), addCriteria()
  */
 void QContentSet::clearFilter()
 {
-    d->clearFilter();
-    d->syncTimer.start(0, this);
-    emit changed();
+    d->setFilter( QContentFilter() );
 }
 
 /*!
-    Joins a filtering criteria of filter type \a kind and value \a filter to the current
-    filter set using the given \a operand.
+    Appends a \a kind filter matching the value \a filter to the existing filtering criteria using
+    the given \a operand.
+
+    \bold Example: Filter for documents with the mime type \c image/jpeg or \c {image/png}.
+    \code
+    QContentSet contentSet;
+    contentSet.addCriteria( QContentFilter::MimeType, "image/jpeg", QContentFilter::Or );
+    contentSet.addCriteria( QContentFilter::MimeType, "image/png", QContentFilter::Or );
+    contentSet.addCriteria( QContentFilter::Role", "Document", QContentFilter::And );
+    \endcode
 */
 void QContentSet::addCriteria( QContentFilter::FilterType kind, const QString &filter, QContentFilter::Operand operand )
 {
-    d->addCriteria(kind, filter, operand);
-    d->syncTimer.start(0, this);
-    emit changed();
+    if( operand == QContentFilter::And )
+    {
+        d->setFilter( d->filter() & QContentFilter( kind, filter ) );
+    }
+    else if( operand == QContentFilter::Or )
+    {
+        d->setFilter( d->filter() | QContentFilter( kind, filter ) );
+    }
 }
 
 /*!
-    \overload
-    Joins a group of filtering criteria \a filters to the current filter set using the
-    given \a operand.
+    Appends \a filter to the existing filtering criteria using the given \a operand.
+
+    \bold Example: Filter for documents with the mime type \c image/jpeg or \c {image/png}.
+    \code
+    QContentSet contentSet( QContentFilter( QContent::Document ) );
+    contentSet.addCriteria(
+        QContentFilter::mimeType( "image/jpeg" ) | QContentFilter::mimeType( "image/png" ),
+        QContentFilter::And );
+    \endcode
  */
-void QContentSet::addCriteria(const QContentFilter& filters, QContentFilter::Operand operand )
+void QContentSet::addCriteria(const QContentFilter& filter, QContentFilter::Operand operand )
 {
-    d->addCriteria(filters, operand);
-    d->syncTimer.start(0, this);
-    emit changed();
+    if( operand == QContentFilter::And )
+    {
+        d->setFilter( d->filter() & filter );
+    }
+    else if( operand == QContentFilter::Or )
+    {
+        d->setFilter( d->filter() | filter );
+    }
 }
 
 /*!
-    Sets a filtering criteria of \c FilterType \a kind and value \a filter to the current
-    filter set. This operation will replace all previously specified filters.
+    Sets the filtering criteria of a QContentSet to a \a kind filter matching the value \a filter.
+
+    This will replace any existing filtering criteria.
  */
 void QContentSet::setCriteria(QContentFilter::FilterType kind, const QString &filter)
 {
-    d->clearFilter();
-    d->addCriteria(kind, filter, QContentFilter::NoOperand );
-    sync();
-    emit changed();
+    d->setFilter( QContentFilter( kind, filter ) );
 }
 
 /*!
-    \overload
-    Sets a group of filtering criteria \a filters to the current filter set.
-    This operation will replace all previously specified filters.
+    Sets the filtering criteria of a QContentSet to \a filter.
+
+    This will replace any existing filtering criteria.
+
+    \bold Example: Filter for documents with the mime type \c image/jpeg or \c {image/png}.
+    \code
+    QContentSet contentSet;
+    contentSet.setCriteria( QContentFilter( QContent::Document )
+            & ( QContentFilter::mimeType( "image/jpeg" )
+            | QContentFilter::mimeType( "image/png" ) ) );
+    \endcode
  */
-void QContentSet::setCriteria(const QContentFilter& filters)
+void QContentSet::setCriteria(const QContentFilter& filter)
 {
-    d->clearFilter();
-    d->addCriteria(filters, QContentFilter::NoOperand);
-    sync();
-    emit changed();
+    d->setFilter( filter );
 }
 
 /*!
-    Returns a copy of the current filter set for this \c QContentSet.
+    Returns the current filtering criteria of the QContentSet.
 */
 QContentFilter QContentSet::filter() const
 {
-    return d->currentFilter;
+    return d->filter();
 }
 
 /*!
-    Sets the attribute(s) that content in this QContentSet is ordered by to \a sortOrder.
+    Sets the attributes that content in this QContentSet is ordered by to \a sortOrder.
+
+    Valid sort attributes are:
+    \list
+        \o \c {name}: The user visible name of the content.
+        \o \c {type}: The MIME type of the content.
+        \o \c {time}: The date-time the content was last modified.
+        \o \c {synthetic/[group]/[key]}: A content property with the given property \c group and \c key.
+    \endlist
+
+    To specify whether to sort in ascending or descending order append \c asc or \c desc preceded by a space
+    to the end of the attribute name.
+
+    \bold Example: Sorting a QContent by last modified date in descending order.
+
+    \code
+    contentSet.setSortOrder( QStringList << "time desc" );
+    \endcode
+
+    This method has been deprecated, use setSortCriteria() instead.
+
+    \deprecated
+
+    \sa setSortCriteria()
  */
 void QContentSet::setSortOrder( const QStringList &sortOrder )
 {
-    d->currentSortOrder = sortOrder;
-    d->implicitLinksNeedsFlush = true;
-    sync( true );
+    d->setSortOrder( sortOrder );
 }
 
 /*!
-    Returns the attribute(s) the content in this QContentSet is ordered by.
+    Returns the attributes the content in this QContentSet is ordered by.
+
+    This method has been deprecated, use sortCriteria() instead.
+
+   \deprecated
+
+   \sa sortCriteria()
  */
 QStringList QContentSet::sortOrder() const
 {
-    return d->currentSortOrder;
+    return d->sortOrder();
 }
 
 /*!
@@ -997,152 +907,15 @@ QStringList QContentSet::sortOrder() const
 */
 void QContentSet::timerEvent(QTimerEvent *e)
 {
-    if (e->timerId() == d->syncTimer.timerId()) {
-        sync();
-        d->syncTimer.stop();
-    }
+    QObject::timerEvent( e );
 }
 
 /*!
-    \internal
-    Synchronised the internal information about this contentset, requerying the database if
-    necessary, and executing a \a resort if forced to.
-*/
-
-bool QContentSet::sync( bool resort )
-{
-    if (d->implicitLinksNeedsFlush) {
-        d->implicitLinksNeedsFlush = false;
-
-        QContentIdList implicits = QContent().database()->matches( QContentIdList(), d->currentFilter, d->currentSortOrder );
-
-        if( resort )
-        {
-            d->implicitLinks = implicits;
-
-            emit changed();
-        }
-        else
-            updateImplicits( implicits );
-
-        return true;
-    }
-
-    return false;
-}
-
-/*!
-  \internal
-  Given a new set of implicits (matching our filter criteria), generate a set of signals to
-  be emitted to give our listeners an idea of which have been added and removed (so that they
-  can incrementally update their view/display, without having to clear/restart).
-*/
-
-void QContentSet::updateImplicits( const QContentIdList &implicits )
-{
-    int existingIndex = 0;
-    int updatedIndex = 0;
-    bool updatesSeen = false;
-
-    while( existingIndex < d->implicitLinks.count() || updatedIndex < implicits.count() )
-    {
-        if( existingIndex == d->implicitLinks.count() )
-        {
-            int start = existingIndex;
-            int end   = existingIndex + implicits.count() - 1 - updatedIndex;
-
-            emit contentAboutToBeInserted( start, end );
-
-            for( ; updatedIndex < implicits.count(); updatedIndex++ )
-                d->implicitLinks.append( implicits[ updatedIndex ] );
-
-            emit contentInserted();
-            if(start != end)
-                updatesSeen = true;
-
-            break;
-        }
-
-        if( updatedIndex == implicits.count() )
-        {
-            int start = existingIndex;
-            int end   = d->implicitLinks.count() - 1;
-
-            emit contentAboutToBeRemoved( start, end );
-
-            while( existingIndex < d->implicitLinks.count() )
-                d->implicitLinks.removeLast();
-
-            emit contentRemoved();
-            if(start != end)
-                updatesSeen = true;
-
-            break;
-        }
-
-        if( existingIndex < d->implicitLinks.count() &&
-            updatedIndex < implicits.count() &&
-            d->implicitLinks[ existingIndex ] == implicits[ updatedIndex ] )
-        {
-            existingIndex++;
-            updatedIndex++;
-            continue;
-        }
-
-        int lastMatch = implicits.indexOf( d->implicitLinks[ existingIndex ], updatedIndex + 1 );
-
-        if( lastMatch != -1 )
-        {
-            int start = existingIndex;
-            int end   = existingIndex + lastMatch - 1 - updatedIndex;
-
-            emit contentAboutToBeInserted( start, end );
-
-            for( ; updatedIndex < lastMatch; updatedIndex++ )
-                d->implicitLinks.insert( existingIndex++, implicits[ updatedIndex ] );
-
-            emit contentInserted();
-            if(start != end)
-                updatesSeen = true;
-
-            continue;
-        }
-
-        lastMatch = existingIndex;
-
-        while( ++lastMatch < d->implicitLinks.count() && d->implicitLinks[ lastMatch ] != implicits[ updatedIndex ] );
-
-
-        int start = existingIndex;
-        int end   = lastMatch - 1;
-
-        emit contentAboutToBeRemoved( start, end );
-
-        while( lastMatch-- != existingIndex )
-            d->implicitLinks.removeAt( lastMatch );
-
-        emit contentRemoved();
-        if(start != end)
-            updatesSeen = true;
-    }
-}
-
-/*!
-  \internal
-  Force a refresh/resynch of the implicits.
-*/
-void QContentSet::refreshRequested()
-{
-    d->implicitLinksNeedsFlush = true;
-    sync();
-}
-
-/*!
-    Returns the number of content items in the database that match the content filter \a filter.
+    Returns the number of \l {QContent}s in the database that match a content \a filter.
 */
 int QContentSet::count( const QContentFilter &filter )
 {
-    return QContent::database()->recordCount( filter );
+    return QContentStore::instance()->contentCount( filter );
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1159,15 +932,32 @@ public:
 /*!
   \class QContentSetModel
   \mainclass
-  QAbstractItemModel subclass
 
-  The QContentSetModel provides a model to represent the data in a QContentSet.
+  \brief The QContentSetModel class provides a data model to represent the items in a QContentSet.
+
+  This class provides access to the content system information, providing extra functions for
+  retrieving information relevant to the \l{QContentSet}{content set} passed in the
+  constructor.
+
+  Example usage:
+  \code
+    QContentSet contentset( QContentFilter::Directory, "/Documents" );
+    QContentSetModel model( &contentset );
+
+    QListView listview( this );
+    listview->setModel( &model );
+  \endcode
+
+
+   For a complete example that includes the use of \c QContentSetModel, see
+   the \l {Tutorial: Content Filtering} {Content Filtering} tutorial, and the
+   \l {Model/View Programming} documentation.
 
   \ingroup content
 */
 
 /*!
-  Construct a new model based on the QContentSet \a cls with parent \a parent.
+  Constructs a new model based on the QContentSet \a cls with parent \a parent.
 */
 QContentSetModel::QContentSetModel( const QContentSet *cls, QObject *parent )
     : QAbstractListModel(parent), contentSet(cls), d(0)
@@ -1185,14 +975,17 @@ QContentSetModel::QContentSetModel( const QContentSet *cls, QObject *parent )
              this, SLOT(beginRemoveContent(int,int)) );
     connect( cls, SIGNAL(contentRemoved()),
              this, SLOT(endRemoveContent()) );
+    connect( cls, SIGNAL(contentChanged(int,int)), this, SLOT(contentChanged(int,int)) );
     connect( cls, SIGNAL(aboutToSort()), this, SLOT(emitLayoutAboutToBeChanged()) );
     connect( cls, SIGNAL(sorted()), this, SLOT(emitLayoutChanged()) );
-    connect( cls, SIGNAL(changed() ), this, SLOT(doReset()) );
-    connect( cls, SIGNAL(destroyed() ), this, SLOT(clearContentSet()) );
+    connect( cls->d, SIGNAL(reset()), this, SLOT(doReset()) );
+    connect( cls->d, SIGNAL(updateStarted()), this, SIGNAL(updateStarted()) );
+    connect( cls->d, SIGNAL(updateFinished()), this, SIGNAL(updateFinished()) );
+    connect( cls, SIGNAL(destroyed()), this, SLOT(clearContentSet()) );
 }
 
 /*!
-  Destroys a QContentSetModel object.
+  Destroys the QContentSetModel object.
  */
 
 QContentSetModel::~QContentSetModel()
@@ -1201,7 +994,7 @@ QContentSetModel::~QContentSetModel()
 }
 
 /*!
-  Return the number of rows in the model - since this is a flat list the
+  Returns the number of rows in the model. Since this is a flat list the
   \a parent argument will always be the default null index, indicating a
   top level item.  The result is the count of the items in the backing
   store which match the filter expression plus any explicitly added
@@ -1215,26 +1008,23 @@ int QContentSetModel::rowCount( const QModelIndex & /* parent */ ) const
 }
 
 /*!
-  Return the appropriate QVariant data from the model for the given \a index.
+  Returns the appropriate QVariant data from the model for the given \a index.
   Depending upon the \a role, the QVariant will contain the name of the QContent
   object at that index, its icon, or relevant tooltip text.  The "ToolTip"
   text is shown when the user hovers the cursor over the item in the
   model view.  The tooltip text will display the comment() field from the
   QContent object, or if error() is true, the error text.  Additionally
-  the drm rights in summary form will be shown.
+  the DRM rights in summary form will be shown.
 */
 QVariant QContentSetModel::data( const QModelIndex & index, int role ) const
 {
     if (!contentSet)
         return QVariant();
 
-    const_cast<QContentSet *>(contentSet)->sync();
     switch ( role )
     {
         case Qt::DecorationRole:
-            return d->selectPermission == QDrmRights::InvalidPermission
-                    ? content( index ).icon()
-                    : content( index ).icon( d->selectPermission );
+            return content( index ).icon();
         case Qt::DisplayRole:
             return content( index ).name();
         case Qt::ToolTipRole:
@@ -1242,10 +1032,29 @@ QVariant QContentSetModel::data( const QModelIndex & index, int role ) const
                 ? content( index ).errorString()
                 : content( index ).comment();
         case Qt::UserRole:
-            if( content( index ).fileKnown() )
-                return content( index ).file();
-            if( content( index ).linkFileKnown() )
-                return content( index ).linkFile();
+            return content( index ).fileName();
+        case Qt::UserRole + 1:
+            return QVariant::fromValue( content( index ) );
+        case Qtopia::AdditionalDecorationRole:
+            {
+                QContent c = content( index );
+
+                if ( c.drmState() == QContent::Protected ) {
+                    static const QIcon lockIcon(":icon/drm/Drm_lock");
+                    static const QIcon invalidLockIcon(":icon/drm/Drm_lock_invalid");
+                    QDrmRights::Permission permission = d->selectPermission == QDrmRights::InvalidPermission
+                            ? QMimeType::fromId(c.type()).permission()
+                            : d->selectPermission;
+
+                    QIcon icon = (content(index).permissions( false ) & permission) == permission
+                                ? lockIcon
+                                : invalidLockIcon;
+                    return QVariant(icon);
+                } else if( c.role() == QContent::Application && c.categories().contains( QLatin1String( "Packages" ) ) ) {
+                    static const QIcon packagesIcon( ":icon/packagemanager/PackageManager" );
+                    return packagesIcon;
+                }
+            }
     }
     return QVariant();
 }
@@ -1259,7 +1068,7 @@ Qt::ItemFlags QContentSetModel::flags( const QModelIndex &index ) const
 
     if( d->mandatoryPermissions != QDrmRights::NoPermissions &&
         (content( index ).permissions() & d->mandatoryPermissions) != d->mandatoryPermissions )
-        flags &= ~(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        flags &= ~(Qt::ItemIsEnabled );
 
     return flags;
 }
@@ -1269,33 +1078,10 @@ Qt::ItemFlags QContentSetModel::flags( const QModelIndex &index ) const
 */
 QContent QContentSetModel::content( uint row ) const
 {
-
     if (!contentSet)
         return QContent();
 
-    const_cast<QContentSet *>(contentSet)->sync();
-    uint expCount = contentSet->d->explicitLinks.count();
-    uint impCount = contentSet->d->implicitLinks.count();
-    if ( row >= expCount + impCount )
-        return QContent();
-    if ( row < expCount )
-        return contentSet->d->explicitLinks[ row ];
-
-    row -= expCount;
-    QContentId iid = contentSet->d->implicitLinks[ row ];
-    if (!QContent::isCached(iid)) {
-        int count = 0;
-        QContentIdList iidList;
-        for (unsigned int i = row>=10 ? row-10 : 0; i < impCount && count < 20; i++) {
-            if (!QContent::isCached(contentSet->d->implicitLinks[i])) {
-                iidList.append(contentSet->d->implicitLinks[i]);
-                count++;
-            }
-        }
-        QContent::cache(iidList);
-    }
-
-    return QContent(iid);
+    return contentSet->d->content( row );
 }
 
 /*!
@@ -1313,11 +1099,7 @@ QContent QContentSetModel::content( const QModelIndex & index ) const
 
 QContentId QContentSetModel::contentId( const QModelIndex & index ) const
 {
-    if (!contentSet)
-        return QContent::InvalidId;
-
-    const_cast<QContentSet *>(contentSet)->sync();
-    return content(index).id();
+    return contentId( index.row() );
 }
 
 /*!
@@ -1330,8 +1112,7 @@ QContentId QContentSetModel::contentId( uint row ) const
     if (!contentSet)
         return QContent::InvalidId;
 
-    const_cast<QContentSet *>(contentSet)->sync();
-    return content(row).id();
+    return contentSet->d->contentId( row );
 }
 
 /*!
@@ -1376,38 +1157,12 @@ void QContentSetModel::setSelectPermission( QDrmRights::Permission permission )
 }
 
 /*!
-    Returns the permssion which indicates the intended usage of the content in the model.
+    Returns the permission which indicates the intended usage of the content in the model.
     \sa QDrmRights, setSelectPermission()
 */
 QDrmRights::Permission QContentSetModel::selectPermission() const
 {
     return d->selectPermission;
-}
-
-/*!
-    \internal
-    Determine the row that a given \a contentid belongs to
-    Returns -1 if not found.
-*/
-int QContentSetModel::rowForContentId(QContentId contentId)
-{
-    if (!contentSet)
-        return -1;
-
-    // Find row index for given Content ID
-    int rowNum = 0;
-    foreach(const QContent &content, contentSet->d->explicitLinks) {
-        ++rowNum;
-        if(content.id() == contentId)
-            return rowNum;
-    }
-    foreach(QContentId dId, contentSet->d->implicitLinks) {
-        ++rowNum;
-        if(dId == contentId)
-            return rowNum;
-    }
-
-    return contentSet->d->implicitLinks.count() + contentSet->d->explicitLinks.count();
 }
 
 void QContentSetModel::doReset()
@@ -1457,98 +1212,36 @@ void QContentSetModel::clearContentSet()
     reset();
 }
 
-////////////////////////////////////////////////////////////////
-//
-// QContentSetPrivate implementation
+/*!
+    \fn QContentSetModel::updateStarted()
+
+    Signals that an update of the contents of the set has started.
+
+    This only applies to asynchronous content sets.
+
+    \sa updateInProgress(), updateFinished()
+*/
 
 /*!
-  \internal
-  Private inner classes containing actual implementation, for binary
-  compatibility purposes
+    \fn QContentSetModel::updateFinished()
+
+    Signals that an update of the contents of the set has started.
+
+    This only applies to asynchronous content sets.
+
+    \sa updateInProgress(), updateStarted()
 */
-QContentSetPrivate::QContentSetPrivate()
-    : q( 0 )
-    , implicitLinksNeedsFlush( true )
+
+/*!
+    Returns true if the content of the set are being updated.
+
+    This only applies to asynchronous content sets.
+
+    \sa updateStarted(), updateFinished()
+*/
+bool QContentSetModel::updateInProgress() const
 {
-}
-
-QContentSetPrivate::QContentSetPrivate( const QContentSetPrivate & copy )
-    : q( 0 )
-{
-    (*this) = copy;  // use operator =
-}
-
-QContentSetPrivate &QContentSetPrivate::operator=( const QContentSetPrivate &rhs )
-{
-    this->currentFilter = rhs.currentFilter;
-    this->explicitLinks = rhs.explicitLinks;
-    this->implicitLinks = rhs.implicitLinks;
-    this->implicitLinksNeedsFlush = rhs.implicitLinksNeedsFlush;
-    this->q = 0;
-    return *this;
-}
-
-QContentSetPrivate::~QContentSetPrivate()
-{
-}
-
-void QContentSetPrivate::installContent()
-{
-}
-
-void QContentSetPrivate::uninstallContent()
-{
-}
-
-void QContentSetPrivate::clear()
-{
-    currentFilter.clear();
-    implicitLinks.clear();
-    explicitLinks.clear();
-    implicitLinksNeedsFlush = true;
-}
-
-void QContentSetPrivate::addCriteria( const QContentFilter &filter, QContentFilter::Operand operand )
-{
-    switch( operand )
-    {
-    case QContentFilter::And:
-        currentFilter &= filter; break;
-    case QContentFilter::Or:
-        currentFilter |= filter; break;
-    case QContentFilter::NoOperand:
-        currentFilter = filter; break;
-    }
-
-    implicitLinksNeedsFlush = true;
-}
-
-void QContentSetPrivate::addCriteria( const QContentFilter::FilterType& tag, const QString& filter, QContentFilter::Operand operand )
-{
-    switch( operand )
-    {
-        case QContentFilter::And:
-            currentFilter &= QContentFilter( tag, filter ); break;
-        case QContentFilter::Or:
-            currentFilter |= QContentFilter( tag, filter ); break;
-        case QContentFilter::NoOperand:
-            currentFilter = QContentFilter( tag, filter ); break;
-    }
-
-    implicitLinksNeedsFlush = true;
-}
-
-void QContentSetPrivate::clearFilter()
-{
-    currentFilter.clear();
-    implicitLinksNeedsFlush = true;
-}
-
-bool QContentSetPrivate::contains( const QContent &m ) const
-{
-    QContentSetPrivate *that=const_cast<QContentSetPrivate*>(this);
-    that->implicitLinks = QContent().database()->matches( implicitLinks, currentFilter, currentSortOrder );
-    return explicitLinks.contains(m) || implicitLinks.contains( m.id() );
+    return !contentSet || contentSet->d->updateInProgress();
 }
 
 /*!
@@ -1557,15 +1250,12 @@ bool QContentSetPrivate::contains( const QContent &m ) const
 */
 template <typename Stream> void QContentSet::serialize(Stream &stream) const
 {
-    stream << d->currentFilter;
+    stream << filter();
 
     QContentIdList explicitIds;
 
-    foreach( const QContent &content, d->explicitLinks )
-        explicitIds.append( content.id() );
-
     stream << explicitIds;
-    stream << d->currentSortOrder;
+    stream << sortOrder();
 }
 
 /*!
@@ -1600,4 +1290,6 @@ template <typename Stream> void QContentSet::deserialize(Stream &stream)
 */
 
 Q_IMPLEMENT_USER_METATYPE(QContentSet)
+Q_IMPLEMENT_USER_METATYPE_ENUM(QContentSet::UpdateMode)
+
 

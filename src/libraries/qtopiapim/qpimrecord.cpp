@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,6 +30,8 @@
 #include <qobject.h>
 #include <stdlib.h>
 
+#include "qpimdependencylist_p.h"
+
 /*!
   \class QPimRecord
   \mainclass
@@ -42,14 +44,16 @@
   of PIM records such as contacts, tasks and appointments.  It is an also
   abstract and as such should not be created explicitly.  Instead use one
   of the subclasses, QContact, QAppointment or QTask.
+
+  \sa {Pim Library}
 */
 
 /*!
   \fn QMap<QString, QString> QPimRecord::customFields() const
 
-  Returns a map of custom field key and value for the record.
+  Returns a map of custom field key and value pairs for the record.
 
-  \sa setCustomFields()
+  \sa setCustomFields(), customField(), customFieldsRef()
 */
 
 
@@ -70,36 +74,48 @@
 /*!
   \fn QUniqueId &QPimRecord::uidRef()
 
-  Subclass should re-implement this function to return a reference to the identifier for this object.
+  Subclasses should re-implement this function to return a reference to the identifier for this object.
+
+  \sa uid()
 */
 
 /*!
   \fn const QUniqueId &QPimRecord::uidRef() const
-  Subclass should re-implement this function to return a reference to the identifier for this object.
+  Subclasses should re-implement this function to return a reference to the identifier for this object.
+
+  \sa uid()
 */
 
 /*!
   \fn QList<QString> &QPimRecord::categoriesRef()
-  Subclass should re-implement this function to return a reference to the categories for this object.
+  Subclasses should re-implement this function to return a reference to the categories for this object.
+
+  \sa categories()
 */
 
 /*!
   \fn const QList<QString> &QPimRecord::categoriesRef() const
-  Subclass should re-implement this function to return a reference to the categories for this object.
+  Subclasses should re-implement this function to return a reference to the categories for this object.
+
+  \sa categories()
 */
 
 /*!
   \fn QMap<QString, QString> &QPimRecord::customFieldsRef()
-  Subclass should re-implement this function to return a reference to the custom fields for this object.
+  Subclasses should re-implement this function to return a reference to the custom fields for this object.
+
+  \sa customFields()
 */
 
 /*!
   \fn const QMap<QString, QString> &QPimRecord::customFieldsRef() const
-  Subclass should re-implement this function to return a reference to the custom fields for this object.
+  Subclasses should re-implement this function to return a reference to the custom fields for this object.
+
+  \sa customFields()
 */
 
 /*!
-  Destroys the record
+  Destroys the record.
 */
 
 QPimRecord::~QPimRecord()
@@ -107,10 +123,11 @@ QPimRecord::~QPimRecord()
 }
 
 /*!
-  Returns true if the record and the \a other record have all the same:
+  Returns true if this record and the \a other record have all the same:
   \list
-  \o UID
+  \o identifier as returned by uid()
   \o categories
+  \o parentDependency and parentDependencyType
   \o custom fields
   \o notes
   \endlist
@@ -122,24 +139,24 @@ bool QPimRecord::operator==( const QPimRecord &other ) const
 {
     if (uidRef() != other.uidRef())
         return false;
-    if (categoriesRef() != other.categoriesRef())
+    if (categoriesRef().count() != other.categoriesRef().count())
+        return false;
+    if (QSet<QString>::fromList(categoriesRef()) != QSet<QString>::fromList(other.categoriesRef()))
         return false;
     if (customFieldsRef() != other.customFieldsRef())
         return false;
     if (notes() != other.notes())
         return false;
+    if (parentDependency() != other.parentDependency())
+        return false;
+    if (parentDependencyType() != other.parentDependencyType())
+        return false;
     return true;
 }
 
 /*!
-  Returns false if the record and the \a other record have all the same:
-  \list
-  \o UID
-  \o categories
-  \o custom fields
-  \o notes
-  \endlist
-  and otherwise returns true.
+  Returns true if this record and the \a other record are not equal according
+  to the contract specified by operator==().
 
   \sa operator==()
 */
@@ -155,7 +172,8 @@ bool QPimRecord::operator!=( const QPimRecord &other ) const
 */
 void QPimRecord::setCategories( const QList<QString> &categories )
 {
-    categoriesRef() = categories;
+    // remove duplicate categories.
+    categoriesRef() = categories.toSet().toList();
 }
 
 /*!
@@ -171,7 +189,7 @@ void QPimRecord::setCategories( const QString & identifier )
 }
 
 /*!
-  Renames category \a oldId in record to category \a newId
+  Renames category \a oldId in record to category \a newId.
 */
 void QPimRecord::reassignCategoryId( const QString & oldId, const QString & newId )
 {
@@ -210,7 +228,7 @@ bool QPimRecord::pruneDeadCategories(const QList<QString> &categories)
 /*!
   Returns the set of categories the record belongs to.
 
-  \sa setCategories()
+  \sa setCategories(), categoriesRef()
 */
 QList<QString> QPimRecord::categories() const
 {
@@ -222,7 +240,7 @@ QList<QString> QPimRecord::categories() const
 
   Returns the unique identifier for this record.
   
-  \sa setUid()
+  \sa setUid(), uidRef()
 */
 
 /*!
@@ -236,6 +254,8 @@ QList<QString> QPimRecord::categories() const
 /*!
   Returns the string stored for the custom field \a key.
   Returns a null string if the field does not exist.
+
+  \sa setCustomField(), customFields()
  */
 QString QPimRecord::customField(const QString &key) const
 {
@@ -252,6 +272,8 @@ QString QPimRecord::customField(const QString &key) const
 
     Custom fields allow storing data that doesn't fit into the existing
     fields for a given PIM record.
+
+    \sa customFields(), setCustomField()
 */
 
 /*!
@@ -270,6 +292,72 @@ void QPimRecord::removeCustomField(const QString &key)
     customFieldsRef().remove(key);
 }
 
+/*!
+  If this record is a dependant of another record (for example, this
+  record is the appointment that represents a contact's birthday),
+  this function returns the identifier for the original record.
+
+  Otherwise, returns a null identifier.
+
+  \sa parentDependencyType()
+*/
+QUniqueId QPimRecord::parentDependency() const
+{
+    return QPimDependencyList::parentRecord(uid());
+}
+
+/*!
+  If this record is a dependant of another record (for example, this
+  record is the appointment that represents a contact's birthday),
+  this function returns the type of the dependency.  The types are
+  defined by the PIM library, and include:
+
+  \list
+  \o \c "birthday" - the parent record is a QContact, and the dependent
+    record is the QAppointment representing that contact's birthday
+  \o \c "anniversary" - the parent record is a QContact, and the dependent
+    record is the QAppointment representing that contact's anniversary
+  \o \c "duedate" - the parent record is a QTask, and the dependent
+    record is the QAppointment representing that task's due date.
+  \endlist
+
+  If there is no dependency, this will return a null string.
+
+  \sa parentDependency()
+*/
+QString QPimRecord::parentDependencyType() const
+{
+    return QPimDependencyList::parentDependencyType(uid());
+}
+
+
+/*!
+  Returns the record identifiers for any records that have the
+  specified \a type of dependency on this record.
+
+  For example, if this record is a QContact, there may be QAppointment
+  objects that have a \c "birthday" or \c "anniversary" dependency
+  on this record.
+
+  \sa dependentChildren()
+*/
+QList <QUniqueId> QPimRecord::dependentChildrenOfType(const QString& type) const
+{
+    return QPimDependencyList::typedChildrenRecords(uid(), type);
+}
+
+/*!
+  Returns the identifiers and type of dependency for any records
+  that depend on this record.
+
+  \sa dependentChildrenOfType()
+*/
+QMap<QString, QUniqueId> QPimRecord::dependentChildren() const
+{
+    return QPimDependencyList::childrenRecords(uid());
+}
+
+/* VObject stuff */
 static QTextCodec* vobj_codec=0;
 static QStringList* comps=0;
 

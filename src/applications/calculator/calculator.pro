@@ -18,6 +18,7 @@ PHONE_HEADERS = interfaces/phone.h phoneinstruction.h \
                 doubleinstruction.h interfaces/simple.h
 PHONE_SOURCES = interfaces/phone.cpp phoneinstruction.cpp \
                 doubleinstruction.cpp interfaces/simple.cpp
+PHONE_FORMS=helperpanel.ui
 
 SIMPLEUI_SOURCES = interfaces/simple.cpp
 SIMPLEUI_HEADERS = interfaces/simple.h
@@ -56,28 +57,25 @@ DEFINES+=ENABLE_FRACTION ENABLE_SCIENCE ENABLE_CONVERSION
 } else {
     HEADERS+= $${PHONE_HEADERS}
     SOURCES+= $${PHONE_SOURCES}
+    FORMS+=$${PHONE_FORMS}
 }
 
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/calculator.desktop
 desktop.path=/apps/Applications
 desktop.hint=desktop
+INSTALLS+=desktop
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=calculator*
 help.hint=help
+INSTALLS+=help
 pics.files=$$QTOPIA_DEPOT_PATH/pics/calculator/*
 pics.path=/pics/calculator
 pics.hint=pics
-INSTALLS+=desktop help pics
-
-!enable_singleexec {
-    plugindir.files=$$QTOPIA_DEPOT_PATH/plugins/calculator/.directory
-    plugindir.path=/plugins/calculator/
-    INSTALLS+=plugindir
-}
+INSTALLS+=pics
 
 pkg.name=qpe-calculator
-pkg.desc=A pluggable calculator for Qtopia that includes a simple interface.
-pkg.multi=libraries/qtopiacalc plugins/calculator/simple
+pkg.desc=A simple calculator for Qtopia.
+pkg.multi=libraries/qtopiacalc
 pkg.domain=window
 
 #idep(LIBS+=-l$$TARGET)

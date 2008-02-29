@@ -1,6 +1,10 @@
+exists($$(QPEDIR)/src/build/qt_patch/force_qmake.pri):include($$(QPEDIR)/src/build/qt_patch/force_qmake.pri)
+else:error(Missing $$(QPEDIR)/src/build/qt_patch/force_qmake.pri)
 QPE_CONFIG=$$(QPE_CONFIG)
 QTOPIACORE_CONFIG=$$(QTOPIACORE_CONFIG)
 QPE_TARGET=$$(QPE_TARGET)
+ADD_CFLAGS=$$(ADD_CFLAGS)
+#win32:equals(ADD_CFLAGS,none):ADD_CFLAGS=
 
 QMAKE_BEHAVIORS=
 
@@ -15,6 +19,43 @@ contains(QMAKE_BEHAVIORS,keep_quotes) {
 }
 bar=$$foo
 count(bar,2):QMAKE_BEHAVIORS+=var_split
+
+# Deal with qmake behaviors
+contains(QMAKE_BEHAVIORS,keep_quotes) {
+    LITERAL_QUOTE="
+    LITERAL_ESCAPED_QUOTE=\"
+    LITERAL_SQUOTE='
+    LITERAL_BACKSLASH=\\
+
+} else {
+    LITERAL_QUOTE=\"
+    LITERAL_ESCAPED_QUOTE=\\\"
+    LITERAL_SQUOTE=\'
+    LITERAL_BACKSLASH=\\\
+
+}
+
+# containsre(val,regex,flags,splitchar) is like containstext() but it uses a regular expression
+defineTest(containsre) {
+    tmp="$$1"
+    contains(QMAKE_BEHAVIORS,keep_quotes) {
+        tmp~=s/^"//
+        tmp~=s/"$//
+    }
+    re=$$2
+    flags=$$3
+    splitter=$$4
+    isEmpty(splitter):splitter=,
+
+    eval(tmp~=s$$splitter\$$re$$splitter ___CONTAINSTEXT_FOUND_THE_TEXT___ $$splitter\$$flags)
+    contains(QMAKE_BEHAVIORS,var_split) {
+        tmp=$$tmp
+    } else {
+        tmp=$$split(tmp," ")
+    }
+    contains(tmp,___CONTAINSTEXT_FOUND_THE_TEXT___):return(1)
+    else:return(0)
+}
 
 !contains(QMAKE_BEHAVIORS,var_split) {
     QPE_CONFIG=$$split(QPE_CONFIG," ")
@@ -99,9 +140,28 @@ contains(QTOPIACORE_CONFIG,subdirs) {
     QMAKE_EXTRA_TARGETS+=remove_target
 }
 
-# Disable the SVG iconengine
+# Disable the SVG iconengine (we've got our own version)
 equals(TEMPLATE,subdirs):contains(SUBDIRS,svgiconengine) {
     SUBDIRS-=svgiconengine
+}
+
+# Qt plugins are compiled in to the server but unless we take some extra
+# steps they aren't actually made available to Qtopia.
+contains(QPE_CONFIG,enable_singleexec) {
+    singleexec_pri.commands=
+    equals(TEMPLATE,subdirs) {
+        for(s,SUBDIRS) {
+            !isEmpty(singleexec_pri.commands):singleexec_pri.commands+=$$LINE_SEP
+            singleexec_pri.commands+=$(MAKE) -C $$s singleexec_pri
+        }
+    }
+    plugin:containsre($$target.path,^$$[QT_INSTALL_PLUGINS]):contains(SOURCES,main.cpp) {
+        SOURCES-=main.cpp
+        SOURCES+=$$PWD/wrapmain.cpp
+        SE_LIBS=$$DESTDIR/lib$${TARGET}.a $$LIBS
+        singleexec_pri.commands=echo $${LITERAL_QUOTE}LIBS*=$${SE_LIBS}$$LITERAL_QUOTE >>$$(QPEDIR)/src/plugins/qtopiacore/singleexec.pri
+    }
+    QMAKE_EXTRA_TARGETS+=singleexec_pri
 }
 
 # Turn off hiding symbols in qtestlib
@@ -109,6 +169,11 @@ equals(TARGET,QtTest) {
     QT_CONFIG -= reduce_exports
     CONFIG    -= hide_symbols
 }
+QMAKE_CFLAGS+=$$ADD_CFLAGS
+QMAKE_CXXFLAGS+=$$ADD_CFLAGS
+
+# Disable the ActiveQt designer plugin
+contains(SUBDIRS,activeqt):SUBDIRS-=activeqt
 
 # Get Qt's version of this file
 load(default_post)

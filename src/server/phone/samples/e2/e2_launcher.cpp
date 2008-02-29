@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -41,7 +41,10 @@
 #include <QtopiaChannel>
 #include <QContent>
 #include <QContentSet>
+#include <custom.h>
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
 #include <QExportedBackground>
+#endif
 #include <QDesktopWidget>
 #include "e2_bar.h"
 #include "e2_frames.h"
@@ -79,6 +82,7 @@ E2ServerInterface::E2ServerInterface(QWidget *parent, Qt::WFlags flags)
     // XXX - remove me
     DialerControl::instance();
     MessageControl::instance();
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
     QExportedBackground::initExportedBackground(desktopRect.width(),
@@ -88,6 +92,8 @@ E2ServerInterface::E2ServerInterface(QWidget *parent, Qt::WFlags flags)
     m_background = new QExportedBackground(this);
     QObject::connect(m_background, SIGNAL(wallpaperChanged()),
                      this, SLOT(wallpaperChanged()));
+#endif
+
     wallpaperChanged();
 
     // XXX - hack to make exported backgrounds work - weird
@@ -113,8 +119,8 @@ E2ServerInterface::E2ServerInterface(QWidget *parent, Qt::WFlags flags)
     (void)new E2NewMessage();
 
     QtopiaChannel *e2 = new QtopiaChannel("QPE/E2", this);
-    QObject::connect(e2, SIGNAL(received(QString, QByteArray)),
-                     this, SLOT(e2Received(QString, QByteArray)));
+    QObject::connect(e2, SIGNAL(received(QString,QByteArray)),
+                     this, SLOT(e2Received(QString,QByteArray)));
 
     operatorItem = new QValueSpaceItem("/Telephony/Status/OperatorName",
                                        this);
@@ -161,11 +167,13 @@ void E2ServerInterface::operatorChanged()
 
 void E2ServerInterface::wallpaperChanged()
 {
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
     m_wallpaper = m_background->wallpaper();
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
     m_wallpaper = m_wallpaper.scaled(desktopRect.size());
     QExportedBackground::setExportedBackground(m_wallpaper, false);
+#endif
 }
 
 void E2ServerInterface::resizeEvent(QResizeEvent *e)
@@ -247,7 +255,6 @@ void E2ServerInterface::doAppointmentTimer(bool on)
         QObject::connect(m_model, SIGNAL(rowsInserted(QModelIndex,int,int)), this, SLOT(updateAppointment()));
         QObject::connect(m_model, SIGNAL(rowsRemoved(QModelIndex,int,int)), this, SLOT(updateAppointment()));
 
-        m_model->rebuildCache();
         updateAppointment();
 
         appointmentTimer.start(60 * 1000);
@@ -321,9 +328,8 @@ void E2ServerInterface::applicationLaunched(const QString &name)
     if(name == "profileedit")
         return;
 
-    QContentSet set(QContent::Application);
-    QContent app = set.findExecutable(name);
-    if(!app.isValid()) return;
+    QContent app(name,false);
+    if(app.isNull()) return;
 
     for(int ii = 0; ii < m_lastUsedApps.count(); ++ii)
         if(m_lastUsedApps.at(ii) == app)

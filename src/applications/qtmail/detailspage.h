@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,7 +26,7 @@
 #include <qstring.h>
 #include <qstringlist.h>
 
-#include <qtopia/mail/mailmessage.h>
+#include <qtopia/mail/qmailmessage.h>
 
 class QLineEdit;
 class QHBoxLayout;
@@ -34,6 +34,7 @@ class QComboBox;
 class QToolButton;
 class QLabel;
 class QCheckBox;
+class RecipientEdit;
 
 class DetailsPage : public QWidget
 {
@@ -61,15 +62,15 @@ public:
 
     void setType( int t );
 
-    void getDetails( MailMessage &mail );
-
-    bool eventFilter(QObject* obj, QEvent* event);
+    void getDetails( QMailMessage &mail );
 
 public slots:
     void clear();
 
 signals:
-    void recipientsChanged();
+    void changed();
+    void sendMessage();
+    void cancel();
 
 private slots:
     void editRecipients();
@@ -86,7 +87,7 @@ private:
     QLabel *m_subjectFieldLabel, *m_fromFieldLabel;
     QComboBox *m_fromField;
     QLabel *m_toFieldLabel, *m_ccFieldLabel, *m_bccFieldLabel;
-    QLineEdit *m_ccField, *m_bccField, *m_toField;
+    RecipientEdit *m_ccField, *m_bccField, *m_toField;
     QHBoxLayout *m_toBox, *m_ccBox, *m_bccBox;
     QToolButton *m_toPicker, *m_ccPicker, *m_bccPicker;
 };

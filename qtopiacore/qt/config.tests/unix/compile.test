@@ -3,13 +3,14 @@
 SUCCESS=no
 QMKSPEC=$1
 XPLATFORM=`basename "$1"`
-VERBOSE=$2
-SRCDIR=$3
-OUTDIR=$4
-TEST=$5
-EXE=`basename "$5"`
-DESCRIPTION=$6
-shift 6
+QMAKE_CONFIG=$2
+VERBOSE=$3
+SRCDIR=$4
+OUTDIR=$5
+TEST=$6
+EXE=`basename "$6"`
+DESCRIPTION=$7
+shift 7
 LFLAGS=""
 INCLUDEPATH=""
 CXXFLAGS=""
@@ -20,7 +21,7 @@ while [ "$#" -gt 0 ]; do
         LFLAGS="$LFLAGS -framework \"$2\""
         shift
         ;;
-    -F*)
+    -F*|-m*)
         LFLAGS="$LFLAGS $PARAM"
         CXXFLAGS="$CXXFLAGS $PARAM"
         ;;
@@ -32,6 +33,9 @@ while [ "$#" -gt 0 ]; do
         INCLUDEPATH="$INCLUDEPATH $INC"
         ;;
     -f*)
+        CXXFLAGS="$CXXFLAGS $PARAM"
+        ;;
+    -m*)
         CXXFLAGS="$CXXFLAGS $PARAM"
         ;;
     *)  ;;
@@ -46,7 +50,8 @@ test -d "$OUTDIR/$TEST" || mkdir -p "$OUTDIR/$TEST"
 
 cd "$OUTDIR/$TEST"
 
-"$OUTDIR/bin/qmake" -nocache -spec "$QMKSPEC" "LIBS*=$LFLAGS" "INCLUDEPATH*=$INCLUDEPATH" "QMAKE_CXXFLAGS*=$CXXFLAGS" "$SRCDIR/$TEST/$EXE.pro" -o "$OUTDIR/$TEST/Makefile" >/dev/null 2>&1
+make distclean >/dev/null 2>&1
+"$OUTDIR/bin/qmake" -nocache -spec "$QMKSPEC" "CONFIG+=$QMAKE_CONFIG" "LIBS*=$LFLAGS" "INCLUDEPATH*=$INCLUDEPATH" "QMAKE_CXXFLAGS*=$CXXFLAGS" "$SRCDIR/$TEST/$EXE.pro" -o "$OUTDIR/$TEST/Makefile"
 
 if [ "$VERBOSE" = "yes" ]; then
     make

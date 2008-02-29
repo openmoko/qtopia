@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -47,12 +62,41 @@ class QPollingFileSystemWatcherEngine : public QFileSystemWatcherEngine
 {
     Q_OBJECT
 
+    class FileInfo
+    {
+        uint ownerId;
+        uint groupId;
+        QFile::Permissions permissions;
+        QDateTime lastModified;
+
+    public:
+        FileInfo(const QFileInfo &fileInfo)
+            : ownerId(fileInfo.ownerId()),
+              groupId(fileInfo.groupId()),
+              permissions(fileInfo.permissions()),
+              lastModified(fileInfo.lastModified())
+        { }
+        FileInfo &operator=(const QFileInfo &fileInfo)
+        {
+            *this = FileInfo(fileInfo);
+            return *this;
+        }
+
+        bool operator!=(const QFileInfo &fileInfo) const
+        {
+            return (ownerId != fileInfo.ownerId()
+                    || groupId != fileInfo.groupId()
+                    || permissions != fileInfo.permissions()
+                    || lastModified != fileInfo.lastModified());
+        }
+    };
+
     mutable QMutex mutex;
-    QHash<QString, QDateTime> files, directories;
+    QHash<QString, FileInfo> files, directories;
 
 public:
     QPollingFileSystemWatcherEngine();
-    
+
     void run();
 
     QStringList addPaths(const QStringList &paths, QStringList *files, QStringList *directories);
@@ -92,11 +136,11 @@ QStringList QPollingFileSystemWatcherEngine::addPaths(const QStringList &paths,
         if (fi.isDir()) {
             if (!directories->contains(path))
                 directories->append(path);
-            this->directories.insert(path, fi.lastModified());
+            this->directories.insert(path, fi);
         } else {
             if (!files->contains(path))
                 files->append(path);
-            this->files.insert(path, fi.lastModified());
+            this->files.insert(path, fi);
         }
         it.remove();
     }
@@ -137,29 +181,29 @@ void QPollingFileSystemWatcherEngine::stop()
 void QPollingFileSystemWatcherEngine::timeout()
 {
     QMutexLocker locker(&mutex);
-    QMutableHashIterator<QString, QDateTime> fit(files);
+    QMutableHashIterator<QString, FileInfo> fit(files);
     while (fit.hasNext()) {
-        QHash<QString, QDateTime>::iterator x = fit.next();
+        QHash<QString, FileInfo>::iterator x = fit.next();
         QString path = x.key();
         QFileInfo fi(path);
         if (!fi.exists()) {
             fit.remove();
             emit fileChanged(path, true);
-        } else if (x.value() != fi.lastModified()) {
-            x.value() = fi.lastModified();
+        } else if (x.value() != fi) {
+            x.value() = fi;
             emit fileChanged(path, false);
         }
     }
-    QMutableHashIterator<QString, QDateTime> dit(directories);
+    QMutableHashIterator<QString, FileInfo> dit(directories);
     while (dit.hasNext()) {
-        QHash<QString, QDateTime>::iterator x = dit.next();
+        QHash<QString, FileInfo>::iterator x = dit.next();
         QString path = x.key();
         QFileInfo fi(path);
         if (!fi.exists()) {
             dit.remove();
             emit directoryChanged(path, true);
-        } else if (x.value() != fi.lastModified()) {
-            x.value() = fi.lastModified();
+        } else if (x.value() != fi) {
+            x.value() = fi;
             emit directoryChanged(path, false);
         }
     }
@@ -248,9 +292,9 @@ void QFileSystemWatcherPrivate::_q_directoryChanged(const QString &path, bool re
 
     The fileChanged() signal is emitted when a file has been modified
     or removed from disk. Similarly, the directoryChanged() signal
-    is emitted when a directory is modified or removed. Note that
-    QFileSystemWatcher stops monitoring files and directories once they
-    have been removed from disk.
+    is emitted when a directory or its contents is modified or removed.
+    Note that QFileSystemWatcher stops monitoring files and directories
+    once they have been removed from disk.
 
     \sa QFile, QDir
 */
@@ -310,6 +354,10 @@ QFileSystemWatcher::~QFileSystemWatcher()
 */
 void QFileSystemWatcher::addPath(const QString &path)
 {
+    if (path.isEmpty()) {
+        qWarning("QFileSystemWatcher::addPath: path is empty");
+        return;
+    }
     addPaths(QStringList(path));
 }
 
@@ -328,8 +376,10 @@ void QFileSystemWatcher::addPath(const QString &path)
 void QFileSystemWatcher::addPaths(const QStringList &paths)
 {
     Q_D(QFileSystemWatcher);
-    if (paths.isEmpty())
+    if (paths.isEmpty()) {
+        qWarning("QFileSystemWatcher::addPaths: list is empty");
         return;
+    }
     QStringList p = paths;
     if (objectName() != QLatin1String("_qt_autotest_force_engine_poller")) {
         if (d->native)
@@ -358,7 +408,7 @@ void QFileSystemWatcher::addPaths(const QStringList &paths)
     }
     if (!p.isEmpty())
         qWarning("QFileSystemWatcher: failed to add paths: %s",
-                 qPrintable(p.join(", ")));
+                 qPrintable(p.join(QLatin1String(", "))));
 }
 
 /*!
@@ -368,6 +418,10 @@ void QFileSystemWatcher::addPaths(const QStringList &paths)
 */
 void QFileSystemWatcher::removePath(const QString &path)
 {
+    if (path.isEmpty()) {
+        qWarning("QFileSystemWatcher::removePath: path is empty");
+        return;
+    }
     removePaths(QStringList(path));
 }
 
@@ -378,6 +432,10 @@ void QFileSystemWatcher::removePath(const QString &path)
 */
 void QFileSystemWatcher::removePaths(const QStringList &paths)
 {
+    if (paths.isEmpty()) {
+        qWarning("QFileSystemWatcher::removePaths: list is empty");
+        return;
+    }
     Q_D(QFileSystemWatcher);
     QStringList p = paths;
     if (d->native)
@@ -398,8 +456,11 @@ void QFileSystemWatcher::removePaths(const QStringList &paths)
 /*!
     \fn void QFileSystemWatcher::directoryChanged(const QString &path)
 
-    This signal is emitted when the directory at the specified \a path is
-    modified or removed from disk.
+    This signal is emitted when the directory at a specified \a path, is modified
+    (e.g., when a file is added, modified or deleted) or removed from disk. Note
+    that if there are several changes during a short period of time, some of the
+    changes might not emit this signal. However, the last change in the sequence
+    of changes will always generate this signal.
 
     \sa fileChanged()
 */

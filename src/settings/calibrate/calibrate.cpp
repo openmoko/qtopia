@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,17 +23,15 @@
 
 #include "calibrate.h"
 
-#if defined(Q_WS_QWS)
-
 #include <QScreen>
 #include <QPainter>
 #include <QDesktopWidget>
 #include <QApplication>
 #include <QMenu>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 #include <qtopialog.h>
+#include <QFile>
+#include <QTimer>
 
 #include <qtopiaipcenvelope.h>
 #include <qtopiaservices.h>
@@ -41,7 +39,7 @@
 Calibrate::Calibrate(QWidget* parent, Qt::WFlags f)
     : QDialog( parent, f )
 {
-    setObjectName("_fullscreen_");
+    setObjectName("calibrate");
     setWindowFlags(Qt::Dialog | Qt::WindowStaysOnTopHint);
     setWindowState(Qt::WindowFullScreen);
     activateWindow();
@@ -50,8 +48,9 @@ Calibrate::Calibrate(QWidget* parent, Qt::WFlags f)
     connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
 
     QMenu *contextMenu = QSoftMenuBar::menuFor(this);
-    connect (contextMenu,SIGNAL(triggered(QAction*)),this,SLOT(menuTriggered(QAction*)));
-    
+    connect (contextMenu,SIGNAL(triggered(QAction*)),
+             this,SLOT(menuTriggered(QAction*)));
+
     qLog(Input)<<"Starting Calibrate!";
 }
 
@@ -88,7 +87,7 @@ void Calibrate::showEvent(QShowEvent *e )
 
       qLog(Input) << "Using calibration file " << calFile;
       anygood = QFile::exists(calFile);
-      QWSServer::mouseHandler()->getCalibration(&goodcd);
+     QWSServer::mouseHandler()->getCalibration(&goodcd);
       QWSServer::mouseHandler()->clearCalibration();
     }
     QDialog::showEvent(e);
@@ -103,13 +102,15 @@ void Calibrate::store()
 {
     if ( QWSServer::mouseHandler() && anygood ) {
       qLog(Input) << "Store calibration data to file";
+        QFile calFile("/etc/pointercal");
+        if(!QFile::exists("/etc/pointercal.orig"))
+        calFile.copy("/etc/pointercal.orig");
       QWSServer::mouseHandler()->calibrate( &goodcd );
     }
 }
 
 void Calibrate::hideEvent(QHideEvent *e )
 {
-    qLog(Input) << "Calibrate::hideEvent()";
     store();
     reset();
     QDialog::hide();
@@ -119,7 +120,6 @@ void Calibrate::hideEvent(QHideEvent *e )
 
 void Calibrate::reset()
 {
-    qLog(Input) << "Calibrate::reset()";
     penPos = QPoint();
     location = QWSPointerCalibrationData::TopLeft;
     crossPos = fromDevice( cd.screenPoints[location] );
@@ -153,11 +153,14 @@ bool Calibrate::sanityCheck()
     int tol= (int)avg/50; // tolerance of 2% in calibration points
     // Decrease 50 to increase percentage tolerance
 
-    qLog(Input)<<"sanityCheck() d1="<<d1<<", d2="<<d2<<", avg="<<avg<<", tol="<<tol;
+    qLog(Input)<<"sanityCheck() d1:"<<d1<<", d2:"<<d2<<", average:"<<avg<<", tolerance:"<<tol;
     if( (d1 >= avg-tol) && (d1 <= avg+tol) ) {
-      if( (d2 >= avg-tol) && (d2 <= avg+tol) )
+        if( (d2 >= avg-tol) && (d2 <= avg+tol) ) {
+            qLog(Input)<< "SanityCheck() return true";
         return true;
+        }
     }
+    qLog(Input)<< "SanityCheck() return false";
     return false;
 }
 
@@ -233,7 +236,6 @@ void Calibrate::keyReleaseEvent( QKeyEvent *e )
 
 void Calibrate::mousePressEvent( QMouseEvent *e )
 {
-    qLog(Input) << "Calibrate::mousePressEvent( QMouseEvent *e )";
     pressed = true;
     // map to device coordinates
     QPoint devPos = qt_screen->mapToDevice( e->pos(),
@@ -247,7 +249,6 @@ void Calibrate::mousePressEvent( QMouseEvent *e )
 
 void Calibrate::mouseMoveEvent( QMouseEvent *e )
 {
-    qLog(Input) << "Calibrate::mouseMoveEvent( QMouseEvent *e )";
     if ( !pressed )
       return;
     // map to device coordinates
@@ -262,7 +263,6 @@ void Calibrate::mouseMoveEvent( QMouseEvent *e )
 
 void Calibrate::mouseReleaseEvent( QMouseEvent * )
 {
-    qLog(Input) << "Calibrate::mouseReleaseEvent( QMouseEvent *e )";
     if ( !pressed )
       return;
     pressed = false;
@@ -270,7 +270,7 @@ void Calibrate::mouseReleaseEvent( QMouseEvent * )
       return;
 
     bool doMove = true;
-
+    qLog(Input)<< "Location:"<< location << penPos.x() << penPos.y();
     cd.devPoints[location] = penPos;
     if ( location < QWSPointerCalibrationData::LastLocation ) {
       location = (QWSPointerCalibrationData::Location)((int)location + 1);
@@ -321,7 +321,6 @@ void Calibrate::timeout()
 
 void Calibrate::doGrab()
 {
-    qLog(Input) << "Calibrate::doGrab()";
 /*
     if ( !QWidget::mouseGrabber() ) {
       grabMouse();
@@ -339,4 +338,3 @@ void Calibrate::menuTriggered(QAction *action)
     hide();
 }
 
-#endif // Q_WS_QWS

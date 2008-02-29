@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -63,7 +63,7 @@
 
     \code
     QAtChat *atchat = device->atchat();
-    atchat()->registerNotificationType("+CSSI:", this, SLOT(cssi(const QString&)));
+    atchat()->registerNotificationType("+CSSI:", this, SLOT(cssi(QString)));
     \endcode
 
     When the corresponding slot is invoked for an unsolicited notification,
@@ -359,7 +359,7 @@ void QAtChat::chatPDU( const QString& command, const QByteArray& pdu,
 
     \code
     QAtChat *atchat = device->atchat();
-    atchat()->registerNotificationType("+CSSI:", this, SLOT(cssi(const QString&)));
+    atchat()->registerNotificationType("+CSSI:", this, SLOT(cssi(QString)));
     \endcode
 
     When the \c{cssi()} slot is invoked for the \c{+CSSI:} unsolicited notification,

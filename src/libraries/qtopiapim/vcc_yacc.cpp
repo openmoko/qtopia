@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -657,7 +657,7 @@ static void lexAppendc(int c)
     /* append up to zero termination */
     if (c == 0) return;
     lexBuf.strsLen++;
-    if (lexBuf.strsLen > lexBuf.maxToken) {
+    if (lexBuf.strsLen >= lexBuf.maxToken) {
         /* double the token string size */
         lexBuf.maxToken <<= 1;
         lexBuf.strs = (char*) realloc(lexBuf.strs,(size_t)lexBuf.maxToken);

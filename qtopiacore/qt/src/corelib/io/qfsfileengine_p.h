@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -45,26 +60,51 @@ class QFSFileEnginePrivate : public QAbstractFileEnginePrivate
 
 public:
 #ifdef Q_WS_WIN
-    static QString fixToQtSlashes(const QString &path);
     static QByteArray win95Name(const QString &path);
     static QString longFileName(const QString &path);
-#else
-    static inline QString fixToQtSlashes(const QString &path) { return path; }
 #endif
 
-    QString file;
+    QString filePath;
+    QByteArray nativeFilePath;
+    QIODevice::OpenMode openMode;
+
+    void nativeInitFileName();
+    bool nativeOpen(QIODevice::OpenMode openMode);
+    bool openFh(QIODevice::OpenMode flags, FILE *fh);
+    bool openFd(QIODevice::OpenMode flags, int fd);
+    bool nativeClose();
+    bool closeFdFh();
+    bool nativeFlush();
+    bool flushFh();
+    qint64 nativeSize() const;
+    qint64 sizeFdFh() const;
+    qint64 nativePos() const;
+    qint64 posFdFh() const;
+    bool nativeSeek(qint64);
+    bool seekFdFh(qint64);
+    qint64 nativeRead(char *data, qint64 maxlen);
+    qint64 readFdFh(char *data, qint64 maxlen);
+    qint64 nativeReadLine(char *data, qint64 maxlen);
+    qint64 readLineFdFh(char *data, qint64 maxlen);
+    qint64 nativeWrite(const char *data, qint64 len);
+    qint64 writeFdFh(const char *data, qint64 len);
+    int nativeHandle() const;
+    bool nativeIsSequential() const;
+    bool isSequentialFdFh() const;
 
     int fd;
-    mutable uint sequential : 1;
-    QByteArray ungetchBuffer;
+    FILE *fh;
+#ifdef Q_WS_WIN
+    HANDLE fileHandle;
+#endif
 
+    mutable uint is_sequential : 2;
     mutable uint could_stat : 1;
     mutable uint tried_stat : 1;
 #ifdef Q_OS_UNIX
     mutable uint need_lstat : 1;
     mutable uint is_link : 1;
 #endif
-    mutable uint is_readonly : 1;
 #ifdef Q_WS_WIN
     mutable DWORD fileAttrib;
 #else
@@ -72,13 +112,11 @@ public:
 #endif
     bool doStat() const;
     bool isSymlink() const;
-#if defined (Q_WS_MAC)
-    bool isMacHidden(const QString &path) const;
+
+#if defined(Q_OS_WIN32)
+    int sysOpen(const QString &, int flags);
 #endif
 
-    int sysOpen(const QString &, int flags);
-
-    FILE *fh;
     bool closeFileHandle;
     enum LastIOCommand
     {
@@ -88,6 +126,12 @@ public:
     };
     LastIOCommand  lastIOCommand;
     bool lastFlushFailed;
+#if defined(Q_OS_WIN32)
+    static void resolveLibs();
+    static bool resolveUNCLibs_NT();
+    static bool resolveUNCLibs_9x();
+    static bool uncListSharesOnServer(const QString &server, QStringList *list);
+#endif
 
 protected:
     QFSFileEnginePrivate();

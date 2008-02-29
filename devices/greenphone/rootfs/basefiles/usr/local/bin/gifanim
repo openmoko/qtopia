@@ -1,2 +1,2 @@
 #!/bin/sh
-echo q|fbv -c "$@" >/dev/null
+exec /bin/addtext i "$@"

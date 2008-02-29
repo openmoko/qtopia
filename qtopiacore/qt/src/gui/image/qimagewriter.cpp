@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -122,7 +137,7 @@ static QImageIOHandler *createWriteHandler(QIODevice *device, const QByteArray &
         if (QFile *file = qobject_cast<QFile *>(device)) {
             if (!(suffix = QFileInfo(file->fileName()).suffix().toLower().toLatin1()).isEmpty()) {
 #ifndef QT_NO_LIBRARY
-                int index = keys.indexOf(suffix);
+                int index = keys.indexOf(QString::fromLatin1(suffix));
                 if (index != -1)
                     suffixPluginIndex = index;
 #endif
@@ -136,7 +151,7 @@ static QImageIOHandler *createWriteHandler(QIODevice *device, const QByteArray &
     if (suffixPluginIndex != -1) {
         // when format is missing, check if we can find a plugin for the
         // suffix.
-        QImageIOPlugin *plugin = qobject_cast<QImageIOPlugin *>(l->instance(suffix));
+        QImageIOPlugin *plugin = qobject_cast<QImageIOPlugin *>(l->instance(QString::fromLatin1(suffix)));
         if (plugin && (plugin->capabilities(device, suffix) & QImageIOPlugin::CanWrite))
             handler = plugin->create(device, suffix);
     }
@@ -205,6 +220,7 @@ public:
 
     // image options
     int quality;
+    int compression;
     float gamma;
     QString description;
     QString text;
@@ -225,6 +241,7 @@ QImageWriterPrivate::QImageWriterPrivate(QImageWriter *qq)
     deleteDevice = false;
     handler = 0;
     quality = -1;
+    compression = 0;
     gamma = 0.0;
     imageWriterError = QImageWriter::UnknownError;
     errorString = QT_TRANSLATE_NOOP(QImageWriter, QLatin1String("Unknown error"));
@@ -396,6 +413,32 @@ int QImageWriter::quality() const
 }
 
 /*!
+    This is an image format specific function that set the compression
+    of an image. For image formats that do not support setting the
+    compression, this value is ignored.
+
+    The value range of \a compression depends on the image format. For
+    example, the "tiff" format supports two values, 0(no compression) and
+    1(LZW-compression).
+
+    \sa compression()
+*/
+void QImageWriter::setCompression(int compression)
+{
+    d->compression = compression;
+}
+
+/*!
+    Returns the compression of the image.
+
+    \sa setCompression()
+*/
+int QImageWriter::compression() const
+{
+    return d->compression;
+}
+
+/*!
     This is an image format specific function that sets the gamma
     level of the image to \a gamma. For image formats that do not
     support setting the gamma level, this value is ignored.
@@ -526,6 +569,8 @@ bool QImageWriter::write(const QImage &image)
 
     if (d->handler->supportsOption(QImageIOHandler::Quality))
         d->handler->setOption(QImageIOHandler::Quality, d->quality);
+    if (d->handler->supportsOption(QImageIOHandler::CompressionRatio))
+        d->handler->setOption(QImageIOHandler::CompressionRatio, d->compression);
     if (d->handler->supportsOption(QImageIOHandler::Gamma))
         d->handler->setOption(QImageIOHandler::Gamma, d->gamma);
     if (!d->description.isEmpty() && d->handler->supportsOption(QImageIOHandler::Description))
@@ -533,8 +578,8 @@ bool QImageWriter::write(const QImage &image)
 
     if (!d->handler->write(image))
         return false;
-    if (d->deleteDevice)
-        qobject_cast<QFile *>(d->device)->flush();
+    if (QFile *file = qobject_cast<QFile *>(d->device))
+        file->flush();
     return true;
 }
 
@@ -603,6 +648,7 @@ bool QImageWriter::supportsOption(QImageIOHandler::ImageOption option) const
     \row    \o JPEG   \o Joint Photographic Experts Group
     \row    \o PNG    \o Portable Network Graphics
     \row    \o PPM    \o Portable Pixmap
+    \row    \o TIFF   \o Tagged Image File Format
     \row    \o XBM    \o X11 Bitmap
     \row    \o XPM    \o X11 Pixmap
     \endtable

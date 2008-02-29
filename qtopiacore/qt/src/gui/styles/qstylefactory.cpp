@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -39,6 +54,9 @@
 #ifndef QT_NO_STYLE_WINDOWSXP
 #include "qwindowsxpstyle.h"
 #endif
+#ifndef QT_NO_STYLE_WINDOWSVISTA
+#include "qwindowsvistastyle.h"
+#endif
 
 #if !defined(QT_NO_STYLE_MAC) && defined(Q_WS_MAC)
 #  include <private/qt_mac_p.h>
@@ -50,7 +68,7 @@ QString qt_mac_get_style_name()
     if (c) {
         GetTheme(c);
         Str255 str;
-        long int s = 256;
+        SInt32 s = 256;
         if(!GetCollectionItem(c, kThemeNameTag, 0, &s, &str)) {
             extern QString qt_mac_from_pascal_string(const Str255); //qglobal.cpp
             ret = qt_mac_from_pascal_string(str);
@@ -107,6 +125,11 @@ QStyle *QStyleFactory::create(const QString& key)
 #ifndef QT_NO_STYLE_WINDOWSXP
     if (style == QLatin1String("windowsxp"))
         ret = new QWindowsXPStyle;
+    else
+#endif
+#ifndef QT_NO_STYLE_WINDOWSVISTA
+    if (style == QLatin1String("windowsvista"))
+        ret = new QWindowsVistaStyle;
     else
 #endif
 #ifndef QT_NO_STYLE_MOTIF
@@ -168,8 +191,14 @@ QStringList QStyleFactory::keys()
         list << QLatin1String("Windows");
 #endif
 #ifndef QT_NO_STYLE_WINDOWSXP
-    if (!list.contains(QLatin1String("WindowsXP")))
+    if (!list.contains(QLatin1String("WindowsXP")) &&
+        (QSysInfo::WindowsVersion >= QSysInfo::WV_XP && QSysInfo::WindowsVersion < QSysInfo::WV_NT_based))
         list << QLatin1String("WindowsXP");
+#endif
+#ifndef QT_NO_STYLE_WINDOWSVISTA
+    if (!list.contains(QLatin1String("WindowsVista")) &&
+        (QSysInfo::WindowsVersion >= QSysInfo::WV_VISTA && QSysInfo::WindowsVersion < QSysInfo::WV_NT_based))
+        list << QLatin1String("WindowsVista");
 #endif
 #ifndef QT_NO_STYLE_MOTIF
     if (!list.contains(QLatin1String("Motif")))
@@ -190,7 +219,7 @@ QStringList QStyleFactory::keys()
 #ifndef QT_NO_STYLE_MAC
     QString mstyle = QLatin1String("Macintosh");
 # ifdef Q_WS_MAC
-    mstyle += " (" + qt_mac_get_style_name() + ")";
+    mstyle += QLatin1String(" (") + qt_mac_get_style_name() + QLatin1String(")");
 # endif
     if (!list.contains(mstyle))
         list << mstyle;

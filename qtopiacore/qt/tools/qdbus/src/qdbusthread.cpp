@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -29,15 +44,20 @@
 
 struct DBusMutex: public QMutex
 {
-    inline DBusMutex()
-        : QMutex( QMutex::NonRecursive )
+    inline DBusMutex(QMutex::RecursionMode mode = QMutex::NonRecursive)
+        : QMutex(mode)
     { }
 
     static DBusMutex* mutex_new()
     {
         return new DBusMutex;
     }
-    
+
+    static DBusMutex* recursive_mutex_new()
+    {
+        return new DBusMutex(QMutex::Recursive);
+    }
+     
     static void mutex_free(DBusMutex *mutex)
     {
         delete mutex;
@@ -54,6 +74,17 @@ struct DBusMutex: public QMutex
         mutex->unlock();
         return true;
     }
+
+    static void recursive_mutex_lock(DBusMutex *mutex)
+    {
+        mutex_lock(mutex);
+    }
+
+    static void recursive_mutex_unlock(DBusMutex *mutex)
+    {
+        mutex_unlock(mutex);
+    }
+
 };
 
 struct DBusCondVar: public QWaitCondition
@@ -94,6 +125,13 @@ struct DBusCondVar: public QWaitCondition
 
 bool qDBusInitThreads()
 {
+
+#ifdef dbus_threads_init_default
+
+    return dbus_threads_init_default();
+
+#else
+    // ### Disable the recursive mutex functions.
     static DBusThreadFunctions fcn = {
         DBUS_THREAD_FUNCTIONS_MUTEX_NEW_MASK |
         DBUS_THREAD_FUNCTIONS_MUTEX_FREE_MASK |
@@ -105,6 +143,12 @@ bool qDBusInitThreads()
         DBUS_THREAD_FUNCTIONS_CONDVAR_WAIT_TIMEOUT_MASK |
         DBUS_THREAD_FUNCTIONS_CONDVAR_WAKE_ONE_MASK |
         DBUS_THREAD_FUNCTIONS_CONDVAR_WAKE_ALL_MASK,
+#if 0
+        DBUS_THREAD_FUNCTIONS_RECURSIVE_MUTEX_NEW_MASK |
+        DBUS_THREAD_FUNCTIONS_RECURSIVE_MUTEX_FREE_MASK |
+        DBUS_THREAD_FUNCTIONS_RECURSIVE_MUTEX_LOCK_MASK |
+        DBUS_THREAD_FUNCTIONS_RECURSIVE_MUTEX_UNLOCK_MASK,
+#endif
         DBusMutex::mutex_new,
         DBusMutex::mutex_free,
         DBusMutex::mutex_lock,
@@ -115,11 +159,19 @@ bool qDBusInitThreads()
         DBusCondVar::condvar_wait_timeout,
         DBusCondVar::condvar_wake_one,
         DBusCondVar::condvar_wake_all,
-        0, 0, 0, 0, 0, 0, 0, 0
+#if 0
+        DBusMutex::recursive_mutex_new,
+        DBusMutex::mutex_free,
+        DBusMutex::recursive_mutex_lock,
+        DBusMutex::recursive_mutex_unlock,
+#else
+        0, 0, 0, 0,
+#endif
+        0, 0, 0, 0
     };
 
     dbus_threads_init(&fcn);
-    return true;
-}
 
-        
+    return true;
+#endif
+}

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,20 +19,18 @@
 **
 ****************************************************************************/
 
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
 #include <qbluetoothpasskeyrequest.h>
 #include <qbluetoothpasskeyagent.h>
-#include <qtopialog.h>
 
 #include <QList>
 #include <qglobal.h>
 
-#include <qtdbus/qdbusargument.h>
-#include <qtdbus/qdbusconnection.h>
-#include <qtdbus/qdbusinterface.h>
-#include <qtdbus/qdbusreply.h>
-#include <qtdbus/qdbusmessage.h>
-#include <qtdbus/qdbusabstractadaptor.h>
+#include <QDBusArgument>
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusReply>
+#include <QDBusMessage>
+#include <QDBusAbstractAdaptor>
 
 #include <stdio.h>
 #include <string.h>
@@ -124,7 +122,9 @@ static bluez_error_mapping bluez_errors[] = {
 void QBluetoothPasskeyAgent_Private::handleError(const QDBusError &error)
 {
     m_error = QBluetoothPasskeyAgent::UnknownError;
-    qLog(Bluetooth) << "Decoding error:" << error;
+#ifdef QBLUETOOTH_DEBUG
+    qDebug() << "Decoding error:" << error;
+#endif
 
     int i = 0;
     while (bluez_errors[i].name) {

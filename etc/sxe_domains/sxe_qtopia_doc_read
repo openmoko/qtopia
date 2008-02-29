@@ -1,0 +1,2 @@
+#!/bin/sh
+lidsconf -A POSTBOOT -s ${BIN} -o /mnt/documents -j READ

@@ -24,6 +24,7 @@
 <li><div class="fn"/>bool <b><a href="themecontrol.html#exportBackground">exportBackground</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="themecontrol.html#refresh">refresh</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="themecontrol.html#registerThemedView">registerThemedView</a></b> ( ThemedView * <i>view</i>, const QString &amp; <i>name</i> )</li>
+<li><div class="fn"/>void <b><a href="themecontrol.html#setThemeWidgetFactory">setThemeWidgetFactory</a></b> ( QAbstractThemeWidgetFactory * <i>factory</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
@@ -58,6 +59,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The ThemeControl class manages the registered theme views.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="currentTheme"></a><a href="qstring.html">QString</a> ThemeControl::currentTheme () const</h3>
@@ -70,6 +72,8 @@
 <p>Update themed views.</p>
 <h3 class="fn"><a name="registerThemedView"></a>void ThemeControl::registerThemedView ( <a href="themedview.html">ThemedView</a> * <i>view</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Register a theme <i>view</i> with the given <i>name</i>.</p>
+<h3 class="fn"><a name="setThemeWidgetFactory"></a>void ThemeControl::setThemeWidgetFactory ( QAbstractThemeWidgetFactory * <i>factory</i> )</h3>
+<p>Sets the factory used to create theme widgets displayed in themes to <i>factory</i>.</p>
 <h3 class="fn"><a name="themeChanged"></a>void ThemeControl::themeChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted immediately after the theme changes.</p>
 <h3 class="fn"><a name="themeChanging"></a>void ThemeControl::themeChanging ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -78,6 +82,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

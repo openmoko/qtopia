@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,6 +53,7 @@ class QHeaderView;
 class Q_GUI_EXPORT QTreeView : public QAbstractItemView
 {
     Q_OBJECT
+    Q_PROPERTY(int autoExpandDelay READ autoExpandDelay WRITE setAutoExpandDelay)
     Q_PROPERTY(int indentation READ indentation WRITE setIndentation)
     Q_PROPERTY(bool rootIsDecorated READ rootIsDecorated WRITE setRootIsDecorated)
     Q_PROPERTY(bool uniformRowHeights READ uniformRowHeights WRITE setUniformRowHeights)
@@ -45,6 +61,7 @@ class Q_GUI_EXPORT QTreeView : public QAbstractItemView
     Q_PROPERTY(bool sortingEnabled READ isSortingEnabled WRITE setSortingEnabled)
     Q_PROPERTY(bool animated READ isAnimated WRITE setAnimated)
     Q_PROPERTY(bool allColumnsShowFocus READ allColumnsShowFocus WRITE setAllColumnsShowFocus)
+    Q_PROPERTY(bool wordWrap READ wordWrap WRITE setWordWrap)
 
 public:
     explicit QTreeView(QWidget *parent = 0);
@@ -56,6 +73,9 @@ public:
 
     QHeaderView *header() const;
     void setHeader(QHeaderView *header);
+
+    int autoExpandDelay() const;
+    void setAutoExpandDelay(int delay);
 
     int indentation() const;
     void setIndentation(int i);
@@ -80,6 +100,9 @@ public:
     bool isRowHidden(int row, const QModelIndex &parent) const;
     void setRowHidden(int row, const QModelIndex &parent, bool hide);
 
+    bool isFirstColumnSpanned(int row, const QModelIndex &parent) const;
+    void setFirstColumnSpanned(int row, const QModelIndex &parent, bool span);
+ 
     bool isExpanded(const QModelIndex &index) const;
     void setExpanded(const QModelIndex &index, bool expand);
 
@@ -91,6 +114,9 @@ public:
 
     void setAllColumnsShowFocus(bool enable);
     bool allColumnsShowFocus() const;
+
+    void setWordWrap(bool on);
+    bool wordWrap() const;
 
     void keyboardSearch(const QString &search);
 
@@ -120,6 +146,7 @@ public Q_SLOTS:
     void selectAll();
     void expandAll();
     void collapseAll();
+    void expandToDepth(int depth);
 
 protected Q_SLOTS:
     void columnResized(int column, int oldSize, int newSize);
@@ -158,21 +185,35 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
+#ifndef QT_NO_DRAGANDDROP
+    void dragMoveEvent(QDragMoveEvent *event);
+#endif
+    bool viewportEvent(QEvent *event);
 
     void updateGeometries();
 
     int sizeHintForColumn(int column) const;
     int indexRowSizeHint(const QModelIndex &index) const;
+    int rowHeight(const QModelIndex &index) const;
 
     void horizontalScrollbarAction(int action);
 
     bool isIndexHidden(const QModelIndex &index) const;
+    void selectionChanged(const QItemSelection &selected,
+                          const QItemSelection &deselected);
+    void currentChanged(const QModelIndex &current, const QModelIndex &previous);
 
 private:
+    friend class QAccessibleItemView;
+    int visualIndex(const QModelIndex &index) const;
+
     Q_DECLARE_PRIVATE(QTreeView)
     Q_DISABLE_COPY(QTreeView)
     Q_PRIVATE_SLOT(d_func(), void _q_endAnimatedOperation())
     Q_PRIVATE_SLOT(d_func(), void _q_currentChanged(const QModelIndex&, const QModelIndex &))
+    Q_PRIVATE_SLOT(d_func(), void _q_columnsAboutToBeRemoved(const QModelIndex &, int, int))
+    Q_PRIVATE_SLOT(d_func(), void _q_columnsRemoved(const QModelIndex &, int, int))
+    Q_PRIVATE_SLOT(d_func(), void _q_modelAboutToBeReset())
 };
 
 #endif // QT_NO_TREEVIEW

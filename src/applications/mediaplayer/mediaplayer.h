@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,7 +36,9 @@ class MediaPlayer : public QWidget
     Q_OBJECT
 public:
     MediaPlayer( QWidget* parent = 0, Qt::WFlags f = 0 );
+    ~MediaPlayer();
 
+    bool isPlayerVisible() const;
     void setPlayerVisible( bool visible );
 
     // Open playlist in player
@@ -54,13 +56,14 @@ private slots:
     void playingChanged( const QModelIndex& index );
 
 protected:
+    void keyPressEvent( QKeyEvent* e );
     void closeEvent( QCloseEvent* e );
 
 private:
     QLayout *m_layout;
     PlayerControl *m_playercontrol;
     PlayerWidget *m_playerwidget;
-    bool m_closeonback;
+    bool m_closeonback, m_acceptclose;
 
     RequestHandler *m_requesthandler;
     MediaBrowser *m_mediabrowser;

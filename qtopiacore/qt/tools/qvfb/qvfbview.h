@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -47,7 +62,7 @@ class QVFbView :
     Q_OBJECT
 public:
     enum Rotation { Rot0, Rot90, Rot180, Rot270 };
-    QVFbView( int id, int w, int h, int d, Rotation r, QWidget *parent = 0);
+    QVFbView(int id, int w, int h, int d, Rotation r, QWidget *parent = 0);
     virtual ~QVFbView();
 
     int displayId() const;
@@ -67,9 +82,9 @@ public:
     double gammaGreen() const { return ggreen; }
     double gammaBlue() const { return gblue; }
     void getGamma(int i, QRgb& rgb);
-    void skinKeyPressEvent( int code, const QString& text, bool autorep=FALSE );
-    void skinKeyReleaseEvent( int code, const QString& text, bool autorep=FALSE );
-    void skinMouseEvent( QMouseEvent *e );
+    void skinKeyPressEvent(int code, const QString& text, bool autorep=FALSE);
+    void skinKeyReleaseEvent(int code, const QString& text, bool autorep=FALSE);
+    void skinMouseEvent(QMouseEvent *e);
 
     double zoomH() const { return hzm; }
     double zoomV() const { return vzm; }
@@ -78,34 +93,34 @@ public:
     void setRate(int);
 
 public slots:
-    void setTouchscreenEmulation( bool );
-    void setLcdScreenEmulation( bool );
-    void setZoom( double, double );
-    void startAnimation( const QString& );
+    void setTouchscreenEmulation(bool);
+    void setLcdScreenEmulation(bool);
+    void setZoom(double, double);
+    void startAnimation(const QString&);
     void stopAnimation();
 
 protected slots:
     void refreshDisplay(const QRect &);
 
 protected:
-    QImage getBuffer( const QRect &r, int &leading ) const;
-    void drawScreen();
-    void sendMouseData( const QPoint &pos, int buttons, int wheel );
-    void sendKeyboardData( QString unicode, int keycode, int modifiers,
-			   bool press, bool repeat );
-    //virtual bool eventFilter( QObject *obj, QEvent *e );
-    virtual void paintEvent( QPaintEvent *pe );
-    virtual void contextMenuEvent( QContextMenuEvent *e );
-    virtual void mousePressEvent( QMouseEvent *e );
-    virtual void mouseDoubleClickEvent( QMouseEvent *e );
-    virtual void mouseReleaseEvent( QMouseEvent *e );
-    virtual void mouseMoveEvent( QMouseEvent *e );
-    virtual void wheelEvent( QWheelEvent *e );
-    virtual void keyPressEvent( QKeyEvent *e );
-    virtual void keyReleaseEvent( QKeyEvent *e );
+    QImage getBuffer(const QRect &r, int &leading) const;
+    void drawScreen(const QRect &r);
+    void sendMouseData(const QPoint &pos, int buttons, int wheel);
+    void sendKeyboardData(QString unicode, int keycode, int modifiers,
+			   bool press, bool repeat);
+    //virtual bool eventFilter(QObject *obj, QEvent *e);
+    virtual void paintEvent(QPaintEvent *pe);
+    virtual void contextMenuEvent(QContextMenuEvent *e);
+    virtual void mousePressEvent(QMouseEvent *e);
+    virtual void mouseDoubleClickEvent(QMouseEvent *e);
+    virtual void mouseReleaseEvent(QMouseEvent *e);
+    virtual void mouseMoveEvent(QMouseEvent *e);
+    virtual void wheelEvent(QWheelEvent *e);
+    virtual void keyPressEvent(QKeyEvent *e);
+    virtual void keyReleaseEvent(QKeyEvent *e);
 
 private:
-    void setDirty( const QRect& );
+    void setDirty(const QRect&);
     int viewdepth; // "faked" depth
     int rsh;
     int gsh;

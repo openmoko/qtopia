@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,6 +40,7 @@
 #define QLOCALE_H
 
 #include <QtCore/qstring.h>
+#include <QtCore/qobjectdefs.h>
 
 QT_BEGIN_HEADER
 
@@ -38,8 +54,13 @@ struct QLocalePrivate;
 
 class Q_CORE_EXPORT QLocale
 {
+    Q_GADGET
+    Q_ENUMS(Language)
+    Q_ENUMS(Country)
     friend class QString;
     friend class QByteArray;
+    friend class QIntValidator;
+    friend class QDoubleValidator;
 
 public:
     enum Language {
@@ -128,6 +149,7 @@ public:
         NauruLanguage = 83,
         Nepali = 84,
         Norwegian = 85,
+        NorwegianBokmal = Norwegian,
         Occitan = 86,
         Oriya = 87,
         Pashto = 88,
@@ -183,12 +205,33 @@ public:
         Yoruba = 138,
         Zhuang = 139,
         Zulu = 140,
-        Nynorsk = 141,
+        NorwegianNynorsk = 141,
+        Nynorsk = NorwegianNynorsk, // ### obsolete
         Bosnian = 142,
         Divehi = 143,
         Manx = 144,
         Cornish = 145,
-        LastLanguage = Cornish
+        Akan = 146,
+        Konkani = 147,
+        Ga = 148,
+        Igbo = 149,
+        Kamba = 150,
+        Syriac = 151,
+        Blin = 152,
+        Geez = 153,
+        Koro = 154,
+        Sidamo = 155,
+        Atsam = 156,
+        Tigre = 157,
+        Jju = 158,
+        Friulian = 159,
+        Venda = 160,
+        Ewe = 161,
+        Walamo = 162,
+        Hawaiian = 163,
+        Tyap = 164,
+        Chewa = 165,
+        LastLanguage = Chewa
     };
 
     enum Country {
@@ -497,13 +540,15 @@ public:
     static QLocale c() { return QLocale(C); }
     static QLocale system();
 
+    static QList<Country> countriesForLanguage(Language lang);
+
     void setNumberOptions(NumberOptions options);
     NumberOptions numberOptions() const;
 
 private:
     friend struct QLocalePrivate;
     // ### We now use this field to pack an index into locale_data and NumberOptions.
-    // change to a QLocaleData *d; uint numberOptions; in Qt 5
+    // ### Qt 5: change to a QLocaleData *d; uint numberOptions.
     void *v;
     const QLocalePrivate *d() const;
 };
@@ -521,9 +566,9 @@ inline QString QLocale::toString(uint i) const
 inline QString QLocale::toString(float i, char f, int prec) const
     { return toString(double(i), f, prec); }
 inline bool QLocale::operator==(const QLocale &other) const
-    { return d() == other.d(); }
+    { return d() == other.d() && numberOptions() == other.numberOptions(); }
 inline bool QLocale::operator!=(const QLocale &other) const
-    { return d() != other.d(); }
+    { return d() != other.d() || numberOptions() != other.numberOptions(); }
 
 #ifndef QT_NO_DATASTREAM
 Q_CORE_EXPORT QDataStream &operator<<(QDataStream &, const QLocale &);

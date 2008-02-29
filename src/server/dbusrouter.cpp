@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -121,10 +121,10 @@ void DBusLauncherService::launch(const QString &app)
     ApplicationLauncher *l = qtopiaTask<ApplicationLauncher>();
     if (l) {
         m_pending.insert(app);
-        connect(l, SIGNAL(applicationStateChanged(const QString &, ApplicationTypeLauncher::ApplicationState)),
-                this, SLOT(applicationStateChanged(const QString &, ApplicationTypeLauncher::ApplicationState)));
-        connect(l, SIGNAL(applicationTerminated(const QString &, ApplicationTypeLauncher::TerminationReason, bool)),
-                this, SLOT(terminated(const QString &,                           ApplicationTypeLauncher::TerminationReason, bool)));
+        connect(l, SIGNAL(applicationStateChanged(QString,ApplicationTypeLauncher::ApplicationState)),
+                this, SLOT(applicationStateChanged(QString,ApplicationTypeLauncher::ApplicationState)));
+        connect(l, SIGNAL(applicationTerminated(QString,ApplicationTypeLauncher::TerminationReason,bool)),
+                this, SLOT(terminated(QString,ApplicationTypeLauncher::TerminationReason,bool)));
 
         l->launch(app);
     }
@@ -142,6 +142,8 @@ void DBusLauncherService::launch(const QString &app)
 
     For ease of replacability with QCopRouter, the DBusRouter
     task installs itself as an IpcRouter.
+  
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 QTOPIA_TASK(IpcRouter, DBusRouter);
@@ -230,8 +232,8 @@ void DBusRouter::addRoute(const QString &app, RouteDestination *dest)
 
     if (!m_channels.contains(app)) {
         DBUSQtopiaApplicationChannel *channel = new DBUSQtopiaApplicationChannel(app, this);
-        connect(channel, SIGNAL(received(const QString &, const QByteArray &)),
-                this, SLOT(applicationMessage(const QString &, const QByteArray &)));
+        connect(channel, SIGNAL(received(QString,QByteArray)),
+                this, SLOT(applicationMessage(QString,QByteArray)));
         m_channels.insert(app, channel);
     }
 }

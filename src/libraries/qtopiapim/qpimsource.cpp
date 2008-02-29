@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -44,11 +44,13 @@ QTOPIAPIM_EXPORT uint qHash(const QPimSource &s)
   \ingroup pim
   \brief The QPimSource class holds identifying information for a storage source of PIM data.
 
-  The QPimSource class include a universal identifier representing the QPimContext
-  that created the source, and an identity string representing the source within
-  the context it represents.
+  The QPimSource class includes:
+  \list
+  \o a universal identifier representing the QPimContext that created the source
+  \o an identity string representing the source within that context.
+  \endlist
 
-  \sa QPimContext
+  \sa QAppointmentModel, QContactModel, QTaskModel, {Pim Library}
 */
 
 /*!
@@ -64,23 +66,23 @@ QTOPIAPIM_EXPORT uint qHash(const QPimSource &s)
 /*!
   \fn bool QPimSource::operator==(const QPimSource &other) const
 
-  Returns true if this source is equal to \a other, otherwise returns false.
+  Returns true if this source is equal to \a other, otherwise false.
 */
 
 /*!
   \fn bool QPimSource::operator!=(const QPimSource &other) const
 
-  Returns true if this source is not equal to \a other, otherwise returns false.
+  Returns true if this source is not equal to \a other, otherwise false.
 */
 
 /*!
   \fn bool QPimSource::operator<(const QPimSource &other) const
-  Returns true if this source is less than \a other, otherwise returns false.
+  Returns true if this source is less than \a other, otherwise false.
 */
 
 /*!
   \fn bool QPimSource::isNull() const
-  Returns true if the source is null, otherwise returns false.
+  Returns true if the source is null, otherwise false.
 */
 
 
@@ -95,16 +97,14 @@ QTOPIAPIM_EXPORT uint qHash(const QPimSource &s)
   device in Qtopia's native format.  The class can be used to perform
   operations that relate to a specific context of PIM data.
 
-  QPimContext should not be subclassed directly.  Instead, one of the data type
+  QPimContext should not be instantiated directly.  Instead, one of the data type
   specific contexts should be used.  These are \l QContactContext,
   \l QTaskContext and \l QAppointmentContext.
 
   Currently there is no way for applications to implement their own contexts.
   This feature is being considered for future versions of Qtopia.
 
-  Generally, it is easier to use a QPimModel to access QPimRecords.
-
-  \sa QPimRecord, QPimSource, QPimModel
+  \sa QAppointmentModel, QContactModel, QTaskModel, {Pim Library}
 */
 
 /*!
@@ -122,7 +122,7 @@ QPimContext::QPimContext(QObject *parent)
 QIcon QPimContext::icon() const { return QIcon(); }
 
 /*!
-  Returns true if any PIM records stored by the context can be edited
+  Returns true if any PIM records stored by the context can be edited.
   The default implementation returns false.
 */
 bool QPimContext::editable() const { return false; }
@@ -130,28 +130,28 @@ bool QPimContext::editable() const { return false; }
 /*!
   \fn QString QPimContext::description() const
 
-  Returns text describing the PIM context, suitable for displaying to the user.
+  Returns text describing the PIM context, in a format suitable for displaying to the user.
 */
 
 /*!
   \fn QString QPimContext::title() const
 
-  Returns the title of the PIM context, suitable for displaying to the user.
+  Returns the title of the PIM context, in a format suitable for displaying to the user.
 */
 
 /*!
   \fn QString QPimContext::title(const QPimSource &source) const
 
-  Returns the title of the PIM data \a source, suitable for displaying to the user.
-  By default returns the title for the context.
+  Returns the title of the PIM data \a source, in a format suitable for displaying to the user.
+  Returns the title for the context by default.
 */
 
 
 /*!
   \fn bool QPimContext::editable(const QUniqueId &id) const
 
-  Returns whether the PIM record identified by \a id can be edited by this context,
-  otherwise returns false.
+  Returns true if the PIM record identified by \a id can be edited by this context,
+  otherwise false.
 */
 
 /*!
@@ -175,6 +175,14 @@ bool QPimContext::editable() const { return false; }
 */
 
 /*!
+  \fn QPimSource QPimContext::defaultSource() const
+
+  Returns the default PIM data source that is controlled by this context.
+
+  If there is no default PIM data source returns a null source.
+*/
+
+/*!
   \fn QUuid QPimContext::id() const
 
   Returns a unique identifier for this context.
@@ -185,6 +193,7 @@ bool QPimContext::editable() const { return false; }
 
   Returns true if the PIM record identified by \a id exists in a PIM data source
   controlled by this context.  Otherwise returns false.
+  \sa source()
 */
 
 /*!
@@ -192,14 +201,15 @@ bool QPimContext::editable() const { return false; }
 
   Returns true if the contact identified by \a id exists in the PIM data \a source
   and the \a source is controlled by this context.  Otherwise returns false.
+  \sa source()
 */
 
 /*!
   \fn QPimSource QPimContext::source(const QUniqueId &id) const
 
-  Provided that the PIM record identified by \a id exists for this context,
-  returns the PIM data source where the record is stored.  Otherwise
-  returns a null PIM data source.
+  Returns the PIM data source identified by \a id where the record is stored, if it exists.
+  Returns a null PIM data source if there is no record for \a id.
+  \sa exists()
 */
 
 /*!
@@ -243,6 +253,8 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 
   Currently there is no way for applications to implement their own contexts.
   This feature is being considered for future versions of Qtopia.
+
+  \sa QContactModel, {Pim Library}
 */
 
 /*!
@@ -329,6 +341,8 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 
   Currently there is no way for applications to implement their own contexts.
   This feature is being considered for future versions of Qtopia.
+
+  \sa QAppointmentModel, {Pim Library}
 */
 
 /*!
@@ -368,6 +382,17 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   by \a id with \a occurrence.  If \a date is null, the date of the supplied
   \a occurrence will be used.
   Returns true if the appointment was successfully updated, otherwise returns false.
+*/
+
+/*!
+  \fn bool QAppointmentContext::restoreOccurrence(const QUniqueId &identifier, const QDate &date)
+
+  If an recurring appointment with the specified \a identifier
+  has an exception listed for the given \a date, restores the original
+  occurrence for that date.  If the exception included a replacement
+  appointment will also remove the replacement.
+
+  Returns true if the appointment was successfully updated.
 */
 
 /*!
@@ -441,6 +466,8 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 
   Currently there is no way for applications to implement their own contexts.
   This feature is being considered for future versions of Qtopia.
+
+  \sa QTaskModel, {Pim Library}
 */
 
 /*!

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,7 +32,11 @@
 #include <QMouseEvent>
 #include <QMenu>
 #include "e1_bar.h"
+#ifdef Q_WS_X11
+#include <qcopchannel_x11.h>
+#else
 #include <qcopchannel_qws.h>
+#endif
 #include <QSignalMapper>
 #include "e1_popup.h"
 #include "e1_battery.h"
@@ -75,7 +79,7 @@ private:
 E1PhoneTelephonyBar::E1PhoneTelephonyBar(QWidget *parent)
 : E1Bar(parent),
   time("/UI/DisplayTime/Time"),
-  signal("/Hardware/Accessories/QSignalSource/DefaultSignal/Values/SignalStrength"),
+  signal("/Hardware/Accessories/QSignalSource/DefaultSignal/SignalStrength"),
   batteryPixmap(":image/samples/e1_bat"),
   signalPixmap(":image/samples/e1_signal")
 {
@@ -514,7 +518,7 @@ void E1PhoneBrowserTabs::drawTab(QPainter *painter, int tab)
 // define E1PhoneBrowser
 E1PhoneBrowser::E1PhoneBrowser(QWidget *parent, Qt::WFlags wflags)
 : LazyContentStack(NoStack, parent, wflags), m_tabs(0),
-  appCategories("Applications"),
+  appCategories(QContentFilter( QContent::Folder ) & QContentFilter::category(QLatin1String("MainApplications"))),
   m_mode(QListView::IconMode)
 {
     QVBoxLayout * vlayout = new QVBoxLayout(this);
@@ -528,13 +532,13 @@ E1PhoneBrowser::E1PhoneBrowser(QWidget *parent, Qt::WFlags wflags)
 
     m_tabs = new E1PhoneBrowserTabs(this);
     layout->addWidget(m_tabs);
-    QObject::connect(m_tabs, SIGNAL(tabChanged(const QString &)),
-                     this, SLOT(tabChanged(const QString &)));
+    QObject::connect(m_tabs, SIGNAL(tabChanged(QString)),
+                     this, SLOT(tabChanged(QString)));
 
-    QList<QString> cats = appCategories.categoryIds();
-    for(int ii = 0; ii < cats.count(); ++ii) {
-        if(!appCategories.isGlobal(cats.at(ii)))
-            m_tabs->addTab(cats.at(ii), appCategories.icon(cats.at(ii)));
+    QContentSetModel model(&appCategories);
+    for(int ii = 0; ii < model.rowCount(); ++ii) {
+        QContent c = model.content( ii );
+        m_tabs->addTab(c.type().mid( 7 ), c.icon());
     }
 
     m_stack = new QStackedWidget(this);
@@ -553,8 +557,8 @@ E1PhoneBrowser::E1PhoneBrowser(QWidget *parent, Qt::WFlags wflags)
 
     // Listen to header channel
     QCopChannel* channel = new QCopChannel( "QPE/E1", this );
-    connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
-             this, SLOT(message(const QString&,const QByteArray&)) );
+    connect( channel, SIGNAL(received(QString,QByteArray)),
+             this, SLOT(message(QString,QByteArray)) );
 }
 
 QObject* E1PhoneBrowser::createView(const QString &category)

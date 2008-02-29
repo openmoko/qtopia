@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,17 +19,39 @@
 **
 ****************************************************************************/
 
-#include "qtopiaserverapplication.h"
 #include "audiovolumemanager.h"
 #include "mediakeyservice.h"
 #include "mediaservicestask.h"
 
 
+/*!
+    \class MediaServicesTask
+    \ingroup QtopiaServer::Task
+
+    \brief The MediaServicesTask class provides a task that manages services related to Media in Qtopia
+
+    This class is used to manage media related facilities in Qtopia. It watches
+    media key events and forwards them to the appropriate party.
+
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+*/
+
+
+/*!
+    \internal
+*/
+
 MediaServicesTask::MediaServicesTask()
 {
     m_avm = new AudioVolumeManager();
     m_mks = new MediaKeyService(m_avm);
+    connect(m_mks, SIGNAL(volumeChanged(bool)),
+            this, SIGNAL(volumeChanged(bool)));
 }
+
+/*!
+    \internal
+*/
 
 MediaServicesTask::~MediaServicesTask()
 {
@@ -37,5 +59,21 @@ MediaServicesTask::~MediaServicesTask()
     delete m_avm;
 }
 
+/*!
+    \internal
+    Connect key management with volume management
+*/
+
+void MediaServicesTask::setVolume(bool up)
+{
+    m_mks->setVolume(up);
+}
+
+/*!
+    \fn MediaServicesTask::volumeChanged(bool)
+    \internal
+*/
+
 QTOPIA_TASK(MediaServicesTask, MediaServicesTask);
+QTOPIA_TASK_PROVIDES(MediaServicesTask, MediaServicesTask);
 

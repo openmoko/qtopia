@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,10 +25,7 @@
 #include <qtopiaipcenvelope.h>
 #include <qsettings.h>
 #include <qtimestring.h>
-#ifdef QTOPIA_PHONE
-# include <qtopia/qsoftmenubar.h>
-#endif
-
+#include <qtopia/qsoftmenubar.h>
 #include <qlcdnumber.h>
 #include <qlabel.h>
 #include <qtimer.h>
@@ -50,11 +47,13 @@ Clock::Clock(QWidget *parent, Qt::WFlags f)
 
     analogClock->display( QTime::currentTime() );
     analogClock->setFace( QPixmap( ":image/background" ) );
+    QPalette p = analogClock->palette();
+    p.setColor(QPalette::Text, Qt::black);
+    analogClock->setPalette(p);
     clockLcd->setNumDigits( 5 );
     clockLcd->setFixedWidth( clockLcd->sizeHint().width() );
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::setLabel(clockLcd, Qt::Key_Select, QSoftMenuBar::NoLabel);
-#endif
+    QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
     date->setText( QTimeString::localYMD( QDate::currentDate(), QTimeString::Long ) );
 
     if ( qApp->desktop()->height() > 240 )
@@ -62,7 +61,6 @@ Clock::Clock(QWidget *parent, Qt::WFlags f)
 
     t = new QTimer( this );
     connect( t, SIGNAL(timeout()), SLOT(updateClock()) );
-    t->start( 1000 );
 
     connect( qApp, SIGNAL(timeChanged()), SLOT(updateClock()) );
     connect( qApp, SIGNAL(clockChanged(bool)), this, SLOT(changeClock(bool)) );
@@ -104,4 +102,16 @@ void Clock::changeClock( bool a )
     updateClock();
 }
 
+void Clock::showEvent(QShowEvent *e)
+{
+    updateClock();
+    t->start( 1000 );
+    QWidget::showEvent(e);
+}
+
+void Clock::hideEvent(QHideEvent *e)
+{
+    t->stop();
+    QWidget::hideEvent(e);
+}
 

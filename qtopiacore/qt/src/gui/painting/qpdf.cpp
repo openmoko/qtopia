@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -24,6 +39,7 @@
 #include <qdebug.h>
 #include "qpdf_p.h"
 #include <qfile.h>
+#include <private/qmath_p.h>
 #include "private/qcups_p.h"
 
 extern int qt_defaultDpi();
@@ -101,7 +117,7 @@ const char *qt_int_to_string(int val, char *buf) {
 
 #define QT_PATH_ELEMENT(elm)
 
-QByteArray QPdf::generatePath(const QPainterPath &path, const QMatrix &matrix, PathFlags flags)
+QByteArray QPdf::generatePath(const QPainterPath &path, const QTransform &matrix, PathFlags flags)
 {
     QByteArray result;
     if (!path.elementCount())
@@ -163,7 +179,7 @@ QByteArray QPdf::generatePath(const QPainterPath &path, const QMatrix &matrix, P
     return result;
 }
 
-QByteArray QPdf::generateMatrix(const QMatrix &matrix)
+QByteArray QPdf::generateMatrix(const QTransform &matrix)
 {
     QByteArray result;
     ByteStream s(&result);
@@ -431,8 +447,8 @@ QByteArray QPdf::generateLinearGradientShader(const QLinearGradient *gradient, c
     for (int i = 0; i < 4; ++i) {
         qreal off = ((page_rect[i].x() - start.x()) * offset.x() + (page_rect[i].y() - start.y()) * offset.y())/length;
         qreal ort = ((page_rect[i].x() - start.x()) * orthogonal.x() + (page_rect[i].y() - start.y()) * orthogonal.y())/length;
-        off_min = qMin(off_min, (int)floor(off));
-        off_max = qMax(off_max, (int)ceil(off));
+        off_min = qMin(off_min, qFloor(off));
+        off_max = qMax(off_max, qCeil(off));
         ort_min = qMin(ort_min, ort);
         ort_max = qMax(ort_max, ort);
     }
@@ -550,7 +566,7 @@ static void moveToHook(qfixed x, qfixed y, void *data)
     QPdf::Stroker *t = (QPdf::Stroker *)data;
     if (!t->first)
         *t->stream << "h\n";
-    if (!t->zeroWidth)
+    if (!t->cosmeticPen)
         t->matrix.map(x, y, &x, &y);
     *t->stream << x << y << "m\n";
     t->first = false;
@@ -559,7 +575,7 @@ static void moveToHook(qfixed x, qfixed y, void *data)
 static void lineToHook(qfixed x, qfixed y, void *data)
 {
     QPdf::Stroker *t = (QPdf::Stroker *)data;
-    if (!t->zeroWidth)
+    if (!t->cosmeticPen)
         t->matrix.map(x, y, &x, &y);
     *t->stream << x << y << "l\n";
 }
@@ -570,7 +586,7 @@ static void cubicToHook(qfixed c1x, qfixed c1y,
                         void *data)
 {
     QPdf::Stroker *t = (QPdf::Stroker *)data;
-    if (!t->zeroWidth) {
+    if (!t->cosmeticPen) {
         t->matrix.map(c1x, c1y, &c1x, &c1y);
         t->matrix.map(c2x, c2y, &c2x, &c2y);
         t->matrix.map(ex, ey, &ex, &ey);
@@ -588,7 +604,7 @@ QPdf::Stroker::Stroker()
     basicStroker.setMoveToHook(moveToHook);
     basicStroker.setLineToHook(lineToHook);
     basicStroker.setCubicToHook(cubicToHook);
-    zeroWidth = true;
+    cosmeticPen = true;
     basicStroker.setStrokeWidth(.1);
 }
 
@@ -599,7 +615,8 @@ void QPdf::Stroker::setPen(const QPen &pen)
         return;
     }
     qreal w = pen.widthF();
-    zeroWidth = (w < 0.0001);
+    bool zeroWidth = w < 0.0001;
+    cosmeticPen = pen.isCosmetic();
     if (zeroWidth)
         w = .1;
 
@@ -615,6 +632,7 @@ void QPdf::Stroker::setPen(const QPen &pen)
     }
     if (!dashpattern.isEmpty()) {
         dashStroker.setDashPattern(dashpattern);
+        dashStroker.setDashOffset(pen.dashOffset());
         stroker = &dashStroker;
     } else {
         stroker = &basicStroker;
@@ -626,7 +644,8 @@ void QPdf::Stroker::strokePath(const QPainterPath &path)
     if (!stroker)
         return;
     first = true;
-    stroker->strokePath(path, this, zeroWidth ? matrix : QMatrix());
+
+    stroker->strokePath(path, this, cosmeticPen ? matrix : QTransform());
     *stream << "h f\n";
 }
 
@@ -794,9 +813,34 @@ QByteArray QPdf::stripSpecialCharacters(const QByteArray &string)
 
 // -------------------------- base engine, shared code between PS and PDF -----------------------
 
-QPdfBaseEngine::QPdfBaseEngine(QPdfBaseEnginePrivate &d, PaintEngineFeatures f)
-    : QPaintEngine(d, f)
+QPdfBaseEngine::QPdfBaseEngine(QPdfBaseEnginePrivate &dd, PaintEngineFeatures f)
+    : QPaintEngine(dd, f)
 {
+    Q_D(QPdfBaseEngine);
+#if !defined(QT_NO_CUPS) && !defined(QT_NO_LIBRARY)
+    if (QCUPSSupport::isAvailable()) {
+        QCUPSSupport cups;
+        const cups_dest_t* printers = cups.availablePrinters();
+        int prnCount = cups.availablePrintersCount();
+
+        for (int i = 0; i <  prnCount; ++i) {
+            if (printers[i].is_default) {
+                d->printerName = QString::fromLocal8Bit(printers[i].name);
+                break;
+            }
+        }
+
+    } else
+#endif
+    {
+        d->printerName = QString::fromLocal8Bit(qgetenv("PRINTER"));
+        if (d->printerName.isEmpty())
+            d->printerName = QString::fromLocal8Bit(qgetenv("LPDEST"));
+        if (d->printerName.isEmpty())
+            d->printerName = QString::fromLocal8Bit(qgetenv("NPRINTER"));
+        if (d->printerName.isEmpty())
+            d->printerName = QString::fromLocal8Bit(qgetenv("NGPRINTER"));
+    }
 }
 
 void QPdfBaseEngine::drawPoints (const QPointF *points, int pointCount)
@@ -900,7 +944,7 @@ void QPdfBaseEngine::drawPath (const QPainterPath &p)
 
     if (d->simplePen) {
         // draw strokes natively in this case for better output
-        *d->currentPage << QPdf::generatePath(p, QMatrix(), d->hasBrush ? QPdf::FillAndStrokePath : QPdf::StrokePath);
+        *d->currentPage << QPdf::generatePath(p, QTransform(), d->hasBrush ? QPdf::FillAndStrokePath : QPdf::StrokePath);
     } else {
         if (d->hasBrush)
             *d->currentPage << QPdf::generatePath(p, d->stroker.matrix, QPdf::FillPath);
@@ -948,7 +992,7 @@ void QPdfBaseEngine::updateState(const QPaintEngineState &state)
     QPaintEngine::DirtyFlags flags = state.state();
 
     if (flags & DirtyTransform)
-        d->stroker.matrix = state.matrix();
+        d->stroker.matrix = state.transform();
 
     if (flags & DirtyPen) {
         d->pen = state.pen();
@@ -956,7 +1000,7 @@ void QPdfBaseEngine::updateState(const QPaintEngineState &state)
         d->stroker.setPen(d->pen);
         QBrush penBrush = d->pen.brush();
         bool oldSimple = d->simplePen;
-        d->simplePen = (d->hasPen && penBrush == Qt::SolidPattern && penBrush.isOpaque());
+        d->simplePen = (d->hasPen && (penBrush.style() == Qt::SolidPattern) && penBrush.isOpaque());
         if (oldSimple != d->simplePen)
             flags |= DirtyTransform;
     }
@@ -1017,7 +1061,7 @@ void QPdfBaseEngine::setupGraphicsState(QPaintEngine::DirtyFlags flags)
             }
             if (!d->allClipped) {
                 for (int i = 0; i < d->clips.size(); ++i) {
-                    *d->currentPage << QPdf::generatePath(d->clips.at(i), QMatrix(), QPdf::ClipPath);
+                    *d->currentPage << QPdf::generatePath(d->clips.at(i), QTransform(), QPdf::ClipPath);
                 }
             }
         }
@@ -1030,7 +1074,7 @@ void QPdfBaseEngine::setupGraphicsState(QPaintEngine::DirtyFlags flags)
     }
     if (flags & DirtyBrush)
         setBrush();
-    if (d->simplePen && flags & DirtyPen)
+    if (d->simplePen && (flags & DirtyPen))
         setPen();
 }
 
@@ -1060,6 +1104,8 @@ void QPdfBaseEngine::updateClipPath(const QPainterPath &p, Qt::ClipOperation op)
 void QPdfBaseEngine::setPen()
 {
     Q_D(QPdfBaseEngine);
+    if (d->pen.style() == Qt::NoPen)
+        return;
     QBrush b = d->pen.brush();
     Q_ASSERT(b.style() == Qt::SolidPattern && b.isOpaque());
 
@@ -1314,7 +1360,7 @@ QVariant QPdfBaseEngine::property(PrintEnginePropertyKey key) const
 }
 
 QPdfBaseEnginePrivate::QPdfBaseEnginePrivate(QPrinter::PrinterMode m)
-    : clipEnabled(false), allClipped(false), hasPen(true), hasBrush(false), simplePen(true),
+    : clipEnabled(false), allClipped(false), hasPen(true), hasBrush(false), simplePen(false),
       outDevice(0), fd(-1),
       duplex(false), collate(false), fullPage(false), embedFonts(true), copies(1),
       pageOrder(QPrinter::FirstPageFirst), orientation(QPrinter::Portrait),
@@ -1455,11 +1501,6 @@ bool QPdfBaseEnginePrivate::openPrintDevice()
                     cupsArgList << "Collate=True";
                 }
 
-                if (pageOrder == QPrinter::LastPageFirst) {
-                    cupsArgList << "-o";
-                    cupsArgList << "outputorder=reverse";
-                }
-
                 if (duplex) {
                     cupsArgList << "-o";
                     if (orientation == QPrinter::Portrait)
@@ -1468,7 +1509,7 @@ bool QPdfBaseEnginePrivate::openPrintDevice()
                         cupsArgList << "sides=two-sided-short-edge";
                 }
 
-                if (orientation == QPrinter::Landscape) {
+                if (QCUPSSupport::cupsVersion() >= 10200 && orientation == QPrinter::Landscape) {
                     cupsArgList << "-o";
                     cupsArgList << "landscape";
                 }
@@ -1496,6 +1537,7 @@ bool QPdfBaseEnginePrivate::openPrintDevice()
                 (void)execvp( "lpr", lprargs );
                 (void)execv( "/bin/lpr", lprargs);
                 (void)execv( "/usr/bin/lpr", lprargs);
+
 #endif
             } else {
                 // if no print program has been specified, be smart
@@ -1628,7 +1670,7 @@ void QPdfBaseEnginePrivate::drawTextItem(const QPointF &p, const QTextItemInt &t
 
     QVarLengthArray<glyph_t> glyphs;
     QVarLengthArray<QFixedPoint> positions;
-    QMatrix m;
+    QTransform m;
     m.translate(p.x(), p.y());
     ti.fontEngine->getGlyphPositions(ti.glyphs, ti.num_glyphs, m, ti.flags,
                                      glyphs, positions);

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -140,9 +140,9 @@ E2TaskManager::E2TaskManager(QWidget* par)
     connect(button, SIGNAL(clicked()), this, SLOT(close()));
     m_bar->addButton(button,0);
 
-    QObject::connect(&m_appMonitor, SIGNAL(applicationRunning(const QString &)),
+    QObject::connect(&m_appMonitor, SIGNAL(applicationRunning(QString)),
                      this, SLOT(doUpdate()));
-    QObject::connect(&m_appMonitor, SIGNAL(applicationClosed(const QString &)),
+    QObject::connect(&m_appMonitor, SIGNAL(applicationClosed(QString)),
                      this, SLOT(doUpdate()));
 }
 

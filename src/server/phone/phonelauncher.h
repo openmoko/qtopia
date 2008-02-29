@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,7 +27,9 @@
 #include <qdialog.h>
 #include <qlist.h>
 #include <qbasictimer.h>
+#ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
+#endif
 #include <QPointer>
 
 #include <qsoftmenubar.h>
@@ -36,7 +38,6 @@
 #include <qvaluespace.h>
 #include "launcherview.h"
 #include "qabstractmessagebox.h"
-#include "homescreen.h"
 #include "applicationmonitor.h"
 
 #ifdef QTOPIA_PHONEUI
@@ -50,6 +51,7 @@
 #include "qabstractserverinterface.h"
 
 class HomeScreen;
+class QAbstractHomeScreen;
 class ContextLabel;
 class PhoneMainMenu;
 class PhoneHeader;
@@ -80,6 +82,8 @@ public:
     QSpeedDialFeedback();
 
     void show(QWidget* center, const QString& input, const QtopiaServiceDescription&);
+signals:
+    void requestSent();
 
 protected:
     void keyReleaseEvent(QKeyEvent*);
@@ -105,6 +109,7 @@ public:
 
     CallScreen *callScreen(bool create = true) const;
     QAbstractDialerScreen *dialer(bool create = true) const;
+    QAbstractHomeScreen *homeScreen() const;
     CallHistory *callHistory() const { return mCallHistory; }
 #endif
 
@@ -116,20 +121,25 @@ public:
 public slots:
 #ifdef QTOPIA_PHONEUI
     void showDialer(const QString &, bool speedDial = false);
-    void showCallHistory(bool missed = false, const QString &hint = QString() );
+    void showCallHistory(bool missed = false, const QString &hint = QString());
     void showMissedCalls();
     void showCallScreen();
     void requestDial(const QString &n, const QUniqueId &c = QUniqueId());
-    void dialNumber(const QString &n, const QUniqueId &c = QUniqueId(), const QString &callType = QString("Voice"));
+    void dialNumber(const QString &n, 
+		    const QUniqueId &c = QUniqueId(), 
+		    const QString &callType = QString("Voice"));
     void acceptIncoming();
     void dialVoiceMail();
     void showSpeedDialer(const QString &);
 #endif
     bool activateSpeedDial( const QString& input );
     void showProfileSelector();
+    void showWarning(const QString &title, const QString &text);
 
 signals:
+#ifdef Q_WS_QWS
     void windowRaised( QWSWindow *win );
+#endif
 
 protected slots:
     void polishWindows();
@@ -141,10 +151,12 @@ protected slots:
 #ifdef QTOPIA_PHONEUI
     void missedCount(int);
     void messageCountChanged(int, bool, bool, bool);
+    void smsMemoryFull(bool);
     void messageRejected();
     void activeCallCount(int);
     void registrationChanged();
     void ussdMessage(const QString &);
+    void initializeCallHistory();
 #endif
     void callPressed();
     void hangupPressed();
@@ -152,6 +164,7 @@ protected slots:
     void showRunningTasks();
     void keyStateChanged(bool);
     void updateBackground();
+    void updateSecondaryBackground();
 #ifdef QTOPIA_CELL
     void cellBroadcast(CellBroadcastControl::Type, const QString &, const QString &);
 #endif
@@ -160,7 +173,7 @@ protected:
     void initInfo();
     void resizeEvent(QResizeEvent *);
     void timerEvent(QTimerEvent *);
-
+    void closeEvent(QCloseEvent *);
     void paintEvent(QPaintEvent *);
     void updateLauncherIconSize();
 
@@ -177,15 +190,16 @@ private slots:
     void messageBoxDone(int);
     void stateChanged();
     void resetMissedCalls();
+    void speedDialActivated();
 #endif
     void speedDial( const QString& input );
     void increaseEarVolume();
     void decreaseEarVolume();
     void rejectModalDialog();
+    void newMessagesChanged();
 
 private:
     friend class PhoneManager;
-    void showWarning(const QString &title, const QString &text);
 
     int updateTid;
 
@@ -197,7 +211,8 @@ private:
     ContextLabel *m_context;
 
     mutable QAbstractBrowserScreen *stack;
-    HomeScreen *homeScreen;
+    //HomeScreen *homeScreen;
+    mutable QAbstractHomeScreen *m_homeScreen;
     QMenu *documentsMenu;
     QPointer<QAbstractMessageBox> warningBox;
     int separatorId;
@@ -206,12 +221,11 @@ private:
     uint registrationMsgId;
 #ifdef QTOPIA_PHONEUI
     int messageCount;
-    int missedCallCount;
     int activeCalls;
+    QValueSpaceItem newMessages;
 #endif
     QStringList iconPath;
     bool slowUpdates;
-    bool showAlerts;
 #ifdef QTOPIA_PHONEUI
     QAbstractMessageBox *serviceMsgBox;
     QAbstractMessageBox *CBSMessageBox;
@@ -235,14 +249,11 @@ private:
 #endif
 #ifdef QTOPIA_VOIP
     QAbstractMessageBox *voipNoPresenceMsgBox;
-    int voipHideMsgTimer;
-    bool voipHideMsg;
 #endif
     QAbstractMessageBox *warningMsgBox;
 
 #ifdef QTOPIA_PHONEUI
     int alertedMissed;
-    int alertedMessageCount;
     bool messageBoxFull;
     bool isSysMsg;
     QString queuedCall;
@@ -253,7 +264,6 @@ private:
     bool waitingVoiceMailNumber;
 #endif
     QSpeedDialFeedback *speeddialfeedback;
-    QExportedBackground * m_exportedBackground;
     QString configuration;
 
     UIApplicationMonitor appMon;
@@ -264,6 +274,9 @@ private:
 #ifdef QTOPIA_CELL
     CellModemManager *cellModem;
     GsmKeyActions *gsmKeyActions;
+#endif
+#ifdef QTOPIA_PHONEUI
+    bool dialerSpeedDialFeedbackActive;
 #endif
 };
 

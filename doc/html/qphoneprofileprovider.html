@@ -33,8 +33,8 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QPhoneProfileProvider class provides the backend functionality for phone profiles.</p>
-<p>The QPhoneProfileProvider class provides the auto activation portion of the profile system. Profiles may be auto activated at a specific time, controlled through the <a href="qphoneprofile.html#schedule">QPhoneProfile::schedule</a>() value, or whenever the <a href="qphoneprofile.html#accessory">QPhoneProfile::accessory</a>() accessory is present.</p>
-<p>Currently the QPhoneProfileProvider class checks the <tt>/Hardware/Accessories/&lt;accessory name&gt;/Present</tt> value space key to determine whether a given accessory is available.</p>
+<p>The QPhoneProfileProvider class provides the auto activation portion of the profile system. Profiles may be auto activated at a specific time, controlled through the <a href="qphoneprofile.html#schedule">QPhoneProfile::schedule</a>() value, or whenever the <a href="qphoneprofile.html#audioProfile">QPhoneProfile::audioProfile</a>() profile is active.</p>
+<p>Currently the QPhoneProfileProvider class checks the <a href="qaudiostateconfiguration.html">QAudioStateConfiguration</a> to obtain updates about audio states.</p>
 <p>Additionally, the QPhoneProfileProvider class sets the following value space keys to values dictated by the currently active profile:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Key</th><th>Description</th></tr></thead>
@@ -43,11 +43,12 @@
 <tr valign="top" class="odd"><td><tt>/UI/Profile/PlaneMode</tt></td><td>True if plane mode is on, false if not, as returned by <a href="qphoneprofilemanager.html#planeMode">QPhoneProfileManager::planeMode</a>().</td></tr>
 <tr valign="top" class="even"><td><tt>/UI/Profile/RingVolume</tt></td><td>Set to the ring volume of the current profile, as returned by <a href="qphoneprofile.html#volume">QPhoneProfile::volume</a>().</td></tr>
 </table></p>
-<p>The QPhoneProfileProvider provides the <tt>PhoneProfiles</tt> task.</p>
+<p>The QPhoneProfileProvider provides the <tt>PhoneProfiles</tt> task. This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
+<p>See also <a href="qphoneprofile.html">QPhoneProfile</a> and <a href="qphoneprofilemanager.html">QPhoneProfileManager</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

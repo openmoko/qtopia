@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,7 +19,7 @@
 **
 ****************************************************************************/
 
-#if !defined(QDOCUMENTSELECTOR_H)
+#ifndef QDOCUMENTSELECTOR_H
 #define QDOCUMENTSELECTOR_H
 
 #include <qcontentfilter.h>
@@ -27,6 +27,7 @@
 
 class QDrmContent;
 class QDocumentSelectorPrivate;
+class QContentSortCriteria;
 
 class QTOPIA_EXPORT QDocumentSelector : public QWidget
 {
@@ -47,7 +48,8 @@ public:
         Alphabetical,
         ReverseAlphabetical,
         Chronological,
-        ReverseChronological
+        ReverseChronological,
+        SortCriteria
     };
 
     enum Selection
@@ -78,6 +80,9 @@ public:
     void setSortMode( SortMode mode );
     SortMode sortMode() const;
 
+    void setSortCriteria( const QContentSortCriteria &sort );
+    QContentSortCriteria sortCriteria() const;
+
     Options options() const;
     void setOptions( Options options );
     void enableOptions( Options option );
@@ -95,6 +100,7 @@ public:
 
 signals:
     void documentSelected( const QContent &content );
+    void currentChanged();
     void newSelected();
     void documentsChanged();
 
@@ -126,6 +132,9 @@ public:
 
     void setSortMode( QDocumentSelector::SortMode mode );
     QDocumentSelector::SortMode sortMode() const;
+
+    void setSortCriteria( const QContentSortCriteria &sort );
+    QContentSortCriteria sortCriteria() const;
 
     QDocumentSelector::Options options() const;
     void setOptions( QDocumentSelector::Options options );

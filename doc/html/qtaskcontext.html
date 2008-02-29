@@ -20,16 +20,16 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/>virtual QUniqueId <b><a href="qtaskcontext.html#addTask">addTask</a></b> ( const QTask &amp; <i>task</i>, const QPimSource &amp; <i>source</i> ) = 0</li>
+<li><div class="fn"/>virtual QUniqueId <b><a href="qtaskcontext.html#addTask">addTask</a></b> ( const QTask &amp; <i>task</i>, const QPimSource &amp; <i>source</i> )</li>
 <li><div class="fn"/>virtual QTask <b><a href="qtaskcontext.html#exportTask">exportTask</a></b> ( const QUniqueId &amp; <i>id</i>, bool &amp; <i>ok</i> ) const</li>
 <li><div class="fn"/>virtual QList&lt;QTask&gt; <b><a href="qtaskcontext.html#exportTasks">exportTasks</a></b> ( const QPimSource &amp; <i>source</i>, bool &amp; <i>ok</i> ) const</li>
 <li><div class="fn"/>virtual bool <b><a href="qtaskcontext.html#importTask">importTask</a></b> ( const QPimSource &amp; <i>source</i>, const QTask &amp; <i>task</i> )</li>
 <li><div class="fn"/>virtual bool <b><a href="qtaskcontext.html#importTasks">importTasks</a></b> ( const QPimSource &amp; <i>source</i>, const QList&lt;QTask&gt; &amp; <i>tasks</i> )</li>
-<li><div class="fn"/>virtual bool <b><a href="qtaskcontext.html#removeTask">removeTask</a></b> ( const QUniqueId &amp; <i>id</i> ) = 0</li>
-<li><div class="fn"/>virtual bool <b><a href="qtaskcontext.html#updateTask">updateTask</a></b> ( const QTask &amp; <i>task</i> ) = 0</li>
+<li><div class="fn"/>virtual bool <b><a href="qtaskcontext.html#removeTask">removeTask</a></b> ( const QUniqueId &amp; <i>id</i> )</li>
+<li><div class="fn"/>virtual bool <b><a href="qtaskcontext.html#updateTask">updateTask</a></b> ( const QTask &amp; <i>task</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>13 public functions inherited from <a href="qpimcontext.html#public-functions">QPimContext</a></li>
+<li><div class="fn"/>14 public functions inherited from <a href="qpimcontext.html#public-functions">QPimContext</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
@@ -56,11 +56,12 @@
 <p>The QTaskContext class represents a storage context of task data.</p>
 <p>The class can be used to perform operations that relate to a specific context of PIM data, such as tasks stored on a device in the native Qtopia format.</p>
 <p>Currently there is no way for applications to implement their own contexts. This feature is being considered for future versions of Qtopia.</p>
+<p>See also <a href="qtaskmodel.html">QTaskModel</a> and <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QTaskContext"></a>QTaskContext::QTaskContext ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Constructs a <a href="qtaskcontext.html">QTaskContext</a> with parent <i>parent</i>.</p>
-<h3 class="fn"><a name="addTask"></a><a href="quniqueid.html">QUniqueId</a> QTaskContext::addTask ( const <a href="qtask.html">QTask</a> &amp; <i>task</i>, const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="addTask"></a><a href="quniqueid.html">QUniqueId</a> QTaskContext::addTask ( const <a href="qtask.html">QTask</a> &amp; <i>task</i>, const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Adds the <i>task</i> to the PIM data <i>source</i> if it is controlled by this context. If the task is successfully added, returns the new unique id for this task, otherwise returns a null id.</p>
 <h3 class="fn"><a name="exportTask"></a><a href="qtask.html">QTask</a> QTaskContext::exportTask ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, bool &amp; <i>ok</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Exports a single task identified by <i>id</i>. If successful sets <i>ok</i> to true, otherwise sets <i>ok</i> to false.</p>
@@ -74,14 +75,14 @@
 <h3 class="fn"><a name="importTasks"></a>bool QTaskContext::importTasks ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, const <a href="qlist.html">QList</a>&lt;<a href="qtask.html">QTask</a>&gt; &amp; <i>tasks</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Imports <i>tasks</i> and merges them with the tasks listed in the PIM data <i>source</i>. The source must be controlled by this context. If successful returns true, otherwise returns false.</p>
 <p>There isn't necessarily going to be a one to one match to tasks in the PIM data source. Tasks may be merged or split over multiple tasks. Also tasks that match in name will be updated from the list rather than additional tasks created.</p>
-<h3 class="fn"><a name="removeTask"></a>bool QTaskContext::removeTask ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="removeTask"></a>bool QTaskContext::removeTask ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Removes the task with the identifier <i>id</i> if it exists in this context. Returns true upon success; otherwise returns false.</p>
-<h3 class="fn"><a name="updateTask"></a>bool QTaskContext::updateTask ( const <a href="qtask.html">QTask</a> &amp; <i>task</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="updateTask"></a>bool QTaskContext::updateTask ( const <a href="qtask.html">QTask</a> &amp; <i>task</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Updates the task with the same identifier as <i>task</i> if it exists in this context. Returns true upon success; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

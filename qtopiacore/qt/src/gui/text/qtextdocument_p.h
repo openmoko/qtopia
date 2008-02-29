@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -42,6 +57,7 @@
 #include "private/qobject_p.h"
 #include "private/qfragmentmap_p.h"
 #include "QtGui/qtextlayout.h"
+#include "QtGui/qtextoption.h"
 #include "private/qtextformat_p.h"
 #include "QtGui/qtextdocument.h"
 #include "QtGui/qtextobject.h"
@@ -66,6 +82,8 @@ class QTextFrame;
 
 #define QTextBeginningOfFrame QChar(0xfdd0)
 #define QTextEndOfFrame QChar(0xfdd1)
+
+enum { DefaultRootFrameMargin = 2 };
 
 class QTextFragmentData : public QFragment
 {
@@ -154,6 +172,7 @@ public:
     int insertBlock(const QChar &blockSeparator, int pos, int blockFormat, int charFormat,
                      QTextUndoCommand::Operation op = QTextUndoCommand::MoveCursor);
 
+    void move(int from, int to, int length, QTextUndoCommand::Operation = QTextUndoCommand::MoveCursor);
     void remove(int pos, int length, QTextUndoCommand::Operation = QTextUndoCommand::MoveCursor);
 
     QTextFrame *insertFrame(int start, int end, const QTextFrameFormat &format);
@@ -165,6 +184,9 @@ public:
     void setBlockFormat(const QTextBlock &from, const QTextBlock &to,
 			const QTextBlockFormat &newFormat, FormatChangeMode mode = SetFormat);
 
+    void emitUndoAvailable(bool available);
+    void emitRedoAvailable(bool available);
+
     int undoRedo(bool undo);
     inline void undo() { undoRedo(true); }
     inline void redo() { undoRedo(false); }
@@ -172,6 +194,7 @@ public:
     inline void beginEditBlock() { editBlock++; }
     void joinPreviousEditBlock();
     void endEditBlock();
+    inline bool isInEditBlock() const { return editBlock; }
     void enableUndoRedo(bool enable);
     inline bool isUndoRedoEnabled() const { return undoEnabled; }
 
@@ -229,6 +252,9 @@ private:
 
     void adjustDocumentChangesAndCursors(int from, int addedOrRemoved, QTextUndoCommand::Operation op);
 
+    bool wasUndoAvailable;
+    bool wasRedoAvailable;
+
 public:
     void documentChange(int from, int length);
 
@@ -258,7 +284,10 @@ private:
 
     void contentsChanged();
 
+    void compressPieceTable();
+
     QString text;
+    uint unreachableCharacterCount;
 
     QVector<QTextUndoCommand> undoStack;
     bool undoEnabled;
@@ -287,7 +316,8 @@ private:
     QMap<QUrl, QVariant> cachedResources;
     QString defaultStyleSheet;
 
-    bool useDesignMetrics;
+    QTextOption defaultTextOption;
+    int lastBlockCount;
 
 public:
     QCss::StyleSheet parsedDefaultStyleSheet;
@@ -303,14 +333,19 @@ class QTextHtmlExporter
 public:
     QTextHtmlExporter(const QTextDocument *_doc);
 
-    QString toHtml(const QByteArray &encoding);
+    enum ExportMode {
+        ExportEntireDocument,
+        ExportFragment
+    };
 
-    void setFragmentMarkers(bool enable) { fragmentMarkers = enable; }
+    QString toHtml(const QByteArray &encoding, ExportMode mode = ExportEntireDocument);
 
 private:
     enum StyleMode { EmitStyleTag, OmitStyleTag };
+    enum FrameType { TextFrame, TableFrame, RootFrame };
 
     void emitFrame(QTextFrame::Iterator frameIt);
+    void emitTextFrame(const QTextFrame *frame);
     void emitBlock(const QTextBlock &block);
     void emitTable(const QTextTable *table);
     void emitFragment(const QTextFragment &fragment);
@@ -322,6 +357,11 @@ private:
     void emitFloatStyle(QTextFrameFormat::Position pos, StyleMode mode = EmitStyleTag);
     void emitMargins(const QString &top, const QString &bottom, const QString &left, const QString &right);
     void emitAttribute(const char *attribute, const QString &value);
+    void emitFrameStyle(const QTextFrameFormat &format, FrameType frameType);
+    void emitBorderStyle(QTextFrameFormat::BorderStyle style);
+    void emitPageBreakPolicy(QTextFormat::PageBreakFlags policy);
+
+    void emitFontFamily(const QString &family);
 
     QString html;
     QTextCharFormat defaultCharFormat;

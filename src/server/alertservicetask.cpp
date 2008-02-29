@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,6 +36,7 @@
     of this service if the device has special hardware (e.g. a buzzer or
     vibration system) that can alert the user.
 
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
     \sa Qtopia::soundAlarm()
 */
 
@@ -58,7 +59,7 @@ AlertService::~AlertService()
 /*!
     \fn AlertService::soundAlert()
 
-    Sounds the audible system alert. This is used for applications such
+    Sounds the audible system alert (once). This is used for applications such
     as Calendar when it needs to inform the user of an event.
 
     This slot corresponds to the QCop service message \c{Alert::soundAlert()}.
@@ -81,7 +82,8 @@ AlertService::~AlertService()
   On reception of the Alert::soundAlert() service message the \c {:sound/alarm} system sound 
   is played using the QSoundControl API.
 
-  \sa AlertService
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \sa AlertService, Qtopia::soundAlarm()
  */
 
 /*! \internal */
@@ -95,6 +97,7 @@ void AlertServiceTask::soundAlert()
 {
     QSoundControl *soundcontrol =
         new QSoundControl(new QSound(":sound/alarm"));
+    soundcontrol->setPriority(QSoundControl::RingTone);
     soundcontrol->sound()->play();
 
     QObject::connect(soundcontrol, SIGNAL(done()),

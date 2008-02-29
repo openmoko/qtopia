@@ -57,6 +57,20 @@
 <h2>Detailed Description</h2>
 <p>The QtopiaNetworkInterface class describes the minimum interface that a network plug-in must provide.</p>
 <p>The <a href="qtopianetworkserver.html">QtopiaNetworkServer</a> interacts with Linux network devices via Qtopia's network plug-ins. Each plug-in implements this interface. It allows to <a href="qtopianetworkinterface.html#start">start</a>() and <a href="qtopianetworkinterface.html#stop">stop</a>() network devices, changes to the routing table via <a href="qtopianetworkinterface.html#setDefaultGateway">setDefaultGateway</a>() and provides access to the <a href="qtopianetworkinterface.html#status">status</a>() and Linux <a href="qtopianetworkinterface.html#device">device</a>() name.</p>
+<p>Note that applications should usually not handle QtopiaNetworkInterface instances directly. This interface is only of interest to device integrators intending to implement their own network plug-ins. Most functions of this interface have a public equivalent which can be used by application developer wanting to utilise Qtopia's network facilities:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>QtopiaNetworkInterface call</th><th>Public replacement call</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>cleanup()</tt></td><td>none (internally used by network server only)</td></tr>
+<tr valign="top" class="even"><td><tt>configuration()</tt></td><td>can be savely called from any Qtopia application that intends to configure the interface.</td></tr>
+<tr valign="top" class="odd"><td><tt>device()</tt></td><td>use <a href="qnetworkdevice.html#interfaceName">QNetworkDevice::interfaceName</a>()</td></tr>
+<tr valign="top" class="even"><td><tt>initialize()</tt></td><td>none (internally used by network server only)</td></tr>
+<tr valign="top" class="odd"><td><tt>setDefaultGateway()</tt></td><td>use <a href="qtopianetwork.html#setDefaultGateway">QtopiaNetwork::setDefaultGateway</a>() and <a href="qtopianetwork.html#unsetDefaultGateway">QtopiaNetwork::unsetDefaultGateway</a>()</td></tr>
+<tr valign="top" class="even"><td><tt>setProperties()</tt></td><td><tt>no</tt> equivalent available (use <a href="qtopianetworkinterface.html#configuration">configuration</a>())</td></tr>
+<tr valign="top" class="odd"><td><tt>start()</tt></td><td>use <a href="qtopianetwork.html#startInterface">QtopiaNetwork::startInterface</a>()</td></tr>
+<tr valign="top" class="even"><td><tt>status()</tt></td><td>use <a href="qnetworkdevice.html#state">QNetworkDevice::state</a>() and <a href="qnetworkdevice.html#stateChanged">QNetworkDevice::stateChanged</a>()</td></tr>
+<tr valign="top" class="odd"><td><tt>stop()</tt></td><td>use <a href="qtopianetwork.html#stopInterface">QtopiaNetwork::stopInterface</a>()</td></tr>
+<tr valign="top" class="even"><td><tt>type()</tt></td><td>use <a href="qnetworkstate.html#deviceType">QNetworkState::deviceType</a>()</td></tr>
+</table></p>
 <p>Each instance publishes various internal states to the network value space. The network value space can be found under <tt>/Network/Interfaces/&lt;config hash&gt;</tt>. The hash value uniquely identifies each interface and is generated via:</p>
 <pre>    QtopiaNetworkInterface* iface = ...
     QString hash = qHash( iface-&gt;configuration()-&gt;configFile() );</pre>
@@ -100,13 +114,13 @@
 <h3 class="fn"><a name="cleanup"></a>void QtopiaNetworkInterface::cleanup ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Removes all system and config files (e.g&#x2e;, the dialup plug-in deletes the peer and connect/disconnect chat file) created for this interface. However this function must not remove the network configuration file associated with this plug-in instance as this will be done by the network server.</p>
 <h3 class="fn"><a name="configuration"></a><a href="qtopianetworkconfiguration.html">QtopiaNetworkConfiguration</a> * QtopiaNetworkInterface::configuration ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Returns a pointer to allow access to the configuration for this interface.</p>
+<p>Returns a pointer to allow access to the configuration for this interface. This function must not change the internal state of the current network interface instance. Its sole purpose is to allow applications to change the underlying configuration.</p>
 <h3 class="fn"><a name="device"></a><a href="qstring.html">QString</a> QtopiaNetworkInterface::device () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the name of the network device that is used for connections. (e.g&#x2e;, eth0, wlan1, ppp0). This name is only valid if the interface status is not <a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Unknown</a> or <a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Unavailable</a></p>
 <h3 class="fn"><a name="initialize"></a>void QtopiaNetworkInterface::initialize ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Initializes the network interface configuration. The implementation must change the interface state to a value that is not equal to <a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Unknown</a>.</p>
 <h3 class="fn"><a name="setDefaultGateway"></a>bool QtopiaNetworkInterface::setDefaultGateway ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>This interface becomes the default gateway for the device. Returns true upon success; otherwise returns false.</p>
+<p>This interface becomes the default gateway for the device. This function returns false if the default gateway could not be set.</p>
 <h3 class="fn"><a name="setProperties"></a>void QtopiaNetworkInterface::setProperties ( const <a href="qtopianetworkproperties.html">QtopiaNetworkProperties</a> &amp; <i>properties</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>The content of <i>properties</i> is written to the network configuration for this interface.</p>
 <h3 class="fn"><a name="start"></a>bool QtopiaNetworkInterface::start ( const <a href="qvariant.html">QVariant</a> <i>options</i> = QVariant() )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
@@ -124,6 +138,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

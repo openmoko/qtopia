@@ -5,11 +5,11 @@
 </phrase>
 <phrase>
     <source>access key</source>
-    <target>valintanäppäin</target>
+    <target>valintanÃ¤ppÃ¤in</target>
 </phrase>
 <phrase>
     <source>accessibility</source>
-    <target>helppokäyttötoiminto</target>
+    <target>helppokÃ¤yttÃ¶toiminto</target>
 </phrase>
 <phrase>
     <source>action handle</source>
@@ -21,7 +21,7 @@
 </phrase>
 <phrase>
     <source>active end</source>
-    <target>valinnan aktiivinen päätöskohta</target>
+    <target>valinnan aktiivinen pÃ¤Ã¤tÃ¶skohta</target>
 </phrase>
 <phrase>
     <source>active object</source>
@@ -33,11 +33,11 @@
 </phrase>
 <phrase>
     <source>adornment</source>
-    <target>graafinen lisäke</target>
+    <target>graafinen lisÃ¤ke</target>
 </phrase>
 <phrase>
     <source>Always on Top</source>
-    <target>Aina päällimmäisenä</target>
+    <target>Aina pÃ¤Ã¤llimmÃ¤isenÃ¤</target>
 </phrase>
 <phrase>
     <source>anchor point</source>
@@ -45,7 +45,7 @@
 </phrase>
 <phrase>
     <source>Apply</source>
-    <target>Käytä</target>
+    <target>KÃ¤ytÃ¤</target>
 </phrase>
 <phrase>
     <source>auto-exit</source>
@@ -105,7 +105,7 @@
 </phrase>
 <phrase>
     <source>Clipboard</source>
-    <target>Leikepöytä</target>
+    <target>LeikepÃ¶ytÃ¤</target>
 </phrase>
 <phrase>
     <source>Close</source>
@@ -117,13 +117,13 @@
 </phrase>
 <phrase>
     <source>collapse</source>
-    <target>tiivistää</target>
-    <definition>outline/jäsennys</definition>
+    <target>tiivistÃ¤Ã¤</target>
+    <definition>outline/jÃ¤sennys</definition>
 </phrase>
 <phrase>
     <source>collapse</source>
     <target>kutistaa</target>
-    <definition>outline/jäsennys</definition>
+    <definition>outline/jÃ¤sennys</definition>
 </phrase>
 <phrase>
     <source>column heading</source>
@@ -137,7 +137,7 @@
 </phrase>
 <phrase>
     <source>combo box</source>
-    <target>yhdistelmäruutu</target>
+    <target>yhdistelmÃ¤ruutu</target>
 </phrase>
 <phrase>
     <source>command button</source>
@@ -149,7 +149,7 @@
 </phrase>
 <phrase>
     <source>container</source>
-    <target>säilö</target>
+    <target>sÃ¤ilÃ¶</target>
 </phrase>
 <phrase>
     <source>context-sensitive Help</source>
@@ -169,7 +169,7 @@
 </phrase>
 <phrase>
     <source>Copy here</source>
-    <target>Kopioi tähän</target>
+    <target>Kopioi tÃ¤hÃ¤n</target>
 </phrase>
 <phrase>
     <source>Create Shortcut</source>
@@ -177,7 +177,7 @@
 </phrase>
 <phrase>
     <source>Create Shortcut Here</source>
-    <target>Luo pikakuvake tähän</target>
+    <target>Luo pikakuvake tÃ¤hÃ¤n</target>
 </phrase>
 <phrase>
     <source>Cut</source>
@@ -197,7 +197,7 @@
 </phrase>
 <phrase>
     <source>desktop</source>
-    <target>työpöytä</target>
+    <target>tyÃ¶pÃ¶ytÃ¤</target>
 </phrase>
 <phrase>
     <source>destination</source>
@@ -233,15 +233,15 @@
 </phrase>
 <phrase>
     <source>drag</source>
-    <target>vetää</target>
+    <target>vetÃ¤Ã¤</target>
 </phrase>
 <phrase>
     <source>drag-and-drop</source>
-    <target>vetää ja pudottaa</target>
+    <target>vetÃ¤Ã¤ ja pudottaa</target>
 </phrase>
 <phrase>
     <source>drop-down combo box</source>
-    <target>avattava yhdistelmäruutu</target>
+    <target>avattava yhdistelmÃ¤ruutu</target>
 </phrase>
 <phrase>
     <source>drop-down list box</source>
@@ -261,7 +261,7 @@
 </phrase>
 <phrase>
     <source>ellipsis</source>
-    <target>kolme pistettä</target>
+    <target>kolme pistettÃ¤</target>
 </phrase>
 <phrase>
     <source>embedded object</source>
@@ -274,7 +274,7 @@
 <phrase>
     <source>expand</source>
     <target>laajentaa</target>
-    <definition>an outline/jäsennys</definition>
+    <definition>an outline/jÃ¤sennys</definition>
 </phrase>
 <phrase>
     <source>Explore</source>
@@ -306,7 +306,7 @@
 </phrase>
 <phrase>
     <source>Find What</source>
-    <target>Etsittävä</target>
+    <target>EtsittÃ¤vÃ¤</target>
 </phrase>
 <phrase>
     <source>folder</source>
@@ -326,11 +326,11 @@
 </phrase>
 <phrase>
     <source>function key</source>
-    <target>funktionäppäin</target>
+    <target>funktionÃ¤ppÃ¤in</target>
 </phrase>
 <phrase>
     <source>group box</source>
-    <target>ryhmän kehys</target>
+    <target>ryhmÃ¤n kehys</target>
 </phrase>
 <phrase>
     <source>handle</source>
@@ -354,7 +354,7 @@
 </phrase>
 <phrase>
     <source>hold</source>
-    <target>pitää painettuna</target>
+    <target>pitÃ¤Ã¤ painettuna</target>
 </phrase>
 <phrase>
     <source>hot spot</source>
@@ -378,19 +378,19 @@
 </phrase>
 <phrase>
     <source>input focus</source>
-    <target>syöttöalue</target>
+    <target>syÃ¶ttÃ¶alue</target>
 </phrase>
 <phrase>
     <source>Insert</source>
-    <target>Lisää-valikko</target>
+    <target>LisÃ¤Ã¤-valikko</target>
 </phrase>
 <phrase>
     <source>Insert Object</source>
-    <target>Lisää objekti</target>
+    <target>LisÃ¤Ã¤ objekti</target>
 </phrase>
 <phrase>
     <source>insertion point</source>
-    <target>lisäyskohta</target>
+    <target>lisÃ¤yskohta</target>
 </phrase>
 <phrase>
     <source>italic</source>
@@ -415,12 +415,12 @@
 </phrase>
 <phrase>
     <source>link</source>
-    <target>linkittää</target>
+    <target>linkittÃ¤Ã¤</target>
     <definition>verb</definition>
 </phrase>
 <phrase>
     <source>Link Here</source>
-    <target>Linkitä tähän</target>
+    <target>LinkitÃ¤ tÃ¤hÃ¤n</target>
 </phrase>
 <phrase>
     <source>list box</source>
@@ -428,7 +428,7 @@
 </phrase>
 <phrase>
     <source>list view</source>
-    <target>luettelonäyttö</target>
+    <target>luettelonÃ¤yttÃ¶</target>
     <definition>control/ohjausobjekti</definition>
 </phrase>
 <phrase>
@@ -473,7 +473,7 @@
 </phrase>
 <phrase>
     <source>Minimize</source>
-    <target>Pienennä</target>
+    <target>PienennÃ¤</target>
 </phrase>
 <phrase>
     <source>minimize button</source>
@@ -497,7 +497,7 @@
 </phrase>
 <phrase>
     <source>modifier key</source>
-    <target>yhdistelmänäppäin</target>
+    <target>yhdistelmÃ¤nÃ¤ppÃ¤in</target>
 </phrase>
 <phrase>
     <source>mouse</source>
@@ -505,15 +505,15 @@
 </phrase>
 <phrase>
     <source>Move</source>
-    <target>Siirrä</target>
+    <target>SiirrÃ¤</target>
 </phrase>
 <phrase>
     <source>Move Here</source>
-    <target>Siirrä tähän</target>
+    <target>SiirrÃ¤ tÃ¤hÃ¤n</target>
 </phrase>
 <phrase>
     <source>Multiple Document Interface</source>
-    <target>MDI-liittymä</target>
+    <target>MDI-liittymÃ¤</target>
 </phrase>
 <phrase>
     <source>multiple selection list box</source>
@@ -526,7 +526,7 @@
 </phrase>
 <phrase>
     <source>Network Neighborhood</source>
-    <target>Verkkoympäristö</target>
+    <target>VerkkoympÃ¤ristÃ¶</target>
     <definition>icon/kuvake</definition>
 </phrase>
 <phrase>
@@ -551,7 +551,7 @@
 </phrase>
 <phrase>
     <source>OLE drag and drop</source>
-    <target>vedä ja pudota-OLE-toiminto</target>
+    <target>vedÃ¤ ja pudota-OLE-toiminto</target>
 </phrase>
 <phrase>
     <source>OLE embedded object</source>
@@ -563,7 +563,7 @@
 </phrase>
 <phrase>
     <source>OLE nondefault drag and drop</source>
-    <target>käyttäjän määrittämä vedä ja pudota-OLE-toiminto</target>
+    <target>kÃ¤yttÃ¤jÃ¤n mÃ¤Ã¤rittÃ¤mÃ¤ vedÃ¤ ja pudota-OLE-toiminto</target>
 </phrase>
 <phrase>
     <source>Open</source>
@@ -599,7 +599,7 @@
 </phrase>
 <phrase>
     <source>parent window</source>
-    <target>ylemmän tason ikkuna</target>
+    <target>ylemmÃ¤n tason ikkuna</target>
 </phrase>
 <phrase>
     <source>password</source>
@@ -607,19 +607,19 @@
 </phrase>
 <phrase>
     <source>Paste</source>
-    <target>Liitä</target>
+    <target>LiitÃ¤</target>
 </phrase>
 <phrase>
     <source>Paste Link</source>
-    <target>Liitä linkki</target>
+    <target>LiitÃ¤ linkki</target>
 </phrase>
 <phrase>
     <source>Paste Shortcut</source>
-    <target>Liitä pikakuvake</target>
+    <target>LiitÃ¤ pikakuvake</target>
 </phrase>
 <phrase>
     <source>Paste Special</source>
-    <target>Liitä määräten</target>
+    <target>LiitÃ¤ mÃ¤Ã¤rÃ¤ten</target>
 </phrase>
 <phrase>
     <source>path</source>
@@ -664,16 +664,16 @@
 <phrase>
     <source>press</source>
     <target>painaa</target>
-    <definition>and hold a mouse button/ja pitää painettuna hiiripainiketta</definition>
+    <definition>and hold a mouse button/ja pitÃ¤Ã¤ painettuna hiiripainiketta</definition>
 </phrase>
 <phrase>
     <source>press</source>
     <target>painaa</target>
-    <definition>a key/näppäintä</definition>
+    <definition>a key/nÃ¤ppÃ¤intÃ¤</definition>
 </phrase>
 <phrase>
     <source>primary container</source>
-    <target>ensisijainen säilö</target>
+    <target>ensisijainen sÃ¤ilÃ¶</target>
 </phrase>
 <phrase>
     <source>primary window</source>
@@ -706,7 +706,7 @@
 </phrase>
 <phrase>
     <source>property page</source>
-    <target>ominaisuusryhmä</target>
+    <target>ominaisuusryhmÃ¤</target>
 </phrase>
 <phrase>
     <source>property sheet</source>
@@ -718,7 +718,7 @@
 </phrase>
 <phrase>
     <source>Quick View</source>
-    <target>Pikanäyttö</target>
+    <target>PikanÃ¤yttÃ¶</target>
 </phrase>
 <phrase>
     <source>read-only</source>
@@ -763,7 +763,7 @@
 </phrase>
 <phrase>
     <source>Retry</source>
-    <target>Yritä uudelleen</target>
+    <target>YritÃ¤ uudelleen</target>
 </phrase>
 <phrase>
     <source>rich-text box</source>
@@ -779,11 +779,11 @@
 </phrase>
 <phrase>
     <source>Save as</source>
-    <target>Tallenna nimellä</target>
+    <target>Tallenna nimellÃ¤</target>
 </phrase>
 <phrase>
     <source>scroll</source>
-    <target>vierittää</target>
+    <target>vierittÃ¤Ã¤</target>
 </phrase>
 <phrase>
     <source>scroll arrow</source>
@@ -819,7 +819,7 @@
 </phrase>
 <phrase>
     <source>Send To</source>
-    <target>Lähetä tiedosto</target>
+    <target>LÃ¤hetÃ¤ tiedosto</target>
 </phrase>
 <phrase>
     <source>separator</source>
@@ -847,15 +847,15 @@
 </phrase>
 <phrase>
     <source>shortcut key</source>
-    <target>pikanäppäin</target>
+    <target>pikanÃ¤ppÃ¤in</target>
 </phrase>
 <phrase>
     <source>shortcut key control</source>
-    <target>pikanäppäin-ohjausobjekti</target>
+    <target>pikanÃ¤ppÃ¤in-ohjausobjekti</target>
 </phrase>
 <phrase>
     <source>Show</source>
-    <target>Näytä</target>
+    <target>NÃ¤ytÃ¤</target>
 </phrase>
 <phrase>
     <source>Shutdown</source>
@@ -875,7 +875,7 @@
 </phrase>
 <phrase>
     <source>slider</source>
-    <target>liukusäädin</target>
+    <target>liukusÃ¤Ã¤din</target>
 </phrase>
 <phrase>
     <source>spin box</source>
@@ -895,11 +895,11 @@
 </phrase>
 <phrase>
     <source>Start button</source>
-    <target>Käynnistä-painike</target>
+    <target>KÃ¤ynnistÃ¤-painike</target>
 </phrase>
 <phrase>
     <source>StartUp folder</source>
-    <target>Käynnistys-kansio</target>
+    <target>KÃ¤ynnistys-kansio</target>
 </phrase>
 <phrase>
     <source>status bar</source>
@@ -907,20 +907,20 @@
 </phrase>
 <phrase>
     <source>Stop</source>
-    <target>Pysäytä</target>
+    <target>PysÃ¤ytÃ¤</target>
 </phrase>
 <phrase>
     <source>tab control</source>
-    <target>välilehti</target>
+    <target>vÃ¤lilehti</target>
     <definition>ohjausobjekti</definition>
 </phrase>
 <phrase>
     <source>task bar</source>
-    <target>tehtäväpalkki</target>
+    <target>tehtÃ¤vÃ¤palkki</target>
 </phrase>
 <phrase>
     <source>task-oriented Help</source>
-    <target>tehtäväohje</target>
+    <target>tehtÃ¤vÃ¤ohje</target>
 </phrase>
 <phrase>
     <source>template</source>
@@ -940,19 +940,19 @@
 </phrase>
 <phrase>
     <source>toggle key</source>
-    <target>tilanvaihtonäppäin</target>
+    <target>tilanvaihtonÃ¤ppÃ¤in</target>
 </phrase>
 <phrase>
     <source>toolbar</source>
-    <target>työkalurivi</target>
+    <target>tyÃ¶kalurivi</target>
 </phrase>
 <phrase>
     <source>tooltip</source>
-    <target>työkaluvihje</target>
+    <target>tyÃ¶kaluvihje</target>
 </phrase>
 <phrase>
     <source>tree view control</source>
-    <target>puunäyttö</target>
+    <target>puunÃ¤yttÃ¶</target>
     <definition>ohjausobjekti</definition>
 </phrase>
 <phrase>
@@ -972,7 +972,7 @@
 </phrase>
 <phrase>
     <source>unavailable</source>
-    <target>ei käytettävissä</target>
+    <target>ei kÃ¤ytettÃ¤vissÃ¤</target>
 </phrase>
 <phrase>
     <source>Undo</source>
@@ -984,7 +984,7 @@
 </phrase>
 <phrase>
     <source>View</source>
-    <target>Näytä-valikko</target>
+    <target>NÃ¤ytÃ¤-valikko</target>
 </phrase>
 <phrase>
     <source>visual editing</source>
@@ -996,7 +996,7 @@
 </phrase>
 <phrase>
     <source>What&apos;s This?</source>
-    <target>Lisätietoja</target>
+    <target>LisÃ¤tietoja</target>
 </phrase>
 <phrase>
     <source>Window</source>
@@ -1016,18 +1016,4 @@
 </phrase>
 <phrase>
     <source>workbook</source>
-    <target>työkirja</target>
-</phrase>
-<phrase>
-    <source>workgroup</source>
-    <target>työryhmä</target>
-</phrase>
-<phrase>
-    <source>workspace</source>
-    <target>työtila</target>
-</phrase>
-<phrase>
-    <source>Yes</source>
-    <target>Kyllä</target>
-</phrase>
-</QPH>
+    <target>tyÃ¶

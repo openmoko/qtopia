@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,6 +28,7 @@
 #include <QtopiaApplication>
 #include <QMimeType>
 #include <qtopialog.h>
+#include <QtopiaItemDelegate>
 
 // Qt includes
 #include <QVBoxLayout>
@@ -79,7 +80,10 @@ QDLSourceSelector::QDLSourceSelector( const QMimeType& responseDataType,
 
     // Setup the window layout
     QVBoxLayout *l = new QVBoxLayout( this );
+    l->setMargin(0);
     d->serviceList = new QListWidget( this );
+    d->serviceList->setFrameStyle(QFrame::NoFrame);
+    d->serviceList->setItemDelegate(new QtopiaItemDelegate(d->serviceList));
     l->addWidget( d->serviceList );
     d->serviceList->setFocus();
 
@@ -101,26 +105,25 @@ QDLSourceSelector::QDLSourceSelector( const QMimeType& responseDataType,
     }
 
     d->serviceList->sortItems();
+    d->serviceList->setCurrentRow(0);
 
     // Connect the signals
     connect( d->serviceList,
-             SIGNAL( itemActivated( QListWidgetItem* ) ),
+             SIGNAL(itemActivated(QListWidgetItem*)),
              this,
-             SLOT( accept() ) );
+             SLOT(accept()) );
 
     connect( d->serviceList,
-             SIGNAL( itemPressed( QListWidgetItem*) ),
+             SIGNAL(itemPressed(QListWidgetItem*)),
              this,
-             SLOT( accept()) );
+             SLOT(accept()) );
 
     if ( len && !d->serviceList->selectedItems().count() == 0 )
         d->serviceList->setItemSelected( d->serviceList->item( 0 ), true );
 
-#ifdef QTOPIA_PHONE
     QDialog::setModal( true );
     QDialog::showMaximized();
     QtopiaApplication::setMenuLike( this, true );
-#endif
 }
 
 QDLSourceSelector::~QDLSourceSelector()

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -76,7 +91,7 @@ struct QWSCommand : QWSProtocolItem
     enum Type {
         Unknown = 0,
         Create,
-        Destroy,
+        Shutdown,
         Region,
         RegionMove,
         RegionDestroy,
@@ -103,7 +118,8 @@ struct QWSCommand : QWSProtocolItem
         IMMouse,
         IMUpdate,
         IMResponse,
-        Embed
+        Embed,
+        Font
     };
     static QWSCommand *factory(int type);
 };
@@ -349,7 +365,7 @@ struct QWSChangeAltitudeCommand : public QWSCommand
     QWSChangeAltitudeCommand() :
         QWSCommand(QWSCommand::ChangeAltitude, sizeof(simpleData), reinterpret_cast<char*>(&simpleData)) {}
 
-    typedef enum Altitude {
+    enum Altitude {
         Lower = -1,
         Raise = 0,
         StaysOnTop = 1
@@ -414,6 +430,7 @@ struct QWSRepaintRegionCommand : public QWSCommand
 
     struct SimpleData {
         int windowid;
+        int windowFlags;
         bool opaque;
         int nrectangles;
     } simpleData;
@@ -480,6 +497,11 @@ struct QWSDefineCursorCommand : public QWSCommand
     void setData(const char *d, int len, bool allocateMem = true) {
         QWSCommand::setData(d, len, allocateMem);
         data = reinterpret_cast<unsigned char *>(rawDataPtr);
+        if (simpleData.height * ((simpleData.width+7) / 8) > len) {
+            qWarning("define cursor command - width %d height %d- buffer size %d - buffer overrun",
+                     simpleData.width, simpleData.height, len );
+            simpleData.width = simpleData.height = 0;
+        }
     }
 
     struct SimpleData {
@@ -772,5 +794,34 @@ struct QWSEmbedCommand : public QWSCommand
     QRegion region;
 };
 #endif // QT_NO_QWSEMBEDWIDGET
+
+struct QWSFontCommand : public QWSCommand
+{
+    enum CommandType {
+        StartedUsingFont,
+        StoppedUsingFont
+    };
+
+    QWSFontCommand() :
+        QWSCommand(QWSCommand::Font,
+                    sizeof(simpleData), reinterpret_cast<char *>(&simpleData)) {}
+
+    void setData(const char *d, int len, bool allocateMem) {
+        QWSCommand::setData(d, len, allocateMem);
+
+        fontName = QByteArray(d, len);
+    }
+
+    void setFontName(const QByteArray &name)
+    {
+        setData(name.constData(), name.size(), true);
+    }
+
+    struct SimpleData {
+        int type;
+    } simpleData;
+
+    QByteArray fontName;
+};
 
 #endif // QWSCOMMAND_QWS_P_H

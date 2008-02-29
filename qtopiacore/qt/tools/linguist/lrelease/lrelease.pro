@@ -9,12 +9,14 @@ build_all:!build_pass {
 HEADERS         = ../shared/metatranslator.h \
                   ../shared/translator.h \
                   ../shared/profileevaluator.h \
-                  ../shared/proparser.h
+                  ../shared/proparser.h \
+                  ../shared/xliff.h
 SOURCES         = main.cpp \
                   ../shared/metatranslator.cpp \
                   ../shared/translator.cpp \
                   ../shared/profileevaluator.cpp \
-                  ../shared/proparser.cpp
+                  ../shared/proparser.cpp \
+                  ../shared/xliff.cpp
 
 QT += xml
 include( ../../../src/qt_professional.pri )

@@ -24,7 +24,7 @@
 <li><div class="fn"/>virtual <b><a href="quickexeapplicationlauncher.html#dtor.QuickExeApplicationLauncher">~QuickExeApplicationLauncher</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
+<li><div class="fn"/>5 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="applicationipcrouter-routedestination.html#public-functions">ApplicationIpcRouter::RouteDestination</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
@@ -51,7 +51,7 @@
 <tr valign="top" class="even"><td>Interfaces</td><td><a href="applicationtypelauncher.html">ApplicationTypeLauncher</a>, <a href="systemshutdownhandler.html">SystemShutdownHandler</a></td></tr>
 <tr valign="top" class="odd"><td>Services</td><td>None</td></tr>
 </table></p>
-<p>The QuickExeApplicationLauncher class provides the ApplicationLauncherType implementation that works with the <tt>quicklauncher</tt> executable to accelerate application launching.</p>
+<p>The QuickExeApplicationLauncher class provides the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> implementation that works with the <tt>quicklauncher</tt> executable to accelerate application launching.</p>
 <p>When Qtopia applications start, there are many non-application-specific tasks they must perform during startup. For example, every Qtopia application dynamically links against the Qtopia libraries and instantiates a <a href="qtopiaapplication.html">QtopiaApplication</a> instance. These tasks are independent of any specifics regarding the application.</p>
 <p>The Quicklauncher process attempts to minimize the inefficiencies of these predictable tasks by performing them before any specific application is launched. The system consists of two main parts - the <tt>quicklauncher</tt> binary and the application launcher interface provided by this class.</p>
 <p>When the QuickExeApplicationLauncher is first instantiated, it spawns a copy of the <tt>quicklauncher</tt> executable. The <tt>quicklauncher</tt> executable, like every other Qtopia application, links against the Qtopia libraries, instantiates a <a href="qtopiaapplication.html">QtopiaApplication</a> instance and other performs all the other common, non-application-specific tasks. Once these tasks are completed, however, the <tt>quicklauncher</tt> stub enters an idle loop awaiting instruction from the QuickExeApplicationLauncher.</p>
@@ -60,6 +60,7 @@
 <p>Once a <tt>quicklauncher</tt> instance has transformed itself into a running application, the QuickExeApplicationLauncher class starts another. When the system shuts down, the QuickExeApplicationLauncher will ensure that the running <tt>quicklauncher</tt> instance is stopped.</p>
 <p>Both the QuickExeApplicationLauncher and the <tt>quicklauncher</tt> itself search the paths returned by the <a href="qtopia.html#installPaths">Qtopia::installPaths</a>() method for the <tt>plugins/application/lib&lt;application name&gt;.so</tt> application plugin.</p>
 <p><i>Note:</i> <tt>quicklauncher</tt> itself does not correctly search the install paths for applications. This functionality is planned for a future Qtopia version.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QuickExeApplicationLauncher"></a>QuickExeApplicationLauncher::QuickExeApplicationLauncher ()</h3>
@@ -70,6 +71,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -193,7 +208,7 @@ QDebug &operator<<(QDebug &dbg, QWSCommand::Type tp)
     return dbg;
 }
 
-#define N_EVENTS 18
+#define N_EVENTS 19
 const char * eventNames[N_EVENTS] =  {
         "NoEvent",
         "Connected",
@@ -210,7 +225,8 @@ const char * eventNames[N_EVENTS] =  {
         "WindowOperation",
         "IMEvent",
         "IMQuery",
-        "IMInit"
+        "IMInit",
+        "Font"
     };
 
 class QWSServer;
@@ -224,8 +240,8 @@ const char *qws_getCommandTypeString( QWSCommand::Type tp )
         case QWSCommand::Create:
             typeStr = "Create";
             break;
-        case QWSCommand::Destroy:
-            typeStr = "Destroy";
+        case QWSCommand::Shutdown:
+            typeStr = "Shutdown";
             break;
         case QWSCommand::Region:
             typeStr = "Region";
@@ -304,6 +320,9 @@ const char *qws_getCommandTypeString( QWSCommand::Type tp )
             break;
         case QWSCommand::IMResponse:
             typeStr = "IMResponse";
+            break;
+        case QWSCommand::Font:
+            typeStr = "Font";
             break;
         case QWSCommand::Unknown:
         default:
@@ -480,6 +499,9 @@ QWSCommand *QWSCommand::factory(int type)
     case QWSCommand::Create:
         command = new QWSCreateCommand;
         break;
+    case QWSCommand::Shutdown:
+        command = new QWSCommand(type, 0, 0);
+        break;
     case QWSCommand::Region:
         command = new QWSRegionCommand;
         break;
@@ -568,6 +590,9 @@ QWSCommand *QWSCommand::factory(int type)
         command = new QWSEmbedCommand;
         break;
 #endif
+    case QWSCommand::Font:
+        command = new QWSFontCommand;
+        break;
     default:
         qWarning("QWSCommand::factory : Type error - got %08x!", type);
     }

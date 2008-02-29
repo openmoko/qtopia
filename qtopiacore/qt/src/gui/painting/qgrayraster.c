@@ -1523,7 +1523,7 @@
   /*************************************************************************/
   /*                                                                       */
   /* <Function>                                                            */
-  /*    QT_FT_Outline_Decompose                                               */
+  /*    QT_FT_Outline_Decompose                                            */
   /*                                                                       */
   /* <Description>                                                         */
   /*    Walks over an outline's structure to decompose it into individual  */
@@ -1544,7 +1544,7 @@
   /*                      decomposition.                                   */
   /*                                                                       */
   /* <Return>                                                              */
-  /*    Error code.  0 means sucess.                                       */
+  /*    Error code.  0 means success.                                      */
   /*                                                                       */
   static
   int  QT_FT_Outline_Decompose( QT_FT_Outline*              outline,

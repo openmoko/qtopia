@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -326,25 +326,33 @@ static const ShiftMap shiftMap[] = {
 };
 
 
-static int keycode( int i2, int j, const uchar **keyboard )
+int KeyboardFrame::keycode( int i2, int j, const uchar **keyboard, QRect *repaintrect )
 {
     if ( j <0 || j >= 5 )
         return 0;
 
     const uchar *row = keyboard[j];
 
-    while ( *row && *row <= i2 ) {
-        i2 -= *row;
+    int x = 0;
+    while ( *row && x+*row <= i2 ) {
+        x += *row;
         row += 2;
     }
 
     if ( !*row ) return 0;
 
+    if ( repaintrect ) {
+        *repaintrect = QRect(
+            x*defaultKeyWidth/2+xoffs,
+            j*keyHeight+picks->height(),
+            *row*defaultKeyWidth/2,keyHeight);
+    }
+
     int k;
     if ( row[1] >= 0x80 ) {
         k = row[1];
     } else {
-        k = row[1]+i2/2;
+        k = row[1]+(i2-x)/2;
     }
 
     return k;
@@ -393,7 +401,7 @@ void KeyboardFrame::paintEvent(QPaintEvent* e)
 {
     QPainter painter(this);
     painter.setClipRect(e->rect());
-    drawKeyboard( painter );
+    drawKeyboard( painter, e->rect() );
     picks->dc->draw( &painter );
 }
 
@@ -403,7 +411,7 @@ void KeyboardFrame::paintEvent(QPaintEvent* e)
 
   If key >= 0, only the specified key is drawn.
 */
-void KeyboardFrame::drawKeyboard( QPainter &p, int key )
+void KeyboardFrame::drawKeyboard( QPainter &p, const QRect& clip, int key )
 {
     const bool threeD = false;
     QColor keycolor = palette().button().color();
@@ -418,95 +426,97 @@ void KeyboardFrame::drawKeyboard( QPainter &p, int key )
 
     for ( int j = 0; j < 5; j++ ) {
         int y = j * keyHeight + picks->height() + 1;
-        int x = xoffs;
-        int kw = defaultKeyWidth;
-        int k= getKey( kw, j );
-        while ( k ) {
-            if ( key < 0 || k == key ) {
-                QString s;
-                bool pressed = (k == pressedKey);
-                bool blank = (k == 0223);
-                QPixmap *pic = 0;
+        if ( y <= clip.bottom() && y+keyHeight >= clip.top() ) {
+            int x = xoffs;
+            int kw = defaultKeyWidth;
+            int k= getKey( kw, j );
+            while ( k ) {
+                if ( (key < 0 || k == key) && x <= clip.right() && x+kw > clip.left() ) {
+                    QString s;
+                    bool pressed = (k == pressedKey);
+                    bool blank = (k == 0223);
+                    QPixmap *pic = 0;
 
-                if ( k >= 0x80 ) {
-                    s = specialM[k - 0x80].label;
+                    if ( k >= 0x80 ) {
+                        s = specialM[k - 0x80].label;
 
-                    pic = specialM[k - 0x80].pic;
+                        pic = specialM[k - 0x80].pic;
 
-                    if ( k == ShiftCode ) {
-                        pressed = shift;
-                    } else if ( k == CapsCode ) {
-                        pressed = lock;
-                    } else if ( k == CtrlCode ) {
-                        pressed = ctrl;
-                    } else if ( k == AltCode ) {
-                        pressed = alt;
-                    }
-                } else {
-#if defined(Q_WS_QWS) || defined(Q_WS_QWS)
-/*
-                    s = QChar( shift^lock ? QWSServer::keyMap()[k].shift_unicode :
-                               QWSServer::keyMap()[k].unicode);
-*/
-                    // ### Fixme, bad code, needs improving, whole thing needs to
-                    // be re-coded to get rid of the way it did things with scancodes etc
-                    char shifted = k;
-                    if ( !isalpha( k ) ) {
-                        for ( unsigned i = 0; i < sizeof(shiftMap)/sizeof(ShiftMap); i++ )
-                            if ( shiftMap[i].normal == k )
-                                shifted = shiftMap[i].shifted;
+                        if ( k == ShiftCode ) {
+                            pressed = shift;
+                        } else if ( k == CapsCode ) {
+                            pressed = lock;
+                        } else if ( k == CtrlCode ) {
+                            pressed = ctrl;
+                        } else if ( k == AltCode ) {
+                            pressed = alt;
+                        }
                     } else {
-                        shifted = toupper( k );
+    #if defined(Q_WS_QWS) || defined(Q_WS_QWS)
+    /*
+                        s = QChar( shift^lock ? QWSServer::keyMap()[k].shift_unicode :
+                                   QWSServer::keyMap()[k].unicode);
+    */
+                        // ### Fixme, bad code, needs improving, whole thing needs to
+                        // be re-coded to get rid of the way it did things with scancodes etc
+                        char shifted = k;
+                        if ( !isalpha( k ) ) {
+                            for ( unsigned i = 0; i < sizeof(shiftMap)/sizeof(ShiftMap); i++ )
+                                if ( shiftMap[i].normal == k )
+                                    shifted = shiftMap[i].shifted;
+                        } else {
+                            shifted = toupper( k );
+                        }
+                        s = QChar( shift^lock ? shifted : k );
+    #endif
                     }
-                    s = QChar( shift^lock ? shifted : k );
-#endif
-                }
 
-                if (!blank) {
-                    if ( pressed )
-                        p.fillRect( x+margin, y+margin, kw-margin, keyHeight-margin-1, keycolor_pressed );
-                    else
-                        p.fillRect( x+margin, y+margin, kw-margin, keyHeight-margin-1, keycolor );
+                    if (!blank) {
+                        if ( pressed )
+                            p.fillRect( x+margin, y+margin, kw-margin, keyHeight-margin-1, keycolor_pressed );
+                        else
+                            p.fillRect( x+margin, y+margin, kw-margin, keyHeight-margin-1, keycolor );
 
-                    if ( threeD ) {
-                        p.setPen(pressed ? keycolor_lo : keycolor_hi);
-                        p.drawLine( x, y+1, x, y+keyHeight-2 );
-                        p.drawLine( x+1, y+1, x+1, y+keyHeight-3 );
-                        p.drawLine( x+1, y+1, x+1+kw-2, y+1 );
-                    } else if ( j == 0 ) {
+                        if ( threeD ) {
+                            p.setPen(pressed ? keycolor_lo : keycolor_hi);
+                            p.drawLine( x, y+1, x, y+keyHeight-2 );
+                            p.drawLine( x+1, y+1, x+1, y+keyHeight-3 );
+                            p.drawLine( x+1, y+1, x+1+kw-2, y+1 );
+                        } else if ( j == 0 ) {
+                            p.setPen(pressed ? keycolor_hi : keycolor_lo);
+                            p.drawLine( x, y, x+kw, y );
+                        }
+
+                        // right
                         p.setPen(pressed ? keycolor_hi : keycolor_lo);
-                        p.drawLine( x, y, x+kw, y );
-                    }
+                        p.drawLine( x+kw-1, y, x+kw-1, y+keyHeight-2 );
 
-                    // right
-                    p.setPen(pressed ? keycolor_hi : keycolor_lo);
-                    p.drawLine( x+kw-1, y, x+kw-1, y+keyHeight-2 );
+                        if ( threeD ) {
+                            p.setPen(keycolor_lo.light());
+                            p.drawLine( x+kw-2, y+keyHeight-2, x+kw-2, y+1 );
+                            p.drawLine( x+kw-2, y+keyHeight-2, x+1, y+keyHeight-2 );
+                        }
 
-                    if ( threeD ) {
-                        p.setPen(keycolor_lo.light());
-                        p.drawLine( x+kw-2, y+keyHeight-2, x+kw-2, y+1 );
-                        p.drawLine( x+kw-2, y+keyHeight-2, x+1, y+keyHeight-2 );
-                    }
+                        if (pic && !pic->isNull()) {
+                            p.drawPixmap( x + 1, y + 2, *pic );
+                        } else {
+                            p.setPen(textcolor);
+                            p.drawText( x - 1, y, kw, keyHeight-2, Qt::AlignCenter, s );
+                        }
 
-                    if (pic && !pic->isNull()) {
-                        p.drawPixmap( x + 1, y + 2, *pic );
+                        if ( threeD ) {
+                            p.setPen(keycolor_hi);
+                            p.drawLine( x, y, x+kw-1, y );
+                        }
                     } else {
-                        p.setPen(textcolor);
-                        p.drawText( x - 1, y, kw, keyHeight-2, Qt::AlignCenter, s );
+                        p.fillRect( x, y, kw, keyHeight, keycolor );
                     }
-
-                    if ( threeD ) {
-                        p.setPen(keycolor_hi);
-                        p.drawLine( x, y, x+kw-1, y );
-                    }
-                } else {
-                    p.fillRect( x, y, kw, keyHeight, keycolor );
                 }
-            }
 
-            x += kw;
-            kw = defaultKeyWidth;
-            k = getKey( kw );
+                x += kw;
+                kw = defaultKeyWidth;
+                k = getKey( kw );
+            }
         }
     }
 }
@@ -519,24 +529,23 @@ void KeyboardFrame::mousePressEvent(QMouseEvent *e)
     int i2 = ((e->x() - xoffs) * 2) / defaultKeyWidth;
     int j = (e->y() - picks->height()) / keyHeight;
 
-    int k = keycode( i2, j, (const uchar **)((useOptiKeys) ? keyboard_opti : keyboard_standard) );
-    bool need_repaint = false;
+    QRect keyrect;
+    int k = keycode( i2, j, (const uchar **)((useOptiKeys) ? keyboard_opti : keyboard_standard), &keyrect );
+
     bool key_down = false;
     unicode = -1;
     qkeycode = 0;
     if ( k >= 0x80 ) {
         if ( k == ShiftCode ) {
             shift = !shift;
-            need_repaint = true;
+            keyrect = rect();
         } else if ( k == AltCode ){
             alt = !alt;
-            need_repaint = true;
         } else if ( k == CapsCode ) {
             lock = !lock;
-            need_repaint = true;
+            keyrect = rect();
         } else if ( k == CtrlCode ) {
             ctrl = !ctrl;
-            need_repaint = true;
         } else if ( k == 0224 /* Expand */ ) {
             useLargeKeys = !useLargeKeys;
             resizeEvent(0);
@@ -574,8 +583,10 @@ void KeyboardFrame::mousePressEvent(QMouseEvent *e)
             unicode = unicode - 'a'+1;
 
         modifiers = Qt::NoModifier;
-        if (shift)
+        if (shift) {
             modifiers |= Qt::ShiftModifier;
+            keyrect = rect();
+        }
         if (ctrl)
             modifiers |= Qt::ControlModifier;
         if (alt)
@@ -585,7 +596,6 @@ void KeyboardFrame::mousePressEvent(QMouseEvent *e)
 
         qwsServer->processKeyEvent( unicode, qkeycode, modifiers, true, false );
 
-        need_repaint = shift || alt || ctrl;
         shift = alt = ctrl = false;
 
         KeyboardConfig *dc = picks->dc;
@@ -608,18 +618,12 @@ void KeyboardFrame::mousePressEvent(QMouseEvent *e)
         }
 
         picks->repaint();
+
         key_down = true;
     }
     pressedKey = k;
-    repaint();
-    /*
-    if ( need_repaint ) {
-        repaint( false );
-    } else {
-        QPainter p(this);
-        drawKeyboard( p, pressedKey );
-    }
-    */
+    pressedKeyRect = keyrect;
+    repaint(keyrect);
     if ( pressTid )
         killTimer(pressTid);
     pressTid = startTimer(80);
@@ -669,7 +673,7 @@ void KeyboardFrame::clearHighlight()
 {
     if ( pressedKey >= 0 ) {
         pressedKey = -1;
-        repaint();
+        repaint(pressedKeyRect);
     }
 }
 

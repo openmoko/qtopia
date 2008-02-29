@@ -13,19 +13,20 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">VoIPManager Class Reference</h1>
 <p>The VoIPManager class maintains information about the active VoIP telephony service. <a href="#details">More...</a></p>
-<pre>    #include &lt;VoIPManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;VoIPManager&gt;</pre><p>Inherits <a href="qabstractcallpolicymanager.html">QAbstractCallPolicyManager</a>.</p>
 <ul>
 <li><a href="voipmanager-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/>bool <b><a href="voipmanager.html#isAvailable">isAvailable</a></b> ( const QString &amp; <i>uri</i> )</li>
+<li><div class="fn"/><b><a href="voipmanager.html#VoIPManager">VoIPManager</a></b> ( QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/>virtual bool <b><a href="voipmanager.html#isAvailable">isAvailable</a></b> ( const QString &amp; <i>uri</i> )</li>
 <li><div class="fn"/>QPresence::Status <b><a href="voipmanager.html#localPresence">localPresence</a></b> () const</li>
-<li><div class="fn"/>QTelephony::RegistrationState <b><a href="voipmanager.html#registrationState">registrationState</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="voipmanager.html#startMonitoring">startMonitoring</a></b> ()</li>
 </ul>
 <ul>
+<li><div class="fn"/>8 public functions inherited from <a href="qabstractcallpolicymanager.html#public-functions">QAbstractCallPolicyManager</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
@@ -33,9 +34,9 @@
 <ul>
 <li><div class="fn"/>void <b><a href="voipmanager.html#localPresenceChanged">localPresenceChanged</a></b> ( QPresence::Status <i>status</i> )</li>
 <li><div class="fn"/>void <b><a href="voipmanager.html#monitoredPresenceChanged">monitoredPresenceChanged</a></b> ( const QString &amp; <i>uri</i>, bool <i>available</i> )</li>
-<li><div class="fn"/>void <b><a href="voipmanager.html#registrationChanged">registrationChanged</a></b> ( QTelephony::RegistrationState <i>state</i> )</li>
 </ul>
 <ul>
+<li><div class="fn"/>1 signal inherited from <a href="qabstractcallpolicymanager.html#signals">QAbstractCallPolicyManager</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
@@ -60,29 +61,27 @@
 <h2>Detailed Description</h2>
 <p>The VoIPManager class maintains information about the active VoIP telephony service.</p>
 <p>This class provides access to some of the common facilities of the <tt>voip</tt> telephony service, if it is running within the system, to ease the implementation of VoIP-specific user interfaces in the server. The telephony service itself is started by <a href="phoneserver.html">PhoneServer</a> at system start up.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <p>See also <a href="phoneserver.html">PhoneServer</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="VoIPManager"></a>VoIPManager::VoIPManager ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Create a new VoIP telephony service manager and attach it to <i>parent</i>.</p>
 <h3 class="fn"><a name="instance"></a>VoIPManager * VoIPManager::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the <a href="voipmanager.html">VoIPManager</a> instance.</p>
-<h3 class="fn"><a name="isAvailable"></a>bool VoIPManager::isAvailable ( const <a href="qstring.html">QString</a> &amp; <i>uri</i> )</h3>
+<h3 class="fn"><a name="isAvailable"></a>bool VoIPManager::isAvailable ( const <a href="qstring.html">QString</a> &amp; <i>uri</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns true if the VoIP user associated with <i>uri</i> is available for calling; false otherwise.</p>
+<p>Reimplemented from <a href="qabstractcallpolicymanager.html#isAvailable">QAbstractCallPolicyManager</a>.</p>
 <p>See also <a href="voipmanager.html#monitoredPresenceChanged">monitoredPresenceChanged</a>() and <a href="voipmanager.html#startMonitoring">startMonitoring</a>().</p>
-<h3 class="fn"><a name="localPresence"></a>QPresence::Status VoIPManager::localPresence () const</h3>
+<h3 class="fn"><a name="localPresence"></a><a href="qpresence.html#Status-enum">QPresence::Status</a> VoIPManager::localPresence () const</h3>
 <p>Returns the presence status of the local user.</p>
 <p>See also <a href="voipmanager.html#localPresenceChanged">localPresenceChanged</a>().</p>
-<h3 class="fn"><a name="localPresenceChanged"></a>void VoIPManager::localPresenceChanged ( QPresence::Status <i>status</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="localPresenceChanged"></a>void VoIPManager::localPresenceChanged ( <a href="qpresence.html#Status-enum">QPresence::Status</a> <i>status</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when <a href="voipmanager.html#localPresence">localPresence</a>() changes to <i>status</i>.</p>
 <p>See also <a href="voipmanager.html#localPresence">localPresence</a>().</p>
 <h3 class="fn"><a name="monitoredPresenceChanged"></a>void VoIPManager::monitoredPresenceChanged ( const <a href="qstring.html">QString</a> &amp; <i>uri</i>, bool <i>available</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the presence of the user identified by <i>uri</i> changes to <i>available</i>.</p>
 <p>See also <a href="voipmanager.html#isAvailable">isAvailable</a>() and <a href="voipmanager.html#startMonitoring">startMonitoring</a>().</p>
-<h3 class="fn"><a name="registrationChanged"></a>void VoIPManager::registrationChanged ( QTelephony::RegistrationState <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Signal that is emitted when <a href="voipmanager.html#registrationState">registrationState</a>() changes to <i>state</i>.</p>
-<p>See also <a href="voipmanager.html#registrationState">registrationState</a>().</p>
-<h3 class="fn"><a name="registrationState"></a>QTelephony::RegistrationState VoIPManager::registrationState () const</h3>
-<p>Returns the current VoIP registration state.</p>
-<p>See also <a href="voipmanager.html#registrationChanged">registrationChanged</a>().</p>
 <h3 class="fn"><a name="startMonitoring"></a>void VoIPManager::startMonitoring ()</h3>
 <p>Start monitoring all contacts in the user's contact list that have associated VoIP identities. The <a href="voipmanager.html#monitoredPresenceChanged">monitoredPresenceChanged</a>() signal will be emitted whenever the presence information for a monitored contact changes.</p>
 <p>See also <a href="voipmanager.html#isAvailable">isAvailable</a>() and <a href="voipmanager.html#monitoredPresenceChanged">monitoredPresenceChanged</a>().</p>
@@ -90,6 +89,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,12 +25,17 @@
 #include <QList>
 #include <QSettings>
 
+#include <QPowerStatus>
+
 #include <qtopiaipcenvelope.h>
 #include <QtopiaServiceRequest>
+#ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
+#endif
 
 #include <qtopiaipcenvelope.h>
 #include "qtopiaserverapplication.h"
+#include "systemsuspend.h"
 
 /*!
   \class PhonePowerManager
@@ -40,17 +45,18 @@
 
   This manager uses three levels for power management. The first level dims
   the background light, the second level turns the light off and the last level
-  returns the phone to the homescreen.
+  suspends the device.
 
   The PhonePowerManager class provides the \c {PhonePowerManager} task.
+  It is part of the Qtopia server and cannot be used by other Qtopia applications.
   \sa QtopiaPowerManager
 */
 
 /*!
   Constructs a new PhonePowerManager instance.
-  */
+*/
 PhonePowerManager::PhonePowerManager() : 
-    QtopiaPowerManager(), showhomescreen_on(false), suspend_on(true)
+    QtopiaPowerManager(), m_suspendEnabled(true)
 {
     setDefaultIntervals();
 }
@@ -64,49 +70,56 @@ PhonePowerManager::~PhonePowerManager()
 
 /*!
     This function activates the appropriate actions for the given
-    screensaver \a level.
-  */
+    power management \a level.
+*/
 bool PhonePowerManager::save(int level)
 {
+    QSettings config("Trolltech", "qpe");
+    config.beginGroup("HomeScreen");
+    QString showHomeScreen = config.value("ShowHomeScreen", "Never").toString();    //Note: defaults need to be in sync with
+    bool autoKeyLock = config.value("AutoKeyLock", false).toBool();                //defaults in homescreen settings app
     int action = m_levelToAction.value(level);
-    switch ( action) {
+    qLog(PowerManagement) << "PhonePowerManager::save()" << "level" << level << "action" << action << "homescreen settings:" << showHomeScreen << autoKeyLock;
+
+    switch (action) {
         case PhonePowerManager::DimLight:
             if ( m_powerConstraint > QtopiaApplication::Disable && m_dimLightEnabled ) {
                 if (backlight() > 1)
                     setBacklight(1); // lowest non-off
                 qLog(PowerManagement) << "Dimming light";
+                return true;
             }
-            return true;
             break;
         case PhonePowerManager::LightOff:
             if ( m_powerConstraint > QtopiaApplication::DisableLightOff
                     && m_lightOffEnabled ) {
                 setBacklight(0); // off
-                qLog(PowerManagement) << "turning light off";
-            }
-            return true;
-            break;
-        case PhonePowerManager::HomeScreen:
-            if (m_powerConstraint > QtopiaApplication::DisableReturnToHomeScreen
-                    && showhomescreen_on) {
-                qLog(PowerManagement) << "show HomeScreen";
 
-                QSettings c("Trolltech","qpe");
-                c.beginGroup("HomeScreen");
-                if (c.value( "AutoKeyLock", "Disabled" ).toString() == "Enabled")
-                    QtopiaIpcEnvelope showHome( "QPE/System", "showHomeScreenAndKeylock()" );
-                else
-                    QtopiaIpcEnvelope showHome( "QPE/System", "showHomeScreen()" );
+                if (showHomeScreen == "DisplayOff") {
+                    qLog(PowerManagement) << "Showing HomeScreen";
+                    QtopiaIpcEnvelope showHome("QPE/System", autoKeyLock ?
+                                               "showHomeScreenAndKeylock()" : "showHomeScreen()");
+                }
+
+                qLog(PowerManagement) << "turning light off";
+                return true;
             }
-            return true;
             break;
         case PhonePowerManager::Suspend:
+            qLog(PowerManagement) << "case PhonePowerManager::Suspend:" << "m_powerConstraint" << m_powerConstraint << "m_suspendEnabled" << m_suspendEnabled;
             if (m_powerConstraint > QtopiaApplication::DisableSuspend
-                    && suspend_on) {
-                QtopiaServiceRequest r("Suspend", "suspend()");
-                r.send();
+                    && m_suspendEnabled) {
+
+                if (showHomeScreen == "Suspend") {
+                    qLog(PowerManagement) << "Showing HomeScreen";
+                    QtopiaIpcEnvelope showHome("QPE/System", autoKeyLock ?
+                                               "showHomeScreenAndKeylock()" : "showHomeScreen()");
+                }
+                qLog(PowerManagement) << "Suspending device";
+                SystemSuspend *suspend = qtopiaTask<SystemSuspend>();
+                suspend->suspendSystem();
+                return true;
             }
-            return true;
             break;
         default:
             ;
@@ -116,25 +129,26 @@ bool PhonePowerManager::save(int level)
 
 
 /*! 
-    This function sets the internal screensaver timeouts
+    This function sets the power management internal timeouts
     to the values passed in \a ivals. \a size determines the number of entries in 
     \a ivals.
 
 
-    The phone screensaver maps the timeouts to the following actions:
+    The phone power manager maps the timeouts to the following actions:
         \list
         \o 0 -> dim light
         \o 1 -> turn off light
-        \o 3 -> show HomeScreen
+        \o 2 -> suspend device
         \endlist
-
-     */
+*/
 void PhonePowerManager::setIntervals(int* ivals, int size )
 {
+    //update value space
+    QtopiaPowerManager::setIntervals( ivals, size );
+
     QSettings config("Trolltech","qpe");
 
-    QPowerStatus ps = QPowerStatusManager::readStatus();
-    QString powerGroup = (ps.acStatus() == QPowerStatus::Online) ? "ExternalPower" : "BatteryPower";
+    QString powerGroup = (powerstatus.wallStatus() == QPowerStatus::Available) ? "ExternalPower" : "BatteryPower";
     config.beginGroup( powerGroup );
 
     int *v = new int[size+1];
@@ -146,48 +160,42 @@ void PhonePowerManager::setIntervals(int* ivals, int size )
 
     switch (size) {
         default:
-        case 4:
-            ivals[3] = interval(ivals[3], config, "Suspend","Interval", 60); // No tr
-            v[3] = qMax( 1000*ivals[3] + 100, 100);
-            timeToAction.insert(v[3], PhonePowerManager::Suspend);
         case 3:
-            config.endGroup();
-            config.beginGroup( "HomeScreen" );
-            ivals[2] = interval(ivals[2], config, "ShowHomeScreen","Interval_HomeScreen", 300); // No tr
-            v[2] = qMax( 1000*ivals[2], 100);
-            if (timeToAction.contains(v[2]))
-                v[2] = v[2]+100; //add few ms for next timeout
-            timeToAction.insert(v[2], PhonePowerManager::HomeScreen);
-            config.endGroup();
-            config.beginGroup( powerGroup );
+            ivals[2] = interval(ivals[2], config, "Suspend","Interval", 60); // No tr
+            v[2] = qMax( 1000*ivals[2] + 100, 100);
+            m_suspendEnabled = ( (ivals[2] != 0) ? config.value("Suspend", true).toBool() : false );
+            if (m_suspendEnabled)
+                timeToAction.insert(v[2], PhonePowerManager::Suspend);
         case 2:
-            ivals[1] = interval(ivals[1], config, "LightOff","Interval_LightOff", 20);
+            ivals[1] = interval(ivals[1], config, "LightOff","Interval_LightOff", 30);
+            if (ivals[1] == 0 && m_suspendEnabled)
+                ivals[1] = ivals[2];
             v[1] = qMax( 1000*ivals[1], 100);
             if (timeToAction.contains(v[1]))
                 v[1] = v[1]+100; //add few ms for next timeout
-            timeToAction.insert(v[1], PhonePowerManager::LightOff);
+            m_lightOffEnabled = ( (ivals[1] != 0 ) ? config.value("LightOff", true).toBool() : false );
+            m_lightOffEnabled |= m_suspendEnabled;
+            if (m_lightOffEnabled)
+                timeToAction.insert(v[1], PhonePowerManager::LightOff);
         case 1:
-            ivals[0] = interval(ivals[0], config, "Dim","Interval_Dim", 30); // No tr
+            ivals[0] = interval(ivals[0], config, "Dim","Interval_Dim", 20); // No tr
             v[0] = qMax( 1000*ivals[0], 100);
             while ( timeToAction.contains( v[0] ) )
                 v[0] = v[0]+100; //add few ms for next timeout
-            timeToAction.insert(v[0], PhonePowerManager::DimLight);
+            m_dimLightEnabled = ( (ivals[0] != 0) ? config.value("Dim", true).toBool() : false );
+            if (m_dimLightEnabled)
+                timeToAction.insert(v[0], PhonePowerManager::DimLight);
         case 0:
             break;
     }
 
     qLog(PowerManagement) << "PhonePowerManager::setIntervals:"
-                          << ivals[0] << ivals[1] << ivals[2];
-
-    m_dimLightEnabled = ( (ivals[0] != 0) ? config.value("Dim",true).toBool() : false );
-    m_lightOffEnabled = ( (ivals[1] != 0 ) ? config.value("LightOff",true).toBool() : false );
-    suspend_on = ( (ivals[3] != 0) ? config.value("Suspend", true).toBool(): false );
-    config.endGroup();
-    config.beginGroup( "HomeScreen" );
-    showhomescreen_on = ( (ivals[2] != 0) ? config.value("ShowHomeScreen", true).toBool(): false );
+                          << ivals[0] << ivals[1] << ivals[2] <<" size: " << size;
 
     if ( !ivals[0] && !ivals[1] && !ivals[2] ){
+#ifdef Q_WS_QWS
         QWSServer::setScreenSaverInterval(0);
+#endif
         delete [] v;
         return;
     }
@@ -206,12 +214,62 @@ void PhonePowerManager::setIntervals(int* ivals, int size )
         sum+= v[j];
         m_levelToAction.insert(j, timeToAction.value(sum));
     }
+    v[keys.count()] = 0;
 
-    //FIXME: add evenBlocking
-    //QWSServer::setScreenSaverIntervals(v, ScreenSaver::eventBlockLevel);
+    qLog(PowerManagement) << "PhonePowerManager::setIntervals:"
+                          << v[0] << v[1] << v[2];
+#ifdef Q_WS_QWS
     QWSServer::setScreenSaverIntervals(v);
+#endif
     delete [] v;
+
+    // when the backlight goes off, ignore the key that wakes it up
+    int blocklevel = PhonePowerManager::LightOff;
+    if ( !m_lightOffEnabled ) {
+        // we're not turning the backlight off, ignore the key that wakes us up from suspend
+        blocklevel = PhonePowerManager::Suspend;
+        if ( !m_suspendEnabled ) {
+            // we're not suspending, never ignore keys
+            blocklevel = -1;
+        }
+    }
+    // Now we need to map blocklevel from "action" to "level"
+    if ( blocklevel != -1 ) {
+        for ( QMap<int,int>::const_iterator it = m_levelToAction.begin(); it != m_levelToAction.end(); ++it ) {
+            if ( blocklevel == it.value() ) {
+                blocklevel = it.key();
+                break;
+            }
+        }
+    }
+#ifdef Q_WS_QWS
+    qLog(PowerManagement) << "Using Block level " << blocklevel;
+    QWSServer::setScreenSaverBlockLevel(blocklevel);
+#endif
+}
+
+/*!
+  \reimp
+*/
+void PhonePowerManager::forceSuspend()
+{
+    qLog(PowerManagement) << "PhonePowerManager::forceSuspend()";
+    QSettings config("Trolltech", "qpe");
+    config.beginGroup("HomeScreen");
+    QString showHomeScreen = config.value("ShowHomeScreen", "Never").toString();    //Note: defaults need to be in sync with
+    bool autoKeyLock = config.value("AutoKeyLock", false).toBool();                //defaults in homescreen settings app
+    qLog(PowerManagement) << "HomeScreen settings:" << showHomeScreen << autoKeyLock;
+
+    if ( m_suspendEnabled ) {
+        if (showHomeScreen == "Suspend") {
+            qLog(PowerManagement) << "Showing HomeScreen";
+            QtopiaIpcEnvelope showHome("QPE/System", autoKeyLock ?
+                    "showHomeScreenAndKeylock()" : "showHomeScreen()");
+        }
+        qLog(PowerManagement) << "Suspending device";
+        SystemSuspend *suspend = qtopiaTask<SystemSuspend>();
+        suspend->suspendSystem();
+    }
 }
 
 QTOPIA_TASK(PhonePowerManager, PhonePowerManager);
-QTOPIA_TASK_PROVIDES(PhonePowerManager,PowerManagerTask)

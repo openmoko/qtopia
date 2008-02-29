@@ -3,7 +3,7 @@
 #
 
 
-# Copyright 1996-2000, 2003, 2004 by
+# Copyright 1996-2000, 2003, 2004, 2006, 2007 by
 # David Turner, Robert Wilhelm, and Werner Lemberg.
 #
 # This file is part of the FreeType project, and may only be used, modified,
@@ -48,7 +48,7 @@ ifeq ($(PLATFORM),ansi)
     #
     # Note that on Windows NT, such an environment variable will not be seen
     # from DOS-based tools like DJGPP's make; this is not actually a problem
-    # since NT is detected independantly above.  But do not try to be clever!
+    # since NT is detected independently above.  But do not try to be clever!
     #
     ifdef winbootdir
       ifdef windir
@@ -65,6 +65,7 @@ endif # test PLATFORM ansi
 ifeq ($(PLATFORM),win32)
 
   DELETE := del
+  CAT    := type
   SEP    := $(BACKSLASH)
 
   # Setting COPY is a bit trickier.  Plain COPY on NT will not work
@@ -75,7 +76,7 @@ ifeq ($(PLATFORM),win32)
   # So we need to hack.
   #
   # Kudos to Eli Zaretskii (DJGPP guru) that helped debug it.
-  # Details are available in threads of the freetype mailing list 
+  # Details are available in threads of the freetype mailing list
   # (2004-11-11), and then in the devel mailing list (2004-11-20 to -23).
   #
   ifeq ($(OS),Windows_NT)
@@ -93,17 +94,17 @@ ifeq ($(PLATFORM),win32)
 
   ifneq ($(findstring list,$(MAKECMDGOALS)),)  # test for the "list" target
     dump_target_list:
-	    @echo ÿ
+	    @echo Ã¿
 	    @echo $(PROJECT_TITLE) build system -- supported compilers
-	    @echo ÿ
+	    @echo Ã¿
 	    @echo Several command-line compilers are supported on Win32:
-	    @echo ÿ
-	    @echo ÿÿmake setupÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿgcc (with Mingw)
-	    @echo ÿÿmake setup visualcÿÿÿÿÿÿÿÿÿÿÿÿÿMicrosoft Visual C++
-	    @echo ÿÿmake setup bcc32ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿBorland C/C++
-	    @echo ÿÿmake setup lccÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿWin32-LCC
-	    @echo ÿÿmake setup intelcÿÿÿÿÿÿÿÿÿÿÿÿÿÿIntel C/C++
-	    @echo ÿ
+	    @echo Ã¿
+	    @echo Ã¿Ã¿make setupÃ¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿gcc (with Mingw)
+	    @echo Ã¿Ã¿make setup visualcÃ¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Microsoft Visual C++
+	    @echo Ã¿Ã¿make setup bcc32Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Borland C/C++
+	    @echo Ã¿Ã¿make setup lccÃ¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Win32-LCC
+	    @echo Ã¿Ã¿make setup intelcÃ¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Ã¿Intel C/C++
+	    @echo Ã¿
 
     setup: dump_target_list
     .PHONY: dump_target_list list
@@ -171,12 +172,4 @@ ifeq ($(PLATFORM),win32)
 
   ifneq ($(findstring devel-gcc,$(MAKECMDGOALS)),)   # development target
     CONFIG_FILE := w32-dev.mk
-    CC          := gcc
-    devel-gcc: setup
-    .PHONY: devel-gcc
-  endif
-
-endif   # test PLATFORM win32
-
-
-# EOF
+    CC          := 

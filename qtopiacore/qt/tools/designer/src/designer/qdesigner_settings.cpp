@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,11 +37,14 @@
 ****************************************************************************/
 
 #include "qdesigner.h"
+#include "preferences.h"
 #include "qdesigner_settings.h"
 #include "qdesigner_widgetbox.h"
 #include "qdesigner_workbench.h"
 #include "qdesigner_propertyeditor.h"
 #include "qdesigner_objectinspector.h"
+
+#include <qdesigner_utils_p.h>
 
 #include <QtCore/QVariant>
 #include <QtCore/QDir>
@@ -36,26 +54,53 @@
 
 #include <QtCore/qdebug.h>
 
-QDesignerSettings::QDesignerSettings()
-    : QSettings()
-{
-    m_designerPath = QLatin1String("/.designer");
+static const char *designerPath = "/.designer";
 
-    QStringList paths = defaultFormTemplatePaths();
-    foreach (QString path, paths) {
-        if (!QDir::current().exists(path))
-            QDir::current().mkpath(path);
-    }
+static bool checkTemplatePath(const QString &path, bool create)
+{
+    QDir current(QDir::current());
+    if (current.exists(path))
+        return true;
+
+    if (!create)
+        return false;
+
+    if (current.mkpath(path))
+        return true;
+
+    qdesigner_internal::designerWarning(QObject::tr("The template path %1 could not be created.").arg(path));
+    return false;
 }
 
-QDesignerSettings::~QDesignerSettings()
+QDesignerSettings::QDesignerSettings()
 {
+}
+
+const QStringList &QDesignerSettings::defaultFormTemplatePaths()
+{
+    static QStringList rc;
+    if (rc.empty()) {
+        // Ensure default form template paths
+        const QString templatePath = QLatin1String("/templates");
+        // home
+        QString path = QDir::homePath();
+        path += QLatin1String(designerPath);
+        path += templatePath;
+        if (checkTemplatePath(path, true))
+            rc += path;
+
+        // designer/bin: Might be owned by root in some installations, do not force it.
+        path = qDesigner->applicationDirPath();
+        path += templatePath;
+        if (checkTemplatePath(path, false))
+            rc += path;
+    }
+    return rc;
 }
 
 QStringList QDesignerSettings::formTemplatePaths() const
 {
-    return value(QLatin1String("FormTemplatePaths"),
-                 defaultFormTemplatePaths()).toStringList();
+    return value(QLatin1String("FormTemplatePaths"),defaultFormTemplatePaths()).toStringList();
 }
 
 void QDesignerSettings::setFormTemplatePaths(const QStringList &paths)
@@ -65,19 +110,10 @@ void QDesignerSettings::setFormTemplatePaths(const QStringList &paths)
 
 QString QDesignerSettings::defaultUserWidgetBoxXml() const
 {
-    return QDir::homePath() + m_designerPath + QLatin1String("/widgetbox.xml");
-}
-
-QStringList QDesignerSettings::defaultFormTemplatePaths() const
-{
-    QStringList paths;
-
-    QString templatePath = QLatin1String("/templates");
-
-    paths.append(QDir::homePath() + m_designerPath + templatePath);
-    paths.append(qDesigner->applicationDirPath() + templatePath);
-
-    return paths;
+    QString rc = QDir::homePath();
+    rc += QLatin1String(designerPath);
+    rc += QLatin1String("/widgetbox.xml");
+    return rc;
 }
 
 void QDesignerSettings::saveGeometryFor(const QWidget *w)
@@ -96,69 +132,25 @@ void QDesignerSettings::setGeometryFor(QWidget *w, const QRect &fallBack) const
 void QDesignerSettings::saveGeometryHelper(const QWidget *w, const QString &key)
 {
     beginGroup(key);
-    QPoint pos = w->pos();
-    if (!w->isWindow()) // in workspace
-        pos = w->parentWidget()->pos();
-
-    setValue(QLatin1String("screen"), QApplication::desktop()->screenNumber(w));
-    setValue(QLatin1String("geometry"), QRect(pos, w->size()));
     setValue(QLatin1String("visible"), w->isVisible());
-    setValue(QLatin1String("maximized"), w->isMaximized());
+    setValue(QLatin1String("geometry"), w->saveGeometry());
     endGroup();
 }
 
 void QDesignerSettings::setGeometryHelper(QWidget *w, const QString &key,
                                           const QRect &fallBack) const
 {
-//    beginGroup();
-    int screen = value(key + QLatin1String("/screen"), 0).toInt();
-    QRect g = value(key + QLatin1String("/geometry"), fallBack).toRect();
-    QRect screenRect = QApplication::desktop()->availableGeometry(screen);
+    QByteArray ba(value(key + QLatin1String("/geometry")).toByteArray());
 
-    // Do geometry in a couple of steps
-    // 1) Make sure the rect is within the specified geometry
-    // 2) Make sure the bottom right and top left fit on the screen, move them in.
-    // 3) Check again and resize.
-
-    if (w->isWindow() && g.intersect(screenRect).isEmpty())
-        g = fallBack;
-
-    // Maybe use center?
-    if (!screenRect.contains(g.bottomRight())) {
-        g.moveRight(qMax(0 + g.width(), qMin(screenRect.right(), g.right())));
-        g.moveBottom(qMax(0 + g.height(), qMin(screenRect.bottom(), g.bottom())));
-    }
-
-    if (!screenRect.contains(g.topLeft())) {
-        g.moveLeft(qMin(screenRect.right() - g.width(), qMax(screenRect.left(), g.left())));
-        g.moveTop(qMin(screenRect.bottom() - g.height(), qMax(screenRect.top(), g.top())));
-    }
-
-    if (!screenRect.contains(g.bottomRight())) {
-        g.setRight(qMin(screenRect.right(), g.right()));
-        g.moveBottom(qMin(screenRect.bottom(), g.bottom()));
-    }
-
-    if (!screenRect.contains(g.topLeft())) {
-        g.setLeft(qMax(0, qMin(screenRect.left(), g.left())));
-        g.moveTop(qMax(0, qMin(screenRect.top(), g.top())));
-    }
-
-
-    if (!w->isWindow()) // in workspace
-        w->parentWidget()->move(g.topLeft());
-    else
-        w->move(g.topLeft());
-
-    if (value(key + QLatin1String("/maximized"), false).toBool()) {
-        w->setWindowState(w->windowState() | Qt::WindowMaximized);
+    if (ba.isEmpty()) {
+        w->move(fallBack.topLeft());
+        w->resize(fallBack.size());
     } else {
-        w->resize(g.size());
+        w->restoreGeometry(ba);
     }
 
     if (value(key + QLatin1String("/visible"), true).toBool())
         w->show();
-//    endGroup();
 }
 
 QStringList QDesignerSettings::recentFilesList() const
@@ -181,20 +173,6 @@ bool QDesignerSettings::showNewFormOnStartup() const
     return value(QLatin1String("newFormDialog/ShowOnStartup"), true).toBool();
 }
 
-void QDesignerSettings::setUIMode(int mode)
-{
-    setValue(QLatin1String("UI/currentMode"), mode);
-}
-
-int QDesignerSettings::uiMode() const
-{
-#if defined(Q_WS_WIN)
-    return value(QLatin1String("UI/currentMode"), QDesignerWorkbench::DockedMode).toInt();
-#else
-    return value(QLatin1String("UI/currentMode"), QDesignerWorkbench::TopLevelMode).toInt();
-#endif
-}
-
 QByteArray QDesignerSettings::mainWindowState() const
 {
     return value(QLatin1String("MainWindowState")).toByteArray();
@@ -205,3 +183,86 @@ void QDesignerSettings::setMainWindowState(const QByteArray &mainWindowState)
     setValue(QLatin1String("MainWindowState"), mainWindowState);
 }
 
+QByteArray QDesignerSettings::toolBoxState() const
+{
+    return value(QLatin1String("ToolBoxState")).toByteArray();
+}
+
+void QDesignerSettings::setToolBoxState(const QByteArray &state)
+{
+    setValue(QLatin1String("ToolBoxState"), state);
+}
+
+void QDesignerSettings::clearBackup()
+{
+    remove(QLatin1String("backup/fileListOrg"));
+    remove(QLatin1String("backup/fileListBak"));
+}
+
+void QDesignerSettings::setBackup(const QMap<QString, QString> &map)
+{
+    const QStringList org = map.keys();
+    const QStringList bak = map.values();
+
+    setValue(QLatin1String("backup/fileListOrg"), org);
+    setValue(QLatin1String("backup/fileListBak"), bak);
+}
+
+QMap<QString, QString> QDesignerSettings::backup() const
+{
+    const QStringList org = value(QLatin1String("backup/fileListOrg"), QStringList()).toStringList();
+    const QStringList bak = value(QLatin1String("backup/fileListBak"), QStringList()).toStringList();
+
+    QMap<QString, QString> map;
+    for (int i = 0; i < org.count(); ++i)
+        map.insert(org.at(i), bak.at(i));
+
+    return map;
+}
+
+void QDesignerSettings::setPreferences(const Preferences& p)
+{
+    beginGroup(QLatin1String("UI"));
+    setValue(QLatin1String("currentMode"), p.m_uiMode);
+    setValue(QLatin1String("font"), p.m_font);
+    setValue(QLatin1String("useFont"), p.m_useFont);
+    setValue(QLatin1String("writingSystem"), p.m_writingSystem);
+    endGroup();
+    // grid
+    setValue(QLatin1String("defaultGrid"), p.m_defaultGrid.toVariantMap());
+    // merge template paths
+    QStringList templatePaths = defaultFormTemplatePaths();
+    templatePaths += p.m_additionalTemplatePaths;
+    setFormTemplatePaths(templatePaths);
+}
+
+Preferences QDesignerSettings::preferences() const
+{
+    Preferences rc;
+#ifdef Q_WS_WIN
+    const UIMode defaultMode = DockedMode;
+#else
+    const UIMode defaultMode = TopLevelMode;
+#endif
+    rc.m_uiMode = static_cast<UIMode>(value(QLatin1String("UI/currentMode"), defaultMode).toInt());
+    rc.m_writingSystem = static_cast<QFontDatabase::WritingSystem>(value(QLatin1String("UI/writingSystem"), QFontDatabase::Any).toInt());
+    rc.m_font = qVariantValue<QFont>(value(QLatin1String("UI/font")));
+    rc.m_useFont = value(QLatin1String("UI/useFont"), QVariant(false)).toBool();
+    const QVariantMap defaultGridMap = value(QLatin1String("defaultGrid"), QVariantMap()).toMap();
+    if (!defaultGridMap.empty())
+        rc.m_defaultGrid.fromVariantMap(defaultGridMap);
+    rc.m_additionalTemplatePaths = additionalFormTemplatePaths();
+    return rc;
+}
+
+QStringList QDesignerSettings::additionalFormTemplatePaths() const
+{
+    // get template paths excluding internal ones
+    QStringList rc = formTemplatePaths();
+    foreach (QString internalTemplatePath, defaultFormTemplatePaths()) {
+        const int index = rc.indexOf(internalTemplatePath);
+        if (index != -1)
+            rc.removeAt(index);
+    }
+    return rc;
+}

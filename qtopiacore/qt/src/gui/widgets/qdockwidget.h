@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,9 +47,10 @@ QT_MODULE(Gui)
 
 #ifndef QT_NO_DOCKWIDGET
 
-class QDockWidgetLayout;
+class QDockAreaLayout;
 class QDockWidgetPrivate;
 class QMainWindow;
+class QStyleOptionDockWidget;
 
 class Q_GUI_EXPORT QDockWidget : public QWidget
 {
@@ -59,9 +75,10 @@ public:
         DockWidgetClosable    = 0x01,
         DockWidgetMovable     = 0x02,
         DockWidgetFloatable   = 0x04,
+        DockWidgetVerticalTitleBar = 0x08,
 
-        DockWidgetFeatureMask = 0x07,
-        AllDockWidgetFeatures = DockWidgetFeatureMask,
+        DockWidgetFeatureMask = 0x0f,
+        AllDockWidgetFeatures = DockWidgetClosable|DockWidgetMovable|DockWidgetFloatable, // ### remove in 5.0
         NoDockWidgetFeatures  = 0x00,
 
         Reserved              = 0xff
@@ -77,6 +94,9 @@ public:
     void setAllowedAreas(Qt::DockWidgetAreas areas);
     Qt::DockWidgetAreas allowedAreas() const;
 
+    void setTitleBarWidget(QWidget *widget);
+    QWidget *titleBarWidget() const;
+
     inline bool isAreaAllowed(Qt::DockWidgetArea area) const
     { return (allowedAreas() & area) == area; }
 
@@ -88,21 +108,26 @@ Q_SIGNALS:
     void featuresChanged(QDockWidget::DockWidgetFeatures features);
     void topLevelChanged(bool topLevel);
     void allowedAreasChanged(Qt::DockWidgetAreas allowedAreas);
+    void visibilityChanged(bool visible);
+    void dockLocationChanged(Qt::DockWidgetArea area);
 
 protected:
     void changeEvent(QEvent *event);
     void closeEvent(QCloseEvent *event);
     void paintEvent(QPaintEvent *event);
     bool event(QEvent *event);
+    void initStyleOption(QStyleOptionDockWidget *option) const;
 
 private:
     Q_DECLARE_PRIVATE(QDockWidget)
     Q_DISABLE_COPY(QDockWidget)
     Q_PRIVATE_SLOT(d_func(), void _q_toggleView(bool))
     Q_PRIVATE_SLOT(d_func(), void _q_toggleTopLevel())
-    friend class QDockWidgetLayout;
+    friend class QDockAreaLayout;
     friend class QDockWidgetItem;
     friend class QMainWindowLayout;
+    friend class QDockWidgetLayout;
+    friend class QDockAreaLayoutInfo;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QDockWidget::DockWidgetFeatures)

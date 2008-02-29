@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,30 +19,14 @@
 **
 ****************************************************************************/
 
-#include <qpowerstatus.h>
+#include <custom.h>
 
 QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
 {
     return 255;
 }
 
-
 QTOPIABASE_EXPORT void qpe_setBrightness(int)
 {
 }
 
-QTOPIABASE_EXPORT void QPowerStatusManager::getStatus()
-{
-#ifdef Q_WS_QWS
-    int ac, bs, bf, pc, sec;
-    if ( getProcApmStatus( ac, bs, bf, pc, sec ) ) {
-        ps->percentRemain = pc;
-        ps->secsRemain = sec;
-        ps->percentAccurate = true;
-    } else {
-        ps->percentRemain = 100;
-        ps->secsRemain = -1;
-        ps->percentAccurate = false;
-    }
-#endif
-}

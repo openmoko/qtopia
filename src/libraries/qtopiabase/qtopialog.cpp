@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -47,10 +47,10 @@ bool qtopiaLogOptional( const char* category )
 #undef QTOPIA_LOG_OPTION
 #undef QLOG_DISABLE
 #undef QLOG_ENABLE
-#define QTOPIA_LOG_OPTION(dbgcat) if ( strcmp(category,#dbgcat)==0 ) return 1;
-#define QLOG_DISABLE(dbgcat)
-#define QLOG_ENABLE(dbgcat)
+#define QTOPIA_LOG_OPTION(dbgcat)
+#define QLOG_DISABLE(dbgcat) if ( strcmp(category,#dbgcat)==0 ) return 0;
+#define QLOG_ENABLE(dbgcat) if ( strcmp(category,#dbgcat)==0 ) return 0;
 #include <qtopialog-config.h>
-    return 0;
+    return 1;
 }
 

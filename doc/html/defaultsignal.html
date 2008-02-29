@@ -47,8 +47,8 @@
 <h2>Detailed Description</h2>
 <p>The DefaultSignal class provides a proxy for another system signal.</p>
 <p>To simplify the design of system themes and other mechanisms that source information directly from the value space, the DefaultSignal class proxies the information of another, configurable system signal provider under the name &quot;DefaultSignal&quot;.</p>
-<p>The Signal to proxy can be manually configured by setting the <tt>SignalSources/DefaultSignalSource</tt> key in the <tt>Trolltech/SignalStatus</tt> configuration file. If this setting is missing, the DefaultSignal class will proxy the first available signal source of type modem. If Qtopia is configured without a modem the first wlan signal source that becomes available will be used.</p>
-<p>The DefaultSignal class provides the <tt>DefaultSignal</tt> task.</p>
+<p>The Signal to proxy can be manually configured by setting the <tt>SignalSources/DefaultSignalSource</tt> key in the <tt>Trolltech/HardwareAccessories</tt> configuration file. If this setting is missing, the DefaultSignal class will proxy the first available signal source of type modem. If Qtopia is configured without a modem the first wlan signal source that becomes available will be used.</p>
+<p>The DefaultSignal class provides the <tt>DefaultSignal</tt> task. It is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="DefaultSignal"></a>DefaultSignal::DefaultSignal ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -57,6 +57,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

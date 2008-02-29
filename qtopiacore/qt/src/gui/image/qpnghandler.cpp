@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -33,12 +48,120 @@
 #include <qvector.h>
 
 #include <png.h>
+#include <pngconf.h>
 
 #ifdef Q_OS_TEMP
 #define CALLBACK_CALL_TYPE        __cdecl
 #else
 #define CALLBACK_CALL_TYPE
 #endif
+
+#ifdef QT_LSB
+
+// LSB doesn't standardize png_info_struct and png_struct_def
+// These structs are documented to not change, so fork as much as
+// we need. In the future, we should use the propper accessors, though.
+
+#include <setjmp.h>
+
+struct png_info_struct
+{
+   /* the following are necessary for every PNG file */
+   png_uint_32 width;       /* width of image in pixels (from IHDR) */
+   png_uint_32 height;      /* height of image in pixels (from IHDR) */
+   png_uint_32 valid;       /* valid chunk data (see PNG_INFO_ below) */
+   png_uint_32 rowbytes;    /* bytes needed to hold an untransformed row */
+   png_colorp palette;      /* array of color values (valid & PNG_INFO_PLTE) */
+   png_uint_16 num_palette; /* number of color entries in "palette" (PLTE) */
+   png_uint_16 num_trans;   /* number of transparent palette color (tRNS) */
+   png_byte bit_depth;      /* 1, 2, 4, 8, or 16 bits/channel (from IHDR) */
+   png_byte color_type;     /* see PNG_COLOR_TYPE_ below (from IHDR) */
+   /* The following three should have been named *_method not *_type */
+   png_byte compression_type; /* must be PNG_COMPRESSION_TYPE_BASE (IHDR) */
+   png_byte filter_type;    /* must be PNG_FILTER_TYPE_BASE (from IHDR) */
+   png_byte interlace_type; /* One of PNG_INTERLACE_NONE, PNG_INTERLACE_ADAM7 */
+
+   /* The following is informational only on read, and not used on writes. */
+   png_byte channels;       /* number of data channels per pixel (1, 2, 3, 4) */
+   png_byte pixel_depth;    /* number of bits per pixel */
+   png_byte spare_byte;     /* to align the data, and for future use */
+   png_byte signature[8];   /* magic bytes read by libpng from start of file */
+
+   /* The rest of the data is optional.  If you are reading, check the
+    * valid field to see if the information in these are valid.  If you
+    * are writing, set the valid field to those chunks you want written,
+    * and initialize the appropriate fields below.
+    */
+
+#if defined(PNG_gAMA_SUPPORTED) && defined(PNG_FLOATING_POINT_SUPPORTED)
+   /* The gAMA chunk describes the gamma characteristics of the system
+    * on which the image was created, normally in the range [1.0, 2.5].
+    * Data is valid if (valid & PNG_INFO_gAMA) is non-zero.
+    */
+   float gamma; /* gamma value of image, if (valid & PNG_INFO_gAMA) */
+#endif
+
+#if defined(PNG_sRGB_SUPPORTED)
+    /* GR-P, 0.96a */
+    /* Data valid if (valid & PNG_INFO_sRGB) non-zero. */
+   png_byte srgb_intent; /* sRGB rendering intent [0, 1, 2, or 3] */
+#endif
+
+#if defined(PNG_TEXT_SUPPORTED)
+   /* The tEXt, and zTXt chunks contain human-readable textual data in
+    * uncompressed, compressed, and optionally compressed forms, respectively.
+    * The data in "text" is an array of pointers to uncompressed,
+    * null-terminated C strings. Each chunk has a keyword that describes the
+    * textual data contained in that chunk.  Keywords are not required to be
+    * unique, and the text string may be empty.  Any number of text chunks may
+    * be in an image.
+    */
+   int num_text; /* number of comments read/to write */
+   int max_text; /* current size of text array */
+   png_textp text; /* array of comments read/to write */
+#endif /* PNG_TEXT_SUPPORTED */
+
+#if defined(PNG_tIME_SUPPORTED)
+   /* The tIME chunk holds the last time the displayed image data was
+    * modified.  See the png_time struct for the contents of this struct.
+    */
+   png_time mod_time;
+#endif
+
+#if defined(PNG_sBIT_SUPPORTED)
+   /* The sBIT chunk specifies the number of significant high-order bits
+    * in the pixel data.  Values are in the range [1, bit_depth], and are
+    * only specified for the channels in the pixel data.  The contents of
+    * the low-order bits is not specified.  Data is valid if
+    * (valid & PNG_INFO_sBIT) is non-zero.
+    */
+   png_color_8 sig_bit; /* significant bits in color channels */
+#endif
+
+#if defined(PNG_tRNS_SUPPORTED) || defined(PNG_READ_EXPAND_SUPPORTED) || \
+defined(PNG_READ_BACKGROUND_SUPPORTED)
+   /* The tRNS chunk supplies transparency data for paletted images and
+    * other image types that don't need a full alpha channel.  There are
+    * "num_trans" transparency values for a paletted image, stored in the
+    * same order as the palette colors, starting from index 0.  Values
+    * for the data are in the range [0, 255], ranging from fully transparent
+    * to fully opaque, respectively.  For non-paletted images, there is a
+    * single color specified that should be treated as fully transparent.
+    * Data is valid if (valid & PNG_INFO_tRNS) is non-zero.
+    */
+   png_bytep trans; /* transparent values for paletted image */
+   png_color_16 trans_values; /* transparent color for non-palette image */
+#endif
+};
+
+struct png_struct_def
+{
+#ifdef PNG_SETJMP_SUPPORTED
+       jmp_buf jmpbuf;            /* used in png_error */
+#endif
+};
+
+#endif // QT_LSB
 
 
 /*
@@ -331,7 +454,7 @@ bool QPngHandlerPrivate::readPngHeader()
         return false;
     }
 
-    if (setjmp(png_ptr->jmpbuf)) {
+    if (setjmp(png_jmpbuf(png_ptr))) {
         png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
         png_ptr = 0;
         return false;
@@ -355,13 +478,13 @@ bool QPngHandlerPrivate::readPngHeader()
                 value = codec->toUnicode(QByteArray(text_ptr->text, text_ptr->itxt_length));
             } else {
                 key = QString::fromLatin1(text_ptr->key);
-                value = QString::fromLatin1(QByteArray(text_ptr->text, text_ptr->text_length));
+                value = QString::fromLatin1(QByteArray(text_ptr->text, int(text_ptr->text_length)));
             }
         } else
 #endif
         {
             key = QString::fromLatin1(text_ptr->key);
-            value = QString::fromLatin1(QByteArray(text_ptr->text, text_ptr->text_length));
+            value = QString::fromLatin1(QByteArray(text_ptr->text, int(text_ptr->text_length)));
         }
         if (!description.isEmpty())
             description += QLatin1String("\n\n");
@@ -388,7 +511,7 @@ bool QPngHandlerPrivate::readPngImage(QImage *outImage)
     }
 
     row_pointers = 0;
-    if (setjmp(png_ptr->jmpbuf)) {
+    if (setjmp(png_jmpbuf(png_ptr))) {
         png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
         delete [] row_pointers;
         png_ptr = 0;
@@ -626,7 +749,7 @@ bool QPNGImageWriter::writeImage(const QImage& image_in, int quality_in, const Q
         return false;
     }
 
-    if (setjmp(png_ptr->jmpbuf)) {
+    if (setjmp(png_jmpbuf(png_ptr))) {
         png_destroy_write_struct(&png_ptr, &info_ptr);
         return false;
     }

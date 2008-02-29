@@ -2,7 +2,7 @@ TARGET   = qimsw-multi
 include(../../qpluginbase.pri)
 CONFIG      += warn_on
 
-DESTDIR = $$QT_BUILD_TREE/plugins/inputmethods
+QTDIR_build:DESTDIR = $$QT_BUILD_TREE/plugins/inputmethods
 
 HEADERS += qmultiinputcontext.h \
            qmultiinputcontextplugin.h

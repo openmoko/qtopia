@@ -20,10 +20,13 @@
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
 <ul>
+<li><div class="fn"/>void <b><a href="smsservice.html#flashSms">flashSms</a></b> ( const QDSActionRequest &amp; <i>request</i> )</li>
+<li><div class="fn"/>void <b><a href="smsservice.html#pushMmsMessage">pushMmsMessage</a></b> ( const QDSActionRequest &amp; <i>request</i> )</li>
 <li><div class="fn"/>void <b><a href="smsservice.html#smsVCard">smsVCard</a></b> ( const QString &amp; <i>filename</i>, const QString &amp; <i>description</i> )</li>
+<li><div class="fn"/>void <b><a href="smsservice.html#smsVCard-2">smsVCard</a></b> ( const QString &amp; <i>channel</i>, const QString &amp; <i>id</i>, const QString &amp; <i>filename</i>, const QString &amp; <i>description</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>void <b><a href="smsservice.html#smsVCard-3">smsVCard</a></b> ( const QDSActionRequest &amp; <i>request</i> )</li>
-<li><div class="fn"/>void <b><a href="smsservice.html#viewSms">viewSms</a></b> ()</li>
-<li><div class="fn"/>void <b><a href="smsservice.html#viewSmsList">viewSmsList</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="smsservice.html#viewSms">viewSms</a></b> ()&nbsp;&nbsp;<tt> (deprecated)</tt></li>
+<li><div class="fn"/>void <b><a href="smsservice.html#viewSmsList">viewSmsList</a></b> ()&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>void <b><a href="smsservice.html#writeSms">writeSms</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="smsservice.html#writeSms-2">writeSms</a></b> ( const QString &amp; <i>name</i>, const QString &amp; <i>number</i> )</li>
 <li><div class="fn"/>void <b><a href="smsservice.html#writeSms-3">writeSms</a></b> ( const QString &amp; <i>name</i>, const QString &amp; <i>number</i>, const QString &amp; <i>filename</i> )</li>
@@ -50,18 +53,34 @@
 <p>The <i>SMS</i> service enables applications to access features of the system's SMS application.</p>
 <hr />
 <h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="flashSms"></a>void SMSService::flashSms ( const <a href="qdsactionrequest.html">QDSActionRequest</a> &amp; <i>request</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Direct the <i>SMS</i> service to process the flash SMS message within <i>request</i>.</p>
+<p>This slot corresponds to a QDS service with request data containing the serialization of a <a href="qsmsmessage.html">QSMSMessage</a>, and no response data.</p>
+<p>This slot corresponds to the QCop service message <tt>SMS::flashSms(QDSActionRequest)</tt>.</p>
+<h3 class="fn"><a name="pushMmsMessage"></a>void SMSService::pushMmsMessage ( const <a href="qdsactionrequest.html">QDSActionRequest</a> &amp; <i>request</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Direct the <i>SMS</i> services to handle the MMS push notification <i>request</i>.</p>
+<p>This slot corresponds to a QDS service with request data containing the serialization of an <tt>MMSMessage</tt>, and no response data.</p>
+<p>This slot corresponds to the QCop service message <tt>SMS::pushMmsMessage(QDSActionRequest)</tt>.</p>
 <h3 class="fn"><a name="smsVCard"></a>void SMSService::smsVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Direct the <i>SMS</i> service to interact with the user to compose a new SMS message for sending the vcard data in <i>filename</i>. The <i>description</i> argument provides an optional descriptive text message.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::smsVCard(QString,QString)</tt>.</p>
+<h3 class="fn"><a name="smsVCard-2"></a>void SMSService::smsVCard ( const <a href="qstring.html">QString</a> &amp; <i>channel</i>, const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This function is deprecated.</p>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Direct the <i>SMS</i> service to interact with the user to compose a new SMS message for sending the vcard data in <i>filename</i>. The <i>description</i> argument provides an optional descriptive text message. The <i>channel</i> and <i>id</i> are not used.</p>
+<p>This slot corresponds to the QCop service message <tt>SMS::smsVCard(QString,QString,QString,QString)</tt>.</p>
 <h3 class="fn"><a name="smsVCard-3"></a>void SMSService::smsVCard ( const <a href="qdsactionrequest.html">QDSActionRequest</a> &amp; <i>request</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Direct the <i>SMS</i> service to interact with the user to compose a new SMS message for sending the vcard data in <i>request</i>.</p>
 <p>This slot corresponds to a QDS service with a request data type of &quot;text/x-vcard&quot; and no response data.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::smsVCard(QDSActionRequest)</tt>.</p>
 <h3 class="fn"><a name="viewSms"></a>void SMSService::viewSms ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This function is deprecated.</p>
 <p>Show the most recently received SMS message.</p>
+<p>Clients of this service should instead use <tt>Messages::viewNewMessages()</tt>.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::viewSms()</tt>.</p>
 <h3 class="fn"><a name="viewSmsList"></a>void SMSService::viewSmsList ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This function is deprecated.</p>
 <p>Show the list of all received SMS messages.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::viewSmsList()</tt>.</p>
 <h3 class="fn"><a name="writeSms"></a>void SMSService::writeSms ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -79,6 +98,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,10 +30,12 @@
 #include <QFile>
 #include <QSqlError>
 
+#include "quniqueid.h"
+
 #include "../migrateengine.h"
 
-#include <qsql_sqlite.h>
 #include <sqlite3.h>
+#include <QSqlDriver>
 #include <netinet/in.h>
 
 // migratoin tables
@@ -61,11 +63,10 @@ const QStringList &PimMigrate::tables() const
         tables << "taskcustom";
 
         tables << "simcardidmap";
+
         tables << "googleid";
-        tables << "gcal_appointments";
-        tables << "gcal_appointmentcategories";
-        tables << "gcal_appointmentcustom";
-        tables << "gcal_appointmentexceptions";
+
+        tables << "pimdependencies";
     }
 
     return tables;
@@ -103,7 +104,7 @@ bool PimMigrate::migrate()
 {
     // 4.2.0 brings in the changelog table
     // 4.2.2 brings in a change to rec id's.
-    // but because migrate only handles from 4.1.x, 
+    // but because migrate only handles from 4.1.x,
     // the only relavant table version number is 110, the
     // number that maps to 4.2.2
 
@@ -153,6 +154,14 @@ bool PimMigrate::migrate()
     foreach(QString table, tables()) {
         CHECK(migrate(db, table, mi->tableVersion(table)));
     }
+
+    // only one version so far.. change this line if version changes
+    if (!existingTables.contains("syncServers")) {
+        // sync server identification
+        QSqlQuery q(db);
+        CHECK(q.exec("CREATE TABLE syncServers (serverIdentity VARCHAR(255), datasource VARCHAR(255), lastSyncAnchor TIMESTAMP, UNIQUE(serverIdentity, datasource))"));
+        CHECK(mi->setTableVersion("syncServers", 111));
+    }
     return true;
 }
 
@@ -170,7 +179,7 @@ bool PimMigrate::migrate(const QSqlDatabase &db, const QString &table, int versi
         // if it was backed up
         if (existingTables.contains(table+"_old")) {
             QSqlQuery query(db);
-            CHECK(query.prepare(copyText(table)));
+            CHECK(query.prepare(queryText("copy", table)));
             CHECK(query.exec());
 
             if (table == "tasks" || table == "contacts" || table == "appointments") {
@@ -184,15 +193,20 @@ bool PimMigrate::migrate(const QSqlDatabase &db, const QString &table, int versi
             //mi->dropTable(table+"_old");
             CHECK(query.exec("DROP TABLE "+table+"_old;"));
         }
+
+        if (table == "pimdependencies") {
+            CHECK(createContactEvents(db));
+            CHECK(createTodoEvents(db));
+        }
     }
     return true;
 }
 
-QString PimMigrate::copyText(const QString &table)
+QString PimMigrate::queryText(const QString& queryType, const QString &table)
 {
     const QSqlDatabase &db  = mi->database();
 
-    QFile data(QLatin1String(":/QtopiaSql/copy/") + db.driverName() + QLatin1String("/") + table);
+    QFile data(QLatin1String(":/QtopiaSql/") + queryType + QLatin1String("/") + db.driverName() + QLatin1String("/") + table);
     data.open(QIODevice::ReadOnly);
     QTextStream ts(&data);
     // read assuming utf8 encoding.
@@ -201,5 +215,61 @@ QString PimMigrate::copyText(const QString &table)
 
     // assumption, no comments or mult-statements.  those belong in rc file if anywhere.
     return ts.readAll();
+}
+
+bool PimMigrate::createContactEvents(const QSqlDatabase &db)
+{
+    bool ret = true;
+
+    uint birthdayContext = QUniqueIdGenerator::mappedContext(QUuid("822d32bc-d646-4b36-b1fd-090b2199b725"));
+    uint anniversaryContext = QUniqueIdGenerator::mappedContext(QUuid("5a72a3fe-f2a8-4cba-94bb-0880dac41520"));
+
+    QSqlQuery createBirthdays(db);
+    QSqlQuery createBirthdaysDeps(db);
+    QSqlQuery createAnniversaries(db);
+    QSqlQuery createAnniversariesDeps(db);
+
+    // Birthdays
+    CHECK(createBirthdaysDeps.prepare(queryText("generate", "contact_birthdays_deps")));
+    createBirthdaysDeps.bindValue(":birthdaycontext", birthdayContext);
+    CHECK(createBirthdaysDeps.exec());
+
+    CHECK(createBirthdays.prepare(queryText("generate", "contact_birthdays")));
+    createBirthdays.bindValue(":birthdaycontext", birthdayContext);
+    createBirthdays.bindValue(":birthdaycontext2", birthdayContext);
+    CHECK(createBirthdays.exec());
+
+    // Anniversaries
+    CHECK(createAnniversariesDeps.prepare(queryText("generate", "contact_anniversaries_deps")));
+    createAnniversariesDeps.bindValue(":anniversarycontext", anniversaryContext);
+    CHECK(createAnniversariesDeps.exec());
+
+    CHECK(createAnniversaries.prepare(queryText("generate", "contact_anniversaries")));
+    createAnniversaries.bindValue(":anniversarycontext", anniversaryContext);
+    createAnniversaries.bindValue(":anniversarycontext2", anniversaryContext);
+    CHECK(createAnniversaries.exec());
+
+    return ret;
+}
+
+bool PimMigrate::createTodoEvents(const QSqlDatabase &db)
+{
+    bool ret = true;
+
+    uint taskContext = QUniqueIdGenerator::mappedContext(QUuid("a2c69584-a85a-49c6-967b-6e2895f5c777"));
+
+    QSqlQuery createTaskEvents(db);
+    QSqlQuery createTaskEventsDeps(db);
+
+    CHECK(createTaskEvents.prepare(queryText("generate", "task_duedates")));
+    createTaskEvents.bindValue(":taskcontext", taskContext);
+    createTaskEvents.bindValue(":taskcontext2", taskContext);
+    CHECK(createTaskEvents.exec());
+
+    CHECK(createTaskEventsDeps.prepare(queryText("generate", "task_duedates_deps")));
+    createTaskEventsDeps.bindValue(":taskcontext", taskContext);
+    CHECK(createTaskEventsDeps.exec());
+
+    return ret;
 }
 

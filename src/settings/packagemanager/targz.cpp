@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -56,14 +56,14 @@ static int wrap_gzclose( int fd )
     return result;
 }
 
-static ssize_t wrap_gzread( int fd, void *buf, uint count )
+static ssize_t wrap_gzread( int fd, void *buf, size_t count )
 {
     if ( !gzHandles.contains( fd )) return -1;
     gzFile fh = gzHandles[ fd ];
     return gzread( fh, buf, count );
 }
 
-static ssize_t wrap_gzwrite( int fd, const void *buf, uint count )
+static ssize_t wrap_gzwrite( int fd, const void *buf, size_t count )
 {
     if ( !gzHandles.contains( fd )) return -1;
     gzFile fh = gzHandles[ fd ];
@@ -177,3 +177,53 @@ bool targz_archive_all( const QString &tarfile, const QString &srcpath, bool gzi
     return ( result >= 0 );
 }
 
+qlonglong targz_archive_size( const QString &tarfile )
+{
+       QByteArray pathnameArr = tarfile.toLocal8Bit();
+       char *pathname = pathnameArr.data();
+
+
+       TAR *tarHandle;
+       int options = TAR_GNU;
+       int filemode = 0;  // only care about this if creating files (ie untar)
+       tartype_t *arctype = 0;
+       
+       {
+           // QFile and stream go away at end of scope
+           QFile tfs( tarfile );
+           if ( !tfs.exists() )
+           {
+               qWarning( "Tar extract all file %s doesnt exist", pathname );
+               return false;
+           }
+           tfs.open(QIODevice::ReadOnly);
+           QDataStream tarbytes( &tfs );
+           quint8 b1, b2;
+
+           // if the first two bytes are the magic numbers for a gzip format
+           // file, use the above zlib wrapped i/o function pointers, otherwise
+           // assume normal uncompressed tar format (default)
+           tarbytes >> b1 >> b2;
+           if ( b1 == 0x1f && b2 == 0x8b ) arctype = &zlibtype;
+       }
+
+
+    int result = tar_open( &tarHandle, pathname, arctype, O_RDONLY, filemode, options);
+    if ( result < 0 )
+    {
+        qWarning( "error opening tar file %s: %s", pathname, strerror(errno) );
+        return false;
+    }
+
+    qlonglong size = 0;
+    int i;
+    while ((i = th_read(tarHandle)) == 0)
+    {
+        size += th_get_size(tarHandle);
+        if( TH_ISREG(tarHandle) )
+            tar_skip_regfile(tarHandle);
+    }
+
+    tar_close( tarHandle );
+    return size;
+}

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <BSciAPI.h>
+#include <bsci.h>
 
 int main( int , char ** ) {
     return 0;

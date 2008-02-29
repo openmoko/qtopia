@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,62 @@
 #include "qmediawidgets.h"
 
 #include <private/mediastyle_p.h>
+
+static QImage load_scaled_image( const QString& filename, const QSize& size, Qt::AspectRatioMode mode = Qt::IgnoreAspectRatio )
+{
+    QImageReader reader( filename );
+
+    QSize scaled;
+    if( mode == Qt::IgnoreAspectRatio ) {
+        scaled = size;
+    } else {
+        scaled = reader.size();
+        scaled.scale( size, mode );
+    }
+
+    reader.setScaledSize( scaled );
+    return reader.read();
+}
+
+static QImage invert( const QImage& image )
+{
+    QImage ret;
+
+    switch( image.format() )
+    {
+    case QImage::Format_RGB32:
+    case QImage::Format_ARGB32:
+        ret = image;
+        break;
+    case QImage::Format_ARGB32_Premultiplied:
+        ret = image.convertToFormat( QImage::Format_ARGB32 );
+        break;
+    default:
+        // Unsupported
+        return image;
+    }
+
+    quint32 *p = (quint32*)ret.bits();
+    quint32 *end = p + ret.numBytes()/4;
+    while( p != end ) {
+        *p++ ^= 0x00ffffff;
+    }
+
+    return ret;
+}
+
+static QImage contrast( const QColor& color, const QImage& image )
+{
+    static const int INVERT_THRESHOLD = 128;
+
+    int x, v;
+    color.getHsv( &x, &x, &v );
+    if( v > INVERT_THRESHOLD ) {
+        return invert( image );
+    }
+
+    return image;
+}
 
 /*!
     \class QMediaStateLabel
@@ -49,7 +105,7 @@
 class QMediaStateLabelPrivate
 {
 public:
-    QPixmap buffer;
+    QImage buffer;
 };
 
 /*!
@@ -100,7 +156,7 @@ void QMediaStateLabel::setState( QtopiaMedia::State state )
 {
     m_state = state;
 
-    m_d->buffer = QPixmap();
+    m_d->buffer = QImage();
     update();
 }
 
@@ -109,17 +165,19 @@ void QMediaStateLabel::setState( QtopiaMedia::State state )
 */
 void QMediaStateLabel::paintEvent( QPaintEvent* )
 {
+    QColor textcolor = palette().windowText().color();
+
     if( m_d->buffer.isNull() ) {
         switch( m_state )
         {
         case QtopiaMedia::Playing:
-            m_d->buffer = QIcon( ":icon/mediaplayer/black/play" ).pixmap( size() );
+            m_d->buffer = contrast( textcolor, load_scaled_image( ":image/mediaplayer/black/play", size() ) );
             break;
         case QtopiaMedia::Paused:
-            m_d->buffer = QIcon( ":icon/mediaplayer/black/pause" ).pixmap( size() );
+            m_d->buffer = contrast( textcolor, load_scaled_image( ":image/mediaplayer/black/pause", size() ) );
             break;
         case QtopiaMedia::Stopped:
-            m_d->buffer = QIcon( ":icon/mediaplayer/black/stop" ).pixmap( size() );
+            m_d->buffer = contrast( textcolor, load_scaled_image( ":icon/mediaplayer/black/stop", size() ) );
             break;
         default:
             // Ignore
@@ -128,7 +186,7 @@ void QMediaStateLabel::paintEvent( QPaintEvent* )
     }
 
     QPainter painter( this );
-    painter.drawPixmap( QPoint( 0, 0 ), m_d->buffer );
+    painter.drawImage( QPoint( 0, 0 ), m_d->buffer );
 }
 
 /*!
@@ -136,7 +194,7 @@ void QMediaStateLabel::paintEvent( QPaintEvent* )
 */
 void QMediaStateLabel::resizeEvent( QResizeEvent* )
 {
-    m_d->buffer = QPixmap();
+    m_d->buffer = QImage();
     update();
 }
 
@@ -209,7 +267,7 @@ QSize SimpleLabel::sizeHint() const
     return m_size;
 }
 
-void SimpleLabel::paintEvent( QPaintEvent* e )
+void SimpleLabel::paintEvent( QPaintEvent* )
 {
     QPainter painter( this );
     painter.drawText( rect(), m_alignment, m_text );
@@ -285,8 +343,7 @@ public:
 /*!
     \fn QMediaProgressLabel::QMediaProgressLabel( Type type, QWidget* parent )
 
-    Constructs a progress label with the format \a type. Elapsed and total time
-    are initialized to \tt {0:00}.
+    Constructs a progress label with the format \a type. Elapsed and total time are initialized to \tt {0:00}.
 
     The \a parent argument is passed to the QWidget constructor.
 */
@@ -412,7 +469,7 @@ void QMediaProgressLabel::setTotal( quint32 ms )
 void QMediaProgressLabel::activate()
 {
     // Connect to media control
-    m_control = new QMediaControl( m_content->handle() );
+    m_control = new QMediaControl( m_content );
     connect( m_control, SIGNAL(lengthChanged(quint32)),
         this, SLOT(setTotal(quint32)) );
     connect( m_control, SIGNAL(positionChanged(quint32)),
@@ -638,7 +695,7 @@ void QMediaProgressWidget::setLength( quint32 ms )
 
 void QMediaProgressWidget::activate()
 {
-    m_control = new QMediaControl( m_content->handle() );
+    m_control = new QMediaControl( m_content );
     connect( m_control, SIGNAL(positionChanged(quint32)),
         this, SLOT(setPosition(quint32)) );
     connect( m_control, SIGNAL(lengthChanged(quint32)),
@@ -692,7 +749,7 @@ void QMediaProgressWidget::deactivate()
 class QMediaVolumeLabelPrivate
 {
 public:
-    QPixmap buffer;
+    QImage buffer;
 };
 
 /*!
@@ -737,7 +794,7 @@ void QMediaVolumeLabel::setVolumeType( Type type )
 {
     m_type = type;
 
-    m_d->buffer = QPixmap();
+    m_d->buffer = QImage();
     update();
 }
 
@@ -754,23 +811,25 @@ QSize QMediaVolumeLabel::sizeHint() const
 */
 void QMediaVolumeLabel::paintEvent( QPaintEvent* )
 {
+    QColor textcolor = palette().windowText().color();
+
     if( m_d->buffer.isNull() ) {
         switch( m_type )
         {
         case MinimumVolume:
-            m_d->buffer = QIcon( ":icon/mediaplayer/black/volume-min" ).pixmap( size() );
+            m_d->buffer = contrast( textcolor, load_scaled_image( ":icon/mediaplayer/black/volume-min", size() ) );
             break;
         case MaximumVolume:
-            m_d->buffer = QIcon( ":icon/mediaplayer/black/volume-max" ).pixmap( size() );
+            m_d->buffer = contrast( textcolor, load_scaled_image( ":icon/mediaplayer/black/volume-max", size() ) );
             break;
         case MuteVolume:
-            m_d->buffer = QIcon( ":icon/mediaplayer/black/volume-mute" ).pixmap( size() );
+            m_d->buffer = contrast( textcolor, load_scaled_image( ":icon/mediaplayer/black/volume-mute", size() ) );
             break;
         }
     }
 
     QPainter painter( this );
-    painter.drawPixmap( QPoint( 0, 0 ), m_d->buffer );
+    painter.drawImage( QPoint( 0, 0 ), m_d->buffer );
 }
 
 /*!
@@ -778,7 +837,7 @@ void QMediaVolumeLabel::paintEvent( QPaintEvent* )
 */
 void QMediaVolumeLabel::resizeEvent( QResizeEvent* )
 {
-    m_d->buffer = QPixmap();
+    m_d->buffer = QImage();
     update();
 }
 
@@ -963,7 +1022,7 @@ void QMediaVolumeWidget::setVolume( int volume )
 
 void QMediaVolumeWidget::activate()
 {
-    m_control = new QMediaControl( m_content->handle() );
+    m_control = new QMediaControl( m_content );
     connect( m_control, SIGNAL(volumeChanged(int)),
         this, SLOT(setVolume(int)) );
 
@@ -1145,7 +1204,7 @@ SeekProgress::SeekProgress( QWidget* parent )
 
 void SeekProgress::activate()
 {
-    m_control = new QMediaControl( m_content->handle() );
+    m_control = new QMediaControl( m_content );
     connect( m_control, SIGNAL(lengthChanged(quint32)),
         this, SLOT(setLength(quint32)) );
     if( m_istracking ) {
@@ -1299,7 +1358,7 @@ void SeekMonitor::setMediaContent( QMediaContent* content )
 
 void SeekMonitor::activate()
 {
-    m_control = new QMediaControl( m_content->handle() );
+    m_control = new QMediaControl( m_content );
 }
 
 void SeekMonitor::deactivate()
@@ -1312,8 +1371,7 @@ void SeekMonitor::deactivate()
     \class QMediaSeekWidget
     \mainclass
 
-    \brief The QMediaSeekWidget class allows the user to seek within a media
-content
+    \brief The QMediaSeekWidget class allows the user to seek within a media content
     object.
 
     \ingroup multimedia

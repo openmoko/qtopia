@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,9 +32,9 @@ class PackageInformationReader : public QObject
     Q_OBJECT
 public:
 
-    PackageInformationReader(const QString& fileName);
-    PackageInformationReader( QTextStream &ts );
-    PackageInformationReader();
+    PackageInformationReader(const QString& fileName, InstallControl::PackageInfo::Source source = InstallControl::PackageInfo::PkgList);
+    PackageInformationReader(QTextStream &ts, InstallControl::PackageInfo::Source source = InstallControl::PackageInfo::PkgList); 
+    PackageInformationReader(InstallControl::PackageInfo::Source source = InstallControl::PackageInfo::PkgList);
 
     void readLine( const QString & );
     void reset();
@@ -47,6 +47,10 @@ public:
     QString url() const { return pkg.url; }
     QString md5Sum() const { return pkg.md5Sum; }
     QString qtopiaVersion() const { return pkg.qtopiaVersion; }
+    QString devices() const { return pkg.devices; }
+    QString installedSize() const { return pkg.installedSize; }
+    QString type() const { return pkg.type; }
+
 
     const InstallControl::PackageInfo &package() const { return pkg; }
     bool getIsError() const { return isError; }
@@ -62,6 +66,7 @@ private:
 
     bool accumulatingFullDesc;
     InstallControl::PackageInfo pkg;
+    InstallControl::PackageInfo::Source source;
 
     void checkCompleted();
 };

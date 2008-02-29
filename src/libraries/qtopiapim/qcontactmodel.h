@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -63,6 +63,8 @@ public:
         DefaultEmail,
         Emails,
 
+        DefaultPhone,
+
         OtherPhone,
         OtherFax,
         OtherMobile,
@@ -112,7 +114,10 @@ public:
         CompanyPronunciation,
 
         Identifier,
-        Categories
+        Categories,
+        OtherVOIP,
+        HomeVOIP,
+        BusinessVOIP
     };
 
     enum QContactModelRole {
@@ -129,6 +134,7 @@ public:
     bool mirrorAll(const QPimSource &source, const QPimSource &dest);
 
     static QList<Field> phoneFields();
+    static QList<Field> labelFields();
     static QStringList localeNameTitles();
     static QStringList localeSuffixes();
 
@@ -203,6 +209,7 @@ public:
 #ifdef QTOPIA_PHONE
     QContact matchPhoneNumber(const QString &);
 #endif
+    QContact matchEmailAddress(const QString &);
 
     /* need a match function since otherwise QAbstractItemModel will do it poorly */
     QModelIndexList match(const QModelIndex &start, int role, const QVariant &,

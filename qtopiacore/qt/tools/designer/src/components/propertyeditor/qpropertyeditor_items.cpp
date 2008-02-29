@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -26,10 +41,10 @@
 #include "stringlisteditorbutton.h"
 #include "defs.h"
 #include "qlonglongvalidator.h"
-
-#include <QtDesigner/propertysheet.h>
+#include "qtcolorbutton.h"
 
 #include <qdesigner_utils_p.h>
+#include <textpropertyeditor_p.h>
 
 #include <QtGui/QLineEdit>
 #include <QtGui/QListView>
@@ -42,7 +57,10 @@
 #include <QtGui/QApplication>
 #include <QtGui/QBitmap>
 #include <QtGui/QLabel>
+#include <QtGui/QMenu>
+#include <QtGui/QHBoxLayout>
 #include <QtCore/QUrl>
+#include <QContextMenuEvent>
 #include <private/qfont_p.h>
 
 #include <QtCore/qdebug.h>
@@ -52,6 +70,15 @@
 using namespace qdesigner_internal;
 
 Q_GLOBAL_STATIC(QFontDatabase, fontDatabase)
+
+static QString matchStringInKeys(const QString &str, const QMap<QString, QVariant> &items) {
+    for (QMap<QString, QVariant>::const_iterator it = items.begin(); it != items.end(); ++it) {
+        if (it.key().contains(str))
+            return it.key();
+    }
+    return str;
+}
+
 
 void IProperty::setDirty(bool b)
 {
@@ -101,6 +128,18 @@ void AbstractPropertyGroup::updateEditorContents(QWidget *editor)
     label->setText(toString());
 }
 
+QString AbstractPropertyGroup::toString() const
+{
+    QString text = QString(QLatin1Char('['));
+    for (int i=0; i<propertyCount(); ++i) {
+        if (i)
+            text += QLatin1String(", ");
+        text += propertyAt(i)->toString();
+    }
+    text += QLatin1Char(']');
+    return text;
+}
+
 // -------------------------------------------------------------------------
 BoolProperty::BoolProperty(bool value, const QString &name)
     : AbstractProperty<bool>(value, name)
@@ -137,8 +176,8 @@ void BoolProperty::updateEditorContents(QWidget *editor)
 
 void BoolProperty::updateValue(QWidget *editor)
 {
-    if (QComboBox *combo = qobject_cast<QComboBox*>(editor)) {
-        bool newValue = combo->currentIndex() ? true : false;
+    if (const QComboBox *combo = qobject_cast<const QComboBox*>(editor)) {
+        const bool newValue = combo->currentIndex() ? true : false;
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -151,11 +190,11 @@ void BoolProperty::updateValue(QWidget *editor)
 PointProperty::PointProperty(const QPoint &value, const QString &name)
     : AbstractPropertyGroup(name)
 {
-    IProperty *px = new IntProperty(value.x(), QLatin1String("x"));
+    IProperty *px = new IntProperty(value.x(), QString(QLatin1Char('x')));
     px->setFake(true);
     px->setParent(this);
 
-    IProperty *py = new IntProperty(value.y(), QLatin1String("y"));
+    IProperty *py = new IntProperty(value.y(), QString(QLatin1Char('y')));
     py->setFake(true);
     py->setParent(this);
 
@@ -170,7 +209,7 @@ QVariant PointProperty::value() const
 
 void PointProperty::setValue(const QVariant &value)
 {
-    QPoint pt = value.toPoint();
+    const QPoint pt = value.toPoint();
     propertyAt(0)->setValue(pt.x());
     propertyAt(1)->setValue(pt.y());
 }
@@ -179,11 +218,11 @@ void PointProperty::setValue(const QVariant &value)
 PointFProperty::PointFProperty(const QPointF &value, const QString &name)
     : AbstractPropertyGroup(name)
 {
-    DoubleProperty *px = new DoubleProperty(value.x(), QLatin1String("x"));
+    DoubleProperty *px = new DoubleProperty(value.x(), QString(QLatin1Char('x')));
     px->setFake(true);
     px->setParent(this);
 
-    DoubleProperty *py = new DoubleProperty(value.y(), QLatin1String("y"));
+    DoubleProperty *py = new DoubleProperty(value.y(), QString(QLatin1Char('y')));
     py->setFake(true);
     py->setParent(this);
 
@@ -198,7 +237,7 @@ QVariant PointFProperty::value() const
 
 void PointFProperty::setValue(const QVariant &value)
 {
-    QPointF pt = value.toPointF();
+    const QPointF pt = value.toPointF();
     propertyAt(0)->setValue(pt.x());
     propertyAt(1)->setValue(pt.y());
 }
@@ -286,11 +325,12 @@ QWidget *PropertyCollection::createExternalEditor(QWidget *parent)
 
 // -------------------------------------------------------------------------
 
-StringProperty::StringProperty(const QString &value, const QString &name, bool hasComment, const QString &comment)
+StringProperty::StringProperty(const QString &value, const QString &name,
+                               TextPropertyValidationMode validationMode,
+                               bool hasComment, const QString &comment)
     : AbstractPropertyGroup(name),
-      m_value(value),
-      m_checkValidObjectName(false),
-      m_allowScope(false)
+      m_validationMode(validationMode),
+      m_value(value)
 {
     if (hasComment) {
         StringProperty *pcomment = new StringProperty(comment, QLatin1String("comment"));
@@ -299,25 +339,6 @@ StringProperty::StringProperty(const QString &value, const QString &name, bool h
     }
 }
 
-bool StringProperty::checkValidObjectName() const
-{
-    return m_checkValidObjectName;
-}
-
-void StringProperty::setCheckValidObjectName(bool b)
-{
-    m_checkValidObjectName = b;
-}
-
-bool StringProperty::allowScope() const
-{
-    return m_allowScope;
-}
-
-void StringProperty::setAllowScope(bool b)
-{
-    m_allowScope = b;
-}
 
 QVariant StringProperty::value() const
 {
@@ -331,7 +352,7 @@ void StringProperty::setValue(const QVariant &value)
 
 QString StringProperty::toString() const
 {
-    return m_value;
+    return TextPropertyEditor::stringToEditorString(m_value, m_validationMode);
 }
 
 bool StringProperty::hasEditor() const
@@ -341,30 +362,24 @@ bool StringProperty::hasEditor() const
 
 QWidget *StringProperty::createEditor(QWidget *parent, const QObject *target, const char *receiver) const
 {
-    QLineEdit *lineEdit = new QLineEdit(parent);
-    lineEdit->setFrame(0);
+    TextPropertyEditor* textEditor = new TextPropertyEditor(TextPropertyEditor::EmbeddingTreeView, m_validationMode, parent);
 
-    if (checkValidObjectName()) {
-        QString rx = allowScope() ? QString("[_a-zA-Z:][_a-zA-Z0-9:]*") : QString("[_a-zA-Z][_a-zA-Z0-9]*");
-        lineEdit->setValidator(new QRegExpValidator(QRegExp(rx), lineEdit));
-    }
-
-    QObject::connect(lineEdit, SIGNAL(textChanged(QString)), target, receiver);
-    return lineEdit;
+    QObject::connect(textEditor, SIGNAL(textChanged(QString)), target, receiver);
+    return textEditor;
 }
 
 void StringProperty::updateEditorContents(QWidget *editor)
 {
-    if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor)) {
-        if (lineEdit->text() != m_value)
-            lineEdit->setText(m_value);
+    if (TextPropertyEditor *textEditor = qobject_cast<TextPropertyEditor*>(editor)) {
+        if (textEditor->text() != m_value)
+            textEditor->setText(m_value);
     }
 }
 
 void StringProperty::updateValue(QWidget *editor)
 {
-    if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor)) {
-        QString newValue = lineEdit->text();
+    if (const TextPropertyEditor *textEditor = qobject_cast<const TextPropertyEditor*>(editor)) {
+        const QString newValue = textEditor->text();
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -422,7 +437,7 @@ void ListProperty::updateEditorContents(QWidget *editor)
 void ListProperty::updateValue(QWidget *editor)
 {
     if (QComboBox *combo = qobject_cast<QComboBox*>(editor)) {
-        int newValue = combo->currentIndex();
+        const int newValue = combo->currentIndex();
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -465,7 +480,7 @@ QVariant SizeProperty::value() const
 
 void SizeProperty::setValue(const QVariant &value)
 {
-    QSize pt = value.toSize();
+    const QSize pt = value.toSize();
     propertyAt(0)->setValue(pt.width());
     propertyAt(1)->setValue(pt.height());
 }
@@ -495,7 +510,7 @@ QVariant SizeFProperty::value() const
 
 void SizeFProperty::setValue(const QVariant &value)
 {
-    QSizeF pt = value.toSizeF();
+    const QSizeF pt = value.toSizeF();
     propertyAt(0)->setValue(pt.width());
     propertyAt(1)->setValue(pt.height());
 }
@@ -570,7 +585,7 @@ void IntProperty::updateEditorContents(QWidget *editor)
 void IntProperty::updateValue(QWidget *editor)
 {
     if (QSpinBox *spinBox = qobject_cast<QSpinBox*>(editor)) {
-        int newValue = spinBox->value();
+        const int newValue = spinBox->value();
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -583,11 +598,11 @@ void IntProperty::updateValue(QWidget *editor)
 RectProperty::RectProperty(const QRect &value, const QString &name)
     : AbstractPropertyGroup(name)
 {
-    IntProperty *px = new IntProperty(value.x(), QLatin1String("x"));
+    IntProperty *px = new IntProperty(value.x(), QString(QLatin1Char('x')));
     px->setFake(true);
     px->setParent(this);
 
-    IntProperty *py = new IntProperty(value.y(), QLatin1String("y"));
+    IntProperty *py = new IntProperty(value.y(), QString(QLatin1Char('y')));
     py->setFake(true);
     py->setParent(this);
 
@@ -630,11 +645,11 @@ void RectProperty::setValue(const QVariant &value)
 RectFProperty::RectFProperty(const QRectF &value, const QString &name)
     : AbstractPropertyGroup(name)
 {
-    DoubleProperty *px = new DoubleProperty(value.x(), QLatin1String("x"));
+    DoubleProperty *px = new DoubleProperty(value.x(), QString(QLatin1Char('x')));
     px->setFake(true);
     px->setParent(this);
 
-    DoubleProperty *py = new DoubleProperty(value.y(), QLatin1String("y"));
+    DoubleProperty *py = new DoubleProperty(value.y(), QString(QLatin1Char('y')));
     py->setFake(true);
     py->setParent(this);
 
@@ -712,6 +727,33 @@ QVariant ColorProperty::decoration() const
     return qVariantFromValue(pix);
 }
 
+QWidget *ColorProperty::createEditor(QWidget *parent, const QObject *target, const char *receiver) const
+{
+    QtColorButton *button = new QtColorButton(parent);
+    QObject::connect(button, SIGNAL(colorChanged(const QColor &)), target, receiver);
+    return button;
+}
+
+void ColorProperty::updateEditorContents(QWidget *editor)
+{
+    QtColorButton *button = qobject_cast<QtColorButton *>(editor);
+    if (!button)
+        return;
+    button->setColor(qvariant_cast<QColor>(value()));
+}
+
+void ColorProperty::updateValue(QWidget *editor)
+{
+    QtColorButton *button = qobject_cast<QtColorButton *>(editor);
+    if (!button)
+        return;
+    const QVariant color = qVariantFromValue(button->color());
+    if (color != value()) {
+        setValue(color);
+        setChanged(true);
+    }
+}
+
 // -------------------------------------------------------------------------
 FontProperty::FontProperty(const QFont &value, const QString &name, QWidget *selectedWidget)
     : AbstractPropertyGroup(name)
@@ -773,11 +815,20 @@ FontProperty::FontProperty(const QFont &value, const QString &name, QWidget *sel
     i->setParent(this);
     m_properties << i;
 
-    i = new BoolProperty(value.styleStrategy() == QFont::PreferDefault, QLatin1String("Antialiasing"));
-    i->setFake(true);
-    i->setHasReset(true);
-    i->setParent(this);
-    m_properties << i;
+    QStringList keys;
+    keys << QString::fromUtf8("QFont::PreferDefault");
+    keys << QString::fromUtf8("QFont::NoAntialias");
+    keys << QString::fromUtf8("QFont::PreferAntialias");
+    QMap<QString, QVariant> map;
+    map[QString::fromUtf8("QFont::PreferDefault")] = QVariant(QFont::PreferDefault);
+    map[QString::fromUtf8("QFont::NoAntialias")] = QVariant(QFont::NoAntialias);
+    map[QString::fromUtf8("QFont::PreferAntialias")] = QVariant(QFont::PreferAntialias);
+
+    MapProperty *pa = new MapProperty(map, value.styleStrategy(), QLatin1String("Antialiasing"), keys);
+    pa->setFake(true);
+    pa->setHasReset(true);
+    pa->setParent(this);
+    m_properties << pa;
 
     m_font = value;
 }
@@ -800,13 +851,13 @@ void FontProperty::setValue(const QVariant &value)
         }
     }
 
-    uint mask = m_font.resolve();
+    const uint mask = m_font.resolve();
     m_font = m_font.resolve(parentFont);
     m_font.resolve(mask);
 
     m_changed = mask != 0;
 
-    int family = fontDatabase()->families().indexOf(m_font.family());
+    const int family = fontDatabase()->families().indexOf(m_font.family());
     int pointSize = m_font.pointSize();
 
     if (pointSize < 1) {
@@ -822,7 +873,7 @@ void FontProperty::setValue(const QVariant &value)
     propertyAt(4)->setValue(m_font.underline());
     propertyAt(5)->setValue(m_font.strikeOut());
     propertyAt(6)->setValue(m_font.kerning());
-    propertyAt(7)->setValue(m_font.styleStrategy() == QFont::PreferDefault);
+    propertyAt(7)->setValue(m_font.styleStrategy());
 }
 
 QVariant FontProperty::decoration() const
@@ -840,11 +891,15 @@ QVariant FontProperty::decoration() const
 
 QString FontProperty::toString() const
 {
-    QString family = propertyAt(0)->toString();
-    QString pointSize = propertyAt(1)->value().toString();
-
-    return QLatin1String("  ")  // ### temp hack
-        + QLatin1String("[") + family + QLatin1String(", ") + pointSize + QLatin1String("]");
+    const QString family = propertyAt(0)->toString();
+    const QString pointSize = propertyAt(1)->value().toString();
+    QString rc(QLatin1String("  "));  // ### temp hack
+    rc += QLatin1Char('[');
+    rc += family;
+    rc += QLatin1String(", ");
+    rc += pointSize;
+    rc += QLatin1Char(']');
+    return rc;
 }
 
 // -------------------------------------------------------------------------
@@ -877,10 +932,10 @@ QVariant MapProperty::value() const
 void MapProperty::setValue(const QVariant &value)
 {
    if (qVariantCanConvert<EnumType>(value)) {
-        EnumType e = qvariant_cast<EnumType>(value);
+        const EnumType e = qvariant_cast<EnumType>(value);
         m_value = e.value;
     } else if (qVariantCanConvert<FlagType>(value)) {
-        FlagType e = qvariant_cast<FlagType>(value);
+        const FlagType e = qvariant_cast<FlagType>(value);
         m_value = e.value;
     } else {
         m_value = value;
@@ -894,7 +949,7 @@ QString MapProperty::toString() const
 
 int MapProperty::indexOf(const QVariant &value) const
 {
-    QString key = m_items.key(value);
+    const QString key = m_items.key(value);
     return comboKeys.indexOf(key);
 }
 
@@ -920,8 +975,8 @@ void MapProperty::updateEditorContents(QWidget *editor)
 void MapProperty::updateValue(QWidget *editor)
 {
     if (QComboBox *combo = qobject_cast<QComboBox*>(editor)) {
-        QString key = combo->currentText();
-        QVariant newValue = m_items.value(key);
+        const QString key = combo->currentText();
+        const QVariant newValue = m_items.value(key);
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -941,7 +996,7 @@ QWidget *FlagsProperty::createEditor(QWidget *parent, const QObject *target, con
 {
     QList<FlagBoxModelItem> l;
     QMapIterator<QString, QVariant> it(items());
-    unsigned int v = m_value.toUInt();
+    const unsigned int v = m_value.toUInt();
     int initialIndex = -1;
     int i = 0;
     while (it.hasNext()) {
@@ -1137,7 +1192,7 @@ void DateTimeProperty::updateEditorContents(QWidget *editor)
 void DateTimeProperty::updateValue(QWidget *editor)
 {
     if (QDateTimeEdit *lineEdit = qobject_cast<QDateTimeEdit*>(editor)) {
-        QDateTime newValue = lineEdit->dateTime();
+        const QDateTime newValue = lineEdit->dateTime();
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -1180,7 +1235,7 @@ void DateProperty::updateEditorContents(QWidget *editor)
 void DateProperty::updateValue(QWidget *editor)
 {
     if (QDateEdit *lineEdit = qobject_cast<QDateEdit*>(editor)) {
-        QDate newValue = lineEdit->date();
+        const QDate newValue = lineEdit->date();
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -1223,7 +1278,228 @@ void TimeProperty::updateEditorContents(QWidget *editor)
 void TimeProperty::updateValue(QWidget *editor)
 {
     if (QTimeEdit *lineEdit = qobject_cast<QTimeEdit*>(editor)) {
-        QTime newValue = lineEdit->time();
+        const QTime newValue = lineEdit->time();
+
+        if (newValue != m_value) {
+            m_value = newValue;
+            setChanged(true);
+        }
+
+    }
+}
+
+// QtKeqSequenceEdit
+
+class QtKeySequenceEdit : public QWidget
+{
+    Q_OBJECT
+public:
+    QtKeySequenceEdit(QWidget *parent = 0);
+
+    QKeySequence keySequence() const;
+    bool eventFilter(QObject *o, QEvent *e);
+public Q_SLOTS:
+    void setKeySequence(const QKeySequence &sequence);
+Q_SIGNALS:
+    void keySequenceChanged(const QKeySequence &sequence);
+protected:
+    void focusInEvent(QFocusEvent *e);
+    void focusOutEvent(QFocusEvent *e);
+    void keyPressEvent(QKeyEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
+    bool event(QEvent *e);
+private slots:
+    void slotClearShortcut();
+private:
+    void handleKeyEvent(QKeyEvent *e);
+    int translateModifiers(Qt::KeyboardModifiers state) const;
+
+    int m_num;
+    QKeySequence m_keySequence;
+    QLineEdit *m_lineEdit;
+};
+
+bool QtKeySequenceEdit::event(QEvent *e)
+{
+    if (e->type() == QEvent::Shortcut ||
+            e->type() == QEvent::ShortcutOverride  ||
+            e->type() == QEvent::KeyRelease) {
+        e->accept();
+        return true;
+    }
+    return QWidget::event(e);
+}
+
+QtKeySequenceEdit::QtKeySequenceEdit(QWidget *parent)
+    : QWidget(parent), m_num(0)
+{
+    m_lineEdit = new QLineEdit(this);
+    QHBoxLayout *layout = new QHBoxLayout(this);
+    layout->addWidget(m_lineEdit);
+    layout->setMargin(0);
+    m_lineEdit->installEventFilter(this);
+    m_lineEdit->setReadOnly(true);
+    m_lineEdit->setFocusProxy(this);
+    setFocusPolicy(m_lineEdit->focusPolicy());
+    setAttribute(Qt::WA_InputMethodEnabled);
+}
+
+bool QtKeySequenceEdit::eventFilter(QObject *o, QEvent *e)
+{
+    if (o == m_lineEdit && e->type() == QEvent::ContextMenu) {
+        QContextMenuEvent *c = static_cast<QContextMenuEvent *>(e);
+        QMenu *menu = m_lineEdit->createStandardContextMenu();
+        QList<QAction *> actions = menu->actions();
+        QListIterator<QAction *> itAction(actions);
+        while (itAction.hasNext()) {
+            QAction *action = itAction.next();
+            action->setShortcut(QKeySequence());
+            QString actionString = action->text();
+            int pos = actionString.lastIndexOf("\t");
+            if (pos > 0) {
+                actionString = actionString.mid(0, pos);
+            }
+            action->setText(actionString);
+        }
+        QAction *actionBefore = 0;
+        if (actions.count() > 0)
+            actionBefore = actions[0];
+        QAction *clearAction = new QAction(tr("Clear Shortcut"), menu);
+        menu->insertAction(actionBefore, clearAction);
+        menu->insertSeparator(actionBefore);
+        clearAction->setEnabled(!m_keySequence.isEmpty());
+        connect(clearAction, SIGNAL(triggered()), this, SLOT(slotClearShortcut()));
+        menu->exec(c->globalPos());
+        delete menu;
+        e->accept();
+        return true;
+    }
+
+    return QWidget::eventFilter(o, e);
+}
+
+void QtKeySequenceEdit::slotClearShortcut()
+{
+    setKeySequence(QKeySequence());
+}
+
+void QtKeySequenceEdit::handleKeyEvent(QKeyEvent *e)
+{
+    int nextKey = e->key();
+    if (nextKey == Qt::Key_Control || nextKey == Qt::Key_Shift ||
+            nextKey == Qt::Key_Meta || nextKey == Qt::Key_Alt || nextKey == Qt::Key_Super_L)
+        return;
+
+    nextKey |= translateModifiers(e->modifiers());
+    int k0 = m_keySequence[0];
+    int k1 = m_keySequence[1];
+    int k2 = m_keySequence[2];
+    int k3 = m_keySequence[3];
+    switch (m_num) {
+        case 0: k0 = nextKey; k1 = 0; k2 = 0; k3 = 0; break;
+        case 1: k1 = nextKey; k2 = 0; k3 = 0; break;
+        case 2: k2 = nextKey; k3 = 0; break;
+        case 3: k3 = nextKey; break;
+        default: break;
+    }
+    ++m_num;
+    if (m_num > 3)
+        m_num = 0;
+    m_keySequence = QKeySequence(k0, k1, k2, k3);
+    m_lineEdit->setText(m_keySequence.toString(QKeySequence::NativeText));
+    e->accept();
+    emit keySequenceChanged(m_keySequence);
+}
+
+void QtKeySequenceEdit::setKeySequence(const QKeySequence &sequence)
+{
+    if (sequence == m_keySequence)
+        return;
+    m_num = 0;
+    m_keySequence = sequence;
+    m_lineEdit->setText(m_keySequence.toString(QKeySequence::NativeText));
+}
+
+QKeySequence QtKeySequenceEdit::keySequence() const
+{
+    return m_keySequence;
+}
+
+int QtKeySequenceEdit::translateModifiers(Qt::KeyboardModifiers state) const
+{
+    int result = 0;
+    if (state & Qt::ShiftModifier)
+        result |= Qt::SHIFT;
+    if (state & Qt::ControlModifier)
+        result |= Qt::CTRL;
+    if (state & Qt::MetaModifier)
+        result |= Qt::META;
+    if (state & Qt::AltModifier)
+        result |= Qt::ALT;
+    return result;
+}
+
+void QtKeySequenceEdit::focusInEvent(QFocusEvent *e)
+{
+    m_lineEdit->event(e);
+    m_lineEdit->selectAll();
+    QWidget::focusInEvent(e);
+}
+
+void QtKeySequenceEdit::focusOutEvent(QFocusEvent *e)
+{
+    m_num = 0;
+    m_lineEdit->event(e);
+    QWidget::focusOutEvent(e);
+}
+
+void QtKeySequenceEdit::keyPressEvent(QKeyEvent *e)
+{
+    handleKeyEvent(e);
+    e->accept();
+}
+
+void QtKeySequenceEdit::keyReleaseEvent(QKeyEvent *e)
+{
+    m_lineEdit->event(e);
+}
+
+
+
+// -------------------------------------------------------------------------
+KeySequenceProperty::KeySequenceProperty(const QKeySequence &value, const QString &name)
+    : AbstractProperty<QKeySequence>(value, name)
+{
+}
+
+void KeySequenceProperty::setValue(const QVariant &value)
+{
+    m_value = qVariantValue<QKeySequence>(value);
+}
+
+QString KeySequenceProperty::toString() const
+{
+    return m_value.toString(QKeySequence::NativeText);
+}
+
+QWidget *KeySequenceProperty::createEditor(QWidget *parent, const QObject *target, const char *receiver) const
+{
+    QtKeySequenceEdit *keyEdit = new QtKeySequenceEdit(parent);
+    QObject::connect(keyEdit, SIGNAL(keySequenceChanged(QKeySequence)), target, receiver);
+    return keyEdit;
+}
+
+void KeySequenceProperty::updateEditorContents(QWidget *editor)
+{
+    if (QtKeySequenceEdit *keyEdit = qobject_cast<QtKeySequenceEdit*>(editor)) {
+        keyEdit->setKeySequence(m_value);
+    }
+}
+
+void KeySequenceProperty::updateValue(QWidget *editor)
+{
+    if (QtKeySequenceEdit *keyEdit = qobject_cast<QtKeySequenceEdit*>(editor)) {
+        const QKeySequence newValue = keyEdit->keySequence();
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -1275,6 +1551,10 @@ QWidget *CursorProperty::createEditor(QWidget *parent, const QObject *target, co
     addCursor(combo, Qt::SplitHCursor);
     addCursor(combo, Qt::PointingHandCursor);
     addCursor(combo, Qt::ForbiddenCursor);
+    addCursor(combo, Qt::WhatsThisCursor);
+    addCursor(combo, Qt::BusyCursor);
+    addCursor(combo, Qt::OpenHandCursor);
+    addCursor(combo, Qt::ClosedHandCursor);
 
     QObject::connect(combo, SIGNAL(activated(int)), target, receiver);
 
@@ -1290,8 +1570,8 @@ void CursorProperty::updateEditorContents(QWidget *editor)
 
 void CursorProperty::updateValue(QWidget *editor)
 {
-    if (QComboBox *combo = qobject_cast<QComboBox*>(editor)) {
-        QCursor newValue(static_cast<Qt::CursorShape>(combo->currentIndex()));
+    if (const QComboBox *combo = qobject_cast<const QComboBox*>(editor)) {
+        const QCursor newValue(static_cast<Qt::CursorShape>(combo->currentIndex()));
 
         if (newValue.shape() != m_value.shape()) {
             m_value = newValue;
@@ -1318,6 +1598,8 @@ QString CursorProperty::cursorName(int shape)
     case Qt::SplitHCursor: return QString::fromUtf8("Split Horizontal");
     case Qt::PointingHandCursor: return QString::fromUtf8("Pointing Hand");
     case Qt::ForbiddenCursor: return QString::fromUtf8("Forbidden");
+    case Qt::OpenHandCursor: return QString::fromUtf8("Open Hand");
+    case Qt::ClosedHandCursor: return QString::fromUtf8("Closed Hand");
     case Qt::WhatsThisCursor: return QString::fromUtf8("Whats This");
     case Qt::BusyCursor: return QString::fromUtf8("Busy");
     default: return QString();
@@ -1347,6 +1629,8 @@ QPixmap CursorProperty::cursorPixmap(int shape)
     case Qt::SplitHCursor: return QPixmap(QString::fromUtf8(":/trolltech/formeditor/images/cursors/hsplit.png"));
     case Qt::PointingHandCursor: return QPixmap(QString::fromUtf8(":/trolltech/formeditor/images/cursors/hand.png"));
     case Qt::ForbiddenCursor: return QPixmap(QString::fromUtf8(":/trolltech/formeditor/images/cursors/no.png"));
+    case Qt::OpenHandCursor: return QPixmap(QString::fromUtf8(":/trolltech/formeditor/images/cursors/openhand.png"));
+    case Qt::ClosedHandCursor: return QPixmap(QString::fromUtf8(":/trolltech/formeditor/images/cursors/closedhand.png"));
     case Qt::WhatsThisCursor: return QPixmap(QString::fromUtf8(":/trolltech/formeditor/images/cursors/whatsthis.png"));
     case Qt::BusyCursor: return QPixmap(QString::fromUtf8(":/trolltech/formeditor/images/cursors/busy.png"));
     default: return QPixmap();
@@ -1363,8 +1647,11 @@ AlignmentProperty::AlignmentProperty(const QMap<QString, QVariant> &items, Qt::A
     : AbstractPropertyGroup(name)
 {
     QStringList horz_keys = QStringList()
-        << QString::fromUtf8("Qt::AlignLeft") << QString::fromUtf8("Qt::AlignRight")
-        << QString::fromUtf8("Qt::AlignHCenter") << QString::fromUtf8("Qt::AlignJustify"); // << "Qt::AlignAbsolute"
+                            << matchStringInKeys(QLatin1String("AlignLeft"), items)
+                            << matchStringInKeys(QLatin1String("AlignRight"), items)
+                            << matchStringInKeys(QLatin1String("AlignHCenter"), items)
+                            << matchStringInKeys(QLatin1String("AlignJustify"), items);
+                                                 // << "Qt::AlignAbsolute"
 
     QMap<QString, QVariant> horz_map;
     foreach (QString h, horz_keys) {
@@ -1378,7 +1665,9 @@ AlignmentProperty::AlignmentProperty(const QMap<QString, QVariant> &items, Qt::A
 
 
     QStringList vert_keys = QStringList()
-        << QString::fromUtf8("Qt::AlignTop") << QString::fromUtf8("Qt::AlignBottom") << QString::fromUtf8("Qt::AlignVCenter");
+                            << matchStringInKeys(QLatin1String("AlignTop"), items)
+                            << matchStringInKeys(QLatin1String("AlignBottom"), items)
+                            << matchStringInKeys(QLatin1String("AlignVCenter"), items);
 
     QMap<QString, QVariant> vert_map;
     foreach (QString h, vert_keys) {
@@ -1444,8 +1733,8 @@ void DoubleProperty::updateEditorContents(QWidget *editor)
 
 void DoubleProperty::updateValue(QWidget *editor)
 {
-    if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor)) {
-        double newValue = lineEdit->text().toDouble();
+    if (const QLineEdit *lineEdit = qobject_cast<const QLineEdit*>(editor)) {
+        const double newValue = lineEdit->text().toDouble();
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -1525,8 +1814,8 @@ void SpinBoxDoubleProperty::updateEditorContents(QWidget *editor)
 
 void SpinBoxDoubleProperty::updateValue(QWidget *editor)
 {
-    if (QDoubleSpinBox *spinBox = qobject_cast<QDoubleSpinBox*>(editor)) {
-        double newValue = spinBox->value();
+    if (const QDoubleSpinBox *spinBox = qobject_cast<const QDoubleSpinBox*>(editor)) {
+        const double newValue = spinBox->value();
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -1555,7 +1844,7 @@ QWidget *CharProperty::createEditor(QWidget *parent, const QObject *target, cons
 {
     QLineEdit *lineEdit = new QLineEdit(parent);
     lineEdit->setFrame(0);
-    lineEdit->setInputMask("X; ");
+    lineEdit->setInputMask(QLatin1String("X; "));
     QObject::connect(lineEdit, SIGNAL(textChanged(QString)), target, receiver);
 
     return lineEdit;
@@ -1616,7 +1905,7 @@ QWidget *LongLongProperty::createEditor(QWidget *parent, const QObject *target, 
 void LongLongProperty::updateEditorContents(QWidget *editor)
 {
     if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor)) {
-        qlonglong v = lineEdit->text().toLongLong();
+        const qlonglong v = lineEdit->text().toLongLong();
         if (v != m_value)
             lineEdit->setText(QString::number(m_value));
     }
@@ -1624,8 +1913,8 @@ void LongLongProperty::updateEditorContents(QWidget *editor)
 
 void LongLongProperty::updateValue(QWidget *editor)
 {
-    if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor)) {
-        qlonglong newValue = lineEdit->text().toLongLong();
+    if (const QLineEdit *lineEdit = qobject_cast<const QLineEdit*>(editor)) {
+        const qlonglong newValue = lineEdit->text().toLongLong();
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -1699,8 +1988,8 @@ void UrlProperty::updateEditorContents(QWidget *editor)
 
 void UrlProperty::updateValue(QWidget *editor)
 {
-    if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor)) {
-        QUrl newValue = QUrl(lineEdit->text());
+    if (const QLineEdit *lineEdit = qobject_cast<const QLineEdit*>(editor)) {
+        const QUrl newValue = QUrl(lineEdit->text());
 
         if (newValue != m_value) {
             m_value = newValue;
@@ -1742,11 +2031,109 @@ void StringListProperty::updateEditorContents(QWidget *editor)
 
 void StringListProperty::updateValue(QWidget *editor)
 {
-    if (StringListEditorButton *btn = qobject_cast<StringListEditorButton*>(editor)) {
-        QStringList newValue = btn->stringList();
+    if (const StringListEditorButton *btn = qobject_cast<const StringListEditorButton*>(editor)) {
+        const QStringList newValue = btn->stringList();
         if (newValue != m_value) {
             m_value = newValue;
             setChanged(true);
         }
     }
 }
+
+// -------------------------------------------------------------------------
+UIntProperty::UIntProperty(uint value, const QString &name)
+    : AbstractProperty<uint>(value, name)
+{
+}
+
+void UIntProperty::setValue(const QVariant &value)
+{
+    m_value = value.toUInt();
+}
+
+QString UIntProperty::toString() const
+{
+    return QString::number(m_value);
+}
+
+QWidget *UIntProperty::createEditor(QWidget *parent, const QObject *target, const char *receiver) const
+{
+    QLineEdit *lineEdit = new QLineEdit(parent);
+    lineEdit->setFrame(0);
+    lineEdit->setValidator(new QULongLongValidator(0, UINT_MAX, lineEdit));
+    QObject::connect(lineEdit, SIGNAL(textChanged(QString)), target, receiver);
+
+    return lineEdit;
+}
+
+void UIntProperty::updateEditorContents(QWidget *editor)
+{
+    if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor)) {
+        const uint v = lineEdit->text().toUInt();
+        if (v != m_value)
+            lineEdit->setText(QString::number(m_value));
+    }
+}
+
+void UIntProperty::updateValue(QWidget *editor)
+{
+    if (const QLineEdit *lineEdit = qobject_cast<const QLineEdit*>(editor)) {
+        const uint newValue = lineEdit->text().toUInt();
+
+        if (newValue != m_value) {
+            m_value = newValue;
+            setChanged(true);
+        }
+
+    }
+}
+
+// -------------------------------------------------------------------------
+ULongLongProperty::ULongLongProperty(qulonglong value, const QString &name)
+    : AbstractProperty<qulonglong>(value, name)
+{
+}
+
+void ULongLongProperty::setValue(const QVariant &value)
+{
+    m_value = value.toULongLong();
+}
+
+QString ULongLongProperty::toString() const
+{
+    return QString::number(m_value);
+}
+
+QWidget *ULongLongProperty::createEditor(QWidget *parent, const QObject *target, const char *receiver) const
+{
+    QLineEdit *lineEdit = new QLineEdit(parent);
+    lineEdit->setFrame(0);
+    lineEdit->setValidator(new QULongLongValidator(lineEdit));
+    QObject::connect(lineEdit, SIGNAL(textChanged(QString)), target, receiver);
+
+    return lineEdit;
+}
+
+void ULongLongProperty::updateEditorContents(QWidget *editor)
+{
+    if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor)) {
+        const qulonglong v = lineEdit->text().toULongLong();
+        if (v != m_value)
+            lineEdit->setText(QString::number(m_value));
+    }
+}
+
+void ULongLongProperty::updateValue(QWidget *editor)
+{
+    if (const QLineEdit *lineEdit = qobject_cast<const QLineEdit*>(editor)) {
+        const qulonglong newValue = lineEdit->text().toULongLong();
+
+        if (newValue != m_value) {
+            m_value = newValue;
+            setChanged(true);
+        }
+
+    }
+}
+
+#include "qpropertyeditor_items.moc"

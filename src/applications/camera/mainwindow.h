@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,6 +29,7 @@
 #include <qcontent.h>
 #include <QDSActionRequest>
 #include <QtopiaAbstractService>
+#include <QContentSet>
 
 class QAction;
 class QTimer;
@@ -59,10 +60,10 @@ private slots:
     void takePhotoNow();
     void takePhotoTimer();
     void sendFile();
-    void contentChanged(const QContentIdList&, QContent::ChangeType);
     void clamshellChanged();
     void contextMenuAboutToShow();
     void contextMenuAboutToHide();
+    void loadThumbs( bool resized = false );
 
 private:
     bool event(QEvent* e);
@@ -71,7 +72,7 @@ private:
 
     bool eventFilter(QObject*, QEvent*);
     QString nextFileName();
-    void loadThumbs();
+
     void pushThumb(const QContent& f, const QImage& img);
     static const int nthumb = 5;
     QToolButton* thumb[nthumb];
@@ -121,6 +122,8 @@ private:
     bool videoOnSecondary;
     QValueSpaceItem *clamshellVsi;
 
+    QContentSet m_photoContentSet;
+    QContentSetModel *m_photoModel;
     QString camcat;
     bool    m_contextMenuActive;
 };

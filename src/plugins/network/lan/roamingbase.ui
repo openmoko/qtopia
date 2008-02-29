@@ -20,9 +20,12 @@
     <number>5</number>
    </property>
    <item>
-    <widget class="QLabel" name="label_2" >
+    <widget class="QLabel" name="header" >
      <property name="text" >
       <string>Order of selection:</string>
+     </property>
+     <property name="buddy" >
+      <cstring>knownNetworks</cstring>
      </property>
     </widget>
    </item>
@@ -46,30 +49,6 @@
        </property>
       </widget>
      </item>
-     <item>
-      <layout class="QVBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
-       <property name="spacing" >
-        <number>5</number>
-       </property>
-       <item>
-        <widget class="QToolButton" name="up" >
-         <property name="text" >
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="down" >
-         <property name="text" >
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
     </layout>
    </item>
    <item>
@@ -82,18 +61,16 @@
      </property>
      <item>
       <widget class="QCheckBox" name="autoConnect" >
-       <property name="text" >
-        <string/>
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>5</hsizetype>
+         <vsizetype>0</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="autoConnectLabel" >
        <property name="text" >
-        <string>Stay connected</string>
-       </property>
-       <property name="wordWrap" >
-        <bool>true</bool>
+        <string>Stay Connected</string>
        </property>
       </widget>
      </item>
@@ -122,6 +99,9 @@
        </property>
        <property name="wordWrap" >
         <bool>true</bool>
+       </property>
+       <property name="buddy" >
+        <cstring>timeout</cstring>
        </property>
       </widget>
      </item>

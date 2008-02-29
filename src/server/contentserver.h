@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,6 +32,7 @@
 #include <qtopiaipcadaptor.h>
 #include "qtopiaserverapplication.h"
 #include <qtopia/private/contentserverinterface_p.h>
+#include <QtopiaDocumentServer>
 
 class ServerInterface;
 class AppLoaderPrivate;
@@ -59,6 +60,7 @@ private:
     QList<QFileInfo> addList;
     QTimer contentTimer;
     QValueSpaceObject *scannerVSObject;
+    QMutex guardMutex;
     friend class ContentProcessor;
     friend class DirectoryScannerManager;
 };
@@ -69,6 +71,8 @@ private:
   Models all registered QContentSet objects and on receipt of requests to
   update the database from new path information, forwards updates to those
   objects which are affected.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 class RequestQueue : public QtopiaIpcAdaptor
 {
@@ -107,6 +111,19 @@ private:
     void doShutdown();
 
     bool m_finished;
+};
+
+class DocumentServerTask : public SystemShutdownHandler
+{
+    Q_OBJECT
+public:
+    DocumentServerTask();
+
+    virtual bool systemRestart();
+    virtual bool systemShutdown();
+
+private:
+    QtopiaDocumentServer m_server;
 };
 
 #endif

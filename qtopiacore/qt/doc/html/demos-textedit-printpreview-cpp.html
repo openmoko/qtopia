@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: printpreview.cpp Example File (demos/textedit/printpreview.cpp)</title>
+  <title>Qt 4.3: printpreview.cpp Example File (demos/textedit/printpreview.cpp)</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">printpreview.cpp Example File<br /><sup><sup>demos/textedit/printpreview.cpp</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">printpreview.cpp Example File<br /><span class="small-subtitle">demos/textedit/printpreview.cpp</span>
+</h1>
 <pre><span class="comment"> /****************************************************************************
  **
  ** Copyright (C) 2004-2007 Trolltech ASA. All rights reserved.
@@ -23,12 +24,27 @@
  ** and appearing in the file LICENSE.GPL included in the packaging of
  ** this file.  Please review the following information to ensure GNU
  ** General Public Licensing requirements will be met:
- ** http://www.trolltech.com/products/qt/opensource.html
+ ** http://trolltech.com/products/qt/licenses/licensing/opensource/
  **
  ** If you are unsure which license is appropriate for your use, please
  ** review the following information:
- ** http://www.trolltech.com/products/qt/licensing.html or contact the
- ** sales department at sales@trolltech.com.
+ ** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+ ** or contact the sales department at sales@trolltech.com.
+ **
+ ** In addition, as a special exception, Trolltech gives you certain
+ ** additional rights. These rights are described in the Trolltech GPL
+ ** Exception version 1.0, which can be found at
+ ** http://www.trolltech.com/products/qt/gplexception/ and in the file
+ ** GPL_EXCEPTION.txt in this package.
+ **
+ ** In addition, as a special exception, Trolltech, as the sole copyright
+ ** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+ ** plug-in the right for the Qt/Eclipse Integration to link to
+ ** functionality provided by Qt Designer and its related libraries.
+ **
+ ** Trolltech reserves all rights not expressly granted herein.
+ **
+ ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -73,7 +89,7 @@
  {
      Q_OBJECT
  public:
-     PreviewView(QTextDocument *document);
+     PreviewView(QTextDocument *document, PrintPreview *printPrev);
 
      inline void updateLayout() { resizeEvent(0); viewport()-&gt;update(); }
 
@@ -95,9 +111,11 @@
      int interPageSpacing;
      QPoint mousePressPos;
      QPoint scrollBarValuesOnMousePress;
+     PrintPreview *printPreview;
  };
 
- PreviewView::PreviewView(QTextDocument *document)
+ PreviewView::PreviewView(QTextDocument *document, PrintPreview *printPrev)
+     : printPreview(printPrev)
  {
      verticalScrollBar()-&gt;setSingleStep(20);
      horizontalScrollBar()-&gt;setSingleStep(20);
@@ -138,7 +156,7 @@
          paintPage(&amp;p, i);
 
          p.restore();
-         p.translate(0, interPageSpacing + doc-&gt;pageSize().height() * scale);
+         p.translate(0, interPageSpacing + printPreview-&gt;paperSize.height() * scale);
      }
  }
 
@@ -150,14 +168,16 @@
 
      painter-&gt;setPen(col);
      painter-&gt;setBrush(Qt::white);
-     painter-&gt;drawRect(QRectF(QPointF(0, 0), pgSize));
+     painter-&gt;drawRect(QRectF(QPointF(0, 0), printPreview-&gt;paperSize));
      painter-&gt;setBrush(Qt::NoBrush);
 
      col = col.light();
-     painter-&gt;drawLine(QLineF(pgSize.width(), 1, pgSize.width(), pgSize.height() - 1));
+     painter-&gt;drawLine(QLineF(printPreview-&gt;paperSize.width(), 1,
+                              printPreview-&gt;paperSize.width(), printPreview-&gt;paperSize.height() - 1));
 
      col = col.light();
-     painter-&gt;drawLine(QLineF(pgSize.width(), 2, pgSize.width(), pgSize.height() - 2));
+     painter-&gt;drawLine(QLineF(printPreview-&gt;paperSize.width(), 2,
+                              printPreview-&gt;paperSize.width(), printPreview-&gt;paperSize.height() - 2));
 
      QRectF docRect(QPointF(0, page * pgSize.height()), pgSize);
      QAbstractTextDocumentLayout::PaintContext ctx;
@@ -169,7 +189,9 @@
      ctx.palette.setColor(QPalette::Text, Qt::black);
 
      painter-&gt;translate(0, - page * pgSize.height());
-     painter-&gt;setClipRect(docRect);
+
+     painter-&gt;translate(printPreview-&gt;pageTopLeft);
+     painter-&gt;setClipRect(docRect);//.translated(printPreview-&gt;pageTopLeft));
      doc-&gt;documentLayout()-&gt;draw(painter, ctx);
  }
 
@@ -178,9 +200,9 @@
      const QSize viewportSize = viewport()-&gt;size();
 
      QSize docSize;
-     docSize.setWidth(qRound(doc-&gt;pageSize().width() * scale + 2 * interPageSpacing));
+     docSize.setWidth(qRound(printPreview-&gt;paperSize.width() * scale + 2 * interPageSpacing));
      const int pageCount = doc-&gt;pageCount();
-     docSize.setHeight(qRound(pageCount * doc-&gt;pageSize().height() * scale + (pageCount + 1) * interPageSpacing));
+     docSize.setHeight(qRound(pageCount * printPreview-&gt;paperSize.height() * scale + (pageCount + 1) * interPageSpacing));
 
      horizontalScrollBar()-&gt;setRange(0, docSize.width() - viewportSize.width());
      horizontalScrollBar()-&gt;setPageStep(viewportSize.width());
@@ -225,7 +247,7 @@
      printer.setFullPage(true);
      doc = document-&gt;clone();
 
-     view = new PreviewView(doc);
+     view = new PreviewView(doc, this);
      setCentralWidget(view);
      resize(800, 600);
 
@@ -281,6 +303,14 @@
  void PrintPreview::setup()
  {
      QSizeF page = printer.pageRect().size();
+     paperSize = printer.paperRect().size();
+     paperSize.rwidth() *= qreal(view-&gt;logicalDpiX()) / printer.logicalDpiX();
+     paperSize.rheight() *= qreal(view-&gt;logicalDpiY()) / printer.logicalDpiY();
+
+     pageTopLeft = printer.pageRect().topLeft();
+     pageTopLeft.rx() *= qreal(view-&gt;logicalDpiX()) / printer.logicalDpiX();
+     pageTopLeft.ry() *= qreal(view-&gt;logicalDpiY()) / printer.logicalDpiY();
+
      page.setWidth(page.width() * view-&gt;logicalDpiX() / printer.logicalDpiX());
      page.setHeight(page.height() * view-&gt;logicalDpiY() / printer.logicalDpiY());
 
@@ -321,6 +351,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

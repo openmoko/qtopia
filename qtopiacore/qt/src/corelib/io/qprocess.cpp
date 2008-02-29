@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -648,12 +663,16 @@ bool QProcessPrivate::_q_processDied()
         emit q->error(processError);
     }
 
+    bool wasRunning = (processState == QProcess::Running);
+
     cleanup();
 
     processState = QProcess::NotRunning;
     emit q->stateChanged(processState);
-    emit q->finished(exitCode);
-    emit q->finished(exitCode, exitStatus);
+    if (wasRunning) {
+        emit q->finished(exitCode);
+        emit q->finished(exitCode, exitStatus);
+    }
 #if defined QPROCESS_DEBUG
     qDebug("QProcessPrivate::_q_processDied() process is dead");
 #endif
@@ -822,15 +841,21 @@ QProcess::ProcessChannel QProcess::readChannel() const
     read(), readAll(), readLine(), and getChar(). It also determines
     which channel triggers QProcess to emit readyRead().
 
-    Changing the read channel will clear the unget buffer.
-
     \sa readChannel()
 */
 void QProcess::setReadChannel(ProcessChannel channel)
 {
     Q_D(QProcess);
-    if (d->processChannel != channel)
-        d->buffer.clear();
+    if (d->processChannel != channel) {
+        QByteArray buf = d->buffer.readAll();
+        if (d->processChannel == QProcess::StandardOutput) {
+            for (int i = buf.size() - 1; i >= 0; --i)
+                d->outputReadBuffer.ungetChar(buf.at(i));
+        } else {
+            for (int i = buf.size() - 1; i >= 0; --i)
+                d->errorReadBuffer.ungetChar(buf.at(i));
+        }
+    }
     d->processChannel = channel;
 }
 
@@ -1575,8 +1600,13 @@ void QProcess::start(const QString &program, OpenMode mode)
     The process may not exit as a result of calling this function (it is given
     the chance to prompt the user for any unsaved files, etc).
 
-    On Windows, terminate() posts a WM_CLOSE message to the process, and on
-    Unix and Mac OS X the SIGTERM signal is sent.
+    On Windows, terminate() posts a WM_CLOSE message to all toplevel windows
+    of the process and then to the main thread of the process itself. On Unix
+    and Mac OS X the SIGTERM signal is sent.
+
+    Console applications on Windows that do not run an event loop, or whose
+    event loop does not handle the WM_CLOSE message, can only be terminated by
+    calling kill().
 
     \sa kill()
 */
@@ -1671,8 +1701,37 @@ int QProcess::execute(const QString &program)
     process.
 
     On Windows, arguments that contain spaces are wrapped in quotes.
+
+    The process will be started in the directory \a workingDirectory.
+
+    If the function is successful then *\a pid is set to the process
+    identifier of the started process.
 */
-bool QProcess::startDetached(const QString &program, const QStringList &arguments)
+bool QProcess::startDetached(const QString &program,
+			     const QStringList &arguments,
+			     const QString &workingDirectory,
+                             qint64 *pid)
+{
+    return QProcessPrivate::startDetached(program,
+					  arguments,
+					  workingDirectory,
+					  pid);
+}
+
+/*!
+    Starts the program \a program with the arguments \a arguments in a
+    new process, and detaches from it. Returns true on success;
+    otherwise returns false. If the calling process exits, the
+    detached process will continue to live.
+
+    On Unix, the started process will run in its own session and act
+    like a daemon. On Windows, it will run as a regular standalone
+    process.
+
+    On Windows, arguments that contain spaces are wrapped in quotes.
+*/
+bool QProcess::startDetached(const QString &program,
+			     const QStringList &arguments)
 {
     return QProcessPrivate::startDetached(program, arguments);
 }

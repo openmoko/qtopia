@@ -13,7 +13,7 @@
 </phrase>
 <phrase>
     <source>action handle</source>
-    <target>genvejshåndtag</target>
+    <target>genvejshÃ¥ndtag</target>
 </phrase>
 <phrase>
     <source>active</source>
@@ -33,11 +33,11 @@
 </phrase>
 <phrase>
     <source>adornment</source>
-    <target>værktøjselement</target>
+    <target>vÃ¦rktÃ¸jselement</target>
 </phrase>
 <phrase>
     <source>Always on Top</source>
-    <target>Altid øverst</target>
+    <target>Altid Ã¸verst</target>
 </phrase>
 <phrase>
     <source>anchor point</source>
@@ -57,7 +57,7 @@
 </phrase>
 <phrase>
     <source>automatic link</source>
-    <target>automatisk kæde</target>
+    <target>automatisk kÃ¦de</target>
 </phrase>
 <phrase>
     <source>automatic scrolling</source>
@@ -97,7 +97,7 @@
 </phrase>
 <phrase>
     <source>choose</source>
-    <target>vælge</target>
+    <target>vÃ¦lge</target>
 </phrase>
 <phrase>
     <source>click</source>
@@ -139,11 +139,11 @@
 </phrase>
 <phrase>
     <source>context-sensitive Help</source>
-    <target>kontekstafhængig hjælp</target>
+    <target>kontekstafhÃ¦ngig hjÃ¦lp</target>
 </phrase>
 <phrase>
     <source>contextual</source>
-    <target>kontekstafhængig</target>
+    <target>kontekstafhÃ¦ngig</target>
 </phrase>
 <phrase>
     <source>control</source>
@@ -199,7 +199,7 @@
 </phrase>
 <phrase>
     <source>disjoint selection</source>
-    <target>usammenhængende markering</target>
+    <target>usammenhÃ¦ngende markering</target>
 </phrase>
 <phrase>
     <source>dock</source>
@@ -215,11 +215,11 @@
 </phrase>
 <phrase>
     <source>drag</source>
-    <target>trække</target>
+    <target>trÃ¦kke</target>
 </phrase>
 <phrase>
     <source>drag-and-drop</source>
-    <target>trække og slippe</target>
+    <target>trÃ¦kke og slippe</target>
 </phrase>
 <phrase>
     <source>drop-down combo box</source>
@@ -281,15 +281,15 @@
 </phrase>
 <phrase>
     <source>Find</source>
-    <target>Søg</target>
+    <target>SÃ¸g</target>
 </phrase>
 <phrase>
     <source>Find Next</source>
-    <target>Find næste</target>
+    <target>Find nÃ¦ste</target>
 </phrase>
 <phrase>
     <source>Find What</source>
-    <target>Søg efter</target>
+    <target>SÃ¸g efter</target>
 </phrase>
 <phrase>
     <source>folder</source>
@@ -301,7 +301,7 @@
 </phrase>
 <phrase>
     <source>font size</source>
-    <target>skriftstørrelse</target>
+    <target>skriftstÃ¸rrelse</target>
 </phrase>
 <phrase>
     <source>font style</source>
@@ -317,15 +317,15 @@
 </phrase>
 <phrase>
     <source>handle</source>
-    <target>håndtag</target>
+    <target>hÃ¥ndtag</target>
 </phrase>
 <phrase>
     <source>Help</source>
-    <target>Hjælp</target>
+    <target>HjÃ¦lp</target>
 </phrase>
 <phrase>
     <source>Help menu</source>
-    <target>Menuen Hjælp</target>
+    <target>Menuen HjÃ¦lp</target>
 </phrase>
 <phrase>
     <source>Hide</source>
@@ -365,15 +365,15 @@
 </phrase>
 <phrase>
     <source>Insert</source>
-    <target>Menuen Indsæt</target>
+    <target>Menuen IndsÃ¦t</target>
 </phrase>
 <phrase>
     <source>Insert Object</source>
-    <target>Indsæt objekt</target>
+    <target>IndsÃ¦t objekt</target>
 </phrase>
 <phrase>
     <source>insertion point</source>
-    <target>indsætningspunkt</target>
+    <target>indsÃ¦tningspunkt</target>
 </phrase>
 <phrase>
     <source>italic</source>
@@ -389,17 +389,17 @@
 </phrase>
 <phrase>
     <source>link</source>
-    <target>sammenkæde</target>
+    <target>sammenkÃ¦de</target>
     <definition>verb</definition>
 </phrase>
 <phrase>
     <source>link</source>
-    <target>kæde</target>
+    <target>kÃ¦de</target>
     <definition>noun</definition>
 </phrase>
 <phrase>
     <source>Link Here</source>
-    <target>Indsæt kæde her</target>
+    <target>IndsÃ¦t kÃ¦de her</target>
 </phrase>
 <phrase>
     <source>list box</source>
@@ -412,7 +412,7 @@
 </phrase>
 <phrase>
     <source>manual link</source>
-    <target>manuel kæde</target>
+    <target>manuel kÃ¦de</target>
 </phrase>
 <phrase>
     <source>Maximize</source>
@@ -460,7 +460,7 @@
 </phrase>
 <phrase>
     <source>mixed-value</source>
-    <target>blandet værdi</target>
+    <target>blandet vÃ¦rdi</target>
 </phrase>
 <phrase>
     <source>modal</source>
@@ -476,7 +476,7 @@
 </phrase>
 <phrase>
     <source>modifier key</source>
-    <target>ændringstast</target>
+    <target>Ã¦ndringstast</target>
 </phrase>
 <phrase>
     <source>mouse</source>
@@ -516,7 +516,7 @@
 </phrase>
 <phrase>
     <source>Next</source>
-    <target>Næste</target>
+    <target>NÃ¦ste</target>
 </phrase>
 <phrase>
     <source>object</source>
@@ -532,7 +532,7 @@
 </phrase>
 <phrase>
     <source>OLE drag and drop</source>
-    <target>OLE-træk og slip</target>
+    <target>OLE-trÃ¦k og slip</target>
 </phrase>
 <phrase>
     <source>OLE embedded object</source>
@@ -540,19 +540,19 @@
 </phrase>
 <phrase>
     <source>OLE linked object</source>
-    <target>sammenkædet OLE-objekt</target>
+    <target>sammenkÃ¦det OLE-objekt</target>
 </phrase>
 <phrase>
     <source>OLE nondefault drag and drop</source>
-    <target>interaktiv OLE-træk og slip</target>
+    <target>interaktiv OLE-trÃ¦k og slip</target>
 </phrase>
 <phrase>
     <source>Open</source>
-    <target>Åbn</target>
+    <target>Ãbn</target>
 </phrase>
 <phrase>
     <source>Open With</source>
-    <target>Åbn med</target>
+    <target>Ãbn med</target>
 </phrase>
 <phrase>
     <source>option button</source>
@@ -568,7 +568,7 @@
 </phrase>
 <phrase>
     <source>Page Setup</source>
-    <target>Sideopsætning</target>
+    <target>SideopsÃ¦tning</target>
 </phrase>
 <phrase>
     <source>palette window</source>
@@ -588,19 +588,19 @@
 </phrase>
 <phrase>
     <source>Paste</source>
-    <target>Sæt ind</target>
+    <target>SÃ¦t ind</target>
 </phrase>
 <phrase>
     <source>Paste Link</source>
-    <target>Indsæt kæde</target>
+    <target>IndsÃ¦t kÃ¦de</target>
 </phrase>
 <phrase>
     <source>Paste Shortcut</source>
-    <target>Indsæt genvej</target>
+    <target>IndsÃ¦t genvej</target>
 </phrase>
 <phrase>
     <source>Paste Special</source>
-    <target>Indsæt speciel</target>
+    <target>IndsÃ¦t speciel</target>
 </phrase>
 <phrase>
     <source>path</source>
@@ -630,7 +630,7 @@
 </phrase>
 <phrase>
     <source>pointer</source>
-    <target>markør</target>
+    <target>markÃ¸r</target>
 </phrase>
 <phrase>
     <source>pop-up menu</source>
@@ -642,25 +642,25 @@
 </phrase>
 <phrase>
     <source>portrait</source>
-    <target>stående</target>
+    <target>stÃ¥ende</target>
 </phrase>
 <phrase>
     <source>press</source>
-    <target>trykke på</target>
+    <target>trykke pÃ¥</target>
     <definition>and hold a mouse button/og holde en museknap nede</definition>
 </phrase>
 <phrase>
     <source>press</source>
-    <target>trykke på</target>
+    <target>trykke pÃ¥</target>
     <definition>a key/en tast</definition>
 </phrase>
 <phrase>
     <source>primary container</source>
-    <target>primært destinationsobjekt</target>
+    <target>primÃ¦rt destinationsobjekt</target>
 </phrase>
 <phrase>
     <source>primary window</source>
-    <target>primært vindue</target>
+    <target>primÃ¦rt vindue</target>
 </phrase>
 <phrase>
     <source>Print</source>
@@ -697,7 +697,7 @@
 </phrase>
 <phrase>
     <source>property sheet control</source>
-    <target>kontrolelement på egenskabsark</target>
+    <target>kontrolelement pÃ¥ egenskabsark</target>
 </phrase>
 <phrase>
     <source>Quick View</source>
@@ -718,7 +718,7 @@
 </phrase>
 <phrase>
     <source>region selection</source>
-    <target>områdemarkering</target>
+    <target>omrÃ¥demarkering</target>
 </phrase>
 <phrase>
     <source>registry</source>
@@ -742,11 +742,11 @@
 </phrase>
 <phrase>
     <source>Resume</source>
-    <target>Fortsæt</target>
+    <target>FortsÃ¦t</target>
 </phrase>
 <phrase>
     <source>Retry</source>
-    <target>Forsøg igen</target>
+    <target>ForsÃ¸g igen</target>
 </phrase>
 <phrase>
     <source>rich-text box</source>
@@ -754,7 +754,7 @@
 </phrase>
 <phrase>
     <source>Run</source>
-    <target>Kør</target>
+    <target>KÃ¸r</target>
 </phrase>
 <phrase>
     <source>Save</source>
@@ -782,7 +782,7 @@
 </phrase>
 <phrase>
     <source>secondary window</source>
-    <target>sekundært vindue</target>
+    <target>sekundÃ¦rt vindue</target>
 </phrase>
 <phrase>
     <source>select</source>
@@ -790,7 +790,7 @@
 </phrase>
 <phrase>
     <source>select</source>
-    <target>vælge</target>
+    <target>vÃ¦lge</target>
 </phrase>
 <phrase>
     <source>Select All</source>
@@ -802,11 +802,11 @@
 </phrase>
 <phrase>
     <source>selection handle</source>
-    <target>markeringshåndtag</target>
+    <target>markeringshÃ¥ndtag</target>
 </phrase>
 <phrase>
     <source>Send To</source>
-    <target>Overfør til</target>
+    <target>OverfÃ¸r til</target>
 </phrase>
 <phrase>
     <source>separator</source>
@@ -859,11 +859,11 @@
 </phrase>
 <phrase>
     <source>Size</source>
-    <target>Tilpas størrelse</target>
+    <target>Tilpas stÃ¸rrelse</target>
 </phrase>
 <phrase>
     <source>size grip</source>
-    <target>størrelseshåndtag</target>
+    <target>stÃ¸rrelseshÃ¥ndtag</target>
 </phrase>
 <phrase>
     <source>slider</source>
@@ -911,7 +911,7 @@
 </phrase>
 <phrase>
     <source>task-oriented Help</source>
-    <target>opgaveafhængig Hjælp</target>
+    <target>opgaveafhÃ¦ngig HjÃ¦lp</target>
 </phrase>
 <phrase>
     <source>template</source>
@@ -935,15 +935,15 @@
 </phrase>
 <phrase>
     <source>toolbar</source>
-    <target>verktøjslinje</target>
+    <target>verktÃ¸jslinje</target>
 </phrase>
 <phrase>
     <source>tooltip</source>
-    <target>verktøjstip</target>
+    <target>verktÃ¸jstip</target>
 </phrase>
 <phrase>
     <source>tree view control</source>
-    <target>træstruktur</target>
+    <target>trÃ¦struktur</target>
 </phrase>
 <phrase>
     <source>type</source>
@@ -957,7 +957,7 @@
 </phrase>
 <phrase>
     <source>unavailable</source>
-    <target>ikke tilgængelig</target>
+    <target>ikke tilgÃ¦ngelig</target>
 </phrase>
 <phrase>
     <source>Undo</source>
@@ -1008,11 +1008,4 @@
     <target>arbejdsgruppe</target>
 </phrase>
 <phrase>
-    <source>workspace</source>
-    <target>arbejdsområde</target>
-</phrase>
-<phrase>
-    <source>Yes</source>
-    <target>Ja</target>
-</phrase>
-</QPH>
+    <source>workspace<

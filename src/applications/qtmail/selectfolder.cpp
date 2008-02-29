@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,17 +24,16 @@
 #include <qlistwidget.h>
 #include <qlayout.h>
 #include "emailfolderlist.h"
-#include "common.h"
 
 SelectFolderDialog::SelectFolderDialog(const QStringList list,
                                        QWidget *parent)
     : QDialog( parent )
 {
     QtopiaApplication::setMenuLike( this, true );
-    setWindowTitle( tr( "Select Folder" ) );
+    setWindowTitle( tr( "Select folder" ) );
     QGridLayout *top = new QGridLayout( this );
     for( int i = 0; i < list.count(); i++ ) {
-        mMailboxList.append(QtMail::mailboxTrName(list[i]));
+        mMailboxList.append(MailboxList::mailboxTrName(list[i]));
     }
 
     mFolderList = new QListWidget( this );

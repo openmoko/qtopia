@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/emb-deployment.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/emb-deployment.qdoc -->
 <head>
-  <title>Qt 4.2: Deploying Qtopia Core Applications</title>
+  <title>Qt 4.3: Deploying Qtopia Core Applications</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Deploying Qtopia Core Applications<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Deploying Qtopia Core Applications<br /><span class="subtitle"></span>
+</h1>
 <p>The procedure of deploying an Qt application on <a href="qtopiacore.html">Qtopia Core</a> is essentially the same as the deployment procedure on Qt/X11 which is described in detail in the <a href="deployment-x11.html">Deploying an Application on Qt/X11</a> documentation. See also the <a href="deployment.html">general remarks</a> about deploying Qt applications.</p>
 <p>In addition, there is a couple of Qtopia Core specific issues to keep in mind:</p>
 <ul><li><a href="#qtopia-core-specific-fonts">Qtopia Core Specific: Fonts</a></li>
@@ -21,7 +22,7 @@
 </ul>
 <a name="qtopia-core-specific-fonts"></a>
 <h2>Qtopia Core Specific: Fonts</h2>
-<p>When Qtopia Core applications run, they look for a file called <tt>fontdir</tt> in Qtopia Core's <tt>/lib/fonts/</tt> directory defining the fonts that are available to the application (i.e. the fonts located in the mentioned directory).</p>
+<p>When Qtopia Core applications run, they look for a file called <tt>fontdir</tt> in Qtopia Core's <tt>/lib/fonts/</tt> directory defining the fonts that are available to the application (i.e&#x2e; the fonts located in the mentioned directory).</p>
 <p>For that reason, the preferred fonts must be copied to the <tt>/lib/fonts/</tt> directory, and the <tt>fontdir</tt> file must be customized accordingly. See the <a href="qtopiacore-fonts.html">fonts</a> documentation for more details about the supported font formats.</p>
 <p>Note that the application will look for the <tt>/lib/fonts/</tt> directory relative to the path set using the <tt>-prefix</tt> parameter when running the <tt>configure</tt> script; ensure that this is a sensible path in the target device environment. See the <a href="qtopiacore-install.html#step-3-building-the-library">installation</a> documentation for more details.</p>
 <a name="qtopia-core-specific-environment-variables"></a>
@@ -37,6 +38,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

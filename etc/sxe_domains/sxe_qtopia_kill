@@ -1,0 +1,2 @@
+#!/bin/sh
+lidsconf -A -s ${BIN} -o CAP_KILL -j GRANT

@@ -17,13 +17,16 @@
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>A hardware interface is a particular hardware feature that needs to expose its state and functionality to other parts of Qtopia. Expamples for such interfaces are the battery, the kepad light or the vibration interface on a mobile phone. The accessory API is split into two sets of classes. The first set provides the backend for a hardware feature (also called provider). It usually monitors the state of the hardware and reports its change. Each hardware feature can only have one provider implementation. The second set of accessory classes represents the client API. Each provider instance can have multiple client instances through which other Qtopia components/applications can idiscover and control the hardware feature.</p>
-<p>Some hardware features such as the keypad light may only exist once other features, such as the battery, may have several provider instances. In the case of the battery the device may e.g&#x2e;, have a default battery and a secondary battery. All batteries are exposed via the same hardware interface class (<a href="qbatteryaccessory.html">QBatteryAccessory</a>) but Qtopia would manages two accessory provider, one for the primary battery and one for the secondary battery.</p>
-<p>The <a href="qhardwaremanager.html">QHardwareManager</a> can be used to iterate over the various accessories supported by Qtopia.</p>
-<p /><address><hr /><div align="center">
+<p>A hardware interface is a particular hardware feature that needs to expose its state and functionality to other parts of Qtopia. Inter-process messages and the valuespace are used to allow the separation of client and provider. Expamples for such interfaces are the battery, the kepad light or the vibration device a mobile phone.</p>
+<p>The accessory API is split into two sets of classes. The first set provides the backend for a hardware feature (also called provider). It usually monitors the state of the hardware and reports its change. The second set of accessory classes represents the client API. Each provider instance can have multiple client instances through which other Qtopia components/applications can discover and control the hardware feature.</p>
+<p>Some hardware features such as the keypad light may only exist once other features, such as the battery, may have several provider instances. In the case of the battery the device may e.g&#x2e;, have a default battery and a secondary battery. All batteries are exposed via the same hardware interface class (<a href="qpowersource.html">QPowerSource</a>) but Qtopia would manages two accessory provider, one for the primary battery and one for the secondary battery.</p>
+<p>The following example assumes that several LEDs have to be controlled. In addition each of these LEDs is controlled by different processes. To keep it simple each LED has only two states, on and off.</p>
+<p align="center"><img src="images/AccessoryUML.png" /></p><p>The LedProvider class is instanciated by the LED controlling process. To distingiush several LedProvider instances each instance requires a unique ID. This ID is used by <tt>LedControl</tt> to identify a particular instance. The <tt>LEDProvider::setOn()</tt> function contains the required code to set the state of the LED. Once the state has changed it emits the <tt>stateChanged()</tt> signal is emitted which notifies all <tt>LEDControl</tt> instances of the change.</p>
+<p>The LedControl class represents the client side. A process can identify an LED provider via its ID or can chose to iterate over the list of all <tt>LEDProvider</tt> instances via <a href="qhardwaremanager.html">QHardwareManager</a>. The subsequent diagram demonstrates this:</p>
+<p align="center"><img src="images/AccessoryUML2.png" /></p><p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

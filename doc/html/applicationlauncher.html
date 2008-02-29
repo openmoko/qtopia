@@ -74,10 +74,11 @@
 <tr valign="top" class="even"><td>Application Type Launchers</td><td><a href="applicationtypelauncher.html">ApplicationTypeLauncher</a></td><td>Handles the specifics of different types of applications and launching mechanisms on behalf of the ApplicationLauncher. Other components within the server should never need to access these instances directly.</td></tr>
 <tr valign="top" class="odd"><td>Application Ipc Router</td><td><a href="applicationipcrouter.html">ApplicationIpcRouter</a></td><td>Abstracts the IPC transport used for application messages from the ApplicationLauncher. On reception of an application message, instructs the ApplicationLauncher to start the application and subsequently delivers messages to <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> instances for possible transformation before delivery to the application.</td></tr>
 </table></p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="applicationNotFound"></a>void ApplicationLauncher::applicationNotFound ( const <a href="qstring.html">QString</a> &amp; <i>application</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Emitted whenever a non-existant <i>application</i> is requested to launch. The corresponding call to <a href="applicationlauncher.html#launch">launch</a>() will also return false.</p>
+<p>Emitted whenever a non-existant <i>application</i> is asked to launch. The corresponding call to <a href="applicationlauncher.html#launch">launch</a>() will also return false.</p>
 <h3 class="fn"><a name="applicationStateChanged"></a>void ApplicationLauncher::applicationStateChanged ( const <a href="qstring.html">QString</a> &amp; <i>application</i>, <a href="applicationtypelauncher.html#ApplicationState-enum">ApplicationTypeLauncher::ApplicationState</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the <i>application</i> state changes to <i>state</i>.</p>
 <h3 class="fn"><a name="applicationTerminated"></a>void ApplicationLauncher::applicationTerminated ( const <a href="qstring.html">QString</a> &amp; <i>application</i>, <a href="applicationtypelauncher.html#TerminationReason-enum">ApplicationTypeLauncher::TerminationReason</a> <i>reason</i>, bool <i>filtered</i> = false )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -85,15 +86,16 @@
 <h3 class="fn"><a name="applications"></a><a href="qstringlist.html">QStringList</a> ApplicationLauncher::applications () const</h3>
 <p>Return the list of starting and running applications. The list order represents the order in which the applications were launched.</p>
 <h3 class="fn"><a name="canLaunch"></a>bool ApplicationLauncher::canLaunch ( const <a href="qstring.html">QString</a> &amp; <i>app</i> )</h3>
-<p>Returns true if the application, <i>app</i>, can be launched otherwise false. If this method returns true it indicates that an ApplicationLauncherType instance in the system has claimed responsibility for launching the application. The actual launching process may still fail.</p>
+<p>Returns true if application <i>app</i> can be launched. Returns false otherwise. When true is returned, it means an instance of a subclass of <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> instance exists that knows how to launch the application. The subsequent attempt to launch the application may still fail.</p>
+<p>Note that true is also returned if <i>app</i> is already running.</p>
 <h3 class="fn"><a name="launch"></a>bool ApplicationLauncher::launch ( const <a href="qstring.html">QString</a> &amp; <i>app</i> )</h3>
-<p>Attempt to launch the application, <i>app</i>. This method returns true if the application was launched and false otherwise.</p>
+<p>Attempts to launch application <i>app</i>. Returns true if <i>app</i> is launched successfully. Also returns true if <i>app</i> is already running. Returns false if no launcher can be found that knows how to launch <i>app</i>.</p>
 <h3 class="fn"><a name="state"></a><a href="applicationtypelauncher.html#ApplicationState-enum">ApplicationTypeLauncher::ApplicationState</a> ApplicationLauncher::state ( const <a href="qstring.html">QString</a> &amp; <i>app</i> ) const</h3>
 <p>Returns the current state of the application, <i>app</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

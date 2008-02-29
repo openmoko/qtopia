@@ -2,10 +2,14 @@
   <qresource prefix="/trolltech/formeditor">
     <file>images/submenu.png</file>
     <file>images/cursors/arrow.png</file>
+    <file>images/cursors/busy.png</file>
+    <file>images/cursors/closedhand.png</file>
     <file>images/cursors/cross.png</file>
     <file>images/cursors/hand.png</file>
+    <file>images/cursors/hsplit.png</file>
     <file>images/cursors/ibeam.png</file>
     <file>images/cursors/no.png</file>
+    <file>images/cursors/openhand.png</file>
     <file>images/cursors/sizeall.png</file>
     <file>images/cursors/sizeb.png</file>
     <file>images/cursors/sizef.png</file>
@@ -14,6 +18,7 @@
     <file>images/cursors/uparrow.png</file>
     <file>images/cursors/vsplit.png</file>
     <file>images/cursors/wait.png</file>
+    <file>images/cursors/whatsthis.png</file>
     <file>images/emptyicon.png</file>
     <file>images/mac/adjustsize.png</file>
     <file>images/mac/widgettool.png</file>
@@ -47,6 +52,7 @@
     <file>images/resetproperty.png</file>
     <file>images/widgets/calendarwidget.png</file>
     <file>images/widgets/checkbox.png</file>
+    <file>images/widgets/columnview.png</file>
     <file>images/widgets/combobox.png</file>
     <file>images/widgets/datetimeedit.png</file>
     <file>images/widgets/dial.png</file>
@@ -61,6 +67,7 @@
     <file>images/widgets/label.png</file>
     <file>images/widgets/lcdnumber.png</file>
     <file>images/widgets/line.png</file>
+    <file>images/widgets/vline.png</file>
     <file>images/widgets/lineedit.png</file>
     <file>images/widgets/listbox.png</file>
     <file>images/widgets/listview.png</file>

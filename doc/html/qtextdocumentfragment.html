@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QTextDocumentFragment Class Reference</title>
+  <title>Qt 4.3: QTextDocumentFragment Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTextDocumentFragment Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTextDocumentFragment Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QTextDocumentFragment class represents a piece of formatted text from a <a href="qtextdocument.html">QTextDocument</a>. <a href="#details">More...</a></p>
 <pre> #include &lt;QTextDocumentFragment&gt;</pre><ul>
 <li><a href="qtextdocumentfragment-members.html">List of all members, including inherited members</a></li>
@@ -41,7 +42,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QTextDocumentFragment class represents a piece of formatted text from a <a href="qtextdocument.html">QTextDocument</a>.</p>
-<p>A QTextDocumentFragment is a fragment of rich text, that can be inserted into a <a href="qtextdocument.html">QTextDocument</a>. A document fragment can be created from a <a href="qtextdocument.html">QTextDocument</a>, from a <a href="qtextcursor.html">QTextCursor</a>'s selection, or from another document fragment. Document fragments can also be created by the static functions, <a href="qtextdocumentfragment.html#fromPlainText">fromPlainText</a>() and fromHTML().</p>
+<p>A QTextDocumentFragment is a fragment of rich text, that can be inserted into a <a href="qtextdocument.html">QTextDocument</a>. A document fragment can be created from a <a href="qtextdocument.html">QTextDocument</a>, from a <a href="qtextcursor.html">QTextCursor</a>'s selection, or from another document fragment. Document fragments can also be created by the static functions, <a href="qtextdocumentfragment.html#fromPlainText">fromPlainText</a>() and <a href="qtextdocumentfragment.html#fromHtml">fromHtml</a>().</p>
 <p>The contents of a document fragment can be obtained as plain text by using the <a href="qtextdocumentfragment.html#toPlainText">toPlainText</a>() function, or it can be obtained as HTML with <a href="qtextdocumentfragment.html#toHtml">toHtml</a>().</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -49,7 +50,7 @@
 <p>Constructs an empty <a href="qtextdocumentfragment.html">QTextDocumentFragment</a>.</p>
 <p>See also <a href="qtextdocumentfragment.html#isEmpty">isEmpty</a>().</p>
 <h3 class="fn"><a name="QTextDocumentFragment-2"></a>QTextDocumentFragment::QTextDocumentFragment ( const <a href="qtextdocument.html">QTextDocument</a> * <i>document</i> )</h3>
-<p>Converts the given <i>document</i> into a <a href="qtextdocumentfragment.html">QTextDocumentFragment</a>.</p>
+<p>Converts the given <i>document</i> into a <a href="qtextdocumentfragment.html">QTextDocumentFragment</a>. Note that the <a href="qtextdocumentfragment.html">QTextDocumentFragment</a> only stores the document contents, not meta information like the document's title.</p>
 <h3 class="fn"><a name="QTextDocumentFragment-3"></a>QTextDocumentFragment::QTextDocumentFragment ( const <a href="qtextcursor.html">QTextCursor</a> &amp; <i>cursor</i> )</h3>
 <p>Creates a <a href="qtextdocumentfragment.html">QTextDocumentFragment</a> from the <i>cursor</i>'s selection. If the cursor doesn't have a selection, the created fragment is empty.</p>
 <p>See also <a href="qtextdocumentfragment.html#isEmpty">isEmpty</a>() and <a href="qtextcursor.html#selection">QTextCursor::selection</a>().</p>
@@ -70,13 +71,13 @@
 <h3 class="fn"><a name="isEmpty"></a>bool QTextDocumentFragment::isEmpty () const</h3>
 <p>Returns true if the fragment is empty; otherwise returns false.</p>
 <h3 class="fn"><a name="toHtml"></a><a href="qstring.html">QString</a> QTextDocumentFragment::toHtml ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>encoding</i> ) const</h3>
-<p>Returns the contents of the document fragment as HTML, using the specified <i>encoding</i> (e.g., &quot;UTF-8&quot;, &quot;ISO 8859-1&quot;).</p>
+<p>Returns the contents of the document fragment as HTML, using the specified <i>encoding</i> (e.g&#x2e;, &quot;UTF-8&quot;, &quot;ISO 8859-1&quot;).</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qtextdocumentfragment.html#toPlainText">toPlainText</a>(), <a href="qtextdocument.html#toHtml">QTextDocument::toHtml</a>(), and <a href="qtextcodec.html">QTextCodec</a>.</p>
 <h3 class="fn"><a name="toHtml-2"></a><a href="qstring.html">QString</a> QTextDocumentFragment::toHtml () const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <h3 class="fn"><a name="toPlainText"></a><a href="qstring.html">QString</a> QTextDocumentFragment::toPlainText () const</h3>
-<p>Returns the document fragment's text as plain text (i.e. with no formatting information).</p>
+<p>Returns the document fragment's text as plain text (i.e&#x2e; with no formatting information).</p>
 <p>See also <a href="qtextdocumentfragment.html#toHtml">toHtml</a>().</p>
 <h3 class="fn"><a name="operator-eq"></a>QTextDocumentFragment &amp; QTextDocumentFragment::operator= ( const QTextDocumentFragment &amp; <i>other</i> )</h3>
 <p>Assigns the <i>other</i> fragment to this fragment.</p>
@@ -84,6 +85,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

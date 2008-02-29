@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,7 +27,10 @@
 class QListView;
 class QModelIndex;
 class QOccurrenceModel;
-class AlarmFilterModel;
+class QStandardItemModel;
+class QComboBox;
+class QPushButton;
+class QScrollArea;
 
 class AlarmDialog : public QDialog
 {
@@ -41,6 +44,7 @@ public:
     Button exec(QOccurrenceModel *m, const QDateTime& startTime, int warnDelay);
     Button result();
     QOccurrence selectedOccurrence() const;
+    bool eventFilter( QObject *receiver, QEvent *event );
 
 protected:
     void timerEvent(QTimerEvent *e);
@@ -49,16 +53,22 @@ protected:
 private slots:
     void currentAlarmChanged(const QModelIndex& idx);
     void alarmSelected(const QModelIndex &idx);
+    void snoozeClicked();
 
 private:
+    void formatDateTime(const QOccurrence& ev, bool useStartTime, QString& localDateTime, QString& realDateTime);
+
     Button mButton;
 
     int mAlarmCount;
     int mAlarmTimerId;
+    QDateTime mStartTime;
     QOccurrenceModel* mModel;
-    AlarmFilterModel *mFilterModel;
-
+    QStandardItemModel *mStandardModel;
     /* Widgetty stuff */
+    QComboBox *mSnoozeChoices;
+    QPushButton *mSnoozeButton;
+    QScrollArea *scrollArea;
     QListView *mAlarmList;
 };
 

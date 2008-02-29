@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,6 +19,9 @@
 **
 ****************************************************************************/
 
+#ifndef RINGPROFILE_H
+#define RINGPROFILE_H
+
 #include <QListWidget>
 #include <QDialog>
 #include <QMap>
@@ -26,22 +29,17 @@
 #include <QPhoneProfileManager>
 #include <QtopiaAbstractService>
 
-class QListWidget;
-class QDialog;
 class QAction;
-class QMenu;
-class QGroupBox;
 class QGridLayout;
 class QTabWidget;
 class QLabel;
 class QLineEdit;
-class QVBoxLayout;
 class QSpinBox;
 class QCheckBox;
 class QComboBox;
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
 class RingToneButton;
-class QListWidget;
-class QHBoxLayout;
+#endif
 class QToolButton;
 class QTimeEdit;
 class QPushButton;
@@ -56,7 +54,6 @@ public:
     ~ProfileEditDialog();
     void setProfile(PhoneProfileItem *);
     void setActive( bool b ) { isActive = b; };
-    bool isModified() const { return mIsModified; }
     void addSetting( const QPhoneProfile::Setting s );
 
 protected:
@@ -64,57 +61,55 @@ protected:
     bool event(QEvent *);
 
 private:
-    void init();
     void setPhoneProfile();
     void setSettings();
     void setSchedule();
     void initDialog( QDialog *dlg );
     void processSchedule();
-#ifdef QTOPIA_PHONE
     bool eventFilter( QObject *o, QEvent *e );
-#endif
     bool showSettingList( QStringList &settingList );
 
 private slots:
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
     void updateState();
+    void toneSelected(const QContent& tone);
+#endif
     void viewSetting();
     void deleteSetting();
-#ifdef QTOPIA_PHONE
     void setSoftMenu(int);
     void tabChanged(int);
-#endif
     void showEditScheduleDialog();
     void enableEditSchedule(bool);
     void pullSettingStatus();
 
 private:
     QTabWidget *tabWidget;
+    QWidget *infoTab, *settingTab;
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+    QWidget *toneTab;
+#endif
+    QGridLayout *infoLayout;
 
-    QWidget *infoTab, *toneTab, *settingTab;
-    QGridLayout *infoLayout, *ringToneLayout, *messageToneLayout;
-    QVBoxLayout *infoTabLayout, *toneTabLayout, *settingLayout, *scheduleVLayout;
-    QHBoxLayout *scheduleHLayout1, *scheduleHLayout2;
-
-    QLabel *lblName, *profileLabel;
+    QLabel *profileLabel;
     QLineEdit *profileName;
-    QLabel *lblVolume;
     QSlider *masterVolume;
-    QCheckBox *autoAnswer, *vibrateAlert, *autoActivation;
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+    QCheckBox *autoAnswer, *vibrateAlert;
+#endif
+    QCheckBox *autoActivation;
     QPushButton *editSchedule;
-    QLabel *lblTime;
     QTimeEdit *time;
     QToolButton **days;
 
-    QGroupBox *ringToneGroup;
-    QLabel *lblAlert1, *lblTone1;
+#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
     QComboBox *ringType;
     RingToneButton *ringTone;
+    RingToneButton *videoTone;
 
-    QGroupBox *messageToneGroup;
-    QLabel *lblAlert2, *lblTone2;
     QComboBox *messageType;
     QSpinBox *messageAlertDuration;
     RingToneButton *messageTone;
+#endif
 
     QListWidget *settingListWidget;
 
@@ -122,15 +117,11 @@ private:
     QPhoneProfile::Settings settings;
     int id;
     bool isActive;
-    bool mIsModified;
     bool isLoading;
     bool deleteDays;
-    bool isNew;
     bool editVolume;
-    int mvOrigValue;
     QPhoneProfile::Schedule schedule;
 
-    QMenu *contextMenu;
     QAction *actionView;
     QAction *actionDelete;
     QAction *actionCapture;
@@ -204,10 +195,6 @@ private:
 
     bool origPlaneMode;
     QString appName, appTitle, details;
-
-#ifdef QTOPIA_PHONE
-    QMenu *contextMenu;
-#endif
 };
 
 class ProfilesService : public QtopiaAbstractService
@@ -231,3 +218,4 @@ private:
     ProfileSelect *parent;
 };
 
+#endif     // RINGPROFILE_H

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -43,6 +43,7 @@
     A package install can be started by invoking the service message \c{installPackageConfirm(QString)} with
     URL of the descriptor of the package to install.  Package manager will then download the descriptor and
     after gaining the users consent download the package and install it.
+
 
     \sa QtopiaAbstractService
 */
@@ -121,7 +122,6 @@ public:
         : QDialog( parent )
     {
         setupUi(this);
-        reenableButton->setVisible( false );
     }
 };
 
@@ -132,34 +132,60 @@ PackageServiceInstaller::PackageServiceInstaller( PackageView *parent, Qt::Windo
     , m_installActive( false )
     , m_packageView( parent )
     , m_expectedPackageSize( 0 )
+    , m_maxDescriptorSize( 4096 )
+    , currentUrl( new QUrl() ) 
 {
     QVBoxLayout *progressLayout = new QVBoxLayout( this );
 
-    progressLayout->addWidget( m_progressLabel = new QLabel( this ) );
+    progressLayout->addWidget( m_progressTextEdit = new QTextEdit( this ) );
+    m_progressTextEdit->setReadOnly( true );
+    m_progressTextEdit->setFocusPolicy( Qt::NoFocus );
+    m_progressTextEdit->setTextInteractionFlags( Qt::NoTextInteraction );
+    m_progressTextEdit->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
     progressLayout->addWidget( m_progressBar = new QProgressBar( this ) );
-
-    m_progressLabel->setWordWrap( true );
-    m_progressLabel->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
 
     m_packageDetails = new ServicePackageDetails( this );
 
     QtopiaApplication::setMenuLike( m_packageDetails, true );
 
-    QtopiaApplication::setMenuLike( m_packageDetails, true );
+    QSettings pkgManagerConf( "Trolltech", "PackageManager" );
+
+    pkgManagerConf.beginGroup( QLatin1String( "Configuration" ));
+    if ( pkgManagerConf.contains( QLatin1String( "maxDescriptorSize" )))
+    {
+        m_maxDescriptorSize = pkgManagerConf.value( QLatin1String( "maxDescriptorSize" )).toInt();
+    }
+    else
+    {
+        qWarning( "PackageServiceInstaller constructor:- Configuration/maxDescriptorSize not defined in PackageManager.conf"
+                  "using default value of %d", m_maxDescriptorSize );
+    }
+
+    pkgManagerConf.endGroup();
 }
 
 void PackageServiceInstaller::doReportError( const QString &simpleError, const QString &detailedError )
 {
-    m_progressLabel->setText( simpleError );
-    qWarning( qPrintable(detailedError) );
+    m_progressTextEdit->setText( simpleError );
+    qWarning( qPrintable(simpleError + QLatin1String("\n") + detailedError) );
 }
 
 void PackageServiceInstaller::confirmInstall( const InstallControl::PackageInfo &package )
 {
-    if( !package.isComplete() || package.url.isEmpty() )
+    QString errReason;
+    if ( package.url.isEmpty() )
     {
-        m_progressLabel->setText( tr( "Package header malformed." ) );
-
+        errReason = "URL field is empty/non-existent"; 
+        reportError( tr("Package descriptor Incomplete: %1", "%1 = reason" ).arg( errReason ),
+                       QLatin1String( "PackageServiceInstaller::confirmInstall qpd incomplete: ")
+                            + errReason );
+        return;
+    }
+    else if ( !package.isComplete(InstallControl::PackageInfo::PkgList, &errReason ) ) 
+    {
+        reportError( tr("Package descriptor Incomplete: %1", "%1 = reason" ).arg( errReason ), 
+                       QLatin1String( "PackageServiceInstaller::confirmInstall qpd incomplete: " )
+                            + errReason );
         return;
     }
 
@@ -169,51 +195,43 @@ void PackageServiceInstaller::confirmInstall( const InstallControl::PackageInfo 
 
     if( !toIntOk )
     {
-        m_progressLabel->setText( tr( "Cannot determine package size." ) );
+        m_progressTextEdit->setText( tr( "Cannot determine package size." ) );
 
         return;
     }
 
     m_pendingPackage =  package;
 
-    QString details;
+    m_packageDetails->setWindowTitle( m_pendingPackage.name );
 
 #ifndef QT_NO_SXE
     if( m_packageView->model->hasSensitiveDomains( m_pendingPackage.domain ) )
     {
-        details = tr( "The package <font color=\"#0000FF\">%1</font> <b>cannot be installed</b> as it utilizes protected resources" )
-                .arg( m_pendingPackage.name );
-
-        m_packageDetails->installButton->setVisible( false );
-        m_packageDetails->cancelButton->setText( tr( "OK" ) );
+        QMessageBox::warning(this, tr("Install Error"), tr("%1 utilizes protected resources")
+            .arg( m_pendingPackage.name ) );
     }
     else
 #endif
-    if ( packageInstalled( m_pendingPackage.md5Sum ) )
+    if ( InstalledPackageScanner::isPackageInstalled(m_pendingPackage) )
     {
-        details = tr( "The package <font color=\"#0000FF\">%1</font> has <b>already been installed</b>" )
-                    .arg( m_pendingPackage.name );
-        m_packageDetails->installButton->setVisible( false );
-        m_packageDetails->cancelButton->setText( tr( "OK" ) );
+        QMessageBox::warning(this, tr("Install Error"),
+                            tr("%1 has already been installed").arg(m_pendingPackage.name) );
     }
     else
-    { 
-        details = tr( "<font color=\"#66CC00\"><b>Installing package</b></font> %1 <b>Go ahead?</b>" )
+    {
+        if ( QMessageBox::warning(this, tr("Installing Package"), tr("%1?","%1=package name")
 #ifndef QT_NO_SXE
-            .arg( DomainInfo::explain( m_pendingPackage.domain, m_pendingPackage.name ) );
+            .arg( DomainInfo::explain( m_pendingPackage.domain, m_pendingPackage.name ) ),
 #else
-            .arg( m_pendingPackage.name );
+            .arg( m_pendingPackage.name), 
 #endif
-        m_packageDetails->installButton->setVisible( true );
-        m_packageDetails->cancelButton->setText( tr( "Cancel" ) );
+             QMessageBox::Yes | QMessageBox::No )
+         == QMessageBox::Yes) 
+        {
+        installPendingPackage();
+        }
     }
 
-    m_packageDetails->description->setHtml( details );
-
-    if( QtopiaApplication::execDialog( m_packageDetails ) == QDialog::Accepted )
-        installPendingPackage();
-    else
-        reject();
 }
 
 void PackageServiceInstaller::installPendingPackage()
@@ -227,16 +245,16 @@ void PackageServiceInstaller::installPendingPackage()
         connect( &m_http, SIGNAL(done(bool)), this, SLOT(packageDownloadDone(bool)) );
         connect( &m_http, SIGNAL(dataReadProgress(int,int)), this, SLOT(updatePackageProgress(int,int)) );
 
-        QUrl url( m_pendingPackage.url );
+        currentUrl->setUrl( m_pendingPackage.url );
 
-        m_http.setHost( url.host(), url.port(80) );
-        m_http.get( url.path(), &m_packageFile );
+        m_http.setHost( currentUrl->host(), currentUrl->port(80) );
+        m_http.get( currentUrl->path(), &m_packageFile );
 
-        m_progressLabel->setText( tr( "Downloading %1...", "%1 = package name" ).arg( m_pendingPackage.name ) );
+        m_progressTextEdit->setText( tr( "Downloading %1...", "%1 = package name" ).arg( m_pendingPackage.name ) );
     }
     else
     {
-        m_progressLabel->setText(
+        m_progressTextEdit->setText(
                 tr( "Package download failed due to file error: %1", "%1 = file error description" )
                 .arg( m_packageFile.errorString() ) );
 
@@ -248,7 +266,7 @@ void PackageServiceInstaller::installPackage( const QString &url )
 {
     m_installActive = true;
 
-    m_progressLabel->setText( tr( "Downloading package header..." ) );
+    m_progressTextEdit->setText( tr( "Downloading package header..." ) );
 
     QtopiaApplication::setMenuLike( this, true );
 
@@ -259,10 +277,10 @@ void PackageServiceInstaller::installPackage( const QString &url )
 
     m_headerBuffer.open( QIODevice::ReadWrite );
 
-    QUrl u( url );
+    currentUrl->setUrl( url );
 
-    m_http.setHost( u.host(), u.port(80) );
-    m_http.get( u.path(), &m_headerBuffer );
+    m_http.setHost( currentUrl->host(), currentUrl->port(80) );
+    m_http.get( currentUrl->path(), &m_headerBuffer );
 }
 
 void PackageServiceInstaller::installPackage( const QByteArray &descriptor )
@@ -281,18 +299,40 @@ void PackageServiceInstaller::headerDownloadDone( bool error )
     disconnect( &m_http, SIGNAL(done(bool)), this, SLOT(headerDownloadDone(bool)) );
     disconnect( &m_http, SIGNAL(dataReadProgress(int,int)), this, SLOT(updateHeaderProgress(int,int)) );
 
-    if( error )
+    QHttpResponseHeader responseHeader = m_http.lastResponse();
+    if( responseHeader.statusCode() >= 400 || error )
     {
         m_headerBuffer.close();
         m_headerBuffer.setData( QByteArray() );
 
-        if( m_http.error() != QHttp::Aborted )
+        QString simpleError;
+        QString detailedError;
+        if ( error && m_http.error() != QHttp::Aborted )
         {
-            m_progressLabel->setText( tr( "Header download failed with error: %1" ).arg( m_http.errorString() ) );
+            simpleError =  tr( "Header (qpd descriptor) download failed for URL-%1 : %2", "%1 = URL, %2 = reason" )
+                            .arg( currentUrl->toString() )
+                            .arg( m_http.errorString() );
+            detailedError = QLatin1String( "PackageServiceInstaller::headerDownloadDone: URL = %1, http error = %2" );
+            detailedError = detailedError.arg( currentUrl->toString() ).arg( m_http.errorString() );
+            reportError( simpleError, detailedError );
         }
+        else if ( responseHeader.statusCode() >= 400 )
+        { 
 
+            simpleError = tr( "Header(qpd) download failed: Error connecting to URL-%1 : %2, status code = %3",
+                                        "%1 = URL, %2 = reason, %3 = status code  " )
+                                    .arg( currentUrl->toString() )
+                                    .arg( responseHeader.reasonPhrase() )
+                                    .arg( QString::number(responseHeader.statusCode()) );
+            detailedError = QString( "PackageServiceInstaller::headerDownloadDone: statusCode > 400 "
+                                       "URL = %1, reason = %2, status code = %3" )
+                                    .arg( currentUrl->toString() )
+                                    .arg( responseHeader.reasonPhrase() )
+                                .arg( QString::number(responseHeader.statusCode()) );
+            reportError( simpleError, detailedError );
+        }
+        
         QtopiaApplication::setMenuLike( this, false );
-
         return;
     }
 
@@ -317,17 +357,34 @@ void PackageServiceInstaller::packageDownloadDone( bool error )
 
     m_progressBar->setValue( m_progressBar->maximum() );
 
-    if( error )
+    QHttpResponseHeader responseHeader = m_http.lastResponse();
+       
+    if( responseHeader.statusCode() >= 400 ) 
     {
-        if( m_http.error() != QHttp::Aborted )
-        {
-            // Warn of error condition.
-            m_progressLabel->setText( tr( "Package download failed with error: %1" ).arg( m_http.errorString() ) );
-        }
+        QString simpleError = tr( "Package download failed: Error connecting to URL-%1 : %2, status code = %3", 
+                                    "%1 = URL, %2 = reason, %3 = status code  " )
+                                .arg( currentUrl->toString() )
+                                .arg( responseHeader.reasonPhrase() )
+                                .arg( QString::number(responseHeader.statusCode()) );
+        QString detailedError = QString( "PackageServiceInstaller::packageDownloadDone: statusCode > 400 "
+                                       "URL = %1, reason = %2, status code = %3" )
+                                .arg( currentUrl->toString() )
+                                .arg( responseHeader.reasonPhrase() )
+                                .arg( QString::number(responseHeader.statusCode()) );
+        reportError( simpleError, detailedError );
+    }
+    else if ( error && m_http.error() != QHttp::Aborted )
+    {
+        QString simpleError =  tr( "Package download failed for URL-%1 : %2" )
+                                    .arg( currentUrl->toString() )
+                                    .arg( m_http.errorString() );
+        QString detailedError( "PackageServiceInstaller::packageDownloadDone: URL = %1, http error = %2" );
+        detailedError = detailedError.arg( currentUrl->toString() ).arg( m_http.errorString() ); 
+        reportError( simpleError, detailedError );  
     }
     else if( m_installer.installPackage( m_pendingPackage, m_packageFile.md5Sum(), this ) )
     {
-        m_progressLabel->setText( tr( "%1 installed", "%1 = package name" ).arg( m_pendingPackage.name ) );
+        m_progressTextEdit->setText( tr( "%1 installed", "%1 = package name" ).arg( m_pendingPackage.name ) );
         qobject_cast<InstalledPackageController *>(m_packageView->model->installed )
                 ->reloadInstalledLocations( QStringList( Qtopia::packagePath() + "controls/" ) );
     }
@@ -344,10 +401,10 @@ void PackageServiceInstaller::updateHeaderProgress( int done, int total )
 
     m_progressBar->setValue( done );
 
-    if( total > 4096 )
+    if( total > m_maxDescriptorSize )
     {
-        m_progressLabel->setText(
-                tr( "Package header exceeds maximum size of %1 bytes. Download cancelled" ).arg( 4096 ) );
+        m_progressTextEdit->setText(
+                tr( "Package header exceeds maximum size of %1 bytes. Download cancelled" ).arg( m_maxDescriptorSize ) );
 
         m_http.abort();
     }
@@ -362,15 +419,15 @@ void PackageServiceInstaller::updatePackageProgress( int done, int total )
 
     if( total > m_expectedPackageSize )
     {
-        m_progressLabel->setText(
-                tr( "Package size exceeds the expected size of %1 kB. Download cancelled" ).arg( m_expectedPackageSize / 1024 ) );
+        m_progressTextEdit->setText(
+                tr( "Package size exceeds the expected size of %1 KB. Download cancelled" ).arg( m_expectedPackageSize / 1024 ) );
 
         m_http.abort();
     }
     else if( m_packageFile.error() != QFile::NoError )
     {
-        m_progressLabel->setText(
-                tr( "Package downloaded due to file error: %1", "%1 = file error description" ).arg( m_packageFile.errorString() ) );
+        m_progressTextEdit->setText(
+                tr( "Package download failed due to file error: %1", "%1 = file error description" ).arg( m_packageFile.errorString() ) );
 
         m_http.abort();
     }
@@ -392,10 +449,3 @@ void PackageServiceInstaller::reject()
     QDialog::reject();
 }
 
-bool PackageServiceInstaller::packageInstalled( const QString &md5Sum )
-{
-    if ( !m_scanner )
-        m_scanner = new InstalledPackageScanner( this );
-
-    return m_scanner->isPackageInstalled( md5Sum );
-}

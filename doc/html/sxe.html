@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -9,53 +10,62 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Safe Execution Environment (SXE)<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Safe Execution Environment (SXE)<br /><span class="subtitle"></span>
+</h1>
 <a name="sxe-status"></a>
 <h2>SXE Status</h2>
 <p><b>Important</b></p>
-<p>SXE is released for trial use only, since at the current time full platform integration scripting and security auditing processes have yet to be completed.</p>
-<p>For this reason SXE is controlled by the -sxe switch to the Qtopia configuration script. To enable SXE for conducting technology trials invoke the Qtopia configuration, and add <tt>-sxe</tt> to the command line.</p>
+<p>SXE is scheduled to be released with Qtopia 4.3&#x2e;1 which will allow Qtopia devices to safely run games. The following documentation is the residual of a prototype &quot;System-wide Safe Execution Environment&quot; that was placed in the 4.3&#x2e;0 Beta for experimental purposes. The Safe Execution Environment that will be released will be considerably more lightweight and easy to use.</p>
 <a name="sxe-overview"></a>
 <h2>SXE Overview</h2>
 <p>There is a growing demand among end-users for devices capable of downloading, installing and running third-party packages. This demand is driven in part by the availability of games and other applications conforming to the <a href="http://developers.sun.com/techtopics/mobility/midp/articles/permissions/">Java MIDlet specification </a>.</p>
 <p>Qtopia with the SXE is designed to enable these actions. It provides a level of security that allows for the device owner to have confidence in downloading and running natively compiled binaries without significant risk of compromising the operation of the device, or its data.</p>
-<p>Unauthorized access to device services should not be possible. If anything unexpected is displayed on the screen the user should be able to exit the program by, for example, holding down the <i>hangup</i> button on the phone.</p>
-<p>The SXE has three main features:</p>
+<p>SXE is a platform security solution. This means that it provides continuous policy based countermeasures designed to proactively prevent malicious or malfunctioning programs from harming assets on the device.</p>
+<p>Platform security can be contrasted with:</p>
 <ul>
-<li>Public Key Infrastructure (PKI) for trusting packages:</li>
-<li>Sand-boxing for packages not able to be trusted:</li>
+<li>perimeter solutions like firewalls, or systems relying on trust: these do not provide continuous security since once the program is through the perimeter gateway it is free to perform any action.</li>
+<li>signature or trigger based solutions like anti-virus or change detection systems which react to signs of malicious activity before performing any actions</li>
+</ul>
+<p>Platform security can be combined with perimeter and trigger type security to provide defence indepth. However platform security is a minimum requirement for a system which allows downloaded software to be run.</p>
+<p>The SXE has several components:</p>
+<ul>
+<li>Sand-boxing for packages not able to be trusted</li>
 <li>Application service level controls.</li>
+<li>General least-privileges and system-hardening policies</li>
+<li>Public Key Infrastructure (PKI) for trusting packages (planned for a later release)</li>
 </ul>
 <p>The following table provides links to detailed SXE information:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>General</th><th>Components</th><th>Installer/Packet Manager</th></tr></thead>
+<thead><tr valign="top" class="qt-style"><th>General</th><th>Components</th><th>Installer/Package Manager</th></tr></thead>
 <tr valign="top" class="odd"><td><ul>
 <li><a href="sxe-requirements.html">Requirements</a></li>
 <li><a href="sxe-impacts.html">Impact and Implications</a></li>
 <li><a href="sxe-glossary.html">Glossary of Terms</a></li>
 </ul>
 </td><td><ul>
-<li><a href="sxe-pkgtrusts.html">Package Trusts</a></li>
+<li><a href="sxe-pkgtrusts.html">Package Trusts</a> (planned for a later release)</li>
 <li><a href="sxe-mac.html">Mandatory Access Control</a></li>
 <li><a href="sxe-sandbox.html">Sand-boxing</a></li>
 <li><a href="sxe-alp.html">Application Level Policy</a></li>
-<li><a href="sxe-procmonitor.html">Process Monitor</a></li>
+<li><a href="sxe-sxemonitor.html">Security Monitor</a></li>
 </ul>
 </td><td><ul>
 <li><a href="sxe-pkgmgr.html">What is the Installer/Package Manager?</a></li>
+<li><a href="sxe-browser-impl.html">PackageManager - Browser Integration</a></li>
 <li><a href="sxe-pkgmgr-ctlfile.html">Control File</a></li>
 <li><a href="sxe-pkgmgr-profiles.html">Policy Profiles and Domains</a></li>
 <li><a href="sxe-pkgmgr-download.html">Package Download Protocols</a></li>
 <li><a href="sxe-pkgmgr-dispsec.html">Display Security</a></li>
 <li><a href="sxe-pkgmgr-keying.html">Package Keying and Manifest</a></li>
+<li><a href="sxe-app-checklist.html">SXE Application Checklist</a></li>
 </ul>
 </td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

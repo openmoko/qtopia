@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,6 +47,7 @@
 #include "qdbuserror.h"
 #include "qdbusmessage_p.h"
 #include "qdbusmetatype.h"
+#include "qdbusconnection_p.h"
 
 static inline const char *data(const QByteArray &arr)
 {
@@ -40,7 +56,7 @@ static inline const char *data(const QByteArray &arr)
 
 QDBusMessagePrivate::QDBusMessagePrivate()
     : msg(0), reply(0), type(DBUS_MESSAGE_TYPE_INVALID),
-      timeout(-1), ref(1), delayedReply(false), localMessage(false)
+      timeout(-1), localReply(0), ref(1), delayedReply(false), localMessage(false)
 {
 }
 
@@ -50,19 +66,22 @@ QDBusMessagePrivate::~QDBusMessagePrivate()
         dbus_message_unref(msg);
     if (reply)
         dbus_message_unref(reply);
+    delete localReply;
 }
 
 /*!
-    \internal
-    Creates a QDBusMessage that represents the same error as the QDBusError object.
+    \since 4.3
+     Returns the human-readable message associated with the error that was received.
 */
-QDBusMessage QDBusMessagePrivate::fromError(const QDBusError &error)
+QString QDBusMessage::errorMessage() const
 {
-    QDBusMessage message;
-    message.d_ptr->type = DBUS_MESSAGE_TYPE_ERROR;
-    message.d_ptr->name = error.name();
-    message << error.message();
-    return message;
+    if (d_ptr->type == ErrorMessage) {
+        if (!d_ptr->message.isEmpty())
+           return d_ptr->message;
+        if (!d_ptr->arguments.isEmpty())
+            return d_ptr->arguments.at(0).toString();
+    }
+    return QString();
 }
 
 /*!
@@ -84,13 +103,19 @@ DBusMessage *QDBusMessagePrivate::toDBusMessage(const QDBusMessage &message)
                                            data(d_ptr->interface.toUtf8()), data(d_ptr->name.toUtf8()));
         break;
     case DBUS_MESSAGE_TYPE_METHOD_RETURN:
-        if (d_ptr->reply)
-            msg = dbus_message_new_method_return(d_ptr->reply);
-        else
-            qDebug() << "QDBusMessagePrivate::toDBusMessage" << "reply is invalid";
+        msg = dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_RETURN);
+        if (!d_ptr->localMessage) {
+            dbus_message_set_destination(msg, dbus_message_get_sender(d_ptr->reply));
+            dbus_message_set_reply_serial(msg, dbus_message_get_serial(d_ptr->reply));
+        }
         break;
     case DBUS_MESSAGE_TYPE_ERROR:
-        msg = dbus_message_new_error(d_ptr->reply, data(d_ptr->name.toUtf8()), data(d_ptr->message.toUtf8()));
+        msg = dbus_message_new(DBUS_MESSAGE_TYPE_ERROR);
+        dbus_message_set_error_name(msg, data(d_ptr->name.toUtf8()));
+        if (!d_ptr->localMessage) {
+            dbus_message_set_destination(msg, dbus_message_get_sender(d_ptr->reply));
+            dbus_message_set_reply_serial(msg, dbus_message_get_serial(d_ptr->reply));
+        }
         break;
     case DBUS_MESSAGE_TYPE_SIGNAL:
         msg = dbus_message_new_signal(data(d_ptr->path.toUtf8()), data(d_ptr->interface.toUtf8()),
@@ -115,6 +140,9 @@ DBusMessage *QDBusMessagePrivate::toDBusMessage(const QDBusMessage &message)
     QVariantList::ConstIterator it =  d_ptr->arguments.constBegin();
     QVariantList::ConstIterator cend = d_ptr->arguments.constEnd();
     dbus_message_iter_init_append(msg, &marshaller.iterator);
+    if (!d_ptr->message.isEmpty())
+        // prepend the error message
+        marshaller.append(d_ptr->message);
     for ( ; it != cend; ++it)
         marshaller.appendVariantInternal(*it);
 
@@ -177,35 +205,70 @@ QDBusMessage QDBusMessagePrivate::fromDBusMessage(DBusMessage *dmsg)
     return message;
 }
 
-QDBusMessage QDBusMessagePrivate::updateSignature(const QDBusMessage &message, DBusMessage *dmsg)
-{
-    QDBusMessage messageWithSignature = message; // no signature
-    QString signature = QString::fromUtf8(dbus_message_get_signature(dmsg));
-    messageWithSignature.d_ptr->signature = signature;
-    return messageWithSignature;
-}
-
-void QDBusMessagePrivate::setLocal(const QDBusMessage *message, bool local)
-{
-    Q_ASSERT(message);
-    message->d_ptr->localMessage = local;
-}
-
 bool QDBusMessagePrivate::isLocal(const QDBusMessage &message)
 {
     return message.d_ptr->localMessage;
 }
 
-void QDBusMessagePrivate::setArguments(const QDBusMessage *message, const QList<QVariant> &arguments)
+QDBusMessage QDBusMessagePrivate::makeLocal(const QDBusConnectionPrivate &conn,
+                                            const QDBusMessage &asSent)
 {
-    Q_ASSERT(message);
-    message->d_ptr->arguments = arguments;
+    // simulate the message being sent to the bus and then received back
+    // the only field that the bus sets when delivering the message
+    // (as opposed to the message as we send it), is the sender
+    // so we simply set the sender to our unique name
+
+    // determine if we are carrying any complex types
+    QString computedSignature;
+    QVariantList::ConstIterator it = asSent.d_ptr->arguments.constBegin();
+    QVariantList::ConstIterator end = asSent.d_ptr->arguments.constEnd();
+    for ( ; it != end; ++it) {
+        int id = it->userType();
+        const char *signature = QDBusMetaType::typeToSignature(id);
+        if ((id != QVariant::StringList && id != QVariant::ByteArray &&
+             qstrlen(signature) != 1) || id == qMetaTypeId<QDBusVariant>()) {
+            // yes, we are
+            // we must marshall and demarshall again so as to create QDBusArgument
+            // entries for the complex types
+            DBusMessage *message = toDBusMessage(asSent);
+            dbus_message_set_sender(message, conn.baseService.toUtf8());
+
+            QDBusMessage retval = fromDBusMessage(message);
+            retval.d_ptr->localMessage = true;
+            dbus_message_unref(message);
+            if (retval.d_ptr->service.isEmpty())
+                retval.d_ptr->service = conn.baseService;
+            return retval;
+        } else {
+            computedSignature += QLatin1String(signature);
+        }
+    }
+
+    // no complex types seen
+    // optimise by using the variant list itself
+    QDBusMessage retval;
+    QDBusMessagePrivate *d = retval.d_ptr;
+    d->arguments = asSent.d_ptr->arguments;
+    d->path = asSent.d_ptr->path;
+    d->interface = asSent.d_ptr->interface;
+    d->name = asSent.d_ptr->name;
+    d->message = asSent.d_ptr->message;
+    d->type = asSent.d_ptr->type;
+
+    d->service = conn.baseService;
+    d->signature = computedSignature;
+    d->localMessage = true;
+    return retval;
 }
 
-void QDBusMessagePrivate::setType(const QDBusMessage *message, QDBusMessage::MessageType type)
+QDBusMessage QDBusMessagePrivate::makeLocalReply(const QDBusConnectionPrivate &conn,
+                                                 const QDBusMessage &callMsg)
 {
-    Q_ASSERT(message);
-    message->d_ptr->type = type;
+    // simulate the reply (return or error) message being sent to the bus and
+    // then received back.
+    if (callMsg.d_ptr->localReply)
+        return makeLocal(conn, *callMsg.d_ptr->localReply);
+    return QDBusMessage();      // failed
 }
 
 /*!
@@ -317,6 +380,12 @@ QDBusMessage QDBusMessage::createError(const QString &name, const QString &msg)
     Constructs a new DBus message representing the given \a error.
 */
 
+/*!
+  \fn QDBusMessage QDBusMessage::createError(QDBusError::ErrorType type, const QString &msg)
+
+  Constructs a new DBus message for the error type \a type using
+  the message \a msg. Returns the DBus message.
+*/
 
 /*!
     \fn QDBusMessage QDBusMessage::createReply(const QList<QVariant> &arguments) const
@@ -331,11 +400,13 @@ QDBusMessage QDBusMessage::createReply(const QVariantList &arguments) const
     reply.d_ptr->type = DBUS_MESSAGE_TYPE_METHOD_RETURN;
     if (d_ptr->msg)
         reply.d_ptr->reply = dbus_message_ref(d_ptr->msg);
-    else
-        d_ptr->localMessage = true;
-    Q_ASSERT(d_ptr->msg || d_ptr->localMessage);
-    //qDebug() << "QDBusMessagePrivate::createReply" << "message has no dbus message";
+    if (d_ptr->localMessage) {
+        reply.d_ptr->localMessage = true;
+        d_ptr->localReply = new QDBusMessage(reply); // keep an internal copy
+    }
 
+    // the reply must have a msg or be a local-loop optimisation
+    Q_ASSERT(reply.d_ptr->reply || reply.d_ptr->localMessage);
     return reply;
 }
 
@@ -348,10 +419,13 @@ QDBusMessage QDBusMessage::createErrorReply(const QString name, const QString &m
     QDBusMessage reply = QDBusMessage::createError(name, msg);
     if (d_ptr->msg)
         reply.d_ptr->reply = dbus_message_ref(d_ptr->msg);
-    else
-        d_ptr->localMessage = true;
-    Q_ASSERT(d_ptr->msg || d_ptr->localMessage);
+    if (d_ptr->localMessage) {
+        reply.d_ptr->localMessage = true;
+        d_ptr->localReply = new QDBusMessage(reply); // keep an internal copy
+    }
 
+    // the reply must have a msg or be a local-loop optimisation
+    Q_ASSERT(reply.d_ptr->reply || reply.d_ptr->localMessage);
     return reply;
 }
 
@@ -367,6 +441,13 @@ QDBusMessage QDBusMessage::createErrorReply(const QString name, const QString &m
 
     Constructs a new DBus message representing an error reply message,
     from the given \a error object.
+*/
+
+/*!
+  \fn QDBusMessage QDBusMessage::createErrorReply(QDBusError::ErrorType type, const QString &msg) const
+
+  Constructs a new DBus reply message for the error type \a type using
+  the message \a msg. Returns the DBus message.
 */
 
 /*!
@@ -487,7 +568,7 @@ bool QDBusMessage::isReplyRequired() const
     true) or if an automatic reply should be generated by QtDBus
     (if \a enable is false).
 
-    In D-BUS, all method calls must generate a reply to the caller, unless the
+    In D-Bus, all method calls must generate a reply to the caller, unless the
     caller explicitly indicates otherwise (see isReplyRequired()). QtDBus
     automatically generates such replies for any slots being called, but it
     also allows slots to indicate whether they will take responsibility
@@ -512,19 +593,20 @@ bool QDBusMessage::isDelayedReply() const
 }
 
 /*!
-    Sets the arguments that are going to be sent over D-BUS to \a arguments. Those
+    Sets the arguments that are going to be sent over D-Bus to \a arguments. Those
     will be the arguments to a method call or the parameters in the signal.
 
     \sa arguments()
 */
 void QDBusMessage::setArguments(const QList<QVariant> &arguments)
 {
+    // FIXME: should we detach?
     d_ptr->arguments = arguments;
 }
 
 /*!
     Returns the list of arguments that are going to be sent or were received from
-    D-BUS.
+    D-Bus.
 */
 QList<QVariant> QDBusMessage::arguments() const
 {
@@ -532,12 +614,13 @@ QList<QVariant> QDBusMessage::arguments() const
 }
 
 /*!
-    Appends the argument \a arg to the list of arguments to be sent over D-BUS in
+    Appends the argument \a arg to the list of arguments to be sent over D-Bus in
     a method call or signal emission.
 */
 
 QDBusMessage &QDBusMessage::operator<<(const QVariant &arg)
 {
+    // FIXME: should we detach?
     d_ptr->arguments.append(arg);
     return *this;
 }
@@ -688,11 +771,16 @@ static void debugVariantMap(QDebug dbg, const QVariantMap &map)
 QDebug operator<<(QDebug dbg, const QDBusMessage &msg)
 {
     dbg.nospace() << "QDBusMessage(type=" << msg.type()
-                  << ", service=" << msg.service()
-                  << ", path=" << msg.path()
-                  << ", interface=" << msg.interface()
-                  << ", member=" << msg.member()
-                  << ", signature=" << msg.signature()
+                  << ", service=" << msg.service();
+    if (msg.type() == QDBusMessage::MethodCallMessage ||
+        msg.type() == QDBusMessage::SignalMessage)
+        dbg.nospace() << ", path=" << msg.path()
+                      << ", interface=" << msg.interface()
+                      << ", member=" << msg.member();
+    if (msg.type() == QDBusMessage::ErrorMessage)
+        dbg.nospace() << ", error name=" << msg.errorName()
+                      << ", error message=" << msg.errorMessage();
+    dbg.nospace() << ", signature=" << msg.signature()
                   << ", contents=(";
     debugVariantList(dbg, msg.arguments());
     dbg.nospace() << ") )";

@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: List of All Members for QDBusConnectionInterface</title>
+  <title>Qt 4.3: List of All Members for QDBusConnectionInterface</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -22,7 +22,9 @@
 <li><div class="fn"/><a href="qdbusabstractinterface.html#call">call</a> ( const QString &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp; ) : QDBusMessage</li>
 <li><div class="fn"/><a href="qdbusabstractinterface.html#call-2">call</a> ( QDBus::CallMode, const QString &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp;, const QVariant &amp; ) : QDBusMessage</li>
 <li><div class="fn"/><a href="qdbusabstractinterface.html#callWithArgumentList">callWithArgumentList</a> ( QDBus::CallMode, const QString &amp;, const QList&lt;QVariant&gt; &amp; ) : QDBusMessage</li>
-<li><div class="fn"/><a href="qdbusabstractinterface.html#callWithCallback">callWithCallback</a> ( const QString &amp;, const QList&lt;QVariant&gt; &amp;, QObject *, const char * ) : bool</li>
+<li><div class="fn"/><a href="qdbusabstractinterface.html#callWithCallback">callWithCallback</a> ( const QString &amp;, const QList&lt;QVariant&gt; &amp;, QObject *, const char *, const char * ) : bool</li>
+<li><div class="fn"/><a href="qdbusabstractinterface.html#callWithCallback-2">callWithCallback</a> ( const QString &amp;, const QList&lt;QVariant&gt; &amp;, QObject *, const char * ) : bool</li>
+<li><div class="fn"/><a href="qdbusconnectioninterface.html#callWithCallbackFailed">callWithCallbackFailed</a> ( const QDBusError &amp;, const QDBusMessage &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#childEvent">childEvent</a> ( QChildEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#children">children</a> () const : const QObjectList &amp;</li>
 <li><div class="fn"/><a href="qobject.html#connect">connect</a> ( const QObject *, const char *, const QObject *, const char *, Qt::ConnectionType ) : bool</li>
@@ -49,8 +51,8 @@
 <li><div class="fn"/><a href="qdbusabstractinterface.html#interface">interface</a> () const : QString</li>
 <li><div class="fn"/><a href="qdbusconnectioninterface.html#isServiceRegistered">isServiceRegistered</a> ( const QString &amp; ) const : QDBusReply&lt;bool&gt;</li>
 <li><div class="fn"/><a href="qdbusabstractinterface.html#isValid">isValid</a> () const : bool</li>
-<li><div class="fn"/><a href="qobject.html#isWidgetType">isWidgetType</a> () const : bool</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qobject.html#isWidgetType">isWidgetType</a> () const : bool</li>
 <li><div class="fn"/><a href="qobject.html#killTimer">killTimer</a> ( int )</li>
 <li><div class="fn"/><a href="qdbusabstractinterface.html#lastError">lastError</a> () const : QDBusError</li>
 <li><div class="fn"/><a href="qobject.html#metaObject">metaObject</a> () const : const QMetaObject *</li>
@@ -60,8 +62,8 @@
 <li><div class="fn"/><a href="qdbusabstractinterface.html#path">path</a> () const : QString</li>
 <li><div class="fn"/><a href="qobject.html#property">property</a> ( const char * ) const : QVariant</li>
 <li><div class="fn"/><a href="qobject.html#receivers">receivers</a> ( const char * ) const : int</li>
-<li><div class="fn"/><a href="qdbusconnectioninterface.html#registerService">registerService</a> ( const QString &amp;, ServiceQueueOptions, ServiceReplacementOptions ) : QDBusReply&lt;RegisterServiceReply&gt;</li>
-<li><div class="fn"/><a href="qdbusconnectioninterface.html#registeredServiceNames">registeredServiceNames</a> () const : QDBusReply&lt;QStringList&gt;</li>
+<li><div class="fn"/><a href="qdbusconnectioninterface.html#registerService">registerService</a> ( const QString &amp;, ServiceQueueOptions, ServiceReplacementOptions ) : QDBusReply&lt;QDBusConnectionInterface::RegisterServiceReply&gt;</li>
+<li><div class="fn"/><a href="qdbusconnectioninterface.html#registeredServiceNames-prop">registeredServiceNames</a> () const : QDBusReply&lt;QStringList&gt;</li>
 <li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#sender">sender</a> () const : QObject *</li>
 <li><div class="fn"/><a href="qdbusabstractinterface.html#service">service</a> () const : QString</li>
@@ -90,6 +92,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

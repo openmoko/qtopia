@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,14 +53,18 @@ class QDesignerWidgetDataBaseInterface;
 class QDesignerMetaDataBaseInterface;
 class QDesignerWidgetFactoryInterface;
 class QDesignerObjectInspectorInterface;
+class QDesignerPromotionInterface;
 class QDesignerBrushManagerInterface;
 class QDesignerIconCacheInterface;
 class QDesignerActionEditorInterface;
+class QDesignerIntegrationInterface;
 class QDesignerPluginManager;
 
 class QWidget;
 
 class QExtensionManager;
+
+class  QDesignerFormEditorInterfacePrivate;
 
 class QDESIGNER_SDK_EXPORT QDesignerFormEditorInterface: public QObject
 {
@@ -63,10 +82,12 @@ public:
     QDesignerFormWindowManagerInterface *formWindowManager() const;
     QDesignerWidgetDataBaseInterface *widgetDataBase() const;
     QDesignerMetaDataBaseInterface *metaDataBase() const;
+    QDesignerPromotionInterface *promotion() const;
     QDesignerWidgetFactoryInterface *widgetFactory() const;
     QDesignerBrushManagerInterface *brushManager() const;
     QDesignerIconCacheInterface *iconCache() const;
     QDesignerActionEditorInterface *actionEditor() const;
+    QDesignerIntegrationInterface *integration() const;
     QDesignerPluginManager *pluginManager() const;
     QString resourceLocation() const;
 
@@ -76,32 +97,36 @@ public:
     void setObjectInspector(QDesignerObjectInspectorInterface *objectInspector);
     void setPluginManager(QDesignerPluginManager *pluginManager);
     void setActionEditor(QDesignerActionEditorInterface *actionEditor);
+    void setIntegration(QDesignerIntegrationInterface *integration);
 
 protected:
     void setFormManager(QDesignerFormWindowManagerInterface *formWindowManager);
     void setMetaDataBase(QDesignerMetaDataBaseInterface *metaDataBase);
     void setWidgetDataBase(QDesignerWidgetDataBaseInterface *widgetDataBase);
+    void setPromotion(QDesignerPromotionInterface *promotion);
     void setWidgetFactory(QDesignerWidgetFactoryInterface *widgetFactory);
     void setExtensionManager(QExtensionManager *extensionManager);
     void setBrushManager(QDesignerBrushManagerInterface *brushManager);
     void setIconCache(QDesignerIconCacheInterface *cache);
 
 private:
-    QPointer<QWidget> m_topLevel;
-    QPointer<QDesignerWidgetBoxInterface> m_widgetBox;
-    QPointer<QDesignerPropertyEditorInterface> m_propertyEditor;
-    QPointer<QDesignerFormWindowManagerInterface> m_formWindowManager;
-    QPointer<QExtensionManager> m_extensionManager;
-    QPointer<QDesignerMetaDataBaseInterface> m_metaDataBase;
-    QPointer<QDesignerWidgetDataBaseInterface> m_widgetDataBase;
-    QPointer<QDesignerWidgetFactoryInterface> m_widgetFactory;
-    QPointer<QDesignerObjectInspectorInterface> m_objectInspector;
-    QPointer<QDesignerBrushManagerInterface> m_brushManager;
-    QPointer<QDesignerIconCacheInterface> m_iconCache;
-    QPointer<QDesignerActionEditorInterface> m_actionEditor;
-    QDesignerPluginManager *m_pluginManager;
+    QPointer<QWidget> m_pad1;
+    QPointer<QDesignerWidgetBoxInterface> m_pad2;
+    QPointer<QDesignerPropertyEditorInterface> m_pad3;
+    QPointer<QDesignerFormWindowManagerInterface> m_pad4;
+    QPointer<QExtensionManager> m_pad5;
+    QPointer<QDesignerMetaDataBaseInterface> m_pad6;
+    QPointer<QDesignerWidgetDataBaseInterface> m_pad7;
+    QPointer<QDesignerWidgetFactoryInterface> m_pad8;
+    QPointer<QDesignerObjectInspectorInterface> m_pad9;
+    QPointer<QDesignerBrushManagerInterface> m_pad10;
+    QPointer<QDesignerIconCacheInterface> m_pad11;
+    QPointer<QDesignerActionEditorInterface> m_pad12;
+    QDesignerPluginManager *m_pad13;
 
 private:
+    Q_DECLARE_PRIVATE(QDesignerFormEditorInterface)
+
     QDesignerFormEditorInterface(const QDesignerFormEditorInterface &other);
     void operator = (const QDesignerFormEditorInterface &other);
 };

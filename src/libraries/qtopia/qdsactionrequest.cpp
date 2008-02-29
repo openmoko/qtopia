@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -123,7 +123,7 @@ QDSHeartBeat::QDSHeartBeat( const QString& channel, QObject* parent )
     mTimer( 0 )
 {
     mTimer = new QTimer( this );
-    connect( mTimer, SIGNAL( timeout() ), this, SLOT( beat() ) );
+    connect( mTimer, SIGNAL(timeout()), this, SLOT(beat()) );
     mTimer->start( QDS::SERVERING_HEARTBEAT_PERIOD );
     beat();
 }
@@ -134,7 +134,7 @@ QDSHeartBeat::QDSHeartBeat( const QDSHeartBeat& other )
     mTimer( 0 )
 {
     mTimer = new QTimer( this );
-    connect( mTimer, SIGNAL( timeout() ), this, SLOT( beat() ) );
+    connect( mTimer, SIGNAL(timeout()), this, SLOT(beat()) );
     mTimer->start( QDS::SERVERING_HEARTBEAT_PERIOD );
     beat();
 }

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,6 +24,8 @@
 
 #include <qtopiaglobal.h>
 
+#include <qtopialog.h>
+
 ExampleKbdDriverPlugin::ExampleKbdDriverPlugin( QObject *parent )
     : QKbdDriverPlugin( parent )
 {
@@ -33,16 +35,20 @@ ExampleKbdDriverPlugin::~ExampleKbdDriverPlugin()
 {
 }
 
-QWSKeyboardHandler* ExampleKbdDriverPlugin::create(const QString& driver, const QString&)
+QWSKeyboardHandler* ExampleKbdDriverPlugin::create(const QString& driver,
+                                                   const QString& device)
 {
-    qWarning("ExampleKbdDriverPlugin:create()");
-    return create( driver );
+    if (driver.toLower() == "examplekbdhandler") {
+        qLog(Input) << "Before call ExampleKbdHandler()";
+        return new ExampleKbdHandler(device);
+    }
+    return 0;
 }
 
-QWSKeyboardHandler* ExampleKbdDriverPlugin::create( const QString& driver)
+QWSKeyboardHandler* ExampleKbdDriverPlugin::create(const QString& driver)
 {
-    if( driver.toLower() == "examplekbdhandler" ) {
-        qWarning("Before call ExampleKbdHandler()");
+    if (driver.toLower() == "examplekbdhandler") {
+        qLog(Input) << "Before call ExampleKbdHandler()";
         return new ExampleKbdHandler();
     }
     return 0;

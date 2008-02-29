@@ -52,12 +52,7 @@ mac:!static:contains(QT_CONFIG, qt_framework) {
    }
 }
 
-!debug_and_release|build_pass {
-   CONFIG(debug, debug|release) {
-      mac:TARGET = $$member(TARGET, 0)_debug
-      win32:TARGET = $$member(TARGET, 0)d
-   }
-}
+TARGET = $$qtLibraryTarget($$TARGET) #done towards the end
 
 target.path=$$[QT_INSTALL_LIBS]
 INSTALLS        += target
@@ -67,3 +62,12 @@ qt_install_headers {
     assistant_headers.path = $$[QT_INSTALL_HEADERS]/QtAssistant
     INSTALLS        += assistant_headers
 }
+
+unix {
+   CONFIG     += create_pc
+   QMAKE_PKGCONFIG_LIBDIR = $$[QT_INSTALL_LIBS]
+   QMAKE_PKGCONFIG_INCDIR = $$[QT_INSTALL_HEADERS]/$$TARGET
+   QMAKE_PKGCONFIG_CFLAGS = -I$$[QT_INSTALL_HEADERS]
+   QMAKE_PKGCONFIG_DESTDIR = pkgconfig
+}
+

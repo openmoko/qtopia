@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,14 +49,14 @@
 #define TAG_RESOURCE "qresource"
 #define TAG_FILE "file"
 
-#define ATTRIBUTE_LANG "lang"
-#define ATTRIBUTE_PREFIX "prefix"
-#define ATTRIBUTE_ALIAS "alias"
-#define ATTRIBUTE_THRESHOLD "threshold"
-#define ATTRIBUTE_COMPRESS "compress"
+#define ATTRIBUTE_LANG       QLatin1String("lang")
+#define ATTRIBUTE_PREFIX     QLatin1String("prefix")
+#define ATTRIBUTE_ALIAS      QLatin1String("alias")
+#define ATTRIBUTE_THRESHOLD  QLatin1String("threshold")
+#define ATTRIBUTE_COMPRESS   QLatin1String("compress")
 
 #define CONSTANT_HEADER_SIZE 8
-#define CONSTANT_COMPRESSLEVEL_DEFAULT 0
+#define CONSTANT_COMPRESSLEVEL_DEFAULT -1
 #define CONSTANT_COMPRESSTHRESHOLD_DEFAULT 70
 
 struct RCCFileInfo;
@@ -128,8 +143,8 @@ struct RCCFileInfo
     inline QString resourceName() {
         QString resource = name;
         for(RCCFileInfo *p = parent; p; p = p->parent)
-            resource = resource.prepend(p->name + "/");
-        return ":" + resource;
+            resource = resource.prepend(p->name + QLatin1Char('/'));
+        return QLatin1Char(':') + resource;
     }
 
     int flags;

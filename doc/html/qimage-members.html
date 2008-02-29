@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: List of All Members for QImage</title>
+  <title>Qt 4.3: List of All Members for QImage</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -23,16 +23,19 @@
 <li><div class="fn"/><a href="qimage.html#QImage-3">QImage</a> ( int, int, Format )</li>
 <li><div class="fn"/><a href="qimage.html#QImage-4">QImage</a> ( uchar *, int, int, Format )</li>
 <li><div class="fn"/><a href="qimage.html#QImage-5">QImage</a> ( const uchar *, int, int, Format )</li>
-<li><div class="fn"/><a href="qimage.html#QImage-6">QImage</a> ( const char * const[] )</li>
-<li><div class="fn"/><a href="qimage.html#QImage-7">QImage</a> ( const QString &amp;, const char * )</li>
-<li><div class="fn"/><a href="qimage.html#QImage-8">QImage</a> ( const char *, const char * )</li>
-<li><div class="fn"/><a href="qimage.html#QImage-9">QImage</a> ( const QImage &amp; )</li>
+<li><div class="fn"/><a href="qimage.html#QImage-6">QImage</a> ( uchar *, int, int, int, Format )</li>
+<li><div class="fn"/><a href="qimage.html#QImage-7">QImage</a> ( const uchar *, int, int, int, Format )</li>
+<li><div class="fn"/><a href="qimage.html#QImage-8">QImage</a> ( const char * const[] )</li>
+<li><div class="fn"/><a href="qimage.html#QImage-9">QImage</a> ( const QString &amp;, const char * )</li>
+<li><div class="fn"/><a href="qimage.html#QImage-10">QImage</a> ( const char *, const char * )</li>
+<li><div class="fn"/><a href="qimage.html#QImage-11">QImage</a> ( const QImage &amp; )</li>
 <li><div class="fn"/><a href="qimage.html#dtor.QImage">~QImage</a> ()</li>
 <li><div class="fn"/><a href="qimage.html#allGray">allGray</a> () const : bool</li>
 <li><div class="fn"/><a href="qimage.html#alphaChannel">alphaChannel</a> () const : QImage</li>
 <li><div class="fn"/><a href="qimage.html#bits">bits</a> () : uchar *</li>
 <li><div class="fn"/><a href="qimage.html#bits-2">bits</a> () const : const uchar *</li>
 <li><div class="fn"/><a href="qimage.html#bytesPerLine">bytesPerLine</a> () const : int</li>
+<li><div class="fn"/><a href="qimage.html#cacheKey">cacheKey</a> () const : qint64</li>
 <li><div class="fn"/><a href="qimage.html#color">color</a> ( int ) const : QRgb</li>
 <li><div class="fn"/><a href="qimage.html#colorTable">colorTable</a> () const : QVector&lt;QRgb&gt;</li>
 <li><div class="fn"/><a href="qimage.html#convertToFormat">convertToFormat</a> ( Format, Qt::ImageConversionFlags ) const : QImage</li>
@@ -41,6 +44,7 @@
 <li><div class="fn"/><a href="qimage.html#copy-4">copy</a> ( int, int, int, int ) const : QImage</li>
 <li><div class="fn"/><a href="qimage.html#createAlphaMask">createAlphaMask</a> ( Qt::ImageConversionFlags ) const : QImage</li>
 <li><div class="fn"/><a href="qimage.html#createHeuristicMask">createHeuristicMask</a> ( bool ) const : QImage</li>
+<li><div class="fn"/><a href="qimage.html#createMaskFromColor">createMaskFromColor</a> ( QRgb, Qt::MaskMode ) const : QImage</li>
 <li><div class="fn"/><a href="qimage.html#depth">depth</a> () const : int</li>
 <li><div class="fn"/><a href="qimage.html#dotsPerMeterX">dotsPerMeterX</a> () const : int</li>
 <li><div class="fn"/><a href="qimage.html#dotsPerMeterY">dotsPerMeterY</a> () const : int</li>
@@ -60,9 +64,9 @@
 <li><div class="fn"/><a href="qimage.html#loadFromData-2">loadFromData</a> ( const QByteArray &amp;, const char * ) : bool</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiX">logicalDpiX</a> () const : int</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiY">logicalDpiY</a> () const : int</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qpaintdevice.html#metric">metric</a> ( PaintDeviceMetric ) const : int</li>
 <li><div class="fn"/><a href="qimage.html#mirrored">mirrored</a> ( bool, bool ) const : QImage</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qimage.html#numBytes">numBytes</a> () const : int</li>
 <li><div class="fn"/><a href="qimage.html#numColors">numColors</a> () const : int</li>
 <li><div class="fn"/><a href="qimage.html#offset">offset</a> () const : QPoint</li>
@@ -84,7 +88,6 @@
 <li><div class="fn"/><a href="qimage.html#scaledToWidth">scaledToWidth</a> ( int, Qt::TransformationMode ) const : QImage</li>
 <li><div class="fn"/><a href="qimage.html#scanLine">scanLine</a> ( int ) : uchar *</li>
 <li><div class="fn"/><a href="qimage.html#scanLine-2">scanLine</a> ( int ) const : const uchar *</li>
-<li><div class="fn"/><a href="qimage.html#serialNumber">serialNumber</a> () const : int</li>
 <li><div class="fn"/><a href="qimage.html#setAlphaChannel">setAlphaChannel</a> ( const QImage &amp; )</li>
 <li><div class="fn"/><a href="qimage.html#setColor">setColor</a> ( int, QRgb )</li>
 <li><div class="fn"/><a href="qimage.html#setColorTable">setColorTable</a> ( const QVector&lt;QRgb&gt; )</li>
@@ -99,7 +102,9 @@
 <li><div class="fn"/><a href="qimage.html#text">text</a> ( const QString &amp; ) const : QString</li>
 <li><div class="fn"/><a href="qimage.html#textKeys">textKeys</a> () const : QStringList</li>
 <li><div class="fn"/><a href="qimage.html#transformed">transformed</a> ( const QMatrix &amp;, Qt::TransformationMode ) const : QImage</li>
+<li><div class="fn"/><a href="qimage.html#transformed-2">transformed</a> ( const QTransform &amp;, Qt::TransformationMode ) const : QImage</li>
 <li><div class="fn"/><a href="qimage.html#trueMatrix">trueMatrix</a> ( const QMatrix &amp;, int, int ) : QMatrix</li>
+<li><div class="fn"/><a href="qimage.html#trueMatrix-2">trueMatrix</a> ( const QTransform &amp;, int, int ) : QTransform</li>
 <li><div class="fn"/><a href="qimage.html#valid">valid</a> ( const QPoint &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qimage.html#valid-2">valid</a> ( int, int ) const : bool</li>
 <li><div class="fn"/><a href="qimage.html#width">width</a> () const : int</li>
@@ -115,6 +120,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

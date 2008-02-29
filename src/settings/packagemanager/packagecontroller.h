@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,6 +30,7 @@
 #include <QMap>
 #include <QSignalMapper>
 #include "installcontrol.h"
+#include "domaininfo.h"
 
 class QProgressDialog;
 class HttpFetcher;
@@ -51,6 +52,11 @@ public:
         installed
     };
 
+    enum Role {
+        Domains = Qt::UserRole + 1, 
+        Md5Sum = Qt::UserRole + 2
+    };
+
     static const QString INFORMATION_FILE;
     static const QString PACKAGE_SUMMARY_FILE;
     static AbstractPackageController *factory( PCType t, PackageModel *parent = 0 );
@@ -66,15 +72,15 @@ public:
     virtual QString controllerName() const = 0;
     virtual QString controllerDescription() const = 0;
     virtual QIcon controllerIcon() const = 0;
-    virtual QString packageInstallInfo( int pkgId ) const = 0;
+    virtual QString packageDetails( int pkgId ) const;
     virtual QString operationName() const;
     virtual void install( int pkgId ) = 0;
     virtual void setPackageFilter( const QList<InstallControl::PackageInfo> &filter );
 public slots:
     virtual void addPackage( const InstallControl::PackageInfo & );
+    virtual void clearPackages();
 signals:
-    void packageMessage( const QString & );
-    void packageInstalled( const InstallControl::PackageInfo &, bool );
+    void packageInstalled( const InstallControl::PackageInfo & );
     void rowsAboutToBeRemoved( const QModelIndex &, int, int );
     void rowsRemoved( const QModelIndex &, int, int );
     void updated();
@@ -108,7 +114,7 @@ public:
     virtual QString controllerName() const;
     virtual QIcon controllerIcon() const;
     virtual QString controllerDescription() const;
-    virtual QString packageInstallInfo( int pkgId ) const;
+    virtual QString packageDetails( int pkgId ) const;
     virtual void install( int pkgId );
 protected:
     LocalPackageController( QObject *parent = 0 );
@@ -142,10 +148,12 @@ public:
     virtual QString controllerName() const;
     virtual QIcon controllerIcon() const;
     virtual QString controllerDescription() const;
-    virtual QString packageInstallInfo( int pkgId ) const;
     virtual void install(int packageI);
     QString& networkServer();
     void setNetworkServer( const QString & );
+
+signals:
+    void serverStatus( const QString & );
 
 protected:
     NetworkPackageController( QObject *parent = 0 );
@@ -158,11 +166,12 @@ private slots:
 
 private:
     virtual QIcon getDataIcon( int pkgId ) const;
-    
+
     QString currentNetworkServer;
     QSignalMapper *signalMapper;
     HttpFetcher *hf;
     friend class AbstractPackageController;
+    QString currentPackageName;
 };
 
 class QFileSystem;
@@ -179,12 +188,10 @@ public:
     virtual QString controllerName() const;
     virtual QIcon controllerIcon() const;
     virtual QString controllerDescription() const;
-    virtual QString packageInstallInfo( int pkgId ) const;
     virtual QString operationName() const;
     virtual void install(int packageI);
     virtual QVariant data( int ) const;
     virtual QVariant data( int, int, int ) const;
-    
 
     bool reenable( int pkgId );
 
@@ -202,8 +209,6 @@ private:
     InstalledPackageScanner *installedScanner;
 };
 
-#ifdef Q_WS_QWS
-// QtopiaCore #ifdef's QProgressDialog out of Qt
 #include <QDialog>
 
 class QProgressBar;
@@ -233,8 +238,6 @@ private:
     QPushButton *cancelButton;
     QVBoxLayout *vb;
 };
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////
 /////
@@ -270,9 +273,13 @@ inline QVariant AbstractPackageController::data( int row, int column, int role )
     if ( role == Qt::DecorationRole )  
         return dataIcon( row ); 
     if ( role == Qt::WhatsThisRole )//package domain is returned
-        return packageInstallInfo(row); 
+        return packageDetails(row); 
     if ( role == Qt::StatusTipRole )//is packge enabled
         return true; //always true for general case
+    if ( role == AbstractPackageController::Domains )
+        return pi.domain;
+    if ( role == AbstractPackageController::Md5Sum )
+        return pi.md5Sum;
     return QVariant();
 }
 
@@ -280,6 +287,12 @@ inline void AbstractPackageController::addPackage( const InstallControl::Package
 {
     pkgList.append( pkg );
     qSort( pkgList );
+    emit updated();
+}
+
+inline void AbstractPackageController::clearPackages()
+{
+    pkgList.clear();
     emit updated();
 }
 
@@ -314,7 +327,7 @@ inline QString LocalPackageController::controllerDescription() const
     return tr( "Packages already downloaded available for installation" );
 }
 
-inline QString LocalPackageController::packageInstallInfo( int pkgId ) const
+inline QString LocalPackageController::packageDetails( int pkgId ) const
 {
     return pkgList[ pkgId ].domain;
 }
@@ -351,19 +364,6 @@ inline QString NetworkPackageController::controllerDescription() const
         .arg( currentNetworkServer );
 }
 
-/*!
-  \internal
-  Return the raw domain string here, and let the view do post-processing to
-  add the human-readable description
-*/
-inline QString NetworkPackageController::packageInstallInfo( int pkgId ) const
-{
-    if ( pkgId < pkgList.count() )
-        return pkgList[ pkgId ].domain;
-    else
-        return QString();
-}
-
 ////////////////////////////////////////////////////////////////////////
 /////
 /////  InstalledPackageController inline method implementations
@@ -382,13 +382,6 @@ inline QIcon InstalledPackageController::controllerIcon() const
 inline QString InstalledPackageController::controllerDescription() const
 {
     return tr( "Currently installed packages which may be removed to regain space" );
-}
-
-inline QString InstalledPackageController::packageInstallInfo( int pkgId ) const
-{
-    return tr( "Installed package <font color=\"#0000FF\">%1</font> %2",
-            "%1=name of pkg, %2=short description" ).arg( pkgList[pkgId].name )
-        .arg( pkgList[pkgId].description );
 }
 
 inline QString InstalledPackageController::operationName() const

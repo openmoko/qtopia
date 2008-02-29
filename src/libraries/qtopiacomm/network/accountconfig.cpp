@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,10 +25,14 @@
 #include <QLabel>
 #include <QLayout>
 #include <QLineEdit>
-
-#ifdef QTOPIA_PHONE
-#include <qsoftmenubar.h>
+#ifdef QTOPIA_BLUETOOTH
+#include <QPushButton>
+#include <QBluetoothLocalDevice>
+#include <QBluetoothRemoteDevice>
+#include <QBluetoothRemoteDeviceDialog>
 #endif
+
+#include <qsoftmenubar.h>
 #include <qtopiaapplication.h>
 #include <qtranslatablesettings.h>
 
@@ -47,7 +51,7 @@
     \o password
     \o APN
     \o dialup number
-    \o Autostart behavoir
+    \o Autostart behavior
   \endlist
 
   Note that not all of these details are always enabled. The type of the network plug-in 
@@ -55,31 +59,93 @@
 
   This is not a public class.
   */
+
+class AccountPagePrivate
+{
+public:
+    void _q_selectBluetoothDevice()
+    {
+#ifdef QTOPIA_BLUETOOTH
+        QBluetoothAddress addr = QBluetoothRemoteDeviceDialog::getRemoteDevice( 0 );
+        if ( !addr.isValid() )
+            return;
+        remotePartner = addr;
+        QFont f = QApplication::font();
+        f.setItalic( ! (btDevice->isUp().value()) );
+        btPartner->setFont( f );
+        btPartner->setText( btDeviceName( addr) );
+#endif
+    }
+
+    void _q_BluetoothStateChanged()
+    {
+#ifdef QTOPIA_BLUETOOTH
+        if ( btDevice->isUp().value() ) {
+            chooseBtPartner->setEnabled( true );
+            if ( remotePartner.isValid() )
+                btPartner->setText( btDeviceName(remotePartner) );
+        }  else {
+            chooseBtPartner->setEnabled( false);
+            btPartner->setText( AccountPage::tr("<Bluetooth disabled>") );
+        }
+        QFont f = QApplication::font();
+        f.setItalic( ! (btDevice->isUp().value()) );
+        btPartner->setFont( f );
+
+#endif
+    }
+#ifdef QTOPIA_BLUETOOTH
+    QString btDeviceName( const QBluetoothAddress& addr )
+    {
+        QBluetoothRemoteDevice remote( addr );
+        QBluetoothLocalDevice localDev;
+        QString alias = localDev.remoteAlias( addr ).value();
+        if ( !alias.isEmpty() ) {
+            return alias;
+        }
+        localDev.updateRemoteDevice( remote );
+        if ( remote.name().isEmpty() )
+           return addr.toString();
+        else
+           return remote.name();
+    }
+
+    QLabel* btPartner;
+    QBluetoothAddress remotePartner;
+    QPushButton* chooseBtPartner;
+    QBluetoothLocalDevice* btDevice;
+#endif
+    AccountPage* parent;
+};
+
+
 AccountPage::AccountPage(
         QtopiaNetwork::Type type, const QtopiaNetworkProperties& cfg,
         QWidget* parent, Qt::WFlags flags )
     : QWidget( parent, flags | Qt::Window ), accountType( type )
 {
+    d = new AccountPagePrivate;
+    d->parent = this;
     init();
     readConfig( cfg );
 
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this , true );
-#endif
+
     //this is required for help lookup
     if ( accountType & QtopiaNetwork::Dialup )
-        setObjectName("dialup-account");
+        setObjectName(QLatin1String("dialup-account"));
     else if ( accountType & QtopiaNetwork::GPRS )
-        setObjectName("gprs-account");
+        setObjectName(QLatin1String("gprs-account"));
     else if ( accountType & QtopiaNetwork::BluetoothDUN )
         setObjectName(QLatin1String("bluetooth-account"));
     else
-        setObjectName("lan-account");
+        setObjectName( QLatin1String("lan-account") );
 }
 
 AccountPage::~AccountPage()
 {
+    delete d;
 }
 
 QtopiaNetworkProperties AccountPage::properties()
@@ -92,33 +158,38 @@ QtopiaNetworkProperties AccountPage::properties()
     foreach( QString iface, allInterfaces ) {
         QTranslatableSettings cfg( iface, QSettings::IniFormat );
         allNames << cfg.value(QLatin1String("Info/Name")).toString();
-    } 
+    }
     QString n = name->text();
     bool initialName = true;
     int idx = 1;
     int count = allNames.count( n );
     //find next available name
     //note: allNames always contains this iface too. we must ensure that we don't trigger a false positive.
-    while( (count > 1 && initialName) || ( count>=1 && !initialName ) ) { 
+    while( (count > 1 && initialName) || ( count>=1 && !initialName ) ) {
         n = name->text()+QString::number(idx);
-        idx++; 
+        idx++;
         initialName = false;
         count = allNames.count( n );
-    } 
-   
-    props.insert( "Info/Name", n );
+    }
+
+    props.insert( QLatin1String("Info/Name"), n );
     if ( accountType & ~QtopiaNetwork::BluetoothDUN )
-        props.insert( "Properties/Autostart", startup->currentIndex() ? "y" : "n" );
+        props.insert( QLatin1String("Properties/Autostart"), startup->currentIndex() ? "y" : "n" );
 
     if ( accountType & (QtopiaNetwork::Dialup | QtopiaNetwork::GPRS | QtopiaNetwork::BluetoothDUN) ) {
-        props.insert("Properties/UserName", user->text());
-        props.insert("Properties/Password", password->text());
+        props.insert( QLatin1String("Properties/UserName"), user->text());
+        props.insert( QLatin1String("Properties/Password"), password->text());
 
         if ( accountType & QtopiaNetwork::GPRS )
-            props.insert( "Serial/APN", dialup->text() );
+            props.insert( QLatin1String("Serial/APN"), dialup->text() );
         else if ( accountType & QtopiaNetwork::Dialup )
-            props.insert( "Serial/Phone", dialup->text() );
+            props.insert( QLatin1String("Serial/Phone"), dialup->text() );
     }
+
+#ifdef QTOPIA_BLUETOOTH
+    if ( accountType & QtopiaNetwork::BluetoothDUN )
+        props.insert( QLatin1String("Serial/PartnerDevice"), d->remotePartner.isValid() ? d->remotePartner.toString() : QLatin1String("") );
+#endif
 
     return props;
 }
@@ -133,34 +204,55 @@ void AccountPage::init()
     vb->addWidget( name_label );
     name = new QLineEdit( this );
     vb->addWidget( name );
+    name_label->setBuddy( name );
 
     startup_label = new QLabel( tr("Startup mode:"), this );
     vb->addWidget( startup_label );
     startup = new QComboBox( this );
     startup->addItems( QStringList() << tr("When needed") << tr("Always online") );
     vb->addWidget( startup );
+    startup_label->setBuddy( startup );
 
     dialup_label = new QLabel( this );
     vb->addWidget( dialup_label );
     dialup = new QLineEdit( this );
     vb->addWidget( dialup );
+    dialup_label->setBuddy( dialup );
 
     user_label = new QLabel( tr("Username:"), this );
     vb->addWidget( user_label );
     user = new QLineEdit( this );
-#ifdef QTOPIA_PHONE
-    QtopiaApplication::setInputMethodHint( user, QtopiaApplication::Text );
-#endif
+    QtopiaApplication::setInputMethodHint( user, "text noautocapitalization");
     vb->addWidget( user );
+    user_label->setBuddy( user );
 
     password_label = new QLabel( tr("Password:"), this );
     vb->addWidget( password_label );
     password = new QLineEdit( this );
     password->setEchoMode( QLineEdit::PasswordEchoOnEdit );
-#ifdef QTOPIA_PHONE
-    QtopiaApplication::setInputMethodHint( password, QtopiaApplication::Text );
-#endif
     vb->addWidget( password );
+    password_label->setBuddy( password );
+
+#ifdef QTOPIA_BLUETOOTH
+    if ( accountType & QtopiaNetwork::BluetoothDUN ) {
+        QLabel* bt_label = new QLabel( tr("Bluetooth partner:"), this );
+        vb->addWidget( bt_label );
+        d->btPartner = new QLabel( this );
+        QHBoxLayout* hb = new QHBoxLayout;
+        hb->setMargin( 0 );
+        hb->setSpacing( 4 );
+        vb->addLayout( hb );
+        hb->addWidget( d->btPartner );
+        hb->addStretch( 1 );
+        d->chooseBtPartner = new QPushButton( QIcon(":icon/settings"), "", this );
+        connect( d->chooseBtPartner, SIGNAL(clicked(bool)), this, SLOT(_q_selectBluetoothDevice()) );
+        hb->addWidget( d->chooseBtPartner );
+
+        d->btDevice = new QBluetoothLocalDevice();
+        connect( d->btDevice, SIGNAL(stateChanged(QBluetoothLocalDevice::State)),
+                 this, SLOT(_q_BluetoothStateChanged()) );
+    }
+#endif
 
     QSpacerItem* spacer = new QSpacerItem( 20, 20,
             QSizePolicy::Minimum, QSizePolicy::Expanding );
@@ -170,24 +262,26 @@ void AccountPage::init()
 void AccountPage::readConfig( const QtopiaNetworkProperties& prop)
 {
     if ( accountType & ( QtopiaNetwork::Dialup | QtopiaNetwork::GPRS | QtopiaNetwork::BluetoothDUN ) ) {
-        user->setText( prop.value("Properties/UserName").toString() );
-        password->setText( prop.value("Properties/Password").toString() );
+        user->setText( prop.value(QLatin1String("Properties/UserName")).toString() );
+        password->setText( prop.value(QLatin1String("Properties/Password")).toString() );
 
         if ( accountType & QtopiaNetwork::GPRS ) {
             dialup_label->setText( tr("APN:", "GPRS access point") );
-            dialup->setText( prop.value("Serial/APN").toString());
-#ifdef QTOPIA_PHONE
-            QtopiaApplication::setInputMethodHint( dialup, QtopiaApplication::Text );
-#endif
+            dialup->setText( prop.value(QLatin1String("Serial/APN")).toString());
+            QtopiaApplication::setInputMethodHint( dialup, "text noautocapitalization" );
         } else if ( accountType & QtopiaNetwork::BluetoothDUN ) {
+#ifdef QTOPIA_BLUETOOTH
+            d->remotePartner = QBluetoothAddress( prop.value(QLatin1String("Serial/PartnerDevice")).toString() );
+            if ( d->remotePartner.isValid() )
+                d->btPartner->setText( d->btDeviceName( d->remotePartner ) );
+            d->_q_BluetoothStateChanged();
+#endif
             dialup_label->hide();
             dialup->hide();
         } else {
             dialup_label->setText( tr("Dialup number:") );
-#ifdef QTOPIA_PHONE
             QtopiaApplication::setInputMethodHint( dialup, QtopiaApplication::Number );
-#endif
-            dialup->setText( prop.value("Serial/Phone").toString() );
+            dialup->setText( prop.value(QLatin1String("Serial/Phone")).toString() );
         }
     } else {
         dialup_label->hide();
@@ -197,12 +291,13 @@ void AccountPage::readConfig( const QtopiaNetworkProperties& prop)
         password_label->hide();
         password->hide();
     }
-    name->setText( prop.value("Info/Name").toString() );
+    name->setText( prop.value(QLatin1String("Info/Name")).toString() );
     if ( accountType & ~QtopiaNetwork::BluetoothDUN ) {
-        startup->setCurrentIndex( prop.value("Properties/Autostart").toString() == "y" );
+        startup->setCurrentIndex( prop.value(QLatin1String("Properties/Autostart")).toString() == "y" );
     } else {
         startup_label->hide();
         startup->hide();
     }
 }
 
+#include "moc_accountconfig.cpp"

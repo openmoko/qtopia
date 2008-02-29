@@ -1,0 +1,172 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use File::Basename;
+
+my $gendir = shift(@ARGV) or usage();
+usage() unless ( @ARGV );
+
+my %pagenames;
+
+my %type_to_page = (
+    "overview" => "over",
+    "dataset" => "dataset",
+    "qdsync" => "qdsync",
+    "changelog" => "chlog",
+);
+
+my %type_to_title_pre = (
+    "changelog" => "Changes for ",
+);
+
+my %type_to_title_post = (
+    "dataset" => " Dataset",
+);
+
+my %type_to_group = (
+    "overview" => "overviews",
+    "dataset" => "datasets",
+    "qdsync" => "qdsync_commands",
+    "changelog" => "changes",
+);
+
+my %type_to_parent = (
+    "overview" => "Overviews",
+    "dataset" => "Datasets",
+    "qdsync" => "qdsync Protocol Commands",
+    "changelog" => "What's New?",
+);
+
+for my $infile ( @ARGV ) {
+    my $outfile = "$gendir/".basename($infile);
+    $outfile =~ s/qdoc$/qdocpp/;
+    open IN, $infile or die "Can't read $infile\n";
+    my @indata = <IN>;
+    close IN;
+
+    my @outdata;
+    my %flags;
+    my $section = "";
+    for ( @indata ) {
+        # Pass through lines with \if and \endif unchanged
+        if ( /\\(if|endif)/ ) {
+            push(@outdata, $_);
+            next;
+        }
+        # Definition lists (not supported by qdoc)
+        # Note that these cannot be nested!
+        if ( /\\list type=dl/ ) {
+            $flags{dl_list} = 1;
+            $_ = "\\list\n";
+            push(@outdata, $_);
+            next;
+        }
+        if ( $flags{dl_list} && /\\endlist/ ) {
+            if ( $flags{dl_list_item} ) {
+                my ( $def, $foo ) = @{$flags{dl_list_item}};
+                if ( $def && $foo ) {
+                    push(@outdata, "\\o $def \\list foo $foo \\endlist\n");
+                }
+                $flags{dl_list_item} = undef;
+            }
+            $flags{dl_list} = 0;
+            push(@outdata, $_);
+            next;
+        }
+        if ( $flags{dl_list} && /\\o/ ) {
+            if ( $flags{dl_list_item} ) {
+                my ( $def, $foo ) = @{$flags{dl_list_item}};
+                if ( $def && $foo ) {
+                    push(@outdata, "\\o $def \\list foo $foo \\endlist\n");
+                }
+                $flags{dl_list_item} = undef;
+            }
+            s/^\s*\\o\s*//;
+            my $def;
+            if ( s/^{([^}]+)}\s*// ) {
+                $def = $1;
+            } elsif ( s/^([^\s]+)\s*// ) {
+                $def = $1;
+            } else {
+                die "Parse error: $infile (section $section): $_ ";
+            }
+            chomp;
+            $flags{dl_list_item} = [ $def, $_ ];
+            next;
+        }
+        if ( $flags{dl_list} ) {
+            my ( $def, $foo ) = @{$flags{dl_list_item}};
+            $foo =~ s/\s*$//;
+            chomp;
+            s/^\s*//;
+            $foo .= " ".$_;
+            $flags{dl_list_item} = [ $def, $foo ];
+            next;
+        }
+
+        # New page type declarations
+        if ( /\\(overview|dataset|qdsync|changelog) (.*)/ ) {
+            my $type = $1;
+            my $name = $2;
+            $section = $name;
+            push(@outdata, "\\page ".get_page_name($type_to_page{$type}."_$name")."\n");
+            my $pre = $type_to_title_pre{$type};
+            my $post = $type_to_title_post{$type};
+            for ( $pre, $post ) {
+                $_ = "" unless ( defined($_) );
+            }
+            push(@outdata, "\\title $pre$name$post\n");
+            push(@outdata, "\\ingroup ".$type_to_group{$type}."\n");
+            push(@outdata, "\\sa {".$type_to_parent{$type}."}\n");
+            if ( $type eq "changelog" ) {
+                push(@outdata, "\\brief Changes for the Qtopia Sync Agent $name\n");
+            }
+            next;
+        }
+
+        # New heading tags
+        if ( /\\(usage|description)/ ) {
+            my $tag = $1;
+            if ( $tag eq "usage" ) {
+                $flags{usage} = 1;
+                $_ = "\\section1 Usage\n";
+            } else {
+                $flags{usage} = 0;
+                $_ = "\\section1 Description\n";
+            }
+        }
+
+        if ( /\*\// && $flags{usage} ) {
+            die "Syntax error: missing \\description in $infile (section $section)\n";
+        }
+
+        push(@outdata, $_);
+    }
+
+
+    open OUT, ">$outfile" or die "Can't write $outfile\n";
+    print OUT @outdata;
+    close OUT;
+}
+exit 0;
+
+sub usage
+{
+    print "Usage:  ".basename($0)." destdir sourcefile [sourcefile ...]\n";
+    exit 2;
+}
+
+sub get_page_name
+{
+    my ( $pagename ) = @_;
+    $pagename =~ s/[\(\)]//g;
+    if ( $pagenames{$pagename})  {
+        $pagenames{$pagename}++;
+    } else {
+        $pagenames{$pagename} = 1;
+    }
+    my $num = $pagenames{$pagename};
+    $pagename .= "_$num.html";
+}
+

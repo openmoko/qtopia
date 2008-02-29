@@ -26,7 +26,7 @@
 <li><div class="fn"/>virtual bool <b><a href="qabstractbrowserscreen.html#viewAvailable">viewAvailable</a></b> ( const QString &amp; <i>view</i> ) const = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -52,7 +52,7 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>5 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
@@ -72,10 +72,11 @@
 <p>The QAbstractBrowserScreen class allows developers to replace the &quot;application browser screen&quot; portion of the Phone UI.</p>
 <p>The application browser is part of the <a href="qtopiaserverapplication.html#qtopia-server-widgets">server widgets framework</a> and represents the portion of the phone UI that users navigate through to launch applications or view their documents.</p>
 <p>A small tutorial on how to develop new server widgets using one of the abstract widgets as base can be found in <a href="qabstractserverinterface.html">QAbstractServerInterface</a> class documentation.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QAbstractBrowserScreen"></a>QAbstractBrowserScreen::QAbstractBrowserScreen ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="qt.html#WFlags-typedef">Qt::WFlags</a> <i>flags</i> = 0 )</h3>
-<p>Construct a new <a href="qabstractbrowserscreen.html">QAbstractBrowserScreen</a> instance, with the specified <i>parent</i> and widget <i>flags</i>.</p>
+<p>Constructs a new <a href="qabstractbrowserscreen.html">QAbstractBrowserScreen</a> instance, with the specified <i>parent</i> and widget <i>flags</i>.</p>
 <h3 class="fn"><a name="applicationLaunched"></a>void QAbstractBrowserScreen::applicationLaunched ( const <a href="qstring.html">QString</a> &amp; <i>application</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the user launches an <i>application</i> through the browser.</p>
 <h3 class="fn"><a name="currentView"></a><a href="qstring.html">QString</a> QAbstractBrowserScreen::currentView () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
@@ -83,15 +84,15 @@
 <h3 class="fn"><a name="currentViewChanged"></a>void QAbstractBrowserScreen::currentViewChanged ( const <a href="qstring.html">QString</a> &amp; <i>view</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the current view changes to <i>view</i>. This may be caused by calls the <a href="qabstractbrowserscreen.html#resetToView">resetToView</a>() or <a href="qabstractbrowserscreen.html#moveToView">moveToView</a>(), or by user interaction with the browser.</p>
 <h3 class="fn"><a name="moveToView"></a>void QAbstractBrowserScreen::moveToView ( const <a href="qstring.html">QString</a> &amp; <i>view</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
-<p>Display the <i>view</i> using any appropriate transition effects. <i>view</i> should be added to the end of any back or history handing list.</p>
+<p>Displays the <i>view</i> using any appropriate transition effects. <i>view</i> should be added to the end of any back or history handing list.</p>
 <h3 class="fn"><a name="resetToView"></a>void QAbstractBrowserScreen::resetToView ( const <a href="qstring.html">QString</a> &amp; <i>view</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
-<p>Display the <i>view</i> immediately. Any logical back or history handling should be reset to have <i>view</i> as a starting point.</p>
+<p>Displays the <i>view</i> immediately. Any logical back or history handling should be reset to have <i>view</i> as a starting point.</p>
 <h3 class="fn"><a name="viewAvailable"></a>bool QAbstractBrowserScreen::viewAvailable ( const <a href="qstring.html">QString</a> &amp; <i>view</i> ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns true if the browser is capable of switching to <i>view</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

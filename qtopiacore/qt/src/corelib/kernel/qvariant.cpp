@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -139,9 +154,11 @@ static void construct(QVariant::Private *x, const void *copy)
     case QVariant::Locale:
         v_construct<QLocale>(x, copy);
         break;
+#ifndef QT_NO_REGEXP
     case QVariant::RegExp:
         v_construct<QRegExp>(x, copy);
         break;
+#endif
     case QVariant::Int:
         x->data.i = copy ? *static_cast<const int *>(copy) : 0;
         break;
@@ -238,9 +255,11 @@ static void clear(QVariant::Private *d)
     case QVariant::Locale:
         v_clear<QLocale>(d);
         break;
+#ifndef QT_NO_REGEXP
     case QVariant::RegExp:
         v_clear<QRegExp>(d);
         break;
+#endif
     case QVariant::LongLong:
     case QVariant::ULongLong:
     case QVariant::Double:
@@ -364,8 +383,10 @@ static bool compare(const QVariant::Private *a, const QVariant::Private *b)
         return *v_cast<QUrl>(a) == *v_cast<QUrl>(b);
     case QVariant::Locale:
         return *v_cast<QLocale>(a) == *v_cast<QLocale>(b);
+#ifndef QT_NO_REGEXP
     case QVariant::RegExp:
         return *v_cast<QRegExp>(a) == *v_cast<QRegExp>(b);
+#endif
     case QVariant::Int:
         return a->data.i == b->data.i;
     case QVariant::UInt:
@@ -395,9 +416,21 @@ static bool compare(const QVariant::Private *a, const QVariant::Private *b)
     }
     if (!QMetaType::isRegistered(a->type))
         qFatal("QVariant::compare: type %d unknown to QVariant.", a->type);
+
+    /* The reason we cannot place this test in a case branch above for the types
+     * QMetaType::VoidStar, QMetaType::QObjectStar and so forth, is that it wouldn't include
+     * user defined pointer types. */
+    const char *const typeName = QMetaType::typeName(a->type);
+    if (typeName[qstrlen(typeName) - 1] == '*')
+        return *static_cast<void **>(a->data.shared->ptr) ==
+               *static_cast<void **>(b->data.shared->ptr);
+
     return a->data.shared->ptr == b->data.shared->ptr;
 }
 
+/*!
+  \internal
+ */
 static qlonglong qMetaTypeNumber(const QVariant::Private *d)
 {
     switch (d->type) {
@@ -504,6 +537,11 @@ static qulonglong qConvertToUnsignedNumber(const QVariant::Private *d, bool *ok)
     return Q_UINT64_C(0);
 }
 
+/*!
+ \internal
+
+ Converts \a d to type \a t, which is placed in \a result.
+ */
 static bool convert(const QVariant::Private *d, QVariant::Type t, void *result, bool *ok)
 {
     Q_ASSERT(d->type != uint(t));
@@ -754,6 +792,10 @@ static bool convert(const QVariant::Private *d, QVariant::Type t, void *result, 
         *static_cast<qulonglong *>(result) = qConvertToUnsignedNumber(d, ok);
         return *ok;
     }
+    case QMetaType::UChar: {
+        *static_cast<uchar *>(result) = qConvertToUnsignedNumber(d, ok);
+        return *ok;
+    }
     case QVariant::Bool: {
         bool *b = static_cast<bool *>(result);
         switch(d->type) {
@@ -912,6 +954,11 @@ static bool convert(const QVariant::Private *d, QVariant::Type t, void *result, 
         else
             return false;
         break;
+    case QMetaType::Char:
+    {
+        *static_cast<qint8 *>(result) = qint8(qConvertToNumber(d, ok));
+        return *ok;
+    }
 #endif
     default:
         return false;
@@ -1127,6 +1174,22 @@ const QVariant::Handler *QVariant::handler = &qt_kernel_variant_handler;
         QVariant variant = color;
     \endcode
 
+    \section1 Using canConvert() and convert() Consecutively
+
+    When using canConvert() and convert() consecutively, it is possible for
+    canConvert() to return true, but convert() to return false. This
+    is typically because canConvert() only reports the general ability of
+    QVariant to convert between types given suitable data; it is still
+    possible to supply data which cannot actually be converted.
+
+    For example, canConvert() would return true when called on a variant
+    containing a string because, in principle, QVariant is able to convert
+    strings of numbers to integers.
+    However, if the string contains non-numeric characters, it cannot be
+    converted to an integer, and any attempt to convert it will fail.
+    Hence, it is important to have both functions return true for a
+    successful conversion.
+
     \sa QMetaType
 */
 
@@ -1160,6 +1223,7 @@ const QVariant::Handler *QVariant::handler = &qt_kernel_variant_handler;
     \value LongLong a \l qlonglong
     \value Map  a QVariantMap
     \value Matrix  a QMatrix
+    \value Transform  a QTransform
     \value Palette  a QPalette
     \value Pen  a QPen
     \value Pixmap  a QPixmap
@@ -1310,12 +1374,13 @@ QVariant::QVariant(QDataStream &s)
     \sa QTextCodec::setCodecForCStrings()
 */
 
-
+#ifndef QT_NO_CAST_FROM_ASCII
 QVariant::QVariant(const char *val)
 {
     QString s = QString::fromAscii(val);
     create(String, &s);
 }
+#endif
 
 /*!
   \fn QVariant::QVariant(const QStringList &val)
@@ -1542,7 +1607,9 @@ QVariant::QVariant(const QSizeF &s) { create(SizeF, &s); }
 #endif
 QVariant::QVariant(const QUrl &u) { create(Url, &u); }
 QVariant::QVariant(const QLocale &l) { create(Locale, &l); }
+#ifndef QT_NO_REGEXP
 QVariant::QVariant(const QRegExp &regExp) { create(RegExp, &regExp); }
+#endif
 QVariant::QVariant(Qt::GlobalColor color) { create(62, &color); }
 
 /*!
@@ -1616,6 +1683,7 @@ void QVariant::detach()
     \internal
 */
 
+// Qt 5 ###: change typeName()(and froends= to return a QString. Suggestion from Harald.
 /*!
     Returns the name of the type stored in the variant. The returned
     strings describe the C++ datatype used to store the data: for
@@ -2119,10 +2187,12 @@ QLocale QVariant::toLocale() const
 
     \sa canConvert(), convert()
 */
+#ifndef QT_NO_REGEXP
 QRegExp QVariant::toRegExp() const
 {
     return qVariantToHelper<QRegExp>(d, RegExp, handler);
 }
+#endif
 
 /*!
     \fn QChar QVariant::toChar() const
@@ -2434,7 +2504,10 @@ bool QVariant::canConvert(Type t) const
         }
     }
 
-    return qCanConvertMatrix[t] & (1 << d.type);
+    if(t == String && d.type == StringList)
+        return v_cast<QStringList>(&d)->count() == 1;
+    else
+        return qCanConvertMatrix[t] & (1 << d.type);
 }
 
 /*!
@@ -2933,3 +3006,12 @@ QDebug operator<<(QDebug dbg, const QVariant::Type p)
     Synonym for QMap<QString, QVariant>.
 */
 
+/*!
+    \typedef QVariant::DataPtr
+    \internal
+*/
+
+/*!
+    \fn DataPtr &QVariant::data_ptr()
+    \internal
+*/

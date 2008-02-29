@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QFormLayout Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QFormLayout Class Reference</h1>
+<p>The QFormLayout class manages forms of input widgets with associated labels. <a href="#details">More...</a></p>
+<pre>    #include &lt;QFormLayout&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
+<p>Inherits <a href="qlayout.html">QLayout</a>.</p>
+<p>This class was introduced in Qtopia 4.3.</p>
+<ul>
+<li><a href="qformlayout-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h3>Public Types</h3>
+<ul>
+<li><div class="fn"/>enum <b><a href="qformlayout.html#FormStyle-enum">FormStyle</a></b> { QtopiaDefaultStyle, QtopiaTwoLineStyle }</li>
+</ul>
+<a name="properties"></a>
+<h3>Properties</h3>
+<ul>
+<li><div class="fn"/><b><a href="qformlayout.html#horizontalSpacing-prop">horizontalSpacing</a></b> : int</li>
+<li><div class="fn"/><b><a href="qformlayout.html#verticalSpacing-prop">verticalSpacing</a></b> : int</li>
+</ul>
+<ul>
+<li><div class="fn"/>3 properties inherited from <a href="qlayout.html#properties">QLayout</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qformlayout.html#QFormLayout">QFormLayout</a></b> ( QWidget * <i>parent</i> )</li>
+<li><div class="fn"/><b><a href="qformlayout.html#QFormLayout-2">QFormLayout</a></b> ()</li>
+<li><div class="fn"/><b><a href="qformlayout.html#dtor.QFormLayout">~QFormLayout</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#addRow">addRow</a></b> ( const QString &amp; <i>label</i>, QWidget * <i>field</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#addRow-2">addRow</a></b> ( const QString &amp; <i>label</i>, QLayout * <i>layout</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#addRow-3">addRow</a></b> ( QWidget * <i>label</i>, QWidget * <i>field</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#addRow-4">addRow</a></b> ( QWidget * <i>label</i>, QLayout * <i>layout</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#addRow-5">addRow</a></b> ( QWidget * <i>widget</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#addRow-6">addRow</a></b> ( QLayout * <i>layout</i> )</li>
+<li><div class="fn"/>int <b><a href="qformlayout.html#horizontalSpacing-prop">horizontalSpacing</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#insertRow">insertRow</a></b> ( int <i>index</i>, const QString &amp; <i>label</i>, QWidget * <i>field</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#insertRow-2">insertRow</a></b> ( int <i>index</i>, const QString &amp; <i>label</i>, QLayout * <i>layout</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#insertRow-3">insertRow</a></b> ( int <i>index</i>, QWidget * <i>label</i>, QWidget * <i>field</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#insertRow-4">insertRow</a></b> ( int <i>index</i>, QWidget * <i>label</i>, QLayout * <i>layout</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#insertRow-5">insertRow</a></b> ( int <i>index</i>, QWidget * <i>widget</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#insertRow-6">insertRow</a></b> ( int <i>index</i>, QLayout * <i>layout</i> )</li>
+<li><div class="fn"/>int <b><a href="qformlayout.html#rowCount">rowCount</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#horizontalSpacing-prop">setHorizontalSpacing</a></b> ( int <i>spacing</i> )</li>
+<li><div class="fn"/>void <b><a href="qformlayout.html#verticalSpacing-prop">setVerticalSpacing</a></b> ( int <i>spacing</i> )</li>
+<li><div class="fn"/>int <b><a href="qformlayout.html#verticalSpacing-prop">verticalSpacing</a></b> () const</li>
+</ul>
+<ul>
+<li><div class="fn"/>41 public functions inherited from <a href="qlayout.html#public-functions">QLayout</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>17 public functions inherited from <a href="qlayoutitem.html#public-functions">QLayoutItem</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>1 static public member inherited from <a href="qlayout.html#static-public-members">QLayout</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 protected functions inherited from <a href="qlayout.html#protected-functions">QLayout</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 protected type inherited from <a href="qlayoutitem.html#protected-variables">QLayoutItem</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QFormLayout class manages forms of input widgets with associated labels.</p>
+<p>QFormLayout lays out widgets in a form. The way a form is laid out is based on the style hint <a href="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_FormStyle</a>, which can have the values <a href="qformlayout.html#FormStyle-enum">QtopiaDefaultStyle</a> or <a href="qformlayout.html#FormStyle-enum">QtopiaTwoLineStyle</a>. <a href="qformlayout.html#FormStyle-enum">QtopiaDefaultStyle</a> places labels side by side with their buddy fields, while <a href="qformlayout.html#FormStyle-enum">QtopiaTwoLineStyle</a> places labels above their buddy fields. The following table shows the same interface in each style.</p>
+<p><table width="50%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th><a href="qformlayout.html#FormStyle-enum">QtopiaDefaultStyle</a></th><th><a href="qformlayout.html#FormStyle-enum">QtopiaTwoLineStyle</a></th></tr></thead>
+<tr valign="top" class="odd"><td><p align="center"><img src="images/qtopiadefaultstyle.png" /></p></td><td><p align="center"><img src="images/qtopiatwolinestyle.png" /></p></td></tr>
+</table></p>
+<p>In <a href="qformlayout.html#FormStyle-enum">QtopiaDefaultStyle</a> mode, labels will be given enough horizontal space to fit the widest label, and the rest of the space will be given to the fields. If the minimum size of a label/field pair is wider than the available space, the field will be wrapped to the next line.</p>
+<p>See also <a href="qboxlayout.html">QBoxLayout</a>, <a href="qgridlayout.html">QGridLayout</a>, and <a href="qstackedlayout.html">QStackedLayout</a>.</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="FormStyle-enum"></a>enum QFormLayout::FormStyle</h3>
+<p>This enum specifies the different looks supported by <a href="qformlayout.html">QFormLayout</a>.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QFormLayout::QtopiaDefaultStyle</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Labels are placed side by side with their buddy fields.</td></tr>
+<tr><td valign="top"><tt>QFormLayout::QtopiaTwoLineStyle</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Labels are placed above their buddy fields</td></tr>
+</table></p>
+<hr />
+<h2>Property Documentation</h2>
+<h3 class="fn"><a name="horizontalSpacing-prop"></a>horizontalSpacing : int</h3>
+<p>This property holds the spacing between widgets that are laid out side by side.</p>
+<p>If no value is explicitly set, the layout's horizontal spacing is inherited from the parent layout, or from the style settings for the parent widget.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>int horizontalSpacing () const</b></li>
+<li><div class="fn"/><b>void setHorizontalSpacing ( int <i>spacing</i> )</b></li>
+</ul>
+<p>See also <a href="qformlayout.html#verticalSpacing-prop">verticalSpacing</a>, <a href="qstyle.html#pixelMetric">QStyle::pixelMetric</a>(), and <a href="qstyle.html#PixelMetric-enum">PM_LayoutHorizontalSpacing</a>.</p>
+<h3 class="fn"><a name="verticalSpacing-prop"></a>verticalSpacing : int</h3>
+<p>This property holds the spacing between widgets that are laid out on top of each other.</p>
+<p>If no value is explicitly set, the layout's vertical spacing is inherited from the parent layout, or from the style settings for the parent widget.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>int verticalSpacing () const</b></li>
+<li><div class="fn"/><b>void setVerticalSpacing ( int <i>spacing</i> )</b></li>
+</ul>
+<p>See also <a href="qformlayout.html#horizontalSpacing-prop">horizontalSpacing</a>, <a href="qstyle.html#pixelMetric">QStyle::pixelMetric</a>(), and <a href="qstyle.html#PixelMetric-enum">PM_LayoutHorizontalSpacing</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QFormLayout"></a>QFormLayout::QFormLayout ( <a href="qwidget.html">QWidget</a> * <i>parent</i> )</h3>
+<p>Constructs a new <a href="qformlayout.html">QFormLayout</a> with parent widget <i>parent</i>.</p>
+<h3 class="fn"><a name="QFormLayout-2"></a>QFormLayout::QFormLayout ()</h3>
+<p>Constructs a new <a href="qformlayout.html">QFormLayout</a>.</p>
+<h3 class="fn"><a name="dtor.QFormLayout"></a>QFormLayout::~QFormLayout ()</h3>
+<p>Destroys the form layout.</p>
+<h3 class="fn"><a name="addRow"></a>void QFormLayout::addRow ( const <a href="qstring.html">QString</a> &amp; <i>label</i>, <a href="qwidget.html">QWidget</a> * <i>field</i> )</h3>
+<p>Adds <i>field</i> to the end of this form layout with label <i>label</i>. In <tt>SideBySide</tt> mode, if <i>label</i> is null the widget will take all available horizontal space.</p>
+<h3 class="fn"><a name="addRow-2"></a>void QFormLayout::addRow ( const <a href="qstring.html">QString</a> &amp; <i>label</i>, <a href="qlayout.html">QLayout</a> * <i>layout</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Adds <i>layout</i> to the end of this form layout with label <i>label</i>. In <tt>SideBySide</tt> mode, if <i>label</i> is null the layout will take all available horizontal space.</p>
+<h3 class="fn"><a name="addRow-3"></a>void QFormLayout::addRow ( <a href="qwidget.html">QWidget</a> * <i>label</i>, <a href="qwidget.html">QWidget</a> * <i>field</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Adds <i>field</i> to the end of this form layout with label <i>label</i>. In <tt>SideBySide</tt> mode, if <i>label</i> is null the widget will take all available horizontal space.</p>
+<h3 class="fn"><a name="addRow-4"></a>void QFormLayout::addRow ( <a href="qwidget.html">QWidget</a> * <i>label</i>, <a href="qlayout.html">QLayout</a> * <i>layout</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Adds <i>layout</i> to the end of this form layout with label <i>label</i>. In <tt>SideBySide</tt> mode, if <i>label</i> is null the layout will take all available horizontal space.</p>
+<h3 class="fn"><a name="addRow-5"></a>void QFormLayout::addRow ( <a href="qwidget.html">QWidget</a> * <i>widget</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Adds <i>widget</i> to the end of this form layout with no label.</p>
+<h3 class="fn"><a name="addRow-6"></a>void QFormLayout::addRow ( <a href="qlayout.html">QLayout</a> * <i>layout</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Adds <i>layout</i> to the end of this form layout with no label.</p>
+<h3 class="fn"><a name="insertRow"></a>void QFormLayout::insertRow ( int <i>index</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, <a href="qwidget.html">QWidget</a> * <i>field</i> )</h3>
+<p>Inserts <i>field</i> at position <i>index</i> with label <i>label</i>. If <i>index</i> is negative, the widget is added at the end. In <tt>SideBySide</tt> mode, if <i>label</i> is null the widget will take all available horizontal space.</p>
+<h3 class="fn"><a name="insertRow-2"></a>void QFormLayout::insertRow ( int <i>index</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, <a href="qlayout.html">QLayout</a> * <i>layout</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Inserts <i>layout</i> at position <i>index</i> with label <i>label</i>. If <i>index</i> is negative, the layout is added at the end. In <tt>SideBySide</tt> mode, if <i>label</i> is null the layout will take all available horizontal space.</p>
+<h3 class="fn"><a name="insertRow-3"></a>void QFormLayout::insertRow ( int <i>index</i>, <a href="qwidget.html">QWidget</a> * <i>label</i>, <a href="qwidget.html">QWidget</a> * <i>field</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Inserts <i>field</i> at position <i>index</i> with label <i>label</i>. If <i>index</i> is negative, the widget is added at the end. In <tt>SideBySide</tt> mode, if <i>label</i> is null the widget will take all available horizontal space.</p>
+<h3 class="fn"><a name="insertRow-4"></a>void QFormLayout::insertRow ( int <i>index</i>, <a href="qwidget.html">QWidget</a> * <i>label</i>, <a href="qlayout.html">QLayout</a> * <i>layout</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Inserts <i>layout</i> at position <i>index</i> with label <i>label</i>. If <i>index</i> is negative, the layout is added at the end. In <tt>SideBySide</tt> mode, if <i>label</i> is null the layout will take all available horizontal space.</p>
+<h3 class="fn"><a name="insertRow-5"></a>void QFormLayout::insertRow ( int <i>index</i>, <a href="qwidget.html">QWidget</a> * <i>widget</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Inserts <i>widget</i> at position <i>index</i> with no label. If <i>index</i> is negative, the widget is added at the end.</p>
+<h3 class="fn"><a name="insertRow-6"></a>void QFormLayout::insertRow ( int <i>index</i>, <a href="qlayout.html">QLayout</a> * <i>layout</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Inserts <i>layout</i> at position <i>index</i> with no label. If <i>index</i> is negative, the layout is added at the end.</p>
+<h3 class="fn"><a name="rowCount"></a>int QFormLayout::rowCount () const</h3>
+<p>Returns the number of rows in the form.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+</tr></table></div></address></body>
+</html>

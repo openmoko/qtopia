@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -35,17 +50,31 @@
 class QRadioButtonPrivate : public QAbstractButtonPrivate
 {
     Q_DECLARE_PUBLIC(QRadioButton)
+
 public:
-    QRadioButtonPrivate():hovering(true){}
+    QRadioButtonPrivate() : QAbstractButtonPrivate(QSizePolicy::RadioButton), hovering(true) {}
+    void init();
     uint hovering : 1;
 };
 
+/*
+    Initializes the radio button.
+*/
+void QRadioButtonPrivate::init()
+{
+    Q_Q(QRadioButton);
+    q->setCheckable(true);
+    q->setAutoExclusive(true);
+    q->setMouseTracking(true);
+    q->setForegroundRole(QPalette::WindowText);
+    setLayoutItemMargins(QStyle::SE_RadioButtonLayoutItem);
+}
 
 /*!
     \class QRadioButton
     \brief The QRadioButton widget provides a radio button with a text label.
 
-    \ingroup basic
+    \ingroup basicwidgets
     \mainclass
 
     A QRadioButton is an option button that can be switched on (checked) or
@@ -97,17 +126,6 @@ public:
 */
 
 
-/*
-    Initializes the radio button.
-*/
-static void qRadioButtonInit(QRadioButton *button)
-{
-    button->setCheckable(true);
-    button->setAutoExclusive(true);
-    button->setMouseTracking(true);
-}
-
-
 /*!
     Constructs a radio button with the given \a parent, but with no text or
     pixmap.
@@ -118,7 +136,8 @@ static void qRadioButtonInit(QRadioButton *button)
 QRadioButton::QRadioButton(QWidget *parent)
     : QAbstractButton(*new QRadioButtonPrivate, parent)
 {
-    qRadioButtonInit(this);
+    Q_D(QRadioButton);
+    d->init();
 }
 
 /*!
@@ -130,27 +149,36 @@ QRadioButton::QRadioButton(QWidget *parent)
 QRadioButton::QRadioButton(const QString &text, QWidget *parent)
     : QAbstractButton(*new QRadioButtonPrivate, parent)
 {
-    qRadioButtonInit(this);
+    Q_D(QRadioButton);
+    d->init();
     setText(text);
 }
 
-static QStyleOptionButton getStyleOption(const QRadioButton *btn, bool hitButton = false)
+/*!
+    Initialize \a option with the values from this QRadioButton. This method is useful
+    for subclasses when they need a QStyleOptionButton, but don't want to fill
+    in all the information themselves.
+
+    \sa QStyleOption::initFrom()
+*/
+void QRadioButton::initStyleOption(QStyleOptionButton *option) const
 {
-    QStyleOptionButton opt;
-    opt.init(btn);
-    opt.text = btn->text();
-    opt.icon = btn->icon();
-    opt.iconSize = btn->iconSize();
-    if (btn->isDown())
-        opt.state |= QStyle::State_Sunken;
-    opt.state |= (btn->isChecked() ? QStyle::State_On : QStyle::State_Off);
-    if (btn->testAttribute(Qt::WA_Hover) && btn->underMouse()) {
-        if (hitButton)
-            opt.state |= QStyle::State_MouseOver;
+    if (!option)
+        return;
+    Q_D(const QRadioButton);
+    option->initFrom(this);
+    option->text = d->text;
+    option->icon = d->icon;
+    option->iconSize = iconSize();
+    if (d->down)
+        option->state |= QStyle::State_Sunken;
+    option->state |= (d->checked) ? QStyle::State_On : QStyle::State_Off;
+    if (testAttribute(Qt::WA_Hover) && underMouse()) {
+        if (d->hovering)
+            option->state |= QStyle::State_MouseOver;
         else
-            opt.state &= ~QStyle::State_MouseOver;
+            option->state &= ~QStyle::State_MouseOver;
     }
-    return opt;
 }
 
 /*!
@@ -158,14 +186,19 @@ static QStyleOptionButton getStyleOption(const QRadioButton *btn, bool hitButton
 */
 QSize QRadioButton::sizeHint() const
 {
+    Q_D(const QRadioButton);
+    if (d->sizeHint.isValid())
+        return d->sizeHint;
     ensurePolished();
-    QStyleOptionButton opt = getStyleOption(this);
+    QStyleOptionButton opt;
+    initStyleOption(&opt);
     QSize sz = style()->itemTextRect(fontMetrics(), QRect(0, 0, 1, 1), Qt::TextShowMnemonic,
                                      false, text()).size();
     if (!opt.icon.isNull())
         sz = QSize(sz.width() + opt.iconSize.width() + 4, qMax(sz.height(), opt.iconSize.height()));
-    return (style()->sizeFromContents(QStyle::CT_RadioButton, &opt, sz, this).
-            expandedTo(QApplication::globalStrut()));
+    d->sizeHint = (style()->sizeFromContents(QStyle::CT_RadioButton, &opt, sz, this).
+                  expandedTo(QApplication::globalStrut()));
+    return d->sizeHint;
 }
 
 /*!
@@ -173,7 +206,8 @@ QSize QRadioButton::sizeHint() const
 */
 bool QRadioButton::hitButton(const QPoint &pos) const
 {
-    QStyleOptionButton opt = getStyleOption(this);
+    QStyleOptionButton opt;
+    initStyleOption(&opt);
     return style()->subElementRect(QStyle::SE_RadioButtonClickRect, &opt, this).contains(pos);
 }
 
@@ -201,15 +235,22 @@ void QRadioButton::mouseMoveEvent(QMouseEvent *e)
  */
 void QRadioButton::paintEvent(QPaintEvent *)
 {
-    Q_D(QRadioButton);
     QStylePainter p(this);
-    QStyleOptionButton opt = getStyleOption(this, d->hovering);
+    QStyleOptionButton opt;
+    initStyleOption(&opt);
     p.drawControl(QStyle::CE_RadioButton, opt);
 }
 
 /*! \reimp */
 bool QRadioButton::event(QEvent *e)
 {
+    Q_D(QRadioButton);
+    if (e->type() == QEvent::StyleChange
+#ifdef Q_WS_MAC
+            || e->type() == QEvent::MacSizeChange
+#endif
+            )
+        d->setLayoutItemMargins(QStyle::SE_RadioButtonLayoutItem);
     return QAbstractButton::event(e);
 }
 
@@ -221,8 +262,9 @@ bool QRadioButton::event(QEvent *e)
 QRadioButton::QRadioButton(QWidget *parent, const char* name)
     : QAbstractButton(*new QRadioButtonPrivate, parent)
 {
+    Q_D(QRadioButton);
+    d->init();
     setObjectName(QString::fromAscii(name));
-    qRadioButtonInit(this);
 }
 
 /*!
@@ -232,8 +274,9 @@ QRadioButton::QRadioButton(QWidget *parent, const char* name)
 QRadioButton::QRadioButton(const QString &text, QWidget *parent, const char* name)
     : QAbstractButton(*new QRadioButtonPrivate, parent)
 {
+    Q_D(QRadioButton);
+    d->init();
     setObjectName(QString::fromAscii(name));
-    qRadioButtonInit(this);
     setText(text);
 }
 

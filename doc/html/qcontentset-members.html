@@ -16,12 +16,16 @@
 <p><table width="100%" border="0" cellpadding="0" cellspacing="0">
 <tr><td width="45%" valign="top"><ul>
 <li><div class="fn"/>enum <a href="qcontentset.html#Priority-enum">Priority</a></li>
+<li><div class="fn"/>enum <a href="qcontentset.html#UpdateMode-enum">UpdateMode</a></li>
 <li><div class="fn"/><a href="qcontentset.html#QContentSet">QContentSet</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qcontentset.html#QContentSet-2">QContentSet</a> ( const QContentFilter &amp;, QObject * )</li>
 <li><div class="fn"/><a href="qcontentset.html#QContentSet-3">QContentSet</a> ( const QContentFilter &amp;, const QStringList &amp;, QObject * )</li>
 <li><div class="fn"/><a href="qcontentset.html#QContentSet-4">QContentSet</a> ( QContentFilter::FilterType, const QString &amp;, QObject * )</li>
 <li><div class="fn"/><a href="qcontentset.html#QContentSet-5">QContentSet</a> ( QContentFilter::FilterType, const QString &amp;, const QStringList &amp;, QObject * )</li>
 <li><div class="fn"/><a href="qcontentset.html#QContentSet-6">QContentSet</a> ( const QContentSet &amp;, QObject * )</li>
+<li><div class="fn"/><a href="qcontentset.html#QContentSet-7">QContentSet</a> ( UpdateMode, QObject * )</li>
+<li><div class="fn"/><a href="qcontentset.html#QContentSet-8">QContentSet</a> ( const QContentFilter &amp;, UpdateMode, QObject * )</li>
+<li><div class="fn"/><a href="qcontentset.html#QContentSet-9">QContentSet</a> ( const QContentFilter &amp;, const QContentSortCriteria &amp;, UpdateMode, QObject * )</li>
 <li><div class="fn"/><a href="qcontentset.html#dtor.QContentSet">~QContentSet</a> ()</li>
 <li><div class="fn"/><a href="qcontentset.html#aboutToSort">aboutToSort</a> ()</li>
 <li><div class="fn"/><a href="qcontentset.html#add">add</a> ( const QContent &amp; )</li>
@@ -42,9 +46,11 @@
 <li><div class="fn"/><a href="qobject.html#connect-2">connect</a> ( const QObject *, const char *, const char *, Qt::ConnectionType ) const</li>
 <li><div class="fn"/><a href="qobject.html#connectNotify">connectNotify</a> ( const char * )</li>
 <li><div class="fn"/><a href="qcontentset.html#contains">contains</a> ( const QContent &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qcontentset.html#content">content</a> ( int ) const : QContent</li>
 <li><div class="fn"/><a href="qcontentset.html#contentAboutToBeInserted">contentAboutToBeInserted</a> ( int, int )</li>
 <li><div class="fn"/><a href="qcontentset.html#contentAboutToBeRemoved">contentAboutToBeRemoved</a> ( int, int )</li>
 <li><div class="fn"/><a href="qcontentset.html#contentChanged">contentChanged</a> ( int, int )</li>
+<li><div class="fn"/><a href="qcontentset.html#contentId">contentId</a> ( int ) const : QContentId</li>
 <li><div class="fn"/><a href="qcontentset.html#contentInserted">contentInserted</a> ()</li>
 <li><div class="fn"/><a href="qcontentset.html#contentRemoved">contentRemoved</a> ()</li>
 <li><div class="fn"/><a href="qcontentset.html#count">count</a> () const : int</li>
@@ -62,16 +68,15 @@
 <li><div class="fn"/><a href="qobject.html#event">event</a> ( QEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#eventFilter">eventFilter</a> ( QObject *, QEvent * )</li>
 <li><div class="fn"/><a href="qcontentset.html#filter">filter</a> () const : QContentFilter</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qobject.html#findChild">findChild</a> ( const QString &amp; ) const</li>
 <li><div class="fn"/><a href="qobject.html#findChildren">findChildren</a> ( const QString &amp; ) const</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qobject.html#findChildren-2">findChildren</a> ( const QRegExp &amp; ) const</li>
 <li><div class="fn"/><a href="qcontentset.html#findDocuments">findDocuments</a> ( QContentSet *, const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontentset.html#findExecutable">findExecutable</a> ( const QString &amp; ) const : QContent</li>
 <li><div class="fn"/><a href="qcontentset.html#findFileName">findFileName</a> ( const QString &amp; ) const : QContent</li>
 <li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qobject.html#insertChild">insertChild</a> ( QObject * )</li>
-<li><div class="fn"/><a href="qcontentset.html#installContent">installContent</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#installEventFilter">installEventFilter</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#isA">isA</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qcontentset.html#isEmpty">isEmpty</a> () const : bool</li>
@@ -99,8 +104,10 @@
 <li><div class="fn"/><a href="qobject.html#setObjectName">setObjectName</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#setParent">setParent</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#setProperty">setProperty</a> ( const char *, const QVariant &amp; )</li>
+<li><div class="fn"/><a href="qcontentset.html#setSortCriteria">setSortCriteria</a> ( const QContentSortCriteria &amp; )</li>
 <li><div class="fn"/><a href="qcontentset.html#setSortOrder">setSortOrder</a> ( const QStringList &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#signalsBlocked">signalsBlocked</a> () const</li>
+<li><div class="fn"/><a href="qcontentset.html#sortCriteria">sortCriteria</a> () const : QContentSortCriteria</li>
 <li><div class="fn"/><a href="qcontentset.html#sortOrder">sortOrder</a> () const : QStringList</li>
 <li><div class="fn"/><a href="qcontentset.html#sorted">sorted</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#startTimer">startTimer</a> ( int )</li>
@@ -110,7 +117,7 @@
 <li><div class="fn"/><a href="qobject.html#tr">tr</a> ( const char *, const char *, int )</li>
 <li><div class="fn"/><a href="qobject.html#trUtf8">trUtf8</a> ( const char *, const char *, int )</li>
 <li><div class="fn"/><a href="qcontentset.html#types">types</a> () const : QStringList</li>
-<li><div class="fn"/><a href="qcontentset.html#uninstallContent">uninstallContent</a> ()</li>
+<li><div class="fn"/><a href="qcontentset.html#updateMode">updateMode</a> () const : UpdateMode</li>
 <li><div class="fn"/><a href="qcontentset.html#operator-eq">operator=</a> ( const QContentSet &amp; ) : QContentSet &amp;</li>
 </ul>
 </td></tr>
@@ -119,6 +126,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

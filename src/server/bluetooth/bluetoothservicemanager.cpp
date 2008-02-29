@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -102,11 +102,11 @@ QHash<QString, QVariant> BluetoothServiceSettings::loadSettings(const QString &n
 
 void BluetoothServiceSettings::setValue(const QString &name, const QString &key, const QVariant &value)
 {
-    m_settingsValueSpace->setAttribute(name + "/" + key, value);
+    m_settingsValueSpace->setAttribute(name + '/' + key, value);
 
     // some settings need to be saved into config for persistence
     if (m_persistentSettings.contains(key))
-        m_settingsFile.setValue(name + "/" + key, value);
+        m_settingsFile.setValue(name + '/' + key, value);
 }
 
 void BluetoothServiceSettings::setAllValues(const QString &name, const QHash<QString, QVariant> &settings)
@@ -118,7 +118,7 @@ void BluetoothServiceSettings::setAllValues(const QString &name, const QHash<QSt
 
 QVariant BluetoothServiceSettings::value(const QString &name, const QString &key)
 {
-    return QValueSpaceItem(VALUE_SPACE_PATH + "/" + name).value(key);
+    return QValueSpaceItem(VALUE_SPACE_PATH + '/' + name).value(key);
 }
 
 
@@ -277,6 +277,8 @@ void ServiceUserMessenger::setServiceSecurity(const QString &name,
     See the \l {bluetooth-servicemanager.html} {Bluetooth Service Management Framework}
     page for more details on the Bluetooth Service Manager's communication
     architecture.
+  
+    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 
     \ingroup QtopiaServer::Task::Bluetooth
 */

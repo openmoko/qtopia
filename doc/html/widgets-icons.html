@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Icons Example</title>
+  <title>Qt 4.3: Icons Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Icons Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Icons Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="widgets-icons-iconpreviewarea-cpp.html">widgets/icons/iconpreviewarea.cpp</a></li>
@@ -41,15 +42,16 @@
 </ul>
 <a name="qicon-overview"></a>
 <h2>QIcon Overview</h2>
-<p>The <a href="qicon.html">QIcon</a> class provides scalable icons in different modes and states. An icon's state and mode are depending on the intended use of the icon. There are currently three defined modes:</p>
+<p>The <a href="qicon.html">QIcon</a> class provides scalable icons in different modes and states. An icon's state and mode are depending on the intended use of the icon. Qt currently defines four modes:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Mode</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td><a href="qicon.html#Mode-enum">QIcon::Normal</a></td><td>Display the pixmap when the user is not interacting with the icon, but the functionality represented by the icon is available.</td></tr>
-<tr valign="top" class="even"><td><a href="qicon.html#Mode-enum">QIcon::Disabled</a></td><td>Display the pixmap when the functionality represented by the icon is not available.</td></tr>
-<tr valign="top" class="odd"><td><a href="qicon.html#Mode-enum">QIcon::Active</a></td><td>Display the pixmap when the functionality represented by the icon is available and the user is interacting with the icon, for example, moving the mouse over it or clicking it.</td></tr>
+<tr valign="top" class="even"><td><a href="qicon.html#Mode-enum">QIcon::Active</a></td><td>Display the pixmap when the functionality represented by the icon is available and the user is interacting with the icon, for example, moving the mouse over it or clicking it.</td></tr>
+<tr valign="top" class="odd"><td><a href="qicon.html#Mode-enum">QIcon::Disabled</a></td><td>Display the pixmap when the functionality represented by the icon is not available.</td></tr>
+<tr valign="top" class="even"><td><a href="qicon.html#Mode-enum">QIcon::Selected</a></td><td>Display the pixmap when the icon is selected.</td></tr>
 </table></p>
-<p><a href="qicon.html">QIcon</a>'s states are <a href="qicon.html#State-enum">QIcon::On</a> and <a href="qicon.html#State-enum">QIcon::Off</a>, which will display the pixmap when the widget is in the respective state. The most common usage of <a href="qicon.html">QIcon</a>'s states are when displaying checkable tool buttons or menu entries. When a tool button or menu entry is checked, the <a href="qicon.html">QIcon</a>'s state is On, otherwise it's Off. You can, for example, use the <a href="qicon.html">QIcon</a>'s states to display differing pixmaps depending on whether the tool button or menu entry is checked or not.</p>
-<p>A <a href="qicon.html">QIcon</a> can generate smaller, larger, active, and disabled pixmaps from the set of pixmaps it is given. Such pixmaps are used by Qt widgets to show an icon representing a particular action.</p>
+<p><a href="qicon.html">QIcon</a>'s states are <a href="qicon.html#State-enum">QIcon::On</a> and <a href="qicon.html#State-enum">QIcon::Off</a>, which will display the pixmap when the widget is in the respective state. The most common usage of <a href="qicon.html">QIcon</a>'s states are when displaying checkable tool buttons or menu entries (see <a href="qabstractbutton.html#checkable-prop">QAbstractButton::setCheckable</a>() and <a href="qaction.html#checkable-prop">QAction::setCheckable</a>()). When a tool button or menu entry is checked, the <a href="qicon.html">QIcon</a>'s state is <a href="qicon.html#State-enum">On</a>, otherwise it's <a href="qicon.html#State-enum">Off</a>. You can, for example, use the <a href="qicon.html">QIcon</a>'s states to display differing pixmaps depending on whether the tool button or menu entry is checked or not.</p>
+<p>A <a href="qicon.html">QIcon</a> can generate smaller, larger, active, disabled, and selected pixmaps from the set of pixmaps it is given. Such pixmaps are used by Qt widgets to show an icon representing a particular action.</p>
 <a name="overview-of-the-icons-application"></a>
 <h2>Overview of the Icons Application</h2>
 <p>With the Icons application you get a preview of an icon's generated pixmaps reflecting its different states, modes and size.</p>
@@ -57,44 +59,44 @@
 <p>The application allows you to manipulate the icon size with some predefined sizes and a spin box. The predefined sizes are style dependent, but most of the styles have the same values: Only the Macintosh style differ by using 32 pixels, instead of 16 pixels, for toolbar buttons. You can navigate between the available styles using the <b>View</b> menu.</p>
 <p align="center"><img src="images/icons-view-menu.png" alt="Screenshot of the View menu" /></p><p>The <b>View</b> menu also provide the option to make the application guess the icon state and mode from an image's file name. The <b>File</b> menu provide the options of adding an image and removing all images. These last options are also available through a context menu that appears if you press the right mouse button within the table of image files. In addition, the <b>File</b> menu provide an <b>Exit</b> option, and the <b>Help</b> menu provide information about the example and about Qt.</p>
 <p align="center"><img src="images/icons_find_normal.png" alt="Screenshot of the Find Files" /></p><p>The screenshot above shows the application with one image file loaded. The <b>Guess Image Mode/State</b> is enabled and the style is Plastique.</p>
-<p>When <a href="qicon.html">QIcon</a> is provided with only one available pixmap, that pixmap is used for all the states and modes. In this case the pixmap's icon mode is set to normal, and the generated pixmaps for the normal and active modes will look the same. But in disabled mode Qt will generate disabled pixmaps, i.e. give the generated pixmaps a gray color scale.</p>
-<p align="center"><img src="images/icons_find_normal_disabled.png" alt="Screenshot of the Find Files" /></p><p>The next screenshot shows the application with an additional file loaded, providing <a href="qicon.html">QIcon</a> with two available pixmaps. Note that the new image file's mode is set to disabled. When rendering the <b>Disabled</b> mode pixmaps, Qt will now use the new image. We can see the difference: The generated disabled pixmap in the first screenshot is slightly darker than the pixmap with the originally set disabled mode in the second screenshot.</p>
-<p>When Qt renders the icon's pixmaps it searches through the set of available pixmaps following a particular algorithm. The algorithm is documented in <a href="qicon.html">QIcon</a>, but we will describe some particular cases below.</p>
-<p align="center"><img src="images/icons_find_mess.png" alt="Screenshot of the Find Files" /></p><p>In the screenshot above we have played around with the images' modes and states. We changed the <tt>find_normal.png</tt> image's state to on, and the <tt>find_disabled.png</tt> image's mode to active.</p>
-<p>When rendering the icon's pixmaps, the mentioned search algorithm is essential: To render the Normal/Off pixmap, Qt will first see if there is a pixmap set for this combination of icon state and mode. If there isn't, Qt will look for other combinations according to the table below.</p>
+<p>When <a href="qicon.html">QIcon</a> is provided with only one available pixmap, that pixmap is used for all the states and modes. In this case the pixmap's icon mode is set to normal, and the generated pixmaps for the normal and active modes will look the same. But in disabled and selected mode, Qt will generate a slightly different pixmap.</p>
+<p>The next screenshot shows the application with an additional file loaded, providing <a href="qicon.html">QIcon</a> with two available pixmaps. Note that the new image file's mode is set to disabled. When rendering the <b>Disabled</b> mode pixmaps, Qt will now use the new image. We can see the difference: The generated disabled pixmap in the first screenshot is slightly darker than the pixmap with the originally set disabled mode in the second screenshot.</p>
+<p align="center"><img src="images/icons_find_normal_disabled.png" alt="Screenshot of the Find Files" /></p><p>When Qt renders the icon's pixmaps it searches through the set of available pixmaps following a particular algorithm. The algorithm is documented in <a href="qicon.html">QIcon</a>, but we will describe some particular cases below.</p>
+<p align="center"><img src="images/icons_monkey_active.png" alt="Screenshot of the Find Files" /></p><p>In the screenshot above, we have set <tt>monkey_on_32x32</tt> to be an Active/On pixmap and <tt>monkey_off_64x64</tt> to be Normal/Off. To render the other six mode/state combinations, <a href="qicon.html">QIcon</a> uses the search algorithm described in the table below:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th colspan="2">Requested Pixmap</th><th colspan="6">Preferred Alternatives (mode/state)</th></tr>
-<tr valign="top" class="qt-style"><th>Mode</th><th>State</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead>
-<tr valign="top" class="odd"><td>Normal</td><td>Off</td><td>N/Off</td><td><b>A/Off</b></td><td>N/On</td><td>A/On</td><td>D/Off</td><td>D/On</td></tr>
-<tr valign="top" class="even"><td>Normal</td><td>On</td><td><b>N/On</b></td><td>A/On</td><td>N/Off</td><td>A/Off</td><td>D/On</td><td>D/Off</td></tr>
-<tr valign="top" class="odd"><td>Active</td><td>Off</td><td><b>A/Off</b></td><td>N/Off</td><td>A/On</td><td>N/On</td><td>D/Off</td><td>D/On</td></tr>
-<tr valign="top" class="even"><td>Active</td><td>On</td><td>A/On</td><td><b>N/On</b></td><td>A/Off</td><td>N/Off</td><td>D/On</td><td>D/Off</td></tr>
-<tr valign="top" class="odd"><td>Disabled</td><td>Off</td><td>D/Off</td><td>gray(N/Off)</td><td><b>gray(A/Off)</b></td><td>D/On</td><td>gray(N/On)</td><td>gray(A/On)</td></tr>
-<tr valign="top" class="even"><td>Disabled</td><td>On</td><td>D/On</td><td><b>gray(N/On)</b></td><td>gray(A/On)</td><td>D/Off</td><td>gray(N/Off)</td><td>gray(A/Off)</td></tr>
+<thead><tr valign="top" class="qt-style"><th colspan="2">Requested Pixmap</th><th colspan="8">Preferred Alternatives (mode/state)</th></tr>
+<tr valign="top" class="qt-style"><th>Mode</th><th>State</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr></thead>
+<tr valign="top" class="odd"><td rowspan="2">Normal</td><td>Off</td><td><b>N0</b></td><td>A0</td><td>N1</td><td>A1</td><td>D0</td><td>S0</td><td>D1</td><td>S1</td></tr>
+<tr valign="top" class="even"><td>On</td><td>N1</td><td><b>A1</b></td><td>N0</td><td>A0</td><td>D1</td><td>S1</td><td>D0</td><td>S0</td></tr>
+<tr valign="top" class="odd"><td rowspan="2">Active</td><td>Off</td><td>A0</td><td><b>N0</b></td><td>A1</td><td>N1</td><td>D0</td><td>S0</td><td>D1</td><td>S1</td></tr>
+<tr valign="top" class="even"><td>On</td><td><b>A1</b></td><td>N1</td><td>A0</td><td>N0</td><td>D1</td><td>S1</td><td>D0</td><td>S0</td></tr>
+<tr valign="top" class="odd"><td rowspan="2">Disabled</td><td>Off</td><td>D0</td><td><b>N0'</b></td><td>A0'</td><td>D1</td><td>N1'</td><td>A1'</td><td>S0'</td><td>S1'</td></tr>
+<tr valign="top" class="even"><td>On</td><td>D1</td><td>N1'</td><td><b>A1'</b></td><td>D0</td><td>N0'</td><td>A0'</td><td>S1'</td><td>S0'</td></tr>
+<tr valign="top" class="odd"><td rowspan="2">Selected</td><td>Off</td><td>S0</td><td><b>N0''</b></td><td>A0''</td><td>S1</td><td>N1''</td><td>A1''</td><td>D0''</td><td>D1''</td></tr>
+<tr valign="top" class="even"><td>On</td><td>S1</td><td>N1''</td><td><b>A1''</b></td><td>S0</td><td>N0''</td><td>A0''</td><td>D1''</td><td>D0''</td></tr>
 </table></p>
-<p>The alternatives used in the screenshot above are marked with a bold font. For example, the <tt>find_disabled</tt> image is now Active/Off, and is the preferred alternative for the Normal/Off pixmap. The algorithm is similar for all the normal and active mode pixmaps, but differ when it comes to the disabled mode.</p>
-<p>When rendering the Disabled/Off pixmap, Qt will first see if any of the available pixmaps are set for this combination of icon state and mode. If no one is, it will look for pixmaps set for Normal/Off, and as long as it needs to it will look for a suitable pixmap following the line of search described in the table above. As before: If the preferred alternative is a pixmap that is set for another icon mode, <a href="qicon.html">QIcon</a> will generate a disabled pixmap, i.e. give the generated pixmap a gray color scale.</p>
+<p>In the table, &quot;0&quot; and &quot;1&quot; stand for Off&quot; and &quot;On&quot;, respectively. Single quotes indicates that <a href="qicon.html">QIcon</a> generates a disabled (&quot;grayed out&quot;) version of the pixmap; similarly, double quuote indicate that <a href="qicon.html">QIcon</a> generates a selected (&quot;blued out&quot;) version of the pixmap.</p>
+<p>The alternatives used in the screenshot above are shown in bold. For example, the Disabled/Off pixmap is derived by graying out the Normal/Off pixmap (<tt>monkey_off_64x64</tt>).</p>
+<p>In the next screenshots, we loaded the whole set of monkey images. By checking or unchecking file names from the image list, we get different results:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/icons_monkey.png" alt="Screenshot of the Monkey Files" /></td><td><img src="images/icons_monkey_mess.png" alt="Screenshot of the Monkey Files" /></td></tr>
 </table></p>
-<p>In the next screenshots we have loaded the set of monkey images. This set of images show in particular <a href="qicon.html">QIcon</a>'s on and off states.</p>
-<p>When rendering the generated pixmaps, Qt gives priority to the state. However, it will never use a disabled pixmap to render a normal or active pixmap, unless it has no other choice. The effect is illustrated in the right screenshot above.</p>
+<p>For any given mode/state combination, it is possible to specify several images at different resolutions. When rendering an icon, <a href="qicon.html">QIcon</a> will automatically pick the most suitable image and scale it down if necessary. (<a href="qicon.html">QIcon</a> never scales up images, because this rarely looks good.)</p>
+<p>The screenshots below shows what happens when we provide <a href="qicon.html">QIcon</a> with three images (<tt>qtopia_16x16.png</tt>, <tt>qtopia_32x32.png</tt>, <tt>qtopia_48x48.png</tt>) and try to render the <a href="qicon.html">QIcon</a> at various resolutions:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td></td><td><img src="images/icons_qtopia_8x8.png" alt="Screenshot of the Qtopia Files" /></td><td><img src="images/icons_qtopia_16x16.png" alt="Screenshot of the Qtopia Files" /></td><td><img src="images/icons_qtopia_17x17.png" alt="Screenshot of the Qtopia Files" /></td></tr>
+<tr valign="top" class="odd"><td></td><td><img src="images/icons_qtopia_8x8.png" alt="Qtopia icon at 8 x 8" /></td><td><img src="images/icons_qtopia_16x16.png" alt="Qtopia icon at 16 x 16" /></td><td><img src="images/icons_qtopia_17x17.png" alt="Qtopia icon at 17 x 17" /></td></tr>
 <tr valign="top" class="even"><td></td><td>8 x 8</td><td><b>16 x 16</b></td><td>17 x 17</td></tr>
-<tr valign="top" class="odd"><td><img src="images/icons_qtopia_32x32.png" alt="Screenshot of the Qtopia Files" /></td><td><img src="images/icons_qtopia_33x33.png" alt="Screenshot of the Qtopia Files" /></td><td><img src="images/icons_qtopia_48x48.png" alt="Screenshot of the Qtopia Files" /></td><td><img src="images/icons_qtopia_64x64.png" alt="Screenshot of the Qtopia Files" /></td></tr>
+<tr valign="top" class="odd"><td><img src="images/icons_qtopia_32x32.png" alt="Qtopia icon at 32 x 32" /></td><td><img src="images/icons_qtopia_33x33.png" alt="Qtopia icon at 33 x 33" /></td><td><img src="images/icons_qtopia_48x48.png" alt="Qtopia icon at 48 x 48" /></td><td><img src="images/icons_qtopia_64x64.png" alt="Qtopia icon at 64 x 64" /></td></tr>
 <tr valign="top" class="even"><td><b>32 x 32</b></td><td>33 x 33</td><td><b>48 x 48</b></td><td>64 x 64</td></tr>
 </table></p>
-<p>The screenshots above show how <a href="qicon.html">QIcon</a> behaves when we ask it for pixmaps of various sizes. Here we have played around with the sizes using a set of Qtopia images which only differ in size (<tt>qtopia_16x16.png</tt>, <tt>qtopia_32x32.png</tt>, <tt>qtopia_48x48.png</tt>).</p>
-<p><a href="qicon.html">QIcon</a> can always generate a smaller pixmap from the set of pixmaps it is given, but it never scales them up, because this rarely looks good. This is why we get the 48 x 48 pixmap when we request a 64 x 64 pixmap.</p>
-<p>In summary, for sizes up to 16 x 16, <a href="qicon.html">QIcon</a> uses <tt>qtopia_16x16.png</tt> and scales it down if necessary. Similarly, for sizes between 17 x 17 and 32 x 32, it uses <tt>qtopia_32x32.png</tt>, and for sizes above 32 x 32, it uses <tt>qtopia_48x48.png</tt>.</p>
+<p>For sizes up to 16 x 16, <a href="qicon.html">QIcon</a> uses <tt>qtopia_16x16.png</tt> and scales it down if necessary. For sizes between 17 x 17 and 32 x 32, it uses <tt>qtopia_32x32.png</tt>. For sizes above 32 x 32, it uses <tt>qtopia_48x48.png</tt>.</p>
 <a name="line-by-line-walkthrough"></a>
 <h2>Line-by-Line Walkthrough</h2>
 <p>The Icons example consists of four classes:</p>
 <ul>
 <li><tt>MainWindow</tt> inherits <a href="qmainwindow.html">QMainWindow</a> and is the main application window.</li>
 <li><tt>IconPreviewArea</tt> is a custom widget that displays all combinations of states and modes for a given icon.</li>
-<li><tt>IconSizeSpinBox</tt> is a subclass of <a href="qspinbox.html">QSpinBox</a> that lets the user enter icon sizes (e.g., &quot;48 x 48&quot;).</li>
+<li><tt>IconSizeSpinBox</tt> is a subclass of <a href="qspinbox.html">QSpinBox</a> that lets the user enter icon sizes (e.g&#x2e;, &quot;48 x 48&quot;).</li>
 <li><tt>ImageDelegate</tt> is a subclass of <a href="qitemdelegate.html">QItemDelegate</a> that provides comboboxes for letting the user set the mode and state associated with an image.</li>
 </ul>
 <p>We will start by reviewing the <tt>IconPreviewArea</tt> class before we take a look at the <tt>MainWindow</tt> class. Finally, we will review the <tt>IconSizeSpinBox</tt> and <tt>ImageDelegate</tt> classes.</p>
@@ -196,6 +198,7 @@
      label-&gt;setFrameShape(QFrame::Box);
      label-&gt;setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
      label-&gt;setBackgroundRole(QPalette::Base);
+     label-&gt;setAutoFillBackground(true);
      label-&gt;setMinimumSize(132, 132);
      return label;
  }</pre>
@@ -239,7 +242,7 @@
      void changeStyle(bool checked);
      void changeSize(bool checked = true);
      void changeIcon();
-     void addImage();
+     void addImages();
      void removeAllImages();
 
  private:
@@ -272,7 +275,7 @@
      QMenu *fileMenu;
      QMenu *viewMenu;
      QMenu *helpMenu;
-     QAction *addImageAct;
+     QAction *addImagesAct;
      QAction *removeAllImagesAct;
      QAction *exitAct;
      QAction *guessModeStateAct;
@@ -305,16 +308,16 @@
      createContextMenu();
 
      QGridLayout *mainLayout = new QGridLayout;
-     mainLayout-&gt;addWidget(imagesGroupBox, 0, 0);
-     mainLayout-&gt;addWidget(iconSizeGroupBox, 1, 0);
-     mainLayout-&gt;addWidget(previewGroupBox, 0, 1, 2, 1);
+     mainLayout-&gt;addWidget(previewGroupBox, 0, 0, 1, 2);
+     mainLayout-&gt;addWidget(imagesGroupBox, 1, 0);
+     mainLayout-&gt;addWidget(iconSizeGroupBox, 1, 1);
      centralWidget-&gt;setLayout(mainLayout);
 
      setWindowTitle(tr(&quot;Icons&quot;));
      checkCurrentStyle();
      otherRadioButton-&gt;click();
 
-     resize(860, 400);
+     resize(minimumSizeHint());
  }</pre>
 <p>In the constructor we first create the main window's central widget and its child widgets, and put them in a grid layout. Then we create the menus with their associated entries and actions.</p>
 <p>Before we resize the application window to a suitable size, we set the window title and determine the current style for the application. We also enable the icon size spin box by clicking the associated radio button, making the current value of the spin box the icon's initial size.</p>
@@ -322,8 +325,8 @@
  {
      QMessageBox::about(this, tr(&quot;About Icons&quot;),
              tr(&quot;The &lt;b&gt;Icons&lt;/b&gt; example illustrates how Qt renders an icon in &quot;
-                &quot;different modes (active, normal, and disabled) and states (on &quot;
-                &quot;and off) based on a set of images.&quot;));
+                &quot;different modes (active, normal, disabled, and selected) and &quot;
+                &quot;states (on and off) based on a set of images.&quot;));
  }</pre>
 <p>The <tt>about()</tt> slot displays a message box using the static <a href="qmessagebox.html#about">QMessageBox::about</a>() function. In this example it displays a simple box with information about the example.</p>
 <p>The <tt>about()</tt> function looks for a suitable icon in four locations: It prefers its parent's icon if that exists. If it doesn't, the function tries the top-level widget containing parent, and if that fails, it tries the active window. As a last resort it uses the <a href="qmessagebox.html">QMessageBox</a>'s Information icon.</p>
@@ -333,7 +336,7 @@
          return;
 
      QAction *action = qobject_cast&lt;QAction *&gt;(sender());</pre>
-<p>In the <tt>changeStyle()</tt> slot we first check the slot's parameter. If it is false we immediately return, otherwise we find out which style to change to, i.e. which action that triggered the slot, using the <a href="qobject.html#sender">QObject::sender</a>() function.</p>
+<p>In the <tt>changeStyle()</tt> slot we first check the slot's parameter. If it is false we immediately return, otherwise we find out which style to change to, i.e&#x2e; which action that triggered the slot, using the <a href="qobject.html#sender">QObject::sender</a>() function.</p>
 <p>This function returns the sender as a <a href="qobject.html">QObject</a> pointer. Since we know that the sender is a <a href="qaction.html">QAction</a> object, we can safely cast the <a href="qobject.html">QObject</a>. We could have used a C-style cast or a C++ <tt>static_cast()</tt>, but as a defensive programming technique we use a <a href="qobject.html#qobject_cast">qobject_cast</a>(). The advantage is that if the object has the wrong type, a null pointer is returned. Crashes due to null pointers are much easier to diagnose than crashes due to unsafe casts.</p>
 <pre>     QStyle *style = QStyleFactory::create(action-&gt;data().toString());
      Q_ASSERT(style);
@@ -389,7 +392,7 @@
  }</pre>
 <p>The <tt>changeSize()</tt> slot sets the size for the preview area's icon.</p>
 <p>To determine the new size we first check if the spin box is enabled. If it is, we extract the extent of the new size from the box. If it's not, we search through the predefined size options, extract the <a href="qstyle.html#PixelMetric-enum">QStyle::PixelMetric</a> and use the <a href="qstyle.html#pixelMetric">QStyle::pixelMetric</a>() function to determine the extent. Then we create a <a href="qsize.html">QSize</a> object based on the extent, and use that object to set the size of the preview area's icon.</p>
-<pre> void MainWindow::addImage()
+<pre> void MainWindow::addImages()
  {
      QStringList fileNames = QFileDialog::getOpenFileNames(this,
                                      tr(&quot;Open Images&quot;), &quot;&quot;,
@@ -397,7 +400,8 @@
                                         &quot;All Files (*)&quot;));
      if (!fileNames.isEmpty()) {
          foreach (QString fileName, fileNames) {
-             int row = imagesTable-&gt;rowCount();</pre>
+             int row = imagesTable-&gt;rowCount();
+             imagesTable-&gt;setRowCount(row + 1);</pre>
 <p>The first thing we do when the <tt>addImage()</tt> slot is called, is to show a file dialog to the user. The easiest way to create a file dialog is to use <a href="qfiledialog.html">QFileDialog</a>'s static functions. Here we use the <a href="qfiledialog.html#getOpenFileNames">getOpenFileNames()</a> function that will return one or more existing files selected by the user.</p>
 <p>For each of the files the file dialog returns, we add a row to the table widget. The table widget is listing the images the user has loaded into the application.</p>
 <pre>             QString imageName = QFileInfo(fileName).baseName();
@@ -421,7 +425,7 @@
                  if (fileName.contains(&quot;_on&quot;))
                      item2-&gt;setText(tr(&quot;On&quot;));
              }</pre>
-<p>Then we create the second and third items in the row making the default mode Normal and the default state Off. But if the <b>Guess Image Mode/State</b> option is checked, and the file name contains &quot;_act&quot; or &quot;_dis&quot;, the modes are changed to Active or Disabled respectively. And if the file name contains &quot;on&quot;, the state is changed to On. The sample files in the example's <tt>images</tt> subdirectory respect this naming convension.</p>
+<p>Then we create the second and third items in the row making the default mode Normal and the default state Off. But if the <b>Guess Image Mode/State</b> option is checked, and the file name contains &quot;_act&quot;, &quot;_dis&quot;, or &quot;_sel&quot;, the modes are changed to Active, Disabled, or Selected. And if the file name contains &quot;_on&quot;, the state is changed to On. The sample files in the example's <tt>images</tt> subdirectory respect this naming convension.</p>
 <pre>             imagesTable-&gt;setItem(row, 0, item0);
              imagesTable-&gt;setItem(row, 1, item1);
              imagesTable-&gt;setItem(row, 2, item2);
@@ -484,38 +488,34 @@
 <pre> void MainWindow::createImagesGroupBox()
  {
      imagesGroupBox = new QGroupBox(tr(&quot;Images&quot;));
-     imagesGroupBox-&gt;setSizePolicy(QSizePolicy::Expanding,
-                                   QSizePolicy::Expanding);</pre>
-<p>First we create a group box that will contain the table widget. We set the group box's size policy to be expanding both horizontally and vertically. The <a href="qsizepolicy.html#Policy-enum">expanding</a> size policy means that the size hint is a sensible size, but the widget can be shrunk and still be useful. The widget can make use of extra space, so it should get as much space as possible.</p>
+
+     imagesTable = new QTableWidget;
+     imagesTable-&gt;setSelectionMode(QAbstractItemView::NoSelection);
+     imagesTable-&gt;setItemDelegate(new ImageDelegate(this));</pre>
+<p>First we create a group box that will contain the table widget. Then we create a <a href="qtablewidget.html">QTableWidget</a> and customize it to suit our purposes.</p>
+<p>We call <a href="qabstractitemview.html#selectionMode-prop">QAbstractItemView::setSelectionMode</a>() to prevent the user from selecting items.</p>
+<p>The <a href="qabstractitemview.html#setItemDelegate">QAbstractItemView::setItemDelegate</a>() call sets the item delegate for the table widget. We create a <tt>ImageDelegate</tt> that we make the item delegate for our view.</p>
+<p>The <a href="qitemdelegate.html">QItemDelegate</a> class can be used to provide an editor for an item view class that is subclassed from <a href="qabstractitemview.html">QAbstractItemView</a>. Using a delegate for this purpose allows the editing mechanism to be customized and developed independently from the model and view.</p>
+<p>In this example we derive <tt>ImageDelegate</tt> from <a href="qitemdelegate.html">QItemDelegate</a>. <a href="qitemdelegate.html">QItemDelegate</a> usually provides line editors, while our subclass <tt>ImageDelegate</tt>, provides comboboxes for the mode and state fields.</p>
 <pre>     QStringList labels;
      labels &lt;&lt; tr(&quot;Image&quot;) &lt;&lt; tr(&quot;Mode&quot;) &lt;&lt; tr(&quot;State&quot;);
 
-     imagesTable = new QTableWidget;
-     imagesTable-&gt;setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Ignored);
-     imagesTable-&gt;setSelectionMode(QAbstractItemView::NoSelection);
+     imagesTable-&gt;horizontalHeader()-&gt;setDefaultSectionSize(90);
      imagesTable-&gt;setColumnCount(3);
-     imagesTable-&gt;setHorizontalHeaderLabels(labels);</pre>
-<p>Then we customize the table widget to suit its purpose.</p>
-<p>Its size policy is set to expanding horizontally, and ignored vertically. The <a href="qsizepolicy.html#Policy-enum">ignored</a> size policy means that the widget's size hint is ignored, and the widget will get as much space as possible.</p>
-<p>We call <a href="qabstractitemview.html#selectionMode-prop">QAbstractItemView::setSelectionMode</a>() to prevent the user from selecting items.</p>
-<pre>     imagesTable-&gt;setItemDelegate(new ImageDelegate(this));</pre>
-<p>The <a href="qabstractitemview.html#setItemDelegate">QAbstractItemView::setItemDelegate</a>() function sets the item delegate for the table widget. We create a <tt>ImageDelegate</tt> that we make the item delegate for our view.</p>
-<p>The <a href="qitemdelegate.html">QItemDelegate</a> class can be used to provide an editor for an item view class that is subclassed from <a href="qabstractitemview.html">QAbstractItemView</a>. Using a delegate for this purpose allows the editing mechanism to be customized and developed independently from the model and view.</p>
-<p>In this example we derive <tt>ImageDelegate</tt> from <a href="qitemdelegate.html">QItemDelegate</a>. <a href="qitemdelegate.html">QItemDelegate</a> usually provides line editors, while our subclass <tt>ImageDelegate</tt>, provides comboboxes for the mode and state fields.</p>
-<pre>     imagesTable-&gt;horizontalHeader()-&gt;resizeSection(0, 160);
-     imagesTable-&gt;horizontalHeader()-&gt;resizeSection(1, 80);
-     imagesTable-&gt;horizontalHeader()-&gt;resizeSection(2, 80);
-     imagesTable-&gt;verticalHeader()-&gt;hide();
-
-     connect(imagesTable, SIGNAL(itemChanged(QTableWidgetItem *)),
+     imagesTable-&gt;setHorizontalHeaderLabels(labels);
+     imagesTable-&gt;horizontalHeader()-&gt;setResizeMode(0, QHeaderView::Stretch);
+     imagesTable-&gt;horizontalHeader()-&gt;setResizeMode(1, QHeaderView::Fixed);
+     imagesTable-&gt;horizontalHeader()-&gt;setResizeMode(2, QHeaderView::Fixed);
+     imagesTable-&gt;verticalHeader()-&gt;hide();</pre>
+<p>Then we customize the <a href="qtablewidget.html">QTableWidget</a>'s horizontal header, and hide the vertical header.</p>
+<pre>     connect(imagesTable, SIGNAL(itemChanged(QTableWidgetItem *)),
              this, SLOT(changeIcon()));
 
      QVBoxLayout *layout = new QVBoxLayout;
      layout-&gt;addWidget(imagesTable);
      imagesGroupBox-&gt;setLayout(layout);
  }</pre>
-<p>Then we resize the sections of the table widget to suitable sizes, and hide the table's vertical headers.</p>
-<p>In the end we connect the <a href="qtablewidget.html#itemChanged">QTableWidget::itemChanged</a>() signal to the <tt>changeIcon()</tt> slot, updating the set of pixmaps available to the preview area's icon whenever the user adds a new image, disables an image or makes changes to an image's mode or state.</p>
+<p>At the end, we connect the <a href="qtablewidget.html#itemChanged">QTableWidget::itemChanged</a>() signal to the <tt>changeIcon()</tt> slot to ensuret that the preview area is in sync with the image table.</p>
 <p align="center"><img src="images/icons_size_groupbox.png" alt="Screenshot of the icon size group box" /></p><p>The <tt>createIconSizeGroupBox()</tt> function is called from the constructor. It creates the widgets controlling the size of the preview area's icon.</p>
 <pre> void MainWindow::createIconSizeGroupBox()
  {
@@ -533,7 +533,7 @@
      otherSpinBox-&gt;setRange(8, 128);
      otherSpinBox-&gt;setValue(64);</pre>
 <p>First we create a group box that will contain all the widgets; then we create the radio buttons and the spin box.</p>
-<p>The spin box is not a regular <a href="qspinbox.html">QSpinBox</a> but an <tt>IconSizeSpinBox</tt>. The <tt>IconSizeSpinBox</tt> class inherits <a href="qspinbox.html">QSpinBox</a> and reimplements two functions: <a href="qspinbox.html#textFromValue">QSpinBox::textFromValue</a>() and <a href="qspinbox.html#valueFromText">QSpinBox::valueFromText</a>(). The <tt>IconSizeSpinBox</tt> is designed to handle icon sizes, e.g., &quot;32 x 32&quot;, instead of plain integer values.</p>
+<p>The spin box is not a regular <a href="qspinbox.html">QSpinBox</a> but an <tt>IconSizeSpinBox</tt>. The <tt>IconSizeSpinBox</tt> class inherits <a href="qspinbox.html">QSpinBox</a> and reimplements two functions: <a href="qspinbox.html#textFromValue">QSpinBox::textFromValue</a>() and <a href="qspinbox.html#valueFromText">QSpinBox::valueFromText</a>(). The <tt>IconSizeSpinBox</tt> is designed to handle icon sizes, e.g&#x2e;, &quot;32 x 32&quot;, instead of plain integer values.</p>
 <pre>     connect(smallRadioButton, SIGNAL(toggled(bool)),
              this, SLOT(changeSize(bool)));
      connect(largeRadioButton, SIGNAL(toggled(bool)),
@@ -563,14 +563,15 @@
      layout-&gt;addWidget(iconViewRadioButton, 1, 1);
      layout-&gt;addWidget(tabBarRadioButton, 2, 1);
      layout-&gt;addLayout(otherSizeLayout, 3, 0, 1, 2);
+     layout-&gt;setRowStretch(4, 1);
      iconSizeGroupBox-&gt;setLayout(layout);
  }</pre>
 <p>Then we connect all of the radio buttons <a href="qabstractbutton.html#toggled">toggled()</a> signals and the spin box's <a href="qspinbox.html#valueChanged">valueChanged()</a> signal to the <tt>changeSize()</tt> slot to make sure that the size of the preview area's icon is updated whenever the user changes the icon size. In the end we put the widgets in a layout that we install on the group box.</p>
 <pre> void MainWindow::createActions()
  {
-     addImageAct = new QAction(tr(&quot;&amp;Add Image...&quot;), this);
-     addImageAct-&gt;setShortcut(tr(&quot;Ctrl+A&quot;));
-     connect(addImageAct, SIGNAL(triggered()), this, SLOT(addImage()));
+     addImagesAct = new QAction(tr(&quot;&amp;Add Images...&quot;), this);
+     addImagesAct-&gt;setShortcut(tr(&quot;Ctrl+A&quot;));
+     connect(addImagesAct, SIGNAL(triggered()), this, SLOT(addImages()));
 
      removeAllImagesAct = new QAction(tr(&quot;&amp;Remove All Images&quot;), this);
      removeAllImagesAct-&gt;setShortcut(tr(&quot;Ctrl+R&quot;));
@@ -606,7 +607,7 @@
 <pre> void MainWindow::createMenus()
  {
      fileMenu = menuBar()-&gt;addMenu(tr(&quot;&amp;File&quot;));
-     fileMenu-&gt;addAction(addImageAct);
+     fileMenu-&gt;addAction(addImagesAct);
      fileMenu-&gt;addAction(removeAllImagesAct);
      fileMenu-&gt;addSeparator();
      fileMenu-&gt;addAction(exitAct);
@@ -628,10 +629,10 @@
 <pre> void MainWindow::createContextMenu()
  {
      imagesTable-&gt;setContextMenuPolicy(Qt::ActionsContextMenu);
-     imagesTable-&gt;addAction(addImageAct);
+     imagesTable-&gt;addAction(addImagesAct);
      imagesTable-&gt;addAction(removeAllImagesAct);
  }</pre>
-<p>QWidgets have a <a href="qwidget.html#contextMenuPolicy-prop">contextMenuPolicy</a> property that controls how the widget should behave when the user requests a context menu (e.g., by right-clicking). We set the <a href="qtablewidget.html">QTableWidget</a>'s context menu policy to <a href="qt.html#ContextMenuPolicy-enum">Qt::ActionsContextMenu</a>, meaning that the <a href="qaction.html">QAction</a>s associated with the widget should appear in its context menu.</p>
+<p>QWidgets have a <a href="qwidget.html#contextMenuPolicy-prop">contextMenuPolicy</a> property that controls how the widget should behave when the user requests a context menu (e.g&#x2e;, by right-clicking). We set the <a href="qtablewidget.html">QTableWidget</a>'s context menu policy to <a href="qt.html#ContextMenuPolicy-enum">Qt::ActionsContextMenu</a>, meaning that the <a href="qaction.html">QAction</a>s associated with the widget should appear in its context menu.</p>
 <p>Then we add the <b>Add Image</b> and <b>Remove All Images</b> actions to the table widget. They will then appear in the table widget's context menu.</p>
 <pre> void MainWindow::checkCurrentStyle()
  {
@@ -648,7 +649,7 @@
      }
  }</pre>
 <p>In the <tt>checkCurrentStyle()</tt> function we go through the group of style actions, looking for the current GUI style.</p>
-<p>For each action, we first extract the style name using <a href="qaction.html#data">QAction::data</a>(). Since this is only a <a href="qstylefactory.html">QStyleFactory</a> key (e.g., &quot;macintosh&quot;), we cannot compare it directly to the current style's class name. We need to create a <a href="qstyle.html">QStyle</a> object using the static <a href="qstylefactory.html#create">QStyleFactory::create</a>() function and compare the class name of the created <a href="qstyle.html">QStyle</a> object with that of the current style. As soon as we are done with a <a href="qstyle.html">QStyle</a> candidate, we delete it.</p>
+<p>For each action, we first extract the style name using <a href="qaction.html#data">QAction::data</a>(). Since this is only a <a href="qstylefactory.html">QStyleFactory</a> key (e.g&#x2e;, &quot;macintosh&quot;), we cannot compare it directly to the current style's class name. We need to create a <a href="qstyle.html">QStyle</a> object using the static <a href="qstylefactory.html#create">QStyleFactory::create</a>() function and compare the class name of the created <a href="qstyle.html">QStyle</a> object with that of the current style. As soon as we are done with a <a href="qstyle.html">QStyle</a> candidate, we delete it.</p>
 <p>For all <a href="qobject.html">QObject</a> subclasses that use the <tt>Q_OBJECT</tt> macro, the class name of an object is available through its <a href="qobject.html#metaObject">meta-object</a>.</p>
 <p>We can assume that the style is supported by <a href="qstylefactory.html">QStyleFactory</a>, but to be on the safe side we use the <tt>Q_ASSERT()</tt> macro to make sure that <a href="qstylefactory.html#create">QStyleFactory::create</a>() returned a valid pointer.</p>
 <a name="iconsizespinbox-class-definition"></a>
@@ -689,8 +690,8 @@
  }</pre>
 <p>The <a href="qspinbox.html#valueFromText">QSpinBox::valueFromText</a>() function is used by the spin box whenever it needs to interpret text typed in by the user. Since we reimplement the <tt>textFromValue()</tt> function we also need to reimplement the <tt>valueFromText()</tt> function to interpret the parameter text and return the associated int value.</p>
 <p>We parse the text using a regular expression (a <a href="qregexp.html">QRegExp</a>). We define an expression that matches one or several digits, optionally followed by whitespace, an &quot;x&quot; or the times symbol, whitespace and one or several digits again.</p>
-<p>The first digits of the regular expression are captured using parentheses. This enables us to use the <a href="qregexp.html#cap">QRegExp::cap</a>() or <a href="qregexp.html#capturedTexts">QRegExp::capturedTexts</a>() functions to extract the matched characters. If the first and second numbers of the spin box value differ (e.g., &quot;16 x 24&quot;), we use the first number.</p>
-<p>When the user presses <b>Enter</b>, <a href="qspinbox.html">QSpinBox</a> first calls <a href="qspinbox.html#valueFromText">QSpinBox::valueFromText</a>() to interpret the text typed by the user, then <a href="qspinbox.html#textFromValue">QSpinBox::textFromValue</a>() to present it in a canonical format (e.g., &quot;16 x 16&quot;).</p>
+<p>The first digits of the regular expression are captured using parentheses. This enables us to use the <a href="qregexp.html#cap">QRegExp::cap</a>() or <a href="qregexp.html#capturedTexts">QRegExp::capturedTexts</a>() functions to extract the matched characters. If the first and second numbers of the spin box value differ (e.g&#x2e;, &quot;16 x 24&quot;), we use the first number.</p>
+<p>When the user presses <b>Enter</b>, <a href="qspinbox.html">QSpinBox</a> first calls <a href="qspinbox.html#valueFromText">QSpinBox::valueFromText</a>() to interpret the text typed by the user, then <a href="qspinbox.html#textFromValue">QSpinBox::textFromValue</a>() to present it in a canonical format (e.g&#x2e;, &quot;16 x 16&quot;).</p>
 <a name="imagedelegate-class-definition"></a>
 <h3>ImageDelegate Class Definition</h3>
 <pre> class ImageDelegate : public QItemDelegate
@@ -752,7 +753,7 @@
      comboBox-&gt;setCurrentIndex(pos);
  }</pre>
 <p>The <a href="qitemdelegate.html#setEditorData">QItemDelegate::setEditorData</a>() function is used by <a href="qtablewidget.html">QTableWidget</a> to transfer data from a <a href="qtablewidgetitem.html">QTableWidgetItem</a> to the editor. The data is stored as a string; we use <a href="qcombobox.html#findText">QComboBox::findText</a>() to locate it in the combobox.</p>
-<p>Delegates work in terms of models, not items. This makes it possible to use them with any item view class (e.g., <a href="qlistview.html">QListView</a>, <a href="qlistwidget.html">QListWidget</a>, <a href="qtreeview.html">QTreeView</a>, etc.). The transition between model and items is done implicitly by <a href="qtablewidget.html">QTableWidget</a>; we don't need to worry about it.</p>
+<p>Delegates work in terms of models, not items. This makes it possible to use them with any item view class (e.g&#x2e;, <a href="qlistview.html">QListView</a>, <a href="qlistwidget.html">QListWidget</a>, <a href="qtreeview.html">QTreeView</a>, etc.)&#x2e; The transition between model and items is done implicitly by <a href="qtablewidget.html">QTableWidget</a>; we don't need to worry about it.</p>
 <pre> void ImageDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                   const QModelIndex &amp;index) const
  {
@@ -772,6 +773,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

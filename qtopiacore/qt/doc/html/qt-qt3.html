@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/qnamespace.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qnamespace.qdoc -->
 <head>
-  <title>Qt 4.2: Qt 3 Support Members for Qt</title>
+  <title>Qt 4.3: Qt 3 Support Members for Qt</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -20,6 +20,7 @@
 <li><div class="fn"/>enum <b><a href="qt-qt3.html#BackgroundMode-enum">BackgroundMode</a></b> { FixedColor, FixedPixmap, NoBackground, PaletteForeground, ..., X11ParentRelative }</li>
 <li><div class="fn"/>typedef <b><a href="qt-qt3.html#ButtonState-typedef">ButtonState</a></b></li>
 <li><div class="fn"/>enum <b><a href="qt-qt3.html#ButtonState_enum-enum">ButtonState_enum</a></b> { ShiftButton, ControlButton, AltButton, MetaButton, Keypad, KeyButtonMask }</li>
+<li><div class="fn"/>enum <b><a href="qt-qt3.html#Dock-enum">Dock</a></b> { DockUnmanaged, DockTornOff, DockTop, DockBottom, ..., DockMinimized }</li>
 <li><div class="fn"/>enum <b><a href="qt-qt3.html#GUIStyle-enum">GUIStyle</a></b> { WindowsStyle, MotifStyle, MacStyle, Win3Style, PMStyle }</li>
 <li><div class="fn"/>enum <b><a href="qt-qt3.html#MacintoshVersion-enum">MacintoshVersion</a></b> { MV_Unknown, MV_9, MV_10_DOT_0, MV_10_DOT_1, ..., MV_TIGER }</li>
 <li><div class="fn"/>enum <b><a href="qt-qt3.html#PaintUnit-enum">PaintUnit</a></b> { PixelUnit, LoMetricUnit, HiMetricUnit, LoEnglishUnit, HiEnglishUnit, TwipsUnit }</li>
@@ -67,6 +68,18 @@
 <tr><td valign="top"><tt>Qt::KeyButtonMask</tt></td><td align="center" valign="top"><tt>Qt::KeyboardModifierMask</tt></td></tr>
 </table></p>
 <p>Use <a href="qt.html#KeyboardModifier-enum">Qt::KeyboardModifier</a> instead.</p>
+<h3 class="fn"><a name="Dock-enum"></a>enum Qt::Dock</h3>
+<p>Each dock window can be in one of the following positions:</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>Qt::DockUnmanaged</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">not managed by a Q3MainWindow.</td></tr>
+<tr><td valign="top"><tt>Qt::DockTornOff</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">the dock window floats as its own top level window which always stays on top of the main window.</td></tr>
+<tr><td valign="top"><tt>Qt::DockTop</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">above the central widget, below the menu bar.</td></tr>
+<tr><td valign="top"><tt>Qt::DockBottom</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">below the central widget, above the status bar.</td></tr>
+<tr><td valign="top"><tt>Qt::DockRight</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">to the right of the central widget.</td></tr>
+<tr><td valign="top"><tt>Qt::DockLeft</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">to the left of the central widget.</td></tr>
+<tr><td valign="top"><tt>Qt::DockMinimized</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">the dock window is not shown (this is effectively a 'hidden' dock area); the handles of all minimized dock windows are drawn in one row below the menu bar.</td></tr>
+</table></p>
 <h3 class="fn"><a name="GUIStyle-enum"></a>enum Qt::GUIStyle</h3>
 <p><table border="1" cellpadding="2" cellspacing="1" width="40%">
 <tr><th width="60%">Constant</th><th width="40%">Value</th></tr>
@@ -115,7 +128,7 @@
 <h3 class="fn"><a name="TextFlags-typedef"></a>typedef Qt::TextFlags</h3>
 <p>Use <a href="qt.html#TextFlag-enum">Qt::TextFlag</a> instead.</p>
 <h3 class="fn"><a name="ToolBarDock-typedef"></a>typedef Qt::ToolBarDock</h3>
-<p>Use <a href="qt.html#Dock-enum">Qt::Dock</a> instead.</p>
+<p>Use <a href="qt-qt3.html#Dock-enum">Qt::Dock</a> instead.</p>
 <h3 class="fn"><a name="WindowsVersion-enum"></a>enum Qt::WindowsVersion</h3>
 <p><table border="1" cellpadding="2" cellspacing="1" width="40%">
 <tr><th width="60%">Constant</th><th width="40%">Value</th></tr>
@@ -137,6 +150,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

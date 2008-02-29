@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,6 +24,7 @@
 
 #include "qtopiaserverapplication.h"
 #include "gsmkeyfilter.h"
+#include "qtelephonynamespace.h"
 
 class GsmKeyActionsPrivate;
 class QDialOptions;
@@ -62,13 +63,16 @@ private slots:
     void connectedIdPresentation
         ( GsmKeyFilter::ServiceAction action, const QStringList& args );
     void holdOrSwap();
+    void releaseAllAcceptIncoming();
+    void supplementaryServiceResult( QTelephony::Result result );
 
 private:
     GsmKeyActionsPrivate *d;
 
     bool checkNewPins( const QString& title, const QStringList& pins );
     void sendServiceToNetwork
-        ( GsmKeyFilter::ServiceAction action, const QStringList& args );
+        ( GsmKeyFilter::ServiceAction action, const QStringList& args,
+          const QString& title = QString() );
 };
 
 #endif // _GSMKEYACTIONS_H_

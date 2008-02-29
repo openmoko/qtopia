@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -57,8 +72,8 @@ static bool loadTsFile( MetaTranslator& tor, const QString& tsFileName,
                         bool /* verbose */ )
 {
     QString qmFileName = tsFileName;
-    qmFileName.replace( QRegExp("\\.ts$"), "" );
-    qmFileName += ".qm";
+    qmFileName.replace( QRegExp(QLatin1String("\\.ts$")), QLatin1String("") );
+    qmFileName += QLatin1String(".qm");
 
     bool ok = tor.load( tsFileName );
     if ( !ok )
@@ -88,8 +103,8 @@ static void releaseTsFile( const QString& tsFileName, bool verbose,
     MetaTranslator tor;
     if ( loadTsFile(tor, tsFileName, verbose) ) {
         QString qmFileName = tsFileName;
-        qmFileName.replace( QRegExp("\\.ts$"), "" );
-        qmFileName += ".qm";
+        qmFileName.replace( QRegExp(QLatin1String("\\.ts$")), QLatin1String("") );
+        qmFileName += QLatin1String(".qm");
         releaseMetaTranslator( tor, qmFileName, verbose, ignoreUnfinished,
                                trimmed );
     }
@@ -130,7 +145,7 @@ int main( int argc, char **argv )
                 return 1;
             } else {
                 i++;
-                outputFile = argv[i];
+                outputFile = QString::fromLatin1(argv[i]);
                 argv[i][0] = '-';
             }
         } else if ( qstrcmp(argv[i], "-help") == 0 ) {
@@ -153,7 +168,7 @@ int main( int argc, char **argv )
         if ( argv[i][0] == '-' )
             continue;
 
-        QFile f( argv[i] );
+        QFile f( QString::fromLatin1(argv[i]) );
         if ( !f.open(QIODevice::ReadOnly) ) {
 #if defined(_MSC_VER) && _MSC_VER >= 1400
 			char buf[100];
@@ -173,16 +188,17 @@ int main( int argc, char **argv )
         QString fullText = t.readAll();
         f.close();
 
-        if ( fullText.contains(QString("<!DOCTYPE TS>"))) {
+        if ( fullText.contains(QString(QLatin1String("<!DOCTYPE TS>"))) 
+            || fullText.contains(QLatin1String("urn:oasis:names:tc:xliff:document:1.1"))) {
             if ( outputFile.isEmpty() ) {
-                releaseTsFile( argv[i], verbose, ignoreUnfinished,
+                releaseTsFile( QString::fromLatin1(argv[i]), verbose, ignoreUnfinished,
                                trimmed );
             } else {
-                loadTsFile( tor, argv[i], verbose );
+                loadTsFile( tor, QString::fromLatin1(argv[i]), verbose );
             }
         } else {
             QString oldDir = QDir::currentPath();
-            QDir::setCurrent( QFileInfo(argv[i]).path() );
+            QDir::setCurrent( QFileInfo(QString::fromLatin1(argv[i])).path() );
             QMap<QByteArray, QStringList> varMap;
             bool ok = evaluateProFile(QString::fromAscii(argv[i]), verbose, &varMap);
             if (ok) {

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -39,6 +39,7 @@ public:
 
     void open( const QString& url );
     void open( const QContent& content );
+    void close();
 
     State state() const { return m_state; }
     void setState( State state );

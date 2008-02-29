@@ -1,0 +1,5 @@
+#!/bin/sh
+lidsconf -A POSTBOOT -s ${BIN} -o /proc/lids/keys -j READONLY
+lidsconf -A POSTBOOT -s ${BIN} -o /proc/lids/suid -j WRITE
+lidsconf -A POSTBOOT -s ${BIN} -o $QTOPIA_DIR/bin -j READONLY
+lidsconf -A POSTBOOT -s ${BIN} -o $UPDATE_DIR/bin -j READONLY

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,13 +23,12 @@
 #define ADDWAPUI_H
 
 #include <QDialog>
+#include <QWapAccount>
 
 class QLabel;
 class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
-
-class QtopiaNetworkProperties;
 
 class WapAccountPage;
 class GatewayPage;
@@ -45,23 +44,20 @@ public:
 
 public slots:
     void accept();
+
 private slots:
-#ifdef QTOPIA_PHONE
     void optionSelected(QListWidgetItem* item);
     void updateUserHint(QListWidgetItem* cur, QListWidgetItem* prev );
-#endif
-private:
-    void init();
-    void writeConfig( const QtopiaNetworkProperties prop );
 
 private:
-#ifdef QTOPIA_PHONE
+    void init();
+    //void writeConfig( const QtopiaNetworkProperties prop );
+
+private:
     QListWidget* options;
     QStackedWidget* stack;
     QLabel* hint;
-#else
-    //TODO
-#endif
+    QWapAccount acc;
     QString configFile;
     WapAccountPage* accountPage;
     GatewayPage* gatewayPage;

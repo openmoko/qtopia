@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,6 +25,7 @@
 #include <QObject>
 class QFileSystem;
 class QStorageMetaInfo;
+class QtopiaTimer;
 class QMessageBox;
 
 class StorageMonitor : public QObject
@@ -39,8 +40,9 @@ public slots:
     void systemMsg(const QString &msg, const QByteArray &data);
 
 private slots:
-    void showNotification();
     void showCleanupWizard();
+
+    void availableDisksChanged();
 
 private:
     void outOfSpace(QString& text);
@@ -48,8 +50,10 @@ private:
 
     QStorageMetaInfo *sinfo;
     QMessageBox *box;
-    bool suppressNotification;
+    QtopiaTimer *storageTimer;
 
+    int minimalStorageLimit;
+    int pollFrequency;
 };
 
 #endif // _STORAGEMONITOR_H_

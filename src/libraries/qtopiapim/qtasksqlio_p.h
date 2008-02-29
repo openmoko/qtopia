@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,14 +22,27 @@
 #ifndef TODO_SQLIO_PRIVATE_H
 #define TODO_SQLIO_PRIVATE_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <qtopia/pim/qtask.h>
 #include <qtopiasql.h>
 #include <qsqlquery.h>
+#include <QHash>
 #include "qpimsource.h"
 #include "qtaskio_p.h"
 #include "qpimsqlio_p.h"
 
 class QTaskSqlIO;
+class QTaskDefaultContextData;
 class QTaskDefaultContext : public QTaskContext
 {
     Q_OBJECT
@@ -61,8 +74,10 @@ public:
     bool removeTask(const QUniqueId &);
     QUniqueId addTask(const QTask &, const QPimSource &);
 
+    void processRecurringTasks();
+
 private:
-    QTaskSqlIO *mAccess;
+    QTaskDefaultContextData *d;
 };
 
 class QTaskSqlIO : public QTaskIO, public QPimSqlIO {
@@ -70,7 +85,7 @@ class QTaskSqlIO : public QTaskIO, public QPimSqlIO {
     Q_OBJECT
 
  public:
-     explicit QTaskSqlIO(QObject *parent, const QString &name = QString());
+     explicit QTaskSqlIO(QObject *parent = 0, const QString &name = QString());
   ~QTaskSqlIO();
 
   QUuid contextId() const;
@@ -111,6 +126,9 @@ class QTaskSqlIO : public QTaskIO, public QPimSqlIO {
   QUniqueId id(int row) const { return QPimSqlIO::recordId(row); }
   QVariant key(int row) const;
 
+  QVariant taskField(int row, QTaskModel::Field k) const;
+  bool setTaskField(int row, QTaskModel::Field k,  const QVariant &);
+
   bool removeTask(int row);
   bool removeTask(const QUniqueId & id);
   bool removeTask(const QTask &);
@@ -125,14 +143,6 @@ class QTaskSqlIO : public QTaskIO, public QPimSqlIO {
   bool exists(const QUniqueId & id) const { return !task(id).uid().isNull(); }
   bool contains(const QUniqueId & id) const { return row(id) != -1; }
 
-#ifdef SUPPORT_SYNCML
-  bool canProvideDiff() const { return false; }
-  void clearJournal() {}
-  QList<QUniqueId> addedTasks() const { return QList<QUniqueId>(); }
-  QList<QUniqueId> modifiedTasks() const { return QList<QUniqueId>(); }
-  QList<QUniqueId> deletedTasks() const { return QList<QUniqueId>(); }
-#endif
-
   // searching.  row based.
   // pda based
   int startSearch(const QString &) { return -1; }
@@ -144,7 +154,7 @@ class QTaskSqlIO : public QTaskIO, public QPimSqlIO {
   void checkRemoved(const QList<QUniqueId> &) { invalidateCache(); }
   void checkUpdated(const QUniqueId &) { invalidateCache(); }
  protected:
-  void bindFields(const QPimRecord &, QSqlQuery &) const;
+  void bindFields(const QPimRecord &, QPreparedSqlQuery &) const;
   void invalidateCache();
   QStringList sortColumns() const;
   QStringList otherFilters() const;
@@ -155,6 +165,7 @@ class QTaskSqlIO : public QTaskIO, public QPimSqlIO {
 
   mutable bool taskByRowValid;
   mutable QTask lastTask;
+  mutable QPreparedSqlQuery repeatFieldQuery;
 };
 
 #endif

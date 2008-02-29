@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/examples/tutorial.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/tutorial.qdoc -->
 <head>
-  <title>Qt 4.2: Qt Tutorial 4 - Let There Be Widgets</title>
+  <title>Qt 4.3: Qt Tutorial 4 - Let There Be Widgets</title>
   <link rel="prev" href="tutorial-t3.html" />
   <link rel="contents" href="tutorial.html" />
   <link rel="next" href="tutorial-t5.html" />
@@ -20,7 +20,8 @@
 [<a href="tutorial.html">Qt Tutorial</a>]
 [Next: <a href="tutorial-t5.html">Chapter 5</a>]
 </p>
-<h1 align="center">Qt Tutorial 4 - Let There Be Widgets<br /><small></small></h1>
+<h1 align="center">Qt Tutorial 4 - Let There Be Widgets<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="tutorial-t4-main-cpp.html">tutorial/t4/main.cpp</a></li>
@@ -66,16 +67,16 @@
 <p>Here we create a new class. Because this class inherits from <a href="qwidget.html">QWidget</a>, the new class is a widget and may be a top-level window or a child widget (like the <a href="qpushbutton.html">QPushButton</a> in the previous chapter).</p>
 <p>This class has only one member, a constructor (in addition to the members it inherits from <a href="qwidget.html">QWidget</a>). The constructor is a standard Qt widget constructor; you should always include a similar constructor when you create widgets.</p>
 <p>The argument is its parent widget. To create a top-level window you specify a null pointer as the parent. As you can see, this widget defaults to be a top-level window.</p>
-<pre> MyWidget::MyWidget(QWidget *parent)
-     : QWidget(parent)</pre>
+<pre> MyWidget::MyWidget(QWidget *parent)</pre>
 <p>The implementation of the constructor starts here. Like most widgets, it just passes on the <tt>parent</tt> to the <a href="qwidget.html">QWidget</a> constructor.</p>
-<pre> {
+<pre>     : QWidget(parent)
+ {
      setFixedSize(200, 120);</pre>
 <p>Because this widget doesn't know how to handle resizing, we fix its size. In the next chapter, we will show how a widget can respond to resize event from the user.</p>
 <pre>     QPushButton *quit = new QPushButton(tr(&quot;Quit&quot;), this);
      quit-&gt;setGeometry(62, 40, 75, 30);
      quit-&gt;setFont(QFont(&quot;Times&quot;, 18, QFont::Bold));</pre>
-<p>Here we create and set up a child widget of this widget (the new widget's parent is <tt>this</tt>, i.e. the <tt>MyWidget</tt> instance).</p>
+<p>Here we create and set up a child widget of this widget (the new widget's parent is <tt>this</tt>, i.e&#x2e; the <tt>MyWidget</tt> instance).</p>
 <p>The <a href="qobject.html#tr">tr()</a> function call around the string literal &quot;Quit&quot; marks the string for translation, making it possible to change it at run-time based on the contents of a translation file. It is a good habit to use <a href="qobject.html#tr">tr()</a> around all user-visible strings, in case you decide later to translate your application to other languages.</p>
 <p>Note that <tt>quit</tt> is a local variable in the constructor. <tt>MyWidget</tt> does not keep track of it; Qt does, and will automatically delete it when the <tt>MyWidget</tt> object is deleted. This is why <tt>MyWidget</tt> doesn't need a destructor. (On the other hand, there is no harm in deleting a child when you choose to. The child will automatically tell Qt about its imminent death.)</p>
 <p>The <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a>() call sets both the widget's screen position and the size. It is equivalent to calling <a href="qwidget.html#pos-prop">QWidget::move</a>() followed by <a href="qwidget.html#size-prop">QWidget::resize</a>().</p>
@@ -106,6 +107,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -173,19 +173,14 @@ bool BluetoothImpl::start( const QVariant /*options*/ )
     }
 
     bool result = false;
-    session = QCommDeviceSession::session(QBluetoothLocalDevice().deviceName().toLatin1());
-    if (!session) {
-        updateTrigger( QtopiaNetworkInterface::UnknownError,
-                       tr("Bluetooth Session failed.") );
-        return false;
-    }
-
-    //Find device that offers dial-up networking
-    QSet<QBluetooth::SDPProfile> profiles;
-    profiles.insert( QBluetooth::DialupNetworkingProfile );
-    QBluetoothAddress addr = QBluetoothRemoteDeviceDialog::getRemoteDevice(0, profiles);
-
+    QBluetoothAddress addr( configIface->property(QLatin1String("Serial/PartnerDevice")).toString() );
     if ( addr.isValid() ) {
+        session = QCommDeviceSession::session(QBluetoothLocalDevice().deviceName().toLatin1());
+        if (!session) {
+            updateTrigger( QtopiaNetworkInterface::UnknownError,
+                           tr("Bluetooth Session failed.") );
+            return false;
+        }
         qLog(Network) << "Connecting to" << addr.toString();
         dialupDev->connectToDUNService( addr );
 
@@ -196,10 +191,7 @@ bool BluetoothImpl::start( const QVariant /*options*/ )
         updateTrigger();
     } else {
         updateTrigger( QtopiaNetworkInterface::UnknownError,
-                tr("No remote Bluetooth device selected.") );
-        session->endSession();
-        delete session;
-        session = 0;
+                tr("No remote Bluetooth partner selected.") );
     }
 
     return result;
@@ -249,7 +241,7 @@ bool BluetoothImpl::stop()
 
 QString BluetoothImpl::device() const
 {
-    return deviceName;
+    return pppIface;
 }
 
 bool BluetoothImpl::setDefaultGateway()
@@ -300,7 +292,7 @@ bool BluetoothImpl::isAvailable() const
     netSpace->setAttribute( "BtDevice", deviceName );
     if ( !deviceName.isEmpty()
             && dialupDev->isAvailable( deviceName ) ) {
-        qLog(Network) << "BluetoothImpl: Using device" << deviceName;
+        qLog(Network) << "BluetoothImpl: Using" << deviceName << "for DUN client";
         return true;
     }
     qLog(Network) << "BluetoothImpl: Cannot find bluetooth device. device:"
@@ -386,7 +378,7 @@ void BluetoothImpl::serialPortConnected( )
             qLog(Network) << "Invalid rfcomm device:" << tty;
             dialupDev->releaseDUNConnection();
         } else {
-            qLog(Network) << "Empty rfcomm device:";
+            qLog(Network) << "Empty rfcomm device";
         }
 
         if (session) {
@@ -463,7 +455,6 @@ void BluetoothImpl::timerEvent( QTimerEvent* /*e*/)
         log.replace(QRegExp("\r"),"");
         if ( logIndex > log.length() )
             logIndex = 0;
-        //qDebug() << logIndex << log;
         switch ( state ) {
             case Initialize:
             {

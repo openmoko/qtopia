@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,37 +22,36 @@
 #ifndef __QTOPIA_SERVER_MEDIASERVER_H
 #define __QTOPIA_SERVER_MEDIASERVER_H
 
-#include <QObject>
-
 #include "qtopiaserverapplication.h"
+#include "applicationlauncher.h"
 
-class QProcess;
+
+class MediaServerControlTaskPrivate;
 
 class MediaServerControlTask : public SystemShutdownHandler
 {
-Q_OBJECT
+    Q_OBJECT
+
 public:
     MediaServerControlTask();
 
-    virtual bool systemRestart();
-    virtual bool systemShutdown();
+    bool systemRestart();
+    bool systemShutdown();
 
 protected:
-    virtual void timerEvent(QTimerEvent *e);
+    void timerEvent(QTimerEvent *e);
 
 private slots:
     void soundServerExited();
-    void soundServerReadyStdout();
-    void soundServerReadyStderr();
     void killtimeout();
+    void applicationTerminated(QString const& name,
+                               ApplicationTypeLauncher::TerminationReason reason,
+                               bool filtered = false);
 
 private:
     bool doShutdown();
 
-    QProcess *m_soundserver;
-    int m_qssTimerId;
-    bool m_shutdown;
-    bool m_shutdownCompleted;
+    MediaServerControlTaskPrivate*  d;
 };
 
 #endif  // __QTOPIA_SERVER_MEDIASERVER_H

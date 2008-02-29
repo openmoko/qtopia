@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -29,6 +44,8 @@
 #include "qatomic.h"
 #include "qmutex_p.h"
 
+#include <errno.h>
+
 static void report_error(int code, const char *where, const char *what)
 {
     if (code != 0)
@@ -37,7 +54,7 @@ static void report_error(int code, const char *where, const char *what)
 
 
 QMutexPrivate::QMutexPrivate(QMutex::RecursionMode mode)
-    : lock(0), owner(0), count(0), recursive(mode == QMutex::Recursive), wakeup(false)
+    : recursive(mode == QMutex::Recursive), contenders(0), owner(0), count(0), wakeup(false)
 {
     report_error(pthread_mutex_init(&mutex, NULL), "QMutex", "mutex init");
     report_error(pthread_cond_init(&cond, NULL), "QMutex", "cv init");
@@ -52,13 +69,33 @@ QMutexPrivate::~QMutexPrivate()
 ulong QMutexPrivate::self()
 { return (ulong) pthread_self(); }
 
-void QMutexPrivate::wait()
+bool QMutexPrivate::wait(int timeout)
 {
     report_error(pthread_mutex_lock(&mutex), "QMutex::lock", "mutex lock");
-    while (!wakeup)
-        report_error(pthread_cond_wait(&cond, &mutex), "QMutex::lock", "cv wait");
+    int errorCode = 0;
+    while (!wakeup) {
+        if (timeout < 0) {
+            errorCode = pthread_cond_wait(&cond, &mutex);
+        } else {
+            struct timeval tv;
+            gettimeofday(&tv, 0);
+
+            timespec ti;
+            ti.tv_nsec = (tv.tv_usec + (timeout % 1000) * 1000) * 1000;
+            ti.tv_sec = tv.tv_sec + (timeout / 1000) + (ti.tv_nsec / 1000000000);
+            ti.tv_nsec %= 1000000000;
+
+            errorCode = pthread_cond_timedwait(&cond, &mutex, &ti);
+        }
+        if (errorCode) {
+            if (errorCode == ETIMEDOUT)
+                break;
+            report_error(errorCode, "QMutex::lock()", "cv wait");
+        }
+    }
     wakeup = false;
     report_error(pthread_mutex_unlock(&mutex), "QMutex::lock", "mutex unlock");
+    return errorCode == 0;
 }
 
 void QMutexPrivate::wakeUp()

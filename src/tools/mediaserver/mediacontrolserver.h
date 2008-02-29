@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,24 +22,30 @@
 #ifndef __QTOPIA_MEDIASERVER_MEDIACONTROLSERVER_H
 #define __QTOPIA_MEDIASERVER_MEDIACONTROLSERVER_H
 
-#include <qabstractipcinterface.h>
+#include <QMediaAbstractControlServer>
+
 #include <media.h>
 
+#include <qmediahandle_p.h>
+
+
+class QMediaServerSession;
 
 namespace mediaserver
 {
 
-class MediaSession;
 
-class MediaControlServer : public QAbstractIpcInterface
+class MediaControlServer : public QMediaAbstractControlServer
 {
     Q_OBJECT
 
 public:
-    MediaControlServer(MediaSession* mediaSession, QString const& id);
+    MediaControlServer(QMediaServerSession* mediaSession,
+                       QMediaHandle const& handle);
+
     ~MediaControlServer();
 
-    MediaSession* mediaSession() const;
+    QMediaServerSession* mediaSession() const;
 
 public slots:
     void start();
@@ -56,8 +62,6 @@ signals:
     void lengthChanged(quint32 ms);
     void volumeChanged(int volume);
     void volumeMuted(bool muted);
-    void controlAvailable(const QString& control);
-    void controlUnavailable(const QString& control);
 
 private slots:
     void stateChanged(QtopiaMedia::State state);
@@ -65,12 +69,11 @@ private slots:
     void lenChanged(quint32 ms);
     void volChanged(int volume);
     void volMuted(bool muted);
-    void advertiseInterface(const QString&);
-    void revokeInterface(const QString&);
 
 private:
-    MediaSession* m_mediaSession;
+    QMediaServerSession* m_mediaSession;
 };
+
 
 }   // ns mediaserver
 

@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QGLWidget Class Reference</title>
+  <title>Qt 4.3: QGLWidget Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QGLWidget Class Reference<br /><sup><sup>[<a href="qtopengl.html">QtOpenGL</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QGLWidget Class Reference<br /><span class="small-subtitle">[<a href="qtopengl.html">QtOpenGL</a> module]</span>
+</h1>
 <p>The QGLWidget class is a widget for rendering OpenGL graphics. <a href="#details">More...</a></p>
 <pre> #include &lt;QGLWidget&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
 <ul>
@@ -51,7 +52,7 @@
 <li><div class="fn"/>void <b><a href="qglwidget.html#swapBuffers">swapBuffers</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>201 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -78,7 +79,6 @@
 <h3>Protected Functions</h3>
 <ul>
 <li><div class="fn"/>bool <b><a href="qglwidget.html#autoBufferSwap">autoBufferSwap</a></b> () const</li>
-<li><div class="fn"/>int <b><a href="qglwidget.html#fontDisplayListBase">fontDisplayListBase</a></b> ( const QFont &amp; <i>font</i>, int <i>listBase</i> = 2000 )</li>
 <li><div class="fn"/>virtual void <b><a href="qglwidget.html#glDraw">glDraw</a></b> ()</li>
 <li><div class="fn"/>virtual void <b><a href="qglwidget.html#glInit">glInit</a></b> ()</li>
 <li><div class="fn"/>virtual void <b><a href="qglwidget.html#initializeGL">initializeGL</a></b> ()</li>
@@ -98,7 +98,7 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
@@ -160,7 +160,7 @@
 
  };</pre>
 <p>If you need to trigger a repaint from places other than <a href="qglwidget.html#paintGL">paintGL</a>() (a typical example is when using <a href="qtimer.html">timers</a> to animate scenes), you should call the widget's <a href="qglwidget.html#updateGL">updateGL</a>() function.</p>
-<p>Your widget's OpenGL rendering context is made current when <a href="qglwidget.html#paintGL">paintGL</a>(), <a href="qglwidget.html#resizeGL">resizeGL</a>(), or <a href="qglwidget.html#initializeGL">initializeGL</a>() is called. If you need to call the standard OpenGL API functions from other places (e.g. in your widget's constructor or in your own paint functions), you must call <a href="qglwidget.html#makeCurrent">makeCurrent</a>() first.</p>
+<p>Your widget's OpenGL rendering context is made current when <a href="qglwidget.html#paintGL">paintGL</a>(), <a href="qglwidget.html#resizeGL">resizeGL</a>(), or <a href="qglwidget.html#initializeGL">initializeGL</a>() is called. If you need to call the standard OpenGL API functions from other places (e.g&#x2e; in your widget's constructor or in your own paint functions), you must call <a href="qglwidget.html#makeCurrent">makeCurrent</a>() first.</p>
 <p>QGLWidget provides functions for requesting a new display <a href="qglformat.html">format</a> and you can also create widgets with customized rendering <a href="qglcontext.html">contexts</a>.</p>
 <p>You can also share OpenGL display lists between QGLWidgets (see the documentation of the QGLWidget constructors for details).</p>
 <a name="overlays"></a>
@@ -172,7 +172,7 @@
 <li><a href="qglwidget.html#resizeOverlayGL">resizeOverlayGL</a>()</li>
 <li><a href="qglwidget.html#initializeOverlayGL">initializeOverlayGL</a>()</li>
 </ul>
-<p>These methods work in the same way as the normal <a href="qglwidget.html#paintGL">paintGL</a>() etc. functions, except that they will be called when the overlay context is made current. You can explicitly make the overlay context current by using <a href="qglwidget.html#makeOverlayCurrent">makeOverlayCurrent</a>(), and you can access the overlay context directly (e.g. to ask for its transparent color) by calling <a href="qglwidget.html#overlayContext">overlayContext</a>().</p>
+<p>These methods work in the same way as the normal <a href="qglwidget.html#paintGL">paintGL</a>() etc. functions, except that they will be called when the overlay context is made current. You can explicitly make the overlay context current by using <a href="qglwidget.html#makeOverlayCurrent">makeOverlayCurrent</a>(), and you can access the overlay context directly (e.g&#x2e; to ask for its transparent color) by calling <a href="qglwidget.html#overlayContext">overlayContext</a>().</p>
 <p>On X servers in which the default visual is in an overlay plane, non-GL Qt windows can also be used for overlays.</p>
 <a name="painting-techniques"></a>
 <h3>Painting Techniques</h3>
@@ -197,7 +197,7 @@
 <p>Constructs an OpenGL widget with a <i>parent</i> widget.</p>
 <p>The <a href="qglformat.html#defaultFormat">default format</a> is used. The widget will be <a href="qglwidget.html#isValid">invalid</a> if the system has no <a href="qglformat.html#hasOpenGL">OpenGL support</a>.</p>
 <p>The <i>parent</i> and widget flag, <i>f</i>, arguments are passed to the <a href="qwidget.html">QWidget</a> constructor.</p>
-<p>If the <i>shareWidget</i> parameter points to a valid <a href="qglwidget.html">QGLWidget</a>, this widget will share OpenGL display lists with <i>shareWidget</i>. If this widget and <i>shareWidget</i> have different <a href="qglwidget.html#format">formats</a>, display list sharing may fail. You can check whether display list sharing succeeded by calling <a href="qglwidget.html#isSharing">isSharing</a>().</p>
+<p>If <i>shareWidget</i> is a valid <a href="qglwidget.html">QGLWidget</a>, this widget will share OpenGL display lists and texture objects with <i>shareWidget</i>. But if <i>shareWidget</i> and this widget have different <a href="qglwidget.html#format">formats</a>, sharing might not be possible. You can check whether sharing is in effect by calling <a href="qglwidget.html#isSharing">isSharing</a>().</p>
 <p>The initialization of OpenGL rendering state, etc. should be done by overriding the <a href="qglwidget.html#initializeGL">initializeGL</a>() function, rather than in the constructor of your <a href="qglwidget.html">QGLWidget</a> subclass.</p>
 <p>See also <a href="qglformat.html#defaultFormat">QGLFormat::defaultFormat</a>() and <a href="opengl-textures.html">Textures Example</a>.</p>
 <h3 class="fn"><a name="QGLWidget-2"></a>QGLWidget::QGLWidget ( <a href="qglcontext.html">QGLContext</a> * <i>context</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const QGLWidget * <i>shareWidget</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
@@ -205,7 +205,7 @@
 <p>The <i>context</i> argument is a pointer to the <a href="qglcontext.html">QGLContext</a> that you wish to be bound to this widget. This allows you to pass in your own <a href="qglcontext.html">QGLContext</a> sub-classes.</p>
 <p>The widget will be <a href="qglwidget.html#isValid">invalid</a> if the system has no <a href="qglformat.html#hasOpenGL">OpenGL support</a>.</p>
 <p>The <i>parent</i> and widget flag, <i>f</i>, arguments are passed to the <a href="qwidget.html">QWidget</a> constructor.</p>
-<p>If the <i>shareWidget</i> parameter points to a valid <a href="qglwidget.html">QGLWidget</a>, this widget will share OpenGL display lists with <i>shareWidget</i>. If this widget and <i>shareWidget</i> have different <a href="qglwidget.html#format">formats</a>, display list sharing may fail. You can check whether display list sharing succeeded by calling <a href="qglwidget.html#isSharing">isSharing</a>().</p>
+<p>If <i>shareWidget</i> is a valid <a href="qglwidget.html">QGLWidget</a>, this widget will share OpenGL display lists and texture objects with <i>shareWidget</i>. But if <i>shareWidget</i> and this widget have different <a href="qglwidget.html#format">formats</a>, sharing might not be possible. You can check whether sharing is in effect by calling <a href="qglwidget.html#isSharing">isSharing</a>().</p>
 <p>The initialization of OpenGL rendering state, etc. should be done by overriding the <a href="qglwidget.html#initializeGL">initializeGL</a>() function, rather than in the constructor of your <a href="qglwidget.html">QGLWidget</a> subclass.</p>
 <p>See also <a href="qglformat.html#defaultFormat">QGLFormat::defaultFormat</a>() and <a href="qglwidget.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="QGLWidget-3"></a>QGLWidget::QGLWidget ( const <a href="qglformat.html">QGLFormat</a> &amp; <i>format</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const QGLWidget * <i>shareWidget</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
@@ -213,7 +213,7 @@
 <p>The <i>format</i> argument specifies the desired <a href="qglformat.html">rendering options</a>. If the underlying OpenGL/Window system cannot satisfy all the features requested in <i>format</i>, the nearest subset of features will be used. After creation, the <a href="qglwidget.html#format">format</a>() method will return the actual format obtained.</p>
 <p>The widget will be <a href="qglwidget.html#isValid">invalid</a> if the system has no <a href="qglformat.html#hasOpenGL">OpenGL support</a>.</p>
 <p>The <i>parent</i> and widget flag, <i>f</i>, arguments are passed to the <a href="qwidget.html">QWidget</a> constructor.</p>
-<p>If the <i>shareWidget</i> parameter points to a valid <a href="qglwidget.html">QGLWidget</a>, this widget will share OpenGL display lists with <i>shareWidget</i>. If this widget and <i>shareWidget</i> have different <a href="qglwidget.html#format">formats</a>, display list sharing may fail. You can check whether display list sharing succeeded by calling <a href="qglwidget.html#isSharing">isSharing</a>().</p>
+<p>If <i>shareWidget</i> is a valid <a href="qglwidget.html">QGLWidget</a>, this widget will share OpenGL display lists and texture objects with <i>shareWidget</i>. But if <i>shareWidget</i> and this widget have different <a href="qglwidget.html#format">formats</a>, sharing might not be possible. You can check whether sharing is in effect by calling <a href="qglwidget.html#isSharing">isSharing</a>().</p>
 <p>The initialization of OpenGL rendering state, etc. should be done by overriding the <a href="qglwidget.html#initializeGL">initializeGL</a>() function, rather than in the constructor of your <a href="qglwidget.html">QGLWidget</a> subclass.</p>
 <p>See also <a href="qglformat.html#defaultFormat">QGLFormat::defaultFormat</a>() and <a href="qglwidget.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="dtor.QGLWidget"></a>QGLWidget::~QGLWidget ()</h3>
@@ -250,8 +250,6 @@
 <h3 class="fn"><a name="doubleBuffer"></a>bool QGLWidget::doubleBuffer () const</h3>
 <p>Returns true if the contained GL rendering context has double buffering; otherwise returns false.</p>
 <p>See also <a href="qglformat.html#doubleBuffer">QGLFormat::doubleBuffer</a>().</p>
-<h3 class="fn"><a name="fontDisplayListBase"></a>int QGLWidget::fontDisplayListBase ( const <a href="qfont.html">QFont</a> &amp; <i>font</i>, int <i>listBase</i> = 2000 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>Returns the value of the first display list that is generated for the characters in the given <i>font</i>. <i>listBase</i> indicates the base value used when generating the display lists for the font. The default value is 2000.</p>
 <h3 class="fn"><a name="format"></a><a href="qglformat.html">QGLFormat</a> QGLWidget::format () const</h3>
 <p>Returns the format of the contained GL rendering context.</p>
 <p>See also <a href="qglwidget-obsolete.html#setFormat">setFormat</a>().</p>
@@ -272,12 +270,12 @@
 <p>This function should set up any required OpenGL context rendering flags, defining display lists, etc. for the overlay context.</p>
 <p>There is no need to call <a href="qglwidget.html#makeOverlayCurrent">makeOverlayCurrent</a>() because this has already been done when this function is called.</p>
 <h3 class="fn"><a name="isSharing"></a>bool QGLWidget::isSharing () const</h3>
-<p>Returns true if this widget's GL context is shared with another GL context, otherwise false is returned. The GL system may fail to provide context sharing if the two QGLWidgets use different formats.</p>
+<p>Returns true if this widget's GL context is shared with another GL context, otherwise false is returned. Context sharing might not be possible if the QGLWidgets use different formats.</p>
 <p>See also <a href="qglwidget.html#format">format</a>().</p>
 <h3 class="fn"><a name="isValid"></a>bool QGLWidget::isValid () const</h3>
 <p>Returns true if the widget has a valid GL rendering context; otherwise returns false. A widget will be invalid if the system has no <a href="qglformat.html#hasOpenGL">OpenGL support</a>.</p>
 <h3 class="fn"><a name="makeCurrent"></a>void QGLWidget::makeCurrent ()</h3>
-<p>Makes this widget the current widget for OpenGL operations, i.e. makes the widget's rendering context the current OpenGL rendering context.</p>
+<p>Makes this widget the current widget for OpenGL operations, i.e&#x2e; makes the widget's rendering context the current OpenGL rendering context.</p>
 <h3 class="fn"><a name="makeOverlayCurrent"></a>void QGLWidget::makeOverlayCurrent ()</h3>
 <p>Makes the overlay context of this widget current. Use this if you need to issue OpenGL commands to the overlay context outside of <a href="qglwidget.html#initializeOverlayGL">initializeOverlayGL</a>(), <a href="qglwidget.html#resizeOverlayGL">resizeOverlayGL</a>(), and <a href="qglwidget.html#paintOverlayGL">paintOverlayGL</a>().</p>
 <p>Does nothing if this widget has no overlay.</p>
@@ -312,14 +310,12 @@
 <p>Note that the creation of display lists, modifications of the view frustum etc. should be done from within <a href="qglwidget.html#initializeGL">initializeGL</a>(). If this is not done, the temporary <a href="qglcontext.html">QGLContext</a> will not be initialized properly, and the rendered pixmap may be incomplete/corrupted.</p>
 <h3 class="fn"><a name="renderText"></a>void QGLWidget::renderText ( int <i>x</i>, int <i>y</i>, const <a href="qstring.html">QString</a> &amp; <i>str</i>, const <a href="qfont.html">QFont</a> &amp; <i>font</i> = QFont(), int <i>listBase</i> = 2000 )</h3>
 <p>Renders the string <i>str</i> into the GL context of this widget.</p>
-<p><i>x</i> and <i>y</i> are specified in window coordinates, with the origin in the upper left-hand corner of the window. If <i>font</i> is not specified, the currently set application font will be used to render the string. To change the color of the rendered text you can use the glColor() call (or the <a href="qglwidget.html#qglColor">qglColor</a>() convenience function), just before the renderText() call. Note that if you have GL_LIGHTING enabled, the string will not appear in the color you want. You should therefore switch lighting off before using renderText().</p>
-<p><i>listBase</i> specifies the index of the first display list that is generated by this function. The default value is 2000. 256 display lists will be generated, one for each of the first 256 characters in the font that is used to render the string. If several fonts are used in the same widget, the display lists for these fonts will follow the last generated list. You would normally not have to change this value unless you are using lists in the same range. The lists are deleted when the widget is destroyed.</p>
-<p><b>Warning:</b> This function only works reliably with ASCII strings.</p>
-<p>To draw strings with unicode characters, or draw text to a <a href="qglpixelbuffer.html">QGLPixelBuffer</a>, open a <a href="qpainter.html">QPainter</a> and call <a href="qpainter.html#drawText">QPainter::drawText</a>() instead.</p>
+<p><i>x</i> and <i>y</i> are specified in window coordinates, with the origin in the upper left-hand corner of the window. If <i>font</i> is not specified, the currently set application font will be used to render the string. To change the color of the rendered text you can use the glColor() call (or the <a href="qglwidget.html#qglColor">qglColor</a>() convenience function), just before the renderText() call.</p>
+<p>The <i>listBase</i> parameter is obsolete and will be removed in a future version of Qt.</p>
 <h3 class="fn"><a name="renderText-2"></a>void QGLWidget::renderText ( double <i>x</i>, double <i>y</i>, double <i>z</i>, const <a href="qstring.html">QString</a> &amp; <i>str</i>, const <a href="qfont.html">QFont</a> &amp; <i>font</i> = QFont(), int <i>listBase</i> = 2000 )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p><i>x</i>, <i>y</i> and <i>z</i> are specified in scene or object coordinates relative to the currently set projection and model matrices. This can be useful if you want to annotate models with text labels and have the labels move with the model as it is rotated etc.</p>
-<p>To draw strings with unicode characters, or draw text to a <a href="qglpixelbuffer.html">QGLPixelBuffer</a>, open a <a href="qpainter.html">QPainter</a> and call <a href="qpainter.html#drawText">QPainter::drawText</a>() instead. Note that you will have to do the screen-coordinate to object-coordinate transform yourself.</p>
+<p>Note that this function only works properly if <tt>GL_DEPTH_TEST</tt> is enabled, and you have a properly initialized depth buffer.</p>
 <h3 class="fn"><a name="resizeEvent"></a>void QGLWidget::resizeEvent ( <a href="qresizeevent.html">QResizeEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Handles resize events that are passed in the <i>event</i> parameter. Calls the virtual function <a href="qglwidget.html#resizeGL">resizeGL</a>().</p>
 <p>Reimplemented from <a href="qwidget.html#resizeEvent">QWidget</a>.</p>
@@ -341,7 +337,7 @@
 <p>If <i>enable</i> is true then mouse tracking is enabled; otherwise it is disabled.</p>
 <h3 class="fn"><a name="swapBuffers"></a>void QGLWidget::swapBuffers ()</h3>
 <p>Swaps the screen contents with an off-screen buffer. This only works if the widget's format specifies double buffer mode.</p>
-<p>Normally, there is no need to explicitly call this function because it is done automatically after each widget repaint, i.e. each time after <a href="qglwidget.html#paintGL">paintGL</a>() has been executed.</p>
+<p>Normally, there is no need to explicitly call this function because it is done automatically after each widget repaint, i.e&#x2e; each time after <a href="qglwidget.html#paintGL">paintGL</a>() has been executed.</p>
 <p>See also <a href="qglwidget.html#doubleBuffer">doubleBuffer</a>(), <a href="qglwidget.html#setAutoBufferSwap">setAutoBufferSwap</a>(), and <a href="qglformat.html#setDoubleBuffer">QGLFormat::setDoubleBuffer</a>().</p>
 <h3 class="fn"><a name="updateGL"></a>void QGLWidget::updateGL ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Updates the widget by calling <a href="qglwidget.html#glDraw">glDraw</a>().</p>
@@ -357,6 +353,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

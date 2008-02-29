@@ -31,7 +31,7 @@
 <ul>
 <li><div class="fn"/>void <b><a href="obexservicemanager.html#completed">completed</a></b> ( int <i>id</i>, bool <i>error</i> )</li>
 <li><div class="fn"/>void <b><a href="obexservicemanager.html#progress">progress</a></b> ( int <i>id</i>, qint64 <i>bytes</i>, qint64 <i>total</i> )</li>
-<li><div class="fn"/>void <b><a href="obexservicemanager.html#receiveInitiated">receiveInitiated</a></b> ( int <i>id</i>, const QString &amp; <i>filename</i>, const QString &amp; <i>mime</i> )</li>
+<li><div class="fn"/>void <b><a href="obexservicemanager.html#receiveInitiated">receiveInitiated</a></b> ( int <i>id</i>, const QString &amp; <i>filename</i>, const QString &amp; <i>mime</i>, const QString &amp; <i>description</i> )</li>
 <li><div class="fn"/>void <b><a href="obexservicemanager.html#sendInitiated">sendInitiated</a></b> ( int <i>id</i>, const QString &amp; <i>filename</i>, const QString &amp; <i>mime</i> )</li>
 </ul>
 <ul>
@@ -52,6 +52,7 @@
 <h2>Detailed Description</h2>
 <p>The ObexServiceManager class is responsible for managing OBEX related services over Bluetooth and Infrared.</p>
 <p>ObexServiceManager provides and manages the Bluetooth OBEX Push service and the Infrared IrXfer server. It also provides a common infrastructure for these services, including user notification of files transferred and received.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="ObexServiceManager"></a>ObexServiceManager::ObexServiceManager ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -59,21 +60,21 @@
 <h3 class="fn"><a name="dtor.ObexServiceManager"></a>ObexServiceManager::~ObexServiceManager ()</h3>
 <p>Destructor.</p>
 <h3 class="fn"><a name="completed"></a>void ObexServiceManager::completed ( int <i>id</i>, bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted to report the completion of an operation. The <i>id</i> paramter contains the unique id of the request completed. The <i>error</i> paramter is set to true if the operation finished due to an error, and false otherwise.</p>
+<p>This signal is emitted to report the completion of an operation. The <i>id</i> parameter contains the unique id of the request completed. The <i>error</i> parameter is set to true if the operation finished due to an error, and false otherwise.</p>
 <h3 class="fn"><a name="progress"></a>void ObexServiceManager::progress ( int <i>id</i>, qint64 <i>bytes</i>, qint64 <i>total</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted to report progress of an operation. The <i>id</i> parameter contains the unique id of the request. The <i>bytes</i> paramter contains the number of bytes sent. The <i>total</i> contains the total number of bytes. If the total is not known, it will be set to 0.</p>
-<h3 class="fn"><a name="receiveInitiated"></a>void ObexServiceManager::receiveInitiated ( int <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>mime</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is sent whenever an object is being received. The <i>id</i> parameter contains a unique id of the request. The <i>filename</i> parameter contains the filename of the object being received. This filename will be in an incoming directory (the inbox.) The <i>mime</i> contains the mimetype of the object being received.</p>
+<p>This signal is emitted to report progress of an operation. The <i>id</i> parameter contains the unique id of the request. The <i>bytes</i> parameter contains the number of bytes sent. The <i>total</i> contains the total number of bytes. If the total is not known, it will be set to 0.</p>
+<h3 class="fn"><a name="receiveInitiated"></a>void ObexServiceManager::receiveInitiated ( int <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>mime</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is sent whenever an object is being received. The <i>id</i> parameter contains a unique id of the request. The <i>filename</i> parameter contains the filename of the object being received. This filename will be in an incoming directory (the inbox.) The <i>mime</i> contains the mimetype of the object being received. The <i>description</i> contains the description of the object.</p>
 <p>One can track the progress of the request by using the <a href="obexservicemanager.html#completed">completed</a>() and <a href="obexservicemanager.html#progress">progress</a>() signals.</p>
 <p>See also <a href="obexservicemanager.html#completed">completed</a>() and <a href="obexservicemanager.html#progress">progress</a>().</p>
 <h3 class="fn"><a name="sendInitiated"></a>void ObexServiceManager::sendInitiated ( int <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>mime</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted whenever an object is being sent by the local device. The <i>id</i> paramter contains a unique id of the request. The <i>filename</i> parameter contains the filename of the object being send. The <i>mime</i> contains the mimetype of the object being received.</p>
+<p>This signal is emitted whenever an object is being sent by the local device. The <i>id</i> parameter contains a unique id of the request. The <i>filename</i> parameter contains the filename of the object being send. The <i>mime</i> contains the mimetype of the object being received.</p>
 <p>One can track the progress of the request by using the <a href="obexservicemanager.html#completed">completed</a>() and <a href="obexservicemanager.html#progress">progress</a>() signals.</p>
 <p>See also <a href="obexservicemanager.html#completed">completed</a>() and <a href="obexservicemanager.html#progress">progress</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

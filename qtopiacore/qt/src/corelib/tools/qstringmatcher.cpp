@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -24,7 +39,7 @@
 #include "qstringmatcher.h"
 #include "qunicodetables_p.h"
 
-static void bm_init_skiptable(const QChar *uc, int l, uint *skiptable, Qt::CaseSensitivity cs)
+static void bm_init_skiptable(const ushort *uc, int l, uint *skiptable, Qt::CaseSensitivity cs)
 {
     int i = 0;
     register uint *st = skiptable;
@@ -34,29 +49,30 @@ static void bm_init_skiptable(const QChar *uc, int l, uint *skiptable, Qt::CaseS
     }
     if (cs == Qt::CaseSensitive) {
         while (l--) {
-            skiptable[uc->cell()] = l;
+            skiptable[*uc & 0xff] = l;
             uc++;
         }
     } else {
+        const ushort *start = uc;
         while (l--) {
-            skiptable[QUnicodeTables::lower(*uc).cell()] = l;
+            skiptable[foldCase(uc, start) & 0xff] = l;
             uc++;
         }
     }
 }
 
-static inline int bm_find(const QChar *uc, uint l, int index, const QChar *puc, uint pl,
+static inline int bm_find(const ushort *uc, uint l, int index, const ushort *puc, uint pl,
                           const uint *skiptable, Qt::CaseSensitivity cs)
 {
     if (pl == 0)
         return index > (int)l ? -1 : index;
     const uint pl_minus_one = pl - 1;
 
-    register const QChar *current = uc + index + pl_minus_one;
-    const QChar *end = uc + l;
+    register const ushort *current = uc + index + pl_minus_one;
+    const ushort *end = uc + l;
     if (cs == Qt::CaseSensitive) {
         while (current < end) {
-            uint skip = skiptable[current->cell()];
+            uint skip = skiptable[*current & 0xff];
             if (!skip) {
                 // possible match
                 while (skip < pl) {
@@ -65,11 +81,11 @@ static inline int bm_find(const QChar *uc, uint l, int index, const QChar *puc, 
                     skip++;
                 }
                 if (skip > pl_minus_one) // we have a match
-                    return (current - uc) - skip + 1;
+                    return (current - uc) - pl_minus_one;
 
                 // in case we don't have a match we are a bit inefficient as we only skip by one
                 // when we have the non matching char in the string.
-                if (skiptable[(current - skip)->cell()] == pl)
+                if (skiptable[*(current - skip) & 0xff] == pl)
                     skip = pl - skip;
                 else
                     skip = 1;
@@ -80,19 +96,19 @@ static inline int bm_find(const QChar *uc, uint l, int index, const QChar *puc, 
         }
     } else {
         while (current < end) {
-            uint skip = skiptable[QUnicodeTables::lower(*current).cell()];
+            uint skip = skiptable[foldCase(current, uc) & 0xff];
             if (!skip) {
                 // possible match
                 while (skip < pl) {
-                    if (QUnicodeTables::lower(*(current - skip)) != QUnicodeTables::lower(puc[pl_minus_one-skip]))
+                    if (foldCase(current - skip, uc) != foldCase(puc + pl_minus_one - skip, puc))
                         break;
                     skip++;
                 }
                 if (skip > pl_minus_one) // we have a match
-                    return (current - uc) - skip + 1;
+                    return (current - uc) - pl_minus_one;
                 // in case we don't have a match we are a bit inefficient as we only skip by one
                 // when we have the non matching char in the string.
-                if (skiptable[QUnicodeTables::lower(*(current - skip)).cell()] == pl)
+                if (skiptable[foldCase(current - skip, uc) & 0xff] == pl)
                     skip = pl - skip;
                 else
                     skip = 1;
@@ -105,7 +121,8 @@ static inline int bm_find(const QChar *uc, uint l, int index, const QChar *puc, 
     return -1; // not found
 }
 
-/*! \class QStringMatcher
+/*! 
+    \class QStringMatcher
     \brief The QStringMatcher class holds a sequence of characters that
     can be quickly matched in a Unicode string.
 
@@ -145,7 +162,7 @@ QStringMatcher::QStringMatcher()
 QStringMatcher::QStringMatcher(const QString &pattern, Qt::CaseSensitivity cs)
     : d_ptr(0), q_pattern(pattern), q_cs(cs)
 {
-    bm_init_skiptable(pattern.unicode(), pattern.size(), q_skiptable, cs);
+    bm_init_skiptable((const ushort *)pattern.unicode(), pattern.size(), q_skiptable, cs);
 }
 
 /*!
@@ -183,7 +200,7 @@ QStringMatcher &QStringMatcher::operator=(const QStringMatcher &other)
 */
 void QStringMatcher::setPattern(const QString &pattern)
 {
-    bm_init_skiptable(pattern.unicode(), pattern.size(), q_skiptable, q_cs);
+    bm_init_skiptable((const ushort *)pattern.unicode(), pattern.size(), q_skiptable, q_cs);
     q_pattern = pattern;
 }
 
@@ -197,7 +214,7 @@ void QStringMatcher::setCaseSensitivity(Qt::CaseSensitivity cs)
 {
     if (cs == q_cs)
         return;
-    bm_init_skiptable(q_pattern.unicode(), q_pattern.size(), q_skiptable, cs);
+    bm_init_skiptable((const ushort *)q_pattern.unicode(), q_pattern.size(), q_skiptable, cs);
     q_cs = cs;
 }
 
@@ -214,7 +231,8 @@ int QStringMatcher::indexIn(const QString &str, int from) const
 {
     if (from < 0)
         from = 0;
-    return bm_find(str.unicode(), str.size(), from, q_pattern.unicode(), q_pattern.size(),
+    return bm_find((const ushort *)str.unicode(), str.size(), from,
+                   (const ushort *)q_pattern.unicode(), q_pattern.size(),
                    q_skiptable, q_cs);
 }
 

@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/text/qtextformat.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/text/qtextformat.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QTextCharFormat</title>
+  <title>Qt 4.3: List of All Members for QTextCharFormat</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -25,7 +25,7 @@
 <li><div class="fn"/>enum <a href="qtextcharformat.html#VerticalAlignment-enum">VerticalAlignment</a></li>
 <li><div class="fn"/><a href="qtextcharformat.html#QTextCharFormat">QTextCharFormat</a> ()</li>
 <li><div class="fn"/><a href="qtextcharformat.html#anchorHref">anchorHref</a> () const : QString</li>
-<li><div class="fn"/><a href="qtextcharformat.html#anchorName">anchorName</a> () const : QString</li>
+<li><div class="fn"/><a href="qtextcharformat.html#anchorNames">anchorNames</a> () const : QStringList</li>
 <li><div class="fn"/><a href="qtextformat.html#background">background</a> () const : QBrush</li>
 <li><div class="fn"/><a href="qtextformat.html#boolProperty">boolProperty</a> ( int ) const : bool</li>
 <li><div class="fn"/><a href="qtextformat.html#brushProperty">brushProperty</a> ( int ) const : QBrush</li>
@@ -64,9 +64,10 @@
 </ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qtextformat.html#properties">properties</a> () const : QMap&lt;int, QVariant&gt;</li>
 <li><div class="fn"/><a href="qtextformat.html#property">property</a> ( int ) const : QVariant</li>
+<li><div class="fn"/><a href="qtextformat.html#propertyCount">propertyCount</a> () const : int</li>
 <li><div class="fn"/><a href="qtextcharformat.html#setAnchor">setAnchor</a> ( bool )</li>
 <li><div class="fn"/><a href="qtextcharformat.html#setAnchorHref">setAnchorHref</a> ( const QString &amp; )</li>
-<li><div class="fn"/><a href="qtextcharformat.html#setAnchorName">setAnchorName</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qtextcharformat.html#setAnchorNames">setAnchorNames</a> ( const QStringList &amp; )</li>
 <li><div class="fn"/><a href="qtextformat.html#setBackground">setBackground</a> ( const QBrush &amp; )</li>
 <li><div class="fn"/><a href="qtextcharformat.html#setFont">setFont</a> ( const QFont &amp; )</li>
 <li><div class="fn"/><a href="qtextcharformat.html#setFontFamily">setFontFamily</a> ( const QString &amp; )</li>
@@ -83,15 +84,12 @@
 <li><div class="fn"/><a href="qtextformat.html#setObjectType">setObjectType</a> ( int )</li>
 <li><div class="fn"/><a href="qtextformat.html#setProperty">setProperty</a> ( int, const QVariant &amp; )</li>
 <li><div class="fn"/><a href="qtextformat.html#setProperty-2">setProperty</a> ( int, const QVector&lt;QTextLength&gt; &amp; )</li>
-<li><div class="fn"/><a href="qtextcharformat.html#setTableCellColumnSpan">setTableCellColumnSpan</a> ( int )</li>
-<li><div class="fn"/><a href="qtextcharformat.html#setTableCellRowSpan">setTableCellRowSpan</a> ( int )</li>
 <li><div class="fn"/><a href="qtextcharformat.html#setTextOutline">setTextOutline</a> ( const QPen &amp; )</li>
+<li><div class="fn"/><a href="qtextcharformat.html#setToolTip">setToolTip</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qtextcharformat.html#setUnderlineColor">setUnderlineColor</a> ( const QColor &amp; )</li>
 <li><div class="fn"/><a href="qtextcharformat.html#setUnderlineStyle">setUnderlineStyle</a> ( UnderlineStyle )</li>
 <li><div class="fn"/><a href="qtextcharformat.html#setVerticalAlignment">setVerticalAlignment</a> ( VerticalAlignment )</li>
 <li><div class="fn"/><a href="qtextformat.html#stringProperty">stringProperty</a> ( int ) const : QString</li>
-<li><div class="fn"/><a href="qtextcharformat.html#tableCellColumnSpan">tableCellColumnSpan</a> () const : int</li>
-<li><div class="fn"/><a href="qtextcharformat.html#tableCellRowSpan">tableCellRowSpan</a> () const : int</li>
 <li><div class="fn"/><a href="qtextcharformat.html#textOutline">textOutline</a> () const : QPen</li>
 <li><div class="fn"/><a href="qtextformat.html#toBlockFormat">toBlockFormat</a> () const : QTextBlockFormat</li>
 <li><div class="fn"/><a href="qtextformat.html#toCharFormat">toCharFormat</a> () const : QTextCharFormat</li>
@@ -99,6 +97,7 @@
 <li><div class="fn"/><a href="qtextformat.html#toImageFormat">toImageFormat</a> () const : QTextImageFormat</li>
 <li><div class="fn"/><a href="qtextformat.html#toListFormat">toListFormat</a> () const : QTextListFormat</li>
 <li><div class="fn"/><a href="qtextformat.html#toTableFormat">toTableFormat</a> () const : QTextTableFormat</li>
+<li><div class="fn"/><a href="qtextcharformat.html#toolTip">toolTip</a> () const : QString</li>
 <li><div class="fn"/><a href="qtextformat.html#type">type</a> () const : int</li>
 <li><div class="fn"/><a href="qtextcharformat.html#underlineColor">underlineColor</a> () const : QColor</li>
 <li><div class="fn"/><a href="qtextcharformat.html#underlineStyle">underlineStyle</a> () const : UnderlineStyle</li>
@@ -114,6 +113,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

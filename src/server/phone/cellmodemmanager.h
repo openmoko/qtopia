@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -37,6 +37,7 @@
 #include <QPhoneProfileManager>
 #include <QPhoneBook>
 #include "qtopiaserverapplication.h"
+#include "qabstractcallpolicymanager.h"
 
 class QPinManager;
 class DialerControl;
@@ -53,7 +54,7 @@ class QtopiaServiceDescription;
 class QLabel;
 
 class CellModemManagerPrivate;
-class CellModemManager : public QObject
+class CellModemManager : public QAbstractCallPolicyManager
 {
 Q_OBJECT
 public:
@@ -72,6 +73,14 @@ public:
 
     State state() const;
 
+    QString callType() const;
+    QString trCallType() const;
+    QString callTypeIcon() const;
+    QAbstractCallPolicyManager::CallHandling handling(const QString& number);
+    bool isAvailable(const QString& number);
+    QString registrationMessage() const;
+    QString registrationIcon() const;
+
     QString networkOperator() const;
     QString networkOperatorCountry() const;
     QTelephony::RegistrationState registrationState() const;
@@ -79,6 +88,10 @@ public:
     bool callForwardingEnabled() const;
     bool simToolkitAvailable() const;
     bool cellModemAvailable() const;
+    QString simToolkitIdleModeText() const;
+    QIcon simToolkitIdleModeIcon() const;
+    bool simToolkitIdleModeIconSelfExplanatory() const;
+    QString simToolkitMenuTitle() const;
 
     bool planeModeEnabled() const;
     bool planeModeSupported() const;
@@ -119,10 +132,14 @@ private slots:
     void broadcast(const QCBSMessage&);
     void simInserted();
     void simRemoved();
-    void simCommand(const QSimCommand &cmd);
-    void simMissingTimeout();
+    void simToolkitAvailableChange();
+    void simNotInserted();
+    void readPhoneBooks();
     void fetchEmergencyNumbers();
+    void fetchCallHistory();
     void emergencyNumbersFetched
+        ( const QString& store, const QList<QPhoneBookEntry>& list );
+    void callHistoryEntriesFetched
         ( const QString& store, const QList<QPhoneBookEntry>& list );
 
 private:

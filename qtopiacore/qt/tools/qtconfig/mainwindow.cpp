@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -169,12 +184,12 @@ MainWindow::MainWindow()
     gstyles.sort();
     gstylecombo->insertStringList(gstyles);
 
-    QSettings settings("Trolltech");
-    settings.beginGroup("Qt");
+    QSettings settings(QLatin1String("Trolltech"));
+    settings.beginGroup(QLatin1String("Qt"));
 
-    QString currentstyle = settings.value("style").toString();
+    QString currentstyle = settings.value(QLatin1String("style")).toString();
     if (currentstyle.isNull())
-        currentstyle = QApplication::style()->name();
+        currentstyle = QLatin1String(QApplication::style()->name());
     {
         int s = 0;
         QStringList::Iterator git = gstyles.begin();
@@ -205,7 +220,7 @@ MainWindow::MainWindow()
                 gstylecombo->setCurrentItem(s);
             } else {
                 // we give up
-                gstylecombo->insertItem("Unknown");
+                gstylecombo->insertItem(QLatin1String("Unknown"));
                 gstylecombo->setCurrentItem(gstylecombo->count() - 1);
             }
         }
@@ -328,17 +343,17 @@ MainWindow::MainWindow()
     sublistbox->clear();
     sublistbox->insertStringList(subs);
 
-    rtlExtensions->setChecked(settings.value("useRtlExtensions", false).toBool());
+    rtlExtensions->setChecked(settings.value(QLatin1String("useRtlExtensions"), false).toBool());
 
 #ifdef Q_WS_X11
-    inputStyle->setCurrentText(settings.value("XIMInputStyle", trUtf8("On The Spot")).toString());
+    inputStyle->setCurrentText(settings.value(QLatin1String("XIMInputStyle"), trUtf8("On The Spot")).toString());
 #else
     inputStyle->hide();
     inputStyleLabel->hide();
 #endif
 
-    fontembeddingcheckbox->setChecked(settings.value("embedFonts", true).toBool());
-    fontpaths = settings.value("fontPath").toStringList();
+    fontembeddingcheckbox->setChecked(settings.value(QLatin1String("embedFonts"), true).toBool());
+    fontpaths = settings.value(QLatin1String("fontPath")).toStringList();
     fontpathlistbox->insertStringList(fontpaths);
 
     settings.endGroup(); // Qt
@@ -360,15 +375,15 @@ extern void qt_x11_apply_settings_in_all_apps();
 void MainWindow::fileSave()
 {
     if (! modified) {
-        statusBar()->showMessage("No changes to be saved.", 2000);
+        statusBar()->showMessage(tr("No changes to be saved."), 2000);
         return;
     }
 
-    statusBar()->showMessage("Saving changes...");
+    statusBar()->showMessage(tr("Saving changes..."));
 
     {
-        QSettings settings("Trolltech");
-        settings.beginGroup("Qt");
+        QSettings settings(QLatin1String("Trolltech"));
+        settings.beginGroup(QLatin1String("Qt"));
         QFontDatabase db;
         QFont font = db.font(familycombo->currentText(),
                              stylecombo->currentText(),
@@ -386,61 +401,61 @@ void MainWindow::fileSave()
             discg << editPalette.color(QPalette::Disabled,
                                        (QColorGroup::ColorRole) i).name();
 
-        settings.setValue("font", font.toString());
-        settings.setValue("Palette/active", actcg);
-        settings.setValue("Palette/inactive", inactcg);
-        settings.setValue("Palette/disabled", discg);
+        settings.setValue(QLatin1String("font"), font.toString());
+        settings.setValue(QLatin1String("Palette/active"), actcg);
+        settings.setValue(QLatin1String("Palette/inactive"), inactcg);
+        settings.setValue(QLatin1String("Palette/disabled"), discg);
 
-        settings.setValue("fontPath", fontpaths);
-        settings.setValue("embedFonts", fontembeddingcheckbox->isChecked());
-        settings.setValue("style", gstylecombo->currentText());
-        settings.setValue("doubleClickInterval", dcispin->value());
-        settings.setValue("cursorFlashTime", cfispin->value() == 9 ? 0 : cfispin->value() );
-        settings.setValue("wheelScrollLines", wslspin->value());
-        settings.setValue("resolveSymlinks", resolvelinks->isChecked());
+        settings.setValue(QLatin1String("fontPath"), fontpaths);
+        settings.setValue(QLatin1String("embedFonts"), fontembeddingcheckbox->isChecked());
+        settings.setValue(QLatin1String("style"), gstylecombo->currentText());
+        settings.setValue(QLatin1String("doubleClickInterval"), dcispin->value());
+        settings.setValue(QLatin1String("cursorFlashTime"), cfispin->value() == 9 ? 0 : cfispin->value() );
+        settings.setValue(QLatin1String("wheelScrollLines"), wslspin->value());
+        settings.setValue(QLatin1String("resolveSymlinks"), resolvelinks->isChecked());
 
         QSize strut(strutwidth->value(), strutheight->value());
-        settings.setValue("globalStrut/width", strut.width());
-        settings.setValue("globalStrut/height", strut.height());
+        settings.setValue(QLatin1String("globalStrut/width"), strut.width());
+        settings.setValue(QLatin1String("globalStrut/height"), strut.height());
 
-        settings.setValue("useRtlExtensions", rtlExtensions->isChecked());
+        settings.setValue(QLatin1String("useRtlExtensions"), rtlExtensions->isChecked());
 
 #ifdef Q_WS_X11
         QString style = inputStyle->currentText();
-        QString str = "On The Spot";
+        QString str = QLatin1String("On The Spot");
         if ( style == trUtf8( "Over The Spot" ) )
-            str = "Over The Spot";
+            str = QLatin1String("Over The Spot");
         else if ( style == trUtf8( "Off The Spot" ) )
-            str = "Off The Spot";
+            str = QLatin1String("Off The Spot");
         else if ( style == trUtf8( "Root" ) )
-            str = "Root";
-        settings.setValue( "XIMInputStyle", str );
+            str = QLatin1String("Root");
+        settings.setValue( QLatin1String("XIMInputStyle"), str );
 #endif
 
         QStringList effects;
         if (effectcheckbox->isChecked()) {
-            effects << "general";
+            effects << QLatin1String("general");
 
             switch (menueffect->currentItem()) {
-            case 1: effects << "animatemenu"; break;
-            case 2: effects << "fademenu"; break;
+            case 1: effects << QLatin1String("animatemenu"); break;
+            case 2: effects << QLatin1String("fademenu"); break;
             }
 
             switch (comboeffect->currentItem()) {
-            case 1: effects << "animatecombo"; break;
+            case 1: effects << QLatin1String("animatecombo"); break;
             }
 
             switch (tooltipeffect->currentItem()) {
-            case 1: effects << "animatetooltip"; break;
-            case 2: effects << "fadetooltip"; break;
+            case 1: effects << QLatin1String("animatetooltip"); break;
+            case 2: effects << QLatin1String("fadetooltip"); break;
             }
 
             switch ( toolboxeffect->currentItem() ) {
-            case 1: effects << "animatetoolbox"; break;
+            case 1: effects << QLatin1String("animatetoolbox"); break;
             }
         } else
-            effects << "none";
-        settings.setValue("GUIEffects", effects);
+            effects << QLatin1String("none");
+        settings.setValue(QLatin1String("GUIEffects"), effects);
 
         QStringList familysubs = QFont::substitutions();
         QStringList::Iterator fit = familysubs.begin();
@@ -459,7 +474,7 @@ void MainWindow::fileSave()
 #endif // Q_WS_X11
 
     setModified(false);
-    statusBar()->showMessage("Saved changes.");
+    statusBar()->showMessage(QLatin1String("Saved changes."));
 }
 
 
@@ -896,7 +911,7 @@ void MainWindow::helpAbout()
                    "<br/><br/>The program is provided AS IS with NO WARRANTY OF ANY KIND,"
                    " INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A"
                    " PARTICULAR PURPOSE.<br/> ")
-                   .arg(tr("Qt Configuration")).arg(QT_VERSION_STR));
+                   .arg(tr("Qt Configuration")).arg(QLatin1String(QT_VERSION_STR)));
     box.setWindowTitle(tr("Qt Configuration"));
     box.setIcon(QMessageBox::NoIcon);
     box.exec();
@@ -912,11 +927,11 @@ void MainWindow::helpAboutQt()
 void MainWindow::pageChanged(QWidget *page)
 {
     if (page == tab)
-        helpview->setText(tr(appearance_text));
-    else if (page == tab1)
-        helpview->setText(tr(font_text));
-    else if (page == tab2)
         helpview->setText(tr(interface_text));
+    else if (page == tab1)
+        helpview->setText(tr(appearance_text));
+    else if (page == tab2)
+        helpview->setText(tr(font_text));
     else if (page == tab3)
         helpview->setText(tr(printer_text));
 }

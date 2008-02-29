@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -47,6 +62,8 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
     Q_DECLARE_PUBLIC(QHeaderView)
 
 public:
+    enum StateVersion { VersionMarker = 0xff };
+
     QHeaderViewPrivate()
         : state(NoState),
           offset(0),
@@ -67,13 +84,16 @@ public:
           highlightSelected(false),
           stretchLastSection(false),
           cascadingResizing(false),
+          forceInitializing(false),
           stretchSections(0),
           contentsSections(0),
           minimumSectionSize(-1),
           lastSectionSize(0),
           sectionIndicatorOffset(0),
           sectionIndicator(0),
-          globalResizeMode(QHeaderView::Interactive) {}
+          globalResizeMode(QHeaderView::Interactive)
+    {}
+
 
     int lastVisibleVisualIndex() const;
     int sectionHandleAt(int position);
@@ -81,6 +101,8 @@ public:
     void updateSectionIndicator(int section, int position);
     void resizeSections(QHeaderView::ResizeMode globalMode, bool useGlobalMode = false);
     void _q_sectionsRemoved(const QModelIndex &,int,int);
+    void _q_layoutAboutToBeChanged();
+    void _q_layoutChanged();
 
     bool isSectionSelected(int section) const;
 
@@ -90,6 +112,10 @@ public:
 
     inline bool columnIntersectsSelection(int column) const {
         return (selectionModel ? selectionModel->columnIntersectsSelection(column, root) : false);
+    }
+
+    inline bool sectionIntersectsSelection(int logical) const {
+        return (orientation == Qt::Horizontal ? columnIntersectsSelection(logical) : rowIntersectsSelection(logical));
     }
 
     inline bool isRowSelected(int row) const {
@@ -109,11 +135,15 @@ public:
     }
 
     inline bool reverse() const {
-        return q_func()->isRightToLeft() && orientation == Qt::Horizontal;
+        return orientation == Qt::Horizontal && q_func()->isRightToLeft();
     }
 
     inline int logicalIndex(int visualIndex) const {
         return logicalIndices.isEmpty() ? visualIndex : logicalIndices.at(visualIndex);
+    }
+
+    inline int visualIndex(int logicalIndex) const {
+        return visualIndices.isEmpty() ? logicalIndex : visualIndices.at(logicalIndex);
     }
 
     inline void setDefaultValues(Qt::Orientation o) {
@@ -173,8 +203,14 @@ public:
         }
     }
 
-    inline bool sectionIsCascadable(int visual) {
+    inline bool sectionIsCascadable(int visual) const {
         return visualIndexResizeMode(visual) == QHeaderView::Interactive;
+    }
+
+    inline int modelSectionCount() const {
+        return (orientation == Qt::Horizontal
+                ? model->columnCount(root)
+                : model->rowCount(root));
     }
 
 
@@ -182,7 +218,7 @@ public:
     void flipSortIndicator(int section);
     void cascadingResize(int visual, int newSize);
 
-    enum State { NoState, ResizeSection, MoveSection } state;
+    enum State { NoState, ResizeSection, MoveSection, SelectSections, NoClear } state;
 
     uint offset;
     Qt::Orientation orientation;
@@ -208,6 +244,7 @@ public:
     int target;
     int pressed;
     int hover;
+
     uint length;
     int sectionCount;
     bool movableSections;
@@ -215,6 +252,7 @@ public:
     bool highlightSelected;
     bool stretchLastSection;
     bool cascadingResizing;
+    bool forceInitializing;
     int stretchSections;
     int contentsSections;
     int defaultSectionSize;
@@ -224,6 +262,7 @@ public:
     Qt::Alignment defaultAlignment;
     QLabel *sectionIndicator;
     QHeaderView::ResizeMode globalResizeMode;
+    QList<QPersistentModelIndex> persistentHiddenSections;
 
     // header section spans
 
@@ -235,6 +274,12 @@ public:
         inline SectionSpan(int length, int sections, QHeaderView::ResizeMode mode)
             : size(length), count(sections), resizeMode(mode) {}
         inline int sectionSize() const { return size / count; }
+#ifndef QT_NO_DATASTREAM
+        inline void write(QDataStream &out) const
+        { out << size; out << count; out << (int)resizeMode; }
+        inline void read(QDataStream &in)
+        { in >> size; in >> count; int m; in >> m; resizeMode = (QHeaderView::ResizeMode)m; }
+#endif
     };
 
     QVector<SectionSpan> sectionSpans;
@@ -287,6 +332,11 @@ public:
     // other
     int viewSectionSizeHint(int logical) const;
     int adjustedVisualIndex(int visualIndex) const;
+
+#ifndef QT_NO_DATASTREAM
+    void write(QDataStream &out) const;
+    bool read(QDataStream &in);
+#endif
 
 };
 

@@ -1,8 +1,10 @@
 #!/bin/sh
 
+export TOOLCHAIN=/opt/toolchains/arm9generic/arm-linux/gcc-4.1.1-glibc-2.3.6-linux-2.4.20/arm-linux/
+
 if [ -d /opt/teambuilder ]; then
     # our bin path has special wrapper scripts that set TEAMBUILDER_SYSTEM
-    export PATH="$DEVICE_CONFIG_PATH/bin:/opt/teambuilder/bin:/opt/toolchains/arm9tdmi/arm-linux/gcc-3.3.3-glibc-2.3.2/bin:$PATH"
+    export PATH="$DEVICE_CONFIG_PATH/bin:/opt/teambuilder/bin:$TOOLCHAIN/bin:$PATH"
     # remove any arm-linux-* stuff from TEAMBUILDER_CC_VERSION
     export TEAMBUILDER_CC_VERSION="$(echo $TEAMBUILDER_CC_VERSION | sed 's/arm-linux-[^:]*:[[digit].][[digit].]*;*//')"
     # check to see how the variable is set
@@ -13,12 +15,15 @@ if [ -d /opt/teambuilder ]; then
             export TEAMBUILDER_CC_VERSION="*:$TEAMBUILDER_CC_VERSION"
         fi
     fi
-    # set arm-linux-* to version 3.4.3, keeping the rest of the TEAMBUILDER_CC_VERSION (for the host compile)
-    export TEAMBUILDER_CC_VERSION="arm-linux-*:3.3.3;$TEAMBUILDER_CC_VERSION"
+    # set arm-linux-* to version 4.1.1, keeping the rest of the TEAMBUILDER_CC_VERSION (for the host compile)
+    export TEAMBUILDER_CC_VERSION="arm-linux-*:4.1.1;$TEAMBUILDER_CC_VERSION"
     # this must not be set or cross compiles won't be farmed out
-    if [ "$TEAMBUILDER_SYSTEM" = 'arm:9tdmi' ]; then
+    if [ "$TEAMBUILDER_SYSTEM" = 'arm:9generic' ]; then
         unset TEAMBUILDER_SYSTEM
     fi
 else
-    export PATH="/opt/toolchains/arm9tdmi/arm-linux/gcc-3.3.3-glibc-2.3.2/bin:$PATH"
+    # don't destroy the environment if $TOOLCHAIN/bin is already somewhere in the $PATH
+    if ! echo "$PATH" | grep "$TOOLCHAIN/bin" ; then
+        export PATH="$TOOLCHAIN/bin:$PATH"
+    fi
 fi

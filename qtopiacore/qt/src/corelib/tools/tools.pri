@@ -8,6 +8,7 @@ HEADERS +=  \
 	tools/qcache.h \
 	tools/qchar.h \
 	tools/qcontainerfwd.h \
+	tools/qcryptographichash.h \
 	tools/qdatetime.h \
 	tools/qdatetime_p.h \
 	tools/qhash.h \
@@ -18,6 +19,7 @@ HEADERS +=  \
 	tools/qlocale_p.h \
 	tools/qlocale_data_p.h \
 	tools/qmap.h \
+        tools/qpodlist_p.h \
         tools/qpoint.h \
 	tools/qqueue.h \
         tools/qrect.h \
@@ -40,7 +42,7 @@ SOURCES += \
 	tools/qbitarray.cpp \
 	tools/qbytearray.cpp \
 	tools/qbytearraymatcher.cpp \
-	tools/qchar.cpp \
+	tools/qcryptographichash.cpp \
 	tools/qdatetime.cpp \
 	tools/qhash.cpp \
         tools/qline.cpp \
@@ -55,9 +57,7 @@ SOURCES += \
         tools/qsize.cpp \
 	tools/qstring.cpp \
 	tools/qstringlist.cpp \
-	tools/qstringmatcher.cpp \
 	tools/qtimeline.cpp \
-	tools/qunicodetables.cpp \
 	tools/qvector.cpp \
         tools/qvsnprintf.cpp
 

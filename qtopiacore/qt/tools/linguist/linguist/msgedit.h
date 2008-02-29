@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -215,16 +230,21 @@ protected:
     void resizeEvent(QResizeEvent *);
     void layoutWidgets();
     void updateCommentField();
+    void updateAltSourceField();
     void calculateFieldHeight(QTextEdit *field);
     void fontChange(const QFont &);
 
 private:
     void addPluralForm(const QString &label);
     void adjustTranslationFieldHeights();
+    void handleChanges();
+    void showNothing();
 
     PageCurl *pageCurl;
     QLabel *srcTextLbl;
     SourceTextEdit *srcText;
+    QLabel *altTextLbl;
+    SourceTextEdit *altText;
     QTextEdit *cmtText;
     QStringList m_numerusForms;
     QString     m_invariantForm;
@@ -234,6 +254,7 @@ private:
 
 private slots:
     void handleSourceChanges();
+    void handleAltSourceChanges();
     void handleCommentChanges();
     void sourceSelectionChanged();
     void translationSelectionChanged();
@@ -249,18 +270,20 @@ class MessageEditor : public QScrollArea
 {
     Q_OBJECT
 public:
-    MessageEditor(MessageModel *model, QMainWindow *parent = 0);
+    MessageEditor(MessageModel *model, MessageModel *altTraslatorModel, QMainWindow *parent = 0);
     QTreeView *phraseView() const;
     inline QDockWidget *phraseDockWnd() const {return bottomDockWnd;}
 
     void showNothing();
-    void showMessage(const QString &text, const QString &comment,
+    void showMessage(const QString &context, const QString &text, const QString &comment,
         const QString &fullContext, const QStringList &translation,
         MetaTranslatorMessage::Type type,
         const QList<Phrase> &phrases);
     void setNumerusForms(const QString &invariantForm, const QStringList &numerusForms);
     bool eventFilter(QObject *, QEvent *);
     void setTranslation(const QString &translation, int numerus, bool emitt);
+    void setAltTextLabel(const QString &str);
+    void setTranslationLabel(const QString &str);
 signals:
     void translationChanged(const QStringList &translations);
     void finished(bool finished);
@@ -296,6 +319,7 @@ private slots:
     void insertPhraseInTranslationAndLeave(const QModelIndex &index);
     void updateButtons();
     void updateCanPaste();
+    void clipboardChanged();
 
     void updatePageHeight(int height);
     void updateCutAndCopy();
@@ -308,7 +332,6 @@ public:
     static const char * const friendlyBackTab[];
 
 private:
-
     void visualizeBackTabs(const QString &text, QTextEdit *te);
     void setEditionEnabled(bool enabled);
 
@@ -324,13 +347,15 @@ private:
     ShadowWidget *sw;
 
     MessageModel *m_contextModel;
+    MessageModel *m_altTranslatorModel;
+    QTranslator *altTranslator;
     QString sourceText;
 
     bool cutAvail;
     bool copyAvail;
 
     bool mayOverwriteTranslation;
-    bool canPaste;
+    bool clipboardEmpty;
     bool doGuesses;
 };
 

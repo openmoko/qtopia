@@ -20,12 +20,23 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qmediavideocontrol.html#QMediaVideoControl">QMediaVideoControl</a></b> ( QMediaHandle const &amp; <i>mediaHandle</i>, QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qmediavideocontrol.html#QMediaVideoControl">QMediaVideoControl</a></b> ( QMediaContent * <i>mediaContent</i> )</li>
 <li><div class="fn"/><b><a href="qmediavideocontrol.html#dtor.QMediaVideoControl">~QMediaVideoControl</a></b> ()</li>
 <li><div class="fn"/>QWidget * <b><a href="qmediavideocontrol.html#createVideoWidget">createVideoWidget</a></b> ( QWidget * <i>parent</i> = 0 ) const</li>
 </ul>
 <ul>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qmediavideocontrol.html#invalid">invalid</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qmediavideocontrol.html#valid">valid</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qmediavideocontrol.html#videoTargetAvailable">videoTargetAvailable</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qmediavideocontrol.html#videoTargetRemoved">videoTargetRemoved</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -39,7 +50,6 @@
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
@@ -57,7 +67,7 @@
     QMediaContent *content = new QMediaContent( &quot;video.3gp&quot; );
     notifier-&gt;setMediaContent( content );</pre>
 <p>If video content is available <a href="qmediavideocontrol.html#createVideoWidget">createVideoWidget</a>() can be used to construct a new video widget for the media content.</p>
-<pre>    QMediaVideoControl control( content-&gt;handle() );
+<pre>    QMediaVideoControl control( content );
 
     QWidget *video = control.createVideoWidget();
     videolayout-&gt;addWidget( video );</pre>
@@ -65,21 +75,30 @@
 <p>See also <a href="qmediacontent.html">QMediaContent</a> and <a href="qmediacontrolnotifier.html">QMediaControlNotifier</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMediaVideoControl"></a>QMediaVideoControl::QMediaVideoControl ( <a href="qmediahandle.html">QMediaHandle</a> const &amp; <i>mediaHandle</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QMediaVideoControl"></a>QMediaVideoControl::QMediaVideoControl ( <a href="qmediacontent.html">QMediaContent</a> * <i>mediaContent</i> )</h3>
 <p>Create a <a href="qmediavideocontrol.html">QMediaVideoControl</a> with the handle to a prepared media resource</p>
-<p>The <a href="qmediacontrol.html">QMediaControl</a> needs to be constructed with a valid <a href="qmediahandle.html">QMediaHandle</a> passed in by the <i>mediaHandle</i> parameter, obtained from a <a href="qmediacontent.html">QMediaContent</a> instance.</p>
-<p>The <i>parent</i> is the Parent <a href="qobject.html">QObject</a>.</p>
+<p>The <a href="qmediacontrol.html">QMediaControl</a> needs to be constructed with <i>mediaContent</i> that represents the video to be played.</p>
 <h3 class="fn"><a name="dtor.QMediaVideoControl"></a>QMediaVideoControl::~QMediaVideoControl ()</h3>
 <p>Destroy a <a href="qmediavideocontrol.html">QMediaVideoControl</a></p>
 <h3 class="fn"><a name="createVideoWidget"></a><a href="qwidget.html">QWidget</a> * QMediaVideoControl::createVideoWidget ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 ) const</h3>
 <p>Create a <a href="qwidget.html">QWidget</a> that displays the rendered video content.</p>
 <p>This function is used to create a <a href="qwidget.html">QWidget</a> that will display the video content, it is parented to the widget passed in with the <i>parent</i> parameter. This widget can be deleted when the application is finished with it.</p>
+<h3 class="fn"><a name="invalid"></a>void QMediaVideoControl::invalid ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signal that is emitted when the control is invalid and no longer available for use.</p>
 <h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QMediaVideoControl::name ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return the name of this control.</p>
+<h3 class="fn"><a name="valid"></a>void QMediaVideoControl::valid ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signal that is emitted when the control is valid and available for use.</p>
+<h3 class="fn"><a name="videoTargetAvailable"></a>void QMediaVideoControl::videoTargetAvailable ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when there is a video available to be viewed. The client can call <a href="qmediavideocontrol.html#createVideoWidget">createVideoWidget</a>() at this time.</p>
+<p>See also <a href="qmediavideocontrol.html#createVideoWidget">createVideoWidget</a>().</p>
+<h3 class="fn"><a name="videoTargetRemoved"></a>void QMediaVideoControl::videoTargetRemoved ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when there is no longer video available to be viewed. The client should delete any <a href="qwidget.html">QWidget</a> obtained from <a href="qmediavideocontrol.html#createVideoWidget">createVideoWidget</a>()</p>
+<p>See also <a href="qmediavideocontrol.html#createVideoWidget">createVideoWidget</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 qtopia_project(qtopia core lib)
 license(FREEWARE)
-TARGET          =   qtdbus
+TARGET          =   QtDBus
 CONFIG+=no_tr
 
 DEFINES += QT_NO_CAST_TO_ASCII QT_NO_CAST_FROM_ASCII QDBUS_MAKEDLL DBUS_API_SUBJECT_TO_CHANGE
@@ -17,6 +17,7 @@ HEADERS =  qdbusabstractadaptor.h \
            qdbusargument.h \
            qdbusconnection.h \
            qdbusconnectioninterface.h \
+           qdbuscontext.h \
            qdbuserror.h \
            qdbusextratypes.h \
            qdbusinterface.h \
@@ -37,14 +38,16 @@ PRIVATE_HEADERS += qdbusabstractadaptor_p.h \
                    qdbusabstractinterface_p.h \
                    qdbusargument_p.h \
                    qdbusconnection_p.h \
+                   qdbuscontext_p.h \
+                   qdbusintegrator_p.h \
                    qdbusinterface_p.h \
                    qdbusintrospection_p.h \
                    qdbusmessage_p.h \
                    qdbusmetaobject_p.h \
                    qdbusmetatype_p.h \
+                   qdbusthreaddebug_p.h \
                    qdbusutil_p.h \
                    qdbusxmlparser_p.h
-
 
 HEADERS += $$PRIVATE_HEADERS
 
@@ -53,10 +56,11 @@ SOURCES += qdbusabstractadaptor.cpp \
            qdbusargument.cpp \
            qdbusconnection.cpp \
            qdbusconnectioninterface.cpp \
+           qdbuscontext.cpp \
            qdbusdemarshaller.cpp \
            qdbuserror.cpp \
            qdbusextratypes.cpp \
-           qdbusintegrator.cpp \ 
+           qdbusintegrator.cpp \
            qdbusinterface.cpp \
            qdbusinternalfilters.cpp \
            qdbusintrospection.cpp \
@@ -74,3 +78,5 @@ SOURCES += qdbusabstractadaptor.cpp \
 
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)
+
+VERSION=$${QTE_VERSION}

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,9 +23,9 @@
 #define CALCULATOR_SYSTEM_H
 
 #include <qtopiaglobal.h>
-#include <qstack.h>
-#include <qlist.h>
-#include <qlabel.h>
+#include <QStack>
+#include <QList>
+#include <QLabel>
 
 #include "instruction.h"
 #include "display.h"
@@ -68,15 +68,12 @@ public:
     void setAccType(QString);
     QString getDisplay();
 
-#ifdef QTOPIA_PHONE
     int numOps();
     bool error();
-#endif
 
 signals:
     void stackChanged();
     void dualResetStateChanged(ResetState);
-
 
 protected:
     friend class iBraceOpen;
@@ -102,9 +99,7 @@ private:
 
     State state;
     ResetState drs;
-#ifdef QTOPIA_PHONE
 public:
-#endif
     QStack<QString*> iStack;
     QStack<Data*> dStack;
 private:

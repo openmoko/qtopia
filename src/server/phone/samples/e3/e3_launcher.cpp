@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,8 @@
 ****************************************************************************/
 
 #include "e3_launcher.h"
+#include "e3_clock.h"
+#include "e3_navipane.h"
 #include "phone/phoneheader.h"
 #include "phone/contextlabel.h"
 #include "windowmanagement.h"
@@ -28,6 +30,7 @@
 #include <QDesktopWidget>
 #include "qtopiaserverapplication.h"
 #include "launcherview.h"
+#include <custom.h>
 #include <QVBoxLayout>
 #include <QContentFilter>
 #include <QCategoryFilter>
@@ -35,7 +38,9 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
 #include <QExportedBackground>
+#endif
 #include <QStringListModel>
 #include <QVariant>
 #include <QPainter>
@@ -44,8 +49,20 @@
 #include <QSoftMenuBar>
 #include <QtopiaChannel>
 #include <QKeyEvent>
+#ifdef Q_WS_QWS
+#include <qscreen_qws.h>
+#endif
 #include "phone/qabstractbrowserscreen.h"
+#include "phone/qabstractdialerscreen.h"
+#include "phone/qabstractmessagebox.h"
+#include "phone/cellmodemmanager.h"
+#include "phone/callscreen.h"
+#include "phone/dialercontrol.h"
+#include "applicationlauncher.h"
+#include "phone/callhistory.h"
+#include "phone/qabstractthemewidgetfactory.h"
 #include "e3_today.h"
+#include "phone/dialerservice.h"
 #include <QLabel>
 #include <QPalette>
 #include <QTimeString>
@@ -75,8 +92,8 @@ NonModalLauncherView::NonModalLauncherView(QWidget *parent)
 bool NonModalLauncherView::eventFilter(QObject *, QEvent *e)
 {
     if(e->type() == QEvent::FocusIn) {
-        setEditFocus(true);
         resetSelection();
+        icons->setEditFocus(true);
     } else if(e->type() == QEvent::FocusOut) {
         icons->clearSelection();
     } else if(e->type() == QEvent::KeyPress ||
@@ -183,7 +200,7 @@ E3ListDelegate::E3ListDelegate(QObject *parent)
 QSize E3ListDelegate::sizeHint(const QStyleOptionViewItem &option, 
                                const QModelIndex &) const
 {
-    return QSize(64, 64);
+    return QSize(40, 40);
 }
 
 void E3ListDelegate::paint(QPainter *painter, 
@@ -197,9 +214,13 @@ void E3ListDelegate::paint(QPainter *painter,
         qvariant_cast<QIcon>(index.data(Qt::DecorationRole)).pixmap(s);
 
     if(option.state & QStyle::State_Selected) {
+        painter->save();
         painter->setPen(Qt::NoPen);
         painter->setBrush(option.palette.highlight());
-        painter->drawRoundRect(option.rect);
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->drawRoundRect(option.rect, 600 / option.rect.width(),
+                                            600 / option.rect.height());
+        painter->restore();
     }
 
     int x = option.rect.x() + (option.rect.width() - pix.width()) / 2;
@@ -215,19 +236,88 @@ public:
 
 protected:
     virtual void paintEvent(QPaintEvent *);
+
+private:
+    QColor color;
 };
 
 E3Separator::E3Separator(QWidget *parent)
 : QWidget(parent)
 {
     setFixedHeight(1);
+    color = palette().brightText().color();
+    color.setAlpha(60);
 }
 
 void E3Separator::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
-    p.setPen(QPen(QPalette().brightText(), 1, Qt::DotLine));
+    p.setPen(QPen(color, 1));
     p.drawLine(0, 0, width(), 0);
+}
+
+class E3HomescreenItem : public QWidget
+{
+Q_OBJECT
+public:
+    E3HomescreenItem(QWidget *parent = 0);
+
+
+protected slots:
+    virtual void activated();
+
+protected:
+    virtual void paintEvent(QPaintEvent *);
+    virtual void keyPressEvent(QKeyEvent *);
+    virtual void focusInEvent(QFocusEvent *);
+    virtual void focusOutEvent(QFocusEvent *);
+
+protected:
+    bool isFocused;
+};
+
+E3HomescreenItem::E3HomescreenItem(QWidget *parent)
+: QWidget(parent), isFocused(false)
+{
+    setFocusPolicy(Qt::StrongFocus);
+}
+
+void E3HomescreenItem::activated()
+{
+}
+
+void E3HomescreenItem::paintEvent(QPaintEvent *)
+{
+    if(isFocused) {
+        QPainter p(this);
+        QPalette pal;
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setBrush(pal.highlight());
+        p.setPen(Qt::NoPen);
+        p.drawRoundRect(rect(), 600 / width(), 600 / height());
+    }
+}
+
+void E3HomescreenItem::keyPressEvent(QKeyEvent *e)
+{
+    if(e->key() == Qt::Key_Select) {
+        activated();
+        e->accept();
+    } else {
+        QWidget::keyPressEvent(e);
+    }
+}
+
+void E3HomescreenItem::focusInEvent(QFocusEvent *)
+{
+    isFocused = true;
+    update();
+}
+
+void E3HomescreenItem::focusOutEvent(QFocusEvent *)
+{
+    isFocused = false;
+    update();
 }
 
 class E3Label : public QWidget
@@ -251,56 +341,58 @@ private:
     QLabel *pixmap;
 };
 
-class E3CalItem : public QWidget
+class E3CalItem : public E3HomescreenItem
 {
 Q_OBJECT
 public:
     E3CalItem(E3Today *t, QWidget *parent = 0);
 
-protected:
-    virtual void paintEvent(QPaintEvent *);
-    virtual void focusInEvent(QFocusEvent *);
-    virtual void focusOutEvent(QFocusEvent *);
-    virtual void keyPressEvent(QKeyEvent *);
-
 private slots:
     void dataChanged();
     void activated();
 
 private:
     E3Today *today;
-    bool isFocused;
     E3Label *textLabel;
     E3Label *appointmentLabel;
 };
 
-class E3TodoItem : public QWidget
+class E3TodoItem : public E3HomescreenItem
 {
 Q_OBJECT
 public:
     E3TodoItem(E3Today *t, QWidget *parent = 0);
 
-protected:
-    virtual void paintEvent(QPaintEvent *);
-    virtual void focusInEvent(QFocusEvent *);
-    virtual void focusOutEvent(QFocusEvent *);
-    virtual void keyPressEvent(QKeyEvent *);
-
 private slots:
     void activated();
     void dataChanged();
 
 private:
     E3Today *today;
-    bool isFocused;
     E3Label *textLabel;
+};
+
+class E3CallsItem : public E3HomescreenItem
+{
+Q_OBJECT
+public:
+    E3CallsItem(QWidget *parent = 0);
+
+signals:
+    void showCallscreen();
+
+private slots:
+    void activated();
+    void stateChanged();
+
+private:
+    E3Label *callsLabel;
 };
 
 E3Label::E3Label(QWidget *parent)
 : QWidget(parent)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setMargin(0);
     layout->setSpacing(0);
     setLayout(layout);
 
@@ -308,6 +400,7 @@ E3Label::E3Label(QWidget *parent)
     layout->addWidget(pixmap);
 
     text = new QLabel(this);
+    text->setWordWrap( true );
     layout->addWidget(text);
 
     layout->addStretch(10);
@@ -340,10 +433,8 @@ void E3Label::mousePressEvent(QMouseEvent *e)
 }
 
 E3CalItem::E3CalItem(E3Today *t, QWidget *parent)
-: QWidget(parent), today(t), isFocused(false), textLabel(0), appointmentLabel(0)
+: E3HomescreenItem(parent), today(t), textLabel(0), appointmentLabel(0)
 {
-    setFocusPolicy(Qt::StrongFocus);
-
     QVBoxLayout *layout = new QVBoxLayout(this);
     setLayout(layout);
     layout->setMargin(0);
@@ -353,7 +444,7 @@ E3CalItem::E3CalItem(E3Today *t, QWidget *parent)
     layout->addWidget(sep);
 
     textLabel = new E3Label(this);
-    QPixmap pix(":image/datebook/DateBook_16");
+    QPixmap pix = QIcon(":icon/datebook/DateBook").pixmap(16);
     textLabel->setPixmap(pix);
     layout->addWidget(textLabel);
     appointmentLabel = new E3Label(this);
@@ -373,39 +464,6 @@ void E3CalItem::activated()
     req.send();
 }
 
-void E3CalItem::keyPressEvent(QKeyEvent *e)
-{
-    if(e->key() == Qt::Key_Select) {
-        activated();
-        e->accept();
-    } else {
-        QWidget::keyPressEvent(e);
-    }
-}
-
-void E3CalItem::paintEvent(QPaintEvent *)
-{
-    if(isFocused) {
-        QPainter p(this);
-        QPalette pal;
-        p.setBrush(pal.highlight());
-        p.setPen(Qt::NoPen);
-        p.drawRoundRect(rect());
-    }
-}
-
-void E3CalItem::focusInEvent(QFocusEvent *)
-{
-    isFocused = true;
-    update();
-}
-
-void E3CalItem::focusOutEvent(QFocusEvent *)
-{
-    isFocused = false;
-    update();
-}
-
 void E3CalItem::dataChanged()
 {
     if(today->dayStatus() == E3Today::MoreAppointments) {
@@ -413,11 +471,11 @@ void E3CalItem::dataChanged()
         appointmentLabel->show();
     } else if(today->nextAppointment().isValid()) {
         textLabel->show();
-        textLabel->setText(tr("No more entries today"));
+        textLabel->setText(tr("No more entries today", "calendar entries"));
         appointmentLabel->show();
     } else {
         textLabel->show();
-        textLabel->setText(tr("No cal. entries for today"));
+        textLabel->setText(tr("No cal. entries for today", "cal=calendar"));
         appointmentLabel->hide();
     }
 
@@ -433,11 +491,49 @@ void E3CalItem::dataChanged()
     }
 }
 
-E3TodoItem::E3TodoItem(E3Today *t, QWidget *parent)
-: QWidget(parent), today(t), isFocused(false), textLabel(0)
-{
-    setFocusPolicy(Qt::StrongFocus);
 
+E3CallsItem::E3CallsItem(QWidget *parent)
+: E3HomescreenItem(parent)
+{
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    setLayout(layout);
+    layout->setMargin(0);
+    layout->setSpacing(0);
+
+    E3Separator *sep = new E3Separator(this);
+    layout->addWidget(sep);
+
+    callsLabel = new E3Label(this);
+    QPixmap pix = QIcon(":icon/phone/calls").pixmap(16);
+    callsLabel->setPixmap(pix);
+    layout->addWidget(callsLabel);
+
+    QObject::connect(DialerControl::instance(), SIGNAL(stateChanged()), 
+                     this, SLOT(stateChanged()));
+
+    QObject::connect(callsLabel, SIGNAL(activated()), this, SLOT(activated()));
+
+    stateChanged();
+}
+
+void E3CallsItem::activated()
+{
+    emit showCallscreen();
+}
+
+void E3CallsItem::stateChanged()
+{
+    int calls = DialerControl::instance()->allCalls().count();
+    callsLabel->setText(tr("%1 call(s) in progress", "%1=a number").arg(calls));
+    if(calls)
+        show();
+    else
+        hide();
+}
+
+E3TodoItem::E3TodoItem(E3Today *t, QWidget *parent)
+: E3HomescreenItem(parent), today(t), textLabel(0)
+{
     QVBoxLayout *layout = new QVBoxLayout(this);
     setLayout(layout);
     layout->setMargin(0);
@@ -447,7 +543,7 @@ E3TodoItem::E3TodoItem(E3Today *t, QWidget *parent)
     layout->addWidget(sep);
 
     textLabel = new E3Label(this);
-    QPixmap pix(":image/todolist/TodoList_16");
+    QPixmap pix = QIcon(":icon/todolist/TodoList").pixmap(16);
     textLabel->setPixmap(pix);
     layout->addWidget(textLabel);
 
@@ -460,39 +556,6 @@ void E3TodoItem::activated()
 {
     QtopiaServiceRequest req("Application:todolist", "raise()");
     req.send();
-}
-
-void E3TodoItem::keyPressEvent(QKeyEvent *e)
-{
-    if(e->key() == Qt::Key_Select) {
-        activated();
-        e->accept();
-    } else {
-        QWidget::keyPressEvent(e);
-    }
-}
-
-void E3TodoItem::paintEvent(QPaintEvent *)
-{
-    if(isFocused) {
-        QPainter p(this);
-        QPalette pal;
-        p.setBrush(pal.highlight());
-        p.setPen(Qt::NoPen);
-        p.drawRoundRect(rect());
-    }
-}
-
-void E3TodoItem::focusInEvent(QFocusEvent *)
-{
-    isFocused = true;
-    update();
-}
-
-void E3TodoItem::focusOutEvent(QFocusEvent *)
-{
-    isFocused = false;
-    update();
 }
 
 void E3TodoItem::dataChanged()
@@ -508,58 +571,123 @@ void E3TodoItem::dataChanged()
     if(tasks == 1) {
         str = today->task(0).description();
     } else {
-        str = QString(tr("%1 to-do notes not done")).arg(tasks);
+        str = QString(tr("%1 to-do notes not done", "%1 = number")).arg(tasks);
     }
 
     textLabel->setText(str);
 }
 
+
+
+static QWidget *callHistory()
+{
+    return new CallHistory(DialerControl::instance()->callList(), 0);
+}
+
+class E3DialerServiceProxy : public DialerService
+{
+Q_OBJECT
+public:
+    E3DialerServiceProxy(QObject *parent) : DialerService(parent) {}
+
+protected:
+    virtual void dialVoiceMail() {}
+    virtual void dial( const QString&, const QString& number ) {
+        emit doDial(number);
+    }
+    virtual void dial( const QString&number, const QUniqueId&) {
+        emit doDial(number);
+    }
+    virtual void showDialer( const QString& digits ) {
+        emit doShowDialer(digits);
+    }
+
+signals:
+    void doDial( const QString& number );
+    void doShowDialer( const QString& digits );
+};
+
+//===========================================================================
+
+class E3WidgetFactory : public QAbstractThemeWidgetFactory
+{
+public:
+    virtual bool createWidget(ThemeWidgetItem *item)
+    {
+        if (item->itemName() == QLatin1String("clock")) {
+            E3Clock *clock = new E3Clock;
+            clock->showCurrentTime();
+            item->setWidget(clock);
+            return true;
+        } else if (item->itemName() == QLatin1String("navbar")) {
+            item->setWidget(new E3NaviPane);
+            return true;
+        }
+        return false;
+    }
+};
+
+//===========================================================================
+
 E3ServerInterface::E3ServerInterface(QWidget *parent, Qt::WFlags flags)
 : QAbstractServerInterface(parent, flags), m_view(0), m_header(0), m_context(0),
-  m_background(0), m_browser(0), m_today(0)
+  m_theme(0), m_browser(0), m_dialer(0), m_callscreen(0), m_today(0), m_cell(0)
 {
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
     QExportedBackground::initExportedBackground(desktopRect.width(),
                                                 desktopRect.height());
+#endif
+    ThemeControl::instance()->setThemeWidgetFactory(new E3WidgetFactory);
 
-    m_background = new QExportedBackground(this);
-    QObject::connect(m_background, SIGNAL(wallpaperChanged()),
-                     this, SLOT(wallpaperChanged()));
-    wallpaperChanged();
+    // Install call history builtin
+    BuiltinApplicationLauncher::install("callhistory", callHistory);
+
+    // Create dialer control
+    DialerControl::instance();
+    QObject::connect(DialerControl::instance(), SIGNAL(callIncoming(QPhoneCall)), this, SLOT(showCallscreen()));
+
+    // Get cell modem manager
+    m_cell = qtopiaTask<CellModemManager>();
 
     // Create header
     header();
     // Create context
     context();
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    setLayout(layout);
-    layout->setMargin(0);
-    layout->setSpacing(0);
-
     m_theme = new ThemedView(this);
-    layout->addWidget(m_theme);
-    layout = new QVBoxLayout(m_theme);
-    m_theme->setLayout(layout); 
+    m_theme->setGeometry(desktopRect);
+    m_tbackground = new ThemeBackground(ThemeBackground::PrimaryScreen, this);
+    QVBoxLayout *layout = new QVBoxLayout(m_theme);
+    m_theme->setLayout(layout);
     layout->setMargin(0);
     layout->setSpacing(0);
     ThemeControl::instance()->registerThemedView(m_theme, "Home");
+
+    m_titleSpacer = new QWidget;
+    layout->addWidget(m_titleSpacer);
 
     E3Separator *sep = new E3Separator(m_theme);
     layout->addWidget(sep);
 
     // Quick launcher bar
     m_view = new NonModalLauncherView(m_theme);
-    m_view->setFixedHeight(40);
+    m_view->view()->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_view->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_view->setFixedHeight(37);
+    m_view->setFixedWidth(230);
     m_view->setItemDelegate(new E3ListDelegate(m_view));
-    layout->addWidget(m_view);
+
+    QHBoxLayout *l2 = new QHBoxLayout(m_theme);
+    l2->setMargin(3);
+    l2->addSpacing(7);
+    l2->addWidget(m_view);
+    layout->addLayout(l2);
+
     m_view->setViewMode(QListView::IconMode);
     QObject::connect(m_view, SIGNAL(clicked(QContent)), this, SLOT(launch(QContent)));
     quickApps();
-
-    sep = new E3Separator(m_theme);
-    layout->addWidget(sep);
 
     // Info list
     m_today = new E3Today(this);
@@ -567,6 +695,10 @@ E3ServerInterface::E3ServerInterface(QWidget *parent, Qt::WFlags flags)
     layout->addWidget(calItem);
     E3TodoItem *todoItem = new E3TodoItem(m_today, m_theme);
     layout->addWidget(todoItem);
+    E3CallsItem *callsItem = new E3CallsItem(m_theme);
+    QObject::connect(callsItem, SIGNAL(showCallscreen()), 
+                     this, SLOT(showCallscreen()));
+    layout->addWidget(callsItem);
 
     layout->addStretch(10);
     
@@ -574,12 +706,36 @@ E3ServerInterface::E3ServerInterface(QWidget *parent, Qt::WFlags flags)
     idleContext();
 
     QtopiaChannel *e3 = new QtopiaChannel("QPE/E3", this);
-    QObject::connect(e3, SIGNAL(received(QString, QByteArray)),
-                     this, SLOT(received(QString, QByteArray)));
+    QObject::connect(e3, SIGNAL(received(QString,QByteArray)),
+                     this, SLOT(received(QString,QByteArray)));
 
+    // Themes
     QObject::connect(ThemeControl::instance(), SIGNAL(themeChanged()),
                      this, SLOT(loadTheme()));
     loadTheme();
+
+    // Dialer service
+    E3DialerServiceProxy *proxy = new E3DialerServiceProxy(this);
+    QObject::connect(proxy, SIGNAL(doDial(QString)), this, SLOT(requestDial(QString)));
+    QObject::connect(proxy, SIGNAL(doShowDialer(QString)), this, SLOT(showDialer(QString)));
+
+#ifdef Q_WS_QWS
+    // Window management
+    connect(qwsServer, SIGNAL(windowEvent(QWSWindow*,QWSServer::WindowEvent)),
+            this, SLOT(windowEvent(QWSWindow*,QWSServer::WindowEvent)) );
+#endif
+}
+
+bool E3ServerInterface::eventFilter(QObject *, QEvent *e)
+{
+    if(e->type() == QEvent::Resize) {
+        if(m_theme) {
+            m_theme->setGeometry(0, 0, width(), height());
+            m_titleSpacer->setFixedSize(1,m_header->height());
+        }
+    }
+
+    return false;
 }
 
 bool E3ServerInterface::event(QEvent *e)
@@ -597,6 +753,70 @@ void E3ServerInterface::received(const QString &message, const QByteArray &)
         showApps();
 }
 
+void E3ServerInterface::acceptIncoming()
+{
+    DialerControl::instance()->accept();
+}
+
+void E3ServerInterface::showCallscreen()
+{
+    dialer()->close();
+    callscreen()->showMaximized();
+    callscreen()->raise();
+}
+
+void E3ServerInterface::showDialer(const QString &number)
+{
+    if(DialerControl::instance()->allCalls().isEmpty()) {
+
+        dialer()->reset();
+        dialer()->setDigits(number);
+        dialer()->showMaximized();
+        dialer()->raise();
+
+    }
+}
+
+void E3ServerInterface::requestDial(const QString &number)
+{
+    if(!m_cell || !m_cell->networkRegistered()) {
+        QAbstractMessageBox::information(this, tr("Not Registered"), tr("Cannot make call until network is registered."));
+    } else if(!DialerControl::instance()->allCalls().isEmpty()) {
+        QAbstractMessageBox::information(this, tr("Active call"), tr("Cannot make call while other call in progress."));
+    } else {
+        DialerControl::instance()->dial(number, DialerControl::instance()->callerIdNeeded(number));
+        callscreen()->showMaximized();
+        callscreen()->raise();
+    }
+}
+
+QAbstractDialerScreen *E3ServerInterface::dialer()
+{
+    if(!m_dialer) {
+        m_dialer = qtopiaWidget<QAbstractDialerScreen>();
+        QObject::connect(m_dialer, SIGNAL(requestDial(QString,QUniqueId)),
+                         this, SLOT(requestDial(QString)));
+    }
+
+    return m_dialer;
+}
+
+CallScreen *E3ServerInterface::callscreen()
+{
+    if(!m_callscreen) {
+        m_callscreen = new CallScreen(DialerControl::instance(), 0);
+        ThemeControl::instance()->registerThemedView(m_callscreen, "CallScreen");
+        QObject::connect(m_callscreen, SIGNAL(listEmpty()),
+                         m_callscreen, SLOT(hide()));
+        QObject::connect(m_callscreen, SIGNAL(acceptIncoming()),
+                         this, SLOT(acceptIncoming()));
+        QObject::connect(DialerControl::instance(), SIGNAL(stateChanged()),
+                         m_callscreen, SLOT(stateChanged()));
+    }
+
+    return m_callscreen;
+}
+
 void E3ServerInterface::showApps()
 {
     if(!m_browser)
@@ -609,23 +829,16 @@ void E3ServerInterface::showApps()
     }
 }
 
-void E3ServerInterface::wallpaperChanged()
-{
-    QPixmap wallpaper = m_background->wallpaper();
-    QDesktopWidget *desktop = QApplication::desktop();
-    QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
-    wallpaper = wallpaper.scaled(desktopRect.size());
-    QExportedBackground::setExportedBackground(wallpaper);
-}
-
 void E3ServerInterface::header()
 {
     m_header = new PhoneHeader();
-    m_header->show();
+    m_header->installEventFilter(this);
+
     WindowManagement::protectWindow(m_header);
     ThemeControl::instance()->registerThemedView(m_header, "Title");
     m_header->resize(QApplication::desktop()->screenGeometry().width(),
-                     m_header->height());
+                     m_header->sizeHint().height());
+    QTimer::singleShot(0, m_header, SLOT(show()));
 }
 
 void E3ServerInterface::context()
@@ -633,14 +846,14 @@ void E3ServerInterface::context()
     m_context = new ContextLabel(0, Qt::FramelessWindowHint |
                                     Qt::Tool |
                                     Qt::WindowStaysOnTopHint );
-    m_context->show();
     m_context->move(QApplication::desktop()->screenGeometry().topLeft()); // move to the correct screen
     WindowManagement::protectWindow(m_context);
     m_context->setAttribute(Qt::WA_GroupLeader);
     ThemeControl::instance()->registerThemedView(m_context, "Context");
     // Set width now to avoid relayout later.
     m_context->resize(QApplication::desktop()->screenGeometry().width(),
-                    m_context->height());
+                    m_context->sizeHint().height());
+    QTimer::singleShot(0, m_context, SLOT(show()));
 }
 
 void E3ServerInterface::keyPressEvent(QKeyEvent *e)
@@ -650,6 +863,23 @@ void E3ServerInterface::keyPressEvent(QKeyEvent *e)
         QtopiaServiceRequest req = *iter;
         req.send();
         e->accept();
+    } else if((e->key() >= Qt::Key_0 && e->key() <= Qt::Key_9) ||
+              e->key() == Qt::Key_NumberSign || e->key() == Qt::Key_Asterisk) {
+
+        if(DialerControl::instance()->allCalls().isEmpty()) {
+
+            dialer()->reset();
+            dialer()->appendDigits(e->text());
+            dialer()->showMaximized();
+            dialer()->raise();
+        }
+        e->accept();
+
+    } else if(e->key() == Qt::Key_Yes || e->key() == Qt::Key_Call) {
+        if(DialerControl::instance()->allCalls().isEmpty()) {
+            QtopiaServiceRequest req("Application:callhistory", "raise()");
+            req.send();
+        }
     } else {
         QAbstractServerInterface::keyPressEvent(e);
     }
@@ -662,8 +892,15 @@ void E3ServerInterface::loadTheme()
    
     WindowManagement::dockWindow(m_header, WindowManagement::Top, 
                                  m_header->reservedSize());
+
+    m_theme->setGeometry(0, 0, width(), height());
+    m_titleSpacer->setFixedSize(1,m_header->height());
+
     WindowManagement::dockWindow(m_context, WindowManagement::Bottom, 
                                  m_context->reservedSize());
+
+
+    m_tbackground->updateBackground(m_theme);
 }
 
 void E3ServerInterface::quickApps()
@@ -734,5 +971,68 @@ void E3ServerInterface::launch(QContent c)
 {
     c.execute();
 }
+
+#ifdef Q_WS_QWS
+
+void E3ServerInterface::windowEvent(QWSWindow *w, QWSServer::WindowEvent e)
+{
+    if (!w)
+        return;
+
+    static QWidget *shadeWindow = 0;
+    static int topWindow = 0;
+
+    switch( e ) {
+        case QWSServer::Raise:
+            if (!w->isVisible())
+                break;
+            // else FALL THROUGH
+        case QWSServer::Show:
+            if (w->name() != "_fullscreen_") { // bogus - Qt needs to send window flags to server.
+                QRect req = w->requestedRegion().boundingRect();
+                QSize s(qt_screen->deviceWidth(),
+                        qt_screen->deviceHeight());
+                req = qt_screen->mapFromDevice(req, s);
+
+                QDesktopWidget *desktop = QApplication::desktop();
+                QRect availRect = desktop->availableGeometry(desktop->primaryScreen());
+                if (req != availRect && req.width() >= qt_screen->deviceWidth()) {
+                    QRect rect(0,0,qt_screen->deviceWidth(),qt_screen->deviceHeight());
+                    rect.setBottom(req.top()-1);
+                    if (!shadeWindow || topWindow != w->winId()
+                        || rect != shadeWindow->geometry()) {
+                        if (!shadeWindow) {
+                            shadeWindow = new QWidget(0, Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint|Qt::Tool);
+                            QColor col(Qt::white);
+                            col.setAlpha(160);
+                            QPalette pal = shadeWindow->palette();
+                            pal.setBrush(QPalette::Window, col);
+                            shadeWindow->setPalette(pal);
+                            shadeWindow->setObjectName("_fullscreen_");
+                        }
+                        topWindow = w->winId();
+                        shadeWindow->setGeometry(rect);
+                        shadeWindow->raise();
+                        shadeWindow->show();
+                    }
+                } else {
+                    if (shadeWindow && topWindow == w->winId()) {
+                        shadeWindow->hide();
+                        topWindow = 0;
+                    }
+                }
+            }
+            break;
+        case QWSServer::Hide:
+            if (w->winId() == topWindow && shadeWindow) {
+                shadeWindow->hide();
+                topWindow = 0;
+            }
+        default:
+            break;
+    }
+}
+
+#endif // Q_WS_QWS
 
 #include "e3_launcher.moc"

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -31,10 +31,73 @@
 #include <QSoftMenuBar>
 #include <QMenu>
 #include <QAction>
-
+#include <QItemDelegate>
 #include <QDebug>
 
 QTOPIA_REPLACE_WIDGET(QAbstractBrowserScreen, E3BrowserScreen);
+
+class E3BrowserDelegate : public QAbstractItemDelegate
+{
+Q_OBJECT
+public:
+    E3BrowserDelegate(QObject *parent);
+
+    virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+};
+
+
+E3BrowserDelegate::E3BrowserDelegate(QObject *parent)
+: QAbstractItemDelegate(parent)
+{
+}
+
+QSize E3BrowserDelegate::sizeHint(const QStyleOptionViewItem &option, 
+                               const QModelIndex &) const
+{
+    return QSize(64, 64);
+}
+
+void E3BrowserDelegate::paint(QPainter *painter, 
+                           const QStyleOptionViewItem &option, 
+                           const QModelIndex &index) const
+{
+    QFontMetrics met(option.font);
+
+    QRect iconRect = option.rect;
+    iconRect.adjust(2, 2, -2, -2); // Margin
+    iconRect.adjust(2 + met.height() / 2, 0, 
+                    -1 * (2 + met.height() / 2), -1 * (met.height() + 4)); // Text
+    QRect textRect(option.rect.left(), iconRect.bottom() + 4, option.rect.width() - 4, met.height());
+
+    QPixmap pix = 
+        qvariant_cast<QIcon>(index.data(Qt::DecorationRole)).pixmap(iconRect.size());
+
+    if(option.state & QStyle::State_Selected) {
+        painter->save();
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(option.palette.highlight());
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->drawRoundRect(option.rect, 600 / option.rect.width(),
+                                            600 / option.rect.height());
+        painter->restore();
+    }
+
+    int x = iconRect.x() + (iconRect.width() - pix.width()) / 2;
+    int y = iconRect.y() + (iconRect.height() - pix.height()) / 2;
+    painter->drawPixmap(x, y, pix);
+
+    QString text = index.data(Qt::DisplayRole).toString();
+    painter->setFont(option.font);
+    text = met.elidedText(text, Qt::ElideRight, textRect.width());
+
+    if(option.state & QStyle::State_Selected)
+        painter->setPen(option.palette.color(QPalette::HighlightedText));
+    else
+        painter->setPen(option.palette.color(QPalette::Text));
+
+    painter->drawText(textRect, Qt::AlignHCenter | Qt::AlignVCenter, text);
+}
 
 class E3BrowserScreenStack : public LazyContentStack
 {
@@ -53,9 +116,11 @@ protected:
 
 private:
     QListView::ViewMode m_mode;
-    QContentList mainMenu() const;
     QStackedWidget *stack;
     QHash<QString, int> stackContents;
+    
+    E3BrowserDelegate *m_bd;
+    QItemDelegate *m_id;
 };
 
 E3BrowserScreenStack::E3BrowserScreenStack(QWidget *parent)
@@ -66,6 +131,9 @@ E3BrowserScreenStack::E3BrowserScreenStack(QWidget *parent)
     setLayout(layout);
     stack = new QStackedWidget(this);
     layout->addWidget(stack);
+
+    m_id = new QItemDelegate(this);
+    m_bd = new E3BrowserDelegate(this);
 }
 
 void E3BrowserScreenStack::setMode(QListView::ViewMode mode)
@@ -76,9 +144,15 @@ void E3BrowserScreenStack::setMode(QListView::ViewMode mode)
 
         v->setViewMode(mode);
         if(mode == QListView::ListMode) {
+            v->setItemDelegate(m_id);
             v->setColumns(1);
+            v->setFont(QApplication::font());
         } else {
+            v->setItemDelegate(m_bd);
             v->setColumns(3);
+            QFont fn(QApplication::font());
+            fn.setPointSize(4);
+            v->setFont(fn);
         }
     }
 }
@@ -89,9 +163,7 @@ QObject* E3BrowserScreenStack::createView(const QString &name)
     if("Main" == name) {
 
         view = new LauncherView(stack);
-        QContentList list = mainMenu();
-        for(int ii = 0; ii < list.count(); ++ii) 
-            view->addItem(&list[ii]);
+        view->showCategory(QContentFilter::category(QLatin1String("MainApplications")));
 
     } else if(name.startsWith("Folder/")) {
 
@@ -102,37 +174,17 @@ QObject* E3BrowserScreenStack::createView(const QString &name)
 
     if(view) {
         view->setViewMode(m_mode);
-        if(QListView::IconMode == m_mode)
+        if(QListView::IconMode == m_mode) {
+            view->setItemDelegate(m_bd);
             view->setColumns(3);
+            QFont fn(QApplication::font());
+            fn.setPointSize(4);
+            view->setFont(fn);
+        }
         stackContents[name] = stack->addWidget(view);
     }
 
     return view;
-}
-
-QContentList E3BrowserScreenStack::mainMenu() const
-{
-    QContentSet set(QContentFilter::Category, "MainApplications");
-    QContentList rv = set.items();
-
-    QCategoryManager man("Applications");
-    QStringList cats = man.categoryIds();
-    for(int ii = 0; ii < cats.count(); ++ii) {
-        const QString &cat = cats.at(ii);
-
-        if(man.isGlobal(cat))
-            continue;
-
-        QContent content;
-        content.setIcon(man.iconFile(cat));
-        content.setName(man.label(cat));
-        content.setType("Folder/" + cat);
-
-        rv.append(content);
-
-    }
-
-    return rv;
 }
 
 void E3BrowserScreenStack::raiseView(const QString &view, bool) 

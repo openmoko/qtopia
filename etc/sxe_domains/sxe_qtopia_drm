@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "drm policy for ${BIN} being applied"
+lidsconf -A POSTBOOT -s ${BIN} -o LIDS_SOCKET_CREATE -j ENABLE
+lidsconf -A POSTBOOT -s ${BIN} -o /etc/bscidrm2 -j WRITE

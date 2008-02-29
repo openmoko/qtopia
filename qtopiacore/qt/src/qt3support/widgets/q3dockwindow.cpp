@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -42,6 +57,7 @@
 #include <private/q3titlebar_p.h>
 #include <private/qwidgetresizehandler_p.h>
 #include <qrubberband.h>
+#include <qdebug.h>
 
 #ifdef Q_WS_MAC
 static bool default_opaque = true;
@@ -509,7 +525,7 @@ void Q3DockWindowHandle::updateGui()
 #endif
         QStyleOption opt(0);
         opt.init(closeButton);
-        closeButton->setIcon(style()->standardPixmap(QStyle::SP_DockWidgetCloseButton, &opt,
+        closeButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton, &opt,
                                                     closeButton));
         closeButton->setFixedSize(12, 12);
         connect(closeButton, SIGNAL(clicked()),
@@ -540,7 +556,7 @@ void Q3DockWindowHandle::changeEvent(QEvent *ev)
         if (closeButton) {
             QStyleOption opt(0);
             opt.init(closeButton);
-            closeButton->setIcon(style()->standardPixmap(QStyle::SP_DockWidgetCloseButton,
+            closeButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton,
                                                         &opt, closeButton));
         }
     }
@@ -574,7 +590,7 @@ Q3DockWindowTitleBar::Q3DockWindowTitleBar(Q3DockWindow *dw)
     : Q3TitleBar(0, dw), dockWindow(dw),
       mousePressed(false), hadDblClick(false), opaque(default_opaque)
 {
-    setObjectName("qt_dockwidget_internal");
+    setObjectName(QLatin1String("qt_dockwidget_internal"));
     ctrlDown = false;
     setMouseTracking(true);
     QStyleOptionTitleBar opt = getStyleOption();
@@ -614,10 +630,11 @@ void Q3DockWindowTitleBar::mousePressEvent(QMouseEvent *e)
     QSize s = icon.actualSize(QSize(64, 64));
     opt.icon = icon.pixmap(s);
     opt.titleBarState = window() ? window()->windowState() : static_cast<Qt::WindowStates>(Qt::WindowNoState);
-    opt.titleBarFlags = windowFlags();
+    opt.titleBarFlags = fakeWindowFlags();
     QStyle::SubControl tbctrl = style()->hitTestComplexControl(QStyle::CC_TitleBar, &opt,
                                                                e->pos(), this);
-    if (tbctrl > QStyle::SC_TitleBarLabel) {
+
+    if (tbctrl < QStyle::SC_TitleBarLabel) {
         Q3TitleBar::mousePressEvent(e);
         return;
     }
@@ -704,9 +721,9 @@ void Q3DockWindowTitleBar::resizeEvent(QResizeEvent *e)
 void Q3DockWindowTitleBar::updateGui()
 {
     if (dockWindow->isCloseEnabled()) {
-        setWindowFlags(windowFlags() | Qt::WStyle_SysMenu);
+        setFakeWindowFlags(fakeWindowFlags() | Qt::WStyle_SysMenu);
     } else {
-        setWindowFlags(windowFlags() & ~Qt::WStyle_SysMenu);
+        setFakeWindowFlags(fakeWindowFlags() & ~Qt::WStyle_SysMenu);
     }
 }
 

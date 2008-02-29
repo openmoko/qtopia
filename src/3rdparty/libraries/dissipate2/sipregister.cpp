@@ -27,7 +27,7 @@ SipRegister::SipRegister( SipUser *user, const SipUri &serveruri, int expires, Q
 	cleanRegister = false;
 	timer = new QTimer( this );
 	timer->setSingleShot( true );
-	connect( timer, SIGNAL( timeout() ), this, SLOT( register_timeout() ) );
+	connect( timer, SIGNAL(timeout()), this, SLOT(register_timeout()) );
 	regcall = new SipCall( user, QString::null, SipCall::RegisterCall );
 	regcall->setSubject( "Register Call" );
 	outboundProxy = "";
@@ -84,7 +84,7 @@ void SipRegister::requestRegister( const QString &username, const QString &passw
 			curtrans = regcall->newRegister( regserver, expiresTime, authresponse, proxyauthresponse, qValue );
 		}
 		cleanRegister = false;
-		connect( curtrans, SIGNAL( statusUpdated() ), this, SLOT( localStatusUpdated() ) );
+		connect( curtrans, SIGNAL(statusUpdated()), this, SLOT(localStatusUpdated()) );
 	}
 	statusUpdated();
 }
@@ -102,7 +102,7 @@ void SipRegister::requestClearRegistration( void )
 		regop = RegClear;
 		cleanRegister = true;
 		curtrans = regcall->newRegister( regserver, 0 );
-		connect( curtrans, SIGNAL( statusUpdated() ), this, SLOT( localStatusUpdated() ) );
+		connect( curtrans, SIGNAL(statusUpdated()), this, SLOT(localStatusUpdated()) );
 	}
 	statusUpdated();
 }

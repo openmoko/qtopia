@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,8 +22,7 @@
 
 #include "folder.h"
 #include "search.h"
-#include "email.h"
-#include "common.h"
+#include "emailfolderlist.h"
 
 Folder::Folder(int type)
 {
@@ -36,28 +35,29 @@ Folder::~Folder()
 
 
 // dummy.  Must be reimplemented
-bool Folder::matchesEmail(Email *)
+bool Folder::matchesEmail(const QMailMessage& message) const
 {
+    Q_UNUSED(message);
     return true;
 }
 
 // dummy.  Must be reimplemented
-QString Folder::mailbox()
+QString Folder::mailbox() const
 {
-    return QtMail::InboxString;
+    return MailboxList::InboxString;
 }
 
-QString Folder::name()
-{
-    return _name;
-}
-
-QString Folder::fullName()
+QString Folder::name() const
 {
     return _name;
 }
 
-QString Folder::displayName()
+QString Folder::fullName() const
+{
+    return _name;
+}
+
+QString Folder::displayName() const
 {
     return name();
 }
@@ -83,15 +83,15 @@ SystemFolder::SystemFolder(int systemType, const QString &mailbox)
     }
 }
 
-bool SystemFolder::matchesEmail(Email *mail)
+bool SystemFolder::matchesEmail(const QMailMessage& message) const
 {
     switch ( _systemType ) {
-        case SystemTypeSearch: return _search->matches(mail);
+        case SystemTypeSearch: return _search->matches(message);
         default: return true;           // SystemTypeMailbox
     }
 }
 
-QString SystemFolder::mailbox()
+QString SystemFolder::mailbox() const
 {
     if ( _systemType == SystemTypeSearch )
         return ( _search->mailbox() );
@@ -99,19 +99,19 @@ QString SystemFolder::mailbox()
     return _mailbox;
 }
 
-bool SystemFolder::isSearch()
+bool SystemFolder::isSearch() const
 {
     return _systemType == SystemTypeSearch;
 }
 
-int SystemFolder::systemType()
+int SystemFolder::systemType() const
 {
     return _systemType;
 }
 
-QString SystemFolder::name()
+QString SystemFolder::name() const
 {
-    return QtMail::mailboxTrName( _mailbox );
+    return MailboxList::mailboxTrName( _mailbox );
 }
 
 void SystemFolder::setSearch(Search *in)
@@ -122,7 +122,7 @@ void SystemFolder::setSearch(Search *in)
     _search = in;
 }
 
-Search* SystemFolder::search()
+Search* SystemFolder::search() const
 {
     return _search;
 }
@@ -145,22 +145,22 @@ void SearchFolder::setSearch(Search *in)
     _search = in;
 }
 
-Search* SearchFolder::search()
+Search* SearchFolder::search() const
 {
     return _search;
 }
 
-bool SearchFolder::matchesEmail(Email *mail)
+bool SearchFolder::matchesEmail(const QMailMessage& message) const
 {
-    return _search->matches(mail);
+    return _search->matches(message);
 }
 
-QString SearchFolder::mailbox()
+QString SearchFolder::mailbox() const
 {
     return _search->mailbox();
 }
 
-QString SearchFolder::name()
+QString SearchFolder::name() const
 {
     return _search->name();
 }

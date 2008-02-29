@@ -1,8 +1,8 @@
-/****************************************************************************
+/***************************************************************************
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -42,10 +42,7 @@
 #include <qtimezone.h>
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
-
-#ifdef QTOPIA_PHONE
-# include <qtopia/qsoftmenubar.h>
-#endif
+#include <qtopia/qsoftmenubar.h>
 
 // System includes
 #include <limits.h>
@@ -91,8 +88,8 @@ StylusNormalizer::StylusNormalizer( QWidget *parent )
         _ptList[i].setPoint( -1, -1 );
     }
     _tExpire = new QTimer( this );
-    QObject::connect( _tExpire, SIGNAL( timeout() ),
-                      this, SLOT( slotAveragePoint() ) );
+    QObject::connect( _tExpire, SIGNAL(timeout()),
+                      this, SLOT(slotAveragePoint()));
 }
 
 StylusNormalizer::~StylusNormalizer()
@@ -178,24 +175,20 @@ ZoomButton::ZoomButton( QWidget *parent )
 
 void ZoomButton::focusInEvent(QFocusEvent *e)
 {
-#ifdef QT_KEYPAD_NAVIGATION
     if ( QApplication::keypadNavigationEnabled() ) {
         QPalette pal;
         pal.setColor( QPalette::Button, pal.color(QPalette::Highlight) );
         setPalette( pal );
     }
-#endif
     QToolButton::focusInEvent( e );
 }
 
 void ZoomButton::focusOutEvent( QFocusEvent *e )
 {
-#ifdef QT_KEYPAD_NAVIGATION
     if ( QApplication::keypadNavigationEnabled() ) {
         QPalette pal;
         setPalette( pal );
     }
-#endif
     QToolButton::focusOutEvent( e );
 }
 
@@ -226,6 +219,9 @@ public:
     QPixmap*     pixCurr; // image to be drawn on the screen
     QLabel*      lblCity;    // the "tool-tip" that shows up when you pick a city...
     ZoomButton*  cmdZoom;   // our zoom option...
+    ZoomButton*  selecButton;
+    ZoomButton*  cancelButton;
+
     QTimer*      tHide;  // the timer to hide the "tool tip"
     QTimeZone    m_last;   // the last known good city that was found...
     QTimeZone    m_repaint; // save the location to maximize the repaint...
@@ -382,6 +378,7 @@ bool QWorldmapPrivate::winToZone(
     \ingroup time
 */
 
+
 /*!
     \fn void QWorldmap::selecting();
 
@@ -400,8 +397,16 @@ bool QWorldmapPrivate::winToZone(
     Signal that is emitted when zone selection is canceled.
 */
 
+
 /*!
-    Creates a world map widget and attaches it to \a parent.
+    \fn void QWorldmap::buttonSelected();
+
+    Signal that is emitted when the user selects a new time zone via the slect button used in touchscreen mode.
+*/
+
+/*!
+
+  Creates a world map widget and attaches it to \a parent.
 */
 QWorldmap::QWorldmap( QWidget *parent )
 :   QAbstractScrollArea( parent ),
@@ -411,7 +416,14 @@ QWorldmap::QWorldmap( QWidget *parent )
     d = new QWorldmapPrivate();
 
     d->cursorTimer = new QTimer(this);
-    connect( d->cursorTimer, SIGNAL( timeout() ), this, SLOT( cursorTimeout() ) );
+
+    if( !Qtopia::mousePreferred())  {
+        connect( d->cursorTimer, SIGNAL(timeout()),
+                 this, SLOT(cursorTimeout()));
+    } else {
+       setMouseTracking ( true);
+       setFocusPolicy( Qt::NoFocus );
+    }
 
     setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
@@ -425,11 +437,41 @@ QWorldmap::QWorldmap( QWidget *parent )
     d->cmdZoom = new ZoomButton( this );
     d->cmdZoom->setIcon( pixZoom );
     d->cmdZoom->setDown( false );
-    d->cmdZoom->resize( 20, 20 );
-    d->cmdZoom->setMaximumSize( d->cmdZoom->sizeHint() );
-    // probably don't need this, but just in case...
-    d->cmdZoom->move( viewport()->width() - d->cmdZoom->width(),
-                      viewport()->height() - d->cmdZoom->height() );
+
+    if( !Qtopia::mousePreferred())  {
+        d->cmdZoom->resize( 20,20);
+        d->cmdZoom->setMaximumSize( d->cmdZoom->sizeHint() );
+    } else {
+        d->cmdZoom->resize( 40, 40 );
+        d->cmdZoom->setMaximumSize( d->cmdZoom->sizeHint() );
+    }
+
+    QIcon pixSelect( QPixmap(":icon/select"));
+    d->selecButton = new ZoomButton( this );
+    d->selecButton->setIcon( pixSelect );
+    d->selecButton->setDown( false );
+
+    if( !Qtopia::mousePreferred())  {
+        // not needed on keypad
+        d->selecButton->hide();
+    } else {
+        d->selecButton->resize( 40, 40 );
+        d->selecButton->setMaximumSize(  d->selecButton->sizeHint());
+    }
+
+    QIcon pixCancel( QPixmap(":icon/cancel"));
+    d->cancelButton = new ZoomButton( this );
+    d->cancelButton->setIcon( pixCancel );
+    d->cancelButton->setDown( false );
+
+    if( !Qtopia::mousePreferred())  {
+        // not needed on keypad
+        d->cancelButton->hide();
+    } else {
+        d->cancelButton->resize( 40, 40 );
+        d->cancelButton->setMaximumSize( d->cancelButton->sizeHint());
+    }
+
 
     d->lblCity = new QLabel( tr( "CITY" ), this );
     d->lblCity->setMinimumSize( d->lblCity->sizeHint() );
@@ -439,25 +481,35 @@ QWorldmap::QWorldmap( QWidget *parent )
     QColor col(Qt::yellow);
     col.setAlpha(192);
     pal.setColor(QPalette::Background, col);
+    pal.setColor(QPalette::WindowText, Qt::black);
     d->lblCity->setPalette( pal );
     d->lblCity->setAutoFillBackground( true );
     d->lblCity->hide();
 
     // A timer to make sure the label gets hidden
     d->tHide = new QTimer( this );
-    QObject::connect( d->tHide, SIGNAL( timeout() ),
-                      d->lblCity, SLOT( hide() ) );
-    QObject::connect( d->tHide, SIGNAL( timeout() ),
-                      this, SLOT( redraw() ) );
+    QObject::connect( d->tHide, SIGNAL(timeout()),
+                      d->lblCity, SLOT(hide()));
+    QObject::connect( d->tHide, SIGNAL(timeout()),
+                      this, SLOT(redraw()));
     QTimer *tUpdate = new QTimer( this );
-    QObject::connect( tUpdate, SIGNAL( timeout() ),
-                      this, SLOT( update() ) );
-    QObject::connect( qApp, SIGNAL( timeChanged() ),
-                      this, SLOT( update() ) );
-    QObject::connect( d->cmdZoom, SIGNAL( pressed() ),
-                      this, SLOT( toggleZoom() ) );
-    QObject::connect( &d->norm, SIGNAL( signalNewPoint(const QPoint&) ),
-                      this, SLOT( setZone( const QPoint& ) ) );
+    QObject::connect( tUpdate, SIGNAL(timeout()),
+                      this, SLOT(update()));
+    QObject::connect( qApp, SIGNAL(timeChanged()),
+                      this, SLOT(update()));
+    QObject::connect( d->cmdZoom, SIGNAL(pressed()),
+                      this, SLOT(toggleZoom()));
+
+    if( Qtopia::mousePreferred()) {
+        QObject::connect( d->selecButton, SIGNAL(pressed()),
+                      this, SLOT(select()));
+        if( Qtopia::mousePreferred())
+            QObject::connect( d->cancelButton, SIGNAL(pressed()),
+                              this, SLOT(selectCanceled()));
+    }
+
+    QObject::connect( &d->norm, SIGNAL(signalNewPoint(QPoint)),
+                      this, SLOT(setZone(QPoint)) );
     // update the sun's movement every 5 minutes
     tUpdate->start( 5 * 60 * 1000 );
     // May as well read in the timezone information too...
@@ -469,7 +521,9 @@ QWorldmap::QWorldmap( QWidget *parent )
                             QSoftMenuBar::Cancel,
                             QSoftMenuBar::EditFocus );
 
-    QTimer::singleShot( 0, this, SLOT( initCities() ) );
+    selectionMode = true;
+
+    QTimer::singleShot( 0, this, SLOT(initCities()));
 }
 
 /*!
@@ -509,7 +563,23 @@ void QWorldmap::mouseMoveEvent( QMouseEvent* event )
     if ((event->x() >= 0 && event->x() < viewport()->width()) &&
             (event->y() >= 0 && event->y() < viewport()->height()))
     {
+
+        redraw();
+        d->norm.start();
         d->norm.addEvent( event->pos() );
+
+        if( Qtopia::mousePreferred() && selectionMode) {
+        d->norm.stop();
+        QString line = "";
+        if ( d->m_last.isValid() ) {
+            line = d->m_last.id();
+            stopSelecting();
+            qLog(Time) <<"mouseMoveEvent" << "emit newZone()" <<  line.toLatin1();
+            emit newZone( QTimeZone( line.toLatin1() ) );
+            d->m_last = QTimeZone();
+        }
+        d->tHide->start( 120000);
+        }
     }
 }
 
@@ -524,18 +594,23 @@ void QWorldmap::mouseReleaseEvent( QMouseEvent* event )
     }
 
     QString line = "";
+    if( Qtopia::mousePreferred()) {
+        setMouseTracking ( false);
+        setEditFocus( false);
+    }
 
     // get the averaged points in case a timeout hasn't occurred,
     // more for "mouse clicks"
     d->norm.stop();
     if ( d->m_last.isValid() ) {
         line = d->m_last.id();
-        qLog(Time) << "emit newZone()";
+        qLog(Time) << "emit newZone()" <<  line.toLatin1();
         stopSelecting();
         emit newZone( QTimeZone( line.toLatin1() ) );
         d->m_last = QTimeZone();
     }
-    d->tHide->start( 120000);
+
+        d->tHide->start( 120000);
 }
 
 /*!
@@ -543,23 +618,28 @@ void QWorldmap::mouseReleaseEvent( QMouseEvent* event )
 */
 void QWorldmap::selectNewZone()
 {
-    if ( d->readOnly )
+    if ( d->readOnly ) {
         return;
+    }
 
-#ifdef QTOPIA_PHONE
     if ( Qtopia::mousePreferred() || !hasEditFocus() ) {
         if( !Qtopia::mousePreferred() ) {
             // Generate a key event to put this widget into edit focus
             QKeyEvent keyEvent( QEvent::KeyPress, Qt::Key_Select, Qt::NoModifier );
             keyPressEvent( &keyEvent );
         }
-#endif
-
-    startSelecting();
-
-#ifdef QTOPIA_PHONE
+        startSelecting();
     }
-#endif
+}
+
+/*!
+    Sets the widget into continous time zone selection mode \a selectMode
+
+    touchscreen only.
+*/
+void QWorldmap::setContinuousSelect(const bool selectMode)
+{
+    selectionMode = selectMode;
 }
 
 /*!
@@ -573,7 +653,11 @@ void QWorldmap::startSelecting()
     else
         setZone( QPoint( viewport()->width(), viewport()->height() ) / 2 );
 
-    d->cmdZoom->setFocusPolicy( Qt::NoFocus );
+        d->cmdZoom->setFocusPolicy( Qt::NoFocus );
+
+    if( Qtopia::mousePreferred() && selectionMode) {
+        setMouseTracking ( true);
+    }
     emit selecting();
 }
 
@@ -582,7 +666,17 @@ void QWorldmap::startSelecting()
 */
 void QWorldmap::stopSelecting()
 {
+    if( Qtopia::mousePreferred())
+        return;
+
     d->cmdZoom->setFocusPolicy( Qt::StrongFocus );
+}
+
+void QWorldmap::selectCanceled()
+{
+    //    if(isZoom() )
+    //    toggleZoom();
+    emit selectZoneCanceled();
 }
 
 /*!
@@ -599,7 +693,6 @@ int QWorldmap::heightForWidth( int w ) const
 */
 void QWorldmap::keyPressEvent( QKeyEvent *ke )
 {
-#ifdef QTOPIA_PHONE
     // On keypad devices, we must ignore all keys except the Select
     // key if we don't have edit focus.  This allows the parent window
     // to process key presses that navigate to other widgets or exit the app.
@@ -612,7 +705,6 @@ void QWorldmap::keyPressEvent( QKeyEvent *ke )
             ke->ignore();
         return;
     }
-#endif
 
     // For processing the remaining events, we know that either we have edit
     // focus, or we're running on a touchscreen device, where edit focus
@@ -625,22 +717,20 @@ void QWorldmap::keyPressEvent( QKeyEvent *ke )
             break;
 #endif
 
-#ifdef QTOPIA_PHONE
         case Qt::Key_No:
         case Qt::Key_Back:
             // On keypad devices, the Back button should unfocus the map
             // rather than exiting the application.
-            if (!Qtopia::mousePreferred() && hasEditFocus()) {
+            if ( !Qtopia::mousePreferred() && hasEditFocus()) {
                 emit selectZoneCanceled();
                 setEditFocus( false );
                 stopSelecting();
-                d->tHide->start();
+                d->tHide->start(250);
                 ke->accept();
             }
             else
                 ke->ignore();
             break;
-#endif
 
         case Qt::Key_Left:
             if (!ke->isAutoRepeat() && d->accelHori == 0) {
@@ -686,22 +776,15 @@ void QWorldmap::keyPressEvent( QKeyEvent *ke )
         case Qt::Key_Space:
         case Qt::Key_Enter:
         case Qt::Key_Return:
-#ifdef QTOPIA_PHONE
         case Qt::Key_Select:
-#endif
-
-#ifdef QTOPIA_PHONE
             if( !Qtopia::mousePreferred() )
-#endif
                 if ( d->m_cursor.isValid() ) {
                     QString line = d->m_cursor.id();
                     emit newZone( QTimeZone( line.toLatin1() ) );
                     stopSelecting();
-                    QTimer::singleShot( 0, this, SLOT( redraw() ) );
+                    QTimer::singleShot( 0, this, SLOT(redraw()) );
                     d->lblCity->hide();
-#ifdef QTOPIA_PHONE
                     setEditFocus( false );
-#endif
                 }
             ke->accept();
             break;
@@ -973,7 +1056,7 @@ void QWorldmap::setCursorPoint( int ox, int oy, QString city )
 
     d->lblCity->move( x, y );
     d->lblCity->show();
-    d->tHide->start( 120000 );
+    d->tHide->start( 10000 );
     viewport()->update();
 }
 
@@ -1033,9 +1116,15 @@ void QWorldmap::setZone( const QTimeZone& zone )
 void QWorldmap::setReadOnly( const bool readOnly )
 {
     d->cmdZoom->setVisible( !readOnly );
+
+    if( Qtopia::mousePreferred())  {
+        d->selecButton->setVisible( !readOnly );
+        d->cancelButton->setVisible( !readOnly );
+    }
     d->readOnly = readOnly;
     if ( readOnly ) {
         setFocusPolicy( Qt::NoFocus );
+       d->tHide->start( 1);
     } else {
         setFocusPolicy( Qt::StrongFocus );
     }
@@ -1060,6 +1149,10 @@ void QWorldmap::resizeEvent( QResizeEvent *e )
     QSize _size = e->size();
     d->cmdZoom->move( _size.width() - d->cmdZoom->width(),
                       _size.height() - d->cmdZoom->height() );
+
+    d->selecButton->move( 0, _size.height() - d->selecButton->height() );
+    d->cancelButton->move( d->selecButton->width(), _size.height() - d->cancelButton->height() );
+
 
     d->drawableW = viewport()->width() - 2 * frameWidth();
     d->drawableH = viewport()->height() - 2 * frameWidth();
@@ -1319,13 +1412,11 @@ void QWorldmap::paintEvent( QPaintEvent * )
     if ( d->m_last.isValid() )
         drawCity( &p, d->m_last );
 
-#ifdef QT_KEYPAD_NAVIGATION
     if ( QApplication::keypadNavigationEnabled() && hasFocus() && !hasEditFocus() ) {
         QColor color = palette().color( QPalette::Highlight );
         color.setAlpha( 50 );
         p.fillRect( rect(), color );
     }
-#endif
 }
 
 /*!
@@ -1391,6 +1482,15 @@ void QWorldmap::toggleZoom( )
     d->zoneToWin( d->m_cursor.longitude(), d->m_cursor.latitude(), lx, ly, viewport() );
     d->lblCity->hide();
     viewport()->update();
+}
+
+/*!
+    Button select slot - touchscreen only.
+
+*/
+void QWorldmap::select( )
+{
+    emit buttonSelected();
 }
 
 /*!
@@ -1490,10 +1590,12 @@ void QWorldmap::initCities()
         zoneID = *it;
         QTimeZone curZone( zoneID.toLatin1() );
 
+/* isValid causes Data to be gotten - which includes gmtime calculation! We only need lon/lat.
         if ( !curZone.isValid() ) {
             qLog(Time) << "initCities()-timezone is invalid!";
             continue;
         }
+*/
 
         CityPos *cp = new CityPos;
         cp->lat = curZone.latitude();

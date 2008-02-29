@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/activeqt/container/qaxbase.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/activeqt/container/qaxbase.cpp -->
 <head>
-  <title>Qt 4.2: QAxBase Class Reference</title>
+  <title>Qt 4.3: QAxBase Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QAxBase Class Reference<br /><sup><sup>[<a href="qaxcontainer.html">QAxContainer</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QAxBase Class Reference<br /><span class="small-subtitle">[<a href="qaxcontainer.html">QAxContainer</a> module]</span>
+</h1>
 <p>The QAxBase class is an abstract class that provides an API to initialize and access a COM object. <a href="#details">More...</a></p>
 <pre> #include &lt;QAxBase&gt;</pre><p>Inherited by <a href="qaxobject.html">QAxObject</a> and <a href="qaxwidget.html">QAxWidget</a>.</p>
 <ul>
@@ -96,14 +97,15 @@
 <tr valign="top" class="odd"><td>CY</td><td>qlonglong</td><td>qlonglong</td><td>qlonglong&amp;</td></tr>
 <tr valign="top" class="even"><td>OLE_COLOR</td><td><a href="qcolor.html">QColor</a></td><td>const <a href="qcolor.html">QColor</a>&amp;</td><td><a href="qcolor.html">QColor</a>&amp;</td></tr>
 <tr valign="top" class="odd"><td>SAFEARRAY(VARIANT)</td><td><a href="qlist.html">QList</a>&lt;<a href="qvariant.html">QVariant</a>&gt;</td><td>const <a href="qlist.html">QList</a>&lt;<a href="qvariant.html">QVariant</a>&gt;&amp;</td><td><a href="qlist.html">QList</a>&lt;<a href="qvariant.html">QVariant</a>&gt;&amp;</td></tr>
-<tr valign="top" class="even"><td>SAFEARRAY(BYTE)</td><td><a href="qbytearray.html">QByteArray</a></td><td>const <a href="qbytearray.html">QByteArray</a>&amp;</td><td><a href="qbytearray.html">QByteArray</a>&amp;</td></tr>
-<tr valign="top" class="odd"><td>SAFEARRAY(BSTR)</td><td><a href="qstringlist.html">QStringList</a></td><td>const <a href="qstringlist.html">QStringList</a>&amp;</td><td><a href="qstringlist.html">QStringList</a>&amp;</td></tr>
-<tr valign="top" class="even"><td>VARIANT</td><td>type-dependent</td><td>const <a href="qvariant.html">QVariant</a>&amp;</td><td><a href="qvariant.html">QVariant</a>&amp;</td></tr>
-<tr valign="top" class="odd"><td>IFontDisp*</td><td><a href="qfont.html">QFont</a></td><td>const <a href="qfont.html">QFont</a>&amp;</td><td><a href="qfont.html">QFont</a>&amp;</td></tr>
-<tr valign="top" class="even"><td>IPictureDisp*</td><td><a href="qpixmap.html">QPixmap</a></td><td>const <a href="qpixmap.html">QPixmap</a>&amp;</td><td><a href="qpixmap.html">QPixmap</a>&amp;</td></tr>
-<tr valign="top" class="odd"><td>IDispatch*</td><td><a href="qaxobject.html">QAxObject</a>*</td><td><tt>QAxBase::asVariant()</tt></td><td><a href="qaxobject.html">QAxObject</a>* (return value)</td></tr>
-<tr valign="top" class="even"><td>IUnknown*</td><td><a href="qaxobject.html">QAxObject</a>*</td><td><tt>QAxBase::asVariant()</tt></td><td><a href="qaxobject.html">QAxObject</a>* (return value)</td></tr>
-<tr valign="top" class="odd"><td>SCODE, DECIMAL</td><td><i>unsupported</i></td><td><i>unsupported</i></td><td><i>unsupported</i></td></tr>
+<tr valign="top" class="even"><td>SAFEARRAY(int), SAFEARRAY(double), SAFEARRAY(Date)</td><td><a href="qlist.html">QList</a>&lt;<a href="qvariant.html">QVariant</a>&gt;</td><td>const <a href="qlist.html">QList</a>&lt;<a href="qvariant.html">QVariant</a>&gt;&amp;</td><td><a href="qlist.html">QList</a>&lt;<a href="qvariant.html">QVariant</a>&gt;&amp;</td></tr>
+<tr valign="top" class="odd"><td>SAFEARRAY(BYTE)</td><td><a href="qbytearray.html">QByteArray</a></td><td>const <a href="qbytearray.html">QByteArray</a>&amp;</td><td><a href="qbytearray.html">QByteArray</a>&amp;</td></tr>
+<tr valign="top" class="even"><td>SAFEARRAY(BSTR)</td><td><a href="qstringlist.html">QStringList</a></td><td>const <a href="qstringlist.html">QStringList</a>&amp;</td><td><a href="qstringlist.html">QStringList</a>&amp;</td></tr>
+<tr valign="top" class="odd"><td>VARIANT</td><td>type-dependent</td><td>const <a href="qvariant.html">QVariant</a>&amp;</td><td><a href="qvariant.html">QVariant</a>&amp;</td></tr>
+<tr valign="top" class="even"><td>IFontDisp*</td><td><a href="qfont.html">QFont</a></td><td>const <a href="qfont.html">QFont</a>&amp;</td><td><a href="qfont.html">QFont</a>&amp;</td></tr>
+<tr valign="top" class="odd"><td>IPictureDisp*</td><td><a href="qpixmap.html">QPixmap</a></td><td>const <a href="qpixmap.html">QPixmap</a>&amp;</td><td><a href="qpixmap.html">QPixmap</a>&amp;</td></tr>
+<tr valign="top" class="even"><td>IDispatch*</td><td><a href="qaxobject.html">QAxObject</a>*</td><td><tt>QAxBase::asVariant()</tt></td><td><a href="qaxobject.html">QAxObject</a>* (return value)</td></tr>
+<tr valign="top" class="odd"><td>IUnknown*</td><td><a href="qaxobject.html">QAxObject</a>*</td><td><tt>QAxBase::asVariant()</tt></td><td><a href="qaxobject.html">QAxObject</a>* (return value)</td></tr>
+<tr valign="top" class="even"><td>SCODE, DECIMAL</td><td><i>unsupported</i></td><td><i>unsupported</i></td><td><i>unsupported</i></td></tr>
 </table></p>
 <p>Supported are also enumerations, and typedefs to supported types.</p>
 <p>To call the methods of a COM interface described by the following IDL</p>
@@ -154,13 +156,13 @@
 <h3 class="fn"><a name="control-prop"></a>control : <a href="qstring.html">QString</a></h3>
 <p>This property holds the name of the COM object wrapped by this QAxBase object.</p>
 <p>Setting this property initilializes the COM object. Any COM object previously set is shut down.</p>
-<p>The most efficient way to set this property is by using the registered component's UUID, e.g.</p>
+<p>The most efficient way to set this property is by using the registered component's UUID, e.g&#x2e;</p>
 <pre> ctrl-&gt;setControl(&quot;{8E27C92B-1264-101C-8A2F-040224009C02}&quot;);</pre>
-<p>The second fastest way is to use the registered control's class name (with or without version number), e.g.</p>
+<p>The second fastest way is to use the registered control's class name (with or without version number), e.g&#x2e;</p>
 <pre> ctrl-&gt;setControl(&quot;MSCal.Calendar&quot;);</pre>
-<p>The slowest, but easiest way to use is to use the control's full name, e.g.</p>
+<p>The slowest, but easiest way to use is to use the control's full name, e.g&#x2e;</p>
 <pre> ctrl-&gt;setControl(&quot;Calendar Control 9.0&quot;);</pre>
-<p>It is also possible to initialize the object from a file, e.g.</p>
+<p>It is also possible to initialize the object from a file, e.g&#x2e;</p>
 <pre> ctrl-&gt;setControl(&quot;c:/files/file.doc&quot;);</pre>
 <p>If the component's UUID is used the following patterns can be used to initialize the control on a remote machine, to initialize a licensed control or to connect to a running object:</p>
 <ul>
@@ -171,7 +173,7 @@
 <li>To connect to an already running object use the following pattern:<pre> {8E27C92B-1264-101C-8A2F-040224009C02}&amp;</pre>
 </li>
 </ul>
-<p>The first two patterns can be combined, e.g. to initialize a licensed control on a remote machine:</p>
+<p>The first two patterns can be combined, e.g&#x2e; to initialize a licensed control on a remote machine:</p>
 <pre> ctrl-&gt;setControl(&quot;DOMAIN/user:password@server/{8E27C92B-1264-101C-8A2F-040224009C02}:LicenseKey&quot;);</pre>
 <p>The control's read function always returns the control's UUID, if provided including the license key, and the name of the server, but not including the username, the domain or the password.</p>
 <p>Access functions:</p>
@@ -187,7 +189,7 @@
 <p>Shuts down the COM object and destroys the <a href="qaxbase.html">QAxBase</a> object.</p>
 <p>See also <a href="qaxbase.html#clear">clear</a>().</p>
 <h3 class="fn"><a name="asVariant"></a><a href="qvariant.html">QVariant</a> QAxBase::asVariant () const</h3>
-<p>Returns a <a href="qvariant.html">QVariant</a> that wraps the COM object. The variant can then be used as a parameter in e.g. <a href="qaxbase.html#dynamicCall">dynamicCall</a>().</p>
+<p>Returns a <a href="qvariant.html">QVariant</a> that wraps the COM object. The variant can then be used as a parameter in e.g&#x2e; <a href="qaxbase.html#dynamicCall">dynamicCall</a>().</p>
 <h3 class="fn"><a name="clear"></a>void QAxBase::clear ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Disconnects and destroys the COM object.</p>
 <p>If you reimplement this function you must also reimplement the destructor to call clear(), and call this implementation at the end of your clear() function.</p>
@@ -206,7 +208,7 @@
 <p>Calls the COM object's method <i>function</i>, passing the parameters <i>var1</i>, <i>var1</i>, <i>var2</i>, <i>var3</i>, <i>var4</i>, <i>var5</i>, <i>var6</i>, <i>var7</i> and <i>var8</i>, and returns the value returned by the method, or an invalid <a href="qvariant.html">QVariant</a> if the method does not return a value or when the function call failed.</p>
 <p>If <i>function</i> is a method of the object the string must be provided as the full prototype, for example as it would be written in a <a href="qobject.html#connect">QObject::connect</a>() call.</p>
 <pre> activeX-&gt;dynamicCall(&quot;Navigate(const QString&amp;)&quot;, &quot;www.trolltech.com&quot;);</pre>
-<p>Alternatively a function can be called passing the parameters embedded in the string, e.g. above function can also be invoked using</p>
+<p>Alternatively a function can be called passing the parameters embedded in the string, e.g&#x2e; above function can also be invoked using</p>
 <pre> activeX-&gt;dynamicCall(&quot;Navigate(\&quot;www.trolltech.com\&quot;);</pre>
 <p>All parameters are passed as strings; it depends on the control whether they are interpreted correctly, and is slower than using the prototype with correctly typed parameters.</p>
 <p>If <i>function</i> is a property the string has to be the name of the property. The property setter is called when <i>var1</i> is a valid <a href="qvariant.html">QVariant</a>, otherwise the getter is called.</p>
@@ -227,14 +229,14 @@
 <p>Calls the COM object's method <i>function</i>, passing the parameters in <i>vars</i>, and returns the value returned by the method. If the method does not return a value or when the function call failed this function returns an invalid <a href="qvariant.html">QVariant</a> object.</p>
 <p>The <a href="qvariant.html">QVariant</a> objects in <i>vars</i> are updated when the method has out-parameters.</p>
 <h3 class="fn"><a name="exception"></a>void QAxBase::exception ( int <i>code</i>, const <a href="qstring.html">QString</a> &amp; <i>source</i>, const <a href="qstring.html">QString</a> &amp; <i>desc</i>, const <a href="qstring.html">QString</a> &amp; <i>help</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted when the COM object throws an exception while called using the OLE automation interface IDispatch. <i>code</i>, <i>source</i>, <i>desc</i> and <i>help</i> provide information about the exception as provided by the COM server and can be used to provide useful feedback to the end user. <i>help</i> includes the help file, and the help context ID in brackets, e.g. &quot;filename [id]&quot;.</p>
+<p>This signal is emitted when the COM object throws an exception while called using the OLE automation interface IDispatch. <i>code</i>, <i>source</i>, <i>desc</i> and <i>help</i> provide information about the exception as provided by the COM server and can be used to provide useful feedback to the end user. <i>help</i> includes the help file, and the help context ID in brackets, e.g&#x2e; &quot;filename [id]&quot;.</p>
 <h3 class="fn"><a name="generateDocumentation"></a><a href="qstring.html">QString</a> QAxBase::generateDocumentation ()</h3>
-<p>Returns a rich text string with documentation for the wrapped COM object. Dump the string to an HTML-file, or use it in e.g. a <a href="qtextbrowser.html">QTextBrowser</a> widget.</p>
+<p>Returns a rich text string with documentation for the wrapped COM object. Dump the string to an HTML-file, or use it in e.g&#x2e; a <a href="qtextbrowser.html">QTextBrowser</a> widget.</p>
 <h3 class="fn"><a name="initialize"></a>bool QAxBase::initialize ( IUnknown ** <i>ptr</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This virtual function is called by <a href="qaxbase.html#control-prop">setControl</a>() and creates the requested COM object. <i>ptr</i> is set to the object's IUnknown implementation. The function returns true if the object initialization succeeded; otherwise the function returns false.</p>
 <p>The default implementation interprets the string returned by <a href="qaxbase.html#control-prop">control</a>(), and calls <a href="qaxbase.html#initializeRemote">initializeRemote</a>(), <a href="qaxbase.html#initializeLicensed">initializeLicensed</a>() or <a href="qaxbase.html#initializeActive">initializeActive</a>() if the string matches the respective patterns. If <a href="qaxbase.html#control-prop">control</a>() is the name of an existing file, <a href="qaxbase.html#initializeFromFile">initializeFromFile</a>() is called. If no pattern is matched, or if remote or licensed initialization fails, CoCreateInstance is used directly to create the object.</p>
 <p>See the <a href="qaxbase.html#control-prop">control</a> property documentation for details about supported patterns.</p>
-<p>The interface returned in <i>ptr</i> must be referenced exactly once when this function returns. The interface provided by e.g. CoCreateInstance is already referenced, and there is no need to reference it again.</p>
+<p>The interface returned in <i>ptr</i> must be referenced exactly once when this function returns. The interface provided by e.g&#x2e; CoCreateInstance is already referenced, and there is no need to reference it again.</p>
 <h3 class="fn"><a name="initializeActive"></a>bool QAxBase::initializeActive ( IUnknown ** <i>ptr</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Connects to an active instance running on the current machine, and returns the IUnknown interface to the running object in <i>ptr</i>. This function returns true if successful, otherwise returns false.</p>
 <p>This function is called by <a href="qaxbase.html#initialize">initialize</a>() if the control string contains the substring &quot;}&amp;&quot;.</p>
@@ -272,9 +274,9 @@
 <h3 class="fn"><a name="querySubObject"></a><a href="qaxobject.html">QAxObject</a> * QAxBase::querySubObject ( const char * <i>name</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>var1</i> = QVariant(), const <a href="qvariant.html">QVariant</a> &amp; <i>var2</i> = QVariant(), const <a href="qvariant.html">QVariant</a> &amp; <i>var3</i> = QVariant(), const <a href="qvariant.html">QVariant</a> &amp; <i>var4</i> = QVariant(), const <a href="qvariant.html">QVariant</a> &amp; <i>var5</i> = QVariant(), const <a href="qvariant.html">QVariant</a> &amp; <i>var6</i> = QVariant(), const <a href="qvariant.html">QVariant</a> &amp; <i>var7</i> = QVariant(), const <a href="qvariant.html">QVariant</a> &amp; <i>var8</i> = QVariant() )</h3>
 <p>Returns a pointer to a <a href="qaxobject.html">QAxObject</a> wrapping the COM object provided by the method or property <i>name</i>, passing passing the parameters <i>var1</i>, <i>var1</i>, <i>var2</i>, <i>var3</i>, <i>var4</i>, <i>var5</i>, <i>var6</i>, <i>var7</i> and <i>var8</i>.</p>
 <p>If <i>name</i> is provided by a method the string must include the full function prototype.</p>
-<p>If <i>name</i> is a property the string must be the name of the property, and <i>var1</i>, ... <i>var8</i> are ignored.</p>
+<p>If <i>name</i> is a property the string must be the name of the property, and <i>var1</i>, ..&#x2e; <i>var8</i> are ignored.</p>
 <p>The returned <a href="qaxobject.html">QAxObject</a> is a child of this object (which is either of type <a href="qaxobject.html">QAxObject</a> or <a href="qaxwidget.html">QAxWidget</a>), and is deleted when this object is deleted. It is however safe to delete the returned object yourself, and you should do so when you iterate over lists of subobjects.</p>
-<p>COM enabled applications usually have an object model publishing certain elements of the application as dispatch interfaces. Use this method to navigate the hierarchy of the object model, e.g.</p>
+<p>COM enabled applications usually have an object model publishing certain elements of the application as dispatch interfaces. Use this method to navigate the hierarchy of the object model, e.g&#x2e;</p>
 <pre> QAxWidget outlook(&quot;Outlook.Application&quot;);
  QAxObject *session = outlook.querySubObject(&quot;Session&quot;);
  if (session) {
@@ -318,6 +320,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

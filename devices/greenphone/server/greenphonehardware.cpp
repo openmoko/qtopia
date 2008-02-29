@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -34,18 +34,18 @@
 #include <QDesktopWidget>
 #include <QProcess>
 #include <QFile>
+#include <QtGlobal>
 
 #include <qcontentset.h>
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
-#include <qtopiaipcadaptor.h>
-#include <qspeakerphoneaccessory.h>
 #include <qbootsourceaccessory.h>
 #include <qtopiaipcenvelope.h>
+#include <qpowersource.h>
 
 #include <qtopiaserverapplication.h>
 #include <standarddevicefeatures.h>
-#include <ui/standarddialogs.h>
+//#include <ui/standarddialogs.h>
 
 #include <fcntl.h>
 #include <errno.h>
@@ -56,10 +56,8 @@
 QTOPIA_TASK(GreenphoneHardware, GreenphoneHardware);
 
 GreenphoneHardware::GreenphoneHardware()
-    : vsoBattery("/Accessories/Battery"), charging(false), percent(-1), chargeId(0),
-      vsoPortableHandsfree("/Hardware/Accessories/PortableHandsfree"), mountProc(NULL)
+    : vsoPortableHandsfree("/Hardware/Accessories/PortableHandsfree"), mountProc(NULL)
 {
-    StandardDeviceFeatures::disableBatteryMonitor();
     //StandardDialogs::disableShutdownDialog();
 
     detectFd = ::open("/dev/omega_detect", O_RDONLY|O_NDELAY, 0);
@@ -73,14 +71,16 @@ GreenphoneHardware::GreenphoneHardware()
 
     //QObject::connect(QtopiaServerApplication::instance(), SIGNAL(shutdownRequested()), this, SLOT(shutdownRequested()));
 
-    adaptor = new QtopiaIpcAdaptor("QPE/GreenphoneModem", this );
-
-    speakerPhone =
-        new QSpeakerPhoneAccessoryProvider( "greenphone", this );
-    connect( speakerPhone, SIGNAL(onSpeakerModified()),
-             this, SLOT(onSpeakerModified()) );
-
     bootSource = new QBootSourceAccessoryProvider( "greenphone", this );
+
+    batterySource = new QPowerSourceProvider(QPowerSource::Battery, "GreenphoneBattery", this);
+    batterySource->setAvailability(QPowerSource::Available);
+    connect(batterySource, SIGNAL(chargingChanged(bool)),
+            this, SLOT(chargingChanged(bool)));
+    connect(batterySource, SIGNAL(chargeChanged(int)),
+            this, SLOT(chargeChanged(int)));
+
+    wallSource = new QPowerSourceProvider(QPowerSource::Wall, "GreenphoneCharger", this);
 
     readDetectData(1 << CHARGER_DETECT |
                    1 << BOOTSRC_DETECT |
@@ -151,8 +151,8 @@ void GreenphoneHardware::unmountSD()
     connect(mountProc, SIGNAL(finished(int,QProcess::ExitStatus)),
                        SLOT(mountFinished(int,QProcess::ExitStatus)));
 
-    qLog(Hardware) << "Unmounting /mnt/sd";
-    mountProc->start("umount -l /mnt/sd");
+    qLog(Hardware) << "Unmounting /media/sdcard";
+    mountProc->start("umount -l /media/sdcard");
 }
 
 void GreenphoneHardware::fsckFinished(int exitCode, QProcess::ExitStatus exitStatus)
@@ -167,16 +167,16 @@ void GreenphoneHardware::fsckFinished(int exitCode, QProcess::ExitStatus exitSta
                        SLOT(mountFinished(int,QProcess::ExitStatus)));
 
     QStringList arguments;
-    arguments << sdCardDevice << "/mnt/sd";
+    arguments << sdCardDevice << "/media/sdcard";
 
-    qLog(Hardware) << "Mounting" << sdCardDevice << "on /mnt/sd";
+    qLog(Hardware) << "Mounting" << sdCardDevice << "on /media/sdcard";
     mountProc->start("mount", arguments);
 }
 
 void GreenphoneHardware::mountFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if (exitStatus == QProcess::NormalExit && exitCode != 0)
-        qLog(Hardware) << "Failed to (u)mount" << sdCardDevice << "on /mnt/sd";
+        qLog(Hardware) << "Failed to (u)mount" << sdCardDevice << "on /media/sdcard";
 
     mountProc->deleteLater();
     mountProc = NULL;
@@ -184,40 +184,21 @@ void GreenphoneHardware::mountFinished(int exitCode, QProcess::ExitStatus exitSt
     QtopiaIpcEnvelope msg("QPE/Card", "mtabChanged()");
 }
 
-void GreenphoneHardware::setCharging(bool charge)
+void GreenphoneHardware::chargingChanged(bool charging)
 {
-    charging = charge;
-    vsoBattery.setAttribute("Charging", charge);
-
-    if (!chargeId && charge && percent < 100) {
-        chargeId = startTimer(500);
-    } else if (chargeId && !charge) {
-        killTimer(chargeId);
-        chargeId = 0;
-        vsoBattery.setAttribute("VisualCharge", percent);
-    }
+    if (charging)
+        setLeds(101);
+    else
+        setLeds(batterySource->charge());
 }
 
-void GreenphoneHardware::setBatteryLevel(int level)
+void GreenphoneHardware::chargeChanged(int charge)
 {
-    percent = 25 * qBound(0, level, 4);
-
-    vsoBattery.setAttribute("Charge", percent);
-
-    if (chargeId && percent == 100) {
-        killTimer(chargeId);
-        chargeId = 0;
-    } else if (!chargeId && charging && percent < 100) {
-        chargeId = startTimer(500);
-    }
-        
-    if (!chargeId)
-        vsoBattery.setAttribute("VisualCharge", percent);
-
-    setLeds();
+    if (!batterySource->charging())
+        setLeds(charge);
 }
 
-void GreenphoneHardware::setLeds()
+void GreenphoneHardware::setLeds(int charge)
 {
     int ledFd = ::open("/dev/omega_chgled", O_RDWR);
     if (ledFd < 0) {
@@ -225,39 +206,39 @@ void GreenphoneHardware::setLeds()
         return;
     }
 
-    if (charging) {
+    if (charge == 101) {
         // red on
         ::ioctl(ledFd, SET_GPO0_CTRL, 0);
         ::ioctl(ledFd, SET_GPO1_CTRL, 7);
-    } else if (percent > 75) {
+    } else if (charge > 75) {
         // red flashing slow
         ::ioctl(ledFd, ENABLE_LED1_IN_ACT, 0);
         ::ioctl(ledFd, SET_LED1_BLINK_TIME, 7);
         ::ioctl(ledFd, SET_LED1_LIGHT_TIME, 1);
         ::ioctl(ledFd, SET_GPO0_CTRL, 0);
         ::ioctl(ledFd, SET_GPO1_CTRL, 1);
-    } else if (percent > 50) {
+    } else if (charge > 50) {
         // red flashing slow
         ::ioctl(ledFd, ENABLE_LED1_IN_ACT, 0);
         ::ioctl(ledFd, SET_LED1_BLINK_TIME, 5);
         ::ioctl(ledFd, SET_LED1_LIGHT_TIME, 1);
         ::ioctl(ledFd, SET_GPO0_CTRL, 0);
         ::ioctl(ledFd, SET_GPO1_CTRL, 1);
-    } else if (percent > 25) {
+    } else if (charge > 25) {
         // red flashing fast
         ::ioctl(ledFd, ENABLE_LED1_IN_ACT, 0);
         ::ioctl(ledFd, SET_LED1_BLINK_TIME, 3);
         ::ioctl(ledFd, SET_LED1_LIGHT_TIME, 1);
         ::ioctl(ledFd, SET_GPO0_CTRL, 0);
         ::ioctl(ledFd, SET_GPO1_CTRL, 1);
-    } else if (percent > 0) {
+    } else if (charge > 0) {
         // red flashing fast
         ::ioctl(ledFd, ENABLE_LED1_IN_ACT, 0);
         ::ioctl(ledFd, SET_LED1_BLINK_TIME, 1);
         ::ioctl(ledFd, SET_LED1_LIGHT_TIME, 1);
         ::ioctl(ledFd, SET_GPO0_CTRL, 0);
         ::ioctl(ledFd, SET_GPO1_CTRL, 1);
-    } else if (percent == 0) {
+    } else if (charge == 0) {
         // red flashing very fast
         ::ioctl(ledFd, ENABLE_LED1_IN_ACT, 0);
         ::ioctl(ledFd, SET_LED1_BLINK_TIME, 0);
@@ -277,18 +258,6 @@ void GreenphoneHardware::setLeds()
 void GreenphoneHardware::shutdownRequested()
 {
     QtopiaServerApplication::instance()->shutdown(QtopiaServerApplication::ShutdownSystem);
-}
-
-void GreenphoneHardware::timerEvent(QTimerEvent *e)
-{
-    if (!e)
-        return;
-
-    visualCharge += 20;
-    if (visualCharge > 100)
-        visualCharge = 0;
-
-    vsoBattery.setAttribute("VisualCharge", visualCharge);
 }
 
 void GreenphoneHardware::delayedRead()
@@ -318,41 +287,26 @@ void GreenphoneHardware::readDetectData(quint32 devices)
             switch (device.dev_id) {
             case CHARGER_DETECT:
                 if (device.status == DEV_ON) {
-                    setCharging(true);
+                    wallSource->setAvailability(QPowerSource::Available);
+                    batterySource->setCharging(true);
                     qLog(Hardware) << "Charger cable plugged in";
                 } else if (device.status == DEV_OFF) {
-                    setCharging(false);
+                    wallSource->setAvailability(QPowerSource::NotAvailable);
+                    batterySource->setCharging(false);
                     qLog(Hardware) << "Charger cable unplugged";
                 } else {
+                    wallSource->setAvailability(QPowerSource::Failed);
+                    batterySource->setCharging(false);
                     qLog(Hardware) << "Unknown charger cable event";
                 }
                 break;
             case AVHEADSET_DETECT:
                 if (device.status == HEADSET_ON) {
                     qLog(Hardware) << "Headset plugged in";
-
                     vsoPortableHandsfree.setAttribute("Present", true);
-
-                    int mixerFd = ::open("/dev/mixer", O_RDWR);
-                    if (mixerFd >= 0) {
-                        ::ioctl(mixerFd, IOCTL_OMEGA_SOUND_HEADPHONE_START, 0);
-                        ::close(mixerFd);
-                    }
-
-                    adaptor->send(MESSAGE(setOutput(int)), 1);
-
                 } else if (device.status == DEV_OFF) {
                     qLog(Hardware) << "Headset unplugged";
-
                     vsoPortableHandsfree.setAttribute("Present", false);
-
-                    int mixerFd = ::open("/dev/mixer", O_RDWR);
-                    if (mixerFd >= 0) {
-                        ::ioctl(mixerFd, IOCTL_OMEGA_SOUND_HEADPHONE_STOP, 0);
-                        ::close(mixerFd);
-                    }
-
-                    adaptor->send(MESSAGE(setOutput(int)), 0);
                 } else {
                     qLog(Hardware) << "Unknown AVHEADSET";
                 }
@@ -437,7 +391,7 @@ void GreenphoneHardware::readDetectData(quint32 devices)
                 break;
             case LOWPOWER_DETECT:
             {
-                setBatteryLevel(device.extra);
+                batterySource->setCharge(25 * qBound<quint16>(0, device.extra, 4));
 
                 if (device.status == NORMAL_POWER) {
                     qLog(Hardware) << "Normal power - level" << device.extra;
@@ -484,20 +438,6 @@ void GreenphoneHardware::readDetectData(quint32 devices)
 
         mask <<= 1;
         position++;
-    }
-}
-
-void GreenphoneHardware::onSpeakerModified()
-{
-    int request;
-    if ( speakerPhone->onSpeaker() )
-        request = IOCTL_OMEGA_SOUND_HANDFREE_START;
-    else
-        request = IOCTL_OMEGA_SOUND_HANDFREE_STOP;
-    int mixerFd = ::open("/dev/mixer", O_RDWR);
-    if (mixerFd >= 0) {
-        ::ioctl(mixerFd, request, 0);
-        ::close(mixerFd);
     }
 }
 

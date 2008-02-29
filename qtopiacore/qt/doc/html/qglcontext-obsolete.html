@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/opengl/qgl.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/opengl/qgl.cpp -->
 <head>
-  <title>Qt 4.2: Obsolete Members for QGLContext</title>
+  <title>Qt 4.3: Obsolete Members for QGLContext</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -17,18 +17,25 @@
 <p><ul><li><a href="qglcontext.html">QGLContext class reference</a></li></ul></p>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qglcontext-obsolete.html#QGLContext">QGLContext</a></b> ( const QGLFormat &amp; <i>format</i>, QPaintDevice * <i>device</i> )&nbsp;&nbsp;<tt> (obsolete)</tt></li>
+<li><div class="fn"/><b><a href="qglcontext-obsolete.html#QGLContext-2">QGLContext</a></b> ( const QGLFormat &amp; <i>format</i>, QPaintDevice * <i>device</i> )&nbsp;&nbsp;<tt> (obsolete)</tt></li>
+</ul>
+<h3>Protected Functions</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qglcontext-obsolete.html#generateFontDisplayLists">generateFontDisplayLists</a></b> ( const QFont &amp; <i>font</i>, int <i>listBase</i> )&nbsp;&nbsp;<tt> (obsolete)</tt></li>
 </ul>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QGLContext"></a>QGLContext::QGLContext ( const <a href="qglformat.html">QGLFormat</a> &amp; <i>format</i>, <a href="qpaintdevice.html">QPaintDevice</a> * <i>device</i> )</h3>
+<h3 class="fn"><a name="QGLContext-2"></a>QGLContext::QGLContext ( const <a href="qglformat.html">QGLFormat</a> &amp; <i>format</i>, <a href="qpaintdevice.html">QPaintDevice</a> * <i>device</i> )</h3>
 <p>Constructs an OpenGL context for the given paint <i>device</i>, which can be a widget or a pixmap. The <i>format</i> specifies several display options for the context.</p>
 <p>If the underlying OpenGL/Window system cannot satisfy all the features requested in <i>format</i>, the nearest subset of features will be used. After creation, the <a href="qglcontext.html#format">format</a>() method will return the actual format obtained.</p>
 <p>Note that after a <a href="qglcontext.html">QGLContext</a> object has been constructed, <a href="qglcontext.html#create">create</a>() must be called explicitly to create the actual OpenGL context. The context will be <a href="qglcontext.html#isValid">invalid</a> if it was not possible to obtain a GL context at all.</p>
+<h3 class="fn"><a name="generateFontDisplayLists"></a>void QGLContext::generateFontDisplayLists ( const <a href="qfont.html">QFont</a> &amp; <i>font</i>, int <i>listBase</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Generates a set of 256 display lists for the 256 first characters in the font <i>font</i>. The first list will start at index <i>listBase</i>.</p>
+<p>See also <a href="qglwidget.html#renderText">QGLWidget::renderText</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,6 +29,7 @@
 #include <qtopiaservices.h>
 #include <qcontent.h>
 #include <qimagedocumentselector.h>
+#include <qdrmcontentplugin.h>
 
 #include <QPoint>
 #include <QMessageBox>
@@ -36,30 +37,14 @@
 #include <QVBoxLayout>
 #include <QSize>
 #include <QCloseEvent>
-#include <QDebug>
 #include <QDSActionRequest>
 #include <QDSData>
 #include <QPixmap>
 #include <QMimeType>
-#include <QStackedWidget>
+#include <QStackedLayout>
 #include <QMenu>
 
 #include <cmath>
-
-class PhotoEditStackedWidget : public QStackedWidget
-{
-public:
-    PhotoEditStackedWidget( QWidget *parent = 0 )
-        : QStackedWidget( parent )
-    {
-    }
-protected:
-    void closeEvent( QCloseEvent *e )
-    {
-        parentWidget()->close();
-        e->ignore();
-    }
-};
 
 PhotoEditUI::PhotoEditUI( QWidget* parent, Qt::WFlags f )
     : QWidget( parent, f )
@@ -67,14 +52,10 @@ PhotoEditUI::PhotoEditUI( QWidget* parent, Qt::WFlags f )
     , editor_state( VIEW )
     , only_editor( false )
     , service_requested( false )
-#ifdef QTOPIA_PHONE
     , was_fullscreen( false )
     , edit_canceled( false )
-    , close_ok( false )
     , editor_state_changed( false )
-#endif
     , selector_image( QDrmRights::Display )
-#ifdef QTOPIA_PHONE
     , separator_action(0)
     , properties_action(0)
     , beam_action(0)
@@ -82,12 +63,8 @@ PhotoEditUI::PhotoEditUI( QWidget* parent, Qt::WFlags f )
     , delete_action(0)
     , edit_action(0)
     , slide_show_action(0)
-#else
-    , selector_ui(0)
-#endif
     , selector_menu(0)
     , image_selector(0)
-    , editor_ui(0)
     , region_selector(0)
     , navigator(0)
     , brightness_slider(0)
@@ -103,19 +80,21 @@ PhotoEditUI::PhotoEditUI( QWidget* parent, Qt::WFlags f )
 {
     setWindowTitle( tr( "Pictures" ) );
 
-    setLayout( new QVBoxLayout );
+    QDrmContentPlugin::initialize();
+
+    widget_stack = new QStackedLayout( this );
 
     // Respond to service requests
-    connect( qApp, SIGNAL( appMessage( const QString&, const QByteArray& ) ),
-        this, SLOT( appMessage( const QString&, const QByteArray& ) ) );
+    connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
+        this, SLOT(appMessage(QString,QByteArray)) );
 
     new PhotoEditService( this );
 
     // Respond to file changes
     connect( qApp,
-        SIGNAL(contentChanged(const QContentIdList&,const QContent::ChangeType)),
+        SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
         this,
-        SLOT( contentChanged(const QContentIdList&,const QContent::ChangeType)));
+        SLOT(contentChanged(QContentIdList,QContent::ChangeType)));
 
     // The rest of the UI will be created by calling init(bool) from resizeEvent(...), because
     // by that time we will know whether we are creating PhotoEditUI for a single document or for
@@ -141,110 +120,74 @@ PhotoEditUI::~PhotoEditUI()
 void PhotoEditUI::init(bool listMode)
 {
     // Construct widget stack (only in list mode for phone)
-#ifdef QTOPIA_PHONE
-    if ( listMode )
-#endif
-    {
+    if ( listMode ) {
         // We're constructing for a list of documents, rather than just trying
         // to display a single picture.
-        widget_stack = new PhotoEditStackedWidget;
-        layout()->addWidget( widget_stack );
-
         // For a list of documents, it makes sense to create the slide show. For a single
         // document, it does not.
         // FIXME: Don't create the slideshow until we need it
         slide_show = new SlideShow( this );
         slide_show_dialog = new SlideShowDialog( this );
         slide_show_ui = new SlideShowUI(0);
+        slide_show_ui->setWindowTitle( windowTitle() );
+
         // Update image when slide show has changed
-        connect( slide_show, SIGNAL( changed( const QContent& ) ),
-                 slide_show_ui, SLOT( setImage( const QContent& ) ) );
+        connect( slide_show, SIGNAL(changed(QContent)),
+                 slide_show_ui, SLOT(setImage(QContent)) );
         // Stop slide show when slide show ui pressed
-        connect( slide_show_ui, SIGNAL( pressed() ), slide_show, SLOT( stop() ) );
+        connect( slide_show_ui, SIGNAL(pressed()), slide_show, SLOT(stop()) );
         // Show selector when slide show has stopped
-        connect( slide_show, SIGNAL( stopped() ), this, SLOT( exitCurrentUIState() ) );
-    }
+        connect( slide_show, SIGNAL(stopped()), this, SLOT(exitCurrentUIState()) );
 
-#ifndef QTOPIA_PHONE
-    // Construct selector ui
-    widget_stack->addWidget( selector_ui = new SelectorUI( widget_stack ) );
-    // When slide show selected launch slide show dialog
-    connect( selector_ui, SIGNAL( slideShow() ),
-        this, SLOT( launchSlideShowDialog() ) );
-    connect( selector_ui, SIGNAL( edit() ),
-        this, SLOT( editCurrentSelection() ) );
-    connect( selector_ui, SIGNAL( beam() ),
-        this, SLOT( beamImage() ) );
-    connect( selector_ui, SIGNAL( remove() ),
-        this, SLOT( deleteImage() ) );
-    // When properties selected launch properties dialog
-    connect( selector_ui, SIGNAL( properties() ),
-        this, SLOT( launchPropertiesDialog() ) );
-#endif
+        // Construct image selector
+        widget_stack->addWidget( image_selector = new QImageDocumentSelector( this ) );
 
-    // Construct image selector
-#ifdef QTOPIA_PHONE
-    if ( listMode ) {
-        widget_stack->addWidget( image_selector = new QImageDocumentSelector( widget_stack ) );
-    }
-#else
-    image_selector = new QImageDocumentSelector( selector_ui );
-    selector_ui->setCentralWidget( image_selector );
-    connect( image_selector, SIGNAL( documentHeld( const QContent&, const QPoint& ) ),
-        this, SLOT( launchPopupMenu( const DocLnk&, const QPoint& ) ) );
-#endif
+        if ( !service_category.acceptAll() ) {
+            image_selector->setFilter(
+                QContentFilter( QContent::Document ) &
+                QContentFilter( QContentFilter::MimeType, "image/*" ) &
+                QContentFilter( service_category ) );
+        }
 
-    if ( image_selector ) {
-        connect( image_selector, SIGNAL(documentSelected( const QContent& )),
+        connect( image_selector, SIGNAL(documentSelected(QContent)),
                  this, SLOT(setViewSingle()) );
-        connect( image_selector, SIGNAL( documentsChanged() ),
-            this, SLOT( toggleActions() ) );
+        connect( image_selector, SIGNAL(documentsChanged()),
+            this, SLOT(toggleActions()) );
 
-#ifdef QTOPIA_PHONE
         // Construct context menu for selector ui
         selector_menu = QSoftMenuBar::menuFor( image_selector );
         separator_action = selector_menu->insertSeparator( selector_menu->actions().first() );
         // Add properties item to selector menu
         properties_action = new QAction( QIcon( ":icon/info" ), tr( "Properties" ), this );
         properties_action->setVisible( false );
-        connect( properties_action, SIGNAL( triggered() ), this, SLOT( launchPropertiesDialog() ) );
+        connect( properties_action, SIGNAL(triggered()), this, SLOT(launchPropertiesDialog()) );
         selector_menu->insertAction( separator_action, properties_action );
         // Add print item to selector menu
         print_action = new QAction( QIcon( ":icon/beam" ), tr( "Print" ), this );
         print_action->setVisible( false );
-        connect( print_action, SIGNAL( triggered() ), this, SLOT( printImage() ) );
+        connect( print_action, SIGNAL(triggered()), this, SLOT(printImage()) );
         selector_menu->insertAction( properties_action, print_action );
         // Add beam item to selector menu
         beam_action = new QAction( QIcon( ":icon/beam" ), tr( "Beam" ), this );
         beam_action->setVisible( false );
-        connect( beam_action, SIGNAL( triggered() ), this, SLOT( beamImage() ) );
+        connect( beam_action, SIGNAL(triggered()), this, SLOT(beamImage()) );
         selector_menu->insertAction( print_action, beam_action );
         // Add delete item to selector menu
         delete_action = new QAction( QIcon( ":icon/trash" ), tr( "Delete" ), this );
         delete_action->setVisible( false );
-        connect( delete_action, SIGNAL( triggered() ), this, SLOT( deleteImage() ) );
+        connect( delete_action, SIGNAL(triggered()), this, SLOT(deleteImage()) );
         selector_menu->insertAction( beam_action, delete_action );
         // Add edit item to selector menu
         edit_action = new QAction( QIcon( ":icon/edit" ), tr( "Edit" ), this );
         edit_action->setVisible( false );
-        connect( edit_action, SIGNAL( triggered() ), this, SLOT( editCurrentSelection() ) );
+        connect( edit_action, SIGNAL(triggered()), this, SLOT(editCurrentSelection()) );
         selector_menu->insertAction( delete_action, edit_action );
         // Add slide show item to selector menu
         slide_show_action = new QAction( QIcon( ":icon/slideshow" ), tr( "Slide Show..." ), this );
         slide_show_action->setVisible( true );
-        connect( slide_show_action, SIGNAL( triggered() ), this, SLOT( launchSlideShowDialog() ) );
+        connect( slide_show_action, SIGNAL(triggered()), this, SLOT(launchSlideShowDialog()) );
         selector_menu->insertAction( edit_action, slide_show_action );
-#endif
     }
-
-#ifndef QTOPIA_PHONE
-    selector_menu = new QMenu( this );
-    selector_menu->addAction( QIcon( ":icon/edit" ), tr( "Edit" ), this, SLOT( editCurrentSelection() ) );
-    selector_menu->addAction( QIcon( ":icon/trash" ), tr( "Delete" ), this, SLOT( deleteImage() ) );
-    selector_menu->addAction( QIcon( ":icon/beam" ), tr( "Beam" ), this, SLOT( beamImage() ) );
-    selector_menu->addAction( QIcon( ":icon/beam" ), tr( "Print" ), this, SLOT( printImage() ) );
-    selector_menu->addAction( QIcon( ":icon/info" ), tr( "Properties" ), this, SLOT( launchPropertiesDialog() ) );
-#endif
 
     // Construct image io
     image_io = new ImageIO( this );
@@ -253,19 +196,8 @@ void PhotoEditUI::init(bool listMode)
     image_processor = new ImageProcessor( image_io, this );
 
     // Construct image_ui or editor ui
-#ifdef QTOPIA_PHONE
     image_ui = new ImageUI(image_processor);
-    if ( widget_stack ) {
-        widget_stack->addWidget(image_ui);
-    } else {
-        layout()->addWidget(image_ui);
-    }
-#else
-    widget_stack->addWidget( editor_ui = new EditorUI( widget_stack ) );
-    image_ui = new ImageUI( image_processor, editor_ui ); // editor_ui is the parent of image_ui
-#endif
-
-    image_ui->installEventFilter( this );
+    widget_stack->addWidget(image_ui);
 
     // Construct image ui controls
     QVBoxLayout *box = new QVBoxLayout;
@@ -274,20 +206,17 @@ void PhotoEditUI::init(bool listMode)
     region_selector = new RegionSelector( image_ui );
     box->addWidget( region_selector );
 
-#ifdef QTOPIA_PHONE
     if( Qtopia::mousePreferred() ) {
-#endif
-        connect( region_selector, SIGNAL( pressed() ),
-            this, SLOT( exitCurrentEditorState() ) );
-        connect( region_selector, SIGNAL( canceled() ),
-            this, SLOT( exitCurrentEditorState() ) );
-#ifdef QTOPIA_PHONE
+        connect( region_selector, SIGNAL(pressed()),
+            this, SLOT(exitCurrentEditorState()) );
+        connect( region_selector, SIGNAL(canceled()),
+            this, SLOT(exitCurrentEditorState()) );
     }
-#endif
-    connect( region_selector, SIGNAL( selected() ),
-        this, SLOT( cropImage() ) );
-    connect( region_selector, SIGNAL( selected() ),
-        this, SLOT( exitCurrentEditorState() ) );
+
+    connect( region_selector, SIGNAL(selected()),
+        this, SLOT(cropImage()) );
+    connect( region_selector, SIGNAL(selected()),
+        this, SLOT(exitCurrentEditorState()) );
 
     QGridLayout *grid_layout = new QGridLayout;
     grid_layout->setColumnStretch( 1, 1 );
@@ -296,24 +225,20 @@ void PhotoEditUI::init(bool listMode)
     brightness_slider = new Slider( -70, 70, 0, 0, region_selector );
     grid_layout->addWidget( brightness_slider, 2, 1 );
     brightness_slider->hide();
-#ifdef QTOPIA_PHONE
-    connect( brightness_slider, SIGNAL( selected() ),
-        this, SLOT( exitCurrentEditorState() ) );
-#endif
-    connect( brightness_slider, SIGNAL( valueChanged( int ) ),
-        this, SLOT( setBrightness( int ) ) );
+    connect( brightness_slider, SIGNAL(selected()),
+        this, SLOT(exitCurrentEditorState()) );
+    connect( brightness_slider, SIGNAL(valueChanged(int)),
+        this, SLOT(setBrightness(int)) );
 
     // Construct zoom control
     zoom_slider = new Slider( 100, 200, 10, 0, region_selector );
     zoom_slider->setSingleStep( 5 );
     grid_layout->addWidget( zoom_slider, 2, 1 );
     zoom_slider->hide();
-#ifdef QTOPIA_PHONE
-    connect( zoom_slider, SIGNAL( selected() ),
-        this, SLOT( exitCurrentEditorState() ) );
-#endif
-    connect( zoom_slider, SIGNAL( valueChanged( int ) ),
-        this, SLOT( setZoom( int ) ) );
+    connect( zoom_slider, SIGNAL(selected()),
+        this, SLOT(exitCurrentEditorState()) );
+    connect( zoom_slider, SIGNAL(valueChanged(int)),
+        this, SLOT(setZoom(int)) );
 
     // Construct navigator
     navigator = new Navigator( image_ui );
@@ -322,7 +247,6 @@ void PhotoEditUI::init(bool listMode)
     region_selector->setLayout( grid_layout );
     image_ui->setLayout( box );
 
-#ifdef QTOPIA_PHONE
     // Clear context bar
     QSoftMenuBar::setLabel( image_ui, Qt::Key_Select, QSoftMenuBar::NoLabel );
 
@@ -338,129 +262,49 @@ void PhotoEditUI::init(bool listMode)
     context_menu->addAction( QIcon( ":icon/find" ), tr( "Zoom" ), this, SLOT(enterZoom()) );
     // TODO -- Full screen mode has been removed from 4.2 until further notice, since it offers
     // nothing at this point in time.
-    //context_menu->addAction( QIcon( ":icon/fullscreen" ), tr( "Full Screen" ), this, SLOT(enterFullScreen()) );
+    context_menu->addAction( QIcon( ":icon/fullscreen" ), tr( "Full Screen" ), this, SLOT(enterFullScreen()) );
     context_menu->addSeparator();
     context_menu->addAction( QIcon( ":icon/cancel" ), tr( "Cancel" ), this, SLOT(cancelEdit()) );
-#else
-    // Connect editor ui menu items
-    connect( editor_ui, SIGNAL( open() ), this, SLOT( exitCurrentUIState() ) );
-    connect( editor_ui, SIGNAL( open() ), this, SLOT( exitCurrentEditorState() ) );
-    connect( editor_ui, SIGNAL( rotate() ), this, SLOT( exitCurrentEditorState() ) );
 
-    // Connect imaging functions to image processor
-    connect( editor_ui, SIGNAL( zoom() ), this, SLOT( enterZoom() ) );
-    connect( editor_ui, SIGNAL( brightness() ), this, SLOT( enterBrightness() ) );
-    connect( editor_ui, SIGNAL( crop() ), this, SLOT( enterCrop() ) );
-    connect( editor_ui, SIGNAL( rotate() ), image_processor, SLOT( rotate() ) );
-    connect( editor_ui, SIGNAL( fullScreen() ), this, SLOT( enterFullScreen() ) );
-#endif
-
-    connect( &selector_image, SIGNAL(rightsExpired(const QDrmContent&)),
+    connect( &selector_image, SIGNAL(rightsExpired(QDrmContent)),
               this,           SLOT  (setViewThumbnail()) );
-    connect( &selector_image, SIGNAL(rightsExpired(const QDrmContent&)),
+    connect( &selector_image, SIGNAL(rightsExpired(QDrmContent)),
               this,           SLOT  (enterSelector()) );
 
-    if ( widget_stack ) {
-        toggleActions();
-#ifdef QTOPIA_PHONE
-        widget_stack->setCurrentIndex( widget_stack->indexOf( image_selector ) );
-#else
-        widget_stack->setCurrentIndex( widget_stack->indexOf( selector_ui ) );
-#endif
-    }
+    toggleActions();
+    widget_stack->setCurrentIndex( widget_stack->indexOf( image_selector ) );
 }
 
-void PhotoEditUI::resizeEvent(QResizeEvent *event)
+void PhotoEditUI::showEvent(QShowEvent *event )
 {
     if ( !image_io ) {
-        // Finish creating the UI.
-        init(service_lnk.file().isNull());
-#ifdef QTOPIA_PHONE
-        // ***HACK HACK*** This one is because (you guessed it) the size doesn't get set properly
-        // for some reason, and you get the thing trying to display a huge image.
-        if ( image_ui ) {
-            image_ui->setFixedSize(size());
-        }
-        // ***HACK HACK HACKETY-HACK*** And the QStackedWidget doesn't seem to want to resize
-        // to fit its containing layout. Or maybe, it's supposed to resize for it's children, & we
-        // were actually meant to explicitly set the sizes of all those.
-        if ( widget_stack ) {
-            widget_stack->setFixedSize(size());
-        }
-#endif
+        init(service_lnk.fileName().isNull());
     }
-
-    QWidget::resizeEvent(event);
-}
-
-bool PhotoEditUI::eventFilter( QObject*, QEvent* e )
-{
-    if( e->type() == QEvent::WindowDeactivate ) {
-        switch( ui_state ) {
-        case EDITOR:
-            if( editor_state == FULL_SCREEN ) {
-                exitCurrentEditorState();
-#ifdef QTOPIA_PHONE
-                was_fullscreen = false;
-#endif
-            }
-            break;
-        default:
-            // Ignore
-            break;
-        }
-    }
-
-    return false;
+    QWidget::showEvent( event );
 }
 
 void PhotoEditUI::setDocument( const QString& lnk )
 {
     service_lnk = QContent(lnk);
 
-    // Ensure editor is raised
-    // This wiil be done in enterEditor() and is causing layout
-    // problems in at least phone edition so should probably be removed completely.
-#ifndef QTOPIA_PHONE
-    // If the following is called at this point, it will crash. If we trust the
-    // preceding comment, we can remove it.
-    /*
-    if( ui_state != EDITOR ) {
-        image_ui->setEnabled( false );
-        if ( widget_stack ) {
-            widget_stack->setCurrentIndex( widget_stack->indexOf( editor_ui ) );
-        }
-    }
-    */
-#endif
-    QTimer::singleShot( 0, this, SLOT( processSetDocument() ) );
+    QTimer::singleShot( 0, this, SLOT(processSetDocument()) );
 }
 
 void PhotoEditUI::editImage( const QDSActionRequest& request )
 {
     showMaximized();
-#ifndef QTOPIA_PHONE
-    // Respond to previous service request
-    if( ui_state == EDITOR && service_requested ) sendValueSupplied();
-    service_image = QImage();
-#endif
     currEditImageRequest = new QDSActionRequest( request );
     QDataStream stream( currEditImageRequest->requestData().toIODevice() );
     QPixmap orig;
     stream >> orig;
     service_image = orig.toImage();
 
-    QTimer::singleShot( 0, this, SLOT( processGetImage() ) );
+    QTimer::singleShot( 0, this, SLOT(processGetImage()) );
 }
 
 void PhotoEditUI::appMessage( const QString& msg, const QByteArray& data )
 {
     if( msg == "getImage(QString,QString,int,int,QString)" ) {
-#ifndef QTOPIA_PHONE
-        // Respond to previous service request
-        if( ui_state == EDITOR && service_requested ) sendValueSupplied();
-        service_image = QImage();
-#endif
         QDataStream stream( data );
         QString filename;
         stream >> service_channel >> service_id >> service_width >> service_height >> filename;
@@ -471,66 +315,22 @@ void PhotoEditUI::appMessage( const QString& msg, const QByteArray& data )
             QFile::remove( filename );
         }
 
-        QTimer::singleShot( 0, this, SLOT( processGetImage() ) );
+        QTimer::singleShot( 0, this, SLOT(processGetImage()) );
     }
 }
 
 void PhotoEditUI::processSetDocument()
 {
-#ifndef QTOPIA_PHONE
-    interruptCurrentState();
-    service_requested = false;
-    if( !only_editor ) {
-        editor_ui->removeFileItems();
-#endif
-        only_editor = true;
-#ifndef QTOPIA_PHONE
-    }
-#endif
+    only_editor = true;
     clearEditor();
     qApp->processEvents();
     current_image = service_lnk;
     enterEditor();
 }
 
-void PhotoEditUI::processShowCategory()
-{
-#ifndef QTOPIA_PHONE
-    interruptCurrentState();
-    service_requested = false;
-    if( only_editor ) {
-        editor_ui->addFileItems();
-#endif
-        only_editor = false;
-#ifndef QTOPIA_PHONE
-    }
-#endif
-
-    if ( image_selector ) {
-        image_selector->setFilter(
-            QContentFilter( QContent::Document ) &
-            QContentFilter( QContentFilter::MimeType, "image/*" ) &
-            QContentFilter( service_category ) );
-
-        // For some reason processing events here causes an assert in Qt
-        //qApp->processEvents();
-        enterSelector();
-    } else {
-        qWarning("PhotoEditUI::processShowCategory() being called when there is no image_selector.");
-    }
-}
-
 void PhotoEditUI::processGetImage()
 {
-#ifndef QTOPIA_PHONE
-    if( ui_state == EDITOR && !service_requested ) saveChanges();
-    if( !only_editor && editor_ui ) {
-        editor_ui->removeFileItems();
-#endif
-        only_editor = true;
-#ifndef QTOPIA_PHONE
-    }
-#endif
+    only_editor = true;
     clearEditor();
     qApp->processEvents();
     service_requested = true;
@@ -548,7 +348,6 @@ void PhotoEditUI::toggleActions()
     // Otherwise, disable action
     bool b = image_selector->documents().count();
 
-#ifdef QTOPIA_PHONE
     switch( image_selector->viewMode() ) {
         case QImageDocumentSelector::Single:
             edit_action->setVisible( true );
@@ -576,9 +375,6 @@ void PhotoEditUI::toggleActions()
     }
 
     separator_action->setVisible( b );
-#else
-    selector_ui->setEnabled( b );
-#endif
 }
 
 void PhotoEditUI::enterSelector()
@@ -591,13 +387,9 @@ void PhotoEditUI::enterSelector()
     // Clear current image
     current_image = QContent();
     // Raise selector to top of stack
-#ifdef QTOPIA_PHONE
     widget_stack->setCurrentIndex( widget_stack->indexOf( image_selector ) );
     toggleActions();
     image_selector->setFocus();
-#else
-    widget_stack->setCurrentIndex( widget_stack->indexOf( selector_ui ) );
-#endif
     ui_state = SELECTOR;
 }
 
@@ -639,15 +431,9 @@ void PhotoEditUI::enterEditor()
     }
 
     // Raise editor to top of widget stack
-#ifdef QTOPIA_PHONE
     if ( widget_stack ) {
         widget_stack->setCurrentIndex( widget_stack->indexOf( image_ui ) );
     }
-#else
-    widget_stack->setCurrentIndex( widget_stack->indexOf( editor_ui ) );
-    // FIXME: Integration comment -- !! Do we REALLY need this?? It wasn't there before...
-    editor_ui->show();
-#endif
     ui_state = EDITOR;
 
     qApp->processEvents();
@@ -659,7 +445,7 @@ void PhotoEditUI::enterEditor()
     } else if ( !current_image.isValid() ) {
         // I believe this is because it is possible to get in here before
         // an image has been established.
-        status = ImageIO::NORMAL;
+        status = ImageIO::LOAD_ERROR;
     } else if( selector_image.requestLicense( current_image ) ) {
         status = image_io->load(current_image);
     } else {
@@ -667,6 +453,8 @@ void PhotoEditUI::enterEditor()
     }
 
     switch( status ) {
+        case ImageIO::REDUCED_SIZE:
+            QMessageBox::information( 0, tr( "Scaled Image" ), tr( "<qt>Unable to load complete image.  A scaled copy has been opened instead.</qt>" ) );
         case ImageIO::NORMAL:
         {
             // Initialize editor controls
@@ -674,17 +462,21 @@ void PhotoEditUI::enterEditor()
             // Zoom to fit image in screen
             QSize size = image_io->size();
             QSize view = image_ui->size();
-            disconnect( zoom_slider, SIGNAL( valueChanged( int ) ), this, SLOT( setZoom( int ) ) );
+            disconnect( zoom_slider, SIGNAL(valueChanged(int)), this, SLOT(setZoom(int)) );
             if( size.width() > view.width() || size.height() > view.height() ) {
                 double ratio = REDUCTION_RATIO( view.width(), view.height(), size.width(), size.height() );
                 ratio = LIMIT( ratio, 0.1, 1.0 );
                 image_processor->setZoom( ratio );
+                zoom_slider->setMaximum( 200 );
                 zoom_slider->setValue( (int) ( log( ratio * 100 ) / log( 10.0 ) * 100 ) );
             } else {
+                double ratio = REDUCTION_RATIO( view.width(), view.height(), size.width(), size.height() );
+                ratio = LIMIT( ratio, 1.0, 10.0 );
                 image_processor->setZoom( 1.0 );
+                zoom_slider->setMaximum( (int) ( log( ratio * 100 ) / log( 10.0 ) * 100 ) );
                 zoom_slider->setValue( 200 );
             }
-            connect( zoom_slider, SIGNAL( valueChanged( int ) ), this, SLOT( setZoom( int ) ) );
+            connect( zoom_slider, SIGNAL(valueChanged(int)), this, SLOT(setZoom(int)) );
             image_ui->reset();
             image_ui->setEnabled( true );
             navigator->show();
@@ -693,6 +485,7 @@ void PhotoEditUI::enterEditor()
         }
         break;
 
+        case ImageIO::SIZE_ERROR:
         case ImageIO::LOAD_ERROR:
             QMessageBox::warning( 0, tr( "Load Error" ), tr( "<qt>Unable to load image.</qt>" ) );
             if ( only_editor )
@@ -713,39 +506,26 @@ void PhotoEditUI::enterEditor()
 
 void PhotoEditUI::enterZoom()
 {
-#ifndef QTOPIA_PHONE
-    exitCurrentEditorState();
-#endif
     // Hide navigator
     navigator->hide();
     // Show zoom control
     zoom_slider->show();
-#ifdef QTOPIA_PHONE
     zoom_slider->setFocus();
-#endif
     editor_state = ZOOM;
 }
 
 void PhotoEditUI::enterBrightness()
 {
-#ifndef QTOPIA_PHONE
-    exitCurrentEditorState();
-#endif
     // Hide navigator
     navigator->hide();
     // Show brightness control
     brightness_slider->show();
-#ifdef QTOPIA_PHONE
     brightness_slider->setFocus();
-#endif
     editor_state = BRIGHTNESS;
 }
 
 void PhotoEditUI::enterCrop()
 {
-#ifndef QTOPIA_PHONE
-    exitCurrentEditorState();
-#endif
     // Hide navigator
     navigator->hide();
     // Enable selection in region selector
@@ -757,26 +537,16 @@ void PhotoEditUI::enterCrop()
 
 void PhotoEditUI::enterFullScreen()
 {
-#ifndef QTOPIA_PHONE
-    exitCurrentEditorState();
-#endif
+    navigator->hide();
     // Show editor view in full screen
-#ifdef QTOPIA_PHONE
-    if ( widget_stack ) {
-        widget_stack->setParent( 0 );
-        widget_stack->showFullScreen();
-    } else
-#endif
-    {
-        image_ui->setParent(0);
-        image_ui->showFullScreen();
-    }
-    navigator->setFocus();
-#ifdef QTOPIA_PHONE
-    if( !Qtopia::mousePreferred() ) {
-        connect( region_selector, SIGNAL( pressed() ), this, SLOT( exitCurrentEditorState() ) );
-    }
-#endif
+    QString title = windowTitle();
+
+    setWindowTitle( QLatin1String( "_allow_on_top_" ) );
+    showFullScreen();
+    raise();
+
+    setWindowTitle( title );
+
     editor_state = FULL_SCREEN;
 }
 
@@ -787,16 +557,12 @@ void PhotoEditUI::setViewThumbnail()
         return;
     }
 
-#ifdef QTOPIA_PHONE
     // If image selector not in multi, change to single and update context menu
     if( image_selector->viewMode() != QImageDocumentSelector::Thumbnail )
     {
         image_selector->setViewMode( QImageDocumentSelector::Thumbnail );
     }
     toggleActions();
-#else
-    image_selector->setViewMode( QImageDocumentSelector::Thumbnail );
-#endif
 }
 
 void PhotoEditUI::setViewSingle()
@@ -806,24 +572,13 @@ void PhotoEditUI::setViewSingle()
         return;
     }
 
-#ifdef QTOPIA_PHONE
     // If image selector not in single, change to single and update context menu
     if( image_selector->viewMode() != QImageDocumentSelector::Single )
     {
         image_selector->setViewMode( QImageDocumentSelector::Single );
     }
     toggleActions();
-#else
-    image_selector->setViewMode( QImageDocumentSelector::Single );
-#endif
 }
-
-#ifndef QTOPIA_PHONE
-void PhotoEditUI::launchPopupMenu( const QContent&, const QPoint& pos )
-{
-    selector_menu->popup( pos );
-}
-#endif
 
 void PhotoEditUI::launchSlideShowDialog()
 {
@@ -855,11 +610,10 @@ void PhotoEditUI::launchPropertiesDialog()
     QtopiaApplication::execDialog( &dialog );
 }
 
-void PhotoEditUI::exitCurrentUIState()
+bool PhotoEditUI::exitCurrentUIState()
 {
     switch( ui_state ) {
     case SELECTOR:
-#ifdef QTOPIA_PHONE
         if ( !image_selector ) {
             qWarning("PhotoEditUI::exitCurrentUIState() being called for context requiring image selector.");
             break;
@@ -871,8 +625,7 @@ void PhotoEditUI::exitCurrentUIState()
              image_selector->documents().count() )
             setViewThumbnail();
         else
-            close_ok = true;
-#endif
+            return true;
         break;
     case SLIDE_SHOW:
         if ( !slide_show_ui ) {
@@ -885,7 +638,6 @@ void PhotoEditUI::exitCurrentUIState()
         enterSelector();
         break;
     case EDITOR:
-#ifdef QTOPIA_PHONE
         selector_image.releaseLicense();
 
         if( !edit_canceled ) {
@@ -899,21 +651,16 @@ void PhotoEditUI::exitCurrentUIState()
             if( service_requested && service_image.isNull() && edit_canceled ) {
                 enterSelector();
             } else {
-                close_ok = true;
+                return true;
             }
         } else {
             enterSelector();
         }
         edit_canceled = false;
-#else
-        if( service_requested )
-            sendValueSupplied();
-        else
-            saveChanges();
-        enterSelector();
-#endif
         break;
     }
+
+    return false;
 }
 
 void PhotoEditUI::exitCurrentEditorState()
@@ -921,64 +668,34 @@ void PhotoEditUI::exitCurrentEditorState()
     switch( editor_state ) {
     // If in view, no change
     case VIEW:
-#ifdef QTOPIA_PHONE
         editor_state_changed = false;
-#endif
         break;
     // If in full screen, return from full screen
     case FULL_SCREEN:
-#ifdef QTOPIA_PHONE
-        if( !Qtopia::mousePreferred() ) {
-            disconnect( region_selector, SIGNAL( pressed() ), this, SLOT( exitCurrentEditorState() ) );
-        }
-#endif
         // Set editor central widget to editor view
-#ifdef QTOPIA_PHONE
-        if ( widget_stack ) {
-            layout()->addWidget( widget_stack );
-        } else {
-            layout()->addWidget(image_ui);
-        }
-#else
-        image_ui->setParent( editor_ui );
-
-        editor_ui->setCentralWidget( image_ui );
-        editor_ui->setFocus();
-#endif
-
-#ifdef QTOPIA_PHONE
-        if( !Qtopia::mousePreferred() ) was_fullscreen = true;
-#endif
+        navigator->show();
+        navigator->setFocus();
+        showMaximized();
         editor_state = VIEW;
-#ifdef QTOPIA_PHONE
         editor_state_changed = true;
-#endif
         break;
     // If in zoom, hide zoom control
     case ZOOM:
         zoom_slider->hide();
         // Show navigator
         navigator->show();
-#ifdef QTOPIA_PHONE
         navigator->setFocus();
-#endif
         editor_state = VIEW;
-#ifdef QTOPIA_PHONE
         editor_state_changed = true;
-#endif
         break;
     // If in brightness, hide brightness control
     case BRIGHTNESS:
         brightness_slider->hide();
         // Show navigator
         navigator->show();
-#ifdef QTOPIA_PHONE
         navigator->setFocus();
-#endif
         editor_state = VIEW;
-#ifdef QTOPIA_PHONE
         editor_state_changed = true;
-#endif
         break;
     // If in crop, disable region selector and show navigator
     case CROP:
@@ -988,9 +705,7 @@ void PhotoEditUI::exitCurrentEditorState()
         navigator->show();
         navigator->setFocus();
         editor_state = VIEW;
-#ifdef QTOPIA_PHONE
         editor_state_changed = true;
-#endif
         break;
     };
 }
@@ -1020,10 +735,10 @@ void PhotoEditUI::editCurrentSelection()
 
 void PhotoEditUI::cancelEdit()
 {
-#ifdef QTOPIA_PHONE
     edit_canceled = true;
-    close();
-#endif
+
+    if( exitCurrentUIState() )
+        close();
 }
 
 void PhotoEditUI::cropImage()
@@ -1061,8 +776,8 @@ void PhotoEditUI::printImage()
 
     QContent image = image_selector->currentDocument();
     QtopiaServiceRequest srv( "Print", "print(QString,QString)" );
-    srv << image.file();
-    srv << image.mimeTypes().at(0);
+    srv << image.fileName();
+    srv << (image.mimeTypes().count() ? image.mimeTypes().at(0) : QString());
     srv.send();
 }
 
@@ -1098,67 +813,28 @@ void PhotoEditUI::contentChanged( const QContentIdList &idList, const QContent::
     }
 }
 
-void PhotoEditUI::closeEvent( QCloseEvent* e )
+void PhotoEditUI::keyPressEvent( QKeyEvent *e )
 {
-#ifdef QTOPIA_PHONE
-    close_ok = false;
-    e->ignore();
-    if( Qtopia::mousePreferred() ) {
-        if( ui_state != EDITOR || ( editor_state == VIEW && !editor_state_changed ) || edit_canceled ) {
-            exitCurrentUIState();
-            if( close_ok )
-                e->accept();
+    if( e->key() == Qt::Key_Back )
+    {
+        if( ui_state == EDITOR && editor_state != VIEW )
+        {
+            exitCurrentEditorState();
         }
-    }
-    else if( was_fullscreen )
-        was_fullscreen = false;
-    else if( ui_state == EDITOR && editor_state != VIEW )
-        exitCurrentEditorState();
-    else {
-        exitCurrentUIState();
-        if( close_ok )
-            e->accept();
-    }
-#else
-    exitCurrentEditorState();
-    exitCurrentUIState();
-    // Reverse effects of only editor launch for fast load
-    if( only_editor ) {
-        if ( widget_stack ) {
-            widget_stack->setCurrentIndex( widget_stack->indexOf( selector_ui ) );
+        else if( exitCurrentUIState() )
+        {
+            close();
         }
-        editor_ui->addFileItems();
-        only_editor = service_requested = false;
-        service_image = QImage();
+        e->accept();
     }
-    e->accept();
-#endif
-
-#ifdef QTOPIA_PHONE
-    if( close_ok )
-#endif
-       qApp->quit();
+    else
+        QWidget::keyPressEvent( e );
 }
-
-#ifndef QTOPIA_PHONE
-void PhotoEditUI::interruptCurrentState()
-{
-    // If editing, conclude editing
-    if( ui_state == EDITOR ) {
-        if( service_requested ) sendValueSupplied();
-        else saveChanges();
-    }
-}
-#endif
 
 void PhotoEditUI::clearEditor()
 {
     if ( navigator )
         navigator->hide();
-#ifndef QTOPIA_PHONE
-    zoom_slider->hide();
-    brightness_slider->hide();
-#endif
     if ( image_ui ) {
         image_ui->setEnabled( false );
         image_ui->repaint();
@@ -1169,43 +845,36 @@ void PhotoEditUI::saveChanges()
 {
     // If image was changed, prompt user to save changes
     if( image_processor->isChanged() && current_image.drmState() == QContent::Unprotected ) {
-#ifndef QTOPIA_PHONE
-        if( QMessageBox::information( this, tr( "Save Changes" ),
-            tr( "<qt>Do you want to save your changes?</qt>" ),
-            QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes )
-#endif
-        {
-            // If save supported, prompt user to overwrite original
-            // Otherwise, save as new file
-            bool overwrite = false;
-            if( image_io->isSaveSupported() ) {
-                if ( image_io->isReadOnly() ) {
-                    QMessageBox::warning( this,
-                        tr( "Read-Only File" ),
-                        tr( "<qt>Saving a copy of the read-only file.</qt>" ) );
-                } else {
-                    if( QMessageBox::information( this, tr( "Save Changes " ),
-                        tr( "<qt>Do you want to overwrite the original?</qt>" ),
-                        QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes )
-                        overwrite = true;
-                }
-            } else {
-                const char* format = image_io->format();
+        // If save supported, prompt user to overwrite original
+        // Otherwise, save as new file
+        bool overwrite = false;
+        if( image_io->isSaveSupported() ) {
+            if ( image_io->isReadOnly() ) {
                 QMessageBox::warning( this,
-                    tr( "Saving %1" ).arg( format ),
-                    tr( "<qt>Saving as %1 is not supported. "
-                        "Using the default format instead.</qt>" )
-                        .arg( format ) );
+                    tr( "Read-Only File" ),
+                    tr( "<qt>Saving a copy of the read-only file.</qt>" ) );
+            } else {
+                if( QMessageBox::information( this, tr( "Save Changes " ),
+                    tr( "<qt>Do you want to overwrite the original?</qt>" ),
+                    QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes )
+                    overwrite = true;
             }
+        } else {
+            QByteArray format = image_io->format();
+            QMessageBox::warning( this,
+                tr( "Saving %1" ).arg( format.constData() ),
+                tr( "<qt>Saving as %1 is not supported. "
+                    "Using the default format instead.</qt>" )
+                    .arg( format.constData() ) );
+        }
 
-            QImage image = image_processor->image();
-            // Attempt to save changes
-            if ( !image_io->save( image, overwrite ) ) {
-                 QMessageBox::warning(
-                    this,
-                    tr( "Save failed" ),
-                    tr( "<qt>Your edits were not saved.</qt>" ) );
-            }
+        QImage image = image_processor->image();
+        // Attempt to save changes
+        if ( !image_io->save( image, overwrite ) ) {
+             QMessageBox::warning(
+                this,
+                tr( "Save failed" ),
+                tr( "<qt>Your edits were not saved.</qt>" ) );
         }
     }
 }
@@ -1267,8 +936,17 @@ PhotoEditService::~PhotoEditService()
 void PhotoEditService::showCategory( const QString& category )
 {
     mParent->service_category = QCategoryFilter(category);
+
+    if ( mParent->image_selector ) {
+        mParent->image_selector->setFilter(
+                QContentFilter( QContent::Document ) &
+                QContentFilter( QContentFilter::MimeType, "image/*" ) &
+                QContentFilter( mParent->service_category ) );
+
+        mParent->enterSelector();
+
+    }
     mParent->showMaximized();
-    QTimer::singleShot( 0, mParent, SLOT( processShowCategory() ) );
 }
 
 /*!

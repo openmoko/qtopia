@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,12 +53,14 @@ QT_MODULE(Gui)
 class QTreeWidget;
 class QTreeModel;
 class QWidgetItemData;
+class QTreeWidgetItemPrivate;
 
 class Q_GUI_EXPORT QTreeWidgetItem
 {
     friend class QTreeModel;
     friend class QTreeWidget;
     friend class QTreeWidgetItemIterator;
+    friend class QTreeWidgetItemPrivate;
 public:
     enum ItemType { Type = 0, UserType = 1000 };
     QTreeWidgetItem(int type = Type);
@@ -70,8 +87,18 @@ public:
     inline void setExpanded(bool expand);
     inline bool isExpanded() const;
 
-    inline Qt::ItemFlags flags() const { return itemFlags; }
-    inline void setFlags(Qt::ItemFlags flags);
+    inline void setFirstColumnSpanned(bool span);
+    inline bool isFirstColumnSpanned() const;
+
+    inline void setDisabled(bool disabled);
+    inline bool isDisabled() const;
+
+    enum ChildIndicatorPolicy { ShowIndicator, DontShowIndicator, DontShowIndicatorWhenChildless };
+    void setChildIndicatorPolicy(QTreeWidgetItem::ChildIndicatorPolicy policy);
+    QTreeWidgetItem::ChildIndicatorPolicy childIndicatorPolicy() const;
+
+    Qt::ItemFlags flags() const;
+    void setFlags(Qt::ItemFlags flags);
 
     inline QString text(int column) const
         { return data(column, Qt::DisplayRole).toString(); }
@@ -159,6 +186,7 @@ public:
 
     void addChild(QTreeWidgetItem *child);
     void insertChild(int index, QTreeWidgetItem *child);
+    void removeChild(QTreeWidgetItem *child);
     QTreeWidgetItem *takeChild(int index);
 
     void addChildren(const QList<QTreeWidgetItem*> &children);
@@ -169,7 +197,6 @@ public:
     inline void sortChildren(int column, Qt::SortOrder order)
         { sortChildren(column, order, false); }
 private:
-    // Qt 5 add private class and move private data into it
     void sortChildren(int column, Qt::SortOrder order, bool climb);
     QVariant childrenCheckState(int column) const;
     void itemChanged();
@@ -179,14 +206,11 @@ private:
     // One item has a vector of column entries. Each column has a vector of (role, value) pairs.
     QVector< QVector<QWidgetItemData> > values;
     QTreeWidget *view;
-    QVariantList display;
+    QTreeWidgetItemPrivate *d;
     QTreeWidgetItem *par;
     QList<QTreeWidgetItem*> children;
     Qt::ItemFlags itemFlags;
 };
-
-inline void QTreeWidgetItem::setFlags(Qt::ItemFlags aflags)
-{ itemFlags = aflags; itemChanged(); }
 
 inline void QTreeWidgetItem::setText(int column, const QString &atext)
 { setData(column, Qt::DisplayRole, atext); }
@@ -273,6 +297,7 @@ public:
 
     QWidget *itemWidget(QTreeWidgetItem *item, int column) const;
     void setItemWidget(QTreeWidgetItem *item, int column, QWidget *widget);
+    inline void removeItemWidget(QTreeWidgetItem *item, int column);
 
     bool isItemSelected(const QTreeWidgetItem *item) const;
     void setItemSelected(const QTreeWidgetItem *item, bool select);
@@ -285,6 +310,12 @@ public:
 
     bool isItemExpanded(const QTreeWidgetItem *item) const;
     void setItemExpanded(const QTreeWidgetItem *item, bool expand);
+
+    bool isFirstItemColumnSpanned(const QTreeWidgetItem *item) const;
+    void setFirstItemColumnSpanned(const QTreeWidgetItem *item, bool span);
+
+    QTreeWidgetItem *itemAbove(const QTreeWidgetItem *item) const;
+    QTreeWidgetItem *itemBelow(const QTreeWidgetItem *item) const;
 
 public Q_SLOTS:
     void scrollToItem(const QTreeWidgetItem *item,
@@ -335,7 +366,11 @@ private:
     Q_PRIVATE_SLOT(d_func(), void _q_emitCurrentItemChanged(const QModelIndex &previous, const QModelIndex &current))
     Q_PRIVATE_SLOT(d_func(), void _q_sort())
     Q_PRIVATE_SLOT(d_func(), void _q_dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight))
+    Q_PRIVATE_SLOT(d_func(), void _q_itemsSorted())
 };
+
+inline void QTreeWidget::removeItemWidget(QTreeWidgetItem *item, int column)
+{ setItemWidget(item, column, 0); }
 
 inline QTreeWidgetItem *QTreeWidget::itemAt(int ax, int ay) const
 { return itemAt(QPoint(ax, ay)); }
@@ -360,6 +395,18 @@ inline void QTreeWidgetItem::setExpanded(bool aexpand)
 
 inline bool QTreeWidgetItem::isExpanded() const
 { return (view ? view->isItemExpanded(this) : false); }
+
+inline void QTreeWidgetItem::setFirstColumnSpanned(bool aspan)
+{ if (view) view->setFirstItemColumnSpanned(this, aspan); }
+
+inline bool QTreeWidgetItem::isFirstColumnSpanned() const
+{ return (view ? view->isFirstItemColumnSpanned(this) : false); }
+
+inline void QTreeWidgetItem::setDisabled(bool disabled)
+{ setFlags(disabled ? (flags() & ~Qt::ItemIsEnabled) : flags() | Qt::ItemIsEnabled); }
+
+inline bool QTreeWidgetItem::isDisabled() const
+{ return !(flags() & Qt::ItemIsEnabled); }
 
 #endif // QT_NO_TREEWIDGET
 

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -207,6 +222,8 @@ public:
     virtual uchar * cache(int) { return 0; }
     virtual void uncache(uchar *) {}
 
+    QImage::Format pixelFormat() const;
+
     int screenSize() const { return size; }
     int totalSize() const { return mapsize; }
 
@@ -256,6 +273,7 @@ public:
     int physicalHeight() const { return physHeight; } // physical display size in mm
 
 protected:
+    void setPixelFormat(QImage::Format format);
 
     QRgb screenclut[256];
     int screencols;
@@ -298,6 +316,24 @@ protected:
 private:
     void compose(int level, const QRegion &exposed, QRegion &blend, QImage &blendbuffer, int changing_level);
     void paintBackground(const QRegion &);
+
+    friend class QWSOnScreenSurface;
+    static bool isWidgetPaintOnScreen(const QWidget *w);
+
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+    void setFrameBufferLittleEndian(bool littleEndian);
+    friend class QVNCScreen;
+    friend class QLinuxFbScreen;
+#endif
+    friend void qt_solidFill_setup(QScreen*, const QColor&, const QRegion&);
+    friend void qt_blit_setup(QScreen *screen, const QImage &image,
+                              const QPoint &topLeft, const QRegion &region);
+#ifdef QT_QWS_DEPTH_GENERIC
+    friend void qt_set_generic_blit(QScreen *screen, int bpp,
+                                    int len_red, int len_green, int len_blue,
+                                    int len_alpha, int off_red, int off_green,
+                                    int off_blue, int off_alpha);
+#endif
 
     QScreenPrivate *d_ptr;
 };

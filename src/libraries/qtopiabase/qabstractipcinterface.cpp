@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -67,8 +67,8 @@
 
     \code
     QEcho *echo = new QEcho();
-    connect( echo, SIGNAL(receive(const QString&)),
-             this, SLOT(myReceive(const QString&)) );
+    connect( echo, SIGNAL(receive(QString)),
+             this, SLOT(myReceive(QString)) );
     echo->send( "foo" );
     \endcode
 
@@ -92,13 +92,13 @@
         : QAbstractIpcInterface( "/EchoInterfaces", "QEcho",
                                  group, parent, mode )
     {
-        proxy( SIGNAL(receive(const QString&)) );
-        proxy( SLOT(send(const QString&)) );
+        proxy( SIGNAL(receive(QString)) );
+        proxy( SLOT(send(QString)) );
     }
 
     void QEcho::send( const QString& msg )
     {
-        invoke( SLOT(send(const QString&)), qVariantFromValue( msg ) );
+        invoke( SLOT(send(QString)), qVariantFromValue( msg ) );
     }
     \endcode
 
@@ -159,7 +159,7 @@
     gets the best group based on their current network coverage.
 
     \sa QAbstractIpcInterfaceGroup, QAbstractIpcInterfaceGroupManager
-    \sa QCommInterface
+    \sa QCommInterface, QHardwareInterface
     \ingroup ipc
 */
 
@@ -255,9 +255,9 @@ QAbstractIpcInterface::QAbstractIpcInterface
         d->receive = new QtopiaIpcAdaptor( requestChannel, this );
         d->settings = new QValueSpaceObject( d->path, this );
         d->settings->setAttribute
-            ( QString("requestChannel"), requestChannel );
+            ( QString(".requestChannel"), requestChannel );
         d->settings->setAttribute
-            ( QString("responseChannel"), responseChannel );
+            ( QString(".responseChannel"), responseChannel );
 
     } else {
         // Client side: look up the channel to connect to.
@@ -273,11 +273,11 @@ QAbstractIpcInterface::QAbstractIpcInterface
                 if ( priority > bestPriority ) {
                     group = QString( *iter );
                     requestChannel =
-                        item.value( *iter + "/requestChannel" ).toString();
+                        item.value( *iter + "/.requestChannel" ).toString();
                     responseChannel =
-                        item.value( *iter + "/responseChannel" ).toString();
+                        item.value( *iter + "/.responseChannel" ).toString();
                     valuePath =
-                        item.value( *iter + "/valuePath" ).toString();
+                        item.value( *iter + "/.valuePath" ).toString();
                     bestPriority = priority;
                 }
             }
@@ -289,10 +289,10 @@ QAbstractIpcInterface::QAbstractIpcInterface
             }
         } else {
             // Use the specified group name to look up the channel.
-            requestChannel = item.value( group + "/requestChannel" ).toString();
+            requestChannel = item.value( group + "/.requestChannel" ).toString();
             responseChannel =
-                item.value( group + "/responseChannel" ).toString();
-            valuePath = item.value( group + "/valuePath" ).toString();
+                item.value( group + "/.responseChannel" ).toString();
+            valuePath = item.value( group + "/.valuePath" ).toString();
             if ( requestChannel.isEmpty() ) {
                 QTimer::singleShot( 0, this, SIGNAL(disconnected()) );
                 d->mode = Invalid;
@@ -485,9 +485,9 @@ void QAbstractIpcInterface::proxyAll
         QString responseChannel = "QPE" + d->valueSpaceLocation + "/" +
                                  d->interfaceName + "/Response/" + d->groupName;
         QValueSpaceObject *values = new QValueSpaceObject( path, this );
-        values->setAttribute( QString("requestChannel"), requestChannel );
-        values->setAttribute( QString("responseChannel"), responseChannel );
-        values->setAttribute( QString("valuePath"), d->path );
+        values->setAttribute( QString(".requestChannel"), requestChannel );
+        values->setAttribute( QString(".responseChannel"), responseChannel );
+        values->setAttribute( QString(".valuePath"), d->path );
 
     } else if ( d->mode == Client ) {
 
@@ -495,7 +495,7 @@ void QAbstractIpcInterface::proxyAll
         // that points back to the primary interface name.
         QValueSpaceItem item( d->valueSpaceLocation + "/" +
                               subInterfaceName + "/" + d->groupName );
-        QString path = item.value( "valuePath" ).toString();
+        QString path = item.value( ".valuePath" ).toString();
         if ( path != d->path ) {
             qWarning( "QAbstractIpcInterface: %s is not a sub-interface of %s",
                       subInterfaceName.toLatin1().constData(),
@@ -586,7 +586,7 @@ void QAbstractIpcInterface::setValue
           QAbstractIpcInterface::SyncType sync )
 {
     if ( d->settings ) {
-        d->settings->setAttribute( "Values/" + name, value );
+        d->settings->setAttribute( name, value );
         if ( sync == Immediate )
             QValueSpaceObject::sync();
     }
@@ -603,7 +603,7 @@ void QAbstractIpcInterface::setValue
 QVariant QAbstractIpcInterface::value
             ( const QString& name, const QVariant& def ) const
 {
-    QValueSpaceItem item( d->path + "/Values" );
+    QValueSpaceItem item( d->path );
     return item.value( name, def );
 }
 
@@ -621,7 +621,7 @@ void QAbstractIpcInterface::removeValue
         ( const QString& name, QAbstractIpcInterface::SyncType sync)
 {
     if ( d->settings ) {
-        d->settings->removeAttribute( "Values/" + name );
+        d->settings->removeAttribute( name );
         if ( sync == Immediate )
             QValueSpaceObject::sync();
     }
@@ -636,10 +636,19 @@ void QAbstractIpcInterface::removeValue
 QList<QString> QAbstractIpcInterface::valueNames(
     const QString& path ) const
 {
+    QList<QString> values;
     if ( path.isEmpty())
-        return QValueSpaceItem( d->path + "/Values" ).subPaths();
+        values = QValueSpaceItem( d->path ).subPaths();
     else
-        return QValueSpaceItem( d->path + "/Values/" + path ).subPaths();
+        values = QValueSpaceItem( d->path + "/" + path ).subPaths();
+    for(QList<QString>::iterator iter = values.begin(); iter != values.end();) {
+        if(iter->at(0) == QChar('.'))
+            iter = values.erase(iter);
+        else
+            ++iter;
+    }
+
+    return values;
 }
 
 /*!

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QPhoneSocket Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QPhoneSocket Class Reference</h1>
+<p>The QPhoneSocket class provides socket functionality for phone call handlers <a href="#details">More...</a></p>
+<pre>    #include &lt;QPhoneSocket&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<ul>
+<li><a href="qphonesocket-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qphonesocket.html#QPhoneSocket">QPhoneSocket</a></b> ( QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qphonesocket.html#dtor.QPhoneSocket">~QPhoneSocket</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qphonesocket.html#send">send</a></b> ( const QStringList &amp; <i>cmd</i> )</li>
+<li><div class="fn"/>void <b><a href="qphonesocket.html#send-2">send</a></b> ( const QString &amp; <i>cmd</i> )</li>
+<li><div class="fn"/>void <b><a href="qphonesocket.html#send-3">send</a></b> ( const QString &amp; <i>cmd</i>, const QString &amp; <i>arg1</i> )</li>
+<li><div class="fn"/>void <b><a href="qphonesocket.html#send-4">send</a></b> ( const QString &amp; <i>cmd</i>, const QString &amp; <i>arg1</i>, const QString &amp; <i>arg2</i> )</li>
+<li><div class="fn"/>void <b><a href="qphonesocket.html#send-5">send</a></b> ( const QString &amp; <i>cmd</i>, const QString &amp; <i>arg1</i>, const QString &amp; <i>arg2</i>, const QString &amp; <i>arg3</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qphonesocket.html#closed">closed</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qphonesocket.html#incoming">incoming</a></b> ( QPhoneSocket * <i>socket</i> )</li>
+<li><div class="fn"/>void <b><a href="qphonesocket.html#received">received</a></b> ( const QStringList &amp; <i>cmd</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QPhoneSocket class provides socket functionality for phone call handlers</p>
+<p>Note: this class is provided for supporting Voice-Over-IP implementations that use the VoIP integration mechanism of Qtopia 4.1&#x2e; New Voice-Over-IP implementations should inherit from <a href="qtelephonyservice.html">QTelephonyService</a> instead.</p>
+<p>Phone call handlers manage extensions to the Qtopia phone server for providing additional call types (e.g&#x2e; Voice-Over-IP).</p>
+<p>When a phone call handler starts up, it connects to the phone server on the Unix domain socket /tmp/qtopia-N/call-manager and registers itself with the &quot;INIT&quot; command (N is the QWS display identifier).</p>
+<p>This class provides a convenient method for phone call handlers to effect communication with the server. When a command message arrives from the phone server, the <a href="qphonesocket.html#received">received</a>() signal is emitted with the command details. The <a href="qphonesocket.html#send">send</a>() methods provide a convenient way to send a response message to the phone server.</p>
+<p>Phone call handlers do not need to use this class. They can connect to the Unix domain socket directly with their own mechanism. The handler is then responsible for all data traffic handling, parsing, etc.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QPhoneSocket"></a>QPhoneSocket::QPhoneSocket ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Create an object that manages connections to the Qtopia phone server for phone call handlers and attach it to <i>parent</i>.</p>
+<h3 class="fn"><a name="dtor.QPhoneSocket"></a>QPhoneSocket::~QPhoneSocket ()</h3>
+<p>Destroy a phone socket handling object.</p>
+<h3 class="fn"><a name="closed"></a>void QPhoneSocket::closed ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signal that is emitted when the connection is closed by the peer.</p>
+<h3 class="fn"><a name="incoming"></a>void QPhoneSocket::incoming ( QPhoneSocket * <i>socket</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signal that is emitted when an incoming client <i>socket</i> is detected on a bound server port. This is used internally by the Qtopia Phone Server, and will not be emitted in handler processes.</p>
+<h3 class="fn"><a name="received"></a>void QPhoneSocket::received ( const <a href="qstringlist.html">QStringList</a> &amp; <i>cmd</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signal that is emitted when <i>cmd</i> is received from the peer.</p>
+<h3 class="fn"><a name="send"></a>void QPhoneSocket::send ( const <a href="qstringlist.html">QStringList</a> &amp; <i>cmd</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Sends <i>cmd</i> to the peer on this connection.</p>
+<h3 class="fn"><a name="send-2"></a>void QPhoneSocket::send ( const <a href="qstring.html">QString</a> &amp; <i>cmd</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Sends <i>cmd</i> to the peer on this connection.</p>
+<h3 class="fn"><a name="send-3"></a>void QPhoneSocket::send ( const <a href="qstring.html">QString</a> &amp; <i>cmd</i>, const <a href="qstring.html">QString</a> &amp; <i>arg1</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Sends <i>cmd</i> and <i>arg1</i> to the peer on this connection.</p>
+<h3 class="fn"><a name="send-4"></a>void QPhoneSocket::send ( const <a href="qstring.html">QString</a> &amp; <i>cmd</i>, const <a href="qstring.html">QString</a> &amp; <i>arg1</i>, const <a href="qstring.html">QString</a> &amp; <i>arg2</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Sends <i>cmd</i>, <i>arg1</i>, and <i>arg2</i> to the peer on this connection.</p>
+<h3 class="fn"><a name="send-5"></a>void QPhoneSocket::send ( const <a href="qstring.html">QString</a> &amp; <i>cmd</i>, const <a href="qstring.html">QString</a> &amp; <i>arg1</i>, const <a href="qstring.html">QString</a> &amp; <i>arg2</i>, const <a href="qstring.html">QString</a> &amp; <i>arg3</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Sends <i>cmd</i>, <i>arg1</i>, <i>arg2</i>, and <i>arg3</i> to the peer on this connection.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+</tr></table></div></address></body>
+</html>

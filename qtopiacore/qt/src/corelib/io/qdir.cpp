@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -24,7 +39,7 @@
 #include "qplatformdefs.h"
 #include "qdir.h"
 #include "qabstractfileengine.h"
-#ifndef QT_NO_DEBUG
+#ifndef QT_NO_DEBUG_STREAM
 #include "qdebug.h"
 #endif
 #include "qfsfileengine.h"
@@ -36,6 +51,7 @@
 # include "qresource.h"
 #endif
 
+#include "../kernel/qcoreglobaldata_p.h"
 #include <stdlib.h>
 
 static QString driveSpec(const QString &path)
@@ -65,7 +81,7 @@ protected:
     QDirPrivate(QDir*, const QDir *copy=0);
     ~QDirPrivate();
 
-    void initFileEngine(const QString &file);
+    QString initFileEngine(const QString &file);
 
     void updateFileLists() const;
     void sortFileList(QDir::SortFlags, QStringList &, QStringList *, QFileInfoList *) const;
@@ -126,12 +142,12 @@ private:
         if ((path.endsWith(QLatin1Char('/')) || path.endsWith(QLatin1Char('\\')))
                 && path.length() > 1) {
 #ifdef Q_OS_WIN
-            if (!(path.length() == 3 && path.at(1) == ':'))
+            if (!(path.length() == 3 && path.at(1) == QLatin1Char(':')))
 #endif
                 path.truncate(path.length() - 1);
         }
         if(!data->fileEngine || !QDir::isRelativePath(path))
-            initFileEngine(path);
+            path = initFileEngine(path);
         data->fileEngine->setFileName(path);
         // set the path to be the qt friendly version so then we can operate on it using just /
         data->path = data->fileEngine->fileName(QAbstractFileEngine::DefaultName);
@@ -272,7 +288,8 @@ inline void QDirPrivate::sortFileList(QDir::SortFlags sort, QStringList &l,
             si[i].item = QFileInfo(path + l.at(i));
         }
         qt_cmp_si_sort_flags = sort;
-        qsort(si, i, sizeof(si[0]), qt_cmp_si);
+        if ((sort & QDir::SortByMask) != QDir::Unsorted)
+            qsort(si, i, sizeof(si[0]), qt_cmp_si);
         // put them back in the list(s)
         for (int j = 0; j<i; j++) {
             if(infos)
@@ -293,13 +310,14 @@ inline void QDirPrivate::updateFileLists() const
     }
 }
 
-void QDirPrivate::initFileEngine(const QString &path)
+QString QDirPrivate::initFileEngine(const QString &path)
 {
     detach(false);
     delete data->fileEngine;
     data->fileEngine = 0;
     data->clear();
     data->fileEngine = QAbstractFileEngine::create(path);
+    return data->fileEngine->fileName(QAbstractFileEngine::DefaultName);
 }
 
 void QDirPrivate::detach(bool createFileEngine)
@@ -772,8 +790,8 @@ QString QDir::absoluteFilePath(const QString &fileName) const
         QDir dir("/home/bob");
         QString s;
 
-        s = dir.relativePath("images/file.jpg");     // s is "images/file.jpg"
-        s = dir.relativePath("/home/mary/file.txt"); // s is "../mary/file.txt"
+        s = dir.relativeFilePath("images/file.jpg");     // s is "images/file.jpg"
+        s = dir.relativeFilePath("/home/mary/file.txt"); // s is "../mary/file.txt"
     \endcode
 
     \sa absoluteFilePath() filePath() canonicalPath()
@@ -862,8 +880,8 @@ QString QDir::toNativeSeparators(const QString &pathName)
     QString n(pathName);
 #if defined(Q_FS_FAT) || defined(Q_OS_OS2EMX)
     for (int i=0; i<(int)n.length(); i++) {
-        if (n[i] == '/')
-            n[i] = '\\';
+        if (n[i] == QLatin1Char('/'))
+            n[i] = QLatin1Char('\\');
     }
 #endif
     return n;
@@ -886,8 +904,8 @@ QString QDir::fromNativeSeparators(const QString &pathName)
     QString n(pathName);
 #if defined(Q_FS_FAT) || defined(Q_OS_OS2EMX)
     for (int i=0; i<(int)n.length(); i++) {
-        if (n[i] == '\\')
-            n[i] = '/';
+        if (n[i] == QLatin1Char('\\'))
+            n[i] = QLatin1Char('/');
     }
 #endif
     return n;
@@ -1004,9 +1022,12 @@ void QDir::setNameFilters(const QStringList &nameFilters)
 }
 
 /*!
+    \obsolete
     Adds \a path to the search paths searched in to find resources
     that are not specified with an absolute path. The default search
     path is to search only in the root (\c{:/}).
+
+    Use QDir::addSearchPath() with a prefix instead.
 
     \sa {The Qt Resource System}, QResource::addSearchPath()
 */
@@ -1020,6 +1041,86 @@ void QDir::addResourceSearchPath(const QString &path)
 #endif
 }
 
+#ifdef QT_BUILD_CORE_LIB
+/*!
+    \since 4.3
+
+    Sets or replaces Qt's search paths for file names with the prefix \a prefix
+    to \a searchPaths.
+
+    To specify a prefix for a file name, prepend the prefix followed by a single
+    colon (e.g., "images:undo.png", "xmldocs:books.xml"). \a prefix can only
+    contain letters or numbers (e.g., it cannot contain a colon, nor a slash).
+
+    Qt uses this search path to locate files with a known prefix. The search
+    path entries are tested in order, starting with the first entry.
+
+    \code
+        QDir::setSearchPaths("icons", QStringList(QDir::homePath() + "/images"));
+        QDir::setSearchPaths("docs", QStringList(":/embeddedDocuments"));
+        ...
+        QPixmap pixmap("icons:undo.png"); // will look for undo.png in QDir::homePath() + "/images"
+        QFile file("docs:design.odf"); // will look in the :/embeddedDocuments resource path
+    \endcode
+
+    File name prefix must be at least 2 characters long to avoid conflicts with
+    Windows drive letters.
+
+    Search paths may contain paths to {The Qt Resource System}.
+*/
+void QDir::setSearchPaths(const QString &prefix, const QStringList &searchPaths)
+{
+    if (prefix.length() < 2) {
+        qWarning("QDir::setSearchPaths: Prefix must be longer than 1 character");
+        return;
+    }
+
+    for (int i = 0; i < prefix.count(); i++) {
+        if (!prefix.at(i).isLetterOrNumber()) {
+            qWarning("QDir::setSearchPaths: Prefix can only contain letters or numbers");
+            return;
+        }
+    }
+
+    QWriteLocker lock(&QCoreGlobalData::instance()->dirSearchPathsLock);
+    QMap<QString, QStringList> &paths = QCoreGlobalData::instance()->dirSearchPaths;
+    if (searchPaths.isEmpty()) {
+        paths.remove(prefix);
+    } else {
+        paths.insert(prefix, searchPaths);
+    }
+}
+
+/*!
+    \since 4.3
+
+    Adds \a path to the search path for \a prefix.
+
+    \sa setSearchPaths()
+*/
+void QDir::addSearchPath(const QString &prefix, const QString &path)
+{
+    if (path.isEmpty())
+        return;
+
+    QWriteLocker lock(&QCoreGlobalData::instance()->dirSearchPathsLock);
+    QCoreGlobalData::instance()->dirSearchPaths[prefix] += path;
+}
+
+/*!
+    \since 4.3
+
+    Returns the search paths for \a prefix.
+
+    \sa setSearchPaths(), addSearchPath()
+*/
+QStringList QDir::searchPaths(const QString &prefix)
+{
+    QReadLocker lock(&QCoreGlobalData::instance()->dirSearchPathsLock);
+    return QCoreGlobalData::instance()->dirSearchPaths.value(prefix);
+}
+
+#endif // QT_BUILD_CORE_LIB
 
 /*!
     Returns the value set by setFilter()
@@ -1294,6 +1395,9 @@ QStringList QDir::entryList(const QStringList &nameFilters, Filters filters,
         return d->data->files;
     }
     QStringList l = d->data->fileEngine->entryList(filters, nameFilters);
+    if ((sort & QDir::SortByMask) == QDir::Unsorted)
+        return l;
+
     QStringList ret;
     d->sortFileList(sort, l, &ret, 0);
     return ret;
@@ -1479,8 +1583,11 @@ bool QDir::exists() const
 
     if(!d->data->fileEngine)
         return false;
-    const QAbstractFileEngine::FileFlags info = d->data->fileEngine->fileFlags(QAbstractFileEngine::DirectoryType
-                                                                       |QAbstractFileEngine::ExistsFlag);
+    const QAbstractFileEngine::FileFlags info =
+        d->data->fileEngine->fileFlags(
+            QAbstractFileEngine::DirectoryType
+            | QAbstractFileEngine::ExistsFlag
+            | QAbstractFileEngine::Refresh);
     if(!(info & QAbstractFileEngine::DirectoryType))
         return false;
     return info & QAbstractFileEngine::ExistsFlag;
@@ -1795,11 +1902,19 @@ bool QDir::setCurrent(const QString &path)
 
     \sa current(), homePath(), rootPath(), tempPath()
 */
-
 QString QDir::currentPath()
 {
     return QFSFileEngine::currentPath();
 }
+
+/*!
+  \fn QString QDir::currentDirPath()
+    Returns the absolute path of the application's current directory.
+
+    Use currentPath() instead.
+
+    \sa currentPath()
+*/
 
 /*!
     \fn QDir QDir::home()
@@ -1847,11 +1962,20 @@ QString QDir::currentPath()
 
     \sa home(), currentPath(), rootPath(), tempPath()
 */
-
 QString QDir::homePath()
 {
     return QFSFileEngine::homePath();
 }
+
+/*!
+  \fn QString QDir::homeDirPath()
+
+  Returns the absolute path of the user's home directory.
+
+  Use homePath() instead.
+
+  \sa homePath()
+ */
 
 /*!
     \fn QDir QDir::temp()
@@ -1902,11 +2026,20 @@ QString QDir::tempPath()
 
     \sa root(), drives(), currentPath(), homePath(), tempPath()
 */
-
 QString QDir::rootPath()
 {
     return QFSFileEngine::rootPath();
 }
+
+/*!
+  \fn QString QDir::rootDirPath()
+
+  Returns the absolute path of the root directory.
+
+  Use rootPath() instead.
+
+  \sa rootPath()
+*/
 
 #ifndef QT_NO_REGEXP
 /*!
@@ -2018,6 +2151,12 @@ QString QDir::cleanPath(const QString &path)
                             iwrite = last;
                             last = -1;
                         }
+                    } else if (dotcount == 2 && i > 0 && p[i - 1] != QLatin1Char('.')) {
+                        eaten = true;
+                        used -= iwrite - qMax(0, last);
+                        iwrite = qMax(0, last);
+                        last = -1;
+                        ++i;
                     } else if(dotcount == 1) {
                         eaten = true;
                     }
@@ -2308,7 +2447,7 @@ void QDir::setNameFilter(const QString &nameFilter)
     Use QDir::SortFlags instead.
 */
 
-#ifndef QT_NO_DEBUG
+#ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug debug, QDir::Filters filters)
 {
     QStringList flags;

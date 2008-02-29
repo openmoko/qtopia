@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -71,24 +71,6 @@
 #define LED_MAIL 0
 #define SHARP_LED_MAIL 9
 
-#define QPE_INITIAL_NUMLOCK_STATE \
-{ \
-    bool numLock = false; \
-    sharp_kbdctl_modifstat  st; \
-    int dev = ::open("/dev/sharp_kbdctl", O_RDWR); \
-    if( dev >= 0 ) { \
-        memset(&st, 0, sizeof(st)); \
-        st.which = 3; \
-                int ret = ioctl(dev, SHARP_KBDCTL_GETMODIFSTAT, (char*)&st); \
-        if( !ret ) \
-            numLock = (bool)st.stat; \
-        ::close(dev); \
-    } \
-    return numLock; \
-}
-
 #define SoftKey 0x8000
 
 #define QPE_ARCHITECTURE "SHARP/SL5500"
-#define QPE_DEFAULT_TODAY_MODE "Daily"
-

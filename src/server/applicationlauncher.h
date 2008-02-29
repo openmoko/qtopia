@@ -1,8 +1,9 @@
+// -*-C++-*-
 /****************************************************************************
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,15 +27,16 @@
 #include <QMap>
 #include <QList>
 #include <QProcess>
-#include <qcopchannel_qws.h>
 #include "qtopiaserverapplication.h"
+#include "oommanager.h"
+
 class QValueSpaceObject;
 
 // XXX - QString's used for application names should become QContent's
 
 class ApplicationIpcRouter : public QObject
 {
-Q_OBJECT
+    Q_OBJECT
 public:
     class RouteDestination {
     public:
@@ -48,27 +50,32 @@ QTOPIA_TASK_INTERFACE(ApplicationIpcRouter);
 
 class ApplicationTypeLauncher : public QObject
 {
-Q_OBJECT
-public:
+  Q_OBJECT
+
+  public:
     enum TerminationReason { FailedToStart, Crashed, Unknown, Normal, Killed };
     enum ApplicationState { NotRunning, Starting, Running };
 
+    virtual ~ApplicationTypeLauncher() { /* nothing */ }
     virtual ApplicationState applicationState(const QString &) = 0;
     virtual bool canLaunch(const QString &) = 0;
     virtual void launch(const QString &) = 0;
     virtual void kill(const QString &) = 0;
-signals:
-    void applicationStateChanged(const QString &,
-                                 ApplicationTypeLauncher::ApplicationState);
-    void terminated(const QString &,
+    virtual QString name() = 0;
+
+  signals:
+    void applicationStateChanged(const QString&,
+				ApplicationTypeLauncher::ApplicationState);
+    void terminated(const QString&,
                     ApplicationTypeLauncher::TerminationReason);
 };
 QTOPIA_TASK_INTERFACE(ApplicationTypeLauncher);
 
 class ApplicationTerminationHandler : public QObject
 {
-Q_OBJECT
-public:
+    Q_OBJECT
+
+  public:
     ApplicationTerminationHandler(QObject *parent = 0)
         : QObject(parent) {}
 
@@ -79,8 +86,8 @@ QTOPIA_TASK_INTERFACE(ApplicationTerminationHandler);
 
 class ApplicationLauncher : public QObject
 {
-Q_OBJECT
-public:
+  Q_OBJECT
+  public:
     ApplicationLauncher();
 
     bool canLaunch(const QString &);
@@ -91,7 +98,7 @@ public:
     QStringList applications() const;
     ApplicationTypeLauncher::ApplicationState state(const QString &) const;
 
-signals:
+  signals:
     void applicationTerminated(const QString &,
                                ApplicationTypeLauncher::TerminationReason,
                                bool filtered = false);
@@ -100,18 +107,19 @@ signals:
     void applicationNotFound(const QString &);
 
 
-private slots:
-    void stateChanged(const QString &,
-                      ApplicationTypeLauncher::ApplicationState);
+  private slots:
+    void handleStateChange(const QString &,
+			   ApplicationTypeLauncher::ApplicationState);
     void terminated(const QString &,
                     ApplicationTypeLauncher::TerminationReason);
 
-private:
+  private:
     QList<QString> m_orderedApps;
     QMap<QString, ApplicationTypeLauncher *> m_runningApps;
     QList<ApplicationTypeLauncher *> m_launchers;
-    QCopChannel *m_chan;
     QValueSpaceObject *m_vso;
+    OomManager	oom_manager;
+    QStringList busyApps;
 };
 QTOPIA_TASK_INTERFACE(ApplicationLauncher);
 
@@ -131,6 +139,9 @@ public:
     // QCopRouter::RouteDestination
     virtual void routeMessage(const QString &, const QString &,
                               const QByteArray &);
+    virtual QString name() {
+        return QString("QtopiaServerApplicationLauncher");
+    }
 };
 
 class ExeApplicationLauncherPrivate;
@@ -149,13 +160,16 @@ public:
     // QCopRouter::RouteDestination
     virtual void routeMessage(const QString &, const QString &,
                               const QByteArray &);
+    virtual QString name() {
+	return QString("ExeApplicationLauncher");
+    }
 
 protected:
     void addStartingApplication(const QString &, QProcess *);
     bool isRunning(const QString &);
 
 private slots:
-    void appExited(int);
+    void appExited(int, QProcess::ExitStatus);
     void appError(QProcess::ProcessError);
     void qtopiaApplicationChannel(const QString &,const QByteArray &);
     void newChannel( const QString& ch );
@@ -175,6 +189,9 @@ public:
     // ApplicationTypeLauncher
     virtual bool canLaunch(const QString &app);
     virtual void launch(const QString &app);
+    virtual QString name() {
+	return QString("SimpleExeApplicationLauncher");
+    }
 
 private:
     static QStringList applicationExecutable(const QString &app);
@@ -193,7 +210,11 @@ public:
 
     virtual bool canLaunch(const QString &app);
     virtual void launch(const QString &app);
-
+    virtual QString name() {
+	return QString("SandboxedExeApplicationLauncher");
+    }
+private slots:
+    void init(); 
 private:
     static QStringList applicationExecutable(const QString &app);
 
@@ -219,6 +240,9 @@ public:
     // QCopRouter::RouteDestination
     virtual void routeMessage(const QString &, const QString &,
                               const QByteArray &);
+    virtual QString name() {
+	return QString("ConsoleApplicationLauncher");
+    }
 
 private slots:
     void appStarted();
@@ -248,6 +272,9 @@ public:
     // QCopRouter::RouteDestination
     virtual void routeMessage(const QString &, const QString &,
                               const QByteArray &);
+    virtual QString name() {
+	return QString("BuiltinApplicationLauncher");
+    }
 
     typedef QWidget *(*BuiltinFunc)();
     static void install(const char *, BuiltinFunc);

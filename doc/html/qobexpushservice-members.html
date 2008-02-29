@@ -17,21 +17,23 @@
 <tr><td width="45%" valign="top"><ul>
 <li><div class="fn"/>enum <a href="qobexpushservice.html#Error-enum">Error</a></li>
 <li><div class="fn"/>enum <a href="qobexpushservice.html#State-enum">State</a></li>
-<li><div class="fn"/><a href="qobexpushservice.html#QObexPushService">QObexPushService</a> ( QObexSocket *, QObject * )</li>
+<li><div class="fn"/><a href="qobexpushservice.html#QObexPushService">QObexPushService</a> ( QIODevice *, QObject * )</li>
 <li><div class="fn"/><a href="qobexpushservice.html#dtor.QObexPushService">~QObexPushService</a> ()</li>
-<li><div class="fn"/><a href="qobexpushservice.html#acceptFile">acceptFile</a> ( const QString &amp;, const QString &amp;, qint64 ) : bool</li>
+<li><div class="fn"/><a href="qobexpushservice.html#acceptFile">acceptFile</a> ( const QString &amp;, const QString &amp;, qint64, const QString &amp; ) : QIODevice *</li>
 <li><div class="fn"/><a href="qobject.html#blockSignals">blockSignals</a> ( bool )</li>
 <li><div class="fn"/><a href="qobexpushservice.html#businessCard">businessCard</a> () const : QByteArray</li>
+<li><div class="fn"/><a href="qobexpushservice.html#businessCardRequested">businessCardRequested</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#checkConnectArgs">checkConnectArgs</a> ( const char *, const QObject *, const char * )</li>
 <li><div class="fn"/><a href="qobject.html#child">child</a> ( const char *, const char *, bool ) const</li>
 <li><div class="fn"/><a href="qobject.html#childEvent">childEvent</a> ( QChildEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#children">children</a> () const</li>
 <li><div class="fn"/><a href="qobject.html#className">className</a> () const</li>
-<li><div class="fn"/><a href="qobexpushservice.html#close">close</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#connect">connect</a> ( const QObject *, const char *, const QObject *, const char *, Qt::ConnectionType )</li>
 <li><div class="fn"/><a href="qobject.html#connect-2">connect</a> ( const QObject *, const char *, const char *, Qt::ConnectionType ) const</li>
 <li><div class="fn"/><a href="qobject.html#connectNotify">connectNotify</a> ( const char * )</li>
+<li><div class="fn"/><a href="qobexpushservice.html#currentDevice">currentDevice</a> () const : QIODevice *</li>
 <li><div class="fn"/><a href="qobject.html#customEvent">customEvent</a> ( QEvent * )</li>
+<li><div class="fn"/><a href="qobexpushservice.html#dataTransferProgress">dataTransferProgress</a> ( qint64, qint64 )</li>
 <li><div class="fn"/><a href="qobject.html#deleteLater">deleteLater</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#destroyed">destroyed</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#disconnect">disconnect</a> ( const QObject *, const char *, const QObject *, const char * )</li>
@@ -48,11 +50,9 @@
 <li><div class="fn"/><a href="qobject.html#findChild">findChild</a> ( const QString &amp; ) const</li>
 <li><div class="fn"/><a href="qobject.html#findChildren">findChildren</a> ( const QString &amp; ) const</li>
 <li><div class="fn"/><a href="qobject.html#findChildren-2">findChildren</a> ( const QRegExp &amp; ) const</li>
-<li><div class="fn"/><a href="qobexpushservice.html#getRequest">getRequest</a> ( const QString &amp;, const QString &amp; )</li>
-<li><div class="fn"/><a href="qobexpushservice.html#incomingDirectory">incomingDirectory</a> () const : const QString &amp;</li>
 <li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const</li>
-<li><div class="fn"/><a href="qobject.html#insertChild">insertChild</a> ( QObject * )</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qobject.html#insertChild">insertChild</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#installEventFilter">installEventFilter</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#isA">isA</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qobject.html#isWidgetType">isWidgetType</a> () const</li>
@@ -64,21 +64,20 @@
 <li><div class="fn"/><a href="qobject.html#normalizeSignalSlot">normalizeSignalSlot</a> ( const char * )</li>
 <li><div class="fn"/><a href="qobject.html#objectName">objectName</a> () const</li>
 <li><div class="fn"/><a href="qobject.html#parent">parent</a> () const</li>
-<li><div class="fn"/><a href="qobexpushservice.html#progress">progress</a> ( qint64, qint64 )</li>
 <li><div class="fn"/><a href="qobject.html#property">property</a> ( const char * ) const</li>
-<li><div class="fn"/><a href="qobexpushservice.html#putRequest">putRequest</a> ( const QString &amp;, const QString &amp; )</li>
+<li><div class="fn"/><a href="qobexpushservice.html#putRequested">putRequested</a> ( const QString &amp;, const QString &amp;, qint64, const QString &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#receivers">receivers</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qobject.html#removeChild">removeChild</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
-<li><div class="fn"/><a href="qobexpushservice.html#requestComplete">requestComplete</a> ( bool )</li>
+<li><div class="fn"/><a href="qobexpushservice.html#requestFinished">requestFinished</a> ( bool )</li>
 <li><div class="fn"/><a href="qobject.html#sender">sender</a> () const</li>
-<li><div class="fn"/><a href="qobexpushservice.html#setIncomingDirectory">setIncomingDirectory</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qobexpushservice.html#sessionDevice">sessionDevice</a> () const : QIODevice *</li>
+<li><div class="fn"/><a href="qobexpushservice.html#setBusinessCard">setBusinessCard</a> ( const QByteArray &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#setName">setName</a> ( const char * )</li>
 <li><div class="fn"/><a href="qobject.html#setObjectName">setObjectName</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#setParent">setParent</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#setProperty">setProperty</a> ( const char *, const QVariant &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#signalsBlocked">signalsBlocked</a> () const</li>
-<li><div class="fn"/><a href="qobexpushservice.html#socket">socket</a> () : QObexSocket *</li>
 <li><div class="fn"/><a href="qobject.html#startTimer">startTimer</a> ( int )</li>
 <li><div class="fn"/><a href="qobexpushservice.html#state">state</a> () const : State</li>
 <li><div class="fn"/><a href="qobexpushservice.html#stateChanged">stateChanged</a> ( QObexPushService::State )</li>
@@ -94,6 +93,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

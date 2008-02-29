@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -218,7 +233,7 @@ void Q3ToolBarSeparator::paintEvent(QPaintEvent *)
     represented by small icons. It's purpose is to provide quick
     access to frequently used commands or options. Within a
     Q3MainWindow the user can drag toolbars within and between the
-    \link QDockArea dock areas\endlink. Toolbars can also be dragged
+    \link Q3DockArea dock areas\endlink. Toolbars can also be dragged
     out of any dock area to float freely as top-level windows.
 
     Q3ToolBar is a specialization of QDockWindow, and so provides all
@@ -241,8 +256,8 @@ void Q3ToolBarSeparator::paintEvent(QPaintEvent *)
     recommend calling show() anyway since we hope to fix this anomaly
     in a future release.)
 
-    Q3ToolBars, like QDockWindows, are located in \l{QDockArea}s or
-    float as top-level windows. Q3MainWindow provides four QDockAreas
+    Q3ToolBars, like QDockWindows, are located in \l{Q3DockArea}s or
+    float as top-level windows. Q3MainWindow provides four Q3DockAreas
     (top, left, right and bottom). When you create a new toolbar (as
     in the example above) as a child of a Q3MainWindow the toolbar will
     be added to the top dock area. You can move it to another dock
@@ -265,7 +280,7 @@ void Q3ToolBarSeparator::paintEvent(QPaintEvent *)
     toolbar to fill all available space in the specified orientation.
 
     The toolbar arranges its buttons either horizontally or vertically
-    (see orientation() for details). Generally, QDockArea will set the
+    (see orientation() for details). Generally, Q3DockArea will set the
     orientation correctly for you, but you can set it yourself with
     setOrientation() and track any changes by connecting to the
     orientationChanged() signal.
@@ -474,8 +489,9 @@ bool Q3ToolBar::event(QEvent * e)
         if (child && child->isWidgetType() && !((QWidget*)child)->isWindow()
              && child->parent() == this
             && QLatin1String("qt_dockwidget_internal") != child->objectName()) {
-            boxLayout()->addWidget((QWidget*)child);
+            QWidgetItem *item = new QWidgetItem((QWidget*)child);
             if (QToolButton *button = qobject_cast<QToolButton*>(child)) {
+                item->setAlignment(Qt::AlignHCenter);
                 button->setFocusPolicy(Qt::NoFocus);
                 if (mw) {
                     QObject::connect(mw, SIGNAL(pixmapSizeChanged(bool)),
@@ -487,6 +503,7 @@ bool Q3ToolBar::event(QEvent * e)
                 }
                 button->setAutoRaise(true);
             }
+            boxLayout()->addItem(item);
             if (isVisible()) {
                 // toolbar compatibility: we auto show widgets that
                 // are not explicitly hidden
@@ -630,7 +647,7 @@ void Q3ToolBar::createPopup()
                 QAbstractButton *b = (QAbstractButton*)w;
                 QString s = b->text();
                 if (s.isEmpty())
-                    s = "";
+                    s = QLatin1String("");
                 if (b->pixmap())
                     id = d->extensionPopup->insertItem(*b->pixmap(), s, b, SLOT(click()));
                 else

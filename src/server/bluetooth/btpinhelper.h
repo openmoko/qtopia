@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,6 +25,19 @@
 #include <qbluetoothpasskeyagent.h>
 
 class QPasswordDialog;
+class QValueSpaceItem;
+
+class BluetoothPasskeyAgentTask : public QObject 
+{
+    Q_OBJECT
+public:
+    BluetoothPasskeyAgentTask( QObject* parent = 0 );
+protected slots:
+    void activateAgent();
+    void delayedAgentStart();
+private:
+    QValueSpaceItem* serverWidgetVsi;
+};
 
 class BTPinHelper : public QBluetoothPasskeyAgent {
     Q_OBJECT

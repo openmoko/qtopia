@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -54,6 +69,7 @@ public:
     QHash<QString, int> doNotShow;
 
     bool nextPending();
+    void retranslateStrings();
 };
 
 class QErrorMessageTextView : public QTextEdit
@@ -145,7 +161,7 @@ static void jump(QtMsgType t, const char * m)
     case QtFatalMsg:
         rich = QErrorMessage::tr("Fatal Error:");
     }
-    rich = QString(QLatin1String("<p><b>%1</b></p>")).arg(rich);
+    rich = QString::fromLatin1("<p><b>%1</b></p>").arg(rich);
     rich += Qt::convertFromPlainText(QLatin1String(m), Qt::WhiteSpaceNormal);
 
     // ### work around text engine quirk
@@ -184,15 +200,16 @@ QErrorMessage::QErrorMessage(QWidget * parent)
     grid->addWidget(d->icon, 0, 0, Qt::AlignTop);
     d->errors = new QErrorMessageTextView(this);
     grid->addWidget(d->errors, 0, 1);
-    d->again = new QCheckBox(tr("&Show this message again"), this);
+    d->again = new QCheckBox(this);
     d->again->setChecked(true);
     grid->addWidget(d->again, 1, 1, Qt::AlignTop);
-    d->ok = new QPushButton(tr("&OK"), this);
+    d->ok = new QPushButton(this);
     connect(d->ok, SIGNAL(clicked()), this, SLOT(accept()));
     d->ok->setFocus();
     grid->addWidget(d->ok, 2, 0, 1, 2, Qt::AlignCenter);
     grid->setColumnStretch(1, 42);
     grid->setRowStretch(0, 42);
+    d->retranslateStrings();
 }
 
 
@@ -268,7 +285,7 @@ bool QErrorMessagePrivate::nextPending()
     \a message is queued for later display.
 */
 
-void QErrorMessage::showMessage(const QString & message)
+void QErrorMessage::showMessage(const QString &message)
 {
     Q_D(QErrorMessage);
     if (d->doNotShow.contains(message))
@@ -276,6 +293,24 @@ void QErrorMessage::showMessage(const QString & message)
     d->pending.append(message);
     if (!isVisible() && d->nextPending())
         show();
+}
+
+/*!
+    \reimp
+*/
+void QErrorMessage::changeEvent(QEvent *e)
+{
+    Q_D(QErrorMessage);
+    if (e->type() == QEvent::LanguageChange) {
+        d->retranslateStrings();
+    }
+    QDialog::changeEvent(e);
+}
+
+void QErrorMessagePrivate::retranslateStrings()
+{
+    again->setText(QErrorMessage::tr("&Show this message again"));
+    ok->setText(QErrorMessage::tr("&OK"));
 }
 
 /*!

@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qhash.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/tools/qhash.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QMultiHash</title>
+  <title>Qt 4.3: List of All Members for QMultiHash</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -32,24 +32,31 @@
 <li><div class="fn"/><a href="qhash.html#clear">clear</a> ()</li>
 <li><div class="fn"/><a href="qhash.html#constBegin">constBegin</a> () const : const_iterator</li>
 <li><div class="fn"/><a href="qhash.html#constEnd">constEnd</a> () const : const_iterator</li>
-<li><div class="fn"/><a href="qhash.html#constFind">constFind</a> ( const Key &amp; ) const : const_iterator</li>
-<li><div class="fn"/><a href="qhash.html#contains">contains</a> ( const Key &amp; ) const : bool</li>
-<li><div class="fn"/><a href="qhash.html#count">count</a> ( const Key &amp; ) const : int</li>
-<li><div class="fn"/><a href="qhash.html#count-2">count</a> () const : int</li>
+<li><div class="fn"/><a href="qmultihash.html#constFind">constFind</a> ( const Key &amp;, const T &amp; ) const : QHash&lt;Key, T&gt;::const_iterator</li>
+<li><div class="fn"/><a href="qmultihash.html#constFind-2">constFind</a> ( const Key &amp; ) const : QHash&lt;Key, T&gt;::const_iterator</li>
+<li><div class="fn"/><a href="qmultihash.html#contains">contains</a> ( const Key &amp;, const T &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qmultihash.html#contains-2">contains</a> ( const Key &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qmultihash.html#count">count</a> ( const Key &amp;, const T &amp; ) const : int</li>
+<li><div class="fn"/><a href="qmultihash.html#count-2">count</a> ( const Key &amp; ) const : int</li>
+<li><div class="fn"/><a href="qmultihash.html#count-3">count</a> () const : int</li>
 <li><div class="fn"/><a href="qhash.html#empty">empty</a> () const : bool</li>
 <li><div class="fn"/><a href="qhash.html#end">end</a> () : iterator</li>
 <li><div class="fn"/><a href="qhash.html#end-2">end</a> () const : const_iterator</li>
 <li><div class="fn"/><a href="qhash.html#erase">erase</a> ( iterator ) : iterator</li>
-<li><div class="fn"/><a href="qhash.html#find">find</a> ( const Key &amp; ) : iterator</li>
-<li><div class="fn"/><a href="qhash.html#find-2">find</a> ( const Key &amp; ) const : const_iterator</li>
+<li><div class="fn"/><a href="qmultihash.html#find">find</a> ( const Key &amp;, const T &amp; ) : QHash&lt;Key, T&gt;::iterator</li>
+<li><div class="fn"/><a href="qmultihash.html#find-2">find</a> ( const Key &amp; ) : QHash&lt;Key, T&gt;::iterator</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qmultihash.html#find-3">find</a> ( const Key &amp;, const T &amp; ) const : QHash&lt;Key, T&gt;::const_iterator</li>
+<li><div class="fn"/><a href="qmultihash.html#find-4">find</a> ( const Key &amp; ) const : QHash&lt;Key, T&gt;::const_iterator</li>
 <li><div class="fn"/><a href="qmultihash.html#insert">insert</a> ( const Key &amp;, const T &amp; ) : QHash&lt;Key, T&gt;::iterator</li>
 <li><div class="fn"/><a href="qhash.html#insertMulti">insertMulti</a> ( const Key &amp;, const T &amp; ) : iterator</li>
 <li><div class="fn"/><a href="qhash.html#isEmpty">isEmpty</a> () const : bool</li>
 <li><div class="fn"/><a href="qhash.html#key">key</a> ( const T &amp; ) const : const Key</li>
+<li><div class="fn"/><a href="qhash.html#key-2">key</a> ( const T &amp;, const Key &amp; ) const : const Key</li>
 <li><div class="fn"/><a href="qhash.html#keys">keys</a> () const : QList&lt;Key&gt;</li>
 <li><div class="fn"/><a href="qhash.html#keys-2">keys</a> ( const T &amp; ) const : QList&lt;Key&gt;</li>
-<li><div class="fn"/><a href="qhash.html#remove">remove</a> ( const Key &amp; ) : int</li>
+<li><div class="fn"/><a href="qmultihash.html#remove">remove</a> ( const Key &amp;, const T &amp; ) : int</li>
+<li><div class="fn"/><a href="qmultihash.html#remove-2">remove</a> ( const Key &amp; ) : int</li>
 <li><div class="fn"/><a href="qmultihash.html#replace">replace</a> ( const Key &amp;, const T &amp; ) : QHash&lt;Key, T&gt;::iterator</li>
 <li><div class="fn"/><a href="qhash.html#reserve">reserve</a> ( int )</li>
 <li><div class="fn"/><a href="qhash.html#size">size</a> () const : int</li>
@@ -75,6 +82,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

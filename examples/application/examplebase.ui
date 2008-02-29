@@ -33,7 +33,7 @@
         </widget>
       </item>
       <item>
-        <widget class="QPushButton" name="quit" >
+        <widget class="QPushButton" name="QuitButton" >
           <property name="text" >
             <string>Quit</string>
           </property>

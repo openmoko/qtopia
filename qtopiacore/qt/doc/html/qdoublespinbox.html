@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qspinbox.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/widgets/qspinbox.cpp -->
 <head>
-  <title>Qt 4.2: QDoubleSpinBox Class Reference</title>
+  <title>Qt 4.3: QDoubleSpinBox Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDoubleSpinBox Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDoubleSpinBox Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QDoubleSpinBox class provides a spin box widget that takes doubles. <a href="#details">More...</a></p>
 <pre> #include &lt;QDoubleSpinBox&gt;</pre><p>Inherits <a href="qabstractspinbox.html">QAbstractSpinBox</a>.</p>
 <ul>
@@ -35,8 +36,8 @@
 </td></tr>
 </table></p>
 <ul>
-<li><div class="fn"/>10 properties inherited from <a href="qabstractspinbox.html#properties">QAbstractSpinBox</a></li>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>11 properties inherited from <a href="qabstractspinbox.html#properties">QAbstractSpinBox</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -62,8 +63,8 @@
 <li><div class="fn"/>virtual double <b><a href="qdoublespinbox.html#valueFromText">valueFromText</a></b> ( const QString &amp; <i>text</i> ) const</li>
 </ul>
 <ul>
-<li><div class="fn"/>22 public functions inherited from <a href="qabstractspinbox.html#public-functions">QAbstractSpinBox</a></li>
-<li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>24 public functions inherited from <a href="qabstractspinbox.html#public-functions">QAbstractSpinBox</a></li>
+<li><div class="fn"/>201 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -92,7 +93,7 @@
 <ul>
 <li><div class="fn"/>4 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
 <li><div class="fn"/>5 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>3 protected functions inherited from <a href="qabstractspinbox.html#protected-functions">QAbstractSpinBox</a></li>
+<li><div class="fn"/>4 protected functions inherited from <a href="qabstractspinbox.html#protected-functions">QAbstractSpinBox</a></li>
 <li><div class="fn"/>38 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
 <li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
@@ -102,11 +103,11 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QDoubleSpinBox class provides a spin box widget that takes doubles.</p>
-<p>QDoubleSpinBox allows the user to choose a value by clicking the up and down buttons or by pressing Up or Down on the keyboard to increase or decrease the value currently displayed. The user can also type the value in manually. If the value is entered directly into the spin box, the value will be changed and <a href="qdoublespinbox.html#valueChanged">valueChanged</a>() will be emitted with the new value when Enter or Return is pressed, when the spin box loses focus or when the spin box is deactivated (see QWidget::windowActivationChanged()). The spin box supports double values but can be extended to use different strings with <a href="qabstractspinbox.html#validate">validate</a>(), <a href="qdoublespinbox.html#textFromValue">textFromValue</a>() and <a href="qdoublespinbox.html#valueFromText">valueFromText</a>().</p>
+<p>QDoubleSpinBox allows the user to choose a value by clicking the up and down buttons or by pressing Up or Down on the keyboard to increase or decrease the value currently displayed. The user can also type the value in manually. The spin box supports double values but can be extended to use different strings with <a href="qabstractspinbox.html#validate">validate</a>(), <a href="qdoublespinbox.html#textFromValue">textFromValue</a>() and <a href="qdoublespinbox.html#valueFromText">valueFromText</a>().</p>
 <p>Every time the value changes QDoubleSpinBox emits the <a href="qdoublespinbox.html#valueChanged">valueChanged</a>() signal. The current value can be fetched with <a href="qdoublespinbox.html#value-prop">value</a>() and set with <a href="qdoublespinbox.html#value-prop">setValue</a>().</p>
 <p>Note: QDoubleSpinBox will round numbers so they can be displayed with the current precision. In a QDoubleSpinBox with decimals set to 2, calling setValue(2.555) will cause <a href="qdoublespinbox.html#value-prop">value</a>() to return 2.56.</p>
 <p>Clicking the up and down buttons or using the keyboard accelerator's Up and Down arrows will increase or decrease the current value in steps of size <a href="qdoublespinbox.html#singleStep-prop">singleStep</a>(). If you want to change this behavior you can reimplement the virtual function <a href="qabstractspinbox.html#stepBy">stepBy</a>(). The minimum and maximum value and the step size can be set using one of the constructors, and can be changed later with <a href="qdoublespinbox.html#minimum-prop">setMinimum</a>(), <a href="qdoublespinbox.html#maximum-prop">setMaximum</a>() and <a href="qdoublespinbox.html#singleStep-prop">setSingleStep</a>(). The spinbox has a default precision of 2 decimal places but this can be changed using <a href="qdoublespinbox.html#decimals-prop">setDecimals</a>().</p>
-<p>Most spin boxes are directional, but QDoubleSpinBox can also operate as a circular spin box, i.e. if the range is 0.0-99.9 and the current value is 99.9, clicking &quot;up&quot; will give 0 if <a href="qabstractspinbox.html#wrapping-prop">wrapping</a>() is set to true. Use <a href="qabstractspinbox.html#wrapping-prop">setWrapping</a>() if you want circular behavior.</p>
+<p>Most spin boxes are directional, but QDoubleSpinBox can also operate as a circular spin box, i.e&#x2e; if the range is 0.0-99.9 and the current value is 99.9, clicking &quot;up&quot; will give 0 if <a href="qabstractspinbox.html#wrapping-prop">wrapping</a>() is set to true. Use <a href="qabstractspinbox.html#wrapping-prop">setWrapping</a>() if you want circular behavior.</p>
 <p>The displayed value can be prepended and appended with arbitrary strings indicating, for example, currency or the unit of measurement. See <a href="qdoublespinbox.html#prefix-prop">setPrefix</a>() and <a href="qdoublespinbox.html#suffix-prop">setSuffix</a>(). The text in the spin box is retrieved with <a href="qabstractspinbox.html#text-prop">text</a>() (which includes any <a href="qdoublespinbox.html#prefix-prop">prefix</a>() and <a href="qdoublespinbox.html#suffix-prop">suffix</a>()), or with <a href="qdoublespinbox.html#cleanText-prop">cleanText</a>() (which has no <a href="qdoublespinbox.html#prefix-prop">prefix</a>(), no <a href="qdoublespinbox.html#suffix-prop">suffix</a>() and no leading or trailing whitespace).</p>
 <p>It is often desirable to give the user a special (often default) choice in addition to the range of numeric values. See <a href="qabstractspinbox.html#specialValueText-prop">setSpecialValueText</a>() for how to do this with QDoubleSpinBox.</p>
 <p>See also <a href="qspinbox.html">QSpinBox</a>, <a href="qdatetimeedit.html">QDateTimeEdit</a>, <a href="qslider.html">QSlider</a>, and <a href="widgets-spinboxes.html">Spin Boxes Example</a>.</p>
@@ -121,7 +122,8 @@
 <p>See also <a href="qabstractspinbox.html#text-prop">text</a>, <a href="qdoublespinbox.html#prefix-prop">QDoubleSpinBox::prefix</a>, and <a href="qdoublespinbox.html#suffix-prop">QDoubleSpinBox::suffix</a>.</p>
 <h3 class="fn"><a name="decimals-prop"></a>decimals : int</h3>
 <p>This property holds the precision of the spin box, in decimals.</p>
-<p>Sets how many decimals the spinbox will use for displaying and interpreting doubles. The valid decimal range is 0-13. The default is 2. <i>decimals</i> will be bounded to a value that is within the valid range.</p>
+<p>Sets how many decimals the spinbox will use for displaying and interpreting doubles.</p>
+<p><b>Warning:</b> The results might not be reliable with very high values for <i>decimals</i>.</p>
 <p>Note: The maximum, minimum and value might change as a result of changing this property.</p>
 <p>Access functions:</p>
 <ul>
@@ -142,7 +144,7 @@
 <h3 class="fn"><a name="minimum-prop"></a>minimum : double</h3>
 <p>This property holds the minimum value of the spin box.</p>
 <p>When setting this property the <a href="qdoublespinbox.html#maximum-prop">maximum</a> is adjusted if necessary to ensure that the range remains valid.</p>
-<p>The default minimum value is 0.0.</p>
+<p>The default minimum value is 0.0&#x2e;</p>
 <p>Note: The minimum value will be rounded to match the decimals property.</p>
 <p>Access functions:</p>
 <ul>
@@ -164,7 +166,7 @@
 <p>See also <a href="qdoublespinbox.html#suffix-prop">suffix</a>(), <a href="qdoublespinbox.html#suffix-prop">setSuffix</a>(), <a href="qabstractspinbox.html#specialValueText-prop">specialValueText</a>(), and <a href="qabstractspinbox.html#specialValueText-prop">setSpecialValueText</a>().</p>
 <h3 class="fn"><a name="singleStep-prop"></a>singleStep : double</h3>
 <p>This property holds the step value.</p>
-<p>When the user uses the arrows to change the spin box's value the value will be incremented/decremented by the amount of the singleStep. The default value is 1.0. Setting a singleStep value of less than 0 does nothing.</p>
+<p>When the user uses the arrows to change the spin box's value the value will be incremented/decremented by the amount of the singleStep. The default value is 1.0&#x2e; Setting a singleStep value of less than 0 does nothing.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>double singleStep () const</b></li>
@@ -224,6 +226,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

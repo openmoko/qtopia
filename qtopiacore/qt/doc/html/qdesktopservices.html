@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/util/qdesktopservices.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/util/qdesktopservices.cpp -->
 <head>
-  <title>Qt 4.2: QDesktopServices Class Reference</title>
+  <title>Qt 4.3: QDesktopServices Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDesktopServices Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDesktopServices Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QDesktopServices class provides methods for accessing common desktop services. <a href="#details">More...</a></p>
 <pre> #include &lt;QDesktopServices&gt;</pre><p>This class was introduced in Qt 4.2.</p>
 <ul>
@@ -49,17 +50,17 @@
  };
 
  QDesktopServices::setUrlHandler(&quot;help&quot;, helpInstance, &quot;showHelp&quot;);</pre>
-<p>If inside the handler you decide that you can't open the requested URL, you can just call <a href="qdesktopservices.html#openUrl">QDesktopServices::openUrl</a>() without arguments, and it will try to open the URL using the appropriate mechanism for the user's desktop environment.</p>
+<p>If inside the handler you decide that you can't open the requested URL, you can just call <a href="qdesktopservices.html#openUrl">QDesktopServices::openUrl</a>() again with the same argument, and it will try to open the URL using the appropriate mechanism for the user's desktop environment.</p>
 <p>See also <a href="qsystemtrayicon.html">QSystemTrayIcon</a> and <a href="qprocess.html">QProcess</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="openUrl"></a>bool QDesktopServices::openUrl ( const <a href="qurl.html">QUrl</a> &amp; <i>url</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Opens the given <i>url</i> in the appropriate web browser for the user's desktop environment, and returns true if successful; otherwise returns false.</p>
-<p>If the URL is a reference to a local file (i.e. the URL scheme is &quot;file&quot;) then it will be opened with a suitable application instead of a web browser.</p>
+<p>If the URL is a reference to a local file (i.e&#x2e; the URL scheme is &quot;file&quot;) then it will be opened with a suitable application instead of a web browser.</p>
 <p>If a <tt>mailto</tt> URL is specified, the user's e-mail client will be used to open a composer window containing the options specified in the URL, similar to the way <tt>mailto</tt> links are handled by a web browser.</p>
 <p>For example, the following URL contains a recipient (<tt>user@foo.com</tt>), a subject (<tt>Test</tt>), and a message body (<tt>Just a test</tt>):</p>
 <pre> mailto:user@foo.com?subject=Test&amp;body=Just a test</pre>
-<p><b>Warning:</b> Although many e-mail clients can send attachments and are Unicode-aware, the user may have configured their client without these features. Also, certain e-mail clients (e.g., Lotus Notes) have problems with long URLs.</p>
+<p><b>Warning:</b> Although many e-mail clients can send attachments and are Unicode-aware, the user may have configured their client without these features. Also, certain e-mail clients (e.g&#x2e;, Lotus Notes) have problems with long URLs.</p>
 <p>See also <a href="qdesktopservices.html#setUrlHandler">setUrlHandler</a>().</p>
 <h3 class="fn"><a name="setUrlHandler"></a>void QDesktopServices::setUrlHandler ( const <a href="qstring.html">QString</a> &amp; <i>scheme</i>, <a href="qobject.html">QObject</a> * <i>receiver</i>, const char * <i>method</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets the handler for the given <i>scheme</i> to be the handler <i>method</i> provided by the <i>receiver</i> object.</p>
@@ -74,6 +75,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

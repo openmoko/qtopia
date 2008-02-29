@@ -10,16 +10,12 @@ VPN_SOURCES+=\
     qvpnfactory.cpp\
     qopenvpn.cpp\
     qopenvpngui.cpp\
-    qipsec.cpp \
-    qx500identity.cpp \
-    qkey.cpp
+    qipsec.cpp
 
 VPN_PRIVATE_HEADERS+=\
     qvpnclientprivate_p.h\
     qopenvpn_p.h\
-    qipsec_p.h \
-    qx500identity.h \
-    qkey.h
+    qipsec_p.h
 
 # Don't put this in include because it depends on the forms
 VPN_PACKAGE_HEADERS+=\
@@ -30,8 +26,6 @@ VPN_FORMS+=\
     certificateopenvpnbase.ui\
     optionsopenvpnbase.ui\
     deviceopenvpnbase.ui
-
-enable_ssl:depends(3rdparty/libraries/openssl/crypto)
 
 sdk_vpn_headers.files=$$VPN_HEADERS
 sdk_vpn_headers.path=/include/qtopia/comm

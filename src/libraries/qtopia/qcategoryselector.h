@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -42,6 +42,7 @@ public:
         ListView = 0x10,      // Forces it to appear as a list
         ComboView = 0x20,     // Forces it to appear as a combobox
         DialogView = 0x40,    // Forces it to appear as a button that displays a dialog.
+        SingleSelection = 0x80,    // Forces it to allow only selecting a single category
 
         Filter = IncludeAll | IncludeUnfiled,
         Editor = IncludeUnfiled,
@@ -93,8 +94,11 @@ public:
     {
         IncludeAll = 0x04,
         IncludeUnfiled = 0x08,
+        SingleSelection = 0x80,
+
         Filter = IncludeAll | IncludeUnfiled,
         Editor = IncludeUnfiled
+
     };
     Q_DECLARE_FLAGS(ContentFlags, ContentFlag)
 
@@ -117,9 +121,7 @@ public slots:
 
 protected:
     virtual QSize sizeHint() const;
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     void keyPressEvent(QKeyEvent* e);
-#endif
 
 private:
     QCategoryDialogData *d;

@@ -1,7 +1,7 @@
 TARGET	 = qgfxtransformed
 include(../../qpluginbase.pri)
 
-DESTDIR	 = $$QT_BUILD_TREE/plugins/gfxdrivers
+QTDIR_build:DESTDIR	 = $$QT_BUILD_TREE/plugins/gfxdrivers
 
 DEFINES	+= QT_QWS_TRANSFORMED
 

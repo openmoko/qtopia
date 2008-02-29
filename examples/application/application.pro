@@ -1,6 +1,7 @@
 qtopia_project(qtopia app) # see buildsystem.html for more project keywords
 TARGET=example
 # main.cpp uses the QTOPIA_ADD_APPLICATION/QTOPIA_MAIN macros
+# It can also build without these macros if you disable this and change the define in main.cpp
 CONFIG+=qtopia_main
 # Despite using the QTOPIA_MAIN macro, do not build this app as a
 # quicklaunch plugin unless -force-quicklaunch was passed to configure

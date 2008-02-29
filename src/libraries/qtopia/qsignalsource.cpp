@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,10 +21,14 @@
 
 #include "qsignalsource.h"
 
+#include <QTimer>
+#include <QDebug>
+
 static const char* const QSIGNALPROVIDER_NAME = "QSignalSource";
 static const char* const QSIGNALPROVIDER_TYPE = "Type";
 static const char* const QSIGNALPROVIDER_AVAILABILITY = "Availability";
 static const char* const QSIGNALPROVIDER_SIGNAL_STRENGTH = "SignalStrength";
+static const int QSIGNALPROVIDER_UPDATE_FREQUENCY = 5000;
 
 
 
@@ -43,7 +47,7 @@ static const char* const QSIGNALPROVIDER_SIGNAL_STRENGTH = "SignalStrength";
   In addition to the above hardware related signal sources Qtopia provides a virtual 
   default signal source. This default source is selected from the list of available 
   QSignalSource providers. The selection may be configured
-  in the \c{Trolltech/SignalStatus} configuration file. The following keys apply:
+  in the \c{Trolltech/HardwareAccessories} configuration file. The following keys apply:
 
   \table
   \header   \o key    \o Decription
@@ -52,7 +56,7 @@ static const char* const QSIGNALPROVIDER_SIGNAL_STRENGTH = "SignalStrength";
   \endtable
 
   If the default signal source is not explicitly configured via the configuration file above 
-  the modem signal source is preferred over a WLAN signal source. If there
+  a modem signal source is preferred over a WLAN signal source. If there
   are several signal sources of the same type the first signal source that 
   is created will be used. If the default signal source is configured, but the 
   specified provider does not exist, then QSignalSource becomes invalid. The default signal
@@ -61,16 +65,15 @@ static const char* const QSIGNALPROVIDER_SIGNAL_STRENGTH = "SignalStrength";
   A specific QSignalSource can be selected as shown in the following example:
 
   \code
-        QString requestedType = "wlan";
-        QHardwareManager man( "QSignalSource" );
-        QStringList providers = man.providers();
-
         QSignalSource* src = 0;
+        QHardwareManager* manager = new QHardwareManager("QSignalSource", this);
+        QStringList providers = man->providers();
+        
         //find a WLAN signal source
         foreach( QString signalSourceId, providers )
         {
             src = new QSignalSource( signalSourceId, this );
-            if ( src->type() == requestedType ) {
+            if ( src->type() == "wlan" ) {
                 break;
             } else {
                 delete src;
@@ -127,10 +130,10 @@ static const char* const QSIGNALPROVIDER_SIGNAL_STRENGTH = "SignalStrength";
 /*!
   Constructs a new signal source for provider \a id with the specified \a parent.
 
-  If \a id is not passed, this class will use the default signal source.
+  If \a id is empty, this class will use the default signal source.
 */  
 QSignalSource::QSignalSource( const QString& id, QObject* parent )
-    : QHardwareInterface( QSIGNALPROVIDER_NAME, id.isEmpty() ? "DefaultSignal": id, parent, Client )
+    : QHardwareInterface( QSIGNALPROVIDER_NAME, id.isEmpty() ? QLatin1String("DefaultSignal"): id, parent, Client )
 {
     proxy( SIGNAL(availabilityChanged(QSignalSource::Availability)) );
     proxy( SIGNAL(signalStrengthChanged(int)) );
@@ -186,7 +189,9 @@ int QSignalSource::signalStrength() const
 struct QSignalSourceProviderPrivate
 {
     int strength;
+    int publishedStrength;
     QSignalSource::Availability avail;
+    QTimer *timer;
 };
 
 /*!
@@ -234,6 +239,8 @@ QSignalSourceProvider::QSignalSourceProvider( const QString& type, const QString
     d = new QSignalSourceProviderPrivate();
     d->avail = QSignalSource::Invalid;
     d->strength = -1;
+    d->timer = new QTimer(this);
+    connect(d->timer, SIGNAL(timeout()), this, SLOT(update()));
     
     setValue( QSIGNALPROVIDER_TYPE, type );    
     setAvailability( QSignalSource::NotAvailable );
@@ -290,9 +297,20 @@ void QSignalSourceProvider::setSignalStrength(int strength)
         return;
 
     d->strength = strength;
-    setValue( QSIGNALPROVIDER_SIGNAL_STRENGTH, strength );
-    emit signalStrengthChanged( strength );
-    
+    if  (qAbs(strength - d->publishedStrength) > 10 || strength == -1)
+        update();  // big change updated immediately
+    else if (!d->timer->isActive())
+        d->timer->start(QSIGNALPROVIDER_UPDATE_FREQUENCY);  // limit update frequency
+}
+
+void QSignalSourceProvider::update()
+{
+    d->timer->stop();
+    if (d->publishedStrength != d->strength || d->strength == -1) {
+        d->publishedStrength = d->strength;
+        setValue( QSIGNALPROVIDER_SIGNAL_STRENGTH, d->strength );
+        emit signalStrengthChanged( d->strength );
+    }
 }
 
 Q_IMPLEMENT_USER_METATYPE_ENUM(QSignalSource::Availability);

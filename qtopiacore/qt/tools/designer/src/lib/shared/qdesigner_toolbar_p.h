@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,12 +53,10 @@
 #include "shared_global_p.h"
 
 #include <QtGui/QAction>
-#include <QtGui/QToolBar>
 #include <QtGui/QToolButton>
 
-class QTimer;
+class QToolBar;
 class QDesignerFormWindowInterface;
-class QDesignerActionProviderExtension;
 
 namespace qdesigner_internal {
 
@@ -55,6 +68,7 @@ public:
     virtual ~SentinelAction();
 };
 
+// Dummy tool button used as 'insert before' parameter for  various commands
 class QDESIGNER_SHARED_EXPORT Sentinel: public QToolButton
 {
     Q_OBJECT
@@ -63,52 +77,60 @@ public:
     virtual ~Sentinel();
 };
 
-} // namespace qdesigner_internal
+// Special event filter for  tool bars in designer.
+// Handles drag and drop to and from. Ensures that each
+// child widget is  WA_TransparentForMouseEvents to enable  drag and drop.
 
-class QDESIGNER_SHARED_EXPORT QDesignerToolBar: public QToolBar
-{
+class QDESIGNER_SHARED_EXPORT ToolBarEventFilter : public QObject {
     Q_OBJECT
+
 public:
-    QDesignerToolBar(QWidget *parent = 0);
-    virtual ~QDesignerToolBar();
+    static void install(QToolBar *tb);
+    // Call after adding actions building the form to ensure the sentinel action is last
+    static void adjustSpecialActions(QToolBar *tb);
 
-    bool eventFilter(QObject *object, QEvent *event);
+    // Find action by position. Note that QToolBar::actionAt() will
+    // not work as designer sets WA_TransparentForMouseEvents on its tool bar buttons
+    // to be able to drag them. This function will return the dummy
+    // sentinel action when applied to tool bars created by designer if the position matches.
+    static QAction *actionAt(const QToolBar *tb, const QPoint &pos);
+    static int actionIndexAt(const QToolBar *tb, const QPoint &pos);
 
-    bool interactive(bool i);
-    void adjustSpecialActions();
+    static bool withinHandleArea(const QToolBar *tb, const QPoint &pos);
 
-    QDesignerFormWindowInterface *formWindow() const;
-    QDesignerActionProviderExtension *actionProvider();
+    // Utility to create an action
+    static QAction *createAction(QDesignerFormWindowInterface *fw, const QString &objectName, bool separator);
+
+    virtual bool eventFilter (QObject *watched, QEvent *event);
 
 private slots:
     void slotRemoveSelectedAction();
-    void slotNewToolBar();
     void slotRemoveToolBar();
     void slotInsertSeparator();
 
-protected:
-    virtual void actionEvent(QActionEvent *event);
-    virtual void dragEnterEvent(QDragEnterEvent *event);
-    virtual void dragMoveEvent(QDragMoveEvent *event);
-    virtual void dragLeaveEvent(QDragLeaveEvent *event);
-    virtual void dropEvent(QDropEvent *event);
-
-    void startDrag(const QPoint &pos);
-    bool handleEvent(QWidget *widget, QEvent *event);
-    bool handleMousePressEvent(QWidget *widget, QMouseEvent *event);
-    bool handleMouseReleaseEvent(QWidget *widget, QMouseEvent *event);
-    bool handleMouseMoveEvent(QWidget *widget, QMouseEvent *event);
-    bool handleContextMenuEvent(QWidget *widget, QContextMenuEvent *event);
-
-    void adjustIndicator(const QPoint &pos);
-    int findAction(const QPoint &pos) const;
-    bool isPassiveWidget(QWidget *widget) const;
-    QAction *createAction(const QString &objectName, bool separator = false);
-
 private:
+    ToolBarEventFilter(QToolBar *tb);
+
+    bool handleContextMenuEvent(QContextMenuEvent * event);
+    bool handleDragEnterMoveEvent(QDragMoveEvent *event);
+    bool handleDragLeaveEvent(QDragLeaveEvent *);
+    bool handleDropEvent(QDropEvent *event);
+    bool handleMousePressEvent(QMouseEvent *event);
+    bool handleMouseReleaseEvent(QMouseEvent *event);
+    bool handleMouseMoveEvent(QMouseEvent *event);
+
+    QDesignerFormWindowInterface *formWindow() const;
+    int findAction(const QPoint &pos) const;
+    void adjustDragIndicator(const QPoint &pos);
+    void hideDragIndicator();
+    void startDrag(const QPoint &pos, Qt::KeyboardModifiers modifiers);
+    void positionSentinel();
+    bool withinHandleArea(const QPoint &pos) const;
+
+    QToolBar *m_toolBar;
     QAction *m_sentinel;
     QPoint m_startPosition;
-    bool m_interactive;
 };
+} // namespace qdesigner_internal
 
 #endif // QDESIGNER_TOOLBAR_H

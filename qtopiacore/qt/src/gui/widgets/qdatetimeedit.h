@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,6 +49,8 @@ QT_MODULE(Gui)
 #ifndef QT_NO_DATETIMEEDIT
 
 class QDateTimeEditPrivate;
+class QStyleOptionSpinBox;
+
 class Q_GUI_EXPORT QDateTimeEdit : public QAbstractSpinBox
 {
     Q_OBJECT
@@ -42,7 +59,7 @@ class Q_GUI_EXPORT QDateTimeEdit : public QAbstractSpinBox
     Q_FLAGS(Sections)
     Q_PROPERTY(QDateTime dateTime READ dateTime WRITE setDateTime NOTIFY dateTimeChanged USER true)
     Q_PROPERTY(QDate date READ date WRITE setDate NOTIFY dateChanged)
-    Q_PROPERTY(QTime time READ time WRITE setTime NOTIFY timeChangedu) // ### typo: timeChangedu
+    Q_PROPERTY(QTime time READ time WRITE setTime NOTIFY timeChanged)
     Q_PROPERTY(QDate maximumDate READ maximumDate WRITE setMaximumDate RESET clearMaximumDate)
     Q_PROPERTY(QDate minimumDate READ minimumDate WRITE setMinimumDate RESET clearMinimumDate)
     Q_PROPERTY(QTime maximumTime READ maximumTime WRITE setMaximumTime RESET clearMaximumTime)
@@ -51,6 +68,8 @@ class Q_GUI_EXPORT QDateTimeEdit : public QAbstractSpinBox
     Q_PROPERTY(Sections displayedSections READ displayedSections)
     Q_PROPERTY(QString displayFormat READ displayFormat WRITE setDisplayFormat)
     Q_PROPERTY(bool calendarPopup READ calendarPopup WRITE setCalendarPopup)
+    Q_PROPERTY(int currentSectionIndex READ currentSectionIndex WRITE setCurrentSectionIndex)
+    Q_PROPERTY(int sectionCount READ sectionCount)
 
 public:
     enum Section {
@@ -100,7 +119,13 @@ public:
 
     Sections displayedSections() const;
     Section currentSection() const;
+    Section sectionAt(int index) const;
     void setCurrentSection(Section section);
+
+    int currentSectionIndex() const;
+    void setCurrentSectionIndex(int index);
+
+    int sectionCount() const;
 
     void setSelectedSection(Section section);
 
@@ -143,6 +168,7 @@ protected:
     virtual StepEnabled stepEnabled() const;
     virtual void mousePressEvent(QMouseEvent *event);
     virtual void paintEvent(QPaintEvent *event);
+    void initStyleOption(QStyleOptionSpinBox *option) const;
 
 private:
     Q_DECLARE_PRIVATE(QDateTimeEdit)
@@ -154,6 +180,7 @@ private:
 class Q_GUI_EXPORT QTimeEdit : public QDateTimeEdit
 {
     Q_OBJECT
+    Q_PROPERTY(QTime time READ time WRITE setTime NOTIFY timeChangedu USER true) // ### typo: timeChangedu
 public:
     QTimeEdit(QWidget *parent = 0);
     QTimeEdit(const QTime &time, QWidget *parent = 0);
@@ -162,6 +189,7 @@ public:
 class Q_GUI_EXPORT QDateEdit : public QDateTimeEdit
 {
     Q_OBJECT
+    Q_PROPERTY(QDate date READ date WRITE setDate NOTIFY dateChanged USER true)
 public:
     QDateEdit(QWidget *parent = 0);
     QDateEdit(const QDate &date, QWidget *parent = 0);

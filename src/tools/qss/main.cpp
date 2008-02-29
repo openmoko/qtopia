@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,8 +26,8 @@
 #include <unistd.h>
 
 #ifdef SINGLE_EXEC
-QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,qss)
-#define MAIN_FUNC main_qss
+QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,mediaserver)
+#define MAIN_FUNC main_mediaserver
 #else
 #define MAIN_FUNC main
 #endif
@@ -38,7 +38,7 @@ int MAIN_FUNC(int argc, char **argv)
 {
     QSXE_SET_APP_KEY(argv[0])
 
-    QApplication a(argc, argv, false);
+    QApplication a(argc, argv);
     (void)new QWSSoundServer(0);
 
     //if (1) {

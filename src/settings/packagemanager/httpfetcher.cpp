@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,7 +28,7 @@
 #include "version.h"
 #include <qtopialog.h>
 #include <qtopianamespace.h>
-
+#include <qtopiabase/version.h>
 
 #define DEFAULT_MAX_PACKAGES 100
 #define MAX_PACKAGES_LIST_BYTES 50000
@@ -48,8 +48,8 @@ HttpFetcher::HttpFetcher( const QString &iurl, QObject *parent )
 
 HttpFetcher::~HttpFetcher()
 {
-    if ( packageData ) delete packageData;
-    if ( http ) delete http;
+    delete packageData;
+    delete http;
 }
 
 const int HttpFetcher::initProgress = 10;
@@ -77,13 +77,6 @@ void HttpFetcher::run()
     QDir packagePathDir( Qtopia::packagePath() );
     if ( file.isEmpty() ) // getting package list
     {
-
-        QSettings packageServersConf( "Trolltech", "PackageServers" );
-        packageServersConf.beginGroup( "DeviceType" );
-        QString device( packageServersConf.value( "device", "unknown" ).toString() );
-        query = "?device=" + device;
-        packageServersConf.endGroup(); 
-
         if ( packageData == 0 ) packageData = new QBuffer();
         hr = new HttpInfoReceiver;
         connect( packageData, SIGNAL(bytesWritten(qint64)),
@@ -92,7 +85,6 @@ void HttpFetcher::run()
     else                  // getting a file
     {
         md5File = new Md5File( file.prepend( Qtopia::tempDir() ) );
-        // qDebug() << "http fetching" << md5File->fileName();
         if ( md5File->exists() )
             md5File->remove();
         packageData = md5File;
@@ -101,29 +93,23 @@ void HttpFetcher::run()
     }
     hr->fetcher = this;
 
-    connect( http, SIGNAL(responseHeaderReceived(const QHttpResponseHeader&)),
-            hr, SLOT(readResponseHeader(const QHttpResponseHeader&)));
+    connect( http, SIGNAL(responseHeaderReceived(QHttpResponseHeader)),
+            hr, SLOT(readResponseHeader(QHttpResponseHeader)));
     connect( http, SIGNAL(dataReadProgress(int,int)),
-            hr, SLOT( updateDataReadProgress(int,int)));
+            hr, SLOT(updateDataReadProgress(int,int)));
     connect( http, SIGNAL(requestFinished(int,bool)),
             hr, SLOT(httpRequestFinished(int,bool)));
 
-    // qDebug() << "set host" << server;
     http->setHost( url.host() , url.port(80));
     packageData->open( QIODevice::WriteOnly );
-    // qDebug() << "get data" << path;
     httpGetId = http->get( url.path() + query, packageData );
 
     // show some progress now that we've set everything up
     curProgValue = initProgress;
     emit progressValue( initProgress );
 
-    // qDebug() << "event loop start";
-
     // run threads event loop
     exec();
-    
-    // qDebug() << "event loop done";
 
     packageData->close();
 
@@ -153,20 +139,6 @@ HttpFileReceiver::HttpFileReceiver( QObject *p )
     : QObject( p )
     , fileSize( 0 )
 {
-    QSettings serverConf( "Trolltech", "PackageServers" );
-    serverConf.clear();
-    QStringList servConfList = serverConf.childGroups();
-    if ( servConfList.contains( QLatin1String( "Configuration" )))
-    {
-        serverConf.beginGroup( QLatin1String( "Configuration" ));
-            maxFileSize = serverConf.value( QLatin1String( "maxFileSize" ),
-                                            MAX_FILE_SIZE_BYTES ).toInt();
-        serverConf.endGroup();
-    }
-    else
-    {
-        maxFileSize = MAX_FILE_SIZE_BYTES;
-    }
 }
 
 HttpFileReceiver::~HttpFileReceiver()
@@ -216,12 +188,6 @@ void HttpFileReceiver::updateDataReadProgress(int bytesRead, int totalBytes)
     if ( fetcher->httpRequestAborted )
         return;
 
-    if ( totalBytes > maxFileSize )
-    {
-        fetcher->cancel( tr("Downloaded file size, %1, exceed maximum allowed file size, %2 ")
-                        .arg( totalBytes ).arg( maxFileSize ) );
-    }
-
     int run = HttpFetcher::maxProgress - HttpFetcher::initProgress;
     if ( totalBytes != 0 )
     {
@@ -251,25 +217,24 @@ HttpInfoReceiver::HttpInfoReceiver( QObject *p )
     connect( reader, SIGNAL(packageComplete()),
             this, SLOT(packageComplete()));
 
-    QSettings serverConf( "Trolltech", "PackageServers" );
-    serverConf.clear();
-    QStringList servConfList = serverConf.childGroups();
-    if ( servConfList.contains( QLatin1String( "Configuration" )))
+    QSettings pkgManagerConf( "Trolltech", "PackageManager" );
+    QStringList pkgManagerConfList = pkgManagerConf.childGroups();
+    if ( pkgManagerConfList.contains( QLatin1String( "Configuration" )))
     {
-        serverConf.beginGroup( QLatin1String( "Configuration" ));
-        if ( serverConf.contains( QLatin1String( "maxPackagesList" )))
-            maxPackagesList = serverConf.value( QLatin1String( "maxPackagesList" )).toInt();
+        pkgManagerConf.beginGroup( QLatin1String( "Configuration" ));
+        if ( pkgManagerConf.contains( QLatin1String( "maxPackagesList" )))
+            maxPackagesList = pkgManagerConf.value( QLatin1String( "maxPackagesList" )).toInt();
 
-        maxPackagesListSize = serverConf.value( QLatin1String( "maxPackagesListSize" ),
+        maxPackagesListSize = pkgManagerConf.value( QLatin1String( "maxPackagesListSize" ),
                                         QVariant(MAX_PACKAGES_LIST_BYTES) ).toInt();
 
-        serverConf.endGroup();
-    } 
+        pkgManagerConf.endGroup();
+    }
     else
     {
         maxPackagesListSize = MAX_PACKAGES_LIST_BYTES;
     }
-    
+
 }
 
 HttpInfoReceiver::~HttpInfoReceiver()
@@ -279,23 +244,35 @@ HttpInfoReceiver::~HttpInfoReceiver()
 
 void HttpInfoReceiver::packageComplete()
 {
-    /*
-    qDebug() << "Package {" << reader->description() << ", "
-        << reader->package().fullDescription << ", "
-        << reader->package().size << ", "
-        << reader->section() << ", "
-        << reader->domain() << ", "
-        << reader->package().packageFile << "}"
-        << ( reader->getIsError() ? reader->getError() : " OK" );
-    qDebug() << "\t" << "======= complete ============\n";
-    */
-    Q_ASSERT( fetcher->pkgController );
-    NetworkPackageController *npc = static_cast<NetworkPackageController*>(fetcher->pkgController);
+    NetworkPackageController *npc = qobject_cast<NetworkPackageController*>(fetcher->pkgController);
+    Q_ASSERT( npc );
+
+    //filter out packages based on whether they are sxe compatible 
+#ifdef QT_NO_SXE
+    if ( reader->package().type.toLower() == "sxe-only" )
+    {
+        qLog(Package) <<"The Package: " << reader->package().name << " will only run on an sxe configured qtopia, has been filtered out";
+        return;
+    }
+#endif
+
     if ( npc->numberPackages() < maxPackagesList )
     {
-        //do not display packages which are not compatible with this version of qtopia
-        if ( VersionUtil::checkVersionLists(Qtopia::compatibleVersions(), reader->package().qtopiaVersion ) )
+        //filter out packages according to device
+        if ( DeviceUtil::checkDeviceLists( QLatin1String(QTOPIA_COMPATIBLE_DEVICES), reader->package().devices) )
+        {
+            qLog(Package) << reader->package().name << "is device compatible";
+
+            //filter out packages which are not compatible with this version of qtopia
+            if ( VersionUtil::checkVersionLists(QLatin1String(QTOPIA_COMPATIBLE_VERSIONS), reader->package().qtopiaVersion ) )
                 npc->addPackage( reader->package() );
+            else
+                qLog(Package) << "The Package:" << reader->package().name << "is not version compatible, has been filtered out";
+        }
+        else
+        {
+            qLog(Package) << "The Package: "<< reader->package().name << "is not device compatible, has been filtered out";
+        }
     }
     else
     {
@@ -307,7 +284,6 @@ void HttpInfoReceiver::packageComplete()
 
 void HttpInfoReceiver::packageDataWritten( qint64 bytes )
 {
-    // qDebug() << "package data available" << bytes;
     if ( fetcher->httpRequestAborted )
         return;
     fetcher->packageData->close();
@@ -317,7 +293,6 @@ void HttpInfoReceiver::packageDataWritten( qint64 bytes )
         lineString += fetcher->packageData->readLine( bytes );
         if ( !lineString.contains( "\n" ))
         {
-            // qDebug( "No return character" );
             goto out_recv_data;
         }
         reader->readLine( lineString );

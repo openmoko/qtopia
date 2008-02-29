@@ -791,8 +791,14 @@ QtopiaFileObject::FindMimeType
 
 	// Strip protocol
 	QString file( pURL );
-	if( file.startsWith( "qtopia://" ) ) {
-		file = file.mid( 9 );
+	if( file.startsWith( "qtopia:" ) ) {
+        // URI with qtopia scheme
+
+        file = file.mid(7);
+
+        // handle empty authority
+        if (file.startsWith("///"))
+            file = file.mid(2);
 	}
 
 	pMimeMapperResponse->AddRef();

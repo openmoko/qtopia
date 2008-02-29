@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,14 +36,14 @@ Navigator::Navigator( ImageUI* iui, QWidget* parent, Qt::WFlags f )
     setFocusPolicy( Qt::StrongFocus );
 
     // When image ui has changed update viewport and space
-    connect( image_ui, SIGNAL( changed() ), this, SLOT( updateNavigator() ) );
+    connect( image_ui, SIGNAL(changed()), this, SLOT(updateNavigator()) );
 
     // Update display when image ui updated
-    connect( image_ui, SIGNAL( updated() ), this, SLOT( update() ) );
+    connect( image_ui, SIGNAL(updated()), this, SLOT(update()) );
 
     // When navigator moved notify image ui of movement
-    connect( this, SIGNAL( viewportMoved( int, int ) ),
-        image_ui, SLOT( moveViewportBy( int, int ) ) );
+    connect( this, SIGNAL(viewportMoved(int,int)),
+        image_ui, SLOT(moveViewportBy(int,int)) );
 }
 
 void Navigator::updateNavigator()

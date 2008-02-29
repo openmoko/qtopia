@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -62,13 +62,16 @@ public:
 
     virtual ~QTask();
 
+    static bool writeVCalendar( QIODevice *, const QList<QTask> & );
+    static bool writeVCalendar( QIODevice *, const QTask & );
+    static QList<QTask> readVCalendar( QIODevice * );
+
+    /* deprecated - keep for source compatibility */
     static void writeVCalendar( const QString &filename, const QList<QTask> &tasks);
     static void writeVCalendar( const QString &filename, const QTask &task);
-
     void writeVCalendar( const QString &filename ) const;
     void writeVCalendar( QFile &file ) const;
     void writeVCalendar( QDataStream *stream ) const;
-
     static QList<QTask> readVCalendar( const QString &filename );
     static QList<QTask> readVCalendarData( const char *, unsigned long );
     static QList<QTask> readVCalendar( const QByteArray &vcard );

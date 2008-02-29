@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,10 +20,10 @@
 ****************************************************************************/
 #include <qtopiasql.h>
 #include "qgooglecontext_p.h"
+#ifndef QT_NO_OPENSSL
 #include "qappointment.h"
 #include <QString>
 
-#include <QSqlQuery>
 #include <QSqlError>
 #include <QVariant>
 #include <QDebug>
@@ -55,7 +55,7 @@ class GoogleCalHandler : public QXmlDefaultHandler
 {
 public:
     // will add to this as implementation progresses
-    GoogleCalHandler();
+    GoogleCalHandler(const QString& idContext);
     ~GoogleCalHandler();
 
     const QList<QAppointment> &appointments() const { return mAppointments; }
@@ -99,6 +99,7 @@ private:
         EventState
     };
 
+    QString mIdContext;
     QString lastText;
     QString mName;
     QAppointment lastAppointment;
@@ -111,7 +112,8 @@ private:
     QList<QUniqueId> mRemoved;
 };
 
-GoogleCalHandler::GoogleCalHandler()
+GoogleCalHandler::GoogleCalHandler(const QString& idContext)
+    : mIdContext(idContext)
 {
     startDocument(); // does the same work as init state anyway.
 }
@@ -221,7 +223,7 @@ bool GoogleCalHandler::endElement( const QString & namespaceURI, const QString &
             break;
         case Id:
             {
-                QUniqueId u = parseId(lastText);
+                QUniqueId u = parseId(lastText + mIdContext);
                 lastAppointment.setUid(u);
                 // a lot more redundency in a google id.
                 lastAppointment.setCustomField("GoogleId", lastText);
@@ -257,6 +259,7 @@ bool GoogleCalHandler::startElement( const QString & namespaceURI, const QString
 {
     Q_UNUSED(namespaceURI);
     Q_UNUSED(localName);
+
     // if we are in a tree we dont' recognize, ignore the lot of it.
     if (ignoreDepth) {
         ignoreDepth++;
@@ -405,15 +408,10 @@ QDateTime GoogleCalHandler::parseDateTime(const QString &time, const QTimeZone &
 
 QUniqueId GoogleCalHandler::parseId(const QString &gid)
 {// create and maintain list of uid->googleid mappings.
-    QSqlQuery q(QPimSqlIO::database());
-    if (!q.prepare("SELECT id, gid FROM googleid WHERE gid = :g")) {
-        qWarning("failed to prepare main google id lookup: %s", (const char *)q.lastError().text().toLocal8Bit());
-    }
+    QPreparedSqlQuery q(QPimSqlIO::database());
+    q.prepare("SELECT id, gid FROM googleid WHERE gid = :g");
     q.bindValue(":g", gid);
-    if (!q.exec()) {
-        qWarning("failed main google id lookup: %s", (const char *)q.lastError().text().toLocal8Bit());
-        return QUniqueId();
-    }
+    q.exec();
     if (q.next())
         return QUniqueId::fromUInt(q.value(0).toUInt());
 
@@ -427,8 +425,7 @@ QUniqueId GoogleCalHandler::parseId(const QString &gid)
     q.bindValue(":i", u.toUInt());
     q.bindValue(":g", gid);
     // TODO error handling for sql statements.
-    if (!q.exec())
-        qWarning("failed main google id store: %s", (const char *)q.lastError().text().toLocal8Bit());
+    q.exec();
     return u;
 }
 /**************
@@ -444,7 +441,8 @@ QGoogleCalendarContext::QGoogleCalendarContext(QObject *parent, QObject *access)
 
 QIcon QGoogleCalendarContext::icon() const
 {
-    return QPimContext::icon(); // redundent, but will do for now.
+    static QIcon googicon(":icon/globe"); // It might be nice to have the real icon...
+    return googicon;
 }
 
 QString QGoogleCalendarContext::description() const
@@ -460,7 +458,7 @@ QString QGoogleCalendarContext::title() const
 QString QGoogleCalendarContext::title(const QPimSource &source) const
 {
     if (name(source.identity).isEmpty())
-        return source.identity;
+        return email(source.identity);
     return name(source.identity);
 }
 
@@ -481,6 +479,11 @@ QSet<QPimSource> QGoogleCalendarContext::sources() const
         list.insert(s);
     }
     return list;
+}
+
+QPimSource QGoogleCalendarContext::defaultSource() const
+{
+    return QPimSource();
 }
 
 QUuid QGoogleCalendarContext::id() const
@@ -586,6 +589,13 @@ bool QGoogleCalendarContext::removeOccurrence(const QUniqueId &original, const Q
     return false;
 }
 
+bool QGoogleCalendarContext::restoreOccurrence(const QUniqueId &original, const QDate &date)
+{
+    if (mAccess)
+        return mAccess->restoreOccurrence(original, date);
+    return false;
+}
+
 QUniqueId QGoogleCalendarContext::replaceOccurrence(const QUniqueId &original, const QOccurrence &occurrence, const QDate& date)
 {
     if (mAccess)
@@ -605,55 +615,87 @@ void QGoogleCalendarContext::syncAccountList()
     settings.beginGroup("GoogleAccounts");
     QStringList accounts = settings.childGroups();
     mAccounts.clear();
-    foreach(QString email, accounts) {
-        settings.beginGroup(email);
+    foreach(QString account, accounts) {
+        settings.beginGroup(account);
 
         Account a;
         a.name = settings.value("name").toString();
         a.password = settings.value("password").toString();
         if (settings.contains("type"))
             a.type = (FeedType)settings.value("type").toInt();
+        a.email = settings.value("email", account).toString();   // default to group id for backcompat
+        a.accountHolder = settings.value("accountholder", a.name).toString(); // default to old name for backcompat
 
-        mAccounts.insert(email, a);
+        mAccounts.insert(account, a);
         settings.endGroup();
     }
 }
 
-void QGoogleCalendarContext::addAccount(const QString &email, const QString &password)
+QString QGoogleCalendarContext::addAccount(const QString &email, const QString &password)
 {
     syncAccountList();
     Account a;
     a.password = password;
-    mAccounts.insert(email, a);
-    saveAccount(email);
+    a.email = email;
+
+    // Find an ID (start with the email and add spaces...)
+    QString account = email;
+    while (mAccounts.contains(account)) {
+        account += " ";
+    }
+    mAccounts.insert(account, a);
+    saveAccount(account);
+    return account;
 }
 
-void QGoogleCalendarContext::saveAccount(const QString &email)
+void QGoogleCalendarContext::saveAccount(const QString &account)
 {
-    Account a = mAccounts[email];
+    Account a = mAccounts[account];
     QSettings settings("Trolltech", "Calendar");
     settings.beginGroup("GoogleAccounts");
-    settings.beginGroup(email);
+    settings.beginGroup(account);
     settings.setValue("password", a.password);
     settings.setValue("name", a.name);
     settings.setValue("type", (int)a.type);
+    settings.setValue("email", a.email);
+    settings.setValue("accountholder", a.accountHolder);
 }
 
-void QGoogleCalendarContext::removeAccount(const QString &email)
+void QGoogleCalendarContext::removeAccount(const QString &account)
 {
     syncAccountList();
     foreach (QGoogleCalendarFetcher *f, mFetchers) {
-        if (f->account() == email)
+        if (f->account() == account)
             return;
     }
-    mAccounts.remove(email);
+    mAccounts.remove(account);
     QSettings settings("Trolltech", "Calendar");
     settings.beginGroup("GoogleAccounts");
-    settings.remove(email);
+    settings.remove(account);
 
+    // We also clear any remaining items from SQL database
 
-    // TODO should also clear any remaining items from SQL database
-    // might be best to create a 'worker' thread to do the delete?
+    // First, fetch any ids
+    QPimSource s;
+    s.context = id();
+    s.identity = account;
+    int context = QPimSqlIO::sourceContext(s);
+
+    QList<QUniqueId> victims;
+
+    QPreparedSqlQuery q(QPimSqlIO::database());
+    q.prepare("SELECT recid FROM appointments WHERE context = :c");
+    q.bindValue(":c", context);
+    q.exec();
+    while(q.next()) {
+        victims.append (QUniqueId::fromUInt(q.value(0).toUInt()));
+    }
+
+    // Now remove them
+    mAccess->removeAppointments(victims);
+
+    // and reset the lastSyncTime
+    QPimSqlIO::setLastSyncTime(s, QDateTime());
 }
 
 QStringList QGoogleCalendarContext::accounts() const
@@ -661,64 +703,100 @@ QStringList QGoogleCalendarContext::accounts() const
     return mAccounts.keys();
 }
 
-QString QGoogleCalendarContext::password(const QString &email) const
+QString QGoogleCalendarContext::password(const QString &account) const
 {
-    if (mAccounts.contains(email))
-        return mAccounts[email].password;
+    if (mAccounts.contains(account))
+        return mAccounts[account].password;
     return QString();
 }
 
-QGoogleCalendarContext::FeedType QGoogleCalendarContext::feedType(const QString &email) const
+QGoogleCalendarContext::FeedType QGoogleCalendarContext::feedType(const QString &account) const
 {
-    if (mAccounts.contains(email))
-        return mAccounts[email].type;
+    if (mAccounts.contains(account))
+        return mAccounts[account].type;
     return FullPrivate;
 }
 
-QString QGoogleCalendarContext::name(const QString &email) const
+QString QGoogleCalendarContext::name(const QString &account) const
 {
-    if (mAccounts.contains(email))
-        return mAccounts[email].name;
+    if (mAccounts.contains(account))
+        return mAccounts[account].name;
     return QString();
 }
 
-void QGoogleCalendarContext::setPassword(const QString &email, const QString &password)
+QString QGoogleCalendarContext::email(const QString &account) const
 {
-    if (!mAccounts.contains(email))
+    if (mAccounts.contains(account))
+        return mAccounts[account].email;
+    return QString();
+}
+
+QString QGoogleCalendarContext::accountHolder(const QString &account) const
+{
+    if (mAccounts.contains(account))
+        return mAccounts[account].accountHolder;
+    return QString();
+}
+
+void QGoogleCalendarContext::setName(const QString &account, const QString &name)
+{
+    if (!mAccounts.contains(account))
         return;
-    Account a = mAccounts[email];
+    Account a = mAccounts[account];
+    a.name = name;
+    mAccounts[account] = a;
+    saveAccount(account);
+}
+
+void QGoogleCalendarContext::setEmail(const QString &account, const QString &email)
+{
+    if (!mAccounts.contains(account))
+        return;
+    Account a = mAccounts[account];
+    a.email = email;
+    mAccounts[account] = a;
+    saveAccount(account);
+}
+
+void QGoogleCalendarContext::setPassword(const QString &account, const QString &password)
+{
+    if (!mAccounts.contains(account))
+        return;
+    Account a = mAccounts[account];
     a.password = password;
-    mAccounts[email] = a;
-    saveAccount(email);
+    mAccounts[account] = a;
+    saveAccount(account);
 }
 
-void QGoogleCalendarContext::setFeedType(const QString &email, FeedType type)
+void QGoogleCalendarContext::setFeedType(const QString &account, FeedType type)
 {
-    if (!mAccounts.contains(email))
+    if (!mAccounts.contains(account))
         return;
-    Account a = mAccounts[email];
+    Account a = mAccounts[account];
     a.type = type;
-    mAccounts[email] = a;
-    saveAccount(email);
+    mAccounts[account] = a;
+    saveAccount(account);
 }
 
-void QGoogleCalendarContext::syncAccount(const QString &email)
+void QGoogleCalendarContext::syncAccount(const QString &account)
 {
-    if (!mAccounts.contains(email))
+    if (!mAccounts.contains(account))
         return;
 
     // don't sync already working account.
     foreach (QGoogleCalendarFetcher *f, mFetchers) {
-        if (f->account() == email)
+        if (f->account() == account)
             return;
     }
+    Account a = mAccounts[account];
+
     QPimSource s;
     s.context = id();
-    s.identity = email;
+    s.identity = account;
 
-    QString url = "http://www.google.com/calendar/feeds/" + email;
+    QString url = "http://www.google.com/calendar/feeds/" + a.email;
 
-    switch (mAccounts[email].type) {
+    switch (a.type) {
         case FullPrivate:
             url += "/private/full";
             break;
@@ -730,10 +808,9 @@ void QGoogleCalendarContext::syncAccount(const QString &email)
             break;
     }
 
+    QGoogleCalendarFetcher *f = new QGoogleCalendarFetcher(s, account, a.email, a.password, url, this);
 
-    QGoogleCalendarFetcher *f = new QGoogleCalendarFetcher(s, email, mAccounts[email].password, url, this);
-
-    connect(f, SIGNAL(fetchProgressChanged(int, int)), this, SLOT(updateFetchingProgress(int, int)));
+    connect(f, SIGNAL(fetchProgressChanged(int,int)), this, SLOT(updateFetchingProgress(int,int)));
     connect(f, SIGNAL(completed(QGoogleCalendarContext::Status)), this, SLOT(updateFetchingState(QGoogleCalendarContext::Status)));
 
     mFetchers.append(f);
@@ -756,12 +833,16 @@ void QGoogleCalendarContext::updateFetchingState(Status status)
     QGoogleCalendarFetcher *f = qobject_cast<QGoogleCalendarFetcher *>(sender());
     if (f) {
         mFetchers.removeAll(f);
-        if (!f->name().isEmpty() && name(f->account()) != f->name()) {
-            QString email = f->account();
-            Account a = mAccounts[email];
-            a.name = f->name();
-            mAccounts[email] = a;
-            saveAccount(email);
+        if (!f->name().isEmpty()) {
+            QString account = f->account();
+            Account a = mAccounts[account];
+            if (a.accountHolder != f->name() || a.name.isEmpty()) {
+                if (a.name.isEmpty())
+                    a.name = f->name();
+                a.accountHolder = f->name();
+                mAccounts[account] = a;
+                saveAccount(account);
+            }
         }
         mAccess->refresh(); // e.g. from adds from the fetcher, which is a separate io.
         emit syncStatusChanged(f->account(), status);
@@ -782,6 +863,7 @@ void QGoogleCalendarContext::syncProgress(int &amount, int &total) const
 {
     amount = 0;
     total = 0;
+
     foreach(QGoogleCalendarFetcher *f, mFetchers) {
         int a, t;
         f->fetchProgress(a, t);
@@ -800,11 +882,11 @@ bool QGoogleCalendarContext::syncing() const
 }
 
 
-QGoogleCalendarFetcher::QGoogleCalendarFetcher(const QPimSource &sqlContext, const QString &email, const QString &password, const QString &url, QObject *parent)
+QGoogleCalendarFetcher::QGoogleCalendarFetcher(const QPimSource &sqlContext, const QString &account, const QString &email, const QString &password, const QString &url, QObject *parent)
     : QObject(parent)
     , lastProgress(0), lastTotal(0)
     , mState(IdleState), mStatus(QGoogleCalendarContext::NotStarted) , mUrl(url)
-    , mContext(sqlContext), mAccount(email), mPassword(password)
+    , mContext(sqlContext), mAccount(account), mEmail(email), mPassword(password)
     , xmlReader(0), mSource(0), mHandler(0), mDownloader(0), mSslSocket(0), mAccess(0)
 {
     syncTime = QTimeZone::current().toUtc(QDateTime::currentDateTime());
@@ -818,16 +900,17 @@ QGoogleCalendarFetcher::QGoogleCalendarFetcher(const QPimSource &sqlContext, con
     // avoid stacked calls to reset.
     mAccess = new QAppointmentSqlIO(this);
 
-    mHandler = new GoogleCalHandler;
+    int context = QPimSqlIO::sourceContext(sqlContext);
+    mHandler = new GoogleCalHandler(QString("-%1").arg(context));
     xmlReader = new QXmlSimpleReader;
 
     xmlReader->setContentHandler(mHandler);
 
     mDownloader = new QtopiaHttp(this);
 
-    mSslSocket = new QtSslSocket(QtSslSocket::Client, this);
-    connect(mSslSocket, SIGNAL(connectionVerificationDone(QtSslSocket::VerifyResult, bool, const QString &)),
-            SLOT(sendCertificateError(QtSslSocket::VerifyResult, bool, const QString &)));
+    mSslSocket = new QSslSocket(this);
+    //connect(mSslSocket, SIGNAL(connectionVerificationDone(QtSslSocket::VerifyResult,bool,QString)),
+    //        SLOT(sendCertificateError(QtSslSocket::VerifyResult,bool,QString)));
     mDownloader->setSslSocket(mSslSocket);
 
 
@@ -835,9 +918,8 @@ QGoogleCalendarFetcher::QGoogleCalendarFetcher(const QPimSource &sqlContext, con
     // data on a failed fetch.
     connect(mDownloader, SIGNAL(completedFetch()), this, SLOT(parseRemaining()));
     connect(mDownloader, SIGNAL(failedFetch()), this, SLOT(abortParsing()));
-    connect(mDownloader, SIGNAL(readyRead(const QHttpResponseHeader &)), this, SLOT(parsePartial(const QHttpResponseHeader &)));
-
-    connect(mDownloader, SIGNAL(dataReadProgress(int, int)), this, SLOT(httpFetchProgress(int, int)));
+    connect(mDownloader, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(parsePartial(QHttpResponseHeader)));
+    connect(mDownloader, SIGNAL(dataReadProgress(int,int)), this, SLOT(httpFetchProgress(int,int)));
 }
 
 QGoogleCalendarContext::Status QGoogleCalendarFetcher::status() const
@@ -848,6 +930,11 @@ QGoogleCalendarContext::Status QGoogleCalendarFetcher::status() const
 QString QGoogleCalendarFetcher::account() const
 {
     return mAccount;
+}
+
+QString QGoogleCalendarFetcher::email() const
+{
+    return mEmail;
 }
 
 QString QGoogleCalendarFetcher::name() const
@@ -863,7 +950,7 @@ QString QGoogleCalendarFetcher::statusMessage() const
 
 }
 
-QString QGoogleCalendarContext::statusMessage(Status status) {
+QString QGoogleCalendarContext::statusMessage(int status) {
 
     switch(status) {
         case QGoogleCalendarContext::NotStarted:
@@ -887,6 +974,8 @@ QString QGoogleCalendarContext::statusMessage(Status status) {
             return tr("Attempted to access disabled account.");
         case QGoogleCalendarContext::ServiceUnavailable:
             return tr("Authentication currently not available.  Please try again later.");
+        case QGoogleCalendarContext::DataAccessError:
+            return tr("Could not write changes to disk.");
         case QGoogleCalendarContext::UnknownError:
         default:
             return tr("An unknown error has occurred.");
@@ -915,9 +1004,9 @@ void QGoogleCalendarFetcher::fetchAuthentication()
     mState = AuthenticationState;
 
     QList< QPair<QString, QString> > postData;
-    postData.append(QPair<QString, QString>("Email", mAccount));
+    postData.append(QPair<QString, QString>("Email", mEmail));
     postData.append(QPair<QString, QString>("Passwd", mPassword));
-    postData.append(QPair<QString, QString>("source", "Trolltech-Calendar-4.2.0"));
+    postData.append(QPair<QString, QString>("source", "Trolltech-Calendar-4.3.0"));
     postData.append(QPair<QString, QString>("service", "cl"));
 
 #if 0
@@ -930,7 +1019,7 @@ void QGoogleCalendarFetcher::fetchAuthentication()
     mDownloader->startFetch(QUrl(loginurl), postData);
 }
 
-void QGoogleCalendarFetcher::sendCertificateError(QtSslSocket::VerifyResult result, bool hostNameWrong, const QString &str)
+/*void QGoogleCalendarFetcher::sendCertificateError(QtSslSocket::VerifyResult result, bool hostNameWrong, const QString &str)
 {
     return; // ignore all this for now.
     if (result == QtSslSocket::VerifyOk && !hostNameWrong)
@@ -953,7 +1042,7 @@ void QGoogleCalendarFetcher::sendCertificateError(QtSslSocket::VerifyResult resu
     // TODO
     // should be up to app to handle, not us.
     //mSslSocket->disconnectFromHost();
-}
+}*/
 
 void QGoogleCalendarFetcher::fetchAppointments()
 {
@@ -968,7 +1057,7 @@ void QGoogleCalendarFetcher::fetchAppointments()
     mDownloader->startFetch(mUrl);
 }
 
-#define FAIL_TRANSACTION mStatus = QGoogleCalendarContext::UnknownError; \
+#define FAIL_TRANSACTION mStatus = QGoogleCalendarContext::DataAccessError; \
                     mState = ErrorState; \
                     emit completed(mStatus); \
                     delete mSource; \
@@ -992,27 +1081,20 @@ void QGoogleCalendarFetcher::parseRemaining()
         mStatus = QGoogleCalendarContext::InProgress;
         fetchAppointments();
     } else if (mState == AppointmentDownloadState) {
+        QByteArray ba = mDownloader->readAll();
+
         bool parsed;
-        if (mSource) {
-            QByteArray ba = mDownloader->readAll();
-            if (ba.size() > 0) {
+        if (ba.size() >= 0) {
+            if (mSource) {
                 mSource->setData(ba);
                 parsed = xmlReader->parseContinue();
             } else {
-                parsed = true;
-            }
-        } else {
-            QByteArray ba = mDownloader->readAll();
-            if (ba.size() > 0) {
-                mSource->setData(ba);
                 mSource = new QXmlInputSource();
                 mSource->setData(ba);
                 parsed = xmlReader->parse(mSource, false);
-            } else {
-                parsed = false;
             }
-            mSource = new QXmlInputSource();
-            parsed = xmlReader->parse(mSource, false);
+        } else {
+            parsed = false;
         }
 
         if (parsed) {
@@ -1061,25 +1143,29 @@ void QGoogleCalendarFetcher::parseRemaining()
             emit completed(mStatus);
         }
 
-
         delete mSource;
         mSource = 0;
     }
 }
 
-void QGoogleCalendarFetcher::parsePartial(const QHttpResponseHeader & /* resp */)
+void QGoogleCalendarFetcher::parsePartial(const QHttpResponseHeader &header)
 {
+    // only parse contents of the 'ok' header
+    if (header.statusCode() != 200)
+        return;
     if (mState != AppointmentDownloadState)
         return;
     bool ok;
+    QByteArray bytes = mDownloader->readAll();
     if (mSource) {
-        mSource->setData(mDownloader->readAll());
+        mSource->setData(bytes);
         ok = xmlReader->parseContinue();
     } else {
-        mSource =new QXmlInputSource();
-        mSource->setData(mDownloader->readAll());
+        mSource = new QXmlInputSource();
+        mSource->setData(bytes);
         ok = xmlReader->parse(mSource, true);
     }
+
     if (!ok) {
         qWarning("Failed to parse partial response");
     }
@@ -1149,3 +1235,5 @@ void QGoogleCalendarFetcher::httpFetchProgress(int progress, int total)
     lastTotal = total;
     emit fetchProgressChanged(progress, total);
 }
+
+#endif //QT_NO_OPENSSL

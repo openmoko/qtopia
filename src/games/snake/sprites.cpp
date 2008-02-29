@@ -1,60 +1,41 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "sprites.h"
-#include <qcanvas.h>
-#include <qimage.h>
-#include <qtopia/resource.h>
 
+#include <QPixmap>
+#include <QImage>
+#include <QPainter>
 
-
-// Might want to make this a menu option,
+// TODO: Might want to make this a menu option, or choose based on screen resolution.
 // e.g, pick your snake size, (label with images of snakes head + tail)
-// can smoothscale 3/4 very nicely with medium snake, giving sizes of
-// 8, 12, 16
-// might be possible to do the smallsnake down to 4,  (increments of 4 make more sense)
+// can smoothscale 3/4 very nicely with medium snake, giving sizes of 8, 12, 16.
 // Warning though, the code is not currently set up for this to be a dynamic change.
-#ifdef QTOPIA_PHONE
 int SpriteDB::tilesize = 8;
-const QCString tilename = "snake/smallsnake";
-#else
-int SpriteDB::tilesize = 16;
-const QCString tilename = "snake/mediumsnake";
-#endif
+const QString tilename = ":image/snake/smallsnake";
+//int SpriteDB::tilesize = 16;
+//const QString tilename = ":image/snake/mediumsnake";
 
-QCanvasPixmapArray *SpriteDB::internalcache = 0;
+QList<QPixmap> SpriteDB::parts;
+
 // left, right, up, down
 static int headKey[4] = { 0, 1, 3, 2 };
 static int bodyKey[4][4] = { {8, 8, 12, 10}, {8, 8, 13, 11}, { 11, 10, 9, 9 }, {13, 12, 9, 9 } };
@@ -80,55 +61,45 @@ static int wallKey[16] = {
     26  // 0x0F, down up right left
 };
 
-
-QCanvasPixmapArray *SpriteDB::spriteCache()
+QList<QPixmap> &SpriteDB::spriteCache()
 {
-    if (!internalcache) {
+    if (parts.isEmpty()) {
+        QImage image(tilename);
+        if (!image.valid(tilesize*2-1,tilesize*7-1)) {
+            qFatal("Couldn't create sprites");
+        }
+        int x = 0;
+        int y = 0;
 
-    //QList<QPixmap> pixl;
-    //pixl.append(&borderPix);
-//
-    //QPoint nullp;
-    //QList<QPoint> pl;
-    //pl.append(&nullp);
-   //
-    //QCanvasPixmapArray* borderarray = new QCanvasPixmapArray(pixl, pl);
-	QCanvasPixmapArray *parts = new QCanvasPixmapArray();
-	QImage image = Resource::findPixmap(tilename);
-	if (!image.valid(tilesize*2-1,tilesize*7-1)) {
-	    qWarning("couldn't find image");
-	    return 0;
-	}
-	int x = 0;
-	int y = 0;
-	
-	//snake..
-	int i = 0;
-	for (; i < 14; ++i) {
-	    parts->setImage( i, new QCanvasPixmap(image.copy(x, y, tilesize, tilesize)) );
-	    if (i % 2) {
-		x = 0;
-		y += tilesize;
-	    } else {
-		x = tilesize;
-	    }
-	}
-	x = 2*tilesize;
-	y = 0;
-	for (; i < 30; ++i) {
-	    parts->setImage( i, new QCanvasPixmap(image.copy(x, y, tilesize, tilesize)) );
-	    if (i % 2) {
-		x = 2*tilesize;
-		y += tilesize;
-	    } else {
-		x = 3*tilesize;
-	    }
-	}
-	parts->setImage(i++, new QCanvasPixmap(image.copy(0, tilesize*7, tilesize, tilesize)));
-	parts->setImage(i++, new QCanvasPixmap(image.copy(tilesize, tilesize*7, tilesize, tilesize)));
-	internalcache = parts;
+        // snake
+        int i = 0;
+        for (; i < 14; ++i) {
+            parts.append( QPixmap::fromImage(image.copy(x, y, tilesize, tilesize)) );
+            if (i % 2) {
+                x = 0;
+                y += tilesize;
+            } else {
+                x = tilesize;
+            }
+        }
+        // walls
+        x = 2*tilesize;
+        y = 0;
+        for (; i < 30; ++i) {
+            parts.append( QPixmap::fromImage(image.copy(x, y, tilesize, tilesize)) );
+            if (i % 2) {
+                x = 2*tilesize;
+                y += tilesize;
+            } else {
+                x = 3*tilesize;
+            }
+        }
+        // mouse
+        parts.append( QPixmap::fromImage(image.copy(0, tilesize*7, tilesize, tilesize)) );
+        // ground
+        parts.append( QPixmap::fromImage(image.copy(tilesize, tilesize*7, tilesize, tilesize)) );
     }
-    return internalcache;
+    return parts;
 }
 
 int SpriteDB::snakeHead(Direction dir)
@@ -146,7 +117,6 @@ int SpriteDB::snakeTail(Direction dir)
     return tailKey[dir];
 }
 
-
 int SpriteDB::mouse()
 {
     return 30;
@@ -157,21 +127,66 @@ int SpriteDB::ground()
     return 31;
 }
 
-
 int SpriteDB::wall(bool l, bool r, bool u, bool d)
 {
-    int index = 0;
-    if (l)
-	index |= 0x01;
-    if (r)
-	index |= 0x02;
-    if (u)
-	index |= 0x04;
-    if (d)
-	index |= 0x08;
-
-    int res = wallKey[index];
-    if (res > 30 || res < 14) qWarning("index was %d", index);
-    return (res > 30 || res < 14) ? 29 : res;
+    return wallKey[ (l ? 0x01 : 0) | (r ? 0x02 : 0) | (u ? 0x04 : 0) | (d ? 0x08 : 0) ];
 }
 
+
+QAnimatedPixmapItem::QAnimatedPixmapItem( const QList<QPixmap> &animation, QGraphicsScene *scene )
+        : QGraphicsItem( 0, scene ), currentFrame( 0 ), vx( 0 ), vy( 0 )
+{
+    for ( int i = 0; i < animation.size(); ++i ) {
+        QPixmap pixmap = animation.at( i );
+        Frame frame;
+        frame.pixmap = pixmap;
+        frame.boundingRect = pixmap.rect();
+        frames << frame;
+    }
+}
+
+QAnimatedPixmapItem::QAnimatedPixmapItem(QGraphicsScene *scene)
+        : QGraphicsItem( 0, scene ), currentFrame( 0 ), vx( 0 ), vy( 0 )
+{
+}
+
+void QAnimatedPixmapItem::setFrame( int frame )
+
+{
+    if ( !frames.isEmpty() ) {
+        prepareGeometryChange();
+        currentFrame = frame % frames.size();
+    }
+}
+
+void QAnimatedPixmapItem::advance( int phase )
+{
+    if ( phase == 1 && !frames.isEmpty() ) {
+        setFrame( currentFrame + 1 );
+
+        if ( vx || vy )
+            moveBy( vx, vy );
+    }
+}
+
+QRectF QAnimatedPixmapItem::boundingRect() const
+{
+    return frames.at( currentFrame ).boundingRect;
+}
+
+void QAnimatedPixmapItem::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
+{
+    painter->drawPixmap( 0, 0, frames.at( currentFrame ).pixmap );
+}
+
+void QAnimatedPixmapItem::setSequence(const QList<QPixmap> &animation)
+{
+    frames.clear();
+    for ( int i = 0; i < animation.size(); ++i ) {
+        QPixmap pixmap = animation.at( i );
+        Frame frame;
+        frame.pixmap = pixmap;
+        frame.boundingRect = pixmap.rect();
+        frames << frame;
+    }
+}

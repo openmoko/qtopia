@@ -6,4 +6,6 @@ SOURCES		= \
     phonebounce.cpp
 
 pkg.desc=Phone bounce daemon
-pkg.domain=none
+
+target.hint+=sxe
+target.domain=modem

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -93,37 +93,23 @@ void GreenphoneVolumeService::setCallDomain()
 void GreenphoneVolumeService::adjustVolume(int leftChannel, int rightChannel, AdjustType adjust)
 {
     int mixerFd = open("/dev/mixer", O_RDWR);
-    if (mixerFd >= 0)
-    {
+    if (mixerFd >= 0) {
         unsigned int leftright;
-        unsigned int left;
-        unsigned int right;
+        int left;
+        int right;
 
-        if (adjust == Relative)
-        {
+        if (adjust == Relative) {
             ioctl(mixerFd, SOUND_MIXER_READ_ALTPCM, &leftright);
 
             left = (leftright & 0xff00) >> 8;
             right = (leftright & 0x00ff);
 
-            left += leftChannel;
-            right += rightChannel;
-        }
-        else
-        {
+            left = qBound(0, left + leftChannel, 100);
+            right = qBound(0, right + rightChannel, 100);
+        } else {
             left = leftChannel;
             right = rightChannel;
         }
-
-        if (left < 0)
-            left = 0;
-        if (left > 100)
-            left = 100;
-
-        if (right < 0)
-            right = 0;
-        if (right > 100)
-            right = 100;
 
         leftright = (left << 8) | right;
         ioctl(mixerFd, SOUND_MIXER_WRITE_ALTPCM, &leftright);

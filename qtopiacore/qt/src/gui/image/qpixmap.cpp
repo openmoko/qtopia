@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -44,17 +59,27 @@
 #include "qimagewriter.h"
 #include "qpaintengine.h"
 
-#if defined(Q_WS_X11)
-#include "qx11info_x11.h"
-#include <private/qt_x11_p.h>
+#ifdef Q_WS_MAC
+# include "private/qt_mac_p.h"
 #endif
 
+#if defined(Q_WS_X11)
+# include "qx11info_x11.h"
+# include <private/qt_x11_p.h>
+#endif
+
+// ### Qt 5: remove
 typedef void (*_qt_pixmap_cleanup_hook)(int);
 Q_GUI_EXPORT _qt_pixmap_cleanup_hook qt_pixmap_cleanup_hook = 0;
 
+// ### Qt 5: rename
+typedef void (*_qt_pixmap_cleanup_hook_64)(qint64);
+Q_GUI_EXPORT _qt_pixmap_cleanup_hook_64 qt_pixmap_cleanup_hook_64 = 0;
+
+// ### Qt 5: remove
 Q_GUI_EXPORT qint64 qt_pixmap_id(const QPixmap &pixmap)
 {
-    return -(((qint64) pixmap.data->ser_no) << 32) | ((qint64) (pixmap.data->detach_no));
+    return pixmap.cacheKey();
 }
 
 /*!
@@ -201,6 +226,8 @@ QPixmap::QPixmap(const char * const xpm[])
     : QPaintDevice()
 {
     init(0, 0);
+    if (!xpm)
+        return;
 
     QImage image(xpm);
     if (!image.isNull()) {
@@ -311,7 +338,7 @@ QPixmap::operator QVariant() const
 */
 
 /*!
-    \fn QMatrix QPixmap::trueMatrix(const QMatrix &matrix, int width, int height)
+    \fn QMatrix QPixmap::trueMatrix(const QTransform &matrix, int width, int height)
 
     Returns the actual matrix used for transforming a pixmap with the
     given \a width, \a height and \a matrix.
@@ -326,10 +353,23 @@ QPixmap::operator QVariant() const
     \sa transformed(), {QPixmap#Pixmap Transformations}{Pixmap
     Transformations}
 */
-QMatrix QPixmap::trueMatrix(const QMatrix &m, int w, int h)
+QTransform QPixmap::trueMatrix(const QTransform &m, int w, int h)
 {
     return QImage::trueMatrix(m, w, h);
 }
+
+/*!
+  \overload
+
+  This convenience function loads the matrix \a m into a
+  QTransform and calls the overloaded function with the
+  QTransform and the width \a w and the height \a h.
+ */
+QMatrix QPixmap::trueMatrix(const QMatrix &m, int w, int h)
+{
+    return trueMatrix(QTransform(m), w, h).toAffine();
+}
+
 
 /*!
     \fn bool QPixmap::isQBitmap() const
@@ -450,19 +490,19 @@ void QPixmap::resize_helper(const QSize &s)
         p.drawPixmap(0, 0, *this, 0, 0, qMin(width(), w), qMin(height(), h));
     }
 #if defined(Q_WS_MAC)
-    if(data->qd_alpha) {
+#ifndef QT_MAC_NO_QUICKDRAW
+    if(data->qd_alpha)
         data->macQDUpdateAlpha();
-    } else
-#endif // Q_WS_X11
-#ifdef Q_WS_X11
-        if (data->x11_mask) {
-            pm.data->x11_mask = (Qt::HANDLE)XCreatePixmap(X11->display, RootWindow(data->xinfo.display(), data->xinfo.screen()),
-                                                          w, h, 1);
-            GC gc = XCreateGC(X11->display, pm.data->x11_mask, 0, 0);
-            XCopyArea(X11->display, data->x11_mask, pm.data->x11_mask, gc, 0, 0, qMin(width(), w), qMin(height(), h), 0, 0);
-            XFreeGC(X11->display, gc);
-        }
-#elif !defined(Q_WS_MAC)
+#endif
+#elif defined(Q_WS_X11)
+    if (data->x11_mask) {
+        pm.data->x11_mask = (Qt::HANDLE)XCreatePixmap(X11->display, RootWindow(data->xinfo.display(), data->xinfo.screen()),
+                                                      w, h, 1);
+        GC gc = XCreateGC(X11->display, pm.data->x11_mask, 0, 0);
+        XCopyArea(X11->display, data->x11_mask, pm.data->x11_mask, gc, 0, 0, qMin(width(), w), qMin(height(), h), 0, 0);
+        XFreeGC(X11->display, gc);
+    }
+#else
     if (data->mask) {
         QBitmap m = *data->mask;
         m.resize(w, h);
@@ -515,12 +555,10 @@ void QPixmap::resize_helper(const QSize &s)
         myPixmap->setMask(myPixmap->createHeuristicMask());
     \endcode
 
-    This function is slow because it involves transformation to a
-    QImage, non-trivial computations and a transformation back to a
-    QBitmap.
+    This function is slow because it involves converting to/from a
+    QImage, and non-trivial computations.
 
-    \sa QImage::createHeuristicMask(), {QPixmap#Pixmap
-    Transformations}{Pixmap Transformations}
+    \sa QImage::createHeuristicMask(), createMaskFromColor()
 */
 QBitmap QPixmap::createHeuristicMask(bool clipTight) const
 {
@@ -531,29 +569,32 @@ QBitmap QPixmap::createHeuristicMask(bool clipTight) const
 
 /*!
     Creates and returns a mask for this pixmap based on the given \a
-    maskColor.
+    maskColor. If the \a mode is Qt::MaskInColor, all pixels matching the
+    maskColor will be opaque. If \a mode is Qt::MaskOutColor, all pixels
+    matching the maskColor will be transparent.
 
-    This function is slow because it involves transformation to a
-    QImage and a transformation back to a QBitmap.
+    This function is slow because it involves converting to/from a
+    QImage.
 
-    \sa createHeuristicMask(), {QPixmap#Pixmap Transformations}{Pixmap
-    Transformations}
+    \sa createHeuristicMask(), QImage::createMaskFromColor()
+*/
+QBitmap QPixmap::createMaskFromColor(const QColor &maskColor, Qt::MaskMode mode) const
+{
+    QImage image = toImage().convertToFormat(QImage::Format_ARGB32);
+    return QBitmap::fromImage(image.createMaskFromColor(maskColor.rgba(), mode));
+}
+
+/*! \overload
+
+    Creates and returns a mask for this pixmap based on the given \a
+    maskColor. Same as calling createMaskFromColor(maskColor,
+    Qt::MaskInColor)
+
+    \sa createHeuristicMask(), QImage::createMaskFromColor()
 */
 QBitmap QPixmap::createMaskFromColor(const QColor &maskColor) const
 {
-    QImage maskImage(size(), QImage::Format_MonoLSB);
-    QImage image = toImage();
-    QRgb mColor = maskColor.rgba();
-    for (int w = 0; w < width(); w++) {
-        for (int h = 0; h < height(); h++) {
-            if (image.pixel(w, h) == mColor)
-                maskImage.setPixel(w, h, Qt::color1);
-            else
-                maskImage.setPixel(w, h, Qt::color0);
-        }
-    }
-    QBitmap m = QBitmap::fromImage(maskImage);
-    return m;
+    return createMaskFromColor(maskColor, Qt::MaskInColor);
 }
 
 /*!
@@ -575,6 +616,10 @@ QBitmap QPixmap::createMaskFromColor(const QColor &maskColor) const
     result (e.g. converting from 32-bit to 8-bit), use the \a flags to
     control the conversion.
 
+    Note that QPixmaps are automatically added to the QPixmapCache
+    when loaded from a file; the key used is internal and can not
+    be acquired.
+
     \sa loadFromData(), {QPixmap#Reading and Writing Image
     Files}{Reading and Writing Image Files}
 */
@@ -585,8 +630,8 @@ bool QPixmap::load(const QString &fileName, const char *format, Qt::ImageConvers
         return false;
 
     QFileInfo info(fileName);
-    QString key = QLatin1String("qt_pixmap_") + info.absoluteFilePath() + QLatin1Char('_') + info.lastModified().toString()
-                  + QString::number(data->type);
+    QString key = QLatin1String("qt_pixmap_") + info.absoluteFilePath() + QLatin1Char('_') + info.lastModified().toString() + QLatin1Char('_') +
+                  QString::number(info.size()) + QLatin1Char('_') + QString::number(data->type);
 
     if (QPixmapCache::find(key, *this))
         return true;
@@ -726,11 +771,13 @@ bool QPixmap::doImageIO(QImageWriter *writer, int quality) const
     to.
 */
 
-/*!
+/*! \obsolete
     Returns a number that identifies the contents of this QPixmap
     object. Distinct QPixmap objects can only have the same serial
     number if they refer to the same contents (but they don't have
     to).
+
+    Use cacheKey() instead.
 
     \warning The serial number doesn't necessarily change when
     the pixmap is altered. This means that it may be dangerous to use
@@ -743,6 +790,18 @@ int QPixmap::serialNumber() const
         return 0;
     else
         return data->ser_no;
+}
+
+/*!
+    Returns a number that identifies this QPixmap. Distinct QPixmap
+    objects can only have the same cache key if they refer to the same
+    contents.
+
+    The cacheKey() will change when the pixmap is altered.
+*/
+qint64 QPixmap::cacheKey() const
+{
+    return (((qint64) data->ser_no) << 32) | ((qint64) (data->detach_no));
 }
 
 static void sendResizeEvents(QWidget *target)
@@ -803,18 +862,9 @@ QPixmap QPixmap::grabWidget(QWidget * widget, const QRect &rect)
     if (!r.intersects(widget->rect()))
         return QPixmap();
 
-     QPixmap res(r.size());
-#ifdef Q_WS_MAC
-    QPixmap buf(r.size());
-    if(res.isNull() || buf.isNull())
-        return res;
-
-    grabWidget_helper(widget, res, buf, r, QPoint(), true);
-#else
-    widget->d_func()->drawWidget(&res, r, -r.topLeft(),
-                                 QWidgetPrivate::DrawRecursive | QWidgetPrivate::DrawAsRoot
-                                 | QWidgetPrivate::DrawPaintOnScreen | QWidgetPrivate::DrawInvisible);
-#endif
+    QPixmap res(r.size());
+    widget->render(&res, -r.topLeft(), r,
+                   QWidget::DrawWindowBackground | QWidget::DrawChildren | QWidget::IgnoreMask);
     return res;
 }
 
@@ -978,10 +1028,9 @@ QDataStream &operator>>(QDataStream &stream, QPixmap &pixmap)
     QImage image;
     stream >> image;
 
-    QPixmap::Type type = pixmap.data->type;
     if (image.isNull()) {
-        pixmap = QPixmap(QSize(0, 0), type);
-    } else if (pixmap.data->type == QPixmap::BitmapType) {
+        pixmap = QPixmap();
+    } else if (image.depth() == 1) {
         pixmap = QBitmap::fromImage(image);
     } else {
         pixmap = QPixmap::fromImage(image);
@@ -1031,8 +1080,8 @@ bool QPixmap::isDetached() const
 void QPixmap::deref()
 {
     if(data && data->deref()) { // Destroy image if last ref
-        if (qt_pixmap_cleanup_hook)
-            qt_pixmap_cleanup_hook(data->ser_no);
+        if (qt_pixmap_cleanup_hook_64)
+            qt_pixmap_cleanup_hook_64(cacheKey());
         delete data;
         data = 0;
     }
@@ -1113,7 +1162,7 @@ QPixmap QPixmap::scaled(const QSize& s, Qt::AspectRatioMode aspectMode, Qt::Tran
         return copy();
 
     QPixmap pix;
-    QMatrix wm;
+    QTransform wm;
     wm.scale((double)newSize.width() / width(), (double)newSize.height() / height());
     pix = transformed(wm, mode);
     return pix;
@@ -1142,7 +1191,7 @@ QPixmap QPixmap::scaledToWidth(int w, Qt::TransformationMode mode) const
     if (w <= 0)
         return QPixmap();
 
-    QMatrix wm;
+    QTransform wm;
     double factor = (double) w / width();
     wm.scale(factor, factor);
     return transformed(wm, mode);
@@ -1171,7 +1220,7 @@ QPixmap QPixmap::scaledToHeight(int h, Qt::TransformationMode mode) const
     if (h <= 0)
         return QPixmap();
 
-    QMatrix wm;
+    QTransform wm;
     double factor = (double) h / height();
     wm.scale(factor, factor);
     return transformed(wm, mode);
@@ -1315,7 +1364,7 @@ QPixmap QPixmap::scaledToHeight(int h, Qt::TransformationMode mode) const
     defaultDepth() function returns the default depth, i.e. the depth
     used by the application on the given screen.
 
-    The serialNumber() function returns a number that uniquely
+    The cacheKey() function returns a number that uniquely
     identifies the contents of the QPixmap object.
 
     The x11Info() function returns information about the configuration
@@ -1371,4 +1420,15 @@ QPixmap QPixmap::scaledToHeight(int h, Qt::TransformationMode mode) const
     setAlphaChannel() function sets the pixmap's alpha channel.
 
     \sa QBitmap, QImage, QImageReader, QImageWriter
+*/
+
+
+/*!
+    \typedef QPixmap::DataPtr
+    \internal
+*/
+
+/*!
+    \fn DataPtr &QPixmap::data_ptr()
+    \internal
 */

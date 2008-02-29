@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -79,6 +79,9 @@ public:
         QString attributeName( int index ) const;
         QVariant attributeValue( int index ) const;
 
+        template <typename Stream> void serialize(Stream &stream) const;
+        template <typename Stream> void deserialize(Stream &stream);
+
     private:
         QSharedDataPointer< QDrmRightsConstraintPrivate > d;
     };
@@ -101,11 +104,19 @@ public:
     static QString toString( Permission permission );
     static QString toString( Permission permission, Status status );
 
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
+
 private:
     QSharedDataPointer< QDrmRightsPrivate > d;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS( QDrmRights::Permissions );
-Q_DECLARE_USER_METATYPE_ENUM( QDrmRights::Permission );
+Q_DECLARE_OPERATORS_FOR_FLAGS(QDrmRights::Permissions);
+Q_DECLARE_USER_METATYPE_ENUM(QDrmRights::Permission);
+Q_DECLARE_USER_METATYPE_ENUM(QDrmRights::Permissions);
+Q_DECLARE_USER_METATYPE_ENUM(QDrmRights::Status);
+Q_DECLARE_USER_METATYPE(QDrmRights);
+Q_DECLARE_USER_METATYPE(QDrmRights::Constraint);
+Q_DECLARE_USER_METATYPE_TYPEDEF(QDrmRightsConstraintList,QDrmRights::ConstraintList);
 
 #endif

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,7 +29,6 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QtopiaAbstractService>
-
 #include "installcontrol.h"
 #include "md5file.h"
 
@@ -37,6 +36,8 @@ class PackageServiceInstaller;
 class PackageView;
 class QDSActionRequest;
 class InstalledPackageScanner;
+class QUrl;
+class QTextEdit;
 
 class PackageManagerService : public QtopiaAbstractService
 {
@@ -92,15 +93,16 @@ private:
     InstallControl m_installer;
     InstalledPackageScanner *m_scanner;
 
-    QLabel *m_progressLabel;
+    QTextEdit *m_progressTextEdit;
     QProgressBar *m_progressBar;
     ServicePackageDetails *m_packageDetails;
     bool m_installActive;
     PackageView *m_packageView;
 
     int m_expectedPackageSize;
+    int m_maxDescriptorSize;
+    QUrl *currentUrl;
 
-    bool packageInstalled( const QString &md5Sum );
     void doReportError( const QString &error, const QString &detailedError );
 };
 

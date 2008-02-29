@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,7 +43,8 @@
 
 QSvgNode::QSvgNode(QSvgNode *parent)
     : m_parent(parent),
-      m_visible(true)
+      m_visible(true),
+      m_displayMode(BlockMode)
 {
 }
 
@@ -76,6 +92,9 @@ void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop, const QString &id,
             break;
         case QSvgStyleProperty::OPACITY:
             m_style.opacity = static_cast<QSvgOpacityStyle*>(prop);
+            break;
+        case QSvgStyleProperty::COMP_OP:
+            m_style.compop = static_cast<QSvgCompOpStyle*>(prop);
             break;
         default:
             qDebug("QSvgNode: Trying to append unknown property!");
@@ -143,8 +162,12 @@ QSvgStyleProperty * QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
                 return node->m_style.animateTransforms.first();
             break;
         case QSvgStyleProperty::OPACITY:
-            if (!node->m_style.opacity)
+            if (node->m_style.opacity)
                 return node->m_style.opacity;
+            break;
+        case QSvgStyleProperty::COMP_OP:
+            if (node->m_style.compop)
+                return node->m_style.compop;
             break;
         default:
             break;
@@ -262,7 +285,7 @@ QRectF QSvgNode::transformedBounds(const QMatrix &mat) const
     QRectF rect = bounds();
 
     rect = m.mapRect(rect);
-    
+
     return rect;
 }
 
@@ -274,4 +297,23 @@ void QSvgNode::setNodeId(const QString &i)
 void QSvgNode::setXmlClass(const QString &str)
 {
     m_class = str;
+}
+
+void QSvgNode::setDisplayMode(DisplayMode mode)
+{
+    m_displayMode = mode;
+}
+
+QSvgNode::DisplayMode QSvgNode::displayMode() const
+{
+    return m_displayMode;
+}
+
+qreal QSvgNode::strokeWidth() const
+{
+    QSvgStrokeStyle *stroke = static_cast<QSvgStrokeStyle*>(
+        styleProperty(QSvgStyleProperty::STROKE));
+    if (!stroke)
+        return 0;
+    return stroke->qpen().widthF();
 }

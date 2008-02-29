@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include "qabstractserverinterface.h"
+#include "windowmanagement.h"
 
 /*!
   \class QAbstractServerInterface
@@ -113,10 +114,19 @@
   system will run without a primary user interface.
 
   For more details can be found in the \l {QtopiaServerApplication#qtopia-server-widgets}{server widget documentation}.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
-/*! \fn QAbstractServerInterface::QAbstractServerInterface(QWidget *parent, Qt::WFlags flags)
-
+/*!
   Construct a new QAbstractServerInterface with the specified \a parent and
   widget \a flags.
  */
+QAbstractServerInterface::QAbstractServerInterface(QWidget *parent, Qt::WFlags flags)
+    : QWidget(parent, flags)
+{
+    // If the server UI is created as frameless, we want it to be
+    // below all other windows at all times.
+    if ((flags & Qt::FramelessWindowHint) != 0)
+        WindowManagement::setLowestWindow(this);
+}

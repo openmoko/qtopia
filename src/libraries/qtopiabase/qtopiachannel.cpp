@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,11 +22,20 @@
 #include <qtopiachannel.h>
 #include <QObject>
 
+#if !defined(QTOPIA_HOST) && !defined(QTOPIA_DBUS_IPC)
+#if defined(Q_WS_QWS)
+#include <qcopchannel_qws.h>
+#define QTOPIA_REGULAR_QCOP
+#elif defined(Q_WS_X11)
+#include <qcopchannel_x11.h>
+#define QTOPIA_REGULAR_QCOP
+#endif
+#endif
+
 #if defined(QTOPIA_DBUS_IPC)
 #include <qtdbus/qdbusconnection.h>
 #include <qtdbus/qdbusmessage.h>
-#elif !defined(QT_NO_COP)
-#include <qcopchannel_qws.h>
+#elif defined(QTOPIA_REGULAR_QCOP)
 #include <quuid.h>
 
 // Maximum size of a QCop message before it must be broken up.
@@ -55,7 +64,7 @@ public:
     static bool dbusSend(const QString &channel,
                          const QString &msg,
                          const QByteArray &data);
-#elif !defined(QT_NO_COP)
+#elif defined(QTOPIA_REGULAR_QCOP)
     QCopChannel *m_channel;
     QTimer *m_cleanupTimer;
 
@@ -73,7 +82,7 @@ public:
 #if defined(QTOPIA_DBUS_IPC)
 private slots:
     void handleSignalReceived(const QByteArray &arr, const QDBusMessage &msg);
-#elif !defined(QT_NO_COP)
+#elif defined(QTOPIA_REGULAR_QCOP)
 private slots:
     void receivedFragment(const QString& msg, const QByteArray &data);
     void cleanup();
@@ -82,7 +91,7 @@ private slots:
 };
 
 QtopiaChannel_Private::QtopiaChannel_Private(const QString &channel, QtopiaChannel *parent) :
-#if !defined(QTOPIA_DBUS_IPC) && !defined(QT_NO_COP)
+#if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
         m_channel(0), m_fragments(0),
 #endif
         m_parent(parent)
@@ -104,15 +113,15 @@ QtopiaChannel_Private::QtopiaChannel_Private(const QString &channel, QtopiaChann
                          dbusInterface,                      // Interface
                          QString(),                          // Name
                          this,
-                         SLOT(handleSignalReceived(const QByteArray &, const QDBusMessage &)));
+                         SLOT(handleSignalReceived(QByteArray,QDBusMessage)));
 
     if (!r)
         qFatal("dbc.connect failed!!");
 
-#elif !defined(QT_NO_COP)
+#elif defined(QTOPIA_REGULAR_QCOP)
     m_channel = new QCopChannel(channel, parent);
-    QObject::connect(m_channel, SIGNAL(received(const QString &, const QByteArray &)),
-                     this, SLOT(receivedFragment(const QString &, const QByteArray &)));
+    QObject::connect(m_channel, SIGNAL(received(QString,QByteArray)),
+                     this, SLOT(receivedFragment(QString,QByteArray)));
     m_cleanupTimer = new QTimer();
     m_cleanupTimer->setSingleShot(true);
     connect(m_cleanupTimer, SIGNAL(timeout()), this, SLOT(cleanup()) );
@@ -124,7 +133,7 @@ QtopiaChannel_Private::QtopiaChannel_Private(const QString &channel, QtopiaChann
 
 QtopiaChannel_Private::~QtopiaChannel_Private()
 {
-#if !defined(QTOPIA_DBUS_IPC) && !defined(QT_NO_COP)
+#if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
     if (m_channel)
         delete m_channel;
     if (m_cleanupTimer)
@@ -262,7 +271,7 @@ QString QtopiaChannel::channel() const
 {
 #if defined(QTOPIA_DBUS_IPC)
     return m_data->m_channelName;
-#elif !defined(QT_NO_COP)
+#elif defined(QTOPIA_REGULAR_QCOP)
     return m_data->m_channel->channel();
 #else
     return QString();
@@ -283,7 +292,7 @@ bool QtopiaChannel::isRegistered(const QString &channel)
     //      For now just return whether we're connected
     QDBusConnection dbc = QDBus::sessionBus();
     return dbc.isConnected();
-#elif !defined(QT_NO_COP)
+#elif defined(QTOPIA_REGULAR_QCOP)
     return QCopChannel::isRegistered(channel);
 #else
     Q_UNUSED(channel);
@@ -301,7 +310,7 @@ bool QtopiaChannel::send(const QString &channel, const QString &msg)
 {
 #if defined(QTOPIA_DBUS_IPC)
     return QtopiaChannel_Private::dbusSend(channel, msg, QByteArray(""));
-#elif !defined(QT_NO_COP)
+#elif defined(QTOPIA_REGULAR_QCOP)
     return QCopChannel::send(channel, msg);
 #else
     Q_UNUSED(channel);
@@ -322,7 +331,7 @@ bool QtopiaChannel::send(const QString &channel, const QString &msg,
 {
 #if defined(QTOPIA_DBUS_IPC)
     return QtopiaChannel_Private::dbusSend(channel, msg, data);
-#elif !defined(QT_NO_COP)
+#elif defined(QTOPIA_REGULAR_QCOP)
 
     // Send the message as-is if it is smaller than the fragment size.
     if ( data.size() <= MAX_FRAGMENT_SIZE )
@@ -369,14 +378,14 @@ bool QtopiaChannel::flush()
 #if defined(QTOPIA_DBUS_IPC)
     qWarning("QtopiaChannel::flush() - Not implemented for DBus");
     return true;
-#elif !defined(QT_NO_COP)
+#elif defined(QTOPIA_REGULAR_QCOP)
     return QCopChannel::flush();
 #else
     return false;
 #endif
 }
 
-#if !defined(QTOPIA_DBUS_IPC) && !defined(QT_NO_COP)
+#if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
 
 void QtopiaChannel_Private::receivedFragment(const QString& msg, const QByteArray &data)
 {

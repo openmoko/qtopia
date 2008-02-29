@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,12 +23,19 @@
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QPainter>
 
-static int childMargin = 4;
-static int layoutSpacing = 4;
 static int indicatorSize = 11;
 static int exclusiveIndicatorSize = 10;
+
+static int leftMargin = 6;
+static int topMargin = 6;
+static int rightMargin = 6;
+static int bottomMargin = 6;
 static int buttonMargin = 4;
+
+static int horizontalSpacing = 6;
+static int verticalSpacing = 6;
 
 /*!
     \class QtopiaStyle
@@ -51,14 +58,20 @@ QtopiaStyle::QtopiaStyle()
     d = 0;
     int dpi = QApplication::desktop()->screen()->logicalDpiY();
 
-    // 4 pixels on a 100dpi screen
-    childMargin = qRound(4.0 * dpi / 100.0);
-    layoutSpacing = qRound(4.0 * dpi / 100.0);
-    buttonMargin = qRound(4.0 * dpi / 100.0);
     // 8 pixels on a 100dpi screen
     indicatorSize = qRound(8.0 * dpi / 100.0);
-    // 8 pixels on a 100dpi screen
-    exclusiveIndicatorSize = qRound(8.0 * dpi / 100.0);
+    exclusiveIndicatorSize = qRound(8.5 * dpi / 100.0);
+
+    // 3 pixels on a 100dpi screen
+    leftMargin = qRound(3.0 * dpi / 100.0);
+    topMargin = qRound(3.0 * dpi / 100.0);
+    rightMargin = qRound(3.0 * dpi / 100.0);
+    bottomMargin = qRound(3.0 * dpi / 100.0);
+    buttonMargin = qRound(3.0 * dpi / 100.0);
+
+    // 3 pixels on a 100dpi screen
+    horizontalSpacing = qRound(3.0 * dpi / 100.0);
+    verticalSpacing = qRound(3.0 * dpi / 100.0);
 }
 
 /*!
@@ -66,14 +79,6 @@ QtopiaStyle::QtopiaStyle()
 */
 QtopiaStyle::~QtopiaStyle()
 {
-}
-
-/*!
-    \obsolete
-*/
-void QtopiaStyle::setTheme(const QString& themeconfig)
-{
-    Q_UNUSED(themeconfig);
 }
 
 /*!
@@ -85,16 +90,28 @@ int QtopiaStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
     int ret;
 
     switch (metric) {
-        case PM_DefaultTopLevelMargin:
-            ret = 0;
+        case PM_LayoutLeftMargin:
+            ret = leftMargin;
             break;
 
-        case PM_DefaultChildMargin:
-            ret = childMargin;
+        case PM_LayoutTopMargin:
+            ret = topMargin;
             break;
 
-        case PM_DefaultLayoutSpacing:
-            ret = layoutSpacing;
+        case PM_LayoutRightMargin:
+            ret = rightMargin;
+            break;
+
+        case PM_LayoutBottomMargin:
+            ret = bottomMargin;
+            break;
+
+        case PM_LayoutHorizontalSpacing:
+            ret = horizontalSpacing;
+            break;
+
+        case PM_LayoutVerticalSpacing:
+            ret = verticalSpacing;
             break;
 
         case PM_IndicatorWidth:
@@ -120,8 +137,8 @@ int QtopiaStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
         case PM_SmallIconSize: {
                 static int size = 0;
                 if (!size) {
-                    // We would like a 14x14 icon at 100dpi
-                    size = (14 * QApplication::desktop()->screen()->logicalDpiY()+50) / 100;
+                    // We would like a 12x12 icon at 100dpi
+                    size = (12 * QApplication::desktop()->screen()->logicalDpiY()+50) / 100;
                 }
                 ret = size;
             }
@@ -171,11 +188,9 @@ int QtopiaStyle::styleHint(StyleHint stylehint, const QStyleOption *option,
         case QStyle::SH_ItemView_ActivateItemOnSingleClick:
             ret = true;
             break;
-#if QT_VERSION >= 0x040200 // Doesn't work in earlier Qt
         case QStyle::SH_Menu_Scrollable:
             ret = 1;
             break;
-#endif
         default:
             ret = QWindowsStyle::styleHint(stylehint, option, widget, returnData);
     }
@@ -199,3 +214,38 @@ QPixmap QtopiaStyle::standardPixmap(StandardPixmap standardPixmap,
     }
 }
 
+/*!
+  Draws a rectangle \a r with rounded corners using \a painter.
+
+  The \a xRnd and \a yRnd arguments specify how rounded the corners
+  should be. 0 is angled corners, 99 is maximum roundedness.
+
+  The roundness is scaled to maintain a similar appearance at different
+  display resolutions.
+
+  \sa QPainter::drawRoundRect()
+*/
+void QtopiaStyle::drawRoundRect(QPainter *painter, const QRectF &r, int xRnd, int yRnd)
+{
+    if (r.isEmpty())
+        return;
+
+    int dpi = QApplication::desktop()->screen()->logicalDpiY();
+    painter->drawRoundRect(r, xRnd * dpi / (r.width()*2), yRnd * dpi / (r.height()*2));
+}
+
+/*!
+  Draws a rectangle \a r with rounded corners using \a painter.
+
+  The \a xRnd and \a yRnd arguments specify how rounded the corners
+  should be. 0 is angled corners, 99 is maximum roundedness.
+
+  The roundness is scaled to maintain a similar appearance at different
+  display resolutions.
+
+  \sa QPainter::drawRoundRect()
+*/
+void QtopiaStyle::drawRoundRect(QPainter *painter, const QRect &r, int xRnd, int yRnd)
+{
+    drawRoundRect(painter, QRectF(r), xRnd, yRnd);
+}

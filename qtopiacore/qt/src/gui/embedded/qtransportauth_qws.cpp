@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -29,6 +44,7 @@
 #include "../../3rdparty/md5/md5.h"
 #include "../../3rdparty/md5/md5.cpp"
 #include "qwsutils_qws.h"
+#include "qwssocket_qws.h"
 #include "qwscommand_qws_p.h"
 #include "qwindowsystem_qws.h"
 #include "qbuffer.h"
@@ -52,6 +68,7 @@
 
 #include <QtCore/qcache.h>
 
+#define BUF_SIZE 512
 
 /*!
   \internal
@@ -94,7 +111,7 @@ Q_GUI_EXPORT void *guaranteed_memset(void *v,int c,size_t n)
   QTransportAuth::Data *conData;
   QTransportAuth *a = QTransportAuth::getInstance();
 
-  conData = a->QTransportconnectTransport(
+  conData = a->connectTransport(
         QTransportAuth::Trusted | QTransportAuth::UnixStreamSock,
         socketDescriptor );
   \endcode
@@ -174,15 +191,12 @@ SxeRegistryLocker::~SxeRegistryLocker()
 
 QTransportAuthPrivate::QTransportAuthPrivate()
     : keyInitialised(false)
-    , keyChanged(false)
     , m_packageRegistry( 0 )
 {
 }
 
 QTransportAuthPrivate::~QTransportAuthPrivate()
 {
-    while ( data.count() )
-        delete data.takeLast();
 }
 
 /*!
@@ -225,7 +239,6 @@ void QTransportAuth::setProcessKey( const char *authdata )
 #endif
     }
     d->keyInitialised = true;
-    d->keyChanged = true;
 }
 
 
@@ -258,25 +271,11 @@ void QTransportAuth::setProcessKey( const char *key, const char *prog )
 */
 void QTransportAuth::registerPolicyReceiver( QObject *pr )
 {
-    Q_D(QTransportAuth);
-    QPointer<QObject> guard = pr;
-    // relies on QPointer::operator ==(const T *o, const QPointer<T> &p)
-    // and QList::contains() which calls it
-    if ( d->policyReceivers.contains( guard ))
-        return;
-    d->policyReceivers.append(guard);
     // not every policy receiver needs setup - no error if this fails
     QMetaObject::invokeMethod( pr, "setupPolicyCheck" );
-    if ( d->buffers.count() > 0 )
-    {
-        QHash<QTransportAuth::Data*,QAuthDevice*>::iterator it = d->buffers.begin();
-        while ( it != d->buffers.end() )
-        {
-            connect( it.value(), SIGNAL(policyCheck(QTransportAuth::Data&,QString)),
-                pr, SLOT(policyCheck(QTransportAuth::Data&,QString)));
-            ++it;
-        }
-    }
+
+    connect( this, SIGNAL(policyCheck(QTransportAuth::Data&,QString)),
+             pr, SLOT(policyCheck(QTransportAuth::Data&,QString)), Qt::DirectConnection );
 }
 
 /*!
@@ -285,33 +284,21 @@ void QTransportAuth::registerPolicyReceiver( QObject *pr )
 */
 void QTransportAuth::unregisterPolicyReceiver( QObject *pr )
 {
-    Q_D(QTransportAuth);
-    QPointer<QObject> guard = pr;
-    if ( !d->policyReceivers.contains( guard ))
-        return;
-    d->policyReceivers.removeAll(guard);
-    if ( d->buffers.count() > 0 )
-    {
-        QHash<QTransportAuth::Data*,QAuthDevice*>::iterator it = d->buffers.begin();
-        while ( it != d->buffers.end() )
-        {
-            it.value()->disconnect( pr );
-            ++it;
-        }
-    }
+    disconnect( pr );
     // not every policy receiver needs tear down - no error if this fails
     QMetaObject::invokeMethod( pr, "teardownPolicyCheck" );
 }
 
 /*!
   Record a new transport connection with \a properties and \a descriptor.
+
+  The calling code is responsible for destroying the returned data when the
+  tranport connection is closed.
 */
 QTransportAuth::Data *QTransportAuth::connectTransport( unsigned char properties, int descriptor )
 {
-    Q_D(QTransportAuth);
     Data *data = new Data(properties, descriptor);
     data->status = Pending;
-    d->data.append(data);
     return data;
 }
 
@@ -482,23 +469,14 @@ QIODevice *QTransportAuth::passThroughByClient( QWSClient *client ) const
   This will be called in the server process to handle incoming
   authenticated requests.
 
+  The returned QIODevice will take ownership of \a data which will be deleted
+  when the QIODevice is delected.
+
   \sa setTargetDevice()
 */
 QAuthDevice *QTransportAuth::recvBuf( QTransportAuth::Data *data, QIODevice *iod )
 {
-    Q_D(QTransportAuth);
-
-    if (d->buffers.contains(data))
-        return d->buffers[data];
-    QAuthDevice *authBuf = new QAuthDevice( iod, data, QAuthDevice::Receive );
-    for ( int i = 0; i < d->policyReceivers.count(); ++i )
-    {
-        connect( authBuf, SIGNAL(policyCheck(QTransportAuth::Data&,QString)),
-                d->policyReceivers[i], SLOT(policyCheck(QTransportAuth::Data&,QString)));
-    }
-    // qDebug( "created new authbuf %p", authBuf );
-    d->buffers[data] = authBuf;
-    return authBuf;
+    return new QAuthDevice( iod, data, QAuthDevice::Receive );
 }
 
 /*!
@@ -514,16 +492,14 @@ QAuthDevice *QTransportAuth::recvBuf( QTransportAuth::Data *data, QIODevice *iod
   This will be called in the client process to generate outgoing
   authenticated requests.
 
+  The returned QIODevice will take ownership of \a data which will be deleted
+  when the QIODevice is delected.
+
   \sa setTargetDevice()
 */
 QAuthDevice *QTransportAuth::authBuf( QTransportAuth::Data *data, QIODevice *iod )
 {
-    Q_D(QTransportAuth);
-    if (d->buffers.contains(data))
-        return d->buffers[data];
-    QAuthDevice *authBuf = new QAuthDevice( iod, data, QAuthDevice::Send );
-    d->buffers[data] = authBuf;
-    return authBuf;
+    return new QAuthDevice( iod, data, QAuthDevice::Send );
 }
 
 const unsigned char *QTransportAuth::getClientKey( unsigned char progId )
@@ -562,6 +538,79 @@ void QTransportAuth::bufferDestroyed( QObject *cli )
     // qDebug( "           client count %d", d->buffersByClient.count() );
 }
 
+bool QTransportAuth::authorizeRequest( QTransportAuth::Data &d, const QString &request )
+{
+    bool isAuthorized = true;
+
+    if ( !request.isEmpty() && request != "Unknown" )
+    {
+        d.status &= QTransportAuth::ErrMask;  // clear the status
+        emit policyCheck( d, request );
+        isAuthorized = (( d.status & QTransportAuth::StatusMask ) == QTransportAuth::Allow );
+    }
+#if defined(SXE_DISCOVERY)
+    if (isDiscoveryMode()) {
+#ifndef QT_NO_TEXTSTREAM
+        if (!logFilePath().isEmpty()) {
+            QFile log( logFilePath() );
+            if (!log.open(QIODevice::WriteOnly | QIODevice::Append)) {
+                qWarning("Could not write to log in discovery mode: %s",
+                         qPrintable(logFilePath()));
+            } else {
+                QTextStream ts( &log );
+                ts << d.progId << '\t' << ( isAuthorized ? "Allow" : "Deny" ) << '\t' << request << endl;
+            }
+        }
+#endif
+        isAuthorized = true;
+    }
+#endif
+    if ( !isAuthorized )
+    {
+        qWarning( "%s - denied: for Program Id %u [PID %d]"
+                , qPrintable(request), d.progId, d.processId );
+
+        char linkTarget[BUF_SIZE]="";
+        char exeLink[BUF_SIZE]="";
+        char cmdlinePath[BUF_SIZE]="";
+        char cmdline[BUF_SIZE]="";
+        
+        //get executable from /proc/pid/exe
+        snprintf( exeLink, BUF_SIZE, "/proc/%d/exe", d.processId );
+        if ( -1 == ::readlink( exeLink, linkTarget, BUF_SIZE - 1 ) ) 
+        {
+            qWarning( "SXE:- Error encountered in retrieving executable link target from /proc/%u/exe : %s", 
+                d.processId, strerror(errno) );
+            snprintf( linkTarget, BUF_SIZE, "%s", linkTarget );
+        }
+
+        //get cmdline from proc/pid/cmdline
+        snprintf( cmdlinePath, BUF_SIZE, "/proc/%d/cmdline", d.processId );
+        int  cmdlineFd = open( cmdlinePath, O_RDONLY ); 
+        if ( cmdlineFd == -1 )
+        {
+            qWarning( "SXE:- Error encountered in opening /proc/%u/cmdline: %s",
+                d.processId, strerror(errno) );
+            snprintf( cmdline, BUF_SIZE, "%s", "Unknown" );
+        }
+        else
+        {
+            if ( -1 == ::read(cmdlineFd, cmdline, BUF_SIZE - 1 ) )
+            {
+                qWarning( "SXE:- Error encountered in reading /proc/%u/cmdline : %s",
+                    d.processId, strerror(errno) );
+                snprintf( cmdline, BUF_SIZE, "%s", "Unknown" );
+            }
+            close( cmdlineFd );
+        }
+        
+        syslog( LOG_ERR | LOG_LOCAL6, "%s // PID:%u // ProgId:%u // Exe:%s // Request:%s // Cmdline:%s",
+                "<SXE Breach>", d.processId, d.progId, linkTarget, qPrintable(request), cmdline);
+    }
+
+    return isAuthorized;
+}
+
 inline bool __fileOpen( QFile *f )
 {
 #ifdef QTRANSPORTAUTH_DEBUG
@@ -589,7 +638,7 @@ inline bool __fileOpen( QFile *f )
   to storage allocated for the internal cache and must be used asap.
 
   The list returned is a sequence of one or more keys which match the
-  progId.  There is no seperator, each 16 byte sequence represents a key.
+  progId.  There is no separator, each 16 byte sequence represents a key.
   The sequence is followed by two iterations of the SXE magic
   bytes,eg  0xBA, 0xD4, 0xD4, 0xBA, 0xBA, 0xD4, 0xD4, 0xBA
 
@@ -631,8 +680,12 @@ const unsigned char *QTransportAuthPrivate::getClientKey(unsigned char progId)
     // This is hacky - fix in 4.3 - see documentation for setKeyFilePath
     QString manifestPath = m_keyFilePath + QLatin1String( "/manifest" );
     QString actualKeyPath( "/proc/lids/keys" );
+    bool noFailOnKeyMissing = true;
     if ( !QFile::exists( actualKeyPath ))
+    {
         actualKeyPath = m_keyFilePath + QLatin1String( "/" QSXE_KEYFILE );
+        noFailOnKeyMissing = false;
+    }
     QFile kf( actualKeyPath );
     QFile mn( manifestPath );
     if ( !__fileOpen( &mn ))
@@ -644,7 +697,10 @@ const unsigned char *QTransportAuthPrivate::getClientKey(unsigned char progId)
     if ( manifestMatchCount == 0 )
         goto key_not_found;
     if ( !__fileOpen( &kf ))
+    {
+        noFailOnKeyMissing = false;
         goto key_not_found;
+    }
     total_size = 2 * QSXE_MAGIC_BYTES + manifestMatchCount * QSXE_KEY_LEN;
     result = (char*)malloc( total_size );
     Q_CHECK_PTR( result );
@@ -695,6 +751,19 @@ const unsigned char *QTransportAuthPrivate::getClientKey(unsigned char progId)
     goto success_out;
 
 key_not_found:
+    if ( noFailOnKeyMissing )  // return an "empty" set of keys in this case
+    {
+        if ( result == 0 )
+        {
+            result = (char*)malloc( 2 * QSXE_MAGIC_BYTES );
+            Q_CHECK_PTR( result );
+        }
+        result_ptr = result;
+        for ( int i = 0; i < 2; ++i )
+            for ( int j = 0; j < QSXE_MAGIC_BYTES; ++j )
+                *result_ptr++ = magic[j];
+        return (unsigned char *)result;
+    }
     qWarning( "PID %d : Not found client key for prog %u", getpid(), progId );
     if ( result )
     {
@@ -756,6 +825,7 @@ Note: this method will modify the msgQueue and pull off the data
 */
 QString RequestAnalyzer::analyze( QByteArray *msgQueue )
 {
+#ifdef Q_WS_QWS
     dataSize = 0;
     moreData = false;
     QBuffer cmdBuf( msgQueue );
@@ -792,6 +862,10 @@ QString RequestAnalyzer::analyze( QByteArray *msgQueue )
     dataSize = QWS_PROTOCOL_ITEM_SIZE( *command );
     delete command;
     return request;
+#else
+    Q_UNUSED(msgQueue);
+    return QString();
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -799,6 +873,14 @@ QString RequestAnalyzer::analyze( QByteArray *msgQueue )
 ////  AuthDevice definition
 ////
 
+/*!
+  Constructs a new auth device for the transport \a data and I/O device \a parent.
+
+  Incoming or outgoing data will be authenticated according to the auth direction \a dir.
+
+  The auth device will take ownership of the transport \a data and delete it when the device
+  is destroyed.
+*/
 QAuthDevice::QAuthDevice( QIODevice *parent, QTransportAuth::Data *data, AuthDirection dir )
     : QIODevice( parent )
     , d( data )
@@ -826,6 +908,7 @@ QAuthDevice::~QAuthDevice()
 {
     if ( analyzer )
         delete analyzer;
+    delete d;
 }
 
 /*!
@@ -895,7 +978,7 @@ qint64 QAuthDevice::writeData(const char *data, qint64 len)
     char header[QSXE_HEADER_LEN];
     ::memset( header, 0, QSXE_HEADER_LEN );
     qint64 bytes = 0;
-    if ( authToMessage( *d, header, data, len ))
+    if ( QTransportAuth::getInstance()->authToMessage( *d, header, data, len ))
     {
         m_target->write( header, QSXE_HEADER_LEN );
 #ifdef QTRANSPORTAUTH_DEBUG
@@ -994,7 +1077,12 @@ void QAuthDevice::recvReadyRead()
     while ( bufHasMessages )
     {
         unsigned char saveStatus = d->status;
-        if ( !authFromMessage( *d, msgQueue, msgQueue.size() ))
+        if (( d->status & QTransportAuth::ErrMask ) == QTransportAuth::NoSuchKey )
+        {
+            QTransportAuth::getInstance()->authorizeRequest( *d, "NoSuchKey" );
+            break;
+        }
+        if ( !QTransportAuth::getInstance()->authFromMessage( *d, msgQueue, msgQueue.size() ))
         {
             // not all arrived yet?  come back later
             if (( d->status & QTransportAuth::ErrMask ) == QTransportAuth::TooSmall )
@@ -1058,30 +1146,12 @@ bool QAuthDevice::authorizeMessage()
     if ( analyzer->requireMoreData() )
         return false;
     bool isAuthorized = true;
-    QTransportAuth *auth = QTransportAuth::getInstance();
+
     if ( !request.isEmpty() && request != "Unknown" )
     {
-        d->status &= QTransportAuth::ErrMask;  // clear the status
-        emit policyCheck( *d, request );
-        isAuthorized = (( d->status & QTransportAuth::StatusMask ) == QTransportAuth::Allow );
+        isAuthorized = QTransportAuth::getInstance()->authorizeRequest( *d, request );
     }
-#if defined(SXE_DISCOVERY)
-    if (auth->isDiscoveryMode()) {
-#ifndef QT_NO_TEXTSTREAM
-        if (!auth->logFilePath().isEmpty()) {
-            QFile log( auth->logFilePath() );
-            if (!log.open(QIODevice::WriteOnly | QIODevice::Append)) {
-                qWarning("Could not write to log in discovery mode: %s",
-                         qPrintable(auth->logFilePath()));
-            } else {
-                QTextStream ts( &log );
-                ts << d->progId << '\t' << ( isAuthorized ? "Allow" : "Deny" ) << '\t' << request << endl;
-            }
-        }
-#endif
-        isAuthorized = true;
-    }
-#endif
+
     bool moreToProcess = ( msgQueue.size() - analyzer->bytesAnalyzed() ) > (int)sizeof(int);
     if ( isAuthorized )
     {
@@ -1094,12 +1164,9 @@ bool QAuthDevice::authorizeMessage()
     }
     else
     {
-        qWarning( "%s - denied: for Program Id %u [PID %d]"
-                , qPrintable(request), d->progId, d->processId );
         msgQueue = msgQueue.mid( analyzer->bytesAnalyzed() );
-        syslog( LOG_ERR | LOG_LOCAL6, "%s %u %s",
-               "_SXE_", d->processId, qPrintable(request) );
     }
+
     return true;
 }
 
@@ -1127,17 +1194,16 @@ void QAuthDevice::setRequestAnalyzer( RequestAnalyzer *ra )
    Returns true if header successfully added.  Will fail if the
    per-process key has not yet been set with setProcessKey()
 */
-bool QAuthDevice::authToMessage( QTransportAuth::Data &d, char *hdr, const char *msg, int msgLen )
+bool QTransportAuth::authToMessage( QTransportAuth::Data &d, char *hdr, const char *msg, int msgLen )
 {
     // qDebug( "authToMessage(): prog id %u", d.progId );
-    QTransportAuth *a = QTransportAuth::getInstance();
     // only authorize connection oriented transports once, unless key has changed
-    if ( !a->d_func()->keyChanged && d.connection() &&
-            (( d.status & QTransportAuth::ErrMask ) != QTransportAuth::Pending ))
+    if ( d.connection() && ((d.status & QTransportAuth::ErrMask) != QTransportAuth::Pending) &&
+        d_func()->authKey.progId == d.progId )
         return false;
-    a->d_func()->keyChanged = false;
+    d.progId = d_func()->authKey.progId;
     // If Unix socket credentials are being used the key wont be set
-    if ( ! a->d_func()->keyInitialised )
+    if ( !d_func()->keyInitialised )
         return false;
     unsigned char digest[QSXE_KEY_LEN];
     char *msgPtr = hdr;
@@ -1148,24 +1214,24 @@ bool QAuthDevice::authToMessage( QTransportAuth::Data &d, char *hdr, const char 
     if ( !d.trusted())
     {
         // Use HMAC
-        int rc = hmac_md5( (unsigned char *)msg, msgLen, a->d_func()->authKey.key, QSXE_KEY_LEN, digest );
+        int rc = hmac_md5( (unsigned char *)msg, msgLen, d_func()->authKey.key, QSXE_KEY_LEN, digest );
         if ( rc == -1 )
             return false;
         memcpy( hdr + QSXE_KEY_IDX, digest, QSXE_KEY_LEN );
     }
     else
     {
-        memcpy( hdr + QSXE_KEY_IDX, a->d_func()->authKey.key, QSXE_KEY_LEN );
+        memcpy( hdr + QSXE_KEY_IDX, d_func()->authKey.key, QSXE_KEY_LEN );
     }
 
-    hdr[ QSXE_PROG_IDX ] = a->d_func()->authKey.progId;
+    hdr[ QSXE_PROG_IDX ] = d_func()->authKey.progId;
 
 #ifdef QTRANSPORTAUTH_DEBUG
     char keydisplay[QSXE_KEY_LEN*2+1];
-    hexstring( keydisplay, a->d_func()->authKey.key, QSXE_KEY_LEN );
+    hexstring( keydisplay, d_func()->authKey.key, QSXE_KEY_LEN );
 
     qDebug( "%d CLIENT Auth to message %s against prog id %u and key %s\n",
-            getpid(), msg, a->d_func()->authKey.progId, keydisplay );
+            getpid(), msg, d_func()->authKey.progId, keydisplay );
 #endif
 
     // TODO implement sequence to prevent replay attack, not required
@@ -1226,7 +1292,7 @@ bool QAuthDevice::authToMessage( QTransportAuth::Data &d, char *hdr, const char 
       qWarning( "error: %s", QTransportAuth::errorStrings[r] );
   \endcode
 */
-bool QAuthDevice::authFromMessage( QTransportAuth::Data &d, const char *msg, int msgLen )
+bool QTransportAuth::authFromMessage( QTransportAuth::Data &d, const char *msg, int msgLen )
 {
     if ( msgLen < QSXE_MAGIC_BYTES )
     {
@@ -1244,7 +1310,7 @@ bool QAuthDevice::authFromMessage( QTransportAuth::Data &d, const char *msg, int
             return false;
         }
     }
-    QTransportAuth *a = QTransportAuth::getInstance();
+
     if ( msgLen < AUTH_SPACE(1) )
     {
         d.status = ( d.status & QTransportAuth::StatusMask ) | QTransportAuth::TooSmall;
@@ -1272,7 +1338,9 @@ bool QAuthDevice::authFromMessage( QTransportAuth::Data &d, const char *msg, int
         d.status = ( d.status & QTransportAuth::StatusMask ) | QTransportAuth::TooSmall;
         return false;
     }
-    const unsigned char *clientKey = a->d_func()->getClientKey( d.progId );
+
+    bool isCached = d_func()->keyCache.contains( d.progId );
+    const unsigned char *clientKey = d_func()->getClientKey( d.progId );
     if ( clientKey == NULL )
     {
         d.status = ( d.status & QTransportAuth::StatusMask ) | QTransportAuth::NoSuchKey;
@@ -1289,32 +1357,62 @@ bool QAuthDevice::authFromMessage( QTransportAuth::Data &d, const char *msg, int
     const unsigned char *auth_tok;
     unsigned char digest[QSXE_KEY_LEN];
     bool multi_tok = false;
-    if ( !d.trusted())
+
+    bool need_to_recheck=false;
+    do
     {
-        hmac_md5( AUTH_DATA(msg), authLen, clientKey, QSXE_KEY_LEN, digest );
-        auth_tok = digest;
-    }
-    else
-    {
-        auth_tok = clientKey;
-        multi_tok = true;  // 1 or more keys are in the clientKey
-        GAREnforcer::getInstance()->logAuthAttempt( QDateTime::currentDateTime() );
-    }
-    while( true )
-    {
-        if ( memcmp( msg + QSXE_KEY_IDX, auth_tok, QSXE_KEY_LEN ) == 0 )
+        if ( !d.trusted())
         {
-            d.status = ( d.status & QTransportAuth::StatusMask ) | QTransportAuth::Success;
-            return true;
+            hmac_md5( AUTH_DATA(msg), authLen, clientKey, QSXE_KEY_LEN, digest );
+            auth_tok = digest;
         }
-        if ( !multi_tok )
-            break;
-        auth_tok += QSXE_KEY_LEN;
-        if ( memcmp( auth_tok, magic, QSXE_MAGIC_BYTES ) == 0
-                && memcmp( auth_tok + QSXE_MAGIC_BYTES, magic, QSXE_MAGIC_BYTES ) == 0 )
-            break;
-    }
+        else
+        {
+            auth_tok = clientKey;
+            multi_tok = true;  // 1 or more keys are in the clientKey
+        }
+        while( true )
+        {
+            if ( memcmp( auth_tok, magic, QSXE_MAGIC_BYTES ) == 0
+                    && memcmp( auth_tok + QSXE_MAGIC_BYTES, magic, QSXE_MAGIC_BYTES ) == 0 )
+                break;
+            if ( memcmp( msg + QSXE_KEY_IDX, auth_tok, QSXE_KEY_LEN ) == 0 )
+            {
+                d.status = ( d.status & QTransportAuth::StatusMask ) | QTransportAuth::Success;
+                return true;
+            }
+            if ( !multi_tok )
+                break;
+            auth_tok += QSXE_KEY_LEN;
+        }
+        //the keys cached on d.progId may not contain the binary key because the cache entry was made
+        //before the binary had first started, must search for client key again.
+        if ( isCached )
+        {
+            d_func()->keyCache.remove(d.progId);
+            isCached = false;
+
+#ifdef QTRANSPORTAUTH_DEBUG
+            qDebug() << "QTransportAuth::authFromMessage(): key not found in set of keys cached"
+                     << "against prog Id =" << d.progId << ". Re-obtaining client key. ";
+#endif
+            clientKey = d_func()->getClientKey( d.progId );
+            if ( clientKey == NULL )
+            {
+                d.status = ( d.status & QTransportAuth::StatusMask ) | QTransportAuth::NoSuchKey;
+                return false;
+            }
+            need_to_recheck = true;
+        }
+        else
+        {
+            need_to_recheck = false;
+        }
+    } while( need_to_recheck );
+
     d.status = ( d.status & QTransportAuth::StatusMask ) | QTransportAuth::FailMatch;
+    qWarning() << "QTransportAuth::authFromMessage():failed authentication";
+    FAREnforcer::getInstance()->logAuthAttempt( QDateTime::currentDateTime() );
     emit authViolation( d );
     return false;
 }
@@ -1404,54 +1502,79 @@ static int hmac_md5(
         MD5Init(&context);                   /* init context for 1st pass */
         MD5Update(&context, k_ipad, 64);     /* start with inner pad */
         MD5Update(&context, text, text_length); /* then text of datagram */
-        MD5Final(digest, &context);          /* finish up 1st pass */
+        MD5Final(&context, digest);          /* finish up 1st pass */
 
         /* perform outer MD5 */
         MD5Init(&context);                   /* init context for 2nd pass */
         MD5Update(&context, k_opad, 64);     /* start with outer pad */
         MD5Update(&context, digest, 16);     /* then results of 1st * hash */
-        MD5Final(digest, &context);          /* finish up 2nd pass */
+        MD5Final(&context, digest);          /* finish up 2nd pass */
         return 1;
 }
 
 
-const int GAREnforcer::minutelyRate = 30; //allowed number of authentication attempts per minute
-const QString GAREnforcer::GARMessage = "GAR_Exceeded";
-const QString GAREnforcer::SxeTag = "_SXE_";
-const int GAREnforcer::minute = 60;
+const int FAREnforcer::minutelyRate = 4; //allowed number of false authentication attempts per minute
+const QString FAREnforcer::FARMessage = "FAR_Exceeded";
+const QString FAREnforcer::SxeTag = "<SXE Breach>";
+const int FAREnforcer::minute = 60;
 
-GAREnforcer::GAREnforcer():authAttempts()
-{ 
-    reset(); 
+FAREnforcer::FAREnforcer():authAttempts()
+{
+    QDateTime nullDateTime = QDateTime();
+    for (int i = 0; i < minutelyRate; i++ )
+        authAttempts << nullDateTime;
 }
 
 
-GAREnforcer *GAREnforcer::getInstance()
+FAREnforcer *FAREnforcer::getInstance()
 {
-    static GAREnforcer theInstance;
+    static FAREnforcer theInstance;
     return &theInstance;
 }
 
-
-void GAREnforcer::logAuthAttempt( QDateTime time )
+void FAREnforcer::logAuthAttempt( QDateTime time )
 {
     QDateTime dt =  authAttempts.takeFirst();
 
     authAttempts.append( time );
     if ( dt.secsTo( authAttempts.last() ) <= minute )
     {
-        syslog( LOG_ERR | LOG_LOCAL6, "%s %u %s",
-                qPrintable( GAREnforcer::SxeTag ), getpid(), 
-                qPrintable( GAREnforcer::GARMessage ) );
+#if defined(SXE_DISCOVERY)
+        if ( QTransportAuth::getInstance()->isDiscoveryMode() ) {
+            static QBasicAtomic reported = {0};
+            if ( reported.testAndSet(0,1) ) {
+#ifndef QT_NO_TEXTSTREAM
+                QString logFilePath = QTransportAuth::getInstance()->logFilePath();
+                if ( !logFilePath.isEmpty() ) {
+                      QFile log( logFilePath );
+                    if ( !log.open(QIODevice::WriteOnly | QIODevice::Append) ) {
+                        qWarning("Could not write to log in discovery mode: %s",
+                                 qPrintable(logFilePath) );
+                    } else {
+                        QTextStream ts( &log );
+                        ts << "\t\tWarning: False Authentication Rate of " <<  minutelyRate << "\n"
+                           << "\t\tserver connections/authentications per minute has been exceeded,\n"
+                           << "\t\tno further warnings will be issued\n";
+                    }
+                }
+            }
+#endif
+            reset();
+            return;
+        }
+#endif
+        syslog( LOG_ERR | LOG_LOCAL6, "%s %s",
+                qPrintable( FAREnforcer::SxeTag ), 
+                qPrintable( FAREnforcer::FARMessage ) );
         reset();
     }
 }
 
-void GAREnforcer::reset()
+void FAREnforcer::reset()
 {
-    authAttempts.clear();
+    QDateTime nullDateTime = QDateTime();
     for (int i = 0; i < minutelyRate; i++ )
-        authAttempts << QDateTime();
+        authAttempts[i] = nullDateTime; 
 }
 
 #include "moc_qtransportauth_qws_p.cpp"

@@ -43,7 +43,7 @@
     Description[]=Receive a vcard via SMS push on port 226</pre>
 <p>When the message arrives, the QCop message <tt>pushVCard(QDSActionRequest)</tt> will be sent to the <a href="contactsphoneservice.html">ContactsPhone</a> service, with the vcard data as the payload within the <a href="qdsactionrequest.html">QDSActionRequest</a> object. The <a href="qdsactionrequest.html#auxiliaryData">QDSActionRequest::auxiliaryData</a>() will contain the complete SMS message, including headers. Normally this auxiliary data can be ignored, but some applications may need to know the sender's phone number, or other information.</p>
 <p>If the OTA message consists of several parts, the parts will be concatenated before the message is delivered to the application.</p>
-<p>See the documentation of QSMSMessage::destinationPort() for more information.</p>
+<p>See the documentation of <a href="qsmsmessage.html#destinationPort">QSMSMessage::destinationPort</a>() for more information.</p>
 <a name="handling-incoming-wap-push-messages"></a>
 <h2>Handling incoming WAP Push messages</h2>
 <p>WAP Push messages are handled in a similar fashion. The difference being the MIME type in the QDS definition:</p>
@@ -59,6 +59,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

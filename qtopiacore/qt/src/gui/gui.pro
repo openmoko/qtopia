@@ -1,10 +1,10 @@
-TARGET	   = QtGui
+TARGET     = QtGui
 QPRO_PWD   = $$PWD
 QT = core
 DEFINES   += QT_BUILD_GUI_LIB
 win32-msvc*|win32-icc:QMAKE_LFLAGS += /BASE:0x65000000
 
-!win32:!embedded:!mac:CONFIG	  += x11
+!win32:!embedded:!mac:CONFIG      += x11
 
 include(../qbase.pri)
 
@@ -28,7 +28,6 @@ include(accessible/accessible.pri)
 include(itemviews/itemviews.pri)
 include(inputmethod/inputmethod.pri)
 include(graphicsview/graphicsview.pri)
-include(undo/undo.pri)
 include(util/util.pri)
 
 embedded: INCLUDEPATH *= $$QMAKE_INCDIR_QT/QtNetwork
@@ -36,6 +35,8 @@ embedded: INCLUDEPATH *= $$QMAKE_INCDIR_QT/QtNetwork
 QMAKE_LIBS += $$QMAKE_LIBS_GUI
 
 contains(DEFINES,QT_EVAL):include($$QT_BUILD_TREE/src/corelib/eval.pri)
+
+QMAKE_DYNAMIC_LIST_FILE = $$PWD/QtGui.dynlist
 
 DEFINES += Q_INTERNAL_QAPP_SRC
 

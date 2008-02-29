@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,25 +19,18 @@
 **
 ****************************************************************************/
 
-#include <QLabel>
-#include <QLayout>
-#include <QTimer>
 #include "graph.h"
 #include "storage.h"
 
+#include <QLabel>
+#include <QLayout>
+#include <QTimer>
 #include <qstorage.h>
 #include <QScrollArea>
-#include <QFont>
-#include <QFontMetrics>
-#include <QKeyEvent>
-#include <QCoreApplication>
-
 #include <stdio.h>
-#ifdef Q_OS_LINUX
 #include <sys/vfs.h>
 #include <mntent.h>
 #include <errno.h>
-#endif
 
 StorageInfoView::StorageInfoView( QWidget *parent )
     : QWidget( parent ), area(0)
@@ -47,14 +40,14 @@ StorageInfoView::StorageInfoView( QWidget *parent )
 
 void StorageInfoView::init()
 {
-    sinfo = new QStorageMetaInfo(this);
+    sinfo = QStorageMetaInfo::instance();
     QLayout *layout = new QVBoxLayout( this );
     layout->setSpacing( 0 );
     layout->setMargin( 0 );
     area = new QScrollArea;
     layout->addWidget( area );
 
-    area->setFocusPolicy( Qt::NoFocus );
+    area->setFocusPolicy( Qt::TabFocus );
     area->setFrameShape( QFrame::NoFrame );
 
     updateMounts();
@@ -101,12 +94,8 @@ void StorageInfoView::updateMounts()
     if ( oldFs.count() == 0 && newFs.count() == 0 )
         return;
    
-    if ( area->widget() )
-        delete area->takeWidget();
     fsHash.clear();
     QWidget *vb = new QWidget;
-    area->setWidget( vb );
-    area->setWidgetResizable( true );
     QVBoxLayout *vLayout = new QVBoxLayout(vb);
     vLayout->setSpacing( 6 );
     vLayout->setMargin(0);
@@ -120,10 +109,12 @@ void StorageInfoView::updateMounts()
         fsHash.insert( fs, mi ); 
     }
     vLayout->addStretch( 1 );
-    vb->updateGeometry();
+    if ( area->widget() )
+        delete area->takeWidget();
+    area->setWidget( vb );
+    area->setWidgetResizable( true );
     vb->show();
 }
-
 
 MountInfo::MountInfo( const QFileSystem* f, QWidget *parent )
     : QWidget( parent ), title(f->name())

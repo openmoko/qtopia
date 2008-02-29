@@ -1,7 +1,7 @@
 #!/bin/sh
 # This script is no longer capable of running Qtopia 1.x or 2.x. Please use the runqpe scripts in those packages.
 
-if [ -z "$QPEDIR" -a -d $PWD/qtopiacore/host/tools/qvfb ];then
+if [ -z "$QPEDIR" -a -d $PWD/src/tools/qt/qvfb ];then
     QPEDIR=$PWD
 fi
 

@@ -1,0 +1,25 @@
+-edition phone -xplatform nokia -arch arm -no-qvfb
+-reduce-exports=yes
+-eval 'if ( &$helix_visref() ) { opt("qtopiamedia") = 1; opt("mediaengines") = "helix"; }'
+-sound-system alsa
+-helix-system-id linux-2.6-libc6-arm11-cross-gcc4
+-prefix /opt/Qtopia
+-no-sxe 
+-no-drm 
+-no-infrared
+-no-sxe
+-no-modem
+-extra-qtopiacore-config "-qt-mouse-tslib" 
+-extra-qtopiacore-config "-depths 8,16,32"
+-D SYSINFO_GEEK_MODE
+-D QT_QWS_NOKIA
+-release
+-I /scratchbox/compilers/cs2005q3.2-glibc-arm/arm-none-linux-gnueabi/sys-include
+-L /scratchbox/compilers/cs2005q3.2-glibc-arm//arm-none-linux-gnueabi/lib
+-extra-qt-config -no-glib 
+-no-test
+-dbus
+-dbuspath "/scratchbox/compilers/cs2005q3.2-glibc-arm/arm-none-linux-gnueabi/"
+-bluetooth
+
+

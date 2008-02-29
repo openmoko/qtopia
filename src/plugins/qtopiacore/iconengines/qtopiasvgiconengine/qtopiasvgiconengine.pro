@@ -6,4 +6,3 @@ SOURCES += svgiconengine.cpp
 
 TARGET  = qtopiasvgiconengine
 
-depends(libraries/qtopiabase)

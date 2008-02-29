@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,9 +52,11 @@
     QAbstractSocket that allows you to send and receive UDP
     datagrams.
 
-    The most common way to use this class is to bind to an address
-    and port using bind(), then call writeDatagram() and
-    readDatagram() to transfer data.
+    The most common way to use this class is to bind to an address and port
+    using bind(), then call writeDatagram() and readDatagram() to transfer
+    data. If you want to use the standard QIODevice functions read(),
+    readLine(), write(), etc., you must first connect the socket directly to a
+    peer by calling connectToHost().
 
     The socket emits the bytesWritten() signal every time a datagram
     is written to the network. If you just want to send datagrams,
@@ -385,12 +402,12 @@ qint64 QUdpSocket::readDatagram(char *data, qint64 maxSize, QHostAddress *addres
 #endif
     QT_CHECK_BOUND("QUdpSocket::readDatagram()", -1);
     qint64 readBytes = d->socketEngine->readDatagram(data, maxSize, address, port);
+    d_func()->socketEngine->setReadNotificationEnabled(true);
     if (readBytes < 0) {
         d->socketError = d->socketEngine->error();
         setErrorString(d->socketEngine->errorString());
         emit error(d->socketError);
     }
-    d_func()->socketEngine->setReadNotificationEnabled(true);
     return readBytes;
 }
 #endif // QT_NO_UDPSOCKET

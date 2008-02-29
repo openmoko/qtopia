@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,6 +23,8 @@
 #include <QtopiaChannel>
 #include <QtopiaServiceRequest>
 
+#ifdef Q_WS_QWS
+
 // "calibrate" builtin
 #include "../settings/calibrate/calibrate.h"
 static QWidget *calibrate()
@@ -31,6 +33,8 @@ static QWidget *calibrate()
     return c;
 }
 QTOPIA_SIMPLE_BUILTIN(calibrate, calibrate);
+
+#endif
 
 // "taskmanager" builtin
 static QWidget *taskmanager()
@@ -42,15 +46,15 @@ QTOPIA_SIMPLE_BUILTIN(taskmanager, taskmanager);
 
 #ifdef QTOPIA_PHONEUI
 // "callhistory" builtin
-#ifdef QTOPIA_PHONE
-#include <phone/homescreen.h>
+#include <phone/phonelauncher.h>
+#include <phone/homescreencontrol.h>
 static QWidget *callhistory()
 {
-    HomeScreen::getInstancePtr()->showCallHistory(false, QString());
+    if (HomeScreenControl::instance()->homeScreen())
+        HomeScreenControl::instance()->homeScreen()->showCallHistory(false, QString());
     return 0;
 }
 QTOPIA_SIMPLE_BUILTIN(callhistory, callhistory);
-#endif
 #endif
 
 // "shutdown" builtin
@@ -60,4 +64,17 @@ static QWidget *shutdown()
     return 0;
 }
 QTOPIA_SIMPLE_BUILTIN(shutdown, shutdown);
+
+#ifdef QTOPIA_CELL
+
+// "simapp" builtin
+#include "../applications/simapp/simapp.h"
+static QWidget *simapp()
+{
+    SimApp *s = SimApp::instance();
+    return s;
+}
+QTOPIA_SIMPLE_BUILTIN(simapp, simapp);
+
+#endif
 

@@ -1,6 +1,8 @@
 /*!
- \class GSMLegal
- \brief The GSMLegal class is a placeholder for licensing information.
+ \page gsmlegal.html
+ \title GSM
+ \ingroup qtopia3rdparty
+ \brief License information for GSM.
  \legalese
   GSM is a codec optimised for recording human speech, and is used by the MediaRecorder.
 
@@ -20,13 +22,6 @@ improvements that may be of general interest.
 Berlin, 28.11.1994
 Jutta Degener
 Carsten Bormann
-
-  \ingroup qtopia3rdparty
+  \endlegalese
 */
 
-/*!
-    \internal
-*/
-GSMLegal::GSMLegal()
-{
-}

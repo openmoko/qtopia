@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,7 +21,6 @@
 
 #include "qcontentfiltermodel.h"
 #include <QtDebug>
-#include <qmimetype.h>
 #include <qcategorymanager.h>
 #include <QStorageMetaInfo>
 #include <QObject>
@@ -1683,8 +1682,8 @@ QContentFilterModel::QContentFilterModel( QObject *parent )
 {
     d = new QContentFilterModelPrivate;
 
-    connect( qApp, SIGNAL(contentChanged(const QContentIdList&,QContent::ChangeType)),
-             this, SLOT  (contentChanged(const QContentIdList&,QContent::ChangeType)) );
+    connect( qApp, SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
+             this, SLOT  (contentChanged(QContentIdList,QContent::ChangeType)) );
 }
 
 /*!
@@ -1700,8 +1699,8 @@ QContentFilterModel::QContentFilterModel( QContent::Property property, TemplateO
 
     setModelTemplate( Template( property, options, checked ) );
 
-    connect( qApp, SIGNAL(contentChanged(const QContentIdList&,QContent::ChangeType)),
-             this, SLOT  (contentChanged(const QContentIdList&,QContent::ChangeType)) );
+    connect( qApp, SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
+             this, SLOT  (contentChanged(QContentIdList,QContent::ChangeType)) );
 }
 
 /*!
@@ -1717,8 +1716,8 @@ QContentFilterModel::QContentFilterModel( QContentFilter::FilterType type, const
 
     setModelTemplate( Template( type, scope, options, checked ) );
 
-    connect( qApp, SIGNAL(contentChanged(const QContentIdList&,QContent::ChangeType)),
-             this, SLOT  (contentChanged(const QContentIdList&,QContent::ChangeType)) );
+    connect( qApp, SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
+             this, SLOT  (contentChanged(QContentIdList,QContent::ChangeType)) );
 }
 
 /*!

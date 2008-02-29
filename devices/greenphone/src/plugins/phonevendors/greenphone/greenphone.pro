@@ -1,17 +1,10 @@
-qtopia_project(stub)
+qtopia_project(qtopia plugin)
 TARGET=greenphonevendor
 
-file=$$dirname(QTOPIA_LIBQTOPIAPHONE)/../devices/greenphone/src/plugins/phonevendors/greenphone/lib$${TARGET}.so
-!exists($$file):error(Cannot locate lib$${TARGET}.so. You must copy this file to the image for full functionality.)
+CONFIG+=no_tr
 
-# install the plugin
-path=/plugins/phonevendors
-var=lib_$$TARGET
-commands=\
-    install -c $$LITERAL_QUOTE$$file$$LITERAL_QUOTE $$LITERAL_QUOTE$(INSTALL_ROOT)$$path/$$tail($$file)$$LITERAL_QUOTE
-CONFIG(release,debug|release):!isEmpty(QMAKE_STRIP):commands+=\
-    $$LINE_SEP_VERBOSE $$QMAKE_STRIP $$QMAKE_STRIPFLAGS_LIB $$LITERAL_QUOTE$(INSTALL_ROOT)$$path/$$tail($$file)$$LITERAL_QUOTE
-eval($${var}.commands=\$$commands)
-eval($${var}.path=$$path)
-echo(installing $$var)
-INSTALLS+=$$var
+HEADERS		=  vendor_greenphone_p.h greenphoneplugin.h
+SOURCES	        =  vendor_greenphone.cpp greenphoneplugin.cpp
+
+requires(enable_modem)
+depends(libraries/qtopiaphonemodem)

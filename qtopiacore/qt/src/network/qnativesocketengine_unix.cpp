@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,6 +53,11 @@
 #ifndef QT_NO_IPV6IFNAME
 #include <net/if.h>
 #endif
+#ifdef QT_LSB
+#include <arpa/inet.h>
+#endif
+
+//#define QNATIVESOCKETENGINE_DEBUG
 
 #if defined QNATIVESOCKETENGINE_DEBUG
 #include <qstring.h>
@@ -257,7 +277,20 @@ bool QNativeSocketEnginePrivate::setOption(QNativeSocketEngine::SocketOption opt
     case QNativeSocketEngine::NonBlockingSocketOption: {
         // Make the socket nonblocking.
         int flags = ::fcntl(socketDescriptor, F_GETFL, 0);
-        return flags != -1 && ::fcntl(socketDescriptor, F_SETFL, flags | O_NONBLOCK) != -1;
+        if (flags == -1) {
+#ifdef QNATIVESOCKETENGINE_DEBUG
+            perror("QNativeSocketEnginePrivate::setOption(): fcntl(F_GETFL) failed");
+#endif
+            return false;
+        }
+        if (::fcntl(socketDescriptor, F_SETFL, flags | O_NONBLOCK) == -1) {
+#ifdef QNATIVESOCKETENGINE_DEBUG
+            perror("QNativeSocketEnginePrivate::setOption(): fcntl(F_SETFL) failed");
+#endif
+            return false;
+        }
+
+        return true;
     }
     case QNativeSocketEngine::AddressReusable:
 #ifdef SO_REUSEPORT
@@ -319,42 +352,47 @@ bool QNativeSocketEnginePrivate::nativeConnect(const QHostAddress &addr, quint16
     int connectResult = QT_SOCKET_CONNECT(socketDescriptor, sockAddrPtr, sockAddrSize);
     if (connectResult == -1) {
         switch (errno) {
-        case EINVAL:
-            setError(QAbstractSocket::UnsupportedSocketOperationError, OperationUnsupportedErrorString);
-            break;
         case EISCONN:
             socketState = QAbstractSocket::ConnectedState;
             break;
         case ECONNREFUSED:
+        case EINVAL:
             setError(QAbstractSocket::ConnectionRefusedError, ConnectionRefusedErrorString);
+            socketState = QAbstractSocket::UnconnectedState;
             break;
         case ETIMEDOUT:
             setError(QAbstractSocket::NetworkError, ConnectionTimeOutErrorString);
             break;
         case EHOSTUNREACH:
             setError(QAbstractSocket::NetworkError, HostUnreachableErrorString);
+            socketState = QAbstractSocket::UnconnectedState;
             break;
         case ENETUNREACH:
             setError(QAbstractSocket::NetworkError, NetworkUnreachableErrorString);
+            socketState = QAbstractSocket::UnconnectedState;
             break;
         case EADDRINUSE:
             setError(QAbstractSocket::NetworkError, AddressInuseErrorString);
             break;
         case EINPROGRESS:
         case EALREADY:
+            setError(QAbstractSocket::UnfinishedSocketOperationError, InvalidSocketErrorString);
             socketState = QAbstractSocket::ConnectingState;
             break;
         case EAGAIN:
+            setError(QAbstractSocket::UnfinishedSocketOperationError, InvalidSocketErrorString);
             setError(QAbstractSocket::SocketResourceError, ResourceErrorString);
             break;
         case EACCES:
         case EPERM:
             setError(QAbstractSocket::SocketAccessError, AccessErrorString);
+            socketState = QAbstractSocket::UnconnectedState;
             break;
         case EAFNOSUPPORT:
         case EBADF:
         case EFAULT:
         case ENOTSOCK:
+            socketState = QAbstractSocket::UnconnectedState;
         default:
             break;
         }
@@ -541,14 +579,9 @@ bool QNativeSocketEnginePrivate::nativeHasPendingDatagrams() const
         readBytes = ::recvfrom(socketDescriptor, &c, 1, MSG_PEEK, storagePtr, &storageSize);
     } while (readBytes == -1 && errno == EINTR);
 
-    // If the port was set in the sockaddr structure, then a new message is available.
-    bool result = false;
-#if !defined(QT_NO_IPV6)
-    if (storagePtr->sa_family == AF_INET6)
-        result = (storagePtrIPv6->sin6_port != 0);
-    else
-#endif
-    result = (storagePtrIPv4->sin_port != 0);
+    // If there's no error, or if our buffer was too small, there must be a
+    // pending datagram.
+    bool result = (readBytes != -1) || errno == EMSGSIZE;
 
 #if defined (QNATIVESOCKETENGINE_DEBUG)
     qDebug("QNativeSocketEnginePrivate::nativeHasPendingDatagrams() == %s",

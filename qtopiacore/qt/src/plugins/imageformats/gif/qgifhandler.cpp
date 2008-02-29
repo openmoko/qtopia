@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** WARNING:
 **      A separate license from Unisys may be required to use the gif
@@ -54,7 +69,7 @@ public:
 
 private:
     void fillRect(QImage *image, int x, int y, int w, int h, QRgb col);
-    QRgb color(uchar index) const;
+    inline QRgb color(uchar index) const;
 
     // GIF specific stuff
     QRgb* globalcmap;
@@ -491,16 +506,27 @@ int QGIFFormat::decode(QImage *image, const uchar *buffer, int length,
                             }
                         }
                         oldcode=incode;
+                        const int h = image->height();
+                        const QRgb *map = lcmap ? localcmap : globalcmap;
+                        QRgb *line = 0;
+                        if (!out_of_bounds && h > y)
+                            line = (QRgb*)image->scanLine(y);
                         while (sp>stack) {
-                            --sp;
-                            if (!out_of_bounds && image->height() > y && *sp!=trans_index)
-                                ((QRgb*)image->scanLine(y))[x] = color(*sp);
+                            const uchar index = *(--sp);
+                            if (!out_of_bounds && h > y && index!=trans_index) {
+                                if (index > ncols)
+                                    line[x] = Q_TRANSPARENT;
+                                else
+                                    line[x] = map ? map[index] : 0;
+                            }
                             x++;
                             if (x>=swidth) out_of_bounds = true;
                             if (x>=left+width) {
                                 x=left;
                                 out_of_bounds = left>=swidth || y>=sheight;
                                 nextY(image);
+                                if (!out_of_bounds && h > y)
+                                    line = (QRgb*)image->scanLine(y);
                             }
                         }
                     }
@@ -703,7 +729,7 @@ void QGIFFormat::nextY(QImage *image)
     if (y >= sheight) out_of_bounds=true; //y=bottom;
 }
 
-QRgb QGIFFormat::color(uchar index) const
+inline QRgb QGIFFormat::color(uchar index) const
 {
     if (index == trans_index || index > ncols)
         return Q_TRANSPARENT;

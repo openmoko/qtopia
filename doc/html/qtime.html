@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QTime Class Reference</title>
+  <title>Qt 4.3: QTime Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTime Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTime Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QTime class provides clock time functions. <a href="#details">More...</a></p>
 <pre> #include &lt;QTime&gt;</pre><p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
 <ul>
@@ -24,7 +25,7 @@
 <li><div class="fn"/><b><a href="qtime.html#QTime">QTime</a></b> ()</li>
 <li><div class="fn"/><b><a href="qtime.html#QTime-2">QTime</a></b> ( int <i>h</i>, int <i>m</i>, int <i>s</i> = 0, int <i>ms</i> = 0 )</li>
 <li><div class="fn"/>QTime <b><a href="qtime.html#addMSecs">addMSecs</a></b> ( int <i>ms</i> ) const</li>
-<li><div class="fn"/>QTime <b><a href="qtime.html#addSecs">addSecs</a></b> ( int <i>nsecs</i> ) const</li>
+<li><div class="fn"/>QTime <b><a href="qtime.html#addSecs">addSecs</a></b> ( int <i>s</i> ) const</li>
 <li><div class="fn"/>int <b><a href="qtime.html#elapsed">elapsed</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qtime.html#hour">hour</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qtime.html#isNull">isNull</a></b> () const</li>
@@ -49,7 +50,7 @@
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
-<li><div class="fn"/>QTime <b><a href="qtime.html#currentTime-2">currentTime</a></b> ()</li>
+<li><div class="fn"/>QTime <b><a href="qtime.html#currentTime">currentTime</a></b> ()</li>
 <li><div class="fn"/>QTime <b><a href="qtime.html#fromString">fromString</a></b> ( const QString &amp; <i>string</i>, Qt::DateFormat <i>format</i> = Qt::TextDate )</li>
 <li><div class="fn"/>QTime <b><a href="qtime.html#fromString-2">fromString</a></b> ( const QString &amp; <i>string</i>, const QString &amp; <i>format</i> )</li>
 <li><div class="fn"/>bool <b><a href="qtime.html#isValid-2">isValid</a></b> ( int <i>h</i>, int <i>m</i>, int <i>s</i>, int <i>ms</i> = 0 )</li>
@@ -57,16 +58,16 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qtime.html#operator-lt-lt-38">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QTime &amp; <i>time</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qtime.html#operator-lt-lt-32">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QTime &amp; <i>time</i> )</li>
 <li><div class="fn"/>QDataStream &amp; <b><a href="qtime.html#operator-gt-gt-20">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QTime &amp; <i>time</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The QTime class provides clock time functions.</p>
-<p>A QTime object contains a clock time, i.e. the number of hours, minutes, seconds, and milliseconds since midnight. It can read the current time from the system clock and measure a span of elapsed time. It provides functions for comparing times and for manipulating a time by adding a number of milliseconds.</p>
+<p>A QTime object contains a clock time, i.e&#x2e; the number of hours, minutes, seconds, and milliseconds since midnight. It can read the current time from the system clock and measure a span of elapsed time. It provides functions for comparing times and for manipulating a time by adding a number of milliseconds.</p>
 <p>QTime uses the 24-hour clock format; it has no concept of AM/PM. Unlike <a href="qdatetime.html">QDateTime</a>, QTime knows nothing about time zones or daylight savings time (DST).</p>
-<p>A QTime object is typically created either by giving the number of hours, minutes, seconds, and milliseconds explicitly, or by using the static function <a href="qtime-qt3.html#currentTime">currentTime</a>(), which creates a QTime object that contains the system's local time. Note that the accuracy depends on the accuracy of the underlying operating system; not all systems provide 1-millisecond accuracy.</p>
+<p>A QTime object is typically created either by giving the number of hours, minutes, seconds, and milliseconds explicitly, or by using the static function <a href="qtime.html#currentTime">currentTime</a>(), which creates a QTime object that contains the system's local time. Note that the accuracy depends on the accuracy of the underlying operating system; not all systems provide 1-millisecond accuracy.</p>
 <p>The <a href="qtime.html#hour">hour</a>(), <a href="qtime.html#minute">minute</a>(), <a href="qtime.html#second">second</a>(), and <a href="qtime.html#msec">msec</a>() functions provide access to the number of hours, minutes, seconds, and milliseconds of the time. The same information is provided in textual format by the <a href="qtime.html#toString">toString</a>() function.</p>
 <p>QTime provides a full set of operators to compare two QTime objects. One time is considered smaller than another if it is earlier than the other.</p>
 <p>The time a given number of seconds or milliseconds later than a given time can be found using the <a href="qtime.html#addSecs">addSecs</a>() or <a href="qtime.html#addMSecs">addMSecs</a>() functions. Correspondingly, the number of seconds or milliseconds between two times can be found using <a href="qtime.html#secsTo">secsTo</a>() or <a href="qtime.html#msecsTo">msecsTo</a>().</p>
@@ -75,7 +76,7 @@
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QTime"></a>QTime::QTime ()</h3>
-<p>Constructs a null time object. A null time is identical to a <a href="qtime.html">QTime</a>(0, 0, 0, 0) (i.e., midnight), except that <a href="qtime.html#isNull">isNull</a>() and <a href="qtime.html#isValid">isValid</a>() return false.</p>
+<p>Constructs a null time object. A null time is identical to a <a href="qtime.html">QTime</a>(0, 0, 0, 0) (i.e&#x2e;, midnight), except that <a href="qtime.html#isNull">isNull</a>() and <a href="qtime.html#isValid">isValid</a>() return false.</p>
 <p>See also <a href="qtime.html#isNull">isNull</a>() and <a href="qtime.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="QTime-2"></a>QTime::QTime ( int <i>h</i>, int <i>m</i>, int <i>s</i> = 0, int <i>ms</i> = 0 )</h3>
 <p>Constructs a time with hour <i>h</i>, minute <i>m</i>, seconds <i>s</i> and milliseconds <i>ms</i>.</p>
@@ -85,8 +86,8 @@
 <p>Returns a <a href="qtime.html">QTime</a> object containing a time <i>ms</i> milliseconds later than the time of this object (or earlier if <i>ms</i> is negative).</p>
 <p>Note that the time will wrap if it passes midnight. See <a href="qtime.html#addSecs">addSecs</a>() for an example.</p>
 <p>See also <a href="qtime.html#addSecs">addSecs</a>() and <a href="qtime.html#msecsTo">msecsTo</a>().</p>
-<h3 class="fn"><a name="addSecs"></a>QTime QTime::addSecs ( int <i>nsecs</i> ) const</h3>
-<p>Returns a <a href="qtime.html">QTime</a> object containing a time <i>nsecs</i> seconds later than the time of this object (or earlier if <i>nsecs</i> is negative).</p>
+<h3 class="fn"><a name="addSecs"></a>QTime QTime::addSecs ( int <i>s</i> ) const</h3>
+<p>Returns a <a href="qtime.html">QTime</a> object containing a time <i>s</i> seconds later than the time of this object (or earlier if <i>s</i> is negative).</p>
 <p>Note that the time will wrap if it passes midnight.</p>
 <p>Example:</p>
 <pre> QTime n(14, 0, 0);                <span class="comment">// n == 14:00:00</span>
@@ -96,8 +97,7 @@
  t = n.addSecs(10 * 60 * 60 + 5);  <span class="comment">// t == 00:00:05</span>
  t = n.addSecs(-15 * 60 * 60);     <span class="comment">// t == 23:00:00</span></pre>
 <p>See also <a href="qtime.html#addMSecs">addMSecs</a>(), <a href="qtime.html#secsTo">secsTo</a>(), and <a href="qdatetime.html#addSecs">QDateTime::addSecs</a>().</p>
-<h3 class="fn"><a name="currentTime-2"></a>QTime QTime::currentTime ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
+<h3 class="fn"><a name="currentTime"></a>QTime QTime::currentTime ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the current time as reported by the system clock.</p>
 <p>Note that the accuracy depends on the accuracy of the underlying operating system; not all systems provide 1-millisecond accuracy.</p>
 <h3 class="fn"><a name="elapsed"></a>int QTime::elapsed () const</h3>
@@ -140,7 +140,7 @@
 <p>Returns the hour part (0 to 23) of the time.</p>
 <p>See also <a href="qtime.html#minute">minute</a>(), <a href="qtime.html#second">second</a>(), and <a href="qtime.html#msec">msec</a>().</p>
 <h3 class="fn"><a name="isNull"></a>bool QTime::isNull () const</h3>
-<p>Returns true if the time is null (i.e., the <a href="qtime.html">QTime</a> object was constructed using the default constructor); otherwise returns false. A null time is also an invalid time.</p>
+<p>Returns true if the time is null (i.e&#x2e;, the <a href="qtime.html">QTime</a> object was constructed using the default constructor); otherwise returns false. A null time is also an invalid time.</p>
 <p>See also <a href="qtime.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="isValid"></a>bool QTime::isValid () const</h3>
 <p>Returns true if the time is valid; otherwise returns false. For example, the time 23:30:55.746 is valid, but 24:12:30 is invalid.</p>
@@ -167,7 +167,7 @@
 <p>This function is guaranteed to be atomic and is thus very handy for repeated measurements. Call <a href="qtime.html#start">start</a>() to start the first measurement, and restart() for each later measurement.</p>
 <p>Note that the counter wraps to zero 24 hours after the last call to <a href="qtime.html#start">start</a>() or restart().</p>
 <p><b>Warning:</b> If the system's clock setting has been changed since the last time <a href="qtime.html#start">start</a>() or restart() was called, the result is undefined. This can happen when daylight savings time is turned on or off.</p>
-<p>See also <a href="qtime.html#start">start</a>(), <a href="qtime.html#elapsed">elapsed</a>(), and <a href="qtime-qt3.html#currentTime">currentTime</a>().</p>
+<p>See also <a href="qtime.html#start">start</a>(), <a href="qtime.html#elapsed">elapsed</a>(), and <a href="qtime.html#currentTime">currentTime</a>().</p>
 <h3 class="fn"><a name="second"></a>int QTime::second () const</h3>
 <p>Returns the second part (0 to 59) of the time.</p>
 <p>See also <a href="qtime.html#hour">hour</a>(), <a href="qtime.html#minute">minute</a>(), and <a href="qtime.html#msec">msec</a>().</p>
@@ -185,7 +185,7 @@
  t.start();
  some_lengthy_task();
  qDebug(&quot;Time elapsed: %d ms&quot;, t.elapsed());</pre>
-<p>See also <a href="qtime.html#restart">restart</a>(), <a href="qtime.html#elapsed">elapsed</a>(), and <a href="qtime-qt3.html#currentTime">currentTime</a>().</p>
+<p>See also <a href="qtime.html#restart">restart</a>(), <a href="qtime.html#elapsed">elapsed</a>(), and <a href="qtime.html#currentTime">currentTime</a>().</p>
 <h3 class="fn"><a name="toString"></a><a href="qstring.html">QString</a> QTime::toString ( const <a href="qstring.html">QString</a> &amp; <i>format</i> ) const</h3>
 <p>Returns the time as a string. The <i>format</i> parameter determines the format of the result string.</p>
 <p>These expressions may be used:</p>
@@ -204,7 +204,7 @@
 <tr valign="top" class="odd"><td>AP or A</td><td>use AM/PM display. <i>AP</i> will be replaced by either &quot;AM&quot; or &quot;PM&quot;.</td></tr>
 <tr valign="top" class="even"><td>ap or a</td><td>use am/pm display. <i>ap</i> will be replaced by either &quot;am&quot; or &quot;pm&quot;.</td></tr>
 </table></p>
-<p>All other input characters will be ignored. Any sequence of characters that are enclosed in singlequotes will be treated as text and not be used as an expression.</p>
+<p>All other input characters will be ignored. Any sequence of characters that are enclosed in singlequotes will be treated as text and not be used as an expression. Two consecutive singlequotes (&quot;''&quot;) are replaced by a singlequote in the output.</p>
 <p>Example format strings (assuming that the <a href="qtime.html">QTime</a> is 14:13:09.042)</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Format</th><th>Result</th></tr></thead>
@@ -217,7 +217,7 @@
 <h3 class="fn"><a name="toString-2"></a><a href="qstring.html">QString</a> QTime::toString ( <a href="qt.html#DateFormat-enum">Qt::DateFormat</a> <i>f</i> = Qt::TextDate ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the time as a string. Milliseconds are not included. The <i>f</i> parameter determines the format of the string.</p>
-<p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::TextDate</a>, the string format is HH:MM:SS; e.g. 1 second before midnight would be &quot;23:59:59&quot;.</p>
+<p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::TextDate</a>, the string format is HH:MM:SS; e.g&#x2e; 1 second before midnight would be &quot;23:59:59&quot;.</p>
 <p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::ISODate</a>, the string format corresponds to the ISO 8601 extended specification for representations of dates, which is also HH:MM:SS. (However, unlike that ISO 8601 specifies, dates before 1582 are handled as Julian dates, not Gregorian dates. This might change in a future version of Qt.)</p>
 <p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::LocalDate</a> or <a href="qt.html#DateFormat-enum">Qt::SystemLocaleDate</a>, the string format depends on the locale settings of the system. Identical to calling <a href="qlocale.html#system">QLocale::system</a>().toString(time, <a href="qlocale.html#FormatType-enum">QLocale::ShortFormat</a>). <i><a href="qt.html#DateFormat-enum">Qt::LocalDate</a> has been deprecated, please use <a href="qt.html#DateFormat-enum">Qt::SystemLocaleDate</a> instead.</i></p>
 <p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::LocaleDate</a>, the string format depends on the default application locale. This is the locale set with <a href="qlocale.html#setDefault">QLocale::setDefault</a>(), or the system locale if no default locale has been set. Identical to calling QLocale().toString(time, <a href="qlocale.html#FormatType-enum">QLocale::ShortFormat</a>);</p>
@@ -237,7 +237,7 @@
 <p>Returns true if this time is later than or equal to <i>t</i>; otherwise returns false.</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-38"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QTime &amp; <i>time</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-32"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QTime &amp; <i>time</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes <i>time</i> to stream <i>out</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
@@ -247,7 +247,8 @@
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="currentTime"></a>QTime QTime::currentTime ( <a href="qt.html#TimeSpec-enum">Qt::TimeSpec</a> <i>specification</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="currentTime-2"></a>QTime QTime::currentTime ( <a href="qt.html#TimeSpec-enum">Qt::TimeSpec</a> <i>specification</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the current time for the given <i>specification</i>.</p>
 <p>To replace uses of this function where the <i>specification</i> is <a href="qt.html#TimeSpec-enum">Qt::LocalTime</a>, use the currentDate() overload that takes no parameters instead; otherwise, use <a href="qdatetime.html#currentDateTime">QDateTime::currentDateTime</a>() and convert the result to a UTC measurement.</p>
 <p>For example, if you have code like</p>
@@ -261,6 +262,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

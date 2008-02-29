@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,9 +21,8 @@
 
 #include <QValueSpaceItem>
 #include <qtopianamespace.h>
-#include <qpowerstatus.h>
 #include <qwindowsystem_qws.h>
-#include "custom.h"
+#include <custom.h>
 
 #include "include/ipmc.h"
 
@@ -38,18 +37,18 @@
 #define KPBL_OFF                2
 
 
-QTOPIA_EXPORT int qpe_sysBrightnessSteps()
+QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
 {
     return 11;
 }
 
-QTOPIA_EXPORT void qpe_setBrightness(int b)
+QTOPIABASE_EXPORT void qpe_setBrightness(int b)
 {
     int lcdFd = ::open("/dev/lcdctrl", O_RDWR);
     if(lcdFd >= 0) {
-        ::ioctl(lcdFd, _LCDCTRL_IOCTL_BRIGHTNESS, 10*b/255);
+        ::ioctl(lcdFd, _LCDCTRL_IOCTL_BRIGHTNESS, 10*b/qpe_sysBrightnessSteps());
         ::close(lcdFd);
-    }  
+    }
 
     int ipmcFd = ::open("/dev/ipmc", O_RDWR);
     if (ipmcFd >= 0) {
@@ -68,47 +67,6 @@ QTOPIA_EXPORT void qpe_setBrightness(int b)
         }
 
         ::close(ipmcFd);
-    }
-}
-
-void QPowerStatusManager::getStatus()
-{
-    // ac = AC line status
-    // bs = battery status
-    // percentRemain = remaining battery life as percent
-    // secsRemain = remaining battery life in time units
-
-
-    QValueSpaceItem battery("/Accessories/Battery");
-    bool charging = battery.value("Charging", false).toBool();
-    int batteryLevel = battery.value("Charge", -1).toInt();
-
-    if (batteryLevel >= 0) {
-        ps->percentRemain = batteryLevel;
-
-        if (charging)
-            ps->ac = QPowerStatus::Online;
-        else
-            ps->ac = QPowerStatus::Offline;
-
-        if (charging && batteryLevel < 4)
-            ps->bs = QPowerStatus::Charging;
-        else if (batteryLevel == 0)
-            ps->bs = QPowerStatus::Critical;
-        else if (batteryLevel == 1)
-            ps->bs = QPowerStatus::VeryLow;
-        else if (batteryLevel == 2)
-            ps->bs = QPowerStatus::Low;
-        else if (batteryLevel == 3)
-            ps->bs = QPowerStatus::High;
-        else if (batteryLevel >= 4)
-            ps->bs = QPowerStatus::High;
-    } else {
-        ps->bs = QPowerStatus::NotPresent;
-        ps->percentRemain = -1;
-        ps->secsRemain = -1;
-        ps->ac = QPowerStatus::Unknown;
-        ps->percentAccurate = false;
     }
 }
 

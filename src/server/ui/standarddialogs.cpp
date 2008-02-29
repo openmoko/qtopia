@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,29 +20,31 @@
 ****************************************************************************/
 
 #include "standarddialogs.h"
-#include "criticalmemorypopup.h"
-#include "desktoppoweralerter.h"
 #include "shutdownimpl.h"
 #include "applicationlauncher.h"
 #include "qterminationhandlerprovider.h"
 #include "startupapps.h"
+#include <QTimer>
 #include <QContent>
 #include <QContentSet>
 #include <QPowerStatus>
-#include <QPowerStatusManager>
 #include <QtopiaServiceRequest>
+#include <QtopiaTimer>
+#include "media/mediaservicestask.h"
+#include "volumeimpl.h"
+#include <QDebug>
 
-#ifdef QTOPIA_TEST
-#include <QTestMessage>
-#include <QtopiaServerTestSlave>
+#ifndef Q_WS_X11
+#include <qtopia/private/testslaveinterface_p.h>
+#define QTOPIA_USE_TEST_SLAVE 1
 #endif
 
-static bool criticalMemoryPopup = true;
 static bool shutdownDialog = true;
 static bool defaultCrashDialog = true;
 static bool preloadCrashDialog = true;
 static bool powerAlertDialog = true;
 static bool terminationHandlerDialog = true;
+static bool volumeDialog = true;
 
 // declare StandardDialogsImpl
 class StandardDialogsImpl : public QObject
@@ -52,7 +54,6 @@ public:
     StandardDialogsImpl(QObject *parent = 0);
     virtual ~StandardDialogsImpl();
 
-    void disableCriticalMemoryPopup();
     void disablePowerAlert();
     void disableTerminationHandlerDialog();
 
@@ -62,14 +63,18 @@ private slots:
                                ApplicationTypeLauncher::TerminationReason,
                                bool filtered);
     void preloadTerminated(const QString &name);
-    void powerTimeout();
+    void powerChanged();
     void applicationTerminated(const QString &name, const QString &text,
                                const QPixmap &icon, const QString &buttonText,
                                QtopiaServiceRequest &buttonAction);
+    void volumeChanged(bool);
 
 private:
-    CriticalMemoryPopup *cmi;
-    DesktopPowerAlerter *dpa;
+    QMessageBox *ata;
+    QStringList ata_list;
+    QMessageBox *dpa;
+    QPowerStatus *powerstatus;
+    QtopiaTimer dpaTimer;
     QTerminationHandlerProvider *thp;
 };
 
@@ -77,35 +82,43 @@ private:
 static StandardDialogsImpl *sdi = 0;
 
 StandardDialogsImpl::StandardDialogsImpl(QObject *parent)
-: QObject(parent), cmi(0), dpa(0), thp(0)
+: QObject(parent), ata(0), dpa(0), thp(0)
 {
     sdi = this;
-
-    if(criticalMemoryPopup) {
-        cmi = new CriticalMemoryPopup;
-    }
 
     if(shutdownDialog) {
         QObject::connect(QtopiaServerApplication::instance(), SIGNAL(shutdownRequested()), this, SLOT(shutdownRequested()));
     }
 
+    if(volumeDialog && qtopiaTask<MediaServicesTask>()) {
+        QObject::connect(qtopiaTask<MediaServicesTask>(), SIGNAL(volumeChanged(bool)), this, SLOT(volumeChanged(bool)));
+    }
+
     if(defaultCrashDialog) {
         ApplicationLauncher *launcher = qtopiaTask<ApplicationLauncher>();
         if(launcher)
-            QObject::connect(launcher, SIGNAL(applicationTerminated(const QString &, ApplicationTypeLauncher::TerminationReason,bool)), this, SLOT(applicationTerminated(const QString &, ApplicationTypeLauncher::TerminationReason,bool)));
+            QObject::connect(launcher, SIGNAL(applicationTerminated(QString,ApplicationTypeLauncher::TerminationReason,bool)), this, SLOT(applicationTerminated(QString,ApplicationTypeLauncher::TerminationReason,bool)));
     }
 
     if(preloadCrashDialog) {
         StartupApplications *apps = qtopiaTask<StartupApplications>();
         if(apps)
-            QObject::connect(apps, SIGNAL(preloadCrashed(const QString &)), this, SLOT(preloadTerminated(const QString &)));
+            QObject::connect(apps, SIGNAL(preloadCrashed(QString)), this, SLOT(preloadTerminated(QString)));
     }
 
     if(powerAlertDialog) {
-        dpa = new DesktopPowerAlerter(0);
-        QTimer *timer = new QTimer(this);
-        QObject::connect(timer, SIGNAL(timeout()), this, SLOT(powerTimeout()));
-        timer->start(10000);
+        QSettings cfg("Trolltech", "HardwareAccessories");
+        int redisplay = 
+            cfg.value("PowerAlertDialog/DisplayPeriod", 300).toInt();
+        if(redisplay > 0) {
+            powerstatus = new QPowerStatus(0);
+            dpaTimer.setInterval(redisplay * 1000, 
+                                 QtopiaTimer::PauseWhenInactive);
+            QObject::connect(&dpaTimer, SIGNAL(timeout()), this, SLOT(powerChanged()));
+            QObject::connect(powerstatus, SIGNAL(batteryStatusChanged(QPowerStatus::BatteryStatus)), this, SLOT(powerChanged()));
+            QObject::connect(powerstatus, SIGNAL(batteryChargingChanged(bool)),
+                             this, SLOT(powerChanged()));
+        }
     }
 
     if(terminationHandlerDialog) {
@@ -116,29 +129,52 @@ StandardDialogsImpl::StandardDialogsImpl(QObject *parent)
 
 StandardDialogsImpl::~StandardDialogsImpl()
 {
-    if(dpa) { delete dpa; dpa = 0; }
-    if(cmi) { delete cmi; cmi = 0; }
+    if (ata) {
+	delete ata;
+	ata = 0;
+    }
+    if (dpa) {
+	delete dpa;
+	dpa = 0;
+    }
 }
 
-void StandardDialogsImpl::powerTimeout()
+void StandardDialogsImpl::powerChanged()
 {
-    QTimer *timer = static_cast<QTimer *>(sender());
-    Q_ASSERT(timer);
-    if(!dpa) {
-        timer->stop();
+    if(dpa) {
+        delete dpa;
+        dpa = 0;
     }
 
-    QPowerStatus status = QPowerStatusManager::readStatus();
-    if((status.batteryStatus() == QPowerStatus::VeryLow)) {
-        dpa->alert( tr( "Battery is running very low." ), 6 );
+    if ( !powerstatus )
+        return;
+
+    QString str;
+    if(!powerstatus->batteryCharging()) {
+        switch(powerstatus->batteryStatus()) {
+            case QPowerStatus::VeryLow:
+                str = tr( "Battery is running very low." );
+                break;
+            case QPowerStatus::Critical:
+                str = tr( "Battery level is critical!\n"
+                          "Please recharge now!" );
+                break;
+            default:
+                break;
+        }
     }
 
-    if(status.batteryStatus() == QPowerStatus::Critical ) {
-        dpa->alert(  tr( "Battery level is critical!\n"
-                        "Please recharge the main battery!" ), 1 );
-    }
-    if (status.backupBatteryStatus() == QPowerStatus::VeryLow ) {
-        dpa->alert( tr( "Back-up battery is very low.\nPlease charge the back-up battery." ), 3 );
+    if(!str.isEmpty()) {
+        dpa = new QMessageBox( tr("Battery Status"), tr("Low Battery"),
+                               QMessageBox::Critical,
+                               QMessageBox::Ok | QMessageBox::Default,
+                               QMessageBox::NoButton, QMessageBox::NoButton,
+                               0 );
+        dpa->setText("<qt>" + str + "</qt>");
+        dpaTimer.start();
+        dpa->show();
+    } else {
+        dpaTimer.stop();
     }
 }
 
@@ -151,15 +187,14 @@ void StandardDialogsImpl::applicationTerminated(
     if( !text.isEmpty() ) {
         bool ba = !buttonAction.isNull() && !buttonText.isEmpty();
 
-    QString error_title = tr("Application terminated");
+        QString error_title = tr("Application terminated");
 
-#ifdef QTOPIA_TEST
-        QtopiaServerApplication *a = (QtopiaServerApplication*)qApp;
-        if (a) {
-            QTestMessage msg("application_terminated");
-            msg["title"] = error_title;
-            msg["text"] = text;
-            a->m_serverSlave->postMessage( msg );
+#ifdef QTOPIA_USE_TEST_SLAVE
+        if (QtopiaApplication::instance()->testSlave()) {
+            QVariantMap map;
+            map["title"] = error_title;
+            map["text"] = text;
+            QtopiaApplication::instance()->testSlave()->postMessage("application_terminated", map);
         }
 #endif
 
@@ -184,12 +219,9 @@ void StandardDialogsImpl::disableTerminationHandlerDialog()
 
 void StandardDialogsImpl::disablePowerAlert()
 {
+    if(powerstatus) { delete powerstatus; powerstatus = 0; }
+    dpaTimer.stop();
     if(dpa) { delete dpa; dpa = 0; }
-}
-
-void StandardDialogsImpl::disableCriticalMemoryPopup()
-{
-    if(cmi) { delete cmi; cmi = 0; }
 }
 
 void StandardDialogsImpl::shutdownRequested()
@@ -203,58 +235,92 @@ void StandardDialogsImpl::shutdownRequested()
     }
 }
 
+void StandardDialogsImpl::volumeChanged(bool up)
+{
+    if (volumeDialog && qtopiaTask<MediaServicesTask>()) {
+        static VolumeDialogImpl *vd = 0;
+        if ( !vd ) {
+            vd = new VolumeDialogImpl(0, Qt::Tool| Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+        }
+        vd->setVolume(up);
+        vd->show();
+    }
+}
+
+/*!
+  \internal
+  Raise the "Application terminated" message in an information
+  message box. Don't raise it if the application terminated
+  normally or because it was killed.
+ */
 void StandardDialogsImpl::applicationTerminated(const QString &name,
         ApplicationTypeLauncher::TerminationReason reason,
         bool filtered)
 {
-    if (ApplicationTypeLauncher::Normal == reason || 
-        ApplicationTypeLauncher::Killed == reason ||
-        !defaultCrashDialog || filtered)
+    if (ApplicationTypeLauncher::Normal == reason ||
+	ApplicationTypeLauncher::Killed == reason ||
+	!defaultCrashDialog || filtered)
         return;
 
-    QContentFilter filter(QContent::Application);
-    QContentSet set(filter);
-    QContent app = set.findExecutable(name);
-    if(app.id() == QContent::InvalidId || !app.isValid()) return;
+    QContent app(name,false);
+    if(app.isNull()) return;
     QString appname = Qtopia::dehyphenate(app.name());
 
-    QString error_title = tr("Application terminated");
-    QString error_details = tr("<qt><b>%1</b> was terminated due to application error.</qt>").arg(appname);
+    if ( !ata || !ata->isVisible() )
+        ata_list.clear();
 
-#ifdef QTOPIA_TEST
-        QtopiaServerApplication *a = (QtopiaServerApplication*)qApp;
-        if (a) {
-            QTestMessage msg("application_terminated");
-            msg["title"] = error_title;
-            msg["text"] = error_details;
-            a->m_serverSlave->postMessage( msg );
-        }
+#ifndef QT_BUG_QMessageBoxSetTextNoUpdate
+    delete ata;
+    ata = 0;
 #endif
 
-    QMessageBox::information(0, error_title, error_details);
+    if ( !ata )
+        ata = new QMessageBox(QString(), QString(), QMessageBox::Critical, QMessageBox::Ok | QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
+    QString error_title;
+    QString error_details;
+    if ( !ata_list.contains(appname) )
+        ata_list.append(appname);
+    QString l = ata_list.join(", ");
+    if ( ata_list.count() == 1 ) {
+        error_title = tr("Application terminated");
+        error_details = tr("<qt><b>%1</b> was terminated due to application error.</qt>").arg(l);
+    } else {
+        error_title = tr("Applications terminated");
+        error_details = tr("<qt><b>%1</b> were terminated due to application errors.</qt>").arg(l);
+    }
+
+#ifdef QTOPIA_USE_TEST_SLAVE
+    if (QtopiaApplication::instance()->testSlave()) {
+        QVariantMap map;
+        map["title"] = error_title;
+        map["text"] = error_details;
+        QtopiaApplication::instance()->testSlave()->postMessage("application_terminated", map);
+    }
+#endif
+
+    ata->setWindowTitle(error_title);
+    ata->setText(error_details);
+    ata->show();
 }
 
 void StandardDialogsImpl::preloadTerminated(const QString &name)
 {
     if(!preloadCrashDialog) return;
 
-    QContentFilter filter(QContent::Application);
-    QContentSet set(filter);
-    QContent app = set.findExecutable(name);
-    if(!app.isValid()) return;
+    QContent app(name,false);
+    if(app.isNull()) return;
     QString appname = Qtopia::dehyphenate(app.name());
 
     QString error_title = tr("Application terminated");
     QString error_details = tr("<qt><b>%1</b> was terminated due to application error.  (Fast loading has been disabled for this application. Tap and hold the application icon to reenable it.)</qt>").arg(appname);
 
-#ifdef QTOPIA_TEST
-        QtopiaServerApplication *a = (QtopiaServerApplication*)qApp;
-        if (a) {
-            QTestMessage msg("application_terminated");
-            msg["title"] = error_title;
-            msg["text"] = error_details;
-            a->m_serverSlave->postMessage( msg );
-        }
+#ifdef QTOPIA_USE_TEST_SLAVE
+    if (QtopiaApplication::instance()->testSlave()) {
+        QVariantMap map;
+        map["title"] = error_title;
+        map["text"] = error_details;
+        QtopiaApplication::instance()->testSlave()->postMessage("application_terminated", map);
+    }
 #endif
 
     QMessageBox::information(0, error_title, error_details);
@@ -284,23 +350,6 @@ QTOPIA_TASK(StandardDialogs, StandardDialogsImpl);
  */
 
 /*!
-  The critical memory popup dialog appears whenever the memory available to the
-  device becomes dangerously low.  The default implementation is a standard
-  QMessageBox alerting the user to close any unnecessary applications.
-
-  The dialog appears 20 seconds after the MemoryMonitor::memoryState() becomes
-  MemoryMonitor::MemVeryLow.  The 20 second delay is an attempt to prevent
-  the dialog from exacerbating the situation.
-
-  Invoking this method will disable the default critical memory popup.
- */
-void StandardDialogs::disableCriticalMemoryPopup()
-{
-    criticalMemoryPopup = false;
-    if(sdi) sdi->disableCriticalMemoryPopup();
-}
-
-/*!
   The shutdown dialog allows users to terminate Qtopia, restart Qtopia, shutdown
   the system or reboot the system.  The default implementation is a simple
   dialog allowing the user to select from one of these four options.
@@ -315,6 +364,17 @@ void StandardDialogs::disableCriticalMemoryPopup()
 void StandardDialogs::disableShutdownDialog()
 {
     shutdownDialog = false;
+}
+
+/*!
+  The volume dialog provides users the feedback on volume changes.
+
+  The volume dialog appears in response
+  to the MediaServicesTask::volumeChanged() signal.
+*/
+void StandardDialogs::disableVolumeDialog()
+{
+    volumeDialog = false;
 }
 
 /*!
@@ -354,17 +414,16 @@ void StandardDialogs::disablePreloadCrashDialog()
   default implementation is a standard QMessageBox alerting the user to the
   low power situation.
 
-  The dialog appears:
-  \list 1
-  \i Immediately when the QPowerStatus::batteryStatus() is reported as Critical.
-  \i 30 seconds after the QPowerStatus::backupBatteryStatus() is reported as
-     VeryLow.
-  \i 60 seconds after the QPowerStatus::batteryStatus() is reported as VeryLow.
-  \endlist
-
+  The dialog appears when the battery level is very low or critical.
   The dialog will be redisplayed every five minutes until the power state
-  changes or a higher priority (as listed) case occurs.  The default
-  implementation uses the QPowerStatusManager to determine this information.
+  improves or the device is placed on a charger.  The default implementation 
+  uses the QPowerStatus to determine this information.
+
+  The period at which the power alert dialog redisplays can be configured 
+  by setting the \c {PowerAlertDialog/DisplayPeriod} value to the period in
+  seconds in the \c {Trolltech\HardwareAccessories} configuration file.  By default
+  this value is 300 seconds (5 minutes).  Setting it to 0 disables the power
+  alert dialog.
 
   Invoking this method will disable the power alert dialog.
 */

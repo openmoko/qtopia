@@ -19,7 +19,7 @@ for(s,SUBDIRS) {
                 break()
             }
         }
-        !equals(foundroot,1):error(Could not find directory $$s in any of the project roots)
+        !equals(foundroot,1):error(Could not find directory $$s in any of the project roots (looking for $$tail($$s).pro))
     }
     !exists($$file):error(Missing $$file)
     cachedinfo($$file,QTOPIA_DEPENDS,CONFIG)

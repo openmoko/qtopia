@@ -42,6 +42,7 @@
 <li><div class="fn"/>virtual int <b><a href="themeitem.html#rtti">rtti</a></b> () const</li>
 <li><div class="fn"/>virtual void <b><a href="themeitem.html#setActive">setActive</a></b> ( bool <i>active</i> )</li>
 <li><div class="fn"/>virtual void <b><a href="themeitem.html#setGeometry">setGeometry</a></b> ( const QRect &amp; <i>rect</i> )</li>
+<li><div class="fn"/>void <b><a href="themeitem.html#setVisible">setVisible</a></b> ( bool <i>visible</i> )</li>
 <li><div class="fn"/>ThemeItem::State <b><a href="themeitem.html#state">state</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="themeitem.html#transient">transient</a></b> () const</li>
 <li><div class="fn"/>ThemedView * <b><a href="themeitem.html#view">view</a></b> () const</li>
@@ -62,7 +63,6 @@
 <li><div class="fn"/>virtual void <b><a href="themeitem.html#paint">paint</a></b> ( QPainter * <i>painter</i>, const QRect &amp; <i>rect</i> )</li>
 <li><div class="fn"/>void <b><a href="themeitem.html#setAttribute">setAttribute</a></b> ( const QString &amp; <i>key</i>, const int &amp; <i>value</i>, ThemeItem::State <i>state</i> = ThemeItem::Default )</li>
 <li><div class="fn"/>void <b><a href="themeitem.html#setAttribute-2">setAttribute</a></b> ( const QString &amp; <i>key</i>, const QString &amp; <i>value</i>, ThemeItem::State <i>state</i> = ThemeItem::Default )</li>
-<li><div class="fn"/>void <b><a href="themeitem.html#setVisible">setVisible</a></b> ( bool <i>visible</i> )</li>
 <li><div class="fn"/>virtual void <b><a href="themeitem.html#stateChanged">stateChanged</a></b> ( const ThemeItem::State &amp; <i>state</i> )</li>
 <li><div class="fn"/>QString <b><a href="themeitem.html#strAttribute">strAttribute</a></b> ( const QString &amp; <i>key</i>, ThemeItem::State <i>state</i> = ThemeItem::Default )</li>
 <li><div class="fn"/>QString <b><a href="themeitem.html#stripStringExpression">stripStringExpression</a></b> ( const QString &amp; <i>str</i> )</li>
@@ -155,7 +155,7 @@
 <h3 class="fn"><a name="setGeometry"></a>void ThemeItem::setGeometry ( const <a href="qrect.html">QRect</a> &amp; <i>rect</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sets this item's run-time geometry to <i>rect</i>. This controls the position and size of the item in the <a href="themedview.html">ThemedView</a>.</p>
 <p>See also <a href="themeitem.html#geometry">geometry</a>().</p>
-<h3 class="fn"><a name="setVisible"></a>void ThemeItem::setVisible ( bool <i>visible</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="setVisible"></a>void ThemeItem::setVisible ( bool <i>visible</i> )</h3>
 <p>Sets this item to be visible if <i>visible</i> is true, otherwise hides the item.</p>
 <p>See also <a href="themeitem.html#isVisible">isVisible</a>().</p>
 <h3 class="fn"><a name="state"></a><a href="themeitem.html#State-enum">ThemeItem::State</a> ThemeItem::state () const</h3>
@@ -183,6 +183,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

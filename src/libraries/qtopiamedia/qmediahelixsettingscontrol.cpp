@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,7 +19,7 @@
 **
 ****************************************************************************/
 
-#include <qabstractipcinterface.h>
+#include <QAbstractIpcInterface>
 
 #include "qmediahelixsettingscontrol.h"
 
@@ -29,8 +29,10 @@ class QMediaHelixSettingsControlPrivate : public QAbstractIpcInterface
     Q_OBJECT
 
 public:
-    QMediaHelixSettingsControlPrivate(QString const& id):
-        QAbstractIpcInterface("/MediaServer", QMediaHelixSettingsControl::name(), id)
+    QMediaHelixSettingsControlPrivate():
+        QAbstractIpcInterface("/Media/Control/Helix",
+                              QMediaHelixSettingsControl::name(),
+                              "HelixGlobalSettings")
     {
     }
 
@@ -47,7 +49,7 @@ public:
 public slots:
     void setOption(QString const& name, QVariant const& value)
     {
-        invoke(SLOT(setOption(QString, QVariant)), name, value);
+        invoke(SLOT(setOption(QString,QVariant)), name, value);
     }
 
 signals:
@@ -96,10 +98,10 @@ QMediaHelixSettingsControl::QMediaHelixSettingsControl
 ):
     QObject(parent)
 {
-    d = new QMediaHelixSettingsControlPrivate("HelixGlobalSettings");
+    d = new QMediaHelixSettingsControlPrivate;
 
-    connect(d, SIGNAL(optionChanged(QString, QVariant)),
-            this, SIGNAL(optionChanged(QString, QVariant)));
+    connect(d, SIGNAL(optionChanged(QString,QVariant)),
+            this, SIGNAL(optionChanged(QString,QVariant)));
 }
 
 /*!
@@ -149,7 +151,7 @@ QVariant QMediaHelixSettingsControl::optionValue(QString const& name)
 
 QString QMediaHelixSettingsControl::name()
 {
-    return QLatin1String("MediaHelixSettingsControl");
+    return QLatin1String("Settings");
 }
 
 /*!

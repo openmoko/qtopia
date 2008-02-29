@@ -29,7 +29,7 @@
 <li><div class="fn"/>virtual <b><a href="builtinapplicationlauncher.html#dtor.BuiltinApplicationLauncher">~BuiltinApplicationLauncher</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
+<li><div class="fn"/>5 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="applicationipcrouter-routedestination.html#public-functions">ApplicationIpcRouter::RouteDestination</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
@@ -60,10 +60,11 @@
 <tr valign="top" class="even"><td>Interfaces</td><td><a href="applicationtypelauncher.html">ApplicationTypeLauncher</a></td></tr>
 <tr valign="top" class="odd"><td>Services</td><td>None</td></tr>
 </table></p>
-<p>The BuiltinApplicationLauncher class provides the ApplicationLauncherType implementation for simple applications compiled into the Qtopia Server - known as builtin applications.</p>
+<p>The BuiltinApplicationLauncher class provides the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> implementation for simple applications compiled into the Qtopia Server - known as builtin applications.</p>
 <p>A builtin application must consist of a single, toplevel widget. Generally builtins do not implement services, but they may. If multiple builtins implement the same service, or the Qtopia Server and a builtin implements the same service, the behaviour is undefined.</p>
 <p>Adding a builtin application is a simple case of linking it into the Qtopia Server, and adding a <a href="builtinapplicationlauncher.html#QTOPIA_SIMPLE_BUILTIN">QTOPIA_SIMPLE_BUILTIN</a>() macro to your code. The <a href="builtinapplicationlauncher.html#QTOPIA_SIMPLE_BUILTIN">QTOPIA_SIMPLE_BUILTIN</a>() macro registers the builtin application with the BuiltinApplicationLauncher class. The macro takes the application name, and a simple static function that &quot;launches&quot; the application and returns a <a href="qwidget.html">QWidget</a> pointer as paramters.</p>
 <p><i>Note:</i> Builtins may not currently implement services. This functionality is planned for future versions of Qtopia.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="BuiltinFunc-typedef"></a>typedef BuiltinApplicationLauncher::BuiltinFunc</h3>
@@ -92,6 +93,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

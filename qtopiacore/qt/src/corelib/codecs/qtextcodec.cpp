@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -328,6 +343,7 @@ static QTextCodec * ru_RU_hack(const char * i) {
 
 #endif
 
+#ifndef Q_OS_WIN32
 static QTextCodec *checkForCodec(const char *name) {
     QTextCodec *c = QTextCodec::codecForName(name);
     if (!c) {
@@ -339,6 +355,7 @@ static QTextCodec *checkForCodec(const char *name) {
     }
     return c;
 }
+#endif
 
 /* the next two functions are implicitely thread safe,
    as they are only called by setup() which uses a mutex.
@@ -473,8 +490,7 @@ static void setupLocaleMapper()
 static void setup()
 {
 #ifndef QT_NO_THREAD
-    QMutexLocker locker(qt_global_mutexpool ?
-                        qt_global_mutexpool->get(&all) : 0);
+    QMutexLocker locker(QMutexPool::globalInstanceGet(&all));
 #endif
 
     if (all)
@@ -1031,7 +1047,6 @@ QString QTextCodec::toUnicode(const QByteArray& a) const
     return convertToUnicode(a.constData(), a.length(), 0);
 }
 
-
 /*!
     Returns true if the Unicode character \a ch can be fully encoded
     with this codec; otherwise returns false.
@@ -1219,6 +1234,30 @@ QString QTextDecoder::toUnicode(const char *chars, int len)
     return c->toUnicode(chars, len, &state);
 }
 
+
+/*! \overload
+
+    The converted string is returned in \a target.
+ */
+void QTextDecoder::toUnicode(QString *target, const char *chars, int len)
+{
+    Q_ASSERT(target);
+    switch (c->mibEnum()) {
+    case 106: // utf8
+        static_cast<const QUtf8Codec*>(c)->convertToUnicode(target, chars, len, &state);
+        break;
+    case 4: { // latin1
+        target->resize(len);
+        ushort *data = (ushort*)target->data();
+        for (int i = len; i >=0; --i)
+            data[i] = (uchar) chars[i];
+    } break;
+    default:
+        *target = c->toUnicode(chars, len, &state);
+    }
+}
+
+
 /*!
     \overload
 
@@ -1334,6 +1373,17 @@ QTextCodec *QTextCodec::codecForHtml(const QByteArray &ba)
         c = QTextCodec::codecForMib(mib);
 
     return c;
+}
+
+/*! \internal
+    \since 4.3
+    Determines whether the decoder encountered a failure while decoding the input. If
+    an error was encountered, the produced result is undefined, and gets converted as according
+    to the conversion flags.
+ */
+bool QTextDecoder::hasFailure() const
+{
+    return state.invalidChars != 0;
 }
 
 /*!

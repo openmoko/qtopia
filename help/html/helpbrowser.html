@@ -7,19 +7,22 @@
    <h3>Help Browser</h3>
 <!--#endif -->
 <p><img src=":image/helpbrowser/HelpBrowser"></p>
-<p>You're using it! The Help Browser is a hypertext help system that works in a similar way to a web browser. Hypertext links appear in colored underlined text.</p>
+<p>
+<!--#if expr="$USERGUIDE"-->
+<!--#else -->
+You're using it!
+<!--#endif -->
+The Help Browser is a hypertext help system that works in a similar way to a web browser.
+Hypertext links appear in colored underlined text.</p>
 <p><b>To get help within an application:</b></p>
-<!--#if expr="$PDASTYLE"-->
 <ul>
-<li>Tap <img src=":image/qpe/pda/HelpButton" width="16" height="16"> </img> on the title bar.</li>
+<li>Press <img src=":icon/options"><b>Options</b> and select <b>Help</b> by highlighting (use <img src=":image/help/dpad">) it and pressing <img src=":icon/select"><b>Select</b>.</li>
 </ul>
-<p>Some applications provide brief descriptions for different areas on the screen. Tap and hold <img src=":image/qpe/pda/HelpButton" width="16" height="16"> </img> in the title bar until <b>What's this...</b> is displayed, then tap an area of the screen.</p>
-<!--#endif-->
-<!--#if expr="$PHONESTYLE"-->
-<ul>
-<li>Press <img src=":icon/options"> </img> and select <b>Help</b> by highlighting (use <img src=":image/help/dpad">) it and pressing <img src=":icon/select">.</li>
-</ul>
-<!--#endif-->
+<p><b>History</b></p>
+Press left on <img src=":image/help/dpad"> to go back to previous pages and right to then go forward.
+<p><b>Bookmarks</b></p>
+You can add bookmarks to pages you find particularly useful by selecting <b>Add Bookmark</b> from the options menu.
+Select <b>Bookmarks</b> from that menu to view/change stored bookmarks.
 <p>See Also: <a href="help.html">Help</a> </p>
 </body>
 </html>

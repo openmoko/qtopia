@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -45,6 +60,26 @@
 #endif
 #include "private/qrasterdefs_p.h"
 
+#ifdef Q_WS_QWS
+#include "QtGui/qscreen_qws.h"
+#define Q_GUI_QWS_EXPORT Q_GUI_EXPORT
+#else
+#define Q_GUI_QWS_EXPORT
+#endif
+
+#define QT_ROTATION_CACHEDREAD 1
+#define QT_ROTATION_CACHEDWRITE 2
+#define QT_ROTATION_PACKING 3
+#define QT_ROTATION_TILED 4
+
+#ifndef QT_ROTATION_ALGORITHM
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+#define QT_ROTATION_ALGORITHM QT_ROTATION_TILED
+#else
+#define QT_ROTATION_ALGORITHM QT_ROTATION_CACHEDREAD
+#endif
+#endif
+
 /*******************************************************************************
  * QSpan
  *
@@ -60,32 +95,41 @@ struct RadialGradientData;
 struct ConicalGradientData;
 struct QSpanData;
 class QGradient;
+class QRasterBuffer;
 
 typedef QT_FT_SpanFunc ProcessSpans;
+typedef void (*BitmapBlitFunc)(QRasterBuffer *rasterBuffer,
+                               int x, int y, quint32 color,
+                               const uchar *bitmap,
+                               int mapWidth, int mapHeight, int mapStride);
+typedef void (*AlphamapBlitFunc)(QRasterBuffer *rasterBuffer,
+                                 int x, int y, quint32 color,
+                                 const uchar *bitmap,
+                                 int mapWidth, int mapHeight, int mapStride);
+typedef void (*RectFillFunc)(QRasterBuffer *rasterBuffer,
+                             int x, int y, int width, int height,
+                             quint32 color);
 
 struct DrawHelper {
     ProcessSpans blendColor;
     ProcessSpans blendGradient;
+    BitmapBlitFunc bitmapBlit;
+    AlphamapBlitFunc alphamapBlit;
+    RectFillFunc fillRect;
 };
 
 extern DrawHelper qDrawHelper[QImage::NImageFormats];
 void qBlendTexture(int count, const QSpan *spans, void *userData);
+#ifdef Q_WS_QWS
+extern DrawHelper qDrawHelperCallback[QImage::NImageFormats];
+void qBlendTextureCallback(int count, const QSpan *spans, void *userData);
+#endif
 
 typedef void QT_FASTCALL (*CompositionFunction)(uint *dest, const uint *src, int length, uint const_alpha);
 typedef void QT_FASTCALL (*CompositionFunctionSolid)(uint *dest, int length, uint color, uint const_alpha);
 
-#ifdef QT_HAVE_SSE
-extern const CompositionFunction qt_functionForMode_SSE[];
-extern const CompositionFunctionSolid qt_functionForModeSolid_SSE[];
-#endif
-
-
 void qInitDrawhelperAsm();
-#ifdef Q_WS_QWS
-void qResetDrawhelper();
-#endif
 
-class QRasterBuffer;
 class QRasterPaintEngine;
 
 struct SolidData
@@ -137,6 +181,13 @@ struct GradientData
         ConicalGradientData conical;
     };
 
+    // need to keep track of these as the same gradient might be used for several objects
+    union {
+        LinearGradientData unresolvedLinear;
+        RadialGradientData unresolvedRadial;
+        ConicalGradientData unresolvedConical;
+    };
+
 #ifdef Q_WS_QWS
 #define GRADIENT_STOPTABLE_SIZE 256
 #else
@@ -146,6 +197,7 @@ struct GradientData
     uint* colorTable; //[GRADIENT_STOPTABLE_SIZE];
 
     uint alphaColor : 1;
+    uint needsResolving : 1;
 };
 
 struct TextureData
@@ -174,7 +226,10 @@ struct QSpanData
 #endif
     ProcessSpans blend;
     ProcessSpans unclipped_blend;
-    qreal m11, m12, m21, m22, dx, dy;   // inverse xform matrix
+    BitmapBlitFunc bitmapBlit;
+    AlphamapBlitFunc alphamapBlit;
+    RectFillFunc fillRect;
+    qreal m11, m12, m13, m21, m22, m23, dx, dy;   // inverse xform matrix
     enum Type {
         None,
         Solid,
@@ -193,50 +248,227 @@ struct QSpanData
     };
     void init(QRasterBuffer *rb, QRasterPaintEngine *pe = 0);
     void setup(const QBrush &brush, int alpha);
-    void setupMatrix(const QMatrix &matrix, int txop, int bilinear);
+    void setupMatrix(const QTransform &matrix, int bilinear);
     void initTexture(const QImage *image, int alpha, TextureData::Type = TextureData::Plain);
     void adjustSpanMethods();
 };
 
-#define QT_MEMFILL_UINT(dest, length, color)\
-do {                                        \
-    /* Duff's device */                     \
-    uint *_d = (dest);                       \
-    uint _c = (color);                       \
-    register int n = ((length) + 7) / 8;    \
-    switch ((length) & 0x07)                \
-    {                                       \
-    case 0: do { *_d++ = _c;                  \
-    case 7:      *_d++ = _c;                  \
-    case 6:      *_d++ = _c;                  \
-    case 5:      *_d++ = _c;                  \
-    case 4:      *_d++ = _c;                  \
-    case 3:      *_d++ = _c;                  \
-    case 2:      *_d++ = _c;                  \
-    case 1:      *_d++ = _c;                  \
-    } while (--n > 0);                      \
-    }                                       \
-} while (0)
+template <class DST, class SRC>
+inline DST qt_colorConvert(SRC color, DST dummy)
+{
+    Q_UNUSED(dummy);
+    return color;
+}
+
+
+template <>
+inline quint32 qt_colorConvert(quint16 color, quint32 dummy)
+{
+    Q_UNUSED(dummy);
+    const int r = (color & 0xf800);
+    const int g = (color & 0x07e0);
+    const int b = (color & 0x001f);
+    const int tr = (r >> 8) | (r >> 13);
+    const int tg = (g >> 3) | (g >> 9);
+    const int tb = (b << 3) | (b >> 2);
+
+    return qRgb(tr, tg, tb);
+}
+
+template <>
+inline quint16 qt_colorConvert(quint32 color, quint16 dummy)
+{
+    Q_UNUSED(dummy);
+    const int r = qRed(color) << 8;
+    const int g = qGreen(color) << 3;
+    const int b = qBlue(color) >> 3;
+
+    return (r & 0xf800) | (g & 0x07e0)| (b & 0x001f);
+}
+
+#ifdef QT_QWS_DEPTH_8
+template <>
+inline quint8 qt_colorConvert(quint32 color, quint8 dummy)
+{
+    Q_UNUSED(dummy);
+
+    uchar r = ((qRed(color) & 0xf8) + 0x19) / 0x33;
+    uchar g = ((qGreen(color) &0xf8) + 0x19) / 0x33;
+    uchar b = ((qBlue(color) &0xf8) + 0x19) / 0x33;
+
+    return r*6*6 + g*6 + b;
+}
+
+template <>
+inline quint8 qt_colorConvert(quint16 color, quint8 dummy)
+{
+    Q_UNUSED(dummy);
+
+    uchar r = (color & 0xf800) >> (11-3);
+    uchar g = (color & 0x07c0) >> (6-3);
+    uchar b = (color & 0x001f) << 3;
+
+    uchar tr = (r + 0x19) / 0x33;
+    uchar tg = (g + 0x19) / 0x33;
+    uchar tb = (b + 0x19) / 0x33;
+
+    return tr*6*6 + tg*6 + tb;
+}
+#endif // QT_QWS_DEPTH_8
+
+#ifdef QT_QWS_DEPTH_24
+
+// hw: endianess??
+class quint24
+{
+public:
+    inline quint24(quint32 v)
+    {
+        data[0] = qBlue(v);
+        data[1] = qGreen(v);
+        data[2] = qRed(v);
+    }
+
+    inline operator quint32 ()
+    {
+        return qRgb(data[2], data[1], data[0]);
+    }
+
+private:
+    uchar data[3];
+} Q_PACKED;
+
+template <>
+inline quint24 qt_colorConvert(quint32 color, quint24 dummy)
+{
+    Q_UNUSED(dummy);
+    return quint24(color);
+}
+
+#endif // QT_QWS_DEPTH_24
+
+#ifdef QT_QWS_DEPTH_18
+
+// hw: endianess??
+class quint18
+{
+public:
+    inline quint18(quint32 v)
+    {
+        uchar b = qBlue(v);
+        uchar g = qGreen(v);
+        uchar r = qRed(v);
+        uint p = (b >> 2) | ((g >> 2) << 6) | ((r >> 2) << 12);
+        data[0] = qBlue(p);
+        data[1] = qGreen(p);
+        data[2] = qRed(p);
+    }
+
+    inline operator quint32 ()
+    {
+        const uchar r = (data[2] << 6) | ((data[1] & 0xf0) >> 2) | (data[2] & 0x3);
+        const uchar g = (data[1] << 4) | ((data[0] & 0xc0) >> 4) | ((data[1] & 0x0f) >> 2);
+        const uchar b = (data[0] << 2) | ((data[0] & 0x3f) >> 4);
+        return qRgb(r, g, b);
+    }
+
+private:
+    uchar data[3];
+} Q_PACKED;
+
+template <>
+inline quint18 qt_colorConvert(quint32 color, quint18 dummy)
+{
+    Q_UNUSED(dummy);
+    return quint18(color);
+}
+
+#endif // QT_QWS_DEPTH_18
+
+template <class T>
+void qt_memfill(T *dest, T value, int count);
+
+template<> inline void qt_memfill(quint32 *dest, quint32 color, int count)
+{
+    extern void (*qt_memfill32)(quint32 *dest, quint32 value, int count);
+    qt_memfill32(dest, color, count);
+}
+
+template<> inline void qt_memfill(quint16 *dest, quint16 color, int count)
+{
+    extern void (*qt_memfill16)(quint16 *dest, quint16 value, int count);
+    qt_memfill16(dest, color, count);
+}
+
+template <class T>
+inline void qt_memfill(T *dest, T value, int count)
+{
+    int n = (count + 7) / 8;
+    switch (count & 0x07)
+    {
+    case 0: do { *dest++ = value;
+    case 7:      *dest++ = value;
+    case 6:      *dest++ = value;
+    case 5:      *dest++ = value;
+    case 4:      *dest++ = value;
+    case 3:      *dest++ = value;
+    case 2:      *dest++ = value;
+    case 1:      *dest++ = value;
+    } while (--n > 0);
+    }
+}
+
+template <class T>
+inline void qt_rectfill(T *dest, T value,
+                        int x, int y, int width, int height, int stride)
+{
+    stride /= sizeof(T);
+    dest += y * stride + x;
+    for (int j = 0; j < height; ++j) {
+        qt_memfill(dest, value, width);
+        dest += stride;
+    }
+}
+
+template <class DST, class SRC>
+inline void qt_memconvert(DST *dest, const SRC *src, int count)
+{
+    /* Duff's device */
+    int n = (count + 7) / 8;
+    switch (count & 0x07)
+    {
+    case 0: do { *dest++ = qt_colorConvert<DST, SRC>(*src++, 0);
+    case 7:      *dest++ = qt_colorConvert<DST, SRC>(*src++, 0);
+    case 6:      *dest++ = qt_colorConvert<DST, SRC>(*src++, 0);
+    case 5:      *dest++ = qt_colorConvert<DST, SRC>(*src++, 0);
+    case 4:      *dest++ = qt_colorConvert<DST, SRC>(*src++, 0);
+    case 3:      *dest++ = qt_colorConvert<DST, SRC>(*src++, 0);
+    case 2:      *dest++ = qt_colorConvert<DST, SRC>(*src++, 0);
+    case 1:      *dest++ = qt_colorConvert<DST, SRC>(*src++, 0);
+    } while (--n > 0);
+    }
+}
+
+template <class DST, class SRC>
+void qt_rectconvert(DST *dest, const SRC *src,
+                    int x, int y, int width, int height,
+                    int dstStride, int srcStride)
+{
+    dstStride /= sizeof(DST);
+    srcStride /= sizeof(SRC);
+    dest += y * dstStride + x;
+    for (int i = 0; i < height; ++i) {
+        qt_memconvert<DST,SRC>(dest, src, width);
+        dest += dstStride;
+        src += srcStride;
+    }
+}
+
+#define QT_MEMFILL_UINT(dest, length, color)            \
+    qt_memfill<quint32>(dest, color, length);
 
 #define QT_MEMFILL_USHORT(dest, length, color) \
-do {                                           \
-    /* Duff's device */                        \
-    ushort *_d = (dest);                        \
-    ushort _c = (color);                        \
-    register int n = ((length) + 7) / 8;       \
-    switch ((length) & 0x07)                   \
-    {                                          \
-    case 0: do { *_d++ = _c;                     \
-    case 7:      *_d++ = _c;                     \
-    case 6:      *_d++ = _c;                     \
-    case 5:      *_d++ = _c;                     \
-    case 4:      *_d++ = _c;                     \
-    case 3:      *_d++ = _c;                     \
-    case 2:      *_d++ = _c;                     \
-    case 1:      *_d++ = _c;                     \
-    } while (--n > 0);                         \
-    }                                          \
-} while (0)
+    qt_memfill<quint16>(dest, color, length);
 
 #define QT_MEMCPY_REV_UINT(dest, src, length) \
 do {                                          \
@@ -278,7 +510,26 @@ do {                                          \
     }                                         \
 } while (0)
 
+#define QT_DECL_MEMROTATE(srctype, desttype)                            \
+    void Q_GUI_QWS_EXPORT qt_memrotate90(const srctype*, int, int, int, desttype*, int); \
+    void Q_GUI_QWS_EXPORT qt_memrotate180(const srctype*, int, int, int, desttype*, int); \
+    void Q_GUI_QWS_EXPORT qt_memrotate270(const srctype*, int, int, int, desttype*, int)
 
+QT_DECL_MEMROTATE(quint32, quint32);
+QT_DECL_MEMROTATE(quint32, quint16);
+QT_DECL_MEMROTATE(quint16, quint32);
+QT_DECL_MEMROTATE(quint16, quint16);
+#ifdef QT_QWS_DEPTH_24
+QT_DECL_MEMROTATE(quint32, quint24);
+#endif
+#ifdef QT_QWS_DEPTH_18
+QT_DECL_MEMROTATE(quint32, quint18);
+#endif
+QT_DECL_MEMROTATE(quint32, quint8);
+QT_DECL_MEMROTATE(quint16, quint8);
+QT_DECL_MEMROTATE(quint8, quint8);
+
+#undef QT_DECL_MEMROTATE
 
 static inline int qt_div_255(int x) { return (x + (x>>8) + 0x80) >> 8; }
 

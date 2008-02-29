@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,11 +30,9 @@
 #include <QAction>
 #include <QPainter>
 #include <QMenu>
-#include <QToolBar>
 #include <QMessageBox>
 #include <QStringList>
 #include <QApplication>
-#include <QToolButton>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QHeaderView>
@@ -86,23 +84,13 @@ FifteenMainWindow::FifteenMainWindow(QWidget *parent, Qt::WFlags fl)
 
     connect( table, SIGNAL(updateMenu(bool)), this, SLOT(updateMenu(bool)) );
     updateMenu( table->useImage() );
-#ifdef QTOPIA_PHONE
+
     QMenu* menu = QSoftMenuBar::menuFor(this);
     menu->addAction( actionShuffle );
     menu->addAction( actionReset );
     menu->addAction( actionLoadImg );
     menu->addAction( actionDeleteImg );
     menu->addAction( actionShowNum );
-#else
-    QToolBar *toolbar = new QToolBar(this);
-    toolbar->setMovable(false);
-    addToolBar(toolbar);
-    toolbar->addAction( actionShuffle );
-    toolbar->addAction( actionReset );
-    toolbar->addAction( actionLoadImg );
-    toolbar->addAction( actionDeleteImg );
-    toolbar->addAction( actionShowNum );
-#endif
 }
 
 void FifteenMainWindow::showNumber()
@@ -206,7 +194,7 @@ void PiecesTable::loadImage()
     if (QtopiaApplication::execDialog(&sel)) {
         QContent doc = sel.selectedDocument();
         if(doc.fileKnown())
-            _imgName = doc.file();
+            _imgName = doc.fileName();
     }
     if ( _imgName.isEmpty() )
         return;
@@ -267,7 +255,7 @@ void PiecesDelegate::paint(QPainter *p, const QStyleOptionViewItem &o, const QMo
 
     // draw cell background
     if(number == 16)
-        p->setBrush( QColor( Qt::white ) );
+        p->setBrush(o.palette.window());
     else
         p->setBrush(color);
 

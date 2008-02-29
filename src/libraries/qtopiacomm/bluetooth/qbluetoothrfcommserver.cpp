@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,26 +26,23 @@
 
 #include <qbluetoothrfcommserver.h>
 #include <qbluetoothrfcommsocket.h>
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
+#include "qbluetoothnamespace_p.h"
 #include <qbluetoothaddress.h>
+#include "qbluetoothsocketengine_p.h"
+#include "qbluetoothabstractserver_p.h"
 
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <bluetooth/rfcomm.h>
-#include <fcntl.h>
-
-class QBluetoothRfcommServerPrivate
+class QBluetoothRfcommServerPrivate : public QBluetoothAbstractServerPrivate
 {
 public:
+    QBluetoothRfcommServerPrivate(QBluetoothRfcommServer *parent);
     int m_channel;
     QBluetoothAddress m_address;
     QBluetooth::SecurityOptions m_options;
 };
+
+QBluetoothRfcommServerPrivate::QBluetoothRfcommServerPrivate(QBluetoothRfcommServer *parent) : QBluetoothAbstractServerPrivate(parent)
+{
+}
 
 /*!
     \class QBluetoothRfcommServer
@@ -54,9 +51,6 @@ public:
 
     This class makes it possible to accept incoming RFCOMM connections.
     You can specify the address and the RFCOMM channel to listen on.
-
-    \bold{NOTE:} If you are implementing an OBEX based service, you
-    should use the QBluetoothObexServer instead.
 
     Call listen() to make the server listen for new connections.  The
     newConnection() signal will be emmited each time a client connects
@@ -85,9 +79,10 @@ public:
     The server is in the UnconnectedState.
 */
 QBluetoothRfcommServer::QBluetoothRfcommServer(QObject *parent)
-    : QBluetoothAbstractServer(parent)
+    : QBluetoothAbstractServer(new QBluetoothRfcommServerPrivate(this), parent)
 {
-    m_data = new QBluetoothRfcommServerPrivate();
+    SERVER_DATA(QBluetoothRfcommServer);
+
     m_data->m_channel = -1;
     m_data->m_options = 0;
 }
@@ -97,8 +92,6 @@ QBluetoothRfcommServer::QBluetoothRfcommServer(QObject *parent)
 */
 QBluetoothRfcommServer::~QBluetoothRfcommServer()
 {
-    if (m_data)
-        delete m_data;
 }
 
 /*!
@@ -113,50 +106,43 @@ QBluetoothRfcommServer::~QBluetoothRfcommServer()
 */
 bool QBluetoothRfcommServer::listen(const QBluetoothAddress &local, int channel)
 {
+    SERVER_DATA(QBluetoothRfcommServer);
+
     if (isListening()) {
         return false;
     }
 
-    int fd = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+    m_data->m_fd = m_data->m_engine->rfcommSocket();
 
-    if (fd < 0) {
-        setError(QBluetoothRfcommServer::ResourceError);
+    if (m_data->m_fd < 0) {
         return false;
     }
 
-    struct sockaddr_rc addr;
-    bdaddr_t localBdaddr;
+    m_data->m_engine->setSocketOption(m_data->m_fd,
+                                      QBluetoothSocketEngine::NonBlockingOption);
 
-    str2bdaddr(local.toString(), &localBdaddr);
-
-    memset(&addr, 0, sizeof(addr));
-    addr.rc_family = AF_BLUETOOTH;
-    memcpy(&addr.rc_bdaddr, &localBdaddr, sizeof(bdaddr_t));
-    addr.rc_channel = channel;
-
-    _q_setSecurityOptions(fd, m_data->m_options);
-
-    bool ret = initiateListen(fd, (struct sockaddr *) &addr, sizeof(addr));
-
-    if (ret) {
-        m_data->m_channel = channel;
-        m_data->m_address = local;
-
-        struct sockaddr_rc addr;
-        socklen_t len = sizeof(addr);
-        memset(&addr, 0, sizeof(addr));
-
-        if (::getsockname(fd, (struct sockaddr *) &addr, &len) == 0) {
-            bdaddr_t localBdaddr;
-            memcpy(&localBdaddr, &addr.rc_bdaddr, sizeof(bdaddr_t));
-            QString str = bdaddr2str(&localBdaddr);
-            m_data->m_address = QBluetoothAddress(str);
-            m_data->m_channel = channel;
-        }
-
+    if (!m_data->m_engine->rfcommBind(m_data->m_fd, local, channel)) {
+        m_data->m_engine->close(m_data->m_fd);
+        m_data->m_fd = -1;
+        return false;
     }
 
-    return ret;
+    if (!m_data->m_engine->listen(m_data->m_fd, 1)) {
+        m_data->m_engine->close(m_data->m_fd);
+        m_data->m_fd = -1;
+        return false;
+    }
+
+    if (!_q_setSecurityOptions(m_data->m_fd, m_data->m_options))
+        qWarning("Cannot set security options for RFCOMM socket %d", m_data->m_fd); 
+    setListening();
+
+    m_data->m_channel = channel;
+    m_data->m_address = local;
+
+    m_data->m_engine->getsocknameRfcomm(m_data->m_fd,
+                                        &m_data->m_address, &m_data->m_channel);
+    return true;
 }
 
 /*!
@@ -164,6 +150,8 @@ bool QBluetoothRfcommServer::listen(const QBluetoothAddress &local, int channel)
 */
 void QBluetoothRfcommServer::close()
 {
+    SERVER_DATA(QBluetoothRfcommServer);
+
     QBluetoothAbstractServer::close();
 
     m_data->m_address = QBluetoothAddress::invalid;
@@ -178,6 +166,7 @@ void QBluetoothRfcommServer::close()
 */
 int QBluetoothRfcommServer::serverChannel() const
 {
+    SERVER_DATA(QBluetoothRfcommServer);
     return m_data->m_channel;
 }
 
@@ -189,6 +178,7 @@ int QBluetoothRfcommServer::serverChannel() const
  */
 QBluetoothAddress QBluetoothRfcommServer::serverAddress() const
 {
+    SERVER_DATA(QBluetoothRfcommServer);
     return m_data->m_address;
 }
 
@@ -219,6 +209,8 @@ bool QBluetoothRfcommServer::isAuthenticated() const
  */
 QBluetooth::SecurityOptions QBluetoothRfcommServer::securityOptions() const
 {
+    SERVER_DATA(QBluetoothRfcommServer);
+
     if (!isListening()) {
         return m_data->m_options;
     }
@@ -236,6 +228,8 @@ QBluetooth::SecurityOptions QBluetoothRfcommServer::securityOptions() const
  */
 bool QBluetoothRfcommServer::setSecurityOptions(QBluetooth::SecurityOptions options)
 {
+    SERVER_DATA(QBluetoothRfcommServer);
+
     m_data->m_options = options;
 
     if (!isListening()) {

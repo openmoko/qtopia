@@ -1,5 +1,6 @@
 
-#include <qtimer.h>
+#include <QTimer>
+#include <QFileInfo>
 
 #include <qtopianamespace.h>
 #include <qtopialog.h>
@@ -15,6 +16,7 @@
 #define MAX_AMPLIFICATION   800         // From libtimidity
 
 
+// {{{ MidiDecoderPrivate
 class MidiDecoderPrivate
 {
 public:
@@ -30,8 +32,10 @@ public:
     MidSongOptions      options;
     QtopiaMedia::State  state;
 };
+// }}}
 
 
+// {{{ MidiDecoder
 MidiDecoder::MidiDecoder():
     d(new MidiDecoderPrivate)
 {
@@ -44,22 +48,22 @@ MidiDecoder::MidiDecoder():
     d->state = QtopiaMedia::Stopped;
 
     // Load .cfg
-    QString configPath;
-
-    foreach(QString path, Qtopia::installPaths())
+    foreach (QString configPath, Qtopia::installPaths())
     {
-        path += QLatin1String("etc/timidity");
+        configPath += QLatin1String("etc/timidity/timidity.cfg");
 
-        if (QDir(configPath).exists())
+        qLog(Media) << "MidiDecoder::MidiDecoder(); searching for config -" << configPath;
+
+        if (QFileInfo(configPath).exists())
         {
-            configPath = path + QLatin1String("/timidity.cfg");
+            qLog(Media) << "MidiDecoder::MidiDecoder(); found timidity.cfg";
+
+            if (mid_init(configPath.toLocal8Bit().data()) == -1)
+                qLog(Media) << "MidiDecoder::MidiDecoder(); Invalid config file";
+
             break;
         }
     }
-
-    int rc = mid_init(configPath.toLocal8Bit().data());
-    if (rc == -1)
-        qLog(Media) << "Failed to initialize timidity libraries";
 }
 
 MidiDecoder::~MidiDecoder()
@@ -70,14 +74,41 @@ MidiDecoder::~MidiDecoder()
     delete d;
 }
 
-void MidiDecoder::setInputPipe(QMediaPipe* inputPipe)
+void MidiDecoder::connectInputPipe(QMediaPipe* inputPipe)
 {
     d->inputPipe = inputPipe;
 }
 
-void MidiDecoder::setOutputPipe(QMediaPipe* outputPipe)
+void MidiDecoder::connectOutputPipe(QMediaPipe* outputPipe)
 {
     d->outputPipe = outputPipe;
+}
+
+void MidiDecoder::disconnectInputPipe(QMediaPipe* inputPipe)
+{
+    Q_UNUSED(inputPipe);
+
+    d->inputPipe = 0;
+}
+
+void MidiDecoder::disconnectOutputPipe(QMediaPipe* outputPipe)
+{
+    Q_UNUSED(outputPipe);
+
+    d->outputPipe = 0;
+}
+
+void MidiDecoder::setValue(QString const& name, QVariant const& value)
+{
+    Q_UNUSED(name);
+    Q_UNUSED(value);
+}
+
+QVariant MidiDecoder::value(QString const& name)
+{
+    Q_UNUSED(name);
+
+    return QVariant();
 }
 
 void MidiDecoder::start()
@@ -118,9 +149,10 @@ void MidiDecoder::start()
         d->state = QtopiaMedia::Playing;
 
     if (d->initialized)
+    {
+        emit readyRead();
         emit playerStateChanged(d->state);
-
-    QTimer::singleShot(0, this, SLOT(next()));
+    }
 }
 
 void MidiDecoder::stop()
@@ -139,10 +171,12 @@ quint32 MidiDecoder::length()
     return d->length;
 }
 
-void MidiDecoder::seek(quint32 ms)
+bool MidiDecoder::seek(qint64 ms)
 {
     if (d->initialized)
         mid_song_seek(d->song, ms);
+
+    return true;
 }
 
 void MidiDecoder::setVolume(int volume)
@@ -174,21 +208,6 @@ bool MidiDecoder::isMuted()
     return d->muted;
 }
 
-void MidiDecoder::next()
-{
-    switch (d->state)
-    {
-    case QtopiaMedia::Playing:
-        emit readyRead();
-        break;
-
-    case QtopiaMedia::Stopped:
-    case QtopiaMedia::Paused:
-        emit playerStateChanged(d->state);
-        break;
-    }
-}
-
 //private:
 qint64 MidiDecoder::readData(char *data, qint64 maxlen)
 {
@@ -209,8 +228,6 @@ qint64 MidiDecoder::readData(char *data, qint64 maxlen)
 
             if (rc == 0)
                 d->state = QtopiaMedia::Stopped;
-
-            QTimer::singleShot(0, this, SLOT(next()));
         }
         else
         {
@@ -254,6 +271,5 @@ int MidiDecoder::midiCloseCallback(void* ctx)
 {
     return reinterpret_cast<MidiDecoder*>(ctx)->closeCallback();
 }
-
-
+// }}}
 

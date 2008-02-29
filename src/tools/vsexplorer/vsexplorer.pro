@@ -9,5 +9,9 @@ SOURCES		= vsexplorer.cpp
 #    LIBS += -lreadline
 #}
 
+enable_bluetooth {
+    depends(libraries/qtopiacomm/bluetooth)
+}
+
 pkg.desc=Value Space explorer for Qtopia
 pkg.domain=base

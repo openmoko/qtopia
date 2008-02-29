@@ -1,10 +1,11 @@
 <html>
 <head><title>System Info</title></head>
 <body>
+<!--#include file="device-name.html"-->
 <h3>System Info</h3>
 <p><img src=":image/sysinfo/SystemInfo"></p>
-<p>This application presents a set of tabs each containing information about the current system-related status of your device.</p>
-<p><b>Version:</b> version information for the build of Qtopia installed on your device.</p>
+<p>This application presents a set of tabs each containing information about the current system-related status of your <!--#echo var="device-name" -->.</p>
+<p><b>Version:</b> version information for the build of Qtopia installed on your <!--#echo var="device-name" -->.</p>
 <p><b>Storage:</b> used and available space on the device's internal storage and any removable storage cards.</p>
 <p><b>Memory:</b> free and used amounts of memory.</p>
 <p><b>Data:</b> provides a detailed breakdown of the memory being used.</p>

@@ -33,7 +33,7 @@
 </phrase>
 <phrase>
     <source>adornment</source>
-    <target>Zubehör</target>
+    <target>ZubehÃ¶r</target>
 </phrase>
 <phrase>
     <source>Always on Top</source>
@@ -57,7 +57,7 @@
 </phrase>
 <phrase>
     <source>automatic link</source>
-    <target>Automatische OLE-Verknüpfung</target>
+    <target>Automatische OLE-VerknÃ¼pfung</target>
 </phrase>
 <phrase>
     <source>automatic scrolling</source>
@@ -69,7 +69,7 @@
 </phrase>
 <phrase>
     <source>Back</source>
-    <target>Zurück</target>
+    <target>ZurÃ¼ck</target>
 </phrase>
 <phrase>
     <source>barrel button</source>
@@ -95,16 +95,16 @@
 </phrase>
 <phrase>
     <source>cascading menu</source>
-    <target>Überlappendes Menü</target>
+    <target>Ãberlappendes MenÃ¼</target>
 </phrase>
 <phrase>
     <source>check box</source>
-    <target>Kontrollkästchen</target>
+    <target>KontrollkÃ¤stchen</target>
 </phrase>
 <phrase>
     <source>check mark</source>
     <target>Markierung</target>
-    <definition>Kontrollkästchen</definition>
+    <definition>KontrollkÃ¤stchen</definition>
 </phrase>
 <phrase>
     <source>child window</source>
@@ -112,7 +112,7 @@
 </phrase>
 <phrase>
     <source>choose</source>
-    <target>Wählen</target>
+    <target>WÃ¤hlen</target>
 </phrase>
 <phrase>
     <source>click</source>
@@ -124,12 +124,12 @@
 </phrase>
 <phrase>
     <source>Close</source>
-    <target>Schließen</target>
+    <target>SchlieÃen</target>
 </phrase>
 <phrase>
     <source>Close button</source>
-    <target>Schließen</target>
-    <definition>Schaltfläche</definition>
+    <target>SchlieÃen</target>
+    <definition>SchaltflÃ¤che</definition>
 </phrase>
 <phrase>
     <source>collapse</source>
@@ -138,7 +138,7 @@
 </phrase>
 <phrase>
     <source>column heading</source>
-    <target>Spaltenüberschrift</target>
+    <target>SpaltenÃ¼berschrift</target>
     <definition>control/Steuerelement</definition>
 </phrase>
 <phrase>
@@ -147,7 +147,7 @@
 </phrase>
 <phrase>
     <source>command button</source>
-    <target>Schaltfläche</target>
+    <target>SchaltflÃ¤che</target>
 </phrase>
 <phrase>
     <source>container</source>
@@ -175,11 +175,11 @@
 </phrase>
 <phrase>
     <source>Create Shortcut</source>
-    <target>Verknüpfung erstellen</target>
+    <target>VerknÃ¼pfung erstellen</target>
 </phrase>
 <phrase>
     <source>Create Shortcut Here</source>
-    <target>Hiermit verknüpfen</target>
+    <target>Hiermit verknÃ¼pfen</target>
 </phrase>
 <phrase>
     <source>Cut</source>
@@ -191,11 +191,11 @@
 </phrase>
 <phrase>
     <source>default button</source>
-    <target>Standardschaltfläche</target>
+    <target>StandardschaltflÃ¤che</target>
 </phrase>
 <phrase>
     <source>Delete</source>
-    <target>Löschen</target>
+    <target>LÃ¶schen</target>
 </phrase>
 <phrase>
     <source>desktop</source>
@@ -215,7 +215,7 @@
 </phrase>
 <phrase>
     <source>disjoint selection</source>
-    <target>Nichtzusammenhängende Auswahl</target>
+    <target>NichtzusammenhÃ¤ngende Auswahl</target>
 </phrase>
 <phrase>
     <source>dock</source>
@@ -251,7 +251,7 @@
 </phrase>
 <phrase>
     <source>drop-down menu</source>
-    <target>Dropdown-Menü</target>
+    <target>Dropdown-MenÃ¼</target>
 </phrase>
 <phrase>
     <source>Edit</source>
@@ -260,7 +260,7 @@
 <phrase>
     <source>Edit</source>
     <target>Bearbeiten</target>
-    <definition>menu/Menü</definition>
+    <definition>menu/MenÃ¼</definition>
 </phrase>
 <phrase>
     <source>ellipsis</source>
@@ -290,7 +290,7 @@
 </phrase>
 <phrase>
     <source>extended selection list box</source>
-    <target>Listenfeld für erweiterte Auswahl</target>
+    <target>Listenfeld fÃ¼r erweiterte Auswahl</target>
 </phrase>
 <phrase>
     <source>File</source>
@@ -404,16 +404,16 @@
 </phrase>
 <phrase>
     <source>Insert</source>
-    <target>Einfügen</target>
-    <definition>Menü</definition>
+    <target>EinfÃ¼gen</target>
+    <definition>MenÃ¼</definition>
 </phrase>
 <phrase>
     <source>Insert Object</source>
-    <target>Objekt einfügen</target>
+    <target>Objekt einfÃ¼gen</target>
 </phrase>
 <phrase>
     <source>insertion point</source>
-    <target>Einfügemarke</target>
+    <target>EinfÃ¼gemarke</target>
 </phrase>
 <phrase>
     <source>italic</source>
@@ -438,17 +438,17 @@
 </phrase>
 <phrase>
     <source>link</source>
-    <target>Verknüpfung</target>
+    <target>VerknÃ¼pfung</target>
     <definition>noun</definition>
 </phrase>
 <phrase>
     <source>link</source>
-    <target>Verknüpfen</target>
+    <target>VerknÃ¼pfen</target>
     <definition>verb</definition>
 </phrase>
 <phrase>
     <source>Link Here</source>
-    <target>Hiermit verknüpfen</target>
+    <target>Hiermit verknÃ¼pfen</target>
 </phrase>
 <phrase>
     <source>list box</source>
@@ -461,7 +461,7 @@
 </phrase>
 <phrase>
     <source>manual link</source>
-    <target>Manuelle OLE-Verknüpfung</target>
+    <target>Manuelle OLE-VerknÃ¼pfung</target>
 </phrase>
 <phrase>
     <source>Maximize</source>
@@ -470,7 +470,7 @@
 <phrase>
     <source>maximize button</source>
     <target>Maximieren</target>
-    <definition>Schaltfläche</definition>
+    <definition>SchaltflÃ¤che</definition>
 </phrase>
 <phrase>
     <source>MDI</source>
@@ -478,24 +478,24 @@
 </phrase>
 <phrase>
     <source>menu</source>
-    <target>Menü</target>
+    <target>MenÃ¼</target>
 </phrase>
 <phrase>
     <source>menu bar</source>
-    <target>Menüleiste</target>
+    <target>MenÃ¼leiste</target>
 </phrase>
 <phrase>
     <source>menu button</source>
-    <target>Menü</target>
-    <definition>Schaltfläche</definition>
+    <target>MenÃ¼</target>
+    <definition>SchaltflÃ¤che</definition>
 </phrase>
 <phrase>
     <source>menu item</source>
-    <target>Menüelement</target>
+    <target>MenÃ¼element</target>
 </phrase>
 <phrase>
     <source>menu title</source>
-    <target>Menütitel</target>
+    <target>MenÃ¼titel</target>
 </phrase>
 <phrase>
     <source>message box</source>
@@ -508,7 +508,7 @@
 <phrase>
     <source>minimize button</source>
     <target>Minimieren</target>
-    <definition>Schaltfläche</definition>
+    <definition>SchaltflÃ¤che</definition>
 </phrase>
 <phrase>
     <source>mixed-value</source>
@@ -549,7 +549,7 @@
 </phrase>
 <phrase>
     <source>multiple selection list box</source>
-    <target>Listenfeld für Mehrfachauswahl</target>
+    <target>Listenfeld fÃ¼r Mehrfachauswahl</target>
 </phrase>
 <phrase>
     <source>My Computer</source>
@@ -591,7 +591,7 @@
 </phrase>
 <phrase>
     <source>OLE linked object</source>
-    <target>Verknüpftes OLE-Objekt</target>
+    <target>VerknÃ¼pftes OLE-Objekt</target>
 </phrase>
 <phrase>
     <source>OLE nondefault drag and drop</source>
@@ -603,11 +603,11 @@
 </phrase>
 <phrase>
     <source>Open</source>
-    <target>Öffnen</target>
+    <target>Ãffnen</target>
 </phrase>
 <phrase>
     <source>Open With</source>
-    <target>Öffnen mit</target>
+    <target>Ãffnen mit</target>
 </phrase>
 <phrase>
     <source>option button</source>
@@ -635,7 +635,7 @@
 </phrase>
 <phrase>
     <source>parent window</source>
-    <target>Übergeordnetes Fenster</target>
+    <target>Ãbergeordnetes Fenster</target>
 </phrase>
 <phrase>
     <source>password</source>
@@ -643,19 +643,19 @@
 </phrase>
 <phrase>
     <source>Paste</source>
-    <target>Einfügen</target>
+    <target>EinfÃ¼gen</target>
 </phrase>
 <phrase>
     <source>Paste Link</source>
-    <target>Verknüpfung einfügen</target>
+    <target>VerknÃ¼pfung einfÃ¼gen</target>
 </phrase>
 <phrase>
     <source>Paste Shortcut</source>
-    <target>Verknüpfung einfügen</target>
+    <target>VerknÃ¼pfung einfÃ¼gen</target>
 </phrase>
 <phrase>
     <source>Paste Special</source>
-    <target>Inhalte einfügen</target>
+    <target>Inhalte einfÃ¼gen</target>
 </phrase>
 <phrase>
     <source>path</source>
@@ -687,7 +687,7 @@
 </phrase>
 <phrase>
     <source>pop-up menu</source>
-    <target>Kontextmenü</target>
+    <target>KontextmenÃ¼</target>
 </phrase>
 <phrase>
     <source>pop-up window</source>
@@ -699,21 +699,21 @@
 </phrase>
 <phrase>
     <source>press</source>
-    <target>Drücken</target>
+    <target>DrÃ¼cken</target>
     <definition>and hold a mouse button/und Halten einer Maustaste</definition>
 </phrase>
 <phrase>
     <source>press</source>
-    <target>Drücken</target>
+    <target>DrÃ¼cken</target>
     <definition>a key/einer Taste</definition>
 </phrase>
 <phrase>
     <source>primary container</source>
-    <target>Primär-Container</target>
+    <target>PrimÃ¤r-Container</target>
 </phrase>
 <phrase>
     <source>primary window</source>
-    <target>Primärfenster</target>
+    <target>PrimÃ¤rfenster</target>
 </phrase>
 <phrase>
     <source>Print</source>
@@ -758,7 +758,7 @@
 </phrase>
 <phrase>
     <source>read-only</source>
-    <target>Schreibgeschützt</target>
+    <target>SchreibgeschÃ¼tzt</target>
 </phrase>
 <phrase>
     <source>recognition</source>
@@ -796,7 +796,7 @@
 <phrase>
     <source>Restore button</source>
     <target>Wiederherstellen </target>
-    <definition>Schaltfläche</definition>
+    <definition>SchaltflÃ¤che</definition>
 </phrase>
 <phrase>
     <source>Resume</source>
@@ -812,7 +812,7 @@
 </phrase>
 <phrase>
     <source>Run</source>
-    <target>Ausführen</target>
+    <target>AusfÃ¼hren</target>
 </phrase>
 <phrase>
     <source>Save</source>
@@ -824,7 +824,7 @@
 </phrase>
 <phrase>
     <source>scroll</source>
-    <target>Bildlauf durchführen</target>
+    <target>Bildlauf durchfÃ¼hren</target>
 </phrase>
 <phrase>
     <source>scroll arrow</source>
@@ -840,11 +840,11 @@
 </phrase>
 <phrase>
     <source>secondary window</source>
-    <target>Sekundärfenster</target>
+    <target>SekundÃ¤rfenster</target>
 </phrase>
 <phrase>
     <source>select</source>
-    <target>Auswählen</target>
+    <target>AuswÃ¤hlen</target>
 </phrase>
 <phrase>
     <source>Select All</source>
@@ -876,15 +876,15 @@
 </phrase>
 <phrase>
     <source>shortcut</source>
-    <target>Verknüpfung</target>
+    <target>VerknÃ¼pfung</target>
 </phrase>
 <phrase>
     <source>shortcut button</source>
-    <target>Verknüpfte Schaltfläche</target>
+    <target>VerknÃ¼pfte SchaltflÃ¤che</target>
 </phrase>
 <phrase>
     <source>shortcut icon</source>
-    <target>Verknüpfungssymbol</target>
+    <target>VerknÃ¼pfungssymbol</target>
 </phrase>
 <phrase>
     <source>shortcut key</source>
@@ -892,7 +892,7 @@
 </phrase>
 <phrase>
     <source>shortcut key control</source>
-    <target>Steuerelement für Tastenbelegung</target>
+    <target>Steuerelement fÃ¼r Tastenbelegung</target>
 </phrase>
 <phrase>
     <source>Show</source>
@@ -904,15 +904,15 @@
 </phrase>
 <phrase>
     <source>single selection list box</source>
-    <target>Listenfeld für Einfachauswahl</target>
+    <target>Listenfeld fÃ¼r Einfachauswahl</target>
 </phrase>
 <phrase>
     <source>Size</source>
-    <target>Größe ändern</target>
+    <target>GrÃ¶Ãe Ã¤ndern</target>
 </phrase>
 <phrase>
     <source>size grip</source>
-    <target>Element für Größenänderung</target>
+    <target>Element fÃ¼r GrÃ¶ÃenÃ¤nderung</target>
 </phrase>
 <phrase>
     <source>slider</source>
@@ -937,7 +937,7 @@
 <phrase>
     <source>Start button</source>
     <target>Start</target>
-    <definition>Schaltfläche</definition>
+    <definition>SchaltflÃ¤che</definition>
 </phrase>
 <phrase>
     <source>StartUp folder</source>
@@ -1012,11 +1012,11 @@
 </phrase>
 <phrase>
     <source>unavailable</source>
-    <target>Nicht verfügbar</target>
+    <target>Nicht verfÃ¼gbar</target>
 </phrase>
 <phrase>
     <source>Undo</source>
-    <target>Rückgängig</target>
+    <target>RÃ¼ckgÃ¤ngig</target>
 </phrase>
 <phrase>
     <source>Uninstall</source>
@@ -1025,7 +1025,7 @@
 <phrase>
     <source>View</source>
     <target>Ansicht</target>
-    <definition>Menü</definition>
+    <definition>MenÃ¼</definition>
 </phrase>
 <phrase>
     <source>visual editing</source>
@@ -1042,7 +1042,7 @@
 <phrase>
     <source>Window</source>
     <target>Fenster</target>
-    <definition>Menü</definition>
+    <definition>MenÃ¼</definition>
 </phrase>
 <phrase>
     <source>window</source>
@@ -1064,12 +1064,4 @@
     <source>workgroup</source>
     <target>Arbeitsgruppe</target>
 </phrase>
-<phrase>
-    <source>workspace</source>
-    <target>Arbeitsbereich</target>
-</phrase>
-<phrase>
-    <source>Yes</source>
-    <target>Ja</target>
-</phrase>
-</QPH>
+<phra

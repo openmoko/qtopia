@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,6 +49,9 @@
 //#include "qmemorymanager_qws.h"
 #include "qtextengine_p.h"
 #include "qfontengine_p.h"
+#if !defined(QT_NO_FREETYPE)
+#include "qfontengine_ft_p.h"
+#endif
 
 
 void QFont::initialize()
@@ -56,18 +74,28 @@ void QFont::cleanup()
 Qt::HANDLE QFont::handle() const
 {
 #ifndef QT_NO_FREETYPE
-    QFontEngine *engine = d->engineForScript(QUnicodeTables::Common);
-    Q_ASSERT(engine != 0);
+    return freetypeFace();
+#endif
+    return 0;
+}
 
-    if (engine->type() == QFontEngine::Freetype)
-        return static_cast<QFontEngineFT *>(engine)->handle();
+FT_Face QFont::freetypeFace() const
+{
+#ifndef QT_NO_FREETYPE
+    QFontEngine *engine = d->engineForScript(QUnicodeTables::Common);
+    if (engine->type() == QFontEngine::Multi)
+        engine = static_cast<QFontEngineMulti *>(engine)->engine(0);
+    if (engine->type() == QFontEngine::Freetype) {
+        const QFontEngineFT *ft = static_cast<const QFontEngineFT *>(engine);
+        return ft->non_locked_face();
+    }
 #endif
     return 0;
 }
 
 QString QFont::rawName() const
 {
-    return "unknown";
+    return QLatin1String("unknown");
 }
 
 void QFont::setRawName(const QString &)
@@ -102,83 +130,3 @@ QString QFont::lastResortFont() const
     return QString();
 }
 
-void QFontPrivate::load(int)
-{
-    QFontDef req = request;
-    int script = QUnicodeTables::Common;
-
-    if (req.pixelSize == -1)
-        req.pixelSize = qRound(req.pointSize*dpi/72);
-    if (req.pointSize < 0)
-        req.pointSize = req.pixelSize*72.0/dpi;
-
-    if (! engineData) {
-        QFontCache::Key key(req, script);
-
-        // look for the requested font in the engine data cache
-        engineData = QFontCache::instance->findEngineData(key);
-
-        if (! engineData) {
-            // create a new one
-            engineData = new QFontEngineData;
-            QFontCache::instance->insertEngineData(key, engineData);
-        } else {
-            engineData->ref.ref();
-        }
-    }
-
-    // the cached engineData could have already loaded the engine we want
-    if (engineData->engine) return;
-
-    // load the font
-    QFontEngine *engine = 0;
-    //    double scale = 1.0; // ### TODO: fix the scale calculations
-
-    // list of families to try
-    QStringList family_list;
-
-    if (!req.family.isEmpty()) {
-        family_list = req.family.split(',');
-
-        // append the substitute list for each family in family_list
-        QStringList subs_list;
-        QStringList::ConstIterator it = family_list.constBegin(), end = family_list.constEnd();
-        for (; it != end; ++it)
-            subs_list += QFont::substitutes(*it);
-        family_list += subs_list;
-
-        // append the default fallback font for the specified script
-        // family_list << ... ; ###########
-
-        // add the default family
-        QString defaultFamily = QApplication::font().family();
-        if (! family_list.contains(defaultFamily))
-            family_list << defaultFamily;
-
-        // add QFont::defaultFamily() to the list, for compatibility with
-        // previous versions
-        family_list << QApplication::font().defaultFamily();
-    }
-
-    // null family means find the first font matching the specified script
-    family_list << QString();
-
-    QStringList::ConstIterator it = family_list.constBegin(), end = family_list.constEnd();
-    for (; ! engine && it != end; ++it) {
-        req.family = *it;
-
-        engine = QFontDatabase::findFont(script, this, req);
-        if (engine) {
-            if (engine->type() != QFontEngine::Box)
-                break;
-
-            if (! req.family.isEmpty())
-                engine = 0;
-
-            continue;
-        }
-    }
-
-    engine->ref.ref();
-    engineData->engine = engine;
-}

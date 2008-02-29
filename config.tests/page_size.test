@@ -8,12 +8,12 @@ cd "$dest"
 cat >.qmake.cache <<END
 include($QPEDIR/src/config.pri)
 END
-$DQTDIR/bin/qmake -spec "$XPLATFORM_ABSOLUTE" -o $dest/Makefile $source/$test.pro || exit 2
+$QMAKE -spec "$XPLATFORM_ABSOLUTE" -o $dest/Makefile $source/$test.pro || exit 2
 $MAKECMD clean >/dev/null 2>&1
 ok=1
 $MAKECMD 2>&1 || ok=0
 if [ "$ok" = 0 ]; then
-    $DQTDIR/bin/qmake -spec "$XPLATFORM_ABSOLUTE" -o $dest/Makefile $source/$test.pro CONFIG+=kernel || exit 2
+    $QMAKE -spec "$XPLATFORM_ABSOLUTE" -o $dest/Makefile $source/$test.pro CONFIG+=kernel || exit 2
     $MAKECMD clean >/dev/null 2>&1
     $MAKECMD 2>&1 || exit 2
 fi

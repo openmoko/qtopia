@@ -1,7 +1,9 @@
 
 /*!
- \class Dissipate2Legal
- \brief The Dissipate2Legal class is a placeholder for licensing information.
+ \page dissipate2legal.html
+ \title Dissipate2
+ \ingroup qtopia3rdparty
+ \brief License information for Dissipate2.
  \legalese
   Dissipate2 is an implementation of the Session Initiation Protocol (SIP).
 
@@ -22,13 +24,6 @@ You should have received a copy of the GNU Library General Public License
 along with this library; see the file COPYING.LIB.  If not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 MA 02111-1307, USA.
-
-  \ingroup qtopia3rdparty
+  \endlegalese
 */
 
-/*!
-    \internal
-*/
-Dissipate2Legal::Dissipate2Legal()
-{
-}

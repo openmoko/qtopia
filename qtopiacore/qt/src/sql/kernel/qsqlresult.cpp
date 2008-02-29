@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -117,36 +132,66 @@ static QString qFieldSerial(int i)
     return QString::fromUtf16(arr, int(ptr - arr) + 1);
 }
 
+static bool qIsAlnum(QChar ch)
+{
+    uint u = uint(ch.unicode());
+    // matches [a-zA-Z0-9_]
+    return u - 'a' < 26 || u - 'A' < 26 || u - '0' < 10 || u == '_';
+}
+
 QString QSqlResultPrivate::positionalToNamedBinding()
 {
-    QRegExp rx(QLatin1String("'[^']*'|\\?"));
-    QString q = sql;
-    int i = 0, cnt = -1;
-    while ((i = rx.indexIn(q, i)) != -1) {
-        if (rx.cap(0) == QLatin1String("?"))
-            q = q.replace(i, 1, qFieldSerial(++cnt));
-        i += rx.matchedLength();
+    int n = sql.size();
+
+    QString result;
+    result.reserve(n * 5 / 4);
+    bool inQuote = false;
+    int count = 0;
+
+    for (int i = 0; i < n; ++i) {
+        QChar ch = sql.at(i);
+        if (ch == QLatin1Char('?') && !inQuote) {
+            result += qFieldSerial(count++);
+        } else {
+            if (ch == QLatin1Char('\''))
+                inQuote = !inQuote;
+            result += ch;
+        }
     }
-    return q;
+    result.squeeze();
+    return result;
 }
 
 QString QSqlResultPrivate::namedToPositionalBinding()
 {
-    QRegExp rx(QLatin1String("'[^']*'|:([a-zA-Z0-9_]+)"));
-    QString q = sql;
-    int i = 0, cnt = -1;
-    while ((i = rx.indexIn(q, i)) != -1) {
-        if (rx.cap(1).isEmpty()) {
-            i += rx.matchedLength();
+    int n = sql.size();
+
+    QString result;
+    result.reserve(n);
+    bool inQuote = false;
+    int count = 0;
+    int i = 0;
+
+    while (i < n) {
+        QChar ch = sql.at(i);
+        if (ch == QLatin1Char(':') && !inQuote
+                && (i == 0 || sql.at(i - 1) != QLatin1Char(':'))
+                && (i < n - 1 && qIsAlnum(sql.at(i + 1)))) {
+            int pos = i + 2;
+            while (pos < n && qIsAlnum(sql.at(pos)))
+                ++pos;
+            indexes[sql.mid(i, pos - i)] = count++;
+            result += QLatin1Char('?');
+            i = pos;
         } else {
-            // record the index of the placeholder - needed
-            // for emulating named bindings with ODBC
-            indexes[rx.cap(0)]= ++cnt;
-            q.replace(i, rx.matchedLength(), QLatin1String("?"));
+            if (ch == QLatin1Char('\''))
+                inQuote = !inQuote;
+            result += ch;
             ++i;
         }
     }
-    return q;
+    result.squeeze();
+    return result;
 }
 
 /*!
@@ -546,12 +591,27 @@ bool QSqlResult::savePrepare(const QString& query)
 */
 bool QSqlResult::prepare(const QString& query)
 {
-    QRegExp rx(QLatin1String("'[^']*'|:([a-zA-Z0-9_]+)"));
+    int n = query.size();
+
+    bool inQuote = false;
     int i = 0;
-    while ((i = rx.indexIn(query, i)) != -1) {
-        if (!rx.cap(1).isEmpty())
-            d->holders.append(QHolder(rx.cap(0), i));
-        i += rx.matchedLength();
+
+    while (i < n) {
+        QChar ch = query.at(i);
+        if (ch == QLatin1Char(':') && !inQuote
+                && (i == 0 || query.at(i - 1) != QLatin1Char(':'))
+                && (i < n - 1 && qIsAlnum(query.at(i + 1)))) {
+            int pos = i + 2;
+            while (pos < n && qIsAlnum(query.at(pos)))
+                ++pos;
+
+            d->holders.append(QHolder(query.mid(i, pos - i), i));
+            i = pos;
+        } else {
+            if (ch == QLatin1Char('\''))
+                inQuote = !inQuote;
+            ++i;
+        }
     }
     d->sql = query;
     return true; // fake prepares should always succeed
@@ -820,6 +880,10 @@ QSqlRecord QSqlResult::record() const
     If more than one row was touched by the insert, the behavior is
     undefined.
 
+    Note that for Oracle databases the row's ROWID will be returned,
+    while for MySQL databases the row's auto-increment field will
+    be returned.
+
     \sa QSqlDriver::hasFeature()
 */
 QVariant QSqlResult::lastInsertId() const
@@ -901,6 +965,21 @@ bool QSqlResult::execBatch(bool arrayBind)
     return false;
 }
 
+/*! \internal
+ */
+void QSqlResult::detachFromResultSet()
+{
+    if (driver()->hasFeature(QSqlDriver::SimpleLocking))
+        virtual_hook(DetachFromResultSet, 0);
+}
+
+/*! \internal
+ */
+void QSqlResult::setNumericalPrecisionPolicy(QSql::NumericalPrecisionPolicy policy)
+{
+    if (driver()->hasFeature(QSqlDriver::LowPrecisionNumbers))
+        virtual_hook(SetNumericalPrecision, &policy);
+}
 
 /*!
     Returns the low-level database handle for this result set
@@ -921,7 +1000,7 @@ bool QSqlResult::execBatch(bool arrayBind)
     \code
     QSqlQuery query = ...
     QVariant v = query.result()->handle();
-    if (v.isValid() && v.typeName() == "sqlite3_stmt*") {
+    if (v.isValid() && qstrcmp(v.typeName(), "sqlite3_stmt*")) {
         // v.data() returns a pointer to the handle
         sqlite3_stmt *handle = *static_cast<sqlite3_stmt **>(v.data());
         if (handle != 0) { // check that it is not NULL

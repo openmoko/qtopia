@@ -31,27 +31,17 @@
 #include <dirent.h>
 #include <syslog.h>
 
-#include "atd.h"
-
 /*!
- \class atd
- \brief The atd class is a place-holder for licensing information.
+ \page atdlegal.html
+ \title atd
+ \brief License information for atd.
+ \ingroup qtopia3rdparty
  \legalese
- The atd program is based on Russ Nelson's lightweight At daemon.
- It is distributed under the terms of the GNU General Public License.
  The atd program is based on Russ Nelson's lightweight At daemon.
  The At daemon will run a program at a specified time.
  It is distributed under the terms of the GNU General Public License.
-
-  \ingroup qtopia3rdparty
+ \endlegalese
 */
-
-/*!
-    \internal
-*/
-atd::atd()
-{
-}
 
 
 #if defined(QT_QWS_SL5XXX)

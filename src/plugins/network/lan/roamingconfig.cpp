@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,21 +23,21 @@
 
 #ifndef NO_WIRELESS_LAN
 
+#include <QKeyEvent>
 #include <QMultiHash>
 #include "roamingmonitor.h" //includes wireless.h
 
 RoamingPage::RoamingPage( const QtopiaNetworkProperties& cfg, QWidget* parent, Qt::WFlags fl )
-    : QWidget( parent, fl )
+    : QWidget( parent, fl ), currentSelection( 0 )
 {
 #if WIRELESS_EXT > 13
     ui.setupUi( this );
-    ui.up->setIcon( QIcon(":icon/up") );
-    ui.down->setIcon( QIcon(":icon/down") );
     init ( cfg );
 
-    connect( ui.up, SIGNAL(clicked()), this, SLOT(up()) );
-    connect( ui.down, SIGNAL(clicked()), this, SLOT(down()) );
     connect( ui.autoConnect, SIGNAL(stateChanged(int)), this, SLOT(reconnectToggled(int)) );
+    connect( ui.knownNetworks, SIGNAL(itemActivated(QListWidgetItem*)), 
+             this, SLOT(listActivated(QListWidgetItem*)) );
+    ui.knownNetworks->installEventFilter(this);
 #else
     Q_UNUSED( cfg )
 #endif // WIRELESS_EXT
@@ -126,38 +126,6 @@ void RoamingPage::saveConfig()
 #endif // WIRELESS_EXT
 }
 
-void RoamingPage::up()
-{
-#if WIRELESS_EXT > 13
-    QListWidgetItem* item = ui.knownNetworks->currentItem();
-    if ( !item )
-        return;
-
-    const int oldRow = ui.knownNetworks->row( item );
-    if ( oldRow > 0 ) {
-        ui.knownNetworks->takeItem( oldRow );
-        ui.knownNetworks->insertItem( oldRow-1, item );
-        ui.knownNetworks->setCurrentRow( oldRow-1 );
-    }
-#endif // WIRELESS_EXT
-}
-
-void RoamingPage::down()
-{
-#if WIRELESS_EXT > 13
-    QListWidgetItem* item = ui.knownNetworks->currentItem();
-    if ( !item )
-        return;
-
-    const int oldRow = ui.knownNetworks->row( item );
-    if ( oldRow < ui.knownNetworks->count()-1 ) {
-        ui.knownNetworks->takeItem( oldRow );
-        ui.knownNetworks->insertItem( oldRow+1, item );
-        ui.knownNetworks->setCurrentRow( oldRow+1 );
-    }
-#endif // WIRELESS_EXT
-}
-
 void RoamingPage::reconnectToggled( int newState )
 {
 #if WIRELESS_EXT > 13
@@ -166,5 +134,68 @@ void RoamingPage::reconnectToggled( int newState )
 #else
     Q_UNUSED( newState )
 #endif // WIRELESS_EXT
+}
+
+void RoamingPage::listActivated(QListWidgetItem* item)
+{
+#if WIRELESS_EXT > 13
+    if ( !item )
+        return;
+    if ( !currentSelection ) {
+        ui.header->setText( tr("Moving %1", "%1=essid").arg(item->text()) );
+        QFont f = item->font();
+        f.setBold( true );
+        item->setFont( f );
+        item->setText( item->text() );
+        currentSelection = item;
+    }else if ( item == currentSelection ) {
+        ui.header->setText( tr("Order of selection") );
+        QFont f = item->font();
+        f.setBold( false );
+        currentSelection->setFont( f );
+        currentSelection = 0;
+    }
+#else
+    Q_UNUSED( item );
+#endif //WIRELESS_EXT
+}
+
+bool RoamingPage::eventFilter( QObject* watched, QEvent* event )
+{
+#if WIRELESS_EXT > 13
+    if ( watched == ui.knownNetworks && 
+            0 != currentSelection )
+    {
+        if ( event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease ) {
+            QKeyEvent *ke = static_cast<QKeyEvent*>(event);
+
+            if ( event->type() == QEvent::KeyRelease &&  //ignore releases if key is one we watch out for
+                    (ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down || ke->key()==Qt::Key_Back) )
+                return true;
+
+            int row = ui.knownNetworks->currentRow();
+            if ( ke->key() == Qt::Key_Up ) {
+                if ( row > 0 ) //top row cannot move further up
+                {
+                    ui.knownNetworks->takeItem( row );
+                    ui.knownNetworks->insertItem( row-1, currentSelection );
+                    ui.knownNetworks->setCurrentRow( row-1 );
+                }
+                return true;
+            } else if ( ke->key() == Qt::Key_Down ) {
+                if ( row < ui.knownNetworks->count()-1 ) { //bottom row cannot move further down
+                    ui.knownNetworks->takeItem( row );
+                    ui.knownNetworks->insertItem( row+1, currentSelection );
+                    ui.knownNetworks->setCurrentRow( row+1 );
+                    
+                }
+                return true;
+            } else if ( ke->key() == Qt::Key_Back ) {
+                return true; //ignore back for as long as we have a selection
+            }
+        }
+    }
+#endif
+    return false;
 }
 #endif // NO_WIRELESS_LAN

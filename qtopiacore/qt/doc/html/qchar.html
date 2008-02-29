@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qchar.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/tools/qchar.cpp -->
 <head>
-  <title>Qt 4.2: QChar Class Reference</title>
+  <title>Qt 4.3: QChar Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QChar Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QChar Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QChar class provides a 16-bit Unicode character. <a href="#details">More...</a></p>
 <pre> #include &lt;QChar&gt;</pre><p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
 <ul>
@@ -33,8 +34,8 @@
 <h3>Public Functions</h3>
 <ul>
 <li><div class="fn"/><b><a href="qchar.html#QChar">QChar</a></b> ()</li>
-<li><div class="fn"/>QT_ASCII_CAST_WARN_CONSTRUCTOR <b><a href="qchar.html#QChar-2">QChar</a></b> ( char <i>ch</i> )</li>
-<li><div class="fn"/>QT_ASCII_CAST_WARN_CONSTRUCTOR <b><a href="qchar.html#QChar-3">QChar</a></b> ( uchar <i>ch</i> )</li>
+<li><div class="fn"/><b><a href="qchar.html#QChar-2">QChar</a></b> ( char <i>ch</i> )</li>
+<li><div class="fn"/><b><a href="qchar.html#QChar-3">QChar</a></b> ( uchar <i>ch</i> )</li>
 <li><div class="fn"/><b><a href="qchar.html#QChar-4">QChar</a></b> ( QLatin1Char <i>ch</i> )</li>
 <li><div class="fn"/><b><a href="qchar.html#QChar-5">QChar</a></b> ( uchar <i>cell</i>, uchar <i>row</i> )</li>
 <li><div class="fn"/><b><a href="qchar.html#QChar-6">QChar</a></b> ( ushort <i>code</i> )</li>
@@ -51,8 +52,10 @@
 <li><div class="fn"/>Direction <b><a href="qchar.html#direction">direction</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#hasMirrored">hasMirrored</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#isDigit">isDigit</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qchar.html#isHighSurrogate">isHighSurrogate</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#isLetter">isLetter</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#isLetterOrNumber">isLetterOrNumber</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qchar.html#isLowSurrogate">isLowSurrogate</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#isLower">isLower</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#isMark">isMark</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#isNull">isNull</a></b> () const</li>
@@ -61,13 +64,16 @@
 <li><div class="fn"/>bool <b><a href="qchar.html#isPunct">isPunct</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#isSpace">isSpace</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#isSymbol">isSymbol</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qchar.html#isTitleCase">isTitleCase</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#isUpper">isUpper</a></b> () const</li>
-<li><div class="fn"/>Joining <b><a href="qchar.html#joining">joining</a></b> () const&nbsp;&nbsp;<tt> (preliminary)</tt></li>
+<li><div class="fn"/>Joining <b><a href="qchar.html#joining">joining</a></b> () const</li>
 <li><div class="fn"/>QChar <b><a href="qchar.html#mirroredChar">mirroredChar</a></b> () const</li>
 <li><div class="fn"/>uchar <b><a href="qchar.html#row">row</a></b> () const</li>
 <li><div class="fn"/>const char <b><a href="qchar.html#toAscii">toAscii</a></b> () const</li>
+<li><div class="fn"/>QChar <b><a href="qchar.html#toCaseFolded">toCaseFolded</a></b> () const</li>
 <li><div class="fn"/>const char <b><a href="qchar.html#toLatin1">toLatin1</a></b> () const</li>
 <li><div class="fn"/>QChar <b><a href="qchar.html#toLower">toLower</a></b> () const</li>
+<li><div class="fn"/>QChar <b><a href="qchar.html#toTitleCase">toTitleCase</a></b> () const</li>
 <li><div class="fn"/>QChar <b><a href="qchar.html#toUpper">toUpper</a></b> () const</li>
 <li><div class="fn"/>ushort &amp; <b><a href="qchar.html#unicode">unicode</a></b> ()</li>
 <li><div class="fn"/>const ushort <b><a href="qchar.html#unicode-2">unicode</a></b> () const</li>
@@ -76,15 +82,43 @@
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
+<li><div class="fn"/>Category <b><a href="qchar.html#category-2">category</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>Category <b><a href="qchar.html#category-3">category</a></b> ( ushort <i>ucs2</i> )</li>
+<li><div class="fn"/>unsigned char <b><a href="qchar.html#combiningClass-2">combiningClass</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>unsigned char <b><a href="qchar.html#combiningClass-3">combiningClass</a></b> ( ushort <i>ucs2</i> )</li>
+<li><div class="fn"/>QString <b><a href="qchar.html#decomposition-2">decomposition</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>Decomposition <b><a href="qchar.html#decompositionTag-2">decompositionTag</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>int <b><a href="qchar.html#digitValue-2">digitValue</a></b> ( ushort <i>ucs2</i> )</li>
+<li><div class="fn"/>int <b><a href="qchar.html#digitValue-3">digitValue</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>Direction <b><a href="qchar.html#direction-2">direction</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>Direction <b><a href="qchar.html#direction-3">direction</a></b> ( ushort <i>ucs2</i> )</li>
 <li><div class="fn"/>QChar <b><a href="qchar.html#fromAscii">fromAscii</a></b> ( char <i>c</i> )</li>
 <li><div class="fn"/>QChar <b><a href="qchar.html#fromLatin1">fromLatin1</a></b> ( char <i>c</i> )</li>
+<li><div class="fn"/>ushort <b><a href="qchar.html#highSurrogate">highSurrogate</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>Joining <b><a href="qchar.html#joining-2">joining</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>Joining <b><a href="qchar.html#joining-3">joining</a></b> ( ushort <i>ucs2</i> )</li>
+<li><div class="fn"/>ushort <b><a href="qchar.html#lowSurrogate">lowSurrogate</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>uint <b><a href="qchar.html#mirroredChar-2">mirroredChar</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>ushort <b><a href="qchar.html#mirroredChar-3">mirroredChar</a></b> ( ushort <i>ucs2</i> )</li>
+<li><div class="fn"/>uint <b><a href="qchar.html#surrogateToUcs4">surrogateToUcs4</a></b> ( ushort <i>high</i>, ushort <i>low</i> )</li>
+<li><div class="fn"/>uint <b><a href="qchar.html#surrogateToUcs4-2">surrogateToUcs4</a></b> ( QChar <i>high</i>, QChar <i>low</i> )</li>
+<li><div class="fn"/>uint <b><a href="qchar.html#toCaseFolded-2">toCaseFolded</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>ushort <b><a href="qchar.html#toCaseFolded-3">toCaseFolded</a></b> ( ushort <i>ucs2</i> )</li>
+<li><div class="fn"/>uint <b><a href="qchar.html#toLower-2">toLower</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>ushort <b><a href="qchar.html#toLower-3">toLower</a></b> ( ushort <i>ucs2</i> )</li>
+<li><div class="fn"/>uint <b><a href="qchar.html#toTitleCase-2">toTitleCase</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>ushort <b><a href="qchar.html#toTitleCase-3">toTitleCase</a></b> ( ushort <i>ucs2</i> )</li>
+<li><div class="fn"/>uint <b><a href="qchar.html#toUpper-2">toUpper</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>ushort <b><a href="qchar.html#toUpper-3">toUpper</a></b> ( ushort <i>ucs2</i> )</li>
+<li><div class="fn"/>UnicodeVersion <b><a href="qchar.html#unicodeVersion-2">unicodeVersion</a></b> ( uint <i>ucs4</i> )</li>
+<li><div class="fn"/>UnicodeVersion <b><a href="qchar.html#unicodeVersion-3">unicodeVersion</a></b> ( ushort <i>ucs2</i> )</li>
 </ul>
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
 <li><div class="fn"/>bool <b><a href="qchar.html#operator-not-eq-10">operator!=</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qchar.html#operator-lt-2">operator&lt;</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qchar.html#operator-lt-lt-36">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QChar &amp; <i>chr</i> )</li>
+<li><div class="fn"/>bool <b><a href="qchar.html#operator-lt">operator&lt;</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qchar.html#operator-lt-lt-30">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QChar &amp; <i>chr</i> )</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#operator-lt-eq">operator&lt;=</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#operator-eq-eq-11">operator==</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#operator-gt">operator&gt;</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
@@ -224,13 +258,15 @@
 <p>Specifies which version of the <a href="http://www.unicode.org/">Unicode standard</a> introduced a certain character.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QChar::Unicode_1_1</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Version 1.1.</td></tr>
-<tr><td valign="top"><tt>QChar::Unicode_2_0</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">Version 2.0.</td></tr>
-<tr><td valign="top"><tt>QChar::Unicode_2_1_2</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">Version 2.1.2.</td></tr>
-<tr><td valign="top"><tt>QChar::Unicode_3_0</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">Version 3.0.</td></tr>
-<tr><td valign="top"><tt>QChar::Unicode_3_1</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">Version 3.1.</td></tr>
-<tr><td valign="top"><tt>QChar::Unicode_3_2</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">Version 3.2.</td></tr>
-<tr><td valign="top"><tt>QChar::Unicode_4_0</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">Version 4.0.</td></tr>
+<tr><td valign="top"><tt>QChar::Unicode_1_1</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Version 1.1&#x2e;</td></tr>
+<tr><td valign="top"><tt>QChar::Unicode_2_0</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">Version 2.0&#x2e;</td></tr>
+<tr><td valign="top"><tt>QChar::Unicode_2_1_2</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">Version 2.1&#x2e;2&#x2e;</td></tr>
+<tr><td valign="top"><tt>QChar::Unicode_3_0</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">Version 3.0&#x2e;</td></tr>
+<tr><td valign="top"><tt>QChar::Unicode_3_1</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">Version 3.1&#x2e;</td></tr>
+<tr><td valign="top"><tt>QChar::Unicode_3_2</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">Version 3.2&#x2e;</td></tr>
+<tr><td valign="top"><tt>QChar::Unicode_4_0</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">Version 4.0&#x2e;</td></tr>
+<tr><td valign="top"><tt>QChar::Unicode_4_1</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">Version 4.1&#x2e;</td></tr>
+<tr><td valign="top"><tt>QChar::Unicode_5_0</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">Version 5.0&#x2e;</td></tr>
 <tr><td valign="top"><tt>QChar::Unicode_Unassigned</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The value is not assigned to any character in version 4.0 of Unicode.</td></tr>
 </table></p>
 <p>See also <a href="qchar.html#unicodeVersion">unicodeVersion</a>().</p>
@@ -239,9 +275,9 @@
 <h3 class="fn"><a name="QChar"></a>QChar::QChar ()</h3>
 <p>Constructs a null <a href="qchar.html">QChar</a> ('\0').</p>
 <p>See also <a href="qchar.html#isNull">isNull</a>().</p>
-<h3 class="fn"><a name="QChar-2"></a>QT_ASCII_CAST_WARN_CONSTRUCTOR QChar::QChar ( char <i>ch</i> )</h3>
+<h3 class="fn"><a name="QChar-2"></a>QChar::QChar ( char <i>ch</i> )</h3>
 <p>Constructs a <a href="qchar.html">QChar</a> corresponding to ASCII/Latin-1 character <i>ch</i>.</p>
-<h3 class="fn"><a name="QChar-3"></a>QT_ASCII_CAST_WARN_CONSTRUCTOR QChar::QChar ( <a href="qtglobal.html#uchar-typedef">uchar</a> <i>ch</i> )</h3>
+<h3 class="fn"><a name="QChar-3"></a>QChar::QChar ( <a href="qtglobal.html#uchar-typedef">uchar</a> <i>ch</i> )</h3>
 <p>Constructs a <a href="qchar.html">QChar</a> corresponding to ASCII/Latin-1 character <i>ch</i>.</p>
 <h3 class="fn"><a name="QChar-4"></a>QChar::QChar ( <a href="qlatin1char.html">QLatin1Char</a> <i>ch</i> )</h3>
 <p>Constructs a <a href="qchar.html">QChar</a> corresponding to ASCII/Latin-1 character <i>ch</i>.</p>
@@ -260,20 +296,50 @@
 <p>Constructs a <a href="qchar.html">QChar</a> for the predefined character value <i>ch</i>.</p>
 <h3 class="fn"><a name="category"></a><a href="qchar.html#Category-enum">Category</a> QChar::category () const</h3>
 <p>Returns the character's category.</p>
+<h3 class="fn"><a name="category-2"></a><a href="qchar.html#Category-enum">Category</a> QChar::category ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the category of the UCS-4-encoded character specified by <i>ucs4</i>.</p>
+<h3 class="fn"><a name="category-3"></a><a href="qchar.html#Category-enum">Category</a> QChar::category ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the category of the UCS-2-encoded character specified by <i>ucs2</i>.</p>
 <h3 class="fn"><a name="cell"></a><a href="qtglobal.html#uchar-typedef">uchar</a> QChar::cell () const</h3>
 <p>Returns the cell (least significant byte) of the Unicode character.</p>
 <p>See also <a href="qchar.html#row">row</a>().</p>
 <h3 class="fn"><a name="combiningClass"></a>unsigned char QChar::combiningClass () const</h3>
 <p>Returns the combining class for the character as defined in the Unicode standard. This is mainly useful as a positioning hint for marks attached to a base character.</p>
 <p>The Qt text rendering engine uses this information to correctly position non-spacing marks around a base character.</p>
+<h3 class="fn"><a name="combiningClass-2"></a>unsigned char QChar::combiningClass ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the combining class for the UCS-4-encoded character specified by <i>ucs4</i>, as defined in the Unicode standard.</p>
+<h3 class="fn"><a name="combiningClass-3"></a>unsigned char QChar::combiningClass ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the combining class for the UCS-2-encoded character specified by <i>ucs2</i>, as defined in the Unicode standard.</p>
 <h3 class="fn"><a name="decomposition"></a><a href="qstring.html">QString</a> QChar::decomposition () const</h3>
 <p>Decomposes a character into its parts. Returns an empty string if no decomposition exists.</p>
+<h3 class="fn"><a name="decomposition-2"></a><a href="qstring.html">QString</a> QChar::decomposition ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Decomposes the UCS-4-encoded character specified by <i>ucs4</i> into its constituent parts. Returns an empty string if no decomposition exists.</p>
 <h3 class="fn"><a name="decompositionTag"></a><a href="qchar.html#Decomposition-enum">Decomposition</a> QChar::decompositionTag () const</h3>
 <p>Returns the tag defining the composition of the character. Returns <a href="qchar.html#Decomposition-enum">QChar::Single</a> if no decomposition exists.</p>
+<h3 class="fn"><a name="decompositionTag-2"></a><a href="qchar.html#Decomposition-enum">Decomposition</a> QChar::decompositionTag ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the tag defining the composition of the UCS-4-encoded character specified by <i>ucs4</i>. Returns <a href="qchar.html#Decomposition-enum">QChar::Single</a> if no decomposition exists.</p>
 <h3 class="fn"><a name="digitValue"></a>int QChar::digitValue () const</h3>
 <p>Returns the numeric value of the digit, or -1 if the character is not a digit.</p>
+<h3 class="fn"><a name="digitValue-2"></a>int QChar::digitValue ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the numeric value of the digit, specified by the UCS-2-encoded character, <i>ucs2</i>, or -1 if the character is not a digit.</p>
+<h3 class="fn"><a name="digitValue-3"></a>int QChar::digitValue ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the numeric value of the digit specified by the UCS-4-encoded character, <i>ucs4</i>, or -1 if the character is not a digit.</p>
 <h3 class="fn"><a name="direction"></a><a href="qchar.html#Direction-enum">Direction</a> QChar::direction () const</h3>
 <p>Returns the character's direction.</p>
+<h3 class="fn"><a name="direction-2"></a><a href="qchar.html#Direction-enum">Direction</a> QChar::direction ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the direction of the UCS-4-encoded character specified by <i>ucs4</i>.</p>
+<h3 class="fn"><a name="direction-3"></a><a href="qchar.html#Direction-enum">Direction</a> QChar::direction ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the direction of the UCS-2-encoded character specified by <i>ucs2</i>.</p>
 <h3 class="fn"><a name="fromAscii"></a>QChar QChar::fromAscii ( char <i>c</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Converts the ASCII character <i>c</i> to its equivalent <a href="qchar.html">QChar</a>. This is mainly useful for non-internationalized software.</p>
 <p>An alternative is to use <a href="qlatin1char.html">QLatin1Char</a>.</p>
@@ -283,22 +349,29 @@
 <p>See also <a href="qchar.html#fromAscii">fromAscii</a>(), <a href="qchar.html#unicode">unicode</a>(), and <a href="qtextcodec.html#codecForCStrings">QTextCodec::codecForCStrings</a>().</p>
 <h3 class="fn"><a name="hasMirrored"></a>bool QChar::hasMirrored () const</h3>
 <p>Returns true if the character should be reversed if the text direction is reversed; otherwise returns false.</p>
+<p>Same as (ch.<a href="qchar.html#mirroredChar">mirroredChar</a>() != ch).</p>
 <p>See also <a href="qchar.html#mirroredChar">mirroredChar</a>().</p>
+<h3 class="fn"><a name="highSurrogate"></a><a href="qtglobal.html#ushort-typedef">ushort</a> QChar::highSurrogate ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the high surrogate value of a ucs4 code point. The returned result is undefined if <i>ucs4</i> is smaller than 0x10000.</p>
 <h3 class="fn"><a name="isDigit"></a>bool QChar::isDigit () const</h3>
 <p>Returns true if the character is a decimal digit (<a href="qchar.html#Category-enum">Number_DecimalDigit</a>); otherwise returns false.</p>
+<h3 class="fn"><a name="isHighSurrogate"></a>bool QChar::isHighSurrogate () const</h3>
+<p>Returns true if the <a href="qchar.html">QChar</a> is the high part of a utf16 surrogate (ie. if it's code point is between 0xd800 and 0xdbff).</p>
 <h3 class="fn"><a name="isLetter"></a>bool QChar::isLetter () const</h3>
 <p>Returns true if the character is a letter (Letter_* categories); otherwise returns false.</p>
 <h3 class="fn"><a name="isLetterOrNumber"></a>bool QChar::isLetterOrNumber () const</h3>
-<p>Returns true if the character is a letter or number (Letter_* or <a href="stylesheet.html#number">Number_</a>* categories); otherwise returns false.</p>
+<p>Returns true if the character is a letter or number (Letter_* or <a href="stylesheet-reference.html#number">Number_</a>* categories); otherwise returns false.</p>
+<h3 class="fn"><a name="isLowSurrogate"></a>bool QChar::isLowSurrogate () const</h3>
+<p>Returns true if the <a href="qchar.html">QChar</a> is the low part of a utf16 surrogate (ie. if it's code point is between 0xdc00 and 0xdfff).</p>
 <h3 class="fn"><a name="isLower"></a>bool QChar::isLower () const</h3>
-<p>Returns true if the character is a lowercase letter, i.e. <a href="qchar.html#category">category</a>() is <a href="qchar.html#Category-enum">Letter_Lowercase</a>.</p>
+<p>Returns true if the character is a lowercase letter, i.e&#x2e; <a href="qchar.html#category">category</a>() is <a href="qchar.html#Category-enum">Letter_Lowercase</a>.</p>
 <p>See also <a href="qchar.html#isUpper">isUpper</a>(), <a href="qchar.html#toLower">toLower</a>(), and <a href="qchar.html#toUpper">toUpper</a>().</p>
 <h3 class="fn"><a name="isMark"></a>bool QChar::isMark () const</h3>
 <p>Returns true if the character is a mark (Mark_* categories); otherwise returns false.</p>
 <h3 class="fn"><a name="isNull"></a>bool QChar::isNull () const</h3>
 <p>Returns true if the character is the Unicode character 0x0000 ('\0'); otherwise returns false.</p>
 <h3 class="fn"><a name="isNumber"></a>bool QChar::isNumber () const</h3>
-<p>Returns true if the character is a number (<a href="stylesheet.html#number">Number_</a>* categories, not just 0-9); otherwise returns false.</p>
+<p>Returns true if the character is a number (<a href="stylesheet-reference.html#number">Number_</a>* categories, not just 0-9); otherwise returns false.</p>
 <p>See also <a href="qchar.html#isDigit">isDigit</a>().</p>
 <h3 class="fn"><a name="isPrint"></a>bool QChar::isPrint () const</h3>
 <p>Returns true if the character is a printable character; otherwise returns false. This is any character not of category Cc or Cn.</p>
@@ -309,44 +382,101 @@
 <p>Returns true if the character is a separator character (Separator_* categories); otherwise returns false.</p>
 <h3 class="fn"><a name="isSymbol"></a>bool QChar::isSymbol () const</h3>
 <p>Returns true if the character is a symbol (Symbol_* categories); otherwise returns false.</p>
+<h3 class="fn"><a name="isTitleCase"></a>bool QChar::isTitleCase () const</h3>
+<p>Returns true if the character is a titlecase letter, i.e&#x2e; <a href="qchar.html#category">category</a>() is <a href="qchar.html#Category-enum">Letter_Titlecase</a>.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qchar.html#isLower">isLower</a>(), <a href="qchar.html#toUpper">toUpper</a>(), <a href="qchar.html#toLower">toLower</a>(), and <a href="qchar.html#toTitleCase">toTitleCase</a>().</p>
 <h3 class="fn"><a name="isUpper"></a>bool QChar::isUpper () const</h3>
-<p>Returns true if the character is an uppercase letter, i.e. <a href="qchar.html#category">category</a>() is <a href="qchar.html#Category-enum">Letter_Uppercase</a>.</p>
+<p>Returns true if the character is an uppercase letter, i.e&#x2e; <a href="qchar.html#category">category</a>() is <a href="qchar.html#Category-enum">Letter_Uppercase</a>.</p>
 <p>See also <a href="qchar.html#isLower">isLower</a>(), <a href="qchar.html#toUpper">toUpper</a>(), and <a href="qchar.html#toLower">toLower</a>().</p>
 <h3 class="fn"><a name="joining"></a><a href="qchar.html#Joining-enum">Joining</a> QChar::joining () const</h3>
-<p><b>This function is under development and is subject to change.</b></p>
 <p>Returns information about the joining properties of the character (needed for certain languages such as Arabic).</p>
+<h3 class="fn"><a name="joining-2"></a><a href="qchar.html#Joining-enum">Joining</a> QChar::joining ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns information about the joining properties of the UCS-4-encoded character specified by <i>ucs4</i> (needed for certain languages such as Arabic).</p>
+<h3 class="fn"><a name="joining-3"></a><a href="qchar.html#Joining-enum">Joining</a> QChar::joining ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns information about the joining properties of the UCS-2-encoded character specified by <i>ucs2</i> (needed for certain languages such as Arabic).</p>
+<h3 class="fn"><a name="lowSurrogate"></a><a href="qtglobal.html#ushort-typedef">ushort</a> QChar::lowSurrogate ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the low surrogate value of a ucs4 code point. The returned result is undefined if <i>ucs4</i> is smaller than 0x10000.</p>
 <h3 class="fn"><a name="mirroredChar"></a>QChar QChar::mirroredChar () const</h3>
 <p>Returns the mirrored character if this character is a mirrored character; otherwise returns the character itself.</p>
+<p>See also <a href="qchar.html#hasMirrored">hasMirrored</a>().</p>
+<h3 class="fn"><a name="mirroredChar-2"></a><a href="qtglobal.html#uint-typedef">uint</a> QChar::mirroredChar ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the mirrored character if the UCS-4-encoded character specified by <i>ucs4</i> is a mirrored character; otherwise returns the character itself.</p>
+<p>See also <a href="qchar.html#hasMirrored">hasMirrored</a>().</p>
+<h3 class="fn"><a name="mirroredChar-3"></a><a href="qtglobal.html#ushort-typedef">ushort</a> QChar::mirroredChar ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the mirrored character if the UCS-2-encoded character specified by <i>ucs2</i> is a mirrored character; otherwise returns the character itself.</p>
 <p>See also <a href="qchar.html#hasMirrored">hasMirrored</a>().</p>
 <h3 class="fn"><a name="row"></a><a href="qtglobal.html#uchar-typedef">uchar</a> QChar::row () const</h3>
 <p>Returns the row (most significant byte) of the Unicode character.</p>
 <p>See also <a href="qchar.html#cell">cell</a>().</p>
+<h3 class="fn"><a name="surrogateToUcs4"></a><a href="qtglobal.html#uint-typedef">uint</a> QChar::surrogateToUcs4 ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>high</i>, <a href="qtglobal.html#ushort-typedef">ushort</a> <i>low</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Converts a utf16 surrogate pair (<i>high</i>, <i>low</i>) to it's ucs4 code point.</p>
+<h3 class="fn"><a name="surrogateToUcs4-2"></a><a href="qtglobal.html#uint-typedef">uint</a> QChar::surrogateToUcs4 ( QChar <i>high</i>, QChar <i>low</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Converts a utf16 surrogate pair (<i>high</i>, <i>low</i>) to it's ucs4 code point.</p>
 <h3 class="fn"><a name="toAscii"></a>const char QChar::toAscii () const</h3>
 <p>Returns the character value of the <a href="qchar.html">QChar</a> obtained using the current codec used to read C strings, or 0 if the character is not representable using this codec. The default codec handles Latin-1 encoded text, but this can be changed to assist developers writing source code using other encodings.</p>
 <p>The main purpose of this function is to preserve ASCII characters used in C strings. This is mainly useful for developers of non-internationalized software.</p>
 <p>See also <a href="qchar.html#toLatin1">toLatin1</a>(), <a href="qchar.html#unicode">unicode</a>(), and <a href="qtextcodec.html#codecForCStrings">QTextCodec::codecForCStrings</a>().</p>
+<h3 class="fn"><a name="toCaseFolded"></a>QChar QChar::toCaseFolded () const</h3>
+<p>Returns the case folded equivalent of the character. For most Unicode characters this is the same as toLowerCase().</p>
+<h3 class="fn"><a name="toCaseFolded-2"></a><a href="qtglobal.html#uint-typedef">uint</a> QChar::toCaseFolded ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the case folded equivalent of the UCS-4-encoded character specified by <i>ucs4</i>. For most Unicode characters this is the same as toLowerCase().</p>
+<h3 class="fn"><a name="toCaseFolded-3"></a><a href="qtglobal.html#ushort-typedef">ushort</a> QChar::toCaseFolded ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the case folded equivalent of the UCS-2-encoded character specified by <i>ucs2</i>. For most Unicode characters this is the same as toLowerCase().</p>
 <h3 class="fn"><a name="toLatin1"></a>const char QChar::toLatin1 () const</h3>
 <p>Returns the Latin-1 character equivalent to the <a href="qchar.html">QChar</a>, or 0. This is mainly useful for non-internationalized software.</p>
 <p>See also <a href="qchar.html#toAscii">toAscii</a>(), <a href="qchar.html#unicode">unicode</a>(), and <a href="qtextcodec.html#codecForCStrings">QTextCodec::codecForCStrings</a>().</p>
 <h3 class="fn"><a name="toLower"></a>QChar QChar::toLower () const</h3>
-<p>Returns the lowercase equivalent if the character is uppercase; otherwise returns the character itself.</p>
+<p>Returns the lowercase equivalent if the character is uppercase or titlecase; otherwise returns the character itself.</p>
+<h3 class="fn"><a name="toLower-2"></a><a href="qtglobal.html#uint-typedef">uint</a> QChar::toLower ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the lowercase equivalent of the UCS-4-encoded character specified by <i>ucs4</i> if the character is uppercase or titlecase; otherwise returns the character itself.</p>
+<h3 class="fn"><a name="toLower-3"></a><a href="qtglobal.html#ushort-typedef">ushort</a> QChar::toLower ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the lowercase equivalent of the UCS-2-encoded character specified by <i>ucs2</i> if the character is uppercase or titlecase; otherwise returns the character itself.</p>
+<h3 class="fn"><a name="toTitleCase"></a>QChar QChar::toTitleCase () const</h3>
+<p>Returns the title case equivalent if the character is lowercase or uppercase; otherwise returns the character itself.</p>
+<h3 class="fn"><a name="toTitleCase-2"></a><a href="qtglobal.html#uint-typedef">uint</a> QChar::toTitleCase ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the title case equivalent of the UCS-4-encoded character specified by <i>ucs4</i> if the character is lowercase or uppercase; otherwise returns the character itself.</p>
+<h3 class="fn"><a name="toTitleCase-3"></a><a href="qtglobal.html#ushort-typedef">ushort</a> QChar::toTitleCase ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the title case equivalent of the UCS-2-encoded character specified by <i>ucs2</i> if the character is lowercase or uppercase; otherwise returns the character itself.</p>
 <h3 class="fn"><a name="toUpper"></a>QChar QChar::toUpper () const</h3>
-<p>Returns the uppercase equivalent if the character is lowercase; otherwise returns the character itself.</p>
+<p>Returns the uppercase equivalent if the character is lowercase or titlecase; otherwise returns the character itself.</p>
+<h3 class="fn"><a name="toUpper-2"></a><a href="qtglobal.html#uint-typedef">uint</a> QChar::toUpper ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the uppercase equivalent of the UCS-4-encoded character specified by <i>ucs4</i> if the character is lowercase or titlecase; otherwise returns the character itself.</p>
+<h3 class="fn"><a name="toUpper-3"></a><a href="qtglobal.html#ushort-typedef">ushort</a> QChar::toUpper ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the uppercase equivalent of the UCS-2-encoded character specified by <i>ucs2</i> if the character is lowercase or titlecase; otherwise returns the character itself.</p>
 <h3 class="fn"><a name="unicode"></a><a href="qtglobal.html#ushort-typedef">ushort</a> &amp; QChar::unicode ()</h3>
 <p>Returns a reference to the numeric Unicode value of the <a href="qchar.html">QChar</a>.</p>
 <h3 class="fn"><a name="unicode-2"></a>const <a href="qtglobal.html#ushort-typedef">ushort</a> QChar::unicode () const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <h3 class="fn"><a name="unicodeVersion"></a><a href="qchar.html#UnicodeVersion-enum">UnicodeVersion</a> QChar::unicodeVersion () const</h3>
 <p>Returns the Unicode version that introduced this character.</p>
+<h3 class="fn"><a name="unicodeVersion-2"></a><a href="qchar.html#UnicodeVersion-enum">UnicodeVersion</a> QChar::unicodeVersion ( <a href="qtglobal.html#uint-typedef">uint</a> <i>ucs4</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the Unicode version that introduced the character specified in its UCS-4-encoded form as <i>ucs4</i>.</p>
+<h3 class="fn"><a name="unicodeVersion-3"></a><a href="qchar.html#UnicodeVersion-enum">UnicodeVersion</a> QChar::unicodeVersion ( <a href="qtglobal.html#ushort-typedef">ushort</a> <i>ucs2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the Unicode version that introduced the character specified in its UCS-2-encoded form as <i>ucs2</i>.</p>
 <hr />
 <h2>Related Non-Members</h2>
 <h3 class="fn"><a name="operator-not-eq-10"></a>bool operator!= ( QChar <i>c1</i>, QChar <i>c2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>c1</i> and <i>c2</i> are not the same Unicode character; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-lt-2"></a>bool operator&lt; ( QChar <i>c1</i>, QChar <i>c2</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
+<h3 class="fn"><a name="operator-lt"></a>bool operator&lt; ( QChar <i>c1</i>, QChar <i>c2</i> )</h3>
 <p>Returns true if the numeric Unicode value of <i>c1</i> is less than that of <i>c2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-lt-lt-36"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QChar &amp; <i>chr</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-30"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QChar &amp; <i>chr</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the char <i>chr</i> to the stream <i>out</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
@@ -381,6 +511,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

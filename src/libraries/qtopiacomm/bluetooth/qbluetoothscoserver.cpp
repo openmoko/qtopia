@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,24 +26,24 @@
 
 #include <qbluetoothscoserver.h>
 #include <qbluetoothscosocket.h>
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
+#include "qbluetoothnamespace_p.h"
 #include <qbluetoothaddress.h>
 
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <bluetooth/sco.h>
-#include <fcntl.h>
+#include "qbluetoothabstractserver_p.h"
+#include "qbluetoothsocketengine_p.h"
 
-class QBluetoothScoServerPrivate
+class QBluetoothScoServerPrivate : public QBluetoothAbstractServerPrivate
 {
 public:
+    QBluetoothScoServerPrivate(QBluetoothScoServer *parent);
     QBluetoothAddress m_address;
 };
+
+QBluetoothScoServerPrivate::QBluetoothScoServerPrivate(QBluetoothScoServer *parent)
+    : QBluetoothAbstractServerPrivate(parent)
+{
+    
+}
 
 /*!
     \class QBluetoothScoServer
@@ -78,9 +78,8 @@ public:
     The server is in the UnconnectedState.
  */
 QBluetoothScoServer::QBluetoothScoServer(QObject *parent)
-    : QBluetoothAbstractServer(parent)
+    : QBluetoothAbstractServer(new QBluetoothScoServerPrivate(this), parent)
 {
-    m_data = new QBluetoothScoServerPrivate();
 }
 
 /*!
@@ -88,8 +87,6 @@ QBluetoothScoServer::QBluetoothScoServer(QObject *parent)
 */
 QBluetoothScoServer::~QBluetoothScoServer()
 {
-    if (m_data)
-        delete m_data;
 }
 
 /*!
@@ -102,43 +99,40 @@ QBluetoothScoServer::~QBluetoothScoServer()
  */
 bool QBluetoothScoServer::listen(const QBluetoothAddress &local)
 {
+    SERVER_DATA(QBluetoothScoServer);
+
     if (isListening()) {
         return false;
     }
 
-    int fd = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_SCO);
+    m_data->m_fd = m_data->m_engine->scoSocket();
 
-    if (fd < 0) {
-        setError(QBluetoothAbstractServer::ResourceError);
+    if (m_data->m_fd < 0) {
         return false;
     }
 
-    struct sockaddr_sco addr;
-    bdaddr_t localBdaddr;
+    m_data->m_engine->setSocketOption(m_data->m_fd,
+                                      QBluetoothSocketEngine::NonBlockingOption);
 
-    str2bdaddr(local.toString(), &localBdaddr);
-
-    memset(&addr, 0, sizeof(addr));
-    addr.sco_family = AF_BLUETOOTH;
-    memcpy(&addr.sco_bdaddr, &localBdaddr, sizeof(bdaddr_t));
-
-    bool ret = initiateListen(fd, (struct sockaddr *)&addr, sizeof(addr));
-    if (ret) {
-        m_data->m_address = local;
-
-        struct sockaddr_sco addr;
-        socklen_t len = sizeof(addr);
-        memset(&addr, 0, sizeof(addr));
-
-        if (::getsockname(fd, (struct sockaddr *) &addr, &len) == 0) {
-            bdaddr_t localBdaddr;
-            memcpy(&localBdaddr, &addr.sco_bdaddr, sizeof(bdaddr_t));
-            QString str = bdaddr2str(&localBdaddr);
-            m_data->m_address = QBluetoothAddress(str);
-        }
+    if (!m_data->m_engine->scoBind(m_data->m_fd, local)) {
+        m_data->m_engine->close(m_data->m_fd);
+        m_data->m_fd = -1;
+        return false;
     }
 
-    return ret;
+    if (!m_data->m_engine->listen(m_data->m_fd, 1)) {
+        m_data->m_engine->close(m_data->m_fd);
+        m_data->m_fd = -1;
+        return false;
+    }
+
+    setListening();
+
+    m_data->m_address = local;
+
+    m_data->m_engine->getsocknameSco(m_data->m_fd, &m_data->m_address);
+
+    return true;
 }
 
 /*!
@@ -146,8 +140,9 @@ bool QBluetoothScoServer::listen(const QBluetoothAddress &local)
  */
 void QBluetoothScoServer::close()
 {
-    QBluetoothAbstractServer::close();
+    SERVER_DATA(QBluetoothScoServer);
 
+    QBluetoothAbstractServer::close();
     m_data->m_address = QBluetoothAddress::invalid;
 }
 
@@ -157,6 +152,7 @@ void QBluetoothScoServer::close()
  */
 QBluetoothAddress QBluetoothScoServer::serverAddress() const
 {
+    SERVER_DATA(QBluetoothScoServer);
     return m_data->m_address;
 }
 

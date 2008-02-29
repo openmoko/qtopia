@@ -1,25 +1,15 @@
 <ui version="4.0" >
- <comment>*********************************************************************
-**
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
-**
-** This file is part of the Qt Assistant of the Qt Toolkit.
-**
-** This file may be used under the terms of the GNU General Public
-** License version 2.0 as published by the Free Software Foundation
-** and appearing in the file LICENSE.GPL included in the packaging of
-** this file.  Please review the following information to ensure GNU
-** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
-**
-** If you are unsure which license is appropriate for your use, please
-** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+ <comment>*********************************************************************&#xd;
+**&#xd;
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.&#xd;
+**&#xd;
+** This file is part of the Qt Assistant of the Qt Toolkit.&#xd;
+**&#xd;
+** $TROLLTECH_DUAL_LICENSE$&#xd;
+**&#xd;
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE&#xd;
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&#xd;
+**&#xd;
 *********************************************************************</comment>
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow" >
@@ -43,7 +33,10 @@
     <enum>Qt::Horizontal</enum>
    </property>
    <attribute name="toolBarArea" >
-    <number>4</number>
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak" >
+    <bool>false</bool>
    </attribute>
    <addaction name="actionGoPrevious" />
    <addaction name="actionGoNext" />
@@ -67,7 +60,10 @@
     <enum>Qt::Horizontal</enum>
    </property>
    <attribute name="toolBarArea" >
-    <number>4</number>
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak" >
+    <bool>false</bool>
    </attribute>
   </widget>
   <widget class="QMenuBar" name="menubar" >
@@ -76,7 +72,7 @@
      <x>0</x>
      <y>0</y>
      <width>949</width>
-     <height>21</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="helpMenu" >
@@ -137,6 +133,8 @@
     <addaction name="actionEditFind" />
     <addaction name="actionEditFindNext" />
     <addaction name="actionEditFindPrev" />
+    <addaction name="separator" />
+    <addaction name="actionEditFont_Settings" />
    </widget>
    <addaction name="fileMenu" />
    <addaction name="editMenu" />
@@ -168,6 +166,9 @@
    </property>
    <property name="shortcut" >
     <string>Ctrl+Q</string>
+   </property>
+   <property name="menuRole" >
+    <enum>QAction::QuitRole</enum>
    </property>
   </action>
   <action name="actionEditCopy" >
@@ -263,10 +264,16 @@
    <property name="whatsThis" >
     <string>Display further information about Qt Assistant.</string>
    </property>
+   <property name="menuRole" >
+    <enum>QAction::AboutRole</enum>
+   </property>
   </action>
   <action name="actionAboutApplication" >
    <property name="text" >
     <string>About Qt</string>
+   </property>
+   <property name="menuRole" >
+    <enum>QAction::AboutQtRole</enum>
    </property>
   </action>
   <action name="actionZoomIn" >
@@ -314,6 +321,9 @@
    </property>
    <property name="whatsThis" >
     <string>Close the current window.</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionAddBookmark" >
@@ -401,6 +411,14 @@
    </property>
    <property name="whatsThis" >
     <string>Select the page in contents tab.</string>
+   </property>
+  </action>
+  <action name="actionEditFont_Settings" >
+   <property name="text" >
+    <string>Font Settings...</string>
+   </property>
+   <property name="menuRole" >
+    <enum>QAction::PreferencesRole</enum>
    </property>
   </action>
  </widget>

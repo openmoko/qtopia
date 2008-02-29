@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,47 +52,25 @@
 #  define DEBUG if(false)qDebug
 #endif
 
-
-// 256 maximum + 1 used in QRegExp
-static const int MAX_THREAD_STORAGE = 257;
-
+static QBasicAtomic idCounter = Q_ATOMIC_INIT(0);
 Q_GLOBAL_STATIC(QMutex, mutex)
-
-static bool thread_storage_init = false;
-static struct {
-    bool used;
-    void (*func)(void *);
-} thread_storage_usage[MAX_THREAD_STORAGE];
-
+typedef QHash<int, void (*)(void *)> DestructorHash;
+Q_GLOBAL_STATIC(DestructorHash, destructors)
 
 QThreadStorageData::QThreadStorageData(void (*func)(void *))
-    : id(0)
+    : id(idCounter.fetchAndAdd(1))
 {
     QMutexLocker locker(mutex());
+    destructors()->insert(id, func);
 
-    // make sure things are initialized
-    if (! thread_storage_init)
-        memset(thread_storage_usage, 0, sizeof(thread_storage_usage));
-    thread_storage_init = true;
-
-    for (; id < MAX_THREAD_STORAGE; ++id) {
-        if (!thread_storage_usage[id].used)
-            break;
-    }
-
-    Q_ASSERT(id >= 0 && id < MAX_THREAD_STORAGE);
-    thread_storage_usage[id].used = true;
-    thread_storage_usage[id].func = func;
-
-    DEBUG("QThreadStorageData: Allocated id %d", id);
+    DEBUG("QThreadStorageData: Allocated id %d, destructor %p", id, func);
 }
 
 QThreadStorageData::~QThreadStorageData()
 {
     QMutexLocker locker(mutex());
-
-    // thread_storage_usage[id].used = false;
-    thread_storage_usage[id].func = 0;
+    if (destructors())
+        destructors()->remove(id);
 
     DEBUG("QThreadStorageData: Released id %d", id);
 }
@@ -89,7 +82,12 @@ void **QThreadStorageData::get() const
         qWarning("QThreadStorage::get: QThreadStorage can only be used with threads started with QThread");
         return 0;
     }
-    return data->tls && data->tls[id] ? &data->tls[id] : 0;
+    QHash<int, void *>::iterator it = data->tls.find(id);
+    DEBUG("QThreadStorageData: Returning storage %d, data %p, for thread %p",
+          id,
+          it != data->tls.end() ? it.value() : 0,
+          data->thread);
+    return it != data->tls.end() && it.value() != 0 ? &it.value() : 0;
 }
 
 void **QThreadStorageData::set(void *p)
@@ -99,52 +97,69 @@ void **QThreadStorageData::set(void *p)
         qWarning("QThreadStorage::set: QThreadStorage can only be used with threads started with QThread");
         return 0;
     }
-    if (!data->tls) {
-        DEBUG("QThreadStorageData: Allocating storage %d for thread %p",
-              id, QThread::currentThread());
 
-        data->tls = new void*[MAX_THREAD_STORAGE];
-        memset(data->tls, 0, sizeof(void*) * MAX_THREAD_STORAGE);
+    QHash<int, void *>::iterator it = data->tls.find(id);
+    if (it != data->tls.end()) {
+        // delete any previous data
+        if (it.value() != 0) {
+            DEBUG("QThreadStorageData: Deleting previous storage %d, data %p, for thread %p",
+                  id,
+                  it.value(),
+                  data->thread);
+
+            void *q = it.value();
+            it.value() = 0;
+
+            mutex()->lock();
+            void (*destructor)(void *) = destructors()->value(id);
+            mutex()->unlock();
+
+            destructor(q);
+        }
+
+        // store new data
+        it.value() = p;
+        DEBUG("QThreadStorageData: Set storage %d for thread %p to %p", id, data->thread, p);
+    } else {
+        it = data->tls.insert(id, p);
+        DEBUG("QThreadStorageData: Inserted storage %d, data %p, for thread %p", id, p, data->thread);
     }
 
-    // delete any previous data
-    if (data->tls[id]) {
-        DEBUG("QThreadStorageData: Deleting previous storage %d for thread %p",
-              id, QThread::currentThread());
-
-        void *q = data->tls[id];
-        data->tls[id] = 0;
-        thread_storage_usage[id].func(q);
-    }
-
-    // store new data
-    data->tls[id] = p;
-    DEBUG("QThreadStorageData: Set storage %d for thread %p to %p",
-          id, QThread::currentThread(), p);
-    return &data->tls[id];
+    return &it.value();
 }
 
-void QThreadStorageData::finish(void **tls)
+void QThreadStorageData::finish(void **p)
 {
-    if (!tls) return; // nothing to do
+    QHash<int, void *> *tls = reinterpret_cast<QHash<int, void *> *>(p);
+    if (!tls || tls->isEmpty() || !mutex())
+        return; // nothing to do
 
-    DEBUG("QThreadStorageData: Destroying storage for thread %p",
-          QThread::currentThread());
+    DEBUG("QThreadStorageData: Destroying storage for thread %p", QThread::currentThread());
 
-    for (int i = 0; i < MAX_THREAD_STORAGE; ++i) {
-        if (!tls[i]) continue;
-        if (!thread_storage_usage[i].func) {
-            qWarning("QThreadStorage: Thread %p exited after QThreadStorage destroyed",
-                     QThread::currentThread());
+    QHash<int, void *>::iterator it = tls->begin();
+    while (it != tls->end()) {
+        int id = it.key();
+        void *q = it.value();
+        it.value() = 0;
+        ++it;
+
+        if (!q) {
+            // data already deleted
             continue;
         }
 
-        void *q = tls[i];
-        tls[i] = 0;
-        thread_storage_usage[i].func(q);
-    }
+        mutex()->lock();
+        void (*destructor)(void *) = destructors()->value(id);
+        mutex()->unlock();
 
-    delete [] tls;
+        if (!destructor) {
+            qWarning("QThreadStorage: Thread %p exited after QThreadStorage %d destroyed",
+                     QThread::currentThread(), id);
+            continue;
+        }
+        destructor(q);
+    }
+    tls->clear();
 }
 
 /*!
@@ -195,24 +210,10 @@ void QThreadStorageData::finish(void **tls)
     QThreadStorage only deletes per-thread data when the thread exits
     or when setLocalData() is called multiple times.
 
-    \o QThreadStorage can only be used with threads started with
-    QThread. It cannot be used with threads started using
-    platform-specific APIs.
-
-    \o As a corollary to the above, platform-specific APIs cannot be
-    used to exit or terminate a QThread using QThreadStorage. Doing so
-    will cause all per-thread data to be leaked. See QThread::exit()
-    and QThread::terminate().
-
     \o QThreadStorage can be used to store data for the \c main()
-    thread after QApplication has been constructed. QThreadStorage
-    deletes all data set for the \c main() thread when QApplication is
-    destroyed, regardless of whether or not the \c main() thread has
-    actually finished.
-
-    \o The implementation of QThreadStorage limits the total number of
-    QThreadStorage objects to 256. An unlimited number of threads
-    can store per-thread data in each QThreadStorage object.
+    thread. QThreadStorage deletes all data set for the \c main()
+    thread when QApplication is destroyed, regardless of whether or
+    not the \c main() thread has actually finished.
 
     \endlist
 

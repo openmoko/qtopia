@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -84,40 +84,44 @@ public:
         Business = 0x02
     };
 
-    /* 12 types total so far */
+    /* Don't even THINK about using this as a bitmask */
     enum PhoneType {
         /* phone */
         OtherPhone = 0x00, // other land line
         HomePhone = 0x01, // home phone (not mobile, fax or pager
         BusinessPhone = 0x02, // work phone
 
-        Mobile = 0x0100, // as on other MobilePhone
-        Fax = 0x0200, // as on other Fax
+        Mobile = 0x0100, // as in other MobilePhone
+        HomeMobile = 0x0101,
+        BusinessMobile = 0x0102,
+
+        Fax = 0x0200, // as in other Fax
+        HomeFax = 0x0201,
+        BusinessFax = 0x0202,
+
+        VOIP = 0x0300,
+        HomeVOIP = 0x0301,
+        BusinessVOIP = 0x0302,
+
         Pager = 0x0400, // as in other Pager
-
-        HomeMobile = Mobile | HomePhone,
-        HomeFax = Fax | HomePhone,
-        HomePager = Pager | HomePhone,
-
-        BusinessMobile = Mobile | BusinessPhone,
-        BusinessFax = Fax | BusinessPhone,
-        BusinessPager = Pager | BusinessPhone
+        HomePager = 0x0401,
+        BusinessPager = 0x0402
     };
-
-    Qt::WindowFlags window_flags;
-
 
     QContact &operator=(const QContact &other);
 
     bool operator==(const QContact &other) const;
     bool operator!=(const QContact &other) const;
 
-    static bool writeVCard( const QString &filename,
-        const QList<QContact> &contacts);
+    static bool writeVCard( QIODevice *, const QList<QContact> & );
+    static bool writeVCard( QIODevice *, const QContact & );
+    static QList<QContact> readVCard( QIODevice * );
+
+    /* deprecated - keep for source compatibility */
     static QList<QContact> readVCard( const QString &filename );
     static QList<QContact> readVCard( const QByteArray &vcard );
     static QList<QContact> readVCard( VObject* vobject );
-
+    static bool writeVCard( const QString &filename, const QList<QContact> &contacts);
     bool writeVCard( const QString &filename ) const;
     void writeVCard( QFile &file ) const;
     void writeVCard( QDataStream *stream ) const;
@@ -141,8 +145,8 @@ public:
     void setEmailList( const QStringList &v );
 
     void setPhoneNumber(PhoneType, const QString &);
-
     void setAddress(Location, const QContactAddress &);
+
     // home
     void setHomeStreet( const QString &v );
     void setHomeCity( const QString &v );
@@ -152,6 +156,7 @@ public:
     void setHomePhone( const QString &v ) { setPhoneNumber(HomePhone, v); }
     void setHomeFax( const QString &v ) { setPhoneNumber(HomeFax, v); }
     void setHomeMobile( const QString &v ) { setPhoneNumber(HomeMobile, v); }
+    void setHomeVOIP( const QString &v ) { setPhoneNumber(HomeVOIP, v); }
 
     void setHomeWebpage( const QString &v ) { replace( HomeWebPage, v ); }
 
@@ -173,6 +178,7 @@ public:
     void setBusinessFax( const QString &v ) { setPhoneNumber(BusinessFax, v); }
     void setBusinessMobile( const QString &v ) { setPhoneNumber(BusinessMobile, v); }
     void setBusinessPager( const QString &v ) { setPhoneNumber(BusinessPager, v); }
+    void setBusinessVOIP( const QString &v) { setPhoneNumber(BusinessVOIP, v); }
 
     void setProfession( const QString &v ) { replace( Profession, v ); }
     void setAssistant( const QString &v ) { replace( Assistant, v ); }
@@ -188,9 +194,12 @@ public:
     void setChildren( const QString &v ) { replace( Children, v ); }
 
     // other
-    void setNotes( const QString &v ) { replace( Notes, v); }
-    void setPortraitFile( const QString &v ) { replace( Portrait, v); }
+    void setNotes( const QString &v );
+    void setPortraitFile( const QString &v );
+
     void changePortrait( const QPixmap &p );
+    void changePortrait( const QImage &p );
+    void changePortrait( const QString &p, const QRect & = QRect() );
 
     bool match( const QString &regexp ) const;
     bool match( const QRegExp &regexp ) const;
@@ -232,6 +241,7 @@ public:
     QString homePhone() const { return phoneNumber(HomePhone); }
     QString homeFax() const { return phoneNumber(HomeFax); }
     QString homeMobile() const { return phoneNumber(HomeMobile); }
+    QString homeVOIP() const { return phoneNumber(HomeVOIP); }
 
     QString homeWebpage() const { return find( HomeWebPage ); }
     /** Multi line string containing all non-empty address info in the form
@@ -259,6 +269,7 @@ public:
     QString businessPhone() const { return phoneNumber(BusinessPhone); }
     QString businessFax() const { return phoneNumber(BusinessFax); }
     QString businessMobile() const { return phoneNumber(BusinessMobile); }
+    QString businessVOIP() const { return phoneNumber(BusinessVOIP); }
     QString businessPager() const { return phoneNumber(BusinessPager); }
 
     QString profession() const { return find( Profession ); }
@@ -273,6 +284,11 @@ public:
 
     QMap<PhoneType, QString> phoneNumbers() const;
     QMap<Location, QContactAddress> addresses() const;
+
+    void setPhoneNumbers(const QMap<PhoneType, QString> &);
+    void setAddresses(const QMap<Location, QContactAddress> &);
+    void clearPhoneNumbers();
+    void clearAddresses();
 
     QString defaultPhoneNumber() const;
 
@@ -298,6 +314,7 @@ public:
     static QContact parseLabel(const QString &, const QContact &contact = QContact());
 
     QPixmap portrait() const;
+    QIcon icon() const;
     QPixmap thumbnail() const;
     static QSize portraitSize();
     static QSize thumbnailSize();
@@ -323,6 +340,9 @@ protected:
     const QMap<QString, QString> &customFieldsRef() const;
 
 private:
+    void removeExistingPortrait();
+    void saveScaledPortrait(const QImage &);
+
     enum ContactFields {
         NameTitle,
         FirstName,
@@ -366,6 +386,14 @@ private:
     void insert( int key, const QString &value );
     void replace( int key, const QString &value );
     QString find( int key ) const;
+
+    static QIcon &corporationIcon();
+    static QIcon &genericIcon();
+    static QIcon &personalIcon();
+
+    static QIcon cIcon;
+    static QIcon gIcon;
+    static QIcon pIcon;
 
     QSharedDataPointer<QContactData> d;
 };

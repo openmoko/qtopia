@@ -10,13 +10,15 @@ depends(libraries/qtopiacomm)
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=beaming*
 help.hint=help
+INSTALLS+=help
 pics.files=$$QTOPIA_DEPOT_PATH/pics/beaming/*
 pics.path=/pics/beaming
 pics.hint=pics
-desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/Beaming.desktop
+INSTALLS+=pics
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/beaming.desktop
 desktop.path=/apps/Settings
 desktop.hint=desktop
-INSTALLS+=help pics desktop
+INSTALLS+=desktop
 
 pkg.desc=Beaming settings dialog for Qtopia.
-pkg.domain=window,beaming
+pkg.domain=window,beaming,doc_server,doc_write

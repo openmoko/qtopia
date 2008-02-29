@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -205,28 +205,28 @@ void QDSActionPrivate::connectToChannel()
             mResponseChannel,
             MESSAGE( heartbeat() ),
             this,
-            SLOT( heartbeatSlot() ),
+            SLOT(heartbeatSlot()),
             QtopiaIpcAdaptor::SenderIsChannel );
 
         QtopiaIpcAdaptor::connect(
             mResponseChannel,
             MESSAGE( response() ),
             this,
-            SLOT( responseSlot() ),
+            SLOT(responseSlot()),
             QtopiaIpcAdaptor::SenderIsChannel );
 
         QtopiaIpcAdaptor::connect(
             mResponseChannel,
             MESSAGE( response( const QDSData& ) ),
             this,
-            SLOT( responseSlot( const QDSData& ) ),
+            SLOT(responseSlot(QDSData)),
             QtopiaIpcAdaptor::SenderIsChannel );
 
         QtopiaIpcAdaptor::connect(
             mResponseChannel,
             MESSAGE( error( const QString& ) ),
             this,
-            SLOT( errorSlot( const QString& ) ),
+            SLOT(errorSlot(QString)),
             QtopiaIpcAdaptor::SenderIsChannel );
     }
 }
@@ -243,9 +243,9 @@ void QDSActionPrivate::startTimer()
         mTimer = new QTimer( this );
         mTimer->setSingleShot( true );
         connect( mTimer,
-                 SIGNAL( timeout() ),
+                 SIGNAL(timeout()),
                  this,
-                 SLOT( requestTimeoutSlot() ) );
+                 SLOT(requestTimeoutSlot()) );
     }
 
     mTimer->start( QDS::REQUEST_TIMEOUT );
@@ -273,19 +273,19 @@ void QDSActionPrivate::reset()
 void QDSActionPrivate::connectToAction( QDSAction* action )
 {
     connect( this,
-             SIGNAL( response( const QUniqueId& ) ),
+             SIGNAL(response(QUniqueId)),
              action,
-             SIGNAL( response( const QUniqueId& ) ) );
+             SIGNAL(response(QUniqueId)) );
 
     connect( this,
-             SIGNAL( response( const QUniqueId&, const QDSData& ) ),
+             SIGNAL(response(QUniqueId,QDSData)),
              action,
-             SIGNAL( response( const QUniqueId&, const QDSData& ) ) );
+             SIGNAL(response(QUniqueId,QDSData)) );
 
     connect( this,
-             SIGNAL( error( const QUniqueId&, const QString& ) ),
+             SIGNAL(error(QUniqueId,QString)),
              action,
-             SIGNAL( error( const QUniqueId&, const QString& ) ) );
+             SIGNAL(error(QUniqueId,QString)) );
 }
 
 // ============================================================================

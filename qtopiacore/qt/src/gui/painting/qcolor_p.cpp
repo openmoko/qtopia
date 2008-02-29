@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,19 +45,26 @@
 #include "qrgb.h"
 #include "qstringlist.h"
 
-static int hex2int(char hex)
+static inline int h2i(char hex)
 {
-    QChar hexchar = QLatin1Char(hex);
-    int v;
-    if (hexchar.isDigit())
-        v = hexchar.digitValue();
-    else if (hexchar >= QLatin1Char('A') && hexchar <= QLatin1Char('F'))
-        v = hexchar.cell() - 'A' + 10;
-    else if (hexchar >= QLatin1Char('a') && hexchar <= QLatin1Char('f'))
-        v = hexchar.cell() - 'a' + 10;
-    else
-        v = -1;
-    return v;
+    if (hex >= '0' && hex <= '9')
+        return hex - '0';
+    if (hex >= 'a' && hex <= 'f')
+        return hex - 'a' + 10;
+    if (hex >= 'A' && hex <= 'F')
+        return hex - 'A' + 10;
+    return -1;
+}
+
+static inline int hex2int(const char *s)
+{
+    return (h2i(s[0]) << 4) | h2i(s[1]);
+}
+
+static inline int hex2int(char s)
+{
+    int h = h2i(s);
+    return (h << 4) | h;
 }
 
 bool qt_get_hex_rgb(const char *name, QRgb *rgb)
@@ -53,21 +75,21 @@ bool qt_get_hex_rgb(const char *name, QRgb *rgb)
     int len = qstrlen(name);
     int r, g, b;
     if (len == 12) {
-        r = (hex2int(name[0]) << 4) + hex2int(name[1]);
-        g = (hex2int(name[4]) << 4) + hex2int(name[5]);
-        b = (hex2int(name[8]) << 4) + hex2int(name[9]);
+        r = hex2int(name);
+        g = hex2int(name + 4);
+        b = hex2int(name + 8);
     } else if (len == 9) {
-        r = (hex2int(name[0]) << 4) + hex2int(name[1]);
-        g = (hex2int(name[3]) << 4) + hex2int(name[4]);
-        b = (hex2int(name[6]) << 4) + hex2int(name[7]);
+        r = hex2int(name);
+        g = hex2int(name + 3);
+        b = hex2int(name + 6);
     } else if (len == 6) {
-        r = (hex2int(name[0]) << 4) + hex2int(name[1]);
-        g = (hex2int(name[2]) << 4) + hex2int(name[3]);
-        b = (hex2int(name[4]) << 4) + hex2int(name[5]);
+        r = hex2int(name);
+        g = hex2int(name + 2);
+        b = hex2int(name + 4);
     } else if (len == 3) {
-        r = (hex2int(name[0]) << 4) + hex2int(name[0]);
-        g = (hex2int(name[1]) << 4) + hex2int(name[1]);
-        b = (hex2int(name[2]) << 4) + hex2int(name[2]);
+        r = hex2int(name[0]);
+        g = hex2int(name[1]);
+        b = hex2int(name[2]);
     } else {
         r = g = b = -1;
     }
@@ -77,6 +99,17 @@ bool qt_get_hex_rgb(const char *name, QRgb *rgb)
     }
     *rgb = qRgb(r, g ,b);
     return true;
+}
+
+bool qt_get_hex_rgb(const QChar *str, int len, QRgb *rgb)
+{
+    if (len > 13)
+        return false;
+    char tmp[16];
+    for(int i = 0; i < len; ++i)
+        tmp[i] = str[i].toLatin1();
+    tmp[len] = 0;
+    return qt_get_hex_rgb(tmp, rgb);
 }
 
 #ifndef QT_NO_COLORNAMES
@@ -267,25 +300,47 @@ static int rgb_cmp(const void *d1, const void *d2)
 }
 #endif
 
-bool qt_get_named_rgb(const char *name, QRgb* rgb)
+static bool get_named_rgb(const char *name, QRgb *rgb)
 {
-    int len = int(strlen(name))+1;
-    char *name_no_space = (char *)malloc(len);
-    for(int o = 0, i = 0; i < len; i++) {
-        if(name[i] != '\t' && name[i] != ' ')
-            name_no_space[o++] = name[i];
-    }
-
     RGBData x;
-    x.name = name_no_space;
+    x.name = name;
     RGBData *r = (RGBData*)bsearch(&x, rgbTbl, rgbTblSize, sizeof(RGBData), rgb_cmp);
-    free(name_no_space);
     if (r) {
         *rgb = r->value;
         return true;
     }
     return false;
 }
+
+bool qt_get_named_rgb(const char *name, QRgb* rgb)
+{
+    int len = int(strlen(name));
+    if(len > 255)
+        return false;
+    char name_no_space[256];
+    for(int o = 0, i = 0; i < len; i++) {
+        if(name[i] != '\t' && name[i] != ' ')
+            name_no_space[o++] = name[i];
+    }
+    name_no_space[len] = 0;
+
+    return get_named_rgb(name_no_space, rgb);
+}
+
+bool qt_get_named_rgb(const QChar *name, int len, QRgb *rgb)
+{
+    if(len > 255)
+        return false;
+    char name_no_space[256];
+    for(int o = 0, i = 0; i < len; i++) {
+        if(name[i] != QLatin1Char('\t') && name[i] != QLatin1Char(' '))
+            name_no_space[o++] = name[i].toLatin1();
+    }
+    name_no_space[len] = 0;
+
+    return get_named_rgb(name_no_space, rgb);
+}
+
 
 uint qt_get_rgb_val(const char *name)
 {

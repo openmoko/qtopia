@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -947,7 +962,7 @@ QSize Q3TableItem::sizeHint() const
     }
 
     QString t = text();
-    if (!wordwrap && t.find('\n') == -1)
+    if (!wordwrap && t.find(QLatin1Char('\n')) == -1)
         return QSize(s.width() + table()->fontMetrics().width(text()) + 10,
                       QMAX(s.height(), table()->fontMetrics().height())).expandedTo(strutSize);
 
@@ -1190,7 +1205,7 @@ int Q3ComboTableItem::fakeRef = 0;
 */
 
 Q3ComboTableItem::Q3ComboTableItem(Q3Table *table, const QStringList &list, bool editable)
-    : Q3TableItem(table, WhenCurrent, ""), entries(list), current(0), edit(editable)
+    : Q3TableItem(table, WhenCurrent, QLatin1String("")), entries(list), current(0), edit(editable)
 {
     setReplaceable(false);
     if (!Q3ComboTableItem::fakeCombo) {
@@ -1450,6 +1465,15 @@ QSize Q3ComboTableItem::sizeHint() const
     fakeCombo->removeItem(fakeCombo->count() - 1);
     return sh.expandedTo(QApplication::globalStrut());
 }
+
+/*!
+    \fn QString Q3ComboTableItem::text() const
+
+    Returns the text of the table item or an empty string if there is
+    no text.
+
+    \sa Q3TableItem::text()
+*/
 
 /*!
     \class Q3CheckTableItem
@@ -2090,7 +2114,7 @@ void Q3Table::init(int rows, int cols)
     // Prepare for contents
     contents.setAutoDelete(false);
 
-    // Connect header, table and scrollbars
+    // Connect header, table and scroll bars
     connect(horizontalScrollBar(), SIGNAL(valueChanged(int)),
              topHeader, SLOT(setOffset(int)));
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)),
@@ -2309,7 +2333,7 @@ Q3Table::FocusStyle Q3Table::focusStyle() const
 /*!
     This functions updates all the header states to be in sync with
     the current selections. This should be called after
-    programatically changing, adding or removing selections, so that
+    programmatically changing, adding or removing selections, so that
     the headers are updated.
 */
 
@@ -3884,7 +3908,10 @@ void Q3Table::contentsMouseReleaseEvent(QMouseEvent *e)
             QMouseEvent ev(e->type(), w->mapFromGlobal(e->globalPos()),
                             e->globalPos(), e->button(), e->state());
             QApplication::sendPostedEvents(w, 0);
+            bool old = w->testAttribute(Qt::WA_NoMousePropagation);
+            w->setAttribute(Qt::WA_NoMousePropagation, true);
             QApplication::sendEvent(w, &ev);
+            w->setAttribute(Qt::WA_NoMousePropagation, old);
         }
     }
 }
@@ -4876,7 +4903,7 @@ void Q3Table::setNumRows(int r)
     bool updateBefore;
     updateHeaderAndResizeContents(leftHeader, numRows(), r, 20, updateBefore);
 
-    int w = fontMetrics().width(QString::number(r) + "W");
+    int w = fontMetrics().width(QString::number(r) + QLatin1Char('W'));
     if (VERTICALMARGIN > 0 && w > VERTICALMARGIN)
         setLeftMargin(w);
 

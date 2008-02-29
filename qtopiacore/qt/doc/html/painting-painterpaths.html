@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/examples/painterpaths.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/painterpaths.qdoc -->
 <head>
-  <title>Qt 4.2: Painter Paths Example</title>
+  <title>Qt 4.3: Painter Paths Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Painter Paths Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Painter Paths Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="painting-painterpaths-renderarea-cpp.html">painting/painterpaths/renderarea.cpp</a></li>
@@ -81,7 +82,7 @@
      rectPath.lineTo(20.0, 70.0);
      rectPath.closeSubpath();</pre>
 <p>We construct a rectangle with sharp corners using the <a href="qpainterpath.html#moveTo">QPainterPath::moveTo</a>() and <a href="qpainterpath.html#lineTo">QPainterPath::lineTo</a>() functions.</p>
-<p><a href="qpainterpath.html#moveTo">QPainterPath::moveTo</a>() moves the current point to the point passed as argument. A painter path is an object composed of a number of graphical building blocks, i.e. subpaths. Moving the current point will also start a new subpath (implicitly closing the previously current path when the new one is started). The <a href="qpainterpath.html#lineTo">QPainterPath::lineTo</a>() function adds a straight line from the current point to the given end point. After the line is drawn, the current point is updated to be at the end point of the line.</p>
+<p><a href="qpainterpath.html#moveTo">QPainterPath::moveTo</a>() moves the current point to the point passed as argument. A painter path is an object composed of a number of graphical building blocks, i.e&#x2e; subpaths. Moving the current point will also start a new subpath (implicitly closing the previously current path when the new one is started). The <a href="qpainterpath.html#lineTo">QPainterPath::lineTo</a>() function adds a straight line from the current point to the given end point. After the line is drawn, the current point is updated to be at the end point of the line.</p>
 <p>We first move the current point starting a new subpath, and we draw three of the rectangle's sides. Then we call the <a href="qpainterpath.html#closeSubpath">QPainterPath::closeSubpath</a>() function which draws a line to the beginning of the current subpath. A new subpath is automatically begun when the current subpath is closed. The current point of the new path is (0, 0). We could also have called <a href="qpainterpath.html#lineTo">QPainterPath::lineTo</a>() to draw the last line as well, and then explicitly start a new subpath using the <a href="qpainterpath.html#moveTo">QPainterPath::moveTo</a>() function.</p>
 <p><a href="qpainterpath.html">QPainterPath</a> also provide the <a href="qpainterpath.html#addRect">QPainterPath::addRect</a>() convenience function, which adds a given rectangle to the path as a closed subpath. The rectangle is added as a clockwise set of lines. The painter path's current position after the rect has been added is at the top-left corner of the rectangle.</p>
 <pre>     QPainterPath roundRectPath;
@@ -375,7 +376,7 @@
      QPainter painter(this);
      painter.setRenderHint(QPainter::Antialiasing);</pre>
 <p>A paint event is a request to repaint all or parts of the widget. The paintEvent() function is an event handler that can be reimplemented to receive the widget's paint events. We reimplement the event handler to render the <tt>RenderArea</tt> widget's painter path.</p>
-<p>First, we create a <a href="qpainter.html">QPainter</a> for the <tt>RenderArea</tt> instance, and set the painter's render hints. The <a href="qpainter.html#RenderHint-enum">QPainter::RenderHints</a> are used to specify flags to <a href="qpainter.html">QPainter</a> that may, or may not, be respected by any given engine. <a href="qpainter.html#RenderHint-enum">QPainter::Antialiasing</a> indicates that the engine should anti-alias the edges of primitives if possible, i.e. put additional pixels around the original ones to smooth the edges.</p>
+<p>First, we create a <a href="qpainter.html">QPainter</a> for the <tt>RenderArea</tt> instance, and set the painter's render hints. The <a href="qpainter.html#RenderHint-enum">QPainter::RenderHints</a> are used to specify flags to <a href="qpainter.html">QPainter</a> that may, or may not, be respected by any given engine. <a href="qpainter.html#RenderHint-enum">QPainter::Antialiasing</a> indicates that the engine should anti-alias the edges of primitives if possible, i.e&#x2e; put additional pixels around the original ones to smooth the edges.</p>
 <pre>     painter.scale(width() / 100.0, height() / 100.0);
      painter.translate(50.0, 50.0);
      painter.rotate(-rotationAngle);
@@ -395,6 +396,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

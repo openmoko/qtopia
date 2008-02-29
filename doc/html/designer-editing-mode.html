@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt Designer's Widget Editing Mode</title>
+  <title>Qt 4.3: Qt Designer's Widget Editing Mode</title>
   <link rel="prev" href="designer-designing-a-component.html" />
   <link rel="contents" href="designer-manual.html" />
   <link rel="next" href="designer-using-containers.html" />
@@ -19,11 +19,14 @@
 [<a href="designer-manual.html">Contents</a>]
 [Next: <a href="designer-using-containers.html">Using Containers in Qt Designer</a>]
 </p>
-<h1 align="center">Qt Designer's Widget Editing Mode<br /><small></small></h1>
+<h1 align="center">Qt Designer's Widget Editing Mode<br /><span class="subtitle"></span>
+</h1>
 <p align="center"><img src="images/designer-editing-mode.png" /></p><p>In <i>Qt Designer</i>'s Widget Editing Mode, objects can be dragged from the main window's widget box to a form, edited, resized, dragged around on the form, and even dragged between forms. Their properties can be modified interactively, so that changes can be seen immediately. The editing interface is intuitive for simple operations, yet it still supports Qt's powerful layout facilities.</p>
 <ul><li><a href="#managing-forms">Managing Forms</a></li>
 <li><a href="#editing-a-form">Editing a Form</a></li>
 <li><a href="#the-property-editor">The Property Editor</a></li>
+<ul><li><a href="#dynamic-properties">Dynamic Properties</a></li>
+</ul>
 <li><a href="#the-object-inspector">The Object Inspector</a></li>
 <li><a href="#layouts">Layouts</a></li>
 <ul><li><a href="#applying-and-breaking-layouts">Applying and Breaking Layouts</a></li>
@@ -36,8 +39,8 @@
 </ul>
 <a name="managingforms"></a><a name="managing-forms"></a>
 <h2>Managing Forms</h2>
-<p><i>Qt Designer</i> allows you to create and edit new forms (open the <b>File</b> menu and select <b>New Form...</b> or press <b>Ctrl N</b>). Existing forms can also be edited (open the <b>File</b> menu and select <b>Open Form...</b> or press <b>Ctrl O</b>).</p>
-<p>At any point, it is possible to save a form by selecting the <b>Save Form As...</b> option from the <b>File</b> menu. The <tt>.ui</tt> files saved by <i>Qt Designer</i> contain information about the objects used, and record the details of any signal and slot connections between them.</p>
+<p><i>Qt Designer</i> allows you to create and edit new forms (open the <b>File</b> menu and select <b>New Form..&#x2e;</b> or press <b>Ctrl N</b>). Existing forms can also be edited (open the <b>File</b> menu and select <b>Open Form..&#x2e;</b> or press <b>Ctrl O</b>).</p>
+<p>At any point, it is possible to save a form by selecting the <b>Save Form As..&#x2e;</b> option from the <b>File</b> menu. The <tt>.ui</tt> files saved by <i>Qt Designer</i> contain information about the objects used, and record the details of any signal and slot connections between them.</p>
 <a name="editingaform"></a><a name="editing-a-form"></a>
 <h2>Editing a Form</h2>
 <p>By default, new forms are opened in widget editing mode. If <i>Qt Designer</i> is in another mode, you can enter widget editing mode by opening the <b>Edit</b> menu and selecting <b>Edit Widgets</b>, or by pressing the <b>F3</b> key.</p>
@@ -46,6 +49,7 @@
 <a name="selectingobjects"></a><p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/designer-selecting-widget.png" /></td><td><b>Selecting Objects</b><p>Objects on the form are selected by clicking on them with the left mouse button. When an object is selected, resize handles are shown at each corner and at the midpoint of each side, indicating that it can be resized.</p>
 <p>To select additional objects, hold down the <b>Shift</b> key and click on them. If more than one object is selected, the current object will be displayed with resize handles that are colored differently to the others.</p>
+<p>Alternatively, objects can be selected in the <a href="#the-object-inspector">Object Inspector</a>.</p>
 </td></tr>
 </table></p>
 <p>When selected, the normal clipboard operations can be performed on a widget to cut, copy, and paste it. All of these operations are recorded in an undo buffer to enable changes to be undone and redone as necessary. The shortcuts used to perform all of these actions are described in the table below.</p>
@@ -63,22 +67,41 @@
 <a name="draganddrop"></a><p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/designer-dragging-onto-form.png" /></td><td><b>Drag and Drop</b><p><i>Qt Designer</i> makes extensive use of the drag and drop facilities provided by Qt. Widgets can be dragged from the widget box and dropped onto the form.</p>
 <p>Widgets can also be &quot;cloned&quot; on the form: Holding down <b>Ctrl</b> and dragging the widget creates a copy of the widget that can be dragged to a new position.</p>
+<p>It is also possible to drop Widgets onto the <a href="#the-object-inspector">Object Inspector</a> to ease handling of nested layouts.</p>
 </td></tr>
 </table></p>
 <p><i>Qt Designer</i> allows selections of objects to be copied, pasted, and dragged between forms. You can use this feature to create more than one copy of the same form, and experiment with different layouts in each of them.</p>
 <a name="thepropertyeditor"></a><a name="the-property-editor"></a>
 <h2>The Property Editor</h2>
-<p>The Property Editor always displays the properties of the currently selected object on the form. The properties available depend on the object being edited, but all of the widgets provided have common properties such as <tt>objectName</tt> (the object's internal name) and <tt>enabled</tt> (whether it can be interacted with).</p>
+<p>The Property Editor always displays the properties of the currently selected object on the form. The properties available depend on the object being edited, but all of the widgets provided have common properties such as <a href="qobject.html#objectName-prop">objectName</a> (the object's internal name) and <a href="qwidget.html#enabled-prop">enabled</a> (whether it can be interacted with).</p>
 <a name="editingproperties"></a><p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/designer-property-editor.png" /></td><td><b>Editing Properties</b><p>The property editor uses standard Qt input widgets to manage the properties of objects on the form. Textual properties are shown in line edits, integer properties are displayed in spinboxes, and compound properties such as colors and sizes are presented in drop-down lists of input widgets.</p>
+<p>Modified properties are indicated by bold labels. To reset, click the arrow button on the right-hand side.</p>
+<p>Changes in properties are applied to all selected objects that have a matching property.</p>
 </td></tr>
 </table></p>
+<p>Certain properties are treated specially by the property editor:</p>
+<ul>
+<li>Compound properties - properties that are made up of more than one value - are represented as nodes that can be expanded, enabling their values to be edited.</li>
+<li>Properties that contain a choice or selection of flags are edited via combo boxes whose items can be checked.</li>
+<li>Properties that allow access to rich data types, such as <a href="qpalette.html">QPalette</a>, are modified using dialogs that open when the properties are edited. <a href="qlabel.html">QLabel</a> and the widgets in the <b>Buttons</b> section of the widget box have a <tt>text</tt> property that can also be edited by double clicking on the widget or by pressing <b>F2</b>. <i>Qt Designer</i> interprets the backslash (\) character specially, enabling newline (\n) characters to be inserted into the text; the \\ character sequence is used to insert a single backslash into the text. A context menu can also be opened while editing, providing another way to insert special characters and newlines into the text.</li>
+</ul>
+<a name="dynamic-properties"></a>
+<h3>Dynamic Properties</h3>
+<p>The property editor can also be used to add new <a href="qobject.html#dynamic-properties">dynamic properties</a> to both standard Qt widgets and to forms themselves. Dynamic properties are added and removed via the property editor's context menu - click the right mouse button to open this.</p>
+<table align="center" width="80%">
+<tr><td>
+<p><img src="images/designer-adding-dynamic-property.png" /></p>
+</td><td>
+<p><img src="images/designer-creating-dynamic-property.png" /></p>
+</td></tr>
+</table>
 <a name="the-object-inspector"></a>
 <h2>The Object Inspector</h2>
 <p>The Object Inspector shows an up-to-date hierarchical list of the objects (widgets, layouts, spacers, and other objects) on the form that is currently being edited.</p>
 <a name="theobjectinspector"></a><p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/designer-object-inspector.png" /></td><td><b>The Object Inspector</b><p>The Object Inspector displays a hierarchical list of all the objects on the form that is currently being edited. To show the child objects of a container widget or a layout, click the handle next to the object label.</p>
-<p>Each object on a form can be selected by double clicking on the corresponding item in the Object Inspector. This feature can be useful if you have many overlapping objects.</p>
+<p>Each object on a form can be selected by clicking on the corresponding item in the Object Inspector. Right-clicking opens the form's context menu. These features can be useful if you have many overlapping objects.</p>
 </td></tr>
 </table></p>
 <a name="layouts"></a><a name="layouts"></a>
@@ -129,6 +152,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

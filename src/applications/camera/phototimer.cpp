@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include "phototimer.h"
+#include "minsecspinbox.h"
 
 // Qt includes
 #include <QTimer>
@@ -56,7 +57,7 @@ PhotoTimer::PhotoTimer( int timeout,
 
     QTimer* timer = new QTimer( this );
     timer->setInterval( 1000 );
-    connect( timer, SIGNAL( timeout() ), this, SLOT( timeout() ) );
+    connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
     timer->start();
 }
 
@@ -90,15 +91,15 @@ PhotoTimerDialog::PhotoTimerDialog( QWidget* parent, Qt::WFlags f )
     QGridLayout* layout = new QGridLayout( this );
 
     // Add labels
-    layout->addWidget( new QLabel( tr( "Timeout (s)" ) ), 0, 0 );
-    QSpinBox* timeout = new QSpinBox( this );
+    layout->addWidget( new QLabel( tr( "Timeout" ) ), 0, 0 );
+    QSpinBox* timeout = new CameraMinSecSpinBox( this );
     timeout->setMinimum( 1 );
     timeout->setValue( mTimeout );
     layout->addWidget( timeout, 0, 1 );
     connect( timeout,
-             SIGNAL( valueChanged( int ) ),
+             SIGNAL(valueChanged(int)),
              this,
-             SLOT( timeoutChanged( int ) ) );
+             SLOT(timeoutChanged(int)) );
 
     layout->addWidget( new QLabel( tr( "Photos" ) ), 1, 0 );
     QSpinBox* number = new QSpinBox( this );
@@ -106,20 +107,20 @@ PhotoTimerDialog::PhotoTimerDialog( QWidget* parent, Qt::WFlags f )
     number->setValue( mNumber );
     layout->addWidget( number, 1, 1 );
     connect( number,
-             SIGNAL( valueChanged( int ) ),
+             SIGNAL(valueChanged(int)),
              this,
-             SLOT( numberChanged( int ) ) );
+             SLOT(numberChanged(int)) );
 
-    layout->addWidget( new QLabel( tr( "Interval (s)" ) ), 2, 0 );
-    mIntervalSpin = new QSpinBox( this );
+    layout->addWidget( new QLabel( tr( "Interval" ) ), 2, 0 );
+    mIntervalSpin = new CameraMinSecSpinBox( this );
     mIntervalSpin->setMinimum( 1 );
     mIntervalSpin->setValue( mInterval );
     mIntervalSpin->setEnabled( false );
     layout->addWidget( mIntervalSpin, 2, 1 );
     connect( mIntervalSpin,
-             SIGNAL( valueChanged( int ) ),
+             SIGNAL(valueChanged(int)),
              this,
-             SLOT( intervalChanged( int ) ) );
+             SLOT(intervalChanged(int)) );
 
     setLayout( layout );
 

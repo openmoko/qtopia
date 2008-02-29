@@ -7,3 +7,4 @@ Exec=todolist
 Icon=todolist/TodoList
 Type=Application
 Name[]=Tasks
+Categories=MainApplications

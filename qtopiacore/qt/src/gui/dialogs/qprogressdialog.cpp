@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -52,12 +67,17 @@ public:
     QProgressDialogPrivate() : label(0), cancel(0), bar(0),
         shown_once(false),
         cancellation_flag(false),
-        showTime(defaultShowTime)
+        showTime(defaultShowTime),
+#ifndef QT_NO_SHORTCUT
+        escapeShortcut(0),
+#endif
+        useDefaultCancelText(false)
     {
     }
 
     void init(const QString &labelText, const QString &cancelText, int min, int max);
     void layout();
+    void retranslateStrings();
 
     QLabel *label;
     QPushButton *cancel;
@@ -73,6 +93,10 @@ public:
     bool autoClose;
     bool autoReset;
     bool forceHide;
+#ifndef QT_NO_SHORTCUT
+    QShortcut *escapeShortcut;
+#endif
+    bool useDefaultCancelText;
 };
 
 void QProgressDialogPrivate::init(const QString &labelText, const QString &cancelText,
@@ -87,10 +111,14 @@ void QProgressDialogPrivate::init(const QString &labelText, const QString &cance
     autoClose = true;
     autoReset = true;
     forceHide = false;
-    q->setCancelButtonText(cancelText);
     QObject::connect(q, SIGNAL(canceled()), q, SLOT(cancel()));
     forceTimer = new QTimer(q);
     QObject::connect(forceTimer, SIGNAL(timeout()), q, SLOT(forceShow()));
+    if (useDefaultCancelText) {
+        retranslateStrings();
+    } else {
+        q->setCancelButtonText(cancelText);
+    }
 }
 
 void QProgressDialogPrivate::layout()
@@ -137,6 +165,12 @@ void QProgressDialogPrivate::layout()
     bar->setGeometry(mlr, lh+sp, q->width()-mlr*2, bh.height());
 }
 
+void QProgressDialogPrivate::retranslateStrings()
+{
+    Q_Q(QProgressDialog);
+    if (useDefaultCancelText)
+        q->setCancelButtonText(QProgressDialog::tr("Cancel"));
+}
 
 /*!
   \class QProgressDialog
@@ -171,12 +205,9 @@ void QProgressDialogPrivate::layout()
 
   There are two ways of using QProgressDialog: modal and modeless.
 
-  Using a modal QProgressDialog is simpler for the programmer, but you
-  must call QApplication::processEvents() or
-  QEventLoop::processEvents(ExcludeUserInput) to keep the event loop
-  running to ensure that the application doesn't freeze. Do the
-  operation in a loop, call \l setValue() at intervals, and check
-  for cancellation with wasCanceled(). For example:
+  Compared to a modeless QProgressDialog, a modal QProgressDialog is simpler
+  to use for the programmer. Do the operation in a loop, call \l setValue() at
+  intervals, and check for cancellation with wasCanceled(). For example:
 
   \quotefromfile snippets/dialogs/dialogs.cpp
   \skipto QProgressDialog progress("Copying files...", "Abort Copy", 0, numFiles, this);
@@ -236,7 +267,8 @@ QProgressDialog::QProgressDialog(QWidget *parent, Qt::WindowFlags f)
     : QDialog(*(new QProgressDialogPrivate), parent, f)
 {
     Q_D(QProgressDialog);
-    d->init(QString::fromLatin1(""), tr("Cancel"), 0, 100);
+    d->useDefaultCancelText = true;
+    d->init(QString::fromLatin1(""), QString(), 0, 100);
 }
 
 /*!
@@ -367,7 +399,12 @@ void QProgressDialog::setCancelButton(QPushButton *cancelButton)
         }
         connect(d->cancel, SIGNAL(clicked()), this, SIGNAL(canceled()));
 #ifndef QT_NO_SHORTCUT
-        new QShortcut(Qt::Key_Escape, this, SIGNAL(canceled()));
+        d->escapeShortcut = new QShortcut(Qt::Key_Escape, this, SIGNAL(canceled()));
+#endif
+    } else {
+#ifndef QT_NO_SHORTCUT
+        delete d->escapeShortcut;
+        d->escapeShortcut = 0;
 #endif
     }
     int w = qMax(isVisible() ? width() : 0, sizeHint().width());
@@ -385,6 +422,8 @@ void QProgressDialog::setCancelButton(QPushButton *cancelButton)
 void QProgressDialog::setCancelButtonText(const QString &cancelButtonText)
 {
     Q_D(QProgressDialog);
+    d->useDefaultCancelText = false;
+
     if (!cancelButtonText.isNull()) {
         if (d->cancel)
             d->cancel->setText(cancelButtonText);
@@ -547,7 +586,7 @@ int QProgressDialog::value() const
 
   For the progress dialog to work as expected, you should initially set
   this property to 0 and finally set it to
-  QProgressDialog::totalSteps(); you can call setProgress() any number of times
+  QProgressDialog::maximum(); you can call setValue() any number of times
   in-between.
 
   \warning If the progress dialog is modal
@@ -644,8 +683,10 @@ void QProgressDialog::resizeEvent(QResizeEvent *)
 void QProgressDialog::changeEvent(QEvent *ev)
 {
     Q_D(QProgressDialog);
-    if(ev->type() == QEvent::StyleChange)
+    if (ev->type() == QEvent::StyleChange)
         d->layout();
+    else if (ev->type() == QEvent::LanguageChange)
+        d->retranslateStrings();
     QDialog::changeEvent(ev);
 }
 

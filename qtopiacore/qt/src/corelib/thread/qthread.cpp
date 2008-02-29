@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,11 +49,29 @@
 #include "qthread_p.h"
 
 /*
+#ifdef Q_OS_WIN32
+# include "qt_windows.h"
+#else
+# include <unistd.h>
+# include <netinet/in.h>
+# include <sys/utsname.h>
+# include <sys/socket.h>
+*/
+/*
+#  elif defined(Q_OS_HPUX)
+#   include <sys/pstat.h>
+#  elif defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD) || defined(Q_OS_MAC)
+#   include <sys/sysctl.h>
+#  endif
+#endif
+*/
+
+/*
   QThreadData
 */
 
 QThreadData::QThreadData(int initialRefCount)
-    : _ref(initialRefCount), thread(0), quitNow(false), eventDispatcher(0), canWait(true), tls(0)
+    : _ref(initialRefCount), thread(0), quitNow(false), eventDispatcher(0), canWait(true)
 {
     // fprintf(stderr, "QThreadData %p created\n", this);
 }
@@ -55,10 +88,6 @@ QThreadData::~QThreadData()
         const QPostEvent &pe = postEventList.at(i);
         if (pe.event) {
             --pe.receiver->d_func()->postedEvents;
-#ifdef QT3_SUPPORT
-            if (pe.event->type() == QEvent::ChildInserted)
-                --pe.receiver->d_func()->postedChildInsertedEvents;
-#endif
             pe.event->posted = false;
             delete pe.event;
         }
@@ -397,6 +426,7 @@ int QThread::exec()
 {
     Q_D(QThread);
     d->mutex.lock();
+    d->data->quitNow = false;
     QEventLoop eventLoop;
     d->mutex.unlock();
     int returnCode = eventLoop.exec();
@@ -463,7 +493,7 @@ void QThread::initialize()
 {
     if (qt_global_mutexpool)
         return;
-    qt_global_mutexpool = new QMutexPool(true);
+    qt_global_mutexpool = QMutexPool::instance();
 
 #if defined (Q_OS_WIN)
     extern void qt_create_tls();
@@ -477,7 +507,6 @@ void QThread::initialize()
 */
 void QThread::cleanup()
 {
-    delete qt_global_mutexpool;
     qt_global_mutexpool = 0;
 }
 

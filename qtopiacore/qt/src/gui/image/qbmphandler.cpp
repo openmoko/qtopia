@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -285,29 +300,12 @@ static bool read_dib_body(QDataStream &s, const BMP_INFOHDR &bi, int offset, int
     }
 
     int             bpl = image.bytesPerLine();
-#ifdef Q_WS_QWS
-    //
-    // Guess the number of bytes-per-line if we don't know how much
-    // image data is in the file (bogus image ?).
-    //
-    int bmpbpl = (bi.biHeight > 0 ? (bi.biSizeImage > 0 ?
-                                     bi.biSizeImage / bi.biHeight :
-                                     (d->size() - offset) / bi.biHeight)
-                                  : 0);
-    int pad = bmpbpl-bpl;
-#endif
     uchar *data = image.bits();
 
     if (nbits == 1) {                                // 1 bit BMP image
         while (--h >= 0) {
             if (d->read((char*)(data + h*bpl), bpl) != bpl)
                 break;
-#ifdef Q_WS_QWS
-            if (pad > 0) {
-                if (!d->isSequential())
-                    d->seek(d->pos()+pad);
-            }
-#endif
         }
         if (ncols == 2 && qGray(image.color(0)) < qGray(image.color(1)))
             swapPixel01(&image);                // pixel 0 is white!
@@ -387,6 +385,7 @@ static bool read_dib_body(QDataStream &s, const BMP_INFOHDR &bi, int offset, int
                 }
             }
         } else if (comp == BMP_RGB) {                // no compression
+            memset(data, 0, h*bpl);
             while (--h >= 0) {
                 if (d->read((char*)buf,buflen) != buflen)
                     break;
@@ -465,12 +464,6 @@ static bool read_dib_body(QDataStream &s, const BMP_INFOHDR &bi, int offset, int
             while (--h >= 0) {
                 if (d->read((char *)data + h*bpl, bpl) != bpl)
                     break;
-#ifdef Q_WS_QWS
-                if (pad > 0) {
-                    if (!d->isSequential())
-                        d->seek(d->pos()+pad);
-                }
-#endif
             }
         }
     }

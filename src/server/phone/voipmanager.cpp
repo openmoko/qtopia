@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,18 +23,25 @@
 #include <qvaluespace.h>
 
 #include <QSqlQuery>
+#include <QTimer>
+#include <QContact>
 
 class VoIPManagerPrivate {
 public:
     VoIPManagerPrivate()
     : netReg(0),
     serviceManager(0),
-    status(0) {}
+    status(0),
+    voipHideMsgTimer(0),
+    voipHideMsg(false)
+    {}
 
     QNetworkRegistration *netReg;
     QPresence *presence;
     QCommServiceManager *serviceManager;
     QValueSpaceObject *status;
+    QTimer *voipHideMsgTimer;
+    bool voipHideMsg;
 };
 
 /*!
@@ -47,6 +54,7 @@ public:
     user interfaces in the server.  The telephony service itself is started by PhoneServer
     at system start up.
 
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
     \sa PhoneServer
 */
 
@@ -55,16 +63,109 @@ public:
 */
 VoIPManager * VoIPManager::instance()
 {
-    static VoIPManager *manager = 0;
-    if(!manager)
-        manager = new VoIPManager;
-    return manager;
+    // TODO: replace calls to VoIPManager::instance() with
+    // direct calls to qtopiaTask<VoIPManager>() and then
+    // remove this function.
+    return qtopiaTask<VoIPManager>();
 }
 
 /*!
-    Returns the current VoIP registration state.
+    \reimp
+*/
+QString VoIPManager::callType() const
+{
+    return "VoIP";      // No tr
+}
 
-    \sa registrationChanged()
+/*!
+    \reimp
+*/
+QString VoIPManager::trCallType() const
+{
+    return tr("VoIP");
+}
+
+/*!
+    \reimp
+*/
+QString VoIPManager::callTypeIcon() const
+{
+    return "sipsettings/SIP";   // No tr
+}
+
+/*!
+    \reimp
+*/
+QAbstractCallPolicyManager::CallHandling VoIPManager::handling
+        (const QString& number)
+{
+    // If no network registration, then cannot use this to dial.
+    if ( registrationState() != QTelephony::RegistrationHome )
+        return CannotHandle;
+
+    // If at least one '@' sign, then assume that it is a VoIP URI.
+    if ( number.contains(QChar('@')) )
+        return CanHandle;
+
+    // Probably an ordinary number, which may be gatewayable via VoIP.
+    // TODO: may want to user to be able to choose to turn this on/off.
+    return CanHandle;
+}
+
+/*!
+    \reimp
+*/
+QString VoIPManager::registrationMessage() const
+{
+    // Don't display anything if we do not have a VoIP service active yet.
+    if ( !d->netReg )
+        return QString();
+
+    QString voipMsg;
+    QTelephony::RegistrationState v = registrationState();
+
+    switch (v) {
+    case QTelephony::RegistrationNone:
+        if(!d->voipHideMsg)
+            voipMsg = tr("No VoIP network");
+        break;
+    case QTelephony::RegistrationHome:
+    case QTelephony::RegistrationUnknown:
+    case QTelephony::RegistrationRoaming:
+        ((VoIPManager *)this)->startMonitoring();
+        break;
+    case QTelephony::RegistrationSearching:
+        voipMsg = tr("Searching VoIP network");
+        break;
+    case QTelephony::RegistrationDenied:
+        voipMsg += tr("VoIP Authentication Failed");
+        break;
+    }
+
+    // If no registration, we want to hide the message after
+    // some time, because the VoIP service may not be configured.
+    if(v == QTelephony::RegistrationNone) {
+        if(!d->voipHideMsg && !d->voipHideMsgTimer->isActive())
+            d->voipHideMsgTimer->start(7000);
+    } else {
+        d->voipHideMsgTimer->stop();
+        d->voipHideMsg = false;
+    }
+
+    return voipMsg;
+}
+
+/*!
+    \reimp
+*/
+QString VoIPManager::registrationIcon() const
+{
+    // No specific icon used for VoIP registration messages.
+    return QString();
+}
+
+/*!
+    \reimp
 */
 QTelephony::RegistrationState VoIPManager::registrationState() const
 {
@@ -73,14 +174,6 @@ QTelephony::RegistrationState VoIPManager::registrationState() const
     else
         return QTelephony::RegistrationNone;
 }
-
-/*!
-    \fn void VoIPManager::registrationChanged(QTelephony::RegistrationState state);
-
-    Signal that is emitted when registrationState() changes to \a state.
-
-    \sa registrationState()
-*/
 
 /*!
     Returns the presence status of the local user.
@@ -111,7 +204,19 @@ QPresence::Status VoIPManager::localPresence() const
 */
 bool VoIPManager::isAvailable( const QString &uri )
 {
-    return d->presence->monitoredUriStatus( uri ) == QPresence::Available;
+    if ( d->presence ) {
+        // If we were monitoring this uri because it was in the user's
+        // contacts, then check to see if they are available.  If the
+        // uri is not in the user's contacts, then assume that it is
+        // available and let the dialing sequence fail later if not.
+        if ( d->presence->monitoredUris().contains( uri ) )
+            return d->presence->monitoredUriStatus( uri ) == QPresence::Available;
+        else
+            return true;
+    } else {
+        // The VoIP stack does not support presence, so just assume it is available.
+        return true;
+    }
 }
 
 /*!
@@ -123,10 +228,18 @@ bool VoIPManager::isAvailable( const QString &uri )
     \sa isAvailable(), startMonitoring()
 */
 
-VoIPManager::VoIPManager()
+/*!
+    Create a new VoIP telephony service manager and attach it to \a parent.
+*/
+VoIPManager::VoIPManager(QObject *parent)
+    : QAbstractCallPolicyManager(parent)
 {
     d = new VoIPManagerPrivate;
     d->status = new QValueSpaceObject("/Telephony/Status/VoIP", this);
+    d->voipHideMsgTimer = new QTimer( this );
+    d->voipHideMsgTimer->setSingleShot( true );
+    connect( d->voipHideMsgTimer, SIGNAL(timeout()),
+             this, SLOT(hideMessageTimeout()) );
 #ifdef QTOPIA_VOIP
     // The "voip" telephony handler may not have started yet.
     // Hook onto QCommServiceManager to watch for it.
@@ -205,8 +318,8 @@ void VoIPManager::serviceStarted()
     } else {
         connect( d->presence, SIGNAL(localPresenceChanged()),
                 this, SLOT(localPresenceChanged()) );
-        connect( d->presence, SIGNAL(monitoredPresence(const QString&,QPresence::Status)),
-                this, SLOT(monitoredPresence(const QString&,QPresence::Status)) );
+        connect( d->presence, SIGNAL(monitoredPresence(QString,QPresence::Status)),
+                this, SLOT(monitoredPresence(QString,QPresence::Status)) );
     }
     localPresenceChanged();
 #endif
@@ -237,11 +350,30 @@ void VoIPManager::startMonitoring()
 {
 #ifdef QTOPIA_VOIP
     QSqlQuery q;
-    q.prepare("SELECT fieldvalue FROM contactcustom WHERE fieldname = :fn");
-    q.bindValue(":fn", "VOIP_ID");
+    QList<QContact::PhoneType> voipList;
+    voipList << QContact::VOIP << QContact::HomeVOIP << QContact::BusinessVOIP; // XXX this needs the phone type api
+    QString query(QLatin1String("SELECT phone_number from contactphonenumbers WHERE phone_type IN ("));
+    int typecount = voipList.count();
+    foreach(QContact::PhoneType p, voipList) {
+        query.append(QString::number((int)p));
+        if (--typecount > 0)
+            query.append(',');
+    }
+    query.append(')');
+    q.prepare(query);
     q.exec();
     while(q.next())
         d->presence->startMonitoring( q.value(0).toString() );
 #endif
 }
 
+void VoIPManager::hideMessageTimeout()
+{
+    // Mark the message as hidden and then fake a registration state change.
+    d->voipHideMsg = true;
+    emit registrationChanged( registrationState() );
+}
+
+QTOPIA_TASK(VoIP, VoIPManager);
+QTOPIA_TASK_PROVIDES(VoIP, VoIPManager);
+QTOPIA_TASK_PROVIDES(VoIP, QAbstractCallPolicyManager);

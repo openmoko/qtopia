@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,13 +29,9 @@
 #include <QDateTime>
 #include <QApplication>
 #endif
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
-
 #include <qpixmap.h>
 #include <qpixmapcache.h>
-#include <qcontent.h>
 #include <qstring.h>
 #include <qfileinfo.h>
 #include <qlayout.h>
@@ -48,6 +44,7 @@
 #include <QCursor>
 #include <QDebug>
 #include <QDesktopWidget>
+#include <QContentSet>
 
 // ### TODO: incorporate global pixmap cache
 
@@ -70,9 +67,14 @@ QPixmap ThumbnailCache::retrieve( const ThumbnailRequest& request )
     return ret;
 }
 
+bool ThumbnailCache::contains( const ThumbnailRequest &request ) const
+{
+    return cache.contains( key( request ) );
+};
+
 QString ThumbnailCache::key( const ThumbnailRequest& request )
 {
-     return request.filename() + QString::number( request.size().width() ) + QString::number( request.size().height() ) + QFileInfo( request.filename() ).lastModified().toString();
+     return request.filename() + QString::number( request.size().width() ) + QString::number( request.size().height() ) + request.time().toString( Qt::ISODate );
 }
 
 bool VisibleRule::isMetBy( const ThumbnailRequest& request ) const
@@ -91,11 +93,7 @@ bool CacheRule::isMetBy( const ThumbnailRequest& request ) const
 {
     // If thumbnail in cache, return true
     // Otherwise, return false
-    if( cache_->retrieve( request ).isNull() ) {
-        return false;
-    }
-
-    return true;
+    return cache_->contains( request );
 }
 
 ThumbnailLoader::ThumbnailLoader( ThumbnailCache* cache, QObject* parent )
@@ -134,14 +132,14 @@ void ThumbnailLoader::loadFront()
         // Load thumbnail and insert into cache
 
         QPixmap pixmap = loadThumbnail( request.filename(), request.size() );
-        if (pixmap.isNull()) {
-            QContent content(request.filename(), false);
-            pixmap = content.icon().pixmap(32);
-        }
+
         // Load thumbnail and insert into cache
         cache_->insert( request, pixmap );
         // Notify thumbnail has been loaded
-        emit loaded( request, pixmap );
+
+        if( !pixmap.isNull() ) {
+            emit loaded( request, pixmap );
+        }
     }
 
     // If queue is not empty, restart timer
@@ -155,16 +153,43 @@ void ThumbnailLoader::loadFront()
 
 QPixmap ThumbnailLoader::loadThumbnail( const QString &filename, const QSize &size )
 {
-    QThumbnail thumbnail( filename );
+    QImageReader reader( filename );
 
-    return thumbnail.pixmap( size );
+    QImage image;
+
+    bool scaled = false;
+
+    if( reader.supportsOption( QImageIOHandler::Size ) && reader.supportsOption( QImageIOHandler::ScaledSize ) )
+    {
+        QSize maxSize = reader.size();
+
+        maxSize.scale( size.boundedTo( reader.size() ), Qt::KeepAspectRatio );
+
+        reader.setScaledSize( maxSize );
+
+        scaled = true;
+    }
+
+    if( reader.read( &image ) )
+    {
+        if( !scaled )
+        {
+            QSize maxSize = size.boundedTo( image.size() );
+
+            image = image.scaled( maxSize, Qt::KeepAspectRatio, Qt::FastTransformation );
+        }
+
+        return QPixmap::fromImage( image );
+    }
+    else
+        return QPixmap();
 }
 
 ThumbnailRepository::ThumbnailRepository( ThumbnailCache* cache, ThumbnailLoader* loader, QObject* parent )
     : QObject( parent ), cache_( cache ), loader_( loader )
 {
-    connect( loader_, SIGNAL(loaded(const ThumbnailRequest&,const QPixmap&)),
-        this, SIGNAL(loaded(const ThumbnailRequest&,const QPixmap&)) );
+    connect( loader_, SIGNAL(loaded(ThumbnailRequest,QPixmap)),
+        this, SIGNAL(loaded(ThumbnailRequest,QPixmap)) );
 }
 
 QPixmap ThumbnailRepository::thumbnail( const ThumbnailRequest& request )
@@ -173,7 +198,7 @@ QPixmap ThumbnailRepository::thumbnail( const ThumbnailRequest& request )
     // Otherwise, request thumbnail from thumbnail loader
     // ### FIXME: continual loading of request if unable to load image
     QPixmap pixmap = cache_->retrieve( request );
-    if( pixmap.isNull() ) {
+    if( pixmap.isNull() && !cache_->contains( request ) ) {
         loader_->load( request );
     }
 
@@ -183,7 +208,7 @@ QPixmap ThumbnailRepository::thumbnail( const ThumbnailRequest& request )
 void ThumbnailDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
 {
     Q_ASSERT(index.isValid());
-    const QAbstractItemModel *model = index.model();
+    const QContentSetModel *model = qobject_cast< const QContentSetModel * >( index.model() );
     Q_ASSERT(model);
 
     QStyleOptionViewItem opt = option;
@@ -192,13 +217,18 @@ void ThumbnailDelegate::paint( QPainter* painter, const QStyleOptionViewItem& op
     opt.displayAlignment = Qt::AlignCenter;
 
     // do layout
-    QString filename = model->data(index, Qt::UserRole).toString();
-    QPixmap pixmap = repository_->thumbnail( ThumbnailRequest( index, filename, option.decorationSize ) );
+    QContent content = model->content( index );
+    QPixmap pixmap;
+
+    if( content.fileKnown() ) {
+        pixmap = repository_->thumbnail( ThumbnailRequest( index, content.file(), option.decorationSize, content.lastUpdated() ) );
+    }
     if( pixmap.isNull() ) {
         QIcon icon = qvariant_cast<QIcon>(model->data(index, Qt::DecorationRole));
         pixmap = icon.pixmap( option.decorationSize );
     }
-    QRect pixmapRect = pixmap.rect();
+    QRect pixmapRect = QRect(0, 0, option.decorationSize.width(),
+                           option.decorationSize.height());
 
     QFontMetrics fontMetrics(opt.font);
     QString text = model->data(index, Qt::DisplayRole).toString();
@@ -236,9 +266,7 @@ QSize ThumbnailDelegate::sizeHint( const QStyleOptionViewItem& option, const QMo
 
     QFont fnt = option.font;
     QString text = model->data(index, Qt::DisplayRole).toString();
-    QRect pixmapRect;
-    if (model->data(index, Qt::DecorationRole).isValid())
-        pixmapRect = QRect(0, 0, option.decorationSize.width(),
+    QRect pixmapRect = QRect(0, 0, option.decorationSize.width(),
                            option.decorationSize.height());
 
     QFontMetrics fontMetrics(fnt);
@@ -255,7 +283,8 @@ ThumbnailView::ThumbnailView( QWidget* parent )
     QDesktopWidget *desktop = QApplication::desktop();
     resize(desktop->availableGeometry(desktop->screenNumber(this)).width(), height());  //### workaround to make view layout properly on first view.
     setMovement( QListView::Static );
-    connect( this, SIGNAL(pressed(const QModelIndex&)), this, SLOT(emitSelected(const QModelIndex&)) );
+    setFrameStyle(QFrame::NoFrame);
+    connect( this, SIGNAL(pressed(QModelIndex)), this, SLOT(emitSelected(QModelIndex)) );
 }
 
 void ThumbnailView::repaintThumbnail( const ThumbnailRequest& request )
@@ -276,9 +305,7 @@ void ThumbnailView::keyPressEvent( QKeyEvent* e )
     QListView::keyPressEvent( e );
     switch( e->key() ) {
     // If select key, emit selected signal
-#ifdef QTOPIA_PHONE
     case Qt::Key_Select:
-#endif
     case Qt::Key_Enter:
         emit selected();
         break;

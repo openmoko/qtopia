@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -298,9 +313,11 @@ void QTextFormatPrivate::recalcFont() const
             case  QTextFormat::FontPixelSize:
                 f.setPixelSize(props.at(i).value.toInt());
                 break;
-            case QTextFormat::FontWeight:
-                f.setWeight(props.at(i).value.toInt());
-                break;
+            case QTextFormat::FontWeight: {
+                int weight = props.at(i).value.toInt();
+                if (weight == 0) weight = QFont::Normal;
+                f.setWeight(weight);
+                break; }
             case QTextFormat::FontItalic:
                 f.setItalic(props.at(i).value.toBool());
                 break;
@@ -337,9 +354,16 @@ Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QTextFormat &fmt)
 {
     QMap<qint32, QVariant> properties;
     stream >> fmt.format_type >> properties;
+
+    // QTextFormat's default constructor doesn't allocate the private structure, so
+    // we have to do this, in case fmt is a default constructed value.
+    if(!fmt.d)
+        fmt.d = new QTextFormatPrivate();
+
     for (QMap<qint32, QVariant>::ConstIterator it = properties.constBegin();
          it != properties.constEnd(); ++it)
         fmt.d->insertProperty(it.key(), it.value());
+
     return stream;
 }
 
@@ -381,7 +405,7 @@ Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QTextFormat &fmt)
     associate the format with a QTextObject. It is used to represent
     lists, frames, and tables inside the document.
 
-    \sa {Text Related Classes}
+    \sa {Text Processing Classes}
 */
 
 /*!
@@ -432,8 +456,8 @@ Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QTextFormat &fmt)
     \value FontSizeIncrement
     \value FontWeight
     \value FontItalic
-    \value FontUnderline
-    \value FontOverline
+    \value FontUnderline \e{This property has been deprecated.} Use QTextFormat::TextUnderlineStyle instead.
+    \value FontOverline 
     \value FontStrikeOut
     \value FontFixedPitch
     \value FontPixelSize
@@ -442,6 +466,7 @@ Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QTextFormat &fmt)
     \value TextVerticalAlignment
     \value TextOutline
     \value TextUnderlineStyle
+    \value TextToolTip Specifies the (optional) tool tip to be displayed for a fragment of text.
 
     \value IsAnchor
     \value AnchorHref
@@ -456,15 +481,21 @@ Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QTextFormat &fmt)
 
     Table and frame properties
 
-    \value TableColumns
     \value FrameBorder
+    \value FrameBorderBrush
+    \value FrameBorderStyle
+    \value FrameBottomMargin
+    \value FrameHeight
+    \value FrameLeftMargin 
     \value FrameMargin
     \value FramePadding
+    \value FrameRightMargin
+    \value FrameTopMargin
     \value FrameWidth
-    \value FrameHeight
-    \value TableColumnWidthConstraints
     \value TableCellSpacing
     \value TableCellPadding
+    \value TableColumns
+    \value TableColumnWidthConstraints
     \value TableHeaderRowCount
 
     Table cell properties
@@ -587,7 +618,7 @@ QTextFormat::QTextFormat(int type)
 /*!
     \fn QTextFormat::QTextFormat(const QTextFormat &other)
 
-    Creates a new text format with the same attributes at the \a other
+    Creates a new text format with the same attributes as the \a other
     text format.
 */
 QTextFormat::QTextFormat(const QTextFormat &rhs)
@@ -1002,6 +1033,14 @@ QMap<int, QVariant> QTextFormat::properties() const
     return map;
 }
 
+/*!
+    \since 4.3
+    Returns the number of properties stored in the format.
+*/
+int QTextFormat::propertyCount() const
+{
+    return d ? d->props.count() : 0;
+}
 
 /*!
     \fn bool QTextFormat::operator!=(const QTextFormat &other) const
@@ -1057,12 +1096,8 @@ bool QTextFormat::operator==(const QTextFormat &rhs) const
 
     The color is set with setForeground(). If the text is intended to be used
     as an anchor (for hyperlinks), this can be enabled with setAnchor(). The
-    setAnchorHref() and setAnchorName() functions are used to specify the
+    setAnchorHref() and setAnchorNames() functions are used to specify the
     information about the hyperlink's destination and the anchor's name.
-
-    If the text is written within a table, it can be made to span a number of
-    rows and columns with the setTableCellRowSpan() and setTableCellColumnSpan()
-    functions.
 
     \sa QTextFormat QTextBlockFormat QTextTableFormat QTextListFormat
 */
@@ -1079,6 +1114,12 @@ bool QTextFormat::operator==(const QTextFormat &rhs) const
                             normal text.
     \value AlignSubScript   Characters are placed below the baseline for
                             normal text.
+    \value AlignMiddle This is currently only implemented for inline objects. The center
+                       of the object is vertically aligned with the base line.
+    \value AlignBottom The bottom edge of the object is vertically aligned with
+                       the base line.
+    \value AlignTop    The top edge of the object is vertically aligned with
+                       the base line.
 */
 
 /*!
@@ -1157,7 +1198,7 @@ QTextCharFormat::QTextCharFormat() : QTextFormat(CharFormat) {}
 
     Sets the text format's font weight to \a weight.
 
-    \sa setFont()
+    \sa setFont(), QFont::Weight
 */
 
 
@@ -1166,7 +1207,7 @@ QTextCharFormat::QTextCharFormat() : QTextFormat(CharFormat) {}
 
     Returns the text format's font weight.
 
-    \sa font()
+    \sa font(), QFont::Weight
 */
 
 
@@ -1309,6 +1350,19 @@ void QTextCharFormat::setUnderlineStyle(UnderlineStyle style)
     Sets the pen used to draw the outlines of characters to the given \a pen.
 */
 
+/*!
+    \fn void QTextCharFormat::setToolTip(const QString &text)
+    \since 4.3
+
+    Sets the tool tip for a fragment of text to the given \a text.
+*/
+
+/*!
+    \fn QString QTextCharFormat::toolTip() const
+    \since 4.3
+
+    Returns the tool tip that is displayed for a fragment of text.
+*/
 
 /*!
     \fn void QTextFormat::setForeground(const QBrush &brush)
@@ -1349,7 +1403,7 @@ void QTextCharFormat::setUnderlineStyle(UnderlineStyle style)
 
     The way the text is rendered is independent of whether or not the format
     has a valid anchor defined. Use setAnchorHref(), and optionally
-    setAnchorName() to create a hypertext link.
+    setAnchorNames() to create a hypertext link.
 
     \sa isAnchor()
 */
@@ -1361,7 +1415,7 @@ void QTextCharFormat::setUnderlineStyle(UnderlineStyle style)
     Returns true if the text is formatted as an anchor; otherwise
     returns false.
 
-    \sa setAnchor() setAnchorHref() setAnchorName()
+    \sa setAnchor() setAnchorHref() setAnchorNames()
 */
 
 
@@ -1372,7 +1426,7 @@ void QTextCharFormat::setUnderlineStyle(UnderlineStyle style)
     This is typically a URL like "http://www.trolltech.com/index.html".
 
     The anchor will be displayed with the \a value as its display text;
-    if you want to display different text call setAnchorName().
+    if you want to display different text call setAnchorNames().
 
     To format the text as a hypertext link use setAnchor().
 */
@@ -1388,24 +1442,66 @@ void QTextCharFormat::setUnderlineStyle(UnderlineStyle style)
 
 /*!
     \fn void QTextCharFormat::setAnchorName(const QString &name)
+    \obsolete
+
+    This function is deprecated. Use setAnchorNames() instead.
 
     Sets the text format's anchor \a name. For the anchor to work as a
     hyperlink, the destination must be set with setAnchorHref() and
     the anchor must be enabled with setAnchor().
 */
 
+/*!
+    \fn void QTextCharFormat::setAnchorNames(const QStringList &names)
+    \since 4.3
+
+    Sets the text format's anchor \a names. For the anchor to work as a
+    hyperlink, the destination must be set with setAnchorHref() and
+    the anchor must be enabled with setAnchor().
+*/
 
 /*!
     \fn QString QTextCharFormat::anchorName() const
+    \obsolete
+
+    This function is deprecated. Use anchorNames() instead.
 
     Returns the anchor name associated with this text format, or an empty
     string if none has been set. If the anchor name is set, text with this
     format can be the destination of a hypertext link.
 */
+QString QTextCharFormat::anchorName() const
+{
+    QVariant prop = property(AnchorName);
+    if (prop.type() == QVariant::StringList)
+        return prop.toStringList().value(0);
+    else if (prop.type() != QVariant::String)
+        return QString();
+    return prop.toString();
+}
+
+/*!
+    \fn QStringList QTextCharFormat::anchorNames() const
+    \since 4.3
+
+    Returns the anchor names associated with this text format, or an empty
+    string list if none has been set. If the anchor names are set, text with this
+    format can be the destination of a hypertext link.
+*/
+QStringList QTextCharFormat::anchorNames() const
+{
+    QVariant prop = property(AnchorName);
+    if (prop.type() == QVariant::StringList)
+        return prop.toStringList();
+    else if (prop.type() != QVariant::String)
+        return QStringList();
+    return QStringList(prop.toString());
+}
 
 
 /*!
     \fn void QTextCharFormat::setTableCellRowSpan(int tableCellRowSpan)
+    \internal
 
     If this character format is applied to characters in a table cell,
     the cell will span \a tableCellRowSpan rows.
@@ -1414,6 +1510,7 @@ void QTextCharFormat::setUnderlineStyle(UnderlineStyle style)
 
 /*!
     \fn int QTextCharFormat::tableCellRowSpan() const
+    \internal
 
     If this character format is applied to characters in a table cell,
     this function returns the number of rows spanned by the text (this may
@@ -1423,6 +1520,7 @@ void QTextCharFormat::setUnderlineStyle(UnderlineStyle style)
 
 /*!
     \fn void QTextCharFormat::setTableCellColumnSpan(int tableCellColumnSpan)
+    \internal
 
     If this character format is applied to characters in a table cell,
     the cell will span \a tableCellColumnSpan columns.
@@ -1431,6 +1529,7 @@ void QTextCharFormat::setUnderlineStyle(UnderlineStyle style)
 
 /*!
     \fn int QTextCharFormat::tableCellColumnSpan() const
+    \internal
 
     If this character format is applied to characters in a table cell,
     this function returns the number of columns spanned by the text (this
@@ -1868,11 +1967,33 @@ QTextListFormat::QTextListFormat()
 */
 
 /*!
+    \enum QTextFrameFormat::BorderStyle
+    \since 4.3
+
+    \value BorderStyle_None
+    \value BorderStyle_Dotted
+    \value BorderStyle_Dashed
+    \value BorderStyle_Solid
+    \value BorderStyle_Double
+    \value BorderStyle_DotDash
+    \value BorderStyle_DotDotDash
+    \value BorderStyle_Groove
+    \value BorderStyle_Ridge
+    \value BorderStyle_Inset
+    \value BorderStyle_Outset
+
+*/
+
+/*!
     \fn QTextFrameFormat::QTextFrameFormat()
 
     Constructs a text frame format object with the default properties.
 */
-QTextFrameFormat::QTextFrameFormat() : QTextFormat(FrameFormat) {}
+QTextFrameFormat::QTextFrameFormat() : QTextFormat(FrameFormat)
+{
+    setBorderStyle(BorderStyle_Outset);
+    setBorderBrush(Qt::darkGray);
+}
 
 /*!
     \fn QTextFrameFormat::isValid() const
@@ -1906,16 +2027,136 @@ QTextFrameFormat::QTextFrameFormat() : QTextFormat(FrameFormat) {}
 */
 
 /*!
+    \fn QTextFrameFormat::setBorderBrush(const QBrush &brush)
+    \since 4.3
+
+    Sets the \a brush used for the frame's border.
+*/
+
+/*!
+    \fn QBrush QTextFrameFormat::borderBrush() const
+    \since 4.3
+
+    Returns the brush used for the frame's border.
+*/
+
+/*!
+    \fn QTextFrameFormat::setBorderStyle(BorderStyle style)
+    \since 4.3
+
+    Sets the \a style of the frame's border.
+*/
+
+/*!
+    \fn BorderStyle QTextFrameFormat::borderStyle() const
+    \since 4.3
+
+    Returns the style of the frame's border.
+*/
+
+/*!
     \fn QTextFrameFormat::setMargin(qreal margin)
 
     Sets the frame's \a margin in pixels.
+    This method also sets the left, right, top and bottom margins
+    of the frame to the same value. The individual margins override
+    the general margin.
 */
+void QTextFrameFormat::setMargin(qreal amargin)
+{
+    setProperty(FrameMargin, amargin);
+    setProperty(FrameTopMargin, amargin);
+    setProperty(FrameBottomMargin, amargin);
+    setProperty(FrameLeftMargin, amargin);
+    setProperty(FrameRightMargin, amargin);
+}
+
 
 /*!
     \fn qreal QTextFrameFormat::margin() const
 
     Returns the width of the frame's external margin in pixels.
 */
+
+/*!
+    \fn QTextFrameFormat::setTopMargin(qreal margin)
+    \since 4.3
+
+    Sets the frame's top \a margin in pixels.
+*/
+
+/*!
+    \fn qreal QTextFrameFormat::topMargin() const
+    \since 4.3
+
+    Returns the width of the frame's top margin in pixels.
+*/
+qreal QTextFrameFormat::topMargin() const
+{
+    if (!hasProperty(FrameTopMargin))
+        return margin();
+    return doubleProperty(FrameTopMargin);
+}
+
+/*!
+    \fn QTextFrameFormat::setBottomMargin(qreal margin)
+    \since 4.3
+
+    Sets the frame's bottom \a margin in pixels.
+*/
+
+/*!
+    \fn qreal QTextFrameFormat::bottomMargin() const
+    \since 4.3
+
+    Returns the width of the frame's bottom margin in pixels.
+*/
+qreal QTextFrameFormat::bottomMargin() const
+{
+    if (!hasProperty(FrameBottomMargin))
+        return margin();
+    return doubleProperty(FrameBottomMargin);
+}
+
+/*!
+    \fn QTextFrameFormat::setLeftMargin(qreal margin)
+    \since 4.3
+
+    Sets the frame's left \a margin in pixels.
+*/
+
+/*!
+    \fn qreal QTextFrameFormat::leftMargin() const
+    \since 4.3
+
+    Returns the width of the frame's left margin in pixels.
+*/
+qreal QTextFrameFormat::leftMargin() const
+{
+    if (!hasProperty(FrameLeftMargin))
+        return margin();
+    return doubleProperty(FrameLeftMargin);
+}
+
+/*!
+    \fn QTextFrameFormat::setRightMargin(qreal margin)
+    \since 4.3
+
+    Sets the frame's right \a margin in pixels.
+*/
+
+/*!
+    \fn qreal QTextFrameFormat::rightMargin() const
+    \since 4.3
+
+    Returns the width of the frame's right margin in pixels.
+*/
+qreal QTextFrameFormat::rightMargin() const
+{
+    if (!hasProperty(FrameRightMargin))
+        return margin();
+    return doubleProperty(FrameRightMargin);
+}
 
 /*!
     \fn QTextFrameFormat::setPadding(qreal width)
@@ -2026,8 +2267,7 @@ QTextFrameFormat::QTextFrameFormat() : QTextFormat(FrameFormat) {}
     returns the number of columns with constraints, and the
     columnWidthConstraints() function returns the constraints defined for the
     table. These quantities can also be set by calling setColumnWidthConstraints()
-    with a vector containing new constraints. The setColumns() function can be
-    used to change the number of constraints in use. If no constraints are
+    with a vector containing new constraints. If no constraints are
     required, clearColumnWidthConstraints() can be used to remove them.
 
     \sa QTextTable QTextTableCell QTextLength
@@ -2059,12 +2299,11 @@ QTextTableFormat::QTextTableFormat()
     \fn int QTextTableFormat::columns() const
 
     Returns the number of columns specified by the table format.
-
-    \sa setColumns()
 */
 
 
 /*!
+    \internal
     \fn void QTextTableFormat::setColumns(int columns)
 
     Sets the number of \a columns required by the table format.

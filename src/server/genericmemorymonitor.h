@@ -1,8 +1,9 @@
+// -*-C++-*-
 /****************************************************************************
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,33 +27,60 @@
 #include <QVector>
 #include <QDateTime>
 #include <QValueSpaceObject>
+
 class QTimer;
 
 class GenericMemoryMonitorTask : public MemoryMonitor
 {
-Q_OBJECT
-public:
+    Q_OBJECT
+	
+  public:
     GenericMemoryMonitorTask();
 
     virtual MemState memoryState() const;
     virtual unsigned int timeInState() const;
 
-private slots:
+  private slots:
     void memoryMonitor();
-    void evalMemory();
 
-private:
-    void setMemState(MemState);
-    void readMemInfo(int *, int *);
-    enum { VMUnknown, VMLinux_2_4, VMLinux_2_6 } m_vmStatType;
-    QTimer *m_vmMonitor;
-    bool m_slowVMMonitor;
-    short m_count;
-    long m_prevFaults;
-    QVector<int> m_pgFaults;
-    MemState m_memstate;
-    QDateTime m_lastChanged;
-    QValueSpaceObject * m_vso;
+  private:
+    enum VM_Model {
+	VMUnknown,
+	VMLinux_2_4,
+	VMLinux_2_6
+    }; 
+
+  private:
+    void computeMemoryValues();
+    void computePageFaultValues();
+    void computeMemoryState();
+    void restartTimer();
+
+  private:
+    int			m_low_threshhold;
+    int			m_verylow_threshhold;
+    int			m_critical_threshhold;
+    int			m_percent_threshhold;
+    int			m_memory_available;
+    int			m_percent_available;
+    int			m_samples;
+    int			m_long_interval;
+    int			m_short_interval;
+    int			m_normal_count;
+    int			m_critical_count;
+    int			m_verylow_count;
+    int			m_low_count;
+
+    VM_Model		m_vmStatType;
+    QTimer* 		m_vmMonitor;
+    bool 		m_useLongInterval;
+    short 		m_count;
+    long 		m_previousFaults;
+    QVector<int> 	m_pageFaults;
+    QVector<int> 	m_memStates;
+    MemState 		m_memoryState;
+    QDateTime 		m_lastChanged;
+    QValueSpaceObject*	m_vso;
 };
 
 #endif // _GENERICMEMORYMONITOR_H_

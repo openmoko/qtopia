@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,10 +22,8 @@
 #include "accountsettings.h"
 #include "accountlist.h"
 #include "editaccount.h"
-#ifdef QTOPIA_PHONE
-# ifndef QTOPIA_NO_MMS
+#ifndef QTOPIA_NO_MMS
 #  include "mmseditaccount.h"
-# endif
 #endif
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
@@ -43,8 +41,9 @@ AccountSettings::AccountSettings(AccountList *al, QWidget *parent, const char *n
 {
     setObjectName( name );
     setModal( modal );
-    setWindowTitle(tr("Account Settings"));
+    setWindowTitle(tr("Account settings"));
     QVBoxLayout *vb = new QVBoxLayout(this);
+    vb->setContentsMargins(0, 0, 0, 0);
     accountListBox = new QListWidget(this);
     vb->addWidget(accountListBox);
     accountListBox->setFrameStyle(QFrame::NoFrame);
@@ -163,11 +162,7 @@ void AccountSettings::editAccount(MailAccount *account, bool newAccount)
         editAccountView = e;
     }
 
-#ifdef QTOPIA_DESKTOP
-    int ret = editAccountView->exec();
-#else
     int ret = QtopiaApplication::execDialog(editAccountView);
-#endif
     delete editAccountView;
 
     if (ret == QDialog::Accepted) {

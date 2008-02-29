@@ -290,7 +290,7 @@ SeeAlso: ???
 Feature: TOOLBOX
 Description:  Supports columns of tabbed widget items.
 Section: Widgets
-Requires: ICON TOOLTIP TOOLBUTTON SCROLLAREA
+Requires: ICON TOOLBUTTON SCROLLAREA
 Name: QToolBox
 SeeAlso: ???
 
@@ -328,6 +328,13 @@ Description: Supports workspace windows, e.g. used in an MDI application.
 Section: Widgets
 Requires: SCROLLBAR RESIZEHANDLER MENU TOOLBUTTON MAINWINDOW TOOLBAR MENUBAR
 Name: QWorkSpace
+SeeAlso: ???
+
+Feature: MDIAREA
+Description: Provides an area in which MDI windows are displayed.
+Section: Widgets
+Requires: SCROLLAREA
+Name: QMdiArea
 SeeAlso: ???
 
 Feature: RESIZEHANDLER
@@ -411,7 +418,7 @@ SeeAlso: ???
 Feature: TEXTEDIT
 Description: Supports rich text editing.
 Section: Widgets
-Requires: SCROLLAREA
+Requires: SCROLLAREA PROPERTIES
 Name: QTextEdit
 SeeAlso: ???
 
@@ -499,7 +506,7 @@ SeeAlso: ???
 Feature: FILEDIALOG
 Description: Supports a dialog widget for selecting files or directories. 
 Section: Dialogs
-Requires: DIRMODEL TREEVIEW COMBOBOX TOOLBUTTON BUTTONGROUP 
+Requires: DIRMODEL TREEVIEW COMBOBOX TOOLBUTTON BUTTONGROUP TOOLTIP SPLITTER STACKEDWIDGET FILESYSTEMWATCHER
 Name: QFileDialog
 SeeAlso: ???
 
@@ -543,6 +550,13 @@ Description:  Supports an error message display dialog.
 Section: Dialogs
 Requires: TEXTEDIT
 Name: QErrorMessage
+SeeAlso: ???
+
+Feature: WIZARD
+Description: Provides a framework for wizards.
+Section: Dialogs
+Requires: PROPERTIES
+Name: QWizard
 SeeAlso: ???
 
 # ItemViews
@@ -615,8 +629,15 @@ SeeAlso: ???
 Feature: DATAWIDGETMAPPER
 Description: Provides mapping between a section of a data model to widgets.
 Section: ItemViews
-Requires: ITEMVIEWS
+Requires: ITEMVIEWS PROPERTIES
 Name: QDataWidgetMapper
+SeeAlso: ???
+
+Feature: COLUMNVIEW
+Description: Provides a model/view implementation of a column view.
+Section: ItemViews
+Requires: LISTVIEW
+Name: QColumnView
 SeeAlso: ???
 
 # Styles
@@ -654,6 +675,13 @@ Description: Supports a Microsoft WindowsXP-like look and feel.
 Section: Styles
 Requires: STYLE_WINDOWS
 Name: QWindowsXPStyle
+SeeAlso: ???
+
+Feature: STYLE_WINDOWSVISTA
+Description: Supports a Microsoft WindowsVista-like look and feel.
+Section: Styles
+Requires: STYLE_WINDOWS STYLE_WINDOWSXP
+Name: QWindowsVistaStyle
 SeeAlso: ???
 
 Feature: STYLE_CLEANLOOKS
@@ -787,6 +815,20 @@ Requires: PRINTER LIBRARY
 Name: Common UNIX Printing System
 SeeAlso: ???
 
+Feature: PAINTONSCREEN
+Description: Supports the Qt::WA_PaintOnScreen widget attribute.
+Section: Painting
+Requires:
+Name: Qt::WA_PaintOnScreen
+SeeAlso: ???
+
+Feature: PAINT_DEBUG
+Description: Debug painting with the environment variables QT_FLUSH_UPDATE and QT_FLUSH_PAINT
+Section: Painting
+Requires:
+Name: Painting Debug Utilities
+SeeAlso: ???
+
 # Fonts
 
 Feature: FREETYPE
@@ -802,6 +844,14 @@ specific to Qtopia Core.
 Section: Fonts
 Requires:
 Name: Qt Prerendered Font Format
+SeeAlso: ???
+
+Feature: QWS_QPF2
+Description: Supports Qt's second generation of pre-rendered fonts, a light-weight 
+non-scalable font format specific to Qtopia Core.
+Section: Fonts
+Requires: QWS_QPF
+Name: Qt Prerendered Font Format 2
 SeeAlso: ???
 
 # Internationalization
@@ -964,6 +1014,20 @@ Description: A widget which shows the contents of an undo stack.
 Section: Utilities
 Requires: UNDOSTACK LISTVIEW
 Name: QUndoView
+SeeAlso: ???
+
+Feature: SCRIPT
+Description: Provides support for the QtScript module
+Section: Utilities
+Requires: TEXTDATE DATESTRING PROPERTIES
+Name: QtScript
+SeeAlso: ???
+
+Feature: ACCESSIBILITY
+Description: Provides accessibility support.
+Section: Utilities
+Requires: PROPERTIES
+Name: Accessibility
 SeeAlso: ???
 
 # Qtopia Core

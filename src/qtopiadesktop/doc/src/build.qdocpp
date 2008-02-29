@@ -1,0 +1,65 @@
+/*!
+
+\page over_Building Qtopia Sync Agent_1.html
+\title Building Qtopia Sync Agent
+\ingroup overviews
+\sa {Overviews}
+\brief Instructions on how to build Qtopia Sync Agent from source.
+
+These instructions tell you how to build Qtopia Sync Agent, how to run a build and
+how to deploy Qtopia Sync Agent.
+
+\section1 Requirements
+
+Qtopia Sync Agent is known to build with Microsoft Visual C++ 6 (VC6),
+Microsoft Visual Studio .NET 2003 Standard Edition (VC7)
+and Microsoft Visual C++ Express 2005 (VC8).
+
+You must have the Platform SDK installed to build Qtopia Sync Agent.
+
+You must have Outlook installed to build a fully-functional Qtopia Sync Agent.
+
+\section1 Setup
+
+Ensure that a suitable compiler is installed and the appropriate environment variables are
+set. You will also need to install the platform SDK to build Qtopia Sync Agent.
+
+You should set QMAKESPEC to a suitable value.
+
+\table
+\header \o Compiler \o QMAKESPEC
+\row    \o VC6   \o win32-msvc
+\row    \o VC7   \o win32-msvc.net
+\row    \o VC8   \o win32-msvc2005
+\endtable
+
+\section1 Build
+
+\code
+configure
+nmake
+nmake install
+\endcode
+
+\section1 Execute Unit Tests
+
+There is only minimal test coverage at this time, mostly aimed at the Outlook interface.
+
+\code
+cd tests\src\qtopiadesktop
+nmake
+nmake test
+\endcode
+
+\section1 Running
+
+\code
+dimage\qtopiadesktop.exe
+\endcode
+
+\section1 Deployment
+
+You can build an installer for Qtopia Sync Agent.
+Please see src/qtopiadesktop/dist/README for details.
+
+*/

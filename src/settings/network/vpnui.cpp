@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,7 +22,6 @@
 #include "vpnui.h"
 
 #include <QButtonGroup>
-#include <QDebug>
 #include <QKeyEvent>
 #include <QItemSelectionModel>
 #include <QLabel>
@@ -47,7 +46,7 @@ public:
         : QAbstractListModel( parent )
     {
         vpnSpace = new QValueSpaceItem( "/Network/VPN", this );
-        connect( vpnSpace, SIGNAL( contentsChanged() ), this, SLOT(updateVPNs()) );
+        connect( vpnSpace, SIGNAL(contentsChanged()), this, SLOT(updateVPNs()) );
         updateVPNs();
     }
 
@@ -267,19 +266,19 @@ void VpnUI::init()
     vbox->addWidget( label );
 
     model = new VPNListModel( this );
-    connect( model, SIGNAL(vpnStateChanged(const QModelIndex&)),
-                this, SLOT(newVPNSelected(const QModelIndex&)) );
+    connect( model, SIGNAL(vpnStateChanged(QModelIndex)),
+                this, SLOT(newVPNSelected(QModelIndex)) );
 
     vpnList = new QListView( this );
     vpnList->setModel( model );
     vpnList->setSelectionBehavior( QAbstractItemView::SelectRows );
     vpnList->setSelectionMode( QAbstractItemView::SingleSelection );
-    connect( vpnList, SIGNAL(activated(const QModelIndex&)),
-            this, SLOT(vpnActivated(const QModelIndex&)) );
+    connect( vpnList, SIGNAL(activated(QModelIndex)),
+            this, SLOT(vpnActivated(QModelIndex)) );
 
     QItemSelectionModel * selModel = vpnList->selectionModel();
-    connect( selModel, SIGNAL(currentChanged(const QModelIndex&,const QModelIndex&)),
-            this, SLOT(newVPNSelected(const QModelIndex&,const QModelIndex&)) );
+    connect( selModel, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this, SLOT(newVPNSelected(QModelIndex,QModelIndex)) );
 
     vbox->addWidget( vpnList );
 

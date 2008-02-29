@@ -26,7 +26,7 @@ for(it,QTOPIA_DEPENDS) {
     ROOTS=$$PROJECT_ROOT
     # Then look in Qtopia
     qtopia|part_of_qtopia:ROOTS+=$$QTOPIA_PROJECT_ROOT
-    # Then Qtopia Desktop
+    # Then Qtopia Sync Agent
     qtopiadesktop|part_of_qtopiadesktop:ROOTS+=$$QTOPIADESKTOP_PROJECT_ROOT
     # Then everything else
     ROOTS*=$$PROJECT_ROOTS

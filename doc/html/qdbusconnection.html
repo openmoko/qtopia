@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QDBusConnection Class Reference</title>
+  <title>Qt 4.3: QDBusConnection Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDBusConnection Class Reference<br /><sup><sup>[<a href="qtdbus.html">QtDBus</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDBusConnection Class Reference<br /><span class="small-subtitle">[<a href="qtdbus.html">QtDBus</a> module]</span>
+</h1>
 <p>The QDBusConnection class represents a connection to the D-Bus bus daemon. <a href="#details">More...</a></p>
 <pre> #include &lt;QDBusConnection&gt;</pre><p>This class was introduced in Qt 4.2.</p>
 <ul>
@@ -33,7 +34,8 @@
 <li><div class="fn"/><b><a href="qdbusconnection.html#dtor.QDBusConnection">~QDBusConnection</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qdbusconnection.html#baseService">baseService</a></b> () const</li>
 <li><div class="fn"/>QDBusMessage <b><a href="qdbusconnection.html#call">call</a></b> ( const QDBusMessage &amp; <i>message</i>, QDBus::CallMode <i>mode</i> = QDBus::Block, int <i>timeout</i> = -1 ) const</li>
-<li><div class="fn"/>bool <b><a href="qdbusconnection.html#callWithCallback">callWithCallback</a></b> ( const QDBusMessage &amp; <i>message</i>, QObject * <i>receiver</i>, const char * <i>method</i>, int <i>timeout</i> = -1 ) const</li>
+<li><div class="fn"/>bool <b><a href="qdbusconnection.html#callWithCallback">callWithCallback</a></b> ( const QDBusMessage &amp; <i>message</i>, QObject * <i>receiver</i>, const char * <i>returnMethod</i>, const char * <i>errorMethod</i>, int <i>timeout</i> = -1 ) const</li>
+<li><div class="fn"/>bool <b><a href="qdbusconnection.html#callWithCallback-2">callWithCallback</a></b> ( const QDBusMessage &amp; <i>message</i>, QObject * <i>receiver</i>, const char * <i>returnMethod</i>, int <i>timeout</i> = -1 ) const&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>bool <b><a href="qdbusconnection.html#connect">connect</a></b> ( const QString &amp; <i>service</i>, const QString &amp; <i>path</i>, const QString &amp; <i>interface</i>, const QString &amp; <i>name</i>, QObject * <i>receiver</i>, const char * <i>slot</i> )</li>
 <li><div class="fn"/>bool <b><a href="qdbusconnection.html#connect-2">connect</a></b> ( const QString &amp; <i>service</i>, const QString &amp; <i>path</i>, const QString &amp; <i>interface</i>, const QString &amp; <i>name</i>, const QString &amp; <i>signature</i>, QObject * <i>receiver</i>, const char * <i>slot</i> )</li>
 <li><div class="fn"/>bool <b><a href="qdbusconnection.html#disconnect">disconnect</a></b> ( const QString &amp; <i>service</i>, const QString &amp; <i>path</i>, const QString &amp; <i>interface</i>, const QString &amp; <i>name</i>, QObject * <i>receiver</i>, const char * <i>slot</i> )</li>
@@ -99,12 +101,11 @@
 <tr><td valign="top"><tt>QDBusConnection::ExportNonScriptableProperties</tt></td><td align="center" valign="top"><tt>0x400</tt></td><td valign="top">export this object's non-scriptable properties</td></tr>
 <tr><td valign="top"><tt>QDBusConnection::ExportNonScriptableContents</tt></td><td align="center" valign="top"><tt>0xf00</tt></td><td valign="top">shorthand form for ExportNonScriptableSlots | ExportNonScriptableSignals | ExportNonScriptableProperties</td></tr>
 <tr><td valign="top"><tt>QDBusConnection::ExportAllSlots</tt></td><td align="center" valign="top"><tt>ExportScriptableSlots | ExportNonScriptableSlots</tt></td><td valign="top">export all of this object's slots</td></tr>
-<tr><td valign="top"><tt>QDBusConnection::ExportAllSignal</tt></td><td align="center" valign="top"><tt>ExportScriptableSignals | ExportNonScriptableSignals</tt></td><td valign="top">export all of this object's signals</td></tr>
+<tr><td valign="top"><tt>QDBusConnection::ExportAllSignals</tt></td><td align="center" valign="top"><tt>ExportScriptableSignals | ExportNonScriptableSignals</tt></td><td valign="top">export all of this object's signals</td></tr>
 <tr><td valign="top"><tt>QDBusConnection::ExportAllProperties</tt></td><td align="center" valign="top"><tt>ExportScriptableProperties | ExportNonScriptableProperties</tt></td><td valign="top">export all of this object's properties</td></tr>
 <tr><td valign="top"><tt>QDBusConnection::ExportAllContents</tt></td><td align="center" valign="top"><tt>ExportScriptableContents | ExportNonScriptableContents</tt></td><td valign="top">export all of this object's contents</td></tr>
 <tr><td valign="top"><tt>QDBusConnection::ExportChildObjects</tt></td><td align="center" valign="top"><tt>0x1000</tt></td><td valign="top">export this object's child objects</td></tr>
 </table></p>
-<p><b>Warning:</b> It is currently not possible to export signals from objects. If you pass the ExportScriptableSignals, ExportNonScriptableSignals, or ExportAllSignal, the <a href="qdbusconnection.html#registerObject">registerObject</a>() function will print a warning.</p>
 <p>The RegisterOptions type is a typedef for <a href="qflags.html">QFlags</a>&lt;RegisterOption&gt;. It stores an OR combination of RegisterOption values.</p>
 <p>See also <a href="qdbusconnection.html#registerObject">registerObject</a>(), <a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a>, and <a href="usingadaptors.html">Using adaptors</a>.</p>
 <h3 class="fn"><a name="UnregisterMode-enum"></a>enum QDBusConnection::UnregisterMode</h3>
@@ -132,10 +133,18 @@
 <p>Sends the <i>message</i> over this connection and blocks, waiting for a reply, for at most <i>timeout</i> milliseconds. This function is suitable for method calls only. It returns the reply message as its return value, which will be either of type <a href="qdbusmessage.html#MessageType-enum">QDBusMessage::ReplyMessage</a> or <a href="qdbusmessage.html#MessageType-enum">QDBusMessage::ErrorMessage</a>.</p>
 <p>See the <a href="qdbusabstractinterface.html#call">QDBusInterface::call</a>() function for a more friendly way of placing calls.</p>
 <p><b>Warning:</b> If <i>mode</i> is <a href="qdbus.html#CallMode-enum">QDBus::BlockWithGui</a>, this function will reenter the Qt event loop in order to wait for the reply. During the wait, it may deliver signals and other method calls to your application. Therefore, it must be prepared to handle a reentrancy whenever a call is placed with call().</p>
-<h3 class="fn"><a name="callWithCallback"></a>bool QDBusConnection::callWithCallback ( const <a href="qdbusmessage.html">QDBusMessage</a> &amp; <i>message</i>, <a href="qobject.html">QObject</a> * <i>receiver</i>, const char * <i>method</i>, int <i>timeout</i> = -1 ) const</h3>
-<p>Sends the <i>message</i> over this connection and blocks, waiting for a reply, for at most <i>timeout</i> milliseconds. When the reply is received, the given <i>method</i> is called in the <i>receiver</i> object. The default <i>timeout</i> is -1, meaning that the function won't wait for a reply before calling the specified <i>method</i>.</p>
-<p>This function is suitable for method calls only. It is guaranteed that the slot will be called exactly once with the reply, as long as the parameter types match. If they don't, the reply cannot be delivered.</p>
-<p>Returns the identification of the message that was sent or 0 if nothing was sent.</p>
+<h3 class="fn"><a name="callWithCallback"></a>bool QDBusConnection::callWithCallback ( const <a href="qdbusmessage.html">QDBusMessage</a> &amp; <i>message</i>, <a href="qobject.html">QObject</a> * <i>receiver</i>, const char * <i>returnMethod</i>, const char * <i>errorMethod</i>, int <i>timeout</i> = -1 ) const</h3>
+<p>Sends the <i>message</i> over this connection and returns immediately. When the reply is received, the method <i>returnMethod</i> is called in the <i>receiver</i> object. If an error occurs, the method <i>errorMethod</i> will be called instead.</p>
+<p>If no reply is received within <i>timeout</i> milliseconds, an automatic error will be delivered indicating the expiration of the call. The default <i>timeout</i> is -1, which will be replaced with an implementation-defined value that is suitable for inter-process communications (generally, 25 seconds).</p>
+<p>This function is suitable for method calls only. It is guaranteed that the slot will be called exactly once with the reply, as long as the parameter types match and no error occurs.</p>
+<p>Returns true if the message was sent, or false if the message could not be sent.</p>
+<h3 class="fn"><a name="callWithCallback-2"></a>bool QDBusConnection::callWithCallback ( const <a href="qdbusmessage.html">QDBusMessage</a> &amp; <i>message</i>, <a href="qobject.html">QObject</a> * <i>receiver</i>, const char * <i>returnMethod</i>, int <i>timeout</i> = -1 ) const</h3>
+<p>This function is deprecated.</p>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Sends the <i>message</i> over this connection and returns immediately. When the reply is received, the method <i>returnMethod</i> is called in the <i>receiver</i> object.</p>
+<p>This function is suitable for method calls only. It is guaranteed that the slot will be called exactly once with the reply, as long as the parameter types match and no error occurs.</p>
+<p>This function is dangerous because it cannot report errors, including the expiration of the timeout.</p>
+<p>Returns true if the message was sent, or false if the message could not be sent.</p>
 <h3 class="fn"><a name="connect"></a>bool QDBusConnection::connect ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, const <a href="qstring.html">QString</a> &amp; <i>path</i>, const <a href="qstring.html">QString</a> &amp; <i>interface</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i>, <a href="qobject.html">QObject</a> * <i>receiver</i>, const char * <i>slot</i> )</h3>
 <p>Connects the signal specified by the <i>service</i>, <i>path</i>, <i>interface</i> and <i>name</i> parameters to the slot <i>slot</i> in object <i>receiver</i>. The arguments <i>service</i> and <i>path</i> can be empty, denoting a connection to any signal of the (<i>interface</i>, <i>name</i>) pair, from any remote application.</p>
 <p>Returns true if the connection was successful.</p>
@@ -203,6 +212,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

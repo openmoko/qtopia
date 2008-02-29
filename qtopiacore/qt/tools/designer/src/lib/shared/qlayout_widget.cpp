@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,13 +37,16 @@
 ****************************************************************************/
 
 #include "qlayout_widget_p.h"
-#include "qdesigner_widget_p.h"
 #include "qdesigner_command_p.h"
 #include "layout_p.h"
 #include "invisible_widget_p.h"
 
-#include <QtDesigner/QtDesigner>
+#include <QtDesigner/QDesignerFormWindowInterface>
+#include <QtDesigner/QDesignerLayoutDecorationExtension>
 #include <QtDesigner/QExtensionManager>
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <QtDesigner/QDesignerPropertySheetExtension>
+#include <QtDesigner/QDesignerWidgetFactoryInterface>
 
 #include <QtGui/QBitmap>
 #include <QtGui/QPixmapCache>
@@ -43,6 +61,8 @@
 #include <QtCore/qdebug.h>
 
 namespace qdesigner_internal {
+
+const int ShiftValue = 1;
 
 class FriendlyLayout: public QLayout
 {
@@ -89,7 +109,10 @@ QLayoutSupport::QLayoutSupport(QDesignerFormWindowInterface *formWindow, QWidget
     m_indicatorBottom->hide();
 
     if (QDesignerPropertySheetExtension *sheet = qt_extension<QDesignerPropertySheetExtension*>(formWindow->core()->extensionManager(), m_widget)) {
-        sheet->setChanged(sheet->indexOf(QLatin1String("margin")), true);
+        sheet->setChanged(sheet->indexOf(QLatin1String("leftMargin")), true);
+        sheet->setChanged(sheet->indexOf(QLatin1String("topMargin")), true);
+        sheet->setChanged(sheet->indexOf(QLatin1String("rightMargin")), true);
+        sheet->setChanged(sheet->indexOf(QLatin1String("bottomMargin")), true);
         sheet->setChanged(sheet->indexOf(QLatin1String("spacing")), true);
     }
 }
@@ -279,7 +302,7 @@ void QLayoutSupport::adjustIndicator(const QPoint &pos, int index)
             gridLayout->getItemPosition(m_currentIndex, &row, &column, &rowspan, &colspan);
             m_currentCell = qMakePair(row, column);
         } else {
-            qWarning("Warning: found a fake spacer inside a vbox layout");
+            qDebug("Warning: found a fake spacer inside a vbox layout");
             m_currentCell = qMakePair(0, 0);
         }
     } else {
@@ -442,7 +465,7 @@ void QLayoutSupport::insertWidget(QWidget *widget, const QPair<int, int> &cell)
 
         default: {
 #ifdef QD_DEBUG
-            qWarning() << "expected a layout here!";
+            qDebug() << "expected a layout here!";
             Q_ASSERT(0);
 #endif
         }
@@ -558,7 +581,7 @@ void QLayoutSupport::insertWidget(int index, QWidget *widget)
     QLayoutItem *item = gridLayout->itemAt(index);
 
     if (!item || !isEmptyItem(item)) {
-        qWarning() << "the cell is not empty";
+        qDebug() << "the cell is not empty";
         return;
     }
 
@@ -608,9 +631,9 @@ void QLayoutSupport::createEmptyCells(QGridLayout *&gridLayout)
                 if (!item) {
                     /* skip */
                 } else if (item->layout()) {
-                    qWarning("unexpected layout");
+                    qDebug("unexpected layout");
                 } else if (item->spacerItem()) {
-                    qWarning("unexpected spacer");
+                    qDebug("unexpected spacer");
                 }
             }
         }
@@ -805,8 +828,29 @@ void QLayoutSupport::computeGridLayout(QHash<QLayoutItem*, QRect> *l)
 void QLayoutSupport::rebuildGridLayout(QHash<QLayoutItem*, QRect> *infos)
 {
     QGridLayout *gridLayout = qobject_cast<QGridLayout*>(layout());
-    int margin = gridLayout->margin();
-    int spacing = gridLayout->spacing();
+    int leftMargin, topMargin, rightMargin, bottomMargin;
+    leftMargin = topMargin = rightMargin = bottomMargin = 0;
+    int horizSpacing = gridLayout->horizontalSpacing();
+    int vertSpacing = gridLayout->verticalSpacing();
+    bool leftMarginChanged, topMarginChanged, rightMarginChanged, bottomMarginChanged, horizSpacingChanged, vertSpacingChanged;;
+    leftMarginChanged = topMarginChanged = rightMarginChanged = bottomMarginChanged = horizSpacingChanged = vertSpacingChanged = false;
+
+    QDesignerFormEditorInterface *core = formWindow()->core();
+    QDesignerPropertySheetExtension *sheet = qt_extension<QDesignerPropertySheetExtension*>(core->extensionManager(), gridLayout);
+    if (sheet) {
+        leftMargin = sheet->property(sheet->indexOf("leftMargin")).toInt();
+        topMargin = sheet->property(sheet->indexOf("topMargin")).toInt();
+        rightMargin = sheet->property(sheet->indexOf("rightMargin")).toInt();
+        bottomMargin = sheet->property(sheet->indexOf("bottomMargin")).toInt();
+        horizSpacing = sheet->property(sheet->indexOf("horizontalSpacing")).toInt();
+        vertSpacing = sheet->property(sheet->indexOf("verticalSpacing")).toInt();
+        leftMarginChanged = sheet->isChanged(sheet->indexOf(QLatin1String("leftMargin")));
+        topMarginChanged = sheet->isChanged(sheet->indexOf(QLatin1String("topMargin")));
+        rightMarginChanged = sheet->isChanged(sheet->indexOf(QLatin1String("rightMargin")));
+        bottomMarginChanged = sheet->isChanged(sheet->indexOf(QLatin1String("bottomMargin")));
+        horizSpacingChanged = sheet->isChanged(sheet->indexOf(QLatin1String("horizontalSpacing")));
+        vertSpacingChanged = sheet->isChanged(sheet->indexOf(QLatin1String("verticalSpacing")));
+    }
 
     { // take the items
         int index = 0;
@@ -816,7 +860,6 @@ void QLayoutSupport::rebuildGridLayout(QHash<QLayoutItem*, QRect> *infos)
 
     Q_ASSERT(gridLayout == m_widget->layout());
 
-    QDesignerFormEditorInterface *core = formWindow()->core();
     LayoutInfo::deleteLayout(core, m_widget);
 
     gridLayout = (QGridLayout*) core->widgetFactory()->createLayout(m_widget, 0, LayoutInfo::Grid);
@@ -831,13 +874,26 @@ void QLayoutSupport::rebuildGridLayout(QHash<QLayoutItem*, QRect> *infos)
                 info.height(), info.width());
     }
 
-    gridLayout->setMargin(margin);
-    gridLayout->setSpacing(spacing);
+    QDesignerPropertySheetExtension *newSheet = qt_extension<QDesignerPropertySheetExtension*>(core->extensionManager(), gridLayout);
+    if (sheet && newSheet) {
+        newSheet->setProperty(newSheet->indexOf("leftMargin"), leftMargin);
+        newSheet->setChanged(newSheet->indexOf("leftMargin"), leftMarginChanged);
+        newSheet->setProperty(newSheet->indexOf("topMargin"), topMargin);
+        newSheet->setChanged(newSheet->indexOf("topMargin"), topMarginChanged);
+        newSheet->setProperty(newSheet->indexOf("rightMargin"), rightMargin);
+        newSheet->setChanged(newSheet->indexOf("rightMargin"), rightMarginChanged);
+        newSheet->setProperty(newSheet->indexOf("bottomMargin"), bottomMargin);
+        newSheet->setChanged(newSheet->indexOf("bottomMargin"), bottomMarginChanged);
+        newSheet->setProperty(newSheet->indexOf("horizontalSpacing"), horizSpacing);
+        newSheet->setChanged(newSheet->indexOf("horizontalSpacing"), horizSpacingChanged);
+        newSheet->setProperty(newSheet->indexOf("verticalSpacing"), vertSpacing);
+        newSheet->setChanged(newSheet->indexOf("verticalSpacing"), vertSpacingChanged);
+    }
 }
 
 QLayoutWidget::QLayoutWidget(QDesignerFormWindowInterface *formWindow, QWidget *parent)
     : QWidget(parent), m_formWindow(formWindow),
-      m_support(formWindow, this)
+      m_support(formWindow, this), m_leftMargin(0), m_topMargin(0), m_rightMargin(0), m_bottomMargin(0)
 {
 }
 
@@ -902,35 +958,94 @@ bool QLayoutWidget::event(QEvent *e)
     return QWidget::event(e);
 }
 
-int QLayoutWidget::layoutMargin() const
+int QLayoutWidget::layoutLeftMargin() const
 {
-    if (layout())
-        return layout()->margin() - 1;
-
-    return -1;
+    if (m_leftMargin < 0 && layout()) {
+        int margin;
+        layout()->getContentsMargins(&margin, 0, 0, 0);
+        return margin;
+    }
+    return m_leftMargin;
 }
 
-void QLayoutWidget::setLayoutMargin(int layoutMargin)
+void QLayoutWidget::setLayoutLeftMargin(int layoutMargin)
 {
-    if (layout())
-        layout()->setMargin(layoutMargin + 1);
-
-    QList<QLayoutWidget*> lst = qFindChildren<QLayoutWidget*>(this);
-    foreach (QLayoutWidget *lay, lst)
-        lay->setLayoutMargin(layoutMargin);
+    m_leftMargin = layoutMargin;
+    if (layout()) {
+        int newMargin = m_leftMargin;
+        if (newMargin >= 0 && newMargin < ShiftValue)
+            newMargin = ShiftValue;
+        int left, top, right, bottom;
+        layout()->getContentsMargins(&left, &top, &right, &bottom);
+        layout()->setContentsMargins(newMargin, top, right, bottom);
+    }
 }
 
-int QLayoutWidget::layoutSpacing() const
+int QLayoutWidget::layoutTopMargin() const
 {
-    if (layout())
-        return layout()->spacing();
-
-    return 0;
+    if (m_topMargin < 0 && layout()) {
+        int margin;
+        layout()->getContentsMargins(0, &margin, 0, 0);
+        return margin;
+    }
+    return m_topMargin;
 }
 
-void QLayoutWidget::setLayoutSpacing(int layoutSpacing)
+void QLayoutWidget::setLayoutTopMargin(int layoutMargin)
 {
-    if (layout())
-        layout()->setSpacing(layoutSpacing);
+    m_topMargin = layoutMargin;
+    if (layout()) {
+        int newMargin = m_topMargin;
+        if (newMargin >= 0 && newMargin < ShiftValue)
+            newMargin = ShiftValue;
+        int left, top, right, bottom;
+        layout()->getContentsMargins(&left, &top, &right, &bottom);
+        layout()->setContentsMargins(left, newMargin, right, bottom);
+    }
 }
 
+int QLayoutWidget::layoutRightMargin() const
+{
+    if (m_rightMargin < 0 && layout()) {
+        int margin;
+        layout()->getContentsMargins(0, 0, &margin, 0);
+        return margin;
+    }
+    return m_rightMargin;
+}
+
+void QLayoutWidget::setLayoutRightMargin(int layoutMargin)
+{
+    m_rightMargin = layoutMargin;
+    if (layout()) {
+        int newMargin = m_rightMargin;
+        if (newMargin >= 0 && newMargin < ShiftValue)
+            newMargin = ShiftValue;
+        int left, top, right, bottom;
+        layout()->getContentsMargins(&left, &top, &right, &bottom);
+        layout()->setContentsMargins(left, top, newMargin, bottom);
+    }
+}
+
+int QLayoutWidget::layoutBottomMargin() const
+{
+    if (m_bottomMargin < 0 && layout()) {
+        int margin;
+        layout()->getContentsMargins(0, 0, 0, &margin);
+        return margin;
+    }
+    return m_bottomMargin;
+}
+
+void QLayoutWidget::setLayoutBottomMargin(int layoutMargin)
+{
+    m_bottomMargin = layoutMargin;
+    if (layout()) {
+        int newMargin = m_bottomMargin;
+        if (newMargin >= 0 && newMargin < ShiftValue)
+            newMargin = ShiftValue;
+        int left, top, right, bottom;
+        layout()->getContentsMargins(&left, &top, &right, &bottom);
+        layout()->setContentsMargins(left, top, right, newMargin);
+    }
+}

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,9 +22,21 @@
 #ifndef QOPENVPNGUI_P_H
 #define QOPENVPNGUI_P_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #ifndef QTOPIA_NO_OPENVPN
 
 #include <QWidget>
+#include <QHash>
 #include <qcontent.h>
 
 class VPNConfigWidget : public QWidget {
@@ -118,7 +130,7 @@ private slots:
 private:
     Ui::CertificateOpenVPNBase ui;
 
-    QHash<QPushButton*,QContent> toDocument;
+    QHash<QToolButton*,QContent> toDocument;
 };
 
 #include "ui_optionsopenvpnbase.h"

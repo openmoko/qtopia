@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qapplication.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qapplication.cpp -->
 <head>
-  <title>Qt 4.2: QSessionManager Class Reference</title>
+  <title>Qt 4.3: QSessionManager Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QSessionManager Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QSessionManager Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QSessionManager class provides access to the session manager. <a href="#details">More...</a></p>
 <pre> #include &lt;QSessionManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -58,11 +59,13 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QSessionManager class provides access to the session manager.</p>
-<p>The session manager is responsible for session management, most importantly for interruption and resumption. A &quot;session&quot; is a kind of record of the state of the system, e.g. which applications were run at start up and which applications are currently running. The session manager is used to save the session, e.g. when the machine is shut down; and to restore a session, e.g. when the machine is started up. Use <a href="qsettings.html">QSettings</a> to save and restore an individual application's settings, e.g. window positions, recently used files, etc.</p>
-<p>QSessionManager provides an interface between the application and the session manager so that the program can work well with the session manager. In Qt, session management requests for action are handled by the two virtual functions <a href="qapplication.html#commitData">QApplication::commitData</a>() and <a href="qapplication.html#saveState">QApplication::saveState</a>(). Both provide a reference to a session manager object as argument, to allow the application to communicate with the session manager.</p>
-<p>During a session management action (i.e. within <a href="qapplication.html#commitData">commitData()</a> and <a href="qapplication.html#saveState">saveState()</a>), no user interaction is possible <i>unless</i> the application got explicit permission from the session manager. You ask for permission by calling <a href="qsessionmanager.html#allowsInteraction">allowsInteraction</a>() or, if it's really urgent, <a href="qsessionmanager.html#allowsErrorInteraction">allowsErrorInteraction</a>(). Qt does not enforce this, but the session manager may.</p>
+<p>A session manager in a desktop environment (in which Qt GUI applications live) keeps track of a session, which is a group of running applications, each of which has a particular state. The state of an application contains (most notably) the documents the application has open and the position and size of its windows.</p>
+<p>The session manager is used to save the session, e.g&#x2e; when the machine is shut down, and to restore a session, e.g&#x2e; when the machine is started up. We recommend that you use <a href="qsettings.html">QSettings</a> to save an individual application's settings, e.g&#x2e; window positions, recently used files, etc. When the application is restarted by the session manager, you can restore the settings.</p>
+<p>QSessionManager provides an interface between the application and the session manager so that the program can work well with the session manager. In Qt, session management requests for action are handled by the two virtual functions <a href="qapplication.html#commitData">QApplication::commitData</a>() and <a href="qapplication.html#saveState">QApplication::saveState</a>(). Both provide a reference to a session manager object as argument, to allow the application to communicate with the session manager. The session manager can only be accessed through these functions.</p>
+<p>No user interaction is possible <i>unless</i> the application gets explicit permission from the session manager. You ask for permission by calling <a href="qsessionmanager.html#allowsInteraction">allowsInteraction</a>() or, if it's really urgent, <a href="qsessionmanager.html#allowsErrorInteraction">allowsErrorInteraction</a>(). Qt does not enforce this, but the session manager may.</p>
 <p>You can try to abort the shutdown process by calling <a href="qsessionmanager.html#cancel">cancel</a>(). The default commitData() function does this if some top-level window rejected its closeEvent().</p>
-<p>For sophisticated session managers provided on Unix/X11, QSessionManager offers further possibilites to fine-tune an application's session management behavior: <a href="qsessionmanager.html#setRestartCommand">setRestartCommand</a>(), <a href="qsessionmanager.html#setDiscardCommand">setDiscardCommand</a>(), <a href="qsessionmanager.html#setRestartHint">setRestartHint</a>(), <a href="qobject.html#setProperty">setProperty</a>(), <a href="qsessionmanager.html#requestPhase2">requestPhase2</a>(). See the respective function descriptions for further details.</p>
+<p>For sophisticated session managers provided on Unix/X11, QSessionManager offers further possibilities to fine-tune an application's session management behavior: <a href="qsessionmanager.html#setRestartCommand">setRestartCommand</a>(), <a href="qsessionmanager.html#setDiscardCommand">setDiscardCommand</a>(), <a href="qsessionmanager.html#setRestartHint">setRestartHint</a>(), <a href="qobject.html#setProperty">setProperty</a>(), <a href="qsessionmanager.html#requestPhase2">requestPhase2</a>(). See the respective function descriptions for further details.</p>
+<p>See also <a href="qapplication.html">QApplication</a> and <a href="session.html">Session Management</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="RestartHint-enum"></a>enum QSessionManager::RestartHint</h3>
@@ -178,6 +181,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,7 +23,7 @@
 
 #include "imapclient.h"
 #include "emailhandler.h"
-#include "longstream.h"
+#include <longstream_p.h>
 
 namespace QtMail
 {
@@ -36,15 +36,19 @@ namespace QtMail
 ImapClient::ImapClient()
 {
     connect(&client, SIGNAL(finished(ImapCommand&,OperationState&)),
-            this, SLOT( operationDone(ImapCommand&,OperationState&) ) );
-    connect(&client, SIGNAL( mailboxListed(QString&,QString&,QString&) ),
-            this, SLOT( mailboxListed(QString&,QString&,QString&) ) );
-    connect(&client, SIGNAL( messageFetched(Email&) ),
-            this, SLOT( messageFetched(Email&) ) );
-    connect(&client, SIGNAL( downloadSize(int) ),
-            this, SIGNAL( downloadedSize(int) ) );
-    connect(&client, SIGNAL( connectionError(int) ),
-            this, SLOT( connectionError(int) ) );
+            this, SLOT(operationDone(ImapCommand&,OperationState&)) );
+    connect(&client, SIGNAL(mailboxListed(QString&,QString&,QString&)),
+            this, SLOT(mailboxListed(QString&,QString&,QString&)) );
+    connect(&client, SIGNAL(messageFetched(QMailMessage&)),
+            this, SLOT(messageFetched(QMailMessage&)) );
+    connect(&client, SIGNAL(nonexistentMessage(QString)),
+            this, SLOT(nonexistentMessage(QString)) );
+    connect(&client, SIGNAL(downloadSize(int)),
+            this, SIGNAL(downloadedSize(int)) );
+    connect(&client, SIGNAL(updateStatus(QString)),
+            this, SIGNAL(updateStatus(QString)) );
+    connect(&client, SIGNAL(connectionError(int,QString)),
+            this, SLOT(errorHandling(int,QString)) );
 }
 
 ImapClient::~ImapClient()
@@ -70,16 +74,9 @@ void ImapClient::newConnection()
     messageCount = 0;
 
     atCurrentBox = 0;
-    internalId = QUuid();
+    internalId = QMailId();
 
-    emit updateStatus( tr("DNS lookup" ) );
-#ifdef SMTPAUTH
-    if(account->mailEncryption() != MailAccount::Encrypt_NONE)
-        client.openSecure(account->mailServer(),account->mailPort());
-    else
-#endif
-        client.open(account->mailServer(), account->mailPort() );
-
+    client.open( *account );
 }
 
 void ImapClient::operationDone(ImapCommand &command, OperationState &state)
@@ -207,7 +204,7 @@ void ImapClient::handleUidFetch()
             emit mailTransferred( 0 );
             return;
         }
-    } else if (status == RFC822) {    //getting complete messages
+    } else if (status == Rfc822) {    //getting complete messages
         fetchNextMail();
         return;
     }
@@ -263,7 +260,7 @@ void ImapClient::handleUid()
 
         status = Fetch;
         client.uidFetch(uniqueUidList.first(), uniqueUidList.last(),
-                        F_UID | F_RFC822_SIZE | F_RFC822_HEADER );
+                        F_Uid | F_Rfc822_Size | F_Rfc822_Header );
 
     } else if (nextMailbox()) {
         emit updateStatus( tr("Checking ") + currentBox->displayName() );
@@ -310,9 +307,9 @@ void ImapClient::handleSelect()
 {
     /*  We arrive here when we want to get a single mail, need to change
         folder, and the correct folder has been selected.  Isn't async. prog. fun? */
-    if (status == RFC822) {
+    if (status == Rfc822) {
         emit updateStatus( tr("Completing %1 / %2").arg(messageCount).arg(mailList->count()) );
-        client.uidFetch( msgUidl, msgUidl, F_UID | F_RFC822_SIZE | F_RFC822 );
+        client.uidFetch( msgUidl, msgUidl, F_Uid | F_Rfc822_Size | F_Rfc822 );
         return;
     }
 
@@ -332,7 +329,7 @@ bool ImapClient::nextMailbox()
     bool found = false;
 
     while (!found) {
-        if (atCurrentBox >= (uint)account->mailboxes.count())
+        if (atCurrentBox >= static_cast<uint>(account->mailboxes.count()))
             return false;
 
         currentBox = account->mailboxes.at(atCurrentBox);
@@ -370,7 +367,7 @@ void ImapClient::fetchNextMail()
         return;
     }
 
-    status = RFC822;
+    status = Rfc822;
 
     // Get next message in queue, but verify it's still on the server
     currentBox = account->getMailboxRefByMsgUid(*mPtr, mailList->currentMailbox() );
@@ -389,7 +386,7 @@ void ImapClient::fetchNextMail()
         if ((currentBox->pathName()) == client.selected()) {
             emit updateStatus( tr("Completing %1 / %2").arg(messageCount).arg(mailList->count()) );
             msgUidl = *mPtr;
-            client.uidFetch( msgUidl, msgUidl, F_UID | F_RFC822_SIZE | F_RFC822 );
+            client.uidFetch( msgUidl, msgUidl, F_Uid | F_Rfc822_Size | F_Rfc822 );
             return;
 
         } else {
@@ -442,22 +439,33 @@ void ImapClient::mailboxListed(QString &flags, QString &del, QString &name)
     mailboxNames.append(name);
 }
 
-void ImapClient::messageFetched(Email& mail)
+void ImapClient::messageFetched(QMailMessage& mail)
 {     //set some other parameters
 
     mail.setFromAccount( account->id() );
     mail.setFromMailbox( currentBox->pathName() );
 
     if ( status == Fetch ) {
-        mail.setUuid( QUuid());
-        mail.setStatus(EFlag_Downloaded, false);
+        mail.setId( QMailId());
+        mail.setStatus(QMailMessage::Downloaded, false);
     } else {
-        mail.setUuid( internalId );
-        mail.setStatus(EFlag_Downloaded, true);
+        mail.setId( internalId );
+        mail.setStatus(QMailMessage::Downloaded, true);
     }
 
     emit newMessage(mail);
+}
 
+void ImapClient::nonexistentMessage(const QString& uid)
+{
+    if (uid == msgUidl) {
+        emit nonexistentMessage(internalId);
+    } else {
+        emit updateStatus(tr("Error occurred"));
+
+        QString errorText(tr("Message deleted from server"));
+        emit errorOccurred(ErrNonexistentMessage, errorText);
+    }
 }
 
 void ImapClient::setAccount(MailAccount *_account)
@@ -465,20 +473,11 @@ void ImapClient::setAccount(MailAccount *_account)
     account = _account;
 }
 
-/* DNS lookup failures and socket errors are reported here */
-void ImapClient::connectionError(int e)
-{
-   //Socket already closed in protocol, just emit an error
-   QString msg = tr("Connection failed");
-
-   emit errorOccurred(e, msg);
-}
-
 void ImapClient::errorHandling(int status, QString msg)
 {
     if ( client.connected() ) {
         client.close();
-        emit updateStatus(tr("Error Occurred"));
+        emit updateStatus(tr("Error occurred"));
         emit errorOccurred(status, msg);
     }
 }
@@ -532,3 +531,15 @@ void ImapClient::removeDeletedMailboxes()
         }
     }
 }
+
+void ImapClient::checkForNewMessages()
+{
+    // Don't implement this properly yet - emails are currently only DL'd on-demand
+    emit allMessagesReceived();
+}
+
+int ImapClient::newMessageCount()
+{
+    return 0;
+}
+

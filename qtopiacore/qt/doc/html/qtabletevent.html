@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qevent.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qevent.cpp -->
 <head>
-  <title>Qt 4.2: QTabletEvent Class Reference</title>
+  <title>Qt 4.3: QTabletEvent Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTabletEvent Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QTabletEvent Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QTabletEvent class contains parameters that describe a Tablet event. <a href="#details">More...</a></p>
 <pre> #include &lt;QTabletEvent&gt;</pre><p>Inherits <a href="qinputevent.html">QInputEvent</a>.</p>
 <ul>
@@ -98,7 +99,7 @@
 <p><i>pressure</i> contains the pressure exerted on the <i>device</i>.</p>
 <p><i>pointerType</i> describes the type of pen that is being used.</p>
 <p><i>xTilt</i> and <i>yTilt</i> contain the device's degree of tilt from the x and y axes respectively.</p>
-<p><i>keyState</i> specifies which keyboard modifiers are pressed (e.g., <b>Ctrl</b>).</p>
+<p><i>keyState</i> specifies which keyboard modifiers are pressed (e.g&#x2e;, <b>Ctrl</b>).</p>
 <p>The <i>uniqueID</i> parameter contains the unique ID for the current device.</p>
 <p>The <i>z</i> parameter contains the coordinate of the device on the tablet, this is usually given by a wheel on 4D mouse. If the device does not support a Z-axis, pass zero here.</p>
 <p>The <i>tangentialPressure</i> paramater contins the tangential pressure of an air brush. If the device does not support tangential pressure, pass 0 here.</p>
@@ -133,9 +134,9 @@
 <p>Returns the pressure for the device. 0.0 indicates that the stylus is not on the tablet, 1.0 indicates the maximum amount of pressure for the stylus.</p>
 <p>See also <a href="qtabletevent.html#tangentialPressure">tangentialPressure</a>().</p>
 <h3 class="fn"><a name="rotation"></a><a href="qtglobal.html#qreal-typedef">qreal</a> QTabletEvent::rotation () const</h3>
-<p>Returns the rotation of the current device in degress. This is usually given by a 4D Mouse. If the device doesn't support rotation this value is always 0.0.</p>
+<p>Returns the rotation of the current device in degress. This is usually given by a 4D Mouse. If the device doesn't support rotation this value is always 0.0&#x2e;</p>
 <h3 class="fn"><a name="tangentialPressure"></a><a href="qtglobal.html#qreal-typedef">qreal</a> QTabletEvent::tangentialPressure () const</h3>
-<p>Returns the tangential pressure for the device. This is typically given by a finger wheel on an airbrush tool. The range is from -1.0 to 1.0. 0.0 indicates a neutral position. Current airbrushes can only move in the positive direction from the neutrual position. If the device does not support tangential pressure, this value is always 0.0.</p>
+<p>Returns the tangential pressure for the device. This is typically given by a finger wheel on an airbrush tool. The range is from -1.0 to 1.0&#x2e; 0.0 indicates a neutral position. Current airbrushes can only move in the positive direction from the neutrual position. If the device does not support tangential pressure, this value is always 0.0&#x2e;</p>
 <p>See also <a href="qtabletevent.html#pressure">pressure</a>().</p>
 <h3 class="fn"><a name="uniqueId"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QTabletEvent::uniqueId () const</h3>
 <p>Returns a unique ID for the current device, making it possible to differentiate between multiple devices being used at the same time on the tablet.</p>
@@ -163,6 +164,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

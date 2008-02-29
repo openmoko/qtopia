@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,9 +27,8 @@
 #include <qtablewidget.h>
 #include <qtimer.h>
 #include <qsettings.h>
-
+#include <QMailMessage>
 #include "emaillistitem.h"
-#include <qtopia/pim/qcontactmodel.h>
 
 class MailListView : public QTableWidget
 {
@@ -40,12 +39,13 @@ public:
     int sortedColumn();
     bool isAscending();
     void setSorting(int, bool);
+    void setShowEmailsOnly(bool);
+    bool showEmailsOnly();
 
     int labelPos(int at);
     void moveSection(int section, int toIndex);
     void defineSort(int column, bool ascend);
-    uint getMailCount(QString type);
-    EmailListItem *getRef(QUuid id);
+    EmailListItem *getRef(QMailId id);
 
     void setByArrival(bool on);
     bool arrivalDate();
@@ -56,7 +56,8 @@ public:
     QString currentMailbox();
     void setCurrentMailbox(const QString &mailbox);
 
-    void treeInsert(Email *mail);
+    void treeInsert(const QMailId& id);
+    void treeInsert(const QMailIdList& idList);
     void clear();
 
     void ensureWidthSufficient(const QString &text);
@@ -68,11 +69,13 @@ public:
 
     EmailListItem* emailItemFromIndex( const QModelIndex & i ) const;
 
-    QContactModel *contactModel(); // for addressbook lookup
+    void setSelectedItem(QTableWidgetItem* item);
+    void setSelectedId(const QMailId& id);
+    void setSelectedRow(int row);
 
 signals:
     void itemPressed(EmailListItem *);
-    void viewFolderList();
+    void backPressed();
     void enableMessageActions( bool );
 
 protected slots:
@@ -89,13 +92,12 @@ protected slots:
 private:
     QTimer menuTimer;
     int sortColumn;
-    bool ascending, hVisible, arrival;
+    bool ascending, hVisible, arrival, emailsOnly;
     int maxColumnWidth;
     bool mSingleColumnMode;
     QStringList columns;
 
     QString _mailbox;
-    QContactModel *mContactModel;
 };
 
 #endif

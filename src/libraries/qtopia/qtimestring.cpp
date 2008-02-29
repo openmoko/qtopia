@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -364,28 +364,6 @@ QStringList QTimeString::formatOptions()
 }
 
 /*!
-  \deprecated
-  Use QDate::fromString() instead.
-
-  This function simply logs a warning message to qLog(Time) to indicate
-  that it is deprecated.
-  The \a date, \a year. \a month and \a day parameters are all ignored.
-
-  This function always returns true.
-*/
-bool QTimeString::parseDate(const QString& date, int& year, int& month, int& day)
-{
-    Q_UNUSED(date);
-    Q_UNUSED(year);
-    Q_UNUSED(month);
-    Q_UNUSED(day);
-    qLog(Time) << "QTimeString::parseDate() is deprecated use QDate::fromString() instead";
-
-    return bool();
-}
-
-
-/*!
   \fn QString QTimeString::numberDateString( const QDate &date, Length len )
 
   Returns a localized string for \a date
@@ -577,11 +555,9 @@ QString QTimeString::localYMD( const QDate &dt, Length len )
     QLocale loc;
     QString format;
     if ( len == QTimeString::Long )
-        format = loc.dateFormat( QLocale::LongFormat );
+        return loc.toString(dt, QLocale::LongFormat );
     else  //since Qtopia overrides the short format the returned value will be the same as the numberDate
-        format = loc.dateFormat( QLocale::ShortFormat );
-
-    return dt.toString( format );
+        return loc.toString(dt, QLocale::ShortFormat );
 }
 
 /*!

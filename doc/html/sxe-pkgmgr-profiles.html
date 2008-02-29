@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -9,47 +10,92 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Policy Profiles and Domains<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Policy Profiles and Domains<br /><span class="subtitle"></span>
+</h1>
 <ul><li><a href="#formulating-policy-profiles-and-domains">Formulating Policy Profiles and Domains</a></li>
+<ul><li><a href="#adding-new-services-or-qcop-messaages">Adding new Services or QCop messaages.</a></li>
+<li><a href="#adding-new-services-or-qcop-messaages">Adding new Services or QCop messaages.</a></li>
+</ul>
+<li><a href="#profile-creation-checklist">Profile Creation Checklist</a></li>
+<li><a href="#working-with-policies">Working with Policies</a></li>
 <li><a href="#policy-profile-examples">Policy Profile Examples</a></li>
 </ul>
 <p>The following sections describe the methods to formulate policy profiles and domains and provides examples of policy profiles and their effects.</p>
 <a name="formulating-policy-profiles-and-domains"></a>
 <h2>Formulating Policy Profiles and Domains</h2>
+<p>An SXE domain is a keyword, made up of lower case a-z and the underscore character, for example &quot;datetime&quot;. The domain specifies allowed access rights either or both of</p>
+<ul>
+<li>SXE applications policy eg, sending qcop messages</li>
+<li>LIDS OS level policy eg, access to devices or capabilities</li>
+</ul>
+<a name="adding-new-services-or-qcop-messaages"></a>
 <p>When developing or customizing Qtopia applications, as part of the engineering process, policy profiles and sxe domains must also be formulated.</p>
 <p>Tools to assist in developing policy are:</p>
 <ul>
 <li>SXE Discovery Mode: If Qtopiacore is compiled in debug mode and the <tt>SXE_DISCOVERY_MODE</tt> environment variable is exported <tt>qpe</tt> will operate in SXE Discovery Mode. This mode has severe performance impacts but is useful for finding which policy requests an application is making. These will all be logged in <tt>/tmp/qtopia-0/sxe_discovery.log</tt> (where 0 is the session).</li>
-<li><tt>$QPEDIR/scripts/dumpsec.pl</tt> : this perl script will present SXE information including the current Program Identifiers. If the script is invoked as <tt>dumpsec.pl progname</tt>, where <i>progname</i> is for example <tt>Camera</tt>, a detailed SXE listing will be shown for that application</li>
-<li>Warning output: If running with a console for <tt>qpe tty</tt> output some useful warnings should be displayed when a request is denied.</li>
+<li><tt>$QPEDIR/scripts/dumpsec.pl</tt> : this perl script will present SXE information including the current Program Identifiers. If the script is invoked as <tt>dumpsec.pl progname</tt>, where <i>progname</i> is for example <tt>Camera</tt>, or as <tt>dumpsec.pl 32</tt> where <tt>32</tt> is a program id, a detailed SXE listing will be shown for matching application/s.</li>
+<li>Warning output: If running with a console for <tt>qpe</tt> output some useful warnings should be displayed when a request is denied.</li>
 </ul>
 <p>To create your applications policy edit these files:</p>
 <ul>
 <li><tt>app.pro</tt> - your applications <tt>.pro qmake</tt> file. This should have a set of <i>pkg.*</i> entries, one of which must be the <tt>pkg.domain</tt> entry. Set this to a comma-delimited list of the SXE domains you wish to award to the application, for example, <tt>pkg.domain=window,phonecomm</tt>.</li>
 <li><tt>etc/sxe.profiles</tt> : if the application has the correct domains but the profile listing for that domain does not contain a request which it ought to, it may be added by editing this file. Entries toward the bottom of the file are as a rule-of-thumb for more security sensitive applications. Read the descriptions in the next section to be sure you do not alter the meaning or the scope of the domain.</li>
 </ul>
+<a name="adding-new-services-or-qcop-messaages"></a>
+<h3>Adding new Services or QCop messaages.</h3>
 <p>If you create a new type of Service or QCop message generally it will need to be added to the <tt>sxe.profiles</tt> file.</p>
+<p>If you are the creator of a service, or write code to detect and act on a QCop message then you <b>must</b> ensure it is included in <tt>sxe.profiles</tt>, creating a new domain for it if necessary.</p>
+<a name="profile-creation-checklist"></a>
+<h2>Profile Creation Checklist</h2>
+<p>If you create a new domain check the following list to see if everything has been done to correctly have the domain function with SXE.</p>
+<ul>
+<li>domain added to etc/sxe.profiles as described above</li>
+<li>is the domain suitable for use by downloaded packages? If yes, then edit etc/settings/packagemanager/domaininfo.cpp to add the plain english description, and regenerate any translations.</li>
+<li>is the domain sensitive? If downloaded packages should not be able to request your domain be authorized by the end-user, then add it to the [Sensitive] section of the PackageServers.conf file.</li>
+<li>add the domain to relevant <tt>pkg.domain</tt> lines in .pro files</li>
+</ul>
+<a name="working-with-policies"></a>
+<h2>Working with Policies</h2>
 <p><b>Important:</b> after changing policies do the following:</p>
 <ol type="1">
 <li><tt>make install</tt> in the build root directory</li>
-<li>run <tt>sxe_installer</tt>.</li>
 </ol>
-<p>To trouble-shoot SXE problems follow these steps:</p>
+<p>To trouble-shoot SXE problems try these ideas:</p>
 <ul>
-<li>run <tt>make install &amp;&amp; sxe_installer</tt></li>
+<li>run <tt>make install</tt> to ensure the image is up to date</li>
+<li>flash the image onto your device to make sure the device is up to date</li>
 <li>use the <tt>dumpsec.pl</tt> script to ensure that the problem application has the Program Identifier expected</li>
 <li>check the applications <tt>.pro</tt> file to ensure the correct domain list has been awarded to the application</li>
 <li>compile in debug mode and export <tt>SXE_DISCOVERY_MODE</tt> to see what applications are making requests.</li>
+<li>turn on SXE logging in the log utility</li>
 </ul>
 <a name="policy-profile-examples"></a>
 <h2>Policy Profile Examples</h2>
 <p>The <tt>qipkg</tt> system is extended to provide additional information to the SXE system using the Domain field. The list below shows each value, its effect on the access granted to the application, and the install information displayed to the user.</p>
 <p>Note: do not change the format of this table.</p>
-<p>The script <tt>scripts/extract_sxe_profiles.pl</tt> may be used to create the in code table of user visible policy strings in the package manager.</p>
+<p>The script <tt>bin/extract_sxe_profiles.pl</tt> may be used to create the in code table of user visible policy strings in the package manager.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>SXE Profile name</th><th>Access Controls Effect</th><th>Information display</th><th>Risk level</th></tr></thead>
-<tr valign="top" class="odd"><td>base</td><td>Allow qtopia system level access, not available unless package is signed. Automatically has access as for all the other categories. Intended for use for OTA upgrades (ie equivalent to reflash).</td><td><i>New system for your Qtopia device</i></td><td>High</td></tr>
+<tr valign="top" class="odd"><td>accessories <a name="accessories-domain"></a></td><td>Allow application level access to hardware accessories</td><td><i>use accessories such as keypad light</i></td><td>Low</td></tr>
+<tr valign="top" class="even"><td>alarm <a name="alarm-domain"></a></td><td>Allow the creation and deletion of alarms</td><td><i>can create,delete and check status of alarms</i></td><td>Med</td></tr>
+<tr valign="top" class="odd"><td>audio-policy <a name="audio-policy-domain"></a></td><td>Allow requests to be made of policy which dictates routing of audio to audio devices such as the phone speaker or bluetooth headset</td><td><i>route audio between audio devices</i></td><td>Med</td></tr>
+<tr valign="top" class="even"><td>base <a name="base-domain"></a></td><td>Allow unlimited application level access. Intended for use for OTA upgrades (ie equivalent to reflash).</td><td>N/A for downloaded applications</td><td>High</td></tr>
+<tr valign="top" class="odd"><td>beaming <a name="beaming-domain"></a></td><td>Allow the beaming of files and Vcards over irda (obex)</td><td><i>send and receive files over infrared interfaces</i></td><td>Medium</td></tr>
+<tr valign="top" class="even"><td>bluetooth <a name="bluetooth-domain"></a></td><td>Allow bluetooth connections to other devices and the sending of files and Vcards using bluetooth</td><td><i>connect, pair, send and receive files over bluetooth interfaces</i></td><td>Medium</td></tr>
+<tr valign="top" class="odd"><td>callhistory <a name="callhistory-domain"></a></td><td>Allow an application to invoke the <a href="callhistoryservice.html">CallHistoryService</a></td><td><i>display call history </i></td><td>Low</td></tr>
+<tr valign="top" class="even"><td>camera <a name="camera-domain"></a></td><td>Allow an application to use the <a href="cameraservice.html">CameraService</a></td><td><i>capture images via the camera application</i></td><td>Low</td></tr>
+<tr valign="top" class="odd"><td>cameraservice <a name="cameraservice-domain"></a></td><td>Allow access to camera devices</td><td><i>directly access camera hardware</i></td><td>Med</td></tr>
+<tr valign="top" class="even"><td>categories <a name="categories-domain"></a></td><td>Allows an application to edit categories. (No domain is required to view categories.</td><td><i>New system items for your Qtopia device</i></td><td>Med</td></tr>
+<tr valign="top" class="odd"><td>datetime</td><td>Allow setting of the system date, time and timezone</td><td><i>set date, time and timezone</i></td><td>High</td></tr>
+<tr valign="top" class="even"><td>directaudio</td><td>Allows file level access to audio hardware</td><td><i>directly access audio hardware</i></td><td>High</td></tr>
+<tr valign="top" class="odd"><td>directvideo</td><td>Allows file level access to video hardware</td><td><i>directly access video hardware</i></td><td>High</td></tr>
+<tr valign="top" class="even"><td>drm</td><td>Allows rendering of drm content and querying the rights of drm enabled files</td><td>N/A for downloaded applications</td><td>High</td></tr>
+<tr valign="top" class="odd"><td>dbmigrate</td><td>Allows upgrading of system databases</td><td>N/A for downloaded applications</td><td>High</td></tr>
+<tr valign="top" class="even"><td>doc_api</td><td>Allows access to the system database</td><td>N/A for downloaded applications</td><td>High</td></tr>
+<tr valign="top" class="odd"><td>doc_install</td><td>Allows an application to install other applications</td><td>N/A for downloaded applications</td><td>High</td></tr>
+<tr valign="top" class="even"><td>doc_mimetypes</td><td>Allows an application to manage MIME type associations</td><td>N/A for downloaded applications</td><td>High</td></tr>
+<tr valign="top" class="odd"><td>doc_mimetypes</td><td>Allows an application to manage MIME type associations</td><td>N/A for downloaded applications</td><td>High</td></tr>
 <tr valign="top" class="even"><td>libs</td><td>Allow qtopia library load access, not available unless package is signed. Automatically has access for all other categories. Reserved for use for OTA updates (ie equivalent to major patch), and plug-in libraries.</td><td><i>New system items for your Qtopia device</i></td><td>High</td></tr>
 <tr valign="top" class="odd"><td>phonecomm</td><td>Allow file level access to /dev for low level phone or device functionality, not available unless package is signed. Automatically has access as for all other categories. Intended for use by OEMs providing new apps or updates.</td><td><i>Use [phone|device] hardware</i></td><td>High</td></tr>
 <tr valign="top" class="even"><td>docapi</td><td>Allow file level access to user Documents, optionally restricted by mime-type</td><td><i>Edit and delete your [mime-type user description, eg MP3, jpeg] files</i></td><td>Medium</td></tr>
@@ -58,8 +104,6 @@
 <tr valign="top" class="odd"><td>net</td><td>Allow file and app level access to WAP, GSM, GPRS.</td><td><i>download and talk over your [phone/device]'s internet service</i></td><td>Medium</td></tr>
 <tr valign="top" class="even"><td>netconfig</td><td>Allow the creation, deletion, starting and stopping of network interface configurations</td><td><i>start, stop and configure network interfaces</i></td><td>Medium</td></tr>
 <tr valign="top" class="odd"><td>alarm</td><td>Allow the creation and deletion of alarms</td><td><i>create, delete and check status of alarms</i></td><td>Medium</td></tr>
-<tr valign="top" class="even"><td>beaming</td><td>Allow the beaming of files and Vcards over irda (obex)</td><td><i>send and receive files over infrared interfaces</i></td><td>Medium</td></tr>
-<tr valign="top" class="odd"><td>bluetooth</td><td>Allow bluetooth connections to other devices and the sending of files and Vcards using bluetooth</td><td><i>connect, pair, send and receive files over bluetooth interfaces</i></td><td>Medium</td></tr>
 <tr valign="top" class="even"><td>cardreader</td><td>Allow access to the cardreader to access sd cards, compact flash etc</td><td><i>read and write data to/from memory cards</i></td><td>Low</td></tr>
 <tr valign="top" class="odd"><td>camera</td><td>Allow access to the camera for capturing images</td><td><i>capture images using camera device</i></td><td>Low</td></tr>
 <tr valign="top" class="even"><td>datetime</td><td>Allow setting of the system date, time and timezone</td><td><i>set date, time and timezone</i></td><td>Low</td></tr>
@@ -86,8 +130,8 @@
 <p>In the example below a user is looking for a package to install. This one accesses the users PIM data - if that was not what the user was expecting they will choose another package instead.</p>
 <p align="center"><img src="images/packagemanager.png" /></p><p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

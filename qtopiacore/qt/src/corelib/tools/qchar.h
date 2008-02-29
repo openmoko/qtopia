@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -192,28 +207,27 @@ public:
         Unicode_3_0,
         Unicode_3_1,
         Unicode_3_2,
-        Unicode_4_0
+        Unicode_4_0,
+        Unicode_4_1,
+        Unicode_5_0
     };
     // ****** WHEN ADDING FUNCTIONS, CONSIDER ADDING TO QCharRef TOO
-
-    int digitValue() const;
-    QChar toLower() const;
-    QChar toUpper() const;
 
     Category category() const;
     Direction direction() const;
     Joining joining() const;
     bool hasMirrored() const;
-    inline bool isLower() const { return category() == Letter_Lowercase; }
-    inline bool isUpper() const { return category() == Letter_Uppercase; }
+    unsigned char combiningClass() const;
 
-#ifdef QT3_SUPPORT
-    inline QT3_SUPPORT bool mirrored() const { return hasMirrored(); }
-#endif
     QChar mirroredChar() const;
     QString decomposition() const;
     Decomposition decompositionTag() const;
-    unsigned char combiningClass() const;
+
+    int digitValue() const;
+    QChar toLower() const;
+    QChar toUpper() const;
+    QChar toTitleCase() const;
+    QChar toCaseFolded() const;
 
     UnicodeVersion unicodeVersion() const;
 
@@ -239,13 +253,66 @@ public:
     bool isLetterOrNumber() const;
     bool isDigit() const;
     bool isSymbol() const;
+    inline bool isLower() const { return category() == Letter_Lowercase; }
+    inline bool isUpper() const { return category() == Letter_Uppercase; }
+    inline bool isTitleCase() const { return category() == Letter_Titlecase; }
+
+    inline bool isHighSurrogate() const {
+        return ((ucs & 0xfc00) == 0xd800);
+    }
+    inline bool isLowSurrogate() const {
+        return ((ucs & 0xfc00) == 0xdc00);
+    }
 
     inline uchar cell() const { return uchar(ucs & 0xff); }
     inline uchar row() const { return uchar((ucs>>8)&0xff); }
     inline void setCell(uchar cell);
     inline void setRow(uchar row);
 
+    static inline uint surrogateToUcs4(ushort high, ushort low) {
+        return (uint(high)<<10) + low - 0x35fdc00;
+    }
+    static inline uint surrogateToUcs4(QChar high, QChar low) {
+        return (uint(high.ucs)<<10) + low.ucs - 0x35fdc00;
+    }
+    static inline ushort highSurrogate(uint ucs4) {
+        return (ucs4>>10) + 0xd7c0;
+    }
+    static inline ushort lowSurrogate(uint ucs4) {
+        return ucs4%0x400 + 0xdc00;
+    }
+
+    static Category QT_FASTCALL category(uint ucs4);
+    static Category QT_FASTCALL category(ushort ucs2);
+    static Direction QT_FASTCALL direction(uint ucs4);
+    static Direction QT_FASTCALL direction(ushort ucs2);
+    static Joining QT_FASTCALL joining(uint ucs4);
+    static Joining QT_FASTCALL joining(ushort ucs2);
+    static unsigned char QT_FASTCALL combiningClass(uint ucs4);
+    static unsigned char QT_FASTCALL combiningClass(ushort ucs2);
+
+    static uint QT_FASTCALL mirroredChar(uint ucs4);
+    static ushort QT_FASTCALL mirroredChar(ushort ucs2);
+    static Decomposition QT_FASTCALL decompositionTag(uint ucs4);
+
+    static int QT_FASTCALL digitValue(uint ucs4);
+    static int QT_FASTCALL digitValue(ushort ucs2);
+    static uint QT_FASTCALL toLower(uint ucs4);
+    static ushort QT_FASTCALL toLower(ushort ucs2);
+    static uint QT_FASTCALL toUpper(uint ucs4);
+    static ushort QT_FASTCALL toUpper(ushort ucs2);
+    static uint QT_FASTCALL toTitleCase(uint ucs4);
+    static ushort QT_FASTCALL toTitleCase(ushort ucs2);
+    static uint QT_FASTCALL toCaseFolded(uint ucs4);
+    static ushort QT_FASTCALL toCaseFolded(ushort ucs2);
+
+    static UnicodeVersion QT_FASTCALL unicodeVersion(uint ucs4);
+    static UnicodeVersion QT_FASTCALL unicodeVersion(ushort ucs2);
+
+    static QString QT_FASTCALL decomposition(uint ucs4);
+
 #ifdef QT3_SUPPORT
+    inline QT3_SUPPORT bool mirrored() const { return hasMirrored(); }
     inline QT3_SUPPORT QChar lower() const { return toLower(); }
     inline QT3_SUPPORT QChar upper() const { return toUpper(); }
     static inline QT3_SUPPORT bool networkOrdered() {

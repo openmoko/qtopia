@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,6 +26,7 @@
 
 #include "qrecordiomerge_p.h"
 #include "qrecordio_p.h"
+#include "quniqueid.h"
 
 class QPimModelData
 {
@@ -40,7 +41,9 @@ public:
 
     QPimContext *defaultContext;
     QRecordIO *defaultModel;
+    QPimSource defaultSource;
     QList<QPimContext *> contexts;
+    QHash<uint, QPimContext* > mappedContexts;
     QList<QRecordIO*> models;
 
     mutable QPimModel *searchModel;
@@ -56,9 +59,12 @@ public:
   \brief The QPimModel class provides an abstract interface to the PIM model classes.
 
   The QPimModel class defines a standard interface that is implemented by all of the PIM
-  model classes.
+  model classes.  As it is an abstract interface, the QPimModel class should not be used directly.
+  Instead use the classes that provide access for the specific PIM data types, QAppointmentModel, QContactModel
+  or QTaskModel.
+  
 
-  \sa QAppointmentModel, QContactModel, QTaskModel
+  \sa QAppointmentModel, QContactModel, QTaskModel, {Pim Library}
 */
 
 /*!
@@ -67,6 +73,7 @@ public:
   Adds the PIM record encoded in \a bytes to the model under the specified storage \a source.
   The format of the record in \a bytes is given by \a format.  An empty format string will
   cause the record to be read using the data stream operators for the PIM data type of the model.
+  Valid format strings are documented in QAppointmentModel, QContactModel and QTaskModel.
   If the specified source is null the function will add the record to the default storage source.
 
   Returns a valid identifier for the record if the record was
@@ -84,7 +91,7 @@ public:
   The format of the record in \a bytes is given by the \a format string.
   An empty \a format string will cause the record to be read using the data stream operators
   for the PIM data type of the model. If \a id is not null will set the record identifier to \a id
-  before attempting to update the record.
+  ready from the given \a bytes before attempting to update the record.
 
   Returns true if the record was successfully updated.
 
@@ -149,12 +156,17 @@ void QPimModel::addAccess(QRecordIO *accessModel)
 
   Adds the record \a context to the QPimModel.  If no contexts have
   been added previously the \a context is set to be the default context.
+  \sa context()
 */
 void QPimModel::addContext(QPimContext *context)
 {
-    if (!d->defaultContext)
+    Q_ASSERT(context);
+    if (!d->defaultContext) {
         d->defaultContext = context;
+        d->defaultSource = context->defaultSource();
+    }
     d->contexts.append(context);
+    d->mappedContexts.insert(QUniqueIdGenerator::mappedContext(context->id()), context);
 }
 
 /*!
@@ -247,7 +259,7 @@ void QPimModel::setVisibleSources(const QSet<QPimSource> &list)
 }
 
 /*!
-  Returns the set of identifiers for storage sources that can be shown.
+  Returns the set of storage sources that can be shown.
 
   \sa setVisibleSources(), visibleSources()
 */
@@ -260,43 +272,56 @@ QSet<QPimSource> QPimModel::availableSources() const
 }
 
 /*!
-  Returns the source identifier that contains the record with the specified \a identifier.
-  If the record does not exist returns a null source.
+  Returns the default storage sources relating to the device memory.
+  \sa source(), availableSources(), visibleSources()
+ */
+QPimSource QPimModel::defaultSource() const
+{
+    return d->defaultSource;
+}
+
+/*!
+  Returns the storage source that contains the record with the specified \a identifier.
+  Returns a null source if the record does not exist.
 
   \sa availableSources()
 */
 QPimSource QPimModel::source(const QUniqueId &identifier) const
 {
-    foreach(QPimContext *context, d->contexts) {
-        if (context->exists(identifier))
-            return context->source(identifier);
+    if (!identifier.isNull()) {
+        QPimContext *pc = d->mappedContexts.value(identifier.mappedContext());
+        if (pc)
+            return pc->source(identifier);
     }
     return QPimSource();
 }
 
 /*!
-  Returns the context that contains the record with the specified \a identifier.
-  If the record does not exists returns 0.
+  Returns the context that could contain the record with specified \a identifier.
+  This function does not check if the record currently exists in the
+  corresponding context, but instead returns the context that this identifier
+  belongs to.  You can call \c QPimContext::exists() if you wish to be more
+  certain, but be aware that other threads or processes may make the result
+  out of date.
+
+  Returns 0 if this identifier does not belong to any context.
 
   \sa contexts()
 */
 QPimContext *QPimModel::context(const QUniqueId &identifier) const
 {
-    foreach(QPimContext *context, d->contexts) {
-        if (context->exists(identifier))
-            return context;
-    }
-    return 0;
+    return d->mappedContexts.value(identifier.mappedContext());
 }
 
 /*!
-  Prepares the currently visible sources for syncing.  
+  Prepares the currently visible sources for synchronization.
   All modifications between startSyncTransaction() and commitSyncTransaction()
   will be marked with the given \a timestamp for modification or creation as appropriate.
 
   Returns true if transaction successfully initiated.
-  
-  Does not abort transaction if unsuccessfully initiated.
+
+  Does not abort the transaction if it is unsuccessful. The calling code must call
+  abortSyncTransaction() to do that.
 
   \sa commitSyncTransaction(), abortSyncTransaction()
 */
@@ -313,7 +338,7 @@ bool QPimModel::startSyncTransaction(const QDateTime &timestamp)
 }
 
 /*!
-  Aborts the current sync transaction.
+  Aborts the current synchronization transaction.
 
   Returns true if transaction successfully aborted.
 
@@ -332,7 +357,7 @@ bool QPimModel::abortSyncTransaction()
 }
 
 /*!
-  Commits the current sync transaction.
+  Commits the current synchronization transaction.
 
   Returns true if transaction successfully committed.
 
@@ -368,7 +393,7 @@ QList<QUniqueId> QPimModel::removed(const QDateTime &timestamp) const
 }
 
 /*!
-  Returns the list of identifiers for records added the current set of visible sources
+  Returns the list of identifiers for records added to the current set of visible sources
   on or after the specified \a timestamp.
 
   \sa removed(), modified()
@@ -435,8 +460,7 @@ bool QPimModel::contains(const QUniqueId & identifier) const
 }
 
 /*!
-  Returns true if a record with the given \a identifier is stored in the model.  Otherwise
-  return false.
+  Returns true if a record with the given \a identifier is stored in the model.
 
   The specified record does not need to be in the current filter mode.
 
@@ -520,16 +544,19 @@ bool QPimModel::hasChildren(const QModelIndex &parent) const
 }
 
 /*!
-  Ensures the data in Records is in a state suitable for syncing.
+  Ensures the data for the model is in a state suitable for syncing.
 
   Returns true upon success.
+
+  \sa startSyncTransaction()
 */
 bool QPimModel::flush() {
     return true;
 }
 
 /*!
-  Forces a refresh of the Record data.
+  Forces a refresh of the data for the model.  The PIM data models update automatically and it should not be required that this function is called in normal use of the PIM data models.
+
   Returns true upon success.
 */
 bool QPimModel::refresh() {

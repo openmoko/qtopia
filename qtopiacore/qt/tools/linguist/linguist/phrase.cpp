@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -33,11 +48,11 @@
 static QString protect(const QString & str)
 {
     QString p = str;
-    p.replace(QLatin1Char('&'),  "&amp;");
-    p.replace(QLatin1Char('\"'), "&quot;");
-    p.replace(QLatin1Char('>'),  "&gt;");
-    p.replace(QLatin1Char('<'),  "&lt;");
-    p.replace(QLatin1Char('\''), "&apos;");
+    p.replace(QLatin1Char('&'),  QLatin1String("&amp;"));
+    p.replace(QLatin1Char('\"'), QLatin1String("&quot;"));
+    p.replace(QLatin1Char('>'),  QLatin1String("&gt;"));
+    p.replace(QLatin1Char('<'),  QLatin1String("&lt;"));
+    p.replace(QLatin1Char('\''), QLatin1String("&apos;"));
     return p;
 }
 
@@ -82,7 +97,7 @@ bool QphHandler::startElement(const QString & /* namespaceURI */,
                               const QString &qName,
                               const QXmlAttributes & /* atts */)
 {
-    if (qName == QString("phrase")) {
+    if (qName == QString(QLatin1String("phrase"))) {
         source.truncate(0);
         target.truncate(0);
         definition.truncate(0);
@@ -95,13 +110,13 @@ bool QphHandler::endElement(const QString & /* namespaceURI */,
                             const QString & /* localName */,
                             const QString &qName)
 {
-    if (qName == QString("source"))
+    if (qName == QString(QLatin1String("source")))
         source = accum;
-    else if (qName == QString("target"))
+    else if (qName == QString(QLatin1String("target")))
         target = accum;
-    else if (qName == QString("definition"))
+    else if (qName == QString(QLatin1String("definition")))
         definition = accum;
-    else if (qName == QString("phrase"))
+    else if (qName == QString(QLatin1String("phrase")))
         pb->append(Phrase(source, target, definition));
     return true;
 }
@@ -135,10 +150,10 @@ bool PhraseBook::load(const QString &filename)
     QXmlInputSource in(&f);
     QXmlSimpleReader reader;
     // don't click on these!
-    reader.setFeature("http://xml.org/sax/features/namespaces", false);
-    reader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
-    reader.setFeature("http://trolltech.com/xml/features/report-whitespace"
-        "-only-CharData", false);
+    reader.setFeature(QLatin1String("http://xml.org/sax/features/namespaces"), false);
+    reader.setFeature(QLatin1String("http://xml.org/sax/features/namespace-prefixes"), true);
+    reader.setFeature(QLatin1String("http://trolltech.com/xml/features/report-whitespace"
+                                    "-only-CharData"), false);
     QXmlDefaultHandler *hand = new QphHandler(this);
     reader.setContentHandler(hand);
     reader.setErrorHandler(hand);

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,11 +19,12 @@
 **
 ****************************************************************************/
 
-#include <qdrmcontent.h>
+#include <QDrmContent>
 
-#include "mediasession.h"
+#include <qtopialog.h>
 
 #include "drmsession.h"
+
 
 namespace mediaserver
 {
@@ -32,30 +33,35 @@ namespace mediaserver
 class DrmSessionPrivate
 {
 public:
-    MediaSession*   mediaSession;
-    QDrmContent     content;
-    bool            drmContent;
-    bool            haveLicense;
+    QMediaServerSession*    mediaSession;
+    QDrmContent             content;
+    bool                    drmContent;
+    bool                    haveLicense;
 };
 
 
-DrmSession::DrmSession(QString const& url, MediaSession* mediaSession):
+DrmSession::DrmSession(QUrl const& url, QMediaServerSession* mediaSession):
     d(new DrmSessionPrivate)
 {
     // init
     d->mediaSession = mediaSession;
     d->haveLicense = false;
 
-    if (url.startsWith("qtopia://"))
+    if (url.scheme() == "qtopia")
     {
-        QContent content(url.mid(9));   // sizeof("qtopia://")
+        QContent content(url.path());   // sizeof("qtopia://")
 
         if (content.isValid() &&
             content.drmState() == QContent::Protected)
         {
             d->drmContent = true;
             d->content.setPermission(QDrmRights::Play);
-            d->haveLicense = d->content.requestLicense( content );
+            d->haveLicense = d->content.requestLicense(content);
+
+            connect(&d->content, SIGNAL(rightsExpired(QDrmContent)),
+                     this, SLOT(licenseExpired()) );
+            connect(d->mediaSession, SIGNAL(playerStateChanged(QtopiaMedia::State)),
+            this, SLOT(changeLicenseState(QtopiaMedia::State)));
         }
     }
 
@@ -70,8 +76,10 @@ DrmSession::DrmSession(QString const& url, MediaSession* mediaSession):
             this, SIGNAL(volumeChanged(int)));
     connect(d->mediaSession, SIGNAL(volumeMuted(bool)),
             this, SIGNAL(volumeMuted(bool)));
-    connect(d->mediaSession, SIGNAL(interfaceAvailable(const QString&)),
-            this, SIGNAL(interfaceAvailable(const QString&)));
+    connect(d->mediaSession, SIGNAL(interfaceAvailable(QString)),
+            this, SIGNAL(interfaceAvailable(QString)));
+    connect(d->mediaSession, SIGNAL(interfaceUnavailable(QString)),
+            this, SIGNAL(interfaceUnavailable(QString)));
 }
 
 DrmSession::~DrmSession()
@@ -82,26 +90,26 @@ DrmSession::~DrmSession()
 
 void DrmSession::start()
 {
-    d->mediaSession->start();
+    if (!d->drmContent && d->haveLicense)
+    {
+        d->mediaSession->start();
+    }
+    else if( d->content.requestLicense( d->content.content() ) )
+    {
+        d->haveLicense = true;
 
-    if (d->haveLicense)
-        d->content.renderStarted();
+        d->mediaSession->start();
+    }
 }
 
 void DrmSession::pause()
 {
     d->mediaSession->pause();
-
-    if (d->haveLicense)
-        d->content.renderPaused();
 }
 
 void DrmSession::stop()
 {
     d->mediaSession->stop();
-
-    if (d->haveLicense)
-        d->content.renderStopped();
 }
 
 void DrmSession::suspend()
@@ -168,5 +176,43 @@ QStringList DrmSession::interfaces()
 {
     return d->mediaSession->interfaces();
 }
+
+QString DrmSession::id() const
+{
+    return d->mediaSession->id();
+}
+
+QString DrmSession::reportData() const
+{
+    return d->mediaSession->reportData();
+}
+
+void DrmSession::licenseExpired()
+{
+    stop();
+    d->content.releaseLicense();
+    d->haveLicense = false;
+}
+
+void DrmSession::changeLicenseState(QtopiaMedia::State state)
+{
+    if (d->haveLicense)
+    {
+        switch (state)
+        {
+        case QtopiaMedia::Playing:
+            d->content.renderStarted();
+            break;
+        case QtopiaMedia::Paused:
+        case QtopiaMedia::Buffering:
+            d->content.renderPaused();
+            break;
+        case QtopiaMedia::Stopped:
+        case QtopiaMedia::Error:
+            d->content.renderStopped();
+        }
+    }
+}
+
 
 }   // ns mediaserver

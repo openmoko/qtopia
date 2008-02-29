@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,16 +19,16 @@
 **
 ****************************************************************************/
 
+#include "ringtoneeditor.h"
+
 #include <QAction>
 #include <QFileInfo>
 #include <QDialog>
-#ifndef QTOPIA_DESKTOP
-# ifdef MEDIA_SERVER
+#ifdef MEDIA_SERVER
 #  include <qsoundcontrol.h>
 #  include <QSound>
-# else
+#elif defined(Q_WS_QWS)
 #  include <qsoundqss_qws.h>
-# endif
 #endif
 #include <QLayout>
 #include <QListWidget>
@@ -38,17 +38,13 @@
 #include <qtopiaapplication.h>
 #include <qcontent.h>
 #include <qcontentset.h>
-
 #include <qtranslatablesettings.h>
 #include <qdocumentselector.h>
-#ifdef QTOPIA_PHONE
-# include <qsoftmenubar.h>
-#endif
-
-#include "ringtoneeditor.h"
+#include <qsoftmenubar.h>
 
 #include <QPhoneProfile>
 #include <QPhoneProfileManager>
+#include <QFileSystem>
 
 // RingToneSelect
 // up to 4 most recently used user ringtones
@@ -102,12 +98,12 @@ void RingToneLink::paint( QPainter *p )
     p->drawText( 3, 0, w-3*2, h, 0, text() );
 }
 
-RingToneSelect::RingToneSelect(QWidget *parent)
-    : QListWidget(parent), volume(0), volumeSet(false),
+RingToneSelect::RingToneSelect(QWidget *parent, bool video)
+    : QListWidget(parent), volume(0), volumeSet(false), m_video(video)
 # ifdef MEDIA_SERVER
-    scontrol(0)
-# else
-    sclient(0)
+    , scontrol(0)
+# elif defined(Q_WS_QWS)
+    , sclient(0), soundFinished(false)
 # endif
 {
     init();
@@ -115,10 +111,12 @@ RingToneSelect::RingToneSelect(QWidget *parent)
 
 void RingToneSelect::init()
 {
+    setFrameStyle(QFrame::NoFrame);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-# ifndef MEDIA_SERVER
+# if !defined(MEDIA_SERVER) && defined(Q_WS_QWS)
     sclient = new QWSSoundClient(this);
+    connect( sclient, SIGNAL(soundCompleted(int)), this, SLOT(soundCompleted(int)) );
 # endif
     stimer = new QTimer(this);
     aNone = false;
@@ -142,6 +140,10 @@ void RingToneSelect::init()
         QString linkname = c.value("item" + QString::number(i)).toString(); // No tr
         QContent dl(linkname);
         if (dl.fileKnown()) {
+            // need to show either audio or vidio
+            if ( !m_video && dl.type().contains("video")
+                    || m_video && dl.type().contains("audio") )
+                continue;
             customCount++;
             new RingToneLink(dl, this);
         }
@@ -149,7 +151,11 @@ void RingToneSelect::init()
 
     QContentSet rtones;
     rtones.setCriteria(QContentFilter::Location, Qtopia::qtopiaDir() + "etc/SystemRingTones");
-    rtones.addCriteria(QContentFilter::MimeType, "audio/*", QContentFilter::And);
+    if ( !m_video ) {
+        rtones.addCriteria(QContentFilter::MimeType, "audio/*", QContentFilter::And);
+    } else {
+        rtones.addCriteria(QContentFilter::MimeType, "video/*", QContentFilter::And);
+    }
 
     QContentSetModel model(&rtones);
     for(i = 0; i < model.rowCount(); i++)
@@ -207,7 +213,7 @@ void RingToneSelect::closeEvent( QCloseEvent *e )
 
 RingToneLink *RingToneSelect::linkItem(int index) const
 {
-    if (index == (int)count() - 1 || (index == 0 && aNone))
+    if (index < 0 || index == (int)count() - 1 || (index == 0 && aNone))
         return 0;
     return (RingToneLink*)item(index);
 }
@@ -220,15 +226,16 @@ RingToneLink *RingToneSelect::currentLinkItem() const
 void RingToneSelect::setCurrentTone(const QContent &d)
 {
     stopSound();
-    if (!d.fileKnown()) {
+    if (d.fileName().isEmpty()) {
         if (aNone)
             setCurrentRow(0);
+        else
+            setCurrentRow(-1);
     } else {
     // for each item, check its link.  same as d, then set as Current Item
         for (int i = aNone ? 1 : 0; i < (int)count()-1; i++) {
             QContent lnk = linkItem(i)->link();
-            if (lnk.linkFileKnown() && d.linkFileKnown() && lnk.linkFile() == d.linkFile()
-                || lnk.file() == d.file()) {
+            if (lnk.fileName() == d.fileName()) {
 
                 if (m_currentItem == i) // Already been here, replay
                     stimer->start(200);
@@ -254,10 +261,21 @@ void RingToneSelect::selectItem(int pos)
         addFromDocuments();
     else {
         stopSound();
-        if (linkItem(pos))
+        if (linkItem(pos)) {
             emit selected(linkItem(pos)->link());
-        else
+
+            const QFileSystem *fs = QStorageMetaInfo::instance()->fileSystemOf( linkItem(pos)->link().fileName() );
+            if ( fs && fs->isRemovable() ) {
+                QMessageBox::warning(this, tr("Removable media"),
+                        tr("<qt>\"%1\" is from <b>removable media</b>.<br>"
+                            "If the media is removed"
+                            " the default ringtone will be played.</qt>", "%1 = file name")
+                        .arg(linkItem(pos)->link().name()));
+            }
+
+        } else {
             emit selected(QContent());
+        }
     }
 }
 
@@ -280,7 +298,10 @@ void RingToneSelect::addFromDocuments()
 
     QContentFilter audiofilter(QContent::Document);
 
-    audiofilter &= QContentFilter( QContentFilter::MimeType, QLatin1String( "audio/*" ) );
+    if ( !m_video )
+        audiofilter &= QContentFilter( QContentFilter::MimeType, QLatin1String( "audio/*" ) );
+    else
+        audiofilter &= QContentFilter( QContentFilter::MimeType, QLatin1String( "video/*" ) );
 
     dlg->setFilter( audiofilter );
     dlg->disableOptions( QDocumentSelector::ContextMenu );
@@ -297,9 +318,7 @@ void RingToneSelect::addCustom( const QContent &content )
     // first find out if custom is in the list already.
     for (int i = 0; i < customCount; i++) {
         QContent lnk = linkItem(aNone ? i+1 : i)->link();
-        if (lnk.linkFileKnown() && link.linkFileKnown()
-            && lnk.linkFile() == link.linkFile()
-            || lnk.file() == link.file()) {
+        if (lnk.fileName() == link.fileName()) {
            // ok, just move it to the first of the list.
            RingToneLink *rtli = linkItem(aNone ? i+1 : i);
            takeItem(row(rtli));
@@ -333,8 +352,7 @@ void RingToneSelect::saveCustom()
     int i;
     for (i = 0; i < customCount; i++) {
         QContent lnk = linkItem(aNone ? i+1 : i)->link();
-        c.setValue("item" + QString::number(i+1),
-        lnk.linkFileKnown() ? lnk.linkFile() : lnk.file());
+        c.setValue("item" + QString::number(i+1), lnk.fileName());
     }
 }
 
@@ -375,7 +393,7 @@ void RingToneSelect::playCurrentSound()
 #ifdef MEDIA_SERVER
         if (scontrol == NULL)
         {
-            scontrol = new QSoundControl( new QSound( currentLinkItem()->link().file() ) );
+            scontrol = new QSoundControl( new QSound( currentLinkItem()->link().fileName() ) );
 
             // uncomment this to play a tone more than once
             //connect(scontrol, SIGNAL(done()), this, SLOT(playDone()));
@@ -396,8 +414,9 @@ void RingToneSelect::playCurrentSound()
         scontrol->setVolume( volume * 20 );
 
         scontrol->sound()->play();
-#else
-        sclient->play(0, currentLinkItem()->link().file(), volume * 20);
+# elif defined(Q_WS_QWS)
+        soundFinished = false;
+        sclient->play(0, currentLinkItem()->link().fileName(), volume * 20);
 #endif
     }
 }
@@ -414,9 +433,30 @@ void RingToneSelect::stopSound()
 
         scontrol = NULL;
     }
-#else
+# elif defined(Q_WS_QWS)
     if ( sclient ) sclient->stop(0);
 #endif
+}
+
+#ifndef MEDIA_SERVER
+void RingToneSelect::soundCompleted(int)
+{
+    bool soundFinished = true;
+}
+#endif
+
+bool RingToneSelect::isFinished()
+{
+    bool result = true;
+#ifdef MEDIA_SERVER
+    if (scontrol)
+    {
+        result = scontrol->sound()->isFinished();
+    }
+#else
+    result = soundFinished;
+#endif
+    return result;
 }
 
 RingToneButton::RingToneButton( QWidget *parent )
@@ -428,26 +468,26 @@ RingToneButton::RingToneButton( QWidget *parent )
 RingToneButton::RingToneButton( const QContent &tone, QWidget *parent )
     : QPushButton( parent ), rtl(0), dlg(0), aNone(false)
 {
-    init();
     setTone( tone );
 }
 
-void RingToneButton::init()
+void RingToneButton::init( bool video )
 {
     setText(tr("None", "no ring tone selected"));
     //construction should not be used.
-    connect(this, SIGNAL(clicked()), this, SLOT(selectTone()));
+    if ( !video ) // might get hooked up twice.
+        connect(this, SIGNAL(clicked()), this, SLOT(selectTone()));
     dlg = new QDialog(this);
     dlg->setModal(true);
-#ifdef QTOPIA_PHONE
     QtopiaApplication::setMenuLike(dlg, true);
-#endif
     QVBoxLayout *vbl = new QVBoxLayout(dlg);
-
+    vbl->setContentsMargins(0, 0, 0, 0);
     dlg->setWindowTitle(tr("Select Ringtone"));
 
-    rtl = new RingToneSelect(dlg);
-    connect(rtl, SIGNAL(selected(const QContent &)), dlg, SLOT(accept()));
+    rtl = new RingToneSelect(dlg, video);
+    connect(rtl, SIGNAL(selected(QContent)),
+            this, SIGNAL(selected(QContent)));
+    connect(rtl, SIGNAL(selected(QContent)), dlg, SLOT(accept()));
     vbl->addWidget(rtl);
     if (aNone)
         rtl->setAllowNone(true);
@@ -461,12 +501,7 @@ void RingToneButton::setTone( const QContent &tone )
     } else {
         mTone = tone;
         // limit total string length
-        if (mTone.name().length() > 15) {
-            static const QString overlength = tr("%1...");
-            setText(overlength.arg(mTone.name().left(12)));
-        } else {
-            setText( mTone.name() );
-        }
+        setText( fontMetrics().elidedText( mTone.name(), Qt::ElideRight, sizeHint().width() ) );
     }
 }
 
@@ -477,6 +512,9 @@ QContent RingToneButton::tone() const
 
 void RingToneButton::setAllowNone(bool b)
 {
+    if ( !dlg && !rtl )
+        init();
+
     aNone = b;
     if (rtl)
         rtl->setAllowNone(b);
@@ -489,6 +527,9 @@ bool RingToneButton::allowNone() const
 
 void RingToneButton::selectTone()
 {
+    if ( !dlg && !rtl )
+        init();
+
     rtl->setCurrentTone( mTone );
     if (QtopiaApplication::execDialog(dlg)) {
         setTone( rtl->currentTone() );
@@ -496,3 +537,9 @@ void RingToneButton::selectTone()
     rtl->stopSound();
 }
 
+void RingToneButton::setVideoSelector( bool b )
+{
+    if ( dlg )
+        delete dlg;
+    init( b );
+}

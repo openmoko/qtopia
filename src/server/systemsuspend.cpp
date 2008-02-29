@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include "systemsuspend.h"
+#include "qtopiainputevents.h"
 #include <QList>
 
 /*!
@@ -53,7 +54,7 @@
   \code
   SystemSuspend *suspend = qtopiaTask<SystemSuspend>();
   qWarning() << "About to suspend!";
-  if(suspend->syspendSystem())
+  if(suspend->suspendSystem())
     qWarning() << "Resumed from suspend!";
   else
     qWarning() << "Suspend failed";
@@ -67,6 +68,7 @@
   req.send();
   \endcode
 
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   \sa SystemSuspendHandler, SuspendService
  */
 
@@ -151,6 +153,7 @@
   SystemSuspendHandler implementers are called, is available in the 
   documentation for that class.
 
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   \sa SystemSuspend
  */
 
@@ -201,19 +204,31 @@
  */
 
 // declare SystemSuspendPrivate
-class SystemSuspendPrivate : public SystemSuspend
+class SystemSuspendPrivate : public SystemSuspend,
+#ifdef Q_WS_QWS
+                             public QtopiaServerApplication::QWSEventFilter,
+#endif
+                             public QtopiaKeyboardFilter
 {
 Q_OBJECT
 public:
     SystemSuspendPrivate(QObject *parent = 0);
+    ~SystemSuspendPrivate();
 
     virtual bool suspendSystem();
+
+    bool filter(int, int, int, bool, bool);
+#ifdef Q_WS_QWS
+    bool qwsEventFilter(QWSEvent *e);
+#endif
 
 private:
     bool handlersValid;
     QList<SystemSuspendHandler *> handlers;
 
     SystemSuspendHandler *waitingOn;
+
+    bool inputEvent;
 
 private slots:
     void operationCompleted();
@@ -227,6 +242,18 @@ SystemSuspendPrivate::SystemSuspendPrivate(QObject *parent)
 {
     SuspendService *s = new SuspendService(this);
     QObject::connect(s, SIGNAL(doSuspend()), this, SLOT(suspendSystem()));
+
+    QtopiaInputEvents::addKeyboardFilter(this);
+#ifdef Q_WS_QWS
+    QtopiaServerApplication::instance()->installQWSEventFilter(this);
+#endif
+}
+
+SystemSuspendPrivate::~SystemSuspendPrivate()
+{
+#ifdef Q_WS_QWS
+    QtopiaServerApplication::instance()->removeQWSEventFilter(this);
+#endif
 }
 
 void SystemSuspendPrivate::operationCompleted()
@@ -254,13 +281,18 @@ bool SystemSuspendPrivate::suspendSystem()
         }
     }
 
+    // abort suspension if we see an input event
+    inputEvent = false;
+
     // Do suspend
     emit systemSuspending();
     for(int ii = handlers.count(); ii > 0; --ii) {
         waitingOn = handlers.at(ii - 1);
         if(!waitingOn->suspend()) {
             while(waitingOn)
-                QApplication::instance()->processEvents();
+                QApplication::instance()->processEvents(QEventLoop::AllEvents | QEventLoop::WaitForMoreEvents);
+            if (inputEvent)
+                break;
         } else {
             waitingOn = 0;
         }
@@ -273,7 +305,7 @@ bool SystemSuspendPrivate::suspendSystem()
         waitingOn = handlers.at(ii);
         if(!waitingOn->wake()) {
             while(waitingOn)
-                QApplication::instance()->processEvents();
+                QApplication::instance()->processEvents(QEventLoop::AllEvents | QEventLoop::WaitForMoreEvents);
         } else {
             waitingOn = 0;
         }
@@ -284,6 +316,22 @@ bool SystemSuspendPrivate::suspendSystem()
 
     return true;
 }
+
+bool SystemSuspendPrivate::filter(int, int, int, bool, bool)
+{
+    inputEvent = true;
+    return false;
+}
+
+#ifdef Q_WS_QWS
+bool SystemSuspendPrivate::qwsEventFilter(QWSEvent *e)
+{
+    if (e->type == QWSEvent::Mouse)
+        inputEvent = true;
+
+    return false;
+}
+#endif
 
 // define SuspendService
 /*!

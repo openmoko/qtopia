@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -67,10 +67,6 @@
     \o Qt::DecorationRole
     \o QList<QIcon>
     \o Optional. Drawn on the right side of the item, top-to-bottom, right-to-left
-   \row
-    \o Qt::BackgroundColorRole
-    \o QColor
-    \o Background color of the item.
   \endtable
 
   The four appointments shown in the picture above have the following data in the model:
@@ -78,19 +74,15 @@
    \header
     \o DisplayRole
     \o DecorationRole
-    \o BackgroundColorRole
    \row
     \o Status meeting
     \o List with a single icon for recurrence
-    \o Blue
    \row
     \o Lunch at Moe's
     \o List with a single icon for a reminder
-    \o Red
    \row
     \o School play
     \o <empty list>
-    \o Red
    \row
     \o Oslo conf.
     \o List with two icons:
@@ -98,11 +90,12 @@
         \o a recurrence icon
         \o a timezone icon
        \endlist
-    \o Red (note that this is the selected appointment, and it is
-       rendered with the current palette's \c Highlight color)
   \endtable
 
-  \sa QAppointment, QAppointmentModel
+  Selected appointments are rendered with the current palette's \c Highlight color),
+  while unselected appointments are rendered with the \c Button color.
+
+  \sa QAppointment, QAppointmentModel, {Pim Library}
 */
 
 /*!
@@ -181,13 +174,13 @@ void QAppointmentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
     //  Prepare brush + pen and draw in background rectangle
 
     QRect border;
-    QPen pen(Qt::black);
+    QPen pen(option.palette.color(QPalette::Mid));
     if (option.state & QStyle::State_Selected) {
         painter->setBrush(option.palette.highlight());
         border = option.rect.adjusted(1, 1, -1, -1);
         pen.setWidth(2);
     } else {
-        painter->setBrush(qvariant_cast<QColor>(index.model()->data(index, Qt::BackgroundColorRole)).light(170));
+        painter->setBrush(option.palette.button());
         border = option.rect.adjusted(0, 0, -1, -1);
     }
 
@@ -204,16 +197,11 @@ void QAppointmentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
     // centered if that does not result in too much whitespace (being
     // defined as more than one font linespacing high)
 
-    // In addition, we try to wrap the text to the left boundary of the icons
+    // In addition, we try to wrap the text to the leading boundary of the icons
+    bool rtl = option.direction == Qt::RightToLeft;
 
     QString appText = index.model()->data(index, Qt::DisplayRole).toString();
     int fontHeight = QFontMetrics(option.font).lineSpacing();
-    int rightTextEdge = contentRect.right();
-    int vertPos = 0;
-    QRect textMetrics = painter->boundingRect(textRect, Qt::AlignLeft | Qt::TextWrapAnywhere, appText);
-
-    if (textMetrics.height() < contentRect.height() && textMetrics.height() > (contentRect.height() - fontHeight))
-        vertPos = (contentRect.height() - textMetrics.height() + 1) / 2;
 
     //  Draw in the relevant event icons (vertically centered), with a 2px margin
     // If the text is not vertically centered, we don't center the icons either.
@@ -231,41 +219,50 @@ void QAppointmentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
         // vertical offset, if any (if more than one line spare, we top align)
         int iconVOffset = (contentRect.height() + 2 - (numRows * (drawnIconSize + 2)) + 1) / 2;
-        if (vertPos == 0 || iconVOffset < 0 || iconVOffset >= contentRect.height() || iconVOffset > (drawnIconSize / 2))
+        if (iconVOffset < 0 || iconVOffset >= contentRect.height() || iconVOffset > (drawnIconSize / 2))
             iconVOffset = 0;
 
         // Icon drawing position
         int iconY = iconVOffset;
-        int iconX = contentRect.right() - drawnIconSize;
+        int iconX = rtl ? contentRect.left() : contentRect.right() - drawnIconSize;
+        int iconDX = rtl ? (drawnIconSize + 2) : -(drawnIconSize + 2);
 
         // Now draw the icons, starting from top right, moving downwards and then leftwards
-        for (QList<QVariant>::Iterator it = icons.begin(); it != icons.end(); ++it) {
+        for (QList<QVariant>::Iterator it = icons.begin(); it != icons.end(); ) {
             QIcon icon = qvariant_cast<QIcon>(*it);
             icon.paint(painter, iconX, contentRect.top() + iconY, drawnIconSize, drawnIconSize);
 
-            // Save this
-            rightTextEdge = iconX - 2;
-
             // Calculate where the next icon should go
-            if(contentRect.height() >= iconY + drawnIconSize + 2 + drawnIconSize)
-                iconY += drawnIconSize + 2;
-            else {
-                iconY = iconVOffset;
-                iconX -= drawnIconSize + 2;
+            ++it;
+            if (it !=icons.end()) {
+                if(contentRect.height() >= iconY + drawnIconSize + 2 + drawnIconSize)
+                    iconY += drawnIconSize + 2;
+                else {
+                    iconY = iconVOffset;
+                    iconX += iconDX;
+                }
             }
         }
+
+        if (rtl)
+            textRect.setLeft(iconX + drawnIconSize + 2);
+        else
+            textRect.setRight(iconX - 2);
     }
 
     //  Prepare pen and draw in text
     if (option.state & QStyle::State_Selected)
         painter->setPen(option.palette.color(QPalette::HighlightedText));
     else
-        painter->setPen(option.palette.color(QPalette::Text));
+        painter->setPen(option.palette.color(QPalette::ButtonText));
 
     // Now see if we can fit our text in.
-    textRect.setRight(rightTextEdge);
-    textRect.adjust(0, vertPos, 0, 0);
+    int vertPos = 0;
+    QRect textMetrics = painter->boundingRect(textRect, Qt::AlignLeft | Qt::TextWrapAnywhere, appText);
 
+    if (textMetrics.height() < contentRect.height() && textMetrics.height() > (contentRect.height() - fontHeight))
+        vertPos = (contentRect.height() - textMetrics.height() + 1) / 2;
+    textRect.adjust(0, vertPos, 0, 0);
     painter->drawText(textRect, Qt::AlignLeft | Qt::TextWrapAnywhere, appText);
     painter->restore();
 }

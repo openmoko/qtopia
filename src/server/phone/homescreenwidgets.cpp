@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -49,7 +49,7 @@
     \class HomeScreenWidgets
     \brief The HomeScreenWidgets class is a factory for homescreen widgets.
 
-    The HomescrrenWidgets class is used as a factory for creating homescreen
+    The HomescreenWidgets class is used as a factory for creating homescreen
     widgets that have registered. Homescreen widgets are registered with the
     HSWIDGET macro, which takes the name of the widget and the method used
     to create the widget. Typically this will be the name of the widget
@@ -59,6 +59,7 @@
     HSWIDGET(WorldmapHSWidget, WorldmapHSWidget)
     \endcode
 
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
     \sa AnalogClockHSWidget, AppointmentsHSWidget, LauncherHSWidget, WorldmapHSWidget
 */
 
@@ -351,19 +352,19 @@ AppointmentsHSWidget::AppointmentsHSWidget( QWidget* parent )
     // Connect system events which cause appointments to update()
     mVsItem = new QValueSpaceItem( "/UI/DisplayTime/Time", this );
     connect( mVsItem,
-             SIGNAL( contentsChanged() ),
+             SIGNAL(contentsChanged()),
              this,
-             SLOT( update() ) );
+             SLOT(update()) );
 
     connect( qApp,
-             SIGNAL( timeChanged() ),
+             SIGNAL(timeChanged()),
              this,
-             SLOT( update ( ) ) );
+             SLOT(update()) );
 
     connect( qApp,
-             SIGNAL( clockChanged( bool ) ),
+             SIGNAL(clockChanged(bool)),
              this,
-             SLOT( update() ) );
+             SLOT(update()) );
 
     // Create the value space object and set default values
     mVsObject = new QValueSpaceObject( "/PIM/Appointments/Next", this );
@@ -437,22 +438,21 @@ bool AppointmentsHSWidget::updateModel()
         QDateTime start( currentDateTime );
         QDateTime end( currentDateTime.addDays(1) );
         mModel = new QOccurrenceModel( start, end, this );
-        mModel->refresh();
 
         connect( mModel,
-                 SIGNAL( rowsInserted ( const QModelIndex&, int, int ) ),
+                 SIGNAL(rowsInserted(QModelIndex,int,int)),
                  this,
-                 SLOT( update() ) );
+                 SLOT(update()) );
 
         connect( mModel,
-                 SIGNAL( rowsRemoved ( const QModelIndex&, int, int ) ),
+                 SIGNAL(rowsRemoved(QModelIndex,int,int)),
                  this,
-                 SLOT( update() ) );
+                 SLOT(update()) );
 
         connect( mModel,
-                 SIGNAL( fetchCompleted() ),
+                 SIGNAL(fetchCompleted()),
                  this,
-                 SLOT( update() ) );
+                 SLOT(update()) );
 
         return false;
     } else {
@@ -460,7 +460,6 @@ bool AppointmentsHSWidget::updateModel()
         if ( ( mModel->rangeStart().addSecs( 5 * 60 ) ) <
              currentDateTime ) {
             mModel->setRange( currentDateTime, currentDateTime.addDays(1) );
-            mModel->refresh();
 
             // Need to wait for model to complete the fetch for appointments
             // before we fresh the value space with the next appointment.
@@ -586,7 +585,7 @@ void WorldmapHSWidget::showCity()
 {
     setZone( mapFromGlobal( QCursor::pos() ) );
     ++mCheck;
-    QTimer::singleShot( 5000, this, SLOT( showTZ() ) );
+    QTimer::singleShot( 5000, this, SLOT(showTZ()) );
 }
 
 /*!
@@ -657,9 +656,9 @@ AnalogClockHSWidget::AnalogClockHSWidget( QWidget* parent )
 {
     QTimer* timer = new QTimer( this );
     connect( timer,
-             SIGNAL( timeout() ),
+             SIGNAL(timeout()),
              this,
-             SLOT( update() ) );
+             SLOT(update()) );
     timer->start( 1000 );
 
     QSettings config( "Trolltech", "HomeScreenWidgets" );

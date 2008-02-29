@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,14 +23,13 @@
 #define ACCOUNTEDITOR_H
 
 #include <QWidget>
-
+#ifndef QT_NO_OPENSSL
 class QListWidget;
+class QListWidgetItem;
 class QProgressBar;
-class QListWidget;
 class QAction;
 class QTimer;
 class QAppointmentModel;
-class QListWidgetItem;
 
 class AccountEditor : public QWidget
 {
@@ -55,9 +54,12 @@ private slots:
 
     void updateProgress();
 
+    void updateAccountName(const QString& account);
+
     void populate();
 
     void hideProgressBar();
+    void processSyncStatus(const QString &, int);
 
     void currentAccountChanged(QListWidgetItem *);
 
@@ -78,5 +80,6 @@ private:
 
     QTimer *progressHideTimer;
 };
+#endif //QT_NO_OPENSSL
 
 #endif // ACCOUNTEDITOR_H

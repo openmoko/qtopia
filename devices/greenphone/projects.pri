@@ -1,7 +1,10 @@
 PROJECTS-=\
-    settings/beaming
+    settings/beaming\
+    libraries/qtopiatest
 PROJECTS*=\
     3rdparty/tools/atd\
-    3rdparty/applications/target_sqlite
-!free_package|free_plus_binaries:PROJECTS*=\
+    3rdparty/applications/target_sqlite\
+    tools/startupflags\
     tools/phonebounce
+THEMES-=smudge
+

@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt 3 Support Members for QStringList</title>
+  <title>Qt 4.3: Qt 3 Support Members for QStringList</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -58,11 +58,8 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Use <a href="qstringlist.html#replaceInStrings">replaceInStrings</a>() instead.</p>
 <h3 class="fn"><a name="split"></a>QStringList QStringList::split ( const <a href="qregexp.html">QRegExp</a> &amp; <i>sep</i>, const <a href="qstring.html">QString</a> &amp; <i>str</i>, bool <i>allowEmptyEntries</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Splits the string <i>str</i> into strings wherever the regular expression <i>sep</i> occurs, and returns the list of those strings.</p>
-<p>If <i>allowEmptyEntries</i> is true, an empty string is inserted in the list wherever the separator matches twice without intervening text.</p>
-<p>For example, if you split the string &quot;a,,b,c&quot; on commas, split() returns the three-item list &quot;a&quot;, &quot;b&quot;, &quot;c&quot; if <i>allowEmptyEntries</i> is false (the default), and the four-item list &quot;a&quot;, &quot;&quot;, &quot;b&quot;, &quot;c&quot; if <i>allowEmptyEntries</i> is true.</p>
-<p>Use <tt>split(QRegExp(&quot;\\s+&quot;), str)</tt> to split on arbitrary amounts of whitespace.</p>
-<p>If <i>sep</i> does not match anywhere in <i>str</i>, split() returns a single element list with the element containing the original string, <i>str</i>.</p>
+<p>Use QString::split(<i>sep</i>, <a href="qstring.html#SplitBehavior-enum">QString::SkipEmptyParts</a>) or QString::split(<i>sep</i>, <a href="qstring.html#SplitBehavior-enum">QString::KeepEmptyParts</a>) instead.</p>
+<p>Be aware that the <a href="qstring.html#split">QString::split</a>()'s return value is a <a href="qstringlist.html">QStringList</a> that always contains at least one element, even if <i>str</i> is empty.</p>
 <p>See also <a href="qstringlist.html#join">join</a>() and <a href="qstring.html#section">QString::section</a>().</p>
 <h3 class="fn"><a name="split-2"></a>QStringList QStringList::split ( const <a href="qchar.html">QChar</a> &amp; <i>sep</i>, const <a href="qstring.html">QString</a> &amp; <i>str</i>, bool <i>allowEmptyEntries</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -71,13 +68,11 @@
 <h3 class="fn"><a name="split-3"></a>QStringList QStringList::split ( const <a href="qstring.html">QString</a> &amp; <i>sep</i>, const <a href="qstring.html">QString</a> &amp; <i>str</i>, bool <i>allowEmptyEntries</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This version of the function uses a <a href="qstring.html">QString</a> as separator.</p>
-<p>If <i>sep</i> is an empty string, the return value is a list of one-character strings: split(<a href="qstring.html">QString</a>(&quot;&quot;), &quot;four&quot;) returns the four-item list, &quot;f&quot;, &quot;o&quot;, &quot;u&quot;, &quot;r&quot;.</p>
-<p>If <i>allowEmptyEntries</i> is true, an empty string is inserted in the list wherever the separator matches twice without intervening text.</p>
 <p>See also <a href="qstringlist.html#join">join</a>() and <a href="qstring.html#section">QString::section</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

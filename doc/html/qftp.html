@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QFtp Class Reference</title>
+  <title>Qt 4.3: QFtp Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QFtp Class Reference<br /><sup><sup>[<a href="qtnetwork.html">QtNetwork</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QFtp Class Reference<br /><span class="small-subtitle">[<a href="qtnetwork.html">QtNetwork</a> module]</span>
+</h1>
 <p>The QFtp class provides an implementation of the client side of FTP protocol. <a href="#details">More...</a></p>
 <pre> #include &lt;QFtp&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -98,13 +99,13 @@
 <p>The class works asynchronously, so there are no blocking functions. If an operation cannot be executed immediately, the function will still return straight away and the operation will be scheduled for later execution. The results of scheduled operations are reported via signals. This approach depends on the event loop being in operation.</p>
 <p>The operations that can be scheduled (they are called &quot;commands&quot; in the rest of the documentation) are the following: <a href="qftp.html#connectToHost">connectToHost</a>(), <a href="qftp.html#login">login</a>(), <a href="qftp.html#close">close</a>(), <a href="qftp.html#list">list</a>(), <a href="qftp.html#cd">cd</a>(), <a href="qftp.html#get">get</a>(), <a href="qftp.html#put">put</a>(), <a href="qftp.html#remove">remove</a>(), <a href="qftp.html#mkdir">mkdir</a>(), <a href="qftp.html#rmdir">rmdir</a>(), <a href="qftp.html#rename">rename</a>() and <a href="qftp.html#rawCommand">rawCommand</a>().</p>
 <p>All of these commands return a unique identifier that allows you to keep track of the command that is currently being executed. When the execution of a command starts, the <a href="qftp.html#commandStarted">commandStarted</a>() signal with the command's identifier is emitted. When the command is finished, the <a href="qftp.html#commandFinished">commandFinished</a>() signal is emitted with the command's identifier and a bool that indicates whether the command finished with an error.</p>
-<p>In some cases, you might want to execute a sequence of commands, e.g. if you want to connect and login to a FTP server. This is simply achieved:</p>
+<p>In some cases, you might want to execute a sequence of commands, e.g&#x2e; if you want to connect and login to a FTP server. This is simply achieved:</p>
 <pre> QFtp *ftp = new QFtp(parent);
  ftp-&gt;connectToHost(&quot;ftp.trolltech.com&quot;);
  ftp-&gt;login();</pre>
 <p>In this case two FTP commands have been scheduled. When the last scheduled command has finished, a <a href="qftp.html#done">done</a>() signal is emitted with a bool argument that tells you whether the sequence finished with an error.</p>
-<p>If an error occurs during the execution of one of the commands in a sequence of commands, all the pending commands (i.e. scheduled, but not yet executed commands) are cleared and no signals are emitted for them.</p>
-<p>Some commands, e.g. <a href="qftp.html#list">list</a>(), emit additional signals to report their results.</p>
+<p>If an error occurs during the execution of one of the commands in a sequence of commands, all the pending commands (i.e&#x2e; scheduled, but not yet executed commands) are cleared and no signals are emitted for them.</p>
+<p>Some commands, e.g&#x2e; <a href="qftp.html#list">list</a>(), emit additional signals to report their results.</p>
 <p>Example: If you want to download the INSTALL file from Trolltech's FTP server, you would write this:</p>
 <pre> ftp-&gt;connectToHost(&quot;ftp.trolltech.com&quot;);  <span class="comment">// id == 1</span>
  ftp-&gt;login();                             <span class="comment">// id == 2</span>
@@ -139,7 +140,7 @@
  finished(5, false)
 
  done(false)</pre>
-<p>The <a href="qftp.html#dataTransferProgress">dataTransferProgress</a>() signal in the above example is useful if you want to show a <a href="qprogressbar.html">progressbar</a> to inform the user about the progress of the download. The <a href="qftp.html#readyRead">readyRead</a>() signal tells you that there is data ready to be read. The amount of data can be queried then with the <a href="qftp.html#bytesAvailable">bytesAvailable</a>() function and it can be read with the <a href="qftp.html#read">read</a>() or <a href="qftp.html#readAll">readAll</a>() function.</p>
+<p>The <a href="qftp.html#dataTransferProgress">dataTransferProgress</a>() signal in the above example is useful if you want to show a <a href="qprogressbar.html">progress bar</a> to inform the user about the progress of the download. The <a href="qftp.html#readyRead">readyRead</a>() signal tells you that there is data ready to be read. The amount of data can be queried then with the <a href="qftp.html#bytesAvailable">bytesAvailable</a>() function and it can be read with the <a href="qftp.html#read">read</a>() or <a href="qftp.html#readAll">readAll</a>() function.</p>
 <p>If the login fails for the above example, the signals would look like this:</p>
 <pre> start(1)
  stateChanged(HostLookup)
@@ -162,7 +163,7 @@
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Command-enum"></a>enum QFtp::Command</h3>
-<p>This enum is used as the return value for the <a href="qftp.html#currentCommand">currentCommand</a>() function. This allows you to perform specific actions for particular commands, e.g. in a FTP client, you might want to clear the directory view when a <a href="qftp.html#list">list</a>() command is started; in this case you can simply check in the slot connected to the start() signal if the <a href="qftp.html#currentCommand">currentCommand</a>() is <tt>List</tt>.</p>
+<p>This enum is used as the return value for the <a href="qftp.html#currentCommand">currentCommand</a>() function. This allows you to perform specific actions for particular commands, e.g&#x2e; in a FTP client, you might want to clear the directory view when a <a href="qftp.html#list">list</a>() command is started; in this case you can simply check in the slot connected to the start() signal if the <a href="qftp.html#currentCommand">currentCommand</a>() is <tt>List</tt>.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QFtp::None</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">No command is being executed.</td></tr>
@@ -228,7 +229,7 @@
 <p>Destructor.</p>
 <h3 class="fn"><a name="abort"></a>void QFtp::abort ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Aborts the current command and deletes all scheduled commands.</p>
-<p>If there is an unfinished command (i.e. a command for which the <a href="qftp.html#commandStarted">commandStarted</a>() signal has been emitted, but for which the <a href="qftp.html#commandFinished">commandFinished</a>() signal has not been emitted), this function sends an <tt>ABORT</tt> command to the server. When the server replies that the command is aborted, the <a href="qftp.html#commandFinished">commandFinished</a>() signal with the <tt>error</tt> argument set to <tt>true</tt> is emitted for the command. Due to timing issues, it is possible that the command had already finished before the abort request reached the server, in which case, the <a href="qftp.html#commandFinished">commandFinished</a>() signal is emitted with the <tt>error</tt> argument set to <tt>false</tt>.</p>
+<p>If there is an unfinished command (i.e&#x2e; a command for which the <a href="qftp.html#commandStarted">commandStarted</a>() signal has been emitted, but for which the <a href="qftp.html#commandFinished">commandFinished</a>() signal has not been emitted), this function sends an <tt>ABORT</tt> command to the server. When the server replies that the command is aborted, the <a href="qftp.html#commandFinished">commandFinished</a>() signal with the <tt>error</tt> argument set to <tt>true</tt> is emitted for the command. Due to timing issues, it is possible that the command had already finished before the abort request reached the server, in which case, the <a href="qftp.html#commandFinished">commandFinished</a>() signal is emitted with the <tt>error</tt> argument set to <tt>false</tt>.</p>
 <p>For all other commands that are affected by the abort(), no signals are emitted.</p>
 <p>If you don't start further FTP commands directly after the abort(), there won't be any scheduled commands and the <a href="qftp.html#done">done</a>() signal is emitted.</p>
 <p><b>Warning:</b> Some FTP servers, for example the BSD FTP daemon (version 0.3), wrongly return a positive reply even when an abort has occurred. For these servers the <a href="qftp.html#commandFinished">commandFinished</a>() signal has its error flag set to <tt>false</tt>, even though the command did not complete successfully.</p>
@@ -246,7 +247,7 @@
 <p>See also <a href="qftp.html#hasPendingCommands">hasPendingCommands</a>() and <a href="qftp.html#abort">abort</a>().</p>
 <h3 class="fn"><a name="close"></a>int QFtp::close ()</h3>
 <p>Closes the connection to the FTP server.</p>
-<p>The <a href="qftp.html#stateChanged">stateChanged</a>() signal is emitted when the state of the connecting process changes, e.g. to <tt>Closing</tt>, then <tt>Unconnected</tt>.</p>
+<p>The <a href="qftp.html#stateChanged">stateChanged</a>() signal is emitted when the state of the connecting process changes, e.g&#x2e; to <tt>Closing</tt>, then <tt>Unconnected</tt>.</p>
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qftp.html#commandStarted">commandStarted</a>() and <a href="qftp.html#commandFinished">commandFinished</a>().</p>
 <p>When the command is started the <a href="qftp.html#commandStarted">commandStarted</a>() signal is emitted. When it is finished the <a href="qftp.html#commandFinished">commandFinished</a>() signal is emitted.</p>
 <p>See also <a href="qftp.html#stateChanged">stateChanged</a>(), <a href="qftp.html#commandStarted">commandStarted</a>(), and <a href="qftp.html#commandFinished">commandFinished</a>().</p>
@@ -258,7 +259,7 @@
 <p>See also <a href="qftp.html#commandFinished">commandFinished</a>() and <a href="qftp.html#done">done</a>().</p>
 <h3 class="fn"><a name="connectToHost"></a>int QFtp::connectToHost ( const <a href="qstring.html">QString</a> &amp; <i>host</i>, <a href="qtglobal.html#quint16-typedef">quint16</a> <i>port</i> = 21 )</h3>
 <p>Connects to the FTP server <i>host</i> using port <i>port</i>.</p>
-<p>The <a href="qftp.html#stateChanged">stateChanged</a>() signal is emitted when the state of the connecting process changes, e.g. to <tt>HostLookup</tt>, then <tt>Connecting</tt>, then <tt>Connected</tt>.</p>
+<p>The <a href="qftp.html#stateChanged">stateChanged</a>() signal is emitted when the state of the connecting process changes, e.g&#x2e; to <tt>HostLookup</tt>, then <tt>Connecting</tt>, then <tt>Connected</tt>.</p>
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qftp.html#commandStarted">commandStarted</a>() and <a href="qftp.html#commandFinished">commandFinished</a>().</p>
 <p>When the command is started the <a href="qftp.html#commandStarted">commandStarted</a>() signal is emitted. When it is finished the <a href="qftp.html#commandFinished">commandFinished</a>() signal is emitted.</p>
 <p>See also <a href="qftp.html#stateChanged">stateChanged</a>(), <a href="qftp.html#commandStarted">commandStarted</a>(), and <a href="qftp.html#commandFinished">commandFinished</a>().</p>
@@ -290,7 +291,7 @@
 <p>Downloads the file <i>file</i> from the server.</p>
 <p>If <i>dev</i> is 0, then the <a href="qftp.html#readyRead">readyRead</a>() signal is emitted when there is data available to read. You can then read the data with the <a href="qftp.html#read">read</a>() or <a href="qftp.html#readAll">readAll</a>() functions.</p>
 <p>If <i>dev</i> is not 0, the data is written directly to the device <i>dev</i>. Make sure that the <i>dev</i> pointer is valid for the duration of the operation (it is safe to delete it when the <a href="qftp.html#commandFinished">commandFinished</a>() signal is emitted). In this case the <a href="qftp.html#readyRead">readyRead</a>() signal is <i>not</i> emitted and you cannot read data with the <a href="qftp.html#read">read</a>() or <a href="qftp.html#readAll">readAll</a>() functions.</p>
-<p>If you don't read the data immediately it becomes available, i.e. when the <a href="qftp.html#readyRead">readyRead</a>() signal is emitted, it is still available until the next command is started.</p>
+<p>If you don't read the data immediately it becomes available, i.e&#x2e; when the <a href="qftp.html#readyRead">readyRead</a>() signal is emitted, it is still available until the next command is started.</p>
 <p>For example, if you want to present the data to the user as soon as there is something available, connect to the <a href="qftp.html#readyRead">readyRead</a>() signal and read the data immediately. On the other hand, if you only want to work with the complete data, you can connect to the <a href="qftp.html#commandFinished">commandFinished</a>() signal and read the data when the get() command is finished.</p>
 <p>The data is transferred as Binary or Ascii depending on the value of <i>type</i>.</p>
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qftp.html#commandStarted">commandStarted</a>() and <a href="qftp.html#commandFinished">commandFinished</a>().</p>
@@ -312,7 +313,7 @@
 <p>See also <a href="qftp.html#list">list</a>().</p>
 <h3 class="fn"><a name="login"></a>int QFtp::login ( const <a href="qstring.html">QString</a> &amp; <i>user</i> = QString(), const <a href="qstring.html">QString</a> &amp; <i>password</i> = QString() )</h3>
 <p>Logs in to the FTP server with the username <i>user</i> and the password <i>password</i>.</p>
-<p>The <a href="qftp.html#stateChanged">stateChanged</a>() signal is emitted when the state of the connecting process changes, e.g. to <tt>LoggedIn</tt>.</p>
+<p>The <a href="qftp.html#stateChanged">stateChanged</a>() signal is emitted when the state of the connecting process changes, e.g&#x2e; to <tt>LoggedIn</tt>.</p>
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qftp.html#commandStarted">commandStarted</a>() and <a href="qftp.html#commandFinished">commandFinished</a>().</p>
 <p>When the command is started the <a href="qftp.html#commandStarted">commandStarted</a>() signal is emitted. When it is finished the <a href="qftp.html#commandFinished">commandFinished</a>() signal is emitted.</p>
 <p>See also <a href="qftp.html#commandStarted">commandStarted</a>() and <a href="qftp.html#commandFinished">commandFinished</a>().</p>
@@ -379,7 +380,7 @@
 <p>See also <a href="qftp.html#State-enum">State</a> and <a href="qftp.html#stateChanged">stateChanged</a>().</p>
 <h3 class="fn"><a name="stateChanged"></a>void QFtp::stateChanged ( int <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the state of the connection changes. The argument <i>state</i> is the new state of the connection; it is one of the <a href="qftp.html#State-enum">State</a> values.</p>
-<p>It is usually emitted in response to a <a href="qftp.html#connectToHost">connectToHost</a>() or <a href="qftp.html#close">close</a>() command, but it can also be emitted &quot;spontaneously&quot;, e.g. when the server closes the connection unexpectedly.</p>
+<p>It is usually emitted in response to a <a href="qftp.html#connectToHost">connectToHost</a>() or <a href="qftp.html#close">close</a>() command, but it can also be emitted &quot;spontaneously&quot;, e.g&#x2e; when the server closes the connection unexpectedly.</p>
 <p>See also <a href="qftp.html#connectToHost">connectToHost</a>(), <a href="qftp.html#close">close</a>(), <a href="qftp.html#state">state</a>(), and <a href="qftp.html#State-enum">State</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -391,6 +392,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

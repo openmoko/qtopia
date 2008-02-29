@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -35,6 +50,13 @@ static void qIterAppend(DBusMessageIter *it, QByteArray *ba, int type, const voi
 QDBusMarshaller::~QDBusMarshaller()
 {
     close();
+}
+
+inline QString QDBusMarshaller::currentSignature()
+{
+    if (message)
+        return QString::fromUtf8(dbus_message_get_signature(message));
+    return QString();
 }
 
 inline void QDBusMarshaller::append(uchar arg)
@@ -83,7 +105,7 @@ inline void QDBusMarshaller::append(double arg)
     qIterAppend(&iterator, ba, DBUS_TYPE_DOUBLE, &arg);
 }
 
-inline void QDBusMarshaller::append(const QString &arg)
+void QDBusMarshaller::append(const QString &arg)
 {
     QByteArray data = arg.toUtf8();
     const char *cdata = data.constData();
@@ -306,10 +328,23 @@ bool QDBusMarshaller::appendVariantInternal(const QVariant &arg)
     // intercept QDBusArgument parameters here
     if (id == qMetaTypeId<QDBusArgument>()) {
         QDBusArgument dbusargument = qvariant_cast<QDBusArgument>(arg);
-        QDBusDemarshaller *demarshaller = QDBusArgumentPrivate::demarshaller(dbusargument);
-        if (demarshaller)
-            return appendCrossMarshalling(demarshaller);
-        return false;
+        QDBusArgumentPrivate *d = QDBusArgumentPrivate::d(dbusargument);
+        if (!d->message)
+            return false;       // can't append this one...
+
+        QDBusDemarshaller demarshaller;
+        demarshaller.message = dbus_message_ref(d->message);
+
+        if (d->direction == Demarshalling) {
+            // it's demarshalling; just copy
+            demarshaller.iterator = static_cast<QDBusDemarshaller *>(d)->iterator;
+        } else {
+            // it's marshalling; start over
+            if (!dbus_message_iter_init(demarshaller.message, &demarshaller.iterator))
+                return false;   // error!
+        }
+
+        return appendCrossMarshalling(&demarshaller);
     }
 
     const char *signature = QDBusMetaType::typeToSignature( QVariant::Type(id) );

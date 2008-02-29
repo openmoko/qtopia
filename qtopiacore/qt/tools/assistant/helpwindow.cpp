@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -53,70 +68,52 @@
 #endif
 
 HelpWindow::HelpWindow(MainWindow *w, QWidget *parent)
-    : QTextBrowser(parent), mw(w), blockScroll(false),
-      shiftPressed(false), newWindow(false)
+    : QTextBrowser(parent)
+    , mw(w)
+    , blockScroll(false)
+    , shiftPressed(false)
+    , newWindow(false)
 {
-    QFont f = font();
-    f.setPointSizeF(Config::configuration()->fontPointSize());
-    setFont(f);
+    FontSettings settings = Config::configuration()->fontSettings();
+    setFont(settings.browserFont);
 }
 
 void HelpWindow::setSource(const QUrl &name)
 {
-    if (!name.isValid())
-        return;
-
-    shiftPressed = shiftPressed & hasFocus();
-
-    if (newWindow || shiftPressed) {
-        shiftPressed = false;
-        QTextCursor c = textCursor();
-        c.clearSelection();
-        setTextCursor(c);
-        mw->saveSettings();
-        MainWindow *nmw = new MainWindow;
-
-        nmw->setup();
-        nmw->showLink(name.toString());
-        nmw->move(mw->geometry().topLeft());
-        if (mw->isMaximized())
-            nmw->showMaximized();
-        else
-            nmw->show();
-        return;
-    }
-
-    if (name.scheme() == QLatin1String("http") || name.scheme() == QLatin1String("ftp") || name.scheme() == QLatin1String("mailto")
-        || name.path().endsWith(QLatin1String("pdf"))) {
-        bool launched = QDesktopServices::openUrl(name);
-        if (!launched) {
-            QMessageBox::information(mw, tr("Help"),
-                         tr("Unable to launch web browser.\n"),
-                         tr("Ok"));
-        }
-        return;
-    }
-
-    if (name.scheme() == QLatin1String("file")) {
-        QFileInfo fi(name.toLocalFile());
-        if (!fi.exists()) {
-            mw->statusBar()->showMessage(tr("Failed to open link: '%1'").arg(fi.absoluteFilePath()), 5000);
-            setHtml(tr("<div align=\"center\"><h1>The page could not be found</h1><br>"
-                "<h3>'%1'</h3></div>").arg(fi.absoluteFilePath()));
-            mw->browsers()->updateTitle(tr("Error..."));
+    if (name.isValid()) {
+        if (name.scheme() == QLatin1String("http") || name.scheme() == QLatin1String("ftp") 
+            || name.scheme() == QLatin1String("mailto") || name.path().endsWith(QLatin1String("pdf"))) {
+            bool launched = QDesktopServices::openUrl(name);
+            if (!launched) {
+                QMessageBox::information(mw, tr("Help"),
+                             tr("Unable to launch web browser.\n"),
+                             tr("OK"));
+            }
             return;
         }
 
-        /*
-        setHtml(QLatin1String("<body bgcolor=\"")
-            + palette().color(backgroundRole()).name()
-            + QLatin1String("\">"));
-            */
-
-        QTextBrowser::setSource(name);
-
-        return;
+        QFileInfo fi(name.toLocalFile());
+        if (name.scheme() == QLatin1String("file") && fi.exists()) {
+            if (newWindow || (shiftPressed && hasFocus())) {
+                shiftPressed = false;
+                mw->saveSettings();
+                MainWindow *nmw = new MainWindow;
+                nmw->move(mw->geometry().topLeft());
+                nmw->show();
+                
+                if (mw->isMaximized())
+                    nmw->showMaximized();
+                
+                nmw->setup();
+                nmw->showLink(name.toString());
+            } else {
+                QTextBrowser::setSource(name);
+                QTextBrowser::scrollToAnchor(name.fragment());
+            }
+            return;
+        }
     }
+
     mw->statusBar()->showMessage(tr("Failed to open link: '%1'").arg(name.toString()), 5000);
     setHtml(tr("<div align=\"center\"><h1>The page could not be found</h1><br>"
         "<h3>'%1'</h3></div>").arg(name.toString()));
@@ -182,6 +179,16 @@ void HelpWindow::contextMenuEvent(QContextMenuEvent *e)
 
 void HelpWindow::mouseReleaseEvent(QMouseEvent *e)
 {
+    if (e->button() == Qt::XButton1) {
+        QTextBrowser::backward();
+        return;
+    } 
+    
+    if (e->button() == Qt::XButton2) {
+        QTextBrowser::forward();
+        return;
+    }
+
     if (e->button() == Qt::MidButton && hasAnchorAt(e->pos())) {
         openLinkInNewPage();
         return;
@@ -203,7 +210,8 @@ void HelpWindow::ensureCursorVisible()
 void HelpWindow::mousePressEvent(QMouseEvent *e)
 {
     shiftPressed = e->modifiers() & Qt::ShiftModifier;
-    QTextBrowser::mousePressEvent(e);
+    if (!(shiftPressed && hasAnchorAt(e->pos())))
+        QTextBrowser::mousePressEvent(e);
 }
 
 void HelpWindow::keyPressEvent(QKeyEvent *e)

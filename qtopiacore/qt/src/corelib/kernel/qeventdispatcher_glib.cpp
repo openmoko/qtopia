@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -131,9 +146,7 @@ static gboolean timerSourceCheck(GSource *source)
     if (src->timerList.isEmpty())
         return false;
 
-    timeval currentTime;
-    getTime(currentTime);
-    if (currentTime < src->timerList.first()->timeout)
+    if (src->timerList.updateCurrentTime() < src->timerList.first()->timeout)
         return false;
 
     return true;
@@ -141,61 +154,7 @@ static gboolean timerSourceCheck(GSource *source)
 
 static gboolean timerSourceDispatch(GSource *source, GSourceFunc, gpointer)
 {
-    GTimerSource *src = reinterpret_cast<GTimerSource *>(source);
-
-    bool first = true;
-    timeval currentTime;
-    int n_act = 0, maxCount = src->timerList.size();
-    QTimerInfo *begin = 0;
-
-    while (maxCount--) {
-        getTime(currentTime);
-        if (first) {
-            src->timerList.updateWatchTime(currentTime);
-            first = false;
-        }
-
-        if (src->timerList.isEmpty())
-            break;
-        QTimerInfo *t = src->timerList.first();
-        if (currentTime < t->timeout)
-            break; // no timer has expired
-
-        if (!begin) {
-            begin = t;
-        } else if (begin == t) {
-            // avoid sending the same timer multiple times
-            break;
-        } else if (t->interval <  begin->interval || t->interval == begin->interval) {
-            begin = t;
-        }
-
-        // remove from list
-        src->timerList.removeFirst();
-        t->timeout += t->interval;
-        if (t->timeout < currentTime)
-            t->timeout = currentTime + t->interval;
-
-        // reinsert timer
-        src->timerList.timerInsert(t);
-        if (t->interval.tv_usec > 0 || t->interval.tv_sec > 0)
-            n_act++;
-
-        if (!t->inTimerEvent) {
-            // send event, but don't allow it to recurse
-            t->inTimerEvent = true;
-
-            QTimerEvent e(t->id);
-            QCoreApplication::sendEvent(t->obj, &e);
-
-            if (src->timerList.contains(t))
-                t->inTimerEvent = false;
-        }
-
-        if (!src->timerList.contains(begin))
-            begin = 0;
-    }
-
+    (void) reinterpret_cast<GTimerSource *>(source)->timerList.activateTimers();
     return true; // ??? don't remove, right again?
 }
 
@@ -261,17 +220,24 @@ static GSourceFuncs postEventSourceFuncs = {
 };
 
 
-QEventDispatcherGlibPrivate::QEventDispatcherGlibPrivate()
+QEventDispatcherGlibPrivate::QEventDispatcherGlibPrivate(GMainContext *context)
+    : mainContext(context)
 {
-    if (!g_thread_supported())
-        g_thread_init(NULL);
+    if (qgetenv("QT_NO_THREADED_GLIB").isEmpty()) {
+        if (!g_thread_supported())
+            g_thread_init(NULL);
+    }
 
-    QCoreApplication *app = QCoreApplication::instance();
-    if (app && QThread::currentThread() == app->thread()) {
-        mainContext = g_main_context_default();
+    if (mainContext) {
         g_main_context_ref(mainContext);
     } else {
-        mainContext = g_main_context_new();
+        QCoreApplication *app = QCoreApplication::instance();
+	if (app && QThread::currentThread() == app->thread()) {
+	    mainContext = g_main_context_default();
+	    g_main_context_ref(mainContext);
+	} else {
+	    mainContext = g_main_context_new();
+	}
     }
 
     postEventSource = reinterpret_cast<GPostEventSource *>(g_source_new(&postEventSourceFuncs,
@@ -314,6 +280,13 @@ QEventDispatcherGlib::QEventDispatcherGlib(QObject *parent)
 {
 }
 
+QEventDispatcherGlib::QEventDispatcherGlib(GMainContext *mainContext,
+					   QObject *parent)
+    : QAbstractEventDispatcher(*(new QEventDispatcherGlibPrivate(mainContext)),
+			       parent)
+{
+}
+
 QEventDispatcherGlib::~QEventDispatcherGlib()
 {
     Q_D(QEventDispatcherGlib);
@@ -347,6 +320,7 @@ QEventDispatcherGlib::~QEventDispatcherGlib()
     g_source_unref(&d->postEventSource->source);
     d->postEventSource = 0;
 
+    Q_ASSERT(d->mainContext != 0);
     g_main_context_unref(d->mainContext);
     d->mainContext = 0;
 }
@@ -379,22 +353,22 @@ bool QEventDispatcherGlib::hasPendingEvents()
     return g_main_context_pending(d->mainContext);
 }
 
-void QEventDispatcherGlib::registerSocketNotifier(QSocketNotifier *socketNotifier)
+void QEventDispatcherGlib::registerSocketNotifier(QSocketNotifier *notifier)
 {
-    int sockfd;
-    int type;
-    if (!socketNotifier
-        || (sockfd = socketNotifier->socket()) < 0
-        || unsigned(sockfd) >= FD_SETSIZE
-        || (type = socketNotifier->type()) < 0
-        || type > 2) {
+    Q_ASSERT(notifier);
+    int sockfd = notifier->socket();
+    int type = notifier->type();
+#ifndef QT_NO_DEBUG
+    if (sockfd < 0
+        || unsigned(sockfd) >= FD_SETSIZE) {
         qWarning("QSocketNotifier: Internal error");
         return;
-    } else if (socketNotifier->thread() != thread()
+    } else if (notifier->thread() != thread()
                || thread() != QThread::currentThread()) {
         qWarning("QSocketNotifier: socket notifiers cannot be enabled from another thread");
         return;
     }
+#endif
 
     Q_D(QEventDispatcherGlib);
 
@@ -412,35 +386,34 @@ void QEventDispatcherGlib::registerSocketNotifier(QSocketNotifier *socketNotifie
         p->pollfd.events = G_IO_PRI | G_IO_ERR;
         break;
     }
-    p->socketNotifier = socketNotifier;
+    p->socketNotifier = notifier;
 
     d->socketNotifierSource->pollfds.append(p);
 
     g_source_add_poll(&d->socketNotifierSource->source, &p->pollfd);
 }
 
-void QEventDispatcherGlib::unregisterSocketNotifier(QSocketNotifier *socketNotifier)
+void QEventDispatcherGlib::unregisterSocketNotifier(QSocketNotifier *notifier)
 {
-    int sockfd;
-    int type;
-    if (!socketNotifier
-        || (sockfd = socketNotifier->socket()) < 0
-        || unsigned(sockfd) >= FD_SETSIZE
-        || (type = socketNotifier->type()) < 0
-        || type > 2) {
+    Q_ASSERT(notifier);
+#ifndef QT_NO_DEBUG
+    int sockfd = notifier->socket();
+    if (sockfd < 0
+        || unsigned(sockfd) >= FD_SETSIZE) {
         qWarning("QSocketNotifier: Internal error");
         return;
-    } else if (socketNotifier->thread() != thread()
+    } else if (notifier->thread() != thread()
                || thread() != QThread::currentThread()) {
         qWarning("QSocketNotifier: socket notifiers cannot be disabled from another thread");
         return;
     }
+#endif
 
     Q_D(QEventDispatcherGlib);
 
     for (int i = 0; i < d->socketNotifierSource->pollfds.count(); ++i) {
         GPollFDWithQSocketNotifier *p = d->socketNotifierSource->pollfds.at(i);
-        if (p->socketNotifier == socketNotifier) {
+        if (p->socketNotifier == notifier) {
             // found it
             g_source_remove_poll(&d->socketNotifierSource->source, &p->pollfd);
 
@@ -454,6 +427,7 @@ void QEventDispatcherGlib::unregisterSocketNotifier(QSocketNotifier *socketNotif
 
 void QEventDispatcherGlib::registerTimer(int timerId, int interval, QObject *object)
 {
+#ifndef QT_NO_DEBUG
     if (timerId < 1 || interval < 0 || !object) {
         qWarning("QEventDispatcherUNIX::registerTimer: invalid arguments");
         return;
@@ -461,24 +435,15 @@ void QEventDispatcherGlib::registerTimer(int timerId, int interval, QObject *obj
         qWarning("QObject::startTimer: timers cannot be started from another thread");
         return;
     }
+#endif
 
     Q_D(QEventDispatcherGlib);
-
-    QTimerInfo *t = new QTimerInfo;
-    t->id = timerId;
-    t->interval.tv_sec  = interval / 1000;
-    t->interval.tv_usec = (interval % 1000) * 1000;
-    timeval currentTime;
-    getTime(currentTime);
-    t->timeout = currentTime + t->interval;
-    t->obj = object;
-    t->inTimerEvent = false;
-
-    d->timerSource->timerList.timerInsert(t);
+    d->timerSource->timerList.registerTimer(timerId, interval, object);
 }
 
 bool QEventDispatcherGlib::unregisterTimer(int timerId)
 {
+#ifndef QT_NO_DEBUG
     if (timerId < 1) {
         qWarning("QEventDispatcherUNIX::unregisterTimer: invalid argument");
         return false;
@@ -486,23 +451,15 @@ bool QEventDispatcherGlib::unregisterTimer(int timerId)
         qWarning("QObject::killTimer: timers cannot be stopped from another thread");
         return false;
     }
+#endif
 
     Q_D(QEventDispatcherGlib);
-    // set timer inactive
-    for (int i = 0; i < d->timerSource->timerList.size(); ++i) {
-        register QTimerInfo *t = d->timerSource->timerList.at(i);
-        if (t->id == timerId) {
-            d->timerSource->timerList.removeAt(i);
-            delete t;
-            return true;
-        }
-    }
-    // id not found
-    return false;
+    return d->timerSource->timerList.unregisterTimer(timerId);
 }
 
 bool QEventDispatcherGlib::unregisterTimers(QObject *object)
 {
+#ifndef QT_NO_DEBUG
     if (!object) {
         qWarning("QEventDispatcherUNIX::unregisterTimers: invalid argument");
         return false;
@@ -510,21 +467,10 @@ bool QEventDispatcherGlib::unregisterTimers(QObject *object)
         qWarning("QObject::killTimers: timers cannot be stopped from another thread");
         return false;
     }
+#endif
 
     Q_D(QEventDispatcherGlib);
-    if (d->timerSource->timerList.isEmpty())
-        return false;
-    for (int i = 0; i < d->timerSource->timerList.size(); ++i) {
-        register QTimerInfo *t = d->timerSource->timerList.at(i);
-        if (t->obj == object) {
-            // object found
-            d->timerSource->timerList.removeAt(i);
-            delete t;
-            // move back one so that we don't skip the new current item
-            --i;
-        }
-    }
-    return true;
+    return d->timerSource->timerList.unregisterTimers(object);
 }
 
 QList<QEventDispatcherGlib::TimerInfo> QEventDispatcherGlib::registeredTimers(QObject *object) const
@@ -535,13 +481,7 @@ QList<QEventDispatcherGlib::TimerInfo> QEventDispatcherGlib::registeredTimers(QO
     }
 
     Q_D(const QEventDispatcherGlib);
-    QList<TimerInfo> list;
-    for (int i = 0; i < d->timerSource->timerList.size(); ++i) {
-        register const QTimerInfo * const t = d->timerSource->timerList.at(i);
-        if (t->obj == object)
-            list << TimerInfo(t->id, t->interval.tv_sec * 1000 + t->interval.tv_usec / 1000);
-    }
-    return list;
+    return d->timerSource->timerList.registeredTimers(object);
 }
 
 void QEventDispatcherGlib::interrupt()
@@ -558,6 +498,15 @@ void QEventDispatcherGlib::wakeUp()
 
 void QEventDispatcherGlib::flush()
 {
+}
+
+bool QEventDispatcherGlib::versionSupported()
+{
+#if !defined(GLIB_MAJOR_VERSION) || !defined(GLIB_MINOR_VERSION) || !defined(GLIB_MICRO_VERSION)
+    return false;
+#else
+    return ((GLIB_MAJOR_VERSION << 16) + (GLIB_MINOR_VERSION << 8) + GLIB_MICRO_VERSION) >= 0x020301;
+#endif
 }
 
 QEventDispatcherGlib::QEventDispatcherGlib(QEventDispatcherGlibPrivate &dd, QObject *parent)

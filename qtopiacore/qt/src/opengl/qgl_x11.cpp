@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,8 +47,12 @@
 #include "qhash.h"
 #include "qlibrary.h"
 #include "qdebug.h"
-#include <private/qfontengine_p.h>
+#include <private/qfontengine_ft_p.h>
 #include <private/qt_x11_p.h>
+#ifdef Q_OS_HPUX
+// for GLXPBuffer
+#include <private/qglpixelbuffer_p.h>
+#endif
 
 #define INT8  dummy_INT8
 #define INT32 dummy_INT32
@@ -238,16 +257,18 @@ static void find_trans_colors()
         int actualFormat;
         ulong nItems;
         ulong bytesAfter;
-        OverlayProp* overlayProps = 0;
+        unsigned char *retval = 0;
         int res = XGetWindowProperty(appDisplay, rootWin->winId(),
                                       overlayVisualsAtom, 0, 10000, False,
                                       overlayVisualsAtom, &actualType,
                                       &actualFormat, &nItems, &bytesAfter,
-                                      (uchar**)&overlayProps);
+                                      &retval);
 
         if (res != Success || actualType != overlayVisualsAtom
-             || actualFormat != 32 || nItems < 4 || !overlayProps)
+             || actualFormat != 32 || nItems < 4 || !retval)
             return;                                        // Error reading property
+
+        OverlayProp *overlayProps = (OverlayProp *)retval;
 
         int numProps = nItems / 4;
         trans_colors.resize(lastsize + numProps);
@@ -365,23 +386,31 @@ bool QGLContext::chooseContext(const QGLContext* shareContext)
     // 1. Sharing between rgba and color-index will give wrong colors.
     // 2. Contexts cannot be shared btw. direct/non-direct renderers.
     // 3. Pixmaps cannot share contexts that are set up for direct rendering.
-    if (shareContext && (format().rgba() != shareContext->format().rgba() ||
-                          (deviceIsPixmap() &&
-                           glXIsDirect(disp, (GLXContext)shareContext->d_func()->cx))))
+    // 4. If the contexts are not created on the same screen, they can't be shared
+
+    if (shareContext
+        && (format().rgba() != shareContext->format().rgba()
+            || (deviceIsPixmap() && glXIsDirect(disp, (GLXContext)shareContext->d_func()->cx))
+            || (shareContext->d_func()->screen != xinfo->screen())))
+    {
         shareContext = 0;
+    }
 
     d->cx = 0;
     if (shareContext) {
         d->cx = glXCreateContext(disp, (XVisualInfo *)d->vi,
                                (GLXContext)shareContext->d_func()->cx, direct);
+        d->screen = ((XVisualInfo*)d->vi)->screen;
         if (d->cx) {
             QGLContext *share = const_cast<QGLContext *>(shareContext);
             d->sharing = true;
             share->d_func()->sharing = true;
         }
     }
-    if (!d->cx)
+    if (!d->cx) {
         d->cx = glXCreateContext(disp, (XVisualInfo *)d->vi, NULL, direct);
+        d->screen = ((XVisualInfo*)d->vi)->screen;
+    }
     if (!d->cx)
         return false;
     d->glFormat.setDirectRendering(glXIsDirect(disp, (GLXContext)d->cx));
@@ -617,15 +646,15 @@ void QGLContext::makeCurrent()
     }
     const QX11Info *xinfo = qt_x11Info(d->paintDevice);
     bool ok = true;
-    if (deviceIsPixmap())
+    if (d->paintDevice->devType() == QInternal::Pixmap) {
         ok = glXMakeCurrent(xinfo->display(), (GLXPixmap)d->gpm, (GLXContext)d->cx);
-
-    else
-        ok = glXMakeCurrent(xinfo->display(), ((QWidget *)d->paintDevice)->winId(),
-                             (GLXContext)d->cx);
+    } else if (d->paintDevice->devType() == QInternal::Pbuffer) {
+        ok = glXMakeCurrent(xinfo->display(), (GLXPbuffer)d->pbuf, (GLXContext)d->cx);
+    } else if (d->paintDevice->devType() == QInternal::Widget) {
+        ok = glXMakeCurrent(xinfo->display(), ((QWidget *)d->paintDevice)->winId(), (GLXContext)d->cx);
+    }
     if (!ok)
         qWarning("QGLContext::makeCurrent(): Failed.");
-
 
     if (ok) {
         if (!qgl_context_storage.hasLocalData() && QThread::currentThread())
@@ -658,34 +687,19 @@ void QGLContext::swapBuffers() const
 
 QColor QGLContext::overlayTransparentColor() const
 {
-    Q_D(const QGLContext);
-    if (isValid()) {
-        if (!trans_colors_init)
-            find_trans_colors();
-
-        VisualID myVisualId = ((XVisualInfo*)d->vi)->visualid;
-        int myScreen = ((XVisualInfo*)d->vi)->screen;
-        for (int i = 0; i < (int)trans_colors.size(); i++) {
-            if (trans_colors[i].vis == myVisualId &&
-                 trans_colors[i].screen == myScreen) {
-                XColor col;
-                col.pixel = trans_colors[i].color;
-                col.red = col.green = col.blue = 0;
-                col.flags = 0;
-                Display *dpy = qt_x11Info(d->paintDevice)->display();
-                if (col.pixel > (uint) ((XVisualInfo *)d->vi)->colormap_size - 1)
-                    col.pixel = ((XVisualInfo *)d->vi)->colormap_size - 1;
-                XQueryColor(dpy, choose_cmap(dpy, (XVisualInfo *) d->vi), &col);
-                uchar r = (uchar)((col.red / 65535.0) * 255.0 + 0.5);
-                uchar g = (uchar)((col.green / 65535.0) * 255.0 + 0.5);
-                uchar b = (uchar)((col.blue / 65535.0) * 255.0 + 0.5);
-                return QColor(qRgb(r,g,b));
-            }
-        }
-    }
+    if (isValid())
+        return Qt::transparent;
     return QColor();                // Invalid color
 }
 
+static uint qt_transparent_pixel(VisualID id, int screen)
+{
+    for (int i = 0; i < trans_colors.size(); i++) {
+        if (trans_colors[i].vis == id && trans_colors[i].screen == screen)
+            return trans_colors[i].color;
+    }
+    return 0;
+}
 
 uint QGLContext::colorIndex(const QColor& c) const
 {
@@ -693,9 +707,10 @@ uint QGLContext::colorIndex(const QColor& c) const
     int screen = ((XVisualInfo *)d->vi)->screen;
     QColormap colmap = QColormap::instance(screen);
     if (isValid()) {
-        if (format().plane()
-             && colmap.pixel(c) == colmap.pixel(overlayTransparentColor()))
-            return colmap.pixel(c);                // Special; don't look-up
+        if (format().plane() && c == Qt::transparent) {
+            return qt_transparent_pixel(((XVisualInfo *)d->vi)->visualid,
+                                        ((XVisualInfo *)d->vi)->screen);
+        }
         if (((XVisualInfo*)d->vi)->visualid ==
              XVisualIDFromVisual((Visual *) QX11Info::appVisual(screen)))
             return colmap.pixel(c);                // We're using QColor's cmap
@@ -777,8 +792,7 @@ static void qgl_use_font(QFontEngineFT *engine, int first, int count, int listBa
     glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    FcBool antialiased = True;
-    FcPatternGetBool(engine->pattern(), FC_ANTIALIAS, 0, &antialiased);
+    const bool antialiased = engine->drawAntialiased();
     FT_Face face = engine->lockFace();
 
     // start generating font glyphs
@@ -892,7 +906,8 @@ void *QGLContext::getProcAddress(const QString &proc) const
     if (!glXGetProcAddressARB) {
         QString glxExt = QString(QLatin1String(glXGetClientString(QX11Info::display(), GLX_EXTENSIONS)));
         if (glxExt.contains(QLatin1String("GLX_ARB_get_proc_address"))) {
-            QLibrary lib(QLatin1String("GL"));
+            extern const QString qt_gl_library_name();
+            QLibrary lib(qt_gl_library_name());
             glXGetProcAddressARB = (qt_glXGetProcAddressARB) lib.resolve("glXGetProcAddressARB");
         }
         resolved = true;
@@ -1040,12 +1055,18 @@ void QGLWidgetPrivate::cleanupColormaps()
 /*! \reimp */
 bool QGLWidget::event(QEvent *e)
 {
+    Q_D(QGLWidget);
     // prevents X errors on some systems, where we get a flush to a
     // hidden widget
     if (e->type() == QEvent::Hide) {
         makeCurrent();
         glFinish();
         doneCurrent();
+    } else if (e->type() == QEvent::ParentChange) {
+        if (d->glcx->d_func()->screen != d->xinfo.screen()) {
+            setContext(new QGLContext(d->glcx->requestedFormat(), this));
+            // ### recreating the overlay isn't supported atm
+        }
     }
 
     return QWidget::event(e);
@@ -1125,6 +1146,14 @@ void QGLWidget::setContext(QGLContext *context,
         d->glcx->doneCurrent();
     QGLContext* oldcx = d->glcx;
     d->glcx = context;
+
+
+    if (parentWidget()) {
+        // force creation of delay-created widgets
+        parentWidget()->winId();
+        if (parentWidget()->x11Info().screen() != x11Info().screen())
+            d_func()->xinfo = parentWidget()->d_func()->xinfo;
+    }
 
     bool createFailed = false;
     if (!d->glcx->isValid()) {
@@ -1346,4 +1375,13 @@ void QGLExtensions::init()
     QGLWidget dmy;
     dmy.makeCurrent();
     init_extensions();
+
+    // nvidia 9x.xx unix drivers contain a bug which requires us to call glFinish before releasing an fbo
+    // to avoid painting artifacts
+    const QByteArray versionString(reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+    const int pos = versionString.indexOf("NVIDIA");
+    if (pos >= 0) {
+        const float nvidiaDriverVersion = versionString.mid(pos + strlen("NVIDIA")).toFloat();
+        nvidiaFboNeedsFinish = nvidiaDriverVersion >= 90.0 && nvidiaDriverVersion < 100.0;
+    }
 }

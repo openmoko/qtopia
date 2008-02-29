@@ -109,7 +109,7 @@
         CannonController::CannonController(QObject *parent)
             : QtopiaIpcAdaptor(&quot;QPE/CannonExample&quot;, parent)
         {
-            publishAll(SignalsAndSlots);
+            publishAll(QtopiaIpcAdaptor::SignalsAndSlots);
         }
 
         void CannonController::missed()
@@ -248,7 +248,7 @@
 <li>setDocument(<a href="qstring.html">QString</a>) -- Internal. Causes the setDocument(const <a href="qstring.html">QString</a>&amp;) slot of <a href="docwidget.html">the main document widget</a> be called.</li>
 <li>nextView() -- Applications connected to hardware buttons will receive this message if they are already visible.</li>
 <li>raise() -- Internal. Causes the the main document widget and the current modal widget to be raised.</li>
-<li>quit() -- Internal. Terminates the application.</li>
+<li><a href="qtopiadesktop/qdsync-quit-1.html">quit</a>() -- Internal. Terminates the application.</li>
 <li>quitIfInvisible() -- Internal. Terminates the application if it is not shown.</li>
 </ul>
 <p>The <b>QPE/Application/<i>appname</i></b> channel has a special property: when messages are sent to these channels via <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a>, the message is delivered even if the application is not yet running (the application is run and the message is then sent).</p>
@@ -289,6 +289,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

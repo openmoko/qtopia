@@ -20,7 +20,7 @@ SipTransaction::SipTransaction( unsigned int seqn, SipCallMember *farend, SipCal
 	branch.sprintf( "z9hG4bK%X", uniqid );
 	cancelled = false;
 	timer_202 = new QTimer( this );
-	connect( timer_202, SIGNAL( timeout() ), this, SLOT( send_202() ) );
+	connect( timer_202, SIGNAL(timeout()), this, SLOT(send_202()) );
 }
 
 SipTransaction::~SipTransaction( void )

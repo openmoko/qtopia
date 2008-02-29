@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,7 +32,6 @@
 #include <qtopiaapplication.h>
 #include <qpluginmanager.h>
 #include <qapplicationplugin.h>
-#include <perftest.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -57,9 +56,6 @@ bool QuickLauncher::validExitLoop = false;
 bool QuickLauncher::needsInit = false;
 QEventLoop *QuickLauncher::eventLoop = 0;
 
-char **QuickLauncher::argv0 = 0;
-int QuickLauncher::argv_lth;
-
 #if defined(QTOPIA_DBUS_IPC)
 // For quicklaunched apps
 class WaitForRaiseTask : public QObject
@@ -76,7 +72,16 @@ WaitForRaiseTask::WaitForRaiseTask(QObject *parent) : QObject(parent)
 }
 #endif
 
-#ifdef Q_OS_LINUX
+#if defined(QTOPIA_SETPROC_PRCTL)
+#include <sys/prctl.h>
+void setproctitle( const char *name )
+{
+    int ret = prctl(PR_SET_NAME, (unsigned long)name, 0, 0, 0);
+    Q_ASSERT(ret == 0);
+}
+#elif defined(QTOPIA_SETPROC_ARGV0)
+char **QuickLauncher::argv0 = 0;
+int QuickLauncher::argv_lth;
 extern char **environ;
 #ifndef SPT_BUFSIZE
 #define SPT_BUFSIZE     2048
@@ -104,6 +109,9 @@ void setproctitle (const char *fmt,...) {
 
     QuickLauncher::argv0[1] = NULL;
 }
+#else
+// No implementation for setproctitle, create an empty stub
+void setproctitle(const char *){}
 #endif
 
 // ====================================================================
@@ -141,8 +149,8 @@ QuickLauncher::QuickLauncher()
     QString ch("QPE/QuickLauncher-");
     ch += QString::number(::getpid());
     qlChannel = new QtopiaChannel( ch, this);
-    connect( qlChannel, SIGNAL(received(const QString&,const QByteArray&)),
-             this, SLOT(message(const QString&,const QByteArray&)) );
+    connect( qlChannel, SIGNAL(received(QString,QByteArray)),
+             this, SLOT(message(QString,QByteArray)) );
     QtopiaIpcEnvelope env("QPE/QuickLauncher", "available(int)");
     env << ::getpid();
 }
@@ -155,7 +163,7 @@ void QuickLauncher::exec( int argc, char **argv )
     if ( sep > 0 )
         appName = appName.mid( sep+1 );
 
-    QPerformanceLog(appName.toLatin1().constData()) << "Starting quicklauncher exec";
+    QPerformanceLog(appName) << QPerformanceLog::Begin << "quicklauncher main";
 
     if ( needsInit ) {
         needsInit = false;
@@ -167,13 +175,23 @@ void QuickLauncher::exec( int argc, char **argv )
 #endif
 
 #ifndef SINGLE_EXEC
-    QPerformanceLog(appName.toLatin1().constData()) << "Before loading libraries ";
+    QPerformanceLog(appName) << (QPerformanceLog::Begin|QPerformanceLog::LibraryLoading);
 #ifndef QT_NO_SXE
     // loader invokes the constructor - need to clear the key before this
     guaranteed_memset( _key, 0, QSXE_KEY_LEN );
+    SxeProgramInfo bin;
+    bin.fileName = appName;
+    if ( !bin.fileName.endsWith( ".so" ))
+        bin.fileName.append( ".so" );
+    if ( !bin.fileName.startsWith( "lib" ))
+        bin.fileName.prepend( "lib" );
+    if ( bin.locateBinary() )
+        bin.suid();
+    else
+        qWarning( "Could not find app for suid: %s", qPrintable( appName ));
 #endif
     appInstance = loader->instance(appName);
-    QPerformanceLog(appName.toLatin1().constData()) << "After loading libraries";
+    QPerformanceLog(appName) << (QPerformanceLog::End|QPerformanceLog::LibraryLoading);
     appIface = qobject_cast<QApplicationFactoryInterface*>(appInstance);
     if ( !appIface ) {
         qWarning("%s: cannot load application: %s", (const char*) QFile::encodeName(appName),
@@ -183,9 +201,9 @@ void QuickLauncher::exec( int argc, char **argv )
 #ifndef QT_NO_SXE
     appIface->setProcessKey( appName );
 #endif
-    QPerformanceLog(appName.toLatin1().constData()) << "Before creating main window";
+    QPerformanceLog(appName) << (QPerformanceLog::Begin|QPerformanceLog::MainWindow);
     mainWindow = appIface->createMainWindow( appName );
-    QPerformanceLog(appName.toLatin1().constData()) << "After creating main window";
+    QPerformanceLog(appName) << (QPerformanceLog::End|QPerformanceLog::MainWindow);
 #else
     if ( qpeAppMap()->contains(appName) ) {
         mainWindow = (*qpeAppMap())[appName](0, 0);
@@ -245,10 +263,8 @@ void QuickLauncher::doQuickLaunch( QStringList &argList )
         strcpy( myargv[j], argList.at(j).toLocal8Bit().constData() );
     }
     myargv[myargc] = NULL;
-#ifdef Q_OS_LINUX
     // Change name of process
     setproctitle(myargv[0]);
-#endif
 
     validExitLoop = true;
     needsInit = true;

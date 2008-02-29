@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -36,21 +51,27 @@
 //
 
 #include "QtGui/qlayoutitem.h"
+#include "QtGui/qstyle.h"
 
 template <typename T> class QVector;
 
 struct QLayoutStruct
 {
-    inline void init(int stretchFactor = 0, int spacing = 0) {
+    inline void init(int stretchFactor = 0, int minSize = 0) {
         stretch = stretchFactor;
-        minimumSize = sizeHint = spacing;
+        minimumSize = sizeHint = minSize;
         maximumSize = QLAYOUTSIZE_MAX;
         expansive = false;
         empty = true;
+        spacing = 0;
     }
 
     int smartSizeHint() {
         return (stretch > 0) ? minimumSize : sizeHint;
+    }
+    int effectiveSpacer(int uniformSpacer) const {
+        Q_ASSERT(uniformSpacer >= 0 || spacing >= 0);
+        return (uniformSpacer >= 0) ? uniformSpacer : spacing;
     }
 
     // parameters
@@ -60,6 +81,7 @@ struct QLayoutStruct
     int minimumSize;
     bool expansive;
     bool empty;
+    int spacing;
 
     // temporary storage
     bool done;
@@ -71,12 +93,19 @@ struct QLayoutStruct
 
 
 Q_GUI_EXPORT void qGeomCalc(QVector<QLayoutStruct> &chain, int start, int count,
-                         int pos, int space, int spacer);
+                            int pos, int space, int spacer = -1);
+Q_GUI_EXPORT QSize qSmartMinSize(const QSize &sizeHint, const QSize &minSizeHint,
+                                 const QSize &minSize, const QSize &maxSize,
+                                 const QSizePolicy &sizePolicy);
 Q_GUI_EXPORT QSize qSmartMinSize(const QWidgetItem *i);
 Q_GUI_EXPORT QSize qSmartMinSize(const QWidget *w);
+Q_GUI_EXPORT QSize qSmartMaxSize(const QSize &sizeHint,
+                                 const QSize &minSize, const QSize &maxSize,
+                                 const QSizePolicy &sizePolicy, Qt::Alignment align = 0);
 Q_GUI_EXPORT QSize qSmartMaxSize(const QWidgetItem *i, Qt::Alignment align = 0);
 Q_GUI_EXPORT QSize qSmartMaxSize(const QWidget *w, Qt::Alignment align = 0);
 
+int qSmartSpacing(const QLayout *layout, QStyle::PixelMetric pm);
 
 /*
   Modify total maximum (max), total expansion (exp), and total empty

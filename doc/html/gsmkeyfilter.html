@@ -45,6 +45,7 @@
 <li><div class="fn"/>void <b><a href="gsmkeyfilter.html#join">join</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="gsmkeyfilter.html#release">release</a></b> ( int <i>call</i> )</li>
 <li><div class="fn"/>void <b><a href="gsmkeyfilter.html#releaseActive">releaseActive</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="gsmkeyfilter.html#releaseAllAcceptIncoming">releaseAllAcceptIncoming</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="gsmkeyfilter.html#releaseHeld">releaseHeld</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="gsmkeyfilter.html#setBusy">setBusy</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="gsmkeyfilter.html#swap">swap</a></b> ()</li>
@@ -79,6 +80,7 @@
 <tr valign="top" class="even"><td><tt>4*n SEND</tt></td><td>Deflect the waiting call to the number <tt>n</tt>.</td></tr>
 </table></p>
 <p>Additional actions can be added with <a href="gsmkeyfilter.html#addAction">addAction</a>().</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="flags"><a name="Flag-enum"></a>enum GsmKeyFilter::Flag<br />flags GsmKeyFilter::Flags</h3>
@@ -139,6 +141,8 @@
 <p>Signal that is emitted when the <tt>1X SEND</tt> key sequence is encountered while on a call, where <tt>X</tt> is the <i>call</i> identifier. This will release the indicated call.</p>
 <h3 class="fn"><a name="releaseActive"></a>void GsmKeyFilter::releaseActive ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the <tt>1 SEND</tt> key sequence is encountered while on a call. This will release the active calls, and accept the waiting call if there is one.</p>
+<h3 class="fn"><a name="releaseAllAcceptIncoming"></a>void GsmKeyFilter::releaseAllAcceptIncoming ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signal that is emitted when the <tt>1 SEND</tt> key sequence is encountered when there is an incoming call but no active calls. This will accept the incoming call.</p>
 <h3 class="fn"><a name="releaseHeld"></a>void GsmKeyFilter::releaseHeld ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the <tt>0 SEND</tt> key sequence is encountered while on a call and there is no incoming waiting call. This will release the held calls, if any.</p>
 <h3 class="fn"><a name="setBusy"></a>void GsmKeyFilter::setBusy ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -151,6 +155,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

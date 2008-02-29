@@ -1,36 +1,26 @@
 #!/bin/sh
 
-# This flash script updates the Greenphone with a new Qtopia image,
-# by running trolltech_flash.sh in the update image.
+# This script updates the Greenphone with a new Qtopia image
 
 usage()
 {
     echo "Usage: $0 [options] <Qtopia image>"
-    echo "    --remove-flash-files    Remove flash files after upgrade"
-    echo "    --dont-reboot           Don't automatically reboot after upgrade"
-    echo "    --ignore-firstrun       Ignore firstrun file and always flash"
+    echo "    --force-flash           Force a reflash even if it is detected that the"
+    echo "                            installed image is the same as the update image"
     echo "    --no-questions          Don't ask any questions"
 }
 
 export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
 
 # Process command line options
-OPTION_REMOVE_FLASH_FILES=0
-OPTION_DONT_REBOOT=0
-OPTION_IGNORE_FIRSTRUN=0
+OPTION_FORCE_FLASH=0
 OPTION_NO_QUESTIONS=0
 QTOPIA_IMAGE_PATH=""
 
 while [ $# -gt 0 ]; do
     case $1 in
-        --remove-flash-files)
-            OPTION_REMOVE_FLASH_FILES=1
-            ;;
-        --dont-reboot)
-            OPTION_DONT_REBOOT=1
-            ;;
-        --ignore-firstrun)
-            OPTION_IGNORE_FIRSTRUN=1
+        --force-flash)
+            OPTION_FORCE_FLASH=1
             ;;
         --no-questions)
             OPTION_NO_QUESTIONS=1
@@ -57,8 +47,6 @@ fi
 
 cd "$QTOPIA_IMAGE_PATH"
 
-QTOPIA_FIRST_RUN=/mnt/user/tools/.firstrun
-
 # Path where status images are stored
 STATUS_IMAGE_PATH=/usr/share/updateqtopia
 
@@ -73,19 +61,68 @@ STATUS_IMAGES="flash-status-fail-fserror.gif \
                flash-status-flashing.gif \
                flash-status-pass.gif"
 
+# Block device where QTOPIA_IMAGE is installed to
+QTOPIA_IMAGE_DEVICE=/dev/tffsa2
+
 contains_update_image()
 {
-    for i in trolltech_flash.sh $QTOPIA_IMAGE $STATUS_IMAGES; do
+    # check for update image
+    for i in $QTOPIA_IMAGE $STATUS_IMAGES; do
         [ ! -r $QTOPIA_IMAGE_PATH/$i ] && return 1
     done
-    
     return 0
+}
+
+contains_old_update_image()
+{
+    # check for old update image
+    [ -f $QTOPIA_IMAGE_PATH/trolltech_flash.sh ]
+}
+
+check_free_space()
+{
+    # Find size of QTOPIA_IMAGE_DEVICE
+    local DEVICE=$(basename $QTOPIA_IMAGE_DEVICE)
+    if grep $DEVICE /proc/partitions >/dev/null; then
+        local AVAILABLE_SPACE=$(awk "/$DEVICE/ {print \$3}" /proc/partitions)
+    else
+        local AVAILABLE_SPACE=0
+    fi
+
+    local REQUIRED_SPACE=$(ls -s $QTOPIA_IMAGE_PATH/qtopia.cramfs | awk '{print $1}')
+
+    [ $AVAILABLE_SPACE -lt $REQUIRED_SPACE ]
+}
+
+same_update_image()
+{
+    # check if update image is different to installed image
+    # We use the first 48 bytes of the super block in qtopia.cramfs for this.
+    # The structure of the first 48 bytes of the cramfs super block is:
+    # Bytes     Description     Contents
+    # 0 - 3     Magic number    0x28cd3d45
+    # 4 - 7     Size            <variable>
+    # 8 - 11    Flags           0x00000003
+    # 12 - 15   Future          0x00000000
+    # 16 - 31   Signiture       "Compressed ROMSFS"
+    # 32 - 35   CRC             <variable>
+    # 36 - 39   Edition         0x00000000
+    # 40 - 43   Blocks          <variable>
+    # 44 - 47   Files           <variable>
+    INST_ID=$( hexdump -e '"%08x"' -n 48 $QTOPIA_IMAGE_DEVICE )
+    NEW_ID=$( hexdump -e '"%08x"' -n 48 $QTOPIA_IMAGE_PATH/$QTOPIA_IMAGE )
+
+    [ "$INST_ID" = "$NEW_ID" ]
 }
 
 flash_status()
 {
-    echo "TROLL: $2"
-    gifanim $STATUS_IMAGE_PATH/$1.gif
+    echo "Update Qtopia: $2"
+    if [ -f $QTOPIA_IMAGE_PATH/$1.gif ]; then
+        gifanim $QTOPIA_IMAGE_PATH/$1.gif
+    elif [ -f $STATUS_IMAGE_PATH/$1.gif ]; then
+        gifanim $STATUS_IMAGE_PATH/$1.gif
+    fi
 }
 
 question()
@@ -95,27 +132,32 @@ question()
     flash_status "$1" "$2"
 
     while true; do
-        KEYCODE=`getkeycode`
+        KEYCODE=$(getkeycode)
 
         [ "$KEYCODE" = "19" ] && return 0
         [ "$KEYCODE" = "26" ] && return 1
     done
 }
 
-###############################################
-# Greenphone Qtoipa Flash for SDK Development #
-###############################################
-
-[ $OPTION_IGNORE_FIRSTRUN -eq 1 ] && rm -f $QTOPIA_FIRST_RUN
-
-if [ -e $QTOPIA_FIRST_RUN ]; then
-    # this is the first boot after flashing
-    # don't reflash the device
-    rm -f $QTOPIA_FIRST_RUN
+if ! contains_update_image; then
+    echo "Update Qtopia: Update image not found"
     exit 1
 fi
 
-if ! contains_update_image; then
+if contains_old_update_image; then
+    flash_status flash-status-fail-fsversion "Old Update Qtopia image, not supported with this root filesystem"
+    sleep 30
+    exit 1
+fi
+
+if check_free_space; then
+    flash_status flash-status-fail-space "Insufficient space on system storage"
+    sleep 30
+    exit 1
+fi
+
+if same_update_image && [ $OPTION_FORCE_FLASH -eq 0 ]; then
+    echo "Update Qtopia: Update image already installed"
     exit 1
 fi
 
@@ -126,20 +168,12 @@ if [ $OPTION_NO_QUESTIONS -eq 0 ]; then
     fi
 fi
 
-# trolltech_flash expects the image to be mounted on /mnt/sd
-if [ "$QTOPIA_IMAGE_PATH" != "/mnt/sd" ]; then
-    mount -o bind $QTOPIA_IMAGE_PATH /mnt/sd
-fi
+flash_status flash-status-flashing "Installing new Qtopia image"
 
-[ $OPTION_REMOVE_FLASH_FILES -eq 1 ] && OPTIONS="--remove-files"
-[ $OPTION_DONT_REBOOT -eq 1 ] && OPTIONS="$OPTIONS --dont-reboot"
+dd if=$QTOPIA_IMAGE_PATH/$QTOPIA_IMAGE of=$QTOPIA_IMAGE_DEVICE bs=1M
 
-updateqtopiahelper flash $OPTIONS
-RETVAL=$?
+# Force LIDS rules to be regenerated at reboot
+rm -f /etc/lids/lids_initialized
 
-if [ "$QTOPIA_IMAGE_PATH" != "/mnt/sd" ]; then
-    umount /mnt/sd
-fi
-
-exit $RETVAL
+flash_status flash-status-pass "Qtopia update complete"
 

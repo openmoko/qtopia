@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,13 +19,14 @@
 **
 ****************************************************************************/
 
-#ifndef __QTOPIA_MEDIASERVER_MEDIAPIPE_H
-#define __QTOPIA_MEDIASERVER_MEDIAPIPE_H
+#ifndef __QTOPIA_MEDIA_MEDIAPIPE_H
+#define __QTOPIA_MEDIA_MEDIAPIPE_H
 
 #include <qobject.h>
 #include <qtopiaglobal.h>
 
-class QIODevice;
+
+class QMediaDevice;
 
 
 class QMediaPipePrivate;
@@ -35,9 +36,9 @@ class QTOPIAMEDIA_EXPORT QMediaPipe : public QObject
     Q_OBJECT
 
 public:
-    QMediaPipe(QIODevice* inputDevice,
-                QIODevice* outputDevice,
-                QObject* parent = 0);
+    QMediaPipe(QMediaDevice* inputDevice,
+               QMediaDevice* outputDevice,
+               QObject* parent = 0);
     ~QMediaPipe();
 
     qint64 read(char *data, qint64 maxlen);
@@ -53,4 +54,4 @@ private:
 
 
 
-#endif  // __QTOPIA_MEDIASERVER_MEDIAPIPE_H
+#endif  // __QTOPIA_MEDIA_MEDIAPIPE_H

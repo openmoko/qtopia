@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,6 +28,11 @@
 #include <QDesktopWidget>
 #include <QTextEdit>
 #include <QLineEdit>
+#include <QStyle>
+#include <QClipboard>
+#ifndef QT_NO_WIZARD
+# include <QWizard>
+#endif
 
 #include <QtopiaInputMethod>
 
@@ -35,8 +40,6 @@
 #include <qtopiaipcenvelope.h>
 #include <qtopiaservices.h>
 #include <QValueSpaceItem>
-
-//#define DEBUG_QSOFTMENUBAR_IM_ACTIONS
 
 /*!
   \class QSoftMenuBar
@@ -156,6 +159,7 @@ const QList<int> &QSoftMenuBar::keys()
     return ContextKeyManager::instance()->keys();
 }
 
+#ifndef QT_NO_CLIPBOARD
 class EditMenu : public QMenu
 {
     Q_OBJECT
@@ -163,20 +167,22 @@ public:
     EditMenu(QWidget *parent)
         : QMenu(parent)
     {
-        copyAction = addAction(QIcon(":icon/selecttext"), tr("Select..."));
-        cutAction = addAction(QIcon(":icon/cut"), tr("Cut"));
-        cutAction->setVisible(false);
-        pasteAction = addAction(QIcon(":icon/paste"), tr("Paste"));
-        if ( isReadOnly(parent) )
-            pasteAction->setVisible(false);
+        selectAction = addAction(QIcon(":icon/selecttext"), tr("Select text..."));
+        copyAction = addAction(QIcon(":icon/copy"), tr("Copy text"));
+        pasteAction = addAction(QIcon(":icon/paste"), tr("Paste text"));
         connect(this, SIGNAL(triggered(QAction*)),
                 this, SLOT(editMenuActivated(QAction*)));
+
+        // use aboutToShow() instead of overriding showEvent() to customise the
+        // menu, or else the menu flickers if screen repainting is slow
+        connect(this, SIGNAL(aboutToShow()),
+                this, SLOT(menuAboutToShow()));
     }
 
     static bool keyEventFilter( QObject *o, QEvent *e )
     {
         if (highlighting) {
-            if ( e->type() == QEvent::KeyPress /*|| e->type() == QEvent::KeyRelease*/ ) {
+            if ( e->type() == QEvent::KeyPress) {
                 QKeyEvent *ke = (QKeyEvent *)e;
                 if ( ke->key() >= Qt::Key_Left && ke->key() <= Qt::Key_Down ) {
                     if ( !(ke->modifiers()&Qt::ShiftModifier) ) {
@@ -186,94 +192,128 @@ public:
                         }
                     }
                 } else {
-                    setHighlighting(0);
+                    highlighting = 0;
                 }
             }
         }
         return false;
     }
 
-    static bool isHighlighting()
+private slots:
+    void menuAboutToShow()
     {
-        return highlighting;
-    }
+        // actions might have been removed
+        if (!selectAction && !copyAction && !pasteAction)
+            return;
 
-    static void setHighlighting(EditMenu* m)
-    {
-        if ( highlighting != m ) {
-            if ( highlighting ) {
-                highlighting->copyAction->setText(tr("Select..."));
-                highlighting->copyAction->setIcon(QIcon(":icon/selecttext"));
-                highlighting->cutAction->setVisible(false);
+        QWidget *w = QApplication::focusWidget();
+        QTextEdit *te = qobject_cast<QTextEdit*>(w);
+        QLineEdit *le = qobject_cast<QLineEdit*>(w);
+
+        bool readOnly = (te && te->isReadOnly() || le && le->isReadOnly());
+        bool showPaste = false;
+        bool hasText = (te && te->document() && !te->document()->isEmpty()) ||
+                       (le && !le->text().isEmpty());
+
+        if (!readOnly && pasteAction) {
+            if (te) {
+                showPaste = te->canPaste();
+            } else if (le) {
+                const QMimeData *mime = QApplication::clipboard()->mimeData();
+                if (mime && mime->hasText())
+                    showPaste = true;
             }
-            highlighting = m;
+        }
+
+        if (te && te->hasEditFocus() || le && le->hasEditFocus()) {
+            if ( (te && te->textCursor().hasSelection()) ||
+                    (le && le->hasSelectedText()) ) {
+                if (selectAction)
+                    selectAction->setVisible(false);
+                if (copyAction)
+                    copyAction->setVisible(true);
+                if (pasteAction)
+                    pasteAction->setVisible(showPaste);
+            } else {
+                if (selectAction)
+                    selectAction->setVisible(hasText);
+                if (copyAction)
+                    copyAction->setVisible(false);
+                if (pasteAction)
+                    pasteAction->setVisible(showPaste);
+            }
+        } else {
+            // in navigation mode
+            if (selectAction)
+                selectAction->setVisible(false);
+            if (copyAction)
+                copyAction->setVisible(hasText);
+            if (pasteAction)
+                pasteAction->setVisible(showPaste);
         }
     }
 
-private slots:
     void editMenuActivated(QAction *action)
     {
-        QString text;
-        int scan=0;
         QWidget* w = qApp->focusWidget();
-        bool reset_sel = true;
+        QTextEdit* te = qobject_cast<QTextEdit*>(w);
+        QLineEdit* le = qobject_cast<QLineEdit*>(w);
 
-        if (w && action == copyAction) {
-            bool has_sel = false;
-            QTextEdit* te = qobject_cast<QTextEdit*>(w);
-            QLineEdit* le = qobject_cast<QLineEdit*>(w);
-            if ( te ) {
-                has_sel = te->textCursor().hasSelection();
-            } else if ( le ) {
-                has_sel = le->hasSelectedText();
+        if (action == selectAction) {
+            highlighting = this;
+            return;
+        }
+        highlighting = 0;
+
+        if (action == copyAction) {
+            if (te) {
+                if (te->hasEditFocus()) {
+                    te->copy();
+                } else {
+                    QTextCursor c = te->textCursor();
+                    te->selectAll();
+                    te->copy();
+                    te->setTextCursor(c);   // reset selection
+                }
+            } else if (le) {
+                if (le->hasEditFocus()) {
+                    le->copy();
+                } else {
+                    qApp->clipboard()->setText(le->text());
+                }
             }
-            if ( has_sel ) {
-                text="c"; scan=Qt::Key_C; // Copy
-            } else {
-                reset_sel = false;
-                setHighlighting(this);
-                copyAction->setText(tr("Copy"));
-                copyAction->setIcon(QIcon(":icon/copy"));
-                if ( !isReadOnly(w) )
-                    cutAction->setVisible(true);
-            }
-        } else if (action == cutAction) {
-            text="x"; scan=Qt::Key_X;
         } else if (action == pasteAction) {
-            text="v"; scan=Qt::Key_V;
-        }
-        if ( reset_sel ) {
-            setHighlighting(0);
-        }
-
-        if (scan && qApp->focusWidget()) {
-            QKeyEvent *ke = new QKeyEvent(QEvent::KeyPress, scan, Qt::KeyboardModifiers(Qt::ControlModifier), text);
-            QApplication::postEvent(qApp->focusWidget(), ke);
-            ke = new QKeyEvent(QEvent::KeyRelease, scan, Qt::KeyboardModifiers(Qt::ControlModifier), text);
-            QApplication::postEvent(qApp->focusWidget(), ke);
+            // assumes clipboard is not empty if 'Paste' is able to be
+            // activated, otherwise the line/textedit might be cleared
+            // without pasting anything back into it
+            if (te) {
+                if (!te->hasEditFocus())
+                    te->clear();
+                te->paste();
+                if (!te->hasEditFocus()) {
+                    te->moveCursor(QTextCursor::Start);
+                    te->ensureCursorVisible();
+                }
+            } else if (le) {
+                if (!le->hasEditFocus())
+                    le->clear();
+                le->paste();
+                if (!le->hasEditFocus())
+                    le->home(false);
+            }
         }
     }
 
 private:
-    bool isReadOnly(QWidget* w) const
-    {
-        bool ro = false;
-        QTextEdit* te = qobject_cast<QTextEdit*>(w);
-        QLineEdit* le = qobject_cast<QLineEdit*>(w);
-        if ( te ) {
-            ro = te->isReadOnly();
-        } else if ( le ) {
-            ro = le->isReadOnly();
-        }
-        return ro;
-    }
-
     static QPointer<EditMenu> highlighting;
-    QAction *cutAction;
-    QAction *copyAction;
-    QAction *pasteAction;
+
+    QPointer<QAction> selectAction;
+    QPointer<QAction> copyAction;
+    QPointer<QAction> pasteAction;
 };
 QPointer<EditMenu> EditMenu::highlighting;
+
+#endif // QT_NO_CLIPBOARD
 
 class MenuManager : public QObject
 {
@@ -296,9 +336,7 @@ public:
         return mmgr;
     }
 
-#ifdef QTOPIA_TEST
     QMenu *getActiveMenu() const;
-#endif
 
 protected:
     bool eventFilter(QObject *, QEvent *e);
@@ -337,10 +375,9 @@ private:
     QPointer<QAction> helpAction;
     QPointer<QAction> inputMethodAction;
     QPointer<QAction> cancelAction;
+    QPointer<QAction> previousAction;
     static QPointer<MenuManager> mmgr;
-#ifdef QTOPIA_TEST
     QMenu *activeMenu;
-#endif
 };
 
 QPointer<MenuManager> MenuManager::mmgr = 0;
@@ -436,13 +473,18 @@ int QSoftMenuBar::menuKey()
 
 /*!
   Creates and returns a standard "Edit" menu used for QLineEdit and QTextEdit.
+
+  Returns 0 if the clipboard functionality has been disabled in Qtopia Core.
 */
 QMenu *QSoftMenuBar::createEditMenu()
 {
+#ifndef QT_NO_CLIPBOARD
     return new EditMenu(0);
+#else
+    return 0;
+#endif
 }
 
-#ifdef QTOPIA_TEST
 /*!
   \internal
 */
@@ -450,7 +492,6 @@ QMenu* QSoftMenuBar::activeMenu()
 {
     return MenuManager::instance()->getActiveMenu();
 }
-#endif
 
 MenuManager::MenuManager()
     : QObject(qApp)
@@ -459,23 +500,28 @@ MenuManager::MenuManager()
     , helpAction(0)
     , inputMethodAction(0)
     , cancelAction(0)
-#ifdef QTOPIA_TEST
+    , previousAction(0)
     , activeMenu(0)
-#endif
 {
 }
 
 QMenu *MenuManager::menuFor(QWidget *w, QSoftMenuBar::FocusState state)
 {
+    if ( !w )
+        return 0;
+
     if (!state)
         state = QSoftMenuBar::AnyFocus;
 
     QMenu *m = internalMenuFor(w, state);
+#ifndef QT_NO_CLIPBOARD
     if (!m && (w->inherits("QLineEdit") ||
             w->inherits("QTextEdit") && !w->inherits("QTextBrowser"))) {
         m = new EditMenu(w);
         addMenuTo(w, m, state);
-    } else if (!m) {
+    } else
+#endif
+    if (!m) {
         m = new QMenu(w);
         addMenuTo(w, m, state);
     }
@@ -518,6 +564,8 @@ void MenuManager::addMenuTo(QWidget *w, QMenu *menu, QSoftMenuBar::FocusState st
     QSoftMenuBar::setLabel(fw, key(), QSoftMenuBar::Options, state);
     QSoftMenuBar::setLabel(w, key(), QSoftMenuBar::Options, state);
     QSoftMenuBar::setLabel(menu, key(), "options-hide", tr("Hide"), QSoftMenuBar::AnyFocus);
+    if (QApplication::style()->inherits("Series60Style"))   //HACK
+        QSoftMenuBar::setLabel(menu, key(), "select", tr("Select"), QSoftMenuBar::AnyFocus);
 
     if (state & QSoftMenuBar::EditFocus)
         modalMenuMap.insert(w, menu);
@@ -539,6 +587,9 @@ void MenuManager::addMenuTo(QWidget *w, QMenu *menu, QSoftMenuBar::FocusState st
 
 void MenuManager::removeMenuFrom(QWidget *w, QMenu *menu, QSoftMenuBar::FocusState state)
 {
+    if ( !w )
+        return;
+
     if (!state)
         state = QSoftMenuBar::AnyFocus;
 
@@ -610,12 +661,10 @@ int MenuManager::key()
     return k;
 }
 
-#ifdef QTOPIA_TEST
 QMenu *MenuManager::getActiveMenu() const
 {
     return activeMenu;
 }
-#endif
 
 bool MenuManager::triggerMenuItem( QMenu *menu, int keyNum )
 {
@@ -680,20 +729,25 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
     if (menu && keyNum >= Qt::Key_0 && keyNum <= Qt::Key_9 ) {
         // trigger menuitem and close menu
         if (triggerMenuItem(menu, keyNum)) {
-#ifdef QTOPIA_TEST
             activeMenu = 0;
-#endif
             menu->close();
         }
     }
 
     if (k->key() != key()) {
+#ifndef QT_NO_CLIPBOARD
         return EditMenu::keyEventFilter(o,e);
+#else
+        return false;
+#endif
+    } else if (QApplication::style()->inherits("Series60Style") && menu) {  //HACK
+        QAction *a = menu->activeAction();
+        if (a) emit a->trigger();
     }
 
     focusWidget = (QWidget*)o;
 
-    if (e->type() == QEvent::KeyPress) {
+    if (e->type() == QEvent::KeyPress && !((QKeyEvent*)e)->isAutoRepeat()) {
         if (menu) {
             menu->close();
         } else {
@@ -708,9 +762,7 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
             if (w) {
                 QMenu *menu = internalMenuFor(w, w->hasEditFocus() ? QSoftMenuBar::EditFocus : QSoftMenuBar::NavigationFocus);
                 if (menu) {
-#ifdef QTOPIA_TEST
                     activeMenu = menu;
-#endif
                     popup(w, menu);
                     return true;
                 }
@@ -842,6 +894,11 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
         delete cancelAction;
         cancelAction = 0;
     }
+
+    if (previousAction ) {
+        delete previousAction;
+        previousAction = 0;
+    }
     // for now, refresh every time, in case input method has changed it's action
     // TODO: InputMethods should let us know when the IMMenu changes
     if(inputMethodAction)
@@ -863,11 +920,6 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
     if(d.inputMethodEnabled && !descriptionList.isEmpty()){
         qLog(Input) << "Adding IM action to QSoftMenuBar menu";
         QIMActionDescription desc = descriptionList.first().value<QIMActionDescription>();
-#ifdef DEBUG_QSOFTMENUBAR_IM_ACTIONS
-        qDebug() << "desc.label is "<<desc.label();
-        qDebug() << "desc.iconFileName is "<<desc.iconFileName();
-        qDebug() << "inputMethodAction->icon() is "<<inputMethodAction->icon();
-#endif
         inputMethodAction = menu->addAction(QIcon(desc.iconFileName()),desc.label());
         inputMethodAction->setData(desc.id());
         connect(inputMethodAction, SIGNAL(triggered()), this, SLOT(inputMethod()));
@@ -895,29 +947,59 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
             tr("Help"), this, SLOT(help()));
 
 
-    // qwizard check first?
-    if (w && d.cancelEnabled) {
+    if (w) {
         QWidget* tlw = w->topLevelWidget();
-        if (tlw->inherits("QDialog") && !Qtopia::hasKey(Qt::Key_No)) {
+        if (d.cancelEnabled && tlw->inherits("QDialog") && !Qtopia::hasKey(Qt::Key_No)) {
             if (!QtopiaApplication::isMenuLike((QDialog*)tlw))
                 cancelAction = menu->addAction(QIcon(":icon/cancel"), tr("Cancel"), tlw, SLOT(reject()));
         }
+#ifndef QT_NO_WIZARD
+        if (QWizard *wizard = qobject_cast<QWizard*>(tlw)) {
+            if (wizard->currentId() != wizard->startId())
+                previousAction = menu->addAction(QIcon(":icon/previous"), tr("Previous"), tlw, SLOT(back()));
+        }
+#endif
     }
 
-    if( !helpAction && !cancelAction && !inputMethodAction && sepAction ) {
+    if( !helpAction && !cancelAction && !inputMethodAction && !previousAction && sepAction ) {
         delete sepAction;
         sepAction = 0;
     }
 
     if (menu->actions().count()) {
-        menu->popup(positionForMenu(menu));
-        foreach (QAction *a, menu->actions()) {
-            if (a->isEnabled() && a->isVisible() && !a->isSeparator()) {
-                if ( a->menu() == 0 )
-                    menu->setActiveAction(a);
-                break;
+#ifndef GREENPHONE_EFFECTS
+        QDesktopWidget *desktop = QApplication::desktop();
+        QRect r = desktop->availableGeometry(desktop->primaryScreen());
+        bool rtl = !( QApplication::layoutDirection() == Qt::LeftToRight );
+        int x = rtl ? r.right() - menu->sizeHint().width()+1 : r.left();
+        menu->popup(QPoint(x, r.bottom()), menu->actions().last());  //last item at bottom of screen
+#endif
+        if (!Qtopia::mousePreferred()) {
+            //select first action by default
+            foreach (QAction *a, menu->actions()) {
+                if (a->isEnabled() && a->isVisible() && !a->isSeparator()) {
+                    if ( a->menu() == 0 ) {
+                        menu->setActiveAction(a);
+                    } else {
+                        // if first item points to submenu, remove the submenu
+                        // before setActiveAction() or else the submenu will
+                        // be shown when the menu pops up
+                        QMenu *m = a->menu();
+                        a->setMenu(0);
+                        menu->setActiveAction(a);
+                        a->setMenu(m);
+                    }
+                    break;
+                }
             }
         }
+#ifdef GREENPHONE_EFFECTS
+        QDesktopWidget *desktop = QApplication::desktop();
+        QRect r = desktop->availableGeometry(desktop->primaryScreen());
+        bool rtl = !( QApplication::layoutDirection() == Qt::LeftToRight );
+        int x = rtl ? r.right() - menu->sizeHint().width()+1 : r.left();
+        menu->popup(QPoint(x, r.bottom()), menu->actions().last());  //last item at bottom of screen
+#endif
     }
 }
 
@@ -938,35 +1020,44 @@ QString MenuManager::findHelp(const QWidget* w)
             }
         }
     }
-    const QObject *widget=w;
-    while(widget) {
-        qLog(Help) << "checking object with widget->metaObject()->className():" << widget->metaObject()->className() << "widget->objectName():" << widget->objectName().toLower();
-        hf = fi.baseName();
-        hf += "-" + widget->objectName().toLower() + ".html";
-        QStringList helpPath = Qtopia::helpPaths();
-        for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end(); ++it) {
-            if ( QFile::exists( *it + "/" + hf ) ) {
-                qLog(Help) << "Using help " << hf;
-                return hf;
-                break;
+    for (int qualified=1; qualified>=0; --qualified) {
+        const QObject *widget=w;
+        while(widget) {
+            qLog(Help) << "checking object with widget->metaObject()->className():" << widget->metaObject()->className() << "widget->objectName():" << widget->objectName().toLower();
+            if ( qualified ) {
+                hf = fi.baseName() + "-";
+            } else {
+                hf.clear();
             }
+            hf += widget->objectName().toLower() + ".html";
+            QStringList helpPath = Qtopia::helpPaths();
+            for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end(); ++it) {
+                if ( QFile::exists( *it + "/" + hf ) ) {
+                    qLog(Help) << "Using help " << hf;
+                    return hf;
+                    break;
+                }
+            }
+            widget=widget->parent();
         }
-        widget=widget->parent();
     }
 
-    hf = fi.baseName();
-    if ( w && w->objectName().isEmpty() ) {
-        QString parents;
-        parents = QString("(%1)").arg(w->metaObject()->className());
-        QObject *p = w->parent();
-        while (p) {
-            parents = QString("(%1)%2").arg(p->metaObject()->className()).arg(parents);
-            p = p->parent();
+    if ( qLogEnabled(Help) ) {
+        hf = fi.baseName();
+        if ( w && w->objectName().isEmpty() ) {
+            QString parents;
+            parents = QString("(%1)").arg(w->metaObject()->className());
+            QObject *p = w->parent();
+            while (p) {
+                parents = QString("(%1)%2").arg(p->metaObject()->className()).arg(parents);
+                p = p->parent();
+            }
+            qLog(Help) << "No help for" << hf << parents;
+        } else {
+            qLog(Help) << "No help for " << hf;
         }
-        qLog(Help) << "No help for" << hf << parents;
-    } else {
-        qLog(Help) << "No help for " << hf;
     }
+
     return "";
 }
 
@@ -978,10 +1069,12 @@ bool MenuManager::helpExists(QWidget *w)
         bool he = !hf.isEmpty();
         d.helpFile = hf;
         d.helpexists = he;
+        if (!d.helpexists)
+            qWarning() << ">>> NO help exists for" << QString(qApp->argv()[0]);
         return he;
     }
     if (!d.helpexists)
-        qLog(UI) << ">>> NO help exists for" << d.helpFile;
+        qWarning() << ">>> NO help exists for" << QString(qApp->argv()[0]);
     return d.helpexists;
 }
 

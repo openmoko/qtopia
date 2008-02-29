@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -40,6 +40,8 @@
     Please note, this class only acts as a forwarding agent
     to the QBluetoothHandsfreeService class, which handles all
     implementation details.
+  
+    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 
     \sa QBluetoothAudioGateway, QBluetoothHandsfreeService
 */
@@ -57,10 +59,10 @@ QBluetoothHandsfreeAudioGatewayServer::QBluetoothHandsfreeAudioGatewayServer(
 {
     m_parent = parent;
 
-    QObject::connect(m_parent, SIGNAL(connectResult(bool, const QString &)),
-                     this, SIGNAL(connectResult(bool, const QString &)));
-    QObject::connect(m_parent, SIGNAL(newConnection(const QBluetoothAddress &)),
-                     this, SIGNAL(newConnection(const QBluetoothAddress &)));
+    QObject::connect(m_parent, SIGNAL(connectResult(bool,QString)),
+                     this, SIGNAL(connectResult(bool,QString)));
+    QObject::connect(m_parent, SIGNAL(newConnection(QBluetoothAddress)),
+                     this, SIGNAL(newConnection(QBluetoothAddress)));
     QObject::connect(m_parent, SIGNAL(disconnected()),
                      this, SIGNAL(headsetDisconnected()));
     QObject::connect(m_parent, SIGNAL(speakerVolumeChanged()),
@@ -73,6 +75,9 @@ QBluetoothHandsfreeAudioGatewayServer::QBluetoothHandsfreeAudioGatewayServer(
     setValue("AudioDevice", audioDev, Delayed);
     setValue("IsConnected", false, Delayed);
     setValue("RemotePeer", QVariant::fromValue(QBluetoothAddress::invalid), Delayed);
+    setValue("AudioEnabled", false, Delayed);
+    setValue("SpeakerVolume", 0, Delayed);
+    setValue("MicrophoneVolume", 0, Delayed);
 }
 
 /*!

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,6 +27,9 @@
 class QContentFilterDialog;
 class QLabeledProgressBar;
 class QValueSpaceItem;
+class QLabel;
+class QTextEntryProxy;
+class QHBoxLayout;
 
 class DocumentLauncherView : public LauncherView
 {
@@ -47,9 +50,9 @@ class DocumentLauncherView : public LauncherView
         void openRightsIssuerURL();
         void selectDocsType();
         void selectDocsCategory();
-        void contentSetChanged();
         void updateScanningStatus();
         void currentChanged( const QModelIndex &current, const QModelIndex &previous );
+        void textEntrytextChanged(const QString &);
 
     private:
         QLabel *typeLbl;
@@ -70,9 +73,18 @@ class DocumentLauncherView : public LauncherView
         QValueSpaceItem *scanningVSItem;
         QValueSpaceItem *updatingVSItem;
         QValueSpaceItem *installingVSItem;
+        
+    protected:
+        QMenu *softMenu;
+        QTextEntryProxy *textEntry;
+        QLabel *findIcon;
+        QHBoxLayout *findLayout;
 
     public:
         QAction *separatorAction;
+        
+    private:
+        void init();
 };
 
 #endif // _DOCUMENTVIEW_H_

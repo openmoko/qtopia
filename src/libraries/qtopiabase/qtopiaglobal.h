@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,24 +25,6 @@
 #include <qplugin.h>
 
 // The _EXPORT macros...
-
-#ifdef Q_OS_WIN32
-# if defined(QTOPIA_MAKEDLL)
-#  define QTOPIA_EXPORT __declspec(dllexport)
-# elif defined(QTOPIA_DLL)
-#  define QTOPIA_EXPORT __declspec(dllimport)
-# endif
-# if defined(QTOPIAPIM_MAKEDLL)
-#  define QTOPIAPIM_EXPORT __declspec(dllexport)
-# elif defined(QTOPIAPIM_DLL)
-#  define QTOPIAPIM_EXPORT __declspec(dllimport)
-# endif
-# if defined(QTOPIAMAIL_MAKEDLL)
-#  define QTOPIAMAIL_EXPORT __declspec(dllexport)
-# elif defined(QTOPIAMAIL_DLL)
-#  define QTOPIAMAIL_EXPORT __declspec(dllimport)
-# endif
-#endif
 
 #if defined(QT_VISIBILITY_AVAILABLE)
 #   define QTOPIA_VISIBILITY __attribute__((visibility("default")))
@@ -99,11 +81,14 @@
 #ifndef QTOPIAPRINTING_EXPORT
 #   define QTOPIAPRINTING_EXPORT QTOPIA_VISIBILITY
 #endif
+#ifndef QTOPIATEST_EXPORT
+#   define QTOPIATEST_EXPORT QTOPIA_VISIBILITY
+#endif
 
 // This macro exports symbols only when building a test-enabled build.
 // Use this to make private classes available for test.
 
-#ifdef QTOPIA_TEST
+#ifdef QTOPIA_TEST_EXTRA_SYMBOLS
 #   ifndef QTOPIA_AUTOTEST_EXPORT
 #       define QTOPIA_AUTOTEST_EXPORT QTOPIA_VISIBILITY
 #   endif

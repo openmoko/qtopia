@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -73,6 +88,7 @@ class QHideEvent;
 class QInputContext;
 class QIcon;
 class QWindowSurface;
+class QLocale;
 #if defined(Q_WS_X11)
 class QX11Info;
 #endif
@@ -185,8 +201,16 @@ class Q_GUI_EXPORT QWidget : public QObject, public QPaintDevice
 #ifndef QT_NO_STYLE_STYLESHEET
     Q_PROPERTY(QString styleSheet READ styleSheet WRITE setStyleSheet)
 #endif
+    Q_PROPERTY(QLocale locale READ locale WRITE setLocale RESET unsetLocale)
 
 public:
+    enum RenderFlag {
+        DrawWindowBackground = 0x1,
+        DrawChildren = 0x2,
+        IgnoreMask = 0x4
+    };
+    Q_DECLARE_FLAGS(RenderFlags, RenderFlag)
+
     explicit QWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
 #ifdef QT3_SUPPORT
     QT3_SUPPORT_CONSTRUCTOR QWidget(QWidget* parent, const char *name, Qt::WindowFlags f = 0);
@@ -307,6 +331,10 @@ public:
     QRegion mask() const;
     void clearMask();
 
+    void render(QPaintDevice *target, const QPoint &targetOffset = QPoint(),
+                const QRegion &sourceRegion = QRegion(),
+                RenderFlags renderFlags = RenderFlags(DrawWindowBackground | DrawChildren));
+
 public Q_SLOTS:
     void setWindowTitle(const QString &);
 #ifndef QT_NO_STYLE_STYLESHEET
@@ -350,6 +378,10 @@ public:
     void setLayoutDirection(Qt::LayoutDirection direction);
     Qt::LayoutDirection layoutDirection() const;
     void unsetLayoutDirection();
+
+    void setLocale(const QLocale &locale);
+    QLocale locale() const;
+    void unsetLocale();
 
     inline bool isRightToLeft() const { return layoutDirection() == Qt::RightToLeft; }
     inline bool isLeftToRight() const { return layoutDirection() == Qt::LeftToRight; }
@@ -441,6 +473,7 @@ public:
     void adjustSize();
     bool isVisible() const;
     bool isVisibleTo(QWidget*) const;
+    // ### Qt 5: bool isVisibleTo(_const_ QWidget *) const
     inline bool isHidden() const;
 
     bool isMinimized() const;
@@ -513,6 +546,11 @@ public:
 #if defined(Q_WS_X11)
     const QX11Info &x11Info() const;
     Qt::HANDLE x11PictureHandle() const;
+#endif
+
+#if defined(Q_WS_MAC)
+    Qt::HANDLE macQDHandle() const;
+    Qt::HANDLE macCGHandle() const;
 #endif
 
 #if defined(Q_WS_WIN)
@@ -631,6 +669,8 @@ private:
     friend void qt_syncBackingStore(QWidget *);
     friend void qt_syncBackingStore(QRegion, QWidget *);
     friend void qt_syncBackingStore(QRegion, QWidget *, bool);
+    friend QWindowSurface *qt_default_window_surface(QWidget*);
+
     friend class QBackingStoreDevice;
     friend class QWidgetBackingStore;
     friend class QApplication;
@@ -644,17 +684,23 @@ private:
     friend class QLayout;
     friend class QWidgetItem;
     friend class QGLContext;
+    friend class QGLWidget;
     friend class QX11PaintEngine;
     friend class QWin32PaintEngine;
     friend class QShortcutPrivate;
+    friend class QWindowSurface;
+    friend class QD3DWindowSurface;
 
 #ifdef Q_WS_MAC
+#ifdef Q_WS_MAC32
     friend class QMacSavedPortInfo;
+#endif
     friend class QCoreGraphicsPaintEnginePrivate;
     friend QPoint qt_mac_posInWindow(const QWidget *w);
     friend WindowPtr qt_mac_window_for(const QWidget *w);
     friend bool qt_mac_is_metal(const QWidget *w);
     friend HIViewRef qt_mac_hiview_for(const QWidget *w);
+    friend void qt_event_request_window_change(QWidget *widget);
 #endif
 #ifdef Q_WS_QWS
     friend class QWSBackingStore;
@@ -662,6 +708,10 @@ private:
     friend class QWSManagerPrivate;
     friend class QDecoration;
     friend class QWSWindowSurface;
+    friend class QScreen;
+    friend class QVNCScreen;
+    friend bool isWidgetOpaque(const QWidget *);
+    friend class QGLWidgetPrivate;
 #endif
 
     friend Q_GUI_EXPORT QWidgetData *qt_qwidget_data(QWidget *widget);
@@ -775,6 +825,8 @@ protected:
     virtual void windowActivationChange(bool);  // compat
     virtual void languageChange();  // compat
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QWidget::RenderFlags)
 
 #if defined Q_CC_MSVC && _MSC_VER < 1300
 template <> inline QWidget *qobject_cast_helper<QWidget*>(QObject *o, QWidget *)

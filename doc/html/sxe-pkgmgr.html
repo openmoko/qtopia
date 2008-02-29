@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -9,32 +10,31 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Installer/Package Manager Overview<br /><small></small></h1>
-<p>Qtopia provides a simplified package system in a system binary called <tt>packagemanger</tt>. This binary reduces the dependency on the <tt>ipkg</tt> utility and extends <tt>qipkg</tt> to meet the requirements of safe execution.</p>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Installer/Package Manager Overview<br /><span class="subtitle"></span>
+</h1>
+<p>Qtopia provides a simplified software installation system in a system binary called <tt>packagemanger</tt>.</p>
+<p><b>Note that earlier versions of Qtopia for PDA's provided a utility to install packages utilizing the ipkg system. There is no such facility currently in Qtopia. The SXE PackageManager is not a general purpose package installation system</b></p>
 <p>Additionally to create safe execution images using the <tt>make install</tt> command during development and when readying a device image for shipping, on a device, the installer tool <tt>sxe_installer</tt> is provided.</p>
 <p>The following features are provided:</p>
 <ul>
 <li>fetch Package list from remote server via HTTP</li>
 <li>display package information, in particular categories</li>
-<li><tt>ungzip</tt>, <tt>untar</tt> and install of <tt>ipkg</tt> format packages</li>
+<li><tt>ungzip</tt>, <tt>untar</tt> and install of <tt>qpk</tt> format packages</li>
 <li>modifications to the two SXE policy rules tables</li>
 <li>installation of run-time keys into binaries</li>
 <li>provide uninstall capability.</li>
 </ul>
-<p><b>Note:</b> there is no feature planned to check for dependencies on other packages.</p>
-<p>Programs packaged for Qtopia 4.1 and later depend simply on the Qtopia version number, and architecture.</p>
-<p>Packages which do not fit the version requirement or architecture requirement, will not be presented for download or installation. The device architecture control file information will be used to present the user first with packages known and tested for that device (eg sl5600), if desired the user can navigate to additional packages which are not tested on that device.</p>
-<p>Applications which are not certified run with the <tt>SANDBOX</tt> attribute which means that only files specifically allowed may be accessed. Applications are by default installed in <tt>/usr/local/&lt;app-name&gt;</tt> and have by default read-only access to all system libraries, and read-write access to a <tt>/tmp/&lt;app-name&gt;</tt> directory and the <tt>/usr/local/&lt;app-name&gt;</tt> directory. During package installation the <tt>PackageManager</tt> will update Qtopia's mime-types to reflect any values from the Domain field. This will have two effects:</p>
-<ol type="1">
-<li>the packaged application will be registered as being available to handle files of that mime-type</li>
-<li>it will be allowed read-only access to those documents in the users document collection at run-time via the <a href="docsys-overview.html">Document System</a></li>
-</ol>
-<p>If the package also has the <i>editor</i> Domain value, the application will be allowed read-write access.</p>
+<p>Packages have dependencies on the version of Qtopia and device; packages which are not compatible will not be presented for download or be installable. There is no feature planned to have packages dependent on other packages, all packages will need to be self contained.</p>
+<p>In future, packages that do not match the Qtopia version or device will be displayed (if desired) and be allowed to install. Notification will be given that packages these are unlikely to run correctly.</p>
+<p><b>Note:</b> Packages created by both non-SXE and SXE configured builds of Qtopia can be installed onto an SXE enabled device, provided a number of <a href="sxe-app-checklist.html">requirements</a> are met.</p>
+<p>Packges created by an SXE configured Qtopia however will not run or be available to install onto a non-SXE enabled device.</p>
+<p>Applications which are untrusted run with the <tt>LIDS_SANDBOX</tt> attribute which means that only files specifically allowed may be accessed. Applications are by default installed in <tt>/home/Packages/&lt;md5-sum&gt;</tt> and have by default read-only access to all system libraries, and read-write access to their <tt>/home/Packages/&lt;md5-sum&gt;</tt> directory. Packages do not have access to the /tmp directory nor are they allowed to create <a href="qsettings.html">QSettings</a> objects by supplying an organization or application. To create temporary files or <a href="qsettings.html">QSettings</a> files, an application should use the <a href="qtopia.html#sandboxDir">Qtopia::sandboxDir</a>() to obtain the package's directory; in the case of a <a href="qsettings.html">QSettings</a> file something like <a href="qtopia.html#sandboxDir">Qtopia::sandboxDir</a>() + &quot;/etc/mysettings.conf&quot; should be supplied as a fileName parameter.</p>
+<p>As a side note, packages cannot be quicklaunched applications, ensure that CONFIG+=<a href="buildsystem/conf-no-quicklaunch-1.html">no_quicklaunch</a> is added into the application project(.pro) file.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

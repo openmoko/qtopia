@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,17 @@
 #ifndef BOUNCER_P_H
 #define BOUNCER_P_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include "animator_p.h"
 
 #include <QString>
@@ -39,7 +50,7 @@ public:
 
     void animate(QPainter *,SelectedItem *,qreal percent);
 
-    static const QString &getDescription() { return description; }
+    static const QString &description() { return mDescription; }
 
 protected:
 
@@ -54,7 +65,7 @@ protected:
 private:
 
     // Description which can be used by a factory to identify this class.
-    static const QString description;
+    static const QString mDescription;
 
     qreal minVariation;
     qreal maxVariation;

@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/qdbusadaptors.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qdbusadaptors.qdoc -->
 <head>
-  <title>Qt 4.2: D-BUS Adaptor Example</title>
+  <title>Qt 4.3: D-Bus Adaptor Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,8 +12,9 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">D-BUS Adaptor Example<br /><small></small></h1>
-<p>The following example code shows how a D-BUS interface can be implemented using an adaptor.</p>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">D-Bus Adaptor Example<br /><span class="subtitle"></span>
+</h1>
+<p>The following example code shows how a D-Bus interface can be implemented using an adaptor.</p>
 <p>A sample usage of <a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a> is as follows:</p>
 <pre> class MainApplicationAdaptor: public QDBusAbstractAdaptor
  {
@@ -28,7 +29,7 @@
      QApplication *app;
 
  public:
-     MyInterfaceAdaptor(QApplication *application)
+     MainApplicationAdaptor(QApplication *application)
          : QDBusAbstractAdaptor(application), app(application)
      {
          connect(application, SIGNAL(aboutToQuit()), SIGNAL(aboutToQuit());
@@ -121,7 +122,7 @@
      <span class="comment">// create the MainApplication adaptor:</span>
      new MainApplicationAdaptor(app);
 
-     <span class="comment">// connect to D-BUS and register as an object:</span>
+     <span class="comment">// connect to D-Bus and register as an object:</span>
      QDBus::sessionBus().registerObject(&quot;/MainApplication&quot;, app);
 
      <span class="comment">// add main window, etc.</span>
@@ -148,7 +149,7 @@
 <ul>
 <li>it declares the adaptor MainApplicationAdaptor, which descends from <a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a></li>
 <li>it declares the Qt Meta Object data using the <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> macro</li>
-<li>it declares the names of two D-BUS interfaces it implements. Those interfaces are equal in all aspects.</li>
+<li>it declares the names of two D-Bus interfaces it implements. Those interfaces are equal in all aspects.</li>
 </ul>
 <a name="the-properties"></a>
 <h2>The properties</h2>
@@ -196,12 +197,12 @@
 <li>it initialises its base class (<a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a>) with the parent object it is related to.</li>
 <li>it stores the app pointer in a member variable. Note that it would be possible to access the same object using the QDBusAbstractAdaptor::object() function, but it would be necessary to use <i>static_cast&lt;&gt;</i> to properly access the methods in <a href="qapplication.html">QApplication</a> that are not part of <a href="qobject.html">QObject</a>.</li>
 <li>it connects the application's signal <i>aboutToQuit</i> to its own signal <i>aboutToQuit</i>.</li>
-<li>it connects the application's signal <i>focusChanged</i> to a private slot to do some further processing before emitting a D-BUS signal.</li>
+<li>it connects the application's signal <i>focusChanged</i> to a private slot to do some further processing before emitting a D-Bus signal.</li>
 </ul>
 <p>Note that there is no destructor in the example. An eventual destructor could be used to emit one last signal before the object is destroyed, for instance.</p>
 <a name="slots-methods"></a>
 <h2>Slots/methods</h2>
-<p>The public slots in the example (which will be exported as D-BUS methods) are the following:</p>
+<p>The public slots in the example (which will be exported as D-Bus methods) are the following:</p>
 <pre> public slots:
      Q_NOREPLY void quit()
      { app-&gt;quit(); }
@@ -225,7 +226,7 @@
      }</pre>
 <p>This snippet of code defines 4 methods with different properties each:</p>
 <ol type="1">
-<li><tt>quit</tt>: this method takes no parameters and is defined to be asynchronous. That is, callers are expected to use &quot;fire-and-forget&quot; mechanism when calling this method, since it provides no useful reply. This is represented in D-BUS by the use of the org.freedesktop.DBus.Method.NoReply annotation. See <a href="qdbusabstractadaptor.html#Q_NOREPLY">Q_NOREPLY</a> for more information on asynchronous methods</li>
+<li><tt>quit</tt>: this method takes no parameters and is defined to be asynchronous. That is, callers are expected to use &quot;fire-and-forget&quot; mechanism when calling this method, since it provides no useful reply. This is represented in D-Bus by the use of the org.freedesktop.DBus.Method.NoReply annotation. See <a href="qdbusabstractadaptor.html#Q_NOREPLY">Q_NOREPLY</a> for more information on asynchronous methods</li>
 <li><tt>reparseConfiguration</tt>: this simple method, with no input or output arguments simply relays the call to the application's reparseConfiguration member function.</li>
 <li><tt>mainWindowObject</tt>: this method takes no input parameter, but returns one string output argument, containing the path to the main window object (if the application has a main window), or an empty string if it has no main window. Note that this method could have also been written: void mainWindowObject(<a href="qstring.html">QString</a> &amp;path).</li>
 <li><tt>setSessionManagement</tt>: this method takes one input argument (a boolean) and, depending on its value, it calls one function or another in the application.</li>
@@ -246,11 +247,11 @@
          if (now == app-&gt;mainWindow())
              emit mainWindowHasFocus();
      }</pre>
-<p>This private slot (which will not be exported as a method via D-BUS) was connected to the <tt>focusChanged</tt> signal in the adaptor's constructor. It is therefore able to shape the application's signal into what the interface expects it to be.</p>
+<p>This private slot (which will not be exported as a method via D-Bus) was connected to the <tt>focusChanged</tt> signal in the adaptor's constructor. It is therefore able to shape the application's signal into what the interface expects it to be.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

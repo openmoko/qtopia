@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,23 +23,15 @@
 #include "langmodel.h"
 
 #include <qtopianamespace.h>
-
-#include <qtopiaapplication.h>
 #include <qtopialog.h>
 #include <qtopiaipcenvelope.h>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
-
-#include <QLabel>
+#include <QtopiaItemDelegate>
 #include <QFile>
 #include <QMessageBox>
 #include <QListView>
-#include <QAbstractListModel>
 #include <QDir>
-#include <QDebug>
 #include <QMenu>
-#include <QSettings>
 
 using namespace Ui;
 
@@ -95,7 +87,8 @@ LanguageSettings::LanguageSettings( QWidget* parent, Qt::WFlags fl )
                     qLog(I18n) << "Found language:" << langName
                         << id << "Font:" << font.family() << "Font size:"<< font.pointSize()<< "RTL:" << rightToLeft;
                     FontedItem item (langName, font,
-                        dictLanguages().contains(id) && inputLanguages.contains(id) );
+                        dictLanguages().contains(id) && inputLanguages.contains(id),
+                        id == chosenLanguage );
                     item.direction = rightToLeft ? Qt::RightToLeft : Qt::LeftToRight;
                     itemList.append(item);
                 }
@@ -106,6 +99,8 @@ LanguageSettings::LanguageSettings( QWidget* parent, Qt::WFlags fl )
     model = new LanguageModel(this, itemList);
 
     listView = new QListView(this);
+    listView->setFrameStyle(QFrame::NoFrame);
+    listView->setItemDelegate(new QtopiaItemDelegate);
     listView->setModel(model);
     listView->setSelectionMode(QAbstractItemView::SingleSelection);
     listView->setAlternatingRowColors( true );
@@ -120,21 +115,16 @@ LanguageSettings::LanguageSettings( QWidget* parent, Qt::WFlags fl )
     vboxLayout->addWidget(listView);
 
     QItemSelectionModel *selectionModel = listView->selectionModel();
-    connect(selectionModel,SIGNAL(currentChanged(const QModelIndex &, const QModelIndex&)),
-            this, SLOT(applyLanguage(const QModelIndex&)));
-#ifdef QTOPIA_PHONE
-    connect(listView,SIGNAL(activated(const QModelIndex&)), this, SLOT(newLanguageSelected()));
+    connect(selectionModel,SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this, SLOT(applyLanguage(QModelIndex)));
+    connect(listView,SIGNAL(activated(QModelIndex)), this, SLOT(newLanguageSelected()));
     a_input = new QAction( tr("Use for input"), this );
-    connect( a_input, SIGNAL( triggered(bool) ), this, SLOT( inputToggled() ) );
+    connect( a_input, SIGNAL(triggered(bool)), this, SLOT(inputToggled()) );
     a_input->setCheckable(true);
     updateActions(listView->currentIndex());
 
     QMenu *menu = QSoftMenuBar::menuFor(this);
     menu->addAction(a_input);
-#else
-    connect(listView, SIGNAL(doubleClicked(const QModelIndex&)),
-            this, SLOT(inputToggled(const QModelIndex&)));
-#endif
 }
 
 LanguageSettings::~LanguageSettings()
@@ -163,7 +153,6 @@ void LanguageSettings::inputToggled(const QModelIndex &index)
 
 void LanguageSettings::updateActions(const QModelIndex& index)
 {
-#ifdef QTOPIA_PHONE
     if (!index.isValid())
         return;
     QString lang = langAvail.at( listView->currentIndex().row() );
@@ -172,17 +161,12 @@ void LanguageSettings::updateActions(const QModelIndex& index)
     a_input->setEnabled(dictLang);
     a_input->setVisible(dictLang);
     a_input->setChecked(inputLanguages.contains(lang));
-#else
-    Q_UNUSED(index);
-#endif
 }
 
-#ifdef QTOPIA_PHONE
 void LanguageSettings::inputToggled()
 {
     inputToggled(listView->currentIndex());
 }
-#endif
 
 void LanguageSettings::forceChosen()
 {
@@ -224,7 +208,7 @@ void LanguageSettings::newLanguageSelected()
                                   "<p>Change Language?</qt>"),
                                   QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes ) {
         return;
-   }
+    }
 
     // because reading language is primary writing language (see forceChosen())
     // we have to remove previous language from inputLanguages if it does not
@@ -242,41 +226,22 @@ void LanguageSettings::newLanguageSelected()
 
     //we have to set the new default font for the new language
 
-    QSettings qpeconfig("Trolltech","qpe");
-    QSettings fmcfg( QSettings::SystemScope, "Trolltech", "FontMap" );
-    fmcfg.beginGroup("Map");
-    QString bf=fmcfg.value("Font1[]").toString();
+    QSettings sysConfig(QSettings::SystemScope, "Trolltech", "qpe");
+    sysConfig.beginGroup("Font");
+    QString fontFamily = sysConfig.value("FontFamily[]").toString();
+    QString fontSize = sysConfig.value("FontSize[]").toString();
 
-    QTranslator t(0);
-    QString tfn = Qtopia::qtopiaDir() +"/i18n/";
-    if (t.load(tfn+chosenLanguage+"/QtopiaDefaults.qm")) {
-        //we assume the user wants normal font size
-        QStringList fs = t.translate("FontMap",bf.toAscii().constData(),0).split(',');
-        if ( fs.count() == 3 ) {
-            qLog(I18n) << "New Font:" << fs[1] << "Font size:" << fs[2];
-            qpeconfig.setValue("Appearance/FontFamily", fs[1]);
-            qpeconfig.setValue("Appearance/FontSize", fs[2]);
-        }
-    } else{ //drop back to default font
-        // simply read what is in etc/default/Fontmap.conf
-        //if we cannot find FontMap.conf use hardcoded value
-        QStringList fs = bf.split(',');
-        if ( fs.count() == 3 ) {
-            qLog(I18n) << "New Font:" << fs[1] << "Font size:" << fs[2];
-            qpeconfig.setValue("Appearance/FontFamily", fs[1]);
-            qpeconfig.setValue("Appearance/FontSize", fs[2]);
-        } else {
-            qLog(I18n) << "Could not determine font, dropping back to dejavu";
-            qpeconfig.setValue("Appearance/FontFamily", "dejavau");
-            qpeconfig.setValue("Appearance/FontSize", "7");
-        }
-    }
+    //remove the current font selection and let the new language determine
+    //what the font should be
+    QSettings qpeconfig("Trolltech", "qpe");
+    qpeconfig.beginGroup("Font");
+    qpeconfig.remove("");
+
     //remove the current date format and let the new language determine
     //what the format should be
     qpeconfig.remove("Date/DateFormat");
 
     qpeconfig.sync();
-
 
     if( lang != chosenLanguage ) {
         QtopiaIpcEnvelope e("QPE/System","language(QString)");

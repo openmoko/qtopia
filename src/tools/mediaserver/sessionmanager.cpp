@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,177 +19,246 @@
 **
 ****************************************************************************/
 
-#include <qdebug.h>
-#include <qtimer.h>
-#include <qtopiaipcenvelope.h>
+#include <QTimer>
+#include <QValueSpaceObject>
+#include <QMediaServerSession>
+#include <QMediaSessionRequest>
+#include <QDebug>
 
-#include "mediaengine.h"
-#include "mediasession.h"
+#include "mediaagent.h"
+#include "domainmanager.h"
+#include "sessionmanagersession.h"
 
 #include "sessionmanager.h"
+
 
 
 namespace mediaserver
 {
 
-
-// {{{ SessionManagerSession
-class SessionManagerSession : public MediaSession
+// {{{ SessionStatusMonitor
+class SessionStatusMonitor : public QObject
 {
     Q_OBJECT
 
 public:
-    SessionManagerSession(MediaSession* mediaSession,
-                          SessionManager* sessionManager):
-        m_mediaSession(mediaSession),
-        m_sessionManager(sessionManager)
-    {
-        // XXX: Re-emit
-        connect(m_mediaSession, SIGNAL(playerStateChanged(QtopiaMedia::State)),
-                this, SLOT(stateChanged(QtopiaMedia::State)));
-        connect(m_mediaSession, SIGNAL(positionChanged(quint32)),
-                this, SIGNAL(positionChanged(quint32)));
-        connect(m_mediaSession, SIGNAL(lengthChanged(quint32)),
-                this, SIGNAL(lengthChanged(quint32)));
-        connect(m_mediaSession, SIGNAL(volumeChanged(int)),
-                this, SIGNAL(volumeChanged(int)));
-        connect(m_mediaSession, SIGNAL(volumeMuted(bool)),
-                this, SIGNAL(volumeMuted(bool)));
-        connect(m_mediaSession, SIGNAL(interfaceAvailable(const QString&)),
-                this, SIGNAL(interfaceAvailable(const QString&)));
-        connect(m_mediaSession, SIGNAL(interfaceUnavailable(const QString&)),
-                this, SIGNAL(interfaceUnavailable(const QString&)));
-    }
-
-    ~SessionManagerSession()
-    {
-        delete m_mediaSession;
-    }
-
-    void start()
-    {
-        if (m_sessionManager->canStart(m_mediaSession))
-            m_mediaSession->start();
-    }
-
-    void pause()
-    {
-        m_mediaSession->pause();
-    }
-
-    void stop()
-    {
-        m_mediaSession->stop();
-    }
-
-    void suspend()
-    {
-        m_mediaSession->suspend();
-    }
-
-    void resume()
-    {
-        m_mediaSession->resume();
-    }
-
-    void seek(quint32 ms)
-    {
-        m_mediaSession->seek(ms);
-    }
-
-    quint32 length()
-    {
-        return m_mediaSession->length();
-    }
-
-    void setVolume(int volume)
-    {
-        m_mediaSession->setVolume(volume);
-    }
-
-    int volume() const
-    {
-        return m_mediaSession->volume();
-    }
-
-    void setMuted(bool mute)
-    {
-        m_mediaSession->setMuted(mute);
-    }
-
-    bool isMuted() const
-    {
-        return m_mediaSession->isMuted();
-    }
-
-    QtopiaMedia::State playerState() const
-    {
-        return m_mediaSession->playerState();
-    }
-
-    QString errorString()
-    {
-        return m_mediaSession->errorString();
-    }
-
-    void setDomain(QString const& domain)
-    {
-        m_mediaSession->setDomain(domain);
-    }
-
-    QString domain() const
-    {
-        return m_mediaSession->domain();
-    }
-
-    QStringList interfaces()
-    {
-        return m_mediaSession->interfaces();
-    }
-
-    MediaSession*   m_mediaSession;
-    SessionManager* m_sessionManager;
+    SessionStatusMonitor(QValueSpaceObject* statusStore,
+                   QMediaServerSession* session,
+                   QObject* parent = 0);
 
 private slots:
-    void stateChanged(QtopiaMedia::State state)
-    {
-        switch (state)
-        {
-        case QtopiaMedia::Playing:
-            m_sessionManager->sessionPlaying(m_mediaSession);
-            break;
+    void sessionStateChanged(QtopiaMedia::State state);
+    void sessionDestroyed();
 
-        case QtopiaMedia::Stopped:
-        case QtopiaMedia::Error:
-            m_sessionManager->sessionStopped(m_mediaSession);
-            break;
+private:
+    QValueSpaceObject*      m_statusStore;
+    QString                 m_sessionId;
+    QMediaServerSession*    m_session;
+};
 
-        default:
-            ;
-        }
+SessionStatusMonitor::SessionStatusMonitor
+(
+ QValueSpaceObject* statusStore,
+ QMediaServerSession* session,
+ QObject* parent
+):
+    QObject(parent),
+    m_statusStore(statusStore),
+    m_session(session)
+{
+    connect(m_session, SIGNAL(playerStateChanged(QtopiaMedia::State)),
+            this, SLOT(sessionStateChanged(QtopiaMedia::State)));
 
-        emit playerStateChanged(state);
-    }
+    connect(m_session, SIGNAL(destroyed(QObject*)),
+            this, SLOT(sessionDestroyed()));
+
+    m_sessionId = session->id();
+
+    m_statusStore->setAttribute(m_sessionId + "/Domain", session->domain());
+    m_statusStore->setAttribute(m_sessionId + "/Data", session->reportData());
+    m_statusStore->setAttribute(m_sessionId + "/State", int(session->playerState()));
+}
+
+void SessionStatusMonitor::sessionStateChanged(QtopiaMedia::State state)
+{
+    m_statusStore->setAttribute(m_sessionId + "/State", int(state));
+}
+
+void SessionStatusMonitor::sessionDestroyed()
+{
+    m_statusStore->removeAttribute(m_sessionId);
+    deleteLater();
+}
+// }}}
+
+
+// {{{ SessionInfo
+class SessionInfo
+{
+public:
+    enum SessionState { Starting, Activated, Deactivated, Stopped };
+
+    SessionInfo():state(Stopped) {}
+
+    void addSession(SessionManagerSession);
+
+    SessionState    state;
 };
 // }}}
 
 // {{{ SessionManagerPrivate
-class SessionManagerPrivate
+class SessionManagerPrivate :
+    public QObject,
+    public DomainManagerCallback
 {
+    Q_OBJECT
+
+    typedef QMap<SessionManagerSession*, SessionInfo>   ManagedSessions;
+
 public:
-    MediaEngine*            mediaEngine;
-    QList<MediaSession*>    suspendedSessions;
-    QList<MediaSession*>    nonActivatedSessions;
-    MediaSession*           activeSession;
+    SessionManagerPrivate(SessionManager* manager);
+    ~SessionManagerPrivate();
+
+    void domainChange(QStringList const& newDomains, QStringList const& oldDomains);
+
+public slots:
+    void sessionStateChange(QtopiaMedia::State state);
+
+public:
+    bool                wrapSessions;
+    int                 activePlayingSessions;
+    MediaAgent*         mediaAgent;
+    DomainManager*      domainManager;
+    SessionManager*     sessionManager;
+    ManagedSessions     managedSessions;
+    QValueSpaceObject*  status;
 };
+
+
+SessionManagerPrivate::SessionManagerPrivate(SessionManager* manager):
+    wrapSessions(false),
+    activePlayingSessions(0),
+    sessionManager(manager)
+{
+    mediaAgent = MediaAgent::instance();
+    domainManager = DomainManager::instance();
+
+    status = new QValueSpaceObject("/Media/Sessions");
+
+    // Should Wrap?
+    QStringList const& audioDomains = domainManager->availableDomains();
+
+    if (audioDomains.size() > 1)
+    {
+        QStringList::const_iterator it = audioDomains.begin();
+        int priority = domainManager->priorityForDomain(*it);
+
+        for (++it; it != audioDomains.end(); ++it)
+        {
+            if (priority != domainManager->priorityForDomain(*it))
+            {
+                wrapSessions = true;
+                domainManager->addCallback(this);
+                break;
+            }
+        }
+    }
+}
+
+SessionManagerPrivate::~SessionManagerPrivate()
+{
+    delete status;
+}
+
+void SessionManagerPrivate::domainChange
+(
+ QStringList const& activeDomains,
+ QStringList const& inactiveDomains
+)
+{
+    ManagedSessions::iterator it;
+
+    // Deactivate any
+    for (it = managedSessions.begin(); it != managedSessions.end(); ++it)
+    {
+        if (!domainManager->isActiveDomain(it.key()->domain()))
+        {
+            switch (it.value().state)
+            {
+            case SessionInfo::Activated:
+                it.key()->deactivate();
+                it.value().state = SessionInfo::Deactivated;
+                break;
+
+            case SessionInfo::Starting:
+            case SessionInfo::Deactivated:
+            case SessionInfo::Stopped:
+                break;
+            }
+        }
+    }
+
+    // Activate any
+    for (it = managedSessions.begin(); it != managedSessions.end(); ++it)
+    {
+        if (domainManager->isActiveDomain(it.key()->domain()))
+        {
+            switch (it.value().state)
+            {
+            case SessionInfo::Starting:
+            case SessionInfo::Deactivated:
+                it.key()->activate();
+                it.value().state = SessionInfo::Activated;
+                break;
+
+            case SessionInfo::Activated:
+            case SessionInfo::Stopped:
+                break;
+            }
+        }
+    }
+}
+
+SessionManager* SessionManager::instance()
+{
+    static SessionManager self;
+
+    return &self;
+}
+
+// {{{ state change
+void SessionManagerPrivate::sessionStateChange(QtopiaMedia::State state)
+{
+    int current = activePlayingSessions;
+
+    // count playing state
+    switch (state)
+    {
+    case QtopiaMedia::Playing:
+        ++activePlayingSessions;
+        break;
+
+    case QtopiaMedia::Paused:
+    case QtopiaMedia::Stopped:
+    case QtopiaMedia::Error:
+        --activePlayingSessions;
+        break;
+
+    case QtopiaMedia::Buffering:
+        break;
+    }
+
+    // emit
+    if (current != activePlayingSessions)
+        sessionManager->activeSessionCountChanged(activePlayingSessions);
+}
+// }}}
 // }}}
 
 // {{{ SessionManager
-SessionManager::SessionManager(MediaEngine* mediaEngine):
-    d(new SessionManagerPrivate)
+SessionManager::SessionManager()
 {
-    d->mediaEngine = mediaEngine;
-    d->activeSession = 0;
+    d = new SessionManagerPrivate(this);
 }
 
 SessionManager::~SessionManager()
@@ -197,189 +266,98 @@ SessionManager::~SessionManager()
     delete d;
 }
 
-MediaSession* SessionManager::manageSession(MediaSession* mediaSession)
+QMediaServerSession* SessionManager::createSession(QMediaSessionRequest const& sessionRequest)
 {
-    return new SessionManagerSession(mediaSession, this);
-}
+    QMediaServerSession*      mediaSession;
 
-void SessionManager::releaseSession(MediaSession* mediaSession)
-{
-    SessionManagerSession*  sms = qobject_cast<SessionManagerSession*>(mediaSession);
+    // Create the session
+    mediaSession = d->mediaAgent->createSession(sessionRequest);
 
-    if (sms != 0)
-        mediaSession = sms->m_mediaSession;
-
-    if (d->activeSession == mediaSession)
+    if (mediaSession != 0)
     {
-        sessionStopped(mediaSession);
+        QString const& domain = sessionRequest.domain();
 
-        d->activeSession = 0;
-    }
-    else
-    {
-        int index;
-        if ((index = d->nonActivatedSessions.indexOf(mediaSession)) != -1)
-            d->nonActivatedSessions.removeAt(index);
-        else
-        if ((index = d->suspendedSessions.indexOf(mediaSession)) != -1)
-            d->suspendedSessions.removeAt(index);
-    }
-}
+        // Set domain
+        mediaSession->setDomain(domain);
 
-void SessionManager::activeDomainChanged()
-{
-    QTimer::singleShot(500, this, SLOT(rescheduleSessions()));
-}
+        // Listen to aggregated status to set suspend state of device
+        connect(mediaSession, SIGNAL(playerStateChanged(QtopiaMedia::State)),
+                d, SLOT(sessionStateChange(QtopiaMedia::State)));
 
-void SessionManager::setVolume(int volume)
-{
-    d->activeSession->setVolume(volume);
-}
+        // Monitor status of the session
+        new SessionStatusMonitor(d->status, mediaSession, this);
 
-void SessionManager::increaseVolume(int increment)
-{
-    int volume = d->activeSession->volume();
-    if (volume + increment > 100)
-        d->activeSession->setVolume(100);
-    else
-        d->activeSession->setVolume(volume + increment);
-}
-
-void SessionManager::decreaseVolume(int decrement)
-{
-    int volume = d->activeSession->volume();
-    if (volume - decrement < 0)
-        d->activeSession->setVolume(0);
-    else
-        d->activeSession->setVolume(volume - decrement);
-}
-
-void SessionManager::setMuted(bool mute)
-{
-    d->activeSession->setMuted(mute);
-}
-
-
-void SessionManager::rescheduleSessions()
-{
-    bool        newActiveSession = false;
-
-    QString domain = d->mediaEngine->activeDomain();
-
-    if (domain.isEmpty())
-        domain = "Default";
-
-    if (d->activeSession == 0 ||
-        d->activeSession->playerState() == QtopiaMedia::Stopped ||
-        d->activeSession->playerState() == QtopiaMedia::Error)
-    {
-        if (d->nonActivatedSessions.size() > 0)
+        // Wrap
+        if (d->wrapSessions)
         {
-            // Check non-activated sessions in same domain
-            QList<MediaSession*>::iterator  it = d->nonActivatedSessions.begin();
+            SessionManagerSession*  session = new SessionManagerSession(this, mediaSession);
 
-            for (;it != d->nonActivatedSessions.end(); ++it)
-            {
-                if (domain.compare((*it)->domain(), Qt::CaseInsensitive) == 0)
-                {   // OK, activate it
-                    d->activeSession = *it;
-                    d->nonActivatedSessions.erase(it);
+            d->managedSessions.insert(session, SessionInfo());
 
-                    d->activeSession->start();
-
-                    newActiveSession = true;
-                    break;
-                }
-            }
-        }
-
-        if (!newActiveSession && d->suspendedSessions.size() > 0)
-        {
-            // Check suspended
-            QList<MediaSession*>::iterator it = d->suspendedSessions.begin();
-
-            for (;it != d->suspendedSessions.end(); ++it)
-            {
-                if (domain.compare((*it)->domain(), Qt::CaseInsensitive) == 0)
-                {
-                    d->activeSession = *it;
-                    d->suspendedSessions.erase(it);
-
-                    d->activeSession->resume();
-                    break;
-                }
-            }
+            mediaSession = session;
         }
     }
-    else
-    {
-        if (domain.compare(d->activeSession->domain(), Qt::CaseInsensitive) != 0)
-        {
-            d->suspendedSessions.push_front(d->activeSession);
-            d->activeSession->suspend();
-            d->activeSession = 0;
 
-            QTimer::singleShot(500, this, SLOT(rescheduleSessions()));
-        }
-    }
+    return mediaSession;
 }
 
-bool SessionManager::canStart(MediaSession* mediaSession)
+void SessionManager::destroySession(QMediaServerSession* mediaSession)
 {
-    bool    rc;
-    QString activeDomain = d->mediaEngine->activeDomain();
+    QMediaServerSession*    session = mediaSession;
 
-    if (mediaSession == d->activeSession)
+    if (d->wrapSessions)
     {
-        rc = true;
+        SessionManagerSession*  wrapper = qobject_cast<SessionManagerSession*>(mediaSession);
+
+        d->managedSessions.remove(wrapper);
+
+        session = wrapper->wrappedSession();
+
+        delete wrapper;
     }
-    else if (activeDomain.compare("RingTone", Qt::CaseInsensitive) == 0 &&
-             mediaSession->domain().compare("RingTone", Qt::CaseInsensitive) != 0)
+
+    // send to agent to remove
+    d->mediaAgent->destroySession(session);
+}
+
+bool SessionManager::sessionCanStart(SessionManagerSession* session)
+{
+    bool            rc = false;
+    SessionInfo&    info = d->managedSessions[session];
+
+
+    switch (info.state)
     {
-        d->nonActivatedSessions.push_front(mediaSession);
+    case SessionInfo::Starting:
+    case SessionInfo::Deactivated:
         rc = false;
-    }
-    else if (d->activeSession == 0)
-    {
-        d->activeSession = mediaSession;
-        rc = true;
-    }
-    else
-    {
-        d->suspendedSessions.push_front(d->activeSession);
-        d->activeSession->suspend();
-        d->activeSession = mediaSession;
+        break;
 
+    case SessionInfo::Activated:
         rc = true;
+        break;
+
+    case SessionInfo::Stopped:
+        rc = d->domainManager->activateDomain(session->domain());
+        info.state = rc ? SessionInfo::Activated : SessionInfo::Starting;
+        break;
     }
 
     return rc;
 }
 
-void SessionManager::sessionPlaying(MediaSession* mediaSession)
+void SessionManager::sessionStopped(SessionManagerSession* session)
 {
-    Q_UNUSED(mediaSession);
-
-    QtopiaIpcEnvelope   e("QPE/AudioVolumeManager", "setActiveDomain(QString)");
-
-    e << QString("Media");
+    d->domainManager->deactivateDomain(session->domain());
+    d->managedSessions[session].state = SessionInfo::Stopped;
 }
-
-void SessionManager::sessionStopped(MediaSession* mediaSession)
-{
-    if (mediaSession == d->activeSession)
-    {
-        QTimer::singleShot(500, this, SLOT(rescheduleSessions()));
-    }
-
-    QtopiaIpcEnvelope   e("QPE/AudioVolumeManager", "resetActiveDomain(QString)");
-
-    e << QString("Media");
-}
-// }}}
+// }}} SessionManager
 
 }   // ns mediaserver
 
 
 #include "sessionmanager.moc"
+
+
+
 

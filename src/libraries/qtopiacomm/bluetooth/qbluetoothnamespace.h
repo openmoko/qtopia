@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,15 +19,17 @@
 **
 ****************************************************************************/
 
-#ifndef __QBLUETOOTHGLOBAL_H__
-#define __QBLUETOOTHGLOBAL_H__
+#ifndef __QBLUETOOTHNAMESPACE_H__
+#define __QBLUETOOTHNAMESPACE_H__
 
 #include <QtGlobal>
 #include <QMetaType>
 #include <QFlags>
 
-#include <qtopiaglobal.h>
+#include <qbluetoothglobal.h>
+#ifdef QTOPIA_BLUETOOTH
 #include <qtopiaipcmarshal.h>
+#endif
 
 class QString;
 #ifndef Q_QDOC
@@ -100,24 +102,27 @@ public:
 Q_DECLARE_OPERATORS_FOR_FLAGS(QBluetooth::ServiceClasses)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QBluetooth::SecurityOptions)
 
-struct QTOPIACOMM_EXPORT quint128 {
+struct QBLUETOOTH_EXPORT quint128 {
     quint128();
     quint128(const quint8 indata[16]);
 
     quint8 data[16];
 };
 
-struct QTOPIACOMM_EXPORT qint128 {
+struct QBLUETOOTH_EXPORT qint128 {
     qint128();
     qint128(const quint8 indata[]);
 
     quint8 data[16];
 };
 
-Q_DECLARE_USER_METATYPE_ENUM(QBluetooth::SDPProfile);
-Q_DECLARE_USER_METATYPE_ENUM(QBluetooth::SecurityOptions);
-Q_DECLARE_METATYPE(qint128);
-Q_DECLARE_METATYPE(quint128);
-Q_DECLARE_METATYPE(qint8);  //TODO: Should Qt support this out of the box?
+#ifdef QTOPIA_BLUETOOTH
+Q_DECLARE_USER_METATYPE_ENUM(QBluetooth::SDPProfile)
+Q_DECLARE_USER_METATYPE_ENUM(QBluetooth::SecurityOptions)
+#endif
+
+Q_DECLARE_METATYPE(qint128)
+Q_DECLARE_METATYPE(quint128)
+Q_DECLARE_METATYPE(qint8) //TODO: Should Qt support this out of the box?
 
 #endif

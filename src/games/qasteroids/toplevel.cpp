@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** $TROLLTECH_DUAL_LICENSE$
 **
@@ -40,54 +40,29 @@ struct GameLevelStruct
 
 #define MAX_GAME_LEVELS      16
 
-#ifndef QTOPIA_PHONE
-
 GameLevelStruct gameLevels[MAX_GAME_LEVELS] =
 {
-    { 1, 0.4 },
-    { 1, 0.6 },
-    { 2, 0.5 },
-    { 2, 0.7 },
-    { 2, 0.8 },
-    { 3, 0.6 },
-    { 3, 0.7 },
-    { 3, 0.8 },
-    { 4, 0.6 },
-    { 4, 0.7 },
-    { 4, 0.8 },
-    { 5, 0.7 },
-    { 5, 0.8 },
-    { 5, 0.9 },
-    { 5, 1.0 }
+    { 1, 0.2+0.2 },
+    { 1, 0.3+0.2 },
+    { 1, 0.25+0.2 },
+    { 1, 0.35+0.2 },
+    { 2, 0.4+0.2 },
+    { 2, 0.3+0.2 },
+    { 2, 0.35+0.2 },
+    { 2, 0.4+0.2 },
+    { 3, 0.3+0.2 },
+    { 3, 0.35+0.2 },
+    { 3, 0.4+0.2 },
+    { 3, 0.35+0.2 },
+    { 4, 0.4+0.2 },
+    { 4, 0.45+0.2 },
+    { 4, 0.5+0.2 }
 };
-
-#else
-
-GameLevelStruct gameLevels[MAX_GAME_LEVELS] =
-{
-    { 1, 0.2 },
-    { 1, 0.3 },
-    { 1, 0.25 },
-    { 1, 0.35 },
-    { 2, 0.4 },
-    { 2, 0.3 },
-    { 2, 0.35 },
-    { 2, 0.4 },
-    { 3, 0.3 },
-    { 3, 0.35 },
-    { 3, 0.4 },
-    { 3, 0.35 },
-    { 4, 0.4 },
-    { 4, 0.45 },
-    { 4, 0.5 }
-};
-
-#endif
 
 #if 0
 
 /*
-  These had been used for the QTOPIA_PHONE case,
+  These had been used for the Qtopia Phone case,
   but they are too slow on the GreenPhone. mws
  */
 GameLevelStruct gameLevels[MAX_GAME_LEVELS] =
@@ -107,6 +82,25 @@ GameLevelStruct gameLevels[MAX_GAME_LEVELS] =
     { 4, 0.1 },
     { 4, 0.2 },
     { 4, 0.3 }
+};
+
+GameLevelStruct gameLevels[MAX_GAME_LEVELS] =
+{
+    { 1, 0.2 },
+    { 1, 0.3 },
+    { 1, 0.25 },
+    { 1, 0.35 },
+    { 2, 0.4 },
+    { 2, 0.3 },
+    { 2, 0.35 },
+    { 2, 0.4 },
+    { 3, 0.3 },
+    { 3, 0.35 },
+    { 3, 0.4 },
+    { 3, 0.35 },
+    { 4, 0.4 },
+    { 4, 0.45 },
+    { 4, 0.5 }
 };
 
 #endif
@@ -174,11 +168,8 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
       score_(0),
       currentLevel_(0)
 {
-    QtopiaApplication::grabKeyboard();
-
-#ifdef QTOPIA_PHONE
-    contextMenu_ = 0;
-#endif
+    // This call was an empty function and has now been removed
+    // QtopiaApplication::grabKeyboard();
 
     setWindowTitle(tr("Asteroids"));
     QPalette p = buildPalette();
@@ -212,12 +203,6 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
     actions_.insert(Qt::Key_Right,RotateRight);
     actions_.insert(Qt::Key_Down,Brake);
 
-#ifndef QTOPIA_PHONE
-    actions_.insert(Qt::Key_Enter,Shoot);
-    actions_.insert(Qt::Key_Space,Shoot);
-    actions_.insert(Qt::Key_Z,Teleport);
-    actions_.insert(Qt::Key_P,Pause);
-#else
     actions_.insert(Qt::Key_NumberSign,Teleport);
     actions_.insert(Qt::Key_Asterisk,Pause);
     actions_.insert(Qt::Key_Select,Shoot);
@@ -227,15 +212,8 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
                            "qasteroids/ship/ship0000",
                            tr("Launch"));
     contextMenu_ = QSoftMenuBar::menuFor(this);
-#endif
 
-#ifndef QTOPIA_PHONE
-    const QValueList<QDeviceButton>& buttons =
-        QDeviceButtonManager::instance().buttons();
-    actions_.insert(buttons[0].keycode(),Launch);
-    actions_.insert(buttons[1].keycode(),Shield);
-#endif
-
+    //QString s = tr("BOZO");
     QString s = tr("Select (OK)");
     view_->constructMessages(s);
     setFocusPolicy(Qt::StrongFocus);
@@ -362,12 +340,8 @@ KAstTopLevel::buildTopRow(QWidget* parent)
       count LCD with a single digit. The maximum number of
       ships is 3, i think.
      */
-#ifdef QTOPIA_PHONE
     label = new QLabel(parent);
     label->setPixmap(QPixmap(":image/ship/ship0000"));
-#else
-    label = new QLabel(tr("Ships"),parent);
-#endif
     label->setFont(labelFont);
     label->setPalette(palette);
     layout->addWidget(label);
@@ -534,7 +508,7 @@ KAstTopLevel::keyPressEvent(QKeyEvent* event)
             break;
 
         case Shield:
-	    if (KSprite::ship()) 
+	    if (KSprite::ship())
 		view_->raiseShield();
             break;
 
@@ -616,10 +590,10 @@ KAstTopLevel::keyReleaseEvent(QKeyEvent* event)
             startNewGame();
             break;
         case Populate_Powerups:
-	    //populatePowerups();
+	    populatePowerups();
 	    break;
         case Populate_Rocks:
-	    //populateRocks();
+	    populateRocks();
 	    break;
         case Pause:
             {
@@ -696,8 +670,8 @@ void KAstTopLevel::populateRocks()
 	qreal y = KSprite::ship()->y();
 	newRock->setPos(x + (x_multiplier[i%4] * 10 * KSprite::randInt(10)),
 			y + (y_multiplier[i%4] * 10 * KSprite::randInt(10)));
-	newRock->setVelocity(dx + (x_multiplier[i%4] * 0.25) + r,
-			     dy + (y_multiplier[i%4] * 0.25) + r);
+	newRock->setVelocity(dx + (x_multiplier[i%4] * 0.25) + r + 5.0,
+			     dy + (y_multiplier[i%4] * 0.25) + r + 5.0);
 	newRock->setImage(KSprite::randInt(32));
 	newRock->show();
 	newRock->wrap();
@@ -825,7 +799,6 @@ void KAstTopLevel::slotShipKilled()
         endGame();
         reportStatistics();
     }
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::setLabel(this,
                            Qt::Key_0,
                            "qasteroids/ship/ship0000",
@@ -833,7 +806,6 @@ void KAstTopLevel::slotShipKilled()
     //QSoftMenuBar::clearLabel(this,Qt::Key_Context1);
     if (!contextMenu_)
         contextMenu_ = QSoftMenuBar::menuFor(this);
-#endif
 }
 
 /*!
@@ -864,7 +836,7 @@ void KAstTopLevel::endGame()
   This slot increments the score by an appropriate amount
   and displays the updated score. It also plays the rock
   destroyed sound.
- */ 
+ */
 void KAstTopLevel::slotUpdateScore(int key)
 {
     score_ += 10 * key;

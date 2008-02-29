@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/examples/blockingfortuneclient.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/blockingfortuneclient.qdoc -->
 <head>
-  <title>Qt 4.2: Blocking Fortune Client Example</title>
+  <title>Qt 4.3: Blocking Fortune Client Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Blocking Fortune Client Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Blocking Fortune Client Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="network-blockingfortuneclient-blockingclient-cpp.html">network/blockingfortuneclient/blockingclient.cpp</a></li>
@@ -25,7 +26,7 @@
 <p align="center"><img src="images/blockingfortuneclient-example.png" /></p><p><a href="qtcpsocket.html">QTcpSocket</a> supports two general approaches to network programming:</p>
 <ul>
 <li><i>The asynchronous (non-blocking) approach.</i> Operations are scheduled and performed when control returns to Qt's event loop. When the operation is finished, <a href="qtcpsocket.html">QTcpSocket</a> emits a signal. For example, <a href="qabstractsocket.html#connectToHost">QTcpSocket::connectToHost</a>() returns immediately, and when the connection has been established, <a href="qtcpsocket.html">QTcpSocket</a> emits <a href="qabstractsocket.html#connected">connected()</a>.</li>
-<li><i>The synchronous (blocking) approach.</i> In non-GUI and multithreaded applications, you can call the <tt>waitFor...()</tt> functions (e.g., <a href="qabstractsocket.html#waitForConnected">QTcpSocket::waitForConnected</a>()) to suspend the calling thread until the operation has completed, instead of connecting to signals.</li>
+<li><i>The synchronous (blocking) approach.</i> In non-GUI and multithreaded applications, you can call the <tt>waitFor...()</tt> functions (e.g&#x2e;, <a href="qabstractsocket.html#waitForConnected">QTcpSocket::waitForConnected</a>()) to suspend the calling thread until the operation has completed, instead of connecting to signals.</li>
 </ul>
 <p>The implementation is very similar to the <a href="network-fortuneclient.html">Fortune Client</a> example, but instead of having <a href="qtcpsocket.html">QTcpSocket</a> as a member of the main class, doing asynchronous networking in the main thread, we will do all network operations in a separate thread and use <a href="qtcpsocket.html">QTcpSocket</a>'s blocking API.</p>
 <p>The purpose of this example is to demonstrate a pattern that you can use to simplify your networking code, without losing responsiveness in your user interface. Use of Qt's blocking network API often leads to simpler code, but because of its blocking behavior, it should only be used in non-GUI threads to prevent the user interface from freezing. But contrary to what many think, using threads with <a href="qthread.html">QThread</a> does not necessarily add unmanagable complexity to your application.</p>
@@ -91,7 +92,7 @@
                  return;
              }
          }</pre>
-<p>This step is to read the size of the packet. Although we are only reading two bytes here, and the <tt>while</tt> loop may seem to overdo it, we present this code to demonstrate a good pattern for waiting for data using <a href="qiodevice.html#waitForReadyRead">QTcpSocket::waitForReadyRead</a>(). It goes like this: For as long as we still need more data, we call waitForReadyRead(). If it returns false, we abort the operation. After this statement, we know that we have received enough data.</p>
+<p>This step is to read the size of the packet. Although we are only reading two bytes here, and the <tt>while</tt> loop may seem to overdo it, we present this code to demonstrate a good pattern for waiting for data using <a href="qabstractsocket.html#waitForReadyRead">QTcpSocket::waitForReadyRead</a>(). It goes like this: For as long as we still need more data, we call waitForReadyRead(). If it returns false, we abort the operation. After this statement, we know that we have received enough data.</p>
 <pre>         quint16 blockSize;
          QDataStream in(&amp;socket);
          in.setVersion(QDataStream::Qt_4_0);
@@ -103,7 +104,7 @@
                  return;
              }
          }</pre>
-<p>Again, we'll use a loop that waits for more data by calling <a href="qiodevice.html#waitForReadyRead">QTcpSocket::waitForReadyRead</a>(). In this loop, we're waiting until <a href="qabstractsocket.html#bytesAvailable">QTcpSocket::bytesAvailable</a>() returns the full packet size.</p>
+<p>Again, we'll use a loop that waits for more data by calling <a href="qabstractsocket.html#waitForReadyRead">QTcpSocket::waitForReadyRead</a>(). In this loop, we're waiting until <a href="qabstractsocket.html#bytesAvailable">QTcpSocket::bytesAvailable</a>() returns the full packet size.</p>
 <pre>         QMutexLocker locker(&amp;mutex);
 
          QString fortune;
@@ -188,6 +189,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

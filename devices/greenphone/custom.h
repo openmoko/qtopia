@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,8 +26,6 @@
 #if defined(__GNUC__) && (__GNUC__ > 2)
 #define QPE_USE_MALLOC_FOR_NEW
 #endif
-
-#define QPE_DEFAULT_TODAY_MODE "Daily"
 
 #define QPE_NEED_CALIBRATION
 
@@ -64,3 +62,24 @@
 // Disable media player visualization
 #define NO_VISUALIZATION
 
+// Define the devices whose packages are compatible with this device,
+// by convention the first device listed is this device.
+#define QTOPIA_COMPATIBLE_DEVICES "Greenphone"
+
+// Start Synchronization daemons for TCP and Serial comms by default.
+#define QDSYNC_DEFAULT_PORTS QStringList() << "tcp" << "serial"
+// Specify the location of the serial port
+#define QDSYNC_DEFAULT_SERIAL_PORT "/dev/ttyUSB0"
+// Specify the time to delay the first Synchronization instance from running
+#define QDSYNC_STARTUP_DELAY 30000 // 30 seconds
+// Specify the device name to report
+#define QDSYNC_MODEL "Greenphone"
+
+#ifdef QTOPIA_DRM
+#define BSCI_DATABASE_PATH "/etc/bscidrm2"
+#endif
+
+// Define the name of the Video4Linux device to use for the camera.
+#ifndef V4L_VIDEO_DEVICE
+#define V4L_VIDEO_DEVICE            "/dev/video"
+#endif

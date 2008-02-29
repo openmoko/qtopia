@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,6 +23,204 @@
 
 #include <qcontent.h>
 
+MyShufflePlaylist::MyShufflePlaylist( const QContentFilter& filter )
+    : m_recent( 15 ), m_filter( filter )
+{
+    // Generate initial shuffle
+    for( int i = 0; i < 6; ++i ) {
+        QString random = randomTrack();
+        if( !random.isNull() ) {
+            m_list.append( random );
+        }
+    }
+}
+
+MyShufflePlaylist::~MyShufflePlaylist()
+{ }
+
+void MyShufflePlaylist::setPlaying( const QModelIndex& index )
+{
+    if( m_playing != index ) {
+        if( index.row() > 2 ) {
+            for( int i = 0; i < index.row() - 2; ++i ) { // ### FIXME tidy up
+                m_list.pop_front();
+
+                // If tracks cued, add a cued track
+                // Otherwise, add a random track
+                if( m_cued.count() ) {
+                    m_list.append( m_cued.takeFirst() );
+                } else {
+                    QString random = randomTrack();
+                    if( !random.isNull() ) {
+                        m_list.append( random );
+                    }
+                }
+            }
+
+            m_playing = MyShufflePlaylist::index( 2 );
+
+            // ### FIXME dirty
+            emit dataChanged( MyShufflePlaylist::index( 0 ), MyShufflePlaylist::index( m_list.count() - 1 ) );
+        } else {
+            m_playing = index;
+        }
+
+        emit playingChanged( m_playing );
+    }
+}
+
+QModelIndex MyShufflePlaylist::playing() const
+{
+    return m_playing;
+}
+
+static const QString mapping[3] = {"frequent","infrequent","never"};
+
+void MyShufflePlaylist::setProbability( const QModelIndex& index, Probability probability )
+{
+    QContent track = m_list[index.row()];
+
+    track.setProperty( "rating", mapping[probability] );
+    track.commit();
+}
+
+void MyShufflePlaylist::reset()
+{
+    QContentFilter filter = m_filter & QContentFilter( QContentFilter::Synthetic, "none/rating/never" );
+
+    QContentList tracks = QContentSet( filter ).items();
+    foreach( QContent track, tracks ) {
+        track.setProperty( "rating", QString() );
+        track.commit();
+    }
+}
+
+void MyShufflePlaylist::cue( Playlist* playlist )
+{
+    for( int i = 0; i < playlist->rowCount(); ++i ) {
+        QString track = playlist->data( playlist->index( i ), Playlist::Url ).toString();
+        m_recent.insert( track );
+
+        if( m_cued.count() < 3 ) {
+            m_list.insert( 3 + m_cued.count(), track );
+            m_cued.prepend( m_list.takeLast() );
+        } else {
+            m_cued.insert( m_cued.count() - 3, track );
+        }
+    }
+
+    // ### FIXME dirty
+    emit dataChanged( MyShufflePlaylist::index( 0 ), MyShufflePlaylist::index( m_list.count() - 1 ) );
+}
+
+void MyShufflePlaylist::playNow( Playlist* playlist )
+{
+    int front = 3 + m_cued.count();
+
+    for( int i = 0; i < playlist->rowCount(); ++i ) {
+        QString track = playlist->data( playlist->index( i ), Playlist::Url ).toString();
+        m_recent.insert( track );
+
+        m_list.insert( 3 + i, track );
+        m_cued.prepend( m_list.takeLast() );
+    }
+
+    // ### FIXME dirty
+    emit dataChanged( MyShufflePlaylist::index( 0 ), MyShufflePlaylist::index( m_list.count() - 1 ) );
+
+    setPlaying( index( 3 ) );
+}
+
+QVariant MyShufflePlaylist::data( const QModelIndex& index, int role ) const 
+{
+    if( !index.isValid() ) {
+        return QVariant();
+    }
+
+    if( index.row() < 0 || index.row() >= m_list.count() ) {
+        return QVariant();
+    }
+
+    QContent content = m_list[index.row()];
+
+    if( content.isValid() ) {
+        switch( role )
+        {
+        case Playlist::Title:
+            return content.name();
+        case Playlist::Url:
+            return content.fileName();
+        case Playlist::Artist:
+            return content.property( QContent::Artist );
+        case Playlist::Album:
+            return content.property( QContent::Album );
+        case Playlist::Genre:
+            return content.property( QContent::Genre );
+        case Playlist::AlbumCover:
+            {
+            QString coverfile = QFileInfo( content.fileName() ).path() + "/cover.jpg";
+            if( QFile::exists( coverfile ) ) {
+                return coverfile;
+            }
+            }
+            break;
+        default:
+            // Ignore
+            break;
+        }
+    }
+    return QVariant();
+}
+
+int MyShufflePlaylist::rowCount( const QModelIndex& parent ) const
+{
+    return m_list.count();
+}
+
+// 8 biased array
+static const int array[8] = {0,1,1,1,1,1,1,2};
+
+QString MyShufflePlaylist::randomTrack() const
+{
+    static const int MISS_THRESHOLD = 15;
+
+    int bias = array[rand()%8];
+
+    QContentFilter filter = m_filter & ~QContentFilter( QContentFilter::Synthetic, "none/rating/never" );
+
+    switch( bias )
+    {
+    case 2:
+        filter = filter & QContentFilter( QContentFilter::Synthetic, "none/rating/frequent" );
+    case 1:
+        filter = filter & ~QContentFilter( QContentFilter::Synthetic, "none/rating/infrequent" );
+    case 0:
+        break;
+    }
+
+    QContentList list = QContentSet( filter ).items();
+
+    if( list.isEmpty() ) {
+        list = QContentSet( m_filter & ~QContentFilter( QContentFilter::Synthetic, "none/rating/never" ) ).items();
+    }
+
+    int misses = 0;
+    while( !list.isEmpty() ) {
+        int index = rand() % list.count();
+        QString file = list[index].fileName();
+
+        if( m_recent.contains( file ) && misses < MISS_THRESHOLD ) {
+            ++misses;
+            // Go fish
+        } else {
+            m_recent.insert( file );
+            return file;
+        }
+    }
+
+    return QString();
+}
+
 void BasicPlaylist::setPlaying( const QModelIndex& index )
 {
     if( m_playing != index ) {
@@ -38,13 +236,28 @@ QModelIndex BasicPlaylist::playing() const
 void BasicPlaylist::cue( Playlist* playlist )
 {
     int cuepos = m_urls.count();
-    beginInsertRows( QModelIndex(), cuepos, cuepos + playlist->rowCount() );
+    beginInsertRows( QModelIndex(), cuepos, cuepos + playlist->rowCount() - 1 );
 
     for( int i = 0; i < playlist->rowCount(); ++i ) {
         m_urls.append( playlist->data( playlist->index( i ), Playlist::Url ).toString() );
     }
 
     endInsertRows();
+}
+
+void BasicPlaylist::playNow( Playlist* playlist )
+{
+    int cuepos = m_playing.isValid() ? m_playing.row() + 1 : m_urls.count();
+
+    beginInsertRows( QModelIndex(), cuepos, cuepos + playlist->rowCount() - 1 );
+
+    for( int i = 0; i < playlist->rowCount(); ++i ) {
+        m_urls.insert( cuepos + i, playlist->data( playlist->index( i ), Playlist::Url ).toString() );
+    }
+
+    endInsertRows();
+
+    setPlaying( index( cuepos ) );
 }
 
 void BasicPlaylist::remove( const QModelIndex& index )

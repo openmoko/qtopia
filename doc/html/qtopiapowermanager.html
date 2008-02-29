@@ -39,13 +39,20 @@
 <ul>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
+<a name="protected-functions"></a>
+<h3>Protected Functions</h3>
+<ul>
+<li><div class="fn"/>virtual void <b><a href="qtopiapowermanager.html#forceSuspend">forceSuspend</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+</ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 <li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
 </ul>
@@ -56,15 +63,9 @@
 <p>Qtopia provides an implementation for a phone device. These implementations support the following three timeouts and actions.</p>
 <p><a href="phonepowermanager.html">PhonePowerManager</a> (phone/phonepowermanager.cpp)</p>
 <ul>
-<li>show homescreen (and close open applications)</li>
 <li>dim backlight</li>
 <li>turn backlight off</li>
-</ul>
-<p>A PDA might have an implementation that provides the following three levels of actions:</p>
-<ul>
-<li>dim backlight</li>
-<li>turn backlight off</li>
-<li>suspend device (apm suspend)</li>
+<li>suspend device</li>
 </ul>
 <p>To extend Qtopia's default behaviour it is necessary to subclass either <a href="phonepowermanager.html">PhonePowerManager</a> or QtopiaPowerManager. A minimal subclass of QtopiaPowerManager has to reimplement the following functions:</p>
 <ul>
@@ -73,11 +74,14 @@
 </ul>
 <p>Applications can interact with the Qtopia power management via the <a href="qtopiapowermanagerservice.html">QtopiaPowerManagerService</a>. For more details on how to utilize services see the <a href="services.html">Services</a> documentation.</p>
 <p>This class provides functionality to temporarily restrict power management. It might be necessary to surpress the diming of the backlight e.g&#x2e;, when the mediaplayer is showing a video or to prevent the suspension of the device when the user is playing music. The <a href="qtopiapowerconstraintmanager.html">QtopiaPowerConstraintManager</a> ensures that application cannot request restriction beyond their own life time.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <p>See also <a href="qtopiapowermanager.html#setIntervals">setIntervals</a>(), <a href="qtopiapowermanager.html#save">save</a>(), <a href="phonepowermanager.html">PhonePowerManager</a>, <a href="qtopiapowermanagerservice.html">QtopiaPowerManagerService</a>, and <a href="qtopiapowerconstraintmanager.html">QtopiaPowerConstraintManager</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QtopiaPowerManager"></a>QtopiaPowerManager::QtopiaPowerManager ()</h3>
 <p>Constructs a <a href="qtopiapowermanager.html">QtopiaPowerManager</a> instance.</p>
+<h3 class="fn"><a name="forceSuspend"></a>void QtopiaPowerManager::forceSuspend ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<p>This function is called when the <a href="qtopiapowerconstraintmanager.html#forceSuspend">QtopiaPowerConstraintManager::forceSuspend</a>() signal is emitted. The default implementation suspends the system using the Suspend service. Custom implementations may want to re-implement this method if suspending can be prevented so as to avoid processing the <a href="systemsuspendhandler.html">SystemSuspendHandler</a> tasks.</p>
 <h3 class="fn"><a name="restore"></a>void QtopiaPowerManager::restore ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Restores the state of the device when power saving is active. This usually happens when the user interacts with the device.</p>
 <p>Reimplemented from <a href="qwsscreensaver.html#restore">QWSScreenSaver</a>.</p>
@@ -91,11 +95,11 @@
 <p>Resets the intervals to the default configuration for the power manager. The default values are defined in configuration files and can be edited by the user using the Power Management application.</p>
 <h3 class="fn"><a name="setIntervals"></a>void QtopiaPowerManager::setIntervals ( int * <i>a</i>, int <i>size</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This function sets the internal timeouts for the power manager. It expects an array <i>a</i> containing the timeout values and <i>size</i> being the number of entries in <i>a</i>. This allows any arbitrary number of power saving levels.</p>
-<p>This function needs to be reimplemented by subclasses.</p>
+<p>This function needs to be reimplemented by subclasses. However any overriding function should call QtopiaPowerManager::setIntervals() as part of its implementation.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

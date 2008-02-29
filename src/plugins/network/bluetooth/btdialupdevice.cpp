@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -33,20 +33,22 @@
 #include <QBluetoothRemoteDevice>
 #include <qbluetoothsdprecord.h>
 
+#include <unistd.h>
+
 BluetoothDialupDevice::BluetoothDialupDevice( QObject* parent )
     : QObject( parent ), btDevice( 0 ), serialPort( 0 ), socket( 0 )
 {
     btManager = new QBluetoothLocalDeviceManager( this );
-    connect( btManager, SIGNAL(deviceAdded(const QString&)),
-                this, SLOT(devAdded(const QString&)) );
-    connect( btManager, SIGNAL(deviceRemoved(const QString&)),
-                this, SLOT(devRemoved(const QString&)) );
+    connect( btManager, SIGNAL(deviceAdded(QString)),
+                this, SLOT(devAdded(QString)) );
+    connect( btManager, SIGNAL(deviceRemoved(QString)),
+                this, SLOT(devRemoved(QString)) );
     knownDevices = btManager->devices();
 
     reconnectDevice();
 
-    connect( &m_sdap, SIGNAL(searchComplete(const QBluetoothSdpQueryResult&)),
-            this, SLOT(searchComplete(const QBluetoothSdpQueryResult&)) );
+    connect( &m_sdap, SIGNAL(searchComplete(QBluetoothSdpQueryResult)),
+            this, SLOT(searchComplete(QBluetoothSdpQueryResult)) );
     remoteAddress = QBluetoothAddress::invalid;
 }
 
@@ -134,7 +136,16 @@ void BluetoothDialupDevice::reconnectDevice()
     }
     remoteAddress = QBluetoothAddress::invalid;
 
-    btDeviceName = btManager->defaultDevice();
+    //this is bad but hcid forces us to do this.
+    //deviceAdded() signal is triggered but the bluetooth device still doesn't exist
+    //as a consequence defaultDevice would return an empty string.
+    int i = 0;
+    while ( i < 30 && btDeviceName.isEmpty() ) {
+        usleep( 100 );
+        btDeviceName = btManager->defaultDevice();
+        i++;
+    }
+
     btDevice = new QBluetoothLocalDevice( btDeviceName, this );
     if ( btDevice->isValid() ) {
         connect( btDevice, SIGNAL(stateChanged(QBluetoothLocalDevice::State)),
@@ -154,14 +165,14 @@ void BluetoothDialupDevice::connectToDUNService( const QBluetoothAddress& remote
     }
     qLog(Network) << "Searching for Dialup Networking Profile";
     remoteAddress = remote;
-    m_sdap.cancelSearch();
     m_sdap.searchServices( remote, *btDevice, QBluetooth::DialupNetworkingProfile  );
 }
 
 void BluetoothDialupDevice::releaseDUNConnection()
 {
     if ( serialPort ) {
-        delete serialPort;
+        serialPort->disconnect();
+        serialPort->deleteLater();
         serialPort = 0;
         remoteAddress = QBluetoothAddress::invalid;
     }
@@ -186,16 +197,16 @@ void BluetoothDialupDevice::searchComplete( const QBluetoothSdpQueryResult& resu
                 delete serialPort;
 
             serialPort = new QBluetoothRfcommSerialPort( this );
-            QObject::connect(serialPort, SIGNAL(connected(const QString&)), this, SLOT(serialPortConnected(const QString&)));
+            QObject::connect(serialPort, SIGNAL(connected(QString)), this, SLOT(serialPortConnected(QString)));
             QObject::connect(serialPort, SIGNAL(error(QBluetoothRfcommSerialPort::Error)),
                              this, SLOT(serialPortError(QBluetoothRfcommSerialPort::Error)));
             serialPort->connect(btDevice->address(), remoteAddress, channel);
             return;
         }
     }
-    
     //the service doesn't exist
     //cancel connect process
+    qLog(Network) << "Target device doesn't provide Dialup Networking Profile";
     serialPortError( QBluetoothRfcommSerialPort::ConnectionFailed );
 }
 

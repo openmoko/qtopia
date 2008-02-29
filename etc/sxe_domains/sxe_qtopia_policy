@@ -1,0 +1,7 @@
+#!/bin/sh
+lidsconf -A -s ${BIN} -o ${SXE_DATABASE} -j WRITE
+lidsconf -A -s ${BIN} -o ${SXE_DATABASE}/sxe.policy -j WRITE
+lidsconf -A -s ${BIN} -o ${SXE_DATABASE}/sxe.profiles -j WRITE
+lidsconf -A -s ${BIN} -o ${SXE_DATABASE}/installs -j WRITE
+lidsconf -A -s ${BIN} -o ${SXE_DATABASE}/manifest -j WRITE
+lidsconf -A -s ${BIN} -o ${SXE_DATABASE}/keyfile -j WRITE

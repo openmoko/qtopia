@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Using Drag and Drop with Item Views</title>
+  <title>Qt 4.3: Using Drag and Drop with Item Views</title>
   <link rel="prev" href="model-view-convenience.html" />
   <link rel="contents" href="model-view-programming.html" />
   <link rel="next" href="model-view-proxy-models.html" />
@@ -19,7 +19,8 @@
 [<a href="model-view-programming.html">Contents</a>]
 [Next: <a href="model-view-proxy-models.html">Proxy Models</a>]
 </p>
-<h1 align="center">Using Drag and Drop with Item Views<br /><small></small></h1>
+<h1 align="center">Using Drag and Drop with Item Views<br /><span class="subtitle"></span>
+</h1>
 <ul><li><a href="#overview">Overview</a></li>
 <li><a href="#using-convenience-views">Using Convenience Views</a></li>
 <li><a href="#using-model-view-classes">Using Model/View Classes</a></li>
@@ -116,7 +117,7 @@
 <h3>Inserting Dropped Data into a Model</h3>
 <p>The way that any given model handles dropped data depends on both its type (list, table, or tree) and the way its contents is likely to be presented to the user. Generally, the approach taken to accommodate dropped data should be the one that most suits the model's underlying data store.</p>
 <p>Different types of model tend to handle dropped data in different ways. List and table models only provide a flat structure in which items of data are stored. As a result, they may insert new rows (and columns) when data is dropped on an existing item in a view, or they may overwrite the item's contents in the model using some of the data supplied. Tree models are often able to add child items containing new data to their underlying data stores, and will therefore behave more predictably as far as the user is concerned.</p>
-<p>Dropped data is handled by a model's reimplementation of <a href="qabstractitemmodel.html#dropMimeData">QAbstractItemModel::dropMimeData</a>(). For example, a model that handles a simple list of strings can provide an implementation that handles data dropped onto existing items separately to data dropped into the top level of the model (i.e., onto an invalid item).</p>
+<p>Dropped data is handled by a model's reimplementation of <a href="qabstractitemmodel.html#dropMimeData">QAbstractItemModel::dropMimeData</a>(). For example, a model that handles a simple list of strings can provide an implementation that handles data dropped onto existing items separately to data dropped into the top level of the model (i.e&#x2e;, onto an invalid item).</p>
 <p>The model first has to make sure that the operation should be acted on, the data supplied is in a format that can be used, and that its destination within the model is valid:</p>
 <pre> bool DragDropListModel::dropMimeData(const QMimeData *data,
      Qt::DropAction action, int row, int column, const QModelIndex &amp;parent)
@@ -180,6 +181,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

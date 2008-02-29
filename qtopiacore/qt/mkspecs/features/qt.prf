@@ -22,56 +22,15 @@ INCLUDEPATH = $$QMAKE_INCDIR_QT $$INCLUDEPATH #prepending prevents us from picki
 win32:INCLUDEPATH += $$QMAKE_INCDIR_QT/ActiveQt
 
 # As order does matter for static libs, we reorder the QT variable here
-TMPLIBS = svg qt3support sql xml opengl gui network core
+TMPLIBS = script svg qt3support sql xml opengl gui network core
 for(QTLIB, $$list($$TMPLIBS)) {
    contains(QT, $$QTLIB): QT_ORDERED += $$QTLIB
 }
 
 QT = $$QT_ORDERED
 
-#specific module settings
-!isEmpty(QT_BUILD_TREE):QMAKE_LIBDIR = $$QT_BUILD_TREE/lib $$QMAKE_LIBDIR #as above, prepending prevents us from picking up "stale" libs
-QMAKE_LIBDIR += $$QMAKE_LIBDIR_QT
-for(QTLIB, $$list($$lower($$unique(QT)))) {
-   qlib_style = 
-   !qt_debug:!qt_release {
-      CONFIG(debug, debug|release):qlib_style = debug
-      else:qlib_style = release
-   } else:CONFIG(qt_debug, qt_debug|qt_release) {
-      qlib_style = debug
-   } else {
-      qlib_style = release
-   }
-
-   qlib =
-   isEqual(QTLIB, gui):qlib = QtGui
-   else:isEqual(QTLIB, network):qlib = QtNetwork
-   else:isEqual(QTLIB, xml):qlib = QtXml
-   else:isEqual(QTLIB, opengl):qlib = QtOpenGL
-   else:isEqual(QTLIB, sql):qlib = QtSql
-   else:isEqual(QTLIB, core):qlib = QtCore
-   else:isEqual(QTLIB, canvas):qlib = QtCanvas
-   else:isEqual(QTLIB, qt3support):qlib = Qt3Support
-   else:isEqual(QTLIB, svg):qlib = QtSvg
-   else:message("Unknown QT: $$QTLIB"):qlib =
-   !isEmpty(qlib) {
-      target_qt:isEqual(TARGET, qlib) {
-         warning($$TARGET cannot have a QT of $$QTLIB)
-      } else {
-         DEFINES *= $$upper(QT_$${QTLIB}_LIB)
-	 exists($$QMAKE_INCDIR_QT/$$qlib) {
-             INCLUDEPATH -= $$QMAKE_INCDIR_QT/$$qlib
-             INCLUDEPATH = $$QMAKE_INCDIR_QT/$$qlib $$INCLUDEPATH
-         }
-	 isEqual(QTLIB, opengl):CONFIG += opengl
-	 isEqual(QTLIB, qt3support):DEFINES *= QT3_SUPPORT
-
-     qtAddLibrary($$qlib)
-      }
-   }
-}
 for(QTPLUG, $$list($$lower($$unique(QTPLUGIN)))) {
-   qplugin_style = 
+   qplugin_style =
    !qt_debug:!qt_release {
       CONFIG(debug, debug|release):qplugin_style = debug
       else:qplugin_style = release
@@ -94,7 +53,7 @@ for(QTPLUG, $$list($$lower($$unique(QTPLUGIN)))) {
 
    ALLQTPLUGINS = $$ACCESSIBLEPLUGINS $$CODECPLUGINS $$DECORATIONPLUGINS $$GFXDRIVERPLUGINS $$IMAGEPLUGINS $$INPUTPLUGINS $$MOUSEDRIVERPLUGINS $$SQLPLUGINS
 
-   QT_PLUGINPATH = 
+   QT_PLUGINPATH =
    contains(ALLQTPLUGINS, $$QTPLUG) {
        # Determine the plugin path
        contains(ACCESSIBLEPLUGINS, $$QTPLUG): QT_PLUGINPATH = $$[QT_INSTALL_PLUGINS]/accessible/
@@ -114,13 +73,55 @@ for(QTPLUG, $$list($$lower($$unique(QTPLUGIN)))) {
           QT_LINKAGE = -l$${QTPLUG}
           win32 {
              CONFIG(debug, debug|release):QT_LINKAGE = -l$${QTPLUG}d
-          } else:mac { 
+          } else:mac {
              isEqual(qplugin_style, debug):QT_LINKAGE = -l$${QTPLUG}_debug
           }
        }
-       
+
     !isEmpty(QT_PLUGINPATH): LIBS += -L$$QT_PLUGINPATH
     LIBS += $$QT_LINKAGE
+}
+#specific module settings
+!isEmpty(QT_BUILD_TREE):QMAKE_LIBDIR = $$QT_BUILD_TREE/lib $$QMAKE_LIBDIR #as above, prepending prevents us from picking up "stale" libs
+QMAKE_LIBDIR += $$QMAKE_LIBDIR_QT
+for(QTLIB, $$list($$lower($$unique(QT)))) {
+   unset(qlib_style)
+   !qt_debug:!qt_release {
+      CONFIG(debug, debug|release):qlib_style = debug
+      else:qlib_style = release
+   } else:CONFIG(qt_debug, qt_debug|qt_release) {
+      qlib_style = debug
+   } else {
+      qlib_style = release
+   }
+
+   unset(qlib)
+   isEqual(QTLIB, gui):qlib = QtGui
+   else:isEqual(QTLIB, network):qlib = QtNetwork
+   else:isEqual(QTLIB, xml):qlib = QtXml
+   else:isEqual(QTLIB, opengl):qlib = QtOpenGL
+   else:isEqual(QTLIB, sql):qlib = QtSql
+   else:isEqual(QTLIB, core):qlib = QtCore
+   else:isEqual(QTLIB, canvas):qlib = QtCanvas
+   else:isEqual(QTLIB, qt3support):qlib = Qt3Support
+   else:isEqual(QTLIB, svg):qlib = QtSvg
+   else:isEqual(QTLIB, script):qlib = QtScript
+   else:message("Unknown QT: $$QTLIB"):qlib =
+   !isEmpty(qlib) {
+      target_qt:isEqual(TARGET, qlib) {
+         warning($$TARGET cannot have a QT of $$QTLIB)
+      } else {
+         DEFINES *= $$upper(QT_$${QTLIB}_LIB)
+	 exists($$QMAKE_INCDIR_QT/$$qlib) {
+             INCLUDEPATH -= $$QMAKE_INCDIR_QT/$$qlib
+             INCLUDEPATH = $$QMAKE_INCDIR_QT/$$qlib $$INCLUDEPATH
+         }
+	 isEqual(QTLIB, opengl):CONFIG += opengl
+	 isEqual(QTLIB, qt3support):DEFINES *= QT3_SUPPORT
+
+     qtAddLibrary($$qlib)
+      }
+   }
 }
 
 qt_compat {

@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,19 +27,10 @@
 #define QPE_USE_MALLOC_FOR_NEW
 #endif
 
-#define QPE_DEFAULT_TODAY_MODE "Daily"
-
 // The serial device for AT command access to the phone
 // hardware:
 //
 #define QTOPIA_PHONE_DEVICE "/dev/csmi/5"
-//
-// The baud rate for the serial connection:
-//
-#define QTOPIA_PHONE_RATE 115200
-
-// Sets the phone vendor plugin to load (normally all plugins are loaded).
-#define QTOPIA_PRELOAD_PHONE_PLUGIN "omap730vendor"
 
 // Define this to use the "advanced" GSM 07.10 CMUX mode instead of "basic".
 #define QTOPIA_ADVANCED_CMUX
@@ -63,3 +54,12 @@
 
 // Disable media player visualization
 #define NO_VISUALIZATION
+
+// Define the devices whose packages are compatible with this device,
+// by convention the first device listed is this device.
+#define QTOPIA_COMPATIBLE_DEVICES "OMAP730"
+
+// Define the name of the Video4Linux device to use for the camera.
+#ifndef V4L_VIDEO_DEVICE
+#define V4L_VIDEO_DEVICE            "/dev/video"
+#endif

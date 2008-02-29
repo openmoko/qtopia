@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -82,20 +97,10 @@ QStandardItemPrivate::~QStandardItemPrivate()
 /*!
   \internal
 */
-int QStandardItemPrivate::childIndex(int row, int column) const
+QPair<int, int> QStandardItemPrivate::position() const
 {
-    if ((row < 0) || (column < 0) || (row >= rowCount()) || (column >= columnCount()))
-        return -1;
-    return (row * columnCount()) + column;
-}
-
-/*!
-  \internal
-*/
-QPair<int, int> QStandardItemPrivate::itemPosition(const QStandardItem *item) const
-{
-    if (QStandardItem *par = item->d_func()->parent) {
-        int idx = par->d_func()->childIndex(item);
+    if (QStandardItem *par = parent) {
+        int idx = par->d_func()->childIndex(q_func());
         if (idx == -1)
             return QPair<int, int>(-1, -1);
         return QPair<int, int>(idx / par->columnCount(), idx % par->columnCount());
@@ -151,13 +156,12 @@ void QStandardItemPrivate::setChild(int row, int column, QStandardItem *item,
 void QStandardItemPrivate::changeFlags(bool enable, Qt::ItemFlags f)
 {
     Q_Q(QStandardItem);
-    Qt::ItemFlags oldFlags = flags;
+    Qt::ItemFlags flags = q->flags();
     if (enable)
         flags |= f;
     else
         flags &= ~f;
-    if ((flags != oldFlags) && model)
-        model->d_func()->itemChanged(q);
+    q->setFlags(flags);
 }
 
 /*!
@@ -175,12 +179,25 @@ void QStandardItemPrivate::childDeleted(QStandardItem *child)
 */
 void QStandardItemPrivate::setItemData(const QMap<int, QVariant> &roles)
 {
-    values.clear();
+    Q_Q(QStandardItem);
+
+    //let's build the vector of new values
+    QVector<QWidgetItemData> newValues;
     QMap<int, QVariant>::const_iterator it;
     for (it = roles.begin(); it != roles.end(); ++it) {
-        int role = it.key();
-        role = (role == Qt::EditRole) ? Qt::DisplayRole : role;
-        values.append(QWidgetItemData(role, it.value()));
+        QVariant value = it.value();
+        if (value.isValid()) {
+            int role = it.key();
+            role = (role == Qt::EditRole) ? Qt::DisplayRole : role;
+            QWidgetItemData wid(role,it.value());
+            newValues.append(wid);
+        }
+    }
+
+    if (values!=newValues) {
+        values=newValues;
+        if (model)
+            model->d_func()->itemChanged(q);
     }
 }
 
@@ -316,6 +333,34 @@ void QStandardItemModelPrivate::_q_emitItemChanged(const QModelIndex &topLeft,
 /*!
     \internal
 */
+bool QStandardItemPrivate::insertRows(int row, const QList<QStandardItem*> &items)
+{
+    Q_Q(QStandardItem);
+    if ((row < 0) || (row > rowCount()))
+        return false;
+    int count = items.count();
+    if (model)
+        model->d_func()->rowsAboutToBeInserted(q, row, row + count - 1);
+    if (rowCount() == 0) {
+        if (columnCount() == 0)
+            q->setColumnCount(1);
+        children.resize(columnCount() * count);
+        rows = count;
+    } else {
+        rows += count;
+        int index = childIndex(row, 0);
+        if (index != -1)
+            children.insert(index, columnCount() * count, 0);
+    }
+    for (int i = 0; i < items.count(); ++i) {
+        int index = childIndex(i + row, 0);
+        children.replace(index, items.at(i));
+    }
+    if (model)
+        model->d_func()->rowsInserted(q, row, count);
+    return true;
+}
+
 bool QStandardItemPrivate::insertRows(int row, int count, const QList<QStandardItem*> &items)
 {
     Q_Q(QStandardItem);
@@ -689,7 +734,6 @@ QStandardItem &QStandardItem::operator=(const QStandardItem &other)
 {
     Q_D(QStandardItem);
     d->values = other.d_func()->values;
-    d->flags = other.d_func()->flags;
     return *this;
 }
 
@@ -725,17 +769,16 @@ void QStandardItem::setData(const QVariant &value, int role)
 {
     Q_D(QStandardItem);
     role = (role == Qt::EditRole) ? Qt::DisplayRole : role;
-    QVariant oldValue = data(role);
-    if (value == oldValue)
-        return;
-
     QVector<QWidgetItemData>::iterator it;
     for (it = d->values.begin(); it != d->values.end(); ++it) {
         if ((*it).role == role) {
-            if (value.isValid())
+            if (value.isValid()) {
+                if ((*it).value == value)
+                    return;
                 (*it).value = value;
-            else
+            } else {
                 d->values.erase(it);
+            }
             if (d->model)
                 d->model->d_func()->itemChanged(this);
             return;
@@ -772,12 +815,7 @@ QVariant QStandardItem::data(int role) const
 */
 void QStandardItem::setFlags(Qt::ItemFlags flags)
 {
-    Q_D(QStandardItem);
-    if (flags != d->flags) {
-        d->flags = flags;
-        if (d->model)
-            d->model->d_func()->itemChanged(this);
-    }
+    setData((int)flags, Qt::UserRole - 1);
 }
 
 /*!
@@ -792,8 +830,11 @@ void QStandardItem::setFlags(Qt::ItemFlags flags)
 */
 Qt::ItemFlags QStandardItem::flags() const
 {
-    Q_D(const QStandardItem);
-    return d->flags;
+    QVariant v = data(Qt::UserRole - 1);
+    if (!v.isValid())
+        return (Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsEditable
+                |Qt::ItemIsDragEnabled|Qt::ItemIsDropEnabled);
+    return ((Qt::ItemFlags)(v.toInt()));
 }
 
 /*!
@@ -1164,6 +1205,8 @@ void QStandardItem::setTristate(bool tristate)
   \sa setTristate(), isCheckable(), checkState()
 */
 
+#ifndef QT_NO_DRAGANDDROP
+
 /*!
   Sets whether the item is drag enabled. If \a dragEnabled is true, the item
   can be dragged by the user; otherwise, the user cannot drag the item.
@@ -1220,6 +1263,8 @@ void QStandardItem::setDropEnabled(bool dropEnabled)
   \sa setDropEnabled(), isDragEnabled(), flags()
 */
 
+#endif // QT_NO_DRAGANDDROP
+
 /*!
   Returns the row where the item is located in its parent's child table, or
   -1 if the item has no parent.
@@ -1229,7 +1274,7 @@ void QStandardItem::setDropEnabled(bool dropEnabled)
 int QStandardItem::row() const
 {
     Q_D(const QStandardItem);
-    QPair<int, int> pos = d->itemPosition(this);
+    QPair<int, int> pos = d->position();
     return pos.first;
 }
 
@@ -1242,7 +1287,7 @@ int QStandardItem::row() const
 int QStandardItem::column() const
 {
     Q_D(const QStandardItem);
-    QPair<int, int> pos = d->itemPosition(this);
+    QPair<int, int> pos = d->position();
     return pos.second;
 }
 
@@ -1351,6 +1396,19 @@ void QStandardItem::insertRow(int row, const QList<QStandardItem*> &items)
 }
 
 /*!
+    Inserts \a items at \a row. The column count wont be changed.
+
+    \sa insertRow(), insertColumn()
+*/
+void QStandardItem::insertRows(int row, const QList<QStandardItem*> &items)
+{
+    Q_D(QStandardItem);
+    if (row < 0)
+        return;
+    d->insertRows(row, items);
+}
+
+/*!
     Inserts a column at \a column containing \a items. If necessary,
     the row count is increased to the size of \a items.
 
@@ -1406,6 +1464,14 @@ void QStandardItem::insertColumns(int column, int count)
 */
 
 /*!
+    \fn void QStandardItem::appendRows(const QList<QStandardItem*> &items)
+
+    Appends rows containing \a items.  The column count will not change.
+
+    \sa insertRow()
+*/
+
+/*!
     \fn void QStandardItem::appendColumn(const QList<QStandardItem*> &items)
 
     Appends a column containing \a items. If necessary, the row count is
@@ -1416,12 +1482,22 @@ void QStandardItem::insertColumns(int column, int count)
 
 /*!
     \fn bool QStandardItemModel::insertRow(int row, const QModelIndex &parent)
-    \internal
+
+    Inserts a single row before the given \a row in the child items of the
+    \a parent specified. Returns true if the row is inserted; otherwise
+    returns false.
+
+    \sa insertRows(), insertColumn(), removeRow()
 */
 
 /*!
     \fn bool QStandardItemModel::insertColumn(int column, const QModelIndex &parent)
-    \internal
+
+    Inserts a single column before the given \a column in the child items of
+    the \a parent specified. Returns true if the column is inserted; otherwise
+    returns false.
+
+    \sa insertColumns(), insertRow(), removeColumn()
 */
 
 /*!
@@ -1746,7 +1822,7 @@ void QStandardItem::read(QDataStream &in)
     in >> d->values;
     qint32 flags;
     in >> flags;
-    d->flags = Qt::ItemFlags(flags);
+    setFlags((Qt::ItemFlags)flags);
 }
 
 /*!
@@ -1759,7 +1835,7 @@ void QStandardItem::write(QDataStream &out) const
 {
     Q_D(const QStandardItem);
     out << d->values;
-    out << qint32(d->flags);
+    out << flags();
 }
 
 /*!
@@ -1932,9 +2008,11 @@ QStandardItemModel::QStandardItemModel(int rows, int columns, QObject *parent)
 {
     Q_D(QStandardItemModel);
     d->init();
+    d->root->insertColumns(0, columns);
+    d->columnHeaderItems.insert(0, columns, 0);
+    d->root->insertRows(0, rows);
+    d->rowHeaderItems.insert(0, rows, 0);
     d->root->d_func()->setModel(this);
-    d->root->setRowCount(rows);
-    d->root->setColumnCount(columns);
 }
 
 /*!
@@ -2023,8 +2101,10 @@ QStandardItem *QStandardItemModel::itemFromIndex(const QModelIndex &index) const
 */
 QModelIndex QStandardItemModel::indexFromItem(const QStandardItem *item) const
 {
-    if (item && item->d_func()->parent)
-        return createIndex(item->row(), item->column(), item->d_func()->parent);
+    if (item && item->d_func()->parent) {
+        QPair<int, int> pos = item->d_func()->position();
+        return createIndex(pos.first, pos.second, item->d_func()->parent);
+    }
     return QModelIndex();
 }
 
@@ -2374,7 +2454,7 @@ void QStandardItemModel::insertRow(int row, const QList<QStandardItem*> &items)
 /*!
     \since 4.2
 
-    \fn QStandardItemModel::insertRow(int row, QStandardItem *item)
+    \fn void QStandardItemModel::insertRow(int row, QStandardItem *item)
     \overload
 
     Inserts a row at \a row containing \a item.
@@ -2752,6 +2832,11 @@ void QStandardItemModel::sort(int column, Qt::SortOrder order)
     Q_D(QStandardItemModel);
     d->root->sortChildren(column, order);
 }
+
+/*!
+  \fn QObject *QStandardItemModel::parent() const
+  \internal
+*/
 
 #include "moc_qstandarditemmodel.cpp"
 

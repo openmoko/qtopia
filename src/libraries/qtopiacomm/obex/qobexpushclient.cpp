@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -18,31 +18,14 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+#include "qobexpushclient.h"
+#include <qobexheader.h>
+#include <qobexclientsession.h>
 
-#include <qmimetype.h>
-#include <qtopialog.h>
-#include <qobexpushclient.h>
-#include <qobexsocket.h>
-#include <qtopiacomm/private/qobexcommand_p.h>
-#include <qtopiacomm/private/qobexcommon_p.h>
-
-#include <qtopiaipcenvelope.h>
-
-#include <QSocketNotifier>
 #include <QString>
 #include <QFile>
-#include <QTimer>
-#include <QQueue>
-#include <qglobal.h>
+#include <QHash>
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-
-#include <openobex/obex.h>
 
 /*!
     \class QObexPushClient
@@ -58,16 +41,16 @@
     Bluetooth connection:
 
     \code
-        QBluetoothObexSocket *socket =
-            new QBluetoothObexSocket("00:00:00:00:00:01", 1); // Fake address, rfcomm channel 1
+    // Connect to an RFCOMM server
+    QBluetoothRfcommSocket *rfcommSocket = new QBluetoothRfcommSocket;
+    if (rfcommSocket->connect("11:22:33:aa:bb:cc", 9)) {
 
-        if (socket->connect()) {
-            QObexPushClient *sender = new QObexPushClient(socket);
-            sender->connect();
-            QByteArray data = getSomeData();
-            sender->send(data, "MyData.txt");
-            sender->disconnect();
-        }
+        QObexPushClient *sender = new QObexPushClient(rfcommSocket);
+        sender->connect();
+        QByteArray data = getSomeData();
+        sender->send(data, "MyData.txt");
+        sender->disconnect();
+    }
     \endcode
 
     The functions connect(), disconnect(), send(), sendBusinessCard(),
@@ -85,8 +68,8 @@
     The done() signal is emitted when all pending commands have finished. This
     can be used to automatically delete the client object when it has finished
     its operations, by connecting the client's done() signal to the client's
-    QObject::deleteLater() slot. (The socket object can similarly be connected
-    to automatically delete the socket object when the client has finished.)
+    QObject::deleteLater() slot. (The QIODevice object can similarly be connected
+    to automatically delete it when the client has finished.)
 
     If an error occurs during the execution of one of the commands in a
     sequence of commands, all the pending commands (i.e. scheduled, but not
@@ -94,21 +77,7 @@
     In this case, the done() signal is emitted with the error argument set to
     \c true.
 
-    \bold {Note:} Once a client has been disconnected, it cannot perform any
-    more commands.
-
     \ingroup qtopiaobex
- */
-
-/*!
-    \enum QObexPushClient::State
-    Defines the possible states for a push client.
-
-    \value Ready The client is ready to send commands to an OBEX service. This is the default state.
-    \value Connecting The client is connecting to the server.
-    \value Disconnecting The client is disconnecting from the server.
-    \value Streaming A file transfer operation is in progress.
-    \value Closed The client has been closed and cannot perform any more commands.
  */
 
 /*!
@@ -116,514 +85,174 @@
     Defines the possible errors for a push client.
 
     \value NoError No error has occurred.
-    \value LinkError A connection link has been interrupted. If this error occurs, the client state will change to QObexPushClient::Closed and the client cannot be used for any more operations.
-    \value TransportConnectionError The underlying socket transport is not connected.
-    \value RequestFailed The client's request was refused by the remote service, or an error occured while sending the request.
+    \value ConnectionError The client is unable to send data, or the client-server communication process is otherwise disrupted. In this case, the client and server are no longer synchronized with each other, so the QIODevice provided in the constructor should not be used for any more OBEX requests.
+    \value RequestFailed The client's request was refused by the remote service, or an error occurred while sending the request.
     \value Aborted The command was aborted by a call to abort().
     \value UnknownError An error other than those specified above occurred.
  */
 
+/*!
+    \enum QObexPushClient::Command
+    Defines the commands that may be returned from currentCommand() to
+    indicate the command that is being executed.
 
-static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp);
+    \value None No command is being executed.
+    \value Connect connect() is being executed.
+    \value Disconnect disconnect() is being executed.
+    \value Send send() is being executed.
+    \value SendBusinessCard sendBusinessCard() is being executed.
+    \value RequestBusinessCard requestBusinessCard() is being executed.
+ */
+
 
 class QObexPushClientPrivate : public QObject
 {
     Q_OBJECT
 
-    friend void qobex_sender_callback(obex_t *handle, obex_object_t *obj,
-                                      int mode, int event, int obex_cmd, int obex_rsp);
 public:
-    QObexPushClientPrivate(QObexSocket *socket, QObexPushClient *parent);
+    QObexPushClientPrivate(QIODevice *device, QObexPushClient *parent);
     ~QObexPushClientPrivate();
 
-    void feedStream( obex_object_t *object );
-    void readData( obex_object_t *object );
-    void putFile();
-    void getFile();
-    void process( obex_object_t *object );
-    void commandFinished(QObexPushClient::Error error);
+    QIODevice *sessionDevice() const;
 
-    void resetState();
-    void updateState(QObexPushClient::State state);
+    QObexPushClient::Error error() const;
+    QObexPushClient::Command currentCommand() const;
 
     int connect();
     int disconnect();
     int send(QIODevice *device, const QString &filename,
-             const QString &mimetype = QString());
+             const QString &type, const QString &description);
     int send(const QByteArray &array, const QString &filename,
-             const QString &mimetype = QString());
+             const QString &type, const QString &description);
 
     int sendBusinessCard(QIODevice *vcard);
     int requestBusinessCard(QIODevice *vcard);
-    void exchangeBusinessCard(QIODevice *mine, QIODevice *theirs, int *putId, int *getId);
+    void exchangeBusinessCard(QIODevice *mine, QIODevice *theirs,
+                              int *putId = 0, int *getId = 0);
 
-    void clearPendingCommands();
-
-    void hardAbort(QObexPushClient::Error error);
     void abort();
-    void performAbort();
-
-    int addCommand(QObexCommand *cmd);
 
 public slots:
-    void processInput();
-    void doPending();
-
-signals:
+    void requestStarted(int id);
+    void requestFinished(int id, bool error);
     void done(bool error);
-    void progress(qint64, qint64);
-    void stateChanged(QObexPushClient::State);
-    void commandFinished(int id, bool error);
-    void commandStarted(int id);
-
-    void enableSocketNotifier(bool enable);
 
 public:
-    QObexPushClient::State m_state;
-    QObexPushClient::Error m_error;
-    bool m_aborting;
-
     QObexPushClient *m_parent;
-    QQueue<QObexCommand *> m_q;
-    obex_t *m_self;
+    QObexClientSession *m_client;
 
 private:
-    void cleanup();
+    void fillPutHeader(QObexHeader &, const QString &, const QString &, const QString &);
 
-    char *m_buf;
-    qint64 m_total;
-    qint64 m_bytes;
+    QHash<int, QObexPushClient::Command> m_requestCommands;
 };
 
-QObexPushClientPrivate::QObexPushClientPrivate(QObexSocket *socket, QObexPushClient *parent)
-    : QObject(parent),
-      m_self(0)
+QObexPushClientPrivate::QObexPushClientPrivate(QIODevice *device, QObexPushClient *parent) :
+        QObject(parent),
+        m_client(new QObexClientSession(device, this))
 {
-    if (socket && socket->isConnected()) {
-        m_self = static_cast<obex_t *>(socket->handle());
-        if (m_self) {
-            OBEX_SetUserCallBack(m_self, qobex_sender_callback, 0);
-            OBEX_SetUserData( m_self, this );
-
-            QSocketNotifier *sn = new QSocketNotifier(socket->socketDescriptor(),
-                    QSocketNotifier::Read, this);
-            QObject::connect(sn, SIGNAL(activated(int)), this, SLOT(processInput()));
-            QObject::connect(this, SIGNAL(enableSocketNotifier(bool)),
-                            sn, SLOT(setEnabled(bool)));
-        }
-    }
-
-    m_buf = 0;
-
-    resetState();
-
     m_parent = parent;
-    m_aborting = false;
+
+    // connect signals from client to self
+    QObject::connect(m_client, SIGNAL(done(bool)),
+                     SLOT(done(bool)));
+    QObject::connect(m_client, SIGNAL(requestStarted(int)),
+                     SLOT(requestStarted(int)));
+    QObject::connect(m_client, SIGNAL(requestFinished(int,bool)),
+                     SLOT(requestFinished(int,bool)));
+
+    // connect these client signals directly to parent signals
+    QObject::connect(m_client, SIGNAL(dataTransferProgress(qint64,qint64)),
+                     m_parent, SIGNAL(dataTransferProgress(qint64,qint64)));
 }
 
 QObexPushClientPrivate::~QObexPushClientPrivate()
 {
-    emit enableSocketNotifier(false);
-    cleanup();
 }
 
-void QObexPushClientPrivate::resetState()
+QIODevice *QObexPushClientPrivate::sessionDevice() const
 {
-    m_state = QObexPushClient::Ready;
-    m_error = QObexPushClient::NoError;
+    return m_client->sessionDevice();
 }
 
-void QObexPushClientPrivate::feedStream( obex_object_t *object )
+QObexPushClient::Error QObexPushClientPrivate::error() const
 {
-    Q_ASSERT(m_state == QObexPushClient::Streaming);
+    switch (m_client->error()) {
+        case QObexClientSession::NoError:
+            return QObexPushClient::NoError;
+        case QObexClientSession::ConnectionError:
+            return QObexPushClient::ConnectionError;
+        case QObexClientSession::RequestFailed:
+            return QObexPushClient::RequestFailed;
+        case QObexClientSession::Aborted:
+            return QObexPushClient::Aborted;
 
-    qLog(Obex) <<  "QObexPushClient::Feeding Stream";
-
-    char *streambuf = NULL;
-    int len = 0;
-    QObexCommand *cmd = m_q.head();
-
-    // Handle Byte Array case
-    if (cmd->m_isba) {
-        streambuf = &cmd->m_data.data->data()[m_bytes];
-        if ( (m_total - m_bytes) > OBEX_STREAM_BUF_SIZE)
-            len = OBEX_STREAM_BUF_SIZE;
-        else
-            len = m_total - m_bytes;
-    } else {
-        streambuf = m_buf;
-        len = cmd->m_data.device->read(m_buf, OBEX_STREAM_BUF_SIZE);
-    }
-
-    m_bytes += len;
-
-    obex_headerdata_t hd;
-    if ( len > 0 ) {
-        hd.bs = (uchar*)streambuf;
-        OBEX_ObjectAddHeader(m_self, object, OBEX_HDR_BODY,
-                             hd, len, OBEX_FL_STREAM_DATA);
-        qLog(Obex) << "QObexPushClient::emitting progress report" << m_bytes << "/" << m_total;
-        emit progress( m_bytes, m_total );
-    } else {
-        /* EOF */
-        hd.bs = 0;
-        OBEX_ObjectAddHeader(m_self, object, OBEX_HDR_BODY,
-                             hd, 0, OBEX_FL_STREAM_DATAEND);
+        default:    // including UnknownError
+            return QObexPushClient::UnknownError;
     }
 }
 
-void QObexPushClientPrivate::putFile()
+QObexPushClient::Command QObexPushClientPrivate::currentCommand() const
 {
-    if (m_aborting) {
-        performAbort();
-        return;
-    }
-
-    QObexCommand *cmd = m_q.head();
-
-    if (cmd->m_mimetype.isEmpty())
-        cmd->m_mimetype = QMimeType(cmd->m_filename).id();
-
-    obex_object_t *object = OBEX_ObjectNew(m_self, OBEX_CMD_PUT);
-    if (object == NULL) {
-        qLog(Obex) << "QObexPushClient::putFile error occurred, Aborting...";
-        commandFinished(QObexPushClient::UnknownError);
-        return;
-    }
-
-    m_total = 0;
-    m_bytes = 0;
-
-    if (cmd->m_isba) {
-        m_total = cmd->m_data.data->size();
-    } else {
-        bool error = false;
-        if (cmd->m_data.device &&
-            (cmd->m_data.device->isOpen() ||
-             cmd->m_data.device->open(QIODevice::ReadOnly)))
-        {
-            if (!cmd->m_data.device->isSequential())
-                m_total = cmd->m_data.device->size();
-            else
-                error = true;
-        }
-        else {
-            error = true;
-        }
-
-        if (error) {
-            // Couldn't open the file, mark the command as finished
-            // and bail
-            commandFinished(QObexPushClient::UnknownError);
-            return;
-        }
-    }
-
-    QObexHeader obexHeader;
-    obexHeader.setName(cmd->m_filename);
-    obexHeader.setMimeType(cmd->m_mimetype);
-    obexHeader.setLength(m_total);
-    setHeaders(m_self, object, obexHeader);
-
-    obex_headerdata_t hd;
-    hd.bs = 0;
-    OBEX_ObjectAddHeader(m_self, object, OBEX_HDR_BODY,
-                            hd, 0, OBEX_FL_STREAM_START);
-
-    // Create the buffer (only needed in QIODevice case)
-    if (!cmd->m_isba && !m_buf)
-        m_buf = new char[OBEX_STREAM_BUF_SIZE];
-
-    updateState(QObexPushClient::Streaming);
-
-    process( object );
-}
-
-void QObexPushClientPrivate::readData( obex_object_t *object )
-{
-    if (m_aborting) {
-        performAbort();
-        return;
-    }
-
-    const uchar* buf;
-    int len = OBEX_ObjectReadStream( m_self, object, &buf );
-
-    qLog(Obex) <<  "QObexPushClient::Reading data";
-
-    if (m_bytes == 0) {
-        QObexHeader hdr;
-
-        qLog(Obex) << "Gettings headers";
-        getHeaders(m_self, object, hdr);
-
-        if (hdr.mimeType() != "text/x-vCard") {
-            qWarning("QObexPushClient: This is not a vCard, discarding!");
-            return;
-        }
-
-        m_total = hdr.length();
-    }
-
-    QObexCommand *cmd = m_q.head();
-    if (cmd->m_data.device &&
-        (cmd->m_data.device->isOpen() || cmd->m_data.device->open(QIODevice::WriteOnly))) {
-        updateState(QObexPushClient::Streaming);
-    }
-    else {
-        qWarning("QObexPushClient: Could not write to QIODevice!");
-    }
-
-    if ( len > 0 ) {
-        cmd->m_data.device->write( (const char*)buf, len );
-        m_bytes += len;
-        qLog(Obex) << "QObexPushClient::emitting progress report" << m_bytes << "/" << m_total;
-        emit progress( m_bytes, m_total );
-    } else if ( len == 0 ) {
-        if (m_state == QObexPushClient::Streaming)
-            updateState(QObexPushClient::Ready);
-    }
-}
-
-void QObexPushClientPrivate::getFile()
-{
-    QObexCommand *cmd = m_q.head();
-
-    Q_ASSERT(!cmd->m_mimetype.isEmpty());
-
-    obex_object_t *object = OBEX_ObjectNew(m_self, OBEX_CMD_GET);
-    if (object == NULL) {
-        qLog(Obex) << "QObexPushClient::getFile error occurred, Aborting...";
-        commandFinished(QObexPushClient::UnknownError);
-        return;
-    }
-
-    /* Add type header */
-    obex_headerdata_t hd;
-    QByteArray latinArr = cmd->m_mimetype.toLatin1();
-    hd.bs = (uchar*)latinArr.constData();
-    OBEX_ObjectAddHeader(m_self, object,
-                         OBEX_HDR_TYPE, hd, cmd->m_mimetype.length()+1, OBEX_FL_FIT_ONE_PACKET);
-
-    // Create the buffer (only needed in QIODevice case)
-    if (!cmd->m_isba && !m_buf)
-        m_buf = new char[OBEX_STREAM_BUF_SIZE];
-    OBEX_ObjectReadStream(m_self, object, NULL);
-
-    updateState(QObexPushClient::Streaming);
-
-    m_total = 0;
-    m_bytes = 0;
-
-    process( object );
-}
-
-static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, int /*mode*/,
-                                  int event, int obex_cmd, int obex_rsp)
-{
-    QObexPushClientPrivate *sender =
-            (QObexPushClientPrivate*)OBEX_GetUserData( handle );
-
-    switch (event) {
-        case OBEX_EV_ABORT:
-            // the abort request got a successful response
-            qLog(Obex) << "Got an abort";
-            sender->commandFinished(QObexPushClient::Aborted);
-            break;
-
-        case OBEX_EV_REQDONE:
-            qLog(Obex) << "Received REQDONE Event" << obex_cmd;
-            if (obex_rsp != OBEX_RSP_SUCCESS) {
-                qLog(Obex) << "Server refused PUT";
-                qLog(Obex) << "Obex_rsp: " << obex_rsp;
-                sender->commandFinished(QObexPushClient::RequestFailed);
-            } else {
-                sender->commandFinished(QObexPushClient::NoError);
-            }
-            break;
-
-        case OBEX_EV_LINKERR:
-            // Got an error sending/receiving at transport level
-            if (sender->m_aborting) {
-                // we get linkerr if got non-success response from abort request
-                sender->hardAbort(QObexPushClient::LinkError);
-            } else {
-                qLog(Obex) << "QObexPushClient::LinkError calling hardabort...";
-                sender->hardAbort(QObexPushClient::LinkError);
-            }
-            break;
-
-        case OBEX_EV_STREAMEMPTY:
-            // when streaming: add more
-            sender->feedStream( obj );
-            break;
-
-        case OBEX_EV_STREAMAVAIL:
-            sender->readData( obj );
-            break;
-
-        default:
-            break;
-    };
-}
-
-void QObexPushClientPrivate::processInput()
-{
-    OBEX_HandleInput(m_self, 0);
-}
-
-void QObexPushClientPrivate::updateState(QObexPushClient::State state)
-{
-    qLog(Obex) << "QObexPushClient::updating state" << state;
-    if (m_state != state) {
-        m_state = state;
-        emit stateChanged(m_state);
-    }
-}
-
-void QObexPushClientPrivate::process( obex_object_t *object )
-{
-    if (!object)
-        return;
-
-    qLog(Obex) << "Sending request...";
-    int ret = OBEX_Request(m_self, object);
-
-    if (ret < 0) {
-        qLog(Obex) << "OBEX_Request returned: " << ret;
-        commandFinished(QObexPushClient::RequestFailed);
-    }
-}
-
-void QObexPushClientPrivate::commandFinished(QObexPushClient::Error error)
-{
-    m_error = error;
-    m_aborting = false;
-
-    QObexCommand *cmd = m_q.dequeue();
-
-    if ((cmd->m_cmd == QObexCommand::CONNECT) ||
-        (cmd->m_cmd == QObexCommand::GET) ||
-        (cmd->m_cmd == QObexCommand::PUT)) {
-        qLog(Obex) << "Command finished... error:" << m_error;
-        updateState(QObexPushClient::Ready);
-    }
-    else if (cmd->m_cmd == QObexCommand::DISCONNECT) {
-        qLog(Obex) << "CMD_DISCONNECT finished...";
-        updateState(QObexPushClient::Closed);
-        cleanup();
-    }
-
-    emit commandFinished(cmd->m_id, m_error != QObexPushClient::NoError);
-
-    if (m_error == QObexPushClient::NoError) {
-        qLog(Obex) << "Scheduling next command...";
-        QTimer::singleShot(0, this, SLOT(doPending()));
-
-    } else {
-        // the command failed, so clear all commands and emit done()
-        for (int i=0; i<m_q.size(); i++)
-            delete m_q[i];
-        m_q.clear();
-
-        qLog(Obex) << "emitting done" << m_error;
-        emit done(m_error != QObexPushClient::NoError);
-    }
-}
-
-void QObexPushClientPrivate::doPending()
-{
-    qLog(Obex) << "QObexPushClient::doPending";
-
-    if (m_q.size() == 0) {
-        qLog(Obex) << "Queue empty. Emitting done with error:" << m_error;
-        emit done(m_error != QObexPushClient::NoError);
-        return;
-    }
-
-    m_error = QObexPushClient::NoError;
-
-    // notify the command has started
-    QObexCommand *cmd = m_q.head();
-    emit commandStarted(cmd->m_id);
-
-    if (m_aborting) {
-        // "abort" the current command by not sending it at all
-        qLog(Obex) << "Aborting request, not sending request" << cmd->m_cmd;
-        commandFinished(QObexPushClient::Aborted);
-        return;
-    }
-
-    if (!m_self) {
-        commandFinished(QObexPushClient::TransportConnectionError);
-        return;
-    }
-
-    switch (cmd->m_cmd) {
-        case QObexCommand::CONNECT:
-        {
-            updateState(QObexPushClient::Connecting);
-            qLog(Obex) << "QObexPushClient::sending connect";
-            obex_object_t *object = OBEX_ObjectNew(m_self, OBEX_CMD_CONNECT);
-            process( object );
-            break;
-        }
-        case QObexCommand::DISCONNECT:
-        {
-            updateState(QObexPushClient::Disconnecting);
-            qLog(Obex) << "QObexPushClient::sending disconnect";
-            obex_object_t *object = OBEX_ObjectNew(m_self, OBEX_CMD_DISCONNECT);
-            process( object );
-            break;
-        }
-        case QObexCommand::PUT:
-        {
-            qLog(Obex) << "QObexPushClient::putting File";
-            putFile();
-            break;
-        }
-        case QObexCommand::GET:
-        {
-            qLog(Obex) << "QObexPushClient::getting business card";
-            getFile();
-            break;
-        }
-        default:
-            qLog(Obex) << "Unknown command!";
-    };
+    return m_requestCommands.value(m_client->currentId(), QObexPushClient::None);
 }
 
 int QObexPushClientPrivate::connect()
 {
-    return addCommand(new QObexCommand(QObexCommand::CONNECT, NULL, QString(), QString()));
+    int id = m_client->connect();
+    m_requestCommands.insert(id, QObexPushClient::Connect);
+    return id;
 }
 
 int QObexPushClientPrivate::disconnect()
 {
-    return addCommand(new QObexCommand(QObexCommand::DISCONNECT, NULL, QString(), QString()));
+    int id = m_client->disconnect();
+    m_requestCommands.insert(id, QObexPushClient::Disconnect);
+    return id;
 }
 
 int QObexPushClientPrivate::send(QIODevice *device, const QString &filename,
-                                  const QString &mimetype)
+const QString &type, const QString &description)
 {
-    return addCommand(new QObexCommand(QObexCommand::PUT, device, filename, mimetype));
+    QObexHeader header;
+    fillPutHeader(header, filename, type, description);
+    if ( device && (device->isOpen() || device->open(QIODevice::ReadOnly)) ) {
+        if (!device->isSequential())
+            header.setLength(device->size());
+    }
+    int id = m_client->put(header, device);
+    m_requestCommands.insert(id, QObexPushClient::Send);
+    return id;
 }
 
-int QObexPushClientPrivate::send(const QByteArray &array, const QString &filename,
-             const QString &mimetype)
+int QObexPushClientPrivate::send(const QByteArray &array, const QString &filename, const QString &type, const QString &description)
 {
-    return addCommand(new QObexCommand(QObexCommand::PUT, array, filename, mimetype));
+    QObexHeader header;
+    fillPutHeader(header, filename, type, description);
+    header.setLength(array.size());
+
+    int id = m_client->put(header, array);
+    m_requestCommands.insert(id, QObexPushClient::Send);
+    return id;
 }
 
 int QObexPushClientPrivate::sendBusinessCard(QIODevice *vcard)
 {
-    return addCommand(new QObexCommand(QObexCommand::PUT, vcard,
-                      "MyBusinessCard.vcf", "text/x-vCard"));
+    int id = send(vcard, "BusinessCard.vcf", "text/x-vCard", QString());
+    m_requestCommands.insert(id, QObexPushClient::SendBusinessCard);
+    return id;
 }
 
 int QObexPushClientPrivate::requestBusinessCard(QIODevice *vcard)
 {
-    return addCommand(new QObexCommand(QObexCommand::GET, vcard, QString(), "text/x-vCard"));
+    QObexHeader header;
+    header.setType("text/x-vCard");
+    if (vcard && !vcard->isOpen())
+        vcard->open(QIODevice::ReadWrite);
+
+    int id = m_client->get(header, vcard);
+    m_requestCommands.insert(id, QObexPushClient::RequestBusinessCard);
+    return id;
 }
 
 void QObexPushClientPrivate::exchangeBusinessCard(QIODevice *mine, QIODevice *theirs,
@@ -640,107 +269,55 @@ void QObexPushClientPrivate::exchangeBusinessCard(QIODevice *mine, QIODevice *th
         *getId = ret;
 }
 
-void QObexPushClientPrivate::clearPendingCommands()
-{
-    // leave the first item alone - do not delete the current operation!
-    while (m_q.size() > 1)
-        delete m_q.takeLast();
-}
-
 void QObexPushClientPrivate::abort()
 {
-    if (m_q.empty() || m_aborting) {
-        qLog(Obex) << "QObexPushClient ignoring abort request";
-        return;
-    }
-
-    // clear pending operations
-    clearPendingCommands();
-
-    // abort when we get our chance
-    m_aborting = true;
+    m_client->abort();
 }
 
-void QObexPushClientPrivate::performAbort()
+void QObexPushClientPrivate::fillPutHeader(QObexHeader &header, const QString &filename, const QString &type, const QString &description)
 {
-    // send Abort request
-    if (OBEX_CancelRequest(m_self, 1) < 0) {
-        qLog(Obex) << "OBEX_CancelRequest() failed!";
-        hardAbort(QObexPushClient::UnknownError);
-    }
+    if (!filename.isNull())
+        header.setName(filename);
+
+    if (!type.isNull())
+        header.setType(type);
+
+    if (!description.isNull())
+        header.setDescription(description);
 }
 
-void QObexPushClientPrivate::cleanup()
+void QObexPushClientPrivate::requestStarted(int id)
 {
-    // Delete the temp buffer
-    if (m_buf) {
-        delete[] m_buf;
-        m_buf = 0;
-    }
-
-    // Clear the command queue
-    foreach (QObexCommand *cmd, m_q) {
-        delete cmd;
-    }
-    m_q.clear();
-
-    // stateChanged() signal not emitted here - do it before calling this if
-    // necessary
-    m_state = QObexPushClient::Closed;
+    emit m_parent->commandStarted(id);
 }
 
-void QObexPushClientPrivate::hardAbort(QObexPushClient::Error error)
+void QObexPushClientPrivate::requestFinished(int id, bool error)
 {
-    qLog(Obex) << "QObexPushClient::Hard Aborting with error..." << error;
-    m_error = error;
-
-    if (!m_q.isEmpty()) {
-        emit commandFinished(m_q.head()->m_id, m_error != QObexPushClient::NoError);
-    }
-
-    updateState(QObexPushClient::Closed);
-    cleanup();
-
-    qLog(Obex) << "emitting done" << m_error;
-    emit done(m_error != QObexPushClient::NoError);
+    emit m_parent->commandFinished(id, error);
+    m_requestCommands.remove(id);
 }
 
-int QObexPushClientPrivate::addCommand(QObexCommand *cmd)
+void QObexPushClientPrivate::done(bool error)
 {
-    m_q.enqueue(cmd);
-
-    if (m_q.size() == 1)
-        QTimer::singleShot(0, this, SLOT(doPending()));
-
-    return cmd->m_id;
+    emit m_parent->done(error);
 }
+
+
 
 //================================================================
 
 /*!
-    Constructs an OBEX Push client.  The \a socket parameter specifies the
-    OBEX socket to use for the transport connection. The \a parent specifies
+    Constructs an OBEX Push client.  The \a device parameter specifies the
+    device to use for the transport connection. The \a parent specifies
     the parent object.
 
-    The socket must be connected; that is, you have either called 
-    QObexSocket::connect() on the socket, or the socket has been obtained from 
-    \c QObexServer::nextPendingConnection(). Otherwise, commands will finish
-    with TransportConnectionError.
+    The \a device should already be opened, or else commands will fail with
+    ConnectionError.
 */
-QObexPushClient::QObexPushClient(QObexSocket *socket, QObject *parent) : QObject(parent)
+QObexPushClient::QObexPushClient(QIODevice *device, QObject *parent)
+    : QObject(parent)
 {
-    m_data = new QObexPushClientPrivate(socket, this);
-
-    QObject::connect(m_data, SIGNAL(stateChanged(QObexPushClient::State)),
-                     this, SIGNAL(stateChanged(QObexPushClient::State)));
-    QObject::connect(m_data, SIGNAL(done(bool)),
-                     this, SIGNAL(done(bool)));
-    QObject::connect(m_data, SIGNAL(progress(qint64, qint64)),
-                     this, SIGNAL(progress(qint64, qint64)));
-    QObject::connect(m_data, SIGNAL(commandFinished(int, bool)),
-                     this, SIGNAL(commandFinished(int, bool)));
-    QObject::connect(m_data, SIGNAL(commandStarted(int)),
-                     this, SIGNAL(commandStarted(int)));
+    m_data = new QObexPushClientPrivate(device, this);
 }
 
 /*!
@@ -753,7 +330,7 @@ QObexPushClient::~QObexPushClient()
 }
 
 /*!
-    Connects to the OBEX server. 
+    Sends a \c Connect command to the OBEX server to initiate the OBEX session.
 
     This function returns immediately. It will be executed asynchronously, and
     the unique identifier that is returned from this function can be used to
@@ -768,12 +345,18 @@ int QObexPushClient::connect()
 }
 
 /*!
-    Disconnects from the OBEX server.
+    Sends a \c Disconnect command to the OBEX server to close the OBEX session.
 
     This function returns immediately. It will be executed asynchronously, and
     the unique identifier that is returned from this function can be used to
     track the the status of the command through the currentId() function and
     the commandStarted() and commandFinished() signals.
+
+    \bold {Note:} Some OBEX Push services close the transport connection as 
+    soon as a file transfer operation is completed. In this case, if an OBEX
+    Push client sends a file transfer request and then sends a disconnect()
+    request, the disconnect() request will fail as the transport connection
+    is no longer available.
 
     \sa connect()
 */
@@ -783,32 +366,34 @@ int QObexPushClient::disconnect()
 }
 
 /*!
-    Sends the contents of \a device to the OBEX server, using \a filename and
-    \a mimetype to describe the contents to the server. If the \a mimetype
-    is an empty string, then the client will assume a mimetype based on the
-    file extension in \a filename.
+    Sends the contents of \a device to the OBEX server, using the given
+    \a name, \a type and \a description to describe the contents to the
+    server. If a given \a name, \a type or \a description value is a null
+    string, that value will not be used in the request.
 
     This function returns immediately. It will be executed asynchronously, and
     the unique identifier that is returned from this function can be used to
     track the the status of the command through the currentId() function and
     the commandStarted() and commandFinished() signals.
  */
-int QObexPushClient::send(QIODevice *device, const QString &filename,
-                          const QString &mimetype)
+int QObexPushClient::send(QIODevice *device, const QString &name,
+const QString &type, const QString &description)
 {
-    return m_data->send(device, filename, mimetype);
+    return m_data->send(device, name, type, description);
 }
 
 /*!
     \overload
 
     This convenience function sends the contents of \a array to the OBEX
-    server, using \a filename and \a mimetype to describe the contents.
+    server, using \a name, \a type and \a description to describe the
+    contents to the server.  If a given \a name, \a type or \a description
+    value is a null string, that value will not be used in the request.
 */
-int QObexPushClient::send(const QByteArray &array, const QString &filename,
-                          const QString &mimetype)
+int QObexPushClient::send(const QByteArray &array, const QString &name,
+const QString &type, const QString &description)
 {
-    return m_data->send(array, filename, mimetype);
+    return m_data->send(array, name, type, description);
 }
 
 /*!
@@ -851,7 +436,7 @@ void QObexPushClient::exchangeBusinessCard(QIODevice *mine, QIODevice *theirs,
     Aborts the current file transfer operation and deletes all scheduled
     commands.
 
-    If there is a file transfer operation in progress, an \c ABORT command
+    If there is a file transfer operation in progress, an \c Abort command
     will be sent to the server. When the server replies that the command is
     aborted, the commandFinished() signal will be emitted with the \c error
     argument set to \c true, and the error() function will return
@@ -871,6 +456,15 @@ void QObexPushClient::abort()
 }
 
 /*!
+    Returns the device used for this OBEX Push client session, as provided
+    in the constructor.
+ */
+QIODevice *QObexPushClient::sessionDevice() const
+{
+    return m_data->sessionDevice();
+}
+
+/*!
     Returns the last error that occurred. This is useful for finding out
     what happened when receiving a commandFinished() or done()
     signal that has the \c error argument set to \c true.
@@ -879,32 +473,29 @@ void QObexPushClient::abort()
 */
 QObexPushClient::Error QObexPushClient::error() const
 {
-    return m_data->m_error;
-}
-
-/*!
-    Returns the current state of the object. When the state changes,
-    the stateChanged() signal is emitted.
-
-    \sa stateChanged()
-*/
-QObexPushClient::State QObexPushClient::state() const
-{
-    return m_data->m_state;
+    return m_data->error();
 }
 
 /*!
     Returns the identifier of the command that is being executed, or 0 if
     there is no command being executed.
 
-    \sa hasPendingCommands()
+    \sa currentCommand(), hasPendingCommands()
  */
 int QObexPushClient::currentId() const
 {
-    if (m_data->m_q.empty())
-        return 0;
+    return m_data->m_client->currentId();
+}
 
-    return m_data->m_q.head()->m_id;
+/*!
+    Returns the command that is being executed, or QObexPushClient::None if
+    there is no command being executed.
+
+    \sa currentId()
+ */
+QObexPushClient::Command QObexPushClient::currentCommand() const
+{
+    return m_data->currentCommand();
 }
 
 /*!
@@ -913,11 +504,11 @@ int QObexPushClient::currentId() const
 
     The command that is being executed is not considered as a scheduled command.
 
-    \sa clearPendingCommands(), currentId()
+    \sa clearPendingCommands(), currentId(), currentCommand()
  */
 bool QObexPushClient::hasPendingCommands() const
 {
-    return m_data->m_q.size() > 1;
+    return m_data->m_client->hasPendingRequests();
 }
 
 /*!
@@ -925,11 +516,19 @@ bool QObexPushClient::hasPendingCommands() const
     does not affect the command that is being executed. If you want to stop
     this command as well, use abort().
 
-    \sa hasPendingCommands(), currentId(), abort()
+    \sa hasPendingCommands(), currentId(), currentCommand(), abort()
  */
 void QObexPushClient::clearPendingCommands()
 {
-    m_data->clearPendingCommands();
+    m_data->m_client->clearPendingRequests();
+}
+
+/*!
+    Returns the server's response code for the last completed command.
+ */
+QObex::ResponseCode QObexPushClient::lastCommandResponse() const
+{
+    return m_data->m_client->lastResponseCode();
 }
 
 /*!
@@ -938,6 +537,12 @@ void QObexPushClient::clearPendingCommands()
     This signal is emitted when the client has finished processing the command
     identified by \a id. The \a error value is \c true if an error occurred
     during the processing of the command; otherwise \a error is \c false.
+
+    \bold {Note:} Some OBEX Push services close the transport connection as 
+    soon as a file transfer operation is completed. In this case, if an OBEX
+    Push client sends a file transfer request and then sends a disconnect()
+    request, the disconnect() request will fail as the transport connection
+    is no longer available.
 
     \sa commandStarted(), currentId()
 */
@@ -961,19 +566,13 @@ void QObexPushClient::clearPendingCommands()
  */
 
 /*!
-    \fn void QObexPushClient::progress(qint64 completed, qint64 total);
+    \fn void QObexPushClient::dataTransferProgress(qint64 done, qint64 total);
 
     This signal is emitted during file transfer operations to
-    indicate the progress of the transfer. The \a completed value is the
+    indicate the progress of the transfer. The \a done value is the
     number of bytes that have been sent or received so far, and \a total
     is the total number of bytes to be sent or received.
  */
 
-/*!
-    \fn void QObexPushClient::stateChanged(QObexPushClient::State state)
-
-    This signal is emitted when the state of the client changes. The \a state
-    is the new state of the client.
- */
 
 #include "qobexpushclient.moc"

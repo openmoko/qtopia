@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -48,7 +48,7 @@ DataView::~DataView()
 
 void DataView::init()
 {
-    storage = new QStorageMetaInfo( this );
+    storage = QStorageMetaInfo::instance();
     QVBoxLayout *vb = new QVBoxLayout(this);
 
     QLabel * desc = new QLabel( tr("Data Types"), this );
@@ -159,7 +159,7 @@ int DataView::documentSize(QString& filter)
     QList<QContent> list = allDocs.items();
 
     foreach(const QContent &dl, list ) {
-        sum += QFileInfo(dl.file()).size()/1024;
+        sum += QFileInfo(dl.fileName()).size()/1024;
     }
 
     return sum;

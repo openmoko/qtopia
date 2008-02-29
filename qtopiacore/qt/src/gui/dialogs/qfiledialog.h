@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -40,6 +55,8 @@ struct QFileDialogArgs;
 class QFileIconProvider;
 class QFileDialogPrivate;
 class QAbstractItemDelegate;
+class QAbstractProxyModel;
+class QUrl;
 
 class Q_GUI_EXPORT QFileDialog : public QDialog
 {
@@ -104,6 +121,12 @@ public:
     void setResolveSymlinks(bool enabled);
     bool resolveSymlinks() const;
 
+    void setSidebarUrls(const QList<QUrl> &urls);
+    QList<QUrl> sidebarUrls() const;
+
+    QByteArray saveState() const;
+    bool restoreState(const QByteArray &state);
+
     void setConfirmOverwrite(bool enabled);
     bool confirmOverwrite() const;
 
@@ -122,9 +145,16 @@ public:
     void setLabelText(DialogLabel label, const QString &text);
     QString labelText(DialogLabel label) const;
 
+#ifndef QT_NO_PROXYMODEL
+    void setProxyModel(QAbstractProxyModel *model);
+    QAbstractProxyModel *proxyModel() const;
+#endif
+
 Q_SIGNALS:
     void filesSelected(const QStringList &files);
     void currentChanged(const QString &path);
+    void directoryEntered(const QString &directory);
+    void filterSelected(const QString &filter);
 
 public:
 #ifdef QT3_SUPPORT
@@ -210,33 +240,35 @@ protected:
     QFileDialog(const QFileDialogArgs &args);
     void done(int result);
     void accept();
+    void changeEvent(QEvent *e);
 
 private:
     Q_DECLARE_PRIVATE(QFileDialog)
     Q_DISABLE_COPY(QFileDialog)
-    Q_PRIVATE_SLOT(d_func(), void _q_reload())
-    Q_PRIVATE_SLOT(d_func(), void _q_navigateToPrevious())
+
+    Q_PRIVATE_SLOT(d_func(), void _q_pathChanged(const QString &))
+
+    Q_PRIVATE_SLOT(d_func(), void _q_navigateBackward())
+    Q_PRIVATE_SLOT(d_func(), void _q_navigateForward())
     Q_PRIVATE_SLOT(d_func(), void _q_navigateToParent())
-    Q_PRIVATE_SLOT(d_func(), void _q_enterDirectory(const QModelIndex &index))
-    Q_PRIVATE_SLOT(d_func(), void _q_enterDirectory(const QString &path))
-    Q_PRIVATE_SLOT(d_func(), void _q_enterDirectory())
-    Q_PRIVATE_SLOT(d_func(), void _q_showList())
-    Q_PRIVATE_SLOT(d_func(), void _q_showDetails())
-    Q_PRIVATE_SLOT(d_func(), void _q_showHidden())
-    Q_PRIVATE_SLOT(d_func(), void _q_useFilter(const QString &filter))
-    Q_PRIVATE_SLOT(d_func(), void _q_updateFileName(const QItemSelection &selection))
-    Q_PRIVATE_SLOT(d_func(), void _q_autoCompleteFileName(const QString &text))
-    Q_PRIVATE_SLOT(d_func(), void _q_autoCompleteDirectory(const QString &text))
-    Q_PRIVATE_SLOT(d_func(), void _q_showContextMenu(const QPoint &pos))
     Q_PRIVATE_SLOT(d_func(), void _q_createDirectory())
+    Q_PRIVATE_SLOT(d_func(), void _q_showListView())
+    Q_PRIVATE_SLOT(d_func(), void _q_showDetailsView())
+    Q_PRIVATE_SLOT(d_func(), void _q_showContextMenu(const QPoint &))
     Q_PRIVATE_SLOT(d_func(), void _q_renameCurrent())
     Q_PRIVATE_SLOT(d_func(), void _q_deleteCurrent())
-    Q_PRIVATE_SLOT(d_func(), void _q_sortByName())
-    Q_PRIVATE_SLOT(d_func(), void _q_sortBySize())
-    Q_PRIVATE_SLOT(d_func(), void _q_sortByDate())
-    Q_PRIVATE_SLOT(d_func(), void _q_setUnsorted())
-    Q_PRIVATE_SLOT(d_func(), void _q_sortByColumn(int))
+    Q_PRIVATE_SLOT(d_func(), void _q_showHidden())
+    Q_PRIVATE_SLOT(d_func(), void _q_updateOkButton())
     Q_PRIVATE_SLOT(d_func(), void _q_currentChanged(const QModelIndex &index))
+    Q_PRIVATE_SLOT(d_func(), void _q_enterDirectory(const QModelIndex &index))
+    Q_PRIVATE_SLOT(d_func(), void _q_goToDirectory(const QString &path))
+    Q_PRIVATE_SLOT(d_func(), void _q_useNameFilter(const QString &nameFilter))
+    Q_PRIVATE_SLOT(d_func(), void _q_selectionChanged())
+    Q_PRIVATE_SLOT(d_func(), void _q_goToUrl(const QUrl &url))
+    Q_PRIVATE_SLOT(d_func(), void _q_goHome())
+    Q_PRIVATE_SLOT(d_func(), void _q_showHeader(QAction *))
+    Q_PRIVATE_SLOT(d_func(), void _q_autoCompleteFileName(const QString &text))
+    Q_PRIVATE_SLOT(d_func(), void _q_rowsInserted(const QModelIndex & parent))
 };
 
 inline void QFileDialog::setDirectory(const QDir &adirectory)

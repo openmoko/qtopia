@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,12 +22,13 @@
 #ifndef __QTOPIA_MEDIALIBRARY_HELIXSETTINGSCONTROL_H
 #define __QTOPIA_MEDIALIBRARY_HELIXSETTINGSCONTROL_H
 
-#include <qobject.h>
-#include <qstring.h>
-#include <qvariant.h>
+#include <QObject>
+#include <QString>
+#include <QStringList>
+#include <QVariant>
+
 #include <qtopiaglobal.h>
 
-#include "qmediahandle.h"
 
 class QMediaHelixSettingsControlPrivate;
 
@@ -50,6 +51,8 @@ signals:
     void optionChanged(QString name, QVariant value);
 
 private:
+    Q_DISABLE_COPY(QMediaHelixSettingsControl);
+
     QMediaHelixSettingsControlPrivate*   d;
 };
 

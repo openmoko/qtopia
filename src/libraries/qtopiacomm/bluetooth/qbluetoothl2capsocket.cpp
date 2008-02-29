@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,18 +19,11 @@
 **
 ****************************************************************************/
 
-#include <qtopia/comm/qbluetoothl2capsocket.h>
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
-#include <qtopiacomm/private/qbluetoothabstractsocket_p.h>
-#include <bluetooth/l2cap.h>
+#include <qbluetoothl2capsocket.h>
+#include "qbluetoothnamespace_p.h"
+#include "qbluetoothabstractsocket_p.h"
 #include <qbluetoothaddress.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+#include "qbluetoothsocketengine_p.h"
 
 class QBluetoothL2CapSocketPrivate : public QBluetoothAbstractSocketPrivate
 {
@@ -205,41 +198,15 @@ bool QBluetoothL2CapSocket::readSocketParameters(int socket)
 {
     SOCKET_DATA(QBluetoothL2CapSocket);
 
-    struct sockaddr_l2 addr;
-    socklen_t len = sizeof(addr);
+    int dummy;
+    m_data->m_engine->getsocknameL2Cap(socket, &m_data->m_local, &dummy);
+    m_data->m_engine->getpeernameL2Cap(socket, &m_data->m_remote, &m_data->m_remotePsm);
 
-    memset(&addr, 0, sizeof(addr));
-    if (::getsockname(socket, (struct sockaddr *) &addr, &len) == 0) {
-
-        if (addr.l2_family != AF_BLUETOOTH) {
-            qWarning("rc_family doesn't match AF_BLUETOOTH!!");
-            return false;
-        }
-
-        bdaddr_t localBdaddr;
-        memcpy(&localBdaddr, &addr.l2_bdaddr, sizeof(bdaddr_t));
-        QString str = bdaddr2str(&localBdaddr);
-        m_data->m_local = QBluetoothAddress(str);
-    }
-
-    memset(&addr, 0, sizeof(addr));
-    if (::getpeername(socket, (struct sockaddr *) &addr, &len) == 0) {
-        bdaddr_t remoteBdaddr;
-        memcpy(&remoteBdaddr, &addr.l2_bdaddr, sizeof(bdaddr_t));
-        QString str = bdaddr2str(&remoteBdaddr);
-        m_data->m_remote = QBluetoothAddress(str);
-        m_data->m_remotePsm = btohs(addr.l2_psm);
-    }
-
-    struct l2cap_options opts;
-    memset(&opts, 0, sizeof(opts));
-    socklen_t optlen = sizeof(opts);
-
-    if (::getsockopt(socket, SOL_L2CAP, L2CAP_OPTIONS, &opts, &optlen) == 0) {
-        m_data->m_imtu = opts.imtu;
-        m_data->m_omtu = opts.omtu;
-
+    if (m_data->m_engine->getL2CapIncomingMtu(socket, &m_data->m_imtu)) {
         setReadMtu(m_data->m_imtu);
+    }
+
+    if (m_data->m_engine->getL2CapOutgoingMtu(socket, &m_data->m_omtu)) {
         setWriteMtu(m_data->m_omtu);
     }
 
@@ -283,58 +250,22 @@ bool QBluetoothL2CapSocket::connect(const QBluetoothAddress &local,
 
     resetSocketParameters();
 
-    int sockfd = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
+    int sockfd = m_data->m_engine->l2capSocket();
 
     if (sockfd < 0) {
-        setError(QBluetoothAbstractSocket::ResourceError);
+        setError(m_data->m_engine->error());
         return false;
     }
 
-    struct sockaddr_l2 addr;
-    bdaddr_t localBdaddr;
-
-    str2bdaddr(local.toString(), &localBdaddr);
-
-    memset(&addr, 0, sizeof(addr));
-    addr.l2_family = AF_BLUETOOTH;
-    memcpy(&addr.l2_bdaddr, &localBdaddr, sizeof(bdaddr_t));
-
-    if (::bind(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
-        ::close(sockfd);
-        setError(QBluetoothAbstractSocket::BindError);
-        return false;
-    }
+    m_data->m_engine->setSocketOption(sockfd, QBluetoothSocketEngine::NonBlockingOption);
 
     _q_setL2CapSecurityOptions(sockfd, options);
 
-    struct l2cap_options opts;
-    socklen_t optlen;
+    QBluetoothAbstractSocket::SocketState connectState =
+            m_data->m_engine->connectL2Cap(sockfd, local, remote, psm,
+                                           incomingMtu, outgoingMtu);
 
-    memset(&opts, 0, sizeof(opts));
-    optlen = sizeof(opts);
-
-    if (getsockopt(sockfd, SOL_L2CAP, L2CAP_OPTIONS, &opts, &optlen) < 0) {
-        ::close(sockfd);
-        setError(QBluetoothAbstractSocket::UnknownError);
-    }
-
-    opts.omtu = outgoingMtu;
-    opts.imtu = incomingMtu;
-
-    if (setsockopt(sockfd, SOL_L2CAP, L2CAP_OPTIONS, &opts, sizeof(opts)) < 0) {
-        ::close(sockfd);
-        setError(QBluetoothAbstractSocket::UnknownError);
-    }
-
-    bdaddr_t remoteBdaddr;
-    str2bdaddr(remote.toString(), &remoteBdaddr);
-
-    memset(&addr, 0, sizeof(addr));
-    addr.l2_family = AF_BLUETOOTH;
-    memcpy(&addr.l2_bdaddr, &remoteBdaddr, sizeof(bdaddr_t));
-    addr.l2_psm = htobs(psm);
-
-    return initiateConnect(sockfd, (struct sockaddr *) &addr, sizeof(addr));
+    return handleConnect(sockfd, connectState);
 }
 
 /*!

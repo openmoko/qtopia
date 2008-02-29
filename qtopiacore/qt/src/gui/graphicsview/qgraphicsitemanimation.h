@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -36,6 +51,7 @@ class QGraphicsItem;
 class QMatrix;
 class QPointF;
 class QTimeLine;
+template <class T1, class T2> struct QPair;
 
 class QGraphicsItemAnimationPrivate;
 class Q_GUI_EXPORT QGraphicsItemAnimation : public QObject
@@ -52,23 +68,28 @@ public:
     void setTimeLine(QTimeLine *timeLine);
 
     QPointF posAt(qreal step) const;
+    QList<QPair<qreal, QPointF> > posList() const;
     void setPosAt(qreal step, const QPointF &pos);
 
     QMatrix matrixAt(qreal step) const;
 
     qreal rotationAt(qreal step) const;
+    QList<QPair<qreal, qreal> > rotationList() const;
     void setRotationAt(qreal step, qreal angle);
 
     qreal xTranslationAt(qreal step) const;
     qreal yTranslationAt(qreal step) const;
+    QList<QPair<qreal, QPointF> > translationList() const;
     void setTranslationAt(qreal step, qreal dx, qreal dy);
 
     qreal verticalScaleAt(qreal step) const;
     qreal horizontalScaleAt(qreal step) const;
+    QList<QPair<qreal, QPointF> > scaleList() const;
     void setScaleAt(qreal step, qreal sx, qreal sy);
 
     qreal verticalShearAt(qreal step) const;
     qreal horizontalShearAt(qreal step) const;
+    QList<QPair<qreal, QPointF> > shearList() const;
     void setShearAt(qreal step, qreal sh, qreal sv);
 
     void clear();

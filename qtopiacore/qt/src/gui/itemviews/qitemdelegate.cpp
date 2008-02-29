@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,6 +49,7 @@
 #include <qrect.h>
 #include <qsize.h>
 #include <qstyle.h>
+#include <qdatetime.h>
 #include <qstyleoption.h>
 #include <qevent.h>
 #include <qpixmap.h>
@@ -44,6 +60,7 @@
 #include <qtextlayout.h>
 #include <private/qobject_p.h>
 #include <private/qdnd_p.h>
+#include <private/qtextengine_p.h>
 #include <qdebug.h>
 #include <qlocale.h>
 
@@ -54,7 +71,7 @@ class QItemDelegatePrivate : public QObjectPrivate
     Q_DECLARE_PUBLIC(QItemDelegate)
 
 public:
-    QItemDelegatePrivate() : f(0), clipPainting(false) {}
+    QItemDelegatePrivate() : f(0), clipPainting(true) {}
 
     inline const QItemEditorFactory *editorFactory() const
         { return f ? f : QItemEditorFactory::defaultFactory(); }
@@ -78,6 +95,8 @@ public:
             return text;
         }
 
+    static QString valueToText(const QVariant &value, const QStyleOptionViewItemV3 &option);
+
     void _q_commitDataAndCloseEditor(QWidget *editor);
 
     QItemEditorFactory *f;
@@ -87,6 +106,14 @@ public:
     QSizeF doTextLayout(int lineWidth) const;
     mutable QTextLayout textLayout;
     mutable QTextOption textOption;
+
+    const QWidget *widget(const QStyleOptionViewItem &option) const
+    {
+        if (const QStyleOptionViewItemV3 *v3 = qstyleoption_cast<const QStyleOptionViewItemV3 *>(&option))
+            return v3->widget;
+
+        return 0;
+    }
 
     // ### temporary hack until we have QStandardItemDelegate
     mutable struct Icon {
@@ -110,11 +137,11 @@ QRect QItemDelegatePrivate::textLayoutBounds(const QStyleOptionViewItemV2 &optio
     switch (option.decorationPosition) {
     case QStyleOptionViewItem::Left:
     case QStyleOptionViewItem::Right:
-        rect.setWidth(INT_MAX >> 6);
+        rect.setWidth(wrapText && rect.isValid() ? rect.width() : (QFIXED_MAX));
         break;
     case QStyleOptionViewItem::Top:
     case QStyleOptionViewItem::Bottom:
-        rect.setWidth(wrapText ? option.decorationSize.width() : (INT_MAX >> 6));
+        rect.setWidth(wrapText ? option.decorationSize.width() : (QFIXED_MAX));
         break;
     }
 
@@ -166,27 +193,36 @@ QSizeF QItemDelegatePrivate::doTextLayout(int lineWidth) const
     the default delegate can provide.
 
     This class provides default implementations of the functions for
-    painting item data in a view, and editing data obtained from a model.
-    Default implementations of the paint() and sizeHint() virtual functions,
-    defined in QAbstractItemDelegate, are provided to ensure that the
-    delegate implements the correct basic behavior expected by views. You
-    can reimplement these functions in subclasses to customize the
-    appearance of items.
+    painting item data in a view and editing data from item models.
+    Default implementations of the paint() and sizeHint() virtual
+    functions, defined in QAbstractItemDelegate, are provided to
+    ensure that the delegate implements the correct basic behavior
+    expected by views. You can reimplement these functions in
+    subclasses to customize the appearance of items.
 
-    Delegates can be used to manipulate item data in two complementary ways:
-    by processing events in the normal manner, or by implementing a
-    custom editor widget. The item delegate takes the approach of providing
-    a widget for editing purposes that can be supplied to
-    QAbstractItemView::setDelegate() or the equivalent function in
-    subclasses of QAbstractItemView.
+    When editing data in an item view, QItemDelegate provides an
+    editor widget, which is a widget that is placed on top of the view
+    while editing takes place. Editors are created with a
+    QItemEditorFactory; a default static instance provided by
+    QItemEditorFactory is installed on all item delagates. You can set
+    a custom factory using setItemEditorFactory() or set a new default
+    factory with QItemEditorFactory::setDefaultFactory(). It is the
+    data stored in the item model with the Qt::EditRole that is edited.
 
     Only the standard editing functions for widget-based delegates are
-    reimplemented here: editor() returns the widget used to change data
-    from the model; setEditorData() provides the widget with data to
-    manipulate; updateEditorGeometry() ensures that the editor is displayed
-    correctly with respect to the item view; setModelData() returns the
-    updated data to the model; releaseEditor() indicates that the user has
-    completed editing the data, and that the editor widget can be destroyed.
+    reimplemented here:
+
+    \list
+        \o createEditor() returns the widget used to change data from the model
+           and can be reimplemented to customize editing behavior.
+        \o setEditorData() provides the widget with data to manipulate.
+        \o updateEditorGeometry() ensures that the editor is displayed correctly
+           with respect to the item view.
+        \o setModelData() returns updated data to the model.
+    \endlist
+
+    The closeEditor() signal indicates that the user has completed editing the data,
+    and that the editor widget can be destroyed.
 
     \section1 Standard Roles and Data Types
 
@@ -233,10 +269,13 @@ QSizeF QItemDelegatePrivate::doTextLayout(int lineWidth) const
     disabled, checked. The documentation for the paint() function contains
     some hints to show how this can be achieved.
 
-    Custom editing features for can be added by subclassing QItemDelegate and
-    reimplementing createEditor(), setEditorData(), setModelData(), and
-    updateEditorGeometry(). This process is described in the
-    \l{Spin Box Delegate example}.
+    You can provide custom editors by using a QItemEditorFactory. The
+    \l{Color Editor Factory Example} shows how a custom editor can be
+    made available to delegates with the default item editor
+    factory. This way, there is no need to subclass QItemDelegate.  An
+    alternative is to reimplement createEditor(), setEditorData(),
+    setModelData(), and updateEditorGeometry(). This process is
+    described in the \l{Spin Box Delegate example}.
 
     \sa {Delegate Classes}, QAbstractItemDelegate, {Spin Box Delegate Example},
         {Settings Editor Example}, {Icons Example}
@@ -266,7 +305,7 @@ QItemDelegate::~QItemDelegate()
   \since 4.2
 
   This property will set the paint clip to the size of the item.
-  The default value is off.  It is useful for cases such
+  The default value is on. It is useful for cases such
   as when images are larger then the size of the item.
 */
 
@@ -280,6 +319,39 @@ void QItemDelegate::setClipping(bool clip)
 {
     Q_D(QItemDelegate);
     d->clipPainting = clip;
+}
+
+QString QItemDelegatePrivate::valueToText(const QVariant &value, const QStyleOptionViewItemV3 &option)
+{
+    QString text;
+    switch (value.type()) {
+        case QVariant::Double:
+            text = option.locale.toString(value.toDouble());
+            break;
+        case QVariant::Int:
+        case QVariant::LongLong:
+            text = option.locale.toString(value.toLongLong());
+            break;
+        case QVariant::UInt:
+        case QVariant::ULongLong:
+            text = option.locale.toString(value.toULongLong());
+            break;
+        case QVariant::Date:
+            text = option.locale.toString(value.toDate(), QLocale::ShortFormat);
+            break;
+        case QVariant::Time:
+            text = option.locale.toString(value.toTime(), QLocale::ShortFormat);
+            break;
+        case QVariant::DateTime:
+            text = option.locale.toString(value.toDateTime().date(), QLocale::ShortFormat);
+            text += QLatin1Char(' ');
+            text += option.locale.toString(value.toDateTime().time(), QLocale::ShortFormat);
+            break;
+        default:
+            text = replaceNewLine(value.toString());
+            break;
+    }
+    return text;
 }
 
 /*!
@@ -306,16 +378,21 @@ void QItemDelegate::setClipping(bool clip)
 
     \sa QStyle::State
 */
-
 void QItemDelegate::paint(QPainter *painter,
                           const QStyleOptionViewItem &option,
                           const QModelIndex &index) const
 {
     Q_D(const QItemDelegate);
     Q_ASSERT(index.isValid());
-    QStyleOptionViewItemV2 opt = setOptions(index, option);
+
+    QStyleOptionViewItemV3 opt = setOptions(index, option);
+
     const QStyleOptionViewItemV2 *v2 = qstyleoption_cast<const QStyleOptionViewItemV2 *>(&option);
-    opt.features = v2 ? v2->features : QStyleOptionViewItemV2::ViewItemFeatures(QStyleOptionViewItemV2::None);
+    opt.features = v2 ? v2->features
+                    : QStyleOptionViewItemV2::ViewItemFeatures(QStyleOptionViewItemV2::None);
+    const QStyleOptionViewItemV3 *v3 = qstyleoption_cast<const QStyleOptionViewItemV3 *>(&option);
+    opt.locale = v3 ? v3->locale : QLocale();
+    opt.widget = v3 ? v3->widget : 0;
 
     // prepare
     painter->save();
@@ -343,17 +420,16 @@ void QItemDelegate::paint(QPainter *painter,
             d->tmp.icon = QIcon();
             decorationRect = QRect(QPoint(0, 0), pixmap.size());
         }
+    } else {
+        d->tmp.icon = QIcon();
+        decorationRect = QRect();
     }
 
     QString text;
     QRect displayRect;
     value = index.data(Qt::DisplayRole);
     if (value.isValid()) {
-        if (value.type() == QVariant::Double)
-            text = QLocale().toString(value.toDouble());
-        else
-            text = QItemDelegatePrivate::replaceNewLine(value.toString());
-
+        text = QItemDelegatePrivate::valueToText(value, opt);
         displayRect = textRectangle(painter, d->textLayoutBounds(opt), opt.font, text);
     }
 
@@ -375,7 +451,7 @@ void QItemDelegate::paint(QPainter *painter,
     drawCheck(painter, opt, checkRect, checkState);
     drawDecoration(painter, opt, decorationRect, pixmap);
     drawDisplay(painter, opt, displayRect, text);
-    drawFocus(painter, opt, text.isEmpty() ? QRect() : displayRect);
+    drawFocus(painter, opt, displayRect);
 
     // done
     painter->restore();
@@ -447,9 +523,10 @@ void QItemDelegate::setEditorData(QWidget *editor, const QModelIndex &index) con
     QVariant v = index.data(Qt::EditRole);
     QByteArray n = editor->metaObject()->userProperty().name();
 
-    // ### Remove in Qt 5: A work-around for missing "USER true" in
-    // qdatetimeedit.h for QTimeEdit's time property and QDateEdit's date
-    // property. It only triggers if the default user property "dateTime" is
+    // ### Qt 5: remove
+    // A work-around for missing "USER true" in qdatetimeedit.h for
+    // QTimeEdit's time property and QDateEdit's date property.
+    // It only triggers if the default user property "dateTime" is
     // reported for QTimeEdit and QDateEdit.
     if (n == "dateTime") {
         if (editor->inherits("QTimeEdit"))
@@ -575,8 +652,11 @@ void QItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionViewItem &o
         painter->restore();
     }
 
-    const QStyleOptionViewItemV2 opt = option;
-    const int textMargin = QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
+    const QStyleOptionViewItemV3 opt = option;
+
+    const QWidget *widget = d->widget(option);
+    QStyle *style = widget ? widget->style() : QApplication::style();
+    const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, widget) + 1;
     QRect textRect = rect.adjusted(textMargin, 0, -textMargin, 0); // remove width padding
     const bool wrapText = opt.features & QStyleOptionViewItemV2::WrapText;
     d->textOption.setWrapMode(wrapText ? QTextOption::WordWrap : QTextOption::ManualWrap);
@@ -606,6 +686,8 @@ void QItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionViewItem &o
             //let's add the last line (after the last QChar::LineSeparator)
             elided += option.fontMetrics.elidedText(text.mid(start),
                                                     option.textElideMode, textRect.width());
+            if (end != -1)
+                elided += QChar::LineSeparator;
         }
         d->textLayout.setText(elided);
         textLayoutSize = d->doTextLayout(textRect.width());
@@ -614,7 +696,16 @@ void QItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionViewItem &o
     const QSize layoutSize(textRect.width(), int(textLayoutSize.height()));
     const QRect layoutRect = QStyle::alignedRect(option.direction, option.displayAlignment,
                                                   layoutSize, textRect);
-    d->textLayout.draw(painter, layoutRect.topLeft(), QVector<QTextLayout::FormatRange>(), layoutRect);
+    // if we still overflow even after eliding the text, enable clipping
+    if (!hasClipping() && (textRect.width() < textLayoutSize.width()
+                           || textRect.height() < textLayoutSize.height())) {
+        painter->save();
+        painter->setClipRect(layoutRect);
+        d->textLayout.draw(painter, layoutRect.topLeft(), QVector<QTextLayout::FormatRange>(), layoutRect);
+        painter->restore();
+    } else {
+        d->textLayout.draw(painter, layoutRect.topLeft(), QVector<QTextLayout::FormatRange>(), layoutRect);
+    }
 }
 
 /*!
@@ -653,17 +744,21 @@ void QItemDelegate::drawFocus(QPainter *painter,
                               const QStyleOptionViewItem &option,
                               const QRect &rect) const
 {
+    Q_D(const QItemDelegate);
     if ((option.state & QStyle::State_HasFocus) == 0 || !rect.isValid())
         return;
     QStyleOptionFocusRect o;
     o.QStyleOption::operator=(option);
     o.rect = rect;
     o.state |= QStyle::State_KeyboardFocusChange;
+    o.state |= QStyle::State_Item;
     QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled)
                               ? QPalette::Normal : QPalette::Disabled;
     o.backgroundColor = option.palette.color(cg, (option.state & QStyle::State_Selected)
                                              ? QPalette::Highlight : QPalette::Window);
-    QApplication::style()->drawPrimitive(QStyle::PE_FrameFocusRect, &o, painter);
+    const QWidget *widget = d->widget(option);
+    QStyle *style = widget ? widget->style() : QApplication::style();
+    style->drawPrimitive(QStyle::PE_FrameFocusRect, &o, painter, widget);
 }
 
 /*!
@@ -676,6 +771,7 @@ void QItemDelegate::drawCheck(QPainter *painter,
                               const QStyleOptionViewItem &option,
                               const QRect &rect, Qt::CheckState state) const
 {
+    Q_D(const QItemDelegate);
     if (!rect.isValid())
         return;
 
@@ -695,7 +791,9 @@ void QItemDelegate::drawCheck(QPainter *painter,
         break;
     }
 
-    QApplication::style()->drawPrimitive(QStyle::PE_IndicatorViewItemCheck, &opt, painter);
+    const QWidget *widget = d->widget(option);
+    QStyle *style = widget ? widget->style() : QApplication::style();
+    style->drawPrimitive(QStyle::PE_IndicatorViewItemCheck, &opt, painter, widget);
 }
 
 /*!
@@ -737,19 +835,27 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
                              bool hint) const
 {
     Q_ASSERT(checkRect && pixmapRect && textRect);
-    const int textMargin = QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
+    Q_D(const QItemDelegate);
+    const QWidget *widget = d->widget(option);
+    QStyle *style = widget ? widget->style() : QApplication::style();
+    const bool hasCheck = checkRect->isValid();
+    const bool hasPixmap = pixmapRect->isValid();
+    const bool hasText = textRect->isValid();
+    const int textMargin = hasText ? style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, widget) + 1 : 0;
+    const int pixmapMargin = hasPixmap ? style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, widget) + 1 : 0;
+    const int checkMargin = hasCheck ? style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, widget) + 1 : 0;
     int x = option.rect.left();
     int y = option.rect.top();
     int w, h;
 
     textRect->adjust(-textMargin, 0, textMargin, 0); // add width padding
-    if (textRect->height() == 0)
+    if (textRect->height() == 0 && !hasPixmap)
         textRect->setHeight(option.fontMetrics.height());
 
     QSize pm(0, 0);
-    if (pixmapRect->isValid()) {
+    if (hasPixmap) {
         pm = pixmapRect->size();
-        pm.rwidth() += 2 * textMargin;
+        pm.rwidth() += 2 * pixmapMargin;
     }
     if (hint) {
         h = qMax(checkRect->height(), qMax(textRect->height(), pm.height()));
@@ -766,13 +872,13 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
 
     int cw = 0;
     QRect check;
-    if (checkRect->isValid()) {
-        cw = checkRect->width() + 2 * textMargin;
+    if (hasCheck) {
+        cw = checkRect->width() + 2 * checkMargin;
         if (hint) w += cw;
         if (option.direction == Qt::RightToLeft) {
             check.setRect(x + w - cw, y, cw, h);
         } else {
-            check.setRect(x, y, cw, h);
+            check.setRect(x + checkMargin, y, cw, h);
         }
     }
 
@@ -782,8 +888,8 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
     QRect decoration;
     switch (option.decorationPosition) {
     case QStyleOptionViewItem::Top: {
-        if (!pm.isEmpty())
-            pm.setHeight(pm.height() + textMargin); // add space
+        if (hasPixmap)
+            pm.setHeight(pm.height() + pixmapMargin); // add space
         h = hint ? textRect->height() : h - pm.height();
 
         if (option.direction == Qt::RightToLeft) {
@@ -795,7 +901,7 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
         }
         break; }
     case QStyleOptionViewItem::Bottom: {
-        if (!textRect->isEmpty())
+        if (hasText)
             textRect->setHeight(textRect->height() + textMargin); // add space
         h = hint ? textRect->height() + pm.height() : h;
 
@@ -836,7 +942,7 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
                                          checkRect->size(), check);
         *pixmapRect = QStyle::alignedRect(option.direction, option.decorationAlignment,
                                           pixmapRect->size(), decoration);
-        // the text takes up all awailable space, unless the decoration is not shown as selected
+        // the text takes up all available space, unless the decoration is not shown as selected
         if (option.showDecorationSelected)
             *textRect = display;
         else
@@ -950,7 +1056,7 @@ QRect QItemDelegate::rect(const QStyleOptionViewItem &option,
             return QRect(QPoint(0, 0), option.decorationSize);
         case QVariant::String:
         default: {
-            QString text = QItemDelegatePrivate::replaceNewLine(value.toString());
+            QString text = QItemDelegatePrivate::valueToText(value, option);
             value = index.data(Qt::FontRole);
             QFont fnt = qvariant_cast<QFont>(value).resolve(option.font);
             return textRectangle(0, d->textLayoutBounds(option), fnt, text); }
@@ -961,15 +1067,30 @@ QRect QItemDelegate::rect(const QStyleOptionViewItem &option,
 
 /*!
   \internal
+
+  Note that on Mac, if /usr/include/AssertMacros.h is included prior to QItemDelegate,
+  and the application is building in debug mode, the check(assertion) will conflict
+  with QItemDelegate::check.
+
+  To avoid this problem, add
+
+  #ifdef check
+	#undef check
+  #endif
+
+  after including AssertMacros.h
 */
 QRect QItemDelegate::check(const QStyleOptionViewItem &option,
                            const QRect &bounding, const QVariant &value) const
 {
     if (value.isValid()) {
+        Q_D(const QItemDelegate);
         QStyleOptionButton opt;
         opt.QStyleOption::operator=(option);
         opt.rect = bounding;
-        return QApplication::style()->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt);
+        const QWidget *widget = d->widget(option); // cast
+        QStyle *style = widget ? widget->style() : QApplication::style();
+        return style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, widget);
     }
     return QRect();
 }
@@ -986,6 +1107,7 @@ QRect QItemDelegate::textRectangle(QPainter * /*painter*/, const QRect &rect,
     d->textLayout.setFont(font);
     d->textLayout.setText(QItemDelegatePrivate::replaceNewLine(text));
     const QSize size = d->doTextLayout(rect.width()).toSize();
+    // ###: textRectangle should take style option as argument
     const int textMargin = QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
     return QRect(0, 0, size.width() + 2 * textMargin, size.height());
 }
@@ -1090,7 +1212,8 @@ bool QItemDelegate::editorEvent(QEvent *event,
 
     // make sure that the item is checkable
     Qt::ItemFlags flags = model->flags(index);
-    if (!(flags & Qt::ItemIsUserCheckable) || !((flags & Qt::ItemIsEnabled)))
+    if (!(flags & Qt::ItemIsUserCheckable) || !(option.state & QStyle::State_Enabled) 
+        || !(flags & Qt::ItemIsEnabled))
         return false;
 
     // make sure that we have a check state
@@ -1101,11 +1224,7 @@ bool QItemDelegate::editorEvent(QEvent *event,
     // make sure that we have the right event type
     if ((event->type() == QEvent::MouseButtonRelease)
         || (event->type() == QEvent::MouseButtonDblClick)) {
-        const int textMargin = QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
-        QRect checkRect = QStyle::alignedRect(option.direction, Qt::AlignLeft | Qt::AlignVCenter,
-                                              check(option, option.rect, Qt::Checked).size(),
-                                              QRect(option.rect.x() + textMargin, option.rect.y(),
-                                                    option.rect.width(), option.rect.height()));
+        QRect checkRect = check(option, option.rect, Qt::Checked);
         if (!checkRect.contains(static_cast<QMouseEvent*>(event)->pos()))
             return false;
 

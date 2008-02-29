@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,8 +45,8 @@
 
 #include "qwidgetanimator_p.h"
 
-static const int g_animation_steps = 14;
-static const int g_animation_interval = 20;
+static const int g_animation_steps = 12;
+static const int g_animation_interval = 16;
 
 // 1000 * (x/(1 + x*x) + 0.5) on interval [-1, 1]
 static const int g_animate_function[] =
@@ -67,6 +82,16 @@ QWidgetAnimator::QWidgetAnimator(QObject *parent)
 QWidgetAnimator::~QWidgetAnimator()
 {
     delete m_time;
+}
+
+void QWidgetAnimator::abort(QWidget *w)
+{
+    if (m_animation_map.remove(w) == 0)
+        return;
+    if (m_animation_map.isEmpty()) {
+        m_timer->stop();
+        emit finishedAll();
+    }
 }
 
 void QWidgetAnimator::animate(QWidget *widget, const QRect &_final_geometry, bool animate)

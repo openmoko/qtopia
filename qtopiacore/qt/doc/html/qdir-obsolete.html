@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/io/qdir.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/io/qdir.cpp -->
 <head>
-  <title>Qt 4.2: Obsolete Members for QDir</title>
+  <title>Qt 4.3: Obsolete Members for QDir</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -19,8 +19,16 @@
 <ul>
 <li><div class="fn"/>QDir &amp; <b><a href="qdir-obsolete.html#operator-eq-2">operator=</a></b> ( const QString &amp; <i>path</i> )&nbsp;&nbsp;<tt> (obsolete)</tt></li>
 </ul>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qdir-obsolete.html#addResourceSearchPath">addResourceSearchPath</a></b> ( const QString &amp; <i>path</i> )&nbsp;&nbsp;<tt> (obsolete)</tt></li>
+</ul>
 <hr />
 <h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="addResourceSearchPath"></a>void QDir::addResourceSearchPath ( const <a href="qstring.html">QString</a> &amp; <i>path</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Adds <i>path</i> to the search paths searched in to find resources that are not specified with an absolute path. The default search path is to search only in the root (<tt>:/</tt>).</p>
+<p>Use <a href="qdir.html#addSearchPath">QDir::addSearchPath</a>() with a prefix instead.</p>
+<p>See also <a href="resources.html">The Qt Resource System</a> and <a href="qresource-obsolete.html#addSearchPath">QResource::addSearchPath</a>().</p>
 <h3 class="fn"><a name="operator-eq-2"></a>QDir &amp; QDir::operator= ( const <a href="qstring.html">QString</a> &amp; <i>path</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sets the directory path to the given <i>path</i>.</p>
@@ -29,6 +37,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

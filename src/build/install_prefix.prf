@@ -6,7 +6,7 @@ libdir=/lib
 plugdir=/plugins
 resdir=/
 
-# Qtopia Desktop overrides
+# Qtopia Sync Agent overrides
 part_of_qtopiadesktop {
     win32 {
         bindir=/

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,17 @@
 #ifndef SERVICEREQUEST_H
 #define SERVICEREQUEST_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <private/menumodel_p.h>
 
 #include <QtCore>
@@ -29,7 +40,7 @@
 class ServiceRequest
 {
 public:
-    enum Type { PushTitle, PushMenu, OpenUrl, OpenPlaylist, CuePlaylist, ShowPlayer, TriggerSlot, Compound, User = 0xff };
+    enum Type { PushTitle, PushMenu, OpenUrl, OpenPlaylist, CuePlaylist, PlayNow, ShowPlayer, TriggerSlot, Compound, User = 0xff };
 
     virtual ~ServiceRequest() { }
 
@@ -119,6 +130,23 @@ public:
     // ServiceRequest
     Type type() const { return CuePlaylist; }
     ServiceRequest* clone() const { return new CuePlaylistRequest( m_playlist ); }
+
+private:
+    Playlist *m_playlist;
+};
+
+class PlayNowRequest : public ServiceRequest
+{
+public:
+    explicit PlayNowRequest( Playlist* playlist )
+        : m_playlist( playlist )
+    { }
+
+    Playlist* playlist() const { return m_playlist; }
+
+    // ServiceRequest
+    Type type() const { return PlayNow; }
+    ServiceRequest* clone() const { return new PlayNowRequest( m_playlist ); }
 
 private:
     Playlist *m_playlist;

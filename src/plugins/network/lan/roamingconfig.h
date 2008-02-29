@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -31,6 +31,8 @@
 
 #include "ui_roamingbase.h"
 
+class QEvent;
+class QListWidgetItem;
 class RoamingPage : public QWidget
 {
 Q_OBJECT
@@ -40,19 +42,20 @@ public:
 
     QtopiaNetworkProperties properties();
     void setProperties( const QtopiaNetworkProperties& cfg );
+    bool eventFilter( QObject* watched, QEvent* event );
 private:
     void init( const QtopiaNetworkProperties& cfg );
     void readConfig();
     void saveConfig();
 
 private slots:
-    void up();
-    void down();
     void reconnectToggled(int newState);
+    void listActivated(QListWidgetItem*);
 
 private:
     QMultiHash<QString, QVariant> props;
     Ui::RoamingBase ui;
+    QListWidgetItem* currentSelection;
 };
 
 #endif //NO_WIRELESS_LAN

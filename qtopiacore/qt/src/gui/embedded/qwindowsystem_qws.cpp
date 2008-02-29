@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,6 +45,7 @@
 #include "qwsdisplay_qws.h"
 #include "qmouse_qws.h"
 #include "qcopchannel_qws.h"
+#include "qwssocket_qws.h"
 
 #include "qapplication.h"
 #include "private/qapplication_p.h"
@@ -86,13 +102,21 @@
 #include "qmousedriverfactory_qws.h"
 
 #include <qbuffer.h>
+#include <qdir.h>
 
 #include <private/qwindowsurface_qws_p.h>
+#include <private/qfontengine_qpf_p.h>
 
 #include "qwindowsystem_p.h"
 
+//#define QWS_DEBUG_FONTCLEANUP
+
 QWSServer Q_GUI_EXPORT *qwsServer=0;
 static QWSServerPrivate *qwsServerPrivate=0;
+
+#define MOUSE 0
+#define KEY 1
+//#define EVENT_BLOCK_DEBUG
 
 QWSScreenSaver::~QWSScreenSaver()
 {
@@ -105,8 +129,9 @@ extern QString qws_qtePipeFilename();
 extern void qt_client_enqueue(const QWSEvent *); //qapplication_qws.cpp
 extern QList<QWSCommand*> *qt_get_server_queue();
 
-Q_GLOBAL_STATIC_WITH_ARGS(QString, defaultMouse, ("Auto"));
-Q_GLOBAL_STATIC_WITH_ARGS(QString, defaultKeyboard, ("TTY"));
+Q_GLOBAL_STATIC_WITH_ARGS(QString, defaultMouse, (QLatin1String("Auto")))
+Q_GLOBAL_STATIC_WITH_ARGS(QString, defaultKeyboard, (QLatin1String("TTY")))
+static const int FontCleanupInterval = 60 * 1000;
 
 static int qws_keyModifiers = 0;
 
@@ -128,6 +153,7 @@ static int current_IM_winId = -1;
 static bool force_reject_strokeIM = false;
 #endif
 
+static void cleanupFontsDir();
 
 //#define QWS_REGION_DEBUG
 
@@ -147,7 +173,7 @@ static bool force_reject_strokeIM = false;
 
     Note that there exists no default screensaver implementation.
 
-    To create a custom screen driver, derive from this class and
+    To create a custom screensaver, derive from this class and
     reimplement the restore() and save() functions. These functions
     are called whenever the screensaver is activated or deactivated,
     respectively. Once an instance of your custom screensaver is
@@ -201,12 +227,18 @@ public:
     QList<QWSWindow*> embedded;
     QWSWindow *embedder;
 #endif
+    QWSWindow::State state;
+    Qt::WindowFlags windowFlags;
+    QRegion dirtyOnScreen;
+    bool painted;
 };
 
 QWSWindowPrivate::QWSWindowPrivate()
+    :
 #ifndef QT_NO_QWSEMBEDWIDGET
-    : embedder(0)
+    embedder(0), state(QWSWindow::NoState),
 #endif
+    painted(false)
 {
 }
 
@@ -338,11 +370,74 @@ QWSWindow::QWSWindow(int i, QWSClient* client)
     surface = 0;
 }
 
+
+/*!
+    \enum QWSWindow::State
+
+    This enum describes the state of a window. Most of the
+    transitional states are set just before a call to
+    QScreen::exposeRegion() and reset immediately afterwards.
+
+    \value NoState Initial state before the window is properly initialized.
+    \value Hidden The window is not visible.
+    \value Showing The window is being shown.
+    \value Visible The window is visible, and not in a transition.
+    \value Hiding The window is being hidden.
+    \value Raising The windoe is being raised.
+    \value Lowering The window is being raised.
+    \value Moving The window is being moved.
+    \value ChangingGeometry The window's geometry is being changed.
+    \value Destroyed  The window is destroyed.
+
+    \sa state(), QScreen::exposeRegion()
+*/
+
+/*!
+  Returns the current state of the window.
+
+  \since 4.3
+*/
+QWSWindow::State QWSWindow::state() const
+{
+    return d->state;
+}
+
+/*!
+  Returns the window flags of the window. This value is only available
+  after the first paint event.
+
+  \since 4.3
+*/
+Qt::WindowFlags QWSWindow::windowFlags() const
+{
+    return d->windowFlags;
+}
+
+/*!
+  Returns the region that has been repainted since the previous
+  QScreen::exposeRegion(), and needs to be copied to the screen.
+  \since 4.3
+*/
+QRegion QWSWindow::dirtyOnScreen() const
+{
+    return d->dirtyOnScreen;
+}
+
 void QWSWindow::createSurface(const QString &key, const QByteArray &data)
 {
+#ifndef QT_NO_QWS_MULTIPROCESS
+    if (surface && !surface->isBuffered())
+        c->removeUnbufferedSurface();
+#endif
+
     delete surface;
     surface = qt_screen->createSurface(key);
-    surface->attach(data);
+    surface->setPermanentState(data);
+
+#ifndef QT_NO_QWS_MULTIPROCESS
+    if (!surface->isBuffered())
+        c->addUnbufferedSurface();
+#endif
 }
 
 /*!
@@ -480,6 +575,14 @@ QWSWindow::~QWSWindow()
     while (!d->embedded.isEmpty())
         stopEmbed(d->embedded.first());
 #endif
+
+#ifndef QT_NO_QWS_MULTIPROCESS
+    if (surface && !surface->isBuffered()) {
+        if (c && c->d_func()) // d_func() will be 0 if client is deleted
+            c->removeUnbufferedSurface();
+    }
+#endif
+
     delete surface;
     delete d;
 }
@@ -491,11 +594,23 @@ QWSWindow::~QWSWindow()
     including any window decorations but excluding regions covered by
     other windows.
 
-    \sa requestedRegion()
+    \sa paintedRegion(), requestedRegion()
 */
 QRegion QWSWindow::allocatedRegion() const
 {
     return d->allocatedRegion;
+}
+
+/*!
+    \internal
+
+    Returns the region that the window is known to have drawn into.
+
+    \sa allocatedRegion(), requestedRegion()
+*/
+QRegion QWSWindow::paintedRegion() const
+{
+    return (d->painted ? d->allocatedRegion : QRegion());
 }
 
 inline void QWSWindow::setAllocatedRegion(const QRegion &region)
@@ -538,7 +653,10 @@ public:
 private:
 #ifndef QT_NO_QWS_MULTIPROCESS
     QWSLock *clientLock;
+    bool shutdown;
+    int numUnbufferedSurfaces;
 #endif
+    QSet<QByteArray> usedFonts;
     friend class QWSServerPrivate;
 };
 
@@ -546,6 +664,8 @@ QWSClientPrivate::QWSClientPrivate()
 {
 #ifndef QT_NO_QWS_MULTIPROCESS
     clientLock = 0;
+    shutdown = false;
+    numUnbufferedSurfaces = 0;
 #endif
 }
 
@@ -645,6 +765,20 @@ QWSClient::~QWSClient()
 #endif
 }
 
+#ifndef QT_NO_QWS_MULTIPROCESS
+void QWSClient::removeUnbufferedSurface()
+{
+    Q_D(QWSClient);
+    --d->numUnbufferedSurfaces;
+}
+
+void QWSClient::addUnbufferedSurface()
+{
+    Q_D(QWSClient);
+    ++d->numUnbufferedSurfaces;
+}
+#endif // QT_NO_QWS_MULTIPROCESS
+
 /*!
    \internal
 */
@@ -661,7 +795,7 @@ void QWSClient::closeHandler()
 
 void QWSClient::errorHandler()
 {
-#ifdef QWS_SOCKET_DEBUG
+#if defined(QWS_SOCKET_DEBUG)
     qDebug("Client %p error %s", this, csocket ? csocket->errorString().toLatin1().constData() : "(no socket)");
 #endif
     isClosed = true;
@@ -702,17 +836,22 @@ void QWSClient::sendEvent(QWSEvent* event)
 */
 void QWSClient::sendRegionEvent(int winid, QRegion rgn, int type)
 {
+#ifndef QT_NO_QWS_MULTIPROCESS
+    Q_D(QWSClient);
+    if (d->clientLock)
+        d->clientLock->lock(QWSLock::RegionEvent);
+#endif
+
     QWSRegionEvent event;
-    event.simpleData.window = winid;
-    event.simpleData.nrectangles = rgn.rects().count();
-    event.simpleData.type = type;
-    QVector<QRect> rects = rgn.rects();
-    event.setData((char *)rects.constData(),
-                    rects.count() * sizeof(QRect), false);
+    event.setData(winid, rgn, type);
 
 //    qDebug() << "Sending Region event to" << winid << "rgn" << rgn << "type" << type;
 
     sendEvent(&event);
+#ifndef QT_NO_QWS_MULTIPROCESS
+    if (d->clientLock && d->numUnbufferedSurfaces > 0)
+        csocket->waitForBytesWritten(); // ### must flush to prevent deadlock
+#endif
 }
 
 extern int qt_servershmid;
@@ -851,13 +990,16 @@ void QWSClient::sendEmbedEvent(int windowid, QWSEmbedEvent::Type type,
 
     In \l {Qtopia Core}, all system generated events are passed to the
     server application which then propagates the event to the
-    appropiate client. See the \l {Qtopia Core Architecture}
+    appropriate client. See the \l {Qtopia Core Architecture}
     documentation for details.
 
     Note that this class is instantiated by QApplication for \l
     {Qtopia Core} server processes; you should never construct this
     class yourself. Use the instance() function to retrieve a pointer
     to the server object.
+
+    Note that the static functions of the QWSServer class can only be
+    used in the server process.
 
     \tableofcontents
 
@@ -983,7 +1125,7 @@ void QWSClient::sendEmbedEvent(int windowid, QWSEmbedEvent::Type type,
     Whenever the server receives an event, it queries its stack of
     top-level windows to find the window containing the event's
     position (each window can identify the client application that
-    created it). Then the server forwards the event to the appropiate
+    created it). Then the server forwards the event to the appropriate
     client. If an input method is installed, it is used as a filter
     between the server and the client application.
 
@@ -1168,6 +1310,41 @@ QWSServer::QWSServer(int flags, QObject *parent, const char *name) :
 static void ignoreSignal(int) {} // Used to eat SIGPIPE signals below
 #endif
 
+bool QWSServerPrivate::screensaverblockevent( int index, int *screensaverinterval, bool isDown )
+{
+    static bool ignoreEvents[2] = { false, false };
+    if ( isDown ) {
+        if ( !ignoreEvents[index] ) {
+            bool wake = false;
+            if ( screensaverintervals ) {
+                if ( screensaverinterval != screensaverintervals ) {
+                    wake = true;
+                }
+            }
+            if ( screensaverblockevents && wake ) {
+#ifdef EVENT_BLOCK_DEBUG
+                qDebug( "waking the screen" );
+#endif
+                ignoreEvents[index] = true;
+            } else if ( !screensaverblockevents ) {
+#ifdef EVENT_BLOCK_DEBUG
+                qDebug( "the screen was already awake" );
+#endif
+                ignoreEvents[index] = false;
+            }
+        }
+    } else {
+        if ( ignoreEvents[index] ) {
+#ifdef EVENT_BLOCK_DEBUG
+            qDebug( "mouseup?" );
+#endif
+            ignoreEvents[index] = false;
+            return true;
+        }
+    }
+    return ignoreEvents[index];
+}
+
 void QWSServerPrivate::initServer(int flags)
 {
     Q_Q(QWSServer);
@@ -1206,7 +1383,7 @@ void QWSServerPrivate::initServer(int flags)
 #ifndef QT_NO_QWS_MULTIPROCESS
 
     if (!geteuid()) {
-#if !defined(Q_OS_FREEBSD) && !defined(Q_OS_SOLARIS) && !defined(Q_OS_DARWIN)
+#if !defined(Q_OS_FREEBSD) && !defined(Q_OS_SOLARIS) && !defined(Q_OS_DARWIN) && !defined(QT_LSB)
         if(mount(0,"/var/shm", "shm", 0, 0)) {
             /* This just confuses people with 2.2 kernels
             if (errno != EBUSY)
@@ -1220,6 +1397,13 @@ void QWSServerPrivate::initServer(int flags)
     // no selection yet
     selectionOwner.windowid = -1;
     selectionOwner.time.set(-1, -1, -1, -1);
+
+    cleanupFontsDir();
+
+    // initialize the font database
+    // from qfontdatabase_qws.cpp
+    extern void qt_qws_init_fontdb();
+    qt_qws_init_fontdb();
 
     openDisplay();
 
@@ -1260,8 +1444,22 @@ QWSServer::~QWSServer()
 #ifndef QT_NO_QWS_KEYBOARD
     closeKeyboard();
 #endif
+    d_func()->cleanupFonts(/*force =*/true);
 }
 
+/*!
+  \internal
+ */
+void QWSServer::timerEvent(QTimerEvent *e)
+{
+    Q_D(QWSServer);
+    if (e->timerId() == d->fontCleanupTimer.timerId()) {
+        d->cleanupFonts();
+        d->fontCleanupTimer.stop();
+    } else {
+        QObject::timerEvent(e);
+    }
+}
 
 const QList<QWSWindow*> &QWSServer::clientWindows()
 {
@@ -1424,6 +1622,7 @@ void QWSServerPrivate::_q_clientClosed()
             propertyManager.removeProperties(w->winId());
 #endif
             emit q->windowEvent(w, QWSServer::Destroy);
+            w->d->state = QWSWindow::Destroyed; //???
             deletedWindows.append(w);
         } else {
             ++i;
@@ -1431,6 +1630,27 @@ void QWSServerPrivate::_q_clientClosed()
     }
     if (deletedWindows.count())
         QTimer::singleShot(0, q, SLOT(_q_deleteWindowsLater()));
+
+    QWSClientPrivate *clientPrivate = cl->d_func();
+    if (!clientPrivate->shutdown) {
+#if defined(QWS_DEBUG_FONTCLEANUP)
+        qDebug() << "client" << cl->clientId() << "crashed";
+#endif
+        // this would be the place to emit a signal to notify about the
+        // crash of a client
+        crashedClientIds.append(cl->clientId());
+        fontCleanupTimer.start(10, q_func());
+    }
+    clientPrivate->shutdown = true;
+
+    while (!clientPrivate->usedFonts.isEmpty()) {
+        const QByteArray font = *clientPrivate->usedFonts.begin();
+#if defined(QWS_DEBUG_FONTCLEANUP)
+        qDebug() << "dereferencing font" << font << "from disconnected client";
+#endif
+        dereferenceFont(clientPrivate, font);
+    }
+    clientPrivate->usedFonts.clear();
 
     //qDebug("removing client %d with socket %d", cl->clientId(), cl->socket());
     clientMap.remove(cl->socket());
@@ -1451,6 +1671,101 @@ void QWSServerPrivate::_q_deleteWindowsLater()
 }
 
 #endif //QT_NO_QWS_MULTIPROCESS
+
+void QWSServerPrivate::referenceFont(QWSClientPrivate *client, const QByteArray &font)
+{
+    if (!client->usedFonts.contains(font)) {
+        client->usedFonts.insert(font);
+
+        ++fontReferenceCount[font];
+#if defined(QWS_DEBUG_FONTCLEANUP)
+        qDebug() << "Client" << client->q_func()->clientId() << "added font" << font;
+        qDebug() << "Refcount is" << fontReferenceCount[font];
+#endif
+    }
+}
+
+void QWSServerPrivate::dereferenceFont(QWSClientPrivate *client, const QByteArray &font)
+{
+    if (client->usedFonts.contains(font)) {
+        client->usedFonts.remove(font);
+
+        Q_ASSERT(fontReferenceCount[font]);
+        if (!--fontReferenceCount[font] && !fontCleanupTimer.isActive())
+            fontCleanupTimer.start(FontCleanupInterval, q_func());
+
+#if defined(QWS_DEBUG_FONTCLEANUP)
+        qDebug() << "Client" << client->q_func()->clientId() << "removed font" << font;
+        qDebug() << "Refcount is" << fontReferenceCount[font];
+#endif
+    }
+}
+
+static void cleanupFontsDir()
+{
+    static bool dontDelete = !qgetenv("QWS_KEEP_FONTS").isEmpty();
+    if (dontDelete)
+        return;
+
+    extern QString qws_fontCacheDir();
+    QDir dir(qws_fontCacheDir(), QLatin1String("*.qsf"));
+    for (uint i = 0; i < dir.count(); ++i) {
+#if defined(QWS_DEBUG_FONTCLEANUP)
+        qDebug() << "removing stale font file" << dir[i];
+#endif
+        dir.remove(dir[i]);
+    }
+}
+
+void QWSServerPrivate::cleanupFonts(bool force)
+{
+    static bool dontDelete = !qgetenv("QWS_KEEP_FONTS").isEmpty();
+    if (dontDelete)
+        return;
+
+#if defined(QWS_DEBUG_FONTCLEANUP)
+    qDebug() << "cleanupFonts()";
+#endif
+    QMap<QByteArray, int>::Iterator it = fontReferenceCount.begin();
+    while (it != fontReferenceCount.end()) {
+        if (it.value() && !force) {
+            ++it;
+            continue;
+        }
+
+        const QByteArray &fontName = it.key();
+#if defined(QWS_DEBUG_FONTCLEANUP)
+        qDebug() << "removing unused font file" << fontName;
+#endif
+        QFile::remove(QFile::decodeName(fontName));
+        sendFontRemovedEvent(fontName);
+
+        it = fontReferenceCount.erase(it);
+    }
+
+    if (crashedClientIds.isEmpty())
+        return;
+
+    QList<QByteArray> removedFonts;
+#ifndef QT_NO_QWS_QPF
+    removedFonts = QFontEngineQPF::cleanUpAfterClientCrash(crashedClientIds);
+#endif
+    crashedClientIds.clear();
+
+    for (int i = 0; i < removedFonts.count(); ++i)
+        sendFontRemovedEvent(removedFonts.at(i));
+}
+
+void QWSServerPrivate::sendFontRemovedEvent(const QByteArray &font)
+{
+    QWSFontEvent event;
+    event.simpleData.type = QWSFontEvent::FontRemoved;
+    event.setData(font.constData(), font.length(), false);
+
+    QMap<int,QWSClient*>::const_iterator it = clientMap.constBegin();
+    for (; it != clientMap.constEnd(); ++it)
+        (*it)->sendEvent(&event);
+}
 
 /*!
    \internal
@@ -1519,12 +1834,6 @@ void QWSServer::processEventQueue()
 void QWSServerPrivate::_q_doClient()
 {
     Q_Q(QWSServer);
-    static bool active = false;
-    if (active) {
-        qDebug("QWSServer::_q_doClient() reentrant call, ignoring");
-        return;
-    }
-    active = true;
 
     QWSClient* client;
 #ifndef QT_NO_SXE
@@ -1534,8 +1843,20 @@ void QWSServerPrivate::_q_doClient()
     else
 #endif
         client = (QWSClient*)q->sender();
+
+    if (doClientIsActive) {
+        pendingDoClients.append(client);
+        return;
+    }
+    doClientIsActive = true;
+
     doClient(client);
-    active = false;
+
+    while (!pendingDoClients.isEmpty()) {
+        doClient(pendingDoClients.takeFirst());
+    }
+
+    doClientIsActive = false;
 }
 #endif // QT_NO_QWS_MULTIPROCESS
 
@@ -1559,6 +1880,11 @@ void QWSServerPrivate::doClient(QWSClient *client)
         case QWSCommand::Create:
             invokeCreate((QWSCreateCommand*)cs->command, cs->client);
             break;
+#ifndef QT_NO_QWS_MULTIPROCESS
+        case QWSCommand::Shutdown:
+            cs->client->d_func()->shutdown = true;
+            break;
+#endif
         case QWSCommand::RegionName:
             invokeRegionName((QWSRegionNameCommand*)cs->command, cs->client);
             break;
@@ -1651,6 +1977,9 @@ void QWSServerPrivate::doClient(QWSClient *client)
             }
             break;
 #endif
+        case QWSCommand::Font:
+            invokeFont((QWSFontCommand *)cs->command, cs->client);
+            break;
         case QWSCommand::RepaintRegion:
             invokeRepaintRegion((QWSRepaintRegionCommand*)cs->command,
                                 cs->client);
@@ -1691,21 +2020,34 @@ void QWSServerPrivate::hideCursor()
     \sa {Qtopia Core Architecture#Drawing on Screen}{Qtopia Core
     Architecture}
 */
-void QWSServer::enablePainting(bool e)
+void QWSServer::enablePainting(bool enable)
 {
     Q_D(QWSServer);
-    // ### don't like this
-    if (e)
-    {
-        d->disablePainting = false;
-        d->setWindowRegion(0, QRegion());
+
+    if (d->disablePainting == !enable)
+        return;
+
+    d->disablePainting = !enable;
+
+    if (enable) {
+        // Reset the server side allocated regions to ensure update_regions()
+        // will send out region events.
+        for (int i = 0; i < d->windows.size(); ++i) {
+            QWSWindow *w = d->windows.at(i);
+            w->setAllocatedRegion(QRegion());
+        }
+        d->update_regions();
         d->showCursor();
-    }
-    else
-    {
-        d->disablePainting = true;
+    } else {
+        // Disable painting by clients by taking away their allocated region.
+        // To ensure mouse events are still delivered to the correct windows,
+        // the allocated regions are not modified on the server.
+        for (int i = 0; i < d->windows.size(); ++i) {
+            QWSWindow *w = d->windows.at(i);
+            w->client()->sendRegionEvent(w->winId(), QRegion(),
+                                         QWSRegionEvent::Allocation);
+        }
         d->hideCursor();
-        d->setWindowRegion(0, QRegion(0,0,d->swidth,d->sheight));
     }
 }
 
@@ -1740,6 +2082,8 @@ void QWSServer::refresh(QRegion & r)
 
     Sets the maximum area of the screen that \l {Qtopia Core}
     applications can use, to be the given \a rectangle.
+
+    Note that this function can only be used in the server process.
 
     \sa QWidget::showMaximized()
 */
@@ -1780,7 +2124,9 @@ void QWSServerPrivate::sendMaxWindowRectEvents(const QRect &rect)
     environment variable is not defined, to be the given \a
     mouseDriver.
 
-    Note that the default is platform-dependent.
+    Note that the default is platform-dependent. This function can
+    only be used in the server process.
+
 
     \sa setMouseHandler(), {Qtopia Core Pointer Handling}
 */
@@ -1796,7 +2142,8 @@ void QWSServer::setDefaultMouse(const char *m)
     environment variable is not defined, to be the given \a
     keyboardDriver.
 
-    Note that the default is platform-dependent.
+    Note that the default is platform-dependent. This function can
+    only be used in the server process.
 
     \sa setKeyboardHandler(), {Qtopia Core Character Input}
 */
@@ -1824,12 +2171,16 @@ extern int *qt_last_x,*qt_last_y;
 */
 void QWSServer::sendMouseEvent(const QPoint& pos, int state, int wheel)
 {
-    //const int btnMask = Qt::LeftButton | Qt::RightButton | Qt::MidButton;
-    qwsServerPrivate->showCursor();
+    bool block = qwsServerPrivate->screensaverblockevent(MOUSE, qwsServerPrivate->screensaverinterval, state);
+#ifdef EVENT_BLOCK_DEBUG
+    qDebug() << "sendMouseEvent" << pos.x() << pos.y() << state << (block?"block":"pass");
+#endif
 
     if (state)
         qwsServerPrivate->_q_screenSaverWake();
 
+    if ( block )
+        return;
 
     QPoint tpos;
     // transformations
@@ -1949,6 +2300,8 @@ void QWSServerPrivate::sendMouseEventUnfiltered(const QPoint &pos, int state, in
 /*!
     Returns the primary mouse driver.
 
+    Note that this function can only be used in the server process.
+
     \sa setMouseHandler(), openMouse(), closeMouse()
 */
 QWSMouseHandler *QWSServer::mouseHandler()
@@ -1969,6 +2322,8 @@ QWSMouseHandler *QWSServer::mouseHandler()
     mechanism. See the \l {Qtopia Core Pointer Handling} documentation
     for details.
 
+    Note that this function can only be used in the server process.
+
     \sa mouseHandler(), setDefaultMouse()
 */
 void QWSServer::setMouseHandler(QWSMouseHandler* mh)
@@ -1981,7 +2336,7 @@ void QWSServer::setMouseHandler(QWSMouseHandler* mh)
 
 /*!
   \internal
-
+  \obsolete
   Caller owns data in list, and must delete contents
 */
 QList<QWSInternalWindowInfo*> * QWSServer::windowList()
@@ -1992,27 +2347,8 @@ QList<QWSInternalWindowInfo*> * QWSServer::windowList()
         QWSInternalWindowInfo * qwi=new QWSInternalWindowInfo();
         qwi->winid=window->winId();
         qwi->clientid=window->client()->clientId();
-#ifndef QT_NO_QWS_PROPERTIES
-        const char * name;
-        int len;
-        qwsServerPrivate->propertyManager.getProperty(qwi->winid,
-                                               QT_QWS_PROPERTY_WINDOWNAME,
-                                               name,len);
-        if(name) {
-            char * buf=(char *)malloc(len+2);
-            strncpy(buf,name,len);
-            buf[len]=0;
-            qwi->name=buf;
-            free(buf);
-        } else {
-            qwi->name = QLatin1String("unknown");
-        }
-#else
-        qwi->name = QLatin1String("unknown");
-#endif
         ret->append(qwi);
     }
-
     return ret;
 }
 
@@ -2112,6 +2448,8 @@ static int keyUnicode(int keycode)
     event is caused by an auto-repeat mechanism and not an actual key
     press.
 
+    Note that this function can only be used in the server process.
+
     \sa processKeyEvent(), {Qtopia Core Character Input}
 */
 void QWSServer::sendKeyEvent(int unicode, int keycode, Qt::KeyboardModifiers modifiers,
@@ -2152,13 +2490,13 @@ void QWSServerPrivate::sendKeyEventUnfiltered(int unicode, int keycode, Qt::Keyb
     event.simpleData.modifiers = modifiers;
     event.simpleData.is_press = isPress;
     event.simpleData.is_auto_repeat = autoRepeat;
-#ifdef QT_QWS_KEYEVENT_SINGLECLIENT
-    if (win)
-        win->client()->sendEvent(&event);
-    else
-#endif
-        for (ClientIterator it = qwsServerPrivate->clientMap.begin(); it != qwsServerPrivate->clientMap.end(); ++it)
-            (*it)->sendEvent(&event);
+
+    QWSClient *serverClient = qwsServerPrivate->clientMap.value(-1);
+    QWSClient *winClient = win ? win->client() : 0;
+    if (serverClient)
+        serverClient->sendEvent(&event);
+    if (winClient && winClient != serverClient)
+        winClient->sendEvent(&event);
 }
 
 /*!
@@ -2214,6 +2552,8 @@ void QWSServerPrivate::resetEngine()
     Shows the cursor if \a visible is true: otherwise the cursor is
     hidden.
 
+    Note that this function can only be used in the server process.
+
     \sa isCursorVisible()
 */
 void QWSServer::setCursorVisible(bool vis)
@@ -2228,6 +2568,8 @@ void QWSServer::setCursorVisible(bool vis)
 
 /*!
     Returns true if the cursor is visible; otherwise returns false.
+
+    Note that this function can only be used in the server process.
 
     \sa setCursorVisible()
 */
@@ -2325,6 +2667,8 @@ void QWSServer::sendIMQuery(int property)
     \fn void QWSServer::setCurrentInputMethod(QWSInputMethod *method)
 
     Sets the current input method to be the given \a method.
+
+    Note that this function can only be used in the server process.
 
     \sa sendIMQuery(), sendIMEvent()
 */
@@ -2623,6 +2967,13 @@ void QWSServerPrivate::invokeRemoveProperty(QWSRemovePropertyCommand *cmd)
     }
 }
 
+
+bool QWSServerPrivate:: get_property(int winId, int property, const char *&data, int &len)
+{
+    return propertyManager.getProperty(winId, property, data, len);
+}
+
+
 void QWSServerPrivate::invokeGetProperty(QWSGetPropertyCommand *cmd, QWSClient *client)
 {
     const char *data;
@@ -2820,12 +3171,22 @@ void QWSServerPrivate::invokeIMUpdate(const QWSIMUpdateCommand *cmd,
 
 #endif
 
+void QWSServerPrivate::invokeFont(const QWSFontCommand *cmd, QWSClient *client)
+{
+    QWSClientPrivate *priv = client->d_func();
+    if (cmd->simpleData.type == QWSFontCommand::StartedUsingFont) {
+        referenceFont(priv, cmd->fontName);
+    } else if (cmd->simpleData.type == QWSFontCommand::StoppedUsingFont) {
+        dereferenceFont(priv, cmd->fontName);
+    }
+}
+
 void QWSServerPrivate::invokeRepaintRegion(QWSRepaintRegionCommand * cmd,
                                            QWSClient *)
 {
     QRegion r;
     r.setRects(cmd->rectangles,cmd->simpleData.nrectangles);
-    repaint_region(cmd->simpleData.windowid, cmd->simpleData.opaque, r);
+    repaint_region(cmd->simpleData.windowid, cmd->simpleData.windowFlags, cmd->simpleData.opaque, r);
 }
 
 #ifndef QT_NO_QWSEMBEDWIDGET
@@ -2904,7 +3265,8 @@ void QWSServerPrivate::raiseWindow(QWSWindow *changingw, int /*alt*/)
     Q_Q(QWSServer);
     if (changingw == windows.first())
         return;
-
+    QWSWindow::State oldstate = changingw->d->state;
+    changingw->d->state = QWSWindow::Raising;
     // Expose regions previously overlapped by transparent windows
     const QRegion bound = changingw->allocatedRegion();
     QRegion expose;
@@ -2949,6 +3311,7 @@ void QWSServerPrivate::raiseWindow(QWSWindow *changingw, int /*alt*/)
         if (!expose.isEmpty())
             exposeRegion(expose, newPos);
     }
+    changingw->d->state = oldstate;
     emit q->windowEvent(changingw, QWSServer::Raise);
 }
 
@@ -2957,9 +3320,12 @@ void QWSServerPrivate::lowerWindow(QWSWindow *changingw, int /*alt*/)
     Q_Q(QWSServer);
     if (changingw == windows.last())
         return;
+    QWSWindow::State oldstate = changingw->d->state;
+    changingw->d->state = QWSWindow::Lowering;
 
     int i = windows.indexOf(changingw);
-    windows.move(i,windows.size()-1);
+    int newIdx = windows.size()-1;
+    windows.move(i, newIdx);
 
     const QRegion bound = changingw->allocatedRegion();
 
@@ -2971,22 +3337,26 @@ void QWSServerPrivate::lowerWindow(QWSWindow *changingw, int /*alt*/)
         for (int j = i; j < windows.size() - 1; ++j)
             expose += (windows.at(j)->allocatedRegion() & bound);
         if (!expose.isEmpty())
-            exposeRegion(expose, i);
+            exposeRegion(expose, newIdx);
     }
 
+    changingw->d->state = oldstate;
     emit q->windowEvent(changingw, QWSServer::Lower);
 }
 
 void QWSServerPrivate::update_regions()
 {
+    if (disablePainting)
+        return;
+
     static QRegion prevAvailable = QRect(0, 0, qt_screen->width(), qt_screen->height());
     QRegion available = QRect(0, 0, qt_screen->width(), qt_screen->height());
-    QRegion reserved;
+    QRegion transparentRegion;
 
-    QList<QWSWindow*> transparentWindows;
-    QList<QRegion> transparentRegions;
-
-    // XXX (try?)grab display lock
+    // only really needed if there are unbuffered surfaces...
+    const bool doLock = (clientMap.size() > 1);
+    if (doLock)
+        QWSDisplay::grab(true);
 
     for (int i = 0; i < windows.count(); ++i) {
         QWSWindow *w = windows.at(i);
@@ -3004,29 +3374,16 @@ void QWSServerPrivate::update_regions()
 #endif // QT_NO_QWSEMBEDWIDGET
 
         QWSWindowSurface *surface = w->windowSurface();
-        if (surface && (surface->isReserved() || !surface->isBuffered())) {
-            available -= r;
-            reserved += r;
-        } else if (!w->isOpaque()) {
-            transparentWindows.append(w);
-            transparentRegions.append(r);
-            continue;
+        const bool opaque = w->isOpaque()
+                            && (w->d->painted || !surface || !surface->isBuffered());
+
+        if (!opaque) {
+            transparentRegion += r;
         } else {
+            if (surface && (surface->isRegionReserved() || !surface->isBuffered()))
+                r -= transparentRegion;
             available -= r;
         }
-
-        if (r == w->allocatedRegion())
-            continue;
-
-        w->setAllocatedRegion(r);
-        w->client()->sendRegionEvent(w->winId(), r,
-                                     QWSRegionEvent::Allocation);
-    }
-
-    // Adjust transparent windows for nonbuffered regions
-    for (int i = 0; i < transparentWindows.count(); ++i) {
-        QWSWindow *w = transparentWindows.at(i);
-        const QRegion r = transparentRegions.at(i) - reserved;
 
         if (r == w->allocatedRegion())
             continue;
@@ -3041,7 +3398,8 @@ void QWSServerPrivate::update_regions()
     if (!expose.isEmpty())
         exposeRegion(expose);
 
-    // XXX ungrab display lock
+    if (doLock)
+        QWSDisplay::ungrab();
 }
 
 void QWSServerPrivate::moveWindowRegion(QWSWindow *changingw, int dx, int dy)
@@ -3049,13 +3407,31 @@ void QWSServerPrivate::moveWindowRegion(QWSWindow *changingw, int dx, int dy)
     if (!changingw)
         return;
 
+    QWSWindow::State oldState = changingw->d->state;
+    changingw->d->state = QWSWindow::Moving;
     const QRegion oldRegion(changingw->allocatedRegion());
     changingw->requested_region.translate(dx, dy);
+
+    // hw: Even if the allocated region doesn't change, the requested region
+    // region has changed and we need to send region events.
+    // Resetting the allocated region to force update_regions to send events.
+    changingw->setAllocatedRegion(QRegion());
     update_regions();
     const QRegion newRegion(changingw->allocatedRegion());
 
+    QWSWindowSurface *surface = changingw->windowSurface();
+    QRegion expose;
+    if (surface)
+        expose = surface->move(QPoint(dx, dy), changingw->allocatedRegion());
+    else
+        expose = oldRegion + newRegion;
+
+    if (!changingw->d->painted && !expose.isEmpty())
+        expose = oldRegion - newRegion;
+
     int idx = windows.indexOf(changingw);
-    exposeRegion(oldRegion + newRegion, idx);
+    exposeRegion(expose, idx);
+    changingw->d->state = oldState;
 }
 
 /*!
@@ -3084,13 +3460,19 @@ void QWSServerPrivate::setWindowRegion(QWSWindow* changingw, QRegion r)
 
 void QWSServerPrivate::exposeRegion(QRegion r, int changing)
 {
+    if (disablePainting)
+        return;
+
+    if (r.isEmpty())
+        return;
+
     static bool initial = true;
     if (initial) {
         r = QRect(0,0,qt_screen->width(), qt_screen->height());
         changing = 0;
         initial = false;
     }
-    qt_screen->exposeRegion(r, qMax(nReserved, changing));
+    qt_screen->exposeRegion(r, changing);
 }
 
 /*!
@@ -3108,7 +3490,9 @@ void QWSServer::closeMouse()
 
 /*!
     Opens the mouse devices specified by the QWS_MOUSE_PROTO
-    environment variable.
+    environment variable. Be advised that closeMouse() is called first
+    to delete all the existing mouse handlers. This behaviour could be
+    the cause of problems if you were not expecting it.
 
     \sa closeMouse(), mouseHandler()
 */
@@ -3185,8 +3569,8 @@ QWSMouseHandler* QWSServerPrivate::newMouseHandler(const QString& spec)
 
     int screen = -1;
     const QList<QRegExp> regexps = QList<QRegExp>()
-                                   << QRegExp(":screen=(\\d+)\\b")
-                                   << QRegExp("\\bscreen=(\\d+):");
+                                   << QRegExp(QLatin1String(":screen=(\\d+)\\b"))
+                                   << QRegExp(QLatin1String("\\bscreen=(\\d+):"));
     for (int i = 0; i < regexps.size(); ++i) {
         QRegExp regexp = regexps.at(i);
         if (regexp.indexIn(mouseDev) == -1)
@@ -3223,6 +3607,8 @@ void QWSServer::closeKeyboard()
 /*!
     Returns the primary keyboard driver.
 
+    Note that this function can only be used in the server process.
+
     \sa setKeyboardHandler(), openKeyboard(), closeKeyboard()
 */
 QWSKeyboardHandler* QWSServer::keyboardHandler()
@@ -3239,6 +3625,8 @@ QWSKeyboardHandler* QWSServer::keyboardHandler()
     custom drivers are typically added using Qt's plugin
     mechanism. See the \l {Qtopia Core Character Input} documentation
     for details.
+
+    Note that this function can only be used in the server process.
 
     \sa keyboardHandler(), setDefaultKeyboard()
 */
@@ -3321,7 +3709,7 @@ void QWSServerPrivate::set_identity(const QWSIdentifyCommand *cmd)
     invokeIdentify(cmd, clientMap.value(-1));
 }
 
-void QWSServerPrivate::repaint_region(int wid, bool opaque, QRegion region)
+void QWSServerPrivate::repaint_region(int wid, int windowFlags, bool opaque, QRegion region)
 {
     QWSWindow* changingw = findWindow(wid, 0);
     if (!changingw) {
@@ -3329,12 +3717,17 @@ void QWSServerPrivate::repaint_region(int wid, bool opaque, QRegion region)
     }
 
     const bool isOpaque = changingw->opaque;
+    const bool wasPainted = changingw->d->painted;
     changingw->opaque = opaque;
-    if (isOpaque != opaque)
+    changingw->d->windowFlags = QFlag(windowFlags);
+    changingw->d->dirtyOnScreen |= region;
+    changingw->d->painted = true;
+    if (isOpaque != opaque || !wasPainted)
         update_regions();
 
     int level = windows.indexOf(changingw);
     exposeRegion(region, level);
+    changingw->d->dirtyOnScreen = QRegion();
 }
 
 QRegion QWSServerPrivate::reserve_region(QWSWindow *win, const QRegion &region)
@@ -3372,28 +3765,45 @@ void QWSServerPrivate::request_region(int wid, const QString &surfaceKey,
     changingw->opaque = surface->isOpaque();
 
     QRegion r;
-    if (surface->isReserved())
+    if (surface->isRegionReserved())
         r = reserve_region(changingw, region);
     else
         r = region;
 
-    bool isShow = !changingw->isVisible() && !region.isEmpty();
+    QWSWindow::State windowState;
+    if (region.isEmpty()) {
+        windowState = QWSWindow::Hiding;
+    } else {
+        if (changingw->isVisible())
+            windowState = QWSWindow::ChangingGeometry;
+        else
+            windowState = QWSWindow::Showing;
+    }
+    changingw->d->state = windowState;
 
-    if (wasOpaque != changingw->opaque && surface->isBuffered())
+    if (!r.isEmpty() && wasOpaque != changingw->opaque && surface->isBuffered()) {
         changingw->requested_region = QRegion(); // XXX: force update_regions
+        changingw->setAllocatedRegion(QRegion()); // XXX: force region events
+    }
 
     setWindowRegion(changingw, r);
+    surface->QWindowSurface::setGeometry(r.boundingRect());
 
     Q_Q(QWSServer);
 
-    if (isShow)
+    if (windowState == QWSWindow::Showing)
         emit q->windowEvent(changingw, QWSServer::Show);
-    if (!region.isEmpty())
-        emit q->windowEvent(changingw, QWSServer::Geometry);
-    else
+    if (windowState == QWSWindow::Hiding)
         emit q->windowEvent(changingw, QWSServer::Hide);
-    if (region.isEmpty())
+    else
+        emit q->windowEvent(changingw, QWSServer::Geometry);
+    if (windowState == QWSWindow::Hiding) {
         handleWindowClose(changingw);
+        changingw->d->state = QWSWindow::Hidden;
+        changingw->d->painted = false;
+    } else {
+        changingw->d->state = QWSWindow::Visible;
+    }
 }
 
 void QWSServerPrivate::destroy_region(const QWSRegionDestroyCommand *cmd)
@@ -3452,6 +3862,8 @@ const QBrush &QWSServer::backgroundBrush() const
 /*!
     Sets the brush used as background in the absence of obscuring
     windows, to be the given \a brush.
+
+    Note that this function can only be used in the server process.
 
     \sa backgroundBrush()
 */
@@ -3562,12 +3974,31 @@ static QList<QWSServer::KeyboardFilter*> *keyFilters = 0;
     press.
 
     This function is typically called internally by keyboard drivers.
+    Note that this function can only be used in the server process.
 
     \sa sendKeyEvent(), {Qtopia Core Character Input}
 */
 void QWSServer::processKeyEvent(int unicode, int keycode, Qt::KeyboardModifiers modifiers,
                                 bool isPress, bool autoRepeat)
 {
+    bool block;
+    // Don't block the POWER or LIGHT keys
+    if ( keycode == Qt::Key_F34 || keycode == Qt::Key_F35 )
+        block = false;
+    else
+        block = qwsServerPrivate->screensaverblockevent(KEY, qwsServerPrivate->screensaverinterval, isPress);
+
+#ifdef EVENT_BLOCK_DEBUG
+    qDebug() << "processKeyEvent" << unicode << keycode << modifiers << isPress << autoRepeat << (block?"block":"pass");
+#endif
+
+    // If we press a key and it's going to be blocked, wake up the screen
+    if ( block && isPress )
+        qwsServerPrivate->_q_screenSaverWake();
+
+    if ( block )
+        return;
+
     if (keyFilters) {
         for (int i = 0; i < keyFilters->size(); ++i) {
             QWSServer::KeyboardFilter *keyFilter = keyFilters->at(i);
@@ -3588,6 +4019,8 @@ void QWSServer::processKeyEvent(int unicode, int keycode, Qt::KeyboardModifiers 
     Note that the filter is not invoked for keys generated by \e
     virtual keyboard drivers (i.e., events sent using the
     sendKeyEvent() function).
+
+    Note that this function can only be used in the server process.
 
     \sa removeKeyboardFilter()
 */
@@ -3616,6 +4049,8 @@ void QWSServer::addKeyboardFilter(KeyboardFilter *f)
     Note that the programmer is responsible for removing each added
     keyboard filter.
 
+    Note that this function can only be used in the server process.
+
     \sa addKeyboardFilter()
 */
 void QWSServer::removeKeyboardFilter()
@@ -3641,13 +4076,15 @@ void QWSServer::removeKeyboardFilter()
 
     Note that an interval of 0 milliseconds will turn off the
     screensaver, and that the \a intervals array must be 0-terminated.
+    This function can only be used in the server process.
 
-    \sa setScreenSaverInterval()
+    \sa setScreenSaverInterval(), setScreenSaverBlockLevel()
 */
 void QWSServer::setScreenSaverIntervals(int* ms)
 {
     if (!qwsServerPrivate)
         return;
+
     delete [] qwsServerPrivate->screensaverintervals;
     if (ms) {
         int* t=ms;
@@ -3677,7 +4114,9 @@ void QWSServer::setScreenSaverIntervals(int* ms)
     milliseconds. To turn off the screensaver, set the timout interval
     to 0.
 
-    \sa setScreenSaverIntervals()
+    Note that this function can only be used in the server process.
+
+    \sa setScreenSaverIntervals(), setScreenSaverBlockLevel()
 */
 void QWSServer::setScreenSaverInterval(int ms)
 {
@@ -3685,6 +4124,78 @@ void QWSServer::setScreenSaverInterval(int ms)
     v[0] = ms;
     v[1] = 0;
     setScreenSaverIntervals(v);
+}
+
+/*!
+  Block the key or mouse event that wakes the system from level \a eventBlockLevel or higher.
+  To completely disable event blocking (the default behavior), set \a eventBlockLevel to -1.
+
+  The algorithm blocks the "down", "up" as well as any "repeat" events for the same key
+  but will not block other key events after the initial "down" event. For mouse events, the
+  algorithm blocks all mouse events until an event with no buttons pressed is received.
+
+  There are 2 keys that are never blocked, Qt::Key_F34 (POWER) and Qt::Key_F35 (LIGHT).
+
+  Example usage:
+
+  \code
+    bool MyScreenSaver::save( int level )
+    {
+        switch ( level ) {
+            case 0:
+                if ( dim_enabled ) {
+                    // dim the screen
+                }
+                return true;
+            case 1:
+                if ( screenoff_enabled ) {
+                    // turn off the screen
+                }
+                return true;
+            case 2:
+                if ( suspend_enabled ) {
+                    // suspend
+                }
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    ...
+
+    int timings[4];
+    timings[0] = 5000;  // dim after 5 seconds
+    timings[1] = 10000; // light off after 15 seconds
+    timings[2] = 45000; // suspend after 60 seconds
+    timings[3] = 0;
+    QWSServer::setScreenSaverIntervals( timings );
+
+    // ignore the key/mouse event that turns on the screen
+    int blocklevel = 1;
+    if ( !screenoff_enabled ) {
+        // screenoff is disabled, ignore the key/mouse event that wakes from suspend
+        blocklevel = 2;
+        if ( !suspend_enabled ) {
+            // suspend is disabled, never ignore events
+            blocklevel = -1;
+        }
+    }
+    QWSServer::setScreenSaverBlockLevel( blocklevel );
+  \endcode
+
+    Note that this function can only be used in the server process.
+
+  \sa setScreenSaverIntervals(), setScreenSaverInterval()
+*/
+void QWSServer::setScreenSaverBlockLevel(int eventBlockLevel)
+{
+    if (!qwsServerPrivate)
+        return;
+    qwsServerPrivate->screensavereventblocklevel = eventBlockLevel;
+#ifdef EVENT_BLOCK_DEBUG
+    qDebug() << "QWSServer::setScreenSaverBlockLevel() " << eventBlockLevel;
+#endif
 }
 
 extern bool qt_disable_lowpriority_timers; //in qeventloop_unix.cpp
@@ -3695,6 +4206,7 @@ void QWSServerPrivate::_q_screenSaverWake()
         if (screensaverinterval != screensaverintervals) {
             if (saver) saver->restore();
             screensaverinterval = screensaverintervals;
+            screensaverblockevents = false;
         } else {
             if (!screensavertimer->isActive()) {
                 qt_screen->blank(false);
@@ -3729,7 +4241,9 @@ void QWSServerPrivate::_q_screenSaverSleep()
     Installs the given \a screenSaver, deleting the current screen
     saver.
 
-    \sa screenSaverActivate(), setScreenSaverInterval(), setScreenSaverIntervals()
+    Note that this function can only be used in the server process.
+
+    \sa screenSaverActivate(), setScreenSaverInterval(), setScreenSaverIntervals(), setScreenSaverBlockLevel()
 */
 void QWSServer::setScreenSaver(QWSScreenSaver* ss)
 {
@@ -3741,14 +4255,31 @@ void QWSServer::setScreenSaver(QWSScreenSaver* ss)
 void QWSServerPrivate::screenSave(int level)
 {
     if (saver) {
+        // saver->save() may call QCoreApplication::processEvents,
+        // block event before calling saver->save().
+        bool oldScreensaverblockevents = screensaverblockevents;
+        if (*screensaverinterval >= 1000) {
+            screensaverblockevents = (screensavereventblocklevel >= 0 && screensavereventblocklevel <= level);
+#ifdef EVENT_BLOCK_DEBUG
+            if (screensaverblockevents)
+                qDebug("ready to block events");
+#endif
+        }
+        int *oldScreensaverinterval = screensaverinterval;
         if (saver->save(level)) {
-            if (screensaverinterval && screensaverinterval[1]) {
-                screensavertimer->start(*++screensaverinterval);
-                screensavertime.start();
-            } else {
-                screensaverinterval = 0;
+            // only update screensaverinterval if it hasn't already changed
+            if (oldScreensaverinterval == screensaverinterval) {
+                if (screensaverinterval && screensaverinterval[1]) {
+                    screensavertimer->start(*++screensaverinterval);
+                    screensavertime.start();
+                } else {
+                    screensaverinterval = 0;
+                }
             }
         } else {
+            // restore previous state
+            screensaverblockevents = oldScreensaverblockevents;
+
             // for some reason, the saver don't want us to change to the
             // next level, so we'll stay at this level for another interval
             if (screensaverinterval && *screensaverinterval) {
@@ -3758,6 +4289,7 @@ void QWSServerPrivate::screenSave(int level)
         }
     } else {
         screensaverinterval = 0;//screensaverintervals;
+        screensaverblockevents = false;
         _q_screenSaverSleep();
     }
 }
@@ -3778,6 +4310,8 @@ void QWSServerPrivate::_q_screenSaverTimeout()
     Returns true if the screen saver is active; otherwise returns
     false.
 
+    Note that this function can only be used in the server process.
+
     \sa screenSaverActivate()
 */
 bool QWSServer::screenSaverActive()
@@ -3789,6 +4323,8 @@ bool QWSServer::screenSaverActive()
 /*!
     Activates the screen saver if \a activate is true; otherwise it is
     deactivated.
+
+    Note that this function can only be used in the server process.
 
     \sa screenSaverActive(), setScreenSaver()
 */
@@ -3830,7 +4366,7 @@ void QWSServerPrivate::updateClientCursorPos()
     running, or to be the server application itself. All system
     generated events, including keyboard and mouse events, are passed
     to the server application which then propagates the event to the
-    appropiate client.
+    appropriate client.
 
     An input method consists of a filter and optionally a graphical
     interface, and is used to filter input events between the server
@@ -4274,7 +4810,7 @@ void QWSInputMethod::sendMouseEvent( const QPoint &pos, int state, int wheel )
 
     In \l {Qtopia Core}, all system generated events, including
     keyboard events, are passed to the server application which then
-    propagates the event to the appropiate client. The KeyboardFilter
+    propagates the event to the appropriate client. The KeyboardFilter
     class is used to implement a global, low-level filter on the
     server side. The server applies the filter to all keyboard events
     before passing them on to the clients:

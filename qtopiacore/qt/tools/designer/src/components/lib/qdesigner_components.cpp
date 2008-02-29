@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -33,13 +48,19 @@
 #include <objectinspector/objectinspector.h>
 #include <taskmenu/taskmenu_component.h>
 #include <resourceeditor_p.h>
+#include <qdesigner_integration_p.h>
 #include <signalsloteditor/signalsloteditorwindow.h>
 
 #include <buddyeditor/buddyeditor_plugin.h>
 #include <signalsloteditor/signalsloteditor_plugin.h>
 #include <tabordereditor/tabordereditor_plugin.h>
 
+#include <QtDesigner/QDesignerLanguageExtension>
+#include <QtDesigner/QExtensionManager>
+#include <QtDesigner/QDesignerResourceBrowserInterface>
+
 #include <QtCore/qplugin.h>
+#include <QtCore/QDir>
 
 // ### keep it in sync with Q_IMPORT_PLUGIN in qplugin.h
 #define DECLARE_PLUGIN_INSTANCE(PLUGIN) \
@@ -89,17 +110,7 @@ void QDesignerComponents::initializeResources()
     Initializes the plugins used by the components.*/
 void QDesignerComponents::initializePlugins(QDesignerFormEditorInterface *core)
 {
-    using namespace qdesigner_internal;
-
-    // load the plugins
-    if (WidgetDataBase *widgetDatabase = qobject_cast<WidgetDataBase*>(core->widgetDataBase())) {
-        widgetDatabase->loadPlugins();
-        widgetDatabase->grabDefaultPropertyValues();
-    }
-
-    if (WidgetFactory *widgetFactory = qobject_cast<WidgetFactory*>(core->widgetFactory())) {
-        widgetFactory->loadPlugins();
-    }
+    qdesigner_internal::QDesignerIntegration::initializePlugins(core);
 }
 
 /*!
@@ -130,7 +141,36 @@ QObject *QDesignerComponents::createTaskMenu(QDesignerFormEditorInterface *core,
     Returns a new widget box interface with the given \a parent for the \a core interface.*/
 QDesignerWidgetBoxInterface *QDesignerComponents::createWidgetBox(QDesignerFormEditorInterface *core, QWidget *parent)
 {
-    return new qdesigner_internal::WidgetBox(core, parent);
+    qdesigner_internal::WidgetBox *widgetBox = new qdesigner_internal::WidgetBox(core, parent);
+
+    const QDesignerLanguageExtension *lang = qt_extension<QDesignerLanguageExtension*>(core->extensionManager(), core);
+
+    do {
+        if (lang) {
+            const QString languageWidgetBox = lang->widgetBoxContents();
+            if (!languageWidgetBox.isEmpty()) {
+                widgetBox->loadContents(lang->widgetBoxContents());
+                break;
+            }
+        }
+
+        widgetBox->setFileName(QLatin1String(":/trolltech/widgetbox/widgetbox.xml"));
+        widgetBox->load();
+    } while (false);
+
+    QString rc = QDir::homePath();
+    rc += QLatin1String("/.designer");
+    rc += QLatin1String("/widgetbox");
+    if (lang) {
+        rc += QLatin1Char('.');
+        rc += lang->uiExtension();
+    }
+    rc += QLatin1String(".xml");
+
+    widgetBox->setFileName(rc);
+    widgetBox->load();
+
+    return widgetBox;
 }
 
 /*!
@@ -158,7 +198,12 @@ QDesignerActionEditorInterface *QDesignerComponents::createActionEditor(QDesigne
     Returns a new resource editor with the given \a parent for the \a core interface.*/
 QWidget *QDesignerComponents::createResourceEditor(QDesignerFormEditorInterface *core, QWidget *parent)
 {
-    return new qdesigner_internal::ResourceEditor(core, parent);
+    if (QDesignerLanguageExtension *lang = qt_extension<QDesignerLanguageExtension*>(core->extensionManager(), core)) {
+        QWidget *w = lang->createResourceBrowser(parent);
+        if (w)
+            return w;
+    }
+    return new qdesigner_internal::ResourceEditor(core, true, parent);
 }
 
 /*!

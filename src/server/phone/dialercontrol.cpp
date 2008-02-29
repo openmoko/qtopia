@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,7 @@
 
 #include "dialercontrol.h"
 #include "servercontactmodel.h"
+#include "qtopiapowermanager.h"
 
 #include <qcategoryselector.h>
 #include <qtopia/pim/qcontact.h>
@@ -31,8 +32,9 @@
 #include <QSettings>
 #include <QContactModel>
 #include <QString>
-#include <qwindowsystem_qws.h>
 #include <QtopiaApplication>
+#include <QTimer>
+#include <unistd.h>
 
 static const int auto_answer_gap = 2000;
 
@@ -46,6 +48,8 @@ static const int auto_answer_gap = 2000;
   simpler than dealing with QPhoneCallManager class directly.  It provides a
   reusable block of functionality that simplifies the \i common model of managing
   calls.
+    
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 /*!
@@ -96,6 +100,18 @@ static const int auto_answer_gap = 2000;
 */
 
 /*!
+  \fn void DialerControl::callControlRequested()
+  This signal is emitted when a call control operations
+  such as hold, resume and join are requested.
+*/
+
+/*!
+  \fn void DialerControl::callControlSucceeded()
+  This signal is emitted when a call control operation
+  such as hold, resume and join are successful.
+*/
+
+/*!
   Return the single instance of DialerControl
  */
 DialerControl * DialerControl::instance()
@@ -116,11 +132,13 @@ DialerControl::DialerControl( )
       activeCallCount(-1)
 {
     mCallManager = new QPhoneCallManager( this );
-    connect( mCallManager, SIGNAL(newCall(const QPhoneCall&)),
-             this, SLOT(newCall(const QPhoneCall&)) );
+    connect( mCallManager, SIGNAL(newCall(QPhoneCall)),
+             this, SLOT(newCall(QPhoneCall)) );
 
-    connect( this, SIGNAL(callDropped(const QPhoneCall&)),
-                                        this, SLOT(recordCall(const QPhoneCall&)) );
+    connect( this, SIGNAL(callIncoming(QPhoneCall)),
+            this, SLOT(cacheCall(QPhoneCall)) );
+    connect( this, SIGNAL(callDropped(QPhoneCall)),
+                                        this, SLOT(recordCall(QPhoneCall)) );
     mProfiles = new QPhoneProfileManager(this);
 
     QSettings setting("Trolltech", "qpe");
@@ -128,6 +146,7 @@ DialerControl::DialerControl( )
     missedCalls = setting.value("MissedCalls", 0).toInt();
     phoneValueSpace.setAttribute("MissedCalls", QVariant(missedCalls));
     doActiveCalls();
+    QTimer::singleShot( 0, this, SLOT(readCachedCall()) );
 }
 
 /*! \internal */
@@ -292,9 +311,9 @@ QPhoneCall DialerControl::incomingCall() const
 QPhoneCall DialerControl::createCall( const QString& callType )
 {
     QPhoneCall c = mCallManager->create(callType);
-    c.connectStateChanged( this, SLOT(callStateChanged(const QPhoneCall&)) );
-    c.connectPendingTonesChanged( this, SIGNAL(pendingTonesChanged(const QPhoneCall&)) );
-    c.connectRequestFailed( this, SIGNAL(requestFailed(const QPhoneCall &,QPhoneCall::Request)) );
+    c.connectStateChanged( this, SLOT(callStateChanged(QPhoneCall)) );
+    c.connectPendingTonesChanged( this, SIGNAL(pendingTonesChanged(QPhoneCall)) );
+    c.connectRequestFailed( this, SIGNAL(requestFailed(QPhoneCall,QPhoneCall::Request)) );
     return c;
 }
 
@@ -336,6 +355,9 @@ void DialerControl::dial( const QString &number, bool sendcallerid, const QStrin
         QPhoneCall call = createCall(callType);
         phoneValueSpace.setAttribute( "LastDialedCall", QVariant(number) );
         call.dial( dialopts );
+
+        // cache call here to preserve the information even if the battery run out.
+        cacheCall( call );
     }
 }
 
@@ -435,9 +457,6 @@ void DialerControl::accept()
     {
         QPhoneCall incoming = incomingCalls.first();
         if ( incoming.incoming() ) {
-            //if no room for this call, hangup on the calls on hold
-            if( hasActiveCalls() && hasCallsOnHold() )
-                callsOnHold().first().hangup();
             //put active calls on hold
             if ( incoming.callType() == "Voice" ) {   // No tr
                 // GSM calls will be put on hold automatically by the accept().
@@ -469,8 +488,21 @@ void DialerControl::accept()
 void DialerControl::hold()
 {
     if ( hasActiveCalls() ) {
+        emit callControlRequested();
+        active().connectStateChanged( this, SLOT(checkHoldState(QPhoneCall)) );
         active().hold();
     }
+}
+
+/*!
+    \internal
+    Checks if the request to hold the \a call was successful.
+*/
+void DialerControl::checkHoldState( const QPhoneCall &call )
+{
+    if ( call.state() == QPhoneCall::Hold )
+        emit callControlSucceeded();
+    call.disconnectStateChanged( this, SLOT(checkHoldState(QPhoneCall)) );
 }
 
 /*!
@@ -479,8 +511,11 @@ void DialerControl::hold()
 void DialerControl::unhold()
 {
     QList<QPhoneCall> hc = findCalls( QPhoneCall::Hold );
-    if( hc.count() )
+    if( hc.count() ) {
+        emit callControlRequested();
+        hc.first().connectStateChanged( this, SLOT(checkConnectedState(QPhoneCall)) );
         hc.first().activate();
+    }
 }
 
 /*!
@@ -490,8 +525,21 @@ void DialerControl::join()
 {
     QList<QPhoneCall> coh = callsOnHold();
     if ( hasActiveCalls() && coh.count() ) {
+        emit callControlRequested();
+        callsOnHold().first().connectStateChanged( this, SLOT(checkConnectedState(QPhoneCall)) );
         callsOnHold().first().join();
     }
+}
+
+/*!
+    \internal
+    Checks if the request to connect the \a call was successful.
+*/
+void DialerControl::checkConnectedState( const QPhoneCall &call )
+{
+    if ( call.state() == QPhoneCall::Connected )
+        emit callControlSucceeded();
+    call.disconnectStateChanged( this, SLOT(checkConnectedState(QPhoneCall)) );
 }
 
 /*!
@@ -543,8 +591,8 @@ void DialerControl::sendBusy()
 void DialerControl::newCall( const QPhoneCall& call )
 {
     QPhoneCall c = call;
-    c.connectStateChanged( this, SLOT(callStateChanged(const QPhoneCall&)) );
-    c.connectPendingTonesChanged( this, SIGNAL(pendingTonesChanged(const QPhoneCall&)) );
+    c.connectStateChanged( this, SLOT(callStateChanged(QPhoneCall)) );
+    c.connectPendingTonesChanged( this, SIGNAL(pendingTonesChanged(QPhoneCall)) );
     emit callCreated( c );
     doActiveCalls();
     callStateChanged( call ); //force an update
@@ -622,6 +670,8 @@ void DialerControl::callStateChanged( const QPhoneCall& call )
     if( call.state() == QPhoneCall::Connected )
     {
         emit callConnected( call );
+        // update cached call info.
+        updateCachedCall( call );
     }
     else if( call.state() == QPhoneCall::Hold )
     {
@@ -634,16 +684,12 @@ void DialerControl::callStateChanged( const QPhoneCall& call )
     else if( call.incoming() )
     {
         // Turn off screen saver so the incoming call will be visible.
-        QWSServer::screenSaverActivate(false);
+        QtopiaPowerManager::setActive(false);
 
         emit callIncoming( call );
     }
     else if ( call.dropped()  )
     {
-        if( call.missed() )
-        {
-            missedCall(call);
-        }
         emit callDropped( call );
     }
     doActiveCalls();
@@ -667,16 +713,97 @@ void DialerControl::recordCall( const QPhoneCall &call )
         ct = QCallListItem::Dialed;
     else if( call.hasBeenConnected() )
         ct = QCallListItem::Received;
-    else
+    else {
         ct = QCallListItem::Missed;
+        // increase missed call count
+        missedCall( call );
+    }
 
     // QPhoneCall::connectTime() in case call has been connected
     // QPhoneCall::startTime() in other cases
     QDateTime startTime = call.hasBeenConnected() ? call.connectTime() : call.startTime();
 
     QCallListItem listItem( ct, call.fullNumber(),
-            startTime, call.endTime(), call.contact() );
+            startTime, call.endTime(), call.contact(), call.callType() );
     mCallList.record( listItem );
+
+    removeCachedCall( call );
+}
+
+/*! \internal */
+void DialerControl::cacheCall( const QPhoneCall &call )
+{
+    // cache call info to perserve data when battery runs out
+    QSettings setting( "Trolltech", "qpe" );
+    setting.beginGroup( "CallControl" );
+    setting.beginGroup( call.identifier() );
+    setting.setValue( "CallType", call.dialing() ? QCallListItem::Dialed : QCallListItem::Missed );
+    setting.setValue( "FullNumber", call.fullNumber() );
+    setting.setValue( "StartTime", call.startTime() );
+    setting.setValue( "EndTime", QDateTime() );
+    setting.setValue( "Contact", call.contact().toString() );
+    setting.setValue( "ServiceType", call.callType() );
+    setting.endGroup();
+    setting.endGroup();
+    setting.sync();
+    // make sure the data is written to disk
+    ::sync();
+}
+
+/*! \internal */
+void DialerControl::removeCachedCall( const QPhoneCall &call )
+{
+    QSettings setting( "Trolltech", "qpe" );
+    setting.beginGroup( "CallControl" );
+    setting.remove( call.identifier() );
+    setting.sync();
+    ::sync();
+}
+
+/*! \internal */
+void DialerControl::updateCachedCall( const QPhoneCall &call )
+{
+    QSettings setting( "Trolltech", "qpe" );
+    setting.beginGroup( "CallControl" );
+    setting.beginGroup( call.identifier() );
+    setting.setValue( "CallType", call.dialed() ? QCallListItem::Dialed : QCallListItem::Received );
+    setting.setValue( "EndTime", QDateTime::currentDateTime() );
+    setting.endGroup();
+    setting.endGroup();
+    setting.sync();
+    ::sync();
+}
+
+/*! \internal */
+void DialerControl::readCachedCall()
+{
+    QSettings setting( "Trolltech", "qpe" );
+    setting.beginGroup( "CallControl" );
+    QStringList groupList = setting.childGroups();
+    foreach ( QString group, groupList ) {
+        setting.beginGroup( group );
+        QCallListItem::CallType ct = (QCallListItem::CallType)setting.value( "CallType" ).toInt();
+        if ( ct == QCallListItem::Missed )
+            missedCalls++;
+        QString fullNumber = setting.value( "FullNumber" ).toString();
+        QDateTime startTime = setting.value( "StartTime" ).toDateTime();
+        QDateTime endTime = setting.value( "EndTime" ).toDateTime();
+        QUniqueId contact = QUniqueId( setting.value( "Contact" ).toString() );
+        QString serviceType = setting.value( "ServiceType" ).toString();
+
+        QCallListItem item( ct, fullNumber, startTime, endTime, contact, serviceType );
+        mCallList.record( item );
+        setting.endGroup();
+        setting.remove( group );
+    }
+
+    if ( missedCalls ) {
+        setting.setValue( "MissedCalls", missedCalls );
+        phoneValueSpace.setAttribute("MissedCalls", missedCalls);
+        emit missedCount(missedCalls);
+    }
+    setting.sync();
+    ::sync();
 }
 
 /*!  \internal */

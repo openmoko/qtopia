@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,9 +28,9 @@
 #include <QList>
 #include <QCache>
 
-#if QT_VERSION >= 0x040300
 #include <QResource>
-#endif
+#include "private/qresource_p.h"
+//#define ENABLE_RESOURCEFILEENGINE
 
 #include <QDebug>
 #include <QApplication>
@@ -38,9 +38,24 @@
 #include <qfsfileengine.h>
 #include <QImageReader>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+static bool fileExists(const QByteArray &filename)
+{
+    struct stat statbuf;
+    int rv = stat(filename, &statbuf);
+    if (rv == 0 && statbuf.st_mode & S_IRUSR)
+        return true;
+
+    return false;
+}
+
 QFileResourceFileEngineHandler::QFileResourceFileEngineHandler()
     : QAbstractFileEngineHandler()
 {
+    QImageReader::supportedImageFormats();
 }
 
 QFileResourceFileEngineHandler::~QFileResourceFileEngineHandler()
@@ -49,8 +64,10 @@ QFileResourceFileEngineHandler::~QFileResourceFileEngineHandler()
 
 void QFileResourceFileEngineHandler::setIconPath(const QStringList& p)
 {
-    if (!p.isEmpty())
-        iconpath = p;
+    if (!p.isEmpty()) {
+        foreach (QString ip, p)
+            iconpath.append(ip.toLocal8Bit());
+    }
     imagedirs.clear();
     sounddirs.clear();
 }
@@ -67,7 +84,7 @@ QAbstractFileEngine *QFileResourceFileEngineHandler::create(const QString &path)
             }
         }
 
-#if QT_VERSION >= 0x040300
+#ifdef ENABLE_RESOURCEFILEENGINE
         QAbstractFileEngine * e = findArchivedResourceFile(path);
         if(e)
             return e;
@@ -80,11 +97,11 @@ QAbstractFileEngine *QFileResourceFileEngineHandler::create(const QString &path)
     return 0;
 }
 
-void QFileResourceFileEngineHandler::appendSearchDirs(QStringList& dirs,
-        const QString& dir, const QString& subdir) const
+void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
+        const QString& dir, const char *subdir) const
 {
-    QString t = dir + subdir;
-    if ( QFSFileEngine(t).fileFlags(QFSFileEngine::ExistsFlag) )
+    QByteArray t = dir.toLocal8Bit() + subdir;
+    if (fileExists(t))
         dirs.append(t);
 }
 
@@ -189,6 +206,8 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QStringList& dirs,
   QPixmap pix(":image/email");
   \endcode
 
+  More information on image translation can be found in Qtopia's \l{Internationalization#image-translation}{Internationalization} guide.
+
   \section1 Icons
 
   When requesting an icon, applications use a "filename" of the form
@@ -226,6 +245,8 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QStringList& dirs,
   language and \c {<locale>} its configured locale.  The supported
   <icon extensions> are currently "png", "jpg", "mng" and no extension.
 
+  More information on icon translation can be found in Qtopia's \l{Internationalization#image-translation}{Internationalization} guide.
+
   \section1 Sounds
 
   When requesting a sound, applications use a "filename" of the form
@@ -238,7 +259,7 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QStringList& dirs,
   \c {sounds/<sound>.wav}
  */
 
-#if QT_VERSION >= 0x040300
+#ifdef ENABLE_RESOURCEFILEENGINE
 QAbstractFileEngine *QFileResourceFileEngineHandler::findArchivedResourceFile(const QString &path) const
 {
     if ( path.left(7 /* ::strlen(":image/") */)==":image/" ) {
@@ -433,17 +454,17 @@ QString QFileResourceFileEngineHandler::findDiskResourceFile(const QString &path
 /* _path does NOT include the ":image/" prefix; _subdir is either empty or MUST include trailing "/" */
 QString QFileResourceFileEngineHandler::findDiskImage(const QString &_path, const QString& _subdir) const
 {
-    static QStringList commonFormats;
-    static QStringList otherFormats;
-    static const QLatin1Char sep('/');
-    static const QString i18nDir("i18n/");
+    static QList<QByteArray> commonFormats;
+    static QList<QByteArray> otherFormats;
+    static const char sep = '/';
+    static const QByteArray i18nDir("i18n/");
 
     if (!commonFormats.count()) {
         //XXX Only 3 letter extensions supported for common formats.
-        commonFormats.append("svg");
 #ifndef QT_NO_PICTURE
         commonFormats.append("pic");
 #endif
+        commonFormats.append("svg");
         commonFormats.append("png");
         commonFormats.append("jpg");
         commonFormats.append("mng");
@@ -457,8 +478,9 @@ QString QFileResourceFileEngineHandler::findDiskImage(const QString &_path, cons
         }
     }
 
-    QString path = _path;
-    QStringList searchNames; // List of names to search for
+    QByteArray path = _path.toLocal8Bit();
+    QByteArray subDir = _subdir.toLocal8Bit();
+    QList<QByteArray> searchNames; // List of names to search for
 
     bool i18n = false;
     if(path.startsWith(i18nDir)) {
@@ -466,15 +488,15 @@ QString QFileResourceFileEngineHandler::findDiskImage(const QString &_path, cons
         i18n = true;
     }
 
-    QString myApp = QApplication::applicationName();
-    QString app;
-    QString image;
+    QByteArray myApp = QApplication::applicationName().toLocal8Bit() + sep;
+    QByteArray app;
+    QByteArray image;
     bool knownExtn = false;
 
     {
         int slash = path.indexOf(sep);
         if(slash != -1) {
-            app = path.left(slash);
+            app = path.left(slash + 1);
             image = path.mid(slash + 1);
         } else {
             image = path;
@@ -483,7 +505,7 @@ QString QFileResourceFileEngineHandler::findDiskImage(const QString &_path, cons
         if ( dot >= 0 ) {
             slash = image.lastIndexOf(sep);
             if (slash < 0 || dot > slash) {
-                QString img_extn = image.mid(dot+1);
+                QByteArray img_extn = image.mid(dot+1);
                 if (commonFormats.contains(img_extn)
                     || otherFormats.contains(img_extn)) {
                     knownExtn = true;
@@ -498,50 +520,55 @@ QString QFileResourceFileEngineHandler::findDiskImage(const QString &_path, cons
 
         foreach(QString lang, langs) {
             if(app.isEmpty()) {
-                searchNames.append(myApp + sep + _subdir + i18nDir + lang + sep + image);
-                searchNames.append(_subdir + i18nDir + lang + sep + image);
+                searchNames.append(myApp + subDir + i18nDir + lang.toLatin1() + sep + image);
+                searchNames.append(subDir + i18nDir + lang.toLatin1() + sep + image);
             } else {
-                searchNames.append(myApp + sep + app + sep + _subdir + i18nDir + lang + sep + image);
-                searchNames.append(app + sep + _subdir + i18nDir + lang + sep + image);
+                searchNames.append(myApp + app + subDir + i18nDir + lang.toLatin1() + sep + image);
+                searchNames.append(app + subDir + i18nDir + lang.toLatin1() + sep + image);
             }
         }
     }
-    if(app.isEmpty()) {
-        searchNames.append(myApp + sep + _subdir + image);
-        searchNames.append(_subdir + image);
-    } else {
-        searchNames.append(myApp + sep + app + sep + _subdir + image);
-        searchNames.append(app + sep + _subdir + image);
-    }
 
-    foreach (QString searchBase, imagedirs) {
-        searchBase += sep;
-        foreach (QString searchName, searchNames) {
-            QString r(searchBase + searchName);
+    QByteArray tmpStr;
+    tmpStr.reserve(app.size() + subDir.size() + image.size());
+    if (app.size() > 1)  // i.e. not just '/'
+        tmpStr += app;
+    tmpStr += subDir;
+    tmpStr += image;
+    searchNames.append(myApp + tmpStr);
+    searchNames.append(tmpStr);
+
+    foreach (QByteArray searchBase, imagedirs) {
+        foreach (QByteArray searchName, searchNames) {
+            QByteArray r;
+            r.reserve(searchBase.size() + searchName.size() + 5); // +5 for extn below
+            r += searchBase;
+            r += searchName;
             if (!knownExtn) {
-                QString fn = r + QLatin1String("....");
-                int ext = fn.length()-3;
+                r += "....";
+                int ext = r.length()-3;
                 // Try our common formats first.
-                foreach (QString extn, commonFormats) {
-                    fn[ext]=extn[0]; fn[ext+1]=extn[1]; fn[ext+2]=extn[2];
-                    if (QFSFileEngine(fn).fileFlags(QFSFileEngine::ExistsFlag)) {
-                        qLog(Resource) << extn << "Image Resource" << path << "->" << fn;
-                        return fn;
+                foreach (QByteArray extn, commonFormats) {
+                    r[ext]=extn[0]; r[ext+1]=extn[1]; r[ext+2]=extn[2];
+                    if (fileExists(r)) {
+                        qLog(Resource) << extn << "Image Resource" << path << "->" << r;
+                        return QString::fromLocal8Bit(r);
                     }
                 }
+                r.truncate(ext);
                 // Then anything else Qt supports
-                foreach (QString extn, otherFormats) {
-                    fn = r + QLatin1Char('.') + extn;
-                    if (QFSFileEngine(fn).fileFlags(QFSFileEngine::ExistsFlag)) {
+                foreach (QByteArray extn, otherFormats) {
+                    QByteArray fn = r + extn;
+                    if (fileExists(fn)) {
                         qLog(Resource) << extn << "Image Resource" << path << "->" << fn;
-                        return fn;
+                        return QString::fromLocal8Bit(fn);
                     }
                 }
             } else {
                 // File has an extension we know
-                if (QFSFileEngine(r).fileFlags(QFSFileEngine::ExistsFlag)) {
+                if (fileExists(r)) {
                     qLog(Resource) << "Found Image Resource" << path << "->" << r;
-                    return r;
+                    return QString::fromLocal8Bit(r);
                 }
             }
         }
@@ -559,20 +586,20 @@ QString QFileResourceFileEngineHandler::findDiskImage(const QString &_path, cons
  */
 QString QFileResourceFileEngineHandler::findDiskSound(const QString &path) const
 {
-    QString myApp = QApplication::applicationName();
-    QString p1 = path;
+    QByteArray myApp = QApplication::applicationName().toLatin1();
+    QByteArray p1 = path.toLocal8Bit();
     p1 += ".wav";
-    foreach (QString s, sounddirs) {
-        QString r = s + p1;
-        if ( QFSFileEngine(r).fileFlags(QFSFileEngine::ExistsFlag) ) {
+    foreach (QByteArray s, sounddirs) {
+        QByteArray r = s + p1;
+        if (fileExists(r)) {
             qLog(Resource) << "WAV Sound Resource" << path << "->" << r;
-            return r;
+            return QString::fromLocal8Bit(r);
         }
 
         r = s + "/" + myApp + "/" + p1;
-        if ( QFSFileEngine(r).fileFlags(QFSFileEngine::ExistsFlag) ) {
+        if (fileExists(r)) {
             qLog(Resource) << "WAV Sound Resource" << path << "->" << r;
-            return r;
+            return QString::fromLocal8Bit(r);
         }
     }
 
@@ -581,7 +608,7 @@ QString QFileResourceFileEngineHandler::findDiskSound(const QString &path) const
     return QString();
 }
 
-#if QT_VERSION >= 0x040300
+#ifdef ENABLE_RESOURCEFILEENGINE
 // declare QRawImageIOPlugin
 class QRawImageIOPlugin : public QImageIOPlugin
 {

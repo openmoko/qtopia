@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,71 +25,7 @@
 #include <QtDebug>
 #include <qcategorymanager.h>
 #include <qtranslatablesettings.h>
-
-DotDirectoryContentPlugin::DotDirectoryContentPlugin()
-{
-}
-
-DotDirectoryContentPlugin::~DotDirectoryContentPlugin()
-{
-}
-
-QStringList DotDirectoryContentPlugin::keys() const
-{
-    return QStringList() << QLatin1String( "directory" );
-}
-
-bool DotDirectoryContentPlugin::installContent( const QString &filePath, QContent *content )
-{
-    QSettings settings( filePath, QSettings::IniFormat );
-
-    settings.beginGroup( QLatin1String( "Desktop Entry" ) );
-
-    QString folder = QFileInfo( filePath ).absoluteDir().path();
-
-    if( folder.endsWith( QDir::separator() ) )
-        folder.chop( 1 );
-
-    folder = folder.section( QDir::separator(), -1 );
-
-    QString name = settings.value( QLatin1String("Name[]") ).toString();
-
-    content->setName( !name.isEmpty() ? name : folder );
-
-    content->setComment( settings.value( QLatin1String("Comment[]") ).toString() );
-
-    content->setIcon( settings.value( QLatin1String("Icon") ).toString() );
-
-    content->setType( QLatin1String( "Folder/" ) + folder );
-
-    content->setFile( folder );
-
-    content->setLinkFile( filePath );
-
-    content->setRole( QContent::Data );
-
-    settings.endGroup();
-
-    foreach( QString group, settings.childGroups() )
-    {
-        if( group == QLatin1String("Desktop Entry") )
-            continue;
-
-        settings.beginGroup( group );
-
-        foreach( QString key, settings.childKeys() )
-            content->setProperty( key, settings.value( key ).toString(), group );
-
-        settings.endGroup();
-    }
-
-    return true;
-}
-
-bool DotDirectoryContentPlugin::updateContent( QContent *content )
-{
-    return content->linkFileKnown() ? installContent( content->linkFile(), content ) : false;
-}
+#include <QMimeType>
 
 DotDesktopContentPlugin::DotDesktopContentPlugin()
 {
@@ -104,23 +40,41 @@ QStringList DotDesktopContentPlugin::keys() const
     return QStringList() << QLatin1String( "desktop" );
 }
 
+QList< QDrmRights::Permission > extractPermissions( const QString &permissionList )
+{
+    QStringList permissionStrings = permissionList.toLower().split( ';' );
+
+    QList< QDrmRights::Permission > permissions;
+
+    foreach( QString permission, permissionStrings )
+    {
+        if( permission.isEmpty() )
+            continue;
+
+        if( permission == QLatin1String( "play" ) )
+            permissions.append( QDrmRights::Play );
+        else if( permission == QLatin1String( "display" ) )
+            permissions.append( QDrmRights::Display );
+        else if( permission == QLatin1String( "execute" ) )
+            permissions.append( QDrmRights::Execute );
+        else if( permission == QLatin1String( "print" ) )
+            permissions.append( QDrmRights::Print );
+        else if( permission == QLatin1String( "export" ) )
+            permissions.append( QDrmRights::Export );
+        else if( permission == QLatin1String( "browsecontents" ) )
+            permissions.append( QDrmRights::BrowseContents );
+        else
+            permissions.append( QDrmRights::Unrestricted );
+    }
+
+    return permissions;
+}
+
 bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent *content )
 {
     QSettings settings( filePath, QSettings::IniFormat );
 
-    QFileInfo info( filePath );
-
-    QDir dir = info.absoluteDir();
-
-    QString folder = dir.absolutePath();
-
-    if( folder.endsWith( QDir::separator() ) )
-        folder.chop( 1 );
-
-    QDir parentDir( dir );
-    parentDir.cdUp();
-
-    folder = folder.section( QDir::separator(), -1 );
+    QDir dir = QFileInfo( filePath ).absoluteDir();
 
     settings.beginGroup( QLatin1String( "Desktop Entry" ) );
 
@@ -130,8 +84,6 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
 
     QString role = settings.value( QLatin1String( "Role" ) ).toString();
 
-    QStringList categories;
-
     if( type == QLatin1String( "Application" ) || type == QLatin1String( "ConsoleApplication" ) )
     {
         content->setType( QLatin1String( "application/x-executable" ) );
@@ -139,25 +91,6 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
         content->setRole( QContent::Application );
         if( type == QLatin1String( "ConsoleApplication" ) )
             content->setProperty( QLatin1String("ConsoleApplication"), "1");
-
-        QCategoryManager catMan( QLatin1String( "Applications" ) );
-
-        if ( dir.exists( QLatin1String( ".directory" )) ||
-                parentDir.exists( QLatin1String( ".directory" )))
-        {
-            // Extract the category id from the .directory file
-            QString dotDir = dir.exists( QLatin1String( ".directory" )) ?
-                dir.filePath(".directory") : parentDir.filePath(".directory");
-            QSettings ts( dotDir, QSettings::IniFormat);
-            ts.beginGroup("Desktop Entry");
-            //QString id = QString("_apps_%1").arg(ts.value("Name[]").toString());
-            QString id = ts.value("Name[]").toString();  // Don't format the id.
-            // Ensure the category id exists
-            // For new code a more unique id should be used instead of using the untranslated text
-            // eg. ensureSystemCategory("com.mycompany.myapp.mycategory", "My Category");
-            catMan.ensureSystemCategory( id, ts.value("Name[]").toString(), ts.value("Icon").toString() );
-            categories.append( id );
-        }
     }
     else
     {
@@ -186,20 +119,52 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
 
     content->setProperty( QLatin1String("Rotation"), settings.value( QLatin1String("Rotation") ).toString() );
 
+    QStringList mimeTypes;
+    QStringList mimeIcons;
+    QList< QDrmRights::Permission > mimePermissions;
+
     if( settings.contains( QLatin1String("MimeType") ))
-        content->setMimeTypes( settings.value( QLatin1String("MimeType") ).toString().toLower().split( ';' ) );
+        mimeTypes = settings.value( QLatin1String("MimeType") ).toString().toLower().split( ';' );
 
     if( settings.contains( QLatin1String("MimeTypeIcons") ))
-        content->setProperty( QLatin1String("MimeTypeIcons"), settings.value( QLatin1String("MimeTypeIcons") ).toString() );
+        mimeIcons = settings.value( QLatin1String("MimeTypeIcons") ).toString().split( ';' );
+
+    settings.endGroup();
+    settings.beginGroup( QLatin1String( "DRM" ) );
+
+    if( settings.contains( QLatin1String("MimeTypePermissions") ))
+        mimePermissions = extractPermissions( settings.value( QLatin1String("MimeTypePermissions") ).toString() );
+
+    settings.endGroup();
+    settings.beginGroup( QLatin1String( "Desktop Entry" ) );
+
+    if( mimeTypes.count() > 1 )
+    {
+        if( mimeIcons.count() == 1 )
+            for( int i = 1; i < mimeTypes.count(); i++ )
+                mimeIcons.append( mimeIcons.first() );
+        if( mimePermissions.count() == 1 )
+            for( int i = 1; i < mimeTypes.count(); i++ )
+                mimePermissions.append( mimePermissions.first() );
+    }
+
+    content->setMimeTypes( mimeTypes, mimeIcons, mimePermissions);
 
     content->setLinkFile( filePath );
 
-    // Import categories from a Qtopia 2.x .desktop file
-    QCategoryManager catMan("Documents");
+    QStringList categories;
 
-    foreach( QString id, settings.value( QLatin1String("Categories") ).toString().split(';') ) {
-        if( id.isEmpty() )
-            continue;
+    // Import categories from a Qtopia 2.x .desktop file
+    QCategoryManager catMan( content->role() == QContent::Application ? QLatin1String("Applications") : QLatin1String("Documents") );
+
+#ifndef QTOPIA_CONTENT_INSTALLER
+    QString folder = dir.dirName();
+
+    if( catMan.contains( folder ) )
+        categories.append( folder );
+#endif
+
+    foreach( QString id, settings.value( QLatin1String("Categories") ).toString().split( QLatin1Char( ';' ), QString::SkipEmptyParts ) ) {
         if ( !catMan.exists(id) ) {
             if ( id.startsWith("_") ) {
                 // It's a "system" category but we don't know about it. Add it anyway and hope for a translation.
@@ -222,6 +187,7 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
         categories.append( id );
     }
 
+#ifndef QTOPIA_CONTENT_INSTALLER
     if( categories.isEmpty() && content->role() == QContent::Application )
     {
         // No .directory file exists, just use the Applications category
@@ -232,6 +198,7 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
         catMan.ensureSystemCategory( id, id, QLatin1String( "qpe/AppsIcon" ) );
         categories.append( id );
     }
+#endif
 
     content->setCategories( categories );
 
@@ -271,13 +238,9 @@ ContentPluginManager::ContentPluginManager()
     QStringList pluginNames = manager.list();
 
     static DotDesktopContentPlugin dotDesktopPlugin;
-    static DotDirectoryContentPlugin dotDirectoryPlugin;
 
     foreach( QString key, dotDesktopPlugin.keys() )
         typePluginMap.insert( key, &dotDesktopPlugin );
-
-    foreach( QString key, dotDirectoryPlugin.keys() )
-        typePluginMap.insert( key, &dotDirectoryPlugin );
 
     foreach( QString pluginName, pluginNames )
     {

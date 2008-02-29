@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -91,10 +91,10 @@ private:
     int sockfd;
 };
 
+class QEvent;
 class QLabel;
 class QListWidget;
 class QListWidgetItem;
-class QPushButton;
 class QNetworkDevice;
 
 class WSearchPage : public QWidget
@@ -106,6 +106,7 @@ public:
 
     void attachToInterface( const QString& ifaceName );
     void saveScanResults();
+    bool eventFilter( QObject* watched, QEvent* event );
 
 public slots:
     void updateConnectivity();
@@ -127,16 +128,12 @@ private:
 private:
     QString config;
     WirelessScan* scanEngine;
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QAction* connectAction, *scanAction, *environmentAction, *deleteAction;
-#else
-    QPushButton *connectPB, *refreshPB;
-#endif
     QListWidget* knownNetworks;
     QLabel* descr;
     QLabel* currentNetwork;
     QtopiaNetworkInterface::Status state;
-    bool isShiftMode;
+    QListWidgetItem* currentSelection;
     bool isRestart;
     QNetworkDevice *devSpace;
 };

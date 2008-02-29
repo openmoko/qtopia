@@ -1,0 +1,19 @@
+#!/bin/sh
+
+TOOLCHAIN=/scratchbox/compilers/cs2005q3.2-glibc-arm
+
+#if [ -d /opt/teambuilder ]; then
+#    export PATH="$DEVICE_CONFIG_PATH/bin:/opt/teambuilder/bin:$TOOLCHAIN/bin:$PATH"
+#    echo "$TEAMBUILDER_CC_VERSION" | grep ':' >/dev/null 2>&1
+#    if [ $? -eq 0 ]; then
+#        export TEAMBUILDER_CC_VERSION="arm-linux-gnueabi*:4.1.2;$(echo $TEAMBUILDER_CC_VERSION | sed 's/arm-linux[^:]*:[[digit].][[digit].]*;*//')"
+#    else
+#        export TEAMBUILDER_CC_VERSION="arm-linux-gnueabi*:4.1.2;*:$(echo $TEAMBUILDER_CC_VERSION | sed 's/arm-linux[^:]*:[[digit].][[digit].]*;*//')"
+#    fi
+#    if [ "$TEAMBUILDER_SYSTEM" = 'arm:nokia' ]; then
+#        unset TEAMBUILDER_SYSTEM
+#    fi
+#else
+    export PATH="$TOOLCHAIN/bin:$PATH"
+#fi
+

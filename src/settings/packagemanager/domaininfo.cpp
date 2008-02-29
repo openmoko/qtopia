@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,104 +24,117 @@
 #include <QCoreApplication>
 #include <QStringList>
 
-#ifdef QTOPIA_PHONE
 const char *DomainInfo::domainStrings[] = {
-    "base",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\"><b>new system for your Qtopia phone</b></font>" ),
-    "libs",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\"><b>new components for your Qtopia phone</b></font>" ),
-    "phonecomm",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\">use <b>phone hardware</b></font>" ),
-    "docapi",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#FF9900\">access and modify <b>documents</b></font>" ),
-    "pim",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#FF9900\">access or modify <b>personal addresses and info</b></font>" ),
-    "msg",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\">send <b>sms and email</b></font>" ),
-    "net",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\">download/send over your <b>phones internet service</b></font>" ),
-    "netconfig",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">start, stop and configure <b>network interfaces</b></font>" ),
+    "accessories",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">use <b>accessories</b> such as keypad lights</font>" ),
     "alarm",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">create, delete and check status of <b>alarms</b></font>" ),
-    "beaming",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">send and receive files over <b>infrared interfaces</b></font>" ),
-    "bluetooth",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">connect, pair, send and receive files over <b>bluetooth interfaces</b></font>" ),
-    "cardreader",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">read and write data to/from <b>memory cards</b></font>" ),
-    "camera",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">capture images using <b>camera devices</b></font>" ),
-    "datetime",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">set <b>date, time and timezone</b></font>" ),
-    "drm",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">download, use and check the rights on <b>DRM</b> enabled files</font>" ),
-    "handwriting",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">allow <b>handwriting</b> as an input method</font>" ),
-    "helix",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">play media files using <b>helix</b></font>" ),
-    "language",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">change system <b>language</b></font>" ),
-    "lightandpower",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\"><b>power management and lighting settings</b></font>" ),
-    "mediarecorder",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\"><b>record sound files</b></font>" ),
-    "pictures",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">view and edit <b>image files</b></font>" ),
-    "qdl",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\"><b>link to documents/objects</b></font>" ),
-    "quicklauncher",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">run applications using <b>quicklauncher</b></font>" ),
-    "ringprofiles",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">change <b>Profile, Appearance and Light and Power settings</b></font>" ),
-    "screensaver",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">set <b>screensaver</b></font>" ),
-    "security",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">change phone and sim <b>security settings</b></font>" ),
-    "sxemonitor",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">issue security alerts using <b>sxemonitor</b></font>" ),
-    "words",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\"><b>add words to dictionary</b></font>" ),
-    "window",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">display <b>text and buttons on screen</b></font>" ),
-    "graphics",
-
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#FF9900\">use your <b>whole screen</b></font>" ),
-    "theme",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">provide a <b>new theme for your phone</b></font>" ),
-    "none",
-    QT_TRANSLATE_NOOP( "PackageView", "not <font color=\"#66CC00\">access any resources on your phone</font>" ),
-    0,
-    0
-};
-#else
-const char *DomainInfo::domainStrings[] = {
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF9900\">create, delete and check status of <b>alarms</b></font>" ),
+    "audio-policy",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">route <b>audio</b> between audio devices</font>" ),
     "base",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\"><b>new system for your Qtopia device</b></font>" ),
-    "libs",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\"><b>new components for your Qtopia device</b></font>" ),
-    "phonecomm",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\">use <b>device hardware</b></font>" ),
-    "docapi",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#FF9900\">access and modify <b>documents</b></font>" ),
-    "pim",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#FF9900\">access or modify <b>personal addresses and info</b></font>" ),
-    "msg",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\">send <b>sms and email</b></font>" ),
-    "net",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\">download/send over your <b>devices internet service</b></font>" ),
-    "window",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">display <b>text and buttons on screen</b></font>" ),
+    QT_TRANSLATE_NOOP( "PackageView", "is a <font color=\"#CC0000\"><b>new system for your Qtopia device</b></font>" ),
+    "beaming",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF9900\">send and receive files over <b>infrared interfaces</b></font>" ),
+    "bluetooth",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF9900\">connect, pair, send and receive files over <b>bluetooth interfaces</b></font>" ),
+    "callhistory",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">display <b>call history</b></font>" ),
+    "camera",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">capture images via the <b>camera application</b></font>" ),
+    "cameraservice",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF9900\">directly access the <b>camera device</b></font>" ),
+    "categories",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF99C00\">edit system and user<b>categories</b></font>" ),
+    "datetime",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#CC0000\">set <b>date, time and timezone</b></font>" ),
+    "directaudio",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#CC0000\">directly access <b>audio hardware</b></font>" ),
+    "directvideo",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#CC0000\">directly access <b>video hardware</b></font>" ),
+    "doc_open",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">read <b>user documents</b> that you specifically choose</font>" ),
+    "doc_read",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF9900\">read <b>any user document</b></font>" ),
+    "doc_save",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\"><b>write</b> to <b>user documents</b> that you specifically choose</font>" ),
+    "doc_server",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">search <b>user documents</b></font>" ),
+    "doc_write",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#CC0000\"><b>write</b> to <b>any user document</b></font>" ),
     "graphics",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#FF9900\">use your <b>whole screen</b></font>" ),
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF9900\">use your <b>whole screen</b></font>" ),
+    "handwriting",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">allow <b>handwriting</b> as an input method</font>" ),
+    "language",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">change system <b>language</b></font>" ),
+    "lightandpower",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\"><b>power management and lighting settings</b></font>" ),
+    "mediarecorder",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\"><b>record sound files</b></font>" ),
+    "mediasession",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\"><b>play media files</b></font>" ),
+    "msg",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF9900\">start the mail application</font>" ),
+    "net",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#CC0000\">download/send over your <b>internet service</b></font>" ),
+    "netconfig",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#CC0000\">start, stop and configure <b>network interfaces</b></font>" ),
+    "pictures",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">view and edit <b>image files</b></font>" ),
+    "pim",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF9900\">access or modify <b>personal addresses and info</b></font>" ),
+    "print",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\"><b>print</b> files</font>" ),
+    "profiles",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">change <b>Profile,Appearance and Light and Power settings</b></font>" ),
+    "qdl",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\"><b>link to documents/objects</b></font>" ),
+    "qds",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF9900\">share data with other applications</font>" ),
+    "security",
+#ifdef QTOPIA_CELL
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">change phone and sim <b>security settings</b></font>" ),
+#else
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">change device <b>security settings</b></font>" ),
+#endif
+    "voip",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">display <b>voip configuration</b> settings</font>" ),
+    "volumemanager",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">change <b>volume settings</b></font>" ),
+    "window",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">display <b>text and buttons on screen</b></font>" ),
+    "words",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\"><b>add words to dictionary</b></font>" ),
+
+//This set of domains are not available for third party apps
+//but are retained for when they may be used when dowloading signed/trusted applications
+    "phonecomm",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#CC0000\">use <b>device hardware</b></font>" ),
+    "docapi",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#FF9900\">access and modify <b>documents</b></font>" ),
+    "drm",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">download, use and check the rights on <b>DRM</b> enabled files</font>" ),
+    "helix",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">play media files using <b>helix</b></font>" ),
+    "quicklauncher",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">run applications using <b>quicklauncher</b></font>" ),
+    "ringprofiles",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">change <b>Profile, Appearance and Light and Power settings</b></font>" ),
+    "screensaver",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">set <b>screensaver</b></font>" ),
+    "sxemonitor",
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">issue security alerts using <b>sxemonitor</b></font>" ),
     "theme",
-    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">provide a <b>new theme</b> for your device</font>" ),
+    QT_TRANSLATE_NOOP( "PackageView", "can <font color=\"#66CC00\">provide a <b>new theme for your device</b></font>" ),
     "none",
-    QT_TRANSLATE_NOOP( "PackageView", "not <font color=\"#66CC00\">access any resources on your device</font>" ),
+    QT_TRANSLATE_NOOP( "PackageView", "can not <font color=\"#66CC00\">access any resources on your device</font>" ),
+    "trusted",
+    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#CC0000\">requests <b>unrestricted access</b> on your device</font>" ),
+    "untrusted",
+    QT_TRANSLATE_NOOP( "PackageView", "<font color=\"#66CC00\">requests <b>minimal access priveleges</b> on your device</font>" ),
     0,
     0
 };
-#endif
 
 QString DomainInfo::explain( const QString &dom, const QString &packageName )
 {
@@ -134,24 +147,20 @@ QString DomainInfo::explain( const QString &dom, const QString &packageName )
                 qPrintable(dom) );
         return QString();
     }
-    QString html = QObject::tr( "%1 can", "[%1 = Package] is able to [for example access documents]" )
-        .arg( packageName );
+    QString html = packageName;
     QString conjunction = " ";
-    bool emptyDomTextDisplayed = false;
     QString badDomainWarning;
     for ( int i = 0; i < domList.count(); i++ )
     {
         if ( domList[i].isEmpty() ) continue;
-        if ( domList[i] == "none" )
-            emptyDomTextDisplayed = true;
         QString res = getWarningResource( domList[i] );
         if ( res.isEmpty() )
         {
-            badDomainWarning = QObject::tr( " (\"%1\" domain not known)" ).arg( domList[i] );
+            badDomainWarning = QLatin1String(" ") +  QObject::tr( "(\"%1\" domain not known)" ).arg( domList[i] );
             continue;
         }
         html += conjunction + res;
-        conjunction = " and ";
+        conjunction = QLatin1String(" ") + QObject::tr("and") + QLatin1String(" ");
     }
     return html + badDomainWarning;
 }

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -41,8 +41,9 @@
 */
 QDeviceButton::QDeviceButton() :
     m_Keycode(0),
-    m_PressedActionMapable(true),
-    m_HeldActionMapable(true)
+    m_PressedActionMappable(true),
+    m_HeldActionMappable(true),
+    m_releasedActionMappable(true)
 {
 }
 
@@ -114,6 +115,15 @@ QtopiaServiceRequest QDeviceButton::heldAction() const
 }
 
 /*!
+  Returns the user-assigned action for when this button is released.
+ */
+QtopiaServiceRequest QDeviceButton::releasedAction() const
+{
+    return m_releasedAction;
+}
+
+
+/*!
   Sets the \a keycode that is sent when the button is pressed.
 */
 void QDeviceButton::setKeycode(int keycode)
@@ -168,6 +178,15 @@ void QDeviceButton::setHeldAction(const QtopiaServiceRequest& action)
 }
 
 /*!
+  Set the action to be performed when this button is released \a action.
+*/
+
+void QDeviceButton::setReleasedAction(const QtopiaServiceRequest& action)
+{
+    m_releasedAction = action;
+}
+
+/*!
   \fn bool QDeviceButton::pressedActionMappable() const
   Returns the mappability set for the pressed action.
 */
@@ -178,11 +197,16 @@ void QDeviceButton::setHeldAction(const QtopiaServiceRequest& action)
 */
 
 /*!
+  \fn bool QDeviceButton::releasedActionMappable() const
+  Returns the mappability set for the released action.
+*/
+
+/*!
   Set the mappability of the pressed action to \a mappable.
 */
 void QDeviceButton::setPressedActionMappable(bool mappable)
 {
-    m_PressedActionMapable = mappable;
+    m_PressedActionMappable = mappable;
 }
 
 /*!
@@ -190,9 +214,16 @@ void QDeviceButton::setPressedActionMappable(bool mappable)
 */
 void QDeviceButton::setHeldActionMappable(bool mappable)
 {
-    m_HeldActionMapable = mappable;
+    m_HeldActionMappable = mappable;
 }
 
+/*!
+  Set the mappability of the released action to \a mappable.
+*/
+void QDeviceButton::setReleasedActionMappable(bool mappable)
+{
+    m_releasedActionMappable = mappable;
+}
 
 /*!
   Returns true if this QDeviceButton is equal to \a e.
@@ -203,5 +234,6 @@ bool QDeviceButton::operator==(const QDeviceButton &e) const
             (userText() == e.userText()) &&
             (context() == e.context()) &&
             (pressedAction() == e.pressedAction()) &&
-            (heldAction() == e.heldAction()));
+            (heldAction() == e.heldAction()) &&
+            (releasedAction() == e.releasedAction()));
 }

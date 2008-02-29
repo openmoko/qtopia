@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,9 +23,6 @@
 #include <qtopia/smil/module.h>
 #include <qmap.h>
 
-// WARNING: These classes are not part of the Qtopia API.
-// They are subject to change at any time.
-
 class SmilRootLayout : public SmilElement
 {
 public:
@@ -33,10 +30,8 @@ public:
 
     void process();
     void paint(QPainter *p);
-    QColor backgroundColor() const { return bgColor; }
 
 private:
-    QColor bgColor;
     QSize size;
 };
 
@@ -63,7 +58,6 @@ public:
 
     Position parsePosition(const QString &val);
 
-    QColor backgroundColor;
     Fit fit;
     QString regionName;
     ShowBackground showBackground;

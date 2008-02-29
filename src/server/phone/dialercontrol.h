@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -90,6 +90,8 @@ signals:
     void autoAnswerCall();
 
     void modifyDial( QDialOptions& options, bool& handledAlready );
+    void callControlRequested();
+    void callControlSucceeded();
 
 public slots:
     QPhoneCall createCall( const QString& callType = "Voice" ); // No tr
@@ -160,6 +162,12 @@ private:
 private slots:
     void newCall( const QPhoneCall& call );
     void callStateChanged( const QPhoneCall& call );
+    void checkConnectedState( const QPhoneCall& call );
+    void checkHoldState( const QPhoneCall& call );
+    void cacheCall( const QPhoneCall& call );
+    void removeCachedCall( const QPhoneCall& call );
+    void updateCachedCall( const QPhoneCall& call );
+    void readCachedCall();
 };
 
 #endif

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,7 +28,6 @@
 #include <QDSActionRequest>
 
 class QAction;
-class QPushButton;
 class QTabWidget;
 class QMenu;
 class QOtaReader;
@@ -44,9 +43,6 @@ class NetworkUI : public QDialog
 public:
     NetworkUI( QWidget * parent = 0, Qt::WFlags fl = 0);
     ~NetworkUI();
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    bool eventFilter( QObject* watched, QEvent* event );
-#endif
 
     void setCurrentTab(int tab);
 
@@ -81,14 +77,9 @@ private:
     QTabWidget* tabWidget;
     WapUI* wapPage;
     VpnUI* vpnPage;
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QMenu* contextMenu;
     QMultiMap<QString, QPointer<QAction> > actionMap;
     QAction *a_add, *a_remove, *a_props, *a_gateway;
-#else
-    QPushButton *startPB, *propPB, *addPB, *removePB;
-#endif
-
 };
 
 class NetworkSetupService : public QtopiaAbstractService

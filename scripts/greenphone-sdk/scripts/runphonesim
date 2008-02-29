@@ -6,7 +6,7 @@ runproc()
 {
     pid=`pidof phonesim`
     #echo $pid
-    if [ "$pid" == "" ] ;then 
+    if [ -z "$pid" ] ;then 
         phonesim -gui /opt/Qtopia/SDK/scripts/troll.xml &
     fi
 }

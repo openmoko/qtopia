@@ -17,6 +17,8 @@
 <tr><td width="45%" valign="top"><ul>
 <li><div class="fn"/>enum <a href="qwidget.html#BackgroundOrigin-enum">BackgroundOrigin</a></li>
 <li><div class="fn"/>enum <a href="qpaintdevice.html#PaintDeviceMetric-enum">PaintDeviceMetric</a></li>
+<li><div class="fn"/>enum <a href="qwidget.html#RenderFlag-enum">RenderFlag</a></li>
+<li><div class="fn"/>typedef <a href="qwidget.html#RenderFlags-typedef">RenderFlags</a></li>
 <li><div class="fn"/>enum <a href="qtoolbutton.html#TextPosition-enum">TextPosition</a></li>
 <li><div class="fn"/>enum <a href="qtoolbutton.html#ToolButtonPopupMode-enum">ToolButtonPopupMode</a></li>
 <li><div class="fn"/><a href="qiconselector.html#QIconSelector">QIconSelector</a> ( QWidget * )</li>
@@ -152,6 +154,7 @@
 <li><div class="fn"/><a href="qwidget.html#iconText">iconText</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#iconify">iconify</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const</li>
+<li><div class="fn"/><a href="qtoolbutton.html#initStyleOption">initStyleOption</a> ( QStyleOptionToolButton * ) const</li>
 <li><div class="fn"/><a href="qwidget.html#inputContext">inputContext</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#inputMethodEvent">inputMethodEvent</a> ( QInputMethodEvent * )</li>
 <li><div class="fn"/><a href="qwidget.html#inputMethodQuery">inputMethodQuery</a> ( Qt::InputMethodQuery ) const</li>
@@ -198,10 +201,13 @@
 <li><div class="fn"/><a href="qwidget.html#layout">layout</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#layoutDirection">layoutDirection</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#leaveEvent">leaveEvent</a> ( QEvent * )</li>
+<li><div class="fn"/><a href="qwidget.html#locale">locale</a> () const</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiX">logicalDpiX</a> () const</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiY">logicalDpiY</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#lower">lower</a> ()</li>
+<li><div class="fn"/><a href="qwidget.html#macCGHandle">macCGHandle</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#macEvent">macEvent</a> ( EventHandlerCallRef, EventRef )</li>
+<li><div class="fn"/><a href="qwidget.html#macQDHandle">macQDHandle</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#mapFrom">mapFrom</a> ( QWidget *, const QPoint &amp; ) const</li>
 <li><div class="fn"/><a href="qwidget.html#mapFromGlobal">mapFromGlobal</a> ( const QPoint &amp; ) const</li>
 <li><div class="fn"/><a href="qwidget.html#mapFromParent">mapFromParent</a> ( const QPoint &amp; ) const</li>
@@ -263,8 +269,8 @@
 <li><div class="fn"/><a href="qobject.html#property">property</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qwidget.html#qwsEvent">qwsEvent</a> ( QWSEvent * )</li>
 <li><div class="fn"/><a href="qwidget.html#raise">raise</a> ()</li>
-<li><div class="fn"/><a href="qobject.html#receivers">receivers</a> ( const char * ) const</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qobject.html#receivers">receivers</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qwidget.html#recreate">recreate</a> ( QWidget *, Qt::WindowFlags, const QPoint &amp;, bool )</li>
 <li><div class="fn"/><a href="qwidget.html#rect">rect</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#releaseDC">releaseDC</a> ( HDC ) const</li>
@@ -276,6 +282,7 @@
 <li><div class="fn"/><a href="qobject.html#removeChild">removeChild</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qiconselector.html#removeIndex">removeIndex</a> ( int )</li>
+<li><div class="fn"/><a href="qwidget.html#render">render</a> ( QPaintDevice *, const QPoint &amp;, const QRegion &amp;, RenderFlags )</li>
 <li><div class="fn"/><a href="qwidget.html#repaint">repaint</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#repaint-2">repaint</a> ( int, int, int, int )</li>
 <li><div class="fn"/><a href="qwidget.html#repaint-3">repaint</a> ( const QRect &amp; )</li>
@@ -353,6 +360,7 @@
 <li><div class="fn"/><a href="qwidget.html#setKeyCompression">setKeyCompression</a> ( bool )</li>
 <li><div class="fn"/><a href="qwidget.html#setLayout">setLayout</a> ( QLayout * )</li>
 <li><div class="fn"/><a href="qwidget.html#setLayoutDirection">setLayoutDirection</a> ( Qt::LayoutDirection )</li>
+<li><div class="fn"/><a href="qwidget.html#setLocale">setLocale</a> ( const QLocale &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setMask">setMask</a> ( const QBitmap &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setMask-2">setMask</a> ( const QRegion &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setMaximumHeight">setMaximumHeight</a> ( int )</li>
@@ -438,7 +446,7 @@
 <li><div class="fn"/><a href="qwidget.html#styleSheet">styleSheet</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#tabletEvent">tabletEvent</a> ( QTabletEvent * )</li>
 <li><div class="fn"/><a href="qwidget.html#testAttribute">testAttribute</a> ( Qt::WidgetAttribute ) const</li>
-<li><div class="fn"/><a href="qabstractbutton.html#text">text</a> () const</li>
+<li><div class="fn"/><a href="qiconselector.html#text">text</a> () const : QString</li>
 <li><div class="fn"/><a href="qtoolbutton.html#textLabel">textLabel</a> () const</li>
 <li><div class="fn"/><a href="qtoolbutton.html#textPosition">textPosition</a> () const</li>
 <li><div class="fn"/><a href="qobject.html#thread">thread</a> () const</li>
@@ -455,6 +463,7 @@
 <li><div class="fn"/><a href="qwidget.html#unsetCursor">unsetCursor</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#unsetFont">unsetFont</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#unsetLayoutDirection">unsetLayoutDirection</a> ()</li>
+<li><div class="fn"/><a href="qwidget.html#unsetLocale">unsetLocale</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#unsetPalette">unsetPalette</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#update">update</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#update-2">update</a> ( int, int, int, int )</li>
@@ -518,6 +527,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

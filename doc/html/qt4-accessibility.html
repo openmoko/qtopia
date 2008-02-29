@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Cross-Platform Accessibility Support in Qt 4</title>
+  <title>Qt 4.3: Cross-Platform Accessibility Support in Qt 4</title>
   <link rel="prev" href="qt4-designer.html" />
   <link rel="contents" href="qt4-intro.html" />
   <link rel="next" href="qt4-sql.html" />
@@ -19,15 +19,16 @@
 [<a href="qt4-intro.html">Home</a>]
 [Next: <a href="qt4-sql.html">The Qt 4 Database GUI Layer</a>]
 </p>
-<h1 align="center">Cross-Platform Accessibility Support in Qt 4<br /><small></small></h1>
+<h1 align="center">Cross-Platform Accessibility Support in Qt 4<br /><span class="subtitle"></span>
+</h1>
 <p>Qt 4 allows developers to write cross-platform applications that are usable by visually impaired users as well as by users with other disabilities. Qt accessibility will make applications accessible to more users and opens the governmental market, where accessibility is often a requirement.</p>
 <a name="general-overview"></a>
 <h2>General Overview</h2>
 <p>Qt 3 already supports Microsoft Active Accessibility (MSAA) and Mac OS X Accessibility. Qt 4 closes the gap in Trolltech's accessibility offering by introducing support for AT-SPI on Unix/X11 systems.</p>
 <p>The accessibility classes themselves have been extended in various ways since Qt 3. We added new functions and new enum values, and revised the API to make it more consistent with the rest of Qt. We also added two properties to <a href="qwidget.html">QWidget</a>, <a href="qwidget.html#accessibleName-prop">accessibleName</a> and <a href="qwidget.html#accessibleDescription-prop">accessibleDescription</a>, that can be set in <i>Qt Designer</i> to provide basic help texts without having to write any code.</p>
-<p>Qt's accessibility architecture is as follows. Qt offers one generic interface, <a href="qaccessibleinterface.html">QAccessibleInterface</a>, that can be used to wrap all widgets and objects (e.g., <a href="qpushbutton.html">QPushButton</a>). This single interface provides all the metadata necessary for the assistive technologies. Qt provides implementations of this interface for its built-in widgets as plugins.</p>
+<p>Qt's accessibility architecture is as follows. Qt offers one generic interface, <a href="qaccessibleinterface.html">QAccessibleInterface</a>, that can be used to wrap all widgets and objects (e.g&#x2e;, <a href="qpushbutton.html">QPushButton</a>). This single interface provides all the metadata necessary for the assistive technologies. Qt provides implementations of this interface for its built-in widgets as plugins.</p>
 <p>When you develop custom widgets, you can create custom subclasses of <a href="qaccessibleinterface.html">QAccessibleInterface</a> and distribute them as plugins (using <a href="qaccessibleplugin.html">QAccessiblePlugin</a>) or compile them into the application. Likewise, Qt's predefined accessibility support can be built as plugin (the default) or directly into the Qt library. The main advantage of using plugins is that the accessibility classes are only loaded into memory if they are actually used; they don't slow down the common case where no assistive technology is being used.</p>
-<p>In addition to <a href="qaccessibleinterface.html">QAccessibleInterface</a>, Qt includes two convenience classes, <a href="qaccessibleobject.html">QAccessibleObject</a> and <a href="qaccessiblewidget.html">QAccessibleWidget</a>, that provide the lowest common denominator of metadata (e.g., widget geometry, window title, basic help text). You can use them as base classes when wrapping your custom <a href="qobject.html">QObject</a> or <a href="qwidget.html">QWidget</a> subclasses.</p>
+<p>In addition to <a href="qaccessibleinterface.html">QAccessibleInterface</a>, Qt includes two convenience classes, <a href="qaccessibleobject.html">QAccessibleObject</a> and <a href="qaccessiblewidget.html">QAccessibleWidget</a>, that provide the lowest common denominator of metadata (e.g&#x2e;, widget geometry, window title, basic help text). You can use them as base classes when wrapping your custom <a href="qobject.html">QObject</a> or <a href="qwidget.html">QWidget</a> subclasses.</p>
 <p>Another new feature in Qt 4 is that Qt can now support other backends in addition to the predefined ones. This is done by subclassing <a href="qaccessiblebridge.html">QAccessibleBridge</a>.</p>
 <a name="example-code"></a>
 <h2>Example Code</h2>
@@ -88,6 +89,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

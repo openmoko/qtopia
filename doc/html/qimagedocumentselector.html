@@ -37,15 +37,17 @@
 <li><div class="fn"/>void <b><a href="qimagedocumentselector.html#setFilter">setFilter</a></b> ( const QContentFilter &amp; <i>filter</i> )</li>
 <li><div class="fn"/>void <b><a href="qimagedocumentselector.html#setMandatoryPermissions">setMandatoryPermissions</a></b> ( QDrmRights::Permissions <i>permissions</i> )</li>
 <li><div class="fn"/>void <b><a href="qimagedocumentselector.html#setSelectPermission">setSelectPermission</a></b> ( QDrmRights::Permission <i>permission</i> )</li>
+<li><div class="fn"/>void <b><a href="qimagedocumentselector.html#setSortCriteria">setSortCriteria</a></b> ( const QContentSortCriteria &amp; <i>sort</i> )</li>
 <li><div class="fn"/>void <b><a href="qimagedocumentselector.html#setSortMode">setSortMode</a></b> ( QDocumentSelector::SortMode <i>sortMode</i> )</li>
 <li><div class="fn"/>void <b><a href="qimagedocumentselector.html#setThumbnailSize">setThumbnailSize</a></b> ( const QSize &amp; <i>size</i> )</li>
 <li><div class="fn"/>void <b><a href="qimagedocumentselector.html#setViewMode">setViewMode</a></b> ( ViewMode <i>mode</i> )</li>
+<li><div class="fn"/>QContentSortCriteria <b><a href="qimagedocumentselector.html#sortCriteria">sortCriteria</a></b> () const</li>
 <li><div class="fn"/>QDocumentSelector::SortMode <b><a href="qimagedocumentselector.html#sortMode">sortMode</a></b> () const</li>
 <li><div class="fn"/>QSize <b><a href="qimagedocumentselector.html#thumbnailSize">thumbnailSize</a></b> () const</li>
 <li><div class="fn"/>ViewMode <b><a href="qimagedocumentselector.html#viewMode">viewMode</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -70,7 +72,7 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>5 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
@@ -118,8 +120,8 @@
 <pre>    QImageDocumentSelector *selector = new QImageDocumentSelector( this );
     selector-&gt;setThumbnailSize( QSize( 100, 100 ) );
 
-    connect( selector, SIGNAL(documentSelected(const QContent&amp;)),
-        this, SLOT(openImage(const QContent&amp;)) );</pre>
+    connect( selector, SIGNAL(documentSelected(QContent)),
+        this, SLOT(openImage(QContent)) );</pre>
 <p>QImageDocumentSelector is often the first widget seen in a <a href="docwidget.html">document-oriented application </a>. When used with <a href="qstackedwidget.html">QStackedWidget</a>, an application allows choosing of a document using the selector before revealing the document viewer or editor.</p>
 <p>See also <a href="qimagedocumentselectordialog.html">QImageDocumentSelectorDialog</a>, <a href="qdocumentselector.html">QDocumentSelector</a>, and <a href="qdocumentselectordialog.html">QDocumentSelectorDialog</a>.</p>
 <hr />
@@ -181,6 +183,10 @@
 <p>If a document does not have provide the given <i>permission</i>, the document selector will try to activate and thus acquire permissions for the document. If the document cannot be activated with that <i>permission</i>, it will not be choosable from the list and visual indication of this is given.</p>
 <p>If the <i>permission</i> is <a href="qdrmrights.html#Permission-enum">QDrmRights::InvalidPermission</a> the default permissions for the document is used.</p>
 <p>See also <a href="qimagedocumentselector.html#selectPermission">selectPermission</a>(), <a href="qimagedocumentselector.html#setMandatoryPermissions">setMandatoryPermissions</a>(), and <a href="qimagedocumentselector.html#mandatoryPermissions">mandatoryPermissions</a>().</p>
+<h3 class="fn"><a name="setSortCriteria"></a>void QImageDocumentSelector::setSortCriteria ( const <a href="qcontentsortcriteria.html">QContentSortCriteria</a> &amp; <i>sort</i> )</h3>
+<p>Sets the document <i>sort</i> criteria.</p>
+<p>This will set the document selector sort mode to SortCriteria.</p>
+<p>See also <a href="qimagedocumentselector.html#sortCriteria">sortCriteria</a>() and <a href="qimagedocumentselector.html#setSortMode">setSortMode</a>().</p>
 <h3 class="fn"><a name="setSortMode"></a>void QImageDocumentSelector::setSortMode ( <a href="qdocumentselector.html#SortMode-enum">QDocumentSelector::SortMode</a> <i>sortMode</i> )</h3>
 <p>Sets the document <i>sortMode</i></p>
 <p>The default mode is <a href="qdocumentselector.html#SortMode-enum">QDocumentSelector::Alphabetical</a>.</p>
@@ -194,6 +200,9 @@
 <p>The default mode is <a href="qimagedocumentselector.html#ViewMode-enum">QImageDocumentSelector::Thumbnail</a>.</p>
 <p>See <a href="qimagedocumentselector.html#ViewMode-enum">QImageDocumentSelector::ViewMode</a> for a listing of supported view modes.</p>
 <p>See also <a href="qimagedocumentselector.html#viewMode">viewMode</a>().</p>
+<h3 class="fn"><a name="sortCriteria"></a><a href="qcontentsortcriteria.html">QContentSortCriteria</a> QImageDocumentSelector::sortCriteria () const</h3>
+<p>Returns the current document sort criteria.</p>
+<p>See also <a href="qimagedocumentselector.html#setSortCriteria">setSortCriteria</a>().</p>
 <h3 class="fn"><a name="sortMode"></a><a href="qdocumentselector.html#SortMode-enum">QDocumentSelector::SortMode</a> QImageDocumentSelector::sortMode () const</h3>
 <p>Returns the current document sort mode.</p>
 <p>See also <a href="qimagedocumentselector.html#setSortMode">setSortMode</a>().</p>
@@ -208,6 +217,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

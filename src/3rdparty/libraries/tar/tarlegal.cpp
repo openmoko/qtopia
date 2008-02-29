@@ -1,8 +1,8 @@
 /*!
-    \class TarLegal
-    \brief The TarLegal class is a placeholder for licensing information.
-
-  \ingroup qtopia3rdparty
+    \page tarlegal.html
+    \title Tar
+    \brief License information for Tar.
+    \ingroup qtopia3rdparty
 
     The Tar License from the COPYRIGHT file is reproduced here for your
     convenience.
@@ -69,8 +69,6 @@ IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
 ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
-
+  \endlegalese
 */
 
-/*! */
-TarLegal::TarLegal() {}

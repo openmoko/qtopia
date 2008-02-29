@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,6 +47,37 @@
 #include "qbezier_p.h"
 
 #include <stdarg.h>
+
+//same as qt_painterpath_isect_line in qpainterpath.cpp
+static void qt_polygon_isect_line(const QPointF &p1, const QPointF &p2, const QPointF &pos,
+                                  int *winding)
+{
+    qreal x1 = p1.x();
+    qreal y1 = p1.y();
+    qreal x2 = p2.x();
+    qreal y2 = p2.y();
+    qreal y = pos.y();
+
+    int dir = 1;
+
+    if (qFuzzyCompare(y1, y2)) {
+        // ignore horizontal lines according to scan conversion rule
+        return;
+    } else if (y2 < y1) {
+        qreal x_tmp = x2; x2 = x1; x1 = x_tmp;
+        qreal y_tmp = y2; y2 = y1; y1 = y_tmp;
+        dir = -1;
+    }
+
+    if (y >= y1 && y < y2) {
+        qreal x = x1 + ((x2 - x1) / (y2 - y1)) * (y - y1);
+
+        // count up the winding number if we're
+        if (x<=pos.x()) {
+            (*winding) += dir;
+        }
+    }
+}
 
 /*!
     \class QPolygon
@@ -686,3 +732,154 @@ QDebug operator<<(QDebug dbg, const QPolygonF &a)
 }
 #endif
 
+
+/*!
+    \since 4.3
+
+    \fn bool QPolygonF::containsPoint(const QPointF &point, Qt::FillRule fillRule) const
+
+    Returns true if the given \a point is inside the polygon according to
+    the specified \a fillRule; otherwise returns false.
+*/
+bool QPolygonF::containsPoint(const QPointF &pt, Qt::FillRule fillRule) const
+{
+    if (isEmpty())
+        return false;
+
+    int winding_number = 0;
+
+    QPointF last_pt = at(0);
+    QPointF last_start = at(0);
+    for (int i = 1; i < size(); ++i) {
+        const QPointF &e = at(i);
+        qt_polygon_isect_line(last_pt, e, pt, &winding_number);
+        last_pt = e;
+    }
+
+    // implicitly close last subpath
+    if (last_pt != last_start)
+        qt_polygon_isect_line(last_pt, last_start, pt, &winding_number);
+
+    return (fillRule == Qt::WindingFill
+            ? (winding_number != 0)
+            : ((winding_number % 2) != 0));
+}
+
+/*!
+    \since 4.3
+
+    \fn bool QPolygon::containsPoint(const QPoint &point, Qt::FillRule fillRule) const
+    Returns true if the given \a point is inside the polygon according to
+    the specified \a fillRule; otherwise returns false.
+*/
+bool QPolygon::containsPoint(const QPoint &pt, Qt::FillRule fillRule) const
+{
+    if (isEmpty())
+        return false;
+
+    int winding_number = 0;
+
+    QPoint last_pt = at(0);
+    QPoint last_start = at(0);
+    for (int i = 1; i < size(); ++i) {
+        const QPoint &e = at(i);
+        qt_polygon_isect_line(last_pt, e, pt, &winding_number);
+        last_pt = e;
+    }
+
+    // implicitly close last subpath
+    if (last_pt != last_start)
+        qt_polygon_isect_line(last_pt, last_start, pt, &winding_number);
+
+    return (fillRule == Qt::WindingFill
+            ? (winding_number != 0)
+            : ((winding_number % 2) != 0));
+}
+
+/*!
+    \since 4.3
+
+    Returns a polygon which is the union of this polygon and \a r.
+
+    \sa intersected(), subtracted()
+*/
+
+QPolygon QPolygon::united(const QPolygon &r) const
+{
+    QPainterPath subject; subject.addPolygon(*this);
+    QPainterPath clip; clip.addPolygon(r);
+
+    return subject.united(clip).toFillPolygon().toPolygon();
+}
+
+/*!
+    \since 4.3
+
+    Returns a polygon which is the intersection of this polygon and \a r.
+*/
+
+QPolygon QPolygon::intersected(const QPolygon &r) const
+{
+    QPainterPath subject; subject.addPolygon(*this);
+    QPainterPath clip; clip.addPolygon(r);
+
+    return subject.intersected(clip).toFillPolygon().toPolygon();
+}
+
+/*!
+    \since 4.3
+
+    Returns a polygon which is \a r subtracted from this polygon.
+*/
+
+QPolygon QPolygon::subtracted(const QPolygon &r) const
+{
+    QPainterPath subject; subject.addPolygon(*this);
+    QPainterPath clip; clip.addPolygon(r);
+
+    return subject.subtracted(clip).toFillPolygon().toPolygon();
+}
+
+/*!
+    \since 4.3
+
+    Returns a polygon which is the union of this polygon and \a r.
+
+    \sa intersected(), subtracted()
+*/
+
+QPolygonF QPolygonF::united(const QPolygonF &r) const
+{
+    QPainterPath subject; subject.addPolygon(*this);
+    QPainterPath clip; clip.addPolygon(r);
+
+    return subject.united(clip).toFillPolygon();
+}
+
+/*!
+    \since 4.3
+
+    Returns a polygon which is the intersection of this polygon and \a r.
+*/
+
+QPolygonF QPolygonF::intersected(const QPolygonF &r) const
+{
+    QPainterPath subject; subject.addPolygon(*this);
+    QPainterPath clip; clip.addPolygon(r);
+
+    return subject.intersected(clip).toFillPolygon();
+}
+
+/*!
+    \since 4.3
+
+    Returns a polygon which is \a r subtracted from this polygon.
+*/
+
+QPolygonF QPolygonF::subtracted(const QPolygonF &r) const
+{
+    QPainterPath subject; subject.addPolygon(*this);
+    QPainterPath clip; clip.addPolygon(r);
+
+    return subject.subtracted(clip).toFillPolygon();
+}

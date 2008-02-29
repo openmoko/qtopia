@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -140,7 +155,8 @@ QPluginLoader::~QPluginLoader()
     If the root component object was destroyed, calling this function
     creates a new instance.
 
-    The instance is not deleted when the QPluginLoader is destroyed.
+    The root component, returned by this function, is not deleted when
+    the QPluginLoader is destroyed.
 
     The component object is a QObject. Use qobject_cast() to access
     interfaces you are interested in.
@@ -192,6 +208,12 @@ bool QPluginLoader::load()
     call will fail, and unloading will only happen when every instance
     has called unload().
 
+    \warning The root component of a plugin, returned by the instance()
+    function, becomes invalid once the plugin is unloaded. Delete the
+    root component before unloading the plugin. Attempting to access
+    members of invalid root components will in most cases result in a
+    segmentation fault.
+
     \sa instance(), load()
 */
 bool QPluginLoader::unload()
@@ -200,6 +222,8 @@ bool QPluginLoader::unload()
         did_load = false;
         return d->unload();
     }
+    if (d)  // Ouch
+        d->errorString = tr("The plugin was not loaded.");
     return false;
 }
 
@@ -233,11 +257,9 @@ void QPluginLoader::setFileName(const QString &fileName)
         did_load = false;
     }
     d = QLibraryPrivate::findOrCreate(QFileInfo(fileName).canonicalFilePath());
-    if (d && d->pHnd && d->instance)
-        did_load = true;
 #else
     if (qt_debug_component()) {
-        qWarning("Cannot load %s into a statically linked Qt library.", 
+        qWarning("Cannot load %s into a statically linked Qt library.",
             (const char*)QFile::encodeName(fileName));
     }
     Q_UNUSED(fileName);
@@ -275,7 +297,8 @@ void Q_CORE_EXPORT qRegisterStaticPluginInstanceFunction(QtPluginInstanceFunctio
 }
 
 /*!
-    Returns a list of static plugin instances held by the plugin loader.
+    Returns a list of static plugin instances (root components) held
+    by the plugin loader.
 */
 QObjectList QPluginLoader::staticInstances()
 {

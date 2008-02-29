@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -131,10 +146,10 @@ public:
     inline void lineTo(qfixed x, qfixed y);
     inline void cubicTo(qfixed x1, qfixed y1, qfixed x2, qfixed y2, qfixed ex, qfixed ey);
 
-    void strokePath(const QPainterPath &path, void *data, const QMatrix &matrix);
+    void strokePath(const QPainterPath &path, void *data, const QTransform &matrix);
     void strokePolygon(const QPointF *points, int pointCount, bool implicit_close,
-                       void *data, const QMatrix &matrix);
-    void strokeEllipse(const QRectF &ellipse, void *data, const QMatrix &matrix);
+                       void *data, const QTransform &matrix);
+    void strokeEllipse(const QRectF &ellipse, void *data, const QTransform &matrix);
 
     QRectF clipRect() const { return m_clip_rect; }
     void setClipRect(const QRectF &clip) { m_clip_rect = clip; }
@@ -230,6 +245,9 @@ public:
     void setDashPattern(const QVector<qfixed> &dashPattern) { m_dashPattern = dashPattern; }
     QVector<qfixed> dashPattern() const { return m_dashPattern; }
 
+    void setDashOffset(qreal offset) { m_dashOffset = offset; }
+    qreal dashOffset() const { return m_dashOffset; }
+
     virtual void begin(void *data);
     virtual void end();
 
@@ -238,6 +256,7 @@ protected:
 
     QStroker *m_stroker;
     QVector<qfixed> m_dashPattern;
+    qreal m_dashOffset;
 };
 
 
@@ -313,8 +332,18 @@ inline void QStroker::emitCubicTo(qfixed c1x, qfixed c1y,
                                   qfixed c2x, qfixed c2y,
                                   qfixed ex, qfixed ey)
 {
-    m_back2X = c2x;
-    m_back2Y = c2y;
+    if (c2x == ex && c2y == ey) {
+        if (c1x == ex && c1y == ey) {
+            m_back2X = m_back1X;
+            m_back2Y = m_back1Y;
+        } else {
+            m_back2X = c1x;
+            m_back2Y = c1y;
+        }
+    } else {
+        m_back2X = c2x;
+        m_back2Y = c2y;
+    }
     m_back1X = ex;
     m_back1Y = ey;
     QStrokerOps::emitCubicTo(c1x, c1y, c2x, c2y, ex, ey);

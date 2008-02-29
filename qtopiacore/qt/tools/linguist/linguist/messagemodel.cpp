@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -23,6 +38,7 @@
 
 #include "messagemodel.h"
 #include "trwindow.h"
+#include <QtCore/QTextCodec>
 
 static Qt::SortOrder sSortOrder = Qt::AscendingOrder;
 static int sSortColumn = 1;
@@ -37,7 +53,7 @@ MessageItem::MessageItem(const MetaTranslatorMessage &message,
                          : m(message), tx(text), com(comment), cntxtItem(ctxtI)
 {
     if (m.translation().isEmpty()) {
-        QString t = "";
+        QString t = QLatin1String("");
         m.setTranslation(t);
     }
 
@@ -85,7 +101,7 @@ void MessageItem::setDanger(bool danger)
  *
  **************************************************************************** */
 ContextItem::ContextItem(QString c, MessageModel *model)
-: sortColumn(-1), com(""), ctxt(c)
+: sortColumn(-1), com(QLatin1String("")), ctxt(c)
 {
     m_finishedCount = 0;
     dangerCount   = 0;
@@ -105,7 +121,7 @@ ContextItem::~ContextItem()
 void ContextItem::appendToComment(const QString& x)
 {
     if (!com.isEmpty())
-        com += QString("\n\n");
+        com += QString(QLatin1String("\n\n"));
     com += x;
 }
 
@@ -156,14 +172,14 @@ bool ContextItem::compare(const MessageItem *left, const MessageItem *right)
             return true;
     }
     else if (sSortColumn == 1) {
-        res = QString::localeAwareCompare(left->sourceText().remove('&'),
-            right->sourceText().remove('&'));
+        res = QString::localeAwareCompare(left->sourceText().remove(QLatin1Char('&')),
+            right->sourceText().remove(QLatin1Char('&')));
         if ((sSortOrder == Qt::AscendingOrder) ? (res < 0) : !(res < 0))
             return true;
     }
     else if (sSortColumn == 2) {
-        res = QString::localeAwareCompare(left->translation().remove('&'),
-            right->translation().remove('&'));
+        res = QString::localeAwareCompare(left->translation().remove(QLatin1Char('&')),
+            right->translation().remove(QLatin1Char('&')));
         if ((sSortOrder == Qt::AscendingOrder) ? (res < 0) : !(res < 0))
             return true;
     }
@@ -180,6 +196,11 @@ bool ContextItem::compare(const MessageItem *left, const MessageItem *right)
  **************************************************************************** */
 MessageModel::MessageModel(QObject *parent)
 : QAbstractItemModel(parent), sortColumn(-1)
+{
+    init();
+}
+
+void MessageModel::init()
 {
     m_srcWords = 0;
     m_srcChars = 0;
@@ -334,7 +355,7 @@ QVariant MessageModel::headerData(int section, Qt::Orientation orientation, int 
             return tr("Items");
         }
 
-        return "Error";
+        return QLatin1String("Error");
     }
 
     return QVariant();
@@ -425,7 +446,11 @@ void MessageModel::sort(int column, Qt::SortOrder order)
     sortColumn = sSortColumn = column;
 
     qSort(cntxtList.begin(), cntxtList.end(), MessageModel::compare);
-    emit dataChanged(index(0,0), index(cntxtList.count()-1, 2));
+    //foreach(ContextItem *c, cmdl->contextList()) {
+    //    c->sortMessages(1, Qt::AscendingOrder);
+    //}
+
+    reset();
 }
 
 bool MessageModel::compare(const ContextItem *left, const ContextItem *right)
@@ -437,9 +462,14 @@ bool MessageModel::compare(const ContextItem *left, const ContextItem *right)
     switch (sSortColumn)
     {
     case 0: {
-        nleft =  (100 * left->finishedCount())/left->messageItemsInList();      //percent
-        nright = (100 * right->finishedCount())/right->messageItemsInList();    //percent
+        int totalItemsL = left->messageItemsInList() - left->obsolete();
+        nleft = totalItemsL ? (100 * left->finishedCount())/totalItemsL : 100; //percent
+        int totalItemsR = right->messageItemsInList() - right->obsolete();
+        nright = totalItemsR ? (100 * right->finishedCount())/totalItemsR : 100; //percent
 
+        if (nleft == 0 && nright == 0) {
+            nleft = totalItemsL > totalItemsR ? -1 : 1;
+        }
         if ((sortOrder == Qt::AscendingOrder) ? (nleft < nright) : (nleft > nright))
             return true;
         break; }
@@ -511,6 +541,27 @@ MessageItem *MessageModel::messageItem(int context, int message) const
     return 0;
 }
 
+MessageItem *MessageModel::findMessage(const char *context, const char *sourcetext, const char *comment /*= 0*/) const
+{
+    for (int c = 0; c < cntxtList.count(); ++c) {
+        ContextItem *ctx = cntxtList.at(c);
+        if (ctx->context() == QLatin1String(context)) {
+            QList<MessageItem*> items = ctx->messageItemList();
+            for (int i = 0; i < items.count(); ++i) {
+                MessageItem *mi = items.at(i);
+                if (mi->sourceText() == QLatin1String(sourcetext)) {
+                    if (comment) {
+                        if (mi->comment() != QLatin1String(comment)) continue;
+                    }
+                    return mi;
+                }
+            }
+            break;
+        }
+    }
+    return 0;
+}
+
 bool MessageModel::findMessage(int *contextNo, int *itemNo, const QString &findText, int findWhere, 
     bool matchSubstring, Qt::CaseSensitivity cs)
 {
@@ -540,7 +591,7 @@ bool MessageModel::findMessage(int *contextNo, int *itemNo, const QString &findT
                     searchText = m->translation();
                     break;
                 case Comments:
-                    searchText = c->fullContext();
+                    searchText = m->comment();
                     break;
             }
             if (matchSubstring) {
@@ -585,6 +636,8 @@ bool MessageModel::load(const QString &fileName)
     MetaTranslator tor;
     bool ok = tor.load(fileName);
     if (ok) {
+        if(tor.codecForTr())
+            m_codecForTr = tor.codecForTr()->name();
         int messageCount = 0;
         clearContextList();
         m_numFinished = 0;
@@ -600,13 +653,13 @@ bool MessageModel::load(const QString &fileName)
         foreach(MetaTranslatorMessage mtm, all) {
             QCoreApplication::processEvents();
             ContextItem *c;
-            if (contexts.contains(QString(mtm.context()))) {
-                c = contexts.value( QString(mtm.context()));
+            if (contexts.contains(QLatin1String(mtm.context()))) {
+                c = contexts.value( QLatin1String(mtm.context()));
             }
             else {
                 c = createContextItem(tor.toUnicode(mtm.context(), mtm.utf8()));;
                 appendContextItem(c);
-                contexts.insert(QString(mtm.context()), c);
+                contexts.insert(QLatin1String(mtm.context()), c);
             }
             if (QByteArray(mtm.sourceText()) == ContextComment) {
                 c->appendToComment(tor.toUnicode(mtm.comment(), mtm.utf8()));
@@ -629,10 +682,16 @@ bool MessageModel::load(const QString &fileName)
             }
         }
 
+        // Try to detect the correct language in the following order
+        // 1. Look for the language attribute in the ts 
+        //   if that fails
+        // 2. Guestimate the language from the filename (expecting the qt_{en,de}.ts convention)
+        //   if that fails
+        // 3. Retrieve the locale from the system.
         QString lang = tor.languageCode();
         if (lang.isEmpty()) {
-            int pos_sep = fileName.indexOf(QChar('_'));
-            if (pos_sep + 3 <= fileName.length()) {
+            int pos_sep = fileName.indexOf(QLatin1Char('_'));
+            if (pos_sep != -1 && pos_sep + 3 <= fileName.length()) {
                 lang = fileName.mid(pos_sep + 1, 2);
             }
         }
@@ -640,14 +699,12 @@ bool MessageModel::load(const QString &fileName)
         QLocale::Country c;
         MetaTranslator::languageAndCountry(lang, &l, &c);
         if (l == QLocale::C) {
-            QLocale sys = QLocale::system();
+            QLocale sys;
             l = sys.language();
             c = sys.country();
         }
         setLanguage(l);
         setCountry(c);
-        // locale will be 'C' if we could not find the language in the ts file nor 
-        // guestimate the language from the filename
 
         m_numMessages = messageCount;
         updateAll();
@@ -673,6 +730,7 @@ bool MessageModel::save(const QString &fileName)
         QString languageCode = locale.name();
         tor.setLanguageCode(languageCode);
     }
+    tor.setCodecForTr(m_codecForTr.constData());
     bool ok = tor.save(fileName);
     if (ok) setModified(false);
     return ok;
@@ -711,7 +769,7 @@ void MessageModel::doCharCounting(const QString& text, int& trW, int& trC, int& 
     trCS += text.length();
     bool inWord = false;
     for (int i=0; i<(int)text.length(); ++i) {
-        if (text[i].isLetterOrNumber() || text[i] == QChar('_')) {
+        if (text[i].isLetterOrNumber() || text[i] == QLatin1Char('_')) {
             if (!inWord) {
                 ++trW;
                 inWord = true;
@@ -734,6 +792,7 @@ void MessageModel::setLanguage(QLocale::Language lang)
     if (m_language != lang) {
         m_language = lang;
         emit languageChanged(m_language);
+        setModified(true);
     }
 }
 
@@ -744,7 +803,10 @@ QLocale::Country MessageModel::country() const
 
 void MessageModel::setCountry(QLocale::Country country)
 {
-    m_country = country;
+    if (m_country != country) {
+        m_country = country;
+        setModified(true);
+    }
 }
 
 void MessageModel::updateStatistics()
@@ -762,27 +824,6 @@ void MessageModel::updateStatistics()
     }
 
     emit statsChanged(m_srcWords, m_srcChars, m_srcCharsSpc, trW, trC, trCS);
-}
-
-MessageItem *MessageModel::findMessage(const char *context, const char *sourcetext, const char *comment /*= 0*/) const
-{
-    for (int c = 0; c < cntxtList.count(); ++c) {
-        ContextItem *ctx = cntxtList.at(c);
-        if (ctx->context() == QLatin1String(context)) {
-            QList<MessageItem*> items = ctx->messageItemList();
-            for (int i = 0; i < items.count(); ++i) {
-                MessageItem *mi = items.at(i);
-                if (mi->sourceText() == QLatin1String(sourcetext)) {
-                    if (comment) {
-                        if (mi->comment() != QLatin1String(comment)) continue;
-                    }
-                    return mi;
-                }
-            }
-            break;
-        }
-    }
-    return 0;
 }
 
 QTranslator *MessageModel::translator()

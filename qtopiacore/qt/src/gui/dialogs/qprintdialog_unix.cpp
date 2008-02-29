@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -58,6 +73,8 @@
 #    define BOOL_DEFINED
 #  endif
 
+#  include <sys/types.h>
+#  include <rpc/rpc.h>
 #  include <rpcsvc/ypclnt.h>
 #  include <rpcsvc/yp_prot.h>
 #endif // QT_NO_NIS
@@ -95,6 +112,7 @@ public:
     void _q_printToFileChanged(int);
     void _q_rbPrintRangeToggled(bool);
     void _q_printerChanged(int index);
+    void _q_chbPrintLastFirstToggled(bool);
 #ifndef QT_NO_FILEDIALOG
     void _q_btnBrowseClicked();
 #endif
@@ -828,8 +846,8 @@ static int getLprPrinters(QList<QPrinterDescription>& printers)
         if (def.open(QIODevice::ReadOnly)) {
             etcLpDefault.resize(1025);
             if (def.readLine(etcLpDefault.data(), 1024) > 0) {
-                QRegExp rx("^(\\S+)");
-                if (rx.indexIn(etcLpDefault) != -1)
+                QRegExp rx(QLatin1String("^(\\S+)"));
+                if (rx.indexIn(QString::fromLatin1(etcLpDefault)) != -1)
                     etcLpDefault = rx.cap(1).toAscii();
             }
         }
@@ -853,11 +871,16 @@ static int getLprPrinters(QList<QPrinterDescription>& printers)
     // all printers hopefully known.  try to find a good default
     QString dollarPrinter;
     {
-        if (!qgetenv("PRINTER").isEmpty())
-            dollarPrinter = QString::fromLocal8Bit(qgetenv("LPDEST").constData());
+        dollarPrinter = QString::fromLocal8Bit(qgetenv("PRINTER"));
+        if (dollarPrinter.isEmpty())
+            dollarPrinter = QString::fromLocal8Bit(qgetenv("LPDEST"));
+        if (dollarPrinter.isEmpty())
+            dollarPrinter = QString::fromLocal8Bit(qgetenv("NPRINTER"));
+        if (dollarPrinter.isEmpty())
+            dollarPrinter = QString::fromLocal8Bit(qgetenv("NGPRINTER"));
         if (!dollarPrinter.isEmpty())
             perhapsAddPrinter(&printers, dollarPrinter,
-                               QPrintDialog::tr("unknown"),
+                              QPrintDialog::tr("unknown"),
                               QLatin1String(""));
     }
 
@@ -917,7 +940,7 @@ void QPrintDialogPrivate::init()
 
 #if !defined(QT_NO_CUPS) && !defined(QT_NO_LIBRARY)
     cups = new QCUPSSupport;
-    if (QCUPSSupport::isAvailable() && cups->availablePrintersCount() > 0) {
+    if (QCUPSSupport::isAvailable()) {
         cupsPPD = cups->currentPPD();
         cupsPrinterCount = cups->availablePrintersCount();
         cupsPrinters = cups->availablePrinters();
@@ -947,11 +970,15 @@ void QPrintDialogPrivate::init()
 #if !defined(QT_NO_CUPS) && !defined(QT_NO_LIBRARY)
     }
 #endif
+    if (!ui.cbPrinters->count())
+        ui.buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
-    ui.cbPaperLayout->addItem(QApplication::translate("QPrintDialog","Portrait"), QPrinter::Portrait);
-    ui.cbPaperLayout->addItem(QApplication::translate("QPrintDialog","Landscape"), QPrinter::Landscape);
+    ui.cbPaperLayout->addItem(QPrintDialog::tr("Portrait"), QPrinter::Portrait);
+    ui.cbPaperLayout->addItem(QPrintDialog::tr("Landscape"), QPrinter::Landscape);
 
-    ui.buttonBox->button(QDialogButtonBox::Ok)->setText(QApplication::translate("QPrintDialog","Print"));
+    QPushButton *printButton = ui.buttonBox->button(QDialogButtonBox::Ok);
+    printButton->setText(QPrintDialog::tr("Print"));
+    printButton->setDefault(true);
 
     applyPrinterProperties(p);
 
@@ -965,6 +992,8 @@ void QPrintDialogPrivate::init()
                      q, SLOT(_q_rbPrintRangeToggled(bool)));
     QObject::connect(ui.cbPrinters, SIGNAL(currentIndexChanged(int)),
                      q, SLOT(_q_printerChanged(int)));
+    QObject::connect(ui.chbPrintLastFirst, SIGNAL(toggled(bool)),
+                     q, SLOT(_q_chbPrintLastFirstToggled(bool)));
 
 #ifndef QT_NO_FILEDIALOG
     QObject::connect(ui.btnBrowse, SIGNAL(clicked()), q, SLOT(_q_btnBrowseClicked()));
@@ -1002,6 +1031,8 @@ void QPrintDialogPrivate::applyPrinterProperties(QPrinter *p)
     QString file = p->outputFileName();
     if (!file.isEmpty()) {
         ui.chbPrintToFile->setChecked(true);
+        ui.stackedWidget->setCurrentIndex(1);
+        ui.gbDestination->setTitle(QApplication::translate("QPrintDialog","File"));
         ui.leFile->setText(file);
     }
     QString printer = p->printerName();
@@ -1020,7 +1051,7 @@ void QPrintDialogPrivate::_q_printToFileChanged(int state)
     Q_Q(QPrintDialog);
     if (state == Qt::Checked) {
         ui.stackedWidget->setCurrentIndex(1);
-        ui.gbDestination->setTitle(QApplication::translate("QPrintDialog","File"));
+        ui.gbDestination->setTitle(QPrintDialog::tr("File"));
         QString fileName = q->printer()->outputFileName();
         if (fileName.isEmpty()) {
             QString home = QString::fromLocal8Bit(::qgetenv("HOME").constData());
@@ -1041,9 +1072,13 @@ void QPrintDialogPrivate::_q_printToFileChanged(int state)
 
         ui.leFile->setCursorPosition(ui.leFile->text().length());
         ui.leFile->selectAll();
+        ui.buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+
     } else {
         ui.stackedWidget->setCurrentIndex(0);
-        ui.gbDestination->setTitle(QApplication::translate("QPrintDialog","Printer"));
+        ui.gbDestination->setTitle(QPrintDialog::tr("Printer"));
+        if (!ui.cbPrinters->count())
+            ui.buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
     }
     refreshPageSizes();
 }
@@ -1087,6 +1122,15 @@ void QPrintDialogPrivate::_q_printerChanged(int index)
     refreshPageSizes();
 }
 
+void QPrintDialogPrivate::_q_chbPrintLastFirstToggled(bool checked)
+{
+    Q_Q(QPrintDialog);
+    if (checked)
+        q->printer()->setPageOrder(QPrinter::LastPageFirst);
+    else
+        q->printer()->setPageOrder(QPrinter::FirstPageFirst);
+}
+
 void QPrintDialogPrivate::refreshPageSizes()
 {
     ui.cbPaperSize->blockSignals(true);
@@ -1118,7 +1162,10 @@ void QPrintDialogPrivate::refreshPageSizes()
 void QPrintDialogPrivate::_q_btnBrowseClicked()
 {
     Q_Q(QPrintDialog);
-    ui.leFile->setText(QFileDialog::getSaveFileName(q, QApplication::translate("QPrintDialog","Print To File ...")));
+    QString fileName = QFileDialog::getSaveFileName(q, QPrintDialog::tr("Print To File ..."),
+                                                    ui.leFile->text());
+    if (!fileName.isNull())
+        ui.leFile->setText(fileName);
 }
 #endif
 
@@ -1150,7 +1197,12 @@ bool QPrintDialogPrivate::setupPrinter()
         QFile f(file);
         QFileInfo fi(f);
         bool exists = fi.exists();
-        if((exists && !fi.isWritable()) || !f.open(QFile::WriteOnly)) {
+        bool opened = false;
+        if (exists && fi.isDir()) {
+            QMessageBox::warning(q, q->windowTitle(),
+			    QPrintDialog::tr("%1 is a directory.\nPlease choose a different file name.").arg(file));
+            return false;
+        } else if ((exists && !fi.isWritable()) || !(opened = f.open(QFile::WriteOnly))) {
             QMessageBox::warning(q, q->windowTitle(),
 			    QPrintDialog::tr("File %1 is not writable.\nPlease choose a different file name.").arg(file));
             return false;
@@ -1161,11 +1213,16 @@ bool QPrintDialogPrivate::setupPrinter()
             if (ret == QMessageBox::No)
                 return false;
         }
+        if (opened) {
+            f.close();
+            if (!exists)
+                f.remove();
+        }
 #endif
         p->setOutputFileName(file);
     } else {
         p->setPrinterName(ui.cbPrinters->currentText());
-        p->setOutputFileName(QString::null);
+        p->setOutputFileName(QString());
     }
 
     // print range
@@ -1226,18 +1283,36 @@ bool QPrintDialogPrivate::setupPrinter()
 
 void QPrintDialogPrivate::updateWidgets()
 {
-    ui.gbPrintRange->setEnabled(options & QPrintDialog::PrintPageRange);
-    ui.rbPrintSelection->setEnabled(options & QPrintDialog::PrintSelection);
-    ui.chbPrintToFile->setEnabled(options & QPrintDialog::PrintToFile);
-    ui.chbCollate->setEnabled(options & QPrintDialog::PrintCollateCopies);
+    Q_Q(QPrintDialog);
+    ui.gbPrintRange->setEnabled(q->isOptionEnabled(QPrintDialog::PrintPageRange) ||
+                                q->isOptionEnabled(QPrintDialog::PrintSelection));
 
-    ui.sbFrom->setMinimum(minPage);
-    ui.sbTo->setMinimum(minPage);
-    ui.sbFrom->setMaximum(maxPage);
-    ui.sbTo->setMaximum(maxPage);
+    ui.rbPrintRange->setEnabled(q->isOptionEnabled(QPrintDialog::PrintPageRange));
+    ui.rbPrintSelection->setEnabled(q->isOptionEnabled(QPrintDialog::PrintSelection));
+    ui.chbPrintToFile->setEnabled(q->isOptionEnabled(QPrintDialog::PrintToFile));
+    ui.chbCollate->setEnabled(q->isOptionEnabled(QPrintDialog::PrintCollateCopies));
 
-    ui.sbFrom->setValue(fromPage);
-    ui.sbTo->setValue(toPage);
+    switch (q->printRange()) {
+    case QPrintDialog::AllPages:
+        ui.gbPrintRange->setChecked(true);
+        break;
+    case QPrintDialog::Selection:
+        ui.rbPrintSelection->setChecked(true);
+        break;
+    case QPrintDialog::PageRange:
+        ui.rbPrintRange->setChecked(true);
+        break;
+    default:
+        break;
+    }
+
+    ui.sbFrom->setMinimum(q->minPage());
+    ui.sbTo->setMinimum(q->minPage());
+    ui.sbFrom->setMaximum(q->maxPage());
+    ui.sbTo->setMaximum(q->maxPage());
+
+    ui.sbFrom->setValue(q->fromPage());
+    ui.sbTo->setValue(q->toPage());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1428,9 +1503,9 @@ QVariant PPDOptionsModel::data(const QModelIndex& index, int role) const
                 itm = reinterpret_cast<OptionTreeItem*>(index.internalPointer());
 
             if (index.column() == 0)
-                return QVariant(QString::fromLocal8Bit(itm->description));
+                return cups->unicodeString(itm->description);
             else if (itm->type == OptionTreeItem::Option && itm->selected > -1)
-                return QVariant(QString::fromLocal8Bit(itm->selDescription));
+                return cups->unicodeString(itm->selDescription);
             else
                 return QVariant();
         }
@@ -1576,7 +1651,7 @@ void PPDOptionsEditor::setEditorData(QWidget* editor, const QModelIndex& index) 
     OptionTreeItem* itm = reinterpret_cast<OptionTreeItem*>(index.internalPointer());
 
     if (itm->selected == -1)
-        cb->addItem(QString::null);
+        cb->addItem(QString());
 
     for (int i = 0; i < itm->childItems.count(); ++i)
         cb->addItem(QString::fromLocal8Bit(itm->childItems.at(i)->description));

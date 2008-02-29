@@ -29,10 +29,10 @@
 <li><div class="fn"/>void <b><a href="phonelauncherview.html#updateImages">updateImages</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>62 public functions inherited from <a href="qgraphicsview.html#public-functions">QGraphicsView</a></li>
+<li><div class="fn"/>74 public functions inherited from <a href="qgraphicsview.html#public-functions">QGraphicsView</a></li>
 <li><div class="fn"/>15 public functions inherited from <a href="qabstractscrollarea.html#public-functions">QAbstractScrollArea</a></li>
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -48,12 +48,12 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>10 properties inherited from <a href="qgraphicsview.html#properties">QGraphicsView</a></li>
+<li><div class="fn"/>13 properties inherited from <a href="qgraphicsview.html#properties">QGraphicsView</a></li>
 <li><div class="fn"/>2 properties inherited from <a href="qabstractscrollarea.html#properties">QAbstractScrollArea</a></li>
 <li><div class="fn"/>6 properties inherited from <a href="qframe.html#properties">QFrame</a></li>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>2 public slots inherited from <a href="qgraphicsview.html#public-slots">QGraphicsView</a></li>
+<li><div class="fn"/>3 public slots inherited from <a href="qgraphicsview.html#public-slots">QGraphicsView</a></li>
 <li><div class="fn"/>20 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
@@ -78,7 +78,8 @@
 <p>The PhoneLauncherView class is a view onto a scene, which is a grid of objects.</p>
 <p>PhoneLauncherView creates and maintains the scene itself; it is capable of creating and adding the grid objects which will populate the scene's grid. Each grid object represents a folder or application, i.e&#x2e; something that can be 'opened'.</p>
 <p>In addition to the grid objects, a 'selected' item is positioned over the 'current' grid object. The selected item has a different appearance to its current grid object, and is also able to animate.</p>
-<p>See also PhoneBrowser.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
+<p>See also <a href="phonebrowserscreen.html">PhoneBrowserScreen</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="PhoneLauncherView"></a>PhoneLauncherView::PhoneLauncherView ( int <i>rows</i>, int <i>cols</i>, const <a href="qstring.html">QString</a> &amp; <i>mapping</i>, const <a href="qstring.html">QString</a> &amp; <i>animator</i>, const <a href="qstring.html">QString</a> &amp; <i>animatorBackground</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
@@ -95,7 +96,7 @@
 <h3 class="fn"><a name="highlighted"></a>void PhoneLauncherView::highlighted ( <a href="qcontent.html">QContent</a> <i>content</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Indicates that the item on the grid with the given content has become the new current item. <i>content</i> See description.</p>
 <h3 class="fn"><a name="setBusy"></a>void PhoneLauncherView::setBusy ( bool <i>flag</i> )</h3>
-<p>Affects the appearance of the SelectedItem object. <i>flag</i>: If true, the SelectedItem will take on its 'active' appearance.</p>
+<p>Currently does nothing. In the future, this function could allow <a href="phonelauncherview.html">PhoneLauncherView</a> to change the appearance of the SelectedItem object to indicate that it is 'busy' (for example, starting an application). <i>flag</i>: Not currently used.</p>
 <h3 class="fn"><a name="setCurrentItem"></a>void PhoneLauncherView::setCurrentItem ( int <i>idx</i> )</h3>
 <p>Causes the item positioned at the given index to become the current item. If <i>idx</i> is invalid, no change will occur. <i>idx</i>: The index of a GridItem object.</p>
 <p>See also <a href="phonelauncherview.html#currentItem">currentItem</a>().</p>
@@ -105,6 +106,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

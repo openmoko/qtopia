@@ -5,22 +5,28 @@ IR_HEADERS+=\
     qiriasdatabase.h\
     qirlocaldevice.h\
     qirnamespace.h\
-    qirobexserver.h\
-    qirobexsocket.h\
     qirremotedevice.h \
-    qirremotedevicewatcher.h
+    qirremotedevicewatcher.h \
+    qirserver.h \
+    qirsocket.h \
+    qirglobal.h
 
 IR_PRIVATE_HEADERS+=\
-    qirnamespace_p.h
+    qirnamespace_p.h \
+    qirsocketengine_p.h
 
 IR_SOURCES+=\
     qiriasdatabase.cpp\
     qirlocaldevice.cpp\
     qirnamespace.cpp\
-    qirobexserver.cpp\
-    qirobexsocket.cpp\
     qirremotedevice.cpp \
-    qirremotedevicewatcher.cpp
+    qirremotedevicewatcher.cpp \
+    qirserver.cpp \
+    qirsocket.cpp
+
+unix {
+    IR_SOURCES += qirsocketengine_unix.cpp
+}
 
 sdk_ir_headers.files=$$IR_HEADERS
 sdk_ir_headers.path=/include/qtopia/comm

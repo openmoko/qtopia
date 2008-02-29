@@ -45,8 +45,8 @@
 <h2>Detailed Description</h2>
 <p>The QtopiaNetworkServer class manages all network interfaces.</p>
 <p>This server task synchronizes the network access across all Qtopia applications. Client applications request network functions via <a href="qtopianetwork.html">QtopiaNetwork</a> which forwards the requests to this network server. The network server creates and keeps the references to the various <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a> instance. All forwarded network requests are directly executed by this server class.</p>
-<p>The network server ensures the automated start-up of network interfaces during Qtopia's start phase, stops all network interfaces when Qtopia shuts down and manages the network sessions for all network devices.</p>
-<p>The QtopiaNetworkServer class provides the <tt>QtopiaNetworkServer</tt> task.</p>
+<p>The network server ensures the automated start-up of network interfaces during Qtopia's start phase, stops all network interfaces when Qtopia shuts down and manages the network sessions for all network devices. External network devices such as PCMCIA cards are automatically detected and initialized by the network server when they are plugged into the Qtopia device.</p>
+<p>The QtopiaNetworkServer is a Qtopia server task and is automatically started by the server. It is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <p>See also <a href="qtopianetwork.html">QtopiaNetwork</a> and <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -58,6 +58,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Qt Tutorial 9 - With Cannon You Can</title>
+  <title>Qt 4.3: Qt Tutorial 9 - With Cannon You Can</title>
   <link rel="prev" href="tutorial-t8.html" />
   <link rel="contents" href="tutorial.html" />
   <link rel="next" href="tutorial-t10.html" />
@@ -19,7 +19,8 @@
 [<a href="tutorial.html">Qt Tutorial</a>]
 [Next: <a href="tutorial-t10.html">Chapter 10</a>]
 </p>
-<h1 align="center">Qt Tutorial 9 - With Cannon You Can<br /><small></small></h1>
+<h1 align="center">Qt Tutorial 9 - With Cannon You Can<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="tutorial-t9-cannonfield-cpp.html">tutorial/t9/cannonfield.cpp</a></li>
@@ -42,7 +43,7 @@
 <pre>     painter.setBrush(Qt::blue);</pre>
 <p>When <a href="qpainter.html">QPainter</a> fills a rectangle, a circle, or whatever, it fills the shape using its brush. Here we set it to use a solid blue brush. (We could also use a pattern.) The blue brush will go all the way to the edges of the things we draw.</p>
 <pre>     painter.translate(0, rect().height());</pre>
-<p>The <a href="qpainter.html#translate">QPainter::translate</a>() function translates the coordinate system of the <a href="qpainter.html">QPainter</a> (i.e., it moves it by an offset). Here we set the (0, 0) point to the bottom-left corner of the widget. The <i>x</i> and <i>y</i> directions remain unchanged, i.e., all the <i>y</i> coordinates inside the widget are now negative. (See <a href="coordsys.html">The Coordinate System</a> for more information about Qt's coordinate system.)</p>
+<p>The <a href="qpainter.html#translate">QPainter::translate</a>() function translates the coordinate system of the <a href="qpainter.html">QPainter</a> (i.e&#x2e;, it moves it by an offset). Here we set the (0, 0) point to the bottom-left corner of the widget. The <i>x</i> and <i>y</i> directions remain unchanged, i.e&#x2e;, all the <i>y</i> coordinates inside the widget are now negative. (See <a href="coordsys.html">The Coordinate System</a> for more information about Qt's coordinate system.)</p>
 <pre>     painter.drawPie(QRect(-35, -35, 70, 70), 0, 90 * 16);</pre>
 <p>The <a href="qpainter.html#drawPie">QPainter::drawPie</a>() function draws a pie shape inside the specified rectangle using a start angle and an arc length. The angles are specified in sixteenths of a degree. Zero degrees is at the 3 o'clock position. The drawing direction is counter-clockwise. Here we draw a quarter of a circle in the bottom-left corner of the widget. The pie is filled with blue and has no outline.</p>
 <pre>     painter.rotate(-currentAngle);</pre>
@@ -69,6 +70,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

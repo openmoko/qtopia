@@ -19,6 +19,7 @@
 <li><a href="#gsm-07-10-multiplexing">GSM 07.10 multiplexing</a></li>
 <li><a href="#xml-response-file-format">XML Response File Format</a></li>
 <li><a href="#sim-application-toolkit-commands">SIM Application Toolkit commands</a></li>
+<li><a href="#sim-file-system-commands">SIM file system commands</a></li>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
@@ -82,7 +83,7 @@
 <tr valign="top" class="even"><td>&lt;eval var=&quot;NAME&quot; left=&quot;LEFT&quot; op=&quot;OPERATOR&quot; right=&quot;RIGHT&quot;/&gt;</td><td>Evaluate an arithmetic expression and place the result into the variable &quot;NAME&quot;. &quot;OPERATOR&quot; may be one of &quot;+&quot;, &quot;-&quot;, &quot;*&quot;, &quot;/&quot;, &quot;%&quot;, &quot;&amp;&quot;, &quot;|&quot;, &quot;^&quot;, &quot;~&quot;, &quot;&lt;&lt;&quot;, }{&gt;&quot;, &quot;&amp;&amp;&quot;, &quot;||&quot;, &quot;!&quot;, or &quot;concat&quot;.</td></tr>
 <tr valign="top" class="odd"><td>&lt;mainmenu title=&quot;TITLE&quot;&gt;</td><td>Define the main program menu with the given &quot;TITLE&quot;.</td></tr>
 <tr valign="top" class="even"><td>&lt;menu title=&quot;TITLE&quot; default=&quot;ITEM&quot; [back=&quot;LABEL&quot;]&gt;</td><td>Define a program menu with the given &quot;TITLE&quot; and default &quot;ITEM&quot;. When the user selects &quot;Back&quot;, the program will jump to &quot;LABEL&quot;.</td></tr>
-<tr valign="top" class="odd"><td>&lt;item id=&quot;ID&quot; name=&quot;NAME&quot; [help=&quot;HELPLABEL&quot;] goto=&quot;LABEL&quot;/&gt;</td><td>Define an item within a &lt;mainmenu&gt; or &lt;menu&gt; element. &quot;ID&quot; is a numeric value that identifies the item; &quot;NAME&quot; is the text name to display on the user's screen; &quot;HELPLABEL&quot; is a label to jump to if the user selects &quot;Help&quot; for the item; and &quot;LABEL&quot; is the regular label to jump to when the user selects the item.</td></tr>
+<tr valign="top" class="odd"><td>&lt;item id=&quot;ID&quot; name=&quot;NAME&quot; [help=&quot;HELPLABEL&quot;] [iconid=&quot;ICONID&quot; [iconselfexplanatory=&quot;SEFLAG&quot;]] goto=&quot;LABEL&quot;/&gt;</td><td>Define an item within a &lt;mainmenu&gt; or &lt;menu&gt; element. &quot;ID&quot; is a numeric value that identifies the item; &quot;NAME&quot; is the text name to display on the user's screen; &quot;HELPLABEL&quot; is a label to jump to if the user selects &quot;Help&quot; for the item; and &quot;LABEL&quot; is the regular label to jump to when the user selects the item. If &quot;ICONID&quot; is supplied, then it indicates an icon to be associated with the menu item. If &quot;SEFLAG&quot; is set to &quot;true&quot;, then the icon is self-explanatory and the text does not need to be displayed.</td></tr>
 <tr valign="top" class="even"><td>&lt;displaytext [autoclear=&quot;CLEAR&quot;] [highpriority=&quot;HIGH&quot;&gt;TEXT&lt;/displaytext&gt;</td><td>Display &quot;TEXT&quot; on the user's screen. If &quot;CLEAR&quot; is &quot;true&quot;, then automatically clear the text after 3 seconds. If &quot;HIGH&quot; is &quot;true&quot;, then the text should be displayed with high priority.</td></tr>
 <tr valign="top" class="odd"><td>&lt;getkey type=&quot;TYPE&quot; [help=&quot;LABEL&quot;]/&gt;</td><td>Ask the user for a single keypress. &quot;TYPE&quot; may be one of &quot;digit&quot;, &quot;alpha&quot;, or &quot;ucs2&quot;. If the user selects &quot;Help&quot;, then the program will jump to &quot;LABEL&quot;.</td></tr>
 <tr valign="top" class="even"><td>&lt;getinput type=&quot;TYPE&quot; [help=&quot;LABEL&quot;] [echo=&quot;ECHO&quot;] [minlength=&quot;MIN&quot;] [maxlength=&quot;MAX&quot;]/&gt;</td><td>Ask the user for a line of input. &quot;TYPE&quot; may be one of &quot;digit&quot;, &quot;alpha&quot;, or &quot;ucs2&quot;. If the user selects &quot;Help&quot;, then the program will jump to &quot;LABEL&quot;. If &quot;ECHO&quot; is &quot;false&quot;, then the characters will not be echoed to the screen (e.g&#x2e; for passwords). &quot;MIN&quot; and &quot;MAX&quot; define the minimum and maximum text lengths (1 and 255 by default, respectively).</td></tr>
@@ -93,11 +94,20 @@
 <tr valign="top" class="odd"><td>&lt;sendsms&gt;TEXT&lt;/sendsms&gt;</td><td>Tell the user with the message &quot;TEXT&quot; that an SMS message is being sent.</td></tr>
 <tr valign="top" class="even"><td>&lt;sendussd&gt;TEXT&lt;/sendussd&gt;</td><td>Tell the user with the message &quot;TEXT&quot; that Unstructured Supplementary Service Data (USSD) is being sent.</td></tr>
 <tr valign="top" class="odd"><td>&lt;setupeventlist type=&quot;TYPE&quot;/&gt;</td><td>Setup event reporting according to &quot;TYPE&quot;, which should be one of &quot;idle&quot;, &quot;user&quot;, &quot;idle and user&quot;, or &quot;cancel&quot;.</td></tr>
+<tr valign="top" class="even"><td>&lt;setupidle text=&quot;TEXT&quot; [iconid=&quot;ICONID&quot; [iconselfexplanatory=&quot;SEFLAG&quot;]]/&gt;</td><td>Set the idle mode text to &quot;TEXT&quot;. If &quot;ICONID&quot; is supplied, then it indicates an icon to be associated with the idle mode text. If &quot;SEFLAG&quot; is set to &quot;true&quot;, then the icon is self-explanatory and the text does not need to be displayed.</td></tr>
+</table></p>
+<a name="sim-file-system-commands"></a>
+<h2>SIM file system commands</h2>
+<p>The &lt;filesystem&gt; tag is used to define the contents of the SIM file system for access via the <tt>AT+CRSM</tt> command. The body of the tag should be zero or more &lt;file&gt; tags, each of which defines the hexadecimal contents of a SIM file. The following attributes may be present for each file:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>attribute</th><th>description</th></tr></thead>
+<tr valign="top" class="odd"><td>name</td><td>Name of the file, which is one of the <tt>EFxxx</tt> names from GSM 51.011.</td></tr>
+<tr valign="top" class="even"><td>recordsize</td><td>Size of records within the file if it is record-based. Leave this attribute off for binary files.</td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

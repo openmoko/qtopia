@@ -209,7 +209,7 @@
 </phrase>
 <phrase>
     <source>disability</source>
-    <target>disabilità</target>
+    <target>disabilitÃ </target>
 </phrase>
 <phrase>
     <source>disjoint selection</source>
@@ -529,7 +529,7 @@
 </phrase>
 <phrase>
     <source>mode</source>
-    <target>modalità</target>
+    <target>modalitÃ </target>
 </phrase>
 <phrase>
     <source>modeless</source>
@@ -750,23 +750,23 @@
 </phrase>
 <phrase>
     <source>Properties</source>
-    <target>Proprietà</target>
+    <target>ProprietÃ </target>
 </phrase>
 <phrase>
     <source>property inspector</source>
-    <target>visualizzatore proprietà</target>
+    <target>visualizzatore proprietÃ </target>
 </phrase>
 <phrase>
     <source>property page</source>
-    <target>scheda proprietà</target>
+    <target>scheda proprietÃ </target>
 </phrase>
 <phrase>
     <source>property sheet</source>
-    <target>finestra proprietà</target>
+    <target>finestra proprietÃ </target>
 </phrase>
 <phrase>
     <source>property sheet control</source>
-    <target>controllo finestra proprietà</target>
+    <target>controllo finestra proprietÃ </target>
 </phrase>
 <phrase>
     <source>Quick View</source>
@@ -993,7 +993,7 @@
 </phrase>
 <phrase>
     <source>task-oriented Help</source>
-    <target>guida orientata alle attività</target>
+    <target>guida orientata alle attivitÃ </target>
 </phrase>
 <phrase>
     <source>template</source>
@@ -1100,6 +1100,4 @@
 </phrase>
 <phrase>
     <source>Yes</source>
-    <target>Sì</target>
-</phrase>
-</QPH>
+    <target>SÃ¬</target>

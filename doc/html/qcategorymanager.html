@@ -38,9 +38,11 @@
 <li><div class="fn"/>QString <b><a href="qcategorymanager.html#label">label</a></b> ( const QString &amp; <i>id</i> ) const</li>
 <li><div class="fn"/>QList&lt;QString&gt; <b><a href="qcategorymanager.html#labels">labels</a></b> ( const QList&lt;QString&gt; &amp; <i>l</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qcategorymanager.html#remove">remove</a></b> ( const QString &amp; <i>id</i> )</li>
+<li><div class="fn"/>QString <b><a href="qcategorymanager.html#ringTone">ringTone</a></b> ( const QString &amp; <i>id</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qcategorymanager.html#setGlobal">setGlobal</a></b> ( const QString &amp; <i>id</i>, bool <i>global</i> )</li>
 <li><div class="fn"/>bool <b><a href="qcategorymanager.html#setIcon">setIcon</a></b> ( const QString &amp; <i>id</i>, const QString &amp; <i>icon</i> )</li>
 <li><div class="fn"/>bool <b><a href="qcategorymanager.html#setLabel">setLabel</a></b> ( const QString &amp; <i>id</i>, const QString &amp; <i>trLabel</i> )</li>
+<li><div class="fn"/>bool <b><a href="qcategorymanager.html#setRingTone">setRingTone</a></b> ( const QString &amp; <i>id</i>, const QString &amp; <i>fileName</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
@@ -134,6 +136,9 @@
 <h3 class="fn"><a name="remove"></a>bool QCategoryManager::remove ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )</h3>
 <p>Attempts to remove the category with category id <i>id</i> as long as the category is either global or in the scope of the <a href="qcategorymanager.html">QCategoryManager</a> object. Returns true If the category is successfully removed. Otherwise returns false.</p>
 <p>Note that this will always fail if <i>id</i> is a system category.</p>
+<h3 class="fn"><a name="ringTone"></a><a href="qstring.html">QString</a> QCategoryManager::ringTone ( const <a href="qstring.html">QString</a> &amp; <i>id</i> ) const</h3>
+<p>If there is a category id <i>id</i> in the scope of the QCategoryManger returns the ringtone filename for the category id. Otherwise returns an empty string.</p>
+<p>See also <a href="qcategorymanager.html#setRingTone">setRingTone</a>().</p>
 <h3 class="fn"><a name="setGlobal"></a>bool QCategoryManager::setGlobal ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, bool <i>global</i> )</h3>
 <p>Sets the category with category id <i>id</i> to the global scope if <i>global</i> is true or to the scope of <a href="qcategorymanager.html">QCategoryManager</a> otherwise. Returns true on success. Returns false if the category does not exist, if <i>global</i> is false and <a href="qcategorymanager.html">QCategoryManager</a> does not have a scope or if there is a database failure.</p>
 <p>See also <a href="qcategorymanager.html#isGlobal">isGlobal</a>().</p>
@@ -145,12 +150,15 @@
 <p>Attempts to rename the category with category id <i>id</i> to have the translated label <i>trLabel</i>. Returns true If the category is successfully renamed. Otherwise returns false.</p>
 <p>Note that this will always fail if <i>id</i> is a system category.</p>
 <p>See also <a href="qcategorymanager.html#label">label</a>().</p>
+<h3 class="fn"><a name="setRingTone"></a>bool QCategoryManager::setRingTone ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>fileName</i> )</h3>
+<p>Attempts to set the ringtone for the category with category id <i>id</i> to <i>fileName</i>. Returns true if the category ringtone is changed successfully. Otherwise return false.</p>
+<p>See also <a href="qcategorymanager.html#ringTone">ringTone</a>().</p>
 <h3 class="fn"><a name="unfiledLabel"></a><a href="qstring.html">QString</a> QCategoryManager::unfiledLabel ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the translated label for the empty set of categories. Also known as unfiled due to the set not yet having any categories assigned.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/image/qpixmap.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/image/qpixmap.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QPixmap</title>
+  <title>Qt 4.3: List of All Members for QPixmap</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -26,10 +26,12 @@
 <li><div class="fn"/><a href="qpixmap.html#QPixmap-9">QPixmap</a> ( const QSize &amp; )</li>
 <li><div class="fn"/><a href="qpixmap.html#dtor.QPixmap">~QPixmap</a> ()</li>
 <li><div class="fn"/><a href="qpixmap.html#alphaChannel">alphaChannel</a> () const : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#cacheKey">cacheKey</a> () const : qint64</li>
 <li><div class="fn"/><a href="qpixmap.html#copy">copy</a> ( const QRect &amp; ) const : QPixmap</li>
 <li><div class="fn"/><a href="qpixmap.html#copy-2">copy</a> ( int, int, int, int ) const : QPixmap</li>
 <li><div class="fn"/><a href="qpixmap.html#createHeuristicMask">createHeuristicMask</a> ( bool ) const : QBitmap</li>
-<li><div class="fn"/><a href="qpixmap.html#createMaskFromColor">createMaskFromColor</a> ( const QColor &amp; ) const : QBitmap</li>
+<li><div class="fn"/><a href="qpixmap.html#createMaskFromColor">createMaskFromColor</a> ( const QColor &amp;, Qt::MaskMode ) const : QBitmap</li>
+<li><div class="fn"/><a href="qpixmap.html#createMaskFromColor-2">createMaskFromColor</a> ( const QColor &amp; ) const : QBitmap</li>
 <li><div class="fn"/><a href="qpixmap.html#defaultDepth">defaultDepth</a> () : int</li>
 <li><div class="fn"/><a href="qpixmap.html#depth">depth</a> () const : int</li>
 <li><div class="fn"/><a href="qpixmap.html#detach">detach</a> ()</li>
@@ -50,8 +52,8 @@
 <li><div class="fn"/><a href="qpixmap.html#isNull">isNull</a> () const : bool</li>
 <li><div class="fn"/><a href="qpixmap.html#isQBitmap">isQBitmap</a> () const : bool</li>
 <li><div class="fn"/><a href="qpixmap.html#load">load</a> ( const QString &amp;, const char *, Qt::ImageConversionFlags ) : bool</li>
-<li><div class="fn"/><a href="qpixmap.html#loadFromData">loadFromData</a> ( const uchar *, uint, const char *, Qt::ImageConversionFlags ) : bool</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qpixmap.html#loadFromData">loadFromData</a> ( const uchar *, uint, const char *, Qt::ImageConversionFlags ) : bool</li>
 <li><div class="fn"/><a href="qpixmap.html#loadFromData-3">loadFromData</a> ( const QByteArray &amp;, const char *, Qt::ImageConversionFlags ) : bool</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiX">logicalDpiX</a> () const : int</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiY">logicalDpiY</a> () const : int</li>
@@ -69,15 +71,16 @@
 <li><div class="fn"/><a href="qpixmap.html#scaled-2">scaled</a> ( int, int, Qt::AspectRatioMode, Qt::TransformationMode ) const : QPixmap</li>
 <li><div class="fn"/><a href="qpixmap.html#scaledToHeight">scaledToHeight</a> ( int, Qt::TransformationMode ) const : QPixmap</li>
 <li><div class="fn"/><a href="qpixmap.html#scaledToWidth">scaledToWidth</a> ( int, Qt::TransformationMode ) const : QPixmap</li>
-<li><div class="fn"/><a href="qpixmap.html#serialNumber">serialNumber</a> () const : int</li>
 <li><div class="fn"/><a href="qpixmap.html#setAlphaChannel">setAlphaChannel</a> ( const QPixmap &amp; )</li>
 <li><div class="fn"/><a href="qpixmap.html#setMask">setMask</a> ( const QBitmap &amp; )</li>
 <li><div class="fn"/><a href="qpixmap.html#size">size</a> () const : QSize</li>
 <li><div class="fn"/><a href="qpixmap.html#toImage">toImage</a> () const : QImage</li>
 <li><div class="fn"/><a href="qpixmap.html#toMacCGImageRef">toMacCGImageRef</a> () const : CGImageRef</li>
 <li><div class="fn"/><a href="qpixmap.html#toWinHBITMAP">toWinHBITMAP</a> ( HBitmapFormat ) const : HBITMAP</li>
-<li><div class="fn"/><a href="qpixmap.html#transformed">transformed</a> ( const QMatrix &amp;, Qt::TransformationMode ) const : QPixmap</li>
-<li><div class="fn"/><a href="qpixmap.html#trueMatrix">trueMatrix</a> ( const QMatrix &amp;, int, int ) : QMatrix</li>
+<li><div class="fn"/><a href="qpixmap.html#transformed">transformed</a> ( const QTransform &amp;, Qt::TransformationMode ) const : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#transformed-2">transformed</a> ( const QMatrix &amp;, Qt::TransformationMode ) const : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#trueMatrix">trueMatrix</a> ( const QTransform &amp;, int, int ) : QTransform</li>
+<li><div class="fn"/><a href="qpixmap.html#trueMatrix-2">trueMatrix</a> ( const QMatrix &amp;, int, int ) : QMatrix</li>
 <li><div class="fn"/><a href="qpixmap.html#width">width</a> () const : int</li>
 <li><div class="fn"/><a href="qpaintdevice.html#widthMM">widthMM</a> () const : int</li>
 <li><div class="fn"/><a href="qpixmap.html#x11Info">x11Info</a> () const : const QX11Info &amp;</li>
@@ -92,6 +95,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

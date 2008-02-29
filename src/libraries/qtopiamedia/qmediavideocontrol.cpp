@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,22 +19,31 @@
 **
 ****************************************************************************/
 
-#include <qwsembedwidget.h>
+#include <QObject>
 
-#include <qabstractipcinterface.h>
+#if defined(Q_WS_QWS)
+#include <QWSEmbedWidget>
+#elif defined(Q_WS_X11)
+#include <QX11EmbedWidget>
+#endif
+
+#include "qmediaabstractcontrol.h"
+#include "qmediacontent.h"
 
 #include "qmediavideocontrol.h"
 
 
 
 // {{{ QMediaVideoControlPrivate
-class QMediaVideoControlPrivate : public QAbstractIpcInterface
+class QMediaVideoControlPrivate : public QMediaAbstractControl
 {
-public:
+    Q_OBJECT
 
-    QMediaVideoControlPrivate(QUuid const& id):
-        QAbstractIpcInterface("/MediaServer", QMediaVideoControl::name(), id.toString())
+public:
+    QMediaVideoControlPrivate(QMediaContent* mediaContent):
+        QMediaAbstractControl(mediaContent, QMediaVideoControl::name())
     {
+        proxyAll();
     }
 
     bool hasVideo() const
@@ -42,15 +51,17 @@ public:
         return value("hasVideo").toBool();
     }
 
-    WId getWId() const
+    WId getWindowId() const
     {
-        return value("WId").toInt();        // XXX: knowledge
+        return value("windowId").toInt();        // XXX: knowledge
     }
 
 signals:
-    void videoAvailable();
+    void videoTargetAvailable();
+    void videoTargetRemoved();
 };
 // }}}
+
 
 /*!
     \class QMediaVideoControl
@@ -77,7 +88,7 @@ signals:
     new video widget for the media content.
 
     \code
-        QMediaVideoControl control( content->handle() );
+        QMediaVideoControl control( content );
 
         QWidget *video = control.createVideoWidget();
         videolayout->addWidget( video );
@@ -94,16 +105,20 @@ signals:
 /*!
     Create a QMediaVideoControl with the handle to a prepared media resource
 
-    The QMediaControl needs to be constructed with a valid QMediaHandle passed in by
-    the \a mediaHandle parameter, obtained from a QMediaContent instance.
-
-    The \a parent is the Parent QObject.
+    The QMediaControl needs to be constructed with \a mediaContent that
+    represents the video to be played.
 */
 
-QMediaVideoControl::QMediaVideoControl(QMediaHandle const& mediaHandle, QObject* parent):
-    QObject(parent)
+QMediaVideoControl::QMediaVideoControl(QMediaContent* mediaContent):
+    QObject(mediaContent)
 {
-    d = new QMediaVideoControlPrivate(mediaHandle.id());
+    d = new QMediaVideoControlPrivate(mediaContent);
+
+    connect(d, SIGNAL(valid()), this, SIGNAL(valid()));
+    connect(d, SIGNAL(invalid()), this, SIGNAL(invalid()));
+
+    connect(d, SIGNAL(videoTargetAvailable()), this, SIGNAL(videoTargetAvailable()));
+    connect(d, SIGNAL(videoTargetRemoved()), this, SIGNAL(videoTargetRemoved()));
 }
 
 /*!
@@ -130,7 +145,13 @@ QWidget* QMediaVideoControl::createVideoWidget(QWidget* parent) const
 
     if (d->hasVideo())
     {
-        rc = new QWSEmbedWidget(d->getWId(), parent);
+#if defined(Q_WS_QWS)
+        rc = new QWSEmbedWidget(d->getWindowId(), parent);
+#elif defined(Q_WS_X11)
+        QX11EmbedWidget *embed = new QX11EmbedWidget(parent);
+        embed->embedInto(d->getWindowId());
+        rc = embed;
+#endif
     }
 
     return rc;
@@ -142,7 +163,38 @@ QWidget* QMediaVideoControl::createVideoWidget(QWidget* parent) const
 
 QString QMediaVideoControl::name()
 {
-    return "VideoControl";
+    return "Video";
 }
 
+/*!
+    \fn void QMediaVideoControl::valid();
+
+    Signal that is emitted when the control is valid and available for use.
+*/
+
+/*!
+    \fn void QMediaVideoControl::invalid();
+
+    Signal that is emitted when the control is invalid and no longer available for use.
+*/
+
+/*!
+    \fn void QMediaVideoControl::videoTargetAvailable();
+
+    This signal is emitted when there is a video available to be viewed. The client can
+    call createVideoWidget() at this time.
+
+    \sa createVideoWidget()
+*/
+
+/*!
+    \fn void QMediaVideoControl::videoTargetRemoved();
+
+    This signal is emitted when there is no longer video available to be viewed. The client should
+    delete any QWidget obtained from createVideoWidget()
+
+    \sa createVideoWidget()
+*/
+
+#include "qmediavideocontrol.moc"
 

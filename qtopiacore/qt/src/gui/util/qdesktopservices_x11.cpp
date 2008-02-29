@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,7 +47,7 @@
 
 inline static bool launch(const QUrl &url, const QString &client)
 {
-    return (QProcess::startDetached(client + " " + url.toEncoded()));
+    return (QProcess::startDetached(client + QLatin1Char(' ') + QString::fromLatin1(url.toEncoded().constData())));
 }
 
 static bool openDocument(const QUrl &url)
@@ -40,23 +55,23 @@ static bool openDocument(const QUrl &url)
     if (!url.isValid())
         return false;
 
-    if (launch(url, "xdg-open"))
+    if (launch(url, QLatin1String("xdg-open")))
         return true;
 
-    if (X11->desktopEnvironment == DE_GNOME && launch(url, "gnome-open")) {
+    if (X11->desktopEnvironment == DE_GNOME && launch(url, QLatin1String("gnome-open"))) {
         return true;
     } else {
-        if (X11->desktopEnvironment == DE_KDE && launch(url, "kfmclient exec"))
+        if (X11->desktopEnvironment == DE_KDE && launch(url, QLatin1String("kfmclient exec")))
             return true;
     }
 
-    if (launch(url, "firefox"))
+    if (launch(url, QLatin1String("firefox")))
         return true;
-    if (launch(url, "mozilla"))
+    if (launch(url, QLatin1String("mozilla")))
         return true;
-    if (launch(url, "netscape"))
+    if (launch(url, QLatin1String("netscape")))
         return true;
-    if (launch(url, "opera"))
+    if (launch(url, QLatin1String("opera")))
         return true;
 
     return false;
@@ -66,30 +81,30 @@ static bool launchWebBrowser(const QUrl &url)
 {
     if (!url.isValid())
         return false;
-    if (url.scheme() == "mailto")
+    if (url.scheme() == QLatin1String("mailto"))
         return openDocument(url);
 
-    if (launch(url, "xdg-open"))
+    if (launch(url, QLatin1String("xdg-open")))
         return true;
-    if (launch(url, getenv("DEFAULT_BROWSER")))
+    if (launch(url, QString::fromLocal8Bit(getenv("DEFAULT_BROWSER"))))
         return true;
-    if (launch(url, getenv("BROWSER")))
+    if (launch(url, QString::fromLocal8Bit(getenv("BROWSER"))))
         return true;
 
-    if (X11->desktopEnvironment == DE_GNOME && launch(url, "gnome-open")) {
+    if (X11->desktopEnvironment == DE_GNOME && launch(url, QLatin1String("gnome-open"))) {
         return true;
     } else {
-        if (X11->desktopEnvironment == DE_KDE && launch(url, "kfmclient openURL"))
+        if (X11->desktopEnvironment == DE_KDE && launch(url, QLatin1String("kfmclient openURL")))
             return true;
     }
 
-    if (launch(url, "firefox"))
+    if (launch(url, QLatin1String("firefox")))
         return true;
-    if (launch(url, "mozilla"))
+    if (launch(url, QLatin1String("mozilla")))
         return true;
-    if (launch(url, "netscape"))
+    if (launch(url, QLatin1String("netscape")))
         return true;
-    if (launch(url, "opera"))
+    if (launch(url, QLatin1String("opera")))
         return true;
     return false;
 }

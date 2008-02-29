@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,31 +24,21 @@
 #include "qtmailwindow.h"
 #include "writemail.h"
 
-#ifdef QTOPIA_DESKTOP
-#include <qcopenvelope_qd.h>
-#else
 #include <qtopiaipcenvelope.h>
 #include <qtopiaapplication.h>
-#endif
 #include <qdatetime.h>
 #include <qtimer.h>
 #include <QDebug>
-
+#include <QDrmContentPlugin>
 
 QTMailWindow *QTMailWindow::self = 0;
 
-#ifdef QTOPIA_DESKTOP
-QTMailWindow::QTMailWindow()
-    : QTMailGui()
-{
-}
-#else
 QTMailWindow::QTMailWindow(QWidget *parent, Qt::WFlags fl)
-    : QTMailGui(parent, fl), parentWidget( this ), noShow(false)
+    : QMainWindow(parent, fl), parentWidget( this ), noShow(false)
 {
+    QtopiaApplication::loadTranslations("libqtopiamail");
     init();
 }
-#endif
 
 void QTMailWindow::init()
 {
@@ -67,16 +57,16 @@ void QTMailWindow::init()
     // This seems to be a QMainWindow in a QStackedWidget bug
     emailClient = new EmailClient(this, "client"); // No tr
 #endif
-    connect(emailClient, SIGNAL( raiseWidget(QWidget*,const QString&) ),
-            this, SLOT( raiseWidget(QWidget*,const QString&) ) );
+    connect(emailClient, SIGNAL(raiseWidget(QWidget*,QString)),
+            this, SLOT(raiseWidget(QWidget*,QString)) );
     views->addWidget(emailClient);
 
     views->setCurrentWidget(emailClient);
 
-#ifndef QTOPIA_DESKTOP
     setCentralWidget(views);
     setWindowTitle( emailClient->windowTitle() );
-#endif
+
+    QDrmContentPlugin::initialize();
 }
 
 QTMailWindow::~QTMailWindow()
@@ -87,68 +77,19 @@ QTMailWindow::~QTMailWindow()
 
 void QTMailWindow::closeEvent(QCloseEvent *e)
 {
-    if (views->currentWidget() != emailClient) {
-        //because closeEvent is passed to this instead of sub qtmainwindows
-
-        // We have to test for w = 0 (means none visible) since mWriteMail/mReadMail would
-        // also be 0 if they haven't yet been created
-        QWidget *w = views->currentWidget();
-        if ( w ) {
-            if (w == emailClient->mWriteMail ) {
-#ifdef QTOPIA_PHONE
-                if ( !emailClient->mWriteMail->hasContent() ) {
-                    emailClient->writeMailWidget()->discard();
-                    e->ignore();
-                    return;
-                }
-                if (!Qtopia::mousePreferred() &&
-                    emailClient->mWriteMail->keyPressAccepted()) {
-                    e->ignore();
-                    return;
-                }
-                emailClient->writeMailWidget()->tryAccept();
-#else
-                if( !emailClient->writeMailWidget()->tryAccept() )
-                    emailClient->writeMailWidget()->discard();
-                return; //call from writemail will be caught by emailclient
-#endif
-            } else if (w == emailClient->mReadMail ) {
-                emailClient->readMailWidget()->close();
-                e->ignore();
-                return;
-            }
-
-            w->hide();
+    if (WriteMail* writeMail = emailClient->mWriteMail) {
+        if ((views->currentWidget() == writeMail) && (writeMail->hasContent())) {
+            // We need to save whatever is currently being worked on
+            writeMail->forcedClosure();
         }
+    }
 
-        views->setCurrentWidget(emailClient);
-        if (emailClient->focusWidget())
-            emailClient->focusWidget()->setFocus();
-#ifndef QTOPIA_DESKTOP
-        setWindowTitle( emailClient->windowTitle() );
-#endif
-        emailClient->update();
-        // needed to work with context-help
-        setObjectName( w->objectName() );
-
+    if (emailClient->isTransmitting()) {
+        emailClient->closeAfterTransmissionsFinished();
+        hide();
         e->ignore();
     } else {
-        if (Qtopia::mousePreferred() &&
-            emailClient->currentMailboxWidgetId() == emailClient->currentMessageId() ) {
-            emailClient->showFolderList();
-            return;
-        }
-
-        if (emailClient->isTransmitting()) {
-            emailClient->closeAfterTransmissionsFinished();
-#ifndef QTOPIA_DESKTOP
-            hide();
-#endif
-            e->ignore();
-            return;
-        } else {
-            e->accept();
-        }
+        e->accept();
     }
 }
 
@@ -161,7 +102,7 @@ void QTMailWindow::setVisible(bool visible)
 {
     if (noShow && visible)
         return;
-    QTMailGui::setVisible(visible);
+    QMainWindow::setVisible(visible);
 }
 
 void QTMailWindow::setDocument(const QString &_address)
@@ -171,23 +112,23 @@ void QTMailWindow::setDocument(const QString &_address)
 
 void QTMailWindow::raiseWidget(QWidget *w, const QString &caption)
 {
-    showMaximized();
-    if ( caption == "qcop") {
-        //the emailclient can't raise itself, only we can
-#ifndef QTOPIA_DESKTOP
-        raise();
-#endif
-    } else {
-        views->setCurrentWidget(w);
-        if (w->focusWidget())
-            w->focusWidget()->setFocus(); // Needed, but don't know why.
-#ifndef QTOPIA_DESKTOP
-        setWindowTitle( caption );
-#endif
+    if (!isVisible())
+        showMaximized();
 
-        // needed to work with context-help
-        setObjectName( w->objectName() );
-    }
+    views->setCurrentWidget(w);
+    if (!caption.isEmpty())
+        setWindowTitle( caption );
+
+    raise();
+    activateWindow();
+
+    // needed to work with context-help
+    setObjectName( w->objectName() );
+}
+
+QWidget* QTMailWindow::currentWidget() const
+{
+    return views->currentWidget();
 }
 
 QTMailWindow* QTMailWindow::singleton()

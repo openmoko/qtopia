@@ -48,6 +48,7 @@
 <li><div class="fn"/>virtual bool <b><a href="qappointmentmodel.html#removeRecord">removeRecord</a></b> ( const QUniqueId &amp; <i>identifier</i> )</li>
 <li><div class="fn"/>QUniqueId <b><a href="qappointmentmodel.html#replaceOccurrence">replaceOccurrence</a></b> ( const QAppointment &amp; <i>appointment</i>, const QOccurrence &amp; <i>occurrence</i>, const QDate &amp; <i>date</i> = QDate() )</li>
 <li><div class="fn"/>QUniqueId <b><a href="qappointmentmodel.html#replaceRemaining">replaceRemaining</a></b> ( const QAppointment &amp; <i>appointment</i>, const QAppointment &amp; <i>replacement</i>, const QDate &amp; <i>date</i> = QDate() )</li>
+<li><div class="fn"/>bool <b><a href="qappointmentmodel.html#restoreOccurrence">restoreOccurrence</a></b> ( const QUniqueId &amp; <i>identifier</i>, const QDate &amp; <i>date</i> )</li>
 <li><div class="fn"/>virtual bool <b><a href="qappointmentmodel.html#setData">setData</a></b> ( const QModelIndex &amp; <i>index</i>, const QVariant &amp; <i>value</i>, int <i>role</i> )</li>
 <li><div class="fn"/>void <b><a href="qappointmentmodel.html#setDurationType">setDurationType</a></b> ( DurationType <i>type</i> )</li>
 <li><div class="fn"/>void <b><a href="qappointmentmodel.html#setRange">setRange</a></b> ( const QDateTime &amp; <i>start</i>, const QDateTime &amp; <i>end</i> )</li>
@@ -55,7 +56,7 @@
 <li><div class="fn"/>virtual bool <b><a href="qappointmentmodel.html#updateRecord">updateRecord</a></b> ( const QUniqueId &amp; <i>id</i>, const QByteArray &amp; <i>bytes</i>, const QString &amp; <i>format</i> = QString() )</li>
 </ul>
 <ul>
-<li><div class="fn"/>31 public functions inherited from <a href="qpimmodel.html#public-functions">QPimModel</a></li>
+<li><div class="fn"/>32 public functions inherited from <a href="qpimmodel.html#public-functions">QPimModel</a></li>
 <li><div class="fn"/>34 public functions inherited from <a href="qabstractitemmodel.html#public-functions">QAbstractItemModel</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
@@ -79,7 +80,6 @@
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>14 signals inherited from <a href="qabstractitemmodel.html#signals">QAbstractItemModel</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qabstractitemmodel.html#public-variables">QAbstractItemModel</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>15 protected functions inherited from <a href="qabstractitemmodel.html#protected-functions">QAbstractItemModel</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
@@ -94,7 +94,7 @@
 <p>The appointment model is a descendant of <a href="qabstractitemmodel.html">QAbstractItemModel</a>, so it is suitable for use with the Qt View classes such as <a href="qlistview.html">QListView</a> and <a href="qtableview.html">QTableView</a>, as well as any custom views.</p>
 <p>The appointment model provides functions for sorting and some filtering of items. For filters or sorting that is not provided by the appointment model it is recommended that <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a> is used to wrap the appointment model.</p>
 <p>A QAppointmentModel instance will also reflect changes made in other instances of QAppointmentModel, both within this application and from other applications. This will result in the <a href="qabstractitemmodel.html#modelReset">modelReset</a>() signal being emitted.</p>
-<p>See also <a href="qappointment.html">QAppointment</a> and <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a>.</p>
+<p>See also <a href="qappointment.html">QAppointment</a>, <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a>, and <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="DurationType-enum"></a>enum QAppointmentModel::DurationType</h3>
@@ -221,6 +221,9 @@
 <h3 class="fn"><a name="replaceRemaining"></a><a href="quniqueid.html">QUniqueId</a> QAppointmentModel::replaceRemaining ( const <a href="qappointment.html">QAppointment</a> &amp; <i>appointment</i>, const <a href="qappointment.html">QAppointment</a> &amp; <i>replacement</i>, const <a href="qdate.html">QDate</a> &amp; <i>date</i> = QDate() )</h3>
 <p>Updates the appointment in the model with the same identifier as the specified <i>appointment</i> to no longer repeat on or after the specified <i>date</i>. If the specified date is null, the start date of the <i>replacement</i> will be used. The <i>replacement</i> appointment will be added to the model.</p>
 <p>Returns a valid identifier for the replacement appointment if the model was successfully modified. Otherwise returns a null identifier.</p>
+<h3 class="fn"><a name="restoreOccurrence"></a>bool QAppointmentModel::restoreOccurrence ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i>, const <a href="qdate.html">QDate</a> &amp; <i>date</i> )</h3>
+<p>If an recurring appointment in the model with the specified <i>identifier</i> has an exception listed for the given <i>date</i>, restores the original occurrence for that date. If the exception included a replacement appointment will also remove the replacement.</p>
+<p>Returns true if the appointment was successfully updated.</p>
 <h3 class="fn"><a name="setAppointmentField"></a>bool QAppointmentModel::setAppointmentField ( <a href="qappointment.html">QAppointment</a> &amp; <i>appointment</i>, <a href="qappointmentmodel.html#Field-enum">QAppointmentModel::Field</a> <i>field</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets the value for the specified <i>field</i> of the given <i>appointment</i> to <i>value</i>.</p>
 <p>Returns true if the appointment was modified.</p>
@@ -247,6 +250,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

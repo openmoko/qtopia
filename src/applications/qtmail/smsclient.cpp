@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,33 +22,28 @@
 
 #ifndef QTOPIA_NO_SMS
 #include "smsclient.h"
-#include "emailhandler.h"
 #include "smsdecoder.h"
-#include "email.h"
-#include "common.h"
+#include "account.h"
 
 #include <qtopia/pim/qphonenumber.h>
 #include <qsmsreader.h>
 #include <qsmsmessage.h>
 #include <qsmssender.h>
-#include <qtopia/mail/mailmessage.h>
+#include <qtopia/mail/qmailaddress.h>
+#include <qtopia/mail/qmailmessage.h>
+#include <qtopia/mail/qmailtimestamp.h>
 #include <qregexp.h>
+#include <qtopialog.h>
+#include <QSettings>
 
 QRegExp* SmsClient::sSmsAddress = 0;
 QRegExp* SmsClient::sValidSmsAddress = 0;
-
-QString SmsClient::vCardPrefix()
-{
-    static QString prefix("//qtmail-smsvcard "); //no tr
-    return prefix;
-}
 
 SmsClient::SmsClient()
 {
     req = new QSMSReader( QString(), this );
     smsFetching = false;
     smsSending = false;
-    req->check();
     total = 0;
     count = 0;
     success = false;
@@ -61,15 +56,16 @@ SmsClient::SmsClient()
       sValidSmsAddress = new QRegExp( "^[\\+\\*#\\d\\-\\(\\)\\s]*$");
 
     sender = new QSMSSender( QString(), this );
-    connect( sender, SIGNAL(finished(const QString&,QTelephony::Result)),
-             this, SLOT(finished(const QString&,QTelephony::Result)) );
+    connect( sender, SIGNAL(finished(QString,QTelephony::Result)),
+             this, SLOT(finished(QString,QTelephony::Result)) );
 
     simInfo = new QSimInfo( QString(), this );
 
-    connect( req, SIGNAL(messageCount( int )),
-             this, SLOT(messageCount( int )) );
-    connect( req, SIGNAL(fetched( const QString&, const QSMSMessage& )),
-             this, SLOT(fetched( const QString&, const QSMSMessage& )) );
+    connect( req, SIGNAL(messageCount(int)),
+             this, SLOT(messageCount(int)) );
+    connect( req, SIGNAL(fetched(QString,QSMSMessage)),
+             this, SLOT(fetched(QString,QSMSMessage)) );
+    req->check();
 }
 
 SmsClient::~SmsClient()
@@ -97,21 +93,21 @@ void SmsClient::newConnection()
     for ( rawMsg = smsList.begin(); rawMsg != smsList.end(); rawMsg++) {
         QSMSMessage msg;
 
-    //check for vcard over sms
-    QString prelude = rawMsg->body.left(vCardPrefix().length());
-    if(prelude == vCardPrefix())
-    {
-        QString vcardData = rawMsg->body.right(rawMsg->body.length()-prelude.length());
-        //restore CR's stripped by composer
-        vcardData.replace("\n","\r\n");
-        msg.setApplicationData(vcardData.toLatin1());
-        msg.setDestinationPort(9204);
-    }
-    else
-        msg.setText( rawMsg->body );
+        //check for vcard over sms
+        if (rawMsg->mimetype == QLatin1String("text/x-vCard")) {
+            QString vcardData = rawMsg->body;
+            //restore CR's stripped by composer
+            vcardData.replace("\n","\r\n");
+            msg.setApplicationData(vcardData.toLatin1());
+            msg.setDestinationPort(9204);
+        } else {
+            msg.setText( rawMsg->body );
+        }
 
         msg.setRecipient( rawMsg->number );
-        sender->send( msg );
+
+        QString smsKey = sender->send( msg );
+        sentMessages.insert( smsKey, *rawMsg );
         ++total;
     }
     success = true;
@@ -124,54 +120,56 @@ int SmsClient::unreceivedSmsCount()
     return req->unreadList().count();
 }
 
+int SmsClient::unreadSmsCount()
+{
+    return req->unreadCount();
+}
+
 bool SmsClient::readyToDelete()
 {
     return req->ready();
 }
 
-int SmsClient::addMail(Email* mail)
+bool SmsClient::addMail(const QMailMessage& mail)
 {
-    QString from,name,email;
-    int msgSize = 0;
-
-    QStringList recipients = mail->to() + mail->cc() + mail->bcc();
-    QStringList smsRecipients = separateSmsAddresses(recipients);
+    QList<QMailAddress> smsRecipients = separateSmsAddresses(mail.recipients());
     Q_ASSERT(smsRecipients.count() > 0);
 
-    QString smsBody = formatOutgoing(mail->subject(),mail->plainTextBody());
+    QString smsBody = formatOutgoing(mail.subject(),mail.body().data());
 
-    for(QStringList::Iterator it = smsRecipients.begin();
-        it != smsRecipients.end(); it++)
+    foreach (const QMailAddress& recipient, smsRecipients)
     {
-        if(smsAddress(*it))
+        if(smsAddress(recipient))
         {
-            if(!validSmsAddress(*it))
+            if(!validSmsAddress(recipient))
             {
-                QString temp = "<qt>" + tr("Invalid sms recipient specified for\n "
+                QString temp = "<qt>" + tr("Invalid SMS recipient specified for\n "
                    "mail with subject:\n%1\n"
                    "NO mail has been sent.")
-                .arg( mail->subject() ) + "</qt>";
+                .arg( mail.subject() ) + "</qt>";
 
                 emit errorOccurred(0,temp);
-                return -1;
+                return false;
             }
+            else
             {
                 //address is valid, queue for sending
+
                 // Extract the phone number from the e-mail address.
-                from = *it;
-                MailMessage::parseEmailAddress( from, name, email );
-                if ( email.length() > 4 && email.right(4) == "@sms" ) {
-                    email = email.left( email.length() - 4 );
-                }
                 RawSms msg;
-                msg.number = QPhoneNumber::resolveLetters( email );
+                msg.msgId = mail.id();
+                msg.number = QPhoneNumber::resolveLetters( recipient.address() );
                 msg.body = smsBody;
-                msgSize += smsBody.length();
+                if (mail.contentType().content().toLower() == "text/x-vcard")
+                    msg.mimetype = QLatin1String("text/x-vCard");
+                else
+                    msg.mimetype = QLatin1String("text/plain");
                 smsList.append( msg );
             }
         }
     }
-    return msgSize;
+
+    return true;
 }
 
 void SmsClient::clearList()
@@ -179,38 +177,23 @@ void SmsClient::clearList()
     smsList.clear();
 }
 
-bool SmsClient::smsAddress(const QString& str )
+bool SmsClient::smsAddress( const QMailAddress& fromAddress )
 {
-    QString from, name, email;
-    from = str;
-    MailMessage::parseEmailAddress( from, name, email );
-    return sSmsAddress->indexIn( email ) != -1;
+    return sSmsAddress->indexIn( fromAddress.address() ) != -1;
 }
 
-bool SmsClient::validSmsAddress(const QString& str )
+bool SmsClient::validSmsAddress( const QMailAddress& fromAddress )
 {
-    QString from, name, email;
-    from = str;
-    MailMessage::parseEmailAddress( from, name, email );
-    return sValidSmsAddress->indexIn( email ) != -1;
+    return sValidSmsAddress->indexIn( fromAddress.address() ) != -1;
 }
 
-QStringList SmsClient::separateSmsAddresses( QStringList &addresses )
+QList<QMailAddress> SmsClient::separateSmsAddresses( const QList<QMailAddress> &addresses )
 {
-    QStringList validSms;
-    QStringList::Iterator it = addresses.begin();
-    while( it != addresses.end() )
-    {
-        if( validSmsAddress( *it ) )
-        {
-            validSms.append( *it );
-            it = addresses.erase( it );
-        }
-        else
-        {
-            ++it;
-        }
-    }
+    QList<QMailAddress> validSms;
+    foreach (const QMailAddress& address, addresses)
+        if (validSmsAddress( address ) )
+            validSms.append( address );
+
     return validSms;
 }
 
@@ -220,23 +203,34 @@ void SmsClient::errorHandling(int id, QString msg)
         emit errorOccurred(id, msg);
 }
 
-void SmsClient::mailRead(Email *mail)
+void SmsClient::mailRead(const QMailMessage& mail)
 {
     Q_UNUSED(mail)
     // Tell phone library mail has been read
     // req->markMessageReadMethod( mail->serverUid() );
 }
 
-void SmsClient::finished( const QString &, QTelephony::Result result )
+void SmsClient::finished( const QString& id, QTelephony::Result result )
 {
+    QMap<QString, RawSms>::iterator it = sentMessages.find(id);
+    if (it != sentMessages.end()) {
+        // Report this message back as 'processed', whether transmission succeeded or not
+        emit messageProcessed(it->msgId);
+
+        sentMessages.erase(it);
+    } else {
+        qWarning() << "SMS: Cannot process unknown message:" << id;
+    }
+
     if ( result != QTelephony::OK )
         success = false;
+
     ++count;
     if ( count >= total ) {
         if ( success )
             emit mailSent( count );
         else
-            emit mailSent( -1 );
+            emit transmissionCompleted();
     }
 }
 
@@ -257,6 +251,9 @@ void SmsClient::messageCount( int count )
         // we can force another check to happen at the end of the fetch.
         sawNewMessage = true;
 
+    } else if ( count == 0 ) {
+
+        emit allMessagesReceived();
     }
 }
 
@@ -368,9 +365,8 @@ void SmsClient::deleteImmediately(const QString& serverUid)
         activeIds.removeAt( idx );
         timeStamps.removeAt( idx );
     }
-        
+
     // activeIds.removeAll( serverUid );
-    
 }
 
 void SmsClient::resetNewMailCount()
@@ -381,8 +377,7 @@ void SmsClient::resetNewMailCount()
 void SmsClient::fetched( const QString& id, const QSMSMessage& message )
 {
     if (!id.isEmpty()) {
-        MailMessage mail;
-        QString mailStr;
+        QMailMessage mail;
         QString subject;
         QString body;
         int part;
@@ -419,15 +414,14 @@ void SmsClient::fetched( const QString& id, const QSMSMessage& message )
             account->setUidlList( list );
         }
         mail.setServerUid( identity );
-        
 
         // If the sender is not set, but the recipient is, then this
         // is probably an outgoing message that was reflected back
         // by the phone simulator.
         if( !message.sender().isEmpty() )
-            mail.setFrom( message.sender() + "@sms" );
+            mail.setHeaderField( "From", message.sender() );
         else if( !message.recipient().isEmpty() )
-            mail.setFrom( message.recipient() + "@sms" );
+            mail.setHeaderField( "From", message.recipient() );
 
         // Extract the subject and body.
         extractSubjectAndBody( message.text(), subject, body );
@@ -445,48 +439,51 @@ void SmsClient::fetched( const QString& id, const QSMSMessage& message )
             }
         }
         if( !hasAttachments ) {
-            // Set the plaintext body (MailMessage will encode as UTF-8).
-            mail.setPlainTextBody( body );
+            QMailMessageContentType type("text/plain; charset=UTF-8");
+            mail.setBody( QMailMessageBody::fromData( body, type, QMailMessageBody::Base64 ) );
         } else {
             SMSDecoder::formatMessage( mail, message );
         }
 
         // Set the reception date.
         QDateTime date = message.timestamp();
-        if (date.isValid())
-            mail.setDateTime( date );
-        else
-            mail.setDateTime( QDateTime::currentDateTime() );
+        if (!date.isValid())
+            date = QDateTime::currentDateTime();
+        mail.setDate( QMailTimeStamp( date ) );
 
-        // Synthesize some other headers that MailMessage::encodeMail can't do.
-        mailStr = "X-Sms-Type: ";
+        // Synthesize some other headers
+        QString smsType;
         switch(message.messageType()) {
             case QSMSMessage::Normal:
-                mailStr += "normal\n"; break;
+                smsType = "normal"; break;
             case QSMSMessage::CellBroadCast:
-                mailStr += "broadcast\n"; break;
+                smsType = "broadcast"; break;
             case QSMSMessage::StatusReport:
-                mailStr += "status-report\n"; break;
+                smsType = "status-report"; break;
             default:
-                mailStr += "unknown\n"; break;
+                smsType = "unknown"; break;
         }
-        mailStr += "Mime-Version: 1.0\n";
-        if ( !hasAttachments )
-            mailStr += "Content-Type: text/plain; charset=utf-8\n";
+        mail.setHeaderField( "X-Sms-Type", smsType );
 
-        // Create the final message.
-        mail.encodeMail();
-        mailStr += mail.toRFC822();
+        QMailId id;
+        mail.setId( id );
 
-        Email newMail(mail);
-        QUuid id;
-        createMail(newMail,mailStr,identity,id,mailStr.length());
-        emit newMessage(newMail);
+        mail.setStatus( QMailMessage::Incoming, true);
+        mail.setStatus( QMailMessage::Downloaded, true);
+        mail.setFromAccount( account->id() );
+        mail.setFromMailbox( "" );
+        mail.setMessageType( QMailMessage::Sms );
 
+        // Is this necessary?
+        QByteArray mailStr = mail.toRfc2822();
+        mail.setSize( mailStr.length() );
+
+        emit newMessage(mail);
+        
         // If the "deleteMail" flag is set, then delete the message
         // from the SIM immediately, rather than waiting for later.
         if ( account && account->deleteMail() )
-            deleteImmediately( id );
+            deleteImmediately( QString::number(id.toULongLong()) );
 
         req->nextMessage();
 
@@ -499,6 +496,8 @@ void SmsClient::fetched( const QString& id, const QSMSMessage& message )
             req->check();
             return;
         }
+
+        emit allMessagesReceived();
 
         // Make sure there are always 5 free slots on the SIM card
         // so there is enough space for the reception of new messages.
@@ -539,27 +538,14 @@ void SmsClient::simIdentityChanged()
 void SmsClient::smsReadyChanged()
 {
     // Force a message check if the sim has just become ready.
+    checkForNewMessages();
+}
+
+void SmsClient::checkForNewMessages()
+{
     if ( req->ready() ) {
         req->check();
     }
 }
 
-void SmsClient::createMail(Email& mail, QString& message, QString& id, QUuid& internalId, uint size)
-{
-    mail.setStatus(EFlag_Incoming, true );
-    mail.setUuid( internalId );
-
-    QString str = message;
-    QtMail::replace(str, QString::fromLatin1( "\r\n" ), QString::fromLatin1( "\n" ) );
-    mail.fromRFC822( str );
-
-    mail.setSize( size );
-    mail.setStatus(EFlag_Downloaded, true);
-    mail.setServerUid( id.mid( id.indexOf(" ") + 1, id.length() ) );
-
-    mail.setServerUid(id);
-    mail.setFromAccount( account->id() );
-    mail.setType(MailMessage::SMS);
-    mail.setFromMailbox("");
-}
 #endif //QTOPIA_NO_SMS

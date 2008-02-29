@@ -1,15 +1,12 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>CertificateOpenVPNBase</class>
  <widget class="QWidget" name="CertificateOpenVPNBase" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>202</width>
-    <height>409</height>
+    <width>384</width>
+    <height>659</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -20,67 +17,44 @@
     <number>4</number>
    </property>
    <property name="spacing" >
-    <number>5</number>
+    <number>6</number>
    </property>
    <item>
-    <widget class="QLabel" name="label" >
+    <widget class="QLabel" name="label_9" >
      <property name="text" >
       <string>Authentication mode:</string>
+     </property>
+     <property name="buddy" >
+      <cstring>authentication</cstring>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
+    <widget class="QComboBox" name="authentication" >
      <item>
-      <spacer>
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" >
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+      <property name="text" >
+       <string>None</string>
+      </property>
      </item>
      <item>
-      <widget class="QComboBox" name="authentication" >
-       <item>
-        <property name="text" >
-         <string>None</string>
-        </property>
-       </item>
-       <item>
-        <property name="text" >
-         <string>Static key</string>
-        </property>
-       </item>
-       <item>
-        <property name="text" >
-         <string>SSL/TLS</string>
-        </property>
-       </item>
-      </widget>
+      <property name="text" >
+       <string>Static key</string>
+      </property>
      </item>
-    </layout>
+     <item>
+      <property name="text" >
+       <string>SSL/TLS</string>
+      </property>
+     </item>
+    </widget>
    </item>
    <item>
     <widget class="QFrame" name="secretFrame" >
      <property name="frameShape" >
-      <enum>QFrame::Box</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow" >
-      <enum>QFrame::Raised</enum>
-     </property>
-     <property name="lineWidth" >
-      <number>0</number>
+      <enum>QFrame::Plain</enum>
      </property>
      <layout class="QVBoxLayout" >
       <property name="margin" >
@@ -98,44 +72,41 @@
          <number>6</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_2" >
+         <widget class="QLabel" name="label" >
           <property name="text" >
            <string>Secret:</string>
+          </property>
+          <property name="wordWrap" >
+           <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="secretKey" >
-          <property name="sizePolicy" >
-           <sizepolicy>
-            <hsizetype>13</hsizetype>
-            <vsizetype>0</vsizetype>
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>0</number>
           </property>
-          <property name="text" >
-           <string>Select...</string>
+          <property name="spacing" >
+           <number>0</number>
           </property>
-         </widget>
+          <item>
+           <widget class="QToolButton" name="secretKey" >
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
       <item>
        <widget class="QLabel" name="secretLabel" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>5</hsizetype>
-          <vsizetype>7</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>1</verstretch>
-         </sizepolicy>
-        </property>
         <property name="text" >
          <string/>
         </property>
         <property name="alignment" >
-         <set>Qt::AlignHCenter|Qt::AlignTop</set>
+         <set>Qt::AlignCenter</set>
         </property>
         <property name="wordWrap" >
          <bool>true</bool>
@@ -147,21 +118,12 @@
    </item>
    <item>
     <widget class="QFrame" name="certFrame" >
-     <property name="frameShape" >
-      <enum>QFrame::Box</enum>
-     </property>
-     <property name="frameShadow" >
-      <enum>QFrame::Raised</enum>
-     </property>
-     <property name="lineWidth" >
-      <number>0</number>
-     </property>
      <layout class="QVBoxLayout" >
       <property name="margin" >
        <number>0</number>
       </property>
       <property name="spacing" >
-       <number>5</number>
+       <number>0</number>
       </property>
       <item>
        <layout class="QHBoxLayout" >
@@ -169,10 +131,18 @@
          <number>0</number>
         </property>
         <property name="spacing" >
-         <number>6</number>
+         <number>1</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_3" >
+         <widget class="QLabel" name="label_4" >
+          <property name="sizePolicy" >
+           <sizepolicy>
+            <hsizetype>5</hsizetype>
+            <vsizetype>5</vsizetype>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text" >
            <string>Certificate:</string>
           </property>
@@ -182,46 +152,148 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="certKey" >
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>0</number>
+          </property>
+          <property name="spacing" >
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QToolButton" name="certKey" >
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>20</width>
+              <height>5</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="certLabel" >
+          <property name="text" >
+           <string/>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="wordWrap" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>2</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="Line" name="line_4" >
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_10" >
           <property name="sizePolicy" >
            <sizepolicy>
             <hsizetype>5</hsizetype>
-            <vsizetype>7</vsizetype>
+            <vsizetype>5</vsizetype>
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="text" >
-           <string>Select...</string>
+           <string>Private Key:</string>
+          </property>
+          <property name="wordWrap" >
+           <bool>true</bool>
           </property>
          </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>0</number>
+          </property>
+          <property name="spacing" >
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QToolButton" name="privKey" >
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>20</width>
+              <height>5</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
       <item>
-       <widget class="QLabel" name="certLabel" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>5</hsizetype>
-          <vsizetype>7</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>1</verstretch>
-         </sizepolicy>
-        </property>
+       <widget class="QLabel" name="privLabel" >
         <property name="text" >
          <string/>
         </property>
-        <property name="textFormat" >
-         <enum>Qt::RichText</enum>
-        </property>
         <property name="alignment" >
-         <set>Qt::AlignHCenter|Qt::AlignTop</set>
+         <set>Qt::AlignCenter</set>
         </property>
         <property name="wordWrap" >
          <bool>true</bool>
-        </property>
-        <property name="margin" >
-         <number>0</number>
         </property>
        </widget>
       </item>
@@ -241,116 +313,68 @@
          <number>6</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_4" >
-          <property name="text" >
-           <string>Private Key:</string>
-          </property>
-          <property name="wordWrap" >
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="privKey" >
+         <widget class="QLabel" name="label_5" >
           <property name="sizePolicy" >
            <sizepolicy>
             <hsizetype>5</hsizetype>
-            <vsizetype>0</vsizetype>
+            <vsizetype>5</vsizetype>
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="text" >
-           <string>Select...</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QLabel" name="privLabel" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>5</hsizetype>
-          <vsizetype>7</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>1</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-        <property name="textFormat" >
-         <enum>Qt::RichText</enum>
-        </property>
-        <property name="alignment" >
-         <set>Qt::AlignHCenter|Qt::AlignTop</set>
-        </property>
-        <property name="wordWrap" >
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_2" >
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" >
-        <property name="margin" >
-         <number>0</number>
-        </property>
-        <property name="spacing" >
-         <number>6</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_5" >
           <property name="text" >
            <string>CA:</string>
           </property>
+          <property name="textFormat" >
+           <enum>Qt::RichText</enum>
+          </property>
           <property name="wordWrap" >
            <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="caKey" >
-          <property name="sizePolicy" >
-           <sizepolicy>
-            <hsizetype>5</hsizetype>
-            <vsizetype>0</vsizetype>
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>0</number>
           </property>
-          <property name="text" >
-           <string>Select...</string>
+          <property name="spacing" >
+           <number>0</number>
           </property>
-         </widget>
+          <item>
+           <widget class="QToolButton" name="caKey" >
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType" >
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
       <item>
        <widget class="QLabel" name="caLabel" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>5</hsizetype>
-          <vsizetype>7</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>1</verstretch>
-         </sizepolicy>
-        </property>
         <property name="text" >
          <string/>
         </property>
-        <property name="textFormat" >
-         <enum>Qt::RichText</enum>
-        </property>
         <property name="alignment" >
-         <set>Qt::AlignHCenter|Qt::AlignTop</set>
+         <set>Qt::AlignCenter</set>
         </property>
         <property name="wordWrap" >
          <bool>true</bool>
@@ -373,7 +397,15 @@
          <number>6</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_6" >
+         <widget class="QLabel" name="label_7" >
+          <property name="sizePolicy" >
+           <sizepolicy>
+            <hsizetype>5</hsizetype>
+            <vsizetype>5</vsizetype>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text" >
            <string>TLS auth:</string>
           </property>
@@ -383,40 +415,44 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="authKey" >
-          <property name="sizePolicy" >
-           <sizepolicy>
-            <hsizetype>5</hsizetype>
-            <vsizetype>0</vsizetype>
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>0</number>
           </property>
-          <property name="text" >
-           <string>Select...</string>
+          <property name="spacing" >
+           <number>0</number>
           </property>
-         </widget>
+          <item>
+           <widget class="QToolButton" name="authKey" >
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>20</width>
+              <height>5</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
       <item>
        <widget class="QLabel" name="authLabel" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>5</hsizetype>
-          <vsizetype>7</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>1</verstretch>
-         </sizepolicy>
-        </property>
         <property name="text" >
          <string/>
         </property>
-        <property name="textFormat" >
-         <enum>Qt::RichText</enum>
-        </property>
         <property name="alignment" >
-         <set>Qt::AlignHCenter|Qt::AlignTop</set>
+         <set>Qt::AlignCenter</set>
         </property>
         <property name="wordWrap" >
          <bool>true</bool>
@@ -441,15 +477,6 @@
    </item>
   </layout>
  </widget>
- <pixmapfunction></pixmapfunction>
- <tabstops>
-  <tabstop>authentication</tabstop>
-  <tabstop>secretKey</tabstop>
-  <tabstop>certKey</tabstop>
-  <tabstop>privKey</tabstop>
-  <tabstop>caKey</tabstop>
-  <tabstop>authKey</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,6 +24,8 @@
 
 #include <qtopiaglobal.h>
 
+#include <qtopialog.h>
+
 ExampleMouseDriverPlugin::ExampleMouseDriverPlugin( QObject *parent )
     : QMouseDriverPlugin( parent )
 {
@@ -33,16 +35,19 @@ ExampleMouseDriverPlugin::~ExampleMouseDriverPlugin()
 {
 }
 
-QWSMouseHandler* ExampleMouseDriverPlugin::create(const QString& driver, const QString&)
+QWSMouseHandler* ExampleMouseDriverPlugin::create(const QString& driver, const QString& device)
 {
-    qWarning("ExampleMouseDriverPlugin:create()");
-    return create( driver );
+    if ( driver.toLower() == "examplemousehandler" ) {
+        qLog(Input) << "Before call ExampleMouseHandler()";
+        return new ExampleMouseHandler(device);
+    }
+    return 0;
 }
 
-QWSMouseHandler* ExampleMouseDriverPlugin::create( const QString& driver)
+QWSMouseHandler* ExampleMouseDriverPlugin::create(const QString& driver)
 {
     if( driver.toLower() == "examplemousehandler" ) {
-        qWarning("Before call ExampleMouseHandler()");
+        qLog(Input) << "Before call ExampleMouseHandler()";
         return new ExampleMouseHandler();
     }
     return 0;
@@ -50,7 +55,7 @@ QWSMouseHandler* ExampleMouseDriverPlugin::create( const QString& driver)
 
 QStringList ExampleMouseDriverPlugin::keys() const
 {
-    return QStringList() << "examplemousehandler" << "example_ts";
+    return QStringList() << "examplemousehandler";
 }
 
 QTOPIA_EXPORT_QT_PLUGIN(ExampleMouseDriverPlugin)

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -115,6 +130,18 @@ Q3TitleBar::Q3TitleBar(QWidget *w, QWidget *parent, Qt::WindowFlags f)
     setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
     setMouseTracking(true);
     setAutoRaise(style()->styleHint(QStyle::SH_TitleBar_AutoRaise, 0, this));
+}
+
+void Q3TitleBar::setFakeWindowFlags(Qt::WindowFlags f)
+{
+    Q_D(Q3TitleBar);
+    d->flags = f;
+}
+
+Qt::WindowFlags Q3TitleBar::fakeWindowFlags() const
+{
+    Q_D(const Q3TitleBar);
+    return d->flags;
 }
 
 Q3TitleBar::~Q3TitleBar()
@@ -440,17 +467,23 @@ void Q3TitleBar::paintEvent(QPaintEvent *)
         if (d->window && (d->flags & Qt::WindowMaximizeButtonHint) && !d->window->isMaximized())
             opt.subControls |= QStyle::SC_TitleBarMaxButton;
     }
-
     QStyle::SubControl under_mouse = QStyle::SC_None;
-    if(autoRaise() && underMouse()) {
+    
+    if (underMouse()) {
         under_mouse = style()->hitTestComplexControl(QStyle::CC_TitleBar, &opt,
                                                      mapFromGlobal(QCursor::pos()), this);
         opt.activeSubControls |= under_mouse;
-        opt.state |= QStyle::State_MouseOver;
+        if (d->pressed)
+            opt.state |= QStyle::State_Sunken;
+        else if(autoRaise())
+            opt.state |= QStyle::State_MouseOver;
     }
+    
     opt.palette.setCurrentColorGroup(usesActiveColor() ? QPalette::Active : QPalette::Inactive);
 
     QPainter p(this);
+    if (!windowTitle().isEmpty())
+        opt.titleBarFlags |= Qt::WindowTitleHint;
     style()->drawComplexControl(QStyle::CC_TitleBar, &opt, &p, this);
 }
 
@@ -491,16 +524,16 @@ void Q3TitleBar::cutText()
     QString txt = d->window->windowTitle();
     if (style()->styleHint(QStyle::SH_TitleBar_ModifyNotification, 0, this) && d->window
         && d->window->isWindowModified())
-        txt += " *";
+        txt += QLatin1String(" *");
 
     QString cuttext = txt;
-    if (fm.width(txt + "m") > maxw) {
+    if (fm.width(txt + QLatin1Char('m')) > maxw) {
         int i = txt.length();
-        int dotlength = fm.width("...");
+        int dotlength = fm.width(QLatin1String("..."));
         while (i>0 && fm.width(txt.left(i)) + dotlength > maxw)
             i--;
         if(i != (int)txt.length())
-            cuttext = txt.left(i) + "...";
+            cuttext = txt.left(i) + QLatin1String("...");
     }
 
     setWindowTitle(cuttext);

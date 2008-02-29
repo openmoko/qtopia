@@ -38,6 +38,7 @@
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>1 static public member inherited from <a href="qtopiapowermanager.html#static-public-members">QtopiaPowerManager</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 protected function inherited from <a href="qtopiapowermanager.html#protected-functions">QtopiaPowerManager</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 <li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
@@ -46,8 +47,8 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The PhonePowerManager class implements phone specific power management functionality in Qtopia.</p>
-<p>This manager uses three levels for power management. The first level dims the background light, the second level turns the light off and the last level returns the phone to the homescreen.</p>
-<p>The PhonePowerManager class provides the <tt>PhonePowerManager</tt> task.</p>
+<p>This manager uses three levels for power management. The first level dims the background light, the second level turns the light off and the last level suspends the device.</p>
+<p>The PhonePowerManager class provides the <tt>PhonePowerManager</tt> task. It is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <p>See also <a href="qtopiapowermanager.html">QtopiaPowerManager</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -56,21 +57,21 @@
 <h3 class="fn"><a name="dtor.PhonePowerManager"></a>PhonePowerManager::~PhonePowerManager ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="phonepowermanager.html">PhonePowerManager</a> instance</p>
 <h3 class="fn"><a name="save"></a>bool PhonePowerManager::save ( int <i>level</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>This function activates the appropriate actions for the given screensaver <i>level</i>.</p>
+<p>This function activates the appropriate actions for the given power management <i>level</i>.</p>
 <p>Reimplemented from <a href="qwsscreensaver.html#save">QWSScreenSaver</a>.</p>
 <h3 class="fn"><a name="setIntervals"></a>void PhonePowerManager::setIntervals ( int * <i>ivals</i>, int <i>size</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>This function sets the internal screensaver timeouts to the values passed in <i>ivals</i>. <i>size</i> determines the number of entries in <i>ivals</i>.</p>
-<p>The phone screensaver maps the timeouts to the following actions:</p>
+<p>This function sets the power management internal timeouts to the values passed in <i>ivals</i>. <i>size</i> determines the number of entries in <i>ivals</i>.</p>
+<p>The phone power manager maps the timeouts to the following actions:</p>
 <ul>
 <li>0 -&gt; dim light</li>
 <li>1 -&gt; turn off light</li>
-<li>3 -&gt; show HomeScreen</li>
+<li>2 -&gt; suspend device</li>
 </ul>
 <p>Reimplemented from <a href="qtopiapowermanager.html#setIntervals">QtopiaPowerManager</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

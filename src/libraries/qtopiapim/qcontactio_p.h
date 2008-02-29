@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,17 @@
 
 #ifndef CONTACTIO_PRIVATE_H
 #define CONTACTIO_PRIVATE_H
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 #include <QVector>
 #include <QList>
@@ -52,12 +63,16 @@ public:
     static QList<QVariant> format(int);
 
     static QString formattedLabel(const QContact &);
+    virtual QString formattedLabel(int row);
 
     virtual void setSortKey(QContactModel::Field k) = 0;
     virtual QContactModel::Field sortKey() const = 0;
 
     virtual QContact contact(const QUniqueId &) const = 0;
     virtual QContact contact(int row) const = 0;
+
+    virtual QContact simpleContact(int row) const
+    { return contact(row); }
 
     virtual QVariant contactField(int row, QContactModel::Field k) const;
     virtual bool setContactField(int row, QContactModel::Field k,  const QVariant &);
@@ -75,6 +90,7 @@ public:
     virtual void setFilter(const QString &, int) = 0;
     virtual void clearFilter() = 0;
 
+    virtual QUniqueId matchEmailAddress(const QString &, int &) const;
 #ifdef QTOPIA_PHONE
     virtual QUniqueId matchPhoneNumber(const QString &, int &) const;
 

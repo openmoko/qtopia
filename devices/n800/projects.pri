@@ -1,0 +1,9 @@
+PROJECTS-=\
+    settings/beaming
+PROJECTS*=\
+    3rdparty/tools/atd\
+    3rdparty/applications/target_sqlite\
+    tools/startupflags
+PROJECTS*=\
+    tools/phonebounce
+PROJECTS-=libraries/qtopiatest

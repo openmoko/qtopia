@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,324 +20,46 @@
 ****************************************************************************/
 
 #include "entrydialog.h"
-#include "repeatentry.h"
-#include "appointmentdetails.h"
+#include "datebookcategoryselector.h"
+#include "../todo/qtopiatabwidget.h"
 
 #include <qtopiaapplication.h>
-#include <qcategoryselector.h>
-
-#include <qtimestring.h>
-#include <qtimezonewidget.h>
-#if !defined(QTOPIA_PHONE)
-#include <pixmapdisplay.h>
-#endif
-
-#ifdef QTOPIA_PHONE
-#include <qiconselector.h>
-#endif
+#include <QTimeZoneSelector>
 
 #include <QDL>
 #include <QDLEditClient>
 
-#ifdef QTOPIA_DESKTOP
-#include <worldtimedialog.h>
-#endif
-
-#include <QDebug>
-#include <QCheckBox>
 #include <QStyle>
-#include <QRegExp>
-#include <QComboBox>
 #include <QLayout>
-#include <QLineEdit>
-#include <QSpinBox>
-#include <QToolButton>
-#include <QLabel>
-#include <QLayout>
-#include <QTimer>
 #include <QTextEdit>
 #include <QTabWidget>
+#include <QScrollArea>
+#include <QDateEdit>
+#include <QTimeEdit>
+#include <QCheckBox>
+#include <QFormLayout>
+#include <QLabel>
 #include <QGroupBox>
-#include <QDateTimeEdit>
+#include <QHBoxLayout>
+#include <QLineEdit>
 
-#include <stdlib.h>
+#include "qtopia/qtimezoneselector.h"
 
-
-static bool onceAWeek(const QAppointment &e)
-{
-    int orig = e.start().date().dayOfWeek();
-
-    for (int i = 1; i <= 7; i++) {
-        if (i != orig && e.repeatOnWeekDay(i))
-            return false;
-    }
-    return true;
-}
-
-static void setOnceAWeek( QAppointment &e )
-{
-    int orig = e.start().date().dayOfWeek();
-
-    for (int i = 1; i <= 7; i++) {
-        if (i != orig)
-            e.setRepeatOnWeekDay(i, false);
-    }
-}
-
-static void addOrPick( QComboBox* combo, const QString& t )
-{
-    for (int i=0; i<combo->count(); i++) {
-        if ( combo->itemText(i) == t ) {
-            combo->setCurrentIndex(i);
-            return;
-        }
-    }
-    combo->setEditText(t);
-}
+#include "../todo/reminderpicker.h"
+#include "../todo/recurrencedetails.h"
 
 //------------------------------------------------------------------------------
 
-#ifdef QTOPIA_DESKTOP
-#   define WNDFLAGS f | WStyle_Customize | WStyle_DialogBorder | WStyle_Title
-#else
-#   define WNDFLAGS f
-#endif
-
-EntryDialog::EntryDialog( bool startOnMonday, const QDateTime &start, const QDateTime &end,
+EntryDialog::EntryDialog( bool startOnMonday, const QAppointment &appointment, const QTime& defaultAllDayReminder,
                           QWidget *parent, Qt::WFlags f )
-    : QDialog( parent, WNDFLAGS ), startWeekOnMonday( startOnMonday )
+    : QDialog( parent, f ), mAppointment(appointment), mOrigAppointment( appointment ),
+    startWeekOnMonday( startOnMonday ), allDayReminder(defaultAllDayReminder),
+    comboCategory(0), recurDetails(0), reminderPicker(0), editNote(0),
+    editnoteQC(0), mDescription(0), mLocation(0), checkAllDay(0),
+    startDate(0), endDate(0), startTime(0), endTime(0), startTimeLabel(0),
+    endTimeLabel(0), timezone(0)
 {
     init();
-    setDates(start,end);
-}
-
-EntryDialog::EntryDialog( bool startOnMonday, const QAppointment &appointment,
-                          QWidget *parent, Qt::WFlags f )
-    : QDialog( parent, WNDFLAGS ), mAppointment(appointment), mOrigAppointment( appointment ), startWeekOnMonday( startOnMonday )
-{
-    init();
-    if (mAppointment.timeZone().isValid()) {
-        entry->timezone->setCurrentZone(mAppointment.timeZone().id());
-    }
-
-    setDates(mAppointment.start(),mAppointment.end());
-    entry->comboCategory->selectCategories( mAppointment.categories() );
-    addOrPick( entry->comboDescription, mAppointment.description() );
-    addOrPick( entry->comboLocation, mAppointment.location() );
-    entry->spinAlarm->setValue(mAppointment.alarmDelay());
-    entry->spinAlarm->setEnabled(mAppointment.hasAlarm());
-    if ( mAppointment.hasAlarm() ) {
-        if (mAppointment.alarm() == QAppointment::Audible)
-            entry->comboSound->setCurrentIndex(2);
-        else
-            entry->comboSound->setCurrentIndex(1);
-    } else {
-        entry->comboSound->setCurrentIndex(0);
-    }
-    entry->checkAllDay->setChecked( mAppointment.isAllDay() );
-    if(!mAppointment.notes().isEmpty())
-        editNote->setHtml(mAppointment.notes()); //PlainText(mAppointment.notes());
-
-    if ( mAppointment.hasRepeat() ) {
-        entry->repeatCheck->setEnabled(true);
-        if (mAppointment.frequency() == 1 && mAppointment.repeatRule() == QAppointment::Daily)
-            entry->repeatSelect->setCurrentIndex(1);
-        else if (mAppointment.frequency() == 1 && mAppointment.repeatRule() == QAppointment::Weekly
-                && onceAWeek(mAppointment) )
-            entry->repeatSelect->setCurrentIndex(2);
-        else if (mAppointment.frequency() == 1 && mAppointment.repeatRule() == QAppointment::Yearly)
-            entry->repeatSelect->setCurrentIndex(3);
-        else
-            entry->repeatSelect->setCurrentIndex(4);
-        if (mAppointment.repeatForever()) {
-            // so that when opens, will have view at or close to start date of appointment,
-            entry->repeatCheck->setChecked(false);
-            entry->repeatDate->setDate(mAppointment.start().date());
-        } else {
-            entry->repeatCheck->setChecked(true);
-            entry->repeatDate->setDate(mAppointment.repeatUntil());
-        }
-    } else {
-        entry->repeatSelect->setCurrentIndex(0);
-        entry->repeatCheck->setChecked(false);
-        entry->repeatCheck->setEnabled(false);
-        // so that when opens, will have view at or close to start date of appointment,
-        entry->repeatDate->setDate(mAppointment.start().date());
-    }
-    setRepeatLabel();
-
-    QDL::loadLinks( appointment.customField( QDL::CLIENT_DATA_KEY ),
-                    QDL::clients( this ) );
-    editnoteQC->verifyLinks();
-}
-
-void EntryDialog::setDates( const QDateTime& s, const QDateTime& e )
-{
-    mAppointment.setStart(s);
-    mAppointment.setEnd(e);
-    entry->startTime->setTime(s.time());
-    entry->startDate->setDate(s.date());
-    entry->endTime->setTime(e.time());
-    entry->endDate->setDate(e.date());
-}
-
-#ifndef QTOPIA_DESKTOP
-//  Catch resize events sent to scroll area's viewport, and force child widget to conform to parent's width
-//  TODO: There has to be a better way to do this.
-bool EntryDialog::eventFilter( QObject *receiver, QEvent *event )
-{
-    if( scrollArea && scrollArea->widget() && receiver == scrollArea->viewport() && event->type() == QEvent::Resize )
-        scrollArea->widget()->setFixedWidth( scrollArea->viewport()->width() );
-    return false;
-}
-#endif
-
-void EntryDialog::init()
-{
-    setObjectName( "edit-appointment" );
-
-    QGridLayout *gl = new QGridLayout( this );
-
-    tw = new QTabWidget( this );
-    gl->addWidget( tw, 0, 0, 0, 2 );
-
-#ifdef QTOPIA_DESKTOP
-    gl->setSpacing( 6 );
-    gl->setMargin( 6 );
-    QPushButton *buttonCancel = new QPushButton( this );
-    buttonCancel->setText( tr("Cancel") );
-    gl->addWidget( buttonCancel, 1, 2 );
-
-    QPushButton *buttonOk = new QPushButton( this );
-    buttonOk->setText( tr( "OK" ) );
-    gl->addWidget( buttonOk, 1, 1 );
-    buttonOk->setDefault( true );
-
-    QSpacerItem *spacer = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-    gl->addItem( spacer, 1, 0 );
-#else
-    gl->setSpacing( 3 );
-    gl->setMargin( 0 );
-#endif
-
-    QWidget *noteTab = new QWidget( this );
-    QGridLayout *noteLayout = new QGridLayout( noteTab );
-
-    editNote = new QTextEdit( noteTab );
-    editNote->setLineWrapMode( QTextEdit::WidgetWidth );
-
-    int rowCount = 0;
-    editnoteQC = new QDLEditClient( editNote, "editnote" );
-
-#ifdef QTOPIA_PHONE
-    editnoteQC->setupStandardContextMenu();
-#else
-    PixmapDisplay *linkButton = new PixmapDisplay( noteTab );
-    linkButton->setPixmap( QIcon( ":icon/qdllink" )
-                                            .pixmap( QStyle::PixelMetric(QStyle::PM_SmallIconSize),true ) );
-    connect( linkButton, SIGNAL(clicked()), client, SLOT(requestLink()) );
-    noteLayout->addWidget( linkButton, rowCount++, 0, Qt::AlignRight );
-    linkButton->setFocusPolicy( Qt::NoFocus );
-#endif
-
-    noteLayout->addWidget( editNote, rowCount++, 0 );
-
-#ifndef QTOPIA_DESKTOP
-    scrollArea = new QScrollArea( this );
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setFocusPolicy( Qt::NoFocus );
-    scrollArea->setFrameStyle( QFrame::NoFrame );
-    entry = new EntryDetails( scrollArea->viewport() );
-    scrollArea->setWidget(entry);
-    tw->addTab( scrollArea, tr("Event") );
-
-    //  Event filter to catch viewport resizes to force child widget to conform to horiz. size.
-    //  TODO: There has to be a better way to do this.
-    scrollArea->viewport()->installEventFilter( this );
-#else
-    entry = new EntryDetails( tw );
-    tw->addTab( entry, tr("Event") );
-#endif
-
-    tw->addTab( noteTab, tr("Notes") );
-
-#if defined(QTOPIA_DESKTOP)
-    appointmentDetails = new AppointmentDetails( this );
-    connect(tw, SIGNAL(currentChanged(QWidget*)),
-            this, SLOT(tabChanged(QWidget*)) );
-    tw->addTab( appointmentDetails, tr("Summary") );
-#else
-    appointmentDetails = 0;
-#endif
-
-    // XXX should load/save thisentry->startDate
-    entry->comboLocation->addItem(tr("Office"));
-    entry->comboLocation->addItem(tr("Home","ie. not work"));
-
-    // XXX enable these two lines to be able to specify local time appointments.
-    entry->timezone->setLocalIncluded(true);
-    entry->timezone->setCurrentZone("None");
-
-    entry->comboDescription->setInsertPolicy(QComboBox::InsertAtCurrent);
-    entry->comboLocation->setInsertPolicy(QComboBox::InsertAtCurrent);
-
-#ifdef QTOPIA_PHONE
-    // Setup the comboSound widget
-    entry->comboSound->insertItem( QPixmap( ":image/noalarm" ), tr( "No Alarm" ) );
-    entry->comboSound->insertItem( QPixmap( ":image/silent" ), tr( "Silent" ) );
-    entry->comboSound->insertItem( QPixmap( ":image/audible" ), tr( "Audible" ) );
-#endif
-
-#ifdef QTOPIA_DESKTOP
-    connect((QObject *)entry->timezone->d, SIGNAL(configureTimeZones()), this, SLOT(configureTimeZones()));
-#endif
-
-    entry->comboDescription->setFocus();
-
-    connect( entry->repeatSelect, SIGNAL(activated(int)),
-            this, SLOT(setRepeatRule(int)));
-    connect( entry->repeatDate, SIGNAL(dateChanged(const QDate&)),
-            this, SLOT(setEndDate(const QDate&)));
-
-    connect( entry->spinAlarm, SIGNAL(valueChanged(int)),
-             this, SLOT(turnOnAlarm()) );
-    connect( entry->comboSound, SIGNAL(activated(int)),
-             this, SLOT(checkAlarmSpin(int)) );
-
-    connect( entry->startDate, SIGNAL(dateChanged(const QDate &)),
-             this, SLOT(updateStartDateTime()));
-    connect( entry->startTime, SIGNAL(timeChanged(const QTime &)),
-             this, SLOT(updateStartTime()));
-    connect( entry->startTime, SIGNAL(editingFinished()),
-             this, SLOT(updateStartTime()));
-    connect( entry->endDate, SIGNAL(dateChanged(const QDate &)),
-             this, SLOT(updateEndDateTime()));
-    connect( entry->endTime, SIGNAL(timeChanged(const QTime &)),
-             this, SLOT(updateEndTime()));
-    connect( entry->endTime, SIGNAL(editingFinished()),
-             this, SLOT(updateEndTime()));
-
-    connect( entry->repeatCheck, SIGNAL(toggled(bool)),
-            this, SLOT(checkRepeatDate(bool)));
-
-    connect( qApp, SIGNAL(weekChanged(bool)),
-             this, SLOT(setWeekStartsMonday(bool)) );
-
-#ifdef QTOPIA_DESKTOP
-    connect( buttonOk, SIGNAL(clicked()), this, SLOT(accept()) );
-    connect( buttonCancel, SIGNAL(clicked()), this, SLOT(reject()) );
-
-    setMaximumSize( sizeHint()*2 );
-
-    connect( entryDetails()->comboCategory,
-             SIGNAL(editCategoriesClicked(QWidget*)),
-             this, SLOT(editCategories(QWidget*)) );
-
-    connect( this, SIGNAL(categorymanagerChanged()),
-             this, SLOT(updateCategories()) );
-
-    resize( 500, 300 );
-#endif
 }
 
 /*
@@ -345,7 +67,214 @@ void EntryDialog::init()
  */
 EntryDialog::~EntryDialog()
 {
-    // no need to delete child widgets, Qt does it all for us
+}
+
+void EntryDialog::init()
+{
+    setObjectName( "edit-event" );
+
+    QVBoxLayout *vl = new QVBoxLayout;
+    QtopiaTabWidget *tw = new QtopiaTabWidget;
+    vl->setSpacing( 3 );
+    vl->setMargin( 0 );
+
+    vl->addWidget(tw);
+
+    // connected here, in case delayed loading is disabled.
+    connect(tw, SIGNAL(prepareTab(int,QScrollArea*)), this, SLOT(initTab(int,QScrollArea*)));
+
+    tw->addTab( QIcon(":icon/DateBook"), tr("Event") );
+    tw->addTab( QIcon(":icon/repeat"), tr("Recurrence"));
+    tw->addTab( QIcon(":icon/addressbook/notes"), tr("Notes") );
+
+    setLayout(vl);
+}
+
+
+void EntryDialog::initTab(int index, QScrollArea *sc)
+{
+    switch(index)
+    {
+        case 0:
+            initEventDetails(sc);
+            break;
+        case 1:
+            initRepeatDetails(sc);
+            break;
+        case 2:
+            initNoteDetails(sc);
+            break;
+    }
+}
+
+void EntryDialog::initEventDetails(QScrollArea *sc)
+{
+    /* construct */
+    QWidget *eventTab = new QWidget;
+    QFormLayout *fl = new QFormLayout;
+
+    mDescription = new QLineEdit();
+    fl->addRow(tr("Desc."), mDescription);
+
+    // Location
+    mLocation = new QLineEdit();
+    fl->addRow(tr("Loc."), mLocation);
+
+    QHBoxLayout *hb = new QHBoxLayout();
+    checkAllDay = new QCheckBox(tr("All day event"));
+    hb->addStretch();
+    hb->addWidget(checkAllDay);
+    hb->addStretch();
+
+    fl->addRow(hb);
+
+    startDate = new QDateEdit();
+    startTime = new QTimeEdit();
+    startTimeLabel = new QLabel(tr("Time"));
+    endDate = new QDateEdit();
+    endTime = new QTimeEdit();
+    endTimeLabel = new QLabel(tr("Time"));
+
+    QGroupBox *groupbox = new QGroupBox();
+    QFormLayout *gfl = new QFormLayout();
+    gfl->addRow(tr("Date"), startDate);
+    gfl->addRow(startTimeLabel, startTime);
+    groupbox->setTitle(tr("Start"));
+    groupbox->setLayout(gfl);
+
+    fl->addRow(groupbox);
+
+    groupbox = new QGroupBox();
+    gfl = new QFormLayout();
+    gfl->addRow(tr("Date"), endDate);
+    gfl->addRow(endTimeLabel, endTime);
+    groupbox->setTitle(tr("End"));
+    groupbox->setLayout(gfl);
+
+    fl->addRow(groupbox);
+
+    // timezone
+    timezone = new QTimeZoneSelector();
+    timezone->setAllowNoZone(true);
+    timezone->setCurrentZone("None");
+
+    fl->addRow(tr("T.Z.", "short string for Time Zone"), timezone);
+
+    // Reminder (stick it in an anonymous groupbox)
+    groupbox = new QGroupBox();
+    gfl = new QFormLayout();
+    reminderPicker = new ReminderPicker(this, gfl);
+    groupbox->setLayout(gfl);
+    fl->addRow(groupbox);
+
+    eventTab->setLayout(fl);
+
+    /* init */
+
+    if (mAppointment.timeZone().isValid()) {
+        timezone->setCurrentZone(mAppointment.timeZone().id());
+    }
+
+    setDates(mAppointment.start(),mAppointment.end());
+    mDescription->setText(mAppointment.description());
+    mLocation->setText(mAppointment.location());
+
+    reminderPicker->setDefaultAllDayReminderTime(allDayReminder);
+    reminderPicker->setAllDay(mAppointment.isAllDay());
+    reminderPicker->setReminderType(mAppointment.alarm());
+    reminderPicker->setReminderMinutes(mAppointment.alarmDelay());
+
+    checkAllDay->setChecked( mAppointment.isAllDay() );
+
+    updateTimeUI();
+
+    /* connect */
+    connect( startDate, SIGNAL(dateChanged(QDate)),
+             this, SLOT(updateStartDateTime()));
+    connect( startTime, SIGNAL(timeChanged(QTime)),
+             this, SLOT(updateStartTime()));
+    connect( startTime, SIGNAL(editingFinished()),
+             this, SLOT(updateStartTime()));
+    connect( endDate, SIGNAL(dateChanged(QDate)),
+             this, SLOT(updateEndDateTime()));
+    connect( endTime, SIGNAL(timeChanged(QTime)),
+             this, SLOT(updateEndTime()));
+    connect( endTime, SIGNAL(editingFinished()),
+             this, SLOT(updateEndTime()));
+
+    connect( checkAllDay, SIGNAL(stateChanged(int)),
+            this, SLOT(updateTimeUI()));
+
+    connect( qApp, SIGNAL(weekChanged(bool)),
+             this, SLOT(setWeekStartsMonday(bool)) );
+
+    sc->setWidget(eventTab);
+    eventTab->setFocusPolicy(Qt::NoFocus);
+}
+
+void EntryDialog::initRepeatDetails(QScrollArea *sc)
+{
+    /* construct */
+    QWidget *repeatTab = new QWidget;
+    QFormLayout *fl = new QFormLayout();
+
+    recurDetails = new RecurrenceDetails(mAppointment);
+    recurDetails->initGui(fl);
+    repeatTab->setLayout(fl);
+
+    /* init */
+    recurDetails->updateUI();
+
+    /* if connections, put them here */
+
+    sc->setWidget(repeatTab);
+    repeatTab->setFocusPolicy(Qt::NoFocus);
+}
+
+void EntryDialog::initNoteDetails(QScrollArea *sc)
+{
+    /* construct */
+    QWidget *noteTab = new QWidget();
+    QFormLayout *fl = new QFormLayout();
+
+    editNote = new QTextEdit( noteTab );
+    editNote->setLineWrapMode( QTextEdit::WidgetWidth );
+    QFontMetrics fmTxtNote( editNote->font() );
+    editNote->setFixedHeight( fmTxtNote.height() * 5 );
+
+    editnoteQC = new QDLEditClient( editNote, "editnote" );
+    editnoteQC->setupStandardContextMenu();
+
+    comboCategory = new DateBookCategorySelector();
+    fl->addRow( tr("Notes"), editNote );
+    fl->addRow( tr("Category"), comboCategory);
+
+    noteTab->setLayout(fl);
+    /* init */
+    comboCategory->selectCategories( mAppointment.categories() );
+
+    if(!mAppointment.notes().isEmpty())
+        editNote->setHtml(mAppointment.notes()); //PlainText(mAppointment.notes());
+
+
+    QDL::loadLinks( mAppointment.customField( QDL::CLIENT_DATA_KEY ),
+                    QDL::clients( this ) );
+    editnoteQC->verifyLinks();
+
+    /* if connections, put them here */
+    sc->setWidget(noteTab);
+    noteTab->setFocusPolicy(Qt::NoFocus);
+}
+
+
+void EntryDialog::setDates( const QDateTime& s, const QDateTime& e )
+{
+    mAppointment.setStart(s);
+    mAppointment.setEnd(e);
+    startTime->setTime(s.time());
+    startDate->setDate(s.date());
+    endTime->setTime(e.time());
+    endDate->setDate(e.date());
 }
 
 /*
@@ -354,7 +283,7 @@ EntryDialog::~EntryDialog()
 void EntryDialog::updateEndTime()
 {
     // Filter time edits, only process the time when we are not in edit mode
-    if ( !entry->endTime->hasEditFocus() ) {
+    if ( !endTime->hasEditFocus() ) {
         updateEndDateTime();
     }
 }
@@ -364,13 +293,14 @@ void EntryDialog::updateEndTime()
  */
 void EntryDialog::updateEndDateTime()
 {
-    entry->startDate->blockSignals(true);
-    entry->startTime->blockSignals(true);
-    entry->endDate->blockSignals(true);
-    entry->endTime->blockSignals(true);
-    entry->repeatDate->blockSignals(true);
+    startDate->blockSignals(true);
+    startTime->blockSignals(true);
+    endDate->blockSignals(true);
+    endTime->blockSignals(true);
 
-    QDateTime target = QDateTime(entry->endDate->date(), entry->endTime->time());
+    // TODO - update recurrence details enddate API
+
+    QDateTime target = QDateTime(endDate->date(), endTime->time());
 
     // since setting the start can change the end, do this first.
     if (target.addSecs(-300) < mAppointment.start()) {
@@ -378,15 +308,16 @@ void EntryDialog::updateEndDateTime()
     }
 
     mAppointment.setEnd(target);
-    entry->startDate->setDate(mAppointment.start().date());
-    entry->startTime->setTime(mAppointment.start().time());
-    entry->repeatDate->setDate(mAppointment.repeatUntil());
+    startDate->setDate(mAppointment.start().date());
+    startTime->setTime(mAppointment.start().time());
 
-    entry->startDate->blockSignals(false);
-    entry->startTime->blockSignals(false);
-    entry->endDate->blockSignals(false);
-    entry->endTime->blockSignals(false);
-    entry->repeatDate->blockSignals(false);
+    if (recurDetails)
+        recurDetails->updateUI();
+
+    startDate->blockSignals(false);
+    startTime->blockSignals(false);
+    endDate->blockSignals(false);
+    endTime->blockSignals(false);
 }
 
 /*
@@ -395,7 +326,7 @@ void EntryDialog::updateEndDateTime()
 void EntryDialog::updateStartTime()
 {
     // Filter time edits, only process the time when we are not in edit mode
-    if ( !entry->startTime->hasEditFocus() ) {
+    if ( !startTime->hasEditFocus() ) {
         updateStartDateTime();
     }
 }
@@ -405,56 +336,28 @@ void EntryDialog::updateStartTime()
  */
 void EntryDialog::updateStartDateTime()
 {
-    entry->startDate->blockSignals(true);
-    entry->startTime->blockSignals(true);
-    entry->endDate->blockSignals(true);
-    entry->endTime->blockSignals(true);
-    entry->repeatDate->blockSignals(true);
+    startDate->blockSignals(true);
+    startTime->blockSignals(true);
+    endDate->blockSignals(true);
+    endTime->blockSignals(true);
 
     // start always works.
-    QDateTime s = QDateTime(entry->startDate->date(), entry->startTime->time());
+    QDateTime s = QDateTime(startDate->date(), startTime->time());
 
     mAppointment.setStart(s);
 
     // modifying start modifies end, so no need check or modify anything.
     // just ensure we update the widget.
-    entry->endDate->setDate(mAppointment.end().date());
-    entry->endTime->setTime(mAppointment.end().time());
-    entry->repeatDate->setDate(mAppointment.repeatUntil());
+    endDate->setDate(mAppointment.end().date());
+    endTime->setTime(mAppointment.end().time());
 
-    entry->startDate->blockSignals(false);
-    entry->startTime->blockSignals(false);
-    entry->endDate->blockSignals(false);
-    entry->endTime->blockSignals(false);
-    entry->repeatDate->blockSignals(false);
-}
+    if (recurDetails)
+        recurDetails->updateUI();
 
-void EntryDialog::checkRepeatDate(bool on)
-{
-    entry->repeatDate->blockSignals(true);
-    if (on) {
-        mAppointment.setRepeatUntil(entry->repeatDate->date());
-        // and feed it back, to follow the mAppointment logic
-        entry->repeatDate->setDate(mAppointment.repeatUntil());
-    } else {
-        mAppointment.setRepeatForever();
-        entry->repeatDate->setDate(mAppointment.start().date());
-    }
-    entry->repeatDate->blockSignals(false);
-}
-
-void EntryDialog::editCustomRepeat()
-{
-    RepeatEntry e;
-    e.setModal(true);
-    appointment(); // update of the shown values;
-    e.setAppointment(mAppointment);
-
-    if ( QtopiaApplication::execDialog(&e) ) {
-         mAppointment = e.appointment();
-         entry->repeatCheck->setEnabled(true);
-    }
-    setRepeatLabel();
+    startDate->blockSignals(false);
+    startTime->blockSignals(false);
+    endDate->blockSignals(false);
+    endTime->blockSignals(false);
 }
 
 void EntryDialog::setWeekStartsMonday( bool onMonday )
@@ -464,138 +367,66 @@ void EntryDialog::setWeekStartsMonday( bool onMonday )
 
 QAppointment EntryDialog::appointment( const bool includeQdlLinks )
 {
-    mAppointment.setDescription( entry->comboDescription->currentText() );
-    mAppointment.setLocation( entry->comboLocation->currentText() );
-    mAppointment.setCategories( entry->comboCategory->selectedCategories() );
-    mAppointment.setAllDay( entry->checkAllDay->isChecked() );
+    // first tab widgets.
+    if (mDescription) {
+        mAppointment.setDescription( mDescription->text() );
+        mAppointment.setLocation( mLocation->text() );
+        mAppointment.setAllDay( checkAllDay->isChecked() );
 
-    // don't set the time if theres no need too
+        // Since we don't always update start/end time
+        // if the changes happen with edit focus, and
+        // the controls don't lose focus until after this is called
+        // (to emit editingFinished), force an update
+        if (startTime->hasFocus())
+            updateStartDateTime();
+        if (endTime->hasFocus())
+            updateEndDateTime();
 
-    if (entry->timezone->currentZone() == "None")
-        mAppointment.setTimeZone(QTimeZone());
-    else
-        mAppointment.setTimeZone(QTimeZone(entry->timezone->currentZone().toAscii().constData()));
-
-    // all day appointments don't have an alarm
-    if ( entry->checkAllDay->isChecked() )
-        entry->comboSound->setCurrentIndex(0);
-    // we only have one type of sound at the moment... LOUD!!!
-    switch (entry->comboSound->currentIndex()) {
-        case 0:
-            mAppointment.clearAlarm();
-            break;
-        case 1:
-            mAppointment.setAlarm( entry->spinAlarm->value(), QAppointment::Visible);
-            break;
-        case 2:
-            mAppointment.setAlarm( entry->spinAlarm->value(), QAppointment::Audible);
-            break;
+        // don't set the time if theres no need too
+        if (timezone->currentZone() == "None")
+            mAppointment.setTimeZone(QTimeZone());
+        else
+            mAppointment.setTimeZone(QTimeZone(timezone->currentZone().toAscii().constData()));
     }
-    // don't need to do repeat, repeat dialog handles that.
 
-    if ( editNote->toPlainText().isEmpty() )
-        mAppointment.setNotes( QString() );
-    else
-        mAppointment.setNotes( editNote->toHtml() );
+    // third tab widgets
+    if (editNote) {
+        if ( editNote->toPlainText().isEmpty() )
+            mAppointment.setNotes( QString() );
+        else
+            mAppointment.setNotes( editNote->toHtml() );
 
-    if ( includeQdlLinks ) {
-        QString links;
-        QDL::saveLinks( links, QDL::clients( this ) );
-        mAppointment.setCustomField( QDL::CLIENT_DATA_KEY, links );
+        if ( includeQdlLinks ) {
+            QString links;
+            QDL::saveLinks( links, QDL::clients( this ) );
+            mAppointment.setCustomField( QDL::CLIENT_DATA_KEY, links );
+        }
+        mAppointment.setCategories( comboCategory->selectedCategories() );
     }
+
+    if (recurDetails)
+        recurDetails->updateAppointment();
+    if (reminderPicker)
+        mAppointment.setAlarm(reminderPicker->reminderMinutes(), reminderPicker->reminderType());
 
     return mAppointment;
 }
 
-void EntryDialog::setRepeatLabel()
+void EntryDialog::updateTimeUI()
 {
-    if ( mAppointment.hasRepeat() ) {
-        //cmdRepeat->setText( tr("Repeat...") );
-        if (mAppointment.frequency() == 1 && mAppointment.repeatRule() == QAppointment::Daily)
-            entry->repeatSelect->setCurrentIndex(1);
-        else if (mAppointment.frequency() == 1 && mAppointment.repeatRule() == QAppointment::Weekly
-                && onceAWeek(mAppointment))
-            entry->repeatSelect->setCurrentIndex(2);
-        else if (mAppointment.frequency() == 1 && mAppointment.repeatRule() == QAppointment::Yearly)
-            entry->repeatSelect->setCurrentIndex(3);
-        else
-            entry->repeatSelect->setCurrentIndex(4);
+    if (checkAllDay->checkState() == Qt::Checked) {
+        reminderPicker->setAllDay(true);
+        startTime->hide();
+        startTimeLabel->hide();
+        endTime->hide();
+        endTimeLabel->hide();
     } else {
-        entry->repeatSelect->setCurrentIndex(0);
+        reminderPicker->setAllDay(false);
+        startTime->show();
+        startTimeLabel->show();
+        endTime->show();
+        endTimeLabel->show();
     }
-}
-
-void EntryDialog::configureTimeZones()
-{
-#ifdef QTOPIA_DESKTOP
-    // Show the WorldTime as a dialog
-    WorldTimeDialog dlg(0, entry->timezone);
-    dlg.exec();
-#endif
-}
-
-void EntryDialog::turnOnAlarm()
-{
-    // if alarm spin spun, then user probably wants an alarm.  Make it loud :)
-    if (entry->comboSound->currentIndex() == 0 && entry->spinAlarm->value() != 0)
-        entry->comboSound->setCurrentIndex(2);
-}
-
-void EntryDialog::checkAlarmSpin(int aType)
-{
-    entry->spinAlarm->setEnabled( aType != 0 );
-}
-
-void EntryDialog::setRepeatRule(int i)
-{
-    switch (i) {
-        case 0:
-            mAppointment.setRepeatRule(QAppointment::NoRepeat);
-            entry->repeatCheck->setChecked(false);
-            entry->repeatCheck->setEnabled(false);
-            break;
-        case 1:
-            mAppointment.setRepeatRule(QAppointment::Daily);
-            mAppointment.setFrequency(1);
-            entry->repeatCheck->setEnabled(true);
-            break;
-        case 2:
-            mAppointment.setRepeatRule(QAppointment::Weekly);
-            mAppointment.setFrequency(1);
-            setOnceAWeek(mAppointment);
-            entry->repeatCheck->setEnabled(true);
-            break;
-        case 3:
-            mAppointment.setRepeatRule(QAppointment::Yearly);
-            mAppointment.setFrequency(1);
-            entry->repeatCheck->setEnabled(true);
-            break;
-        case 4:
-        default:
-            editCustomRepeat();
-            break;
-    }
-}
-
-void EntryDialog::setEndDate(const QDate &date)
-{
-    entry->repeatDate->blockSignals(true);
-
-    mAppointment.setRepeatUntil(entry->repeatDate->date());
-    entry->repeatDate->setDate(mAppointment.repeatUntil());
-
-    entry->repeatDate->blockSignals(false);
-}
-
-void EntryDialog::updateCategories()
-{
-#ifdef QTOPIA_DESKTOP
-    connect( this, SIGNAL( categorymanagerChanged() ),
-             entry->comboCategory, SLOT( categorymanagerChanged() ) );
-    emit categorymanagerChanged();
-    disconnect( this, SIGNAL( categorymanagerChanged() ),
-                entry->comboCategory, SLOT( categorymanagerChanged() ) );
-#endif
 }
 
 void EntryDialog::accept()
@@ -608,7 +439,7 @@ void EntryDialog::accept()
     }
 
     // otherwise, see if we now have an empty description
-    if ( entry->comboDescription->currentText().isEmpty() )
+    if ( mDescription && mDescription->text().isEmpty() )
     {
         if (QMessageBox::warning(this, tr("New Event"),
                     tr("<qt>An event description is required. Cancel editing?</qt>"),
@@ -616,7 +447,7 @@ void EntryDialog::accept()
             QDialog::reject();
             return;
         } else {
-            entry->comboDescription->setFocus();
+            mDescription->setFocus();
             return;
         }
 
@@ -627,28 +458,3 @@ void EntryDialog::accept()
     appointment();
     QDialog::accept();
 }
-
-void EntryDialog::tabChanged( QWidget *tab )
-{
-    if ( appointmentDetails && tab == appointmentDetails ) {
-        appointmentDetails->init( appointment().firstOccurrence() );
-    }
-}
-
-void EntryDialog::showSummary()
-{
-    tw->setCurrentIndex( tw->indexOf( appointmentDetails ) );
-}
-
-// ====================================================================
-
-EntryDetails::EntryDetails( QWidget *parent )
-    : QWidget( parent )
-{
-    setupUi( this );
-}
-
-EntryDetails::~EntryDetails()
-{
-}
-

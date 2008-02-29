@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Obsolete Members for QMessageBox</title>
+  <title>Qt 4.3: Obsolete Members for QMessageBox</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -171,7 +171,7 @@
 <p>See also <a href="qmessagebox-obsolete.html#buttonText">buttonText</a>().</p>
 <h3 class="fn"><a name="standardIcon-2"></a><a href="qpixmap.html">QPixmap</a> QMessageBox::standardIcon ( <a href="qmessagebox.html#Icon-enum">Icon</a> <i>icon</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns the pixmap used for a standard icon. This allows the pixmaps to be used in more complex message boxes. <i>icon</i> specifies the required icon, e.g. <a href="qmessagebox.html#Icon-enum">QMessageBox::Question</a>, <a href="qmessagebox.html#Icon-enum">QMessageBox::Information</a>, <a href="qmessagebox.html#Icon-enum">QMessageBox::Warning</a> or <a href="qmessagebox.html#Icon-enum">QMessageBox::Critical</a>.</p>
+<p>Returns the pixmap used for a standard icon. This allows the pixmaps to be used in more complex message boxes. <i>icon</i> specifies the required icon, e.g&#x2e; <a href="qmessagebox.html#Icon-enum">QMessageBox::Question</a>, <a href="qmessagebox.html#Icon-enum">QMessageBox::Information</a>, <a href="qmessagebox.html#Icon-enum">QMessageBox::Warning</a> or <a href="qmessagebox.html#Icon-enum">QMessageBox::Critical</a>.</p>
 <p>Call <a href="qstyle.html#pixelMetric">QStyle::pixelMetric</a>() with <a href="qstyle.html#StandardPixmap-enum">QStyle::SP_MessageBoxInformation</a> etc. instead.</p>
 <h3 class="fn"><a name="warning-2"></a>int QMessageBox::warning ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, int <i>button0</i>, int <i>button1</i>, int <i>button2</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -190,7 +190,7 @@
 </ul>
 <p>If you don't want all three buttons, set the last button, or last two buttons to <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a>.</p>
 <p>One button can be OR-ed with <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Default</a>, and one button can be OR-ed with <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Escape</a>.</p>
-<p>Returns the identity (<a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ok</a> or <a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a> or ...) of the button that was clicked.</p>
+<p>Returns the identity (<a href="qmessagebox.html#StandardButton-enum">QMessageBox::Ok</a> or <a href="qmessagebox.html#StandardButton-enum">QMessageBox::No</a> or ..&#x2e;) of the button that was clicked.</p>
 <p>If <i>parent</i> is 0, the message box becomes an application-global modal dialog box. If <i>parent</i> is a widget, the message box becomes modal relative to <i>parent</i>.</p>
 <p>See also <a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#question">question</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
 <h3 class="fn"><a name="warning-4"></a>int QMessageBox::warning ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, const <a href="qstring.html">QString</a> &amp; <i>button0Text</i>, const <a href="qstring.html">QString</a> &amp; <i>button1Text</i> = QString(), const <a href="qstring.html">QString</a> &amp; <i>button2Text</i> = QString(), int <i>defaultButtonNumber</i> = 0, int <i>escapeButtonNumber</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -203,6 +203,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

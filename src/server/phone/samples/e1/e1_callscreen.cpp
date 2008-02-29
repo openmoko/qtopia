@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -108,25 +108,25 @@ E1Callscreen::E1Callscreen(E1Button *b, QWidget *parent)
     QObject::connect(spkr, SIGNAL(clicked()), this, SLOT(spkr()));
 
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callConnected(const QPhoneCall &)),
+                     SIGNAL(callConnected(QPhoneCall)),
                      this,
-                     SLOT(callConnected(const QPhoneCall &)));
+                     SLOT(callConnected(QPhoneCall)));
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callIncoming(const QPhoneCall &)),
+                     SIGNAL(callIncoming(QPhoneCall)),
                      this,
-                     SLOT(callIncoming(const QPhoneCall &)));
+                     SLOT(callIncoming(QPhoneCall)));
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callDialing(const QPhoneCall &)),
+                     SIGNAL(callDialing(QPhoneCall)),
                      this,
-                     SLOT(callDialing(const QPhoneCall &)));
+                     SLOT(callDialing(QPhoneCall)));
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callMissed(const QPhoneCall &)),
+                     SIGNAL(callMissed(QPhoneCall)),
                      this,
-                     SLOT(callEnded(const QPhoneCall &)));
+                     SLOT(callEnded(QPhoneCall)));
     QObject::connect(DialerControl::instance(),
-                     SIGNAL(callDropped(const QPhoneCall &)),
+                     SIGNAL(callDropped(QPhoneCall)),
                      this,
-                     SLOT(callEnded(const QPhoneCall &)));
+                     SLOT(callEnded(QPhoneCall)));
 
     QObject::connect(m_button, SIGNAL(clicked()),
                      this, SLOT(end()));

@@ -1,13 +1,14 @@
 <html>
 <head><title>Internet Help</title></head>
 <body>
+<!--#include file="device-name.html"-->
 <!--#if expr="$USERGUIDE"-->
    <h2>Internet</h2>
 <!--#else -->
    <h3>Internet Help</h3>
 <!--#endif -->
 <p><img src=":image/netsetup/PPPConnect"></p>
-<p>Used to manually define the network settings for your <i>Qtopia</i> device, or to show settings that have been sent to your device by your network operator.</p>
+<p>Used to manually define the network settings for your <!--#echo var="device-name" -->, or to show settings that have been sent to it by your network operator.</p>
 <!--#if expr="$USERGUIDE"-->
    <h3>Internet services</h3>
 <!--#else -->
@@ -29,12 +30,7 @@
    <h4>Wireless Access Protocol (WAP)</h4>
 <!--#endif -->
 <p>The second tab shows all existing WAP accounts. The user can add, remove and configure new accounts. The default account is marked bold.</p>
-<p>For details see <a href="netsetup-wap-menu.html">WAP details</a>
-
-<!--#if expr="$PDASTYLE"-->
-and <a href="qipkg.html">Software Packages</a>
-<!--#endif -->
-</p>
+<p>For details see <a href="netsetup-wap-menu.html">WAP details</a></p>
 
 <!--#if expr="$USERGUIDE"-->
    <h3>Virtual Private Network (VPN)</h3>

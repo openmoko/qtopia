@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -46,14 +61,12 @@
 #include "QtGui/qtextobject.h"
 #include "QtGui/qtextoption.h"
 #include "QtCore/qset.h"
+#include "QtCore/qdebug.h"
 #ifndef QT_BUILD_COMPAT_LIB
 #include "private/qtextdocument_p.h"
 #endif
 
 #include <stdlib.h>
-#ifndef Q_OS_TEMP
-#include <assert.h>
-#endif // Q_OS_TEMP
 
 class QFontPrivate;
 class QFontEngine;
@@ -160,11 +173,13 @@ private:
 };
 Q_DECLARE_TYPEINFO(QFixed, Q_PRIMITIVE_TYPE);
 
+#define QFIXED_MAX (INT_MAX/256)
+
 inline int qRound(const QFixed &f) { return f.toInt(); }
 
 inline QFixed operator*(int i, const QFixed &d) { return d*i; }
 inline QFixed operator+(int i, const QFixed &d) { return d+i; }
-inline QFixed operator-(int i, const QFixed &d) { return -(d-i); } 
+inline QFixed operator-(int i, const QFixed &d) { return -(d-i); }
 inline QFixed operator*(uint i, const QFixed &d) { return d*i; }
 inline QFixed operator+(uint i, const QFixed &d) { return d+i; }
 inline QFixed operator-(uint i, const QFixed &d) { return -(d-i); }
@@ -183,28 +198,55 @@ inline bool operator<(int i, const QFixed &f) { return (i<<6) < f.value(); }
 inline bool operator>(const QFixed &f, int i) { return f.value() > (i<<6); }
 inline bool operator>(int i, const QFixed &f) { return (i<<6) > f.value(); }
 
+inline QDebug &operator<<(QDebug &dbg, const QFixed &f)
+{ return dbg << f.toReal(); }
+
 struct QFixedPoint {
     QFixed x;
     QFixed y;
+    inline QFixedPoint() {}
+    inline QFixedPoint(const QFixed &_x, const QFixed &_y) : x(_x), y(_y) {}
     QPointF toPointF() const { return QPointF(x.toReal(), y.toReal()); }
+    static QFixedPoint fromPointF(const QPointF &p) {
+        return QFixedPoint(QFixed::fromReal(p.x()), QFixed::fromReal(p.y()));
+    }
 };
+Q_DECLARE_TYPEINFO(QFixedPoint, Q_PRIMITIVE_TYPE);
+
+inline QFixedPoint operator-(const QFixedPoint &p1, const QFixedPoint &p2)
+{ return QFixedPoint(p1.x - p2.x, p1.y - p2.y); }
+inline QFixedPoint operator+(const QFixedPoint &p1, const QFixedPoint &p2)
+{ return QFixedPoint(p1.x + p2.x, p1.y + p2.y); }
+
+struct QFixedSize {
+    QFixed width;
+    QFixed height;
+    QSizeF toSizeF() const { return QSizeF(width.toReal(), height.toReal()); }
+    static QFixedSize fromSizeF(const QSizeF &s) {
+        QFixedSize size;
+        size.width = QFixed::fromReal(s.width());
+        size.height = QFixed::fromReal(s.height());
+        return size;
+    }
+};
+Q_DECLARE_TYPEINFO(QFixedSize, Q_PRIMITIVE_TYPE);
 
 struct QScriptItem;
 class QTextItemInt : public QTextItem
 {
 public:
     inline QTextItemInt()
-        : underlineStyle(QTextCharFormat::NoUnderline), num_chars(0), chars(0),
+        : justified(false), underlineStyle(QTextCharFormat::NoUnderline), num_chars(0), chars(0),
           logClusters(0), f(0), glyphs(0), num_glyphs(0), fontEngine(0)
     {}
-    
-    void initFontAttributes(const QScriptItem &si, QFont *font, const QTextCharFormat &format = QTextCharFormat());
+    QTextItemInt(const QScriptItem &si, QFont *font, const QTextCharFormat &format = QTextCharFormat());
 
     QFixed descent;
     QFixed ascent;
     QFixed width;
 
     RenderFlags flags;
+    bool justified;
     QTextCharFormat::UnderlineStyle underlineStyle;
     int num_chars;
     const QChar *chars;
@@ -351,17 +393,23 @@ Q_DECLARE_TYPEINFO(QGlyphLayout, Q_PRIMITIVE_TYPE);
 
 inline bool qIsControlChar(ushort uc)
 {
-    return (uc >= 0x200b && uc <= 0x200f /* ZW Space, ZWNJ, ZWJ, LRM and RLM */)
+    return uc >= 0x200b && uc <= 0x206f
+        && (uc <= 0x200f /* ZW Space, ZWNJ, ZWJ, LRM and RLM */
             || (uc >= 0x2028 && uc <= 0x202f /* LS, PS, LRE, RLE, PDF, LRO, RLO, NNBSP */)
-            || (uc >= 0x206a && uc <= 0x206f /* ISS, ASS, IAFS, AFS, NADS, NODS */);
+            || uc >= 0x206a /* ISS, ASS, IAFS, AFS, NADS, NODS */);
 }
 
 
 struct QCharAttributes {
-    uchar softBreak      :1;     // Potential linebreak point _before_ this character
+    enum LineBreakType {
+        NoBreak,
+        SoftHyphen,
+        Break,
+        ForcedBreak
+    };
+    uchar lineBreakType  :2;
     uchar whiteSpace     :1;     // A unicode whitespace character, except NBSP, ZWNBSP
     uchar charStop       :1;     // Valid cursor position (for left/right arrow)
-    uchar category       :5;
 };
 Q_DECLARE_TYPEINFO(QCharAttributes, Q_PRIMITIVE_TYPE);
 
@@ -394,7 +442,8 @@ struct QScriptLine
 {
     QScriptLine()
         : from(0), length(0),
-        justified(0), gridfitted(0) {}
+        justified(0), gridfitted(0),
+        hasTrailingSpaces(0) {}
     QFixed descent;
     QFixed ascent;
     QFixed x;
@@ -402,9 +451,10 @@ struct QScriptLine
     QFixed width;
     QFixed textWidth;
     int from;
-    signed int length : 30;
+    signed int length : 29;
     mutable uint justified : 1;
     mutable uint gridfitted : 1;
+    uint hasTrailingSpaces : 1;
     QFixed height() const { return ascent + descent + 1; }
     void setDefaultHeight(QTextEngine *eng);
     void operator+=(const QScriptLine &other);
@@ -456,9 +506,9 @@ public:
         WidthOnly = 0x07
     };
 
+    // keep in sync with QAbstractFontEngine::TextShapingFlag!!
     enum ShaperFlag {
         RightToLeft = 0x0001,
-        Mirrored = 0x0001,
         DesignMetrics = 0x0002,
         GlyphIndicesOnly = 0x0004
     };
@@ -479,6 +529,7 @@ public:
 
     QFixed width(int charFrom, int numChars) const;
     glyph_metrics_t boundingBox(int from,  int len) const;
+    glyph_metrics_t tightBoundingBox(int from,  int len) const;
 
     int length(int item) const {
         const QScriptItem &si = layoutData->items[item];
@@ -545,6 +596,7 @@ public:
     uint ignoreBidi : 1;
     uint cacheGlyphs : 1;
     uint stackEngine : 1;
+    uint forceJustification : 1;
 
     int *underlinePositions;
 
@@ -563,7 +615,7 @@ public:
 
     bool atWordSeparator(int position) const;
     void indexAdditionalFormats();
-    
+
     QString elidedText(Qt::TextElideMode mode, const QFixed &width, int flags = 0) const;
 
 private:
@@ -585,7 +637,6 @@ public:
 
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QTextEngine::ShaperFlags)
-
 
 
 #endif // QTEXTENGINE_P_H

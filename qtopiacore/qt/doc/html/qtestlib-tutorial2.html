@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/qtestlib.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qtestlib.qdoc -->
 <head>
-  <title>Qt 4.2: Chapter 2: Data Driven Testing</title>
+  <title>Qt 4.3: Chapter 2: Data Driven Testing</title>
   <link rel="prev" href="qtestlib-tutorial1.html" />
   <link rel="contents" href="qtestlib-tutorial.html" />
   <link rel="next" href="qtestlib-tutorial3.html" />
@@ -20,7 +20,8 @@
 [<a href="qtestlib-tutorial.html">Contents</a>]
 [Next: <a href="qtestlib-tutorial3.html">Chapter 3</a>]
 </p>
-<h1 align="center">Chapter 2: Data Driven Testing<br /><small></small></h1>
+<h1 align="center">Chapter 2: Data Driven Testing<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="qtestlib-tutorial2-testqstring-cpp.html">qtestlib/tutorial2/testqstring.cpp</a></li>
@@ -32,28 +33,7 @@
  QCOMPARE(QString(&quot;HellO&quot;).toUpper(), QString(&quot;HELLO&quot;));
  QCOMPARE(QString(&quot;HELLO&quot;).toUpper(), QString(&quot;HELLO&quot;));</pre>
 <p>To prevent that the function ends up being cluttered by repetitive code, <a href="qtestlib-manual.html#qtestlib">QTestLib</a> supports adding test data to a test function. All we need is to add another private slot to our test class:</p>
-<pre> ** This file is part of the example classes of the Qt Toolkit.
- **
- ** This file may be used under the terms of the GNU General Public
- ** License version 2.0 as published by the Free Software Foundation
- ** and appearing in the file LICENSE.GPL included in the packaging of
- ** this file.  Please review the following information to ensure GNU
- ** General Public Licensing requirements will be met:
- ** http://www.trolltech.com/products/qt/opensource.html
- **
- ** If you are unsure which license is appropriate for your use, please
- ** review the following information:
- ** http://www.trolltech.com/products/qt/licensing.html or contact the
- ** sales department at sales@trolltech.com.
- **
- ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
- ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- **
- ****************************************************************************/</span>
-
- #include &lt;QtTest/QtTest&gt;
-
- class TestQString: public QObject
+<pre> class TestQString: public QObject
  {
      Q_OBJECT
 
@@ -109,6 +89,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

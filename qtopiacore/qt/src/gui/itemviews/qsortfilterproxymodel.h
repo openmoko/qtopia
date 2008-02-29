@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -49,6 +64,7 @@ class Q_GUI_EXPORT QSortFilterProxyModel : public QAbstractProxyModel
     Q_PROPERTY(bool dynamicSortFilter READ dynamicSortFilter WRITE setDynamicSortFilter)
     Q_PROPERTY(Qt::CaseSensitivity filterCaseSensitivity READ filterCaseSensitivity WRITE setFilterCaseSensitivity)
     Q_PROPERTY(Qt::CaseSensitivity sortCaseSensitivity READ sortCaseSensitivity WRITE setSortCaseSensitivity)
+    Q_PROPERTY(bool isSortLocaleAware READ isSortLocaleAware WRITE setSortLocaleAware)
     Q_PROPERTY(int sortRole READ sortRole WRITE setSortRole)
     Q_PROPERTY(int filterRole READ filterRole WRITE setFilterRole)
 
@@ -76,6 +92,9 @@ public:
     Qt::CaseSensitivity sortCaseSensitivity() const;
     void setSortCaseSensitivity(Qt::CaseSensitivity cs);
 
+    bool isSortLocaleAware() const;
+    void setSortLocaleAware(bool on);
+
     bool dynamicSortFilter() const;
     void setDynamicSortFilter(bool enable);
 
@@ -90,6 +109,7 @@ public Q_SLOTS:
     void setFilterWildcard(const QString &pattern);
     void setFilterFixedString(const QString &pattern);
     void clear();
+    void invalidate();
 
 protected:
     virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
@@ -97,6 +117,7 @@ protected:
     virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
     void filterChanged();
+    void invalidateFilter();
 
 public:
 #ifdef Q_NO_USING_KEYWORD
@@ -113,10 +134,11 @@ public:
     bool hasChildren(const QModelIndex &parent = QModelIndex()) const;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    bool setData(const QModelIndex &index, const QVariant &value, int role);
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role);
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::EditRole) const;
+    bool setHeaderData(int section, Qt::Orientation orientation,
+            const QVariant &value, int role = Qt::EditRole);
 
     QMimeData *mimeData(const QModelIndexList &indexes) const;
     bool dropMimeData(const QMimeData *data, Qt::DropAction action,
@@ -133,8 +155,9 @@ public:
 
     QModelIndex buddy(const QModelIndex &index) const;
     QModelIndexList match(const QModelIndex &start, int role,
-                          const QVariant &value, int hits,
-                          Qt::MatchFlags flags) const;
+                          const QVariant &value, int hits = 1,
+                          Qt::MatchFlags flags =
+                          Qt::MatchFlags(Qt::MatchStartsWith|Qt::MatchWrap)) const;
     QSize span(const QModelIndex &index) const;
     void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -169,20 +184,20 @@ static QAssistantClientPrivate *data( const QAssistantClient *client, bool creat
     is used.
 */
 QAssistantClient::QAssistantClient( const QString &path, QObject *parent )
-    : QObject( parent ), host ( "localhost" )
+    : QObject( parent ), host ( QLatin1String("localhost") )
 {
     if ( path.isEmpty() )
-        assistantCommand = "assistant";
+        assistantCommand = QLatin1String("assistant");
     else {
         QFileInfo fi( path );
         if ( fi.isDir() )
-            assistantCommand = path + "/assistant";
+            assistantCommand = path + QLatin1String("/assistant");
         else
             assistantCommand = path;
     }
 
 #if defined(Q_OS_MAC)
-    assistantCommand += ".app/Contents/MacOS/assistant";
+    assistantCommand += QLatin1String(".app/Contents/MacOS/assistant");
 #endif
 
     socket = new QTcpSocket( this );
@@ -195,7 +210,7 @@ QAssistantClient::QAssistantClient( const QString &path, QObject *parent )
     opened = false;
     proc = new QProcess( this );
     port = 0;
-    pageBuffer = "";
+    pageBuffer = QLatin1String("");
     connect( proc, SIGNAL(readyReadStandardError()),
              this, SLOT(readStdError()) );
     connect( proc, SIGNAL(error(QProcess::ProcessError)),
@@ -243,9 +258,9 @@ void QAssistantClient::openAssistant()
         return;
 
     QStringList args;
-    args.append("-server");
+    args.append(QLatin1String("-server"));
     if( !pageBuffer.isEmpty() ) {
-        args.append( "-file" );
+        args.append( QLatin1String("-file") );
         args.append( pageBuffer );
     }
 
@@ -281,7 +296,7 @@ void QAssistantClient::procError(QProcess::ProcessError err)
 
 void QAssistantClient::readPort()
 {
-    QString p = proc->readAllStandardOutput();
+    QString p(QString::fromLatin1(proc->readAllStandardOutput()));
     quint16 port = p.toUShort();
     if ( port == 0 ) {
         emit error( tr( "Cannot connect to Qt Assistant." ) );
@@ -315,7 +330,7 @@ void QAssistantClient::closeAssistant()
 /*!
     Brings Qt Assistant to the foreground showing the given \a page.
     The \a page parameter is a path to an HTML file
-    (e.g., "/home/pasquale/superproduct/docs/html/intro.html").
+    (e.g., QLatin1String("/home/pasquale/superproduct/docs/html/intro.html")).
 
     If Qt Assistant hasn't been opened yet, this function will call
     the openAssistant() slot with the specified page as the start
@@ -327,7 +342,7 @@ void QAssistantClient::showPage( const QString &page )
 {
     if (opened) {
         QTextStream os( socket );
-        os << page << "\n";
+        os << page << QLatin1String("\n");
     } else {
         pageBuffer = page;
 
@@ -376,7 +391,7 @@ void QAssistantClient::socketError()
 
 void QAssistantClient::readStdError()
 {
-    QString errmsg = proc->readAllStandardError();
+    QString errmsg = QString::fromLatin1(proc->readAllStandardError());
 
     if (!errmsg.isEmpty())
         emit error( errmsg.simplified() );

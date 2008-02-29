@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -36,20 +51,23 @@ class QCheckBoxPrivate : public QAbstractButtonPrivate
 {
     Q_DECLARE_PUBLIC(QCheckBox)
 public:
-    QCheckBoxPrivate():tristate(false), noChange(false), hovering(true), publishedState(Qt::Unchecked){}
+    QCheckBoxPrivate()
+        : QAbstractButtonPrivate(QSizePolicy::CheckBox), tristate(false), noChange(false),
+          hovering(true), publishedState(Qt::Unchecked) {}
+
     uint tristate : 1;
     uint noChange : 1;
     uint hovering : 1;
     uint publishedState : 2;
+
     void init();
-    QStyleOptionButton getStyleOption() const;
 };
 
 /*!
     \class QCheckBox
     \brief The QCheckBox widget provides a checkbox with a text label.
 
-    \ingroup basic
+    \ingroup basicwidgets
     \mainclass
 
     A QCheckBox is an option button that can be switched on (checked)
@@ -130,36 +148,43 @@ public:
     The default is false; i.e. the checkbox has only two states.
 */
 
-
-
 void QCheckBoxPrivate::init()
 {
     Q_Q(QCheckBox);
     q->setCheckable(true);
     q->setMouseTracking(true);
+    q->setForegroundRole(QPalette::WindowText);
+    setLayoutItemMargins(QStyle::SE_CheckBoxLayoutItem);
 }
 
-QStyleOptionButton QCheckBoxPrivate::getStyleOption() const
+/*!
+    Initialize \a option with the values from this QCheckBox. This method is useful
+    for subclasses when they need a QStyleOptionButton, but don't want to fill
+    in all the information themselves.
+
+    \sa QStyleOption::initFrom()
+*/
+void QCheckBox::initStyleOption(QStyleOptionButton *option) const
 {
-    Q_Q(const QCheckBox);
-    QStyleOptionButton opt;
-    opt.init(q);
-    if (down)
-        opt.state |= QStyle::State_Sunken;
-    if (tristate && noChange)
-        opt.state |= QStyle::State_NoChange;
+    if (!option)
+        return;
+    Q_D(const QCheckBox);
+    option->initFrom(this);
+    if (d->down)
+        option->state |= QStyle::State_Sunken;
+    if (d->tristate && d->noChange)
+        option->state |= QStyle::State_NoChange;
     else
-        opt.state |= checked ? QStyle::State_On : QStyle::State_Off;
-    if (q->testAttribute(Qt::WA_Hover) &&  q->underMouse()) {
-        if (hovering)
-            opt.state |= QStyle::State_MouseOver;
+        option->state |= d->checked ? QStyle::State_On : QStyle::State_Off;
+    if (testAttribute(Qt::WA_Hover) && underMouse()) {
+        if (d->hovering)
+            option->state |= QStyle::State_MouseOver;
         else
-            opt.state &= ~QStyle::State_MouseOver;
+            option->state &= ~QStyle::State_MouseOver;
     }
-    opt.text = text;
-    opt.icon = icon;
-    opt.iconSize = q->iconSize();
-    return opt;
+    option->text = d->text;
+    option->icon = d->icon;
+    option->iconSize = iconSize();
 }
 
 /*!
@@ -245,24 +270,28 @@ void QCheckBox::setCheckState(Qt::CheckState state)
 QSize QCheckBox::sizeHint() const
 {
     Q_D(const QCheckBox);
+    if (d->sizeHint.isValid())
+        return d->sizeHint;
     ensurePolished();
     QFontMetrics fm = fontMetrics();
-    QStyleOptionButton opt = d->getStyleOption();
+    QStyleOptionButton opt;
+    initStyleOption(&opt);
     QSize sz = style()->itemTextRect(fm, QRect(0, 0, 1, 1), Qt::TextShowMnemonic, false,
                                      text()).size();
     if (!opt.icon.isNull())
         sz = QSize(sz.width() + opt.iconSize.width() + 4, qMax(sz.height(), opt.iconSize.height()));
-    return (style()->sizeFromContents(QStyle::CT_CheckBox, &opt, sz, this)
-            .expandedTo(QApplication::globalStrut()));
+    d->sizeHint = (style()->sizeFromContents(QStyle::CT_CheckBox, &opt, sz, this)
+                  .expandedTo(QApplication::globalStrut()));
+    return d->sizeHint;
 }
 
 /*!\reimp
 */
 void QCheckBox::paintEvent(QPaintEvent *)
 {
-    Q_D(QCheckBox);
     QStylePainter p(this);
-    QStyleOptionButton opt = d->getStyleOption();
+    QStyleOptionButton opt;
+    initStyleOption(&opt);
     p.drawControl(QStyle::CE_CheckBox, opt);
 }
 
@@ -290,8 +319,8 @@ void QCheckBox::mouseMoveEvent(QMouseEvent *e)
 /*!\reimp*/
 bool QCheckBox::hitButton(const QPoint &pos) const
 {
-    Q_D(const QCheckBox);
-    QStyleOptionButton opt = d->getStyleOption();
+    QStyleOptionButton opt;
+    initStyleOption(&opt);
     return style()->subElementRect(QStyle::SE_CheckBoxClickRect, &opt, this).contains(pos);
 }
 
@@ -324,6 +353,13 @@ void QCheckBox::nextCheckState()
 */
 bool QCheckBox::event(QEvent *e)
 {
+    Q_D(QCheckBox);
+    if (e->type() == QEvent::StyleChange
+#ifdef Q_WS_MAC
+            || e->type() == QEvent::MacSizeChange
+#endif
+            )
+        d->setLayoutItemMargins(QStyle::SE_CheckBoxLayoutItem);
     return QAbstractButton::event(e);
 }
 

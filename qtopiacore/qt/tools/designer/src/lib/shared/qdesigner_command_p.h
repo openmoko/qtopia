@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,24 +52,18 @@
 
 #include "shared_global_p.h"
 #include "layoutinfo_p.h"
+#include "qdesigner_formwindowcommand_p.h"
+#include "qdesigner_formeditorcommand_p.h"
 
 #include <QtDesigner/layoutdecoration.h>
 
-#include <QtGui/QUndoCommand>
 #include <QtGui/QIcon>
-
 #include <QtCore/QObject>
-#include <QtCore/QPointer>
 #include <QtCore/QPair>
-#include <QtCore/QVariant>
-
-class QDesignerFormEditorInterface;
-class QDesignerFormWindowManagerInterface;
-class QDesignerFormWindowInterface;
-class QDesignerWidgetDataBaseItemInterface;
+#include <QtCore/QMap>
+#include <QtCore/QPoint>
 
 class QDesignerContainerExtension;
-class QDesignerPropertySheetExtension;
 class QDesignerMetaDataBaseItemInterface;
 
 class QDesignerMenu;
@@ -75,180 +84,7 @@ class QMainWindow;
 
 namespace qdesigner_internal {
 
-class QDesignerPromotedWidget;
 class Layout;
-
-class QDESIGNER_SHARED_EXPORT QDesignerFormEditorCommand: public QUndoCommand
-{
-
-public:
-    QDesignerFormEditorCommand(const QString &description, QDesignerFormEditorInterface *core);
-
-    QDesignerFormEditorInterface *core() const;
-
-private:
-    QPointer<QDesignerFormEditorInterface> m_core;
-};
-
-class QDESIGNER_SHARED_EXPORT QDesignerFormWindowManagerCommand: public QUndoCommand
-{
-
-public:
-    QDesignerFormWindowManagerCommand(const QString &description, QDesignerFormWindowManagerInterface *formWindowManager);
-
-    QDesignerFormWindowManagerInterface *formWindowManager() const;
-
-private:
-    QPointer<QDesignerFormWindowManagerInterface> m_formWindowManager;
-};
-
-class QDESIGNER_SHARED_EXPORT QDesignerFormWindowCommand: public QUndoCommand
-{
-
-public:
-    QDesignerFormWindowCommand(const QString &description, QDesignerFormWindowInterface *formWindow);
-
-    QDesignerFormWindowInterface *formWindow() const;
-    QDesignerFormEditorInterface *core() const;
-
-    virtual void undo();
-    virtual void redo();
-
-protected:
-    void checkObjectName(QObject *object);
-    void updateBuddies(const QString &old_name, const QString &new_name);
-    void checkSelection(QWidget *widget);
-    void checkParent(QWidget *widget, QWidget *parentWidget);
-    bool hasLayout(QWidget *widget) const;
-
-    void cheapUpdate();
-
-private:
-    QPointer<QDesignerFormWindowInterface> m_formWindow;
-};
-
-class QDESIGNER_SHARED_EXPORT SetPropertyCommand: public QDesignerFormWindowCommand
-{
-
-public:
-    SetPropertyCommand(QDesignerFormWindowInterface *formWindow);
-
-    void init(QObject *object, const QString &propertyName, const QVariant &newValue);
-
-    QObject *object() const;
-
-    QWidget *widget() const;
-    QWidget *parentWidget() const;
-
-    inline QString propertyName() const
-    { return m_propertyName; }
-
-    inline QVariant oldValue() const
-    { return m_oldValue; }
-
-    inline void setOldValue(const QVariant &oldValue)
-    { m_oldValue = oldValue; }
-
-    inline QVariant newValue() const
-    { return m_newValue; }
-
-    inline void setNewValue(const QVariant &newValue)
-    { m_newValue = newValue; }
-
-    virtual void redo();
-    virtual void undo();
-
-    virtual int id() const;
-    virtual bool mergeWith(const QUndoCommand *other);
-
-private:
-    QString m_propertyName;
-    int m_index;
-    QPointer<QObject> m_object;
-    QPointer<QWidget> m_parentWidget;
-    QDesignerPropertySheetExtension *m_propertySheet;
-    QVariant m_oldValue;
-    QVariant m_newValue;
-    bool m_changed;
-};
-
-class QDESIGNER_SHARED_EXPORT SetFormPropertyCommand: public QDesignerFormWindowCommand
-{
-
-public:
-    SetFormPropertyCommand(QDesignerFormWindowInterface *formWindow);
-
-    void init(QObject *object, const QString &propertyName, const QVariant &newValue);
-
-    inline QString propertyName() const
-    { return m_propertyName; }
-
-    inline QVariant oldValue() const
-    { return m_oldValue; }
-
-    inline void setOldValue(const QVariant &oldValue)
-    { m_oldValue = oldValue; }
-
-    inline QVariant newValue() const
-    { return m_newValue; }
-
-    inline void setNewValue(const QVariant &newValue)
-    { m_newValue = newValue; }
-
-    virtual void redo();
-    virtual void undo();
-
-    virtual int id() const;
-    virtual bool mergeWith(const QUndoCommand *other);
-
-private:
-    QWidget* containerWindow(QWidget *widget);
-    void updateFormWindowGeometry(const QVariant &value);
-
-private:
-    int m_index;
-    bool m_changed;
-    QDesignerPropertySheetExtension *m_propertySheet;
-    QString m_propertyName;
-    QVariant m_oldValue;
-    QVariant m_newValue;
-};
-
-class QDESIGNER_SHARED_EXPORT ResetPropertyCommand: public QDesignerFormWindowCommand
-{
-
-public:
-    ResetPropertyCommand(QDesignerFormWindowInterface *formWindow);
-
-    void init(QObject *object, const QString &propertyName);
-
-    QObject *object() const;
-    QObject *parentObject() const;
-
-    inline QString propertyName() const
-    { return m_propertyName; }
-
-    inline QVariant oldValue() const
-    { return m_oldValue; }
-
-    inline void setOldValue(const QVariant &oldValue)
-    { m_oldValue = oldValue; }
-
-    virtual void redo();
-    virtual void undo();
-
-protected:
-    virtual bool mergeWith(const QUndoCommand *other) { Q_UNUSED(other); return false; }
-
-private:
-    QString m_propertyName;
-    int m_index;
-    QPointer<QObject> m_object;
-    QPointer<QObject> m_parentObject;
-    QDesignerPropertySheetExtension *m_propertySheet;
-    QVariant m_oldValue;
-    bool m_changed;
-};
 
 class QDESIGNER_SHARED_EXPORT InsertWidgetCommand: public QDesignerFormWindowCommand
 {
@@ -262,6 +98,8 @@ public:
     virtual void undo();
 
 private:
+    void refreshBuddyLabels();
+
     QPointer<QWidget> m_widget;
     QDesignerLayoutDecorationExtension::InsertMode m_insertMode;
     QPair<int, int> m_cell;
@@ -355,6 +193,7 @@ private:
     QPoint m_newPos;
     QPointer<QWidget> m_oldParentWidget;
     QPointer<QWidget> m_newParentWidget;
+    QList<QWidget *> m_oldParentList;
 };
 
 class QDESIGNER_SHARED_EXPORT ChangeLayoutItemGeometry: public QDesignerFormWindowCommand
@@ -420,25 +259,32 @@ private:
 class QDESIGNER_SHARED_EXPORT PromoteToCustomWidgetCommand : public QDesignerFormWindowCommand
 {
 public:
+    typedef QList<QPointer<QWidget> > WidgetList;
+    
     PromoteToCustomWidgetCommand(QDesignerFormWindowInterface *formWindow);
-    void init(QDesignerWidgetDataBaseItemInterface *item, QWidget *widget);
+
+    void init(const WidgetList &widgets, const QString &customClassName);
     virtual void redo();
     virtual void undo();
+
 private:
-    QWidget *m_widget;
-    QDesignerPromotedWidget *m_promoted;
-    friend class DemoteFromCustomWidgetCommand;
+    void updateSelection();
+    WidgetList m_widgets;
+    QString m_customClassName;
 };
 
 class QDESIGNER_SHARED_EXPORT DemoteFromCustomWidgetCommand : public QDesignerFormWindowCommand
 {
 public:
+    typedef PromoteToCustomWidgetCommand::WidgetList WidgetList;
+
     DemoteFromCustomWidgetCommand(QDesignerFormWindowInterface *formWindow);
-    void init(QDesignerPromotedWidget *promoted);
+
+    void init(const WidgetList &promoted);
     virtual void redo();
     virtual void undo();
 private:
-    PromoteToCustomWidgetCommand *m_promote_cmd;
+    PromoteToCustomWidgetCommand m_promote_cmd;
 };
 
 class QDESIGNER_SHARED_EXPORT LayoutCommand: public QDesignerFormWindowCommand
@@ -483,8 +329,20 @@ private:
     QList<QWidget*> m_widgets;
     QPointer<QWidget> m_layoutBase;
     QPointer<Layout> m_layout;
-    int m_margin;
+    int m_leftMargin;
+    int m_topMargin;
+    int m_rightMargin;
+    int m_bottomMargin;
     int m_spacing;
+    int m_horizSpacing;
+    int m_vertSpacing;
+    bool m_leftMarginChanged;
+    bool m_topMarginChanged;
+    bool m_rightMarginChanged;
+    bool m_bottomMarginChanged;
+    bool m_spacingChanged;
+    bool m_horizSpacingChanged;
+    bool m_vertSpacingChanged;
 };
 
 class QDESIGNER_SHARED_EXPORT ToolBoxCommand: public QDesignerFormWindowCommand
@@ -1001,64 +859,81 @@ private:
     ActionData m_actionData;
 };
 
-class QDESIGNER_SHARED_EXPORT InsertActionIntoCommand : public QDesignerFormWindowCommand
+class QDESIGNER_SHARED_EXPORT ActionInsertionCommand : public QDesignerFormWindowCommand
+{
+
+protected:
+    ActionInsertionCommand(const QString &text, QDesignerFormWindowInterface *formWindow);
+
+public:
+    void init(QWidget *parentWidget, QAction *action, QAction *beforeAction, bool update = true);
+
+protected:
+    void insertAction();
+    void removeAction();
+
+private:
+    QWidget *m_parentWidget;
+    QAction *m_action;
+    QAction *m_beforeAction;
+    bool m_update;
+};
+
+class QDESIGNER_SHARED_EXPORT InsertActionIntoCommand : public ActionInsertionCommand
 {
 
 public:
     InsertActionIntoCommand(QDesignerFormWindowInterface *formWindow);
 
-    void init(QWidget *parentWidget, QAction *action, QAction *beforeAction, bool update = true);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    QWidget *m_parentWidget;
-    QAction *m_action;
-    QAction *m_beforeAction;
-    bool m_update;
+    virtual void redo() {  insertAction(); }
+    virtual void undo() {  removeAction(); }
 };
 
-class QDESIGNER_SHARED_EXPORT RemoveActionFromCommand : public QDesignerFormWindowCommand
+class QDESIGNER_SHARED_EXPORT RemoveActionFromCommand : public ActionInsertionCommand
 {
 
 public:
     RemoveActionFromCommand(QDesignerFormWindowInterface *formWindow);
 
-    void init(QWidget *parentWidget, QAction *action, QAction *beforeAction, bool update = true);
-    virtual void redo();
-    virtual void undo();
+    virtual void redo()  {  removeAction(); }
+    virtual void undo()  {  insertAction(); }
+};
+    
+class QDESIGNER_SHARED_EXPORT MenuActionCommand : public QDesignerFormWindowCommand
+{
+public:
+    void init(QAction *action, QAction *actionBefore, QWidget *associatedWidget, QWidget *objectToSelect);
+
+protected:    
+    MenuActionCommand(const QString &text, QDesignerFormWindowInterface *formWindow);
+    void insertMenu();
+    void removeMenu();
 
 private:
-    QWidget *m_parentWidget;
     QAction *m_action;
-    QAction *m_beforeAction;
-    bool m_update;
+    QAction *m_actionBefore;
+    QWidget *m_menuParent;
+    QWidget *m_associatedWidget;
+    QWidget *m_objectToSelect;
 };
 
-class QDESIGNER_SHARED_EXPORT AddMenuActionCommand : public QDesignerFormWindowCommand
+class QDESIGNER_SHARED_EXPORT AddMenuActionCommand : public MenuActionCommand 
 {
 
 public:
     AddMenuActionCommand(QDesignerFormWindowInterface *formWindow);
-    void init(QAction *action, QWidget *parent);
-    virtual void redo();
-    virtual void undo();
-private:
-    QAction *m_action;
-    QWidget *m_parent;
+    virtual void redo() { insertMenu(); }
+    virtual void undo() { removeMenu(); }
 };
 
-class QDESIGNER_SHARED_EXPORT RemoveMenuActionCommand : public QDesignerFormWindowCommand
+class QDESIGNER_SHARED_EXPORT RemoveMenuActionCommand : public MenuActionCommand 
 {
 
 public:
     RemoveMenuActionCommand(QDesignerFormWindowInterface *formWindow);
-    void init(QAction *action, QWidget *parent);
-    virtual void redo();
-    virtual void undo();
-private:
-    QAction *m_action;
-    QWidget *m_parent;
+
+    virtual void redo() { removeMenu(); }
+    virtual void undo() { insertMenu(); }
 };
 
 class QDESIGNER_SHARED_EXPORT CreateSubmenuCommand : public QDesignerFormWindowCommand
@@ -1066,12 +941,13 @@ class QDESIGNER_SHARED_EXPORT CreateSubmenuCommand : public QDesignerFormWindowC
 
 public:
     CreateSubmenuCommand(QDesignerFormWindowInterface *formWindow);
-    void init(QDesignerMenu *menu, QAction *action);
+    void init(QDesignerMenu *menu, QAction *action, QObject *m_objectToSelect = 0);
     virtual void redo();
     virtual void undo();
 private:
     QAction *m_action;
     QDesignerMenu *m_menu;
+    QObject *m_objectToSelect;
 };
 
 } // namespace qdesigner_internal

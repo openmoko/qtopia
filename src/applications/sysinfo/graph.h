@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -50,16 +50,6 @@ protected:
     virtual void paintEvent(QPaintEvent *pe);
     virtual void drawContents( QPainter *p ) = 0;
     const GraphData *data;
-};
-
-class PieGraph : public Graph
-{
-    Q_OBJECT
-public:
-    PieGraph( QWidget *parent = 0, Qt::WFlags f = 0 );
-
-protected:
-    virtual void drawContents( QPainter *p );
 };
 
 class BarGraph : public Graph

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -85,7 +85,7 @@ BluetoothUI::BluetoothUI( BluetoothConfig* bconfig, QWidget* parent, Qt::WFlags 
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this, true );
 #endif
-    setObjectName("bluetooth-menu");
+    setObjectName("bluetooth-dun");
 }
 
 BluetoothUI::~BluetoothUI()
@@ -141,7 +141,7 @@ void BluetoothUI::init()
 
     vb->addLayout( hBox );
 
-    connect( options, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
+    connect( options, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
             this, SLOT(updateUserHint(QListWidgetItem*,QListWidgetItem*)));
     options->setCurrentRow( 0 );
 

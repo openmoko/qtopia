@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -76,20 +76,6 @@ private:
     QString m_control;
     QMediaContent *m_content;
     QMediaControlNotifierPrivate *m_d;
-};
-
-class QTOPIAMEDIA_EXPORT KeyFilter : public QObject
-{
-public:
-    KeyFilter( QObject* subject, QObject* target, QObject* parent = 0 );
-
-    void addKey( int key );
-
-    bool eventFilter( QObject* o, QEvent* e );
-
-private:
-    QObject *m_target;
-    QSet<int> m_keys;
 };
 
 #endif // QMEDIATOOLS_H

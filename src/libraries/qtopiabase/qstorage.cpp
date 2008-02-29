@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,32 +19,36 @@
 **
 ****************************************************************************/
 
+#include <qstorage.h>
+
 #include <QSettings>
 #include <QTimer>
 #include <QFile>
 #include <QDir>
 #include <QStringList>
 #include <QHash>
-#include <qstorage.h>
 #include <QTimer>
+#ifndef QTOPIA_HOST
+#if defined(Q_WS_QWS)
+#include <qwsdisplay_qws.h>
+#elif defined(Q_WS_X11)
+#include <qx11info_x11.h>
+#endif
+#endif
 
 #include <qtopiachannel.h>
 #include <qtopialog.h>
 #include <qtopianamespace.h>
 
 #include <stdio.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#ifdef Q_OS_LINUX
 #include <unistd.h>
 #include <sys/vfs.h>
 #include <mntent.h>
-#endif
 
-#ifdef Q_WS_QWS
-#include <qwsdisplay_qws.h>
+#ifdef QT_LSB
+#include <sys/statvfs.h>
 #endif
 
 /*!
@@ -68,6 +72,7 @@ public:
         : channel( 0 )
         , documentsFileSystem( 0 )
         , applicationsFileSystem( 0 )
+        , suppressMessages(false)
     {
     }
 
@@ -75,6 +80,7 @@ public:
     QtopiaChannel *channel;
     QFileSystem *documentsFileSystem;
     QFileSystem *applicationsFileSystem;
+    bool suppressMessages;
 };
 
 /*! Constructor that determines the current mount points of the filesystem.
@@ -88,12 +94,16 @@ QStorageMetaInfo::QStorageMetaInfo( QObject *parent )
 {
     d = new QStorageMetaInfoPrivate;
 
-#ifdef Q_WS_QWS
+#ifndef QTOPIA_HOST
+#if defined(Q_WS_QWS)
     if ( qt_fbdpy )
+#elif defined(Q_WS_X11)
+    if (QX11Info::display())
+#endif
     {
         d->channel = new QtopiaChannel( "QPE/QStorage", this );
-        connect( d->channel, SIGNAL(received(const QString&,const QByteArray&)),
-                this, SLOT(cardMessage(const QString&,const QByteArray&)) );
+        connect( d->channel, SIGNAL(received(QString,QByteArray)),
+                this, SLOT(cardMessage(QString,QByteArray)) );
     }
 #endif
     update();
@@ -187,10 +197,17 @@ const QFileSystem *QStorageMetaInfo::applicationsFileSystem()
     and we need to refresh our internal information.
 */
 
-void QStorageMetaInfo::cardMessage( const QString& msg, const QByteArray& )
+void QStorageMetaInfo::cardMessage( const QString& message, const QByteArray& data )
 {
-    if ( msg == "updateStorage()" )
+    if ( message == "updateStorage()" )
         update();
+    else if( message == "mounting(QString)" || message == "unmounting(QString)" ) {
+        QDataStream in(data);
+        QString mountpoint;
+        in >> mountpoint;
+
+        update(mountpoint, message == "mounting(QString)" ? true : false);
+    }
 }
 
 /*! Updates the mount and free space information for each mount
@@ -200,7 +217,7 @@ void QStorageMetaInfo::cardMessage( const QString& msg, const QByteArray& )
 void QStorageMetaInfo::update()
 {
     QSettings cfg(QLatin1String("Trolltech"), QLatin1String("Storage"));
-#ifdef Q_OS_LINUX
+#if !defined(QT_LSB)
     mntent *me;
     FILE *mntfp = NULL;
     QHash<QString, QString> mountEntries;
@@ -358,8 +375,43 @@ void QStorageMetaInfo::update()
         else
             fs->update();
     }
-    emit disksChanged();
+    if(d->suppressMessages == false)
+        emit disksChanged();
 #endif
+}
+
+/*!
+    Update the system mounted at \a mountpoint, marking whether it is \a connected.
+*/
+void QStorageMetaInfo::update(QString& mountpoint, bool connected)
+{
+    d->suppressMessages = true;
+    update();
+    d->suppressMessages = false;
+    foreach(QFileSystem *fs, d->fileSystems)
+    {
+        if(fs->disk() == mountpoint && fs->isRemovable())
+        {
+            QString path;
+            mntent *me;
+            FILE *mntfp = NULL;
+            QHash<QString, QString> mountEntries;
+
+            mntfp = setmntent( "/proc/mounts", "r" );
+            me = getmntent(mntfp);
+            while(me != NULL)
+            {
+                mountEntries[me->mnt_fsname] = me->mnt_dir;
+                me = getmntent(mntfp);
+            }
+            endmntent(mntfp);
+            if(mountEntries.contains(fs->disk()))
+                path=mountEntries[fs->disk()];
+
+            fs->update(connected, path);
+        }
+    }
+    emit disksChanged();
 }
 
 /*!
@@ -449,10 +501,14 @@ QStringList QStorageMetaInfo::fileSystemNames( QFileSystemFilter *filter, bool c
   a CF card has been inserted or removed.
 */
 
-Q_GLOBAL_STATIC(QStorageMetaInfo,storageMetaInfoInstance);
-
 /*!
     Returns a pointer to a static instance of QStorageMetaInfo.
+*/
+Q_GLOBAL_STATIC(QStorageMetaInfo, storageMetaInfoInstance);
+
+/*!
+    Singleton accessor for an application wide QStorageMetaInfo. This is the preferred means for
+    creating a QStorageMetaInfo object.
 */
 QStorageMetaInfo *QStorageMetaInfo::instance()
 {
@@ -576,7 +632,14 @@ void QFileSystem::update()
     _d->blockSize = 0;
     _d->totalBlocks = 0;
     _d->availBlocks = 0;
-#ifdef Q_OS_LINUX
+#ifdef QT_LSB
+    struct statvfs fs;
+    if (_d->connected && statvfs(_d->path.toLocal8Bit().constData(), &fs) == 0) {
+        _d->blockSize = fs.f_bsize;
+        _d->totalBlocks = fs.f_blocks;
+        _d->availBlocks = fs.f_bavail;
+    }
+#else
     struct statfs fs;
     if ( _d->connected && statfs( _d->path.toLocal8Bit(), &fs ) ==0 ) {
         _d->blockSize = fs.f_bsize;

@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/xml/qxml.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/xml/qxml.cpp -->
 <head>
-  <title>Qt 4.2: QXmlReader Class Reference</title>
+  <title>Qt 4.3: QXmlReader Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,8 +12,9 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QXmlReader Class Reference<br /><sup><sup>[<a href="qtxml.html">QtXml</a> module]</sup></sup></h1>
-<p>The QXmlReader class provides an interface for XML readers (i.e. parsers). <a href="#details">More...</a></p>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QXmlReader Class Reference<br /><span class="small-subtitle">[<a href="qtxml.html">QtXml</a> module]</span>
+</h1>
+<p>The QXmlReader class provides an interface for XML readers (i.e&#x2e; parsers). <a href="#details">More...</a></p>
 <pre> #include &lt;QXmlReader&gt;</pre><p>Inherited by <a href="qxmlsimplereader.html">QXmlSimpleReader</a>.</p>
 <p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
 <ul>
@@ -33,7 +34,7 @@
 <li><div class="fn"/>virtual bool <b><a href="qxmlreader.html#hasFeature">hasFeature</a></b> ( const QString &amp; <i>name</i> ) const = 0</li>
 <li><div class="fn"/>virtual bool <b><a href="qxmlreader.html#hasProperty">hasProperty</a></b> ( const QString &amp; <i>name</i> ) const = 0</li>
 <li><div class="fn"/>virtual QXmlLexicalHandler * <b><a href="qxmlreader.html#lexicalHandler">lexicalHandler</a></b> () const = 0</li>
-<li><div class="fn"/>virtual bool <b><a href="qxmlreader.html#parse-2">parse</a></b> ( const QXmlInputSource * <i>input</i> ) = 0</li>
+<li><div class="fn"/>virtual bool <b><a href="qxmlreader.html#parse">parse</a></b> ( const QXmlInputSource * <i>input</i> ) = 0</li>
 <li><div class="fn"/>virtual void * <b><a href="qxmlreader.html#property">property</a></b> ( const QString &amp; <i>name</i>, bool * <i>ok</i> = 0 ) const = 0</li>
 <li><div class="fn"/>virtual void <b><a href="qxmlreader.html#setContentHandler">setContentHandler</a></b> ( QXmlContentHandler * <i>handler</i> ) = 0</li>
 <li><div class="fn"/>virtual void <b><a href="qxmlreader.html#setDTDHandler">setDTDHandler</a></b> ( QXmlDTDHandler * <i>handler</i> ) = 0</li>
@@ -47,12 +48,12 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QXmlReader class provides an interface for XML readers (i.e. parsers).</p>
-<p>This abstract class provides an interface for all of Qt's XML readers. Currently there is only one implementation of a reader included in Qt's XML module: <a href="qxmlsimplereader.html">QXmlSimpleReader</a>. In future releases there might be more readers with different properties available (e.g. a validating parser).</p>
+<p>The QXmlReader class provides an interface for XML readers (i.e&#x2e; parsers).</p>
+<p>This abstract class provides an interface for all of Qt's XML readers. Currently there is only one implementation of a reader included in Qt's XML module: <a href="qxmlsimplereader.html">QXmlSimpleReader</a>. In future releases there might be more readers with different properties available (e.g&#x2e; a validating parser).</p>
 <p>The design of the XML classes follows the <a href="http://www.saxproject.org/">SAX2 Java interface</a>, with the names adapted to fit Qt naming conventions. It should be very easy for anybody who has worked with SAX2 to get started with the Qt XML classes.</p>
 <p>All readers use the class <a href="qxmlinputsource.html">QXmlInputSource</a> to read the input document. Since you are normally interested in particular content in the XML document, the reader reports the content through special handler classes (<a href="qxmldtdhandler.html">QXmlDTDHandler</a>, <a href="qxmldeclhandler.html">QXmlDeclHandler</a>, <a href="qxmlcontenthandler.html">QXmlContentHandler</a>, <a href="qxmlentityresolver.html">QXmlEntityResolver</a>, <a href="qxmlerrorhandler.html">QXmlErrorHandler</a> and <a href="qxmllexicalhandler.html">QXmlLexicalHandler</a>), which you must subclass, if you want to process the contents.</p>
 <p>Since the handler classes only describe interfaces you must implement all the functions. We provide the <a href="qxmldefaulthandler.html">QXmlDefaultHandler</a> class to make this easier: it implements a default behavior (do nothing) for all functions, so you can subclass it and just implement the functions you are interested in.</p>
-<p>Features and properties of the reader can be set with <a href="qxmlreader.html#setFeature">setFeature</a>() and <a href="qxmlreader.html#setProperty">setProperty</a>() respectively. You can set the reader to use your own subclasses with <a href="qxmlreader.html#setEntityResolver">setEntityResolver</a>(), <a href="qxmlreader.html#setDTDHandler">setDTDHandler</a>(), <a href="qxmlreader.html#setContentHandler">setContentHandler</a>(), <a href="qxmlreader.html#setErrorHandler">setErrorHandler</a>(), <a href="qxmlreader.html#setLexicalHandler">setLexicalHandler</a>() and <a href="qxmlreader.html#setDeclHandler">setDeclHandler</a>(). The parse itself is started with a call to <a href="qxmlreader-obsolete.html#parse">parse</a>().</p>
+<p>Features and properties of the reader can be set with <a href="qxmlreader.html#setFeature">setFeature</a>() and <a href="qxmlreader.html#setProperty">setProperty</a>() respectively. You can set the reader to use your own subclasses with <a href="qxmlreader.html#setEntityResolver">setEntityResolver</a>(), <a href="qxmlreader.html#setDTDHandler">setDTDHandler</a>(), <a href="qxmlreader.html#setContentHandler">setContentHandler</a>(), <a href="qxmlreader.html#setErrorHandler">setErrorHandler</a>(), <a href="qxmlreader.html#setLexicalHandler">setLexicalHandler</a>() and <a href="qxmlreader.html#setDeclHandler">setDeclHandler</a>(). The parse itself is started with a call to <a href="qxmlreader.html#parse">parse</a>().</p>
 <p>See also <a href="qxmlsimplereader.html">QXmlSimpleReader</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -86,8 +87,7 @@
 <h3 class="fn"><a name="lexicalHandler"></a><a href="qxmllexicalhandler.html">QXmlLexicalHandler</a> * QXmlReader::lexicalHandler () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the lexical handler or 0 if none was set.</p>
 <p>See also <a href="qxmlreader.html#setLexicalHandler">setLexicalHandler</a>().</p>
-<h3 class="fn"><a name="parse-2"></a>bool QXmlReader::parse ( const <a href="qxmlinputsource.html">QXmlInputSource</a> * <i>input</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
+<h3 class="fn"><a name="parse"></a>bool QXmlReader::parse ( const <a href="qxmlinputsource.html">QXmlInputSource</a> * <i>input</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Reads an XML document from <i>input</i> and parses it. Returns true if the parsing was successful; otherwise returns false.</p>
 <h3 class="fn"><a name="property"></a>void * QXmlReader::property ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, bool * <i>ok</i> = 0 ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>If the reader has the property <i>name</i>, this function returns the value of the property; otherwise the return value is undefined.</p>
@@ -121,6 +121,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,11 +23,11 @@
 #include "folderlistview.h"
 
 #include <qtopiaapplication.h>
+#include <qmailtimestamp.h>
 
 #include "searchview.h"
 #include "accountlist.h"
 #include "emailfolderlist.h"
-#include "common.h"
 
 #include <qmessagebox.h>
 #include <qcursor.h>
@@ -36,46 +36,46 @@
 #include <qevent.h>
 #include <QHeaderView>
 
-using namespace QtMail;
+static QPixmap* pm_normal = 0;
+static QPixmap* pm_unread = 0;
+static QPixmap* pm_unsent = 0;
 
-FolderListItem::FolderListItem(QTreeWidget *parent, Folder *in)
-    : QTreeWidgetItem( parent )
+static void ensurePixmaps()
 {
-    _folder = in;
-    _statusText = "";
-    _highlight = false;
-
-    QString pixmap = "folder"; // No tr
-    if ( _folder->folderType() == FolderTypeSearch ) {
-        pixmap = "find"; // No tr
-    } else if ( _folder->folderType() == FolderTypeSystem ) {
-        if ( ((SystemFolder *) _folder)->systemType() == SystemTypeSearch )
-            pixmap = "find"; // No tr
+    if ( !pm_normal ) {
+	// These should be replaced once new icons are available
+        pm_normal = new QPixmap(":image/flag_normal");
+        pm_unread = new QPixmap(":image/flag_unread");
+        pm_unsent = new QPixmap(":image/flag_tosend");
     }
-
-    setText(0, _folder->displayName() );
-    int extent = qApp->style()->pixelMetric(QStyle::PM_SmallIconSize);
-    setIcon( 0, QIcon( ":icon/"+pixmap ).pixmap(extent));
 }
 
-FolderListItem::FolderListItem(QTreeWidgetItem *parent, Folder *in)
-    : QTreeWidgetItem(parent)
+FolderListItem::FolderListItem(QTreeWidget *parent, Folder *in, const QString& mailboxName)
+    : QTreeWidgetItem( parent ),
+      _folder(in),
+      _highlight(false)
 {
-    _folder = in;
-    _statusText = "";
-    _highlight = false;
+    init(mailboxName);
+}
 
-    QString pixmap = "folder"; // No tr
-    if ( _folder->folderType() == FolderTypeSearch ) {
-        pixmap = "find"; // No tr
-    } else if ( _folder->folderType() == FolderTypeSystem ) {
-        if ( ((SystemFolder *) _folder)->systemType() == SystemTypeSearch )
-            pixmap = "find"; // No tr
-    }
+FolderListItem::FolderListItem(QTreeWidgetItem *parent, Folder *in, const QString& mailboxName)
+    : QTreeWidgetItem(parent),
+      _folder(in),
+      _highlight(false)
+{
+    init(mailboxName);
+}
+
+void FolderListItem::init(QString name)
+{
+    if (name.isNull())
+        name = _folder->mailbox();
+
+    QIcon icon = MailboxList::mailboxIcon(name);
 
     setText(0, _folder->displayName() );
     int extent = qApp->style()->pixelMetric(QStyle::PM_SmallIconSize);
-    setIcon( 0, QIcon( ":icon/"+pixmap ).pixmap(extent));
+    setIcon( 0, icon.pixmap(extent));
 }
 
 Folder* FolderListItem::folder()
@@ -83,18 +83,18 @@ Folder* FolderListItem::folder()
     return _folder;
 }
 
-void FolderListItem::setStatusText( const QString &str, bool highlight, const QColor &col )
+void FolderListItem::setStatusText( const QString &str, bool highlight, IconType type )
 {
     _statusText = str;
     _highlight = highlight;
-    _col = col;
+    _type = type;
 }
 
-void FolderListItem::statusText( QString *str, bool *highlight, QColor *col )
+void FolderListItem::statusText( QString *str, bool *highlight, IconType *type )
 {
     *str = _statusText;
     *highlight = _highlight;
-    *col = _col;
+    *type = _type;
 }
 
 int FolderListItem::depth()
@@ -108,87 +108,6 @@ int FolderListItem::depth()
     return count;
 }
 
-#ifdef QTOPIA4_TODO
-void FolderListItem::paintCell( QPainter *p, const QColorGroup &cg, int column, int width, int alignment )
-{
-    QColorGroup _cg( cg );
-
-    QString t = text( column );
-
-    QTreeWidget *lv = listView();
-    int r = lv ? lv->itemMargin() : 1;
-    const QPixmap * icon = pixmap( column );
-
-    p->fillRect( 0, 0, width, height(), cg.brush( QColorGroup::Base ) );
-
-    int marg = r;
-    if ( isSelected() &&
-         (column==0 || listView()->allColumnsShowFocus()) ) {
-        p->fillRect( r - marg, 0, width - r + marg, height(),
-                     cg.brush( QColorGroup::Highlight ) );
-        p->setPen( cg.highlightedText() );
-    } else {
-        p->setPen( cg.text() );
-    }
-
-    if ( icon ) {
-        p->drawPixmap( r, (height()-icon->height())/2, *icon );
-        r += icon->width() + listView()->itemMargin();
-    }
-
-    if ( !t.isEmpty() ) {
-        if ( ! (alignment & AlignTop | alignment & AlignBottom) )
-            alignment |= AlignVCenter;
-
-
-        if ( !_statusText.isEmpty() ) {
-            if ( _highlight ) {
-                QFont font = p->font();
-                font.setBold( true );
-                p->setFont( font );
-            }
-
-            QRect rBound;
-
-            p->drawText( r, 0, width-marg-r, height(), alignment, t, -1, &rBound );
-            r += rBound.width();
-
-            if ( !isSelected() && _highlight ) {
-                _cg.setColor( QColorGroup::Text, _col );
-                p->setPen( _cg.text() );
-            }
-
-            p->drawText( r, 0, width-marg-r, height(), alignment, _statusText);
-        } else {
-            p->drawText( r, 0, width-marg-r, height(), alignment, t );
-        }
-
-    }
-
-    _cg.setColor( QColorGroup::Text, column );
-}
-
-int FolderListItem::width( const QFontMetrics& fm,  const QTreeWidget* lv, int c ) const
-{
-    int w;
-    if ( !_statusText.isEmpty() ) {
-        QFont font = lv->font();
-        font.setBold( _highlight );
-        QFontMetrics fm2( font );
-
-        w = fm2.width( text( c ) + _statusText ) + lv->itemMargin() * 2;
-    } else {
-        w = fm.width( text( c ) ) + lv->itemMargin() * 2;
-    }
-
-    const QPixmap * pm = pixmap( c );
-    if ( pm )
-        w += pm->width() + lv->itemMargin(); // ### correct margin stuff?
-
-    return qMax( w, QApplication::globalStrut().width() );
-}
-#endif
-
 /*  We want a particular layout, use sort to enforce it  */
 QString FolderListItem::key(int c, bool) const
 {
@@ -201,20 +120,20 @@ QString FolderListItem::key(int c, bool) const
     {
         // system search folder(last search) has a mailbox equal to one of the other real mailboxes,
         // but we still want it to appear last though.
-      if ( ((SystemFolder *) _folder)->isSearch() )
+      if ( static_cast<SystemFolder *>(_folder)->isSearch() )
         return ( "77" );
 
       QChar i = '7';
       QString s = _folder->mailbox();
-      if ( s == InboxString)
+      if ( s == MailboxList::InboxString)
         i = '1';
-      else if ( s == OutboxString )
+      else if ( s == MailboxList::OutboxString )
         i = '2';
-      else if ( s == DraftsString )
+      else if ( s == MailboxList::DraftsString )
         i = '3';
-      else if ( s == SentString )
+      else if ( s == MailboxList::SentString )
         i = '4';
-      else if ( s == TrashString )
+      else if ( s == MailboxList::TrashString )
         i = '5';
 
       return QString::number( type ) + i;
@@ -245,20 +164,14 @@ FolderListView::FolderListView(MailboxList *list, QWidget *parent, const char *n
 
     _mailboxList = list;
 
-    searchFolder = new SystemFolder(SystemTypeSearch, LastSearchString);
-
     FolderListItemDelegate *delegate = new FolderListItemDelegate( this );
     setItemDelegate( delegate );
 
     connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
             this, SLOT(folderChanged(QTreeWidgetItem*)) );
     header()->hide();
-    connect( &menuTimer, SIGNAL(timeout()), SLOT(showFolderMenu()) );
-    connect( this, SIGNAL(itemSelectionChanged()), SLOT(cancelMenuTimer()) );
-#ifdef QTOPIA_PHONE
     connect( this, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
              this, SLOT(itemClicked(QTreeWidgetItem*)) );
-#endif
 }
 
 FolderListView::~FolderListView()
@@ -266,29 +179,43 @@ FolderListView::~FolderListView()
 }
 
 
-Folder* FolderListView::currentFolder()
+Folder* FolderListView::currentFolder() const
 {
-    FolderListItem *item = (FolderListItem *) currentItem();
+    FolderListItem *item = currentFolderItem();
     if ( item != NULL )
         return item->folder();
 
     return NULL;
 }
 
-MailAccount* FolderListView::currentAccount()
+bool FolderListView::setCurrentFolder(const Folder* folder)
 {
-    FolderListItem *item = (FolderListItem*)currentItem();
+    QModelIndex index = model()->index( 0, 0 );
+    for ( ; index.isValid(); index = next( index ) ) {
+        FolderListItem *item = folderItemFromIndex( index );
+        if ( item->folder() == folder ) {
+            setCurrentItem( item );
+            return true;
+        }
+    }
+
+    return false;
+}
+
+MailAccount* FolderListView::currentAccount() const
+{
+    FolderListItem *item = currentFolderItem();
     MailAccount *account = 0;
 
     while (item &&
            item->folder() &&
            item->folder()->folderType() != FolderTypeAccount)
-        item = (FolderListItem*)item->parent();
+        item = static_cast<FolderListItem*>(item->parent());
 
     if (item &&
         item->folder() &&
         item->folder()->folderType() == FolderTypeAccount)
-        account = (MailAccount*)item->folder();
+        account = static_cast<MailAccount*>(item->folder());
 
     return account;
 }
@@ -296,16 +223,23 @@ MailAccount* FolderListView::currentAccount()
 void FolderListView::keyPressEvent( QKeyEvent *e )
 {
     switch( e->key() ) {
-#ifdef QTOPIA_PHONE
         case Qt::Key_Select:
-#endif
         case Qt::Key_Space:
         case Qt::Key_Return:
         case Qt::Key_Enter:
         {
+            e->accept();
             emit viewMessageList();
         }
         break;
+
+        case Qt::Key_Back:
+        {
+            e->accept();
+            emit finished();
+        }
+        break;
+
         default:  QTreeWidget::keyPressEvent( e );
     }
 }
@@ -328,17 +262,22 @@ void FolderListView::setupFolders(AccountList *list)
     for (QStringList::Iterator it = mboxList.begin(); it != mboxList.end(); ++it) {
         new FolderListItem(this, new SystemFolder(SystemTypeMailbox, *it ) );
     }
-    new FolderListItem(this, searchFolder);
+
     //build inbox
-    QListIterator<MailAccount*> itAccount = list->accountIterator();
-    FolderListItem* inbox = (FolderListItem*)topLevelItem(0);
+    FolderListItem* inbox = static_cast<FolderListItem*>(topLevelItem(0));
+
     //build all other accounts
+    QListIterator<MailAccount*> itAccount = list->accountIterator();
     while (itAccount.hasNext()) {
         MailAccount* accountInfo = itAccount.next();
-        FolderListItem* accountItem = new FolderListItem(inbox, accountInfo);
-        buildImapFolder(accountItem,accountInfo);
+        if (accountInfo->accountType() == MailAccount::POP ||
+            accountInfo->accountType() == MailAccount::IMAP) {
+            FolderListItem* accountItem = new FolderListItem(inbox, accountInfo, "");
+            buildImapFolder(accountItem,accountInfo);
+        }
     }
     setItemExpanded(inbox, true);
+    setCurrentItem(inbox);
 }
 
 QModelIndex FolderListView::next(QModelIndex mi, bool nextParent)
@@ -367,8 +306,8 @@ QTreeWidgetItem* FolderListView::next(QTreeWidgetItem *item)
 void FolderListView::updateAccountFolder(MailAccount *account)
 {
     QModelIndex index = model()->index( 0, 0 ); //inbox
-    FolderListItem *inbox_item = (FolderListItem *)itemFromIndex( index );
-    FolderListItem *item = (FolderListItem *) inbox_item->child(0);
+    FolderListItem *inbox_item = folderItemFromIndex( index );
+    FolderListItem *item = static_cast<FolderListItem *>(inbox_item->child(0));
     Folder *folder;
 
     while (item != NULL) {
@@ -378,10 +317,10 @@ void FolderListView::updateAccountFolder(MailAccount *account)
                 bool selected = selectedChildOf(item);
                 QString statusText;
                 bool statusHighlight;
-                QColor statusCol;
-                item->statusText( &statusText, &statusHighlight, &statusCol );
-        buildImapFolder(item,account); //rebuild imap subtree
-                item->setStatusText( statusText, statusHighlight, statusCol );
+                IconType type;
+                item->statusText( &statusText, &statusHighlight, &type );
+                buildImapFolder(item,account); //rebuild imap subtree
+                item->setStatusText( statusText, statusHighlight, type );
 
                 if ( selected ) {
                     setCurrentItem( item );
@@ -392,7 +331,7 @@ void FolderListView::updateAccountFolder(MailAccount *account)
                 return;
             }
         }
-        item = (FolderListItem *)next( item );
+        item = static_cast<FolderListItem *>(next( item ));
     }
 
     //if we get here, it was a new folder
@@ -409,19 +348,22 @@ void FolderListView::deleteAccountFolder(MailAccount *account)
     if(index == rootindex)
       return;
     for ( ; index.isValid(); index = next( index ) ) {
-        folder = ( (FolderListItem *) itemFromIndex( index ) )->folder();
+        folder = folderItemFromIndex( index )->folder();
         if ( folder->folderType() == FolderTypeAccount ) {
 
             //make updates
             if ( folder == account ) {
-                EmailFolderList *inbox = _mailboxList->mailbox(InboxString);
-                QListIterator<Email*> it2 = inbox->entryIterator();
-                while ( it2.hasNext() ) {
-                    Email *mail = it2.next();
-                    if ( mail->fromAccount() == account->id() ) {
-                        inbox->removeMail( mail->uuid(), true );
-                    }
-                }
+                EmailFolderList *inbox = _mailboxList->mailbox(MailboxList::InboxString);
+                QMailIdList accountMessages = inbox->messagesFromAccount(account->id());
+                foreach(QMailId id, accountMessages)
+                    inbox->removeMail(id);
+                
+//                QListIterator<Email*> it2 = inbox->entryIterator();
+//                while ( it2.hasNext() ) {
+//                   Email *mail = it2.next();
+//                    if ( mail->fromAccount() == account->id() ) {
+//                        inbox->removeMail( mail->id(), true );
+//                    }
                 delete itemFromIndex( index );
                 folderChanged( currentItem() );
                 return;
@@ -432,7 +374,7 @@ void FolderListView::deleteAccountFolder(MailAccount *account)
 
 bool FolderListView::selectedChildOf(FolderListItem *folder)
 {
-   FolderListItem *selected = (FolderListItem *) currentItem();
+   FolderListItem *selected = currentFolderItem();
 
    if (selected == NULL)
        return false;
@@ -440,7 +382,7 @@ bool FolderListView::selectedChildOf(FolderListItem *folder)
     if (folder == selected)
         return true;
 
-    while ( ( selected = (FolderListItem *) selected->parent() ) != NULL ) {
+    while ( ( selected = static_cast<FolderListItem *>( selected->parent() ) ) != NULL ) {
         if (folder == selected)
             return true;
     }
@@ -451,14 +393,14 @@ bool FolderListView::selectedChildOf(FolderListItem *folder)
 void FolderListView::changeToSystemFolder(const QString &str)
 {
     Folder *folder;
-    bool search = (str == LastSearchString);
+    bool search = (str == MailboxList::LastSearchString);
 
     QModelIndex index = model()->index( 0, 0 ); //inbox
     for ( ; index.isValid(); index = next( index ) ) {
-        FolderListItem *item = (FolderListItem *) itemFromIndex( index );
+        FolderListItem *item = folderItemFromIndex( index );
         folder = item->folder();
         if ( folder->folderType() == FolderTypeSystem ) {
-            if ( search && ((SystemFolder *) folder)->isSearch() ) {
+            if ( search && static_cast<SystemFolder *>(folder)->isSearch() ) {
                 setCurrentItem( item );
                 break;
             } else if ( folder->mailbox() == str ) {
@@ -469,16 +411,16 @@ void FolderListView::changeToSystemFolder(const QString &str)
     }
 }
 
-void FolderListView::updateFolderStatus(const QString &mailbox, const QString &txt, bool highlight, const QColor &col)
+void FolderListView::updateFolderStatus(const QString &mailbox, const QString &txt, bool highlight, IconType type)
 {
     Folder *folder;
     QModelIndex index = model()->index( 0, 0 );
     for ( ; index.isValid(); index = next( index ) ) {
-        FolderListItem *item = (FolderListItem *) itemFromIndex( index );
+        FolderListItem *item = folderItemFromIndex( index );
         folder = item->folder();
         if ( folder->folderType() == FolderTypeSystem ) {
-            if ( ( (SystemFolder *) folder )->mailbox() == mailbox ) {
-                item->setStatusText( txt, highlight, col );
+            if ( static_cast<SystemFolder *>( folder )->mailbox() == mailbox ) {
+                item->setStatusText( txt, highlight, type );
                 dataChanged( index, index );
                 return;
             }
@@ -486,29 +428,19 @@ void FolderListView::updateFolderStatus(const QString &mailbox, const QString &t
     }
 }
 
-void FolderListView::updateAccountStatus(const Folder *account, const QString &txt, bool highlight, const QColor &col)
+void FolderListView::updateAccountStatus(const Folder *account, const QString &txt, bool highlight, IconType type)
 {
     Folder *folder;
     QModelIndex index = model()->index( 0, 0 );
     for ( ; index.isValid(); index = next( index ) ) {
-        FolderListItem *item = (FolderListItem *) itemFromIndex( index );
+        FolderListItem *item = folderItemFromIndex( index );
         folder = item->folder();
         if ( folder == account ) {
-            item->setStatusText( txt, highlight, col );
+            item->setStatusText( txt, highlight, type );
             dataChanged( index, index );
             return;
         }
     }
-}
-
-void FolderListView::setLastSearch(Search *search)
-{
-    searchFolder->setSearch( search );
-}
-
-Search* FolderListView::lastSearch()
-{
-    return searchFolder->search();
 }
 
 void FolderListView::folderChanged(QTreeWidgetItem *folder)
@@ -516,13 +448,11 @@ void FolderListView::folderChanged(QTreeWidgetItem *folder)
     QString str;
 
     if ( folder == NULL ) {
-        showFolderChoice( NULL );
-        emit folderSelected( (Folder *) NULL );
+        emit folderSelected( reinterpret_cast<Folder *>( NULL ) );
         return;
     }
 
-    showFolderChoice( (FolderListItem *) folder);
-    emit folderSelected( ((FolderListItem *) folder)->folder() );
+    emit folderSelected( static_cast<FolderListItem *>(folder)->folder() );
 }
 
 void FolderListView::buildImapFolder(FolderListItem *item, MailAccount* account)
@@ -539,14 +469,13 @@ void FolderListView::buildImapFolder(FolderListItem *item, MailAccount* account)
         delete children.takeFirst();
     blockSignals(false);
 
-
-
     //build new subtree
     QListIterator<Mailbox*> it(account->mailboxes);
     while ( it.hasNext()) {
-    box = it.next();
-        if ( !box->isDeleted() && box->localCopy())
-            subfolder = new FolderListItem(getParent(item, box->pathName(), box->getDelimiter() ), (Folder *) box);
+        box = it.next();
+        if ( !box->isDeleted() && box->localCopy()) {
+            subfolder = new FolderListItem(getParent(item, box->pathName(), box->getDelimiter()), box, box->displayName());
+        }
     }
 }
 
@@ -570,7 +499,7 @@ FolderListItem* FolderListView::getParent(FolderListItem *parent, QString name, 
     index = next(index); //get first child
 
     for ( ; index.isValid(); index = next( index ) ) {
-        FolderListItem *item = (FolderListItem *) itemFromIndex( index );
+        FolderListItem *item = folderItemFromIndex( index );
         if ( item->depth() <= level )
             return parent;              //failed
 
@@ -578,17 +507,11 @@ FolderListItem* FolderListView::getParent(FolderListItem *parent, QString name, 
         if ( folder->folderType() != FolderTypeMailbox )
             return parent;              //failed
 
-        if ( ((Mailbox *) folder)->pathName() == target )
+        if ( static_cast<Mailbox *>(folder)->pathName() == target )
             return item;
     }
 
     return parent;
-}
-
-void FolderListView::cancelMenuTimer()
-{
-    if( menuTimer.isActive() )
-        menuTimer.stop();
 }
 
 void FolderListView::itemClicked(QTreeWidgetItem *i)
@@ -608,430 +531,94 @@ void FolderListView::popFolderSelected(int value)
     scrollToItem( itemFromIndex( index ) );
 }
 
-QMenu* FolderListView::folderParentMenu(QMenuBar *host)
+FolderListItem *FolderListView::folderItemFromIndex( QModelIndex index ) const
 {
-    folderBar = new QMenu(host);
-    newQueryAction = folderBar->addAction( QIcon(":icon/find"), tr("New query"),
-                                           this, SLOT( newQuery() ) );
-    modifyQueryAction = folderBar->addAction( QIcon(":icon/edit"), tr("Modify query"),
-                                              this, SLOT( modifyQuery() ) );
-    deleteFolderAction = folderBar->addAction( QIcon(":icon/trash"), tr("Delete query"),
-                                               this, SLOT( deleteFolder() ) );
-    showFolderChoice( NULL );
-
-    return folderBar;
+    return static_cast<FolderListItem *>(itemFromIndex( index ));
 }
 
-/* sets the valid choices for the parent folder menu.  Basically
-   the same as showfoldermenu()  (might join)  */
-void FolderListView::showFolderChoice(FolderListItem *item)
+FolderListItem *FolderListView::currentFolderItem() const
 {
-    // mark all as not active
-    newQueryAction->setVisible( false );
-    modifyQueryAction->setVisible( false );
-    deleteFolderAction->setVisible( false );
+    return static_cast<FolderListItem *>(currentItem());
+}
 
-    if ( item == NULL )
-        return;
-
-    Folder *folder = item->folder();
-
-    if ( folder->folderType() == FolderTypeSystem ) {
-        if ( ((SystemFolder *) folder)->systemType() != SystemTypeSearch )
-            newQueryAction->setVisible( true );
-    } else if ( folder->folderType() == FolderTypeSearch ) {
-        modifyQueryAction->setVisible( true );
-        deleteFolderAction->setVisible( true );
+void FolderListView::restoreCurrentFolder()
+{
+    if (currentIndex.isValid()) {
+	setCurrentItem( itemFromIndex( currentIndex ) );
+	scrollToItem( itemFromIndex( currentIndex ) );
     }
 }
 
-void FolderListView::showFolderMenu()
+void FolderListView::rememberCurrentFolder()
 {
-    FolderListItem *item = (FolderListItem *) currentItem();
-
-    if ( item == NULL )
-        return;
-
-    Folder *folder = item->folder();
-    QMenu *popFolder = new QMenu(this);
-    bool empty = false;
-
-    if ( folder->folderType() == FolderTypeSystem ) {
-        if ( !(folder->mailbox() == TrashString )  && !((SystemFolder *) folder)->isSearch() ) {
-            popFolder->addAction( QIcon(":icon/find"), tr( "New query" ), this, SLOT( newQuery() ) );
-        } else if ( folder->mailbox() == TrashString && ! ((SystemFolder *) folder)->isSearch() ) {
-            popFolder->addAction( QIcon(":icon/trash"), tr( "Empty trash" ), this, SIGNAL( emptyFolder() ) );
-        } else {
-            empty = true;
-        }
-    } else if ( folder->folderType() == FolderTypeSearch ) {
-        popFolder->addAction( QIcon(":icon/edit"), tr("Modify query"), this, SLOT( modifyQuery() ) );
-        popFolder->addSeparator();
-        popFolder->addAction( QIcon(":icon/trash"), tr("Delete query"), this, SLOT( deleteFolder() ) );
-    } else {
-        empty = true;
-    }
-
-    if ( !empty )
-        popFolder->popup( QCursor::pos() );
-
-}
-
-void FolderListView::mousePressEvent( QMouseEvent * e )
-{
-    QTreeWidget::mousePressEvent( e );
-    menuTimer.setSingleShot( true );
-    menuTimer.start( 500 );
-}
-
-void FolderListView::mouseReleaseEvent( QMouseEvent * e )
-{
-    QTreeWidget::mouseReleaseEvent( e );
-    menuTimer.stop();
-}
-
-void FolderListView::newQuery()
-{
-    SearchView searchView(true, this,Qt::Dialog); // No tr
-    searchView.setWindowTitle( tr("New query") );
-    searchView.setModal(true);
-
-    FolderListItem *item = (FolderListItem *) currentItem();
-    Folder *folder = item->folder();
-    searchView.setQueryBox( folder->mailbox() );
-
-    QtopiaApplication::execDialog(&searchView);
-    if (searchView.result() == QDialog::Accepted) {
-        Search *newSearch = searchView.getSearch();
-
-        Folder *newFolder = new SearchFolder(newSearch);
-        new FolderListItem(item, newFolder);
-    }
-}
-
-void FolderListView::modifyQuery()
-{
-    FolderListItem *item = (FolderListItem *) currentItem();
-    SearchView searchView(true, this,Qt::Dialog); // No tr
-    searchView.setWindowTitle( tr("Modify query") );
-
-    Folder *folder = item->folder();
-    if (folder->folderType() != FolderTypeSearch) {
-        qWarning("not a virtual folder");
-        return;
-    }
-
-    searchView.setQueryBox( folder->mailbox() );
-    searchView.setSearch( ( (SearchFolder *) folder )->search() );
-
-    QtopiaApplication::execDialog(&searchView);
-    if (searchView.result() == QDialog::Accepted) {
-        Search *newSearch = searchView.getSearch();
-        delete ( ( (SearchFolder *) folder )->search() );
-        ( (SearchFolder *) folder )->setSearch(newSearch);
-        item->setText(0, newSearch->name() );
-
-        searchView.hide();      // in case it's a slow search
-        emit folderSelected( folder );
-    }
-}
-
-void FolderListView::deleteFolder()
-{
-    FolderListItem *item = (FolderListItem *) currentItem();
-
-    if ( item == NULL )
-        return;
-
-    Folder *folder = item->folder();
-
-    if ( folder->folderType() == FolderTypeSearch ) {
-        delete folder;
-        delete item;
-
-        folderChanged( currentItem() );
-    }
-
-}
-
-void FolderListView::saveQueries(QString mainGroup, QSettings *config)
-{
-    FolderListItem *item;
-    int count = 0, posCount = 0;
-
-    QModelIndex index = model()->index( 0, 0);
-    for ( ; index.isValid(); index = next( index ) ) {
-        item = (FolderListItem *) itemFromIndex( index );
-
-        if ( item == (FolderListItem *) currentItem() ) {
-            config->beginGroup( mainGroup );
-            config->setValue("folderselected", posCount);
-            config->endGroup();
-        }
-
-        Folder *folder = item->folder();
-        if ( folder->folderType() == FolderTypeSearch ) {
-            config->beginGroup( "query_" + QString::number(count) );
-            saveSingleQuery(config, folder);
-            count++;
-            config->endGroup();
-        }
-
-        posCount++; //current position in QTreeWidget
-    }
-
-    config->beginGroup("lastsearch");
-    saveSingleQuery(config, searchFolder);
-    config->endGroup();
-
-    // save count
-    config->beginGroup(mainGroup);
-    config->setValue("querycount", count );
-    config->endGroup();
-}
-
-void FolderListView::saveSingleQuery(QSettings *config, Folder *folder)
-{
-    Search *search = NULL;
-
-    if ( folder->folderType() == FolderTypeSearch ) {
-        search = ( (SearchFolder * ) folder )->search();
-    } else if ( folder->folderType() == FolderTypeSystem ) {
-        if ( ((SystemFolder *) folder)->systemType() == SystemTypeSearch ) {
-            search = ((SystemFolder *) folder)->search();
-        }
-    }
-
-    if (search == NULL) {
-        qWarning("trying to save invalid folder");
-        return;
-    }
-
-    config->setValue("mailbox", search->mailbox() );
-    config->setValue("name", search->name() );
-    config->setValue("from", search->getFrom() );
-    config->setValue("to", search->getTo() );
-    config->setValue("subject", search->getSubject() );
-    config->setValue("body", search->getBody() );
-    config->setValue("status", (int) search->status() );
-    if ( !search->getBeforeDate().isNull() ) {
-        config->setValue("datebefore", search->getBeforeDate().toString() );
-    } else {
-        config->setValue("datebefore", "" );
-    }
-    if ( !search->getAfterDate().isNull() ) {
-        config->setValue("dateafter", search->getAfterDate().toString() );
-    } else {
-        config->setValue("dateafter", "" );
-    }
-}
-
-void FolderListView::readQueries(QString mainGroup, QSettings *config)
-{
-    SearchFolder  *sFolder;
-    Search *search;
-
-    config->beginGroup(mainGroup);
-    int count = config->value("querycount", 0).toInt();
-
-    for (int x = 0; x < count; x++) {
-        config->beginGroup( "query_" + QString::number(x) );
-        search = readSingleQuery(config);
-        sFolder = new SearchFolder(search);
-
-        Folder *folder;
-        FolderListItem *item;
-        QModelIndex index = model()->index( 0, 0 );
-        for ( ; index.isValid(); index = next( index ) ) {
-            item = (FolderListItem *) itemFromIndex( index );
-            folder = item->folder();
-            if ( folder->folderType() == FolderTypeSystem ) {
-                if ( ( (SystemFolder *) folder )->mailbox() == search->mailbox() ) {
-                    new FolderListItem( item, sFolder);
-                    break;
-                }
-            }
-        }
-        config->endGroup();
-    }
-    config->endGroup();
-
-    config->beginGroup("lastsearch");
-    search = readSingleQuery(config);
-    searchFolder->setSearch( search );
-    config->endGroup();
-
-    config->beginGroup(mainGroup);
-    count = config->value("folderselected", -1).toInt();
-    if ( count != -1 ) {
-        QModelIndex index = model()->index( 0, 0 );
-        while (count) {
-            index = next( index );
-            --count;
-        }
-        if (index.isValid()) {
-            scrollToItem( itemFromIndex( index ) );
-            setCurrentIndex( index );
-        }
-    }
-    config->endGroup();
-
-
-}
-
-Search* FolderListView::readSingleQuery(QSettings *config)
-{
-    Search *search = new Search();
-
-    search->setMailbox( config->value("mailbox", "inbox").toString() );
-    search->setMailFrom( config->value("from").toString().trimmed() );
-    search->setMailTo( config->value("to").toString().trimmed() );
-    search->setMailSubject( config->value("subject").toString().trimmed() );
-    search->setMailBody( config->value("body").toString().trimmed() );
-    search->setStatus( config->value("status", (int) Search::Any).toInt() );
-    search->setName( config->value("name").toString().trimmed() );
-
-    QString strDate = config->value("dateafter").toString();
-    if (!strDate.isEmpty())
-        search->setAfterDate( Email::parseDate(strDate).date() );
-    strDate = config->value("datebefore").toString();
-    if (!strDate.isEmpty())
-        search->setBeforeDate( Email::parseDate(strDate).date() );
-
-    return search;
-}
-
-FolderListItem *FolderListView::folderItemFromIndex( QModelIndex index )
-{
-    return (FolderListItem *)itemFromIndex( index );
+    currentIndex = indexFromItem( currentItem() );
 }
 
 /* Folder List Item Delegate */
 
 FolderListItemDelegate::FolderListItemDelegate(FolderListView *parent)
-    : QItemDelegate(parent),
+    : QtopiaItemDelegate(parent),
       mParent(parent)
 {
+    ensurePixmaps();
 }
 
 void FolderListItemDelegate::paint(QPainter *painter,
                                    const QStyleOptionViewItem &option,
                                    const QModelIndex &index) const
 {
-    Q_ASSERT(index.isValid());
-    const QAbstractItemModel *model = index.model();
-    Q_ASSERT(model);
-
     FolderListItem *item = mParent->folderItemFromIndex( index );
-    QString statusText;
     bool statusHighlight;
-    QColor statusCol;
-    if ( item )
-        item->statusText( &statusText, &statusHighlight, &statusCol );
+    statusText = QString();
+    if (item)
+        item->statusText( &statusText, &statusHighlight, &type );
 
-    QStyleOptionViewItem opt = option;
-
-    // Set color group
-    opt.palette.setCurrentColorGroup(option.state & QStyle::State_Enabled
-                                     ? QPalette::Active : QPalette::Disabled);
-
-    // set font
-    QVariant value = model->data(index, Qt::FontRole);
-    if (value.isValid())
-        opt.font = qvariant_cast<QFont>(value);
-
-    // set text alignment
-    value = model->data(index, Qt::TextAlignmentRole);
-    if (value.isValid())
-        opt.displayAlignment = QFlag(value.toInt());
-
-    // set text color
-    value = model->data(index, Qt::TextColorRole);
-    if (value.isValid() && qvariant_cast<QColor>(value).isValid())
-        opt.palette.setColor(QPalette::Text, qvariant_cast<QColor>(value));
-
-    // do layout
-
-    // decoration
-    value = model->data(index, Qt::DecorationRole);
-    QPixmap pixmap = decoration(opt, value);
-    QRect pixmapRect = (pixmap.isNull() ? QRect(0, 0, 0, 0)
-                        : QRect(QPoint(0, 0), option.decorationSize));
-
-    // display
-    QRect textRect;
-    QString text = model->data(index, Qt::DisplayRole).toString().simplified();
-    QString orgText = text;
-    QRect statusRect;
-    const int elideMargin = 6;
-    if (item && !statusText.isEmpty()) {
-        QFontMetrics fontMetrics(opt.font);
-        statusRect = QRect(0, 0, fontMetrics.width(statusText),
-                           fontMetrics.lineSpacing());
-        text += statusText;
-    }
-    if (!text.isEmpty())
-    {
-        QFontMetrics fontMetrics(opt.font);
-        textRect = QRect(0, 0, fontMetrics.width(text) + elideMargin,
-                         fontMetrics.lineSpacing());
-    }
-
-    // check
-    value = model->data(index, Qt::CheckStateRole);
-    QRect checkRect = check(opt, opt.rect, value);
-    Qt::CheckState checkState = static_cast<Qt::CheckState>(value.toInt());
-
-    QRect savedRect = opt.rect;
-    opt.rect.setWidth( pixmapRect.width() + textRect.width() + elideMargin );
-    doLayout(opt, &checkRect, &pixmapRect, &textRect, false);
-    opt.rect = savedRect;
-
-    statusRect.translate( textRect.topRight() );
-    statusRect.setWidth( statusRect.width() + 2 );
-    statusRect.setLeft( textRect.right() - statusRect.width() );
-
-    // handle rtl drawing
-    if (opt.direction == Qt::RightToLeft) {
-        checkRect.setRect( opt.rect.left() + opt.rect.width() - checkRect.width(), opt.rect.top(),
-                            checkRect.width(), checkRect.height() );
-        pixmapRect.setRect( opt.rect.left() + opt.rect.width() - pixmapRect.width() - 3, opt.rect.top(),
-                            pixmapRect.width(), pixmapRect.height() );
-        textRect.setRect( pixmapRect.left() - textRect.width(), textRect.top(),
-                            textRect.width(), textRect.height() );
-        statusRect.setRect( textRect.left() - statusRect.width(), statusRect.top(),
-                            statusRect.width(), statusRect.height() );
-    }
-
-    // draw the background color
-    if (option.showDecorationSelected && (option.state & QStyle::State_Selected)) {
-        QPalette::ColorGroup cg = option.state & QStyle::State_Enabled
-                                  ? QPalette::Normal : QPalette::Disabled;
-        painter->fillRect(option.rect, option.palette.brush(cg, QPalette::Highlight));
-    } else {
-        value = model->data(index, Qt::BackgroundColorRole);
-        if (value.isValid() && qvariant_cast<QColor>(value).isValid())
-            painter->fillRect(option.rect, qvariant_cast<QColor>(value));
-    }
-
-    // draw the item
-    if (checkRect.isValid())
-        drawCheck(painter, opt, checkRect, checkState);
-    if (pixmapRect.isValid())
-        drawDecoration(painter, opt, pixmapRect, pixmap);
-
-    // avoid drawing highlight color twice.
-    opt.palette.setColor(QPalette::Highlight, QColor(0,0,0,0));
-
-    if (!orgText.isEmpty()) {
-        drawDisplay(painter, opt, textRect, orgText);
-        drawFocus(painter, opt, textRect);
-    }
-    if (item && !statusText.isEmpty()) {
-        opt.palette.setColor( QPalette::Text, statusCol );
-        opt.font.setBold( statusHighlight );
-        drawDisplay(painter, opt, statusRect, statusText);
-        drawFocus(painter, opt, statusRect);
-    }
+    QtopiaItemDelegate::paint(painter, option, index);
 }
 
+void FolderListItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionViewItem &option,
+                     const QRect &rect, const QString &text) const
+{
+    QtopiaItemDelegate::drawDisplay(painter, option, rect, text);
+    if (!statusText.isEmpty()) {
+        QString str = statusText;
+        if (option.direction == Qt::RightToLeft) {
+            QString trim = statusText.trimmed();
+            // swap new/total counts in rtl mode
+            int sepPos = trim.indexOf( "/" );
+            if (sepPos != -1) {
+                str = trim.mid( sepPos + 1 );
+                str += "/";
+                str += trim.left( sepPos );
+            }
+        }
+        QPixmap *pm = 0;
+        if (type == UnreadMessages) {
+            pm = pm_unread;
+        } else if (type == UnsentMessages) {
+            pm = pm_unsent;
+        } else if (type == AllMessages) {
+            pm = pm_normal;
+        }
+        QFontMetrics fontMetrics(option.font);
+        int tw = fontMetrics.width(str);
+        int margin = 5;
+        int pw = margin;
+        int ph = 0;
+        if (pm) {
+            pw = pm->width() + 2*margin;
+            ph = pm->height();
+        }
+        QRect statusRect = option.direction == Qt::RightToLeft
+            ? QRect(0, rect.top(), tw + pw, rect.height())
+            : QRect(rect.left()+rect.width()-tw-pw, rect.top(), tw, rect.height());
+        
+        int v = (rect.height() - ph) / 2;
+        QRect pixRect = option.direction == Qt::RightToLeft
+            ? QRect(margin, rect.top(), pw-margin, v)
+            : QRect(rect.left()+rect.width()-pw+margin, rect.top() + v, pw-2*margin, ph);
+        painter->drawText(statusRect, Qt::AlignCenter, str);
+        if (pm)
+            painter->drawPixmap(pixRect, *pm);
+    }
+}

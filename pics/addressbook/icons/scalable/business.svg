@@ -8,9 +8,9 @@
 	 viewBox="0 0 16.552 14.067" style="overflow:visible;enable-background:new 0 0 16.552 14.067;" xml:space="preserve">
 <g>
 	<g>
-		<rect x="4.479" y="0.656" style="fill:#7D8489;stroke:#000000;stroke-width:0.25;" width="7.238" height="0.361"/>
+		<rect x="4.479" y="0.33" style="fill:#7D8489;stroke:#000000;stroke-width:0.25;" width="7.238" height="0.585"/>
 		<rect x="0.125" y="1.538" style="fill:#C58C2D;stroke:#69493E;stroke-width:0.25;" width="16.302" height="12.404"/>
-		<linearGradient id="XMLID_3_" gradientUnits="userSpaceOnUse" x1="8.2593" y1="9.5225" x2="8.2593" y2="7.4927">
+		<linearGradient id="XMLID_2_" gradientUnits="userSpaceOnUse" x1="8.2593" y1="9.3467" x2="8.2593" y2="8.7346">
 			<stop  offset="0" style="stop-color:#CDCED0"/>
 			<stop  offset="0.1397" style="stop-color:#ABADB0"/>
 			<stop  offset="0.3546" style="stop-color:#808284"/>
@@ -19,33 +19,16 @@
 			<stop  offset="0.8806" style="stop-color:#1A1A1A"/>
 			<stop  offset="0.9831" style="stop-color:#000000"/>
 		</linearGradient>
-		<path style="fill:url(#XMLID_3_);" d="M16.328,7.628c0,0-0.538,1.397-1.658,1.623c0,0-12.652,0.046-12.527,0
-			C0.481,9.161,0.19,7.628,0.19,7.628V2.169h16.138V7.628z"/>
+		<path style="fill:url(#XMLID_2_);" d="M16.328,7.628c0,0-0.538,1.397-1.658,1.623c0,0-12.652,0.046-12.527,0
+			C0.481,9.161,0.19,7.628,0.19,7.628V7.129h16.138V7.628z"/>
 		<path style="fill:#C58C2D;stroke:#69493E;stroke-width:0.25;" d="M16.313,6.997c0,0-0.536,1.398-1.659,1.621
 			c0,0-12.652,0.047-12.525,0C0.469,8.529,0.178,6.995,0.178,6.995V1.538h16.135V6.997z"/>
 		<polygon style="fill:#D4DADF;stroke:#696A6C;stroke-width:0.25;" points="8.89,9.235 8.612,10.272 7.588,10.272 7.367,9.205 
 			7.341,7.702 8.89,7.702 		"/>
-		<rect x="7.59" y="8.483" style="fill:#A6ACB3;stroke:#000000;stroke-width:0.25;" width="1.05" height="0.573"/>
-		<linearGradient id="XMLID_4_" gradientUnits="userSpaceOnUse" x1="14.0947" y1="7.4624" x2="14.0947" y2="7.346">
-			<stop  offset="0" style="stop-color:#CDCED0"/>
-			<stop  offset="0.1397" style="stop-color:#ABADB0"/>
-			<stop  offset="0.3546" style="stop-color:#808284"/>
-			<stop  offset="0.554" style="stop-color:#5E5F61"/>
-			<stop  offset="0.7316" style="stop-color:#414142"/>
-			<stop  offset="0.8806" style="stop-color:#1A1A1A"/>
-			<stop  offset="0.9831" style="stop-color:#000000"/>
-		</linearGradient>
-		<rect x="13.244" y="7.041" style="fill:url(#XMLID_4_);" width="1.701" height="0.407"/>
 		<path style="fill:#A2A8AF;stroke:#363639;stroke-width:0.25;" d="M4.575,1.358H2.626C3.538-0.026,4.56,0.155,4.56,0.155
 			L4.575,1.358z"/>
-		<path style="fill:#FFFFFF;" d="M4.477,0.374L4.473,0.155c0,0-0.84-0.289-1.752,1.094h0.339C3.702,0.416,4.179,0.383,4.477,0.374z"
-			/>
 		<path style="fill:#A2A8AF;stroke:#363639;stroke-width:0.25;" d="M11.793,1.341l1.95-0.013c-1.018-1.413-1.941-1.19-1.941-1.19
 			L11.793,1.341z"/>
-		<path style="fill:#FFFFFF;" d="M13.352,1.228l0.331-0.002c-1.018-1.414-1.812-1.068-1.812-1.068l-0.002,0.188
-			C12.155,0.353,12.656,0.37,13.352,1.228z"/>
-		<rect x="0.219" y="1.538" style="fill:#FFFFFF;" width="16.067" height="0.3"/>
 	</g>
-	<rect x="7.483" y="7.748" style="fill:#FFFFFF;" width="1.256" height="0.192"/>
 </g>
 </svg>

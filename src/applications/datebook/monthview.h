@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,25 +22,19 @@
 #define MONTHVIEW_H
 
 #include <qtopia/pim/qappointment.h>
-//#include <qtopia/qcalendarwidget.h>
 #include <qtopia/pim/qappointmentmodel.h>
 
 #include <QDateTime>
 #include <QCalendarWidget>
-#include <QBasicTimer>
 
+class QTimer;
 class DayPaintCache
 {
 public:
-    DayPaintCache() : nAllDay(false), rAllDay(false), tAllDay(false) {}
+    DayPaintCache() : allDay(false), timed(false) {}
 
-    QList<int> nLine;
-    QList<int> rLine;
-    QList<int> tLine;
-
-    bool nAllDay;
-    bool rAllDay;
-    bool tAllDay;
+    bool allDay;
+    bool timed;
 };
 
 class MonthView : public QCalendarWidget
@@ -48,17 +42,26 @@ class MonthView : public QCalendarWidget
     Q_OBJECT
 
 public:
-    MonthView(QWidget *parent = 0, const QCategoryFilter& c = QCategoryFilter());
+    MonthView(QWidget *parent = 0, const QCategoryFilter& c = QCategoryFilter(), QSet<QPimSource> set = QSet<QPimSource>());
     ~MonthView();
 
-public slots:
-    void rebuildCache();
+    bool eventFilter(QObject *o, QEvent *e);
 
+signals:
+    void closeView();
+
+public slots:
     void updateModelRange(int year, int month);
     void categorySelected( const QCategoryFilter &c );
+    void setVisibleSources( QSet<QPimSource> set);
 
 protected:
     void paintCell(QPainter *p, const QRect &cr, const QDate &cDay) const;
+
+private slots:
+    void rebuildCacheNow();
+    void rebuildCacheSoon();
+    void rebuildCache() const;
 
 private:
     void resizeAppointment(QResizeEvent *e);
@@ -66,9 +69,12 @@ private:
 
     QOccurrenceModel *model;
 
+    mutable QTimer *dirtyTimer;
+    mutable bool dirtyModel;
+
     //QList<DayPaintCache> paintCache;
-    QMap<QDate, DayPaintCache*> paintCache;
-    int line_height;
+    mutable QMap<QDate, DayPaintCache*> paintCache;
+    mutable int line_height;
 };
 
 #endif

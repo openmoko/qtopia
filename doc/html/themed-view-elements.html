@@ -28,6 +28,8 @@
 <tr valign="top" class="even"><td><tt>rect</tt></td><td>The size and position of the element. See <a href="themed-views.html#positioning-elements">Positioning Elements</a>.</td></tr>
 <tr valign="top" class="odd"><td><tt>transient</tt></td><td>If set to &quot;yes&quot; the item can change. See <a href="themed-views.html#showing-hiding-elements">Showing/Hiding Elements</a>.</td></tr>
 <tr valign="top" class="even"><td><tt>vspath</tt></td><td>The valuespace path for which expressions appearing in this element are relative to. See <a href="themed-views.html#themeexpressions">Expressions and Valuespace</a>.</td></tr>
+<tr valign="top" class="odd"><td><tt>onclick</tt></td><td>Changes the value of attributes when the item is clicked. See <a href="themed-views.html#interactive-elements">Interactive Elements</a>.</td></tr>
+<tr valign="top" class="even"><td><tt>onfocus</tt></td><td>Changes the value of attributes when the item has the focus. See <a href="themed-views.html#interactive-elements">Interactive Elements</a>.</td></tr>
 </table></p>
 <a name="page"></a>
 <h2>page</h2>
@@ -38,9 +40,11 @@
 <thead><tr valign="top" class="qt-style"><th>Attribute</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td><tt>background</tt></td><td>The image used as the background.</td></tr>
 <tr valign="top" class="even"><td><tt>base</tt></td><td>The base directory where the image data can be found relative to <tt>$QPEDIR/pics</tt>.</td></tr>
-<tr valign="top" class="odd"><td><tt>mask</tt></td><td>The mask used to set the widget shape. This is useful for the title and context bar.</td></tr>
-<tr valign="top" class="even"><td><tt>orientation</tt></td><td>The page direction (&quot;vertical&quot; or &quot;horizontal&quot;).</td></tr>
-<tr valign="top" class="odd"><td><tt>rect</tt></td><td>The size of the view. The <tt>x</tt> and <tt>y</tt> coordinates are ignored.</td></tr>
+<tr valign="top" class="odd"><td><tt>keypad</tt></td><td>If true, the item is active in keypad mode.</td></tr>
+<tr valign="top" class="even"><td><tt>mask</tt></td><td>The mask used to set the widget shape. This is useful for the title and context bar.</td></tr>
+<tr valign="top" class="odd"><td><tt>orientation</tt></td><td>The page direction (&quot;vertical&quot; or &quot;horizontal&quot;).</td></tr>
+<tr valign="top" class="even"><td><tt>rect</tt></td><td>The size of the view. The <tt>x</tt> and <tt>y</tt> coordinates are ignored.</td></tr>
+<tr valign="top" class="odd"><td><tt>color</tt></td><td>See <a href="themed-views.html#specifying-colors">Specifying Colors</a>.</td></tr>
 <tr valign="top" class="even"><td><tt>stretch</tt></td><td>The stretch points for the mask. See <a href="themed-views.html#stretching-images">Stretching Images</a>.</td></tr>
 <tr valign="top" class="odd"><td><tt>transparent</tt></td><td>Set to &quot;yes&quot; if the page is transparent.</td></tr>
 </table></p>
@@ -54,6 +58,8 @@
 <tr valign="top" class="odd"><td><tt>alpha</tt></td><td>Add an alpha channel with value in the range 0-255</td></tr>
 <tr valign="top" class="even"><td><tt>brush</tt></td><td>The color to fill the interior with. See <a href="themed-views.html#specifying-colors">Specifying Colors</a>.</td></tr>
 <tr valign="top" class="odd"><td><tt>color</tt></td><td>The color of the line. See <a href="themed-views.html#specifying-colors">Specifying Colors</a>.</td></tr>
+<tr valign="top" class="even"><td><tt>keypad</tt></td><td>If true, the item is active in keypad mode.</td></tr>
+<tr valign="top" class="odd"><td><tt>transparent</tt></td><td>Set to &quot;yes&quot; if the item is transparent.</td></tr>
 </table></p>
 <a name="line"></a>
 <h2>line</h2>
@@ -97,11 +103,13 @@
 <thead><tr valign="top" class="qt-style"><th>Attribute</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td><tt>alpha</tt></td><td>Add an alpha channel with value in the range 0-255.</td></tr>
 <tr valign="top" class="even"><td><tt>color</tt></td><td>A color to blend with the image. This allows images to be colored to match the selected color scheme. See <a href="themed-views.html#specifying-colors">Specifying Colors</a>.</td></tr>
-<tr valign="top" class="odd"><td><tt>orientation</tt></td><td>The direction to stretch the image (&quot;vertical&quot; or &quot;horizontal&quot;).</td></tr>
-<tr valign="top" class="even"><td><tt>scale</tt></td><td>If set to &quot;yes&quot;, scale the image to fit the rect. It is possible to scale in one direction only with &quot;vertical&quot; or &quot;horizontal&quot;.</td></tr>
-<tr valign="top" class="odd"><td><tt>src</tt></td><td>The image to be drawn. This may be a literal reference to a file or an expression returning a string which is a reference to a file.</td></tr>
-<tr valign="top" class="even"><td><tt>stretch</tt></td><td>The stretch points for the image. See <a href="themed-views.html#stretching-images">Stretching Images</a>.</td></tr>
-<tr valign="top" class="odd"><td><tt>tile</tt></td><td>If set to &quot;yes&quot;, tiles the entire rect with the image. This attribute is ignored if <tt>scale</tt> is set.</td></tr>
+<tr valign="top" class="odd"><td><tt>keypad</tt></td><td>If true, the item is active in keypad mode.</td></tr>
+<tr valign="top" class="even"><td><tt>orientation</tt></td><td>The direction to stretch the image (&quot;vertical&quot; or &quot;horizontal&quot;).</td></tr>
+<tr valign="top" class="odd"><td><tt>scale</tt></td><td>If set to &quot;yes&quot;, scale the image to fit the rect. It is possible to scale in one direction only with &quot;vertical&quot; or &quot;horizontal&quot;.</td></tr>
+<tr valign="top" class="even"><td><tt>src</tt></td><td>The image to be drawn. This may be a literal reference to a file or an expression returning a string which is a reference to a file.</td></tr>
+<tr valign="top" class="odd"><td><tt>stretch</tt></td><td>The stretch points for the image. See <a href="themed-views.html#stretching-images">Stretching Images</a>.</td></tr>
+<tr valign="top" class="even"><td><tt>tile</tt></td><td>If set to &quot;yes&quot;, tiles the entire rect with the image. This attribute is ignored if <tt>scale</tt> is set.</td></tr>
+<tr valign="top" class="odd"><td><tt>transparent</tt></td><td>Set to &quot;yes&quot; if the image is transparent.</td></tr>
 </table></p>
 <a name="anim"></a>
 <h2>anim</h2>
@@ -176,9 +184,10 @@
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Attribute</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td><tt>align</tt></td><td>Set the alignment of the elements. See <a href="themed-views.html#themealignment">Alignment</a>.</td></tr>
-<tr valign="top" class="even"><td><tt>orientation</tt></td><td>The direction to layout the elements (&quot;vertical&quot; or &quot;horizontal&quot;).</td></tr>
-<tr valign="top" class="odd"><td><tt>spacing</tt></td><td>The space left between elements.</td></tr>
-<tr valign="top" class="even"><td><tt>stretch</tt></td><td>When set to &quot;yes&quot;, stretch the elements to use all available space.</td></tr>
+<tr valign="top" class="even"><td><tt>keypad</tt></td><td>If true, the item is active in keypad mode.</td></tr>
+<tr valign="top" class="odd"><td><tt>orientation</tt></td><td>The direction to layout the elements (&quot;vertical&quot; or &quot;horizontal&quot;).</td></tr>
+<tr valign="top" class="even"><td><tt>spacing</tt></td><td>The space left between elements.</td></tr>
+<tr valign="top" class="odd"><td><tt>stretch</tt></td><td>When set to &quot;yes&quot;, stretch the elements to use all available space.</td></tr>
 </table></p>
 <a name="exclusive"></a>
 <h2>exclusive</h2>
@@ -212,6 +221,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

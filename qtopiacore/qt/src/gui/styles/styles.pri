@@ -19,7 +19,7 @@ SOURCES += \
 RESOURCES += styles/qstyle.qrc
 
 contains( styles, all ) {
-	styles = mac windows windowsxp
+	styles = mac windows windowsxp windowsvista
 }
 
 x11|embedded|!macx-*:styles -= mac
@@ -51,6 +51,19 @@ contains( styles, cde ) {
 	}
 } else {
 	DEFINES += QT_NO_STYLE_CDE
+}
+
+contains( styles, windowsvista ) {
+	HEADERS += styles/qwindowsvistastyle.h
+	HEADERS += styles/qwindowsvistastyle_p.h
+	SOURCES += styles/qwindowsvistastyle.cpp
+	!contains( styles, windowsxp ) {
+		message( windowsvista requires windowsxp )
+		styles += windowsxp
+		DEFINES+= QT_STYLE_WINDOWSXP
+	}
+} else {
+	DEFINES += QT_NO_STYLE_WINDOWSVISTA
 }
 
 contains( styles, windowsxp ) {

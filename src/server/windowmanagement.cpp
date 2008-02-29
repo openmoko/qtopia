@@ -1,8 +1,9 @@
+// -*-C++-*-
 /****************************************************************************
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -39,41 +40,59 @@
 class ServerLayoutManager : public QObject
 {
     Q_OBJECT
-public:
+  public:
     ServerLayoutManager();
 
-    void addDocked( QWidget *w, WindowManagement::DockArea placement, const QSize &s, int screen );
+    void addDocked(QWidget* w,
+		   WindowManagement::DockArea placement,
+		   const QSize &s,
+		   int screen);
 
-protected:
+    void showDockedWindow(QWidget *w);
+    void hideDockedWindow(QWidget *w);
+
+  protected:
     virtual void customEvent(QEvent *);
 
-private slots:
+  private slots:
     void removeWidget();
+    void updateGeometries(int screen=-1);
 
-private:
+  private:
     struct Item {
-        QWidget *w;
+        QWidget* w;
         WindowManagement::DockArea p;
         QSize fixed;
         int screen;
+        QRect geometry;
+        bool hiding;
     };
 
-    bool eventFilter( QObject *object, QEvent *event );
-    void dolayout(int screen);
+    bool eventFilter(QObject* object, QEvent* event);
+    void setWidgetGeometry(QWidget *w, const QRect &r);
+    void dolayout(int screen, bool deferUpdate=false);
     void layout(int screen);
-    Item *findWidget( const QWidget *w ) const;
+    Item* findWidget(const QWidget* w) const;
 
     QVector<QList<Item*> > docked;
+    QVector<QRect> availableGeom;
 };
 
 // define ServerLayoutManager
 ServerLayoutManager::ServerLayoutManager()
     : docked(QApplication::desktop()->numScreens())
 {
-    qApp->desktop()->installEventFilter( this );
+    QDesktopWidget *desktop = QApplication::desktop();
+    availableGeom.resize(desktop->numScreens());
+    for (int screen=0; screen < desktop->numScreens(); ++screen)
+        availableGeom[screen] = desktop->availableGeometry(screen);
+    desktop->installEventFilter(this);
 }
 
-void ServerLayoutManager::addDocked( QWidget *w, WindowManagement::DockArea placement, const QSize &s, int screen )
+void ServerLayoutManager::addDocked(QWidget* w,
+				    WindowManagement::DockArea placement,
+				    const QSize& s,
+				    int screen)
 {
     if (screen == -1)
         screen = QApplication::desktop()->primaryScreen();
@@ -89,43 +108,77 @@ void ServerLayoutManager::addDocked( QWidget *w, WindowManagement::DockArea plac
     i->p = placement;
     i->fixed = s;
     i->screen = screen;
+    i->hiding = false;
     if (!oldItem) {
-        w->installEventFilter( this );
+        w->installEventFilter(this);
         connect(w, SIGNAL(destroyed()), this, SLOT(removeWidget()));
     }
     docked[screen].append(i);
-    layout(screen);
+    dolayout(screen);
+}
+
+void ServerLayoutManager::showDockedWindow(QWidget *w)
+{
+    Item *item = findWidget(w);
+    if (item) {
+        bool wasHiding = item->hiding;
+        item->hiding = false;
+        w->show();
+        if (wasHiding)
+            layout(item->screen);
+    }
+}
+
+void ServerLayoutManager::hideDockedWindow(QWidget *w)
+{
+    Item *item = findWidget(w);
+    if (item) {
+        item->hiding = true;
+        layout(item->screen);
+    }
 }
 
 void ServerLayoutManager::removeWidget()
 {
     QWidget *w = (QWidget*)sender();
     Item *item = findWidget(w);
-    if ( item ) {
+    if (item) {
         int screen = item->screen;
-        docked[screen].removeAll( item );
+        docked[screen].removeAll(item);
         delete item;
         layout(screen);
     }
 }
 
-bool ServerLayoutManager::eventFilter( QObject *object, QEvent *event )
+bool ServerLayoutManager::eventFilter(QObject *object, QEvent *event)
 {
-    if ( object == qApp->desktop() ) {
-        if ( event->type() == QEvent::Resize ) {
-            for (int screen = 0; screen < docked.count(); ++screen)
-                layout(screen);
+    if (object == qApp->desktop()) {
+        if (event->type() == QEvent::Resize) {
+            QDesktopWidget *desktop = QApplication::desktop();
+            for (int screen=0; screen < desktop->numScreens(); ++screen) {
+                if (availableGeom[screen] != desktop->availableGeometry(screen)) {
+                    layout(screen);
+                }
+            }
         }
-        return QObject::eventFilter( object, event );
+        return QObject::eventFilter(object, event);
     }
 
     Item *item;
 
-    switch ( event->type() ) {
+    switch (event->type()) {
         case QEvent::Hide:
+            item = findWidget((QWidget *)object);
+            if (item) {
+                if (item->hiding)
+                    item->hiding = false;
+                else
+                    layout(item->screen);
+            }
+            break;
         case QEvent::Show:
-            item = findWidget( (QWidget *)object );
-            if ( item )
+            item = findWidget((QWidget *)object);
+            if (item)
                 layout(item->screen);
             break;
 
@@ -133,137 +186,188 @@ bool ServerLayoutManager::eventFilter( QObject *object, QEvent *event )
             break;
     }
 
-    return QObject::eventFilter( object, event );
+    return QObject::eventFilter(object, event);
 }
 
 class LayoutEvent : public QEvent
 {
-public:
+  public:
     LayoutEvent(int screen)
-    : QEvent(QEvent::User), _screen(screen)
-    {
-    }
+	: QEvent(QEvent::User), _screen(screen) { }
 
-    int screen() const 
-    {
-        return _screen;
-    }
+    int screen() const { return _screen; }
 
-private:
+  private:
     int _screen;
 };
 
-void ServerLayoutManager::customEvent(QEvent *e)
+void ServerLayoutManager::customEvent(QEvent* e)
 {
-    if(e->type() == QEvent::User) {
+    if (e->type() == QEvent::User) {
         dolayout(static_cast<LayoutEvent *>(e)->screen());
     } 
 }
 
 void ServerLayoutManager::layout(int screen)
 {
-    QEvent *e = new LayoutEvent(screen);
+    QEvent* e = new LayoutEvent(screen);
     QCoreApplication::postEvent(this, e);
 }
 
-void ServerLayoutManager::dolayout(int screen)
+void ServerLayoutManager::setWidgetGeometry(QWidget *w, const QRect &r)
+{
+    if (w->size() != r.size() || w->geometry().topLeft() != r.topLeft()) {
+        w->setGeometry(r.left(), r.top(), r.width(), r.height());
+    }
+}
+
+void ServerLayoutManager::updateGeometries(int screen)
+{
+    if (screen < 0) {
+        for (int i=0; i < QApplication::desktop()->numScreens(); ++i)
+            updateGeometries(i);
+        return;
+    }
+    foreach (Item *item, docked[screen]) {
+        if (item->hiding) {
+            if (item->w->isVisible()) {
+                item->w->hide();
+            }
+        } else if (item->w->isVisible()) {
+            setWidgetGeometry(item->w, item->geometry);
+        }
+    }
+}
+
+void ServerLayoutManager::dolayout(int screen, bool deferUpdate)
 {
     QDesktopWidget *desktop = QApplication::desktop();
+    QRect oldMwr(desktop->availableGeometry(screen));
     QRect mwr(desktop->screenGeometry(screen));
     qLog(UI) << "Layout screen docking" << screen;
+    foreach (Item *item, docked[screen])
+        item->geometry = item->w->geometry();
+
     foreach (Item *item, docked[screen]) {
         QWidget *w = item->w;
-        if ( !w->isVisible() )
-            continue;
         QSize sh = w->sizeHint();
         QSize fs = item->fixed.isValid() ? item->fixed : sh;
-        switch ( item->p ) {
+        switch (item->p) {
             case WindowManagement::Top:
-                w->setGeometry(mwr.left(), mwr.top(),
-                    mwr.width(), fs.height() );
-                mwr.setTop( mwr.top() + fs.height() );
+                item->geometry = QRect(mwr.left(), mwr.top(),
+                                        mwr.width(), fs.height());
+                if (w->isVisible() && !item->hiding)
+                    mwr.setTop(mwr.top() + fs.height());
                 break;
             case WindowManagement::Bottom:
-                w->setGeometry( mwr.left(), mwr.bottom()-fs.height()+1,
-                    mwr.width(), fs.height() );
-                mwr.setBottom( mwr.bottom()-fs.height() );
+                item->geometry = QRect(mwr.left(), mwr.bottom()-fs.height()+1,
+                                        mwr.width(), fs.height());
+                if (w->isVisible() && !item->hiding)
+                    mwr.setBottom(mwr.bottom()-fs.height());
                 break;
             case WindowManagement::Left:
-                w->setGeometry( mwr.left(), mwr.top(),
-                    fs.width(), mwr.height() );
-                mwr.setLeft( w->geometry().right() + 1 );
+                item->geometry = QRect(mwr.left(), mwr.top(),
+                                        fs.width(), mwr.height());
+                if (w->isVisible() && !item->hiding)
+                    mwr.setLeft(item->geometry.right() + 1);
                 break;
             case WindowManagement::Right:
-                w->setGeometry( mwr.right()-fs.width()+1, mwr.top(),
-                    fs.width(), mwr.height() );
-                mwr.setRight( w->geometry().left() - 1 );
+                item->geometry = QRect(mwr.right()-fs.width()+1, mwr.top(),
+                                        fs.width(), mwr.height());
+                if (w->isVisible() && !item->hiding)
+                    mwr.setRight(item->geometry.left() - 1);
                 break;
         }
     }
 
-#ifdef Q_WS_QWS
-    qLog(UI) << " set max window rect for screen" << screen << mwr;
-    QWSServer::setMaxWindowRect( mwr );
-#endif
+    if (mwr != oldMwr) {
+        qLog(UI) << " set max window rect for screen" << screen << mwr;
+        availableGeom[screen] = mwr;
+        QWSServer::setMaxWindowRect(mwr);
+    }
+
+    if (oldMwr.intersected(mwr) == mwr && !deferUpdate) {
+        updateGeometries(screen);
+    } else {
+        // Would be better to wait until we know the active window has
+        // resized and then updateGeometries.
+        QTimer::singleShot(100, this, SLOT(updateGeometries()));
+    }
 }
 
-ServerLayoutManager::Item *ServerLayoutManager::findWidget( const QWidget *w ) const
+ServerLayoutManager::Item*
+ServerLayoutManager::findWidget(const QWidget* w) const
 {
     foreach (QList<Item*> screenItems, docked) {
         foreach (Item *item, screenItems) {
-            if ( item->w == w )
+            if (item->w == w)
                 return item;
         }
     }
 
     return 0;
 }
+
+//===========================================================================
 // declare WindowManagementPrivate
 class WindowManagementPrivate : public QObject
 {
     Q_OBJECT
-public:
+  public:
     WindowManagementPrivate(QObject * = 0);
     void protectWindow(QWidget *);
+    const QString& activeAppName() { return m_activeAppName; }
 
-signals:
-    void windowActive(const QString &, const QRect &, QWSWindow *);
+    ServerLayoutManager *serverLayoutManager() {
+        static ServerLayoutManager *lm = 0;
+        if (!lm)
+            lm = new ServerLayoutManager;
+        return lm;
+    }
+    
+    signals:
+    void windowActive(const QString &, const QRect &, WId);
     void windowCaption(const QString &);
 
-private slots:
+  private slots:
     void windowEvent(QWSWindow *, QWSServer::WindowEvent);
     void destroyed(QObject *);
 
-private:
+  private:
     void doWindowActive(const QString &, const QRect &, QWSWindow *);
-    QValueSpaceObject wmValueSpace;
-    QSet<QWidget *> widgets;
+
+  private:
+    QString		m_activeAppName;
+    QValueSpaceObject 	m_wmValueSpace;
+    QSet<QWidget*> 	m_widgets;
 };
 extern QWSServer *qwsServer;
 Q_GLOBAL_STATIC(WindowManagementPrivate, windowManagement);
 
 // define WindowManagementPrivate
 WindowManagementPrivate::WindowManagementPrivate(QObject *parent)
-: QObject(parent), wmValueSpace("/UI/ActiveWindow")
+    : QObject(parent),
+      m_activeAppName(""),
+      m_wmValueSpace("/UI/ActiveWindow")
 {
     Q_ASSERT(qwsServer);
     connect(qwsServer, SIGNAL(windowEvent(QWSWindow*,QWSServer::WindowEvent)),
-            this, SLOT(windowEvent(QWSWindow*,QWSServer::WindowEvent)) );
+            this, SLOT(windowEvent(QWSWindow*,QWSServer::WindowEvent)));
 }
 
 void WindowManagementPrivate::protectWindow(QWidget *wid)
 {
-    if(wid->isVisible())
+    if (wid->isVisible())
         wid->raise();
 
-    if(!widgets.contains(wid)) {
-        widgets.insert(wid);
-        QObject::connect(wid, SIGNAL(destroyed(QObject *)),
-                         this, SLOT(destroyed(QObject *)));
+    if (!m_widgets.contains(wid)) {
+        m_widgets.insert(wid);
+        QObject::connect(wid, SIGNAL(destroyed(QObject*)),
+                         this, SLOT(destroyed(QObject*)));
     }
 }
 
-void WindowManagementPrivate::windowEvent(QWSWindow *w,
+void WindowManagementPrivate::windowEvent(QWSWindow* w,
                                           QWSServer::WindowEvent e)
 {
     if (!w)
@@ -272,39 +376,49 @@ void WindowManagementPrivate::windowEvent(QWSWindow *w,
 
     bool known = false;
 
-    // only calculate known for these events, and only for created QWSWindows (otherwise QWidget::winId() creates them)
+    /*
+      only calculate known for these events, and only for created
+      QWSWindows (otherwise QWidget::winId() creates them)
+    */
     switch (e) {
         case QWSServer::Raise:
         case QWSServer::Show:
         case QWSServer::Active:
         case QWSServer::Name:
-            for(QSet<QWidget *>::ConstIterator iter = widgets.begin();
-                    !known && widgets.end() != iter;
+            for (QSet<QWidget *>::ConstIterator iter = m_widgets.begin();
+                    !known && m_widgets.end() != iter;
                     ++iter)
-                known = ((*iter)->testAttribute(Qt::WA_WState_Created)) && (((*iter)->winId() == (unsigned)w->winId()));
+                known = ((*iter)->testAttribute(Qt::WA_WState_Created)) &&
+		    (((*iter)->winId() == (unsigned)w->winId()));
             break;
         default:
-            break;
+	    break;
     }
 
-    switch( e ) {
+    switch(e) {
         case QWSServer::Raise:
             if (!w->isVisible() || w->requestedRegion().isEmpty())
                 break;
             // else FALL THROUGH
         case QWSServer::Show:
             {
-                if(!known
-                    && w->name() != "_fullscreen_") { // bogus - Qt needs to send window flags to server.
+                // check if it is the full screen window
+                QWidget *widget = QWidget::find( w->winId() );
+                static bool fullscreen = false;
+                if ( widget && ( widget->windowState() & Qt::WindowFullScreen ) )
+                    fullscreen = true;
+
+                if (!known && !fullscreen
+                        && w->caption() != QLatin1String("_allow_on_top_")) {
                     QRect req = w->requestedRegion().boundingRect();
                     QSize s(qt_screen->deviceWidth(),
                             qt_screen->deviceHeight());
                     req = qt_screen->mapFromDevice(req, s);
 
-                    for(QSet<QWidget *>::ConstIterator iter = widgets.begin();
-                            !known && widgets.end() != iter;
+                    for(QSet<QWidget *>::ConstIterator iter = m_widgets.begin();
+                            !known && m_widgets.end() != iter;
                             ++iter)
-                        if((*iter)->isVisible() &&
+                        if ((*iter)->isVisible() &&
                                 req.intersects((*iter)->geometry())) {
                             QTimer::singleShot(0, *iter, SLOT(raise()));
                         }
@@ -318,7 +432,7 @@ void WindowManagementPrivate::windowEvent(QWSWindow *w,
             if (e == QWSServer::Active)
                 active = w->winId();
 
-            if(active == w->winId() && !known) {
+            if (active == w->winId() && !known) {
                 QRect req = w->requestedRegion().boundingRect();
                 QSize s(qt_screen->deviceWidth(), qt_screen->deviceHeight());
                 req = qt_screen->mapFromDevice(req, s);
@@ -331,15 +445,16 @@ void WindowManagementPrivate::windowEvent(QWSWindow *w,
     }
 }
 
-void WindowManagementPrivate::doWindowActive(const QString &caption,
-                                             const QRect &rect, QWSWindow *win)
+void WindowManagementPrivate::doWindowActive(const QString& caption,
+                                             const QRect& rect,
+					     QWSWindow* win)
 {
     static QString currCaption;
     static QRect currRect;
     static int currWinId = 0;
 
     if (currCaption != caption || currRect != rect || currWinId != win->winId()) {
-        emit windowActive(caption, rect, win);
+        emit windowActive(caption, rect, win->winId());
         currWinId = win->winId();
     }
 
@@ -347,26 +462,33 @@ void WindowManagementPrivate::doWindowActive(const QString &caption,
         if(rect.top() <= qt_screen->deviceHeight()/3 &&
                 rect.bottom() > qt_screen->deviceHeight()/2 &&
                 rect.width() >= qt_screen->deviceWidth()-4) {
-            wmValueSpace.setAttribute("Caption", caption);
+            m_wmValueSpace.setAttribute("Caption", caption);
+            QString iconName;
+            QContentId cid = QContent::execToContent(m_activeAppName);
+            if (cid != QContent::InvalidId) {
+                QContent app(cid);
+                iconName = QLatin1String(":icon/")+app.iconName();
+            }
+            m_wmValueSpace.setAttribute("Icon", iconName);
             emit windowCaption(caption);
         }
     }
 
     if (currRect != rect) {
-        wmValueSpace.setAttribute("Rect", rect);
+        m_wmValueSpace.setAttribute("Rect", rect);
         currRect = rect;
     }
 
     if (currCaption != caption) {
-        wmValueSpace.setAttribute("Title", caption);
+        m_wmValueSpace.setAttribute("Title", caption);
         currCaption = caption;
     }
 }
 
 void WindowManagementPrivate::destroyed(QObject *obj)
 {
-    QWidget * wid = static_cast<QWidget *>(obj);
-    widgets.remove(wid);
+    QWidget* wid = static_cast<QWidget *>(obj);
+    m_widgets.remove(wid);
 }
 
 // define WindowManagement
@@ -391,10 +513,12 @@ void WindowManagementPrivate::destroyed(QObject *obj)
   These value space keys are updated if either the \c {WindowManagement} task is
   running, or at least one instance of the WindowManagement class has been
   instantiated.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
-  \fn void WindowManagement::windowActive(const QString &caption, const QRect &rect, QWSWindow *window)
+  \fn void WindowManagement::windowActive(const QString &caption, const QRect &rect, WId window)
 
   Emitted whenever a \a window becomes active or the active window's \a caption
   changes.  \a rect is the rectangle covered by the window.
@@ -414,13 +538,13 @@ void WindowManagementPrivate::destroyed(QObject *obj)
   Construct a new WindowManagement instance with the specified \a parent.
  */
 WindowManagement::WindowManagement(QObject *parent)
-: QObject(parent), d(windowManagement())
+    : QObject(parent), d(windowManagement())
 {
-    if(d) {
-        QObject::connect(d, SIGNAL(windowActive(const QString &, const QRect &, QWSWindow *)),
-                this, SIGNAL(windowActive(const QString &, const QRect &, QWSWindow *)));
-        QObject::connect(d, SIGNAL(windowCaption(const QString &)),
-                this, SIGNAL(windowCaption(const QString &)));
+    if (d) {
+        QObject::connect(d, SIGNAL(windowActive(QString,QRect,WId)),
+                this, SIGNAL(windowActive(QString,QRect,WId)));
+        QObject::connect(d, SIGNAL(windowCaption(QString)),
+                this, SIGNAL(windowCaption(QString)));
     }
 }
 
@@ -435,18 +559,20 @@ WindowManagement::WindowManagement(QObject *parent)
   */
 WindowManagement::~WindowManagement()
 {
+    // nothing.
 }
 
 /*!
-  Prevent applications windows from being raised above the provided toplevel
-  \a window.  If an application window attempts to obscure any of the protected
-  region, the protected window will immediately be raised above it.
+  Prevent application windows from being raised above the
+  provided toplevel \a window.  If an application window
+  attempts to obscure any of the protected region, the
+  protected window will immediately be raised above it.
  */
-void WindowManagement::protectWindow(QWidget *window)
+void WindowManagement::protectWindow(QWidget* window)
 {
     Q_ASSERT(window->isWindow());
-    WindowManagementPrivate *d = windowManagement();
-    if(d)
+    WindowManagementPrivate* d = windowManagement();
+    if (d)
         d->protectWindow(window);
 }
 
@@ -469,7 +595,9 @@ void WindowManagement::protectWindow(QWidget *window)
   docked window.  To prevent this, also call WindowManagement::protectWindow()
   on the window.
 */
-void WindowManagement::dockWindow(QWidget *window, DockArea placement, int screen)
+void WindowManagement::dockWindow(QWidget* window,
+				  DockArea placement,
+				  int screen)
 {
     dockWindow(window, placement, QSize(), screen);
 }
@@ -482,17 +610,96 @@ void WindowManagement::dockWindow(QWidget *window, DockArea placement, int scree
   be used to override it.  The \a window, \a placement and \a screen parameters
   are used as above.
  */
-void WindowManagement::dockWindow(QWidget *window, DockArea placement,
-                                  const QSize &size, int screen)
+void WindowManagement::dockWindow(QWidget* window,
+				  DockArea placement,
+                                  const QSize& size,
+				  int screen)
 {
     Q_ASSERT(window->isWindow());
+    WindowManagementPrivate* d = windowManagement();
+    if (d)
+        d->serverLayoutManager()->addDocked(window, placement, size, screen);
+}
 
-    static ServerLayoutManager *lm = 0;
+/*!
+  Shows the docked \a window.  While you can call QWidget::show() on the
+  docked window, using this function may result in smoother screen
+  updates.
+ */
+void WindowManagement::showDockedWindow(QWidget *window)
+{
+    Q_ASSERT(window->isWindow());
+    WindowManagementPrivate* d = windowManagement();
+    if (d)
+        d->serverLayoutManager()->showDockedWindow(window);
+}
 
-    if ( !lm )
-        lm = new ServerLayoutManager;
+/*!
+  Hides the docked \a window.  While you can call QWidget::hide() on the
+  docked window, using this function will result in smoother screen
+  updates.
+ */
+void WindowManagement::hideDockedWindow(QWidget *window)
+{
+    Q_ASSERT(window->isWindow());
+    WindowManagementPrivate* d = windowManagement();
+    if (d)
+        d->serverLayoutManager()->hideDockedWindow(window);
+}
 
-    lm->addDocked(window, placement, size, screen);
+/*!
+    Sets \a window as the lowest in the screen stacking order,
+    below all normal and docked windows.  This is normally used
+    only for the QAbstractServerInterface widget.
+*/
+void WindowManagement::setLowestWindow(QWidget *window)
+{
+    // The QWS window placement logic should guarantee that the
+    // specified window is lowest without doing anything special.
+    Q_UNUSED(window);
+}
+
+/*!
+  Returns a reference to the name of the active application,
+  ie the one that is visible. If there is no active application,
+  the string is returned empty.
+ */
+QString WindowManagement::activeAppName()
+{
+    WindowManagementPrivate* d = windowManagement();
+    if (d)
+        return d->activeAppName();
+    else
+        return QString();
+}
+
+/*!
+  Returns true if \a winId supports the Qtopia soft menu bar via the
+  QSoftMenuBar class; false otherwise.
+
+  Under QWS, this function always returns true.  Under X11, it will
+  return false if the application uses a foreign widget toolkit
+  other than Qtopia's.  The soft menu bar changes its behavior so
+  that the "back" button will send a close message to the foreign
+  application using closeWindow().
+
+  \sa closeWindow()
+*/
+bool WindowManagement::supportsSoftMenus(WId winId)
+{
+    Q_UNUSED(winId);
+    return true;
+}
+
+/*!
+ Sends a close message to the window \a winId.  This is used for
+ applications that do not support Qtopia's soft menu bar.
+
+ \sa supportsSoftMenus()
+*/
+void WindowManagement::closeWindow(WId winId)
+{
+    Q_UNUSED(winId);
 }
 
 QTOPIA_STATIC_TASK(WindowManagement, windowManagement());

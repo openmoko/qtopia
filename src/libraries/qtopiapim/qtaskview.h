@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,30 +23,29 @@
 
 #include <qtopia/pim/qtask.h>
 #include <qtopia/pim/qtaskmodel.h>
+#include <qtopia/pim/qpimdelegate.h>
 
 #include <QListView>
-#include <QAbstractItemDelegate>
 #include <QMap>
 #include <QDialog>
 
 class QFont;
-class QTOPIAPIM_EXPORT QTaskDelegate : public QAbstractItemDelegate
+class QTOPIAPIM_EXPORT QTaskDelegate : public QPimDelegate
 {
+    Q_OBJECT
 public:
-    explicit QTaskDelegate( QObject * parent = 0 );
+    explicit QTaskDelegate(QObject * parent = 0);
     virtual ~QTaskDelegate();
 
-    virtual void paint( QPainter *painter,
-                        const QStyleOptionViewItem & option,
-                        const QModelIndex & index ) const;
+    void drawDecorations(QPainter* p, bool rtl, const QStyleOptionViewItem &option, const QModelIndex& index, QList<QRect>& leadingFloats, QList<QRect>& trailingFloats) const;
+    QSize decorationsSizeHint(const QStyleOptionViewItem& option, const QModelIndex& index, const QSize& textSize) const;
 
-    virtual QSize sizeHint(const QStyleOptionViewItem & option,
-                           const QModelIndex &index) const;
-
-    virtual QFont mainFont(const QStyleOptionViewItem &) const;
+    QList<StringPair> subTexts(const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    int subTextsCountHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    QFont secondaryHeaderFont(const QStyleOptionViewItem &option, const QModelIndex& index) const;
 
 private:
-    QFont differentFont(const QFont& start, int step) const;
+    QString formatDate(const QDate& date) const;
 };
 
 class QTOPIAPIM_EXPORT QTaskListView : public QListView
@@ -89,6 +88,7 @@ public:
 private slots:
     void setNewSelected();
     void setSelected(const QModelIndex&);
+    void taskModelReset();
 
 private:
     QTaskSelectorPrivate *d;

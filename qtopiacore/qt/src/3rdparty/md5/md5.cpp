@@ -25,7 +25,7 @@
 
 #include "md5.h"
 
-void
+static void
 byteSwap(UWORD32 *buf, unsigned words)
 {
         const quint32 byteOrderTest = 0x1;
@@ -44,7 +44,7 @@ byteSwap(UWORD32 *buf, unsigned words)
  * Start MD5 accumulation.  Set bit count to 0 and buffer to mysterious
  * initialization constants.
  */
-void
+static void
 MD5Init(struct MD5Context *ctx)
 {
 	ctx->buf[0] = 0x67452301;
@@ -60,7 +60,7 @@ MD5Init(struct MD5Context *ctx)
  * Update context to reflect the concatenation of another buffer full
  * of bytes.
  */
-void
+static void
 MD5Update(struct MD5Context *ctx, md5byte const *buf, unsigned len)
 {
 	UWORD32 t;
@@ -100,8 +100,8 @@ MD5Update(struct MD5Context *ctx, md5byte const *buf, unsigned len)
  * Final wrapup - pad to 64-byte boundary with the bit pattern 
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
-void
-MD5Final(md5byte digest[16], struct MD5Context *ctx)
+static void
+MD5Final(struct MD5Context *ctx, md5byte digest[16])
 {
 	int count = ctx->bytes[0] & 0x3f;	/* Number of bytes in ctx->in */
 	md5byte *p = (md5byte *)ctx->in + count;
@@ -151,7 +151,7 @@ MD5Final(md5byte digest[16], struct MD5Context *ctx)
  * reflect the addition of 16 longwords of new data.  MD5Update blocks
  * the data and converts bytes into longwords for this routine.
  */
-void
+static void
 MD5Transform(UWORD32 buf[4], UWORD32 const in[16])
 {
 	register UWORD32 a, b, c, d;
@@ -236,23 +236,3 @@ MD5Transform(UWORD32 buf[4], UWORD32 const in[16])
 }
 
 #endif
-
-void qtMD5(const QByteArray &src, unsigned char *digest)
-{
-    MD5Context context;
-
-    MD5Init(&context);
-    MD5Update(&context, (unsigned char *) src.data(), src.size());
-    MD5Final(digest, &context);
-}
-
-QString qtMD5(const QByteArray &src)
-{
-    unsigned char digest[16];
-    qtMD5(src, digest);
-
-    QString output, tmp;
-    for (int i = 0; i < 16; ++i)
-        output += tmp.sprintf("%02x", digest[i]);
-    return output;
-}

@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>FreeType-2.2.1 API Reference</title>
+<title>FreeType-2.3.4 API Reference</title>
 <style type="text/css">
   body { font-family: Verdana, Geneva, Arial, Helvetica, serif;
          color: #000000;
@@ -29,7 +29,7 @@
 </style>
 </head>
 <body>
-<center><h1>FreeType-2.2.1 API Reference</h1></center>
+<center><h1>FreeType-2.3.4 API Reference</h1></center>
 
 <center><h1>
 Outline Processing
@@ -86,8 +86,8 @@ Outline Processing
 <p>A pointer to an array of &lsquo;n_points&rsquo; <a href="ft2-basic_types.html#FT_Vector">FT_Vector</a> elements, giving the outline's point coordinates.</p>
 </td></tr>
 <tr valign=top><td><b>tags</b></td><td>
-<p>A pointer to an array of &lsquo;n_points&rsquo; chars, giving each outline point's type. If bit 0 is unset, the point is &lsquo;off&rsquo; the curve, i.e., a Bézier control point, while it is &lsquo;on&rsquo; when set.</p>
-<p>Bit 1 is meaningful for &lsquo;off&rsquo; points only. If set, it indicates a third-order Bézier arc control point; and a second-order control point if unset.</p>
+<p>A pointer to an array of &lsquo;n_points&rsquo; chars, giving each outline point's type. If bit 0 is unset, the point is &lsquo;off&rsquo; the curve, i.e., a BÃ©zier control point, while it is &lsquo;on&rsquo; when set.</p>
+<p>Bit 1 is meaningful for &lsquo;off&rsquo; points only. If set, it indicates a third-order BÃ©zier arc control point; and a second-order control point if unset.</p>
 </td></tr>
 <tr valign=top><td><b>contours</b></td><td>
 <p>An array of &lsquo;n_contours&rsquo; shorts, giving the end point of each contour within the outline. For example, the first contour is defined by the points &lsquo;0&rsquo; to &lsquo;contours[0]&rsquo;, the second one is defined by the points &lsquo;contours[0]+1&rsquo; to &lsquo;contours[1]&rsquo;, etc.</p>
@@ -136,7 +136,7 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 </td></tr>
 <tr valign=top><td colspan=0><b>FT_OUTLINE_REVERSE_FILL</b></td></tr>
 <tr valign=top><td></td><td>
-<p>By default, outside contours of an outline are oriented in clock-wise direction, as defined in the TrueType specification. This flag is set if the outline uses the opposite direction (typically for Type 1 fonts). This flag is ignored by the scan-converter. However, it is very important for the auto-hinter.</p>
+<p>By default, outside contours of an outline are oriented in clock-wise direction, as defined in the TrueType specification. This flag is set if the outline uses the opposite direction (typically for Type 1 fonts). This flag is ignored by the scan-converter.</p>
 </td></tr>
 <tr valign=top><td colspan=0><b>FT_OUTLINE_IGNORE_DROPOUTS</b></td></tr>
 <tr valign=top><td></td><td>
@@ -484,7 +484,7 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 
 </pre></table><br>
 <table align=center width="87%"><tr><td>
-<p>Computes the exact bounding box of an outline. This is slower than computing the control box. However, it uses an advanced algorithm which returns <i>very</i> quickly when the two boxes coincide. Otherwise, the outline Bézier arcs are walked over to extract their extrema.</p>
+<p>Computes the exact bounding box of an outline. This is slower than computing the control box. However, it uses an advanced algorithm which returns <i>very</i> quickly when the two boxes coincide. Otherwise, the outline BÃ©zier arcs are walked over to extract their extrema.</p>
 </td></tr></table><br>
 <table align=center width="87%" cellpadding=5><tr bgcolor="#EEEEFF"><td><em><b>input</b></em></td></tr><tr><td>
 <table cellpadding=3 border=0>
@@ -650,7 +650,7 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 </pre></table><br>
 <table align=center width="87%"><tr><td>
 <p>A function pointer type use to describe the signature of a &lsquo;conic to&rsquo; function during outline walking/decomposition.</p>
-<p>A &lsquo;conic to&rsquo; is emitted to indicate a second-order Bézier arc in the outline.</p>
+<p>A &lsquo;conic to&rsquo; is emitted to indicate a second-order BÃ©zier arc in the outline.</p>
 </td></tr></table><br>
 <table align=center width="87%" cellpadding=5><tr bgcolor="#EEEEFF"><td><em><b>input</b></em></td></tr><tr><td>
 <table cellpadding=3 border=0>
@@ -691,15 +691,15 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 </pre></table><br>
 <table align=center width="87%"><tr><td>
 <p>A function pointer type used to describe the signature of a &lsquo;cubic to&rsquo; function during outline walking/decomposition.</p>
-<p>A &lsquo;cubic to&rsquo; is emitted to indicate a third-order Bézier arc.</p>
+<p>A &lsquo;cubic to&rsquo; is emitted to indicate a third-order BÃ©zier arc.</p>
 </td></tr></table><br>
 <table align=center width="87%" cellpadding=5><tr bgcolor="#EEEEFF"><td><em><b>input</b></em></td></tr><tr><td>
 <table cellpadding=3 border=0>
 <tr valign=top><td><b>control1</b></td><td>
-<p>A pointer to the first Bézier control point.</p>
+<p>A pointer to the first BÃ©zier control point.</p>
 </td></tr>
 <tr valign=top><td><b>control2</b></td><td>
-<p>A pointer to the second Bézier control point.</p>
+<p>A pointer to the second BÃ©zier control point.</p>
 </td></tr>
 <tr valign=top><td><b>to</b></td><td>
 <p>A pointer to the target end point.</p>
@@ -738,7 +738,7 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 
 </pre></table><br>
 <table align=center width="87%"><tr><td>
-<p>A structure to hold various function pointers used during outline decomposition in order to emit segments, conic, and cubic Béziers, as well as &lsquo;move to&rsquo; and &lsquo;close to&rsquo; operations.</p>
+<p>A structure to hold various function pointers used during outline decomposition in order to emit segments, conic, and cubic BÃ©ziers, as well as &lsquo;move to&rsquo; and &lsquo;close to&rsquo; operations.</p>
 </td></tr></table><br>
 <table align=center width="87%" cellpadding=5><tr bgcolor="#EEEEFF"><td><em><b>fields</b></em></td></tr><tr><td>
 <table cellpadding=3 border=0>
@@ -749,10 +749,10 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 <p>The segment emitter.</p>
 </td></tr>
 <tr valign=top><td><b>conic_to</b></td><td>
-<p>The second-order Bézier arc emitter.</p>
+<p>The second-order BÃ©zier arc emitter.</p>
 </td></tr>
 <tr valign=top><td><b>cubic_to</b></td><td>
-<p>The third-order Bézier arc emitter.</p>
+<p>The third-order BÃ©zier arc emitter.</p>
 </td></tr>
 <tr valign=top><td><b>shift</b></td><td>
 <p>The shift that is applied to coordinates before they are sent to the emitter.</p>
@@ -789,7 +789,7 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 
 </pre></table><br>
 <table align=center width="87%"><tr><td>
-<p>Walks over an outline's structure to decompose it into individual segments and Bézier arcs. This function is also able to emit &lsquo;move to&rsquo; and &lsquo;close to&rsquo; operations to indicate the start and end of new contours in the outline.</p>
+<p>Walks over an outline's structure to decompose it into individual segments and BÃ©zier arcs. This function is also able to emit &lsquo;move to&rsquo; and &lsquo;close to&rsquo; operations to indicate the start and end of new contours in the outline.</p>
 </td></tr></table><br>
 <table align=center width="87%" cellpadding=5><tr bgcolor="#EEEEFF"><td><em><b>input</b></em></td></tr><tr><td>
 <table cellpadding=3 border=0>
@@ -809,7 +809,7 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 </table>
 </td></tr></table>
 <table align=center width="87%" cellpadding=5><tr bgcolor="#EEEEFF"><td><em><b>return</b></em></td></tr><tr><td>
-<p>FreeType error code. 0 means sucess.</p>
+<p>FreeType error code. 0 means success.</p>
 </td></tr></table>
 </td></tr></table>
 <hr width="75%">
@@ -829,7 +829,7 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 
 </pre></table><br>
 <table align=center width="87%"><tr><td>
-<p>Returns an outline's &lsquo;control box&rsquo;. The control box encloses all the outline's points, including Bézier control points. Though it coincides with the exact bounding box for most glyphs, it can be slightly larger in some situations (like when rotating an outline which contains Bézier outside arcs).</p>
+<p>Returns an outline's &lsquo;control box&rsquo;. The control box encloses all the outline's points, including BÃ©zier control points. Though it coincides with the exact bounding box for most glyphs, it can be slightly larger in some situations (like when rotating an outline which contains BÃ©zier outside arcs).</p>
 <p>Computing the control box is very fast, while getting the bounding box can take much more time as it needs to walk over all segments and arcs in the outline. To get the latter, you can use the &lsquo;ftbbox&rsquo; component which is dedicated to this single task.</p>
 </td></tr></table><br>
 <table align=center width="87%" cellpadding=5><tr bgcolor="#EEEEFF"><td><em><b>input</b></em></td></tr><tr><td>
@@ -889,7 +889,7 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 </td></tr></table>
 <table align=center width="87%" cellpadding=5><tr bgcolor="#EEEEFF"><td><em><b>note</b></em></td></tr><tr><td>
 <p>This function does NOT CREATE the bitmap, it only renders an outline image within the one you pass to it!</p>
-<p>It will use the raster correponding to the default glyph format.</p>
+<p>It will use the raster corresponding to the default glyph format.</p>
 </td></tr></table>
 </td></tr></table>
 <hr width="75%">
@@ -955,7 +955,7 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
     <a href="ft2-outline_processing.html#FT_Orientation">FT_ORIENTATION_FILL_RIGHT</a> = <a href="ft2-outline_processing.html#FT_Orientation">FT_ORIENTATION_TRUETYPE</a>,
     <a href="ft2-outline_processing.html#FT_Orientation">FT_ORIENTATION_FILL_LEFT</a>  = <a href="ft2-outline_processing.html#FT_Orientation">FT_ORIENTATION_POSTSCRIPT</a>,
     <a href="ft2-outline_processing.html#FT_Orientation">FT_ORIENTATION_NONE</a>
-  
+
   } <b>FT_Orientation</b>;
 
 </pre></table><br>
@@ -1022,7 +1022,4 @@ ft2-toc.html">TOC</a>]</font></td></tr></table>
 ft2-index.html">Index</a>]</font></td>
 <td width="100%"></td>
 <td><font size=-2>[<a href="
-ft2-toc.html">TOC</a>]</font></td></tr></table>
-
-</body>
-</html>
+ft2-toc.html">TOC</a>]</font></td></tr>

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -49,8 +64,8 @@ static QByteArray combinePath(const char *infile, const char *outfile)
     QFileInfo outFileInfo(QDir::current(), QFile::decodeName(outfile));
     int numCommonComponents = 0;
 
-    QStringList inSplitted = inFileInfo.dir().canonicalPath().split('/');
-    QStringList outSplitted = outFileInfo.dir().canonicalPath().split('/');
+    QStringList inSplitted = inFileInfo.dir().canonicalPath().split(QLatin1Char('/'));
+    QStringList outSplitted = outFileInfo.dir().canonicalPath().split(QLatin1Char('/'));
 
     while (!inSplitted.isEmpty() && !outSplitted.isEmpty() &&
             inSplitted.first() == outSplitted.first()) {
@@ -71,10 +86,10 @@ static QByteArray combinePath(const char *infile, const char *outfile)
      */
     while (!outSplitted.isEmpty()) {
         outSplitted.removeFirst();
-        inSplitted.prepend("..");
+        inSplitted.prepend(QLatin1String(".."));
     }
     inSplitted.append(inFileInfo.fileName());
-    return QFile::encodeName(inSplitted.join("/"));
+    return QFile::encodeName(inSplitted.join(QLatin1String("/")));
 }
 
 
@@ -183,14 +198,12 @@ int main(int _argc, char **_argv)
             optionsFile.remove(0, 1);
             if (optionsFile.isEmpty())
                 error("The @ option requires an input file");
-            QFile f(optionsFile);
+            QFile f(QString::fromLatin1(optionsFile.constData()));
             if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
                 error("Cannot open options file specified with @");
             argv.remove(n);
             while (!f.atEnd()) {
-                QByteArray line = f.readLine();
-                if (line.endsWith('\n'))
-                    line.chop(1);
+                QByteArray line = f.readLine().trimmed();
                 if (!line.isEmpty())
                     argv.insert(n++, line);
             }
@@ -202,12 +215,12 @@ int main(int _argc, char **_argv)
 #ifdef QT_CONFIGURE_BINARIES_PATH
     const char *binariesPath = QT_CONFIGURE_BINARIES_PATH;
     QString reporterPath = QString::fromLocal8Bit(binariesPath) + QDir::separator()
-                           + "qtusagereporter";
+                           + QLatin1String("qtusagereporter");
 #if defined(Q_OS_WIN)
-    reporterPath += ".exe";
+    reporterPath += QLatin1String(".exe");
 #endif
     if (QFile::exists(reporterPath))
-        system(qPrintable(reporterPath + " moc"));
+        system(qPrintable(reporterPath + QLatin1String(" moc")));
 #endif
 #endif
 
@@ -265,9 +278,22 @@ int main(int _argc, char **_argv)
             if (!more) {
                 if (!(n < argc-1))
                     error("Missing path name for the -I option.");
-                pp.includes += argv[++n];
+                pp.includes += Preprocessor::IncludePath(argv[++n]);
             } else {
-                pp.includes += opt.mid(1);
+                pp.includes += Preprocessor::IncludePath(opt.mid(1));
+            }
+            break;
+        case 'F': // minimalistic framework support for the mac
+            if (!more) {
+                if (!(n < argc-1))
+                    error("Missing path name for the -F option.");
+                Preprocessor::IncludePath p(argv[++n]);
+                p.isFrameworkPath = true;
+                pp.includes += p;
+            } else {
+                Preprocessor::IncludePath p(opt.mid(1));
+                p.isFrameworkPath = true;
+                pp.includes += p;
             }
             break;
         case 'D': // define macro
@@ -364,9 +390,9 @@ int main(int _argc, char **_argv)
         in = stdin;
     } else {
 #if defined(_MSC_VER) && _MSC_VER >= 1400
-		if (fopen_s(&in, filename.data(), "r")) {
+		if (fopen_s(&in, filename.data(), "rb")) {
 #else
-        in = fopen(filename.data(), "r");
+        in = fopen(filename.data(), "rb");
 		if (!in) {
 #endif
             fprintf(stderr, "moc: %s: No such file\n", (const char*)filename);

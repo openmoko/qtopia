@@ -34,14 +34,19 @@
 <li><div class="fn"/><a href="qcontact.html#businessPhone">businessPhone</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#businessState">businessState</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#businessStreet">businessStreet</a> () const : QString</li>
+<li><div class="fn"/><a href="qcontact.html#businessVOIP">businessVOIP</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#businessWebpage">businessWebpage</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#businessZip">businessZip</a> () const : QString</li>
 <li><div class="fn"/><a href="qpimrecord.html#categories">categories</a> () const : QList&lt;QString&gt;</li>
 <li><div class="fn"/><a href="qpimrecord.html#categoriesRef">categoriesRef</a> () : QList&lt;QString&gt; &amp;</li>
 <li><div class="fn"/><a href="qpimrecord.html#categoriesRef-2">categoriesRef</a> () const : const QList&lt;QString&gt; &amp;</li>
 <li><div class="fn"/><a href="qcontact.html#changePortrait">changePortrait</a> ( const QPixmap &amp; )</li>
+<li><div class="fn"/><a href="qcontact.html#changePortrait-2">changePortrait</a> ( const QImage &amp; )</li>
+<li><div class="fn"/><a href="qcontact.html#changePortrait-3">changePortrait</a> ( const QString &amp;, const QRect &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#children">children</a> () const : QString</li>
+<li><div class="fn"/><a href="qcontact.html#clearAddresses">clearAddresses</a> ()</li>
 <li><div class="fn"/><a href="qcontact.html#clearEmailList">clearEmailList</a> ()</li>
+<li><div class="fn"/><a href="qcontact.html#clearPhoneNumbers">clearPhoneNumbers</a> ()</li>
 <li><div class="fn"/><a href="qcontact.html#company">company</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#companyPronunciation">companyPronunciation</a> () const : QString</li>
 <li><div class="fn"/><a href="qpimrecord.html#customField">customField</a> ( const QString &amp; ) const : QString</li>
@@ -51,6 +56,8 @@
 <li><div class="fn"/><a href="qcontact.html#defaultEmail">defaultEmail</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#defaultPhoneNumber">defaultPhoneNumber</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#department">department</a> () const : QString</li>
+<li><div class="fn"/><a href="qpimrecord.html#dependentChildren">dependentChildren</a> () const : QMap&lt;QString, QUniqueId&gt;</li>
+<li><div class="fn"/><a href="qpimrecord.html#dependentChildrenOfType">dependentChildrenOfType</a> ( const QString &amp; ) const : QList&lt;QUniqueId&gt;</li>
 <li><div class="fn"/><a href="qcontact.html#displayAddress">displayAddress</a> ( Location ) const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#displayBusinessAddress">displayBusinessAddress</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#displayHomeAddress">displayHomeAddress</a> () const : QString</li>
@@ -65,8 +72,10 @@
 <li><div class="fn"/><a href="qcontact.html#homePhone">homePhone</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#homeState">homeState</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#homeStreet">homeStreet</a> () const : QString</li>
+<li><div class="fn"/><a href="qcontact.html#homeVOIP">homeVOIP</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#homeWebpage">homeWebpage</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#homeZip">homeZip</a> () const : QString</li>
+<li><div class="fn"/><a href="qcontact.html#icon">icon</a> () const : QIcon</li>
 <li><div class="fn"/><a href="qcontact.html#insertEmail">insertEmail</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#jobTitle">jobTitle</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#label">label</a> () const : QString</li>
@@ -75,13 +84,16 @@
 <li><div class="fn"/><a href="qcontact.html#lastName">lastName</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#lastNamePronunciation">lastNamePronunciation</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#manager">manager</a> () const : QString</li>
-<li><div class="fn"/><a href="qcontact.html#match">match</a> ( const QString &amp; ) const : bool</li>
-<li><div class="fn"/><a href="qcontact.html#match-2">match</a> ( const QRegExp &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qcontact.html#match">match</a> ( const QRegExp &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qcontact.html#match-2">match</a> ( const QString &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qcontact.html#middleName">middleName</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#nameTitle">nameTitle</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#nickname">nickname</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#notes">notes</a> () const : QString</li>
 <li><div class="fn"/><a href="qcontact.html#office">office</a> () const : QString</li>
+<li><div class="fn"/><a href="qpimrecord.html#parentDependency">parentDependency</a> () const : QUniqueId</li>
+<li><div class="fn"/><a href="qpimrecord.html#parentDependencyType">parentDependencyType</a> () const : QString</li>
+<li><div class="fn"/><a href="qcontact.html#parseLabel">parseLabel</a> ( const QString &amp;, const QContact &amp; ) : QContact</li>
 <li><div class="fn"/><a href="qcontact.html#phoneIcon">phoneIcon</a> ( PhoneType ) : QIcon</li>
 <li><div class="fn"/><a href="qcontact.html#phoneIconResource">phoneIconResource</a> ( PhoneType ) : QString</li>
 <li><div class="fn"/><a href="qcontact.html#phoneNumber">phoneNumber</a> ( PhoneType ) const : QString</li>
@@ -89,17 +101,19 @@
 <li><div class="fn"/><a href="qcontact.html#phoneTypes">phoneTypes</a> () : QList&lt;PhoneType&gt;</li>
 <li><div class="fn"/><a href="qcontact.html#portrait">portrait</a> () const : QPixmap</li>
 <li><div class="fn"/><a href="qcontact.html#portraitFile">portraitFile</a> () const : QString</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qcontact.html#portraitSize">portraitSize</a> () : QSize</li>
 <li><div class="fn"/><a href="qcontact.html#profession">profession</a> () const : QString</li>
 <li><div class="fn"/><a href="qpimrecord.html#pruneDeadCategories">pruneDeadCategories</a> ( const QList&lt;QString&gt; &amp; ) : bool</li>
-</ul></td><td valign="top"><ul>
-<li><div class="fn"/><a href="qcontact.html#readVCard">readVCard</a> ( const QString &amp; ) : QList&lt;QContact&gt;</li>
-<li><div class="fn"/><a href="qcontact.html#readVCard-2">readVCard</a> ( const QByteArray &amp; ) : QList&lt;QContact&gt;</li>
-<li><div class="fn"/><a href="qcontact.html#readVCard-3">readVCard</a> ( VObject * ) : QList&lt;QContact&gt;</li>
+<li><div class="fn"/><a href="qcontact.html#readVCard">readVCard</a> ( QIODevice * ) : QList&lt;QContact&gt;</li>
+<li><div class="fn"/><a href="qcontact.html#readVCard-2">readVCard</a> ( const QString &amp; ) : QList&lt;QContact&gt;</li>
+<li><div class="fn"/><a href="qcontact.html#readVCard-3">readVCard</a> ( const QByteArray &amp; ) : QList&lt;QContact&gt;</li>
+<li><div class="fn"/><a href="qcontact.html#readVCard-4">readVCard</a> ( VObject * ) : QList&lt;QContact&gt;</li>
 <li><div class="fn"/><a href="qpimrecord.html#reassignCategoryId">reassignCategoryId</a> ( const QString &amp;, const QString &amp; )</li>
 <li><div class="fn"/><a href="qpimrecord.html#removeCustomField">removeCustomField</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#removeEmail">removeEmail</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setAddress">setAddress</a> ( Location, const QContactAddress &amp; )</li>
+<li><div class="fn"/><a href="qcontact.html#setAddresses">setAddresses</a> ( const QMap&lt;Location, QContactAddress&gt; &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setAnniversary">setAnniversary</a> ( const QDate &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setAssistant">setAssistant</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setBirthday">setBirthday</a> ( const QDate &amp; )</li>
@@ -111,6 +125,7 @@
 <li><div class="fn"/><a href="qcontact.html#setBusinessPhone">setBusinessPhone</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setBusinessState">setBusinessState</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setBusinessStreet">setBusinessStreet</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qcontact.html#setBusinessVOIP">setBusinessVOIP</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setBusinessWebpage">setBusinessWebpage</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setBusinessZip">setBusinessZip</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qpimrecord.html#setCategories">setCategories</a> ( const QList&lt;QString&gt; &amp; )</li>
@@ -135,6 +150,7 @@
 <li><div class="fn"/><a href="qcontact.html#setHomePhone">setHomePhone</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setHomeState">setHomeState</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setHomeStreet">setHomeStreet</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qcontact.html#setHomeVOIP">setHomeVOIP</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setHomeWebpage">setHomeWebpage</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setHomeZip">setHomeZip</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setJobTitle">setJobTitle</a> ( const QString &amp; )</li>
@@ -148,6 +164,7 @@
 <li><div class="fn"/><a href="qcontact.html#setNotes">setNotes</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setOffice">setOffice</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setPhoneNumber">setPhoneNumber</a> ( PhoneType, const QString &amp; )</li>
+<li><div class="fn"/><a href="qcontact.html#setPhoneNumbers">setPhoneNumbers</a> ( const QMap&lt;PhoneType, QString&gt; &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setPortraitFile">setPortraitFile</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setProfession">setProfession</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qcontact.html#setSpouse">setSpouse</a> ( const QString &amp; )</li>
@@ -161,11 +178,12 @@
 <li><div class="fn"/><a href="qpimrecord.html#uid">uid</a> () const : QUniqueId</li>
 <li><div class="fn"/><a href="qpimrecord.html#uidRef">uidRef</a> () : QUniqueId &amp;</li>
 <li><div class="fn"/><a href="qpimrecord.html#uidRef-2">uidRef</a> () const : const QUniqueId &amp;</li>
-<li><div class="fn"/><a href="qcontact.html#window_flags-var">window_flags</a> : Qt::WindowFlags</li>
-<li><div class="fn"/><a href="qcontact.html#writeVCard">writeVCard</a> ( const QString &amp;, const QList&lt;QContact&gt; &amp; ) : bool</li>
-<li><div class="fn"/><a href="qcontact.html#writeVCard-2">writeVCard</a> ( const QString &amp; ) const : bool</li>
-<li><div class="fn"/><a href="qcontact.html#writeVCard-3">writeVCard</a> ( QFile &amp; ) const</li>
-<li><div class="fn"/><a href="qcontact.html#writeVCard-4">writeVCard</a> ( QDataStream * ) const</li>
+<li><div class="fn"/><a href="qcontact.html#writeVCard">writeVCard</a> ( QIODevice *, const QList&lt;QContact&gt; &amp; ) : bool</li>
+<li><div class="fn"/><a href="qcontact.html#writeVCard-2">writeVCard</a> ( QIODevice *, const QContact &amp; ) : bool</li>
+<li><div class="fn"/><a href="qcontact.html#writeVCard-3">writeVCard</a> ( const QString &amp;, const QList&lt;QContact&gt; &amp; ) : bool</li>
+<li><div class="fn"/><a href="qcontact.html#writeVCard-4">writeVCard</a> ( const QString &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qcontact.html#writeVCard-5">writeVCard</a> ( QFile &amp; ) const</li>
+<li><div class="fn"/><a href="qcontact.html#writeVCard-6">writeVCard</a> ( QDataStream * ) const</li>
 <li><div class="fn"/><a href="qcontact.html#operator-not-eq">operator!=</a> ( const QContact &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qcontact.html#operator-eq">operator=</a> ( const QContact &amp; ) : QContact &amp;</li>
 <li><div class="fn"/><a href="qcontact.html#operator-eq-eq">operator==</a> ( const QContact &amp; ) const : bool</li>
@@ -176,6 +194,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

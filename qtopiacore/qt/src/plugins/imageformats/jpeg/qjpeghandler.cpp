@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -117,14 +132,14 @@ QImageSmoothScaler::QImageSmoothScaler(const int srcWidth, const int srcHeight,
 #else
     sscanf(parameters, "Scale( %i, %i, %s )", &dstWidth, &dstHeight, sModeStr);
 #endif
-    QString sModeQStr(sModeStr);
+    QString sModeQStr = QString::fromLatin1(sModeStr);
 
     t1 = srcWidth * dstHeight;
     t2 = srcHeight * dstWidth;
 
-    if (((sModeQStr == "ScaleMin") && (t1 > t2)) || ((sModeQStr == "ScaleMax") && (t2 < t2))) {
+    if (((sModeQStr == QLatin1String("ScaleMin")) && (t1 > t2)) || ((sModeQStr == QLatin1String("ScaleMax")) && (t2 < t2))) {
 	dstHeight = t2 / srcWidth;
-    } else if (sModeQStr != "ScaleFree") {
+    } else if (sModeQStr != QLatin1String("ScaleFree")) {
 	dstWidth = t1 / srcHeight;
     }
 
@@ -635,7 +650,7 @@ static bool read_jpeg_image(QIODevice *device, QImage *outImage, const QByteArra
 
         (void) jpeg_start_decompress(&cinfo);
 
-        QString params = parameters;
+        QString params = QString::fromLatin1(parameters);
         params.simplified();
         int sWidth = 0, sHeight = 0;
         char sModeStr[1024] = "";
@@ -647,7 +662,7 @@ static bool read_jpeg_image(QIODevice *device, QImage *outImage, const QByteArra
             cinfo.do_fancy_upsampling = FALSE;
         }
 
-        if (params.contains("GetHeaderInformation")) {
+        if (params.contains(QLatin1String("GetHeaderInformation"))) {
 
             // Create QImage but don't read the pixels
             if (cinfo.output_components == 3 || cinfo.output_components == 4) {
@@ -666,7 +681,7 @@ static bool read_jpeg_image(QIODevice *device, QImage *outImage, const QByteArra
             }
 
 
-        } else if (params.contains("Scale")) {
+        } else if (params.contains(QLatin1String("Scale"))) {
 #if defined(_MSC_VER) && _MSC_VER >= 1400
             sscanf_s(params.toLatin1().data(), "Scale(%i, %i, %1023s)",
                    &sWidth, &sHeight, sModeStr, sizeof(sModeStr));
@@ -675,12 +690,12 @@ static bool read_jpeg_image(QIODevice *device, QImage *outImage, const QByteArra
                    &sWidth, &sHeight, sModeStr);
 #endif
 
-            QString sModeQStr(sModeStr);
-            if (sModeQStr == "IgnoreAspectRatio") {
+            QString sModeQStr(QString::fromLatin1(sModeStr));
+            if (sModeQStr == QLatin1String("IgnoreAspectRatio")) {
                 sMode = Qt::IgnoreAspectRatio;
-            } else if (sModeQStr == "KeepAspectRatio") {
+            } else if (sModeQStr == QLatin1String("KeepAspectRatio")) {
                 sMode = Qt::KeepAspectRatio;
-            } else if (sModeQStr == "KeepAspectRatioByExpanding") {
+            } else if (sModeQStr == QLatin1String("KeepAspectRatioByExpanding")) {
                 sMode = Qt::KeepAspectRatioByExpanding;
             } else {
                 qDebug("read_jpeg_image: invalid aspect ratio mode \"%s\", see QImage::AspectRatioMode documentation", sModeStr);

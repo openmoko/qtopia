@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,6 +28,10 @@
 #include <QPair>
 #include <QtopiaServiceRequest>
 #include <QHash>
+#ifdef Q_WS_QWS
+#include <qwindowsystem_qws.h>
+#endif
+#include "phone/themebackground_p.h"
 
 class LauncherView;
 class PhoneHeader;
@@ -37,6 +41,11 @@ class QSettings;
 class QAbstractBrowserScreen;
 class E3Today;
 class ThemedView;
+class QAbstractDialerScreen;
+class QPhoneCall;
+class CallScreen;
+class QUniqueId;
+class CellModemManager;
 class E3ServerInterface : public QAbstractServerInterface
 {
 Q_OBJECT
@@ -46,12 +55,19 @@ public:
 protected:
     virtual void keyPressEvent(QKeyEvent *);
     virtual bool event(QEvent *);
+    virtual bool eventFilter(QObject *, QEvent *);
 
 private slots:
+    void acceptIncoming();
     void loadTheme();
     void launch(QContent);
-    void wallpaperChanged();
     void received(const QString &, const QByteArray &);
+    void showCallscreen();
+    void requestDial(const QString &);
+    void showDialer(const QString &);
+#ifdef Q_WS_QWS
+    void windowEvent(QWSWindow*,QWSServer::WindowEvent);
+#endif
 
 private:
     void header();
@@ -67,10 +83,16 @@ private:
     PhoneHeader *m_header;
     ContextLabel *m_context;
     QContentSet m_idleApps;
-    QExportedBackground *m_background;
     QAbstractBrowserScreen *m_browser;
+    QAbstractDialerScreen *dialer();
+    QAbstractDialerScreen *m_dialer;
+    CallScreen *callscreen();
+    CallScreen *m_callscreen;
     E3Today *m_today;
     ThemedView *m_theme;
+    ThemeBackground *m_tbackground;
+    QWidget *m_titleSpacer;
+    CellModemManager *m_cell;
 
     typedef QHash<int, QtopiaServiceRequest> IdleKeys;
     IdleKeys m_idleKeys;

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -42,6 +57,7 @@ static const char MagicComment[] = "TRANSLATOR ";
 static QMap<QByteArray, int> needs_Q_OBJECT;
 static QMap<QByteArray, int> lacks_Q_OBJECT;
 
+//#define DIAGNOSE_RETRANSLATABILITY
 /*
   The first part of this source file is the C++ tokenizer.  We skip
   most of C++; the only tokens that interest us are defined here.
@@ -496,7 +512,7 @@ static int getToken()
                     yyInteger = ba.toLongLong(&ok);
                     if (ok) return Tok_Integer;
                     break;
-                } 
+                }
             default:
                 yyCh = getChar();
             }
@@ -621,23 +637,30 @@ static bool matchExpression()
     return true;
 }
 
-static QByteArray getFullyQualifiedClassName(const QList<QByteArray> &classes, const QStringList &namespaces, const QByteArray &ident)
+static QByteArray getFullyQualifiedClassName(const QList<QByteArray> &classes, const QStringList &namespaces, 
+                                             const QByteArray &ident, bool hasPrefix = false)
 {
     QByteArray context = ident;
-    for (int n = namespaces.count() - 1; n >= 0; --n) {
-        QByteArray ns;
-        for (int i = 0; i <= n; ++i) {
-            ns+=namespaces[i].toAscii() + "::";
+    if (context.endsWith("::"))
+        context.chop(2);
+    int n = namespaces.count() - 1; 
+    if (!context.startsWith("::")) {
+        for ( ; n >= 0; --n) {
+            QByteArray ns;
+            for (int i = 0; i <= n; ++i) {
+                ns+=namespaces[i].toAscii() + "::";
+            }
+            if (classes.indexOf(ns + context) != -1) {
+                context = ns + context;
+                break;
+            }
         }
-        if (classes.indexOf(ns + context) != -1) {
-            context = ns + context;
-            break;
+        if (!hasPrefix && n == -1 && namespaces.count()) {
+            context = namespaces.join(QLatin1String("::")).toLatin1() + "::" + context;
         }
+    } else {
+        context.remove(0, 2);
     }
-    if (context == ident && namespaces.count()) {
-        context = namespaces.join(QLatin1String("::")).toLatin1() + "::" + context;
-    }
-
     return context;
 }
 
@@ -652,6 +675,9 @@ static void parse( MetaTranslator *tor, const char *initialContext, const char *
     QByteArray com;
     QByteArray functionContext = initialContext;
     QByteArray prefix;
+#ifdef DIAGNOSE_RETRANSLATABILITY
+    QByteArray functionName;
+#endif
     bool utf8 = false;
     bool missing_Q_OBJECT = false;
 
@@ -689,6 +715,11 @@ static void parse( MetaTranslator *tor, const char *initialContext, const char *
 
                 if ( yyTok == Tok_Colon ) {
                     missing_Q_OBJECT = true;
+                    // Skip any token until '{' since lupdate might do things wrong if it finds
+                    // a '::' token here.
+                    do {
+                        yyTok = getToken();
+                    } while (yyTok != Tok_LeftBrace && yyTok != Tok_Eof);
                 } else {
                     functionContext = defaultContext;
                 }
@@ -701,7 +732,7 @@ static void parse( MetaTranslator *tor, const char *initialContext, const char *
                 yyTok = getToken();
                 if ( yyTok == Tok_LeftBrace &&
                      yyBraceDepth == namespaces.count() + 1 )
-                    namespaces.append( QString(ns) );
+                    namespaces.append( QString::fromLatin1(ns.constData()) );
             }
             break;
         case Tok_tr:
@@ -712,12 +743,11 @@ static void parse( MetaTranslator *tor, const char *initialContext, const char *
                 com = "";
                 bool plural = false;
 
-
                 if ( match(Tok_RightParen) ) {
                     // no comment
                 } else if (match(Tok_Comma) && matchStringOrNull(&com)) {   //comment
                     if ( match(Tok_RightParen)) {
-                        // ok, 
+                        // ok,
                     } else if (match(Tok_Comma)) {
                         plural = true;
                     }
@@ -725,12 +755,21 @@ static void parse( MetaTranslator *tor, const char *initialContext, const char *
                 if ( prefix.isNull() ) {
                     context = functionContext;
                 } else {
-                    context = getFullyQualifiedClassName(classes, namespaces, prefix);
+#ifdef DIAGNOSE_RETRANSLATABILITY
+                    int last = prefix.lastIndexOf("::");
+                    QByteArray className = prefix.mid(last == -1 ? 0 : last + 2);
+                    if (!className.isEmpty() && className == functionName) {
+                        qWarning( "%s::%d: It is not recommended to call tr() from within a constructor '%s::%s' ",
+                                  (const char *) yyFileName, yyLineNo,
+                                  className.constData(), functionName.constData() );
+                    }
+#endif
+                    context = getFullyQualifiedClassName(classes, namespaces, prefix, true);
                 }
                 prefix = (const char *) 0;
                 if ( qualifiedContexts.contains(context) )
                     context = qualifiedContexts[context];
-                tor->insert( MetaTranslatorMessage(context, text, com, yyFileName, yyLineNo,
+                tor->insert( MetaTranslatorMessage(context, text, com, QLatin1String(yyFileName), yyLineNo,
                     QStringList(), utf8, MetaTranslatorMessage::Unfinished, plural) );
 
                 if ( lacks_Q_OBJECT.contains(context) ) {
@@ -782,7 +821,7 @@ static void parse( MetaTranslator *tor, const char *initialContext, const char *
                         break;
                     }
                  }
-                tor->insert( MetaTranslatorMessage(context, text, com, yyFileName, yyLineNo,
+                tor->insert( MetaTranslatorMessage(context, text, com, QLatin1String(yyFileName), yyLineNo,
                                                    QStringList(), utf8, MetaTranslatorMessage::Unfinished, plural) );
             }
             break;
@@ -791,8 +830,6 @@ static void parse( MetaTranslator *tor, const char *initialContext, const char *
             yyTok = getToken();
             break;
         case Tok_Ident:
-            if ( !prefix.isNull() )
-                prefix += "::";
             prefix += yyIdent;
             yyTok = getToken();
             if ( yyTok != Tok_Gulbrandsen )
@@ -809,7 +846,7 @@ static void parse( MetaTranslator *tor, const char *initialContext, const char *
                 } else {
                     context = com.left( k );
                     com.remove( 0, k + 1 );
-                    tor->insert( MetaTranslatorMessage(context, "", com, yyFileName, yyLineNo,
+                    tor->insert( MetaTranslatorMessage(context, "", com, QLatin1String(yyFileName), yyLineNo,
                                                        QStringList(), false) );
                 }
 
@@ -833,9 +870,15 @@ static void parse( MetaTranslator *tor, const char *initialContext, const char *
             break;
         case Tok_Gulbrandsen:
             // at top level?
+            prefix+="::";
             if ( yyBraceDepth == (int) namespaces.count() && yyParenDepth == 0 )
                 functionContext = ::getFullyQualifiedClassName(classes, namespaces, prefix);
             yyTok = getToken();
+#ifdef DIAGNOSE_RETRANSLATABILITY
+            if ( yyTok == Tok_Ident && yyBraceDepth == (int) namespaces.count() && yyParenDepth == 0 ) {
+                functionName = yyIdent;
+            }
+#endif
             break;
         case Tok_RightBrace:
         case Tok_Semicolon:
@@ -923,7 +966,7 @@ class UiHandler : public QXmlDefaultHandler
 {
 public:
     UiHandler( MetaTranslator *translator, const char *fileName )
-        : tor( translator ), fname( fileName ), comment( "" ), m_lineNumber(-1)  { }
+        : tor( translator ), fname( fileName ), comment( QLatin1String("") ), m_lineNumber(-1)  { }
 
     virtual bool startElement( const QString& namespaceURI,
                                const QString& localName, const QString& qName,
@@ -957,16 +1000,16 @@ bool UiHandler::startElement( const QString& /* namespaceURI */,
                               const QString& qName,
                               const QXmlAttributes& atts )
 {
-    if ( qName == QString("item") ) {
+    if ( qName == QString(QLatin1String("item")) ) {
         flush();
-        if ( !atts.value(QString("text")).isEmpty() )
-            source = atts.value( QString("text") );
-    } else if ( qName == QString("string") ) {
+        if ( !atts.value(QString(QLatin1String("text"))).isEmpty() )
+            source = atts.value( QString(QLatin1String("text")) );
+    } else if ( qName == QString(QLatin1String("string")) ) {
         flush();
-        if (atts.value(QString("notr")).isEmpty() ||
-            atts.value(QString("notr")) != QString("true")) {
+        if (atts.value(QString(QLatin1String("notr"))).isEmpty() ||
+            atts.value(QString(QLatin1String("notr"))) != QString(QLatin1String("true"))) {
             trString = true;
-            comment = atts.value(QString("comment"));
+            comment = atts.value(QString(QLatin1String("comment")));
         } else {
             trString = false;
         }
@@ -980,17 +1023,17 @@ bool UiHandler::endElement( const QString& /* namespaceURI */,
                             const QString& /* localName */,
                             const QString& qName )
 {
-    accum.replace( QRegExp(QString("\r\n")), "\n" );
+    accum.replace( QRegExp(QString(QLatin1String("\r\n"))), QLatin1String("\n") );
 
-    if ( qName == QString("class") ) {
+    if ( qName == QString(QLatin1String("class")) ) {
         if ( context.isEmpty() )
             context = accum;
-    } else if ( qName == QString("string") && trString ) {
+    } else if ( qName == QString(QLatin1String("string")) && trString ) {
         source = accum;
-    } else if ( qName == QString("comment") ) {
+    } else if ( qName == QString(QLatin1String("comment")) ) {
         comment = accum;
         flush();
-    } else if ( qName == QString("function") ) {
+    } else if ( qName == QString(QLatin1String("function")) ) {
         fetchtr_inlined_cpp( (const char *) fname, accum, tor,
                              context.toLatin1() );
     } else {
@@ -1019,7 +1062,7 @@ void UiHandler::flush()
 {
     if ( !context.isEmpty() && !source.isEmpty() )
         tor->insert( MetaTranslatorMessage(context.toUtf8(), source.toUtf8(),
-                                           comment.toUtf8(), QString(fname), m_lineNumber,
+                                           comment.toUtf8(), QLatin1String(fname), m_lineNumber,
                                            QStringList(), true) );
     source.truncate( 0 );
     comment.truncate( 0 );
@@ -1028,7 +1071,7 @@ void UiHandler::flush()
 void fetchtr_ui( const char *fileName, MetaTranslator *tor,
                  const char * /* defaultContext */, bool mustExist )
 {
-    QFile f( fileName );
+    QFile f( QString::fromLatin1(fileName) );
     if ( !f.open(QIODevice::ReadOnly) ) {
 		if ( mustExist ) {
 #if defined(_MSC_VER) && _MSC_VER >= 1400
@@ -1046,10 +1089,10 @@ void fetchtr_ui( const char *fileName, MetaTranslator *tor,
 
     QXmlInputSource in( &f );
     QXmlSimpleReader reader;
-    reader.setFeature( "http://xml.org/sax/features/namespaces", false );
-    reader.setFeature( "http://xml.org/sax/features/namespace-prefixes", true );
-    reader.setFeature( "http://trolltech.com/xml/features/report-whitespace"
-                       "-only-CharData", false );
+    reader.setFeature( QLatin1String("http://xml.org/sax/features/namespaces"), false );
+    reader.setFeature( QLatin1String("http://xml.org/sax/features/namespace-prefixes"), true );
+    reader.setFeature( QLatin1String("http://trolltech.com/xml/features/report-whitespace"
+                                     "-only-CharData"), false );
     QXmlDefaultHandler *hand = new UiHandler( tor, fileName );
     reader.setContentHandler( hand );
     reader.setErrorHandler( hand );

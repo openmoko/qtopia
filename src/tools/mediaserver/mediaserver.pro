@@ -1,84 +1,56 @@
 qtopia_project(qtopia app)
 TARGET=mediaserver
-CONFIG+=no_tr singleexec_main
+CONFIG+=singleexec_main
+# Give us a direct connection to the document system
+DEFINES+=QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION
 
 HEADERS =   \
-            helixengine.h \
-            helixsession.h \
-            mediaengine.h \
-            mediaserver.h \
-            mediasession.h \
             sessionmanager.h \
+            engineloader.h \
+            buildermanager.h \
+            buildernegotiator.h \
+            urinegotiator.h \
+            mediaagent.h \
             qsoundprovider.h \
             qtopiamediaprovider.h \
             mediacontrolserver.h \
-            videocontrolserver.h \
-            qmediahelixsettingsserver.h \
+            mediacontentserver.h \
+            domainmanager.h \
+            domainmanagerservice.h \
+            sessionmanagersession.h \
+            mediaagentsession.h \
             drmsession.h \
-            plugindecodesession.h \
-            pluginencodesession.h \
-            fullduplexpluginsession.h \
-            devicemanager.h \
-            contentdevice.h \
-            mediavolumecontrol.h \
-            observer.h
-
-HEADERS +=  \
-            helixutil.h \
-            helixplayer.h \
-            helixsite.h \
-            helixvideosurface.h \
-            reporterror.h
-
+            mediapowercontrol.h
 
 SOURCES =   \
-            helixengine.cpp \
-            helixsession.cpp \
             main.cpp \
-            mediaengine.cpp \
-            mediaserver.cpp \
             sessionmanager.cpp \
+            engineloader.cpp \
+            buildermanager.cpp \
+            buildernegotiator.cpp \
+            urinegotiator.cpp \
+            mediaagent.cpp \
             qsoundprovider.cpp \
             qtopiamediaprovider.cpp \
             mediacontrolserver.cpp \
-            videocontrolserver.cpp \
-            qmediahelixsettingsserver.cpp \
+            mediacontentserver.cpp \
+            domainmanager.cpp \
+            domainmanagerservice.cpp \
+            sessionmanagersession.cpp \
+            mediaagentsession.cpp \
             drmsession.cpp \
-            plugindecodesession.cpp \
-            pluginencodesession.cpp \
-            fullduplexpluginsession.cpp \
-            devicemanager.cpp \
-            contentdevice.cpp \
-            mediavolumecontrol.cpp
+            mediapowercontrol.cpp
 
-SOURCES +=  \
-            helixutil.cpp \
-            helixplayer.cpp \
-            helixsite.cpp \
-            helixvideosurface.cpp \
-            reporterror.cpp \
-            iids.cpp
+pkg.desc = Media Server
+pkg.domain = mediaserver,window,graphics,docapi,drm,cardreader,audio-policy,bluetooth,directaudio,launcher,directvideo
 
-
-# From helix
-HELIX_PATH=$$fromfile($$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/helix/helix.pro,HELIX_PATH)
-VPATH += $$HELIX_PATH/common/util \
-            $$HELIX_PATH/video/vidutil
-SOURCES += HXErrorCodeStrings.c \
-            colormap.c
-
-dbg=$$HELIX_OUT_DIR
-idep(DEFINES+=CONFIG_H_FILE=\$$LITERAL_ESCAPED_QUOTE$$HELIX_PATH/$$dbg/makefile_ribodefs.h\$$LITERAL_ESCAPED_QUOTE,DEFINES)
-
-pkg.desc=Media Server
-pkg.domain=volumemanager,mediaserver,window,graphics,docapi,launcher,drm,cardreader
-
-mediaserverservice.files=$$QTOPIA_DEPOT_PATH/services/MediaServer/mediaserver
-mediaserverservice.path=/services/MediaServer
+mediaserverservice.files = $$QTOPIA_DEPOT_PATH/services/MediaServer/mediaserver
+mediaserverservice.path = /services/MediaServer
 INSTALLS += mediaserverservice
 
-depends(libraries/qtopiamedia)
-depends(libraries/qtopia)
-!enable_qtopiabase:depends(libraries/qtopiail)
-depends(3rdparty/libraries/helix)
+domainmanager.files = $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/AudioDomains.conf
+domainmanager.path = /etc/default/Trolltech
+INSTALLS += domainmanager
 
+depends(libraries/qtopiamedia)
+depends(libraries/qtopiaaudio)

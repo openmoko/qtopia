@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -33,6 +48,7 @@
 #include "qicon.h"
 #include "qimage.h"
 #include "qkeysequence.h"
+#include "qtransform.h"
 #include "qmatrix.h"
 #include "qpalette.h"
 #include "qpen.h"
@@ -93,6 +109,9 @@ static void construct(QVariant::Private *x, const void *copy)
 #endif
     case QVariant::Matrix:
         v_construct<QMatrix>(x, copy);
+        break;
+    case QVariant::Transform:
+        v_construct<QTransform>(x, copy);
         break;
     case QVariant::TextFormat:
         v_construct<QTextFormat>(x, copy);
@@ -177,6 +196,9 @@ static void clear(QVariant::Private *d)
     case QVariant::Matrix:
         v_clear<QMatrix>(d);
         break;
+    case QVariant::Transform:
+        v_clear<QTransform>(d);
+        break;
     case QVariant::TextFormat:
         v_clear<QTextFormat>(d);
         break;
@@ -255,8 +277,8 @@ static bool compare(const QVariant::Private *a, const QVariant::Private *b)
         return v_cast<QCursor>(a)->shape() == v_cast<QCursor>(b)->shape();
 #endif
     case QVariant::Bitmap:
-        return v_cast<QBitmap>(a)->serialNumber()
-            == v_cast<QBitmap>(b)->serialNumber();
+        return v_cast<QBitmap>(a)->cacheKey()
+            == v_cast<QBitmap>(b)->cacheKey();
     case QVariant::Polygon:
         return *v_cast<QPolygon>(a) == *v_cast<QPolygon>(b);
     case QVariant::Region:
@@ -264,7 +286,7 @@ static bool compare(const QVariant::Private *a, const QVariant::Private *b)
     case QVariant::Font:
         return *v_cast<QFont>(a) == *v_cast<QFont>(b);
     case QVariant::Pixmap:
-        return v_cast<QPixmap>(a)->serialNumber() == v_cast<QPixmap>(b)->serialNumber();
+        return v_cast<QPixmap>(a)->cacheKey() == v_cast<QPixmap>(b)->cacheKey();
     case QVariant::Image:
         return *v_cast<QImage>(a) == *v_cast<QImage>(b);
     case QVariant::Brush:
@@ -279,10 +301,14 @@ static bool compare(const QVariant::Private *a, const QVariant::Private *b)
 #endif
 #ifndef QT_NO_ICON
     case QVariant::Icon:
-        return false; // #### FIXME
+        /* QIcon::operator==() cannot be reasonably implemented for QIcon,
+         * so we always return false. */
+        return false;
 #endif
     case QVariant::Matrix:
         return *v_cast<QMatrix>(a) == *v_cast<QMatrix>(b);
+    case QVariant::Transform:
+        return *v_cast<QTransform>(a) == *v_cast<QTransform>(b);
     case QVariant::TextFormat:
         return *v_cast<QTextFormat>(a) == *v_cast<QTextFormat>(b);
     case QVariant::TextLength:
@@ -382,7 +408,7 @@ static bool convert(const QVariant::Private *d, QVariant::Type t,
     case QVariant::Color:
         if (d->type == QVariant::String) {
             static_cast<QColor *>(result)->setNamedColor(*v_cast<QString>(d));
-            return true;
+            return static_cast<QColor *>(result)->isValid();
         } else if (d->type == QVariant::ByteArray) {
             static_cast<QColor *>(result)->setNamedColor(QString::fromLatin1(
                                 *v_cast<QByteArray>(d)));
@@ -447,6 +473,9 @@ static void streamDebug(QDebug dbg, const QVariant &v)
         break;
     case QVariant::Matrix:
         dbg.nospace() << qvariant_cast<QMatrix>(v);
+        break;
+    case QVariant::Transform:
+        dbg.nospace() << qvariant_cast<QTransform>(v);
         break;
     case QVariant::Pixmap:
 //        dbg.nospace() << qvariant_cast<QPixmap>(v); //FIXME
@@ -566,6 +595,7 @@ Q_DECL_METATYPE_HELPER(QPen)
 Q_DECL_METATYPE_HELPER(QTextLength)
 Q_DECL_METATYPE_HELPER(QTextFormat)
 Q_DECL_METATYPE_HELPER(QMatrix)
+Q_DECL_METATYPE_HELPER(QTransform)
 
 #ifdef QT_NO_DATASTREAM
 #  define Q_IMPL_METATYPE_HELPER(TYPE) \
@@ -614,15 +644,25 @@ static const QMetaTypeGuiHelper qVariantGuiHelper[] = {
     Q_IMPL_METATYPE_HELPER(QPen),
     Q_IMPL_METATYPE_HELPER(QTextLength),
     Q_IMPL_METATYPE_HELPER(QTextFormat),
-    Q_IMPL_METATYPE_HELPER(QMatrix)
+    Q_IMPL_METATYPE_HELPER(QMatrix),
+    Q_IMPL_METATYPE_HELPER(QTransform)
 };
 
+static const QVariant::Handler *qt_guivariant_last_handler = 0;
 int qRegisterGuiVariant()
 {
+    qt_guivariant_last_handler = QVariant::handler;
     QVariant::handler = &qt_gui_variant_handler;
     qMetaTypeGuiHelper = qVariantGuiHelper;
-
     return 1;
 }
-
 Q_CONSTRUCTOR_FUNCTION(qRegisterGuiVariant)
+
+int qUnregisterGuiVariant()
+{
+    QVariant::handler = qt_guivariant_last_handler;
+    qMetaTypeGuiHelper = 0;
+    return 1;
+}
+Q_DESTRUCTOR_FUNCTION(qUnregisterGuiVariant)
+

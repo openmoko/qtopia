@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,6 +25,7 @@
 #include "packagemodel.h"
 #include "installedpackagescanner.h"
 #include "targz.h"
+#include "utils.h"
 
 #include <QIcon>
 #include <QDir>
@@ -33,14 +34,8 @@
 #include <QTimer>
 #include <QtopiaApplication>
 #include <QDesktopWidget>
-
 #include <qtopianamespace.h>
 #include <qtopialog.h>
-
-#ifndef Q_WS_QWS
-#include <QProgressDialog>
-#else
-
 #include <QProgressBar>
 #include <QTextBrowser>
 #include <QBoxLayout>
@@ -88,11 +83,8 @@ QProgressDialog::~QProgressDialog()
 
 QSize QProgressDialog::sizeHint() const
 {
-#ifdef QTOPIA_PHONE
     //XXX Wrong.  Should showMaximized() if that's what we want.
     return QApplication::desktop()->availableGeometry().size();
-#endif
-    return QSize();
 }
 
 void QProgressDialog::setLabelText( const QString &t )
@@ -116,7 +108,6 @@ void QProgressDialog::reset()
     hide();
 }
 
-#endif
 ////////////////////////////////////////////////////////////////////////
 /////
 ///// AbstractPackageController implementation
@@ -186,6 +177,32 @@ void AbstractPackageController::setPackageFilter( const QList<InstallControl::Pa
             qLog(Package) << pkg.name << "is now filtered out";
         }
     }
+}
+
+QString AbstractPackageController::packageDetails( int pkgId ) const
+{
+    InstallControl::PackageInfo pkg = pkgList[pkgId];
+
+    const char * dummyStr[] ={ QT_TRANSLATE_NOOP("PackageView", "Download Size:"),
+                               QT_TRANSLATE_NOOP("PackageView", "Size:" ),
+                               QT_TRANSLATE_NOOP("PackageView", "Cost:" ),
+                               QT_TRANSLATE_NOOP("PackageView", "Security:" ),
+                               QT_TRANSLATE_NOOP("PackageView", "Signed:" ),
+                               QT_TRANSLATE_NOOP("PackageView", "Trust:" ),
+                               QT_TRANSLATE_NOOP("PackageView", "Trusted:" )
+                             };
+    Q_UNUSED( dummyStr );
+
+    return  tr( "Name:" ) + QLatin1String(" ") + pkg.name + "<br>" +
+            tr( "Description:" ) + QLatin1String(" ")+ pkg.description + "<br>" +
+            tr( "Installation Size:" )  + QLatin1String(" ")+ pkg.installedSize + "<br>" +
+            tr( "MD5Sum:" ) + QLatin1String(" ")+ pkg.md5Sum + "<br>"
+#ifndef QT_NO_SXE
+            + tr( "Capabilities:" ) + QLatin1String(" ") + DomainInfo::explain( pkg.domain, pkg.name );
+#else
+            ;
+#endif
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -266,7 +283,7 @@ void LocalPackageController::install( int pkgId )
 
     //TODO: Error handling
     emit updated();
-    emit packageInstalled( pkgList[pkgId], true ); 
+    emit packageInstalled( pkgList[pkgId] ); 
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -281,11 +298,17 @@ NetworkPackageController::NetworkPackageController( QObject *parent )
     progressDisplay = new QProgressDialog( topLevelWidgets[0] );
     progressDisplay->setMaximum( HttpFetcher::maxProgress );
     progressDisplay->setWindowTitle( "Downloading" );
+
+    //The signal mapper is used to provide an empty error parameter
+    //from the progressDiplay dialog's cancelled signal to the
+    //cancel slot of a httpfetcher which is connected later. 
     signalMapper = new QSignalMapper(this);
     connect( progressDisplay, SIGNAL(canceled()),
                 signalMapper, SLOT(map()));
-
-    signalMapper->setMapping( progressDisplay, ""); //no error parameter for cancel() implies user aborted 
+    signalMapper->setMapping( progressDisplay, ""); //empty error parameter implies user aborted 
+    
+    connect( progressDisplay, SIGNAL(rejected()),
+             progressDisplay, SIGNAL(canceled()) );
 }
 
 NetworkPackageController::~NetworkPackageController()
@@ -314,42 +337,41 @@ void NetworkPackageController::insertNetworkPackageItems()
     progressDisplay->setLabelText(
             tr( "Getting package list from %1" ).arg( currentNetworkServer ));
 
-    connect( signalMapper, SIGNAL(mapped(const QString &)), hf, SLOT(cancel(const QString &)) );
+    connect( signalMapper, SIGNAL(mapped(QString)), hf, SLOT(cancel(QString)) );
 
     connect( hf, SIGNAL(progressValue(int)), progressDisplay, SLOT(setValue(int)));
     connect( hf, SIGNAL(finished()), this, SLOT(listFetchComplete()));
     connect( hf, SIGNAL(terminated()), this, SLOT(listFetchComplete()));
+   
+    QtopiaApplication::setMenuLike( progressDisplay, true );
     QtopiaApplication::showDialog( progressDisplay );
     hf->start();
 }
 
 void NetworkPackageController::listFetchComplete()
 {
-    // qDebug() << "package list fetch complete";
     if ( hf )
     {
-        
         if ( hf->httpRequestWasAborted() )
         {
-            if ( hf->getError().isEmpty() )
+            if ( !hf->getError().isEmpty() )
             {
-               emit packageMessage( tr( "Cancelled fetch of packages list from server: %1" )
-                                        .arg(currentNetworkServer) );  
-            }
-            else
-            { 
                 SimpleErrorReporter errorReporter( SimpleErrorReporter::Other );
                 QString detailedMessage( "NetworkPackageController::listFetchComplete:- Fetch from %1 failed: %2" );
-                detailedMessage = detailedMessage.arg( currentNetworkServer ).arg( hf->getError() );    
+                detailedMessage = detailedMessage.arg( currentNetworkServer ).arg( hf->getError() );
 
                 errorReporter.reportError( tr( "Error connecting to server, check server URL is correct and/or "
                                          "contact server administrator" ), detailedMessage );
+            } else //Note: if getError does return empty, then the user cancelled the package fetch.
+            {
+               clearPackages();
             }
+            emit serverStatus( tr( "Not connected" ) );
         }
-        else    
+        else
         {
             emit updated();
-            emit packageMessage( tr( "Found %n package(s) on server", "%1 = # of packages", pkgList.count()) );
+            emit serverStatus( tr( "Connected") + "<br>" + tr("%n program(s) found","%n =# of packages", pkgList.count()));
         }
         delete hf;
         hf = 0;
@@ -358,31 +380,73 @@ void NetworkPackageController::listFetchComplete()
     {
         qWarning( "HttpFetcher was deleted early!" );
     }
-    // qDebug() << "fetched" << pkgList.count() << "items of package info";
     emit updated();
     progressDisplay->reset();
 }
 
 void NetworkPackageController::install( int packageI )
 {
-    int fileSize;
-    bool intOk = false;
+    SimpleErrorReporter reporter( SimpleErrorReporter::Install, pkgList[packageI].name);
+
+    bool ok;
+    qlonglong fileSize = pkgList[packageI].size.toLongLong( &ok );
+    if ( !ok )
+    {
+        QString simpleError =  PackageView::tr( "Invalid package download size supplied, contact package supplier" );
+        QString detailedError( "NetworkPackageController::install:- Invalid package size supplied: %1" );
+        detailedError = detailedError.arg( pkgList[packageI].size );
+        reporter.reportError( simpleError, detailedError );
+        return;
+    }
+
+    QString installedSizeStr = pkgList[packageI].installedSize;
+    qlonglong installedSize = SizeUtils::parseInstalledSize(installedSizeStr);
+
+    if ( installedSize  < 1 )
+    {
+        QString simpleError =  QObject::tr( "Package did not supply valid installed size, contact package supplier" );
+        QString detailedError( "NetworkPackageController::install:- Package supplied invalid size %1" );
+        detailedError = detailedError.arg( installedSizeStr );
+        reporter.reportError( simpleError, detailedError );
+        return;
+    }
+
+    if ( fileSize >= installedSize )
+    {
+        QString simpleError =  QObject::tr( "Invalid package, contact package supplier" );
+        QString detailedError( "NetworkPackageController::install:- download file size >= installed size, "
+                               "download size = %1, installed size = %2 ");
+        detailedError = detailedError.arg( fileSize ).arg( installedSize );
+        reporter.reportError( simpleError, detailedError );
+        return;
+    }
+
+    QString neededSpace;
+    if ( !SizeUtils::isSufficientSpace( installedSize, neededSpace) )
+    {
+        QString simpleError =  QObject::tr( "Not enough space for package, free up %1", "%1= 1MB" );
+        simpleError = simpleError.arg( neededSpace );
+        QString detailedError( "NetworkPackageController::install:- Insufficient space, need %1" );
+        detailedError = detailedError.arg( neededSpace );
+        reporter.reportError( simpleError, detailedError );
+        return;
+    }
+
+    qLog(Package) << "installing network package" << packageI;
+    qLog(Package) << "\t:" << pkgList[packageI].packageFile << "bytes";
+
     if ( hf == NULL )
         hf = new HttpFetcher( currentNetworkServer, this );
-    fileSize = pkgList[packageI].size.toInt( &intOk );
-    if ( !intOk )
-        qWarning( "Invalid package file size %s\n",
-                qPrintable( pkgList[packageI].size ));
-    qLog(Package) << "installing network package" << packageI;
-    qLog(Package) << "\t:" << pkgList[packageI].packageFile << fileSize << "bytes";
+
     hf->setFile( pkgList[packageI].packageFile, fileSize );
+    currentPackageName = pkgList[packageI].name;
     if ( progressDisplay )
     {
         progressDisplay->setLabelText( tr( "Getting package %1 from %2", "%1 package name, %2 server name" )
                 .arg( pkgList[packageI].name ).arg( currentNetworkServer ));
         connect( hf, SIGNAL(progressValue(int)), progressDisplay, SLOT(setValue(int)));
-    
-        connect( signalMapper, SIGNAL(mapped(const QString &)), hf, SLOT(cancel(const QString &)) );
+
+        connect( signalMapper, SIGNAL(mapped(QString)), hf, SLOT(cancel(QString)) );
         progressDisplay->show();
     }
     connect( hf, SIGNAL(finished()), this, SLOT(packageFetchComplete()));
@@ -392,33 +456,24 @@ void NetworkPackageController::install( int packageI )
 
 void NetworkPackageController::packageFetchComplete()
 {
-
-    // qDebug() << "package list fetch complete";
     if ( hf )
     {
-
         if ( hf->httpRequestWasAborted() )
         {
-            if ( hf->getError().isEmpty() )
+            if ( !hf->getError().isEmpty() )  
             {
-               emit packageMessage( tr( "Cancelled package download" ) );
-            }
-            else
-            {
-                SimpleErrorReporter errorReporter( SimpleErrorReporter::Other );
+                SimpleErrorReporter errorReporter( SimpleErrorReporter::Install, currentPackageName );
                 QString detailedMessage( "NetworkPackageController::packageFetchComplete:- Fetch from %1 failed: %2" );
                 detailedMessage = detailedMessage.arg( currentNetworkServer ).arg( hf->getError() );
 
-                errorReporter.reportError( tr( "<b>Install Failed</b>: Invalid package, contact package supplier") , detailedMessage);
-                
-            }
+                errorReporter.reportError( tr( "Error occurred while downloading package"), detailedMessage);
+            } //note: if getError does return empty, then the user has cancelled package download
         }
         else
         {
             InstallControl::PackageInfo pi;
             QString installFile;
             installFile = hf->getFile();
-            // qDebug() << "Package fetch complete";
             int i;
             for ( i = 0; i < pkgList.count(); ++i )
                 if ( installFile.endsWith( pkgList[i].packageFile ))
@@ -429,7 +484,7 @@ void NetworkPackageController::packageFetchComplete()
             {
                 pi = pkgList[i];
                 emit updated();
-                emit packageInstalled( pi, true );
+                emit packageInstalled( pi );
             }
 
         }
@@ -481,7 +536,7 @@ void InstalledPackageController::install(int pkgId)
     pi = pkgList[pkgId];
     pkgList.removeAt( pkgId );
     emit updated();
-    emit packageInstalled( pi, true );
+    emit packageInstalled( pi );
 }
 
 void InstalledPackageController::reloadInstalledLocations( const QStringList &locs )
@@ -497,7 +552,7 @@ void InstalledPackageController::reloadInstalledLocations( const QStringList &lo
 QIcon InstalledPackageController::getDataIcon( int pkgId ) const
 {
     InstallControl::PackageInfo pi = packageInfo( pkgId );
-    
+
     if ( pi.isEnabled )
          return QIcon( ":icon/accessories" );
     else
@@ -516,7 +571,7 @@ bool InstalledPackageController::reenable( int pkgId )
         qWarning( "InstalledPackageController::reenable: Could not find links to reenable " );
         return false;
     }
-    
+
     QFile linkFile;
     QString oldTarget;
     QString newTarget;
@@ -524,16 +579,16 @@ bool InstalledPackageController::reenable( int pkgId )
     {
         linkFile.setFileName( links[i].absoluteFilePath() );
         oldTarget = linkFile.symLinkTarget();
-            
+
         if ( oldTarget.endsWith(DISABLED_TAG) )
         {
             if ( !linkFile.remove() )
-            {    
+            {
                 qLog(Package) << "InstalledPackageController::reenable:- could not remove symlink during reenable:"
                                 << linkFile.fileName() << "  target: "<< oldTarget;
                 return false;
             }
-            
+
             newTarget =  oldTarget.replace(DISABLED_TAG, "" );
             if ( !QFile::link(newTarget, linkFile.fileName() ) )
             {
@@ -544,5 +599,5 @@ bool InstalledPackageController::reenable( int pkgId )
         }
     }
     pkgList[ pkgId ].isEnabled = true;
-    return true; 
+    return true;
 }

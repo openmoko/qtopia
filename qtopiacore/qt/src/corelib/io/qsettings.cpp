@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -99,7 +114,7 @@ inline bool qt_isEvilFsTypeName(const char *name)
             || qstrncmp(name, "cachefs", 7) == 0);
 }
 
-#if defined(Q_OS_BSD4)
+#if defined(Q_OS_BSD4) && !defined(Q_OS_NETBSD)
 # include <sys/param.h>
 # include <sys/mount.h>
 
@@ -135,7 +150,7 @@ static bool isLikelyToBeNfs(int handle)
 
 #elif defined(Q_OS_SOLARIS) || defined(Q_OS_IRIX) || defined(Q_OS_AIX) || defined(Q_OS_HPUX) \
       || defined(Q_OS_OSF) || defined(Q_OS_QNX) || defined(Q_OS_QNX6) || defined(Q_OS_SCO) \
-      || defined(Q_OS_UNIXWARE) || defined(Q_OS_RELIANT)
+      || defined(Q_OS_UNIXWARE) || defined(Q_OS_RELIANT) || defined(Q_OS_NETBSD)
 # include <sys/statvfs.h>
 
 static bool isLikelyToBeNfs(int handle)
@@ -893,32 +908,13 @@ static bool checkAccess(const QString &name)
         // if the file exists but we can't open it, report an error
         return file.open(QFile::ReadOnly);
     } else {
-        QDir dir;
-        if (QDir::isRelativePath(name))
-            dir = QDir::current();
-        else
-            dir = QDir::root();
-
-        /*
-            Create the directories to the file.
-        */
-        QStringList pathElements = name.split(QLatin1Char('/'), QString::SkipEmptyParts);
-        for (int i = 0; i < pathElements.size() - 1; ++i) {
-            const QString &elt = pathElements.at(i);
-            if (dir.cd(elt))
-                continue;
-
-            if (dir.mkdir(elt) && dir.cd(elt))
-                continue;
-
-            if (dir.cd(elt))
-                continue;
-
-            // if the path can't be created/reached, report an error
-            return false;
+        // Create the directories to the file.
+        QDir dir(fileInfo.absolutePath());
+        if (dir.exists() && dir.isReadable()) {
+            return true;
+        } else {
+            return dir.mkpath(dir.absolutePath());
         }
-        // we treat non-existent files as if they existed but were empty
-        return true;
     }
 }
 
@@ -973,7 +969,7 @@ static QString windowsConfigPath(int type)
 #ifndef QT_NO_QOBJECT
     // We can't use QLibrary if there is QT_NO_QOBJECT is defined
     // This only happens when bootstrapping qmake.
-    QLibrary library("shell32");
+    QLibrary library(QLatin1String("shell32"));
     QT_WA( {
         typedef BOOL (WINAPI*GetSpecialFolderPath)(HWND, LPTSTR, int, BOOL);
         GetSpecialFolderPath SHGetSpecialFolderPath = (GetSpecialFolderPath)library.resolve("SHGetSpecialFolderPathW");
@@ -1376,7 +1372,7 @@ void QConfFileSettingsPrivate::syncConfFile(int confFileNo)
     int numReadLocks = readOnly ? 1 : FileLockSemMax;
 
     if (file.isOpen()) {
-        // Aquire the write lock if we will be writing
+        // Acquire the write lock if we will be writing
         if (!readOnly) {
             QString writeSemName = QLatin1String("QSettingsWriteSem ");
             writeSemName.append(file.fileName());
@@ -1395,8 +1391,8 @@ void QConfFileSettingsPrivate::syncConfFile(int confFileNo)
             }
         }
 
-        // Aquire all the read locks if we will be writing, to make sure nobody
-        // reads while we're writing. If we are only reading, aquire a single
+        // Acquire all the read locks if we will be writing, to make sure nobody
+        // reads while we're writing. If we are only reading, acquire a single
         // read lock.
         QString readSemName = QLatin1String("QSettingsReadSem ");
         readSemName.append(file.fileName());
@@ -1940,7 +1936,8 @@ void QConfFileSettingsPrivate::ensureSectionParsed(QConfFile *confFile,
     \printline setOrganizationDomain
     \printline setApplicationName
     \dots
-    \printline QSettings settings;
+    \skipto QSettings settings;
+    \printuntil QSettings
 
     (Here, we also specify the organization's Internet domain. When
     the Internet domain is set, it is used on Mac OS X instead of the
@@ -1954,6 +1951,7 @@ void QConfFileSettingsPrivate::ensureSectionParsed(QConfFile *confFile,
     that stores the data associated with the key. To write a setting,
     use setValue(). For example:
 
+    \skipto setValue(
     \printline setValue(
 
     If there already exists a setting with the same key, the existing
@@ -2022,23 +2020,34 @@ void QConfFileSettingsPrivate::ensureSectionParsed(QConfFile *confFile,
     \o Avoid key names that are identical except for the case. For
        example, if you have a key called "MainWindow", don't try to
        save another key as "mainwindow".
+
+    \o Do not use slashes  ('/' and '\\') in key names; the
+       backslash character is used to separate sub keys (see below). On
+       windows '\\' are converted by QSettings to '/', which makes
+       them identical.
     \endlist
 
     You can form hierarchical keys using the '/' character as a
     separator, similar to Unix file paths. For example:
 
-    \printline setValue
-    \printline setValue
-    \printline setValue
+    \skipto settings.setValue("mainwindow/size", win->size());
+    \printuntil settings.setValue(
+
+    \skipto settings.setValue("mainwindow/fullScreen", win->isFullScreen());
+    \printuntil settings.setValue(
+
+    \skipto settings.setValue("outputpanel/visible", panel->isVisible());
+    \printuntil settings.setValue(
 
     If you want to save or restore many settings with the same
     prefix, you can specify the prefix using beginGroup() and call
     endGroup() at the end. Here's the same example again, but this
     time using the group mechanism:
 
-    \printline beginGroup
+    \skipto settings.beginGroup("mainwindow");
     \printuntil endGroup
-    \printline beginGroup
+
+    \skipto settings.beginGroup("outputpanel");
     \printuntil endGroup
 
     If a group is set using beginGroup(), the behavior of most
@@ -2108,9 +2117,8 @@ void QConfFileSettingsPrivate::ensureSectionParsed(QConfFile *confFile,
     argument to the QSettings constructor, followed by the scope, the
     organization name, and the application name:
 
-    \skipline {
-    \printline /settings\(.*,$/
-    \printline );
+    \skipto QSettings settings(
+    \printuntil );
 
     The \l{tools/settingseditor}{Settings Editor} example lets you
     experiment with different settings location and with fallbacks
@@ -2124,9 +2132,9 @@ void QConfFileSettingsPrivate::ensureSectionParsed(QConfFile *confFile,
     application's main window.
 
     \skipto ::writeSettings
-    \printuntil /^\}$/
+    \printuntil /^\}/
     \skipto ::readSettings
-    \printuntil /^\}$/
+    \printuntil /^\}/
 
     See \l{Window Geometry} for a discussion on why it is better to
     call QWidget::resize() and QWidget::move() rather than QWidget::setGeometry()
@@ -2281,6 +2289,27 @@ void QConfFileSettingsPrivate::ensureSectionParsed(QConfFile *confFile,
     \code
         settings.setValue("11.0/Outlook/Security/DontTrustInstalledFiles", 0);
     \endcode
+
+    Note that the backslash character is, as mentioned, used by
+    QSettings to separate subkeys. As a result, you cannot read or
+    write windows registry entries that contain slashes or
+    backslashes; you should use a native windows API if you need to do
+    so.
+
+    \section2 Accessing Common Registry Settings on Windows
+
+    On windows, it is possible for a key to have both a value and subkeys.
+    Its default value is accessed by using "Default" or "." in
+    place of a subkey:
+
+    \code
+        settings.setValue("HKEY_CURRENT_USER\\MySoft\\Star Runner\\Galaxy", "Milkyway");
+        settings.setValue("HKEY_CURRENT_USER\\MySoft\\Star Runner\\Galaxy\\Sun", "OurStar");
+        settings.value("HKEY_CURRENT_USER\\MySoft\\Star Runner\\Galaxy\\Default"); // returns "Milkyway"
+    \endcode
+
+    On other platforms than windows, "Default" and "." would be
+    treated as regular subkeys.
 
     \section2 Platform Limitations
 

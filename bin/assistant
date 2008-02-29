@@ -7,7 +7,7 @@ use File::Copy;
 use File::Path;
 use Cwd;
 use File::Basename;
-use lib ( dirname($0) );
+use lib ( dirname($0)."/../src/build/bin" );
 use Qtopia::Paths;
 use Qtopia::Vars;
 use Qtopia::File;
@@ -20,12 +20,18 @@ if ( $isWindows ) {
 }
 
 # Load the Qtopia content files
-for my $file ( "$QPEDIR/doc/html/qtopia.dcf", "$QPEDIR/doc/html/buildsystem/buildsystem.dcf" ) {
+for my $file ( "$QPEDIR/doc/html/qtopia.dcf",
+               "$QPEDIR/doc/html/buildsystem/buildsystem.dcf",
+               "$QPEDIR/doc/html/qtopiadesktop/qtopiadesktop.dcf" ) {
     if ( -f $file ) {
         system("$DQTDIR/bin/assistant", "-addContentFile", $file);
     }
 }
 
-my $ret = system("$DQTDIR/bin/assistant", @ARGV);
+my @cmd = ("$DQTDIR/bin/assistant", @ARGV);
+if ( $isWindows ) {
+    unshift(@cmd, "start", "/b");
+}
+my $ret = system(@cmd);
 exit $ret;
 

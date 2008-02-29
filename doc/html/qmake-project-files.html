@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: qmake Project Files</title>
+  <title>Qt 4.3: qmake Project Files</title>
   <link rel="prev" href="qmake-using.html" />
   <link rel="contents" href="qmake-manual.html" />
   <link rel="next" href="qmake-running.html" />
@@ -19,7 +19,8 @@
 [<a href="qmake-manual.html">Contents</a>]
 [Next: <a href="qmake-running.html">Running qmake</a>]
 </p>
-<h1 align="center">qmake Project Files<br /><small></small></h1>
+<h1 align="center">qmake Project Files<br /><span class="subtitle"></span>
+</h1>
 <p>Project files contain all the information required by <tt>qmake</tt> to build your application, library, or plugin. The resources used by your project are generally specified using a series of declarations, but support for simple programming constructs allow you to describe different build processes for different platforms and environments.</p>
 <ul><li><a href="#project-file-elements">Project File Elements</a></li>
 <ul><li><a href="#variables">Variables</a></li>
@@ -46,7 +47,7 @@
 <p>Note that the first assignment only includes values that are specified on the same line as the <tt>SOURCES</tt> variable. The second assignment splits the items across lines by using the <tt>\\</tt> character.</p>
 <p>The list of values in a variable is extended in the following way:</p>
 <pre> SOURCES = main.cpp mainwindow.cpp \
-           paintwidget.h
+           paintwidget.cpp
  CONFIG += qt</pre>
 <p>The <tt>CONFIG</tt> variable is another special variable that <tt>qmake</tt> uses when generating a Makefile. It is discussed in the section on <a href="#generalconfiguration">general configuration</a> later in this chapter. In the above line, <tt>qt</tt> is added to the list of existing values contained in <tt>CONFIG</tt>.</p>
 <p>The following table lists the variables that <tt>qmake</tt> recognizes, and describes what they should contain.</p>
@@ -164,7 +165,7 @@
 <a name="configuration-features"></a>
 <h2>Configuration Features</h2>
 <p><tt>qmake</tt> can be set up with extra configuration features that are specified in feature (.prf) files. These extra features often provide support for custom tools that are used during the build process. To add a feature to the build process, append the feature name (the stem of the feature filename) to the <tt>CONFIG</tt> variable.</p>
-<p>For example, <tt>qmake</tt> can configure the build process to take advantage of external libraries that are supported by <a href="http://www.freedesktop.org/wiki/Software_2fpkgconfig">pkg-config</a>, such as the D-BUS and ogg libraries, with the following lines:</p>
+<p>For example, <tt>qmake</tt> can configure the build process to take advantage of external libraries that are supported by <a href="http://www.freedesktop.org/wiki/Software_2fpkgconfig">pkg-config</a>, such as the D-Bus and ogg libraries, with the following lines:</p>
 <pre> CONFIG += link_pkgconfig
  PKGCONFIG += ogg dbus-1</pre>
 <p>More information about features can be found in the <a href="qmake-advanced-usage.html#adding-new-configuration-features">Adding New Configuration Features</a> section of the <a href="qmake-advanced-usage.html">qmake Advanced Usage</a> chapter.</p>
@@ -186,6 +187,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

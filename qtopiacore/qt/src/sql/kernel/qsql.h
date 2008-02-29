@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,7 +47,8 @@ QT_MODULE(Sql)
 
 namespace QSql
 {
-    enum Location {
+    enum Location
+    {
         BeforeFirstRow = -1,
         AfterLastRow = -2
 #ifdef QT3_SUPPORT
@@ -41,7 +57,8 @@ namespace QSql
 #endif
     };
 
-    enum ParamTypeFlag {
+    enum ParamTypeFlag
+    {
         In = 0x00000001,
         Out = 0x00000002,
         InOut = In | Out,
@@ -49,11 +66,21 @@ namespace QSql
     };
     Q_DECLARE_FLAGS(ParamType, ParamTypeFlag)
 
-    enum TableType {
+    enum TableType
+    {
         Tables = 0x01,
         SystemTables = 0x02,
         Views = 0x04,
         AllTables = 0xff
+    };
+
+    enum NumericalPrecisionPolicy
+    {
+        LowPrecisionInt32    = 0x01,
+        LowPrecisionInt64    = 0x02,
+        LowPrecisionDouble   = 0x04,
+
+        HighPrecision        = 0
     };
 
 #ifdef QT3_SUPPORT

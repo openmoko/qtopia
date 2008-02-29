@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -542,7 +542,7 @@ QAbstractFileEngine *QDrmContentPlugin::create( const QString &file ) const
 QDrmContentLicense *QDrmContentPlugin::license( const QString &fileName ) const
 {
     foreach( QDrmContentLicense *license, d->licenses )
-        if( license->content().file() == fileName )
+        if( license->content().fileName() == fileName )
             return license;
 
     return 0;
@@ -576,7 +576,7 @@ void QDrmContentPlugin::unregisterLicense( QObject *license )
 */
 void QDrmContentPlugin::initialize()
 {
-    DrmContentPluginManager::instance();
+    DrmContentPluginManager::instance()->load();
 }
 
 /*!

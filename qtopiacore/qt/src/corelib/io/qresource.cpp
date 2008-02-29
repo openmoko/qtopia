@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -23,6 +38,7 @@
 
 #include "qresource.h"
 #include "qresource_p.h"
+#include "qresource_iterator_p.h"
 #include "qset.h"
 #include "qhash.h"
 #include "qmutex.h"
@@ -36,6 +52,8 @@
 #include <qshareddata.h>
 #include <qplatformdefs.h>
 #include "private/qabstractfileengine_p.h"
+
+//#define DEBUG_RESOURCE_MATCH
 
 //resource glue
 class QResourceRoot
@@ -67,7 +85,8 @@ public:
     { return tree == other.tree && names == other.names && payloads == other.payloads; }
     inline bool operator!=(const QResourceRoot &other) const
     { return !operator==(other); }
-    virtual bool isDynamicRoot() const { return false; }
+    enum ResourceRootType { Resource_Builtin, Resource_File, Resource_Buffer };
+    virtual ResourceRootType type() const { return Resource_Builtin; }
 
 protected:
     inline void setSource(const uchar *t, const uchar *n, const uchar *d) {
@@ -475,19 +494,23 @@ QStringList QResource::children() const
 }
 
 /*!
+  \obsolete
+
   Adds \a path to the search paths searched in to find resources that are
   not specified with an absolute path. The \a path must be an absolute
   path (start with \c{/}).
 
   The default search path is to search only in the root (\c{:/}). The last
   path added will be consulted first upon next QResource creation.
+
+  Use QDir::addSearchPath() with a prefix instead.
 */
 
 void
 QResource::addSearchPath(const QString &path)
 {
     if (!path.startsWith(QLatin1Char('/'))) {
-        qWarning("QDir::addResourceSearchPath: Search paths must be absolute (start with /) [%s]",
+        qWarning("QResource::addResourceSearchPath: Search paths must be absolute (start with /) [%s]",
                  path.toLocal8Bit().data());
         return;
     }
@@ -555,6 +578,10 @@ int QResourceRoot::findNode(const QString &_path, const QLocale &locale) const
             }
         }
     }
+#ifdef DEBUG_RESOURCE_MATCH
+    qDebug() << "!!!!" << "START" << path << locale.country() << locale.language();
+#endif
+
     if(path == QLatin1String("/"))
         return 0;
 
@@ -567,8 +594,17 @@ int QResourceRoot::findNode(const QString &_path, const QLocale &locale) const
     //now iterate up the tree
     int node = -1;
     QStringList segments = path.split(QLatin1Char('/'), QString::SkipEmptyParts);
+#ifdef DEBUG_RESOURCE_MATCH
+    qDebug() << "****" << segments;
+#endif
     for(int i = 0; child_count && i < segments.size(); ++i) {
         const QString &segment = segments[i];
+#ifdef DEBUG_RESOURCE_MATCH
+        qDebug() << "  CHILDREN" << segment;
+        for(int j = 0; j < child_count; ++j) {
+            qDebug() << "   " << child+j << " :: " << name(child+j);
+        }
+#endif
         const int h = qHash(segment);
 
         //do the binary search for the hash
@@ -594,7 +630,11 @@ int QResourceRoot::findNode(const QString &_path, const QLocale &locale) const
             for(; sub_node < child+child_count && hash(sub_node) == h; ++sub_node) { //here we go...
                 if(name(sub_node) == segment) {
                     found = true;
-                    int offset = findOffset(sub_node) + 4; //jump past name
+                    int offset = findOffset(sub_node);
+#ifdef DEBUG_RESOURCE_MATCH
+                    qDebug() << "  TRY" << sub_node << name(sub_node) << offset;
+#endif
+                    offset += 4;  //jump past name
 
                     const short flags = (tree[offset+0] << 8) +
                                         (tree[offset+1] << 0);
@@ -609,14 +649,24 @@ int QResourceRoot::findNode(const QString &_path, const QLocale &locale) const
                             const short language = (tree[offset+0] << 8) +
                                                    (tree[offset+1] << 0);
                             offset += 2;
-
-                            if(country == locale.country() && language == locale.language())
+#ifdef DEBUG_RESOURCE_MATCH
+                            qDebug() << "    " << "LOCALE" << country << language;
+#endif
+                            if(country == locale.country() && language == locale.language()) {
+#ifdef DEBUG_RESOURCE_MATCH
+                                qDebug() << "!!!!" << "FINISHED" << __LINE__ << sub_node;
+#endif
                                 return sub_node;
-                            else if((country == QLocale::AnyCountry && language == locale.language()) ||
-                                    (country == QLocale::AnyCountry && language == QLocale::C && node == -1))
+                            } else if((country == QLocale::AnyCountry && language == locale.language()) ||
+                                      (country == QLocale::AnyCountry && language == QLocale::C && node == -1)) {
                                 node = sub_node;
+                            }
                             continue;
                         } else {
+#ifdef DEBUG_RESOURCE_MATCH
+                            qDebug() << "!!!!" << "FINISHED" << __LINE__ << sub_node;
+#endif
+
                             return sub_node;
                         }
                     }
@@ -636,6 +686,9 @@ int QResourceRoot::findNode(const QString &_path, const QLocale &locale) const
         if(!found)
             break;
     }
+#ifdef DEBUG_RESOURCE_MATCH
+    qDebug() << "!!!!" << "FINISHED" << __LINE__ << node;
+#endif
     return node;
 }
 short QResourceRoot::flags(int node) const
@@ -759,6 +812,54 @@ Q_CORE_EXPORT bool qUnregisterResourceData(int version, const unsigned char *tre
 
 //run time resource creation
 
+class QDynamicBufferResourceRoot: public QResourceRoot
+{
+    QString root;
+    const uchar *buffer;
+
+public:
+    inline QDynamicBufferResourceRoot(const QString &_root) : root(_root), buffer(0) { }
+    inline ~QDynamicBufferResourceRoot() { }
+    inline const uchar *mappingBuffer() const { return buffer; }
+    virtual QString mappingRoot() const { return root; }
+    virtual ResourceRootType type() const { return Resource_Buffer; }
+
+    bool registerSelf(const uchar *b) {
+        //setup the data now
+        int offset = 0;
+
+        //magic number
+        if(b[offset+0] != 'q' || b[offset+1] != 'r' ||
+           b[offset+2] != 'e' || b[offset+3] != 's') {
+            return false;
+        }
+        offset += 4;
+
+        const int version = (b[offset+0] << 24) + (b[offset+1] << 16) +
+                         (b[offset+2] << 8) + (b[offset+3] << 0);
+        offset += 4;
+
+        const int tree_offset = (b[offset+0] << 24) + (b[offset+1] << 16) +
+                                (b[offset+2] << 8) + (b[offset+3] << 0);
+        offset += 4;
+
+        const int data_offset = (b[offset+0] << 24) + (b[offset+1] << 16) +
+                                (b[offset+2] << 8) + (b[offset+3] << 0);
+        offset += 4;
+
+        const int name_offset = (b[offset+0] << 24) + (b[offset+1] << 16) +
+                                (b[offset+2] << 8) + (b[offset+3] << 0);
+        offset += 4;
+
+        if(version == 0x01) {
+            buffer = b;
+            setSource(b+tree_offset, b+name_offset, b+data_offset);
+            return true;
+        }
+        return false;
+    }
+};
+
 #if defined(Q_OS_UNIX)
 #define QT_USE_MMAP
 #endif
@@ -771,34 +872,37 @@ Q_CORE_EXPORT bool qUnregisterResourceData(int version, const unsigned char *tre
 #include <errno.h>
 #endif
 
-class QDynamicResourceRoot: public QResourceRoot
+
+
+class QDynamicFileResourceRoot: public QDynamicBufferResourceRoot
 {
-    QString root, fileName;
+    QString fileName;
     // for mmap'ed files, this is what needs to be unmapped.
     uchar *unmapPointer;
     unsigned int unmapLength;
-    bool fromMM;
 
 public:
-    inline QDynamicResourceRoot(const QString &_root) : root(_root), unmapPointer(0), unmapLength(0) { }
-    ~QDynamicResourceRoot() {
-        if (unmapPointer && unmapLength) {
+    inline QDynamicFileResourceRoot(const QString &_root) : QDynamicBufferResourceRoot(_root), unmapPointer(0), unmapLength(0) { }
+    ~QDynamicFileResourceRoot() {
 #if defined(QT_USE_MMAP)
-            if(fromMM)
-                munmap((char*)unmapPointer, unmapLength);
-            else
-#endif
-                delete [] unmapPointer;
+        if (unmapPointer) {
+            munmap((char*)unmapPointer, unmapLength);
             unmapPointer = 0;
             unmapLength = 0;
+        } else
+#endif
+        {
+            delete [] (uchar *)mappingBuffer();
         }
     }
     QString mappingFile() const { return fileName; }
-    virtual QString mappingRoot() const { return root; }
-    virtual bool isDynamicRoot() const { return true; }
+    virtual ResourceRootType type() const { return Resource_File; }
 
     bool registerSelf(const QString &f) {
-        bool ok = false;
+        bool fromMM = false;
+        uchar *data = 0;
+        unsigned int data_len = 0;
+
 #ifdef QT_USE_MMAP
 
 #ifndef MAP_FILE
@@ -816,8 +920,8 @@ public:
 #endif
             );
         if (fd >= 0) {
-            struct stat st;
-            if (!fstat(fd, &st)) {
+            QT_STATBUF st;
+            if (!QT_FSTAT(fd, &st)) {
                 uchar *ptr;
                 ptr = reinterpret_cast<uchar *>(
                     mmap(0, st.st_size,             // any address, whole file
@@ -825,73 +929,43 @@ public:
                          MAP_FILE | MAP_PRIVATE,    // swap-backed map from file
                          fd, 0));                   // from offset 0 of fd
                 if (ptr && ptr != reinterpret_cast<uchar *>(MAP_FAILED)) {
-                    unmapPointer = ptr;
-                    unmapLength = st.st_size;
+                    data = ptr;
+                    data_len = st.st_size;
                     fromMM = true;
-                    ok = true;
                 }
             }
             ::close(fd);
         }
 #endif // QT_USE_MMAP
-        if(!ok) {
+        if(!data) {
             QFile file(f);
             if (!file.exists())
                 return false;
-            unmapLength = file.size();
-            unmapPointer = new uchar[unmapLength];
+            data_len = file.size();
+            data = new uchar[data_len];
 
+            bool ok = false;
             if (file.open(QIODevice::ReadOnly))
-                ok = (unmapLength == (uint)file.read((char*)unmapPointer, unmapLength));
-
+                ok = (data_len == (uint)file.read((char*)data, data_len));
             if (!ok) {
-                delete [] unmapPointer;
-                unmapPointer = 0;
-                unmapLength = 0;
+                delete [] data;
+                data = 0;
+                data_len = 0;
                 return false;
             }
             fromMM = false;
         }
-        if(!ok) {
-	    fileName = QString();
-            return false;
-	}
-	fileName = f;
-
-        //setup the data now
-        int offset = 0;
-
-        //magic number
-        if(unmapPointer[offset+0] != 'q' || unmapPointer[offset+1] != 'r' ||
-           unmapPointer[offset+2] != 'e' || unmapPointer[offset+3] != 's') {
-            return false;
-        }
-        offset += 4;
-
-        const int version = (unmapPointer[offset+0] << 24) + (unmapPointer[offset+1] << 16) +
-                         (unmapPointer[offset+2] << 8) + (unmapPointer[offset+3] << 0);
-        offset += 4;
-
-        const int tree_offset = (unmapPointer[offset+0] << 24) + (unmapPointer[offset+1] << 16) +
-                                (unmapPointer[offset+2] << 8) + (unmapPointer[offset+3] << 0);
-        offset += 4;
-
-        const int data_offset = (unmapPointer[offset+0] << 24) + (unmapPointer[offset+1] << 16) +
-                                (unmapPointer[offset+2] << 8) + (unmapPointer[offset+3] << 0);
-        offset += 4;
-
-        const int name_offset = (unmapPointer[offset+0] << 24) + (unmapPointer[offset+1] << 16) +
-                                (unmapPointer[offset+2] << 8) + (unmapPointer[offset+3] << 0);
-        offset += 4;
-
-        if(version == 0x01) {
-            setSource(unmapPointer+tree_offset, unmapPointer+name_offset, unmapPointer+data_offset);
+        if(data && QDynamicBufferResourceRoot::registerSelf(data)) {
+            if(fromMM) {
+                unmapPointer = data;
+                unmapLength = data_len;
+            }
+            fileName = f;
             return true;
         }
         return false;
     }
 };
-
 
 static QString qt_resource_fixResourceRoot(QString r) {
     if(!r.isEmpty()) {
@@ -924,7 +998,7 @@ QResource::registerResource(const QString &rccFilename, const QString &resourceR
         return false;
     }
 
-    QDynamicResourceRoot *root = new QDynamicResourceRoot(r);
+    QDynamicFileResourceRoot *root = new QDynamicFileResourceRoot(r);
     if(root->registerSelf(rccFilename)) {
         root->ref.ref();
         QMutexLocker lock(resourceMutex());
@@ -938,9 +1012,10 @@ QResource::registerResource(const QString &rccFilename, const QString &resourceR
 /*!
   \fn bool QResource::unregisterResource(const QString &rccFileName, const QString &mapRoot)
 
-  Unregisters the resource with the given \a rccFileName at the location in the
-  resource tree specified by \a mapRoot, and returns true if the resource is
-  successfully unloaded; otherwise returns false.
+  Unregisters the resource with the given \a rccFileName at the location in
+  the resource tree specified by \a mapRoot, and returns true if the
+  resource is successfully unloaded and no references exist for the
+  resource; otherwise returns false.
 
   \sa registerResource()
 */
@@ -954,19 +1029,91 @@ QResource::unregisterResource(const QString &rccFilename, const QString &resourc
     ResourceList *list = resourceList();
     for(int i = 0; i < list->size(); ++i) {
         QResourceRoot *res = list->at(i);
-        if(res->isDynamicRoot()) {
-	    QDynamicResourceRoot *root = reinterpret_cast<QDynamicResourceRoot*>(res);
+        if(res->type() == QResourceRoot::Resource_File) {
+	    QDynamicFileResourceRoot *root = reinterpret_cast<QDynamicFileResourceRoot*>(res);
 	    if(root->mappingFile() == rccFilename && root->mappingRoot() == r) {
                 resourceList()->removeAt(i);
-                if(!root->ref.deref())
+                if(!root->ref.deref()) {
                     delete root;
-		return true;
+                    return true;
+                }
+                return false;
             }
 	}
     }
     return false;
 }
 
+
+/*!
+   \fn bool QResource::registerResource(const uchar *rccData, const QString &mapRoot)
+   \since 4.3
+
+   Registers the resource with the given \a rccData at the location in the
+   resource tree specified by \a mapRoot, and returns true if the file is
+   successfully opened; otherwise returns false.
+
+   \warning The data must remain valid throughout the life of any QFile
+   that may reference the resource data.
+
+   \sa unregisterResource()
+*/
+
+bool
+QResource::registerResource(const uchar *rccData, const QString &resourceRoot)
+{
+    QString r = qt_resource_fixResourceRoot(resourceRoot);
+    if(!r.isEmpty() && r[0] != QLatin1Char('/')) {
+        qWarning("QDir::registerResource: Registering a resource [%p] must be rooted in an absolute path (start with /) [%s]",
+                 rccData, resourceRoot.toLocal8Bit().data());
+        return false;
+    }
+
+    QDynamicBufferResourceRoot *root = new QDynamicBufferResourceRoot(r);
+    if(root->registerSelf(rccData)) {
+        root->ref.ref();
+        QMutexLocker lock(resourceMutex());
+        resourceList()->append(root);
+        return true;
+    }
+    delete root;
+    return false;
+}
+
+/*!
+  \fn bool QResource::unregisterResource(const uchar *rccData, const QString &mapRoot)
+  \since 4.3
+
+  Unregisters the resource with the given \a rccData at the location in the
+  resource tree specified by \a mapRoot, and returns true if the resource is
+  successfully unloaded and no references exist into the resource; otherwise returns false.
+
+  \sa registerResource()
+*/
+
+bool
+QResource::unregisterResource(const uchar *rccData, const QString &resourceRoot)
+{
+    QString r = qt_resource_fixResourceRoot(resourceRoot);
+
+    QMutexLocker lock(resourceMutex());
+    ResourceList *list = resourceList();
+    for(int i = 0; i < list->size(); ++i) {
+        QResourceRoot *res = list->at(i);
+        if(res->type() == QResourceRoot::Resource_Buffer) {
+	    QDynamicBufferResourceRoot *root = reinterpret_cast<QDynamicBufferResourceRoot*>(res);
+	    if(root->mappingBuffer() == rccData && root->mappingRoot() == r) {
+                resourceList()->removeAt(i);
+                if(!root->ref.deref()) {
+                    delete root;
+                    return true;
+                }
+		return false;
+            }
+	}
+    }
+    return false;
+}
 
 //file type handler
 class QResourceFileEngineHandler : public QAbstractFileEngineHandler
@@ -1013,42 +1160,7 @@ bool QResourceFileEngine::setSize(qint64)
 
 QStringList QResourceFileEngine::entryList(QDir::Filters filters, const QStringList &filterNames) const
 {
-    Q_D(const QResourceFileEngine);
-
-    const bool doDirs     = (filters & QDir::Dirs) != 0;
-    const bool doFiles    = (filters & QDir::Files) != 0;
-    const bool doReadable = (filters & QDir::Readable) != 0;
-
-    QStringList ret;
-    if((!doDirs && !doFiles) || ((filters & QDir::PermissionMask) && !doReadable))
-        return ret;
-    if(!d->resource.isValid() || !d->resource.isDir())
-        return ret; // cannot read the "directory"
-
-    QStringList entries = d->resource.children();
-    for(int i = 0; i < entries.size(); i++) {
-        QResource entry(d->resource.fileName() + QLatin1String("/") + entries[i]);
-#ifndef QT_NO_REGEXP
-        if(!(filters & QDir::AllDirs && entry.isDir())) {
-            bool matched = false;
-            for(QStringList::ConstIterator sit = filterNames.begin(); sit != filterNames.end(); ++sit) {
-                QRegExp rx(*sit,
-                           (filters & QDir::CaseSensitive) ? Qt::CaseSensitive : Qt::CaseInsensitive,
-                           QRegExp::Wildcard);
-                if (rx.exactMatch(entries[i])) {
-                    matched = true;
-                    break;
-                }
-            }
-            if(!matched)
-                continue;
-        }
-#endif
-        if  ((doDirs && entry.isDir()) ||
-             (doFiles && !entry.isDir()))
-            ret.append(entries[i]);
-    }
-    return ret;
+    return QAbstractFileEngine::entryList(filters, filterNames);
 }
 
 bool QResourceFileEngine::caseSensitive() const
@@ -1260,6 +1372,23 @@ QString QResourceFileEngine::owner(FileOwner) const
 QDateTime QResourceFileEngine::fileTime(FileTime) const
 {
     return QDateTime();
+}
+
+/*!
+    \internal
+*/
+QAbstractFileEngine::Iterator *QResourceFileEngine::beginEntryList(QDir::Filters filters,
+                                                                   const QStringList &filterNames)
+{
+    return new QResourceFileEngineIterator(filters, filterNames);
+}
+
+/*!
+    \internal
+*/
+QAbstractFileEngine::Iterator *QResourceFileEngine::endEntryList()
+{
+    return 0;
 }
 
 bool QResourceFileEngine::extension(Extension extension, const ExtensionOption *option, ExtensionReturn *output)

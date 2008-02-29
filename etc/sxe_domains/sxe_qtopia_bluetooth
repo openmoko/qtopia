@@ -1,0 +1,2 @@
+#!/bin/sh
+lidsconf -A POSTBOOT -s ${BIN} -o LIDS_SOCKET_CREATE -j ENABLE

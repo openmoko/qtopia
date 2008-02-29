@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -31,6 +46,12 @@
 #include <qapplication.h>
 #include <private/qapplication_p.h>
 #include <private/qshortcutmap_p.h>
+
+#define QAPP_CHECK(functionName) \
+    if (!qApp) { \
+        qWarning("QShortcut: Initialize QApplication before calling '" functionName "'."); \
+        return; \
+    }
 
 /*!
     \class QShortcut
@@ -49,7 +70,7 @@
     \target mnemonic
 
     On certain widgets, using '&' in front of a character will
-    autmatically create a mnemonic (a shortcut) for that character,
+    automatically create a mnemonic (a shortcut) for that character,
     e.g. "E&xit" will create the shortcut \gui Alt+X (use '&&' to
     display an actual ampersand). The widget might consume and perform
     an action on a given shortcut. On X11 the ampersand will not be
@@ -179,6 +200,8 @@ QShortcut::QShortcut(const QKeySequence &key, QWidget *parent,
                      Qt::ShortcutContext context)
     : QObject(*new QShortcutPrivate, parent)
 {
+    QAPP_CHECK("QShortcut");
+
     Q_D(QShortcut);
     Q_ASSERT(parent != 0);
     d->sc_context = context;
@@ -222,6 +245,7 @@ void QShortcut::setKey(const QKeySequence &key)
     Q_D(QShortcut);
     if (d->sc_sequence == key)
         return;
+    QAPP_CHECK("setKey");
     d->sc_sequence = key;
     d->redoGrab(qApp->d_func()->shortcutMap);
 }
@@ -250,6 +274,7 @@ void QShortcut::setEnabled(bool enable)
     Q_D(QShortcut);
     if (d->sc_enabled == enable)
         return;
+    QAPP_CHECK("setEnabled");
     d->sc_enabled = enable;
     qApp->d_func()->shortcutMap.setShortcutEnabled(enable, d->sc_id, this);
 }
@@ -275,6 +300,7 @@ void QShortcut::setContext(Qt::ShortcutContext context)
     Q_D(QShortcut);
     if(d->sc_context == context)
         return;
+    QAPP_CHECK("setContext");
     d->sc_context = context;
     d->redoGrab(qApp->d_func()->shortcutMap);
 }
@@ -324,6 +350,7 @@ void QShortcut::setAutoRepeat(bool on)
     Q_D(QShortcut);
     if (d->sc_autorepeat == on)
         return;
+    QAPP_CHECK("setAutoRepeat");
     d->sc_autorepeat = on;
     qApp->d_func()->shortcutMap.setShortcutAutoRepeat(on, d->sc_id, this);
 }

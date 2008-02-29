@@ -28,6 +28,7 @@ my %modules = ( # path to module name map
 	    "QtSql" => "$basedir/src/sql",
 	    "QtNetwork" => "$basedir/src/network",
 	    "QtSvg" => "$basedir/src/svg",
+	    "QtScript" => "$basedir/src/script",
 	    "Qt3Support" => "$basedir/src/qt3support",
 	    "ActiveQt" => "$basedir/src/activeqt/container;$basedir/src/activeqt/control",
             "QtTest" => "$basedir/tools/qtestlib/src",
@@ -97,6 +98,13 @@ sub checkUnix {
         $r = 0 if( /(ms)|(cyg)win/i );
     }
     return $r;
+}
+
+sub checkRelative {
+    my ($dir) = @_;
+    return 0 if($dir =~ /^\//);
+    return 0 if(!checkUnix() && $dir =~ /[a-zA-Z]:[\/\\]/);
+    return 1;
 }
 
 ######################################################################
@@ -285,7 +293,7 @@ sub syncHeader {
 ######################################################################
 sub fixPaths {
     my ($file, $dir) = @_;
-    $dir =~ s=^$basedir=$out_basedir= if(!($basedir eq $out_basedir));
+    $dir =~ s=^$basedir/=$out_basedir/= if(!($basedir eq $out_basedir));
     $file =~ s=\\=/=g;
     $dir =~ s=\\=/=g;
 
@@ -578,7 +586,7 @@ while ( @ARGV ) {
 	push @modules_to_sync, $val;
     } elsif ("$var" eq "output") {
 	my $outdir = $val;
-	if($outdir !~ /^\//) {
+	if(checkRelative($outdir)) {
 	    $out_basedir = getcwd();
 	    chomp $out_basedir;
 	    $out_basedir .= "/" . $outdir;
@@ -625,6 +633,7 @@ foreach (@modules_to_sync) {
 			$master_contents .= "#include <QtGui/QtGui>\n" if("$_" eq "gui");
 			$master_contents .= "#include <QtNetwork/QtNetwork>\n" if("$_" eq "network");
 			$master_contents .= "#include <QtSvg/QtSvg>\n" if("$_" eq "svg");
+			$master_contents .= "#include <QtScript/QtScript>\n" if("$_" eq "script");
 			$master_contents .= "#include <Qt3Support/Qt3Support>\n" if("$_" eq "qt3support");
 			$master_contents .= "#include <QtSql/QtSql>\n" if("$_" eq "sql");
 			$master_contents .= "#include <QtXml/QtXml>\n" if("$_" eq "xml");
@@ -726,7 +735,7 @@ foreach (@modules_to_sync) {
 			    @headers = ( "$out_basedir/include/$lib/$header" );
 			    push @headers, "$out_basedir/include/Qt/$header"
 			      if ("$subdir" =~ /^$basedir\/src/);
-			    
+
 			    foreach(@classes) {
 				my $class = "$_";
 				my $header_base = basename($header);
@@ -777,7 +786,7 @@ foreach (@modules_to_sync) {
             $oldmaster =~ s/\r//g; # remove \r's , so comparison is ok on all platforms
             $master_include = 0 if($oldmaster eq $master_contents);
         }
-        if($master_include) {
+        if($master_include && $master_contents) {
             my $master_dir = dirname($master_include);
             mkpath $master_dir, 0777;
             print "header (master) created for $lib\n";
@@ -800,7 +809,7 @@ foreach (@modules_to_sync) {
             $old_headers_pri_contents =~ s/\r//g; # remove \r's , so comparison is ok on all platforms
             $headers_pri_file = 0 if($old_headers_pri_contents eq $headers_pri_contents);
         }
-        if($headers_pri_file) {
+        if($headers_pri_file && $master_contents) {
             my $headers_pri_dir = dirname($headers_pri_file);
             mkpath $headers_pri_dir, 0777;
             print "headers.pri file created for $lib\n";

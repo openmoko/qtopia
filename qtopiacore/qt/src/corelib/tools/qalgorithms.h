@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -102,9 +117,9 @@ inline InputIterator qFind(InputIterator first, InputIterator last, const T &val
 }
 
 template <typename Container, typename T>
-inline void qFind(const Container &container, const T &val)
+inline typename Container::const_iterator qFind(const Container &container, const T &val)
 {
-    qFind(container.constBegin(), container.constEnd(), val);
+    return qFind(container.constBegin(), container.constEnd(), val);
 }
 
 template <typename InputIterator, typename T, typename Size>
@@ -121,20 +136,22 @@ inline void qCount(const Container &container, const T &value, Size &n)
     qCount(container.constBegin(), container.constEnd(), value, n);
 }
 
+
+#if defined Q_CC_MSVC && _MSC_VER < 1300
 template <typename T>
 inline void qSwap(T &value1, T &value2)
 {
-    if (!QTypeInfo<T>::isComplex || QTypeInfo<T>::isLarge || QTypeInfo<T>::isStatic) {
-        T t = value1;
-        value1 = value2;
-        value2 = t;
-    } else {
-        const void * const t = reinterpret_cast<const void * const &>(value1);
-        const_cast<const void *&>(reinterpret_cast<const void * const &>(value1)) =
-            reinterpret_cast<const void * const &>(value2);
-        const_cast<const void *&>(reinterpret_cast<const void * const &>(value2)) = t;
-    }
+    qSwap_helper<T>(value1, value2, (T *)0);
 }
+#else
+template <typename T>
+inline void qSwap(T &value1, T &value2)
+{
+    T t = value1;
+    value1 = value2;
+    value2 = t;
+}
+#endif
 
 #ifdef qdoc
 template <typename T>
@@ -401,38 +418,68 @@ inline void qSortHelper(RandomAccessIterator begin, RandomAccessIterator end, co
     qSortHelper(begin, end, dummy, qLess<T>());
 }
 
-template <typename RandomAccessIterator, typename T, typename LessThan>
-Q_OUTOFLINE_TEMPLATE void qStableSortHelper(RandomAccessIterator start, RandomAccessIterator end, const T &t, LessThan lessThan)
+template <typename RandomAccessIterator>
+Q_OUTOFLINE_TEMPLATE void qReverse(RandomAccessIterator begin, RandomAccessIterator end)
 {
-    const int span = end - start;
+    --end;
+    while (begin < end)
+        qSwap(*begin++, *end--);
+}
+
+template <typename RandomAccessIterator>
+Q_OUTOFLINE_TEMPLATE void qRotate(RandomAccessIterator begin, RandomAccessIterator middle, RandomAccessIterator end)
+{
+    qReverse(begin, middle); 
+    qReverse(middle, end); 
+    qReverse(begin, end); 
+}
+
+template <typename RandomAccessIterator, typename T, typename LessThan>
+Q_OUTOFLINE_TEMPLATE void qMerge(RandomAccessIterator begin, RandomAccessIterator pivot, RandomAccessIterator end, T &t, LessThan lessThan)
+{
+    const int len1 = pivot - begin;
+    const int len2 = end - pivot;
+
+    if (len1 == 0 || len2 == 0)
+        return;
+
+    if (len1 + len2 == 2) {
+        if (lessThan(*(begin + 1), *(begin)))
+            qSwap(*begin, *(begin + 1));
+        return;
+    }
+
+    RandomAccessIterator firstCut;
+    RandomAccessIterator secondCut;
+    int len2Half;
+    if (len1 > len2) {
+        const int len1Half = len1 / 2;
+        firstCut = begin + len1Half;
+        secondCut = qLowerBound(pivot, end, *firstCut, lessThan);
+        len2Half = secondCut - pivot;
+    } else {
+        len2Half = len2 / 2;
+        secondCut = pivot + len2Half;
+        firstCut = qUpperBound(begin, pivot, *secondCut, lessThan);
+    }
+
+    qRotate(firstCut, pivot, secondCut);
+    const RandomAccessIterator newPivot = firstCut + len2Half;
+    qMerge(begin, firstCut, newPivot, t, lessThan);
+    qMerge(newPivot, secondCut, end, t, lessThan);
+}
+
+template <typename RandomAccessIterator, typename T, typename LessThan>
+Q_OUTOFLINE_TEMPLATE void qStableSortHelper(RandomAccessIterator begin, RandomAccessIterator end, const T &t, LessThan lessThan)
+{
+    const int span = end - begin;
     if (span < 2)
        return;
-        
-    // Split in half and sort halves.
-    RandomAccessIterator middle = start + span / 2;
-    qStableSortHelper(start, middle, t, lessThan);
+       
+    const RandomAccessIterator middle = begin + span / 2;
+    qStableSortHelper(begin, middle, t, lessThan);
     qStableSortHelper(middle, end, t, lessThan);
-    
-    // Merge
-    RandomAccessIterator lo = start;
-    RandomAccessIterator hi = middle;
-    
-    while (lo != middle && hi != end) {
-        if (!lessThan(*hi, *lo)) {
-            ++lo; // OK, *lo is in its correct position
-        } else {
-            // Move *hi to lo's position, shift values
-            // between lo and hi - 1 one place up.
-            T value = *hi;
-            for (RandomAccessIterator i = hi; i != lo; --i) {
-                *i = *(i-1); 
-            }
-            *lo = value;
-            ++hi;
-            ++lo;
-            ++middle;
-        } 
-    }
+    qMerge(begin, middle, end, t, lessThan);
 }
 
 template <typename RandomAccessIterator, typename T>

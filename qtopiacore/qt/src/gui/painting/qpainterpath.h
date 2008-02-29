@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -105,6 +120,12 @@ public:
     inline void addText(qreal x, qreal y, const QFont &f, const QString &text);
     void addPath(const QPainterPath &path);
     void addRegion(const QRegion &region);
+    void addRoundRect(const QRectF &rect, int xRnd, int yRnd);
+    inline void addRoundRect(qreal x, qreal y, qreal w, qreal h,
+                             int xRnd, int yRnd);
+    inline void addRoundRect(const QRectF &rect, int roundness);
+    inline void addRoundRect(qreal x, qreal y, qreal w, qreal h,
+                             int roundness);
 
     void connectPath(const QPainterPath &path);
 
@@ -124,10 +145,26 @@ public:
     QList<QPolygonF> toSubpathPolygons(const QMatrix &matrix = QMatrix()) const;
     QList<QPolygonF> toFillPolygons(const QMatrix &matrix = QMatrix()) const;
     QPolygonF toFillPolygon(const QMatrix &matrix = QMatrix()) const;
+    QList<QPolygonF> toSubpathPolygons(const QTransform &matrix) const;
+    QList<QPolygonF> toFillPolygons(const QTransform &matrix) const;
+    QPolygonF toFillPolygon(const QTransform &matrix) const;
 
     inline int elementCount() const;
     inline const QPainterPath::Element &elementAt(int i) const;
     inline void setElementPositionAt(int i, qreal x, qreal y);
+
+    qreal   length() const;
+    qreal   percentAtLength(qreal t) const;
+    QPointF pointAtPercent(qreal t) const;
+    qreal   angleAtPercent(qreal t) const;
+    qreal   slopeAtPercent(qreal t) const;
+
+    bool intersects(const QPainterPath &p) const;
+    bool contains(const QPainterPath &p) const;
+    QPainterPath united(const QPainterPath &r) const;
+    QPainterPath intersected(const QPainterPath &r) const;
+    QPainterPath subtracted(const QPainterPath &r) const;
+    QPainterPath subtractedInverted(const QPainterPath &r) const;
 
     bool operator==(const QPainterPath &other) const;
     bool operator!=(const QPainterPath &other) const;
@@ -139,6 +176,9 @@ private:
     void ensureData_helper();
     inline void detach();
     void detach_helper();
+    void setDirty(bool);
+    void computeBoundingRect() const;
+    void computeControlPointRect() const;
 
     QPainterPathData *d_func() const { return reinterpret_cast<QPainterPathData *>(d_ptr); }
 
@@ -146,6 +186,7 @@ private:
     friend class QPainterPathStroker;
     friend class QPainterPathStrokerPrivate;
     friend class QMatrix;
+    friend class QTransform;
 
 #ifndef QT_NO_DATASTREAM
     friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &, const QPainterPath &);
@@ -160,6 +201,7 @@ class QPainterPathPrivate
     friend class QPainterPathStroker;
     friend class QPainterPathStrokerPrivate;
     friend class QMatrix;
+    friend class QTransform;
 #ifndef QT_NO_DATASTREAM
     friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &, const QPainterPath &);
     friend Q_GUI_EXPORT QDataStream &operator>>(QDataStream &, QPainterPath &);
@@ -201,6 +243,9 @@ public:
     void setDashPattern(Qt::PenStyle);
     void setDashPattern(const QVector<qreal> &dashPattern);
     QVector<qreal> dashPattern() const;
+
+    void setDashOffset(qreal offset);
+    qreal dashOffset() const;
 
     QPainterPath createStroke(const QPainterPath &path) const;
 
@@ -250,6 +295,30 @@ inline void QPainterPath::addRect(qreal x, qreal y, qreal w, qreal h)
     addRect(QRectF(x, y, w, h));
 }
 
+inline void QPainterPath::addRoundRect(qreal x, qreal y, qreal w, qreal h,
+                                       int xRnd, int yRnd)
+{
+    addRoundRect(QRectF(x, y, w, h), xRnd, yRnd);
+}
+
+inline void QPainterPath::addRoundRect(const QRectF &rect,
+                                       int roundness)
+{
+    int xRnd = roundness;
+    int yRnd = roundness;
+    if (rect.width() > rect.height())
+        xRnd = int(roundness * rect.height()/rect.width());
+    else
+        yRnd = int(roundness * rect.width()/rect.height());
+    addRoundRect(rect, xRnd, yRnd);
+}
+
+inline void QPainterPath::addRoundRect(qreal x, qreal y, qreal w, qreal h,
+                                       int roundness)
+{
+    addRoundRect(QRectF(x, y, w, h), roundness);
+}
+
 inline void QPainterPath::addText(qreal x, qreal y, const QFont &f, const QString &text)
 {
     addText(QPointF(x, y), f, text);
@@ -287,6 +356,7 @@ inline void QPainterPath::detach()
 {
     if (d_ptr->ref != 1)
         detach_helper();
+    setDirty(true);
 }
 
 QT_END_HEADER

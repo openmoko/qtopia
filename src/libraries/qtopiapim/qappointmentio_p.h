@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,17 @@
 
 #ifndef APPOINTMENTIO_PRIVATE_H
 #define APPOINTMENTIO_PRIVATE_H
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 #include <QVector>
 #include <QList>
@@ -45,6 +56,11 @@ public:
 
     virtual QAppointment appointment(const QUniqueId &) const = 0;
     virtual QAppointment appointment(int row) const = 0;
+
+    virtual QAppointment appointment(const QUniqueId &id, bool) const 
+    { return appointment(id); }
+    virtual QAppointment appointment(int row, bool) const
+    { return appointment(row); }
 
     virtual QVariant appointmentField(int row, QAppointmentModel::Field k) const;
     virtual bool setAppointmentField(int row, QAppointmentModel::Field k,  const QVariant &);
@@ -73,6 +89,10 @@ db systems do and refer to just one id for a series of split events.
     /* modify remaining */
     virtual QUniqueId replaceRemaining(const QUniqueId &original,
             const QAppointment &, const QDate&) = 0;
+   
+    
+    virtual bool restoreOccurrence(const QUniqueId &original,
+            const QDate &) = 0;
 
 signals:
     void alarmTriggered(const QDateTime &when, const QUniqueId &);

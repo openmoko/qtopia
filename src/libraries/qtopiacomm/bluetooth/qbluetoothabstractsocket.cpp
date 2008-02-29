@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,20 +25,13 @@
 #include <QTime>
 #include <QDebug>
 #include <QtAlgorithms>
+#include <QPointer>
 #include <qglobal.h>
 
 #include <qbluetoothabstractsocket.h>
-#include <qtopiacomm/private/qbluetoothabstractsocket_p.h>
+#include "qbluetoothabstractsocket_p.h"
 #include <qbluetoothaddress.h>
-
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <fcntl.h>
+#include "qbluetoothsocketengine_p.h"
 
 static const int QBLUETOOTHRFCOMMSOCKET_DEFAULT_READBUFFERSIZE = 1024;
 static const int QBLUETOOTHRFCOMMSOCKET_DEFAULT_WRITEBUFFERSIZE = 4096;
@@ -63,10 +56,16 @@ QBluetoothAbstractSocketPrivate::QBluetoothAbstractSocketPrivate(bool isBuffered
     m_readSocketNotifierStateSet = false;
     m_emittedReadyRead = false;
     m_emittedBytesWritten = false;
+
+    m_readMtu = 0;
+    m_writeMtu = 0;
+
+    m_engine = new QBluetoothSocketEngine;
 }
 
 QBluetoothAbstractSocketPrivate::~QBluetoothAbstractSocketPrivate()
 {
+    delete m_engine;
 }
 
 void QBluetoothAbstractSocketPrivate::setupNotifiers()
@@ -123,7 +122,7 @@ void QBluetoothAbstractSocketPrivate::abortConnectionAttempt()
     if (m_writeNotifier)
         disconnect(m_writeNotifier, SIGNAL(activated(int)),
                    this, SLOT(testConnected()));
-    ::close(m_fd);
+    m_engine->close(m_fd);
     m_fd = -1;
     m_state = QBluetoothAbstractSocket::UnconnectedState;
     m_parent->setError(QBluetoothAbstractSocket::TimeoutError);
@@ -145,58 +144,16 @@ void QBluetoothAbstractSocketPrivate::testConnected()
         m_timer = 0;
     }
 
-    int error = 0;
-    socklen_t len = sizeof(error);
-
-    if (getsockopt(m_fd, SOL_SOCKET, SO_ERROR, &error, &len) < 0) {
-        m_parent->setError(QBluetoothAbstractSocket::UnknownError);
+    if (!m_engine->testConnected(m_fd)) {
+        m_parent->setError(m_engine->error());
         m_state = QBluetoothAbstractSocket::UnconnectedState;
-        ::close(m_fd);
+        m_engine->close(m_fd);
         m_fd = -1;
         QPointer<QBluetoothAbstractSocket> that = m_parent;
         emit m_parent->error(m_error);
         if (that)
             emit m_parent->stateChanged(m_state);
         return;
-    }
-    else {
-        if (error) {
-            m_state = QBluetoothAbstractSocket::UnconnectedState;
-
-            switch (error) {
-                case EADDRINUSE:
-                    m_parent->setError(QBluetoothAbstractSocket::NetworkError);
-                    break;
-                case ETIMEDOUT:
-                    m_parent->setError(QBluetoothAbstractSocket::TimeoutError);
-                    break;
-                case EINVAL:
-                    m_parent->setError(m_error = QBluetoothAbstractSocket::UnknownError);
-                    break;
-                case EHOSTDOWN:
-                    m_parent->setError(QBluetoothAbstractSocket::HostDownError);
-                    break;
-                case ECONNREFUSED:
-                    m_parent->setError(QBluetoothAbstractSocket::ConnectionRefused);
-                    break;
-                case EAGAIN:
-                    m_parent->setError(QBluetoothAbstractSocket::UnknownError);
-                    break;
-                case EACCES:
-                case EPERM:
-                    m_parent->setError(QBluetoothAbstractSocket::AccessError);
-                    break;
-                default:
-                    m_parent->setError(QBluetoothAbstractSocket::UnknownError);
-                    break;
-            };
-
-            QPointer<QBluetoothAbstractSocket> that = m_parent;
-            emit m_parent->error(m_error);
-            if (that)
-                emit m_parent->stateChanged(m_state);
-            return;
-        }
     }
 
     m_parent->readSocketParameters(m_fd);
@@ -215,67 +172,6 @@ void QBluetoothAbstractSocketPrivate::testConnected()
         emit m_parent->stateChanged(m_state);
 }
 
-qint64 QBluetoothAbstractSocketPrivate::writeToSocket(const char *data, qint64 len)
-{
-    ssize_t writtenBytes;
-    do {
-        writtenBytes = ::write(m_fd, data, len);
-    } while (writtenBytes < 0 && errno == EINTR);
-
-    if (writtenBytes < 0) {
-    switch (errno) {
-        case EPIPE:
-        case ECONNRESET:
-            writtenBytes = -1;
-            m_parent->setError(QBluetoothAbstractSocket::RemoteHostClosedError);
-            m_parent->close();
-            break;
-        case EAGAIN:
-            writtenBytes = 0;
-            break;
-        case EMSGSIZE:
-            m_parent->setError(QBluetoothAbstractSocket::NetworkError);
-            break;
-        default:
-            perror("Error during socketWrite");
-            m_parent->setError(QBluetoothAbstractSocket::NetworkError);
-            break;
-    }
-    }
-
-    return qint64(writtenBytes);
-}
-
-qint64 QBluetoothAbstractSocketPrivate::readFromSocket(char *data, qint64 len)
-{
-    ssize_t r = 0;
-    do {
-        r = ::read(m_fd, data, len);
-    } while (r == -1 && errno == EINTR);
-
-    if (r < 0) {
-        r = -1;
-        switch (errno) {
-            case EAGAIN:
-                r = -2;
-                break;
-            case EBADF:
-            case EINVAL:
-            case EIO:
-                m_parent->setError(QBluetoothAbstractSocket::NetworkError);
-                m_parent->close();
-                break;
-            case ECONNRESET:
-                r = 0;
-                break;
-            default:
-                break;
-        }
-    }
-
-    return qint64(r);
-}
-
 bool QBluetoothAbstractSocketPrivate::readData()
 {
     do {
@@ -292,7 +188,7 @@ bool QBluetoothAbstractSocketPrivate::readData()
             break;
 
         char *ptr = m_readBuffer.reserve(bytesToRead);
-        qint64 readBytes = readFromSocket(ptr, bytesToRead);
+        qint64 readBytes = m_engine->readFromSocket(m_fd, ptr, bytesToRead);
 
         if (readBytes == -2) {
             m_readBuffer.chop(bytesToRead);
@@ -300,6 +196,7 @@ bool QBluetoothAbstractSocketPrivate::readData()
         }
         else if (readBytes == -1) {
             m_readBuffer.chop(bytesToRead);
+            m_parent->setError(m_engine->error());
             emit m_parent->error(m_error);
             return false;
         }
@@ -313,85 +210,11 @@ bool QBluetoothAbstractSocketPrivate::readData()
     return true;
 }
 
-bool QBluetoothAbstractSocketPrivate::initiateConnect(int socket,
-        struct sockaddr *addr, int size)
-{
-    m_writeBuffer.clear();
-    m_readBuffer.clear();
-
-    m_fd = socket;
-
-    int flags = fcntl(m_fd, F_GETFL, 0);
-    fcntl(m_fd, F_SETFL, flags | O_NONBLOCK);
-    ::fcntl(m_fd, F_SETFD, FD_CLOEXEC);
-
-    if (::connect(m_fd, addr, size) < 0) {
-	if (errno != EINPROGRESS && errno != EAGAIN && errno != EALREADY && errno != EISCONN)
-		qWarning("QBluetoothAbstractSocketPrivate::initiateConnect: error during connect: %d, %s", 
-			 errno, strerror(errno));
-
-        switch(errno) {
-            case EINVAL:
-                m_parent->setError(QBluetoothAbstractSocket::UnknownError);
-                break;
-            case EISCONN:
-                m_state = QBluetoothAbstractSocket::ConnectedState;
-                break;
-            case ECONNREFUSED:
-                m_parent->setError(QBluetoothAbstractSocket::ConnectionRefused);
-                break;
-            case ETIMEDOUT:
-            case EADDRINUSE:
-                m_parent->setError(QBluetoothAbstractSocket::NetworkError);
-                break;
-            case EINPROGRESS:
-            case EALREADY:
-                m_state = QBluetoothAbstractSocket::ConnectingState;
-                break;
-            case EAGAIN:
-                // Seems that bluetooth stack uses this instead of EINPROGRESS
-                m_state = QBluetoothAbstractSocket::ConnectingState;
-                break;
-            case EACCES:
-            case EPERM:
-                m_parent->setError(QBluetoothAbstractSocket::AccessError);
-                break;
-            default:
-                m_parent->setError(QBluetoothAbstractSocket::UnknownError);
-                break;
-        }
-    }
-    else {
-        m_state = QBluetoothAbstractSocket::ConnectedState;
-    }
-
-    if (m_state == QBluetoothAbstractSocket::ConnectingState) {
-        if (!m_writeNotifier)
-            m_writeNotifier = new QSocketNotifier(m_fd, QSocketNotifier::Write);
-
-        QObject::connect(m_writeNotifier, SIGNAL(activated(int)),
-                    this, SLOT(testConnected()));
-
-        if (!m_timer) {
-            m_timer = new QTimer(this);
-            QObject::connect(m_timer, SIGNAL(timeout()),
-                             this, SLOT(abortConnectionAttempt()));
-        }
-        m_timer->start(QT_BLUETOOTH_CONNECT_TIMEOUT);
-
-        return true;
-    }
-
-    if ((m_state != QBluetoothAbstractSocket::ConnectedState) &&
-        (m_state != QBluetoothAbstractSocket::ConnectingState)) {
-        emit m_parent->error(m_error);
-    }
-
-    return (m_state == QBluetoothAbstractSocket::ConnectedState);
-}
-
 bool QBluetoothAbstractSocketPrivate::initiateDisconnect()
 {
+    if (m_state == QBluetoothAbstractSocket::UnconnectedState)
+        return true;
+
     if (m_readNotifier)
         m_readNotifier->setEnabled(false);
     if (m_state != QBluetoothAbstractSocket::ClosingState) {
@@ -406,10 +229,12 @@ bool QBluetoothAbstractSocketPrivate::initiateDisconnect()
 
     resetNotifiers();
     m_state = QBluetoothAbstractSocket::UnconnectedState;
-    close(m_fd);
+    m_engine->close(m_fd);
     m_fd = -1;
 
-    m_parent->QIODevice::close();
+    if (m_readBuffer.isEmpty()) {
+        m_parent->QIODevice::close();
+    }
 
     QPointer<QBluetoothAbstractSocket> that = m_parent;
     emit m_parent->disconnected();
@@ -429,6 +254,9 @@ bool QBluetoothAbstractSocketPrivate::initiateDisconnect()
 
 bool QBluetoothAbstractSocketPrivate::readActivated()
 {
+    if (m_state == QBluetoothAbstractSocket::UnconnectedState)
+        return false;
+
     if (m_readSocketNotifierCalled) {
         if (!m_readSocketNotifierStateSet) {
             m_readSocketNotifierStateSet = true;
@@ -442,6 +270,7 @@ bool QBluetoothAbstractSocketPrivate::readActivated()
         m_readNotifier->setEnabled(false);
 
     qint64 newBytes = 0;
+    bool shouldInitiateDisconnect = false;
 
     if (m_isBuffered) {
         if (m_readBufferCapacity && m_readBuffer.size() >= m_readBufferCapacity) {
@@ -452,9 +281,9 @@ bool QBluetoothAbstractSocketPrivate::readActivated()
         newBytes = m_readBuffer.size();
 
         if (!readData()) {
-            m_readSocketNotifierCalled = false;
-            initiateDisconnect();
-            return false;
+            // Even if the socket returned EOF
+            // Should still emit ready read, etc
+            shouldInitiateDisconnect = true;
         }
 
         newBytes = m_readBuffer.size() - newBytes;
@@ -485,6 +314,12 @@ bool QBluetoothAbstractSocketPrivate::readActivated()
     }
 
     m_readSocketNotifierCalled = false;
+
+    if (shouldInitiateDisconnect) {
+        initiateDisconnect();
+        return false;
+    }
+
     return true;
 }
 
@@ -509,8 +344,9 @@ bool QBluetoothAbstractSocketPrivate::flush()
     const char *ptr = m_writeBuffer.readPointer();
 
     // Attempt to write it all in one chunk.
-    qint64 written = writeToSocket(ptr, nextSize);
+    qint64 written = m_engine->writeToSocket(m_fd, ptr, nextSize);
     if (written < 0) {
+        m_parent->setError(m_engine->error());
         emit m_parent->error(m_error);
         // an unexpected error so close the socket.
         qWarning("QBluetoothAbstractSocket::flush: unexpected error");
@@ -540,15 +376,7 @@ bool QBluetoothAbstractSocketPrivate::flush()
 
 qint64 QBluetoothAbstractSocketPrivate::bytesAvailable() const
 {
-    size_t nbytes = 0;
-    // gives shorter than true amounts on Unix domain sockets.
-    qint64 available = 0;
-    if (::ioctl(m_fd, FIONREAD, (char *) &nbytes) >= 0)
-        available = (qint64) *((int *) &nbytes);
-    else
-        perror("FIONREAD failed:");
-
-    return available;
+    return m_engine->bytesAvailable(m_fd);
 }
 
 /*!
@@ -706,6 +534,11 @@ int QBluetoothAbstractSocket::writeMtu() const
     \value NetworkError A network error has occurred, e.g. device moved out of range.
     \value TimeoutError Operation has timed out.
     \value RemoteHostClosedError Remote host has closed the connection.
+    \value BusyError The system is busy.
+    \value HostUnreachableError The remote host could not be reached.
+    \value UnsupportedOperationError The operation is not supported.
+    \value AddressInUseError Address is currently in use.
+    \value AddressNotAvailableError Address is not available.
     \value UnknownError Unknown error has occurred.
  */
 
@@ -713,8 +546,7 @@ int QBluetoothAbstractSocket::writeMtu() const
     \internal
 
     Constructs a new QBluetoothAbstractSocket with \a parent. The socket is not
-    connected.  The \a isBuffered parameter specifies whether the socket should
-    be buffered internally or not.  Stream sockets (RFCOMM) are buffered.
+    connected.  Stream sockets (RFCOMM) are buffered.
     Seqpacket and Datagram sockets (SCO, L2CAP) are not buffered.
  */
 QBluetoothAbstractSocket::QBluetoothAbstractSocket(QBluetoothAbstractSocketPrivate *data,
@@ -776,11 +608,8 @@ bool QBluetoothAbstractSocket::setSocketDescriptor(int socketDescriptor,
         return false;
     }
 
-    // Set socket non-blocking
-    int flags = fcntl(m_data->m_fd, F_GETFL, 0);
-    if (!(flags & O_NONBLOCK)) {
-        fcntl(m_data->m_fd, F_SETFL, flags | O_NONBLOCK);
-    }
+    m_data->m_engine->setSocketOption(socketDescriptor,
+                                      QBluetoothSocketEngine::NonBlockingOption);
 
     m_data->setupNotifiers();
     setOpenMode(openMode);
@@ -794,13 +623,15 @@ bool QBluetoothAbstractSocket::setSocketDescriptor(int socketDescriptor,
 }
 
 /*!
-    Closes the socket. This is the same as disconnect()
+    Closes the socket. Pending data will not be flushed first.
+    The socket will be immediately closed.
 
     \sa abort(), disconnect()
  */
 void QBluetoothAbstractSocket::close()
 {
-    QIODevice::close();
+    if (QIODevice::isOpen())
+        QIODevice::close();
 
     if (m_data->m_state != QBluetoothAbstractSocket::UnconnectedState) {
         m_data->m_readBuffer.clear();
@@ -905,6 +736,16 @@ bool QBluetoothAbstractSocket::isSequential() const
     return true;
 }
 
+static int timeout_value(int timeout, int elapsed)
+{
+    if (timeout < 0)
+        return -1;
+
+    int msecs = timeout - elapsed;
+
+    return msecs < 0 ? 0 : msecs;
+}
+
 /*!
     \reimp
  */
@@ -921,49 +762,33 @@ bool QBluetoothAbstractSocket::waitForReadyRead(int msecs)
             return false;
     }
 
-    while (true) {
-        if (m_data->m_state != QBluetoothAbstractSocket::ConnectedState)
+    while ((msecs < 0) || (stopWatch.elapsed() < msecs)) {
+        bool readyToRead = false;
+        bool readyToWrite = false;
+        bool timedOut = false;
+        QBluetoothSocketEngine::SelectTypes types =
+                QBluetoothSocketEngine::SelectRead;
+        if (!m_data->m_writeBuffer.isEmpty())
+            types = types | QBluetoothSocketEngine::SelectWrite;
+
+        int timeout = timeout_value(msecs, stopWatch.elapsed());
+        if (!m_data->m_engine->waitFor(types, m_data->m_fd, timeout,
+            &timedOut, &readyToRead, &readyToWrite)) {
+            setError(m_data->m_engine->error());
+            emit error(m_data->m_error);
+            if (!timedOut)
+                abort();
             return false;
-
-        fd_set fdread;
-        FD_ZERO(&fdread);
-        FD_SET(m_data->m_fd, &fdread);
-
-        int timeout = msecs < 0 ? 0 : msecs - stopWatch.elapsed();
-        struct timeval tv;
-        struct timeval *tvptr;
-
-        if (msecs != -1) {
-            tv.tv_sec = timeout / 1000;
-            tv.tv_usec = (timeout % 1000) * 1000;
-            tvptr = &tv;
-        }
-        else {
-            tvptr = NULL;
         }
 
-        int rv = ::select(m_data->m_fd + 1, &fdread, 0, 0, tvptr);
+        if (readyToWrite)
+            m_data->writeActivated();
 
-        switch (rv) {
-            case 0:
-                // Timeout
-                return false;
-            case 1:
-                // Read notification, depends on
-                // whether we actually read anything
-                if (m_data->readActivated())
-                    return true;
-                break;
-            default:
-                // Interrupt, retry
-                if (rv == EINTR)
-                    continue;
-                // Otherwise, close the socket
-                setError(QBluetoothAbstractSocket::UnknownError);
-                emit error(m_data->m_error);
-                close();
-                return false;
-        }
+        if (readyToRead && m_data->readActivated())
+            return true;
+
+        if (state() != ConnectedState)
+            return false;
     }
 
     return false;
@@ -977,6 +802,9 @@ bool QBluetoothAbstractSocket::waitForBytesWritten(int msecs)
     if (m_data->m_state == QBluetoothAbstractSocket::UnconnectedState)
         return false;
 
+    if (m_data->m_writeBuffer.isEmpty())
+        return false;
+
     QTime stopWatch;
     stopWatch.start();
 
@@ -985,46 +813,32 @@ bool QBluetoothAbstractSocket::waitForBytesWritten(int msecs)
             return false;
     }
 
-    while (true) {
-        if (m_data->m_state != QBluetoothAbstractSocket::ConnectedState) {
-            qWarning("QBluetoothAbstractSocket::waitForBytesWritten - Socket no longer in connected state...");
+    while ((msecs < 0) || (stopWatch.elapsed() < msecs)) {
+        bool readyToRead = false;
+        bool readyToWrite = false;
+        bool timedOut = false;
+        QBluetoothSocketEngine::SelectTypes types =
+                QBluetoothSocketEngine::SelectTypes(QBluetoothSocketEngine::SelectRead |
+                                                    QBluetoothSocketEngine::SelectWrite);
+
+        int timeout = timeout_value(msecs, stopWatch.elapsed());
+        if (!m_data->m_engine->waitFor(types, m_data->m_fd, timeout,
+            &timedOut, &readyToRead, &readyToWrite)) {
+            setError(m_data->m_engine->error());
+            emit error(m_data->m_error);
+            if (!timedOut)
+                abort();
             return false;
         }
 
-        fd_set fdwrite;
-        FD_ZERO(&fdwrite);
-        FD_SET(m_data->m_fd, &fdwrite);
+        if (readyToRead)
+            m_data->readActivated();
 
-        int timeout = msecs < 0 ? 0 : msecs - stopWatch.elapsed();
-        struct timeval tv;
-        struct timeval *tvptr;
+        if (readyToWrite && m_data->writeActivated())
+            return true;
 
-        if (msecs != -1) {
-            tv.tv_sec = timeout / 1000;
-            tv.tv_usec = (timeout % 1000) * 1000;
-            tvptr = &tv;
-        }
-        else {
-            tvptr = NULL;
-        }
-
-        int rv = ::select(m_data->m_fd + 1, 0, &fdwrite, 0, tvptr);
-
-        switch (rv) {
-            case 0:
-                return false;
-            case 1:
-                m_data->writeActivated();
-                return true;
-            default:
-                if (rv == EINTR)
-                    continue;
-                // Otherwise, close the socket
-                setError(QBluetoothAbstractSocket::UnknownError);
-                emit error(m_data->m_error);
-                close();
-                return false;
-        }
+        if (state() != ConnectedState)
+            return false;
     }
 
     return false;
@@ -1036,10 +850,12 @@ bool QBluetoothAbstractSocket::waitForBytesWritten(int msecs)
 qint64 QBluetoothAbstractSocket::readData(char *data, qint64 maxsize)
 {
     if (!m_data->m_isBuffered) {
-        qint64 readBytes = m_data->readFromSocket(data, maxsize);
+        qint64 readBytes = m_data->m_engine->readFromSocket(m_data->m_fd, data, maxsize);
 
-        if (readBytes == -1)
+        if (readBytes == -1) {
+            setError(m_data->m_engine->error());
             emit error(m_data->m_error);
+        }
 
         if (!m_data->m_readNotifier->isEnabled())
             m_data->m_readNotifier->setEnabled(true);
@@ -1056,6 +872,12 @@ qint64 QBluetoothAbstractSocket::readData(char *data, qint64 maxsize)
 
     if (maxsize == 1) {
         *data = m_data->m_readBuffer.getChar();
+
+        if (m_data->m_state == QBluetoothAbstractSocket::UnconnectedState &&
+            m_data->m_readBuffer.isEmpty()) {
+            QIODevice::close();
+        }
+
         return 1;
     }
 
@@ -1068,6 +890,11 @@ qint64 QBluetoothAbstractSocket::readData(char *data, qint64 maxsize)
         memcpy(data + readSoFar, ptr, bytesToReadFromThisBlock);
         readSoFar += bytesToReadFromThisBlock;
         m_data->m_readBuffer.free(bytesToReadFromThisBlock);
+    }
+
+    if (m_data->m_state == QBluetoothAbstractSocket::UnconnectedState &&
+        m_data->m_readBuffer.isEmpty()) {
+        QIODevice::close();
     }
 
     return readSoFar;
@@ -1092,10 +919,15 @@ qint64 QBluetoothAbstractSocket::writeData(const char *data, qint64 size)
     }
 
     if (!m_data->m_isBuffered) {
-        qint64 written = m_data->writeToSocket(data, size);
+        qint64 written = m_data->m_engine->writeToSocket(m_data->m_fd, data, size);
 
         if (written >= 0)
             emit bytesWritten(written);
+        else {
+            setError(m_data->m_engine->error());
+            emit error(m_data->m_error);
+            abort();
+        }
 
         return written;
     }
@@ -1135,45 +967,23 @@ bool QBluetoothAbstractSocket::waitForConnected(int msecs)
     if (m_data->m_state == QBluetoothAbstractSocket::ConnectedState)
         return true;
 
-    QTime stopWatch;
-    stopWatch.start();
+    bool timedOut = false;
+    QBluetoothSocketEngine::SelectTypes types =
+            QBluetoothSocketEngine::SelectWrite;
 
-    while (true) {
-        fd_set fdwrite;
-        FD_ZERO(&fdwrite);
-        FD_SET(m_data->m_fd, &fdwrite);
-
-        int timeout = msecs < 0 ? 0 : msecs - stopWatch.elapsed();
-        struct timeval tv;
-        struct timeval *tvptr;
-
-        if (msecs != -1) {
-            tv.tv_sec = timeout / 1000;
-            tv.tv_usec = (timeout % 1000) * 1000;
-            tvptr = &tv;
-        }
-        else {
-            tvptr = NULL;
-        }
-
-        int rv = ::select(m_data->m_fd + 1, 0, &fdwrite, 0, tvptr);
-
-        switch (rv) {
-            case 0:
-                return false;
-            case 1:
-                m_data->testConnected();
-                return m_data->m_state == QBluetoothAbstractSocket::ConnectedState;
-            default:
-                if (rv == EINTR)
-                    continue;
-                // Otherwise, close the socket
-                setError(QBluetoothAbstractSocket::UnknownError);
-                emit error(m_data->m_error);
-                close();
-                return false;
-        }
+    if (!m_data->m_engine->waitFor(types, m_data->m_fd, msecs, &timedOut)) {
+        setError(m_data->m_engine->error());
+        emit error(m_data->m_error);
+        if (!timedOut)
+            abort();
+        return false;
     }
+
+    m_data->testConnected();
+    if (state() == ConnectedState)
+        return true;
+
+    return false;
 }
 
 /*!
@@ -1203,53 +1013,33 @@ bool QBluetoothAbstractSocket::waitForDisconnected(int msecs)
             return false;
     }
 
-    while (true) {
-        fd_set fdwrite;
-        FD_ZERO(&fdwrite);
-        FD_SET(m_data->m_fd, &fdwrite);
+    while ((msecs < 0) || (stopWatch.elapsed() < msecs)) {
+        bool readyToRead = false;
+        bool readyToWrite = false;
+        bool timedOut = false;
+        QBluetoothSocketEngine::SelectTypes types =
+                QBluetoothSocketEngine::SelectRead;
 
-        fd_set fdread;
-        FD_ZERO(&fdread);
-        FD_SET(m_data->m_fd, &fdread);
+        if (!m_data->m_writeBuffer.isEmpty())
+            types = types | QBluetoothSocketEngine::SelectWrite;
 
-        int timeout = msecs < 0 ? 0 : msecs - stopWatch.elapsed();
-        struct timeval tv;
-        struct timeval *tvptr;
-
-        if (msecs != -1) {
-            tv.tv_sec = timeout / 1000;
-            tv.tv_usec = (timeout % 1000) * 1000;
-            tvptr = &tv;
-        }
-        else {
-            tvptr = NULL;
-        }
-
-        int rv = ::select(m_data->m_fd + 1, &fdread, &fdwrite, 0, tvptr);
-
-        if (rv == 0) {
-            return false;
-        }
-        else if (rv < 0) {
-            if (rv == EINTR)
-                continue;
-            // Otherwise, close the socket
-            setError(QBluetoothAbstractSocket::UnknownError);
+        int timeout = timeout_value(msecs, stopWatch.elapsed());
+        if (!m_data->m_engine->waitFor(types, m_data->m_fd, timeout,
+            &timedOut, &readyToRead, &readyToWrite)) {
+            setError(m_data->m_engine->error());
             emit error(m_data->m_error);
-            close();
+            if (!timedOut)
+                abort();
             return false;
         }
-        else {
-            if (FD_ISSET(m_data->m_fd, &fdread)) {
-                m_data->readActivated();
-            }
 
-            if (FD_ISSET(m_data->m_fd, &fdwrite)) {
-                m_data->writeActivated();
-            }
-        }
+        if (readyToRead)
+            m_data->readActivated();
 
-        if (m_data->m_state == QBluetoothAbstractSocket::UnconnectedState)
+        if (readyToWrite)
+            m_data->writeActivated();
+
+        if (state() != UnconnectedState)
             return true;
     }
 
@@ -1309,21 +1099,49 @@ bool QBluetoothAbstractSocket::flush()
 
     Returns true on successful completion of the request; otherwise returns false.
 */
-bool QBluetoothAbstractSocket::initiateConnect(int socket,
-        sockaddr *addr, int size)
+bool QBluetoothAbstractSocket::handleConnect(int socket,
+                                             QBluetoothAbstractSocket::SocketState state)
 {
-    bool ret = m_data->initiateConnect(socket, addr, size);
-    if (!ret) {
-        emit error(m_data->m_error);
+
+    m_data->m_writeBuffer.clear();
+    m_data->m_readBuffer.clear();
+    m_data->m_state = state;
+
+    m_data->m_fd = socket;
+
+    if (m_data->m_state == QBluetoothAbstractSocket::ConnectingState) {
+        if (!m_data->m_writeNotifier)
+            m_data->m_writeNotifier = new QSocketNotifier(m_data->m_fd,
+                QSocketNotifier::Write);
+
+        QObject::connect(m_data->m_writeNotifier, SIGNAL(activated(int)),
+                    m_data, SLOT(testConnected()));
+
+        if (!m_data->m_timer) {
+            m_data->m_timer = new QTimer(this);
+            QObject::connect(m_data->m_timer, SIGNAL(timeout()),
+                             m_data, SLOT(abortConnectionAttempt()));
+        }
+        m_data->m_timer->start(QT_BLUETOOTH_CONNECT_TIMEOUT);
     }
-    else {
+
+    if ((m_data->m_state != QBluetoothAbstractSocket::ConnectedState) &&
+        (m_data->m_state != QBluetoothAbstractSocket::ConnectingState)) {
+        m_data->m_engine->close(m_data->m_fd);
+        m_data->m_fd = -1;
+        setError(m_data->m_engine->error());
+        emit error(m_data->m_error);
+        return false;
+    }
+
+    if (m_data->m_state == QBluetoothAbstractSocket::ConnectedState) {
         QPointer<QBluetoothAbstractSocket> that = this;
         emit stateChanged(m_data->m_state);
         if (that && (m_data->m_state == QBluetoothAbstractSocket::ConnectedState))
             emit connected();
     }
 
-    return ret;
+    return true;
 }
 
 
@@ -1355,48 +1173,7 @@ bool QBluetoothAbstractSocket::disconnect()
 void QBluetoothAbstractSocket::setError(QBluetoothAbstractSocket::SocketError error)
 {
     m_data->m_error = error;
-
-    switch (error) {
-        case NoError:
-            setErrorString(QString());
-            break;
-
-        case AccessError:
-            setErrorString(QT_TRANSLATE_NOOP("QBluetoothAbstractSocket", "Permission denied"));
-            break;
-
-        case ResourceError:
-            setErrorString(QT_TRANSLATE_NOOP("QBluetoothAbstractSocket", "Out of resources"));
-            break;
-
-        case BindError:
-            setErrorString(QT_TRANSLATE_NOOP("QBluetoothAbstractSocket", "Could not bind socket"));
-            break;
-
-        case ConnectionRefused:
-            setErrorString(QT_TRANSLATE_NOOP("QBluetoothAbstractSocket", "Connection refused"));
-            break;
-
-        case HostDownError:
-            setErrorString(QT_TRANSLATE_NOOP("QBluetoothAbstractSocket", "Host unreachable"));
-            break;
-
-        case NetworkError:
-            setErrorString(QT_TRANSLATE_NOOP("QBluetoothAbstractSocket", "Network error"));
-            break;
-
-        case TimeoutError:
-            setErrorString(QT_TRANSLATE_NOOP("QBluetoothAbstractSocket", "Network operation timed out"));
-            break;
-
-        case RemoteHostClosedError:
-            setErrorString(QT_TRANSLATE_NOOP("QBluetoothAbstractSocket", "Remote host closed the connection"));
-            break;
-
-        default:
-            setErrorString(QT_TRANSLATE_NOOP("QBluetoothAbstractSocket", "Unknown error"));
-            break;
-    };
+    setErrorString(QBluetoothSocketEngine::getErrorString(error));
 }
 
 /*!

@@ -1,7 +1,6 @@
 qtopia_project(qtopia lib)
 TARGET=qtopiacomm
 depends(3rdparty/libraries/openobex)
-!enable_qtopiabase:depends(libraries/qtopiail)
 
 PREFIX=COMM
 COMM_HEADERS += qcommdevicecontroller.h \

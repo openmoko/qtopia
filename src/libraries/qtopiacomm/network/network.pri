@@ -13,7 +13,11 @@ NETWORK_HEADERS+=\
     qnetworkdevice.h\
     ipvalidator.h \
     hexkeyvalidator.h\
-    qtopiahttp.h
+    qtopiahttp.h\
+    qwapaccount.h\
+    qwlanregistration.h\
+    qnetworkconnection.h
+    
 
 NETWORK_SOURCES+=\
     ipconfig.cpp\
@@ -24,19 +28,10 @@ NETWORK_SOURCES+=\
     qnetworkdevice.cpp\
     ipvalidator.cpp\
     hexkeyvalidator.cpp\
-    qtopiahttp.cpp
-
-SSL_HEADERS=\
-    qtsslsocket.h\
-    ssllibrary.h
-SSL_SOURCES=\
-    qtsslsocket.cpp\
-    ssllibrary.cpp
-enable_ssl {
-    depends(3rdparty/libraries/openssl/ssl)
-    NETWORK_HEADERS+=$$SSL_HEADERS
-    NETWORK_SOURCES+=$$SSL_SOURCES
-}
+    qtopiahttp.cpp\
+    qwapaccount.cpp\
+    qwlanregistration.cpp\
+    qnetworkconnection.cpp
 
 sdk_network_headers.files=$$NETWORK_HEADERS
 sdk_network_headers.path=/include/qtopia/comm

@@ -142,7 +142,7 @@ QWidget *PkImpl::statusWidget( QWidget *parent )
 // TODO: find out what this properties should more properly return
 int PkImpl::properties() const
 {
-    return (RequireMouse | RequireKeypad | InputModifier);
+    return ( InputModifier);
 }
 
 void PkImpl::setHint(const QString &hint, bool r)

@@ -4,16 +4,16 @@ Context=Todo List
 [Service]
 Actions = "activateLink(QDSActionRequest);newTask();addTask(QTask);removeTask(QTask);requestLinks(QDSActionRequest);updateTask(QTask)"
 Icon = todolist/TodoList
-Name[]=Todo List
+Name[]=Tasks
 [newTask()]
 Icon = todolist/TodoList
-Name[]="New Task in Todo List"
+Name[]="New Task"
 [addTask(QTask)]
 Icon = todolist/TodoList
-Name[]="Add Task to Todo List"
+Name[]="Add Task"
 [removeTask(QTask)]
 Icon = todolist/TodoList
-Name[]="Remove Task from Todo List"
+Name[]="Remove Task"
 [updateTask(QTask)]
 Icon = todolist/TodoList
-Name[]="Update Task in Todo List"
+Name[]="Update Task"

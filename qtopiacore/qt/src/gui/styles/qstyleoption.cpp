@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,6 +40,7 @@
 #include "qapplication.h"
 #ifdef Q_WS_MAC
 # include "private/qt_mac_p.h"
+# include "qmacstyle_mac.h"
 #endif
 #ifndef QT_NO_DEBUG
 #include <qdebug.h>
@@ -177,21 +193,35 @@ QStyleOption::~QStyleOption()
 */
 void QStyleOption::init(const QWidget *widget)
 {
+    QWidget *window = widget->window();
     state = QStyle::State_None;
     if (widget->isEnabled())
         state |= QStyle::State_Enabled;
     if (widget->hasFocus())
         state |= QStyle::State_HasFocus;
-    if (widget->window()->testAttribute(Qt::WA_KeyboardFocusChange))
+    if (window->testAttribute(Qt::WA_KeyboardFocusChange))
         state |= QStyle::State_KeyboardFocusChange;
     if (widget->underMouse())
         state |= QStyle::State_MouseOver;
-    if (widget->window()->isActiveWindow())
+    if (window->isActiveWindow())
         state |= QStyle::State_Active;
+    if (widget->isWindow())
+        state |= QStyle::State_Window;
 #ifdef Q_WS_MAC
     extern bool qt_mac_can_clickThrough(const QWidget *w); //qwidget_mac.cpp
     if (!(state & QStyle::State_Active) && !qt_mac_can_clickThrough(widget))
         state &= ~QStyle::State_Enabled;
+
+    switch (QMacStyle::widgetSizePolicy(widget)) {
+    case QMacStyle::SizeSmall:
+        state |= QStyle::State_Small;
+        break;
+    case QMacStyle::SizeMini:
+        state |= QStyle::State_Mini;
+        break;
+    default:
+        ;
+    }
 #endif
 #ifdef QT_KEYPAD_NAVIGATION
     if (widget->hasEditFocus())
@@ -632,6 +662,13 @@ QStyleOptionFrameV2 &QStyleOptionFrameV2::operator=(const QStyleOptionFrame &oth
 */
 
 /*!
+    \variable QStyleOptionFrameV2::features
+    \brief a bitwise OR of the features that describe this frame.
+
+    \sa FrameFeature
+*/
+
+/*!
     \enum QStyleOptionFrameV2::StyleOptionVersion
 
     This enum is used to hold information about the version of the style option, and
@@ -760,6 +797,30 @@ QStyleOptionViewItemV2 &QStyleOptionViewItemV2::operator=(const QStyleOptionView
     \value Alternate Indicates that the item's background is rendered using alternateBase.
 */
 
+QStyleOptionViewItemV3::QStyleOptionViewItemV3()
+    : QStyleOptionViewItemV2(Version)
+{
+}
+
+QStyleOptionViewItemV3::QStyleOptionViewItemV3(const QStyleOptionViewItem &other)
+    : QStyleOptionViewItemV2(Version)
+{
+    (void)QStyleOptionViewItemV3::operator=(other);
+}
+
+QStyleOptionViewItemV3 &QStyleOptionViewItemV3::operator = (const QStyleOptionViewItem &other)
+{
+    QStyleOptionViewItemV2::operator=(other);
+    const QStyleOptionViewItemV3 *v3 = qstyleoption_cast<const QStyleOptionViewItemV3*>(&other);
+    locale = v3 ? v3->locale : QLocale();
+    widget = v3 ? v3->widget : 0;
+    return *this;
+}
+
+QStyleOptionViewItemV3::QStyleOptionViewItemV3(int version)
+    : QStyleOptionViewItemV2(version)
+{
+}
 
 /*!
     \class QStyleOptionGroupBox
@@ -1105,13 +1166,14 @@ QStyleOptionHeader::QStyleOptionHeader(int version)
 /*!
     \enum QStyleOptionButton::ButtonFeature
 
-    This enum describles the different types of features a push button can have.
+    This enum describes the different types of features a push button can have.
 
-    \value None	Indicates a normal push button.
+    \value None Indicates a normal push button.
     \value Flat Indicates a flat push button.
     \value HasMenu Indicates that the button has a drop down menu.
     \value DefaultButton Indicates that the button is a default button.
     \value AutoDefaultButton Indicates that the button is an auto default button.
+    \value CommandLinkButton Indicates that the button is a Windows Vista type command link.
 
     \sa features
 */
@@ -1835,7 +1897,7 @@ QStyleOptionProgressBar::QStyleOptionProgressBar(int version)
     \brief the text alignment for the text in the QProgressBar
 
     This can be used as a guide on where the text should be in the
-    progressbar. The default value is Qt::AlignLeft.
+    progress bar. The default value is Qt::AlignLeft.
 */
 
 /*!
@@ -1973,7 +2035,7 @@ QStyleOptionProgressBarV2 &QStyleOptionProgressBarV2::operator=(const QStyleOpti
 /*!
     \variable QStyleOptionProgressBarV2::invertedAppearance
     \brief whether the progress bar's appearance is inverted
-    
+
     The default value is false.
 
     \sa QProgressBar::invertedAppearance
@@ -3014,6 +3076,33 @@ QStyleOptionDockWidget::QStyleOptionDockWidget(int version)
 {
 }
 
+QStyleOptionDockWidgetV2::QStyleOptionDockWidgetV2()
+    : QStyleOptionDockWidget(Version), verticalTitleBar(false)
+{
+}
+
+QStyleOptionDockWidgetV2::QStyleOptionDockWidgetV2(
+                                    const QStyleOptionDockWidget &other)
+    : QStyleOptionDockWidget(Version)
+{
+    (void)QStyleOptionDockWidgetV2::operator=(other);
+}
+
+QStyleOptionDockWidgetV2 &QStyleOptionDockWidgetV2::operator = (
+                                    const QStyleOptionDockWidget &other)
+{
+    QStyleOptionDockWidget::operator=(other);
+    const QStyleOptionDockWidgetV2 *v2
+        = qstyleoption_cast<const QStyleOptionDockWidgetV2*>(&other);
+    verticalTitleBar = v2 ? v2->verticalTitleBar : false;
+    return *this;
+}
+
+QStyleOptionDockWidgetV2::QStyleOptionDockWidgetV2(int version)
+    : QStyleOptionDockWidget(version), verticalTitleBar(false)
+{
+}
+
 /*!
     \fn QStyleOptionDockWidget::QStyleOptionDockWidget(const QStyleOptionDockWidget &other)
 
@@ -3061,7 +3150,7 @@ QStyleOptionDockWidget::QStyleOptionDockWidget(int version)
 /*!
     \variable QStyleOptionDockWidget::closable
     \brief whether the dock window is closable
-    
+
     The default value is true.
 */
 
@@ -3106,6 +3195,9 @@ QStyleOptionDockWidget::QStyleOptionDockWidget(int version)
     \value Arrow The tool button is an arrow.
     \value Menu The tool button has a menu.
     \value PopupDelay There is a delay to showing the menu.
+    \value HasMenu The button has a popup menu.
+    \value MenuButtonPopup The button should display an arrow to
+           indicate that a menu is present.
 
     \sa features, QToolButton::toolButtonStyle(), QToolButton::popupMode()
 */
@@ -3315,7 +3407,7 @@ QStyleOptionComboBox::QStyleOptionComboBox(int version)
 /*!
     \variable QStyleOptionComboBox::editable
     \brief whether or not the combobox is editable or not
-    
+
     the default
     value is false
 
@@ -3451,6 +3543,139 @@ QStyleOptionToolBox::QStyleOptionToolBox(int version)
     \brief the text for the tool box tab
 
     The default value is an empty string.
+*/
+
+/*!
+    \class QStyleOptionToolBoxV2
+    \brief The QStyleOptionToolBoxV2 class is used to describe the parameters necessary for drawing a frame in Qt 4.3 or above.
+
+    \since 4.3
+    QStyleOptionToolBoxV2 inherits QStyleOptionToolBox which is used for
+    drawing the tabs in a QToolBox.
+
+    An instance of the QStyleOptionToolBoxV2 class has \l type SO_ToolBox
+    and \l version 2.  The type is used internally by QStyleOption,
+    its subclasses, and qstyleoption_cast() to determine the type of
+    style option. In general you do not need to worry about this
+    unless you want to create your own QStyleOption subclass and your
+    own styles. The version is used by QStyleOption subclasses to
+    implement extensions without breaking compatibility. If you use
+    qstyleoption_cast(), you normally don't need to check it.
+
+    If you create your own QStyle subclass, you should handle both
+    QStyleOptionToolBox and QStyleOptionToolBoxV2.
+
+    \sa QStyleOptionToolBox, QStyleOption
+*/
+
+/*!
+    Contsructs a QStyleOptionToolBoxV2 object.
+*/
+QStyleOptionToolBoxV2::QStyleOptionToolBoxV2()
+    : QStyleOptionToolBox(Version), position(Beginning), selectedPosition(NotAdjacent)
+{
+}
+
+/*!
+    \fn QStyleOptionToolBoxV2::QStyleOptionToolBoxV2(const QStyleOptionToolBoxV2 &other)
+
+    Constructs a QStyleOptionToolBoxV2 copy of the \a other style option.
+*/
+
+/*!
+    \internal
+*/
+QStyleOptionToolBoxV2::QStyleOptionToolBoxV2(int version)
+    : QStyleOptionToolBox(version), position(Beginning), selectedPosition(NotAdjacent)
+{
+}
+
+/*!
+    Constructs a QStyleOptionToolBoxV2 copy of the \a other style option
+    which can be either of the QStyleOptionToolBoxV2 or
+    QStyleOptionToolBox types.
+
+    If the \a other style option's version is 1, the new style option's \l
+    position value is set to \l QStyleOptionToolBoxV2::Beginning and \l
+    selectedPosition is set to \l QStyleOptionToolBoxV2::NotAdjacent. If its
+    version is 2, the \l position selectedPosition values are simply copied to
+    the new style option.
+
+    \sa version
+*/
+QStyleOptionToolBoxV2::QStyleOptionToolBoxV2(const QStyleOptionToolBox &other)
+{
+    QStyleOptionToolBox::operator=(other);
+
+    const QStyleOptionToolBoxV2 *f2 = qstyleoption_cast<const QStyleOptionToolBoxV2 *>(&other);
+    position = f2 ? f2->position : Beginning;
+    selectedPosition = f2 ? f2->selectedPosition : NotAdjacent;
+    version = Version;
+}
+
+/*!
+    Assigns the \a other style option to this style option. The \a
+    other style option can be either of the QStyleOptionToolBoxV2 or
+    QStyleOptionToolBox types.
+
+    If the \a{other} style option's version is 1, this style option's \l
+    position and \l selectedPosition values are set to \l
+    QStyleOptionToolBoxV2::Beginning and \l QStyleOptionToolBoxV2::NotAdjacent
+    respectively. If its version is 2, these values are simply copied to this
+    style option.
+*/
+QStyleOptionToolBoxV2 &QStyleOptionToolBoxV2::operator=(const QStyleOptionToolBox &other)
+{
+    QStyleOptionToolBox::operator=(other);
+
+    const QStyleOptionToolBoxV2 *f2 = qstyleoption_cast<const QStyleOptionToolBoxV2 *>(&other);
+    position = f2 ? f2->position : Beginning;
+    selectedPosition = f2 ? f2->selectedPosition : NotAdjacent;
+    version = Version;
+    return *this;
+}
+
+
+/*!
+    \enum QStyleOptionToolBoxV2::SelectedPosition
+
+    This enum describes the position of the selected tab. Some styles
+    need to draw a tab differently depending on whether or not it is
+    adjacent to the selected tab.
+
+    \value NotAdjacent The tab is not adjacent to a selected tab (or is the selected tab).
+    \value NextIsSelected The next tab (typically the tab on the right) is selected.
+    \value PreviousIsSelected The previous tab (typically the tab on the left) is selected.
+
+    \sa selectedPosition
+*/
+
+/*!
+    \enum QStyleOptionToolBoxV2::StyleOptionVersion
+
+    This enum holds the version of this style option
+
+    \value Version 2
+*/
+
+/*!
+    \enum QStyleOptionToolBoxV2::TabPosition
+
+    This enum describes tab positions relative to other tabs.
+
+    \value Beginning The tab is the first (i.e., top-most) tab in
+           the toolbox.
+    \value Middle The tab is placed in the middle of the toolbox.
+    \value End The tab is placed at the bottom of the toolbox.
+    \value OnlyOneTab There is only one tab in the toolbox.
+*/
+
+/*!
+    \variable QStyleOptionToolBoxV2::selectedPosition
+    \brief the position of the selected tab in relation to this tab
+
+    The default value is NotAdjacent, i.e. the tab is not adjacent to
+    a selected tab nor is it the selected tab.
 */
 
 #ifndef QT_NO_RUBBERBAND
@@ -3957,7 +4182,7 @@ QStyleOptionTabWidgetFrame::QStyleOptionTabWidgetFrame(int version)
 /*!
     \class QStyleOptionTabBarBase
     \brief The QStyleOptionTabBarBase class is used to describe
-    the base of a tabbar, i.e. the part that the tabbar usually
+    the base of a tab bar, i.e. the part that the tab bar usually
     overlaps with.
 
     QStyleOptionTabBarBase  contains all the information that QStyle
@@ -4030,7 +4255,7 @@ QStyleOptionTabBarBase::QStyleOptionTabBarBase(int version)
 
 /*!
     \variable QStyleOptionTabBarBase::shape
-    \brief the shape of the tabbar
+    \brief the shape of the tab bar
 
     The default value is QTabBar::RoundedNorth.
 */
@@ -4270,6 +4495,7 @@ QStyleOptionGraphicsItem::QStyleOptionGraphicsItem(int version)
 
     \value SH_Default QStyleHintReturn
     \value SH_Mask \l QStyle::SH_RubberBand_Mask QStyle::SH_FocusFrame_Mask
+    \value SH_Variant \l QStyle::SH_TextControl_FocusIndicatorTextCharFormat
 */
 
 /*!
@@ -4388,6 +4614,58 @@ QStyleHintReturnMask::QStyleHintReturnMask() : QStyleHintReturn(Version, Type)
 
 /*!
     \enum QStyleHintReturnMask::StyleOptionVersion
+
+    This enum is used to hold information about the version of the style option, and
+    is defined for each QStyleHintReturn subclass.
+
+    \value Version 1
+
+    The version is used by QStyleHintReturn subclasses to implement
+    extensions without breaking compatibility. If you use
+    qstyleoption_cast(), you normally don't need to check it.
+
+    \sa StyleOptionType
+*/
+
+/*!
+    \class QStyleHintReturnVariant
+    \brief The QStyleHintReturnVariant class provides style hints that return a QVariant.
+    \since 4.3
+    \ingroup appearance
+*/
+
+/*!
+    \variable QStyleHintReturnVariant::variant
+    \brief the variant for style hints that return a QVariant
+*/
+
+/*!
+    Constructs a QStyleHintReturnVariant. The member variables are
+    initialized to default values.
+*/
+QStyleHintReturnVariant::QStyleHintReturnVariant() : QStyleHintReturn(Version, Type)
+{
+}
+
+/*!
+    \enum QStyleHintReturnVariant::StyleOptionType
+
+    This enum is used to hold information about the type of the style option, and
+    is defined for each QStyleHintReturn subclass.
+
+    \value Type The type of style option provided (\l{SH_Variant} for
+           this class).
+
+    The type is used internally by QStyleHintReturn, its subclasses, and
+    qstyleoption_cast() to determine the type of style option. In
+    general you do not need to worry about this unless you want to
+    create your own QStyleHintReturn subclass and your own styles.
+
+    \sa StyleOptionVersion
+*/
+
+/*!
+    \enum QStyleHintReturnVariant::StyleOptionVersion
 
     This enum is used to hold information about the version of the style option, and
     is defined for each QStyleHintReturn subclass.

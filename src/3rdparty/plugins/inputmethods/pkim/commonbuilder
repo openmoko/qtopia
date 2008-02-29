@@ -29,7 +29,7 @@ sub usage
 {
 print 
 "
-usage is $0 [-v|--verbose] [-d|--dictionary] <dict> <ouput>
+usage is $0 [-v|--verbose] [-d|--dictionary <dict>] <ouput>
 
     files to be read should be piped to stdin
     <dict> is the dictionary of words to restrict output to.

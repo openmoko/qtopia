@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -56,6 +56,9 @@ QTOPIA_LOG_OPTION(ModemEmulator)
 QTOPIA_LOG_OPTION(Package)
 QTOPIA_LOG_OPTION(Quicklauncher)
 QTOPIA_LOG_OPTION(Messaging)
+QTOPIA_LOG_OPTION(SMTP)
+QTOPIA_LOG_OPTION(IMAP)
+QTOPIA_LOG_OPTION(POP)
 QTOPIA_LOG_OPTION(DataSharing)
 QTOPIA_LOG_OPTION(DataLinking)
 QTOPIA_LOG_OPTION(Sip)
@@ -70,5 +73,11 @@ QTOPIA_LOG_OPTION(ApplicationLayer)
 QTOPIA_LOG_OPTION(IniLayer)
 QTOPIA_LOG_OPTION(ILFramework)
 QTOPIA_LOG_OPTION(PowerManagement)
-QTOPIA_LOG_OPTION(Autotest)
+QTOPIA_LOG_OPTION(VoIP)
+QTOPIA_LOG_OPTION(OOM)
 QTOPIA_LOG_OPTION(Performance)
+QTOPIA_LOG_OPTION(QAudioInput)
+QTOPIA_LOG_OPTION(QAudioOutput)
+QTOPIA_LOG_OPTION(AudioState)
+QTOPIA_LOG_OPTION(Synchronization)
+QTOPIA_LOG_OPTION(Qtopiatest)

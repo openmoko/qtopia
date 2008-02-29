@@ -3,7 +3,7 @@
 
 export QWS_DISPLAY=QVFb:mmWidth34:mmHeight44:0
 
-if [ -z "$QPEDIR" -a -d $PWD/qtopiacore/host/tools/qvfb ];then
+if [ -z "$QPEDIR" -a -d $PWD/src/tools/qt/qvfb ];then
     QPEDIR=$PWD
 fi
 

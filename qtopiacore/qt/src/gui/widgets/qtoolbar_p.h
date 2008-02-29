@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -41,15 +56,8 @@
 
 #ifndef QT_NO_TOOLBAR
 
-struct QToolBarItem {
-    QAction *action;
-    QWidget *widget;
-    uint hidden : 1; // toolbar too small to show this item
-    uint hasCustomWidget : 1;
-};
-
-class QToolBarExtension;
-class QToolBarHandle;
+class QToolBarLayout;
+class QTimer;
 
 class QToolBarPrivate : public QWidgetPrivate
 {
@@ -60,8 +68,7 @@ public:
         : explicitIconSize(false), explicitToolButtonStyle(false), movable(false),
           allowedAreas(Qt::AllToolBarAreas), orientation(Qt::Horizontal),
           toolButtonStyle(Qt::ToolButtonIconOnly),
-          handle(0), extension(0),
-          inResizeEvent(false)
+          layout(0), state(0)
     { }
 
     void init();
@@ -69,8 +76,7 @@ public:
     void _q_toggleView(bool b);
     void _q_updateIconSize(const QSize &sz);
     void _q_updateToolButtonStyle(Qt::ToolButtonStyle style);
-    QToolBarItem createItem(QAction *action);
-    int indexOf(QAction *action) const;
+    void _q_waitForPopup();
 
     bool explicitIconSize;
     bool explicitToolButtonStyle;
@@ -79,15 +85,32 @@ public:
     Qt::Orientation orientation;
     Qt::ToolButtonStyle toolButtonStyle;
     QSize iconSize;
-
-    QToolBarHandle *handle;
-    QToolBarExtension *extension;
-
-    QList<QToolBarItem> items;
+    bool floatable;
 
     QAction *toggleViewAction;
 
-    bool inResizeEvent;
+    QToolBarLayout *layout;
+
+    struct DragState {
+        QPoint pressPos;
+        bool dragging;
+        QLayoutItem *widgetItem;
+    };
+    DragState *state;
+
+    void mousePressEvent(QMouseEvent *e);
+    void mouseReleaseEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
+
+    void setWindowState(bool floating, bool unplug = false, const QRect &rect = QRect());
+    void initDrag(const QPoint &pos);
+    void startDrag();
+    void endDrag();
+
+    void unplug(const QRect &r);
+    void plug(const QRect &r);
+
+    QTimer *waitForPopupTimer;
 };
 
 #endif // QT_NO_TOOLBAR

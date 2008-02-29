@@ -1,4 +1,5 @@
-<page name="dialer" base="themes/smart" keypad="no">
+<?xml version="1.0"?>
+<page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="dialer" base="themes/default" keypad="no">
     <image name="background" rect="0,0,0,0" src="background" color="Highlight" tile="yes"/>
     <widget name="dialernumber" rect="0,0,0x24" bold="yes" colorGroup="Background=#EEEEEE;Base=#DDDDDD" bgcolor="Text" size="18"/>
     <layout name="vertical" rect="0,24,0,0" orientation="vertical" spacing="-1" align="vcenter">

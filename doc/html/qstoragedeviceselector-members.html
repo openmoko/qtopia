@@ -19,6 +19,8 @@
 <li><div class="fn"/>enum <a href="qcombobox.html#InsertPolicy-enum">InsertPolicy</a></li>
 <li><div class="fn"/>enum <a href="qpaintdevice.html#PaintDeviceMetric-enum">PaintDeviceMetric</a></li>
 <li><div class="fn"/>typedef <a href="qcombobox.html#Policy-typedef">Policy</a></li>
+<li><div class="fn"/>enum <a href="qwidget.html#RenderFlag-enum">RenderFlag</a></li>
+<li><div class="fn"/>typedef <a href="qwidget.html#RenderFlags-typedef">RenderFlags</a></li>
 <li><div class="fn"/>enum <a href="qcombobox.html#SizeAdjustPolicy-enum">SizeAdjustPolicy</a></li>
 <li><div class="fn"/><a href="qstoragedeviceselector.html#QStorageDeviceSelector">QStorageDeviceSelector</a> ( QWidget * )</li>
 <li><div class="fn"/><a href="qstoragedeviceselector.html#QStorageDeviceSelector-2">QStorageDeviceSelector</a> ( const QContent &amp;, QWidget * )</li>
@@ -165,6 +167,7 @@
 <li><div class="fn"/><a href="qwidget.html#iconText">iconText</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#iconify">iconify</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const</li>
+<li><div class="fn"/><a href="qcombobox.html#initStyleOption">initStyleOption</a> ( QStyleOptionComboBox * ) const</li>
 <li><div class="fn"/><a href="qwidget.html#inputContext">inputContext</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#inputMethodEvent">inputMethodEvent</a> ( QInputMethodEvent * )</li>
 <li><div class="fn"/><a href="qwidget.html#inputMethodQuery">inputMethodQuery</a> ( Qt::InputMethodQuery ) const</li>
@@ -221,10 +224,13 @@
 <li><div class="fn"/><a href="qwidget.html#layoutDirection">layoutDirection</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#leaveEvent">leaveEvent</a> ( QEvent * )</li>
 <li><div class="fn"/><a href="qcombobox.html#lineEdit">lineEdit</a> () const</li>
+<li><div class="fn"/><a href="qwidget.html#locale">locale</a> () const</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiX">logicalDpiX</a> () const</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiY">logicalDpiY</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#lower">lower</a> ()</li>
+<li><div class="fn"/><a href="qwidget.html#macCGHandle">macCGHandle</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#macEvent">macEvent</a> ( EventHandlerCallRef, EventRef )</li>
+<li><div class="fn"/><a href="qwidget.html#macQDHandle">macQDHandle</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#mapFrom">mapFrom</a> ( QWidget *, const QPoint &amp; ) const</li>
 <li><div class="fn"/><a href="qwidget.html#mapFromGlobal">mapFromGlobal</a> ( const QPoint &amp; ) const</li>
 <li><div class="fn"/><a href="qwidget.html#mapFromParent">mapFromParent</a> ( const QPoint &amp; ) const</li>
@@ -270,8 +276,8 @@
 <li><div class="fn"/><a href="qwidget.html#paintEngine">paintEngine</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#paintEvent">paintEvent</a> ( QPaintEvent * )</li>
 <li><div class="fn"/><a href="qpaintdevice.html#paintingActive">paintingActive</a> () const</li>
-<li><div class="fn"/><a href="qwidget.html#palette">palette</a> () const</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qwidget.html#palette">palette</a> () const</li>
 <li><div class="fn"/><a href="qobject.html#parent">parent</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#parentWidget">parentWidget</a> () const</li>
 <li><div class="fn"/><a href="qwidget.html#parentWidget-2">parentWidget</a> ( bool ) const</li>
@@ -295,6 +301,7 @@
 <li><div class="fn"/><a href="qobject.html#removeChild">removeChild</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qcombobox.html#removeItem">removeItem</a> ( int )</li>
+<li><div class="fn"/><a href="qwidget.html#render">render</a> ( QPaintDevice *, const QPoint &amp;, const QRegion &amp;, RenderFlags )</li>
 <li><div class="fn"/><a href="qwidget.html#repaint">repaint</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#repaint-2">repaint</a> ( int, int, int, int )</li>
 <li><div class="fn"/><a href="qwidget.html#repaint-3">repaint</a> ( const QRect &amp; )</li>
@@ -377,6 +384,7 @@
 <li><div class="fn"/><a href="qwidget.html#setLayout">setLayout</a> ( QLayout * )</li>
 <li><div class="fn"/><a href="qwidget.html#setLayoutDirection">setLayoutDirection</a> ( Qt::LayoutDirection )</li>
 <li><div class="fn"/><a href="qcombobox.html#setLineEdit">setLineEdit</a> ( QLineEdit * )</li>
+<li><div class="fn"/><a href="qwidget.html#setLocale">setLocale</a> ( const QLocale &amp; )</li>
 <li><div class="fn"/><a href="qstoragedeviceselector.html#setLocation">setLocation</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qstoragedeviceselector.html#setLocation-2">setLocation</a> ( const QContent &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setMask">setMask</a> ( const QBitmap &amp; )</li>
@@ -469,6 +477,7 @@
 <li><div class="fn"/><a href="qwidget.html#unsetCursor">unsetCursor</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#unsetFont">unsetFont</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#unsetLayoutDirection">unsetLayoutDirection</a> ()</li>
+<li><div class="fn"/><a href="qwidget.html#unsetLocale">unsetLocale</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#unsetPalette">unsetPalette</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#update">update</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#update-2">update</a> ( int, int, int, int )</li>
@@ -532,6 +541,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

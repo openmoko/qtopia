@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qrect.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/tools/qrect.cpp -->
 <head>
-  <title>Qt 4.2: QRectF Class Reference</title>
+  <title>Qt 4.3: QRectF Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QRectF Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QRectF Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QRectF class defines a rectangle in the plane using floating point precision. <a href="#details">More...</a></p>
 <pre> #include &lt;QRectF&gt;</pre><ul>
 <li><a href="qrectf-members.html">List of all members, including inherited members</a></li>
@@ -23,8 +24,9 @@
 <ul>
 <li><div class="fn"/><b><a href="qrectf.html#QRectF">QRectF</a></b> ()</li>
 <li><div class="fn"/><b><a href="qrectf.html#QRectF-2">QRectF</a></b> ( const QPointF &amp; <i>topLeft</i>, const QSizeF &amp; <i>size</i> )</li>
-<li><div class="fn"/><b><a href="qrectf.html#QRectF-3">QRectF</a></b> ( qreal <i>x</i>, qreal <i>y</i>, qreal <i>width</i>, qreal <i>height</i> )</li>
-<li><div class="fn"/><b><a href="qrectf.html#QRectF-4">QRectF</a></b> ( const QRect &amp; <i>rectangle</i> )</li>
+<li><div class="fn"/><b><a href="qrectf.html#QRectF-3">QRectF</a></b> ( const QPointF &amp; <i>topLeft</i>, const QPointF &amp; <i>bottomRight</i> )</li>
+<li><div class="fn"/><b><a href="qrectf.html#QRectF-4">QRectF</a></b> ( qreal <i>x</i>, qreal <i>y</i>, qreal <i>width</i>, qreal <i>height</i> )</li>
+<li><div class="fn"/><b><a href="qrectf.html#QRectF-5">QRectF</a></b> ( const QRect &amp; <i>rectangle</i> )</li>
 <li><div class="fn"/>void <b><a href="qrectf.html#adjust">adjust</a></b> ( qreal <i>dx1</i>, qreal <i>dy1</i>, qreal <i>dx2</i>, qreal <i>dy2</i> )</li>
 <li><div class="fn"/>QRectF <b><a href="qrectf.html#adjusted">adjusted</a></b> ( qreal <i>dx1</i>, qreal <i>dy1</i>, qreal <i>dx2</i>, qreal <i>dy2</i> ) const</li>
 <li><div class="fn"/>qreal <b><a href="qrectf.html#bottom">bottom</a></b> () const</li>
@@ -72,6 +74,7 @@
 <li><div class="fn"/>void <b><a href="qrectf.html#setX">setX</a></b> ( qreal <i>x</i> )</li>
 <li><div class="fn"/>void <b><a href="qrectf.html#setY">setY</a></b> ( qreal <i>y</i> )</li>
 <li><div class="fn"/>QSizeF <b><a href="qrectf.html#size">size</a></b> () const</li>
+<li><div class="fn"/>QRect <b><a href="qrectf.html#toAlignedRect">toAlignedRect</a></b> () const</li>
 <li><div class="fn"/>QRect <b><a href="qrectf.html#toRect">toRect</a></b> () const</li>
 <li><div class="fn"/>qreal <b><a href="qrectf.html#top">top</a></b> () const</li>
 <li><div class="fn"/>QPointF <b><a href="qrectf.html#topLeft">topLeft</a></b> () const</li>
@@ -93,9 +96,9 @@
 <h3>Related Non-Members</h3>
 <ul>
 <li><div class="fn"/>Q_CORE_EXPORT_INLINE <b><a href="qrectf.html#operator-not-eq-17">operator!=</a></b> ( const QRectF &amp; <i>r1</i>, const QRectF &amp; <i>r2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qrectf.html#operator-lt-lt-55">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QRectF &amp; <i>rectangle</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qrectf.html#operator-lt-lt-49">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QRectF &amp; <i>rectangle</i> )</li>
 <li><div class="fn"/>Q_CORE_EXPORT_INLINE <b><a href="qrectf.html#operator-eq-eq-26">operator==</a></b> ( const QRectF &amp; <i>r1</i>, const QRectF &amp; <i>r2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qrectf.html#operator-gt-gt-30">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QRectF &amp; <i>rectangle</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qrectf.html#operator-gt-gt-29">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QRectF &amp; <i>rectangle</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -145,10 +148,14 @@
 <h3 class="fn"><a name="QRectF-2"></a>QRectF::QRectF ( const <a href="qpointf.html">QPointF</a> &amp; <i>topLeft</i>, const <a href="qsizef.html">QSizeF</a> &amp; <i>size</i> )</h3>
 <p>Constructs a rectangle with the given <i>topLeft</i> corner and the given <i>size</i>.</p>
 <p>See also <a href="qrectf.html#setTopLeft">setTopLeft</a>() and <a href="qrectf.html#setSize">setSize</a>().</p>
-<h3 class="fn"><a name="QRectF-3"></a>QRectF::QRectF ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>x</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>y</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>width</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>height</i> )</h3>
+<h3 class="fn"><a name="QRectF-3"></a>QRectF::QRectF ( const <a href="qpointf.html">QPointF</a> &amp; <i>topLeft</i>, const <a href="qpointf.html">QPointF</a> &amp; <i>bottomRight</i> )</h3>
+<p>Constructs a rectangle with the given <i>topLeft</i> and <i>bottomRight</i> corners.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qrectf.html#setTopLeft">setTopLeft</a>() and <a href="qrectf.html#setBottomRight">setBottomRight</a>().</p>
+<h3 class="fn"><a name="QRectF-4"></a>QRectF::QRectF ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>x</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>y</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>width</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>height</i> )</h3>
 <p>Constructs a rectangle with (<i>x</i>, <i>y</i>) as its top-left corner and the given <i>width</i> and <i>height</i>.</p>
 <p>See also <a href="qrectf.html#setRect">setRect</a>().</p>
-<h3 class="fn"><a name="QRectF-4"></a>QRectF::QRectF ( const <a href="qrect.html">QRect</a> &amp; <i>rectangle</i> )</h3>
+<h3 class="fn"><a name="QRectF-5"></a>QRectF::QRectF ( const <a href="qrect.html">QRect</a> &amp; <i>rectangle</i> )</h3>
 <p>Constructs a <a href="qrectf.html">QRectF</a> rectangle from the given <a href="qrect.html">QRect</a> <i>rectangle</i>.</p>
 <p>See also <a href="qrectf.html#toRect">toRect</a>().</p>
 <h3 class="fn"><a name="adjust"></a>void QRectF::adjust ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>dx1</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>dy1</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>dx2</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>dy2</i> )</h3>
@@ -192,12 +199,12 @@
 <p align="center"><img src="images/qrect-intersect.png" /></p><p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qrectf.html#intersects">intersects</a>(), <a href="qrectf.html#united">united</a>(), and <a href="qrectf.html#operator-and-eq">operator&amp;=</a>().</p>
 <h3 class="fn"><a name="intersects"></a>bool QRectF::intersects ( const QRectF &amp; <i>rectangle</i> ) const</h3>
-<p>Returns true if this rectangle intersects with the given <i>rectangle</i> (i.e., there is at least one pixel that is within both rectangles), otherwise returns false.</p>
+<p>Returns true if this rectangle intersects with the given <i>rectangle</i> (i.e&#x2e; there is a non-empty area of overlap between them), otherwise returns false.</p>
 <p>The intersection rectangle can be retrieved using the <a href="qrectf.html#intersected">intersected</a>() function.</p>
 <p>See also <a href="qrectf.html#contains">contains</a>().</p>
 <h3 class="fn"><a name="isEmpty"></a>bool QRectF::isEmpty () const</h3>
 <p>Returns true if the rectangle is empty, otherwise returns false.</p>
-<p>An empty rectangle has <a href="qrectf.html#width">width</a>() &lt;= 0 or <a href="qrectf.html#height">height</a>() &lt;= 0. An empty rectangle is not valid (i.e., isEmpty() == !<a href="qrectf.html#isValid">isValid</a>()).</p>
+<p>An empty rectangle has <a href="qrectf.html#width">width</a>() &lt;= 0 or <a href="qrectf.html#height">height</a>() &lt;= 0. An empty rectangle is not valid (i.e&#x2e;, isEmpty() == !<a href="qrectf.html#isValid">isValid</a>()).</p>
 <p>Use the <a href="qrectf.html#normalized">normalized</a>() function to retrieve a rectangle where the corners are swapped.</p>
 <p>See also <a href="qrectf.html#isNull">isNull</a>(), <a href="qrectf.html#isValid">isValid</a>(), and <a href="qrectf.html#normalized">normalized</a>().</p>
 <h3 class="fn"><a name="isNull"></a>bool QRectF::isNull () const</h3>
@@ -206,7 +213,7 @@
 <p>See also <a href="qrectf.html#isEmpty">isEmpty</a>() and <a href="qrectf.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="isValid"></a>bool QRectF::isValid () const</h3>
 <p>Returns true if the rectangle is valid, otherwise returns false.</p>
-<p>A valid rectangle has a <a href="qrectf.html#width">width</a>() &gt; 0 and <a href="qrectf.html#height">height</a>() &gt; 0. Note that non-trivial operations like intersections are not defined for invalid rectangles. A valid rectangle is not empty (i.e., isValid() == !<a href="qrectf.html#isEmpty">isEmpty</a>()).</p>
+<p>A valid rectangle has a <a href="qrectf.html#width">width</a>() &gt; 0 and <a href="qrectf.html#height">height</a>() &gt; 0. Note that non-trivial operations like intersections are not defined for invalid rectangles. A valid rectangle is not empty (i.e&#x2e;, isValid() == !<a href="qrectf.html#isEmpty">isEmpty</a>()).</p>
 <p>See also <a href="qrectf.html#isNull">isNull</a>(), <a href="qrectf.html#isEmpty">isEmpty</a>(), and <a href="qrectf.html#normalized">normalized</a>().</p>
 <h3 class="fn"><a name="left"></a><a href="qtglobal.html#qreal-typedef">qreal</a> QRectF::left () const</h3>
 <p>Returns the x-coordinate of the rectangle's left edge. Equivalent to <a href="qrectf.html#x">x</a>().</p>
@@ -245,7 +252,7 @@
 <p>Moves the rectangle, leaving the top-right corner at the given <i>position</i>. The rectangle's size is unchanged.</p>
 <p>See also <a href="qrectf.html#setTopRight">setTopRight</a>(), <a href="qrectf.html#moveTop">moveTop</a>(), and <a href="qrectf.html#moveRight">moveRight</a>().</p>
 <h3 class="fn"><a name="normalized"></a>QRectF QRectF::normalized () const</h3>
-<p>Returns a normalized rectangle; i.e., a rectangle that has a non-negative width and height.</p>
+<p>Returns a normalized rectangle; i.e&#x2e;, a rectangle that has a non-negative width and height.</p>
 <p>If <a href="qrectf.html#width">width</a>() &lt; 0 the function swaps the left and right corners, and it swaps the top and bottom corners if <a href="qrectf.html#height">height</a>() &lt; 0.</p>
 <p>See also <a href="qrectf.html#isValid">isValid</a>() and <a href="qrectf.html#isEmpty">isEmpty</a>().</p>
 <h3 class="fn"><a name="right"></a><a href="qtglobal.html#qreal-typedef">qreal</a> QRectF::right () const</h3>
@@ -303,9 +310,13 @@
 <h3 class="fn"><a name="size"></a><a href="qsizef.html">QSizeF</a> QRectF::size () const</h3>
 <p>Returns the size of the rectangle.</p>
 <p>See also <a href="qrectf.html#setSize">setSize</a>(), <a href="qrectf.html#width">width</a>(), and <a href="qrectf.html#height">height</a>().</p>
+<h3 class="fn"><a name="toAlignedRect"></a><a href="qrect.html">QRect</a> QRectF::toAlignedRect () const</h3>
+<p>Returns a <a href="qrect.html">QRect</a> based on the values of this rectangle that is the smallest possible integer rectangle that completely contains this rectangle.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<p>See also <a href="qrectf.html#toRect">toRect</a>().</p>
 <h3 class="fn"><a name="toRect"></a><a href="qrect.html">QRect</a> QRectF::toRect () const</h3>
 <p>Returns a <a href="qrect.html">QRect</a> based on the values of this rectangle. Note that the coordinates in the returned rectangle are rounded to the nearest integer.</p>
-<p>See also <a href="qrectf.html#QRectF">QRectF</a>().</p>
+<p>See also <a href="qrectf.html#QRectF">QRectF</a>() and <a href="qrectf.html#toAlignedRect">toAlignedRect</a>().</p>
 <h3 class="fn"><a name="top"></a><a href="qtglobal.html#qreal-typedef">qreal</a> QRectF::top () const</h3>
 <p>Returns the y-coordinate of the rectangle's top edge. Equivalent to <a href="qrectf.html#y">y</a>().</p>
 <p>See also <a href="qrectf.html#setTop">setTop</a>(), <a href="qrectf.html#topLeft">topLeft</a>(), and <a href="qrectf.html#topRight">topRight</a>().</p>
@@ -357,14 +368,14 @@
 <h3 class="fn"><a name="operator-not-eq-17"></a>Q_CORE_EXPORT_INLINE operator!= ( const QRectF &amp; <i>r1</i>, const QRectF &amp; <i>r2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if the rectangles <i>r1</i> and <i>r2</i> are different, otherwise returns false.</p>
-<h3 class="fn"><a name="operator-lt-lt-55"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QRectF &amp; <i>rectangle</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-49"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QRectF &amp; <i>rectangle</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the <i>rectangle</i> to the <i>stream</i>, and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
 <h3 class="fn"><a name="operator-eq-eq-26"></a>Q_CORE_EXPORT_INLINE operator== ( const QRectF &amp; <i>r1</i>, const QRectF &amp; <i>r2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if the rectangles <i>r1</i> and <i>r2</i> are equal, otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-gt-30"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QRectF &amp; <i>rectangle</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-29"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QRectF &amp; <i>rectangle</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a <i>rectangle</i> from the <i>stream</i>, and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
@@ -372,6 +383,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

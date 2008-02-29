@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -147,7 +162,7 @@ public:
     typedef iterator Iterator;
     typedef const_iterator ConstIterator;
     inline int count() const { return q_hash.count(); }
-    inline const_iterator insert(const T &value) // ### should return an 'iterator' in Qt 5
+    inline const_iterator insert(const T &value) // ### Qt 5: should return an 'iterator'
         { return static_cast<typename Hash::const_iterator>(q_hash.insert(value,
                                                                           QHashDummyValue())); }
     iterator find(const T &value) { return q_hash.find(value); }
@@ -180,6 +195,16 @@ public:
     inline QSet<T> &operator+=(const T &value) { insert(value); return *this; }
     inline QSet<T> &operator-=(const QSet<T> &other) { subtract(other); return *this; }
     inline QSet<T> &operator-=(const T &value) { remove(value); return *this; }
+    inline QSet<T> operator|(const QSet<T> &other) const
+        { QSet<T> result = *this; result |= other; return result; }
+    inline QSet<T> operator&(const QSet<T> &other) const
+        { QSet<T> result = *this; result &= other; return result; }
+    inline QSet<T> operator+(const QSet<T> &other) const
+        { QSet<T> result = *this; result += other; return result; }
+    inline QSet<T> operator-(const QSet<T> &other) const
+        { QSet<T> result = *this; result -= other; return result; }
+#if QT_VERSION < 0x050000
+    // ### Qt 5: remove
     inline QSet<T> operator|(const QSet<T> &other)
         { QSet<T> result = *this; result |= other; return result; }
     inline QSet<T> operator&(const QSet<T> &other)
@@ -188,6 +213,7 @@ public:
         { QSet<T> result = *this; result += other; return result; }
     inline QSet<T> operator-(const QSet<T> &other)
         { QSet<T> result = *this; result -= other; return result; }
+#endif
 
     QList<T> toList() const;
     inline QList<T> values() const { return toList(); }

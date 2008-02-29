@@ -1,0 +1,3 @@
+#!/bin/sh
+lidsconf -A POSTBOOT -s ${BIN} -o /dev/mixer -j WRITE
+lidsconf -A POSTBOOT -s ${BIN} -o /dev/dsp -j WRITE

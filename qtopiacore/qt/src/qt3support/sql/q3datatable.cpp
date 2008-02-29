@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -132,10 +147,10 @@ void qt_debug_buffer( const QString& msg, QSqlRecord* cursor )
     When displaying data, Q3DataTable only retrieves data for visible
     rows. If the driver supports the 'query size' property the
     Q3DataTable will have the correct number of rows and the vertical
-    scrollbar will accurately reflect the number of rows displayed in
+    scroll bar will accurately reflect the number of rows displayed in
     proportion to the number of rows in the dataset. If the driver
     does not support the 'query size' property, rows are dynamically
-    fetched from the database on an as-needed basis with the scrollbar
+    fetched from the database on an as-needed basis with the scroll bar
     becoming more accurate as the user scrolls down through the
     records. This allows extremely large queries to be displayed as
     quickly as possible, with minimum memory usage.
@@ -184,7 +199,7 @@ void qt_debug_buffer( const QString& msg, QSqlRecord* cursor )
     currentRecord(). Use the find() function to search for a string in
     the table.
 
-    Editing actions can be applied programatically. For example, the
+    Editing actions can be applied programmatically. For example, the
     insertCurrent() function reads the fields from the current record
     into the cursor and performs the insert. The updateCurrent() and
     deleteCurrent() functions perform similarly to update and delete
@@ -376,7 +391,7 @@ void Q3DataTable::adjustColumn( int col )
 	d->cur.refresh();
     }
     int oldRow = currentRow();
-    int w = fontMetrics().width( horizontalHeader()->label( col ) + "W" );
+    int w = fontMetrics().width( horizontalHeader()->label( col ) + QLatin1Char('W') );
     cur->seek( QSql::BeforeFirst );
     while ( cur->next() ) {
 	w = QMAX( w, fontMetrics().width( fieldToString( cur->fieldPtr( indexOf( col ) ) ) ) + 10 );
@@ -915,8 +930,7 @@ void Q3DataTable::endInsert()
 }
 
 /*! \internal
-*/
-
+ */
 void Q3DataTable::endUpdate()
 {
     d->dat.setMode( QSql::None );
@@ -928,18 +942,18 @@ void Q3DataTable::endUpdate()
 }
 
 /*!
-    Protected virtual function called when editing is about to begin
-    on a new record. If the table is read-only, or if there's no
-    cursor or the cursor does not allow inserts, nothing happens.
-
-    Editing takes place using the cursor's edit buffer(see
-    Q3SqlCursor::editBuffer()).
-
-    When editing begins, a new row is created in the table marked with
-    an asterisk '*' in the row's vertical header column, i.e. at the
-    left of the row.
+  Protected virtual function called when editing is about to begin
+  on a new record. If the table is read-only, or if there's no cursor
+  or the cursor does not allow inserts, nothing happens and false
+  is returned. Otherwise returns true.
+  
+  Editing takes place using the cursor's edit buffer(see
+  Q3SqlCursor::editBuffer()).
+  
+  When editing begins, a new row is created in the table marked with
+  an asterisk '*' in the row's vertical header column, i.e. at the
+  left of the row.
 */
-
 bool Q3DataTable::beginInsert()
 {
     if ( !sqlCursor() || isReadOnly() || !numCols() )
@@ -970,7 +984,7 @@ bool Q3DataTable::beginInsert()
 	lastRow = numRows() - 1;
     d->insertRowLast = lastRow;
     d->insertHeaderLabelLast = verticalHeader()->label( d->insertRowLast );
-    verticalHeader()->setLabel( row, "*" );
+    verticalHeader()->setLabel( row, QString(QLatin1Char('*')) );
     d->editRow = row;
     // in the db world it's common to allow inserting new records
     // into a table that has read-only columns - temporarily
@@ -1665,7 +1679,7 @@ void Q3DataTable::sortColumn ( int col, bool ascending,
 	if ( !sqlCursor() )
 	    return;
 	QSqlIndex lastSort = sqlCursor()->sort();
-	QSqlIndex newSort( lastSort.cursorName(), "newSort" );
+	QSqlIndex newSort( lastSort.cursorName(), QLatin1String("newSort") );
 	const QSqlField *field = sqlCursor()->fieldPtr( indexOf( col ) );
 	if ( field )
 	    newSort.append( *field );

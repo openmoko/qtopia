@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,11 +29,9 @@
 #include <qcontent.h>
 #include <QDebug>
 #include <qtopialog.h>
-
-#include "perftest.h"
-#include "qperformancelog.h"
 #include <qtopiasxe.h>
 
+#include "qperformancelog.h"
 class QtopiaChannel;
 class QtopiaApplicationData;
 struct QWSEvent;
@@ -41,6 +39,7 @@ struct QWSKeyEvent;
 class PluginLibraryManager;
 class ScreenSaver;
 class QtopiaStyle;
+class TestSlaveInterface;
 
 extern char _key[];
 
@@ -49,7 +48,8 @@ class QTOPIA_EXPORT QtopiaApplication : public QApplication
     Q_OBJECT
     friend class QtopiaApplicationData;
 public:
-    QtopiaApplication( int& argc, char **argv, Type=GuiClient );
+    QtopiaApplication( int& argc, char **argv);
+    QtopiaApplication( int& argc, char **argv, Type);
     ~QtopiaApplication();
 
     static QtopiaApplication *instance();
@@ -59,9 +59,19 @@ public:
     void unregisterRunningTask(const QString &);
     void unregisterRunningTask(QObject *);
 
-    void applyStyle();
-    static void grabKeyboard();
-    static void ungrabKeyboard();
+#if !defined(QT_NO_SXE) || defined(Q_QDOC)
+    enum SxeAuthorizerRole
+    {
+        SxeAuthorizerClientOnly = 0x01,
+        SxeAuthorizerServerOnly = 0x02,
+        SxeAuthorizerServerAndClient = SxeAuthorizerClientOnly | SxeAuthorizerServerOnly
+    };
+
+     SxeAuthorizerRole sxeAuthorizerRole() const;
+    void setSxeAuthorizerRole( SxeAuthorizerRole status );
+#endif
+
+    virtual void applyStyle();
 
     enum StylusMode {
         LeftOnly,
@@ -79,14 +89,14 @@ public:
         PhoneNumber,
         Words,
         Text,
-        Named
+        Named,
+        ProperNouns
     };
 
     enum PowerConstraint {
         Disable = 0,  //disable all timeout actions
         DisableLightOff = 50, //do not turn backlight off
-        DisableReturnToHomeScreen = 100, //do not return to the homescreen (phone only)
-        DisableSuspend = 900, //do not suspend the device (PDA only)
+        DisableSuspend = 900, //do not suspend the device
         Enable = 1000 //enable all timeout actions
     };
 
@@ -106,19 +116,28 @@ public:
     void showMainDocumentWidget( QWidget*, bool nomax=false );
     static void showDialog( QDialog*, bool nomax=false );
     static int execDialog( QDialog*, bool nomax=false );
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     static void setMenuLike( QDialog *, bool );
     static bool isMenuLike( const QDialog* );
-#endif
     static void setPowerConstraint(PowerConstraint);    // libqtopia
-
-    bool keyboardGrabbed() const;
 
     int exec();
 
     static void loadTranslations(const QString&);
     static void loadTranslations(const QStringList&);
     void initApp( int argc, char **argv );
+
+    TestSlaveInterface* testSlave();
+
+#ifdef Q_WS_X11
+    class X11EventFilter {
+    public:
+        virtual ~X11EventFilter() {}
+
+        virtual bool x11EventFilter(XEvent *) = 0;
+    };
+    void installX11EventFilter(X11EventFilter *);
+    void removeX11EventFilter(X11EventFilter *);
+#endif
 
 signals:
     void clientMoused();
@@ -151,10 +170,14 @@ private slots:
     void removeFromWidgetFlags();
     void updateDialogGeometry();
 
-
 protected:
     bool notify(QObject*,QEvent*);
+#ifdef Q_WS_QWS
     bool qwsEventFilter( QWSEvent * );
+#endif
+#ifdef Q_WS_X11
+    bool x11EventFilter( XEvent * );
+#endif
     QtopiaStyle *internalSetStyle( const QString &style );
     virtual void restart();
     virtual void shutdown();
@@ -162,25 +185,23 @@ protected:
     void timerEvent( QTimerEvent * );
     bool raiseAppropriateWindow();
     virtual void tryQuit();
+    virtual void connectNotify(const char *signal);
+    virtual void disconnectNotify(const char *signal);
 
 private:
-    void mapToDefaultAction( QWSKeyEvent *ke, int defKey );
-    void processQCopFile();
+    void init(int argc, char **argv, Type t);
 
-#ifdef QTOPIA_PHONE
-    void hideMessageBoxButtons( QMessageBox * );
+#ifdef Q_WS_QWS
+    void mapToDefaultAction( QWSKeyEvent *ke, int defKey );
 #endif
+    void processQCopFile();
+    void hideMessageBoxButtons( QMessageBox * );
+    void commonInit( int &argc, char **argv );
 
     static void sendInputHintFor(QWidget*,QEvent::Type);
 
     QtopiaApplicationData *d;
 };
-
-#ifdef Q_OS_WIN32
-#include <stdlib.h>
-QTOPIA_EXPORT int setenv(const char* name, const char* value, int overwrite);
-QTOPIA_EXPORT void unsetenv(const char *name);
-#endif
 
 /*
  * Macros for simplifying the support of multiple launch modes in dynamic and singleexec builds.
@@ -211,12 +232,29 @@ typedef int (*qpeMainFunc)(int,char**);
 typedef QMap<QString,qpeMainFunc> QPEMainMap;
 extern void qtopia_registerMain(const char *name, qpeMainFunc mainFunc);
 
+
 // The SXE stuff (depends on quicklaunch or normal mode)
 #ifdef QTOPIA_APP_INTERFACE
 #define QTOPIA_APP_KEY QSXE_QL_APP_KEY
+#define QTOPIA_SET_KEY QSXE_SET_QL_KEY
 #else
 #define QTOPIA_APP_KEY QSXE_APP_KEY
+#define QTOPIA_SET_KEY QSXE_SET_APP_KEY
 #endif
+
+// Document system connection stuff
+#ifdef QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION
+#define QTOPIA_DSCT QContent::DocumentSystemDirect
+#else
+#define QTOPIA_DSCT QContent::DocumentSystemClient
+#endif
+#define QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION()\
+    do {\
+        bool ok = QContent::setDocumentSystemConnection( QTOPIA_DSCT );\
+        if ( !ok ) {\
+            qWarning() << "WARNING: Cannot change document system connection type in file" << __FILE__ << "line" << __LINE__;\
+        }\
+    } while ( 0 )
 
 // Register a main function (singleexec/manual)
 #define QTOPIA_REGISTER_SINGLE_EXEC_MAIN(NAME,IMPLEMENTATION) \
@@ -256,12 +294,14 @@ extern void qtopia_registerMain(const char *name, qpeMainFunc mainFunc);
         ApplicationImpl() {} \
         virtual void setProcessKey( const QString &appName ) { \
             Q_UNUSED(appName); \
-            QSXE_SET_QL_KEY(qPrintable(appName)) \
+            QTOPIA_SET_KEY(qPrintable(appName)) \
         } \
         virtual QWidget *createMainWindow( const QString &appName, QWidget *parent, Qt::WFlags f ) { \
             qLog(Quicklauncher) << "created main window for quicklaunched" << appName.toLocal8Bit().constData(); \
-            if ( qpeAppMap()->contains(appName) ) \
+            if ( qpeAppMap()->contains(appName) ) { \
+                QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION(); \
                 return (*qpeAppMap())[appName](parent, f); \
+            } \
             return 0; \
         } \
         virtual QStringList keys() const { \
@@ -276,11 +316,12 @@ extern void qtopia_registerMain(const char *name, qpeMainFunc mainFunc);
 // The main function (dynamic/normal)
 #define QTOPIA_MAIN_IMPL \
     int main( int argc, char **argv ) { \
-        QSXE_SET_APP_KEY(argv[0]) \
+        QTOPIA_SET_KEY(argv[0]) \
         QString executableName(argv[0]); \
         executableName = executableName.right(executableName.length() - executableName.lastIndexOf('/') - 1); \
         QPerformanceLog(executableName.toLatin1().constData())  << "Starting main()"; \
         QtopiaApplication a( argc, argv ); \
+        QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION(); \
         QWidget *mw = 0; \
         if ( qpeAppMap()->contains(executableName) ) \
             mw = (*qpeAppMap())[executableName](0,0); \

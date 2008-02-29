@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -49,7 +49,7 @@ void QContentUpdateManager::sendUpdate()
             if (item.second == ct) {
                 ids += item.first;
             } else {
-                QtopiaIpcEnvelope se("QPE/System", "contentChanged(QContentIdList,QContent::ChangeType)");
+                QtopiaIpcEnvelope se("QPE/DocAPI", "contentChanged(QContentIdList,QContent::ChangeType)");
                 se << ids;
                 se << ct;
                 ids.clear();
@@ -58,7 +58,7 @@ void QContentUpdateManager::sendUpdate()
                 qLog(DocAPI) << "contentChanged(QContentIdList,QContent::ChangeType)" << ids << ct;
             }
         }
-        QtopiaIpcEnvelope se("QPE/System", "contentChanged(QContentIdList,QContent::ChangeType)");
+        QtopiaIpcEnvelope se("QPE/DocAPI", "contentChanged(QContentIdList,QContent::ChangeType)");
         se << ids;
         se << ct;
         qLog(DocAPI) << "contentChanged(QContentIdList,QContent::ChangeType)" << ids << ct;
@@ -116,21 +116,18 @@ void QContentUpdateManager::endSendingUpdates()
         vsoDocuments->setAttribute("Updating", false);
 }
 
-class QContentUpdateManagerPrivate
-{
-public:
-Q_GLOBAL_STATIC(QContentUpdateManager,instance);
-};
+Q_GLOBAL_STATIC(QContentUpdateManager, QContentUpdateManager_instance);
+
 QContentUpdateManager *QContentUpdateManager::instance()
 {
-    return QContentUpdateManagerPrivate::instance();
+    return QContentUpdateManager_instance();
 }
 
 QValueSpaceProxyObject::QValueSpaceProxyObject( const QString & objectPath, QObject * parent )
     : QObject(parent), d(NULL), path(objectPath)
 {
     qRegisterMetaType<QVariant>("QVariant");
-    connect(this, SIGNAL(doInit(const QString &)), this, SLOT(init(const QString&)), Qt::QueuedConnection);
+    connect(this, SIGNAL(doInit(QString)), this, SLOT(init(QString)), Qt::QueuedConnection);
 }
 
 QValueSpaceProxyObject::~QValueSpaceProxyObject()
@@ -154,10 +151,10 @@ void QValueSpaceProxyObject::init( const QString & objectPath )
     if(!d)
     {
         d=new QValueSpaceObject(objectPath, this);
-        connect(d, SIGNAL(itemRemove(const QByteArray &)), this, SIGNAL(itemRemove(const QByteArray &)), Qt::QueuedConnection);
-        connect(d, SIGNAL(itemSetValue (const QByteArray &, const QVariant &)), this, SIGNAL(itemSetValue (const QByteArray &, const QVariant &)), Qt::QueuedConnection);
-        connect(this, SIGNAL(doInternalSetAttribute(const QString &, const QVariant &)), d, SLOT(setAttribute(const QString&, const QVariant&)), Qt::QueuedConnection);
-        connect(this, SIGNAL(doInternalremoveAttribute(const QString &)), d, SLOT(removeAttribute(const QString&)), Qt::QueuedConnection);
+        connect(d, SIGNAL(itemRemove(QByteArray)), this, SIGNAL(itemRemove(QByteArray)), Qt::QueuedConnection);
+        connect(d, SIGNAL(itemSetValue(QByteArray,QVariant)), this, SIGNAL(itemSetValue(QByteArray,QVariant)), Qt::QueuedConnection);
+        connect(this, SIGNAL(doInternalSetAttribute(QString,QVariant)), d, SLOT(setAttribute(QString,QVariant)), Qt::QueuedConnection);
+        connect(this, SIGNAL(doInternalremoveAttribute(QString)), d, SLOT(removeAttribute(QString)), Qt::QueuedConnection);
     }
 }
 

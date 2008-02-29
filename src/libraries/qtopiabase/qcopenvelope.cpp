@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,25 +20,19 @@
 ****************************************************************************/
 
 #ifndef QT_NO_COP
+
 #include "qcopenvelope_p.h"
-#endif
 #include <qtopianamespace.h>
 #include <QBuffer>
 #include <QDataStream>
 #include <QFile>
 
 #include <errno.h>
-#ifndef Q_OS_WIN32
 #include <unistd.h>
 #include <sys/file.h>
-#else
-#include <stdlib.h>
-#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
-
-#ifndef QT_NO_COP
 
 /*!
   \class QCopEnvelope
@@ -81,8 +75,8 @@
   \o create another channel and connect it to a slot using:
   \code
       myChannel = new QCopChannel( "QPE/FooBar", this );
-      connect( myChannel, SIGNAL(received(const QString&,const QByteArray&)),
-               this, SLOT(fooBarMessage(const QString&,const QByteArray&)) );
+      connect( myChannel, SIGNAL(received(QString,QByteArray)),
+               this, SLOT(fooBarMessage(QString,QByteArray)) );
   \endcode
   \endlist
   See also: \l {Qtopia IPC Layer}{Qtopia IPC} and \l {Services}{Services}.

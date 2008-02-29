@@ -30,11 +30,12 @@
 <li><div class="fn"/>void <b><a href="qiconselector.html#insertItem">insertItem</a></b> ( const QIcon &amp; <i>icn</i>, const QString &amp; <i>text</i> = QString() )</li>
 <li><div class="fn"/>void <b><a href="qiconselector.html#removeIndex">removeIndex</a></b> ( int <i>index</i> )</li>
 <li><div class="fn"/>void <b><a href="qiconselector.html#setIcon">setIcon</a></b> ( const QIcon &amp; <i>icn</i> )</li>
+<li><div class="fn"/>QString <b><a href="qiconselector.html#text">text</a></b> () const</li>
 </ul>
 <ul>
 <li><div class="fn"/>29 public functions inherited from <a href="qtoolbutton.html#public-functions">QToolButton</a></li>
 <li><div class="fn"/>30 public functions inherited from <a href="qabstractbutton.html#public-functions">QAbstractButton</a></li>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -66,7 +67,7 @@
 <li><div class="fn"/>void <b><a href="qiconselector.html#itemSelected">itemSelected</a></b> ( int <i>index</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 protected function inherited from <a href="qtoolbutton.html#protected-functions">QToolButton</a></li>
+<li><div class="fn"/>2 protected functions inherited from <a href="qtoolbutton.html#protected-functions">QToolButton</a></li>
 <li><div class="fn"/>3 protected functions inherited from <a href="qabstractbutton.html#protected-functions">QAbstractButton</a></li>
 <li><div class="fn"/>39 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
@@ -85,7 +86,7 @@
 <ul>
 <li><div class="fn"/>4 properties inherited from <a href="qtoolbutton.html#properties">QToolButton</a></li>
 <li><div class="fn"/>11 properties inherited from <a href="qabstractbutton.html#properties">QAbstractButton</a></li>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>5 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
@@ -139,10 +140,12 @@
 <h3 class="fn"><a name="setIcon"></a>void QIconSelector::setIcon ( const <a href="qicon.html">QIcon</a> &amp; <i>icn</i> )</h3>
 <p>Sets the displayed icon to <i>icn</i>. Note that this does not change the selected item so using this function may confuse the user. It is provided so that a suitable icon can be displayed when nothing is selected.</p>
 <p>See also <a href="qiconselector.html#icon">icon</a>().</p>
+<h3 class="fn"><a name="text"></a><a href="qstring.html">QString</a> QIconSelector::text () const</h3>
+<p>Returns the text that is associated with the icon that is currently being displayed.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

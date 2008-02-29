@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -315,7 +330,7 @@ Q3TextCursor *Q3TextFormatCommand::unexecute(Q3TextCursor *c)
     int idx = startIndex;
     int fIndex = 0;
     while ( fIndex < int(oldFormats.size()) ) {
-        if (oldFormats.at(fIndex).c == '\n') {
+        if (oldFormats.at(fIndex).c == QLatin1Char('\n')) {
             if (idx > 0) {
                 if (idx < sp->length() && fIndex > 0)
                     sp->setFormat(idx, 1, oldFormats.at(fIndex - 1).format());
@@ -509,12 +524,12 @@ void Q3TextCursor::insert(const QString &str, bool checkNewLine, QVector<Q3TextS
 #if defined(Q_WS_WIN)
     if (checkNewLine) {
         int i = 0;
-        while ((i = s.indexOf('\r', i)) != -1)
+        while ((i = s.indexOf(QLatin1Char('\r'), i)) != -1)
             s.remove(i ,1);
     }
 #endif
     if (checkNewLine)
-        justInsert = s.indexOf('\n') == -1;
+        justInsert = s.indexOf(QLatin1Char('\n')) == -1;
     if (justInsert) { // we ignore new lines and insert all in the current para at the current index
         para->insert(idx, s.unicode(), s.length());
         if (formatting) {
@@ -532,7 +547,7 @@ void Q3TextCursor::insert(const QString &str, bool checkNewLine, QVector<Q3TextS
         int y = para->rect().y() + para->rect().height();
         int lastIndex = 0;
         do {
-            end = s.indexOf('\n', start + 1); // find line break
+            end = s.indexOf(QLatin1Char('\n'), start + 1); // find line break
             if (end == -1) // didn't find one, so end of line is end of string
                 end = s.length();
             int len = (start == -1 ? end : end - start - 1);
@@ -551,7 +566,7 @@ void Q3TextCursor::insert(const QString &str, bool checkNewLine, QVector<Q3TextS
             }
             start = end; // next start is at the end of this line
             idx += len; // increase the index of the cursor to the end of the inserted text
-            if (s[end] == '\n') { // if at the end was a line break, break the line
+            if (s[end] == QLatin1Char('\n')) { // if at the end was a line break, break the line
                 splitAndInsertEmptyParagraph(false, true);
                 para->setEndState(-1);
                 para->prev()->format(-1, false);
@@ -1047,20 +1062,20 @@ static bool is_seperator(const QChar &c, bool onlySpace)
     if (onlySpace)
         return c.isSpace();
     return c.isSpace() ||
-        c == '\t' ||
-        c == '.' ||
-        c == ',' ||
-        c == ':' ||
-        c == ';' ||
-        c == '-' ||
-        c == '<' ||
-        c == '>' ||
-        c == '[' ||
-        c == ']' ||
-        c == '(' ||
-        c == ')' ||
-        c == '{' ||
-        c == '}';
+           c == QLatin1Char('\t') ||
+           c == QLatin1Char('.') ||
+           c == QLatin1Char(',') ||
+           c == QLatin1Char(':') ||
+           c == QLatin1Char(';') ||
+           c == QLatin1Char('-') ||
+           c == QLatin1Char('<') ||
+           c == QLatin1Char('>') ||
+           c == QLatin1Char('[') ||
+           c == QLatin1Char(']') ||
+           c == QLatin1Char('(') ||
+           c == QLatin1Char(')') ||
+           c == QLatin1Char('{') ||
+           c == QLatin1Char('}');
 }
 
 void Q3TextCursor::gotoPreviousWord(bool onlySpace)
@@ -1360,7 +1375,7 @@ void Q3TextDocument::init()
     scaleFontsFactor = 1;
 
     commandHistory = new Q3TextCommandHistory(100);
-    tStopWidth = formatCollection()->defaultFormat()->width('x') * 8;
+    tStopWidth = formatCollection()->defaultFormat()->width(QLatin1Char('x')) * 8;
 }
 
 Q3TextDocument::~Q3TextDocument()
@@ -1458,14 +1473,14 @@ void Q3TextDocument::setPlainText(const QString &text)
     oText = text;
 
     int lastNl = 0;
-    int nl = text.indexOf('\n');
+    int nl = text.indexOf(QLatin1Char('\n'));
     if (nl == -1) {
         lParag = createParagraph(this, lParag, 0);
         if (!fParag)
             fParag = lParag;
         QString s = text;
         if (!s.isEmpty()) {
-            if (s[(int)s.length() - 1] == '\r')
+            if (s[(int)s.length() - 1] == QLatin1Char('\r'))
                 s.remove(s.length() - 1, 1);
             lParag->append(s);
         }
@@ -1476,7 +1491,7 @@ void Q3TextDocument::setPlainText(const QString &text)
                 fParag = lParag;
             int l = nl - lastNl;
             if (l > 0) {
-                if (text.unicode()[nl-1] == '\r')
+                if (text.unicode()[nl-1] == QLatin1Char('\r'))
                     l--;
                 QString cs = QString::fromRawData(text.unicode()+lastNl, l);
                 lParag->append(cs);
@@ -1484,7 +1499,7 @@ void Q3TextDocument::setPlainText(const QString &text)
             if (nl == (int)text.length())
                 break;
             lastNl = nl + 1;
-            nl = text.indexOf('\n', nl + 1);
+            nl = text.indexOf(QLatin1Char('\n'), nl + 1);
             if (nl == -1)
                 nl = text.length();
         }
@@ -1580,7 +1595,7 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
     QStack<Q3TextDocumentTag> tags;
     if (!initialFormat)
         initialFormat = formatCollection()->defaultFormat();
-    Q3TextDocumentTag initag("", sheet_->item(""), *initialFormat);
+    Q3TextDocumentTag initag(QLatin1String(""), sheet_->item(QLatin1String("")), *initialFormat);
     if (bodyText.isValid())
         initag.format.setColor(bodyText);
     Q3TextDocumentTag curtag = initag;
@@ -1614,11 +1629,11 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
     // set rtext spacing to false for the initial paragraph.
     curpar->rtext = false;
 
-    QString wellKnownTags = "br hr wsp table qt body meta title";
+    QString wellKnownTags = QLatin1String("br hr wsp table qt body meta title");
 
     while (pos < length) {
-        if (hasPrefix(doc, length, pos, '<')){
-            if (!hasPrefix(doc, length, pos+1, QChar('/'))) {
+        if (hasPrefix(doc, length, pos, QLatin1Char('<'))){
+            if (!hasPrefix(doc, length, pos+1, QLatin1Char('/'))) {
                 // open tag
                 QMap<QString, QString> attr;
                 QMap<QString, QString>::Iterator it, end = attr.end();
@@ -1648,7 +1663,7 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                     if(nstyle->displayMode() == Q3StyleSheetItem::DisplayListItem) {
                         canMergeLi = true;
                     } else if (nstyle->displayMode() == Q3StyleSheetItem::DisplayBlock) {
-                        while (curtag.style->name() == "p") {
+                        while (curtag.style->name() == QLatin1String("p")) {
                             if (tags.isEmpty())
                                 break;
                             curtag = tags.pop();
@@ -1656,7 +1671,7 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
 
                         if (curtag.style->displayMode() == Q3StyleSheetItem::DisplayListItem) {
                             // we are in a li and a new block comes along
-                            if (nstyle->name() == "ul" || nstyle->name() == "ol")
+                            if (nstyle->name() == QString(QLatin1String("ul")) || nstyle->name() == QLatin1String("ol"))
                                 hasNewPar = false; // we want an empty li (like most browsers)
                             if (!hasNewPar) {
                                 /* do not add new blocks inside
@@ -1684,32 +1699,32 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
 
                 // some well-known tags, some have a nstyle, some not
                 if (wellKnownTags.contains(tagname)) {
-                    if (tagname == "br") {
+                    if (tagname == QLatin1String("br")) {
                         emptyTag = space = true;
                         int index = qMax(curpar->length(),1) - 1;
                         Q3TextFormat format = curtag.format.makeTextFormat(nstyle, attr, scaleFontsFactor);
                         curpar->append(QString(QChar(QChar::LineSeparator)));
                         curpar->setFormat(index, 1, &format);
                         hasNewPar = false;
-                    }  else if (tagname == "hr") {
+                    }  else if (tagname == QLatin1String("hr")) {
                         emptyTag = space = true;
 #ifndef QT_NO_TEXTCUSTOMITEM
                         custom = tag(sheet_, tagname, attr, contxt, *factory_ , emptyTag, this);
 #endif
-                    } else if (tagname == "table") {
+                    } else if (tagname == QLatin1String("table")) {
                         emptyTag = space = true;
 #ifndef QT_NO_TEXTCUSTOMITEM
                         Q3TextFormat format = curtag.format.makeTextFormat( nstyle, attr, scaleFontsFactor);
                         curpar->setAlignment(curtag.alignment);
                         custom = parseTable(attr, format, doc, length, pos, curpar);
 #endif
-                    } else if (tagname == "qt" || tagname == "body") {
-                        it = attr.find("bgcolor");
+                    } else if (tagname == QLatin1String("qt") || tagname == QLatin1String("body")) {
+                        it = attr.find(QLatin1String("bgcolor"));
                         if (it != end) {
                             QBrush *b = new QBrush(QColor(*it));
                             setPaper(b);
                         }
-                        it = attr.find("background");
+                        it = attr.find(QLatin1String("background"));
                         if (it != end) {
 #ifndef QT_NO_MIME
                             QImage img;
@@ -1730,28 +1745,28 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                             }
 #endif
                         }
-                        it = attr.find("text");
+                        it = attr.find(QLatin1String("text"));
                         if (it != end) {
                             QColor c(*it);
                             initag.format.setColor(c);
                             curtag.format.setColor(c);
                             bodyText = c;
                         }
-                        it = attr.find("link");
+                        it = attr.find(QLatin1String("link"));
                         if (it != end)
                             linkColor = QColor(*it);
-                        it = attr.find("title");
+                        it = attr.find(QLatin1String("title"));
                         if (it != end)
-                            attribs.insert("title", *it);
+                            attribs.insert(QLatin1String("title"), *it);
 
                         if (textEditMode) {
-                            it = attr.find("style");
+                            it = attr.find(QLatin1String("style"));
                             if (it != end) {
                                 QString a = *it;
-                                int count = a.count(';') + 1;
+                                int count = a.count(QLatin1Char(';')) + 1;
                                 for (int s = 0; s < count; s++) {
-                                    QString style = a.section(';', s, s);
-                                    if (style.startsWith("font-size:") && style.endsWith("pt")) {
+                                    QString style = a.section(QLatin1Char(';'), s, s);
+                                    if (style.startsWith(QLatin1String("font-size:")) && style.endsWith(QLatin1String("pt"))) {
                                         scaleFontsFactor = double(formatCollection()->defaultFormat()->fn.pointSize()) /
                                                            style.mid(10, style.length() - 12).toInt();
                                     }
@@ -1760,19 +1775,19 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                             nstyle = 0; // ignore body in textEditMode
                         }
                         // end qt- and body-tag handling
-                    } else if (tagname == "meta") {
-                        if (attr["name"] == "qrichtext" && attr["content"] == "1")
+                    } else if (tagname == QLatin1String("meta")) {
+                        if (attr[QLatin1String("name")] == QLatin1String("qrichtext") && attr[QLatin1String("content")] == QLatin1String("1"))
                             textEditMode = true;
-                    } else if (tagname == "title") {
+                    } else if (tagname == QLatin1String("title")) {
                         QString title;
                         while (pos < length) {
-                            if (hasPrefix(doc, length, pos, QChar('<')) && hasPrefix(doc, length, pos+1, QChar('/')) &&
-                                 parseCloseTag(doc, length, pos) == "title")
+                            if (hasPrefix(doc, length, pos, QLatin1Char('<')) && hasPrefix(doc, length, pos+1, QLatin1Char('/')) &&
+                                 parseCloseTag(doc, length, pos) == QLatin1String("title"))
                                 break;
                             title += doc[pos];
                             ++pos;
                         }
-                        attribs.insert("title", title);
+                        attribs.insert(QLatin1String("title"), title);
                     }
                 } // end of well-known tag handling
 
@@ -1787,7 +1802,7 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
 #ifndef QT_NO_TEXTCUSTOMITEM
                     int index = qMax(curpar->length(),1) - 1;
                     Q3TextFormat format = curtag.format.makeTextFormat(nstyle, attr, scaleFontsFactor);
-                    curpar->append(QString(QChar('*')));
+                    curpar->append(QString(QLatin1Char('*')));
                     Q3TextFormat* f = formatCollection()->format(&format);
                     curpar->setFormat(index, 1, f);
                     curpar->at(index)->setCustomItem(custom);
@@ -1822,7 +1837,7 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                     /* netscape compatibility: eat a newline and only a newline if a pre block starts */
                     if (curtag.wsm == Q3StyleSheetItem::WhiteSpacePre &&
                          nstyle->displayMode() == Q3StyleSheetItem::DisplayBlock)
-                        eat(doc, length, pos, '\n');
+                        eat(doc, length, pos, QLatin1Char('\n'));
 
                     /* ignore whitespace for inline elements if there
                        was already one*/
@@ -1835,10 +1850,10 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                     curtag.format = curtag.format.makeTextFormat(nstyle, attr, scaleFontsFactor);
                     if (nstyle->isAnchor()) {
                         if (!anchorName.isEmpty())
-                            anchorName += "#" + attr["name"];
+                            anchorName += QLatin1String("#") + attr[QLatin1String("name")];
                         else
-                            anchorName = attr["name"];
-                        curtag.anchorHref = attr["href"];
+                            anchorName = attr[QLatin1String("name")];
+                        curtag.anchorHref = attr[QLatin1String("href")];
                     }
 
                     if (nstyle->alignment() != Q3StyleSheetItem::Undefined)
@@ -1850,22 +1865,24 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                     if (nstyle->displayMode() == Q3StyleSheetItem::DisplayBlock
                          || nstyle->displayMode() == Q3StyleSheetItem::DisplayListItem) {
 
-                        if (nstyle->name() == "ol" || nstyle->name() == "ul" || nstyle->name() == "li") {
-                            QString type = attr["type"];
+                        if (nstyle->name() == QLatin1String("ol") ||
+                            nstyle->name() == QLatin1String("ul") ||
+                            nstyle->name() == QLatin1String("li")) {
+                            QString type = attr[QLatin1String("type")];
                             if (!type.isEmpty()) {
-                                if (type == "1") {
+                                if (type == QLatin1String("1")) {
                                     curtag.liststyle = Q3StyleSheetItem::ListDecimal;
-                                } else if (type == "a") {
+                                } else if (type == QLatin1String("a")) {
                                     curtag.liststyle = Q3StyleSheetItem::ListLowerAlpha;
-                                } else if (type == "A") {
+                                } else if (type == QLatin1String("A")) {
                                     curtag.liststyle = Q3StyleSheetItem::ListUpperAlpha;
                                 } else {
                                     type = type.toLower();
-                                    if (type == "square")
+                                    if (type == QLatin1String("square"))
                                         curtag.liststyle = Q3StyleSheetItem::ListSquare;
-                                    else if (type == "disc")
+                                    else if (type == QLatin1String("disc"))
                                         curtag.liststyle = Q3StyleSheetItem::ListDisc;
-                                    else if (type == "circle")
+                                    else if (type == QLatin1String("circle"))
                                         curtag.liststyle = Q3StyleSheetItem::ListCircle;
                                 }
                             }
@@ -1880,52 +1897,52 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                           parser rathern than later, the unelegance of
                           this approach goes awy
                          */
-                        if (nstyle->name() == "ul")
-                            curtag.style = sheet_->item("ol");
+                        if (nstyle->name() == QLatin1String("ul"))
+                            curtag.style = sheet_->item(QLatin1String("ol"));
 
-                        it = attr.find("align");
+                        it = attr.find(QLatin1String("align"));
                         if (it != end) {
                             QString align = (*it).toLower();
-                            if (align == "center")
+                            if (align == QLatin1String("center"))
                                 curtag.alignment = Qt::AlignCenter;
-                            else if (align == "right")
+                            else if (align == QLatin1String("right"))
                                 curtag.alignment = Qt::AlignRight;
-                            else if (align == "justify")
+                            else if (align == QLatin1String("justify"))
                                 curtag.alignment = Qt::AlignJustify;
                         }
-                        it = attr.find("dir");
+                        it = attr.find(QLatin1String("dir"));
                         if (it != end) {
                             QString dir = (*it).toLower();
-                            if (dir == "rtl")
+                            if (dir == QLatin1String("rtl"))
                                 curtag.direction = QChar::DirR;
-                            else if (dir == "ltr")
+                            else if (dir == QLatin1String("ltr"))
                                 curtag.direction = QChar::DirL;
                         }
 
                         NEWPAR;
 
                         if (curtag.style && curtag.style->displayMode() == Q3StyleSheetItem::DisplayListItem) {
-                            it = attr.find("value");
+                            it = attr.find(QLatin1String("value"));
                             if (it != end)
                                 curpar->setListValue((*it).toInt());
                         }
 
-                        it = attr.find("style");
+                        it = attr.find(QLatin1String("style"));
                         if (it != end) {
                             QString a = *it;
                             bool ok = true;
-                            int count = a.count(';')+1;
+                            int count = a.count(QLatin1Char(';'))+1;
                             for (int s = 0; ok && s < count; s++) {
-                                QString style = a.section(';', s, s);
-                                if (style.startsWith("margin-top:") && style.endsWith("px"))
+                                QString style = a.section(QLatin1Char(';'), s, s);
+                                if (style.startsWith(QLatin1String("margin-top:")) && style.endsWith(QLatin1String("px")))
                                     curpar->utm = 1+style.mid(11, style.length() - 13).toInt(&ok);
-                                else if (style.startsWith("margin-bottom:") && style.endsWith("px"))
+                                else if (style.startsWith(QLatin1String("margin-bottom:")) && style.endsWith(QLatin1String("px")))
                                     curpar->ubm = 1+style.mid(14, style.length() - 16).toInt(&ok);
-                                else if (style.startsWith("margin-left:") && style.endsWith("px"))
+                                else if (style.startsWith(QLatin1String("margin-left:")) && style.endsWith(QLatin1String("px")))
                                     curpar->ulm = 1+style.mid(12, style.length() - 14).toInt(&ok);
-                                else if (style.startsWith("margin-right:") && style.endsWith("px"))
+                                else if (style.startsWith(QLatin1String("margin-right:")) && style.endsWith(QLatin1String("px")))
                                     curpar->urm = 1+style.mid(13, style.length() - 15).toInt(&ok);
-                                else if (style.startsWith("text-indent:") && style.endsWith("px"))
+                                else if (style.startsWith(QLatin1String("text-indent:")) && style.endsWith(QLatin1String("px")))
                                     curpar->uflm = 1+style.mid(12, style.length() - 14).toInt(&ok);
                             }
                             if (!ok) // be pressmistic
@@ -1939,7 +1956,7 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                     continue; // nothing we could do with this, probably parse error
                 if (!sheet_->item(tagname)) // ignore unknown tags
                     continue;
-                if (tagname == "li")
+                if (tagname == QLatin1String("li"))
                     continue;
 
                 // we close a block item. Since the text may continue, we need to have a new paragraph
@@ -1966,7 +1983,7 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                     curtag = initag;
 
                 if (needNewPar) {
-                    if (textEditMode && (tagname == "p" || tagname == "div")) // preserve empty paragraphs
+                    if (textEditMode && (tagname == QLatin1String("p") || tagname == QLatin1String("div"))) // preserve empty paragraphs
                         hasNewPar = false;
                     NEWPAR;
                 }
@@ -1975,7 +1992,7 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
             // normal contents
             QString s;
             QChar c;
-            while (pos < length && !hasPrefix(doc, length, pos, QChar('<'))){
+            while (pos < length && !hasPrefix(doc, length, pos, QLatin1Char('<'))){
                 if (textEditMode) {
                     // text edit mode: we handle all white space but ignore newlines
                     c = parseChar(doc, length, pos, Q3StyleSheetItem::WhiteSpacePre);
@@ -1988,8 +2005,8 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                     // in white space pre mode: treat any space as non breakable
                     // and expand tabs to eight character wide columns.
                     if (curtag.wsm == Q3StyleSheetItem::WhiteSpacePre) {
-                        if  (c == '\t') {
-                            c = ' ';
+                        if  (c == QLatin1Char('\t')) {
+                            c = QLatin1Char(' ');
                             while((++tabExpansionColumn)%8)
                                 s += c;
                         }
@@ -1999,7 +2016,7 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                             tabExpansionColumn++;
 
                     }
-                    if (c == ' ' || c == QChar::LineSeparator) {
+                    if (c == QLatin1Char(' ') || c == QChar::LineSeparator) {
                         /* avoid overlong paragraphs by forcing a new
                                paragraph after 4096 characters. This case can
                                occur when loading undiscovered plain text
@@ -2007,25 +2024,25 @@ void Q3TextDocument::setRichTextInternal(const QString &text, Q3TextCursor* curs
                                forever, we do the trick.
                             */
                         if (curtag.wsm == Q3StyleSheetItem::WhiteSpaceNormal && s.length() > 4096) do {
-                            if (doc[l] == '\n') {
+                            if (doc[l] == QLatin1Char('\n')) {
                                 hasNewPar = false; // for a new paragraph ...
                                 NEWPAR;
                                 hasNewPar = false; // ... and make it non-reusable
-                                c = '\n';  // make sure we break below
+                                c = QLatin1Char('\n');  // make sure we break below
                                 break;
                             }
                         } while (++l < pos);
                     }
                 }
 
-                if (c == '\n')
+                if (c == QLatin1Char('\n'))
                     break;  // break on  newlines, pre delievers a QChar::LineSeparator
 
                 bool c_isSpace = c.isSpace() && c.unicode() != 0x00a0U && !textEditMode;
 
                 if (curtag.wsm == Q3StyleSheetItem::WhiteSpaceNormal && c_isSpace && space)
                     continue;
-                if (c == '\r')
+                if (c == QLatin1Char('\r'))
                     continue;
                 space = c_isSpace;
                 s += c;
@@ -2263,14 +2280,14 @@ QString Q3TextDocument::plainText() const
 #ifndef QT_NO_TEXTCUSTOMITEM
                 if (p->at(i)->isCustom()) {
                     if (p->at(i)->customItem()->isNested()) {
-                        s += "\n";
+                        s += QLatin1String("\n");
                         Q3TextTable *t = (Q3TextTable*)p->at(i)->customItem();
                         QList<Q3TextTableCell *> cells = t->tableCells();
                         for (int idx = 0; idx < cells.size(); ++idx) {
                             Q3TextTableCell *c = cells.at(idx);
-                            s += c->richText()->plainText() + "\n";
+                            s += c->richText()->plainText() + QLatin1String("\n");
                         }
-                        s += "\n";
+                        s += QLatin1String("\n");
                     }
                 } else
 #endif
@@ -2281,7 +2298,7 @@ QString Q3TextDocument::plainText() const
         }
         s.remove(s.length() - 1, 1);
         if (p->next())
-            s += "\n";
+            s += QLatin1String("\n");
         buffer += s;
         p = p->next();
     }
@@ -2291,37 +2308,37 @@ QString Q3TextDocument::plainText() const
 static QString align_to_string(int a)
 {
     if (a & Qt::AlignRight)
-        return " align=\"right\"";
+        return QLatin1String(" align=\"right\"");
     if (a & Qt::AlignHCenter)
-        return " align=\"center\"";
+        return QLatin1String(" align=\"center\"");
     if (a & Qt::AlignJustify)
-        return " align=\"justify\"";
+        return QLatin1String(" align=\"justify\"");
     return QString();
 }
 
 static QString direction_to_string(int dir)
 {
     if (dir != QChar::DirON)
-        return (dir == QChar::DirL? " dir=\"ltr\"" : " dir=\"rtl\"");
+        return (dir == QChar::DirL? QLatin1String(" dir=\"ltr\"") : QLatin1String(" dir=\"rtl\""));
     return QString();
 }
 
 static QString list_value_to_string(int v)
 {
     if (v != -1)
-        return " listvalue=\"" + QString::number(v) + "\"";
+        return QLatin1String(" listvalue=\"") + QString::number(v) + QLatin1Char('"');
     return QString();
 }
 
 static QString list_style_to_string(int v)
 {
     switch(v) {
-    case Q3StyleSheetItem::ListDecimal: return "\"1\"";
-    case Q3StyleSheetItem::ListLowerAlpha: return "\"a\"";
-    case Q3StyleSheetItem::ListUpperAlpha: return "\"A\"";
-    case Q3StyleSheetItem::ListDisc: return "\"disc\"";
-    case Q3StyleSheetItem::ListSquare: return "\"square\"";
-    case Q3StyleSheetItem::ListCircle: return "\"circle\"";
+    case Q3StyleSheetItem::ListDecimal: return QLatin1String("\"1\"");
+    case Q3StyleSheetItem::ListLowerAlpha: return QLatin1String("\"a\"");
+    case Q3StyleSheetItem::ListUpperAlpha: return QLatin1String("\"A\"");
+    case Q3StyleSheetItem::ListDisc: return QLatin1String("\"disc\"");
+    case Q3StyleSheetItem::ListSquare: return QLatin1String("\"square\"");
+    case Q3StyleSheetItem::ListCircle: return QLatin1String("\"circle\"");
     default:
         return QString();
     }
@@ -2339,37 +2356,42 @@ static QString margin_to_string(Q3StyleSheetItem* style, int t, int b, int l, in
 {
     QString s;
     if (l > 0)
-        s += QString(s.size() ? ";" : "") + "margin-left:" + QString::number(l+qMax(0,style->margin(Q3StyleSheetItem::MarginLeft))) + "px";
+        s += QString(s.size() ? QLatin1String(";") : QLatin1String("")) + QLatin1String("margin-left:") +
+             QString::number(l+qMax(0,style->margin(Q3StyleSheetItem::MarginLeft))) + QLatin1String("px");
     if (r > 0)
-        s += QString(s.size() ? ";" : "") + "margin-right:" + QString::number(r+qMax(0,style->margin(Q3StyleSheetItem::MarginRight))) + "px";
+        s += QString(s.size() ? QLatin1String(";") : QLatin1String("")) + QLatin1String("margin-right:") +
+             QString::number(r+qMax(0,style->margin(Q3StyleSheetItem::MarginRight))) + QLatin1String("px");
     if (t > 0)
-        s += QString(s.size() ? ";" : "") + "margin-top:" + QString::number(t+qMax(0,style->margin(Q3StyleSheetItem::MarginTop))) + "px";
+        s += QString(s.size() ? QLatin1String(";") : QLatin1String("")) + QLatin1String("margin-top:") +
+             QString::number(t+qMax(0,style->margin(Q3StyleSheetItem::MarginTop))) + QLatin1String("px");
     if (b > 0)
-        s += QString(s.size() ? ";" : "") + "margin-bottom:" + QString::number(b+qMax(0,style->margin(Q3StyleSheetItem::MarginBottom))) + "px";
+        s += QString(s.size() ? QLatin1String(";") : QLatin1String("")) + QLatin1String("margin-bottom:") +
+             QString::number(b+qMax(0,style->margin(Q3StyleSheetItem::MarginBottom))) + QLatin1String("px");
     if (fl > 0)
-        s += QString(s.size() ? ";" : "") + "text-indent:" + QString::number(fl+qMax(0,style->margin(Q3StyleSheetItem::MarginFirstLine))) + "px";
+        s += QString(s.size() ? QLatin1String(";") : QLatin1String("")) + QLatin1String("text-indent:") +
+             QString::number(fl+qMax(0,style->margin(Q3StyleSheetItem::MarginFirstLine))) + QLatin1String("px");
     if (s.size())
-        return " style=\"" + s + "\"";
+        return QLatin1String(" style=\"") + s + QLatin1String("\"");
     return QString();
 }
 
 QString Q3TextDocument::richText() const
 {
-    QString s = "";
+    QString s = QLatin1String("");
     if (!par) {
-        s += "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\"font-size:" ;
+        s += QLatin1String("<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\"font-size:");
         s += QString::number(formatCollection()->defaultFormat()->font().pointSize());
-        s += "pt;font-family:";
+        s += QLatin1String("pt;font-family:");
         s += formatCollection()->defaultFormat()->font().family();
-        s +="\">";
+        s += QLatin1String("\">");
     }
     Q3TextParagraph* p = fParag;
 
-    Q3StyleSheetItem* item_p = styleSheet()->item("p");
-    Q3StyleSheetItem* item_div = styleSheet()->item("div");
-    Q3StyleSheetItem* item_ul = styleSheet()->item("ul");
-    Q3StyleSheetItem* item_ol = styleSheet()->item("ol");
-    Q3StyleSheetItem* item_li = styleSheet()->item("li");
+    Q3StyleSheetItem* item_p = styleSheet()->item(QLatin1String("p"));
+    Q3StyleSheetItem* item_div = styleSheet()->item(QLatin1String("div"));
+    Q3StyleSheetItem* item_ul = styleSheet()->item(QLatin1String("ul"));
+    Q3StyleSheetItem* item_ol = styleSheet()->item(QLatin1String("ol"));
+    Q3StyleSheetItem* item_li = styleSheet()->item(QLatin1String("li"));
     if (!item_p || !item_div || !item_ul || !item_ol || !item_li) {
         qWarning("QTextEdit: cannot export HTML due to insufficient stylesheet (lack of p, div, ul, ol, or li)");
         return QString();
@@ -2385,21 +2407,21 @@ QString Q3TextDocument::richText() const
         listDepth = p->listDepth();
         if (listDepth < pastListDepth)  {
             for (int i = pastListDepth; i > listDepth; i--)
-                s += list_is_ordered(listStyles[i]) ? "</ol>" : "</ul>";
-            s += '\n';
+                s += list_is_ordered(listStyles[i]) ? QLatin1String("</ol>") : QLatin1String("</ul>");
+            s += QLatin1Char('\n');
         } else if (listDepth > pastListDepth) {
-            s += '\n';
+            s += QLatin1Char('\n');
             listStyles.resize(qMax((int)listStyles.size(), listDepth+1));
             QString list_type;
             listStyles[listDepth] = p->listStyle();
             if (!list_is_ordered(p->listStyle()) || item_ol->listStyle() != p->listStyle())
-                list_type = " type=" + list_style_to_string(p->listStyle());
+                list_type = QLatin1String(" type=") + list_style_to_string(p->listStyle());
             for (int i = pastListDepth; i < listDepth; i++) {
-                s += list_is_ordered(p->listStyle()) ? "<ol" : "<ul" ;
-                s += list_type + ">";
+                s += list_is_ordered(p->listStyle()) ? QLatin1String("<ol") : QLatin1String("<ul");
+                s += list_type + QLatin1String(">");
             }
         } else {
-            s += '\n';
+            s += QLatin1Char('\n');
         }
 
         QString ps = p->richText();
@@ -2413,47 +2435,47 @@ QString Q3TextDocument::richText() const
 
         if (richTextExportStart && richTextExportStart->paragraph() ==p &&
              richTextExportStart->index() == 0)
-            s += "<!--StartFragment-->";
+            s += QLatin1String("<!--StartFragment-->");
 
         if (p->isListItem()) {
-            s += "<li";
+            s += QLatin1String("<li");
             if (p->listStyle() != listStyles[listDepth])
-                s += " type=" + list_style_to_string(p->listStyle());
-            s +=align_to_string(p->alignment());
+                s += QLatin1String(" type=") + list_style_to_string(p->listStyle());
+            s += align_to_string(p->alignment());
             s += margin_to_string(item_li, p->utm, p->ubm, p->ulm, p->urm, p->uflm);
-            s +=  list_value_to_string(p->listValue());
+            s += list_value_to_string(p->listValue());
             s += direction_to_string(p->direction());
-            s +=">";
+            s += QLatin1String(">");
             s += ps;
-            s += "</li>";
+            s += QLatin1String("</li>");
         } else if (p->listDepth()) {
-            s += "<div";
+            s += QLatin1String("<div");
             s += align_to_string(p->alignment());
             s += margin_to_string(item_div, p->utm, p->ubm, p->ulm, p->urm, p->uflm);
-            s +=direction_to_string(p->direction());
-            s += ">";
+            s += direction_to_string(p->direction());
+            s += QLatin1String(">");
             s += ps;
-            s += "</div>";
+            s += QLatin1String("</div>");
         } else {
             // normal paragraph item
-            s += "<p";
+            s += QLatin1String("<p");
             s += align_to_string(p->alignment());
             s += margin_to_string(item_p, p->utm, p->ubm, p->ulm, p->urm, p->uflm);
-            s +=direction_to_string(p->direction());
-            s += ">";
+            s += direction_to_string(p->direction());
+            s += QLatin1String(">");
             s += ps;
-            s += "</p>";
+            s += QLatin1String("</p>");
         }
         pastListDepth = listDepth;
         p = p->next();
     }
     while (listDepth > 0) {
-        s += list_is_ordered(listStyles[listDepth]) ? "</ol>" : "</ul>";
+        s += list_is_ordered(listStyles[listDepth]) ? QLatin1String("</ol>") : QLatin1String("</ul>");
         listDepth--;
     }
 
     if (!par)
-        s += "\n</body></html>\n";
+        s += QLatin1String("\n</body></html>\n");
 
     return s;
 }
@@ -2790,19 +2812,19 @@ QString Q3TextDocument::selectedText(int id, bool asRichText) const
         richTextExportEnd = &c2;
 
         QString sel = richText();
-        int from = sel.indexOf("<!--StartFragment-->");
+        int from = sel.indexOf(QLatin1String("<!--StartFragment-->"));
         if (from >= 0) {
             from += 20;
             // find the previous span and move it into the start fragment before we clip it
             QString prevspan;
-            int pspan = sel.lastIndexOf("<span", from-21);
-            if (pspan > sel.lastIndexOf("</span", from-21)) {
-                int spanend = sel.indexOf('>', pspan);
+            int pspan = sel.lastIndexOf(QLatin1String("<span"), from-21);
+            if (pspan > sel.lastIndexOf(QLatin1String("</span"), from-21)) {
+                int spanend = sel.indexOf(QLatin1Char('>'), pspan);
                 prevspan = sel.mid(pspan, spanend - pspan + 1);
             }
-            int to = sel.lastIndexOf("<!--EndFragment-->");
+            int to = sel.lastIndexOf(QLatin1String("<!--EndFragment-->"));
             if (from <= to)
-                sel = "<!--StartFragment-->" + prevspan + sel.mid(from, to - from);
+                sel = QLatin1String("<!--StartFragment-->") + prevspan + sel.mid(from, to - from);
         }
         richTextExportStart = richTextExportEnd = 0;
         return sel;
@@ -2821,14 +2843,14 @@ QString Q3TextDocument::selectedText(int id, bool asRichText) const
 #ifndef QT_NO_TEXTCUSTOMITEM
                 if (p->at(i)->isCustom()) {
                     if (p->at(i)->customItem()->isNested()) {
-                        s += "\n";
+                        s += QLatin1String("\n");
                         Q3TextTable *t = (Q3TextTable*)p->at(i)->customItem();
                         QList<Q3TextTableCell *> cells = t->tableCells();
                         for (int idx = 0; idx < cells.size(); ++idx) {
                             Q3TextTableCell *c = cells.at(idx);
-                            s += c->richText()->plainText() + "\n";
+                            s += c->richText()->plainText() + QLatin1String("\n");
                         }
-                        s += "\n";
+                        s += QLatin1String("\n");
                     }
                 } else
 #endif
@@ -2847,20 +2869,20 @@ QString Q3TextDocument::selectedText(int id, bool asRichText) const
             if (!p->mightHaveCustomItems) {
                 s += p->string()->toString().mid(start, end - start);
                 if (p != c2.paragraph())
-                    s += "\n";
+                    s += QLatin1String("\n");
             } else {
                 for (int i = start; i < end; ++i) {
 #ifndef QT_NO_TEXTCUSTOMITEM
                     if (p->at(i)->isCustom()) {
                         if (p->at(i)->customItem()->isNested()) {
-                            s += "\n";
+                            s += QLatin1String(QLatin1String("\n"));
                             Q3TextTable *t = (Q3TextTable*)p->at(i)->customItem();
                             QList<Q3TextTableCell *> cells = t->tableCells();
                             for (int idx = 0; idx < cells.size(); ++idx) {
                                 Q3TextTableCell *c = cells.at(idx);
-                                s += c->richText()->plainText() + "\n";
+                                s += c->richText()->plainText() + QLatin1String("\n");
                             }
-                            s += "\n";
+                            s += QLatin1String("\n");
                         }
                     } else
 #endif
@@ -2882,9 +2904,9 @@ QString Q3TextDocument::selectedText(int id, bool asRichText) const
     QChar* uc = (QChar*) s.unicode();
     for (int ii = 0; ii < s.length(); ii++) {
         if (uc[(int)ii] == QChar::LineSeparator)
-            uc[(int)ii] = QChar('\n');
+            uc[(int)ii] = QLatin1Char('\n');
         else if ( uc[(int)ii] == QChar::Nbsp )
-            uc[(int)ii] = QChar(' ');
+            uc[(int)ii] = QLatin1Char(' ');
     }
     return s;
 }
@@ -3141,7 +3163,7 @@ void Q3TextDocument::doLayout(QPainter *p, int w)
     withoutDoubleBuffer = (p != 0);
     QPainter * oldPainter = Q3TextFormat::painter();
     Q3TextFormat::setPainter(p);
-    tStopWidth = formatCollection()->defaultFormat()->width( 'x' ) * 8;
+    tStopWidth = formatCollection()->defaultFormat()->width( QLatin1Char('x') ) * 8;
     flow_->setWidth(w);
     cw = w;
     vw = w;
@@ -3332,7 +3354,7 @@ void Q3TextDocument::setDefaultFormat(const QFont &font, const QColor &color)
 
     if (!reformat)
         return;
-    tStopWidth = formatCollection()->defaultFormat()->width('x') * 8;
+    tStopWidth = formatCollection()->defaultFormat()->width(QLatin1Char('x')) * 8;
 
     // invalidate paragraphs and custom items
     Q3TextParagraph *p = fParag;
@@ -3378,9 +3400,9 @@ Q3TextCustomItem* Q3TextDocument::tag(Q3StyleSheet *sheet, const QString& name,
     // first some known  tags
     if (!style)
         return 0;
-    if (style->name() == "img")
+    if (style->name() == QLatin1String("img"))
         return new Q3TextImage(doc, attr, context, (Q3MimeSourceFactory&)factory);
-    if (style->name() == "hr")
+    if (style->name() == QLatin1String("hr"))
         return new Q3TextHorizontalLine(doc, attr, context, (Q3MimeSourceFactory&)factory );
    return 0;
 }
@@ -3604,8 +3626,8 @@ int Q3TextFormat::width(const QChar &c) const
     if (c.unicode() == 0xad) // soft hyphen
         return 0;
     if (!pntr || !pntr->isActive()) {
-        if (c == '\t')
-            return fm.width(' ');
+        if (c == QLatin1Char('\t'))
+            return fm.width(QLatin1Char(' '));
         if (ha == AlignNormal) {
             int w;
             if (c.row())
@@ -3781,7 +3803,7 @@ int Q3TextString::appendParagraphs( Q3TextParagraph *start, Q3TextParagraph *end
         d[i].type = Q3TextStringChar::Regular;
         d[i].p.format = 0;
         d[i].rightToLeft = 0;
-        d[i].c = '\n';
+        d[i].c = QLatin1Char('\n');
         d += p->length();
     }
 
@@ -3901,7 +3923,7 @@ void Q3TextString::checkBidi() const
             if (bidiLevel)
                 that->bidi = true;
         }
-        ch->softBreak = ca->softBreak;
+        ch->softBreak = ca->lineBreakType >= QCharAttributes::Break;
         ch->whiteSpace = ca->whiteSpace;
         ch->charStop = ca->charStop;
         ch->bidiLevel = bidiLevel;
@@ -3920,17 +3942,17 @@ void Q3TextDocument::setStyleSheet(Q3StyleSheet *s)
     list_tm = list_bm = par_tm = par_bm = 12;
     list_lm = 40;
     li_tm = li_bm = 0;
-    Q3StyleSheetItem* item = s->item("ol");
+    Q3StyleSheetItem* item = s->item(QLatin1String("ol"));
     if (item) {
         list_tm = qMax(0,item->margin(Q3StyleSheetItem::MarginTop));
         list_bm = qMax(0,item->margin(Q3StyleSheetItem::MarginBottom));
         list_lm = qMax(0,item->margin(Q3StyleSheetItem::MarginLeft));
     }
-    if ((item = s->item("li"))) {
+    if ((item = s->item(QLatin1String("li")))) {
         li_tm = qMax(0,item->margin(Q3StyleSheetItem::MarginTop));
         li_bm = qMax(0,item->margin(Q3StyleSheetItem::MarginBottom));
     }
-    if ((item = s->item("p"))) {
+    if ((item = s->item(QLatin1String("p")))) {
         par_tm = qMax(0,item->margin(Q3StyleSheetItem::MarginTop));
         par_bm = qMax(0,item->margin(Q3StyleSheetItem::MarginBottom));
     }
@@ -4074,7 +4096,7 @@ Q3TextParagraph::Q3TextParagraph(Q3TextDocument *dc, Q3TextParagraph *pr, Q3Text
     paintdevice = 0;
     Q3TextFormat* defFormat = formatCollection()->defaultFormat();
     if (!hasdoc) {
-        tabStopWidth = defFormat->width('x') * 8;
+        tabStopWidth = defFormat->width(QLatin1Char('x')) * 8;
         pseudoDocument()->commandHistory = new Q3TextCommandHistory(100);
     }
 
@@ -4104,7 +4126,7 @@ Q3TextParagraph::Q3TextParagraph(Q3TextDocument *dc, Q3TextParagraph *pr, Q3Text
     }
 
     str = new Q3TextString();
-    QChar ch(' ');
+    const QChar ch(QLatin1Char(' '));
     str->insert(0, &ch, 1, formatCollection()->defaultFormat());
 }
 
@@ -4197,7 +4219,7 @@ void Q3TextParagraph::insert(int index, const QChar *unicode, int len)
 void Q3TextParagraph::truncate(int index)
 {
     str->truncate(index);
-    insert(length(), " ");
+    insert(length(), QLatin1String(" "));
     needPreProcess = true;
 }
 
@@ -4228,7 +4250,7 @@ void Q3TextParagraph::join(Q3TextParagraph *s)
         document()->setLastParagraph(this);
 
     int start = str->length();
-    if (length() > 0 && at(length() - 1)->c == ' ') {
+    if (length() > 0 && at(length() - 1)->c == QLatin1Char(' ')) {
         remove(length() - 1, 1);
         --start;
     }
@@ -4598,7 +4620,7 @@ void Q3TextParagraph::paint(QPainter &painter, const QPalette &pal, Q3TextCursor
     // otherwise)
     QChar* uc = (QChar*) qstr.unicode();
     for (int ii = 0; ii < qstr.length(); ii++)
-        if (uc[(int)ii]== '\n' || uc[(int)ii] == '\t')
+        if (uc[(int)ii]== QLatin1Char(QLatin1Char('\n')) || uc[(int)ii] == QLatin1Char('\t'))
             uc[(int)ii] = 0x20;
 
     int line = -1;
@@ -4625,7 +4647,7 @@ void Q3TextParagraph::paint(QPainter &painter, const QPalette &pal, Q3TextCursor
             // we flush on bidi changes
             flush |= (nextchr->rightToLeft != chr->rightToLeft);
             // we flush before and after tabs
-            flush |= (chr->c == '\t' || nextchr->c == '\t');
+            flush |= (chr->c == QLatin1Char('\t') || nextchr->c == QLatin1Char('\t'));
             // we flush on soft hyphens
             if (chr->c.unicode() == 0xad) {
                 flush = true;
@@ -4845,7 +4867,7 @@ void Q3TextParagraph::drawString(QPainter &painter, const QString &str, int star
             if (selWrap || this->str->at(real_selEnd).lineStart) {
                 extendRight = (fullSelectionWidth != 0);
                 if (!extendRight && !rightToLeft)
-                    tmpw += painter.fontMetrics().width(' ');
+                    tmpw += painter.fontMetrics().width(QLatin1Char(' '));
             }
             if (fullSelectionWidth && (selStart == 0 || this->str->at(selStart).lineStart)) {
                 extendLeft = true;
@@ -4968,12 +4990,12 @@ void Q3TextParagraph::drawLabel(QPainter* p, int x, int y, int w, int h, int bas
             switch (s) {
             case Q3StyleSheetItem::ListLowerAlpha:
                 if (n < 27) {
-                    l = QChar(('a' + (char) (n-1)));
+                    l = QLatin1Char(('a' + (char) (n-1)));
                     break;
                 }
             case Q3StyleSheetItem::ListUpperAlpha:
                 if (n < 27) {
-                    l = QChar(('A' + (char) (n-1)));
+                    l = QLatin1Char(('A' + (char) (n-1)));
                     break;
                 }
                 break;
@@ -4982,7 +5004,7 @@ void Q3TextParagraph::drawLabel(QPainter* p, int x, int y, int w, int h, int bas
                 break;
             }
             if (rtl)
-                l.prepend(" .");
+                l.prepend(QLatin1String(" ."));
             else
                 l += QString::fromLatin1(". ");
             int x = (rtl ? r.left() : r.right() - fm.width(l));
@@ -5130,18 +5152,18 @@ QString Q3TextParagraph::richText() const
     QString lastAnchorName;
     for (i = 0; i < length()-1; ++i) {
         if (doStart && i && richTextExportStart->index() == i)
-            s += "<!--StartFragment-->";
+            s += QLatin1String("<!--StartFragment-->");
         if (doEnd && richTextExportEnd->index() == i)
-            s += "<!--EndFragment-->";
+            s += QLatin1String("<!--EndFragment-->");
         Q3TextStringChar *c = &str->at(i);
         if (c->isAnchor() && !c->anchorName().isEmpty() && c->anchorName() != lastAnchorName) {
 	    lastAnchorName = c->anchorName();
-            if (c->anchorName().contains('#')) {
-                QStringList l = c->anchorName().split('#');
+            if (c->anchorName().contains(QLatin1Char('#'))) {
+                QStringList l = c->anchorName().split(QLatin1Char('#'));
                 for (QStringList::ConstIterator it = l.constBegin(); it != l.constEnd(); ++it)
-                    s += "<a name=\"" + *it + "\"></a>";
+                    s += QLatin1String("<a name=\"") + *it + QLatin1String("\"></a>");
             } else {
-                s += "<a name=\"" + c->anchorName() + "\"></a>";
+                s += QLatin1String("<a name=\"") + c->anchorName() + QLatin1String("\"></a>");
             }
         }
         if (!formatChar) {
@@ -5154,25 +5176,25 @@ QString Q3TextParagraph::richText() const
                                                     formatChar->format() , formatChar->anchorHref(), c->anchorHref());
             formatChar = c;
         }
-        if (c->c == '<')
-            s += "&lt;";
-        else if (c->c == '>')
-            s += "&gt;";
-        else if (c->c =='&')
-            s += "&amp;";
-        else if (c->c =='\"')
-            s += "&quot;";
+        if (c->c == QLatin1Char('<'))
+            s += QLatin1String("&lt;");
+        else if (c->c == QLatin1Char('>'))
+            s += QLatin1String("&gt;");
+        else if (c->c == QLatin1Char('&'))
+            s += QLatin1String("&amp;");
+        else if (c->c == QLatin1Char('\"'))
+            s += QLatin1String("&quot;");
 #ifndef QT_NO_TEXTCUSTOMITEM
         else if (c->isCustom())
             s += c->customItem()->richText();
 #endif
-        else if (c->c == '\n' || c->c == QChar::LineSeparator)
-            s += "<br />"; // space on purpose for compatibility with Netscape, Lynx & Co.
+        else if (c->c == QLatin1Char('\n') || c->c == QChar::LineSeparator)
+            s += QLatin1String("<br />"); // space on purpose for compatibility with Netscape, Lynx & Co.
         else
             s += c->c;
     }
     if (doEnd && richTextExportEnd->index() == i)
-        s += "<!--EndFragment-->";
+        s += QLatin1String("<!--EndFragment-->");
     if (formatChar)
         s += formatChar->format()->makeFormatEndTags(formatCollection()->defaultFormat(), formatChar->anchorHref());
     return s;
@@ -5339,7 +5361,7 @@ QTextLineStart *Q3TextFormatter::formatLine(Q3TextParagraph *parag, Q3TextString
     // ignore white space at the end of the line.
     Q3TextStringChar *ch = lastChar;
     while (ch > startChar && ch->whiteSpace) {
-        space += ch->format()->width(' ');
+        space += ch->format()->width(QLatin1Char(' '));
         --ch;
     }
 
@@ -5358,7 +5380,7 @@ QTextLineStart *Q3TextFormatter::formatLine(Q3TextParagraph *parag, Q3TextString
         for (int j = last-1; j >= start; --j) {
             // Start at last tab, if any.
             Q3TextStringChar &ch = string->at(j);
-            if (ch.c == '\t') {
+            if (ch.c == QLatin1Char('\t')) {
                 start = j+1;
                 break;
             }
@@ -5399,7 +5421,7 @@ QTextLineStart *Q3TextFormatter::bidiReorderLine(Q3TextParagraph * /*parag*/, Q3
     // ignore white space at the end of the line.
     int endSpaces = 0;
     while (lastChar > startChar && lastChar->whiteSpace) {
-        space += lastChar->format()->width(' ');
+        space += lastChar->format()->width(QLatin1Char(' '));
         --lastChar;
         ++endSpaces;
     }
@@ -5439,7 +5461,7 @@ QTextLineStart *Q3TextFormatter::bidiReorderLine(Q3TextParagraph * /*parag*/, Q3
     int numSpaces = 0;
     align = QStyle::visualAlignment(text->isRightToLeft() ? Qt::RightToLeft : Qt::LeftToRight, QFlag(align));
 
-    // This is not really correct, but as we can't make the scrollbar move to the left of the origin,
+    // This is not really correct, but as we can't make the scroll bar move to the left of the origin,
     // this ensures all text can be scrolled to and read.
     if (space < 0)
         space = 0;
@@ -5453,7 +5475,7 @@ QTextLineStart *Q3TextFormatter::bidiReorderLine(Q3TextParagraph * /*parag*/, Q3
         for (int j = last-1; j >= start; --j) {
             // Start at last tab, if any.
             Q3TextStringChar &ch = text->at(j);
-            if (ch.c == '\t') {
+            if (ch.c == QLatin1Char('\t')) {
                 start = j+1;
                 break;
             }
@@ -5485,10 +5507,10 @@ QTextLineStart *Q3TextFormatter::bidiReorderLine(Q3TextParagraph * /*parag*/, Q3
         ch->rightToLeft = ch->bidiLevel % 2;
         //qDebug("visual: %d (%p) placed at %d rightToLeft=%d", visual[i], ch, x +toAdd, ch->rightToLeft );
         int ww = 0;
-        if (ch->c.unicode() >= 32 || ch->c == '\t' || ch->c == '\n' || ch->isCustom()) {
+        if (ch->c.unicode() >= 32 || ch->c == QLatin1Char(QLatin1Char('\t')) || ch->c == QLatin1Char('\n') || ch->isCustom()) {
             ww = text->width(start+visual[i]);
         } else {
-            ww = ch->format()->width(' ');
+            ww = ch->format()->width(QLatin1Char(' '));
         }
         x += ww;
         lc = ch;
@@ -5497,7 +5519,7 @@ QTextLineStart *Q3TextFormatter::bidiReorderLine(Q3TextParagraph * /*parag*/, Q3
 
     while (endSpaces--) {
         ++lastChar;
-        int sw = lastChar->format()->width(' ');
+        int sw = lastChar->format()->width(QLatin1Char(' '));
         if (text->isRightToLeft()) {
             xorig -= sw;
             lastChar->x = xorig;
@@ -5636,14 +5658,14 @@ int Q3TextFormatterBreakInWords::format(Q3TextDocument *doc,Q3TextParagraph *par
         }
         if (c->c.unicode() >= 32 || c->isCustom()) {
             ww = parag->string()->width(i);
-        } else if (c->c == '\t') {
+        } else if (c->c == QLatin1Char('\t')) {
             int nx = parag->nextTab(i, x - tabBase) + tabBase;
             if (nx < x)
                 ww = w - x;
             else
                 ww = nx - x;
         } else {
-            ww = c->format()->width(' ');
+            ww = c->format()->width(QLatin1Char(' '));
         }
 
 #ifndef QT_NO_TEXTCUSTOMITEM
@@ -5819,7 +5841,7 @@ int Q3TextFormatterBreakWords::format(Q3TextDocument *doc, Q3TextParagraph *para
         }
 
         // ignore non spacing marks for column count.
-        if (col != 0 && QUnicodeTables::category(c->c) == QChar::Mark_NonSpacing)
+        if (col != 0 && QChar::category(c->c.unicode()) == QChar::Mark_NonSpacing)
             --col;
 
 #ifndef QT_NO_TEXTCUSTOMITEM
@@ -5828,10 +5850,10 @@ int Q3TextFormatterBreakWords::format(Q3TextDocument *doc, Q3TextParagraph *para
 
         if (c->c.unicode() >= 32 || c->isCustom()) {
             ww = string->width(i);
-        } else if (c->c == '\t') {
+        } else if (c->c == QLatin1Char('\t')) {
             if (align == Qt::AlignRight || align == Qt::AlignCenter) {
                 // we can not  (yet) do tabs
-                ww = c->format()->width(' ');
+                ww = c->format()->width(QLatin1Char(' '));
             } else {
                 int tabx = lastWasHardBreak ? (left + (doc ? parag->firstLineMargin() : 0)) : x;
                 int nx = parag->nextTab(i, tabx - tabBase) + tabBase;
@@ -5841,7 +5863,7 @@ int Q3TextFormatterBreakWords::format(Q3TextDocument *doc, Q3TextParagraph *para
                     ww = nx - tabx;
             }
         } else {
-            ww = c->format()->width(' ');
+            ww = c->format()->width(QLatin1Char(' '));
         }
 
 #ifndef QT_NO_TEXTCUSTOMITEM
@@ -5924,7 +5946,7 @@ int Q3TextFormatterBreakWords::format(Q3TextDocument *doc, Q3TextParagraph *para
                 lineStart = formatLine(parag, string, lineStart, firstChar, c-1, align, SPACE(w - x));
                 x = doc ? doc->flow()->adjustLMargin(y + parag->rect().y(), parag->rect().height(), left, 4) : left;
                 w = dw - (doc ? doc->flow()->adjustRMargin(y + parag->rect().y(), parag->rect().height(), rm, 4) : 0);
-                if (!doc && c->c == '\t') { // qt_format_text tab handling
+                if (!doc && c->c == QLatin1Char('\t')) { // qt_format_text tab handling
                     int nx = parag->nextTab(i, x - tabBase) + tabBase;
                     if (nx < x)
                         ww = w - x;
@@ -5955,7 +5977,7 @@ int Q3TextFormatterBreakWords::format(Q3TextDocument *doc, Q3TextParagraph *para
                 lineStart = formatLine(parag, string, lineStart, firstChar, parag->at(lastBreak),align, SPACE(w - string->at(i+1).x));
                 x = doc ? doc->flow()->adjustLMargin(y + parag->rect().y(), parag->rect().height(), left, 4) : left;
                 w = dw - (doc ? doc->flow()->adjustRMargin(y + parag->rect().y(), parag->rect().height(), rm, 4) : 0);
-                if (!doc && c->c == '\t') { // qt_format_text tab handling
+                if (!doc && c->c == QLatin1Char('\t')) { // qt_format_text tab handling
                     int nx = parag->nextTab(i, x - tabBase) + tabBase;
                     if (nx < x)
                         ww = w - x;
@@ -5990,7 +6012,7 @@ int Q3TextFormatterBreakWords::format(Q3TextDocument *doc, Q3TextParagraph *para
             lineStart->baseLine = qMax(lineStart->baseLine, tmpBaseLine);
             h = qMax(h, tmph);
             lineStart->h = h;
-            if (i < len - 2 || c->c != ' ')
+            if (i < len - 2 || c->c != QLatin1Char(' '))
                 lastBreak = i;
         } else {
             tminw += ww;
@@ -6362,57 +6384,57 @@ QString Q3TextFormat::makeFormatChangeTags(Q3TextFormat* defaultFormat, Q3TextFo
         tag += f->makeFormatEndTags(defaultFormat, oldAnchorHref);
 
     if (!anchorHref.isEmpty())
-        tag += "<a href=\"" + anchorHref + "\">";
+        tag += QLatin1String("<a href=\"") + anchorHref + QLatin1String("\">");
 
     if (font() != defaultFormat->font()
         || vAlign() != defaultFormat->vAlign()
         || color().rgb() != defaultFormat->color().rgb()) {
         QString s;
         if (font().family() != defaultFormat->font().family())
-            s += QString(s.size()?";":"") + "font-family:" + fn.family();
+            s += QString(s.size()?QLatin1String(";"):QLatin1String("")) + QLatin1String("font-family:") + fn.family();
         if (font().italic() && font().italic() != defaultFormat->font().italic())
-            s += QString(s.size()?";":"") + "font-style:" + (font().italic() ? "italic" : "normal");
+            s += QString(s.size()?QLatin1String(";"):QLatin1String("")) + QLatin1String("font-style:") + (font().italic() ? QLatin1String("italic") : QLatin1String("normal"));
         if (font().pointSize() != defaultFormat->font().pointSize())
-            s += QString(s.size()?";":"") + "font-size:" + QString::number(fn.pointSize()) + "pt";
+            s += QString(s.size()?QLatin1String(";"):QLatin1String("")) + QLatin1String("font-size:") + QString::number(fn.pointSize()) + QLatin1String("pt");
         if (font().weight() != defaultFormat->font().weight())
-            s += QString(s.size()?";":"") + "font-weight:" + QString::number(fn.weight() * 8);
+            s += QString(s.size()?QLatin1String(";"):QLatin1String("")) + QLatin1String("font-weight:") + QString::number(fn.weight() * 8);
         QString textDecoration;
         bool none = false;
  	if ( font().underline() != defaultFormat->font().underline() ) {
             if (font().underline())
-                textDecoration = "underline";
+                textDecoration = QLatin1String("underline");
             else
                 none = true;
         }
  	if ( font().overline() != defaultFormat->font().overline() ) {
             if (font().overline())
-                textDecoration += " overline";
+                textDecoration += QLatin1String(" overline");
             else
                 none = true;
         }
 	if ( font().strikeOut() != defaultFormat->font().strikeOut() ) {
             if (font().strikeOut())
-                textDecoration += " line-through";
+                textDecoration += QLatin1String(" line-through");
             else
                 none = true;
         }
         if (none && textDecoration.isEmpty())
-            textDecoration = "none";
+            textDecoration = QLatin1String("none");
         if (!textDecoration.isEmpty())
- 	    s += QString(s.size()?";":"") + "text-decoration:" + textDecoration;
+ 	    s += QString(s.size()?QLatin1String(";"):QLatin1String("")) + QLatin1String("text-decoration:") + textDecoration;
         if (vAlign() != defaultFormat->vAlign()) {
-            s += QString(s.size()?";":"") + "vertical-align:";
+            s += QString(s.size()?QLatin1String(";"):QLatin1String("")) + QLatin1String("vertical-align:");
             if (vAlign() == Q3TextFormat::AlignSuperScript)
-                s += "super";
+                s += QLatin1String("super");
             else if (vAlign() == Q3TextFormat::AlignSubScript)
-                s += "sub";
+                s += QLatin1String("sub");
             else
-                s += "normal";
+                s += QLatin1String("normal");
         }
         if (color().rgb() != defaultFormat->color().rgb())
-            s += QString(s.size()?";":"") + "color:" + col.name();
+            s += QString(s.size()?QLatin1String(";"):QLatin1String("")) + QLatin1String("color:") + col.name();
         if (!s.isEmpty())
-            tag += "<span style=\"" + s + "\">";
+            tag += QLatin1String("<span style=\"") + s + QLatin1String("\">");
     }
 
     return tag;
@@ -6429,9 +6451,9 @@ QString Q3TextFormat::makeFormatEndTags(Q3TextFormat* defaultFormat, const QStri
          || font().strikeOut() != defaultFormat->font().strikeOut()
          || vAlign() != defaultFormat->vAlign()
          || color().rgb() != defaultFormat->color().rgb())
-        tag += "</span>";
+        tag += QLatin1String("</span>");
     if (!anchorHref.isEmpty())
-        tag += "</a>";
+        tag += QLatin1String("</a>");
     return tag;
 }
 
@@ -6491,23 +6513,23 @@ Q3TextFormat Q3TextFormat::makeTextFormat(const Q3StyleSheetItem *style, const Q
 
     QMap<QString, QString>::ConstIterator it, end = attr.end();
 
-    if (style->name() == "font") {
-        it = attr.find("color");
+    if (style->name() == QLatin1String("font")) {
+        it = attr.find(QLatin1String("color"));
         if (it != end && ! (*it).isEmpty()){
             format.col.setNamedColor(*it);
             format.linkColor = false;
         }
-        it = attr.find("face");
+        it = attr.find(QLatin1String("face"));
         if (it != end) {
-            QString family = (*it).section(',', 0, 0);
+            QString family = (*it).section(QLatin1Char(','), 0, 0);
             if (family.size())
                 format.fn.setFamily(family);
         }
-        it = attr.find("size");
+        it = attr.find(QLatin1String("size"));
         if (it != end) {
             QString a = *it;
             int n = a.toInt();
-            if (a[0] == '+' || a[0] == '-')
+            if (a[0] == QLatin1Char('+') || a[0] == QLatin1Char('-'))
                 n += 3;
             format.logicalFontSize = n;
             if (format.usePixelSizes)
@@ -6518,48 +6540,48 @@ Q3TextFormat Q3TextFormat::makeTextFormat(const Q3StyleSheetItem *style, const Q
         }
     }
 
-    it = attr.find("style");
+    it = attr.find(QLatin1String("style"));
     if (it != end) {
         QString a = *it;
-        int count = a.count(';')+1;
+        int count = a.count(QLatin1Char(';'))+1;
         for (int s = 0; s < count; s++) {
-            QString style = a.section(';', s, s);
-            if (style.startsWith("font-size:") && style.endsWith("pt")) {
+            QString style = a.section(QLatin1Char(';'), s, s);
+            if (style.startsWith(QLatin1String("font-size:")) && style.endsWith(QLatin1String("pt"))) {
                 format.logicalFontSize = 0;
                 int size = int(scaleFontsFactor * style.mid(10, style.length() - 12).toDouble());
                 format.setPointSize(size);
-            } else if (style.startsWith("font-style:")) {
+            } else if (style.startsWith(QLatin1String("font-style:"))) {
                 QString s = style.mid(11).trimmed();
-                if (s == "normal")
+                if (s == QLatin1String("normal"))
                     format.fn.setItalic(false);
-                else if (s == "italic" || s == "oblique")
+                else if (s == QLatin1String("italic") || s == QLatin1String("oblique"))
                     format.fn.setItalic(true);
-            } else if (style.startsWith("font-weight:")) {
+            } else if (style.startsWith(QLatin1String("font-weight:"))) {
                 QString s = style.mid(12);
                 bool ok = true;
                 int n = s.toInt(&ok);
                 if (ok)
                     format.fn.setWeight(n/8);
-            } else if (style.startsWith("font-family:")) {
-                QString family = style.mid(12).section(',',0,0);
-                family.replace('\"', ' ');
-                family.replace('\'', ' ');
+            } else if (style.startsWith(QLatin1String("font-family:"))) {
+                QString family = style.mid(12).section(QLatin1Char(','),0,0);
+                family.replace(QLatin1Char('\"'), QLatin1Char(' '));
+                family.replace(QLatin1Char('\''), QLatin1Char(' '));
                 family = family.trimmed();
                 format.fn.setFamily(family);
-            } else if (style.startsWith("text-decoration:")) {
+            } else if (style.startsWith(QLatin1String("text-decoration:"))) {
  		QString s = style.mid( 16 );
- 		format.fn.setOverline(s.contains("overline"));
- 		format.fn.setStrikeOut(s.contains("line-through"));
- 		format.fn.setUnderline(s.contains("underline"));
-            } else if (style.startsWith("vertical-align:")) {
+ 		format.fn.setOverline(s.contains(QLatin1String("overline")));
+ 		format.fn.setStrikeOut(s.contains(QLatin1String("line-through")));
+ 		format.fn.setUnderline(s.contains(QLatin1String("underline")));
+            } else if (style.startsWith(QLatin1String("vertical-align:"))) {
                 QString s = style.mid(15).trimmed();
-                if (s == "sub")
+                if (s == QLatin1String("sub"))
                     format.setVAlign(Q3TextFormat::AlignSubScript);
-                else if (s == "super")
+                else if (s == QLatin1String("super"))
                     format.setVAlign(Q3TextFormat::AlignSuperScript);
                 else
                     format.setVAlign(Q3TextFormat::AlignNormal);
-            } else if (style.startsWith("color:")) {
+            } else if (style.startsWith(QLatin1String("color:"))) {
                 format.col.setNamedColor(style.mid(6));
                 format.linkColor = false;
             }
@@ -6589,21 +6611,21 @@ Q3TextImage::Q3TextImage(Q3TextDocument *p, const QMap<QString, QString> &attr, 
     width = height = 0;
 
     QMap<QString, QString>::ConstIterator it, end = attr.end();
-    it = attr.find("width");
+    it = attr.find(QLatin1String("width"));
     if (it != end)
         width = (*it).toInt();
-    it = attr.find("height");
+    it = attr.find(QLatin1String("height"));
     if (it != end)
         height = (*it).toInt();
 
     reg = 0;
-    QString imageName = attr["src"];
+    QString imageName = attr[QLatin1String("src")];
 
     if (imageName.size() == 0)
-        imageName = attr["source"];
+        imageName = attr[QLatin1String("source")];
 
     if (!imageName.isEmpty()) {
-        imgId = QString("%1,%2,%3,%4").arg(imageName).arg(width).arg(height).arg((ulong)&factory);
+        imgId = QString(QLatin1String("%1,%2,%3,%4")).arg(imageName).arg(width).arg(height).arg((ulong)&factory);
         if (!pixmap_map)
             pixmap_map = new QMap<QString, QPixmapInt>;
         if (pixmap_map->contains(imgId)) {
@@ -6664,9 +6686,9 @@ Q3TextImage::Q3TextImage(Q3TextDocument *p, const QMap<QString, QString> &attr, 
         width = height = 50;
 
     place = PlaceInline;
-    if (attr["align"] == "left")
+    if (attr[QLatin1String("align")] == QLatin1String("left"))
         place = PlaceLeft;
-    else if (attr["align"] == "right")
+    else if (attr[QLatin1String("align")] == QLatin1String("right"))
         place = PlaceRight;
 
     tmpwidth = width;
@@ -6694,16 +6716,16 @@ Q3TextImage::~Q3TextImage()
 QString Q3TextImage::richText() const
 {
     QString s;
-    s += "<img ";
+    s += QLatin1String("<img ");
     QMap<QString, QString>::ConstIterator it = attributes.begin();
     for (; it != attributes.end(); ++it) {
-        s += it.key() + "=";
-        if ((*it).contains(' '))
-            s += "\"" + *it + "\" ";
+        s += it.key() + QLatin1String("=");
+        if ((*it).contains(QLatin1Char(' ')))
+            s += QLatin1String("\"") + *it + QLatin1String("\" ");
         else
-            s += *it + " ";
+            s += *it + QLatin1String(" ");
     }
-    s += ">";
+    s += QLatin1String(">");
     return s;
 }
 
@@ -6785,10 +6807,10 @@ Q3TextHorizontalLine::Q3TextHorizontalLine(Q3TextDocument *p, const QMap<QString
 {
     height = tmpheight = 8;
     QMap<QString, QString>::ConstIterator it, end = attr.end();
-    it = attr.find("color");
+    it = attr.find(QLatin1String("color"));
     if (it != end)
         color = QColor(*it);
-    shade = attr.find("noshade") == end;
+    shade = attr.find(QLatin1String("noshade")) == end;
 }
 
 Q3TextHorizontalLine::~Q3TextHorizontalLine()
@@ -6797,7 +6819,7 @@ Q3TextHorizontalLine::~Q3TextHorizontalLine()
 
 QString Q3TextHorizontalLine::richText() const
 {
-    return "<hr>";
+    return QLatin1String("<hr>");
 }
 
 void Q3TextHorizontalLine::draw(QPainter* p, int x, int y, int , int , int , int ,
@@ -6868,30 +6890,30 @@ Q3TextCustomItem* Q3TextDocument::parseTable(const QMap<QString, QString> &attr,
 
     QString rowbgcolor;
     QString rowalign;
-    QString tablebgcolor = attr["bgcolor"];
+    QString tablebgcolor = attr[QLatin1String("bgcolor")];
 
     QList<Q3TextTableCell *> multicells;
 
     QString tagname;
     (void) eatSpace(doc, length, pos);
     while (pos < length) {
-        if (hasPrefix(doc, length, pos, QChar('<'))){
-            if (hasPrefix(doc, length, pos+1, QChar('/'))) {
+        if (hasPrefix(doc, length, pos, QLatin1Char('<'))){
+            if (hasPrefix(doc, length, pos+1, QLatin1Char('/'))) {
                 tagname = parseCloseTag(doc, length, pos);
-                if (tagname == "table") {
+                if (tagname == QLatin1String("table")) {
                     return table;
                 }
             } else {
                 QMap<QString, QString> attr2;
                 bool emptyTag = false;
                 tagname = parseOpenTag(doc, length, pos, attr2, emptyTag);
-                if (tagname == "tr") {
-                    rowbgcolor = attr2["bgcolor"];
-                    rowalign = attr2["align"];
+                if (tagname == QLatin1String("tr")) {
+                    rowbgcolor = attr2[QLatin1String("bgcolor")];
+                    rowalign = attr2[QLatin1String("align")];
                     row++;
                     col = -1;
                 }
-                else if (tagname == "td" || tagname == "th") {
+                else if (tagname == QLatin1String("td") || tagname == QLatin1String("th")) {
                     col++;
                     while (qt_is_cell_in_use(multicells, row, col)) {
                         col++;
@@ -6899,35 +6921,35 @@ Q3TextCustomItem* Q3TextDocument::parseTable(const QMap<QString, QString> &attr,
 
                     if (row >= 0 && col >= 0) {
                         const Q3StyleSheetItem* s = sheet_->item(tagname);
-                        if (!attr2.contains("bgcolor")) {
+                        if (!attr2.contains(QLatin1String("bgcolor"))) {
                             if (!rowbgcolor.isEmpty())
-                                attr2["bgcolor"] = rowbgcolor;
+                                attr2[QLatin1String("bgcolor")] = rowbgcolor;
                             else if (!tablebgcolor.isEmpty())
-                                attr2["bgcolor"] = tablebgcolor;
+                                attr2[QLatin1String("bgcolor")] = tablebgcolor;
                         }
-                        if (!attr2.contains("align")) {
+                        if (!attr2.contains(QLatin1String("align"))) {
                             if (!rowalign.isEmpty())
-                                attr2["align"] = rowalign;
+                                attr2[QLatin1String("align")] = rowalign;
                         }
 
                         // extract the cell contents
                         int end = pos;
                         while (end < length
-                                && !hasPrefix(doc, length, end, "</td")
-                                && !hasPrefix(doc, length, end, "<td")
-                                && !hasPrefix(doc, length, end, "</th")
-                                && !hasPrefix(doc, length, end, "<th")
-                                && !hasPrefix(doc, length, end, "<td")
-                                && !hasPrefix(doc, length, end, "</tr")
-                                && !hasPrefix(doc, length, end, "<tr")
-                                && !hasPrefix(doc, length, end, "</table")) {
-                            if (hasPrefix(doc, length, end, "<table")) { // nested table
+                                && !hasPrefix(doc, length, end, QLatin1String("</td"))
+                                && !hasPrefix(doc, length, end, QLatin1String("<td"))
+                                && !hasPrefix(doc, length, end, QLatin1String("</th"))
+                                && !hasPrefix(doc, length, end, QLatin1String("<th"))
+                                && !hasPrefix(doc, length, end, QLatin1String("<td"))
+                                && !hasPrefix(doc, length, end, QLatin1String("</tr"))
+                                && !hasPrefix(doc, length, end, QLatin1String("<tr"))
+                                && !hasPrefix(doc, length, end, QLatin1String("</table"))) {
+                            if (hasPrefix(doc, length, end, QLatin1String("<table"))) { // nested table
                                 int nested = 1;
                                 ++end;
                                 while (end < length && nested != 0) {
-                                    if (hasPrefix(doc, length, end, "</table"))
+                                    if (hasPrefix(doc, length, end, QLatin1String("</table")))
                                         nested--;
-                                    if (hasPrefix(doc, length, end, "<table"))
+                                    if (hasPrefix(doc, length, end, QLatin1String("<table")))
                                         nested++;
                                     end++;
                                 }
@@ -7270,27 +7292,27 @@ QChar Q3TextDocument::parseHTMLSpecialChar(const QChar* doc, int length, int& po
     QString s;
     pos++;
     int recoverpos = pos;
-    while (pos < length && doc[pos] != ';' && !doc[pos].isSpace() && pos < recoverpos + 8) {
+    while (pos < length && doc[pos] != QLatin1Char(';') && !doc[pos].isSpace() && pos < recoverpos + 8) {
         s += doc[pos];
         pos++;
     }
-    if (doc[pos] != ';' && !doc[pos].isSpace()) {
+    if (doc[pos] != QLatin1Char(';') && !doc[pos].isSpace()) {
         pos = recoverpos;
-        return '&';
+        return QLatin1Char('&');
     }
     pos++;
 
-    if (s.length() > 1 && s[0] == '#') {
+    if (s.length() > 1 && s[0] == QLatin1Char('#')) {
         int off = 1;
         int base = 10;
-        if (s[1] == 'x') {
+        if (s[1] == QLatin1Char('x')) {
             off = 2;
             base = 16;
         }
         bool ok;
 	int num = s.mid(off).toInt(&ok, base);
         if (num == 151) // ### hack for designer manual
-            return '-';
+            return QLatin1Char('-');
         return num;
     }
 
@@ -7300,41 +7322,41 @@ QChar Q3TextDocument::parseHTMLSpecialChar(const QChar* doc, int length, int& po
     }
 
     pos = recoverpos;
-    return '&';
+    return QLatin1Char('&');
 }
 
 QString Q3TextDocument::parseWord(const QChar* doc, int length, int& pos, bool lower)
 {
     QString s;
 
-    if (doc[pos] == '"') {
+    if (doc[pos] == QLatin1Char('"')) {
         pos++;
-        while (pos < length && doc[pos] != '"') {
-            if (doc[pos] == '&') {
+        while (pos < length && doc[pos] != QLatin1Char('"')) {
+            if (doc[pos] == QLatin1Char('&')) {
                 s += parseHTMLSpecialChar(doc, length, pos);
             } else {
                 s += doc[pos];
                 pos++;
             }
         }
-        eat(doc, length, pos, '"');
-    } else if (doc[pos] == '\'') {
+        eat(doc, length, pos, QLatin1Char('"'));
+    } else if (doc[pos] == QLatin1Char('\'')) {
         pos++;
-        while (pos < length  && doc[pos] != '\'') {
+        while (pos < length  && doc[pos] != QLatin1Char('\'')) {
             s += doc[pos];
             pos++;
         }
-        eat(doc, length, pos, '\'');
+        eat(doc, length, pos, QLatin1Char('\''));
     } else {
         static QString term = QString::fromLatin1("/>");
         while (pos < length
-                && doc[pos] != '>'
+                && doc[pos] != QLatin1Char('>')
                 && !hasPrefix(doc, length, pos, term)
-                && doc[pos] != '<'
-                && doc[pos] != '='
+                && doc[pos] != QLatin1Char('<')
+                && doc[pos] != QLatin1Char('=')
                 && !doc[pos].isSpace())
         {
-            if (doc[pos] == '&') {
+            if (doc[pos] == QLatin1Char('&')) {
                 s += parseHTMLSpecialChar(doc, length, pos);
             } else {
                 s += doc[pos];
@@ -7354,12 +7376,12 @@ QChar Q3TextDocument::parseChar(const QChar* doc, int length, int& pos, Q3StyleS
 
     QChar c = doc[pos++];
 
-    if (c == '<')
+    if (c == QLatin1Char('<'))
         return QChar::null;
 
     if (c.isSpace() && c != QChar(QChar::nbsp)) {
         if (wsm == Q3StyleSheetItem::WhiteSpacePre) {
-            if (c == '\n')
+            if (c == QLatin1Char('\n'))
                 return QChar::LineSeparator;
             else
                 return c;
@@ -7367,10 +7389,10 @@ QChar Q3TextDocument::parseChar(const QChar* doc, int length, int& pos, Q3StyleS
             while (pos< length &&
                     doc[pos].isSpace()  && doc[pos] != QChar(QChar::nbsp))
                 pos++;
-            return ' ';
+            return QLatin1Char(' ');
         }
     }
-    else if (c == '&')
+    else if (c == QLatin1Char('&'))
         return parseHTMLSpecialChar(doc, length, --pos);
     else
         return c;
@@ -7381,8 +7403,8 @@ QString Q3TextDocument::parseOpenTag(const QChar* doc, int length, int& pos,
 {
     emptyTag = false;
     pos++;
-    if (hasPrefix(doc, length, pos, '!')) {
-        if (hasPrefix(doc, length, pos+1, "--")) {
+    if (hasPrefix(doc, length, pos, QLatin1Char('!'))) {
+        if (hasPrefix(doc, length, pos+1, QLatin1String("--"))) {
             pos += 3;
             // eat comments
             QString pref = QString::fromLatin1("-->");
@@ -7397,9 +7419,9 @@ QString Q3TextDocument::parseOpenTag(const QChar* doc, int length, int& pos,
         }
         else {
             // eat strange internal tags
-            while (!hasPrefix(doc, length, pos, '>') && pos < length)
+            while (!hasPrefix(doc, length, pos, QLatin1Char('>')) && pos < length)
                 pos++;
-            if (hasPrefix(doc, length, pos, '>')) {
+            if (hasPrefix(doc, length, pos, QLatin1Char('>'))) {
                 pos++;
                 eatSpace(doc, length, pos, true);
             }
@@ -7412,17 +7434,17 @@ QString Q3TextDocument::parseOpenTag(const QChar* doc, int length, int& pos,
     static QString term = QString::fromLatin1("/>");
     static QString s_TRUE = QString::fromLatin1("TRUE");
 
-    while (doc[pos] != '>' && ! (emptyTag = hasPrefix(doc, length, pos, term))) {
+    while (doc[pos] != QLatin1Char('>') && ! (emptyTag = hasPrefix(doc, length, pos, term))) {
         QString key = parseWord(doc, length, pos);
         eatSpace(doc, length, pos, true);
         if (key.isEmpty()) {
             // error recovery
-            while (pos < length && doc[pos] != '>')
+            while (pos < length && doc[pos] != QLatin1Char('>'))
                 pos++;
             break;
         }
         QString value;
-        if (hasPrefix(doc, length, pos, '=')){
+        if (hasPrefix(doc, length, pos, QLatin1Char('='))){
             pos++;
             eatSpace(doc, length, pos);
             value = parseWord(doc, length, pos, false);
@@ -7434,11 +7456,11 @@ QString Q3TextDocument::parseOpenTag(const QChar* doc, int length, int& pos,
     }
 
     if (emptyTag) {
-        eat(doc, length, pos, '/');
-        eat(doc, length, pos, '>');
+        eat(doc, length, pos, QLatin1Char('/'));
+        eat(doc, length, pos, QLatin1Char('>'));
     }
     else
-        eat(doc, length, pos, '>');
+        eat(doc, length, pos, QLatin1Char('>'));
 
     return tag;
 }
@@ -7449,7 +7471,7 @@ QString Q3TextDocument::parseCloseTag(const QChar* doc, int length, int& pos)
     pos++;
     QString tag = parseWord(doc, length, pos);
     eatSpace(doc, length, pos, true);
-    eat(doc, length, pos, '>');
+    eat(doc, length, pos, QLatin1Char('>'));
     return tag;
 }
 
@@ -7593,15 +7615,15 @@ Q3TextTable::Q3TextTable(Q3TextDocument *p, const QMap<QString, QString> & attr 
     border = innerborder = 0;
 
     QMap<QString, QString>::ConstIterator it, end = attr.end();
-    it = attr.find("cellspacing");
+    it = attr.find(QLatin1String("cellspacing"));
     if (it != end)
         cellspacing = (*it).toInt();
-    it = attr.find("cellpadding");
+    it = attr.find(QLatin1String("cellpadding"));
     if (it != end)
         cellpadding = (*it).toInt();
-    it = attr.find("border");
+    it = attr.find(QLatin1String("border"));
     if (it != end) {
-        if (*it == "TRUE")
+        if (*it == QLatin1String("TRUE"))
             border = 1;
         else
             border = (*it).toInt();
@@ -7622,7 +7644,7 @@ Q3TextTable::Q3TextTable(Q3TextDocument *p, const QMap<QString, QString> & attr 
 
     fixwidth = 0;
     stretch = 0;
-    it = attr.find("width");
+    it = attr.find(QLatin1String("width"));
     if (it != end) {
         bool b;
         QString s(*it);
@@ -7631,16 +7653,16 @@ Q3TextTable::Q3TextTable(Q3TextDocument *p, const QMap<QString, QString> & attr 
             fixwidth = w;
         } else {
             s = s.trimmed();
-            if (s.length() > 1 && s[(int)s.length()-1] == '%')
+            if (s.length() > 1 && s[(int)s.length()-1] == QLatin1Char('%'))
                 stretch = s.left(s.length()-1).toInt();
         }
     }
     us_fixwidth = fixwidth;
 
     place = PlaceInline;
-    if (attr["align"] == "left")
+    if (attr[QLatin1String("align")] == QLatin1String("left"))
         place = PlaceLeft;
-    else if (attr["align"] == "right")
+    else if (attr[QLatin1String("align")] == QLatin1String("right"))
         place = PlaceRight;
     cachewidth = 0;
     attributes = attr;
@@ -7655,11 +7677,11 @@ Q3TextTable::~Q3TextTable()
 QString Q3TextTable::richText() const
 {
     QString s;
-    s = "<table ";
+    s = QLatin1String("<table ");
     QMap<QString, QString>::ConstIterator it = attributes.begin();
     for (; it != attributes.end(); ++it)
-        s += it.key() + "=" + *it + " ";
-    s += ">\n";
+        s += it.key() + QLatin1String("=") + *it + QLatin1String(" ");
+    s += QLatin1String(">\n");
 
     int lastRow = -1;
     bool needEnd = false;
@@ -7667,22 +7689,22 @@ QString Q3TextTable::richText() const
         Q3TextTableCell *cell = cells.at(idx);
         if (lastRow != cell->row()) {
             if (lastRow != -1)
-                s += "</tr>\n";
-            s += "<tr>";
+                s += QLatin1String("</tr>\n");
+            s += QLatin1String("<tr>");
             lastRow = cell->row();
             needEnd = true;
         }
-        s += "<td";
+        s += QLatin1String("<td");
         it = cell->attributes.constBegin();
         for (; it != cell->attributes.constEnd(); ++it)
-            s += " " + it.key() + "=" + *it;
-        s += ">";
+            s += QLatin1String(" ") + it.key() + QLatin1String("=") + *it;
+        s += QLatin1String(">");
         s += cell->richText()->richText();
-        s += "</td>";
+        s += QLatin1String("</td>");
     }
     if (needEnd)
-        s += "</tr>\n";
-    s += "</table>\n";
+        s += QLatin1String("</tr>\n");
+    s += QLatin1String("</table>\n");
     return s;
 }
 
@@ -8090,25 +8112,25 @@ Q3TextTableCell::Q3TextTableCell(Q3TextTable* table,
     int halign = style->alignment();
     if (halign != Q3StyleSheetItem::Undefined)
         richtext->setAlignment(halign);
-    it = attr.find("align");
+    it = attr.find(QLatin1String("align"));
     if (it != end && ! (*it).isEmpty()) {
         QString a = (*it).toLower();
-        if (a == "left")
+        if (a == QLatin1String("left"))
             richtext->setAlignment(Qt::AlignLeft);
-        else if (a == "center")
+        else if (a == QLatin1String("center"))
             richtext->setAlignment(Qt::AlignHCenter);
-        else if (a == "right")
+        else if (a == QLatin1String("right"))
             richtext->setAlignment(Qt::AlignRight);
     }
     align = 0;
-    it = attr.find("valign");
+    it = attr.find(QLatin1String("valign"));
     if (it != end && ! (*it).isEmpty()) {
         QString va = (*it).toLower();
-        if ( va == "top" )
+        if ( va == QLatin1String("top") )
 	    align |= Qt::AlignTop;
-	else if ( va == "center" || va == "middle" )
+	else if ( va == QLatin1String("center") || va == QLatin1String("middle") )
             align |= Qt::AlignVCenter;
-        else if (va == "bottom")
+        else if (va == QLatin1String("bottom"))
             align |= Qt::AlignBottom;
     }
     richtext->setFormatter(table->parent->formatter());
@@ -8119,21 +8141,21 @@ Q3TextTableCell::Q3TextTableCell(Q3TextTable* table,
     rowspan_ = 1;
     colspan_ = 1;
 
-    it = attr.find("colspan");
+    it = attr.find(QLatin1String("colspan"));
     if (it != end)
         colspan_ = (*it).toInt();
-    it = attr.find("rowspan");
+    it = attr.find(QLatin1String("rowspan"));
     if (it != end)
         rowspan_ = (*it).toInt();
 
     background = 0;
-    it = attr.find("bgcolor");
+    it = attr.find(QLatin1String("bgcolor"));
     if (it != end) {
         background = new QBrush(QColor(*it));
     }
 
     hasFixedWidth = false;
-    it = attr.find("width");
+    it = attr.find(QLatin1String("width"));
     if (it != end) {
         bool b;
         QString s(*it);
@@ -8144,7 +8166,7 @@ Q3TextTableCell::Q3TextTableCell(Q3TextTable* table,
             hasFixedWidth = true;
         } else {
             s = s.trimmed();
-            if (s.length() > 1 && s[(int)s.length()-1] == '%')
+            if (s.length() > 1 && s[(int)s.length()-1] == QLatin1Char('%'))
                 stretch_ = s.left(s.length()-1).toInt();
         }
     }

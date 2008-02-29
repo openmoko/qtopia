@@ -106,7 +106,12 @@
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::NetworkError</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">A network error has occurred, e.g&#x2e; device moved out of range.</td></tr>
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::TimeoutError</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">Operation has timed out.</td></tr>
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::RemoteHostClosedError</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">Remote host has closed the connection.</td></tr>
-<tr><td valign="top"><tt>QBluetoothAbstractSocket::UnknownError</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">Unknown error has occurred.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractSocket::BusyError</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">The system is busy.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractSocket::HostUnreachableError</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">The remote host could not be reached.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractSocket::UnsupportedOperationError</tt></td><td align="center" valign="top"><tt>11</tt></td><td valign="top">The operation is not supported.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractSocket::AddressInUseError</tt></td><td align="center" valign="top"><tt>12</tt></td><td valign="top">Address is currently in use.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractSocket::AddressNotAvailableError</tt></td><td align="center" valign="top"><tt>13</tt></td><td valign="top">Address is not available.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractSocket::UnknownError</tt></td><td align="center" valign="top"><tt>14</tt></td><td valign="top">Unknown error has occurred.</td></tr>
 </table></p>
 <h3 class="fn"><a name="SocketState-enum"></a>enum QBluetoothAbstractSocket::SocketState</h3>
 <p>State of the rfcomm socket.</p>
@@ -138,7 +143,7 @@
 <p>Reimplemented from <a href="qiodevice.html#canReadLine">QIODevice</a>.</p>
 <p>See also <a href="qiodevice.html#readLine">readLine</a>().</p>
 <h3 class="fn"><a name="close"></a>void QBluetoothAbstractSocket::close ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Closes the socket. This is the same as <a href="qbluetoothabstractsocket.html#disconnect">disconnect</a>()</p>
+<p>Closes the socket. Pending data will not be flushed first. The socket will be immediately closed.</p>
 <p>Reimplemented from <a href="qiodevice.html#close">QIODevice</a>.</p>
 <p>See also <a href="qbluetoothabstractsocket.html#abort">abort</a>() and <a href="qbluetoothabstractsocket.html#disconnect">disconnect</a>().</p>
 <h3 class="fn"><a name="connected"></a>void QBluetoothAbstractSocket::connected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -193,6 +198,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

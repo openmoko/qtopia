@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/qtdesigner.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qtdesigner.qdoc -->
 <head>
-  <title>Qt 4.2: QDesignerPropertySheetExtension Class Reference</title>
+  <title>Qt 4.3: QDesignerPropertySheetExtension Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDesignerPropertySheetExtension Class Reference<br /><sup><sup>[<a href="qtdesigner.html">QtDesigner</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDesignerPropertySheetExtension Class Reference<br /><span class="small-subtitle">[<a href="qtdesigner.html">QtDesigner</a> module]</span>
+</h1>
 <p>The QDesignerPropertySheetExtension class allows you to manipulate a widget's properties which is displayed in Qt Designer's property editor. <a href="#details">More...</a></p>
 <pre> #include &lt;QDesignerPropertySheetExtension&gt;</pre><ul>
 <li><a href="qdesignerpropertysheetextension-members.html">List of all members, including inherited members</a></li>
@@ -101,7 +102,7 @@
       }
   }</pre>
 <p>For a complete example using an extension class, see the <a href="designer-taskmenuextension.html">Task Menu Extension example</a>. The example shows how to create a custom widget plugin for Qt Designer, and how to to use the <a href="qdesignertaskmenuextension.html">QDesignerTaskMenuExtension</a> class to add custom items to <i>Qt Designer</i>'s task menu.</p>
-<p>See also <a href="qextensionfactory.html">QExtensionFactory</a>, <a href="qextensionmanager.html">QExtensionManager</a>, and <a href="designer-creating-custom-widgets-extensions.html">Creating Custom Widget Extensions</a>.</p>
+<p>See also <a href="qdesignerdynamicpropertysheetextension.html">QDesignerDynamicPropertySheetExtension</a>, <a href="qextensionfactory.html">QExtensionFactory</a>, <a href="qextensionmanager.html">QExtensionManager</a>, and <a href="designer-creating-custom-widgets-extensions.html">Creating Custom Widget Extensions</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="dtor.QDesignerPropertySheetExtension"></a>QDesignerPropertySheetExtension::~QDesignerPropertySheetExtension ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -128,13 +129,13 @@
 <p>See also <a href="qdesignerpropertysheetextension.html#indexOf">indexOf</a>(), <a href="qdesignerpropertysheetextension.html#setProperty">setProperty</a>(), and <a href="qdesignerpropertysheetextension.html#propertyGroup">propertyGroup</a>().</p>
 <h3 class="fn"><a name="propertyGroup"></a><a href="qstring.html">QString</a> QDesignerPropertySheetExtension::propertyGroup ( int <i>index</i> ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the property group for the property at the given <i>index</i>.</p>
-<p><i>Qt Designer</i>'s property editor supports property groups, i.e. sections of related properties. A property can be related to a group using the <a href="qdesignerpropertysheetextension.html#setPropertyGroup">setPropertyGroup</a>() function. The default group of any property is the name of the class that defines it. For example, the <a href="qobject.html#objectName-prop">QObject::objectName</a> property appears within the <a href="qobject.html">QObject</a> property group.</p>
+<p><i>Qt Designer</i>'s property editor supports property groups, i.e&#x2e; sections of related properties. A property can be related to a group using the <a href="qdesignerpropertysheetextension.html#setPropertyGroup">setPropertyGroup</a>() function. The default group of any property is the name of the class that defines it. For example, the <a href="qobject.html#objectName-prop">QObject::objectName</a> property appears within the <a href="qobject.html">QObject</a> property group.</p>
 <p>See also <a href="qdesignerpropertysheetextension.html#indexOf">indexOf</a>() and <a href="qdesignerpropertysheetextension.html#setPropertyGroup">setPropertyGroup</a>().</p>
 <h3 class="fn"><a name="propertyName"></a><a href="qstring.html">QString</a> QDesignerPropertySheetExtension::propertyName ( int <i>index</i> ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the name of the property at the given <i>index</i>.</p>
 <p>See also <a href="qdesignerpropertysheetextension.html#indexOf">indexOf</a>().</p>
 <h3 class="fn"><a name="reset"></a>bool QDesignerPropertySheetExtension::reset ( int <i>index</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Resets the value of the property at the given <i>index</i>, to the default value.</p>
+<p>Resets the value of the property at the given <i>index</i>, to the default value. Returns true if a default value could be found, otherwise false.</p>
 <p>See also <a href="qdesignerpropertysheetextension.html#indexOf">indexOf</a>(), <a href="qdesignerpropertysheetextension.html#hasReset">hasReset</a>(), and <a href="qdesignerpropertysheetextension.html#isChanged">isChanged</a>().</p>
 <h3 class="fn"><a name="setAttribute"></a>void QDesignerPropertySheetExtension::setAttribute ( int <i>index</i>, bool <i>attribute</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>If <i>attribute</i> is true, the property at the given <i>index</i> is made an attribute which will be <i>excluded</i> from the .ui file; otherwise it will be included.</p>
@@ -157,6 +158,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

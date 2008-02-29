@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QtOpenGL Module</title>
+  <title>Qt 4.3: QtOpenGL Module</title>
   <link rel="prev" href="qtnetwork.html" />
   <link rel="contents" href="modules.html" />
   <link rel="next" href="qtsql.html" />
@@ -19,24 +19,25 @@
 [<a href="modules.html">Qt's Modules</a>]
 [Next: <a href="qtsql.html">QtSql Module</a>]
 </p>
-<h1 align="center">QtOpenGL Module<br /><small></small></h1>
+<h1 align="center">QtOpenGL Module<br /><span class="subtitle"></span>
+</h1>
 <p>The QtOpenGL module offers classes that make it easy to use OpenGL in Qt applications. <a href="#details">More...</a></p>
 <h2>Namespaces</h2>
-<p><table width="100%" class="annotated">
+<p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><th><a href="qgl.html">QGL</a></th><td>Miscellaneous identifiers used in the Qt OpenGL module</td></tr>
 </table></p>
 <h2>Classes</h2>
-<p><table width="100%" class="annotated">
+<p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><th><a href="qglcolormap.html">QGLColormap</a></th><td>Used for installing custom colormaps into QGLWidgets</td></tr>
 <tr valign="top" class="even"><th><a href="qglcontext.html">QGLContext</a></th><td>Encapsulates an OpenGL rendering context</td></tr>
 <tr valign="top" class="odd"><th><a href="qglformat.html">QGLFormat</a></th><td>The display format of an OpenGL rendering context</td></tr>
 <tr valign="top" class="even"><th><a href="qglframebufferobject.html">QGLFramebufferObject</a></th><td>Encapsulates an OpenGL framebuffer object</td></tr>
 <tr valign="top" class="odd"><th><a href="qglpixelbuffer.html">QGLPixelBuffer</a></th><td>Encapsulates an OpenGL pbuffer</td></tr>
 <tr valign="top" class="even"><th><a href="qglwidget.html">QGLWidget</a></th><td>Widget for rendering OpenGL graphics</td></tr>
+<tr valign="top" class="odd"><th><a href="qwsglwindowsurface.html">QWSGLWindowSurface</a></th><td>The drawing area for top-level windows in Qtopia Core on EGL/OpenGLES. It also provides the drawing area for QGLWidgets whether they are top-level windows or child widget of another QWidget</td></tr>
 </table></p>
 <a name="details"></a>
 <h2>Detailed Description</h2>
-<p>The QtOpenGL module offers classes that make it easy to use OpenGL in Qt applications.</p>
 <p>OpenGL is a standard API for rendering 3D graphics. OpenGL only deals with 3D rendering and provides little or no support for GUI programming issues. The user interface for an OpenGL application must be created with another toolkit, such as Motif on the X platform, Microsoft Foundation Classes (MFC) under Windows, or Qt on both platforms.</p>
 <p><b>Note:</b> OpenGL is a trademark of Silicon Graphics, Inc. in the United States and other countries.</p>
 <p>The Qt OpenGL module makes it easy to use OpenGL in Qt applications. It provides an OpenGL widget class that can be used just like any other Qt widget, except that it opens an OpenGL display buffer where you can use the OpenGL API to render the contents.</p>
@@ -44,7 +45,7 @@
 <pre> #include &lt;QtOpenGL&gt;</pre>
 <p>To link against the module, add this line to your <a href="qmake-manual.html#qmake">qmake</a> <tt>.pro</tt> file:</p>
 <pre> QT += opengl</pre>
-<p>The Qt OpenGL module is implemented as a platform-independent Qt/C++ wrapper around the platform-dependent GLX, WGL, or AGL C APIs. The functionality provided is very similar to Mark Kilgard's GLUT library, but with much more non-OpenGL-specific GUI functionality, i.e. the whole Qt API.</p>
+<p>The Qt OpenGL module is implemented as a platform-independent Qt/C++ wrapper around the platform-dependent GLX, WGL, or AGL C APIs. The functionality provided is very similar to Mark Kilgard's GLUT library, but with much more non-OpenGL-specific GUI functionality, i.e&#x2e; the whole Qt API.</p>
 <p><b>Warning:</b> The QtOpenGL module is part of the <a href="commercialeditions.html#qt-desktop-edition">Qt Desktop Edition</a> and the <a href="opensourceedition.html">Qt Open Source Edition</a>. It is available on Windows, X11, and Mac OS X. <a href="qtopiacore.html">Qtopia Core</a> supports OpenGL ES (OpenGL for Embedded Systems). To be able to use the OpenGL API in <a href="qtopiacore.html">Qtopia Core</a>, it must be integrated with the Q Window System (QWS). See the <a href="qtopiacore-opengl.html">Qtopia Core and OpenGL</a> documentation for details.</p>
 <a name="installation"></a>
 <h3>Installation</h3>
@@ -73,6 +74,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

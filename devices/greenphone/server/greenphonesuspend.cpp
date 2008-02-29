@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,6 +24,8 @@
 #include <QtopiaIpcAdaptor>
 #include <QtopiaIpcEnvelope>
 #include <QtopiaServiceRequest>
+#include <QPowerSource>
+#include <QProcess>
 
 #include "systemsuspend.h"
 
@@ -47,26 +49,21 @@ GreenphoneSuspend::GreenphoneSuspend()
 
 bool GreenphoneSuspend::canSuspend() const
 {
-    QValueSpaceItem battery("/Accessories/Battery");
-    return !battery.value("Charging", false).toBool();
+    QPowerSource src( QLatin1String("DefaultBattery") );
+    return !src.charging();
 }
 
 bool GreenphoneSuspend::suspend()
 {
-    system("apm --suspend");
+    QProcess apm;
+    apm.start("apm", QStringList() << "--suspend");
+    apm.waitForFinished(-1);
     return true;
 }
 
 bool GreenphoneSuspend::wake()
 {
-    QWSServer::screenSaverActivate( false );
-    {
-        QtopiaIpcEnvelope("QPE/Card", "mtabChanged()" ); // might have changed while asleep
-        QtopiaServiceRequest e("QtopiaPowerManager", "setBacklight(int)");
-        e << -3; // Force on
-        e.send();
-    }
-
+    QtopiaIpcEnvelope("QPE/Card", "mtabChanged()" ); // might have changed while asleep
     return true;
 }
 

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -75,6 +90,8 @@ static const qint64 QIODEVICE_BUFFERSIZE = 16384;
 #define CHECK_WRITABLE(function, returnType) \
    do { \
        if ((d->openMode & WriteOnly) == 0) { \
+           if (d->openMode == NotOpen) \
+               return returnType; \
            qWarning("QIODevice::"#function": ReadOnly device"); \
            return returnType; \
        } \
@@ -83,22 +100,17 @@ static const qint64 QIODEVICE_BUFFERSIZE = 16384;
 #define CHECK_READABLE(function, returnType) \
    do { \
        if ((d->openMode & ReadOnly) == 0) { \
+           if (d->openMode == NotOpen) \
+               return returnType; \
            qWarning("QIODevice::"#function": WriteOnly device"); \
            return returnType; \
        } \
    } while (0)
 
-#define CHECK_OPEN(function, returnType) \
-    do { \
-        if (d->openMode == NotOpen) { \
-            return returnType; \
-        } \
-    } while (0)
-
 /*! \internal
  */
 QIODevicePrivate::QIODevicePrivate()
-    : openMode(QIODevice::NotOpen),
+    : openMode(QIODevice::NotOpen), buffer(QIODEVICE_BUFFERSIZE),
       pos(0), devicePos(0), accessMode(Unset)
 {
 }
@@ -262,12 +274,15 @@ QIODevicePrivate::~QIODevicePrivate()
                      example '\r\n' for Win32.
     \value Unbuffered Any buffer in the device is bypassed.
 
-    Certain flags, such as \c Unbuffered and \c Truncate, are meaningless
-    when used with some subclasses. Some of these restrictions are implied
-    by the type of device that is represented by a subclass; for example,
-    access to a QBuffer is always unbuffered. In other cases, the restriction
-    may be due to the implementation, or may be imposed by the underlying
-    platform; for example, QTcpSocket does not support \c Unbuffered mode.
+    Certain flags, such as \c Unbuffered and \c Truncate, are
+    meaningless when used with some subclasses. Some of these
+    restrictions are implied by the type of device that is represented
+    by a subclass; for example, access to a QBuffer is always
+    unbuffered. In other cases, the restriction may be due to the
+    implementation, or may be imposed by the underlying platform; for
+    example, QTcpSocket does not support \c Unbuffered mode, and
+    limitations in the native API prevent QFile from supporting \c
+    Unbuffered on Windows.
 */
 
 /*!     \fn QIODevice::bytesWritten(qint64 bytes)
@@ -713,7 +728,6 @@ qint64 QIODevice::bytesToWrite() const
 qint64 QIODevice::read(char *data, qint64 maxSize)
 {
     Q_D(QIODevice);
-    CHECK_OPEN(read, qint64(-1));
     CHECK_READABLE(read, qint64(-1));
     CHECK_MAXLEN(read, qint64(-1));
 
@@ -1006,6 +1020,13 @@ qint64 QIODevice::readLine(char *data, qint64 maxSize)
             debugBinaryString(data, int(readSoFar));
 #endif
         if (readSoFar && data[readSoFar - 1] == '\n') {
+            if (d->openMode & Text) {
+                // QRingBuffer::readLine() isn't Text aware.
+                if (readSoFar > 1 && data[readSoFar - 2] == '\r') {
+                    --readSoFar;
+                    data[readSoFar - 1] = '\n';
+                }
+            }
             data[readSoFar] = '\0';
             return readSoFar;
         }
@@ -1157,15 +1178,6 @@ bool QIODevice::canReadLine() const
     return d_func()->buffer.canReadLine();
 }
 
-/*! \fn bool QIODevice::getChar(char *c)
-
-    Reads one character from the device and stores it in \a c. If \a c
-    is 0, the character is discarded. Returns true on success;
-    otherwise returns false.
-
-    \sa read() putChar() ungetChar()
-*/
-
 /*!
     Writes at most \a maxSize bytes of data from \a data to the
     device. Returns the number of bytes that were actually written, or
@@ -1176,7 +1188,6 @@ bool QIODevice::canReadLine() const
 qint64 QIODevice::write(const char *data, qint64 maxSize)
 {
     Q_D(QIODevice);
-    CHECK_OPEN(write, qint64(-1));
     CHECK_WRITABLE(write, qint64(-1));
     CHECK_MAXLEN(write, qint64(-1));
 
@@ -1258,14 +1269,6 @@ qint64 QIODevice::write(const char *data, qint64 maxSize)
     \sa read() writeData()
 */
 
-/*! \fn bool QIODevice::putChar(char c)
-
-    Writes the character \a c to the device. Returns true on success;
-    otherwise returns false.
-
-    \sa write() getChar() ungetChar()
-*/
-
 /*!
     Puts the character \a c back into the device, and decrements the
     current position unless the position is 0. This function is
@@ -1278,7 +1281,6 @@ qint64 QIODevice::write(const char *data, qint64 maxSize)
 void QIODevice::ungetChar(char c)
 {
     Q_D(QIODevice);
-    CHECK_OPEN(write, Q_VOID);
     CHECK_READABLE(read, Q_VOID);
 
 #if defined QIODEVICE_DEBUG
@@ -1288,6 +1290,72 @@ void QIODevice::ungetChar(char c)
     d->buffer.ungetChar(c);
     if (!d->isSequential())
         --d->pos;
+}
+
+/*! \fn bool QIODevice::putChar(char c)
+
+    Writes the character \a c to the device. Returns true on success;
+    otherwise returns false.
+
+    \sa write() getChar() ungetChar()
+*/
+bool QIODevice::putChar(char c)
+{
+    return d_func()->putCharHelper(c);
+}
+
+/*!
+    \internal
+*/
+bool QIODevicePrivate::putCharHelper(char c)
+{
+    return q_func()->write(&c, 1) == 1;
+}
+
+/*! \fn bool QIODevice::getChar(char *c)
+
+    Reads one character from the device and stores it in \a c. If \a c
+    is 0, the character is discarded. Returns true on success;
+    otherwise returns false.
+
+    \sa read() putChar() ungetChar()
+*/
+bool QIODevice::getChar(char *c)
+{
+    Q_D(QIODevice);
+    const OpenMode openMode = d->openMode;
+    if (!(openMode & ReadOnly)) {
+        if (openMode == NotOpen)
+            qWarning("QIODevice::getChar: Closed device");
+        else
+            qWarning("QIODevice::getChar: WriteOnly device");
+        return false;
+    }
+
+    // Shortcut for QIODevice::read(c, 1)
+    QRingBuffer *buffer = &d->buffer;
+    const int chint = buffer->getChar();
+    if (chint != -1) {
+        char ch = char(uchar(chint));
+        if ((openMode & Text) && ch == '\r') {
+            buffer->ungetChar(ch);
+        } else {
+            if (c)
+                *c = ch;
+            if (!d->isSequential())
+                ++d->pos;
+            return true;
+        }
+    }
+
+    // Fall back to read().
+    char ch;
+    if (read(&ch, 1) == 1) {
+        if (c)
+            *c = ch;
+        return true;
+    }
+    return false;
 }
 
 /*!
@@ -1439,7 +1507,7 @@ QString QIODevice::errorString() const
     Q_D(const QIODevice);
     if (d->errorString.isEmpty()) {
 #ifdef QT_NO_QOBJECT
-        return QT_TRANSLATE_NOOP(QIODevice, "Unknown error");
+        return QLatin1String(QT_TRANSLATE_NOOP(QIODevice, "Unknown error"));
 #else
         return tr("Unknown error");
 #endif

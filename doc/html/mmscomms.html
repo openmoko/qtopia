@@ -26,7 +26,7 @@
 <li><div class="fn"/>virtual bool <b><a href="mmscomms.html#isActive">isActive</a></b> () const = 0</li>
 <li><div class="fn"/>QString <b><a href="mmscomms.html#networkConfig">networkConfig</a></b> () const</li>
 <li><div class="fn"/>virtual void <b><a href="mmscomms.html#retrieveMessage">retrieveMessage</a></b> ( const QUrl &amp; <i>url</i> ) = 0</li>
-<li><div class="fn"/>virtual void <b><a href="mmscomms.html#sendMessage">sendMessage</a></b> ( MMSMessage &amp; <i>msg</i> ) = 0</li>
+<li><div class="fn"/>virtual void <b><a href="mmscomms.html#sendMessage">sendMessage</a></b> ( MMSMessage &amp; <i>msg</i>, const QByteArray &amp; <i>encoded</i> ) = 0</li>
 </ul>
 <ul>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
@@ -88,8 +88,8 @@
 <h3 class="fn"><a name="sendConf"></a>void MmsComms::sendConf ( const MMSMessage &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal must be emitted in response to a <a href="mmscomms.html#sendMessage">sendMessage</a>(), unless an error occurs. The MMS message <i>msg</i> contains the confirmation details and the message content as received by <a href="mmscomms.html#sendMessage">sendMessage</a>() .</p>
 <p>See also <a href="mmscomms.html#error">error</a>().</p>
-<h3 class="fn"><a name="sendMessage"></a>void MmsComms::sendMessage ( MMSMessage &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Connect to the MMSC and POST the specified MMS message <i>msg</i>. If a connection to a WAP gateway is necessary, it should be done also. The MailAccount details can be accessed via the <i>account</i> variable.</p>
+<h3 class="fn"><a name="sendMessage"></a>void MmsComms::sendMessage ( MMSMessage &amp; <i>msg</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>encoded</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Connect to the MMSC and POST the specified MMS message <i>msg</i>, the encoded content of which is contained in <i>encoded</i>. If a connection to a WAP gateway is necessary, it should be done also. The MailAccount details can be accessed via the <i>account</i> variable.</p>
 <p>See also <a href="mmscomms.html#sendConf">sendConf</a>().</p>
 <h3 class="fn"><a name="statusChange"></a>void MmsComms::statusChange ( const <a href="qstring.html">QString</a> &amp; <i>status</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal can be emitted when the status of a transfer changes, e.g&#x2e; connected to server, transferring data. The status <i>status</i> could be used to provide user feed back eg: a status bar.</p>
@@ -102,6 +102,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

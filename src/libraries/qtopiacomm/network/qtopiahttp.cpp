@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -350,12 +350,12 @@ QtopiaHttp::QtopiaHttp(QObject *parent)
 {
     d = new QtopiaHttpData();
 
-    connect(this, SIGNAL(requestFinished(int, bool)),
-            this, SLOT(httpRequestFinished(int, bool)));
-    connect(this, SIGNAL(dataReadProgress(int, int)),
-            this, SLOT(updateDataReadProgress(int, int)));
-    connect(this, SIGNAL(responseHeaderReceived(const QHttpResponseHeader &)),
-            this, SLOT(readResponseHeader(const QHttpResponseHeader &)));
+    connect(this, SIGNAL(requestFinished(int,bool)),
+            this, SLOT(httpRequestFinished(int,bool)));
+    connect(this, SIGNAL(dataReadProgress(int,int)),
+            this, SLOT(updateDataReadProgress(int,int)));
+    connect(this, SIGNAL(responseHeaderReceived(QHttpResponseHeader)),
+            this, SLOT(readResponseHeader(QHttpResponseHeader)));
     d->mSslSocket = 0;
     d->mTcpSocket = new QTcpSocket(this);
 }
@@ -373,7 +373,7 @@ QTcpSocket *QtopiaHttp::sslSocket() const
 /*!
   Sets the socket used to handle https requests.
   Note that the socket set must sublcass QTcpSocket in such a way that it supports SSL.  Setting
-  a unsecure socket will result in a connection error when attempting to get https pages.
+  an unsecure socket will result in a connection error when attempting to get https pages.
 */
 void QtopiaHttp::setSslSocket(QTcpSocket *socket)
 {
@@ -458,7 +458,7 @@ int QtopiaHttp::startFetch(const QUrl &u, const QList< QPair<QString, QString> >
     int port = u.port();
     if (port < 0)
         port = mSecure ? 443 : 80;
-    QHttp::setHost(u.host(), port);
+    QHttp::setHost(u.host(), mSecure ? ConnectionModeHttps : ConnectionModeHttp, port);
 
     /* set post data */
     QByteArray uploadData = urlEncode(formData);

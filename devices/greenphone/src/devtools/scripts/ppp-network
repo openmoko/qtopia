@@ -21,7 +21,7 @@ LOG=0
 LOG_FILE="/tmp/qtopia-network.log"
 TMP_FILE="/tmp/ppp-intern-network.temp"
 PPPD="/usr/sbin/pppd";
-RESOLVCONF="/mnt/user/etc/resolv.conf"
+RESOLVCONF="/etc/resolv.conf"
 ####################
 
 

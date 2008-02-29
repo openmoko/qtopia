@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -42,7 +57,7 @@
     \class QScrollBar
     \brief The QScrollBar widget provides a vertical or horizontal scroll bar.
 
-    \ingroup basic
+    \ingroup basicwidgets
 
     A scroll bar is a control that enables the user to access parts of a
     document that is larger than the widget used to display it. It provides
@@ -150,10 +165,10 @@
 
     A scroll bar can be controlled by the keyboard, but it has a
     default focusPolicy() of Qt::NoFocus. Use setFocusPolicy() to
-    enable keyboard interaction with the scrollbar:
+    enable keyboard interaction with the scroll bar:
     \list
-         \i Left/Right move a horizontal scrollbar by one single step.
-         \i Up/Down move a vertical scrollbar by one single step.
+         \i Left/Right move a horizontal scroll bar by one single step.
+         \i Up/Down move a vertical scroll bar by one single step.
          \i PageUp moves up one page.
          \i PageDown moves down one page.
          \i Home moves to the start (mininum).
@@ -171,7 +186,7 @@
     \table 100%
     \row \o \inlineimage macintosh-horizontalscrollbar.png Screenshot of a Macintosh style scroll bar
          \o A scroll bar shown in the \l{Macintosh Style Widget Gallery}{Macintosh widget style}.
-    \row \o \inlineimage windows-horizontalscrollbar.png Screenshot of a Windows XP style scroll bar
+    \row \o \inlineimage windowsxp-horizontalscrollbar.png Screenshot of a Windows XP style scroll bar
          \o A scroll bar shown in the \l{Windows XP Style Widget Gallery}{Windows XP widget style}.
     \row \o \inlineimage plastique-horizontalscrollbar.png Screenshot of a Plastique style scroll bar
          \o A scroll bar shown in the \l{Plastique Style Widget Gallery}{Plastique widget style}.
@@ -191,7 +206,6 @@ public:
 
     void activateControl(uint control, int threshold = 500);
     int pixelPosToRangeValue(int pos) const;
-    QStyleOptionSlider getStyleOption() const;
     void init();
     bool updateHoverControl(const QPoint &pos);
     QStyle::SubControl newHoverControl(const QPoint &pos);
@@ -217,7 +231,8 @@ bool QScrollBarPrivate::updateHoverControl(const QPoint &pos)
 QStyle::SubControl QScrollBarPrivate::newHoverControl(const QPoint &pos)
 {
     Q_Q(QScrollBar);
-    QStyleOptionSlider opt = getStyleOption();
+    QStyleOptionSlider opt;
+    q->initStyleOption(&opt);
     opt.subControls = QStyle::SC_All;
     hoverControl = q->style()->hitTestComplexControl(QStyle::CC_ScrollBar, &opt, pos, q);
     if (hoverControl == QStyle::SC_None)
@@ -258,25 +273,32 @@ void QScrollBarPrivate::activateControl(uint control, int threshold)
         q_func()->triggerAction(action);
     }
 }
+/*!
+    Initialize \a option with the values from this QScrollBar. This method
+    is useful for subclasses when they need a QStyleOptionSlider, but don't want
+    to fill in all the information themselves.
 
-QStyleOptionSlider QScrollBarPrivate::getStyleOption() const
+    \sa QStyleOption::initFrom()
+*/
+void QScrollBar::initStyleOption(QStyleOptionSlider *option) const
 {
-    Q_Q(const QScrollBar);
-    QStyleOptionSlider opt;
-    opt.init(q);
-    opt.subControls = QStyle::SC_None;
-    opt.activeSubControls = QStyle::SC_None;
-    opt.orientation = orientation;
-    opt.minimum = minimum;
-    opt.maximum = maximum;
-    opt.sliderPosition = position;
-    opt.sliderValue = value;
-    opt.singleStep = singleStep;
-    opt.pageStep = pageStep;
-    opt.upsideDown = invertedAppearance;
-    if (orientation == Qt::Horizontal)
-        opt.state |= QStyle::State_Horizontal;
-    return opt;
+    if (!option)
+        return;
+
+    Q_D(const QScrollBar);
+    option->initFrom(this);
+    option->subControls = QStyle::SC_None;
+    option->activeSubControls = QStyle::SC_None;
+    option->orientation = d->orientation;
+    option->minimum = d->minimum;
+    option->maximum = d->maximum;
+    option->sliderPosition = d->position;
+    option->sliderValue = d->value;
+    option->singleStep = d->singleStep;
+    option->pageStep = d->pageStep;
+    option->upsideDown = d->invertedAppearance;
+    if (d->orientation == Qt::Horizontal)
+        option->state |= QStyle::State_Horizontal;
 }
 
 
@@ -376,7 +398,7 @@ void QScrollBarPrivate::init()
     pressedControl = hoverControl = QStyle::SC_None;
     pointerOutsidePressedControl = false;
     q->setFocusPolicy(Qt::NoFocus);
-    QSizePolicy sp(QSizePolicy::Minimum, QSizePolicy::Fixed);
+    QSizePolicy sp(QSizePolicy::Minimum, QSizePolicy::Fixed, QSizePolicy::Slider);
     if (orientation == Qt::Vertical)
         sp.transpose();
     q->setSizePolicy(sp);
@@ -387,7 +409,7 @@ void QScrollBarPrivate::init()
 /*! \reimp */
 void QScrollBar::contextMenuEvent(QContextMenuEvent *event)
 {
-    if (!style()->styleHint(QStyle::SH_ScrollBar_ContextMenu)) {
+    if (!style()->styleHint(QStyle::SH_ScrollBar_ContextMenu, 0, this)) {
         QAbstractSlider::contextMenuEvent(event);
         return ;
     }
@@ -439,7 +461,8 @@ void QScrollBar::contextMenuEvent(QContextMenuEvent *event)
 QSize QScrollBar::sizeHint() const
 {
     ensurePolished();
-    QStyleOptionSlider opt = d_func()->getStyleOption();
+    QStyleOptionSlider opt;
+    initStyleOption(&opt);
 
     int scrollBarExtent = style()->pixelMetric(QStyle::PM_ScrollBarExtent, &opt, this);
     int scrollBarSliderMin = style()->pixelMetric(QStyle::PM_ScrollBarSliderMin, &opt, this);
@@ -474,7 +497,7 @@ bool QScrollBar::event(QEvent *event)
     default:
         break;
     }
-    return QWidget::event(event);
+    return QAbstractSlider::event(event);
 }
 
 /*!
@@ -484,7 +507,8 @@ void QScrollBar::paintEvent(QPaintEvent *)
 {
     Q_D(QScrollBar);
     QPainter p(this);
-    QStyleOptionSlider opt = d->getStyleOption();
+    QStyleOptionSlider opt;
+    initStyleOption(&opt);
     opt.subControls = QStyle::SC_All;
     if (d->pressedControl) {
         opt.activeSubControls = (QStyle::SubControl)d->pressedControl;
@@ -504,7 +528,8 @@ void QScrollBar::mousePressEvent(QMouseEvent *e)
     Q_D(QScrollBar);
     bool midButtonAbsPos = style()->styleHint(QStyle::SH_ScrollBar_MiddleClickAbsolutePosition,
                                              0, this);
-    QStyleOptionSlider opt = d->getStyleOption();
+    QStyleOptionSlider opt;
+    initStyleOption(&opt);
 
     if (d->maximum == d->minimum // no range
         || (e->buttons() & (~e->button())) // another button was clicked before
@@ -561,7 +586,8 @@ void QScrollBar::mouseReleaseEvent(QMouseEvent *e)
     d->pressedControl = QStyle::SC_None;
     if (tmp == QStyle::SC_ScrollBarSlider)
         setSliderDown(false);
-    QStyleOptionSlider opt = d->getStyleOption();
+    QStyleOptionSlider opt;
+    initStyleOption(&opt);
     repaint(style()->subControlRect(QStyle::CC_ScrollBar, &opt, tmp, this));
 }
 
@@ -575,7 +601,8 @@ void QScrollBar::mouseMoveEvent(QMouseEvent *e)
     if (!d->pressedControl)
         return;
 
-    QStyleOptionSlider opt = d->getStyleOption();
+    QStyleOptionSlider opt;
+    initStyleOption(&opt);
     if (!(e->buttons() & Qt::LeftButton
           ||  ((e->buttons() & Qt::MidButton)
                && style()->styleHint(QStyle::SH_ScrollBar_MiddleClickAbsolutePosition, &opt, this))))
@@ -629,7 +656,8 @@ void QScrollBar::mouseMoveEvent(QMouseEvent *e)
 int QScrollBarPrivate::pixelPosToRangeValue(int pos) const
 {
     Q_Q(const QScrollBar);
-    QStyleOptionSlider opt = getStyleOption();
+    QStyleOptionSlider opt;
+    q->initStyleOption(&opt);
     QRect gr = q->style()->subControlRect(QStyle::CC_ScrollBar, &opt,
                                           QStyle::SC_ScrollBarGroove, q);
     QRect sr = q->style()->subControlRect(QStyle::CC_ScrollBar, &opt,
@@ -670,11 +698,13 @@ void QScrollBar::hideEvent(QHideEvent *)
 */
 
 /*! \internal
-    Returns the style option for scrollbar.
+    Returns the style option for scroll bar.
 */
 Q_GUI_EXPORT QStyleOptionSlider qt_qscrollbarStyleOption(QScrollBar *scrollbar)
 {
-     return scrollbar->d_func()->getStyleOption();
+    QStyleOptionSlider opt;
+    scrollbar->initStyleOption(&opt);
+    return opt;
 }
 
 #endif // QT_NO_SCROLLBAR

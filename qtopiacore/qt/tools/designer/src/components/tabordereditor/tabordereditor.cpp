@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -23,49 +38,51 @@
 
 #include "tabordereditor.h"
 
-#include <QtGui/QLabel>
-#include <QtGui/QPainter>
-#include <QtCore/qdebug.h>
-#include <QtGui/QRegion>
-#include <QtGui/qevent.h>
-#include <QtGui/QFontMetrics>
-#include <QtGui/QApplication>
-
-#include <QtDesigner/QtDesigner>
-
-#include <QtGui/QUndoCommand>
+#include <metadatabase_p.h>
 #include <qdesigner_command_p.h>
-#include <qdesigner_widget_p.h>
 #include <qdesigner_utils_p.h>
 #include <qlayout_widget_p.h>
-#include <qdesigner_promotedwidget_p.h>
 
-#define BG_ALPHA                32
-#define VBOX_MARGIN             1
-#define HBOX_MARGIN             4
+#include <QtDesigner/QExtensionManager>
+#include <QtDesigner/QDesignerFormWindowInterface>
+#include <QtDesigner/QDesignerFormWindowCursorInterface>
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <QtDesigner/QDesignerWidgetFactoryInterface>
+#include <QtDesigner/QDesignerPropertySheetExtension>
 
-using namespace qdesigner_internal;
+#include <QtGui/QPainter>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QMenu>
+#include <QtGui/QApplication>
+
+namespace {
+    enum { VBOX_MARGIN = 1, HBOX_MARGIN = 4, BG_ALPHA = 32 };
+}
 
 static QRect fixRect(const QRect &r)
 {
     return QRect(r.x(), r.y(), r.width() - 1, r.height() - 1);
 }
 
-TabOrderEditor::TabOrderEditor(QDesignerFormWindowInterface *form, QWidget *parent)
-    : QWidget(parent), m_font_metrics(font())
+namespace qdesigner_internal {
+
+TabOrderEditor::TabOrderEditor(QDesignerFormWindowInterface *form, QWidget *parent) :
+    QWidget(parent), 
+    m_form_window(form),
+    m_bg_widget(0),
+    m_undo_stack(form->commandHistory()),
+    m_font_metrics(font()),
+    m_current_index(0),
+    m_beginning(true)
 {
-    m_form_window = form;
-    m_bg_widget = 0;
-    m_undo_stack = form->commandHistory();
     connect(form, SIGNAL(widgetRemoved(QWidget*)), this, SLOT(widgetRemoved(QWidget*)));
 
-    QFont font = this->font();
-    font.setPointSize(font.pointSize()*2);
-    font.setBold(true);
-    setFont(font);
-    m_font_metrics = QFontMetrics(font);
-    m_current_index = 0;
-
+    QFont tabFont = font();
+    tabFont.setPointSize(tabFont.pointSize()*2);
+    tabFont.setBold(true);
+    setFont(tabFont);
+    m_font_metrics = QFontMetrics(tabFont);
     setAttribute(Qt::WA_MouseTracking, true);
 }
 
@@ -97,6 +114,7 @@ void TabOrderEditor::updateBackground()
 
 void TabOrderEditor::widgetRemoved(QWidget*)
 {
+    initTabOrder();
 }
 
 void TabOrderEditor::showEvent(QShowEvent *e)
@@ -110,11 +128,11 @@ QRect TabOrderEditor::indicatorRect(int index) const
     if (index < 0 || index >= m_tab_order_list.size())
         return QRect();
 
-    QWidget *w = m_tab_order_list.at(index);
-    QString text = QString::number(index + 1);
+    const QWidget *w = m_tab_order_list.at(index);
+    const QString text = QString::number(index + 1);
 
-    QPoint tl = mapFromGlobal(w->mapToGlobal(w->rect().topLeft()));
-    QSize size = m_font_metrics.size(Qt::TextSingleLine, text);
+    const QPoint tl = mapFromGlobal(w->mapToGlobal(w->rect().topLeft()));
+    const QSize size = m_font_metrics.size(Qt::TextSingleLine, text);
     QRect r(tl - QPoint(size.width(), size.height())/2, size);
     r = QRect(r.left() - HBOX_MARGIN, r.top() - VBOX_MARGIN,
                 r.width() + HBOX_MARGIN*2, r.height() + VBOX_MARGIN*2);
@@ -139,14 +157,22 @@ void TabOrderEditor::paintEvent(QPaintEvent *e)
     QPainter p(this);
     p.setClipRegion(e->region());
 
+    int cur = m_current_index - 1;
+    if (m_beginning == false && cur < 0)
+        cur = m_tab_order_list.size() - 1;
+
     for (int i = 0; i < m_tab_order_list.size(); ++i) {
         QWidget *widget = m_tab_order_list.at(i);
         if (!isWidgetVisible(widget))
             continue;
 
-        QRect r = indicatorRect(i);
+        const QRect r = indicatorRect(i);
 
-        QColor c = Qt::blue;
+        QColor c = Qt::darkGreen;
+        if (i == cur)
+            c = Qt::red;
+        else if (i > cur)
+            c = Qt::blue;
         p.setPen(c);
         c.setAlpha(BG_ALPHA);
         p.setBrush(c);
@@ -168,12 +194,9 @@ bool TabOrderEditor::skipWidget(QWidget *w) const
         return true;
     }
 
-    if (qobject_cast<QDesignerPromotedWidget*>(w) != 0)
-        return true;
-
     QExtensionManager *ext = formWindow()->core()->extensionManager();
-    if (QDesignerPropertySheetExtension *sheet = qt_extension<QDesignerPropertySheetExtension*>(ext, w)) {
-        int index = sheet->indexOf(QLatin1String("focusPolicy"));
+    if (const QDesignerPropertySheetExtension *sheet = qt_extension<QDesignerPropertySheetExtension*>(ext, w)) {
+        const int index = sheet->indexOf(QLatin1String("focusPolicy"));
         if (index != -1) {
             bool ok = false;
             Qt::FocusPolicy q = (Qt::FocusPolicy) Utils::valueOf(sheet->property(index), &ok);
@@ -190,7 +213,7 @@ void TabOrderEditor::initTabOrder()
 
     QDesignerFormEditorInterface *core = formWindow()->core();
 
-    if (QDesignerMetaDataBaseItemInterface *item = core->metaDataBase()->item(formWindow())) {
+    if (const QDesignerMetaDataBaseItemInterface *item = core->metaDataBase()->item(formWindow())) {
         m_tab_order_list = item->tabOrder();
     }
 
@@ -206,6 +229,7 @@ void TabOrderEditor::initTabOrder()
     // Append any widgets that are in the form but are not in the tab order
     QDesignerFormWindowCursorInterface *cursor = formWindow()->cursor();
     for (int i = 0; i < cursor->widgetCount(); ++i) {
+
         QWidget *widget = cursor->widget(i);
         if (skipWidget(widget))
             continue;
@@ -219,6 +243,11 @@ void TabOrderEditor::initTabOrder()
         if (m_tab_order_list.at(i)->isVisible())
             m_indicator_region |= indicatorRect(i);
     }
+
+    if (m_current_index >= m_tab_order_list.size())
+        m_current_index = m_tab_order_list.size() - 1;
+    if (m_current_index < 0)
+        m_current_index = 0;
 }
 
 void TabOrderEditor::mouseMoveEvent(QMouseEvent *e)
@@ -272,15 +301,27 @@ void TabOrderEditor::mousePressEvent(QMouseEvent *e)
         return;
     }
 
-    int target_index = widgetIndexAt(e->pos());
+    if (e->button() != Qt::LeftButton)
+        return;
+
+    const int target_index = widgetIndexAt(e->pos());
     if (target_index == -1)
         return;
 
-    update(indicatorRect(target_index));
-    update(indicatorRect(m_current_index));
+    m_beginning = false;
+
+    if (e->modifiers() & Qt::ControlModifier) {
+        m_current_index = target_index + 1;
+        if (m_current_index >= m_tab_order_list.size())
+            m_current_index = 0;
+        update();
+        return;
+    }
+
+    if (m_current_index == -1)
+        return;
+
     m_tab_order_list.swap(target_index, m_current_index);
-    update(indicatorRect(target_index));
-    update(indicatorRect(m_current_index));
 
     ++m_current_index;
     if (m_current_index == m_tab_order_list.size())
@@ -291,10 +332,39 @@ void TabOrderEditor::mousePressEvent(QMouseEvent *e)
     formWindow()->commandHistory()->push(cmd);
 }
 
+void TabOrderEditor::contextMenuEvent(QContextMenuEvent *e)
+{
+    QMenu menu(this);
+    const int target_index = widgetIndexAt(e->pos());
+    QAction *setIndex = menu.addAction(tr("Start from Here"));
+    QAction *resetIndex = menu.addAction(tr("Restart"));
+    setIndex->setEnabled(target_index >= 0);
+    QAction *result = menu.exec(e->globalPos());
+    if (result == resetIndex) {
+        m_current_index = 0;
+        m_beginning = true;
+        update();
+    } else if (result == setIndex) {
+        m_beginning = false;
+        m_current_index = target_index + 1;
+        if (m_current_index >= m_tab_order_list.size())
+            m_current_index = 0;
+        update();
+    }
+}
+
 void TabOrderEditor::mouseDoubleClickEvent(QMouseEvent *e)
 {
+    if (e->button() != Qt::LeftButton)
+        return;
+
+    const int target_index = widgetIndexAt(e->pos());
+    if (target_index >= 0)
+        return;
+
+    m_beginning = true;
     m_current_index = 0;
-    mousePressEvent(e);
+    update();
 }
 
 void TabOrderEditor::resizeEvent(QResizeEvent *e)
@@ -303,3 +373,4 @@ void TabOrderEditor::resizeEvent(QResizeEvent *e)
     QWidget::resizeEvent(e);
 }
 
+}

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -52,6 +52,8 @@
     \endtable
 
     Additional actions can be added with addAction().
+  
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 /*!
@@ -113,6 +115,8 @@ GsmKeyFilter::GsmKeyFilter( QObject *parent )
     addAction( QRegExp( "4\\*([0-9]+)" ), this, SIGNAL(deflect(QString)),
                Send | Incoming );
     addAction( "0", this, SIGNAL(releaseHeld()), Send | OnCall );
+    addAction( "0", this, SIGNAL(releaseActive()), Send | Incoming );
+    addAction( "1", this, SIGNAL(releaseAllAcceptIncoming()), Send | Incoming );
     addAction( "1", this, SIGNAL(releaseActive()), Send | OnCall );
     addAction( QRegExp( "1([1-9])" ), this, SLOT(releaseId(QString)),
                Send | OnCall );
@@ -307,6 +311,14 @@ void GsmKeyFilter::addService
     Signal that is emitted when the \c{1 SEND} key sequence is encountered
     while on a call.  This will release the active calls, and accept the
     waiting call if there is one.
+*/
+
+/*!
+    \fn void GsmKeyFilter::releaseAllAcceptIncoming()
+
+    Signal that is emitted when the \c{1 SEND} key sequence is encountered
+    when there is an incoming call but no active calls.  This will accept
+    the incoming call.
 */
 
 /*!

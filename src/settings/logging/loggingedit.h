@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2006-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,8 +21,9 @@
 #ifndef LOGGINGEDIT_H
 #define LOGGINGEDIT_H
 
-#include <qtopialog.h>
 #include <QDialog>
+#include <QMap>
+#include <QString>
 
 class QTreeWidget;
 class QTreeWidgetItem;
@@ -38,6 +39,7 @@ public:
 protected slots:
     void accept();
     void showWhatsThis();
+    void itemClicked( QTreeWidgetItem *clickedItem );
 
 private:
     QMap<QString,QTreeWidgetItem*> item;

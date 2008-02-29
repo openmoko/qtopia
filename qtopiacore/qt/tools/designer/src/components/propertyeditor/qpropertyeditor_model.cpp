@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,9 +37,16 @@
 ****************************************************************************/
 
 #include "qpropertyeditor_model_p.h"
-#include <QtCore/qdebug.h>
+#include "graphicspropertyeditor.h"
 
-using namespace qdesigner_internal;
+#include <resourcemimedata_p.h>
+#include <qdesigner_utils_p.h>
+
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <QtDesigner/QDesignerFormWindowManagerInterface>
+#include <QtDesigner/QDesignerFormWindowInterface>
+
+namespace qdesigner_internal {
 
 QPropertyEditorModel::QPropertyEditorModel(QObject *parent)
     : QAbstractItemModel(parent), m_initialInput(0)
@@ -66,14 +88,14 @@ int QPropertyEditorModel::rowCount(const QModelIndex &parent) const
     if (!parent.isValid())
         return 1;
 
-    if (IProperty *p = privateData(parent)) {
+    if (const IProperty *p = privateData(parent)) {
         return (p->kind() == IProperty::Property_Group)
-            ? static_cast<IPropertyGroup*>(p)->propertyCount()
+            ? static_cast<const IPropertyGroup*>(p)->propertyCount()
             : 0;
     }
 
     return (m_initialInput->kind() == IProperty::Property_Group)
-        ? static_cast<IPropertyGroup*>(m_initialInput)->propertyCount()
+        ? static_cast<const IPropertyGroup*>(m_initialInput)->propertyCount()
         : 0;
 }
 
@@ -113,14 +135,16 @@ QVariant QPropertyEditorModel::data(const QModelIndex &index, int role) const
     if (!privateData(index))
         return QVariant();
 
-    IProperty *o = privateData(index);
+    static const QString noname = tr("<noname>");
+    const IProperty *o = privateData(index);
     switch (index.column()) {  // ### cleanup
         case 0:
             switch (role) {
                 case Qt::EditRole:
                 case Qt::DisplayRole:
+                case Qt::ToolTipRole:
                     return o->propertyName().isEmpty()
-                        ? QLatin1String("<noname>")
+                        ? noname
                         : o->propertyName();
                 default:
                     break;
@@ -131,6 +155,7 @@ QVariant QPropertyEditorModel::data(const QModelIndex &index, int role) const
             switch (role) {
                 case Qt::EditRole:
                     return o->value();
+                case Qt::ToolTipRole:
                 case Qt::DisplayRole:
                     return o->toString();
                 case Qt::DecorationRole:
@@ -151,26 +176,36 @@ QVariant QPropertyEditorModel::data(const QModelIndex &index, int role) const
 QString QPropertyEditorModel::columnText(int col) const
 {
     switch (col) {
-        case 0: return QLatin1String("Property");
-        case 1: return QLatin1String("Value");
+        case 0: return tr("Property");
+        case 1: return tr("Value");
         default: return QString();
     }
 }
 
 void QPropertyEditorModel::refresh(IProperty *property)
 {
-    IProperty *prop = property;
-
-    while (prop && prop->isFake())
-        prop = prop->parent();
-
-    if (prop != property) {
-        QModelIndex index = indexOf(prop, 0);
-        emit dataChanged(index.sibling(0, 0), index.sibling(rowCount(index), 1));
-        property = prop;
+    // find parent if it is a fake
+    IProperty *parent = property;
+    while (parent && parent->isFake())
+        parent = parent->parent();
+    
+    const int parentRow = rowOf(parent);
+    if (parentRow == -1)
+        return;
+    
+    const QModelIndex parentIndex0 = createIndex(parentRow, 0, parent);
+    const QModelIndex parentIndex1 = createIndex(parentRow, 1, parent);
+            
+    emit dataChanged(parentIndex0, parentIndex1);
+    // refresh children
+    if (parent->kind() == IProperty::Property_Group) {
+        IPropertyGroup* group =  static_cast<IPropertyGroup*>(parent);
+        if (const int numRows = group->propertyCount()) {
+            const  QModelIndex leftTopChild = parentIndex0.child(0, 0);
+            const  QModelIndex rightBottomChild = parentIndex0.child(numRows - 1, 1);
+            emit dataChanged(leftTopChild, rightBottomChild);
+        }
     }
-
-    emit dataChanged(indexOf(property, 0), indexOf(property, 1));
 }
 
 bool QPropertyEditorModel::isEditable(const QModelIndex &index) const
@@ -210,3 +245,71 @@ Qt::ItemFlags QPropertyEditorModel::flags(const QModelIndex &index) const
     return foo;
 }
 
+int QPropertyEditorModel::rowOf(IProperty *property) const
+{
+    Q_ASSERT(property);
+    if (property == m_initialInput)
+        return 0;
+    
+    IProperty *parent = property->parent();
+    
+    if (!parent || parent->kind() != IProperty::Property_Group)
+        return -1;
+    
+    return static_cast<const IPropertyGroup*>(parent)->indexOf(property);
+}
+    
+static bool setImage(const ResourceMimeData &image, PixmapProperty *property)
+{
+    QDesignerFormWindowInterface *form = property->core()->formWindowManager()->activeFormWindow();
+    if (!form)
+        return false;
+    
+    const QPixmap newPixmap = resourceMimeDataToPixmap(image, form);
+    const QPixmap oldPixmap = qvariant_cast<QPixmap>(property->value());
+    if (newPixmap.isNull() || newPixmap .serialNumber() == oldPixmap.serialNumber())
+        return  false;
+
+    property->setValue(QVariant(newPixmap));
+    return true;
+}
+    
+static bool setIcon(const ResourceMimeData &image, IconProperty *property)
+{
+    QDesignerFormWindowInterface *form = property->core()->formWindowManager()->activeFormWindow();
+    if (!form)
+        return false;
+    
+    const QIcon newIcon = resourceMimeDataToIcon(image, form);
+    const QIcon oldIcon = qvariant_cast<QIcon>(property->value());
+    if (newIcon.isNull() || newIcon .serialNumber() == oldIcon.serialNumber())
+        return  false;
+    
+    property->setValue(QVariant(newIcon));
+    return true;
+}
+    
+bool QPropertyEditorModel::resourceImageDropped(const QModelIndex &index, const ResourceMimeData &resourceMimeData)
+{
+    if (!index.isValid() || resourceMimeData.type() != ResourceMimeData::Image)
+        return false;    
+
+    IProperty *property = static_cast<IProperty*>(index.internalPointer());
+    if (!property || property->isFake())
+        return false;
+
+    bool changed = false;
+    switch (property->value().type()) {
+        case  QVariant::Icon:
+            changed = setIcon(resourceMimeData, static_cast<IconProperty *>(property));
+            break;
+        case  QVariant::Pixmap:
+            changed = setImage(resourceMimeData, static_cast<PixmapProperty *>(property));
+            break;
+        default:
+            break;
+        }
+    if (changed) emit propertyChanged(property);
+    return  changed;
+}
+}

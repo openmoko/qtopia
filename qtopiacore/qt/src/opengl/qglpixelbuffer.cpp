@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -75,6 +90,18 @@ void QGLPixelBufferPrivate::common_init(const QSize &size, const QGLFormat &form
         qctx = new QGLContext(format);
         qctx->d_func()->sharing = (shareWidget != 0);
         qctx->d_func()->paintDevice = q;
+        qctx->d_func()->valid = true;
+#if defined(Q_WS_WIN)
+        qctx->d_func()->dc = dc;
+        qctx->d_func()->rc = ctx;
+#elif defined(Q_WS_X11)
+        qctx->d_func()->cx = ctx;
+        qctx->d_func()->pbuf = (void *) pbuf;
+        qctx->d_func()->vi = 0;
+#elif defined(Q_WS_MAC)
+        qctx->d_func()->cx = ctx;
+        qctx->d_func()->vi = 0;
+#endif
     }
 }
 
@@ -92,7 +119,7 @@ void QGLPixelBufferPrivate::common_init(const QSize &size, const QGLFormat &form
     \sa size(), format()
 */
 QGLPixelBuffer::QGLPixelBuffer(const QSize &size, const QGLFormat &format, QGLWidget *shareWidget)
-    : d_ptr(new QGLPixelBufferPrivate)
+    : d_ptr(new QGLPixelBufferPrivate(this))
 {
     Q_D(QGLPixelBuffer);
     d->common_init(size, format, shareWidget);
@@ -114,7 +141,7 @@ QGLPixelBuffer::QGLPixelBuffer(const QSize &size, const QGLFormat &format, QGLWi
     \sa size(), format()
 */
 QGLPixelBuffer::QGLPixelBuffer(int width, int height, const QGLFormat &format, QGLWidget *shareWidget)
-    : d_ptr(new QGLPixelBufferPrivate)
+    : d_ptr(new QGLPixelBufferPrivate(this))
 {
     Q_D(QGLPixelBuffer);
     d->common_init(QSize(width, height), format, shareWidget);
@@ -133,12 +160,13 @@ QGLPixelBuffer::~QGLPixelBuffer()
     extern void qgl_cleanup_glyph_cache(QGLContext *);
 
     QGLContext *current = const_cast<QGLContext *>(QGLContext::currentContext());
-    makeCurrent();
+    if (current != d->qctx)
+        makeCurrent();
     qgl_cleanup_glyph_cache(d->qctx);
-    if (current)
-        current->makeCurrent();
     d->cleanup();
     delete d->qctx;
+    if (current && current != d->qctx)
+        current->makeCurrent();
     delete d_ptr;
 }
 
@@ -150,11 +178,29 @@ QGLPixelBuffer::~QGLPixelBuffer()
     \sa QGLContext::makeCurrent(), doneCurrent()
 */
 
+bool QGLPixelBuffer::makeCurrent()
+{
+    Q_D(QGLPixelBuffer);
+    if (d->invalid)
+        return false;
+    d->qctx->makeCurrent();
+    return true;
+}
+
 /*! \fn bool QGLPixelBuffer::doneCurrent()
 
     Makes no context the current OpenGL context. Returns true on
     success; otherwise returns false.
 */
+
+bool QGLPixelBuffer::doneCurrent()
+{
+    Q_D(QGLPixelBuffer);
+    if (d->invalid)
+        return false;
+    d->qctx->doneCurrent();
+    return true;
+}
 
 /*!
     Generates and binds a 2D GL texture that is the same size as the
@@ -292,24 +338,24 @@ QImage QGLPixelBuffer::toImage() const
     int h = d->req_size.height();
     glReadPixels(0, 0, d->req_size.width(), d->req_size.height(), GL_RGBA, GL_UNSIGNED_BYTE, img.bits());
     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
-	// OpenGL gives RGBA; Qt wants ARGB
-	uint *p = (uint*)img.bits();
-	uint *end = p + w*h;
-	if (1) {
-	    while (p < end) {
-		uint a = *p << 24;
-		*p = (*p >> 8) | a;
-		p++;
-	    }
-	} else {
-	    while (p < end) {
-		*p = 0xFF000000 | (*p>>8);
-		++p;
-	    }
-	}
+        // OpenGL gives RGBA; Qt wants ARGB
+        uint *p = (uint*)img.bits();
+        uint *end = p + w*h;
+        if (1) {
+            while (p < end) {
+                uint a = *p << 24;
+                *p = (*p >> 8) | a;
+                p++;
+            }
+        } else {
+            while (p < end) {
+                *p = 0xFF000000 | (*p>>8);
+                ++p;
+            }
+        }
     } else {
-	// OpenGL gives ABGR (i.e. RGBA backwards); Qt wants ARGB
-	img = img.rgbSwapped();
+        // OpenGL gives ABGR (i.e. RGBA backwards); Qt wants ARGB
+        img = img.rgbSwapped();
     }
     return img.mirrored();
 }

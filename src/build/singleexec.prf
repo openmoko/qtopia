@@ -35,7 +35,11 @@ enable_singleexec {
     target.path=
     !no_dest:DESTDIR=$$QPEDIR/lib
 
-    # We might need some additional stuff on our link line
+    # This makes server.pro take an unreasonable amount of time to process.
+    # It seems to be p ^ d runs where p = number of projects and d = number of dependencies.
+    CONFIG-=link_prl
+
+    # If we had link_prl enabled, we'd get all this from Qt's .prl files.
     qt {
         contains(QTE_CONFIG,system-jpeg):LIBS+=-ljpeg
         contains(QTE_CONFIG,system-png):LIBS+=-lpng
@@ -45,9 +49,11 @@ enable_singleexec {
             include($$QT_SOURCE_TREE/config.tests/unix/freetype/freetype.pri)
             LIBS+=-lfreetype
         }
+        contains(QTE_CONFIG,openssl) {
+            include($$QT_SOURCE_TREE/config.tests/unix/openssl/openssl.pri)
+            LIBS+=-lssl -lcrypto
+        }
+        LIBS+=-lrt
     }
-
-    # This is rediculous. Just ignore it.
-    CONFIG-=link_prl
 }
 

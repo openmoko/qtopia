@@ -1,0 +1,7 @@
+#!/bin/sh
+file=$DBUS_PREFIX/lib/pkgconfig/dbus-1.pc
+if [ ! -f $file ]; then
+    exit 1
+fi
+awk '/^Version:/{print $2}' $file || exit 1
+exit 0

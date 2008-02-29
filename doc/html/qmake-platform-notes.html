@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: qmake Platform Notes</title>
+  <title>Qt 4.3: qmake Platform Notes</title>
   <link rel="prev" href="qmake-running.html" />
   <link rel="contents" href="qmake-manual.html" />
   <link rel="next" href="qmake-advanced-usage.html" />
@@ -19,10 +19,12 @@
 [<a href="qmake-manual.html">Contents</a>]
 [Next: <a href="qmake-advanced-usage.html">qmake Advanced Usage</a>]
 </p>
-<h1 align="center">qmake Platform Notes<br /><small></small></h1>
+<h1 align="center">qmake Platform Notes<br /><span class="subtitle"></span>
+</h1>
 <p>Many cross-platform projects can be handled by the <tt>qmake</tt>'s basic configuration features. On some platforms, it is sometimes useful, or even necessary, to take advantage of platform-specific features. <tt>qmake</tt> knows about many of these features, and these can be accessed via specific variables that only have an effect on the platforms where they are relevant.</p>
 <ul><li><a href="#mac-os-x">Mac OS X</a></li>
-<ul><li><a href="#using-frameworks">Using Frameworks</a></li>
+<ul><li><a href="#source-and-binary-packages">Source and Binary Packages</a></li>
+<li><a href="#using-frameworks">Using Frameworks</a></li>
 <li><a href="#creating-library-bundles">Creating Library Bundles</a></li>
 <li><a href="#creating-frameworks">Creating Frameworks</a></li>
 <li><a href="#creating-universal-binaries">Creating Universal Binaries</a></li>
@@ -36,6 +38,11 @@
 <a name="mac-os-x"></a>
 <h2>Mac OS X</h2>
 <p>Features specific to this platform include support for creating universal binaries, frameworks and bundles.</p>
+<a name="source-and-binary-packages"></a>
+<h3>Source and Binary Packages</h3>
+<p>The version of <tt>qmake</tt> supplied in source packages is configured slightly differently to that supplied in binary packages in that it uses a different feature specification. Where the source package typically uses the <tt>macx-g++</tt> specification, the binary package is typically configured to use the <tt>macx-xcode</tt> specification.</p>
+<p>Users of each package can override this configuration by invoking <tt>qmake</tt> with the <tt>-spec</tt> option (see <a href="qmake-running.html">Running qmake</a> for more information). This makes it possible, for example, to use <tt>qmake</tt> from a binary package to create a Makefile in a project directory with the following command line invocation:</p>
+<pre> qmake -spec macx-g++</pre>
 <a name="using-frameworks"></a>
 <h3>Using Frameworks</h3>
 <p><tt>qmake</tt> is able to automatically generate build rules for linking against frameworks in the standard framework directory on Mac OS X, located at <tt>/Library/Frameworks/</tt>.</p>
@@ -98,6 +105,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -65,6 +65,8 @@
 
     Supplementary service actions that are not recognized are sent
     to the network for processing.
+    
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 class GsmKeyActionsPrivate
@@ -73,13 +75,16 @@ public:
     GsmKeyActionsPrivate()
     {
         imeiRequested = false;
+        suppRequested = false;
     }
 
     GsmKeyFilter *filter;
     QTelephonyConfiguration *config;
     QSupplementaryServices *supp;
     bool imeiRequested;
+    bool suppRequested;
     DialerControl *control;
+    QString serviceTitle;
 };
 
 /*!
@@ -96,6 +101,8 @@ GsmKeyActions::GsmKeyActions( QObject *parent )
     connect( d->config, SIGNAL(notification(QString,QString)),
              this, SLOT(imeiReply(QString,QString)) );
     d->supp = new QSupplementaryServices( "modem", this );
+    connect( d->supp, SIGNAL(supplementaryServiceResult(QTelephony::Result)),
+             this, SLOT(supplementaryServiceResult(QTelephony::Result)) );
 
     // Filter for IMEI requests.
     d->filter->addAction( "*#06#", this, SLOT(imeiRequest()) );
@@ -169,6 +176,7 @@ GsmKeyActions::GsmKeyActions( QObject *parent )
     connect( d->filter, SIGNAL(setBusy()), d->control, SLOT(sendBusy()) );
     connect( d->filter, SIGNAL(releaseHeld()), d->control, SLOT(endHeldCalls()) );
     connect( d->filter, SIGNAL(releaseActive()), d->control, SLOT(endCall()) );
+    connect( d->filter, SIGNAL(releaseAllAcceptIncoming()), this, SLOT(releaseAllAcceptIncoming()) );
     connect( d->filter, SIGNAL(release(int)), d->control, SLOT(endCall(int)) );
     connect( d->filter, SIGNAL(activate(int)), d->control, SLOT(activateCall(int)) );
     connect( d->filter, SIGNAL(swap()), this, SLOT(holdOrSwap()) );
@@ -709,10 +717,10 @@ GsmForwardingAction::GsmForwardingAction( QObject *parent )
     forwardingStatusExpected = (QCallForwarding::Reason)(-1);
     setForwardingExpected = (QCallForwarding::Reason)(-1);
     cf = new QCallForwarding( "modem", this );
-    connect( cf, SIGNAL(forwardingStatus(QCallForwarding::Reason, QList<QCallForwarding::Status>)),
-             this, SLOT(forwardingStatus(QCallForwarding::Reason, QList<QCallForwarding::Status>)) );
-    connect( cf, SIGNAL(setForwardingResult(QCallForwarding::Reason, QTelephony::Result)),
-             this, SLOT(setForwardingResult(QCallForwarding::Reason, QTelephony::Result)) );
+    connect( cf, SIGNAL(forwardingStatus(QCallForwarding::Reason,QList<QCallForwarding::Status>)),
+             this, SLOT(forwardingStatus(QCallForwarding::Reason,QList<QCallForwarding::Status>)) );
+    connect( cf, SIGNAL(setForwardingResult(QCallForwarding::Reason,QTelephony::Result)),
+             this, SLOT(setForwardingResult(QCallForwarding::Reason,QTelephony::Result)) );
 }
 
 GsmForwardingAction::~GsmForwardingAction()
@@ -779,7 +787,7 @@ void GsmKeyActions::callForwarding
     if ( !valid ) {
         // We don't know what the call class is, so it may be one of
         // the operator-specific extension classes.  Send to the network.
-        sendServiceToNetwork( action, args );
+        sendServiceToNetwork( action, args, tr("Call Forwarding") );
         return;
     }
 
@@ -815,7 +823,7 @@ void GsmKeyActions::callForwarding
         case GsmKeyFilter::Erasure:
         {
             // Pass registration and erasure requests direct to the network.
-            sendServiceToNetwork( action, args );
+            sendServiceToNetwork( action, args, tr("Call Forwarding") );
         }
         break;
     }
@@ -833,7 +841,7 @@ void GsmKeyActions::callBarring
     if ( !valid ) {
         // We don't know what the call class is, so it may be one of
         // the operator-specific extension classes.  Send to the network.
-        sendServiceToNetwork( action, args );
+        sendServiceToNetwork( action, args, tr("Call Barring") );
         return;
     }
 
@@ -905,6 +913,13 @@ void GsmKeyActions::holdOrSwap()
         d->control->hold();
 }
 
+void GsmKeyActions::releaseAllAcceptIncoming()
+{
+    if ( d->control->hasActiveCalls() )
+        d->control->endCall();
+    d->control->accept();
+}
+
 bool GsmKeyActions::checkNewPins
     ( const QString& title, const QStringList& pins )
 {
@@ -921,7 +936,8 @@ bool GsmKeyActions::checkNewPins
 // Send a supplementary service request to the network because while a
 // filter activated for it, it cannot be handled directly by us.
 void GsmKeyActions::sendServiceToNetwork
-    ( GsmKeyFilter::ServiceAction action, const QStringList& args )
+    ( GsmKeyFilter::ServiceAction action, const QStringList& args,
+      const QString& title )
 {
     QString data;
     switch ( action ) {
@@ -933,7 +949,26 @@ void GsmKeyActions::sendServiceToNetwork
     }
     data += args.join( QChar('*') );
     data += QChar('#');
+    d->suppRequested = true;
+    if ( !title.isEmpty() )
+        d->serviceTitle = title;
+    else
+        d->serviceTitle = tr("Network Service");
     d->supp->sendSupplementaryServiceData( data );
+}
+
+void GsmKeyActions::supplementaryServiceResult( QTelephony::Result result )
+{
+    if ( d->suppRequested ) {
+        d->suppRequested = false;
+        if ( result != QTelephony::OK ) {
+            QAbstractMessageBox::information
+                (0, d->serviceTitle, tr("<p>An error occurred while requesting the service."));
+        } else {
+            QAbstractMessageBox::information
+                (0, d->serviceTitle, tr("<p>Service request was successful."));
+        }
+    }
 }
 
 #include "gsmkeyactions.moc"

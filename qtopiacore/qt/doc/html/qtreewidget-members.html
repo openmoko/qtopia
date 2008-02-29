@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qtreewidget.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/itemviews/qtreewidget.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QTreeWidget</title>
+  <title>Qt 4.3: List of All Members for QTreeWidget</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -22,6 +22,8 @@
 <li><div class="fn"/>enum <a href="qabstractitemview.html#EditTrigger-enum">EditTrigger</a></li>
 <li><div class="fn"/>flags <a href="qabstractitemview.html#EditTrigger-enum">EditTriggers</a></li>
 <li><div class="fn"/>enum <a href="qpaintdevice.html#PaintDeviceMetric-enum">PaintDeviceMetric</a></li>
+<li><div class="fn"/>enum <a href="qwidget.html#RenderFlag-enum">RenderFlag</a></li>
+<li><div class="fn"/>flags <a href="qwidget.html#RenderFlag-enum">RenderFlags</a></li>
 <li><div class="fn"/>enum <a href="qabstractitemview.html#ScrollHint-enum">ScrollHint</a></li>
 <li><div class="fn"/>enum <a href="qabstractitemview.html#ScrollMode-enum">ScrollMode</a></li>
 <li><div class="fn"/>enum <a href="qabstractitemview.html#SelectionBehavior-enum">SelectionBehavior</a></li>
@@ -47,6 +49,7 @@
 <li><div class="fn"/><a href="qwidget.html#adjustSize">adjustSize</a> ()</li>
 <li><div class="fn"/><a href="qtreeview.html#allColumnsShowFocus-prop">allColumnsShowFocus</a> () const : bool</li>
 <li><div class="fn"/><a href="qabstractitemview.html#alternatingRowColors-prop">alternatingRowColors</a> () const : bool</li>
+<li><div class="fn"/><a href="qtreeview.html#autoExpandDelay-prop">autoExpandDelay</a> () const : int</li>
 <li><div class="fn"/><a href="qwidget.html#autoFillBackground-prop">autoFillBackground</a> () const : bool</li>
 <li><div class="fn"/><a href="qwidget.html#backgroundRole">backgroundRole</a> () const : QPalette::ColorRole</li>
 <li><div class="fn"/><a href="qwidget.html#baseSize-prop">baseSize</a> () const : QSize</li>
@@ -135,6 +138,7 @@
 <li><div class="fn"/><a href="qtreeview.html#expand">expand</a> ( const QModelIndex &amp; )</li>
 <li><div class="fn"/><a href="qtreeview.html#expandAll">expandAll</a> ()</li>
 <li><div class="fn"/><a href="qtreewidget.html#expandItem">expandItem</a> ( const QTreeWidgetItem * )</li>
+<li><div class="fn"/><a href="qtreeview.html#expandToDepth">expandToDepth</a> ( int )</li>
 <li><div class="fn"/><a href="qtreeview.html#expanded">expanded</a> ( const QModelIndex &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#find">find</a> ( WId ) : QWidget *</li>
 <li><div class="fn"/><a href="qobject.html#findChild">findChild</a> ( const QString &amp; ) const : T</li>
@@ -189,7 +193,7 @@
 <li><div class="fn"/><a href="qabstractitemview.html#indexAt">indexAt</a> ( const QPoint &amp; ) const : QModelIndex</li>
 <li><div class="fn"/><a href="qtreeview.html#indexBelow">indexBelow</a> ( const QModelIndex &amp; ) const : QModelIndex</li>
 <li><div class="fn"/><a href="qtreewidget.html#indexFromItem">indexFromItem</a> ( QTreeWidgetItem *, int ) const : QModelIndex</li>
-<li><div class="fn"/><a href="qtreewidget.html#indexOfTopLevelItem-2">indexOfTopLevelItem</a> ( QTreeWidgetItem * ) const : int</li>
+<li><div class="fn"/><a href="qtreewidget.html#indexOfTopLevelItem">indexOfTopLevelItem</a> ( QTreeWidgetItem * ) const : int</li>
 <li><div class="fn"/><a href="qtreeview.html#indexRowSizeHint">indexRowSizeHint</a> ( const QModelIndex &amp; ) const : int</li>
 <li><div class="fn"/><a href="qabstractitemview.html#indexWidget">indexWidget</a> ( const QModelIndex &amp; ) const : QWidget *</li>
 <li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const : bool</li>
@@ -209,6 +213,8 @@
 <li><div class="fn"/><a href="qwidget.html#enabled-prop">isEnabled</a> () const : bool</li>
 <li><div class="fn"/><a href="qwidget.html#isEnabledTo">isEnabledTo</a> ( QWidget * ) const : bool</li>
 <li><div class="fn"/><a href="qtreeview.html#isExpanded">isExpanded</a> ( const QModelIndex &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qtreeview.html#isFirstColumnSpanned">isFirstColumnSpanned</a> ( int, const QModelIndex &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qtreewidget.html#isFirstItemColumnSpanned">isFirstItemColumnSpanned</a> ( const QTreeWidgetItem * ) const : bool</li>
 <li><div class="fn"/><a href="qwidget.html#fullScreen-prop">isFullScreen</a> () const : bool</li>
 <li><div class="fn"/><a href="qwidget.html#isHidden">isHidden</a> () const : bool</li>
 <li><div class="fn"/><a href="qabstractitemview.html#isIndexHidden">isIndexHidden</a> ( const QModelIndex &amp; ) const : bool</li>
@@ -222,9 +228,11 @@
 <li><div class="fn"/><a href="qobject.html#isWidgetType">isWidgetType</a> () const : bool</li>
 <li><div class="fn"/><a href="qwidget.html#isWindow">isWindow</a> () const : bool</li>
 <li><div class="fn"/><a href="qwidget.html#windowModified-prop">isWindowModified</a> () const : bool</li>
+<li><div class="fn"/><a href="qtreewidget.html#itemAbove">itemAbove</a> ( const QTreeWidgetItem * ) const : QTreeWidgetItem *</li>
 <li><div class="fn"/><a href="qtreewidget.html#itemActivated">itemActivated</a> ( QTreeWidgetItem *, int )</li>
 <li><div class="fn"/><a href="qtreewidget.html#itemAt">itemAt</a> ( const QPoint &amp; ) const : QTreeWidgetItem *</li>
 <li><div class="fn"/><a href="qtreewidget.html#itemAt-2">itemAt</a> ( int, int ) const : QTreeWidgetItem *</li>
+<li><div class="fn"/><a href="qtreewidget.html#itemBelow">itemBelow</a> ( const QTreeWidgetItem * ) const : QTreeWidgetItem *</li>
 <li><div class="fn"/><a href="qtreewidget.html#itemChanged">itemChanged</a> ( QTreeWidgetItem *, int )</li>
 <li><div class="fn"/><a href="qtreewidget.html#itemClicked">itemClicked</a> ( QTreeWidgetItem *, int )</li>
 <li><div class="fn"/><a href="qtreewidget.html#itemCollapsed">itemCollapsed</a> ( QTreeWidgetItem * )</li>
@@ -239,7 +247,6 @@
 <li><div class="fn"/><a href="qtreewidget.html#itemPressed">itemPressed</a> ( QTreeWidgetItem *, int )</li>
 <li><div class="fn"/><a href="qtreewidget.html#itemSelectionChanged">itemSelectionChanged</a> ()</li>
 <li><div class="fn"/><a href="qtreewidget.html#itemWidget">itemWidget</a> ( QTreeWidgetItem *, int ) const : QWidget *</li>
-<li><div class="fn"/><a href="qtreewidget.html#items">items</a> ( const QMimeData * ) const : QList&lt;QTreeWidgetItem *&gt;</li>
 <li><div class="fn"/><a href="qtreeview.html#itemsExpandable-prop">itemsExpandable</a> () const : bool</li>
 <li><div class="fn"/><a href="qabstractitemview.html#keyPressEvent">keyPressEvent</a> ( QKeyEvent * )</li>
 <li><div class="fn"/><a href="qwidget.html#keyReleaseEvent">keyReleaseEvent</a> ( QKeyEvent * )</li>
@@ -250,10 +257,13 @@
 <li><div class="fn"/><a href="qwidget.html#layoutDirection-prop">layoutDirection</a> () const : Qt::LayoutDirection</li>
 <li><div class="fn"/><a href="qwidget.html#leaveEvent">leaveEvent</a> ( QEvent * )</li>
 <li><div class="fn"/><a href="qframe.html#lineWidth-prop">lineWidth</a> () const : int</li>
+<li><div class="fn"/><a href="qwidget.html#locale-prop">locale</a> () const : QLocale</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiX">logicalDpiX</a> () const : int</li>
 <li><div class="fn"/><a href="qpaintdevice.html#logicalDpiY">logicalDpiY</a> () const : int</li>
 <li><div class="fn"/><a href="qwidget.html#lower">lower</a> ()</li>
+<li><div class="fn"/><a href="qwidget.html#macCGHandle">macCGHandle</a> () const : Qt::HANDLE</li>
 <li><div class="fn"/><a href="qwidget.html#macEvent">macEvent</a> ( EventHandlerCallRef, EventRef ) : bool</li>
+<li><div class="fn"/><a href="qwidget.html#macQDHandle">macQDHandle</a> () const : Qt::HANDLE</li>
 <li><div class="fn"/><a href="qwidget.html#mapFrom">mapFrom</a> ( QWidget *, const QPoint &amp; ) const : QPoint</li>
 <li><div class="fn"/><a href="qwidget.html#mapFromGlobal">mapFromGlobal</a> ( const QPoint &amp; ) const : QPoint</li>
 <li><div class="fn"/><a href="qwidget.html#mapFromParent">mapFromParent</a> ( const QPoint &amp; ) const : QPoint</li>
@@ -313,6 +323,8 @@
 <li><div class="fn"/><a href="qwidget.html#releaseShortcut">releaseShortcut</a> ( int )</li>
 <li><div class="fn"/><a href="qwidget.html#removeAction">removeAction</a> ( QAction * )</li>
 <li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
+<li><div class="fn"/><a href="qtreewidget.html#removeItemWidget">removeItemWidget</a> ( QTreeWidgetItem *, int )</li>
+<li><div class="fn"/><a href="qwidget.html#render">render</a> ( QPaintDevice *, const QPoint &amp;, const QRegion &amp;, RenderFlags )</li>
 <li><div class="fn"/><a href="qwidget.html#repaint">repaint</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#repaint-6">repaint</a> ( int, int, int, int )</li>
 <li><div class="fn"/><a href="qwidget.html#repaint-7">repaint</a> ( const QRect &amp; )</li>
@@ -326,6 +338,7 @@
 <li><div class="fn"/><a href="qwidget.html#restoreGeometry">restoreGeometry</a> ( const QByteArray &amp; ) : bool</li>
 <li><div class="fn"/><a href="qabstractitemview.html#rootIndex">rootIndex</a> () const : QModelIndex</li>
 <li><div class="fn"/><a href="qtreeview.html#rootIsDecorated-prop">rootIsDecorated</a> () const : bool</li>
+<li><div class="fn"/><a href="qtreeview.html#rowHeight">rowHeight</a> ( const QModelIndex &amp; ) const : int</li>
 <li><div class="fn"/><a href="qtreeview.html#rowsAboutToBeRemoved">rowsAboutToBeRemoved</a> ( const QModelIndex &amp;, int, int )</li>
 <li><div class="fn"/><a href="qtreeview.html#rowsInserted">rowsInserted</a> ( const QModelIndex &amp;, int, int )</li>
 <li><div class="fn"/><a href="qtreeview.html#rowsRemoved">rowsRemoved</a> ( const QModelIndex &amp;, int, int )</li>
@@ -356,6 +369,7 @@
 <li><div class="fn"/><a href="qabstractitemview.html#alternatingRowColors-prop">setAlternatingRowColors</a> ( bool )</li>
 <li><div class="fn"/><a href="qtreeview.html#animated-prop">setAnimated</a> ( bool )</li>
 <li><div class="fn"/><a href="qwidget.html#setAttribute">setAttribute</a> ( Qt::WidgetAttribute, bool )</li>
+<li><div class="fn"/><a href="qtreeview.html#autoExpandDelay-prop">setAutoExpandDelay</a> ( int )</li>
 <li><div class="fn"/><a href="qwidget.html#autoFillBackground-prop">setAutoFillBackground</a> ( bool )</li>
 <li><div class="fn"/><a href="qabstractitemview.html#autoScroll-prop">setAutoScroll</a> ( bool )</li>
 <li><div class="fn"/><a href="qwidget.html#setBackgroundRole">setBackgroundRole</a> ( QPalette::ColorRole )</li>
@@ -381,6 +395,8 @@
 <li><div class="fn"/><a href="qabstractitemview.html#editTriggers-prop">setEditTriggers</a> ( EditTriggers )</li>
 <li><div class="fn"/><a href="qwidget.html#enabled-prop">setEnabled</a> ( bool )</li>
 <li><div class="fn"/><a href="qtreeview.html#setExpanded">setExpanded</a> ( const QModelIndex &amp;, bool )</li>
+<li><div class="fn"/><a href="qtreeview.html#setFirstColumnSpanned">setFirstColumnSpanned</a> ( int, const QModelIndex &amp;, bool )</li>
+<li><div class="fn"/><a href="qtreewidget.html#setFirstItemColumnSpanned">setFirstItemColumnSpanned</a> ( const QTreeWidgetItem *, bool )</li>
 <li><div class="fn"/><a href="qwidget.html#setFixedHeight">setFixedHeight</a> ( int )</li>
 <li><div class="fn"/><a href="qwidget.html#setFixedSize">setFixedSize</a> ( const QSize &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setFixedSize-2">setFixedSize</a> ( int, int )</li>
@@ -417,6 +433,7 @@
 <li><div class="fn"/><a href="qwidget.html#setLayout">setLayout</a> ( QLayout * )</li>
 <li><div class="fn"/><a href="qwidget.html#layoutDirection-prop">setLayoutDirection</a> ( Qt::LayoutDirection )</li>
 <li><div class="fn"/><a href="qframe.html#lineWidth-prop">setLineWidth</a> ( int )</li>
+<li><div class="fn"/><a href="qwidget.html#locale-prop">setLocale</a> ( const QLocale &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setMask">setMask</a> ( const QBitmap &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#setMask-2">setMask</a> ( const QRegion &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#maximumHeight-prop">setMaximumHeight</a> ( int )</li>
@@ -476,6 +493,7 @@
 <li><div class="fn"/><a href="qwidget.html#setWindowState">setWindowState</a> ( Qt::WindowStates )</li>
 <li><div class="fn"/><a href="qwidget.html#setWindowSurface">setWindowSurface</a> ( QWindowSurface * )</li>
 <li><div class="fn"/><a href="qwidget.html#windowTitle-prop">setWindowTitle</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qtreeview.html#wordWrap-prop">setWordWrap</a> ( bool )</li>
 <li><div class="fn"/><a href="qabstractscrollarea.html#setupViewport">setupViewport</a> ( QWidget * )</li>
 <li><div class="fn"/><a href="qwidget.html#show">show</a> ()</li>
 <li><div class="fn"/><a href="qtreeview.html#showColumn">showColumn</a> ( int )</li>
@@ -521,7 +539,8 @@
 <li><div class="fn"/><a href="qtreeview.html#uniformRowHeights-prop">uniformRowHeights</a> () const : bool</li>
 <li><div class="fn"/><a href="qwidget.html#cursor-prop">unsetCursor</a> ()</li>
 <li><div class="fn"/><a href="qwidget.html#layoutDirection-prop">unsetLayoutDirection</a> ()</li>
-<li><div class="fn"/><a href="qwidget.html#update">update</a> ()</li>
+<li><div class="fn"/><a href="qwidget.html#locale-prop">unsetLocale</a> ()</li>
+<li><div class="fn"/><a href="qabstractitemview.html#update">update</a> ( const QModelIndex &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#update-2">update</a> ( int, int, int, int )</li>
 <li><div class="fn"/><a href="qwidget.html#update-3">update</a> ( const QRect &amp; )</li>
 <li><div class="fn"/><a href="qwidget.html#update-4">update</a> ( const QRegion &amp; )</li>
@@ -557,6 +576,7 @@
 <li><div class="fn"/><a href="qwidget.html#windowSurface">windowSurface</a> () const : QWindowSurface *</li>
 <li><div class="fn"/><a href="qwidget.html#windowTitle-prop">windowTitle</a> () const : QString</li>
 <li><div class="fn"/><a href="qwidget.html#windowType">windowType</a> () const : Qt::WindowType</li>
+<li><div class="fn"/><a href="qtreeview.html#wordWrap-prop">wordWrap</a> () const : bool</li>
 <li><div class="fn"/><a href="qwidget.html#x-prop">x</a> () const : int</li>
 <li><div class="fn"/><a href="qwidget.html#x11Event">x11Event</a> ( XEvent * ) : bool</li>
 <li><div class="fn"/><a href="qwidget.html#x11Info">x11Info</a> () const : const QX11Info &amp;</li>
@@ -569,6 +589,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

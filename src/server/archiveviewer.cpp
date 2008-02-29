@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -33,6 +33,8 @@
 /*!
     \class ArchiveViewer
     Archives displays the contents of an archive file format.
+  
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 /*!
@@ -51,7 +53,7 @@ ArchiveViewer::ArchiveViewer( QWidget* parent, Qt::WFlags flags )
     propertiesAction = new QAction( QIcon(":icon/info"), tr("Properties..."), this );
 
     QObject::connect( propertiesAction, SIGNAL(triggered()), this, SLOT(showProperties()) );
-    QObject::connect( this, SIGNAL(clicked(const QContent&)), this, SLOT(executeContent(const QContent&)) );
+    QObject::connect( this, SIGNAL(clicked(QContent)), this, SLOT(executeContent(QContent)) );
 
     softMenu->addAction( propertiesAction );
 }
@@ -75,7 +77,7 @@ void ArchiveViewer::executeContent( const QContent &content )
     {
         filterStack.push( contentSet->filter() );
 
-        setFilter( QContentFilter( QContentFilter::Location, content.file() ) );
+        setFilter( QContentFilter( QContentFilter::Location, content.fileName() ) );
     }
     else if( !content.executableName().isEmpty() )
     {
@@ -85,22 +87,11 @@ void ArchiveViewer::executeContent( const QContent &content )
     {
         if( !warningBox )
         {
-#ifdef QTOPIA_PHONE
             warningBox = QAbstractMessageBox::messageBox(
                     this,
                     tr("No application"),
                     tr("<qt>No application is defined for this document.</qt>"),
                     QAbstractMessageBox::Information );
-#else
-            warningBox = new QMessageBox(
-                    tr("No application"),
-                    tr("<qt>No application is defined for this document.</qt>"),
-                    QMessageBox::NoIcon
-                            QMessageBox::Ok,
-                    QMessageBox::NoButton,
-                    QMessageBox::NoButton,
-                    this,);
-#endif
             warningBox->setAttribute(Qt::WA_DeleteOnClose); // It's a QPointer<> so safe.
         }
 
@@ -135,7 +126,6 @@ void ArchiveViewer::showEvent( QShowEvent *event )
     LauncherView::showEvent( event );
 }
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 /*!
     \reimp
 */
@@ -152,7 +142,6 @@ void ArchiveViewer::keyPressEvent( QKeyEvent *event )
     else
         LauncherView::keyPressEvent( event );
 }
-#endif
 
 /*!
     \reimp

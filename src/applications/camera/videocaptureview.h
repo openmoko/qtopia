@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -59,6 +59,10 @@ public:
 
     uint refocusDelay() const;
 
+    void zoomIn();
+    void zoomOut();
+    void doZoom();
+
 protected:
     void moveEvent(QMoveEvent* moveEvent);
     void resizeEvent(QResizeEvent* resizeEvent);
@@ -70,6 +74,14 @@ private:
     int                 m_tidUpdate;
     QImage              m_image;
     camera::VideoCaptureDevice  *m_capture;
+
+    // Zoom 
+    bool m_doZoom;
+    int m_maxZoom;
+    int m_minZoom;
+    int m_zoomlevel;
+    double m_zoomfactor;
+
 };
 
 #endif

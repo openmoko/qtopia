@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,11 +40,6 @@
 #include "qlist.h"
 
 #ifndef QT_NO_TEXTCODEC
-
-#ifdef Q_WS_QWS
-static const QSimpleTextCodec * reverseOwner = 0;
-static QByteArray reverseMap;
-#endif
 
 #define LAST_MIB 2004
 
@@ -596,48 +606,19 @@ static const struct {
     // if you add more chacater sets at the end, change LAST_MIB above
 };
 
-QSimpleTextCodec::QSimpleTextCodec(int i) : forwardIndex(i)
+QSimpleTextCodec::QSimpleTextCodec(int i) : forwardIndex(i), reverseMap(0)
 {
 }
 
 
 QSimpleTextCodec::~QSimpleTextCodec()
 {
-#ifdef Q_WS_QWS
-    if (reverseOwner == this) {
-        reverseMap.clear();
-        reverseOwner = 0;
-    }
-#endif
+    delete reverseMap;
 }
 
-void QSimpleTextCodec::buildReverseMap() const
+static QByteArray *buildReverseMap(int forwardIndex)
 {
-#ifdef Q_WS_QWS
-    if (reverseOwner != this) {
-        int m = 0;
-        int i = 0;
-        while(i < 128) {
-            if (unicodevalues[forwardIndex].values[i] > m &&
-                 unicodevalues[forwardIndex].values[i] < 0xfffd)
-                m = unicodevalues[forwardIndex].values[i];
-            i++;
-        }
-        m++;
-        if (m > (int)(reverseMap.size()))
-            reverseMap.resize(m);
-        for(i = 0; i < 128 && i < m; i++)
-            reverseMap[i] = (char)i;
-        for(;i < m; i++)
-            reverseMap[i] = 0;
-        for(i=128; i<256; i++) {
-            int u = unicodevalues[forwardIndex].values[i-128];
-            if (u < m)
-                reverseMap[u] = (char)(unsigned char)(i);
-        }
-        reverseOwner = this;
-    }
-#else
+    QByteArray *map = new QByteArray();
     int m = 0;
     int i = 0;
     while(i < 128) {
@@ -647,17 +628,17 @@ void QSimpleTextCodec::buildReverseMap() const
         i++;
     }
     m++;
-    reverseMap.resize(m);
+    map->resize(m);
     for(i = 0; i < 128 && i < m; i++)
-        reverseMap[i] = (char)i;
+        (*map)[i] = (char)i;
     for(;i < m; i++)
-        reverseMap[i] = 0;
+        (*map)[i] = 0;
     for(i=128; i<256; i++) {
         int u = unicodevalues[forwardIndex].values[i-128];
         if (u < m)
-            reverseMap[u] = (char)(unsigned char)(i);
+            (*map)[u] = (char)(unsigned char)(i);
     }
-#endif
+    return map;
 }
 
 QString QSimpleTextCodec::convertToUnicode(const char* chars, int len, ConverterState *) const
@@ -680,18 +661,16 @@ QString QSimpleTextCodec::convertToUnicode(const char* chars, int len, Converter
     return r;
 }
 
-
 QByteArray QSimpleTextCodec::convertFromUnicode(const QChar *in, int length, ConverterState *state) const
 {
     const char replacement = (state && state->flags & ConvertInvalidToNull) ? 0 : '?';
     int invalid = 0;
 
-#ifdef Q_WS_QWS
-    if (this != reverseOwner)
-#else
-    if (reverseMap.size() == 0)
-#endif
-        this->buildReverseMap();
+    if (!reverseMap){
+        QByteArray *tmp = buildReverseMap(this->forwardIndex);
+        if (!reverseMap.testAndSet(0, tmp))
+            delete tmp;
+    }
 
     QByteArray r;
     r.resize(length);
@@ -699,8 +678,8 @@ QByteArray QSimpleTextCodec::convertFromUnicode(const QChar *in, int length, Con
     int u;
     const QChar* ucp = in;
     unsigned char* rp = (unsigned char *)r.data();
-    const unsigned char* rmp = (const unsigned char *)reverseMap.data();
-    int rmsize = (int) reverseMap.size();
+    const unsigned char* rmp = (const unsigned char *)reverseMap->data();
+    int rmsize = (int) reverseMap->size();
     while(i--)
     {
         u = ucp->unicode();

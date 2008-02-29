@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,8 +21,7 @@
 
 #include "langmodel.h"
 
-#include <QIcon>
-#include <QPainter>
+#include <qtopianamespace.h>
 
 QVariant LanguageModel::data(const QModelIndex &index, int role) const
 {
@@ -40,11 +39,16 @@ QVariant LanguageModel::data(const QModelIndex &index, int role) const
             return list[pos].langName+QChar(0x200E); //add LRM
         else
             return list[pos].langName+QChar(0x200F); //add RLM
-    } else if (role == Qt::DecorationRole) {
+    } else if (role == Qtopia::AdditionalDecorationRole) {
         if (list[pos].hasDict)
             return pixmapVariant;
         return QPixmap();
     } else if (role == Qt::FontRole) {
+        if (list[pos].isCurrentLang) {
+            QFont f = list[pos].fnt;
+            f.setBold(true);
+            return QVariant(f);
+        }
         return QVariant(list[pos].fnt);
     } else if (role == Qt::UserRole) {
         return list[pos].hasDict;

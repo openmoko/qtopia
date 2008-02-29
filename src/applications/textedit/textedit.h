@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,19 +22,20 @@
 #ifndef TEXTEDIT_H
 #define TEXTEDIT_H
 
-#include <qdocumentselector.h>
-#ifdef QTOPIA_PHONE
-#include <qsoftmenubar.h>
-#include <QToolButton>
-#endif
-
 #include <qmainwindow.h>
+#include <QContent>
+#include <QList>
 
 class QpeEditor;
 class QLineEdit;
-class QAction;
 class QToolBar;
+class QToolButton;
+class QAction;
 class QStackedWidget;
+class QDocumentSelector;
+class StupidToolTip;
+class QVBoxLayout;
+class QLabel;
 
 class TextEdit : public QMainWindow
 {
@@ -43,6 +44,8 @@ class TextEdit : public QMainWindow
 public:
     TextEdit( QWidget *parent = 0, Qt::WFlags f = 0 );
     ~TextEdit();
+
+    bool eventFilter(QObject *obj, QEvent *event);
 
 protected:
     void closeEvent( QCloseEvent* );
@@ -63,6 +66,7 @@ private slots:
     void editPaste();
     void editFind(bool);
 
+    void search(const QString&);
     void search();
     void searchNext();
     void findNotFound();
@@ -77,7 +81,6 @@ private slots:
     void zoomIn();
     void zoomOut();
     void setWordWrap(bool y);
-    void setFixedWidth(bool y);
 
     void clipboardChanged();
 
@@ -89,7 +92,7 @@ private:
     bool save();
     void clear();
     void updateCaption( const QString &name=QString() );
-    void setFontSize(int sz, bool round_down_not_up);
+    void setFontSize(qreal size);
     void setupFontSizes(void);
     void setReadOnly(bool);
 
@@ -97,32 +100,25 @@ private:
     QStackedWidget *editorStack;
     QDocumentSelector *fileSelector;
     QpeEditor* editor;
-#ifndef QTOPIA_PHONE
-    QToolBar *menu, *editBar;
-#else
-    QToolButton *findTb;
-#endif
-    QToolBar *searchBar;
-    QLineEdit *searchEdit;
     QAction *pasteAction;
-    QAction *fixedAction;
     QAction *findAction;
     QContent *doc;
+    StupidToolTip *mToolTip;
+    QWidget *mFindTextWidget;
+    QLineEdit *mFindTextEntry;
+    QLabel *mFindIcon;
+    QVBoxLayout *mEditorLayout;
 
-#ifdef QTOPIA_PHONE
     QString backup;
     bool qCopActivated, canceled, saved;
-#endif
 
     bool wasCreated;
     bool searchVisible;
     QAction *zin, *zout;
-    bool zinE,zoutE,zoomOutLast;
-    int variableFontSize;
+    bool zinE, zoutE;
+    qreal defaultFontSize;
+    QList<qreal> fontSizes;
     QString calculateName(QString);
-#ifdef QTOPIA_PHONE
-    QMenu *contextMenu;
-#endif
 };
 
 #endif

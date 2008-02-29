@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -60,6 +60,7 @@ IrPowerService_Private::~IrPowerService_Private()
     but the system integrator might change the application that
     implements this service.
 
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
     \sa QCommDeviceController, QCommDeviceSession
  */
 
@@ -135,11 +136,7 @@ bool IrPowerService::shouldBringDown(QUnixSocket *) const
                                        QMessageBox::Yes|QMessageBox::Default,
                                        QMessageBox::No|QMessageBox::Escape,
                                        QMessageBox::NoButton);
-#ifdef QTOPIA_PHONE
     int result = QtopiaApplication::execDialog(box);
-#else
-    int result = box->exec();
-#endif
 
     if (result == QMessageBox::No) {
     qLog(Infrared) << "User doesn't want to shut down the device..";
@@ -158,6 +155,8 @@ bool IrPowerService::shouldBringDown(QUnixSocket *) const
   \brief The IrPowerServiceTask class provides the IrPowerService as a server task.
 
     The IrPowerServiceTask manages the lifetime of an IrPowerService object.
+  
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!

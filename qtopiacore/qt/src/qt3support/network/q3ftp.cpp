@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -372,7 +387,7 @@ void Q3FtpDTP::abortConnection()
 
 bool Q3FtpDTP::parseDir( const QString &buffer, const QString &userName, QUrlInfo *info )
 {
-    QStringList lst = QStringList::split( " ", buffer );
+    QStringList lst = QStringList::split( QLatin1String(" "), buffer );
 
     if ( lst.count() < 9 )
 	return false;
@@ -382,15 +397,15 @@ bool Q3FtpDTP::parseDir( const QString &buffer, const QString &userName, QUrlInf
     // permissions
     tmp = lst[ 0 ];
 
-    if ( tmp[ 0 ] == QChar( 'd' ) ) {
+    if ( tmp[ 0 ] == QChar( QLatin1Char('d') ) ) {
 	info->setDir( true );
 	info->setFile( false );
 	info->setSymLink( false );
-    } else if ( tmp[ 0 ] == QChar( '-' ) ) {
+    } else if ( tmp[ 0 ] == QChar( QLatin1Char('-') ) ) {
 	info->setDir( false );
 	info->setFile( true );
 	info->setSymLink( false );
-    } else if ( tmp[ 0 ] == QChar( 'l' ) ) {
+    } else if ( tmp[ 0 ] == QChar( QLatin1Char('l') ) ) {
 	info->setDir( true ); // #### todo
 	info->setFile( false );
 	info->setSymLink( true );
@@ -406,15 +421,15 @@ bool Q3FtpDTP::parseDir( const QString &buffer, const QString &userName, QUrlInf
     static int executable = 2;
 
     bool perms[ 3 ][ 3 ];
-    perms[0][0] = (tmp[ 1 ] == 'r');
-    perms[0][1] = (tmp[ 2 ] == 'w');
-    perms[0][2] = (tmp[ 3 ] == 'x');
-    perms[1][0] = (tmp[ 4 ] == 'r');
-    perms[1][1] = (tmp[ 5 ] == 'w');
-    perms[1][2] = (tmp[ 6 ] == 'x');
-    perms[2][0] = (tmp[ 7 ] == 'r');
-    perms[2][1] = (tmp[ 8 ] == 'w');
-    perms[2][2] = (tmp[ 9 ] == 'x');
+    perms[0][0] = (tmp[ 1 ] == QLatin1Char('r'));
+    perms[0][1] = (tmp[ 2 ] == QLatin1Char('w'));
+    perms[0][2] = (tmp[ 3 ] == QLatin1Char('x'));
+    perms[1][0] = (tmp[ 4 ] == QLatin1Char('r'));
+    perms[1][1] = (tmp[ 5 ] == QLatin1Char('w'));
+    perms[1][2] = (tmp[ 6 ] == QLatin1Char('x'));
+    perms[2][0] = (tmp[ 7 ] == QLatin1Char('r'));
+    perms[2][1] = (tmp[ 8 ] == QLatin1Char('w'));
+    perms[2][2] = (tmp[ 9 ] == QLatin1Char('x'));
 
     // owner
     tmp = lst[ 2 ];
@@ -458,14 +473,14 @@ bool Q3FtpDTP::parseDir( const QString &buffer, const QString &userName, QUrlInf
     // date and time
     QTime time;
     QString dateStr;
-    dateStr += "Sun ";
+    dateStr += QLatin1String("Sun ");
     lst[ 5 ][ 0 ] = lst[ 5 ][ 0 ].upper();
     dateStr += lst[ 5 ];
-    dateStr += ' ';
+    dateStr += QLatin1Char(' ');
     dateStr += lst[ 6 ];
-    dateStr += ' ';
+    dateStr += QLatin1Char(' ');
 
-    if ( lst[ 7 ].contains( ":" ) ) {
+    if ( lst[ 7 ].contains( QLatin1String(":") ) ) {
 	time = QTime( lst[ 7 ].left( 2 ).toInt(), lst[ 7 ].right( 2 ).toInt() );
 	dateStr += QString::number( QDate::currentDate().year() );
     } else {
@@ -475,7 +490,7 @@ bool Q3FtpDTP::parseDir( const QString &buffer, const QString &userName, QUrlInf
     QDate date = QDate::fromString( dateStr );
     info->setLastModified( QDateTime( date, time ) );
 
-    if ( lst[ 7 ].contains( ":" ) ) {
+    if ( lst[ 7 ].contains( QLatin1String(":") ) ) {
 	const int futureTolerance = 600;
 	if( info->lastModified().secsTo( QDateTime::currentDateTime() ) < -futureTolerance ) {
 	    QDateTime dt = info->lastModified();
@@ -492,7 +507,7 @@ bool Q3FtpDTP::parseDir( const QString &buffer, const QString &userName, QUrlInf
     else {
 	QString n;
 	for ( uint i = 8; i < (uint) lst.count(); ++i )
-	    n += lst[ i ] + " ";
+	    n += lst[ i ] + QLatin1String(" ");
 	n = n.stripWhiteSpace();
 	info->setName( n );
     }
@@ -528,20 +543,20 @@ void Q3FtpDTP::socketReadyRead()
 	return;
     }
 
-    if ( pi->currentCommand().startsWith("LIST") ) {
+    if ( pi->currentCommand().startsWith(QLatin1String("LIST")) ) {
 	while ( socket.canReadLine() ) {
 	    QUrlInfo i;
-	    QString line = socket.readLine();
+	    QString line = QLatin1String(socket.readLine());
 #if defined(Q3FTPDTP_DEBUG)
 	    qDebug( "Q3FtpDTP read (list): '%s'", line.latin1() );
 #endif
-	    if ( parseDir( line, "", &i ) ) {
+	    if ( parseDir( line, QLatin1String(""), &i ) ) {
 		emit listInfo( i );
 	    } else {
 		// some FTP servers don't return a 550 if the file or directory
 		// does not exist, but rather write a text to the data socket
 		// -- try to catch these cases
-		if ( line.endsWith( "No such file or directory\r\n" ) )
+		if ( line.endsWith( QLatin1String("No such file or directory\r\n") ) )
 		    err = line;
 	    }
 	}
@@ -691,7 +706,7 @@ void Q3FtpPI::abort()
 #endif
     commandSocket.writeBlock( "ABOR\r\n", 6 );
 
-    if ( currentCmd.startsWith("STOR ") )
+    if ( currentCmd.startsWith(QLatin1String("STOR ")) )
 	dtp.abortConnection();
 }
 
@@ -740,7 +755,7 @@ void Q3FtpPI::readyRead()
 
     while ( commandSocket.canReadLine() ) {
 	// read line with respect to line continuation
-	QString line = commandSocket.readLine();
+	QString line = QLatin1String(commandSocket.readLine());
 	if ( replyText.isEmpty() ) {
 	    if ( line.length() < 3 ) {
 		// ### protocol error
@@ -772,15 +787,15 @@ void Q3FtpPI::readyRead()
 		replyText += line;
 	    if ( !commandSocket.canReadLine() )
 		return;
-	    line = commandSocket.readLine();
+	    line = QLatin1String(commandSocket.readLine());
 	    lineLeft4 = line.left(4);
 	}
 	replyText += line.mid( 4 ); // strip reply code 'xyz '
-	if ( replyText.endsWith("\r\n") )
+	if ( replyText.endsWith(QLatin1String("\r\n")) )
 	    replyText.truncate( replyText.length()-2 );
 
 	if ( processReply() )
-	    replyText = "";
+	    replyText = QLatin1String("");
     }
 }
 
@@ -869,7 +884,7 @@ bool Q3FtpPI::processReply()
         // both examples where the parenthesis are used, and where
         // they are missing. We need to scan for the address and host
         // info.
-	QRegExp addrPortPattern("(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)");
+	QRegExp addrPortPattern(QLatin1String("(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)"));
 	if (addrPortPattern.search(replyText) == -1) {
 #if defined(Q3FTPPI_DEBUG)
 	    qDebug( "Q3Ftp: bad 227 response -- address and port information missing" );
@@ -877,14 +892,14 @@ bool Q3FtpPI::processReply()
 	    // ### error handling
 	} else {
 	    QStringList lst = addrPortPattern.capturedTexts();
-	    QString host = lst[1] + "." + lst[2] + "." + lst[3] + "." + lst[4];
+	    QString host = lst[1] + QLatin1String(".") + lst[2] + QLatin1String(".") + lst[3] + QLatin1String(".") + lst[4];
 	    Q_UINT16 port = ( lst[5].toUInt() << 8 ) + lst[6].toUInt();
 	    waitForDtpToConnect = true;
 	    dtp.connectToHost( host, port );
 	}
     } else if ( replyCodeInt == 230 ) {
-	if ( currentCmd.startsWith("USER ") && pendingCommands.count()>0 &&
-		pendingCommands.first().startsWith("PASS ") ) {
+	if ( currentCmd.startsWith(QLatin1String("USER ")) && pendingCommands.count()>0 &&
+		pendingCommands.first().startsWith(QLatin1String("PASS ")) ) {
 	    // no need to send the PASS -- we are already logged in
 	    pendingCommands.pop_front();
 	}
@@ -892,9 +907,9 @@ bool Q3FtpPI::processReply()
 	emit connectState( Q3Ftp::LoggedIn );
     } else if ( replyCodeInt == 213 ) {
 	// 213 File status.
-	if ( currentCmd.startsWith("SIZE ") )
+	if ( currentCmd.startsWith(QLatin1String("SIZE ")) )
 	    dtp.setBytesTotal( replyText.simplifyWhiteSpace().toInt() );
-    } else if ( replyCode[0]==1 && currentCmd.startsWith("STOR ") ) {
+    } else if ( replyCode[0]==1 && currentCmd.startsWith(QLatin1String("STOR ")) ) {
 	dtp.writeData();
     }
 
@@ -978,7 +993,7 @@ void Q3FtpPI::dtpConnectState( int s )
 	    if ( waitForDtpToClose ) {
 		// there is an unprocessed reply
 		if ( processReply() )
-		    replyText = "";
+		    replyText = QLatin1String("");
 		else
 		    return;
 	    }
@@ -1176,7 +1191,7 @@ static void delete_d( const Q3Ftp* foo )
     \endcode
 
     The dataTransferProgress() signal in the above example is useful
-    if you want to show a \link QProgressBar progressbar \endlink to
+    if you want to show a \link QProgressBar progress bar \endlink to
     inform the user about the progress of the download. The
     readyRead() signal tells you that there is data ready to be read.
     The amount of data can be queried then with the bytesAvailable()
@@ -1467,8 +1482,8 @@ int Q3Ftp::connectToHost( const QString &host, Q_UINT16 port )
 int Q3Ftp::login( const QString &user, const QString &password )
 {
     QStringList cmds;
-    cmds << ( QString("USER ") + ( user.isNull() ? QString("anonymous") : user ) + "\r\n" );
-    cmds << ( QString("PASS ") + ( password.isNull() ? QString("anonymous@") : password ) + "\r\n" );
+    cmds << ( QString(QLatin1String("USER ")) + ( user.isNull() ? QString(QLatin1String("anonymous")) : user ) + QLatin1String("\r\n") );
+    cmds << ( QString(QLatin1String("PASS ")) + ( password.isNull() ? QString(QLatin1String("anonymous@")) : password ) + QLatin1String("\r\n") );
     return addCommand( new Q3FtpCommand( Login, cmds ) );
 }
 
@@ -1492,7 +1507,7 @@ int Q3Ftp::login( const QString &user, const QString &password )
 */
 int Q3Ftp::close()
 {
-    return addCommand( new Q3FtpCommand( Close, QStringList("QUIT\r\n") ) );
+    return addCommand( new Q3FtpCommand( Close, QStringList(QLatin1String("QUIT\r\n")) ) );
 }
 
 /*!
@@ -1515,12 +1530,12 @@ int Q3Ftp::close()
 int Q3Ftp::list( const QString &dir )
 {
     QStringList cmds;
-    cmds << "TYPE A\r\n";
-    cmds << "PASV\r\n";
+    cmds << QLatin1String("TYPE A\r\n");
+    cmds << QLatin1String("PASV\r\n");
     if ( dir.isEmpty() )
-	cmds << "LIST\r\n";
+	cmds << QLatin1String("LIST\r\n");
     else
-	cmds << ( "LIST " + dir + "\r\n" );
+	cmds << ( QLatin1String("LIST ") + dir + QLatin1String("\r\n") );
     return addCommand( new Q3FtpCommand( List, cmds ) );
 }
 
@@ -1540,7 +1555,7 @@ int Q3Ftp::list( const QString &dir )
 */
 int Q3Ftp::cd( const QString &dir )
 {
-    return addCommand( new Q3FtpCommand( Cd, QStringList("CWD "+dir+"\r\n") ) );
+    return addCommand( new Q3FtpCommand( Cd, QStringList(QLatin1String("CWD ")+dir+QLatin1String("\r\n")) ) );
 }
 
 /*!
@@ -1583,10 +1598,10 @@ int Q3Ftp::cd( const QString &dir )
 int Q3Ftp::get( const QString &file, QIODevice *dev )
 {
     QStringList cmds;
-    cmds << ( "SIZE " + file + "\r\n" );
-    cmds << "TYPE I\r\n";
-    cmds << "PASV\r\n";
-    cmds << ( "RETR " + file + "\r\n" );
+    cmds << ( QLatin1String("SIZE ") + file + QLatin1String("\r\n") );
+    cmds << QLatin1String("TYPE I\r\n");
+    cmds << QLatin1String("PASV\r\n");
+    cmds << ( QLatin1String("RETR ") + file + QLatin1String("\r\n") );
     if ( dev )
 	return addCommand( new Q3FtpCommand( Get, cmds, dev ) );
     return addCommand( new Q3FtpCommand( Get, cmds ) );
@@ -1613,10 +1628,10 @@ int Q3Ftp::get( const QString &file, QIODevice *dev )
 int Q3Ftp::put( const QByteArray &data, const QString &file )
 {
     QStringList cmds;
-    cmds << "TYPE I\r\n";
-    cmds << "PASV\r\n";
-    cmds << ( "ALLO " + QString::number(data.size()) + "\r\n" );
-    cmds << ( "STOR " + file + "\r\n" );
+    cmds << QLatin1String("TYPE I\r\n");
+    cmds << QLatin1String("PASV\r\n");
+    cmds << ( QLatin1String("ALLO ") + QString::number(data.size()) + QLatin1String("\r\n") );
+    cmds << ( QLatin1String("STOR ") + file + QLatin1String("\r\n") );
     return addCommand( new Q3FtpCommand( Put, cmds, data ) );
 }
 
@@ -1634,11 +1649,11 @@ int Q3Ftp::put( const QByteArray &data, const QString &file )
 int Q3Ftp::put( QIODevice *dev, const QString &file )
 {
     QStringList cmds;
-    cmds << "TYPE I\r\n";
-    cmds << "PASV\r\n";
+    cmds << QLatin1String("TYPE I\r\n");
+    cmds << QLatin1String("PASV\r\n");
     if ( !dev->isSequentialAccess() )
-	cmds << ( "ALLO " + QString::number(dev->size()) + "\r\n" );
-    cmds << ( "STOR " + file + "\r\n" );
+	cmds << ( QLatin1String("ALLO ") + QString::number(dev->size()) + QLatin1String("\r\n") );
+    cmds << ( QLatin1String("STOR ") + file + QLatin1String("\r\n") );
     return addCommand( new Q3FtpCommand( Put, cmds, dev ) );
 }
 
@@ -1658,7 +1673,7 @@ int Q3Ftp::put( QIODevice *dev, const QString &file )
 */
 int Q3Ftp::remove( const QString &file )
 {
-    return addCommand( new Q3FtpCommand( Remove, QStringList("DELE "+file+"\r\n") ) );
+    return addCommand( new Q3FtpCommand( Remove, QStringList(QLatin1String("DELE ")+file+QLatin1String("\r\n")) ) );
 }
 
 /*!
@@ -1677,7 +1692,7 @@ int Q3Ftp::remove( const QString &file )
 */
 int Q3Ftp::mkdir( const QString &dir )
 {
-    return addCommand( new Q3FtpCommand( Mkdir, QStringList("MKD "+dir+"\r\n") ) );
+    return addCommand( new Q3FtpCommand( Mkdir, QStringList(QLatin1String("MKD ")+dir+QLatin1String("\r\n")) ) );
 }
 
 /*!
@@ -1696,7 +1711,7 @@ int Q3Ftp::mkdir( const QString &dir )
 */
 int Q3Ftp::rmdir( const QString &dir )
 {
-    return addCommand( new Q3FtpCommand( Rmdir, QStringList("RMD "+dir+"\r\n") ) );
+    return addCommand( new Q3FtpCommand( Rmdir, QStringList(QLatin1String("RMD ")+dir+QLatin1String("\r\n")) ) );
 }
 
 /*!
@@ -1716,8 +1731,8 @@ int Q3Ftp::rmdir( const QString &dir )
 int Q3Ftp::rename( const QString &oldname, const QString &newname )
 {
     QStringList cmds;
-    cmds << ( "RNFR " + oldname + "\r\n" );
-    cmds << ( "RNTO " + newname + "\r\n" );
+    cmds << ( QLatin1String("RNFR ") + oldname + QLatin1String("\r\n") );
+    cmds << ( QLatin1String("RNTO ") + newname + QLatin1String("\r\n") );
     return addCommand( new Q3FtpCommand( Rename, cmds ) );
 }
 
@@ -1741,7 +1756,7 @@ int Q3Ftp::rename( const QString &oldname, const QString &newname )
 */
 int Q3Ftp::rawCommand( const QString &command )
 {
-    QString cmd = command.stripWhiteSpace() + "\r\n";
+    QString cmd = command.stripWhiteSpace() + QLatin1String("\r\n");
     return addCommand( new Q3FtpCommand( RawCommand, QStringList(cmd) ) );
 }
 
@@ -2034,10 +2049,10 @@ void Q3Ftp::piError( int errorCode, const QString &text )
     Q3FtpCommand *c = d->pending.getFirst();
 
     // non-fatal errors
-    if ( c->command==Get && d->pi.currentCommand().startsWith("SIZE ") ) {
+    if ( c->command==Get && d->pi.currentCommand().startsWith(QLatin1String("SIZE ")) ) {
 	d->pi.dtp.setBytesTotal( -1 );
 	return;
-    } else if ( c->command==Put && d->pi.currentCommand().startsWith("ALLO ") ) {
+    } else if ( c->command==Put && d->pi.currentCommand().startsWith(QLatin1String("ALLO ")) ) {
 	return;
     }
 
@@ -2127,7 +2142,7 @@ void Q3Ftp::operationListChildren( Q3NetworkOperation *op )
 {
     op->setState( StInProgress );
 
-    cd( ( url()->path().isEmpty() ? QString( "/" ) : url()->path() ) );
+    cd( ( url()->path().isEmpty() ? QString( QLatin1String("/") ) : url()->path() ) );
     list();
     emit start( op );
 }
@@ -2147,7 +2162,7 @@ void Q3Ftp::operationRemove( Q3NetworkOperation *op )
 {
     op->setState( StInProgress );
 
-    cd( ( url()->path().isEmpty() ? QString( "/" ) : url()->path() ) );
+    cd( ( url()->path().isEmpty() ? QString( QLatin1String("/") ) : url()->path() ) );
     remove( Q3Url( op->arg( 0 ) ).path() );
 }
 
@@ -2157,7 +2172,7 @@ void Q3Ftp::operationRename( Q3NetworkOperation *op )
 {
     op->setState( StInProgress );
 
-    cd( ( url()->path().isEmpty() ? QString( "/" ) : url()->path() ) );
+    cd( ( url()->path().isEmpty() ? QString( QLatin1String("/") ) : url()->path() ) );
     rename( op->arg( 0 ), op->arg( 1 ));
 }
 
@@ -2211,8 +2226,8 @@ bool Q3Ftp::checkConnection( Q3NetworkOperation *op )
 		connectToHost( url()->host(), url()->port() != -1 ? url()->port() : 21 );
 		break;
 	}
-	QString user = url()->user().isEmpty() ? QString( "anonymous" ) : url()->user();
-	QString pass = url()->password().isEmpty() ? QString( "anonymous@" ) : url()->password();
+	QString user = url()->user().isEmpty() ? QString( QLatin1String("anonymous") ) : url()->user();
+	QString pass = url()->password().isEmpty() ? QString( QLatin1String("anonymous@") ) : url()->password();
 	login( user, pass );
     }
 
@@ -2292,7 +2307,7 @@ void Q3Ftp::npDone( bool err )
 		    break;
 		case OpMkDir:
 		    {
-			QUrlInfo inf( op->arg( 0 ), 0, "", "", 0, QDateTime(),
+			QUrlInfo inf( op->arg( 0 ), 0, QLatin1String(""), QLatin1String(""), 0, QDateTime(),
 				QDateTime(), true, false, false, true, true, true );
 			emit newChild( inf, op );
 			emit createdDirectory( inf, op );

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -39,7 +54,7 @@
     \class QLabel
     \brief The QLabel widget provides a text or image display.
 
-    \ingroup basic
+    \ingroup basicwidgets
     \ingroup text
     \mainclass
 
@@ -210,9 +225,8 @@ QLabel::QLabel(const QString &text, QWidget *parent, const char *name,
     buddy widget, \a buddy.
 
     If the \a text contains an underlined letter (a letter preceded by
-    an ampersand, \&), and the text is in plain text format, when the
-    user presses Alt+ the underlined letter, focus is passed to the
-    buddy widget.
+    an ampersand, \&), when the user presses Alt+ the underlined letter,
+    focus is passed to the buddy widget.
 
     The \a parent, \a name and widget flag, \a f, arguments are passed
     to the QFrame constructor.
@@ -255,7 +269,7 @@ void QLabelPrivate::init()
     movie = 0;
 #endif
 #ifndef QT_NO_SHORTCUT
-    shortcutId = -1;
+    shortcutId = 0;
 #endif
     pixmap = 0;
     scaledpixmap = 0;
@@ -266,16 +280,25 @@ void QLabelPrivate::init()
     align = Qt::AlignLeft | Qt::AlignVCenter | Qt::TextExpandTabs;
     indent = -1;
     scaledcontents = false;
+    textLayoutDirty = false;
     textDirty = false;
     textformat = Qt::AutoText;
-    doc = 0;
     control = 0;
     textInteractionFlags = Qt::LinksAccessibleByMouse;
+    isRichText = false;
+    isTextLabel = false;
 
-    q->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
+    q->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred,
+                                 QSizePolicy::Label));
 
-    hasCustomCursor = false;
+#ifndef QT_NO_CURSOR
+    validCursor = false;
+    onAnchor = false;
+#endif
+
     openExternalLinks = false;
+
+    setLayoutItemMargins(QStyle::SE_LabelLayoutItem);
 }
 
 
@@ -291,17 +314,18 @@ void QLabelPrivate::init()
     The default setting is Qt::AutoText; i.e. QLabel will try to
     auto-detect the format of the text set.
 
-    If the text is interpreted as a plain text and a buddy has been
-    set, the buddy mnemonic key is updated from the new text.
-
-    The label resizes itself if auto-resizing is enabled.
+    If a buddy has been set, the buddy mnemonic key is updated
+    from the new text.
 
     Note that QLabel is well-suited to display small rich text
     documents, such as small documents that get their document
     specific settings (font, text color, link color) from the label's
     palette and font properties. For large documents, use QTextEdit
-    in read-only mode instead. QTextEdit can also provide a scrollbar
+    in read-only mode instead. QTextEdit can also provide a scroll bar
     when necessary.
+
+    \note This function enables mouse tracking if \a text contains rich
+    text.
 
     \sa setTextFormat(), setBuddy(), alignment
 */
@@ -311,27 +335,37 @@ void QLabel::setText(const QString &text)
     Q_D(QLabel);
     if (d->text == text)
         return;
+
+    QTextControl *oldControl = d->control;
+    d->control = 0;
+
     d->clearContents();
     d->text = text;
-    if (!d->doc) {
-        d->doc = new QTextDocument(this);
-        d->doc->setUndoRedoEnabled(false);
-        d->doc->setDefaultFont(font());
+    d->isTextLabel = true;
+    d->textDirty = true;
+    d->isRichText = d->textformat == Qt::RichText
+                    || (d->textformat == Qt::AutoText && Qt::mightBeRichText(d->text));
+
+    d->control = oldControl;
+
+    if (d->needTextControl()) {
+        d->ensureTextControl();
+    } else {
+        delete d->control;
+        d->control = 0;
     }
 
-    if (d->isRichText()) {
-        d->doc->setHtml(text);
+    if (d->isRichText) {
         setMouseTracking(true);
     } else {
-        d->doc->setPlainText(text);
-        setMouseTracking(false);
-#ifndef QT_NO_SHORTCUT
-        if (d->buddy)
-            d->updateShortcut();
-#endif
+        // Note: mouse tracking not disabled intentionally
     }
 
-    d->textInteractionFlagsChanged();
+#ifndef QT_NO_SHORTCUT
+    if (d->buddy)
+        d->updateShortcut();
+#endif
+
     d->updateLabel();
 }
 
@@ -356,7 +390,7 @@ void QLabel::clear()
     \property QLabel::pixmap
     \brief the label's pixmap
 
-    If no pixmap has been set this will return an invalid pixmap.
+    If no pixmap has been set this will return 0.
 
     Setting the pixmap clears any previous content. The buddy
     shortcut, if any, is disabled.
@@ -364,7 +398,7 @@ void QLabel::clear()
 void QLabel::setPixmap(const QPixmap &pixmap)
 {
     Q_D(QLabel);
-    if (!d->pixmap || d->pixmap->serialNumber() != pixmap.serialNumber()) {
+    if (!d->pixmap || d->pixmap->cacheKey() != pixmap.cacheKey()) {
         d->clearContents();
         d->pixmap = new QPixmap(pixmap);
     }
@@ -409,8 +443,6 @@ void QLabel::setPicture(const QPicture &picture)
 
     The buddy shortcut, if any, is disabled.
 
-    The label resizes itself if auto-resizing is enabled.
-
     \sa setText(), QString::setNum(), setBuddy()
 */
 
@@ -430,8 +462,6 @@ void QLabel::setNum(int num)
     the current contents of the label.
 
     The buddy shortcut, if any, is disabled.
-
-    The label resizes itself if auto-resizing is enabled.
 
     \sa setText(), QString::setNum(), setBuddy()
 */
@@ -578,6 +608,7 @@ QSize QLabelPrivate::sizeForWidth(int w) const
 
     int hextra = 2 * margin;
     int vextra = hextra;
+    QFontMetrics fm = q->fontMetrics();
 
     if (pixmap)
         br = pixmap->rect();
@@ -589,40 +620,61 @@ QSize QLabelPrivate::sizeForWidth(int w) const
     else if (movie)
         br = movie->currentPixmap().rect();
 #endif
-    else if (doc) {
-        ensureTextLayouted();
-        const qreal oldTextWidth = doc->textWidth();
+    else if (isTextLabel) {
+        int align = QStyle::visualAlignment(q->layoutDirection(), QFlag(this->align));
         // Add indentation
-        QFontMetrics fm(q->fontMetrics());
         int m = indent;
 
         if (m < 0 && q->frameWidth()) // no indent, but we do have a frame
             m = fm.width(QLatin1Char('x')) - margin*2;
         if (m > 0) {
-            int align = QStyle::visualAlignment(q->layoutDirection(), QFlag(this->align));
             if ((align & Qt::AlignLeft) || (align & Qt::AlignRight))
                 hextra += m;
             if ((align & Qt::AlignTop) || (align & Qt::AlignBottom))
                 vextra += m;
         }
 
-        // Calculate the length of document if w is the width
-        if (align & Qt::TextWordWrap) {
-            if (w >= 0) {
-                w = qMax(w-hextra-contentsMargin.width(), 0); // strip margin and indent
-                doc->setTextWidth(w);
+        if (control) {
+            ensureTextLayouted();
+            const qreal oldTextWidth = control->textWidth();
+            // Calculate the length of document if w is the width
+            if (align & Qt::TextWordWrap) {
+                if (w >= 0) {
+                    w = qMax(w-hextra-contentsMargin.width(), 0); // strip margin and indent
+                    control->setTextWidth(w);
+                } else {
+                    control->adjustSize();
+                }
             } else {
-                doc->adjustSize();
+                control->setTextWidth(-1);
             }
-        } else {
-            doc->setTextWidth(-1);
-        }
-        br = QRect(QPoint(0, 0), doc->size().toSize());
+            br = QRect(QPoint(0, 0), control->size().toSize());
 
-        // restore state
-        doc->setTextWidth(oldTextWidth);
+            // restore state
+            control->setTextWidth(oldTextWidth);
+        } else {
+            int flags = align;
+            if (hasShortcut) {
+                flags |= Qt::TextShowMnemonic;
+                QStyleOption opt;
+                opt.initFrom(q);
+                if (!q->style()->styleHint(QStyle::SH_UnderlineShortcut, &opt, q))
+                    flags |= Qt::TextHideMnemonic;
+            }
+
+            bool tryWidth = (w < 0) && (align & Qt::TextWordWrap);
+            if (tryWidth)
+                w = fm.averageCharWidth() * 80;
+            else if (w < 0)
+                w = 2000;
+            w -= (hextra + contentsMargin.width());
+            br = fm.boundingRect(0, 0, w ,2000, flags, text);
+            if (tryWidth && br.height() < 4*fm.lineSpacing() && br.width() > w/2)
+                br = fm.boundingRect(0, 0, w/2, 2000, flags, text);
+            if (tryWidth && br.height() < 2*fm.lineSpacing() && br.width() > w/4)
+                br = fm.boundingRect(0, 0, w/4, 2000, flags, text);
+        }
     } else {
-        QFontMetrics fm = q->fontMetrics();
         br = QRect(QPoint(0, 0), QSize(fm.averageCharWidth(), fm.lineSpacing()));
     }
 
@@ -638,7 +690,7 @@ QSize QLabelPrivate::sizeForWidth(int w) const
 int QLabel::heightForWidth(int w) const
 {
     Q_D(const QLabel);
-    if (d->doc)
+    if (d->isTextLabel)
         return d->sizeForWidth(w).height();
     return QWidget::heightForWidth(w);
 }
@@ -672,22 +724,6 @@ void QLabel::setOpenExternalLinks(bool open)
         d->control->setOpenExternalLinks(open);
 }
 
-void QLabelPrivate::textInteractionFlagsChanged()
-{    
-    if (!doc)
-        return;
-
-    bool richText = isRichText();
-    if ((richText && textInteractionFlags != Qt::NoTextInteraction)
-        || (!richText && (textInteractionFlags & (Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard)))) {
-        ensureTextControl();
-        control->setTextInteractionFlags(textInteractionFlags);
-    } else {
-        delete control;
-        control = 0;
-    }
-}
-
 /*!
     \property QLabel::textInteractionFlags
     \since 4.2
@@ -703,19 +739,25 @@ void QLabelPrivate::textInteractionFlagsChanged()
 void QLabel::setTextInteractionFlags(Qt::TextInteractionFlags flags)
 {
     Q_D(QLabel);
-
     if (d->textInteractionFlags == flags)
         return;
     d->textInteractionFlags = flags;
-
     if (flags & Qt::LinksAccessibleByKeyboard)
         setFocusPolicy(Qt::StrongFocus);
-    else if (flags & Qt::TextSelectableByKeyboard)
+    else if (flags & (Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse))
         setFocusPolicy(Qt::ClickFocus);
     else
         setFocusPolicy(Qt::NoFocus);
 
-    d->textInteractionFlagsChanged();
+    if (d->needTextControl()) {
+        d->ensureTextControl();
+    } else {
+        delete d->control;
+        d->control = 0;
+    }
+
+    if (d->control)
+        d->control->setTextInteractionFlags(d->textInteractionFlags);
 }
 
 Qt::TextInteractionFlags QLabel::textInteractionFlags() const
@@ -750,7 +792,7 @@ QSize QLabel::minimumSizeHint() const
     d->sh = d->sizeForWidth(-1); // wrap ? golden ratio : min doc size
     QSize msh(-1, -1);
 
-    if (!d->doc) {
+    if (!d->isTextLabel) {
         msh = d->sh;
     } else {
         msh.rheight() = d->sizeForWidth(QWIDGETSIZE_MAX).height(); // height for one line
@@ -768,11 +810,6 @@ QSize QLabel::minimumSizeHint() const
 void QLabel::mousePressEvent(QMouseEvent *ev)
 {
     Q_D(QLabel);
-    if (!d->doc) {
-        ev->ignore();
-        return;
-    }
-
     d->sendControlEvent(ev);
 }
 
@@ -781,11 +818,6 @@ void QLabel::mousePressEvent(QMouseEvent *ev)
 void QLabel::mouseMoveEvent(QMouseEvent *ev)
 {
     Q_D(QLabel);
-    if (!d->doc) {
-        ev->ignore();
-        return;
-    }
-
     d->sendControlEvent(ev);
 }
 
@@ -794,11 +826,6 @@ void QLabel::mouseMoveEvent(QMouseEvent *ev)
 void QLabel::mouseReleaseEvent(QMouseEvent *ev)
 {
     Q_D(QLabel);
-    if (!d->doc) {
-        ev->ignore();
-        return;
-    }
-
     d->sendControlEvent(ev);
 }
 
@@ -810,7 +837,7 @@ void QLabel::contextMenuEvent(QContextMenuEvent *ev)
     Q_UNUSED(ev);
 #else
     Q_D(QLabel);
-    if (!d->doc) {
+    if (!d->isTextLabel) {
         ev->ignore();
         return;
     }
@@ -831,7 +858,7 @@ void QLabel::contextMenuEvent(QContextMenuEvent *ev)
 void QLabel::focusInEvent(QFocusEvent *ev)
 {
     Q_D(QLabel);
-    if (d->doc) {
+    if (d->isTextLabel) {
         d->ensureTextControl();
         d->sendControlEvent(ev);
     }
@@ -889,9 +916,15 @@ bool QLabel::event(QEvent *e)
         }
     } else
 #endif
-    if (type == QEvent::Resize && d->doc) {
-        d->textDirty = true;
-    } else if (e->type() == QEvent::StyleChange) {
+    if (type == QEvent::Resize) {
+        if (d->control)
+            d->textLayoutDirty = true;
+    } else if (e->type() == QEvent::StyleChange
+#ifdef Q_WS_MAC
+               || e->type() == QEvent::MacSizeChange
+#endif
+               ) {
+        d->setLayoutItemMargins(QStyle::SE_LabelLayoutItem);
         d->updateLabel();
     }
 
@@ -919,49 +952,57 @@ void QLabel::paintEvent(QPaintEvent *)
     }
     else
 #endif
-    if (d->doc) {
-        const bool underline = (bool)style->styleHint(QStyle::SH_UnderlineShortcut, 0, this, 0);
+    if (d->isTextLabel) {
+        QRectF lr = d->layoutRect();
+        if (d->control) {
 #ifndef QT_NO_SHORTCUT
-        if (d->shortcutId != -1
-            && underline != d->shortcutCursor.charFormat().fontUnderline()) {
+            const bool underline = (bool)style->styleHint(QStyle::SH_UnderlineShortcut, 0, this, 0);
+            if (d->shortcutId != 0
+                && underline != d->shortcutCursor.charFormat().fontUnderline()) {
                 QTextCharFormat fmt;
                 fmt.setFontUnderline(underline);
                 d->shortcutCursor.mergeCharFormat(fmt);
-        }
+            }
 #endif
-        d->ensureTextLayouted();
-        QAbstractTextDocumentLayout *layout = d->doc->documentLayout();
-        QRect lr = d->layoutRect();
+            d->ensureTextLayouted();
 
-        QAbstractTextDocumentLayout::PaintContext context;
-        QStyleOption opt(0);
-        opt.init(this);
+            QAbstractTextDocumentLayout::PaintContext context;
+            QStyleOption opt(0);
+            opt.init(this);
 
-        if (!isEnabled() && style->styleHint(QStyle::SH_EtchDisabledText, &opt, this)) {
+            if (!isEnabled() && style->styleHint(QStyle::SH_EtchDisabledText, &opt, this)) {
+                context.palette = palette();
+                context.palette.setColor(QPalette::Text, context.palette.light().color());
+                painter.save();
+                painter.translate(lr.x() + 1, lr.y() + 1);
+                painter.setClipRect(lr.translated(-lr.x() - 1, -lr.y() - 1));
+                QAbstractTextDocumentLayout *layout = d->control->document()->documentLayout();
+                layout->draw(&painter, context);
+                painter.restore();
+            }
+
+            // Adjust the palette
             context.palette = palette();
-            context.palette.setColor(QPalette::Text, context.palette.light().color());
+            if (foregroundRole() != QPalette::Text && isEnabled())
+                context.palette.setColor(QPalette::Text, context.palette.color(foregroundRole()));
+
             painter.save();
-            painter.translate(lr.x() + 1, lr.y() + 1);
-            painter.setClipRect(lr.translated(-lr.x() - 1, -lr.y() - 1));
-            layout->draw(&painter, context);
-            painter.restore();
-        }
-
-        // Adjust the palette
-        context.palette = palette();
-        if (foregroundRole() != QPalette::Text && isEnabled())
-            context.palette.setColor(QPalette::Text, context.palette.color(foregroundRole()));
-
-        painter.save();
-        painter.translate(lr.topLeft());
-        painter.setClipRect(lr.translated(-lr.x(), -lr.y()));
-        if (d->control) {
+            painter.translate(lr.topLeft());
+            painter.setClipRect(lr.translated(-lr.x(), -lr.y()));
             d->control->setPalette(context.palette);
-            d->control->drawContents(&painter);
+            d->control->drawContents(&painter, QRectF(), this);
+            painter.restore();
         } else {
-            layout->draw(&painter, context);
+            int flags = align;
+            if (d->hasShortcut) {
+                flags |= Qt::TextShowMnemonic;
+                QStyleOption opt;
+                opt.initFrom(this);
+                if (!style->styleHint(QStyle::SH_UnderlineShortcut, &opt, this))
+                    flags |= Qt::TextHideMnemonic;
+            }
+            style->drawItemText(&painter, lr.toRect(), flags, palette(), isEnabled(), d->text, foregroundRole());
         }
-        painter.restore();
     } else
 #ifndef QT_NO_PICTURE
     if (d->picture) {
@@ -1019,13 +1060,13 @@ void QLabelPrivate::updateLabel()
     Q_Q(QLabel);
     valid_hints = false;
 
-    if (doc) {
+    if (isTextLabel) {
         QSizePolicy policy = q->sizePolicy();
         const bool wrap = align & Qt::TextWordWrap;
         policy.setHeightForWidth(wrap);
-        if (policy != q->sizePolicy())
+        if (policy != q->sizePolicy())  // ### should be replaced by WA_WState_OwnSizePolicy idiom
             q->setSizePolicy(policy);
-        textDirty = true;
+        textLayoutDirty = true;
     }
     q->updateGeometry();
     q->update(q->contentsRect());
@@ -1039,7 +1080,7 @@ void QLabelPrivate::updateLabel()
     the keyboard focus is transferred to the label's buddy widget.
 
     The buddy mechanism is only available for QLabels that contain
-    plain text in which one character is prefixed with an ampersand,
+    text in which one character is prefixed with an ampersand,
     '&'.  This character is set as the shortcut key. See the \l
     {QShortcut#mnemonic}{QShortcut} documentation for details (to
     display an actual ampersand, use '&&').
@@ -1071,10 +1112,11 @@ void QLabel::setBuddy(QWidget *buddy)
 {
     Q_D(QLabel);
     d->buddy = buddy;
-    if (d->doc && !d->isRichText()) {
-        releaseShortcut(d->shortcutId);
-        d->shortcutId = -1;
-        d->doc->setPlainText(d->text); // restore the old text
+    if (d->isTextLabel) {
+        if (d->shortcutId)
+            releaseShortcut(d->shortcutId);
+        d->shortcutId = 0;
+        d->textDirty = true;
         if (buddy)
             d->updateShortcut(); // grab new shortcut
         d->updateLabel();
@@ -1097,16 +1139,29 @@ QWidget * QLabel::buddy() const
 void QLabelPrivate::updateShortcut()
 {
     Q_Q(QLabel);
-    Q_ASSERT(shortcutId == -1);
-    Q_ASSERT(!isRichText());
+    Q_ASSERT(shortcutId == 0);
+    // Introduce an extra boolean to indicate the presence of a shortcut in the
+    // text. We cannot use the shortcutId itself because on the mac mnemonics are
+    // off by default, so QKeySequence::mnemonic always returns an empty sequence.
+    // But then we do want to hide the ampersands, so we can't use shortcutId.
+    hasShortcut = false;
 
-    // Underline the first character that follows an ampersand
-    shortcutCursor = doc->find(QLatin1String("&"));
-    if (shortcutCursor.isNull())
-        return;
-    shortcutId = q->grabShortcut(QKeySequence::mnemonic(text));
-    shortcutCursor.deleteChar(); // remove the ampersand
-    shortcutCursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+    if (control) {
+        ensureTextPopulated();
+        // Underline the first character that follows an ampersand
+        shortcutCursor = control->document()->find(QLatin1String("&"));
+        if (shortcutCursor.isNull())
+            return;
+        hasShortcut = true;
+        shortcutId = q->grabShortcut(QKeySequence::mnemonic(text));
+        shortcutCursor.deleteChar(); // remove the ampersand
+        shortcutCursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+    } else {
+        if (!text.contains(QLatin1String("&")))
+            return;
+        hasShortcut = true;
+        shortcutId = q->grabShortcut(QKeySequence::mnemonic(text));
+    }
 }
 
 #endif // QT_NO_SHORTCUT
@@ -1149,8 +1204,6 @@ void QLabelPrivate::_q_movieResized(const QSize& size)
 
     The buddy shortcut, if any, is disabled.
 
-    The label resizes itself if auto-resizing is enabled.
-
     \sa movie(), setBuddy()
 */
 
@@ -1184,8 +1237,8 @@ void QLabelPrivate::clearContents()
 {
     delete control;
     control = 0;
-    delete doc;
-    doc = 0;
+    isTextLabel = false;
+    hasShortcut = false;
 
 #ifndef QT_NO_PICTURE
     delete picture;
@@ -1201,8 +1254,9 @@ void QLabelPrivate::clearContents()
     text.clear();
     Q_Q(QLabel);
 #ifndef QT_NO_SHORTCUT
-    q->releaseShortcut(shortcutId);
-    shortcutId = -1;
+    if (shortcutId)
+        q->releaseShortcut(shortcutId);
+    shortcutId = 0;
 #endif
 #ifndef QT_NO_MOVIE
     if (movie) {
@@ -1210,6 +1264,16 @@ void QLabelPrivate::clearContents()
         QObject::disconnect(movie, SIGNAL(updated(QRect)), q, SLOT(_q_movieUpdated(QRect)));
     }
     movie = 0;
+#endif
+#ifndef QT_NO_CURSOR
+    if (onAnchor) {
+        if (validCursor)
+            q->setCursor(cursor);
+        else
+            q->unsetCursor();
+    }
+    validCursor = false;
+    onAnchor = false;
 #endif
 }
 
@@ -1269,12 +1333,15 @@ void QLabel::changeEvent(QEvent *ev)
 {
     Q_D(QLabel);
     if(ev->type() == QEvent::FontChange || ev->type() == QEvent::ApplicationFontChange) {
-        if (d->doc) {
-            d->doc->setDefaultFont(font());
+        if (d->isTextLabel) {
+            if (d->control)
+                d->control->document()->setDefaultFont(font());
             d->updateLabel();
         }
     } else if (ev->type() == QEvent::PaletteChange && d->control) {
         d->control->setPalette(palette());
+    } else if (ev->type() == QEvent::ContentsRectChange) {
+        d->updateLabel();
     }
     QFrame::changeEvent(ev);
 }
@@ -1324,7 +1391,7 @@ void QLabel::setScaledContents(bool enable)
 QRect QLabelPrivate::documentRect() const
 {
     Q_Q(const QLabel);
-    Q_ASSERT_X(doc, "documentRect", "document rect called when doc not set!");
+    Q_ASSERT_X(isTextLabel, "documentRect", "document rect called for label that is not a text label!");
     QRect cr = q->contentsRect();
     cr.adjust(margin, margin, -margin, -margin);
     const int align = QStyle::visualAlignment(q->layoutDirection(), QFlag(this->align));
@@ -1344,57 +1411,81 @@ QRect QLabelPrivate::documentRect() const
     return cr;
 }
 
-void QLabelPrivate::ensureTextLayouted() const
+void QLabelPrivate::ensureTextPopulated() const
 {
     if (!textDirty)
         return;
-    Q_Q(const QLabel);
-    if (doc) {
-        QTextDocumentLayout *lout = qobject_cast<QTextDocumentLayout *>(doc->documentLayout());
-        Q_ASSERT(lout);
-
-        const bool wrap = align & Qt::TextWordWrap;
-        int align = QStyle::visualAlignment(q->layoutDirection(), QFlag(this->align));
-        int flags = (wrap? 0 : Qt::TextSingleLine) | align;
-        flags |= (q->layoutDirection() == Qt::RightToLeft) ? QTextDocumentLayout::RTL : QTextDocumentLayout::LTR;
-        lout->setBlockTextFlags(flags);
-
-        if (wrap) {
-            // ensure that we break at words and not just about anywhere
-            lout->setWordWrapMode(QTextOption::WordWrap);
+    if (control) {
+        QTextDocument *doc = control->document();
+        if (textDirty) {
+            if (isRichText)
+                doc->setHtml(text);
+            else
+                doc->setPlainText(text);
+            doc->setUndoRedoEnabled(false);
         }
+    }
+    textDirty = false;
+}
+
+void QLabelPrivate::ensureTextLayouted() const
+{
+    if (!textLayoutDirty)
+        return;
+    ensureTextPopulated();
+    Q_Q(const QLabel);
+    if (control) {
+        QTextDocument *doc = control->document();
+        QTextOption opt = doc->defaultTextOption();
+
+        Qt::Alignment align = QStyle::visualAlignment(q->layoutDirection(), QFlag(this->align));
+        opt.setAlignment(align);
+
+        if (this->align & Qt::TextWordWrap)
+            opt.setWrapMode(QTextOption::WordWrap);
+        else
+            opt.setWrapMode(QTextOption::ManualWrap);
+
+        opt.setTextDirection(q->layoutDirection());
+
+        doc->setDefaultTextOption(opt);
 
         QTextFrameFormat fmt = doc->rootFrame()->frameFormat();
         fmt.setMargin(0);
         doc->rootFrame()->setFrameFormat(fmt);
         doc->setTextWidth(documentRect().width());
     }
-    textDirty = false;
+    textLayoutDirty = false;
 }
 
-void QLabelPrivate::ensureTextControl()
+void QLabelPrivate::ensureTextControl() const
 {
-    Q_Q(QLabel);
-    if (control || !doc)
+    Q_Q(const QLabel);
+    if (!isTextLabel)
         return;
-    ensureTextLayouted();
-    control = new QTextControl(doc, q);
-    control->setTextInteractionFlags(textInteractionFlags);
-    control->setOpenExternalLinks(openExternalLinks);
-    control->setPalette(q->palette());
-    control->setFocus(q->hasFocus());
-    QObject::connect(control, SIGNAL(updateRequest(QRectF)),
-                     q, SLOT(update()));
-    QObject::connect(control, SIGNAL(linkHovered(QString)),
-                     q, SLOT(_q_linkHovered(QString)));
-    QObject::connect(control, SIGNAL(linkActivated(QString)),
-                     q, SIGNAL(linkActivated(QString)));
+    if (!control) {
+        control = new QTextControl(const_cast<QLabel *>(q));
+        control->document()->setUndoRedoEnabled(false);
+        control->document()->setDefaultFont(q->font());
+        control->setTextInteractionFlags(textInteractionFlags);
+        control->setOpenExternalLinks(openExternalLinks);
+        control->setPalette(q->palette());
+        control->setFocus(q->hasFocus());
+        QObject::connect(control, SIGNAL(updateRequest(QRectF)),
+                         q, SLOT(update()));
+        QObject::connect(control, SIGNAL(linkHovered(QString)),
+                         q, SLOT(_q_linkHovered(QString)));
+        QObject::connect(control, SIGNAL(linkActivated(QString)),
+                         q, SIGNAL(linkActivated(QString)));
+        textLayoutDirty = true;
+        textDirty = true;
+    }
 }
 
 void QLabelPrivate::sendControlEvent(QEvent *e)
 {
     Q_Q(QLabel);
-    if (!control) {
+    if (!isTextLabel || !control || textInteractionFlags == Qt::NoTextInteraction) {
         e->ignore();
         return;
     }
@@ -1404,42 +1495,48 @@ void QLabelPrivate::sendControlEvent(QEvent *e)
 void QLabelPrivate::_q_linkHovered(const QString &anchor)
 {
     Q_Q(QLabel);
+#ifndef QT_NO_CURSOR
     if (anchor.isEmpty()) { // restore cursor
-#ifndef QT_NO_CURSOR
-        q->setCursor(hasCustomCursor ? cursor : Qt::ArrowCursor);
-#endif
-    } else {
-#ifndef QT_NO_CURSOR
-        hasCustomCursor = q->testAttribute(Qt::WA_SetCursor);
-        if (hasCustomCursor)
+        if (validCursor)
+            q->setCursor(cursor);
+        else
+            q->unsetCursor();
+        onAnchor = false;
+    } else if (!onAnchor) {
+        validCursor = q->testAttribute(Qt::WA_SetCursor);
+        if (validCursor) {
             cursor = q->cursor();
+        }
         q->setCursor(Qt::PointingHandCursor);
-#endif
+        onAnchor = true;
     }
+#endif
     emit q->linkHovered(anchor);
 }
 
 // Return the layout rect - this is the rect that is given to the layout painting code
 // This may be different from the document rect since vertical alignment is not
 // done by the text layout code
-QRect QLabelPrivate::layoutRect() const
+QRectF QLabelPrivate::layoutRect() const
 {
+    QRectF cr = documentRect();
+    if (!control)
+        return cr;
     ensureTextLayouted();
-    QRect cr = documentRect();
     // Caculate y position manually
-    int rh = qRound(doc->documentLayout()->documentSize().height());
-    int yo = 0;
+    qreal rh = control->document()->documentLayout()->documentSize().height();
+    qreal yo = 0;
     if (align & Qt::AlignVCenter)
-        yo = qMax((cr.height()-rh)/2, 0);
+        yo = qMax((cr.height()-rh)/2, qreal(0));
     else if (align & Qt::AlignBottom)
-        yo = qMax(cr.height()-rh, 0);
-    return QRect(cr.x(), yo + cr.y(), cr.width(), cr.height());
+        yo = qMax(cr.height()-rh, qreal(0));
+    return QRectF(cr.x(), yo + cr.y(), cr.width(), cr.height());
 }
 
 // Returns the point in the document rect adjusted with p
 QPoint QLabelPrivate::layoutPoint(const QPoint& p) const
 {
-    QRect lr = layoutRect();
+    QRect lr = layoutRect().toRect();
     return p - lr.topLeft();
 }
 
@@ -1448,9 +1545,9 @@ QMenu *QLabelPrivate::createStandardContextMenu(const QPoint &pos)
 {
     QString linkToCopy;
     QPoint p;
-    if (isRichText()) {
+    if (control && isRichText) {
         p = layoutPoint(pos);
-        linkToCopy = doc->documentLayout()->anchorAt(p);
+        linkToCopy = control->document()->documentLayout()->anchorAt(p);
     }
 
     if (linkToCopy.isEmpty() && !control)

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -43,8 +43,8 @@ SlideShowDialog::SlideShowDialog( QWidget* parent, Qt::WFlags f )
     vbox->addWidget( slide_length_label );
     slide_length_slider = new QSlider( Qt::Horizontal, this );
     vbox->addWidget( slide_length_slider );
-    connect( slide_length_slider, SIGNAL( valueChanged( int ) ),
-        this, SLOT( updateSlideLengthLabel( int ) ) );
+    connect( slide_length_slider, SIGNAL(valueChanged(int)),
+        this, SLOT(updateSlideLengthLabel(int)) );
     slide_length_slider->setMinimum( PAUSE_MIN );
     slide_length_slider->setMaximum( PAUSE_MAX );
 

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,73 +22,79 @@
 #ifndef __QOBEXPUSHCLIENT_H__
 #define __QOBEXPUSHCLIENT_H__
 
+#include <qobexnamespace.h>
+
 #include <QObject>
 #include <QString>
-
-#include <qtopiaglobal.h>
 
 class QObexPushClientPrivate;
 class QByteArray;
 class QIODevice;
-class QObexSocket;
 
-class QTOPIACOMM_EXPORT QObexPushClient : public QObject
+class QTOPIAOBEX_EXPORT QObexPushClient : public QObject
 {
-    friend class QObexPushClientPrivate;
     Q_OBJECT
-
 public:
 
-    enum State {
-        Ready,
-        Connecting,
-        Disconnecting,
-        Streaming,
-        Closed = 100
+    enum Command {
+        None,
+        Connect,
+        Disconnect,
+        Send,
+        SendBusinessCard,
+        RequestBusinessCard
     };
 
     enum Error {
         NoError,
-        LinkError,
-        TransportConnectionError,
+        ConnectionError,
         RequestFailed,
         Aborted,
         UnknownError = 100
     };
 
-    explicit QObexPushClient(QObexSocket *socket, QObject *parent = 0);
+    explicit QObexPushClient(QIODevice *device, QObject *parent = 0);
     virtual ~QObexPushClient();
 
-    State state() const;
+    QIODevice *sessionDevice() const;
+
     Error error() const;
+    QObex::ResponseCode lastCommandResponse() const;
 
     int currentId() const;
+    Command currentCommand() const;
     bool hasPendingCommands() const;
     void clearPendingCommands();
 
     int connect();
     int disconnect();
-    int send(QIODevice *device, const QString &filename,
-             const QString &mimetype = QString());
-    int send(const QByteArray &array, const QString &filename,
-             const QString &mimetype = QString());
+
+    int send(QIODevice *device,
+             const QString &name,
+             const QString &type = QString(),
+             const QString &description = QString());
+
+    int send(const QByteArray &array,
+             const QString &name,
+             const QString &type = QString(),
+             const QString &description = QString());
 
     int sendBusinessCard(QIODevice *vcard);
     int requestBusinessCard(QIODevice *vcard);
     void exchangeBusinessCard(QIODevice *mine, QIODevice *theirs,
-                              int *putId = 0, int *getId = 0);
+                                int *putId = 0, int *getId = 0);
 
 public slots:
     void abort();
 
 signals:
-    void done(bool error);
-    void progress(qint64, qint64);
-    void stateChanged(QObexPushClient::State state);
-    void commandFinished(int id, bool error);
     void commandStarted(int id);
+    void commandFinished(int id, bool error);
+    void dataTransferProgress(qint64, qint64);
+    void done(bool error);
 
 private:
+    friend class QObexPushClientPrivate;
     QObexPushClientPrivate *m_data;
     Q_DISABLE_COPY(QObexPushClient)
 };

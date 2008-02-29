@@ -1,14 +1,8 @@
 qtopia_project(qtopia app)
 TARGET=photoedit
-# This can't be turned on while photoedit checks qApp->arguments in the photoeditUi constructor!
-#CONFIG+=qtopia_main
-# Have replaced it for now -- this hasn't solved the problem, and I've been having probs with
-# qotpia/photoedit getting mixed up, since, at runtime.
 CONFIG+=qtopia_main
 
 HEADERS    = photoeditui.h \
-                selector/selectorui.h \
-                editor/editorui.h \
                 editor/imageui.h \
                 editor/slider.h \
                 editor/navigator.h \
@@ -22,8 +16,6 @@ HEADERS    = photoeditui.h \
 
 SOURCES    = main.cpp \
                 photoeditui.cpp \
-                selector/selectorui.cpp \
-                editor/editorui.cpp \
                 editor/imageui.cpp \
                 editor/slider.cpp \
                 editor/navigator.cpp \
@@ -37,17 +29,21 @@ SOURCES    = main.cpp \
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=photoedit*
 help.hint=help
+INSTALLS+=help
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/photoedit.desktop
 desktop.path=/apps/Applications
 desktop.hint=desktop
+INSTALLS+=desktop
 pics.files=$$QTOPIA_DEPOT_PATH/pics/photoedit/*
 pics.path=/pics/photoedit
 pics.hint=pics
+INSTALLS+=pics
 service.files=$$QTOPIA_DEPOT_PATH/services/PhotoEdit/photoedit
 service.path=/services/PhotoEdit
+INSTALLS+=service
 qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/PhotoEdit
 qdsservice.path=/etc/qds
-INSTALLS+=help desktop pics service qdsservice
+INSTALLS+=qdsservice
 
 pkg.desc=An image manager for Qtopia.
-pkg.domain=window,qds,beaming,cardreader,drm,docapi{image/*},lightandpower,pictures,print
+pkg.domain=window,qds,beaming,cardreader,drm,pictures,print,doc_server,doc_write,bluetooth

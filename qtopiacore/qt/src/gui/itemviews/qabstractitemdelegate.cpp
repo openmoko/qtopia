@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,7 +40,11 @@
 
 #ifndef QT_NO_ITEMVIEWS
 #include <qabstractitemmodel.h>
+#include <qabstractitemview.h>
 #include <qfontmetrics.h>
+#include <qwhatsthis.h>
+#include <qtooltip.h>
+#include <qevent.h>
 #include <qstring.h>
 #include <qdebug.h>
 #include <private/qtextengine_p.h>
@@ -183,7 +202,7 @@ QAbstractItemDelegate::~QAbstractItemDelegate()
     otherwise, \l{QMouseEvent}s received by the widget will propagate
     to the view. The view's background will shine through unless the
     editor paints its own background (e.g., with
-    \l{QWidget::}{setAutoFillBackground()}). 
+    \l{QWidget::}{setAutoFillBackground()}).
 
     \sa setModelData() setEditorData()
 */
@@ -260,10 +279,10 @@ bool QAbstractItemDelegate::editorEvent(QEvent *,
 }
 
 /*!
-    \obsolete 
+    \obsolete
 
     Use QFontMetrics::elidedText() instead.
-    
+
     \oldcode
         QFontMetrics fm = ...
         QString str = QAbstractItemDelegate::elidedText(fm, width, mode, text);
@@ -277,5 +296,61 @@ QString QAbstractItemDelegate::elidedText(const QFontMetrics &fontMetrics, int w
                                           Qt::TextElideMode mode, const QString &text)
 {
     return fontMetrics.elidedText(text, mode, width);
+}
+
+/*!
+    \since 4.3
+    Whenever a help event occurs, this function is called with the \a event
+    \a view \a option and the \a index that corresponds to the item where the
+    event occurs.
+
+    Returns true if the delegate can handle the event; otherwise returns false.
+    A return value of true indicates that the data obtained using the index had
+    the required role.
+
+    For QEvent::ToolTip and QEvent::WhatsThis events that were handled successfully,
+    the relevant popup may be shown depending on the user's system configuration.
+
+    \sa QHelpEvent
+*/
+// ### Qt 5: Make this a virtual non-slot function
+bool QAbstractItemDelegate::helpEvent(QHelpEvent *event,
+                                      QAbstractItemView *view,
+                                      const QStyleOptionViewItem &option,
+                                      const QModelIndex &index)
+{
+    Q_UNUSED(option);
+
+    if (!event || !view)
+        return false;
+    switch (event->type()) {
+#ifndef QT_NO_TOOLTIP
+    case QEvent::ToolTip: {
+        QHelpEvent *he = static_cast<QHelpEvent*>(event);
+        QVariant tooltip = index.data(Qt::ToolTipRole);
+        if (qVariantCanConvert<QString>(tooltip)) {
+            QToolTip::showText(he->globalPos(), tooltip.toString(), view);
+            return true;
+        }
+        break;}
+#endif
+#ifndef QT_NO_WHATSTHIS
+    case QEvent::QueryWhatsThis: {
+        if (index.data(Qt::WhatsThisRole).isValid())
+            return true;
+        break; }
+    case QEvent::WhatsThis: {
+        QHelpEvent *he = static_cast<QHelpEvent*>(event);
+        QVariant whatsthis = index.data(Qt::WhatsThisRole);
+        if (qVariantCanConvert<QString>(whatsthis)) {
+            QWhatsThis::showText(he->globalPos(), whatsthis.toString(), view);
+            return true;
+        }
+        break ; }
+#endif
+    default:
+        break;
+    }
+    return false;
 }
 #endif // QT_NO_ITEMVIEWS

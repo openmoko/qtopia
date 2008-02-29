@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -159,6 +174,8 @@ bool QSqlDriver::isOpenError() const
     \value PositionalPlaceholders  Whether the driver supports the use of positional placeholders.
     \value LastInsertId  Whether the driver supports returning the Id of the last touched row.
     \value BatchOperations  Whether the driver supports batched operations, see QSqlResult::execBatch()
+    \value SimpleLocking  Whether the driver disallows a write lock on a table while other queries have a read lock on it.
+    \value LowPrecisionNumbers  Whether the driver allows fetching numerical values with low precision.
 
     More information about supported features can be found in the
     \l{sql-driver.html}{Qt SQL driver} documentation.
@@ -572,7 +589,7 @@ QString QSqlDriver::formatValue(const QSqlField &field, bool trimStrings) const
     \code
     QSqlDatabase db = ...;
     QVariant v = db.driver()->handle();
-    if (v.isValid() && v.typeName() == "sqlite3*") {
+    if (v.isValid() && qstrcmp(v.typeName(), "sqlite3*")) {
         // v.data() returns a pointer to the handle
         sqlite3 *handle = *static_cast<sqlite3 **>(v.data());
         if (handle != 0) { // check that it is not NULL

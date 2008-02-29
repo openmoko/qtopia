@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -37,6 +37,7 @@
 #include <QDSData>
 #include <QDSServiceInfo>
 #include <QDSAction>
+#include <QtopiaItemDelegate>
 
 #if defined(QTOPIA_INFRARED)
 #include <qvaluespace.h>
@@ -50,6 +51,7 @@ public:
     QtopiaSendFileDialog(QWidget *parent,
                          const QString &filename,
                          const QString &mimetype,
+                         const QString &description,
                          bool autodelete);
     ~QtopiaSendFileDialog();
 
@@ -59,29 +61,34 @@ protected slots:
 private:
     QString m_filename;
     QString m_mimetype;
+    QString m_description;
     bool m_autodelete;
 };
 
 QtopiaSendFileDialog::QtopiaSendFileDialog(QWidget *parent,
                                            const QString &filename,
                                            const QString &mimetype,
+                                           const QString &description,
                                            bool autodelete)
     : QDialog(parent)
 {
     m_filename = filename;
     m_mimetype = mimetype;
+    m_description = description;
     m_autodelete = autodelete;
 
     setModal(true);
     setWindowTitle( tr ( "Send via..."));
     QVBoxLayout* l = new QVBoxLayout( this );
+    l->setMargin(0);
     QListWidget* lb = new QListWidget( this );
+    lb->setFrameStyle(QFrame::NoFrame);
     l->addWidget( lb );
 
     connect( lb,
-                SIGNAL( itemActivated( QListWidgetItem* ) ),
+                SIGNAL(itemActivated(QListWidgetItem*)),
                 this,
-                SLOT( serverClicked( QListWidgetItem* ) ) );
+                SLOT(serverClicked(QListWidgetItem*)) );
 
 #ifdef QTOPIA_BLUETOOTH
     {
@@ -111,14 +118,14 @@ QtopiaSendFileDialog::~QtopiaSendFileDialog()
 void QtopiaSendFileDialog::serverClicked(QListWidgetItem *item)
 {
     if (item->data( Qt::UserRole ).toByteArray() == "Bluetooth") {
-        QtopiaServiceRequest req("BluetoothPush", "pushFile(QString,QString,bool)");
-        req << m_filename << m_mimetype << m_autodelete;
+        QtopiaServiceRequest req("BluetoothPush", "pushFile(QString,QString,QString,bool)");
+        req << m_filename << m_mimetype << m_description << m_autodelete;
         req.send();
     }
 
     else if (item->data( Qt::UserRole ).toByteArray()  == "Infrared") {
-        QtopiaServiceRequest req("InfraredBeaming", "beamFile(QString,QString,bool)");
-        req << m_filename << m_mimetype << m_autodelete;
+        QtopiaServiceRequest req("InfraredBeaming", "beamFile(QString,QString,QString,bool)");
+        req << m_filename << m_mimetype << m_description << m_autodelete;
         req.send();
     }
 
@@ -156,18 +163,21 @@ QtopiaSendViaDialog::QtopiaSendViaDialog(const QByteArray &data,
         setModal(true);
         setWindowTitle( tr ( "Send via..."));
         QVBoxLayout* l = new QVBoxLayout( this );
+        l->setMargin(0);
         QListWidget* lb = new QListWidget( this );
+        lb->setItemDelegate(new QtopiaItemDelegate);
+        lb->setFrameStyle(QFrame::NoFrame);
         l->addWidget( lb );
 
         connect( lb,
-                 SIGNAL( itemActivated( QListWidgetItem* ) ),
+                 SIGNAL(itemActivated(QListWidgetItem*)),
                  this,
-                 SLOT( serverClicked( QListWidgetItem* ) ) );
+                 SLOT(serverClicked(QListWidgetItem*)) );
 
         foreach ( QDSServiceInfo serviceinfo, services ) {
             QListWidgetItem* item
                     = new QListWidgetItem( serviceinfo.description(), lb );
-            item->setIcon( QPixmap( ":icon/" + serviceinfo.icon() ) );
+            item->setIcon( QIcon( ":icon/" + serviceinfo.icon() ) );
             mItemToService.insert( item, serviceinfo );
         }
 
@@ -258,9 +268,7 @@ bool QtopiaSendVia::sendData(QWidget *parent, const QByteArray &data, const QStr
 
     QtopiaSendViaDialog *dlg = new QtopiaSendViaDialog(data, mimetype, parent);
 
-# ifdef QTOPIA_PHONE
     QtopiaApplication::setMenuLike( dlg, true );
-# endif
     QtopiaApplication::execDialog( dlg );
     delete dlg;
 
@@ -272,6 +280,9 @@ bool QtopiaSendVia::sendData(QWidget *parent, const QByteArray &data, const QStr
     user will first be asked what communications medium to use
     via a standard dialog.  Once the user has made their choice, the
     appropriate handler will be invoked and the data will be sent.
+
+    The \a description will be used as a user-friendly
+    description of the file where necessary in the user interface.
 
     The \a parent specifies the parent widget for the dialog.  If the
     \a parent is NULL, then the choice dialog is constructed as a top
@@ -290,17 +301,15 @@ bool QtopiaSendVia::sendData(QWidget *parent, const QByteArray &data, const QStr
     \sa isFileSupported(), sendData(), QDialog
 */
 bool QtopiaSendVia::sendFile(QWidget *parent, const QString &filename, const QString &mimetype,
-                             bool autodelete)
+                             const QString &description, bool autodelete)
 {
 #if defined(QTOPIA_BLUETOOTH) || defined(QTOPIA_INFRARED)
     if (!isFileSupported())
         return false;
 
-    QtopiaSendFileDialog *dlg = new QtopiaSendFileDialog(parent, filename, mimetype, autodelete);
+    QtopiaSendFileDialog *dlg = new QtopiaSendFileDialog(parent, filename, mimetype, description, autodelete);
 
-#ifdef QTOPIA_PHONE
     QtopiaApplication::setMenuLike( dlg, true );
-#endif
     QtopiaApplication::execDialog( dlg );
     delete dlg;
 #else
@@ -323,11 +332,13 @@ bool QtopiaSendVia::sendFile(QWidget *parent, const QString &filename, const QSt
     the request is processed.  The \a parent holds the parent widget
     for the dialog that will be shown to the user.
 
+    The QContent::name() of \a content will be used as a user-friendly
+    description of the object to be sent.
 */
 bool QtopiaSendVia::sendFile(QWidget *parent, const QContent &content, bool autodelete)
 {
     QMimeType mime(content);
-    return sendFile(parent, content.file(), mime.id(), autodelete);
+    return sendFile(parent, content.fileName(), mime.id(), content.name(), autodelete);
 }
 
 #include "qtopiasendvia.moc"

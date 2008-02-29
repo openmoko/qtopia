@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,10 +25,8 @@
 #include <qcontent.h>
 #include <qcontentset.h>
 #include <qcategorymanager.h>
-
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qsoftmenubar.h>
-#endif
+#include <qdocumentselector.h>
 
 #include <QString>
 #include <QStringList>
@@ -36,7 +34,6 @@
 #include <QSize>
 #include <QPoint>
 #include <QDialog>
-#include <qdocumentselector.h>
 
 class QImageDocumentSelectorPrivate;
 
@@ -60,6 +57,9 @@ public:
 
     QDocumentSelector::SortMode sortMode() const;
     void setSortMode( QDocumentSelector::SortMode sortMode );
+
+    void setSortCriteria( const QContentSortCriteria &sort );
+    QContentSortCriteria sortCriteria() const;
 
     QContent currentDocument() const;
     const QContentSet &documents() const;
@@ -107,6 +107,9 @@ public:
     QDocumentSelector::SortMode sortMode() const;
     void setSortMode( QDocumentSelector::SortMode sortMode );
 
+    void setSortCriteria( const QContentSortCriteria &sort );
+    QContentSortCriteria sortCriteria() const;
+
     QContent selectedDocument() const;
     const QContentSet &documents() const;
 
@@ -125,11 +128,8 @@ public slots:
     void reject();
 
 private slots:
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     void setContextBar();
-#else
-    void setViewSingle();
-#endif
+    void viewImage();
 
 private:
     void init();

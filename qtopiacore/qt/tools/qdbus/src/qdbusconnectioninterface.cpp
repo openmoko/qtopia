@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -167,7 +182,10 @@ QDBusReply<QString> QDBusConnectionInterface::serviceOwner(const QString &name) 
 }
 
 /*!
-    Lists all names currently registered on the bus.
+  \property QDBusConnectionInterface::registeredServiceNames
+  \brief holds the registered service names
+
+  Lists all names currently registered on the bus.
 */
 QDBusReply<QStringList> QDBusConnectionInterface::registeredServiceNames() const
 {
@@ -242,7 +260,7 @@ QDBusConnectionInterface::registerService(const QString &serviceName,
         flags = 0;
         break;
     case ReplaceExistingService:
-        flags = DBUS_NAME_FLAG_REPLACE_EXISTING;
+        flags = DBUS_NAME_FLAG_DO_NOT_QUEUE | DBUS_NAME_FLAG_REPLACE_EXISTING;
         break;
     }
 
@@ -299,31 +317,79 @@ QDBusConnectionInterface::unregisterService(const QString &serviceName)
     return reply;
 }
 
+/*!
+    \internal
+*/
+void QDBusConnectionInterface::connectNotify(const char *signalName)
+{
+    // translate the signal names to what we really want
+    // this avoids setting hooks for signals that don't exist on the bus
+    if (qstrcmp(signalName, SIGNAL(serviceRegistered(QString))) == 0)
+        QDBusAbstractInterface::connectNotify(SIGNAL(NameAcquired(QString)));
+
+    else if (qstrcmp(signalName, SIGNAL(serviceUnregistered(QString))) == 0)
+        QDBusAbstractInterface::connectNotify(SIGNAL(NameLost(QString)));
+
+    else if (qstrcmp(signalName, SIGNAL(serviceOwnerChanged(QString,QString,QString))) == 0)
+        QDBusAbstractInterface::connectNotify(SIGNAL(NameOwnerChanged(QString,QString,QString)));
+}
+
+/*!
+    \internal
+*/
+void QDBusConnectionInterface::disconnectNotify(const char *signalName)
+{
+    // translate the signal names to what we really want
+    // this avoids setting hooks for signals that don't exist on the bus
+    if (qstrcmp(signalName, SIGNAL(serviceRegistered(QString))) == 0)
+        QDBusAbstractInterface::disconnectNotify(SIGNAL(NameAcquired(QString)));
+
+    else if (qstrcmp(signalName, SIGNAL(serviceUnregistered(QString))) == 0)
+        QDBusAbstractInterface::disconnectNotify(SIGNAL(NameLost(QString)));
+
+    else if (qstrcmp(signalName, SIGNAL(serviceOwnerChanged(QString,QString,QString))) == 0)
+        QDBusAbstractInterface::disconnectNotify(SIGNAL(NameOwnerChanged(QString,QString,QString)));
+}
+
 // signals
 /*!
     \fn QDBusConnectionInterface::serviceRegistered(const QString &serviceName)
 
-    This signal is emitted by the D-BUS server when the bus service name (unique connection name
-    or well-known service name) given by \a serviceName is acquired by this application.
+    This signal is emitted by the D-BUS server when the bus service
+    name (unique connection name or well-known service name) given by
+    \a serviceName is acquired by this application.
 
-    Acquisition happens after the application requested a name using registerService().
+    Acquisition happens after the application requested a name using
+    registerService().
 */
 
 /*!
     \fn QDBusConnectionInterface::serviceUnregistered(const QString &serviceName)
 
-    This signal is emitted by the D-BUS server when the application loses ownership of the bus
-    service name given by \a serviceName.
+    This signal is emitted by the D-BUS server when the application
+    loses ownership of the bus service name given by \a serviceName.
 */
 
 /*!
     \fn QDBusConnectionInterface::serviceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner)
 
-    This signal is emitted by the D-BUS server whenever a service ownership change happens in the
-    bus, including apparition and disparition of names.
+    This signal is emitted by the D-BUS server whenever a service
+    ownership change happens in the bus, including apparition and
+    disparition of names.
 
-    This signal means the application \a oldOwner lost ownership of bus name \a name to application
-    \a newOwner. If \a oldOwner is an empty string, it means the name \a name has just been created;
-    if \a newOwner is empty, the name \a name has no current owner and is no longer available.
+    This signal means the application \a oldOwner lost ownership of
+    bus name \a name to application \a newOwner. If \a oldOwner is an
+    empty string, it means the name \a name has just been created; if
+    \a newOwner is empty, the name \a name has no current owner and is
+    no longer available.
 */
 
+/*!
+  \fn void QDBusConnectionInterface::callWithCallbackFailed(const QDBusError &error, const QDBusMessage &call)
+
+  This signal is emitted when there is an error during a
+  QDBusConnection::callWithCallback(). \a error specifies the error.
+  \a call is the message that couldn't be delivered.
+
+  \sa QDBusConnection::callWithCallback()
+ */

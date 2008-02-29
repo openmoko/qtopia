@@ -4,7 +4,7 @@ Context=Contacts
 [QDSInformation]
 Name[]=Contacts
 [setContactImage]
-RequestDataType=image/x-qpixmap
+RequestDataType=image/jpeg
 ResponseDataType=
 Attributes="Set picture;Upload"
 Description[]=This service sets a contacts image

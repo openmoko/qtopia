@@ -1,12 +1,11 @@
 TARGET  = qjpeg
 include(../../qpluginbase.pri)
 
-VERSION = 1.0.0
 QTDIR_build:REQUIRES = "!contains(QT_CONFIG, no-jpeg)"
 
-SOURCES += main.cpp
-SOURCES += qjpeghandler.cpp
 HEADERS += qjpeghandler.h
+SOURCES += main.cpp \
+           qjpeghandler.cpp
 
 contains(QT_CONFIG, system-jpeg) {
         unix:LIBS += -ljpeg
@@ -63,6 +62,6 @@ contains(QT_CONFIG, system-jpeg) {
 	    ../../../3rdparty/libjpeg/jmemnobs.c
 }
 
-DESTDIR  = $$QT_BUILD_TREE/plugins/imageformats
+QTDIR_build:DESTDIR = $$QT_BUILD_TREE/plugins/imageformats
 target.path += $$[QT_INSTALL_PLUGINS]/imageformats
 INSTALLS += target

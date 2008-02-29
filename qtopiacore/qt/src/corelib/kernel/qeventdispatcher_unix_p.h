@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,29 +53,17 @@
 #include "QtCore/qabstracteventdispatcher.h"
 #include "QtCore/qlist.h"
 #include "private/qabstracteventdispatcher_p.h"
+#include "private/qpodlist_p.h"
 
 #include <sys/types.h>
 #include <sys/time.h>
-
-// get time of day
-inline void getTime(timeval &t)
-{
-    gettimeofday(&t, 0);
-    // NTP-related fix
-    while (t.tv_usec >= 1000000l) {
-        t.tv_usec -= 1000000l;
-        ++t.tv_sec;
-    }
-    while (t.tv_usec < 0l) {
-        if (t.tv_sec > 0l) {
-            t.tv_usec += 1000000l;
-            --t.tv_sec;
-        } else {
-            t.tv_usec = 0l;
-            break;
-        }
-    }
-}
+#if !defined(Q_OS_HPUX) || defined(__ia64)
+#include <sys/select.h>
+#endif
+#include <unistd.h>
+#if !defined(_POSIX_MONOTONIC_CLOCK)
+#  define _POSIX_MONOTONIC_CLOCK -1
+#endif
 
 // Internal operator functions for timevals
 inline bool operator<(const timeval &t1, const timeval &t2)
@@ -108,16 +111,41 @@ struct QTimerInfo {
 
 class QTimerInfoList : public QList<QTimerInfo*>
 {
+#if (_POSIX_MONOTONIC_CLOCK-0 <= 0)
+    bool useMonotonicTimers;
+
+    timeval previousTime;
+    clock_t previousTicks;
+    int ticksPerSecond;
+    int msPerTick;
+
+    bool timeChanged(timeval *delta);
+#endif
+
+    // state variables used by activateTimers()
+    QTimerInfo *firstTimerInfo, *currentTimerInfo;
 
 public:
     QTimerInfoList();
 
-    timeval watchtime;
-    void updateWatchTime(const timeval &currentTime);
+    void getTime(timeval &t);
+
+    timeval currentTime;
+    timeval updateCurrentTime();
+
+    // must call updateCurrentTime() first!
+    void repairTimersIfNeeded();
 
     bool timerWait(timeval &);
     void timerInsert(QTimerInfo *);
     void timerRepair(const timeval &);
+
+    void registerTimer(int timerId, int interval, QObject *object);
+    bool unregisterTimer(int timerId);
+    bool unregisterTimers(QObject *object);
+    QList<QPair<int, int> > registeredTimers(QObject *object) const;
+
+    int activateTimers();
 };
 
 struct Q_CORE_EXPORT QSockNot
@@ -133,7 +161,9 @@ public:
     QSockNotType();
     ~QSockNotType();
 
-    QList<QSockNot*> list;
+    typedef QPodList<QSockNot*, 32> List;
+
+    List list;
     fd_set select_fds;
     fd_set enabled_fds;
     fd_set pending_fds;
@@ -200,7 +230,7 @@ public:
     QTimerInfoList timerList;
 
     // pending socket notifiers list
-    QList<QSockNot*> sn_pending_list;
+    QSockNotType::List sn_pending_list;
 
     QAtomic wakeUps;
     bool interrupt;

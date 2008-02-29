@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,17 @@
 #ifndef ADDRESSBOOK_SQLIO_PRIVATE_H
 #define ADDRESSBOOK_SQLIO_PRIVATE_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <qtopiasql.h>
 #include <qsqlquery.h>
 #include <qvariant.h>
@@ -35,8 +46,8 @@
 #include "qpimsqlio_p.h"
 #include "qpimsource.h"
 
-class ContactSqlIO;
-class QContactDefaultContext : public QContactContext
+class QContactDefaultContextData;
+class QTOPIAPIM_EXPORT QContactDefaultContext : public QContactContext
 {
     Q_OBJECT
 public:
@@ -72,12 +83,36 @@ public:
     QList<QContact> exportContacts(const QPimSource &, bool &) const;
     QContact exportContact(const QUniqueId &id, bool &) const;
 
+
+    void startSync();
+    bool syncing() const;
+    void syncProgress(int &amount, int &total) const;
+
+    enum Status {
+        NotStarted,
+        InProgress,
+        Completed,
+        BadAuthentication,
+        ServiceUnavailable,
+        ParseError,
+        DataAccessError,
+        UnknownError
+    };
+
+    Status status() const;
+    static QString statusMessage(Status status);
+
+signals:
+    void syncProgressChanged(int, int);
+    void syncStatusChanged(const QString &account, Status);
+    void finishedSyncing();
+
 private:
-    ContactSqlIO *mAccess;
-    QPreparedSqlQuery importQuery;
+    QContactDefaultContextData *d;
 };
 
 class QSqlPimTableModel;
+class ContactSimpleQueryCache;
 class ContactSqlIO : public QContactIO, public QPimSqlIO {
 
     Q_OBJECT
@@ -118,7 +153,7 @@ public:
     { return QPimSqlIO::modified(sources, timestamp); }
 
     QVariant contactField(int row, QContactModel::Field k) const;
-    bool setContactField(int row, QContactModel::Field k,  const QVariant &);
+    QContact simpleContact(int row) const;
 
     QContact contact(const QUniqueId &) const;
     QContact contact(int row) const;
@@ -141,14 +176,6 @@ public:
     bool exists(const QUniqueId & id) const { return !contact(id).uid().isNull(); }
     bool contains(const QUniqueId & id) const { return QPimSqlIO::contains(id); }
 
-#ifdef SUPPORT_SYNCML
-    bool canProvideDiff() const { return false; }
-    void clearJournal() {}
-    QList<QUniqueId> addedContacts() const { return QList<QUniqueId>(); }
-    QList<QUniqueId> modifiedContacts() const { return QList<QUniqueId>(); }
-    QList<QUniqueId> deletedContacts() const { return QList<QUniqueId>(); }
-#endif
-
     void setFilter(const QString &, int);
     void clearFilter();
 
@@ -162,7 +189,7 @@ public:
     void checkRemoved(const QList<QUniqueId> &) { invalidateCache(); }
     void checkUpdated(const QUniqueId &) { invalidateCache(); }
 protected:
-    void bindFields(const QPimRecord &, QSqlQuery &) const;
+    void bindFields(const QPimRecord &, QPreparedSqlQuery &) const;
     QStringList sortColumns() const;
     QString sqlColumn(QContactModel::Field k) const;
 
@@ -179,11 +206,11 @@ private:
     QString sqlLabel() const;
     QString sqlField(QContactModel::Field) const;
     bool canUpdate(QContactModel::Field) const;
+    QContact::PhoneType fieldToPhoneType(QContactModel::Field) const;
     void initMaps();
 
     mutable bool contactByRowValid;
     mutable QContact lastContact;
-    mutable QCache<QUniqueId,QContact> contactCache;
     QString sqlLabelCache;
 
     QString mSearchText;
@@ -197,17 +224,16 @@ private:
 
     // Saved queries
     mutable QPreparedSqlQuery contactQuery;
-    mutable QPreparedSqlQuery categoryQuery;
     mutable QPreparedSqlQuery emailsQuery;
     mutable QPreparedSqlQuery addressesQuery;
     mutable QPreparedSqlQuery phoneQuery;
-    mutable QPreparedSqlQuery customQuery;
     mutable QPreparedSqlQuery insertEmailsQuery;
     mutable QPreparedSqlQuery insertAddressesQuery;
     mutable QPreparedSqlQuery insertPhoneQuery;
     mutable QPreparedSqlQuery removeEmailsQuery;
     mutable QPreparedSqlQuery removeAddressesQuery;
     mutable QPreparedSqlQuery removePhoneQuery;
+    mutable ContactSimpleQueryCache *simpleCache;
 };
 
 #endif

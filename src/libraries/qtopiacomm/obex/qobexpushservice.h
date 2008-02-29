@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,17 +22,16 @@
 #ifndef __QOBEXPUSHSERVICE_H__
 #define __QOBEXPUSHSERVICE_H__
 
+#include <qobexnamespace.h>
+
 #include <QObject>
 #include <QString>
 
-#include <qtopiaglobal.h>
-
-class QObexSocket;
+class QIODevice;
 class QObexPushServicePrivate;
 
-class QTOPIACOMM_EXPORT QObexPushService : public QObject
+class QTOPIAOBEX_EXPORT QObexPushService : public QObject
 {
-    friend class QObexPushServicePrivate;
     Q_OBJECT
 
 public:
@@ -47,38 +46,37 @@ public:
 
     enum Error {
         NoError,
-        LinkError,
+        ConnectionError,
         Aborted,
         UnknownError = 100
     };
 
-    explicit QObexPushService(QObexSocket *socket, QObject *parent = 0);
+    explicit QObexPushService(QIODevice *device, QObject *parent = 0);
     ~QObexPushService();
-
-    void close();
 
     State state() const;
     Error error() const;
 
-    void setIncomingDirectory(const QString &dir);
-    const QString &incomingDirectory() const;
+    QIODevice *sessionDevice() const;
 
-    QObexSocket *socket();
-
+    void setBusinessCard(const QByteArray &vCard);
     virtual QByteArray businessCard() const;
 
+    QIODevice *currentDevice() const;
+
 protected:
-    virtual bool acceptFile(const QString &filename, const QString &mimetype, qint64 size);
+    virtual QIODevice *acceptFile(const QString &name, const QString &type, qint64 size, const QString &description);
 
 signals:
-    void putRequest(const QString &filename, const QString &mimetype);
-    void getRequest(const QString &filename, const QString &mimetype);
-    void requestComplete(bool error);
+    void putRequested(const QString &name, const QString &type, qint64 size, const QString &description);
+    void businessCardRequested();
+    void stateChanged(QObexPushService::State);
+    void dataTransferProgress(qint64 done, qint64 total);
+    void requestFinished(bool error);
     void done(bool error);
-    void progress(qint64, qint64);
-    void stateChanged(QObexPushService::State state);
 
 private:
+    friend class QObexPushServicePrivate;
     QObexPushServicePrivate *m_data;
     Q_DISABLE_COPY(QObexPushService)
 };

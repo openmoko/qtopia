@@ -20,5 +20,4 @@ win32:!contains(LIBS, .*mysql.*):!contains(LIBS, .*mysqld.*) {
     LIBS     *= -llibmysql    
 }
 
-
 include(../qsqldriverbase.pri)

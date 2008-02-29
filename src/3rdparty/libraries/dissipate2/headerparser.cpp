@@ -22,7 +22,7 @@ bool HeaderParser::parse( const QString &buf, size_t bufEnd, int *headerend, int
 
 	// Get field name
 	while( pos < bufEnd ) {
-		if ( buf[ pos ] == ':' ) {
+		if ( buf[ (int)pos ] == ':' ) {
 			break;
 		}
 		pos++;
@@ -31,19 +31,19 @@ bool HeaderParser::parse( const QString &buf, size_t bufEnd, int *headerend, int
 
 	// Remove any white space at end of field-name
 	while( len > 0 ) {
-		if( ! buf[ len - 1 ].isSpace() ) break;
+		if( ! buf[ (int)(len - 1) ].isSpace() ) break;
 		len--;
 	}
 
 	*headerend = len;
 
-	if( pos < bufEnd && buf[ pos ] == ':') {
+	if( pos < bufEnd && buf[ (int)pos ] == ':') {
 		pos++;
 	}
 
 	// Skip spaces and tabs (but not newline!)
 	while( pos < bufEnd ) {
-		if( buf[ pos ] != ' ' && buf[ pos ] != '\t' ) break;
+		if( buf[ (int)pos ] != ' ' && buf[ (int)pos ] != '\t' ) break;
 		pos++;
 	}
 
@@ -51,7 +51,7 @@ bool HeaderParser::parse( const QString &buf, size_t bufEnd, int *headerend, int
 	len = 0;
 	// Get field body
 	while( pos < bufEnd ) {
-		if( buf[ pos ] == '\n' ) {
+		if( buf[ (int)pos ] == '\n' ) {
 			// Are we at the end of the string?
 			if( pos == bufEnd - 1 ) {
 				pos++;
@@ -60,7 +60,7 @@ bool HeaderParser::parse( const QString &buf, size_t bufEnd, int *headerend, int
 
 			// Is this really the end of the field body, and not just
 			// the end of a wrapped line?
-			else if( buf[ pos + 1 ] != ' ' && buf[ pos + 1 ] != '\t' ) {
+			else if( buf[ (int)(pos + 1) ] != ' ' && buf[ (int)(pos + 1) ] != '\t' ) {
 				pos++;
 				break;
 			}
@@ -70,7 +70,7 @@ bool HeaderParser::parse( const QString &buf, size_t bufEnd, int *headerend, int
 
 	// Remove white space at end of field-body
 	while( pos > start ) {
-		if( ! buf[ pos - 1 ].isSpace() ) break;
+		if( ! buf[ (int)(pos - 1) ].isSpace() ) break;
 			pos--;
 	}
 	len = pos - start;

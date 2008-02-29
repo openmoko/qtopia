@@ -23,13 +23,17 @@ VPATH+=$$QTOPIA_DEPOT_PATH/src/tools/dbmigrate
 VPATH+=$$QTOPIA_DEPOT_PATH/src/tools/dbmigrate/qtopiapim
 INCLUDEPATH+=$$QPEDIR/src/tools/dbmigrate
 
+### Also needs the QtopiaPhone database schema
+VPATH+=$$QTOPIA_DEPOT_PATH/src/tools/dbmigrate/qtopiaphone
+RESOURCES+=phonemigrate.qrc
+
 DEFINES+=QTOPIA_CONTENT_INSTALLER
 
 SOURCES	= main.cpp \
     qtopiasql.cpp \
+    qtopiasql_p.cpp \
     qtopialog.cpp \
     qlog.cpp \
-    contentlnksql_p.cpp \
     qcontentfilter.cpp \
     qcontent.cpp \
     qthumbnail.cpp \
@@ -39,7 +43,6 @@ SOURCES	= main.cpp \
     qdrmrights.cpp \
     drmcontent_p.cpp \
     qcontentplugin.cpp \
-    contentlnk_p.cpp \
     contentpluginmanager_p.cpp \
     qcategorymanager.cpp \
     qtopiaipcadaptor.cpp \
@@ -54,13 +57,24 @@ SOURCES	= main.cpp \
     qsignalintercepter.cpp \
     quniqueid.cpp \
     migrateengine.cpp \
-    pimmigrate.cpp
+    pimmigrate.cpp \
+    phonemigrate.cpp \
+    qcategorystore.cpp \
+    qsqlcategorystore.cpp \
+    qcontentengine.cpp \
+    qfscontentengine.cpp \
+    qcontentstore.cpp \
+    qsqlcontentstore.cpp \
+    qcontentsetengine.cpp \
+    qmimetypedata.cpp \
+    qcontentsortcriteria.cpp \
+    qsqlcontentsetengine.cpp
 
 HEADERS = \
     qtopiasql.h \
+    qtopiasql_p.h \
     qtopialog.h \
     qlog.h \
-    contentlnksql_p.h \
     qcontentfilter.h \
     qcontent.h \
     qcontentset.h \
@@ -69,7 +83,6 @@ HEADERS = \
     qdrmrights.h \
     drmcontent_p.h \
     qcontentplugin.h \
-    contentlnk_p.h \
     qthumbnail.h \
     contentpluginmanager_p.h \
     qcategorymanager.h \
@@ -85,15 +98,22 @@ HEADERS = \
     qsignalintercepter.h \
     quniqueid.h \
     migrateengine.h \
-    pimmigrate.h
+    pimmigrate.h \
+    phonemigrate.h \
+    qcategorystore_p.h \
+    qsqlcategorystore_p.h \
+    qcontentstore_p.h \
+    qsqlcontentstore_p.h \
+    qcontentsetengine_p.h \
+    qmimetypedata_p.h \
+    qsqlcontentsetengine_p.h
 
 RESOURCES += pimmigrate.qrc
 
-#INCLUDEPATH+=$$QTE_DEPOT_PATH/src/3rdparty/sqlite
+INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/sqlite
 backup.TARGET=$$TARGET
+VPATH+=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/sqlite
 include($$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/sqlite/sqlite.pro)
+CONFIG-=syncqtopia
 TARGET=$$backup.TARGET
-# qmake can't handle main.cpp and main.c so include sqlitemain.c instead (which includes main.c)
-SOURCES-=main.c
-SOURCES+=sqlitemain.c
 

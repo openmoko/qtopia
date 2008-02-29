@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,7 +21,7 @@
 #include "stdinputwidgets.h"
 #include "calculator.h"
 
-#include <qwhatsthis.h>
+#include <QWhatsThis>
 
 extern Engine *systemEngine;
 
@@ -37,11 +37,7 @@ InputWidget::InputWidget( QWidget* parent,  Qt::WFlags fl )
     InputWidgetLayout->setSpacing( 3 );
 
     QFont big(font());
-#ifndef QTOPIA_PHONE
-    big.setPointSize(qMin(big.pointSize()*2,18));
-#else
     big.setPointSize(qMin(big.pointSize()*2,16));
-#endif
 
     QSizePolicy mySizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
     setSizePolicy(mySizePolicy);
@@ -152,7 +148,7 @@ InputWidget::InputWidget( QWidget* parent,  Qt::WFlags fl )
     PBEval->setText( tr( "=" ) );
     InputWidgetLayout->addWidget( PBEval, 3, 3, 2, 1 );
 
-#ifndef QTOPIA_PHONE
+#ifdef QTOPIA_UNPORTED
     PB0->setFocusPolicy(Qt::TabFocus);
     PB1->setFocusPolicy(Qt::TabFocus);
     PB2->setFocusPolicy(Qt::TabFocus);
@@ -294,16 +290,12 @@ DecimalInputWidget::DecimalInputWidget( QWidget* parent, Qt::WFlags fl )
     setObjectName("DecimalInputWidget");
     QSizePolicy mySizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
     QFont big(font());
-#ifndef QTOPIA_PHONE
-    big.setPointSize(qMin(big.pointSize()*2,18));
-#else
     big.setPointSize(qMin(big.pointSize()*2,16));
-#endif
 
     PBDecimal = new QToolButton( this );
     PBDecimal->setSizePolicy(mySizePolicy);
     PBDecimal->setText( tr( ".", "decimal point" ) );
-#ifndef QTOPIA_PHONE
+#ifdef QTOPIA_UNPORTED
     PBDecimal->setFocusPolicy(Qt::TabFocus);
 #endif
     PBDecimal->setFont(big);

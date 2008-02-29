@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,7 +30,6 @@
 #include <QPainter>
 #include <QScrollArea>
 #include <QPaintEvent>
-#include <QScrollBar>
 
 typedef struct BlockMap {
     ushort start;
@@ -135,6 +134,7 @@ class CharacterView : public QWidget
 {
     Q_OBJECT
 
+    friend class UniSelect;
     friend class ScrolledWidget;
 public:
     CharacterView(QWidget *parent, UniSelect *parentUniSelect);
@@ -177,6 +177,7 @@ protected:
 
     int numGlyphs() const;
 
+    virtual void focusInEvent ( QFocusEvent * event );
 private:
     void addNonPrinting();
 
@@ -211,10 +212,8 @@ CharacterView::CharacterView(QWidget *parent, UniSelect *parentUniSelect)
     updatingCurrent(false)
 {
 #ifdef QTOPIA4_TODO
-#ifdef QTOPIA_PHONE
     if (!Qtopia::mousePreferred())
         QFrame::setMargin(2);
-#endif
 #endif
 //    QWidget *vw = new QWidget();
 //    vw->setObjectName( "viewground" );
@@ -270,9 +269,6 @@ void CharacterView::setIndex(int ind)
         if (mCurrent != -1) {
             /* need to check map in case need to update combo box */
 
-            updatingCurrent = true;
-            updatingCurrent = false;
-
             setSetForIndex(mCurrent);
             updateCellForIndex(mCurrent);
             ensureVisible(mCurrent);
@@ -288,6 +284,8 @@ void CharacterView::setIndex(int ind)
 bool CharacterView::ensureVisible(int index)
 {
     QRect currentCellBounds = bounds(index);
+
+    if(!parent() || !parent()->parent()) return false;
     QScrollArea* scroller = qobject_cast<QScrollArea*>(parent()->parent());
 
     if(scroller){
@@ -300,8 +298,8 @@ bool CharacterView::ensureVisible(int index)
 
 void CharacterView::keyPressEvent(QKeyEvent *e)
 {
-#ifdef QTOPIA_PHONE
-    if( !Qtopia::mousePreferred() ) {
+    bool ignore=true;
+/*    if( !Qtopia::mousePreferred() ) {
         if (!hasEditFocus()) {
             if (e->key() == Qt::Key_Select) {
                 setEditFocus(true);
@@ -312,49 +310,61 @@ void CharacterView::keyPressEvent(QKeyEvent *e)
             }
             return;
         }
-    }
-#endif
+    }*/
+
     int srow,scol;
-    indexToCoord(mCurrent, srow, scol);
+    if(mHighlighted == -1)
+        indexToCoord(mCurrent, srow, scol);
+    else
+        indexToCoord(mHighlighted, srow, scol);
     int row = srow;
     int col = scol;
     switch(e->key()) {
         case Qt::Key_Up:
-            if (row > 0)
+            if (row > 0) {
                 row--;
+            }
             else e->ignore();
             break;
         case Qt::Key_Down:
-            if (row < glyphsPerCol + (int)mSpecials.count())
+            if (row < glyphsPerCol + (int)mSpecials.count()){
                 row++;
+            }
             else e->ignore();
             break;
         case Qt::Key_Left:
-            if (col > 0)
+            if (col > 0) {
                 col--;
-            break;
-        case Qt::Key_Right:
-            if (col < glyphsPerRow-1)
-                col++;
-            break;
-#ifdef QTOPIA_PHONE
-        case Qt::Key_Space:
-        case Qt::Key_Select:
-            if( !Qtopia::mousePreferred() ) {
-                setEditFocus(false);
-                updateCellForIndex(mCurrent);
             }
             break;
-#endif
+        case Qt::Key_Right:
+            if (col < glyphsPerRow-1){
+                col++;
+            }
+            break;
+        case Qt::Key_Space:
+        case Qt::Key_Select:
+            {
+                int old = mCurrent;
+                setIndex(mHighlighted);
+                setHighlighted(-1);
+                updateCellForIndex(mHighlighted);
+                updateCellForIndex(old);
+            }
+            break;
         default:
-            e->ignore();
+            ;
     }
     if (srow != row || scol != col) {
         int ind;
         coordToIndex(row, col, ind);
-        if (ind != -1)
-            setIndex(ind);
+        if (ind != -1){
+            setHighlighted(ind);
+            uniSelect->ensureVisible(ind);
+        }
     }
+    if(ignore)
+        e->ignore();
 }
 
 void CharacterView::setHighlighted(int glyphindex)
@@ -434,7 +444,6 @@ void CharacterView::drawCell(QPainter *p, const QRect &b,
     QRect bounds = b;
     if (glyphindex == mCurrent) {
         p->setBrush(palette().color(QPalette::Shadow));
-#ifdef QTOPIA_PHONE
         if (!Qtopia::mousePreferred() && hasEditFocus()) {
             p->setPen(palette().color(QPalette::Highlight));
             p->drawRect(bounds);
@@ -443,7 +452,6 @@ void CharacterView::drawCell(QPainter *p, const QRect &b,
             p->drawRect(bounds);
             p->setPen(palette().color(QPalette::BrightText));
         } else
-#endif
         {
             p->setPen(palette().color(QPalette::Dark));
             p->drawRect(bounds);
@@ -673,6 +681,11 @@ void CharacterView::mouseReleaseEvent(QMouseEvent *e)
     QWidget::mouseReleaseEvent(e);
 }
 
+void CharacterView::focusInEvent ( QFocusEvent * event )
+{
+    Q_UNUSED(event);
+   uniSelect-> ensureVisible(mCurrent);
+};
 /*
    XXX still need to deal with font changes properly.
  */
@@ -685,17 +698,17 @@ UniSelect::UniSelect( QWidget *parent, const char *name, Qt::WFlags f )
     mSetSelect = new QComboBox(this);
     vl->addWidget(mSetSelect);
 
-    QScrollArea* scroller = new QScrollArea(this);
-    scroller->setFocusPolicy(Qt::NoFocus);
-    mGlyphSelect = new CharacterView(scroller, this);
-    scroller->setWidget(mGlyphSelect);
-    vl->addWidget(scroller);
+    mScroller = new QScrollArea(this);
+    mScroller->setFocusPolicy(Qt::NoFocus);
+    mGlyphSelect = new CharacterView(mScroller, this);
+    mScroller->setWidget(mGlyphSelect);
+    vl->addWidget(mScroller);
 
     connect(mSetSelect, SIGNAL(activated(int)), mGlyphSelect, SLOT(selectSet(int)));
     connect(mGlyphSelect, SIGNAL(selected(uint)),
             this, SIGNAL(selected(uint)));
-    connect(mGlyphSelect, SIGNAL(selected(const QString &)),
-            this, SIGNAL(selected(const QString &)));
+    connect(mGlyphSelect, SIGNAL(selected(QString)),
+            this, SIGNAL(selected(QString)));
 }
 
 UniSelect::~UniSelect()
@@ -722,4 +735,16 @@ QString UniSelect::text() const
     return mGlyphSelect->text();
 }
 
+void UniSelect::ensureVisible(int index)
+{
+    
+    QRect bounds = mGlyphSelect->bounds(index);
+    // find the midpoint, and set the margin to half the width/height +50
+    int xMid = bounds.center().x();
+    int yMid = bounds.center().y();
+    int xMargin = xMid-bounds.left()+50;
+    int yMargin = yMid-bounds.top()+50;
+
+    mScroller->ensureVisible(xMid, yMid, xMargin, yMargin);
+};
 #include "uniselect.moc"

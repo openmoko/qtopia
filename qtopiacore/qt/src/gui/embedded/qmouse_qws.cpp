@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -105,7 +120,7 @@ public:
     The mouse driver receives mouse events from the system device and
     encapsulates each event with an instance of the QWSEvent class
     which it then passes to the server application (the server is
-    responsible for propagating the event to the appropiate
+    responsible for propagating the event to the appropriate
     client). To receive mouse events, a QWSMouseHandler object will
     usually create a QSocketNotifier object for the given device. The
     QSocketNotifier class provides support for monitoring activity on
@@ -159,11 +174,6 @@ public:
     enable the socket notifier.
 
     \sa suspend()
-*/
-
-/*!
-    \fn virtual void QWSMouseHandler::getCalibration(QWSPointerCalibrationData *) const
-    \internal
 */
 
 /*!
@@ -268,6 +278,13 @@ void QWSMouseHandler::mouseChanged(const QPoint &position, int state, int wheel)
     \sa QWSCalibratedMouseHandler::calibrate(), clearCalibration()
 */
 
+/*! \fn QWSMouseHandler::getCalibration(QWSPointerCalibrationData *data) const
+    This virtual function allows subclasses of QWSMouseHandler
+    to fill in the device coordinates in \a data with values
+    that correspond to screen coordinates that are already in
+    \a data. Note that the default implementation does nothing.
+ */
+
 /*!
     \class QWSCalibratedMouseHandler
     \ingroup qws
@@ -334,19 +351,23 @@ QWSCalibratedMouseHandler::QWSCalibratedMouseHandler(const QString &, const QStr
 }
 
 /*!
+    Fills \a cd with the device coordinates corresponding to the given
+    screen coordinates.
+
     \internal
 */
 void QWSCalibratedMouseHandler::getCalibration(QWSPointerCalibrationData *cd) const
 {
-    QPoint screen_tl = cd->screenPoints[QWSPointerCalibrationData::TopLeft];
-    QPoint screen_br = cd->screenPoints[QWSPointerCalibrationData::BottomRight];
-
-    int tlx = (s * screen_tl.x() - c) / a;
-    int tly = (s * screen_tl.y() - f) / e;
-    cd->devPoints[QWSPointerCalibrationData::TopLeft] = QPoint(tlx,tly);
-    cd->devPoints[QWSPointerCalibrationData::BottomRight] =
-        QPoint(tlx - (s * (screen_tl.x() - screen_br.x()) / a),
-                tly - (s * (screen_tl.y() - screen_br.y()) / e));
+    const qint64 scale = qint64(a) * qint64(e) - qint64(b) * qint64(d);
+    const qint64 xOff = qint64(b) * qint64(f) - qint64(c) * qint64(e);
+    const qint64 yOff = qint64(c) * qint64(d) - qint64(a) * qint64(f);
+    for (int i = 0; i <= QWSPointerCalibrationData::LastLocation; ++i) {
+        const qint64 sX = cd->screenPoints[i].x();
+        const qint64 sY = cd->screenPoints[i].y();
+        const qint64 dX = (s*(e*sX - b*sY) + xOff) / scale;
+        const qint64 dY = (s*(a*sY - d*sX) + yOff) / scale;
+        cd->devPoints[i] = QPoint(dX, dY);
+    }
 }
 
 /*!
@@ -420,6 +441,10 @@ void QWSCalibratedMouseHandler::readCalibration()
     if (file.open(QIODevice::ReadOnly)) {
         QTextStream t(&file);
         t >> a >> b >> c >> d >> e >> f >> s;
+        if (s == 0 || t.status() != QTextStream::Ok) {
+            qCritical("Corrupt calibration data");
+            clearCalibration();
+        }
     } else
 #endif
     {
@@ -491,10 +516,10 @@ void QWSCalibratedMouseHandler::calibrate(const QWSPointerCalibrationData *data)
 
     qint64 scale = ((xd0 - xd2)*(yd1 - yd2) - (xd1 - xd2)*(yd0 - yd2));
     int shift = 0;
-
+    qint64 absScale = qAbs(scale);
     // use maximum 16 bit precision to reduce risk of integer overflow
-    if (scale > (1 << 16)) {
-        shift = ilog2(scale >> 16) + 1;
+    if (absScale > (1 << 16)) {
+        shift = ilog2(absScale >> 16) + 1;
         scale >>= shift;
     }
 

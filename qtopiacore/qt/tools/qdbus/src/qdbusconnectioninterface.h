@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -42,11 +57,14 @@ class QByteArray;
 class QDBUS_EXPORT QDBusConnectionInterface: public QDBusAbstractInterface
 {
     Q_OBJECT
+    Q_ENUMS(ServiceQueueOptions ServiceReplacementOptions RegisterServiceReply)
     friend class QDBusConnection;
     static inline const char *staticInterfaceName();
 
     explicit QDBusConnectionInterface(const QDBusConnection &connection, QObject *parent);
     ~QDBusConnectionInterface();
+
+    Q_PROPERTY(QDBusReply<QStringList> registeredServiceNames READ registeredServiceNames)
 
 public:
     enum ServiceQueueOptions {
@@ -69,7 +87,7 @@ public Q_SLOTS:
     QDBusReply<bool> isServiceRegistered(const QString &serviceName) const;
     QDBusReply<QString> serviceOwner(const QString &name) const;
     QDBusReply<bool> unregisterService(const QString &serviceName);
-    QDBusReply<RegisterServiceReply> registerService(const QString &serviceName,
+    QDBusReply<QDBusConnectionInterface::RegisterServiceReply> registerService(const QString &serviceName,
                                                      ServiceQueueOptions qoption = DontQueueService,
                                                      ServiceReplacementOptions roption = DontAllowReplacement);
 
@@ -82,6 +100,7 @@ Q_SIGNALS:
     void serviceRegistered(const QString &service);
     void serviceUnregistered(const QString &service);
     void serviceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
+    void callWithCallbackFailed(const QDBusError &error, const QDBusMessage &call);
 
 #ifndef Q_QDOC
     // internal signals
@@ -89,6 +108,9 @@ Q_SIGNALS:
     void NameAcquired(const QString &);
     void NameLost(const QString &);
     void NameOwnerChanged(const QString &, const QString &, const QString &);
+protected:
+    void connectNotify(const char *);
+    void disconnectNotify(const char *);
 #endif
 };
 

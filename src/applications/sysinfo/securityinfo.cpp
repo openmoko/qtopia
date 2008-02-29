@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,18 +19,16 @@
 **
 ****************************************************************************/
 
-#include <qtopianamespace.h>
+#include "securityinfo.h"
 
-#include <QDebug>
 #include <QFile>
-#include <QKeyEvent>
 #include <QLayout>
 #include <QProcess>
 #include <QScrollBar>
 #include <QTextBrowser>
 #include <QDesktopWidget>
 #include <QTimer>
-#include "securityinfo.h"
+#include <QApplication>
 
 SecurityInfo::SecurityInfo( QWidget *parent, Qt::WFlags f )
     : QWidget( parent, f )
@@ -40,10 +38,9 @@ SecurityInfo::SecurityInfo( QWidget *parent, Qt::WFlags f )
 
 void SecurityInfo::init()
 {
-    infoDisplay = new QTextBrowser();
-    infoDisplay->installEventFilter( this );
+    QTextBrowser *infoDisplay = new QTextBrowser();
     infoDisplay->setFrameShape( QFrame::NoFrame );
-    //infoDisplay->setFocusPolicy( Qt::NoFocus );
+
     QVBoxLayout *vb = new QVBoxLayout( this );
     vb->setSpacing( 0 );
     vb->setMargin( 0 );
@@ -92,19 +89,18 @@ void SecurityInfo::init()
                 tr("Unavailable") +
                 "</b></font></center></p>";
 
-
     if (lidsEnabled)
     {
         QProcess lidsconf;
-        lidsconf.start ("lidsconf -L");
+        lidsconf.start("lidsconf -L");
         if (lidsconf.waitForFinished())
         {
             QStringList output(QString(lidsconf.readAll()).split("\n"));
             if(!output.contains ("Killed"))
             {
                 infoString += "<p><center>";
-                infoString += tr("No of Security Rules: %1").arg(output.count() - 5);
-                infoString += "<p><center>";
+                infoString += tr("Security Rules: %1").arg(output.count() - 5);
+                infoString += "</center></p>";
             }
         }
     }
@@ -114,21 +110,4 @@ void SecurityInfo::init()
 
 SecurityInfo::~SecurityInfo()
 {
-}
-
-bool SecurityInfo::eventFilter( QObject* /*watched*/, QEvent *event )
-{
-    if ( event->type() == QEvent::KeyPress )
-    {
-        QScrollBar* sb = infoDisplay->verticalScrollBar();
-        int key = ((QKeyEvent*)event)->key();
-        if ( key == Qt::Key_Down )
-            sb->triggerAction( QAbstractSlider::SliderSingleStepAdd );
-        else if ( key == Qt::Key_Up )
-            sb->triggerAction( QAbstractSlider::SliderSingleStepSub );
-        else
-            return false;
-        return true;
-    }
-    return false;
 }

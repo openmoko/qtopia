@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,38 +37,38 @@
 ****************************************************************************/
 
 #include "qdesigner_q3widgetstack_p.h"
-#include <QtDesigner/QtDesigner>
-#include "../../../lib/shared/qdesigner_command_p.h"
+#include "../../../lib/shared/qdesigner_propertycommand_p.h"
+
+#include <QtDesigner/QDesignerFormWindowInterface>
+#include <QtDesigner/QDesignerContainerExtension>
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <QtDesigner/QExtensionManager>
 
 #include <QtCore/QEvent>
 #include <QtGui/QToolButton>
 
-using namespace qdesigner_internal;
+namespace {
+    QToolButton *createToolButton(QWidget *parent, Qt::ArrowType at, const QString &name) {
+         QToolButton *rc =  new QToolButton();
+         rc->setAttribute(Qt::WA_NoChildEventsForParent, true);
+         rc->setParent(parent);
+         rc->setObjectName(name);
+         rc->setArrowType(at);
+         rc->setAutoRaise(true);
+         rc->setContextMenuPolicy(Qt::PreventContextMenu);
+         rc->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+         rc->setFixedSize(QSize(15, 15));
+         return rc;
+     }
+}
 
-QDesignerQ3WidgetStack::QDesignerQ3WidgetStack(QWidget *parent)
-    : Q3WidgetStack(parent), prev(0), next(0)
+QDesignerQ3WidgetStack::QDesignerQ3WidgetStack(QWidget *parent) : 
+    Q3WidgetStack(parent), 
+    m_prev(createToolButton(this, Qt::LeftArrow,  QLatin1String("__qt__passive_prev"))),
+    m_next(createToolButton(this, Qt::RightArrow, QLatin1String("__qt__passive_next")))
 {
-    prev = new QToolButton();
-    prev->setAttribute(Qt::WA_NoChildEventsForParent, true);
-    prev->setParent(this);
-
-    prev->setObjectName(QLatin1String("__qt__passive_prev"));
-    prev->setArrowType(Qt::LeftArrow);
-    prev->setAutoRaise(true);
-    prev->setContextMenuPolicy(Qt::PreventContextMenu);
-    prev->setSizePolicy(QSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored));
-    connect(prev, SIGNAL(clicked()), this, SLOT(prevPage()));
-
-    next = new QToolButton();
-    next->setAttribute(Qt::WA_NoChildEventsForParent, true);
-    next->setParent(this);
-    next->setObjectName(QLatin1String("__qt__passive_next"));
-    next->setArrowType(Qt::RightArrow);
-    next->setAutoRaise(true);
-    next->setContextMenuPolicy(Qt::PreventContextMenu);
-    next->setSizePolicy(QSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored));
-    connect(next, SIGNAL(clicked()), this, SLOT(nextPage()));
-
+    connect(m_prev, SIGNAL(clicked()), this, SLOT(prevPage()));
+    connect(m_next, SIGNAL(clicked()), this, SLOT(nextPage()));
     updateButtons();
 
     connect(this, SIGNAL(currentChanged(int)), this, SLOT(slotCurrentChanged(int)));
@@ -98,59 +113,47 @@ QWidget *QDesignerQ3WidgetStack::widget(int index)
 
 void QDesignerQ3WidgetStack::updateButtons()
 {
-    if (prev) {
-        prev->setGeometry(width() - 31, 1, 15, 15);
-        prev->show();
-        prev->raise();
+    if (m_prev) {
+        m_prev->move(width() - 31, 1);
+        m_prev->show();
+        m_prev->raise();
     }
 
-    if (next) {
-        next->setGeometry(width() - 16, 1, 15, 15);
-        next->show();
-        next->raise();
+    if (m_next) {
+        m_next->move(width() - 16, 1);
+        m_next->show();
+        m_next->raise();
     }
 }
 
+void QDesignerQ3WidgetStack::gotoPage(int page) {
+    // Are we on a form or in a preview?
+    if (QDesignerFormWindowInterface *fw = formWindow()) {
+        qdesigner_internal::SetPropertyCommand *cmd = new qdesigner_internal::SetPropertyCommand(fw);
+        cmd->init(this, QLatin1String("currentIndex"), page);
+        fw->commandHistory()->push(cmd);
+        fw->emitSelectionChanged(); // Magically prevent an endless loop triggered by auto-repeat.
+    } else {
+        setCurrentIndex(page);
+    }
+    updateButtons();
+}
+
+
 void QDesignerQ3WidgetStack::prevPage()
 {
-    if (count() == 0) {
-        // nothing to do
-        return;
-    }
-
-    if (QDesignerFormWindowInterface *fw = formWindow()) {
+    if (count() > 1) {
         int newIndex = currentIndex() - 1;
         if (newIndex < 0)
             newIndex = count() - 1;
-
-        SetPropertyCommand *cmd = new SetPropertyCommand(fw);
-        cmd->init(this, QLatin1String("currentIndex"), newIndex);
-        fw->commandHistory()->push(cmd);
-        updateButtons();
-        fw->emitSelectionChanged();
-    } else {
-        setCurrentIndex(qMax(0, currentIndex() - 1));
-        updateButtons();
+        gotoPage(newIndex);
     }
 }
 
 void QDesignerQ3WidgetStack::nextPage()
 {
-    if (count() == 0) {
-        // nothing to do
-        return;
-    }
-
-    if (QDesignerFormWindowInterface *fw = formWindow()) {
-        SetPropertyCommand *cmd = new SetPropertyCommand(fw);
-        cmd->init(this, QLatin1String("currentIndex"), (currentIndex() + 1) % count());
-        fw->commandHistory()->push(cmd);
-        updateButtons();
-        fw->emitSelectionChanged();
-    } else {
-        setCurrentIndex((currentIndex() + 1) % count());
-        updateButtons();
-    }
+    if (count() > 1)
+        gotoPage((currentIndex() + 1) % count());
 }
 
 QString QDesignerQ3WidgetStack::currentPageName()

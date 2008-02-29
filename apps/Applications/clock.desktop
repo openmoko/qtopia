@@ -7,3 +7,4 @@ Exec=clock
 Icon=clock/Clock
 Type=Application
 Name[]=Clock
+Categories=MainApplications

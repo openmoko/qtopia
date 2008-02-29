@@ -30,7 +30,7 @@
 <li><div class="fn"/>void <b><a href="qtopiaserverapplication.html#removeQWSEventFilter">removeQWSEventFilter</a></b> ( QWSEventFilter * <i>filter</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>11 public functions inherited from <a href="qtopiaapplication.html#public-functions">QtopiaApplication</a></li>
+<li><div class="fn"/>13 public functions inherited from <a href="qtopiaapplication.html#public-functions">QtopiaApplication</a></li>
 <li><div class="fn"/>13 public functions inherited from <a href="qapplication.html#public-functions">QApplication</a></li>
 <li><div class="fn"/>8 public functions inherited from <a href="qcoreapplication.html#public-functions">QCoreApplication</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
@@ -71,9 +71,9 @@
 <li><div class="fn"/>bool <b><a href="qtopiaserverapplication.html#taskValueSpaceSetAttribute">taskValueSpaceSetAttribute</a></b> ( const QByteArray &amp; <i>taskName</i>, const QByteArray &amp; <i>attribute</i>, const QVariant &amp; <i>value</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>18 static public members inherited from <a href="qtopiaapplication.html#static-public-members">QtopiaApplication</a></li>
-<li><div class="fn"/>89 static public members inherited from <a href="qapplication.html#static-public-members">QApplication</a></li>
-<li><div class="fn"/>37 static public members inherited from <a href="qcoreapplication.html#static-public-members">QCoreApplication</a></li>
+<li><div class="fn"/>16 static public members inherited from <a href="qtopiaapplication.html#static-public-members">QtopiaApplication</a></li>
+<li><div class="fn"/>90 static public members inherited from <a href="qapplication.html#static-public-members">QApplication</a></li>
+<li><div class="fn"/>39 static public members inherited from <a href="qcoreapplication.html#static-public-members">QCoreApplication</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <a name="related-non-members"></a>
@@ -113,7 +113,7 @@
 <p>The QtopiaServerApplication class provides additional <a href="qtopiaapplication.html">QtopiaApplication</a> functionality.</p>
 <a name="qtopia-server-tasks"></a>
 <h3>Qtopia Server Tasks</h3>
-<p>The QtopiaServerApplication class acts as a <a href="qtopiaapplication.html">QtopiaApplication</a> instance in Qtopia Server. QtopiaServerApplication is primarily responsible for bringing up and shutting down the Qtopia server and acts as the &quot;core&quot; controller in the system.</p>
+<p>The QtopiaServerApplication class acts as a <a href="qtopiaapplication.html">QtopiaApplication</a> instance in Qtopia Server. QtopiaServerApplication is primarily responsible for bringing up and shutting down the Qtopia server and acts as the &quot;core&quot; controller in the system. This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <p>The Qtopia server is structured as a collection of largely independent <i>tasks</i> that are responsible for performing a small, well defined portion of work or functionality which often form the &quot;backend&quot; to other system capabilities. For example, Qtopia's network management APIs ultimately communicate with the <a href="qtopianetworkserver.html">QtopiaNetworkServer</a> task, other tasks may operate more independently. Tasks can be thought of as the building blocks that form the Qtopia server, when arranged appropriately.</p>
 <p>Tasks are QObjects and may work together by exporting C++ interfaces. Other tasks or modules within the server may request tasks that support a particular interface. For example, when the system is shutting down, all the tasks that provide the <a href="systemshutdownhandler.html">SystemShutdownHandler</a> interface are invoked to perform all the necessary cleanup.</p>
 <p>The order in which the task objects are instantiated is configurable. Both the <i>configurator</i> and the task developer has a degree of control over the instantiation order. The <i>configurator</i> controls the start up order through the <tt>$QPEDIR/etc/Tasks.cfg</tt> file which has the following simple syntax:</p>
@@ -174,6 +174,7 @@
 <tr valign="top" class="odd"><td><tt>/System/Tasks/&lt;TaskName&gt;/Order/Interface</tt></td><td>int</td><td>The order that the task will be given when determining interface associations.</td></tr>
 <tr valign="top" class="even"><td><tt>/System/Tasks/&lt;TaskName&gt;/State</tt></td><td>String</td><td>&quot;Disable&quot; if the task was in the <tt>exclude</tt> list, &quot;Active&quot; if the task is running, or &quot;Inactive&quot; if not.</td></tr>
 </table></p>
+<p>A tutorial on how to develop new server tasks can be found in the <a href="integration-guide.html#server-tasks">Device Integration guide</a>.</p>
 <a name="qtopia-server-widgets"></a>
 <h3>Qtopia Server Widgets</h3>
 <p>There are many cases of Qt widgets being used throughout the Qtopia server that may need to be customized to achieve a desired look and feel. For example, while it supports customization through theming, a customer that wants to replace the Qtopia phone dialer with a &quot;rotary dial&quot; style dialer would need to replace the entire dialer widget.</p>
@@ -210,18 +211,18 @@
 <h3 class="fn"><a name="addAggregateObject"></a>void QtopiaServerApplication::addAggregateObject ( <a href="qobject.html">QObject</a> * <i>me</i>, <a href="qobject.html">QObject</a> * <i>them</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Add an object <i>them</i> to <i>me</i> to create an &quot;aggregate&quot; task. Aggregate tasks are designed to work around the limitations in Qt's support for multiple interface inheritance by allowing multiple objects to be &quot;stuck together&quot; to form a single object from the task system's perspective.</p>
 <p>For example, consider the following interfaces:</p>
-<pre>    class ApplicationLauncherType : public QObject {};
-    QTOPIA_TASK_INTERFACE(ApplicationLauncherType);
+<pre>    class ApplicationTypeLauncher : public QObject {};
+    QTOPIA_TASK_INTERFACE(ApplicationTypeLauncher);
     class SystemShutdownHandler : public QObject {};
     QTOPIA_TASK_INTERFACE(SystemShutdownHandler);</pre>
-<p>Using direct inheritance a single task could not implement both interfaces. Instead, a task can create one object that implements the <tt>ApplicationLauncherType</tt> interface and one that implements the <tt>SystemShutdownHandler</tt> interface and aggregate them together.</p>
+<p>Using direct inheritance a single task could not implement both interfaces. Instead, a task can create one object that implements the <tt>ApplicationTypeLauncher</tt> interface and one that implements the <tt>SystemShutdownHandler</tt> interface and aggregate them together.</p>
 <pre>    class MyLauncherShutdown : public SystemShutdownHandler
     {
     public:
         MyLauncherShutdown(MyLauncherType *);
     };
 
-    class MyLauncherType : public ApplicationLauncherType
+    class MyLauncherType : public ApplicationTypeLauncher
     {
     public:
         MyLauncherType()
@@ -231,7 +232,7 @@
         }
     };
     QTOPIA_TASK(MyLauncherType, MyLauncherType);
-    QTOPIA_TASK_PROVIDES(MyLauncherType, ApplicationLauncherType);
+    QTOPIA_TASK_PROVIDES(MyLauncherType, ApplicationTypeLauncher);
     QTOPIA_TASK_PROVIDES(MyLauncherType, SystemShutdownHandler);</pre>
 <p>When the system attempts to cast a task to a particular interface, it first tries the task object itself, and then each of the aggregate objects for that task.</p>
 <h3 class="fn"><a name="argc"></a>int &amp; QtopiaServerApplication::argc ()&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -334,6 +335,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

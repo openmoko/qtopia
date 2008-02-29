@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -68,7 +83,7 @@
 
     Qt supports Microsoft Active Accessibility (MSAA), Mac OS X
     Accessibility, and the Unix/X11 AT-SPI standard. Other backends
-    can be supported using QAccessibilityBridge.
+    can be supported using QAccessibleBridge.
 
     In addition to QAccessible's static functions, Qt offers one
     generic interface, QAccessibleInterface, that can be used to wrap
@@ -129,7 +144,20 @@
     \value SetCursorPosition
     \value GetCursorPosition
 
+    \omitvalue ForegroundColor
+    \omitvalue BackgroundColor
+    
     \sa QAccessibleInterface::invokeMethod()
+*/
+
+/*!
+    \fn QSet<Method> QAccessibleInterface::supportedMethods()
+    \since 4.3
+
+    Returns a QSet of \l{QAccessible::}{Method}s that are supported by this
+    accessible interface.
+
+    \sa QAccessible::Method invokeMethod()
 */
 
 /*!
@@ -180,40 +208,41 @@
     This enum type defines accessible event types.
 
     \value AcceleratorChanged
-    \value Alert
-    \value ContextHelpEnd
-    \value ContextHelpStart
-    \value DefaultActionChanged
-    \value DescriptionChanged
-    \value DialogEnd
-    \value DialogStart
-    \value DragDropEnd
-    \value DragDropStart
-    \value Focus
-    \value ForegroundChanged
-    \value HelpChanged
-    \value LocationChanged
-    \value MenuCommand
-    \value MenuEnd
-    \value MenuStart
-    \value NameChanged
-    \value ObjectCreated
-    \value ObjectDestroyed
-    \value ObjectHide
-    \value ObjectReorder
-    \value ObjectShow
-    \value ParentChanged
-    \value PopupMenuEnd
-    \value PopupMenuStart
-    \value ScrollingEnd
-    \value ScrollingStart
-    \value Selection
-    \value SelectionAdd
-    \value SelectionRemove
-    \value SelectionWithin
-    \value SoundPlayed
-    \value StateChanged
-    \value ValueChanged
+    \value Alert                 A system alert (e.g., a message from a QMessageBox)
+    \value ContextHelpEnd        Context help (QWhatsThis) for an object is finished.
+    \value ContextHelpStart      Context help (QWhatsThis) for an object is initiated.
+    \value DefaultActionChanged  The default QAccessible::Action for the accessible object changed
+    \value DescriptionChanged    The objects QAccessible::Description changed.
+    \value DialogEnd             A dialog (QDialog) is been hidden
+    \value DialogStart           A dialog (QDialog) has been set visible.
+    \value DragDropEnd           A Drag & Drop operation is about to finished.
+    \value DragDropStart         A Drag & Drop operation is about to be initiated.
+    \value Focus                 An object has gained keyboard focus.
+    \value ForegroundChanged     A window has been activated (i.e., a new window has gained focus on the desktop)
+    \value HelpChanged           The QAccessible::Help text property of an object has changed
+    \value LocationChanged       An objects location on the screen changed
+    \value MenuCommand           A menu item is triggered.
+    \value MenuEnd               A menu has been closed (Qt uses PopupMenuEnd for all menus)
+    \value MenuStart             A menu has been opened on the menubar (Qt uses PopupMenuStart for all menus)
+    \value NameChanged           The QAccessible::Name property of an object has changed
+    \value ObjectCreated         A new object is created.
+    \value ObjectDestroyed       An object is deleted.
+    \value ObjectHide            An object is hidden (i.e., with QWidget::hide()). Any children the object that is hidden has do not send this event.
+                                 It is not send when an object is hidden as it is being obcured by others.
+    \value ObjectReorder         A layout or item view  has added, removed, or moved an object (Qt does not use this event).
+    \value ObjectShow            An object is displayed (i.e., with QWidget::show()).
+    \value ParentChanged         An objects parent object changed.
+    \value PopupMenuEnd          A popup menu has closed.
+    \value PopupMenuStart        A popupmenu has opened.
+    \value ScrollingEnd          A scrollbar scroll operation has ended (the mouse has released the slider handle)
+    \value ScrollingStart        A scrollbar scroll operation is about to start (i.e., the mouse has pressed on the slider handle)
+    \value Selection             The selection has changed in a menu or item view.
+    \value SelectionAdd          An item has been added to the selection in an item view.
+    \value SelectionRemove       An item has been removed from an item view selection.
+    \value SelectionWithin       Several changes to a selection has occurred in an item view.
+    \value SoundPlayed           A sound has been played by an object
+    \value StateChanged          The QAccessible::State of an object has changed.
+    \value ValueChanged          The QAccessible::Value of an object has changed.
 */
 
 /*!
@@ -329,7 +358,9 @@
     This enum specifies string information that an accessible object
     returns.
 
-    \value Name         The name of the object.
+    \value Name         The name of the object. This can be used both
+                        as an identifier or a short description by
+                        accessible clients.
     \value Description  A short text describing the object.
     \value Value        The value of the object.
     \value Help         A longer text giving information about how to use the object.
@@ -351,27 +382,6 @@
 /*!
     \fn void QAccessible::cleanup()
     \internal
-*/
-
-/*!
-    \fn static void QAccessible::updateAccessibility(QObject *object, int child, Event reason)
-
-    Notifies accessibility clients about a change in \a object's
-    accessibility information.
-
-    \a reason specifies the cause of the change, for example,
-    \c ValueChange when the position of a slider has been changed. \a
-    child is the (1-based) index of the child element that has changed.
-    When \a child is 0, the object itself has changed.
-
-    Call this function whenever the state of your accessible object or
-    one of its sub-elements has been changed either programmatically
-    (e.g. by calling QLabel::setText()) or by user interaction.
-
-    If there are no accessibility tools listening to this event, the
-    performance penalty for calling this function is small, but if determining
-    the parameters of the call is expensive you can test isActive() to
-    avoid unnecessary computations.
 */
 
 #ifndef QT_NO_LIBRARY
@@ -409,6 +419,8 @@ static void qAccessibleCleanup()
 /*!
     \typedef QAccessible::UpdateHandler
 
+    \internal
+
     A function pointer type. Use a function with this prototype to install
     your own update function.
 
@@ -417,6 +429,8 @@ static void qAccessibleCleanup()
 
 /*!
     \typedef QAccessible::RootObjectHandler
+
+    \internal
 
     A function pointer type. Use a function with this prototype to install
     your own root object handler.
@@ -451,6 +465,8 @@ void QAccessible::removeFactory(InterfaceFactory factory)
 }
 
 /*!
+    \internal
+
     Installs the given \a handler as the function to be used by
     updateAccessibility(), and returns the previously installed
     handler.
@@ -544,20 +560,41 @@ bool QAccessible::isActive()
 }
 
 /*!
-    \fn void QAccessible::setRootObject(QObject *object)
+  \fn void QAccessible::setRootObject(QObject *object)
 
-    Sets the root accessible object of this application to \a object.
-    All other accessible objects in the application can be reached by the
-    client using object navigation.
+  Sets the root accessible object of this application to \a object.
+  All other accessible objects in the application can be reached by the
+  client using object navigation.
 
-    You should never need to call this function. Qt sets the QApplication
-    object as the root object immediately before the event loop is entered
-    in QApplication::exec().
+  You should never need to call this function. Qt sets the QApplication
+  object as the root object immediately before the event loop is entered
+  in QApplication::exec().
 
-    Use installRootObjectHandler() to redirect the function call to a
-    customized handler function.
+  Use QAccessible::installRootObjectHandler() to redirect the function
+  call to a customized handler function.
 
-    \sa RootObjectHandler, queryAccessibleInterface()
+  \sa queryAccessibleInterface()
+*/
+
+/*!
+  \fn void QAccessible::updateAccessibility(QObject *object, int child, Event reason)
+
+  Notifies accessibility clients about a change in \a object's
+  accessibility information.
+
+  \a reason specifies the cause of the change, for example,
+  \c ValueChange when the position of a slider has been changed. \a
+  child is the (1-based) index of the child element that has changed.
+  When \a child is 0, the object itself has changed.
+  
+  Call this function whenever the state of your accessible object or
+  one of its sub-elements has been changed either programmatically
+  (e.g. by calling QLabel::setText()) or by user interaction.
+  
+  If there are no accessibility tools listening to this event, the
+  performance penalty for calling this function is small, but if determining
+  the parameters of the call is expensive you can test isActive() to
+  avoid unnecessary computations.
 */
 
 
@@ -609,7 +646,7 @@ bool QAccessible::isActive()
 
     The central property of an accessible objects is what role() it
     has. Different objects can have the same role, e.g. both the "Add
-    line" element in a scrollbar and the \c OK button in a dialog have
+    line" element in a scroll bar and the \c OK button in a dialog have
     the same role, "button". The role implies what kind of
     interaction the user can perform with the user interface element.
 
@@ -647,7 +684,7 @@ bool QAccessible::isActive()
     implementation themselves. This is practical if the object has
     many similar children (e.g. items in a list view), or if the
     children are an integral part of the object itself, for example, the
-    different sections in a scrollbar.
+    different sections in a scroll bar.
 
     If an accessible object provides information about its children
     through one QAccessibleInterface, the children are referenced
@@ -752,8 +789,8 @@ const QAccessibleInterface *other, int otherChild) const
     \a target. It is the caller's responsibility to delete *\a target
     after use.
 
-    If an object is found \a target is set to point to the object, and
-    the index of the child in \a target is returned. The return value
+    If an object is found, \a target is set to point to the object, and
+    the index of the child of \a target is returned. The return value
     is 0 if \a target itself is the requested object. \a target is set
     to null if this object is the target object (i.e. the requested
     object is a handled by this object).
@@ -773,7 +810,7 @@ const QAccessibleInterface *other, int otherChild) const
 
     \code
         QAccessibleInterface *child = 0;
-        int targetChild = object->navigate(Child, 1, &child);
+        int targetChild = object->navigate(Accessible::Child, 1, &child);
         if (child) {
             // ...
             delete child;
@@ -800,16 +837,18 @@ const QAccessibleInterface *other, int otherChild) const
     Returns the value of the text property \a t of the object, or of
     the object's child if \a child is not 0.
 
-    The \l Name is a string used by clients to identify, find or
+    The \l Name is a string used by clients to identify, find, or
     announce an accessible object for the user. All objects must have
-    a name that is unique within their container.
+    a name that is unique within their container. The name can be
+    used differently by clients, so the name should both give a
+    short description of the object and be unique.
 
     An accessible object's \l Description provides textual information
     about an object's visual appearance. The description is primarily
     used to provide greater context for vision-impaired users, but is
     also used for context searching or other applications. Not all
     objects have a description. An "OK" button would not need a
-    description, but a toolbutton that shows a picture of a smiley
+    description, but a tool button that shows a picture of a smiley
     would.
 
     The \l Value of an accessible object represents visual information
@@ -917,6 +956,36 @@ const QAccessibleInterface *other, int otherChild) const
 */
 
 /*!
+    \fn QColor QAccessibleInterface::backgroundColor()
+    \internal
+*/
+
+/*!
+    \fn QAccessibleEditableTextInterface *QAccessibleInterface::editableTextInterface()
+    \internal
+*/
+
+/*!
+    \fn QColor QAccessibleInterface::foregroundColor()
+    \internal
+*/
+
+/*!
+    \fn QAccessibleTextInterface *QAccessibleInterface::textInterface()
+    \internal
+*/
+
+/*!
+    \fn QAccessibleValueInterface *QAccessibleInterface::valueInterface()
+    \internal
+*/
+
+/*!
+    \fn QAccessibleTableInterface *QAccessibleInterface::tableInterface()
+    \internal
+*/
+
+/*!
     \class QAccessibleEvent
     \brief The QAccessibleEvent class is used to query addition
     accessibility information about complex widgets.
@@ -999,4 +1068,11 @@ QVariant QAccessibleInterfaceEx::virtual_hook(const QVariant &)
     return QVariant();
 }
 
+/*! \internal */
+QAccessible2Interface *QAccessibleInterface::cast_helper(QAccessible2::InterfaceType t)
+{
+    if (state(0) & HasInvokeExtension)
+        return static_cast<QAccessibleInterfaceEx *>(this)->interface_cast(t);
+    return 0;
+}
 #endif

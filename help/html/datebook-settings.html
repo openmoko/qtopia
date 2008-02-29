@@ -1,15 +1,3 @@
-<!--#if expr="$PDASTYLE"-->
-<!--#set var="SetMinutes" value="using the up and down arrows beside the minutes box"-->
-<!--#set var="Tap" value="Tap"-->
-<!--#set var="OkButton" value=":image/qpe/pda/OKButton"-->
-<!--#set var="CancelButton" value=":image/qpe/pda/CloseButton"-->
-<!--#endif-->
-<!--#if expr="$PHONESTYLE"-->
-<!--#set var="SetMinutes" value="highlighting the field and using the keypad to enter the number"-->
-<!--#set var="Tap" value="Press"-->
-<!--#set var="OkButton" value=":icon/ok"-->
-<!--#set var="CancelButton" value=":icon/cancel"-->
-<!--#endif-->
 <html>
 <head><title>Calendar Settings</title></head>
 <body>
@@ -22,20 +10,12 @@
 <p>View settings are used to control the appearance of the calendar.
 <p><b>Default view:</b> determines whether <b>Calendar</b> starts in Day View or Month View each time it is launched.</p>
 <p><b>Day starts at:</b> first blank time slot to display; events set for an earlier time will still show.</p>
-<!--#if expr="$PDASTYLE"-->
-<p><b>To change the start time:</b></p>
-<ul>
-<li>Tap <b>View</b>, then <b>Settings...</b></li>
-<li>Adjust the <b>Start Time</b> by tapping the <b>up / down</b> arrows beside the current start time.</li>
-<li>Tap <img src=":image/qpe/pda/OKButton" alt="OK"> </img> to save your changes or <img src=":image/qpe/pda/CloseButton" alt="X"> </img> to cancel.</li>
-</ul>
-<!--#endif-->
 <p>Alarm settings are used to specify if an alarm should be preset for newly created events and if so, how many minutes prior to the start time of the event should the alarm go off.</p>
 <p><b>To activate Preset Alarms:</b></p>
 <ul>
 <li>Select the <b>Preset</b> checkbox to place a tick in it.</li>
-<li>Specify the number of minutes by <!--#echo var="SetMinutes"-->.</li>
-<li><!--#echo var="Tap"--> <img src="<!--#echo var="OkButton"-->" alt="OK"> </img> to save your changes or <img src="<!--#echo var="CancelButton"-->" alt="X"> </img> to cancel.</li>
+<li>Specify the number of minutes.</li>
+<li>Press <img src=":icon/ok" alt="OK"> </img> to save your changes or <img src=":icon/cancel" alt="X"> </img> to cancel.</li>
 </ul>
 <p>See Also: <a href="systemtime-setdate.html">Setting the Date</a></p>
 </body>

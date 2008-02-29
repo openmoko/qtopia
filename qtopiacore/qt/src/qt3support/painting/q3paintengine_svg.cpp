@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -114,14 +129,14 @@ public:
     QColor parseColor(const QString &col);
     void init() {
         QDomImplementation domImpl;
-        QDomDocumentType docType = domImpl.createDocumentType("svg", publicId, systemId);
-        doc = domImpl.createDocument("http://www.w3.org/2000/svg", "svg", docType);
-        doc.insertBefore(doc.createProcessingInstruction("xml", piData), doc.firstChild());
+        QDomDocumentType docType = domImpl.createDocumentType(QLatin1String("svg"), QLatin1String(publicId), QLatin1String(systemId));
+        doc = domImpl.createDocument(QLatin1String("http://www.w3.org/2000/svg"), QLatin1String("svg"), docType);
+        doc.insertBefore(doc.createProcessingInstruction(QLatin1String("xml"), QLatin1String(piData)), doc.firstChild());
         current = doc.documentElement();
         images.clear();
         pixmaps.clear();
 
-        doc.documentElement().setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+        doc.documentElement().setAttribute(QLatin1String("xmlns:xlink"), QLatin1String("http://www.w3.org/1999/xlink"));
     }
 
 
@@ -242,11 +257,11 @@ void Q3SVGPaintEngine::updateClipPath(const QPainterPath &path, Qt::ClipOperatio
 
     QDomElement e;
     d->currentClip++;
-    e = d->doc.createElement("clipPath");
-    e.setAttribute("id", QString("clip%1").arg(d->currentClip));
+    e = d->doc.createElement(QLatin1String("clipPath"));
+    e.setAttribute(QLatin1String("id"), QString(QLatin1String("clip%1")).arg(d->currentClip));
 
-    QDomElement path_element = d->doc.createElement("path");
-    path_element.setAttribute("d", qt_svg_compose_path(path));
+    QDomElement path_element = d->doc.createElement(QLatin1String("path"));
+    path_element.setAttribute(QLatin1String("d"), qt_svg_compose_path(path));
     e.appendChild(path_element);
 
     d->appendChild(e, QPicturePrivate::PdcSetClipPath);
@@ -267,12 +282,12 @@ void Q3SVGPaintEngine::drawRect(const QRectF &r)
 {
     Q_D(Q3SVGPaintEngine);
     QDomElement e;
-    e = d->doc.createElement("rect");
+    e = d->doc.createElement(QLatin1String("rect"));
 
-    e.setAttribute("x", r.x());
-    e.setAttribute("y", r.y());
-    e.setAttribute("width", r.width());
-    e.setAttribute("height", r.height());
+    e.setAttribute(QLatin1String("x"), r.x());
+    e.setAttribute(QLatin1String("y"), r.y());
+    e.setAttribute(QLatin1String("width"), r.width());
+    e.setAttribute(QLatin1String("height"), r.height());
     d->appendChild(e, QPicturePrivate::PdcDrawRect);
 }
 
@@ -296,20 +311,20 @@ void Q3SVGPaintEngine::drawEllipse(const QRect &r)
     QDomElement e;
 
     if (r.width() == r.height()) {
-        e = d->doc.createElement("circle");
+        e = d->doc.createElement(QLatin1String("circle"));
         double cx = r.x() + (r.width() / 2.0);
         double cy = r.y() + (r.height() / 2.0);
-        e.setAttribute("cx", cx);
-        e.setAttribute("cy", cy);
-        e.setAttribute("r", cx - r.x());
+        e.setAttribute(QLatin1String("cx"), cx);
+        e.setAttribute(QLatin1String("cy"), cy);
+        e.setAttribute(QLatin1String("r"), cx - r.x());
     } else {
-        e = d->doc.createElement("ellipse");
+        e = d->doc.createElement(QLatin1String("ellipse"));
         double cx = r.x() + (r.width() / 2.0);
         double cy = r.y() + (r.height() / 2.0);
-        e.setAttribute("cx", cx);
-        e.setAttribute("cy", cy);
-        e.setAttribute("rx", cx - r.x());
-        e.setAttribute("ry", cy - r.y());
+        e.setAttribute(QLatin1String("cx"), cx);
+        e.setAttribute(QLatin1String("cy"), cy);
+        e.setAttribute(QLatin1String("rx"), cx - r.x());
+        e.setAttribute(QLatin1String("ry"), cy - r.y());
     }
     d->appendChild(e, QPicturePrivate::PdcDrawEllipse);
 }
@@ -325,11 +340,11 @@ void Q3SVGPaintEngine::drawLines(const QLineF *lines, int lineCount)
     QDomElement e;
 
     for (int i = 0; i < lineCount; ++i) {
-        e = d->doc.createElement("line");
-        e.setAttribute("x1", lines[i].x1());
-        e.setAttribute("y1", lines[i].y1());
-        e.setAttribute("x2", lines[i].x2());
-        e.setAttribute("y2", lines[i].y2());
+        e = d->doc.createElement(QLatin1String("line"));
+        e.setAttribute(QLatin1String("x1"), lines[i].x1());
+        e.setAttribute(QLatin1String("y1"), lines[i].y1());
+        e.setAttribute(QLatin1String("x2"), lines[i].x2());
+        e.setAttribute(QLatin1String("y2"), lines[i].y2());
         d->appendChild(e, QPicturePrivate::PdcDrawLineSegments);
     }
 }
@@ -337,8 +352,8 @@ void Q3SVGPaintEngine::drawLines(const QLineF *lines, int lineCount)
 void Q3SVGPaintEngine::drawPath(const QPainterPath &path)
 {
     Q_D(Q3SVGPaintEngine);
-    QDomElement e = d->doc.createElement("path");
-    e.setAttribute("d", qt_svg_compose_path(path));
+    QDomElement e = d->doc.createElement(QLatin1String("path"));
+    e.setAttribute(QLatin1String("d"), qt_svg_compose_path(path));
     d->appendChild(e, QPicturePrivate::PdcDrawPath);
 }
 
@@ -347,22 +362,22 @@ void Q3SVGPaintEngine::drawPolygon(const QPointF *points, int pointCount, Polygo
     Q_D(Q3SVGPaintEngine);
     QString str;
     if (mode == PolylineMode) {
-        QDomElement e = d->doc.createElement("polyline");
+        QDomElement e = d->doc.createElement(QLatin1String("polyline"));
         for (int i = 0; i < pointCount; ++i) {
             QString tmp;
             tmp.sprintf("%f %f ", points[i].x(), points[i].y());
             str += tmp;
         }
-        e.setAttribute("points", str.trimmed());
+        e.setAttribute(QLatin1String("points"), str.trimmed());
         d->appendChild(e, QPicturePrivate::PdcDrawPolyline);
     } else {
-        QDomElement e = d->doc.createElement("polygon");
+        QDomElement e = d->doc.createElement(QLatin1String("polygon"));
         for (int i = 0; i < pointCount; ++i) {
             QString tmp;
             tmp.sprintf("%f %f ", points[i].x(), points[i].y());
             str += tmp;
         }
-        e.setAttribute("points", str.trimmed());
+        e.setAttribute(QLatin1String("points"), str.trimmed());
         d->appendChild(e, QPicturePrivate::PdcDrawPolygon);
     }
 }
@@ -378,11 +393,11 @@ void Q3SVGPaintEngine::drawPolygon(const QPoint *points, int pointCount, Polygon
 void Q3SVGPaintEngine::drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF & /* sr */)
 {
     Q_D(Q3SVGPaintEngine);
-    QDomElement e = d->doc.createElement("image");
-    e.setAttribute("x", r.x());
-    e.setAttribute("y", r.y());
-    e.setAttribute("width", r.width());
-    e.setAttribute("height", r.height());
+    QDomElement e = d->doc.createElement(QLatin1String("image"));
+    e.setAttribute(QLatin1String("x"), r.x());
+    e.setAttribute(QLatin1String("y"), r.y());
+    e.setAttribute(QLatin1String("width"), r.width());
+    e.setAttribute(QLatin1String("height"), r.height());
 
     QPixElement pe;
     pe.element = e;
@@ -402,7 +417,7 @@ void Q3SVGPaintEngine::drawTiledPixmap(const QRectF & /* r */, const QPixmap & /
 void Q3SVGPaintEngine::drawTextItem(const QPointF &p, const QTextItem &ti)
 {
     Q_D(Q3SVGPaintEngine);
-    QDomElement e = d->doc.createElement("text");
+    QDomElement e = d->doc.createElement(QLatin1String("text"));
 //     int x, y;
 //     const QRect r(p.x(), p.y(), ti.width, ti.ascent + ti.descent);
     // horizontal text alignment
@@ -426,8 +441,8 @@ void Q3SVGPaintEngine::drawTextItem(const QPointF &p, const QTextItem &ti)
 //         e.setAttribute("x", x);
 //     if (y)
 //         e.setAttribute("y", y);
-    e.setAttribute("x", p.x());
-    e.setAttribute("y", p.y());
+    e.setAttribute(QLatin1String("x"), p.x());
+    e.setAttribute(QLatin1String("y"), p.y());
     e.appendChild(d->doc.createTextNode(ti.text()));
 }
 
@@ -435,11 +450,11 @@ void Q3SVGPaintEngine::drawImage(const QRectF &r, const QImage &im,
                                  const QRectF &, Qt::ImageConversionFlags)
 {
     Q_D(Q3SVGPaintEngine);
-    QDomElement e = d->doc.createElement("image");
-    e.setAttribute("x", r.x());
-    e.setAttribute("y", r.y());
-    e.setAttribute("width", r.width());
-    e.setAttribute("height", r.height());
+    QDomElement e = d->doc.createElement(QLatin1String("image"));
+    e.setAttribute(QLatin1String("x"), r.x());
+    e.setAttribute(QLatin1String("y"), r.y());
+    e.setAttribute(QLatin1String("width"), r.width());
+    e.setAttribute(QLatin1String("height"), r.height());
     QImgElement ie;
     ie.element = e;
     ie.image = im;
@@ -471,34 +486,34 @@ bool Q3SVGPaintEngine::save(const QString &fileName)
 {
     Q_D(Q3SVGPaintEngine);
     // guess svg id from fileName
-    QString svgName = fileName.endsWith(".svg") ?
+    QString svgName = fileName.endsWith(QLatin1String(".svg")) ?
                       fileName.left(fileName.length()-4) : fileName;
 
     // now we have the info about name and dimensions available
     QDomElement root = d->doc.documentElement();
-    root.setAttribute("id", svgName);
+    root.setAttribute(QLatin1String("id"), svgName);
     // the standard doesn't take respect x and y. But we want a
     // proper bounding rect. We make width and height bigger when
     // writing out and subtract x and y when reading in.
-    root.setAttribute("x", d->brect.x());
-    root.setAttribute("y", d->brect.y());
-    root.setAttribute("width", d->brect.width() + d->brect.x());
-    root.setAttribute("height", d->brect.height() + d->brect.y());
+    root.setAttribute(QLatin1String("x"), d->brect.x());
+    root.setAttribute(QLatin1String("y"), d->brect.y());
+    root.setAttribute(QLatin1String("width"), d->brect.width() + d->brect.x());
+    root.setAttribute(QLatin1String("height"), d->brect.height() + d->brect.y());
 
     // ... and know how to name any image files to be written out
     int icount = 0;
     ImageList::Iterator iit = d->images.begin();
     for (; iit != d->images.end(); ++iit) {
-        QString href = QString("%1_%2.png").arg(svgName).arg(icount);
+        QString href = QString(QLatin1String("%1_%2.png")).arg(svgName).arg(icount);
         (*iit).image.save(href, "PNG");
-        (*iit).element.setAttribute("xlink:href", href);
+        (*iit).element.setAttribute(QLatin1String("xlink:href"), href);
         icount++;
     }
     PixmapList::Iterator pit = d->pixmaps.begin();
     for (; pit != d->pixmaps.end(); ++pit) {
-        QString href = QString("%1_%2.png").arg(svgName).arg(icount);
+        QString href = QString(QLatin1String("%1_%2.png")).arg(svgName).arg(icount);
         (*pit).pixmap.save(href, "PNG");
-        (*pit).element.setAttribute("xlink:href", href);
+        (*pit).element.setAttribute(QLatin1String("xlink:href"), href);
         icount++;
     }
 
@@ -571,8 +586,8 @@ void Q3SVGPaintEnginePrivate::appendChild(QDomElement &e, QPicturePrivate::Paint
         // ### optimize application of attributes utilizing <g>
         if (c == QPicturePrivate::PdcSetClipRegion || c == QPicturePrivate::PdcSetClipPath) {
             QDomElement ne;
-            ne = doc.createElement("g");
-            ne.setAttribute("style", QString("clip-path:url(#clip%1)").arg(currentClip));
+            ne = doc.createElement(QLatin1String("g"));
+            ne.setAttribute(QLatin1String("style"), QString(QLatin1String("clip-path:url(#clip%1)")).arg(currentClip));
             if (dirtyTransform) {
                 applyTransform(&ne);
                 dirtyTransform = false;
@@ -582,7 +597,7 @@ void Q3SVGPaintEnginePrivate::appendChild(QDomElement &e, QPicturePrivate::Paint
         } else {
             if (dirtyStyle)                // only reset when entering
                 applyStyle(&e, c);        // or leaving a <g> tag
-            if (dirtyTransform && e.tagName() != "g") {
+            if (dirtyTransform && e.tagName() != QLatin1String("g")) {
                 // same as above but not for <g> tags
                 applyTransform(&e);
                 if (c == QPicturePrivate::PdcSave)
@@ -601,54 +616,54 @@ void Q3SVGPaintEnginePrivate::applyStyle(QDomElement *e, QPicturePrivate::PaintC
     if (c == QPicturePrivate::PdcDrawText2 || c == QPicturePrivate::PdcDrawText2Formatted) {
         // QPainter has a reversed understanding of pen/stroke vs.
         // brush/fill for text
-        s += QString("fill:rgb(%1,%2,%3);").arg(pcol.red()).arg(pcol.green()).arg(pcol.blue());
-        s += QString("stroke-width:0;");
+        s += QString(QLatin1String("fill:rgb(%1,%2,%3);")).arg(pcol.red()).arg(pcol.green()).arg(pcol.blue());
+        s += QString(QLatin1String("stroke-width:0;"));
         QFont f = cfont;
         QFontInfo fi(f);
-        s += QString("font-size:%1;").arg(fi.pointSize());
-        s += QString("font-style:%1;").arg(f.italic() ? "italic" : "normal");
+        s += QString(QLatin1String("font-size:%1;")).arg(fi.pointSize());
+        s += QString(QLatin1String("font-style:%1;")).arg(f.italic() ? QLatin1String("italic") : QLatin1String("normal"));
         // not a very scientific distribution
         QString fw;
         if (f.weight() <= QFont::Light)
-            fw = "100";
+            fw = QLatin1String("100");
         else if (f.weight() <= QFont::Normal)
-            fw = "400";
+            fw = QLatin1String("400");
         else if (f.weight() <= QFont::DemiBold)
-            fw = "600";
+            fw = QLatin1String("600");
         else if (f.weight() <= QFont::Bold)
-            fw = "700";
+            fw = QLatin1String("700");
         else if (f.weight() <= QFont::Black)
-            fw = "800";
+            fw = QLatin1String("800");
         else
-            fw = "900";
-        s += QString("font-weight:%1;").arg(fw);
-        s += QString("font-family:%1;").arg(f.family());
+            fw = QLatin1String("900");
+        s += QString(QLatin1String("font-weight:%1;")).arg(fw);
+        s += QString(QLatin1String("font-family:%1;")).arg(f.family());
     } else {
-        s += QString("stroke:rgb(%1,%2,%3);").arg(pcol.red()).arg(pcol.green()).arg(pcol.blue());
+        s += QString(QLatin1String("stroke:rgb(%1,%2,%3);")).arg(pcol.red()).arg(pcol.green()).arg(pcol.blue());
         if (pcol.alpha() != 255)
-            s += QString("stroke-opacity:%1;").arg(pcol.alpha()/255.0);
+            s += QString(QLatin1String("stroke-opacity:%1;")).arg(pcol.alpha()/255.0);
         if (bcol.alpha() != 255)
-            s += QString("fill-opacity:%1;").arg(bcol.alpha()/255.0);
+            s += QString(QLatin1String("fill-opacity:%1;")).arg(bcol.alpha()/255.0);
         double pw = cpen.width();
         if (pw == 0 && cpen.style() != Qt::NoPen)
             pw = 0.9;
         if (c == QPicturePrivate::PdcDrawLine)
             pw /= (qAbs(worldMatrix.m11()) + qAbs(worldMatrix.m22())) / 2.0;
-        s += QString("stroke-width:%1;").arg(pw);
+        s += QString(QLatin1String("stroke-width:%1;")).arg(pw);
         if (cpen.style() == Qt::DashLine)
-            s+= QString("stroke-dasharray:18,6;");
+            s+= QString(QLatin1String("stroke-dasharray:18,6;"));
         else if (cpen.style() == Qt::DotLine)
-            s+= QString("stroke-dasharray:3;");
+            s+= QString(QLatin1String("stroke-dasharray:3;"));
         else if (cpen.style() == Qt::DashDotLine)
-            s+= QString("stroke-dasharray:9,6,3,6;");
+            s+= QString(QLatin1String("stroke-dasharray:9,6,3,6;"));
         else if (cpen.style() == Qt::DashDotDotLine)
-            s+= QString("stroke-dasharray:9,3,3;");
+            s+= QString(QLatin1String("stroke-dasharray:9,3,3;"));
         if (cbrush.style() == Qt::NoBrush || c == QPicturePrivate::PdcDrawPolyline || c == QPicturePrivate::PdcDrawCubicBezier)
-            s += "fill:none;"; // Qt polylines use no brush, neither do Beziers
+            s += QLatin1String("fill:none;"); // Qt polylines use no brush, neither do Beziers
         else
-            s += QString("fill:rgb(%1,%2,%3);").arg(bcol.red()).arg(bcol.green()).arg(bcol.blue());
+            s += QString(QLatin1String("fill:rgb(%1,%2,%3);")).arg(bcol.red()).arg(bcol.green()).arg(bcol.blue());
     }
-    e->setAttribute("style", s);
+    e->setAttribute(QLatin1String("style"), s);
 }
 
 void Q3SVGPaintEnginePrivate::applyTransform(QDomElement *e) const
@@ -659,20 +674,20 @@ void Q3SVGPaintEnginePrivate::applyTransform(QDomElement *e) const
     bool rot = (m.m11() != 1.0 || m.m12() != 0.0 ||
                  m.m21() != 0.0 || m.m22() != 1.0);
     if (!rot && (m.dx() != 0.0 || m.dy() != 0.0)) {
-        s = QString("translate(%1,%2)").arg(m.dx()).arg(m.dy());
+        s = QString(QLatin1String("translate(%1,%2)")).arg(m.dx()).arg(m.dy());
     } else if (rot) {
         if (m.m12() == 0.0 && m.m21() == 0.0 &&
              m.dx() == 0.0 && m.dy() == 0.0)
-            s = QString("scale(%1,%2)").arg(m.m11()).arg(m.m22());
+            s = QString(QLatin1String("scale(%1,%2)")).arg(m.m11()).arg(m.m22());
         else
-            s = QString("matrix(%1,%2,%3,%4,%5,%6)")
+            s = QString(QLatin1String("matrix(%1,%2,%3,%4,%5,%6)"))
                 .arg(m.m11()).arg(m.m12())
                 .arg(m.m21()).arg(m.m22())
                 .arg(m.dx()).arg(m.dy());
     } else {
         return;
     }
-    e->setAttribute("transform", s);
+    e->setAttribute(QLatin1String("transform"), s);
 }
 
 bool Q3SVGPaintEngine::play(QPainter *pt)
@@ -694,7 +709,7 @@ bool Q3SVGPaintEngine::play(QPainter *pt)
         return false;
     }
 
-    QDomNode svg = d->doc.namedItem("svg");
+    QDomNode svg = d->doc.namedItem(QLatin1String("svg"));
     if (svg.isNull() || !svg.isElement()) {
         qWarning("Q3SVGPaintEngine::play: Couldn't find any svg element.");
         return false;
@@ -705,14 +720,14 @@ bool Q3SVGPaintEngine::play(QPainter *pt)
     pt->setWorldXForm(true);
 
     QDomNamedNodeMap attr = svg.attributes();
-    int x = d->lenToInt(attr, "x");
-    int y = d->lenToInt(attr, "y");
+    int x = d->lenToInt(attr, QLatin1String("x"));
+    int y = d->lenToInt(attr, QLatin1String("y"));
     d->brect.setX(x);
     d->brect.setY(y);
-    QString wstr = attr.contains("width")
-                   ? attr.namedItem("width").nodeValue() : QString("100%");
-    QString hstr = attr.contains("height")
-                   ? attr.namedItem("height").nodeValue() : QString("100%");
+    QString wstr = attr.contains(QLatin1String("width"))
+                   ? attr.namedItem(QLatin1String("width")).nodeValue() : QString(QLatin1String("100%"));
+    QString hstr = attr.contains(QLatin1String("height"))
+                   ? attr.namedItem(QLatin1String("height")).nodeValue() : QString(QLatin1String("100%"));
     double width = d->parseLen(wstr, 0, true);
     double height = d->parseLen(hstr, 0, false);
     // SVG doesn't respect x and y. But we want a proper bounding rect.
@@ -720,10 +735,10 @@ bool Q3SVGPaintEngine::play(QPainter *pt)
     d->brect.setHeight(int(height) - y);
     pt->setClipRect(d->brect);
 
-    if (attr.contains("viewBox")) {
-        QRegExp re(QString::fromLatin1("\\s*(\\S+)\\s*,?\\s*(\\S+)\\s*,?"
-                                       "\\s*(\\S+)\\s*,?\\s*(\\S+)\\s*"));
-        if (re.indexIn(attr.namedItem("viewBox").nodeValue()) < 0) {
+    if (attr.contains(QLatin1String("viewBox"))) {
+        QRegExp re(QString::fromLatin1("\\s*(\\S+)\\s*,?\\s*(\\S+)\\s*,?"),
+                                       "\\s*(\\S+)\\s*,?\\s*(\\S+)\\s*");
+        if (re.indexIn(attr.namedItem(QLatin1String("viewBox")).nodeValue()) < 0) {
             qWarning("Q3SVGPaintEngine::play: Invalid viewBox attribute.");
             return false;
         } else {
@@ -770,7 +785,7 @@ bool Q3SVGPaintEngine::play(QPainter *pt)
         qSvgTypeMap = new QSvgTypeMap;
         const ElementTable *t = etab;
         while (t->name) {
-            qSvgTypeMap->insert(t->name, t->type);
+            qSvgTypeMap->insert(QLatin1String(t->name), t->type);
             t++;
         }
     }
@@ -799,11 +814,11 @@ bool Q3SVGPaintEnginePrivate::play(const QDomNode &node, QPainter *pt)
         pt->setPen(p);
     }
     QDomNamedNodeMap attr = node.attributes();
-    if (attr.contains("style"))
-        setStyle(attr.namedItem("style").nodeValue(), pt);
+    if (attr.contains(QLatin1String("style")))
+        setStyle(attr.namedItem(QLatin1String("style")).nodeValue(), pt);
     // ### might have to exclude more elements from transform
-    if (t != SvgElement && attr.contains("transform"))
-        setTransform(attr.namedItem("transform").nodeValue(), pt);
+    if (t != SvgElement && attr.contains(QLatin1String("transform")))
+        setTransform(attr.namedItem(QLatin1String("transform")).nodeValue(), pt);
     uint i = attr.length();
     if (i > 0) {
         QPen pen = pt->pen();
@@ -826,18 +841,18 @@ bool Q3SVGPaintEnginePrivate::play(const QDomNode &node, QPainter *pt)
         break;
     case RectElement:
         rx = ry = 0;
-        x1 = lenToDouble(attr, "x");
-        y1 = lenToDouble(attr, "y");
-        w = lenToDouble(attr, "width");
-        h = lenToDouble(attr, "height");
+        x1 = lenToDouble(attr, QLatin1String("x"));
+        y1 = lenToDouble(attr, QLatin1String("y"));
+        w = lenToDouble(attr, QLatin1String("width"));
+        h = lenToDouble(attr, QLatin1String("height"));
         if (w == 0 || h == 0) // prevent div by zero below
             break;
-        x2 = attr.contains("rx"); // tiny abuse of x2 and y2
-        y2 = attr.contains("ry");
+        x2 = attr.contains(QLatin1String("rx")); // tiny abuse of x2 and y2
+        y2 = attr.contains(QLatin1String("ry"));
         if (x2)
-            rx = lenToDouble(attr, "rx");
+            rx = lenToDouble(attr, QLatin1String("rx"));
         if (y2)
-            ry = lenToDouble(attr, "ry");
+            ry = lenToDouble(attr, QLatin1String("ry"));
         if (x2 && !y2)
             ry = rx;
         else if (!x2 && y2)
@@ -847,24 +862,24 @@ bool Q3SVGPaintEnginePrivate::play(const QDomNode &node, QPainter *pt)
         pt->drawRoundRect(QRectF(x1, y1, w, h), int(rx), int(ry));
         break;
     case CircleElement:
-        cx1 = lenToDouble(attr, "cx") + 0.5;
-        cy1 = lenToDouble(attr, "cy") + 0.5;
-        crx = lenToDouble(attr, "r");
+        cx1 = lenToDouble(attr, QLatin1String("cx")) + 0.5;
+        cy1 = lenToDouble(attr, QLatin1String("cy")) + 0.5;
+        crx = lenToDouble(attr, QLatin1String("r"));
         pt->drawEllipse(QRectF(cx1-crx, cy1-crx, 2*crx, 2*crx));
         break;
     case EllipseElement:
-        cx1 = lenToDouble(attr, "cx") + 0.5;
-        cy1 = lenToDouble(attr, "cy") + 0.5;
-        crx = lenToDouble(attr, "rx");
-        cry = lenToDouble(attr, "ry");
+        cx1 = lenToDouble(attr, QLatin1String("cx")) + 0.5;
+        cy1 = lenToDouble(attr, QLatin1String("cy")) + 0.5;
+        crx = lenToDouble(attr, QLatin1String("rx"));
+        cry = lenToDouble(attr, QLatin1String("ry"));
         pt->drawEllipse(QRectF(cx1-crx, cy1-cry, 2*crx, 2*cry));
         break;
     case LineElement:
         {
-            x1 = lenToDouble(attr, "x1");
-            x2 = lenToDouble(attr, "x2");
-            y1 = lenToDouble(attr, "y1");
-            y2 = lenToDouble(attr, "y2");
+            x1 = lenToDouble(attr, QLatin1String("x1"));
+            x2 = lenToDouble(attr, QLatin1String("x2"));
+            y1 = lenToDouble(attr, QLatin1String("y1"));
+            y2 = lenToDouble(attr, QLatin1String("y2"));
             QPen p = pt->pen();
             w = p.width();
             p.setWidth((unsigned int)(w * (qAbs(pt->worldMatrix().m11()) + qAbs(pt->worldMatrix().m22())) / 2));
@@ -877,7 +892,7 @@ bool Q3SVGPaintEnginePrivate::play(const QDomNode &node, QPainter *pt)
     case PolylineElement:
     case PolygonElement:
         {
-            QString pts = attr.namedItem("points").nodeValue();
+            QString pts = attr.namedItem(QLatin1String("points")).nodeValue();
             pts = pts.simplified();
             QStringList sl = pts.split(QRegExp(QString::fromLatin1("[,\\s]")),
                                                QString::SkipEmptyParts);
@@ -912,18 +927,18 @@ bool Q3SVGPaintEnginePrivate::play(const QDomNode &node, QPainter *pt)
         }
         break;
     case PathElement:
-        drawPath(attr.namedItem("d").nodeValue(), pt);
+        drawPath(attr.namedItem(QLatin1String("d")).nodeValue(), pt);
         break;
     case TSpanElement:
     case TextElement:
         {
-            if (attr.contains("x"))
-                 curr->textx = lenToDouble(attr, "x");
-            if (attr.contains("y"))
-                 curr->texty = lenToDouble(attr, "y");
+            if (attr.contains(QLatin1String("x")))
+                 curr->textx = lenToDouble(attr, QLatin1String("x"));
+            if (attr.contains(QLatin1String("y")))
+                 curr->texty = lenToDouble(attr, QLatin1String("y"));
             if (t == TSpanElement) {
-                curr->textx += lenToDouble(attr, "dx");
-                curr->texty += lenToDouble(attr, "dy");
+                curr->textx += lenToDouble(attr, QLatin1String("dx"));
+                curr->texty += lenToDouble(attr, QLatin1String("dy"));
             }
             // backup old colors
             QPen pn = pt->pen();
@@ -947,7 +962,7 @@ bool Q3SVGPaintEnginePrivate::play(const QDomNode &node, QPainter *pt)
                     pn.setColor(pcolor);
                     pt->setPen(pn);
                     curr->textx += w;
-                } else if (c.isElement() && c.toElement().tagName() == "tspan") {
+                } else if (c.isElement() && c.toElement().tagName() == QLatin1String("tspan")) {
                     play(c, pt);
 
                 }
@@ -963,11 +978,11 @@ bool Q3SVGPaintEnginePrivate::play(const QDomNode &node, QPainter *pt)
         break;
     case ImageElement:
         {
-            x1 = lenToDouble(attr, "x");
-            y1 = lenToDouble(attr, "y");
-            w = lenToDouble(attr, "width");
-            h = lenToDouble(attr, "height");
-            QString href = attr.namedItem("xlink:href").nodeValue();
+            x1 = lenToDouble(attr, QLatin1String("x"));
+            y1 = lenToDouble(attr, QLatin1String("y"));
+            w = lenToDouble(attr, QLatin1String("width"));
+            h = lenToDouble(attr, QLatin1String("height"));
+            QString href = attr.namedItem(QLatin1String("xlink:href")).nodeValue();
             // ### catch references to embedded .svg files
             QPixmap pix;
             if (!pix.load(href)){
@@ -986,19 +1001,19 @@ bool Q3SVGPaintEnginePrivate::play(const QDomNode &node, QPainter *pt)
             restoreAttributes(pt); // To ensure the clip rect is saved, we need to restore now
             QDomNode child = node.firstChild();
             QDomNamedNodeMap childAttr = child.attributes();
-            if (child.nodeName() == "rect") {
+            if (child.nodeName() == QLatin1String("rect")) {
                 QRect r;
-                r.setX(lenToInt(childAttr, "x"));
-                r.setY(lenToInt(childAttr, "y"));
-                r.setWidth(lenToInt(childAttr, "width"));
-                r.setHeight(lenToInt(childAttr, "height"));
+                r.setX(lenToInt(childAttr, QLatin1String("x")));
+                r.setY(lenToInt(childAttr, QLatin1String("y")));
+                r.setWidth(lenToInt(childAttr, QLatin1String("width")));
+                r.setHeight(lenToInt(childAttr, QLatin1String("height")));
                 pt->setClipRect(r);
-            } else if (child.nodeName() == "ellipse") {
+            } else if (child.nodeName() == QLatin1String("ellipse")) {
                 QRect r;
-                int x = lenToInt(childAttr, "cx");
-                int y = lenToInt(childAttr, "cy");
-                int width = lenToInt(childAttr, "rx");
-                int height = lenToInt(childAttr, "ry");
+                int x = lenToInt(childAttr, QLatin1String("cx"));
+                int y = lenToInt(childAttr, QLatin1String("cy"));
+                int width = lenToInt(childAttr, QLatin1String("rx"));
+                int height = lenToInt(childAttr, QLatin1String("ry"));
                 r.setX(x - width);
                 r.setY(y - height);
                 r.setWidth(width * 2);
@@ -1039,24 +1054,24 @@ double Q3SVGPaintEnginePrivate::parseLen(const QString &str, bool *ok, bool hori
 
     double dbl = reg.cap(1).toDouble();
     QString u = reg.cap(2);
-    if (!u.isEmpty() && u != "px") {
-        if (u == "em") {
+    if (!u.isEmpty() && u != QLatin1String("px")) {
+        if (u == QLatin1String("em")) {
             QFontInfo fi(cfont);
             dbl *= fi.pixelSize();
-        } else if (u == "ex") {
+        } else if (u == QLatin1String("ex")) {
             QFontInfo fi(cfont);
             dbl *= 0.5 * fi.pixelSize();
-        } else if (u == "%")
+        } else if (u == QLatin1String("%"))
             dbl *= (horiz ? wwidth : wheight)/100.0;
-        else if (u == "cm")
+        else if (u == QLatin1String("cm"))
             dbl *= dev->logicalDpiX() / 2.54;
-        else if (u == "mm")
+        else if (u == QLatin1String("mm"))
             dbl *= dev->logicalDpiX() / 25.4;
-        else if (u == "in")
+        else if (u == QLatin1String("in"))
             dbl *= dev->logicalDpiX();
-        else if (u == "pt")
+        else if (u == QLatin1String("pt"))
             dbl *= dev->logicalDpiX() / 72.0;
-        else if (u == "pc")
+        else if (u == QLatin1String("pc"))
             dbl *= dev->logicalDpiX() / 6.0;
         else
             qWarning("Q3SVGPaintEngine::parseLen: Unknown unit %s", u.latin1());
@@ -1107,29 +1122,29 @@ void Q3SVGPaintEnginePrivate::setTransform(const QString &tr, QPainter *pt)
         QString params = reg.cap(2);
         QStringList plist = params.split(QRegExp(QString::fromLatin1("[,\\s]")),
                                          QString::SkipEmptyParts);
-        if (command == "translate") {
+        if (command == QLatin1String("translate")) {
             double tx = 0, ty = 0;
             tx = plist[0].toDouble();
             if (plist.count() >= 2)
                 ty = plist[1].toDouble();
             pt->translate(tx, ty);
-        } else if (command == "rotate") {
+        } else if (command == QLatin1String("rotate")) {
             pt->rotate(plist[0].toDouble());
-        } else if (command == "scale") {
+        } else if (command == QLatin1String("scale")) {
             double sx, sy;
             sx = sy = plist[0].toDouble();
             if (plist.count() >= 2)
                 sy = plist[1].toDouble();
             pt->scale(sx, sy);
-        } else if (command == "matrix" && plist.count() >= 6) {
+        } else if (command == QLatin1String("matrix") && plist.count() >= 6) {
             double m[6];
             for (int i = 0; i < 6; i++)
                 m[i] = plist[i].toDouble();
             QMatrix wm(m[0], m[1], m[2], m[3], m[4], m[5]);
             pt->setWorldMatrix(wm, true);
-        } else if (command == "skewX") {
+        } else if (command == QLatin1String("skewX")) {
             pt->shear(0.0, tan(plist[0].toDouble() * deg2rad));
-        } else if (command == "skewY") {
+        } else if (command == QLatin1String("skewY")) {
             pt->shear(tan(plist[0].toDouble() * deg2rad), 0.0);
         }
 
@@ -1172,14 +1187,14 @@ void Q3SVGPaintEnginePrivate::restoreAttributes(QPainter *pt)
 
 void Q3SVGPaintEnginePrivate::setStyle(const QString &s, QPainter *pt)
 {
-    QStringList rules = s.split(QChar(';'), QString::SkipEmptyParts);
+    QStringList rules = s.split(QLatin1Char(';'), QString::SkipEmptyParts);
 
     QPen pen = pt->pen();
     QFont font = pt->font();
 
     QStringList::ConstIterator it = rules.constBegin();
     for (; it != rules.constEnd(); it++) {
-        int col = (*it).indexOf(':');
+        int col = (*it).indexOf(QLatin1Char(':'));
         if (col > 0) {
             QString prop = (*it).left(col).simplified();
             QString val = (*it).right((*it).length() - col - 1);
@@ -1194,8 +1209,8 @@ void Q3SVGPaintEnginePrivate::setStyle(const QString &s, QPainter *pt)
 void Q3SVGPaintEnginePrivate::setStyleProperty(const QString &prop, const QString &val, QPen *pen,
                                        QFont *font, int *talign, QPainter *pt)
 {
-    if (prop == "stroke") {
-        if (val == "none") {
+    if (prop == QLatin1String("stroke")) {
+        if (val == QLatin1String("none")) {
             pen->setStyle(Qt::NoPen);
         } else {
             pen->setColor(parseColor(val));
@@ -1204,79 +1219,79 @@ void Q3SVGPaintEnginePrivate::setStyleProperty(const QString &prop, const QStrin
             if (pen->width() == 0)
                 pen->setWidth(1);
         }
-    } else if (prop == "stroke-opacity") {
+    } else if (prop == QLatin1String("stroke-opacity")) {
         double opacity = parseLen(val);
         QColor c = pen->color();
         c.setAlpha((int)(opacity*255));
         pen->setColor(c);
-    } else if (prop == "fill-opacity") {
+    } else if (prop == QLatin1String("fill-opacity")) {
         double opacity = parseLen(val);
         QColor c = pt->brush().color();
         c.setAlpha((int)(opacity*255));
         pt->setBrush(c);
-    } else if (prop == "stroke-width") {
+    } else if (prop == QLatin1String("stroke-width")) {
         double w = parseLen(val);
         if (w > 0.0001)
             pen->setWidth(int(w));
         else
             pen->setStyle(Qt::NoPen);
-    } else if (prop == "stroke-linecap") {
-        if (val == "butt")
+    } else if (prop == QLatin1String("stroke-linecap")) {
+        if (val == QLatin1String("butt"))
             pen->setCapStyle(Qt::FlatCap);
-        else if (val == "round")
+        else if (val == QLatin1String("round"))
             pen->setCapStyle(Qt::RoundCap);
-        else if (val == "square")
+        else if (val == QLatin1String("square"))
             pen->setCapStyle(Qt::SquareCap);
-    } else if (prop == "stroke-linejoin") {
-        if (val == "miter")
+    } else if (prop == QLatin1String("stroke-linejoin")) {
+        if (val == QLatin1String("miter"))
             pen->setJoinStyle(Qt::MiterJoin);
-        else if (val == "round")
+        else if (val == QLatin1String("round"))
             pen->setJoinStyle(Qt::RoundJoin);
-        else if (val == "bevel")
+        else if (val == QLatin1String("bevel"))
             pen->setJoinStyle(Qt::BevelJoin);
-    } else if (prop == "stroke-dasharray") {
-        if (val == "18,6")
+    } else if (prop == QLatin1String("stroke-dasharray")) {
+        if (val == QLatin1String("18,6"))
             pen->setStyle(Qt::DashLine);
-        else if (val == "3")
+        else if (val == QLatin1String("3"))
             pen->setStyle(Qt::DotLine);
-        else if (val == "9,6,3,6")
+        else if (val == QLatin1String("9,6,3,6"))
             pen->setStyle(Qt::DashDotLine);
-        else if (val == "9,3,3")
+        else if (val == QLatin1String("9,3,3"))
             pen->setStyle(Qt::DashDotDotLine);
-    } else if (prop == "fill") {
-        if (val == "none")
+    } else if (prop == QLatin1String("fill")) {
+        if (val == QLatin1String("none"))
             pt->setBrush(Qt::NoBrush);
         else
             pt->setBrush(parseColor(val));
-    } else if (prop == "font-size") {
+    } else if (prop == QLatin1String("font-size")) {
         font->setPixelSize(qRound(parseLen(val)));
-    } else if (prop == "font-family") {
+    } else if (prop == QLatin1String("font-family")) {
         font->setFamily(val);
-    } else if (prop == "font-style") {
-        if (val == "normal")
+    } else if (prop == QLatin1String("font-style")) {
+        if (val == QLatin1String("normal"))
             font->setItalic(false);
-        else if (val == "italic")
+        else if (val == QLatin1String("italic"))
             font->setItalic(true);
         else
             qWarning("QSvgDevice::setStyleProperty: unhandled font-style: %s", val.latin1());
-    } else if (prop == "font-weight") {
+    } else if (prop == QLatin1String("font-weight")) {
         int w = font->weight();
-        // no exact equivalents so we have to "round" a little bit
-        if (val == "100" || val == "200")
+        // no exact equivalents so we have to QLatin1String("round") a little bit
+        if (val == QLatin1String("100") || val == QLatin1String("200"))
             w = QFont::Light;
-        if (val == "300" || val == "400" || val == "normal")
+        if (val == QLatin1String("300") || val == QLatin1String("400") || val == QLatin1String("normal"))
             w = QFont::Normal;
-        else if (val == "500" || val == "600")
+        else if (val == QLatin1String("500") || val == QLatin1String("600"))
             w = QFont::DemiBold;
-        else if (val == "700" || val == "bold" || val == "800")
+        else if (val == QLatin1String("700") || val == QLatin1String("bold") || val == QLatin1String("800"))
             w = QFont::Bold;
-        else if (val == "900")
+        else if (val == QLatin1String("900"))
             w = QFont::Black;
         font->setWeight(w);
-    } else if (prop == "text-anchor") {
-        if (val == "middle")
+    } else if (prop == QLatin1String("text-anchor")) {
+        if (val == QLatin1String("middle"))
             *talign = Qt::AlignHCenter;
-        else if (val == "end")
+        else if (val == QLatin1String("end"))
             *talign = Qt::AlignRight;
         else
             *talign = Qt::AlignLeft;
@@ -1292,7 +1307,7 @@ void Q3SVGPaintEnginePrivate::drawPath(const QString &data, QPainter *pt)
     int idx = 0;                        // current data position
     int mode = 0, lastMode = 0;         // parser state
     bool relative = false;              // e.g. 'h' vs. 'H'
-    QString commands("MZLHVCSQTA");     // recognized commands
+    QString commands(QLatin1String("MZLHVCSQTA"));     // recognized commands
     int cmdArgs[] = { 2, 0, 2, 1, 1, 6, 4, 4, 2, 7 };                   // no of arguments
     QRegExp reg(QString::fromLatin1("\\s*,?\\s*([+-]?\\d*\\.?\\d*)"));  // floating point
 
@@ -1456,7 +1471,7 @@ QColor Q3SVGPaintEnginePrivate::parseColor(const QString &col)
         qSvgColMap = new QMap<QString,QString>;
         const struct ColorTable *t = coltab;
         while (t->name) {
-            qSvgColMap->insert(t->name, t->rgb);
+            qSvgColMap->insert(QLatin1String(t->name), QLatin1String(t->rgb));
             ++t;
         }
     }
@@ -1466,7 +1481,7 @@ QColor Q3SVGPaintEnginePrivate::parseColor(const QString &col)
         return QColor((*qSvgColMap)[col]);
     // in rgb(r,g,b) form ?
     QString c = col;
-    c.replace(QRegExp(QString::fromLatin1("\\s*")), "");
+    c.replace(QRegExp(QString::fromLatin1("\\s*")), QLatin1String(""));
     QRegExp reg(QString::fromLatin1("^rgb\\((\\d+)(%?),(\\d+)(%?),(\\d+)(%?)\\)$"));
     if (reg.indexIn(c) >= 0) {
         int comp[3];

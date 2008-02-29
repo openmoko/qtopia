@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -81,14 +81,14 @@ QDLBrowserClient::QDLBrowserClient( QWidget* parent, const QString& name )
     d->mLoadLinks = false;
 
     connect( qobject_cast<QTextBrowser*>( this ),
-             SIGNAL( textChanged() ),
+             SIGNAL(textChanged()),
              this,
-             SLOT( browserTextChanged() ) );
+             SLOT(browserTextChanged()) );
 
     connect( qobject_cast<QTextBrowser*>( this ),
-             SIGNAL( anchorClicked( const QUrl & ) ),
+             SIGNAL(anchorClicked(QUrl)),
              this,
-             SLOT( activateLink( const QUrl& ) ) );
+             SLOT(activateLink(QUrl)) );
 }
 
 /*!

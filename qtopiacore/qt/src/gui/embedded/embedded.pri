@@ -112,7 +112,8 @@ embedded {
 	}
 
 	contains( gfx-drivers, vnc ) {
-		HEADERS += embedded/qscreenvnc_qws.h
+		HEADERS += embedded/qscreenvnc_qws.h \
+			   embedded/qscreenvnc_p.h
 		SOURCES += embedded/qscreenvnc_qws.cpp
 	}
 
@@ -127,11 +128,9 @@ embedded {
 	contains( kbd-drivers, qvfb ) {
 		HEADERS +=embedded/qkbdvfb_qws.h
 		SOURCES +=embedded/qkbdvfb_qws.cpp
-        !contains( kbd-drivers, qvfb ) {
-            kbd-drivers += qvfb
-         }
-      } else {
-            DEFINES+=QT_NO_QWS_KBD_QVFB
+		!contains( kbd-drivers, qvfb ) {
+			kbd-drivers += qvfb
+		}
          }
 
 	contains( kbd-drivers, sl5000 ) {
@@ -140,9 +139,7 @@ embedded {
 		!contains( kbd-drivers, tty ) {
 		    kbd-drivers += tty
 		}
-	} else {
-            DEFINES+=QT_NO_QWS_KBD_SL5000
-        }
+	}
 
 	contains( kbd-drivers, tty ) {
 		HEADERS +=embedded/qkbdtty_qws.h
@@ -150,8 +147,6 @@ embedded {
 		!contains( kbd-drivers, pc101 ) {
 		    kbd-drivers += pc101
 		}
-	} else {
-            DEFINES+=QT_NO_QWS_KBD_TTY
 	}
 
 	contains( kbd-drivers, usb ) {
@@ -160,36 +155,26 @@ embedded {
 		!contains( kbd-drivers, pc101 ) {
 		    kbd-drivers += pc101
 		}
-	} else {
-            DEFINES+=QT_NO_QWS_KBD_USB
 	}
 
 	contains( kbd-drivers, um ) {
 		HEADERS +=embedded/qkbdum_qws.h
 		SOURCES +=embedded/qkbdum_qws.cpp
-	} else {
-            DEFINES+=QT_NO_QWS_KBD_UM
 	}
 
 	contains( kbd-drivers, pc101 ) {
 		HEADERS +=embedded/qkbdpc101_qws.h
 		SOURCES +=embedded/qkbdpc101_qws.cpp
-	} else {
-            DEFINES+=QT_NO_QWS_KBD_PC101
 	}
 
 	contains( kbd-drivers, yopy ) {
 		HEADERS +=embedded/qkbdyopy_qws.h
 		SOURCES +=embedded/qkbdyopy_qws.cpp
-	} else {
-            DEFINES+=QT_NO_QWS_KBD_YOPY
 	}
 
 	contains( kbd-drivers, vr41xx ) {
 		HEADERS +=embedded/qkbdvr41xx_qws.h
 		SOURCES +=embedded/qkbdvr41xx_qws.cpp
-	} else {
-            DEFINES+=QT_NO_QWS_KBD_VR41XX
 	}
 
 #
@@ -198,50 +183,36 @@ embedded {
 	contains( mouse-drivers, qvfb ) {
 		HEADERS +=embedded/qmousevfb_qws.h
 		SOURCES +=embedded/qmousevfb_qws.cpp
-        } else {
-            DEFINES+= QT_NO_QWS_MOUSE_QVFB
-     }
+	}
 
 	contains( mouse-drivers, pc ) {
 		HEADERS +=embedded/qmousepc_qws.h
 		SOURCES +=embedded/qmousepc_qws.cpp
-        } else {
-            DEFINES+=QT_NO_QWS_MOUSE_PC
 	}
 
 	contains( mouse-drivers, bus ) {
 		HEADERS +=embedded/qmousebus_qws.h
 		SOURCES +=embedded/qmousebus_qws.cpp
-        } else {
-            DEFINES+=QT_NO_QWS_MOUSE_BUS
 	}
 
 	contains( mouse-drivers, linuxtp ) {
 		HEADERS +=embedded/qmouselinuxtp_qws.h
 		SOURCES +=embedded/qmouselinuxtp_qws.cpp
-        } else {
-            DEFINES+=QT_NO_QWS_MOUSE_LINUXTP
 	}
 
 	contains( mouse-drivers, vr41xx ) {
 		HEADERS +=embedded/qmousevr41xx_qws.h
 		SOURCES +=embedded/qmousevr41xx_qws.cpp
-        } else {
-            DEFINES+=QT_NO_QWS_MOUSE_VR41XX
 	}
 
 	contains( mouse-drivers, yopy ) {
 		HEADERS +=embedded/qmouseyopy_qws.h
 		SOURCES +=embedded/qmouseyopy_qws.cpp
-        } else {
-            DEFINES+=QT_NO_QWS_MOUSE_YOPY
 	}
 	
 	contains( mouse-drivers, tslib ) {
 		LIBS += -lts
 		HEADERS +=embedded/qmousetslib_qws.h
 		SOURCES +=embedded/qmousetslib_qws.cpp
-        } else {
-            DEFINES+=QT_NO_QWS_MOUSE_TSLIB
 	}
 }

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,11 +19,13 @@
 **
 ****************************************************************************/
 
-#include <qexportedbackground.h>
 #include <QApplication>
 #include <QDesktopWidget>
+#ifdef Q_WS_X11
+#include <qcopchannel_x11.h>
+#else
 #include <QCopChannel>
-#include <QCloseEvent>
+#endif
 #include <QPainter>
 #include <QKeyEvent>
 #include <QShowEvent>
@@ -47,13 +49,19 @@
 #include <qtopiaipcenvelope.h>
 #include "qtopiaserverapplication.h"
 #include "qabstractserverinterface.h"
+#include <custom.h>
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
+#include <qexportedbackground.h>
+#endif
 
 E1ServerInterface::E1ServerInterface(QWidget *parent, Qt::WFlags flags)
 : QAbstractServerInterface(parent, flags), m_dialer(0), m_newMessages("/Communications/Messages/NewMessages")
 {
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
     m_eb = new QExportedBackground(0, this);
     QObject::connect(m_eb, SIGNAL(wallpaperChanged()),
                      this, SLOT(wallpaperChanged()));
+#endif
 
     wallpaperChanged();
 
@@ -63,7 +71,7 @@ E1ServerInterface::E1ServerInterface(QWidget *parent, Qt::WFlags flags)
 
     // Listen for showDialer message
     QCopChannel* dialerChannel = new QCopChannel( "QPE/Application/qpe", this );
-    connect( dialerChannel, SIGNAL(received(const QString&,const QByteArray&)), this, SLOT(showDialer(const QString&, const QByteArray&)) );
+    connect( dialerChannel, SIGNAL(received(QString,QByteArray)), this, SLOT(showDialer(QString,QByteArray)) );
 
     m_header = new E1Header(0, Qt::FramelessWindowHint |
                                 Qt::Tool |
@@ -99,7 +107,9 @@ void E1ServerInterface::messageCountChanged()
 
 void E1ServerInterface::wallpaperChanged()
 {
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
     m_wallpaper = m_eb->wallpaper();
+#endif
     update();
 }
 
@@ -110,16 +120,6 @@ void E1ServerInterface::paintEvent(QPaintEvent *)
 
     QPainter p(this);
     p.drawTiledPixmap(rect(), m_wallpaper);
-}
-
-void E1ServerInterface::keyReleaseEvent(QKeyEvent *e)
-{
-    e->accept();
-}
-
-void E1ServerInterface::closeEvent(QCloseEvent *e)
-{
-    e->ignore();
 }
 
 void E1ServerInterface::keyPressEvent(QKeyEvent *e)
@@ -150,8 +150,8 @@ void E1ServerInterface::showDialer( const QString& msg, const QByteArray& )
             m_dialer = new E1Dialer( 0 );
             m_dialer->setObjectName("Dialer");
             /* Not connected to anything
-            connect(m_dialer, SIGNAL(dial(const QString&, const QUniqueId&)),
-                    this, SLOT(dialNumber(const QString&, const QUniqueId&)) );
+            connect(m_dialer, SIGNAL(dial(QString,QUniqueId)),
+                    this, SLOT(dialNumber(QString,QUniqueId)) );
                     */
         }
         m_dialer->showMaximized();

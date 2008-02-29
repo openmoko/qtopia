@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -31,6 +31,8 @@
     \class ContentSetLauncherView
     \brief Displays a content set received by the "ContentSetView" service.
     \internal
+    
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 /*!
@@ -75,11 +77,12 @@ void ContentSetLauncherView::showProperties()
 }
 
 /*!
-    \class ContentSetViewService
-    \brief The ContentSetViewService class implments the "ContentSetView" service.
+    \service ContentSetViewService ContentSetView
+    \brief Provides the Qtopia ContentSetView service.
 
-    The ContentSetView service raises a document view on the homescreen which displays a custom
-    content set.
+    The \i ContentSetView service raises a launcher menu on the homescreen which displays a custom QContentSet.
+
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 
@@ -133,6 +136,8 @@ QContentSet ContentSetViewService::contentSet() const
 
 /*!
     Requests that a content \a set be displayed on the home screen.
+
+    This slot corresponds to the QCop service message \c {ContentSetView::showContentSet(QContentSet)}.
 */
 void ContentSetViewService::showContentSet( const QContentSet &set )
 {
@@ -144,6 +149,8 @@ void ContentSetViewService::showContentSet( const QContentSet &set )
 
 /*!
     Requests that a content \a set be displayed on the home screen with the title \a title.
+
+    This slot corresponds to the QCop service message \c {ContentSetView::showContentSet(QString,QContentSet)}.
  */
 void ContentSetViewService::showContentSet( const QString &title, const QContentSet &set )
 {

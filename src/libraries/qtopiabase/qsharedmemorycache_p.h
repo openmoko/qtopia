@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,17 @@
 
 #ifndef QSHAREDMEMORYCACHE_H
 #define QSHAREDMEMORYCACHE_H
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 #include <QString>
 #include <QMap>
@@ -112,8 +123,8 @@ public:
     // constructs from a memory ptr to where the data after the item starts
     QSMCacheItemPtr(void *data) {
         char *ptr = (char*)data;
-        if ( (int)ptr != (((int)ptr+3)&~3) )
-            qWarning("QSMCacheItemPtr: passed a non-aligned data ptr %x", (int)ptr);
+        if ( (long)ptr != (((long)ptr+3)&~3) )
+            qWarning("QSMCacheItemPtr: passed a non-aligned data ptr %lx", (long)ptr);
         d = (QSMCacheItem*)(ptr - sizeof(QSMCacheItem));
     }
     // returns a pointer to the data after the item
@@ -180,7 +191,7 @@ private:
     QSharedMemoryData *shm;
 
     mutable QMap<int,char*> localSerialMap;
-    static void derefSharedMemoryPixmap(int);
+    static void derefSharedMemoryPixmap(qint64);
 };
 
 extern QSharedMemoryManager *qt_getSMManager();

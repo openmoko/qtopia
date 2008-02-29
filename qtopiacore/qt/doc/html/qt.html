@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/qnamespace.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qnamespace.qdoc -->
 <head>
-  <title>Qt 4.2: Qt Namespace Reference</title>
+  <title>Qt 4.3: Qt Namespace Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Qt Namespace Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Qt Namespace Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The Qt namespace contains miscellaneous identifiers used throughout the Qt library. <a href="#details">More...</a></p>
 <pre> #include &lt;Qt&gt;</pre><ul>
 <li><a href="qt-qt3.html">Qt 3 support members</a></li>
@@ -23,25 +24,26 @@
 <li><div class="fn"/>flags <b><a href="qt.html#AlignmentFlag-enum">Alignment</a></b></li>
 <li><div class="fn"/>enum <b><a href="qt.html#AlignmentFlag-enum">AlignmentFlag</a></b> { AlignLeft, AlignRight, AlignHCenter, AlignJustify, ..., AlignVertical_Mask }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#AnchorAttribute-enum">AnchorAttribute</a></b> { AnchorName, AnchorHref }</li>
-<li><div class="fn"/>enum <b><a href="qt.html#ApplicationAttribute-enum">ApplicationAttribute</a></b> { AA_ImmediateWidgetCreation }</li>
+<li><div class="fn"/>enum <b><a href="qt.html#ApplicationAttribute-enum">ApplicationAttribute</a></b> { AA_ImmediateWidgetCreation, AA_MSWindowsUseDirect3DByDefault }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#ArrowType-enum">ArrowType</a></b> { NoArrow, UpArrow, DownArrow, LeftArrow, RightArrow }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#AspectRatioMode-enum">AspectRatioMode</a></b> { IgnoreAspectRatio, KeepAspectRatio, KeepAspectRatioByExpanding }</li>
+<li><div class="fn"/>enum <b><a href="qt.html#Axis-enum">Axis</a></b> { XAxis, YAxis, ZAxis }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#BGMode-enum">BGMode</a></b> { TransparentMode, OpaqueMode }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#BrushStyle-enum">BrushStyle</a></b> { NoBrush, SolidPattern, Dense1Pattern, Dense2Pattern, ..., TexturePattern }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#CaseSensitivity-enum">CaseSensitivity</a></b> { CaseInsensitive, CaseSensitive }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#CheckState-enum">CheckState</a></b> { Unchecked, PartiallyChecked, Checked }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#ClipOperation-enum">ClipOperation</a></b> { NoClip, ReplaceClip, IntersectClip, UniteClip }</li>
-<li><div class="fn"/>enum <b><a href="qt.html#ConnectionType-enum">ConnectionType</a></b> { DirectConnection, QueuedConnection, AutoConnection }</li>
+<li><div class="fn"/>enum <b><a href="qt.html#ConnectionType-enum">ConnectionType</a></b> { DirectConnection, QueuedConnection, BlockingQueuedConnection, AutoConnection }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#ContextMenuPolicy-enum">ContextMenuPolicy</a></b> { NoContextMenu, PreventContextMenu, DefaultContextMenu, ActionsContextMenu, CustomContextMenu }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#Corner-enum">Corner</a></b> { TopLeftCorner, TopRightCorner, BottomLeftCorner, BottomRightCorner }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#CursorShape-enum">CursorShape</a></b> { ArrowCursor, UpArrowCursor, CrossCursor, WaitCursor, ..., BitmapCursor }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#DateFormat-enum">DateFormat</a></b> { TextDate, ISODate, LocalDate, SystemLocaleDate, LocaleDate }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#DayOfWeek-enum">DayOfWeek</a></b> { Monday, Tuesday, Wednesday, Thursday, ..., Sunday }</li>
-<li><div class="fn"/>enum <b><a href="qt.html#Dock-enum">Dock</a></b> { DockUnmanaged, DockTornOff, DockTop, DockBottom, ..., DockMinimized }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#DockWidgetArea-enum">DockWidgetArea</a></b> { LeftDockWidgetArea, RightDockWidgetArea, TopDockWidgetArea, BottomDockWidgetArea, AllDockWidgetAreas, NoDockWidgetArea }</li>
 <li><div class="fn"/>flags <b><a href="qt.html#DockWidgetArea-enum">DockWidgetAreas</a></b></li>
 <li><div class="fn"/>enum <b><a href="qt.html#DropAction-enum">DropAction</a></b> { CopyAction, MoveAction, LinkAction, ActionMask, IgnoreAction }</li>
 <li><div class="fn"/>flags <b><a href="qt.html#DropAction-enum">DropActions</a></b></li>
+<li><div class="fn"/>enum <b><a href="qt.html#EventPriority-enum">EventPriority</a></b> { HighEventPriority, NormalEventPriority, LowEventPriority }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#FillRule-enum">FillRule</a></b> { OddEvenFill, WindingFill }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#FocusPolicy-enum">FocusPolicy</a></b> { TabFocus, ClickFocus, StrongFocus, WheelFocus, NoFocus }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#FocusReason-enum">FocusReason</a></b> { MouseFocusReason, TabFocusReason, BacktabFocusReason, ActiveWindowFocusReason, ..., OtherFocusReason }</li>
@@ -59,6 +61,7 @@
 <li><div class="fn"/>enum <b><a href="qt.html#KeyboardModifier-enum">KeyboardModifier</a></b> { NoModifier, ShiftModifier, ControlModifier, AltModifier, ..., GroupSwitchModifier }</li>
 <li><div class="fn"/>flags <b><a href="qt.html#KeyboardModifier-enum">KeyboardModifiers</a></b></li>
 <li><div class="fn"/>enum <b><a href="qt.html#LayoutDirection-enum">LayoutDirection</a></b> { LeftToRight, RightToLeft }</li>
+<li><div class="fn"/>enum <b><a href="qt.html#MaskMode-enum">MaskMode</a></b> { MaskInColor, MaskOutColor }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#MatchFlag-enum">MatchFlag</a></b> { MatchExactly, MatchFixedString, MatchContains, MatchStartsWith, ..., MatchRecursive }</li>
 <li><div class="fn"/>flags <b><a href="qt.html#MatchFlag-enum">MatchFlags</a></b></li>
 <li><div class="fn"/>enum <b><a href="qt.html#Modifier-enum">Modifier</a></b> { SHIFT, META, CTRL, ALT, UNICODE_ACCEL }</li>
@@ -73,7 +76,7 @@
 <li><div class="fn"/>enum <b><a href="qt.html#ShortcutContext-enum">ShortcutContext</a></b> { WidgetShortcut, WindowShortcut, ApplicationShortcut }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#SortOrder-enum">SortOrder</a></b> { AscendingOrder, DescendingOrder }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#TextElideMode-enum">TextElideMode</a></b> { ElideLeft, ElideRight, ElideMiddle, ElideNone }</li>
-<li><div class="fn"/>enum <b><a href="qt.html#TextFlag-enum">TextFlag</a></b> { TextSingleLine, TextDontClip, TextExpandTabs, TextShowMnemonic, ..., TextIncludeTrailingSpaces }</li>
+<li><div class="fn"/>enum <b><a href="qt.html#TextFlag-enum">TextFlag</a></b> { TextSingleLine, TextDontClip, TextExpandTabs, TextShowMnemonic, ..., TextJustificationForced }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#TextFormat-enum">TextFormat</a></b> { PlainText, RichText, AutoText, LogText }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#TextInteractionFlag-enum">TextInteractionFlag</a></b> { NoTextInteraction, TextSelectableByMouse, TextSelectableByKeyboard, LinksAccessibleByMouse, ..., TextBrowserInteraction }</li>
 <li><div class="fn"/>flags <b><a href="qt.html#TextInteractionFlag-enum">TextInteractionFlags</a></b></li>
@@ -85,7 +88,7 @@
 <li><div class="fn"/>enum <b><a href="qt.html#UIEffect-enum">UIEffect</a></b> { UI_AnimateMenu, UI_FadeMenu, UI_AnimateCombo, UI_AnimateTooltip, UI_FadeTooltip, UI_AnimateToolBox }</li>
 <li><div class="fn"/>typedef <b><a href="qt.html#WFlags-typedef">WFlags</a></b></li>
 <li><div class="fn"/>enum <b><a href="qt.html#WhiteSpaceMode-enum">WhiteSpaceMode</a></b> { WhiteSpaceNormal, WhiteSpacePre, WhiteSpaceNoWrap }</li>
-<li><div class="fn"/>enum <b><a href="qt.html#WidgetAttribute-enum">WidgetAttribute</a></b> { WA_AcceptDrops, WA_DeleteOnClose, WA_QuitOnClose, WA_KeyCompression, ..., WA_ShowModal }</li>
+<li><div class="fn"/>enum <b><a href="qt.html#WidgetAttribute-enum">WidgetAttribute</a></b> { WA_AcceptDrops, WA_AlwaysShowToolTips, WA_ContentsPropagated, WA_CustomWhatsThis, ..., WA_StyledBackground }</li>
 <li><div class="fn"/>flags <b><a href="qt.html#WindowType-enum">WindowFlags</a></b></li>
 <li><div class="fn"/>enum <b><a href="qt.html#WindowModality-enum">WindowModality</a></b> { NonModal, WindowModal, ApplicationModal }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#WindowState-enum">WindowState</a></b> { WindowNoState, WindowMinimized, WindowMaximized, WindowFullScreen, WindowActive }</li>
@@ -155,7 +158,8 @@
 <p>This enum describes attributes that change the behavior of application-wide features. These are enabled and disabled using <a href="qcoreapplication.html#setAttribute">QCoreApplication::setAttribute</a>(), and can be tested for with <a href="qcoreapplication.html#testAttribute">QCoreApplication::testAttribute</a>().</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>Qt::AA_ImmediateWidgetCreation</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Ensures that widgets are created as soon as they are constructed. By default, resources for widgets are allocated on demand to improve efficiency and minimize resource usage. Setting or clearing this attribute will influence widgets constructed after the change.</td></tr>
+<tr><td valign="top"><tt>Qt::AA_ImmediateWidgetCreation</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Ensures that widgets are created as soon as they are constructed. By default, resources for widgets are allocated on demand to improve efficiency and minimize resource usage. Setting or clearing this attribute affects widgets constructed after the change. Setting it tells Qt to create toplevel windows immediately. Therefore, if it is important to minimize resource consumption, do not set this attribute.</td></tr>
+<tr><td valign="top"><tt>Qt::AA_MSWindowsUseDirect3DByDefault</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Is a Windows specific attribute, that will make the Direct3D paint engine the default Qt widget paint engine. Note that you can toggle usage of the Direct3D engine on individual QWidgets by setting/clearing the <tt>WA_MSWindowsUseDirect3D</tt> attribute on a specific widget. <b>This functionality is experimental</b>.</td></tr>
 </table></p>
 <h3 class="fn"><a name="ArrowType-enum"></a>enum Qt::ArrowType</h3>
 <p><table border="1" cellpadding="2" cellspacing="1" width="40%">
@@ -175,6 +179,15 @@
 <tr><td valign="top"><tt>Qt::KeepAspectRatioByExpanding</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The size is scaled to a rectangle as small as possible outside a given rectangle, preserving the aspect ratio.</td></tr>
 </table></p>
 <p>See also <a href="qsize.html#scale">QSize::scale</a>() and <a href="qimage.html#scaled">QImage::scaled</a>().</p>
+<h3 class="fn"><a name="Axis-enum"></a>enum Qt::Axis</h3>
+<p>This enum type defines three values to represent the three axes in the cartesian coordinate system.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>Qt::XAxis</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The X axis.</td></tr>
+<tr><td valign="top"><tt>Qt::YAxis</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The Y axis.</td></tr>
+<tr><td valign="top"><tt>Qt::ZAxis</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The Z axis.</td></tr>
+</table></p>
+<p>See also <a href="qtransform.html#rotate">QTransform::rotate</a>() and <a href="qtransform.html#rotateRadians">QTransform::rotateRadians</a>().</p>
 <h3 class="fn"><a name="BGMode-enum"></a>enum Qt::BGMode</h3>
 <p>Background mode:</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="40%">
@@ -183,7 +196,7 @@
 <tr><td valign="top"><tt>Qt::OpaqueMode</tt></td><td align="center" valign="top"><tt>1</tt></td></tr>
 </table></p>
 <h3 class="fn"><a name="BrushStyle-enum"></a>enum Qt::BrushStyle</h3>
-<p>This enum type defines the brush styles supported by Qt, i.e. the fill pattern of shapes drawn using <a href="qpainter.html">QPainter</a>.</p>
+<p>This enum type defines the brush styles supported by Qt, i.e&#x2e; the fill pattern of shapes drawn using <a href="qpainter.html">QPainter</a>.</p>
 <p align="center"><img src="images/brush-styles.png" alt="Brush Styles" /></p><p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>Qt::NoBrush</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">No brush pattern.</td></tr>
@@ -236,6 +249,7 @@
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>Qt::DirectConnection</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">When emitted, the signal is immediately delivered to the slot.</td></tr>
 <tr><td valign="top"><tt>Qt::QueuedConnection</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">When emitted, the signal is queued until the event loop is able to deliver it to the slot.</td></tr>
+<tr><td valign="top"><tt>Qt::BlockingQueuedConnection</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">Same as QueuedConnection, except that the current thread blocks until the slot has been delivered. This connection type should only be used for receivers in a different thread. Note that misuse of this type can lead to dead locks in your application.</td></tr>
 <tr><td valign="top"><tt>Qt::AutoConnection</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">If the signal is emitted from the thread in which the receiving object lives, the slot is invoked directly, as with Qt::DirectConnection; otherwise the signal is queued, as with Qt::QueuedConnection.</td></tr>
 </table></p>
 <p>With queued connections, the parameters must be of types that are known to Qt's meta-object system, because Qt needs to copy the arguments to store them in an event behind the scenes. If you try to use a queued connection and get the error message</p>
@@ -282,7 +296,7 @@
 <tr><td valign="top"><tt>Qt::PointingHandCursor</tt></td><td align="center" valign="top"><tt>13</tt></td><td valign="top"><img src="images/cursor-hand.png" /> A pointing hand cursor that is typically used for clickable elements such as hyperlinks.</td></tr>
 <tr><td valign="top"><tt>Qt::ForbiddenCursor</tt></td><td align="center" valign="top"><tt>14</tt></td><td valign="top"><img src="images/cursor-forbidden.png" /> A slashed circle cursor, typically used during drag and drop operations to indicate that dragged content cannot be dropped on particular widgets or inside certain regions.</td></tr>
 <tr><td valign="top"><tt>Qt::OpenHandCursor</tt></td><td align="center" valign="top"><tt>17</tt></td><td valign="top"><img src="images/cursor-openhand.png" /> A cursor representing an open hand, typically used to indicate that the area under the cursor is the visible part of a canvas that the user can click and drag in order to scroll around.</td></tr>
-<tr><td valign="top"><tt>Qt::ClosedHandCursor</tt></td><td align="center" valign="top"><tt>18</tt></td><td valign="top"><img src="images/cursor-closedhand.png" /> A cursor representing an open hand, typically used to indicate that a dragging operation is in progress that involves scrolling.</td></tr>
+<tr><td valign="top"><tt>Qt::ClosedHandCursor</tt></td><td align="center" valign="top"><tt>18</tt></td><td valign="top"><img src="images/cursor-closedhand.png" /> A cursor representing a closed hand, typically used to indicate that a dragging operation is in progress that involves scrolling.</td></tr>
 <tr><td valign="top"><tt>Qt::WhatsThisCursor</tt></td><td align="center" valign="top"><tt>15</tt></td><td valign="top"><img src="images/cursor-whatsthis.png" /> An arrow with a question mark, typically used</td></tr>
 <tr><td valign="top"><tt>Qt::BusyCursor</tt></td><td align="center" valign="top"><tt>16</tt></td><td valign="top"><img src="images/cursor-wait.png" /> An hourglass or watch cursor, usually shown during operations that allow the user to interact with the application while they are performed in the background.</td></tr>
 <tr><td valign="top"><tt>Qt::BitmapCursor</tt></td><td align="center" valign="top"><tt>24</tt></td><td valign="top">&nbsp;</td></tr>
@@ -294,7 +308,7 @@
 <tr><td valign="top"><tt>Qt::ISODate</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">ISO 8601 extended format (YYYY-MM-DD, or with time, YYYY-MM-DDTHH:MM:SS).</td></tr>
 <tr><td valign="top"><tt>Qt::LocalDate</tt></td><td align="center" valign="top"><tt>SystemLocaleDate</tt></td><td valign="top"><i>This attribute has been deprecated.</i> Use Qt::LocaleDate or Qt::SystemLocaleDate instead.</td></tr>
 <tr><td valign="top"><tt>Qt::SystemLocaleDate</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The format used by the operating system.</td></tr>
-<tr><td valign="top"><tt>Qt::LocaleDate</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top">The format used by the default application locale. This is the locale set with <a href="qlocale.html#setDefault">QLocale::setDefault</a>(), or the operating system locale if no default locale has been set.</td></tr>
+<tr><td valign="top"><tt>Qt::LocaleDate</tt></td><td align="center" valign="top">?</td><td valign="top">The format used by the default application locale. This is the locale set with <a href="qlocale.html#setDefault">QLocale::setDefault</a>(), or the operating system locale if no default locale has been set.</td></tr>
 </table></p>
 <h3 class="fn"><a name="DayOfWeek-enum"></a>enum Qt::DayOfWeek</h3>
 <p><table border="1" cellpadding="2" cellspacing="1" width="40%">
@@ -306,18 +320,6 @@
 <tr><td valign="top"><tt>Qt::Friday</tt></td><td align="center" valign="top"><tt>5</tt></td></tr>
 <tr><td valign="top"><tt>Qt::Saturday</tt></td><td align="center" valign="top"><tt>6</tt></td></tr>
 <tr><td valign="top"><tt>Qt::Sunday</tt></td><td align="center" valign="top"><tt>7</tt></td></tr>
-</table></p>
-<h3 class="fn"><a name="Dock-enum"></a>enum Qt::Dock</h3>
-<p>Each dock window can be in one of the following positions:</p>
-<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
-<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>Qt::DockUnmanaged</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">not managed by a Q3MainWindow.</td></tr>
-<tr><td valign="top"><tt>Qt::DockTornOff</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">the dock window floats as its own top level window which always stays on top of the main window.</td></tr>
-<tr><td valign="top"><tt>Qt::DockTop</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">above the central widget, below the menu bar.</td></tr>
-<tr><td valign="top"><tt>Qt::DockBottom</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">below the central widget, above the status bar.</td></tr>
-<tr><td valign="top"><tt>Qt::DockRight</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">to the right of the central widget.</td></tr>
-<tr><td valign="top"><tt>Qt::DockLeft</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">to the left of the central widget.</td></tr>
-<tr><td valign="top"><tt>Qt::DockMinimized</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">the dock window is not shown (this is effectively a 'hidden' dock area); the handles of all minimized dock windows are drawn in one row below the menu bar.</td></tr>
 </table></p>
 <h3 class="flags"><a name="DockWidgetArea-enum"></a>enum Qt::DockWidgetArea<br />flags Qt::DockWidgetAreas</h3>
 <p><table border="1" cellpadding="2" cellspacing="1" width="40%">
@@ -340,6 +342,33 @@
 <tr><td valign="top"><tt>Qt::IgnoreAction</tt></td><td align="center" valign="top"><tt>0x0</tt></td><td valign="top">Ignore the action (do nothing with the data).</td></tr>
 </table></p>
 <p>The DropActions type is a typedef for <a href="qflags.html">QFlags</a>&lt;DropAction&gt;. It stores an OR combination of DropAction values.</p>
+<h3 class="fn"><a name="EventPriority-enum"></a>enum Qt::EventPriority</h3>
+<p>This enum can be used to specify event priorities.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>Qt::HighEventPriority</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Events with this priority are sent before events with NormalEventPriority or LowEventPriority.</td></tr>
+<tr><td valign="top"><tt>Qt::NormalEventPriority</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Events with this priority are sent after events with HighEventPriority, but before events with LowEventPriority.</td></tr>
+<tr><td valign="top"><tt>Qt::LowEventPriority</tt></td><td align="center" valign="top"><tt>-1</tt></td><td valign="top">Events with this priority are sent after events with HighEventPriority or NormalEventPriority.</td></tr>
+</table></p>
+<p>Note that these values are provided purely for convenience, since event priorities can be any value between <tt>INT_MAX</tt> and <tt>INT_MIN</tt>, inclusive. For example, you can define custom priorities as being relative to each other:</p>
+<pre> enum CustomEventPriority
+ {
+     <span class="comment">// An important event</span>
+     ImportantEventPriority = Qt::HighEventPriority,
+
+     <span class="comment">// A more important event</span>
+     MoreImportantEventPriority = ImportantEventPriority + 1,
+
+     <span class="comment">// A critical event</span>
+     CriticalEventPriority = 100 * MoreImportantEventPriority,
+
+     <span class="comment">// Not that important</span>
+     StatusEventPriority = Qt::LowEventPriority,
+
+     <span class="comment">// These are less important than Status events</span>
+     IdleProcessingDoneEventPriority = StatusEventPriority - 1
+ };</pre>
+<p>See also <a href="qcoreapplication.html#postEvent">QCoreApplication::postEvent</a>().</p>
 <h3 class="fn"><a name="FillRule-enum"></a>enum Qt::FillRule</h3>
 <p>Specifies which method should be used to fill the paths and polygons.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -363,7 +392,7 @@
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>Qt::MouseFocusReason</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">A mouse action occurred.</td></tr>
 <tr><td valign="top"><tt>Qt::TabFocusReason</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The Tab key was pressed.</td></tr>
-<tr><td valign="top"><tt>Qt::BacktabFocusReason</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">A Backtab occurred. The input for this may include the Shift or Control keys; e.g. Shift+Tab.</td></tr>
+<tr><td valign="top"><tt>Qt::BacktabFocusReason</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">A Backtab occurred. The input for this may include the Shift or Control keys; e.g&#x2e; Shift+Tab.</td></tr>
 <tr><td valign="top"><tt>Qt::ActiveWindowFocusReason</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The window system made this window either active or inactive.</td></tr>
 <tr><td valign="top"><tt>Qt::PopupFocusReason</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The application opened/closed a popup that grabbed/released the keyboard focus.</td></tr>
 <tr><td valign="top"><tt>Qt::ShortcutFocusReason</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">The user typed a label's buddy shortcut</td></tr>
@@ -428,7 +457,7 @@
     </td></tr>
 <tr><td valign="top"><tt>Qt::lightGray</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">    Light gray <tt id="lightGray">(#c0c0c0)</tt>
     </td></tr>
-<tr><td valign="top"><tt>Qt::transparent</tt></td><td align="center" valign="top"><tt>19</tt></td><td valign="top">a transparent black value (i.e., <a href="qcolor.html">QColor</a>(0, 0, 0, 0))</td></tr>
+<tr><td valign="top"><tt>Qt::transparent</tt></td><td align="center" valign="top"><tt>19</tt></td><td valign="top">a transparent black value (i.e&#x2e;, <a href="qcolor.html">QColor</a>(0, 0, 0, 0))</td></tr>
 <tr><td valign="top"><tt>Qt::color0</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">0 pixel value (for bitmaps)</td></tr>
 <tr><td valign="top"><tt>Qt::color1</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">1 pixel value (for bitmaps)</td></tr>
 </table></p>
@@ -890,6 +919,13 @@
 </table></p>
 <p>Right-to-left layouts are necessary for certain languages, notably Arabic and Hebrew.</p>
 <p>See also <a href="qapplication.html#layoutDirection-prop">QApplication::setLayoutDirection</a>() and <a href="qwidget.html#layoutDirection-prop">QWidget::setLayoutDirection</a>().</p>
+<h3 class="fn"><a name="MaskMode-enum"></a>enum Qt::MaskMode</h3>
+<p>This enum specifies the behavior of the <a href="qpixmap.html#createMaskFromColor">QPixmap::createMaskFromColor</a>() and <a href="qimage.html#createMaskFromColor">QImage::createMaskFromColor</a>() functions.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>Qt::MaskInColor</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Creates a mask where all pixels matching the given color are opaque.</td></tr>
+<tr><td valign="top"><tt>Qt::MaskOutColor</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Creates a mask where all pixels matching the given color are transparent.</td></tr>
+</table></p>
 <h3 class="flags"><a name="MatchFlag-enum"></a>enum Qt::MatchFlag<br />flags Qt::MatchFlags</h3>
 <p>This enum describes the type of matches that can be used when searching for items in a model.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -942,7 +978,7 @@
 <p>Orientation is used with <a href="qscrollbar.html">QScrollBar</a> for example.</p>
 <p>The Orientations type is a typedef for <a href="qflags.html">QFlags</a>&lt;Orientation&gt;. It stores an OR combination of Orientation values.</p>
 <h3 class="fn"><a name="PenCapStyle-enum"></a>enum Qt::PenCapStyle</h3>
-<p>This enum type defines the pen cap styles supported by Qt, i.e. the line end caps that can be drawn using <a href="qpainter.html">QPainter</a>.</p>
+<p>This enum type defines the pen cap styles supported by Qt, i.e&#x2e; the line end caps that can be drawn using <a href="qpainter.html">QPainter</a>.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/qpen-square.png" /></td><td><img src="images/qpen-flat.png" /></td><td><img src="images/qpen-roundcap.png" /></td></tr>
 <tr valign="top" class="even"><td>Qt::SquareCap</td><td>Qt::FlatCap</td><td>Qt::RoundCap</td></tr>
@@ -955,7 +991,7 @@
 </table></p>
 <p>See also <a href="qpen.html">QPen</a>.</p>
 <h3 class="fn"><a name="PenJoinStyle-enum"></a>enum Qt::PenJoinStyle</h3>
-<p>This enum type defines the pen join styles supported by Qt, i.e. which joins between two connected lines can be drawn using <a href="qpainter.html">QPainter</a>.</p>
+<p>This enum type defines the pen join styles supported by Qt, i.e&#x2e; which joins between two connected lines can be drawn using <a href="qpainter.html">QPainter</a>.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/qpen-bevel.png" /></td><td><img src="images/qpen-miter.png" /></td><td><img src="images/qpen-roundjoin.png" /></td></tr>
 <tr valign="top" class="even"><td>Qt::BevelJoin</td><td>Qt::MiterJoin</td><td>Qt::RoundJoin</td></tr>
@@ -1000,16 +1036,16 @@
 <p>For a <a href="qevent.html#Type-enum">QEvent::Shortcut</a> event to occur, the shortcut's key sequence must be entered by the user in a context where the shortcut is active. The possible contexts are these:</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>Qt::WidgetShortcut</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The shortcut is only triggered when its parent widget has focus.</td></tr>
-<tr><td valign="top"><tt>Qt::WindowShortcut</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The shortcut is triggered when its parent widget is a logical subwidget of the active top-level window.</td></tr>
-<tr><td valign="top"><tt>Qt::ApplicationShortcut</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The shortcut is triggered when the application is active.</td></tr>
+<tr><td valign="top"><tt>Qt::WidgetShortcut</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The shortcut is active when its parent widget has focus.</td></tr>
+<tr><td valign="top"><tt>Qt::WindowShortcut</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The shortcut is active when its parent widget is a logical subwidget of the active top-level window.</td></tr>
+<tr><td valign="top"><tt>Qt::ApplicationShortcut</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The shortcut is active when one of the applications windows are active.</td></tr>
 </table></p>
 <h3 class="fn"><a name="SortOrder-enum"></a>enum Qt::SortOrder</h3>
 <p>This enum describes how the items in a widget are sorted.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>Qt::AscendingOrder</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The items are sorted ascending e.g. starts with 'AAA' ends with 'ZZZ' in Latin-1 locales</td></tr>
-<tr><td valign="top"><tt>Qt::DescendingOrder</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The items are sorted descending e.g. starts with 'ZZZ' ends with 'AAA' in Latin-1 locales</td></tr>
+<tr><td valign="top"><tt>Qt::AscendingOrder</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The items are sorted ascending e.g&#x2e; starts with 'AAA' ends with 'ZZZ' in Latin-1 locales</td></tr>
+<tr><td valign="top"><tt>Qt::DescendingOrder</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The items are sorted descending e.g&#x2e; starts with 'ZZZ' ends with 'AAA' in Latin-1 locales</td></tr>
 </table></p>
 <h3 class="fn"><a name="TextElideMode-enum"></a>enum Qt::TextElideMode</h3>
 <p>This enum specifies where the ellipsis should appear when displaying texts that don't fit:</p>
@@ -1020,8 +1056,8 @@
 <tr><td valign="top"><tt>Qt::ElideMiddle</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The ellipsis should appear in the middle of the text.</td></tr>
 <tr><td valign="top"><tt>Qt::ElideNone</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">Ellipsis should NOT appear in the text.</td></tr>
 </table></p>
-<p>Qt::ElideMiddle is normally the most appropriate choice for URLs (e.g., &quot;<a href="http://www.trolltech.com/careers/movingto/beijing/">http://www.troll...ovingto/beijing/</a>&quot;), whereas Qt::ElideRight is appropriate for other strings (e.g., &quot;<a href="http://doc.trolltech.com/qq/qq09-mac-deployment.html">Deploying Applications on Ma...</a>&quot;).</p>
-<p>See also <a href="qabstractitemview.html#textElideMode-prop">QAbstractItemView::textElideMode</a>, <a href="qabstractitemdelegate-obsolete.html#elidedText">QAbstractItemDelegate::elidedText</a>(), <a href="qt.html#AlignmentFlag-enum">AlignmentFlag</a>, and <a href="qtabbar.html#elideMode-prop">QTabBar::elideMode</a>.</p>
+<p>Qt::ElideMiddle is normally the most appropriate choice for URLs (e.g&#x2e;, &quot;<a href="http://www.trolltech.com/careers/movingto/beijing/">http://www.troll..&#x2e;ovingto/beijing/</a>&quot;), whereas Qt::ElideRight is appropriate for other strings (e.g&#x2e;, &quot;<a href="http://doc.trolltech.com/qq/qq09-mac-deployment.html">Deploying Applications on Ma..&#x2e;</a>&quot;).</p>
+<p>See also <a href="qabstractitemview.html#textElideMode-prop">QAbstractItemView::textElideMode</a>, <a href="qfontmetrics.html#elidedText">QFontMetrics::elidedText</a>(), <a href="qt.html#AlignmentFlag-enum">AlignmentFlag</a>, and <a href="qtabbar.html#elideMode-prop">QTabBar::elideMode</a>.</p>
 <h3 class="fn"><a name="TextFlag-enum"></a>enum Qt::TextFlag</h3>
 <p>This enum type is used to define some modifier flags. Some of these flags only make sense in the context of printing:</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -1030,16 +1066,17 @@
 <tr><td valign="top"><tt>Qt::TextDontClip</tt></td><td align="center" valign="top"><tt>0x0200</tt></td><td valign="top">If it's impossible to stay within the given bounds, it prints outside.</td></tr>
 <tr><td valign="top"><tt>Qt::TextExpandTabs</tt></td><td align="center" valign="top"><tt>0x0400</tt></td><td valign="top">Makes the U+0009 (ASCII tab) character move to the next tab stop.</td></tr>
 <tr><td valign="top"><tt>Qt::TextShowMnemonic</tt></td><td align="center" valign="top"><tt>0x0800</tt></td><td valign="top">Displays the string &quot;&amp;P&quot; as <u>P</u> (see <a href="porting4.html#qbutton">QButton</a> for an example). For an ampersand, use &quot;&amp;&amp;&quot;.</td></tr>
-<tr><td valign="top"><tt>Qt::TextWordWrap</tt></td><td align="center" valign="top"><tt>0x1000</tt></td><td valign="top">Breaks lines at appropriate points, e.g. at word boundaries.</td></tr>
+<tr><td valign="top"><tt>Qt::TextWordWrap</tt></td><td align="center" valign="top"><tt>0x1000</tt></td><td valign="top">Breaks lines at appropriate points, e.g&#x2e; at word boundaries.</td></tr>
 <tr><td valign="top"><tt>Qt::TextWrapAnywhere</tt></td><td align="center" valign="top"><tt>0x2000</tt></td><td valign="top">Breaks lines anywhere, even within words.</td></tr>
 <tr><td valign="top"><tt>Qt::TextHideMnemonic</tt></td><td align="center" valign="top"><tt>0x8000</tt></td><td valign="top">Same as Qt::TextShowMnemonic but doesn't draw the underlines.</td></tr>
 <tr><td valign="top"><tt>Qt::TextDontPrint</tt></td><td align="center" valign="top"><tt>0x4000</tt></td><td valign="top">Treat this text as &quot;hidden&quot; and don't print it.</td></tr>
 <tr><td valign="top"><tt>Qt::TextIncludeTrailingSpaces</tt></td><td align="center" valign="top"><tt>0x08000000</tt></td><td valign="top">Don't automatically delete trailing whitespace.</td></tr>
+<tr><td valign="top"><tt>Qt::TextJustificationForced</tt></td><td align="center" valign="top"><tt>0x10000</tt></td><td valign="top">Ensures that text lines are justified.</td></tr>
 </table></p>
 <p>You can use as many modifier flags as you want, except that Qt::TextSingleLine and Qt::TextWordWrap cannot be combined.</p>
 <p>Flags that are inappropriate for a given use are generally ignored.</p>
 <h3 class="fn"><a name="TextFormat-enum"></a>enum Qt::TextFormat</h3>
-<p>This enum is used in widgets that can display both plain text and rich text, e.g. <a href="qlabel.html">QLabel</a>. It is used for deciding whether a text string should be interpreted as one or the other. This is normally done by passing one of the enum values to a setTextFormat() function.</p>
+<p>This enum is used in widgets that can display both plain text and rich text, e.g&#x2e; <a href="qlabel.html">QLabel</a>. It is used for deciding whether a text string should be interpreted as one or the other. This is normally done by passing one of the enum values to a setTextFormat() function.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>Qt::PlainText</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The text string is interpreted as a plain text string.</td></tr>
@@ -1088,7 +1125,7 @@
 <tr><td valign="top"><tt>Qt::ToolButtonTextUnderIcon</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The text appears under the icon.</td></tr>
 </table></p>
 <h3 class="fn"><a name="TransformationMode-enum"></a>enum Qt::TransformationMode</h3>
-<p>This enum type defines whether image transformations (e.g., scaling) should be smooth or not.</p>
+<p>This enum type defines whether image transformations (e.g&#x2e;, scaling) should be smooth or not.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>Qt::FastTransformation</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The transformation is performed quickly, with no smoothing.</td></tr>
@@ -1125,52 +1162,62 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>Qt::WA_AcceptDrops</tt></td><td align="center" valign="top"><tt>78</tt></td><td valign="top">Allows data from drag and drop operations to be dropped onto the widget (see <a href="qwidget.html#acceptDrops-prop">QWidget::setAcceptDrops</a>()).</td></tr>
-<tr><td valign="top"><tt>Qt::WA_DeleteOnClose</tt></td><td align="center" valign="top"><tt>55</tt></td><td valign="top">Makes Qt delete this widget when the widget has accepted the close event (see <a href="qwidget.html#closeEvent">QWidget::closeEvent</a>()).</td></tr>
-<tr><td valign="top"><tt>Qt::WA_QuitOnClose</tt></td><td align="center" valign="top"><tt>76</tt></td><td valign="top">Makes Qt quit the application when the last widget with the attribute set has accepted closeEvent(). This behavior can be adjusted with the <a href="qapplication.html#quitOnLastWindowClosed-prop">QApplication::quitOnLastWindowClosed</a> property. By default the attribute is set for all widgets of type <a href="qt.html#WindowType-enum">Qt::Window</a>.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_KeyCompression</tt></td><td align="center" valign="top"><tt>33</tt></td><td valign="top">Enables key event compression if set, and disables it if not set. By default key compression is off, so widgets receive one key press event for each key press (or more, since autorepeat is usually on). If you turn it on and your program doesn't keep up with key input, Qt may try to compress key events so that more than one character can be processed in each event. For example, a word processor widget might receive 2, 3 or more characters in each <a href="qkeyevent.html#text">QKeyEvent::text</a>(), if the layout recalculation takes too long for the CPU. If a widget supports multiple character unicode input, it is always safe to turn the compression on. Qt performs key event compression only for printable characters. <a href="qt.html#Modifier-enum">Qt::Modifier</a> keys, cursor movement keys, function keys and miscellaneous action keys (e.g. Escape, Enter, Backspace, PrintScreen) will stop key event compression, even if there are more compressible key events available. Not all platforms support this compression, in which case turning it on will have no effect. This is set/cleared by the widget's author.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_PendingMoveEvent</tt></td><td align="center" valign="top"><tt>34</tt></td><td valign="top">Indicates that a move event is pending, e.g. when a hidden widget was moved. This is set/cleared by the Qt kernel.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_PendingResizeEvent</tt></td><td align="center" valign="top"><tt>35</tt></td><td valign="top">Indicates that a resize event is pending, e.g. when a hidden widget was resized. This is set/cleared by the Qt kernel.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_UnderMouse</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Indicates that the widget is under the mouse cursor. The value is not updated correctly during drag and drop operations. There is also a getter function <a href="qwidget.html#underMouse">QWidget::underMouse</a>(). This is set/cleared by the Qt kernel.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_Disabled</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Indicates that the widget is disabled, i.e. it does not receive any mouse or keyboard events. There is also a getter functions <a href="qwidget.html#enabled-prop">QWidget::isEnabled</a>(). This is set/cleared by the Qt kernel.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_AlwaysShowToolTips</tt></td><td align="center" valign="top"><tt>84</tt></td><td valign="top">Enables tooltips for inactive windows.</td></tr>
 <tr><td valign="top"><tt>Qt::WA_ContentsPropagated</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">This flag is superfluous and obsolete; it no longer has any effect. Since Qt 4.1, all widgets that do not set WA_PaintOnScreen propagate their contents.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_ForceDisabled</tt></td><td align="center" valign="top"><tt>32</tt></td><td valign="top">Indicates that the widget is explicitly disabled, i.e. it will remain disabled even when all its ancestors are set to the enabled state. This implies WA_Disabled. This is set/cleared by <a href="qwidget.html#enabled-prop">QWidget::setEnabled</a>() and <a href="qwidget.html#setDisabled">QWidget::setDisabled</a>().</td></tr>
-<tr><td valign="top"><tt>Qt::WA_SetPalette</tt></td><td align="center" valign="top"><tt>36</tt></td><td valign="top">Indicates that the widget has a palette of its own. This is set/cleared by <a href="qwidget.html#palette-prop">QWidget::setPalette</a>().</td></tr>
-<tr><td valign="top"><tt>Qt::WA_SetFont</tt></td><td align="center" valign="top"><tt>37</tt></td><td valign="top">Indicates that the widget has a font of its own. This is set/cleared by <a href="qwidget.html#font-prop">QWidget::setFont</a>().</td></tr>
-<tr><td valign="top"><tt>Qt::WA_SetCursor</tt></td><td align="center" valign="top"><tt>38</tt></td><td valign="top">Indicates that the widget has a cursor of its own. This is set/cleared by <a href="qwidget.html#cursor-prop">QWidget::setCursor</a>() and <a href="qwidget.html#cursor-prop">QWidget::unsetCursor</a>().</td></tr>
-<tr><td valign="top"><tt>Qt::WA_SetStyle</tt></td><td align="center" valign="top"><tt>86</tt></td><td valign="top">Indicates that the widget has a style of its own. This is set/cleared by <a href="qwidget.html#setStyle">QWidget::setStyle</a>().</td></tr>
-<tr><td valign="top"><tt>Qt::WA_NoBackground</tt></td><td align="center" valign="top"><tt>WA_OpaquePaintEvent</tt></td><td valign="top">This value is obsolete. Use WA_OpaquePaintEvent instead.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_OpaquePaintEvent</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">Indicates that the widget paints all its pixels when it receives a paint event. It is thus not required for operations like updating, resizing, scrolling and focus changes to erase the widget before generating paint events. Using WA_OpaquePaintEvent is a small optimization. It can help to reduce flicker on systems that do not provide double buffer support, and it avoids the computational cycles necessary to erase the background prior to paint. <b>Note:</b> Unlike WA_NoSystemBackground, WA_OpaquePaintEvent makes an effort to avoid transparent window backgrounds. This is set/cleared by the widget's author.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_NoSystemBackground</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">Indicates that the widget has no background, i.e. when the widget receives paint events, the background is not automatically repainted. <b>Note:</b> Unlike WA_OpaquePaintEvent, newly exposed areas are <i>never</i> filled with the background (e.g after showing a window for the first time the user can see &quot;through&quot; it until the application processes the paint events). Setting this flag implicitly disables double buffering for the widget. This is set/cleared by the widget's author.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_UpdatesDisabled</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">Indicates that updates are blocked (including the system background). This flag must never be set/cleared by the widget author. It is set/cleared by the Qt kernel.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_ForceUpdatesDisabled</tt></td><td align="center" valign="top"><tt>59</tt></td><td valign="top">Indicates that updates are explicitly disabled for the widget; i.e. it will remain disabled even when all its ancestors are set to the updates-enabled state. This implies WA_UpdatesDisabled. This is set/cleared by <a href="qwidget.html#updatesEnabled-prop">QWidget::setUpdatesEnabled</a>().</td></tr>
-<tr><td valign="top"><tt>Qt::WA_StaticContents</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">Indicates that the widget contents are north-west aligned and static. On resize, such a widget will receive paint events only for the newly visible part of itself. This is set/cleared by the widget's author.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_PaintOnScreen</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">Indicates that the widget wants to draw directly onto the screen. Widgets with this attribute set do not participate in composition management, i.e. they cannot be semi-transparent or shine through semi-transparent overlapping widgets. This is only supported on X11. The flag is set or cleared by the widget's author. This flag is required for rendering outside of Qt's paint system; e.g. if you need to use native X11 painting primitives.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_PaintUnclipped</tt></td><td align="center" valign="top"><tt>52</tt></td><td valign="top">Makes all painters operating on this widget unclipped. Children of this widget or other widgets in front of it do not clip the area the painter can paint on. This flag is only supported on X11 for widgets for which the WA_PaintOnScreen flag is set. The preferred way to do this in a cross platform way is to create a transparent widget that lies in front of the other widgets.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_PaintOutsidePaintEvent</tt></td><td align="center" valign="top"><tt>13</tt></td><td valign="top">Makes it possible to use <a href="qpainter.html">QPainter</a> to paint on the widget outside <a href="qwidget.html#paintEvent">paintEvent()</a>. This is not supported on Windows, Mac OS X or Qtopia Core. We recommend that you use this attribute only when porting Qt 3 code to Qt 4.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_Hover</tt></td><td align="center" valign="top"><tt>74</tt></td><td valign="top">Forces Qt to generate paint events when the mouse enters or leaves the widget. This feature is typically used when implementing custom styles; see the <a href="widgets-styles.html">Styles</a> example for details.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_WindowModified</tt></td><td align="center" valign="top"><tt>41</tt></td><td valign="top">Indicates that the window is marked as modified. On some platforms this will mean nothing, on others (including Mac OS X and Windows) the window will take a modified appearance. This is set/cleared by <a href="qwidget.html#windowModified-prop">QWidget::setWindowModified</a>().</td></tr>
-<tr><td valign="top"><tt>Qt::WA_Resized</tt></td><td align="center" valign="top"><tt>42</tt></td><td valign="top">Indicates that the widget has an explicit size. This is set/cleared by <a href="qwidget.html#size-prop">QWidget::resize</a>() and by <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a>().</td></tr>
-<tr><td valign="top"><tt>Qt::WA_Moved</tt></td><td align="center" valign="top"><tt>43</tt></td><td valign="top">Indicates that the widget has an explicit position. This is set/cleared by <a href="qwidget.html#pos-prop">QWidget::move</a>() and by <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a>().</td></tr>
-<tr><td valign="top"><tt>Qt::WA_Mapped</tt></td><td align="center" valign="top"><tt>11</tt></td><td valign="top">Indicates that the widget is mapped on screen. This is set/cleared by the Qt kernel.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_NoMouseReplay</tt></td><td align="center" valign="top"><tt>54</tt></td><td valign="top">Used for popup widgets. Indicates that the most recent mouse press event should not be replayed when the popup widget closes. The flag is set by the widget's author and cleared by the Qt kernel every time the widget receives a new mouse event.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_OutsideWSRange</tt></td><td align="center" valign="top"><tt>49</tt></td><td valign="top">Indicates that the widget is outside the valid range of the window system's coordinate system. A widget outside the valid range cannot be mapped on screen. This is set/cleared by the Qt kernel.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_MacMetalStyle</tt></td><td align="center" valign="top"><tt>46</tt></td><td valign="top">Indicates the the widget should be drawn in metal style as supported by the windowing system (only meaningful on Mac OS X). This is set by widget's author.</td></tr>
 <tr><td valign="top"><tt>Qt::WA_CustomWhatsThis</tt></td><td align="center" valign="top"><tt>47</tt></td><td valign="top">Indicates that the widget wants to continue operating normally in &quot;What's This?&quot; mode. This is set by the widget's author.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_DeleteOnClose</tt></td><td align="center" valign="top"><tt>55</tt></td><td valign="top">Makes Qt delete this widget when the widget has accepted the close event (see <a href="qwidget.html#closeEvent">QWidget::closeEvent</a>()).</td></tr>
+<tr><td valign="top"><tt>Qt::WA_Disabled</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Indicates that the widget is disabled, i.e&#x2e; it does not receive any mouse or keyboard events. There is also a getter functions <a href="qwidget.html#enabled-prop">QWidget::isEnabled</a>(). This is set/cleared by the Qt kernel.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_ForceDisabled</tt></td><td align="center" valign="top"><tt>32</tt></td><td valign="top">Indicates that the widget is explicitly disabled, i.e&#x2e; it will remain disabled even when all its ancestors are set to the enabled state. This implies WA_Disabled. This is set/cleared by <a href="qwidget.html#enabled-prop">QWidget::setEnabled</a>() and <a href="qwidget.html#setDisabled">QWidget::setDisabled</a>().</td></tr>
+<tr><td valign="top"><tt>Qt::WA_ForceUpdatesDisabled</tt></td><td align="center" valign="top"><tt>59</tt></td><td valign="top">Indicates that updates are explicitly disabled for the widget; i.e&#x2e; it will remain disabled even when all its ancestors are set to the updates-enabled state. This implies WA_UpdatesDisabled. This is set/cleared by <a href="qwidget.html#updatesEnabled-prop">QWidget::setUpdatesEnabled</a>().</td></tr>
+<tr><td valign="top"><tt>Qt::WA_GroupLeader</tt></td><td align="center" valign="top"><tt>72</tt></td><td valign="top"><i>This attribute has been deprecated.</i> Use <a href="qwidget.html#windowModality-prop">QWidget::windowModality</a> instead.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_Hover</tt></td><td align="center" valign="top"><tt>74</tt></td><td valign="top">Forces Qt to generate paint events when the mouse enters or leaves the widget. This feature is typically used when implementing custom styles; see the <a href="widgets-styles.html">Styles</a> example for details.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_InputMethodEnabled</tt></td><td align="center" valign="top"><tt>14</tt></td><td valign="top">Enables input methods for Asian languages. Must be set when creating custom text editing widgets.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_KeyboardFocusChange</tt></td><td align="center" valign="top"><tt>77</tt></td><td valign="top">Set on a toplevel window when the users changes focus with the keyboard (tab, backtab, or shortcut).</td></tr>
+<tr><td valign="top"><tt>Qt::WA_KeyCompression</tt></td><td align="center" valign="top"><tt>33</tt></td><td valign="top">Enables key event compression if set, and disables it if not set. By default key compression is off, so widgets receive one key press event for each key press (or more, since autorepeat is usually on). If you turn it on and your program doesn't keep up with key input, Qt may try to compress key events so that more than one character can be processed in each event. For example, a word processor widget might receive 2, 3 or more characters in each <a href="qkeyevent.html#text">QKeyEvent::text</a>(), if the layout recalculation takes too long for the CPU. If a widget supports multiple character unicode input, it is always safe to turn the compression on. Qt performs key event compression only for printable characters. <a href="qt.html#Modifier-enum">Qt::Modifier</a> keys, cursor movement keys, function keys and miscellaneous action keys (e.g&#x2e; Escape, Enter, Backspace, PrintScreen) will stop key event compression, even if there are more compressible key events available. Not all platforms support this compression, in which case turning it on will have no effect. This is set/cleared by the widget's author.</td></tr>
 <tr><td valign="top"><tt>Qt::WA_LayoutOnEntireRect</tt></td><td align="center" valign="top"><tt>48</tt></td><td valign="top">Indicates that the widget wants <a href="qlayout.html">QLayout</a> to operate on the entire <a href="qwidget.html#rect-prop">QWidget::rect</a>(), not only on <a href="qwidget.html#contentsRect">QWidget::contentsRect</a>(). This is set by the widget's author.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_LayoutUsesWidgetRect</tt></td><td align="center" valign="top"><tt>92</tt></td><td valign="top">Ignore the layout item rect from the style when laying out this widget with <a href="qlayout.html">QLayout</a>. This makes a difference in <a href="qmacstyle.html">QMacStyle</a> and <a href="qplastiquestyle.html">QPlastiqueStyle</a> for some widgets.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MacNoClickThrough</tt></td><td align="center" valign="top"><tt>12</tt></td><td valign="top">Indicates that the window is only activated when clicked.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MacOpaqueSizeGrip</tt></td><td align="center" valign="top"><tt>85</tt></td><td valign="top">Indicates that the native Carbon size grip should be opaque instead of transparent (the default). This attribute is only applicable to Mac OS X and is set by the widget's author.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MacShowFocusRect</tt></td><td align="center" valign="top"><tt>88</tt></td><td valign="top">Indicates that this widget should get a <a href="qfocusframe.html">QFocusFrame</a> around it. Some widgets draw their own focus halo regardless of this attribute. Not that the <a href="qwidget.html#focusPolicy-prop">QWidget::focusPolicy</a> also plays the main role in whether something is given focus or not, this only controls whether or not this gets the focus frame. This attribute is only applicable to Mac OS X.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MacNormalSize</tt></td><td align="center" valign="top"><tt>89</tt></td><td valign="top">Indicates the widget should have the normal size for widgets in Mac OS X. This attribute is only applicable to Mac OS X.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MacSmallSize</tt></td><td align="center" valign="top"><tt>90</tt></td><td valign="top">Indicates the widget should have the small size for widgets in Mac OS X. This attribute is only applicable to Mac OS X.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MacMiniSize</tt></td><td align="center" valign="top"><tt>91</tt></td><td valign="top">Indicates the widget should have the mini size for widgets in Mac OS X. This attribute is only applicable to Mac OS X.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MacBrushedMetal</tt></td><td align="center" valign="top"><tt>46</tt></td><td valign="top">Indicates the widget should be drawn in the brushed metal style as supported by the windowing system. This attribute is only applicable to Mac OS X.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_Mapped</tt></td><td align="center" valign="top"><tt>11</tt></td><td valign="top">Indicates that the widget is mapped on screen. This is set/cleared by the Qt kernel.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MouseNoMask</tt></td><td align="center" valign="top"><tt>71</tt></td><td valign="top">Makes the widget receive mouse events for the entire widget regardless of the currently set mask, overriding <a href="qwidget.html#setMask">QWidget::setMask</a>().</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MouseTracking</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">Indicates that the widget has mouse tracking enabled. See <a href="qwidget.html#mouseTracking-prop">QWidget::mouseTracking</a>.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_Moved</tt></td><td align="center" valign="top"><tt>43</tt></td><td valign="top">Indicates that the widget has an explicit position. This is set/cleared by <a href="qwidget.html#pos-prop">QWidget::move</a>() and by <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a>().</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MSWindowsUseDirect3D</tt></td><td align="center" valign="top"><tt>94</tt></td><td valign="top">Makes drawing to a widget with this attribute set use the Direct3D paint engine, if the Direct3D paint engine is available. <b>This functionality is experimental.</b></td></tr>
+<tr><td valign="top"><tt>Qt::WA_NoBackground</tt></td><td align="center" valign="top"><tt>WA_OpaquePaintEvent</tt></td><td valign="top">This value is obsolete. Use WA_OpaquePaintEvent instead.</td></tr>
 <tr><td valign="top"><tt>Qt::WA_NoChildEventsForParent</tt></td><td align="center" valign="top"><tt>58</tt></td><td valign="top">Indicates that the widget does not want ChildAdded or ChildRemoved events sent to its parent. This is rarely necessary but can help to avoid automatic insertion widgets like splitters and layouts. This is set by a widget's author.</td></tr>
 <tr><td valign="top"><tt>Qt::WA_NoChildEventsFromChildren</tt></td><td align="center" valign="top"><tt>39</tt></td><td valign="top">Indicates that the widget does not want to receive ChildAdded or ChildRemoved events sent from its children. This is set by a widget's author.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_MouseTracking</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">Indicates that the widget has mouse tracking enabled. See <a href="qwidget.html#mouseTracking-prop">QWidget::mouseTracking</a>.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_GroupLeader</tt></td><td align="center" valign="top"><tt>72</tt></td><td valign="top"><i>This attribute has been deprecated.</i> Use <a href="qwidget.html#windowModality-prop">QWidget::windowModality</a> instead.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_KeyboardFocusChange</tt></td><td align="center" valign="top"><tt>77</tt></td><td valign="top">Set on a toplevel window when the users changes focus with the keyboard (tab, backtab, or shortcut).</td></tr>
-<tr><td valign="top"><tt>Qt::WA_WindowPropagation</tt></td><td align="center" valign="top"><tt>80</tt></td><td valign="top">Makes a toplevel window inherit font and palette from its parent.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_InputMethodEnabled</tt></td><td align="center" valign="top"><tt>14</tt></td><td valign="top">Enables input methods for asian languages. Must be set when creating custom text editing widgets.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_MacNoClickThrough</tt></td><td align="center" valign="top"><tt>12</tt></td><td valign="top">Indicates that the window is only activated when clicked.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_MouseNoMask</tt></td><td align="center" valign="top"><tt>71</tt></td><td valign="top">Makes the widget receive mouse events for the entire widget regardless of the currently set mask.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_NoMouseReplay</tt></td><td align="center" valign="top"><tt>54</tt></td><td valign="top">Used for popup widgets. Indicates that the most recent mouse press event should not be replayed when the popup widget closes. The flag is set by the widget's author and cleared by the Qt kernel every time the widget receives a new mouse event.</td></tr>
 <tr><td valign="top"><tt>Qt::WA_NoMousePropagation</tt></td><td align="center" valign="top"><tt>73</tt></td><td valign="top">Prohibits mouse events from being propagated to the widget's parent.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_NoSystemBackground</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">Indicates that the widget has no background, i.e&#x2e; when the widget receives paint events, the background is not automatically repainted. <b>Note:</b> Unlike WA_OpaquePaintEvent, newly exposed areas are <i>never</i> filled with the background (e.g after showing a window for the first time the user can see &quot;through&quot; it until the application processes the paint events). Setting this flag implicitly disables double buffering for the widget. This is set/cleared by the widget's author.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_OpaquePaintEvent</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">Indicates that the widget paints all its pixels when it receives a paint event. It is thus not required for operations like updating, resizing, scrolling and focus changes to erase the widget before generating paint events. Using WA_OpaquePaintEvent is a small optimization. It can help to reduce flicker on systems that do not provide double buffer support, and it avoids the computational cycles necessary to erase the background prior to paint. <b>Note:</b> Unlike WA_NoSystemBackground, WA_OpaquePaintEvent makes an effort to avoid transparent window backgrounds. This is set/cleared by the widget's author.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_OutsideWSRange</tt></td><td align="center" valign="top"><tt>49</tt></td><td valign="top">Indicates that the widget is outside the valid range of the window system's coordinate system. A widget outside the valid range cannot be mapped on screen. This is set/cleared by the Qt kernel.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_PaintOnScreen</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">Indicates that the widget wants to draw directly onto the screen. Widgets with this attribute set do not participate in composition management, i.e&#x2e; they cannot be semi-transparent or shine through semi-transparent overlapping widgets. This is only supported on X11. On Qtopia Core the flag currently only works when set on a top level widget and relies on support from the active screen driver. The flag is set or cleared by the widget's author. For rendering outside of Qt's paint system; e.g&#x2e; if you need to use native X11 painting primitives, you need to reimplement <a href="qwidget.html#paintEngine">QWidget::paintEngine</a>() to return 0 and set this flag.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_PaintOutsidePaintEvent</tt></td><td align="center" valign="top"><tt>13</tt></td><td valign="top">Makes it possible to use <a href="qpainter.html">QPainter</a> to paint on the widget outside <a href="qwidget.html#paintEvent">paintEvent()</a>. This is not supported on Windows, Mac OS X or Qtopia Core. We recommend that you use this attribute only when porting Qt 3 code to Qt 4.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_PaintUnclipped</tt></td><td align="center" valign="top"><tt>52</tt></td><td valign="top">Makes all painters operating on this widget unclipped. Children of this widget or other widgets in front of it do not clip the area the painter can paint on. This flag is only supported for widgets for which the WA_PaintOnScreen flag is set. The preferred way to do this in a cross platform way is to create a transparent widget that lies in front of the other widgets.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_PendingMoveEvent</tt></td><td align="center" valign="top"><tt>34</tt></td><td valign="top">Indicates that a move event is pending, e.g&#x2e; when a hidden widget was moved. This is set/cleared by the Qt kernel.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_PendingResizeEvent</tt></td><td align="center" valign="top"><tt>35</tt></td><td valign="top">Indicates that a resize event is pending, e.g&#x2e; when a hidden widget was resized. This is set/cleared by the Qt kernel.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_QuitOnClose</tt></td><td align="center" valign="top"><tt>76</tt></td><td valign="top">Makes Qt quit the application when the last widget with the attribute set has accepted closeEvent(). This behavior can be adjusted with the <a href="qapplication.html#quitOnLastWindowClosed-prop">QApplication::quitOnLastWindowClosed</a> property. By default the attribute is set for all widgets of type <a href="qt.html#WindowType-enum">Qt::Window</a>.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_Resized</tt></td><td align="center" valign="top"><tt>42</tt></td><td valign="top">Indicates that the widget has an explicit size. This is set/cleared by <a href="qwidget.html#size-prop">QWidget::resize</a>() and by <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a>().</td></tr>
 <tr><td valign="top"><tt>Qt::WA_RightToLeft</tt></td><td align="center" valign="top"><tt>56</tt></td><td valign="top">Indicates that the layout direction for the widget is right to left.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_MacOpaqueSizeGrip</tt></td><td align="center" valign="top"><tt>85</tt></td><td valign="top">Indicates that the native Carbon size grip should be opaque instead of transparent (the default). This attribute is only meaningfull on Mac OS X and is set by widget's author.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_AlwaysShowToolTips</tt></td><td align="center" valign="top"><tt>84</tt></td><td valign="top">Enables tooltips for inactive windows.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_SetCursor</tt></td><td align="center" valign="top"><tt>38</tt></td><td valign="top">Indicates that the widget has a cursor of its own. This is set/cleared by <a href="qwidget.html#cursor-prop">QWidget::setCursor</a>() and <a href="qwidget.html#cursor-prop">QWidget::unsetCursor</a>().</td></tr>
+<tr><td valign="top"><tt>Qt::WA_SetFont</tt></td><td align="center" valign="top"><tt>37</tt></td><td valign="top">Indicates that the widget has a font of its own. This is set/cleared by <a href="qwidget.html#font-prop">QWidget::setFont</a>().</td></tr>
+<tr><td valign="top"><tt>Qt::WA_SetPalette</tt></td><td align="center" valign="top"><tt>36</tt></td><td valign="top">Indicates that the widget has a palette of its own. This is set/cleared by <a href="qwidget.html#palette-prop">QWidget::setPalette</a>().</td></tr>
+<tr><td valign="top"><tt>Qt::WA_SetStyle</tt></td><td align="center" valign="top"><tt>86</tt></td><td valign="top">Indicates that the widget has a style of its own. This is set/cleared by <a href="qwidget.html#setStyle">QWidget::setStyle</a>().</td></tr>
 <tr><td valign="top"><tt>Qt::WA_ShowModal</tt></td><td align="center" valign="top"><tt>70</tt></td><td valign="top"><i>This attribute has been deprecated.</i> Use <a href="qwidget.html#windowModality-prop">QWidget::windowModality</a> instead.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_StaticContents</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">Indicates that the widget contents are north-west aligned and static. On resize, such a widget will receive paint events only for the newly visible part of itself. This is set/cleared by the widget's author.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_StyleSheet</tt></td><td align="center" valign="top"><tt>97</tt></td><td valign="top">Indicates that the widget is styled using a <a href="stylesheet.html">style sheet</a>.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_UnderMouse</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Indicates that the widget is under the mouse cursor. The value is not updated correctly during drag and drop operations. There is also a getter function <a href="qwidget.html#underMouse">QWidget::underMouse</a>(). This is set/cleared by the Qt kernel.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_UpdatesDisabled</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">Indicates that updates are blocked (including the system background). This flag must never be set/cleared by the widget author. It is set/cleared by the Qt kernel.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_WindowModified</tt></td><td align="center" valign="top"><tt>41</tt></td><td valign="top">Indicates that the window is marked as modified. On some platforms this will mean nothing, on others (including Mac OS X and Windows) the window will take a modified appearance. This is set/cleared by <a href="qwidget.html#windowModified-prop">QWidget::setWindowModified</a>().</td></tr>
+<tr><td valign="top"><tt>Qt::WA_WindowPropagation</tt></td><td align="center" valign="top"><tt>80</tt></td><td valign="top">Makes a toplevel window inherit font and palette from its parent.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_MacAlwaysShowToolWindow</tt></td><td align="center" valign="top"><tt>96</tt></td><td valign="top">On Mac OS X, show the tool window even when the application is not active. By default, all tool windows are hidden when the application is inactive.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_SetLocale</tt></td><td align="center" valign="top"><tt>87</tt></td><td valign="top">Indicates the local should be taken into consideration in the widget.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_StyledBackground</tt></td><td align="center" valign="top"><tt>93</tt></td><td valign="top">Indicates the widget should be drawn using a styled background.</td></tr>
 </table></p>
 <h3 class="fn"><a name="WindowModality-enum"></a>enum Qt::WindowModality</h3>
 <a name="modal"></a><p>This enum specifies the behavior of a modal window. A modal window is one that blocks input to other windows. Note that windows that are children of a modal window are not blocked.</p>
@@ -1188,10 +1235,10 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>Qt::WindowNoState</tt></td><td align="center" valign="top"><tt>0x00000000</tt></td><td valign="top">The window has no state set (in normal state).</td></tr>
-<tr><td valign="top"><tt>Qt::WindowMinimized</tt></td><td align="center" valign="top"><tt>0x00000001</tt></td><td valign="top">The window is minimized (i.e. iconified).</td></tr>
+<tr><td valign="top"><tt>Qt::WindowMinimized</tt></td><td align="center" valign="top"><tt>0x00000001</tt></td><td valign="top">The window is minimized (i.e&#x2e; iconified).</td></tr>
 <tr><td valign="top"><tt>Qt::WindowMaximized</tt></td><td align="center" valign="top"><tt>0x00000002</tt></td><td valign="top">The window is maximized with a frame around it.</td></tr>
 <tr><td valign="top"><tt>Qt::WindowFullScreen</tt></td><td align="center" valign="top"><tt>0x00000004</tt></td><td valign="top">The window fills the entire screen without any frame around it.</td></tr>
-<tr><td valign="top"><tt>Qt::WindowActive</tt></td><td align="center" valign="top"><tt>0x00000008</tt></td><td valign="top">The window is the active window, i.e. it has keyboard focus.</td></tr>
+<tr><td valign="top"><tt>Qt::WindowActive</tt></td><td align="center" valign="top"><tt>0x00000008</tt></td><td valign="top">The window is the active window, i.e&#x2e; it has keyboard focus.</td></tr>
 </table></p>
 <p>The WindowStates type is a typedef for <a href="qflags.html">QFlags</a>&lt;WindowState&gt;. It stores an OR combination of WindowState values.</p>
 <h3 class="flags"><a name="WindowType-enum"></a>enum Qt::WindowType<br />flags Qt::WindowFlags</h3>
@@ -1201,10 +1248,10 @@
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>Qt::Widget</tt></td><td align="center" valign="top"><tt>0x00000000</tt></td><td valign="top">This is the default type for <a href="qwidget.html">QWidget</a>. Widgets of this type are child widgets if they have a parent, and independent windows if they have no parent. See also Qt::Window and Qt::SubWindow.</td></tr>
 <tr><td valign="top"><tt>Qt::Window</tt></td><td align="center" valign="top"><tt>0x00000001</tt></td><td valign="top">Indicates that the widget is a window, usually with a window system frame and a title bar, irrespective of whether the widget has a parent or not.</td></tr>
-<tr><td valign="top"><tt>Qt::Dialog</tt></td><td align="center" valign="top"><tt>0x00000002 | Window</tt></td><td valign="top">Indicates that the widget is a window that should be decorated as a dialog (i.e., typically no maximize or minimize buttons in the title bar). This is the default type for <a href="qdialog.html">QDialog</a>. If you want to use it as a modal dialog, it should be launched from another window, or have a parent and used with the <a href="qwidget.html#windowModality-prop">QWidget::windowModality</a> property. If you make it modal, the dialog will prevent other top-level windows in the application from getting any input. We refer to a top-level window that has a parent as a <i>secondary</i> window.</td></tr>
+<tr><td valign="top"><tt>Qt::Dialog</tt></td><td align="center" valign="top"><tt>0x00000002 | Window</tt></td><td valign="top">Indicates that the widget is a window that should be decorated as a dialog (i.e&#x2e;, typically no maximize or minimize buttons in the title bar). This is the default type for <a href="qdialog.html">QDialog</a>. If you want to use it as a modal dialog, it should be launched from another window, or have a parent and used with the <a href="qwidget.html#windowModality-prop">QWidget::windowModality</a> property. If you make it modal, the dialog will prevent other top-level windows in the application from getting any input. We refer to a top-level window that has a parent as a <i>secondary</i> window.</td></tr>
 <tr><td valign="top"><tt>Qt::Sheet</tt></td><td align="center" valign="top"><tt>0x00000004 | Window</tt></td><td valign="top">Indicates that the widget is a Macintosh sheet.</td></tr>
 <tr><td valign="top"><tt>Qt::Drawer</tt></td><td align="center" valign="top"><tt>0x00000006 | Window</tt></td><td valign="top">Indicates that the widget is a Macintosh drawer.</td></tr>
-<tr><td valign="top"><tt>Qt::Popup</tt></td><td align="center" valign="top"><tt>0x00000008 | Window</tt></td><td valign="top">Indicates that the widget is a popup top-level window, i.e. that it is modal, but has a window system frame appropriate for popup menus.</td></tr>
+<tr><td valign="top"><tt>Qt::Popup</tt></td><td align="center" valign="top"><tt>0x00000008 | Window</tt></td><td valign="top">Indicates that the widget is a popup top-level window, i.e&#x2e; that it is modal, but has a window system frame appropriate for popup menus.</td></tr>
 <tr><td valign="top"><tt>Qt::Tool</tt></td><td align="center" valign="top"><tt>0x0000000a | Window</tt></td><td valign="top">Indicates that the widget is a tool window. A tool window is often a small window with a smaller than usual title bar and decoration, typically used for collections of tool buttons. It there is a parent, the tool window will always be kept on top of it. If there isn't a parent, you may consider using Qt::WindowStaysOnTopHint as well. If the window system supports it, a tool window can be decorated with a somewhat lighter frame. It can also be combined with Qt::FramelessWindowHint.</td></tr>
 <tr><td valign="top"><tt>Qt::ToolTip</tt></td><td align="center" valign="top"><tt>0x0000000c | Window</tt></td><td valign="top">Indicates that the widget is a tooltip. This is used internally to implement <a href="qwidget.html#toolTip-prop">tooltips</a>.</td></tr>
 <tr><td valign="top"><tt>Qt::SplashScreen</tt></td><td align="center" valign="top"><tt>0x0000000e | Window</tt></td><td valign="top">Indicates that the window is a splash screen. This is the default type for <a href="qsplashscreen.html">QSplashScreen</a>.</td></tr>
@@ -1216,7 +1263,7 @@
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>Qt::MSWindowsFixedSizeDialogHint</tt></td><td align="center" valign="top"><tt>0x00000100</tt></td><td valign="top">Gives the window a thin dialog border on Windows. This style is traditionally used for fixed-size dialogs.</td></tr>
 <tr><td valign="top"><tt>Qt::MSWindowsOwnDC</tt></td><td align="center" valign="top"><tt>0x00000200</tt></td><td valign="top">Gives the window its own display context on Windows.</td></tr>
-<tr><td valign="top"><tt>Qt::X11BypassWindowManagerHint</tt></td><td align="center" valign="top"><tt>0x00000400</tt></td><td valign="top">Bypass the window manager completely. This results in a borderless window that is not managed at all (i.e., no keyboard input unless you call <a href="qwidget.html#activateWindow">QWidget::activateWindow</a>() manually).</td></tr>
+<tr><td valign="top"><tt>Qt::X11BypassWindowManagerHint</tt></td><td align="center" valign="top"><tt>0x00000400</tt></td><td valign="top">Bypass the window manager completely. This results in a borderless window that is not managed at all (i.e&#x2e;, no keyboard input unless you call <a href="qwidget.html#activateWindow">QWidget::activateWindow</a>() manually).</td></tr>
 <tr><td valign="top"><tt>Qt::FramelessWindowHint</tt></td><td align="center" valign="top"><tt>0x00000800</tt></td><td valign="top">Produces a borderless window. The user cannot move or resize a borderless window via the window system. On X11, the result of the flag is dependent on the window manager and its ability to understand Motif and/or NETWM hints. Most existing modern window managers can handle this.</td></tr>
 <tr><td valign="top"><tt>Qt::CustomizeWindowHint</tt></td><td align="center" valign="top"><tt>0x02000000</tt></td><td valign="top">Turns off the default window title hints.</td></tr>
 <tr><td valign="top"><tt>Qt::WindowTitleHint</tt></td><td align="center" valign="top"><tt>0x00001000</tt></td><td valign="top">Gives the window a title bar.</td></tr>
@@ -1331,6 +1378,18 @@
 <tr><td valign="top"><tt>Qt::KeyButtonMask</tt></td><td align="center" valign="top"><tt>Qt::KeyboardModifierMask</tt></td></tr>
 </table></p>
 <p>Use <a href="qt.html#KeyboardModifier-enum">Qt::KeyboardModifier</a> instead.</p>
+<h3 class="fn"><a name="Dock-enum"></a>enum Qt::Dock</h3>
+<p>Each dock window can be in one of the following positions:</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>Qt::DockUnmanaged</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">not managed by a Q3MainWindow.</td></tr>
+<tr><td valign="top"><tt>Qt::DockTornOff</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">the dock window floats as its own top level window which always stays on top of the main window.</td></tr>
+<tr><td valign="top"><tt>Qt::DockTop</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">above the central widget, below the menu bar.</td></tr>
+<tr><td valign="top"><tt>Qt::DockBottom</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">below the central widget, above the status bar.</td></tr>
+<tr><td valign="top"><tt>Qt::DockRight</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">to the right of the central widget.</td></tr>
+<tr><td valign="top"><tt>Qt::DockLeft</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">to the left of the central widget.</td></tr>
+<tr><td valign="top"><tt>Qt::DockMinimized</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">the dock window is not shown (this is effectively a 'hidden' dock area); the handles of all minimized dock windows are drawn in one row below the menu bar.</td></tr>
+</table></p>
 <h3 class="fn"><a name="GUIStyle-enum"></a>enum Qt::GUIStyle</h3>
 <p><table border="1" cellpadding="2" cellspacing="1" width="40%">
 <tr><th width="60%">Constant</th><th width="40%">Value</th></tr>
@@ -1379,7 +1438,7 @@
 <h3 class="fn"><a name="TextFlags-typedef"></a>typedef Qt::TextFlags</h3>
 <p>Use <a href="qt.html#TextFlag-enum">Qt::TextFlag</a> instead.</p>
 <h3 class="fn"><a name="ToolBarDock-typedef"></a>typedef Qt::ToolBarDock</h3>
-<p>Use <a href="qt.html#Dock-enum">Qt::Dock</a> instead.</p>
+<p>Use <a href="qt-qt3.html#Dock-enum">Qt::Dock</a> instead.</p>
 <h3 class="fn"><a name="WindowsVersion-enum"></a>enum Qt::WindowsVersion</h3>
 <p><table border="1" cellpadding="2" cellspacing="1" width="40%">
 <tr><th width="60%">Constant</th><th width="40%">Value</th></tr>
@@ -1401,6 +1460,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

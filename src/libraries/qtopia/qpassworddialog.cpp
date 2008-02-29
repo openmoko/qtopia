@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,34 +27,16 @@
 #include <QDesktopWidget>
 #include <QEvent>
 #include <QKeyEvent>
-#include <QDebug>
 
 #include <md5hash.h>
-
-#ifdef Q_WS_QWS
-#include <qwindowsystem_qws.h>
-#endif
-
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
 #include <QLayout>
-#endif
-
-#ifndef Q_OS_WIN32
 #include <unistd.h> //for sleep
-#else
-#include <windows.h>
-#include <winbase.h>
-#endif
 #include "ui_passwordbase_p.h"
 
 static int execDialog( QDialog *dialog, bool nomax )
 {
-#ifdef QTOPIA_PHONE
     return QtopiaApplication::execDialog( dialog, nomax );
-#else
-    return dialog.exec();
-#endif
 }
 
 static int execDialog( QDialog *dialog )
@@ -74,6 +56,7 @@ public:
     void reset();
     void setPrompt( const QString& );
     QString password() const;
+    void setLast( bool value );
 
     bool eventFilter( QObject *obj, QEvent *e );
 
@@ -91,6 +74,7 @@ private:
     friend class QPasswordDialog;
     QString text;
     QPasswordDialog::InputMode mode;
+    bool last;
 };
 
 /*
@@ -98,12 +82,11 @@ private:
  *  name 'name' and widget flags set to 'f'
  */
 QPasswordWidget::QPasswordWidget( QWidget* parent, Qt::WFlags fl )
-    : QWidget( parent, fl )
+    : QWidget( parent, fl ), last( true )
 {
     setupUi(this);
     installEventFilter( this );
 
-#ifdef QTOPIA_PHONE
     if  (!Qtopia::mousePreferred()) {
         button_0->hide();
         button_1->hide();
@@ -117,7 +100,7 @@ QPasswordWidget::QPasswordWidget( QWidget* parent, Qt::WFlags fl )
         button_9->hide();
     }
     button_OK->hide();
-#endif
+
     connect(button_0,SIGNAL(clicked()),this,SLOT(key()));
     connect(button_1,SIGNAL(clicked()),this,SLOT(key()));
     connect(button_2,SIGNAL(clicked()),this,SLOT(key()));
@@ -171,7 +154,6 @@ void QPasswordWidget::key()
 
 void QPasswordWidget::keyPressEvent( QKeyEvent *e )
 {
-#ifdef QTOPIA_PHONE
     if ( (Qtopia::mousePreferred() || (!Qtopia::mousePreferred() && hasEditFocus()))
         && (e->key() == Qt::Key_Back || e->key() == Qt::Key_No) ) {
         if( !Qtopia::mousePreferred() )
@@ -179,23 +161,25 @@ void QPasswordWidget::keyPressEvent( QKeyEvent *e )
         e->ignore();
         return;
     }
-#endif
+
     if ( e->key() == Qt::Key_Back ) {
         if (text.length() > 0) {
             text = text.left( text.size() - 1 );
             display->setText( text );
             if ( text.size() == 0 ) {
-#ifdef QTOPIA_PHONE
-                QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
+                if ( last )
+                    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
+                else
+                    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Next);
                 QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
-#endif
             }
+            return;
         } else {
             emit passwordEntered( text );
             return;
         }
     }
-#ifdef QTOPIA_PHONE
+
     if ( e->key() == Qt::Key_Select ) {
         emit passwordEntered( text );
         return;
@@ -206,19 +190,12 @@ void QPasswordWidget::keyPressEvent( QKeyEvent *e )
         emit passwordEntered( text );
         return;
     }
-#else
-    if ( e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return ) {
-        emit passwordEntered( text );
-        return;
-    }
-#endif
+
     QString t = e->text().left(1);
     if ( t[0]>='0' && t[0]<='9' ) {
         input(t);
-#ifdef QTOPIA_PHONE
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
         QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Ok);
-#endif
     }
 
     QWidget::keyPressEvent( e );
@@ -250,6 +227,18 @@ QString QPasswordWidget::password() const
     return ( mode == QPasswordDialog::Crypted ? MD5::hash(text) : text );
 }
 
+void QPasswordWidget::setLast( bool value )
+{
+    last = value;
+#ifdef QTOPIA_PHONE
+    if ( last )
+        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
+    else
+        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Next);
+    QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
+#endif
+}
+
 /**
 * Implement event filter interface (part of qobject). Filter to prevent
 * users escaping from the password dialog by using the "Escape" or other
@@ -261,13 +250,13 @@ bool QPasswordWidget::eventFilter( QObject *obj, QEvent *e )
     if ( obj != this )
         return QWidget::eventFilter( obj, e );
     // if event is anything other than keypress allow m_passw to handle it
-    if ( e->type() == QEvent::KeyPress )
-        return false;
-    QKeyEvent *k = (QKeyEvent *)e;
-    if ( k->modifiers() == Qt::NoModifier
-        || k->key() == Qt::Key_Escape
-        || k->key() == Qt::Key_Menu )
-        return true;
+    if ( e->type() == QEvent::KeyRelease ) {
+        QKeyEvent *k = (QKeyEvent *)e;
+        if ( k->modifiers() == Qt::NoModifier
+                || k->key() == Qt::Key_Escape
+                || k->key() == Qt::Key_Menu )
+            return true;
+    }
     // if keypress is other, allow m_passw to handle it
     return false;
 }
@@ -301,10 +290,8 @@ bool QPasswordWidget::eventFilter( QObject *obj, QEvent *e )
 QPasswordDialog::QPasswordDialog( QWidget* parent, Qt::WFlags flags)
     : QDialog( parent, flags )
 {
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::menuFor(this);
     QSoftMenuBar::setHelpEnabled(this, false);
-#endif
 
     m_passw = new QPasswordWidget( this );
     QBoxLayout *l = new QVBoxLayout( this );
@@ -312,9 +299,9 @@ QPasswordDialog::QPasswordDialog( QWidget* parent, Qt::WFlags flags)
 
     // defaults
     m_passw->mode = QPasswordDialog::Crypted;
-    setWindowTitle(tr("Authentication Required"));
+    setWindowTitle(tr("Authentication"));
 
-    connect( m_passw, SIGNAL(passwordEntered(const QString&)),
+    connect( m_passw, SIGNAL(passwordEntered(QString)),
              this, SLOT(accept()) );
 }
 
@@ -400,10 +387,7 @@ QString QPasswordDialog::getPassword( QWidget* parent,
         max = false;
 
     QPasswordDialog pd( parent );
-    if ( !last ) {
-        QSoftMenuBar::setLabel( &pd, Qt::Key_Back, QSoftMenuBar::Next,
-                QSoftMenuBar::AnyFocus );
-    }
+    pd.m_passw->setLast( last );
     pd.setPrompt( prompt );
     pd.setInputMode( mode );
 
@@ -438,10 +422,8 @@ void QPasswordDialog::authenticateUser( QWidget* parent, bool atPowerOn )
         QPasswordDialog pd( parent );
         pd.setInputMode( QPasswordDialog::Crypted );
         pd.setWindowFlags( Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint );
-#ifdef QTOPIA_PHONE
-        if ( Qtopia::mousePreferred() )
-#endif
-        {
+
+        if ( Qtopia::mousePreferred() ) {
             QRect desk = qApp->desktop()->geometry();
             pd.setGeometry( 0, 0, desk.width(), desk.height() );
         }

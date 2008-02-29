@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include "qdocumentselector.h"
+
 #include <QMenu>
 #include <QVBoxLayout>
 #include <QListView>
@@ -33,10 +34,11 @@
 #include <qwaitwidget.h>
 #include "drmcontent_p.h"
 #include <QFocusEvent>
-
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qsoftmenubar.h>
-#endif
+#include <qtopiaitemdelegate.h>
+#include <QContentSortCriteria>
+#include <QPainter>
+#include <QScrollBar>
 
 class NewDocumentProxyModel : public QAbstractProxyModel
 {
@@ -83,58 +85,58 @@ public:
 
         if( oldModel )
         {
-            disconnect( oldModel, SIGNAL(columnsAboutToBeInserted(const QModelIndex&,int,int)),
-                        this    , SLOT (_columnsAboutToBeInserted(const QModelIndex&,int,int)) );
-            disconnect( oldModel, SIGNAL(columnsAboutToBeRemoved(const QModelIndex&,int,int)),
-                        this    , SLOT (_columnsAboutToBeRemoved(const QModelIndex&,int,int)) );
-            disconnect( oldModel, SIGNAL(columnsInserted(const QModelIndex&,int,int)),
-                        this    , SLOT (_columnsInserted(const QModelIndex&,int,int)) );
-            disconnect( oldModel, SIGNAL(columnsRemoved(const QModelIndex&,int,int)),
-                        this    , SLOT (_columnsRemoved(const QModelIndex&,int,int)) );
-            disconnect( oldModel, SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&)),
-                        this    , SLOT (_dataChanged(const QModelIndex&,const QModelIndex&)) );
+            disconnect( oldModel, SIGNAL(columnsAboutToBeInserted(QModelIndex,int,int)),
+                        this    , SLOT (_columnsAboutToBeInserted(QModelIndex,int,int)) );
+            disconnect( oldModel, SIGNAL(columnsAboutToBeRemoved(QModelIndex,int,int)),
+                        this    , SLOT (_columnsAboutToBeRemoved(QModelIndex,int,int)) );
+            disconnect( oldModel, SIGNAL(columnsInserted(QModelIndex,int,int)),
+                        this    , SLOT (_columnsInserted(QModelIndex,int,int)) );
+            disconnect( oldModel, SIGNAL(columnsRemoved(QModelIndex,int,int)),
+                        this    , SLOT (_columnsRemoved(QModelIndex,int,int)) );
+            disconnect( oldModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+                        this    , SLOT (_dataChanged(QModelIndex,QModelIndex)) );
             disconnect( oldModel, SIGNAL(layoutAboutToBeChanged()),
                         this    , SIGNAL(layoutAboutToBeChanged()) );
             disconnect( oldModel, SIGNAL(layoutChanged()),
                         this    , SIGNAL(layoutChanged()) );
             disconnect( oldModel, SIGNAL(modelReset()),
                         this    , SIGNAL(modelReset()) );
-            disconnect( oldModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&,int,int)),
-                        this    , SLOT (_rowsAboutToBeInserted(const QModelIndex&,int,int)) );
-            disconnect( oldModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&,int,int)),
-                        this    , SLOT (_rowsAboutToBeRemoved(const QModelIndex&,int,int)) );
-            disconnect( oldModel, SIGNAL(rowsInserted(const QModelIndex&,int,int)),
-                        this    , SLOT (_rowsInserted(const QModelIndex&,int,int)) );
-            disconnect( oldModel, SIGNAL(rowsRemoved(const QModelIndex&,int,int)),
-                        this    , SLOT (_rowsRemoved(const QModelIndex&,int,int)) );
+            disconnect( oldModel, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)),
+                        this    , SLOT (_rowsAboutToBeInserted(QModelIndex,int,int)) );
+            disconnect( oldModel, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)),
+                        this    , SLOT (_rowsAboutToBeRemoved(QModelIndex,int,int)) );
+            disconnect( oldModel, SIGNAL(rowsInserted(QModelIndex,int,int)),
+                        this    , SLOT (_rowsInserted(QModelIndex,int,int)) );
+            disconnect( oldModel, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+                        this    , SLOT (_rowsRemoved(QModelIndex,int,int)) );
         }
 
         QAbstractProxyModel::setSourceModel( model );
 
-        connect( model, SIGNAL(columnsAboutToBeInserted(const QModelIndex&,int,int)),
-                 this , SLOT (_columnsAboutToBeInserted(const QModelIndex&,int,int)) );
-        connect( model, SIGNAL(columnsAboutToBeRemoved(const QModelIndex&,int,int)),
-                 this , SLOT (_columnsAboutToBeRemoved(const QModelIndex&,int,int)) );
-        connect( model, SIGNAL(columnsInserted(const QModelIndex&,int,int)),
-                 this , SLOT (_columnsInserted(const QModelIndex&,int,int)) );
-        connect( model, SIGNAL(columnsRemoved(const QModelIndex&,int,int)),
-                 this , SLOT (_columnsRemoved(const QModelIndex&,int,int)) );
-        connect( model, SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&)),
-                 this , SLOT (_dataChanged(const QModelIndex&,const QModelIndex&)) );
+        connect( model, SIGNAL(columnsAboutToBeInserted(QModelIndex,int,int)),
+                 this , SLOT (_columnsAboutToBeInserted(QModelIndex,int,int)) );
+        connect( model, SIGNAL(columnsAboutToBeRemoved(QModelIndex,int,int)),
+                 this , SLOT (_columnsAboutToBeRemoved(QModelIndex,int,int)) );
+        connect( model, SIGNAL(columnsInserted(QModelIndex,int,int)),
+                 this , SLOT (_columnsInserted(QModelIndex,int,int)) );
+        connect( model, SIGNAL(columnsRemoved(QModelIndex,int,int)),
+                 this , SLOT (_columnsRemoved(QModelIndex,int,int)) );
+        connect( model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+                 this , SLOT (_dataChanged(QModelIndex,QModelIndex)) );
         connect( model, SIGNAL(layoutAboutToBeChanged()),
                  this , SIGNAL(layoutAboutToBeChanged()) );
         connect( model, SIGNAL(layoutChanged()),
                  this , SIGNAL(layoutChanged()) );
         connect( model, SIGNAL(modelReset()),
                  this , SIGNAL(modelReset()) );
-        connect( model, SIGNAL(rowsAboutToBeInserted(const QModelIndex&,int,int)),
-                 this , SLOT (_rowsAboutToBeInserted(const QModelIndex&,int,int)) );
-        connect( model, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&,int,int)),
-                 this , SLOT (_rowsAboutToBeRemoved(const QModelIndex&,int,int)) );
-        connect( model, SIGNAL(rowsInserted(const QModelIndex&,int,int)),
-                 this , SLOT (_rowsInserted(const QModelIndex&,int,int)) );
-        connect( model, SIGNAL(rowsRemoved(const QModelIndex&,int,int)),
-                 this , SLOT (_rowsRemoved(const QModelIndex&,int,int)) );
+        connect( model, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)),
+                 this , SLOT (_rowsAboutToBeInserted(QModelIndex,int,int)) );
+        connect( model, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)),
+                 this , SLOT (_rowsAboutToBeRemoved(QModelIndex,int,int)) );
+        connect( model, SIGNAL(rowsInserted(QModelIndex,int,int)),
+                 this , SLOT (_rowsInserted(QModelIndex,int,int)) );
+        connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+                 this , SLOT (_rowsRemoved(QModelIndex,int,int)) );
     }
 
     virtual int columnCount( const QModelIndex &parent = QModelIndex() ) const
@@ -346,6 +348,9 @@ public:
     void setSortMode( QDocumentSelector::SortMode mode );
     QDocumentSelector::SortMode sortMode() const;
 
+    void setSortCriteria( const QContentSortCriteria &sort );
+    QContentSortCriteria sortCriteria() const;
+
     QDocumentSelector::Options options() const;
     void setOptions( QDocumentSelector::Options options );
 
@@ -357,14 +362,16 @@ public:
 
 signals:
     void documentSelected( const QContent &content );
+    void currentChanged();
     void newSelected();
     void documentsChanged();
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 protected slots:
     virtual void currentChanged( const QModelIndex &current, const QModelIndex &previous );
     virtual void focusInEvent( QFocusEvent *event );
-#endif
+    virtual void rowsAboutToBeRemoved( const QModelIndex &parent, int start, int end );
+    virtual void rowsInserted( const QModelIndex &parent, int start, int end );
+    virtual void scrollContentsBy( int dx, int dy );
 private slots:
     void indexActivated( const QModelIndex &index );
     void selectTypeFilter();
@@ -403,7 +410,6 @@ private:
     QStringList m_filteredDefaultCategories;
     bool m_defaultCategoriesDirty;
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QMenu *m_softMenu;
 
     QAction *m_newAction;
@@ -411,12 +417,12 @@ private:
     QAction *m_propertiesAction;
     QAction *m_typeAction;
     QAction *m_categoryAction;
-#endif
 };
 
 DocumentView::DocumentView( QWidget *parent )
     : QListView( parent )
     , m_baseFilter( QContent::Document )
+    , m_contentSet( QContentSet::Asynchronous )
     , m_typeDialog( 0 )
     , m_categoryDialog( 0 )
     , m_propertiesDialog( 0 )
@@ -427,9 +433,15 @@ DocumentView::DocumentView( QWidget *parent )
 {
     QIcon newIcon( ":icon/new" );
 
-    setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    setItemDelegate(new QtopiaItemDelegate( this ));
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
+    setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    setFrameStyle(NoFrame);
+    setResizeMode( QListView::Fixed );
+    setSelectionMode( QAbstractItemView::SingleSelection );
+    setSelectionBehavior( QAbstractItemView::SelectItems );
+    setUniformItemSizes( true );
+
     m_softMenu = QSoftMenuBar::menuFor( this );
 
     m_newAction = m_softMenu->addAction( newIcon, tr( "New" ) );
@@ -452,9 +464,8 @@ DocumentView::DocumentView( QWidget *parent )
     connect( m_propertiesAction, SIGNAL(triggered()), this, SLOT(showProperties()) );
     connect( m_typeAction, SIGNAL(triggered()), this, SLOT(selectTypeFilter()) );
     connect( m_categoryAction, SIGNAL(triggered()), this, SLOT(selectCategoryFilter()) );
-#endif
 
-    connect( this, SIGNAL(activated(const QModelIndex&)), this, SLOT(indexActivated(const QModelIndex&)) );
+    connect( this, SIGNAL(activated(QModelIndex)), this, SLOT(indexActivated(QModelIndex)) );
 
     connect( &m_contentSet, SIGNAL(changed()), this, SIGNAL(documentsChanged()));
 
@@ -501,16 +512,18 @@ void DocumentView::setSortMode( QDocumentSelector::SortMode mode )
         switch( mode )
         {
         case QDocumentSelector::Alphabetical:
-            m_contentSet.setSortOrder( QStringList() << QLatin1String( "name" ) );
+            m_contentSet.setSortCriteria( QContentSortCriteria( QContentSortCriteria::Name, Qt::AscendingOrder ) );
             break;
         case QDocumentSelector::ReverseAlphabetical:
-            m_contentSet.setSortOrder( QStringList() << QLatin1String( "name desc" ) );
+            m_contentSet.setSortCriteria( QContentSortCriteria( QContentSortCriteria::Name, Qt::DescendingOrder ) );
             break;
         case QDocumentSelector::Chronological:
-            m_contentSet.setSortOrder( QStringList() << QLatin1String( "time" ) );
+            m_contentSet.setSortCriteria( QContentSortCriteria( QContentSortCriteria::LastUpdated, Qt::AscendingOrder ) );
             break;
         case QDocumentSelector::ReverseChronological:
-            m_contentSet.setSortOrder( QStringList() << QLatin1String( "time desc" ) );
+            m_contentSet.setSortCriteria( QContentSortCriteria( QContentSortCriteria::LastUpdated, Qt::DescendingOrder ) );
+            break;
+        case QDocumentSelector::SortCriteria:
             break;
         }
     }
@@ -521,6 +534,17 @@ QDocumentSelector::SortMode DocumentView::sortMode() const
     return m_sortMode;
 }
 
+void DocumentView::setSortCriteria( const QContentSortCriteria &sort )
+{
+    m_sortMode = QDocumentSelector::SortCriteria;
+
+    m_contentSet.setSortCriteria( sort );
+}
+
+QContentSortCriteria DocumentView::sortCriteria() const
+{
+    return m_contentSet.sortCriteria();
+}
 
 QDocumentSelector::Options DocumentView::options() const
 {
@@ -556,7 +580,7 @@ void DocumentView::setOptions( QDocumentSelector::Options options )
     {
         m_typeAction->setVisible( options & QDocumentSelector::TypeSelector );
     }
-#ifdef QTOPIA_KEYPAD_NAVIGATION
+
     if( changes & QDocumentSelector::ContextMenu )
     {
         if( options & QDocumentSelector::ContextMenu )
@@ -564,7 +588,6 @@ void DocumentView::setOptions( QDocumentSelector::Options options )
         else
             QSoftMenuBar::removeMenuFrom( this, m_softMenu );
     }
-#endif
 
     m_options = options;
 }
@@ -633,7 +656,6 @@ void DocumentView::indexActivated( const QModelIndex &index )
     }
 }
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 void DocumentView::currentChanged( const QModelIndex &current, const QModelIndex &previous )
 {
     QListView::currentChanged( current, previous );
@@ -650,14 +672,86 @@ void DocumentView::currentChanged( const QModelIndex &current, const QModelIndex
         m_deleteAction->setVisible( false );
         m_propertiesAction->setVisible( false );
     }
+
+    emit currentChanged();
 }
-#endif
 
 void DocumentView::focusInEvent( QFocusEvent *event )
 {
     QListView::focusInEvent( event );
 
     setCurrentIndex( currentIndex() );
+}
+
+void DocumentView::rowsAboutToBeRemoved( const QModelIndex &parent, int start, int end )
+{
+    QModelIndex index = currentIndex();
+    int scrollValue = verticalScrollBar()->value();
+
+    QListView::rowsAboutToBeRemoved(parent, start, end);
+
+    if( index.row() >= start && index.row() <= end && end + 1 < model()->rowCount( parent ) )
+        selectionModel()->setCurrentIndex(
+                model()->index( end + 1, index.column(), parent ),
+                QItemSelectionModel::ClearAndSelect );
+
+    if( index.row() >= start )
+    {
+        int adjustedValue = index.row() > end
+                ? scrollValue - end + start - 1
+                : scrollValue - index.row() + start;
+
+        verticalScrollBar()->setValue( adjustedValue > 0 ? adjustedValue : 0 );
+    }
+}
+
+void DocumentView::rowsInserted( const QModelIndex &parent, int start, int end )
+{
+    QModelIndex index = currentIndex();
+
+    QListView::rowsInserted(parent, start, end);
+
+    if( index.row() > start )
+    {
+        int adjustedValue = index.row() > end
+                ? verticalScrollBar()->value() + end - start + 1
+                : verticalScrollBar()->value() + end - index.row() + 1;
+
+        verticalScrollBar()->setMaximum( verticalScrollBar()->maximum() + end - start + 1 );
+        verticalScrollBar()->setValue( adjustedValue < verticalScrollBar()->maximum() ? adjustedValue : verticalScrollBar()->maximum() );
+    }
+}
+
+void DocumentView::scrollContentsBy( int dx, int dy )
+{
+    QListView::scrollContentsBy(dx, dy);
+
+    // Drag the selection with the viewport.
+    QModelIndex index = currentIndex();
+    QRect viewRect = viewport()->rect();
+    QRect itemRect = visualRect(index);
+
+    if( !viewRect.intersects( itemRect ) )
+    {
+        if ( dy < 0 )
+        {
+            setSelection( QRect( itemRect.left(), viewRect.top() + spacing() * 2, 1, 1 ), QItemSelectionModel::ClearAndSelect );
+
+            QModelIndexList indexes = selectionModel()->selectedIndexes();
+            if( !indexes.isEmpty() )
+                index = indexes.first();
+        }
+        else
+        {
+            setSelection( QRect( itemRect.left(), viewRect.bottom() - spacing() * 2, 1, 1 ), QItemSelectionModel::ClearAndSelect );
+
+            QModelIndexList indexes = selectionModel()->selectedIndexes();
+            if( !indexes.isEmpty() )
+                index = indexes.last();
+        }
+
+        selectionModel()->setCurrentIndex( index, QItemSelectionModel::ClearAndSelect);
+    }
 }
 
 void DocumentView::selectTypeFilter()
@@ -674,6 +768,7 @@ void DocumentView::selectTypeFilter()
         QString(),
         QContentFilterModel::CheckList | QContentFilterModel::SelectAll );
 
+        m_typeDialog->setWindowTitle( tr("Select Type") );
         m_typeDialog->setFilter( m_baseFilter );
     }
 
@@ -706,6 +801,7 @@ void DocumentView::selectCategoryFilter()
 
         m_categoryDialog = new QContentFilterDialog( categoryPage, this );
 
+        m_categoryDialog->setWindowTitle( tr("Select Category") );
         m_categoryDialog->setFilter( m_baseFilter );
     }
 
@@ -820,7 +916,7 @@ public:
             a list of documents available on the device.
 
     The QDocumentSelector widget builds the list of documents by using a supplied \l QContent filter.  If no
-    filter is set a default filter which searches for all documents on the device is used.
+    filter is set a default filter, which searches for all documents on the device, is used.
 
     Some of the most commonly used functionality is:
     \table
@@ -881,8 +977,8 @@ public:
     selector->enableOptions( QDocumentSelector::NewDocument );
 
     connect( selector, SIGNAL(newSelected()), this, SLOT(newDocument()) );
-    connect( selector, SIGNAL(documentSelected(const QContent&)),
-             this, SLOT(openDocument(const QContent&)) );
+    connect( selector, SIGNAL(documentSelected(QContent)),
+             this, SLOT(openDocument(QContent)) );
     \endcode
 
     The document selector also complies with DRM requirements so that the user can only
@@ -914,6 +1010,8 @@ public:
     \l {QStackedWidget}, a typical application allows
     choosing of a document using the QDocumentSelector, before revealing the document in a viewer or editor.
 
+   For a complete example that uses QDocumentSelector, see the tutorial \l {Tutorial: A Notes Application} {Using QDocumentSelector to Write a Notes Application}.
+
     \sa QDocumentSelectorDialog, QImageDocumentSelector, QImageDocumentSelectorDialog
 */
 /*!
@@ -923,8 +1021,21 @@ public:
     \value None No special configuration options.
     \value NewDocument The first item in the documents list is the new document item
     \value TypeSelector A 'Select Type' menu item is available in the context menu which allows the user to restrict the visible document types.
-    \value NestTypes The type selector widget combines common mime types together as a single type. 
-           Individual mime types are accessible through a sub menu.
+    \value NestTypes The 'Select Type' dialog groups similar types into a single selectable filter which the specific types are children of,
+           similar to the list below:
+           \list
+                \o Audio
+                \list
+                    \o mp3
+                    \o wav
+                \endlist
+                \o Image
+                \list
+                    \o png
+                    \o ...
+                \endlist
+                \o ...
+            \endlist
     \value ContextMenu The QDocumentSelector has a context menu.
  */
 
@@ -932,16 +1043,17 @@ public:
     \enum QDocumentSelector::SortMode
 
     This enum specifies the sort order of the documents.
-    \value Alphabetical
-    \value ReverseAlphabetical
-    \value Chronological
-    \value ReverseChronological
+    \value Alphabetical The document set is ordered alphabetically on the names of the documents.
+    \value ReverseAlphabetical The document set is reverse ordered alphabetically on the names of the documents.
+    \value Chronological The document set is ordered on the date and time the documents were last edited.
+    \value ReverseChronological The document set is reverse ordered on the date and time the documents were last edited.
+    \value SortCriteria The document set is ordered by a QContentSortCriteria specified by sortCriteria().
  */
 
 /*!
     \enum QDocumentSelector::Selection
 
-    This enum indicates the result of displaying a document selector dialog.
+    This enum indicates the result of displaying a document selector dialog. See select().
 
     \value NewSelected The user has chosen the new document option.
     \value DocumentSelected The user has chosen an existing document.
@@ -969,7 +1081,8 @@ QDocumentSelector::QDocumentSelector( QWidget *parent )
 
     layout->addWidget( d );
 
-    connect( d, SIGNAL(documentSelected(const QContent&)), this, SIGNAL(documentSelected(const QContent&)) );
+    connect( d, SIGNAL(documentSelected(QContent)), this, SIGNAL(documentSelected(QContent)) );
+    connect( d, SIGNAL(currentChanged()), this, SIGNAL(currentChanged()) );
     connect( d, SIGNAL(newSelected()), this, SIGNAL(newSelected()) );
     connect( d, SIGNAL(documentsChanged()), this, SIGNAL(documentsChanged()) );
 
@@ -998,6 +1111,8 @@ QContentFilter QDocumentSelector::filter() const
 /*!
     Sets the \a filter which defines the subset of content on the device the user can select from.
 
+    The document list is filtered when control returns to the event loop.
+
     \sa filter(), QContentSet::filter()
  */
 void QDocumentSelector::setFilter( const QContentFilter &filter )
@@ -1006,9 +1121,9 @@ void QDocumentSelector::setFilter( const QContentFilter &filter )
 }
 
 /*!
-  Sets the document sort \a mode.
+  Sets the document sort \a mode, the default is QDocumentSelector::Alphabetical.
 
-  The default mode is QDocumentSelector::Alphabetical.
+  The document list is sorted when control returns to the event loop.
 
   \sa sortMode()
  */
@@ -1025,6 +1140,28 @@ void QDocumentSelector::setSortMode( SortMode mode )
 QDocumentSelector::SortMode QDocumentSelector::sortMode() const
 {
     return d->sortMode();
+}
+
+/*!
+    Sets the document \a sort criteria.
+
+    This will set the document selector sort mode to SortCriteria.
+
+    The document list is sorted when control returns to the event loop.
+
+    \sa setSortMode()
+*/
+void QDocumentSelector::setSortCriteria( const QContentSortCriteria &sort )
+{
+    d->setSortCriteria( sort );
+}
+
+/*!
+    Returns the current document sort criteria.
+*/
+QContentSortCriteria QDocumentSelector::sortCriteria() const
+{
+    return d->sortCriteria();
 }
 
 /*!
@@ -1067,14 +1204,16 @@ void QDocumentSelector::disableOptions( Options options )
 /*!
     Sets the \a categories checked by default in the document selector's category filter dialog.
 
-    This function is only relevant if the QDocumentSelector::ContextMenu option has been set or enabled as the category
-    filter dialog is only available through the context menu.
+    The categories displayed in a document selector's category filter dialog are restricted to categories assigned
+    to documents that would appear in the document selector with no categories checked.  If a default category does
+    not match any visible in the category filter dialog it will be ignored.
 
-    If a supplied category does not match those available in the category filter dialog, the document 
-    selector will not be filtered on that category. Upon invocation this function will set the default checked 
-    categories within the category filter dialog, and filter according to the supplied \a categories.   
+    Setting a default category will filter the visible documents by that category (assuming there are documents belonging
+    to that category) but the user is able to remove the filtering by unchecking the category in the filter dialog.  To
+    apply a filter that cannot be removed use setFilter() instead.
+
     \bold {Note:} Once the dialog has been shown once, this function no longer has any effect.
-    
+
     Filtering according to \a categories is applied after the filter defined by filter().
 
     \sa defaultCategories(), filter(), setFilter(), Categories
@@ -1131,10 +1270,10 @@ QDrmRights::Permission QDocumentSelector::selectPermission() const
 
     Unlike select permissions, if a document is missing a mandatory permission it will not be activated,
     and the document cannot be chosen.
-    
+
     Because the \a permissions are mandatory, passing QDrmRights::InvalidPermission as a parameter
     does not exhibit the same behavior as in setSelectPermission().
-    
+
     \sa mandatoryPermissions(), setSelectPermission(), selectPermission()
 */
 void QDocumentSelector::setMandatoryPermissions( QDrmRights::Permissions permissions )
@@ -1166,7 +1305,7 @@ QContent QDocumentSelector::currentDocument() const {
 
 /*!
     Returns true if the new document item is currently selected.
-    
+
     \sa setOptions()
  */
 bool QDocumentSelector::newCurrent() const
@@ -1190,6 +1329,16 @@ const QContentSet &QDocumentSelector::documents() const
     Signals that the user has chosen \a content from the document list.
     \sa newSelected() 
  */
+
+/*!
+    \fn QDocumentSelector::currentChanged()
+
+    Signals that the currently selected document has changed.
+
+    The current selection can be determined using newCurrent() and currentDocument().
+
+    \sa newCurrent(), currentDocument()
+*/
 
 /*!
     \fn QDocumentSelector::newSelected()
@@ -1309,9 +1458,7 @@ public:
 QDocumentSelectorDialog::QDocumentSelectorDialog( QWidget *parent )
     : QDialog( parent )
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QtopiaApplication::setMenuLike( this, true );
-#endif
     QVBoxLayout *layout = new QVBoxLayout( this );
 
     d = new QDocumentSelectorDialogPrivate( this );
@@ -1321,7 +1468,7 @@ QDocumentSelectorDialog::QDocumentSelectorDialog( QWidget *parent )
 
     layout->addWidget( d );
 
-    connect( d, SIGNAL(documentSelected(const QContent&)), this, SLOT(accept()) );
+    connect( d, SIGNAL(documentSelected(QContent)), this, SLOT(accept()) );
     connect( d, SIGNAL(newSelected()), this, SLOT(accept()) );
 }
 
@@ -1347,6 +1494,8 @@ QContentFilter QDocumentSelectorDialog::filter() const
 /*!
     Sets the \a filter which defines the subset of content on the device the user can select from.
 
+The document list is filtered when control returns to the event loop.
+
     \sa filter(), QContentSet::filter()
  */
 void QDocumentSelectorDialog::setFilter( const QContentFilter &filter )
@@ -1359,7 +1508,9 @@ void QDocumentSelectorDialog::setFilter( const QContentFilter &filter )
 
   The default mode is QDocumentSelector::Alphabetical.
 
-  \sa sortMode()
+  Setting the sort mode to SortCriteria will not change the sorting of the documents.
+
+  \sa sortMode(), setSortCriteria()
  */
 void QDocumentSelectorDialog::setSortMode( QDocumentSelector::SortMode mode )
 {
@@ -1369,11 +1520,35 @@ void QDocumentSelectorDialog::setSortMode( QDocumentSelector::SortMode mode )
 /*!
   Returns the current document sort mode.
 
-  \sa setSortMode()
+  If the sort mode is SortCriteria sortCriteria() must be queried to get the actual document sorting.
+
+  \sa setSortMode(), sortCriteria()
  */
 QDocumentSelector::SortMode QDocumentSelectorDialog::sortMode() const
 {
     return d->sortMode();
+}
+
+/*!
+    Sets the document \a sort criteria.
+
+    This will set the document selector sort mode to SortCriteria.
+
+    The document list is sorted when control returns to the event loop.
+
+    \sa setSortMode()
+*/
+void QDocumentSelectorDialog::setSortCriteria( const QContentSortCriteria &sort )
+{
+    d->setSortCriteria( sort );
+}
+
+/*!
+    Returns the current document sort criteria.
+*/
+QContentSortCriteria QDocumentSelectorDialog::sortCriteria() const
+{
+    return d->sortCriteria();
 }
 
 /*!
@@ -1418,9 +1593,14 @@ void QDocumentSelectorDialog::disableOptions( QDocumentSelector::Options options
 /*!
     Sets the \a categories checked by default in the document selector's category filter dialog.
 
-    If a supplied category does not match those available in the category filter dialog, the document 
-    selector will not be filtered on that category.  Upon invocation this function will set the default 
-    checked categories within the category filter dialog and filter according to the supplied \a categories  
+    The categories displayed in a document selector's category filter dialog are restricted to categories assigned
+    to documents that would appear in the document selector with no categories checked.  If a default category does
+    not match any visible in the category filter dialog it will be ignored.
+
+    Setting a default category will filter the visible documents by that category (assuming there are documents belonging
+    to that category) but the user is able to remove the filtering by unchecking the category in the filter dialog.  To
+    apply a filter that cannot be removed use setFilter() instead.
+
     \bold {Note:} Once the dialog has been shown once, this function no longer has any effect.
 
     Filtering according to \a categories is applied after the filter defined by filter().
@@ -1452,7 +1632,7 @@ QStringList QDocumentSelectorDialog::defaultCategories() const
     will not be choosable from the list and visual indication of this is given.
 
     If the \a permission is QDrmRights::InvalidPermission the default
-    permissions for the document is used.
+    permission for the document is used.
 
     \sa selectPermission(), setMandatoryPermissions(), mandatoryPermissions() 
  */

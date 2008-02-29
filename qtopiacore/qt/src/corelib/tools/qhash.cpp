@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -27,7 +42,7 @@
 #undef truncate
 #endif
 
-#include <qbytearray.h>
+#include <qbitarray.h>
 #include <qstring.h>
 #include <stdlib.h>
 
@@ -38,10 +53,8 @@
     "a", "aa", "aaa", "aaaa", ...
 */
 
-uint qHash(const QByteArray &key)
+static uint hash(const uchar *p, int n)
 {
-    const uchar *p = reinterpret_cast<const uchar *>(key.data());
-    int n = key.size();
     uint h = 0;
     uint g;
 
@@ -54,10 +67,8 @@ uint qHash(const QByteArray &key)
     return h;
 }
 
-uint qHash(const QString &key)
+static uint hash(const QChar *p, int n)
 {
-    const QChar *p = key.unicode();
-    int n = key.size();
     uint h = 0;
     uint g;
 
@@ -68,6 +79,34 @@ uint qHash(const QString &key)
         h &= ~g;
     }
     return h;
+}
+
+uint qHash(const QByteArray &key)
+{
+    return hash(reinterpret_cast<const uchar *>(key.data()), key.size());
+}
+
+uint qHash(const QString &key)
+{
+    return hash(key.unicode(), key.size());
+}
+
+uint qHash(const QStringRef &key)
+{
+    return hash(key.unicode(), key.size());
+}
+
+uint qHash(const QBitArray &bitArray)
+{
+    int m = bitArray.d.size() - 1;
+    uint result = hash(reinterpret_cast<const uchar *>(bitArray.d.data()), qMax(0, m));
+
+    // deal with the last 0 to 7 bits manually, because we can't trust that
+    // the padding is initialized to 0 in bitArray.d
+    int n = bitArray.size();
+    if (n & 0x7)
+        result = (result << 4) + bitArray.d.at(m) & ((1 << n) - 1);
+    return result;
 }
 
 /*
@@ -736,7 +775,7 @@ void QHashData::checkSanity()
     be 0 if the key isn't in the hash, or greater than 1 if
     insertMulti() has been used with the \a key.
 
-    \sa clear(), take()
+    \sa clear(), take(), QMultiHash::remove()
 */
 
 /*! \fn T QHash::take(const Key &key)
@@ -759,7 +798,7 @@ void QHashData::checkSanity()
     Returns true if the hash contains an item with key \a key;
     otherwise returns false.
 
-    \sa count()
+    \sa count(), QMultiHash::contains()
 */
 
 /*! \fn const T QHash::value(const Key &key) const
@@ -850,7 +889,7 @@ void QHashData::checkSanity()
 
     The order is guaranteed to be the same as that used by keys().
 
-    \sa keys()
+    \sa keys(), value()
 */
 
 /*! \fn QList<T> QHash::values(const Key &key) const
@@ -875,7 +914,20 @@ void QHashData::checkSanity()
     internal data structure is optimized for fast lookup by key, not
     by value.
 
-    \sa value(), values()
+    \sa value(), keys()
+*/
+
+/*! 
+    \fn Key QHash::key(const T &value, const Key &defaultKey) const
+    \since 4.3
+    \overload
+
+    Returns the first key with value \a value, or \a defaultKey if
+    the hash contains no item with value \a value.
+
+    This function can be slow (\l{linear time}), because QHash's
+    internal data structure is optimized for fast lookup by key, not
+    by value.
 */
 
 /*! \fn int QHash::count(const Key &key) const
@@ -985,7 +1037,7 @@ void QHashData::checkSanity()
         }
     \endcode
 
-    \sa value(), values()
+    \sa value(), values(), QMultiHash::find()
 */
 
 /*! \fn QHash::const_iterator QHash::find(const Key &key) const
@@ -1002,7 +1054,7 @@ void QHashData::checkSanity()
     If the hash contains no item with key \a key, the function
     returns constEnd().
 
-    \sa find()
+    \sa find(), QMultiHash::constFind()
 */
 
 /*! \fn QHash::iterator QHash::insert(const Key &key, const T &value)
@@ -1674,6 +1726,7 @@ void QHashData::checkSanity()
 */
 
 /*! \fn uint qHash(const QByteArray &key)
+    \fn uint qHash(const QBitArray &key)
     \relates QHash
     \overload
 
@@ -1692,6 +1745,16 @@ void QHashData::checkSanity()
     \overload
 
     Returns the hash value for \a key.
+*/
+
+/*! 
+    \fn uint qHash(const QPair<T1, T2> &key)
+    \relates QHash
+    \since 4.3
+
+    Returns the hash value for \a key.
+
+    Types \c T1 and \c T2 must be supported by qHash().
 */
 
 /*! \fn QDataStream &operator<<(QDataStream &out, const QHash<Key, T>& hash)
@@ -1846,4 +1909,110 @@ void QHashData::checkSanity()
     hashes, the resulting hash will contain the key multiple times.
 
     \sa operator+=()
+*/
+
+/*!
+    \fn bool QMultiHash::contains(const Key &key, const T &value) const
+    \since 4.3
+
+    Returns true if the hash contains an item with key \a key and
+    value \a value; otherwise returns false.
+
+    \sa QHash::contains()
+*/
+
+/*!
+    \fn bool QMultiHash::contains(const Key &key) const
+    \overload
+    \sa QHash::contains()
+*/
+
+/*!
+    \fn int QMultiHash::remove(const Key &key, const T &value)
+    \since 4.3
+
+    Removes all the items that have the key \a key and the value \a
+    value from the hash. Returns the number of items removed.
+
+    \sa QHash::remove()
+*/
+
+/*!
+    \fn int QMultiHash::remove(const Key &key)
+    \overload
+    \sa QHash::remove()
+*/
+
+/*!
+    \fn int QMultiHash::count(const Key &key, const T &value) const
+    \since 4.3
+
+    Returns the number of items with key \a key and value \a value.
+
+    \sa QHash::count()
+*/
+
+/*!
+    \fn int QMultiHash::count(const Key &key) const
+    \overload
+    \sa QHash::count()
+*/
+
+/*!
+    \fn int QMultiHash::count() const
+    \overload
+    \sa QHash::count()
+*/
+
+/*!
+    \fn typename QHash<Key, T>::iterator QMultiHash::find(const Key &key, const T &value)
+    \since 4.3
+
+    Returns an iterator pointing to the item with key \a key and
+    value \a value in the hash.
+
+    If the hash contains no such item, the function returns end().
+
+    If the hash contains multiple items with key \a key, this
+    function returns an iterator that points to the most recently
+    inserted value.
+
+    \sa QHash::find()
+*/
+
+/*!
+    \fn typename QHash<Key, T>::iterator QMultiHash::find(const Key &key)
+    \overload
+    \sa QHash::find()
+*/
+
+/*!
+    \fn typename QHash<Key, T>::const_iterator QMultiHash::find(const Key &key, const T &value) const
+    \since 4.3
+    \overload
+*/
+
+/*!
+    \fn typename QHash<Key, T>::const_iterator QMultiHash::find(const Key &key) const
+    \overload
+    \sa QHash::find()
+*/
+
+/*!
+    \fn typename QHash<Key, T>::const_iterator QMultiHash::constFind(const Key &key, const T &value) const
+    \since 4.3
+
+    Returns an iterator pointing to the item with key \a key and the
+    value \a value in the hash.
+
+    If the hash contains no such item, the function returns
+    constEnd().
+
+    \sa QHash::constFind()
+*/
+
+/*!
+    \fn typename QHash<Key, T>::const_iterator QMultiHash::constFind(const Key &key) const
+    \overload
+    \sa QHash::constFind()
 */

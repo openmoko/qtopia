@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -54,13 +69,14 @@ public:
         LinkType      = 0x10000,
         FileType      = 0x20000,
         DirectoryType = 0x40000,
+        BundleType    = 0x80000,
 
         //flags
         HiddenFlag     = 0x0100000,
         LocalDiskFlag  = 0x0200000,
         ExistsFlag     = 0x0400000,
         RootFlag       = 0x0800000,
-        // Qt 4.2: Refresh   = 0x1000000,
+        Refresh        = 0x1000000,
 
         //masks
         PermsMask  = 0x0000FFFF,
@@ -78,7 +94,8 @@ public:
         AbsolutePathName,
         LinkName,
         CanonicalName,
-        CanonicalPathName
+        CanonicalPathName,
+        BundleName
     };
     enum FileOwner {
         OwnerUser,
@@ -117,6 +134,7 @@ public:
     virtual QDateTime fileTime(FileTime time) const;
     virtual void setFileName(const QString &file);
     virtual int handle() const;
+    bool atEnd() const;
 
     typedef QAbstractFileEngineIterator Iterator;
     virtual Iterator *beginEntryList(QDir::Filters filters, const QStringList &filterNames);
@@ -130,6 +148,8 @@ public:
     QString errorString() const;
 
     enum Extension {
+        AtEndExtension,
+        FastReadLineExtension
     };
     class ExtensionOption
     {};
@@ -161,6 +181,37 @@ public:
     QAbstractFileEngineHandler();
     virtual ~QAbstractFileEngineHandler();
     virtual QAbstractFileEngine *create(const QString &fileName) const = 0;
+};
+
+class QAbstractFileEngineIteratorPrivate;
+class Q_CORE_EXPORT QAbstractFileEngineIterator
+{
+public:
+    QAbstractFileEngineIterator(QDir::Filters filters, const QStringList &nameFilters);
+    virtual ~QAbstractFileEngineIterator();
+
+    virtual QString next() = 0;
+    virtual bool hasNext() const = 0;
+
+    QString path() const;
+    QStringList nameFilters() const;
+    QDir::Filters filters() const;
+
+    virtual QString currentFileName() const = 0;
+    virtual QFileInfo currentFileInfo() const;
+    QString currentFilePath() const;
+
+protected:
+    enum EntryInfoType {
+    };
+    virtual QVariant entryInfo(EntryInfoType type) const;
+
+private:
+    Q_DISABLE_COPY(QAbstractFileEngineIterator)
+    friend class QDirIterator;
+    friend class QDirIteratorPrivate;
+    void setPath(const QString &path);
+    QAbstractFileEngineIteratorPrivate *d;
 };
 
 QT_END_HEADER

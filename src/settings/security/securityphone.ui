@@ -1,233 +1,115 @@
-<ui version="4.0" stdsetdef="1" >
-  <author></author>
-  <comment></comment>
-  <exportmacro></exportmacro>
-  <class>SecurityBase</class>
-  <widget class="QWidget" name="SecurityBase" >
-    <property name="objectName" >
-      <string notr="true" >SecurityBase</string>
-    </property>
-    <property name="geometry" >
-      <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>268</width>
-        <height>388</height>
-      </rect>
-    </property>
-    <property name="windowTitle" >
-      <string>Security</string>
-    </property>
-    <layout class="QVBoxLayout" >
-      <property name="margin" >
-        <number>0</number>
-      </property>
-      <property name="spacing" >
-        <number>0</number>
-      </property>
-      <item>
-        <widget class="QTabWidget" name="TabWidget2" >
-          <property name="objectName" >
-            <string notr="true" >TabWidget2</string>
-          </property>
-          <widget class="QWidget" name="tab" >
-            <property name="objectName" >
-              <string notr="true" >tab</string>
-            </property>
-            <attribute name="title" >
-              <string>Locks</string>
-            </attribute>
-            <layout class="QVBoxLayout" >
-              <property name="margin" >
-                <number>6</number>
-              </property>
-              <property name="spacing" >
-                <number>6</number>
-              </property>
-              <item>
-                <widget class="QComboBox" name="pinSelection" >
-                  <property name="objectName" >
-                    <string notr="true" >pinSelection</string>
-                  </property>
-                  <item>
-                    <property name="text" >
-                      <string>SIM Lock</string>
-                    </property>
-                  </item>
-                  <item>
-                    <property name="text" >
-                      <string>Phone Lock</string>
-                    </property>
-                  </item>
-                </widget>
-              </item>
-              <item>
-                <widget class="QFrame" name="Frame3" >
-                  <property name="objectName" >
-                    <string notr="true" >Frame3</string>
-                  </property>
-                  <property name="frameShape" >
-                    <enum>StyledPanel</enum>
-                  </property>
-                  <property name="frameShadow" >
-                    <enum>Raised</enum>
-                  </property>
-                  <layout class="QGridLayout" >
-                    <property name="margin" >
-                      <number>6</number>
-                    </property>
-                    <property name="spacing" >
-                      <number>6</number>
-                    </property>
-                    <item row="2" column="1" >
-                      <spacer name="Spacer1" >
-                        <property name="sizeHint" >
-                          <size>
-                            <width>20</width>
-                            <height>20</height>
-                          </size>
-                        </property>
-                        <property name="sizeType" >
-                          <enum>Expanding</enum>
-                        </property>
-                        <property name="orientation" >
-                          <enum>Vertical</enum>
-                        </property>
-                      </spacer>
-                    </item>
-                    <item row="0" column="0" >
-                      <widget class="QPushButton" name="changepasscode" >
-                        <property name="objectName" >
-                          <string notr="true" >changepasscode</string>
-                        </property>
-                        <property name="text" >
-                          <string>Change</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item row="0" column="1" >
-                      <widget class="QPushButton" name="clearpasscode" >
-                        <property name="objectName" >
-                          <string notr="true" >clearpasscode</string>
-                        </property>
-                        <property name="text" >
-                          <string>Clear</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item rowspan="1" row="1" column="0" colspan="2" >
-                      <widget class="QCheckBox" name="passcode_poweron" >
-                        <property name="objectName" >
-                          <string notr="true" >passcode_poweron</string>
-                        </property>
-                        <property name="text" >
-                          <string>Protection On</string>
-                        </property>
-                        <property name="whatsThis" >
-                          <string>Pass code protection provides a minimal level of protection from casual access to this device.</string>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </widget>
-              </item>
-            </layout>
-          </widget>
-          <widget class="QWidget" name="tab" >
-            <property name="objectName" >
-              <string notr="true" >tab</string>
-            </property>
-            <attribute name="title" >
-              <string>Sync</string>
-            </attribute>
-            <layout class="QVBoxLayout" >
-              <property name="margin" >
-                <number>6</number>
-              </property>
-              <property name="spacing" >
-                <number>6</number>
-              </property>
-              <item>
-                <widget class="QLabel" name="TextLabel1_2" >
-                  <property name="objectName" >
-                    <string notr="true" >TextLabel1_2</string>
-                  </property>
-                  <property name="text" >
-                    <string>Accept sync from network:</string>
-                  </property>
-                  <property name="textFormat" >
-                    <enum>Qt::RichText</enum>
-                  </property>
-                </widget>
-              </item>
-              <item>
-                <widget class="QComboBox" name="syncnet" >
-                  <property name="objectName" >
-                    <string notr="true" >syncnet</string>
-                  </property>
-                  <property name="editable" >
-                    <bool>true</bool>
-                  </property>
-                  <item>
-                    <property name="text" >
-                      <string>192.168.129.0/24 (default)</string>
-                    </property>
-                  </item>
-                  <item>
-                    <property name="text" >
-                      <string>192.168.0.0/16</string>
-                    </property>
-                  </item>
-                  <item>
-                    <property name="text" >
-                      <string>172.16.0.0/12</string>
-                    </property>
-                  </item>
-                  <item>
-                    <property name="text" >
-                      <string>10.0.0.0/8</string>
-                    </property>
-                  </item>
-                  <item>
-                    <property name="text" >
-                      <string>Any</string>
-                    </property>
-                  </item>
-                  <item>
-                    <property name="text" >
-                      <string>None</string>
-                    </property>
-                  </item>
-                </widget>
-              </item>
-              <item>
-                <spacer name="Spacer2" >
-                  <property name="sizeHint" >
-                    <size>
-                      <width>20</width>
-                      <height>20</height>
-                    </size>
-                  </property>
-                  <property name="sizeType" >
-                    <enum>Expanding</enum>
-                  </property>
-                  <property name="orientation" >
-                    <enum>Vertical</enum>
-                  </property>
-                </spacer>
-              </item>
-            </layout>
-          </widget>
-        </widget>
-      </item>
+<ui version="4.0" >
+ <class>SecurityBase</class>
+ <widget class="QWidget" name="SecurityBase" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>182</width>
+    <height>224</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Security</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="leftMargin" >
+    <number>6</number>
+   </property>
+   <property name="topMargin" >
+    <number>6</number>
+   </property>
+   <property name="rightMargin" >
+    <number>6</number>
+   </property>
+   <property name="bottomMargin" >
+    <number>6</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>Settings for</string>
+       </property>
+       <property name="buddy" >
+        <cstring>pinSelection</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="pinSelection" >
+       <item>
+        <property name="text" >
+         <string>SIM PIN</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Phone PIN</string>
+        </property>
+       </item>
+      </widget>
+     </item>
     </layout>
-  </widget>
-  <tabstops>
-    <tabstop>TabWidget2</tabstop>
-    <tabstop>pinSelection</tabstop>
-    <tabstop>changepasscode</tabstop>
-    <tabstop>clearpasscode</tabstop>
-    <tabstop>passcode_poweron</tabstop>
-    <tabstop>syncnet</tabstop>
-  </tabstops>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="title" >
+      <string/>
+     </property>
+     <layout class="QVBoxLayout" >
+      <item>
+       <widget class="QCheckBox" name="passcode_poweron" >
+        <property name="whatsThis" >
+         <string>Pass code protection provides a minimal level of protection from casual access to this device.</string>
+        </property>
+        <property name="text" >
+         <string>Enable protection</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="changepasscode" >
+        <property name="text" >
+         <string>Change PIN</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearpasscode" >
+        <property name="text" >
+         <string>Clear PIN</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType" >
+      <enum>QSizePolicy::Expanding</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>21</width>
+       <height>91</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>pinSelection</tabstop>
+  <tabstop>passcode_poweron</tabstop>
+  <tabstop>changepasscode</tabstop>
+  <tabstop>clearpasscode</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
 </ui>

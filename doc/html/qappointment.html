@@ -41,11 +41,13 @@
 <li><div class="fn"/>QString <b><a href="qappointment.html#description">description</a></b> () const</li>
 <li><div class="fn"/>QDateTime <b><a href="qappointment.html#end">end</a></b> () const</li>
 <li><div class="fn"/>QDateTime <b><a href="qappointment.html#endInCurrentTZ">endInCurrentTZ</a></b> () const</li>
+<li><div class="fn"/>QDate <b><a href="qappointment.html#exceptionDate">exceptionDate</a></b> () const</li>
 <li><div class="fn"/>QUniqueId <b><a href="qappointment.html#exceptionParent">exceptionParent</a></b> () const</li>
 <li><div class="fn"/>QList&lt;Exception&gt; <b><a href="qappointment.html#exceptions">exceptions</a></b> () const</li>
 <li><div class="fn"/>QOccurrence <b><a href="qappointment.html#firstOccurrence">firstOccurrence</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qappointment.html#frequency">frequency</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qappointment.html#hasAlarm">hasAlarm</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qappointment.html#hasExceptions">hasExceptions</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qappointment.html#hasRepeat">hasRepeat</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qappointment.html#isAllDay">isAllDay</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qappointment.html#isException">isException</a></b> () const</li>
@@ -60,6 +62,7 @@
 <li><div class="fn"/>QDate <b><a href="qappointment.html#repeatUntilInCurrentTZ">repeatUntilInCurrentTZ</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qappointment.html#setAlarm">setAlarm</a></b> ( int <i>minutes</i>, AlarmFlags <i>action</i> )</li>
 <li><div class="fn"/>void <b><a href="qappointment.html#setAllDay">setAllDay</a></b> ( bool <i>enable</i> = true )</li>
+<li><div class="fn"/>void <b><a href="qappointment.html#setAsException">setAsException</a></b> ( const QUniqueId &amp; <i>identifier</i>, const QDate &amp; <i>date</i> )</li>
 <li><div class="fn"/>void <b><a href="qappointment.html#setDescription">setDescription</a></b> ( const QString &amp; <i>text</i> )</li>
 <li><div class="fn"/>void <b><a href="qappointment.html#setEnd">setEnd</a></b> ( const QDateTime &amp; <i>time</i> )</li>
 <li><div class="fn"/>void <b><a href="qappointment.html#setExceptionParent">setExceptionParent</a></b> ( const QUniqueId &amp; <i>identifier</i> )</li>
@@ -81,26 +84,29 @@
 <li><div class="fn"/>QTimeZone <b><a href="qappointment.html#timeZone">timeZone</a></b> () const</li>
 <li><div class="fn"/>WeekFlags <b><a href="qappointment.html#weekFlags">weekFlags</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qappointment.html#weekOffset">weekOffset</a></b> () const</li>
-<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-3">writeVCalendar</a></b> ( const QString &amp; <i>filename</i> ) const</li>
-<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-4">writeVCalendar</a></b> ( QFile &amp; <i>file</i> ) const</li>
-<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-5">writeVCalendar</a></b> ( QDataStream * <i>stream</i> ) const</li>
+<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-5">writeVCalendar</a></b> ( const QString &amp; <i>filename</i> ) const&nbsp;&nbsp;<tt> (deprecated)</tt></li>
+<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-6">writeVCalendar</a></b> ( QFile &amp; <i>file</i> ) const&nbsp;&nbsp;<tt> (deprecated)</tt></li>
+<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-7">writeVCalendar</a></b> ( QDataStream * <i>stream</i> ) const&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>bool <b><a href="qappointment.html#operator-not-eq">operator!=</a></b> ( const QAppointment &amp; <i>other</i> ) const</li>
 <li><div class="fn"/>QAppointment &amp; <b><a href="qappointment.html#operator-eq">operator=</a></b> ( const QAppointment &amp; <i>other</i> )</li>
 <li><div class="fn"/>bool <b><a href="qappointment.html#operator-eq-eq">operator==</a></b> ( const QAppointment &amp; <i>other</i> ) const</li>
 </ul>
 <ul>
-<li><div class="fn"/>16 public functions inherited from <a href="qpimrecord.html#public-functions">QPimRecord</a></li>
+<li><div class="fn"/>20 public functions inherited from <a href="qpimrecord.html#public-functions">QPimRecord</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
 <li><div class="fn"/>WeekFlag <b><a href="qappointment.html#fromDateDay">fromDateDay</a></b> ( int <i>day</i> )</li>
-<li><div class="fn"/>QList&lt;QAppointment&gt; <b><a href="qappointment.html#readVCalendar">readVCalendar</a></b> ( const QString &amp; <i>filename</i> )</li>
-<li><div class="fn"/>QList&lt;QAppointment&gt; <b><a href="qappointment.html#readVCalendar-2">readVCalendar</a></b> ( const QByteArray &amp; <i>vcal</i> )</li>
-<li><div class="fn"/>QList&lt;QAppointment&gt; <b><a href="qappointment.html#readVCalendarData">readVCalendarData</a></b> ( const char * <i>data</i>, unsigned long <i>len</i> )</li>
+<li><div class="fn"/>QList&lt;QAppointment&gt; <b><a href="qappointment.html#readVCalendar">readVCalendar</a></b> ( QIODevice * <i>device</i> )</li>
+<li><div class="fn"/>QList&lt;QAppointment&gt; <b><a href="qappointment.html#readVCalendar-2">readVCalendar</a></b> ( const QString &amp; <i>filename</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
+<li><div class="fn"/>QList&lt;QAppointment&gt; <b><a href="qappointment.html#readVCalendar-3">readVCalendar</a></b> ( const QByteArray &amp; <i>vcal</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
+<li><div class="fn"/>QList&lt;QAppointment&gt; <b><a href="qappointment.html#readVCalendarData">readVCalendarData</a></b> ( const char * <i>data</i>, unsigned long <i>len</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>int <b><a href="qappointment.html#toDateDay">toDateDay</a></b> ( WeekFlag <i>day</i> )</li>
-<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar">writeVCalendar</a></b> ( const QString &amp; <i>filename</i>, const QList&lt;QAppointment&gt; &amp; <i>appointments</i> )</li>
-<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-2">writeVCalendar</a></b> ( const QString &amp; <i>filename</i>, const QAppointment &amp; <i>appointment</i> )</li>
+<li><div class="fn"/>bool <b><a href="qappointment.html#writeVCalendar">writeVCalendar</a></b> ( QIODevice * <i>device</i>, const QList&lt;QAppointment&gt; &amp; <i>appointments</i> )</li>
+<li><div class="fn"/>bool <b><a href="qappointment.html#writeVCalendar-2">writeVCalendar</a></b> ( QIODevice * <i>device</i>, const QAppointment &amp; <i>appointment</i> )</li>
+<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-3">writeVCalendar</a></b> ( const QString &amp; <i>filename</i>, const QList&lt;QAppointment&gt; &amp; <i>appointments</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
+<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-4">writeVCalendar</a></b> ( const QString &amp; <i>filename</i>, const QAppointment &amp; <i>appointment</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -120,6 +126,7 @@
 <h2>Detailed Description</h2>
 <p>The QAppointment class holds the data of a calendar appointment.</p>
 <p>This data includes descriptive data of the appointment and scheduling information.</p>
+<p>See also <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="flags"><a name="AlarmFlag-enum"></a>enum QAppointment::AlarmFlag<br />flags QAppointment::AlarmFlags</h3>
@@ -146,7 +153,7 @@
 </table></p>
 <p>See also <a href="qappointment.html#frequency">frequency</a>(), <a href="qappointment.html#weekOffset">weekOffset</a>(), <a href="qappointment.html#showOnNearest">showOnNearest</a>(), and <a href="qappointment.html#repeatOnWeekDay">repeatOnWeekDay</a>().</p>
 <h3 class="flags"><a name="WeekFlag-enum"></a>enum QAppointment::WeekFlag<br />flags QAppointment::WeekFlags</h3>
-<p>The WeekFlags only apply to appointments that have a <a href="qappointment.html#RepeatRule-enum">RepeatRule</a> of Weekly.</p>
+<p>The WeekFlags only apply to appointments that have a <a href="qappointment.html#RepeatRule-enum">RepeatRule</a> of Weekly, <a href="qappointment.html#RepeatRule-enum">MonthlyDay</a> or <a href="qappointment.html#RepeatRule-enum">MonthlyEndDay</a>.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QAppointment::OccurMonday</tt></td><td align="center" valign="top"><tt>0x01</tt></td><td valign="top">The appointment occurs on each Monday</td></tr>
@@ -199,6 +206,8 @@
 <h3 class="fn"><a name="endInCurrentTZ"></a><a href="qdatetime.html">QDateTime</a> QAppointment::endInCurrentTZ () const</h3>
 <p>Returns the end time of the appointment in the current system timezone.</p>
 <p>See also <a href="qappointment.html#end">end</a>().</p>
+<h3 class="fn"><a name="exceptionDate"></a><a href="qdate.html">QDate</a> QAppointment::exceptionDate () const</h3>
+<p>Returns the date of the repeating appointment to which this appointment is an exception.</p>
 <h3 class="fn"><a name="exceptionParent"></a><a href="quniqueid.html">QUniqueId</a> QAppointment::exceptionParent () const</h3>
 <p>Returns the identifier of the repeating appointment to which this appointment is an exception.</p>
 <p>See also <a href="qappointment.html#setExceptionParent">setExceptionParent</a>().</p>
@@ -216,6 +225,8 @@
 <h3 class="fn"><a name="hasAlarm"></a>bool QAppointment::hasAlarm () const</h3>
 <p>Returns true if there is an alarm set for the appointment. Otherwise returns false.</p>
 <p>See also <a href="qappointment.html#setAlarm">setAlarm</a>().</p>
+<h3 class="fn"><a name="hasExceptions"></a>bool QAppointment::hasExceptions () const</h3>
+<p>Returns if there are any exceptions to the appointments recurrence rule.</p>
 <h3 class="fn"><a name="hasRepeat"></a>bool QAppointment::hasRepeat () const</h3>
 <p>Returns false if the appointment has repeat type <a href="qappointment.html#RepeatRule-enum">NoRepeat</a>. Otherwise returns true.</p>
 <p>See also <a href="qappointment.html#setRepeatRule">setRepeatRule</a>() and <a href="qappointment.html#RepeatRule-enum">RepeatRule</a>.</p>
@@ -236,21 +247,28 @@
 <p>Returns the notes of the appointment.</p>
 <p>Reimplemented from <a href="qpimrecord.html#notes">QPimRecord</a>.</p>
 <p>See also <a href="qappointment.html#setNotes">setNotes</a>().</p>
-<h3 class="fn"><a name="readVCalendar"></a><a href="qlist.html">QList</a>&lt;QAppointment&gt; QAppointment::readVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="readVCalendar"></a><a href="qlist.html">QList</a>&lt;QAppointment&gt; QAppointment::readVCalendar ( <a href="qiodevice.html">QIODevice</a> * <i>device</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Reads a list of vCalendars from the given <i>device</i> and returns the equivalent set of appointments.</p>
+<p>See also <a href="qappointment.html#writeVCalendar">writeVCalendar</a>().</p>
+<h3 class="fn"><a name="readVCalendar-2"></a><a href="qlist.html">QList</a>&lt;QAppointment&gt; QAppointment::readVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This function is deprecated.</p>
+<p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads the file specified by <i>filename</i> as a list of vCalendar objects and returns the list of near equivalent appointments.</p>
 <p>See also <a href="qappointment.html#writeVCalendar">writeVCalendar</a>().</p>
-<h3 class="fn"><a name="readVCalendar-2"></a><a href="qlist.html">QList</a>&lt;QAppointment&gt; QAppointment::readVCalendar ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>vcal</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="readVCalendar-3"></a><a href="qlist.html">QList</a>&lt;QAppointment&gt; QAppointment::readVCalendar ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>vcal</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads the given VCalendar data in <i>vcal</i> and returns the list of near equivalent appointments.</p>
 <p>See also <a href="qappointment.html#writeVCalendar">writeVCalendar</a>().</p>
 <h3 class="fn"><a name="readVCalendarData"></a><a href="qlist.html">QList</a>&lt;QAppointment&gt; QAppointment::readVCalendarData ( const char * <i>data</i>, unsigned long <i>len</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Reads the <i>data</i> of <i>len</i> byets as a list of vCalendar objects and returns the list of near equivalent appointments.</p>
+<p>This function is deprecated.</p>
+<p>Reads the <i>data</i> of <i>len</i> bytes as a list of vCalendar objects and returns the list of near equivalent appointments.</p>
 <p>See also <a href="qappointment.html#writeVCalendar">writeVCalendar</a>().</p>
 <h3 class="fn"><a name="repeatForever"></a>bool QAppointment::repeatForever () const</h3>
 <p>Returns true if the appointment will repeat forever. Otherwise returns false.</p>
 <p>See also <a href="qappointment.html#repeatUntil">repeatUntil</a>() and <a href="qappointment.html#setRepeatForever">setRepeatForever</a>().</p>
 <h3 class="fn"><a name="repeatOnWeekDay"></a>bool QAppointment::repeatOnWeekDay ( int <i>day</i> ) const</h3>
-<p>If the repeat type of the appointment is Weekly and the appointment is set to repeat on <i>day</i> of the week, then returns true. Otherwise returns false.</p>
+<p>If the appointment is set to repeat on the given <i>day</i> of the week, then returns true. Otherwise returns false.</p>
 <p>See also <a href="qappointment.html#setRepeatOnWeekDay">setRepeatOnWeekDay</a>().</p>
 <h3 class="fn"><a name="repeatRule"></a><a href="qappointment.html#RepeatRule-enum">RepeatRule</a> QAppointment::repeatRule () const</h3>
 <p>Returns the <a href="qappointment.html#RepeatRule-enum">RepeatRule</a> of the appointment.</p>
@@ -267,6 +285,8 @@
 <h3 class="fn"><a name="setAllDay"></a>void QAppointment::setAllDay ( bool <i>enable</i> = true )</h3>
 <p>Sets the appointment to an all day appointment if <i>enable</i> is true. All day appointments have a no set time-zone.</p>
 <p>See also <a href="qappointment.html#isAllDay">isAllDay</a>() and <a href="qappointment.html#setTimeZone">setTimeZone</a>().</p>
+<h3 class="fn"><a name="setAsException"></a>void QAppointment::setAsException ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i>, const <a href="qdate.html">QDate</a> &amp; <i>date</i> )</h3>
+<p>Sets the appointment to be an exception to the recurring appointment with the specified <i>identifier</i>. The appointment is specified to replace the occurrence that occurs on the given <i>date</i>.</p>
 <h3 class="fn"><a name="setDescription"></a>void QAppointment::setDescription ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )</h3>
 <p>Sets the description of the appointment to <i>text</i>.</p>
 <p>See also <a href="qappointment.html#description">description</a>().</p>
@@ -344,36 +364,51 @@
 <p>Returns the instance of the week the appointment will occur for the repeat types <a href="qappointment.html#RepeatRule-enum">MonthlyDay</a> and <a href="qappointment.html#RepeatRule-enum">MonthlyEndDay</a>. The week offset is determined by the starting date of the appointment.</p>
 <p>if (weekOffset() == 1) appointment occurs in first week of the month. if (weekOffset() == 3) appointment occurs in third week of the month. if (weekOffset() == -1) appointment occurs in last week of the month.</p>
 <p>Returns 0 if there is no week offset for the appointment.</p>
-<h3 class="fn"><a name="writeVCalendar"></a>void QAppointment::writeVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qlist.html">QList</a>&lt;QAppointment&gt; &amp; <i>appointments</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="writeVCalendar"></a>bool QAppointment::writeVCalendar ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, const <a href="qlist.html">QList</a>&lt;QAppointment&gt; &amp; <i>appointments</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Writes the given list of <i>appointments</i> to the given <i>device</i> as vCalendars.</p>
+<p>Returns true on success.</p>
+<p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
+<h3 class="fn"><a name="writeVCalendar-2"></a>bool QAppointment::writeVCalendar ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, const QAppointment &amp; <i>appointment</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Writes the given <i>appointment</i> to the given <i>device</i> as vCalendars.</p>
+<p>Returns true on success.</p>
+<p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
+<h3 class="fn"><a name="writeVCalendar-3"></a>void QAppointment::writeVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qlist.html">QList</a>&lt;QAppointment&gt; &amp; <i>appointments</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This function is deprecated.</p>
+<p>This is an overloaded member function, provided for convenience.</p>
 <p>Write the list of <i>appointments</i> as vCalendar objects to the file specified by <i>filename</i>.</p>
 <p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
-<h3 class="fn"><a name="writeVCalendar-2"></a>void QAppointment::writeVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const QAppointment &amp; <i>appointment</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="writeVCalendar-4"></a>void QAppointment::writeVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const QAppointment &amp; <i>appointment</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Write the <i>appointment</i> as a vCalendar to the file specified by <i>filename</i>.</p>
 <p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
-<h3 class="fn"><a name="writeVCalendar-3"></a>void QAppointment::writeVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
+<h3 class="fn"><a name="writeVCalendar-5"></a>void QAppointment::writeVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
+<p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the appointment as a vCalendar object to the file specified by <i>filename</i>.</p>
 <p>Returns true on success, false on fail.</p>
 <p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
-<h3 class="fn"><a name="writeVCalendar-4"></a>void QAppointment::writeVCalendar ( <a href="qfile.html">QFile</a> &amp; <i>file</i> ) const</h3>
+<h3 class="fn"><a name="writeVCalendar-6"></a>void QAppointment::writeVCalendar ( <a href="qfile.html">QFile</a> &amp; <i>file</i> ) const</h3>
+<p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the appointment as a vCalendar object to the given <i>file</i>, which must be already open for writing.</p>
 <p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
-<h3 class="fn"><a name="writeVCalendar-5"></a>void QAppointment::writeVCalendar ( <a href="qdatastream.html">QDataStream</a> * <i>stream</i> ) const</h3>
+<h3 class="fn"><a name="writeVCalendar-7"></a>void QAppointment::writeVCalendar ( <a href="qdatastream.html">QDataStream</a> * <i>stream</i> ) const</h3>
+<p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the appointment as a vCalendar object to the given <i>stream</i>, which must be writable.</p>
 <p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QAppointment::operator!= ( const QAppointment &amp; <i>other</i> ) const</h3>
-<p>Returns true if the appointment is not equal to <i>other</i>. Otherwise returns false.</p>
+<p>Returns true if this appointment is not equal to <i>other</i>. Otherwise returns false.</p>
 <h3 class="fn"><a name="operator-eq"></a>QAppointment &amp; QAppointment::operator= ( const QAppointment &amp; <i>other</i> )</h3>
 <p>Sets the appointment to be a copy of <i>other</i>.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QAppointment::operator== ( const QAppointment &amp; <i>other</i> ) const</h3>
-<p>Returns true if the appointment is equal to <i>other</i>. Otherwise returns false.</p>
+<p>Returns true if this appointment is equal to <i>other</i>. Otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

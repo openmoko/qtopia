@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,11 +52,13 @@
 #endif
 #include <private/qwidget_p.h>
 
+#include "qdebug.h"
+
 class QGroupBoxPrivate : public QWidgetPrivate
 {
     Q_DECLARE_PUBLIC(QGroupBox)
-public:
 
+public:
     void skip();
     void init();
     void calculateFrame();
@@ -59,44 +76,51 @@ public:
     bool checked;
     bool hover;
     QStyle::SubControl pressedControl;
-
-    QStyleOptionGroupBox getStyleOption() const;
 };
 
-QStyleOptionGroupBox QGroupBoxPrivate::getStyleOption() const
+/*!
+    Initialize \a option with the values from this QGroupBox. This method
+    is useful for subclasses when they need a QStyleOptionGroupBox, but don't want
+    to fill in all the information themselves.
+
+    \sa QStyleOption::initFrom()
+*/
+void QGroupBox::initStyleOption(QStyleOptionGroupBox *option) const
 {
-    Q_Q(const QGroupBox);
-    QStyleOptionGroupBox option;
-    option.init(q);
-    option.text = title;
-    option.lineWidth = 1;
-    option.midLineWidth = 0;
-    option.textAlignment = Qt::Alignment(align);
-    option.activeSubControls |= pressedControl;
-    option.subControls = QStyle::SC_GroupBoxFrame;
+    if (!option)
+        return;
 
-    if (hover)
-        option.state |= QStyle::State_MouseOver;
+    Q_D(const QGroupBox);
+    option->initFrom(this);
+    option->text = d->title;
+    option->lineWidth = 1;
+    option->midLineWidth = 0;
+    option->textAlignment = Qt::Alignment(d->align);
+    option->activeSubControls |= d->pressedControl;
+    option->subControls = QStyle::SC_GroupBoxFrame;
+
+    if (d->hover)
+        option->state |= QStyle::State_MouseOver;
     else
-        option.state &= ~QStyle::State_MouseOver;
+        option->state &= ~QStyle::State_MouseOver;
 
-    if (flat)
-        option.features |= QStyleOptionFrameV2::Flat;
+    if (d->flat)
+        option->features |= QStyleOptionFrameV2::Flat;
 
-    if (checkable) {
-        option.subControls |= QStyle::SC_GroupBoxCheckBox;
-        option.state |= (checked ? QStyle::State_On : QStyle::State_Off);
-        if (pressedControl == QStyle::SC_GroupBoxCheckBox || pressedControl == QStyle::SC_GroupBoxLabel)
-            option.state |= QStyle::State_Sunken;
+    if (d->checkable) {
+        option->subControls |= QStyle::SC_GroupBoxCheckBox;
+        option->state |= (d->checked ? QStyle::State_On : QStyle::State_Off);
+        if (d->pressedControl == QStyle::SC_GroupBoxCheckBox
+                || d->pressedControl == QStyle::SC_GroupBoxLabel)
+            option->state |= QStyle::State_Sunken;
     }
 
-    if (!q->testAttribute(Qt::WA_SetPalette))
-        option.textColor = QColor(q->style()->styleHint(QStyle::SH_GroupBox_TextLabelColor, &option, q));
+    if (!testAttribute(Qt::WA_SetPalette))
+        option->textColor = QColor(style()->styleHint(QStyle::SH_GroupBox_TextLabelColor,
+                                   option, this));
 
-    if (!title.isEmpty())
-        option.subControls |= QStyle::SC_GroupBoxLabel;
-
-    return option;
+    if (!d->title.isEmpty())
+        option->subControls |= QStyle::SC_GroupBoxLabel;
 }
 
 void QGroupBoxPrivate::click()
@@ -190,6 +214,7 @@ QGroupBox::~QGroupBox()
 
 void QGroupBoxPrivate::init()
 {
+    Q_Q(QGroupBox);
     align = Qt::AlignLeft;
 #ifndef QT_NO_SHORTCUT
     shortcutId = 0;
@@ -200,8 +225,9 @@ void QGroupBoxPrivate::init()
     hover = false;
     pressedControl = QStyle::SC_None;
     calculateFrame();
+    q->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred, 
+                     QSizePolicy::GroupBox));
 }
-
 
 void QGroupBox::setTitle(const QString &title)
 {
@@ -294,9 +320,10 @@ void QGroupBox::resizeEvent(QResizeEvent *e)
 
 void QGroupBox::paintEvent(QPaintEvent *)
 {
-    Q_D(QGroupBox);
     QStylePainter paint(this);
-    paint.drawComplexControl(QStyle::CC_GroupBox, d->getStyleOption());
+    QStyleOptionGroupBox option;
+    initStyleOption(&option);
+    paint.drawComplexControl(QStyle::CC_GroupBox, option);
 }
 
 /*! \reimp  */
@@ -317,7 +344,8 @@ bool QGroupBox::event(QEvent *e)
         }
     }
 #endif
-    QStyleOptionGroupBox box = d->getStyleOption();
+    QStyleOptionGroupBox box;
+    initStyleOption(&box);
     switch (e->type()) {
     case QEvent::HoverEnter:
     case QEvent::HoverMove: {
@@ -426,20 +454,19 @@ void QGroupBoxPrivate::_q_fixFocus(Qt::FocusReason reason)
         fw->setFocus(reason);
 }
 
-
 /*
     Sets the right frame rect depending on the title.
 */
 void QGroupBoxPrivate::calculateFrame()
 {
     Q_Q(QGroupBox);
-    QStyleOptionGroupBox box = getStyleOption();
+    QStyleOptionGroupBox box;
+    q->initStyleOption(&box);
     QRect contentsRect = q->style()->subControlRect(QStyle::CC_GroupBox, &box, QStyle::SC_GroupBoxContents, q);
     q->setContentsMargins(contentsRect.left() - box.rect.left(), contentsRect.top() - box.rect.top(),
                           box.rect.right() - contentsRect.right(), box.rect.bottom() - contentsRect.bottom());
+    setLayoutItemMargins(QStyle::SE_GroupBoxLayoutItem, &box);
 }
-
-
 
 /*! \reimp
  */
@@ -449,7 +476,8 @@ void QGroupBox::focusInEvent(QFocusEvent *fe)
     if (focusPolicy() == Qt::NoFocus) {
         d->_q_fixFocus(fe->reason());
     } else {
-        QStyleOptionGroupBox box = d->getStyleOption();
+        QStyleOptionGroupBox box;
+        initStyleOption(&box);
         QRect rect = style()->subControlRect(QStyle::CC_GroupBox, &box, QStyle::SC_GroupBoxCheckBox, this)
             | style()->subControlRect(QStyle::CC_GroupBox, &box, QStyle::SC_GroupBoxLabel, this);
         update(rect);
@@ -463,18 +491,21 @@ void QGroupBox::focusInEvent(QFocusEvent *fe)
 QSize QGroupBox::minimumSizeHint() const
 {
     Q_D(const QGroupBox);
-    QStyleOptionGroupBox option = d->getStyleOption();
+    QStyleOptionGroupBox option;
+    initStyleOption(&option);
 
-    int baseWidth = fontMetrics().width(d->title + QLatin1Char(' '));
-    int baseHeight = fontMetrics().height();
+    QFontMetrics metrics(fontMetrics());
+
+    int baseWidth = metrics.width(d->title) + metrics.width(QLatin1Char(' '));
+    int baseHeight = metrics.height();
     if (d->checkable) {
         baseWidth += style()->pixelMetric(QStyle::PM_IndicatorWidth);
         baseWidth += style()->pixelMetric(QStyle::PM_CheckBoxLabelSpacing);
         baseHeight = qMax(baseHeight, style()->pixelMetric(QStyle::PM_IndicatorHeight));
     }
 
-    QSize size = QWidget::minimumSizeHint().expandedTo(QSize(baseWidth, baseHeight));
-    return style()->sizeFromContents(QStyle::CT_GroupBox, &option, size, this);
+    QSize size = style()->sizeFromContents(QStyle::CT_GroupBox, &option, QSize(baseWidth, baseHeight), this);
+    return size.expandedTo(QWidget::minimumSizeHint());
 }
 
 /*!
@@ -550,8 +581,10 @@ void QGroupBox::setCheckable(bool checkable)
         d->_q_setChildrenEnabled(true);
     }
 
-    if (wasCheckable != checkable)
+    if (wasCheckable != checkable) {
+        d->calculateFrame();
         update();
+    }
 }
 
 bool QGroupBox::isCheckable() const
@@ -649,14 +682,17 @@ void QGroupBoxPrivate::_q_setChildrenEnabled(bool b)
 void QGroupBox::changeEvent(QEvent *ev)
 {
     Q_D(QGroupBox);
-    if(ev->type() == QEvent::EnabledChange) {
+    if (ev->type() == QEvent::EnabledChange) {
         if (d->checkable && isEnabled()) {
             // we are being enabled - disable children
             if (!d->checked)
                 d->_q_setChildrenEnabled(false);
         }
-    } else if(ev->type() == QEvent::FontChange || ev->type() == QEvent::StyleChange) {
-        updateGeometry();
+    } else if (ev->type() == QEvent::FontChange
+#ifdef Q_WS_MAC
+               || ev->type() == QEvent::MacSizeChange
+#endif
+               || ev->type() == QEvent::StyleChange) {
         d->calculateFrame();
     }
     QWidget::changeEvent(ev);
@@ -666,7 +702,8 @@ void QGroupBox::changeEvent(QEvent *ev)
 void QGroupBox::mousePressEvent(QMouseEvent *event)
 {
     Q_D(QGroupBox);
-    QStyleOptionGroupBox box = d->getStyleOption();
+    QStyleOptionGroupBox box;
+    initStyleOption(&box);
     d->pressedControl = style()->hitTestComplexControl(QStyle::CC_GroupBox, &box,
                                                        event->pos(), this);
     if (d->checkable && (d->pressedControl & (QStyle::SC_GroupBoxCheckBox | QStyle::SC_GroupBoxLabel)))
@@ -677,7 +714,8 @@ void QGroupBox::mousePressEvent(QMouseEvent *event)
 void QGroupBox::mouseMoveEvent(QMouseEvent *event)
 {
     Q_D(QGroupBox);
-    QStyleOptionGroupBox box = d->getStyleOption();
+    QStyleOptionGroupBox box;
+    initStyleOption(&box);
     QStyle::SubControl pressed = style()->hitTestComplexControl(QStyle::CC_GroupBox, &box,
                                                                 event->pos(), this);
     if (d->pressedControl == QStyle::SC_GroupBoxCheckBox && d->pressedControl != pressed)
@@ -688,7 +726,8 @@ void QGroupBox::mouseMoveEvent(QMouseEvent *event)
 void QGroupBox::mouseReleaseEvent(QMouseEvent *)
 {
     Q_D(QGroupBox);
-    QStyleOptionGroupBox box = d->getStyleOption();
+    QStyleOptionGroupBox box;
+    initStyleOption(&box);
     bool toggle = d->checkable && (d->pressedControl == QStyle::SC_GroupBoxLabel
                    || d->pressedControl == QStyle::SC_GroupBoxCheckBox);
     d->pressedControl = QStyle::SC_None;

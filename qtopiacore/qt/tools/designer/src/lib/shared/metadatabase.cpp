@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,13 +37,19 @@
 ****************************************************************************/
 
 #include "metadatabase_p.h"
+#include "widgetdatabase_p.h"
 
 // sdk
-#include <QtDesigner/QtDesigner>
+#include <QtDesigner/QDesignerFormEditorInterface>
 
 // Qt
+#include <QtGui/QWidget>
 #include <QtCore/qalgorithms.h>
 #include <QtCore/qdebug.h>
+
+namespace {
+    const bool debugMetaDatabase = false;
+}
 
 namespace qdesigner_internal {
 
@@ -63,13 +84,23 @@ void MetaDataBaseItem::setName(const QString &name)
     Q_ASSERT(m_object);
     m_object->setObjectName(name);
 }
+    
+QString MetaDataBaseItem::customClassName() const
+{
+    return m_customClassName;
+}
+void MetaDataBaseItem::setCustomClassName(const QString &customClassName)
+{
+    m_customClassName = customClassName;
+}
 
-QList<QWidget*> MetaDataBaseItem::tabOrder() const
+
+MetaDataBaseItem::TabOrder  MetaDataBaseItem::tabOrder() const
 {
     return m_tabOrder;
 }
 
-void MetaDataBaseItem::setTabOrder(const QList<QWidget*> &tabOrder)
+void MetaDataBaseItem::setTabOrder(const TabOrder &tabOrder)
 {
     m_tabOrder = tabOrder;
 }
@@ -84,6 +115,15 @@ void MetaDataBaseItem::setEnabled(bool b)
     m_enabled = b;
 }
 
+QString MetaDataBaseItem::script() const 
+{
+    return m_script;
+}
+
+void MetaDataBaseItem::setScript(const QString &script)
+{
+    m_script = script;
+}
 // -----------------------------------------------------
 MetaDataBase::MetaDataBase(QDesignerFormEditorInterface *core, QObject *parent)
     : QDesignerMetaDataBaseInterface(parent),
@@ -96,7 +136,8 @@ MetaDataBase::~MetaDataBase()
     qDeleteAll(m_items);
 }
 
-QDesignerMetaDataBaseItemInterface *MetaDataBase::item(QObject *object) const
+    
+MetaDataBaseItem *MetaDataBase::metaDataBaseItem(QObject *object) const
 {
     MetaDataBaseItem *i = m_items.value(object);
     if (i == 0 || !i->enabled())
@@ -109,11 +150,17 @@ void MetaDataBase::add(QObject *object)
     MetaDataBaseItem *item = m_items.value(object);
     if (item != 0) {
         item->setEnabled(true);
+        if (debugMetaDatabase) {
+            qDebug() << "MetaDataBase::add: Existing item for " << object->metaObject()->className() << item->name();
+        }
         return;
     }
 
     item = new MetaDataBaseItem(object);
     m_items.insert(object, item);
+    if (debugMetaDatabase) {
+        qDebug() << "MetaDataBase::add: New item " << object->metaObject()->className() << item->name();
+    }
     connect(object, SIGNAL(destroyed(QObject*)),
         this, SLOT(slotDestroyed(QObject*)));
 
@@ -162,10 +209,100 @@ void MetaDataBase::dump()
     QHashIterator<QObject *, MetaDataBaseItem*> it(m_items);
     while (it.hasNext()) {
         it.next();
-
         qDebug() << it.value() << "item:" << it.key() << "comments:" << it.value()->comments();
     }
 }
+
+// promotion convenience
+QDESIGNER_SHARED_EXPORT bool promoteWidget(QDesignerFormEditorInterface *core,QWidget *widget,const QString &customClassName)
+{
+
+    MetaDataBase *db = qobject_cast<MetaDataBase *>(core->metaDataBase());
+    if (!db)
+        return false;
+    MetaDataBaseItem *item = db->metaDataBaseItem(widget);
+    if (!item) {
+        db ->add(widget);
+        item = db->metaDataBaseItem(widget);
+    }
+    // Recursive promotion occurs if there is a plugin missing.
+    const QString oldCustomClassName = item->customClassName();
+    if (!oldCustomClassName.isEmpty()) {
+        qDebug() << "WARNING: Recursive promotion of " << oldCustomClassName << " to " << customClassName
+            << ". A plugin is missing.";
+    }
+    item->setCustomClassName(customClassName);  
+    if (debugMetaDatabase) {
+        qDebug() << "Promoting " << widget->metaObject()->className() << " to " << customClassName;
+    }
+    return true;
+}
+
+QDESIGNER_SHARED_EXPORT void demoteWidget(QDesignerFormEditorInterface *core,QWidget *widget)
+{
+    MetaDataBase *db = qobject_cast<MetaDataBase *>(core->metaDataBase());
+    if (!db)
+        return;
+    MetaDataBaseItem *item = db->metaDataBaseItem(widget);
+    item->setCustomClassName(QString());
+    if (debugMetaDatabase) {
+        qDebug() << "Demoting " << widget;
+    }
+}
+
+QDESIGNER_SHARED_EXPORT bool isPromoted(QDesignerFormEditorInterface *core, QWidget* widget)
+{
+    const MetaDataBase *db = qobject_cast<const MetaDataBase *>(core->metaDataBase());
+    if (!db)
+        return false;
+    const MetaDataBaseItem *item = db->metaDataBaseItem(widget);
+    if (!item)
+        return false;
+    return !item->customClassName().isEmpty();
+}
+
+QDESIGNER_SHARED_EXPORT QString promotedCustomClassName(QDesignerFormEditorInterface *core, QWidget* widget)
+{
+    const MetaDataBase *db = qobject_cast<const MetaDataBase *>(core->metaDataBase());
+    if (!db)
+        return QString();
+    const MetaDataBaseItem *item = db->metaDataBaseItem(widget);
+    if (!item)
+        return QString();
+    return item->customClassName();
+}
+ 
+QDESIGNER_SHARED_EXPORT QString promotedExtends(QDesignerFormEditorInterface *core, QWidget* widget)
+{
+    const QString customClassName = promotedCustomClassName(core,widget);
+    if (customClassName.isEmpty())
+        return QString();
+    const int i = core->widgetDataBase()->indexOfClassName(customClassName);
+    if (i == -1)
+        return QString();
+    return core->widgetDataBase()->item(i)->extends();
+}
+    
+QDESIGNER_SHARED_EXPORT QString propertyComment(QDesignerFormEditorInterface* core, QObject *o, const QString &propertyName) {
+    const MetaDataBase *db = qobject_cast<const MetaDataBase *>(core->metaDataBase());
+    if (!db)
+        return QString();
+    const MetaDataBaseItem *item = db->metaDataBaseItem(o);
+    if (!item)
+        return QString();
+    return item->propertyComment(propertyName);
+}
+
+QDESIGNER_SHARED_EXPORT bool setPropertyComment(QDesignerFormEditorInterface* core, QObject *o, const QString &propertyName, const QString &value) {
+    MetaDataBase *db = qobject_cast<MetaDataBase *>(core->metaDataBase());
+    if (!db)
+        return false;
+    MetaDataBaseItem *item = db->metaDataBaseItem(o);
+    if (!item)
+        return false;  
+    item->setPropertyComment(propertyName, value);
+    return true;
+}    
 
 
 } // namespace qdesigner_internal

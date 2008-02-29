@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,45 +22,57 @@
 #ifndef __QOBEXCOMMANDS_P_H__
 #define __QOBEXCOMMANDS_P_H__
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
+#include <qobexnamespace.h>
+#include <qobexheader.h>
+
 #include <QString>
-#include <QAtomic>
+#include <qatomic.h>
 
 class QIODevice;
 class QByteArray;
 
 class QObexCommand
 {
-public:
+    public:
+        QObexCommand(QObex::Request req, const QObexHeader &header,
+                     const QByteArray &data);
+        QObexCommand(QObex::Request req,
+                     const QObexHeader &header = QObexHeader(),
+                     QIODevice *device = 0);
+        ~QObexCommand();
 
-    enum TYPE {
-        CONNECT = 0,
-        DISCONNECT,
-        PUT,
-        GET
-    };
-
-    QObexCommand(TYPE cmd, const QByteArray &data,
-                 const QString &filename, const QString &mimetype);
-    QObexCommand(TYPE cmd, QIODevice *device,
-                 const QString &filename, const QString &mimetype);
-
-    ~QObexCommand();
-
-    QString m_mimetype;
-    QString m_filename;
+        QObex::Request m_req;
+        QObexHeader m_header;
+        QObex::SetPathFlags m_setPathFlags;
+        int m_id;
 
     // Concept stolen from QFTP
-    union {
-        QIODevice *device;
-        QByteArray *data;
-    } m_data;
-    bool m_isba;
+        union {
+            QIODevice *device;
+            QByteArray *data;
+        } m_data;
+        bool m_isba;
 
-    TYPE m_cmd;
-    int m_id;
+#if QT_VERSION < 0x040400
+        static QBasicAtomic idCounter;
+#else
+        static QAtomicInt idCounter;
+#endif
+        static int nextId();
 
-    static QBasicAtomic idCounter;
-    static int nextId();
+    private:
+        Q_DISABLE_COPY(QObexCommand)
 };
 
 #endif

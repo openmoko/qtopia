@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/examples/mandelbrot.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/mandelbrot.qdoc -->
 <head>
-  <title>Qt 4.2: Mandelbrot Example</title>
+  <title>Qt 4.3: Mandelbrot Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Mandelbrot Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Mandelbrot Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="threads-mandelbrot-mandelbrotwidget-cpp.html">threads/mandelbrot/mandelbrotwidget.cpp</a></li>
@@ -23,7 +24,7 @@
 </ul>
 <p>The Mandelbrot example shows how to use a worker thread to perform heavy computations without blocking the main thread's event loop.</p>
 <p>The heavy computation here is the Mandelbrot set, probably the world's most famous fractal. These days, while sophisticated programs such as <a href="http://xaos.sourceforge.net/">XaoS</a> that provide real-time zooming in the Mandelbrot set, the standard Mandelbrot algorithm is just slow enough for our purposes.</p>
-<p align="center"><img src="images/mandelbrot.png" alt="Screenshot of the Mandelbrot example" /></p><p>In real life, the approach described here is applicable to a large set of problems, including synchronous network I/O and database access, where the user interface must remain responsive while some heavy operation is taking place. The <a href="network-blockingfortuneclient.html">network/blockingfortuneclient</a> example shows the same principle at work in a TCP client.</p>
+<p align="center"><img src="images/mandelbrot-example.png" alt="Screenshot of the Mandelbrot example" /></p><p>In real life, the approach described here is applicable to a large set of problems, including synchronous network I/O and database access, where the user interface must remain responsive while some heavy operation is taking place. The <a href="network-blockingfortuneclient.html">network/blockingfortuneclient</a> example shows the same principle at work in a TCP client.</p>
 <p>The Mandelbrot application supports zooming and scrolling using the mouse or the keyboard. To avoid freezing the main thread's event loop (and, as a consequence, the application's user interface), we put all the fractal computation in a separate worker thread. The thread emits a signal when it is done rendering the fractal.</p>
 <p>During the time where the worker thread is recomputing the fractal to reflect the new zoom factor position, the main thread simply scales the previously rendered pixmap to provide immediate feedback. The result doesn't look as good as what the worker thread eventually ends up providing, but at least it makes the application more responsive. The sequence of screenshots below shows the original image, the scaled image, and the rerendered image.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -131,7 +132,7 @@
          double centerY = this-&gt;centerY;
          mutex.unlock();</pre>
 <p><tt>run()</tt> is quite a big function, so we'll break it down into parts.</p>
-<p>The function body is an infinite loop which starts by storing the rendering parameters in local variables. As usual, we protect accesses to the member variables using the class's mutex. Storing the member variables in local variables allows us to minimize the amout of code that needs to be protected by a mutex. This ensures that the main thread will never have to block for too long when it needs to access <tt>RenderThread</tt>'s member variables (e.g., in <tt>render()</tt>).</p>
+<p>The function body is an infinite loop which starts by storing the rendering parameters in local variables. As usual, we protect accesses to the member variables using the class's mutex. Storing the member variables in local variables allows us to minimize the amout of code that needs to be protected by a mutex. This ensures that the main thread will never have to block for too long when it needs to access <tt>RenderThread</tt>'s member variables (e.g&#x2e;, in <tt>render()</tt>).</p>
 <p>The <tt>forever</tt> keyword is, like <tt>foreach</tt>, a Qt pseudo-keyword.</p>
 <pre>         int halfWidth = resultSize.width() / 2;
          int halfHeight = resultSize.height() / 2;
@@ -303,7 +304,7 @@
      resize(550, 400);
  }</pre>
 <p>The interesting part of the constructor is the <a href="qmetatype.html#qRegisterMetaType">qRegisterMetaType</a>() and <a href="qobject.html#connect">QObject::connect</a>() calls. Let's start with the <a href="qobject.html#connect">connect()</a> call.</p>
-<p>Although it looks like a standard signal-slot connection between two <a href="qobject.html">QObject</a>s, because the signal is emitted in a different thread than the receiver lives in, the connection is effectively a <a href="qt.html#ConnectionType-enum">queued connection</a>. These connections are asynchronous (i.e., non-blocking), meaning that the slot will be called at some point after the <tt>emit</tt> statement. What's more, the slot will be invoked in the thread in which the receiver lives. Here, the signal is emitted in the worker thread, and the slot is executed in the GUI thread when control returns to the event loop.</p>
+<p>Although it looks like a standard signal-slot connection between two <a href="qobject.html">QObject</a>s, because the signal is emitted in a different thread than the receiver lives in, the connection is effectively a <a href="qt.html#ConnectionType-enum">queued connection</a>. These connections are asynchronous (i.e&#x2e;, non-blocking), meaning that the slot will be called at some point after the <tt>emit</tt> statement. What's more, the slot will be invoked in the thread in which the receiver lives. Here, the signal is emitted in the worker thread, and the slot is executed in the GUI thread when control returns to the event loop.</p>
 <p>With queued connections, Qt must store a copy of the arguments that were passed to the signal so that it can pass them to the slot later on. Qt knows how to take of copy of many C++ and Qt types, but <a href="qimage.html">QImage</a> isn't one of them. We must therefore call the template function <a href="qmetatype.html#qRegisterMetaType">qRegisterMetaType</a>() before we can use <a href="qimage.html">QImage</a> as parameter in queued connections.</p>
 <pre> void MandelbrotWidget::paintEvent(QPaintEvent * <span class="comment">/* event */</span>)
  {
@@ -334,7 +335,7 @@
          painter.restore();
      }</pre>
 <p>If the pixmap has the right scale factor, we draw the pixmap directly onto the widget. Otherwise, we scale and translate the <a href="coordsys.html">coordinate system</a> before we draw the pixmap. By reverse mapping the widget's rectangle using the scaled painter matrix, we also make sure that only the exposed areas of the pixmap are drawn. The calls to <a href="qpainter.html#save">QPainter::save</a>() and <a href="qpainter.html#restore">QPainter::restore</a>() make sure that any painting performed afterwards uses the standard coordinate system.</p>
-<pre>     QString text = tr(&quot;Use mouse wheel to zoom. &quot;
+<pre>     QString text = tr(&quot;Use mouse wheel or the '+' and '-' keys to zoom. &quot;
                        &quot;Press and hold left mouse button to scroll.&quot;);
      QFontMetrics metrics = painter.fontMetrics();
      int textWidth = metrics.width(text);
@@ -386,7 +387,7 @@
      double numSteps = numDegrees / 15.0f;
      zoom(pow(ZoomInFactor, numSteps));
  }</pre>
-<p>The wheel event handler is reimplemented to make the mouse wheel control the zoom level. <a href="qwheelevent.html#delta">QWheelEvent::delta</a>() returns the angle of the wheel mouse movement, in eights of a degree. For most mice, one wheel step corresponds to 15 degrees. We find out how many mouse steps we have and determine the zoom factor in consequence. For example, if we have two wheel steps in the positive direction (i.e., +30 degrees), the zoom factor becomes <tt>ZoomInFactor</tt> to the second power, i.e. 0.8 * 0.8 = 0.64.</p>
+<p>The wheel event handler is reimplemented to make the mouse wheel control the zoom level. <a href="qwheelevent.html#delta">QWheelEvent::delta</a>() returns the angle of the wheel mouse movement, in eights of a degree. For most mice, one wheel step corresponds to 15 degrees. We find out how many mouse steps we have and determine the zoom factor in consequence. For example, if we have two wheel steps in the positive direction (i.e&#x2e;, +30 degrees), the zoom factor becomes <tt>ZoomInFactor</tt> to the second power, i.e&#x2e; 0.8 * 0.8 = 0.64.</p>
 <pre> void MandelbrotWidget::mousePressEvent(QMouseEvent *event)
  {
      if (event-&gt;button() == Qt::LeftButton)
@@ -456,6 +457,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

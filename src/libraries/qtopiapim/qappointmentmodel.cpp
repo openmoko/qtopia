@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,9 +20,10 @@
 ****************************************************************************/
 #include <qtopia/pim/qappointmentmodel.h>
 #include "qappointmentsqlio_p.h"
-#ifdef GOOGLE_CALENDAR_CONTEXT
+#if defined(GOOGLE_CALENDAR_CONTEXT) && !defined(QT_NO_OPENSSL)
 #include "qgooglecontext_p.h"
 #endif
+#include "qdependentcontexts_p.h"
 #include <QSettings>
 #include <QMap>
 #include <QList>
@@ -186,7 +187,7 @@ QAppointmentModel::Field QAppointmentModel::identifierField(const QString &ident
   both within this application and from other applications.  This will result in
   the modelReset() signal being emitted.
 
-  \sa QAppointment, QSortFilterProxyModel
+  \sa QAppointment, QSortFilterProxyModel, {Pim Library}
 */
 
 /*!
@@ -196,7 +197,7 @@ QAppointmentModel::QAppointmentModel(QObject *parent)
     : QPimModel(parent)
 {
 
-    QtopiaSql::openDatabase();
+    QtopiaSql::instance()->openDatabase();
     d = new QAppointmentModelData();
 
     QAppointmentSqlIO *access = new QAppointmentSqlIO(this);
@@ -205,9 +206,12 @@ QAppointmentModel::QAppointmentModel(QObject *parent)
     addAccess(access);
     addContext(context);
 
-#ifdef GOOGLE_CALENDAR_CONTEXT
+#if defined(GOOGLE_CALENDAR_CONTEXT) && !defined(QT_NO_OPENSSL)
     addContext(new QGoogleCalendarContext(this, access));
 #endif
+    addContext(new QContactBirthdayContext(this, access));
+    addContext(new QContactAnniversaryContext(this, access));
+    addContext(new QTaskEventContext(this, access));
 }
 
 /*!
@@ -696,6 +700,24 @@ bool QAppointmentModel::removeOccurrence(const QUniqueId &identifier, const QDat
 }
 
 /*!
+  If an recurring appointment in the model with the specified \a identifier
+  has an exception listed for the given \a date, restores the original
+  occurrence for that date.  If the exception included a replacement
+  appointment will also remove the replacement.
+
+  Returns true if the appointment was successfully updated.
+*/
+bool QAppointmentModel::restoreOccurrence(const QUniqueId &identifier, const QDate &date)
+{
+    QAppointmentContext *c = qobject_cast<QAppointmentContext *>(context(identifier));
+    if (c && c->restoreOccurrence(identifier, date)) {
+        refresh();
+        return true;
+    }
+    return false;
+}
+
+/*!
   Updates the appointment in the model with the same identifier as the specified \a appointment to
   have an exception on the specified \a date.  The \a occurrence will be added as a child occurrence
   of the modified appointment.  If the specified date is null, the start date of the occurrence will be used
@@ -924,7 +946,7 @@ QDateTime QAppointmentModel::rangeEnd() const
 class QOccurrenceModelData
 {
 public:
-    QOccurrenceModelData() : requestedCount(-1) {}
+    QOccurrenceModelData() : requestedCount(-1), rangeChangeTimer(0) {}
 
     QAppointmentModel *appointmentModel;
 
@@ -939,10 +961,12 @@ public:
         QDateTime endInTZ;
         QDate date;
         QUniqueId id;
-        int row;
+        QAppointment appointment;
+        bool minimal;
     };
 
-    QVector< OccurrenceItem > cache;
+    mutable QVector< OccurrenceItem > cache;
+    mutable QTimer *rangeChangeTimer;
 };
 
 /*!
@@ -960,6 +984,8 @@ public:
   range must be specified to limit the total set of occurrences included in the model.  Another important difference
   is that the values for the QAppointmentModel::Start and QAppointmentModel::End fields are converted
   to the current time zone of the device.
+
+  \sa {Pim Library}
 */
 
 /*!
@@ -973,17 +999,32 @@ public:
 */
 
 /*!
-  \fn QAppointment QOccurrenceModel::appointment(const QModelIndex &index) const
-
   Returns the appointment for the row specified by \a index.
   The column of \a index is ignored.
 */
+QAppointment QOccurrenceModel::appointment(const QModelIndex &index) const
+{
+    return appointment(index.row());
+}
 
 /*!
-  \fn QAppointment QOccurrenceModel::appointment(int row) const
-
   Returns the appointment for the given \a row.
 */
+QAppointment QOccurrenceModel::appointment(int row) const
+{
+    if (od->rangeChangeTimer->isActive())
+        rebuildCache();
+
+    if (row >= 0 && row < count()) {
+        if (od->cache[row].appointment.uid().isNull() || od->cache[row].minimal) {
+            od->cache[row].appointment = od->appointmentModel->appointment(od->cache[row].id);
+            od->cache[row].minimal = false;
+        }
+        return od->cache[row].appointment;
+    }
+    return QAppointment();
+}
+
 
 /*!
   Constructs an occurrence model with the given \a parent that 
@@ -1017,7 +1058,13 @@ void QOccurrenceModel::init(QAppointmentModel *appointmentModel)
     od = new QOccurrenceModelData();
 
     od->appointmentModel = appointmentModel;
-    connect(od->appointmentModel, SIGNAL(modelReset()), this, SLOT(rebuildCache()));
+    connect(od->appointmentModel, SIGNAL(modelReset()), this, SLOT(forwardAppointmentReset()));
+
+    od->rangeChangeTimer = new QTimer(this);
+    od->rangeChangeTimer->setSingleShot(true);
+    od->rangeChangeTimer->setInterval(0);
+
+    connect(od->rangeChangeTimer, SIGNAL(timeout()), this, SLOT(rebuildCache()));
 }
 
 /*!
@@ -1039,6 +1086,9 @@ QOccurrenceModel::~QOccurrenceModel()
 */
 int QOccurrenceModel::rowCount(const QModelIndex &parent) const
 {
+    if (od->rangeChangeTimer->isActive())
+        rebuildCache();
+
     Q_UNUSED(parent);
     return od->cache.size();
 }
@@ -1071,7 +1121,34 @@ QStringList QOccurrenceModel::mimeTypes() const
 
 QVariant QOccurrenceModel::appointmentData(int row, int column) const
 {
-    return od->appointmentModel->data(od->appointmentModel->index(row, column), Qt::DisplayRole);
+    if (row < 0 || row >= count())
+        return QVariant();
+
+    QAppointment a;
+    switch(column) {
+        case QAppointmentModel::Description:
+        case QAppointmentModel::Location:
+        case QAppointmentModel::Start:
+        case QAppointmentModel::End:
+        case QAppointmentModel::AllDay:
+        case QAppointmentModel::TimeZone:
+        case QAppointmentModel::Alarm:
+        case QAppointmentModel::RepeatRule:
+        case QAppointmentModel::RepeatFrequency:
+        case QAppointmentModel::RepeatEndDate:
+        case QAppointmentModel::RepeatWeekFlags:
+        case QAppointmentModel::Identifier:
+            a = od->cache[row].appointment;
+            break;
+
+        case QAppointmentModel::Notes:
+        case QAppointmentModel::Categories:
+            a = appointment(row);
+            break;
+    }
+
+    // Until we have a data(id) function...
+    return QAppointmentModel::appointmentField(a, QAppointmentModel::Field(column));
 }
 
 /*!
@@ -1086,6 +1163,9 @@ QVariant QOccurrenceModel::appointmentData(int row, int column) const
 */
 QVariant QOccurrenceModel::data(const QModelIndex &index, int role) const
 {
+    if (od->rangeChangeTimer->isActive())
+        rebuildCache();
+
     if (!index.isValid() || index.row() >= rowCount())
         return QVariant();
 
@@ -1097,31 +1177,36 @@ QVariant QOccurrenceModel::data(const QModelIndex &index, int role) const
                 default:
                     break;
                 case Qt::DisplayRole:
-                    return appointmentData(item.row, QAppointmentModel::Description);
+                    return appointmentData(index.row(), QAppointmentModel::Description);
                 case Qt::EditRole:
                     return item.id.toByteArray();
                 case QAppointmentModel::LabelRole:
                     {
-                        QString l = appointmentData(item.row, QAppointmentModel::Description).toString();
+                        QString l = appointmentData(index.row(), QAppointmentModel::Description).toString();
                         return "<b>" + l + "</b>";
                     }
                 case Qt::BackgroundColorRole:
-                    if( appointmentData(item.row, QAppointmentModel::RepeatRule)
+                    if( appointmentData(index.row(), QAppointmentModel::RepeatRule)
                             != QAppointment::NoRepeat )
                         return QVariant( QColor( 0, 50, 255 ) );
                     else
                         return QVariant( QColor( 255, 50, 0 ) );
                 case Qt::DecorationRole:
                     {
-                        QOccurrence o = occurrence(index);
                         QList<QVariant> icons;
-                        if( o.appointment().hasRepeat() )
+                        QPimContext *pc = od->appointmentModel->context(item.id);
+                        if (pc) {
+                            QIcon contextIcon = pc->icon();
+                            if (!contextIcon.isNull())
+                                icons.append(contextIcon);
+                        }
+                        if( item.appointment.hasRepeat() )
                             icons.append( QVariant( QAppointmentModelData::getCachedIcon( ":icon/repeat" ) ) );
-                        if( o.appointment().isException() )
+                        if( item.appointment.isException() )
                             icons.append( QVariant( QAppointmentModelData::getCachedIcon( ":icon/repeatException" ) ) );
-                        if( o.appointment().timeZone() != QTimeZone() && o.appointment().timeZone() != QTimeZone::current() )
+                        if( item.appointment.timeZone() != QTimeZone() && item.appointment.timeZone() != QTimeZone::current() )
                             icons.append( QVariant( QAppointmentModelData::getCachedIcon( ":icon/globe" ) ) );
-                        switch( o.alarm() ) {
+                        switch( item.appointment.alarm() ) {
                             case QAppointment::Audible:
                                 icons.append( QVariant( QAppointmentModelData::getCachedIcon( ":icon/audible" ) ) );
                                 break;
@@ -1142,7 +1227,8 @@ QVariant QOccurrenceModel::data(const QModelIndex &index, int role) const
         default:
             break;
     }
-    return od->appointmentModel->data(od->appointmentModel->index(item.row, index.column()), role);
+    // appointment model ignores role so take advantage of the occurrence model cache.
+    return appointmentData(index.row(), index.column());
 }
 
 /*!
@@ -1196,6 +1282,9 @@ QMap<int,QVariant> QOccurrenceModel::itemData(const QModelIndex &index) const
 */
 bool QOccurrenceModel::contains(const QModelIndex &index) const
 {
+    if (od->rangeChangeTimer->isActive())
+        rebuildCache();
+
     return (index.row() >= 0 && index.row() < rowCount());
 }
 
@@ -1205,6 +1294,9 @@ bool QOccurrenceModel::contains(const QModelIndex &index) const
 */
 bool QOccurrenceModel::contains(const QUniqueId &identifier) const
 {
+    if (od->rangeChangeTimer->isActive())
+        rebuildCache();
+
     for (int i = 0; i < od->cache.size(); ++i) {
         if (od->cache.at(i).id == identifier)
             return true;
@@ -1220,6 +1312,9 @@ bool QOccurrenceModel::contains(const QUniqueId &identifier) const
 */
 QModelIndex QOccurrenceModel::index(const QUniqueId &identifier) const
 {
+    if (od->rangeChangeTimer->isActive())
+        rebuildCache();
+
     for (int i = 0; i < od->cache.size(); ++i) {
         if (od->cache.at(i).id == identifier)
             return createIndex(i, 0);
@@ -1234,6 +1329,9 @@ QModelIndex QOccurrenceModel::index(const QUniqueId &identifier) const
 */
 QUniqueId QOccurrenceModel::id(const QModelIndex &index) const
 {
+    if (od->rangeChangeTimer->isActive())
+        rebuildCache();
+
     return od->cache.at(index.row()).id;
 }
 
@@ -1243,6 +1341,9 @@ QUniqueId QOccurrenceModel::id(const QModelIndex &index) const
 */
 QModelIndex QOccurrenceModel::index(const QOccurrence &occurrence) const
 {
+    if (od->rangeChangeTimer->isActive())
+        rebuildCache();
+
     if (od->cache.count() < 1)
         return QModelIndex();
     for (int i = 0; i < od->cache.size(); ++i) {
@@ -1266,8 +1367,11 @@ QOccurrence QOccurrenceModel::occurrence(const QModelIndex &index) const
 */
 QOccurrence QOccurrenceModel::occurrence(int row) const
 {
+    if (od->rangeChangeTimer->isActive())
+        rebuildCache();
+
     QOccurrenceModelData::OccurrenceItem value = od->cache[row];
-    return QOccurrence(value.date, od->appointmentModel->appointment(value.id));
+    return QOccurrence(value.date, appointment(row));
 }
 
 /*!
@@ -1340,10 +1444,13 @@ void QOccurrenceModel::setRange(const QDateTime &start, int count)
 {
     if (!start.isValid() || count < 1)
         return;
-    od->appointmentModel->setRange(start, QDateTime());
+    //od->appointmentModel->setRange(start, QDateTime());
     od->start = start;
     od->end = QDateTime();
     od->requestedCount = count;
+
+    od->rangeChangeTimer->start();
+    reset();
 }
 
 /*!
@@ -1355,10 +1462,13 @@ void QOccurrenceModel::setRange(const QDateTime &start, const QDateTime &end)
 {
     if (!start.isValid() || !end.isValid() || start >= end)
         return;
-    od->appointmentModel->setRange(start.addDays(-1), end.addDays(1)); // account for TZ
+    //od->appointmentModel->setRange(start.addDays(-1), end.addDays(1)); // account for TZ
     od->start = start;
     od->end = end;
     od->requestedCount = -1;
+
+    od->rangeChangeTimer->start();
+    reset();
 }
 
 /*!
@@ -1450,36 +1560,13 @@ bool QOccurrenceModel::editable(const QUniqueId &identifier) const
 }
 
 /*!
-  Returns true if the occurrence model has not yet updated the list of occurrence
-  due to a change in stored appointments.
+  Rebuilds the cache of the occurrence model and calls QAbstractItemModel::reset()
 
-  \sa fetchCompleted(), completeFetch()
-*/
-bool QOccurrenceModel::fetching() const
+  */
+void QOccurrenceModel::forwardAppointmentReset()
 {
-    return false;
-}
-
-/*!
-  \fn void QOccurrenceModel::fetchCompleted()
-
-  This signal is emitted when the occurrence model finished caching changes
-  resulting from a change to the stored appointments.
-
-  \sa completeFetch(), fetching()
-*/
-
-/*!
-  Forces the occurrence model to finish updating its internal cache now.
-  This can be expensive and should only be called if no further modifications
-  to appointments is expected.  The occurrence model will update its cache in
-  the next Qt event loop if this function is not called.
-
-  \sa fetchCompleted(), fetching()
-*/
-void QOccurrenceModel::completeFetch()
-{
-    od->appointmentModel->refresh();
+    od->rangeChangeTimer->start();
+    reset();
 }
 
 /*!
@@ -1487,19 +1574,30 @@ void QOccurrenceModel::completeFetch()
 
   Ensures any recently updates to the model will be reflected in queries against the model.
 
-  This can be an expensive operation.
+  This can be an expensive operation.  As QOccurrenceModel automatically rebuilds the cache when
+  required it is recommended not to call this function explicitly as this may lead to excessive
+  processing and a subsequent loss in application performance.
 */
-void QOccurrenceModel::rebuildCache()
+void QOccurrenceModel::rebuildCache() const
 {
+    od->rangeChangeTimer->stop();
     /*
        for each appointment, build a list of occurrences.
    */
     if( (!od->end.isNull() || od->requestedCount > 0) && !od->start.isNull()) {
         QMultiMap< QDateTime, QOccurrenceModelData::OccurrenceItem > result;
 
-        int c = od->appointmentModel->rowCount(); // count can be expensive for some types of requests.
-        for (int i = 0; i < c; i++) {
-            QAppointment a = od->appointmentModel->appointment(i);
+
+        // ASSUMPTION, one model and its an SqlIO
+        QAppointmentSqlIO *access = qobject_cast<QAppointmentSqlIO *>(od->appointmentModel->accessModels()[0]);
+        if (!access) {
+            qWarning("Invalid access class retrieved by Occurrence Model");
+            return;
+        }
+
+        QList<QAppointment> candidates = access->fastRange(od->start.addDays(-1), od->end.addDays(1), od->requestedCount);
+
+        foreach (QAppointment a, candidates) {
 
             // not first occurrence, that may be far too early.
             QOccurrence o = a.nextOccurrence(od->start.date().addDays(-1));
@@ -1516,7 +1614,8 @@ void QOccurrenceModel::rebuildCache()
                     item.endInTZ = end.addSecs(1);
                     item.date = o.date();
                     item.id = o.uid();
-                    item.row = i;
+                    item.appointment = a;
+                    item.minimal = true;
                     result.insert(start, item);
                 }
                 // escape for forever events going past end range.
@@ -1533,11 +1632,7 @@ void QOccurrenceModel::rebuildCache()
         // truncate
         if (od->requestedCount > 0 && od->cache.size() > od->requestedCount)
             od->cache.resize(od->requestedCount);
-
-        reset();
     }
-    // and whether the cache changed, didn't change, or didn't even update....
-    emit fetchCompleted();
 }
 
 /*!
@@ -1548,3 +1643,37 @@ void QOccurrenceModel::refresh()
     reset();
 }
 
+/*!
+  \fn void QOccurrenceModel::fetchCompleted()
+  \obsolete
+
+  This signal is emitted when the occurrence model finished caching changes
+  resulting from a change to the stored appointments.
+
+  \sa completeFetch(), fetching()
+*/
+
+/*!
+  \obsolete
+  Forces the occurrence model to finish updating its internal cache now.
+  This can be expensive and should only be called if no further modifications
+  to appointments is expected.  The occurrence model will update its cache in
+  the next Qt event loop if this function is not called.
+
+  \sa fetchCompleted(), fetching()
+*/
+void QOccurrenceModel::completeFetch()
+{
+}
+
+/*!
+  \obsolete
+  Returns true if the occurrence model has not yet updated the list of occurrence
+  due to a change in stored appointments.
+
+  \sa fetchCompleted(), completeFetch()
+*/
+bool QOccurrenceModel::fetching() const
+{
+    return false;
+}

@@ -26,23 +26,26 @@
 <p>The Help Browser includes a preprocessor that allows a single source of html help files from which device-specific help can be extracted for presentation to the user. This allows packages to be distributed with on-line help that adapts to the user's actual device.</p>
 <a name="syntax"></a>
 <h2>Syntax</h2>
-<p>The supported syntax is a subset of Server Side Includes. This syntax was chosen so that the documentation can alternatively be served by a web browser.</p>
+<p>The supported syntax is a subset of Server Side Includes (SSI). This syntax was chosen so that the documentation can alternatively be served by an appropriately-configured web browser.</p>
 <a name="flow-control"></a>
 <h3>Flow Control</h3>
 <p>SSI <tt>if-else-endif</tt> can be used (but not <tt>elif</tt>), with the expression being a set of variable references separated by &quot;||&quot;. Variables that are non-empty are &quot;true&quot; and variables that are empty (or not defined) are &quot;false&quot;.</p>
-<pre>    &lt;!--#if expr=&quot;$PHONE || $TOUCH&quot;--&gt;
+<pre>    &lt;!--#if expr=&quot;$CELL || $VOIP&quot;--&gt;
     ...
     &lt;!--#else--&gt;
     ...
     &lt;!--#endif--&gt;</pre>
-<p>The following variables are pre-defined (or not) for Qtopia Documentation:</p>
+<p>The following variables are pre-defined (or not, depending on configuration) for Qtopia Documentation:</p>
 <ul>
-<li>PDA - On PDA devices (large touchscreen display with menus).</li>
-<li>KEYPAD - On phones primarily operated by the keypad.</li>
-<li>TOUCH - On phones primarily operated by a touch screen.</li>
-<li>PHONE - On phones (both keypad and touch).</li>
+<li>VOIP - Device supports VoIP (determined by build time configuration)</li>
+<li>CELL - Device supports cellular telephony (GSM or other) (determined by build time configuration)</li>
+<li>TELEPHONY - Device supports some form of telephony (determined by build time configuration)</li>
+<li>INFRARED - Device supports Infrared beaming (determined by build time configuration)</li>
+<li>TOUCH - Device has a touch screen as the primary input (see <a href="qtopia.html#mousePreferred">Qtopia::mousePreferred</a>())</li>
+<li>KEYPAD - Device has a keypad as the primary input (see <a href="qtopia.html#mousePreferred">Qtopia::mousePreferred</a>())</li>
+<li>FLIP - Device can open/close (if <a href="qt.html#Key-enum">Qt::Key_Flip</a> is available)</li>
+<li>USERGUIDE - Not on device - intended for printed manual</li>
 </ul>
-<p>Additionally, the Helpbrowser pre-loads &quot;device.html&quot; before each page. It contains variable device-specific variable settings.</p>
 <a name="variable-substitution"></a>
 <h3>Variable Substitution</h3>
 <p>The string</p>
@@ -51,11 +54,11 @@
 <p>The syntax for setting a variable is:</p>
 <pre>    &lt;!--#set var=&quot;MYVAR&quot; value=&quot;some text&quot;--&gt;</pre>
 <p>It is usually useful to define variables inside configuration blocks. Like this:</p>
-<pre>    &lt;!--#if expr=&quot;$PHONE&quot;--&gt;
-     &lt;!--#set var=&quot;YOURDEV&quot; value=&quot;your phone&quot;--&gt;
+<pre>    &lt;!--#if expr=&quot;$CELL&quot;--&gt;
+     &lt;!--#set var=&quot;YOURDEV&quot; value=&quot;your cellphone&quot;--&gt;
     &lt;!--#else--&gt;
-     &lt;!--#if expr=&quot;$PDA&quot;--&gt;
-      &lt;!--#set var=&quot;YOURDEV&quot; value=&quot;the PDA&quot;--&gt;
+     &lt;!--#if expr=&quot;$TELEPHONY&quot;--&gt;
+      &lt;!--#set var=&quot;YOURDEV&quot; value=&quot;the phone&quot;--&gt;
      &lt;!--#else--&gt;
       &lt;!--#set var=&quot;YOURDEV&quot; value=&quot;the device&quot;--&gt;
      &lt;!--#endif--&gt;
@@ -67,20 +70,13 @@
 <p>The string</p>
 <pre>    &lt;!--#include file=&quot;FILENAME&quot;--&gt;</pre>
 <p>is replaced with the contents of the file FILENAME, which is recursively processed in the manner described here.</p>
-<p>One use for this is device-specific documentation. The Qtopia help attempts to put anything that might vary between devices into a device-specific file. These files all start with &quot;device-&quot;. By replacing these files, the Qtopia help can document a different device.</p>
+<p>One use for this is device-specific documentation. The Qtopia help attempts to put anything that might vary between devices into a device-specific file. These files all start with &quot;device-&quot; (such as &quot;device-keys.html&quot; and &quot;device-name.html&quot;). By replacing these files, the Qtopia help can document a different device.</p>
 <a name="examples"></a>
 <h3>Examples</h3>
-<pre>    &lt;!--#if expr=&quot;$PDA&quot;--&gt;
-    Stuff for the PDA
+<pre>    &lt;!--#if expr=&quot;$CELL&quot;--&gt;
+    Stuff for the cell phone...
     &lt;!--#endif--&gt;</pre>
-<pre>    &lt;!--#if expr=&quot;$PDA || $TOUCH&quot;--&gt;
-    Stuff for the PDA or Touchscreen Phone
-    &lt;!--#if expr=&quot;$PDA&quot;--&gt;
-    Here's some PDA specific stuff in the middle
-    &lt;!--#endif--&gt;
-    Here's some more PDA/Touchscreen stuff
-    &lt;!--#endif--&gt;</pre>
-<pre>    &lt;!--#if expr=&quot;$PHONE&quot;--&gt;
+<pre>    &lt;!--#if expr=&quot;$TELEPHONY&quot;--&gt;
     Stuff for any Phone
     &lt;!--#if expr=&quot;$KEYPAD&quot;--&gt;
     Stuff for a Keypad Phone
@@ -92,6 +88,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

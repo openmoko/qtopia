@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,62 +19,40 @@
 **
 ****************************************************************************/
 
-
-#include <qapplication.h>
-#include <QTemporaryFile>
 #include "imapprotocol.h"
-#include "common.h"
-#include "email.h"
-#include "longstream.h"
+
+#include <QApplication>
+#include <QTemporaryFile>
+
+#include "mailtransport.h"
+#include <longstream_p.h>
+#include <longstring_p.h>
+#include <QMailMessage>
 
 ImapProtocol::ImapProtocol()
 {
     _connected = false;
     read = 0;
     firstParseFetch = true;
+    transport = 0;
     d = new LongStream();
-    socket = 0;
-    stream = 0;
-#ifdef SMTPAUTH
-    secureSocket = 0;
-#endif
+    connect(&incomingDataTimer, SIGNAL(timeout()),
+            this, SLOT(incomingData()));
+    connect(&parseFetchTimer, SIGNAL(timeout()),
+            this, SLOT(parseFetch()));
 }
 
 ImapProtocol::~ImapProtocol()
 {
-    delete socket;
-    delete stream;
     delete d;
+    delete transport;
 }
 
-bool ImapProtocol::open( QString url, int port )
+bool ImapProtocol::open( const MailAccount& account )
 {
     if ( _connected ) {
-        qWarning("socket in use, connection refused");
+        qWarning("transport in use, connection refused");
         return false;
-    }
-#ifdef SMTPAUTH
-    if (secureSocket) {
-        secureSocket->deleteLater();
-        delete stream;
-        secureSocket = 0;
-        socket = 0;
-    }
-#endif
-
-    if (!socket) {
-      socket = new QTcpSocket( this );
-      socket->setReadBufferSize( 65536 );
-      socket->setObjectName( "imapProtocol" );
-      connect( socket, SIGNAL(error(QAbstractSocket::SocketError)),
-               SLOT(socketError(QAbstractSocket::SocketError)));
-      connect( socket, SIGNAL(connected()), this,
-               SLOT(connectionEstablished()));
-      connect( socket, SIGNAL(readyRead()), this, SLOT(incomingData()));
-      connect( &incomingDataTimer, SIGNAL(timeout()), this,
-               SLOT(incomingData()));
-      connect( &parseFetchTimer, SIGNAL(timeout()), this, SLOT(parseFetch()));
-      stream = new QTextStream( socket );
     }
 
     status = IMAP_Init;
@@ -86,86 +64,29 @@ bool ImapProtocol::open( QString url, int port )
     requests.clear();
     d->reset();
 
-    socket->connectToHost( url, port );
+    if (!transport) {
+        transport = new MailTransport("IMAP");
+
+        connect(transport, SIGNAL(updateStatus(QString)),
+                this, SIGNAL(updateStatus(QString)));
+        connect(transport, SIGNAL(errorOccurred(int,QString)),
+                this, SLOT(errorHandling(int,QString)));
+        connect(transport, SIGNAL(connected(MailAccount::EncryptType)),
+                this, SLOT(connected(MailAccount::EncryptType)));
+        connect(transport, SIGNAL(readyRead()),
+                this, SLOT(incomingData()));
+    }
+
+    transport->open( account );
+
     return true;
 }
-
-#ifdef SMTPAUTH
-bool ImapProtocol::openSecure( QString url, int port, bool useTLS )
-{
-    if ( _connected ) {
-        qWarning("socket in use, connection refused");
-        return false;
-    }
-
-    if (socket && !secureSocket)
-    {
-        socket->deleteLater();
-        delete stream;
-        socket = 0;
-    }
-
-    //if useTLS is enabled then enable starttls for the connection
-
-    if (!secureSocket) {
-        if (!useTLS) { //SSL connection
-            secureSocket = new QtSslSocket( QtSslSocket::Client, this );
-            secureSocket->setReadBufferSize( 65536 );
-            secureSocket->setObjectName( "imapProtocol-secure" );
-            secureSocket->setPathToCACertDir( QtMail::sslCertsPath() );
-            connect( secureSocket,
-                     SIGNAL(connectionVerificationDone(QtSslSocket::VerifyResult, bool, const QString&)),
-                     SLOT(certCheckDone(QtSslSocket::VerifyResult, bool, const QString&)));
-            socket = secureSocket;
-            connect( socket, SIGNAL(error(QAbstractSocket::SocketError)),
-                     SLOT(socketError(QAbstractSocket::SocketError)));
-            connect( socket, SIGNAL(connected()),
-                     this, SLOT(connectionEstablished()));
-            connect( socket, SIGNAL(readyRead()),
-                     this, SLOT(incomingData()));
-            connect( &incomingDataTimer, SIGNAL(timeout()),
-                     this, SLOT(incomingData()));
-            connect( &parseFetchTimer, SIGNAL(timeout()),
-                     this, SLOT(parseFetch()));
-            stream = new QTextStream( socket );
-        } else {
-            //TODO add support for starttls command
-        }
-    }
-
-    status = IMAP_Init;
-
-    errorList.clear();
-    _connected = true;
-
-    requestCount = 0;
-    requests.clear();
-    d->reset();
-
-    secureSocket->connectToHost( url, port );
-    return true;
-}
-
-
-void ImapProtocol::certCheckDone( QtSslSocket::VerifyResult result, bool hostMatched, const QString& msg)
-{
-    Q_UNUSED(hostMatched)
-    if (result == QtSslSocket::VerifyOk)
-        return;
-
-    qWarning( ("SSL cert check failed: " + msg).toAscii() );
-    socket->close();
-    _connected = false;
-    emit connectionError( static_cast<int>(result) );
-}
-
-#endif
 
 void ImapProtocol::close()
 {
     _connected = false;
     _name = "";
-    socket->close();
+    transport->close();
 }
 
 int ImapProtocol::exists()
@@ -279,18 +200,20 @@ void ImapProtocol::uidFetch( QString from, QString to, FetchItemFlags items )
     dataItems = items;
 
     QString flags = "(FLAGS";
-    if (dataItems & F_UID)
+    if (dataItems & F_Uid)
         flags += " UID";
-    if (dataItems & F_RFC822_SIZE)
+    if (dataItems & F_Rfc822_Size)
         flags += " RFC822.SIZE";
-    if (dataItems & F_RFC822_HEADER)
+    if (dataItems & F_Rfc822_Header)
         flags += " RFC822.HEADER";
-    if (dataItems & F_RFC822)
+    if (dataItems & F_Rfc822)
         flags += " RFC822";
 
     flags += ")";
 
     QString cmd = QString( "UID FETCH %1:%2 %3\r\n" ).arg( from ).arg( to ).arg( flags );
+    if (from == to)
+        fetchUid = from;
     status = IMAP_UIDFetch;
 
     sendCommand( cmd );
@@ -328,22 +251,28 @@ void ImapProtocol::expunge()
     sendCommand( cmd );
 }
 
-void ImapProtocol::connectionEstablished()
+void ImapProtocol::connected(MailAccount::EncryptType encryptType)
 {
-   // qWarning( "Connection established");
-#ifdef SMTPAUTH
-    if(secureSocket)
-        qLog(Messaging) << "ImapProtocol: Secure connection established";
-#endif
     mailDropSize = 0;
+
+#ifndef QT_NO_OPENSSL
+    if (encryptType == MailAccount::Encrypt_NONE)
+    {
+        // TODO - TLS support not yet added!
+    }
+#endif
 }
 
-void ImapProtocol::socketError( QAbstractSocket::SocketError status )
+void ImapProtocol::errorHandling(int status, QString msg)
 {
     _connected = false;
-    socket->close();
+    transport->close();
+
+    if (msg.isEmpty())
+        msg = tr("Connection failed");
+
     if (this->status != IMAP_Logout)
-        emit connectionError(static_cast<int>(status));
+        emit connectionError(status, msg);
 }
 
 void ImapProtocol::sendCommand( QString cmd )
@@ -353,16 +282,14 @@ void ImapProtocol::sendCommand( QString cmd )
     requests.append( command );
     d->reset();
 
-//    qWarning("sending command: " + command);
-
-    *stream << command << flush;
+    transport->stream() << command << flush;
 }
 
 void ImapProtocol::incomingData()
 {
     int readLines = 0;
-    while (socket->canReadLine()) {
-        response = socket->readLine();
+    while (transport->canReadLine()) {
+        response = transport->readLine();
         readLines++;
         read += response.length();
 
@@ -379,7 +306,7 @@ void ImapProtocol::incomingData()
             }
         }
 
-        if ((status == IMAP_UIDFetch) && (dataItems & F_RFC822)) {
+        if ((status == IMAP_UIDFetch) && (dataItems & F_Rfc822)) {
             mailDropSize += response.length();
         }
         if (readLines > MAX_LINES) {
@@ -390,6 +317,11 @@ void ImapProtocol::incomingData()
 
     incomingDataTimer.stop();
 
+    nextAction();
+}
+
+void ImapProtocol::nextAction()
+{
     if (status == IMAP_Init) {
         operationState = OpOk;
         emit finished(status, operationState);
@@ -399,7 +331,7 @@ void ImapProtocol::incomingData()
     }
 
     if (status == IMAP_Logout) {
-        socket->close();
+        transport->close();
         _connected = false;
         d->reset();
         operationState = OpOk;
@@ -410,7 +342,7 @@ void ImapProtocol::incomingData()
         return;
     }
 
-    if ((status == IMAP_UIDFetch) && (dataItems & F_RFC822))
+    if ((status == IMAP_UIDFetch) && (dataItems & F_Rfc822))
         emit downloadSize( mailDropSize );
 
     /* Applies to all functions below   */
@@ -473,7 +405,7 @@ void ImapProtocol::incomingData()
 
     if (status == IMAP_UIDFetch) {
         //temporary for now
-        if (dataItems & F_RFC822_HEADER) {
+        if (dataItems & F_Rfc822_Header) {
             parseFetch();
         } else {
             parseFetchAll();
@@ -482,6 +414,7 @@ void ImapProtocol::incomingData()
             read = 0;
         }
 
+        fetchUid = QString();
         return;
     }
 
@@ -499,20 +432,6 @@ void ImapProtocol::incomingData()
         return;
     }
 
-/*
-    if (status == Exit) {
-        socket->close();
-        receiving = false;
-        serverData.clear();
-        emit updateStatus(tr("Communication finished"));
-//      if (unresolvedUidl.count() > 0 && !preview) {
-//          emit unresolvedUidlList(unresolvedUidl);
-//      }
-        emit mailTransferred(0);
-        if (errorList.count() > 0)
-            emit failedList(errorList);
-    }
-*/
     response = "";
     read = 0;
 }
@@ -561,7 +480,6 @@ OperationState ImapProtocol::commandResponse( QString in )
 
     return state;
 }
-
 
 void ImapProtocol::parseList( QString in )
 {
@@ -630,6 +548,10 @@ void ImapProtocol::parseSelect()
 
 void ImapProtocol::parseFetch()
 {
+    static const QByteArray crlfSequence( QMailMessage::CRLF );
+    static const QByteArray headerTerminator( crlfSequence + crlfSequence );
+    static const QByteArray popTerminator( crlfSequence + '.' + crlfSequence );
+
     int start, endMsg;
     QString str, uid, msg, size;
     MessageFlags flags = 0;
@@ -675,16 +597,16 @@ void ImapProtocol::parseFetch()
                 qWarning( ("fetch failed: " + str).toAscii() );
                 flags = 0;
             } else {
-                endMsg = msg.indexOf( "\n\n" );
+                endMsg = msg.indexOf( headerTerminator );
                 if (endMsg != -1)
-                    msg.truncate( (uint)endMsg);
+                    msg.truncate(endMsg);
 
                 //to work with pop standard
-                endMsg = msg.indexOf( "\n.\n", -3 );
+                endMsg = msg.indexOf( popTerminator, -popTerminator.length() );
                 if (endMsg == -1)
-                    msg += "\n.\n";
+                    msg.append( popTerminator );
 
-                createMail( false, msg, uid, size.toInt(), flags );
+                createMail( msg.toLatin1(), uid, size.toInt(), flags );
 
                 flags = 0;
                 // don't freeze up the pda when we're very busy
@@ -704,14 +626,35 @@ void ImapProtocol::parseFetch()
     }
 }
 
+static bool parseFlags(const QString& field, MessageFlags& flags)
+{
+    QRegExp pattern("FLAGS *\\((.*)\\)");
+    pattern.setMinimal(true);
+
+    if (pattern.indexIn(field) == -1)
+        return false;
+
+    QString messageFlags = pattern.cap(1);
+
+    flags = 0;
+    if (messageFlags.indexOf("\\Seen") != -1)
+        flags |= MFlag_Seen;
+    if (messageFlags.indexOf("\\Answered") != -1)
+        flags |= MFlag_Answered;
+    if (messageFlags.indexOf("\\Flagged") != -1)
+        flags |= MFlag_Flagged;
+    if (messageFlags.indexOf("\\Deleted") != -1)
+        flags |= MFlag_Deleted;
+    if (messageFlags.indexOf("\\Draft") != -1)
+        flags |= MFlag_Draft;
+    if (messageFlags.indexOf("\\Recent") != -1)
+        flags |= MFlag_Recent;
+
+    return true;
+}
+
 void ImapProtocol::parseFetchAll()
 {
-    int start;
-    int msgSize = 0;
-    QString uid, size;
-    bool result;
-    MessageFlags flags = 0;
-
     QString str = d->first();
     if (str == QString::null) {
         qWarning( "not a valid message" );
@@ -719,73 +662,61 @@ void ImapProtocol::parseFetchAll()
     }
 
     if (str.startsWith( "* " )) {
-        //get flags as well
-        if ((start = str.indexOf( "UID", 0 )) != -1) {
-            uid = token( str, ' ', ' ', &start );
-        }
-        if ((start = str.indexOf( "RFC822.SIZE", 0 )) != -1) {
-            size = token( str, ' ', ' ', &start );
-            msgSize = size.toUInt( &result );
-            if (!result)
-                msgSize = 0;
+        QString uid, size;
+        uint msgSize = 0;
+
+        QRegExp format("UID *(\\d+).*RFC822\\.SIZE *(\\d+)");
+        if (format.indexIn(str) != -1) {
+            uid = format.cap(1);
+            size = format.cap(2);
+            msgSize = size.toUInt();
         }
 
-        if (str.indexOf("\\Seen") > -1)
-            flags |= MFlag_Seen;
-        if (str.indexOf("\\Answered") > -1)
-            flags |= MFlag_Answered;
-        if (str.indexOf("\\Flagged") > -1)
-              flags |= MFlag_Flagged;
-        if (str.indexOf("\\Deleted") > -1)
-              flags |= MFlag_Deleted;
-        if (str.indexOf("\\Draft") > -1)
-            flags |= MFlag_Draft;
-        if (str.indexOf("\\Recent") > -1)
-            flags |= MFlag_Recent;
+        MessageFlags flags = 0;
+        bool flagsParsed(parseFlags(str, flags));
+
+        int bypass = str.length() + 2;  // Account for CRLF
+
+        // Read the body data from the file
+        LongString ls(d->fileName());
+        
+        const QByteArray& orgData(ls.toQByteArray());
+        uint remainder(orgData.length() - bypass);
+        if (msgSize)
+            remainder = qMin(msgSize, remainder);
+
+        QByteArray data(orgData.constData() + bypass, remainder);
+
+        QByteArray trailer;
+        if (msgSize == 0) {
+            // Find the trailing part of the imap server traffic
+            trailer = QByteArray( (QByteArray( QMailMessage::CRLF ) + ')' + QMailMessage::CRLF) );
+            int pos = data.lastIndexOf( trailer );
+            if (pos != -1) {
+                // Leave the terminating CRLF
+                trailer = data.mid(pos + 2);
+                data.chop(data.length() - (pos + 2));
+            }
+
+            msgSize = data.length();
+        } else {
+            trailer = QByteArray(orgData.constData() + (bypass + remainder), orgData.length() - (bypass + remainder));
+        }
+
+        if (!flagsParsed) {
+            // See if the flags follow the message data
+            flagsParsed = parseFlags(QString(trailer), flags);
+        }
+
+        // Append the pop trailer
+        data.append('.').append(QMailMessage::CRLF);
+
+        createMail( data, uid, msgSize, flags );
+    } else {
+        emit nonexistentMessage(fetchUid);
     }
 
-    // Make a copy of the downloaded file
-    QString fileName;
-    QTemporaryFile *tmpFile;
-    QTextStream *ts;
-    QString tmpName( LongStream::tempDir() + QLatin1String( "/qtmail" ) );
-    tmpFile = new QTemporaryFile( tmpName + QLatin1String( ".XXXXXX" ));
-    tmpFile->setAutoRemove( false );
-    tmpFile->open(); // todo error checking
-    fileName = tmpFile->fileName();
-    ts = new QTextStream( tmpFile );
-    ts->setCodec( "UTF-8" ); // Mail should be 7bit ascii
-    str = d->next();
-    while (str != QString::null) {
-        *ts << str << flush; //todo error checking - out of disk
-        str = d->next();
-    }
-    tmpFile->close();
-    delete ts;
-    delete tmpFile;
-
-    // If necessary truncate the copy to remove spurious imap server chatter,
-    // e.g. remove "junk" lines:   )\r\n* Ax FETCH ...
-    // then unconditionally append "\n.\n" to it.
-    LongString ls( fileName, false );
-    int pos = ls.toQByteArray().lastIndexOf( "\n)\n", -1 );
-    QFile mailFile( fileName );
-    QTextStream *mts;
-
-    if (pos > 0)
-        mailFile.resize( pos + 1 );
-    mailFile.open( QIODevice::Append | QIODevice::Text );// todo error checking
-    mts = new QTextStream( &mailFile );
-    mts->setCodec( "UTF-8" ); // Mail should be 7bit ascii
-    *mts << "\n.\n" << flush;
-    mailFile.close();
-    delete mts;
-
-    // Clear the download file minimizing simultaneous copies on the filesystem
     d->reset();
-
-    // Create the mail and emit the relevant signal
-    createMail( true, fileName, uid, msgSize, flags );
 }
 
 void ImapProtocol::parseUid()
@@ -811,14 +742,28 @@ void ImapProtocol::parseUid()
 QString ImapProtocol::token( QString str, QChar c1, QChar c2, int *index )
 {
     int start, stop;
+
+    // The strings we're tokenizing use CRLF as the line delimiters - assume that the
+    // caller considers the sequence to be atomic.
+    if (c1 == QMailMessage::LineFeed)
+        c1 = QMailMessage::CarriageReturn;
     start = str.indexOf( c1, *index, Qt::CaseInsensitive );
     if (start == -1)
         return QString::null;
+
+    // Bypass the LF if necessary
+    if (c1 == QMailMessage::CarriageReturn)
+        start += 1;
+
+    if (c2 == QMailMessage::LineFeed)
+        c2 = QMailMessage::CarriageReturn;
     stop = str.indexOf( c2, ++start, Qt::CaseInsensitive );
     if (stop == -1)
         return QString::null;
 
-    *index = stop + 1;
+    // Bypass the LF if necessary
+    *index = stop + (c2 == QMailMessage::CarriageReturn ? 2 : 1);
+
     return str.mid( start, stop - start );
 }
 
@@ -838,32 +783,26 @@ QString ImapProtocol::unquoteString( QString name )
     QString str = name.simplified();
     if (str[0] == '\"')
         str = str.right( str.length() - 1 );
-    if (str[(int)str.length() - 1] == '\"')
+    if (str[str.length() - 1] == '\"')
         str = str.left( str.length() - 1 );
 
     return str.trimmed();
 }
 
-void ImapProtocol::createMail( bool isFile, QString& msg, QString& id, int size, uint flags )
+void ImapProtocol::createMail( const QByteArray& msg, QString& id, int size, uint flags )
 {
-    Email mail;
-    mail.setStatus( EFlag_Incoming, true );
-    if (flags & MFlag_Seen) {
-        mail.setStatus( EFlag_IMAP_Seen, true );
-    }
-    if (flags & MFlag_Answered)
-        mail.setStatus( EFlag_Replied, true );
+    QMailMessage mail = QMailMessage::fromRfc2822( msg );
 
-    if (isFile) {
-        LongString ls( msg );
-        mail.fromRFC822( ls );
-    } else {
-        QString str = msg;
-        mail.fromRFC822( str );
-    }
+    mail.setStatus( QMailMessage::Incoming, true );
+    if (flags & MFlag_Seen)
+        mail.setStatus( QMailMessage::ReadElsewhere, true );
+    if (flags & MFlag_Answered)
+        mail.setStatus( QMailMessage::Replied, true );
+
     mail.setSize( size );
     mail.setServerUid( id.mid( id.indexOf( " " ) + 1, id.length() ));
-    mail.setType( MailMessage::Email );
+    mail.setMessageType( QMailMessage::Email );
 
     emit messageFetched(mail);
 }
+

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -25,16 +25,21 @@
 #include <QObject>
 #include <QList>
 #include <qtopiaapplication.h>
-#include <qwindowsystem_qws.h>
 #include <custom.h>
-#include <qpowerstatus.h>
 #include <qvaluespace.h>
-#include "powermanagertask.h"
+#include <QPowerStatus>
+#ifdef Q_WS_QWS
+#include <qwindowsystem_qws.h>
+#endif
 
 class QSettings;
 
-class QtopiaPowerManager : public PowerManagerTask, public QWSScreenSaver
+class QtopiaPowerManager : public QObject
+#ifdef Q_WS_QWS
+    , public QWSScreenSaver
+#endif
 {
+Q_OBJECT
 public:
     QtopiaPowerManager();
 
@@ -45,14 +50,13 @@ public:
     virtual void setIntervals(int* a, int size) = 0;
     virtual bool save(int level) = 0;
 
-    static void setBacklight(int bright);
-    static int backlight();
+    void setBacklight(int bright);
+    int backlight();
     static void setActive(bool on);
 
     void setConstraint(QtopiaApplication::PowerConstraint m);
 
 protected:
-    virtual void powerStatusChanged(const QPowerStatus &);
     int interval(int interval, QSettings& cfg, const QString &enable,
             const QString& value, int def);
 
@@ -61,6 +65,14 @@ protected:
     bool m_lightOffEnabled;
     QMap<int,int> m_levelToAction;
     static QValueSpaceObject *m_vso;
+    virtual void forceSuspend();
+
+private slots:
+    virtual void powerStatusChanged();
+    void _forceSuspend();
+
+private:
+    QPowerStatus powerstatus;
 };
 
 class QtopiaPowerConstraintManager : public QObject
@@ -88,7 +100,7 @@ private:
     int timerValue();
 
 private:
-    QList<QString> sStatus[4];
+    QList<QString> sStatus[3];
     int currentMode;
     int timerId;
 };

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -45,10 +60,15 @@ static int grow(int size)
     return x;
 }
 
+#if QT_VERSION >= 0x050000
+#  error "Remove QListData::detach(), it is only required for binary compatibility for 4.0.x to 4.2.x"
+#endif
 QListData::Data *QListData::detach()
 {
-    Q_ASSERT(d->ref != 1);
     Data *x = static_cast<Data *>(qMalloc(DataHeaderSize + d->alloc * sizeof(void *)));
+    if (!x)
+        qFatal("QList: Out of memory");
+
     ::memcpy(x, d, DataHeaderSize + d->alloc * sizeof(void *));
     x->alloc = d->alloc;
     x->ref.init(1);
@@ -62,15 +82,35 @@ QListData::Data *QListData::detach()
     return 0;
 }
 
+// Returns the old (shared) data, it is up to the caller to deref() and free()
+QListData::Data *QListData::detach2()
+{
+    Data *x = static_cast<Data *>(qMalloc(DataHeaderSize + d->alloc * sizeof(void *)));
+    if (!x)
+        qFatal("QList: Out of memory");
+
+    ::memcpy(x, d, DataHeaderSize + d->alloc * sizeof(void *));
+    x->alloc = d->alloc;
+    x->ref.init(1);
+    x->sharable = true;
+    if (!x->alloc)
+        x->begin = x->end = 0;
+
+    return qAtomicSetPtr(&d, x);
+}
+
 void QListData::realloc(int alloc)
 {
     Q_ASSERT(d->ref == 1);
-    d = static_cast<Data *>(qRealloc(d, DataHeaderSize + alloc * sizeof(void *)));
+    Data *x = static_cast<Data *>(qRealloc(d, DataHeaderSize + alloc * sizeof(void *)));
+    if (!x)
+        qFatal("QList: Out of memory");
+
+    d = x;
     d->alloc = alloc;
     if (!alloc)
         d->begin = d->end = 0;
 }
-
 
 void **QListData::append()
 {
@@ -266,16 +306,22 @@ void **QListData::erase(void **xi)
        use QVector.
     \endlist
 
+
     Internally, QList\<T\> is represented as an array of pointers to
-    items. (Exceptionally, if T is a pointer type, a basic type of
-    the size of a pointer, or one of Qt's \l{shared classes},
-    QList\<T\> stores the item directly in the pointer.) For lists
-    under a thousand items, this representation allows for very fast
-    insertions in the middle, in addition to instantaneous
-    index-based access. Furthermore, operations like prepend() and
-    append() are very fast, because QList preallocates memory on both
-    sides of its internal array. (See \l{Algorithmic Complexity}
-    for details.)
+    items. (Exceptionally, if T is itself a pointer type or a basic
+    type that is no larger than a pointer, or if T is one of Qt's
+    \l{shared classes}, then QList\<T\> stores the items directly in
+    the pointer array.) For lists under a thousand items, this
+    representation allows for very fast insertions in the middle, in
+    addition to instantaneous index-based access. Furthermore,
+    operations like prepend() and append() are very fast, because
+    QList preallocates memory at both ends of its internal array. (See
+    \l{Algorithmic Complexity} for details.) Note, however, that for
+    unshared list items that are larger than a pointer, each append or
+    insert of a new item requires allocating the new item on the heap,
+    and this per item allocation might make QVector a better choice in
+    cases that do lots of appending or inserting, since QVector
+    allocates memory for its items in a single heap allocation.
 
     Here's an example of a QList that stores integers and
     a QList that stores QDate values:
@@ -454,7 +500,7 @@ void **QListData::erase(void **xi)
     \sa operator==()
 */
 
-/*! 
+/*!
     \fn int QList::size() const
 
     Returns the number of items in the list.
@@ -606,7 +652,7 @@ void **QListData::erase(void **xi)
     \sa operator[](), removeAt()
 */
 
-/*!     
+/*!
     \fn int QList::removeAll(const T &value)
 
     Removes all occurrences of \a value in the list and returns the number of entries
@@ -1010,7 +1056,7 @@ void **QListData::erase(void **xi)
 /*! \fn bool QList::empty() const
 
     This function is provided for STL compatibility. It is equivalent
-    to isEmpty().
+    to isEmpty() and returns true if the list is empty.
 */
 
 /*! \fn QList<T> &QList::operator+=(const QList<T> &other)

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -114,8 +129,8 @@ bool Qt::mightBeRichText(const QString& text)
 
     \code
         QString plain = "#include <QtCore>"
-	QString html = Qt::escape(plain);
-	// html == "#include &lt;QtCore&gt;"
+        QString html = Qt::escape(plain);
+        // html == "#include &lt;QtCore&gt;"
     \endcode
 
     This function is defined in the \c <QTextDocument> header file.
@@ -263,6 +278,15 @@ QTextCodec *Qt::codecForHtml(const QByteArray &ba)
 */
 
 /*!
+    \property QTextDocument::defaultTextOption
+    \brief the default text option will be set on all \l{QTextLayout}s in the document.
+
+    When \l{QTextBlock}s are created, the defaultTextOption is set on their
+    QTextLayout. This allows setting global properties for the document such as the
+    default word wrap mode. 
+ */
+
+/*!
     Constructs an empty QTextDocument with the given \a parent.
 */
 QTextDocument::QTextDocument(QObject *parent)
@@ -311,13 +335,15 @@ QTextDocument *QTextDocument::clone(QObject *parent) const
     Q_D(const QTextDocument);
     QTextDocument *doc = new QTextDocument(parent);
     QTextCursor(doc).insertFragment(QTextDocumentFragment(this));
-    doc->d_func()->title = d->title;
-    doc->d_func()->pageSize = d->pageSize;
-    doc->d_func()->useDesignMetrics = d->useDesignMetrics;
-    doc->d_func()->setDefaultFont(d->defaultFont());
-    doc->d_func()->resources = d->resources;
-    doc->d_func()->defaultStyleSheet = d->defaultStyleSheet;
-    doc->d_func()->parsedDefaultStyleSheet = d->parsedDefaultStyleSheet;
+    doc->rootFrame()->setFrameFormat(rootFrame()->frameFormat());
+    QTextDocumentPrivate *priv = doc->d_func();
+    priv->title = d->title;
+    priv->pageSize = d->pageSize;
+    priv->defaultTextOption = d->defaultTextOption;
+    priv->setDefaultFont(d->defaultFont());
+    priv->resources = d->resources;
+    priv->defaultStyleSheet = d->defaultStyleSheet;
+    priv->parsedDefaultStyleSheet = d->parsedDefaultStyleSheet;
     return doc;
 }
 
@@ -450,6 +476,8 @@ bool QTextDocument::isUndoRedoEnabled() const
     Note that setting this property will apply the limit immediately to the document
     contents.
 
+    Setting this property also disables the undo redo history.
+
     This property is undefined in documents with tables or frames.
 */
 int QTextDocument::maximumBlockCount() const
@@ -463,6 +491,33 @@ void QTextDocument::setMaximumBlockCount(int maximum)
     Q_D(QTextDocument);
     d->maximumBlockCount = maximum;
     d->ensureMaximumBlockCount();
+    setUndoRedoEnabled(false);
+}
+
+/*!
+    \since 4.3
+
+    The default text option is used on all QTextLayout objects in the document.
+    This allows setting global properties for the document such as the default
+    word wrap mode.
+*/
+QTextOption QTextDocument::defaultTextOption() const
+{
+    Q_D(const QTextDocument);
+    return d->defaultTextOption;
+}
+
+/*!
+    \since 4.3
+
+    Sets the default text option.
+*/
+void QTextDocument::setDefaultTextOption(const QTextOption &option)
+{
+    Q_D(QTextDocument);
+    d->defaultTextOption = option;
+    if (d->lout)
+        d->lout->documentChanged(0, 0, d->length());
 }
 
 /*!
@@ -490,7 +545,7 @@ void QTextDocument::markContentsDirty(int from, int length)
 void QTextDocument::setUseDesignMetrics(bool b)
 {
     Q_D(QTextDocument);
-    d->useDesignMetrics = b;
+    d->defaultTextOption.setUseDesignMetrics(b);
     if (d->lout)
         d->lout->documentChanged(0, 0, d->length());
 }
@@ -498,7 +553,7 @@ void QTextDocument::setUseDesignMetrics(bool b)
 bool QTextDocument::useDesignMetrics() const
 {
     Q_D(const QTextDocument);
-    return d->useDesignMetrics;
+    return d->defaultTextOption.useDesignMetrics();
 }
 
 /*!
@@ -565,14 +620,9 @@ qreal QTextDocument::textWidth() const
 */
 qreal QTextDocument::idealWidth() const
 {
-#ifndef QT_NO_PROPERTIES
-    QAbstractTextDocumentLayout *lout = documentLayout();
-    if (lout->metaObject()->indexOfProperty("idealWidth") == -1)
-        return textWidth();
-    return lout->property("idealWidth").toDouble();
-#else
+    if (QTextDocumentLayout *lout = qobject_cast<QTextDocumentLayout *>(documentLayout()))
+        return lout->idealWidth();
     return textWidth();
-#endif
 }
 
 /*!
@@ -591,18 +641,19 @@ void QTextDocument::adjustSize()
     QFontMetrics fm(f);
     int mw =  fm.width(QLatin1Char('x')) * 80;
     int w = mw;
-    setPageSize(QSizeF(w, -1));
+    setTextWidth(w);
     QSizeF size = documentLayout()->documentSize();
     if (size.width() != 0) {
         w = qt_int_sqrt((uint)(5 * size.height() * size.width() / 3));
-        setPageSize(QSizeF(qMin(w, mw), -1));
+        setTextWidth(qMin(w, mw));
 
         size = documentLayout()->documentSize();
         if (w*3 < 5*size.height()) {
             w = qt_int_sqrt((uint)(2 * size.height() * size.width()));
-            setPageSize(QSizeF(qMin(w, mw), -1));
+            setTextWidth(qMin(w, mw));
         }
     }
+    setTextWidth(idealWidth());
 }
 
 /*!
@@ -725,6 +776,15 @@ QString QTextDocument::defaultStyleSheet() const
 */
 
 /*!
+    \fn QTextDocument::blockCountChanged(int newBlockCount);
+    \since 4.3
+
+    This signal is emitted when the total number of text blocks in the
+    document changes. The value passed in \a newBlockCount is the new
+    total.
+*/
+
+/*!
     Returns true if undo is available; otherwise returns false.
 */
 bool QTextDocument::isUndoAvailable() const
@@ -825,10 +885,11 @@ QString QTextDocument::toPlainText() const
 void QTextDocument::setPlainText(const QString &text)
 {
     Q_D(QTextDocument);
-    setUndoRedoEnabled(false);
+    bool previousState = d->isUndoRedoEnabled();
+    d->enableUndoRedo(false);
     d->clear();
     QTextCursor(this).insertText(text);
-    setUndoRedoEnabled(true);
+    d->enableUndoRedo(previousState);
 }
 
 /*!
@@ -839,15 +900,20 @@ void QTextDocument::setPlainText(const QString &text)
     "<b>bold</b> text" will produce text where the first word has a font
     weight that gives it a bold appearance: "\bold{bold} text".
 
+    \note It is the responsibility of the caller to make sure that the
+    text is correctly decoded when a QString containing HTML is created
+    and passed to setHtml().
+
     \sa setPlainText(), {Supported HTML Subset}
 */
 void QTextDocument::setHtml(const QString &html)
 {
     Q_D(QTextDocument);
-    setUndoRedoEnabled(false);
+    bool previousState = d->isUndoRedoEnabled();
+    d->enableUndoRedo(false);
     d->clear();
-    QTextHtmlImporter(this, html).import();
-    setUndoRedoEnabled(true);
+    QTextHtmlImporter(this, html, QTextHtmlImporter::ImportToDocument).import();
+    d->enableUndoRedo(previousState);
 }
 
 /*!
@@ -932,10 +998,12 @@ QTextCursor QTextDocument::find(const QString &subString, const QTextCursor &fro
 }
 
 
-static bool findInBlock(const QTextBlock &block, const QString &text, const QRegExp &expression, int offset,
+static bool findInBlock(const QTextBlock &block, const QRegExp &expression, int offset,
                         QTextDocument::FindFlags options, QTextCursor &cursor)
 {
     const QRegExp expr(expression);
+    QString text = block.text();
+    text.replace(QChar::Nbsp, QLatin1Char(' '));
 
     int idx = -1;
     while (offset >=0 && offset <= text.length()) {
@@ -951,6 +1019,7 @@ static bool findInBlock(const QTextBlock &block, const QString &text, const QReg
                 || (end != text.length() && text.at(end).isLetterOrNumber())) {
                 //if this is not a whole word, continue the search in the string
                 offset = (options & QTextDocument::FindBackward) ? idx-1 : end+1;
+                idx = -1;
                 continue;
             }
         }
@@ -1003,8 +1072,7 @@ QTextCursor QTextDocument::find(const QRegExp & expr, int from, FindFlags option
     if (!(options & FindBackward)) {
        int blockOffset = qMax(0, pos - block.position());
         while (block.isValid()) {
-            const QString blockText = block.text();
-            if (findInBlock(block, blockText, expr, blockOffset, options, cursor))
+            if (findInBlock(block, expr, blockOffset, options, cursor))
                 return cursor;
             blockOffset = 0;
             block = block.next();
@@ -1012,8 +1080,7 @@ QTextCursor QTextDocument::find(const QRegExp & expr, int from, FindFlags option
     } else {
         int blockOffset = pos - block.position();
         while (block.isValid()) {
-            const QString blockText = block.text();
-            if (findInBlock(block, blockText, expr, blockOffset, options, cursor))
+            if (findInBlock(block, expr, blockOffset, options, cursor))
                 return cursor;
             block = block.previous();
             blockOffset = block.length() - 1;
@@ -1134,7 +1201,16 @@ QTextBlock QTextDocument::begin() const
 }
 
 /*!
-    Returns the document's last text block.
+    This function returns a block to test for the end of the document
+    while iterating over it.
+
+    \quotefromfile snippets/textdocumentendsnippet.cpp
+    \skipto for
+    \printuntil cout
+
+    The block returned is invalid and represents the block after the
+    last block in the document.
+
 */
 QTextBlock QTextDocument::end() const
 {
@@ -1265,15 +1341,25 @@ static void printPage(int index, QPainter *painter, const QTextDocument *doc, co
 
     If the document is not paginated, like for example a document used in a QTextEdit,
     then a temporary copy of the document is created and the copy is broken into
-    multiple pages according to the size of the QPrinter's paperRect(). The default
-    font size is also set to a font with 10 points and a 2 cm margin is set around the
-    document contents. In addition the current page number is printed at the bottom of
-    each page.
+    multiple pages according to the size of the QPrinter's paperRect(). By default
+    a 2 cm margin is set around the document contents. In addition the current page
+    number is printed at the bottom of each page.
+
+    Note that QPrinter::Selection is not supported as print range with this function since
+    the selection is a property of QTextCursor. If you have a QTextEdit associated with
+    your QTextDocument then you can use QTextEdit's print() function because QTextEdit has
+    access to the user's selection.
+
+    \sa QTextEdit::print()
 */
 
 void QTextDocument::print(QPrinter *printer) const
 {
     Q_D(const QTextDocument);
+
+    if (!d->title.isEmpty())
+        printer->setDocName(d->title);
+
     QPainter p(printer);
 
     // Check that there is a valid device to print to.
@@ -1287,7 +1373,7 @@ void QTextDocument::print(QPrinter *printer) const
     QRectF body = QRectF(QPointF(0, 0), d->pageSize);
     QPointF pageNumberPos;
 
-    if (d->pageSize.isValid()
+    if (d->pageSize.isValid() && !d->pageSize.isNull()
         && d->pageSize.height() != INT_MAX) {
         extern int qt_defaultDpi();
 
@@ -1310,7 +1396,7 @@ void QTextDocument::print(QPrinter *printer) const
         scaledPageSize.rwidth() *= dpiScaleX;
         scaledPageSize.rheight() *= dpiScaleY;
 
-        const QSizeF printerPageSize(printer->width(), printer->height());
+        const QSizeF printerPageSize(printer->pageRect().size());
 
         // scale to page
         p.scale(printerPageSize.width() / scaledPageSize.width(),
@@ -1335,9 +1421,6 @@ void QTextDocument::print(QPrinter *printer) const
                                 + QFontMetrics(doc->defaultFont(), p.device()).ascent()
                                 + 5 * p.device()->logicalDpiY() / 72);
 
-        QFont font(doc->defaultFont());
-        font.setPointSize(10); // we define 10pt to be a nice base size for printing
-        clonedDoc->setDefaultFont(font);
         clonedDoc->setPageSize(body.size());
     }
 
@@ -1518,6 +1601,11 @@ QTextHtmlExporter::QTextHtmlExporter(const QTextDocument *_doc)
 {
     const QFont defaultFont = doc->defaultFont();
     defaultCharFormat.setFont(defaultFont);
+    // don't export those for the default font since we cannot turn them off with CSS
+    defaultCharFormat.clearProperty(QTextFormat::FontUnderline);
+    defaultCharFormat.clearProperty(QTextFormat::FontOverline);
+    defaultCharFormat.clearProperty(QTextFormat::FontStrikeOut);
+    defaultCharFormat.clearProperty(QTextFormat::TextUnderlineStyle);
 }
 
 /*!
@@ -1525,10 +1613,12 @@ QTextHtmlExporter::QTextHtmlExporter(const QTextDocument *_doc)
     perfect, especially for complex documents, due to the limitations
     of HTML.
 */
-QString QTextHtmlExporter::toHtml(const QByteArray &encoding)
+QString QTextHtmlExporter::toHtml(const QByteArray &encoding, ExportMode mode)
 {
     html = QLatin1String("<html><head><meta name=\"qrichtext\" content=\"1\" />");
     html.reserve(doc->docHandle()->length());
+
+    fragmentMarkers = (mode == ExportFragment);
 
     if (!encoding.isEmpty())
         html += QString::fromLatin1("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%1\" />").arg(QString::fromAscii(encoding));
@@ -1539,59 +1629,53 @@ QString QTextHtmlExporter::toHtml(const QByteArray &encoding)
     html += QLatin1String("<style type=\"text/css\">\n");
     html += QLatin1String("p, li { white-space: pre-wrap; }\n");
     html += QLatin1String("</style>");
-    html += QLatin1String("</head><body style=\"");
+    html += QLatin1String("</head><body");
 
-    html += QLatin1String(" font-family:'");
-    html += defaultCharFormat.fontFamily();
-    html += QLatin1String("';");
+    if (mode == ExportEntireDocument) {
+        html += QLatin1String(" style=\"");
 
-    if (defaultCharFormat.hasProperty(QTextFormat::FontPointSize)) {
-        html += QLatin1String(" font-size:");
-        html += QString::number(defaultCharFormat.fontPointSize());
-        html += QLatin1String("pt;");
-    }
+        emitFontFamily(defaultCharFormat.fontFamily());
 
-    html += QLatin1String(" font-weight:");
-    html += QString::number(defaultCharFormat.fontWeight() * 8);
-    html += QLatin1Char(';');
-
-    html += QLatin1String(" font-style:");
-    html += (defaultCharFormat.fontItalic() ? QLatin1String("italic") : QLatin1String("normal"));
-    html += QLatin1Char(';');
-
-    {
-        html += QLatin1String(" text-decoration:");
-        bool atLeastOneDecorationSet = false;
-
-        if (defaultCharFormat.fontUnderline()) {
-            html += QLatin1String(" underline");
-            atLeastOneDecorationSet = true;
+        if (defaultCharFormat.hasProperty(QTextFormat::FontPointSize)) {
+            html += QLatin1String(" font-size:");
+            html += QString::number(defaultCharFormat.fontPointSize());
+            html += QLatin1String("pt;");
         }
 
-        if (defaultCharFormat.fontOverline()) {
-            html += QLatin1String(" overline");
-            atLeastOneDecorationSet = true;
-        }
-
-        if (defaultCharFormat.fontStrikeOut()) {
-            html += QLatin1String(" line-through");
-            atLeastOneDecorationSet = true;
-        }
-
-        if (!atLeastOneDecorationSet)
-            html += QLatin1String("none");
+        html += QLatin1String(" font-weight:");
+        html += QString::number(defaultCharFormat.fontWeight() * 8);
         html += QLatin1Char(';');
+
+        html += QLatin1String(" font-style:");
+        html += (defaultCharFormat.fontItalic() ? QLatin1String("italic") : QLatin1String("normal"));
+        html += QLatin1Char(';');
+
+        // do not set text-decoration on the default font since those values are /always/ propagated
+        // and cannot be turned off with CSS
+
+        html += QLatin1Char('\"');
+
+        const QTextFrameFormat fmt = doc->rootFrame()->frameFormat();
+        QBrush bg = fmt.background();
+        if (bg != Qt::NoBrush)
+            emitAttribute("bgcolor", bg.color().name());
+
+    } else {
+        defaultCharFormat = QTextCharFormat();
     }
-    html += QLatin1Char('\"');
-
-    const QTextFrameFormat fmt = doc->rootFrame()->frameFormat();
-    QBrush bg = fmt.background();
-    if (bg != Qt::NoBrush)
-        emitAttribute("bgcolor", bg.color().name());
-
     html += QLatin1Char('>');
 
-    emitFrame(doc->rootFrame()->begin());
+    QTextFrameFormat rootFmt = doc->rootFrame()->frameFormat();
+    rootFmt.clearProperty(QTextFormat::BackgroundBrush);
+
+    QTextFrameFormat defaultFmt;
+    defaultFmt.setMargin(DefaultRootFrameMargin);
+
+    if (rootFmt == defaultFmt)
+        emitFrame(doc->rootFrame()->begin());
+    else
+        emitTextFrame(doc->rootFrame());
+
     html += QLatin1String("</body></html>");
     return html;
 }
@@ -1612,9 +1696,7 @@ bool QTextHtmlExporter::emitCharFormatStyle(const QTextCharFormat &format)
     {
         const QString family = format.fontFamily();
         if (!family.isEmpty() && family != defaultCharFormat.fontFamily()) {
-            html += QLatin1String(" font-family:'");
-            html += family;
-            html += QLatin1String("';");
+            emitFontFamily(family);
             attributesEmitted = true;
         }
     }
@@ -1642,14 +1724,16 @@ bool QTextHtmlExporter::emitCharFormatStyle(const QTextCharFormat &format)
         }
     }
 
-    if (format.fontWeight() != defaultCharFormat.fontWeight()) {
+    if (format.hasProperty(QTextFormat::FontWeight)
+        && format.fontWeight() != defaultCharFormat.fontWeight()) {
         html += QLatin1String(" font-weight:");
         html += QString::number(format.fontWeight() * 8);
         html += QLatin1Char(';');
         attributesEmitted = true;
     }
 
-    if (format.fontItalic() != defaultCharFormat.fontItalic()) {
+    if (format.hasProperty(QTextFormat::FontItalic)
+        && format.fontItalic() != defaultCharFormat.fontItalic()) {
         html += QLatin1String(" font-style:");
         html += (format.fontItalic() ? QLatin1String("italic") : QLatin1String("normal"));
         html += QLatin1Char(';');
@@ -1661,7 +1745,8 @@ bool QTextHtmlExporter::emitCharFormatStyle(const QTextCharFormat &format)
     bool hasDecoration = false;
     bool atLeastOneDecorationSet = false;
 
-    if (format.fontUnderline() != defaultCharFormat.fontUnderline()) {
+    if ((format.hasProperty(QTextFormat::FontUnderline) || format.hasProperty(QTextFormat::TextUnderlineStyle))
+        && format.fontUnderline() != defaultCharFormat.fontUnderline()) {
         hasDecoration = true;
         if (format.fontUnderline()) {
             html += QLatin1String(" underline");
@@ -1669,7 +1754,8 @@ bool QTextHtmlExporter::emitCharFormatStyle(const QTextCharFormat &format)
         }
     }
 
-    if (format.fontOverline() != defaultCharFormat.fontOverline()) {
+    if (format.hasProperty(QTextFormat::FontOverline)
+        && format.fontOverline() != defaultCharFormat.fontOverline()) {
         hasDecoration = true;
         if (format.fontOverline()) {
             html += QLatin1String(" overline");
@@ -1677,7 +1763,8 @@ bool QTextHtmlExporter::emitCharFormatStyle(const QTextCharFormat &format)
         }
     }
 
-    if (format.fontStrikeOut() != defaultCharFormat.fontStrikeOut()) {
+    if (format.hasProperty(QTextFormat::FontStrikeOut)
+        && format.fontStrikeOut() != defaultCharFormat.fontStrikeOut()) {
         hasDecoration = true;
         if (format.fontStrikeOut()) {
             html += QLatin1String(" line-through");
@@ -1710,7 +1797,9 @@ bool QTextHtmlExporter::emitCharFormatStyle(const QTextCharFormat &format)
         attributesEmitted = true;
     }
 
-    if (format.verticalAlignment() != defaultCharFormat.verticalAlignment()) {
+    if (format.verticalAlignment() != defaultCharFormat.verticalAlignment()
+        && format.verticalAlignment() != QTextCharFormat::AlignNormal)
+    {
         html += QLatin1String(" vertical-align:");
 
         QTextCharFormat::VerticalAlignment valign = format.verticalAlignment();
@@ -1718,6 +1807,12 @@ bool QTextHtmlExporter::emitCharFormatStyle(const QTextCharFormat &format)
             html += QLatin1String("sub");
         else if (valign == QTextCharFormat::AlignSuperScript)
             html += QLatin1String("super");
+        else if (valign == QTextCharFormat::AlignMiddle)
+            html += QLatin1String("middle");
+        else if (valign == QTextCharFormat::AlignTop)
+            html += QLatin1String("top");
+        else if (valign == QTextCharFormat::AlignBottom)
+            html += QLatin1String("bottom");
 
         html += QLatin1Char(';');
         attributesEmitted = true;
@@ -1775,6 +1870,77 @@ void QTextHtmlExporter::emitFloatStyle(QTextFrameFormat::Position pos, StyleMode
         html += QLatin1Char('\"');
 }
 
+void QTextHtmlExporter::emitBorderStyle(QTextFrameFormat::BorderStyle style)
+{
+    Q_ASSERT(style <= QTextFrameFormat::BorderStyle_Outset);
+
+    html += QLatin1String(" border-style:");
+
+    switch (style) {
+    case QTextFrameFormat::BorderStyle_None:
+        html += QLatin1String("none");
+        break;
+    case QTextFrameFormat::BorderStyle_Dotted:
+        html += QLatin1String("dotted");
+        break;
+    case QTextFrameFormat::BorderStyle_Dashed:
+        html += QLatin1String("dashed");
+        break;
+    case QTextFrameFormat::BorderStyle_Solid:
+        html += QLatin1String("solid");
+        break;
+    case QTextFrameFormat::BorderStyle_Double:
+        html += QLatin1String("double");
+        break;
+    case QTextFrameFormat::BorderStyle_DotDash:
+        html += QLatin1String("dot-dash");
+        break;
+    case QTextFrameFormat::BorderStyle_DotDotDash:
+        html += QLatin1String("dot-dot-dash");
+        break;
+    case QTextFrameFormat::BorderStyle_Groove:
+        html += QLatin1String("groove");
+        break;
+    case QTextFrameFormat::BorderStyle_Ridge:
+        html += QLatin1String("ridge");
+        break;
+    case QTextFrameFormat::BorderStyle_Inset:
+        html += QLatin1String("inset");
+        break;
+    case QTextFrameFormat::BorderStyle_Outset:
+        html += QLatin1String("outset");
+        break;
+    default:
+        Q_ASSERT(false);
+        break;
+    };
+
+    html += QLatin1Char(';');
+}
+
+void QTextHtmlExporter::emitPageBreakPolicy(QTextFormat::PageBreakFlags policy)
+{
+    if (policy & QTextFormat::PageBreak_AlwaysBefore)
+        html += QLatin1String(" page-break-before:always;");
+
+    if (policy & QTextFormat::PageBreak_AlwaysAfter)
+        html += QLatin1String(" page-break-after:always;");
+}
+
+void QTextHtmlExporter::emitFontFamily(const QString &family)
+{
+    html += QLatin1String(" font-family:");
+
+    QLatin1Char quote('\'');
+    if (family.contains(quote))
+        quote = QLatin1Char('\"');
+
+    html += quote;
+    html += family;
+    html += quote;
+    html += QLatin1Char(';');
+}
+
 void QTextHtmlExporter::emitMargins(const QString &top, const QString &bottom, const QString &left, const QString &right)
 {
     html += QLatin1String(" margin-top:");
@@ -1816,18 +1982,23 @@ void QTextHtmlExporter::emitFragment(const QTextFragment &fragment)
         }
     }
 
+    QString txt = fragment.text();
+    const bool isObject = txt.contains(QChar::ObjectReplacementCharacter);
+    const bool isImage = isObject && format.isImageFormat();
+
     QLatin1String styleTag("<span style=\"");
     html += styleTag;
 
-    const bool attributesEmitted = emitCharFormatStyle(format);
+    bool attributesEmitted = false;
+    if (!isImage)
+        attributesEmitted = emitCharFormatStyle(format);
     if (attributesEmitted)
         html += QLatin1String("\">");
     else
         html.chop(qstrlen(styleTag.latin1()));
 
-    QString txt = fragment.text();
-    if (txt.count() == 1 && txt.at(0) == QChar::ObjectReplacementCharacter) {
-        if (format.isImageFormat()) {
+    if (isObject) {
+        for (int i = 0; isImage && i < txt.length(); ++i) {
             QTextImageFormat imgFmt = format.toImageFormat();
 
             html += QLatin1String("<img");
@@ -1840,6 +2011,11 @@ void QTextHtmlExporter::emitFragment(const QTextFragment &fragment)
 
             if (imgFmt.hasProperty(QTextFormat::ImageHeight))
                 emitAttribute("height", QString::number(imgFmt.height()));
+
+            if (imgFmt.verticalAlignment() == QTextCharFormat::AlignMiddle)
+                html += QLatin1String(" style=\"vertical-align: middle;\"");
+            else if (imgFmt.verticalAlignment() == QTextCharFormat::AlignTop)
+                html += QLatin1String(" style=\"vertical-align: top;\"");
 
             if (QTextFrame *imageFrame = qobject_cast<QTextFrame *>(doc->objectForFormat(imgFmt)))
                 emitFloatStyle(imageFrame->frameFormat().position());
@@ -1909,15 +2085,38 @@ void QTextHtmlExporter::emitBlockAttributes(const QTextBlock &block)
     html += QString::number(format.indent());
     html += QLatin1String("px;");
 
-    QTextCharFormat diff = formatDifference(defaultCharFormat, block.charFormat()).toCharFormat();
+    if (block.userState() != -1) {
+        html += QLatin1String(" -qt-user-state:");
+        html += QString::number(block.userState());
+        html += QLatin1Char(';');
+    }
+
+    emitPageBreakPolicy(format.pageBreakPolicy());
+
+    const QTextCharFormat blockCharFmt = block.charFormat();
+    QTextCharFormat diff = formatDifference(defaultCharFormat, blockCharFmt).toCharFormat();
+
+    diff.clearProperty(QTextFormat::BackgroundBrush);
+    if (format.hasProperty(QTextFormat::BackgroundBrush)) {
+        QBrush bg = format.background();
+        if (bg.style() != Qt::NoBrush)
+            diff.setProperty(QTextFormat::BackgroundBrush, format.property(QTextFormat::BackgroundBrush));
+    }
+
     if (!diff.properties().isEmpty())
         emitCharFormatStyle(diff);
 
+#if 0
+    QBrush blockCharFmtBg = blockCharFmt.background();
+    if (blockCharFmtBg.style() != Qt::NoBrush) {
+        html += QLatin1String(" -qt-blockcharfmt-background-color:");
+        html += blockCharFmtBg.color().name();
+        html += QLatin1Char(';');
+    }
+#endif
+
     html += QLatin1Char('"');
 
-    QBrush bg = format.background();
-    if (bg != Qt::NoBrush)
-        emitAttribute("bgcolor", bg.color().name());
 }
 
 void QTextHtmlExporter::emitBlock(const QTextBlock &block)
@@ -2003,8 +2202,15 @@ void QTextHtmlExporter::emitBlock(const QTextBlock &block)
 
     html += QLatin1Char('>');
 
-    const QTextCharFormat blockCharFmt = block.charFormat();
-    const QTextCharFormat diff = formatDifference(defaultCharFormat, blockCharFmt).toCharFormat();
+    QTextCharFormat blockCharFmt = block.charFormat();
+    const QTextBlockFormat blockFmt = block.blockFormat();
+
+    blockCharFmt.clearProperty(QTextFormat::BackgroundBrush);
+    if (blockFmt.hasProperty(QTextFormat::BackgroundBrush)) {
+        QBrush bg = blockFmt.background();
+        if (bg.style() != Qt::NoBrush)
+            blockCharFmt.setProperty(QTextFormat::BackgroundBrush, blockFmt.property(QTextFormat::BackgroundBrush));
+    }
 
     defaultCharFormat.merge(blockCharFmt);
 
@@ -2046,7 +2252,8 @@ void QTextHtmlExporter::emitTable(const QTextTable *table)
     if (format.hasProperty(QTextFormat::FrameBorder))
         emitAttribute("border", QString::number(format.border()));
 
-    emitFloatStyle(format.position());
+    emitFrameStyle(format, TableFrame);
+
     emitAlignment(format.alignment());
     emitTextLength("width", format.width());
 
@@ -2094,7 +2301,7 @@ void QTextHtmlExporter::emitTable(const QTextTable *table)
 
             html += QLatin1String("\n<td");
 
-            if (!widthEmittedForColumn[col]) {
+            if (!widthEmittedForColumn[col] && cell.columnSpan() == 1) {
                 emitTextLength("width", columnWidths.at(col));
                 widthEmittedForColumn[col] = true;
             }
@@ -2110,11 +2317,38 @@ void QTextHtmlExporter::emitTable(const QTextTable *table)
             if (bg != Qt::NoBrush)
                 emitAttribute("bgcolor", bg.color().name());
 
+            QTextCharFormat oldDefaultCharFormat = defaultCharFormat;
+
+            QTextCharFormat::VerticalAlignment valign = cellFormat.verticalAlignment();
+            if (valign >= QTextCharFormat::AlignMiddle && valign <= QTextCharFormat::AlignBottom) {
+                html += QLatin1String(" style=\" vertical-align:");
+                switch (valign) {
+                case QTextCharFormat::AlignMiddle:
+                    html += QLatin1String("middle");
+                    break;
+                case QTextCharFormat::AlignTop:
+                    html += QLatin1String("top");
+                    break;
+                case QTextCharFormat::AlignBottom:
+                    html += QLatin1String("bottom");
+                    break;
+                default:
+                    break;
+                }
+                html += QLatin1String(";\"");
+
+                QTextCharFormat temp;
+                temp.setVerticalAlignment(valign);
+                defaultCharFormat.merge(temp);
+            }
+
             html += QLatin1Char('>');
 
             emitFrame(cell.begin());
 
             html += QLatin1String("</td>");
+
+            defaultCharFormat = oldDefaultCharFormat;
         }
 
         html += QLatin1String("</tr>");
@@ -2143,38 +2377,81 @@ void QTextHtmlExporter::emitFrame(QTextFrame::Iterator frameIt)
             if (QTextTable *table = qobject_cast<QTextTable *>(f)) {
                 emitTable(table);
             } else {
-                html += QLatin1String("\n<table");
-                QTextFrameFormat format = f->frameFormat();
-
-                if (format.hasProperty(QTextFormat::FrameBorder))
-                    emitAttribute("border", QString::number(format.border()));
-
-                html += QLatin1String(" style=\"-qt-table-type: frame;");
-                emitFloatStyle(format.position(), OmitStyleTag);
-
-                if (format.hasProperty(QTextFormat::FrameMargin)) {
-                    const QString margin = QString::number(format.margin());
-                    emitMargins(margin, margin, margin, margin);
-                }
-
-                html += QLatin1Char('\"');
-
-                emitTextLength("width", format.width());
-                emitTextLength("height", format.height());
-
-                QBrush bg = format.background();
-                if (bg != Qt::NoBrush)
-                    emitAttribute("bgcolor", bg.color().name());
-
-                html += QLatin1Char('>');
-                html += QLatin1String("\n<tr>\n<td style=\"border: none;\">");
-                emitFrame(f->begin());
-                html += QLatin1String("</td></tr></table>");
+                emitTextFrame(f);
             }
         } else if (it.currentBlock().isValid()) {
             emitBlock(it.currentBlock());
         }
     }
+}
+
+void QTextHtmlExporter::emitTextFrame(const QTextFrame *f)
+{
+    FrameType frameType = f->parentFrame() ? TextFrame : RootFrame;
+
+    html += QLatin1String("\n<table");
+    QTextFrameFormat format = f->frameFormat();
+
+    if (format.hasProperty(QTextFormat::FrameBorder))
+        emitAttribute("border", QString::number(format.border()));
+
+    emitFrameStyle(format, frameType);
+
+    emitTextLength("width", format.width());
+    emitTextLength("height", format.height());
+
+    // root frame's bcolor goes in the <body> tag
+    if (frameType != RootFrame) {
+        QBrush bg = format.background();
+        if (bg != Qt::NoBrush)
+            emitAttribute("bgcolor", bg.color().name());
+    }
+
+    html += QLatin1Char('>');
+    html += QLatin1String("\n<tr>\n<td style=\"border: none;\">");
+    emitFrame(f->begin());
+    html += QLatin1String("</td></tr></table>");
+}
+
+void QTextHtmlExporter::emitFrameStyle(const QTextFrameFormat &format, FrameType frameType)
+{
+    QLatin1String styleAttribute(" style=\"");
+    html += styleAttribute;
+    const int originalHtmlLength = html.length();
+
+    if (frameType == TextFrame)
+        html += QLatin1String("-qt-table-type: frame;");
+    else if (frameType == RootFrame)
+        html += QLatin1String("-qt-table-type: root;");
+
+    const QTextFrameFormat defaultFormat;
+
+    emitFloatStyle(format.position(), OmitStyleTag);
+    emitPageBreakPolicy(format.pageBreakPolicy());
+
+    if (format.borderBrush() != defaultFormat.borderBrush()) {
+        html += QLatin1String(" border-color:");
+        html += format.borderBrush().color().name();
+        html += QLatin1Char(';');
+    }
+
+    if (format.borderStyle() != defaultFormat.borderStyle())
+        emitBorderStyle(format.borderStyle());
+
+    if (format.hasProperty(QTextFormat::FrameMargin)
+        || format.hasProperty(QTextFormat::FrameLeftMargin)
+        || format.hasProperty(QTextFormat::FrameRightMargin)
+        || format.hasProperty(QTextFormat::FrameTopMargin)
+        || format.hasProperty(QTextFormat::FrameBottomMargin))
+        emitMargins(QString::number(format.topMargin()),
+                    QString::number(format.bottomMargin()),
+                    QString::number(format.leftMargin()),
+                    QString::number(format.rightMargin()));
+
+    if (html.length() == originalHtmlLength) // nothing emitted?
+        html.chop(qstrlen(styleAttribute.latin1()));
+    else
+        html += QLatin1Char('\"');
 }
 
 /*!

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -36,6 +51,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <string.h>
 
 #if defined(Q_CC_MSVC) && !defined(Q_OS_TEMP)
 #include <crtdbg.h>
@@ -1092,6 +1108,123 @@ bool qSharedBuild()
 */
 
 /*!
+    \fn T qFromBigEndian(const uchar *src)
+    \since 4.3
+    \relates <QtGlobal>
+
+    Reads a big-endian number from memory location \a src and returns the number in the
+    host byte order representation.
+    On CPU architectures where the host byte order is little-endian (such as x86) this
+    will swap the byte order; otherwise it will just read from \a src.
+
+    Note that template type \c{T} can only be an integer data type (signed or unsigned).
+
+    There are no data alignment constraints for \a src.
+
+    \sa qFromLittleEndian()
+    \sa qToBigEndian()
+    \sa qToLittleEndian()
+*/
+/*!
+    \fn T qFromBigEndian(T src)
+    \since 4.3
+    \relates <QtGlobal>
+    \overload
+
+    Converts \a src from big-endian byte order and returns the number in host byte order
+    representation of that number.
+    On CPU architectures where the host byte order is little-endian (such as x86) this
+    will return \a src with the byte order swapped; otherwise it will return \a src
+    unmodified.
+*/
+/*!
+    \fn T qFromLittleEndian(const uchar *src)
+    \since 4.3
+    \relates <QtGlobal>
+
+    Reads a little-endian number from memory location \a src and returns the number in
+    the host byte order representation.
+    On CPU architectures where the host byte order is big-endian (such as PowerPC) this
+    will swap the byte order; otherwise it will just read from \a src.
+
+    Note that template type \c{T} can only be an integer data type (signed or unsigned).
+
+    There are no data alignment constraints for \a src.
+
+    \sa qFromBigEndian()
+    \sa qToBigEndian()
+    \sa qToLittleEndian()
+*/
+/*!
+    \fn T qFromLittleEndian(T src)
+    \since 4.3
+    \relates <QtGlobal>
+    \overload
+
+    Converts \a src from little-endian byte order and returns the number in host byte
+    order representation of that number.
+    On CPU architectures where the host byte order is big-endian (such as PowerPC) this
+    will return \a src with the byte order swapped; otherwise it will return \a src
+    unmodified.
+*/
+/*!
+    \fn void qToBigEndian(T src, uchar *dest)
+    \since 4.3
+    \relates <QtGlobal>
+
+    Writes the number \a src with template type \c{T} to the memory location at \a dest
+    in big-endian byte order.
+
+    Note that template type \c{T} can only be an integer data type (signed or unsigned).
+
+    There are no data alignment constraints for \a dest.
+
+    \sa qFromBigEndian()
+    \sa qFromLittleEndian()
+    \sa qToLittleEndian()
+*/
+/*!
+    \fn T qToBigEndian(T src)
+    \since 4.3
+    \relates <QtGlobal>
+    \overload
+
+    Converts \a src from host byte order and returns the number in big-endian byte order
+    representation of that number.
+    On CPU architectures where the host byte order is little-endian (such as x86) this
+    will return \a src with the byte order swapped; otherwise it will return \a src
+    unmodified.
+*/
+/*!
+    \fn void qToLittleEndian(T src, uchar *dest)
+    \since 4.3
+    \relates <QtGlobal>
+
+    Writes the number \a src with template type \c{T} to the memory location at \a dest
+    in little-endian byte order.
+
+    Note that template type \c{T} can only be an integer data type (signed or unsigned).
+
+    There are no data alignment constraints for \a dest.
+
+    \sa qFromBigEndian()
+    \sa qFromLittleEndian()
+    \sa qToBigEndian()
+*/
+/*!
+    \fn T qToLittleEndian(T src)
+    \since 4.3
+    \relates <QtGlobal>
+    \overload
+
+    Converts \a src from host byte order and returns the number in little-endian byte
+    order representation of that number.
+    On CPU architectures where the host byte order is big-endian (such as PowerPC) this
+    will return \a src with the byte order swapped; otherwise it will return \a src
+    unmodified.
+*/
+
+/*!
     \macro Q_WS_MAC
     \relates <QtGlobal>
 
@@ -1470,7 +1603,7 @@ bool qSharedBuild()
     Optimizing C++ Compilers.
 */
 
-#if !defined(Q_BYTE_ORDER) && defined(QT_BUILD_QMAKE)
+#if defined(QT_BUILD_QMAKE)
 // needed to bootstrap qmake
 static const unsigned int qt_one = 1;
 const int QSysInfo::ByteOrder = ((*((unsigned char *) &qt_one) == 0) ? BigEndian : LittleEndian);
@@ -1481,15 +1614,18 @@ const int QSysInfo::ByteOrder = ((*((unsigned char *) &qt_one) == 0) ? BigEndian
 #include "private/qcore_mac_p.h"
 #include "qnamespace.h"
 
-// This function has descended from Apple Source Code (FSpLocationFromFullPath),
-// but changes have been made. [Creates a minimal alias from the full pathname]
+Q_CORE_EXPORT OSErr qt_mac_create_fsref(const QString &file, FSRef *fsref)
+{
+    return FSPathMakeRef(reinterpret_cast<const UInt8 *>(file.toUtf8().constData()), fsref, 0);
+}
+
+// Don't use this function, it won't work in 10.5 (Leopard) and up
 Q_CORE_EXPORT OSErr qt_mac_create_fsspec(const QString &file, FSSpec *spec)
 {
-    FSRef fref;
-    QByteArray utfs = file.toUtf8();
-    OSErr ret = FSPathMakeRef((const UInt8 *)utfs.data(), &fref, NULL);
-    if(ret == noErr)
-        ret = FSGetCatalogInfo(&fref, kFSCatInfoNone, NULL, NULL, spec, NULL);
+    FSRef fsref;
+    OSErr ret = qt_mac_create_fsref(file, &fsref);
+    if (ret == noErr)
+        ret = FSGetCatalogInfo(&fsref, kFSCatInfoNone, 0, 0, spec, 0);
     return ret;
 }
 
@@ -1530,11 +1666,6 @@ Q_CORE_EXPORT QString qt_mac_from_pascal_string(const Str255 pstr) {
 
 static QSysInfo::MacVersion macVersion()
 {
-#if __LP64__
-typedef signed int SInt32;
-#else
-typedef signed long SInt32;
-#endif
     SInt32 gestalt_version;
     if (Gestalt(gestaltSystemVersion, &gestalt_version) == noErr) {
         return QSysInfo::MacVersion(((gestalt_version & 0x00F0) >> 4) + 2);
@@ -1646,7 +1777,6 @@ const QSysInfo::WinVersion QSysInfo::WindowsVersion = winVersion();
 
 #endif
 
-
 /*!
     \macro void Q_ASSERT(bool test)
     \relates <QtGlobal>
@@ -1742,6 +1872,35 @@ const QSysInfo::WinVersion QSysInfo::WindowsVersion = winVersion();
     \sa qWarning(), {Debugging Techniques}
 */
 
+/*!
+    \macro const char* Q_FUNC_INFO()
+    \relates <QtGlobal>
+
+    Expands to a string that describe the function the macro resides in. How this string looks
+    more specifically is compiler dependent. With GNU GCC it is typically the function signature,
+    while with other compilers it might be the line and column number.
+
+    Q_FUNC_INFO can be conveniently used with qDebug(). For example, this function:
+
+    \code
+        template<typename TInputType>
+        const TInputType &myMin(const TInputType &value1, const TInputType &value2)
+        {
+            qDebug() << Q_FUNC_INFO << "was called with value1:" << value1 << "value2:" << value2;
+
+            if(value1 < value2)
+                return value1;
+            else
+                return value2;
+        }
+    \endcode
+
+    when instantiated with the integer type, will with the GCC compiler produce:
+
+    \tt{const TInputType& myMin(const TInputType&, const TInputType&) [with TInputType = int] was called with value1: 3 value2: 4}
+
+    If this macro is used outside a function, the behavior is undefined.
+ */
 
 /*
   The Q_CHECK_PTR macro calls this function if an allocation check
@@ -1881,7 +2040,8 @@ QString qt_error_string(int errorCode)
             ret = QString::fromLocal8Bit(string);
             LocalFree((HLOCAL)string);
         });
-#elif !defined(QT_NO_THREAD) && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && _POSIX_VERSION >= 200112L
+#elif !defined(QT_NO_THREAD) && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && _POSIX_VERSION >= 200112L && !defined(Q_OS_INTEGRITY)
+
         QByteArray buf(1024, '\0');
         strerror_r(errorCode, buf.data(), buf.size());
         ret = QString::fromLocal8Bit(buf.constData());
@@ -1901,7 +2061,7 @@ QString qt_error_string(int errorCode)
     \fn QtMsgHandler qInstallMsgHandler(QtMsgHandler handler)
     \relates <QtGlobal>
 
-    Installs a Qt message \a handler whis has been defined
+    Installs a Qt message \a handler which has been defined
     previously. Returns a pointer to the message \a handler.
 
     The message handler is a function that prints out debug messages,
@@ -1964,7 +2124,9 @@ QtMsgHandler qInstallMsgHandler(QtMsgHandler h)
     return old;
 }
 
-
+/*!
+    \internal
+*/
 void qt_message_output(QtMsgType msgType, const char *buf)
 {
     if (handler) {
@@ -2037,9 +2199,6 @@ void qt_message_output(QtMsgType msgType, const char *buf)
     \warning The internal buffer is limited to 8192 bytes, including
     the '\0'-terminator.
 
-    \warning Passing (const char *)0 as argument to qDebug might lead
-    to crashes on certain platforms due to the platform's printf() implementation.
-
     \sa qWarning(), qCritical(), qFatal(), qInstallMsgHandler(),
         {Debugging Techniques}
 */
@@ -2049,7 +2208,8 @@ void qDebug(const char *msg, ...)
     buf[QT_BUFFER_LENGTH - 1] = '\0';
     va_list ap;
     va_start(ap, msg);                        // use variable arg list
-    qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
+    if (msg)
+        qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
     va_end(ap);
 
     qt_message_output(QtDebugMsg, buf);
@@ -2092,9 +2252,6 @@ void qDebug(const char *msg, ...)
     \warning The internal buffer is limited to 8192 bytes, including
     the '\0'-terminator.
 
-    \warning Passing (const char *)0 as argument to qWarning might lead
-    to crashes on certain platforms due to the platforms printf implementation.
-
     \sa qDebug(), qCritical(), qFatal(), qInstallMsgHandler(),
         {Debugging Techniques}
 */
@@ -2104,7 +2261,8 @@ void qWarning(const char *msg, ...)
     buf[QT_BUFFER_LENGTH - 1] = '\0';
     va_list ap;
     va_start(ap, msg); // use variable arg list
-    qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
+    if (msg)
+        qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
     va_end(ap);
 
     qt_message_output(QtWarningMsg, buf);
@@ -2130,7 +2288,7 @@ void qWarning(const char *msg, ...)
         }
     \endcode
 
-    If you include <QtDebug>, a more convenitent syntax is
+    If you include <QtDebug>, a more convenient syntax is
     also available:
 
     \code
@@ -2144,10 +2302,6 @@ void qWarning(const char *msg, ...)
     \warning The internal buffer is limited to 8192 bytes, including
     the '\0'-terminator.
 
-    \warning Passing (const char *)0 as argument to qCritical might
-    lead to crashes on certain platforms due to the platforms printf
-    implementation.
-
     \sa qDebug(), qWarning(), qFatal(), qInstallMsgHandler(),
         {Debugging Techniques}
 */
@@ -2157,7 +2311,8 @@ void qCritical(const char *msg, ...)
     buf[QT_BUFFER_LENGTH - 1] = '\0';
     va_list ap;
     va_start(ap, msg); // use variable arg list
-    qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
+    if (msg)
+        qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
     va_end(ap);
 
     qt_message_output(QtCriticalMsg, buf);
@@ -2173,7 +2328,8 @@ void qErrnoWarning(const char *msg, ...)
     buf[QT_BUFFER_LENGTH - 1] = '\0';
     va_list ap;
     va_start(ap, msg);
-    qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
+    if (msg)
+        qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
     va_end(ap);
 
     qCritical("%s (%s)", buf, qt_error_string(-1).toLocal8Bit().constData());
@@ -2185,7 +2341,8 @@ void qErrnoWarning(int code, const char *msg, ...)
     buf[QT_BUFFER_LENGTH - 1] = '\0';
     va_list ap;
     va_start(ap, msg);
-    qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
+    if (msg)
+        qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
     va_end(ap);
 
     qCritical("%s (%s)", buf, qt_error_string(code).toLocal8Bit().constData());
@@ -2220,9 +2377,6 @@ void qErrnoWarning(int code, const char *msg, ...)
     \warning The internal buffer is limited to 8192 bytes, including
     the '\0'-terminator.
 
-    \warning Passing (const char *)0 as argument to qFatal might lead
-    to crashes on certain platforms due to the platforms printf implementation.
-
     \sa qDebug(), qCritical(), qWarning(), qInstallMsgHandler(),
         {Debugging Techniques}
 */
@@ -2232,7 +2386,8 @@ void qFatal(const char *msg, ...)
     buf[QT_BUFFER_LENGTH - 1] = '\0';
     va_list ap;
     va_start(ap, msg); // use variable arg list
-    qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
+    if (msg)
+        qvsnprintf(buf, QT_BUFFER_LENGTH - 1, msg, ap);
     va_end(ap);
 
     qt_message_output(QtFatalMsg, buf);
@@ -2256,9 +2411,16 @@ QByteArray qgetenv(const char *varName)
 #endif
 }
 
-
 #if defined(Q_OS_UNIX) && !defined(QT_NO_THREAD)
-static QThreadStorage<uint *> randTLS; // Thread Local Storage for seed value
+
+#  if defined(Q_OS_INTEGRITY)
+typedef long SeedStorageType;
+#  else
+typedef uint SeedStorageType;
+#  endif
+
+typedef QThreadStorage<SeedStorageType *> SeedStorage;
+Q_GLOBAL_STATIC(SeedStorage, randTLS)  // Thread Local Storage for seed value
 #endif
 
 /*!
@@ -2281,9 +2443,9 @@ static QThreadStorage<uint *> randTLS; // Thread Local Storage for seed value
 void qsrand(uint seed)
 {
 #if defined(Q_OS_UNIX) && !defined(QT_NO_THREAD)
-    if (!randTLS.hasLocalData())
-        randTLS.setLocalData(new uint);
-    *randTLS.localData() = seed;
+    if (!randTLS()->hasLocalData())
+        randTLS()->setLocalData(new SeedStorageType);
+    *randTLS()->localData() = seed;
 #else
     // On Windows srand() and rand() already use Thread-Local-Storage
     // to store the seed between calls
@@ -2309,12 +2471,12 @@ void qsrand(uint seed)
 int qrand()
 {
 #if defined(Q_OS_UNIX) && !defined(QT_NO_THREAD)
-    if (!randTLS.hasLocalData()) {
-        randTLS.setLocalData(new uint);
-        *randTLS.localData() = 1;
+    if (!randTLS()->hasLocalData()) {
+        randTLS()->setLocalData(new SeedStorageType);
+        *randTLS()->localData() = 1;
     }
 
-    return rand_r(randTLS.localData());
+    return rand_r(randTLS()->localData());
 #else
     // On Windows srand() and rand() already use Thread-Local-Storage
     // to store the seed between calls
@@ -2512,7 +2674,7 @@ int qrand()
     \relates <QtGlobal>
 
     Returns \a str as a \c{const char *}. This is equivalent to
-    \a{str}.toLocal8bit().constData().
+    \a{str}.toLocal8Bit().constData().
 
     Example:
 
@@ -2639,7 +2801,7 @@ struct QInternal_CallBackTable {
     QVector<QList<qInternalCallback> > callbacks;
 };
 
-Q_GLOBAL_STATIC(QInternal_CallBackTable, global_callback_table);
+Q_GLOBAL_STATIC(QInternal_CallBackTable, global_callback_table)
 
 bool QInternal::registerCallback(Callback cb, qInternalCallback callback)
 {
@@ -2707,3 +2869,113 @@ bool QInternal::callFunction(InternalFunction func, void **args)
 
     return false;
 }
+
+/*!
+    \macro Q_BYTE_ORDER
+    \relates <QtGlobal>
+
+    This macro can be used to determine the byte order your system
+    uses for storing data in memory. i.e., whether your system is
+    little-endian or big-endian. It is set by Qt to one of the macros
+    Q_LITTLE_ENDIAN or Q_BIG_ENDIAN. You normally won't need to worry
+    about endian-ness, but you might, for example if you need to know
+    which byte of an integer or UTF-16 character is stored in the
+    lowest address. Endian-ness is important in networking, where
+    computers with different values for Q_BYTE_ORDER must pass data
+    back and forth.
+
+    Use this macro as in the following examples.
+
+    \code
+    #if Q_BYTE_ORDER == Q_BIG_ENDIAN
+    ...
+    #endif
+
+    or
+
+    #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    ...
+    #endif
+    
+    \endcode
+
+    \sa Q_BIG_ENDIAN, Q_LITTLE_ENDIAN
+*/
+
+/*!
+    \macro Q_LITTLE_ENDIAN
+    \relates <QtGlobal>
+
+    This macro represents a value you can compare to the macro
+    Q_BYTE_ORDER to determine the endian-ness of your system.  In a
+    little-endian system, the least significant byte is stored at the
+    lowest address. The other bytes follow in increasing order of
+    significance.
+
+    \code
+
+    #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    ...
+    #endif
+    
+    \endcode
+
+    \sa Q_BYTE_ORDER, Q_BIG_ENDIAN
+*/
+
+/*!
+    \macro Q_BIG_ENDIAN
+    \relates <QtGlobal>
+
+    This macro represents a value you can compare to the macro
+    Q_BYTE_ORDER to determine the endian-ness of your system.  In a
+    big-endian system, the most significant byte is stored at the
+    lowest address. The other bytes follow in decreasing order of
+    significance.
+
+    \code
+    #if Q_BYTE_ORDER == Q_BIG_ENDIAN
+    ...
+    #endif
+    
+    \endcode
+
+    \sa Q_BYTE_ORDER, Q_LITTLE_ENDIAN
+*/
+
+/*!
+    \macro Q_GLOBAL_STATIC(type, name)
+    \internal
+
+    Declares a global static variable with the given \a type and \a name.
+
+    Use this macro to instantiate an object in a thread-safe way, creating
+    a global pointer that can be used to refer to it.
+
+    \warning This macro is subject to a race condition that can cause the object
+    to be constructed twice. However, if this occurs, the second instance will
+    be immediately deleted.
+
+    See also
+    \l{http://www.aristeia.com/publications.html}{"C++ and the perils of Double-Checked Locking"}
+    by Scott Meyers and Andrei Alexandrescu.
+*/
+
+/*!
+    \macro Q_GLOBAL_STATIC_WITH_ARGS(type, name, arguments)
+    \internal
+
+    Declares a global static variable with the specified \a type and \a name.
+
+    Use this macro to instantiate an object using the \a arguments specified
+    in a thread-safe way, creating a global pointer that can be used to refer
+    to it.
+
+    \warning This macro is subject to a race condition that can cause the object
+    to be constructed twice. However, if this occurs, the second instance will
+    be immediately deleted.
+
+    See also
+    \l{http://www.aristeia.com/publications.html}{"C++ and the perils of Double-Checked Locking"}
+    by Scott Meyers and Andrei Alexandrescu.
+*/

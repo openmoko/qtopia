@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -30,9 +30,8 @@
 #include <qvaluespace.h>
 
 class QSocketNotifier;
-class QtopiaIpcAdaptor;
-class QSpeakerPhoneAccessoryProvider;
 class QBootSourceAccessoryProvider;
+class QPowerSourceProvider;
 
 class GreenphoneHardware : public QObject
 {
@@ -43,12 +42,6 @@ public:
     ~GreenphoneHardware();
 
 private:
-    QValueSpaceObject vsoBattery;
-    bool charging;
-    int percent;
-    int visualCharge;
-    int chargeId;
-
     QValueSpaceObject vsoPortableHandsfree;
 
     QSocketNotifier *m_notifyDetect;
@@ -57,16 +50,12 @@ private:
     QProcess *mountProc;
     QString sdCardDevice;
 
-    QtopiaIpcAdaptor *adaptor;
-
-    QSpeakerPhoneAccessoryProvider *speakerPhone;
     QBootSourceAccessoryProvider *bootSource;
 
-    void setCharging(bool charge);
-    void setBatteryLevel(int level);
-    void setLeds();
+    QPowerSourceProvider *batterySource;
+    QPowerSourceProvider *wallSource;
 
-    void timerEvent(QTimerEvent *e);
+    void setLeds(int charge);
 
 private slots:
     void readDetectData(quint32 devices = 0);
@@ -80,7 +69,8 @@ private slots:
     void fsckFinished(int, QProcess::ExitStatus);
     void mountFinished(int, QProcess::ExitStatus);
 
-    void onSpeakerModified();
+    void chargingChanged(bool charging);
+    void chargeChanged(int charge);
 };
 
 #endif // QT_QWS_GREENPHONE

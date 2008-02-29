@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -126,6 +141,7 @@ public:
         OutlinePen = 0x810,
         BackgroundBrush = 0x820,
         ForegroundBrush = 0x821,
+        // Internal to qtextlayout.cpp: ObjectSelectionBrush = 0x822
 
         // paragraph
         BlockAlignment = 0x1010,
@@ -155,6 +171,7 @@ public:
         TextVerticalAlignment = 0x2021,
         TextOutline = 0x2022,
         TextUnderlineStyle = 0x2023,
+        TextToolTip = 0x2024,
 
         IsAnchor = 0x2030,
         AnchorHref = 0x2031,
@@ -172,6 +189,13 @@ public:
         FramePadding = 0x4002,
         FrameWidth = 0x4003,
         FrameHeight = 0x4004,
+        FrameTopMargin    = 0x4005,
+        FrameBottomMargin = 0x4006,
+        FrameLeftMargin   = 0x4007,
+        FrameRightMargin  = 0x4008,
+        FrameBorderBrush = 0x4009,
+        FrameBorderStyle = 0x4010,
+
         TableColumns = 0x4100,
         TableColumnWidthConstraints = 0x4101,
         TableCellSpacing = 0x4102,
@@ -247,8 +271,8 @@ public:
 
     void setProperty(int propertyId, const QVector<QTextLength> &lengths);
 
-
     QMap<int, QVariant> properties() const;
+    int propertyCount() const;
 
     inline void setObjectType(int type);
     inline int objectType() const
@@ -309,7 +333,14 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QTextFormat::PageBreakFlags)
 class Q_GUI_EXPORT QTextCharFormat : public QTextFormat
 {
 public:
-    enum VerticalAlignment { AlignNormal = 0, AlignSuperScript, AlignSubScript };
+    enum VerticalAlignment {
+        AlignNormal = 0,
+        AlignSuperScript,
+        AlignSubScript,
+        AlignMiddle,
+        AlignTop,
+        AlignBottom
+    };
     enum UnderlineStyle { // keep in sync with Qt::PenStyle!
         NoUnderline,
         SingleUnderline,
@@ -384,6 +415,11 @@ public:
     inline QPen textOutline() const
     { return penProperty(TextOutline); }
 
+    inline void setToolTip(const QString &tip)
+    { setProperty(TextToolTip, tip); }
+    inline QString toolTip() const
+    { return stringProperty(TextToolTip); }
+
     inline void setAnchor(bool anchor)
     { setProperty(IsAnchor, anchor); }
     inline bool isAnchor() const
@@ -395,9 +431,12 @@ public:
     { return stringProperty(AnchorHref); }
 
     inline void setAnchorName(const QString &name)
-    { setProperty(AnchorName, name); }
-    inline QString anchorName() const
-    { return stringProperty(AnchorName); }
+    { setAnchorNames(QStringList(name)); }
+    QString anchorName() const;
+
+    inline void setAnchorNames(const QStringList &names)
+    { setProperty(AnchorName, names); }
+    QStringList anchorNames() const;
 
     inline void setTableCellRowSpan(int tableCellRowSpan);
     inline int tableCellRowSpan() const
@@ -555,6 +594,20 @@ public:
 //        Absolute
     };
 
+    enum BorderStyle {
+        BorderStyle_None,
+        BorderStyle_Dotted,
+        BorderStyle_Dashed,
+        BorderStyle_Solid,
+        BorderStyle_Double,
+        BorderStyle_DotDash,
+        BorderStyle_DotDotDash,
+        BorderStyle_Groove,
+        BorderStyle_Ridge,
+        BorderStyle_Inset,
+        BorderStyle_Outset
+    };
+
     inline void setPosition(Position f)
     { setProperty(CssFloat, f); }
     inline Position position() const
@@ -564,9 +617,31 @@ public:
     inline qreal border() const
     { return doubleProperty(FrameBorder); }
 
-    inline void setMargin(qreal margin);
+    inline void setBorderBrush(const QBrush &brush)
+    { setProperty(FrameBorderBrush, brush); }
+    inline QBrush borderBrush() const
+    { return brushProperty(FrameBorderBrush); }
+
+    inline void setBorderStyle(BorderStyle style)
+    { setProperty(FrameBorderStyle, style); }
+    inline BorderStyle borderStyle() const
+    { return static_cast<BorderStyle>(intProperty(FrameBorderStyle)); }
+
+    void setMargin(qreal margin);
     inline qreal margin() const
     { return doubleProperty(FrameMargin); }
+
+    inline void setTopMargin(qreal margin);
+    qreal topMargin() const;
+
+    inline void setBottomMargin(qreal margin);
+    qreal bottomMargin() const;
+
+    inline void setLeftMargin(qreal margin);
+    qreal leftMargin() const;
+
+    inline void setRightMargin(qreal margin);
+    qreal rightMargin() const;
 
     inline void setPadding(qreal padding);
     inline qreal padding() const
@@ -592,9 +667,6 @@ public:
 inline void QTextFrameFormat::setBorder(qreal aborder)
 { setProperty(FrameBorder, aborder); }
 
-inline void QTextFrameFormat::setMargin(qreal amargin)
-{ setProperty(FrameMargin, amargin); }
-
 inline void QTextFrameFormat::setPadding(qreal apadding)
 { setProperty(FramePadding, apadding); }
 
@@ -605,6 +677,18 @@ inline void QTextFrameFormat::setHeight(qreal aheight)
 { setProperty(FrameHeight, QTextLength(QTextLength::FixedLength, aheight)); }
 inline void QTextFrameFormat::setHeight(const QTextLength &aheight)
 { setProperty(FrameHeight, aheight); }
+
+inline void QTextFrameFormat::setTopMargin(qreal amargin)
+{ setProperty(FrameTopMargin, amargin); }
+
+inline void QTextFrameFormat::setBottomMargin(qreal amargin)
+{ setProperty(FrameBottomMargin, amargin); }
+
+inline void QTextFrameFormat::setLeftMargin(qreal amargin)
+{ setProperty(FrameLeftMargin, amargin); }
+
+inline void QTextFrameFormat::setRightMargin(qreal amargin)
+{ setProperty(FrameRightMargin, amargin); }
 
 class Q_GUI_EXPORT QTextTableFormat : public QTextFrameFormat
 {

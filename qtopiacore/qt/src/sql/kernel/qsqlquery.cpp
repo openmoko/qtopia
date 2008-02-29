@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -41,12 +56,14 @@ public:
     ~QSqlQueryPrivate();
     QAtomic ref;
     QSqlResult* sqlResult;
+    QSql::NumericalPrecisionPolicy precisionPolicy;
 
-    Q_GLOBAL_STATIC_WITH_ARGS(QSqlQueryPrivate, nullQueryPrivate, (0))
-    Q_GLOBAL_STATIC(QSqlNullDriver, nullDriver)
-    Q_GLOBAL_STATIC_WITH_ARGS(QSqlNullResult, nullResult, (nullDriver()))
     static QSqlQueryPrivate* shared_null();
 };
+
+Q_GLOBAL_STATIC_WITH_ARGS(QSqlQueryPrivate, nullQueryPrivate, (0))
+Q_GLOBAL_STATIC(QSqlNullDriver, nullDriver)
+Q_GLOBAL_STATIC_WITH_ARGS(QSqlNullResult, nullResult, (nullDriver()))
 
 QSqlQueryPrivate* QSqlQueryPrivate::shared_null()
 {
@@ -58,7 +75,8 @@ QSqlQueryPrivate* QSqlQueryPrivate::shared_null()
 /*!
 \internal
 */
-QSqlQueryPrivate::QSqlQueryPrivate(QSqlResult* result): ref(1), sqlResult(result)
+QSqlQueryPrivate::QSqlQueryPrivate(QSqlResult* result)
+    : ref(1), sqlResult(result), precisionPolicy(QSql::HighPrecision)
 {
     if (!sqlResult)
         sqlResult = nullResult();
@@ -203,8 +221,12 @@ QSqlQueryPrivate::~QSqlQueryPrivate()
     Note that unbound parameters will retain their values.
 
     Stored procedures that uses the return statement to return values,
-    or return multiple result sets, are not fully supported. For specific 
+    or return multiple result sets, are not fully supported. For specific
     details see \l{SQL Database Drivers}.
+
+    \warning You must load the SQL driver and open the connection before a
+    QSqlQuery is created. Also, the connection must remain open while the
+    query exists; otherwise, the behavior of QSqlQuery is undefined.
 
     \sa QSqlDatabase, QSqlQueryModel, QSqlTableModel, QVariant
 */
@@ -337,12 +359,14 @@ bool QSqlQuery::exec(const QString& query)
     if (d->ref != 1) {
         bool fo = isForwardOnly();
         *this = QSqlQuery(driver()->createResult());
+        d->sqlResult->setNumericalPrecisionPolicy(d->precisionPolicy);
         setForwardOnly(fo);
     } else {
         d->sqlResult->clear();
         d->sqlResult->setActive(false);
         d->sqlResult->setLastError(QSqlError());
         d->sqlResult->setAt(QSql::BeforeFirstRow);
+        d->sqlResult->setNumericalPrecisionPolicy(d->precisionPolicy);
     }
     d->sqlResult->setQuery(query.trimmed());
     if (!driver()->isOpen() || driver()->isOpenError()) {
@@ -856,10 +880,12 @@ bool QSqlQuery::prepare(const QString& query)
         bool fo = isForwardOnly();
         *this = QSqlQuery(driver()->createResult());
         setForwardOnly(fo);
+        d->sqlResult->setNumericalPrecisionPolicy(d->precisionPolicy);
     } else {
         d->sqlResult->setActive(false);
         d->sqlResult->setLastError(QSqlError());
         d->sqlResult->setAt(QSql::BeforeFirstRow);
+        d->sqlResult->setNumericalPrecisionPolicy(d->precisionPolicy);
     }
     if (!driver()) {
         qWarning("QSqlQuery::prepare: no driver");
@@ -935,8 +961,9 @@ bool QSqlQuery::exec()
         4  NULL
     \endcode
 
-    To bind NULL values, a null QVariant has to be added to the bound QVariantList,
-    for example: \c {QVariant(QVariant::String)}
+    To bind NULL values, a null QVariant of the relevant type has to be added to
+    the bound QVariantList; for example, \c {QVariant(QVariant::String)} should be
+    used if you are using strings.
 
     Note that every bound QVariantList must contain the same amount of variants.
     Note that the type of the QVariants in a list must not change. For example,
@@ -964,6 +991,9 @@ bool QSqlQuery::execBatch(BatchExecutionMode mode)
     must be included when specifying the placeholder name. If \a paramType
     is QSql::Out or QSql::InOut, the placeholder will be
     overwritten with data from the database after the exec() call.
+
+    To bind a NULL value, use a null QVariant; for example, use
+    \c {QVariant(QVariant::String)} if you are binding a string.
 
     \sa addBindValue(), prepare(), exec(), boundValue() boundValues()
 */
@@ -993,6 +1023,9 @@ void QSqlQuery::bindValue(int pos, const QVariant& val, QSql::ParamType paramTyp
     which placeholder a value will be bound to in the prepared query.
     If \a paramType is QSql::Out or QSql::InOut, the placeholder will
     be overwritten with data from the database after the exec() call.
+
+    To bind a NULL value, use a null QVariant; for example, use
+    \c {QVariant(QVariant::String)} if you are binding a string.
 
     \sa bindValue(), prepare(), exec(), boundValue() boundValues()
 */
@@ -1051,7 +1084,7 @@ QMap<QString,QVariant> QSqlQuery::boundValues() const
 }
 
 /*!
-    Returns the last query that was executed.
+    Returns the last query that was successfully executed.
 
     In most cases this function returns the same string as
     lastQuery(). If a prepared query with placeholders is executed on
@@ -1081,6 +1114,10 @@ QString QSqlQuery::executedQuery() const
     If more than one row was touched by the insert, the behavior is
     undefined.
 
+    Note that for Oracle databases the row's ROWID will be returned,
+    while for MySQL databases the row's auto-increment field will
+    be returned.
+
     \sa QSqlDriver::hasFeature()
 */
 QVariant QSqlQuery::lastInsertId() const
@@ -1088,3 +1125,61 @@ QVariant QSqlQuery::lastInsertId() const
     return d->sqlResult->lastInsertId();
 }
 
+/*!
+    Instruct the database driver to return numerical values with a precision specified by
+    \a precisionPolicy.
+
+    The Oracle driver, for example, retrieves numerical values as strings by default to
+    prevent the loss of precision. If the high precision doesn't matter, use this method
+    to increase execution speed by bypassing string conversions.
+
+    Note: Drivers that don't support fetching numerical values with low precision will
+    ignore the precision policy. You can use QSqlDriver::hasFeature() to find out whether a
+    driver supports this feature.
+
+    Note: Setting the precision policy doesn't affect the currently active query. Call
+    \l{exec()}{exec(QString)} or prepare() in order to activate the policy.
+
+    \sa QSql::NumericalPrecisionPolicy, numericalPrecisionPolicy()
+*/
+void QSqlQuery::setNumericalPrecisionPolicy(QSql::NumericalPrecisionPolicy precisionPolicy)
+{
+    d->precisionPolicy = precisionPolicy;
+}
+
+/*!
+    Returns the current precision policy.
+
+    \sa QSql::NumericalPrecisionPolicy, setNumericalPrecisionPolicy()
+*/
+QSql::NumericalPrecisionPolicy QSqlQuery::numericalPrecisionPolicy() const
+{
+    return d->precisionPolicy;
+}
+
+/*!
+    \since 4.3.2
+    \preliminary
+
+    Instruct the database driver that no more data will be fetched from this
+    query until it is re-executed. There is normally no need to call this
+    function, but it may be helpful in order to free resources such as locks
+    or cursors if you intend to re-use the query at a later time.
+    
+    Sets the query to inactive. Bound values retain their values.
+
+    This function is new in Qt 4.3.2 and requires that QT_44_API_QSQLQUERY_FINISH
+    is defined when compiling your application. It is expected to become part
+    of the public API in Qt 4.4.
+
+    \sa prepare() exec() isActive()
+*/
+void QSqlQuery::finish()
+{
+    if (isActive()) {
+        d->sqlResult->setLastError(QSqlError());
+        d->sqlResult->setAt(QSql::BeforeFirstRow);
+        d->sqlResult->detachFromResultSet();
+        d->sqlResult->setActive(false);
+    }
+}

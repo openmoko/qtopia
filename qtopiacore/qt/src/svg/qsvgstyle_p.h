@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -35,6 +50,7 @@
 // We mean it.
 //
 
+#include "QtGui/qpainter.h"
 #include "QtGui/qpen.h"
 #include "QtGui/qbrush.h"
 #include "QtGui/qmatrix.h"
@@ -51,37 +67,37 @@ template <class T> class QSvgRefCounter
 {
 public:
     QSvgRefCounter() { t = 0; }
-    QSvgRefCounter(T *_t) 
-    { 
-        t = _t; 
-        if (t) 
-            t->ref(); 
+    QSvgRefCounter(T *_t)
+    {
+        t = _t;
+        if (t)
+            t->ref();
     }
-    QSvgRefCounter(const QSvgRefCounter &other) 
-    { 
-        t = other.t; 
-        if (t) 
-            t->ref(); 
+    QSvgRefCounter(const QSvgRefCounter &other)
+    {
+        t = other.t;
+        if (t)
+            t->ref();
     }
-    QSvgRefCounter &operator =(T *_t) 
-    { 
+    QSvgRefCounter &operator =(T *_t)
+    {
         if(_t)
             _t->ref();
-        if (t) 
-            t->deref(); 
-        t = _t; 
+        if (t)
+            t->deref();
+        t = _t;
         return *this;
     }
-    QSvgRefCounter &operator =(const QSvgRefCounter &other) 
-    { 
+    QSvgRefCounter &operator =(const QSvgRefCounter &other)
+    {
         if(other.t)
             other.t->ref();
-        if (t) 
-            t->deref(); 
-        t = other.t; 
+        if (t)
+            t->deref();
+        t = other.t;
         return *this;
     }
-    ~QSvgRefCounter() 
+    ~QSvgRefCounter()
     {
         if (t)
             t->deref();
@@ -89,7 +105,7 @@ public:
 
     inline T *operator->() const { return t; }
     inline operator T*() const { return t; }
-    
+
 private:
     T *t;
 };
@@ -99,15 +115,15 @@ class QSvgRefCounted
 public:
     QSvgRefCounted() { _ref = 0; }
     virtual ~QSvgRefCounted() {}
-    void ref() { 
-        ++_ref; 
-//        qDebug() << this << ": adding ref, now " << _ref; 
+    void ref() {
+        ++_ref;
+//        qDebug() << this << ": adding ref, now " << _ref;
     }
-    void deref() { 
-//        qDebug() << this << ": removing ref, now " << _ref; 
+    void deref() {
+//        qDebug() << this << ": removing ref, now " << _ref;
         if(!--_ref) {
 //            qDebug("     deleting");
-            delete this; 
+            delete this;
         }
     }
 private:
@@ -129,7 +145,8 @@ public:
         TRANSFORM,
         ANIMATE_TRANSFORM,
         ANIMATE_COLOR,
-        OPACITY
+        OPACITY,
+        COMP_OP
     };
 public:
     virtual ~QSvgStyleProperty();
@@ -190,6 +207,8 @@ public:
     virtual void revert(QPainter *p);
     virtual Type type() const;
 
+    void setFillRule(Qt::FillRule f);
+
     //### hack that would be a lot better handled by
     //having a default QSvgColorStyle element and handling it
     //correctly in qsvghandler
@@ -206,12 +225,13 @@ private:
     // fill            v 	v 	'inherit' | <Paint.datatype>
     // fill-opacity    v 	v 	'inherit' | <OpacityValue.datatype>
     QBrush m_fill;
-    // fill-rule       v 	v 	'inherit' | <ClipFillRule.datatype>
-    //int m_fillRule;
 
     QBrush m_oldFill;
 
     bool m_fromColor;
+
+    bool         m_fillRuleSet;
+    Qt::FillRule m_fillRule;
 };
 
 class QSvgViewportFillStyle : public QSvgStyleProperty
@@ -438,6 +458,27 @@ private:
     qreal m_repeatCount;
 };
 
+
+class QSvgCompOpStyle : public QSvgStyleProperty
+{
+public:
+    QSvgCompOpStyle(QPainter::CompositionMode mode);
+    virtual void apply(QPainter *p, const QRectF &, QSvgNode *node);
+    virtual void revert(QPainter *p);
+    virtual Type type() const;
+
+    const QPainter::CompositionMode & compOp() const
+    {
+        return m_mode;
+    }
+private:
+    //comp-op attribute
+    QPainter::CompositionMode m_mode;
+
+    QPainter::CompositionMode m_oldMode;
+};
+
+
 class QSvgStyle
 {
 public:
@@ -450,7 +491,9 @@ public:
           solidColor(0),
           gradient(0),
           transform(0),
-          animateColor(0)
+          animateColor(0),
+          opacity(0),
+          compop(0)
     {}
     ~QSvgStyle();
 
@@ -467,6 +510,7 @@ public:
     QSvgRefCounter<QSvgAnimateColor>      animateColor;
     QList<QSvgRefCounter<QSvgAnimateTransform> >   animateTransforms;
     QSvgRefCounter<QSvgOpacityStyle>      opacity;
+    QSvgRefCounter<QSvgCompOpStyle>       compop;
 };
 
 /********************************************************/

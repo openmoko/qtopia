@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,58 +21,18 @@
 #ifndef SYSTEM_TIME_H
 #define SYSTEM_TIME_H
 
-
 #include <qdatetime.h>
 #include <QMainWindow>
-#include <QSpinBox>
-
-#include <qtimestring.h>
+#include <QBasicTimer>
 #include <qtopiaabstractservice.h>
-
-#ifdef QTOPIA_PHONE
-# include <qtopia/qsoftmenubar.h>
-#endif
 
 class QToolButton;
 class QLabel;
-class QHBoxLayout;
-class QTimeZoneWidget;
+class QTimeZoneSelector;
 class QComboBox;
-class MinuteSpinBox;
-
-class SetTime : public QWidget
-{
-    Q_OBJECT
-public:
-    SetTime( QWidget *parent=0 );
-
-    QTime time() const;
-
-    bool changed() const { return userChanged; }
-
-public slots:
-    void slotTzChange( const QString& tz );
-    void show12hourTime( int );
-
-protected slots:
-    void hourChanged( int value );
-    void minuteChanged( int value );
-
-    void checkedPM( int );
-
-protected:
-    void focusInEvent( QFocusEvent *e );
-
-    int hour;
-    int minute;
-    bool use12hourTime;
-    QComboBox *ampm;
-    QSpinBox *sbHour;
-    MinuteSpinBox *sbMin;
-    bool userChanged;
-};
-
 class QDateEdit;
+class QTimeEdit;
+class QValueSpaceItem;
 
 class SetDateTime : public QMainWindow
 {
@@ -85,49 +45,42 @@ public:
 protected slots:
     void tzChange( const QString &tz );
     void dateChange(const QDate &);
+    void timeChange(const QTime &);
     void setDateFormat();
     void updateDateFormat();
+    void updateTimeFormat(int);
 
 public slots:
     void editTime();
     void editDate();
+    void setAutomatic(int on);
+    void sysTimeZoneChanged();
 
 protected:
     virtual void closeEvent( QCloseEvent* e );
+    virtual void timerEvent( QTimerEvent* );
 
-    SetTime *time;
+private:
+    QTimeEdit *time;
     QDateEdit *date;
-    QTimeZoneWidget *tz;
+    QComboBox *atz;
+    QTimeZoneSelector *tz;
     QComboBox *weekStartCombo;
     QComboBox *ampmCombo;
     QComboBox *dateFormatCombo;
+    QLabel *tz_label, *time_label, *date_label;
 
     QStringList date_formats;
     bool dateChanged;
+    bool timeChanged;
     bool tzChanged;
     bool tzEditable;
     QLabel *tzLabel;
-    QHBoxLayout *tzLayout;
-#ifdef QTOPIA_PHONE
-    QMenu *contextMenu;
-#endif
 
-private:
+    QBasicTimer clocktimer;
+
     void storeSettings();
 };
-
-class MinuteSpinBox : public QSpinBox
-{
-    Q_OBJECT
-
-public:
-    MinuteSpinBox( QWidget * parent = 0 );
-
-protected:
-    virtual QString textFromValue( int value ) const;
-};
-
-#ifndef QT_NO_COP
 
 class TimeService : public QtopiaAbstractService
 {
@@ -162,7 +115,5 @@ public slots:
 private:
     SetDateTime *parent;
 };
-
-#endif
 
 #endif //SYSTEM_TIME_H

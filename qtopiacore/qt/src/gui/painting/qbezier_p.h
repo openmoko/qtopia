@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,20 +53,29 @@
 #include "QtCore/qpoint.h"
 #include "QtCore/qline.h"
 #include "QtCore/qrect.h"
+#include "QtCore/qvector.h"
+#include "QtCore/qlist.h"
 
 class QPolygonF;
 
 class Q_GUI_EXPORT QBezier
 {
 public:
-    static QBezier fromPoints(const QPointF &p1, const QPointF &p2, const QPointF &p3, const QPointF &p4);
+    static QBezier fromPoints(const QPointF &p1, const QPointF &p2,
+                              const QPointF &p3, const QPointF &p4);
 
     inline QPointF pointAt(qreal t) const;
     inline QPointF normalVector(qreal t) const;
 
     QPolygonF toPolygon() const;
     void addToPolygon(QPolygonF *p) const;
+    void addToPolygonIterative(QPolygonF *p) const;
+    void addToPolygonMixed(QPolygonF *p) const;
     QRectF bounds() const;
+    qreal length(qreal error = 0.01) const;
+    void addIfClose(qreal *length, qreal error) const;
+
+    qreal tAtLength(qreal len) const;
 
     QPointF pt1() const { return QPointF(x1, y1); }
     QPointF pt2() const { return QPointF(x2, y2); }
@@ -61,8 +85,20 @@ public:
     inline QPointF midPoint() const;
     inline QLineF midTangent() const;
 
-    void split(QBezier *firstHalf, QBezier *secondHalf) const;
-    int shifted(QBezier *curveSegments, int maxSegmets, qreal offset, float threshold) const;
+    inline QLineF startTangent() const;
+    inline QLineF endTangent() const;
+
+    inline void parameterSplitLeft(qreal t, QBezier *left);
+    inline void split(QBezier *firstHalf, QBezier *secondHalf) const;
+    int shifted(QBezier *curveSegments, int maxSegmets,
+                qreal offset, float threshold) const;
+
+    QVector< QList<QBezier> > splitAtIntersections(QBezier &a);
+
+    QBezier bezierOnInterval(qreal t0, qreal t1) const;
+
+    static QVector< QList<qreal> > findIntersections(const QBezier &a,
+                                                     const QBezier &b);
 
     qreal x1, y1, x2, y2, x3, y3, x4, y4;
 };
@@ -78,6 +114,26 @@ inline QLineF QBezier::midTangent() const
     QLineF dir(QLineF(x1, y1, x2, y2).pointAt(0.5), QLineF(x3, y3, x4, y4).pointAt(0.5));
     return QLineF(mid.x() - dir.dx(), mid.y() - dir.dy(),
                   mid.x() + dir.dx(), mid.y() + dir.dy());
+}
+
+inline QLineF QBezier::startTangent() const
+{
+    QLineF tangent(pt1(), pt2());
+    if (tangent.isNull())
+        tangent = QLineF(pt1(), pt3());
+    if (tangent.isNull())
+        tangent = QLineF(pt1(), pt4());
+    return tangent;
+}
+
+inline QLineF QBezier::endTangent() const
+{
+    QLineF tangent(pt4(), pt3());
+    if (tangent.isNull())
+        tangent = QLineF(pt4(), pt2());
+    if (tangent.isNull())
+        tangent = QLineF(pt4(), pt1());
+    return tangent;
 }
 
 inline QPointF QBezier::pointAt(qreal t) const
@@ -122,6 +178,54 @@ inline QPointF QBezier::normalVector(qreal t) const
     qreal c = t * t;
 
     return QPointF((y2-y1) * a + (y3-y2) * b + (y4-y3) * c,  -(x2-x1) * a - (x3-x2) * b - (x4-x3) * c);
+}
+
+inline void QBezier::split(QBezier *firstHalf, QBezier *secondHalf) const
+{
+    Q_ASSERT(firstHalf);
+    Q_ASSERT(secondHalf);
+
+    qreal c = (x2 + x3)*.5;
+    firstHalf->x2 = (x1 + x2)*.5;
+    secondHalf->x3 = (x3 + x4)*.5;
+    firstHalf->x1 = x1;
+    secondHalf->x4 = x4;
+    firstHalf->x3 = (firstHalf->x2 + c)*.5;
+    secondHalf->x2 = (secondHalf->x3 + c)*.5;
+    firstHalf->x4 = secondHalf->x1 = (firstHalf->x3 + secondHalf->x2)*.5;
+
+    c = (y2 + y3)/2;
+    firstHalf->y2 = (y1 + y2)*.5;
+    secondHalf->y3 = (y3 + y4)*.5;
+    firstHalf->y1 = y1;
+    secondHalf->y4 = y4;
+    firstHalf->y3 = (firstHalf->y2 + c)*.5;
+    secondHalf->y2 = (secondHalf->y3 + c)*.5;
+    firstHalf->y4 = secondHalf->y1 = (firstHalf->y3 + secondHalf->y2)*.5;
+}
+
+inline void QBezier::parameterSplitLeft(qreal t, QBezier *left)
+{
+    left->x1 = x1;
+    left->y1 = y1;
+
+    left->x2 = x1 + t * ( x2 - x1 );
+    left->y2 = y1 + t * ( y2 - y1 );
+
+    left->x3 = x2 + t * ( x3 - x2 ); // temporary holding spot
+    left->y3 = y2 + t * ( y3 - y2 ); // temporary holding spot
+
+    x3 = x3 + t * ( x4 - x3 );
+    y3 = y3 + t * ( y4 - y3 );
+
+    x2 = left->x3 + t * ( x3 - left->x3);
+    y2 = left->y3 + t * ( y3 - left->y3);
+
+    left->x3 = left->x2 + t * ( left->x3 - left->x2 );
+    left->y3 = left->y2 + t * ( left->y3 - left->y2 );
+
+    left->x4 = x1 = left->x3 + t * (x2 - left->x3);
+    left->y4 = y1 = left->y3 + t * (y2 - left->y3);
 }
 
 #endif // QBEZIER_P_H

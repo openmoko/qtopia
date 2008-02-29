@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -29,6 +44,8 @@
 #include "globaldefs.h"
 #include "qt3to4.h"
 #include "utils.h"
+#include "option.h"
+#include "cppextractimages.h"
 
 #include <QtDebug>
 #include <QFile>
@@ -40,6 +57,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+enum { warnHeaderGeneration = 0 };
 
 #define CONVERT_PROPERTY(o, n) \
     do { \
@@ -65,7 +84,10 @@ static QString classNameForObjectName(const QDomElement &widget, const QString &
                 str.read(name);
                 if (str.text() == objectName)
                     return w.attribute(QLatin1String("class"));
-            } else if (child.tagName() == QLatin1String("widget")) {
+            } else if (child.tagName() == QLatin1String("widget")
+                || child.tagName() == QLatin1String("vbox")
+                || child.tagName() == QLatin1String("hbox")
+                || child.tagName() == QLatin1String("grid")) {
                 widgetStack.prepend(child);
             }
             child = child.nextSibling().toElement();
@@ -74,7 +96,26 @@ static QString classNameForObjectName(const QDomElement &widget, const QString &
     return QString();
 }
 
-DomUI *Ui3Reader::generateUi4(const QDomElement &widget)
+// Check for potential KDE classes like
+//  K3ListView or KLineEdit as precise as possible
+static inline bool isKDEClass(const QString &className)
+{
+    if (className.indexOf(QLatin1Char(':')) != -1)
+        return false;
+    const int size = className.size();
+    if (size < 3 || className.at(0) != QLatin1Char('K'))
+        return false;
+    // K3ListView
+    if (className.at(1) == QLatin1Char('3')) {
+        if (size < 4)
+            return false;
+        return className.at(2).isUpper() &&  className.at(3).isLower();
+    }
+    // KLineEdit
+    return className.at(1) .isUpper() && className.at(2).isLower();
+}
+
+DomUI *Ui3Reader::generateUi4(const QDomElement &widget, bool implicitIncludes)
 {
     QDomNodeList nl;
     candidateCustomWidgets.clear();
@@ -123,10 +164,10 @@ DomUI *Ui3Reader::generateUi4(const QDomElement &widget)
             comment = n.firstChild().toText().data();
         } else if (tagName == QLatin1String("exportmacro")) {
             exportMacro = n.firstChild().toText().data();
-        } else if ( n.tagName() == "includehints" ) {
+        } else if ( n.tagName() == QLatin1String("includehints") ) {
             QDomElement n2 = n.firstChild().toElement();
             while ( !n2.isNull() ) {
-                if ( n2.tagName() == "includehint" ) {
+                if ( n2.tagName() == QLatin1String("includehint") ) {
                     QString name = n2.firstChild().toText().data();
 
                     DomInclude *incl = new DomInclude();
@@ -217,6 +258,9 @@ DomUI *Ui3Reader::generateUi4(const QDomElement &widget)
                 data->setText(tmp.firstChild().toText().data());
 
                 ui_image_list.append(img);
+                QString format = img->elementData()->attributeFormat();
+                QString extension = format.left(format.indexOf('.')).toLower();
+                m_imageMap[img->attributeName()] = img->attributeName() + QLatin1Char('.') + extension;
             }
 
             if (ui_image_list.size()) {
@@ -271,6 +315,9 @@ DomUI *Ui3Reader::generateUi4(const QDomElement &widget)
                     DomCustomWidget *customWidget = new DomCustomWidget;
                     customWidget->read(n2);
 
+                    if (!customWidget->hasElementExtends())
+                        customWidget->setElementExtends(QLatin1String("QWidget"));
+
                     QDomElement n3 = n2.firstChild().toElement();
                     QString cl;
 
@@ -323,7 +370,7 @@ DomUI *Ui3Reader::generateUi4(const QDomElement &widget)
             while (!n2.isNull()) {
                 if (n2.tagName().toLower() == QLatin1String("slot")) {
                     QString name = n2.firstChild().toText().data();
-                    ui_custom_slots.append(fixMethod(name));
+                    ui_custom_slots.append(fixMethod(Parser::cleanArgs(name)));
                 }
                 n2 = n2.nextSibling().toElement();
             }
@@ -381,7 +428,6 @@ DomUI *Ui3Reader::generateUi4(const QDomElement &widget)
     if (klass.isEmpty())
         klass = w->attributeName();
 
-    w->setAttributeName(klass);
     ui->setElementClass(klass);
     ui->setElementAuthor(author);
     ui->setElementComment(comment);
@@ -415,13 +461,24 @@ DomUI *Ui3Reader::generateUi4(const QDomElement &widget)
         if (baseClass.isEmpty())
             continue;
 
-        DomHeader *header = new DomHeader;
-        header->setText(customClass.toLower() + QLatin1String(".h"));
-
         DomCustomWidget *customWidget = new DomCustomWidget();
         customWidget->setElementClass(customClass);
-        customWidget->setElementHeader(header);
         customWidget->setElementExtends(baseClass);
+
+        // Magic header generation feature for legacy KDE forms
+        // (for example, filesharing/advanced/kcm_sambaconf/share.ui)
+        if (implicitIncludes && isKDEClass(customClass)) {
+            QString header = customClass.toLower();
+            header += QLatin1String(".h");
+            DomHeader *domHeader = new DomHeader;
+            domHeader->setText(header);
+            domHeader->setAttributeLocation(QLatin1String("global"));
+            customWidget->setElementHeader(domHeader);
+            if (warnHeaderGeneration) {
+                const QString msg = QString::fromUtf8("Warning: generated header '%1' for class '%2'.").arg(header).arg(customClass);
+                qWarning(msg.toUtf8().constData());
+            }
+        }
         ui_customwidget_list.append(customWidget);
     }
 
@@ -451,8 +508,31 @@ DomUI *Ui3Reader::generateUi4(const QDomElement &widget)
 
     ui->setAttributeStdSetDef(stdsetdef);
 
+    if (m_extractImages) {
+        Option opt;
+        opt.extractImages = m_extractImages;
+        opt.qrcOutputFile = m_qrcOutputFile;
+        CPP::ExtractImages(opt).acceptUI(ui);
+
+        ui->clearElementImages();
+
+        DomResources *res = ui->elementResources();
+        if (!res) {
+            res = new DomResources();
+        }
+        DomResource *incl = new DomResource();
+        incl->setAttributeLocation(m_qrcOutputFile);
+        QList<DomResource *> inclList = res->elementInclude();
+        inclList.append(incl);
+        res->setElementInclude(inclList);
+        if (!ui->elementResources())
+            ui->setElementResources(res);
+    }
+
     return ui;
 }
+
+
 
 QString Ui3Reader::fixActionProperties(QList<DomProperty*> &properties,
                                        bool isActionGroup)
@@ -473,9 +553,9 @@ QString Ui3Reader::fixActionProperties(QList<DomProperty*> &properties,
             delete prop;
             it.remove();
         } else if (name == QLatin1String("menuText")) {
-            prop->setAttributeName("text");
+            prop->setAttributeName(QLatin1String("text"));
         } else if (name == QLatin1String("text")) {
-            prop->setAttributeName("iconText");
+            prop->setAttributeName(QLatin1String("iconText"));
         } else if (name == QLatin1String("iconSet")) {
             prop->setAttributeName(QLatin1String("icon"));
         } else if (name == QLatin1String("accel")) {
@@ -573,9 +653,7 @@ DomWidget *Ui3Reader::createWidget(const QDomElement &w, const QString &widgetCl
     }
 
     QDomElement e = w.firstChild().toElement();
-    bool inQ3ToolBar = className == QLatin1String("Q3ToolBar");
-    bool inQ3GroupBox = (className == QLatin1String("Q3GroupBox")) || (className == QLatin1String("Q3ButtonGroup"));
-
+    const bool inQ3ToolBar = className == QLatin1String("Q3ToolBar");
     while (!e.isNull()) {
         QString t = e.tagName().toLower();
         if (t == QLatin1String("vbox") || t == QLatin1String("hbox") || t == QLatin1String("grid")) {
@@ -583,27 +661,6 @@ DomWidget *Ui3Reader::createWidget(const QDomElement &w, const QString &widgetCl
             Q_ASSERT(lay != 0);
 
             if (ui_layout_list.isEmpty()) {
-                DomProperty *pmargin = 0;
-
-                if (inQ3GroupBox) {
-                    foreach (DomProperty *prop, lay->elementProperty()) {
-                        if (prop->attributeName() == QLatin1String("margin")) {
-                            pmargin = prop;
-                            break;
-                        }
-                    }
-
-                    if (! pmargin) {
-                        pmargin = new DomProperty();
-                        pmargin->setAttributeName(QLatin1String("margin"));
-                        pmargin->setElementNumber(0);
-
-                        QList<DomProperty*> plist = lay->elementProperty();
-                        plist.append(pmargin);
-                        lay->setElementProperty(plist);
-                    }
-                }
-
                 ui_layout_list.append(lay);
             } else {
                 // it's not possible to have more than one layout for widget!
@@ -786,7 +843,7 @@ DomLayoutItem *Ui3Reader::createLayoutItem(const QDomElement &e)
         DomSpacer *ui_spacer = new DomSpacer();
         QList<DomProperty*> properties;
 
-        QByteArray name = DomTool::readProperty(e, QLatin1String("name"), "spacer").toByteArray();
+        QByteArray name = DomTool::readProperty(e, QLatin1String("name"), QLatin1String("spacer")).toByteArray();
 
         Variant var;
         var.createSize(0, 0);
@@ -794,8 +851,8 @@ DomLayoutItem *Ui3Reader::createLayoutItem(const QDomElement &e)
         QVariant def = qVariantFromValue(var);
 
         Size size = asVariant(DomTool::readProperty(e, QLatin1String("sizeHint"), def)).size;
-        QString sizeType = DomTool::readProperty(e, QLatin1String("sizeType"), "Expanding").toString();
-        QString orientation = DomTool::readProperty(e, QLatin1String("orientation"), "Horizontal").toString();
+        QString sizeType = QLatin1String("QSizePolicy::") + DomTool::readProperty(e, QLatin1String("sizeType"), QLatin1String("Expanding")).toString();
+        QString orientation = QLatin1String("Qt::") + DomTool::readProperty(e, QLatin1String("orientation"), QLatin1String("Horizontal")).toString();
 
         ui_spacer->setAttributeName(QLatin1String(name));
 
@@ -845,20 +902,7 @@ DomLayoutItem *Ui3Reader::createLayoutItem(const QDomElement &e)
 
 void Ui3Reader::fixLayoutMargin(DomLayout *ui_layout)
 {
-    bool hasMargin = false;
-    QList<DomProperty*> properties = ui_layout->elementProperty();
-    foreach (DomProperty *p, properties) {
-        if (p->attributeName() == QLatin1String("margin"))
-            hasMargin = true;
-    }
-
-    if (!hasMargin) {
-        DomProperty *margin = new DomProperty();
-        margin->setAttributeName(QLatin1String("margin"));
-        margin->setElementNumber(0);
-        properties.append(margin);
-        ui_layout->setElementProperty(properties);
-    }
+    Q_UNUSED(ui_layout)
 }
 
 void Ui3Reader::findDerivedFontProperties(const QDomElement &n, DomFont &result) const
@@ -895,7 +939,7 @@ void Ui3Reader::findDerivedFontProperties(const QDomElement &n, DomFont &result)
                             result.setElementStrikeOut(true);
                     } else if (name == QLatin1String("family")) {
                         if (result.elementFamily().isEmpty())
-                            result.setElementFamily(text.toAscii());
+                            result.setElementFamily(text);
                     } else if (name == QLatin1String("pointsize")) {
                         if (!result.elementPointSize())
                             result.setElementPointSize(text.toInt());
@@ -988,7 +1032,7 @@ void Ui3Reader::createProperties(const QDomElement &n, QList<DomProperty*> *prop
                 }
             }
 
-            if (className.endsWith("ComboBox")) {
+            if (className.endsWith(QLatin1String("ComboBox"))) {
                 CONVERT_PROPERTY(QLatin1String("currentItem"), QLatin1String("currentIndex"));
                 CONVERT_PROPERTY(QLatin1String("insertionPolicy"), QLatin1String("insertPolicy"));
             }
@@ -1028,7 +1072,7 @@ void Ui3Reader::createProperties(const QDomElement &n, QList<DomProperty*> *prop
             if (className == QLatin1String("QLabel") && name == QLatin1String("alignment")) {
                 QString v = prop->elementSet();
 
-                if (v.contains(QRegExp("\\bWordBreak\\b")))
+                if (v.contains(QRegExp(QLatin1String("\\bWordBreak\\b"))))
                     wordWrapFound = true;
             }
 
@@ -1117,9 +1161,16 @@ DomProperty *Ui3Reader::readProperty(const QDomElement &e)
         if (value.contains(QLatin1Char('.'))) {
             p->setElementDouble(value.toDouble());
         }
-    }
-
-    else if (p->kind() == DomProperty::Unknown) {
+    } else if (p->kind() == DomProperty::Pixmap) {
+        DomResourcePixmap *domPix = p->elementPixmap();
+        if (m_extractImages) {
+            QString imageFile = domPix->text() + QLatin1String(".xpm");
+            if (m_imageMap.contains(domPix->text()))
+                imageFile = m_imageMap.value(domPix->text());
+            domPix->setAttributeResource(m_qrcOutputFile);
+            domPix->setText(QLatin1String(":/") + nameOfClass + QLatin1String("/images/") + imageFile);
+        }
+    } else if (p->kind() == DomProperty::Unknown) {
         delete p;
         p = 0;
     }
@@ -1175,7 +1226,7 @@ QString Ui3Reader::fixType(const QString &t) const
 {
     QString newText = t;
     //split type name on <>*& and whitespace
-    QStringList typeNames = t.split(QRegExp("<|>|\\*|&| "), QString::SkipEmptyParts);
+    QStringList typeNames = t.split(QRegExp(QLatin1String("<|>|\\*|&| ")), QString::SkipEmptyParts);
     foreach(QString typeName , typeNames) {
         QString newName = fixClassName(typeName);
         if( newName != typeName ) {

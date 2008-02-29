@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QLocale Class Reference</title>
+  <title>Qt 4.3: QLocale Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QLocale Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QLocale Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QLocale class converts between numbers and their string representations in various languages. <a href="#details">More...</a></p>
 <pre> #include &lt;QLocale&gt;</pre><p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>, except <a href="qlocale.html#setDefault">setDefault</a>().</p>
 <ul>
@@ -22,7 +23,7 @@
 <ul>
 <li><div class="fn"/>enum <b><a href="qlocale.html#Country-enum">Country</a></b> { AnyCountry, Afghanistan, Albania, Algeria, ..., Zimbabwe }</li>
 <li><div class="fn"/>enum <b><a href="qlocale.html#FormatType-enum">FormatType</a></b> { LongFormat, ShortFormat }</li>
-<li><div class="fn"/>enum <b><a href="qlocale.html#Language-enum">Language</a></b> { C, Abkhazian, Afan, Afar, ..., Zulu }</li>
+<li><div class="fn"/>enum <b><a href="qlocale.html#Language-enum">Language</a></b> { C, Abkhazian, Afan, Afar, ..., Chewa }</li>
 <li><div class="fn"/>enum <b><a href="qlocale.html#NumberOption-enum">NumberOption</a></b> { OmitGroupSeparator, RejectGroupSeparator }</li>
 <li><div class="fn"/>flags <b><a href="qlocale.html#NumberOption-enum">NumberOptions</a></b></li>
 </ul>
@@ -76,6 +77,7 @@
 <h3>Static Public Members</h3>
 <ul>
 <li><div class="fn"/>QLocale <b><a href="qlocale.html#c">c</a></b> ()</li>
+<li><div class="fn"/>QList&lt;Country&gt; <b><a href="qlocale.html#countriesForLanguage">countriesForLanguage</a></b> ( Language <i>language</i> )</li>
 <li><div class="fn"/>QString <b><a href="qlocale.html#countryToString">countryToString</a></b> ( Country <i>country</i> )</li>
 <li><div class="fn"/>QString <b><a href="qlocale.html#languageToString">languageToString</a></b> ( Language <i>language</i> )</li>
 <li><div class="fn"/>void <b><a href="qlocale.html#setDefault">setDefault</a></b> ( const QLocale &amp; <i>locale</i> )</li>
@@ -97,7 +99,7 @@
 <ul>
 <li>If a QLocale object is constructed with the default constructor, it will use the default locale's settings.</li>
 <li><a href="qstring.html#toInt">QString::toInt</a>(), <a href="qstring.html#toDouble">QString::toDouble</a>(), etc., interpret the string according to the default locale. If this fails, it falls back on the &quot;C&quot; locale.</li>
-<li><a href="qstring.html#arg">QString::arg</a>() uses the default locale to format a number when its position specifier in the format string contains an 'L', e.g. &quot;%L1&quot;.</li>
+<li><a href="qstring.html#arg">QString::arg</a>() uses the default locale to format a number when its position specifier in the format string contains an 'L', e.g&#x2e; &quot;%L1&quot;.</li>
 </ul>
 <p>The following example illustrates how to use QLocale directly:</p>
 <pre> QLocale::setDefault(QLocale(QLocale::Hebrew, QLocale::Israel));
@@ -396,153 +398,179 @@
 </table></p>
 <h3 class="fn"><a name="Language-enum"></a>enum QLocale::Language</h3>
 <p>This enumerated type is used to specify a language.</p>
-<p><table border="1" cellpadding="2" cellspacing="1" width="40%">
-<tr><th width="60%">Constant</th><th width="40%">Value</th></tr>
-<tr><td valign="top"><tt>QLocale::C</tt></td><td align="center" valign="top"><tt>1</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Abkhazian</tt></td><td align="center" valign="top"><tt>2</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Afan</tt></td><td align="center" valign="top"><tt>3</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Afar</tt></td><td align="center" valign="top"><tt>4</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Afrikaans</tt></td><td align="center" valign="top"><tt>5</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Albanian</tt></td><td align="center" valign="top"><tt>6</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Amharic</tt></td><td align="center" valign="top"><tt>7</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Arabic</tt></td><td align="center" valign="top"><tt>8</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Armenian</tt></td><td align="center" valign="top"><tt>9</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Assamese</tt></td><td align="center" valign="top"><tt>10</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Aymara</tt></td><td align="center" valign="top"><tt>11</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Azerbaijani</tt></td><td align="center" valign="top"><tt>12</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Bashkir</tt></td><td align="center" valign="top"><tt>13</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Basque</tt></td><td align="center" valign="top"><tt>14</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Bengali</tt></td><td align="center" valign="top"><tt>15</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Bhutani</tt></td><td align="center" valign="top"><tt>16</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Bihari</tt></td><td align="center" valign="top"><tt>17</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Bislama</tt></td><td align="center" valign="top"><tt>18</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Bosnian</tt></td><td align="center" valign="top"><tt>142</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Breton</tt></td><td align="center" valign="top"><tt>19</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Bulgarian</tt></td><td align="center" valign="top"><tt>20</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Burmese</tt></td><td align="center" valign="top"><tt>21</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Byelorussian</tt></td><td align="center" valign="top"><tt>22</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Cambodian</tt></td><td align="center" valign="top"><tt>23</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Catalan</tt></td><td align="center" valign="top"><tt>24</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Chinese</tt></td><td align="center" valign="top"><tt>25</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Cornish</tt></td><td align="center" valign="top"><tt>145</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Corsican</tt></td><td align="center" valign="top"><tt>26</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Croatian</tt></td><td align="center" valign="top"><tt>27</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Czech</tt></td><td align="center" valign="top"><tt>28</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Danish</tt></td><td align="center" valign="top"><tt>29</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Divehi</tt></td><td align="center" valign="top"><tt>143</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Dutch</tt></td><td align="center" valign="top"><tt>30</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::English</tt></td><td align="center" valign="top"><tt>31</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Esperanto</tt></td><td align="center" valign="top"><tt>32</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Estonian</tt></td><td align="center" valign="top"><tt>33</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Faroese</tt></td><td align="center" valign="top"><tt>34</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::FijiLanguage</tt></td><td align="center" valign="top"><tt>35</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Finnish</tt></td><td align="center" valign="top"><tt>36</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::French</tt></td><td align="center" valign="top"><tt>37</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Frisian</tt></td><td align="center" valign="top"><tt>38</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Gaelic</tt></td><td align="center" valign="top"><tt>39</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Galician</tt></td><td align="center" valign="top"><tt>40</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Georgian</tt></td><td align="center" valign="top"><tt>41</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::German</tt></td><td align="center" valign="top"><tt>42</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Greek</tt></td><td align="center" valign="top"><tt>43</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Greenlandic</tt></td><td align="center" valign="top"><tt>44</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Guarani</tt></td><td align="center" valign="top"><tt>45</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Gujarati</tt></td><td align="center" valign="top"><tt>46</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Hausa</tt></td><td align="center" valign="top"><tt>47</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Hebrew</tt></td><td align="center" valign="top"><tt>48</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Hindi</tt></td><td align="center" valign="top"><tt>49</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Hungarian</tt></td><td align="center" valign="top"><tt>50</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Icelandic</tt></td><td align="center" valign="top"><tt>51</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Indonesian</tt></td><td align="center" valign="top"><tt>52</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Interlingua</tt></td><td align="center" valign="top"><tt>53</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Interlingue</tt></td><td align="center" valign="top"><tt>54</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Inuktitut</tt></td><td align="center" valign="top"><tt>55</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Inupiak</tt></td><td align="center" valign="top"><tt>56</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Irish</tt></td><td align="center" valign="top"><tt>57</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Italian</tt></td><td align="center" valign="top"><tt>58</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Japanese</tt></td><td align="center" valign="top"><tt>59</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Javanese</tt></td><td align="center" valign="top"><tt>60</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Kannada</tt></td><td align="center" valign="top"><tt>61</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Kashmiri</tt></td><td align="center" valign="top"><tt>62</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Kazakh</tt></td><td align="center" valign="top"><tt>63</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Kinyarwanda</tt></td><td align="center" valign="top"><tt>64</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Kirghiz</tt></td><td align="center" valign="top"><tt>65</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Korean</tt></td><td align="center" valign="top"><tt>66</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Kurdish</tt></td><td align="center" valign="top"><tt>67</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Kurundi</tt></td><td align="center" valign="top"><tt>68</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Laothian</tt></td><td align="center" valign="top"><tt>69</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Latin</tt></td><td align="center" valign="top"><tt>70</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Latvian</tt></td><td align="center" valign="top"><tt>71</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Lingala</tt></td><td align="center" valign="top"><tt>72</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Lithuanian</tt></td><td align="center" valign="top"><tt>73</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Macedonian</tt></td><td align="center" valign="top"><tt>74</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Malagasy</tt></td><td align="center" valign="top"><tt>75</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Malay</tt></td><td align="center" valign="top"><tt>76</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Malayalam</tt></td><td align="center" valign="top"><tt>77</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Maltese</tt></td><td align="center" valign="top"><tt>78</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Manx</tt></td><td align="center" valign="top"><tt>144</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Maori</tt></td><td align="center" valign="top"><tt>79</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Marathi</tt></td><td align="center" valign="top"><tt>80</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Moldavian</tt></td><td align="center" valign="top"><tt>81</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Mongolian</tt></td><td align="center" valign="top"><tt>82</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::NauruLanguage</tt></td><td align="center" valign="top"><tt>83</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Nepali</tt></td><td align="center" valign="top"><tt>84</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Norwegian</tt></td><td align="center" valign="top"><tt>85</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Nynorsk</tt></td><td align="center" valign="top"><tt>141</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Occitan</tt></td><td align="center" valign="top"><tt>86</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Oriya</tt></td><td align="center" valign="top"><tt>87</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Pashto</tt></td><td align="center" valign="top"><tt>88</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Persian</tt></td><td align="center" valign="top"><tt>89</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Polish</tt></td><td align="center" valign="top"><tt>90</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Portuguese</tt></td><td align="center" valign="top"><tt>91</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Punjabi</tt></td><td align="center" valign="top"><tt>92</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Quechua</tt></td><td align="center" valign="top"><tt>93</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::RhaetoRomance</tt></td><td align="center" valign="top"><tt>94</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Romanian</tt></td><td align="center" valign="top"><tt>95</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Russian</tt></td><td align="center" valign="top"><tt>96</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Samoan</tt></td><td align="center" valign="top"><tt>97</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Sangho</tt></td><td align="center" valign="top"><tt>98</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Sanskrit</tt></td><td align="center" valign="top"><tt>99</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Serbian</tt></td><td align="center" valign="top"><tt>100</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::SerboCroatian</tt></td><td align="center" valign="top"><tt>101</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Sesotho</tt></td><td align="center" valign="top"><tt>102</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Setswana</tt></td><td align="center" valign="top"><tt>103</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Shona</tt></td><td align="center" valign="top"><tt>104</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Sindhi</tt></td><td align="center" valign="top"><tt>105</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Singhalese</tt></td><td align="center" valign="top"><tt>106</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Siswati</tt></td><td align="center" valign="top"><tt>107</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Slovak</tt></td><td align="center" valign="top"><tt>108</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Slovenian</tt></td><td align="center" valign="top"><tt>109</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Somali</tt></td><td align="center" valign="top"><tt>110</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Spanish</tt></td><td align="center" valign="top"><tt>111</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Sundanese</tt></td><td align="center" valign="top"><tt>112</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Swahili</tt></td><td align="center" valign="top"><tt>113</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Swedish</tt></td><td align="center" valign="top"><tt>114</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Tagalog</tt></td><td align="center" valign="top"><tt>115</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Tajik</tt></td><td align="center" valign="top"><tt>116</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Tamil</tt></td><td align="center" valign="top"><tt>117</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Tatar</tt></td><td align="center" valign="top"><tt>118</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Telugu</tt></td><td align="center" valign="top"><tt>119</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Thai</tt></td><td align="center" valign="top"><tt>120</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Tibetan</tt></td><td align="center" valign="top"><tt>121</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Tigrinya</tt></td><td align="center" valign="top"><tt>122</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::TongaLanguage</tt></td><td align="center" valign="top"><tt>123</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Tsonga</tt></td><td align="center" valign="top"><tt>124</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Turkish</tt></td><td align="center" valign="top"><tt>125</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Turkmen</tt></td><td align="center" valign="top"><tt>126</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Twi</tt></td><td align="center" valign="top"><tt>127</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Uigur</tt></td><td align="center" valign="top"><tt>128</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Ukrainian</tt></td><td align="center" valign="top"><tt>129</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Urdu</tt></td><td align="center" valign="top"><tt>130</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Uzbek</tt></td><td align="center" valign="top"><tt>131</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Vietnamese</tt></td><td align="center" valign="top"><tt>132</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Volapuk</tt></td><td align="center" valign="top"><tt>133</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Welsh</tt></td><td align="center" valign="top"><tt>134</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Wolof</tt></td><td align="center" valign="top"><tt>135</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Xhosa</tt></td><td align="center" valign="top"><tt>136</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Yiddish</tt></td><td align="center" valign="top"><tt>137</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Yoruba</tt></td><td align="center" valign="top"><tt>138</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Zhuang</tt></td><td align="center" valign="top"><tt>139</tt></td></tr>
-<tr><td valign="top"><tt>QLocale::Zulu</tt></td><td align="center" valign="top"><tt>140</tt></td></tr>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QLocale::C</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Abkhazian</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Afan</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Afar</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Afrikaans</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Albanian</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Amharic</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Arabic</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Armenian</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Assamese</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Aymara</tt></td><td align="center" valign="top"><tt>11</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Azerbaijani</tt></td><td align="center" valign="top"><tt>12</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Bashkir</tt></td><td align="center" valign="top"><tt>13</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Basque</tt></td><td align="center" valign="top"><tt>14</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Bengali</tt></td><td align="center" valign="top"><tt>15</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Bhutani</tt></td><td align="center" valign="top"><tt>16</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Bihari</tt></td><td align="center" valign="top"><tt>17</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Bislama</tt></td><td align="center" valign="top"><tt>18</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Bosnian</tt></td><td align="center" valign="top"><tt>142</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Breton</tt></td><td align="center" valign="top"><tt>19</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Bulgarian</tt></td><td align="center" valign="top"><tt>20</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Burmese</tt></td><td align="center" valign="top"><tt>21</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Byelorussian</tt></td><td align="center" valign="top"><tt>22</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Cambodian</tt></td><td align="center" valign="top"><tt>23</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Catalan</tt></td><td align="center" valign="top"><tt>24</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Chinese</tt></td><td align="center" valign="top"><tt>25</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Cornish</tt></td><td align="center" valign="top"><tt>145</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Corsican</tt></td><td align="center" valign="top"><tt>26</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Croatian</tt></td><td align="center" valign="top"><tt>27</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Czech</tt></td><td align="center" valign="top"><tt>28</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Danish</tt></td><td align="center" valign="top"><tt>29</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Divehi</tt></td><td align="center" valign="top"><tt>143</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Dutch</tt></td><td align="center" valign="top"><tt>30</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::English</tt></td><td align="center" valign="top"><tt>31</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Esperanto</tt></td><td align="center" valign="top"><tt>32</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Estonian</tt></td><td align="center" valign="top"><tt>33</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Faroese</tt></td><td align="center" valign="top"><tt>34</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::FijiLanguage</tt></td><td align="center" valign="top"><tt>35</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Finnish</tt></td><td align="center" valign="top"><tt>36</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::French</tt></td><td align="center" valign="top"><tt>37</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Frisian</tt></td><td align="center" valign="top"><tt>38</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Gaelic</tt></td><td align="center" valign="top"><tt>39</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Galician</tt></td><td align="center" valign="top"><tt>40</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Georgian</tt></td><td align="center" valign="top"><tt>41</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::German</tt></td><td align="center" valign="top"><tt>42</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Greek</tt></td><td align="center" valign="top"><tt>43</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Greenlandic</tt></td><td align="center" valign="top"><tt>44</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Guarani</tt></td><td align="center" valign="top"><tt>45</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Gujarati</tt></td><td align="center" valign="top"><tt>46</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Hausa</tt></td><td align="center" valign="top"><tt>47</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Hebrew</tt></td><td align="center" valign="top"><tt>48</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Hindi</tt></td><td align="center" valign="top"><tt>49</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Hungarian</tt></td><td align="center" valign="top"><tt>50</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Icelandic</tt></td><td align="center" valign="top"><tt>51</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Indonesian</tt></td><td align="center" valign="top"><tt>52</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Interlingua</tt></td><td align="center" valign="top"><tt>53</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Interlingue</tt></td><td align="center" valign="top"><tt>54</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Inuktitut</tt></td><td align="center" valign="top"><tt>55</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Inupiak</tt></td><td align="center" valign="top"><tt>56</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Irish</tt></td><td align="center" valign="top"><tt>57</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Italian</tt></td><td align="center" valign="top"><tt>58</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Japanese</tt></td><td align="center" valign="top"><tt>59</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Javanese</tt></td><td align="center" valign="top"><tt>60</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Kannada</tt></td><td align="center" valign="top"><tt>61</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Kashmiri</tt></td><td align="center" valign="top"><tt>62</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Kazakh</tt></td><td align="center" valign="top"><tt>63</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Kinyarwanda</tt></td><td align="center" valign="top"><tt>64</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Kirghiz</tt></td><td align="center" valign="top"><tt>65</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Korean</tt></td><td align="center" valign="top"><tt>66</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Kurdish</tt></td><td align="center" valign="top"><tt>67</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Kurundi</tt></td><td align="center" valign="top"><tt>68</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Laothian</tt></td><td align="center" valign="top"><tt>69</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Latin</tt></td><td align="center" valign="top"><tt>70</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Latvian</tt></td><td align="center" valign="top"><tt>71</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Lingala</tt></td><td align="center" valign="top"><tt>72</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Lithuanian</tt></td><td align="center" valign="top"><tt>73</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Macedonian</tt></td><td align="center" valign="top"><tt>74</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Malagasy</tt></td><td align="center" valign="top"><tt>75</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Malay</tt></td><td align="center" valign="top"><tt>76</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Malayalam</tt></td><td align="center" valign="top"><tt>77</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Maltese</tt></td><td align="center" valign="top"><tt>78</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Manx</tt></td><td align="center" valign="top"><tt>144</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Maori</tt></td><td align="center" valign="top"><tt>79</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Marathi</tt></td><td align="center" valign="top"><tt>80</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Moldavian</tt></td><td align="center" valign="top"><tt>81</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Mongolian</tt></td><td align="center" valign="top"><tt>82</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::NauruLanguage</tt></td><td align="center" valign="top"><tt>83</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Nepali</tt></td><td align="center" valign="top"><tt>84</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Norwegian</tt></td><td align="center" valign="top"><tt>85</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::NorwegianBokmal</tt></td><td align="center" valign="top"><tt>Norwegian</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Nynorsk</tt></td><td align="center" valign="top"><tt>NorwegianNynorsk</tt></td><td valign="top">Obsolete, please use NorwegianNynorsk</td></tr>
+<tr><td valign="top"><tt>QLocale::NorwegianNynorsk</tt></td><td align="center" valign="top"><tt>141</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Occitan</tt></td><td align="center" valign="top"><tt>86</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Oriya</tt></td><td align="center" valign="top"><tt>87</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Pashto</tt></td><td align="center" valign="top"><tt>88</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Persian</tt></td><td align="center" valign="top"><tt>89</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Polish</tt></td><td align="center" valign="top"><tt>90</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Portuguese</tt></td><td align="center" valign="top"><tt>91</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Punjabi</tt></td><td align="center" valign="top"><tt>92</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Quechua</tt></td><td align="center" valign="top"><tt>93</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::RhaetoRomance</tt></td><td align="center" valign="top"><tt>94</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Romanian</tt></td><td align="center" valign="top"><tt>95</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Russian</tt></td><td align="center" valign="top"><tt>96</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Samoan</tt></td><td align="center" valign="top"><tt>97</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Sangho</tt></td><td align="center" valign="top"><tt>98</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Sanskrit</tt></td><td align="center" valign="top"><tt>99</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Serbian</tt></td><td align="center" valign="top"><tt>100</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::SerboCroatian</tt></td><td align="center" valign="top"><tt>101</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Sesotho</tt></td><td align="center" valign="top"><tt>102</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Setswana</tt></td><td align="center" valign="top"><tt>103</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Shona</tt></td><td align="center" valign="top"><tt>104</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Sindhi</tt></td><td align="center" valign="top"><tt>105</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Singhalese</tt></td><td align="center" valign="top"><tt>106</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Siswati</tt></td><td align="center" valign="top"><tt>107</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Slovak</tt></td><td align="center" valign="top"><tt>108</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Slovenian</tt></td><td align="center" valign="top"><tt>109</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Somali</tt></td><td align="center" valign="top"><tt>110</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Spanish</tt></td><td align="center" valign="top"><tt>111</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Sundanese</tt></td><td align="center" valign="top"><tt>112</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Swahili</tt></td><td align="center" valign="top"><tt>113</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Swedish</tt></td><td align="center" valign="top"><tt>114</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Tagalog</tt></td><td align="center" valign="top"><tt>115</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Tajik</tt></td><td align="center" valign="top"><tt>116</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Tamil</tt></td><td align="center" valign="top"><tt>117</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Tatar</tt></td><td align="center" valign="top"><tt>118</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Telugu</tt></td><td align="center" valign="top"><tt>119</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Thai</tt></td><td align="center" valign="top"><tt>120</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Tibetan</tt></td><td align="center" valign="top"><tt>121</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Tigrinya</tt></td><td align="center" valign="top"><tt>122</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::TongaLanguage</tt></td><td align="center" valign="top"><tt>123</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Tsonga</tt></td><td align="center" valign="top"><tt>124</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Turkish</tt></td><td align="center" valign="top"><tt>125</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Turkmen</tt></td><td align="center" valign="top"><tt>126</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Twi</tt></td><td align="center" valign="top"><tt>127</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Uigur</tt></td><td align="center" valign="top"><tt>128</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Ukrainian</tt></td><td align="center" valign="top"><tt>129</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Urdu</tt></td><td align="center" valign="top"><tt>130</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Uzbek</tt></td><td align="center" valign="top"><tt>131</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Vietnamese</tt></td><td align="center" valign="top"><tt>132</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Volapuk</tt></td><td align="center" valign="top"><tt>133</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Welsh</tt></td><td align="center" valign="top"><tt>134</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Wolof</tt></td><td align="center" valign="top"><tt>135</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Xhosa</tt></td><td align="center" valign="top"><tt>136</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Yiddish</tt></td><td align="center" valign="top"><tt>137</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Yoruba</tt></td><td align="center" valign="top"><tt>138</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Zhuang</tt></td><td align="center" valign="top"><tt>139</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Zulu</tt></td><td align="center" valign="top"><tt>140</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Bosnian</tt></td><td align="center" valign="top"><tt>142</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Divehi</tt></td><td align="center" valign="top"><tt>143</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Manx</tt></td><td align="center" valign="top"><tt>144</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Cornish</tt></td><td align="center" valign="top"><tt>145</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Akan</tt></td><td align="center" valign="top"><tt>146</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Konkani</tt></td><td align="center" valign="top"><tt>147</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Ga</tt></td><td align="center" valign="top"><tt>148</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Igbo</tt></td><td align="center" valign="top"><tt>149</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Kamba</tt></td><td align="center" valign="top"><tt>150</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Syriac</tt></td><td align="center" valign="top"><tt>151</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Blin</tt></td><td align="center" valign="top"><tt>152</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Geez</tt></td><td align="center" valign="top"><tt>153</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Koro</tt></td><td align="center" valign="top"><tt>154</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Sidamo</tt></td><td align="center" valign="top"><tt>155</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Atsam</tt></td><td align="center" valign="top"><tt>156</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Tigre</tt></td><td align="center" valign="top"><tt>157</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Jju</tt></td><td align="center" valign="top"><tt>158</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Friulian</tt></td><td align="center" valign="top"><tt>159</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Venda</tt></td><td align="center" valign="top"><tt>160</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Ewe</tt></td><td align="center" valign="top"><tt>161</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Walamo</tt></td><td align="center" valign="top"><tt>162</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Hawaiian</tt></td><td align="center" valign="top"><tt>163</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Tyap</tt></td><td align="center" valign="top"><tt>164</tt></td><td valign="top">&nbsp;</td></tr>
+<tr><td valign="top"><tt>QLocale::Chewa</tt></td><td align="center" valign="top"><tt>165</tt></td><td valign="top">&nbsp;</td></tr>
 </table></p>
 <p>See also <a href="qlocale.html#language">language</a>().</p>
 <h3 class="flags"><a name="NumberOption-enum"></a>enum QLocale::NumberOption<br />flags QLocale::NumberOptions</h3>
@@ -584,6 +612,9 @@
 <h3 class="fn"><a name="c"></a>QLocale QLocale::c ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a <a href="qlocale.html">QLocale</a> object initialized to the &quot;C&quot; locale.</p>
 <p>See also <a href="qlocale.html#system">system</a>().</p>
+<h3 class="fn"><a name="countriesForLanguage"></a><a href="qlist.html">QList</a>&lt;<a href="qlocale.html#Country-enum">Country</a>&gt; QLocale::countriesForLanguage ( <a href="qlocale.html#Language-enum">Language</a> <i>language</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the list of countries that have entires for <i>language</i> in Qt's locale database. If the result is an empty list, then <i>language</i> is not represented in Qt's locale database.</p>
+<p>This function was introduced in Qt 4.3.</p>
 <h3 class="fn"><a name="country"></a><a href="qlocale.html#Country-enum">Country</a> QLocale::country () const</h3>
 <p>Returns the country of this locale.</p>
 <p>See also <a href="qlocale.html#language">language</a>(), <a href="qlocale.html#countryToString">countryToString</a>(), and <a href="qlocale.html#name">name</a>().</p>
@@ -643,7 +674,7 @@
 <p>See also <a href="qlocale.html#numberOptions">numberOptions</a>().</p>
 <h3 class="fn"><a name="system"></a>QLocale QLocale::system ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a <a href="qlocale.html">QLocale</a> object initialized to the system locale.</p>
-<p>On Windows and Mac, this locale will use system functions to format dates and strings. It will therefore reflect customizations made by the user in the control panel.</p>
+<p>On Windows and Mac, this locale will use the decimal/grouping characters and date/time formats specified in the system configuration panel.</p>
 <p>See also <a href="qtextcodec-qt3.html#locale">QTextCodec::locale</a>() and <a href="qlocale.html#c">c</a>().</p>
 <h3 class="fn"><a name="timeFormat"></a><a href="qstring.html">QString</a> QLocale::timeFormat ( <a href="qlocale.html#FormatType-enum">FormatType</a> <i>format</i> = LongFormat ) const</h3>
 <p>Returns the time format used for the current locale.</p>
@@ -763,6 +794,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

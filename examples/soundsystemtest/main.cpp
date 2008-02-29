@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -31,7 +31,7 @@
 #include <sys/soundcard.h>
 
 
-int main(int argc, char **argv) {
+int main(int /*argc*/, char ** /*argv*/) {
 
     printf("Check current kernel system volume:\n");
     int mixerHandle = ::open( "/dev/mixer", O_RDWR|O_NONBLOCK );
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
     v=AFMT_S16_LE;
     o = v;
-    printf("Set audio format 16bit, little endian: ", v);
+    printf("Set audio format 16bit, little endian %08x: ", v);
     if ( ioctl(fd, SNDCTL_DSP_SETFMT, &v) )
 	printf("false\n");
     else

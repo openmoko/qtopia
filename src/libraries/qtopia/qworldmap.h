@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -62,15 +62,18 @@ public:
 public slots:
     void selectNewZone();
     void toggleZoom();
+    void select();
     void setDaylight( const bool show );
     void setZone( const QTimeZone& zone );
     void setZone( const QPoint& pos );
     void setReadOnly( const bool readOnly = true );
+    void setContinuousSelect(const bool selectMode = false);
 
 signals:
     void selecting();
     void newZone( const QTimeZone& zone );
     void selectZoneCanceled();
+    void buttonSelected();
 
 protected:
     virtual void keyPressEvent( QKeyEvent * );
@@ -87,8 +90,10 @@ private slots:
     void redraw( void );
     void initCities();
     void cursorTimeout();
+    void selectCanceled();
 
 private:
+    bool selectionMode;
 #ifdef DEBUG_QWORLDMAP
     void testAccess();
     void drawCities( QPainter *p );

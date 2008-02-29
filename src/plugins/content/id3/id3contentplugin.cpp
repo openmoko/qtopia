@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -130,7 +130,7 @@ Id3ContentPlugin::~Id3ContentPlugin()
 
 QStringList Id3ContentPlugin::keys() const
 {
-    return QMimeType( QLatin1String( "audio/mpeg" ) ).extensions();
+    return QMimeType::fromId( QLatin1String( "audio/mpeg" ) ).extensions();
 }
 
 bool Id3ContentPlugin::installContent( const QString &filePath, QContent *content )
@@ -147,7 +147,7 @@ bool Id3ContentPlugin::installContent( const QString &filePath, QContent *conten
 
             content->setName( name( filePath, tag ) );
             content->setFile( filePath );
-            content->setType( QMimeType( filePath ).id() );
+            content->setType( QMimeType::fromFileName( filePath ).id() );
             content->setRole( QContent::Document );
 
             QList< QPair< quint32, qint64 > > frames = tag.framePositions();
@@ -200,7 +200,7 @@ bool Id3ContentPlugin::installContent( const QString &filePath, QContent *conten
 
 bool Id3ContentPlugin::updateContent( QContent *content )
 {
-    return installContent( content->file(), content );
+    return installContent( content->fileName(), content );
 }
 
 QString Id3ContentPlugin::name( const QString &filePath, Id3Tag &tag ) const

@@ -1,0 +1,32 @@
+#!/bin/sh
+
+export TOOLCHAIN=/opt/toolchains/arm920t-eabi
+export PKG_CONFIG_PATH=$TOOLCHAIN/arm-angstrom-linux-gnueabi/lib/pkgconfig
+#export TOOLCHAIN=/opt/toolchains/arm920t
+
+if [ -d /opt/teambuilder ]; then
+    # our bin path has special wrapper scripts that set TEAMBUILDER_SYSTEM
+    export PATH="$DEVICE_CONFIG_PATH/bin:/opt/teambuilder/bin:$TOOLCHAIN/bin:$PATH"
+    # remove any arm-linux-* stuff from TEAMBUILDER_CC_VERSION
+    export TEAMBUILDER_CC_VERSION="$(echo $TEAMBUILDER_CC_VERSION | sed 's/arm-linux-[^:]*:[[digit].][[digit].]*;*//')"
+    # check to see how the variable is set
+    if [ -n "$TEAMBUILDER_CC_VERSION" ]; then
+        echo "$TEAMBUILDER_CC_VERSION" | grep ':' >/dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            # handle the old-style setting (ie. just a version number)
+            export TEAMBUILDER_CC_VERSION="*:$TEAMBUILDER_CC_VERSION"
+        fi
+    fi
+
+    export TEAMBUILDER_CC_VERSION="arm-linux-*:4.1.2;$TEAMBUILDER_CC_VERSION"
+#    export TEAMBUILDER_CC_VERSION="arm-linux-*:4.1.2;$TEAMBUILDER_CC_VERSION"
+    # this must not be set or cross compiles won't be farmed out
+    if [ "$TEAMBUILDER_SYSTEM" = 'neo:eabi' ]; then
+        unset TEAMBUILDER_SYSTEM
+    fi
+else
+    # don't destroy the environment if $TOOLCHAIN/bin is already somewhere in the $PATH
+    if ! echo "$PATH" | grep "$TOOLCHAIN/bin" ; then
+        export PATH="$TOOLCHAIN/bin:$PATH"
+    fi
+fi

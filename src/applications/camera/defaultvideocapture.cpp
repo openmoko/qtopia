@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,6 +36,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <custom.h>
 
 #endif /* HAVE_VIDEO4LINUX */
 
@@ -87,8 +88,6 @@ VideoCapture* VideoCapture::instance()
 
 #ifdef HAVE_VIDEO4LINUX
 
-#define VIDEO_DEVICE        "/dev/video"
-
 bool DefaultVideoCapture::hasCamera() const
 {
     return ( fd != -1 );
@@ -132,16 +131,16 @@ void DefaultVideoCapture::setupCamera( QSize size )
     caps.maxheight = height;
 
     // Open the video device.
-    fd = open( VIDEO_DEVICE, O_RDWR );
+    fd = open( V4L_VIDEO_DEVICE, O_RDWR );
     if ( fd == -1 ) {
-        qWarning( "Cannot open video device %s: %s", VIDEO_DEVICE, strerror( errno ) );
+        qWarning( "Cannot open video device %s: %s", V4L_VIDEO_DEVICE, strerror( errno ) );
         return;
     }
 
     // Get the device's current capabilities.
     memset( &caps, 0, sizeof( caps ) );
     if ( ioctl( fd, VIDIOCGCAP, &caps ) < 0 ) {
-        qWarning( "%s: could not retrieve the video capabilities", VIDEO_DEVICE );
+        qWarning( "%s: could not retrieve the video capabilities", V4L_VIDEO_DEVICE );
         close( fd );
         fd = -1;
         return;
@@ -170,7 +169,7 @@ void DefaultVideoCapture::setupCamera( QSize size )
             if ( chanInfo.type == VIDEO_TYPE_CAMERA ) {
                 qLog(Camera) << "selecting camera on input" << chanInfo.name;
                 if ( ioctl( fd, VIDIOCSCHAN, &chan ) < 0 ) {
-                    qWarning( "%s: could not set the channel", VIDEO_DEVICE );
+                    qWarning( "%s: could not set the channel", V4L_VIDEO_DEVICE );
                 }
                 break;
             }
@@ -184,7 +183,7 @@ void DefaultVideoCapture::setupCamera( QSize size )
     ioctl( fd, VIDIOCGPICT, &pict );
     pict.palette = VIDEO_PALETTE_RGB32;
     if ( ioctl( fd, VIDIOCSPICT, &pict ) < 0 ) {
-        qWarning( "%s: could not set the picture mode", VIDEO_DEVICE );
+        qWarning( "%s: could not set the picture mode", V4L_VIDEO_DEVICE );
         close( fd );
         fd = -1;
         return;
@@ -217,7 +216,7 @@ void DefaultVideoCapture::setupCamera( QSize size )
     wind.width = size.width();
     wind.height = size.height();
     if ( ioctl( fd, VIDIOCSWIN, &wind ) < 0 ) {
-        qWarning( "%s: could not set the capture window", VIDEO_DEVICE );
+        qWarning( "%s: could not set the capture window", V4L_VIDEO_DEVICE );
     }
 
     // Re-read the capture window, to see what it was adjusted to.
@@ -228,7 +227,7 @@ void DefaultVideoCapture::setupCamera( QSize size )
     // Enable mmap-based access to the camera.
     memset( &mbuf, 0, sizeof( mbuf ) );
     if ( ioctl( fd, VIDIOCGMBUF, &mbuf ) < 0 ) {
-        qWarning( "%s: mmap-based camera access is not available", VIDEO_DEVICE );
+        qWarning( "%s: mmap-based camera access is not available", V4L_VIDEO_DEVICE );
         close( fd );
         fd = -1;
         return;
@@ -238,7 +237,7 @@ void DefaultVideoCapture::setupCamera( QSize size )
     frames = (unsigned char *)mmap( 0, mbuf.size, PROT_READ | PROT_WRITE,
                                     MAP_SHARED, fd, 0 );
     if ( !frames || frames == (unsigned char *)(long)(-1) ) {
-        qWarning( "%s: could not mmap the device", VIDEO_DEVICE );
+        qWarning( "%s: could not mmap the device", V4L_VIDEO_DEVICE );
         close( fd );
         fd = -1;
         return;

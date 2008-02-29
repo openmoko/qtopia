@@ -69,3 +69,6 @@ platform.cc.args["default"] = platform.cc.args["default"] + " " + \
 if not project.BuildOption("debug") and project.IsDefined('HELIX_CONFIG_USE_RLINK'):
     platform.cc.args["default"] = platform.cc.args["default"] + " -ffunction-sections -fdata-sections"
     platform.cxx.args["default"] = platform.cxx.args["default"] + " -ffunction-sections -fdata-sections"
+
+# Compile without X11
+project.RemoveDefines('USE_XWINDOWS')

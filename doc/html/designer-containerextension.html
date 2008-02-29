@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Container Extension Example</title>
+  <title>Qt 4.3: Container Extension Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Container Extension Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Container Extension Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="designer-containerextension-multipagewidget-cpp.html">designer/containerextension/multipagewidget.cpp</a></li>
@@ -25,7 +26,7 @@
 </ul>
 <p>The Container Extension example shows how to create a custom multi-page plugin for Qt Designer using the <a href="qdesignercontainerextension.html">QDesignerContainerExtension</a> class.</p>
 <p align="center"><img src="images/containerextension-example.png" /></p><p>To provide a custom widget that can be used with <i>Qt Designer</i>, we need to supply a self-contained implementation. In this example we use a custom multi-page widget designed to show the container extension feature.</p>
-<p>An extension is an object which modifies the behavior of <i>Qt Designer</i>. The <a href="qdesignercontainerextension.html">QDesignerContainerExtension</a> enables <i>Qt Designer</i> to manage and manipulate a custom multi-page widget, i.e. adding and deleting pages to the widget.</p>
+<p>An extension is an object which modifies the behavior of <i>Qt Designer</i>. The <a href="qdesignercontainerextension.html">QDesignerContainerExtension</a> enables <i>Qt Designer</i> to manage and manipulate a custom multi-page widget, i.e&#x2e; adding and deleting pages to the widget.</p>
 <p>There are four available types of extensions in <i>Qt Designer</i>:</p>
 <ul>
 <li><a href="qdesignermembersheetextension.html">QDesignerMemberSheetExtension</a> provides an extension that allows you to manipulate a widget's member functions which is displayed when configuring connections using Qt Designer's mode for editing signals and slots.</li>
@@ -43,7 +44,7 @@
 </ul>
 <p>The project file for custom widget plugins needs some additional information to ensure that they will work within <i>Qt Designer</i>. For example, custom widget plugins rely on components supplied with <i>Qt Designer</i>, and this must be specified in the project file that we use. We will first take a look at the plugin's project file.</p>
 <p>Then we will continue by reviewing the <tt>MultiPageWidgetPlugin</tt> class, and take a look at the <tt>MultiPageWidgetExtensionFactory</tt> and <tt>MultiPageWidgetContainerExtension</tt> classes. Finally, we will take a quick look at the <tt>MultiPageWidget</tt> class definition.</p>
-<p><b>Note:</b> Currently, this particular example can only be used for experimenting and prototyping within QDesigner's workspace. The reason is that uic does not recognize the custom container functionality, i.e., it will not generate the code required to add pages to the container. This issue will be resolved in the next minor release.</p>
+<p><b>Note:</b> Currently, this particular example can only be used for experimenting and prototyping within QDesigner's workspace. The reason is that uic does not recognize the custom container functionality, i.e&#x2e;, it will not generate the code required to add pages to the container. This issue will be resolved in the next minor release.</p>
 <a name="the-project-file-containerextension-pro"></a>
 <h2>The Project File: containerextension.pro</h2>
 <p>The project file must contain some additional information to ensure that the plugin will work as expected:</p>
@@ -56,11 +57,6 @@
 <li><tt>plugin</tt>: We also need to ensure that <tt>qmake</tt> considers the custom widget a <i>plugin</i> library.</li>
 </ul>
 <p>When Qt is configured to build in both debug and release modes, <i>Qt Designer</i> will be built in release mode. When this occurs, it is necessary to ensure that plugins are also built in release mode. For that reason we add a <tt>debug_and_release</tt> value to the <tt>CONFIG</tt> variable. Otherwise, if a plugin is built in a mode that is incompatible with <i>Qt Designer</i>, it won't be loaded and installed.</p>
-<p>When building in both debug and release mode, we must (on Mac and Windows) also ensure that the proper suffix is added to the debug plugin:</p>
-<pre> CONFIG(debug, debug|release) {
-     mac: TARGET = $$join(TARGET,,,_debug)
-     win32: TARGET = $$join(TARGET,,d)
- }</pre>
 <p>The header and source files for the widget are declared in the usual way:</p>
 <pre> HEADERS += multipagewidget.h \
             multipagewidgetplugin.h \
@@ -118,8 +114,8 @@
 
  #endif</pre>
 <p>The plugin class provides <i>Qt Designer</i> with basic information about our plugin, such as its class name and its include file. Furthermore it knows how to create instances of the <tt>MultiPageWidget</tt> widget. <tt>MultiPageWidgetPlugin</tt> also defines the <a href="qdesignercustomwidgetinterface.html#initialize">initialize()</a> function which is called after the plugin is loaded into <i>Qt Designer</i>. The function's <a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a> parameter provides the plugin with a gateway to all of <i>Qt Designer</i>'s API's.</p>
-<p>In case of a multipage widget such as ours, we must also implement two private slots, currentIndexChanged() and pageTitleChanged(), to be able to update <i>Qt Designer</i>'s property editor whenever the user views another page or changes one of the page titles. To be able to give each page their own title, we have chosen to use the <a href="qwidget.html#windowTitle-prop">QWidget::windowTitle</a> property to store the page title (for more information see the MultiPageWidget class <a href="designer-containerextension-multipagewidget-cpp.html">implementation</a>). Note that currently there is no way of adding a custom property (e.g., a page title) to the pages without using a predefined property as placeholder.</p>
-<p>The <tt>MultiPageWidgetPlugin</tt> class inherits from both <a href="qobject.html">QObject</a> and <a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a>. It is important to remember, when using multiple inheritance, to ensure that all the interfaces (i.e. the classes that doesn't inherit <a href="qobject.html#Q_OBJECT">Q_OBJECT</a>) are made known to the meta object system using the <a href="qobject.html#Q_INTERFACES">Q_INTERFACES</a>() macro. This enables <i>Qt Designer</i> to use <a href="qobject.html#qobject_cast">qobject_cast</a>() to query for supported interfaces using nothing but a <a href="qobject.html">QObject</a> pointer.</p>
+<p>In the case of a multipage widget such as ours, we must also implement two private slots, currentIndexChanged() and pageTitleChanged(), to be able to update <i>Qt Designer</i>'s property editor whenever the user views another page or changes one of the page titles. To be able to give each page their own title, we have chosen to use the <a href="qwidget.html#windowTitle-prop">QWidget::windowTitle</a> property to store the page title (for more information see the MultiPageWidget class <a href="designer-containerextension-multipagewidget-cpp.html">implementation</a>). Note that currently there is no way of adding a custom property (e.g&#x2e;, a page title) to the pages without using a predefined property as placeholder.</p>
+<p>The <tt>MultiPageWidgetPlugin</tt> class inherits from both <a href="qobject.html">QObject</a> and <a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a>. It is important to remember, when using multiple inheritance, to ensure that all the interfaces (i.e&#x2e; the classes that doesn't inherit <a href="qobject.html#Q_OBJECT">Q_OBJECT</a>) are made known to the meta object system using the <a href="qobject.html#Q_INTERFACES">Q_INTERFACES</a>() macro. This enables <i>Qt Designer</i> to use <a href="qobject.html#qobject_cast">qobject_cast</a>() to query for supported interfaces using nothing but a <a href="qobject.html">QObject</a> pointer.</p>
 <a name="multipagewidgetplugin-class-implementation"></a>
 <h2>MultiPageWidgetPlugin Class Implementation</h2>
 <p>The MultiPageWidgetPlugin class implementation is in most parts equivalent to the <a href="designer-customwidgetplugin.html">Custom Widget Plugin</a> example's plugin class:</p>
@@ -131,27 +127,27 @@
 
  QString MultiPageWidgetPlugin::name() const
  {
-     return QString(&quot;MultiPageWidget&quot;);
+     return QLatin1String(&quot;MultiPageWidget&quot;);
  }
 
  QString MultiPageWidgetPlugin::group() const
  {
-     return QString(&quot;Display Widgets [Examples]&quot;);
+     return QLatin1String(&quot;Display Widgets [Examples]&quot;);
  }
 
  QString MultiPageWidgetPlugin::toolTip() const
  {
-     return &quot;&quot;;
+     return QString();
  }
 
  QString MultiPageWidgetPlugin::whatsThis() const
  {
-     return &quot;&quot;;
+     return QString();
  }
 
  QString MultiPageWidgetPlugin::includeFile() const
  {
-     return QString(&quot;multipagewidget.h&quot;);
+     return QLatin1String(&quot;multipagewidget.h&quot;);
  }
 
  QIcon MultiPageWidgetPlugin::icon() const
@@ -179,14 +175,14 @@
      return widget;
  }</pre>
 <p>In addition to create and return the widget, we connect our custom container widget's currentIndexChanged() signal to the plugin's currentIndexChanged() slot to ensure that <i>Qt Designer</i>'s property editor is updated whenever the user views another page. We also connect the widget's pageTitleChanged() signal to the plugin's pageTitleChanged() slot.</p>
-<p>The currentIndexChanged() slot is called whenever our custom widget's currentIndexChanged() <i>signal</i> is emitted, i.e. whenever the user views another page:</p>
+<p>The currentIndexChanged() slot is called whenever our custom widget's currentIndexChanged() <i>signal</i> is emitted, i.e&#x2e; whenever the user views another page:</p>
 <pre> void MultiPageWidgetPlugin::currentIndexChanged(int index)
  {
+     Q_UNUSED(index);
      MultiPageWidget *widget = qobject_cast&lt;MultiPageWidget*&gt;(sender());</pre>
 <p>First, we retrieve the object emitting the signal using the <a href="qobject.html#sender">QObject::sender</a>() and <a href="qobject.html#qobject_cast">qobject_cast</a>() functions. If it's called in a slot activated by a signal, <a href="qobject.html#sender">QObject::sender</a>() returns a pointer to the object that sent the signal; otherwise it returns 0.</p>
 <pre>     if (widget) {
-         QDesignerFormWindowInterface *form;
-         form = QDesignerFormWindowInterface::findFormWindow(widget);
+         QDesignerFormWindowInterface *form = QDesignerFormWindowInterface::findFormWindow(widget);
          if (form)
              form-&gt;emitSelectionChanged();
      }
@@ -196,6 +192,7 @@
 <p>When changing a page title a generic refresh of the property editor is not enough because it is actually the page's property extension that needs to be updated. For that reason we need to access the <a href="qdesignerpropertysheetextension.html">QDesignerPropertySheetExtension</a> object for the page which title we want to change. The <a href="qdesignerpropertysheetextension.html">QDesignerPropertySheetExtension</a> class also allows you to manipulate a widget's properties, but to get hold of the extension we must first retrieve access to <i>Qt Designer</i>'s extension manager:</p>
 <pre> void MultiPageWidgetPlugin::pageTitleChanged(const QString &amp;title)
  {
+     Q_UNUSED(title);
      MultiPageWidget *widget = qobject_cast&lt;MultiPageWidget*&gt;(sender());
      if (widget) {
          QWidget *page = widget-&gt;widget(widget-&gt;currentIndex());
@@ -207,7 +204,7 @@
 <p>Now that we have the form window, the <a href="qdesignerformwindowinterface.html">QDesignerFormWindowInterface</a> class provides the <a href="qdesignerformwindowinterface.html#core">core()</a> function which returns the current <a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a> object. The <a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a> class allows you to access Qt Designer's various components. In particular, the <a href="qdesignerformeditorinterface.html#extensionManager">QDesignerFormEditorInterface::extensionManager</a>() function returns a reference to the current extension manager.</p>
 <pre>             QDesignerPropertySheetExtension *sheet;
              sheet = qt_extension&lt;QDesignerPropertySheetExtension*&gt;(manager, page);
-             int propertyIndex = sheet-&gt;indexOf(QLatin1String(&quot;windowTitle&quot;));
+             const int propertyIndex = sheet-&gt;indexOf(QLatin1String(&quot;windowTitle&quot;));
              sheet-&gt;setChanged(propertyIndex, true);
          }
      }
@@ -233,7 +230,7 @@
 <p>The <tt>MultiPageWidgetExtensionFactory</tt> class is a subclass of <a href="qextensionfactory.html">QExtensionFactory</a>. When <i>Qt Designer</i> must know whether a widget is a container, or not, <i>Qt Designer</i>'s extension manager will run through all its registered factories invoking the first one which is able to create a container extension for that widget. This factory will in turn create a <tt>MultiPageWidgetExtension</tt> object.</p>
 <pre> QString MultiPageWidgetPlugin::domXml() const
  {
-     return QString(&quot;\
+     return QLatin1String(&quot;\
      &lt;widget class=\&quot;MultiPageWidget\&quot; name=\&quot;multipagewidget\&quot;&gt;\
          &lt;widget class=\&quot;QWidget\&quot; name=\&quot;page\&quot; /&gt;\
      &lt;/widget&gt;\
@@ -363,17 +360,16 @@
 
      QSize sizeHint() const;
 
-     void addPage(QWidget *page);
-     void removePage(int index);
      int count() const;
      int currentIndex() const;
-     void insertPage(int index, QWidget *page);
      QWidget *widget(int index);
-
      QString pageTitle() const;
-     void setPageTitle(QString const &amp;newTitle);
 
  public slots:
+     void addPage(QWidget *page);
+     void insertPage(int index, QWidget *page);
+     void removePage(int index);
+     void setPageTitle(QString const &amp;newTitle);
      void setCurrentIndex(int index);
 
  signals:
@@ -387,13 +383,13 @@
  };</pre>
 <p>The main detail to observe is that your custom multi-page widget must implement functionality corresponding to the <a href="qdesignercontainerextension.html">QDesignerContainerExtension</a>'s member functions since the <a href="qdesignercontainerextension.html">QDesignerContainerExtension</a> class only is intended to provide Qt Designer access to your custom multi-page widget's functionality.</p>
 <p>In addition, we declare the <tt>currentIndex</tt> and <tt>pageTitle</tt> properties, and their associated set and get functions. By declaring these attributes as properties, we allow <i>Qt Designer</i> to manage them in the same way it manages the properties the MultiPageWidget widget inherits from <a href="qwidget.html">QWidget</a> and <a href="qobject.html">QObject</a>, for example featuring the property editor.</p>
-<p>Note the <tt>STORED</tt> attribute in the declaration of the <tt>pageTitle</tt> property: The <tt>STORED</tt> attribute indicates persistence, i.e. it declares whether the property's value must be remembered when storing an object's state. As mentioned above, we have chosen to store the page title using the <a href="qwidget.html#windowTitle-prop">QWidget::windowTitle</a> property to be able to give each page their own title. For that reason the <tt>pageTitle</tt> property is a &quot;fake&quot; property, provided for editing purposes, and doesn't need to be stored.</p>
+<p>Note the <tt>STORED</tt> attribute in the declaration of the <tt>pageTitle</tt> property: The <tt>STORED</tt> attribute indicates persistence, i.e&#x2e; it declares whether the property's value must be remembered when storing an object's state. As mentioned above, we have chosen to store the page title using the <a href="qwidget.html#windowTitle-prop">QWidget::windowTitle</a> property to be able to give each page their own title. For that reason the <tt>pageTitle</tt> property is a &quot;fake&quot; property, provided for editing purposes, and doesn't need to be stored.</p>
 <p>We must also implement and emit the currentIndexChanged() and pageTitleChanged() signals to ensure that <i>Qt Designer</i>'s property editor is updated whenever the user views another page or changes one of the page titles.</p>
 <p>See the MultiPageWidget class <a href="designer-containerextension-multipagewidget-cpp.html">implementation</a> for more details.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

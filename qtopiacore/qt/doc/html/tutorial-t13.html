@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/examples/tutorial.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/tutorial.qdoc -->
 <head>
-  <title>Qt 4.2: Qt Tutorial 13 - Game Over</title>
+  <title>Qt 4.3: Qt Tutorial 13 - Game Over</title>
   <link rel="prev" href="tutorial-t12.html" />
   <link rel="contents" href="tutorial.html" />
   <link rel="next" href="tutorial-t14.html" />
@@ -20,7 +20,8 @@
 [<a href="tutorial.html">Qt Tutorial</a>]
 [Next: <a href="tutorial-t14.html">Chapter 14</a>]
 </p>
-<h1 align="center">Qt Tutorial 13 - Game Over<br /><small></small></h1>
+<h1 align="center">Qt Tutorial 13 - Game Over<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="tutorial-t13-cannonfield-cpp.html">tutorial/t13/cannonfield.cpp</a></li>
@@ -99,7 +100,7 @@
          painter.setFont(QFont(&quot;Courier&quot;, 48, QFont::Bold));
          painter.drawText(rect(), Qt::AlignCenter, tr(&quot;Game Over&quot;));
      }</pre>
-<p>The paint event has been enhanced to display the text &quot;Game Over&quot; if the game is over, i.e., <tt>gameEnded</tt> is <tt>true</tt>. We don't bother to check the update rectangle here because speed is not critical when the game is over.</p>
+<p>The paint event has been enhanced to display the text &quot;Game Over&quot; if the game is over, i.e&#x2e;, <tt>gameEnded</tt> is <tt>true</tt>. We don't bother to check the update rectangle here because speed is not critical when the game is over.</p>
 <p>To draw the text we first set a black pen; the pen color is used when drawing text. Next we choose a 48 point bold font from the Courier family. Finally we draw the text centered in the widget's rectangle. Unfortunately, on some systems (especially X servers with Unicode fonts) it can take a while to load such a large font. Because Qt caches fonts, you will notice this only the first time the font is used.</p>
 <pre>     paintCannon(painter);
      if (isShooting())
@@ -228,6 +229,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

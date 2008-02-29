@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,7 @@
 #include "bthandsfreetask.h"
 #include "qtopiaserverapplication.h"
 #include "qbluetoothhfservice_p.h"
+#include "bluetooth/btaudiovolumemanager_p.h"
 #include <qtopialog.h>
 
 /*!
@@ -29,8 +30,10 @@
     \ingroup QtopiaServer::Task::Bluetooth
     \brief The BtHandsfreeServiceTask class provides an implementation of the Bluetooth Handsfree Service.
 
-    The BtHeadsetService task manages the lifetime of a
-    QBluetoothHeadsetService object.
+    The BtHandsfreeServiceTask manages the lifetime of a
+    QBluetoothHandsfreeService object.
+  
+    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
  */
 
 /*!
@@ -41,6 +44,7 @@ BtHandsfreeServiceTask::BtHandsfreeServiceTask( QObject* parent )
 {
     qLog(Bluetooth) << "Initializing Handsfree Service";
     m_hfService = new QBluetoothHandsfreeService( "BluetoothHandsfree", tr("Handsfree Audio Gateway"), this );
+    new BtAudioVolumeManager( "BluetoothHandsfree", this );
 }
 
 /*!

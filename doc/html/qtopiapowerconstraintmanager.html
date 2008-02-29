@@ -64,16 +64,17 @@
 <p>The QtopiaPowerConstraintManager class keeps track of power management constraints set by Qtopia applications.</p>
 <p>In some use cases Qtopia applications may want to disable power saving acitivities in order to perform their tasks (e.g&#x2e; videos app disables the dimming of the backlight when it plays a video). This monitor keeps track of all of all constraints set by applications and applies a common denominator to the <a href="qtopiapowermanager.html">QtopiaPowerManager</a>.</p>
 <p>QtopiaPowerConstraintManager is a singleton, which you can access through <a href="qtopiapowerconstraintmanager.html#instance">QtopiaPowerConstraintManager::instance</a>().</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <p>See also <a href="qtopiapowermanager.html">QtopiaPowerManager</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QtopiaPowerConstraintManager"></a>QtopiaPowerConstraintManager::QtopiaPowerConstraintManager ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs the power constraint manager. <i>parent</i> is passed to <a href="qobject.html">QObject</a>.</p>
 <h3 class="fn"><a name="applicationTerminated"></a>void QtopiaPowerConstraintManager::applicationTerminated ( const <a href="qstring.html">QString</a> &amp; <i>app</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>The application <i>app</i> has been terminated. Any power consdtraint applied by this application will be removed.</p>
+<p>The application <i>app</i> has been terminated. Any power constraint applied by this application will be removed.</p>
 <h3 class="fn"><a name="forceSuspend"></a>void QtopiaPowerConstraintManager::forceSuspend ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted when the device was forced to suspend due to the forced-suspend timeout. This timeout is set by defining the QTOPIA_MAX_SCREEN_DISABLE_TIME, usually in custom.h&#x2e;</p>
-<p>See also <a href="syscust-hardware.html">Hardware Configuration</a>.</p>
+<p>See also <a href="syscust-hardware.html">Hardware Configuration</a> and <a href="qtopiapowermanager.html#forceSuspend">QtopiaPowerManager::forceSuspend</a>().</p>
 <h3 class="fn"><a name="instance"></a>QtopiaPowerConstraintManager * QtopiaPowerConstraintManager::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the singleton instance of the <a href="qtopiapowerconstraintmanager.html">QtopiaPowerConstraintManager</a>.</p>
 <h3 class="fn"><a name="setConstraint"></a>void QtopiaPowerConstraintManager::setConstraint ( <a href="qtopiaapplication.html#PowerConstraint-enum">QtopiaApplication::PowerConstraint</a> <i>mode</i>, const <a href="qstring.html">QString</a> &amp; <i>app</i> )</h3>
@@ -82,6 +83,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -12,112 +12,123 @@
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QPowerStatus Class Reference</h1>
-<p>The QPowerStatus class represents a snapshot of the systems power status at a given time. <a href="#details">More...</a></p>
-<pre>    #include &lt;QPowerStatus&gt;</pre><ul>
+<p>The QPowerStatus class provides a simplified interface to the device's primary power sources. <a href="#details">More...</a></p>
+<pre>    #include &lt;QPowerStatus&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<ul>
 <li><a href="qpowerstatus-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-types"></a>
 <h3>Public Types</h3>
 <ul>
-<li><div class="fn"/>enum <b><a href="qpowerstatus.html#ACStatus-enum">ACStatus</a></b> { Offline, Online, Backup, Unknown }</li>
-<li><div class="fn"/>enum <b><a href="qpowerstatus.html#BatteryStatus-enum">BatteryStatus</a></b> { High, Low, VeryLow, Critical, Charging, NotPresent }</li>
+<li><div class="fn"/>enum <b><a href="qpowerstatus.html#BatteryStatus-enum">BatteryStatus</a></b> { Normal, Low, VeryLow, Critical, NoBattery }</li>
+<li><div class="fn"/>enum <b><a href="qpowerstatus.html#WallStatus-enum">WallStatus</a></b> { Available, NotAvailable, NoWallSource }</li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qpowerstatus.html#QPowerStatus">QPowerStatus</a></b> ()</li>
-<li><div class="fn"/><b><a href="qpowerstatus.html#QPowerStatus-2">QPowerStatus</a></b> ( const QPowerStatus &amp; <i>other</i> )</li>
-<li><div class="fn"/>ACStatus <b><a href="qpowerstatus.html#acStatus">acStatus</a></b> () const</li>
-<li><div class="fn"/>BatteryStatus <b><a href="qpowerstatus.html#backupBatteryStatus">backupBatteryStatus</a></b> () const</li>
-<li><div class="fn"/>bool <b><a href="qpowerstatus.html#batteryPercentAccurate">batteryPercentAccurate</a></b> () const</li>
-<li><div class="fn"/>int <b><a href="qpowerstatus.html#batteryPercentRemaining">batteryPercentRemaining</a></b> () const</li>
+<li><div class="fn"/><b><a href="qpowerstatus.html#QPowerStatus">QPowerStatus</a></b> ( QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/>virtual <b><a href="qpowerstatus.html#dtor.QPowerStatus">~QPowerStatus</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qpowerstatus.html#batteryCharging">batteryCharging</a></b> () const</li>
+<li><div class="fn"/>QPowerSource * <b><a href="qpowerstatus.html#batterySource">batterySource</a></b> () const</li>
 <li><div class="fn"/>BatteryStatus <b><a href="qpowerstatus.html#batteryStatus">batteryStatus</a></b> () const</li>
-<li><div class="fn"/>int <b><a href="qpowerstatus.html#batteryTimeRemaining">batteryTimeRemaining</a></b> () const</li>
-<li><div class="fn"/>bool <b><a href="qpowerstatus.html#operator-not-eq">operator!=</a></b> ( const QPowerStatus &amp; <i>ps</i> )</li>
+<li><div class="fn"/>QPowerSource * <b><a href="qpowerstatus.html#wallSource">wallSource</a></b> () const</li>
+<li><div class="fn"/>WallStatus <b><a href="qpowerstatus.html#wallStatus">wallStatus</a></b> () const</li>
 </ul>
-<a name="related-non-members"></a>
-<h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="qpowerstatus.html#qpe_setBrightness">qpe_setBrightness</a></b> ( int <i>bright</i> )</li>
-<li><div class="fn"/>int <b><a href="qpowerstatus.html#qpe_sysBrightnessSteps">qpe_sysBrightnessSteps</a></b> ()</li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qpowerstatus.html#batteryChargingChanged">batteryChargingChanged</a></b> ( bool <i>charging</i> )</li>
+<li><div class="fn"/>void <b><a href="qpowerstatus.html#batteryStatusChanged">batteryStatusChanged</a></b> ( QPowerStatus::BatteryStatus <i>status</i> )</li>
+<li><div class="fn"/>void <b><a href="qpowerstatus.html#wallStatusChanged">wallStatusChanged</a></b> ( QPowerStatus::WallStatus <i>status</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QPowerStatus class represents a snapshot of the systems power status at a given time.</p>
-<p>The QPowerStatus class is a value class. The latest power information can be obtained by calling <a href="qpowerstatusmanager.html#readStatus">QPowerStatusManager::readStatus</a>().</p>
-<p>For example,</p>
-<pre>    QPowerStatus status = QPowerStatusManager::readStatus();
-    if(status.acStatus() == QPowerStatus::Offline)
-        qWarning() &lt;&lt; &quot;The device is not plugged into AC power!&quot;;</pre>
-<p><i>Note:</i> Use of the QPowerStatus class is discouraged. Its API and functionality has been improved in future versions of Qtopia.</p>
-<p>See also <a href="qpowerstatusmanager.html">QPowerStatusManager</a>.</p>
+<p>The QPowerStatus class provides a simplified interface to the device's primary power sources.</p>
+<p>Applications may use the QPowerStatus class to obtain a simplified view of the system's power status. A more complete view can be obtained by examining the supported <a href="qpowersource.html">QPowerSource</a> providers.</p>
+<p>Each device may contain two primary power sources - a primary wall power source and a primary battery power source. Both sources are optional, and a specific device may have one, both or neither.</p>
+<p>The primary power source sources are selected from the list of available <a href="qpowersource.html">QPowerSource</a> providers. The selection may be configured in the <tt>Trolltech/HardwareAccessories</tt> configuration file in the following way:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Key</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>PowerSources/PrimaryWallSource</td><td>Name of the <a href="qpowersource.html">QPowerSource</a> to use as the primary wall source.</td></tr>
+<tr valign="top" class="even"><td>PowerSources/PrimaryBatterySource</td><td>Name of the <a href="qpowersource.html">QPowerSource</a> to use as the primary battery source.</td></tr>
+</table></p>
+<p>If the primary wall source is not configured, the <tt>PrimaryAC</tt> <a href="qpowersource.html">QPowerSource</a> name is tried first, and, if not available, the first AC source is used. If the primary wall source is configured, but the specified provider does not exist, then no <a href="qpowersource.html">QPowerSource</a> is used.</p>
+<p>If the primary battery source is not configured, the <tt>DefaultBattery</tt> <a href="qpowersource.html">QPowerSource</a> is tried first, and, if not available, the first battery source is used. If the primary battery source is configured, but the specified provider does not exist, then no <a href="qpowersource.html">QPowerSource</a> is used.</p>
+<p>The battery status level is determined by mapping a battery percentage to one the four defined levels. The configuration for the various battery status levels are also defined in the <tt>Trolltech/HardwareAccessories</tt> configuration file in the following way:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Key</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>PrimaryBattery/NormalStatus</td><td>If the battery charge is above this percentage level, it is considered Normal. The default is 30.</td></tr>
+<tr valign="top" class="even"><td>PrimaryBattery/LowStatus</td><td>If the battery charge is above this percentage level, but below the normal status level, it is considered Low. The default is 15.</td></tr>
+<tr valign="top" class="odd"><td>PrimaryBattery/VeryLowStatus</td><td>If the battery charge is above this percentage level, but below the low status level, it is considered very Low. The default is 5.</td></tr>
+</table></p>
+<p>If any one of these values is specified illegally (for example, the NormalStatus is lower than the LowStatus), the default values are used.</p>
+<p>See also <a href="qpowersource.html">QPowerSource</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="ACStatus-enum"></a>enum QPowerStatus::ACStatus</h3>
-<p>The current state of AC power. AC power is usually equivalent to an &quot;unlimited&quot; wall provided source.</p>
-<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
-<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QPowerStatus::Offline</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The device is running on battery</td></tr>
-<tr><td valign="top"><tt>QPowerStatus::Online</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The device is powered by an external power source</td></tr>
-<tr><td valign="top"><tt>QPowerStatus::Backup</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The device is running on backup power</td></tr>
-<tr><td valign="top"><tt>QPowerStatus::Unknown</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">Status is unknown</td></tr>
-</table></p>
 <h3 class="fn"><a name="BatteryStatus-enum"></a>enum QPowerStatus::BatteryStatus</h3>
-<p>The current battery state.</p>
+<p>Describes the status of the device's battery connection.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QPowerStatus::High</tt></td><td align="center" valign="top"><tt>0x01</tt></td><td valign="top">The battery is fully charged</td></tr>
-<tr><td valign="top"><tt>QPowerStatus::Low</tt></td><td align="center" valign="top"><tt>0x02</tt></td><td valign="top">The battery level is low</td></tr>
-<tr><td valign="top"><tt>QPowerStatus::VeryLow</tt></td><td align="center" valign="top"><tt>0x04</tt></td><td valign="top">The battery level is very low</td></tr>
-<tr><td valign="top"><tt>QPowerStatus::Critical</tt></td><td align="center" valign="top"><tt>0x08</tt></td><td valign="top">The battery level is critical</td></tr>
-<tr><td valign="top"><tt>QPowerStatus::Charging</tt></td><td align="center" valign="top"><tt>0x10</tt></td><td valign="top">The battery is being charged</td></tr>
-<tr><td valign="top"><tt>QPowerStatus::NotPresent</tt></td><td align="center" valign="top"><tt>0x20</tt></td><td valign="top">The status of the battery is unknown</td></tr>
+<tr><td valign="top"><tt>QPowerStatus::Normal</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The battery level is within normal operational range.</td></tr>
+<tr><td valign="top"><tt>QPowerStatus::Low</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The battery is low.</td></tr>
+<tr><td valign="top"><tt>QPowerStatus::VeryLow</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The battery is very low.</td></tr>
+<tr><td valign="top"><tt>QPowerStatus::Critical</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The battery is at a critical level. The device should shut down to preserve data.</td></tr>
+<tr><td valign="top"><tt>QPowerStatus::NoBattery</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">There is no battery in the device.</td></tr>
+</table></p>
+<h3 class="fn"><a name="WallStatus-enum"></a>enum QPowerStatus::WallStatus</h3>
+<p>Describes the status of the device's wall connection.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QPowerStatus::Available</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The device is connected to a wall power supply.</td></tr>
+<tr><td valign="top"><tt>QPowerStatus::NotAvailable</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The device is not connected to a wall power supply, but connection is supported.</td></tr>
+<tr><td valign="top"><tt>QPowerStatus::NoWallSource</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The device is not connected to a wall power supply, and no such connection is supported.</td></tr>
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QPowerStatus"></a>QPowerStatus::QPowerStatus ()</h3>
-<p>Constructs a <a href="qpowerstatus.html">QPowerStatus</a> object with default values. The default for each value is:</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Value</th><th>Default</th></tr></thead>
-<tr valign="top" class="odd"><td><a href="qpowerstatus.html#acStatus">QPowerStatus::acStatus</a>()</td><td><a href="qpowerstatus.html#ACStatus-enum">QPowerStatus::Offline</a></td></tr>
-<tr valign="top" class="even"><td><a href="qpowerstatus.html#batteryStatus">QPowerStatus::batteryStatus</a>()</td><td><a href="qpowerstatus.html#BatteryStatus-enum">QPowerStatus::NotPresent</a></td></tr>
-<tr valign="top" class="odd"><td><a href="qpowerstatus.html#backupBatteryStatus">QPowerStatus::backupBatteryStatus</a>()</td><td><a href="qpowerstatus.html#BatteryStatus-enum">QPowerStatus::NotPresent</a></td></tr>
-<tr valign="top" class="even"><td><a href="qpowerstatus.html#batteryPercentAccurate">QPowerStatus::batteryPercentAccurate</a>()</td><td>false</td></tr>
-<tr valign="top" class="odd"><td><a href="qpowerstatus.html#batteryPercentRemaining">QPowerStatus::batteryPercentRemaining</a>()</td><td>-1</td></tr>
-<tr valign="top" class="even"><td><a href="qpowerstatus.html#batteryTimeRemaining">QPowerStatus::batteryTimeRemaining</a>()</td><td>-1</td></tr>
-</table></p>
-<h3 class="fn"><a name="QPowerStatus-2"></a>QPowerStatus::QPowerStatus ( const QPowerStatus &amp; <i>other</i> )</h3>
-<p>Constructs a copy of <i>other</i>.</p>
-<h3 class="fn"><a name="acStatus"></a><a href="qpowerstatus.html#ACStatus-enum">ACStatus</a> QPowerStatus::acStatus () const</h3>
-<p>Returns the AC status of the device.</p>
-<h3 class="fn"><a name="backupBatteryStatus"></a><a href="qpowerstatus.html#BatteryStatus-enum">BatteryStatus</a> QPowerStatus::backupBatteryStatus () const</h3>
-<p>Returns the status of the backup device battery, or <a href="qpowerstatus.html#BatteryStatus-enum">QPowerStatus::NotPresent</a> if the device has no backup battery.</p>
-<h3 class="fn"><a name="batteryPercentAccurate"></a>bool QPowerStatus::batteryPercentAccurate () const</h3>
-<p>Some battery sources cannot accuractely provide capacity information. This method returns true if the value returned by <a href="qpowerstatus.html#batteryPercentRemaining">batteryPercentRemaining</a>() reflects the true value of remaining battery.</p>
-<h3 class="fn"><a name="batteryPercentRemaining"></a>int QPowerStatus::batteryPercentRemaining () const</h3>
-<p>Returns the remaining battery life (percentage of charge), or -1 if no information is available.</p>
+<h3 class="fn"><a name="QPowerStatus"></a>QPowerStatus::QPowerStatus ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Construct a new <a href="qpowerstatus.html">QPowerStatus</a> instance with the specified <i>parent</i>.</p>
+<h3 class="fn"><a name="dtor.QPowerStatus"></a>QPowerStatus::~QPowerStatus ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Destroy the <a href="qpowerstatus.html">QPowerStatus</a> instance.</p>
+<h3 class="fn"><a name="batteryCharging"></a>bool QPowerStatus::batteryCharging () const</h3>
+<p>Returns true if the primary battery is charging, false if not. If there is no primary battery, false is returned.</p>
+<h3 class="fn"><a name="batteryChargingChanged"></a>void QPowerStatus::batteryChargingChanged ( bool <i>charging</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when the batteries <i>charging</i> flag changes.</p>
+<p>See also <a href="qpowerstatus.html#batteryCharging">QPowerStatus::batteryCharging</a>().</p>
+<h3 class="fn"><a name="batterySource"></a><a href="qpowersource.html">QPowerSource</a> * QPowerStatus::batterySource () const</h3>
+<p>Returns a pointer to the <a href="qpowersource.html">QPowerSource</a> instance representing the primary battery power source, or null if there is no primary battery power source.</p>
 <h3 class="fn"><a name="batteryStatus"></a><a href="qpowerstatus.html#BatteryStatus-enum">BatteryStatus</a> QPowerStatus::batteryStatus () const</h3>
-<p>Returns the status of the primary device battery, or <a href="qpowerstatus.html#BatteryStatus-enum">QPowerStatus::NotPresent</a> if the device has no primary battery.</p>
-<h3 class="fn"><a name="batteryTimeRemaining"></a>int QPowerStatus::batteryTimeRemaining () const</h3>
-<p>Returns the remaining battery life in seconds, or -1 if no information is available.</p>
-<h3 class="fn"><a name="operator-not-eq"></a>bool QPowerStatus::operator!= ( const QPowerStatus &amp; <i>ps</i> )</h3>
-<p>Returns true if this power status is not equal to <i>ps</i>, otherwise returns false.</p>
-<hr />
-<h2>Related Non-Members</h2>
-<h3 class="fn"><a name="qpe_setBrightness"></a>void qpe_setBrightness ( int <i>bright</i> )</h3>
-<p>Sets the brightness of the device's LCD backlight/frontlight to <i>bright</i>.</p>
-<p><i>bright</i> represents the LCD backlight/frontlight brightness as an integer between 0 and 255. A value of 0 means that the LCD display should be turned off. Values between 1 and 255 are interpreted as varying brightness levels with 1 representing the dimmest level and 255 the brightest.</p>
-<p>This function must be implemented in the custom-&lt;platform-spec&gt;.cpp file by the system integrator, see <a href="syscust-hardware.html">Hardware Configuration</a> for details. It may be necessary for the implementation of this function to convert <i>bright</i> to a device specific brightness level, as returned by <a href="qpowerstatus.html#qpe_sysBrightnessSteps">qpe_sysBrightnessSteps</a>().</p>
-<p>See also <a href="qpowerstatus.html#qpe_sysBrightnessSteps">qpe_sysBrightnessSteps</a>().</p>
-<h3 class="fn"><a name="qpe_sysBrightnessSteps"></a>int qpe_sysBrightnessSteps ()</h3>
-<p>Returns the number of graduations supported by the device's LCD backlight/frontlight.</p>
-<p>This function must be implemented in the custom-&lt;platform-spec&gt;.cpp file by the system integrator, see <a href="syscust-hardware.html">Hardware Configuration</a> for details.</p>
-<p>See also <a href="qpowerstatus.html#qpe_setBrightness">qpe_setBrightness</a>().</p>
+<p>Returns the status of the primary battery power source, or <a href="qpowerstatus.html#BatteryStatus-enum">NoBattery</a> if there is no primary battery source.</p>
+<h3 class="fn"><a name="batteryStatusChanged"></a>void QPowerStatus::batteryStatusChanged ( <a href="qpowerstatus.html#BatteryStatus-enum">QPowerStatus::BatteryStatus</a> <i>status</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever the battery <i>status</i> changes.</p>
+<p>See also <a href="qpowerstatus.html#batteryStatus">QPowerStatus::batteryStatus</a>().</p>
+<h3 class="fn"><a name="wallSource"></a><a href="qpowersource.html">QPowerSource</a> * QPowerStatus::wallSource () const</h3>
+<p>Returns a pointer to the <a href="qpowersource.html">QPowerSource</a> instance representing the primary wall power source, or null if there is no primary wall power source.</p>
+<h3 class="fn"><a name="wallStatus"></a><a href="qpowerstatus.html#WallStatus-enum">WallStatus</a> QPowerStatus::wallStatus () const</h3>
+<p>Return the status of the primary wall power source, or <a href="qpowerstatus.html#WallStatus-enum">NoWallSource</a> if there is no primary wall power source.</p>
+<h3 class="fn"><a name="wallStatusChanged"></a>void QPowerStatus::wallStatusChanged ( <a href="qpowerstatus.html#WallStatus-enum">QPowerStatus::WallStatus</a> <i>status</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever the wall <i>status</i> changes.</p>
+<p>See also <a href="qpowerstatus.html#wallStatus">QPowerStatus::wallStatus</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

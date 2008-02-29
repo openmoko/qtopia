@@ -29,6 +29,8 @@
 <li><div class="fn"/><a href="qpimrecord.html#customFields">customFields</a> () const : QMap&lt;QString, QString&gt;</li>
 <li><div class="fn"/><a href="qpimrecord.html#customFieldsRef">customFieldsRef</a> () : QMap&lt;QString, QString&gt; &amp;</li>
 <li><div class="fn"/><a href="qpimrecord.html#customFieldsRef-2">customFieldsRef</a> () const : const QMap&lt;QString, QString&gt; &amp;</li>
+<li><div class="fn"/><a href="qpimrecord.html#dependentChildren">dependentChildren</a> () const : QMap&lt;QString, QUniqueId&gt;</li>
+<li><div class="fn"/><a href="qpimrecord.html#dependentChildrenOfType">dependentChildrenOfType</a> ( const QString &amp; ) const : QList&lt;QUniqueId&gt;</li>
 <li><div class="fn"/><a href="qtask.html#description">description</a> () const : QString</li>
 <li><div class="fn"/><a href="qtask.html#dueDate">dueDate</a> () const : QDate</li>
 <li><div class="fn"/><a href="qtask.html#hasDueDate">hasDueDate</a> () const : bool</li>
@@ -36,16 +38,19 @@
 <li><div class="fn"/><a href="qtask.html#isCompleted">isCompleted</a> () const : bool</li>
 <li><div class="fn"/><a href="qtask.html#match">match</a> ( const QRegExp &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qtask.html#notes">notes</a> () const : QString</li>
+<li><div class="fn"/><a href="qpimrecord.html#parentDependency">parentDependency</a> () const : QUniqueId</li>
+<li><div class="fn"/><a href="qpimrecord.html#parentDependencyType">parentDependencyType</a> () const : QString</li>
 <li><div class="fn"/><a href="qtask.html#percentCompleted">percentCompleted</a> () const : uint</li>
 <li><div class="fn"/><a href="qtask.html#priority">priority</a> () const : Priority</li>
 <li><div class="fn"/><a href="qpimrecord.html#pruneDeadCategories">pruneDeadCategories</a> ( const QList&lt;QString&gt; &amp; ) : bool</li>
-<li><div class="fn"/><a href="qtask.html#readVCalendar">readVCalendar</a> ( const QString &amp; ) : QList&lt;QTask&gt;</li>
-<li><div class="fn"/><a href="qtask.html#readVCalendar-2">readVCalendar</a> ( const QByteArray &amp; ) : QList&lt;QTask&gt;</li>
+<li><div class="fn"/><a href="qtask.html#readVCalendar">readVCalendar</a> ( QIODevice * ) : QList&lt;QTask&gt;</li>
+<li><div class="fn"/><a href="qtask.html#readVCalendar-2">readVCalendar</a> ( const QString &amp; ) : QList&lt;QTask&gt;</li>
+<li><div class="fn"/><a href="qtask.html#readVCalendar-3">readVCalendar</a> ( const QByteArray &amp; ) : QList&lt;QTask&gt;</li>
 <li><div class="fn"/><a href="qtask.html#readVCalendarData">readVCalendarData</a> ( const char *, unsigned long ) : QList&lt;QTask&gt;</li>
 <li><div class="fn"/><a href="qpimrecord.html#reassignCategoryId">reassignCategoryId</a> ( const QString &amp;, const QString &amp; )</li>
 <li><div class="fn"/><a href="qpimrecord.html#removeCustomField">removeCustomField</a> ( const QString &amp; )</li>
-<li><div class="fn"/><a href="qpimrecord.html#setCategories">setCategories</a> ( const QList&lt;QString&gt; &amp; )</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qpimrecord.html#setCategories">setCategories</a> ( const QList&lt;QString&gt; &amp; )</li>
 <li><div class="fn"/><a href="qpimrecord.html#setCategories-2">setCategories</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qtask.html#setCompleted">setCompleted</a> ( bool )</li>
 <li><div class="fn"/><a href="qtask.html#setCompletedDate">setCompletedDate</a> ( const QDate &amp; )</li>
@@ -68,11 +73,13 @@
 <li><div class="fn"/><a href="qpimrecord.html#uid">uid</a> () const : QUniqueId</li>
 <li><div class="fn"/><a href="qpimrecord.html#uidRef">uidRef</a> () : QUniqueId &amp;</li>
 <li><div class="fn"/><a href="qpimrecord.html#uidRef-2">uidRef</a> () const : const QUniqueId &amp;</li>
-<li><div class="fn"/><a href="qtask.html#writeVCalendar">writeVCalendar</a> ( const QString &amp;, const QList&lt;QTask&gt; &amp; )</li>
-<li><div class="fn"/><a href="qtask.html#writeVCalendar-2">writeVCalendar</a> ( const QString &amp;, const QTask &amp; )</li>
-<li><div class="fn"/><a href="qtask.html#writeVCalendar-3">writeVCalendar</a> ( const QString &amp; ) const</li>
-<li><div class="fn"/><a href="qtask.html#writeVCalendar-4">writeVCalendar</a> ( QFile &amp; ) const</li>
-<li><div class="fn"/><a href="qtask.html#writeVCalendar-5">writeVCalendar</a> ( QDataStream * ) const</li>
+<li><div class="fn"/><a href="qtask.html#writeVCalendar">writeVCalendar</a> ( QIODevice *, const QList&lt;QTask&gt; &amp; ) : bool</li>
+<li><div class="fn"/><a href="qtask.html#writeVCalendar-2">writeVCalendar</a> ( QIODevice *, const QTask &amp; ) : bool</li>
+<li><div class="fn"/><a href="qtask.html#writeVCalendar-3">writeVCalendar</a> ( const QString &amp;, const QList&lt;QTask&gt; &amp; )</li>
+<li><div class="fn"/><a href="qtask.html#writeVCalendar-4">writeVCalendar</a> ( const QString &amp;, const QTask &amp; )</li>
+<li><div class="fn"/><a href="qtask.html#writeVCalendar-5">writeVCalendar</a> ( const QString &amp; ) const</li>
+<li><div class="fn"/><a href="qtask.html#writeVCalendar-6">writeVCalendar</a> ( QFile &amp; ) const</li>
+<li><div class="fn"/><a href="qtask.html#writeVCalendar-7">writeVCalendar</a> ( QDataStream * ) const</li>
 <li><div class="fn"/><a href="qtask.html#operator-not-eq">operator!=</a> ( const QTask &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qtask.html#operator-eq">operator=</a> ( const QTask &amp; ) : QTask &amp;</li>
 <li><div class="fn"/><a href="qtask.html#operator-eq-eq">operator==</a> ( const QTask &amp; ) const : bool</li>
@@ -83,6 +90,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

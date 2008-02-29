@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -323,7 +338,7 @@
     This property is ignored for both Motif 1.x style and non-editable
     comboboxes in Mac style. The default limit is ten
     lines. If the number of items in the combobox is or grows larger
-    than lines, a scrollbar is added.
+    than lines, a scroll bar is added.
 */
 
 class Q3ComboBoxPopup : public Q3PopupMenu
@@ -343,7 +358,7 @@ public:
 static inline QString escapedComboString(const QString &str)
 {
     QString stringToReturn = str;
-    return stringToReturn.replace('&', "&&");
+    return stringToReturn.replace(QLatin1Char('&'), QLatin1String("&&"));
 }
 
 class Q3ComboBoxPopupItem : public QMenuItem
@@ -954,7 +969,7 @@ QString Q3ComboBox::text( int index ) const
 	return d->listBox()->text( index );
     } else {
         QString retText = d->popup()->text(index);
-        retText.replace("&&", "&");
+        retText.replace(QLatin1String("&&"), QString(QLatin1Char('&')));
 	return retText;
     }
 }
@@ -1121,7 +1136,7 @@ QSize Q3ComboBox::sizeHint() const
     int i, w;
     QFontMetrics fm = fontMetrics();
 
-    int maxW = count() ? 18 : 7 * fm.width(QChar('x')) + 18;
+    int maxW = count() ? 18 : 7 * fm.width(QLatin1Char('x')) + 18;
     int maxH = QMAX( fm.lineSpacing(), 14 ) + 2;
 
     if ( !d->usingListBox() ) {

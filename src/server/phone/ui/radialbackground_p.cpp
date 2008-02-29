@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,7 +29,7 @@
 #include <QPalette>
 
 
-const QString RadialBackground::description("Radial");
+const QString RadialBackground::mDescription("Radial");
 
 
 /*!
@@ -42,12 +42,14 @@ const QString RadialBackground::description("Radial");
   from the centre of the SelectedItem's bounding area, over time.
   This class is intended to be used in conjunction with
   another Animation object, which animates the SelectedItem's image.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 */
 
 
 /*!
   \internal
-  \fn static const QString &RadialBackground::getDescription()
+  \fn static const QString &RadialBackground::description()
   Returns description of this class, for configuration purposes.
 */
 

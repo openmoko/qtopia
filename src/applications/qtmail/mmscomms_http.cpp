@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,10 +22,11 @@
 #include "mmscomms_http.h"
 #include "account.h"
 #include "mmsmessage.h"
-#include <qtopia/mail/mailmessage.h>
+#include <qtopia/mail/qmailmessage.h>
 #include <qtopiaipcenvelope.h>
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
+#include <QWapAccount>
 #include <QUrl>
 #include <QFile>
 #include <QBuffer>
@@ -36,14 +37,82 @@
 #include <QDSData>
 #include <QDrmContent>
 
+#ifdef DUMP_MMS_DATA
+// Handy:
+static QByteArray toHexDump( const char *in, int size, int offset = 0 )
+{
+    const char hexdigits[] = "0123456789ABCDEF";
+
+    QByteArray tmp;
+    int lines = (size + 15) & ~15;
+    tmp.resize(lines * ( 9 + 16 * 3 + 1 + 2 + 16 + 1 ));
+            // "offset:", 16 space-separated bytes, space for column 8,
+            // two spaces before ASCII, ASCII, \n
+
+    char *out = tmp.data();
+    int posn;
+    int index = -(((int)offset) & 15);
+    offset &= ~((uint)15);
+    while (index < size) {
+        *out++ = hexdigits[((int)(offset >> 28)) & 0x0F];
+        *out++ = hexdigits[((int)(offset >> 24)) & 0x0F];
+        *out++ = hexdigits[((int)(offset >> 20)) & 0x0F];
+        *out++ = hexdigits[((int)(offset >> 16)) & 0x0F];
+        *out++ = hexdigits[((int)(offset >> 12)) & 0x0F];
+        *out++ = hexdigits[((int)(offset >>  8)) & 0x0F];
+        *out++ = hexdigits[((int)(offset >>  4)) & 0x0F];
+        *out++ = hexdigits[((int)(offset      )) & 0x0F];
+        *out++ = ':';
+        for (posn = 0; posn < 16 && (index + posn) < size; ++posn) {
+            if ( posn == 8 )
+                *out++ = ' ';
+            *out++ = ' ';
+            if ((index + posn) >= 0) {
+                *out++ = hexdigits[(in[index + posn] >> 4) & 0x0F];
+                *out++ = hexdigits[in[index + posn] & 0x0F];
+            } else {
+                *out++ = ' ';
+                *out++ = ' ';
+            }
+        }
+        while ( posn < 16 ) {
+            if ( posn == 8 )
+                *out++ = ' ';
+            *out++ = ' ';
+            *out++ = ' ';
+            *out++ = ' ';
+            ++posn;
+        }
+        *out++ = ' ';
+        *out++ = ' ';
+        for (posn = 0; posn < 16 && (index + posn) < size; ++posn) {
+            if ((index + posn) >= 0) {
+                char ch = in[index + posn];
+                if ( ch >= 0x20 && ch <= 0x7E )
+                    *out++ = ch;
+                else
+                    *out++ = '.';
+            } else {
+                *out++ = ' ';
+            }
+        }
+        index += 16;
+        if ( index < size )
+            *out++ = '\n';
+        offset += 16;
+    }
+
+    tmp.truncate(out - tmp.data());
+    return tmp;
+}
+#endif
+
 // This is an example of how to implement a comms driver for MMS.
 
 MmsCommsHttp::MmsCommsHttp(MailAccount *acc, QObject *parent)
     : MmsComms(acc, parent), rhttp(0), shttp(0), rId(0), sId(0),
       rStatus(200), sStatus(200)
 {
-    connect(qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
-            this, SLOT(appMessage(const QString&,const QByteArray&)));
     timer = new QTimer(this);
     timer->setSingleShot(true);
     connect(timer, SIGNAL(timeout()), this, SLOT(cleanup()));
@@ -73,46 +142,32 @@ void MmsCommsHttp::clearRequests()
     rStatus = 200;
 }
 
-void MmsCommsHttp::sendMessage(MMSMessage &msg)
+void MmsCommsHttp::sendMessage(MMSMessage &msg, const QByteArray& encoded)
 {
-    QByteArray data;
-    QBuffer buffer(&data);
-    buffer.open(QIODevice::WriteOnly);
-    msg.encode(&buffer);
-    buffer.close();
-
-    //### DEBUG
-    /*
-    QFile f("sentmms.mms");
-    if (f.open(QIODevice::WriteOnly)) {
-        f.writeBlock(data);
-    }
-    */
-
-    QSettings conf(networkConfig(), QSettings::IniFormat);
-    conf.beginGroup("MMS");
-    QString server = conf.value("Server").toString();
-
-    if (!server.startsWith("http://"))
-        server = "http://" + server;
-    QUrl url(server);
-
-    int port = 80;
+    QWapAccount acc( networkConfig() );
+    QUrl server = acc.mmsServer();
+    if ( server.scheme().isEmpty() )
+        server.setScheme( "http" );
+    if ( server.port() == -1 )
+        server.setPort( 80 );
+    
     if (!shttp) {
-        port = url.port() > 0 ? url.port() : 80;
-        shttp = createHttpConnection(url.host(), port);
+        shttp = createHttpConnection(server.host(), server.port());
     }
 
     sStatus = 200;
-    QHttpRequestHeader header("POST", url.toString());
-    header.setValue("User-Agent", "Trolltech-Qtopia-MMS-Client/4.1");
-    header.setValue("Host", url.host() + ":" + QString::number(port));
+    QHttpRequestHeader header("POST", server.toString());
+    header.setValue("User-Agent", "Trolltech-Qtopia-MMS-Client/" + Qtopia::version());
+    header.setValue("Host", server.host() + ":" + QString::number(server.port()));
     header.setContentType("application/vnd.wap.mms-message");
-    header.setContentLength(data.size());
+    header.setContentLength(encoded.size());
 //    addAuth(header);
     qLog(Messaging) << "MmsCommsHttp: Sending" << header.toString();
+#ifdef DUMP_MMS_DATA
+    qLog(Messaging).nospace() << "MmsCommsHttp: Data:\n" << qPrintable(toHexDump(encoded.constData(), encoded.length()));
+#endif
 
-    int id = shttp->request(header, data);
+    int id = shttp->request(header, encoded);
     if (msg.type() == MMSMessage::MSendReq)
         sId = id;
 }
@@ -138,30 +193,6 @@ void MmsCommsHttp::retrieveMessage(const QUrl &url)
         header.setValue( "Accept", types.join( ", " ) );
 
     rId = rhttp->request(header);
-}
-
-void MmsCommsHttp::appMessage(const QString &msg, const QByteArray &data)
-{
-    if (msg == "SMS::pushMmsMessage(QDSActionRequest)") {
-        qLog(Messaging) << "Received SMS::pushMmsMessage";
-        QDataStream stream(data);
-        QDSActionRequest request;
-        stream >> request;
-
-        QByteArray pushData(request.requestData().data());
-        QBuffer buffer(&pushData);
-        buffer.open(QIODevice::ReadOnly);
-
-        MMSMessage mmsMsg;
-        mmsMsg.decode(&buffer);
-        if (mmsMsg.type() == MMSMessage::MNotificationInd)
-            emit notificationInd(mmsMsg);
-        else if (mmsMsg.type() == MMSMessage::MDeliveryInd)
-            emit deliveryInd(mmsMsg);
-
-        // Tell the requestor that we are finished with the QDS request.
-        QDSActionRequest( request ).respond();
-    }
 }
 
 void MmsCommsHttp::dataReadProgress(int done, int /*total*/)
@@ -206,7 +237,7 @@ void MmsCommsHttp::cleanup()
 
 void MmsCommsHttp::requestFinished(int id, bool err)
 {
-    QHttp *h = (QHttp *)sender();
+    QHttp *h = static_cast<QHttp *>(sender());
     QByteArray data = h->readAll();
     QString tmp(data);
     if (err) {
@@ -219,7 +250,7 @@ void MmsCommsHttp::requestFinished(int id, bool err)
     }
     if (id == rId && rStatus != 200 || id == sId && sStatus != 200) {
         emit statusChange(tr("Error occurred"));
-        emit error(id == rId ? rStatus : sStatus, tr("Transfer Failed"));
+        emit error(id == rId ? rStatus : sStatus, tr("Transfer failed"));
         return;
     }
     QBuffer buffer(&data);
@@ -272,7 +303,7 @@ void MmsCommsHttp::stateChanged(int state)
             emit statusChange(tr("Receiving..."));
             break;
         case QHttp::Closing:
-            emit statusChange(tr("Closing Connection"));
+            emit statusChange(tr("Closing connection"));
             break;
         default:
             break;
@@ -288,8 +319,8 @@ void MmsCommsHttp::addAuth(QHttpRequestHeader &header)
     if (pass.isNull())
         pass = "";
     QString auth = user + ':' + pass;
-    QByteArray ba = auth.toLatin1();
-    auth = "Basic " + MailMessage::encodeBase64(ba);
+
+    auth = "Basic " + QString::fromLatin1( auth.toLatin1().toBase64() );
     header.setValue("Authorization", auth);
 }
 
@@ -305,8 +336,8 @@ QHttp *MmsCommsHttp::createHttpConnection(const QString &host, int port)
             this, SLOT(requestFinished(int,bool)));
     connect(http, SIGNAL(requestStarted(int)),
             this, SLOT(requestStarted(int)));
-    connect(http, SIGNAL(responseHeaderReceived(const QHttpResponseHeader&)),
-            this, SLOT(responseHeaderReceived(const QHttpResponseHeader&)));
+    connect(http, SIGNAL(responseHeaderReceived(QHttpResponseHeader)),
+            this, SLOT(responseHeaderReceived(QHttpResponseHeader)));
     connect(http, SIGNAL(stateChanged(int)), this, SLOT(stateChanged(int)));
 
     return http;
@@ -325,8 +356,8 @@ void MmsCommsHttp::destroyHttpConnection(QHttp *http)
             this, SLOT(requestFinished(int,bool)));
     disconnect(http, SIGNAL(requestStarted(int)),
             this, SLOT(requestStarted(int)));
-    disconnect(http, SIGNAL(responseHeaderReceived(const QHttpResponseHeader&)),
-            this, SLOT(responseHeaderReceived(const QHttpResponseHeader&)));
+    disconnect(http, SIGNAL(responseHeaderReceived(QHttpResponseHeader)),
+            this, SLOT(responseHeaderReceived(QHttpResponseHeader)));
     disconnect(http, SIGNAL(stateChanged(int)), this, SLOT(stateChanged(int)));
     delete http;
 }

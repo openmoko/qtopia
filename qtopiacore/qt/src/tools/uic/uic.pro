@@ -13,7 +13,8 @@ TARGET = uic
 DESTDIR = ../../../bin
 
 DEFINES	       += QT_BOOTSTRAPPED QT_UIC QT_LITE_UNICODE QT_NO_DATASTREAM \
-	          QT_NO_THREAD QT_NO_QOBJECT QT_NO_UNICODETABLES QT_NO_LIBRARY QT_NO_SYSTEMLOCALE
+	          QT_NO_THREAD QT_NO_QOBJECT QT_NO_UNICODETABLES QT_NO_LIBRARY \
+	          QT_NO_SYSTEMLOCALE QT_NO_GEOM_VARIANT
 win32:DEFINES += QT_NODLL
 
 CONFIG -= qt
@@ -29,16 +30,19 @@ SOURCES += main.cpp
 
 # Qt tools needed to link rcc
 SOURCES	+= ../../corelib/global/qglobal.cpp \
+           ../../corelib/global/qnumeric.cpp \
 	   ../../corelib/io/qbuffer.cpp \
 	   ../../corelib/io/qdir.cpp		\
+	   ../../corelib/io/qdiriterator.cpp		\
 	   ../../corelib/io/qfile.cpp		\
 	   ../../corelib/io/qfileinfo.cpp	\
 	   ../../corelib/io/qfsfileengine.cpp	\
+	   ../../corelib/io/qfsfileengine_iterator.cpp	\
 	   ../../corelib/io/qiodevice.cpp	\
 	   ../../corelib/io/qtemporaryfile.cpp \
 	   ../../corelib/io/qtextstream.cpp \
+	   ../../corelib/io/qurl.cpp \
 	   ../../corelib/tools/qbytearraymatcher.cpp \
-	   ../../corelib/tools/qchar.cpp		\
 	   ../../corelib/tools/qdatetime.cpp	\
 	   ../../corelib/tools/qhash.cpp		\
 	   ../../corelib/tools/qlistdata.cpp		\
@@ -46,14 +50,14 @@ SOURCES	+= ../../corelib/global/qglobal.cpp \
 	   ../../corelib/tools/qmap.cpp		\
 	   ../../corelib/tools/qstring.cpp		\
 	   ../../corelib/tools/qstringlist.cpp	\
-	   ../../corelib/tools/qstringmatcher.cpp \
 	   ../../corelib/tools/qvector.cpp          \
            ../../corelib/io/qabstractfileengine.cpp  \
            ../../corelib/tools/qbytearray.cpp	\
            ../../corelib/tools/qbitarray.cpp	\
-           ../../corelib/tools/qunicodetables.cpp	\
            ../../corelib/tools/qvsnprintf.cpp \
            ../../corelib/tools/qregexp.cpp \
+           ../../corelib/kernel/qmetatype.cpp \
+           ../../corelib/kernel/qvariant.cpp \
            ../../corelib/codecs/qtextcodec.cpp \
            ../../corelib/codecs/qutfcodec.cpp \
            ../../corelib/codecs/qisciicodec.cpp \
@@ -61,14 +65,15 @@ SOURCES	+= ../../corelib/global/qglobal.cpp \
            ../../corelib/codecs/qlatincodec.cpp \
            ../../corelib/codecs/qsimplecodec.cpp \
            ../../xml/qdom.cpp \
+           ../../xml/qxmlutils_p.cpp \
 	   ../../xml/qxml.cpp
 
-unix:SOURCES += ../../corelib/io/qfsfileengine_unix.cpp
+unix:SOURCES += ../../corelib/io/qfsfileengine_unix.cpp ../../corelib/io/qfsfileengine_iterator_unix.cpp
 
-win32:SOURCES += ../../corelib/io/qfsfileengine_win.cpp
+win32:SOURCES += ../../corelib/io/qfsfileengine_win.cpp ../../corelib/io/qfsfileengine_iterator_win.cpp
 
 macx: {
-   QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.2 #enables weak linking for 10.2 (exported)
+   QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.3 #enables weak linking for 10.3 (exported)
    SOURCES += ../../corelib/kernel/qcore_mac.cpp
    LIBS += -framework CoreServices
 }

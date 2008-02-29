@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -27,6 +42,7 @@
 #include <QtCore/qmetatype.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qscrollarea.h>
+#include <QtGui/qgraphicsscene.h>
 
 QT_BEGIN_HEADER
 
@@ -35,7 +51,6 @@ QT_MODULE(Gui)
 #if !defined(QT_NO_GRAPHICSVIEW) || (QT_EDITION & QT_MODULE_GRAPHICSVIEW) != QT_MODULE_GRAPHICSVIEW
 
 class QGraphicsItem;
-class QGraphicsScene;
 class QPainterPath;
 class QPolygonF;
 class QStyleOptionGraphicsItem;
@@ -45,7 +60,7 @@ class Q_GUI_EXPORT QGraphicsView : public QAbstractScrollArea
 {
     Q_OBJECT
     Q_FLAGS(QPainter::RenderHints CacheMode)
-    Q_ENUMS(ViewportAnchor DragMode)
+    Q_ENUMS(ViewportAnchor DragMode ViewportUpdateMode OptimizationFlags)
     Q_PROPERTY(QBrush backgroundBrush READ backgroundBrush WRITE setBackgroundBrush)
     Q_PROPERTY(QBrush foregroundBrush READ foregroundBrush WRITE setForegroundBrush)
     Q_PROPERTY(bool interactive READ isInteractive WRITE setInteractive)
@@ -56,6 +71,11 @@ class Q_GUI_EXPORT QGraphicsView : public QAbstractScrollArea
     Q_PROPERTY(CacheMode cacheMode READ cacheMode WRITE setCacheMode)
     Q_PROPERTY(ViewportAnchor transformationAnchor READ transformationAnchor WRITE setTransformationAnchor)
     Q_PROPERTY(ViewportAnchor resizeAnchor READ resizeAnchor WRITE setResizeAnchor)
+    Q_PROPERTY(ViewportUpdateMode viewportUpdateMode READ viewportUpdateMode WRITE setViewportUpdateMode)
+#ifndef QT_NO_RUBBERBAND
+    Q_PROPERTY(Qt::ItemSelectionMode rubberBandSelectionMode READ rubberBandSelectionMode WRITE setRubberBandSelectionMode)
+#endif
+    Q_PROPERTY(OptimizationFlags optimizationFlags READ optimizationFlags WRITE setOptimizationFlags)
 
 public:
     enum ViewportAnchor {
@@ -76,6 +96,20 @@ public:
         RubberBandDrag
     };
 
+    enum ViewportUpdateMode {
+        FullViewportUpdate,
+        MinimalViewportUpdate,
+        SmartViewportUpdate,
+        NoViewportUpdate
+    };
+
+    enum OptimizationFlag {
+        DontClipPainter = 0x1,
+        DontSavePainterState = 0x2,
+        DontAdjustForAntialiasing = 0x4
+    };
+    Q_DECLARE_FLAGS(OptimizationFlags, OptimizationFlag)
+
     QGraphicsView(QWidget *parent = 0);
     QGraphicsView(QGraphicsScene *scene, QWidget *parent = 0);
     ~QGraphicsView();
@@ -95,8 +129,20 @@ public:
     ViewportAnchor resizeAnchor() const;
     void setResizeAnchor(ViewportAnchor anchor);
 
+    ViewportUpdateMode viewportUpdateMode() const;
+    void setViewportUpdateMode(ViewportUpdateMode mode);
+
+    OptimizationFlags optimizationFlags() const;
+    void setOptimizationFlag(OptimizationFlag flag, bool enabled = true);
+    void setOptimizationFlags(OptimizationFlags flags);
+
     DragMode dragMode() const;
     void setDragMode(DragMode mode);
+
+#ifndef QT_NO_RUBBERBAND
+    Qt::ItemSelectionMode rubberBandSelectionMode() const;
+    void setRubberBandSelectionMode(Qt::ItemSelectionMode mode);
+#endif
 
     CacheMode cacheMode() const;
     void setCacheMode(CacheMode mode);
@@ -115,6 +161,10 @@ public:
     QMatrix matrix() const;
     void setMatrix(const QMatrix &matrix, bool combine = false);
     void resetMatrix();
+    QTransform transform() const;
+    QTransform viewportTransform() const;
+    void setTransform(const QTransform &matrix, bool combine = false);
+    void resetTransform();
     void rotate(qreal angle);
     void scale(qreal sx, qreal sy);
     void shear(qreal sh, qreal sv);
@@ -139,6 +189,7 @@ public:
     QList<QGraphicsItem *> items(const QPoint &pos) const;
     inline QList<QGraphicsItem *> items(int x, int y) const;
     QList<QGraphicsItem *> items(const QRect &rect, Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
+    inline QList<QGraphicsItem *> items(int x, int y, int w, int h, Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
     QList<QGraphicsItem *> items(const QPolygon &polygon, Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
     QList<QGraphicsItem *> items(const QPainterPath &path, Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
     QGraphicsItem *itemAt(const QPoint &pos) const;
@@ -167,6 +218,7 @@ public:
 
 public Q_SLOTS:
     void updateScene(const QList<QRectF> &rects);
+    void invalidateScene(const QRectF &rect = QRectF(), QGraphicsScene::SceneLayers layers = QGraphicsScene::AllLayers);
     void updateSceneRect(const QRectF &rect);
 
 protected Q_SLOTS:
@@ -206,10 +258,15 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(QGraphicsView)
+#ifndef QT_NO_CURSOR
+    Q_PRIVATE_SLOT(d_func(), void _q_setViewportCursor(const QCursor &))
+    Q_PRIVATE_SLOT(d_func(), void _q_unsetViewportCursor())
+#endif
     friend class QGraphicsSceneWidget;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QGraphicsView::CacheMode)
+Q_DECLARE_OPERATORS_FOR_FLAGS(QGraphicsView::OptimizationFlags)
 
 inline void QGraphicsView::setSceneRect(qreal ax, qreal ay, qreal aw, qreal ah)
 { setSceneRect(QRectF(ax, ay, aw, ah)); }
@@ -221,6 +278,8 @@ inline void QGraphicsView::fitInView(qreal ax, qreal ay, qreal w, qreal h, Qt::A
 { fitInView(QRectF(ax, ay, w, h), mode); }
 inline QList<QGraphicsItem *> QGraphicsView::items(int ax, int ay) const
 { return items(QPoint(ax, ay)); }
+inline QList<QGraphicsItem *> QGraphicsView::items(int ax, int ay, int w, int h, Qt::ItemSelectionMode mode) const
+{ return items(QRect(ax, ay, w, h), mode); }
 inline QGraphicsItem *QGraphicsView::itemAt(int ax, int ay) const
 { return itemAt(QPoint(ax, ay)); }
 inline QPointF QGraphicsView::mapToScene(int ax, int ay) const
@@ -232,8 +291,8 @@ inline QPoint QGraphicsView::mapFromScene(qreal ax, qreal ay) const
 inline QPolygon QGraphicsView::mapFromScene(qreal ax, qreal ay, qreal w, qreal h) const
 { return mapFromScene(QRectF(ax, ay, w, h)); }
 
-QT_END_HEADER
-
 #endif // QT_NO_GRAPHICSVIEW
 
-#endif
+QT_END_HEADER
+
+#endif // QGRAPHICSVIEW_H

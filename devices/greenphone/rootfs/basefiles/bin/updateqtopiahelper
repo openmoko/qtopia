@@ -4,16 +4,13 @@ cd /
 
 case "$1" in
     killqtopia)
-        kill $( pidof qpe.sh ) >/dev/null 2>&1
-    	if grep ' /opt/Qtopia.rom ' /proc/mounts >/dev/null 2>&1; then
-            fuser -m /opt/Qtopia.rom -k
-        fi    
+        /etc/rc.d/rc.qtopia stop
         exit 0
         ;;
     unmountqtopia)
-        if grep ' /opt/Qtopia.rom ' /proc/mounts >/dev/null 2>&1; then
+        if grep ' /opt/Qtopia ' /proc/mounts >/dev/null 2>&1; then
             sleep 1
-            umount /opt/Qtopia.rom
+            umount /opt/Qtopia
         fi
         exit 0
         ;;
@@ -30,16 +27,9 @@ case "$1" in
         rmdir $2
         exit 0
         ;;
-    flash)
-        shift
-        # Fall through the case and source /mnt/sd/trolltech_flash.sh
-        ;;
     *)
         echo "unknown option: $1"
         exit 1
         ;;
 esac        
-
-# This script is used as a wrapper for trolltech_flash.sh to work around LIDS.
-. /mnt/sd/trolltech_flash.sh
 

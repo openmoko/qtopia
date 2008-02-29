@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/painting/qpainterpath.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/painting/qpainterpath.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QPainterPath</title>
+  <title>Qt 4.3: List of All Members for QPainterPath</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -29,8 +29,13 @@
 <li><div class="fn"/><a href="qpainterpath.html#addRect">addRect</a> ( const QRectF &amp; )</li>
 <li><div class="fn"/><a href="qpainterpath.html#addRect-2">addRect</a> ( qreal, qreal, qreal, qreal )</li>
 <li><div class="fn"/><a href="qpainterpath.html#addRegion">addRegion</a> ( const QRegion &amp; )</li>
+<li><div class="fn"/><a href="qpainterpath.html#addRoundRect">addRoundRect</a> ( const QRectF &amp;, int, int )</li>
+<li><div class="fn"/><a href="qpainterpath.html#addRoundRect-2">addRoundRect</a> ( const QRectF &amp;, int )</li>
+<li><div class="fn"/><a href="qpainterpath.html#addRoundRect-3">addRoundRect</a> ( qreal, qreal, qreal, qreal, int, int )</li>
+<li><div class="fn"/><a href="qpainterpath.html#addRoundRect-4">addRoundRect</a> ( qreal, qreal, qreal, qreal, int )</li>
 <li><div class="fn"/><a href="qpainterpath.html#addText">addText</a> ( const QPointF &amp;, const QFont &amp;, const QString &amp; )</li>
 <li><div class="fn"/><a href="qpainterpath.html#addText-2">addText</a> ( qreal, qreal, const QFont &amp;, const QString &amp; )</li>
+<li><div class="fn"/><a href="qpainterpath.html#angleAtPercent">angleAtPercent</a> ( qreal ) const : qreal</li>
 <li><div class="fn"/><a href="qpainterpath.html#arcMoveTo">arcMoveTo</a> ( const QRectF &amp;, qreal )</li>
 <li><div class="fn"/><a href="qpainterpath.html#arcMoveTo-2">arcMoveTo</a> ( qreal, qreal, qreal, qreal, qreal )</li>
 <li><div class="fn"/><a href="qpainterpath.html#arcTo">arcTo</a> ( const QRectF &amp;, qreal, qreal )</li>
@@ -39,29 +44,42 @@
 <li><div class="fn"/><a href="qpainterpath.html#closeSubpath">closeSubpath</a> ()</li>
 <li><div class="fn"/><a href="qpainterpath.html#connectPath">connectPath</a> ( const QPainterPath &amp; )</li>
 <li><div class="fn"/><a href="qpainterpath.html#contains">contains</a> ( const QPointF &amp; ) const : bool</li>
-<li><div class="fn"/><a href="qpainterpath.html#contains-2">contains</a> ( const QRectF &amp; ) const : bool</li>
-</ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qpainterpath.html#contains-2">contains</a> ( const QPainterPath &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qpainterpath.html#contains-3">contains</a> ( const QRectF &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qpainterpath.html#controlPointRect">controlPointRect</a> () const : QRectF</li>
 <li><div class="fn"/><a href="qpainterpath.html#cubicTo">cubicTo</a> ( const QPointF &amp;, const QPointF &amp;, const QPointF &amp; )</li>
 <li><div class="fn"/><a href="qpainterpath.html#cubicTo-2">cubicTo</a> ( qreal, qreal, qreal, qreal, qreal, qreal )</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qpainterpath.html#currentPosition">currentPosition</a> () const : QPointF</li>
 <li><div class="fn"/><a href="qpainterpath.html#elementAt">elementAt</a> ( int ) const : const QPainterPath::Element &amp;</li>
 <li><div class="fn"/><a href="qpainterpath.html#elementCount">elementCount</a> () const : int</li>
 <li><div class="fn"/><a href="qpainterpath.html#fillRule">fillRule</a> () const : Qt::FillRule</li>
+<li><div class="fn"/><a href="qpainterpath.html#intersected">intersected</a> ( const QPainterPath &amp; ) const : QPainterPath</li>
 <li><div class="fn"/><a href="qpainterpath.html#intersects">intersects</a> ( const QRectF &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qpainterpath.html#intersects-2">intersects</a> ( const QPainterPath &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qpainterpath.html#isEmpty">isEmpty</a> () const : bool</li>
+<li><div class="fn"/><a href="qpainterpath.html#length">length</a> () const : qreal</li>
 <li><div class="fn"/><a href="qpainterpath.html#lineTo">lineTo</a> ( const QPointF &amp; )</li>
 <li><div class="fn"/><a href="qpainterpath.html#lineTo-2">lineTo</a> ( qreal, qreal )</li>
 <li><div class="fn"/><a href="qpainterpath.html#moveTo">moveTo</a> ( const QPointF &amp; )</li>
 <li><div class="fn"/><a href="qpainterpath.html#moveTo-2">moveTo</a> ( qreal, qreal )</li>
+<li><div class="fn"/><a href="qpainterpath.html#percentAtLength">percentAtLength</a> ( qreal ) const : qreal</li>
+<li><div class="fn"/><a href="qpainterpath.html#pointAtPercent">pointAtPercent</a> ( qreal ) const : QPointF</li>
 <li><div class="fn"/><a href="qpainterpath.html#quadTo">quadTo</a> ( const QPointF &amp;, const QPointF &amp; )</li>
 <li><div class="fn"/><a href="qpainterpath.html#quadTo-2">quadTo</a> ( qreal, qreal, qreal, qreal )</li>
 <li><div class="fn"/><a href="qpainterpath.html#setElementPositionAt">setElementPositionAt</a> ( int, qreal, qreal )</li>
 <li><div class="fn"/><a href="qpainterpath.html#setFillRule">setFillRule</a> ( Qt::FillRule )</li>
-<li><div class="fn"/><a href="qpainterpath.html#toFillPolygon">toFillPolygon</a> ( const QMatrix &amp; ) const : QPolygonF</li>
-<li><div class="fn"/><a href="qpainterpath.html#toFillPolygons">toFillPolygons</a> ( const QMatrix &amp; ) const : QList&lt;QPolygonF&gt;</li>
+<li><div class="fn"/><a href="qpainterpath.html#slopeAtPercent">slopeAtPercent</a> ( qreal ) const : qreal</li>
+<li><div class="fn"/><a href="qpainterpath.html#subtracted">subtracted</a> ( const QPainterPath &amp; ) const : QPainterPath</li>
+<li><div class="fn"/><a href="qpainterpath.html#subtractedInverted">subtractedInverted</a> ( const QPainterPath &amp; ) const : QPainterPath</li>
+<li><div class="fn"/><a href="qpainterpath.html#toFillPolygon">toFillPolygon</a> ( const QTransform &amp; ) const : QPolygonF</li>
+<li><div class="fn"/><a href="qpainterpath.html#toFillPolygon-2">toFillPolygon</a> ( const QMatrix &amp; ) const : QPolygonF</li>
+<li><div class="fn"/><a href="qpainterpath.html#toFillPolygons">toFillPolygons</a> ( const QTransform &amp; ) const : QList&lt;QPolygonF&gt;</li>
+<li><div class="fn"/><a href="qpainterpath.html#toFillPolygons-2">toFillPolygons</a> ( const QMatrix &amp; ) const : QList&lt;QPolygonF&gt;</li>
 <li><div class="fn"/><a href="qpainterpath.html#toReversed">toReversed</a> () const : QPainterPath</li>
-<li><div class="fn"/><a href="qpainterpath.html#toSubpathPolygons">toSubpathPolygons</a> ( const QMatrix &amp; ) const : QList&lt;QPolygonF&gt;</li>
+<li><div class="fn"/><a href="qpainterpath.html#toSubpathPolygons">toSubpathPolygons</a> ( const QTransform &amp; ) const : QList&lt;QPolygonF&gt;</li>
+<li><div class="fn"/><a href="qpainterpath.html#toSubpathPolygons-2">toSubpathPolygons</a> ( const QMatrix &amp; ) const : QList&lt;QPolygonF&gt;</li>
+<li><div class="fn"/><a href="qpainterpath.html#united">united</a> ( const QPainterPath &amp; ) const : QPainterPath</li>
 <li><div class="fn"/><a href="qpainterpath.html#operator-not-eq">operator!=</a> ( const QPainterPath &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qpainterpath.html#operator-eq">operator=</a> ( const QPainterPath &amp; ) : QPainterPath &amp;</li>
 <li><div class="fn"/><a href="qpainterpath.html#operator-eq-eq">operator==</a> ( const QPainterPath &amp; ) const : bool</li>
@@ -72,6 +90,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

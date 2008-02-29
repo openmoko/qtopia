@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,7 +53,7 @@
 #include "QtCore/qstring.h"
 #include "QtCore/qvarlengtharray.h"
 
-struct QLocalePrivate
+struct Q_CORE_EXPORT QLocalePrivate
 {
 public:
     QChar decimal() const { return QChar(m_decimal); }
@@ -94,16 +109,20 @@ public:
     quint64 stringToUnsLongLong(const QString &num, int base, bool *ok, GroupSeparatorMode group_sep_mode) const;
 
 
-    static double bytearrayToDouble(const char *num, bool *ok);
-    static qint64 bytearrayToLongLong(const char *num, int base, bool *ok);
+    static double bytearrayToDouble(const char *num, bool *ok, bool *overflow = 0);
+    static qint64 bytearrayToLongLong(const char *num, int base, bool *ok, bool *overflow = 0);
     static quint64 bytearrayToUnsLongLong(const char *num, int base, bool *ok);
 
     typedef QVarLengthArray<char, 256> CharBuff;
     bool numberToCLocale(const QString &num,
     	    	    	  GroupSeparatorMode group_sep_mode,
                           CharBuff *result) const;
+    inline char digitToCLocale(const QChar &c) const;
 
     static void updateSystemPrivate();
+
+    enum NumberMode { IntegerMode, DoubleStandardMode, DoubleScientificMode };
+    bool validateChars(const QString &str, NumberMode numMode, QByteArray *buff, int decDigits = -1) const;
 
     quint32 m_language_id, m_country_id;
 
@@ -115,5 +134,38 @@ public:
     quint32 m_short_month_names_idx, m_long_month_names_idx;
     quint32 m_short_day_names_idx, m_long_day_names_idx;
 };
+
+inline char QLocalePrivate::digitToCLocale(const QChar &in) const
+{
+    const QChar _zero = zero();
+    const QChar _group = group();
+    const ushort zeroUnicode = _zero.unicode();
+    const ushort tenUnicode = zeroUnicode + 10;
+
+    if (in.unicode() >= zeroUnicode && in.unicode() < tenUnicode)
+        return '0' + in.unicode() - zeroUnicode;
+
+    if (in == plus())
+        return '+';
+
+    if (in == minus())
+        return '-';
+
+    if (in == decimal())
+        return '.';
+
+    if (in == group())
+        return ',';
+
+    if (in == exponential() || in == exponential().toUpper())
+        return 'e';
+
+    // In several languages group() is the char 0xA0, which looks like a space.
+    // People use a regular space instead of it and complain it doesn't work.
+    if (_group.unicode() == 0xA0 && in.unicode() == ' ')
+        return ',';
+
+    return 0;
+}
 
 #endif // QLOCALE_P_H

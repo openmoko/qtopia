@@ -14,4 +14,12 @@
 <file alias="taskcustom">statements/copy/taskcustom.sql</file>
 <file alias="tasks">statements/copy/tasks.sql</file>
 </qresource>
+<qresource prefix="/QtopiaSql/generate/QSQLITE">
+<file alias="task_duedates">statements/generate/task_duedates.sql</file>
+<file alias="task_duedates_deps">statements/generate/task_duedates_deps.sql</file>
+<file alias="contact_birthdays">statements/generate/contact_birthdays.sql</file>
+<file alias="contact_birthdays_deps">statements/generate/contact_birthdays_deps.sql</file>
+<file alias="contact_anniversaries">statements/generate/contact_anniversaries.sql</file>
+<file alias="contact_anniversaries_deps">statements/generate/contact_anniversaries_deps.sql</file>
+</qresource>
 </RCC>

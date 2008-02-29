@@ -61,13 +61,14 @@
 <p>As SystemSuspend is a server task, and not a class, components within the server must access it as such. For example, for a server component to put the device into suspend,</p>
 <pre>    SystemSuspend *suspend = qtopiaTask&lt;SystemSuspend&gt;();
     qWarning() &lt;&lt; &quot;About to suspend!&quot;;
-    if(suspend-&gt;syspendSystem())
+    if(suspend-&gt;suspendSystem())
       qWarning() &lt;&lt; &quot;Resumed from suspend!&quot;;
     else
       qWarning() &lt;&lt; &quot;Suspend failed&quot;;</pre>
 <p>As applications cannot access server tasks directly, they may use the Suspend service.</p>
 <pre>    QtopiaServiceRequest req(&quot;Suspend&quot;, &quot;suspend()&quot;);
     req.send();</pre>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <p>See also <a href="systemsuspendhandler.html">SystemSuspendHandler</a> and <a href="suspendservice.html">SuspendService</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -88,6 +89,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

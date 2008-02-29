@@ -1,4 +1,5 @@
 #include <sys/types.h>
+#include <rpc/rpc.h>
 #include <rpcsvc/ypclnt.h>
 #include <rpcsvc/yp_prot.h>
 

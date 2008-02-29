@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qchar.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/tools/qchar.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QChar</title>
+  <title>Qt 4.3: List of All Members for QChar</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -23,8 +23,8 @@
 <li><div class="fn"/>enum <a href="qchar.html#SpecialCharacter-enum">SpecialCharacter</a></li>
 <li><div class="fn"/>enum <a href="qchar.html#UnicodeVersion-enum">UnicodeVersion</a></li>
 <li><div class="fn"/><a href="qchar.html#QChar">QChar</a> ()</li>
-<li><div class="fn"/><a href="qchar.html#QChar-2">QChar</a> ( char ) : QT_ASCII_CAST_WARN_CONSTRUCTOR</li>
-<li><div class="fn"/><a href="qchar.html#QChar-3">QChar</a> ( uchar ) : QT_ASCII_CAST_WARN_CONSTRUCTOR</li>
+<li><div class="fn"/><a href="qchar.html#QChar-2">QChar</a> ( char )</li>
+<li><div class="fn"/><a href="qchar.html#QChar-3">QChar</a> ( uchar )</li>
 <li><div class="fn"/><a href="qchar.html#QChar-4">QChar</a> ( QLatin1Char )</li>
 <li><div class="fn"/><a href="qchar.html#QChar-5">QChar</a> ( uchar, uchar )</li>
 <li><div class="fn"/><a href="qchar.html#QChar-6">QChar</a> ( ushort )</li>
@@ -33,19 +33,32 @@
 <li><div class="fn"/><a href="qchar.html#QChar-9">QChar</a> ( int )</li>
 <li><div class="fn"/><a href="qchar.html#QChar-10">QChar</a> ( SpecialCharacter )</li>
 <li><div class="fn"/><a href="qchar.html#category">category</a> () const : Category</li>
+<li><div class="fn"/><a href="qchar.html#category-2">category</a> ( uint ) : Category</li>
+<li><div class="fn"/><a href="qchar.html#category-3">category</a> ( ushort ) : Category</li>
 <li><div class="fn"/><a href="qchar.html#cell">cell</a> () const : uchar</li>
 <li><div class="fn"/><a href="qchar.html#combiningClass">combiningClass</a> () const : unsigned char</li>
+<li><div class="fn"/><a href="qchar.html#combiningClass-2">combiningClass</a> ( uint ) : unsigned char</li>
+<li><div class="fn"/><a href="qchar.html#combiningClass-3">combiningClass</a> ( ushort ) : unsigned char</li>
 <li><div class="fn"/><a href="qchar.html#decomposition">decomposition</a> () const : QString</li>
+<li><div class="fn"/><a href="qchar.html#decomposition-2">decomposition</a> ( uint ) : QString</li>
 <li><div class="fn"/><a href="qchar.html#decompositionTag">decompositionTag</a> () const : Decomposition</li>
+<li><div class="fn"/><a href="qchar.html#decompositionTag-2">decompositionTag</a> ( uint ) : Decomposition</li>
 <li><div class="fn"/><a href="qchar.html#digitValue">digitValue</a> () const : int</li>
+<li><div class="fn"/><a href="qchar.html#digitValue-2">digitValue</a> ( ushort ) : int</li>
+<li><div class="fn"/><a href="qchar.html#digitValue-3">digitValue</a> ( uint ) : int</li>
 <li><div class="fn"/><a href="qchar.html#direction">direction</a> () const : Direction</li>
+<li><div class="fn"/><a href="qchar.html#direction-2">direction</a> ( uint ) : Direction</li>
+<li><div class="fn"/><a href="qchar.html#direction-3">direction</a> ( ushort ) : Direction</li>
 <li><div class="fn"/><a href="qchar.html#fromAscii">fromAscii</a> ( char ) : QChar</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qchar.html#fromLatin1">fromLatin1</a> ( char ) : QChar</li>
 <li><div class="fn"/><a href="qchar.html#hasMirrored">hasMirrored</a> () const : bool</li>
+<li><div class="fn"/><a href="qchar.html#highSurrogate">highSurrogate</a> ( uint ) : ushort</li>
 <li><div class="fn"/><a href="qchar.html#isDigit">isDigit</a> () const : bool</li>
+<li><div class="fn"/><a href="qchar.html#isHighSurrogate">isHighSurrogate</a> () const : bool</li>
 <li><div class="fn"/><a href="qchar.html#isLetter">isLetter</a> () const : bool</li>
 <li><div class="fn"/><a href="qchar.html#isLetterOrNumber">isLetterOrNumber</a> () const : bool</li>
+</ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qchar.html#isLowSurrogate">isLowSurrogate</a> () const : bool</li>
 <li><div class="fn"/><a href="qchar.html#isLower">isLower</a> () const : bool</li>
 <li><div class="fn"/><a href="qchar.html#isMark">isMark</a> () const : bool</li>
 <li><div class="fn"/><a href="qchar.html#isNull">isNull</a> () const : bool</li>
@@ -54,17 +67,37 @@
 <li><div class="fn"/><a href="qchar.html#isPunct">isPunct</a> () const : bool</li>
 <li><div class="fn"/><a href="qchar.html#isSpace">isSpace</a> () const : bool</li>
 <li><div class="fn"/><a href="qchar.html#isSymbol">isSymbol</a> () const : bool</li>
+<li><div class="fn"/><a href="qchar.html#isTitleCase">isTitleCase</a> () const : bool</li>
 <li><div class="fn"/><a href="qchar.html#isUpper">isUpper</a> () const : bool</li>
 <li><div class="fn"/><a href="qchar.html#joining">joining</a> () const : Joining</li>
+<li><div class="fn"/><a href="qchar.html#joining-2">joining</a> ( uint ) : Joining</li>
+<li><div class="fn"/><a href="qchar.html#joining-3">joining</a> ( ushort ) : Joining</li>
+<li><div class="fn"/><a href="qchar.html#lowSurrogate">lowSurrogate</a> ( uint ) : ushort</li>
 <li><div class="fn"/><a href="qchar.html#mirroredChar">mirroredChar</a> () const : QChar</li>
+<li><div class="fn"/><a href="qchar.html#mirroredChar-2">mirroredChar</a> ( uint ) : uint</li>
+<li><div class="fn"/><a href="qchar.html#mirroredChar-3">mirroredChar</a> ( ushort ) : ushort</li>
 <li><div class="fn"/><a href="qchar.html#row">row</a> () const : uchar</li>
+<li><div class="fn"/><a href="qchar.html#surrogateToUcs4">surrogateToUcs4</a> ( ushort, ushort ) : uint</li>
+<li><div class="fn"/><a href="qchar.html#surrogateToUcs4-2">surrogateToUcs4</a> ( QChar, QChar ) : uint</li>
 <li><div class="fn"/><a href="qchar.html#toAscii">toAscii</a> () const : const char</li>
+<li><div class="fn"/><a href="qchar.html#toCaseFolded">toCaseFolded</a> () const : QChar</li>
+<li><div class="fn"/><a href="qchar.html#toCaseFolded-2">toCaseFolded</a> ( uint ) : uint</li>
+<li><div class="fn"/><a href="qchar.html#toCaseFolded-3">toCaseFolded</a> ( ushort ) : ushort</li>
 <li><div class="fn"/><a href="qchar.html#toLatin1">toLatin1</a> () const : const char</li>
 <li><div class="fn"/><a href="qchar.html#toLower">toLower</a> () const : QChar</li>
+<li><div class="fn"/><a href="qchar.html#toLower-2">toLower</a> ( uint ) : uint</li>
+<li><div class="fn"/><a href="qchar.html#toLower-3">toLower</a> ( ushort ) : ushort</li>
+<li><div class="fn"/><a href="qchar.html#toTitleCase">toTitleCase</a> () const : QChar</li>
+<li><div class="fn"/><a href="qchar.html#toTitleCase-2">toTitleCase</a> ( uint ) : uint</li>
+<li><div class="fn"/><a href="qchar.html#toTitleCase-3">toTitleCase</a> ( ushort ) : ushort</li>
 <li><div class="fn"/><a href="qchar.html#toUpper">toUpper</a> () const : QChar</li>
+<li><div class="fn"/><a href="qchar.html#toUpper-2">toUpper</a> ( uint ) : uint</li>
+<li><div class="fn"/><a href="qchar.html#toUpper-3">toUpper</a> ( ushort ) : ushort</li>
 <li><div class="fn"/><a href="qchar.html#unicode">unicode</a> () : ushort &amp;</li>
 <li><div class="fn"/><a href="qchar.html#unicode-2">unicode</a> () const : const ushort</li>
 <li><div class="fn"/><a href="qchar.html#unicodeVersion">unicodeVersion</a> () const : UnicodeVersion</li>
+<li><div class="fn"/><a href="qchar.html#unicodeVersion-2">unicodeVersion</a> ( uint ) : UnicodeVersion</li>
+<li><div class="fn"/><a href="qchar.html#unicodeVersion-3">unicodeVersion</a> ( ushort ) : UnicodeVersion</li>
 </ul>
 </td></tr>
 </table></p>
@@ -72,6 +105,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

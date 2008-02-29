@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,42 +36,47 @@ class QtopiaSqlPrivate;
 // named db support required (qtopia name of default db?)
 class QTOPIA_EXPORT QtopiaSql {
 public:
-    static void openDatabase();
+    static QtopiaSql *instance();
+
+    void openDatabase();
 
     static int stringCompare(const QString &, const QString &);
 
-    static QSqlDatabase &systemDatabase();
-    static void loadConfig(const QString &type, const QString &name, const QString &user);
+    QSqlDatabase &systemDatabase();
+    void loadConfig(const QString &type, const QString &name, const QString &user);
 
-    static QSqlError exec(const QString &query, QSqlDatabase& db, bool inTransaction=true );
-    static QSqlError exec(QSqlQuery &query, QSqlDatabase& db, bool inTransaction=true );
-    static void attachDB(const QString& path);
-    static void attachDB(const QString& path, const QString &dbPath);
-    static void detachDB(const QString& path);
-    static QtopiaDatabaseId databaseIdForPath(const QString& path);
-    static QtopiaDatabaseId databaseIdForDatabasePath(const QString& dbPath);
-    static QSqlDatabase &database(const QtopiaDatabaseId& id);
-    static const QList<QtopiaDatabaseId> databaseIds();
-    static const QList<QSqlDatabase> databases();
-    static bool isDatabase(const QString &path);
-    static QString databasePathForId(const QtopiaDatabaseId& id);
+    QSqlError exec(const QString &query, QSqlDatabase& db, bool inTransaction=true );
+    QSqlError exec(QSqlQuery &query, QSqlDatabase& db, bool inTransaction=true );
+    void attachDB(const QString& path);
+    void attachDB(const QString& path, const QString &dbPath);
+    void detachDB(const QString& path);
+    QtopiaDatabaseId databaseIdForPath(const QString& path);
+    QtopiaDatabaseId databaseIdForDatabasePath(const QString& dbPath);
+    QSqlDatabase &database(const QtopiaDatabaseId& id);
+    const QList<QtopiaDatabaseId> databaseIds();
+    const QList<QSqlDatabase> databases();
+    bool isDatabase(const QString &path);
+    QString databasePathForId(const QtopiaDatabaseId& id);
+    bool isValidDatabaseId(const QtopiaDatabaseId& id);
 
-    static QString escapeString(const QString &input);
-    static QSqlDatabase applicationSpecificDatabase(const QString &appname);
-    static bool ensureTableExists(const QString &table, QSqlDatabase &db );
-    static bool ensureTableExists(const QStringList &, QSqlDatabase& );
+    QString escapeString(const QString &input);
+    QSqlDatabase applicationSpecificDatabase(const QString &appname);
+    bool ensureTableExists(const QString &table, QSqlDatabase &db );
+    bool ensureTableExists(const QStringList &, QSqlDatabase& );
 
-    static void logQuery(const QSqlQuery &q);
+    void logQuery(const QSqlQuery &q);
 private:
-    static void closeDatabase();
-    static QSqlDatabase *connectDatabase(const QString &connName);
-    static void init(QSqlDatabase &db, bool force=false);
-    static void loadConfig();
-    static void saveConfig();
+    QtopiaSql();
+    void closeDatabase();
+    QSqlDatabase *connectDatabase(const QString &connName);
+    void init(QSqlDatabase &db, bool force=false);
+    void loadConfig();
+    void saveConfig();
+    void connectDiskChannel();
 
-    static void initPrivate();
-
-    static QtopiaSqlPrivate *d;
+    QtopiaSqlPrivate *d();
+    
+    friend class QtopiaApplication;
 };
 
 #endif

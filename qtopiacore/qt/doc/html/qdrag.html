@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qdrag.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qdrag.cpp -->
 <head>
-  <title>Qt 4.2: QDrag Class Reference</title>
+  <title>Qt 4.3: QDrag Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,17 +12,21 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDrag Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDrag Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QDrag class provides support for MIME-based drag and drop data transfer. <a href="#details">More...</a></p>
 <pre> #include &lt;QDrag&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qdrag-members.html">List of all members, including inherited members</a></li>
+<li><a href="qdrag-obsolete.html">Obsolete members</a></li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
 <li><div class="fn"/><b><a href="qdrag.html#QDrag">QDrag</a></b> ( QWidget * <i>dragSource</i> )</li>
 <li><div class="fn"/><b><a href="qdrag.html#dtor.QDrag">~QDrag</a></b> ()</li>
+<li><div class="fn"/>Qt::DropAction <b><a href="qdrag.html#exec">exec</a></b> ( Qt::DropActions <i>supportedActions</i> = Qt::MoveAction )</li>
+<li><div class="fn"/>Qt::DropAction <b><a href="qdrag.html#exec-2">exec</a></b> ( Qt::DropActions <i>supportedActions</i>, Qt::DropAction <i>defaultDropAction</i> )</li>
 <li><div class="fn"/>QPoint <b><a href="qdrag.html#hotSpot">hotSpot</a></b> () const</li>
 <li><div class="fn"/>QMimeData * <b><a href="qdrag.html#mimeData">mimeData</a></b> () const</li>
 <li><div class="fn"/>QPixmap <b><a href="qdrag.html#pixmap">pixmap</a></b> () const</li>
@@ -31,7 +35,6 @@
 <li><div class="fn"/>void <b><a href="qdrag.html#setMimeData">setMimeData</a></b> ( QMimeData * <i>data</i> )</li>
 <li><div class="fn"/>void <b><a href="qdrag.html#setPixmap">setPixmap</a></b> ( const QPixmap &amp; <i>pixmap</i> )</li>
 <li><div class="fn"/>QWidget * <b><a href="qdrag.html#source">source</a></b> () const</li>
-<li><div class="fn"/>Qt::DropAction <b><a href="qdrag.html#start">start</a></b> ( Qt::DropActions <i>request</i> = Qt::CopyAction )</li>
 <li><div class="fn"/>QWidget * <b><a href="qdrag.html#target">target</a></b> () const</li>
 </ul>
 <ul>
@@ -68,9 +71,10 @@
 <p>A pixmap can be used to represent the data while the drag is in progress, and will move with the cursor to the drop target. This pixmap typically shows an icon that represents the MIME type of the data being transferred, but any pixmap can be set with <a href="qdrag.html#setPixmap">setPixmap</a>(). Care must be taken to ensure that the pixmap is not too large. The cursor's hot spot can be given a position relative to the top-left corner of the pixmap with the <a href="qdrag.html#setHotSpot">setHotSpot</a>() function. The following code positions the pixmap so that the cursor's hot spot points to the center of its bottom edge:</p>
 <pre>     drag-&gt;setHotSpot(QPoint(drag-&gt;pixmap().width()/2,
                              drag-&gt;pixmap().height()));</pre>
+<p><b>Note:</b> on X11, the pixmap may not be able to keep up with the mouse movements if the hot spot causes the pixmap to be displayed directly under the cursor.</p>
 <p>The source and target widgets can be found with <a href="qdrag.html#source">source</a>() and <a href="qdrag.html#target">target</a>(). These functions are often used to determine whether drag and drop operations started and finished at the same widget, so that special behavior can be implemented.</p>
 <p>QDrag only deals with the drag and drop operation itself. It is up to the developer to decide when a drag operation begins, and how a QDrag object should be constructed and used. For a given widget, it is often necessary to reimplement <a href="qwidget.html#mousePressEvent">mousePressEvent()</a> to determine whether the user has pressed a mouse button, and reimplement <a href="qwidget.html#mouseMoveEvent">mouseMoveEvent()</a> to check whether a QDrag is required.</p>
-<p>See also <a href="dnd.html">Drag and Drop</a>, <a href="qclipboard.html">QClipboard</a>, <a href="qmimedata.html">QMimeData</a>, <a href="draganddrop-draggableicons.html">Draggable Icons Example</a>, <a href="draganddrop-draggabletext.html">Draggable Text Example</a>, <a href="draganddrop-dropsite.html">Drop Site Example</a>, and <a href="draganddrop-fridgemagnets.html">Fridge Magnets Example</a>.</p>
+<p>See also <a href="dnd.html">Drag and Drop</a>, <a href="qclipboard.html">QClipboard</a>, <a href="qmimedata.html">QMimeData</a>, <a href="qwindowsmime.html">QWindowsMime</a>, <a href="qmacpasteboardmime.html">QMacPasteboardMime</a>, <a href="draganddrop-draggableicons.html">Draggable Icons Example</a>, <a href="draganddrop-draggabletext.html">Draggable Text Example</a>, <a href="draganddrop-dropsite.html">Drop Site Example</a>, and <a href="draganddrop-fridgemagnets.html">Fridge Magnets Example</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QDrag"></a>QDrag::QDrag ( <a href="qwidget.html">QWidget</a> * <i>dragSource</i> )</h3>
@@ -80,6 +84,16 @@
 <h3 class="fn"><a name="actionChanged"></a>void QDrag::actionChanged ( <a href="qt.html#DropAction-enum">Qt::DropAction</a> <i>action</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the <i>action</i> associated with the drag changes.</p>
 <p>See also <a href="qdrag.html#targetChanged">targetChanged</a>().</p>
+<h3 class="fn"><a name="exec"></a><a href="qt.html#DropAction-enum">Qt::DropAction</a> QDrag::exec ( <a href="qt.html#DropAction-enum">Qt::DropActions</a> <i>supportedActions</i> = Qt::MoveAction )</h3>
+<p>Starts the drag and drop operation and returns a value indicating the requested drop action when it is completed. The drop actions that the user can choose from are specified in <i>supportedActions</i>. The default proposed action will be selected among the allowed actions in the following order: Move, Copy and Link.</p>
+<p><b>Note:</b> Although the drag and drop operation can take some time, this function does not block the event loop. Other events are still delivered to the application while the operation is performed.</p>
+<p>This function was introduced in Qt 4.3.</p>
+<h3 class="fn"><a name="exec-2"></a><a href="qt.html#DropAction-enum">Qt::DropAction</a> QDrag::exec ( <a href="qt.html#DropAction-enum">Qt::DropActions</a> <i>supportedActions</i>, <a href="qt.html#DropAction-enum">Qt::DropAction</a> <i>defaultDropAction</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Starts the drag and drop operation and returns a value indicating the requested drop action when it is completed. The drop actions that the user can choose from are specified in <i>supportedActions</i>.</p>
+<p>The <i>defaultDropAction</i> determines which action will be proposed when the user performs a drag without using modifier keys.</p>
+<p><b>Note:</b> Although the drag and drop operation is blocking, the function does not block the event loop. Other events are still delivered to the application while the operation is performed.</p>
+<p>This function was introduced in Qt 4.3.</p>
 <h3 class="fn"><a name="hotSpot"></a><a href="qpoint.html">QPoint</a> QDrag::hotSpot () const</h3>
 <p>Returns the position of the hot spot relative to the top-left corner of the cursor.</p>
 <p>See also <a href="qdrag.html#setHotSpot">setHotSpot</a>().</p>
@@ -94,6 +108,7 @@
 <p>The <i>action</i> can only be CopyAction, MoveAction or LinkAction. All other values of DropAction are ignored.</p>
 <h3 class="fn"><a name="setHotSpot"></a>void QDrag::setHotSpot ( const <a href="qpoint.html">QPoint</a> &amp; <i>hotspot</i> )</h3>
 <p>Sets the position of the hot spot relative to the top-left corner of the pixmap used to the point specified by <i>hotspot</i>.</p>
+<p><b>Note:</b> on X11, the pixmap may not be able to keep up with the mouse movements if the hot spot causes the pixmap to be displayed directly under the cursor.</p>
 <p>See also <a href="qdrag.html#hotSpot">hotSpot</a>().</p>
 <h3 class="fn"><a name="setMimeData"></a>void QDrag::setMimeData ( <a href="qmimedata.html">QMimeData</a> * <i>data</i> )</h3>
 <p>Sets the data to be sent to the given MIME <i>data</i>. Ownership of the data is transferred to the <a href="qdrag.html">QDrag</a> object.</p>
@@ -103,9 +118,6 @@
 <p>See also <a href="qdrag.html#pixmap">pixmap</a>().</p>
 <h3 class="fn"><a name="source"></a><a href="qwidget.html">QWidget</a> * QDrag::source () const</h3>
 <p>Returns the source of the drag object. This is the widget where the drag and drop operation originated.</p>
-<h3 class="fn"><a name="start"></a><a href="qt.html#DropAction-enum">Qt::DropAction</a> QDrag::start ( <a href="qt.html#DropAction-enum">Qt::DropActions</a> <i>request</i> = Qt::CopyAction )</h3>
-<p>Starts the drag and drop operation and returns a value indicating the requested drop action when it is completed. The drop actions that the user can choose from are specified in <i>request</i>. <a href="qt.html#DropAction-enum">Qt::CopyAction</a> is always allowed.</p>
-<p><b>Note:</b> Although the drag and drop operation can take some time, this function does not block the event loop. Other events are still delivered to the application while the operation is performed.</p>
 <h3 class="fn"><a name="target"></a><a href="qwidget.html">QWidget</a> * QDrag::target () const</h3>
 <p>Returns the target of the drag and drop operation. This is the widget where the drag object was dropped.</p>
 <h3 class="fn"><a name="targetChanged"></a>void QDrag::targetChanged ( <a href="qwidget.html">QWidget</a> * <i>newTarget</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -115,6 +127,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

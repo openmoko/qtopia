@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -46,16 +61,16 @@ QStringList ProFileEvaluator::qmake_feature_paths(/*QMakeProperty *prop=0*/)
 {
     QStringList concat;
     {
-        const QString base_concat = QDir::separator() + QString("features");
-        concat << base_concat + QDir::separator() + "mac";
-        concat << base_concat + QDir::separator() + "macx";
-        concat << base_concat + QDir::separator() + "unix";
-        concat << base_concat + QDir::separator() + "win32";
-        concat << base_concat + QDir::separator() + "mac9";
-        concat << base_concat + QDir::separator() + "qnx6";
+        const QString base_concat = QDir::separator() + QString(QLatin1String("features"));
+        concat << base_concat + QDir::separator() + QLatin1String("mac");
+        concat << base_concat + QDir::separator() + QLatin1String("macx");
+        concat << base_concat + QDir::separator() + QLatin1String("unix");
+        concat << base_concat + QDir::separator() + QLatin1String("win32");
+        concat << base_concat + QDir::separator() + QLatin1String("mac9");
+        concat << base_concat + QDir::separator() + QLatin1String("qnx6");
         concat << base_concat;
     }
-    const QString mkspecs_concat = QDir::separator() + QString("mkspecs");
+    const QString mkspecs_concat = QDir::separator() + QString(QLatin1String("mkspecs"));
     QStringList feature_roots;
     QByteArray mkspec_path = qgetenv("QMAKEFEATURES");
     if(!mkspec_path.isNull())
@@ -101,11 +116,11 @@ QStringList ProFileEvaluator::qmake_feature_paths(/*QMakeProperty *prop=0*/)
     //}
     for(QStringList::Iterator concat_it = concat.begin();
         concat_it != concat.end(); ++concat_it)
-        feature_roots << (propertyValue("QT_INSTALL_PREFIX") + 
+        feature_roots << (propertyValue(QLatin1String("QT_INSTALL_PREFIX")) +
                           mkspecs_concat + (*concat_it));
     for(QStringList::Iterator concat_it = concat.begin();
         concat_it != concat.end(); ++concat_it)
-        feature_roots << (propertyValue("QT_INSTALL_DATA") + 
+        feature_roots << (propertyValue(QLatin1String("QT_INSTALL_DATA")) +
                           mkspecs_concat + (*concat_it));
     return feature_roots;
 }
@@ -178,7 +193,7 @@ bool ProFileEvaluator::visitProValue(ProValue *value)
 {
     PRE(value);
     m_lineNo = value->getLineNumber();
-    QString val(value->value());
+    QString val(QString::fromLatin1(value->value()));
 
     QByteArray varName = m_lastVarName;
 
@@ -194,6 +209,8 @@ bool ProFileEvaluator::visitProValue(ProValue *value)
             insertUnique(&m_valuemap, varName, v, false);
             break;
         case ProVariable::RemoveOperator:       // -
+            // fix me: interaction between AddOperator and RemoveOperator
+            insertUnique(&m_valuemap, QByteArray(varName).prepend(QLatin1Char('-').toLatin1()), v, false);
             break;
         case ProVariable::ReplaceOperator:      // ~
             {
@@ -202,19 +219,22 @@ bool ProFileEvaluator::visitProValue(ProValue *value)
                 QChar sep = val.at(1);
                 QStringList func = val.split(sep);
                 if (func.count() < 3 || func.count() > 4) {
-                    logMessage(QString::fromAscii("~= operator (function s///) expects 3 or 4 arguments.\n"), MT_DebugLevel1);
+                    logMessage(QString::fromAscii(
+                        "~= operator (function s///) expects 3 or 4 arguments.\n"),
+                        MT_DebugLevel1);
                     return false;
                 }
                 if (func[0] != QLatin1String("s")) {
-                    logMessage(QString::fromAscii("~= operator can only handle s/// function.\n"), MT_DebugLevel1);
+                    logMessage(QString::fromAscii("~= operator can only handle s/// function.\n"),
+                        MT_DebugLevel1);
                     return false;
                 }
                 bool global = false, quote = false, case_sense = false;
 
                 if (func.count() == 4) {
-                    global = func[3].indexOf('g') != -1;
-                    case_sense = func[3].indexOf('i') == -1;
-                    quote = func[3].indexOf('q') != -1;
+                    global = func[3].indexOf(QLatin1Char('g')) != -1;
+                    case_sense = func[3].indexOf(QLatin1Char('i')) == -1;
+                    quote = func[3].indexOf(QLatin1Char('q')) != -1;
                 }
                 QString pattern = func[1];
                 QString replace = func[2];
@@ -253,9 +273,9 @@ bool ProFileEvaluator::visitProFunction(ProFunction *func)
     int rparen = text.lastIndexOf(')');
     Q_ASSERT(lparen < rparen);
 
-    QString arguments(text.mid(lparen + 1, rparen - lparen - 1));
+    QString arguments(QString::fromLatin1(text.mid(lparen + 1, rparen - lparen - 1)));
     QByteArray funcName = text.left(lparen);
-    ok &= evaluateConditionalFunction(funcName, arguments, &result);
+    ok &= evaluateConditionalFunction(funcName.trimmed(), arguments, &result);
     return ok;
 }
 
@@ -415,7 +435,9 @@ QString ProFileEvaluator::expandVariableReferences(const QString &str)
                 }
                 if(term) {
                     if(unicode != term) {
-                        logMessage("Missing " + QString(term) + " terminator [found " + QString(unicode) + "]", MT_DebugLevel1);
+                        logMessage(QString::fromAscii(
+                            "Missing %1 terminator [found %2]").arg(QChar(term)).arg(QChar(unicode)), 
+                            MT_DebugLevel1);
                         if(ok)
                             *ok = false;
                         return QString();
@@ -435,7 +457,7 @@ QString ProFileEvaluator::expandVariableReferences(const QString &str)
                 } else if(var_type == FUNCTION) {
                     replacement = evaluateExpandFunction( var.toAscii(), args );
                 } else if(var_type == VAR) {
-                    replacement = values(var).join(" ");
+                    replacement = values(var).join(QLatin1String(" "));
                 }
                 if(!(replaced++) && start_var)
                     current = str.left(start_var);
@@ -447,7 +469,7 @@ QString ProFileEvaluator::expandVariableReferences(const QString &str)
                           replacement.toLatin1().constData());
             } else {
                 if(replaced)
-                    current.append("$");
+                    current.append(QLatin1String("$"));
             }
         }
         if(replaced && unicode)
@@ -484,9 +506,9 @@ bool ProFileEvaluator::isActiveConfig(const QByteArray &config, bool regex)
     else if(Option::target_mode == Option::TARG_WIN_MODE && config == "win32")
         return true;
 
-    QRegExp re(config, Qt::CaseSensitive, QRegExp::Wildcard);
+    QRegExp re(QString::fromLatin1(config), Qt::CaseSensitive, QRegExp::Wildcard);
     QString spec = Option::qmakespec;
-    if((regex && re.exactMatch(spec)) || (!regex && spec == config))
+    if((regex && re.exactMatch(spec)) || (!regex && spec == QString::fromLatin1(config)))
         return true;
 
     return false;
@@ -547,8 +569,9 @@ QString ProFileEvaluator::evaluateExpandFunction(const QByteArray &func, const Q
             int beg=0, end=-1;
             if(func_t == E_SECTION) {
                 if(args.count() != 3 && args.count() != 4) {
-                    logMessage(QString::fromAscii("%2(var) section(var, sep, begin, end) requires three arguments.\n").arg(
-                        QString(func)));
+                    logMessage(QString::fromAscii(
+                        "%2(var) section(var, sep, begin, end) requires three arguments.\n")
+                        .arg(QString::fromLatin1(func.constData())));
                 } else {
                     var = args[0];
                     sep = args[1];
@@ -559,11 +582,11 @@ QString ProFileEvaluator::evaluateExpandFunction(const QByteArray &func, const Q
             } else {
                 if(args.count() != 1) {
                     logMessage(QString::fromAscii("%2(var) requires one argument.\n").arg(
-                        QString(func)));
+                        QString::fromLatin1(func.constData())));
                 } else {
                     var = args[0];
                     regexp = true;
-                    sep = "[\\\\/]";
+                    sep = QLatin1String("[\\\\/]");
                     if(func_t == E_DIRNAME)
                         end = -2;
                     else
@@ -603,7 +626,7 @@ QString ProFileEvaluator::evaluateExpandFunction(const QByteArray &func, const Q
             if(args.count() < 2 || args.count() > 3) {
                 logMessage(QString::fromAscii("split(var, sep, join) requires three arguments\n"));
             } else {
-                QString sep = args[1], join = QString(field_sep);
+                QString sep = args[1], join = QString(QLatin1Char(field_sep));
                 if(args.count() == 3)
                     join = args[2];
                 QStringList var = values(args.first());
@@ -630,7 +653,7 @@ QString ProFileEvaluator::evaluateExpandFunction(const QByteArray &func, const Q
                     start = start_str.toInt(&ok);
                     if(!ok) {
                         if(args.count() == 2) {
-                            int dotdot = start_str.indexOf("..");
+                            int dotdot = start_str.indexOf(QLatin1String(".."));
                             if(dotdot != -1) {
                                 start = start_str.left(dotdot).toInt(&ok);
                                 if(ok)
@@ -659,13 +682,13 @@ QString ProFileEvaluator::evaluateExpandFunction(const QByteArray &func, const Q
                     } else if(start < end) {
                         for(int i = start; i <= end && (int)var.count() >= i; i++) {
                             if(!ret.isEmpty())
-                                ret += field_sep;
+                                ret += QLatin1Char(field_sep);
                             ret += var[i];
                         }
                     } else {
                         for(int i = start; i >= end && (int)var.count() >= i && i >= 0; i--) {
                             if(!ret.isEmpty())
-                                ret += field_sep;
+                                ret += QLatin1Char(field_sep);
                             ret += var[i];
                         }
                     }
@@ -676,7 +699,7 @@ QString ProFileEvaluator::evaluateExpandFunction(const QByteArray &func, const Q
         case E_LAST: {
             if(args.count() != 1) {
                 logMessage(QString::fromAscii("%2(var) requires one argument.\n").arg(
-                                            QString(func)));
+                                            QString::fromLatin1(func.constData())));
             } else {
                 const QStringList var = values(args.first());
                 if(!var.isEmpty()) {
@@ -697,7 +720,7 @@ QString ProFileEvaluator::evaluateExpandFunction(const QByteArray &func, const Q
                     FILE *proc = QT_POPEN(args[0].toLatin1(), "r");
                     bool singleLine = true;
                     if(args.count() > 1)
-                        singleLine = (args[1].toLower() == "true");
+                        singleLine = (args[1].toLower() == QLatin1String("true"));
                     while(proc && !feof(proc)) {
                         int read_in = int(fread(buff, 1, 255, proc));
                         if(!read_in)
@@ -707,7 +730,7 @@ QString ProFileEvaluator::evaluateExpandFunction(const QByteArray &func, const Q
                                 buff[i] = ' ';
                         }
                         buff[read_in] = '\0';
-                        ret += buff;
+                        ret += QString::fromLatin1(buff);
                     }
                 }
             }
@@ -758,7 +781,7 @@ bool ProFileEvaluator::evaluateConditionalFunction(const QByteArray &function, c
                 //cond = isActiveConfig(args.first());
                 break;
             }
-            const QStringList mutuals = args[1].split('|');
+            const QStringList mutuals = args[1].split(QLatin1Char('|'));
             const QStringList &configs = m_valuemap.value("CONFIG");
             for(int i = configs.size() - 1 && ok; i >= 0; i--) {
                 for(int mut = 0; mut < mutuals.count(); mut++) {
@@ -787,7 +810,7 @@ bool ProFileEvaluator::evaluateConditionalFunction(const QByteArray &function, c
                     }
                 }
             } else {
-                const QStringList mutuals = args[2].split('|');
+                const QStringList mutuals = args[2].split(QLatin1Char('|'));
                 for(int i = l.size()-1; i >= 0; i--) {
                     const QString val = l[i];
                     for(int mut = 0; mut < mutuals.count(); mut++) {
@@ -808,15 +831,15 @@ bool ProFileEvaluator::evaluateConditionalFunction(const QByteArray &function, c
             }
             if(args.count() == 3) {
                 QString comp = args[2];
-                if(comp == ">" || comp == "greaterThan") {
+                if(comp == QLatin1String(">") || comp == QLatin1String("greaterThan")) {
                     cond = values(args.first()).count() > args[1].toInt();
-                } else if(comp == ">=") {
+                } else if(comp == QLatin1String(">=")) {
                     cond = values(args.first()).count() >= args[1].toInt();
-                } else if(comp == "<" || comp == "lessThan") {
+                } else if(comp == QLatin1String("<") || comp == QLatin1String("lessThan")) {
                     cond = values(args.first()).count() < args[1].toInt();
-                } else if(comp == "<=") {
+                } else if(comp == QLatin1String("<=")) {
                     cond = values(args.first()).count() <= args[1].toInt();
-                } else if(comp == "equals" || comp == "isEqual" || comp == "=" || comp == "==") {
+                } else if(comp == QLatin1String("equals") || comp == QLatin1String("isEqual") || comp == QLatin1String("=") || comp == QLatin1String("==")) {
                     cond = values(args.first()).count() == args[1].toInt();
                 } else {
                     ok = false;
@@ -836,14 +859,18 @@ bool ProFileEvaluator::evaluateConditionalFunction(const QByteArray &function, c
                 ok = false;
                 break;
             }
-            ok = evaluateFile(args.first(), &ok);
+            QString fileName = args.first();
+            // ### this breaks if we have include(c:/reallystupid.pri) but IMHO that's really bad style.
+            QDir currentProPath(getcwd());
+            fileName = currentProPath.absoluteFilePath(fileName);
+            ok = evaluateFile(fileName, &ok);
             break; }
         case CF_LOAD: {
             QString parseInto;
             bool ignore_error = false;
             if(args.count() == 2) {
                 QString sarg = args[1];
-                ignore_error = (sarg.toLower() == "true" || sarg.toInt());
+                ignore_error = (sarg.toLower() == QLatin1String("true") || sarg.toInt());
             } else if(args.count() != 1) {
                 logMessage(QString::fromAscii("load(feature) requires one argument.\n"), MT_DebugLevel1);
                 ok = false;
@@ -855,7 +882,7 @@ bool ProFileEvaluator::evaluateConditionalFunction(const QByteArray &function, c
         case CF_MESSAGE: {
             if(args.count() != 1) {
                 logMessage(QString::fromAscii("%2(message) requires one argument.\n").arg(
-                    QString(function)), MT_DebugLevel1);
+                    QString(QString::fromLatin1(function.constData()))), MT_DebugLevel1);
                 ok = false;
                 break;
             }
@@ -1056,7 +1083,7 @@ QStringList ProFileEvaluator::absFileNames(const QString &variableName)
                 } else {
                     QString a;
                     for(int i = (int)files.count()-1; i >= 0; i--) {
-                        if(files[i] == "." || files[i] == "..")
+                        if(files[i] == QLatin1String(".") || files[i] == QLatin1String(".."))
                             continue;
                         a = dir + files[i];
                         sources_out+=a;
@@ -1104,7 +1131,7 @@ QString ProFileEvaluator::propertyValue(const QString &val) const
 
 void ProFileEvaluator::logMessage(const ProFileEvaluator::LogMessage &msg)
 {
-    QByteArray locstr = QString("%1(%2):").arg(msg.m_filename).arg(msg.m_linenumber).toAscii();
+    QByteArray locstr = QString(QLatin1String("%1(%2):")).arg(msg.m_filename).arg(msg.m_linenumber).toAscii();
     QByteArray text = msg.m_msg.toAscii();
     switch (msg.m_type) {
         case MT_DebugLevel3:
@@ -1133,13 +1160,13 @@ void ProFileEvaluator::logMessage(const QString &message, MessageType mt)
     LogMessage msg;
     msg.m_msg = message;
     msg.m_type = mt;
-    
+
     ProFile *pro = currentProFile();
     if (pro) {
         msg.m_filename = pro->fileName();
         msg.m_linenumber = m_lineNo;
     } else {
-        msg.m_filename = "Not a file";
+        msg.m_filename = QLatin1String("Not a file");
         msg.m_linenumber = 0;
     }
 

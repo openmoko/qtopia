@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -18,7 +18,6 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-
 #ifdef QUICKLAUNCHER_FORKED
 #include "quicklaunchforked.h"
 #else
@@ -34,14 +33,11 @@
 #include <qtopiaapplication.h>
 #include <qpluginmanager.h>
 #include <qapplicationplugin.h>
-#include <perftest.h>
 #include <QSocketNotifier>
 #include <qtopialog.h>
 #include <QImageReader>
 #include <QtopiaSql>
-#ifdef QTOPIA_PHONE
-# include <qtopia/qsoftmenubar.h>
-#endif
+#include <qtopia/qsoftmenubar.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -57,13 +53,36 @@ QSXE_APP_KEY
 #endif
 #endif
 
-#ifdef Q_OS_LINUX
 extern char **environ;
-#endif
 
 int MAIN_FUNC( int argc, char** argv )
 {
+#ifdef QTOPIA_SETPROC_ARGV0
+    // Setup to change proc title.  Must be done before anything else
+    // could possibly change argv or envp or argv_lth will be very wrong.
+    int i;
+    char **envp = environ;
+    /* Move the environment so we can reuse the memory.
+     * (Code borrowed from sendmail.) */
+    for (i = 0; envp[i] != NULL; i++)
+        continue;
+    environ = (char **) malloc(sizeof(char *) * (i + 1));
+    if (environ == NULL)
+        return -1;
+    for (i = 0; envp[i] != NULL; i++)
+        if ((environ[i] = strdup(envp[i])) == NULL)
+            return -1;
+    environ[i] = NULL;
+
+    QuickLauncher::argv0 = argv;
+    if (i > 0)
+        QuickLauncher::argv_lth = envp[i-1] + strlen(envp[i-1]) - QuickLauncher::argv0[0];
+    else
+        QuickLauncher::argv_lth = QuickLauncher::argv0[argc-1] + strlen(QuickLauncher::argv0[argc-1]) - QuickLauncher::argv0[0];
+#endif
+
 #ifndef QT_NO_SXE
+
     // This is just the key for the quicklauncher, launched processes get
     // their own key
     QTransportAuth::getInstance()->setProcessKey( _key, "quicklauncher" );
@@ -86,29 +105,6 @@ int MAIN_FUNC( int argc, char** argv )
         qLog(Quicklauncher) << "QuickLauncher invoked as:" << arg0.toLatin1();
         QuickLauncher::exec( argc, argv );
     } else {
-
-#ifdef Q_OS_LINUX
-        // Setup to change proc title
-        int i;
-        char **envp = environ;
-        /* Move the environment so we can reuse the memory.
-         * (Code borrowed from sendmail.) */
-        for (i = 0; envp[i] != NULL; i++)
-            continue;
-        environ = (char **) malloc(sizeof(char *) * (i + 1));
-        if (environ == NULL)
-            return -1;
-        for (i = 0; envp[i] != NULL; i++)
-            if ((environ[i] = strdup(envp[i])) == NULL)
-                return -1;
-        environ[i] = NULL;
-
-        QuickLauncher::argv0 = argv;
-        if (i > 0)
-            QuickLauncher::argv_lth = envp[i-1] + strlen(envp[i-1]) - QuickLauncher::argv0[0];
-        else
-            QuickLauncher::argv_lth = QuickLauncher::argv0[argc-1] + strlen(QuickLauncher::argv0[argc-1]) - QuickLauncher::argv0[0];
-#endif
         QuickLauncher::eventLoop = new QEventLoop();
 #ifdef QUICKLAUNCHER_FORKED
         qLog(Quicklauncher) << "QuickLauncherForked running";
@@ -131,15 +127,14 @@ int MAIN_FUNC( int argc, char** argv )
         QTimeString::currentAMPM(); // create internal structures
         QIcon(":icon/new"); // do internal init
         QImageReader::supportedImageFormats(); // Load image plugins
-        QtopiaSql::openDatabase(); QtopiaSql::systemDatabase();
+        QtopiaSql::instance()->openDatabase();
+        QtopiaSql::instance()->systemDatabase();
 
-#ifdef QTOPIA_PHONE
         QSoftMenuBar::menuKey(); // read config.
-#endif
 
         // Create a widget to force initialization of title bar images, etc.
         QObject::disconnect(QuickLauncher::app, SIGNAL(lastWindowClosed()), QuickLauncher::app, SLOT(hideOrQuit()));
-#if QT_VERSION < 0x040300
+#if QT_VERSION < 0x040400
         // Avoid warning about Qt::Tool and Qt::FramelessWindowHint in Qt 4.2
         Qt::WindowFlags wFlags = Qt::WindowContextHelpButtonHint | Qt::Tool | Qt::FramelessWindowHint;
 #else
@@ -167,11 +162,11 @@ int MAIN_FUNC( int argc, char** argv )
 #endif
     }
 
-    QPerformanceLog(QuickLauncher::app->applicationName().toLatin1().constData()) << "Entering event loop";
+    QPerformanceLog(QuickLauncher::app->applicationName()) << (QPerformanceLog::Begin|QPerformanceLog::EventLoop);
     int rv = -1;
     if(QuickLauncher::app->willKeepRunning())
         QuickLauncher::app->exec();
-    QPerformanceLog(QuickLauncher::app->applicationName().toLatin1().constData()) << "Exited event loop";
+    QPerformanceLog(QuickLauncher::app->applicationName()) << (QPerformanceLog::End|QPerformanceLog::EventLoop);
 
     if ( QuickLauncher::mainWindow )
         delete (QWidget*)QuickLauncher::mainWindow;
@@ -190,7 +185,7 @@ int MAIN_FUNC( int argc, char** argv )
     delete QuickLauncher::loader;
 #endif
 
-    QPerformanceLog(appName.toLatin1().constData())  << "Exiting quicklauncher main";
+    QPerformanceLog(appName)  << QPerformanceLog::End << "quicklauncher main";
 
     return rv;
 }

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,7 @@
 
 #include "../engine.h"
 #include "../phoneinstruction.h"
+#include "ui_helperpanel.h"
 #include "phone.h"
 
 
@@ -36,6 +37,29 @@ static const int KEY_HOLD_TIME = 300;
 FormPhone::FormPhone(QWidget *parent)
     : CalcUserInterface(parent)
 {
+    setupUi(this);
+    if ( layoutDirection() == Qt::LeftToRight ) {
+        helper_dec->setText(tr("*\ndecimal"));
+        helper_cycle->setText(tr("#\n+ - x /"));
+        connect(helper_times,SIGNAL(clicked()),this,SLOT(times()));
+        connect(helper_div,SIGNAL(clicked()),this,SLOT(div()));
+    } else {
+        //the layout swaps the widgets around. However our keymapping remains the same.
+        //therefore we have to swap the labels as well.
+        helper_cycle->setText(tr("*\ndecimal"));
+        helper_dec->setText(tr("#\n+ - x /"));
+        QString tmp = helper_times->text();
+        helper_times->setText( helper_div->text() );
+        helper_div->setText( tmp );
+        connect(helper_times,SIGNAL(clicked()),this,SLOT(div()));
+        connect(helper_div,SIGNAL(clicked()),this,SLOT(times()));
+    }
+    connect(helper_dec,SIGNAL(clicked()),this,SLOT(dec()));
+    connect(helper_plus,SIGNAL(clicked()),this,SLOT(plus()));
+    connect(helper_minus,SIGNAL(clicked()),this,SLOT(minus()));
+    connect(helper_eval,SIGNAL(clicked()),this,SLOT(eval()));
+    connect(helper_cycle,SIGNAL(clicked()),this,SLOT(nextInstruction()));
+
     lastInstruction = 0;
 
     displayedState = drNone;
@@ -44,7 +68,14 @@ FormPhone::FormPhone(QWidget *parent)
 
     lockEvaluation = firstNumber = true;
     backpressed = false;
-    setFocusPolicy(Qt::TabFocus);
+    setFocusPolicy(Qt::NoFocus);
+    helper_dec->setFocusPolicy(Qt::NoFocus);
+    helper_plus->setFocusPolicy(Qt::NoFocus);
+    helper_minus->setFocusPolicy(Qt::NoFocus);
+    helper_times->setFocusPolicy(Qt::NoFocus);
+    helper_div->setFocusPolicy(Qt::NoFocus);
+    helper_eval->setFocusPolicy(Qt::NoFocus);
+    helper_cycle->setFocusPolicy(Qt::NoFocus);
 
 #if defined(QTOPIA_PHONE)
     QtopiaApplication::setInputMethodHint( this, QtopiaApplication::Number );
@@ -320,7 +351,6 @@ void FormPhone::keyPressEvent(QKeyEvent *e) {
             break;
         default:
             e->ignore();
-            //qDebug() << "Key not handled: " << e->key();
             break;
     }
 }

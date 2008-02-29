@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Arrow Pad Example</title>
+  <title>Qt 4.3: Arrow Pad Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Arrow Pad Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Arrow Pad Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="linguist-arrowpad-arrowpad-cpp.html">linguist/arrowpad/arrowpad.cpp</a></li>
@@ -39,7 +40,7 @@
      Q_OBJECT</pre>
 <p>When <tt>lupdate</tt> is run it not only extracts the source texts but it also groups them into contexts. A context is the name of the class in which the source text appears. Thus, in this example, &quot;ArrowPad&quot; is a context: it is the context of the texts in the <tt>ArrowPad</tt> class. The <tt>Q_OBJECT</tt> macro defines <tt>tr(x)</tt> in <tt>ArrowPad</tt> like this:</p>
 <pre> qApp-&gt;translate(&quot;ArrowPad&quot;, x)</pre>
-<p>Knowing which class each source text appears in enables <i>Qt Linguist</i> to group texts that are logically related together, e.g. all the text in a dialog will have the context of the dialog's class name and will be shown together. This provides useful information for the translator since the context in which text appears may influence how it should be translated. For some translations keyboard accelerators may need to be changed and having all the source texts in a particular context (class) grouped together makes it easier for the translator to perform any accelerator changes without introducing conflicts.</p>
+<p>Knowing which class each source text appears in enables <i>Qt Linguist</i> to group texts that are logically related together, e.g&#x2e; all the text in a dialog will have the context of the dialog's class name and will be shown together. This provides useful information for the translator since the context in which text appears may influence how it should be translated. For some translations keyboard accelerators may need to be changed and having all the source texts in a particular context (class) grouped together makes it easier for the translator to perform any accelerator changes without introducing conflicts.</p>
 <p>In <tt>arrowpad.cpp</tt> we implement the <tt>ArrowPad</tt> class.</p>
 <pre>     upButton = new QPushButton(tr(&quot;&amp;Up&quot;));
      downButton = new QPushButton(tr(&quot;&amp;Down&quot;));
@@ -111,13 +112,13 @@
 <p align="center"><img src="images/linguist-arrowpad_fr.png" /></p><p>Try the same with Dutch, by setting <tt>LANG=nl</tt>. Now the Dutch version should appear:</p>
 <p align="center"><img src="images/linguist-arrowpad_nl.png" /></p><a name="exercises"></a>
 <h2>Exercises</h2>
-<p>Mark one of the translations in <i>Qt Linguist</i> as not done, i.e. by unchecking the &quot;done&quot; checkbox; run <tt>lupdate</tt>, then <tt>lrelease</tt>, then the example. What effect did this change have?</p>
+<p>Mark one of the translations in <i>Qt Linguist</i> as not done, i.e&#x2e; by unchecking the &quot;done&quot; checkbox; run <tt>lupdate</tt>, then <tt>lrelease</tt>, then the example. What effect did this change have?</p>
 <p>Set <tt>LANG=fr_CA</tt> (French Canada) and run the example program again. Explain why the result is the same as with <tt>LANG=fr</tt>.</p>
 <p>Change one of the accelerators in the Dutch translation to eliminate the conflict between <i>&amp;Bestand</i> and <i>&amp;Boven</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,12 +28,13 @@
 #include <QCategoryManager>
 #include <QPalette>
 #include <QContent>
-#include <QMimeType>
 #include <QKeyEvent>
 #include <QSettings>
 #include "qpixmapwheel.h"
 #include <QTimeLine>
 #include <Qtopia>
+#include <QContentFilter>
+#include <QContentSet>
 
 WheelBrowserScreen::WheelBrowserScreen(QWidget *parent, Qt::WFlags flags)
 : QAbstractBrowserScreen(parent, flags),
@@ -54,8 +55,8 @@ WheelBrowserScreen::WheelBrowserScreen(QWidget *parent, Qt::WFlags flags)
 
     QObject::connect(m_wheel, SIGNAL(moveToCompleted()),
                      this, SLOT(moveToCompleted()));
-    QObject::connect(m_wheel, SIGNAL(itemSelected(const QString &)),
-                     this, SLOT(clicked(const QString &)));
+    QObject::connect(m_wheel, SIGNAL(itemSelected(QString)),
+                     this, SLOT(clicked(QString)));
     setFocusProxy(m_wheel);
 
     layout->addStretch(1);
@@ -79,7 +80,7 @@ WheelBrowserScreen::WheelBrowserScreen(QWidget *parent, Qt::WFlags flags)
             QContent *app = readLauncherMenuItem(entries.first());
 
             if(app) {
-                QString file = app->fileKnown() ? app->file() : QString("");
+                QString file = app->fileName();
                 QString name = app->name();
                 if(app->type().startsWith("Folder/") )
                     file = app->type();
@@ -102,6 +103,7 @@ WheelBrowserScreen::WheelBrowserScreen(QWidget *parent, Qt::WFlags flags)
 
 void WheelBrowserScreen::showEvent(QShowEvent *e)
 {
+    setEditFocus(true);
     m_views.clear();
     m_views.append("Main");
     m_wheel->moveToWheel(*m_data);
@@ -123,8 +125,7 @@ void WheelBrowserScreen::clicked(const QString &name)
         moveToView(name);
 
     } else {
-        QContentSet set(QContent::Application);
-        QContent app = set.findExecutable(name);
+        QContent app(name,false);
         app.execute();
         doHide();
     }
@@ -236,7 +237,7 @@ QPixmapWheelData WheelBrowserScreen::getData(const QString &name)
         for(int ii = 0; ii < items.count(); ++ii) {
             const QContent & app = items.at(ii);
 
-            QString file = app.file();
+            QString file = app.fileName();
             QString name = app.name();
             QPixmap pix = app.icon().pixmap(QSize(48, 48));
             if(file.isEmpty())

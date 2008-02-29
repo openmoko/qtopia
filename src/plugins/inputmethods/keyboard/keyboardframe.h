@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -71,7 +71,7 @@ class KeyboardFrame : public QFrame // was QFrame
 {
     Q_OBJECT
 public:
-    KeyboardFrame( QWidget* parent=0, Qt::WFlags f=0 );
+    explicit KeyboardFrame( QWidget* parent=0, Qt::WFlags f=0 );
     virtual ~KeyboardFrame();
 
     void resetState();
@@ -82,7 +82,7 @@ public:
     void showEvent(QShowEvent*);
     void paintEvent(QPaintEvent* e);
     void timerEvent(QTimerEvent* e);
-    void drawKeyboard(QPainter &p, int key = -1 );
+    void drawKeyboard(QPainter &p, const QRect& clip, int key = -1);
 
     void hideEvent ( QHideEvent * );
 
@@ -121,7 +121,7 @@ private slots:
     void repeat();
 
 private:
-
+    int keycode( int i2, int j, const uchar **keyboard, QRect *repaintrect );
     int getKey( int &w, int j = -1 );
     void clearHighlight();
 
@@ -133,6 +133,7 @@ private:
     uint useOptiKeys:1;
 
     int pressedKey;
+    QRect pressedKeyRect;
 
     KeyboardPicks *picks;
 

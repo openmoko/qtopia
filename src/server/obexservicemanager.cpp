@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,60 +27,80 @@
 #ifdef QTOPIA_BLUETOOTH
 #include <qbluetoothsdprecord.h>
 #include <qbluetoothabstractservice.h>
-#include <qbluetoothobexserver.h>
+#include <qbluetoothrfcommserver.h>
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothlocaldevicemanager.h>
 #include <qbluetoothnamespace.h>
-#include <qbluetoothobexsocket.h>
 #include <qbluetoothsdpquery.h>
 #include <qbluetoothremotedevicedialog.h>
+#include <qbluetoothrfcommsocket.h>
 #endif
 
 #ifdef QTOPIA_INFRARED
 #include <qirlocaldevice.h>
-#include <qirobexserver.h>
+#include <qirserver.h>
 #include <qirnamespace.h>
-#include <qirobexsocket.h>
+#include <qirremotedevice.h>
 #endif
 
 #include <qvaluespace.h>
 #include <qwaitwidget.h>
 #include <qcontent.h>
 #include <qmimetype.h>
-#include <qtopiaabstractservice.h>
 #include <qdsactionrequest.h>
 #include <qdsdata.h>
 #include <qtopialog.h>
 #include <qtopianamespace.h>
-#include <qobexsocket.h>
 #include <qtopia/pim/qcontactmodel.h>
-#include <qcommdevicesession.h>
 
 #include <QProcess>
 #include <QStringList>
 #include <QTimer>
+#include <QTemporaryFile>
 #include <QDebug>
 
 #include <unistd.h>
 #include <sys/vfs.h>
 
-#define OBEX_INCOMING_DIRECTORY (Qtopia::tempDir()+"obex/in/")
 
 class CustomPushService : public QObexPushService
 {
     Q_OBJECT
 public:
-    CustomPushService(QObexSocket *socket, QObject *parent = 0);
+    CustomPushService(QIODevice *device, QObject *parent = 0);
+    ~CustomPushService();
 
     QByteArray businessCard() const;
+    QDialog *confirmationDialog() const { return m_msgBox; }
+
+    static QString incomingDirectory();
+    static QFile *createReceivingFile(const QString &name);
+
+private slots:
+    void completedRequest();
 
 protected:
-    virtual bool acceptFile(const QString &filename, const QString &mimetype, qint64 size);
+    virtual QIODevice *acceptFile(const QString &name, const QString &mimetype, qint64 size, const QString &description);
+
+private:
+    QMessageBox *m_msgBox;
 };
 
-CustomPushService::CustomPushService(QObexSocket *socket, QObject *parent)
-    : QObexPushService(socket, parent)
+CustomPushService::CustomPushService(QIODevice *device, QObject *parent)
+    : QObexPushService(device, parent)
 {
+    QObject::connect(this, SIGNAL(requestFinished(bool)),
+                       this, SLOT(completedRequest()));
+
+    m_msgBox = new QMessageBox(0);
+    m_msgBox->setWindowTitle(tr("Accept file?"));
+    m_msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    m_msgBox->setDefaultButton(QMessageBox::No);
+}
+
+CustomPushService::~CustomPushService()
+{
+    delete m_msgBox;
 }
 
 static QString pretty_print_size(qint64 fsize)
@@ -120,54 +140,99 @@ static QString pretty_print_size(qint64 fsize)
     return size;
 }
 
-bool CustomPushService::acceptFile(const QString &filename,
-                                   const QString &mimetype,
-                                   qint64 size)
+QString CustomPushService::incomingDirectory()
+{
+    return Qtopia::tempDir() + "obex/in/";
+}
+
+QFile *CustomPushService::createReceivingFile(const QString &name)
+{
+    // Filename is not that important, as long as it's a valid filename,
+    // because it's just used to create a temporary file that will be
+    // deleted later by receivewindow.cpp.
+    QString fileName = name;
+    int sepIndex = name.lastIndexOf(QDir::separator());
+    if (sepIndex != -1)
+        fileName = fileName.mid(sepIndex + 1);
+    if (fileName.isEmpty())
+        fileName = "unnamed";
+
+    // assuming incomingDirectory() ends with a dir separator
+    QFile *file = new QFile(incomingDirectory() + fileName);
+    if (file->open(QIODevice::WriteOnly)) {
+        return file;
+    }
+
+    delete file;
+    return 0;
+}
+
+void CustomPushService::completedRequest()
+{
+    qLog(Obex) << "CustomPushService: request has finished";
+
+    QIODevice *d = currentDevice();
+    if (d) {
+        d->close();
+        d->deleteLater();
+    }
+}
+
+QIODevice *CustomPushService::acceptFile(const QString &name,
+                                         const QString &mimetype,
+                                         qint64 size,
+                                         const QString &description)
 {
     qLog(Obex) << "CustomPushService::acceptFile";
 
-    // This checks that the incoming directory is set
-    if (QObexPushService::acceptFile(filename, mimetype, size)) {
+    qint64 availableStorage;
 
-        qint64 availableStorage;
-
-        struct statfs fs;
-        if ( statfs( incomingDirectory().toLocal8Bit(), &fs ) == 0 ) {
-            availableStorage = fs.f_bavail * fs.f_bsize;
-        }
-        else {
-            qWarning("Could not stat: %s",
-                    incomingDirectory().toLocal8Bit().constData());
-            return false;
-        }
-
-        // Accept small files of 10K or less and mimetype vCard or vCalendar
-        if ( (size < 1024*10) && (size < availableStorage) ) {
-            QString mime = mimetype.toLower();
-            if (mime == "text/x-vcard")
-                return true;
-            if (mime == "text/x-vcalendar")
-                return true;
-        }
-
-        int result = QMessageBox::question(0, tr("Accept file?"),
-                                            tr("<qt>Would you like to accept file:"
-                                                " <b>%1</b> of size:"
-                                                " %2?  You have %3 of storage"
-                                                " remaining.</qt>"
-                                                ).arg(filename).
-                                                arg(pretty_print_size(size)).
-                                                    arg(pretty_print_size(availableStorage)),
-                                            QMessageBox::Yes|QMessageBox::Default,
-                                            QMessageBox::No|QMessageBox::Escape);
-        if (result == QMessageBox::Yes) {
-            return true;
-        }
-
-        return false;
+    struct statfs fs;
+    if ( statfs( incomingDirectory().toLocal8Bit(), &fs ) == 0 ) {
+        availableStorage = fs.f_bavail * fs.f_bsize;
+    }
+    else {
+        qWarning("Could not stat: %s",
+                incomingDirectory().toLocal8Bit().constData());
+        return 0;
     }
 
-    return false;
+    if (size >= availableStorage) {
+        qLog(Obex) << "No space available for incoming file, auto-rejecting file";
+        return 0;
+    }
+
+    // Accept files of mimetype vCard or vCalendar
+    QString mime = mimetype.toLower();
+    if (mime == "text/x-vcard" || mime == "text/x-vcalendar") {
+        QFile *file = createReceivingFile(name);
+        if (file)
+            file->setParent(this);
+        return file;
+    }
+
+    QString desc = ( description.isEmpty() ? name : description );
+    if (size > 0) {
+        m_msgBox->setText( tr("<qt>Accept incoming file <b>%1</b> of size %2? "
+                    "You have %3 of storage remaining.</qt>", "%1=name %2=3Kb %3=3MB"
+                            ).arg(desc).
+                              arg(pretty_print_size(size)).
+                              arg(pretty_print_size(availableStorage)) );
+    } else {
+        m_msgBox->setText( tr("<qt>Accept incoming file <b>%1</b>? "
+                    "You have %2 of storage remaining.</qt>", "%1=name %2=3MB"
+                            ).arg(desc).
+                              arg(pretty_print_size(availableStorage)) );
+    }
+
+    if (m_msgBox->exec() == QMessageBox::Yes) {
+        QFile *file = createReceivingFile(name);
+        if (file)
+            file->setParent(this);
+        return file;
+    }
+
+    return 0;
 }
 
 QByteArray CustomPushService::businessCard() const
@@ -186,53 +251,6 @@ QByteArray CustomPushService::businessCard() const
 }
 
 #ifdef QTOPIA_INFRARED
-class InfraredBeamingService : public QtopiaAbstractService
-{
-    Q_OBJECT
-
-public:
-    InfraredBeamingService(ObexServiceManager *parent);
-    ~InfraredBeamingService();
-
-public slots:
-    void beamPersonalBusinessCard();
-    void beamBusinessCard(const QContact &contact);
-    void beamBusinessCard(const QDSActionRequest &request);
-
-    void beamFile(const QString &filename, const QString &mimetype, bool autodelete);
-    void beamFile(const QContentId &id);
-
-    void beamCalendar(const QDSActionRequest &request);
-
-private slots:
-    void doneBeamingVObj(bool error);
-    void doneBeamingFile(bool error);
-
-    void sessionOpen();
-    void sessionFailed();
-
-private:
-    void startBeamingFile(const QString &filename, const QString &mimetype, const QString &displayName,
-                          bool autodelete);
-    void startBeamingVObj(const QByteArray &data, const QString &mimetype);
-
-    bool m_busy;
-    ObexServiceManager *m_parent;
-    QWaitWidget *m_waitWidget;
-    QFile *m_file;
-    QDSActionRequest *m_current;
-    bool m_autodelete;
-    QString m_filename;
-    QString m_mimetype;
-    QString m_prettyFile;
-    QCommDeviceSession *m_session;
-    QByteArray m_deviceName;
-
-    enum Type {VObject, File};
-    Type m_type;
-    QByteArray m_vobj;
-};
-
 /*!
     \service InfraredBeamingService InfraredBeaming
     \brief Provides the Qtopia InfraredBeaming service.
@@ -254,6 +272,7 @@ InfraredBeamingService::InfraredBeamingService(ObexServiceManager *parent)
 {
     QStringList irDevices = QIrLocalDevice::devices();
     m_deviceName = irDevices[0].toLatin1();
+    m_device = new QIrLocalDevice(m_deviceName);
 
     m_parent = parent;
     m_busy = false;
@@ -262,8 +281,12 @@ InfraredBeamingService::InfraredBeamingService(ObexServiceManager *parent)
     m_current = 0;
 
     m_session = 0;
+    m_socket = 0;
 
     publishAll();
+
+    connect(m_device, SIGNAL(remoteDevicesFound(QList<QIrRemoteDevice>)),
+            this, SLOT(remoteDevicesFound(QList<QIrRemoteDevice>)));
 }
 
 /*!
@@ -281,6 +304,8 @@ InfraredBeamingService::~InfraredBeamingService()
  */
 void InfraredBeamingService::sessionFailed()
 {
+    QTimer::singleShot(0, m_session, SLOT(deleteLater()));  // try a new session next time
+
     if (m_type == VObject) {
         m_waitWidget->setText(tr( "<P>There was an error using the local infrared device."));
         m_waitWidget->setCancelEnabled(true);
@@ -299,45 +324,95 @@ void InfraredBeamingService::sessionFailed()
  */
 void InfraredBeamingService::sessionOpen()
 {
-    QIrObexSocket *socket = new QIrObexSocket("OBEX");
-    bool conn = socket->connect();
-    if (!conn) {
-        m_session->endSession();
-        if (m_type == VObject) {
-            m_waitWidget->setText(tr( "<P>Could not connect to the remote device.  Please make sure that the Infrared ports are aligned and the device's Infrared capabilities are turned on."));
-            m_waitWidget->setCancelEnabled(true);
-            QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
-        }
-        else {
-            QMessageBox::warning( 0, tr( "Beam File" ),
-                              tr( "<P>Could not connect to the remote device.  Please make sure that the Infrared ports are aligned and the device's Infrared capabilities are turned on." ));
-        }
+    bool ret = m_device->discoverRemoteDevices(QIr::OBEX);
 
-        m_busy = false;
-        return;
+    // This should never happen in practice if we havean open session
+    if (!ret) {
+        sessionFailed();
+        m_session->endSession();
+    }
+}
+
+void InfraredBeamingService::remoteDevicesFound(const QList<QIrRemoteDevice> &devices)
+{
+    if (devices.size() == 0) {
+        handleConnectionFailed();
     }
 
-    QObexPushClient *client = new QObexPushClient(socket, this);
-    connect(client, SIGNAL(done(bool)), client, SLOT(deleteLater()));
-    connect(client, SIGNAL(destroyed()), socket, SLOT(deleteLater()));
+    // Now make an Infrared Connection to the remote host
+    m_socket = new QIrSocket(this);
+    QObject::connect(m_socket, SIGNAL(connected()), this, SLOT(socketConnected()));
+    QObject::connect(m_socket, SIGNAL(error(QIrSocket::SocketError)),
+                     this, SLOT(handleConnectionFailed()));
+    // Pick the first available device for now
+    m_socket->connect("OBEX", devices[0].address());
+}
+
+void InfraredBeamingService::handleConnectionFailed()
+{
+    if (!m_socket)
+        return;
+
+    m_session->endSession();
+    m_waitWidget->setText(tr( "<P>Could not connect to the remote device.  Please make sure that the Infrared ports are aligned and the device's Infrared capabilities are turned on."));
+
+    m_waitWidget->setCancelEnabled(true);
+    QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
+    m_busy = false;
+
+    delete m_socket;
+    m_socket = 0;
+}
+
+void InfraredBeamingService::socketConnected()
+{
+    m_pushFailed = false;
+    QObexPushClient *pushClient = new QObexPushClient(m_socket, this);
+    connect(pushClient, SIGNAL(done(bool)), pushClient, SLOT(deleteLater()));
+    connect(pushClient, SIGNAL(commandFinished(int,bool)), this,
+            SLOT(pushCommandFinished(int,bool)));
+    disconnect(m_socket, SIGNAL(error(QIrSocket::SocketError)),
+               this, SLOT(handleConnectionFailed()));
+    connect(m_socket, SIGNAL(error(QIrSocket::SocketError)),
+            this, SLOT(socketError(QIrSocket::SocketError)));
 
     if (m_type == File) {
-        QObject::connect(client, SIGNAL(done(bool)), this, SLOT(doneBeamingFile(bool)));
-        m_parent->setupConnection(client, m_filename, m_mimetype);
+        m_waitWidget->hide();
+        QObject::connect(pushClient, SIGNAL(done(bool)), this, SLOT(doneBeamingFile(bool)));
+        m_parent->setupConnection(pushClient, m_filename, m_mimetype);
     }
     else {
-        QObject::connect(client, SIGNAL(done(bool)), this, SLOT(doneBeamingVObj(bool)));
+        QObject::connect(pushClient, SIGNAL(done(bool)), this, SLOT(doneBeamingVObj(bool)));
         m_waitWidget->setText("Sending...");
     }
 
-    client->connect();
+    pushClient->connect();
     if (m_file) {
-        client->send(m_file, m_prettyFile, m_mimetype);
+        pushClient->send(m_file, m_prettyFile, m_mimetype, m_description);
     }
     else {
-        client->send(m_vobj, m_filename, m_mimetype);
+        pushClient->send(m_vobj, m_filename, m_mimetype, m_description);
     }
-    client->disconnect();
+    pushClient->disconnect();
+}
+
+void InfraredBeamingService::socketError(QIrSocket::SocketError error)
+{
+    qLog(Infrared) << "InfraredBeamingService::ConnectionFailed with error: " << error;
+}
+
+/*!
+    \internal
+ */
+void InfraredBeamingService::pushCommandFinished(int id, bool error)
+{
+    QObexPushClient *pushClient = qobject_cast<QObexPushClient *>(sender());
+    if (!pushClient)
+        return;
+    
+    // don't worry about disconnect errors
+    if (error && pushClient->currentCommand() != QObexPushClient::Disconnect)
+        m_pushFailed = true;
 }
 
 /*!
@@ -345,13 +420,17 @@ void InfraredBeamingService::sessionOpen()
  */
 void InfraredBeamingService::startBeamingVObj(const QByteArray &data, const QString &mimetype)
 {
+    QMessageBox::information( 0, tr( "Beam File" ),
+                              tr( "<P>Please align the infrared receivers and hit OK once ready." ));
+
     m_waitWidget->setText("Connecting...");
     m_waitWidget->setCancelEnabled(false);
     m_waitWidget->show();
 
     m_mimetype = mimetype;
+    m_description = QString();
     if (m_mimetype == "text/x-vcard") {
-        m_filename = "MyBusinessCard.vcf";
+        m_filename = "BusinessCard.vcf";
         m_prettyFile = m_filename;
     }
     else if (m_mimetype == "text/x-vcalendar") {
@@ -378,9 +457,10 @@ void InfraredBeamingService::startBeamingVObj(const QByteArray &data, const QStr
  */
 void InfraredBeamingService::doneBeamingVObj(bool error)
 {
+    Q_UNUSED(error);
     m_busy = false;
 
-    if (error) {
+    if (m_pushFailed) {
         if (m_current) {
             m_current->respond(tr("Transmission error"));
             delete m_current;
@@ -410,6 +490,7 @@ void InfraredBeamingService::doneBeamingVObj(bool error)
 void InfraredBeamingService::startBeamingFile(const QString &filename,
                                               const QString &mimetype,
                                               const QString &displayName,
+                                              const QString &description,
                                               bool autodelete)
 {
     m_file = new QFile(filename);
@@ -422,13 +503,21 @@ void InfraredBeamingService::startBeamingFile(const QString &filename,
         return;
     }
 
+    QMessageBox::information( 0, tr( "Beam File" ),
+                            tr( "<P>Please align the infrared receivers and hit OK once ready." ));
+
     m_type = File;
     m_filename = filename;
     m_mimetype = mimetype;
     m_prettyFile = displayName;
+    m_description = description;
     m_autodelete = autodelete;
 
     m_busy = true;
+
+    m_waitWidget->setText("Connecting...");
+    m_waitWidget->setCancelEnabled(false);
+    m_waitWidget->show();
 
     if (!m_session) {
         qLog(Infrared) << "Lazy initializing a QCommDeviceSession object";
@@ -446,13 +535,12 @@ void InfraredBeamingService::startBeamingFile(const QString &filename,
 void InfraredBeamingService::doneBeamingFile(bool error)
 {
     Q_UNUSED(error);
+    qLog(Infrared) << "InfraredBeamingService::doneBeamingFile()" << error;
 
     m_session->endSession();
     m_busy = false;
     delete m_file;
     m_file = 0;
-
-    m_session->endSession();
 
     if (m_autodelete)
         ::unlink(m_filename.toLocal8Bit());
@@ -540,10 +628,12 @@ void InfraredBeamingService::beamCalendar(const QDSActionRequest &request)
     Asks the service to beam \a filename to the remote device.  Mimetype
     of the file is given by \a mimetype.  The \a autodelete parameter
     specifies whether the service should delete the file after it has performed
-    the operation.
+    the operation.  The \a description parameter holds the optional
+    description of the file.
 */
 void InfraredBeamingService::beamFile(const QString &filename,
                                       const QString &mimetype,
+                                      const QString &description,
                                       bool autodelete)
 {
     if (m_busy)
@@ -554,7 +644,7 @@ void InfraredBeamingService::beamFile(const QString &filename,
     if ( pos != -1 )
         display = filename.mid( pos + 1 );
 
-    startBeamingFile(filename, mimetype, display, autodelete);
+    startBeamingFile(filename, mimetype, display, description, autodelete);
 }
 
 /*!
@@ -569,74 +659,16 @@ void InfraredBeamingService::beamFile(const QContentId &id)
 
     QContent content(id);
     QMimeType mime(content);
+    QString display = content.fileName();
+    int pos = content.fileName().lastIndexOf("/");
+    if ( pos != -1 )
+        display = content.fileName().mid( pos + 1 );
 
-    startBeamingFile(content.file(), mime.id(), content.name(), false);
+    startBeamingFile(content.fileName(), mime.id(), display, content.name(), false);
 }
 #endif
 
 #ifdef QTOPIA_BLUETOOTH
-struct BluetoothPushRequest
-{
-    enum Type { File, Data };
-
-    Type m_type;
-    QByteArray m_vobj;
-    QBluetoothAddress m_addr;
-    QString m_mimetype;
-    QString m_filename;
-    QString m_prettyFile;
-    bool m_autodelete;
-};
-
-class BluetoothPushingService : public QtopiaAbstractService
-{
-    Q_OBJECT
-
-public:
-    BluetoothPushingService(ObexServiceManager *parent);
-    ~BluetoothPushingService();
-
-public slots:
-    void pushPersonalBusinessCard();
-    void pushPersonalBusinessCard(const QBluetoothAddress &addr);
-
-    void pushBusinessCard(const QContact &contact);
-    void pushBusinessCard(const QDSActionRequest& request);
-
-    void pushCalendar(const QDSActionRequest &request);
-
-    void pushFile(const QString &filename, const QString &mimetype, bool autodelete);
-    void pushFile(const QContentId &id);
-    void pushFile(const QBluetoothAddress &addr, const QContentId &id);
-
-private slots:
-    void sdapQueryComplete(const QBluetoothSdpQueryResult &result);
-    void donePushingVObj(bool error);
-    void donePushingFile(bool error);
-
-    void sessionOpen();
-    void sessionFailed();
-
-private:
-    void startPushingVObj(const QBluetoothAddress &addr,
-                          const QString &mimetype);
-    bool getPersonalVCard(QByteArray &arr);
-
-    void startPushingFile();
-
-    void startSession();
-
-    ObexServiceManager *m_parent;
-    bool m_busy;
-    QWaitWidget *m_waitWidget;
-    QBluetoothSdpQuery *m_sdap;
-
-    QDSActionRequest *m_current;
-    QIODevice *m_device;
-    BluetoothPushRequest m_req;
-    QCommDeviceSession *m_session;
-};
-
 /*!
     \service BluetoothPushingService BluetoothPush
     \brief Provides the Qtopia BluetoothPush service.
@@ -660,13 +692,14 @@ BluetoothPushingService::BluetoothPushingService(ObexServiceManager *parent)
     m_waitWidget = new QWaitWidget(0);
 
     m_sdap = new QBluetoothSdpQuery();
-    QObject::connect(m_sdap, SIGNAL(searchComplete(const QBluetoothSdpQueryResult)),
-                     this, SLOT(sdapQueryComplete(const QBluetoothSdpQueryResult &)));
+    QObject::connect(m_sdap, SIGNAL(searchComplete(QBluetoothSdpQueryResult)),
+                     this, SLOT(sdapQueryComplete(QBluetoothSdpQueryResult)));
 
     m_device = 0;
     m_current = 0;
 
     m_session = 0;
+    m_socket = 0;
 
     publishAll();
 }
@@ -678,6 +711,7 @@ BluetoothPushingService::~BluetoothPushingService()
 {
     delete m_waitWidget;
     delete m_sdap;
+    delete m_session;
 }
 
 /*!
@@ -712,8 +746,37 @@ void BluetoothPushingService::sessionOpen()
 void BluetoothPushingService::sessionFailed()
 {
     m_busy = false;
+    QTimer::singleShot(0, m_session, SLOT(deleteLater()));  // try a new session next time
+
     QMessageBox::warning( 0, tr( "Bluetooth" ),
                           tr( "<P>There is a problem with the Bluetooth device!" ));
+}
+
+/*!
+    \internal
+*/
+// Called when BT device session has closed.
+// This may be called as a result of the session being closed from
+// donePushingVObj() or donePushinFile(), or as a result of the session being
+// closed from elsewhere, e.g. if Bluetooth is turned off in Bluetooth
+// settings.
+void BluetoothPushingService::sessionClosed()
+{
+    qLog(Bluetooth) << "BluetoothPushingService: session closed";
+
+    m_busy = false;
+
+    if (m_socket) {
+        if (m_socket->state() == QBluetoothAbstractSocket::ConnectedState) {
+            // if push client is still running, it will stop and emit done() when
+            // its transport is disconnected
+            connect(m_socket, SIGNAL(disconnected()), m_socket, SLOT(deleteLater()));
+            m_socket->disconnect();
+        } else {
+            delete m_socket;
+            m_socket = 0;
+        }
+    }
 }
 
 /*!
@@ -727,6 +790,7 @@ void BluetoothPushingService::startSession()
         m_session = new QCommDeviceSession(local.deviceName().toLatin1(), this);
         QObject::connect(m_session, SIGNAL(sessionOpen()), this, SLOT(sessionOpen()));
         QObject::connect(m_session, SIGNAL(sessionFailed()), this, SLOT(sessionFailed()));
+        QObject::connect(m_session, SIGNAL(sessionClosed()), this, SLOT(sessionClosed()));
     }
 
     m_session->startSession();
@@ -760,44 +824,83 @@ void BluetoothPushingService::sdapQueryComplete(const QBluetoothSdpQueryResult &
         return;
     }
 
-    QBluetoothObexSocket *socket =
-            new QBluetoothObexSocket( m_req.m_addr, channel, QBluetoothAddress::any);
+    // Now make a RFCOMM Connection to the remote host
+    m_socket = new QBluetoothRfcommSocket(this);
+    QObject::connect(m_socket, SIGNAL(connected()), this, SLOT(rfcommConnected()));
+    QObject::connect(m_socket, SIGNAL(error(QBluetoothAbstractSocket::SocketError)),
+                     this, SLOT(handleConnectionFailed()));
+    m_socket->connect(QBluetoothAddress::any, m_req.m_addr, channel);
+}
 
-    bool conn = socket->connect();
+void BluetoothPushingService::handleConnectionFailed()
+{
+    m_busy = false;
+    qLog(Bluetooth) << "BluetoothPushingService: ending session";
+    m_session->endSession();
 
-    if (!conn) {
-        m_busy = false;
-        qLog(Bluetooth) << "BluetoothPushingService: ending session";
-        m_session->endSession();
+    m_waitWidget->setText("<P>Could not connect to the selected bluetooth device.  Please make sure that the device is turned on and within range.");
+    m_waitWidget->setCancelEnabled(true);
+    QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
 
-        m_waitWidget->setText("<P>Could not connect to the selected bluetooth device.  Please make sure that the device is turned on and within range.");
-        m_waitWidget->setCancelEnabled(true);
-        QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
-        return;
-    }
+    delete m_socket;
+    m_socket = 0;
+}
 
-    QObexPushClient *client = new QObexPushClient(socket, this);
-    connect(client, SIGNAL(done(bool)), client, SLOT(deleteLater()));
-    connect(client, SIGNAL(destroyed()), socket, SLOT(deleteLater()));
+void BluetoothPushingService::rfcommConnected()
+{
+    m_pushFailed = false;
+    QObexPushClient *pushClient = new QObexPushClient(m_socket, this);
+    connect(pushClient, SIGNAL(done(bool)), pushClient, SLOT(deleteLater()));
+    connect(pushClient, SIGNAL(commandFinished(int,bool)),
+            this, SLOT(pushCommandFinished(int,bool)));
+    disconnect(m_socket, SIGNAL(error(QBluetoothAbstractSocket::SocketError)),
+               this, SLOT(handleConnectionFailed()));
+    connect(m_socket, SIGNAL(error(QBluetoothAbstractSocket::SocketError)),
+            this, SLOT(rfcommError(QBluetoothAbstractSocket::SocketError)));
 
     if ((m_req.m_mimetype == "text/x-vcard") || (m_req.m_mimetype == "text/x-vcalendar")) {
-        QObject::connect(client, SIGNAL(done(bool)), this, SLOT(donePushingVObj(bool)));
+        QObject::connect(pushClient, SIGNAL(done(bool)), this, SLOT(donePushingVObj(bool)));
         m_waitWidget->setText("Sending...");
     }
     else {
         m_waitWidget->hide();
-        QObject::connect(client, SIGNAL(done(bool)), this, SLOT(donePushingFile(bool)));
-        m_parent->setupConnection(client, m_req.m_filename, m_req.m_mimetype);
+        QObject::connect(pushClient, SIGNAL(done(bool)), this, SLOT(donePushingFile(bool)));
+        m_parent->setupConnection(pushClient, m_req.m_filename, m_req.m_mimetype);
     }
 
-    client->connect();
+    pushClient->connect();
     if (m_device) {
-        client->send(m_device, m_req.m_prettyFile, m_req.m_mimetype);
+        qLog(Bluetooth) << "BluetoothPushingService: sending file" << m_req.m_description;
+        pushClient->send(m_device, m_req.m_prettyFile, m_req.m_mimetype, m_req.m_description);
     }
     else {
-        client->send(m_req.m_vobj, m_req.m_filename, m_req.m_mimetype);
+        qLog(Bluetooth) << "BluetoothPushingService: sending v-obj" << m_req.m_description;
+        pushClient->send(m_req.m_vobj, m_req.m_filename, m_req.m_mimetype, m_req.m_description);
     }
-    client->disconnect();
+    pushClient->disconnect();
+
+}
+
+void BluetoothPushingService::rfcommError(QBluetoothAbstractSocket::SocketError error)
+{
+    qLog(Bluetooth) << "BluetoothPushingService::ConnectionFailed with error: " << error;
+}
+
+/*!
+    \internal
+ */
+void BluetoothPushingService::pushCommandFinished(int id, bool error)
+{
+    QObexPushClient *pushClient = qobject_cast<QObexPushClient *>(sender());
+    if (!pushClient)
+        return;
+    
+    qLog(Bluetooth) << "BT Push client finished request" << id << "with error:" << pushClient->error()
+        << "and response:" << pushClient->lastCommandResponse();
+
+    // don't worry about disconnect errors
+    if (error && pushClient->currentCommand() != QObexPushClient::Disconnect)
+        m_pushFailed = true;
 }
 
 /*!
@@ -807,12 +910,14 @@ void BluetoothPushingService::startPushingVObj(const QBluetoothAddress &addr,
                                                const QString &mimetype)
 {
     if (mimetype == "text/x-vcard") {
-        m_req.m_filename = "MyBusinessCard.vcf";
+        m_req.m_filename = "BusinessCard.vcf";
         m_req.m_prettyFile = m_req.m_filename;
+        m_req.m_description = QString();
     }
     else {
         m_req.m_filename = "vcal.vcs";
         m_req.m_prettyFile = m_req.m_filename;
+        m_req.m_description = QString();
     }
 
     QBluetoothLocalDevice localDev;
@@ -828,9 +933,10 @@ void BluetoothPushingService::startPushingVObj(const QBluetoothAddress &addr,
  */
 void BluetoothPushingService::donePushingVObj(bool error)
 {
+    Q_UNUSED(error);
     m_busy = false;
 
-    if (error) {
+    if (m_pushFailed) {
         // Respond to the request
         if (m_current) {
             m_current->respond(tr("Error during transmission"));
@@ -841,6 +947,7 @@ void BluetoothPushingService::donePushingVObj(bool error)
         m_waitWidget->setText(tr( "<P>An error has occurred during transmission.  Please ensure that the selected Bluetooth device is kept on and in range.") );
         QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
         m_waitWidget->setCancelEnabled(true);
+        m_session->endSession();
         return;
     }
 
@@ -855,8 +962,6 @@ void BluetoothPushingService::donePushingVObj(bool error)
     }
 
     m_session->endSession();
-    delete m_session;
-    m_session = 0;
 }
 
 /*!
@@ -889,6 +994,7 @@ void BluetoothPushingService::startPushingFile()
 void BluetoothPushingService::donePushingFile(bool error)
 {
     Q_UNUSED(error);
+    qLog(Bluetooth) << "BluetoothPushingService::donePushingFile()" << error;
 
     m_busy = false;
     delete m_device;
@@ -898,8 +1004,6 @@ void BluetoothPushingService::donePushingFile(bool error)
         ::unlink(m_req.m_filename.toLocal8Bit());
 
     m_session->endSession();
-    delete m_session;
-    m_session = 0;
 }
 
 /*!
@@ -1047,6 +1151,8 @@ void BluetoothPushingService::pushCalendar(const QDSActionRequest &request)
     if (m_busy)
         return;
 
+    qLog(Bluetooth) << "BluetoothPushingService::pushCalendar()";
+
     QByteArray arr = request.requestData().data();
 
     m_req.m_type = BluetoothPushRequest::Data;
@@ -1065,14 +1171,19 @@ void BluetoothPushingService::pushCalendar(const QDSActionRequest &request)
     Asks the service to send \a filename to the remote device.  Mimetype
     of the file is given by \a mimetype.  The \a autodelete parameter
     specifies whether the service should delete the file after it has performed
-    the operation.
+    the operation.  The \a description parameter holds the optional
+    description of the file.
  */
 void BluetoothPushingService::pushFile(const QString &filename,
                                        const QString &mimetype,
+                                       const QString &description,
                                        bool autodelete)
 {
     if (m_busy)
         return;
+
+    qLog(Bluetooth) << "BluetoothPushingService::pushFile()" << filename
+            << mimetype << description << autodelete;
 
     m_req.m_type = BluetoothPushRequest::File;
     m_req.m_addr = QBluetoothAddress();
@@ -1084,6 +1195,8 @@ void BluetoothPushingService::pushFile(const QString &filename,
     int pos = filename.lastIndexOf( "/" );
     if ( pos != -1 )
         m_req.m_prettyFile = filename.mid( pos + 1 );
+
+    m_req.m_description = description;
 
     m_busy = true;
     startSession();
@@ -1099,15 +1212,21 @@ void BluetoothPushingService::pushFile(const QContentId &id)
     if (m_busy)
         return;
 
+    qLog(Bluetooth) << "BluetoothPushingService::pushFile() (QContent)" << id;
+
     QContent content(id);
     QMimeType mime(content);
 
     m_req.m_type = BluetoothPushRequest::File;
     m_req.m_addr = QBluetoothAddress();
-    m_req.m_filename = content.file();
+    m_req.m_filename = content.fileName();
     m_req.m_mimetype = mime.id();
     m_req.m_autodelete = false;
-    m_req.m_prettyFile = content.name();
+    m_req.m_prettyFile = content.fileName();
+    int pos = m_req.m_prettyFile.lastIndexOf( "/" );
+    if ( pos != -1 )
+        m_req.m_prettyFile = m_req.m_prettyFile.mid( pos + 1 );
+    m_req.m_description = content.name();
 
     m_busy = true;
     startSession();
@@ -1126,15 +1245,19 @@ void BluetoothPushingService::pushFile(const QBluetoothAddress &addr, const QCon
     if (m_busy)
         return;
 
+    qLog(Bluetooth) << "BluetoothPushingService::pushFile() (QBluetoothAddress,QContent)"
+            << addr.toString() << id;
+
     QContent content(id);
     QMimeType mime(content);
 
     m_req.m_type = BluetoothPushRequest::File;
     m_req.m_addr = addr;
-    m_req.m_filename = content.file();
+    m_req.m_filename = content.fileName();
     m_req.m_mimetype = mime.id();
     m_req.m_autodelete = false;
     m_req.m_prettyFile = content.name();
+    m_req.m_description = content.name();
 
     m_busy = true;
     startSession();
@@ -1156,24 +1279,28 @@ public:
 
 private slots:
     void newOPushConnection();
+    void pushServiceDone();
+    void rfcommSocketDisconnected();
     void sessionEnded();
+    void btDeviceSessionClosed();
 
 private:
     void close();
 
     ObexServiceManager *m_parent;
-    QBluetoothObexServer *m_opush;
+    QBluetoothRfcommServer *m_rfcommServer;
     QBluetooth::SecurityOptions m_securityOptions;
     QBluetoothLocalDevice *m_local;
     int m_numBtSessions;
     QCommDeviceSession *m_btDeviceSession;
     quint32 m_sdpRecordHandle;
+    QHash<QBluetoothRfcommSocket*, CustomPushService*> m_activeSockets;
 };
 
 ObexPushServiceProvider::ObexPushServiceProvider(ObexServiceManager *parent)
-    : QBluetoothAbstractService("ObexObjectPush", tr("OBEX Object Push Service"), parent),
+    : QBluetoothAbstractService("ObexObjectPush", tr("OBEX Object Push"), parent),
       m_parent(parent),
-      m_opush(0),
+      m_rfcommServer(0),
       m_securityOptions(0),
       m_local(new QBluetoothLocalDevice(this)),
       m_numBtSessions(0),
@@ -1191,10 +1318,10 @@ void ObexPushServiceProvider::close()
 {
     qLog(Bluetooth) << "ObexPushServiceProvider close";
 
-    if (m_opush) {
-        m_opush->close();
-        delete m_opush;
-        m_opush = 0;
+    if (m_rfcommServer) {
+        m_rfcommServer->close();
+        delete m_rfcommServer;
+        m_rfcommServer = 0;
     }
 
     delete m_btDeviceSession;
@@ -1204,7 +1331,7 @@ void ObexPushServiceProvider::close()
 void ObexPushServiceProvider::start()
 {
     qLog(Bluetooth) << "ObexPushServiceProvider start";
-    if (m_opush)
+    if (m_rfcommServer)
         close();
 
     if (!m_local->isValid()) {
@@ -1227,47 +1354,89 @@ void ObexPushServiceProvider::start()
     // the one in the XML file passed in the registerRecord() call above
     int channel = 9;
 
-    m_opush = new QBluetoothObexServer(channel, m_local->address(), this);
-    connect(m_opush, SIGNAL(newConnection()),
+    m_rfcommServer = new QBluetoothRfcommServer(this);
+    connect(m_rfcommServer, SIGNAL(newConnection()),
             this, SLOT(newOPushConnection()));
 
-    if (!m_opush->listen()) {
+    if (!m_rfcommServer->listen(m_local->address(), channel)) {
         unregisterRecord(m_sdpRecordHandle);
         close();
         emit started(true,
                    tr("Error listening on OBEX Push Server"));
         return;
     }
-
-    m_opush->setSecurityOptions(m_securityOptions);
-
+    m_rfcommServer->setSecurityOptions(m_securityOptions);
     emit started(false, QString());
 
     if (!m_btDeviceSession) {
         QBluetoothLocalDevice dev;
         m_btDeviceSession = new QCommDeviceSession(dev.deviceName().toLatin1());
+        connect(m_btDeviceSession, SIGNAL(sessionClosed()),
+                SLOT(btDeviceSessionClosed()));
     }
 }
 
 void ObexPushServiceProvider::newOPushConnection()
 {
-    if (!m_opush->hasPendingConnections())
+    QBluetoothRfcommSocket *rfcommSocket = qobject_cast<QBluetoothRfcommSocket*>(
+            m_rfcommServer->nextPendingConnection());
+    if (!rfcommSocket)
         return;
 
-    QObexSocket *socket = m_opush->nextPendingConnection();
-    CustomPushService *opush = new CustomPushService(socket);
+    CustomPushService *opush = new CustomPushService(rfcommSocket, this);
     m_parent->setupConnection(opush);
+    rfcommSocket->setParent(opush);
 
-    // delete socket once the service is gone
-    connect(opush, SIGNAL(destroyed(QObject *)), socket, SLOT(deleteLater()));
+    m_activeSockets.insert(rfcommSocket, opush);
 
-    connect(opush, SIGNAL(destroyed(QObject *)), this, SLOT(sessionEnded()));
+    // if transport is disconnected, the push service will emit done()
+    connect(opush, SIGNAL(done(bool)), this, SLOT(pushServiceDone()));
+    connect(rfcommSocket, SIGNAL(disconnected()), this, SLOT(rfcommSocketDisconnected()));
+    connect(rfcommSocket, SIGNAL(destroyed(QObject*)), this, SLOT(sessionEnded()));
 
     m_numBtSessions++;
 
     if (m_numBtSessions == 1) { // First session
         qLog(Bluetooth) << "ObexPushServiceProvider starting BT Session";
         m_btDeviceSession->startSession();
+    }
+}
+
+void ObexPushServiceProvider::rfcommSocketDisconnected()
+{
+    qLog(Bluetooth) << "ObexPushServiceProvider: RFCOMM socket has been disconnected";
+
+    QBluetoothRfcommSocket *rfcomm =
+            qobject_cast<QBluetoothRfcommSocket*>(sender());
+
+
+    if (rfcomm && m_activeSockets.contains(rfcomm)) {
+        CustomPushService *service = m_activeSockets[rfcomm];
+        m_activeSockets.remove(rfcomm);
+
+        // might be disconnected while the "Accept file?" dialog is
+        // showing
+        if (service->confirmationDialog()->isVisible()) {
+            service->confirmationDialog()->reject();
+        }
+
+        // delete the rfcomm & obex sockets and also the push service
+        QTimer::singleShot(0, service, SLOT(deleteLater()));
+    }
+}
+
+void ObexPushServiceProvider::pushServiceDone()
+{
+    QObject *s = sender();
+    CustomPushService *opush = qobject_cast<CustomPushService *>(s);
+    if (!opush)
+        return;
+
+    QBluetoothRfcommSocket *rfcomm =
+            qobject_cast<QBluetoothRfcommSocket*>(opush->sessionDevice());
+    if (rfcomm) {
+        qLog(Bluetooth) << "Disconnecting RFCOMM socket for Obex Push session...";
+        rfcomm->disconnect();
     }
 }
 
@@ -1283,11 +1452,23 @@ void ObexPushServiceProvider::sessionEnded()
     }
 }
 
+// Called when BT device session has closed.
+// This may be called as a result of the session being closed in sessionEnded(),
+// or as a result of the session being closed from elsewhere, e.g. if Bluetooth
+// is turned off in Bluetooth settings.
+void ObexPushServiceProvider::btDeviceSessionClosed()
+{
+    QListIterator<QBluetoothRfcommSocket*> i(m_activeSockets.keys());
+    while (i.hasNext()) {
+        i.next()->disconnect();
+    }
+}
+
 void ObexPushServiceProvider::stop()
 {
     qLog(Bluetooth) << "ObexPushServiceProvider stop";
 
-    if (m_opush && m_opush->isListening())
+    if (m_rfcommServer && m_rfcommServer->isListening())
         close();
 
     if (!unregisterRecord(m_sdpRecordHandle))
@@ -1299,8 +1480,8 @@ void ObexPushServiceProvider::stop()
 void ObexPushServiceProvider::setSecurityOptions(QBluetooth::SecurityOptions options)
 {
     m_securityOptions = options;
-    if (m_opush && m_opush->isListening())
-        m_opush->setSecurityOptions(options);
+    if (m_rfcommServer && m_rfcommServer->isListening())
+        m_rfcommServer->setSecurityOptions(options);
 }
 
 #endif
@@ -1315,6 +1496,8 @@ void ObexPushServiceProvider::setSecurityOptions(QBluetooth::SecurityOptions opt
     service and the Infrared IrXfer server.  It also provides a common
     infrastructure for these services, including user notification of
     files transferred and received.
+    
+    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   */
 
 /*!
@@ -1334,8 +1517,8 @@ ObexServiceManager::ObexServiceManager(QObject *parent) : QObject(parent)
     //just blow it all away and recreate the dir
     // Note that any files the user has not accepted from his incoming directory
     // (using the receive window widget) will be gone forever
-    QProcess::execute("rm", QStringList() << "-rf" << OBEX_INCOMING_DIRECTORY);
-    QProcess::execute("mkdir", QStringList() << "-p" << "-m" << "0755" << OBEX_INCOMING_DIRECTORY);
+    QProcess::execute("rm", QStringList() << "-rf" << CustomPushService::incomingDirectory());
+    QProcess::execute("mkdir", QStringList() << "-p" << "-m" << "0755" << CustomPushService::incomingDirectory());
 
 #ifdef QTOPIA_BLUETOOTH
     new ObexPushServiceProvider(this);
@@ -1346,9 +1529,9 @@ ObexServiceManager::ObexServiceManager(QObject *parent) : QObject(parent)
     qLog(Infrared) << "Got Infrared devices:" << irDevices;
 
     if (irDevices.size() > 0) {
-        m_irxfer = new QIrObexServer("OBEX:IrXfer", QIr::OBEX | QIr::Telephony, this);
+        m_irxfer = new QIrServer(this);
+        m_irxfer->listen("OBEX:IrXfer", QIr::OBEX | QIr::Telephony);
         connect(m_irxfer, SIGNAL(newConnection()), SLOT(newIrxferConnection()));
-        m_irxfer->listen();
 
         //TODO: Register other IR services here
         m_irSession = new QCommDeviceSession(irDevices[0].toLatin1());
@@ -1383,16 +1566,13 @@ ObexServiceManager::~ObexServiceManager()
 */
 void ObexServiceManager::setupConnection(QObexPushService *opush)
 {
-    opush->setIncomingDirectory(OBEX_INCOMING_DIRECTORY);
-    connect(opush, SIGNAL(done(bool)), opush, SLOT(deleteLater()));
-
-    connect(opush, SIGNAL(putRequest(const QString &, const QString &)),
-            SLOT(putRequest(const QString &, const QString &)));
-    connect(opush, SIGNAL(getRequest(const QString &, const QString &)),
-            SLOT(getRequest(const QString &, const QString &)));
-    connect(opush, SIGNAL(progress(qint64, qint64)), SLOT(progress(qint64, qint64)));
-    connect(opush, SIGNAL(requestComplete(bool)), SLOT(requestComplete(bool)));
-    connect(opush, SIGNAL(destroyed(QObject *)),
+    connect(opush, SIGNAL(putRequested(QString,QString,qint64,QString)),
+            SLOT(putRequested(QString,QString,qint64,QString)));
+    connect(opush, SIGNAL(businessCardRequested()),
+            SLOT(businessCardRequested()));
+    connect(opush, SIGNAL(dataTransferProgress(qint64,qint64)), SLOT(progress(qint64,qint64)));
+    connect(opush, SIGNAL(requestFinished(bool)), SLOT(requestFinished(bool)));
+    connect(opush, SIGNAL(destroyed(QObject*)),
             SLOT(aboutToDelete()));
 
     m_map.insert(opush, 0);
@@ -1408,9 +1588,9 @@ void ObexServiceManager::setupConnection(QObexPushClient *client,
                                          const QString &mimetype)
 {
     // We never do multiple put commands here, so this is safe
-    connect(client, SIGNAL(progress(qint64, qint64)), SLOT(progress(qint64, qint64)));
-    connect(client, SIGNAL(done(bool)), SLOT(requestComplete(bool)));
-    connect(client, SIGNAL(destroyed(QObject *)),
+    connect(client, SIGNAL(dataTransferProgress(qint64,qint64)), SLOT(progress(qint64,qint64)));
+    connect(client, SIGNAL(done(bool)), SLOT(requestFinished(bool)));
+    connect(client, SIGNAL(destroyed(QObject*)),
             SLOT(aboutToDelete()));
 
     QMap<QObject *, int>::iterator i = m_map.insert(client, 0);
@@ -1429,12 +1609,21 @@ void ObexServiceManager::newIrxferConnection()
     if (!m_irxfer->hasPendingConnections())
         return;
 
+    QIrSocket *irSocket = m_irxfer->nextPendingConnection();
+    qLog(Infrared) << "Connection from:" << irSocket->remoteAddress();
+
     qLog(Infrared) << "Creating ObexPushService";
-    CustomPushService *opush = new CustomPushService(m_irxfer->nextPendingConnection());
+    CustomPushService *opush = new CustomPushService(irSocket, this);
+    irSocket->setParent(opush);
+
+    m_activeSockets.insert(irSocket, opush);
 
     setupConnection(opush);
-    connect(opush, SIGNAL(destroyed(QObject *)),
-            SLOT(irSessionEnded()));
+    connect(irSocket, SIGNAL(destroyed(QObject*)), SLOT(irSessionEnded()));
+
+    // if transport is disconnected, the push service will emit done()
+    connect(opush, SIGNAL(done(bool)), this, SLOT(irXferPushServiceDone()));
+    connect(irSocket, SIGNAL(disconnected()), irSocket, SLOT(irXferSocketDisconnected()));
 
     m_numIrSessions++;
 
@@ -1449,16 +1638,59 @@ void ObexServiceManager::newIrxferConnection()
         m_irSession->startSession();
     }
 }
+
+void ObexServiceManager::irXferPushServiceDone()
+{
+    QObject *s = sender();
+    CustomPushService *opush = qobject_cast<CustomPushService *>(s);
+    if (!opush)
+        return;
+
+    QIrSocket *irSocket = 
+            qobject_cast<QIrSocket*>(opush->sessionDevice());
+    if (irSocket) {
+        qLog(Infrared) << "Disconnecting IR socket for Obex Push session...";
+        irSocket->disconnect();
+    }
+}
+
+void ObexServiceManager::irXferSocketDisconnected()
+{
+    qLog(Infrared) << "IR socket has been disconnected";
+
+    QIrSocket *irSocket = qobject_cast<QIrSocket*>(sender());
+
+    if (irSocket && m_activeSockets.contains(irSocket)) {
+        CustomPushService *service = m_activeSockets[irSocket];
+        m_activeSockets.remove(irSocket);
+
+        // might be disconnected while the "Accept file?" dialog is
+        // showing
+        if (service->confirmationDialog()->isVisible()) {
+            service->confirmationDialog()->reject();
+        }
+
+        // delete the IR & obex sockets and also the push service
+        QTimer::singleShot(0, service, SLOT(deleteLater()));
+    }
+}
 #endif
 
 /*!
     \internal
  */
-void ObexServiceManager::putRequest(const QString &filename, const QString &mimetype)
+void ObexServiceManager::putRequested(const QString &/*filename*/, const QString &mimetype, qint64, const QString &description)
 {
     qLog(Obex) << "ObexServiceManager Put Request";
     QObject *s = sender();
     if (!s)
+        return;
+
+    QObexPushService *push = qobject_cast<QObexPushService*>(s);
+    if (!push)
+        return;
+    QFile *file = qobject_cast<QFile*>(push->currentDevice());
+    if (!file)
         return;
 
     qLog(Obex) << "Sender is valid";
@@ -1471,13 +1703,13 @@ void ObexServiceManager::putRequest(const QString &filename, const QString &mime
 
     i.value() = nextId();
 
-    emit receiveInitiated(i.value(), filename, mimetype);
+    emit receiveInitiated(i.value(), QFileInfo(*file).fileName(), mimetype, description);
 }
 
 /*!
     \internal
  */
-void ObexServiceManager::getRequest(const QString &filename, const QString &mimetype)
+void ObexServiceManager::businessCardRequested()
 {
     QObject *s = sender();
     if (!s)
@@ -1489,21 +1721,29 @@ void ObexServiceManager::getRequest(const QString &filename, const QString &mime
 
     i.value() = nextId();
 
-    emit sendInitiated(i.value(), filename, mimetype);
+    emit sendInitiated(i.value(), "", "text/x-vCard");
 }
 
 /*!
     \internal
  */
-void ObexServiceManager::requestComplete(bool error)
+void ObexServiceManager::requestFinished(bool error)
 {
     QObject *s = sender();
     if (!s)
         return;
 
+    QObexPushService *service = qobject_cast<QObexPushService*>(s);
+    if (service)
+        qLog(Obex) << "OBEX request finished with error:" << service->error();
+
+    qLog(Obex) << "Request finished:" << error;
+
     QMap<QObject *, int>::iterator i = m_map.find(s);
-    if (i == m_map.end())
+    if (i == m_map.end()) {
+        qLog(Obex) << "Unknown request object!";
         return;
+    }
 
     if (i.value() != 0) {
         emit completed(i.value(), error);
@@ -1562,13 +1802,18 @@ void ObexServiceManager::irSessionEnded()
 }
 #endif
 
+#if QT_VERSION < 0x040400
 QBasicAtomic ObexServiceManager::idCounter = Q_ATOMIC_INIT(1);
+#else
+QAtomicInt ObexServiceManager::idCounter(1);
+#endif
 
 /*!
     \internal
  */
 int ObexServiceManager::nextId()
 {
+#if QT_VERSION < 0x040400
     register int id;
     for (;;) {
         id = idCounter;
@@ -1576,15 +1821,25 @@ int ObexServiceManager::nextId()
             break;
     }
     return id;
+#else
+    register int id;
+    for (;;) {
+        id = idCounter;
+        if (idCounter.testAndSetOrdered(id, id + 1))
+            break;
+    }
+    return id;
+#endif
 }
 
 /*!
-    \fn void ObexServiceManager::receiveInitiated(int id, const QString &filename, const QString &mime)
+    \fn void ObexServiceManager::receiveInitiated(int id, const QString &filename, const QString &mime, const QString &description)
 
     This signal is sent whenever an object is being received.  The \a id parameter
     contains a unique id of the request.  The \a filename parameter contains the filename
     of the object being received.  This filename will be in an incoming directory (the inbox.)
-    The \a mime contains the mimetype of the object being received.
+    The \a mime contains the mimetype of the object being received. The \a description
+    contains the description of the object.
 
     One can track the progress of the request by using the completed() and progress() signals.
 
@@ -1595,7 +1850,7 @@ int ObexServiceManager::nextId()
     \fn void ObexServiceManager::sendInitiated(int id, const QString &filename, const QString &mime)
 
     This signal is emitted whenever an object is being sent by the local device.  The \a id
-    paramter contains a unique id of the request.  The \a filename parameter contains
+    parameter contains a unique id of the request.  The \a filename parameter contains
     the filename of the object being send.  The \a mime contains the mimetype of the object
     being received.
 
@@ -1608,7 +1863,7 @@ int ObexServiceManager::nextId()
     \fn void ObexServiceManager::progress(int id, qint64 bytes, qint64 total)
 
     This signal is emitted to report progress of an operation.  The \a id parameter
-    contains the unique id of the request.  The \a bytes paramter contains the number
+    contains the unique id of the request.  The \a bytes parameter contains the number
     of bytes sent.  The \a total contains the total number of bytes.  If the total is
     not known, it will be set to 0.
 */
@@ -1616,8 +1871,8 @@ int ObexServiceManager::nextId()
 /*!
     \fn void ObexServiceManager::completed(int id, bool error)
 
-    This signal is emitted to report the completion of an operation.  The \a id paramter
-    contains the unique id of the request completed.  The \a error paramter
+    This signal is emitted to report the completion of an operation.  The \a id parameter
+    contains the unique id of the request completed.  The \a error parameter
     is set to true if the operation finished due to an error, and false otherwise.
 */
 

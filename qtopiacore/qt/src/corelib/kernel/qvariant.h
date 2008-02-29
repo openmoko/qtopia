@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -43,6 +58,7 @@ class QLine;
 class QLineF;
 class QLocale;
 class QMatrix;
+class QTransform;
 class QStringList;
 class QTime;
 class QPoint;
@@ -51,7 +67,9 @@ class QSize;
 class QSizeF;
 class QRect;
 class QRectF;
+#ifndef QT_NO_REGEXP
 class QRegExp;
+#endif
 class QTextFormat;
 class QTextLength;
 class QUrl;
@@ -128,7 +146,8 @@ class Q_CORE_EXPORT QVariant
         TextLength = 78,
         TextFormat = 79,
         Matrix = 80,
-        LastGuiType = Matrix,
+        Transform = 81,
+        LastGuiType = Transform,
 
         UserType = 127,
 #ifdef QT3_SUPPORT
@@ -182,7 +201,9 @@ class Q_CORE_EXPORT QVariant
 #endif
     QVariant(const QUrl &url);
     QVariant(const QLocale &locale);
+#ifndef QT_NO_REGEXP
     QVariant(const QRegExp &regExp);
+#endif
     QVariant(Qt::GlobalColor color);
 
     QVariant& operator=(const QVariant &other);
@@ -238,7 +259,9 @@ class Q_CORE_EXPORT QVariant
 #endif
     QUrl toUrl() const;
     QLocale toLocale() const;
+#ifndef QT_NO_REGEXP
     QRegExp toRegExp() const;
+#endif
 
 #ifdef QT3_SUPPORT
     inline QT3_SUPPORT int &asInt();
@@ -362,15 +385,14 @@ class Q_CORE_EXPORT QVariant
 protected:
     friend inline bool qvariant_cast_helper(const QVariant &, QVariant::Type, void *);
     friend int qRegisterGuiVariant();
+    friend int qUnregisterGuiVariant();
     friend inline bool operator==(const QVariant &, const QVariantComparisonHelper &);
 #ifndef QT_NO_DEBUG_STREAM
     friend Q_CORE_EXPORT QDebug operator<<(QDebug, const QVariant &);
 #endif
     Private d;
 
-#ifndef QT_MOC
     static const Handler *handler;
-#endif
 
     void create(int type, const void *copy);
 #ifdef QT3_SUPPORT
@@ -387,9 +409,11 @@ private:
     // force compile error, prevent QVariant(QVariant::Type, int) to be called
     inline QVariant(bool, int) { Q_ASSERT(false); }
 #endif
+public:
+    typedef Private DataPtr;
+    inline DataPtr &data_ptr() { return d; }
 };
 
-#ifndef QT_MOC
 typedef QList<QVariant> QVariantList;
 typedef QMap<QString, QVariant> QVariantMap;
 
@@ -413,7 +437,6 @@ inline void qVariantSetValue(QVariant &v, const T &t)
 {
     v = QVariant(qMetaTypeId<T>(reinterpret_cast<T *>(0)), &t);
 }
-#endif
 
 inline QVariant::QVariant() {}
 inline bool QVariant::isValid() const { return d.type != Invalid; }
@@ -513,8 +536,8 @@ template<typename T> T qvariant_cast(const QVariant &v, T * = 0)
         return *reinterpret_cast<const T *>(v.constData());
     if (vid < int(QMetaType::User)) {
         T t;
-        qvariant_cast_helper(v, QVariant::Type(vid), &t);
-        return t;
+        if (qvariant_cast_helper(v, QVariant::Type(vid), &t))
+            return t;
     }
     return T();
 }
@@ -537,8 +560,8 @@ template<typename T> T qvariant_cast(const QVariant &v)
         return *reinterpret_cast<const T *>(v.constData());
     if (vid < int(QMetaType::User)) {
         T t;
-        qvariant_cast_helper(v, QVariant::Type(vid), &t);
-        return t;
+        if (qvariant_cast_helper(v, QVariant::Type(vid), &t))
+            return t;
     }
     return T();
 }

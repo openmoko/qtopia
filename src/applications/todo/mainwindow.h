@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,13 +23,9 @@
 #define TODOMAINWINDOW_H
 
 #include <qtopia/pim/qtask.h>
+#include <qtopia/pim/qappointment.h>
 #include <qtopiaabstractservice.h>
-
-#include <qtextbrowser.h>
 #include <qmainwindow.h>
-#include <qdialog.h>
-#include <qlayout.h>
-
 #include <QDSData>
 #include <QDLBrowserClient>
 #include <QStack>
@@ -37,7 +33,6 @@
 class TodoTable;
 class QAction;
 class QPopupMenu;
-class Ir;
 class QCategorySelector;
 class QCategoryFilter;
 class QLineEdit;
@@ -47,6 +42,8 @@ class QCategoryDialog;
 class QStackedWidget;
 class QTaskModel;
 class QDSActionRequest;
+
+class ListPositionBar;
 
 class TodoView : public QDLBrowserClient
 {
@@ -66,9 +63,13 @@ signals:
 protected:
     void keyPressEvent( QKeyEvent *e );
 
+    QString createTaskText(const QTask& task);
+    static QString formatDate(const QDate& date, const QDate& today);
+
 private:
     QDLBrowserClient *mNotesQC;
     QTask   mTask;
+    bool mIconsLoaded;
 };
 
 class TodoWindow : public QMainWindow
@@ -87,28 +88,24 @@ public slots:
     void flush();
 
 protected slots:
-    void createNewEntry();
+    void createNewEntry(bool useCurrentCategory=true);
     void deleteCurrentEntry();
     void editCurrentEntry();
     void showListView();
     void showDetailView(const QTask &);
     void viewPrevious();
     void viewNext();
-    void setShowCompleted( int );
-    void currentEntryChanged( );
+    void showCompletedTasks();
+    void hideCompletedTasks();
     void taskModelReset( );
     void markTaskDone();
     void markTaskNotDone();
-    void showFindWidget( bool s );
-    void startNewSearch(const QString &);
-    void nextSearchItem();
+    void saveNewTask(const QTask&, const QAppointment&);
 
-    void findFound();
-    void findNotFound();
-    void findWrapped();
     void setDocument( const QString & );
     void beamCurrentEntry();
     void catSelected(const QCategoryFilter &);
+    void markMenuDirty();
 
     void qdlActivateLink( const QDSActionRequest& request );
     void qdlRequestLinks( const QDSActionRequest& request );
@@ -118,15 +115,15 @@ private slots:
 
 protected:
     void closeEvent( QCloseEvent *e );
-#ifdef QTOPIA_PHONE
     void keyPressEvent(QKeyEvent *);
     bool eventFilter(QObject *o, QEvent *e);
-#endif
     void createUI();
 
 private slots:
     void selectAll();
     void selectCategory();
+    void delayedInit();
+    void updateContextMenu();
 
 private:
     bool receiveFile( const QString &filename );
@@ -136,17 +133,19 @@ private:
     void removeTaskQDLLink( QTask& task );
     void removeTasksQDLLink( QList<QUniqueId>& taskIds );
 
+    void updateDependentAppointment(const QTask &src, const QAppointment& appt);
+
     QString beamfile;
 
     QTaskModel *model;
 
     TodoTable *table;
     TodoView *tView;
+    ListPositionBar *listPositionBar;
     QAction *newAction;
     QAction *backAction;
     QAction *editAction;
     QAction *deleteAction;
-    QAction *findAction;
     QAction *beamAction;
     QAction *markDoneAction;
     QAction *markNotDoneAction;
@@ -157,13 +156,14 @@ private:
     QWidget *listView;
     QStackedWidget *centralView;
     QStack<QUniqueId> prevTasks;
-#ifdef QTOPIA_PHONE
-    QMenu *contextMenu;
+    QAction *actionShowCompleted;
+    QAction *actionHideCompleted;
     QAction *actionCategory;
     QCategoryDialog *categoryDlg;
     QLabel *categoryLbl;
-#endif
     bool closeAfterDetailView;
+    bool contextMenuActionsDirty;
+    bool showCompleted;
 };
 
 class TasksService : public QtopiaAbstractService
@@ -186,6 +186,7 @@ public slots:
     void showTask( const QUniqueId& uid );
     void activateLink( const QDSActionRequest& request );
     void requestLinks( const QDSActionRequest& request );
+    void updateRecurringTasks(const QDateTime& datetime, int data);
 
 private:
     TodoWindow *todo;

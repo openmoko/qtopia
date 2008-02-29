@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -153,10 +153,6 @@ public:
 };
 
 
-/*!
-    \class SmilView
-    \internal
-*/
 SmilView::SmilView(QWidget *parent, Qt::WFlags f)
     : QWidget(parent, f), d(0)
 {
@@ -169,15 +165,15 @@ SmilView::~SmilView()
     delete d;
 }
 
-void SmilView::setSource(const QString &str)
+bool SmilView::setSource(const QString &str)
 {
     clear();
     d->sys = new SmilSystem();
     d->sys->setTarget(this);
-    connect(d->sys->transferServer(), SIGNAL(transferRequested(SmilDataSource*, const QString&)),
-            this, SIGNAL(transferRequested(SmilDataSource*, const QString&)));
-    connect(d->sys->transferServer(), SIGNAL(transferCancelled(SmilDataSource*, const QString&)),
-            this, SIGNAL(transferCancelled(SmilDataSource*, const QString&)));
+    connect(d->sys->transferServer(), SIGNAL(transferRequested(SmilDataSource*,QString)),
+            this, SIGNAL(transferRequested(SmilDataSource*,QString)));
+    connect(d->sys->transferServer(), SIGNAL(transferCancelled(SmilDataSource*,QString)),
+            this, SIGNAL(transferCancelled(SmilDataSource*,QString)));
     connect(d->sys, SIGNAL(finished()), this, SIGNAL(finished()));
     d->parser = new SmilParser(d->sys);
     QXmlInputSource source;
@@ -188,11 +184,14 @@ void SmilView::setSource(const QString &str)
     if (!reader.parse( source )){
         qWarning("Unable to parse SMIL file");
         clear();
+        return false;
     } else {
         QPalette pal;
         pal.setColor(QPalette::Window, d->sys->rootColor());
         setPalette(pal);
     }
+
+    return true;
 }
 
 void SmilView::play()

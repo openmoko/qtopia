@@ -18,7 +18,8 @@ HEADERS += \
 	qsvgtinydocument_p.h    \
 	qsvgrenderer.h          \
         qsvgwidget.h            \
-        qgraphicssvgitem.h  
+        qgraphicssvgitem.h      \
+        qsvggenerator.h
 
 
 SOURCES += \
@@ -31,5 +32,6 @@ SOURCES += \
 	qsvgtinydocument.cpp    \
 	qsvgrenderer.cpp        \
         qsvgwidget.cpp          \
-        qgraphicssvgitem.cpp  
+        qgraphicssvgitem.cpp    \
+        qsvggenerator.cpp
 

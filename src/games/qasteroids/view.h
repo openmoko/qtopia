@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** $TROLLTECH_DUAL_LICENSE$
 **
@@ -73,14 +73,12 @@ class KAsteroidsView : public QWidget
 
  private slots:
     void dropShield();
-
- protected:
-    virtual void timerEvent(QTimerEvent* );
+    void mainTimerEvent();
 
  private:
     QGraphicsScene* 	scene_;
     MyGraphicsView* 	view_;
-    QGraphicsTextItem* 	textSprite_;
+    QGraphicsSimpleTextItem* 	textSprite_;
 
     bool		instruct_user_;
     bool 		game_paused_;
@@ -89,9 +87,9 @@ class KAsteroidsView : public QWidget
 
     int 		textDy_;
     int 		timerEventCount_;
-    int 		masterTimerId_;
 
     QTimer*		shieldTimer_;
+    QTimer*             mainTimer_;
 
     QString		nextGameMessage_;
     QString		firstGameMessage_;

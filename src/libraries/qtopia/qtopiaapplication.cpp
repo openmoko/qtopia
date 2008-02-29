@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,20 +23,16 @@
 #include <QValueSpaceObject>
 #include <custom.h>
 #include <qtopianamespace.h>
+#include <QTranslatableSettings>
 
-#ifdef Q_WS_QWS
 #ifndef QT_NO_SXE
 #include <private/qtransportauth_qws_p.h>
 #include <qsxepolicy.h>
 #include <qpackageregistry.h>
 #endif
-#endif
 
 #include <stdlib.h>
-
-#ifdef Q_WS_QWS
 #include <time.h>
-#endif
 
 #include <qfile.h>
 #include <qlist.h>
@@ -48,16 +44,15 @@
 #include <QTextBrowser>
 #include <qdesktopwidget.h>
 #include <qtranslator.h>
+#ifdef Q_WS_QWS
 #include <qsoundqss_qws.h>
+#endif
 #include <QTextCursor>
-
 #include <qtopiaipcenvelope.h>
 #include <qtopiaservices.h>
-
 #ifdef Q_WS_QWS
-#  include <qwindowsystem_qws.h>
+#include <qwindowsystem_qws.h>
 #endif
-
 #include <qtextstream.h>
 #include <qpalette.h>
 #include <qbuffer.h>
@@ -71,9 +66,7 @@
 #include <qclipboard.h>
 #include <qtimer.h>
 #include <qpixmapcache.h>
-#include <qmessagebox.h>
 #include <qpushbutton.h>
-#include <qdebug.h>
 #include <QSettings>
 #include <qspinbox.h>
 #include <qcombobox.h>
@@ -86,58 +79,32 @@
 #include <QResizeEvent>
 #include <private/qlocale_p.h>
 #include <QDateTimeEdit>
-
 #ifdef Q_WS_QWS
 #include <qwsdisplay_qws.h>
 #endif
-
 #include <qtopiaapplication.h>
 #include <qtopia/private/qtopiaresource_p.h>
-#include <qtopia/private/qdateparser_p.h>
 #include <qstylefactory.h>
 #include <qstorage.h>
+#include <qtopia/qphonestyle.h>
 #ifdef Q_WS_QWS
-#  ifdef QTOPIA_PHONE
-#    include <qtopia/qphonestyle.h>
-#  else
-#    include <qtopia/qpdastyle.h>
-#  endif
-#  include <qtopia/private/qpedecoration_p.h>
+#include <qtopia/private/qpedecoration_p.h>
 #endif
 #include <qtopianamespace.h>
-#include <qmimetype.h>
 #include "qpluginmanager.h"
 
-#ifdef Q_OS_UNIX
 #include <unistd.h>
 #include <sys/file.h>
-#ifdef Q_WS_QWS
 #include <errno.h>
 #include <sys/stat.h>
-#endif
-#endif
-
-#ifndef Q_OS_WIN32
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>
-#else
-#include <mmsystem.h>
-#include <io.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#endif // Q_OS_WIN32
-
 #include <math.h>
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qtopia/private/contextkeymanager_p.h>
 #include <qsoftmenubar.h>
-#endif
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 bool mousePreferred = false;
-#endif
 
 #ifdef QTOPIA_DBUS_IPC
 #include <qtdbus/qdbusconnection.h>
@@ -148,24 +115,628 @@ bool mousePreferred = false;
 #include "dbusapplicationchannel_p.h"
 #endif
 
-#include "ezxphonestyle.h"
-
-#include "qcontent_p.h"
-
-#if defined QTOPIA_TEST && ! defined QTOPIA_CONTENT_INSTALLER
-# include <QtopiaSystemTestSlave>
+#ifdef Q_WS_X11
+#include <qcopchannel_x11.h>
+#include <QX11Info>
+#include <QtGui/private/qt_x11_p.h>
 #endif
 
+#include "ezxphonestyle_p.h"
+#include "qthumbstyle_p.h"
 
+#include <qtopia/private/qcontentstore_p.h>
+#include "qcontent_p.h"
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
+#ifndef QTOPIA_HOST
+#include <qtopia/private/qtopiasql_p.h>
+#endif
+
+#if !defined(QTOPIA_CONTENT_INSTALLER) && !defined(Q_WS_X11)
+# include <qtopia/private/testslaveinterface_p.h>
+#define QTOPIA_USE_TEST_SLAVE 1
+#endif
+
 enum QPEWidgetFlagsEnum {
     MenuLikeDialog = 0x01,
 } QPEWidgetFlags;
 
 QMap<const QWidget *, int> qpeWidgetFlags;
 
+// This temporary define is for use while integrating the new QSoftKeyHelper API
+// into Qtopia, and can be removed as soon as this is done.
+//#define QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
+
+//#define GREENPHONE_EFFECTS
+
+#ifdef GREENPHONE_EFFECTS
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <QDirectPainter>
+#include <QLinuxFbScreen>
+
+#ifdef QT_QWS_GREENPHONE
+class GreenphoneScreenPrivate;
+class GreenphoneScreen : public QLinuxFbScreen
+{
+public:
+    GreenphoneScreen(int displayId);
+    ~GreenphoneScreen();
+
+    void exposeRegion(QRegion region, int windowIndex);
+    virtual void addReserved(int id, const QRect &rect);
+    virtual void removeReserved(int id);
+
+    int cookie;
+private:
+    GreenphoneScreenPrivate *d;
+};
 #endif
+
+class SyncPainter : public QDirectPainter
+{
+public:
+    SyncPainter(QObject *parent = 0);
+    virtual ~SyncPainter();
+
+    void syncRegion(const QRect &);
+
+private:
+    QTcpSocket *socket;
+};
+
+
+SyncPainter::SyncPainter(QObject *parent)
+: QDirectPainter(parent), socket(0)
+{
+#ifdef QT_QWS_GREENPHONE
+    if(!qwsServer) {
+        struct ::sockaddr_un addr;
+        int crv;
+        int fd;
+        fd = ::socket(PF_UNIX, SOCK_STREAM, 0);
+        if(fd == -1) {
+            qWarning() << "SyncPainter: Unable to create socket";
+            goto connect_error;
+        }
+
+        ::bzero(&addr, sizeof(sockaddr_un));
+        addr.sun_family = AF_UNIX;
+        ::memcpy(addr.sun_path, "/tmp/region_reserve", strlen("/tmp/region_reserve") + 1);
+
+        crv = ::connect(fd, (sockaddr *)&addr, sizeof(sockaddr_un));
+        if(-1 == crv) {
+            qWarning() << "SyncPainter: Unable to connect";
+            perror("connect");
+            goto connect_error;
+        }
+
+        socket = new QTcpSocket(this);
+        socket->setSocketDescriptor(fd);
+        return;
+
+    connect_error:
+        ::close(fd);
+    }
+#endif
+}
+
+SyncPainter::~SyncPainter()
+{
+#ifdef QT_QWS_GREENPHONE
+    if(qwsServer) 
+        static_cast<GreenphoneScreen *>(qt_screen)->removeReserved((int)this);
+#endif
+}
+
+void SyncPainter::syncRegion(const QRect &r)
+{
+#ifdef QT_QWS_GREENPHONE
+    if(qwsServer) {
+        static_cast<GreenphoneScreen *>(qt_screen)->addReserved((int)this, r);
+    } else {
+        if(!socket) {
+            qWarning() << "SyncPainter: Cannot sync region - not connected";
+            return;
+        }
+
+        uint data[4];
+        data[0] = r.x();
+        data[1] = r.y();
+        data[2] = r.width();
+        data[3] = r.height();
+
+        socket->write((char *)data, sizeof(uint) * 4);
+
+        socket->waitForReadyRead(-1);
+        char d;
+        socket->read(&d, 1);
+    }
+#endif
+}
+
+#ifdef QT_QWS_GREENPHONE
+#include <QDirectPainter>
+#include <QMutex>
+#include <QWaitCondition>
+#include <sched.h>
+#include <blend.h>
+class AImage
+{
+public:
+    AImage(const QImage &);
+    ~AImage();
+
+    int height() const { return m_height; }
+    int width() const { return m_width; }
+    int stepwidth() const { return m_stepwidth; }
+
+    ushort *colorline(int ii) const { return color + ii * m_stepwidth; }
+    uchar *alphaline(int ii) const { return alpha + ii * m_stepwidth; }
+
+private:
+
+    int m_height;
+    int m_width;
+    int m_stepwidth;
+
+    ushort *color;
+    uchar *alpha;
+};
+
+AImage::AImage(const QImage &_img)
+{
+    Q_ASSERT(img.format() == QImage::Format_ARGB32 ||
+             img.format() == QImage::Format_ARGB32_Premultiplied);
+
+    QImage img;
+    if(_img.format() == QImage::Format_ARGB32)
+        img = _img;
+    else
+        img = _img.convertToFormat(QImage::Format_ARGB32);
+
+
+    m_height = img.height();
+    m_width = img.width();
+    if(m_width % 4)
+        m_stepwidth = (m_width & 0xFFFFFFFC) + 4;
+    else
+        m_stepwidth = m_width;
+
+    color = new ushort[m_stepwidth * m_height];
+    alpha = new uchar[m_stepwidth * m_height];
+
+    uint *img_bits = (uint *)img.bits();
+    uint img_step = img.bytesPerLine();
+
+    for(int yy = 0; yy < m_height; ++yy) {
+        ushort *color_l = color + yy * m_stepwidth;
+        uchar *alpha_l = alpha + yy * m_stepwidth;
+
+        for(int xx = 0; xx < m_width; ++xx) {
+            uint color = img_bits[xx];
+
+            alpha_l[xx] = (color & 0xFF000000) >> 24;
+            color_l[xx] = ((color & 0x00F80000) >> 8) |
+                          ((color & 0x0000FC00) >> 5) |
+                          ((color & 0x000000F8) >> 3);
+        }
+
+        img_bits = (uint *)((uchar *)(img_bits) + img_step);
+    }
+};
+
+AImage::~AImage()
+{
+    delete [] color;
+    delete [] alpha;
+}
+
+class FadeThread : public QThread
+{
+Q_OBJECT
+public:
+    FadeThread(QObject *parent);
+
+    void fade(QWidget *wid, const QRect &screenRect, const QImage &begin, const QImage &end, bool leftToRight);
+
+    bool inProgress();
+    void menu(QMenu *wid);
+
+    void addTab(QTabWidget *tab);
+    void removeTab(QTabWidget *tab);
+
+protected:
+    virtual void run();
+    virtual bool eventFilter(QObject *, QEvent *); 
+
+signals:
+    void done();
+
+private slots:
+    void doDone();
+    void tabChanged(int newTab);
+
+private:
+    void menu(QMenu *wid, const QRect &screenRect, const QImage &menu, const QImage &back); 
+    void doFade();
+    void doMenu();
+
+    SyncPainter dp;
+
+    enum Effect { None, Reserving, Tab, Menu, Waiting };
+
+    Effect m_effect;
+
+    QWidget *m_wid;
+    QMutex m_lock;
+    QWaitCondition m_wait;
+    QRect m_screenRect;
+    QImage m_begin;
+    QImage m_end;
+    bool m_leftToRight;
+
+    bool m_ignoreTabChanged;
+
+    QHash<QTabWidget *, int> m_oldTab;
+};
+
+FadeThread::FadeThread(QObject *parent)
+: QThread(parent) , 
+  m_effect(None) , m_wid(0)
+{
+    QObject::connect(this, SIGNAL(done()), 
+                     this, SLOT(doDone()), 
+                     Qt::QueuedConnection);
+
+    m_ignoreTabChanged = false;
+
+    m_lock.lock();
+    start();
+    m_wait.wait(&m_lock);
+    m_lock.unlock();
+}
+
+void FadeThread::addTab(QTabWidget *tab)
+{
+    Q_ASSERT(tab);
+    Q_ASSERT(!m_oldTab.contains(tab));
+    m_oldTab[tab] = tab->currentIndex();
+    QObject::connect(tab, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
+}
+
+void FadeThread::removeTab(QTabWidget *tab)
+{
+    Q_ASSERT(tab);
+    Q_ASSERT(m_oldTab.contains(tab));
+    m_oldTab.remove(tab);
+    QObject::disconnect(tab, SIGNAL(currentChanged(int)), 
+                        this, SLOT(tabChanged(int)));
+}
+
+void FadeThread::fade(QWidget *wid, 
+                      const QRect &screenRect, 
+                      const QImage &begin, 
+                      const QImage &end, 
+                      bool leftToRight)
+{
+    m_lock.lock();
+    if(None == m_effect) {
+        m_screenRect = screenRect;
+        m_begin = begin;
+        m_end = end;
+        m_leftToRight = leftToRight;
+        m_effect = Reserving;
+        m_wid = wid;
+        m_wid->installEventFilter(this);
+        dp.syncRegion(m_screenRect);
+        m_effect = Tab;
+        m_wait.wakeAll();
+    } else {
+        qWarning() << "Effect conflict detected";
+    }
+    m_lock.unlock();
+}
+
+void FadeThread::tabChanged(int newTab)
+{
+    if(m_ignoreTabChanged)
+        return;
+
+    QTabWidget *tb = qobject_cast<QTabWidget *>(sender());
+    Q_ASSERT(tab);
+    Q_ASSERT(m_oldTab.contains(tab));
+
+    if(!tb->isActiveWindow())
+        return;
+
+    int currentTab = m_oldTab[tb];
+    if(currentTab == newTab)
+        return;
+
+    if(currentTab >= tb->count())
+        return;
+
+    m_ignoreTabChanged = true;
+
+    bool leftToRight = (newTab > currentTab);
+
+    QWidget *widget = tb->widget(currentTab);
+    QRect globalRect(tb->mapToGlobal(QPoint(0,0)), tb->size());
+
+    QBrush brush = 
+        widget->window()->palette().brush(widget->window()->backgroundRole());
+
+    // Take a snapshot
+    QImage img_orig(globalRect.width(), 
+                    globalRect.height(), 
+                    QImage::Format_RGB16);
+    {
+        QPainter p(&img_orig);
+        p.setBrushOrigin(-1 * globalRect.x(), -1 * globalRect.y());
+        p.fillRect(0, 0, globalRect.width(), globalRect.height(), brush);
+        p.end();
+    }
+    tb->setCurrentIndex(currentTab);
+    tb->render(&img_orig);
+
+    tb->setCurrentIndex(newTab);
+    QImage img_new(globalRect.width(), 
+                   globalRect.height(), 
+                   QImage::Format_RGB16);
+    {
+        QPainter p(&img_new);
+        p.setBrushOrigin(-1 * globalRect.x(), -1 * globalRect.y());
+        p.fillRect(0, 0, globalRect.width(), globalRect.height(), brush);
+        p.end();
+    }
+    tb->render(&img_new);
+    m_oldTab[tb] = newTab;
+
+    fade(tb, globalRect, img_orig, img_new, leftToRight);
+
+    m_ignoreTabChanged = false;
+}
+
+bool FadeThread::inProgress() 
+{
+    bool rv;
+    m_lock.lock();
+    rv = (None != m_effect);
+    m_lock.unlock();
+    return rv;
+}
+
+void FadeThread::menu(QMenu *wid)
+{
+    QRect rect(wid->mapToGlobal(QPoint(0,0)), wid->rect().size());
+
+    QPalette pal = wid->palette();
+    QPalette pal_copy = pal;
+    pal.setBrush(QPalette::Window, QColor(0,0,0,0));
+    wid->setPalette(pal);
+
+    QImage back(rect.size(), QImage::Format_RGB16);
+    QPainter p(&back);
+    p.setBrush(pal_copy.brush(QPalette::Window));
+    p.setBrushOrigin(-rect.x(), -rect.y());
+    p.setPen(Qt::NoPen);
+    p.drawRect(0, 0, rect.width(), rect.height());
+    p.end();
+
+    QImage img(rect.size(), QImage::Format_ARGB32);
+    img.fill(0x00FFFFFF);
+    qWarning() << "XXXXXXXXXXX Render start";
+    wid->render(&img);
+    qWarning() << "XXXXXXXXXXX Render end";
+    wid->setPalette(pal_copy);
+
+    menu(wid, rect, img, back);
+}
+
+void FadeThread::menu(QMenu *wid,
+                      const QRect &screenRect, 
+                      const QImage &menu, 
+                      const QImage &back)
+{
+    m_lock.lock();
+    if(None == m_effect) {
+        m_screenRect = screenRect;
+        m_begin = menu;
+        m_end = back;
+        m_effect = Reserving;
+        m_wid = wid;
+        m_wid->installEventFilter(this);
+        dp.syncRegion(m_screenRect);
+        m_effect = Menu;
+        m_wait.wakeAll();
+    } else {
+        qWarning() << "Effect conflict detected";
+    }
+    m_lock.unlock();
+}
+
+void FadeThread::run()
+{
+    sched_param p;
+    ::bzero(&p, sizeof(sched_param));
+    p.sched_priority = 1;
+
+    m_lock.lock();
+    m_wait.wakeAll();
+
+    while(true) {
+
+        
+        if(m_effect != None) {
+
+            m_lock.unlock();
+
+            qWarning() << "Start effect";
+            if(m_effect == Tab || m_effect == Menu) {
+
+                sched_param p;
+                ::bzero(&p, sizeof(sched_param));
+                p.sched_priority = 1;
+                sched_setscheduler(0, SCHED_RR, &p);
+
+                if(m_effect == Tab)
+                    doFade();
+                else if(m_effect == Menu)
+                    doMenu();
+
+                p.sched_priority = 0;
+                sched_setscheduler(0, SCHED_OTHER, &p);
+            }
+            qWarning() << "End effect";
+
+            m_lock.lock();
+
+            qWarning() << "Emit done";
+            if(m_wid)
+                m_effect = Waiting;
+            else
+                emit done();
+        }
+
+        qWarning() << "Wait start";
+        m_wait.wait(&m_lock);
+        qWarning() << "Wait end";
+    }
+}
+
+bool FadeThread::eventFilter(QObject *o, QEvent *e)
+{
+    if(e->type() == QEvent::Paint ) {
+        m_lock.lock();
+        m_wid->removeEventFilter(this);
+        m_wid = 0;
+        // This must be done on a timer so the paint event itself has time to
+        // complete before the region is removed
+        if(m_effect == Waiting) 
+            QTimer::singleShot(0, this, SLOT(doDone()));
+
+        m_lock.unlock();
+    }
+
+    return false;
+}
+
+void FadeThread::doDone()
+{
+    qWarning() << "DoDone" << QThread::currentThread();
+    m_lock.lock();
+    if(m_wid || None == m_effect || Reserving == m_effect) {
+        m_lock.unlock();
+        return;
+    }
+    m_effect = Reserving;
+    m_lock.unlock();
+    qWarning() << "clear start";
+    dp.syncRegion(QRect());
+//    dp.setRegion(QRegion());
+    qWarning() << "clear end";
+    m_lock.lock();
+    m_effect = None;
+    m_lock.unlock();
+}
+
+void FadeThread::doMenu()
+{
+    uchar *back_bits = m_end.bits();
+    int back_step = m_end.bytesPerLine();
+
+    AImage aimg(m_begin);
+
+    ushort *framebuffer = 
+        (ushort *)(dp.frameBuffer() + m_screenRect.y() * dp.linestep() + m_screenRect.x() * 2);
+
+    int linestep = dp.linestep() / 2;
+
+    int width = aimg.width();
+
+    int height = m_screenRect.height();
+    for(int ii = 1; ii <= height; ++ii) {
+        for(int jj = 0; jj < ii; ++jj) {
+
+            ushort *dest = (ushort *)(back_bits + height * back_step - ii * back_step + jj * back_step);
+            ushort *src = aimg.colorline(jj);
+            uchar *alpha = aimg.alphaline(jj);
+            int bwidth = width & 0xFFFFFFFC;
+
+            ushort *output = (ushort *)(framebuffer + height * linestep - ii * linestep + jj * linestep);
+
+            blend_rgba16_rgb16(dest, src, alpha, bwidth, output);
+
+        } 
+    }
+}
+
+void FadeThread::doFade()
+{
+    ushort *img_orig_data = (ushort *)m_begin.bits();
+    int imagestep = m_begin.width();
+
+    ushort *img_new_data = (ushort *)m_end.bits();
+
+    uint linestep = dp.linestep() / 2;
+    ushort *frameBuffer = 
+        (ushort *)(dp.frameBuffer() + m_screenRect.y() * linestep * 2 + 
+                   m_screenRect.x() * 2);
+
+    int width = m_screenRect.width();
+    int height = m_screenRect.height();
+
+    uchar *alpha = new uchar[width];
+    ::memset(alpha, 0xFF, width);
+
+    for(int ii = 0; ii < 495; ii += 10) {
+
+        for(int aa = 0; aa < width; ++aa) {
+            if((m_leftToRight && aa < ii && alpha[aa]) ||
+               (!m_leftToRight && aa > (width - ii) && alpha[aa])) {
+                if(alpha[aa] > 10)
+                    alpha[aa]-=10;
+                else 
+                    alpha[aa]=0;
+            }
+        }
+
+        ushort *image_new_data_l = img_new_data;
+        ushort *image_orig_data_l = img_orig_data;
+        ushort *dest_l = frameBuffer;
+
+        for(int jj = 0; jj < height; ++jj) {
+
+
+            blend_rgba16_rgb16(image_new_data_l, image_orig_data_l, 
+                               alpha, width, dest_l); 
+
+            image_new_data_l+=imagestep;
+            image_orig_data_l+=imagestep;
+            dest_l+=linestep;
+        }
+    }
+
+    delete [] alpha;
+}
+
+#endif // QT_QWS_GREENPHONE
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
 
 // declare QtopiaApplicationLifecycle
 /*
@@ -252,7 +823,7 @@ void QtopiaApplicationLifeCycle::reinit()
         m_vso = 0;
 
         // Reinitialise the ValueSpace layers
-        QValueSpace::reinitValuespace();
+        // QValueSpace::reinitValuespace();
 
         QValueSpaceObject *obj = vso();
         for(QMap<QString, QObject *>::ConstIterator iter = m_runningTasks.begin();
@@ -336,8 +907,8 @@ void QtopiaApplicationLifeCycle::registerRunningTask(const QString &name,
     if (m_runningTasks.contains(name)) {
         QObject *oldObj = m_runningTasks.value(name);
         if (oldObj)
-            QObject::disconnect(oldObj, SIGNAL(destroyed(QObject *)),
-                    this, SLOT(unregisterRunningTask(QObject *)));
+            QObject::disconnect(oldObj, SIGNAL(destroyed(QObject*)),
+                    this, SLOT(unregisterRunningTask(QObject*)));
         m_runningTasks[name] = obj;
     } else {
         m_runningTasks.insert(name, obj);
@@ -345,8 +916,8 @@ void QtopiaApplicationLifeCycle::registerRunningTask(const QString &name,
     }
 
     if(obj)
-        QObject::connect(obj, SIGNAL(destroyed(QObject *)),
-                         this, SLOT(unregisterRunningTask(QObject *)));
+        QObject::connect(obj, SIGNAL(destroyed(QObject*)),
+                         this, SLOT(unregisterRunningTask(QObject*)));
 
     recalculateQuit();
 }
@@ -464,8 +1035,8 @@ public:
         if ( targetWidget )
             targetWidget->removeEventFilter(this);
         targetWidget = widget;
-        if ( targetWidget )
-            targetWidget->installEventFilter(this);
+        //if ( targetWidget )
+        //    targetWidget->installEventFilter(this);
     }
 
 private slots:
@@ -477,22 +1048,15 @@ private slots:
             w->setWindowFlags(Qt::Popup);
             w->setHorizontalHeaderFormat(QCalendarWidget::SingleLetterDayNames);
             w->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
-            w->setGridVisible(true);
-            connect(w, SIGNAL(activated(const QDate &)),
-                    this, SLOT(selectDate(const QDate &)));
+            connect(w, SIGNAL(activated(QDate)),
+                    this, SLOT(selectDate(QDate)));
             QWidget *table = w->findChild<QWidget*>("qt_calendar_calendarview");
             table->installEventFilter(this);
-#ifdef QTOPIA_KEYPAD_NAVIGATION
             QSoftMenuBar::setLabel(w, Qt::Key_Context1, QSoftMenuBar::NoLabel);
-#endif
         }
         if (targetWidget) {
             w->blockSignals(true);
-#if QT_VERSION < 0x040200
-            w->setDate(targetWidget->date());
-#else
             w->setSelectedDate(targetWidget->date());
-#endif
             w->blockSignals(false);
         }
         w->setEditFocus(true);
@@ -515,7 +1079,7 @@ private slots:
     bool eventFilter(QObject *o, QEvent *e)
     {
         if ( e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease ) {
-            QKeyEvent* ke = (QKeyEvent*)e;
+            QKeyEvent* ke = static_cast<QKeyEvent*>(e);
             if (o == targetWidget) {
                 if (ke->key() == Qt::Key_Select) {
                     if ( e->type() == QEvent::KeyPress )
@@ -538,158 +1102,8 @@ private:
     QPointer<QDateEdit> targetWidget;
 };
 
-class CalendarTextNavigation : public QObject
-{
-    Q_OBJECT
-public:
-    CalendarTextNavigation(QObject *parent = 0)
-        : QObject(parent), dateText(0), dateFrame(0) { }
-
-    static void ensureNavigationFor(QCalendarWidget * w)
-    {
-        if (!navMap.contains(w)) {
-            CalendarTextNavigation *nav = new CalendarTextNavigation();
-            connect(w, SIGNAL(destroyed()), nav, SLOT(targetDestroyed()));
-            nav->setTargetWidget(w);
-            navMap.insert(w, nav);
-        }
-    }
-
-    void setTargetWidget(QCalendarWidget *widget) {
-        if ( targetWidget ) {
-            QWidget *table = targetWidget->findChild<QWidget*>("qt_calendar_calendarview");
-            table->removeEventFilter(this);
-            if (dateFrame)
-                dateFrame->deleteLater();
-            dateFrame = 0;
-            dateText = 0;
-        }
-        targetWidget = widget;
-        if ( targetWidget ) {
-            QWidget *table = targetWidget->findChild<QWidget*>("qt_calendar_calendarview");
-            table->installEventFilter(this);
-        }
-    }
-
-    void showDateLabel()
-    {
-        if (!targetWidget)
-            return;
-        dateParser.setInputText(inputText);
-
-        acceptTimer.start(1500, this);
-
-        QString text = dateParser.text();
-        // insert formatting info.
-        int start = dateParser.highlightStart();
-        int end = dateParser.highlightEnd();
-
-        QString fText = "<qt>" + text.left(start)
-            + "<b>" + text.mid(start, end - start) + "</b>"
-            + text.mid(end);
-        dateText->setText(fText);
-
-        QSize s = dateFrame->sizeHint();
-        QRect r = targetWidget->geometry(); // later, just the table section
-        dateFrame->setGeometry(r.x() + (r.width() - s.width())>>1,
-                r.y() + (r.height() - s.height())>>1, s.width(), s.height());
-        // need to set palette after geometry update as phonestyle sets transparency
-        // effect in move event.
-        QPalette p = dateFrame->palette();
-        p.setBrush(QPalette::Window, dateFrame->window()->palette().brush(QPalette::Window));
-        dateFrame->setPalette(p);
-        dateFrame->setAutoFillBackground(true);
-        dateFrame->setBackgroundRole(QPalette::Window);
-        dateFrame->raise();
-        dateFrame->show();
-    }
-
-    void hideDateLabel()
-    {
-        dateFrame->hide();
-        if (targetWidget && dateParser.state() != QValidator::Invalid)
-            targetWidget->setSelectedDate(dateParser.date());
-        inputText.clear();
-        acceptTimer.stop();
-    }
-
-    bool eventFilter(QObject *o, QEvent *e)
-    {
-        if ( e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease ) {
-            QKeyEvent* ke = (QKeyEvent*)e;
-            if (ke->text().length() > 0 && ke->text()[0].isPrint()) {
-                if (e->type() == QEvent::KeyPress) {
-                    if (!dateFrame) {
-                        dateFrame = new QFrame(targetWidget);
-                        QVBoxLayout *vl = new QVBoxLayout;
-                        dateText = new QLabel;
-                        vl->addWidget(dateText);
-                        dateFrame->setLayout(vl);
-                        dateFrame->setFrameShadow(QFrame::Plain);
-                        dateFrame->setFrameShape(QFrame::Box);
-                    }
-                    if (inputText.isEmpty()) {
-                        dateParser.setFormat(QLocale::system().dateFormat(QLocale::ShortFormat));
-                        dateParser.setDefaultDate(targetWidget->selectedDate());
-                    }
-
-                    inputText += ke->text();
-                    showDateLabel();
-                }
-                ke->accept();
-                return true;
-            } else {
-                if (inputText.length() > 0) {
-                    if (e->type() == QEvent::KeyRelease) {
-                        switch(ke->key()) {
-                            case Qt::Key_Back:
-                            case Qt::Key_Backspace:
-                                inputText = inputText.left(inputText.length()-1);
-                                if (inputText.isEmpty()) {
-                                    dateFrame->hide();
-                                    inputText.clear();
-                                    acceptTimer.stop();
-                                } else {
-                                    showDateLabel();
-                                }
-                                break;
-                            case Qt::Key_Select:
-                                hideDateLabel();
-                                break;
-                        }
-                    }
-                    ke->accept();
-                    return true;
-                }
-            }
-        }
-        return QObject::eventFilter(o,e);
-    }
-
-    void timerEvent(QTimerEvent *e) {
-        if (e->timerId() == acceptTimer.timerId())
-            hideDateLabel();
-    }
-
-private slots:
-    void targetDestroyed()
-    {
-        navMap.remove(sender());
-        deleteLater();
-    }
-
-private:
-    QLabel *dateText;
-    QFrame *dateFrame;
-    QBasicTimer acceptTimer;
-    QtopiaDateParser dateParser;
-    QString inputText;
-    QPointer<QCalendarWidget> targetWidget;
-
-    static QMap<QObject *, CalendarTextNavigation*> navMap;
-};
-
-QMap<QObject *, CalendarTextNavigation *> CalendarTextNavigation::navMap;
+#define POPUP_SHADOWS   //for now, allows define, and use style hint to control
+#ifdef POPUP_SHADOWS
 
 class ShadowWidget : public QWidget
 {
@@ -845,6 +1259,8 @@ void ShadowWidget::resizeEvent(QResizeEvent *r)
     setMask(rgn);
 }
 
+#endif // POPUP_SHADOWS
+
 static const int npressticks=10;
 
 class PressTickWidget : public QWidget
@@ -975,30 +1391,48 @@ private:
     QBasicTimer pressTimer;
 };
 
+class QContentChangedChannel : public QtopiaIpcAdaptor
+{
+    Q_OBJECT
+public:
+    QContentChangedChannel(QObject *parent = NULL);
+public slots:
+    void contentChanged(QContentIdList idList, QContent::ChangeType ct);
+signals:
+    void contentChangedSignal(QContentIdList idList, QContent::ChangeType ct);
+};
+
 class QtopiaApplicationData {
 public:
     QtopiaApplicationData() : pressHandler(0),
-        kbgrabber(0), kbregrab(false), notbusysent(false),
+        notbusysent(false),
         preloaded(false), nomaximize(false), noshow(false),
         qpe_main_widget(0), skiptimechanged(0), qpe_system_locale(0),
         lifeCycle(0)
+#ifndef QT_NO_SXE
+        , sxeAuthorizerRole( QtopiaApplication::SxeAuthorizerClientOnly )
+#endif
 #ifdef QTOPIA_DBUS_IPC
         , m_appChannel(0)
+#else
+        , qcopQok(false)
 #endif
-#ifndef QTOPIA_DBUS_IPC
-                , qcopQok(false)
-#endif
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         , editMenu(0)
         , calendarMenu(0)
-#endif
         , sysChannel(0), pidChannel(0)
+        , contentChangedChannel(0)
+        , remapKeys(false)
+#if defined(GREENPHONE_EFFECTS) && defined(QT_QWS_GREENPHONE)
+        , m_greenphoneEffects(0)
+#endif
     {
+#if !defined(QT_NO_SXE) && QT_VERSION < 0x040400
+        authorizerInitialized.init( 0 );
+#endif
+        loadKeyRemapTable();
     }
 
     PressTickWidget *pressHandler;
-    int kbgrabber;
-    bool kbregrab;
     bool notbusysent;
     QString appName;
     QString appFullPath;
@@ -1021,20 +1455,24 @@ public:
     bool nomaximize;
     bool noshow;
 
-    QWidget* qpe_main_widget;
+    QPointer<QWidget> qpe_main_widget;
     QPointer<QWidget> lastraised;
     int skiptimechanged;
     QtopiaSystemLocale *qpe_system_locale;
     QtopiaApplicationLifeCycle *lifeCycle;
-#if defined QTOPIA_TEST && ! defined QTOPIA_CONTENT_INSTALLER
-    QtopiaSystemTestSlave app_slave;
+
+#ifndef QT_NO_SXE
+#if QT_VERSION < 0x040400
+    QBasicAtomic authorizerInitialized;
+#else
+    QAtomicInt authorizerInitialized;
+#endif
+    QtopiaApplication::SxeAuthorizerRole sxeAuthorizerRole;
 #endif
 
 #ifdef QTOPIA_DBUS_IPC
     DBUSQtopiaApplicationChannel *m_appChannel;
-#endif
-
-#ifndef QTOPIA_DBUS_IPC
+#else
     bool qcopQok;
     QQueue<QCopRec*> qcopq;
 
@@ -1070,140 +1508,40 @@ public:
 
         QSize sh = d->sizeHint();
 
-#ifdef QTOPIA_PDA
-        if ( d->parentWidget() && !d->parentWidget()->topLevelWidget()->isMaximized() )
-            nomax = true;
-#endif
-
         QDesktopWidget *desktop = QApplication::desktop();
         int screen = desktop->screenNumber(d);
         if (d->parentWidget())
             screen = desktop->screenNumber(d->parentWidget());
+        QRect screenRect(desktop->screenGeometry(screen));
         QRect desktopRect(desktop->availableGeometry(screen));
         QRect fg = d->frameGeometry();
         QRect cg = d->geometry();
         int frameWidth = fg.width() - cg.width();
         int maxY = desktopRect.height() - (fg.height() - cg.height());
-        int h = sh.height();
-        h = qMax(h,d->heightForWidth(desktopRect.width()-frameWidth));
+        int h = -1;
+        if (d->layout() && d->layout()->hasHeightForWidth())
+            h = d->heightForWidth(desktopRect.width()-frameWidth);
+        if (h == -1)
+            h = sh.height();
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-        if ( h >= maxY || ((!nomax) && (h > desktopRect.height()*3/5)) || (d->windowFlags()&Qt::WindowStaysOnTopHint)) {
+        if ( d->isMaximized() || h >= maxY || ((!nomax) && (h > desktopRect.height()/2)) || (d->windowFlags()&Qt::WindowStaysOnTopHint)) {
             if (desktop->screenNumber(d) != screen)
                 d->setGeometry(desktopRect); // appear on the correct screen
+            d->setMaximumSize(screenRect.width(), screenRect.height());
             d->showMaximized();
         } else {
-            d->show();
             fg = d->frameGeometry();
             cg = d->geometry();
             int lb = cg.left()-fg.left()+desktopRect.left();
             int bb = fg.bottom() - cg.bottom();
             d->setFixedSize(desktopRect.width() - frameWidth, h);
-            d->setGeometry(lb, desktopRect.bottom() - h - bb + 1,
-                    desktopRect.width() - frameWidth, h);
+            QRect geom(lb, desktopRect.bottom() - h - bb + 1,
+                       desktopRect.width() - frameWidth, h);
+            d->setGeometry(geom);
+            d->show();
         }
 //        d->raise();
 //        d->activateWindow();
-#else
-        int w = qMax(sh.width(),d->width());
-        int maxX = desktopRect.width() - frameWidth;
-
-        if ( (w >= maxX && h >= maxY) || ( (!nomax) && ( w > desktopRect.width()*3/4 || h > desktopRect.height()*3/4 ) ) ) {
-            d->showMaximized();
-        } else {
-            // try centering the dialog around its parent
-            QPoint p(0,0);
-            if ( d->parentWidget() ) {
-                QPoint pp = d->parentWidget()->mapToGlobal( QPoint(0,0) );
-                p = QPoint( pp.x() + d->parentWidget()->width()/2,
-                        pp.y() + d->parentWidget()->height()/ 2 );
-            } else {
-                p = QPoint( maxX/2, maxY/2 );
-            }
-
-            p = QPoint( p.x() - w/2, p.y() - h/2 );
-
-            if ( w >= maxX ) {
-                if ( p.y() < 0 )
-                    p.setY(0);
-                if ( p.y() + h > maxY )
-                    p.setY( maxY - h);
-
-                d->resize(maxX, h);
-                d->move(0, p.y() );
-            } else if ( h >= maxY ) {
-                if ( p.x() < 0 )
-                    p.setX(0);
-                if ( p.x() + w > maxX )
-                    p.setX( maxX - w);
-
-                d->resize(w, maxY);
-                d->move(p.x(),0);
-            } else {
-                d->resize(w, h);
-            }
-
-            d->show();
-        }
-#endif
-    }
-
-    static void show_mx(QWidget* mw, bool nomaximize, QString &strName)
-    {
-        Q_UNUSED( strName );
-
-        if ( mw->isVisible() ) {
-            mw->raise();
-            mw->activateWindow();
-        } else {
-            QDialog *dialog = qobject_cast<QDialog*>(mw);
-#ifdef QTOPIA_PHONE
-            if (dialog) {
-                qpe_show_dialog(dialog,nomaximize);
-            } else {
-                if ( !nomaximize )
-                    mw->showMaximized();
-                else
-                    mw->show();
-            }
-#else
-            if (dialog) {
-                bool max;
-                QPoint p;
-                QSize s;
-                if ( read_widget_rect(strName, max, p, s) && validate_widget_size(mw, p, s) ) {
-                    mw->resize(s);
-                    mw->move(p);
-
-                    if ( max && !nomaximize )
-                        mw->showMaximized();
-                    else
-                        mw->show();
-                } else
-                    qpe_show_dialog(dialog,nomaximize);
-            } else {
-                bool max;
-                QPoint p;
-                QSize s;
-                if ( read_widget_rect(strName, max, p, s) && validate_widget_size(mw, p, s) ) {
-                    mw->resize(s);
-                    mw->move(p);
-                } else {    //no stored rectangle, make an estimation
-                    QDesktopWidget *desktop = QApplication::desktop();
-                    QRect desktopRect(desktop->availableGeometry(desktop->primaryScreen()));
-                    int x = (desktopRect.width()-mw->frameGeometry().width())/2;
-                    int y = (desktopRect.height()-mw->frameGeometry().height())/2;
-                    mw->move( qMax(x,0), qMax(y,0) );
-                    if ( !nomaximize )
-                        mw->showMaximized();
-                }
-                if ( max && !nomaximize )
-                    mw->showMaximized();
-                else
-                    mw->show();
-            }
-#endif
-        }
     }
 
     static bool read_widget_rect(const QString &app, bool &maximized, QPoint &p, QSize &s)
@@ -1301,33 +1639,21 @@ public:
         cfg.setValue( app, s );
     }
 
-    static bool setWidgetCaptionFromAppName( QWidget* /*mw*/, const QString& /*appName*/, const QString& /*appsPath*/ )
+    static bool setWidgetCaptionFromAppName( QWidget *mw, const QString &appName )
     {
-    /*
-        // This works but disable it for now until it is safe to apply
-        // What is does is scan the .desktop files of all the apps for
-        // the applnk that has the corresponding argv[0] as this program
-        // then it uses the name stored in the .desktop file as the caption
-        // for the main widget. This saves duplicating translations for
-        // the app name in the program and in the .desktop files.
-
-        AppLnkSet apps( appsPath );
-
-        QList<AppLnk> appsList = apps.children();
-        for ( QListIterator<AppLnk> it(appsList); it.current(); ++it ) {
-            if ( (*it)->exec() == appName ) {
-                mw->setIcon( (*it)->pixmap() );
-                mw->setCaption( (*it)->name() );
-                return true;
-            }
+        QContent c(appName,false);
+        if ( !c.isNull() ) {
+            mw->setWindowIcon( c.icon() );
+            mw->setWindowTitle( c.name() );
+            return true;
         }
-    */
         return false;
     }
 
     void show(QWidget* mw, bool nomax)
     {
-        setWidgetCaptionFromAppName( mw, appName, Qtopia::qtopiaDir() + QLatin1String("apps") );
+        if (mw->windowTitle().isEmpty())
+            setWidgetCaptionFromAppName( mw, appName );
         nomaximize = nomax;
         qpe_main_widget = mw;
 
@@ -1336,14 +1662,27 @@ public:
         sendQCopQ();
 #endif
 
-        show_mx(mw, nomax, appName);
+        if ( qpe_main_widget ) {
+            if ( !qpe_main_widget->isVisible() ) {
+                if ( !nomaximize )
+                    qpe_main_widget->showMaximized();
+                else
+                    qpe_main_widget->show();
+            }
+            qpe_main_widget->raise();
+            qpe_main_widget->activateWindow();
+        }
     }
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     static void updateContext(QWidget *w)
     {
         if (!w->hasEditFocus())
             return;
+        if (ContextKeyManager::instance()->haveLabelForWidget(w, Qt::Key_Back, w->hasEditFocus()))
+            return;
+        if (ContextKeyManager::instance()->findHelper(w))
+            return;
+#ifndef QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
         QLineEdit *l = qobject_cast<QLineEdit*>(w);
         if (!l && w->inherits("QSpinBox"))
             l = ((QSpinBoxLineEditAccessor*)w)->getLineEdit();
@@ -1352,7 +1691,7 @@ public:
         if (l) {
             if (l->text().length() == 0 || l->isReadOnly())
                 ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::RevertEdit);
-            else if (l->cursorPosition() == 0)
+            else if (l->cursorPosition() == 0 && !l->hasSelectedText())
                 ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::NoLabel);
             else
                 ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::BackSpace);
@@ -1361,18 +1700,24 @@ public:
             if (l->document()->isEmpty() || l->isReadOnly()) {
                 ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::RevertEdit);
             } else {
-                if (l->textCursor().position() == 0)
+                QTextCursor cursor = l->textCursor();
+                if (cursor.position() == 0 && !cursor.hasSelection())
                     ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::NoLabel);
                 else
                     ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::BackSpace);
             }
         }
+#endif // QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
     }
-#endif
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     static void updateButtonSoftKeys(QWidget *w)
     {
+#ifdef QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
+        Q_UNUSED(w);
+#else
+        if(ContextKeyManager::instance()->findHelper(w)){
+            return;
+        };
         QAbstractButton *b = qobject_cast<QAbstractButton*>(w);
         if (b && b->isCheckable()) {
             if (w->inherits("QCheckBox")) {
@@ -1382,10 +1727,15 @@ public:
                     ContextKeyManager::instance()->setStandard(w, Qt::Key_Select, QSoftMenuBar::Select);
             }
         }
+#endif // QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
     }
 
     static void updateBrowserSoftKeys(QWidget *w)
     {
+        if(ContextKeyManager::instance()->findHelper(w)){
+            return;
+        };
+#ifndef QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
         QTextBrowser *tb = qobject_cast<QTextBrowser*>(w);
         if (!tb || ContextKeyManager::instance()->haveCustomLabelForWidget(w, Qt::Key_Select, w->hasEditFocus()))
             return;
@@ -1395,31 +1745,74 @@ public:
         } else {
             ContextKeyManager::instance()->setStandard(w, Qt::Key_Select, QSoftMenuBar::NoLabel);
         }
+#endif // QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
     }
-#endif
 
-#ifdef Q_WS_QWS
+    void loadKeyRemapTable()
+    {
+        // This function loads key remappings from defaultbuttons.conf,
+        // which is used to translate raw key codes into the special codes
+        // that Qtopia expects.  Normally this isn't required because the
+        // device vendor will set up the mappings correctly at the keyboard
+        // driver level.  However, if Qtopia applications are running under
+        // a foreign launcher environment, it may not be possible to map
+        // the keys at the driver level.  The following is an example:
+        //
+        //      [RemapKeys]
+        //      Back=Esc
+        //      Context1=F4
+        //      Select=Return
+        //
+        QSettings config(Qtopia::defaultButtonsFile(), QSettings::IniFormat);
+        config.beginGroup( QLatin1String("RemapKeys") );
+        QStringList keys = config.childKeys();
+        foreach (QString key, keys) {
+            int from = QKeySequence(config.value(key).toString())[0];
+            int to = QKeySequence(key)[0];
+            if (from != 0 && to != 0)
+                keyRemapper.insert(from, to);
+        }
+        remapKeys = !keyRemapper.isEmpty();
+    }
+
     const char *appKey;
 
     QString styleName;
-#endif
     QString decorationName;
     QString decorationTheme;
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QPointer<QMenu> editMenu;
     QPointer<CalendarMenu> calendarMenu;
-    QBasicTimer singleFocusTimer;
-# ifdef QTOPIA_ENABLE_FADE_IN_WINDOW
+#ifdef QTOPIA_ENABLE_FADE_IN_WINDOW
     QBasicTimer fadeInTimer;
     double fadeInOpacity;
     QPointer<QWidget> fadeInWidget;
-# endif
 #endif
     QFileResourceFileEngineHandler *fileengine;
+#ifdef POPUP_SHADOWS
     QMap<QWidget*,ShadowWidget*> shadowMap;
+#endif
 
     QtopiaChannel *sysChannel;
     QtopiaChannel *pidChannel;
+    QContentChangedChannel *contentChangedChannel;
+
+    bool remapKeys;
+    QMap<int, int> keyRemapper;
+
+#ifdef Q_WS_X11
+    QList<QtopiaApplication::X11EventFilter *> x11Filters;
+#endif
+#if defined(GREENPHONE_EFFECTS) && defined(QT_QWS_GREENPHONE)
+    FadeThread * greenphoneEffects()
+    {
+        if(!m_greenphoneEffects)
+            m_greenphoneEffects = new FadeThread(0);
+        return m_greenphoneEffects;
+    }
+    FadeThread *m_greenphoneEffects;
+#endif
+    QBasicTimer focusOutTimer;
+    QPointer<QWidget> focusOutWidget;
 };
 
 int qtopia_muted=0;
@@ -1438,7 +1831,6 @@ static void setVolume(int t=0, int percent=-1)
                 qtopia_muted = cfg.value(QLatin1String("Muted"),false).toBool();
             }
             int fd = 0;
-#ifndef Q_OS_WIN32
             if ((fd = open("/dev/mixer", O_RDWR))>=0) { // Some devices require this, O_RDONLY doesn't always work
                 int vol = qtopia_muted ? 0 : percent;
                 // set both channels to same volume
@@ -1446,22 +1838,6 @@ static void setVolume(int t=0, int percent=-1)
                 ioctl(fd, MIXER_WRITE(0), &vol);
                 ::close(fd);
             }
-#else
-            HWAVEOUT handle;
-            WAVEFORMATEX formatData;
-            formatData.cbSize = sizeof(WAVEFORMATEX);
-            formatData.wFormatTag = WAVE_FORMAT_PCM;
-            formatData.nAvgBytesPerSec = 4 * 44000;
-            formatData.nBlockAlign = 4;
-            formatData.nChannels = 2;
-            formatData.nSamplesPerSec = 44000;
-            formatData.wBitsPerSample = 16;
-            waveOutOpen(&handle, WAVE_MAPPER, &formatData, 0L, 0L, CALLBACK_NULL);
-            int vol = qtopia_muted ? 0 : percent;
-            unsigned int volume = (vol << 24) | (vol << 8);
-            waveOutSetVolume( handle, volume );
-            waveOutClose( handle );
-#endif
         } break;
     }
 #endif
@@ -1476,17 +1852,17 @@ static void setVolume(int t=0, int percent=-1)
 
   By using QtopiaApplication instead of QApplication, a standard Qt
   application becomes a Qtopia application. It automatically follows
-  style changes, quits and raises, and in the case of 
+  style changes, quits and raises, and in the case of
   \l {Qtopia - Main Document Widget}{document-oriented} applications,
   changes the currently displayed document in response to the environment.
 
-  The QtopiaApplication class also controls the life cycle of a Qtopia 
-  application.  Applications are automatically started by Qtopia when a QCop 
+  The QtopiaApplication class also controls the life cycle of a Qtopia
+  application.  Applications are automatically started by Qtopia when a QCop
   message or service request is sent to their application channel.  The QCop
-  application channel is an implicit, application specific channel of the form 
+  application channel is an implicit, application specific channel of the form
   \c {QPE/Application/<application name>}.
 
-  Conceptually a Qtopia application will continue running as long as it has 
+  Conceptually a Qtopia application will continue running as long as it has
   work to do.  Concretely, it will not terminate so long as;
 
   \list 1
@@ -1495,23 +1871,23 @@ static void setVolume(int t=0, int percent=-1)
   \i The application has running "tasks"
   \endlist
 
-  Visible UI is defined as top level widgets that are not 
-  \l QWidget::isHidden() hidden, although they may be obscured by other 
-  windows.  Most UI-centric applications can rely on the visible UI rule to 
+  Visible UI is defined as top level widgets that are not
+  \l QWidget::isHidden() hidden, although they may be obscured by other
+  windows.  Most UI-centric applications can rely on the visible UI rule to
   implicitly indicate to QtopiaApplication that there is still "work to do", and
   thus correctly manage their execution.  As the user explores the application,
-  new windows (or widgets in the case of an application that utilizes 
-  QStackedWidget) are created and when they back out, each window is closed 
+  new windows (or widgets in the case of an application that utilizes
+  QStackedWidget) are created and when they back out, each window is closed
   until none remain and the application terminates.
 
-  Conversely, tasks are used by an application to explicitly communicate to 
-  QtopiaApplication that there is still work to do.  Tasks are used by 
+  Conversely, tasks are used by an application to explicitly communicate to
+  QtopiaApplication that there is still work to do.  Tasks are used by
   applications that need to continue to run even if they are displaying no UI.
   System daemons or background applications that respond to service requests
   but otherwise display no UI, are obvious cases, but even traditionally UI-centric
-  applications may need to continue after the user has "closed" them to 
+  applications may need to continue after the user has "closed" them to
   complete, for example, transmitting a file or saving state.  Applications
-  may register and unregister tasks at any time by calling the 
+  may register and unregister tasks at any time by calling the
   registerRunningTask() and unregisterRunningTask() methods.
 
   There are two optimizations to the conceptual life cycle model.  To improve 
@@ -1529,18 +1905,18 @@ static void setVolume(int t=0, int percent=-1)
   PreloadApps=addressbook,qtmail
   \endcode
 
-  Lazy application shutdown is a similar, system-wide optimization.  When 
-  enabled, applications will continue running in a hidden state even if they 
-  have no work to do until they are explicitly shutdown by the Qtopia system 
+  Lazy application shutdown is a similar, system-wide optimization.  When
+  enabled, applications will continue running in a hidden state even if they
+  have no work to do until they are explicitly shutdown by the Qtopia system
   server when the system becomes too loaded, or too many such applications are
-  superfluously running.  While preloaded applications allow a system 
-  configurator to improve performance of a preselected few applications, the 
-  rationale behind lazy application shutdown is to allow the system to 
-  dynamically tune itself to improve performance of the most frequently run 
+  superfluously running.  While preloaded applications allow a system
+  configurator to improve performance of a preselected few applications, the
+  rationale behind lazy application shutdown is to allow the system to
+  dynamically tune itself to improve performance of the most frequently run
   applications.  For example, if the user constantly switched between the
-  \c addressbook and \c todo applications, these would remain in the lazy 
-  shutdown state which would improve the startup time of subsequent 
-  "launches".  To enable lazy application shutdown, set the 
+  \c addressbook and \c todo applications, these would remain in the lazy
+  shutdown state which would improve the startup time of subsequent
+  "launches".  To enable lazy application shutdown, set the
   \c {AppLoading/LazyShutdown} key in the \c {Trolltech/Launcher} configuration
   file to true.  For example,
 
@@ -1548,6 +1924,9 @@ static void setVolume(int t=0, int percent=-1)
   [AppLoading]
   LazyShutdown=true
   \endcode
+
+  For information on creating a new application to run within Qtopia, see
+  \l {Tutorial: Creating a New Application}{Creating a New Application}.
 
   \ingroup environment
 */
@@ -1749,15 +2128,10 @@ void QtopiaApplication::unregisterRunningTask(QObject *taskObj)
 void QtopiaApplication::processQCopFile()
 {
     QString qcopfn = d->appName;
-#ifndef Q_OS_UNIX
-    if (QApplication::winVersion() == Qt::WV_98)
-        qcopfn = qcopfn.lower(); // append command name
-#endif
     qcopfn.prepend( Qtopia::tempDir() + "qcop-msg-" );
     QFile qcopfile(qcopfn);
 
     if ( qcopfile.open(QIODevice::ReadWrite) ) {
-#ifndef Q_OS_WIN32
 #ifdef QTOPIA_POSIX_LOCKS
         struct flock fl;
         fl.l_type = F_WRLCK;
@@ -1773,7 +2147,6 @@ void QtopiaApplication::processQCopFile()
             qWarning("Could not acquire lock: %d %s", errno, strerror(errno));
         }
 #endif
-#endif
         QDataStream ds( &qcopfile );
         QString channel, message;
         QByteArray data;
@@ -1782,7 +2155,6 @@ void QtopiaApplication::processQCopFile()
             d->enqueueQCop(channel,message,data);
         }
         Qtopia::truncateFile(qcopfile, 0);
-#ifndef Q_OS_WIN32
         qcopfile.flush();
 #ifdef QTOPIA_POSIX_LOCKS
         fl.l_type = F_UNLCK;
@@ -1793,7 +2165,6 @@ void QtopiaApplication::processQCopFile()
         if (flock(qcopfile.handle(), LOCK_UN) == -1) {
             qWarning("Could not release lock: %d %s", errno, strerror(errno));
         }
-#endif
 #endif
     }
 }
@@ -1851,12 +2222,6 @@ void QtopiaApplication::loadTranslations( const QStringList& qms )
 }
 #endif
 
-#ifdef QTOPIA4_TODO
-#if defined (Q_WS_QWS)
-extern bool qt_lineedit_password_visible_on_focus;
-#endif
-#endif
-
 /*!
   Returns a pointer to the application's QtopiaApplication instance.
  */
@@ -1868,7 +2233,7 @@ QtopiaApplication *QtopiaApplication::instance()
     if(!check) {
         if(qApp) {
             instance = qobject_cast<QtopiaApplication *>(qApp);
-            check = true;
+            check = (bool)instance;
         }
     }
 
@@ -1877,36 +2242,29 @@ QtopiaApplication *QtopiaApplication::instance()
 
 /*!
   Constructs a QtopiaApplication just as you would construct
-  a QApplication, passing \a argc, \a argv, and \a t.
-
-  For applications, \a t should be the default, GuiClient. Only
-  the Qtopia server passes GuiServer.
+  a QApplication, passing \a argc and \a argv.
 */
-QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
-    : QApplication( argc, argv, t )
+QtopiaApplication::QtopiaApplication( int& argc, char **argv)
+: QApplication( argc, argv, GuiClient), d(0)
 {
-#ifdef QTOPIA4_TODO
-#if defined (Q_WS_QWS)
-    // pdas and phones have uncertain input, so as long as line edit
-    // has focus, should be able to see password text.
-    qt_lineedit_password_visible_on_focus = true;
-#endif
+    init(argc, argv, GuiClient);
+}
+
+/*! \internal */
+QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
+: QApplication( argc, argv, t ), d(0)
+{
+    init(argc, argv, t);
+}
+
+void QtopiaApplication::init(int argc, char **argv, Type t)
+{
+#ifdef Q_WS_X11
+    // Start up the QCop server under X11.
+    if ( t == GuiServer )
+        new QCopServer(this);
 #endif
 
-#ifdef Q_WS_QWS
-#ifndef QT_NO_SXE
-    {
-        QTransportAuth *a = QTransportAuth::getInstance();
-        SXEPolicyManager *p = SXEPolicyManager::getInstance();
-        QString confPath = QPackageRegistry::getInstance()->sxeConfPath();
-        a->registerPolicyReceiver( p );
-        a->setKeyFilePath( confPath );  // this is now the dir, not the file
-        a->setLogFilePath( Qtopia::tempDir() + QLatin1String("sxe_discovery.log") );
-        a->setPackageRegistry( QPackageRegistry::getInstance() );
-    }
-#endif
-#endif
-    
 #ifdef QTOPIA_KEYPAD_NAVIGATION
     //NOTE: need to figure out keypad navigation before calling applyStyle
     QSettings config(Qtopia::defaultButtonsFile(), QSettings::IniFormat);
@@ -1919,6 +2277,15 @@ QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
 #endif
 
     d = new QtopiaApplicationData;
+#ifdef QTOPIA_USE_TEST_SLAVE
+    /* Instantiate a test slave */
+    testSlave();
+#endif
+
+#ifndef QT_NO_SXE
+    if ( type() == GuiServer )
+        setSxeAuthorizerRole( SxeAuthorizerServerOnly );
+#endif
 
     setFont( QFont( QLatin1String("helvetica"), 9, QFont::Normal ) );
 
@@ -1926,13 +2293,14 @@ QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
 
     applyStyle();
 
+    connect(desktop(), SIGNAL(workAreaResized(int)), this, SLOT(updateDialogGeometry()));
+
     QApplication::setQuitOnLastWindowClosed(false);
 
-#if defined(Q_WS_QWS) && defined(Q_OS_UNIX)
     QString dataDir(Qtopia::tempDir());
     if ( mkdir( dataDir.toLatin1(), 0700 ) ) {
         if ( errno != EEXIST ) {
-            qFatal( QString("Cannot create Qtopia data directory: %1")
+            qFatal( QString("Cannot create Qtopia data directory with permissions 0700: %1")
                     .arg( dataDir ).toLatin1().constData() );
         }
     }
@@ -1950,9 +2318,8 @@ QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
                 .arg( getuid() ).arg( dataDir ).toLatin1().constData() );
 
     if ( (buf.st_mode & 0677) != 0600 )
-        qFatal( QString( "Qtopia data directory has incorrect permissions: %1" )
+        qFatal( QString( "Qtopia data directory has incorrect permissions (expecting 0700): %1" )
                 .arg( dataDir ).toLatin1().constData() );
-#endif
 
 #ifdef QTOPIA_DBUS_IPC
     // Connect to the session bus as early as possible
@@ -1965,26 +2332,13 @@ QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
 
     QPixmapCache::setCacheLimit(256);  // sensible default for smaller devices.
 
-#ifdef QTOPIA4_TODO
-    QMimeSourceFactory::setDefaultFactory(new ResourceMimeFactory);
-#endif
-
     d->sysChannel = new QtopiaChannel( QLatin1String("QPE/System"), this );
-    connect( d->sysChannel, SIGNAL(received(const QString&,const QByteArray&)),
-             this, SLOT(systemMessage(const QString&,const QByteArray&)) );
+    connect( d->sysChannel, SIGNAL(received(QString,QByteArray)),
+             this, SLOT(systemMessage(QString,QByteArray)) );
 
-#if defined(Q_WS_QWS)
     initApp( argc, argv );
-#endif
 
     d->qpe_system_locale = new QtopiaSystemLocale();
-#if QT_VERSION < 0x040200
-    QLocale::setSystemLocale(d->qpe_system_locale);
-#else
-    //nothing to do here
-    //The QSystemLocale constructor installs itself
-    //and removes any earlier installed system locale
-#endif
 
 #ifndef QT_NO_TRANSLATION
     QStringList qms;
@@ -1996,6 +2350,10 @@ QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
     loadTranslations(qms);
 #endif
 
+#ifndef QTOPIA_HOST
+    QtopiaSql::instance()->connectDiskChannel();
+#endif
+
     QContentUpdateManager::instance();
 
     if ( type() == GuiServer ) {
@@ -2003,10 +2361,8 @@ QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
     }
 
     installEventFilter( this );
-
 }
 
-#if defined(Q_WS_QWS)
 /*!
     \internal
 */
@@ -2026,8 +2382,8 @@ void QtopiaApplication::initApp( int argc, char **argv )
         delete d->m_appChannel;
 
     d->m_appChannel = new DBUSQtopiaApplicationChannel(d->appName, this);
-    connect(d->m_appChannel, SIGNAL(received(const QString &, const QByteArray &)),
-            this, SLOT(pidMessage(const QString &, const QByteArray &)));
+    connect(d->m_appChannel, SIGNAL(received(QString,QByteArray)),
+            this, SLOT(pidMessage(QString,QByteArray)));
 #endif
 
     if(type() != GuiServer) {
@@ -2049,13 +2405,15 @@ void QtopiaApplication::initApp( int argc, char **argv )
 
     loadTranslations(QStringList()<<channel);
 
+#ifdef Q_WS_QWS
     qt_fbdpy->setIdentity( channel ); // In E 2.3.6
+#endif
 
 #ifndef QTOPIA_DBUS_IPC
     channel = QLatin1String("QPE/pid/") + QString::number(getpid());
     d->pidChannel = new QtopiaChannel( channel, this);
-    connect( d->pidChannel, SIGNAL(received(const QString&,const QByteArray&)),
-            this, SLOT(dotpidMessage(const QString&,const QByteArray&)));
+    connect( d->pidChannel, SIGNAL(received(QString,QByteArray)),
+            this, SLOT(dotpidMessage(QString,QByteArray)));
 #endif
 
     {
@@ -2080,8 +2438,69 @@ void QtopiaApplication::initApp( int argc, char **argv )
         }
     }
 
+#ifdef Q_WS_QWS
     /* overide stored arguments */
     setArgs(argc, argv);
+#endif
+}
+
+/*!
+    \enum QtopiaApplication::SxeAuthorizerRole
+
+    Specifies whether to create SXE Authorizer resources in this Qtopia Application.
+
+    \value SxeAuthorizerClientOnly  No SXE Authorizer resources required, only acts as a client
+    \value SxeAuthorizerServerAndClient  Authorizer resources required, also acts as a client of other authorizers
+    \value SxeAuthorizerServerOnly  Authorizer resources required.
+*/
+
+#if !defined(QT_NO_SXE) || defined(Q_QDOC)
+/*!
+  Returns this applications QtopiaApplication::SxeAuthorizerRole.  In general
+  this will be SxeAuthorizerClientOnly for all but a few applications such as the
+  qpe server, mediaserver, and other applications which must authorize requests
+  using SXE.
+
+  \sa QtopiaApplication::SxeAuthorizerRole
+*/
+QtopiaApplication::SxeAuthorizerRole QtopiaApplication::sxeAuthorizerRole() const
+{
+    return d->sxeAuthorizerRole;
+}
+
+/*!
+  Sets this applications QtopiaApplication::SxeAuthorizerRole to \a role.  In general
+  this should not be required for all but a few applications such as the
+  mediaserver, and other applications which must authorize requests
+  using SXE; since the default value of SxeAuthorizerClientOnly will be correct.
+
+  The qpe server (actually any app for which type() is GuiServer) will
+  default to SxeAuthorizerServerOnly.
+
+  \sa QtopiaApplication::SxeAuthorizerRole
+*/
+void QtopiaApplication::setSxeAuthorizerRole( SxeAuthorizerRole role )
+{
+#if QT_VERSION < 0x040400
+    if ( !d->authorizerInitialized.testAndSet( 0, 1 ))
+#else
+    if ( !d->authorizerInitialized.testAndSetRelaxed( 0, 1 ))
+#endif
+    {
+        qWarning( "cannot set authorizer status after initialization!!" );
+        return;
+    }
+    d->sxeAuthorizerRole = role;
+    if ( role != SxeAuthorizerClientOnly )
+    {
+        QTransportAuth *a = QTransportAuth::getInstance();
+        SXEPolicyManager *p = SXEPolicyManager::getInstance();
+        QString confPath = QPackageRegistry::getInstance()->sxeConfPath();
+        a->registerPolicyReceiver( p );
+        a->setKeyFilePath( confPath );  // this is now the dir, not the file
+        a->setLogFilePath( Qtopia::tempDir() + QLatin1String("sxe_discovery.log") );
+        a->setPackageRegistry( QPackageRegistry::getInstance() );
+    }
 }
 #endif
 
@@ -2147,6 +2566,7 @@ QString QtopiaApplication::inputMethodHintParam( QWidget* widget )
     \value Number the widget needs numeric input.
     \value PhoneNumber the widget needs phone-style numeric input.
     \value Words the widget needs word input.
+    \value ProperNouns the widget needs proper names of peoples or places.
     \value Text the widget needs non-word input.
     \value Named the widget needs special input, defined by \c param.
         Each input method may support a different range of special
@@ -2156,7 +2576,8 @@ QString QtopiaApplication::inputMethodHintParam( QWidget* widget )
     By default, QLineEdit and QTextEdit have the Words hint
     unless they have a QIntValidator, in which case they have the Number hint.
     This is appropriate for most cases, including the input of names (new
-    names being added to the user's dictionary).
+    names are added to the user's dictionary by switching to text mode and 
+    entering them as usual).
     All other widgets default to Normal mode.
 
     \sa inputMethodHint(), setInputMethodHint()
@@ -2168,8 +2589,6 @@ QString QtopiaApplication::inputMethodHintParam( QWidget* widget )
     \value Disable all power saving functions are disabled.
     \value DisableLightOff the screen's backlight will not be turned off
         (dimming remains active).
-    \value DisableReturnToHomeScreen the device will not go back to the
-        homescreen (phone edition only).
     \value DisableSuspend the device will not suspend
     \value Enable all power saving functions are enabled.
 
@@ -2186,7 +2605,7 @@ QString QtopiaApplication::inputMethodHintParam( QWidget* widget )
   specified by \a named. Such methods are input-method-specific and
   are defined by the files in [qt_prefix]/etc/im/ for each input method.
 
-  For example, the phone key input method includes support for the
+  For example, the phone-keys input method includes support for the
   named input methods:
 
 \list
@@ -2199,8 +2618,31 @@ QString QtopiaApplication::inputMethodHintParam( QWidget* widget )
   phone keys to characters (such as making "\c{@}" easier to input), and to
   add additional \i words to the recognition word lists, such as: \i www.
 
-  If the current input method doesn't understand the hint, it will be
-  ignored.
+  \bold{Note:} If the current input method doesn't understand the hint, 
+  it will be ignored.
+
+  In addition, Qtopia supports auxiliary hints.  These modify the hint 
+  without overriding it, and are appended to the hint, separated by 
+  whitespace.
+
+  For example, the phone-keys input method includes support for the 
+  following auxiliary hints:
+
+  \table
+    \header \o name \o Description
+    \row \o autocapitalization \o The first word of the field, and the first
+    word of a sentence have their first letter capitalized.
+    \row \o noautocapitalization \o All words not capitalized by the user are
+    in lower-case
+    \row \o propernouns \o The first letter of every word is capitalized (propernouns can
+    be used as either an auxiliary hint, e.g. "text autocapitalization propernouns"
+    or as a hint on it's own, in which case autocapitalization and words are
+    implied).
+  \endtable
+
+  Specific input methods may ignore these auxiliary hints, or only handle
+  some of them. Like all hints, if the input method does not understand the
+  hint, it will ignore it.
 
   \sa inputMethodHint(), InputMethodHint
 */
@@ -2265,7 +2707,6 @@ void QtopiaApplication::hideInputMethod()
     QtopiaChannel::send( QLatin1String("QPE/InputMethod"), QLatin1String("hideInputMethod()") );
 }
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 static bool isSingleFocusWidget(QWidget *focus)
 {
     bool singleFocusWidget = false;
@@ -2289,7 +2730,7 @@ static bool isSingleFocusWidget(QWidget *focus)
     return singleFocusWidget;
 }
 
-#endif
+#ifdef Q_WS_QWS
 
 void QtopiaApplication::mapToDefaultAction( QWSKeyEvent *ke, int key )
 {
@@ -2303,20 +2744,20 @@ void QtopiaApplication::mapToDefaultAction( QWSKeyEvent *ke, int key )
     if ( activePopupWidget() && activePopupWidget()->inherits( "QMenu" ) )
         key = Qt::Key_Return;
 
-#ifdef Q_WS_QWS
     ke->simpleData.keycode = key;
-#else
-    Q_UNUSED( ke );
-#endif
 }
 
-#ifdef Q_WS_QWS
 /*!
   \internal
   Filters Qt event \a e to implement Qtopia-specific functionality.
 */
 bool QtopiaApplication::qwsEventFilter( QWSEvent *e )
 {
+#ifdef QTOPIA_USE_TEST_SLAVE
+    if (testSlave()) {
+        testSlave()->qwsEventFilter(e);
+    }
+#endif
     if ( type() == GuiServer ) {
         switch ( e->type ) {
             case QWSEvent::Mouse:
@@ -2325,56 +2766,7 @@ bool QtopiaApplication::qwsEventFilter( QWSEvent *e )
         }
     }
     if ( e->type == QWSEvent::Key ) {
-        if ( d->kbgrabber == 1 )
-            return true;
-#ifdef QTOPIA_PDA
-        QWSKeyEvent *ke = (QWSKeyEvent *)e;
-        if ( ke->simpleData.keycode == Qt::Key_F33 ) {
-            // Use special "OK" key to press "OK" on top level widgets
-            QWidget *active = activeWindow();
-            QWidget *popup = 0;
-            Qt::WindowFlags wf = active ? active->windowFlags() : (Qt::WindowFlags)0;
-            if ( active && (wf & Qt::Popup) == Qt::Popup) {
-                popup = active;
-                active = active->parentWidget();
-            }
-            if ( active && (int)active->winId() == ke->simpleData.window &&
-                    (wf & (Qt::Popup|Qt::Desktop)) == 0 ) {
-                if ( ke->simpleData.is_press ) {
-                    if ( popup )
-                        popup->close();
-                    if (QDialog *dlg = qobject_cast<QDialog*>(active)) {
-                        dlg->accept();
-                        return true;
-                    } else {
-                        QTimer::singleShot(0, active, SLOT(accept()));
-                    } else {
-                        // do the same as with the select key: Map to the default action of the widget:
-                        mapToDefaultAction( ke, Qt::Key_Return );
-                    }
-                }
-            }
-        } else if ( ke->simpleData.keycode == Qt::Key_F30 ) {
-            // Use special "select" key to do whatever default action a widget has
-            mapToDefaultAction( ke, Qt::Key_Space );
-        } else if ( ke->simpleData.keycode == Qt::Key_Escape &&
-                    ke->simpleData.is_press ) {
-            // Escape key closes app if focus on toplevel
-            QWidget *active = activeWindow();
-            Qt::WindowFlags wf = active ? active->windowFlags() : (Qt::WindowFlags)0;
-            if ( active && active->windowType() == Qt::Window &&
-                    (int)active->winId() == ke->simpleData.window &&
-                    (wf & (Qt::Popup|Qt::Desktop)) == 0 ) {
-                if (QDialog *dlg = qobject_cast<QDialog*>(active)) {
-                    dlg->reject();
-                    return true;
-                } else if ( strcmp( argv()[0], "embeddedkonsole") != 0 ) {
-                    active->close();
-                }
-            }
-        }
-#else
-# ifdef QT_QWS_SL5XXX
+#ifdef QT_QWS_SL5XXX
         QWSKeyEvent *ke = (QWSKeyEvent *)e;
         if ( ke->simpleData.keycode == Qt::Key_F33 )
             ke->simpleData.keycode = Qt::Key_Back;
@@ -2382,8 +2774,6 @@ bool QtopiaApplication::qwsEventFilter( QWSEvent *e )
             ke->simpleData.keycode = Qt::Key_Select;
         else if (ke->simpleData.keycode == Qt::Key_Escape)
             ke->simpleData.keycode = Qt::Key_Back;
-# endif
-
 #endif
     } else if ( e->type == QWSEvent::Focus ) {
         if ( !d->notbusysent ) {
@@ -2402,20 +2792,12 @@ bool QtopiaApplication::qwsEventFilter( QWSEvent *e )
                 active->close();
                 active = activeWindow();
             }
-            if ( !nfw && d->kbgrabber == 2 ) {
-                ungrabKeyboard();
-                d->kbregrab = true; // want kb back when we're active
-            }
         } else {
             // make sure our modal widget is ALWAYS on top
             QWidget *topm = activeModalWidget();
             if ( topm && (int)topm->winId() != fe->simpleData.window) {
                 topm->raise();
                 topm->activateWindow();
-            }
-            if ( d->kbregrab ) {
-                grabKeyboard();
-                d->kbregrab = false;
             }
         }
         if ( fe->simpleData.get_focus && inputMethodDict ) {
@@ -2425,19 +2807,90 @@ bool QtopiaApplication::qwsEventFilter( QWSEvent *e )
             if ( m == AlwaysOn )
                 QtopiaApplication::showInputMethod();
         }
-    } else if (e->type == QWSEvent::MaxWindowRect) {
-        QMetaObject::invokeMethod(this, "updateDialogGeometry", Qt::QueuedConnection);
     }
 
     return QApplication::qwsEventFilter( e );
 }
-#endif
+
+#endif // Q_WS_QWS
+
+#ifdef Q_WS_X11
+
+/*!
+  \class QtopiaApplication::X11EventFilter
+  \ingroup environment
+  \brief The X11EventFilter class provides an interface for filtering Qt Window System events.
+ */
+
+/*!
+  \fn QtopiaApplication::X11EventFilter::~X11EventFilter()
+  \internal
+ */
+
+/*!
+  \fn bool QtopiaApplication::X11EventFilter::x11EventFilter(XEvent *event)
+
+  Called when an X11 \a event is received.  Return true to filter the event, or
+  false to allow the event to continue propagation.
+  */
+
+/*!
+  Install the \a filter for X11 events.  Installing an event filter is
+  equivalent to deriving from QtopiaApplication directly and overriding the
+  QtopiaApplication::x11EventFilter() method.
+
+  Multiple X11 event filters may be installed simultaneously.  In this case,
+  each event filter is queried sequentially in the order it was installed.  If
+  any filter filters the event, subsequent filters will not be called.
+ */
+void QtopiaApplication::installX11EventFilter(X11EventFilter *filter)
+{
+    if (filter && d)
+        d->x11Filters.append(filter);
+}
+
+/*!
+  Remove all instances of \a filter from the list of event filters.  This method
+  should be called when an event filter is destroyed.  No automatic cleanup is
+  performed.
+ */
+void QtopiaApplication::removeX11EventFilter(X11EventFilter *filter)
+{
+    if (!filter || !d)
+        return;
+    QList<QtopiaApplication::X11EventFilter *>::Iterator it;
+    it = d->x11Filters.begin();
+    while (it != d->x11Filters.end()) {
+        if (*it == filter)
+            it = d->x11Filters.erase(it);
+        else
+            ++it;
+    }
+}
+
+/*!
+    \reimp
+*/
+bool QtopiaApplication::x11EventFilter(XEvent *e)
+{
+    if (d && !d->x11Filters.isEmpty()) {
+        foreach (QtopiaApplication::X11EventFilter *filter, d->x11Filters) {
+            if (filter->x11EventFilter(e))
+                return true;
+        }
+    }
+    return false;
+}
+
+#endif // Q_WS_X11
 
 /*!
   Destroys the QtopiaApplication.
 */
 QtopiaApplication::~QtopiaApplication()
 {
+    QContentUpdateManager::instance()->sendUpdate();
+
     if ( !d->notbusysent ) {
         // maybe we didn't map a window - still tell the server we're not
         // busy anymore.
@@ -2446,49 +2899,49 @@ QtopiaApplication::~QtopiaApplication()
             e << d->appName;
         }
     }
-    ungrabKeyboard();
-
     // Need to delete QtopiaChannels early, since the display will
     // be gone by the time we get to ~QObject().
     delete d->sysChannel;
     delete d->pidChannel;
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     delete d->editMenu;
     delete d->calendarMenu;
-#endif
     delete d;
+    d = 0;
 }
 
-#ifdef Q_WS_QWS
-#define setPaletteEntry(pal, cfg, role, defaultVal) \
-    setPalEntry(pal, cfg, #role, QPalette::role, defaultVal)
+#define setPaletteEntry(pal, cfg, role, defaultVal, defaultAlpha) \
+    setPalEntry(pal, cfg, #role, QPalette::role, defaultVal, defaultAlpha)
 static void setPalEntry( QPalette &pal, const QSettings &config, const QString &entry,
-                                QPalette::ColorRole role, const QString &defaultVal )
+                                QPalette::ColorRole role, const QString &defaultVal, int defaultAlpha )
 {
     QString value = config.value( entry, defaultVal ).toString();
-    if ( value[0] == '#' )
-        pal.setColor( role, QColor(value) );
-    else {
+    if ( value[0] == '#' ) {
+        QColor col(value);
+        if (role != QPalette::Window) {
+            // Setting alpha for Window color is very bad.
+            // We deal with this in the exported backgorund code.
+            int alpha = config.value(entry + "_alpha", QString::number(defaultAlpha)).toInt();
+            col.setAlpha(alpha);
+        }
+        pal.setColor(role, col);
+    } else {
         QPixmap pix;
         pix = QPixmap(QLatin1String(":image/")+value);
         pal.setBrush( role, QBrush(QColor(defaultVal), pix) );
     }
 }
-#endif
 
 /*!
   \internal
 */
 void QtopiaApplication::applyStyle()
 {
-#ifdef Q_WS_QWS
     QString styleName;
     QSettings config(QLatin1String("Trolltech"),QLatin1String("qpe"));
 
     config.beginGroup( QLatin1String("Appearance") );
 
-#ifdef QTOPIA_PHONE
     QString themeDir = Qtopia::qtopiaDir() + QLatin1String("etc/themes/");
     QString theme = config.value("Theme").toString(); // The server ensures this value is present and correct
 
@@ -2503,27 +2956,33 @@ void QtopiaApplication::applyStyle()
     d->fileengine->setIconPath( ip );
 
     styleName = config.value( QLatin1String("Style"), QLatin1String("phonestyle") ).toString();
-#else
-    styleName = config.value( QLatin1String("Style"), QLatin1String("Qtopia") ).toString();
-#endif
+
+    // Widget style; 0 if not a QtopiaStyle subclass
+    QtopiaStyle *style = internalSetStyle( styleName );
+    Q_UNUSED(style);
 
     // Colors
     // This first bit is same as settings/appearence/appearence.cpp, readColorScheme()
     QPalette tempPal;
-    setPaletteEntry( tempPal, config, Button, QLatin1String("#F0F0F0") );
-    setPaletteEntry( tempPal, config, Background, QLatin1String("#EEEEEE") );
+    setPaletteEntry( tempPal, config, Button, QLatin1String("#F0F0F0"), 176 );
+    setPaletteEntry( tempPal, config, Background, QLatin1String("#EEEEEE"), 64 );
     QPalette pal( tempPal.button().color(), tempPal.background().color() );
-    setPaletteEntry( pal, config, Button, QLatin1String("#F0F0F0") );
-    setPaletteEntry( pal, config, Background, QLatin1String("#EEEEEE") );
-    setPaletteEntry( pal, config, Base, QLatin1String("#FFFFFF") );
-    setPaletteEntry( pal, config, Highlight, QLatin1String("#8BAF31") );
-    setPaletteEntry( pal, config, Foreground, QLatin1String("#000000") );
+    setPaletteEntry( pal, config, Button, QLatin1String("#F0F0F0"), 176 );
+    setPaletteEntry( pal, config, Background, QLatin1String("#EEEEEE"), 64 );
+    setPaletteEntry( pal, config, Base, QLatin1String("#FFFFFF"), 176 );
+    setPaletteEntry( pal, config, AlternateBase, QLatin1String("#FFFFFF"), 176 );
+    setPaletteEntry( pal, config, Highlight, QLatin1String("#779e1f"), 176 );
+    setPaletteEntry( pal, config, Foreground, QLatin1String("#000000"), 255 );
     QString color = config.value( QLatin1String("HighlightedText"), QLatin1String("#FFFFFF") ).toString();
     pal.setColor( QPalette::HighlightedText, QColor(color) );
     color = config.value( QLatin1String("Text"), QLatin1String("#000000") ).toString();
     pal.setColor( QPalette::Text, QColor(color) );
     color = config.value( QLatin1String("ButtonText"), QLatin1String("#000000") ).toString();
     pal.setColor( QPalette::ButtonText, QColor(color) );
+    color = config.value( QLatin1String("Link"), QLatin1String("#0000FF") ).toString();
+    pal.setColor( QPalette::Link, QColor(color) );
+    color = config.value( QLatin1String("LinkVisited"), QLatin1String("#FF00FF") ).toString();
+    pal.setColor( QPalette::LinkVisited, QColor(color) );
 
     QString val = config.value( QLatin1String("Shadow") ).toString();
     if (!val.isEmpty()) {
@@ -2549,28 +3008,9 @@ void QtopiaApplication::applyStyle()
             pal.color(QPalette::Active, QPalette::Background).dark() );
     }
 
-    color = config.value( QLatin1String("AlternateBase"), QLatin1String("#EEF5D6") ).toString();
-    if ( color[0] == '#' )
-        pal.setColor( QPalette::AlternateBase, QColor(color));
-    else {
-        QPixmap pix;
-        pix = QPixmap(QLatin1String(":image/")+color);
-        pal.setBrush( QPalette::AlternateBase, QBrush(pix));
-    }
-
     setPalette( pal );
 
-    // Widget style; 0 if not a QtopiaStyle subclass
-    QtopiaStyle *style = internalSetStyle( styleName );
-
-#ifdef QTOPIA4_TODO
-    // Unpublished feature for now, since current windows will be broken.
-    // Need to go through all windows and poke QScrollViews to updateScrollbars.
-    extern bool qt_left_hand_scrollbars;
-    int lh = config.value( "LeftHand", 0 ).toInt();
-    qt_left_hand_scrollbars = lh;
-#endif
-
+#ifdef Q_WS_QWS
     // Window Decoration
     QString dec = config.value( QLatin1String("Decoration"), QLatin1String("Qtopia") ).toString();
     QString decTheme = config.value( QLatin1String("DecorationTheme"), QLatin1String("") ).toString();
@@ -2579,44 +3019,29 @@ void QtopiaApplication::applyStyle()
         d->decorationName = dec;
         d->decorationTheme = decTheme;
     }
+#endif
+    config.endGroup();
 
     // Font
-    QString ff = config.value( QLatin1String("FontFamily"), font().family() ).toString();
-    double fs = config.value( QLatin1String("FontSize"), font().pointSizeF() ).toDouble();
+    QTranslatableSettings trconfig(QLatin1String("Trolltech"),QLatin1String("qpe"));
+    trconfig.beginGroup( QLatin1String("Font") );
+    QString ff = trconfig.value( QLatin1String("FontFamily"), font().family() ).toString();
+    double fs = trconfig.value( QLatin1String("FontSize"), font().pointSizeF() ).toDouble();
+    qLog(I18n) << "Using font/size/language" << ff << fs << Qtopia::languageList();
     QFont fn(ff);
     fn.setPointSizeF(fs);
 
     setFont( fn );
 
-#ifdef QTOPIA_PHONE
     // text display of context menubar
-    config.endGroup();
     config.beginGroup( QLatin1String("ContextMenu") );
-    ContextKeyManager::instance()->setLabelType( (QSoftMenuBar::LabelType)config.value( QLatin1String("LabelType"), QSoftMenuBar::IconLabel ).toInt() );
-
-    if ( style ) {
-        QString path = themeCfg.value(QLatin1String("WidgetConfig")).toString();
-        style->setTheme(path.isEmpty() ? path : themeDir+path);
-    }
-#endif
-#endif
+    ContextKeyManager::instance()->setLabelType( (QSoftMenuBar::LabelType)config.value( QLatin1String("LabelType"), QSoftMenuBar::TextLabel ).toInt() );
 }
 
 void QtopiaApplication::systemMessage( const QString &msg, const QByteArray &data)
 {
-#ifdef Q_WS_QWS
     QDataStream stream( data );
-    if ( msg == QLatin1String("contentChanged(QContentIdList,QContent::ChangeType)") ) {
-        QContentIdList ids;
-        stream >> ids;
-        QContent::ChangeType type;
-        stream >> type;
-        if (type != QContent::Added) {
-            foreach (QContentId id, ids)
-                QContent::invalidate(id);
-        }
-        emit contentChanged(ids,type);
-    } else if ( msg == QLatin1String("applyStyle()") ) {
+    if ( msg == QLatin1String("applyStyle()") ) {
         applyStyle();
     } else if ( msg == QLatin1String("shutdown()") ) {
         if ( type() == GuiServer )
@@ -2633,15 +3058,6 @@ void QtopiaApplication::systemMessage( const QString &msg, const QByteArray &dat
     } else if ( msg == QLatin1String("restart()") ) {
         if ( type() == GuiServer )
             restart();
-    } else if ( msg == QLatin1String("grabKeyboard(QString)") ) {
-        QString who;
-        stream >> who;
-        if ( who.isEmpty() )
-            d->kbgrabber = 0;
-        else if ( who != d->appName )
-            d->kbgrabber = 1;
-        else
-            d->kbgrabber = 2;
     } else if ( msg == QLatin1String("language(QString)") ) {
         if ( type() == GuiServer ) {
             QString l;
@@ -2657,21 +3073,16 @@ void QtopiaApplication::systemMessage( const QString &msg, const QByteArray &dat
             }
         }
     } else if ( msg == QLatin1String("timeChange(QString)") ) {
-        // doesn't make sense to do this if quicklauncher,
-        // and may steal call to something that needs it.
-        if (d->appName != QLatin1String("quicklauncher")) {
-            d->skiptimechanged++;
-            QString t;
-            stream >> t;
-            if ( t.isNull() )
-                unsetenv( "TZ" );
-            else {
-                setenv( "TZ", t.toLatin1(), 1 );
-                tzset(); // ensure TZ value is used by subsequent localtime() calls
-            }
-            // emit the signal so everyone else knows...
-            emit timeChanged();
+        QString t;
+        stream >> t;
+        if ( t.isNull() )
+            unsetenv( "TZ" );
+        else {
+            setenv( "TZ", t.toLatin1(), 1 );
+            tzset(); // ensure TZ value is used by subsequent localtime() calls
         }
+        // emit the signal so everyone else knows...
+        emit timeChanged();
     } else if ( msg == QLatin1String("categoriesChanged()") ) {
         emit categoriesChanged();
     } else if ( msg == QLatin1String("clockChange(bool)") ) {
@@ -2721,6 +3132,7 @@ void QtopiaApplication::systemMessage( const QString &msg, const QByteArray &dat
         }
         // App-specifics...
         emit reload();
+#ifdef Q_WS_QWS
     } else if ( msg == QLatin1String("getMarkedText()") ) {
         if ( type() == GuiServer ) {
             const ushort unicode = 'C'-'@';
@@ -2728,6 +3140,7 @@ void QtopiaApplication::systemMessage( const QString &msg, const QByteArray &dat
             qwsServer->processKeyEvent( unicode, scan, Qt::ControlModifier, true, false );
             qwsServer->processKeyEvent( unicode, scan, Qt::ControlModifier, false, false );
         }
+#endif
     } else if ( msg == QLatin1String("wordsChanged(QString,int)") ) {
         QString dictname;
         int pid;
@@ -2740,23 +3153,17 @@ void QtopiaApplication::systemMessage( const QString &msg, const QByteArray &dat
             QPixmapCache::clear();
         }
     }
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     else if ( msg == QLatin1String("updateContextLabels()") ) {
         QSettings config("Trolltech","qpe");
         config.beginGroup( "ContextMenu" );
-        ContextKeyManager::instance()->setLabelType((QSoftMenuBar::LabelType)config.value( "LabelType", QSoftMenuBar::IconLabel).toInt());
+        ContextKeyManager::instance()->setLabelType((QSoftMenuBar::LabelType)config.value( "LabelType", QSoftMenuBar::TextLabel).toInt());
         if (activeWindow() && focusWidget()) {
             ContextKeyManager::instance()->updateContextLabels();
         }
     }
-#endif
     else if ( msg == QLatin1String("resetContent()") ) {
         emit resetContent();
     }
-#else
-    Q_UNUSED( msg );
-    Q_UNUSED( data );
-#endif
 }
 
 /*!
@@ -2775,7 +3182,7 @@ bool QtopiaApplication::raiseAppropriateWindow()
         top = topLevelWidgets()[0];
 
     if ( top ) {
-            if ( top->isVisible() )
+        if ( top->isVisible() )
             r = true;
         else if (d->preloaded) {
             // We are preloaded and not visible.. pretend we just started..
@@ -2783,7 +3190,17 @@ bool QtopiaApplication::raiseAppropriateWindow()
             e << d->appName;
         }
 
-        d->show_mx(top,d->nomaximize, d->appName);
+        QDialog *dialog = qobject_cast<QDialog*>(top);
+        if ( !top->isVisible() ) {
+            if (dialog && top != d->qpe_main_widget) {
+                d->qpe_show_dialog(dialog,d->nomaximize);
+            } else {
+                if ( !d->nomaximize )
+                    top->showMaximized();
+                else
+                    top->show();
+            }
+        }
         top->raise();
         top->activateWindow();
     }
@@ -2839,7 +3256,6 @@ bool QtopiaApplication::raiseAppropriateWindow()
 
 void QtopiaApplication::pidMessage( const QString &msg, const QByteArray & data)
 {
-#ifdef Q_WS_QWS
     if ( msg == QLatin1String("quit()") ) {
         tryQuit();
     } else if ( msg == QLatin1String("quitIfInvisible()") ) {
@@ -2892,31 +3308,20 @@ void QtopiaApplication::pidMessage( const QString &msg, const QByteArray & data)
         QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("appRaised(QString)"));
         e << d->appName;
     } else if ( msg == QLatin1String("TimeMonitor::timeChange(QString)") ) {
-        // Same as the QPE/System message
-        if ( d->skiptimechanged ) {
-            // Was handled in pidMessage()
-            // (ie. we must offer TimeMonitor service)
-            --d->skiptimechanged;
-        } else {
-            QDataStream stream( data );
-            QString t;
-            stream >> t;
-            if ( t.isNull() )
-                unsetenv( "TZ" );
-            else {
-                setenv( "TZ", t.toLatin1(), 1 );
-                tzset(); // ensure TZ value is used by subsequent localtime() calls
-            }
-            // emit the signal so everyone else knows...
-            emit timeChanged();
+        QDataStream stream( data );
+        QString t;
+        stream >> t;
+        if ( t.isNull() )
+            unsetenv( "TZ" );
+        else {
+            setenv( "TZ", t.toLatin1(), 1 );
+            tzset(); // ensure TZ value is used by subsequent localtime() calls
         }
+        // emit the signal so everyone else knows...
+        emit timeChanged();
     } else {
         emit appMessage( msg, data);
     }
-#else
-    Q_UNUSED( msg );
-    Q_UNUSED( data );
-#endif
 }
 
 #ifndef QTOPIA_DBUS_IPC
@@ -2951,6 +3356,31 @@ void QtopiaApplication::setMainWidget(QWidget *widget, bool noMaximize)
     d->nomaximize = noMaximize;
 }
 
+#ifdef Q_WS_X11
+
+// Mark Qtopia windows so that the soft menu bar can detect
+// non-Qtopia applications and handle the back button correctly.
+static void markQtopiaWindow(QWidget *w)
+{
+    Display *dpy = QX11Info::display();
+    Window wId = (w ? w->winId() : 0);
+    if (dpy && wId) {
+        Atom atom = XInternAtom(dpy, "_QTOPIA_SOFT_MENUS", False);
+        unsigned long flag = 1;
+        XChangeProperty(dpy, wId, atom, XA_CARDINAL, 32, PropModeReplace,
+                        (unsigned char *)&flag, 1);
+    }
+}
+
+#else
+
+static void markQtopiaWindow(QWidget *)
+{
+    // Nothing to do here for other platforms.
+}
+
+#endif
+
 /*!
     Show the main widget for this application.
 
@@ -2959,7 +3389,9 @@ void QtopiaApplication::setMainWidget(QWidget *widget, bool noMaximize)
 void QtopiaApplication::showMainWidget()
 {
     if(!d->qpe_main_widget)
-        qWarning("QtopiaApplication: Attempt to show null main widget.");
+        return;
+
+    markQtopiaWindow(d->qpe_main_widget);
 
     if(d->noshow)
         d->noshow = false;
@@ -3028,7 +3460,6 @@ void QtopiaApplication::showMainDocumentWidget( QWidget* widget, bool noMaximize
 */
 QtopiaStyle *QtopiaApplication::internalSetStyle( const QString &styleName )
 {
-#ifdef Q_WS_QWS
     if (styleName != QLatin1String("themedstyle")){
         if ( styleName == d->styleName)
             return qobject_cast<QtopiaStyle*>(style());
@@ -3042,29 +3473,22 @@ QtopiaStyle *QtopiaApplication::internalSetStyle( const QString &styleName )
     QtopiaStyle *newStyle = 0;
 
     if ( styleName == QLatin1String("QPE")  || styleName == QLatin1String("Qtopia") ) {
-# ifdef QTOPIA_PHONE
 #ifdef EZX_A780
         newStyle = new EzXPhoneStyle;
 #else
         newStyle = new QPhoneStyle;
 #endif
-# else
-        newStyle = new QPdaStyle;
-# endif
+    } else if (styleName == QLatin1String("QThumbStyle")) {
+        newStyle = new QThumbStyle;
     } else {
         newStyle = qobject_cast<QtopiaStyle*>(QStyleFactory::create(styleName));
     }
 
     if ( !newStyle ) {
-#ifdef QTOPIA_PHONE
 #ifdef EZX_A780
         newStyle = new EzXPhoneStyle;
 #else
         //newStyle = new QPhoneStyle;
-#endif
-
-#else
-        newStyle = new QPdaStyle;
 #endif
         d->styleName = QLatin1String("QPE");
     } else {
@@ -3075,10 +3499,6 @@ QtopiaStyle *QtopiaApplication::internalSetStyle( const QString &styleName )
         setStyle( newStyle );
 
     return newStyle;
-#else
-    Q_UNUSED( styleName );
-    return 0;
-#endif
 }
 
 /*!
@@ -3150,7 +3570,26 @@ void QtopiaApplication::setStylusOperation( QWidget* widget, StylusMode mode )
 
 void QtopiaApplication::removeSenderFromIMDict()
 {
-    delete inputMethodDict->take(qobject_cast<QWidget*>(sender()));
+    delete inputMethodDict->take( qobject_cast<QWidget*>( sender() ));
+}
+
+class WeekStartsOnMondayUpdater : public QObject {
+    Q_OBJECT
+public:
+    WeekStartsOnMondayUpdater(QCalendarWidget* cw) : QObject(cw)
+    {
+        updateCalendarWidget(Qtopia::weekStartsOnMonday());
+        connect(qApp,SIGNAL(weekChanged(bool)),this,SLOT(updateCalendarWidget(bool)));
+    }
+private slots:
+    void updateCalendarWidget(bool);
+};
+
+void WeekStartsOnMondayUpdater::updateCalendarWidget(bool monday)
+{
+    QCalendarWidget *cw = qobject_cast<QCalendarWidget*>(parent());
+    if ( cw )
+        cw->setFirstDayOfWeek(monday ? Qt::Monday : Qt::Sunday);
 }
 
 /*!
@@ -3226,7 +3665,6 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 return true;
             }
         }
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         else if ( !mousePreferred && ((QWidget*)o)->hasEditFocus()
             && (ke->key() == Qt::Key_Left || ke->key() == Qt::Key_Right
                 || ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down)) {
@@ -3244,32 +3682,29 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 return true;
             }
         } // end elsif menu key
-#endif  // end QTOPIA_KEYPAD_NAVIGATION
     } // end else if key event.
     else if ( e->type() == QEvent::FocusIn
-#ifdef QTOPIA_KEYPAD_NAVIGATION
               || (!mousePreferred && (e->type() == QEvent::EnterEditFocus ||
-              e->type() == QEvent::LeaveEditFocus))
-#endif
-              ) {
+              e->type() == QEvent::LeaveEditFocus)) ) {
 
         QWidget *w = (QWidget *)o;
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
+        d->focusOutTimer.stop();
+        d->focusOutWidget = 0;
+
         if (e->type() == QEvent::FocusIn && !mousePreferred
-            && w->focusPolicy() != Qt::NoFocus) {
+                && w->focusPolicy() != Qt::NoFocus) {
             if (isSingleFocusWidget(w))
-                w->setEditFocus(true); // set edit focus now
-            else
-                d->singleFocusTimer.start(0, this); // may become single focus later
+                w->setEditFocus(true);
         }
-#endif
 
         if (!activeWindow())
             return false;
 
-        sendInputHintFor(w, e->type());
-#ifdef QTOPIA_KEYPAD_NAVIGATION
+        if (e->type() != QEvent::FocusIn || ((QFocusEvent*)e)->reason() != Qt::PopupFocusReason)
+            sendInputHintFor(w, e->type());
+        if (qApp->focusWidget() == w && qApp->activeWindow())
+            ContextKeyManager::instance()->updateContextLabels();
         if (w->inherits("QDateEdit")) {
             if(!QSoftMenuBar::hasMenu(w, QSoftMenuBar::AnyFocus)) {
                 if (!d->calendarMenu)
@@ -3279,6 +3714,7 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
             }
             d->calendarMenu->setTargetWidget(qobject_cast<QDateEdit*>(w));
         }
+#ifndef QT_NO_CLIPBOARD
         if ((mousePreferred || w->hasEditFocus()) &&
                 (w->inherits("QLineEdit")
                  || (w->inherits("QTextEdit") && !w->inherits("QTextBrowser")))) {
@@ -3288,21 +3724,20 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 QSoftMenuBar::addMenuTo(w, d->editMenu, QSoftMenuBar::EditFocus);
             }
         }
- 
+#endif
+
         QAbstractButton *b = qobject_cast<QAbstractButton*>(w);
         if ( b && b->isCheckable() && !mousePreferred ) {
             connect(b, SIGNAL(toggled(bool)),
                 qApp, SLOT(buttonChange(bool)));
         }
-        
+
         QTextBrowser *tb = qobject_cast<QTextBrowser*>(w);
         if ( tb && !mousePreferred ) {
-            connect(tb, SIGNAL(highlighted(const QString&)),
-                    qApp, SLOT(textBrowserHighlightChange(const QString&)));
+            connect(tb, SIGNAL(highlighted(QString)),
+                    qApp, SLOT(textBrowserHighlightChange(QString)));
         }
-#endif
     }
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     else if ( e->type() == QEvent::FocusOut ) {
         QWidget *w = (QWidget *)o;
         QFocusEvent *fe = (QFocusEvent*)e;
@@ -3310,6 +3745,7 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 || (!focusWidget() && w->topLevelWidget()->isVisible() && activeWindow())) {
             ContextKeyManager::instance()->updateContextLabels();
         }
+#ifndef QT_NO_CLIPBOARD
         if (d->editMenu && !d->editMenu->isActiveWindow() && (w->inherits("QLineEdit")
                 || (w->inherits("QTextEdit") && !w->inherits("QTextBrowser")))) {
             QSoftMenuBar::removeMenuFrom(w, d->editMenu);
@@ -3318,7 +3754,8 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 d->editMenu= 0;
             }
         }
-        
+#endif
+
         QAbstractButton *b = qobject_cast<QAbstractButton*>(w);
         if ( b && b->isCheckable() && !mousePreferred ) {
             disconnect(b, SIGNAL(toggled(bool)),
@@ -3326,19 +3763,41 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
         }
         QTextBrowser *tb = qobject_cast<QTextBrowser*>(w);
         if ( tb && !mousePreferred ) {
-            disconnect(tb, SIGNAL(highlighted(const QString&)),
-                    qApp, SLOT(textBrowserHighlightChange(const QString&)));
+            disconnect(tb, SIGNAL(highlighted(QString)),
+                    qApp, SLOT(textBrowserHighlightChange(QString)));
+        }
+
+        if (fe->reason() != Qt::PopupFocusReason) {
+            // If we don't have a FocusIn on its way then we need
+            // to deal with the FocusOut.
+            d->focusOutWidget = w;
+            d->focusOutTimer.start(0, this);
         }
     } else if (e->type() == QEvent::Show) {
+#if defined(GREENPHONE_EFFECTS) && defined(QT_QWS_GREENPHONE)
+        QMenu *menu = qobject_cast<QMenu*>(o);
+        if(menu && !d->greenphoneEffects()->inProgress()) {
+            d->greenphoneEffects()->menu(menu);
+        } else {
+            QTabWidget *tab = qobject_cast<QTabWidget *>(o);
+            if(tab) 
+                d->greenphoneEffects()->addTab(tab);
+        }
+#endif
         QMessageBox *mb = 0;
         if (((QWidget*)o)->testAttribute(Qt::WA_ShowModal)) {
             mb = qobject_cast<QMessageBox*>(o);
-#ifdef QTOPIA_TEST
-            if (mb != 0) {
-                QTestMessage msg("show_messagebox");
-                msg["title"] = mb->windowTitle();
-                msg["text"] = mb->text();
-                d->app_slave.postMessage( msg );
+            if (mb) {
+                // Avoid QDialog::showEvent() moving messagebox.
+                // We'll do it soon anyway.
+                mb->setAttribute(Qt::WA_Moved, true);
+            }
+#ifdef QTOPIA_USE_TEST_SLAVE
+            if (testSlave() && mb) {
+                QVariantMap map;
+                map["title"] = mb->windowTitle();
+                map["text"] = mb->text();
+                testSlave()->postMessage("show_messagebox", map);
             }
 #endif
         }
@@ -3369,12 +3828,10 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
             }
         }
         QWidget *w = qobject_cast<QWidget *>(o);
-        if (w && w->isWindow()) {  // HACK: to get around a bug with minimum size in Qt 4.2.2
-            QDesktopWidget *desktop = QApplication::desktop();
-            QRect availableRect(desktop->availableGeometry(desktop->primaryScreen()));
-            w->setMaximumWidth(availableRect.width());
-        }
-        if (w && w->isWindow() && (w->windowFlags() & Qt::WindowType_Mask) == Qt::Popup) {
+#ifdef POPUP_SHADOWS
+        if (w && w->isWindow()
+            && style()->styleHint((QStyle::StyleHint)QPhoneStyle::SH_PopupShadows)
+            && (w->windowFlags() & Qt::WindowType_Mask) == Qt::Popup) {
             ShadowWidget *shadow = 0;
             if (d->shadowMap.contains(w)) {
                 shadow = d->shadowMap[w];
@@ -3386,17 +3843,29 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 shadow->setTarget(w);
             }
             shadow->show();
+        }
+#endif
 #ifdef QTOPIA_ENABLE_FADE_IN_WINDOW
-        } else if (w && w->isWindow()) {
+        if (w && w->isWindow()) {
             if (d->fadeInWidget && d->fadeInOpacity < 1.0)
                 d->fadeInWidget->setWindowOpacity(1.0);
             w->setWindowOpacity(0.25);
             d->fadeInOpacity = 0.25;
             d->fadeInWidget = w;
             d->fadeInTimer.start(100, this);
-#endif
         }
+#endif
+        if (w && w->inherits("QCalendarPopup")) {
+            w->showMaximized();
+        }
+#if defined(POPUP_SHADOWS) || defined(GREENPHONE_EFFECTS)
     } else if (e->type() == QEvent::Hide) {
+#if defined(GREENPHONE_EFFECTS) && defined(QT_QWS_GREENPHONE)
+        QTabWidget *tab = qobject_cast<QTabWidget *>(o);
+        if(tab) 
+            d->greenphoneEffects()->removeTab(tab);
+#endif
+#ifdef POPUP_SHADOWS
         QWidget *w = qobject_cast<QWidget *>(o);
         if (w && w->isWindow() && (w->windowFlags() & Qt::WindowType_Mask) == Qt::Popup) {
             if (d->shadowMap.contains(w)) {
@@ -3406,13 +3875,23 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 shadow->deleteLater();
             }
         }
+#endif
+#endif
+    } else if (e->type() == QEvent::WindowDeactivate ) {
+
+        // ensure popup widgets (menus, calendar widget, combobox lists, etc.)
+        // hide when switching to home screen, running apps switcher etc.
+        QWidget *w = qApp->activePopupWidget();
+        if (w)
+            w->hide();
+
+    } else if (e->type() == QEvent::LayoutRequest && qobject_cast<QMessageBox*>(o)) {
+        return true;    //stop QMessageBox from resizing our messageboxes (we have already taken care of it)
     }
-#endif  // QTOPIA_KEYPAD_NAVIGATION
 
     return false;
 }
 
-#ifdef QTOPIA_PHONE
 void QtopiaApplication::hideMessageBoxButtons( QMessageBox *mb )
 {
     QList<QPushButton*> pbList = mb->findChildren<QPushButton*>();
@@ -3489,14 +3968,27 @@ void QtopiaApplication::hideMessageBoxButtons( QMessageBox *mb )
         mb->setFocus();
     }
 }
-#endif  // QTOPIA_PHONE
 
 void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
 {
-#ifdef Q_WS_QWS
-#ifdef QTOPIA_PDA
-    Q_UNUSED(etype);
-#endif
+    qint32 windowId = 0;
+    if (w) {
+        // popups don't send window active events... so need
+        // to find the window id for the actual active window,
+        // rather than that of the popup.
+        QWidget *p = w->topLevelWidget();;
+        while(p->windowType() == Qt::Popup && p->parentWidget())
+            p = p->parentWidget();
+        windowId = p->topLevelWidget()->winId();
+    }
+
+    if (etype == QEvent::FocusOut) {
+        QtopiaIpcEnvelope env(QLatin1String("QPE/InputMethod"), QLatin1String("inputMethodHint(QString,int)") );
+        env << QString();
+        env << windowId;
+        return;
+    }
+
     const QValidator* v = 0;
     InputMethodHintRec *hr=0;
     bool passwordFlag = false ;
@@ -3536,23 +4028,20 @@ void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
             };
             v = l->validator();
         }
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         if( n && !mousePreferred ) {
             if (etype == QEvent::EnterEditFocus) {
-                connect(l, SIGNAL(textChanged(const QString&)),
-                        qApp, SLOT(lineEditTextChange(const QString&)));
+                connect(l, SIGNAL(textChanged(QString)),
+                        qApp, SLOT(lineEditTextChange(QString)));
             } else if (etype == QEvent::LeaveEditFocus) {
-                disconnect(l, SIGNAL(textChanged(const QString&)),
-                        qApp, SLOT(lineEditTextChange(const QString&)));
+                disconnect(l, SIGNAL(textChanged(QString)),
+                        qApp, SLOT(lineEditTextChange(QString)));
             }
         }
-#endif
     } else if (w->inherits("QTextEdit") && !w->inherits("QTextBrowser")) {
         QTextEdit* l = (QTextEdit*)w;
         if ( !n && !l->isReadOnly()) {
             n = (int)Words;
         }
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         if( n && !mousePreferred ) {
             if (etype == QEvent::EnterEditFocus) {
                 connect(l, SIGNAL(textChanged()),
@@ -3562,21 +4051,10 @@ void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
                         qApp, SLOT(multiLineEditTextChange()));
             }
         }
-#endif
     }
     if ( !hr && v && v->inherits("QIntValidator") )
         n = (int)Number;
 
-    qint32 windowId = 0;
-    if (w) {
-        // popups don't send window active events... so need
-        // to find the window id for the actual active window,
-        // rather than that of the popup.
-        QWidget *p = w->topLevelWidget();;
-        while(p->windowType() == Qt::Popup && p->parentWidget())
-            p = p->parentWidget();
-        windowId = p->topLevelWidget()->winId();
-    }
     // find ancestor.. top ancestor, then get its' window id
     if (etype == QEvent::FocusIn || etype == QEvent::None) {
         if ( n == Named ) {
@@ -3594,15 +4072,6 @@ void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
 
 
     }
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    if (qApp->focusWidget() == w && qApp->activeWindow()) {
-        ContextKeyManager::instance()->updateContextLabels();
-    }
-#endif
-#else
-    Q_UNUSED(w);
-    Q_UNUSED(etype);
-#endif
 }
 
 /*!
@@ -3610,6 +4079,17 @@ void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
 */
 bool QtopiaApplication::notify(QObject* o, QEvent* e)
 {
+    QEvent *remapped = 0;
+    if (d && d->remapKeys &&
+        (e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease)) {
+        QKeyEvent *ke = (QKeyEvent*)e;
+        if (d->keyRemapper.contains(ke->key())) {
+            remapped = new QKeyEvent(ke->type(), d->keyRemapper[ke->key()],
+                                     ke->modifiers(), ke->text(),
+                                     ke->isAutoRepeat(), ke->count());
+            e = remapped;
+        }
+    }
     bool r = QApplication::notify(o,e);
     if (e->type() == QEvent::Show && o->isWidgetType()
         && ((QWidget*)o)->testAttribute(Qt::WA_ShowModal)) {
@@ -3617,10 +4097,10 @@ bool QtopiaApplication::notify(QObject* o, QEvent* e)
         if (mb)
             hideMessageBoxButtons( mb );
     }
-#if defined(QTOPIA_KEYPAD_NAVIGATION)
     if ( e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease ) {
         QKeyEvent *ke = (QKeyEvent*)e;
         QWidget *w = qobject_cast<QWidget*>(o);
+        QMessageBox *mb = qobject_cast<QMessageBox *>(o);
 
         if (!ke->isAccepted())
         {
@@ -3635,7 +4115,11 @@ bool QtopiaApplication::notify(QObject* o, QEvent* e)
         if (!ke->isAccepted()
                 || (w && !w->hasEditFocus() && isSingleFocusWidget(w)
                     && !Qtopia::mousePreferred())) {
-            if (w && ke->key() == Qt::Key_Back && e->type() == QEvent::KeyPress) {
+
+            // We already have special handling for Message Boxes.  Don't do so here
+            if (mb) {
+                r = true;
+            } else if (w && ke->key() == Qt::Key_Back && e->type() == QEvent::KeyPress) {
                 w = w->window();
                 qLog(UI) << "Handling Back for" << w;
                 if (QDialog *dlg = qobject_cast<QDialog*>(w)) {
@@ -3653,66 +4137,46 @@ bool QtopiaApplication::notify(QObject* o, QEvent* e)
                 r = true;
             }
         }
-    } else if (e->type() == QEvent::InputMethod) {
+    } 
+#ifndef QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
+    else if (e->type() == QEvent::InputMethod) {
         // Try to keep the back button sensible when IM is composing.
         bool setBack = false;
         QSoftMenuBar::StandardLabel label = QSoftMenuBar::NoLabel;
         if (QLineEdit *le = qobject_cast<QLineEdit*>(o)) {
-            setBack = true;
-            QInputMethodEvent *ime = (QInputMethodEvent*)e;
-            if (mousePreferred) {
-                label = QSoftMenuBar::Back;
-            } else {
-                if (ime->commitString().length() + ime->preeditString().length() > 0
-                    || le->cursorPosition() > 0)
-                    label = QSoftMenuBar::BackSpace;
-                else if (le->text().length() == 0)
-                    label = QSoftMenuBar::RevertEdit;
+            if (!ContextKeyManager::instance()->haveLabelForWidget(le, Qt::Key_Back, le->hasEditFocus())) {
+                setBack = true;
+                QInputMethodEvent *ime = (QInputMethodEvent*)e;
+                if (mousePreferred) {
+                    label = QSoftMenuBar::Back;
+                } else {
+                    if (ime->commitString().length() + ime->preeditString().length() > 0
+                            || le->cursorPosition() > 0)
+                        label = QSoftMenuBar::BackSpace;
+                    else if (le->text().length() == 0)
+                        label = QSoftMenuBar::RevertEdit;
+                }
             }
         } else if (QTextEdit *te = qobject_cast<QTextEdit*>(o)) {
-            setBack = true;
-            QInputMethodEvent *ime = (QInputMethodEvent*)e;
-            if (mousePreferred) {
-                label = QSoftMenuBar::Back;
-            } else {
-                if (ime->commitString().length() + ime->preeditString().length() > 0
-                    || te->textCursor().position() > 0)
-                    label = QSoftMenuBar::BackSpace;
-                else if (te->document()->isEmpty())
-                    label = QSoftMenuBar::Cancel;
+            if (!ContextKeyManager::instance()->haveLabelForWidget(te, Qt::Key_Back, te->hasEditFocus())) {
+                setBack = true;
+                QInputMethodEvent *ime = (QInputMethodEvent*)e;
+                if (mousePreferred) {
+                    label = QSoftMenuBar::Back;
+                } else {
+                    if (ime->commitString().length() + ime->preeditString().length() > 0
+                            || te->textCursor().position() > 0)
+                        label = QSoftMenuBar::BackSpace;
+                    else if (te->document()->isEmpty())
+                        label = QSoftMenuBar::Cancel;
+                }
             }
         }
-        if (setBack)
+        if (setBack && !ContextKeyManager::instance()->findHelper(qobject_cast<QWidget*>(o))) {
             ContextKeyManager::instance()->setStandard(qobject_cast<QWidget*>(o), Qt::Key_Back, label);
-    } else if (e->type() == QEvent::ChildAdded) {
-#if QT_VERSION >= 0x040300
-#error "Fix QCalendarWidget in keypad mode (see below)"
-#else
-        QCalendarWidget* w = qobject_cast<QCalendarWidget*>(o);
-        if ( w ) {
-            QWidget *prevMonth = w->findChild<QWidget*>("qt_calendar_prevmonth");
-            QWidget *nextMonth = w->findChild<QWidget*>("qt_calendar_nextmonth");
-            QWidget *monthButton = w->findChild<QWidget*>("qt_calendar_monthbutton");
-            QWidget *yearButton = w->findChild<QWidget*>("qt_calendar_yearbutton");
-            QWidget *yearEdit = w->findChild<QWidget*>("qt_calendar_yearedit");
-            if ( prevMonth && nextMonth && monthButton && yearButton && yearEdit ) {
-
-// This is the fix to go into QCalendarWidget
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-                prevMonth->hide();
-                nextMonth->hide();
-                monthButton->setFocusPolicy(Qt::NoFocus);
-                yearButton->setFocusPolicy(Qt::NoFocus);
-                //yearEdit->setFocusPolicy(Qt::NoFocus);
-
-                CalendarTextNavigation::ensureNavigationFor(w);
-#endif
-// end-of-fix
-            }
         }
-#endif
-#endif
     }
+#endif // QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
 
     /* Work around a QComboBox bug and Key_Hangup */
     if (e->type() == QEvent::ChildAdded) {
@@ -3720,7 +4184,14 @@ bool QtopiaApplication::notify(QObject* o, QEvent* e)
         if ( w ) {
             w->installEventFilter(this);
         }
+    } else if (e->type() == QEvent::PolishRequest) {
+        QCalendarWidget* cw = qobject_cast<QCalendarWidget*>(o);
+        if ( cw )
+            new WeekStartsOnMondayUpdater(cw);
     }
+
+    if (remapped)
+        delete remapped;
 
     return r;
 }
@@ -3731,14 +4202,12 @@ bool QtopiaApplication::notify(QObject* o, QEvent* e)
 */
 void QtopiaApplication::timerEvent( QTimerEvent *e )
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    if (e->timerId() == d->singleFocusTimer.timerId()) {
-        d->singleFocusTimer.stop();
-        QWidget *w = focusWidget();
-        if (w && isSingleFocusWidget(w))
-            w->setEditFocus(true);
-# ifdef QTOPIA_ENABLE_FADE_IN_WINDOW
-    } else if (e->timerId() == d->fadeInTimer.timerId()) {
+    if (e->timerId() == d->focusOutTimer.timerId()) {
+        d->focusOutTimer.stop();
+        sendInputHintFor(d->focusOutWidget, QEvent::FocusOut);
+    }
+#ifdef QTOPIA_ENABLE_FADE_IN_WINDOW
+    else if (e->timerId() == d->fadeInTimer.timerId()) {
         if (d->fadeInWidget) {
             d->fadeInOpacity += 0.25;
             if (d->fadeInOpacity >= 1.0)
@@ -3747,65 +4216,15 @@ void QtopiaApplication::timerEvent( QTimerEvent *e )
         } else {
             d->fadeInTimer.stop();
         }
-# endif
     }
 #endif
 }
 
 void QtopiaApplication::removeSenderFromStylusDict()
 {
-    stylusDict->remove(qobject_cast<QWidget*>(sender()));
+    stylusDict->remove( qobject_cast<QWidget*>( sender() ));
     if (d->pressHandler && d->pressHandler->widget() == sender())
         d->pressHandler->cancelPress();
-}
-
-/*!
-  \internal
-*/
-bool QtopiaApplication::keyboardGrabbed() const
-{
-    return d->kbgrabber;
-}
-
-
-/*!
-  Releases the keyboard previously grabbed by grabKeyboard(). The keyboard
-  is automatically ungrabbed on application exit.
-*/
-void QtopiaApplication::ungrabKeyboard()
-{
-    QtopiaApplicationData* d = ((QtopiaApplication*)qApp)->d;
-    if ( d->kbgrabber == 2 ) {
-        QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("grabKeyboard(QString)") );
-        e << QString();
-        d->kbregrab = false;
-        d->kbgrabber = 0;
-    }
-}
-
-/*!
-  Grabs the physical keyboard keys, including keys which would otherwise
-  be acted on by the system.  This is usually unnecessary and leads
-  to an inconsistent user experience, however some games
-  grab system keys to make interaction easier.
-
-  Under Qtopia Phone Edition this function does nothing.  It is not
-  possible to grab the keyboard under Qtopia Phone Edition.
-
-  \sa ungrabKeyboard()
-*/
-void QtopiaApplication::grabKeyboard()
-{
-#ifdef QTOPIA_PDA
-    QtopiaApplicationData* d = ((QtopiaApplication*)qApp)->d;
-    if ( qApp->type() == QApplication::GuiServer )
-        d->kbgrabber = 0;
-    else {
-        QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("grabKeyboard(QString)") );
-        e << d->appName;
-        d->kbgrabber = 2; // me
-    }
-#endif
 }
 
 /*!
@@ -3882,51 +4301,41 @@ void QtopiaApplication::hideOrQuit()
 
 void QtopiaApplication::lineEditTextChange(const QString &)
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     if (!mousePreferred)
         QtopiaApplicationData::updateContext((QWidget*)sender());
-#endif
 }
 
 void QtopiaApplication::multiLineEditTextChange()
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     if (!mousePreferred)
         QtopiaApplicationData::updateContext((QWidget*)sender());
-#endif
 }
 
 void QtopiaApplication::buttonChange(bool)
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     if (!mousePreferred)
         QtopiaApplicationData::updateButtonSoftKeys((QWidget*)sender());
-#endif
 }
 
 void QtopiaApplication::textBrowserHighlightChange(const QString &)
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     if (!mousePreferred)
         QtopiaApplicationData::updateBrowserSoftKeys((QWidget*)sender());
-#endif
 }
 
 void QtopiaApplication::removeFromWidgetFlags()
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     // removes calling object from flags.
     const QWidget *s = (const QWidget *)sender();
     if (qpeWidgetFlags.contains(s))
         qpeWidgetFlags.remove(s);
-#endif
 }
 
 void QtopiaApplication::updateDialogGeometry()
 {
     foreach (QWidget *widget, topLevelWidgets()) {
         QDialog *dlg = qobject_cast<QDialog*>(widget);
-        if (dlg && dlg->isVisible())
+        if (dlg && dlg->isVisible() && !dlg->isMaximized())
             showDialog(dlg);
     }
 }
@@ -3945,6 +4354,7 @@ void QtopiaApplication::updateDialogGeometry()
 */
 void QtopiaApplication::showDialog( QDialog* dialog, bool noMaximize )
 {
+    markQtopiaWindow(dialog);
     QtopiaApplicationData::qpe_show_dialog( dialog, noMaximize );
 }
 
@@ -3989,30 +4399,6 @@ void QtopiaApplication::setPowerConstraint(PowerConstraint constraint)
     e.send();
 }
 
-#ifdef Q_OS_WIN32
-/*!
-  \internal
-  Provides minimal support for setting environment variables.
- */
-int setenv(const char* name, const char* value, int /*overwrite*/)
-{
-  QString msg(name);
-  msg.append(QLatin1String("=")).append(value);
-  // put env requires ownership of the value and will free it
-  char * envValue = strdup(msg.toLocal8Bit().constData());
-  return _putenv(envValue);
-}
-
-/*!
-  \internal
-  Provides minimal support for clearing environment variables.
- */
-void unsetenv(const char *name)
-{
-  setenv(name, "", 1);
-}
-#endif
-
 #if (__GNUC__ > 2)
 extern "C" void __cxa_pure_virtual();
 
@@ -4022,7 +4408,6 @@ void __cxa_pure_virtual()
     abort();
 
 }
-
 #endif
 
 #if defined(QPE_USE_MALLOC_FOR_NEW)
@@ -4065,10 +4450,8 @@ void operator delete(void* p, size_t /*size*/)
     if (p)
         free(p);
 }
-
 #endif
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 /*!
   In some cases dialogs are easier to interact with if they behave in a
   similar fashion to menus.
@@ -4126,7 +4509,61 @@ bool QtopiaApplication::isMenuLike( const QDialog *dialog)
         return (qpeWidgetFlags[dialog] & MenuLikeDialog == MenuLikeDialog);
     return false; // default.
 }
+
+/*!
+  \internal
+  Return the global test slave used for this application, if one exists.
+  A test slave will only be created if the QTOPIA_TEST environment variable
+  is set and the qtopiatest plugins are installed.
+
+  The test slave is used to communicate with an attached system test, if one
+  exists.
+
+  Note that Qtopia only attempts to load the plugin once, i.e. you must restart
+  qtopia to turn on/off system testing.
+*/
+TestSlaveInterface* QtopiaApplication::testSlave()
+{
+#ifdef QTOPIA_USE_TEST_SLAVE
+    static bool init = false;
+    static TestSlaveInterface* ret = 0;
+
+    if (!init) {
+        init = true;
+        if (!qgetenv("QTOPIA_TEST").isEmpty()) {
+            qLog(Qtopiatest) << "Qtopiatest is enabled.";
+            QPluginManager *mgr = new QPluginManager("qtopiatest", this);
+            QObject *o = 0;
+            if (type() == QApplication::GuiServer) {
+                /* Try to load server plugin first.  If it fails, we're not the server, so try to load app plugin. */
+                o = mgr->instance("qtopiaservertestslave");
+                ret = qobject_cast<TestSlaveInterface*>(o);
+                if (!ret)
+                    qWarning("Couldn't load qtopiatest server plugin");
+                else
+                    qLog(Qtopiatest) << "Loaded Qtopiatest server plugin.";
+            }
+            if (!ret) {
+                if (o) delete o;
+                o = mgr->instance("qtopiaapptestslave");
+                ret = qobject_cast<TestSlaveInterface*>(o);
+                if (!ret) {
+                    qWarning("Couldn't load qtopiatest client plugin");
+                    if (o) delete o;
+                } else
+                    qLog(Qtopiatest) << "Loaded Qtopiatest app plugin.";
+            }
+        } else {
+            qLog(Qtopiatest) << "Qtopiatest is disabled.";
+        }
+    }
+
+    return ret;
+#else
+    return 0;
 #endif
+}
+
 
 /*!
   \macro QTOPIA_ADD_APPLICATION(name,classname)
@@ -4139,7 +4576,7 @@ bool QtopiaApplication::isMenuLike( const QDialog *dialog)
   In singleexec builds, this macro is used to indicate the name of the main function rather than
   specifying the class to instantiate.
 
-  /sa Applications, {Writing Applications that Startup Quickly}
+  \sa Applications
 */
 
 /*!
@@ -4147,6 +4584,8 @@ bool QtopiaApplication::isMenuLike( const QDialog *dialog)
   \relates QtopiaApplication
 
   This macro inserts an appropriate main function when normal launching is used.
+
+  \sa Applications
 */
 
 /*!
@@ -4157,5 +4596,104 @@ bool QtopiaApplication::isMenuLike( const QDialog *dialog)
   plugin file (eg foo.so). This plugin should be used instead of Q_EXPORT_PLUGIN because it
   works correctly in both dynamic and singleexec builds.
 */
+
+/*!
+  \macro QTOPIA_APP_KEY
+  \relates QtopiaApplication
+
+  This macro is used by the QTOPIA_MAIN macro to allocate space for the SXE key.
+  It's set to either QSXE_APP_KEY or QSXE_QL_APP_KEY depending on if you're
+  building a quicklaunch plugin or a standalone app.
+
+  \sa Applications, QTOPIA_SET_KEY()
+*/
+
+/*!
+  \macro QTOPIA_SET_KEY(name)
+  \relates QtopiaApplication
+
+  This macro is used by the QTOPIA_MAIN macro to copy the SXE key into memory.
+  It's set to either QSXE_SET_APP_KEY() or QSXE_SET_QL_KEY() (passing along \a name)
+  depending on if you're building a quicklaunch plugin or a standalone app.
+
+  \sa Applications, QTOPIA_APP_KEY
+*/
+
+/*!
+  \macro QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION()
+  \relates QtopiaApplication
+
+  This macro is used by the QTOPIA_MAIN macro to set the default document system connection type.
+  If you are implementing a \c main() function you should call this after constructing QtopiaApplication.
+  Failure to call this macro is not fatal but you will be unable to influence the default connection type.
+
+  The QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION macro affects the implementation of this function.
+
+  \sa Applications, QContent::setDocumentSystemConnection()
+*/
+
+/*!
+  \macro QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION
+  \relates QtopiaApplication
+
+  This macro should be set to specify that the app needs a direct connection to the document system.
+  Note that enabling this define will mean extra security priviliges are required.
+  If you are not using the QTOPIA_MAIN macros you should ensure that QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION()
+  is being called or this macro will have no effect.
+
+  \sa Applications, QContent::setDocumentSystemConnection()
+*/
+
+Q_GLOBAL_STATIC(QMutex, contentChangedChannelMutex);
+
+/*!
+    \reimp
+*/
+void QtopiaApplication::connectNotify(const char *signal)
+{
+    if(QLatin1String(signal) == SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)))
+    {
+        QMutexLocker lock(contentChangedChannelMutex());
+        if(d->contentChangedChannel == NULL && receivers(SIGNAL(contentChanged(QContentIdList,QContent::ChangeType))) > 0)
+            d->contentChangedChannel = new QContentChangedChannel(this);
+    }
+}
+
+/*!
+    \reimp
+*/
+void QtopiaApplication::disconnectNotify(const char *signal)
+{
+    if(QLatin1String(signal) == SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)))
+    {
+        QMutexLocker lock(contentChangedChannelMutex());
+        if(d->contentChangedChannel != NULL && receivers(SIGNAL(contentChanged(QContentIdList,QContent::ChangeType))) < 1)
+        {
+            // disconnect the channel, as we've run out of listeners
+            QContentChangedChannel *oldChannel=d->contentChangedChannel;
+            d->contentChangedChannel = NULL;
+            delete oldChannel;
+        }
+    }
+}
+
+QContentChangedChannel::QContentChangedChannel(QObject *parent)
+ : QtopiaIpcAdaptor("QPE/DocAPI")
+{
+    Q_UNUSED(parent);
+    publishAll(QtopiaIpcAdaptor::Slots);
+    QObject::connect(this, SIGNAL(contentChangedSignal(QContentIdList,QContent::ChangeType)),
+            qApp, SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)));
+
+}
+
+void QContentChangedChannel::contentChanged(QContentIdList idList, QContent::ChangeType ct)
+{
+    if (ct != QContent::Added) {
+        foreach (QContentId id, idList)
+            QContentCache::instance()->remove( id );
+    }
+    emit contentChangedSignal(idList, ct);
+}
 
 #include "qtopiaapplication.moc"

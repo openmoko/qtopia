@@ -1,0 +1,23 @@
+-xplatform min_voip -arch arm -no-qvfb
+-displaysize 320x240
+-edition phone
+-no-modem
+-voip
+-no-helix
+-no-drm
+-no-sxe
+-prefix /opt/Qtopia
+-no-bluetooth
+-no-infrared
+-iconsize 22
+-font "dejavu_sans_condensed:16:50"
+-languages "en_US"
+-extra-qtopiacore-config "-no-freetype"
+-extra-qtopiacore-config "-qt-libjpeg"
+-extra-qtopiacore-config "-qt-libmng"
+-extra-qtopiacore-config "-qt-libpng"
+-extra-qtopiacore-config "-qt-zlib"
+-extra-qtopiacore-config "-no-accessibility"
+-release
+-silent
+-no-samples

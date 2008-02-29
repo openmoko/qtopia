@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,7 +53,7 @@ QT_MODULE(Core)
 #ifndef Q_SPECIALIZED_QATOMIC
 
 /*
-    We assume that the following 8 functions have been declared by the
+    We assume that the following 11 functions have been declared by the
     platform specific qatomic.h:
 
     int q_atomic_test_and_set_int(volatile int *ptr, int expected, int newval);
@@ -51,6 +66,10 @@ QT_MODULE(Core)
     int q_atomic_set_int(volatile int *ptr, int newval);
     void *q_atomic_set_ptr(volatile void *ptr, void *newval);
 
+    int q_atomic_fetch_and_add_int(volatile int *ptr, value);
+    int q_atomic_fetch_and_add_acquire_int(volatile int *ptr, value);
+    int q_atomic_fetch_and_add_release_int(volatile int *ptr, value);
+
     If you cannot implement these functions efficiently on your
     platform without great difficulty, consider defining
     Q_SPECIALIZED_QATOMIC.  By doing this, you need to implement:
@@ -62,58 +81,67 @@ QT_MODULE(Core)
 */
 
 struct QBasicAtomic {
-    volatile int atomic;
+    volatile int value;
 
     void init(int x = 0)
-    { atomic = x; }
+    { value = x; }
 
     inline bool ref()
-    { return q_atomic_increment(&atomic) != 0; }
+    { return q_atomic_increment(&value) != 0; }
 
     inline bool deref()
-    { return q_atomic_decrement(&atomic) != 0; }
+    { return q_atomic_decrement(&value) != 0; }
 
     inline bool operator==(int x) const
-    { return atomic == x; }
+    { return value == x; }
 
     inline bool operator!=(int x) const
-    { return atomic != x; }
+    { return value != x; }
 
     inline bool operator!() const
-    { return atomic == 0; }
+    { return value == 0; }
 
     inline operator int() const
-    { return atomic; }
+    { return value; }
 
     inline QBasicAtomic &operator=(int x)
     {
-        (void) q_atomic_set_int(&atomic, x);
+        value = x;
         return *this;
     }
 
     inline bool testAndSet(int expected, int newval)
-    { return q_atomic_test_and_set_int(&atomic, expected, newval) != 0; }
+    { return q_atomic_test_and_set_int(&value, expected, newval) != 0; }
 
     inline bool testAndSetAcquire(int expected, int newval)
-    { return q_atomic_test_and_set_acquire_int(&atomic, expected, newval) != 0; }
+    { return q_atomic_test_and_set_acquire_int(&value, expected, newval) != 0; }
 
     inline bool testAndSetRelease(int expected, int newval)
-    { return q_atomic_test_and_set_release_int(&atomic, expected, newval) != 0; }
+    { return q_atomic_test_and_set_release_int(&value, expected, newval) != 0; }
 
     inline int exchange(int newval)
-    { return q_atomic_set_int(&atomic, newval); }
+    { return q_atomic_set_int(&value, newval); }
+
+    inline int fetchAndAdd(int aValue)
+    { return q_atomic_fetch_and_add_int(&value, aValue); }
+
+    inline int fetchAndAddAcquire(int aValue)
+    { return q_atomic_fetch_and_add_acquire_int(&value, aValue); }
+
+    inline int fetchAndAddRelease(int aValue)
+    { return q_atomic_fetch_and_add_release_int(&value, aValue); }
 };
 
 template <typename T>
 struct QBasicAtomicPointer
 {
-    volatile T *pointer;
+    volatile T *value;
 
     void init(T *t = 0)
-    { pointer = t; }
+    { value = t; }
 
     inline bool operator==(T *t) const
-    { return pointer == t; }
+    { return value == t; }
 
     inline bool operator!=(T *t) const
     { return !operator==(t); }
@@ -122,22 +150,22 @@ struct QBasicAtomicPointer
     { return operator==(0); }
 
     inline operator T *() const
-    { return const_cast<T *>(pointer); }
+    { return const_cast<T *>(value); }
 
     inline T *operator->() const
-    { return const_cast<T *>(pointer); }
+    { return const_cast<T *>(value); }
 
     inline QBasicAtomicPointer<T> &operator=(T *t)
     {
-        (void) q_atomic_set_ptr(&pointer, t);
+        value = t;
         return *this;
     }
 
     inline bool testAndSet(T *expected, T *newval)
-    { return q_atomic_test_and_set_ptr(&pointer, expected, newval); }
+    { return q_atomic_test_and_set_ptr(&value, expected, newval); }
 
     inline T *exchange(T * newval)
-    { return static_cast<T *>(q_atomic_set_ptr(&pointer, newval)); }
+    { return static_cast<T *>(q_atomic_set_ptr(&value, newval)); }
 };
 
 #define Q_ATOMIC_INIT(a) { (a) }
@@ -205,35 +233,19 @@ public:
 template <typename T>
 inline void qAtomicAssign(T *&d, T *x)
 {
+    if (d == x)
+        return;
     x->ref.ref();
-    x = qAtomicSetPtr(&d, x);
-    if (!x->ref.deref())
-        delete x;
+    if (!d->ref.deref())
+        delete d;
+    d = x;
 }
 
-/*! \internal
-    \overload
-*/
-template <typename T>
-inline void qAtomicAssign(QBasicAtomicPointer<T> &d, T *x)
-{
-    x->ref.ref();
-    x = d.exchange(x);
-    if (!x->ref.deref())
-        delete x;
-}
-
-/*! \internal
-    \overload
-*/
-template <typename T>
-inline void qAtomicAssign(QBasicAtomicPointer<T> &d, const QBasicAtomicPointer<T> &x)
-{ qAtomicAssign<T>(d, x); }
-
-/*! \internal
-    This is a helper for the detach function. Your private class needs
-    a copy constructor which copies the members and sets the refcount
-    to 1. After that, your detach function should look like this:
+/*!
+    This is a helper for the detach method of implicitly shared
+    classes. Your private class needs a copy constructor which copies
+    the members and sets the refcount to 1. After that, your detach
+    function should look like this:
 
     \code
         void MyClass::detach()
@@ -245,22 +257,8 @@ inline void qAtomicDetach(T *&d)
 {
     if (d->ref == 1)
         return;
-    T *x = new T(*d);
-    x = qAtomicSetPtr(&d, x);
-    if (!x->ref.deref())
-        delete x;
-}
-
-/*! \internal
-    \overload
-*/
-template <typename T>
-inline void qAtomicDetach(QBasicAtomicPointer<T> &d)
-{
-    if (d->ref == 1)
-        return;
-    T *x = new T(*d);
-    x = d.exchange(x);
+    T *x = d;
+    d = new T(*d);
     if (!x->ref.deref())
         delete x;
 }

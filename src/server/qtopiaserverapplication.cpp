@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -37,43 +37,9 @@
 #include <Qtopia>
 #include <qconstcstring.h>
 #include <qtopialog.h>
-#include "qperformancelog.h"
+#include <QPerformanceLog>
 
-#ifndef Q_OS_WIN32
 #include <unistd.h>
-#endif
-
-#ifdef QTOPIA_TEST
-# include <QtopiaServerTestSlave>
-class QtopiaTestServerSocket : public QTcpServer
-{
-public:
-    QtopiaTestServerSocket();
-    virtual ~QtopiaTestServerSocket();
-
-private:
-    virtual void incomingConnection( int socket );
-};
-
-class TestEventFilter : public QtopiaServerApplication::QWSEventFilter
-{
-public:
-    TestEventFilter(QtopiaServerApplication *parent) {
-        parent->installQWSEventFilter(this);
-        m_parent = parent;
-    }
-    ~TestEventFilter() {
-        m_parent->removeQWSEventFilter(this);
-    }
-    bool qwsEventFilter(QWSEvent *e) {
-        m_parent->m_serverSlave->mouseFilter(e);
-        return false;
-    }
-private:
-    QtopiaServerApplication *m_parent;
-};
-
-#endif
 
 class TaskStartupInfo;
 
@@ -172,7 +138,7 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
   The QtopiaServerApplication class acts as a QtopiaApplication instance in
   Qtopia Server.  QtopiaServerApplication is primarily responsible for bringing
   up and shutting down the Qtopia server and acts as the "core" controller in
-  the system.
+  the system. This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 
   The Qtopia server is structured as a collection of largely independent
   \i tasks that are responsible for performing a small, well defined portion
@@ -321,6 +287,9 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
   \row \o \c {/System/Tasks/<TaskName>/Order/Interface} \o int \o The order that the task will be given when determining interface associations.
   \row \o \c {/System/Tasks/<TaskName>/State} \o String \o  "Disable" if the task was in the \c {exclude} list, "Active" if the task is running, or "Inactive" if not.
   \endtable
+  
+  A tutorial on how to develop new server tasks can be found in 
+  the \l{Integration guide#Server Tasks}{Device Integration guide}.
 
   \section1 Qtopia Server Widgets
 
@@ -617,6 +586,7 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
   \l {Qtopia Server Widgets} overview.
 */
 
+static QValueSpaceItem* serverWidgetVsi = 0;
 
 // define QtopiaServerApplication
 QtopiaServerApplication *QtopiaServerApplication::m_instance = 0;
@@ -630,31 +600,31 @@ QtopiaServerApplication::QtopiaServerApplication(int& argc, char **argv)
     QValueSpace::initValuespaceManager();
     qtopiaServerTasks()->enableTaskReporting();
 
-#ifdef QTOPIA_TEST
-    m_serverSlave = new QtopiaServerTestSlave;
-    m_serverSocket = new QtopiaTestServerSocket;
-    m_testFilter = new TestEventFilter(this);
-#endif
+    serverWidget_vso = new QValueSpaceObject("/System/ServerWidgets/Initialized", this);
+    serverWidget_vso->setAttribute( QByteArray(), false );
+    serverWidgetVsi = new QValueSpaceItem( "/System/ServerWidgets" );
+    connect( serverWidgetVsi, SIGNAL(contentsChanged()),
+             this, SLOT(serverWidgetVsChanged()) );
 }
 
 /*! \internal */
 QtopiaServerApplication::~QtopiaServerApplication()
 {
     Q_ASSERT(m_instance);
+#ifdef Q_WS_QWS
     Q_ASSERT(m_filters.isEmpty());
-    m_instance = 0;
-
-#ifdef QTOPIA_TEST
-    delete m_serverSocket;
-    delete m_testFilter;
-    delete m_serverSlave;
 #endif
+    m_instance = 0;
 }
+
+#ifdef Q_WS_QWS
 
 /*!
   \class QtopiaServerApplication::QWSEventFilter
   \ingroup QtopiaServer
   \brief The QWSEventFilter class provides an interface for filtering Qt Window System events.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
@@ -702,6 +672,8 @@ void QtopiaServerApplication::removeQWSEventFilter(QWSEventFilter *filter)
     }
 }
 
+#endif // Q_WS_QWS
+
 /*!
   Return the instantiated QtopiaServerApplication instance.  An instance of
   the class \bold {must} have been constructed prior to calling this method.
@@ -711,6 +683,8 @@ QtopiaServerApplication *QtopiaServerApplication::instance()
     Q_ASSERT(m_instance);
     return m_instance;
 }
+
+#ifdef Q_WS_QWS
 
 /*!
   \internal
@@ -723,6 +697,44 @@ bool QtopiaServerApplication::qwsEventFilter(QWSEvent *e)
 
     return QtopiaApplication::qwsEventFilter(e);
 }
+
+/*!
+  \reimp
+  */
+bool QtopiaServerApplication::notify( QObject* o, QEvent* e )
+{
+    QtopiaApplication::notify(o, e);
+    static bool mainWidgetInitPending = true; 
+    if ( mainWidgetInitPending ) {
+        if ( !mainWidgetName.isEmpty() && e->type() == QEvent::Show && o->isWidgetType() ) {
+            if ( mainWidgetName == o->metaObject()->className() ) {
+                qLog(UI) << "Idle screen widget " << mainWidgetName << " initialized";
+                mainWidgetInitPending = false;
+            } else if ( QWidget* focus = qobject_cast<QWidget*>(o)) {
+                QWidget* w = focus;
+                while ( (w=w->nextInFocusChain()) != focus )
+                    if ( w->isVisible() && w->metaObject()->className() == mainWidgetName ) {
+                        qLog(UI) << "Idle screen widget " << mainWidgetName << " initialized";
+                        mainWidgetInitPending = false;
+                        break;
+                    }
+            }
+
+            if ( !mainWidgetInitPending ) {
+                //notify interested parties that the main idle screen is up and visible 
+                serverWidget_vso->setAttribute(QByteArray(), true );
+                if ( serverWidgetVsi ) {
+                    serverWidgetVsi->disconnect( this );
+                    serverWidgetVsi->deleteLater();
+                    serverWidgetVsi = 0;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+#endif
 
 /*! \internal */
 void QtopiaServerApplication::shutdown()
@@ -775,6 +787,29 @@ void QtopiaServerApplication::restart()
 QTOPIA_TASK(QtopiaApplication,
             QtopiaServerApplication(QtopiaServerApplication::argc(),
                                     QtopiaServerApplication::argv()));
+
+/*!
+  \internal
+  */
+void QtopiaServerApplication::serverWidgetVsChanged()
+{
+    if ( !serverWidgetVsi )
+        return;
+
+    QByteArray idleScreen = serverWidgetVsi->value("QAbstractHomeScreen", "").toByteArray();
+    if ( !idleScreen.isEmpty() ) {
+        qLog(UI) << "Using" << idleScreen << "as idle widget";
+        mainWidgetName = idleScreen;
+        serverWidgetVsi->disconnect( this );
+        serverWidgetVsi->deleteLater();
+        serverWidgetVsi = 0;
+    } else if ( mainWidgetName.isEmpty() ){
+        //fall back -> the server interace must always exist
+        mainWidgetName = serverWidgetVsi->value("QAbstractServerInterface", "").toByteArray();
+        if ( qLogEnabled(UI) && !mainWidgetName.isEmpty() )
+            qLog(UI) << "Using" << mainWidgetName << "as idle widget";
+    }
+}
 
 /*!
   \typedef QtopiaServerApplication::CreateTaskFunc
@@ -1207,7 +1242,7 @@ bool QtopiaServerApplication::startup(int &argc, char **argv, const QList<QByteA
     Q_ASSERT(qst);
 
     qLog(QtopiaServer) << "Starting tasks...";
-    QPerformanceLog("QtopiaServer") << "Starting tasks...";
+    QPerformanceLog("QtopiaServer") << QPerformanceLog::Begin << "tasks";
     qst->argc = &argc;
     qst->argv = argv;
 
@@ -1219,7 +1254,7 @@ bool QtopiaServerApplication::startup(int &argc, char **argv, const QList<QByteA
     // Actually start the tasks
     for(int ii = 0; ii < startupOrder.count(); ++ii) {
         qLog(QtopiaServer) << "Starting task" << startupOrder.at(ii)->name.toByteArray();
-        QPerformanceLog("QtopiaServer") << "Starting task" << startupOrder.at(ii)->name.toByteArray();
+        QPerformanceLog("QtopiaServer") << QPerformanceLog::Begin << "task" << startupOrder.at(ii)->name.toByteArray();
         qst->startTask(startupOrder.at(ii), false);
     }
 
@@ -1257,15 +1292,15 @@ QObject *QtopiaServerApplication::qtopiaTask(const QByteArray &taskName,
   For example, consider the following interfaces:
 
   \code
-  class ApplicationLauncherType : public QObject {};
-  QTOPIA_TASK_INTERFACE(ApplicationLauncherType);
+  class ApplicationTypeLauncher : public QObject {};
+  QTOPIA_TASK_INTERFACE(ApplicationTypeLauncher);
   class SystemShutdownHandler : public QObject {};
   QTOPIA_TASK_INTERFACE(SystemShutdownHandler);
   \endcode
 
   Using direct inheritance a single task could not implement both interfaces.
   Instead, a task can create one object that implements the
-  \c {ApplicationLauncherType} interface and one that implements the
+  \c {ApplicationTypeLauncher} interface and one that implements the
   \c {SystemShutdownHandler} interface and aggregate them together.
 
   \code
@@ -1275,7 +1310,7 @@ QObject *QtopiaServerApplication::qtopiaTask(const QByteArray &taskName,
       MyLauncherShutdown(MyLauncherType *);
   };
 
-  class MyLauncherType : public ApplicationLauncherType
+  class MyLauncherType : public ApplicationTypeLauncher
   {
   public:
       MyLauncherType()
@@ -1285,7 +1320,7 @@ QObject *QtopiaServerApplication::qtopiaTask(const QByteArray &taskName,
       }
   };
   QTOPIA_TASK(MyLauncherType, MyLauncherType);
-  QTOPIA_TASK_PROVIDES(MyLauncherType, ApplicationLauncherType);
+  QTOPIA_TASK_PROVIDES(MyLauncherType, ApplicationTypeLauncher);
   QTOPIA_TASK_PROVIDES(MyLauncherType, SystemShutdownHandler);
   \endcode
 
@@ -1473,8 +1508,15 @@ void QtopiaServerApplication::_shutdown(ShutdownType type)
             qst->ackShutdownObject(shutdown.at(ii));
     }
 
+    QTime t;
+    t.start();
     while(!qst->shutdownDone())
+    {
+        // If this assert fires, then some of the server shutdown tasks above
+        // have failed to exit correctly, and require bug-fixing
+        Q_ASSERT_X( t.elapsed() < 5000, "shutdown", "at least one shutdown handler failed to complete" );
         QApplication::instance()->processEvents();
+    }
     QApplication::instance()->quit();
 }
 
@@ -1589,6 +1631,29 @@ _ReplacementInstaller::_ReplacementInstaller(const QMetaObject *you,
     r->add(you, them, QByteArray(feature), create);
 }
 
+/*!
+  Wrap a value space object around \a widget. This enables 
+  the lookup of server widget mappings.
+  */
+QWidget *wrapValueSpace( QWidget* widget, const QMetaObject* them )
+{
+    if ( !widget )
+        return 0;
+
+    //qtopiaWidget<> creates a new instance each time it is called.
+    //we are only interested in one only
+    QValueSpaceItem item( QLatin1String("/System/ServerWidgets/") );
+    QStringList sub = item.subPaths();
+    if ( sub.contains( them->className() ) )
+        return widget;
+
+    QValueSpaceObject* obj = new QValueSpaceObject( 
+        QLatin1String("/System/ServerWidgets/")+ them->className(), widget );
+    obj->setAttribute( QByteArray(), widget->metaObject()->className() );
+
+    return widget;
+}
+
 QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
                                        QWidget *parent,
                                        Qt::WFlags flags)
@@ -1601,7 +1666,7 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
 
     if(classIter->lastUsedSet) {
         if(classIter->lastUsed)
-            return classIter->lastUsed(parent, flags);
+            return wrapValueSpace(classIter->lastUsed(parent, flags), them);
         else
             return 0;
     }
@@ -1685,7 +1750,7 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
 
     classIter->lastUsedSet = true;
     if(classIter->lastUsed)
-        return classIter->lastUsed(parent, flags);
+        return wrapValueSpace(classIter->lastUsed(parent, flags), them);
     else
         return 0;
 }
@@ -1716,6 +1781,7 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
 
   Shutdown is controlled through the QtopiaServerApplication::shutdown() method.
 
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   \sa QtopiaServerApplication
  */
 
@@ -1749,62 +1815,5 @@ bool SystemShutdownHandler::systemShutdown()
 {
     return true;
 }
-
-#ifdef QTOPIA_TEST
-/*
-    This simple class sets up a TCP server that will listen for incoming connections from the Qt Test Framework.
-    An incoming connection will be hooked up to the testserver slave instance.
-
-    A default port value is used, but an alternative value may be specified with the -remote <port> command line option.
-
-    Note that the test classes only exist if Qtopia is configured with -test.
-*/
-QtopiaTestServerSocket::QtopiaTestServerSocket() : QTcpServer()
-{
-    setMaxPendingConnections( 1 );
-
-    quint16 my_port = 5656;
- 
-    bool found = false;
-    for (int i = 1; i<qApp->arguments().count(); i++) {
-        if (qApp->arguments()[i] == "-remote") {
-            if (found)
-                qWarning("Multiple -remote arguments found, only the first will be used");
-            else {
-                found = true;
-                QString ip_port = qApp->argv()[i+1];
-                int pos = ip_port.indexOf( ":" );
-                if (pos >= 0)
-                    my_port = ip_port.mid(pos+1).toInt();
-                else
-                    my_port = ip_port.toInt();
-            }
-        }
-    }
-
-    listen( QHostAddress::Any, my_port );
-
-    if (this->serverPort() == 0) {
-        qWarning( QString("ERROR: port '%1' is already in use. System testing is not possible.").arg(my_port).toAscii() );
-//        QApplication::exit(777);
-    } else {
-        qWarning( QString("QtopiaTest is using port '%1' for System testing.").arg(my_port).toAscii() );
-    }
-}
-
-QtopiaTestServerSocket::~QtopiaTestServerSocket()
-{
-}
-
-void QtopiaTestServerSocket::incomingConnection( int socket )
-{
-    QtopiaServerApplication *app = QtopiaServerApplication::instance();
-    if (app) {
-        // hook up our internal system test slave to an incoming test connection
-        app->m_serverSlave->close();
-        app->m_serverSlave->setSocket( socket );
-    }
-}
-#endif //ifdef QTOPIA_TEST
 
 #include "qtopiaserverapplication.moc"

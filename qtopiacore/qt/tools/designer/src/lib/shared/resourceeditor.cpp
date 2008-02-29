@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -25,16 +40,19 @@
 TRANSLATOR qdesigner_internal::ResourceEditor
 */
 
+#include "resourceeditor_p.h"
+#include "ui_resourceeditor.h"
+#include "resourcefile_p.h"
+#include "iconloader_p.h"
+
 #include <QtCore/QFileInfo>
 #include <QtCore/QDir>
 #include <QtCore/qdebug.h>
 #include <QtGui/QTabWidget>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QHBoxLayout>
-#include <QtGui/QAction>
 #include <QtGui/QComboBox>
 #include <QtGui/QLabel>
-#include <QtGui/QStackedWidget>
 #include <QtGui/QTreeView>
 #include <QtGui/QItemSelectionModel>
 #include <QtGui/QHeaderView>
@@ -48,7 +66,8 @@ TRANSLATOR qdesigner_internal::ResourceEditor
 #include <QtGui/QDrag>
 #include <QtGui/QDockWidget>
 
-#include <QtDesigner/QtDesigner>
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <QtDesigner/QDesignerFormWindowManagerInterface>
 
 #include <resourcefile_p.h>
 #include <iconloader_p.h>
@@ -56,9 +75,9 @@ TRANSLATOR qdesigner_internal::ResourceEditor
 #include "ui_resourceeditor.h"
 #include "resourceeditor_p.h"
 
-#define COMBO_EMPTY_DATA 0
-#define COMBO_NEW_DATA 1
-#define COMBO_OPEN_DATA 2
+namespace {
+    enum { COMBO_EMPTY_DATA, COMBO_NEW_DATA, COMBO_OPEN_DATA };
+}
 
 namespace qdesigner_internal {
 
@@ -148,16 +167,15 @@ private:
     QStringList m_last_file_list;
 };
 
-QrcView::QrcView(QWidget *parent)
-    : QTreeView(parent)
+QrcView::QrcView(QWidget *parent) :
+    QTreeView(parent),
+    m_last_mime_data(0)
 {
     setItemDelegate(new QrcItemDelegate(this));
     setEditTriggers(QTreeView::DoubleClicked
                             | QTreeView::AnyKeyPressed);
     header()->hide();
     setAcceptDrops(true);
-
-    m_last_mime_data = 0;
 }
 
 QStringList QrcView::mimeFileList(const QMimeData *mime)
@@ -168,16 +186,18 @@ QStringList QrcView::mimeFileList(const QMimeData *mime)
     m_last_mime_data = mime;
     m_last_file_list.clear();
 
-    if (!mime->hasFormat(QLatin1String("text/uri-list")))
+    const QString uriList = QLatin1String("text/uri-list");
+    if (!mime->hasFormat(uriList))
         return m_last_file_list;
 
-    QByteArray data_list_str = mime->data(QLatin1String("text/uri-list"));
+    QByteArray data_list_str = mime->data(uriList);
     QList<QByteArray> data_list = data_list_str.split('\n');
 
+    const QString filePrefix = QLatin1String("file:");
     foreach (QByteArray data, data_list) {
-        QString uri = QFile::decodeName(data.trimmed());
-        if (uri.startsWith(QLatin1String("file:")))
-            m_last_file_list.append(uri.mid(5));
+        const QString uri = QFile::decodeName(data.trimmed());
+        if (uri.startsWith(filePrefix))
+            m_last_file_list.append(uri.mid(filePrefix.size()));
     }
 
     return m_last_file_list;
@@ -232,10 +252,10 @@ void QrcView::dropEvent(QDropEvent *e)
         return;
     }
 
-    QStringList file_list = mimeFileList(e->mimeData());
+    const QStringList file_list = mimeFileList(e->mimeData());
     m_last_mime_data = 0;
 
-    QModelIndex index = indexAt(e->pos());
+    const QModelIndex index = indexAt(e->pos());
     if (!index.isValid()) {
         e->ignore();
         return;
@@ -244,8 +264,8 @@ void QrcView::dropEvent(QDropEvent *e)
     ResourceModel *model = qobject_cast<ResourceModel*>(this->model());
     Q_ASSERT(model != 0);
 
-    QModelIndex prefix_index = model->prefixIndex(index);
-    QModelIndex last_added_idx = model->addFiles(prefix_index, file_list);
+    const QModelIndex prefix_index = model->prefixIndex(index);
+    const QModelIndex last_added_idx = model->addFiles(prefix_index, file_list);
     setExpanded(prefix_index, true);
     selectionModel()->setCurrentIndex(last_added_idx, QItemSelectionModel::ClearAndSelect);
 }
@@ -259,7 +279,8 @@ class EditableResourceModel : public ResourceModel
     Q_OBJECT
 
 public:
-    EditableResourceModel(const ResourceFile &resource_file, QObject *parent = 0);
+    EditableResourceModel(const ResourceFile &resource_file,
+                          QObject *parent = 0);
     virtual Qt::ItemFlags flags(const QModelIndex &index) const;
     virtual QModelIndex addFiles(const QModelIndex &idx, const QStringList &file_list);
     virtual bool reload();
@@ -277,17 +298,17 @@ EditableResourceModel::EditableResourceModel(const ResourceFile &resource_file,
 
 Qt::ItemFlags EditableResourceModel::flags(const QModelIndex &index) const
 {
-    Qt::ItemFlags result = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-
     QString prefix, file;
     getItem(index, prefix, file);
 
     if (file.isEmpty())
-        result |= Qt::ItemIsEditable;
-    else if (!iconFileExtension(file))
-        result &= ~Qt::ItemIsEnabled & ~Qt::ItemIsSelectable;
+        return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
 
-    return result;
+    const QIcon icon = qVariantValue<QIcon>(data(index, Qt::DecorationRole));
+    if (!icon.isNull())
+        return Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+
+    return Qt::ItemFlags();
 }
 
 QModelIndex EditableResourceModel::addFiles(const QModelIndex &idx,
@@ -296,24 +317,24 @@ QModelIndex EditableResourceModel::addFiles(const QModelIndex &idx,
     QModelIndex result;
 
     QStringList good_file_list;
+    const QString upPath = QLatin1String("..");
     foreach (QString file, file_list) {
-        if (!relativePath(file).startsWith(QLatin1String("..")))
+        if (!relativePath(file).startsWith(upPath ))
             good_file_list.append(file);
     }
 
     if (good_file_list.size() == file_list.size()) {
         result = ResourceModel::addFiles(idx, good_file_list);
     } else if (good_file_list.size() > 0) {
-        int answer =
-            QMessageBox::warning(0, tr("Invalid files"),
-                                    tr("Files referenced in a qrc must be in the qrc's "
-                                        "directory or one of its subdirectories:<p><b>%1</b><p>"
-                                        "Some of the selected files do not comply with this.")
-                                            .arg(absolutePath(QString())),
-                                    tr("Cancel"), tr("Only insert files which comply"),
-                                    QString(), 1);
-
-        if (answer != 0)
+        QMessageBox msgBox(QMessageBox::Warning, tr("Invalid files"),
+                           tr("Files referenced in a qrc must be in the qrc's "
+                              "directory or one of its subdirectories:<p><b>%1</b><p>"
+                              "Some of the selected files do not comply with this.")
+                           .arg(absolutePath(QString())), QMessageBox::Cancel);
+        QPushButton *insertButton = msgBox.addButton(tr("Only insert files which comply"), QMessageBox::AcceptRole);
+        msgBox.setDefaultButton(insertButton);
+        msgBox.exec();
+        if (msgBox.clickedButton() == insertButton)
             result = ResourceModel::addFiles(idx, good_file_list);
     } else {
         QMessageBox::warning(0, tr("Invalid files"),
@@ -368,7 +389,8 @@ public:
     ResourceModel *model(const QString &file);
 
 private:
-    QList<ResourceModel*> m_model_list;
+    typedef QList<ResourceModel*> ResourceModelList;
+    ResourceModelList m_model_list;
 };
 
 Q_GLOBAL_STATIC(ModelCache, g_model_cache)
@@ -381,10 +403,12 @@ ResourceModel *ModelCache::model(const QString &file)
         return model;
     }
 
-    for (int i = 0; i < m_model_list.size(); ++i) {
-        ResourceModel *model = m_model_list.at(i);
-        if (model->fileName() == file)
-            return model;
+    if (!m_model_list.empty()) {
+        const ResourceModelList::const_iterator cend = m_model_list.constEnd();
+        for (ResourceModelList::const_iterator it = m_model_list.constBegin(); it !=  cend; ++it) {
+            if ( (*it)->fileName() == file)
+                return *it;
+        }
     }
 
     ResourceFile rf(file);
@@ -405,10 +429,14 @@ ResourceModel *ModelCache::model(const QString &file)
 ** ResourceEditor
 */
 
-ResourceEditor::ResourceEditor(QDesignerFormEditorInterface *core, QWidget *parent)
-    : QWidget(parent)
+ResourceEditor::ResourceEditor(QDesignerFormEditorInterface *core,
+                               bool dragEnabled,
+                               QWidget *parent):
+    QWidget(parent),
+    m_form(0),
+    m_ignore_update(false),
+    m_dragEnabled(dragEnabled)
 {
-    m_ignore_update = false;
     Ui::ResourceEditor ui;
     ui.setupUi(this);
 
@@ -419,7 +447,6 @@ ResourceEditor::ResourceEditor(QDesignerFormEditorInterface *core, QWidget *pare
     m_add_files_button = ui.m_add_files_button;
     m_remove_qrc_button = ui.m_remove_qrc_button;
 
-    m_form = 0;
     setEnabled(false);
 
     connect(core->formWindowManager(),
@@ -441,11 +468,27 @@ ResourceEditor::ResourceEditor(QDesignerFormEditorInterface *core, QWidget *pare
     updateQrcStack();
 }
 
+bool ResourceEditor::isIcon(const QString &_qrc_path, const QString &file_path) const
+{
+    const QDir form_dir = m_form->absoluteDir();
+    const QString qrc_path = form_dir.relativeFilePath(_qrc_path);
+
+    for (int i = 0; i < m_qrc_stack->count(); ++i) {
+        ResourceModel *resourceModel = model(i);
+        if (qrc_path == form_dir.relativeFilePath(resourceModel->fileName())) {
+            const QModelIndex index = resourceModel->getIndex(file_path);
+            const QIcon icon = qVariantValue<QIcon>(resourceModel->data(index, Qt::DecorationRole));
+            return !icon.isNull();
+        }
+    }
+    return false;
+}
+
 void ResourceEditor::insertEmptyComboItem()
 {
     if (m_qrc_combo->count() == 0)
         return;
-    QVariant v = m_qrc_combo->itemData(0);
+    const QVariant v = m_qrc_combo->itemData(0);
     if (v.type() == QVariant::Int && v.toInt() == COMBO_EMPTY_DATA)
         return;
     m_qrc_combo->insertItem(0, QIcon(), tr("<no resource files>"), QVariant(COMBO_EMPTY_DATA));
@@ -456,7 +499,7 @@ void ResourceEditor::removeEmptyComboItem()
 {
     if (m_qrc_combo->count() == 0)
         return;
-    QVariant v = m_qrc_combo->itemData(0);
+    const QVariant v = m_qrc_combo->itemData(0);
     if (v.type() != QVariant::Int || v.toInt() != COMBO_EMPTY_DATA)
         return;
     m_qrc_combo->removeItem(0);
@@ -483,7 +526,7 @@ ResourceModel *ResourceEditor::model(int i) const
 
 QTreeView *ResourceEditor::currentView() const
 {
-    int idx = currentIndex();
+    const int idx = currentIndex();
     if (idx == -1)
         return 0;
     return view(idx);
@@ -491,7 +534,7 @@ QTreeView *ResourceEditor::currentView() const
 
 ResourceModel *ResourceEditor::currentModel() const
 {
-    int idx = currentIndex();
+    const int idx = currentIndex();
     if (idx == -1)
         return 0;
     return model(idx);
@@ -523,7 +566,7 @@ void ResourceEditor::addPrefix()
     if (model == 0)
         return;
 
-    QModelIndex idx = model->addNewPrefix();
+    const QModelIndex idx = model->addNewPrefix();
     view->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::ClearAndSelect);
     model->save();
     updateUi();
@@ -539,13 +582,13 @@ void ResourceEditor::addFiles()
     if (model == 0)
         return;
 
-    QStringList file_list = QFileDialog::getOpenFileNames(this, tr("Open file"),
+    const QStringList file_list = QFileDialog::getOpenFileNames(this, tr("Open file"),
                                                             model->lastResourceOpenDirectory(),
                                                             tr("All files (*)"));
     if (file_list.isEmpty())
         return;
-    
-    QModelIndex idx = model->addFiles(view->currentIndex(), file_list);
+
+    const QModelIndex idx = model->addFiles(view->currentIndex(), file_list);
     if (idx.isValid()) {
         view->setExpanded(model->prefixIndex(view->currentIndex()), true);
         view->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::ClearAndSelect);
@@ -565,14 +608,14 @@ void ResourceEditor::deleteItem()
     if (model == 0)
         return;
 
-    QModelIndex cur_idx = view->currentIndex();
+    const QModelIndex cur_idx = view->currentIndex();
     if (!cur_idx.isValid())
         return;
 
-    QModelIndex idx = model->deleteItem(cur_idx);
+    const QModelIndex idx = model->deleteItem(cur_idx);
 
     if (idx.isValid()) {
-        QModelIndex pref_idx = model->prefixIndex(idx);
+        const QModelIndex pref_idx = model->prefixIndex(idx);
         if (pref_idx != idx)
             view->setExpanded(pref_idx, true);
         view->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::ClearAndSelect);
@@ -596,8 +639,7 @@ void ResourceEditor::updateUi()
     if (m_form != 0)
         name = QFileInfo(m_form->fileName()).fileName();
 
-    QString suffix;
-    name.isEmpty() ? suffix = tr("Resource Editor") : suffix = tr("Resource Editor: %1").arg(name);
+    QString suffix = name.isEmpty() ? tr("Resource Editor") : tr("Resource Editor: %1").arg(name);
 
     QWidget* widget = 0;
     if (m_form != 0)
@@ -621,7 +663,7 @@ int ResourceEditor::currentIndex() const
 
 void ResourceEditor::setCurrentIndex(int i)
 {
-    QVariant v = m_qrc_combo->itemData(i);
+    const QVariant v = m_qrc_combo->itemData(i);
     if (v.type() == QVariant::Int) {
         switch (v.toInt()) {
             case COMBO_EMPTY_DATA: {
@@ -640,7 +682,7 @@ void ResourceEditor::setCurrentIndex(int i)
                 break;
         }
     } else {
-        bool blocked = m_qrc_combo->blockSignals(true);
+        const bool blocked = m_qrc_combo->blockSignals(true);
         m_qrc_combo->setCurrentIndex(i);
         m_qrc_combo->blockSignals(blocked);
         m_qrc_stack->setCurrentIndex(i);
@@ -696,7 +738,7 @@ void ResourceEditor::updateQrcPaths()
 {
     for (int i = 0; i < m_qrc_stack->count(); ++i) {
         ResourceModel *model = this->model(i);
-        m_qrc_combo->setItemText(i, model->fileName());
+        m_qrc_combo->setItemText(i, QDir(model->fileName()).absolutePath());
     }
 
     updateUi();
@@ -704,9 +746,10 @@ void ResourceEditor::updateQrcPaths()
 
 void ResourceEditor::addView(const QString &qrc_file)
 {
-    int idx = qrcCount();
+    const int idx = qrcCount();
 
     QTreeView *view = new QrcView;
+    view->setDragEnabled(m_dragEnabled);
     ResourceModel *model = g_model_cache()->model(qrc_file);
     if (model == 0)
         return;
@@ -720,7 +763,6 @@ void ResourceEditor::addView(const QString &qrc_file)
     connect(view, SIGNAL(activated(QModelIndex)), this, SLOT(itemActivated(QModelIndex)));
     connect(view->selectionModel(), SIGNAL(currentChanged(QModelIndex, QModelIndex)),
             this, SLOT(itemChanged(QModelIndex)));
-//    connect(model, SIGNAL(dirtyChanged(bool)), this, SLOT(updateUi()));
 
     setCurrentIndex(idx);
 
@@ -734,14 +776,14 @@ void ResourceEditor::addView(const QString &qrc_file)
 
 void ResourceEditor::setCurrentFile(const QString &_qrc_path, const QString &file_path)
 {
-    QDir form_dir = m_form->absoluteDir();
-    QString qrc_path = form_dir.relativeFilePath(_qrc_path);
+    const QDir form_dir = m_form->absoluteDir();
+    const QString qrc_path = form_dir.relativeFilePath(_qrc_path);
 
     for (int i = 0; i < m_qrc_stack->count(); ++i) {
-        ResourceModel *model = this->model(i);
-        if (qrc_path == form_dir.relativeFilePath(model->fileName())) {
+        ResourceModel *resourceModel = model(i);
+        if (qrc_path == form_dir.relativeFilePath(resourceModel->fileName())) {
             setCurrentIndex(i);
-            QModelIndex index = model->getIndex(file_path);
+            const QModelIndex index = resourceModel->getIndex(file_path);
             view(i)->setCurrentIndex(index);
             break;
         }
@@ -758,11 +800,7 @@ void ResourceEditor::itemChanged(const QModelIndex &index)
         QString prefix, file;
         model->getItem(index, prefix, file);
         if (!file.isEmpty()) {
-            file_name = QLatin1Char(':')
-                        + prefix
-                        + QLatin1Char('/')
-                        + file;
-            file_name = QDir::cleanPath(file_name);
+            file_name = ResourceModel::resourcePath(prefix, file);
             qrc_path = m_form->absoluteDir().absoluteFilePath(model->fileName());
         }
     }
@@ -781,14 +819,19 @@ void ResourceEditor::itemActivated(const QModelIndex &index)
     if (file.isEmpty())
         return;
 
-    QString file_name = QLatin1Char(':')
-                        + prefix
-                        + QLatin1Char('/')
-                        + file;
-    file_name = QDir::cleanPath(file_name);
-    QString qrc_path = m_form->absoluteDir().absoluteFilePath(model->fileName());
+    const QString file_name = ResourceModel::resourcePath(prefix, file);
+    const QString qrc_path = m_form->absoluteDir().absoluteFilePath(model->fileName());
 
     emit fileActivated(qrc_path, file_name);
+}
+
+static void ensureSuffix(QString &file_name)
+{
+    const QString suffix = QLatin1String("qrc");
+    if (QFileInfo(file_name).suffix() != suffix) {
+        file_name += QLatin1Char('.');
+        file_name += suffix;
+    }
 }
 
 void ResourceEditor::saveCurrentView()
@@ -804,8 +847,7 @@ void ResourceEditor::saveCurrentView()
         if (file_name.isEmpty())
             return;
 
-        if (QFileInfo(file_name).suffix() != QLatin1String("qrc"))
-            file_name.append(QLatin1String(".qrc"));
+        ensureSuffix(file_name);
 
         model->setFileName(file_name);
         m_ignore_update = true;
@@ -889,9 +931,8 @@ void ResourceEditor::newView()
         setCurrentIndex(m_qrc_stack->count() == 0 ? 0 : m_qrc_stack->currentIndex());
         return;
     }
-        
-    if (QFileInfo(file_name).suffix() != QLatin1String("qrc"))
-		file_name.append(QLatin1String(".qrc"));
+
+    ensureSuffix(file_name);
 
     ResourceFile rf(file_name);
     rf.save();
@@ -926,7 +967,7 @@ void ResourceEditor::setActiveForm(QDesignerFormWindowInterface *form)
 
     m_form = form;
     updateQrcStack();
-    
+
     if (m_form != 0) {
         connect(m_form, SIGNAL(fileNameChanged(QString)),
                     this, SLOT(updateQrcPaths()));
@@ -936,7 +977,6 @@ void ResourceEditor::setActiveForm(QDesignerFormWindowInterface *form)
 
     setEnabled(m_form != 0);
 }
-
 } // namespace qdesigner_internal
 
 #include "resourceeditor.moc"

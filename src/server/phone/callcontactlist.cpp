@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -41,10 +41,8 @@
 
 #include "savetocontacts.h"
 
-CallContactItem::CallContactItem( CallContactItem::Types t,
-                                  QCallListItem cli, QObject *parent)
-:  QObject(parent), mType(t), mFieldType(QContactModel::Invalid), mModel(0),
-   clItem(cli)
+CallContactItem::CallContactItem( QCallListItem cli, QObject *parent)
+: QObject(parent), mFieldType(QContactModel::Invalid), mModel(0), clItem(cli)
 {
 }
 
@@ -60,11 +58,6 @@ QContactModel::Field CallContactItem::fieldType() const
         mFieldType = contactNumberToFieldType(number);
     }
     return mFieldType;
-}
-
-CallContactItem::Types CallContactItem::type() const
-{
-    return mType;
 }
 
 QUniqueId CallContactItem::contactID() const
@@ -107,10 +100,10 @@ QContact CallContactItem::contact() const
 */
 QPixmap CallContactItem::decoration() const
 {
-    if (mType == Contact)
+    if (!mId.isNull())
         return contact().thumbnail();
 
-    return typePixmap(mType);
+    return typePixmap(clItem.type());
 }
 
 QPixmap CallContactItem::extraDecoration() const
@@ -121,14 +114,14 @@ QPixmap CallContactItem::extraDecoration() const
 
 QString CallContactItem::text() const
 {
-    if (mType == CallContactItem::Contact)
+    if (!mId.isNull())
         return contact().label();
     return clItem.number();
 }
 
 QString CallContactItem::extraInfoText( ) const
 {
-    if (mType == CallContactItem::Contact && clItem.isNull())
+    if (!mId.isNull() && clItem.isNull())
     {
         return fieldTypeToContactDetail();
     }
@@ -148,7 +141,7 @@ QString CallContactItem::extraInfoText( ) const
        QTime callTime = dt.time();
        QString when("%1 %2");
        when = when.arg(QTimeString::localMD(callDate, QTimeString::Short))
-           .arg(QTimeString::localHM(callTime, QTimeString::Short));
+           .arg(QTimeString::localHM(callTime, QTimeString::Medium));
        return desc + when;
     }
     else
@@ -160,7 +153,7 @@ QString CallContactItem::extraInfoText( ) const
 
 QString CallContactItem::number() const
 {
-    if (mType == CallContactItem::Contact && clItem.isNull())
+    if (!mId.isNull() && clItem.isNull())
         return fieldTypeToContactDetail();
     else if (!clItem.isNull())
         return clItem.number();
@@ -168,21 +161,18 @@ QString CallContactItem::number() const
         return QString("");
 }
 
-QPixmap CallContactItem::typePixmap( CallContactItem::Types type )
+QPixmap CallContactItem::typePixmap( QCallListItem::CallType type )
 {
     QString typePixFileName;
     switch( type )
     {
-        case CallContactItem::Contact:
-            typePixFileName = "AddressBook";
-            break;
-        case CallContactItem::DialedNumber:
+        case QCallListItem::Dialed:
             typePixFileName = "phone/outgoingcall";
             break;
-        case CallContactItem::ReceivedCall:
+        case QCallListItem::Received:
             typePixFileName = "phone/incomingcall";
             break;
-        case CallContactItem::MissedCall:
+        case QCallListItem::Missed:
             typePixFileName = "phone/missedcall";
             break;
     }
@@ -192,17 +182,21 @@ QPixmap CallContactItem::typePixmap( CallContactItem::Types type )
     return icon.pixmap(QContact::thumbnailSize());
 }
 
-
 QContactModel::Field CallContactItem::contactNumberToFieldType(const QString& number) const
 {
     QContact cnt = contact();
-    QList<QContactModel::Field> list = QContactModel::phoneFields();
-    list.append(QContactModel::Emails);
+    static QList<QContactModel::Field> list;
+    if ( list.count() == 0 ) {
+        list = QContactModel::phoneFields();
+        list.append(QContactModel::Emails);
+    }
 
     int bestMatch = 0;
     QContactModel::Field bestField = QContactModel::Invalid;
     foreach(QContactModel::Field f, list) {
         QString candidate = QContactModel::contactField(cnt, f).toString();
+        if ( candidate.isEmpty() )
+            continue;
         int match = QPhoneNumber::matchNumbers(number, candidate);
         if (match > bestMatch) {
             bestField = f;
@@ -219,17 +213,17 @@ QString CallContactItem::fieldTypeToContactDetail() const
 }
 
 
-CallContactItem::Types CallContactItem::stateToType( QCallListItem::CallType st )
+QCallList::ListType CallContactItem::stateToType( QCallListItem::CallType st )
 {
     if ( st == QCallListItem::Dialed )
-        return CallContactItem::DialedNumber;
+        return QCallList::Dialed;
     else if ( st == QCallListItem::Missed )
-        return CallContactItem::MissedCall;
+        return QCallList::Missed;
     else if ( st == QCallListItem::Received )
-        return CallContactItem::ReceivedCall;
+        return QCallList::Received;
     else {
         qWarning("BUG: Invalid state passed to CallContactItem::stateToType");
-        return CallContactItem::DialedNumber;
+        return QCallList::Dialed;
     }
 }
 
@@ -334,8 +328,15 @@ void CallContactModel::resetModel()
 
 void CallContactModel::setFilter(const QString& filter)
 {
-    mFilter = filter;
+    bool ok = false;
+    filter.toInt( &ok );
+    if ( ok )
+        mFilter = filter;
+    else
+        mFilter = pk_matcher.collate( filter );
     refresh();
+
+    emit filtered( filter );
 }
 
 //==================================================================
@@ -359,7 +360,7 @@ QFont CallContactDelegate::secondaryFont(const QStyleOptionViewItem& o, const QM
 //==============================================================
 
 
-CallContactView::CallContactView(QWidget * parent)
+CallContactListView::CallContactListView(QWidget * parent)
     :QListView(parent), addContactMsg(0)
 {
     setFrameStyle(QFrame::NoFrame);
@@ -374,6 +375,10 @@ CallContactView::CallContactView(QWidget * parent)
     mOpenContact->setVisible(false);
     mSendMessage = mMenu->addAction(QIcon(":icon/txt"), tr("Send Message"), this, SLOT(sendMessageToItem()));
     mSendMessage->setVisible(false);
+    mRelatedCalls = mMenu->addAction(QIcon(":icon/view"), tr("Related Calls"), this, SLOT(showRelatedCalls()));
+    mRelatedCalls->setVisible(false);
+    mAllCalls = mMenu->addAction(QIcon(":icon/view"), tr("All Calls"), this, SLOT(showAllCalls()));
+    mAllCalls->setVisible(false);
 
     m_noResultMessage = tr("No matches.");
     setAlternatingRowColors(true);
@@ -381,9 +386,9 @@ CallContactView::CallContactView(QWidget * parent)
     setSelectionMode(QAbstractItemView::SingleSelection);
 }
 
-CallContactView::~CallContactView() {}
+CallContactListView::~CallContactListView() {}
 
-void CallContactView::paintEvent( QPaintEvent *pe )
+void CallContactListView::paintEvent( QPaintEvent *pe )
 {
     QListView::paintEvent(pe);
     if (cclm && !cclm->rowCount())
@@ -399,17 +404,17 @@ void CallContactView::paintEvent( QPaintEvent *pe )
     }
 }
 
-void CallContactView::setModel(QAbstractItemModel* model)
+void CallContactListView::setModel(QAbstractItemModel* model)
 {
     cclm  = qobject_cast<CallContactModel*>(model);
     if (!cclm)
     {
-        qWarning("CallContactView::setModel(): expecting model of type CallContactModel");
+        qWarning("CallContactListView::setModel(): expecting model of type CallContactModel");
     }
     QListView::setModel(model);
 }
 
-void CallContactView::addItemToContact()
+void CallContactListView::addItemToContact()
 {
     QModelIndex idx = selectionModel()->currentIndex();
     CallContactItem * cci = cclm->itemAt(idx);
@@ -421,7 +426,7 @@ void CallContactView::addItemToContact()
         SavePhoneNumberDialog::savePhoneNumber(number);
 }
 
-void CallContactView::openContact()
+void CallContactListView::openContact()
 {
     QModelIndex idx = selectionModel()->currentIndex();
     CallContactItem* cci = cclm->itemAt(idx);
@@ -437,7 +442,7 @@ void CallContactView::openContact()
     }
 }
 
-void CallContactView::sendMessageToItem()
+void CallContactListView::sendMessageToItem()
 {
     QModelIndex idx = selectionModel()->currentIndex();
     CallContactItem* cci = cclm->itemAt(idx);
@@ -455,7 +460,24 @@ void CallContactView::sendMessageToItem()
     }
 }
 
-void CallContactView::updateMenu(const QModelIndex& current, const QModelIndex& /*previous*/)
+void CallContactListView::showRelatedCalls()
+{
+    QModelIndex idx = selectionModel()->currentIndex();
+    CallContactItem * cci = cclm->itemAt(idx);
+    if ( !cci )
+        return;
+    if ( cci->contactID().isNull() )
+        cclm->setFilter( cci->number() );
+    else
+        cclm->setFilter( cci->contact().label() );
+}
+
+void CallContactListView::showAllCalls()
+{
+    cclm->setFilter( QString() );
+}
+
+void CallContactListView::updateMenu()
 {
     mSendMessage->setEnabled(false);
     mSendMessage->setVisible(false);
@@ -463,43 +485,47 @@ void CallContactView::updateMenu(const QModelIndex& current, const QModelIndex& 
     mAddContact->setVisible(false);
     mOpenContact->setEnabled(false);
     mOpenContact->setVisible(false);
+    mRelatedCalls->setEnabled(false);
+    mRelatedCalls->setVisible(false);
+    mAllCalls->setEnabled(false);
+    mAllCalls->setVisible(false);
 
-    CallContactItem* cci = cclm->itemAt(current);
+    CallContactItem* cci = cclm->itemAt(selectionModel()->currentIndex());
     if (!cci)
-        return;
-    if (cci->number().trimmed().isEmpty())
         return;
 
     QContactModel::Field fieldType = cci->fieldType();
     if ( fieldType == QContactModel::HomeMobile ||
-         fieldType == QContactModel::BusinessMobile ||
-         cci->type() != CallContactItem::Contact )
+         fieldType == QContactModel::BusinessMobile )
     {
         mSendMessage->setEnabled(true);
         mSendMessage->setVisible(true);
     }
 
-    switch (cci->type())
-    {
-        case CallContactItem::Contact:
-            mOpenContact->setEnabled(true);
-            mOpenContact->setVisible(true);
-            break;
-        case CallContactItem::DialedNumber:
-        case CallContactItem::ReceivedCall:
-        case CallContactItem::MissedCall:
-            if (fieldType == QContactModel::Invalid) {
-                mAddContact->setVisible(true);
-                mAddContact->setEnabled(true);
-            } else {
-                mOpenContact->setEnabled(true);
-                mOpenContact->setVisible(true);
-            }
-            break;
+    if ( !cci->contactID().isNull() ) {
+        mOpenContact->setEnabled(true);
+        mOpenContact->setVisible(true);
+    }
+
+    if ( fieldType == QContactModel::Invalid
+        && !cci->number().trimmed().isEmpty() ) {
+        mAddContact->setVisible(true);
+        mAddContact->setEnabled(true);
+    }
+
+    if ( cci->number().trimmed().isEmpty() )
+        return;
+
+    if ( cclm->filter().isEmpty() ) {
+        mRelatedCalls->setEnabled(true);
+        mRelatedCalls->setVisible(true);
+    } else {
+        mAllCalls->setEnabled(true);
+        mAllCalls->setVisible(true);
     }
 }
 
-QString CallContactView::numberForIndex(const QModelIndex & idx) const
+QString CallContactListView::numberForIndex(const QModelIndex & idx) const
 {
     QString number;
     CallContactItem* cci = cclm->itemAt(idx);
@@ -509,7 +535,7 @@ QString CallContactView::numberForIndex(const QModelIndex & idx) const
     return number;
 }
 
-QContact CallContactView::contactForIndex(const QModelIndex & idx) const
+QContact CallContactListView::contactForIndex(const QModelIndex & idx) const
 {
     CallContactItem* cci = cclm->itemAt(idx);
     if (!cci)
@@ -517,13 +543,13 @@ QContact CallContactView::contactForIndex(const QModelIndex & idx) const
     return cci->contact();
 }
 
-void CallContactView::reset()
+void CallContactListView::reset()
 {
     QListView::reset();
     mNumber = QString();
 }
 
-void CallContactView::keyPressEvent( QKeyEvent *e )
+void CallContactListView::keyPressEvent( QKeyEvent *e )
 {
     int key = e->key();
     if (key == Qt::Key_Call || key == Qt::Key_Yes) {
@@ -548,13 +574,13 @@ void CallContactView::keyPressEvent( QKeyEvent *e )
     }
 }
 
-void CallContactView::focusInEvent( QFocusEvent *focusEvent)
+void CallContactListView::focusInEvent( QFocusEvent *focusEvent)
 {
     QListView::focusInEvent( focusEvent );
     setEditFocus( true );
 }
 
-void CallContactView::setEmptyMessage(const QString& newMessage)
+void CallContactListView::setEmptyMessage(const QString& newMessage)
 {
     m_noResultMessage = newMessage;
 }

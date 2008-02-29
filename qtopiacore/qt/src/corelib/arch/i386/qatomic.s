@@ -77,3 +77,15 @@ q_atomic_set_ptr:
 	.align 4,0x90
 	.type q_atomic_set_ptr,@function
 	.size	q_atomic_set_ptr,.-q_atomic_set_ptr
+
+        .align 4,0x90
+        .globl q_atomic_fetch_and_add_int
+q_atomic_fetch_and_add_int:
+        mov 4(%esp),%ecx
+        mov 8(%esp),%eax
+        lock
+        xadd %eax,(%ecx)
+        ret
+        .align 4,0x90
+        .type q_atomic_fetch_and_add_int,@function
+        .size q_atomic_fetch_and_add_int,.-q_atomic_fetch_and_add_int

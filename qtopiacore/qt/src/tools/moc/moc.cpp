@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -78,7 +93,8 @@ bool Moc::parseClassHead(ClassDef *def)
     // support "class IDENT name" and "class IDENT(IDENT) name"
     if (test(LPAREN)) {
         until(RPAREN);
-        next(IDENTIFIER);
+        if (!test(IDENTIFIER))
+            return false;
         name = lexem();
     } else  if (test(IDENTIFIER)) {
         name = lexem();
@@ -220,9 +236,15 @@ Type Moc::parseType()
 
 bool Moc::parseEnum(EnumDef *def)
 {
-    if (!test(IDENTIFIER))
-        return false; // anonymous enum
-    def->name = lexem();
+    bool isTypdefEnum = false; // typedef enum { ... } Foo;
+
+    if (test(IDENTIFIER)) {
+        def->name = lexem();
+    } else {
+        if (lookup(-1) != TYPEDEF)
+            return false; // anonymous enum
+        isTypdefEnum = true;
+    }
     if (!test(LBRACE))
         return false;
     do {
@@ -232,6 +254,11 @@ bool Moc::parseEnum(EnumDef *def)
         def->values += lexem();
     } while (test(EQ) ? until(COMMA) : test(COMMA));
     next(RBRACE);
+    if (isTypdefEnum) {
+        if (!test(IDENTIFIER))
+            return false;
+        def->name = lexem();
+    }
     return true;
 }
 
@@ -262,11 +289,39 @@ void Moc::parseFunctionArguments(FunctionDef *def)
     }
 }
 
+bool Moc::testFunctionAttribute(FunctionDef *def)
+{
+    if (index < symbols.size() && testFunctionAttribute(symbols.at(index).token, def)) {
+        ++index;
+        return true;
+    }
+    return false;
+}
+
+bool Moc::testFunctionAttribute(Token tok, FunctionDef *def)
+{
+    switch (tok) {
+        case Q_MOC_COMPAT_TOKEN:
+        case Q_QT3_SUPPORT_TOKEN:
+            def->isCompat = true;
+            return true;
+        case Q_INVOKABLE_TOKEN:
+            def->isInvokable = true;
+            return true;
+        case Q_SCRIPTABLE_TOKEN:
+            def->isInvokable = def->isScriptable = true;
+            return true;
+        default: break;
+    }
+    return false;
+}
+
 // returns false if the function should be ignored
 bool Moc::parseFunction(FunctionDef *def, bool inMacro)
 {
     def->isVirtual = false;
-    while (test(INLINE) || test(STATIC) || test(VIRTUAL)) {
+    while (test(INLINE) || test(STATIC) || test(VIRTUAL)
+           || testFunctionAttribute(def)) {
         if (lookup() == VIRTUAL)
             def->isVirtual = true;
     }
@@ -286,12 +341,8 @@ bool Moc::parseFunction(FunctionDef *def, bool inMacro)
     } else {
         Type tempType = parseType();;
         while (!tempType.name.isEmpty() && lookup() != LPAREN) {
-            if (def->type.firstToken == Q_MOC_COMPAT_TOKEN || def->type.firstToken == Q_QT3_SUPPORT_TOKEN)
-                def->isCompat = true;
-            else if (def->type.firstToken == Q_INVOKABLE_TOKEN)
-                def->isInvokable = true;
-            else if (def->type.firstToken == Q_SCRIPTABLE_TOKEN)
-                def->isInvokable = def->isScriptable = true;
+            if (testFunctionAttribute(def->type.firstToken, def))
+                ; // fine
             else if (def->type.firstToken == Q_SIGNALS_TOKEN)
                 error();
             else if (def->type.firstToken == Q_SLOTS_TOKEN)
@@ -467,13 +518,40 @@ void Moc::parse()
                     next(SEMIC);
                 }
                 break;
+            case CLASS:
+            case STRUCT: {
+                if (currentFilenames.size() <= 1)
+                    break;
+
+                ClassDef def;
+                if (!parseClassHead(&def))
+                    continue;
+
+                while (inClass(&def) && hasNext()) {
+                    if (next() == Q_OBJECT_TOKEN) {
+                        def.hasQObject = true;
+                        break;
+                    }
+                }
+
+                if (!def.hasQObject)
+                    continue;
+
+                for (int i = namespaceList.size() - 1; i >= 0; --i)
+                    if (inNamespace(&namespaceList.at(i)))
+                        def.qualified.prepend(namespaceList.at(i).name + "::");
+
+                knownQObjectClasses.insert(def.classname);
+                knownQObjectClasses.insert(def.qualified);
+
+                continue; }
             default: break;
         }
         if ((t != CLASS && t != STRUCT)|| currentFilenames.size() > 1)
             continue;
         ClassDef def;
-        FunctionDef::Access access = FunctionDef::Private;
         if (parseClassHead(&def)) {
+            FunctionDef::Access access = FunctionDef::Private;
             for (int i = namespaceList.size() - 1; i >= 0; --i)
                 if (inNamespace(&namespaceList.at(i)))
                     def.qualified.prepend(namespaceList.at(i).name + "::");
@@ -601,10 +679,13 @@ void Moc::parse()
             if (!def.hasQObject && !def.hasQGadget)
                 error("Class declarations lacks Q_OBJECT macro.");
 
+            checkSuperClasses(&def);
+
             classList += def;
+            knownQObjectClasses.insert(def.classname);
+            knownQObjectClasses.insert(def.qualified);
         }
     }
-
 }
 
 void Moc::generate(FILE *out)
@@ -653,12 +734,21 @@ void Moc::generate(FILE *out)
 
 
     for (i = 0; i < classList.size(); ++i) {
-        Generator generator(out, &classList[i], metaTypes);
+        Generator generator(&classList[i], metaTypes, out);
         generator.generateCode();
     }
 }
 
 
+QList<QMetaObject*> Moc::generate(bool ignoreProperties)
+{
+    QList<QMetaObject*> result;
+    for (int i = 0; i < classList.size(); ++i) {
+        Generator generator(&classList[i], metaTypes);
+        result << generator.generateMetaObject(ignoreProperties);
+    }
+    return result;
+}
 
 void Moc::parseSlots(ClassDef *def, FunctionDef::Access access)
 {
@@ -1023,4 +1113,57 @@ bool Moc::until(Token target) {
     return false;
 }
 
+void Moc::checkSuperClasses(ClassDef *def)
+{
+    const QByteArray firstSuperclass = def->superclassList.value(0).first;
+
+    if (!knownQObjectClasses.contains(firstSuperclass)) {
+        // enable once we /require/ include paths
+#if 0
+        QByteArray msg;
+        msg += "Class ";
+        msg += def->className;
+        msg += " contains the Q_OBJECT macro and inherits from ";
+        msg += def->superclassList.value(0);
+        msg += " but that is not a known QObject subclass. You may get compilation errors.";
+        warning(msg.constData());
+        return;
+#endif
+    }
+    for (int i = 1; i < def->superclassList.count(); ++i) {
+        const QByteArray superClass = def->superclassList.at(i).first;
+        if (knownQObjectClasses.contains(superClass)) {
+            QByteArray msg;
+            msg += "Class ";
+            msg += def->classname;
+            msg += " inherits from two QObject subclasses ";
+            msg += firstSuperclass;
+            msg += " and ";
+            msg += superClass;
+            msg += ". This is not supported!";
+            warning(msg.constData());
+        }
+
+        if (interface2IdMap.contains(superClass)) {
+            bool registeredInterface = false;
+            for (int i = 0; i < def->interfaceList.count(); ++i)
+                if (def->interfaceList.at(i).first().className == superClass) {
+                    registeredInterface = true;
+                    break;
+                }
+
+            if (!registeredInterface) {
+                QByteArray msg;
+                msg += "Class ";
+                msg += def->classname;
+                msg += " implements the interface ";
+                msg += superClass;
+                msg += " but does not list it in Q_INTERFACES. qobject_cast to ";
+                msg += superClass;
+                msg += " will not work!";
+                warning(msg.constData());
+            }
+        }
+    }
+}
 

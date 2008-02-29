@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -70,31 +70,6 @@ QAbstractIpcInterface::Mode mode) : QCommInterface("QBluetoothAudioGateway", ser
 */
 QBluetoothAudioGateway::~QBluetoothAudioGateway()
 {
-}
-
-/*!
-    Returns the audio device associated with this gateway.  This is implementation
-    dependent.  The default implementation returns an alsa hwid string.
-
-    \bold{NOTE:} This function is not intended to be used.  It might
-    be removed in future versions of Qtopia.
-*/
-QByteArray QBluetoothAudioGateway::audioDevice() const
-{
-    return value("AudioDevice").toByteArray();
-}
-
-/*!
-    Returns the audio frequency currently being used by the device.
-
-    \bold{NOTE:} This function is not intended to be used.  It might
-    be removed in future versions of Qtopia.
-
-    \sa audioDevice()
-*/
-int QBluetoothAudioGateway::audioFrequency() const
-{
-    return 8000;
 }
 
 /*!
@@ -167,7 +142,7 @@ QBluetoothAddress QBluetoothAudioGateway::remotePeer() const
 void QBluetoothAudioGateway::connect(const QBluetoothAddress &addr,
                                      int rfcomm_channel)
 {
-    invoke( SLOT(connect(const QBluetoothAddress &,int)),
+    invoke( SLOT(connect(QBluetoothAddress,int)),
             qVariantFromValue( addr ),
             qVariantFromValue( rfcomm_channel ));
 }
@@ -236,7 +211,7 @@ void QBluetoothAudioGateway::connectAudio()
     \fn void QBluetoothAudioGateway::connectResult(bool success, const QString &msg)
 
     This signal is sent after the connect method has been called on the Audio Gateway
-    object.  The \a success parameter is true if the connection succeded, and false
+    object.  The \a success parameter is true if the connection succeeded, and false
     otherwise.  If the connection failed, the \a msg parameter holds the error
     string.
 

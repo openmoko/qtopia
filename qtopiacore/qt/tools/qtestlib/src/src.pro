@@ -19,7 +19,7 @@ MOC_DIR         = tmp
 DESTDIR = ../../../lib
 DLLDESTDIR = ../../../bin
 isEmpty(QT_MAJOR_VERSION) {
-   VERSION=4.2.3
+   VERSION=4.3.2
 } else {
    VERSION=$${QT_MAJOR_VERSION}.$${QT_MINOR_VERSION}.$${QT_PATCH_VERSION}
 }
@@ -32,7 +32,9 @@ unix {
    CONFIG     += create_libtool create_pc explicitlib
    QMAKE_PKGCONFIG_LIBDIR = $$[QT_INSTALL_LIBS]
    QMAKE_PKGCONFIG_INCDIR = $$[QT_INSTALL_HEADERS]
+   QMAKE_PKGCONFIG_CFLAGS = -I$$[QT_INSTALL_HEADERS]
    QMAKE_PKGCONFIG_DESCRIPTION = Qt Unit Testing Library
+   QMAKE_PKGCONFIG_DESTDIR = pkgconfig
    QMAKE_PKGCONFIG_NAME = QtTest
 }
 
@@ -59,12 +61,7 @@ mac:!static:contains(QT_CONFIG, qt_framework) {
    }
 }
 
-!debug_and_release|build_pass {
-   CONFIG(debug, debug|release) {
-      mac:TARGET = $$member(TARGET, 0)_debug
-      win32:TARGET = $$member(TARGET, 0)d
-   }
-}
+TARGET = $$qtLibraryTarget($$TARGET) #done towards the end (after framework)
 
 # Input
 HEADERS = qtest_global.h qtestcase.h qtestdata.h qtesteventloop.h

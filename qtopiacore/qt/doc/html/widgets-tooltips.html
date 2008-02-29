@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/examples/tooltips.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/tooltips.qdoc -->
 <head>
-  <title>Qt 4.2: Tooltips Example</title>
+  <title>Qt 4.3: Tool Tips Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Tooltips Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Tool Tips Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="widgets-tooltips-shapeitem-cpp.html">widgets/tooltips/shapeitem.cpp</a></li>
@@ -22,12 +23,12 @@
 <li><a href="widgets-tooltips-main-cpp.html">widgets/tooltips/main.cpp</a></li>
 <li><a href="widgets-tooltips-tooltips-qrc.html">widgets/tooltips/tooltips.qrc</a></li>
 </ul>
-<p>The Tooltips example shows how to provide static and dynamic tool tips for an application's widgets.</p>
+<p>The Tool Tips example shows how to provide static and dynamic tool tips for an application's widgets.</p>
 <p>The simplest and most common way to set a widget's tool tip is by calling its <a href="qwidget.html#toolTip-prop">QWidget::setToolTip</a>() function (static tool tips). Then the tool tip is shown whenever the cursor points at the widget. We show how to do this with our application's tool buttons. But it is also possible to show different tool tips depending on the cursor's position (dynamic tooltips). This approach uses mouse tracking and event handling to determine what widgets are located under the cursor at any point in time, and displays their tool tips. The tool tips for the shape items in our application are implemented using the latter approach.</p>
 <p align="center"><img src="images/tooltips-example.png" /></p><p>With the <tt>Tooltips</tt> application the user can create new shape items with the provided tool buttons, and move the items around using the mouse. Tooltips are provided whenever the cursor is pointing to a shape item or one of the buttons.</p>
 <p>The Tooltips example consists of two classes:</p>
 <ul>
-<li><tt>ShapeItem</tt> is a custom widget representing one singel shape item.</li>
+<li><tt>ShapeItem</tt> is a custom widget representing one single shape item.</li>
 <li><tt>SortingBox</tt> inherits from <a href="qwidget.html">QWidget</a> and is the application's main widget.</li>
 </ul>
 <p>First we will review the <tt>SortingBox</tt> class, then we will take a look at the <tt>ShapeItem</tt> class.</p>
@@ -115,7 +116,7 @@
      trianglePath.lineTo(x + 120 / 2, y);</pre>
 <p>After creating the application's tool buttons using the private <tt>createToolButton()</tt> function, we construct the shapes of a circle, a square and a triangle using <a href="qpainterpath.html">QPainterPath</a>.</p>
 <p>The <a href="qpainterpath.html">QPainterPath</a> class provides a container for painting operations, enabling graphical shapes to be constructed and reused. The main advantage of painter paths over normal drawing operations is that complex shapes only need to be created once, but they can be drawn many times using only calls to <a href="qpainter.html#drawPath">QPainter::drawPath</a>().</p>
-<pre>     setWindowTitle(tr(&quot;Tooltips&quot;));
+<pre>     setWindowTitle(tr(&quot;Tool Tips&quot;));
      resize(500, 300);
 
      createShapeItem(circlePath, tr(&quot;Circle&quot;), initialItemPosition(circlePath),
@@ -135,7 +136,7 @@
          if (index != -1)
              QToolTip::showText(helpEvent-&gt;globalPos(), shapeItems[index].toolTip());
          else
-             QToolTip::showText(helpEvent-&gt;globalPos(), &quot;&quot;);
+             QToolTip::hideText();
      }
      return QWidget::event(event);
  }</pre>
@@ -156,6 +157,7 @@
 <pre> void SortingBox::paintEvent(QPaintEvent * <span class="comment">/* event */</span>)
  {
      QPainter painter(this);
+     painter.setRenderHint(QPainter::Antialiasing);
      foreach (ShapeItem shapeItem, shapeItems) {</pre>
 <p>The <tt>paintEvent()</tt> function is reimplemented to receive paint events for the widget. We create a <a href="qpainter.html">QPainter</a> for the <tt>SortingBox</tt> widget, and run through the list of created shape items, drawing each item at its defined position.</p>
 <pre>         painter.translate(shapeItem.position());</pre>
@@ -322,7 +324,7 @@
      QColor myColor;
      QString myToolTip;
  };</pre>
-<p>The <tt>ShapeItem</tt> class is a custom widget representing one single shape item. The widget has a path, a position, a color and a tooltip. We need functions to set or modify these objects, as well as functions that return them. We make the latter functions <tt>const</tt> to prohibit any modifications of the objects, i.e. prohibiting unauthorized manipulation of the shape items appearance.</p>
+<p>The <tt>ShapeItem</tt> class is a custom widget representing one single shape item. The widget has a path, a position, a color and a tooltip. We need functions to set or modify these objects, as well as functions that return them. We make the latter functions <tt>const</tt> to prohibit any modifications of the objects, i.e&#x2e; prohibiting unauthorized manipulation of the shape items appearance.</p>
 <a name="shapeitem-class-implementation"></a>
 <h2>ShapeItem Class Implementation</h2>
 <pre> QPainterPath ShapeItem::path() const
@@ -344,7 +346,7 @@
  {
      return myToolTip;
  }</pre>
-<p>This first group of functions simply return the objects that are requested. The objects are returned as constants, i.e. they cannot be modified.</p>
+<p>This first group of functions simply return the objects that are requested. The objects are returned as constants, i.e&#x2e; they cannot be modified.</p>
 <pre> void ShapeItem::setPath(const QPainterPath &amp;path)
  {
      myPath = path;
@@ -369,6 +371,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

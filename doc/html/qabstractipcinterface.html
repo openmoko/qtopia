@@ -14,7 +14,7 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QAbstractIpcInterface Class Reference</h1>
 <p>The QAbstractIpcInterface class provides facilities for implementing the client and server sides of IPC communications paths. <a href="#details">More...</a></p>
 <pre>    #include &lt;QAbstractIpcInterface&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
-<p>Inherited by <a href="mediaserver-mediacontrolserver.html">mediaserver::MediaControlServer</a>, <a href="mediaserver-videocontrolserver.html">mediaserver::VideoControlServer</a>, <a href="qcomminterface.html">QCommInterface</a>, <a href="qhardwareinterface.html">QHardwareInterface</a>, and <a href="qtopia-helix-qmediahelixsettingsserver.html">qtopia_helix::QMediaHelixSettingsServer</a>.</p>
+<p>Inherited by <a href="qcomminterface.html">QCommInterface</a>, <a href="qhardwareinterface.html">QHardwareInterface</a>, and <a href="qtopia-helix-qmediahelixsettingsserver.html">qtopia_helix::QMediaHelixSettingsServer</a>.</p>
 <ul>
 <li><a href="qabstractipcinterface-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -101,8 +101,8 @@
     };</pre>
 <p>This declares the basic interface that all client applications will see. A client application can instantiate this class and use it like a regular <a href="qobject.html">QObject</a> instance:</p>
 <pre>    QEcho *echo = new QEcho();
-    connect( echo, SIGNAL(receive(const QString&amp;)),
-             this, SLOT(myReceive(const QString&amp;)) );
+    connect( echo, SIGNAL(receive(QString)),
+             this, SLOT(myReceive(QString)) );
     echo-&gt;send( &quot;foo&quot; );</pre>
 <p>In this example, we have left the group name null. This tells QAbstractIpcInterface to look up the default implementation of the <tt>QEcho</tt> interface.</p>
 <p>If there is more than one group implementing the echo functionality, and the default is not suitable, the caller can supply an explicit group name to the <tt>QEcho</tt> constructor. Or the <a href="qabstractipcinterfacegroupmanager.html">QAbstractIpcInterfaceGroupManager</a> class can be used to look up a list of all groups that implement a particular interface.</p>
@@ -112,13 +112,13 @@
         : QAbstractIpcInterface( &quot;/EchoInterfaces&quot;, &quot;QEcho&quot;,
                                  group, parent, mode )
     {
-        proxy( SIGNAL(receive(const QString&amp;)) );
-        proxy( SLOT(send(const QString&amp;)) );
+        proxy( SIGNAL(receive(QString)) );
+        proxy( SLOT(send(QString)) );
     }
 
     void QEcho::send( const QString&amp; msg )
     {
-        invoke( SLOT(send(const QString&amp;)), qVariantFromValue( msg ) );
+        invoke( SLOT(send(QString)), qVariantFromValue( msg ) );
     }</pre>
 <p>The constructor calls <tt>proxy()</tt> for every signal and slot that it wishes to have delivered between the client and server. It can also call <a href="qabstractipcinterface.html#proxyAll">proxyAll</a>() to proxy all signals and public slots. The <tt>/EchoInterfaces</tt> parameter specifies the location in the value space to place information about the interface.</p>
 <p>The implementation of the <tt>send()</tt> slot uses <tt>invoke()</tt> to pass the request on to the server.</p>
@@ -146,7 +146,7 @@
     }</pre>
 <p>Now that we have two group implementations, the client must choose between them. It can either supply the group name explicitly or it can let the system choose. The system will choose the group with the highest priority value. If there is more than one group with the same priority, the one selected is undefined.</p>
 <p>Here, we have set the priority of <tt>QEchoTwiceServer</tt> to 1, which will give it higher priority than <tt>QEchoServer</tt> which has the default priority of 0. Priorities can change over the lifetime of a server. For example, a VoIP group might have a higher priority than a GSM group when the phone is in range of a WiFi access point, but a lower priority when WiFi is not available. This way, the user gets the best group based on their current network coverage.</p>
-<p>See also <a href="qabstractipcinterfacegroup.html">QAbstractIpcInterfaceGroup</a>, <a href="qabstractipcinterfacegroupmanager.html">QAbstractIpcInterfaceGroupManager</a>, and <a href="qcomminterface.html">QCommInterface</a>.</p>
+<p>See also <a href="qabstractipcinterfacegroup.html">QAbstractIpcInterfaceGroup</a>, <a href="qabstractipcinterfacegroupmanager.html">QAbstractIpcInterfaceGroupManager</a>, <a href="qcomminterface.html">QCommInterface</a>, and <a href="qhardwareinterface.html">QHardwareInterface</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Mode-enum"></a>enum QAbstractIpcInterface::Mode</h3>
@@ -237,6 +237,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

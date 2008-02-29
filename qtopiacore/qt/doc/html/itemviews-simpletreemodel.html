@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/doc/src/examples/simpletreemodel.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/simpletreemodel.qdoc -->
 <head>
-  <title>Qt 4.2: Simple Tree Model Example</title>
+  <title>Qt 4.3: Simple Tree Model Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -12,7 +12,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Simple Tree Model Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Simple Tree Model Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="itemviews-simpletreemodel-treeitem-cpp.html">itemviews/simpletreemodel/treeitem.cpp</a></li>
@@ -29,12 +30,12 @@
 <h2>Design and Concepts</h2>
 <p>The data structure that we use to represent the structure of the data takes the form of a tree built from <tt>TreeItem</tt> objects. Each <tt>TreeItem</tt> represents an item in a tree view, and contains several columns of data.</p>
 <a name="simpletreemodelstructure"></a><p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><img src="images/treemodel-structure.png" /></td><td><b>Simple Tree Model Structure</b><p>The data is stored internally in the model using <tt>TreeItem</tt> objects that are linked together in a pointer-based tree structure. Generally, each <tt>TreeItem</tt> has a parent item, and can have a number of child items. However, the root item in the tree structure has no parent item; this item is never referenced outside the model.</p>
+<tr valign="top" class="odd"><td><img src="images/treemodel-structure.png" /></td><td><b>Simple Tree Model Structure</b><p>The data is stored internally in the model using <tt>TreeItem</tt> objects that are linked together in a pointer-based tree structure. Generally, each <tt>TreeItem</tt> has a parent item, and can have a number of child items. However, the root item in the tree structure has no parent item and it is never referenced outside the model.</p>
 <p>Each <tt>TreeItem</tt> contains information about its place in the tree structure; it can return its parent item and its row number. Having this information readily available makes implementing the model easier.</p>
 <p>Since each item in a tree view usually contains several columns of data (a title and a summary in this example), it is natural to store this information in each item. For simplicity, we will use a list of <a href="qvariant.html">QVariant</a> objects to store the data for each column in the item.</p>
 </td></tr>
 </table></p>
-<p>The use of a pointer-based tree structure means that, when passing a model index to a view, we can use record the address of the corresponding item in the index (see <a href="qabstractitemmodel.html#createIndex">QAbstractItemModel::createIndex</a>()) and retrieve it later with <a href="qmodelindex.html#internalPointer">QModelIndex::internalPointer</a>(). This makes writing the model easier and ensures that all model indexes that refer to the same item have the same internal data pointer.</p>
+<p>The use of a pointer-based tree structure means that, when passing a model index to a view, we can record the address of the corresponding item in the index (see <a href="qabstractitemmodel.html#createIndex">QAbstractItemModel::createIndex</a>()) and retrieve it later with <a href="qmodelindex.html#internalPointer">QModelIndex::internalPointer</a>(). This makes writing the model easier and ensures that all model indexes that refer to the same item have the same internal data pointer.</p>
 <p>With the appropriate data structure in place, we can create a tree model with a minimal amount of extra code to supply model indexes and data to other components.</p>
 <a name="treeitem-class-definition"></a>
 <h2>TreeItem Class Definition</h2>
@@ -173,6 +174,9 @@
 <pre> QModelIndex TreeModel::index(int row, int column, const QModelIndex &amp;parent)
              const
  {
+     if (!hasIndex(row, column, parent))
+         return QModelIndex();
+
      TreeItem *parentItem;
 
      if (!parent.isValid())
@@ -207,6 +211,8 @@
 <pre> int TreeModel::rowCount(const QModelIndex &amp;parent) const
  {
      TreeItem *parentItem;
+     if (parent.column() &gt; 0)
+         return 0;
 
      if (!parent.isValid())
          parentItem = rootItem;
@@ -241,7 +247,7 @@
 <pre> Qt::ItemFlags TreeModel::flags(const QModelIndex &amp;index) const
  {
      if (!index.isValid())
-         return Qt::ItemIsEnabled;
+         return 0;
 
      return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
  }</pre>
@@ -276,6 +282,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

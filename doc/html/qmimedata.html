@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QMimeData Class Reference</title>
+  <title>Qt 4.3: QMimeData Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QMimeData Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QMimeData Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QMimeData class provides a container for data that records information about its MIME type. <a href="#details">More...</a></p>
 <pre> #include &lt;QMimeData&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -80,14 +81,14 @@
 <p>For example, if your write a widget that accepts URL drags, you would end up writing code like this:</p>
 <pre> void MyWidget::dragEnterEvent(QDragEnterEvent *event)
  {
-     if (event-&gt;mimeData()-&gt;hasUrl())
-         event-&gt;acceptProposedEvent();
+     if (event-&gt;mimeData()-&gt;hasUrls())
+         event-&gt;acceptProposedAction();
  }
 
  void MyWidget::dropEvent(QDropEvent *event)
  {
-     if (event-&gt;mimeData()-&gt;hasUrl()) {
-         QUrl url = event-&gt;mimeData()-&gt;url();
+     if (event-&gt;mimeData()-&gt;hasUrls()) {
+         QUrl url = event-&gt;mimeData()-&gt;urls();
          ...
      }
  }</pre>
@@ -109,7 +110,16 @@
  }</pre>
 </li>
 </ol>
-<p>See also <a href="qclipboard.html">QClipboard</a>, <a href="qdragenterevent.html">QDragEnterEvent</a>, <a href="qdragmoveevent.html">QDragMoveEvent</a>, <a href="qdropevent.html">QDropEvent</a>, <a href="qdrag.html">QDrag</a>, and <a href="dnd.html">Drag and Drop</a>.</p>
+<a name="platform-specific-mime-types"></a>
+<h3>Platform-Specific MIME Types</h3>
+<p>On Windows, <a href="qmimedata.html#formats">formats</a>() will also return custom formats available in the MIME data, using the <tt>x-qt-windows-mime</tt> subtype to indicate that they represent data in non-standard formats. The formats will take the following form:</p>
+<pre> application/x-qt-windows-mime;value=&quot;&lt;custom type&gt;&quot;</pre>
+<p>The following are examples of custom MIME types:</p>
+<pre> application/x-qt-windows-mime;value=&quot;FileGroupDescriptor&quot;
+ application/x-qt-windows-mime;value=&quot;FileContents&quot;</pre>
+<p>The <tt>value</tt> declaration of each format describes the way in which the data is encoded.</p>
+<p>On Windows, the MIME format does not always map directly to the clipboard formats. Qt provides <a href="qwindowsmime.html">QWindowsMime</a> to map clipboard formats to open-standard MIME formats. Similarly, the <a href="qmacpasteboardmime.html">QMacPasteboardMime</a> maps MIME to Mac flavors.</p>
+<p>See also <a href="qclipboard.html">QClipboard</a>, <a href="qdragenterevent.html">QDragEnterEvent</a>, <a href="qdragmoveevent.html">QDragMoveEvent</a>, <a href="qdropevent.html">QDropEvent</a>, <a href="qdrag.html">QDrag</a>, <a href="qwindowsmime.html">QWindowsMime</a>, <a href="qmacpasteboardmime.html">QMacPasteboardMime</a>, and <a href="dnd.html">Drag and Drop</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QMimeData"></a>QMimeData::QMimeData ()</h3>
@@ -120,7 +130,7 @@
 <p>Removes all the MIME type and data entries in the object.</p>
 <h3 class="fn"><a name="colorData"></a><a href="qvariant.html">QVariant</a> QMimeData::colorData () const</h3>
 <p>Returns a color if the data stored in the object represents a color (MIME type <tt>application/x-color</tt>); otherwise returns a null variant.</p>
-<p>A <a href="qvariant.html">QVariant</a> is used because <a href="qmimedata.html">QMimeData</a> belongs to the <a href="qtcore.html">QtCore</a> library, whereas <a href="qcolor.html">QColor</a> belongs to <a href="qtgui.html">QtGui</a>. To convert the <a href="qvariant.html">QVariant</a> to a <a href="qimage.html">QImage</a>, simply use <a href="qvariant.html#qvariant_cast">qvariant_cast</a>(). For example:</p>
+<p>A <a href="qvariant.html">QVariant</a> is used because <a href="qmimedata.html">QMimeData</a> belongs to the <a href="qtcore.html">QtCore</a> library, whereas <a href="qcolor.html">QColor</a> belongs to <a href="qtgui.html">QtGui</a>. To convert the <a href="qvariant.html">QVariant</a> to a <a href="qcolor.html">QColor</a>, simply use <a href="qvariant.html#qvariant_cast">qvariant_cast</a>(). For example:</p>
 <pre> if (event-&gt;mimeData()-&gt;hasColor()) {
      QColor color = qvariant_cast&lt;QColor&gt;(event-&gt;mimeData()-&gt;colorData());
      ...
@@ -202,6 +212,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

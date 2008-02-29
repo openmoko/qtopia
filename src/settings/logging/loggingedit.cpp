@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2006-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,11 +22,7 @@
 
 #include <qtopiaapplication.h>
 #include <qsoftmenubar.h>
-
 #include <qtranslatablesettings.h>
-#include <qsoftmenubar.h>
-
-#include <QSettings>
 #include <QTreeWidget>
 #include <QVBoxLayout>
 #include <QHeaderView>
@@ -44,7 +40,6 @@ LoggingEdit::LoggingEdit( QWidget* parent, Qt::WFlags fl )
     vbLayout->setMargin(0);
     vbLayout->setSpacing(0);
 
-#ifdef QTOPIA_PHONE
     QMenu* menu = QSoftMenuBar::menuFor( this );
 
     // This implementation is a generic mechanism for adding a What's This?
@@ -60,11 +55,11 @@ LoggingEdit::LoggingEdit( QWidget* parent, Qt::WFlags fl )
     connect( qtopiaWhatsThis, SIGNAL(triggered()), this, SLOT(showWhatsThis()) );
     menu->addAction( qtopiaWhatsThis );
     delete aWhatsThis;
-#endif
 
     // Using a tree since when the number of log streams gets large, we
     // should put them in an hierarchy.
     list = new QTreeWidget;
+    connect( list, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(itemClicked(QTreeWidgetItem*)) );
 
     list->setRootIsDecorated(false);
     list->setColumnCount(1);
@@ -108,7 +103,9 @@ LoggingEdit::LoggingEdit( QWidget* parent, Qt::WFlags fl )
         settings.endGroup();
     }
 
+    list->sortItems( 0, Qt::AscendingOrder );
     list->setCurrentItem(list->topLevelItem(0));
+    showMaximized();
 }
 
 LoggingEdit::~LoggingEdit()
@@ -154,5 +151,11 @@ void LoggingEdit::accept()
     }
 
     QDialog::accept();
+}
+
+void LoggingEdit::itemClicked( QTreeWidgetItem *clickedItem )
+{
+    if ( clickedItem->flags() & Qt::ItemIsEnabled )
+        clickedItem->setCheckState( 0, (clickedItem->checkState(0) == Qt::Checked ? Qt::Unchecked : Qt::Checked) );
 }
 

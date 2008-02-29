@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,6 +23,7 @@
 #include "emaillistitem.h"
 #include "maillistview.h"
 
+#include <qmailaddress.h>
 #include <qtimestring.h>
 
 #include <qstring.h>
@@ -30,6 +31,7 @@
 #include <qpainter.h>
 #include <qstyle.h>
 #include <qicon.h>
+#include <qpixmapcache.h>
 
 #include <stdlib.h>
 
@@ -80,16 +82,11 @@ void EmailListItem::deletePixmaps()
     delete pm_email;
 }
 
-EmailListItem::EmailListItem(MailListView *parent, Email *mailIn, int col)
-    : QTableWidgetItem(), typePm(0), alt(0), mCol( col )
+EmailListItem::EmailListItem(MailListView *parent, const QMailId& id, int col)
+    : QTableWidgetItem(), mId(id), columnsSet(false), typePm(0), alt(0), mCol( col ), messageType(QMailMessage::None)
 {
     ensurePixmaps();
-    _mail = mailIn;
-    parentView = (MailListView *) parent;  //typecasting parent() fails, so we must store it
-    columnsSet = false;
     setFlags( flags() & ~Qt::ItemIsEditable );
-
-    setText( _mail->subject() + " " + _mail->from() ); // DEBUGGING
 }
 
 EmailListItem::~EmailListItem()
@@ -98,83 +95,9 @@ EmailListItem::~EmailListItem()
 
 bool EmailListItem::operator<(const QTableWidgetItem &other) const
 {
-    EmailListItem *otherItem = (EmailListItem *)&other;
+    EmailListItem *otherItem = const_cast<EmailListItem*>(static_cast<const EmailListItem *>(&other));
 
-    //Qtablewidget work around. Fails sort on invisible columns
-    //always sort visible column
-
-//     if ( mCol == 0 ) {
-//         return key(mCol).compare( otherItem->key(mCol) );
-//     } else if (mCol == 3) {  //date
-    if(mCol == 0){
-        //sort by arrival time, (date might not always yield the logical result)
-        if ( parentView->arrivalDate() ) {
-            uint myId = _mail->arrival();
-            uint theirId = otherItem->mail()->arrival();
-
-        return myId < theirId;
-        }
-
-        QDateTime myDate( _mail->dateTime() );
-        QDateTime theirDate( otherItem->mail()->dateTime() );
-
-        if ( myDate == theirDate )
-            return 0;
-
-        if ( myDate < theirDate )
-            return -1;
-
-        return 1;
-    }
-
-    return text().toLower().localeAwareCompare( other.text().toLower() );
-}
-
-QString EmailListItem::key(int c) const
-{
-    QString orderFix = QString::number(_mail->uuid().data1);
-    if ( c == 0 ) {
-        if ( _mail->status(EFlag_Incoming) ) {
-            // order: new top, not downloaded, read
-            if ( _mail->status(EFlag_Downloaded) ) {
-                if (_mail->status(EFlag_Read) ) {
-                    return ("1" + orderFix);
-                } else {
-                    return ("3" + orderFix);
-                }
-            } else {
-                return ("2" + orderFix);
-            }
-        } else {
-            if ( _mail->status(EFlag_Sent) ) {
-                return ("1" + orderFix);
-            } else {
-                return ("2" + orderFix);
-            }
-        }
-    } else if ( c == 1 ) {
-        if ( _mail->status(EFlag_Incoming) )
-            return _mail->fromName().toLower() + orderFix;
-        else
-            return _mail->to().first() + orderFix;
-    } else if ( c == 2 ) {
-        return _mail->subject().toLower() + orderFix;
-    } else if (c == 3) {        //date
-        QString str;
-
-        //sort by arrival time, (date might not always yield the logical result)
-        if ( parentView->arrivalDate() ) {
-            str.sprintf("%08d", _mail->arrival() );
-        } else {
-            QDateTime epoch( QDate( 1980, 1, 1 ) );
-            str.sprintf( "%08d", epoch.secsTo( _mail->dateTime() ) );
-        }
-
-        return str + orderFix;
-    }
-
-    // should never get here
-    return text().toLower() + orderFix;
+    return mId < otherItem->mId;
 }
 
 void EmailListItem::updateState()
@@ -206,98 +129,66 @@ void EmailListItem::setColumns()
 {
     QString temp;
 
-    setText( _mail->subject() + " " + _mail->from() ); // DEBUGGING
+    QMailMessage mail(mId,QMailMessage::Header);
 
-    if ( _mail->status(EFlag_Incoming) ) {
-#ifdef QTOPIA_PHONE
-        if (true) {
-#else
-        if (mCol == 0) {
-#endif
-            if ( _mail->status(EFlag_Downloaded) ) {
-                if ( _mail->status(EFlag_Read) ) {
-                    setIcon(*pm_normal);
-                } else {
-                    setIcon(*pm_unread);
-                }
+    QMailMessage::Status mailStatus(mail.status());
+    if ( mailStatus & QMailMessage::Incoming ) {
+        if ( mailStatus & QMailMessage::Downloaded ) {
+            if ( mailStatus & QMailMessage::Read ) {
+                setIcon(*pm_normal);
             } else {
-                setIcon(*pm_toget);
+                setIcon(*pm_unread);
             }
-        } else if (mCol == 1) {
-            QString from = _mail->fromName();
-            setText(from);
+        } else {
+            setIcon(*pm_toget);
         }
     } else {
-#ifdef QTOPIA_PHONE
-        if (true) {
-#else
-        if (mCol == 0) {
-#endif
-            if ( _mail->status(EFlag_Sent) ) {
-                    setIcon(*pm_normal);
-            } else if ( _mail->unfinished() ) {
-                setIcon(*pm_unfinished);
-            } else {
-                setIcon(*pm_tosend);
-            }
-        } else if (mCol == 1 ) {
-
-            int recipientCount = _mail->to().count() + _mail->cc().count() + _mail->bcc().count();
-            if (_mail->to().count() > 0) {
-                temp = _mail->to().first();
-                if (recipientCount > 1)
-                    temp += "...";
-            }
-
-            setText(temp);
-        }
-    }
-
-    if (mCol == 2) {
-        setText(_mail->subject() );
-#if QTOPIA4_TODO
-        parentView->ensureWidthSufficient( text( 2 ) );
-#endif
-    }
-
-    if (mCol == 3) {
-        QDate date = _mail->dateTime().date();
-        if ( !date.isNull() ) {
-            setText( dateToString( _mail->dateTime() ) );
+        if ( mailStatus & QMailMessage::Sent ) {
+                setIcon(*pm_normal);
+        } else if ( mail.hasRecipients() ) {
+            setIcon(*pm_unfinished);
         } else {
-            setText( _mail->dateString() );
+            setIcon(*pm_tosend);
         }
     }
 
-    if (_mail->status(EFlag_TypeMms))
+    messageType = mail.messageType();
+    if (messageType == QMailMessage::Mms)
         typePm = pm_mms;
-    else if (_mail->status(EFlag_TypeEms))
-        typePm = pm_ems;
-    else if (_mail->status(EFlag_TypeSms))
+    else if (messageType == QMailMessage::Sms)
         typePm = pm_sms;
-    else if (_mail->status(EFlag_TypeEmail))
+    else if (messageType == QMailMessage::Email)
         typePm = pm_email;
 
     columnsSet = true;
 }
 
-Email* EmailListItem::mail()
+QMailId EmailListItem::id() const
 {
-    return _mail;
+    return mId;
 }
 
-void EmailListItem::setMail(Email *newMail)
+void EmailListItem::setId(const QMailId& id)
 {
-    _mail = newMail;
-
-    setColumns();
-    parentView->update( parentView->visualItemRect( this ) );
+    mId = id;
+    columnsSet = false;
 }
 
-QUuid EmailListItem::id()
+QString EmailListItem::cachedName() const
 {
-    return _mail->uuid();
+    return mCachedName;
 }
+
+void EmailListItem::setCachedName(const QString& name)
+{
+    mCachedName = name;
+}
+
+QMailMessage::MessageType EmailListItem::type() const
+{
+    return messageType;
+}
+
 
 EmailListItemDelegate::EmailListItemDelegate(MailListView *parent)
     : QItemDelegate(parent),
@@ -310,7 +201,7 @@ void EmailListItemDelegate::paint(QPainter *painter,
                                   const QModelIndex &index) const
 {
     EmailListItem *item = mParent->emailItemFromIndex( index );
-    if (item && item->mail()) {
+    if (item && item->id().isValid()) {
         Q_ASSERT(index.isValid());
         const QAbstractItemModel *model = index.model();
         Q_ASSERT(model);
@@ -365,39 +256,40 @@ void EmailListItemDelegate::paint(QPainter *painter,
         }
 
         QRect nameRect;
-        QString name;
-        if ( item->mail()->status(EFlag_Incoming) ) {
-            QString from = item->mail()->fromName();
-            QContactModel *model = mParent->contactModel();
-            name = item->mail()->displayName( model, from.simplified() );
+
+        QMailMessage mail(item->id(),QMailMessage::Header);
+
+        if ( mail.status() & QMailMessage::Incoming ) {
+            QMailAddress fromAddress(mail.from());
+            if(item->cachedName().isNull())
+                item->setCachedName(nameString(fromAddress));
         } else {
-            int recipientCount = item->mail()->to().count() +
-                                 item->mail()->cc().count() +
-                                 item->mail()->bcc().count();
-            QString temp;
-            if ( item->mail()->to().count() > 0) {
-                temp = item->mail()->to().first();
-                QContactModel *model = mParent->contactModel();
-                temp = item->mail()->displayName( model, temp.simplified() );
-                if (recipientCount > 1)
-                    temp += "...";
+            if ( mail.to().count() > 0) {
+                QMailAddress firstRecipient(mail.to().first());
+                if(item->cachedName().isNull())
+                {
+                    item->setCachedName(nameString(firstRecipient));
+
+                    int recipientCount = mail.recipients().count();
+                    if (recipientCount > 1)
+                        item->setCachedName(item->cachedName() + "...");
+                }
             }
-            name = temp.simplified();
         }
 
-        if (!name.isEmpty())
+        if (!item->cachedName().isEmpty())
         {
             QRectF result;
             painter->setFont(*nameFont);
             painter->drawText(option.rect,
                               Qt::TextDontPrint|Qt::TextDontClip,
-                              name, &result);
+                              item->cachedName(), &result);
             nameRect = result.toRect();
             nameRect.setWidth( nameRect.width() + 6 );//anti-elide fudge
         }
 
         QRect subjectRect;
-        QString subject = item->mail()->subject().simplified();
+        QString subject = mail.subject().simplified();
 
         if (!subject.isEmpty())
         {
@@ -430,38 +322,74 @@ void EmailListItemDelegate::paint(QPainter *painter,
         }
 
         // draw the background color
-        if (option.showDecorationSelected &&
-            (option.state & QStyle::State_Selected)) {
+        if (option.showDecorationSelected && (option.state & QStyle::State_Selected)) {
             QPalette::ColorGroup cg = option.state & QStyle::State_Enabled
-                                      ? QPalette::Normal : QPalette::Disabled;
-            painter->fillRect(option.rect,
-                              option.palette.brush(cg, QPalette::Highlight));
+                ? QPalette::Normal : QPalette::Disabled;
+
+            QString key = QLatin1String("_QTMAIL_");
+            key += QString::number(option.rect.width());
+            key += QString::number(option.rect.height());
+            key += QString::number(int(option.palette.color(cg, QPalette::Highlight).rgba()));
+
+            QPixmap pm;
+            if (!QPixmapCache::find(key, pm)) {
+                QSize size = option.rect.size();
+                QImage img(size, QImage::Format_ARGB32_Premultiplied);
+                img.fill(0x00000000);
+                QPainter p(&img);
+                p.setRenderHint(QPainter::Antialiasing);
+                QColor color = option.palette.color(cg, QPalette::Highlight);
+                p.setPen(color);
+                QLinearGradient bgg(QPoint(0,0), QPoint(0, size.height()));
+                bgg.setColorAt(0.0f, color.lighter(175));
+                bgg.setColorAt(0.49f, color.lighter(105));
+                bgg.setColorAt(0.5f, color);
+                p.setBrush(bgg);
+                p.drawRoundRect(QRect(QPoint(0,0),size), 800/size.width(),800/size.height());
+                pm = QPixmap::fromImage(img);
+                QPixmapCache::insert(key, pm);
+            }
+            painter->drawPixmap(option.rect.topLeft(), pm);
         } else {
             value = model->data(index, Qt::BackgroundColorRole);
             if (value.isValid() && qvariant_cast<QColor>(value).isValid())
                 painter->fillRect(option.rect, qvariant_cast<QColor>(value));
+         }
+
+        // avoid drawing highlight color twice.
+        opt.palette.setColor(QPalette::Highlight, QColor(0,0,0,0));
+
+        if (!item->cachedName().isEmpty()) {
+            drawDisplay(painter, opt, nameRect, item->cachedName());
         }
+        if (!subject.isEmpty()) {
+            QStyleOptionViewItem subjectOpt = opt;
+            subjectOpt.font = *subjectFont;
+            drawDisplay(painter, subjectOpt, subjectRect, subject);
+        }
+
+        // Don't highlight pixmaps.
+        opt.state &= ~(QStyle::State_Selected);
 
         // draw the item
         if (pixmapRect1.isValid())
             drawDecoration(painter, opt, pixmapRect1, pixmap1);
         if (pixmapRect2.isValid())
             drawDecoration(painter, opt, pixmapRect2, pixmap2);
-
-        // avoid drawing highlight color twice.
-        opt.palette.setColor(QPalette::Highlight, QColor(0,0,0,0));
-
-        if (!name.isEmpty()) {
-            drawDisplay(painter, opt, nameRect, name);
-            drawFocus(painter, opt, nameRect);
-        }
-        if (!subject.isEmpty()) {
-            QStyleOptionViewItem subjectOpt = opt;
-            subjectOpt.font = *subjectFont;
-            drawDisplay(painter, subjectOpt, subjectRect, subject);
-            drawFocus(painter, subjectOpt, subjectRect);
-        }
     } else {
         QItemDelegate::paint( painter, option, index );
     }
+}
+
+QString EmailListItemDelegate::nameString(const QMailAddress& address) const
+{
+    if(address.isEmailAddress())
+    {
+        if(!address.name().isEmpty())
+            return address.name();
+        else
+            return address.address();
+    }
+    else
+        return address.displayName();
 }

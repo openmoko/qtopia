@@ -20,14 +20,14 @@ greenphone_devnode()
 
 host_devnode()
 {
-    /sbin/route -n | awk 'BEGIN{FS=" "}{print $4, $8}' | grep UG | awk 'BEGIN{FS=" "}{print $2}'
+	route -n | awk 'BEGIN{FS=" "}{print $4, $8}' | grep UG | awk 'BEGIN{FS=" "}{print $2}'
 }
 
 hostip()
 {
   if [ -n "$HOSTDEVNODE" ] ; then
     # prints host ip address
-    /sbin/ifconfig $HOSTDEVNODE|grep inet[^6]|awk 'BEGIN{FS=":"}{print $2}'|awk '{print $1}'
+    /sbin/ifconfig eth0|grep inet[^6]|awk 'BEGIN{FS=":"}{print $2}'|awk '{print $1}'
   fi
 }
 

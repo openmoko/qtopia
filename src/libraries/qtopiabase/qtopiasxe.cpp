@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -20,6 +20,26 @@
 ****************************************************************************/
 
 #include "qtopiasxe.h"
+
+#include <qtopialog.h>
+
+#include <private/qtransportauth_qws_p.h>
+
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
+
+#include <QStringList>
+#include <qtopianamespace.h>
+
+#if !defined(QT_NO_SXE) || defined(SXE_INSTALLER) || defined(Q_QDOC)
+
+struct SxeProgramInfoPrivate
+{
+    struct stat sxe_stat;       // cached value of the last stat
+    bool valid;        // does this point to a valid binary?
+    QString binary;    // cached value of the absolute path
+};
 
 /*!
   \class SxeProgramInfo
@@ -68,7 +88,7 @@
 /*!
 
   \variable SxeProgramInfo::relPath
-    for example \c bin, \c packages/bin
+    for example \c bin, \c packages/bin, \c plugings/application
 */
 
 /*!
@@ -81,6 +101,7 @@
 
   \variable SxeProgramInfo::installRoot
     for example \c {$HOME/build/qtopia/42-phone/image}
+    this should only ever be set when running under sxe_installer
 */
 
 /*!
@@ -106,14 +127,24 @@
 
   Construct a new SxeProgramInfo
 */
+SxeProgramInfo::SxeProgramInfo()
+    : id( 0 )
+    , d( new SxeProgramInfoPrivate )
+{
+    ::memset( key, 0, QSXE_KEY_LEN );
+}
 
 /*!
   \fn SxeProgramInfo::~SxeProgramInfo()
 
   Destroy this SxeProgramInfo object
 */
+SxeProgramInfo::~SxeProgramInfo()
+{
+    delete d;
+}
 
-#if !defined(QT_NO_SXE) || defined(SXE_INSTALLER)
+
 void sxeInfoHexstring( char *buf, const unsigned char* key, size_t key_len )
 {
     unsigned int i, p;
@@ -151,6 +182,8 @@ QDebug operator<<(QDebug debug, const SxeProgramInfo &progInfo)
 
   This is simply the concatenation of installRoot, relPath and fileName.  If the installRoot
   is null, the runRoot is used instead.
+
+  isValid() can be called to check that the returned path will point to a valid binary.
 */
 QString SxeProgramInfo::absolutePath() const
 {
@@ -160,19 +193,250 @@ QString SxeProgramInfo::absolutePath() const
 
 /*!
   Return true if the SxeProgramInfo object represents a valid binary for SXE registration,
-  and otherwise returns false.
+  and otherwise return false.
 
   The binary is valid if all of the components of absolutePath() above are non-empty, and
-  the resulting path is to a file which exists.
+  the resulting path is to a file which exists
 */
 bool SxeProgramInfo::isValid() const
 {
+    if ( d->binary == absolutePath() )
+        return d->valid;
+    if ( fileName.isEmpty() || relPath.isEmpty() )
+        return false;
 #ifdef SXE_INSTALLER
     if ( installRoot.isEmpty() )
         return false;
+#else
+    if ( runRoot.isEmpty() )
+        return false;
 #endif
-    return !fileName.isEmpty() && !relPath.isEmpty() &&
-        !runRoot.isEmpty() && QFile::exists( absolutePath() );
+    d->binary = absolutePath();
+    d->valid = false;
+    int result = ::stat( QFile::encodeName( d->binary ), &d->sxe_stat );
+    qLog(SXE) << "stat'ed binary" << d->binary << " - result:" << result;
+    if ( result == 0 )
+    {
+        d->valid = true;
+    }
+    else if ( result != -ENOENT )
+    {
+        qLog(SXE) << "Could not stat" << d->binary << strerror( errno );
+    }
+    return d->valid;
 }
 
+/*!
+  Try to find this binary in the current file-system.  First a check is made to
+  see if isValid() returns true:  if so this method simply returns true.
+
+  Otherwise an attempt to find the binary is made by traversing the
+  entries in Qtopia::installPaths().
+
+  The fileName member should be set to non-empty before calling this method
+  otherwise it simply returns false.
+
+  If the relPath member is set, then only that path is checked under each of
+  the installPaths().
+
+  If the relPath member is empty, then the path searched is decided by checking if
+  the filename refers to a shared library or not: if the fileName starts with "lib"
+  and ends with ".so" then "application/plugins" are checked, otherwise only "bin"
+  is checked.
+
+  If the binary is found, the relPath and runRoot entries are set to the
+  the location, and the method returns \c true.
+
+  If the binary is not found, no entries are altered and the method returns
+  false.
+
+  For example:
+  \code
+  SxeProgramInfo calcBin;
+  calcBin.fileName = "calculator";
+  if ( calcBin.locateBinary() )
+      qDebug() << "Calculator is a standalone app at" << calcBin.absolutePath();
+  else
+  {
+      calcBin.fileName = "libcalculator.so";
+      if ( calcBin.locateBinary() )
+          qDebug() << "Calculator is a quicklaunched app at" << calcBin.absolutePath();
+      else
+          qDebug() << "Calculator is not available";
+  }
+  \endcode
+*/
+bool SxeProgramInfo::locateBinary()
+{
+#ifdef SXE_INSTALLER
+    Q_ASSERT( "SxeProgramInfo::locateBinary called by sxe_installer!!" );
+#else
+    if ( isValid() )
+        return true;
+    if ( fileName.isEmpty() )
+        return false;
+    QStringList paths = Qtopia::installPaths();
+    QString saveRunRoot = runRoot;
+    QString saveRelPath = relPath;
+    foreach ( QString p, paths )
+    {
+        runRoot = p;
+        if ( !relPath.isEmpty() && isValid() )
+            return true;
+        if ( relPath.isEmpty() )
+            relPath = ( fileName.startsWith( "lib" ) && fileName.endsWith( ".so" ))
+                ? "plugins/application" : "bin";
+        if ( isValid() )
+            return true;
+        relPath = saveRelPath;
+    }
+    runRoot = saveRunRoot;
+    return false;
+#endif
+}
+
+/*!
+  Make the current process assume the SXE identity of the executable
+  represented by this SxeProgramInfo.
+
+  Internally this is done by writing to the /proc/lids/suid
+  pseudo file.
+
+  This method only succeeds on a suitably patched SXE linux kernel.
+*/
+void SxeProgramInfo::suid()
+{
+#ifndef SXE_INSTALLER
+    int res = 0;
+    QFile procSuid( "/proc/lids/suid" );
+    struct usr_key_entry k_ent;
+    if ( !procSuid.exists() )
+        return;
+    if ( !isValid() )
+    {
+        qWarning( "Could not suid to invalid binary: %s", qPrintable( d->binary ));
+        return;
+    }
+    if ( procSuid.open( QIODevice::WriteOnly ))
+    {
+        k_ent.ino = d->sxe_stat.st_ino;
+        k_ent.dev = d->sxe_stat.st_dev;
+        res = procSuid.write( (char*)&k_ent, sizeof( k_ent ));
+        if ( res != sizeof( struct usr_key_entry ))
+            qWarning( "Could not write /proc/lids/suid: %s", strerror( errno ));
+        else
+            qLog(SXE) << "SUID to" << d->binary << "device" << d->sxe_stat.st_dev << "inode" << d->sxe_stat.st_ino;
+    }
+#endif
+}
+
+
+
+
+
+/*!
+  \macro QSXE_APP_KEY
+  \relates SxeProgramInfo
+
+  This macro causes the key storage to be allocated and initialized.
+  An application without this macro cannot be used on a SXE-enabled system.
+  It is needed if you are not using the QTOPIA_MAIN macro.
+
+  \code
+    QSXE_APP_KEY
+    int main( int argc, char **argv )
+    {
+        QSXE_SET_APP_KEY(argv[0]);
+        ...
+  \endcode
+
+  \sa Applications, QTOPIA_APP_KEY
+*/
+
+/*!
+  \macro QSXE_SET_APP_KEY(name)
+  \relates SxeProgramInfo
+
+  This macro causes the SXE key to be copied into memory. It is needed if you are not using
+  the QTOPIA_MAIN macro. It must be the first line of your main() function. The \a name value
+  should be set to the binary's name.
+
+  \code
+    QSXE_APP_KEY
+    int main( int argc, char **argv )
+    {
+        QSXE_SET_APP_KEY(argv[0]);
+        ...
+  \endcode
+
+  \sa Applications, QTOPIA_SET_KEY()
+*/
+
+/*!
+  \macro QSXE_QL_APP_KEY
+  \relates SxeProgramInfo
+
+  This macro causes the key storage to be allocated and initialized.
+  An application without this macro cannot be used on a SXE-enabled system.
+  It is needed if you are not using the QTOPIA_MAIN macro.
+
+  Note that this macro only applies to quicklaunch plugins.
+
+  \sa Applications, QTOPIA_APP_KEY
+*/
+
+/*!
+  \macro QSXE_SET_QL_KEY(name)
+  \relates SxeProgramInfo
+
+  This macro causes the SXE key to be copied into memory. It is needed if you are not using
+  the QTOPIA_MAIN macro. It must be called before constructing QtopiaApplication. The \a name value
+  should be set to the binary's name.
+
+  Note that this macro only applies to quicklaunch plugins.
+
+  \sa Applications, QTOPIA_SET_KEY()
+*/
+
+
+
+#endif
+
+#ifndef SINGLE_EXEC
+/*!
+  \relates SxeProgramInfo
+
+  Ensure the SXE key for this executable is valid, and then call the transport
+  authorizer method to set it.
+
+  After this call all QWS calls by \a app will be authorized with this \a key.
+
+  A check is made that the binary has been keyed, and if not then the method
+  will qFatal, with the message "SXE key has not been set".
+
+  (This function is stubbed out with an empty implementation if Qtopia
+  is configured without SXE.)
+*/
+void checkAndSetProcessKey( const char *key, const char *app )
+{
+#if !defined(QT_NO_SXE)
+
+    #ifdef SXE_INSTALLER
+        Q_UNUSED(key);
+        Q_UNUSED(app);
+    #else
+        if ( strncmp( QSXE_KEY_TEMPLATE, key, QSXE_KEY_LEN ) == 0 )
+        {
+            qFatal( "SXE key has not been set.  Has \"make install\" been run on %s?", app );
+        }
+        else
+        {
+            QTransportAuth::getInstance()->setProcessKey( key, app );
+        }
+    #endif
+#else
+        Q_UNUSED(key);
+        Q_UNUSED(app);
+#endif
+}
 #endif

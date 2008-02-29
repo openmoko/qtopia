@@ -2,7 +2,7 @@
 **
 ** Copyright ( C ) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,18 +19,18 @@
 **
 ****************************************************************************/
 
-#include <qtopiacomm/private/qsdpxmlparser_p.h>
+#include "qsdpxmlparser_p.h"
 
-#include <qtopialog.h>
-
-#include <QBluetoothSdpRecord>
-#include <QBluetoothSdpUuid>
+#include <qbluetoothsdprecord.h>
+#include <qbluetoothsdpuuid.h>
 
 #include <QUrl>
 #include <QByteArray>
 
 #include <QXmlSimpleReader>
 #include <QXmlInputSource>
+
+#include <QDebug>
 
 QSdpXmlHandler::QSdpXmlHandler()
 {
@@ -447,7 +447,7 @@ bool QSdpXmlHandler::endElement(const QString &,
             alt->push_back(var);
         }
         else {
-            qLog(Bluetooth) << "Unknown type in the QVariant, should be either a sequence or an alternative";
+            qWarning() << "Unknown type in the QVariant, should be either a sequence or an alternative";
             m_errorString = "Stack size more than 1 and we're not inside an alt or seq";
             return false;
         }

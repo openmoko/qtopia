@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,66 +24,72 @@
 
 #include "callcontactlist.h"
 
-#include <qsoftmenubar.h>
+#include <QSoftMenuBar>
 #include <qtopia/pim/qcontact.h>
-#include <qcalllist.h>
+#include <QCallList>
+#include <QtopiaAbstractService>
 
-#include <QTextBrowser>
-#include <QStack>
 #include <QDialog>
 
 class QLineEdit;
+class QTextEntryProxy;
 class QToolButton;
 class QListWidget;
 class QListWidgetItem;
 
-class FriendlyTabs;
 class QAction;
 class QAbstractMessageBox;
 class QListBox;
+class QTabWidget;
+class QLabel;
+class QKeyEvent;
 
 class CallHistoryModel : public CallContactModel
 {
+    Q_OBJECT
 public:
     CallHistoryModel(QCallList& callList, QObject* parent = 0);
     ~CallHistoryModel();
 
-    CallContactItem::Types type() const;
-    void setType( CallContactItem::Types type );
+    QCallList::ListType type() const;
+    void setType( QCallList::ListType type );
 
     void refresh();
+
+signals:
+    void contactsAboutToBeUpdated();
+    void contactsUpdated();
+
+protected slots:
+    void updateContacts();
+
 private:
-    CallContactItem::Types mType;
+    QCallList::ListType mType;
 };
 
-class CallHistoryList : public CallContactView
+class CallHistoryListView : public CallContactListView
 {
     friend class CallHistory;
     Q_OBJECT
 public:
-    CallHistoryList( QWidget *parent, Qt::WFlags fl = 0 );
+    CallHistoryListView( QWidget *parent, Qt::WFlags fl = 0 );
     void setModel( QAbstractItemModel* model );
 
 public slots:
-    void itemDeleted();
+    void refreshModel();
     void modelChanged();
 
 protected slots:
-    void updateMenu(const QModelIndex& current, const QModelIndex& previous);
-
+    void updateMenu();
+    void contactsAboutToChange();
+    void contactsChanged();
+    
 private:
     QAction *mClearList;
-};
-
-class QKeyEvent;
-class CallHistoryBrowser : public QTextBrowser
-{
-    Q_OBJECT
-public:
-    CallHistoryBrowser( QWidget *parent = 0 );
-    void focusFirstLink();
-protected:
-    void keyPressEvent( QKeyEvent *e );
+    int prevRow;
+    QString prevNumber;
+    int prevCount;
+    bool contactsChanging;
 };
 
 class QContact;
@@ -91,7 +97,7 @@ class CallHistoryView : public QWidget
 {
     Q_OBJECT
 public:
-    CallHistoryView( QCallList &callList, QWidget *parent = 0, Qt::WFlags fl = 0, bool rw = true );
+    CallHistoryView( QWidget *parent = 0, Qt::WFlags fl = 0 );
     ~CallHistoryView();
 
     QContact contact( QContactModel::Field &phoneType ) const;
@@ -101,12 +107,10 @@ public:
 public slots:
     void update();
     void clear();
-    void viewRelatedDetails( int callListIndex );
 
 signals:
     void externalLinkActivated();
-    void relatedCallClicked( int callListIndex );
-    void itemDeleted();
+    void deleteCurrentItem();
 
 protected slots:
     void openContact();
@@ -114,26 +118,22 @@ protected slots:
     void sendMessage();
     void updateMenu();
 
-    void linkActivated( const QUrl &ahref );
     void deleteItem();
     void deleteItem(int);
+    void contactsChanged();
 
 protected:
-    QString makeDialLink( const QString &number ) const;
-    void closeEvent(QCloseEvent *e);
+    void keyPressEvent( QKeyEvent *e );
 
 private:
     bool mHaveFocus;
     bool mHaveContact;
     bool mHaveDialer;
-    CallHistoryBrowser *mBrowser;
+    QLabel *mCallTypePic, *mCallType, *mPortrait, *mName, *mContactTypePic, *mPhoneTypePic, *mNumber, *mStartDate, *mStartTime, *mDuration, *mTimeZone, *mTimeZoneLabel;
     QCallListItem mCallListItem;
     QContact mContact;
     QContactModel::Field mPhoneType;
-    QCallList &mCallList;
     QAbstractMessageBox *deleteMsg, *addContactMsg;
-    CallHistoryView *rView;
-    QStack<QCallListItem> rStack;
 
     QMenu *mMenu;
     QAction *mDeleteAction, *mOpenContact, *mSendMessage, *mAddContact;
@@ -143,24 +143,16 @@ class CallHistoryClearList : public QDialog
 {
     Q_OBJECT
 public:
-    enum ClearType
-    {
-        Dialed = 0,
-        Received,
-        Missed,
-        All
-    };
-
     CallHistoryClearList( QWidget *parent = 0, Qt::WFlags fl = 0 );
     ~CallHistoryClearList();
 
-    void setSelected(CallHistoryClearList::ClearType);
+    void setSelected(QCallList::ListType);
 
 protected slots:
     void userSelected(QListWidgetItem *);
 
 signals:
-    void selected(CallHistoryClearList::ClearType);
+    void selected(QCallList::ListType);
 
 private:
     QListWidget *mList;
@@ -169,6 +161,7 @@ private:
 class CallHistory : public QWidget
 {
     Q_OBJECT
+    friend class CallHistoryService;
 public:
     CallHistory( QCallList &callList, QWidget *parent, Qt::WFlags fl = 0 );
     bool eventFilter( QObject *o, QEvent *e );
@@ -183,29 +176,59 @@ signals:
 
 protected slots:
     void refreshOnFirstShow(int);
+    void focusFindLE(int);
     void showEvent( QShowEvent *e );
     void viewDetails( const QModelIndex& idx );
     void pageChanged(int);
     void clearList();
-    void clearList( CallHistoryClearList::ClearType );
+    void clearList( QCallList::ListType );
     void setFilterCur(const QString &f);
     void cleanup();
+    void deleteCurrentItem();
+    void deleteViewedItem();
+    void showList( QCallList::ListType type );
+    void viewDetails( QCallListItem, QContact, int );
+    void updateTabText( const QString &filterStr );
 
 protected:
     void closeEvent(QCloseEvent *e);
+    void constructTab( QCallList::ListType type, QAction *clearAction, CallContactDelegate *delegate );
 
 private:
     QMap<QObject *, QString> mFilters;
-    FriendlyTabs *mTabs;
-    CallHistoryList *mDialedList, *mReceivedList, *mMissedList;
-    QWidget *mDialedTab, *mReceivedTab, *mMissedTab;
+    QTabWidget *mTabs;
+    CallHistoryListView *mAllList, *mDialedList, *mReceivedList, *mMissedList;
     CallHistoryView *mView;
     QCallList &mCallList;
     bool mShowMissedCalls;
-    bool mDialedListShown, mReceivedListShown, mMissedListShown;
+    bool mAllListShown, mDialedListShown, mReceivedListShown, mMissedListShown;
     CallHistoryClearList *mClearList;
 
-    QLineEdit *mDialedFindLE, *mReceivedFindLE, *mMissedFindLE;
+    QLineEdit *mAllFindLE, *mDialedFindLE, *mReceivedFindLE, *mMissedFindLE;
+    QTextEntryProxy *mAllFindProxy, *mDialedFindProxy, *mReceivedFindProxy, *mMissedFindProxy;
+    QLabel *mAllFindIcon, *mDialedFindIcon, *mReceivedFindIcon, *mMissedFindIcon;
+    QCallListItem mViewedItem;
 };
+
+class CallHistoryService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class CallHistory;
+public:
+    CallHistoryService( CallHistory *parent )
+        : QtopiaAbstractService( "CallHistory", parent )
+        { this->parent = parent; publishAll(); }
+
+public:
+    ~CallHistoryService();
+
+public slots:
+    void showCallHistory( QCallList::ListType type );
+    void viewDetails( QCallListItem, QContact, int );
+
+private:
+    CallHistory *parent;
+};
+
 
 #endif

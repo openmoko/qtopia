@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -42,12 +57,6 @@
 
 # if defined (Q_WS_MAC)
 #  include "private/qt_mac_p.h"
-#  if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_3)
-#    define QMAC_USE_BIG_CURSOR_API
-#  endif
-#  ifndef QMAC_NO_FAKECURSOR
-     class QMacCursorWidget;
-#  endif
    class QMacAnimateCursor;
 # elif defined(Q_WS_X11)
 #  include "private/qt_x11_p.h"
@@ -68,7 +77,9 @@ struct QCursorData {
     QBitmap  *bm, *bmm;
     QPixmap pixmap;
     short     hx, hy;
-#if defined (Q_WS_MAC) || defined(Q_WS_QWS)
+#if defined (Q_WS_MAC)
+    int mId;
+#elif defined(Q_WS_QWS)
     int id;
 #endif
 #if defined (Q_WS_WIN)
@@ -78,26 +89,19 @@ struct QCursorData {
     Cursor hcurs;
     Pixmap pm, pmm;
 #elif defined (Q_WS_MAC)
-    enum { TYPE_None, TYPE_CursPtr, TYPE_ThemeCursor, TYPE_FakeCursor, TYPE_BigCursor } type;
+    enum { TYPE_None, TYPE_ImageCursor, TYPE_ThemeCursor } type;
     union {
         struct {
             uint my_cursor:1;
-            CursPtr   hcurs;
+            void *nscursor;
         } cp;
-#ifndef QMAC_NO_FAKECURSOR
-        struct {
-            QMacCursorWidget *widget;
-            CursPtr empty_curs;
-        } fc;
-#endif
-#ifdef QMAC_USE_BIG_CURSOR_API
-        char *big_cursor_name;
-#endif
         struct {
             QMacAnimateCursor *anim;
             ThemeCursor curs;
         } tc;
     } curs;
+    void initCursorFromBitmap();
+    void initCursorFromPixmap();
 #endif
     static bool initialized;
     void update();

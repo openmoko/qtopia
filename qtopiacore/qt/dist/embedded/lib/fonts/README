@@ -1,47 +1,14 @@
+Copyright statements and the source of the qpf fonts are located in ../../src/3rdparty/fonts
+
 The fonts here are in various formats:
 
     *.ttf - TrueType fonts, requires QT_FEATURE_TRUETYPE
-    *.bdf - BDF fonts, requires QT_FEATURE_BDF
     *.pfa - PostScript fonts, used as source material for some QPF fonts
     *.qpf - Qt prerendered fonts (QPF format) rendered from above fonts.
 
-Normally, small embedded devices will only use QPF files, and these will only
-contain the subset of Unicode appropriate for the device. QPF is a portable,
-endian-independent format.
+QPF is the portable, endian-independent format used by Qt/Embedded 2.x and 3.x.
 
-Source Fonts
-
-    5x7.bdf       - Public domain font obtained from the misc package for X11.
-    6x13.bdf      - Public domain font obtained from the misc package for X11.
-    babelfish.ttf - A handwriting-style font distributed for personal or
-                    commercial use.
-    c04*_.pfb     - Bitstream Courier font - see the Copyright.Courier file
-                    for license information.
-    c06*_.pfb     - Bitstream Charter font - see the Copyright.Charter file
-                    for license information.
-    cour*.pfa     - IBM Courier font - see the COPYRIGHT.IBM file for
-                    license information.
-    cursor.pfa    - Cursor font obtained from the cursor package for X11.
-    helv*.bdf     - Adobe Helvetica font - see the COPYING.Helvetica file
-                    for license information.
-    l04*.pfa      - Bigelow & Holmes Inc. Luxi font - see the COPYRIGHT.BH
-                    file for license information.
-    micro.bdf     - Micro font - public domain and obtained from the micro
-                    package for X11.
-    unifont.bdf   - Public domain font - see the COPYRIGHT.Unifont file for
-                    license information.
-    UT*.pfa       - Adobe Utopia font - see the COPYING.Utopia file for
-                    license information.
-    Vera*.ttf     - Bitstream Vera font - see the COPYRIGHT.Vera file for
-                    license information.
-    wenquanyi_9pt*.bdf
-                  - WenQuanYi Bitmap Song font - see the REAME.WenQuanYi file
-                    for license information.
-
-
-QPF Fonts
-
-The fonts here are generated from various sources:
+The prerendered fonts are generated from various sources:
 
     fixed*        - Fixed font.
     helvetica*    - Helvetica BDF format font distributed with X11
@@ -54,5 +21,4 @@ The fonts here are generated from various sources:
     wenquanyi*    - Chinese character font obtained from
                     http://wqy.sourceforge.net/en and distributed under
                     the terms of the GNU General Public License.
-    
-Each font is provided in all 4 rotated forms (plain, _t5, _t10, _t15).
+

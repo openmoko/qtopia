@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -485,8 +485,8 @@ PhoneServerVoIPService::PhoneServerVoIPService( const QString& service, QObject 
 {
     server = new QPhoneSocket( -1, this );
     _handler = 0;
-    connect( server, SIGNAL(incoming(QPhoneSocket *)),
-             this, SLOT(incoming(QPhoneSocket *)) );
+    connect( server, SIGNAL(incoming(QPhoneSocket*)),
+             this, SLOT(incoming(QPhoneSocket*)) );
 
     // Full list of commands that we support.
     ourCommands += "INIT";                  // Handler to us.
@@ -587,10 +587,10 @@ void PhoneServerVoIPService::incoming( QPhoneSocket *socket )
 {
     if ( !_handler ) {
         _handler = socket;
-        connect( _handler, SIGNAL(received(const QStringList&)),
-                 this, SIGNAL(handlerReceived(const QStringList&)) );
-        connect( _handler, SIGNAL(received(const QStringList&)),
-                 this, SLOT(testCommand(const QStringList&)) );
+        connect( _handler, SIGNAL(received(QStringList)),
+                 this, SIGNAL(handlerReceived(QStringList)) );
+        connect( _handler, SIGNAL(received(QStringList)),
+                 this, SLOT(testCommand(QStringList)) );
         connect( _handler, SIGNAL(closed()), this, SLOT(closed()) );
         qLog(Modem) << "PhoneServerVoIPService::incoming: voip handler has connected";
         emit handlerStarted();

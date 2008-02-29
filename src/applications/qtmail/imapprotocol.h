@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,19 +24,12 @@
 #ifndef ImapProtocol_H
 #define ImapProtocol_H
 
-#include <qtcpsocket.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qobject.h>
-#include <qtextstream.h>
 #include <qtimer.h>
 
-#ifdef SMTPAUTH
-#include <qtsslsocket.h>
-#include "common.h"
-#endif
-
-class Email;
+#include "account.h"
 
 enum ImapCommand
 {
@@ -67,11 +60,11 @@ typedef uint MessageFlags;
 
 enum FetchDataItem
 {
-    F_RFC822_SIZE   =   0x0001,
-    F_RFC822_HEADER =   0x0002,
-    F_RFC822        =   0x0004,
-    F_UID           =   0x0008,
-    F_FLAGS         =   0x0010
+    F_Rfc822_Size   =   0x0001,
+    F_Rfc822_Header =   0x0002,
+    F_Rfc822        =   0x0004,
+    F_Uid           =   0x0008,
+    F_Flags         =   0x0010
 };
 
 typedef uint FetchItemFlags;
@@ -86,6 +79,8 @@ enum OperationState
 };
 
 class LongStream;
+class Email;
+class MailTransport;
 
 class ImapProtocol: public QObject
 {
@@ -95,10 +90,7 @@ public:
     ImapProtocol();
     ~ImapProtocol();
 
-    bool open(QString url, int port);
-#ifdef SMTPAUTH
-    bool openSecure(QString url, int port, bool usetls = false);
-#endif
+    bool open(const MailAccount& account);
     void close();
     bool connected() { return _connected; };
 
@@ -133,22 +125,23 @@ public:
 
 signals:
     void mailboxListed(QString &flags, QString &delimiter, QString &name);
-    void messageFetched(Email& mail);
+    void messageFetched(QMailMessage& mail);
     void downloadSize(int);
+    void nonexistentMessage(const QString& uuid);
 
     void finished(ImapCommand &, OperationState &);
-    void connectionError(int);
+    void updateStatus(const QString &);
+    void connectionError(int status, QString msg);
 
 protected slots:
-    void connectionEstablished();
-    void socketError(QAbstractSocket::SocketError);
+    void connected(MailAccount::EncryptType encryptType);
+    void errorHandling(int status, QString msg);
     void incomingData();
     void parseFetch();
-#ifdef SMTPAUTH
-    void certCheckDone(QtSslSocket::VerifyResult,bool,const QString&);
-#endif
 
 private:
+    void nextAction();
+
     QString newCommandId();
     QString commandId(QString in);
     OperationState commandResponse(QString in);
@@ -162,14 +155,10 @@ private:
 
     QString quoteString(QString name);
     QString unquoteString(QString name);
-    void createMail(bool isFile, QString& msg, QString& uid, int size, uint flags);
+    void createMail(const QByteArray& msg, QString& uid, int size, uint flags);
 
 private:
-    QTcpSocket *socket;
-#ifdef SMTPAUTH
-    QtSslSocket* secureSocket;
-#endif
-    QTextStream *stream;
+    MailTransport *transport;
 
     ImapCommand status;
     OperationState operationState;
@@ -195,6 +184,8 @@ private:
     QTimer incomingDataTimer;
     QTimer parseFetchTimer;
     bool firstParseFetch;
+    QString fetchUid;
+
     static const int MAX_LINES = 30;
 };
 

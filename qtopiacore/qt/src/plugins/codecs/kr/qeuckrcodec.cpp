@@ -9,17 +9,35 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
+// Most of the cp949 code was originally written by Joon-Kyu Park, and is included 
+// in Qt with the author's permission and the grateful thanks of the Trolltech team.
 
 /*! \class QEucKrCodec qeuckrcodec.h
     \reentrant
@@ -37,6 +55,8 @@
 */
 
 #include "qeuckrcodec.h"
+#include "cp949codetbl.h"
+#include <stdlib.h>
 
 #ifndef QT_NO_TEXTCODEC
 unsigned int qt_Ksc5601ToUnicode(unsigned int code);
@@ -44,6 +64,7 @@ unsigned int qt_Ksc5601ToUnicode(unsigned int code);
 unsigned int qt_UnicodeToKsc5601(unsigned int unicode);
 
 #define        IsEucChar(c)        (((c) >= 0xa1) && ((c) <= 0xfe))
+#define        IsCP949Char(c)      (((c) >= 0x81) && ((c) <= 0xa0))
 #define        QValidChar(u)        ((u) ? QChar((ushort)(u)) : QChar(QChar::ReplacementCharacter))
 
 /*!
@@ -3353,4 +3374,191 @@ static unsigned short unicode2ksc(unsigned short unicode)
     }
     return 0;
 }
+
+int QCP949Codec::_mibEnum()
+{
+  return -949; // CP949 has no MIBenum. So we have to use fake value.
+}
+
+QByteArray QCP949Codec::_name()
+{
+  return "cp949";
+}
+
+int compare_ushort(const void *a, const void *b)
+{
+    return *(unsigned short *)a - *(unsigned short *)b;
+}
+
+/*!
+  \reimp
+*/
+QByteArray QCP949Codec::convertFromUnicode(const QChar *uc, int len, ConverterState *state) const
+{
+    char replacement = '?';
+    if (state) {
+        if (state->flags & ConvertInvalidToNull)
+            replacement = 0;
+    }
+    int invalid = 0;
+
+    int rlen = 2*len + 1;
+    QByteArray rstr;
+    rstr.resize(rlen);
+    uchar* cursor = (uchar*)rstr.data();
+    for (int i = 0; i < len; i++) {
+        unsigned short ch = uc[i].unicode();
+        uint j;
+        if (ch < 0x80) {
+            // ASCII
+            *cursor++ = ch;
+        } else if ((j = qt_UnicodeToKsc5601(ch))) {
+            // KSC 5601
+            *cursor++ = (j >> 8)   | 0x80;
+            *cursor++ = (j & 0xff) | 0x80;
+        } else {
+            unsigned short *ptr = (unsigned short *)bsearch(&ch, cp949_icode_to_unicode, 8822, 
+                sizeof(unsigned short), compare_ushort);
+
+            if(!ptr) {
+                // Error
+                *cursor++ = replacement;
+                ++invalid;
+            }
+            else {
+                // The table 'cp949_icode_to_unicode' contains following
+                // 1. Elements of row 81-a0 (32 rows) consisting of 178 elements each.
+                // 2. Elements of row a1-fe not in EUC-KR consisting of 84 elements each.
+                // On each row the elements are distributed (41-5A), (61-7A), (81-FE) in order.
+                // http://www.microsoft.com/globaldev/reference/dbcs/949.mspx
+
+                // find the position of the current unicode in the table.
+                int internal_code = ptr - cp949_icode_to_unicode;
+
+                int row, column;
+                if(internal_code < 32 * 178) {
+                    // code between row 81-a0
+                    row = internal_code / 178;
+                    column = internal_code % 178;
+                }
+                else { 
+                    // code between a1-fe
+                    internal_code -= 3008;
+                    row = internal_code / 84;
+                    column = internal_code % 84;
+                }
+
+                unsigned char first, second;
+                first = row + 0x81;
+
+                if(column < 26)
+                    second = column + 0x41; // between 41-5A
+                else if(column < 52)
+                    second = column - 26 + 0x61; // between 61-7A
+                else
+                    second = column - 52 + 0x81; // between 81-FE
+
+                *cursor++ = first;
+                *cursor++ = second;
+            }
+        }
+    }
+    rstr.resize(cursor - (uchar*)rstr.constData());
+
+    if (state) {
+        state->invalidChars += invalid;
+    }
+    return rstr;
+}
+
+/*!
+  \reimp
+*/
+QString QCP949Codec::convertToUnicode(const char* chars, int len, ConverterState *state) const
+{
+    uchar buf[2] = {0, 0};
+    int nbuf = 0;
+    QChar replacement = QChar::ReplacementCharacter;
+    if (state) {
+        if (state->flags & ConvertInvalidToNull)
+            replacement = QChar::Null;
+        nbuf = state->remainingChars;
+        buf[0] = state->state_data[0];
+        buf[1] = state->state_data[1];
+    }
+    int invalid = 0;
+
+    QString result;
+    for (int i=0; i<len; i++) {
+        uchar ch = chars[i];
+        if (ch == 0)
+            break;
+        switch (nbuf) {
+        case 0:
+            if (ch < 0x80) {
+                // ASCII
+                result += QLatin1Char(ch);
+            } else if (IsEucChar(ch)) {
+                // KSC 5601
+                buf[0] = ch;
+                nbuf = 1;
+            } else if (IsCP949Char(ch)){
+                buf[0] = ch;
+                nbuf = 1;
+            } else {
+                // Invalid
+                result += replacement;
+                ++invalid;
+            }
+            break;
+        case 1:
+            // KSC 5601
+            if (IsEucChar(ch) && !IsCP949Char(buf[0])) {
+                uint u = qt_Ksc5601ToUnicode((buf[0] << 8) |  ch);
+                result += QValidChar(u);
+            } else {
+                // Rest of CP949
+                int row, column;
+                nbuf = 0;
+                row = buf[0] - 0x81;
+                if (0x41 <= ch && ch <= 0x5a)
+                   column = ch - 0x41;
+                else if (0x61 <= ch && ch <= 0x7a)
+                    column = ch - 0x61 + 26;
+                else if (0x81 <= ch && ch <= 0xfe)
+                    column = ch - 0x81 + 52;
+                else {
+                    result += replacement;
+                    ++invalid;
+                    break;
+                }
+
+                int internal_code;
+                if (row < 32)
+                    internal_code = row * 178 + column;
+                else
+                    internal_code = 3008 + row * 84 + column;
+                // check whether the conversion avialble in the table.
+                if (internal_code < 0 || internal_code >= 8822) {
+                    result += replacement;
+                    ++invalid;
+                    break;
+                }
+                else
+                    result += QValidChar(cp949_icode_to_unicode[internal_code]);
+            }
+            nbuf = 0;
+            break;
+        }
+    }
+
+    if (state) {
+        state->remainingChars = nbuf;
+        state->state_data[0] = buf[0];
+        state->state_data[1] = buf[1];
+        state->invalidChars += invalid;
+    }
+    return result;
+}
+
 #endif // QT_NO_TEXTCODEC

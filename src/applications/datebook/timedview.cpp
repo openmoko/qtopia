@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -96,7 +96,6 @@ QSize TimeManager::minimumSizeHint() const
 {
     QFontMetrics fm(font());
     QSize result(fm.width(QTimeString::localHM(QTime(23, 0), QTimeString::Short)) + 6, minimumHeight());
-    qLog(UI) << "Return minimum size" << result;
     return result;
 }
 
@@ -184,7 +183,6 @@ void TimeManager::changeEvent(QEvent *e)
 
 void TimeManager::paintEvent(QPaintEvent *e)
 {
-    qLog(UI) << "TimeManger::paintEvent";
     // repaint the items.  can be overriddent? should be done via delegate?
     // style?
     // shift up half a block for where drawn, (e.g. on line, not just above)
@@ -206,13 +204,11 @@ void TimeManager::paintEvent(QPaintEvent *e)
     QMutableMapIterator<int, int> it(d->mMarks);
     while(it.hasNext()) {
         it.next();
-        qLog(UI) << "calculate mark information for mark" << it.key() << it.value();
 
         top = it.value()-hmgap;
         bottom = it.value()+hmgap;
         minutes = it.key();
 
-        qLog(UI) << "check to see if in range" << minutes << bottom << ctop << top << cbottom;
         // have a bottom and a top
         if (bottom >= ctop && top <= cbottom) {
             QRect itemR(0, top, width(), bottom-top);
@@ -221,9 +217,8 @@ void TimeManager::paintEvent(QPaintEvent *e)
     }
 }
 
-void TimeManager::drawItem(QPainter *painter, const QRect &rect, int minutes, int markpos)
+void TimeManager::drawItem(QPainter *painter, const QRect &rect, int minutes, int )
 {
-    qLog(UI) << "drawItem" << rect << minutes << markpos;
     // TODO might need changing for rtl
     static QTextOption o( Qt::AlignRight );
 
@@ -236,7 +231,6 @@ void TimeManager::drawItem(QPainter *painter, const QRect &rect, int minutes, in
 
 void TimeManager::resizeEvent(QResizeEvent *)
 {
-    qLog(UI) << "Resize event" << size();
     cacheLayout();
 }
 
@@ -247,7 +241,7 @@ void TimeManager::cacheLayout()
     // NOTE these lines dictate how far apart marks are placed.
     // can also include extra marks at this point.
     int mgap = minimumGapHeight();
-    int theight = height();
+    int theight = height() - 1;
     int c = d->mMarks.count();
 
     int e;
@@ -262,7 +256,6 @@ void TimeManager::cacheLayout()
         es = 0;
         er = 0;
     }
-    qLog(UI) << "Extra" << e << theight << c << mgap;
 
     int firstgap = (mgap + es) >> 1;
     // as only stretches downwards, just look for the -1 entry and
@@ -278,7 +271,6 @@ void TimeManager::cacheLayout()
             // might have to make previous wider.
             // gap = what?
             v = last + mgap + es;
-            qLog(UI) << v << last << mgap << es;
         }
         if (er > 0) {
             --er;
@@ -662,7 +654,7 @@ void TimedView::paintEvent(QPaintEvent *e)
         if (top == -1)
             top = 0;
         if (bottom == -1)
-            bottom = height();
+            bottom = height() - 1;
 
         int w = width() / item.width();
         int left = item.offset() * w;
@@ -671,7 +663,7 @@ void TimedView::paintEvent(QPaintEvent *e)
         if (selected)
             option.state |= QStyle::State_Selected;
 
-        option.rect.setCoords(left, top, left + w, bottom);
+        option.rect.setCoords(left, top, left + w - 1, bottom);
 
         d->delegate->paint(&painter, option, item.modelIndex());
 
@@ -694,7 +686,6 @@ void TimedView::setCurrentIndex(const QModelIndex &i)
 
 void TimedView::resizeEvent(QResizeEvent *)
 {
-    qLog(UI) << "TimedView::resizeEvent()" << size();
 }
 
 void TimedView::setItemDelegate(QAbstractItemDelegate *delegate)
@@ -719,7 +710,7 @@ QRect TimedView::occurrenceRect(const QModelIndex &index) const
             if( top == -1 )
                 top = 0;
             if( bottom == -1 )
-                bottom = height();
+                bottom = height() - 1;
 
             int w = width() / item.width();
             int left = item.offset() * w;

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -100,6 +100,17 @@ which accompanied this distribution.
 
 #ifndef __VOBJECT_H__
 #define __VOBJECT_H__ 1
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 #include <QString>
 #include <QDataStream>
@@ -386,8 +397,7 @@ and you can go ahead and use them. If you try to use them with
 the DLL LIB you will get a link error.
 */
 extern DLLEXPORT(void) writeVObject(FILE *fp, VObject *o);
-extern DLLEXPORT(void) writeVObject(QDataStream *stream, VObject *o);
-
+extern DLLEXPORT(void) writeVObject(QIODevice *device, VObject *o);
 
 
 typedef void (*MimeErrorHandler)(char *);

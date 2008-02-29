@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,11 +27,11 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QGroupBox>
+#include <QDesktopWidget>
+#include <QFormLayout>
 
 #include <qtopiaapplication.h>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 
 
 /*!
@@ -62,13 +62,10 @@ IPPage::IPPage( const QtopiaNetworkProperties& prop, QWidget* parent, Qt::WFlags
     init();
     readConfig( prop );
 
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this , true );
-#endif
 
     setObjectName("tcpip");
-
 }
 
 IPPage::~IPPage()
@@ -81,68 +78,59 @@ void IPPage::init()
     vLayout->setSpacing( 4 );
     vLayout->setMargin( 5 );
 
-#ifdef QTOPIA_PHONE
     autoIp = new QCheckBox( tr("Autom. IP (DHCP)"), this );
-#else
-    autoIp = new QCheckBox( tr("Automatic IP (DHCP)"), this );
-#endif
     vLayout->addWidget( autoIp );
 
     dhcpGroup = new QGroupBox( this );
-    QVBoxLayout* groupLayout = new QVBoxLayout( dhcpGroup );
-    groupLayout->setSpacing( 2 );
-    groupLayout->setMargin( 4 );
+    QFormLayout* formLayout = new QFormLayout( dhcpGroup );
 
     IPValidator* val = new IPValidator( this );
 
     ipLabel = new QLabel( tr("IP Address:"), dhcpGroup );
-    groupLayout->addWidget( ipLabel );
     ipAddress = new QLineEdit( dhcpGroup );
     ipAddress->setValidator( val );
-    groupLayout->addWidget( ipAddress );
-
+    ipLabel->setBuddy( ipAddress );
+    formLayout->addRow( ipLabel, ipAddress );
 
     dnsLabel1 = new QLabel( tr("First DNS:"), dhcpGroup );
-    groupLayout->addWidget( dnsLabel1 );
     dnsAddress1 = new QLineEdit( dhcpGroup );
     dnsAddress1->setValidator( val );
-    groupLayout->addWidget( dnsAddress1 );
+    dnsLabel1->setBuddy( dnsAddress1 );
+    formLayout->addRow( dnsLabel1, dnsAddress1 );
 
     dnsLabel2 = new QLabel( tr("Second DNS:"), dhcpGroup );
-    groupLayout->addWidget( dnsLabel2 );
     dnsAddress2 = new QLineEdit( dhcpGroup );
     dnsAddress2->setValidator( val );
-    groupLayout->addWidget( dnsAddress2 );
+    dnsLabel2->setBuddy( dnsAddress2 );
+    formLayout->addRow( dnsLabel2, dnsAddress2 );
 
     broadcastLabel = new QLabel( tr("Broadcast:"), dhcpGroup );
-    groupLayout->addWidget( broadcastLabel );
     broadcast = new QLineEdit( dhcpGroup );
     broadcast->setValidator( val );
-    groupLayout->addWidget( broadcast );
+    broadcastLabel->setBuddy( broadcast );
+    formLayout->addRow( broadcastLabel, broadcast );
 
     gatewayLabel = new QLabel( tr("Gateway:"), dhcpGroup );
-    groupLayout->addWidget( gatewayLabel );
     gateway = new QLineEdit( dhcpGroup );
     gateway->setValidator( val );
-    groupLayout->addWidget( gateway );
+    gatewayLabel->setBuddy( gateway );
+    formLayout->addRow( gatewayLabel, gateway );
 
     subnetLabel = new QLabel( tr("Subnet mask:"), dhcpGroup );
-    groupLayout->addWidget( subnetLabel );
     subnet = new QLineEdit( dhcpGroup );
     subnet->setValidator( val );
-    groupLayout->addWidget( subnet );
+    subnetLabel->setBuddy( subnet );
+    formLayout->addRow( subnetLabel, subnet );
 
     vLayout->addWidget(dhcpGroup);
 
-
-#ifdef QTOPIA_PHONE
     QtopiaApplication::setInputMethodHint(ipAddress, "netmask");
     QtopiaApplication::setInputMethodHint(dnsAddress1, "netmask");
     QtopiaApplication::setInputMethodHint(dnsAddress2, "netmask");
     QtopiaApplication::setInputMethodHint(broadcast, "netmask");
     QtopiaApplication::setInputMethodHint(gateway, "netmask");
     QtopiaApplication::setInputMethodHint(subnet, "netmask");
-#endif
+
     connect( autoIp, SIGNAL(stateChanged(int)), this, SLOT(connectWdgts()));
 }
 

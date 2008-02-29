@@ -45,6 +45,7 @@
 <p>When an application terminates, the <a href="applicationlauncher.html">ApplicationLauncher</a> notifies all tasks, in order, that implement the ApplicationTerminationHandler interface. A task that implements the ApplicationTeminationHandler interface can filter the termination notification by returning true from its <a href="applicationterminationhandler.html#terminated">terminated</a>() notification method. Filtering a termination will prevent subsequently ordered tasks from being notified.</p>
 <p>Regardless of whether or not a task is filtered, the <a href="applicationlauncher.html">ApplicationLauncher</a> class will still emit the global <a href="applicationlauncher.html#applicationTerminated">ApplicationLauncher::applicationTerminated</a>() signal, albeit with the <b>filtered</b> parameter set to true.</p>
 <p>Termination handlers can be used to hide the termination of &quot;system&quot; applications from the user, or to implement custom termination notices. The <a href="qterminationhandler.html">QTerminationHandler</a> class, for example, uses a server side termination handler to display a more descriptive crash message when an application abnormally exits.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="ApplicationTerminationHandler"></a>ApplicationTerminationHandler::ApplicationTerminationHandler ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -56,6 +57,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

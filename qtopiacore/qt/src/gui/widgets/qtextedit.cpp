@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -105,7 +120,7 @@ QTextEditPrivate::QTextEditPrivate()
     : control(0),
       autoFormatting(QTextEdit::AutoNone), tabChangesFocus(false),
       lineWrap(QTextEdit::WidgetWidth), lineWrapColumnOrWidth(0),
-      textFormat(Qt::AutoText)
+      wordWrap(QTextOption::WrapAtWordBoundaryOrAnywhere), textFormat(Qt::AutoText)
 {
     ignoreAutomaticScrollbarAdjustment = false;
     preferRichText = false;
@@ -187,7 +202,7 @@ void QTextEditPrivate::_q_repaintContents(const QRectF &contentsRect)
     const int yOffset = verticalOffset();
     const QRectF visibleRect(xOffset, yOffset, viewport->width(), viewport->height());
 
-    QRect r = contentsRect.intersected(visibleRect).toRect();
+    QRect r = contentsRect.intersected(visibleRect).toAlignedRect();
     if (r.isEmpty())
         return;
 
@@ -295,6 +310,9 @@ void QTextEditPrivate::_q_adjustScrollbars()
 void QTextEditPrivate::_q_ensureVisible(const QRectF &_rect)
 {
     const QRect rect = _rect.toRect();
+    if ((vbar->isVisible() && vbar->maximum() < rect.bottom())
+        || (hbar->isVisible() && hbar->maximum() < rect.right()))
+        _q_adjustScrollbars();
     const int visibleWidth = viewport->width();
     const int visibleHeight = viewport->height();
     const bool rtl = q_func()->isRightToLeft();
@@ -352,7 +370,7 @@ void QTextEditPrivate::ensureViewportLayouted()
     attributes, for example, font and color.
 
     QTextEdit can display images, lists and tables. If the text is
-    too large to view within the text edit's viewport, scrollbars will
+    too large to view within the text edit's viewport, scroll bars will
     appear. The text edit can load both plain text and HTML files (a
     subset of HTML 3.2 and 4).
 
@@ -364,6 +382,9 @@ void QTextEditPrivate::ensureViewportLayouted()
     text support in Qt is designed to provide a fast, portable and
     efficient way to add reasonable online help facilities to
     applications, and to provide a basis for rich text editors.
+
+    The shape of the mouse cursor on a QTextEdit is Qt::IBeamCursor by default.
+    It can be changed through the viewport()'s cursor property.
 
     \section1 Using QTextEdit as a Display Widget
 
@@ -453,6 +474,30 @@ void QTextEditPrivate::ensureViewportLayouted()
     modified since it was either loaded or since the last call to setModified
     with false as argument. In addition it provides methods for undo and redo.
 
+    \section2 Drag and Drop
+    
+    QTextEdit also supports custom drag and drop behavior. By default,
+    QTextEdit will insert plain text, HTML and rich text when the user drops
+    data of these MIME types onto a document. Reimplement 
+    canInsertFromMimeData() and insertFromMimeData() to add support for
+    additional MIME types.
+
+    For example, to allow the user to drag and drop an image onto a QTextEdit,
+    you could the implement these functions in the following way:
+    
+    \quotefromfile snippets/textdocument-imagedrop/textedit.cpp
+    \skipto bool TextEdit::canInsertFromMimeData
+    \printuntil /^\}/
+    
+    We add support for image MIME types by returning true. For all other
+    MIME types, we use the default implementation.
+    
+    \skipto void TextEdit::insertFromMimeData
+    \printuntil /^\}/
+
+    We unpack the image from the QVariant held by the MIME source and insert
+    it into the document as a resource. 
+    
     \section2 Editing Key Bindings
 
     The list of key bindings which are implemented for editing:
@@ -484,7 +529,6 @@ void QTextEditPrivate::ensureViewportLayouted()
     \row \i End \i Moves the cursor to the end of the line.
     \row \i Ctrl+End \i Moves the cursor to the end of the text.
     \row \i Alt+Wheel \i Scrolls the page horizontally (the Wheel is the mouse wheel).
-    \row \i Ctrl+Wheel \i Zooms the text.
     \endtable
 
     To select (mark) text hold down the Shift key whilst pressing one
@@ -494,6 +538,19 @@ void QTextEditPrivate::ensureViewportLayouted()
 
     \sa QTextDocument, QTextCursor, {Application Example},
 	{Syntax Highlighter Example}, {Rich Text Processing}
+*/
+
+/*!
+        \property QTextEdit::plainText
+        \since 4.3
+
+        This property gets and sets the text edit's contents as plain
+        text. Previous contents are removed and undo/redo history is reset
+        when the property is set. If the text edit has another content
+        type, it will not be replaced by plain text when you call
+        toPlainText().
+
+		\sa html
 */
 
 /*!
@@ -719,6 +776,7 @@ void QTextEdit::setDocument(QTextDocument *document)
 {
     Q_D(QTextEdit);
     d->control->setDocument(document);
+    d->updateDefaultTextOption();
     d->relayoutDocument();
 }
 
@@ -978,7 +1036,8 @@ bool QTextEdit::event(QEvent *e)
         const bool result = QAbstractScrollArea::event(&ce);
         e->setAccepted(ce.isAccepted());
         return result;
-    } else if (e->type() == QEvent::ShortcutOverride) {
+    } else if (e->type() == QEvent::ShortcutOverride
+               || e->type() == QEvent::ToolTip) {
         d->sendControlEvent(e);
     }
 #ifdef QT_KEYPAD_NAVIGATION
@@ -1045,11 +1104,14 @@ void QTextEdit::setPlainText(const QString &text)
     toHtml() returns the text of the text edit as html.
 
     setHtml() changes the text of the text edit.  Any previous text is
-    removed. The input text is interpreted as rich text in html format.
+    removed and the undo/redo history is cleared. The input text is
+    interpreted as rich text in html format.
 
-    Note that the undo/redo history is cleared by calling setHtml().
+    \note It is the responsibility of the caller to make sure that the
+    text is correctly decoded when a QString containing HTML is created
+    and passed to setHtml().
 
-    \sa {Supported HTML Subset}
+    \sa {Supported HTML Subset}, plainText
 */
 
 void QTextEdit::setHtml(const QString &text)
@@ -1254,15 +1316,25 @@ QVariant QTextEdit::loadResource(int type, const QUrl &name)
 void QTextEdit::resizeEvent(QResizeEvent *e)
 {
     Q_D(QTextEdit);
-    if (d->lineWrap == WidgetWidth) {
-        if (e->oldSize().width() == e->size().width()
-            && e->oldSize().height() != e->size().height())
+
+    if (d->lineWrap == NoWrap) {
+        QTextDocument *doc = d->control->document();
+        QVariant alignmentProperty = doc->documentLayout()->property("contentHasAlignment");
+
+        if (!doc->pageSize().isNull()
+            && alignmentProperty.type() == QVariant::Bool
+            && !alignmentProperty.toBool()) {
+
             d->_q_adjustScrollbars();
-        else
-            d->relayoutDocument();
-    } else {
-        d->_q_adjustScrollbars();
+            return;
+        }
     }
+
+    if (d->lineWrap != FixedPixelWidth
+        && e->oldSize().width() != e->size().width())
+        d->relayoutDocument();
+    else
+        d->_q_adjustScrollbars();
 }
 
 void QTextEditPrivate::relayoutDocument()
@@ -1290,23 +1362,18 @@ void QTextEditPrivate::relayoutDocument()
     const bool oldIgnoreScrollbarAdjustment = ignoreAutomaticScrollbarAdjustment;
     ignoreAutomaticScrollbarAdjustment = true;
 
-    int width = 0;
-    switch (lineWrap) {
-        case QTextEdit::NoWrap:
-            width = -1;
-            break;
-        case QTextEdit::WidgetWidth:
-            width = viewport->width();
-            break;
-        case QTextEdit::FixedPixelWidth:
-            width = lineWrapColumnOrWidth;
-            break;
-        case QTextEdit::FixedColumnWidth:
+    int width = viewport->width();
+    if (lineWrap == QTextEdit::FixedPixelWidth)
+        width = lineWrapColumnOrWidth;
+    else if (lineWrap == QTextEdit::NoWrap) {
+        QVariant alignmentProperty = doc->documentLayout()->property("contentHasAlignment");
+        if (alignmentProperty.type() == QVariant::Bool && !alignmentProperty.toBool()) {
+
             width = 0;
-            break;
+        }
     }
 
-    doc->setPageSize(QSize(width, INT_MAX));
+    doc->setPageSize(QSize(width, -1));
     if (tlayout)
         tlayout->ensureLayouted(verticalOffset() + viewport->height());
 
@@ -1326,11 +1393,11 @@ void QTextEditPrivate::relayoutDocument()
     // horizontally (causing the character to wrap in the first place) but also
     // vertically, because the original line is now smaller and the one below kept
     // its size. So a layout with less width _can_ take up less vertical space, too.
-    // If the wider case causes a vertical scrollbar to appear and the narrower one
-    // (narrower because the vertical scrollbar takes up horizontal space)) to disappear
+    // If the wider case causes a vertical scroll bar to appear and the narrower one
+    // (narrower because the vertical scroll bar takes up horizontal space)) to disappear
     // again then we have an endless loop, as _q_adjustScrollBars sets new ranges on the
-    // scrollbars, the QAbstractScrollArea will find out about it and try to show/hide the scrollbars
-    // again. That's why we try to detect this case here and break out.
+    // scroll bars, the QAbstractScrollArea will find out about it and try to show/hide
+    // the scroll bars again. That's why we try to detect this case here and break out.
     //
     // (if you change this please also check the layoutingLoop() testcase in
     // QTextEdit's autotests)
@@ -1353,7 +1420,7 @@ void QTextEditPrivate::paint(QPainter *p, QPaintEvent *e)
     p->translate(-xOffset, -yOffset);
     r.translate(xOffset, yOffset);
 
-    control->drawContents(p, r);
+    control->drawContents(p, r, q_func());
 }
 
 /*! \reimp
@@ -1374,6 +1441,22 @@ void QTextEditPrivate::_q_currentCharFormatChanged(const QTextCharFormat &fmt)
     emit q->currentFontChanged(fmt.font());
     emit q->currentColorChanged(fmt.foreground().color());
 #endif
+}
+
+void QTextEditPrivate::updateDefaultTextOption()
+{
+    QTextDocument *doc = control->document();
+
+    QTextOption opt = doc->defaultTextOption();
+    QTextOption::WrapMode oldWrapMode = opt.wrapMode();
+
+    if (lineWrap == QTextEdit::NoWrap)
+        opt.setWrapMode(QTextOption::NoWrap);
+    else
+        opt.setWrapMode(wordWrap);
+
+    if (opt.wrapMode() != oldWrapMode)
+        doc->setDefaultTextOption(opt);
 }
 
 /*! \reimp
@@ -1434,6 +1517,8 @@ bool QTextEdit::focusNextPrevChild(bool next)
 }
 
 /*!
+  \fn void QTextEdit::contextMenuEvent(QContextMenuEvent *event)
+
   Shows the standard context menu created with createStandardContextMenu().
 
   If you do not want the text edit to have a context menu, you can set
@@ -1442,17 +1527,18 @@ bool QTextEdit::focusNextPrevChild(bool next)
   to extend the standard context menu, reimplement this function, call
   createStandardContextMenu() and extend the menu returned.
 
-  Information about the event is passed in \a e.
+  Information about the event is passed in the \a event object.
 
-    \code
-    void TextEdit::contextMenuEvent(QContextMenuEvent * e) {
-            QMenu *menu = createStandardContextMenu();
-            menu->addAction(My Menu Item");
-            //...
-            menu->exec(e->globalPos());
-            delete menu;
-    }
-    \endcode
+  \code
+  void MyTextEdit::contextMenuEvent(QContextMenuEvent *event)
+  {
+      QMenu *menu = createStandardContextMenu();
+      menu->addAction(tr("My Menu Item"));
+      //...
+      menu->exec(event->globalPos());
+      delete menu;
+  }
+  \endcode
 */
 void QTextEdit::contextMenuEvent(QContextMenuEvent *e)
 {
@@ -1700,13 +1786,17 @@ void QTextEdit::setOverwriteMode(bool overwrite)
 int QTextEdit::tabStopWidth() const
 {
     Q_D(const QTextEdit);
-    return d->control->tabStopWidth();
+    return qRound(d->control->document()->defaultTextOption().tabStop());
 }
 
 void QTextEdit::setTabStopWidth(int width)
 {
     Q_D(QTextEdit);
-    d->control->setTabStopWidth(width);
+    QTextOption opt = d->control->document()->defaultTextOption();
+    if (opt.tabStop() == width || width < 0)
+        return;
+    opt.setTabStop(width);
+    d->control->document()->setDefaultTextOption(opt);
 }
 
 /*!
@@ -1815,7 +1905,10 @@ QMimeData *QTextEdit::createMimeDataFromSelection() const
     This function returns true if the contents of the MIME data object, specified
     by \a source, can be decoded and inserted into the document. It is called
     for example when during a drag operation the mouse enters this widget and it
-    is necessary to determine whether it is possible to accept the drag.
+    is necessary to determine whether it is possible to accept the drag and drop
+    operation.
+
+    Reimplement this function to enable drag and drop support for additional MIME types.
  */
 bool QTextEdit::canInsertFromMimeData(const QMimeData *source) const
 {
@@ -1829,7 +1922,9 @@ bool QTextEdit::canInsertFromMimeData(const QMimeData *source) const
     called whenever text is inserted as the result of a clipboard paste
     operation, or when the text edit accepts data from a drag and drop
     operation.
-*/
+
+    Reimplement this function to enable drag and drop support for additional MIME types.   
+ */
 void QTextEdit::insertFromMimeData(const QMimeData *source)
 {
     Q_D(QTextEdit);
@@ -1977,6 +2072,11 @@ void QTextEdit::insertPlainText(const QString &text)
     \code
     edit->textCursor().insertHtml(fragment);
     \endcode
+
+    \note When using this function with a style sheet, the style sheet will
+    only apply to the current block in the document. In order to apply a style
+    sheet throughout a document, use QTextDocument::setDefaultStyleSheet()
+    instead.
  */
 void QTextEdit::insertHtml(const QString &text)
 {
@@ -2001,7 +2101,10 @@ void QTextEdit::scrollToAnchor(const QString &name)
     }
 
     QPointF p = d->control->anchorPosition(name);
-    d->vbar->setValue(qRound(p.y()));
+    const int newPosition = qRound(p.y());
+    if ( d->vbar->maximum() < newPosition )
+        d->_q_adjustScrollbars();
+    d->vbar->setValue(newPosition);
 }
 
 /*!
@@ -2065,6 +2168,22 @@ bool QTextEdit::canPaste() const
     return d->control->canPaste();
 }
 
+#ifndef QT_NO_PRINTER
+/*!
+    \since 4.3
+    Convenience function to print the text edit's document to the given \a printer. This
+    is equivalent to calling the print method on the document directly except that this
+    function also supports QPrinter::Selection as print range.
+
+    \sa QTextDocument::print()
+*/
+void QTextEdit::print(QPrinter *printer) const
+{
+    Q_D(const QTextEdit);
+    d->control->print(printer);
+}
+#endif // QT _NO_PRINTER
+
 /*! \property QTextEdit::tabChangesFocus
   \brief whether \gui Tab changes focus or is accepted as input
 
@@ -2098,9 +2217,9 @@ void QTextEdit::setTabChangesFocus(bool b)
     The default mode is WidgetWidth which causes words to be
     wrapped at the right edge of the text edit. Wrapping occurs at
     whitespace, keeping whole words intact. If you want wrapping to
-    occur within words use setWrapPolicy(). If you set a wrap mode of
+    occur within words use setWordWrapMode(). If you set a wrap mode of
     FixedPixelWidth or FixedColumnWidth you should also call
-    setWrapColumnOrWidth() with the width you want.
+    setLineWrapColumnOrWidth() with the width you want.
 
     \sa lineWrapColumnOrWidth
 */
@@ -2117,6 +2236,7 @@ void QTextEdit::setLineWrapMode(LineWrapMode wrap)
     if (d->lineWrap == wrap)
         return;
     d->lineWrap = wrap;
+    d->updateDefaultTextOption();
     d->relayoutDocument();
 }
 
@@ -2156,13 +2276,16 @@ void QTextEdit::setLineWrapColumnOrWidth(int w)
 QTextOption::WrapMode QTextEdit::wordWrapMode() const
 {
     Q_D(const QTextEdit);
-    return d->control->wordWrapMode();
+    return d->wordWrap;
 }
 
 void QTextEdit::setWordWrapMode(QTextOption::WrapMode mode)
 {
     Q_D(QTextEdit);
-    d->control->setWordWrapMode(mode);
+    if (mode == d->wordWrap)
+        return;
+    d->wordWrap = mode;
+    d->updateDefaultTextOption();
 }
 
 /*!
@@ -2352,10 +2475,15 @@ Qt::TextFormat QTextEdit::textFormat() const
 
 #endif // QT3_SUPPORT
 
-
 /*!
     Appends a new paragraph with \a text to the end of the text edit.
+    
+    \note The new paragraph appended will have the same character format and
+    block format as the current paragraph, determined by the position of the cursor.
+    
+    \sa currentCharFormat(), QTextCursor::blockFormat()
 */
+
 void QTextEdit::append(const QString &text)
 {
     Q_D(QTextEdit);

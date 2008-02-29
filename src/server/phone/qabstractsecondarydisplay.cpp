@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -33,6 +33,8 @@
   
   A small tutorial on how to develop new server widgets using one of the abstract widgets as base can
   be found in QAbstractServerInterface class documentation.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
 
   \ingroup QtopiaServer::PhoneUI::TTSmartPhone
 
@@ -44,3 +46,14 @@
   widget \a flags.
  */
 
+/*!
+  \fn void QAbstractSecondaryDisplay::applyBackgroundImage()
+
+  Applies a background image to the secondary display
+  */
+
+/*!
+  \fn void QAbstractSecondaryDisplay::updateBackground()
+
+   Persist the new background, after applying it.
+*/

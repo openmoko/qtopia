@@ -22,15 +22,17 @@
 <h3>Public Functions</h3>
 <ul>
 <li><div class="fn"/><b><a href="qabstractsecondarydisplay.html#QAbstractSecondaryDisplay">QAbstractSecondaryDisplay</a></b> ( QWidget * <i>parent</i> = 0, Qt::WFlags <i>flags</i> = 0 )</li>
+<li><div class="fn"/>virtual void <b><a href="qabstractsecondarydisplay.html#applyBackgroundImage">applyBackgroundImage</a></b> () = 0</li>
+<li><div class="fn"/>virtual void <b><a href="qabstractsecondarydisplay.html#updateBackground">updateBackground</a></b> () = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>264 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>20 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
@@ -54,14 +56,19 @@
 <p>The QAbstractSecondaryDisplay class allows developers to replace the &quot;secondary screen&quot; portion of the Phone UI.</p>
 <p>The QAbstractSecondaryDisplay interface is part of is part of the <a href="qtopiaserverapplication.html#qtopia-server-widgets">server widgets framework</a> and represents the portion of the phone UI that is shown on a smaller utility screen such as on clam shell phones.</p>
 <p>A small tutorial on how to develop new server widgets using one of the abstract widgets as base can be found in <a href="qabstractserverinterface.html">QAbstractServerInterface</a> class documentation.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QAbstractSecondaryDisplay"></a>QAbstractSecondaryDisplay::QAbstractSecondaryDisplay ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="qt.html#WFlags-typedef">Qt::WFlags</a> <i>flags</i> = 0 )</h3>
 <p>Construct a new <a href="qabstractsecondarydisplay.html">QAbstractSecondaryDisplay</a> with the specified <i>parent</i> and widget <i>flags</i>.</p>
+<h3 class="fn"><a name="applyBackgroundImage"></a>void QAbstractSecondaryDisplay::applyBackgroundImage ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Applies a background image to the secondary display</p>
+<h3 class="fn"><a name="updateBackground"></a>void QAbstractSecondaryDisplay::updateBackground ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Persist the new background, after applying it.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

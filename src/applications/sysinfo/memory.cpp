@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,7 +19,6 @@
 **
 ****************************************************************************/
 
-#include <QDebug>
 #include <QLabel>
 #include <QLayout>
 #include <QFile>
@@ -56,11 +55,8 @@ void MemoryInfo::init()
     vb->addWidget( legend );
     legend->setData( data );
 
-#ifndef QTOPIA_PHONE
-    vb->addStretch(1);
-#else
     vb->addStretch(100);
-#endif
+
     updateData();
 
     startTimer(5000);
@@ -123,5 +119,4 @@ void MemoryInfo::updateData()
         legend->update();
     }
 }
-
 

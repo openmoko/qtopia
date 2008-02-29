@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -70,8 +70,6 @@ public:
     QString toLocalContextString() const;
     QByteArray toLocalContextByteArray() const;
 
-    static QUniqueId constructApplicationLocalUniqueId(); // OBSOLETE
-
 protected:
     // automatically reversable via constructors, which can detect format.
 #ifndef QT_NO_DATASTREAM
@@ -105,8 +103,6 @@ public:
     QUniqueId createUniqueId();
 
     QUniqueId constructUniqueId(uint);
-
-    static QUniqueId temporaryID(uint); // OBSOLETE
 
     static QUniqueId constructTemporaryId(uint);
     static QUniqueId createTemporaryId();

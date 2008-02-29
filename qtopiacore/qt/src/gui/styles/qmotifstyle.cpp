@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -125,7 +140,7 @@ QMotifStyle::~QMotifStyle()
 
 /*!
     \internal
-    Animate indeterminate progressbars only when visible
+    Animate indeterminate progress bars only when visible
 */
 bool QMotifStyle::eventFilter(QObject *o, QEvent *e)
 {
@@ -228,7 +243,7 @@ bool QMotifStyle::useHighlightColors() const
 void QMotifStyle::polish(QPalette& pal)
 {
     if (pal.brush(QPalette::Active, QPalette::Light) == pal.brush(QPalette::Active, QPalette::Base)) {
-        QColor nlight = pal.color(QPalette::Active, QPalette::Light).dark(108);
+        QColor nlight = pal.color(QPalette::Active, QPalette::Light).darker(108);
         pal.setColor(QPalette::Active, QPalette::Light, nlight) ;
         pal.setColor(QPalette::Disabled, QPalette::Light, nlight) ;
         pal.setColor(QPalette::Inactive, QPalette::Light, nlight) ;
@@ -364,7 +379,8 @@ void QMotifStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QP
         break;
     case PE_FrameFocusRect:
         if (const QStyleOptionFocusRect *fropt = qstyleoption_cast<const QStyleOptionFocusRect *>(opt)) {
-            if ((fropt->state & State_HasFocus) && focus && focus->isVisible())
+            if ((fropt->state & State_HasFocus) && focus && focus->isVisible()
+                    && !(fropt->state & QStyle::State_Item))
                 break;
             QCommonStyle::drawPrimitive(pe, opt, p, w);
         }
@@ -386,14 +402,14 @@ void QMotifStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QP
                 int y = 3 + (h%3)/2;
                 p->setPen(dark);
                 p->drawLine(8, 1, 8, h-2);
-                for(i=0; 2*i < a.size(); i ++) {
+                for (i=0; 2*i < a.size(); ++i) {
                     a.setPoint(2*i, 5, y+1+3*i);
                     a.setPoint(2*i+1, 2, y+2+3*i);
                 }
                 p->drawPoints(a);
                 p->setPen(light);
                 p->drawLine(9, 1, 9, h-2);
-                for(i=0; 2*i < a.size(); i++) {
+                for (i=0; 2*i < a.size(); i++) {
                     a.setPoint(2*i, 4, y+3*i);
                     a.setPoint(2*i+1, 1, y+1+3*i);
                 }
@@ -414,14 +430,14 @@ void QMotifStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QP
                 int x = 3 + (w%3)/2;
                 p->setPen(dark);
                 p->drawLine(1, 8, w-2, 8);
-                for(i=0; 2*i < a.size(); i ++) {
+                for (i=0; 2*i < a.size(); ++i) {
                     a.setPoint(2*i, x+1+3*i, 6);
                     a.setPoint(2*i+1, x+2+3*i, 3);
                 }
                 p->drawPoints(a);
                 p->setPen(light);
                 p->drawLine(1, 9, w-2, 9);
-                for(i=0; 2*i < a.size(); i++) {
+                for (i=0; 2*i < a.size(); ++i) {
                     a.setPoint(2*i, x+3*i, 5);
                     a.setPoint(2*i+1, x+1+3*i, 2);
                 }
@@ -437,14 +453,6 @@ void QMotifStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QP
         break; }
 
     case PE_PanelButtonCommand:
-        if (const QStyleOptionButton *btn = qstyleoption_cast<const QStyleOptionButton *>(opt)) {
-            if ((btn->features & QStyleOptionButton::Flat)
-                && !(opt->state & (State_Sunken | State_On))) {
-                p->fillRect(opt->rect, opt->palette.brush(QPalette::Button));
-                break;
-            }
-        }
-        // Fall-through
     case PE_PanelButtonBevel:
     case PE_PanelButtonTool: {
         QBrush fill;
@@ -795,10 +803,10 @@ void QMotifStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QP
             if (const QStyleOptionProgressBarV2 *pb2 = qstyleoption_cast<const QStyleOptionProgressBarV2 *>(opt))
                 vertical = (pb2->orientation == Qt::Vertical);
             if (!vertical) {
-                p->fillRect(opt->rect.x(), opt->rect.y() + 2, opt->rect.width(),
-                            opt->rect.height() - 4, opt->palette.brush(QPalette::Highlight));
+                p->fillRect(opt->rect.x(), opt->rect.y(), opt->rect.width(),
+                            opt->rect.height(), opt->palette.brush(QPalette::Highlight));
             } else {
-                p->fillRect(opt->rect.x() + 1, opt->rect.y(), opt->rect.width() - 4, opt->rect.height(),
+                p->fillRect(opt->rect.x(), opt->rect.y(), opt->rect.width(), opt->rect.height(),
                             opt->palette.brush(QPalette::Highlight));
             }
         }
@@ -924,11 +932,13 @@ void QMotifStyle::drawControl(ControlElement element, const QStyleOption *opt, Q
                     qDrawShadePanel(p, opt->rect.adjusted(1, 1, -1, -1), opt->palette, true);
                 }
             }
-            QStyleOptionButton newOpt = *btn;
-            newOpt.rect = QRect(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
-            p->setBrushOrigin(p->brushOrigin());
-            drawPrimitive(PE_PanelButtonCommand, &newOpt, p, widget);
-
+            if (!(btn->features & QStyleOptionButton::Flat) ||
+                (btn->state & (State_Sunken | State_On))) {
+                QStyleOptionButton newOpt = *btn;
+                newOpt.rect = QRect(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
+                p->setBrushOrigin(p->brushOrigin());
+                drawPrimitive(PE_PanelButtonCommand, &newOpt, p, widget);
+            }
             if (btn->features & QStyleOptionButton::HasMenu) {
                 int mbi = pixelMetric(PM_MenuButtonIndicator, btn, widget);
                 QRect ir = btn->rect;
@@ -1038,7 +1048,7 @@ void QMotifStyle::drawControl(ControlElement element, const QStyleOption *opt, Q
 
     case CE_ProgressBarLabel:
         if (const QStyleOptionProgressBar *pb = qstyleoption_cast<const QStyleOptionProgressBar *>(opt)) {
-            QMatrix oldMatrix = p->matrix();
+            QTransform oldMatrix = p->transform();
             QRect rect = pb->rect;
             bool vertical = false;
             bool invert = false;
@@ -1049,7 +1059,7 @@ void QMotifStyle::drawControl(ControlElement element, const QStyleOption *opt, Q
                 bottomToTop = pb2->bottomToTop;
             }
             if (vertical) {
-                QMatrix m;
+                QTransform m;
                 rect = QRect(rect.left(), rect.top(), rect.height(), rect.width()); // flip width and height
                 if (bottomToTop) {
                     m.translate(0.0, rect.width());
@@ -1058,7 +1068,7 @@ void QMotifStyle::drawControl(ControlElement element, const QStyleOption *opt, Q
                     m.translate(rect.height(), 0.0);
                     m.rotate(90);
                 }
-                p->setMatrix(m);
+                p->setTransform(m);
             }
             const int unit_width = pixelMetric(PM_ProgressBarChunkWidth, opt, widget);
             int u = rect.width() / unit_width;
@@ -1090,7 +1100,7 @@ void QMotifStyle::drawControl(ControlElement element, const QStyleOption *opt, Q
                     p->drawText(rect, Qt::AlignCenter | Qt::TextSingleLine, pb->text);
                 }
             }
-            p->setMatrix(oldMatrix);
+            p->setTransform(oldMatrix);
             break;
         }
 
@@ -1314,11 +1324,11 @@ void QMotifStyle::drawControl(ControlElement element, const QStyleOption *opt, Q
                 inverted = pb2->invertedAppearance;
             }
 
-            QMatrix m;
+            QTransform m;
             if (vertical) {
                 rect = QRect(rect.left(), rect.top(), rect.height(), rect.width()); // flip width and height
-                m.translate(rect.height(), 0.0);
                 m.rotate(90);
+                m.translate(0, -(rect.height() + rect.y()*2));
             }
 
             QPalette pal2 = pb->palette;
@@ -1329,8 +1339,7 @@ void QMotifStyle::drawControl(ControlElement element, const QStyleOption *opt, Q
             bool reverse = ((!vertical && (pb->direction == Qt::RightToLeft)) || vertical);
             if (inverted)
                 reverse = !reverse;
-            int fw = 2;
-            int w = rect.width() - 2 * fw;
+            int w = rect.width();
             if (pb->minimum == 0 && pb->maximum == 0) {
                 QRect progressBar;
                 Q_D(const QMotifStyle);
@@ -1339,9 +1348,9 @@ void QMotifStyle::drawControl(ControlElement element, const QStyleOption *opt, Q
                  if (x > w)
                      x = 2 * w - x;
                  x = reverse ? rect.right() - x : x + rect.x();
-                 p->setMatrix(m);
+                 p->setTransform(m);
                  p->setPen(QPen(pal2.highlight().color(), 4));
-                 p->drawLine(x, rect.y() + 1, x, rect.height() - fw);
+                 p->drawLine(x, rect.y(), x, rect.height());
 
             } else
                 QCommonStyle::drawControl(element, opt, p, widget);
@@ -1570,6 +1579,8 @@ void QMotifStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
             if (slider->subControls & SC_SliderTickmarks) {
                 QStyleOptionSlider tmpSlider = *slider;
                 tmpSlider.subControls = SC_SliderTickmarks;
+                int frameWidth = pixelMetric(PM_DefaultFrameWidth);
+                tmpSlider.rect.translate(frameWidth - 1, 0);
                 QCommonStyle::drawComplexControl(cc, &tmpSlider, p, widget);
             }
         }
@@ -1758,6 +1769,11 @@ int QMotifStyle::pixelMetric(PixelMetric pm, const QStyleOption *opt,
         ret = 5;
         break;
 
+    case PM_CheckBoxLabelSpacing:
+    case PM_RadioButtonLabelSpacing:
+        ret = 10;
+        break;
+
     case PM_ToolBarFrameWidth:
         ret = pixelMetric(PM_DefaultFrameWidth);
         break;
@@ -1875,12 +1891,23 @@ QMotifStyle::subControlRect(ComplexControl cc, const QStyleOptionComplex *opt,
             const int margin = spinbox->frame ? 4 : 0;
             switch (sc) {
             case SC_SpinBoxUp:
+                if (spinbox->buttonSymbols == QAbstractSpinBox::NoButtons)
+                    return QRect();
                 return visualRect(spinbox->direction, spinbox->rect,
                                   QRect(x, y, bs.width(), bs.height() - 1));
             case SC_SpinBoxDown:
+                if (spinbox->buttonSymbols == QAbstractSpinBox::NoButtons)
+                    return QRect();
+
                 return visualRect(spinbox->direction, spinbox->rect,
                                   QRect(x, y + bs.height() + 1, bs.width(), bs.height() - 1));
             case SC_SpinBoxEditField:
+                if (spinbox->buttonSymbols == QAbstractSpinBox::NoButtons)
+                    return visualRect(spinbox->direction, spinbox->rect,
+                                      QRect(lx + margin, fw + margin,
+                                            spinbox->rect.width() - 2*fw - 2*margin,
+                                            spinbox->rect.height() - 2*fw - 2*margin));
+
                 return visualRect(spinbox->direction, spinbox->rect,
                                   QRect(lx + margin, fw + margin, rx - margin,
                                         spinbox->rect.height() - 2*fw - 2 * margin));
@@ -2110,19 +2137,11 @@ QMotifStyle::subElementRect(SubElement sr, const QStyleOption *opt, const QWidge
                     rect.setCoords(opt->rect.left(), opt->rect.top(),
                                    opt->rect.right() - textw, opt->rect.bottom());
             }
+            if (sr == SE_ProgressBarContents)
+                rect.adjust(2, 2, -2, -2);
             rect = visualRect(pb->direction, pb->rect, rect);
         }
         break;
-    case SE_CheckBoxContents:
-    case SE_RadioButtonContents: {
-        QRect ir = visualRect(opt->direction, opt->rect,
-                              subElementRect(sr == SE_CheckBoxContents ? SE_CheckBoxIndicator
-                                                                       : SE_RadioButtonIndicator,
-                                             opt, widget));
-        rect.setRect(ir.right() + 10, opt->rect.y(),
-                     opt->rect.width() - ir.width() - 10, opt->rect.height());
-        rect = visualRect(opt->direction, opt->rect, rect);
-        break; }
     case SE_CheckBoxClickRect:
     case SE_RadioButtonClickRect:
         rect = visualRect(opt->direction, opt->rect, opt->rect);
@@ -2621,10 +2640,6 @@ QMotifStyle::styleHint(StyleHint hint, const QStyleOption *opt, const QWidget *w
         ret = 0;
         break;
 
-    case SH_MenuBar_DismissOnSecondClick:
-        ret = 0;
-        break;
-
     case SH_MessageBox_UseBorderForButtonSpacing:
         ret = 1;
         break;
@@ -2635,6 +2650,9 @@ QMotifStyle::styleHint(StyleHint hint, const QStyleOption *opt, const QWidget *w
 
     case SH_DialogButtonLayout:
         ret = QDialogButtonBox::KdeLayout;
+        break;
+    case SH_LineEdit_PasswordCharacter:
+        ret = '*';
         break;
     default:
         ret = QCommonStyle::styleHint(hint, opt, widget, returnData);
@@ -2655,7 +2673,7 @@ QPalette QMotifStyle::standardPalette() const
     QColor background = QColor(0xcf, 0xcf, 0xcf);
 #endif
 
-    QColor light = background.light();
+    QColor light = background.lighter();
     QColor mid = QColor(0xa6, 0xa6, 0xa6);
     QColor dark = QColor(0x79, 0x7d, 0x79);
     QPalette palette(Qt::black, background, light, dark, mid, Qt::black, Qt::white);

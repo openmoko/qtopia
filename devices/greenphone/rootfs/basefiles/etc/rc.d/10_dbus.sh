@@ -6,6 +6,7 @@ start)
     ;;
 stop)
     kill $( pidof dbus-daemon ) 2>/dev/null
+    rm -f /var/run/dbus/pid
     ;;
 *)
     echo "usage: $0 { start | stop }"

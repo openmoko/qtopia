@@ -2,9 +2,9 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qt-4.2.3-qt-1178868822794/qtopia-core-opensource-src-4.2.3/src/gui/painting/qstylepainter.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/painting/qstylepainter.cpp -->
 <head>
-  <title>Qt 4.2: List of All Members for QStylePainter</title>
+  <title>Qt 4.3: List of All Members for QStylePainter</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -35,9 +35,11 @@
 <li><div class="fn"/><a href="qpainter.html#clipPath">clipPath</a> () const : QPainterPath</li>
 <li><div class="fn"/><a href="qpainter.html#clipRegion">clipRegion</a> () const : QRegion</li>
 <li><div class="fn"/><a href="qpainter.html#combinedMatrix">combinedMatrix</a> () const : QMatrix</li>
+<li><div class="fn"/><a href="qpainter.html#combinedTransform">combinedTransform</a> () const : QTransform</li>
 <li><div class="fn"/><a href="qpainter.html#compositionMode">compositionMode</a> () const : CompositionMode</li>
 <li><div class="fn"/><a href="qpainter.html#device">device</a> () const : QPaintDevice *</li>
 <li><div class="fn"/><a href="qpainter.html#deviceMatrix">deviceMatrix</a> () const : const QMatrix &amp;</li>
+<li><div class="fn"/><a href="qpainter.html#deviceTransform">deviceTransform</a> () const : const QTransform &amp;</li>
 <li><div class="fn"/><a href="qpainter.html#drawArc">drawArc</a> ( const QRectF &amp;, int, int )</li>
 <li><div class="fn"/><a href="qpainter.html#drawArc-2">drawArc</a> ( const QRect &amp;, int, int )</li>
 <li><div class="fn"/><a href="qpainter.html#drawArc-3">drawArc</a> ( int, int, int, int, int, int )</li>
@@ -107,9 +109,9 @@
 <li><div class="fn"/><a href="qpainter.html#drawPolygon-5">drawPolygon</a> ( const QPolygonF &amp;, Qt::FillRule )</li>
 <li><div class="fn"/><a href="qpainter.html#drawPolygon-6">drawPolygon</a> ( const QPolygon &amp;, Qt::FillRule )</li>
 <li><div class="fn"/><a href="qpainter.html#drawPolyline">drawPolyline</a> ( const QPointF *, int )</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qpainter.html#drawPolyline-2">drawPolyline</a> ( const QPoint *, int )</li>
 <li><div class="fn"/><a href="qpainter.html#drawPolyline-4">drawPolyline</a> ( const QPolygonF &amp; )</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qpainter.html#drawPolyline-5">drawPolyline</a> ( const QPolygon &amp; )</li>
 <li><div class="fn"/><a href="qstylepainter.html#drawPrimitive">drawPrimitive</a> ( QStyle::PrimitiveElement, const QStyleOption &amp; )</li>
 <li><div class="fn"/><a href="qpainter.html#drawRect">drawRect</a> ( const QRectF &amp; )</li>
@@ -153,6 +155,7 @@
 <li><div class="fn"/><a href="qpainter.html#redirected">redirected</a> ( const QPaintDevice *, QPoint * ) : QPaintDevice *</li>
 <li><div class="fn"/><a href="qpainter.html#renderHints">renderHints</a> () const : RenderHints</li>
 <li><div class="fn"/><a href="qpainter.html#resetMatrix">resetMatrix</a> ()</li>
+<li><div class="fn"/><a href="qpainter.html#resetTransform">resetTransform</a> ()</li>
 <li><div class="fn"/><a href="qpainter.html#restore">restore</a> ()</li>
 <li><div class="fn"/><a href="qpainter.html#restoreRedirected">restoreRedirected</a> ( const QPaintDevice * )</li>
 <li><div class="fn"/><a href="qpainter.html#rotate">rotate</a> ( qreal )</li>
@@ -181,6 +184,7 @@
 <li><div class="fn"/><a href="qpainter.html#setRedirected">setRedirected</a> ( const QPaintDevice *, QPaintDevice *, const QPoint &amp; )</li>
 <li><div class="fn"/><a href="qpainter.html#setRenderHint">setRenderHint</a> ( RenderHint, bool )</li>
 <li><div class="fn"/><a href="qpainter.html#setRenderHints">setRenderHints</a> ( RenderHints, bool )</li>
+<li><div class="fn"/><a href="qpainter.html#setTransform">setTransform</a> ( const QTransform &amp;, bool )</li>
 <li><div class="fn"/><a href="qpainter.html#setViewTransformEnabled">setViewTransformEnabled</a> ( bool )</li>
 <li><div class="fn"/><a href="qpainter.html#setViewport">setViewport</a> ( const QRect &amp; )</li>
 <li><div class="fn"/><a href="qpainter.html#setViewport-2">setViewport</a> ( int, int, int, int )</li>
@@ -188,9 +192,12 @@
 <li><div class="fn"/><a href="qpainter.html#setWindow-2">setWindow</a> ( int, int, int, int )</li>
 <li><div class="fn"/><a href="qpainter.html#setWorldMatrix">setWorldMatrix</a> ( const QMatrix &amp;, bool )</li>
 <li><div class="fn"/><a href="qpainter.html#setWorldMatrixEnabled">setWorldMatrixEnabled</a> ( bool )</li>
+<li><div class="fn"/><a href="qpainter.html#setWorldTransform">setWorldTransform</a> ( const QTransform &amp;, bool )</li>
 <li><div class="fn"/><a href="qpainter.html#shear">shear</a> ( qreal, qreal )</li>
 <li><div class="fn"/><a href="qpainter.html#strokePath">strokePath</a> ( const QPainterPath &amp;, const QPen &amp; )</li>
 <li><div class="fn"/><a href="qstylepainter.html#style">style</a> () const : QStyle *</li>
+<li><div class="fn"/><a href="qpainter.html#testRenderHint">testRenderHint</a> ( RenderHint ) const : bool</li>
+<li><div class="fn"/><a href="qpainter.html#transform">transform</a> () const : const QTransform &amp;</li>
 <li><div class="fn"/><a href="qpainter.html#translate">translate</a> ( const QPointF &amp; )</li>
 <li><div class="fn"/><a href="qpainter.html#translate-2">translate</a> ( const QPoint &amp; )</li>
 <li><div class="fn"/><a href="qpainter.html#translate-3">translate</a> ( qreal, qreal )</li>
@@ -199,6 +206,7 @@
 <li><div class="fn"/><a href="qpainter.html#window">window</a> () const : QRect</li>
 <li><div class="fn"/><a href="qpainter.html#worldMatrix">worldMatrix</a> () const : const QMatrix &amp;</li>
 <li><div class="fn"/><a href="qpainter.html#worldMatrixEnabled">worldMatrixEnabled</a> () const : bool</li>
+<li><div class="fn"/><a href="qpainter.html#worldTransform">worldTransform</a> () const : const QTransform &amp;</li>
 </ul>
 </td></tr>
 </table></p>
@@ -206,6 +214,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

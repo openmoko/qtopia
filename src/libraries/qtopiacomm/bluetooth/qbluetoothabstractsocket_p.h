@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,13 +22,25 @@
 #ifndef __QBLUETOOTHABSTRACTSOCKET_P_H__
 #define __QBLUETOOTHABSTRACTSOCKET_P_H__
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <QObject>
 
 #include <private/qringbuffer_p.h>
-#include <qtopiacomm/qbluetoothabstractsocket.h>
+#include <qbluetoothabstractsocket.h>
 
 class QSocketNotifier;
 class QTimer;
+class QBluetoothSocketEngine;
 
 class QBluetoothAbstractSocketPrivate : public QObject
 {
@@ -38,13 +50,10 @@ public:
     QBluetoothAbstractSocketPrivate(bool isBuffered);
     ~QBluetoothAbstractSocketPrivate();
 
-    bool initiateConnect(int socket, struct sockaddr *addr, int size);
     bool initiateDisconnect();
 
     bool flush();
 
-    qint64 writeToSocket(const char *data, qint64 len);
-    qint64 readFromSocket(char *data, qint64 len);
     bool readData();
 
     void resetNotifiers();
@@ -81,6 +90,8 @@ public:
 
     int m_readMtu;
     int m_writeMtu;
+
+    QBluetoothSocketEngine *m_engine;
 };
 
 #define SOCKET_DATA(Class) Class##Private * const m_data = static_cast<Class##Private *>(QBluetoothAbstractSocket::m_data)

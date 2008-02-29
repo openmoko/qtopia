@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QtNetwork Module</title>
+  <title>Qt 4.3: QtNetwork Module</title>
   <link rel="prev" href="qtgui.html" />
   <link rel="contents" href="modules.html" />
   <link rel="next" href="qtopengl.html" />
@@ -19,21 +19,32 @@
 [<a href="modules.html">Qt's Modules</a>]
 [Next: <a href="qtopengl.html">QtOpenGL Module</a>]
 </p>
-<h1 align="center">QtNetwork Module<br /><small></small></h1>
+<h1 align="center">QtNetwork Module<br /><span class="subtitle"></span>
+</h1>
 <p>The QtNetwork module offers classes that allow you to write TCP/IP clients and servers. <a href="#details">More...</a></p>
+<h2>Namespaces</h2>
+<p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><th><a href="qssl.html">QSsl</a></th><td>Declares enums common to all SSL classes in QtNetwork</td></tr>
+</table></p>
 <h2>Classes</h2>
-<p><table width="100%" class="annotated">
+<p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><th><a href="qabstractsocket.html">QAbstractSocket</a></th><td>The base functionality common to all socket types</td></tr>
-<tr valign="top" class="even"><th><a href="qftp.html">QFtp</a></th><td>Implementation of the client side of FTP protocol</td></tr>
-<tr valign="top" class="odd"><th><a href="qhostaddress.html">QHostAddress</a></th><td>IP address</td></tr>
-<tr valign="top" class="even"><th><a href="qhostinfo.html">QHostInfo</a></th><td>Static functions for host name lookups</td></tr>
-<tr valign="top" class="odd"><th><a href="qhttp.html">QHttp</a></th><td>Implementation of the HTTP protocol</td></tr>
-<tr valign="top" class="even"><th><a href="qhttpheader.html">QHttpHeader</a></th><td>Header information for HTTP</td></tr>
-<tr valign="top" class="odd"><th><a href="qhttprequestheader.html">QHttpRequestHeader</a></th><td>Request header information for HTTP</td></tr>
-<tr valign="top" class="even"><th><a href="qhttpresponseheader.html">QHttpResponseHeader</a></th><td>Response header information for HTTP</td></tr>
-<tr valign="top" class="odd"><th><a href="qnetworkaddressentry.html">QNetworkAddressEntry</a></th><td>Stores one IP address supported by a network interface, along with its associated netmask and broadcast address</td></tr>
-<tr valign="top" class="even"><th><a href="qnetworkinterface.html">QNetworkInterface</a></th><td>Listing of the host's IP addresses and network interfaces</td></tr>
-<tr valign="top" class="odd"><th><a href="qnetworkproxy.html">QNetworkProxy</a></th><td>Network layer proxy</td></tr>
+<tr valign="top" class="even"><th><a href="qauthenticator.html">QAuthenticator</a></th><td>Authentication object</td></tr>
+<tr valign="top" class="odd"><th><a href="qftp.html">QFtp</a></th><td>Implementation of the client side of FTP protocol</td></tr>
+<tr valign="top" class="even"><th><a href="qhostaddress.html">QHostAddress</a></th><td>IP address</td></tr>
+<tr valign="top" class="odd"><th><a href="qhostinfo.html">QHostInfo</a></th><td>Static functions for host name lookups</td></tr>
+<tr valign="top" class="even"><th><a href="qhttp.html">QHttp</a></th><td>Implementation of the HTTP protocol</td></tr>
+<tr valign="top" class="odd"><th><a href="qhttpheader.html">QHttpHeader</a></th><td>Header information for HTTP</td></tr>
+<tr valign="top" class="even"><th><a href="qhttprequestheader.html">QHttpRequestHeader</a></th><td>Request header information for HTTP</td></tr>
+<tr valign="top" class="odd"><th><a href="qhttpresponseheader.html">QHttpResponseHeader</a></th><td>Response header information for HTTP</td></tr>
+<tr valign="top" class="even"><th><a href="qnetworkaddressentry.html">QNetworkAddressEntry</a></th><td>Stores one IP address supported by a network interface, along with its associated netmask and broadcast address</td></tr>
+<tr valign="top" class="odd"><th><a href="qnetworkinterface.html">QNetworkInterface</a></th><td>Listing of the host's IP addresses and network interfaces</td></tr>
+<tr valign="top" class="even"><th><a href="qnetworkproxy.html">QNetworkProxy</a></th><td>Network layer proxy</td></tr>
+<tr valign="top" class="odd"><th><a href="qsslcertificate.html">QSslCertificate</a></th><td>Convenient API for an X509 certificate</td></tr>
+<tr valign="top" class="even"><th><a href="qsslcipher.html">QSslCipher</a></th><td>Represents an SSL cryptographic cipher</td></tr>
+<tr valign="top" class="odd"><th><a href="qsslerror.html">QSslError</a></th><td>SSL error</td></tr>
+<tr valign="top" class="even"><th><a href="qsslkey.html">QSslKey</a></th><td>Interface for private and public keys</td></tr>
+<tr valign="top" class="odd"><th><a href="qsslsocket.html">QSslSocket</a></th><td>SSL encrypted socket for both clients and servers</td></tr>
 <tr valign="top" class="even"><th><a href="qtcpserver.html">QTcpServer</a></th><td>TCP-based server</td></tr>
 <tr valign="top" class="odd"><th><a href="qtcpsocket.html">QTcpSocket</a></th><td>TCP socket</td></tr>
 <tr valign="top" class="even"><th><a href="qudpsocket.html">QUdpSocket</a></th><td>UDP socket</td></tr>
@@ -41,7 +52,6 @@
 </table></p>
 <a name="details"></a>
 <h2>Detailed Description</h2>
-<p>The QtNetwork module offers classes that allow you to write TCP/IP clients and servers.</p>
 <p>The network module provides classes to make network programming easier and portable. It offers both high-level classes such as <a href="qhttp.html">QHttp</a> and <a href="qftp.html">QFtp</a> that implement specific application-level protocols, and lower-level classes such as <a href="qtcpsocket.html">QTcpSocket</a>, <a href="qtcpserver.html">QTcpServer</a>, and <a href="qudpsocket.html">QUdpSocket</a>.</p>
 <p>The QtNetwork module is part of the <a href="commercialeditions.html#qt-console-edition">Qt Console Edition</a>, the <a href="commercialeditions.html#qt-desktop-edition">Qt Desktop Edition</a>, and the <a href="opensourceedition.html">Qt Open Source Edition</a>.</p>
 <p>Topics:</p>
@@ -80,8 +90,8 @@
 <p>A TCP connection must be established to a remote host and port before any data transfer can begin. Once the connection has been established, the IP address and port of the peer are available through <a href="qabstractsocket.html#peerAddress">QTcpSocket::peerAddress</a>() and <a href="qabstractsocket.html#peerPort">QTcpSocket::peerPort</a>(). At any time, the peer can close the connection, and data transfer will then stop immediately.</p>
 <p><a href="qtcpsocket.html">QTcpSocket</a> works asynchronously and emits signals to report status changes and errors, just like <a href="qhttp.html">QHttp</a> and <a href="qftp.html">QFtp</a>. It relies on the event loop to detect incoming data and to automatically flush outgoing data. You can write data to the socket using <a href="qiodevice.html#write">QTcpSocket::write</a>(), and read data using <a href="qiodevice.html#read">QTcpSocket::read</a>(). <a href="qtcpsocket.html">QTcpSocket</a> represents two independent streams of data: one for reading and one for writing.</p>
 <p>Since <a href="qtcpsocket.html">QTcpSocket</a> inherits <a href="qiodevice.html">QIODevice</a>, you can use it with <a href="qtextstream.html">QTextStream</a> and <a href="qdatastream.html">QDataStream</a>. When reading from a <a href="qtcpsocket.html">QTcpSocket</a>, you must make sure that enough data is available by calling <a href="qabstractsocket.html#bytesAvailable">QTcpSocket::bytesAvailable</a>() beforehand.</p>
-<p>If you need to handle incoming TCP connections (e.g., in a server application), use the <a href="qtcpserver.html">QTcpServer</a> class. Call <a href="qtcpserver.html#listen">QTcpServer::listen</a>() to set up the server, and connect to the <a href="qtcpserver.html#newConnection">QTcpServer::newConnection</a>() signal, which is emitted once for every client that connects. In your slot, call <a href="qtcpserver.html#nextPendingConnection">QTcpServer::nextPendingConnection</a>() to accept the connection and use the returned <a href="qtcpsocket.html">QTcpSocket</a> to communicate with the client.</p>
-<p>Although most of its functions work asynchronously, it's possible to use <a href="qtcpsocket.html">QTcpSocket</a> synchronously (i.e., blocking). To get blocking behavior, call <a href="qtcpsocket.html">QTcpSocket</a>'s waitFor...() functions; these suspend the calling thread until a signal has been emitted. For example, after calling the non-blocking <a href="qabstractsocket.html#connectToHost">QTcpSocket::connectToHost</a>() function, call <a href="qabstractsocket.html#waitForConnected">QTcpSocket::waitForConnected</a>() to block the thread until the <a href="qabstractsocket.html#connected">connected()</a> signal has been emitted.</p>
+<p>If you need to handle incoming TCP connections (e.g&#x2e;, in a server application), use the <a href="qtcpserver.html">QTcpServer</a> class. Call <a href="qtcpserver.html#listen">QTcpServer::listen</a>() to set up the server, and connect to the <a href="qtcpserver.html#newConnection">QTcpServer::newConnection</a>() signal, which is emitted once for every client that connects. In your slot, call <a href="qtcpserver.html#nextPendingConnection">QTcpServer::nextPendingConnection</a>() to accept the connection and use the returned <a href="qtcpsocket.html">QTcpSocket</a> to communicate with the client.</p>
+<p>Although most of its functions work asynchronously, it's possible to use <a href="qtcpsocket.html">QTcpSocket</a> synchronously (i.e&#x2e;, blocking). To get blocking behavior, call <a href="qtcpsocket.html">QTcpSocket</a>'s waitFor...() functions; these suspend the calling thread until a signal has been emitted. For example, after calling the non-blocking <a href="qabstractsocket.html#connectToHost">QTcpSocket::connectToHost</a>() function, call <a href="qabstractsocket.html#waitForConnected">QTcpSocket::waitForConnected</a>() to block the thread until the <a href="qabstractsocket.html#connected">connected()</a> signal has been emitted.</p>
 <p>Synchronous sockets often lead to code with a simpler flow of control. The main disadvantage of the waitFor...() approach is that events won't be processed while a waitFor...() function is blocking. If used in the GUI thread, this might freeze the application's user interface. For this reason, we recommend that you use synchronous sockets only in non-GUI threads. When used synchronously, <a href="qtcpsocket.html">QTcpSocket</a> doesn't require an event loop.</p>
 <p>The <a href="network-fortuneclient.html">Fortune Client</a> and <a href="network-fortuneserver.html">Fortune Server</a> examples show how to use <a href="qtcpsocket.html">QTcpSocket</a> and <a href="qtcpserver.html">QTcpServer</a> to write TCP client-server applications. See also <a href="network-blockingfortuneclient.html">Blocking Fortune Client</a> for an example on how to use a synchronous <a href="qtcpsocket.html">QTcpSocket</a> in a separate thread (without using an event loop), and <a href="network-threadedfortuneserver.html">Threaded Fortune Server</a> for an example of a multithreaded TCP server with one thread per active client.</p>
 <a name="using-udp-with-qudpsocket"></a>
@@ -105,6 +115,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

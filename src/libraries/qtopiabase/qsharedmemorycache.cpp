@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -52,7 +52,7 @@ void cleanup_pixmap_cache();
 
 // Only define this if there really isn't going to be enough room for
 // a full cache, in which case it really means the cache is set too large
-// for the system, instead consider making the cache smalled.
+// for the system, instead consider making the cache smaller.
 #undef WHEN_APP_CLOSES_DESTROY_ANY_PIXMAPS_WITH_ZERO_REFERENCES
 
 #include <QApplication>
@@ -208,6 +208,7 @@ public:
     QSMCacheItemPtr newItem(const char *key, int size, int type);
     QSMCacheItemPtr findItem(const char *key, bool ref, int type);
     void freeItem(QSMCacheItem *item) {
+
         CHECK_CONSISTENCY("Pre free item");
         CHECK_CACHE_CONSISTENCY();
         {
@@ -422,8 +423,8 @@ void cleanUpCacheSignalHandler(int sig)
 #endif // USE_EVIL_SIGNAL_HANDLERS
 
 
-typedef void (*_qt_image_cleanup_hook)(int);
-extern _qt_image_cleanup_hook qt_image_cleanup_hook;
+typedef void (*_qt_image_cleanup_hook_64)(qint64);
+extern _qt_image_cleanup_hook_64 qt_image_cleanup_hook_64;
 
 // Attach/create shared memory cache
 QSharedMemoryManager::QSharedMemoryManager()
@@ -435,8 +436,13 @@ QSharedMemoryManager::QSharedMemoryManager()
 
     QString tmp = Qtopia::tempDir() + "sharedCache";
     QFile f(tmp);
-    f.open(QIODevice::WriteOnly);
-    f.close();
+    if ( !f.exists() ) {
+        if (!f.open(QIODevice::WriteOnly))
+            qFatal("%s creating shared memory key file %s",
+                    ( f.error() == QFile::PermissionsError, "Permissions error",
+                      "Error" ), qPrintable(tmp));
+        f.close();
+    }
 
     QByteArray ipcFile = tmp.toLatin1();
     key_t key = ftok(ipcFile.data(), 0xEEDDCCC2);
@@ -467,7 +473,7 @@ QSharedMemoryManager::QSharedMemoryManager()
 #endif
     }
 
-    if ( shmId == -1 || (int)shm == -1 )
+    if ( shmId == -1 || (long)shm == -1 )
         qFatal("Cannot attach to shared memory");
 
     qt_sharedMemoryData = shm->data;
@@ -484,8 +490,8 @@ QSharedMemoryManager::QSharedMemoryManager()
         shm->tail.setFree(false);
         shm->tail.setNextFree(QSMemPtr());
 #ifdef THROW_AWAY_UNUSED_PAGES
-        int freePageStart = PAGE_ALIGN((int)&shm->first + sizeof(QSMemNode));
-        int freePagesLength = PAGE_ALIGN((int)&shm->tail) - freePageStart;
+        long freePageStart = PAGE_ALIGN((long)&shm->first + sizeof(QSMemNode));
+        long freePagesLength = PAGE_ALIGN((long)&shm->tail) - freePageStart;
         if ( freePagesLength ) {
             if ( madvise((void*)freePageStart, freePagesLength, MADV_DONTNEED) ) {
                 perror("madvise of shared memory");
@@ -510,20 +516,22 @@ QSharedMemoryManager::QSharedMemoryManager()
             oldHandlers[i] = 0;
     }
 #endif // USE_EVIL_SIGNAL_HANDLERS
-    if (!qt_image_cleanup_hook) {
+    if (!qt_image_cleanup_hook_64) {
         qLog(SharedMemCache) << "Setup image cleanup hook";
-        qt_image_cleanup_hook = QSharedMemoryManager::derefSharedMemoryPixmap;
-    }
+        qt_image_cleanup_hook_64 = QSharedMemoryManager::derefSharedMemoryPixmap;
+    } 
 }
 
 
 QSharedMemoryManager::~QSharedMemoryManager()
 {
+    delete cache;
     // Detach from shared memory
     if ( qApp->type() == QApplication::GuiServer )
         shmctl(shmId, IPC_RMID, 0); // Mark for deletion
     shmdt((char*)shm);
     shm = 0;
+    delete l;
 }
 
 
@@ -715,8 +723,8 @@ void QSharedMemoryManager::internal_free(QSMemPtr ptr)
     node = newFreeNode->next();
 
 #ifdef THROW_AWAY_UNUSED_PAGES
-    int freePageStart = PAGE_ALIGN((int)newFreeNode+sizeof(QSMemNode));
-    int freePagesLength = PAGE_ALIGN((int)node) - freePageStart;
+    long freePageStart = PAGE_ALIGN((long)newFreeNode+sizeof(QSMemNode));
+    long freePagesLength = PAGE_ALIGN((long)node) - freePageStart;
     if ( freePagesLength ) {
         if ( madvise((void*)freePageStart, freePagesLength, MADV_DONTNEED) ) {
             perror("madvise of shared memory");
@@ -956,9 +964,11 @@ public:
     //uint    mostRecentId; // relative age of the pixmap
 };
 
-void QSharedMemoryManager::derefSharedMemoryPixmap(int ser_no)
+void QSharedMemoryManager::derefSharedMemoryPixmap(qint64 s)
 {
-    if (qt_getSMManager()->localSerialMap.contains(ser_no)) {
+    int ser_no = s >> 32;
+
+    if (qt_SMManager && qt_getSMManager()->localSerialMap.contains(ser_no)) {
         QSMCacheItemPtr item(qt_getSMManager()->localSerialMap[ser_no]);
         item.deref();
         qt_getSMManager()->localSerialMap.remove(ser_no);
@@ -1109,7 +1119,7 @@ void QSharedMemoryManager::removePixmap(const QString &key)
     space is made available by removing unneeded pixmaps from the global
     cache, or by deleting all references to the global pixmap's data.
 
-    \sa QPixmapCache, QPixmap
+    \sa QPixmapCache, QPixmap, QGLOBAL_PIXMAP_CACHE_LIMIT
     \ingroup multimedia
 */
 
@@ -1202,6 +1212,12 @@ bool QGlobalPixmapCache::insert( const QString &key, const QPixmap &pixmap)
     Space in the global cache will not be reclaimed unless remove() is called
     on pixmaps that are not required or all pixmaps referencing the global
     pixmap data are deleted.
+
+    Note that calling remove marks the image for removal, but may not 
+    necessarily remove it until some time later.  Other callers are permitted
+    to re-reference the pixmap until that time.  Consequently, the mere 
+    presence of an image in the global pixmap cache should not be used to 
+    indicate application state.
 */
 void QGlobalPixmapCache::remove( const QString &key )
 {

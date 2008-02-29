@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -52,11 +67,11 @@ public:
     ~Ui3Reader();
 
     void computeDeps(const QDomElement &e, QStringList &globalIncludes, QStringList &localIncludes, bool impl = false);
-    void generateUi4(const QString &fn, const QString &outputFn, QDomDocument doc);
+    void generateUi4(const QString &fn, const QString &outputFn, QDomDocument doc, bool implicitIncludes);
 
     void generate(const QString &fn, const QString &outputFn,
          QDomDocument doc, bool decl, bool subcl, const QString &trm,
-         const QString& subclname, bool omitForwardDecls);
+         const QString& subclname, bool omitForwardDecls, bool implicitIncludes, const QString &convertedUiFile);
 
     void embed(const char *project, const QStringList &images);
 
@@ -64,8 +79,10 @@ public:
     void setForwardDeclarationsEnabled(bool b);
     void setOutputFileName(const QString &fileName);
 
-    void createFormDecl(const QDomElement &e);
+    void createFormDecl(const QDomElement &e, bool implicitIncludes);
     void createFormImpl(const QDomElement &e);
+
+    void createWrapperDecl(const QDomElement &e, const QString &convertedUiFile);
 
     void createSubDecl(const QDomElement &e, const QString& subclname);
     void createSubImpl(const QDomElement &e, const QString& subclname);
@@ -89,8 +106,12 @@ public:
 
     QDomElement parse(const QDomDocument &doc);
 
+    void setExtractImages(bool extract, const QString &qrcOutputFile);
+
 private:
     void init();
+
+    void createWrapperDeclContents(const QDomElement &e);
 
     void errorInvalidProperty(const QString &propertyName, const QString &widgetName, const QString &widgetClass,
                               int line, int col);
@@ -99,7 +120,7 @@ private:
     void errorInvalidSlot(const QString &slot, const QString &widgetName, const QString &widgetClass,
                           int line, int col);
 
-    DomUI *generateUi4(const QDomElement &e);
+    DomUI *generateUi4(const QDomElement &e, bool implicitIncludes);
     DomWidget *createWidget(const QDomElement &w, const QString &widgetClass = QString());
     void createProperties(const QDomElement &e, QList<DomProperty*> *properties, const QString &className);
     void createAttributes(const QDomElement &e, QList<DomProperty*> *properties, const QString &className);
@@ -196,6 +217,10 @@ private:
 
     QMap<QString, bool> candidateCustomWidgets;
     Porting *m_porting;
+
+    bool m_extractImages;
+    QString m_qrcOutputFile;
+    QMap<QString, QString> m_imageMap;
 };
 
 #endif // UI3READER_H

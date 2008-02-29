@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,9 +22,19 @@
 #ifndef PIMSQLIO_PRIVATE_H
 #define PIMSQLIO_PRIVATE_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qtopia API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <qcategorymanager.h>
 #include <qtopia/pim/qpimrecord.h>
-#include <QSqlQuery>
 #include <QSqlRecord>
 #include <QSqlError>
 #include <QDateTime>
@@ -35,90 +45,8 @@
 
 class QFile;
 class QTimer;
-
-class QPreparedSqlQuery
-{
-public:
-    QPreparedSqlQuery();
-    QPreparedSqlQuery(const QString &statement);
-    ~QPreparedSqlQuery();
-
-    QSqlQuery & operator*() const { return *mQuery; }
-    QSqlQuery * operator->() const { return mQuery; }
-    operator QSqlQuery*() const { return mQuery; }
-
-    bool isValid() const;
-
-    bool prepare();
-    bool prepare(const QString &);
-    void reset();
-    void clear();
-
-    // other wrapped calls to QSqlQuery
-    void addBindValue( const QVariant & val, QSql::ParamType paramType = QSql::In )
-    { mQuery->addBindValue(val, paramType); }
-    int at() const
-    { return mQuery->at(); }
-    void bindValue( const QString & placeholder, const QVariant & val, QSql::ParamType paramType = QSql::In )
-    { mQuery->bindValue(placeholder, val, paramType); }
-    void bindValue( int pos, const QVariant & val, QSql::ParamType paramType = QSql::In )
-    { mQuery->bindValue(pos, val, paramType); }
-    QVariant boundValue( const QString & placeholder ) const
-    { return mQuery->boundValue(placeholder); }
-    QVariant boundValue( int pos ) const
-    { return mQuery->boundValue(pos); }
-    QMap<QString, QVariant> boundValues() const
-    { return mQuery->boundValues(); }
-    const QSqlDriver * driver() const
-    { return mQuery->driver(); }
-    bool exec()
-    { return mQuery->exec(); }
-    QString executedQuery() const
-    { return mQuery->executedQuery(); }
-    bool first()
-    { return mQuery->first(); }
-    bool last()
-    { return mQuery->last(); }
-    bool isActive() const
-    { return mQuery->isActive(); }
-    bool isForwardOnly() const
-    { return mQuery->isForwardOnly(); }
-    bool isNull( int field ) const
-    { return mQuery->isNull(field); }
-    bool isSelect() const
-    { return mQuery->isSelect(); }
-
-    QSqlError lastError() const
-    { return mQuery->lastError(); }
-    QVariant lastInsertId() const
-    { return mQuery->lastInsertId(); }
-    QString lastQuery() const
-    { return mQuery->lastQuery(); }
-    bool next()
-    { return mQuery->next(); }
-    int numRowsAffected() const
-    { return mQuery->numRowsAffected(); }
-    bool previous()
-    { return mQuery->previous(); }
-    QSqlRecord record() const
-    { return mQuery->record(); }
-    const QSqlResult * result() const
-    { return mQuery->result(); }
-    bool seek( int index, bool relative = false )
-    { return mQuery->seek(index, relative); }
-    int size() const
-    { return mQuery->size(); }
-    QVariant value( int index ) const
-    { return mQuery->value(index); }
-
-private:
-    void buildQuery();
-    QSqlQuery *mQuery;
-    uint mHash;
-    QString mStatement;
-};
-
 class QPimSource;
+class QPimQueryCache;
 class QTOPIA_AUTOTEST_EXPORT QPimSqlIO {
 public:
     QPimSqlIO(const QUuid &scope, const char *table, const char *catTable,
@@ -162,6 +90,8 @@ protected:
     bool contains(const QUniqueId & tid) const;
     int count() const;
 
+    void setSimpleQueryCache(QPimQueryCache *cache) { model.setSimpleQueryCache(cache); }
+
     void setContextFilter(const QSet<int> &, ContextFilterType);
 
     /* convenience functions, change sets to invalidate cache? */
@@ -170,6 +100,7 @@ protected:
 
     void setFilter(const QString &filter) { model.setFilter(filter); invalidateCache();}
     void setFilters(const QStringList &list) { model.setFilters(list); invalidateCache();}
+    void clearFilter() { model.setFilters(QStringList()); invalidateCache(); }
     QStringList filters() const { return model.filters(); }
 
     void setJoins(const QStringList &list) { model.setJoins(list); invalidateCache();}
@@ -183,6 +114,10 @@ protected:
     QUniqueId addRecord(const QPimRecord &, int, bool = true);
 
 
+    QString selectText(const QStringList &list = QStringList()) const
+    { return model.selectText(list); }
+    QString selectText(const QString &field, const QStringList &list = QStringList()) const
+    { return model.selectText(field, list); }
 protected:
     QSqlPimTableModel model;
     QDateTime mSyncTime;
@@ -191,7 +126,7 @@ protected:
     virtual bool insertExtraTables(uint, const QPimRecord &);
     virtual bool removeExtraTables(uint);
 
-    virtual void bindFields(const QPimRecord &r, QSqlQuery &) const = 0;
+    virtual void bindFields(const QPimRecord &r, QPreparedSqlQuery &) const = 0;
 
     void retrieveRecord(uint, QPimRecord &) const;
 

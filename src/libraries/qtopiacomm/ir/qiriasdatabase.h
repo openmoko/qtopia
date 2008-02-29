@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,7 +22,9 @@
 #ifndef __QIRIASDATABASE_H__
 #define __QIRIASDATABASE_H__
 
-class QIrIasDatabase
+#include <qirglobal.h>
+
+class QIR_EXPORT QIrIasDatabase
 {
 public:
     static bool setAttribute(const QString &className,

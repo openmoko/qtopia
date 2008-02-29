@@ -32,7 +32,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The ThemeListModelEntry class implements a single theme list entry in a <a href="themelistmodel.html">ThemeListModel</a>.</p>
-<p>The ThemeListModelEntry has a <a href="themelistmodelentry.html#uid">uid</a>() and a <a href="themelistmodelentry.html#type">type</a>(), which are used by <a href="themelistmodelentry.html#templateInstance">templateInstance</a>() to associate a single template instance to this entry. The ThemeListModelEntry stores this template instance internally and can be retrieved using templateInstnace().</p>
+<p>The ThemeListModelEntry has a <a href="themelistmodelentry.html#uid">uid</a>() and a <a href="themelistmodelentry.html#type">type</a>(), which are used by <a href="themelistmodelentry.html#templateInstance">templateInstance</a>() to associate a single template instance to this entry. The ThemeListModelEntry stores this template instance internally and can be retrieved using <a href="themelistmodelentry.html#templateInstance">templateInstance</a>().</p>
 <p>This class must be subclassed and the pure virtual <a href="themelistmodelentry.html#type">type</a>() function reimplemented to return the appropriate value.</p>
 <p>See also <a href="themelistmodel.html">ThemeListModel</a>, <a href="themetemplateitem.html">ThemeTemplateItem</a>, and <a href="themetemplateinstanceitem.html">ThemeTemplateInstanceItem</a>.</p>
 <hr />
@@ -40,7 +40,7 @@
 <h3 class="fn"><a name="ThemeListModelEntry"></a>ThemeListModelEntry::ThemeListModelEntry ( <a href="themelistmodel.html">ThemeListModel</a> * <i>model</i> )</h3>
 <p>Constructs a <a href="themelistmodelentry.html">ThemeListModelEntry</a> an associates it with the given <i>model</i>.</p>
 <h3 class="fn"><a name="dtor.ThemeListModelEntry"></a>ThemeListModelEntry::~ThemeListModelEntry ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Destroys the <a href="themelistmodelentry.html">ThemeListModelEntry</a>. Any associated theme template instance is deleted.</p>
+<p>Destroys the <a href="themelistmodelentry.html">ThemeListModelEntry</a>.</p>
 <h3 class="fn"><a name="model"></a><a href="themelistmodel.html">ThemeListModel</a> * ThemeListModelEntry::model () const</h3>
 <p>Returns the parent <a href="themelistmodel.html">ThemeListModel</a> instance associated with this entry.</p>
 <h3 class="fn"><a name="setValue"></a>void ThemeListModelEntry::setValue ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i> )</h3>
@@ -60,6 +60,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

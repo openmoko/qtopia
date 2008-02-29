@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -40,7 +40,7 @@ public:
 
 
         Dialup          = 0x00000004,    //analog dialup
-        GPRS            = 0x00000008,    //GPRS/UMTS/EDGA dialup
+        GPRS            = 0x00000008,    //GPRS/UMTS/EDGE dialup
 #ifdef QTOPIA_CELL
         PhoneModem      = 0x00000010,    //network device builtin into the device (Phone Edition only)
 #endif
@@ -50,9 +50,10 @@ public:
 
         Bluetooth       = 0x00001000,    //general Bluetooth marker
         BluetoothDUN    = 0X00002000,    //Dial-up Networking profile (DNP) client for Bluetooth
-        //BluetoothPAN    = 0x00008000,    //Personal Area Network profile (PAN) client for Bluetooth
-        //BluetoothPAND   = 0x00010000,    //Personal Area Network profile (PAN) client for Bluetooth
+        BluetoothPAN    = 0x00004000,    //Personal Area Network profile (PAN) client for Bluetooth
 
+        Custom          = 0x20000000,    //Customised type -> cfg must match plugin exactly 
+                                         //(see QtopiaNetworkFactoryIface::customID() for more details)
         Hidden          = 0x10000000,    //hidden network interface
         Any             = 0x00000000     //unknown type
     };

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,16 +21,13 @@
 #ifndef MINESWEEP_H
 #define MINESWEEP_H
 
-#include <qmainwindow.h>
-#include <qdatetime.h>
-#include <qpixmap.h>
+#include <QMainWindow>
 
 class MineField;
-class QLCDNumber;
-class QPushButton;
-class QMenu;
 class QScrollArea;
 class QHBoxLayout;
+class QEvent;
+class ResultIndicator;
 
 class MineSweep : public QMainWindow
 {
@@ -42,42 +39,25 @@ public:
 public slots:
     void gameOver( bool won );
     void newGame();
-    void showPoint(QPoint);
+    void showPoint(int x, int y);
 
 protected slots:
-    void setCounter( int );
-    void updateTime();
-
     void beginner();
     void advanced();
     void expert();
     void closeEvent(QCloseEvent *);
     void resizeEvent(QResizeEvent*);
-
-private slots:
-    void startPlaying();
+    bool eventFilter(QObject *obj, QEvent *event);
 
 protected:
     QScrollArea *scroll;
-    QWidget *layoutHolder;
-    QHBoxLayout *layout;
-    MineField*  field;
+    MineField* field;
+    ResultIndicator *resultIndicator;
 
 private:
     void readConfig();
     void writeConfig() const;
-
     void newGame(int);
-#ifndef QTOPIA_PHONE
-    QLCDNumber* guessLCD;
-    QLCDNumber* timeLCD;
-    QPushButton* newGameButton;
-
-    QDateTime starttime;
-    QTimer* timer;
-
-    QPixmap mNewPM, mHappyPM, mDeadPM, mWorriedPM;
-#endif
 };
 
 #endif // MINESWEEP_H

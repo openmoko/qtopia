@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,14 +23,13 @@
 #include <QSettings>
 #include <QVBoxLayout>
 #include <qcontent.h>
-#include <qmimetype.h>
 #include <qtopialog.h>
 #include <qsoftmenubar.h>
 #include <QtopiaChannel>
 #include <QDataStream>
 #include <QExpressionEvaluator>
+//#include <QtopiaServiceHistoryModel>
 #include "launcherview.h"
-#include "documentview.h"
 #include <QAction>
 #include <QMenu>
 #include <QDesktopWidget>
@@ -41,17 +40,19 @@
 #include "applicationmonitor.h"
 #include "contentserver.h"
 #include "messagebox.h"
-#include <qexportedbackground.h>
 #include "qtopiaserverapplication.h"
 #include "contentsetlauncherview.h"
-#include "qperformancelog.h"
+#include <QPerformanceLog>
+#include "documentview.h"
+#include "hierarchicaldocumentview.h"
+#include "runningapplicationsviewitem.h"
 
 // define LazyContentStack
 LazyContentStack::LazyContentStack(Flags lcsFlags, QWidget *parent,
                                    Qt::WFlags wflags)
 : QWidget(parent, wflags), m_flags(lcsFlags)
 {
-    connect( &monitor, SIGNAL(applicationStateChanged(const QString &, UIApplicationMonitor::ApplicationState)), this, SLOT(appStateChanged(const QString &)) );
+    connect( &monitor, SIGNAL(applicationStateChanged(QString,UIApplicationMonitor::ApplicationState)), this, SLOT(appStateChanged(QString)) );
 }
 
 void LazyContentStack::reset()
@@ -74,6 +75,11 @@ void LazyContentStack::showView(const QString &view)
     } else {
         addView(view, false);
     }
+}
+
+QString LazyContentStack::currentView() const
+{
+    return m_viewStack.top();
 }
 
 void LazyContentStack::back()
@@ -311,7 +317,7 @@ void PhoneBrowserStack::busy(const QContent &content)
     else if(stack->currentWidget() == phoneLauncher)
         phoneLauncher->setBusy(true);
 
-    emit applicationLaunched(content.file());
+    emit applicationLaunched(content.fileName());
 }
 
 void PhoneBrowserStack::notBusy()
@@ -353,22 +359,6 @@ LauncherView *PhoneBrowserStack::createAppView(const QString &category)
     tv.view = new ApplicationLauncherView(categoryId, stack);
     tv.view->setObjectName(category);
 
-    if ( category == "Applications" )
-    {
-        QCategoryManager manager("Applications");
-        // For new code a more unique id should be used instead of using the untranslated text
-        // eg. ensureSystemCategory("com.mycompany.myapp.mycategory", "My Category");
-        manager.ensureSystemCategory( "Packages", "Packages", "qpe/AppsIcon" );
-        QContent *content = new QContent();
-        content->setType("Folder/Packages");
-        content->setName( tr("Installed Apps"));
-        content->setRole(QContent::Application);
-        content->setIcon( "qpe/AppsIcon" );
-
-        tv.view->addItem( content, true );
-        delete content;
-    }
-
     QFont f(font());
     f.setWeight(QFont::Bold);
     tv.view->setFont(f);
@@ -387,7 +377,12 @@ LauncherView * PhoneBrowserStack::addType(const QString& type, const QString& na
 {
     TypeView tv;
     if("Documents" == type) {
-        tv.view = new DocumentLauncherView(this);
+#ifdef ENABLE_HIERARCHICAL_DOCUMENT_VIEW
+        tv.view = new HierarchicalDocumentLauncherView (this, 0);
+#else
+        tv.view = new DocumentLauncherView(this, 0);
+#endif
+        tv.view->setObjectName(type);
     } else if("Running" == type) {
         tv.view = new RunningAppsLauncherView(this);
     } else {
@@ -399,7 +394,6 @@ LauncherView * PhoneBrowserStack::addType(const QString& type, const QString& na
     f.setWeight(QFont::Bold);
     tv.view->setFont(f);
     tv.view->setViewMode(QListView::ListMode);
-    tv.view->setObjectName(type);
 
     tv.name = name;
     tv.icon = icon;
@@ -448,7 +442,7 @@ void PhoneBrowserStack::showType(const QString &type)
 // define PhoneMainMenu
 PhoneMainMenu::PhoneMainMenu(QSettings &config, QWidget * parent)
 : PhoneLauncherView(config.value("Menu/Rows", 3).toInt(),
-                    config.value("Menu/Colums", 3).toInt(),
+                    config.value("Menu/Columns", 3).toInt(),
                     config.value("Menu/Map", "123456789").toString(),
                     config.value("Menu/Animator","").toString(),
                     config.value("Menu/AnimatorBackground","").toString(),
@@ -487,7 +481,7 @@ void PhoneMainMenu::makeLauncherMenu(QSettings &cfg)
     const int menuc = cfg.value("Columns",3).toInt();
     menuKeyMap = cfg.value("Map","123456789").toString();
 
-    QPerformanceLog("UI") << "Creating PhoneMainMenu";
+    QPerformanceLog("UI") << QPerformanceLog::Begin << "PhoneMainMenu create";
 
     qLog(UI) << "PhoneMainMenu:";
     qLog(UI) << "    " << menur << "x" << menuc;
@@ -572,7 +566,7 @@ void PhoneMainMenu::makeLauncherMenu(QSettings &cfg)
     // just to get help for the main menu
     (void)QSoftMenuBar::menuFor(this);
 
-    QPerformanceLog("UI") << "PhoneMainMenu created";
+    QPerformanceLog("UI") << QPerformanceLog::End << "PhoneMainMenu create";
 
     cfg.endGroup();
 }
@@ -730,20 +724,47 @@ QString PhoneBrowserStack::currentName() const
     return QString();
 }
 
-// define RunningAppsLauncherView
+
+/*
+    The RunningAppsLauncherView talks over IPC to the
+    RunningApplicationsViewItem class in src/server/phone/runningapplicationsviewitem.h.
+*/
+
+const QString RunningAppsLauncherView::LAUNCH_MSG_PREFIX = "launch_";
+
 RunningAppsLauncherView::RunningAppsLauncherView(QWidget *parent)
 : LauncherView(parent)
 {
+    setObjectName(QLatin1String("taskmanager"));
+    (void)QSoftMenuBar::menuFor(this); // ensure help
+
     contentSet->setSortOrder(QStringList());
-    
-    QContent *home = new QContent;
-    home->setName(tr("Home"));
-    home->setType("Ipc/QPE/System::showHomeScreen()");
-    home->setIcon("home");
-    addItem(home, false);
-    
+
+    m_channel = new QtopiaChannel("QPE/RunningAppsLauncherViewService");
+    connect(m_channel, SIGNAL(received(QString,QByteArray)),
+            SLOT(receivedLauncherServiceMessage(QString,QByteArray)));
+
+    RunningApplicationsViewItem *homeItem =
+            new RunningApplicationsViewItem(tr("Home"), "home", this);
+    connect(homeItem, SIGNAL(activated()), SLOT(activatedHomeItem()));
+    homeItem->show();
+
     applicationStateChanged();
-    QObject::connect(&monitor, SIGNAL(applicationStateChanged(const QString &, UIApplicationMonitor::ApplicationState)), this, SLOT(applicationStateChanged()));
+    QObject::connect(&monitor, SIGNAL(applicationStateChanged(QString,UIApplicationMonitor::ApplicationState)), this, SLOT(applicationStateChanged()));
+
+    QtopiaChannel::send(m_channel->channel(), "runningApplicationsViewLoaded()");
+}
+
+RunningAppsLauncherView::~RunningAppsLauncherView()
+{
+    QList<QString> keys = m_dynamicallyAddedItems.keys();
+    for (int i=0; i<keys.size(); i++)
+        delete m_dynamicallyAddedItems[keys[i]];
+}
+
+void RunningAppsLauncherView::activatedHomeItem()
+{
+    QtopiaIpcEnvelope env("QPE/System", "showHomeScreen()");
 }
 
 // XXX still need to remove Running apps from display when they all exit
@@ -754,9 +775,13 @@ void RunningAppsLauncherView::applicationStateChanged()
     QStringList apps = monitor.runningApplications();
 
     QContentSetModel csModel(contentSet);
-    for (int i=0; i< csModel.rowCount(); i++)
-        if (csModel.content(i).name() != tr("Home") && !apps.contains(csModel.content(i).executableName()))
-            removeItem(csModel.content(i));
+    for (int i=0; i< csModel.rowCount(); i++) {
+        QContent c = csModel.content(i);
+        if (!m_dynamicallyAddedItems.contains(c.type()) &&
+             !apps.contains(c.executableName())) {
+            removeItem(c);
+        }
+    }
 
     QContentFilter filter(QContent::Application);
     QContentSet set(filter);
@@ -769,6 +794,82 @@ void RunningAppsLauncherView::applicationStateChanged()
     //resetSelection();
 }
 
+void RunningAppsLauncherView::receivedLauncherServiceMessage(const QString &msg, const QByteArray &args)
+{
+    if (msg == QLatin1String("addDynamicLauncherItem(int,QString,QString)")) {
+        QDataStream ds(args);
+        int id;
+        QString name;
+        QString iconPath;
+        ds >> id >> name >> iconPath;
+        addDynamicLauncherItem(id, name, iconPath);
+    } else if (msg == QLatin1String("removeDynamicLauncherItem(int)")) {
+        QDataStream ds(args);
+        int id;
+        ds >> id;
+        removeDynamicLauncherItem(id);
+    } else if (msg.startsWith(LAUNCH_MSG_PREFIX)) {
+        // expect msg to look like "launch_X()" where X is the item's integer ID
+        int launchPrefixLength = LAUNCH_MSG_PREFIX.length();
+        QByteArray bytes;
+        QDataStream ds(&bytes, QIODevice::WriteOnly);
+        int id = msg.mid(launchPrefixLength, msg.length() - launchPrefixLength - 2).toInt();
+        ds << id;
+        QtopiaChannel::send(m_channel->channel(), "activatedLaunchItem(int)", bytes);
+    }
+}
+
+/*
+    Returns the channel/message string that will be used to send an IPC
+    message in order to signal that the item with the given \a itemId should
+    now be launched.
+
+    This string should be set as the "type" for the QContent that corresponds
+    to the given \a itemId.
+*/
+QString RunningAppsLauncherView::itemActivationIpcMessage(int itemId)
+{
+    // make a string like "Ipc/QPE/RunningAppsLauncherViewService/launch_X"
+    // where X is the item's integer ID
+    return QString("Ipc/%1::%2%3()")
+            .arg(m_channel->channel())
+            .arg(LAUNCH_MSG_PREFIX)
+            .arg(itemId);
+}
+
+void RunningAppsLauncherView::addDynamicLauncherItem(int id, const QString &name, const QString &iconPath)
+{
+    QString ipcMsgString = itemActivationIpcMessage(id);
+
+    // remove item if already present
+    if (m_dynamicallyAddedItems.contains(ipcMsgString))
+        removeDynamicLauncherItem(id);
+
+    QContent *c = new QContent;
+    c->setName(name);
+    c->setType(ipcMsgString);
+    c->setIcon(iconPath);
+
+    // Use the type string (i.e. the IPC message) as the key instead of the ID
+    // so the applicationStateChanged() method in this class can easily tell
+    // whether an item a dynamically added launch item, by looking at the
+    // content type().
+    // (The ID is unique, so the IPC message should also be unique among items.)
+    m_dynamicallyAddedItems.insert(ipcMsgString, c);
+
+    addItem(c);
+}
+
+void RunningAppsLauncherView::removeDynamicLauncherItem(int id)
+{
+    QString ipcMsgString = itemActivationIpcMessage(id);
+    if (m_dynamicallyAddedItems.contains(ipcMsgString)) {
+        QContent *c = m_dynamicallyAddedItems.take(ipcMsgString);
+        removeItem(*c);
+        delete c;
+    }
+}
+
 
 /*!
   \class PhoneBrowserScreen
@@ -776,13 +877,14 @@ void RunningAppsLauncherView::applicationStateChanged()
   \ingroup QtopiaServer::PhoneUI
 
   This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+  It is part of the Qtopia server and cannot be used by other Qtopia applications.
 
   \sa QAbstractServerInterface, QAbstractBrowserScreen
 
 */
 
 /*!
-  Constrcuts a new PhoneBrowserScreen instance with the specified \a parent 
+  Constructs a new PhoneBrowserScreen instance with the specified \a parent
   and widget \a flags
   */
 PhoneBrowserScreen::PhoneBrowserScreen(QWidget *parent, Qt::WFlags flags)
@@ -797,7 +899,7 @@ PhoneBrowserScreen::PhoneBrowserScreen(QWidget *parent, Qt::WFlags flags)
                      SIGNAL(applicationLaunched(QString)));
     layout->addWidget(m_stack);
     setFocusPolicy(Qt::NoFocus);
-    setFocusProxy(m_stack);
+//    setFocusProxy(m_stack);
 }
 
 /*!

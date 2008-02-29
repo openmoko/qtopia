@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QListView Class Reference</title>
+  <title>Qt 4.3: QListView Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QListView Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QListView Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+</h1>
 <p>The QListView class provides a list or icon view onto a model. <a href="#details">More...</a></p>
 <pre> #include &lt;QListView&gt;</pre><p>Inherits <a href="qabstractitemview.html">QAbstractItemView</a>.</p>
 <p>Inherited by <a href="qlistwidget.html">QListWidget</a> and <a href="qundoview.html">QUndoView</a>.</p>
@@ -37,9 +38,10 @@
 <li><div class="fn"/><b><a href="qlistview.html#isWrapping-prop">isWrapping</a></b> : bool</li>
 <li><div class="fn"/><b><a href="qlistview.html#layoutMode-prop">layoutMode</a></b> : LayoutMode</li>
 <li><div class="fn"/><b><a href="qlistview.html#modelColumn-prop">modelColumn</a></b> : int</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><b><a href="qlistview.html#movement-prop">movement</a></b> : Movement</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><b><a href="qlistview.html#resizeMode-prop">resizeMode</a></b> : ResizeMode</li>
+<li><div class="fn"/><b><a href="qlistview.html#selectionRectVisible-prop">selectionRectVisible</a></b> : bool</li>
 <li><div class="fn"/><b><a href="qlistview.html#spacing-prop">spacing</a></b> : int</li>
 <li><div class="fn"/><b><a href="qlistview.html#uniformItemSizes-prop">uniformItemSizes</a></b> : bool</li>
 <li><div class="fn"/><b><a href="qlistview.html#viewMode-prop">viewMode</a></b> : ViewMode</li>
@@ -51,7 +53,7 @@
 <li><div class="fn"/>14 properties inherited from <a href="qabstractitemview.html#properties">QAbstractItemView</a></li>
 <li><div class="fn"/>2 properties inherited from <a href="qabstractscrollarea.html#properties">QAbstractScrollArea</a></li>
 <li><div class="fn"/>6 properties inherited from <a href="qframe.html#properties">QFrame</a></li>
-<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -64,6 +66,7 @@
 <li><div class="fn"/>Flow <b><a href="qlistview.html#flow-prop">flow</a></b> () const</li>
 <li><div class="fn"/>QSize <b><a href="qlistview.html#gridSize-prop">gridSize</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qlistview.html#isRowHidden">isRowHidden</a></b> ( int <i>row</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qlistview.html#selectionRectVisible-prop">isSelectionRectVisible</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qlistview.html#isWrapping-prop">isWrapping</a></b> () const</li>
 <li><div class="fn"/>LayoutMode <b><a href="qlistview.html#layoutMode-prop">layoutMode</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qlistview.html#modelColumn-prop">modelColumn</a></b> () const</li>
@@ -77,6 +80,7 @@
 <li><div class="fn"/>void <b><a href="qlistview.html#movement-prop">setMovement</a></b> ( Movement <i>movement</i> )</li>
 <li><div class="fn"/>void <b><a href="qlistview.html#resizeMode-prop">setResizeMode</a></b> ( ResizeMode <i>mode</i> )</li>
 <li><div class="fn"/>void <b><a href="qlistview.html#setRowHidden">setRowHidden</a></b> ( int <i>row</i>, bool <i>hide</i> )</li>
+<li><div class="fn"/>void <b><a href="qlistview.html#selectionRectVisible-prop">setSelectionRectVisible</a></b> ( bool <i>show</i> )</li>
 <li><div class="fn"/>void <b><a href="qlistview.html#spacing-prop">setSpacing</a></b> ( int <i>space</i> )</li>
 <li><div class="fn"/>void <b><a href="qlistview.html#uniformItemSizes-prop">setUniformItemSizes</a></b> ( bool <i>enable</i> )</li>
 <li><div class="fn"/>void <b><a href="qlistview.html#viewMode-prop">setViewMode</a></b> ( ViewMode <i>mode</i> )</li>
@@ -91,7 +95,7 @@
 <li><div class="fn"/>52 public functions inherited from <a href="qabstractitemview.html#public-functions">QAbstractItemView</a></li>
 <li><div class="fn"/>15 public functions inherited from <a href="qabstractscrollarea.html#public-functions">QAbstractScrollArea</a></li>
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
-<li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>201 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
@@ -120,7 +124,7 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>8 public slots inherited from <a href="qabstractitemview.html#public-slots">QAbstractItemView</a></li>
+<li><div class="fn"/>9 public slots inherited from <a href="qabstractitemview.html#public-slots">QAbstractItemView</a></li>
 <li><div class="fn"/>19 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
@@ -145,6 +149,9 @@
 <tr valign="top" class="odd"><td><img src="images/windowsxp-listview.png" alt="Screenshot of a Windows XP style list view" /></td><td><img src="images/macintosh-listview.png" alt="Screenshot of a Macintosh style table view" /></td><td><img src="images/plastique-listview.png" alt="Screenshot of a Plastique style table view" /></td></tr>
 <tr valign="top" class="even"><td>A <a href="gallery-windowsxp.html">Windows XP style</a> list view.</td><td>A <a href="gallery-macintosh.html">Macintosh style</a> list view.</td><td>A <a href="gallery-plastique.html">Plastique style</a> list view.</td></tr>
 </table></p>
+<a name="improving-performance"></a>
+<h3>Improving Performance</h3>
+<p>It is possible to give the view hints about the data it is handling in order to improve its performance when displaying large numbers of items. One approach that can be taken for views that are intended to display items with equal sizes is to set the <a href="qlistview.html#uniformItemSizes-prop">uniformItemSizes</a> property to true.</p>
 <p>See also <a href="model-view-view.html">View Classes</a>, <a href="qtreeview.html">QTreeView</a>, <a href="qtableview.html">QTableView</a>, and <a href="qlistwidget.html">QListWidget</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -256,9 +263,18 @@
 <li><div class="fn"/><b>void setResizeMode ( ResizeMode <i>mode</i> )</b></li>
 </ul>
 <p>See also <a href="qlistview.html#viewMode-prop">viewMode</a>.</p>
+<h3 class="fn"><a name="selectionRectVisible-prop"></a>selectionRectVisible : bool</h3>
+<p>This property holds if the selection rectangle should be visible.</p>
+<p>If this property is true then the selection rectangle is visible; otherwise it will be hidden. Note that the selection rectangle will only be visible if the selection mode is in a mode where more than one item can be selected, i.e&#x2e; it will not draw a selection rectangle if the selection mode is <a href="qabstractitemview.html#SelectionMode-enum">QAbstractItemView::SingleSelection</a>.</p>
+<p>This property was introduced in Qt 4.3.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool isSelectionRectVisible () const</b></li>
+<li><div class="fn"/><b>void setSelectionRectVisible ( bool <i>show</i> )</b></li>
+</ul>
 <h3 class="fn"><a name="spacing-prop"></a>spacing : int</h3>
 <p>This property holds the space between items in the layout.</p>
-<p>This property is the size of the empty space between items in the layout.</p>
+<p>This property is the size of the empty space that is padded around an item in the layout.</p>
 <p>Setting this property when the view is visible will cause the items to be laid out again.</p>
 <p>Access functions:</p>
 <ul>
@@ -287,7 +303,7 @@
 <p>See also <a href="qlistview.html#isWrapping-prop">isWrapping</a>, <a href="qlistview.html#spacing-prop">spacing</a>, <a href="qlistview.html#gridSize-prop">gridSize</a>, <a href="qlistview.html#flow-prop">flow</a>, <a href="qlistview.html#movement-prop">movement</a>, and <a href="qlistview.html#resizeMode-prop">resizeMode</a>.</p>
 <h3 class="fn"><a name="wordWrap-prop"></a>wordWrap : bool</h3>
 <p>This property holds the item text word-wrapping policy.</p>
-<p>If this property is true then item text text is wrapped where necessary at word-breaks; otherwise it is not wrapped at all. This property is false by default.</p>
+<p>If this property is true then the item text is wrapped where necessary at word-breaks; otherwise it is not wrapped at all. This property is false by default.</p>
 <p>This property was introduced in Qt 4.2.</p>
 <p>Access functions:</p>
 <ul>
@@ -321,6 +337,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

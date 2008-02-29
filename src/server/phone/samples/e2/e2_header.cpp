@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -100,8 +100,8 @@ E2AlertScreen::E2AlertScreen(QWidget *parent)
     QObject::connect(&m_calls, SIGNAL(contentsChanged()),
                      this, SLOT(refresh()));
 
-    QObject::connect(m_list, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(itemClicked()));
-    QObject::connect(m_list, SIGNAL(itemActivated(QListWidgetItem *)), this, SLOT(itemClicked()));
+    QObject::connect(m_list, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(itemClicked()));
+    QObject::connect(m_list, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(itemClicked()));
 }
 
 void E2AlertScreen::refresh()

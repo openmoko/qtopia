@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,6 +24,7 @@
 #include <qtopiaapplication.h>
 #include <qtranslatablesettings.h>
 #include <qexpressionevaluator.h>
+#include <qsoftmenubar.h>
 
 #include <QPainter>
 #include <QLineEdit>
@@ -33,22 +34,17 @@
 #include <QKeyEvent>
 #include <QLabel>
 #include <QDialog>
-#include <QMultiHash>
-#include <QDebug>
+#include <QHash>
 #include <QListWidgetItem>
 #include <QAction>
 #include <QMenu>
 #include <QSettings>
 
-#ifdef QTOPIA_PHONE
-# include <qtopia/qsoftmenubar.h>
-#endif
-
 #include <time.h>
 
 
 
-static QMultiHash<QString, QtopiaServiceDescription*>* recs=0;
+static QHash<QString, QtopiaServiceDescription*>* recs=0;
 static QString recs_filename;
 static QDateTime recs_ts;
 
@@ -86,7 +82,7 @@ static void updateReqs()
     {
         clearReqs();
 
-        recs = new QMultiHash<QString, QtopiaServiceDescription*>;
+        recs = new QHash<QString, QtopiaServiceDescription*>;
         recs_ts = ts;
 
         QTranslatableSettings cfg(QLatin1String("Trolltech"),QLatin1String("SpeedDial"));
@@ -115,13 +111,14 @@ static void updateReqs()
             QByteArray a = cfg.value(QLatin1String("Args")).toByteArray();
             QString l = cfg.value(QLatin1String("Label")).toString();
             QString ic = cfg.value(QLatin1String("Icon")).toString();
+            QMap<QString, QVariant> p = cfg.value(QLatin1String("OptionalProperties")).toMap();
 
             QtopiaServiceRequest req(s, m.toLatin1());
 
             if(!a.isEmpty())
                 QtopiaServiceRequest::deserializeArguments(req, a);
 
-            QtopiaServiceDescription* t = new QtopiaServiceDescription(req, l, ic);
+            QtopiaServiceDescription* t = new QtopiaServiceDescription(req, l, ic, p);
             recs->insert((*it), t);
         }
     }
@@ -154,6 +151,7 @@ static void writeReqs(const QString& changed)
                          QtopiaServiceRequest::serializeArguments(rec->request()));
             cfg.setValue(QLatin1String("Label"),rec->label());
             cfg.setValue(QLatin1String("Icon"),rec->iconName());
+            cfg.setValue(QLatin1String("OptionalProperties"), rec->optionalProperties());
             found = true;
         }
     }
@@ -309,6 +307,7 @@ public:
         parent->setItemDelegate(&delegate);
         parent->setModel(&model);
         actionChooser = 0;
+        allowActionChooser = false;
         connect(parentList,SIGNAL(currentRowChanged(int)),
                 this,SLOT(updateActions()));
     }
@@ -329,6 +328,7 @@ public:
     QSpeedDialModel model;
     QSpeedDialList* parentList;
     QtopiaServiceSelector* actionChooser;
+    bool allowActionChooser;
 
     QAction *a_del;
 
@@ -378,10 +378,13 @@ QSpeedDialDialog::QSpeedDialDialog(const QString& l, const QString& ic,
     icon(ic)
 {
     setModal(true);
+    setWindowState(windowState() | Qt::WindowMaximized);
 
     QVBoxLayout *vb = new QVBoxLayout(this);
+    vb->setMargin(0);
 
     list = new QSpeedDialList(l, ic, this);
+    list->setFrameStyle(QFrame::NoFrame);
     if (list->count() > 0) {
         int currentRow = firstAvailableSlot() - 1;
         list->setCurrentRow(currentRow);
@@ -394,12 +397,10 @@ QSpeedDialDialog::QSpeedDialDialog(const QString& l, const QString& ic,
 
     setWindowTitle(list->windowTitle());
 
-    connect(list, SIGNAL(rowClicked(const int)),
-        this, SLOT(store(const int)));
+    connect(list, SIGNAL(rowClicked(int)),
+        this, SLOT(store(int)));
 
-#ifdef QTOPIA_PHONE
     QtopiaApplication::setMenuLike(this, true);
-#endif
 }
 
 /*!
@@ -467,7 +468,6 @@ QSpeedDialList::QSpeedDialList(QWidget* parent) :
     updateReqs();
     init(QString());
 
-#ifdef QTOPIA_PHONE
     QMenu *contextMenu = QSoftMenuBar::menuFor(this);
 
     QAction *a_edit = new QAction( QIcon( ":icon/edit" ), tr("Set...", "set action"), this);
@@ -477,13 +477,11 @@ QSpeedDialList::QSpeedDialList(QWidget* parent) :
     d->a_del = new QAction( QIcon( ":icon/trash" ), tr("Delete"), this);
     connect( d->a_del, SIGNAL(triggered()), this, SLOT(clearItem()) );
     contextMenu->addAction(d->a_del);
-#endif
 
-    d->actionChooser = new QtopiaServiceSelector(this);
-    QtopiaApplication::setMenuLike( d->actionChooser, true );
+    d->allowActionChooser = true;
     connect(this, SIGNAL(rowClicked(int)), this, SLOT(editItem(int)));
-    connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
-            this, SLOT(selectionChanged()));
+    connect(selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(sendRowChanged()));
 
     setWindowTitle( tr( "Speed Dial" ) );
 }
@@ -548,6 +546,10 @@ void QSpeedDialList::clearItem()
 */
 void QSpeedDialList::editItem(int row)
 {
+    if ( d->allowActionChooser && !d->actionChooser ) {
+        d->actionChooser = new QtopiaServiceSelector(this);
+        QtopiaApplication::setMenuLike( d->actionChooser, true );
+    }
     QSpeedDialItem* item = d->item(row);
     if( item && d->actionChooser ) {
         QtopiaServiceDescription desc = item->description();
@@ -585,6 +587,8 @@ void QSpeedDialList::init(const QString& f)
     d->sel = 0;
     d->sel_tid = 0;
     int fn = 0;
+
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     //
     //  Create entries for each possible speed dial number
@@ -629,10 +633,10 @@ void QSpeedDialList::init(const QString& f)
         }
     }
 
-    connect(this,SIGNAL(activated(const QModelIndex&)),
-            this,SLOT(select(const QModelIndex&)));
-    connect(this,SIGNAL(clicked(const QModelIndex&)),
-            this,SLOT(click(const QModelIndex&)));
+    connect(this,SIGNAL(activated(QModelIndex)),
+            this,SLOT(select(QModelIndex)));
+    connect(this,SIGNAL(clicked(QModelIndex)),
+            this,SLOT(click(QModelIndex)));
 }
 
 void QSpeedDialList::setCurrentRow(int row)
@@ -699,7 +703,7 @@ void QSpeedDialList::reload(const QString& sd)
   Catches selection events and emits an event more meaningful to outside this class
   (emits a row instead of a QModelIndex)
 */
-void QSpeedDialList::selectionChanged()
+void QSpeedDialList::sendRowChanged()
 {
     emit currentRowChanged(currentRow());
 }
@@ -775,13 +779,11 @@ void QSpeedDialList::keyPressEvent(QKeyEvent* e)
                 d->sel = 0;
         }
     }
-#ifdef QTOPIA_PHONE
     else if( k == Qt::Key_Select )
     {
         if(currentRow() > -1)
             emit rowClicked(currentRow());
     }
-#endif
     else
     {
         QListView::keyPressEvent(e);
@@ -915,10 +917,37 @@ void QSpeedDial::remove(const QString& input)
 void QSpeedDial::set(const QString& input, const QtopiaServiceDescription& r)
 {
     updateReqs();
-    recs->replace(input,new QtopiaServiceDescription(r));
+    recs->insert(input,new QtopiaServiceDescription(r));
     writeReqs(input);
 }
 
+/*!
+  Returns a list of the currently assigned Speed Dial inputs.
+  \since 4.3
+  \sa possibleInputs()
+*/
+QList<QString> QSpeedDial::assignedInputs()
+{
+    updateReqs();
+    return recs->uniqueKeys();
+}
+
+/*!
+  Returns a list of possible Speed Dial inputs, some of which
+  may be assigned already.
+
+  \since 4.3
+  \sa assignedInputs()
+*/
+QList<QString> QSpeedDial::possibleInputs()
+{
+    QList<QString> ret;
+
+    for (int i = 1; i < 100; i++) {
+        ret << QString::number(i);
+    }
+    return ret;
+}
 
 QSpeedDialItemDelegate::QSpeedDialItemDelegate(QListView* parent)
     : QAbstractItemDelegate(parent)
@@ -943,7 +972,9 @@ QSpeedDialItemDelegate::~QSpeedDialItemDelegate()
 void QSpeedDialItemDelegate::setSelectionDetails(QString label, QString icon)
 {
     selText = label;
-    selIcon = QIcon(QLatin1String(":image/")+icon);
+    selIcon = QIcon(QLatin1String(":icon/")+icon);
+    if (selIcon.isNull())
+        selIcon = QIcon(QLatin1String(":image/")+icon);
 }
 
 void QSpeedDialItemDelegate::paint(QPainter * painter,

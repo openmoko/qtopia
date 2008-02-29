@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: QSemaphore Class Reference</title>
+  <title>Qt 4.3: QSemaphore Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QSemaphore Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QSemaphore Class Reference<br /><span class="small-subtitle">[<a href="qtcore.html">QtCore</a> module]</span>
+</h1>
 <p>The QSemaphore class provides a general counting semaphore. <a href="#details">More...</a></p>
 <pre> #include &lt;QSemaphore&gt;</pre><p><b>Note:</b> All the functions in this class are <a href="threads.html#thread-safe">thread-safe</a>.</p>
 <ul>
@@ -26,6 +27,7 @@
 <li><div class="fn"/>int <b><a href="qsemaphore.html#available">available</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qsemaphore.html#release">release</a></b> ( int <i>n</i> = 1 )</li>
 <li><div class="fn"/>bool <b><a href="qsemaphore.html#tryAcquire">tryAcquire</a></b> ( int <i>n</i> = 1 )</li>
+<li><div class="fn"/>bool <b><a href="qsemaphore.html#tryAcquire-2">tryAcquire</a></b> ( int <i>n</i>, int <i>timeout</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -80,10 +82,19 @@
  sem.tryAcquire(250);    <span class="comment">// sem.available() == 5, returns false</span>
  sem.tryAcquire(3);      <span class="comment">// sem.available() == 2, returns true</span></pre>
 <p>See also <a href="qsemaphore.html#acquire">acquire</a>().</p>
+<h3 class="fn"><a name="tryAcquire-2"></a>bool QSemaphore::tryAcquire ( int <i>n</i>, int <i>timeout</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Tries to acquire <tt>n</tt> resources guarded by the semaphore and returns true on success. If <a href="qsemaphore.html#available">available</a>() &lt; <i>n</i>, this call will wait for at most <i>timeout</i> milliseconds for resources to become available.</p>
+<p>Note: Passing a negative number as the <i>timeout</i> is equivalent to calling <a href="qsemaphore.html#acquire">acquire</a>(), i.e&#x2e; this function will wait forever for resources to become available if <i>timeout</i> is negative.</p>
+<p>Example:</p>
+<pre> QSemaphore sem(5);            <span class="comment">// sem.available() == 5</span>
+ sem.tryAcquire(250, 1000);    <span class="comment">// sem.available() == 5, waits 1000 milliseconds and returns false</span>
+ sem.tryAcquire(3, 30000);     <span class="comment">// sem.available() == 2, returns true without waiting</span></pre>
+<p>See also <a href="qsemaphore.html#acquire">acquire</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

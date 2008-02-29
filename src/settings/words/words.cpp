@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,22 +23,16 @@
 
 #include <qtopia/inputmatch/pkimmatcher.h>
 #include <qtopianamespace.h>
-
 #include <qsoftmenubar.h>
 #include <qtopiaapplication.h>
-
 #include <QLineEdit>
 #include <QLayout>
-#include <QToolBar>
 #include <QLabel>
 #include <QListWidget>
 #include <QKeyEvent>
 #include <QPainter>
 #include <QMenu>
-#include <QSettings>
 #include <QSet>
-
-//#include <stdlib.h>
 
 class WordListItem : public QListWidgetItem {
 
@@ -218,6 +212,7 @@ Words::Words( QWidget* parent, Qt::WFlags fl )
     centralLayout->addWidget(line);
 
     box = new QListWidget(this);
+    box->setFrameStyle(QFrame::NoFrame);
     centralLayout->addWidget(box);
     box->setFocusPolicy(Qt::NoFocus);
     QPalette pal = box->palette();
@@ -257,15 +252,15 @@ Words::Words( QWidget* parent, Qt::WFlags fl )
     connect( mode, SIGNAL(triggered(QAction*)), this, SLOT(modeChanged()) );
 
     tooltip = new QLabel(this);
-    tooltip->setFrameStyle(QFrame::WinPanel|QFrame::Raised);
+    tooltip->setFrameStyle(QFrame::StyledPanel|QFrame::Plain);
     tooltip->setAlignment(Qt::AlignCenter);
     tooltip->setBackgroundRole(QPalette::Button);
     //tooltip->setAutoResize(true);
     tooltip->setWordWrap(true);
     tooltip->setMaximumWidth(150);
+    tooltip->setMargin(6);
     tooltip->hide();
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QMenu *menu = QSoftMenuBar::menuFor(this);
 
     // XXX Need to turn off cut/paste menu for line,
@@ -291,27 +286,10 @@ Words::Words( QWidget* parent, Qt::WFlags fl )
         a_word->setChecked(true);
     else
         a_pkim->setChecked(true);
-#else
-    // Create Toolbars
-    QToolBar *bar = new QToolBar( this );
-    bar->setAllowedAreas(Qt::TopToolBarArea);
-    //bar->setHorizontalStretchable( true );
-    bar->setMovable(false);
-    addToolBar(bar);
-
-    bar->addAction(a_add);
-    bar->addAction(a_del);
-    bar->addSeparator();
-    bar->addAction(a_word);
-    bar->addAction(a_alllocal);
-    bar->addAction(a_alldel);
-
-    a_word->setChecked(true);
-#endif
 
     line->installEventFilter(this);
 
-    connect(line,SIGNAL(textChanged(const QString&)), this, SLOT(lookup()));
+    connect(line,SIGNAL(textChanged(QString)), this, SLOT(lookup()));
     connect(box,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(updateActions()));
 
     modeChanged();
@@ -500,13 +478,11 @@ void Words::lookup(const QString &in)
 void Words::modeChanged()
 {
     lookup();
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     if ( a_word->isChecked()) {
-        QtopiaApplication::setInputMethodHint(line,QtopiaApplication::Text);
+        QtopiaApplication::setInputMethodHint(line, "text noautocapitalization");
     } else {
         QtopiaApplication::setInputMethodHint(line,QtopiaApplication::Number);
     }
-#endif
     line->clear(); // Old text not useful.
 }
 

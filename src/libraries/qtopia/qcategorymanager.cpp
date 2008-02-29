@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -27,6 +27,7 @@
 #include <qtopiasql.h>
 #include <qtopiaipcenvelope.h>
 #include <qtopianamespace.h>
+#include <qtopia/private/qcategorystore_p.h>
 
 #include <QSettings>
 #include <QMap>
@@ -313,9 +314,33 @@ class QCategoryManagerData
 {
 public:
     QCategoryManagerData(const QString &s)
-        : scope(s){}
+        : scope(s), categoriesLoaded( false ){}
 
     const QString scope;
+    QMap< QString, QCategoryData > categories;
+    bool categoriesLoaded;
+
+    void loadCategories()
+    {
+        categories = QCategoryStore::instance()->scopeCategories( scope );
+
+        categoriesLoaded = true;
+    }
+
+    QCategoryData category( const QString &id ) const
+    {
+        if( !categoriesLoaded )
+            const_cast< QCategoryManagerData * >( this )->loadCategories();
+
+        QCategoryData category;
+
+        if( categories.contains( id ) )
+            category = categories.value( id );
+        else
+            category = QCategoryStore::instance()->categoryFromId( id );
+
+        return category;
+    }
 };
 
 /*!
@@ -341,10 +366,8 @@ QCategoryManager::QCategoryManager(QObject *parent)
     : QObject(parent)
 {
     d = new QCategoryManagerData(QString());
-#ifndef QTOPIA_CONTENT_INSTALLER
-    if (qApp)
-        connect(qApp, SIGNAL(categoriesChanged()), this, SLOT(reloadCategories()));
-#endif
+
+    connect( QCategoryStore::instance(), SIGNAL(categoriesChanged()), this, SLOT(reloadCategories()) );
 }
 
 /*!
@@ -356,10 +379,8 @@ QCategoryManager::QCategoryManager(const QString &scope, QObject *parent)
     : QObject(parent)
 {
     d = new QCategoryManagerData(scope);
-#ifndef QTOPIA_CONTENT_INSTALLER
-    if (qApp)
-        connect(qApp, SIGNAL(categoriesChanged()), this, SLOT(reloadCategories()));
-#endif
+
+    connect( QCategoryStore::instance(), SIGNAL(categoriesChanged()), this, SLOT(reloadCategories()) );
 }
 
 /*!
@@ -382,26 +403,7 @@ QCategoryManager::~QCategoryManager()
 */
 QString QCategoryManager::label(const QString &id) const
 {
-    static const QString labelquery = QLatin1String("SELECT categorytext FROM categories WHERE categoryid = :id");
-
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
-    {
-        QSqlQuery q(db);
-        q.prepare(labelquery);
-        q.bindValue(":id", id);
-
-        QtopiaSql::logQuery( q );
-        if (!q.exec())
-            qWarning() << "QCategoryManager::label failed:" << q.lastError();
-
-        if (q.next()) {
-            QString text = q.value(0).toString();
-            if ( isSystem(id) )
-                text = Qtopia::translate("Categories-*", "Categories", text);
-            return text;
-        }
-    }
-    return QString();
+    return d->category( id ).label();
 }
 
 /*!
@@ -411,22 +413,7 @@ QString QCategoryManager::label(const QString &id) const
 */
 QIcon QCategoryManager::icon(const QString &id) const
 {
-    static const QString labelquery = QLatin1String("SELECT categoryicon FROM categories WHERE categoryid = :id");
-
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
-    {
-        QSqlQuery q(db);
-        q.prepare(labelquery);
-        q.bindValue(":id", id);
-
-        QtopiaSql::logQuery( q );
-        if (!q.exec())
-            qWarning() << "QCategoryManager::label failed:" << q.lastError();
-
-        if (q.next())
-            return QIcon(":image/" + q.value(0).toString());
-    }
-    return QIcon();
+    return d->category( id ).icon();
 }
 
 /*!
@@ -436,22 +423,17 @@ QIcon QCategoryManager::icon(const QString &id) const
  */
 QString QCategoryManager::iconFile(const QString &id) const
 {
-    static const QString labelquery = QLatin1String("SELECT categoryicon FROM categories WHERE categoryid = :id");
+    return d->category( id ).iconFile();
+}
 
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
-    {
-        QSqlQuery q(db);
-        q.prepare(labelquery);
-        q.bindValue(":id", id);
-
-        QtopiaSql::logQuery( q );
-        if (!q.exec())
-            qWarning() << "QCategoryManager::label failed:" << q.lastError();
-
-        if (q.next())
-            return q.value(0).toString();
-    }
-    return QString();
+/*!
+  If there is a category id \a id in the scope of the QCategoryManger
+  returns the ringtone filename for the category id. Otherwise returns an
+  empty string.
+  */
+QString QCategoryManager::ringTone(const QString &id) const
+{
+    return d->category( id ).ringTone();
 }
 
 /*!
@@ -501,21 +483,7 @@ QString QCategoryManager::multiLabel()
 */
 bool QCategoryManager::isGlobal(const QString &id) const
 {
-    static const QString globalquery = QLatin1String("SELECT count(*) FROM categories WHERE categoryid = :id AND categoryscope IS NULL");
-
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
-    {
-        QSqlQuery q(db);
-        q.prepare(globalquery);
-        q.bindValue(":id", id);
-
-        QtopiaSql::logQuery( q );
-        if (!q.exec())
-            qWarning() << "QCategoryManager::isGlobal failed:" << q.lastError().text();
-        if (q.next() && q.value(0).toInt() > 0)
-            return true;
-    }
-    return false;
+    return d->category( id ).isGlobal();
 }
 
 /*!
@@ -525,21 +493,7 @@ bool QCategoryManager::isGlobal(const QString &id) const
 */
 bool QCategoryManager::isSystem(const QString &id) const
 {
-    static const QString systemquery = QLatin1String("SELECT count(*) FROM categories WHERE categoryid = :id AND (flags & 1) = 1");
-
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
-    {
-        QSqlQuery q(db);
-        q.prepare(systemquery);
-        q.bindValue(":id", id);
-
-        QtopiaSql::logQuery( q );
-        if (!q.exec())
-            qWarning() << "QCategoryManager::isSystem failed:" << q.lastError().text();
-        if (q.next() && q.value(0).toInt() > 0)
-            return true;
-    }
-    return false;
+    return d->category( id ).isSystem();
 }
 
 /*!
@@ -551,23 +505,9 @@ bool QCategoryManager::isSystem(const QString &id) const
 */
 bool QCategoryManager::setSystem(const QString &id)
 {
-    static const QString systemquery = QLatin1String("udpate categories set flags=flags|1 where categoryid=:id");
+    d->categoriesLoaded = false;
 
-    bool allSucceeded = true;
-
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
-    {
-        QSqlQuery q(db);
-        q.prepare(systemquery);
-        q.bindValue(":id", id);
-
-        QtopiaSql::logQuery( q );
-        if (!q.exec()) {
-            qWarning() << "QCategoryManager::setSystem failed:" << q.lastError().text();
-            allSucceeded = false;
-        }
-    }
-    return allSucceeded;
+    return QCategoryStore::instance()->setSystemCategory( id );
 }
 
 /*!
@@ -578,51 +518,14 @@ bool QCategoryManager::setSystem(const QString &id)
 */
 bool QCategoryManager::setGlobal(const QString &id, bool global)
 {
-    // will make any category global.
-    if (!contains(id))
-        return false;
-    if (isGlobal(id) == global)
-        return true;
+    if( isGlobal( id ) != global )
+    {
+        d->categoriesLoaded = false;
 
-    bool allSucceeded = true;
-
-    if (global) {
-        // straight update.
-        static const QString makelocal = QLatin1String("UPDATE categories SET categoryscope = NULL WHERE categoryid = :id");
-        foreach(const QSqlDatabase &db, QtopiaSql::databases())
-        {
-            QSqlQuery q(db);
-            q.prepare(makelocal);
-            q.bindValue(":id", id);
-
-            QtopiaSql::logQuery( q );
-            if (!q.exec()) {
-                qWarning() << "QCategoryManager::setGlobal failed:" << q.lastError();
-                allSucceeded = false;
-            }
-        }
-        { QtopiaIpcEnvelope e("QPE/System", "categoriesChanged()" ); }
-        return allSucceeded;
-    } else {
-        if (d->scope.isEmpty())
-            return false;
-        static const QString makelocal = QLatin1String("UPDATE categories SET categoryscope = :categoryscope WHERE categoryid = :id");
-        foreach(const QSqlDatabase &db, QtopiaSql::databases())
-        {
-            QSqlQuery q(db);
-            q.prepare(makelocal);
-            q.bindValue(":id", id);
-            q.bindValue(":categoryscope", d->scope);
-
-            QtopiaSql::logQuery( q );
-            if (!q.exec()) {
-                qWarning() << "QCategoryManager::setGlobal failed:" << q.lastError();
-                allSucceeded = false;
-            }
-        }
-        { QtopiaIpcEnvelope e("QPE/System", "categoriesChanged()" ); }
-        return allSucceeded;
+        return QCategoryStore::instance()->setCategoryScope( id, global ? QString() : d->scope );
     }
+    else
+        return true;
 }
 
 /*!
@@ -685,31 +588,12 @@ QString QCategoryManager::add( const QString &trLabel, const QString &icon, bool
 */
 bool QCategoryManager::addCategory( const QString &id, const QString &trLabel, const QString &icon, bool forceGlobal, bool isSystem )
 {
-    if (contains(id))
+    if (id.isEmpty() || trLabel.isEmpty() || contains(id))
         return false;
 
-    static const QString insertquery = QLatin1String("INSERT INTO categories (categoryid, categorytext, categoryscope, categoryicon, flags) VALUES (:id, :label, :categoryscope, :categoryicon, :flags)");
+    d->categoriesLoaded = false;
 
-    bool allSucceeded = true;
-
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
-    {
-        QSqlQuery q(db);
-        q.prepare(insertquery);
-        q.bindValue(":id", id);
-        q.bindValue(":label", trLabel);
-        q.bindValue(":categoryscope", forceGlobal?QString():d->scope);
-        q.bindValue(":categoryicon", icon);
-        q.bindValue(":flags", isSystem ? 1:0);
-
-        QtopiaSql::logQuery( q );
-        if (!q.exec()) {
-            qWarning() << "QCategoryManager::add failed:", q.lastError();
-            allSucceeded = false;
-        }
-    }
-    { QtopiaIpcEnvelope e("QPE/System", "categoriesChanged()" ); }
-    return allSucceeded;
+    return QCategoryStore::instance()->addCategory( id, forceGlobal ? QString() : d->scope, trLabel, icon, isSystem );
 }
 
 /*!
@@ -730,44 +614,26 @@ bool QCategoryManager::addCategory( const QString &id, const QString &trLabel, c
 bool QCategoryManager::ensureSystemCategory( const QString &id, const QString &trLabel, const QString &icon, bool forceGlobal )
 {
     // You cannot create a system category id starting with "user." as that is reserved for user categories
-    if ( id.startsWith("user.") )
+    if (id.isEmpty() || trLabel.isEmpty() || id.startsWith("user.") )
         return false;
 
-    if ( exists(id) ) {
+    if( !d->categoriesLoaded )
+        d->loadCategories();
+
+    QCategoryData data = d->categories.value( id );
+
+    if ( !data.isNull() ) {
         // Simple case, the system category already exists as described by the arguments
-        if ( isSystem(id) ) {
-            QString scope = d->scope;
-            if ( forceGlobal )
-                scope = QString();
-            QCategoryManager test( scope );
-            if ( trLabel == test.label(id) && icon == test.iconFile(id) )
-                return true;
-        }
-
-        // To ensure the category described by the arguments exists, remove the existing
-        // category and re-add using the arguments. We need to use the SQL directly because
-        // the API does not let you remove system categories.
-        static const QString remquery = QLatin1String("DELETE FROM categories WHERE categoryid = :id");
-
-        bool allSucceeded = true;
-
-        foreach(const QSqlDatabase &db, QtopiaSql::databases())
-        {
-            QSqlQuery q(db);
-            q.prepare(remquery);
-            q.bindValue(":id", id);
-
-            QtopiaSql::logQuery( q );
-            if (!q.exec()) {
-                qWarning() << "QCategoryManager::ensureSystemCategory failed:" << q.lastError();
-                allSucceeded = false;
-            }
-        }
-        if ( !allSucceeded )
+        if ( data.isSystem() && trLabel == data.label() && icon == data.label() && forceGlobal == data.isGlobal() ) {
+            return true;
+        } else if ( !QCategoryStore::instance()->removeCategory( id ) ) {
             return false;
+        } else {
+            d->categoriesLoaded = false;
+        }
     }
 
-    return addCategory( id, trLabel, icon, forceGlobal, true );
+    return QCategoryStore::instance()->addCategory( id, forceGlobal ? QString() : d->scope, trLabel, icon, true );
 }
 
 /*!
@@ -780,27 +646,19 @@ bool QCategoryManager::ensureSystemCategory( const QString &id, const QString &t
 */
 bool QCategoryManager::remove( const QString &id )
 {
-    if (!contains(id) || isSystem(id))
-        return false;
+    if( !d->categoriesLoaded )
+        d->loadCategories();
 
-    static const QString remquery = QLatin1String("DELETE FROM categories WHERE categoryid = :id");
+    QCategoryData data = d->categories.value( id );
 
-    bool allSucceeded = true;
-
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
+    if( !data.isNull() && !data.isSystem() && QCategoryStore::instance()->removeCategory( id ) )
     {
-        QSqlQuery q(db);
-        q.prepare(remquery);
-        q.bindValue(":id", id);
+        d->categoriesLoaded = false;
 
-        QtopiaSql::logQuery( q );
-        if (!q.exec()) {
-            qWarning() << "QCategoryManager::remove failed:" << q.lastError();
-            allSucceeded = false;
-        }
+        return true;
     }
-    { QtopiaIpcEnvelope e("QPE/System", "categoriesChanged()" ); }
-    return allSucceeded;
+    else
+        return false;
 }
 
 /*!
@@ -812,30 +670,15 @@ bool QCategoryManager::remove( const QString &id )
 */
 bool QCategoryManager::setLabel( const QString &id, const QString &trLabel )
 {
-    if (!contains(id) || isSystem(id))
-        return false;
-
-    if (label(id) == trLabel)
-        return true;
-
-    bool allSucceeded = true;
-
-    static const QString namequery = QLatin1String("UPDATE categories SET categorytext = :label WHERE categoryid = :id");
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
+    if( QCategoryStore::instance()->setCategoryLabel( id, trLabel ) )
     {
-        QSqlQuery q(db);
-        q.prepare(namequery);
-        q.bindValue(":id", id);
-        q.bindValue(":label", trLabel);
+        if( d->categories.contains( id ) )
+            d->categoriesLoaded = false;
 
-        QtopiaSql::logQuery( q );
-        if (!q.exec()) {
-            qWarning() << "QCategoryManager::setLabel failed:" << q.lastError();
-            allSucceeded = false;
-        }
+        return true;
     }
-    { QtopiaIpcEnvelope e("QPE/System", "categoriesChanged()" ); }
-    return allSucceeded;
+    else
+        return false;
 }
 
 /*!
@@ -847,27 +690,32 @@ bool QCategoryManager::setLabel( const QString &id, const QString &trLabel )
 */
 bool QCategoryManager::setIcon( const QString &id, const QString &icon )
 {
-    if (!contains(id) || isSystem(id))
-        return false;
-
-    bool allSucceeded = true;
-
-    static const QString namequery = QLatin1String("UPDATE categories SET categoryicon = :icon WHERE categoryid = :id");
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
+    if( QCategoryStore::instance()->setCategoryIcon( id, icon ) )
     {
-        QSqlQuery q(db);
-        q.prepare(namequery);
-        q.bindValue(":id", id);
-        q.bindValue(":icon", icon);
+        if( d->categories.contains( id ) )
+            d->categoriesLoaded = false;
 
-        QtopiaSql::logQuery( q );
-        if (!q.exec()) {
-            qWarning() << "QCategoryManager::setIcon failed:" << q.lastError();
-            allSucceeded = false;
-        }
+        return true;
     }
-    { QtopiaIpcEnvelope e("QPE/System", "categoriesChanged()" ); }
-    return allSucceeded;
+    else
+        return false;
+}
+
+/*!
+  Attempts to set the ringtone for the category with category id \a id to \a fileName.
+  Returns true if the category ringtone is changed successfully. Otherwise return false.
+*/
+bool QCategoryManager::setRingTone( const QString &id, const QString &fileName )
+{
+    if ( QCategoryStore::instance()->setCategoryRingTone( id, fileName ) )
+    {
+        if ( d->categories.contains( id ) )
+            d->categoriesLoaded = true;
+
+        return false;
+    }
+    else
+        return false;
 }
 
 /*!
@@ -876,30 +724,10 @@ bool QCategoryManager::setIcon( const QString &id, const QString &icon )
 */
 bool QCategoryManager::contains(const QString &id) const
 {
-    bool result=false;
-    static const QString existsGlobalQuery = QLatin1String(
-            "SELECT count(*) FROM categories WHERE categoryid = :id AND categoryscope IS NULL");
-    static const QString existsQuery = QLatin1String(
-            "SELECT count(*) FROM categories WHERE categoryid = :id AND (categoryscope = :categoryscope OR categoryscope IS NULL)");
+    if( !d->categoriesLoaded )
+        const_cast< QCategoryManagerData * >( d )->loadCategories();
 
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
-    {
-        QSqlQuery q(db);
-        if( d->scope.isEmpty() )
-            q.prepare(existsGlobalQuery);
-        else
-            q.prepare(existsQuery);
-        q.bindValue(":id", id);
-        if (!d->scope.isEmpty())
-            q.bindValue(":categoryscope", d->scope);
-
-        QtopiaSql::logQuery( q );
-        if (!q.exec()) {
-            qWarning() << "QCategoryManager::contains failed:" << q.lastError();
-        }
-        result |= q.next() && q.value(0).toInt() > 0;
-    }
-    return result;
+    return d->categories.contains( id );
 }
 
 /*!
@@ -907,22 +735,7 @@ bool QCategoryManager::contains(const QString &id) const
 */
 bool QCategoryManager::exists( const QString &id ) const
 {
-    static const QString existsQuery = QLatin1String( "SELECT count(*) FROM categories WHERE categoryid = :id");
-
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
-    {
-        QSqlQuery q(db);
-        q.prepare(existsQuery);
-        q.bindValue(":id", id);
-
-        QtopiaSql::logQuery( q );
-        if (!q.exec()) {
-            qWarning() << "QCategoryManager::contains failed:" << q.lastError();
-        }
-        if( q.next() && q.value(0).toInt() > 0 )
-            return true;
-    }
-    return false;
+    return contains( id ) ? true : QCategoryStore::instance()->categoryExists( id );
 }
 
 /*!
@@ -935,28 +748,18 @@ bool QCategoryManager::exists( const QString &id ) const
  */
 bool QCategoryManager::containsLabel(const QString &label, bool forceGlobal) const
 {
-    static const QString existsQuery = QLatin1String("SELECT count(*) FROM categories WHERE categorytext = :label AND (categoryscope = :categoryscope OR categoryscope IS NULL)");
-    static const QString existsGlobalQuery = QLatin1String("SELECT count(*) FROM categories WHERE categorytext = :label");
-    bool result = false;
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
+    if( !d->categoriesLoaded )
+        const_cast< QCategoryManagerData * >( d )->loadCategories();
+
+    foreach( QString id, d->categories.keys() )
     {
-        QSqlQuery q(db);
-        if ( forceGlobal )
-            q.prepare(existsGlobalQuery);
-        else
-            q.prepare(existsQuery);
-        q.bindValue(":label", label);
-        if ( !forceGlobal )
-            q.bindValue(":categoryscope", d->scope);
+        QCategoryData category = d->categories.value( id );
 
-        QtopiaSql::logQuery( q );
-        if (!q.exec()) {
-            qWarning() << "Failed check for existing category with translated label" << label << "Error:" << q.lastError();
-        }
-
-        result |= q.next() && q.value(0).toInt() > 0;
+        if( category.label() == label && (!forceGlobal || category.isGlobal()) )
+            return true;
     }
-    return result;
+
+    return false;
 }
 
 /*!
@@ -968,23 +771,15 @@ bool QCategoryManager::containsLabel(const QString &label, bool forceGlobal) con
  */
 QString QCategoryManager::idForLabel(const QString &label) const
 {
-    static QString existsquery = QLatin1String("SELECT categoryid FROM categories WHERE categorytext = :label AND (categoryscope = :categoryscope OR categoryscope IS NULL)");
-    static QString existsGlobalCategory = QLatin1String( "SELECT categoryid FROM categories WHERE categorytext = :label AND categoryscope IS NULL" );
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
+    if( !d->categoriesLoaded )
+        const_cast< QCategoryManagerData * >( d )->loadCategories();
+
+    foreach( QString id, d->categories.keys() )
     {
-        QSqlQuery q(db);
-        q.prepare(existsquery);
-        q.bindValue(":label", label);
-        q.bindValue(":categoryscope", d->scope);
-
-        QtopiaSql::logQuery( q );
-        if (!q.exec()) {
-            qWarning() << "Failed check for existing category with translated label" << label << "Error:" << q.lastError();
-        }
-
-        if (q.next())
-            return q.value(0).toString();
+        if( d->categories.value( id ).label() == label )
+            return id;
     }
+
     return QString();
 }
 
@@ -993,33 +788,10 @@ QString QCategoryManager::idForLabel(const QString &label) const
 */
 QList<QString> QCategoryManager::categoryIds() const
 {
-    static const QString idquery = QLatin1String("SELECT categoryid, categorytext FROM categories WHERE categoryscope = :categoryscope OR categoryscope IS NULL");
-    static const QString gidquery = QLatin1String("SELECT categoryid, categorytext FROM categories WHERE categoryscope IS NULL");
-    QMap<QString,QString> result;
-    foreach(const QSqlDatabase &db, QtopiaSql::databases())
-    {
-        QSqlQuery q(db);
-        q.prepare(d->scope.isEmpty() ? gidquery : idquery);
-        if (!d->scope.isEmpty())
-            q.bindValue(":categoryscope", d->scope);
+    if( !d->categoriesLoaded )
+        const_cast< QCategoryManagerData * >( d )->loadCategories();
 
-        QtopiaSql::logQuery( q );
-        if (!q.exec())
-        {
-            qWarning() << "QCategoryManager::categoryIds failed" << q.lastError();
-        }
-
-        while (q.next())
-        {
-            QString id   = q.value(0).toString();
-            QString text = q.value(1).toString();
-
-            if( result.key( id ).isEmpty() )
-                result.insert( isSystem(id) ? Qtopia::translate("Categories-*", "Categories", text) : text, id );
-        }
-    }
-
-    return result.values();
+    return d->categories.keys();
 }
 
 /*!
@@ -1028,6 +800,8 @@ QList<QString> QCategoryManager::categoryIds() const
 */
 void QCategoryManager::reloadCategories()
 {
+    d->categoriesLoaded = false;
+
     emit categoriesChanged();
 }
 

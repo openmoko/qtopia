@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,6 +22,7 @@
 #include "migrateengine.h"
 
 #include "qtopiapim/pimmigrate.h"
+#include "qtopiaphone/phonemigrate.h"
 
 #include <QSqlQuery>
 #include <QVariant>
@@ -34,6 +35,7 @@
 #include <QTextCodec>
 #include <qtopiasql.h>
 #include <QMimeType>
+#include <qtopianamespace.h>
 #ifndef QTOPIA_CONTENT_INSTALLER
 #include <QStorageMetaInfo>
 #include <QDSData>
@@ -61,7 +63,7 @@ bool QDBMigrationEngine::check(bool result, int line, char *file)
 
 bool QDBMigrationEngine::exec(QSqlQuery &query, int line, char *file)
 {
-    QtopiaSql::logQuery(query);
+    QtopiaSql::instance()->logQuery(query);
     if(query.exec() == false)
     {
         QString errString=QString("EXEC: %3:%2 Failed while executing query: %1\n").arg(query.executedQuery()).arg(line).arg(file);
@@ -80,7 +82,7 @@ bool QDBMigrationEngine::exec(const QString &query, int line, char *file)
     QSqlQuery qry(db);
     if(qry.exec(query) == false)
     {
-        QtopiaSql::logQuery(qry);
+        QtopiaSql::instance()->logQuery(qry);
         QString errString=QString("EXEC: %3:%2 Failed while executing query: %1\n").arg(query).arg(line).arg(file);
         errString+=QString("SqlError: (%1, %2, %3)\n").arg(qry.lastError().number()).arg(qry.lastError().databaseText()).arg(qry.lastError().driverText());
         db.rollback();
@@ -90,7 +92,7 @@ bool QDBMigrationEngine::exec(const QString &query, int line, char *file)
     }
     else
     {
-        QtopiaSql::logQuery(qry);
+        QtopiaSql::instance()->logQuery(qry);
         return true;
     }
 }
@@ -98,9 +100,14 @@ bool QDBMigrationEngine::exec(const QString &query, int line, char *file)
 
 int QDBMigrationEngine::tableVersion(const QString &tableName)
 {
-    QStringList tables = db.tables();
-    if(!tables.contains("versioninfo"))
-        return 0;
+    static bool versioninfoseen=false;
+    if(versioninfoseen==false)
+    {
+        QStringList tables = db.tables();
+        if(!tables.contains("versioninfo"))
+            return 0;
+        versioninfoseen=true;
+    }
 
     QSqlQuery xsql(db);
     xsql.prepare("select coalesce(max(versionNum), 0) from versioninfo where tableName = :tableName");
@@ -249,6 +256,8 @@ bool QDBMigrationEngine::loadSchema(QTextStream &ts, bool transact)
         EXEC( qry );
         qry = QLatin1String("");
     }
+    if(!qry.isEmpty())
+        EXEC( qry );
     if (transact)
     {
         if (db.commit())
@@ -267,24 +276,31 @@ bool QDBMigrationEngine::doMigrate(const QStringList &args)
     if(args.count() > 0)
     {
         foreach(const QString &arg, args) {
-            const QtopiaDatabaseId &id( QtopiaSql::databaseIdForDatabasePath(arg) );
+            const QtopiaDatabaseId &id( QtopiaSql::instance()->databaseIdForDatabasePath(arg) );
             if(!databaseIds.contains(id))
                 databaseIds.append(id);
         }
     }
     else
-        databaseIds = QtopiaSql::databaseIds();
+        databaseIds = QtopiaSql::instance()->databaseIds();
     foreach(QtopiaDatabaseId id, databaseIds)
     {
         bool removable=false;
 #ifndef QTOPIA_CONTENT_INSTALLER
-        if(id != 0 && !QtopiaSql::databasePathForId(id).isEmpty() && QStorageMetaInfo::instance()->fileSystemOf(QtopiaSql::databasePathForId(id)) != NULL)
-            removable = QStorageMetaInfo::instance()->fileSystemOf(QtopiaSql::databasePathForId(id))->isRemovable();
+        if(id != 0 && !QtopiaSql::instance()->databasePathForId(id).isEmpty() && QStorageMetaInfo::instance()->fileSystemOf(QtopiaSql::instance()->databasePathForId(id)) != NULL)
+            removable = QStorageMetaInfo::instance()->fileSystemOf(QtopiaSql::instance()->databasePathForId(id))->isRemovable();
 #endif
 
-        db=QtopiaSql::database(id);
+        db=QtopiaSql::instance()->database(id);
         if(db.isOpen()==false)
-            CHECK(db.open());
+        {
+            if(!db.open())
+            {
+                QString errString=QString("OPEN DATABASE: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
+                qCritical(qPrintable(errString));
+                return false;
+            }
+        }
         bool hasChanges=false;
         if(db.driverName() == QLatin1String("QSQLITE"))
         {
@@ -302,9 +318,15 @@ bool QDBMigrationEngine::doMigrate(const QStringList &args)
         }
 
         QStringList tables = db.tables();   // grr. db.tables() holds open a lock on the database
-        //db.close();
-        //db.open();
+//         db.close();
+//         db.open();
         
+//
+// Note that content_installer always starts from scratch so it should
+// not attempt to upgrade the database
+//
+
+#ifndef QTOPIA_CONTENT_INSTALLER
         if(tables.contains("content")) // pre-existing database
         {
             QSqlQuery xsql(db);
@@ -320,7 +342,7 @@ bool QDBMigrationEngine::doMigrate(const QStringList &args)
                 hasChanges=true;
             }
             int user_version=0;
-            if(db.driverName() == QLatin1String("QSQLITE") && tableVersion("categories") < 109)
+            if(db.driverName() == QLatin1String("QSQLITE") && tableVersion("content") < 111)
             {
                 CHECK(xsql.exec(QLatin1String("PRAGMA user_version")) && xsql.first());
                 user_version=xsql.value(0).toInt();
@@ -400,30 +422,60 @@ bool QDBMigrationEngine::doMigrate(const QStringList &args)
                     user_version = 109;
                     hasChanges=true;
                 }
-                CHECK(setTableVersion("content", 107));
-                CHECK(setTableVersion("contentProps", 107));
-                CHECK(setTableVersion("mapCategoryToContent", 107));
-                CHECK(setTableVersion("mimeTypeLookup", 107));
-                CHECK(setTableVersion("locationLookup", 107));
-                CHECK(setTableVersion("categories", 109));
+                if(user_version < 110)
+                {
+                    EXEC("ALTER TABLE content ADD uiNameSortOrder VARCHAR(100)");
+                    EXEC("CREATE INDEX cNameSortOrderIndex ON content ( uiNameSortOrder )");
 
+                    EXEC("CREATE TABLE databaseProperties("
+                            "key NVARCHAR (255) NOT NULL, "
+                            "property NVARCHAR (255) NOT NULL)");
+                }
+                CHECK(setTableVersion("content", 111));
+                CHECK(setTableVersion("contentProps", 111));
+                CHECK(setTableVersion("mapCategoryToContent", 111));
+                CHECK(setTableVersion("mimeTypeLookup", 111));
+                CHECK(setTableVersion("locationLookup", 111));
+                CHECK(setTableVersion("categories", 111));
+                CHECK(setTableVersion("databaseProperties",100));
+                user_version = 110;
+                hasChanges=true;
+
+            }
+            if (!db.tables().contains("categoryringtone"))
+            {
+                CHECK(ensureSchema("categoryringtone"));
+                CHECK(setTableVersion("categoryringtone", 110));
+            }
+            if(!db.tables().contains("mimeTypeMapping"))
+            {
+                CHECK(ensureSchema("mimeTypeMapping"));
+                CHECK(setTableVersion("mimeTypeMapping", 100));
             }
         }
         else
+#endif // QTOPIA_CONTENT_INSTALLER
         {
             QStringList tableList;
             tableList << "categories" << "content" << "mapCategoryToContent" << "locationLookup" << "contentProps";
             CHECK(ensureSchema(tableList));
             foreach(const QString &tableName, tableList)
-                CHECK(setTableVersion(tableName, 110));
-            hasChanges=true;
-        }
-        {
-            if (!removable) {
-                PimMigrate pimmigrate(this);
-                CHECK(pimmigrate.migrate());
-                hasChanges = true;
+                CHECK(setTableVersion(tableName, 111));
+            CHECK(setTableVersion("mimeTypeLookup", 111));
+            CHECK(ensureSchema("categoryringtone"));
+            CHECK(setTableVersion("categoryringtone", 110));
+            CHECK(ensureSchema("mimeTypeMapping"));
+            CHECK(setTableVersion("mimeTypeMapping", 100));
+
+            if( !tables.contains("databaseProperties") )
+            {
+                EXEC("CREATE TABLE databaseProperties("
+                        "key NVARCHAR (255) NOT NULL, "
+                        "property NVARCHAR (255) NOT NULL)");
+                CHECK(setTableVersion("databaseProperties",100));
             }
+
+            hasChanges=true;
         }
         if(hasChanges)
         {
@@ -438,8 +490,136 @@ bool QDBMigrationEngine::doMigrate(const QStringList &args)
         }
         else
             db.rollback();
+
+        CHECK(verifyLocale( db ));
+
     }
+
+#ifndef QTOPIA_CONTENT_INSTALLER
+    // do system-database only migrations
+    if(databaseIds.contains(0))
+    {
+        db=QtopiaSql::instance()->systemDatabase();
+        if(db.isOpen()==false)
+        CHECK(db.open());
+        if(!db.transaction())
+        {
+            QString errString=QString("BEGIN TRANSACTION: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
+            db.close();
+            qCritical(qPrintable(errString));
+            return false;
+        }
+
+        PimMigrate pimmigrate(this);
+        CHECK(pimmigrate.migrate());
+
+        PhoneMigrate phonemigrate(this);
+        CHECK(phonemigrate.migrate());
+
+        if(!db.commit())
+        {
+            QString errString=QString("COMMIT: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
+            db.rollback();
+            db.close();
+            qCritical(qPrintable(errString));
+            return false;
+        }
+    }
+#endif
+
     return true;
+}
+
+bool QDBMigrationEngine::verifyLocale( const QSqlDatabase &database )
+{
+    QString dbLanguage;
+    QString dbCollation;
+    {
+        QSqlQuery localeQuery( database );
+
+        CHECK(localeQuery.exec(QLatin1String("SELECT property FROM databaseProperties WHERE key='LANG'")));
+        if(localeQuery.first())
+            dbLanguage = localeQuery.value(0).toString();
+
+        CHECK(localeQuery.exec(QLatin1String("SELECT property FROM databaseProperties WHERE key='LC_COLLATE'")));
+        if(localeQuery.first())
+            dbCollation = localeQuery.value(0).toString();
+
+        QString envLanguage = QLatin1String( getenv("LANG") );
+        QString envCollation = QLatin1String( getenv("LC_COLLATE") );
+
+        if( envCollation.isEmpty() )
+            envCollation = envLanguage;
+
+        if( !dbLanguage.isEmpty() && envLanguage == dbLanguage && envCollation == dbCollation )
+            return true;
+
+        dbLanguage = envLanguage;
+        dbCollation = envCollation;
+    }
+
+    QSqlQuery selectQuery( database );
+
+    for( int offset = 0; ; offset += 100 )
+    {
+        selectQuery.prepare( QString( QLatin1String(
+            "select content.cid, content.uiName, transFile.value, transContext.value "
+            "from content "
+                "left join contentProps as transFile on content.cid = transFile.cid and transFile.grp = 'Translation' and transFile.name = 'File' "
+                "left join contentProps as transContext on content.cid = transContext.cid and transContext.grp = 'Translation' and transContext.name = 'Context' "
+                "order by content.cid "
+                "limit 100 offset %1" ) ).arg( offset ) );
+
+        QVariantList ids;
+        QVariantList names;
+
+        EXEC(selectQuery);
+
+        while( selectQuery.next() )
+        {
+            ids.append( selectQuery.value( 0 ) );
+
+            QString name = selectQuery.value( 1 ).toString();
+            QVariant translationFile = selectQuery.value( 2 );
+            QVariant translationContext = selectQuery.value( 3 );
+
+            if( !translationFile.isNull() && !translationContext.isNull() )
+                name = Qtopia::dehyphenate( Qtopia::translate( translationFile.toString(), translationContext.toString(), name ) );
+
+            names.append( transformString( name ) );
+        }
+
+        if( names.isEmpty() )
+            return true;
+
+        QSqlQuery updateQuery( database );
+        updateQuery.prepare( QLatin1String(
+            "update content "
+            "set uiNameSortOrder = ? "
+            "where cid = ?" ) );
+
+        updateQuery.addBindValue( names );
+        updateQuery.addBindValue( ids );
+
+        CHECK(updateQuery.execBatch());
+
+        EXEC(QLatin1String("DELETE FROM databaseProperties WHERE key = 'LANG'"));
+        EXEC(QLatin1String("DELETE FROM databaseProperties WHERE key = 'LC_COLLATE'"));
+        EXEC(QString(QLatin1String("INSERT INTO databaseProperties (key,property) VALUES( 'LANG', '%1')")).arg(dbLanguage));
+        EXEC(QString(QLatin1String("INSERT INTO databaseProperties (key,property) VALUES( 'LC_COLLATE', '%1')")).arg(dbCollation));
+    }
+}
+
+QByteArray QDBMigrationEngine::transformString( const QString &string ) const
+{
+    char buffer[ 1024 ];
+
+    QByteArray localString = string.toLocal8Bit();
+
+    if( strxfrm( buffer, localString.constData(), 1024 ) > 0 )
+        return QByteArray( buffer );
+    else
+        return localString;
 }
 
 #ifndef QTOPIA_CONTENT_INSTALLER

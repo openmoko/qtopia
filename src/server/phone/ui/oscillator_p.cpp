@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -23,12 +23,13 @@
 
 #include <math.h>
 
-Oscillator::Oscillator(qreal _yMin,qreal _yMax,qreal xMax,qreal _factor)
+Oscillator::Oscillator(qreal _yMin,qreal _yMax,qreal xMax,qreal _factor, qreal _origin)
         : yMax(_yMax)
         , yMin(_yMin)
         , m1(-(yMax-yMin)/2/xMax)
         , m2((yMax-yMin)/2/xMax)
         , factor(_factor)
+        , origin(_origin)
 {
 }
 
@@ -42,6 +43,6 @@ qreal Oscillator::operator() (qreal x) {
     // for example, factor = 2 will give us twice as many peaks
 
     qreal hr = (max - min)/2;
-    qreal rc = (hr * sin(x)) + (min + hr);
+    qreal rc = (hr * sin(x)) + origin;
     return rc;
 }

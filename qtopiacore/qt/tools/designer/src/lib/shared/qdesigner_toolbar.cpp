@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,144 +45,100 @@ TRANSLATOR qdesigner_internal::Sentinel
 #include "actionrepository_p.h"
 #include "actionprovider_p.h"
 #include "qdesigner_utils_p.h"
+#include "qdesigner_objectinspector_p.h"
 
-#include <QtDesigner/QtDesigner>
-
-#include <QtCore/QTimer>
+#include <QtDesigner/QDesignerFormWindowInterface>
+#include <QtDesigner/QDesignerPropertyEditorInterface>
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <actionprovider_p.h>
+#include <QtDesigner/QExtensionManager>
+#include <QtDesigner/QDesignerWidgetFactoryInterface>
 
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QToolButton>
+#include <QtGui/QToolBar>
 #include <QtGui/QMenu>
-#include <QtGui/QMainWindow>
 #include <QtGui/qevent.h>
+#include <QtGui/private/qtoolbarlayout_p.h>
 
 Q_DECLARE_METATYPE(QAction*)
-Q_DECLARE_METATYPE(QListWidgetItem*)
 
-using namespace qdesigner_internal;
+namespace {
+    typedef QList<QAction*> ActionList;
+}
 
-QDesignerToolBar::QDesignerToolBar(QWidget *parent)
-    : QToolBar(parent),
-      m_interactive(true)
+namespace qdesigner_internal {
+// ------------------- ToolBarEventFilter
+void ToolBarEventFilter::install(QToolBar *tb)
 {
-    setContextMenuPolicy(Qt::DefaultContextMenu);
-    setAcceptDrops(true); // ### fake
+    ToolBarEventFilter *tf = new ToolBarEventFilter(tb);
+    tb->installEventFilter(tf);
+    tb->setAcceptDrops(true); // ### fake
+}
 
-    QWidget *w = new QWidget(this);
+ToolBarEventFilter::ToolBarEventFilter(QToolBar *tb) :
+    QObject(tb),
+    m_toolBar(tb),
+    m_sentinel(0)
+{
+    QWidget *w = new QWidget(tb);
     w->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-    m_sentinel = addWidget(w);
-    addAction(m_sentinel);
-
-    qApp->installEventFilter(this);
+    w->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    w->setFocusPolicy(Qt::NoFocus);
+    m_sentinel = tb->addWidget(w);
+    tb->addAction(m_sentinel);
 }
 
-QDesignerToolBar::~QDesignerToolBar()
+bool ToolBarEventFilter::eventFilter (QObject *watched, QEvent *event)
 {
-}
-
-bool QDesignerToolBar::handleEvent(QWidget *widget, QEvent *event)
-{
-    if (!formWindow() || isPassiveWidget(widget))
-        return false;
+    if (watched != m_toolBar)
+        return QObject::eventFilter (watched, event);
 
     switch (event->type()) {
-        default: break;
-
-        case QEvent::MouseButtonPress:
-            return handleMousePressEvent(widget, static_cast<QMouseEvent*>(event));
-        case QEvent::MouseButtonRelease:
-            return handleMouseReleaseEvent(widget, static_cast<QMouseEvent*>(event));
-        case QEvent::MouseMove:
-            return handleMouseMoveEvent(widget, static_cast<QMouseEvent*>(event));
-        case QEvent::ContextMenu:
-            return handleContextMenuEvent(widget, static_cast<QContextMenuEvent*>(event));
-    }
-
-    return true;
-}
-
-void QDesignerToolBar::startDrag(const QPoint &pos)
-{
-    int index = findAction(pos);
-    if (index == actions().count() - 1)
-        return;
-
-    QAction *action = actions().at(index);
-    removeAction(action);
-    adjustSize();
-
-    adjustIndicator(pos);
-
-    QDrag *drag = new QDrag(this);
-    drag->setPixmap(action->icon().pixmap(QSize(22, 22)));
-
-    ActionRepositoryMimeData *data = new ActionRepositoryMimeData();
-    data->items.append(action);
-    drag->setMimeData(data);
-
-    if (drag->start() == Qt::IgnoreAction) {
-        QAction *previous = actions().at(index);
-
-        InsertActionIntoCommand *cmd = new InsertActionIntoCommand(formWindow());
-        cmd->init(this, action, previous);
-        formWindow()->commandHistory()->push(cmd);
-    }
-}
-
-bool QDesignerToolBar::handleMousePressEvent(QWidget *, QMouseEvent *event)
-{
-    event->accept();
-    m_startPosition = QPoint();
-
-    if (event->button() != Qt::LeftButton)
-        return true;
-
-    if (QDesignerFormWindowInterface *fw = formWindow()) {
-        if (QDesignerPropertyEditorInterface *pe = fw->core()->propertyEditor()) {
-            pe->setObject(this);
+    case QEvent::ChildAdded: {
+        // Children should not interact with the mouse
+        const QChildEvent *ce = static_cast<const QChildEvent *>(event);
+        if (QWidget *w = qobject_cast<QWidget *>(ce->child())) {
+            w->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+            w->setFocusPolicy(Qt::NoFocus);
         }
     }
-
-    m_startPosition = mapFromGlobal(event->globalPos());
-
-    return true;
+        break;
+    case QEvent::ContextMenu:
+        return handleContextMenuEvent(static_cast<QContextMenuEvent*>(event));
+    case QEvent::DragEnter:
+    case QEvent::DragMove:
+        return handleDragEnterMoveEvent(static_cast<QDragMoveEvent *>(event));
+    case QEvent::DragLeave:
+        return handleDragLeaveEvent(static_cast<QDragLeaveEvent *>(event));
+    case QEvent::Drop:
+        return handleDropEvent(static_cast<QDropEvent *>(event));
+    case QEvent::MouseButtonPress:
+        return handleMousePressEvent(static_cast<QMouseEvent*>(event));
+    case QEvent::MouseButtonRelease:
+        return handleMouseReleaseEvent(static_cast<QMouseEvent*>(event));
+    case QEvent::MouseMove:
+        return handleMouseMoveEvent(static_cast<QMouseEvent*>(event));
+    default:
+        break;
+    }
+    return QObject::eventFilter (watched, event);
 }
 
-bool QDesignerToolBar::handleMouseReleaseEvent(QWidget *, QMouseEvent *event)
+int  ToolBarEventFilter::findAction(const QPoint &pos) const
+{
+    // Default to sentinel action if out of geometry
+    const int index = actionIndexAt(m_toolBar, pos);
+    return index == -1 ? 0 : index;
+}
+
+bool ToolBarEventFilter::handleContextMenuEvent(QContextMenuEvent * event )
 {
     event->accept();
 
-    m_startPosition = QPoint();
-
-    return true;
-}
-
-bool QDesignerToolBar::handleMouseMoveEvent(QWidget *, QMouseEvent *event)
-{
-    event->accept();
-
-    if (m_startPosition.isNull())
-        return true;
-
-    QPoint pos = mapFromGlobal(event->globalPos());
-
-    if ((pos - m_startPosition).manhattanLength() < qApp->startDragDistance())
-        return true;
-
-    startDrag(m_startPosition);
-    m_startPosition = QPoint();
-
-    return true;
-}
-
-bool QDesignerToolBar::handleContextMenuEvent(QWidget *, QContextMenuEvent *event)
-{
-    event->accept();
-
-    int index = findAction(mapFromGlobal(event->globalPos()));
-
-    QAction *action = actions().at(index);
+    const int index = findAction(m_toolBar->mapFromGlobal(event->globalPos()));
+    QAction *action = m_toolBar->actions().at(index);
     QVariant itemData;
     qVariantSetValue(itemData, action);
 
@@ -181,31 +152,17 @@ bool QDesignerToolBar::handleContextMenuEvent(QWidget *, QContextMenuEvent *even
     if (action && action != m_sentinel) {
         QAction *a = menu.addAction(tr("Remove action '%1'").arg(action->objectName()));
         a->setData(itemData);
-
         connect(a, SIGNAL(triggered()), this, SLOT(slotRemoveSelectedAction()));
-
     }
 
-    QAction *remove_toolbar = menu.addAction(tr("Remove Toolbar '%1'").arg(objectName()));
+    QAction *remove_toolbar = menu.addAction(tr("Remove Toolbar '%1'").arg(m_toolBar->objectName()));
     connect(remove_toolbar, SIGNAL(triggered()), this, SLOT(slotRemoveToolBar()));
 
     menu.exec(event->globalPos());
-
     return true;
 }
 
-void QDesignerToolBar::slotRemoveToolBar()
-{
-    Q_ASSERT(formWindow() != 0);
-
-    QDesignerFormWindowInterface *fw = formWindow();
-
-    DeleteToolBarCommand *cmd = new DeleteToolBarCommand(fw);
-    cmd->init(this);
-    fw->commandHistory()->push(cmd);
-}
-
-void QDesignerToolBar::slotRemoveSelectedAction()
+void ToolBarEventFilter::slotRemoveSelectedAction()
 {
     QAction *action = qobject_cast<QAction*>(sender());
     if (!action)
@@ -214,182 +171,49 @@ void QDesignerToolBar::slotRemoveSelectedAction()
     QAction *a = qvariant_cast<QAction*>(action->data());
     Q_ASSERT(a != 0);
 
-    int pos = actions().indexOf(a);
+    QDesignerFormWindowInterface *fw = formWindow();
+    Q_ASSERT(fw);
+
+    const ActionList actions = m_toolBar->actions();
+    const int pos = actions.indexOf(a);
     QAction *action_before = 0;
-    if (pos != -1 && actions().count() > pos + 1)
-        action_before = actions().at(pos + 1);
+    if (pos != -1 && actions.count() > pos + 1)
+        action_before = actions.at(pos + 1);
 
-    RemoveActionFromCommand *cmd = new RemoveActionFromCommand(formWindow());
-    cmd->init(this, a, action_before);
-    formWindow()->commandHistory()->push(cmd);
+    RemoveActionFromCommand *cmd = new RemoveActionFromCommand(fw);
+    cmd->init(m_toolBar, a, action_before);
+    fw->commandHistory()->push(cmd);
 }
 
-bool QDesignerToolBar::eventFilter(QObject *object, QEvent *event)
-{
-    if (object == qApp->activePopupWidget())
-        return false;
-
-    switch (event->type()) {
-        default: break;
-
-        case QEvent::ContextMenu:
-        case QEvent::MouseMove:
-        case QEvent::MouseButtonPress:
-        case QEvent::MouseButtonRelease:
-        case QEvent::MouseButtonDblClick:
-        case QEvent::Enter:
-        case QEvent::Leave:
-        case QEvent::FocusIn:
-        case QEvent::FocusOut:
-        {
-            QWidget *widget = qobject_cast<QWidget*>(object);
-
-            if (widget && (widget == this || isAncestorOf(widget)))
-                return handleEvent(widget, event);
-        } break;
-    }
-
-    return false;
-};
-
-int QDesignerToolBar::findAction(const QPoint &pos) const
-{
-    QList<QAction*> lst = actions();
-    int index = 0;
-    for (; index<lst.size() - 1; ++index) {
-        QRect g = actionGeometry(lst.at(index));
-        g.setTopLeft(QPoint(0, 0));
-
-        if (g.contains(pos))
-            break;
-    }
-
-    return index;
-}
-
-QDesignerActionProviderExtension *QDesignerToolBar::actionProvider()
-{
-    if (QDesignerFormWindowInterface *fw = formWindow()) {
-        QDesignerFormEditorInterface *core = fw->core();
-        return qt_extension<QDesignerActionProviderExtension*>(core->extensionManager(), this);
-    }
-
-    return 0;
-}
-
-void QDesignerToolBar::adjustIndicator(const QPoint &pos)
-{
-    if (QDesignerActionProviderExtension *a = actionProvider()) {
-        a->adjustIndicator(pos);
-    }
-}
-
-void QDesignerToolBar::dragEnterEvent(QDragEnterEvent *event)
-{
-    if (const ActionRepositoryMimeData *d = qobject_cast<const ActionRepositoryMimeData*>(event->mimeData())) {
-        Q_ASSERT(!d->items.isEmpty());
-
-        QAction *action = d->items.first();
-        if (action && !action->menu() && !actions().contains(action) &&
-            Utils::isObjectAncestorOf(formWindow()->mainContainer(), action)) {
-            event->acceptProposedAction();
-            adjustIndicator(event->pos());
-        }
-    }
-}
-
-void QDesignerToolBar::dragMoveEvent(QDragMoveEvent *event)
-{
-    if (const ActionRepositoryMimeData *d = qobject_cast<const ActionRepositoryMimeData*>(event->mimeData())) {
-        Q_ASSERT(!d->items.isEmpty());
-
-        QAction *action = d->items.first();
-        if (action && !action->menu() && !actions().contains(action)) {
-            event->acceptProposedAction();
-            adjustIndicator(event->pos());
-        }
-    }
-}
-
-void QDesignerToolBar::dragLeaveEvent(QDragLeaveEvent *)
-{
-    if (QDesignerActionProviderExtension *a = actionProvider()) {
-        a->adjustIndicator(QPoint(-1,-1));
-    }
-}
-
-void QDesignerToolBar::dropEvent(QDropEvent *event)
-{
-    if (const ActionRepositoryMimeData *d = qobject_cast<const ActionRepositoryMimeData*>(event->mimeData())) {
-        event->acceptProposedAction();
-
-        QAction *action = d->items.first();
-        if (action && !actions().contains(action)) {
-            int index = findAction(event->pos());
-            index = qMin(index, actions().count() - 1);
-
-            InsertActionIntoCommand *cmd = new InsertActionIntoCommand(formWindow());
-            cmd->init(this, action, actions().at(index));
-            formWindow()->commandHistory()->push(cmd);
-        }
-    }
-
-    if (QDesignerActionProviderExtension *a = actionProvider()) {
-        a->adjustIndicator(QPoint(-1,-1));
-    }
-}
-
-void QDesignerToolBar::actionEvent(QActionEvent *event)
-{
-    QToolBar::actionEvent(event);
-}
-
-QDesignerFormWindowInterface *QDesignerToolBar::formWindow() const
-{
-    return QDesignerFormWindowInterface::findFormWindow(const_cast<QDesignerToolBar*>(this));
-}
-
-bool QDesignerToolBar::isPassiveWidget(QWidget *widget) const
-{
-    if (qobject_cast<Sentinel*>(widget))
-        return true;
-    else if (!qstrcmp(widget->metaObject()->className(), "QToolBarHandle"))
-        return true;
-
-    return false;
-}
-
-void QDesignerToolBar::slotNewToolBar()
+void ToolBarEventFilter::slotRemoveToolBar()
 {
     QDesignerFormWindowInterface *fw = formWindow();
-    if (fw && qobject_cast<QMainWindow*>(fw->mainContainer())) {
-        QMainWindow *mw = qobject_cast<QMainWindow*>(fw->mainContainer());
-
-        AddToolBarCommand *cmd = new AddToolBarCommand(fw);
-        cmd->init(mw);
-        fw->commandHistory()->push(cmd);
-    }
+    Q_ASSERT(fw);
+    DeleteToolBarCommand *cmd = new DeleteToolBarCommand(fw);
+    cmd->init(m_toolBar);
+    fw->commandHistory()->push(cmd);
 }
 
-void QDesignerToolBar::adjustSpecialActions()
+void ToolBarEventFilter::slotInsertSeparator()
 {
-    removeAction(m_sentinel);
-    addAction(m_sentinel);
-}
-
-bool QDesignerToolBar::interactive(bool i)
-{
-    bool old = m_interactive;
-    m_interactive = i;
-    return old;
-}
-
-// ### Share me with QDesignerMenu (a.k.a. I'm a copy of it)
-QAction *QDesignerToolBar::createAction(const QString &objectName, bool separator)
-{
-    Q_ASSERT(formWindow() != 0);
     QDesignerFormWindowInterface *fw = formWindow();
+    QAction *theSender = qobject_cast<QAction*>(sender());
+    QAction *previous = qvariant_cast<QAction *>(theSender->data());
+    fw->beginCommand(tr("Insert Separator"));
+    QAction *action = createAction(fw, QLatin1String("separator"), true);
+    InsertActionIntoCommand *cmd = new InsertActionIntoCommand(fw);
+    cmd->init(m_toolBar, action, previous);
+    fw->commandHistory()->push(cmd);
+    fw->endCommand();
+}
 
+QDesignerFormWindowInterface *ToolBarEventFilter::formWindow() const
+{
+    return QDesignerFormWindowInterface::findFormWindow(m_toolBar);
+}
+
+QAction *ToolBarEventFilter::createAction(QDesignerFormWindowInterface *fw, const QString &objectName, bool separator)
+{
     QAction *action = new QAction(fw);
     fw->core()->widgetFactory()->initialize(action);
     if (separator)
@@ -398,26 +222,213 @@ QAction *QDesignerToolBar::createAction(const QString &objectName, bool separato
     action->setObjectName(objectName);
     fw->ensureUniqueObjectName(action);
 
-    AddActionCommand *cmd = new AddActionCommand(fw);
+    qdesigner_internal::AddActionCommand *cmd = new  qdesigner_internal::AddActionCommand(fw);
     cmd->init(action);
     fw->commandHistory()->push(cmd);
 
     return action;
 }
 
-void QDesignerToolBar::slotInsertSeparator()
+void ToolBarEventFilter::adjustDragIndicator(const QPoint &pos)
 {
-    QAction *theSender = qobject_cast<QAction*>(sender());
-    QAction *previous = qvariant_cast<QAction *>(theSender->data());
-    formWindow()->beginCommand(tr("Insert Separator"));
-    QAction *action = createAction("separator", true);
-    InsertActionIntoCommand *cmd = new InsertActionIntoCommand(formWindow());
-    cmd->init(this, action, previous);
-    formWindow()->commandHistory()->push(cmd);
-    formWindow()->endCommand();
+    if (QDesignerFormWindowInterface *fw = formWindow()) {
+        QDesignerFormEditorInterface *core = fw->core();
+        if (QDesignerActionProviderExtension *a = qt_extension<QDesignerActionProviderExtension*>(core->extensionManager(), m_toolBar))
+            a->adjustIndicator(pos);
+    }
 }
 
-////////////////////////////////////////////////////////////////////////////////
+void ToolBarEventFilter::hideDragIndicator()
+{
+    adjustDragIndicator(QPoint(-1, -1));
+}
+
+void ToolBarEventFilter::adjustSpecialActions(QToolBar *tb)
+{
+    if (ToolBarEventFilter *tef = qFindChild<ToolBarEventFilter *>(tb))
+        tef->positionSentinel();
+}
+
+void ToolBarEventFilter::positionSentinel()
+{
+    // Make sure dummy is last
+    m_toolBar->removeAction(m_sentinel);
+    m_toolBar->addAction(m_sentinel);
+}
+
+bool ToolBarEventFilter::handleMousePressEvent(QMouseEvent *event)
+{
+    if (event->button() != Qt::LeftButton || withinHandleArea(m_toolBar, event->pos()))
+        return false;
+
+    if (QDesignerFormWindowInterface *fw = formWindow()) {
+        QDesignerFormEditorInterface *core = fw->core();
+        // Keep selection in sync
+        fw->clearSelection(false);
+        if (QDesignerObjectInspector *oi = qobject_cast<QDesignerObjectInspector *>(core->objectInspector())) {
+            oi->clearSelection();
+            oi->selectObject(m_toolBar);
+        }
+        core->propertyEditor()->setObject(m_toolBar);
+    }
+    m_startPosition = m_toolBar->mapFromGlobal(event->globalPos());
+    event->accept();
+    return true;
+}
+
+bool ToolBarEventFilter::handleMouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() != Qt::LeftButton || m_startPosition.isNull() || withinHandleArea(m_toolBar, event->pos()))
+        return false;
+
+    // Accept the event, otherwise, form window selection will trigger
+    m_startPosition = QPoint();
+    event->accept();
+    return true;
+}
+
+bool ToolBarEventFilter::handleMouseMoveEvent(QMouseEvent *event)
+{
+    if (m_startPosition.isNull() || withinHandleArea(m_toolBar, event->pos()))
+        return false;
+
+    const QPoint pos = m_toolBar->mapFromGlobal(event->globalPos());
+    if ((pos - m_startPosition).manhattanLength() > qApp->startDragDistance()) {
+        startDrag(m_startPosition, event->modifiers());
+        m_startPosition = QPoint();
+        event->accept();
+        return true;
+    }
+    return false;
+}
+
+bool ToolBarEventFilter::handleDragEnterMoveEvent(QDragMoveEvent *event)
+{
+    const ActionRepositoryMimeData *d = qobject_cast<const ActionRepositoryMimeData*>(event->mimeData());
+    if (!d)
+        return false;
+
+    if (d->actionList().isEmpty()) {
+        event->ignore();
+        hideDragIndicator();
+        return true;
+    }
+
+    QAction *action = d->actionList().first();
+    if (!action || action->menu() || m_toolBar->actions().contains(action) || !Utils::isObjectAncestorOf(formWindow()->mainContainer(), action)) {
+        event->ignore();
+        hideDragIndicator();
+        return true;
+    }
+
+    d->accept(event);
+    adjustDragIndicator(event->pos());
+    return true;
+}
+
+bool ToolBarEventFilter::handleDragLeaveEvent(QDragLeaveEvent *)
+{
+    hideDragIndicator();
+    return false;
+}
+
+bool ToolBarEventFilter::handleDropEvent(QDropEvent *event)
+{
+    const ActionRepositoryMimeData *d = qobject_cast<const ActionRepositoryMimeData*>(event->mimeData());
+    if (!d)
+        return false;
+
+    if (d->actionList().isEmpty()) {
+        event->ignore();
+        hideDragIndicator();
+        return true;
+    }
+
+    QAction *action = d->actionList().first();
+
+    const ActionList actions = m_toolBar->actions();
+    if (!action || actions.contains(action)) {
+        event->ignore();
+        hideDragIndicator();
+        return true;
+    }
+
+    event->acceptProposedAction();
+
+    int index = findAction(event->pos());
+    index = qMin(index, actions.count() - 1);
+
+    QDesignerFormWindowInterface *fw = formWindow();
+    InsertActionIntoCommand *cmd = new InsertActionIntoCommand(fw);
+    cmd->init(m_toolBar, action, actions.at(index));
+    fw->commandHistory()->push(cmd);
+    hideDragIndicator();
+    return true;
+}
+
+void ToolBarEventFilter::startDrag(const QPoint &pos, Qt::KeyboardModifiers modifiers)
+{
+    const int index = findAction(pos);
+    const ActionList actions = m_toolBar->actions();
+    if (index == actions.count() - 1)
+        return;
+
+    QAction *action = actions.at(index);
+    QDesignerFormWindowInterface *fw = formWindow();
+
+    const Qt::DropAction dropAction = (modifiers & Qt::ControlModifier) ? Qt::CopyAction : Qt::MoveAction;
+    if (dropAction == Qt::MoveAction) {
+        RemoveActionFromCommand *cmd = new RemoveActionFromCommand(fw);
+        cmd->init(m_toolBar, action, actions.at(index + 1));
+        fw->commandHistory()->push(cmd);
+    }
+
+    QDrag *drag = new QDrag(m_toolBar);
+    drag->setPixmap(ActionRepositoryMimeData::actionDragPixmap( action));
+    drag->setMimeData(new ActionRepositoryMimeData(action, dropAction));
+
+    if (drag->start(dropAction) == Qt::IgnoreAction) {
+        hideDragIndicator();
+        if (dropAction == Qt::MoveAction) {
+            QAction *previous = m_toolBar->actions().at(index);
+            InsertActionIntoCommand *cmd = new InsertActionIntoCommand(fw);
+            cmd->init(m_toolBar, action, previous);
+            fw->commandHistory()->push(cmd);
+        }
+    }
+}
+
+int ToolBarEventFilter::actionIndexAt(const QToolBar *tb, const QPoint &pos)
+{
+    const ActionList actionList = tb->actions();
+    if (const  int size = actionList.size()) {
+        for (int  i = 0; i < size; i++) {
+            QRect g = tb->actionGeometry(actionList.at(i));
+            g.setTopLeft(QPoint(0, 0));
+            if (g.contains(pos))
+                return i;
+        }
+    }
+    return -1;
+}
+
+QAction *ToolBarEventFilter::actionAt(const QToolBar *tb, const QPoint &pos)
+{
+    const int index = actionIndexAt(tb, pos);
+    if (index == -1)
+        return 0;
+    return tb->actions().at(index);
+}
+
+bool ToolBarEventFilter::withinHandleArea(const QToolBar *tb, const QPoint &pos)
+{
+    if (QToolBarLayout *tbl = qobject_cast<QToolBarLayout *>(tb->layout()))
+        return tbl->handleRect().contains(pos);
+    return false;
+}
+
+// ------------------- SentinelAction
+
 SentinelAction::SentinelAction(QWidget *widget)
     : QAction(widget)
 {
@@ -428,11 +439,12 @@ SentinelAction::~SentinelAction()
 {
 }
 
+// ------------------- Sentinel
 Sentinel::Sentinel(QWidget *widget)
     : QToolButton(widget)
 {
     setObjectName(QString::fromUtf8("__qt__passive_new"));
-    setText(">>");
+    setText(QLatin1String(">>"));
     setToolButtonStyle(Qt::ToolButtonTextOnly);
     setToolTip(tr("New Tool Bar"));
 }
@@ -440,4 +452,4 @@ Sentinel::Sentinel(QWidget *widget)
 Sentinel::~Sentinel()
 {
 }
-
+}

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,6 +53,7 @@
 #include "QtGui/qstyleoption.h"
 #include "private/qwidget_p.h"
 #include "QtGui/qboxlayout.h"
+#include "QtGui/qdockwidget.h"
 
 #ifndef QT_NO_DOCKWIDGET
 
@@ -48,21 +64,6 @@ class QDockWidgetTitleButton;
 class QSpacerItem;
 class QDockWidgetItem;
 
-//We need access to insertItem and addChildWidget in QDockWidget
-class QDockWidgetBoxLayout : public QVBoxLayout
-{
-public:
-    QDockWidgetBoxLayout(QWidget *parent = 0)
-        : QVBoxLayout(parent) {}
-#ifdef Q_NO_USING_KEYWORD
-    inline void addChildWidget(QWidget *widget) { QVBoxLayout::addChildWidget(widget); }
-    inline void insertItem(int index, QLayoutItem *item) { QVBoxLayout::insertItem(index, item); }
-#else
-    using QVBoxLayout::addChildWidget;
-    using QVBoxLayout::insertItem;
-#endif
-};
-
 class QDockWidgetPrivate : public QWidgetPrivate
 {
     Q_DECLARE_PUBLIC(QDockWidget)
@@ -70,58 +71,127 @@ class QDockWidgetPrivate : public QWidgetPrivate
     struct DragState {
         QPoint pressPos;
         bool dragging;
-        QWidgetItem *widgetItem;
-        QList<int> pathToGap;
+        QLayoutItem *widgetItem;
         bool ownWidgetItem;
+        bool nca;
+        bool ctrlDrag;
     };
 
 public:
     inline QDockWidgetPrivate()
-	: QWidgetPrivate(), state(0), widget(0),
+	: QWidgetPrivate(), state(0),
           features(QDockWidget::DockWidgetClosable
                    | QDockWidget::DockWidgetMovable
                    | QDockWidget::DockWidgetFloatable),
-          allowedAreas(Qt::AllDockWidgetAreas), top(0), box(0),
-          topSpacer(0), floatButton(0), closeButton(0), resizer(0)
+          allowedAreas(Qt::AllDockWidgetAreas)
     { }
 
     void init();
     void _q_toggleView(bool); // private slot
     void _q_toggleTopLevel(); // private slot
 
-    QStyleOptionDockWidget getStyleOption();
-
     void updateButtons();
-    void relayout();
     DragState *state;
-
-    QWidget *widget;
 
     QDockWidget::DockWidgetFeatures features;
     Qt::DockWidgetAreas allowedAreas;
 
-    QGridLayout *top;
-    QDockWidgetBoxLayout *box;
-    QSpacerItem *topSpacer;
-    QRect titleArea;
-    QDockWidgetTitleButton *floatButton;
-    QDockWidgetTitleButton *closeButton;
-
     QWidgetResizeHandler *resizer;
+
 #ifndef QT_NO_ACTION
     QAction *toggleViewAction;
 #endif
 
-    QMainWindow *findMainWindow(QWidget *widget) const;
+//    QMainWindow *findMainWindow(QWidget *widget) const;
+    QRect undockedGeometry;
+    QString fixedWindowTitle;
 
     void mousePressEvent(QMouseEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void setWindowState(bool floating, bool unplug = false, const QRect &rect = QRect());
+    void nonClientAreaMouseEvent(QMouseEvent *event);
+    void initDrag(const QPoint &pos, bool nca);
+    void startDrag();
+    void endDrag(bool abort = false);
+    void moveEvent(QMoveEvent *event);
 
     void unplug(const QRect &rect);
     void plug(const QRect &rect);
+
+    bool isAnimating() const;
 };
+
+class Q_GUI_EXPORT QDockWidgetLayout : public QLayout
+{
+    Q_OBJECT
+public:
+    QDockWidgetLayout(QWidget *parent = 0);
+    ~QDockWidgetLayout();
+    void addItem(QLayoutItem *item);
+    QLayoutItem *itemAt(int index) const;
+    QLayoutItem *takeAt(int index);
+    int count() const;
+
+    QSize minimumSize() const;
+    QSize sizeHint() const;
+
+    QSize sizeFromContent(const QSize &content, bool floating) const;
+
+    void setGeometry(const QRect &r);
+
+    enum Role { Content, CloseButton, FloatButton, TitleBar, RoleCount };
+    QWidget *widget(Role r) const;
+    void setWidget(Role r, QWidget *w);
+    QLayoutItem *item(Role r) const;
+
+    QRect titleArea() const { return _titleArea; }
+
+    int minimumTitleWidth() const;
+    int titleHeight() const;
+    void updateMaxSize();
+    bool nativeWindowDeco() const;
+
+    void setVerticalTitleBar(bool b);
+
+    bool verticalTitleBar;
+
+private:
+    QVector<QLayoutItem*> item_list;
+    QRect _titleArea;
+};
+
+/* The size hints of a QDockWidget will depend on wether it is docked or not.
+   This layout item always returns the size hints as if the dock widget was docked. */
+
+class QDockWidgetItem : public QWidgetItem
+{
+public:
+    QDockWidgetItem(QDockWidget *dockWidget);
+    QSize minimumSize() const;
+    QSize maximumSize() const;
+    QSize sizeHint() const;
+
+private:
+    inline QLayoutItem *dockWidgetChildItem() const;
+    inline QDockWidgetLayout *dockWidgetLayout() const;
+};
+
+inline QLayoutItem *QDockWidgetItem::dockWidgetChildItem() const
+{
+    if (QDockWidgetLayout *layout = dockWidgetLayout())
+        return layout->item(QDockWidgetLayout::Content);
+    return 0;
+}
+
+inline QDockWidgetLayout *QDockWidgetItem::dockWidgetLayout() const
+{
+    QWidget *w = const_cast<QDockWidgetItem*>(this)->widget();
+    if (w != 0)
+        return qobject_cast<QDockWidgetLayout*>(w->layout());
+    return 0;
+}
 
 #endif // QT_NO_DOCKWIDGET
 

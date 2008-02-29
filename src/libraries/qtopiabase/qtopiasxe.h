@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,12 +22,13 @@
 #ifndef QTOPIASXE_H
 #define QTOPIASXE_H
 
-#if !defined(QT_NO_SXE) || defined(SXE_INSTALLER)
+#include <qtopiaglobal.h>
 
-#include <qdebug.h>
+#if !defined(QT_NO_SXE) || defined(SXE_INSTALLER) || defined (Q_QDOC)
+
 #include <QFile>
 
-#if defined(Q_WS_QWS) || defined(SXE_INSTALLER)
+#if !defined(QTOPIA_HOST) || defined(SXE_INSTALLER)
 #include <qtransportauth_qws.h>
 
 /* from $QT_DEPOT_PATH/src/gui/embedded/qtransportauth_qws_p.h */
@@ -35,11 +36,14 @@
 #endif
 
 #include <qtopiaglobal.h>
+#include <QDebug>
+
+class SxeProgramInfoPrivate;
 
 struct QTOPIABASE_EXPORT SxeProgramInfo
 {
-    SxeProgramInfo() : id( 0 ) { ::memset( key, 0, QSXE_KEY_LEN ); }
-    ~SxeProgramInfo() {}
+    SxeProgramInfo();
+    ~SxeProgramInfo();
     QString fileName;   // eg calculator, bomber
     QString relPath;    // eg bin, packages/bin
     QString runRoot;    // eg /opt/Qtopia.rom, /opt/Qtopia.user
@@ -50,24 +54,29 @@ struct QTOPIABASE_EXPORT SxeProgramInfo
 
     bool isValid() const;
     QString absolutePath() const;
+    bool locateBinary();
+    void suid();
+private:
+    SxeProgramInfoPrivate *d;
 };
 
 QTOPIABASE_EXPORT QDebug operator<<(QDebug debug, const SxeProgramInfo &progInfo);
 
+#endif  // QT_NO_SXE
+
+#ifdef SINGLE_EXEC
+#define QSXE_KEY_TEMPLATE
+#define QSXE_APP_KEY;
+#define QSXE_QL_APP_KEY;
+#define QSXE_SET_QL_KEY(APPNAME);
+#define QSXE_SET_APP_KEY(APPNAME);
+#else
+QTOPIABASE_EXPORT void checkAndSetProcessKey( const char *key, const char *app );
 #define QSXE_KEY_TEMPLATE "XOXOXOauthOXOXOX99"
 #define QSXE_APP_KEY char _key[] = QSXE_KEY_TEMPLATE;
 #define QSXE_QL_APP_KEY char _ql_key[] = QSXE_KEY_TEMPLATE;
-#define QSXE_SET_QL_KEY(APPNAME) QTransportAuth::getInstance()->setProcessKey( _ql_key, APPNAME );
-#define QSXE_SET_APP_KEY(APPNAME) QTransportAuth::getInstance()->setProcessKey( _key, APPNAME );
-
-#else
-
-#define QSXE_KEY_TEMPLATE
-#define QSXE_APP_KEY
-#define QSXE_QL_APP_KEY
-#define QSXE_SET_QL_KEY(APPNAME)
-#define QSXE_SET_APP_KEY(APPNAME)
-
-#endif  // QT_NO_SXE
+#define QSXE_SET_QL_KEY(APPNAME) checkAndSetProcessKey( _ql_key, APPNAME );
+#define QSXE_SET_APP_KEY(APPNAME) checkAndSetProcessKey( _key, APPNAME );
+#endif
 
 #endif  // QTOPIASXE_H

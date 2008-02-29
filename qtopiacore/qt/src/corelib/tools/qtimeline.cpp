@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -62,6 +77,7 @@ public:
     int currentLoopCount;
 
     int currentTime;
+    int elapsedTime;
     int timerId;
     QTime timer;
 
@@ -85,33 +101,72 @@ void QTimeLinePrivate::setCurrentTime(int msecs)
 {
     Q_Q(QTimeLine);
 
-    if (msecs == currentTime)
-        return;
-
     qreal lastValue = q->currentValue();
     int lastFrame = q->currentFrame();
 
-    currentTime = msecs;
-    while (currentTime < 0)
-        currentTime += duration;
-    bool looped = (msecs < 0 || msecs > duration);
-    currentTime %= (duration + 1);
-    if (looped)
-        ++currentLoopCount;
+    // Determine if we are looping.
+    int elapsed = (direction == QTimeLine::Backward) ? (-msecs +  duration) : msecs;
+    int loopCount = elapsed / duration;
 
+    bool looping = (loopCount != currentLoopCount);
+#ifdef QTIMELINE_DEBUG
+    qDebug() << "QTimeLinePrivate::setCurrentTime:" << msecs << duration << "with loopCount" << loopCount
+             << "currentLoopCount" << currentLoopCount
+             << "looping" << looping;
+#endif
+    if (looping)
+        currentLoopCount = loopCount;
+
+    // Normalize msecs to be between 0 and duration, inclusive.
+    currentTime = elapsed % duration;
+    if (direction == QTimeLine::Backward)
+        currentTime = duration - currentTime;
+
+    // Check if we have reached the end of loopcount.
     bool finished = false;
-    if (totalLoopCount && looped && currentLoopCount >= totalLoopCount) {
+    if (totalLoopCount && currentLoopCount >= totalLoopCount) {
         finished = true;
         currentTime = (direction == QTimeLine::Backward) ? 0 : duration;
+        currentLoopCount = totalLoopCount - 1;
     }
 
+    int currentFrame = q->frameForTime(currentTime);
+#ifdef QTIMELINE_DEBUG
+    qDebug() << "QTimeLinePrivate::setCurrentTime: frameForTime" << currentTime << currentFrame;
+#endif
     if (lastValue != q->currentValue())
         emit q->valueChanged(q->currentValue());
-    if (lastFrame != q->currentFrame())
-        emit q->frameChanged(q->currentFrame());
+    if (lastFrame != currentFrame) {
+        const int transitionframe = (direction == QTimeLine::Forward ? endFrame : startFrame);
+        if (looping && !finished && transitionframe != currentFrame) {
+#ifdef QTIMELINE_DEBUG
+            qDebug() << "QTimeLinePrivate::setCurrentTime: transitionframe";
+#endif
+            emit q->frameChanged(transitionframe);
+        }
+#ifdef QTIMELINE_DEBUG
+        else {
+            QByteArray reason;
+            if (!looping)
+                reason += " not looping";
+            if (finished) {
+                if (!reason.isEmpty())
+                    reason += " and";
+                reason += " finished";
+            }
+            if (transitionframe == currentFrame) {
+                if (!reason.isEmpty())
+                    reason += " and";
+                reason += " transitionframe is equal to currentFrame: " + QByteArray::number(currentFrame);
+            }
+            qDebug("QTimeLinePrivate::setCurrentTime: not transitionframe because %s",  reason.constData());
+        }
+#endif
+        emit q->frameChanged(currentFrame);
+    }
     if (finished) {
-        emit q->finished();
         q->stop();
+        emit q->finished();
     }
 }
 
@@ -146,13 +201,13 @@ void QTimeLinePrivate::setCurrentTime(int msecs)
         timeLine->setFrameRange(0, 100);
         connect(timeLine, SIGNAL(frameChanged(int)), progressBar, SLOT(setValue(int)));
 
-        // Clicking the pushbutton will start the progress bar animation
+        // Clicking the push button will start the progress bar animation
         pushButton = new QPushButton(tr("Start animation"), this);
         connect(pushButton, SIGNAL(clicked()), timeLine, SLOT(start()));
         ...
     \endcode
 
-    You can also use QTimeLine with the 
+    You can also use QTimeLine with the
     \l{Graphics View}{Graphics View framework} for
     animations. The QGraphicsItemAnimation class implements animation
     of \l{QGraphicsItem}{QGraphicsItems} with a timeline.
@@ -344,7 +399,7 @@ void QTimeLine::setDirection(Direction direction)
 
     By default, this value is 1000 (i.e., 1 second), but you can change this
     by either passing a duration to QTimeLine's constructor, or by calling
-    setDuration().
+    setDuration(). The duration must be larger than 0.
 */
 int QTimeLine::duration() const
 {
@@ -354,6 +409,10 @@ int QTimeLine::duration() const
 void QTimeLine::setDuration(int duration)
 {
     Q_D(QTimeLine);
+    if (duration <= 0) {
+        qWarning("QTimeLine::setDuration: cannot set duration <= 0");
+        return;
+    }
     d->duration = duration;
 }
 
@@ -485,6 +544,7 @@ void QTimeLine::setCurrentTime(int msec)
 {
     Q_D(QTimeLine);
     d->startTime = 0;
+    d->currentLoopCount = 0;
     d->timer.restart();
     d->setCurrentTime(msec);
 }
@@ -521,7 +581,9 @@ qreal QTimeLine::currentValue() const
 int QTimeLine::frameForTime(int msec) const
 {
     Q_D(const QTimeLine);
-    return d->startFrame + int((d->endFrame - d->startFrame) * valueForTime(msec));
+    if (d->direction == Forward)
+        return d->startFrame + int((d->endFrame - d->startFrame) * valueForTime(msec));
+    return d->startFrame + int(::ceil(double((d->endFrame - d->startFrame) * valueForTime(msec))));
 }
 
 /*!
@@ -575,12 +637,16 @@ qreal QTimeLine::valueForTime(int msec) const
 }
 
 /*!
-    Starts the timeline. QTimeLine will enter Running state, and once it
-    enters the event loop, it will update its current time, frame and value at
-    regular intervals. The default interval is 40 ms (i.e., 25 times per
-    second). You can change the update interval by calling setUpdateInterval().
+    Starts or restarts the timeline. QTimeLine will enter Running state, and
+    once it enters the event loop, it will update its current time, frame and
+    value at regular intervals. The default interval is 40 ms (i.e., 25 times
+    per second). You can change the update interval by calling
+    setUpdateInterval().
 
-    \sa updateInterval(), frameChanged(), valueChanged()
+    If you want to resume a stopped timeline without restarting, you can call
+    resume() instead.
+
+    \sa resume(), updateInterval(), frameChanged(), valueChanged()
 */
 void QTimeLine::start()
 {
@@ -589,10 +655,36 @@ void QTimeLine::start()
         qWarning("QTimeLine::start: already running");
         return;
     }
-    if (d->currentTime == d->duration && d->direction == Forward)
-        d->currentTime = 0;
-    else if (d->currentTime == 0 && d->direction == Backward)
-        d->currentTime = d->duration;
+    int curTime = d->currentTime;
+    if (curTime == d->duration && d->direction == Forward)
+        curTime = 0;
+    else if (curTime == 0 && d->direction == Backward)
+        curTime = d->duration;
+    d->timerId = startTimer(d->updateInterval);
+    d->startTime = curTime;
+    d->currentLoopCount = 0;
+    d->timer.start();
+    d->setState(Running);
+    d->setCurrentTime(curTime);
+}
+
+/*!
+    Resumes the timeline from the current time. QTimeLine will reenter Running
+    state, and once it enters the event loop, it will update its current time,
+    frame and value at regular intervals.
+
+    In contrast to start(), this function does not restart the timeline before
+    is resumes.
+
+    \sa start(), updateInterval(), frameChanged(), valueChanged()
+*/
+void QTimeLine::resume()
+{
+    Q_D(QTimeLine);
+    if (d->timerId) {
+        qWarning("QTimeLine::resume: already running");
+        return;
+    }
     d->timerId = startTimer(d->updateInterval);
     d->startTime = d->currentTime;
     d->timer.start();

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QDServerSyncPlugin Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">Classes</font></a>&nbsp;&middot; <a href="headers.html"><font color="#004faf">Headers</font></a>&nbsp;&middot; <a href="overviews.html"><font color="#004faf">Overviews</font></a> </td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDServerSyncPlugin Class Reference</h1>
+<p>The QDServerSyncPlugin class represents a sync server. <a href="#details">More...</a></p>
+<pre>    #include &lt;QDServerSyncPlugin&gt;</pre><p>Inherits <a href="qdsyncplugin.html">QDSyncPlugin</a>.</p>
+<ul>
+<li><a href="qdserversyncplugin-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qdserversyncplugin.html#QDServerSyncPlugin">QDServerSyncPlugin</a></b> ( QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/>virtual <b><a href="qdserversyncplugin.html#dtor.QDServerSyncPlugin">~QDServerSyncPlugin</a></b> ()</li>
+<li><div class="fn"/>virtual void <b><a href="qdserversyncplugin.html#createClientRecord">createClientRecord</a></b> ( const QByteArray &amp; <i>record</i> ) = 0</li>
+<li><div class="fn"/>virtual void <b><a href="qdserversyncplugin.html#performSync">performSync</a></b> ( const QDateTime &amp; <i>timestamp</i> ) = 0</li>
+<li><div class="fn"/>virtual void <b><a href="qdserversyncplugin.html#removeClientRecord">removeClientRecord</a></b> ( const QString &amp; <i>identifier</i> ) = 0</li>
+<li><div class="fn"/>virtual void <b><a href="qdserversyncplugin.html#replaceClientRecord">replaceClientRecord</a></b> ( const QByteArray &amp; <i>record</i> ) = 0</li>
+</ul>
+<ul>
+<li><div class="fn"/>4 public functions inherited from <a href="qdsyncplugin.html#public-functions">QDSyncPlugin</a></li>
+<li><div class="fn"/>7 public functions inherited from <a href="qdplugin.html#public-functions">QDPlugin</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="../qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qdserversyncplugin.html#createServerRecord">createServerRecord</a></b> ( const QByteArray &amp; <i>record</i> )</li>
+<li><div class="fn"/>void <b><a href="qdserversyncplugin.html#mappedId">mappedId</a></b> ( const QString &amp; <i>serverId</i>, const QString &amp; <i>clientId</i> )</li>
+<li><div class="fn"/>void <b><a href="qdserversyncplugin.html#removeServerRecord">removeServerRecord</a></b> ( const QString &amp; <i>identifier</i> )</li>
+<li><div class="fn"/>void <b><a href="qdserversyncplugin.html#replaceServerRecord">replaceServerRecord</a></b> ( const QByteArray &amp; <i>record</i> )</li>
+<li><div class="fn"/>void <b><a href="qdserversyncplugin.html#serverChangesCompleted">serverChangesCompleted</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>2 signals inherited from <a href="qdsyncplugin.html#signals">QDSyncPlugin</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="../qobject.html#signals">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="../qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="../qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="../qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="../qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="../qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="../qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="../qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QDServerSyncPlugin class represents a sync server.</p>
+<p>The sync implementation uses both client and server plugins. A typical server plugin is expected to fetch changes from and submit changes back to the data store of another application (either directly or via some third party API).</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QDServerSyncPlugin"></a>QDServerSyncPlugin::QDServerSyncPlugin ( <a href="../qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Construct a <a href="qdclientsyncplugin.html">QDClientSyncPlugin</a> with <i>parent</i> as the owning <a href="../qobject.html">QObject</a>.</p>
+<h3 class="fn"><a name="dtor.QDServerSyncPlugin"></a>QDServerSyncPlugin::~QDServerSyncPlugin ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Destructor.</p>
+<h3 class="fn"><a name="createClientRecord"></a>void QDServerSyncPlugin::createClientRecord ( const <a href="../qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Create the item specified in <i>record</i>.</p>
+<p>See also <a href="qdserversyncplugin.html#mappedId">mappedId</a>().</p>
+<h3 class="fn"><a name="createServerRecord"></a>void QDServerSyncPlugin::createServerRecord ( const <a href="../qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Emit this signal when a new item has been created. The item is passed via <i>record</i>.</p>
+<p>See also <a href="qdserversyncplugin.html#performSync">performSync</a>().</p>
+<h3 class="fn"><a name="mappedId"></a>void QDServerSyncPlugin::mappedId ( const <a href="../qstring.html">QString</a> &amp; <i>serverId</i>, const <a href="../qstring.html">QString</a> &amp; <i>clientId</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Emit this signal when a client id (<i>clientId</i>) can be mapped to a server id (<i>serverId</i>).</p>
+<p>See also <a href="qdserversyncplugin.html#createClientRecord">createClientRecord</a>().</p>
+<h3 class="fn"><a name="performSync"></a>void QDServerSyncPlugin::performSync ( const <a href="../qdatetime.html">QDateTime</a> &amp; <i>timestamp</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Perform a sync on items modified after <i>timestamp</i>. The work can be done asynchronously and progress should be indicated via signals.</p>
+<p>See also <a href="qdserversyncplugin.html#createServerRecord">createServerRecord</a>(), <a href="qdserversyncplugin.html#replaceServerRecord">replaceServerRecord</a>(), <a href="qdserversyncplugin.html#removeServerRecord">removeServerRecord</a>(), and <a href="qdserversyncplugin.html#serverChangesCompleted">serverChangesCompleted</a>().</p>
+<h3 class="fn"><a name="removeClientRecord"></a>void QDServerSyncPlugin::removeClientRecord ( const <a href="../qstring.html">QString</a> &amp; <i>identifier</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Remove the item indicated by <i>identifier</i>.</p>
+<h3 class="fn"><a name="removeServerRecord"></a>void QDServerSyncPlugin::removeServerRecord ( const <a href="../qstring.html">QString</a> &amp; <i>identifier</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Emit this signal when an item has been removed. The identifier of the item is passed via <i>identifier</i>.</p>
+<p>See also <a href="qdserversyncplugin.html#performSync">performSync</a>().</p>
+<h3 class="fn"><a name="replaceClientRecord"></a>void QDServerSyncPlugin::replaceClientRecord ( const <a href="../qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Update the item specified in <i>record</i>.</p>
+<h3 class="fn"><a name="replaceServerRecord"></a>void QDServerSyncPlugin::replaceServerRecord ( const <a href="../qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Emit this signal when an item has been modified. The item is passed via <i>record</i>.</p>
+<p>See also <a href="qdserversyncplugin.html#performSync">performSync</a>().</p>
+<h3 class="fn"><a name="serverChangesCompleted"></a>void QDServerSyncPlugin::serverChangesCompleted ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Emit this signal when the item fetching is complete.</p>
+<p>See also <a href="qdserversyncplugin.html#performSync">performSync</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2007 Trolltech</td>
+<td align="right">Qtopia Sync Agent Documentation</td>
+</tr></table></div></address></body>
+</html>

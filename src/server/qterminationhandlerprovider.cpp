@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -69,8 +69,8 @@ TerminationHandler::TerminationHandler()
     termInstance = this;
     d = new TerminationHandlerPrivate;
     QtopiaChannel* channel = new QtopiaChannel("Qtopia/TerminationHandler", this);
-    QObject::connect(channel, SIGNAL(received(const QString&, const QByteArray&)),
-            this, SLOT(messageReceived(const QString&, const QByteArray&)));
+    QObject::connect(channel, SIGNAL(received(QString,QByteArray)),
+            this, SLOT(messageReceived(QString,QByteArray)));
 }
 
 TerminationHandler::~TerminationHandler()
@@ -133,6 +133,8 @@ QTOPIA_TASK_PROVIDES(TerminationHandler, ApplicationTerminationHandler);
 
   While it is legal to have more than one concurrent instance of
   QTerminationHandlerProvider, it is generally discorouged.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!

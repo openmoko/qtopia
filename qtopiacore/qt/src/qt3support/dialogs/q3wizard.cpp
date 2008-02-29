@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -27,9 +42,8 @@
 #include "qpushbutton.h"
 #include "qcursor.h"
 #include "qlabel.h"
-#include "q3widgetstack.h"
 #include "qapplication.h"
-#include "q3ptrlist.h"
+#include "qlist.h"
 #include "qpainter.h"
 #include "q3accel.h"
 using namespace Qt;
@@ -78,6 +92,13 @@ using namespace Qt;
 class Q3WizardPrivate
 {
 public:
+
+    virtual ~Q3WizardPrivate()
+    {
+        foreach(Page *page, pages)
+            delete page;
+    }
+
     struct Page {
 	Page( QWidget * widget, const QString & title ):
 	    w( widget ), t( title ),
@@ -96,8 +117,7 @@ public:
 
     QVBoxLayout * v;
     Page * current;
-    Q3WidgetStack * ws;
-    Q3PtrList<Page> pages;
+    QList<Page *> pages;
     QLabel * title;
     QPushButton * backButton;
     QPushButton * nextButton;
@@ -135,8 +155,6 @@ Q3Wizard::Q3Wizard(QWidget *parent, const char *name, bool modal, Qt::WindowFlag
 {
     d = new Q3WizardPrivate();
     d->current = 0; // not quite true, but...
-    d->ws = new Q3WidgetStack( this, "qt_widgetstack" );
-    d->pages.setAutoDelete( true );
     d->title = new QLabel( this, "title label" );
 
     // create in nice tab order
@@ -145,8 +163,6 @@ Q3Wizard::Q3Wizard(QWidget *parent, const char *name, bool modal, Qt::WindowFlag
     d->helpButton = new QPushButton( this, "help" );
     d->backButton = new QPushButton( this, "back" );
     d->cancelButton = new QPushButton( this, "cancel" );
-
-    d->ws->installEventFilter( this );
 
     d->v = 0;
     d->hbar1 = 0;
@@ -244,7 +260,6 @@ void Q3Wizard::addPage( QWidget * page, const QString & title )
 
     Q3WizardPrivate::Page * p = new Q3WizardPrivate::Page( page, title );
     p->backEnabled = ( i > 0 );
-    d->ws->addWidget( page, i );
     d->pages.append( p );
 }
 
@@ -277,7 +292,6 @@ void Q3Wizard::insertPage( QWidget * page, const QString & title, int index )
     p->backEnabled = ( index > 0 );
     p->nextEnabled = ( index < (int)d->pages.count() );
 
-    d->ws->addWidget( page, index );
     d->pages.insert( index, p );
 }
 
@@ -315,7 +329,13 @@ void Q3Wizard::showPage( QWidget * page )
 	}
 	setBackEnabled( notFirst );
 	setNextEnabled( true );
-	d->ws->raiseWidget( page );
+
+        page->show();
+        foreach(Q3WizardPrivate::Page *ppage, d->pages) {
+            if (ppage->w != page)
+                ppage->w->hide();
+        }
+
 	d->current = p;
     }
 
@@ -344,7 +364,7 @@ int Q3Wizard::indexOf( QWidget* page ) const
     Q3WizardPrivate::Page * p = d->page( page );
     if ( !p ) return -1;
 
-    return d->pages.find( p );
+    return d->pages.indexOf( p );
 }
 
 /*!
@@ -408,7 +428,7 @@ void Q3Wizard::next()
 
 void Q3Wizard::help()
 {
-    QWidget * page = d->ws->visibleWidget();
+    QWidget *page = d->current ? d->current->w : 0;
     if ( !page )
 	return;
 
@@ -585,7 +605,7 @@ void Q3Wizard::updateButtons()
 
 QWidget * Q3Wizard::currentPage() const
 {
-    return d->ws->visibleWidget();
+    return d->current ? d->current->w : 0;
 }
 
 
@@ -743,7 +763,7 @@ void Q3Wizard::layOutButtonRow( QHBoxLayout * layout )
 	h->addSpacing( 12 );
 	h->addWidget( d->finishButton );
     } else if ( d->pages.count() == 0 ||
-		d->current->finishEnabled ||
+		(d->current && d->current->finishEnabled) ||
 		d->current == d->pages.at( d->pages.count()-1 ) ) {
 	d->nextButton->hide();
 	d->finishButton->show();
@@ -805,7 +825,8 @@ void Q3Wizard::layOut()
 
     d->v->addWidget( d->hbar1 );
 
-    d->v->addWidget( d->ws, 10 );
+    if (d->current)
+        d->v->addWidget(d->current->w, 10);
 
     if ( ! d->hbar2 ) {
 	d->hbar2 = new QFrame( this, "<hr>", 0 );
@@ -827,11 +848,6 @@ void Q3Wizard::layOut()
 
 bool Q3Wizard::eventFilter( QObject * o, QEvent * e )
 {
-    if ( o == d->ws && e && e->type() == QEvent::ChildRemoved ) {
-	QChildEvent * c = (QChildEvent*)e;
-	if ( c->child() && c->child()->isWidgetType() )
-	    removePage( (QWidget *)c->child() );
-    }
     return QDialog::eventFilter( o, e );
 }
 
@@ -853,9 +869,8 @@ void Q3Wizard::removePage( QWidget * page )
     while( --i >= 0 && d->pages.at( i ) && d->pages.at( i )->w != page ) { }
     if ( i < 0 )
 	return;
-    Q3WizardPrivate::Page * p = d->pages.at( i );
-    d->pages.removeRef( p );
-    d->ws->removeWidget( page );
+    delete d->pages.takeAt(i);
+    page->hide();
 
     if( cp == page ) {
 	i--;
@@ -863,6 +878,8 @@ void Q3Wizard::removePage( QWidget * page )
 	    i = 0;
 	if ( pageCount() > 0 )
 	    showPage( Q3Wizard::page( i ) );
+    } else if (pageCount() > 0) {
+        showPage(cp);
     }
 }
 

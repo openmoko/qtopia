@@ -28,5 +28,5 @@ fi
 
 
 # done
-[ "$VERBOSE" = "yes" ] && echo "Pointersize: $PTRSIZE"
+[ "$VERBOSE" = "yes" ] && echo "Pointer size: $PTRSIZE"
 exit $PTRSIZE

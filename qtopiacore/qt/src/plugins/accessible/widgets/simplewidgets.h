@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -24,6 +39,7 @@
 #ifndef SIMPLEWIDGETS_H
 #define SIMPLEWIDGETS_H
 
+#include <QtGui/qaccessible2.h>
 #include <QtGui/qaccessiblewidget.h>
 
 #ifndef QT_NO_ACCESSIBILITY
@@ -32,7 +48,7 @@ class QAbstractButton;
 class QLineEdit;
 class QToolButton;
 
-class QAccessibleButton : public QAccessibleWidget
+class QAccessibleButton : public QAccessibleWidgetEx
 {
 public:
     QAccessibleButton(QWidget *w, Role r);
@@ -78,7 +94,7 @@ protected:
 };
 #endif // QT_NO_TOOLBUTTON
 
-class QAccessibleDisplay : public QAccessibleWidget
+class QAccessibleDisplay : public QAccessibleWidgetEx
 {
 public:
     explicit QAccessibleDisplay(QWidget *w, Role role = StaticText);
@@ -91,7 +107,8 @@ public:
 };
 
 #ifndef QT_NO_LINEEDIT
-class QAccessibleLineEdit : public QAccessibleWidgetEx
+class QAccessibleLineEdit : public QAccessibleWidgetEx, public QAccessibleTextInterface,
+                            public QAccessibleSimpleEditableTextInterface
 {
 public:
     explicit QAccessibleLineEdit(QWidget *o, const QString &name = QString());
@@ -100,6 +117,27 @@ public:
     void setText(Text t, int control, const QString &text);
     State state(int child) const;
     QVariant invokeMethodEx(QAccessible::Method method, int child, const QVariantList &params);
+
+    // QAccessibleTextInterface
+    void addSelection(int startOffset, int endOffset);
+    QString attributes(int offset, int *startOffset, int *endOffset);
+    int cursorPosition();
+    QRect characterRect(int offset, QAccessible2::CoordinateType coordType);
+    int selectionCount();
+    int offsetAtPoint(const QPoint &point, QAccessible2::CoordinateType coordType);
+    void selection(int selectionIndex, int *startOffset, int *endOffset);
+    QString text(int startOffset, int endOffset);
+    QString textBeforeOffset (int offset, QAccessible2::BoundaryType boundaryType,
+            int *startOffset, int *endOffset);
+    QString textAfterOffset(int offset, QAccessible2::BoundaryType boundaryType,
+            int *startOffset, int *endOffset);
+    QString textAtOffset(int offset, QAccessible2::BoundaryType boundaryType,
+            int *startOffset, int *endOffset);
+    void removeSelection(int selectionIndex);
+    void setCursorPosition(int position);
+    void setSelection(int selectionIndex, int startOffset, int endOffset);
+    int characterCount();
+    void scrollToSubstring(int startIndex, int endIndex);
 
 protected:
     QLineEdit *lineEdit() const;

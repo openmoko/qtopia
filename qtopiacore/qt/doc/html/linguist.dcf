@@ -9,4 +9,7 @@
 <section ref="linguist-programmers.html" title="Qt Linguist Manual: Programmers">
     <keyword ref="linguist-programmers.html">Qt Linguist Manual: Programmers</keyword>
 </section>
+<section ref="linguist-ts-file-format.html" title="Qt Linguist Manual: TS File Format">
+    <keyword ref="linguist-ts-file-format.html">Qt Linguist Manual: TS File Format</keyword>
+</section>
 </DCF>

@@ -3,7 +3,7 @@ INCLUDEPATH *= $$QMAKE_INCDIR_QT/$$TARGET #just for today to have some compat
 isEmpty(QT_ARCH):!isEmpty(ARCH):QT_ARCH=$$ARCH #another compat that will rot for change #215700
 TEMPLATE	= lib
 isEmpty(QT_MAJOR_VERSION) {
-   VERSION=4.2.3
+   VERSION=4.3.2
 } else {
    VERSION=$${QT_MAJOR_VERSION}.$${QT_MINOR_VERSION}.$${QT_PATCH_VERSION}
 }
@@ -37,12 +37,12 @@ CONFIG          -= fix_output_dirs
 win32|mac:!macx-xcode:CONFIG += debug_and_release
 
 contains(QT_CONFIG, reduce_exports):CONFIG += hide_symbols
+unix:contains(QT_CONFIG, reduce_relocations):CONFIG += bsymbolic_functions
 contains(QT_CONFIG, largefile):CONFIG += largefile
 
 #mac frameworks
 mac:!static:contains(QT_CONFIG, qt_framework) {
    #QMAKE_FRAMEWORK_VERSION = 4.0
-   QMAKE_FRAMEWORK_BUNDLE_NAME = $$TARGET
    CONFIG += lib_bundle qt_no_framework_direct_includes qt_framework
    CONFIG(debug, debug|release) {
       !build_pass:CONFIG += build_all
@@ -65,7 +65,12 @@ mac:!static:contains(QT_CONFIG, qt_framework) {
 
 mac {
    CONFIG += explicitlib
-   QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.2 #enables weak linking for 10.2 (exported)
+   QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.3 #enables weak linking for 10.3 (exported)
+   true { #we want to use O2 on Qt itself (Os was used to fix other failures in older GCC)
+      QMAKE_CFLAGS_RELEASE ~= s,-Os,-O2,
+      QMAKE_CXXFLAGS_RELEASE ~= s,-Os,-O2,
+      QMAKE_OBJECTIVE_CFLAGS_RELEASE ~= s,-Os,-O2,
+   }
    macx-g++ {
        QMAKE_CFLAGS += -fconstant-cfstrings
        QMAKE_CXXFLAGS += -fconstant-cfstrings
@@ -111,22 +116,29 @@ include(qt_install.pri)
 
 unix {
    CONFIG     += create_libtool create_pc explicitlib
+   QMAKE_LIBTOOL_LIBDIR = $$[QT_INSTALL_LIBS]
+   QMAKE_PRL_LIBDIR = $$[QT_INSTALL_LIBS]
    QMAKE_PKGCONFIG_LIBDIR = $$[QT_INSTALL_LIBS]
    QMAKE_PKGCONFIG_INCDIR = $$[QT_INSTALL_HEADERS]/$$TARGET
    QMAKE_PKGCONFIG_CFLAGS = -I$$[QT_INSTALL_HEADERS]
+   QMAKE_PKGCONFIG_DESTDIR = pkgconfig
+   include_replace.match = $$QMAKE_INCDIR_QT
+   include_replace.replace = $$[QT_INSTALL_HEADERS]
+   lib_replace.match = $$QMAKE_LIBDIR_QT
+   lib_replace.replace = $$[QT_INSTALL_LIBS]
+   prefix_replace.match = $$QT_BUILD_TREE
+   prefix_replace.replace = $$[QT_INSTALL_PREFIX]
+   QMAKE_PRL_INSTALL_REPLACE += include_replace lib_replace
+   QMAKE_LIBTOOL_INSTALL_REPLACE += include_replace lib_replace
+   QMAKE_PKGCONFIG_INSTALL_REPLACE += include_replace lib_replace prefix_replace
 }
 
 contains(QT_PRODUCT, OpenSource.*):DEFINES *= QT_OPENSOURCE
-DEFINES += QT_NO_CAST_TO_ASCII QT_ASCII_CAST_WARNINGS
+DEFINES += QT_NO_CAST_TO_ASCII QT_ASCII_CAST_WARNINGS QT_44_API_QSQLQUERY_FINISH
 contains(QT_CONFIG, qt3support):DEFINES *= QT3_SUPPORT
 DEFINES *= QT_MOC_COMPAT #we don't need warnings from calling moc code in our generated code
 
-!debug_and_release|build_pass {
-   CONFIG(debug, debug|release) {
-      mac:TARGET = $$member(TARGET, 0)_debug
-      win32:TARGET = $$member(TARGET, 0)d
-   }
-}
+TARGET = $$qtLibraryTarget($$TARGET) #do this towards the end
 
 moc_dir.name = moc_location
 moc_dir.variable = QMAKE_MOC
@@ -138,3 +150,4 @@ QMAKE_PKGCONFIG_VARIABLES += moc_dir uic_dir
 
 include(qt_targets.pri)
 
+win32:DEFINES+=_USE_MATH_DEFINES

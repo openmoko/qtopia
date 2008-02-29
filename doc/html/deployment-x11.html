@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Deploying an Application on Qt/X11</title>
+  <title>Qt 4.3: Deploying an Application on Qt/X11</title>
   <link rel="contents" href="deployment.html" />
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
@@ -15,7 +15,8 @@
 <td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><p>
 [<a href="deployment.html">Deploying Qt Applications</a>]
 </p>
-<h1 align="center">Deploying an Application on Qt/X11<br /><small></small></h1>
+<h1 align="center">Deploying an Application on Qt/X11<br /><span class="subtitle"></span>
+</h1>
 <p>Due to the proliferation of Unix systems (commercial Unices, Linux distributions, etc.), deployment on Unix is a complex topic. Before we start, be aware that programs compiled for one Unix flavor will probably not run on a different Unix system. For example, unless you use a cross-compiler, you cannot compile your application on Irix and distribute it on AIX.</p>
 <p>Contents:</p>
 <ul><li><a href="#static-linking">Static Linking</a></li>
@@ -42,7 +43,7 @@
 <pre> cd /path/to/Qt
  ./configure -static -prefix /path/to/Qt &lt;other parameters&gt;
  make sub-src</pre>
-<p>We specify the prefix so that we do not overwrite the existing Qt installation. The example above only builds the Qt libraries, i.e. the examples and Qt Designer will not be built. When <tt>make</tt> is done, you will find the Qt libraries in the <tt>/path/to/Qt/lib</tt> directory.</p>
+<p>We specify the prefix so that we do not overwrite the existing Qt installation. The example above only builds the Qt libraries, i.e&#x2e; the examples and Qt Designer will not be built. When <tt>make</tt> is done, you will find the Qt libraries in the <tt>/path/to/Qt/lib</tt> directory.</p>
 <p>When linking your application against static Qt libraries, note that you might need to add more libraries to the <tt>LIBS</tt> line in your project file. For more information, see the <a href="#application-dependencies">Application Dependencies</a> section.</p>
 <a name="linking-the-application-to-the-static-version-of-qt"></a>
 <h3>Linking the Application to the Static Version of Qt</h3>
@@ -87,9 +88,9 @@
 <p>To deploy the application, we must make sure that we copy the relevant Qt libraries (corresponding to the Qt modules used in the application) as well as the executable to the same directory. Remember that if your application depends on compiler specific libraries, these must also be redistributed along with your application. For more information, see the <a href="#application-dependencies">Application Dependencies</a> section.</p>
 <p>We'll cover the plugins shortly, but the main issue with shared libraries is that you must ensure that the dynamic linker will find the Qt libraries. Unless told otherwise, the dynamic linker doesn't search the directory where your application resides. There are many ways to solve this:</p>
 <ul>
-<li>You can install the Qt libraries in one of the system library paths (e.g. <tt>/usr/lib</tt> on most systems).</li>
+<li>You can install the Qt libraries in one of the system library paths (e.g&#x2e; <tt>/usr/lib</tt> on most systems).</li>
 <li>You can pass a predetermined path to the <tt>-rpath</tt> command-line option when linking the application. This will tell the dynamic linker to look in this directory when starting your application.</li>
-<li>You can write a startup script for your application, where you modify the dynamic linker configuration (e.g. adding your application's directory to the <tt>LD_LIBRARY_PATH</tt> environment variable).</li>
+<li>You can write a startup script for your application, where you modify the dynamic linker configuration (e.g&#x2e; adding your application's directory to the <tt>LD_LIBRARY_PATH</tt> environment variable).</li>
 </ul>
 <p>The disadvantage of the first approach is that the user must have super user privileges. The disadvantage of the second approach is that the user may not have privileges to install into the predetemined path. In either case, the users don't have the option of installing to their home directory. We recommend using the third approach since it is the most flexible. For example, a <tt>plugandpaint.sh</tt> script will look like this:</p>
 <pre> #!/bin/sh
@@ -116,7 +117,7 @@
 </table></p>
 <p>On most systems, the extension for shared libraries is <tt>.so</tt>. A notable exception is HP-UX, which uses <tt>.sl</tt>.</p>
 <p>Remember that if your application depends on compiler specific libraries, these must still be redistributed along with your application. For more information, see the <a href="#application-dependencies">Application Dependencies</a> section.</p>
-<p>To verify that the application now can be successfully deployed, you can extract this archive on a machine without Qt and without any compiler installed, and try to run it, i.e. run the <tt>plugandpaint.sh</tt> script.</p>
+<p>To verify that the application now can be successfully deployed, you can extract this archive on a machine without Qt and without any compiler installed, and try to run it, i.e&#x2e; run the <tt>plugandpaint.sh</tt> script.</p>
 <p>An alternative to putting the plugins in the <tt>plugins</tt> subdirectory is to add a custom search path when you start your application using <a href="qcoreapplication.html#addLibraryPath">QApplication::addLibraryPath</a>() or <a href="qcoreapplication.html#setLibraryPaths">QApplication::setLibraryPaths</a>().</p>
 <pre> qApp-&gt;addLibraryPath(&quot;/some/other/path&quot;);</pre>
 <a name="application-dependencies"></a>
@@ -127,7 +128,7 @@
 <pre> ldd ./application</pre>
 <p>This will list all the shared library dependencies for your application. Depending on configuration, these libraries must be redistributed along with your application. In particular, the standard C++ library must be redistributed if you're compiling your application with a compiler that is binary incompatible with the system compiler. When possible, the safest solution is to link against these libraries statically.</p>
 <p>You will probably want to link dynamically with the regular X11 libraries, since some implementations will try to open other shared libraries with <tt>dlopen()</tt>, and if this fails, the X11 library might cause your application to crash.</p>
-<p>It's also worth mentioning that Qt will look for certain X11 extensions, such as Xinerama and Xrandr, and possibly pull them in, including all the libraries that they link against. If you can't guarantee the presence of a certain extension, the safest approach is to disable it when configuring Qt (e.g. <tt>./configure -no-xrandr</tt>).</p>
+<p>It's also worth mentioning that Qt will look for certain X11 extensions, such as Xinerama and Xrandr, and possibly pull them in, including all the libraries that they link against. If you can't guarantee the presence of a certain extension, the safest approach is to disable it when configuring Qt (e.g&#x2e; <tt>./configure -no-xrandr</tt>).</p>
 <p>FontConfig and <a href="qtopiacore-fonts.html#freetype">FreeType</a> are other examples of libraries that aren't always available or that aren't always binary compatible. As strange as it may sound, some software vendors have had success by compiling their software on very old machines and have been very careful not to upgrade any of the software running on them.</p>
 <p>When linking your application against the static Qt libraries, you must explicitly link with the dependent libraries mentioned above. Do this by adding them to the <tt>LIBS</tt> variable in your project file.</p>
 <a name="qt-plugins"></a>
@@ -146,6 +147,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

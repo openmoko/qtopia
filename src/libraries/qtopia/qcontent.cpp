@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,8 +22,6 @@
 #include <QReadWriteLock>
 
 #include <qcontent.h>
-#include <qtopia/private/contentlnk_p.h>
-#include <qtopia/private/contentlnksql_p.h>
 #include <qtopia/private/drmcontent_p.h>
 
 #include <qtranslatablesettings.h>
@@ -39,6 +37,10 @@
 #include <qtopia/private/qcontent_p.h>
 #endif
 #include <QValueSpaceObject>
+#include <qtopia/private/qcontentstore_p.h>
+#include <qtopia/private/qfscontentengine_p.h>
+#include <QContentSet>
+#include <QContentFilter>
 
 static const uint ContentCacheSize = 100;
 
@@ -48,15 +50,20 @@ static const uint ContentCacheSize = 100;
 */
 const QContentId QContent::InvalidId = QContentId(0xffffffff, Q_UINT64_C(0xffffffffffffffff));
 
+Q_IMPLEMENT_USER_METATYPE(QContent);
 Q_IMPLEMENT_USER_METATYPE_NO_OPERATORS(QContentId);
 Q_IMPLEMENT_USER_METATYPE_TYPEDEF(QContentId, QContentId);
 Q_IMPLEMENT_USER_METATYPE_TYPEDEF(QContentIdList, QContentIdList);
+Q_IMPLEMENT_USER_METATYPE_TYPEDEF(QContentList, QContentList);
 Q_IMPLEMENT_USER_METATYPE_ENUM(QContent::ChangeType);
+Q_IMPLEMENT_USER_METATYPE_ENUM(QContent::Role);
+Q_IMPLEMENT_USER_METATYPE_ENUM(QContent::DrmState);
 
-typedef QCache<QContentId, QContent> QContentCache;
-Q_GLOBAL_STATIC_WITH_ARGS(QContentCache, contentCache, (ContentCacheSize));
-static QMutex contentCacheMutex(QMutex::Recursive);
 static QReadWriteLock databaseLock;
+
+Q_GLOBAL_STATIC_WITH_ARGS(QContent, nullQContent, (QContentStore::instance()->contentFromEngineType( QString() )));
+Q_GLOBAL_STATIC_WITH_ARGS(QContent::DocumentSystemConnection, documentSystemConnection,
+                          (qApp->type() == QApplication::GuiServer ? QContent::DocumentSystemDirect : QContent::DocumentSystemClient));
 
 /*!
     \relates QContent
@@ -72,14 +79,14 @@ static QReadWriteLock databaseLock;
 
     A QContentId is a globally unique identifier for a QContent record.
     Synonym for QPair<QtopiaDatabaseId, quint64>.
-*/
+ */
 
 /*!
     \relates QContent
     \typedef QContentIdList
 
     Synonym for QList<QContentId>.
-*/
+ */
 
 /*!
   \class QContent
@@ -88,9 +95,12 @@ static QReadWriteLock databaseLock;
   Qtopia system, where content includes resources which an end-user may
   view or manage.
 
-  By creating content with a \l {Role} of \c Data using the setRole() method,
+  By creating content with a \l Role of \l Data using the setRole() method,
   resources not intended to be directly consumed by the end-user may also be
   managed.
+
+  A QContent object can be either an executable application or a document. Documents include
+  text documents, pictures, pieces of music, and video clips.
 
   An instance of a QContent may, for example, represent any one of the following
   types of content:
@@ -99,11 +109,11 @@ static QReadWriteLock databaseLock;
   \o a file
   \o a temporary file
   \o a DRM controlled file (possibly encrypted).
-  \o an item in a container, eg an archive or DRM multi-part file
+  \o an item in a container, e.g. an archive or DRM multi-part file
   \endlist
 
   The QContent class is responsible for
-  providing access to metadata about the content contained in a file
+  providing access to meta-data about the content contained in a file
   or stream.
 
   As a system-wide invariant, the backing store is authoritative for information
@@ -117,7 +127,7 @@ static QReadWriteLock databaseLock;
   kind of persistent storage.
 
   The static methods install() and uninstall()
-  are used to update records of metadata in the backing store in response to hardware and
+  are used to update records of meta-data in the backing store in response to hardware and
   software events such as:
   \list
   \o removable storage being removed
@@ -131,6 +141,11 @@ static QReadWriteLock databaseLock;
   \sa QContentSet, QContentFilter
 
   \ingroup content
+
+   For an example of using QContent to read, write and create documents see the \l {Tutorial: A Notes
+   Application}{Notes Application} tutorial.  For other examples using QContent, see the {Tutorial:
+   Content Filtering}{Content Filtering} and \l {Tutorial: Listening for Content Changes}{Change
+    Listener} tutorials.
 */
 
 /*!
@@ -148,7 +163,7 @@ static QReadWriteLock databaseLock;
 /*!
   \typedef QContent::UsageMode
     \deprecated
-    \c UsageMode has been deprecated, use \c Role instead.
+    \c UsageMode has been deprecated, use Role instead.
 
     \sa QContent::Role
  */
@@ -162,6 +177,7 @@ static QReadWriteLock databaseLock;
     \value Document a user-visible document file suitable for "open"
     \value Data a data or config file not suitable for "open"
     \value Application an application (possibly Java, possibly DRM controlled)
+    \value Folder a category used to group applications.
  */
 
 
@@ -170,380 +186,244 @@ static QReadWriteLock databaseLock;
 
     This enum specifies the DRM State of this QContent object.
 
-    \value Unprotected plain text "legacy" file, not subject to drm
-    \value Protected file subject to drm.
+    \value Unprotected plain text "legacy" file, not subject to DRM
+    \value Protected file subject to DRM.
  */
 
 /*!
   \fn bool QContent::linkFileKnown() const
 
-   Return true if the file associated with this QContent object is already
+   Returns true if the file associated with this QContent object is already
    known. If false, calling file() will generate a file name.
 
    \sa QContent::fileKnown(), QContent::linkFile(), QContent::file()
  */
 
 /*!
-  Constructs an empty invalid content object.
+    Constructs an empty invalid content object.
 */
 QContent::QContent()
     : d( 0 )
 {
-    d = new ContentLinkPrivate;
-    Q_ASSERT(d != NULL);
+    *this = *nullQContent();
 }
 
 /*!
-  Create a \c QContent object by fetching the metadata from the backing
+  Creates a QContent object by fetching the meta-data from the backing
   store specified by \a id.  This method will be fast if the object
-  has already been referenced by \c QContent and \c QContentSet
+  has already been referenced by QContent and QContentSet
   classes loaded in the current process, since internally the results
   of calls to the backing store are cached.
-*/
+ */
 QContent::QContent( QContentId id )
     : d( 0 )
 {
-    /*
-       This uses in-process caching with statics in the inner private
-       class to save on SQL/calls to the backing store.  */
-    if(id==QContent::InvalidId)
-    {
-        d = new ContentLinkPrivate;
-        return;
-    }
-    contentCacheMutex.lock();
-    QContent *cached = contentCache()->object(id);
-
-    if (cached) {
-        *this = *cached;
-        contentCacheMutex.unlock();
-        return;
-    }
-    contentCacheMutex.unlock();
-
-    databaseLock.lockForRead();
-
-    QHash<QString, QVariant> databaseLink = database()->linkById( id );
-
-    if( !databaseLink.isEmpty() )
-    {
-        create( databaseLink );
-    }
-    else
-    {
-        d = new ContentLinkPrivate;
-        qWarning() << "No content for id" << id;
-    }
-
-    databaseLock.unlock();
-
-    contentCacheMutex.lock();
-    contentCache()->insert(id, new QContent(*this));
-    contentCacheMutex.unlock();
-    Q_ASSERT(d != NULL);
+    *this = QContentStore::instance()->contentFromId( id );
 }
 
 /*!
-  Create a \c QContent based on the content contained in the file represented by \a fi.
+  Create a QContent based on the content contained in the file represented by \a fi.
 
   Passing \a store specifies whether this content object is stored into the backing store,
   or only used as a local object.
-*/
+ */
 QContent::QContent( const QFileInfo &fi, bool store )
     : d( 0 )
 {
-    d = new ContentLinkPrivate;
+    QContentStore::LookupFlags lookup = QContentStore::Lookup | QContentStore::Construct;
 
-    init( fi, store );
-    Q_ASSERT(d != NULL);
+    if( store )
+        lookup |= QContentStore::Commit;
+
+    *this = QContentStore::instance()->contentFromFileName( fi.absoluteFilePath(), lookup );
 }
 
 /*!
-  Create a \c QContent based on the content contained in the file represented by \a fileName.
+  Create a QContent based on the content contained in the file represented by \a fileName.
 
   Passing \a store specifies whether this content object is stored into the backing store database,
   or only used as a local object.
-*/
+ */
 QContent::QContent( const QString &fileName, bool store )
     : d( 0 )
 {
-    d = new ContentLinkPrivate;
-
-    init( QFileInfo( fileName ), store );
-    Q_ASSERT(d != NULL);
-}
-
-/*!
-  \internal
-  Initialise this QContent object with the QContent point at by \a fileName, \a store in the backing database if necessary
- */
-void QContent::init( const QFileInfo &fi, bool store )
-{
-    if ( fi.fileName().isEmpty() )
-    {
-        return;
-    }
-    // note - this method is slow on Unix (see doco for QFileInfo)
-    const QString filepath=fi.absoluteFilePath();
-    const bool isLink = fi.suffix() == QLatin1String("desktop") || filepath.endsWith(QLatin1String(".directory"));
-    databaseLock.lockForRead();
-    QHash<QString, QVariant> databaseLink = QContent::database()->linkByPath(filepath, isLink);
-    databaseLock.unlock();
-
-    if( !databaseLink.isEmpty() )
-    {
-        QContentId id(databaseLink[QLatin1String("database")].toUInt(), databaseLink[QLatin1String("cid")].toULongLong());
-        if(isCached(id))
-            *this = QContent(id);
-        else
-        {
-            create( databaseLink );
-
-            static const char *unknownMime =  "application/octet-stream";
-
-            if( ( lastUpdated().isNull() || lastUpdated() < fi.lastModified() ||
-                ( type() == unknownMime && QMimeType( file() ).id() != unknownMime ) ) && updateContent() )
-            {
-                d->cContentState = ContentLinkPrivate::Uncommited;
-            }
-            else
-                d->cContentState = ContentLinkPrivate::Committed;
-        }
-    }
-    else if( installContent( filepath ) )
-    {
-        d->cContentState = ContentLinkPrivate::Uncommited;
-    }
-    else
-        return;
+    QContentStore::LookupFlags lookup = QContentStore::Lookup | QContentStore::Construct;
 
     if( store )
-        commit();
+        lookup |= QContentStore::Commit;
+
+    *this = QContentStore::instance()->contentFromFileName( fileName, lookup );
 }
 
 /*!
-    Reads the properties of a file in preperation for an initial write to the database.
-
-    If the \c file() property of the QContent has been set the data will be read from the file
-    at that location, otherwise the file at \a filePath will be used.  If no file exists at either
-    location the method will fail.
-*/
-bool QContent::installContent( const QString &filePath )
-{
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
-        return false;
-
-    QString path = !d->fileKnown() ? filePath : d->file();
-
-    if( path.isEmpty() || !QFile::exists( path ) )
-        return false;
-
-    if( DrmContentPrivate::installContent( path, this ) )
-    {
-        d = new ContentLinkPrivateDRM( *d );
-
-        d->drm = QContent::Protected;
-    }
-    else if( !QContentFactory::installContent( path, this ) && QFileInfo( path ).isDir() )
-    {   // If neither a DRM or content plugin can identify a folder as a content item ignore it.
-        return false;
-    }
-
-    d->cExtraLoaded |= ContentLinkPrivate::Properties;
-
-    if( !d->fileKnown() && !linkFileKnown() )
-        setFile( path );
-
-    if( d->name().isEmpty() )
-        setName( QFileInfo( path ).baseName() );
-
-    if( d->type().isEmpty() )
-        setType( QMimeType( path ).id() );
-
-    if( d->um == QContent::UnknownUsage )
-        setRole( QContent::Document );
-
-    d->cLastUpdated = QDateTime::currentDateTime();
-    d->cContentState = ContentLinkPrivate::Edited;
-
-    return true;
-}
-
-/*!
-    Updates the content meta-data when the associated file has changed.
-*/
-bool QContent::updateContent()
-{
-    bool changed = false;
-
-    d->cContentState = ContentLinkPrivate::New;
-
-    if( DrmContentPrivate::updateContent( this ) || d->drm != Protected && QContentFactory::updateContent( this ) )
-    {
-        return true;
-    }
-    else if( fileKnown() && type() == "application/octet-stream" )
-    {
-        QMimeType mime( file() );
-
-        if( mime.id() != "application/octet-stream" )
-        {
-            setType( mime.id() );
-
-            changed = true;
-        }
-    }
-
-    return changed;
-}
-
-/*!
-  Create a \c QContent by copying the \a other content object.
+  Create a QContent by copying the \a other content object.
 */
 QContent::QContent( const QContent &other )
     : d( 0 )
 {
     (*this) = other;  // use assignment operator
-    Q_ASSERT(d != NULL);
+
+    Q_ASSERT(d.constData() != NULL);
 }
 
 /*!
   \internal
-  Create a content link by copying the \a link private content object.
  */
-QContent::QContent( ContentLinkPrivate *link  )
+QContent::QContent( QContentEngine *link  )
     : d( link )
 {
-    Q_ASSERT(d != NULL);
 }
 
 /*!
   Destroys the content object.
-*/
+ */
 QContent::~QContent()
 {
     // destruction of QSharedDataPointer d not required
 }
 
 /*!
-  Content is invalid if the backing file is unavailable, either
-  due to removal of media or deletion of the file. If \a force is true,
-  the content will be revalidated even if this value has been previously
-  cached. Returns true if content is valid; otherwise returns false.
-
-  Note: this method can be expensive.
+    Returns true if a QContent is uninitialized; returns false otherwise.
 */
+bool QContent::isNull() const
+{
+    return d == nullQContent()->d;
+}
+
+/*!
+  Returns false if the Content link is invalid or if the backing file is unavailable, either.
+  due to removal of media or deletion of the file.
+
+  Note: the parameter \a force is retained for compatibility, but is ignored.
+ */
 bool QContent::isValid(bool force) const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return false;
     else
-        return d->isValid(force);
+        return d->isValid( force );
 }
 
 /*!
-  Return the user-visible name for this content object
+    Returns the file name of the file backing this content object.
+    \sa setFile(), executableName(), name(), file()
 */
+QString QContent::fileName() const
+{
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
+        return QString();
+    else
+        return d->fileName();
+}
+
+/*!
+  Returns the user-visible name for this content object
+ */
 QString QContent::name() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QString();
     else
-        return d->name();
+        return d->translatedName();
 }
 
 /*!
-  Return the RFC2045 mime-type for the content
-  If this is an application, instead return "Application" (the
-  underlying QContent's type)
+    Returns an untranslated user visible name for this content object.
 */
+QString QContent::untranslatedName() const
+{
+    return d->name();
+}
+
+/*!
+  Returns the RFC2045 mime-type for the content.
+ */
 QString QContent::type() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QString();
     else
-        return d->type();
+        return d->mimeType().id();
 }
 
 /*!
-  Return the plaintext size of the content in bytes
-*/
+  Returns the plain-text size of the content in bytes
+ */
 qint64 QContent::size() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return 0;
     else
-        return d->size();
+        return d->size( true );
 }
 
 /*!
-  Return the icon for this object.  If the object is an application, then it
+  Returns the icon for this object.  If the object is an application, then it
   will be the application icon, otherwise it will be a generic icon for the
   mime-type of the object.
-
-  If the object is a DRM controlled,  a key emblem is super-imposed on the
-  icon. If the content does not have current rights for the default application
-  the icon is shown greyed out (using the QIcon dynamic routines).
  */
 QIcon QContent::icon() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QIcon();
-    else
-        return d->icon();
+
+    QIcon icon = d->icon();
+
+    if( icon.isNull() )
+        icon = d->mimeType().icon();
+
+    return icon;
 }
 
 /*!
-  Return the icon for this object.  If the object is an application, then it
+  Returns the icon for this object.  If the object is an application, then it
   will be the application icon, otherwise it will be a generic icon for the
   mime-type of the object.
 
   If the object is a DRM controlled,  a key emblem is super-imposed on the
   icon. If the content does not have current rights for \a permission the icon is shown
-  greyed out (using the QIcon dynamic routines).
-*/
+  grayed out (using the QIcon dynamic routines).
+ */
 QIcon QContent::icon( QDrmRights::Permission permission ) const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QIcon();
-    else
-        return d->icon( permission );
+
+    QIcon icon = d->icon();
+
+    if( icon.isNull() )
+    {
+        if( d->drmState() == Protected )
+            icon = d->mimeType().icon( (d->permissions( false ) & permission) == permission ? QMimeType::DrmValid : QMimeType::DrmInvalid );
+        else
+            icon = d->mimeType().icon();
+    }
+
+    return icon;
 }
 
 
-
 /*!
-  \internal
-  Retrieve an instance of the backing store API.
-  To change to a different backing store when customizing Qtopia, change this
-  method to return a custom backing store implementation.
-*/
-ContentLinkSql *QContent::database()
-{
-    return ContentLinkPrivate::persistenceEngine();
-}
+  Takes a QFileInfo reference \a fi to a content object, and installs the
+  meta-data for it in the backing store.  The path must be an absolute path and
+  the file must exist.  If the file is a .desktop file linking to an application
+  or a document then link target is installed in the database.
 
-/*!
-  Takes a \c QFileInfo reference \a fi to a content object, and installs the
-  metadata for it in the backing store/database.  The path must be an
-  absolute path and the file must exist.  If the file is a .desktop file
-  referring to an application or a document a \c QContent record is created.
-
-  If mimetype data is not available, it is determined by file extension, or
+  If MIME type data is not available, it is determined by file extension, or
   failing that, the magic number.
 
-  If the object is a DRM-controlled file (is a .dcf file, or is otherwise
-  shown as drm controlled) the DRM subsystem is queried for the DRM status.
+  If the object is a DRM-controlled file (i.e. it is a .dcf file, or is otherwise
+  shown as DRM controlled) the DRM subsystem is queried for the DRM status.
 
   \sa QContentSet::scan()
-*/
+ */
 QContentId QContent::install( const QFileInfo &fi )
 {
     if (!fi.exists())
@@ -551,14 +431,15 @@ QContentId QContent::install( const QFileInfo &fi )
         qWarning() << "Attempt to install a file into the content database that doesn't exist:" << fi.fileName();
         return QContent::InvalidId;
     }
-    QContent cl( fi.filePath(), true );
-    updateSets(cl.id(), QContent::Added);
-    return cl.id();
+    return QContentStore::instance()->contentFromFileName(
+            fi.absoluteFilePath(), QContentStore::Construct|QContentStore::Commit ).id();
 }
 
 /*!
-  Remove the Content with \a id from the backing store
-*/
+  Removes the Content with \a id from the backing store.  This does not remove any files
+  associated with the QContent, if the file is in a scanned location it will be reinstalled
+  the next time that location is scanned.
+ */
 void QContent::uninstall( QContentId id )
 {
     if(id == QContent::InvalidId)
@@ -567,11 +448,7 @@ void QContent::uninstall( QContentId id )
         return;
     }
     qLog(DocAPI) << "Uninstalling QContent for id " << id;
-    databaseLock.lockForWrite();
-    QContent::database()->removeLink( id );
-    databaseLock.unlock();
-    invalidate(id);
-    updateSets(id, QContent::Removed);
+    QContentStore::instance()->uninstallContent( id );
 }
 
 /*!
@@ -583,37 +460,11 @@ void QContent::uninstall( QContentId id )
 
 void QContent::installBatch( const QList<QFileInfo> &batch )
 {
-    //QTOPIA_DOCAPI_TODO, wrap this all in a transaction, this code is simply placeholder atm
-    qLog(DocAPI) << "Entering QContent::installBatch";
-#ifndef QTOPIA_CONTENT_INSTALLER
-    QContentUpdateManager::instance()->beginInstall();
-#endif
-    QMultiHash<QtopiaDatabaseId, QContent> list;
+    QList< QContent > content;
     foreach(const QFileInfo &fi, batch)
-        list.insert(QtopiaSql::databaseIdForPath(fi.absolutePath()), QContent(fi, false));
-    foreach(QtopiaDatabaseId dbid, list.uniqueKeys())
-    {
-        QMap<QContentId, ChangeType> cidctypemap;
-        QSqlDatabase db=QtopiaSql::database(dbid);
-        if(!db.transaction())
-            qWarning("QContent::installBatch: couldn't start transaction");
-        foreach(QContent content, list.values(dbid))
-        {
-            content.d->batchLoading = true;
-            ChangeType ctype=Updated;
-            content.commit(ctype);
-            if(content.id() != QContent::InvalidId)
-                cidctypemap[content.id()]=ctype;
-        }
-        if(!db.commit())
-            qWarning("QContent::installBatch: couldn't commit transaction");
-        foreach(QContentId id, cidctypemap.keys())
-            updateSets(id, cidctypemap[id]);
-    }
-#ifndef QTOPIA_CONTENT_INSTALLER
-    QContentUpdateManager::instance()->endInstall();
-#endif
-    qLog(DocAPI) << "Leaving QContent::installBatch";
+        content.append( QContentStore::instance()->contentFromFileName( fi.absoluteFilePath(), QContentStore::Construct ) );
+
+    QContentStore::instance()->batchCommitContent( content );
 }
 
 /*!
@@ -625,316 +476,408 @@ void QContent::installBatch( const QList<QFileInfo> &batch )
 
 void QContent::uninstallBatch( const QList<QContentId> &batch )
 {
-    //QTOPIA_DOCAPI_TODO, wrap this all in a transaction, this code is simply placeholder atm
-    qLog(DocAPI) << "Entering QContent::uninstallBatch";
-#ifndef QTOPIA_CONTENT_INSTALLER
-    QContentUpdateManager::instance()->beginInstall();
-#endif
-    QMultiHash<QtopiaDatabaseId, QContentId> list;
-    foreach(const QContentId& id, batch)
-        list.insert(id.first, id);
-    foreach(QtopiaDatabaseId dbid, list.uniqueKeys())
-    {
-        QSqlDatabase db=QtopiaSql::database(dbid);
-        if(!db.transaction())
-            qWarning("QContent::installBatch: couldn't start transaction");
-        foreach(QContentId contentId, list.values(dbid))
-            uninstall(contentId);
-        if(!db.commit())
-            qWarning("QContent::installBatch: couldn't commit transaction");
-    }
-#ifndef QTOPIA_CONTENT_INSTALLER
-    QContentUpdateManager::instance()->endInstall();
-#endif
-    qLog(DocAPI) << "Leaving QContent::uninstallBatch";
+    QContentStore::instance()->batchUninstallContent( batch );
 }
 
-
 /*!
-  Clear all error flags and errors strings on all \c QContent objects.
-  Note: this method clears the global error cache for all \c QContent objects
+  Clear all error flags and errors strings on all QContent objects.
+  Note: this method clears the global error cache for all QContent objects
   in this process.
-*/
+ */
 void QContent::clearErrors()
 {
-    ContentLinkPrivate::errors.clear();
 }
 
 /*!
-  Given an application binary name \a bin, return \c QContentId pointing to the
-  QContent item representing an application with that binary.
+  Given an application binary name \a bin return the QContentId of the QContent record
+  for that application.  If \a bin is the fully qualified path of an ordinary file the
+  QContentId of that file will be returned.
 
-  A path name may be supplied for \a bin (eg \a bin may contain "/"
-  characters).
+  If \a bin does not refer to any application or file in the backing store then an
+  InvalidId will be returned.
 
-  Note that binary names are unique across qtopia.
-*/
+  Note that binary names are unique across Qtopia.
+ */
 QContentId QContent::execToContent( const QString& bin )
 {
-    return database()->idByExecutable( bin );
+    QContent content = QContentStore::instance()->contentFromFileName( bin, QContentStore::Lookup );
+
+    if( !content.isNull() )
+        return content.id();
+    else
+        return QContent::InvalidId;
 }
 
 /*!
-  Return the DRM status of this object, as per the \c DRMState enum.  This
-  value is a cache of the real value available from the DRM agent.  When
-  an object expires an event should be fired to update the database but be aware
-  that stale information may be displayed.
-*/
+  Returns a value of the DrmState enumeration indicating whether the content is DRM protected or not.
+ */
 QContent::DrmState QContent::drmState() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return Unprotected;
     else
-        return d->drm;
+        return d->drmState();
 }
 
 /*!
     \deprecated
-  Return the document status of the object as per the \c UsageMode enum.  This
+  Returns the document status of the object as per the UsageMode enum.  This
   value does not usually change.  The status is used to determine what to display
-  to the user. \c Data objects make no sense to display to the user, as
+  to the user. Data objects make no sense to display to the user, as
   they cannot be launched or categorized. These files are only of use to the
   applications which operate on them.
 
     \sa role()
-*/
+ */
 QContent::UsageMode QContent::usageMode() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return UnknownUsage;
     else
-        return d->um;
+        return d->role();
 }
 
 /*!
-  Return the document status of the object as per the \c Role enum.  This
+  Returns the document status of the object as per the Role enum.  This
   value does not usually change.  The status is used to determine what to display
-  to the user. \c Data objects make no sense to display to the user, as
+  to the user. \l Data objects make no sense to display to the user, as
   they cannot be launched or categorized. These files are only of use to the
   applications which operate on them.
  */
 QContent::Role QContent::role() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return UnknownUsage;
     else
-        return d->um;
+        return d->role();
 }
 
 /*!
-    Set the document status of the object to \a role as per the \c Role enum.
-*/
+    Sets the document status of the object to \a role as per the Role enum.
+ */
 void QContent::setRole( Role role )
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
 
-    if( d->contentState() == ContentLinkPrivate::Committed )
-        d->cContentState = ContentLinkPrivate::Edited;
-
-    d->um = role;
+    d->setRole( role );
 }
 
 
 /*!
-  Return the comment for this object, typically used on ToolTips
+  Returns the comment for this object, typically used on ToolTips
   For DRM controlled objects this will include a summary of the
   rights and DRM status
-*/
+ */
 QString QContent::comment() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QString();
     else
-        return d->comment();
+    {
+        QString comment = d->property( QLatin1String( "none" ), QLatin1String( "comment" ) );
+
+        if( comment.isEmpty() )
+            return QMimeType::fromId( type() ).description();
+        else
+            return comment;
+    }
 }
 
 /*!
     Sets a string \a comment for this object.
-*/
+ */
 void QContent::setComment( const QString &comment )
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
 
-    if( d->contentState() == ContentLinkPrivate::Committed )
-        d->cContentState = ContentLinkPrivate::Edited;
-
-    d->cComment = comment;
+    d->setProperty( QLatin1String( "none" ), QLatin1String( "comment" ), comment );
 }
 
 /*!
-  Return the error string of this object.  If \c error() is false
-  then this method returns an empty string.  Use \c error() instead
+  Returns the error string of this object.  If error() is false
+  then this method returns an empty string.  Use error() instead
   of checking for an empty error string. The error string is not translated
   and therefore should not be used in a user interface.
-
-  \internal
-  Internally the error is stored in a static hash by record id.  In the
-  general case there wont be an error and if 1000's of \c QContent
-  objects are created having the extra storage for a string and a
-  bool which are almost always empty is inefficient.
-*/
+ */
 QString QContent::errorString() const
 {
-    return (error() && id() != InvalidId) ? ContentLinkPrivate::errors[id()] : QString();
+    return d->errorString();
 }
 
 /*!
-  Return true if this \c QContent object is in an error state.
-  Call the \c errorString() method to return a text description of the error.
-*/
+  Returns true if this QContent object is in an error state.
+  Call the errorString() method to return a text description of the error.
+ */
 bool QContent::error() const
 {
-    return id() != InvalidId && ContentLinkPrivate::errors.contains( id() );
+    return !d->errorString().isEmpty();
 }
 
 /*!
     Returns all the DRM permissions the content currently has rights for.
-    A true value of \a force will cause the rights to be requeried otherwise a
-    cached value may be returned.
-*/
+    If \a force is true the rights will be re-queried. If \a force is false a
+    cached value might be returned.
+ */
 QDrmRights::Permissions QContent::permissions( bool force ) const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QDrmRights::InvalidPermission;
     else
         return d->permissions( force );
 }
 
 /*!
-  Return a QDrmRights representation of any rights for this object for the
-  given \a permission.
-  If the drmStatus() returns Unprotected, then this method returns a QDrmRights
-  object with valid rights for all permissions.  Use drmStatus() != Unprotected
-  to test for unprotected content and permissions() & [permission] to test for
-  a specific permission.
-*/
+    Returns a QDrmRights representation of any rights for this object for the
+    given \a permission.
+
+    If drmStatus() returns Unprotected, then this method returns a QDrmRights
+    object with valid rights for all permissions.  Use drmStatus() != Unprotected
+    to test for unprotected content and permissions() & [permission] to test for
+    a specific permission.
+
+    \bold {Displaying the play permissions of a QContent:}
+    \code
+    void showPlayRights( const QContent &content, QWidget *parent )
+    {
+        QDrmRights = content.rights( QDrmRights::Play );
+
+        QString title;
+
+        switch( rights.status() )
+        {
+        case QDrmRights::Invalid:
+            title = tr( "Play permissions invalid." );
+            break;
+        case QDrmRights::Valid:
+            title = tr( "Play permissions valid." );
+            break;
+        case QDrmRights::ValidInFuture:
+            title = tr( "Play permissions pending." );
+            break;
+        }
+
+        QString message = title;
+
+        foreach( QDrmRights::Constraint constraint, rights.constraints() )
+        {
+            message += '\n' + constraint.name() + ":\t" + constraint.value();
+
+            for( int i = 0; i < constraint.attributeCount(); i++ )
+                message += "\n\t" constraint.attributeName( i ) + ":\t" ) + constraint.attributeValue( i );
+
+        }
+
+        QMessageBox::information( parent, title, QString( "<qt>%1</qt>" ).arg( message );
+    }
+    \endcode
+ */
 QDrmRights QContent::rights( QDrmRights::Permission permission ) const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QDrmRights();
-    else
+
         return d->rights( permission );
 }
 
 /*!
-   Return true if the file associated with this QContent object is already
-   known. If false, calling file() will generate a file name.
-*/
+  Returns true if the QContent has not been assigned a file name.  Calling file() when
+  fileKnown() is false will generate a new file and assign its file name to the QContent.
+
+  \sa file()
+  \deprecated
+ */
 bool QContent::fileKnown() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return false;
     else
-        return d->fileKnown();
+        return !d->fileName().isEmpty();
 }
 
 /*!
-  Deprecated functionality: Return the path of the .desktop link file
-  this metainfo ContentLink was generated from if available.
-*/
+  Returns the path of the .desktop file the QContent was generated from or an empty string
+  if the QContent was not generated from a .desktop file.
+
+  \sa file(), linkFileKnown()
+  \deprecated
+ */
 QString QContent::linkFile() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
-        return QString();
-    else
-        return d->linkFile();
+    return d->property( QLatin1String( "dotdesktop" ), QLatin1String( "linkFile" ) );
 }
 
 /*!
-  Returns the file associated with the QContent.
+  Returns the file name of the file associated with the QContent.  If no file is currently associated with the
+  content this will reserve a new file name and so should be called with caution.  To determine if there is
+  a file associated with the QContent call fileKnown().
 
-  \sa executableName(), name()
-*/
+  To get the file name with out potentially creating a new file use fileName() instead.
+
+  \sa executableName(), name(), fileName(), fileKnown()
+  \deprecated
+ */
 QString QContent::file() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QString();
-    return d->file();
+
+    QString fileName = d->fileName();
+
+    if( fileName.isEmpty() )
+    {
+        QIODevice *dev = QContentStore::instance()->openContent( const_cast< QContent * >( this ), QIODevice::WriteOnly );
+
+        if( dev )
+        {
+            dev->close();
+
+            delete dev;
+        }
+
+        fileName = d->fileName();
+    }
+
+    return fileName;
 }
 
 /*!
-    Returns MimeTypePermissions property of the QContent.
-*/
+  Returns a DRM permission for each MIME type an application QContent can open.
+  The launcher will ensure that a documents opened from the launcher menu have
+  valid rights for their MIME type permission before launching the application.
+
+  The permission list will contain one permission for each MIME type returned
+  by mimeTypes().
+
+  \sa mimeTypes()
+ */
 QList< QDrmRights::Permission > QContent::mimeTypePermissions() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QList<QDrmRights::Permission>();
-    return d->mimeTypePermissions();
+
+    QList<QDrmRights::Permission> permissions;
+
+    QList< QMimeEngineData > execTypes = d->executableMimeTypes();
+
+    foreach( QMimeEngineData execType, execTypes )
+        permissions.append( execType.permission );
+
+    return permissions;
 }
 
 /*!
-  Returns the MimeTypeIcons property of the QContent.
-*/
+  Returns an icon path for each MIME type an application QContent an open.
 
+  The icon list will contain one icon for each MIME type returned by mimeTypes().
+
+  \sa mimeTypes()
+ */
 QStringList QContent::mimeTypeIcons() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QStringList();
-    else
-        return d->mimeTypeIcons();
+
+    QStringList icons;
+
+    QList< QMimeEngineData > execTypes = d->executableMimeTypes();
+
+    foreach( QMimeEngineData execType, execTypes )
+        icons.append( execType.icon );
+
+    return icons;
 }
 
 /*!
-  Returns the MimeTypes property. This is the list of MIME types
-  that the application can view or edit.
-*/
+  Returns a list of MIME types that an application QContent can view or edit.  If the QContent is not
+  an application this will return an empty list.
+ */
 QStringList QContent::mimeTypes() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QStringList();
-    else
-        return d->mimeTypes();
+
+    QStringList mimeTypes;
+
+    QList< QMimeEngineData > execTypes = d->executableMimeTypes();
+
+    foreach( QMimeEngineData execType, execTypes )
+        mimeTypes.append( execType.type );
+
+    return mimeTypes;
 }
 
 /*!
-  Sets the MimeTypes property tp \a mimeTypes. This is the list of MIME types
-  that the application can view or edit.
+  Sets the list of MIME types that the application can view or edit to \a mimeTypes.
+
+  The application's icon will be associated with the mime types in document lists and
+  the application will be unable to open DRM protected content from the launcher.
+
+  MIME type associations are written to the database when commit() is called, if the
+  QContent is not an application the associations will not be written to the database.
  */
 void QContent::setMimeTypes( const QStringList &mimeTypes )
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
-
-    if( d->contentState() == ContentLinkPrivate::Committed )
-        d->cContentState = ContentLinkPrivate::Edited;
-
-    d->cMimeTypes = mimeTypes;
+    d->setMimeTypes(mimeTypes, QStringList(), QList< QDrmRights::Permission >());
 }
 
 /*!
-  Return a list of strings representing the categories on this object.
-  Usually it will make more sense to create a \c QContentSet and set
-  category filters on it.
-*/
+  Sets the list of MIME types that the application can view or edit to \a mimeTypes.
+
+  The icon displayed each MIME type is obtained from the \a mimeTypeIcons list, and
+  the DRM permission which is verified for documents opened from the launcher is obtained
+  from the \a permissions list.
+
+  Each mime type is assigned the icon and DRM permission from the corresponding index in the
+  \a mimeTypeIcons and \a permissions lists.  If there is only one value in either list it is
+  repeated for each MIME type.  If a list has more then one item but fewer than  \a mimeTypes
+  then a null value is assigned for the remainder of the MIME types.
+
+  MIME type associations are written to the database when commit() is called, if the
+  QContent is not an application the associations will not be written to the database.
+
+  \sa mimeTypeIcons(), mimeTypePermissions()
+ */
+void QContent::setMimeTypes( const QStringList &mimeTypes, const QStringList& mimeTypeIcons, const QList< QDrmRights::Permission >& permissions)
+{
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
+        return;
+    d->setMimeTypes(mimeTypes, mimeTypeIcons, permissions);
+}
+
+/*!
+  Returns a list of category IDs for the categories a QContent has been assigned.
+ */
 QStringList QContent::categories() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QStringList();
-    
+
     return d->categories();
 }
 
 /*!
-  Assignment operator.  Sets data on this to be what is set on \a other.
-*/
+  Assignment operator. Assigns the data in \a other to this content object.
+ */
 QContent &QContent::operator=( const QContent &other )
 {
     d = other.d;   // shallow QSharedData copy
@@ -943,21 +886,37 @@ QContent &QContent::operator=( const QContent &other )
 }
 
 /*!
-  Equality operator.  Return true if this \c Content object is the same as
-  the \a other; otherwise returns false.  Is true if both have the same Id number, or if both are
-  empty.
-*/
+  Equality operator.  Returns true if this QContent object is the same as
+  the \a other; otherwise returns false.
+
+  The values of the \l {QContent}s are only tested if both are not null and both
+  have invalid IDs, otherwise only the IDs are used to determine equality.
+ */
 bool QContent::operator==( const QContent &other ) const
 {
-    if(id() == QContent::InvalidId && other.id() == QContent::InvalidId) {
-        return *d == *other.d;
-    } else {
-        return (id() == other.id());
-    }
+    if( d == other.d )
+        return true;
+    else if( other.d == nullQContent()->d )
+        return false;
+    else if( d->id() != QContent::InvalidId )
+        return d->id() == other.d->id();
+    else if( other.d->id() == QContent::InvalidId )
+        return d->name() == other.d->name()
+            && d->fileName() == other.d->fileName()
+            && d->mimeType() == other.d->mimeType()
+            && d->role() == other.d->role();
+    else
+        return false;
 }
 
 /*!
-    Queries the launcher configuration settings and returns true if this object is in the systems PreloadApps list; otherwise returns false.
+    Queries the launcher configuration settings and returns true if an application QContent
+    is in the systems PreloadApps list; otherwise returns false.
+
+    If the QContent is a document then the return value will indicate if the associated application
+    is preloaded
+
+    Preloaded applications are applications that are launched in the background when Qtopia is started.
 */
 bool QContent::isPreloaded() const
 {
@@ -973,19 +932,25 @@ bool QContent::isPreloaded() const
 }
 
 /*!
-  Returns the executable name property. This is the name of the executable
-  program associated with the QContent target.
+  Returns the name of the name of the application that will be launched if the QContent is executed.
 
-  \sa setExecutableName(), execute()
-*/
+  If the QContent is an application this is the name of the binary, if it is a document it is the
+  executable name of the application associated with the document MIME type.
+
+  If the content is not an application and there is no associated application associated with its
+  MIME type then a null string will be returned.
+
+  \sa execute()
+ */
 QString QContent::executableName() const
 {
-    if (role() == Application)
-        return file();
+    if( role() == Application )
+    {
+        return d->fileName();
+    }
     else
     {
-        QMimeType mt(type());
-        QContent app = mt.application();
+        QContent app = d->mimeType().application();
         if ( app.id() != InvalidId )
             return app.executableName();
         else
@@ -994,163 +959,136 @@ QString QContent::executableName() const
 }
 
 /*!
-    Sets the executable name property to \a exec.
-    The property will not be written to the backing store until commit()
-    is called.
+    Sets the executable name property to \a exec.  If the content is not an executable this will change the file name.
 
-  \sa executableName(), execute()
-*/
+    The property will not be written to the backing store until commit() is called.
 
+    Use setFile() instead.
+
+    \deprecated
+    \sa setFile()
+ */
 void QContent::setExecutableName(const QString &exec)
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
-    
-    if( d->contentState() == ContentLinkPrivate::Committed )
-        d->cContentState = ContentLinkPrivate::Edited;
 
-    if( d->cPath.isEmpty() )
-        d->cPath = exec;
+    d->setFileName( exec );
 }
 
 /*!
-  \overload
   Executes the application associated with this QContent.
 
-  \sa executableName(), setExecutableName()
-*/
-
+  \sa executableName()
+ */
 void QContent::execute() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
     else
-        d->execute();
+        d->execute( QStringList() );
 }
 
 /*!
   Executes the application associated with this QContent, with
   \a args as arguments.
 
-  \sa executableName(), setExecutableName()
-*/
-
+  \sa executableName()
+ */
 void QContent::execute(const QStringList& args) const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
     else
         d->execute(args);
 }
 
 /*!
-    Return the path to the icon for this file.
+    Returns the path to the icon for this file.
 
     \sa icon()
-*/
-
+ */
 QString QContent::iconName() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QString();
     else
         return d->iconName();
 }
 
 /*!
-    Sets the Name property to \a docname.
+    Sets the Name property to \a name.
+
     The property will not be written to the backing store until commit()
     is called.
 
   \sa name()
  */
-void QContent::setName(const QString& docname)
+void QContent::setName( const QString& name )
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
-    else if( d->cName != docname )
-    {
-        if( d->contentState() == ContentLinkPrivate::Committed )
-            d->cContentState = ContentLinkPrivate::Edited;
 
-        if( d->contentState() != ContentLinkPrivate::New )
-            d->cNameChanged = true;
-
-        d->cName = docname;
-
-        d->loadIcon( true );
-    }
+    d->setName( name );
 }
 
 /*!
-    Sets the Type property to \a doctype.
+    Sets the Type property to \a type.
+
     The property will not be written to the backing store until commit()
     is called.
 
   \sa name()
  */
-void QContent::setType(const QString& doctype)
+void QContent::setType(const QString& type)
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
-    
-    if( d->contentState() == ContentLinkPrivate::Committed )
-        d->cContentState = ContentLinkPrivate::Edited;
 
-    d->cType = doctype;
-    d->loadIcon();
+    d->setMimeType( QMimeType( type ) );
 
-    if( d->um == UnknownUsage )
-    {
-        if (doctype == "application/x-executable") {
-            d->um = Application;
-        } else {
-            d->um = Document;
-        }
-    }
 }
 
 /*!
     Sets the icons associated with this content to \a iconpath.
+
     The property will not be written to the backing store until commit()
     is called.
 
     \sa icon(), commit()
-*/
+ */
 void QContent::setIcon(const QString& iconpath)
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
-    
-    if( d->contentState() == ContentLinkPrivate::Committed )
-        d->cContentState = ContentLinkPrivate::Edited;
 
-    d->cIconPath = iconpath;
-    d->loadIcon( true );
+    d->setIconName( iconpath );
 }
 
 /*!
-    Convenience function to test if this QContent is a Document or an Application.
-    Returns true if this QContent is a Document or an Application; otherwise returns false.
+  Returns true if this QContent object represents a document, or false if it represents
+  an application. Convenience function.
 
     \sa usageMode()
-*/
+ */
 bool QContent::isDocument() const
 {
-    return usageMode() != Application;
+    return role() != Application;
 }
 
 /*!
     \enum QContent::Property
 
-    Convenience enum provides some of the more common content properties.
+    Convenience enumeration that provides some of the more common content properties. All
+    the properties have a key equal to their enumeration name in the default property group
+    \c {none}.
 
     \value Album  The name of the album which the content is part of.
     \value Artist The name of the artist who produced the content.
@@ -1166,62 +1104,58 @@ bool QContent::isDocument() const
     \value RightsIssuerUrl A URL where rights for DRM protected content may be obtained.  Typically associated with OMA DRM content.
     \value Track The content's position on an album.
     \value Version The content's version number.
-*/
+ */
 
 /*!
-    Set a property associated with the content with key \a key and value
-    \a value.  If \a group is specified then the property will be stored in
-    the specified group, otherwise it will be stored in the default group.
-    The property will not be written to the backing store until
-    commit() is called.
+    Sets the \a key property of a QContent to \a value.  A key is unique within a property
+    \a {group}, but may be repeated in another group.  If no \a group is specified then the
+    key is assumed to belong to the default property group \c {none}.
 
-    \sa property(), commit()
-*/
+    The property value will not be written to the backing store until commit() is called.
+
+    \sa commit()
+ */
 void QContent::setProperty(const QString& key, const QString& value, const QString &group)
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
-    
-    if( d->contentState() == ContentLinkPrivate::Committed )
-        d->cContentState = ContentLinkPrivate::Edited;
 
-    d->setProperty(key, value, group);
+    d->setProperty( !group.isEmpty() ? group : QLatin1String( "none" ), key, value );
 }
 
 /*!
-    Set a property associated with the content with key \a key and value
-    \a value.  The property will not be written to the backing store until
-    commit() is called.
+    Sets the \a key property of a QContent to \a value.
 
-    \sa property(), commit()
-*/
+    The property will not be written to the backing store until commit() is called.
+
+    \sa commit()
+ */
 void QContent::setProperty( Property key, const QString &value )
 {
     setProperty( propertyKey( key ), value );
 }
 
 /*!
-    Return a property associated with this content with key \a key and
-    group \a group.  If \a group is not specifed the default group will be
-    used.
+    Returns the value of the \a key property within a property \a group.
 
-    \sa setProperty()
-*/
+    Property groups provide a namespace for keys. Within a group a QContent may
+    only have one value for a key, but a key may be repeated in another group
+    with a different value.  If no \a group is specified then the default group
+    \c none is assumed.
+ */
 QString QContent::property(const QString& key, const QString &group) const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QString();
     else
-        return d->property(key, group);
+        return d->property( !group.isEmpty() ? group : QLatin1String( "none" ), key );
 }
 
 /*!
-    Return a property associated with this content with key \a key.
-
-    \sa setProperty()
-*/
+    Returns the value of the \a key property.
+ */
 QString QContent::property( Property key ) const
 {
     return property( propertyKey( key ) );
@@ -1229,7 +1163,7 @@ QString QContent::property( Property key ) const
 
 /*!
     Returns the string key for a given \a property.
-*/
+ */
 QString QContent::propertyKey( Property property )
 {
     switch( property )
@@ -1254,150 +1188,85 @@ QString QContent::propertyKey( Property property )
 }
 
 /*!
-    Set the categories associated with this content to \a categoryList.
-    The categores will not be written to the backing store until commit()
+    Sets the list of category IDs assigned to a QContent to \a categoryList.
+
+    This will overwrite the list of categories already assigned to a QContent, so new
+    categories should be appended to the list returned by categories() to prevent existing
+    categories being lost.
+
+    \code
+        content.setCategories( content.categories() << newCategoryId );
+    \endcode
+
+    The categories will not be written to the backing store until commit()
     is called.
 
     \sa categories(), commit()
-*/
+ */
 void QContent::setCategories( const QStringList &categoryList )
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
 
-    if( d->contentState() == ContentLinkPrivate::Committed )
-        d->cContentState = ContentLinkPrivate::Edited;
-
-    d->cExtraLoaded |= ContentLinkPrivate::Categories;
-    d->cCategories = categoryList;
+    d->setCategories( categoryList );
 }
 /*!
   \fn bool QContent::commit()
 
-  Writes the changes to the QContent object to the backing store. Returns true if successfull
- */
+   Writes the changes to the QContent object to the backing store. Returns true if successful
+
+   When a QContent is committed a notification is sent to all applications which can be listened
+   for on the QtopiaApplication::contentChanged() signal.
+*/
 
 
 /*!
-    Writes the changes to the QContent to the backing store. Returns true if successfull and sets
+    Writes the changes to the QContent to the backing store. Returns true if successful and sets
     \a change to the type of change committed.
-*/
+ */
 bool QContent::commit(ChangeType &change)
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return false;
 
-#ifndef QTOPIA_CONTENT_INSTALLER
-    if ( !d->isValid() )
-        return false;
-#endif
+    change = id() == InvalidId ? Added : Updated;
 
-    switch( d->cContentState )
-    {
-    case ContentLinkPrivate::New:
-        if( !installContent( linkFileKnown() ? linkFile() : file() ) )
-            return false;
-        else
-            break;
-    case ContentLinkPrivate::Committed:
-        if( !lastUpdated().isNull() && lastUpdated() >= QFileInfo( linkFileKnown() ? linkFile() : file() ).lastModified() )
-            return true;
-    case ContentLinkPrivate::Edited:
-        {
-            if(d->cNameChanged)
-                d->syncFileName();
-
-            updateContent();
-        }
-        break;
-    case ContentLinkPrivate::Uncommited:
-        break;
-    }
-
-    databaseLock.lockForWrite();
-    d->cId = database()->postLink( d.data(), change );
-    if( id() != InvalidId )
-    {
-        invalidate(d->cId);
-        if( d->cExtraLoaded & ContentLinkPrivate::Categories )
-        {
-            database()->removeCategoryMap(id());
-            foreach(QString cat, d->cCategories)
-                database()->appendNewCategoryMap(cat, d->um == Application ? QLatin1String("Applications") : (d->um == Data ? QLatin1String("Data") : QLatin1String("Documents")), id(), QString::null, !d->batchLoading);
-        }
-        QMap<QPair<QString,QString>,QString>::const_iterator pit = d->cPropertyList.constBegin();
-        while (pit != d->cPropertyList.constEnd()) {
-            QPair<QString, QString> realKey = pit.key();
-            database()->writeProperty(id(), realKey.first, pit.value(), realKey.second);
-            pit++;
-        }
-        if( !d->cMimeTypeIcons.isEmpty() )
-            database()->writeProperty( d->cId, QLatin1String("MimeTypeIcons"), d->cMimeTypeIcons.join( QLatin1String(";") ), QLatin1String("Desktop Entry") );
-        databaseLock.unlock();
-        d->cContentState = ContentLinkPrivate::Committed;
-        if(!d->batchLoading)
-            updateSets(id(), change);
-
-        return true;
-    }
-    else
-    {
-        databaseLock.unlock();
-
-        return false;
-    }
+    return QContentStore::instance()->commitContent( this );
 }
 
 /*!
-    Set the file that this content references to \a filename
-*/
+    Sets the file that this content references to \a filename
+ */
 void QContent::setFile( const QString& filename )
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
 
-#ifndef QTOPIA_CONTENT_INSTALLER
-    if( d->contentState() == ContentLinkPrivate::New )
-    {
-#endif
-        d->valid = ContentLinkPrivate::UnknownValidity;
-
-        d->cPath = filename;
-#ifndef QTOPIA_CONTENT_INSTALLER
-    }
-#endif
+    d->setFileName( filename );
 }
 
 /*!
-    Uninstall this object from the database, and remove it from the filesystem.
+    Uninstalls a QContent from the database and removes the associated file from the file-system.
  */
 void QContent::removeFiles()
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return;
-    else if(QFileInfo(file()).isWritable() && !file().startsWith(Qtopia::qtopiaDir()+"/"))
-    {
-        if ( !type().startsWith("Folder/") && type() != "Applications"
-            && type() != "Games" && type() != "Settings" && fileKnown()) {
-            d->removeFiles();
-        }
-        uninstall(id());
-    }
+
+    QContentStore::instance()->removeContent( this );
+
 }
 
 /*!
     \deprecated
-    Uninstall the .desktop/link file for this object from the database, and remove it from the filesystem.
+    Uninstall the .desktop/link file for this object from the database, and remove it from the file-system.
  */
 void QContent::removeLinkFile()
 {
-    QFile fi(linkFile());
-    if (fi.exists()  && fi.isWritable() && !linkFile().startsWith(Qtopia::qtopiaDir()+"/"))
-        fi.remove();
 }
 
 /*!
@@ -1406,62 +1275,49 @@ void QContent::removeLinkFile()
  */
 void QContent::setLinkFile( const QString& filename )
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
-        return;
-
-#ifndef QTOPIA_CONTENT_INSTALLER
-    if( d->contentState() == ContentLinkPrivate::New )
-    {
-#endif
-        d->valid = ContentLinkPrivate::UnknownValidity;
-
-        d->cLinkFile = filename;
-#ifndef QTOPIA_CONTENT_INSTALLER
-    }
-#endif
+    d->setProperty( QLatin1String( "dotdesktop" ), QLatin1String( "linkFile" ), filename );
 }
 
 /*!
     Returns the root path of the media the content is stored on.
-*/
+ */
 QString QContent::media() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QString();
     else
         return d->media();
 }
 
 /*!
-    Sets the root path of the \a media the file is stored on.  Once a QContent has been commited to the database
+    Sets the root path of the \a media the file is stored on.  Once a QContent has been committed to the database
     the media cannot be changed. Returns true if successful; otherwise false.
-*/
+ */
 bool QContent::setMedia( const QString &media )
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return false;
     else
     {
-        if( d->contentState() == ContentLinkPrivate::Committed )
-            d->cContentState = ContentLinkPrivate::Edited;
-        return d->setMedia( media );
+        d->setMedia( media );
+
+        return true;
     }
 }
 
 /*!
-    Returns the Id of this QContent.  If this QContent is not present in
+    Returns the ID of this QContent.  If this QContent is not present in
     the backing store its value will be QContent::InvalidId.
-*/
+ */
 QContentId QContent::id() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QContent::InvalidId;
     else
-        return d->cId;
+        return d->id();
 }
 
 /*!
@@ -1469,19 +1325,17 @@ QContentId QContent::id() const
 
     Returns the QIODevice if successful, otherwise returns 0.  It is the
     caller's responsibility to delete the return value.
-*/
+ */
 QIODevice *QContent::open(QIODevice::OpenMode mode)
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return NULL;
 
-    QIODevice *dev = d ? d->open(mode) : 0;
-    if (dev && mode & (QIODevice::WriteOnly | QIODevice::Append | QIODevice::Truncate)) {
-        commit();
-    }
-
-    return dev;
+    if( d->fileName().isEmpty() )
+        return QContentStore::instance()->openContent( this, mode );
+    else
+        return d->open( mode );
 }
 
 /*!
@@ -1492,22 +1346,47 @@ QIODevice *QContent::open(QIODevice::OpenMode mode)
  */
 QIODevice *QContent::open() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return NULL;
-    else
-        return fileKnown() ? d->open( QIODevice::ReadOnly ) : 0;
+
+    return const_cast< QContent * >( this )->d->open( QIODevice::ReadOnly );
 }
 
 /*!
-    Saves the data \a data.
+    Saves \a data to the file associated with a QContent.
 
-    Returns true is successful; otherwise false.
-*/
+    If the QContent is associated with an existing file its contents will be overwritten,
+    otherwise a new file will be created.  In order to create a new file the QContent must
+    have valid values of name() and type().
+
+    Returns true if all the data is written to the file and false otherwise.
+
+    \bold {Saving data to a new file:}
+    \code
+    bool saveData( const QString &name, const QString &type, const QByteArray &data )
+    {
+        QContent content;
+
+        content.setName( name );
+        content.setType( type );
+
+        if( content.save( data ) )
+        {
+            content.commit();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    \endcode
+ */
 bool QContent::save(const QByteArray &data)
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return false;
 
     QIODevice *dev = open(QIODevice::WriteOnly);
@@ -1519,23 +1398,19 @@ bool QContent::save(const QByteArray &data)
     delete dev;
 
     if (bytesWritten != data.size()) {
-        removeFiles();
         return false;
     }
-
-    if( d->contentState() != ContentLinkPrivate::New )
-        d->cContentState = ContentLinkPrivate::Edited;
-
-    commit();
 
     return true;
 }
 
 /*!
-    Loads the content into \a data.
+    Read the unformatted contents of the file associated with a QContent into \a data.
 
-    Returns true if successful; otherwise false.
-*/
+    If \a data is not empty the contents will be overridden.
+
+    Returns true if data could be read from the file and false otherwise.
+ */
 bool QContent::load(QByteArray &data) const
 {
     QIODevice *dev = open();
@@ -1551,22 +1426,22 @@ bool QContent::load(QByteArray &data) const
 }
 
 /*!
-    Copy the contents of \a from to this QContent.
+    Copies the contents of \a from to this QContent.
 
     Returns true is successful, otherwise false.
-*/
+ */
 bool QContent::copyContent(const QContent &from)
 {
-    QFile source( from.file() );
+    QFile source( from.fileName() );
 
-    if( source.copy( file() ) )
+    if( source.copy( fileName() ) )
         return true;
 
     return false;
 }
 
 /*!
-    Copy the contents of the file and the metainfo from this QContent to
+    Copies the contents of the file and the meta-info from this QContent to
     \a newPath.
 
     Returns true is successful, otherwise false.
@@ -1574,25 +1449,15 @@ bool QContent::copyContent(const QContent &from)
 
 bool QContent::copyTo(const QString &newPath)
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return false;
 
-    bool ok;
-    if(!isValid())
-        return false;
-    QContent newCopy(*this);
-    newCopy.d->cId = QContent::InvalidId;
-    newCopy.d->cPath = newPath;
-    newCopy.commit();
-    ok = newCopy.copyContent(*this);
-    if(!ok)
-        newCopy.removeFiles();
-    return ok;
+    return QContentStore::instance()->copyContentTo( this, newPath );
 }
 
 /*!
-    Move the contents of the file and the metainfo from this QContent to
+    Moves the contents of the file and the meta-info from this QContent to
     \a newPath.
 
     Returns true if the contents is successfully moved, otherwise false.
@@ -1602,121 +1467,16 @@ bool QContent::copyTo(const QString &newPath)
 
 bool QContent::moveTo(const QString &newPath)
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return false;
 
-    if(copyTo(newPath)) {
-        removeFiles();
-        *this = QContent(newPath);
-        return true;
-    }
-    return false;
-}
-
-void QContent::invalidate(QContentId id)
-{
-    contentCacheMutex.lock();
-    contentCache()->remove(id);
-    contentCacheMutex.unlock();
-}
-
-bool QContent::isCached(QContentId id)
-{
-    return contentCache()->contains(id);
-}
-
-void QContent::cache(const QContentIdList &idList)
-{
-    databaseLock.lockForRead();
-    QContentIdList internalidList;
-    QMutexLocker guard(&contentCacheMutex);
-    foreach(QContentId id, idList)
-        if(!contentCache()->contains(id))
-            internalidList.append(id);
-    QList< QHash<QString, QVariant> > results = QContent::database()->linksById(internalidList);
-    databaseLock.unlock();
-    if (results.count()) {
-        QHash<QString, QVariant> result;
-        foreach( result, results ) {
-            QContent *c = new QContent();
-            c->create( result );
-            contentCache()->insert(c->id(), c);
-        }
-    }
-}
-
-void QContent::create(QHash<QString, QVariant> result)
-{
-    bool correctionNeeded = false;
-    static const QString docStatusString("docStatus"), drmFlagsString("drmFlags");
-
-    QContentId id(result[QLatin1String("database")].toUInt(), result[QLatin1String("cid")].toULongLong());
-    QChar docStatus = result[ docStatusString ].toString()[0];
-    bool isProtected = result[ drmFlagsString ].toInt() != 65536;
-    QString mimeType=result[ QLatin1String("mimeType") ].toString();
-
-    if ( result.count() == 0
-         || !result.contains( drmFlagsString )
-         || !result.contains( docStatusString ))
-    {
-        QString error;
-        ContentLinkPrivate::errors.insert( id, QString("Record (%1,%2) for QContent does not contain both drm & doc status"
-                                                      ).arg( result[QLatin1String("database")].toUInt() ).arg( result[QLatin1String("cid")].toULongLong() ));
-        d = new ContentLinkPrivate;
-        return;
-    }
-    if ( (mimeType == QLatin1String("Applications") || mimeType == QLatin1String("Games") || mimeType == QLatin1String("Settings")) && docStatus != 'a' )
-    {
-        qLog (DocAPI) << "database has invalid doc/drm state data, fixing ( to be done, internal values corrected, database not corrected)";
-        result[ docStatusString ] = QLatin1String("a");
-        // QTOPIA_DOCAPI_TODO mark for write back to the database
-        correctionNeeded = true;
-    }
-
-    if( isProtected )
-    {
-        d = new ContentLinkPrivateDRM;
-
-        d->drm = Protected;
-    }
-    else
-    {
-        d = new ContentLinkPrivate;
-
-        d->drm = Unprotected;
-    }
-
-    switch ( docStatus.toAscii() )
-    {
-    case 'a':
-        d->um = Application;
-        break;
-    case 'd':
-        d->um = Document;
-        break;
-    default:
-        d->um = Data;
-    }
-
-    d->cId = id;
-    d->load( result );
-
-    d->cContentState = ContentLinkPrivate::Committed;
-
-    if (correctionNeeded)
-    {
-
-        //ChangeType change = QContent::Updated;
-        //d->cId = database()->postLink( d.data(), change );
-    }
-    QMutexLocker guard(&contentCacheMutex);
-    contentCache()->insert(id, new QContent(*this));
+    return QContentStore::instance()->moveContentTo( this, newPath );
 }
 
 /*!
-  Update all the QContentSets this content is a member of
-*/
+  Updates all the QContentSets this content is a member of.
+ */
 void QContent::updateSets(QContentId id, QContent::ChangeType c)
 {
 #ifdef QTOPIA_CONTENT_INSTALLER
@@ -1729,16 +1489,100 @@ void QContent::updateSets(QContentId id, QContent::ChangeType c)
 }
 
 /*!
-  Return the value of the last time underlying file was updated.
+  Returns the value of the last time underlying file was updated.
  */
-
 QDateTime QContent::lastUpdated() const
 {
-    Q_ASSERT(d != NULL);
-    if (d == NULL)
+    Q_ASSERT( d.constData() != NULL );
+    if( d.constData() == NULL )
         return QDateTime();
     else
         return d->lastUpdated();
+}
+
+/*!
+    Returns true if the QContent is detached; otherwise returns false.
+
+    \internal
+*/
+bool QContent::isDetached() const
+{
+    return d->ref == 1;
+}
+
+/*!
+    \enum QContent::DocumentSystemConnection
+
+    Identifies how an application is connected to the Qtopia Document System.
+
+    \value DocumentSystemClient The application performs document system operations by connecting to the Qtopia Document Server.
+    \value DocumentSystemDirect The application connects directly to the backing store and performs all document system operations locally.
+*/
+
+/*!
+    Identifies whether the application connects to the Qtopia Document Server or performs Document System operations locally.
+*/
+QContent::DocumentSystemConnection QContent::documentSystemConnection()
+{
+    return *::documentSystemConnection();
+}
+
+/*!
+    Sets the type of \a connection the application has to the Qtopia Document System.
+    Returns true if the connection type is set, false otherwise.
+
+    Notes:
+    \list
+    \o The connection type cannot be changed once connected to the Document System.
+    \o Applications with the GuiServer type always have a direct connection.
+    \o This function has no effect before QApplication is constructed.
+    \endlist
+
+    \sa QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION()
+*/
+bool QContent::setDocumentSystemConnection( DocumentSystemConnection connection )
+{
+    if ( !qApp ) {
+        qWarning() << "QContent::setDocumentSystemConnection() has no effect before QApplication is constructed.";
+        return false;
+    }
+    if ( QContentStore::initialized() )
+        qWarning() << "QContent::setDocumentSystemConnection() cannot be called because the document system is already connected.";
+    else if ( qApp->type() != QApplication::GuiServer )
+        *::documentSystemConnection() = connection;
+    return ( *::documentSystemConnection() == connection );
+}
+
+
+/*!
+    \fn QContent::serialize(Stream &stream) const
+
+    Writes the contents of a QContent to a \a stream.
+
+    \internal
+*/
+template <typename Stream> void QContent::serialize(Stream &stream) const
+{
+    stream << d->engineType();
+    stream << *d;
+}
+
+/*!
+    \fn QContent::deserialize(Stream &stream)
+
+    Reads the contents of a QContent from \a stream.
+
+    \internal
+*/
+template <typename Stream> void QContent::deserialize(Stream &stream)
+{
+    QString engineType;
+
+    stream >> engineType;
+
+    *this = QContentStore::instance()->contentFromEngineType( engineType );
+
+    stream >> *d;
 }
 
 QDataStream& operator<<(QDataStream& ds, const QContentId &id)
@@ -1773,9 +1617,14 @@ QDBusArgument &operator<<(QDBusArgument &a, const QContentId &id)
 }
 #endif
 
-QTOPIA_EXPORT QDebug &operator<<(QDebug &debug, const QContent &content)
+QTOPIA_EXPORT QDebug operator<<(QDebug debug, const QContent &content)
 {
-    return debug << content.d.data();
+    if( content.isNull() )
+        debug << "QContent()";
+    else
+        debug << "QContent(" << (*content.d) << ")";
+
+    return debug;
 }
 
 /*!

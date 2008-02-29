@@ -18,7 +18,7 @@ conjunction with the Qtopia(R) Greenphone(TM).  This software is licensed
 under a variety of different licenses.
 
 
-        - Qtopia Greenphone Community SDK Licensees
+        Qtopia Greenphone Community SDK Licensees
 
 If you are a Qtopia Greenphone Community SDK licensee, your use of the
 Qtopia software provided in binary format in this .iso file is licensed
@@ -28,9 +28,9 @@ License Agreement”.  This license agreement is included on this CDROM
 is also available on qtopia.net.
 
 
-        - Qtopia Greenphone Light and Professional Licensees
+        Qtopia Greenphone Professional Licensees
 
-If you are a Qtopia Greenphone SDK Light or Professional licensee, your
+If you are a Qtopia Greenphone SDK Professional licensee, your
 use of the Qtopia software provided in binary format in this .iso file
 is licensed under the terms contained in the “Qtopia(R) Greenphone(TM) SDK
 License Agreement” that accompanied your purchase of the Qtopia Greenphone.
@@ -58,7 +58,7 @@ available at http://www.qtopia.net <http://www.qtopia.net/>
       Release Notes
 
    Qtopia release notes are available at
-   http://doc.trolltech.com/qtopia4.2/release-index.html
+   http://doc.trolltech.com/qtopia!QPE_URL_VERSION!/release-index.html
    and from Assistant inside the VmPlayer environment.
 
 

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,8 +19,7 @@
 **
 ****************************************************************************/
 
-#include <qtopiaapplication.h>
-
+#include <QtopiaApplication>
 
 #include "engine.h"
 #include "doubleinstruction.h"
@@ -57,12 +56,10 @@ public:
 void Engine::openBrace () {
     if (state == sError)
         return;
-#ifdef QTOPIA_PHONE
     if (!Qtopia::mousePreferred())
         // prevents crash when x-y*(...) is entered => calc is not entirely correct
         if (state == sAppend)
             return;
-#endif
     pushInstruction("Open brace"); // No tr
     if (state != sError)
         changeState(sStart);
@@ -120,7 +117,7 @@ Engine::Engine():QObject() {
         da = new iNegateFractionFraction();
         registerInstruction(da);
 #endif
-#if !defined(QTOPIA_PHONE) && defined(ENABLE_SCIENCE)
+#if defined(ENABLE_SCIENCE)
         da = new iDoublePow();
         registerInstruction(da);
         da = new iDoubleExp();
@@ -307,26 +304,20 @@ void Engine::doEvalStack(int p,bool inbrace) {
 
 void Engine::evalStack(int p,bool inbrace) {
     if (state != sError) {
-#ifdef QTOPIA_PHONE
         QStack<QString*> tmpIStack;
-#endif
         // could be more efficient and only resolve i once
         Instruction *i;
         while (!iStack.isEmpty ()
                 && state != sError
-#ifdef QTOPIA_PHONE
                 && *iStack.top() != "EvaluateLine" // No tr
-#endif
                 && (p <= resolve(*iStack.top())->precedence)) {
             // Pop the next instruction
             QString *iString = iStack.pop();
             i = resolve(*iString);
             if (Qtopia::mousePreferred())
                 delete iString;
-#ifdef QTOPIA_PHONE
             else
                 tmpIStack.push(iString);
-#endif
 
             // Stop at the open brace
             if (i->name == "Open brace impl" && inbrace) { // No tr
@@ -334,10 +325,8 @@ void Engine::evalStack(int p,bool inbrace) {
                 if (Qtopia::mousePreferred())
                     return;
                 else {
-#ifdef QTOPIA_PHONE
                     //--braceCount;
                     delete tmpIStack.pop(); // delete open brace instraction
-#endif
                     return;
                 }
             }
@@ -359,7 +348,6 @@ void Engine::evalStack(int p,bool inbrace) {
             // Evaluate
             i->eval();
 
-#ifdef QTOPIA_PHONE
             if (!Qtopia::mousePreferred()) {
                 if (!braceCount && !dStack.isEmpty()){
                     Data *top = dStack.pop();
@@ -372,13 +360,10 @@ void Engine::evalStack(int p,bool inbrace) {
                     delete tmpIStack.pop();
                 }
             }
-#endif
         }
-#ifdef QTOPIA_PHONE
         if (!Qtopia::mousePreferred())
             while (!tmpIStack.isEmpty())
                 iStack.push(tmpIStack.pop());
-#endif
     }
 }
 
@@ -480,12 +465,8 @@ void Engine::push(char c) {
         dStack.top()->clear();
         changeState(sAppend);
     } else {
-
-#ifdef QTOPIA_PHONE
         if (!Qtopia::mousePreferred() && !iStack.isEmpty() && *iStack.top() == "EvaluateLine") // No tr
             hardReset();
-        else
-#endif
         changeResetState(drSoft);
         if (!dStack.top()->push(c, false)) {
             return;
@@ -549,12 +530,10 @@ bool Engine::checkState() {
     return true;
 }
 Data *Engine::getData() {
-#ifdef QTOPIA_PHONE
     if (!Qtopia::mousePreferred()) {
         executeInstructionOnStack("Copy"); // No tr
         tmpDStack.push(dStack.pop());
     }
-#endif
     return dStack.pop();
 }
 void Engine::putData(Data *d) {
@@ -777,7 +756,6 @@ void Engine::incBraceCount() {
     braceCount++;
 }
 
-#ifdef QTOPIA_PHONE
 bool Engine::error(){
     if ( state == sError )
         return true;
@@ -787,5 +765,3 @@ bool Engine::error(){
 int Engine::numOps(){
     return dStack.count();
 }
-
-#endif

@@ -16,6 +16,8 @@
 <a name="top"></a><ul><li><a href="#themed-views">Themed Views</a></li>
 <ul><li><a href="#naming-elements">Naming Elements</a></li>
 <li><a href="#positioning-elements">Positioning Elements</a></li>
+<ul><li><a href="#units">Units</a></li>
+</ul>
 <li><a href="#showing-hiding-elements">Showing/Hiding Elements</a></li>
 <li><a href="#specifying-colors">Specifying Colors</a></li>
 <li><a href="#alignment">Alignment</a></li>
@@ -30,13 +32,16 @@
 <h2>Themed Views</h2>
 <p>Themed Views defined by XML files, describe a hierarchical group of visual and formatting elements. They are used by the following:</p>
 <ul>
-<li><tt>Title</tt></li>
-<li><tt>Home</tt> Screen</li>
-<li><tt>Call</tt> Screen</li>
+<li><tt>Title bar</tt></li>
+<li><tt>Home screen</tt></li>
+<li><tt>Call screen</tt></li>
 <li><tt>Dialer</tt></li>
-<li><tt>Context</tt> Bar.</li>
+<li><tt>Context bar</tt></li>
+<li><tt>Boot charger</tt></li>
+<li><tt>Secondary Home screen</tt> (Optional)</li>
+<li><tt>Secondary Title bar</tt> (Optional)</li>
 </ul>
-<p>to display items such as: status information,text and animations.</p>
+<p>to display items such as: status information, text and animations.</p>
 <p>Qtopia interacts with a themed view using elements such as <i>page</i>, <i>line</i>, <i>alarm</i>, <i>date</i>, <i>button0</i>. Each of these elements has attributes which affect the visual appearance and placement of elements. For a full list of view elements refer to: <a href="themed-view-elements.html">Themed View Elements</a>. Attributes that are common to many elements are known as Common attributes and include:</p>
 <ul>
 <li>Naming Elements</li>
@@ -62,6 +67,13 @@
 <p>For example, to place a rect element that scales as the view gets wider:</p>
 <pre>    &lt;rect rect=&quot;20,10,-20,50&quot; color=&quot;Highlight&quot; brush=&quot;Highlight&quot;/&gt;</pre>
 <p>This places a rectangle, using the Highlight color, at 20,10 with height of 40 pixels and the y2 coordinate 20 pixels from the parent element's right side.</p>
+<a name="units"></a>
+<h4>Units</h4>
+<p>The theme engine supports different units. By default position and size are specified in pixels but it is possible to use point sizes or proportional positioning.</p>
+<pre>    &lt;rect rect=&quot;10,10,150x12pt&quot;/&gt;</pre>
+<p>This element has a height of 12 points.</p>
+<pre>    &lt;image src=&quot;settings&quot; rect=&quot;0,0,50%x50%&quot;/&gt;</pre>
+<p>This element width and height are half of the width and height of its parent. It will be updated if the size of the parent changes.</p>
 <a name="showing-hiding-elements"></a>
 <h3>Showing/Hiding Elements</h3>
 <p>Attributes to show or hide and elements are available to all elements. The <tt>transient</tt> and <tt>active</tt> attributes control the visibility of an element. Both the <tt>transient</tt> and <tt>active</tt> attributes can have literal values of <tt>yes</tt> or <tt>no</tt>, with the default value for <tt>transient</tt> being <tt>no</tt> and the default value of <tt>active</tt> being yes. The active attribute only has effect when <tt>transient=&quot;yes&quot;</tt>. In addition to a literal value, a boolean expression can also be specified for the value of the <tt>active</tt> attribute. This allows the visibility of a theme element to be controlled by the valuespace.</p>
@@ -190,6 +202,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

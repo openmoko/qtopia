@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -56,18 +71,18 @@ static void slashify( QString& s, bool allowMultiple = true )
     bool justHadSlash = false;
     for ( int i = 0; i < (int)s.length(); i++ ) {
 	if ( !allowMultiple && justHadSlash &&
-	     ( s[ i ] == '/' || s[ i ] == '\\' ) ) {
+	     ( s[ i ] == QLatin1Char('/') || s[ i ] == QLatin1Char('\\') ) ) {
 	    s.remove( i, 1 );
 	    --i;
 	    continue;
 	}
-	if ( s[ i ] == '\\' )
-	    s[ i ] = '/';
+	if ( s[ i ] == QLatin1Char('\\') )
+	    s[ i ] = QLatin1Char('/');
 #if defined (Q_WS_MAC9)
-	if ( s[ i ] == ':' && (i == (int)s.length()-1 || s[ i + 1 ] != '/' ) ) //mac colon's go away, unless after a protocol
-		s[ i ] = '/';
+	if ( s[ i ] == QLatin1Char(':') && (i == (int)s.length()-1 || s[ i + 1 ] != QLatin1Char('/') ) ) //mac colon's go away, unless after a protocol
+		s[ i ] = QLatin1Char('/');
 #endif
-	if ( s[ i ] == '/' )
+	if ( s[ i ] == QLatin1Char('/') )
 	    justHadSlash = true;
 	else
 	    justHadSlash = false;
@@ -180,7 +195,7 @@ Q3Url::Q3Url()
 Q3Url::Q3Url( const QString& url )
 {
     d = new Q3UrlPrivate;
-    d->protocol = "file";
+    d->protocol = QLatin1String("file");
     d->port = -1;
     parse( url );
 }
@@ -201,8 +216,8 @@ Q3Url::Q3Url( const Q3Url& url )
 
 bool Q3Url::isRelativeUrl( const QString &url )
 {
-    int colon = url.find( ":" );
-    int slash = url.find( "/" );
+    int colon = url.find( QLatin1String(":") );
+    int slash = url.find( QLatin1String("/") );
 
     return ( slash != 0 && ( colon == -1 || ( slash != -1 && colon > slash ) ) );
 }
@@ -251,12 +266,12 @@ Q3Url::Q3Url( const Q3Url& url, const QString& relUrl, bool checkSlash )
 	urlTmp.reset();
     }
     if ( isRelativeUrl( rel ) ) {
-	if ( rel[ 0 ] == '#' ) {
+	if ( rel[ 0 ] == QLatin1Char('#') ) {
 	    *this = urlTmp;
 	    rel.remove( (uint)0, 1 );
 	    decode( rel );
 	    setRef( rel );
-	} else if ( rel[ 0 ] == '?' ) {
+	} else if ( rel[ 0 ] == QLatin1Char('?') ) {
 	    *this = urlTmp;
 	    rel.remove( (uint)0, 1 );
 	    setQuery( rel );
@@ -264,7 +279,7 @@ Q3Url::Q3Url( const Q3Url& url, const QString& relUrl, bool checkSlash )
 	    decode( rel );
 	    *this = urlTmp;
 	    setRef( QString() );
-	    if ( checkSlash && d->cleanPath[(int)path().length()-1] != '/' ) {
+	    if ( checkSlash && d->cleanPath[(int)path().length()-1] != QLatin1Char('/') ) {
 		if ( isRelativeUrl( path() ) )
 		    setEncodedPathAndQuery( rel );
 		else
@@ -274,17 +289,17 @@ Q3Url::Q3Url( const Q3Url& url, const QString& relUrl, bool checkSlash )
 		if ( p.isEmpty() ) {
 		    // allow URLs like "file:foo"
 		    if ( !d->host.isEmpty() && !d->user.isEmpty() && !d->pass.isEmpty() )
-			p = "/";
+			p = QLatin1String("/");
 		}
-		if ( !p.isEmpty() && p.right(1)!="/" )
-		    p += "/";
+		if ( !p.isEmpty() && p.right(1)!=QLatin1String("/") )
+		    p += QLatin1String("/");
 		p += rel;
 		d->path = p;
 		d->cleanPathDirty = true;
 	    }
 	}
     } else {
-	if ( rel[ 0 ] == QChar( '/' ) ) {
+	if ( rel[ 0 ] == QChar( QLatin1Char('/') ) ) {
 	    *this = urlTmp;
 	    setEncodedPathAndQuery( rel );
 	} else {
@@ -426,7 +441,7 @@ QString Q3Url::host() const
 void Q3Url::setHost( const QString& host )
 {
     d->host = host;
-    if ( !d->protocol.isNull() && d->protocol != "file" )
+    if ( !d->protocol.isNull() && d->protocol != QLatin1String("file") )
 	d->isValid = true;
 }
 
@@ -572,20 +587,20 @@ bool Q3Url::isValid() const
 
 void Q3Url::reset()
 {
-    d->protocol = "file";
-    d->user = "";
-    d->pass = "";
-    d->host = "";
-    d->path = "";
-    d->queryEncoded = "";
-    d->refEncoded = "";
+    d->protocol = QLatin1String("file");
+    d->user = QLatin1String("");
+    d->pass = QLatin1String("");
+    d->host = QLatin1String("");
+    d->path = QLatin1String("");
+    d->queryEncoded = QLatin1String("");
+    d->refEncoded = QLatin1String("");
     d->isValid = true;
     d->port = -1;
     d->cleanPathDirty = true;
 }
 
 /*!
-    Parses the \a url.
+    Parses the \a url. Returns true on success; otherwise returns false.
 */
 
 bool Q3Url::parse( const QString& url )
@@ -648,17 +663,17 @@ bool Q3Url::parse( const QString& url )
 
     // If ':' is at pos 1, we have only one letter
     // before that separator => that's a drive letter!
-    if ( url_.length() >= 2 && url_[1] == ':' )
+    if ( url_.length() >= 2 && url_[1] == QLatin1Char(':') )
 	relPath = forceRel = true;
 
     int hasNoHost = -1;
-    int cs = url_.find( ":/" );
+    int cs = url_.find( QLatin1String(":/") );
     if ( cs != -1 ) // if a protocol is there, find out if there is a host or directly the path after it
-	hasNoHost = url_.find( "///", cs );
+	hasNoHost = url_.find( QLatin1String("///"), cs );
     table[ 4 ][ 1 ] = User;
     table[ 4 ][ 2 ] = User;
     if ( cs == -1 || forceRel ) { // we have a relative file
-	if ( url.find( ':' ) == -1 || forceRel ) {
+	if ( url.find( QLatin1Char(':') ) == -1 || forceRel ) {
 	    table[ 0 ][ 1 ] = Path;
 	    // Filenames may also begin with a digit
 	    table[ 0 ][ 2 ] = Path;
@@ -672,9 +687,9 @@ bool Q3Url::parse( const QString& url )
 	// find the part between the protocol and the path as the meaning
 	// of that part is dependent on some chars
 	++cs;
-	while ( url_[ cs ] == '/' )
+	while ( url_[ cs ] == QLatin1Char('/') )
 	    ++cs;
-	int slash = url_.find( "/", cs );
+	int slash = url_.find( QLatin1String("/"), cs );
 	if ( slash == -1 )
 	    slash = url_.length() - 1;
 	QString tmp = url_.mid( cs, slash - cs + 1 );
@@ -682,7 +697,7 @@ bool Q3Url::parse( const QString& url )
 	if ( !tmp.isEmpty() ) { // if this part exists
 
 	    // look for the @ in this part
-	    int at = tmp.find( "@" );
+	    int at = tmp.find( QLatin1String("@") );
 	    if ( at != -1 )
 		at += cs;
 	    // we have no @, which means host[:port], so directly
@@ -690,7 +705,7 @@ bool Q3Url::parse( const QString& url )
 	    // is file or there were more than 2 slashes, it is the
 	    // path
 	    if ( at == -1 ) {
-		if ( url_.left( 4 ) == "file" || hasNoHost != -1 )
+		if ( url_.left( 4 ) == QLatin1String("file") || hasNoHost != -1 )
 		    table[ 4 ][ 1 ] = Path;
 		else
 		    table[ 4 ][ 1 ] = Host;
@@ -785,15 +800,15 @@ bool Q3Url::parse( const QString& url )
 	d->protocol = oldProtocol;
 
     if ( d->path.isEmpty() )
-	d->path = "/";
+	d->path = QLatin1String("/");
 
     // hack for windows
-    if ( d->path.length() == 2 && d->path[ 1 ] == ':' )
-	d->path += "/";
+    if ( d->path.length() == 2 && d->path[ 1 ] == QLatin1Char(':') )
+	d->path += QLatin1String("/");
 
     // #### do some corrections, should be done nicer too
     if ( !d->pass.isEmpty() ) {
-	if ( d->pass[ 0 ] == ':' )
+	if ( d->pass[ 0 ] == QLatin1Char(':') )
 	    d->pass.remove( (uint)0, 1 );
 	decode( d->pass );
     }
@@ -801,24 +816,24 @@ bool Q3Url::parse( const QString& url )
 	decode( d->user );
     }
     if ( !d->path.isEmpty() ) {
-	if ( d->path[ 0 ] == '@' || d->path[ 0 ] == ':' )
+	if ( d->path[ 0 ] == QLatin1Char('@') || d->path[ 0 ] == QLatin1Char(':') )
 	    d->path.remove( (uint)0, 1 );
-	if ( d->path[ 0 ] != '/' && !relPath && d->path[ 1 ] != ':' )
-	    d->path.prepend( "/" );
+	if ( d->path[ 0 ] != QLatin1Char('/') && !relPath && d->path[ 1 ] != QLatin1Char(':') )
+	    d->path.prepend( QLatin1String("/") );
     }
-    if ( !d->refEncoded.isEmpty() && d->refEncoded[ 0 ] == '#' )
+    if ( !d->refEncoded.isEmpty() && d->refEncoded[ 0 ] == QLatin1Char('#') )
 	d->refEncoded.remove( (uint)0, 1 );
-    if ( !d->queryEncoded.isEmpty() && d->queryEncoded[ 0 ] == '?' )
+    if ( !d->queryEncoded.isEmpty() && d->queryEncoded[ 0 ] == QLatin1Char('?') )
 	d->queryEncoded.remove( (uint)0, 1 );
-    if ( !d->host.isEmpty() && d->host[ 0 ] == '@' )
+    if ( !d->host.isEmpty() && d->host[ 0 ] == QLatin1Char('@') )
 	d->host.remove( (uint)0, 1 );
 
 #if defined(Q_OS_WIN32)
     // hack for windows file://machine/path syntax
-    if ( d->protocol == "file" ) {
-	if ( url.left( 7 ) == "file://" &&
-	     d->path.length() > 1 && d->path[ 1 ] != ':' )
-		 d->path.prepend( "/" );
+    if ( d->protocol == QLatin1String("file") ) {
+	if ( url.left( 7 ) == QLatin1String("file://") &&
+	     d->path.length() > 1 && d->path[ 1 ] != QLatin1Char(':') )
+		 d->path.prepend( QLatin1String("/") );
     }
 #endif
 
@@ -920,25 +935,25 @@ void Q3Url::setFileName( const QString& name )
     QString fn( name );
     slashify( fn );
 
-    while ( fn[ 0 ] == '/' )
+    while ( fn[ 0 ] == QLatin1Char( '/' ) )
 	fn.remove( (uint)0, 1 );
 
     QString p;
     if ( path().isEmpty() ) {
-	p = "/";
+	p = QLatin1String("/");
     } else {
 	p = path();
-	int slash = p.findRev( QChar( '/' ) );
+	int slash = p.findRev( QLatin1Char( '/' ) );
 	if ( slash == -1 ) {
-	    p = "/";
-	} else if ( p[ (int)p.length() - 1 ] != '/' ) {
+	    p = QLatin1String("/");
+	} else if ( p[ (int)p.length() - 1 ] != QLatin1Char( '/' ) ) {
 	    p.truncate( slash + 1 );
 	}
     }
 
     p += fn;
     if ( !d->queryEncoded.isEmpty() )
-	p += "?" + d->queryEncoded;
+	p += QLatin1String("?") + d->queryEncoded;
     setEncodedPathAndQuery( p );
 }
 
@@ -952,12 +967,12 @@ QString Q3Url::encodedPathAndQuery()
 {
     QString p = path();
     if ( p.isEmpty() )
-	p = "/";
+	p = QLatin1String("/");
 
     encode( p );
 
     if ( !d->queryEncoded.isEmpty() ) {
-	p += "?";
+	p += QLatin1String("?");
 	p += d->queryEncoded;
     }
 
@@ -974,10 +989,10 @@ QString Q3Url::encodedPathAndQuery()
 void Q3Url::setEncodedPathAndQuery( const QString& pathAndQuery )
 {
     d->cleanPathDirty = true;
-    int pos = pathAndQuery.find( '?' );
+    int pos = pathAndQuery.find( QLatin1Char('?') );
     if ( pos == -1 ) {
 	d->path = pathAndQuery;
-	d->queryEncoded = "";
+	d->queryEncoded = QLatin1String("");
     } else {
 	d->path = pathAndQuery.left( pos );
 	d->queryEncoded = pathAndQuery.mid( pos + 1 );
@@ -1007,17 +1022,17 @@ QString Q3Url::path( bool correct ) const
 	} else if ( isLocalFile() ) {
 #if defined(Q_OS_WIN32)
 	    // hack for stuff like \\machine\path and //machine/path on windows
-	    if ( ( d->path.left( 1 ) == "/" || d->path.left( 1 ) == "\\" ) &&
+	    if ( ( d->path.left( 1 ) == QLatin1String("/") || d->path.left( 1 ) == QLatin1String("\\") ) &&
 		 d->path.length() > 1 ) {
 		d->cleanPath = d->path;
-		bool share = (d->cleanPath[0] == '\\' && d->cleanPath[1] == '\\') ||
-		             (d->cleanPath[0] == '/' && d->cleanPath[1] == '/');
+		bool share = (d->cleanPath[0] == QLatin1Char('\\') && d->cleanPath[1] == QLatin1Char('\\')) ||
+		             (d->cleanPath[0] == QLatin1Char('/') && d->cleanPath[1] == QLatin1Char('/'));
 		slashify( d->cleanPath, false );
 		d->cleanPath = QDir::cleanDirPath( d->cleanPath );
 		if ( share ) {
 		    check = false;
-		    while (d->cleanPath.at(0) != '/' || d->cleanPath.at(1) != '/')
-			d->cleanPath.prepend("/");
+		    while (d->cleanPath.at(0) != QLatin1Char('/') || d->cleanPath.at(1) != QLatin1Char('/'))
+			d->cleanPath.prepend(QLatin1String("/"));
 		}
 	    }
 #endif
@@ -1032,9 +1047,9 @@ QString Q3Url::path( bool correct ) const
                        dir = QDir::cleanDirPath( canPath );
                     else
                        dir = QDir::cleanDirPath( QDir( d->path ).absPath() );
-                    dir += "/";
-		    if ( dir == "//" )
-			d->cleanPath = "/";
+                    dir += QLatin1String("/");
+		    if ( dir == QLatin1String("//") )
+			d->cleanPath = QLatin1String("/");
 		    else
 			d->cleanPath = dir;
 		} else {
@@ -1042,12 +1057,12 @@ QString Q3Url::path( bool correct ) const
 			QDir::cleanDirPath( (qt_resolve_symlinks ?
 					    fi.dir().canonicalPath() :
 					    fi.dir().absPath()) );
-		    d->cleanPath = p + "/" + fi.fileName();
+		    d->cleanPath = p + QLatin1String("/") + fi.fileName();
 		}
 	    }
 	} else {
-	    if ( d->path != "/" && d->path[ (int)d->path.length() - 1 ] == '/' )
-		d->cleanPath = QDir::cleanDirPath( d->path ) + "/";
+	    if ( d->path != QLatin1String("/") && d->path[ (int)d->path.length() - 1 ] == QLatin1Char('/') )
+		d->cleanPath = QDir::cleanDirPath( d->path ) + QLatin1String("/");
 	    else
 		d->cleanPath = QDir::cleanDirPath( d->path );
 	}
@@ -1066,7 +1081,7 @@ QString Q3Url::path( bool correct ) const
 
 bool Q3Url::isLocalFile() const
 {
-    return d->protocol == "file";
+    return d->protocol == QLatin1String("file");
 }
 
 /*!
@@ -1080,9 +1095,9 @@ bool Q3Url::isLocalFile() const
 
 QString Q3Url::fileName() const
 {
-    if ( d->path.isEmpty() || d->path.endsWith( "/" )
+    if ( d->path.isEmpty() || d->path.endsWith( QLatin1String("/") )
 #ifdef Q_WS_WIN
-	|| d->path.endsWith( "\\" )
+	|| d->path.endsWith( QLatin1String("\\") )
 #endif
 	)
 	return QString();
@@ -1105,13 +1120,13 @@ void Q3Url::addPath( const QString& pa )
     slashify( p );
 
     if ( path().isEmpty() ) {
-	if ( p[ 0 ] != QChar( '/' ) )
-	    d->path = "/" + p;
+	if ( p[ 0 ] != QLatin1Char( '/' ) )
+	    d->path = QLatin1String("/") + p;
 	else
 	    d->path = p;
     } else {
-	if ( p[ 0 ] != QChar( '/' ) && d->path[ (int)d->path.length() - 1 ] != '/' )
-	    d->path += "/" + p;
+	if ( p[ 0 ] != QLatin1Char( '/' ) && d->path[ (int)d->path.length() - 1 ] != QLatin1Char('/') )
+	    d->path += QLatin1String("/") + p;
 	else
 	    d->path += p;
     }
@@ -1133,9 +1148,9 @@ QString Q3Url::dirPath() const
 	return QString();
 
     QString s = path();
-    int pos = s.findRev( '/' );
+    int pos = s.findRev( QLatin1Char('/') );
     if ( pos == -1 ) {
-	return QString::fromLatin1(".");
+	return QString::fromLatin1( "." );
     } else {
 	if ( pos == 0 )
 	    return QString::fromLatin1( "/" );
@@ -1171,7 +1186,7 @@ void Q3Url::encode( QString& url )
 	uchar inCh = (uchar)curl[ i ];
 
 	if ( inCh >= 128 || special.contains(inCh) ) {
-	    newUrl[ newlen++ ] = QChar( '%' );
+	    newUrl[ newlen++ ] = QLatin1Char( '%' );
 
 	    ushort c = inCh / 16;
 	    c += c > 9 ? 'A' - 10 : '0';
@@ -1254,13 +1269,13 @@ QString Q3Url::toString( bool encodedPath, bool forcePrependProtocol ) const
 
     if ( isLocalFile() ) {
 	if ( forcePrependProtocol )
-	    res = d->protocol + ":" + p;
+	    res = d->protocol + QLatin1String(":") + p;
 	else
 	    res = p;
-    } else if ( d->protocol == "mailto" ) {
-	res = d->protocol + ":" + p;
+    } else if ( d->protocol == QLatin1String("mailto") ) {
+	res = d->protocol + QLatin1String(":") + p;
     } else {
-	res = d->protocol + "://";
+	res = d->protocol + QLatin1String("://");
 	if ( !d->user.isEmpty() || !d->pass.isEmpty() ) {
 	    QString tmp;
 	    if ( !d->user.isEmpty() ) {
@@ -1271,24 +1286,24 @@ QString Q3Url::toString( bool encodedPath, bool forcePrependProtocol ) const
 	    if ( !d->pass.isEmpty() ) {
 		tmp = d->pass;
 		encode( tmp );
-		res += ":" + tmp;
+		res += QLatin1String(":") + tmp;
 	    }
-	    res += "@";
+	    res += QLatin1String("@");
 	}
 	res += d->host;
 	if ( d->port != -1 )
-	    res += ":" + QString( "%1" ).arg( d->port );
+	    res += QLatin1String(":") + QString( QLatin1String("%1") ).arg( d->port );
 	if ( !p.isEmpty() ) {
-	    if ( !d->host.isEmpty() && p[0]!='/' )
-		res += "/";
+	    if ( !d->host.isEmpty() && p[0]!= QLatin1Char( '/' ) )
+		res += QLatin1String("/");
 	    res += p;
 	}
     }
 
     if ( !d->refEncoded.isEmpty() )
-	res += "#" + d->refEncoded;
+	res += QLatin1String("#") + d->refEncoded;
     if ( !d->queryEncoded.isEmpty() )
-	res += "?" + d->queryEncoded;
+	res += QLatin1String("?") + d->queryEncoded;
 
     return res;
 }
@@ -1305,14 +1320,15 @@ Q3Url::operator QString() const
 }
 
 /*!
-    Changes the directory to one directory up.
+    Changes the directory to one directory up. This function always returns
+    true.
 
     \sa setPath()
 */
 
 bool Q3Url::cdUp()
 {
-    d->path += "/..";
+    d->path += QLatin1String("/..");
     d->cleanPathDirty = true;
     return true;
 }

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -219,18 +234,14 @@ static QString fmtDateTime(const QString& f, const QTime* dt = 0, const QDate* d
     isValid() returns false. Any date before 2 January 4713 B.C. is
     considered invalid.
 
-    \warning For historical reasons, if \a y is in the range 0 to 99,
-    it is interpreted as a year in the range 1900 to 1999. New code
-    should not rely on this behavior as it might be changed in a
-    future release.
+    \warning Years 0 to 99 are interpreted as is. If you want to
+    specify the year 2010, you must write 2010, not 10.
 
     \sa isValid()
 */
 
 QDate::QDate(int y, int m, int d)
 {
-    if (uint(y) <= 99u)
-        y += 1900;
     setDate(y, m, d);
 }
 
@@ -678,7 +689,8 @@ QString QDate::toString(Qt::DateFormat f) const
 
     All other input characters will be ignored. Any sequence of characters that
     are enclosed in singlequotes will be treated as text and not be used as an
-    expression.
+    expression. Two consecutive singlequotes ("''") are replaced by a singlequote
+    in the output.
 
     Example format strings (assuming that the QDate is the 20 July
     1969):
@@ -945,42 +957,52 @@ QDate QDate::fromString(const QString& s, Qt::DateFormat f)
         break;
     default:
 #ifndef QT_NO_TEXTDATE
-    case Qt::TextDate:
-        {
-            /*
-              This will fail gracefully if the input string doesn't
-              contain any space.
-            */
-            int monthPos = s.indexOf(QLatin1Char(' ')) + 1;
-            int dayPos = s.indexOf(QLatin1Char(' '), monthPos) + 1;
-            int yearPos = s.indexOf(QLatin1Char(' '), dayPos) + 1;
+    case Qt::TextDate: {
+        QStringList parts = s.split(QLatin1Char(' '), QString::SkipEmptyParts);
 
-            QString monthName(s.mid(monthPos, dayPos - monthPos - 1));
-            int month = -1;
+        if (parts.count() != 4) {
+            qWarning("QDateTime::fromString: Parameter out of range");
+            return QDate();
+        }
 
-            // try English names first
-            for (int i = 0; i < 12; i++) {
-                if (monthName == QLatin1String(qt_shortMonthNames[i])) {
-                    month = i + 1;
+        QString monthName = parts.at(1);
+        int month = -1;
+        // Assume that English monthnames are the default
+        for (int i = 0; i < 12; ++i) {
+            if (monthName == QLatin1String(qt_shortMonthNames[i])) {
+                month = i + 1;
+                break;
+            }
+        }
+        // If English names can't be found, search the localized ones
+        if (month == -1) {
+            for (int i = 1; i <= 12; ++i) {
+                if (monthName == QDate::shortMonthName(i)) {
+                    month = i;
                     break;
                 }
             }
-
-            // try the localized names
-            if (month == -1) {
-                for (int i = 0; i < 12; i++) {
-                    if (monthName == shortMonthName(i + 1)) {
-                        month = i + 1;
-                        break;
-                    }
-                }
-            }
-            if (month >= 1 && month <= 12) {
-                int day = s.mid(dayPos, 2).trimmed().toInt();
-                int year = s.mid(yearPos).toInt();
-                return strictDate(year, month, day);
-            }
         }
+        if (month < 1 || month > 12) {
+            qWarning("QDateTime::fromString: Parameter out of range");
+            return QDate();
+        }
+
+        bool ok;
+        int day = parts.at(2).toInt(&ok);
+        if (!ok) {
+            qWarning("QDateTime::fromString: Parameter out of range");
+            return QDate();
+        }
+
+        int year = parts.at(3).toInt(&ok);
+        if (!ok) {
+            qWarning("QDateTime::fromString: Parameter out of range");
+            return QDate();
+        }
+
+        return strictDate(year, month, day);
+    }
 #else
         break;
 #endif
@@ -1131,8 +1153,8 @@ bool QDate::isLeapYear(int y)
     \internal
 
     This function has a confusing name and shouldn't be part of the
-    API anyway, since we have toJulian() and fromJulian(). Remove it
-    in Qt 5.
+    API anyway, since we have toJulian() and fromJulian().
+    ### Qt 5: remove it
 */
 uint QDate::gregorianToJulian(int y, int m, int d)
 {
@@ -1143,8 +1165,8 @@ uint QDate::gregorianToJulian(int y, int m, int d)
     \internal
 
     This function has a confusing name and shouldn't be part of the
-    API anyway, since we have toJulian() and fromJulian(). Remove it
-    in Qt 5.
+    API anyway, since we have toJulian() and fromJulian().
+    ### Qt 5: remove it
 */
 void QDate::julianToGregorian(uint jd, int &y, int &m, int &d)
 {
@@ -1392,7 +1414,8 @@ QString QTime::toString(Qt::DateFormat f) const
 
     All other input characters will be ignored. Any sequence of characters that
     are enclosed in singlequotes will be treated as text and not be used as an
-    expression.
+    expression. Two consecutive singlequotes ("''") are replaced by a singlequote
+    in the output.
 
     Example format strings (assuming that the QTime is 14:13:09.042)
 
@@ -1434,8 +1457,8 @@ bool QTime::setHMS(int h, int m, int s, int ms)
 }
 
 /*!
-    Returns a QTime object containing a time \a nsecs seconds later
-    than the time of this object (or earlier if \a nsecs is negative).
+    Returns a QTime object containing a time \a s seconds later
+    than the time of this object (or earlier if \a s is negative).
 
     Note that the time will wrap if it passes midnight.
 
@@ -1453,9 +1476,9 @@ bool QTime::setHMS(int h, int m, int s, int ms)
     \sa addMSecs(), secsTo(), QDateTime::addSecs()
 */
 
-QTime QTime::addSecs(int nsecs) const
+QTime QTime::addSecs(int s) const
 {
-    return addMSecs(nsecs * 1000);
+    return addMSecs(s * 1000);
 }
 
 /*!
@@ -2227,7 +2250,8 @@ QString QDateTime::toString(Qt::DateFormat f) const
 
     All other input characters will be ignored. Any sequence of characters that
     are enclosed in singlequotes will be treated as text and not be used as an
-    expression.
+    expression. Two consecutive singlequotes ("''") are replaced by a singlequote
+    in the output.
 
     Example format strings (assumed that the QDateTime is 21 May 2001
     14:13:09):
@@ -2325,16 +2349,16 @@ QDateTime QDateTimePrivate::addMSecs(const QDateTime &dt, qint64 msecs)
 }
 
 /*!
-    Returns a QDateTime object containing a datetime \a nsecs seconds
-    later than the datetime of this object (or earlier if \a nsecs is
+    Returns a QDateTime object containing a datetime \a s seconds
+    later than the datetime of this object (or earlier if \a s is
     negative).
 
     \sa addMSecs(), secsTo(), addDays(), addMonths(), addYears()
 */
 
-QDateTime QDateTime::addSecs(int nsecs) const
+QDateTime QDateTime::addSecs(int s) const
 {
-    return d->addMSecs(*this, qint64(nsecs) * 1000);
+    return d->addMSecs(*this, qint64(s) * 1000);
 }
 
 /*!
@@ -2546,6 +2570,22 @@ QDateTime QDateTime::fromTime_t(uint seconds)
 }
 
 #ifndef QT_NO_DATESTRING
+
+static int fromShortMonthName(const QString &monthName)
+{
+    // Assume that English monthnames are the default
+    for (int i = 0; i < 12; ++i) {
+        if (monthName == QLatin1String(qt_shortMonthNames[i]))
+            return i + 1;
+    }
+    // If English names can't be found, search the localized ones
+    for (int i = 1; i <= 12; ++i) {
+        if (monthName == QDate::shortMonthName(i))
+            return i;
+    }
+    return -1;
+}
+
 /*!
     \fn QDateTime QDateTime::fromString(const QString &string, Qt::DateFormat format)
 
@@ -2567,52 +2607,93 @@ QDateTime QDateTime::fromString(const QString& s, Qt::DateFormat f)
     if (f == Qt::ISODate) {
         QString tmp = s;
         Qt::TimeSpec ts = Qt::LocalTime;
+        const QDate date = QDate::fromString(tmp.left(10), Qt::ISODate);
+        if (tmp.size() == 10)
+            return QDateTime(date);
 
         // Recognize UTC specifications
         if (tmp.endsWith(QLatin1Char('Z'))) {
             ts = Qt::UTC;
             tmp.chop(1);
         }
-        return QDateTime(QDate::fromString(tmp.mid(0, 10), Qt::ISODate),
-                         QTime::fromString(tmp.mid(11), Qt::ISODate), ts);
+        return QDateTime(date, QTime::fromString(tmp.mid(11), Qt::ISODate), ts);
     }
-#if !defined(QT_NO_REGEXP) && !defined(QT_NO_TEXTDATE)
+#if !defined(QT_NO_TEXTDATE)
     else if (f == Qt::TextDate) {
-        QString monthName(s.mid(4, 3));
-        int month = -1;
-        // Assume that English monthnames are the default
-        for (int i = 0; i < 12; ++i) {
-            if (monthName == QLatin1String(qt_shortMonthNames[i])) {
-                month = i + 1;
-                break;
-            }
-        }
-        // If English names can't be found, search the localized ones
-        if (month == -1) {
-            for (int i = 1; i <= 12; ++i) {
-                if (monthName == QDate::shortMonthName(i)) {
-                    month = i;
-                    break;
-                }
-            }
-        }
-        if (month < 1 || month > 12) {
+        QStringList parts = s.split(QLatin1Char(' '), QString::SkipEmptyParts);
+
+        if (parts.count() != 5) {
             qWarning("QDateTime::fromString: Parameter out of range");
             return QDateTime();
         }
-        int day = s.mid(8, 2).simplified().toInt();
-        int yearPos = s.lastIndexOf(QLatin1Char(' ')) + 1;
-        int year = s.mid(yearPos).toInt();
-        QDate date = strictDate(year, month, day);
-        QTime time;
-        int hour, minute, second;
-        int pivot = s.indexOf(QRegExp(QString::fromLatin1("[0-9][0-9]:[0-9][0-9]:[0-9][0-9]")));
-        if (pivot != -1) {
-            hour = s.mid(pivot, 2).toInt();
-            minute = s.mid(pivot + 3, 2).toInt();
-            second = s.mid(pivot + 6, 2).toInt();
-            time.setHMS(hour, minute, second);
+
+        // Accept "Sun Dec 1 13:02:00 1974" and "Sun 1. Dec 13:02:00 1974"
+        int month = -1, day = -1;
+        bool ok;
+
+        month = fromShortMonthName(parts.at(1));
+        if (month != -1) {
+            day = parts.at(2).toInt(&ok);
+            if (!ok)
+                day = -1;
         }
+
+        if (month == -1 || day == -1) {
+            // first variant failed, lets try the other
+            month = fromShortMonthName(parts.at(2));
+            if (month != -1) {
+                QString dayStr = parts.at(1);
+                if (dayStr.endsWith(QLatin1Char('.'))) {
+                    dayStr.chop(1);
+                    day = dayStr.toInt(&ok);
+                    if (!ok)
+                        day = -1;
+                } else {
+                    day = -1;
+                }
+            }
+        }
+
+        if (month == -1 || day == -1) {
+            // both variants failed, give up
+            qWarning("QDateTime::fromString: Parameter out of range");
+            return QDateTime();
+        }
+
+        int year = parts.at(4).toInt(&ok);
+        if (!ok) {
+            qWarning("QDateTime::fromString: Parameter out of range");
+            return QDateTime();
+        }
+
+        QDate date = strictDate(year, month, day);
+
+        QStringList timeParts = parts.at(3).split(QLatin1Char(':'));
+        if (timeParts.count() != 3) {
+            qWarning("QDateTime::fromString: Parameter out of range");
+            return QDateTime();
+        }
+
+        int hour = timeParts.at(0).toInt(&ok);
+        if (!ok) {
+            qWarning("QDateTime::fromString: Parameter out of range");
+            return QDateTime();
+        }
+
+        int minute = timeParts.at(1).toInt(&ok);
+        if (!ok) {
+            qWarning("QDateTime::fromString: Parameter out of range");
+            return QDateTime();
+        }
+
+        int second = timeParts.at(2).toInt(&ok);
+        if (!ok) {
+            qWarning("QDateTime::fromString: Parameter out of range");
+            return QDateTime();
+        }
+
+        QTime time(hour, minute, second);
+
         return QDateTime(date, time);
     }
 #endif //QT_NO_REGEXP
@@ -3075,6 +3156,8 @@ static QString fmtDateTime(const QString& f, const QTime* dt, const QDate* dd)
     for (int i = 0; i < (int)f.length(); ++i) {
         if (f.at(i) == quote) {
             if (status == quote) {
+                if (i > 0 && f.at(i - 1) == quote)
+                    buf += QLatin1Char('\'');
                 status = QLatin1Char('0');
             } else {
                 if (!frm.isEmpty()) {
@@ -3291,14 +3374,16 @@ int QDateTimeParser::getDigit(const QVariant &t, int index) const
     case MinuteSection: return t.toTime().minute();
     case SecondSection: return t.toTime().second();
     case MSecSection: return t.toTime().msec();
-    case YearSection: return node.count == 2 ? t.toDate().year() % 100 : t.toDate().year();
+    case YearSection: return t.toDate().year();
     case MonthSection: return t.toDate().month();
     case DaySection: return t.toDate().day();
     case AmPmSection: return t.toTime().hour() > 11 ? 1 : 0;
 
     default: break;
     }
-    qFatal("%s passed to getDigit. This should never happen. Index is %d", sectionName(node.type).toLatin1().constData(), index);
+    Q_ASSERT_X(0, "QDateTimeParser::getDigit()",
+               qPrintable(QString::fromAscii("Internal error (%1 %2)").
+                          arg(sectionName(node.type).arg(index))));
     return -1;
 }
 
@@ -3334,19 +3419,13 @@ void QDateTimeParser::setDigit(QVariant &v, int index, int newVal) const
     case MinuteSection: minute = newVal; break;
     case SecondSection: second = newVal; break;
     case MSecSection: msec = newVal; break;
-    case YearSection:
-        if (node.count == 2) {
-            year -= year % 100;
-            year += newVal;
-        } else {
-            year = newVal;
-        }
-        break;
+    case YearSection: year = newVal; break;
     case MonthSection: month = newVal; break;
     case DaySection: day = newVal; break;
     case AmPmSection: hour = (newVal == 0 ? hour % 12 : (hour % 12) + 12); break;
     default:
-        qFatal("%s passed to setDigit. This should never happen", sectionName(node.type).toLatin1().constData());
+        Q_ASSERT_X(0, "QDateTimeParser::setDigit()",
+                   qPrintable(QString::fromAscii("Internal error (%1)").arg(sectionName(node.type))));
         break;
     }
 
@@ -3365,22 +3444,28 @@ void QDateTimeParser::setDigit(QVariant &v, int index, int newVal) const
   Returns the absolute maximum for a section
 */
 
-int QDateTimeParser::absoluteMax(int s) const
+int QDateTimeParser::absoluteMax(int s, const QDateTime &cur) const
 {
     const SectionNode sn = sectionNode(s);
     switch (sn.type) {
     case Hour24Section:
-    case Hour12Section: return 23; // this is special-cased in parseSection. We want it to be 23 for the stepBy case.
+    case Hour12Section: return 23; // this is special-cased in
+                                   // parseSection. We want it to be
+                                   // 23 for the stepBy case.
     case MinuteSection:
     case SecondSection: return 59;
     case MSecSection: return 999;
-    case YearSection: return sn.count == 2 ? 99 : 9999;
+    case YearSection: return 9999; // sectionMaxSize will prevent
+                                   // people from typing in a larger
+                                   // number in count == 2 sections.
+                                   // stepBy() will work on real years anyway
     case MonthSection: return 12;
-    case DaySection: return 31;
+    case DaySection: return cur.isValid() ? cur.date().daysInMonth() : 31;
     case AmPmSection: return 1;
     default: break;
     }
-    qFatal("%s passed to max. This should never happen", sectionName(s).toLatin1().constData());
+    Q_ASSERT_X(0, "QDateTimeParser::absoluteMax()",
+               qPrintable(QString::fromAscii("Internal error (%1)").arg(sectionName(s))));
     return -1;
 
 }
@@ -3406,7 +3491,8 @@ int QDateTimeParser::absoluteMin(int s) const
     case AmPmSection: return 0;
     default: break;
     }
-    qFatal("%s passed to min. This should never happen", sectionName(s).toLatin1().constData());
+    Q_ASSERT_X(0, "QDateTimeParser::absoluteMin()",
+               qPrintable(QString::fromAscii("Internal error (%1)").arg(sectionName(s))));
     return -1;
 }
 
@@ -3763,7 +3849,7 @@ QString QDateTimeParser::sectionText(const QString &text, int sectionIndex, int 
   stateptr != 0.
 */
 
-int QDateTimeParser::parseSection(int sectionIndex, QString &text, int index,
+int QDateTimeParser::parseSection(const QVariant &currentValue, int sectionIndex, QString &text, int index,
                                   State &state, int *usedptr) const
 {
     state = Invalid;
@@ -3779,126 +3865,134 @@ int QDateTimeParser::parseSection(int sectionIndex, QString &text, int index,
               << index;
 
     int used = 0;
-    if (false && sectiontext.trimmed().isEmpty()) {
-        state = Intermediate;
-    } else {
-        switch (sn.type) {
-        case AmPmSection: {
-            const int ampm = findAmPm(sectiontext, sectionIndex, &used);
-            switch (ampm) {
-            case AM: // sectiontext == AM
-            case PM: // sectiontext == PM
-                num = ampm;
-                state = Acceptable;
-                break;
-            case PossibleAM: // sectiontext => AM
-            case PossiblePM: // sectiontext => PM
-                num = ampm - 2;
-                state = Intermediate;
-                break;
-            case PossibleBoth: // sectiontext => AM|PM
-                num = 0;
-                state = Intermediate;
-                break;
-            case Neither:
-                state = Invalid;
-                QDTPDEBUG << "invalid because findAmPm(" << sectiontext << ") returned -1";
-                break;
-            default:
-                QDTPDEBUGN("This should never happen(findAmPm returned %d", ampm);
-                break;
-            }
-            if (state != Invalid) {
-                QString str = text;
-                text.replace(index, used, sectiontext.left(used));
-            }
+    switch (sn.type) {
+    case AmPmSection: {
+        const int ampm = findAmPm(sectiontext, sectionIndex, &used);
+        switch (ampm) {
+        case AM: // sectiontext == AM
+        case PM: // sectiontext == PM
+            num = ampm;
+            state = Acceptable;
+            break;
+        case PossibleAM: // sectiontext => AM
+        case PossiblePM: // sectiontext => PM
+            num = ampm - 2;
+            state = Intermediate;
+            break;
+        case PossibleBoth: // sectiontext => AM|PM
+            num = 0;
+            state = Intermediate;
+            break;
+        case Neither:
+            state = Invalid;
+            QDTPDEBUG << "invalid because findAmPm(" << sectiontext << ") returned -1";
+            break;
+        default:
+            QDTPDEBUGN("This should never happen(findAmPm returned %d", ampm);
             break;
         }
-        case MonthSection:
-        case DaySection:
-            if (sn.count >= 3) {
-                if (sn.type == MonthSection) {
-                    num = findMonth(sectiontext.toLower(), 1, sectionIndex, &sectiontext, &used);
-                } else {
-                    num = findDay(sectiontext.toLower(), 1, sectionIndex, &sectiontext, &used);
+        if (state != Invalid) {
+            QString str = text;
+            text.replace(index, used, sectiontext.left(used));
+        }
+        break; }
+    case MonthSection:
+    case DaySection:
+        if (sn.count >= 3) {
+            if (sn.type == MonthSection) {
+                int min = 1;
+                if (currentValue.toDate().year() == getMinimum().toDate().year()) {
+                    min = getMinimum().toDate().month();
                 }
-
-                if (num != -1) {
-                    state = (used == sectiontext.size() ? Acceptable : Intermediate);
-                    QString str = text;
-                    text.replace(index, used, sectiontext.left(used));
-                } else {
-                    state = Intermediate;
-                }
-                break;
-            }
-            // fall through
-        case YearSection:
-        case Hour12Section:
-        case Hour24Section:
-        case MinuteSection:
-        case SecondSection:
-        case MSecSection: {
-            if (sectiontext.isEmpty()) {
-                num = 0;
-                used = 0;
-                state = Intermediate;
+                num = findMonth(sectiontext.toLower(), min, sectionIndex, &sectiontext, &used);
             } else {
-                const int absMax = absoluteMax(sectionIndex);
-                QLocale loc;
-                bool ok = true;
-                int last = -1;
-                used = -1;
+                num = findDay(sectiontext.toLower(), 1, sectionIndex, &sectiontext, &used);
+            }
 
-                const int max = qMin(sectionMaxSize(sectionIndex), sectiontext.size());
-                for (int digits=1; digits<=max; ++digits) {
-                    if (sectiontext.at(digits - 1).isSpace()) // loc.toUInt will allow spaces at the end
-                        break;
-                    int tmp = (int)loc.toUInt(sectiontext.left(digits), &ok, 10);
-                    if (ok && sn.type == Hour12Section) {
-                        if (tmp > 12) {
-                            tmp = -1;
-                            ok = false;
-                        } else if (tmp == 12) {
-                            tmp = 0;
-                        }
-                    }
-                    if (ok && tmp <= absMax) {
-                        QDTPDEBUG << sectiontext.left(digits) << tmp << digits;
-                        last = tmp;
-                        used = digits;
-                    } else {
-                        break;
-                    }
-                }
-                if (last == -1) {
-                    const QChar &first = sectiontext.at(0);
-                    if (separators.at(sectionIndex + 1).startsWith(first)) {
-                        used = 0;
-                        state = Intermediate;
-                    } else {
-                        state = Invalid;
-                        QDTPDEBUG << "invalid because" << sectiontext << "can't become a uint" << last << ok;
-                    }
-                } else {
-                    num += last;
-                    const bool done = (used == sectionMaxSize(sectionIndex));
-                    if (num < absoluteMin(sectionIndex)) {
-                        state = done ? Invalid : Intermediate;
-                        if (done)
-                            QDTPDEBUG << "invalid because" << num << "is less than absoluteMin" << absoluteMin(sectionIndex);
-                    } else if (num > absMax) {
-                        state = Intermediate;
-                    } else if (!done && (fieldInfo(sectionIndex) & (FixedWidth|Numeric)) == (FixedWidth|Numeric)) {
-                        state = Intermediate;
-                    } else {
-                        state = Acceptable;
-                    }
-                }
+            if (num != -1) {
+                state = (used == sectiontext.size() ? Acceptable : Intermediate);
+                QString str = text;
+                text.replace(index, used, sectiontext.left(used));
+            } else {
+                state = Intermediate;
             }
             break; }
-        default: qFatal("NoSection or Internal. This should never happen"); break;
+        // fall through
+    case YearSection:
+    case Hour12Section:
+    case Hour24Section:
+    case MinuteSection:
+    case SecondSection:
+    case MSecSection: {
+        if (sectiontext.isEmpty()) {
+            num = 0;
+            used = 0;
+            state = Intermediate;
+        } else {
+            const int absMax = absoluteMax(sectionIndex);
+            QLocale loc;
+            bool ok = true;
+            int last = -1;
+            used = -1;
+
+            const int max = qMin(sectionMaxSize(sectionIndex), sectiontext.size());
+            for (int digits=1; digits<=max; ++digits) {
+                if (sectiontext.at(digits - 1).isSpace()) // loc.toUInt will allow spaces at the end
+                    break;
+                int tmp = (int)loc.toUInt(sectiontext.left(digits), &ok, 10);
+                if (ok && sn.type == Hour12Section) {
+                    if (tmp > 12) {
+                        tmp = -1;
+                        ok = false;
+                    } else if (tmp == 12) {
+                        tmp = 0;
+                    }
+                }
+                if (ok && tmp <= absMax) {
+                    QDTPDEBUG << sectiontext.left(digits) << tmp << digits;
+                    last = tmp;
+                    used = digits;
+                } else {
+                    break;
+                }
+            }
+            if (last == -1) {
+                const QChar &first = sectiontext.at(0);
+                if (separators.at(sectionIndex + 1).startsWith(first)) {
+                    used = 0;
+                    state = Intermediate;
+                } else {
+                    state = Invalid;
+                    QDTPDEBUG << "invalid because" << sectiontext << "can't become a uint" << last << ok;
+                }
+            } else {
+                num += last;
+                const FieldInfo fi = fieldInfo(sectionIndex);
+                const int sectionms = sectionMaxSize(sectionIndex);
+                const bool done = (used == sectionms);
+                if (!done && fi & Fraction) { // typing 2 in a zzz field should be .200, not .002
+                    for (int i=used; i<sectionms; ++i) {
+                        num *= 10;
+                    }
+                }
+                if (num < absoluteMin(sectionIndex)) {
+                    state = done ? Invalid : Intermediate;
+                    if (done)
+                        QDTPDEBUG << "invalid because" << num << "is less than absoluteMin" << absoluteMin(sectionIndex);
+                } else if (num > absMax) {
+                    state = Intermediate;
+                } else if (!done && (fieldInfo(sectionIndex) & (FixedWidth|Numeric)) == (FixedWidth|Numeric)) {
+                    state = Intermediate;
+                } else {
+                    state = Acceptable;
+                }
+            }
         }
+        break; }
+    default:
+        Q_ASSERT_X(0, "QDateTimeParser::parseSection()",
+                   qPrintable(QString::fromAscii("Internal error (%1)").arg(sectionName(sn.type))));
+        break;
     }
 
     if (usedptr)
@@ -3916,6 +4010,7 @@ int QDateTimeParser::parseSection(int sectionIndex, QString &text, int index,
 QDateTimeParser::StateNode QDateTimeParser::parse(const QString &inp,
                                                   const QVariant &currentValue, bool fixup) const
 {
+
     QString input = inp;
     State state = Acceptable;
     const QVariant maximum = getMaximum();
@@ -3926,7 +4021,7 @@ QDateTimeParser::StateNode QDateTimeParser::parse(const QString &inp,
     int pos = 0;
     bool conflicts = false;
 
-//    QDTPDEBUG << "validateAndInterpret" << input;
+//    QDTPDEBUG << "parse" << input;
     {
         int year, month, day, hour12, hour, minute, second, msec, ampm, dayofweek, year2digits;
         const QDateTime &dt = currentValue.toDateTime();
@@ -3963,12 +4058,17 @@ QDateTimeParser::StateNode QDateTimeParser::parse(const QString &inp,
             sn = sectionNodes.at(index);
             int used;
 
-            num = parseSection(index, input, pos, tmpstate, &used);
+            num = parseSection(currentValue, index, input, pos, tmpstate, &used);
             QDTPDEBUG << "sectionValue" << sectionName(sectionType(index)) << input
                       << "pos" << pos << "used" << used << stateName(tmpstate);
-            if (fixup && tmpstate == Intermediate && (fieldInfo(index) & (Numeric|FixedWidth)) == (Numeric|FixedWidth) && used < sn.count) {
-                input.insert(pos, QString().fill(QLatin1Char('0'), sn.count - used)); // ### ltor?
-                num = parseSection(index, input, pos, tmpstate, &used);
+            if (fixup && tmpstate == Intermediate && used < sn.count) {
+                const FieldInfo fi = fieldInfo(index);
+                if ((fi & (Numeric|FixedWidth)) == (Numeric|FixedWidth)) {
+                    const QString newText = QString(QLatin1String("%1")).arg(num, sn.count, 10, QLatin1Char('0'));
+                    QString old = input;
+                    input.replace(pos, used, newText);
+                    used = sn.count;
+                }
             }
             pos += qMax(0, used);
 
@@ -3996,13 +4096,15 @@ QDateTimeParser::StateNode QDateTimeParser::parse(const QString &inp,
                     if (sn.count >= 3) {
                         current = &dayofweek;
                     } else {
-                        current = &day; num = qMax<int>(1, num);
+                        current = &day;
+                        num = qMax<int>(1, num);
                     }
                     break;
                 case AmPmSection: current = &ampm; break;
                 default:
-                    qFatal("%s found in sections validateAndInterpret. This should never happen",
-                           sectionName(sn.type).toLatin1().constData());
+                    Q_ASSERT_X(0, "QDateTimeParser::parse()",
+                               qPrintable(QString::fromAscii("Internal error (%1)").
+                                          arg(sectionName(sn.type))));
                     break;
                 }
                 Q_ASSERT(current);
@@ -4044,13 +4146,14 @@ QDateTimeParser::StateNode QDateTimeParser::parse(const QString &inp,
                 }
 
                 const QDate date = strictDate(year, month, day);
-                const int diff = dayofweek - date.dayOfWeek() && isSet.contains(&dayofweek);
-                if (diff != 0 && state == Acceptable) {
-                    conflicts = true;
+                const int diff = dayofweek - date.dayOfWeek();
+                if (diff != 0 && state == Acceptable && isSet.contains(&dayofweek)) {
+                    conflicts = isSet.contains(&day);
                     const SectionNode &sn = sectionNode(currentSectionIndex);
-                    if (sn.type == DaySection && sn.count >= 3) {
-                        day -= diff;
-                        if (day < 0) {
+                    if ((sn.type == DaySection && sn.count >= 3) || currentSectionIndex == -1) {
+                        // dayofweek should be preferred
+                        day += diff;
+                        if (day <= 0) {
                             day += 7;
                         } else if (day > date.daysInMonth()) {
                             day -= 7;
@@ -4120,18 +4223,18 @@ QDateTimeParser::StateNode QDateTimeParser::parse(const QString &inp,
 
             tmp = QVariant(QDateTime(strictDate(year, month, day), QTime(hour, minute, second, msec)));
             QDTPDEBUG << year << month << day << hour << minute << second << msec;
-
         }
         QDTPDEBUGN("'%s' => '%s'(%s)", input.toLatin1().constData(),
-                   tmp.toString().toLatin1().constData(), stateName(state).toLatin1().constData());
+                   tmp.toDateTime().toString(QLatin1String("yyyy/MM/dd hh:mm:ss.zzz")).toLatin1().constData(), stateName(state).toLatin1().constData());
     }
 end:
     if (tmp.toDateTime().isValid()) {
         if (state != Invalid && dateTimeCompare(tmp, minimum) < 0) {
             state = checkIntermediate(tmp.toDateTime(), input);
         } else {
-            if (dateTimeCompare(tmp, maximum) > 0)
+            if (dateTimeCompare(tmp, maximum) > 0) {
                 state = Invalid;
+            }
             QDTPDEBUG << "not checking intermediate because tmp is" << tmp  << minimum << maximum;
         }
     }
@@ -4140,7 +4243,7 @@ end:
     node.state = state;
     node.conflicts = conflicts;
     node.value = tmp;
-    text = input; // ### do I need this?
+    text = input;
     return node;
 }
 #endif // QT_NO_DATESTRING
@@ -4200,10 +4303,10 @@ int QDateTimeParser::findMonth(const QString &str1, int startMonth, int sectionI
                     if (used) {
                         *used = limit;
                     }
-                    if (usedMonth)
+                    if (usedMonth) {
                         *usedMonth = nameFunction(month);
                     QDTPDEBUG << "used is set to" << limit << *usedMonth;
-
+                    }
                     return month;
                 }
             }
@@ -4381,8 +4484,12 @@ int QDateTimeParser::maxChange(int index) const
     case YearSection: return sn.count == 2
             ? 100 * 365
             : 9999 * 365;
-    default: qFatal("%s passed to maxChange. This should never happen", sectionName(sectionType(index)).toLatin1().constData());
+    default:
+        Q_ASSERT_X(0, "QDateTimeParser::maxChange",
+                   qPrintable(QString::fromAscii("Internal error (%1)").
+                              arg(sectionName(sectionType(index)))));
     }
+
     return -1;
 }
 
@@ -4393,6 +4500,8 @@ QDateTimeParser::FieldInfo QDateTimeParser::fieldInfo(int index) const
     const Section s = sn.type;
     switch (s) {
     case MSecSection:
+        ret |= Fraction;
+        // fallthrough
     case SecondSection:
     case MinuteSection:
     case Hour24Section:
@@ -4411,7 +4520,8 @@ QDateTimeParser::FieldInfo QDateTimeParser::fieldInfo(int index) const
         switch (sn.count) {
         case 2:
             ret |= FixedWidth;
-        case 1: // fallthrough
+            // fallthrough
+        case 1:
             ret |= (Numeric|AllowPartial);
             break;
         case 3:
@@ -4419,16 +4529,25 @@ QDateTimeParser::FieldInfo QDateTimeParser::fieldInfo(int index) const
             break;
         case 4:
             break;
-        default: qFatal("This should not happen %d %s %d",
-                        index, qPrintable(sectionName(sn.type)), sn.count);
+        default:
+            Q_ASSERT_X(0, "QDateTimeParser::fieldInfo()",
+                       qPrintable(QString::fromAscii("Internal error 1 (%1 %2 %3)").
+                                  arg(index).
+                                  arg(sectionName(sn.type)).
+                                  arg(sn.count)));
             break;
         }
         break;
     case AmPmSection:
         ret |= FixedWidth;
         break;
-    default: qFatal("This should not happen %d %s",
-                    index, qPrintable(sectionName(sn.type)));
+    default:
+        Q_ASSERT_X(0, "QDateTimeParser::fieldInfo()",
+                   qPrintable(QString::fromAscii("Internal error 2 (%1 %2 %3)").
+                              arg(index).
+                              arg(sectionName(sn.type)).
+                              arg(sn.count)));
+        break;
     }
     return ret;
 }
@@ -4462,7 +4581,9 @@ QString QDateTimeParser::sectionFormat(Section s, int count) const
     case MonthSection: fillChar = QLatin1Char('M'); break;
     case YearSection: fillChar = QLatin1Char('y'); break;
     default:
-        qFatal("%s passed to sectionFormat. This should never happen", sectionName(s).toLatin1().constData());
+        Q_ASSERT_X(0, "QDateTimeParser::sectionFormat()",
+                   qPrintable(QString::fromAscii("Internal error (%1)").
+                              arg(sectionName(s))));
         return QString();
     }
     Q_ASSERT(!fillChar.isNull());
@@ -4542,27 +4663,29 @@ QDateTimeParser::State QDateTimeParser::checkIntermediate(const QDateTime &dt, c
 
     const QVariant minimum = getMinimum();
     const QVariant maximum = getMaximum();
+
     Q_ASSERT(dateTimeCompare(dt, minimum) < 0);
 
-    bool found = false;
     for (int i=0; i<sectionNodes.size(); ++i) {
         const SectionNode &sn = sectionNodes.at(i);
         QString t = sectionText(s, i, sn.pos).toLower();
         if (t.contains(space) || (t.size() < sectionMaxSize(i) && (((int)fieldInfo(i) & (FixedWidth|Numeric)) != Numeric))) {
-            found = true;
             switch (sn.type) {
             case AmPmSection:
                 switch (findAmPm(t, i)) {
                 case AM:
-                case PM: qFatal("%d This should not happen", __LINE__); return Acceptable;
-                case Neither: return Invalid;
+                case PM:
+                    Q_ASSERT_X(0, "QDateTimeParser::checkIntermediate", "Internal error");
+                    return Acceptable;
+                case Neither:
+                    return Invalid;
                 case PossibleAM:
                 case PossiblePM:
                 case PossibleBoth: {
                     const QVariant copy(dt.addSecs(12 * 60 * 60));
                     if (dateTimeCompare(copy, minimum) >= 0 && dateTimeCompare(copy, maximum) <= 0)
                         return Intermediate;
-                    return Invalid; }
+                    break; }
                 }
             case MonthSection:
                 if (sn.count >= 3) {
@@ -4571,22 +4694,21 @@ QDateTimeParser::State QDateTimeParser::checkIntermediate(const QDateTime &dt, c
                     while ((tmp = findMonth(t, tmp + 1, i)) != -1) {
                         const QVariant copy(dt.addMonths(tmp - dt.date().month()));
                         if (dateTimeCompare(copy, minimum) >= 0 && dateTimeCompare(copy, maximum) <= 0)
-                            break;
+                            break; // break out of while
                     }
                     if (tmp == -1) {
-                        return Invalid;
+                        break;
                     }
+                    return Intermediate;
                 }
                 // fallthrough
-
             default: {
                 int toMin;
                 int toMax;
 
                 if (sn.type & TimeSectionMask) {
                     if (dt.daysTo(minimum.toDateTime()) != 0) {
-                        QDTPDEBUG << "if (dt.daysTo(minimum.toDateTime()) != 0)" << dt.daysTo(minimum.toDateTime());
-                        return Invalid;
+                        break;
                     }
                     toMin = dt.time().msecsTo(minimum.toDateTime().time());
                     if (dt.daysTo(maximum.toDateTime()) > 0) {
@@ -4602,8 +4724,7 @@ QDateTimeParser::State QDateTimeParser::checkIntermediate(const QDateTime &dt, c
                 if (toMin > maxChange) {
                     QDTPDEBUG << "invalid because toMin > maxChange" << toMin
                               << maxChange << t << dt << minimum.toDateTime();
-
-                    return Invalid;
+                    break;
                 } else if (toMax > maxChange) {
                     toMax = -1; // can't get to max
                 }
@@ -4619,24 +4740,24 @@ QDateTimeParser::State QDateTimeParser::checkIntermediate(const QDateTime &dt, c
                 if (tmp == -1) {
                     QDTPDEBUG << "invalid because potentialValue(" << t << min << max
                               << sectionName(sn.type) << "returned" << tmp << toMax;
-                    return Invalid;
+                    break;
                 } else if (tmp > absoluteMax(i)) {
                     QDTPDEBUG << "invalid because potentialValue(" << t << min << max
                               << sectionName(sn.type) << "returned a larger number than absoluteMax" << tmp << absoluteMax(i);
-                    return Invalid;
+                    break;
                 }
 
                 QVariant var(dt);
                 setDigit(var, i, tmp);
                 if (dateTimeCompare(var, maximum) > 0) {
                     QDTPDEBUG << "invalid because" << var.toString() << ">" << maximum.toString();
-                    return Invalid;
+                    break;
                 }
-                break; }
+                return Intermediate; }
             }
         }
     }
-    return found ? Intermediate : Invalid;
+    return Invalid;
 }
 #endif // QT_NO_DATESTRING
 
@@ -4712,6 +4833,7 @@ bool QDateTimeParser::fromString(const QString &text, QDate *date, QTime *time) 
     }
     return true;
 }
+#endif // QT_NO_DATESTRING
 
 QVariant QDateTimeParser::getMinimum() const
 {
@@ -4733,7 +4855,6 @@ QVariant QDateTimeParser::getMaximum() const
     }
     return QVariant();
 }
-#endif // QT_NO_DATESTRING
 
 QString QDateTimeParser::getAmPmText(AmPm ap, Case cs) const
 {

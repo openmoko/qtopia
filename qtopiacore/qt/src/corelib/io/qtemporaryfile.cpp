@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -151,10 +166,17 @@ static int _gettemp(char *path, int *doopen, int domkdir, int slen)
 	for (;;) {
 		if (doopen) {
 #if defined(Q_OS_WIN) && defined(_MSC_VER) && _MSC_VER >= 1400
-                        if (_sopen_s(doopen, path, O_CREAT|O_EXCL|O_RDWR|O_BINARY, _SH_DENYNO, _S_IREAD | _S_IWRITE)== 0)
+                        if (_sopen_s(doopen, path, QT_OPEN_CREAT|O_EXCL|QT_OPEN_RDWR|QT_OPEN_BINARY
+#ifdef QT_LARGEFILE_SUPPORT
+                                     |QT_OPEN_LARGEFILE
+#endif
+                                     , _SH_DENYNO, _S_IREAD | _S_IWRITE)== 0)
 #else
                         if ((*doopen =
-                            open(path, O_CREAT|O_EXCL|O_RDWR
+                            open(path, QT_OPEN_CREAT|O_EXCL|QT_OPEN_RDWR
+#ifdef QT_LARGEFILE_SUPPORT
+                                 |QT_OPEN_LARGEFILE
+#endif
 #  if defined(Q_OS_WIN)
                                  |O_BINARY
 #  endif
@@ -227,11 +249,11 @@ QTemporaryFileEngine::~QTemporaryFileEngine()
 {
 }
 
-bool QTemporaryFileEngine::open(QIODevice::OpenMode)
+bool QTemporaryFileEngine::open(QIODevice::OpenMode openMode)
 {
     Q_D(QFSFileEngine);
 
-    QString qfilename = d->file;
+    QString qfilename = d->filePath;
     if(!qfilename.contains(QLatin1String("XXXXXX")))
         qfilename += QLatin1String(".XXXXXX");
 
@@ -239,12 +261,19 @@ bool QTemporaryFileEngine::open(QIODevice::OpenMode)
     d->closeFileHandle = true;
     char *filename = qstrdup(qfilename.toLocal8Bit());
 
-    d->fd = qt_mkstemps(filename, suffixLength);
+    int fd = qt_mkstemps(filename, suffixLength);
+    if (fd != -1) {
+        // First open the fd as an external file descriptor to
+        // initialize the engine properly.
+        QFSFileEngine::open(openMode, fd);
 
-    if(d->fd != -1) {
-        d->file = QString::fromLocal8Bit(filename); //changed now!
+        // Allow the engine to close the handle even if it's "external".
+        d->closeFileHandle = true;
+
+        // Restore the file names (open() resets them).
+        d->filePath = QString::fromLocal8Bit(filename); //changed now!
+        d->nativeInitFileName();
         delete [] filename;
-        d->sequential = 0;
         return true;
     }
     delete [] filename;
@@ -259,7 +288,7 @@ bool QTemporaryFileEngine::remove()
     // we must explicitly call QFSFileEngine::close() before we remove it.
     QFSFileEngine::close();
     bool removed = QFSFileEngine::remove();
-    d->file.clear();
+    d->filePath.clear();
     return removed;
 }
 

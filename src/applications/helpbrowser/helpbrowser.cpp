@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -26,27 +26,21 @@
 
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
-#include <qmimetype.h>
 
 #include <qcontent.h>
 #include <qcontentset.h>
 
 #include <qtopianamespace.h>
-
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 
-#include <QToolBar>
-#include <QToolButton>
-#include <QMenuBar>
+#include <QAction>
+#include <QMenu>
 #include <QFile>
 #include <QEvent>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLayout>
 #include <QScrollBar>
-#include <QToolButton>
 #include <QFileInfo>
 #include <QStyle>
 #include <QImageReader>
@@ -58,104 +52,6 @@ MagicTextBrowser::MagicTextBrowser( QWidget* parent )
     : QTextBrowser( parent )
 { }
 
-void MagicTextBrowser::clear()
-{
-    // Clear text browser
-    setCurrent( QString() );
-
-    // Clear backward history
-    if( !backStack.isEmpty() ) {
-        backStack.clear();
-        emit hasBack( false );
-    }
-
-    // Clear forward history
-    if( !forwardStack.isEmpty() ) {
-        forwardStack.clear();
-        emit hasForward( false );
-    }
-}
-
-void MagicTextBrowser::setSource( const QUrl& file )
-{
-    if( file.toLocalFile() != current ) {
-        // If not first page, add current to backward history
-        if( !current.isNull() ) {
-            // Keep a copy of the current information.
-            PagePlaceInfo info(current,documentTitle(),verticalScrollBar()->value());
-            backStack.push( info );
-            if( backStack.count() == 1 ) emit hasBack( true );
-        }
-
-        // Clear forward history
-        if( !forwardStack.isEmpty() ) {
-            forwardStack.clear();
-            emit hasForward( false );
-        }
-
-        setCurrent( file.toLocalFile() );
-        emit sourceChanged( file );
-    }
-}
-
-void MagicTextBrowser::emitStatus()
-{
-    // Notify listeners of the current history status.
-    emit hasBack(!backStack.isEmpty());
-    emit hasForward(!forwardStack.isEmpty());
-
-    // Also notify listeners of the previous and next document titles.
-    emitHistoryChanged();
-}
-
-void MagicTextBrowser::backward()
-{
-    if( !backStack.isEmpty() ) {
-        // Add current to forward history
-        PagePlaceInfo info(current,documentTitle(),verticalScrollBar()->value());
-        forwardStack.push( info );
-        if( forwardStack.count() == 1 ) emit hasForward( true );
-
-        // Remove last page from backward history and set current
-        info = backStack.pop();
-        setCurrent(info.name);
-        verticalScrollBar()->setValue(info.vPlace);
-        if( backStack.isEmpty() ) emit hasBack( false );
-    }
-}
-
-void MagicTextBrowser::forward()
-{
-    if( !forwardStack.isEmpty() ) {
-        // Add current to backward history
-        PagePlaceInfo info(current,documentTitle(),verticalScrollBar()->value());
-        backStack.push( info );
-        if( backStack.count() == 1 ) emit hasBack( true );
-
-        // Remove last page from forward history and set current
-        info = forwardStack.pop();
-        setCurrent( info.name );
-        verticalScrollBar()->setValue(info.vPlace);
-        if( forwardStack.isEmpty() ) emit hasForward( false );
-    }
-}
-
-void MagicTextBrowser::setCurrent( const QString& file )
-{
-    current = file;
-    if( current.isNull() ) {
-        QTextBrowser::clear();
-    } else {
-        HelpPreProcessor hpp( file );
-        QString source = hpp.text();
-        if( !( magic( file, "applications", source ) || magic( file, "games", source ) || magic( file, "settings", source ) ) )
-            setHtml( source );
-    }
-
-    // Notify listeners of the current history titles.
-    emitHistoryChanged();
-}
-
 QVariant MagicTextBrowser::loadResource(int type, const QUrl &name)
 {
     if (type == QTextDocument::ImageResource) {
@@ -164,10 +60,10 @@ QVariant MagicTextBrowser::loadResource(int type, const QUrl &name)
         if (filename.startsWith(QLatin1String("image/"))) {
             filename.prepend(":");
             QFileInfo fi(filename);
-            if (fi.suffix() == "svg") {
+            if (fi.suffix() == "svg" || fi.suffix() == "pic") {
                 // We'll force a sensible size, otherwise we could get
                 // anything.
-                int size = style()->pixelMetric(QStyle::PM_LargeIconSize);
+                int size = style()->pixelMetric(QStyle::PM_ListViewIconSize);
                 QImageReader reader(filename);
                 reader.setScaledSize(QSize(size, size));
                 QImage img = reader.read();
@@ -183,25 +79,31 @@ QVariant MagicTextBrowser::loadResource(int type, const QUrl &name)
                 return QVariant(icon.pixmap(size, size));
             }
         }
+    } else if (type == QTextDocument::HtmlResource) {
+        QString filename(name.toLocalFile());
+        HelpPreProcessor hpp(filename);
+        QString result = hpp.text();
+
+        static const char* special[] = { "applications", "games", "settings", 0 };
+        for (int i=0; special[i]; ++i) {
+            QString specialname = special[i];
+            if (filename.endsWith("qpe-" + specialname + ".html")) {
+                QRegExp re( "<qtopia-" + specialname + ">.*</qtopia-" + specialname + ">" );
+                int start;
+                if( ( start = re.indexIn( result ) ) >= 0 ) {
+                    specialname[0] = specialname[0].toUpper();
+                    result.replace( start, re.matchedLength(), generate( specialname ) );
+                }
+                break;
+            }
+        }
+
+        return QVariant(result);
     }
 
     return QTextBrowser::loadResource(type, name);
 }
 
-
-bool MagicTextBrowser::magic( const QString& file, const QString& name, const QString& source )
-{
-    if( "qpe-" + name + ".html" == file ) {
-        QRegExp re( "<qtopia-" + name + ">.*</qtopia-" + name + ">" );
-        int start;
-        if( ( start = re.indexIn( source ) ) >= 0 ) {
-            QString copy = source;
-            setHtml( copy.replace( start, re.matchedLength(), generate( name ) ) );
-            return true;
-        }
-    }
-    return false;
-}
 
 QString MagicTextBrowser::generate( const QString& name )
 {
@@ -220,15 +122,27 @@ QString MagicTextBrowser::generate( const QString& name )
         QString helpFile = lnk.executableName() + ".html";
         QStringList helpPath = Qtopia::helpPaths();
         QStringList::ConstIterator it;
-        for( it = helpPath.begin(); it != helpPath.end() && !QFile::exists( *it + "/" + helpFile ); ++it )
-            ;
-        if( it != helpPath.end() ) {
-            s += "<br><a href=" + helpFile + "><img src=" + icon + "> " + name + "</a>\n";
+        const char* prefix[]={"","qpe-",0};
+        int pref=0;
+        for (; prefix[pref]; ++pref) {
+            for (it = helpPath.begin(); it != helpPath.end() && !QFile::exists( *it + "/" + prefix[pref] + helpFile ); ++it)
+                ;
+            if (it != helpPath.end())
+                break;
+        }
+        if (it != helpPath.end()) {
+            s += QString("<br><a href=") + prefix[pref] + helpFile + "><img src=" + icon + "> " + name + "</a>\n";
+#ifdef DEBUG
+        } else {
+            s += "<br>No <tt>" + helpFile + "</tt> for " + name + "\n";
+#endif
         }
     }
     return s;
 }
 
+/*
+XXX - needs Qt functionality.
 
 void MagicTextBrowser::emitHistoryChanged()
 {
@@ -243,6 +157,8 @@ void MagicTextBrowser::emitHistoryChanged()
 
     emit historyChanged(prevDocTitle,nextDocTitle);
 }
+*/
+
 
 HelpBrowser::~HelpBrowser()
 {
@@ -276,36 +192,32 @@ void HelpBrowser::init()
     // Ensure that when either navigationBar's left or right arrow button is clicked,
     // we pick up the emitted signal and handle it by moving forwards or backwards
     // in the document hierarchy.
-    connect(navigationBar,SIGNAL(forwards()),this,SLOT(forward()));
-    connect(navigationBar,SIGNAL(backwards()),this,SLOT(backward()));
+    connect(navigationBar,SIGNAL(forwards()),browser,SLOT(forward()));
+    connect(navigationBar,SIGNAL(backwards()),browser,SLOT(backward()));
 
     // Ensure that when the browser's document queue changes condition at either end
     // (i.e. it has a 'backwards' document when previously it had none, or it no
     // longer has a 'forwards' document, etc), navigationBar's left or right
     // arrow button is enabled or disabled appropriately.
-    connect(browser,SIGNAL(hasBack(bool)),navigationBar,(SLOT(setBackwardsEnabled(bool))));
-    connect(browser,SIGNAL(hasForward(bool)),navigationBar,(SLOT(setForwardsEnabled(bool))));
+    connect(browser,SIGNAL(backwardAvailable(bool)),navigationBar,(SLOT(setBackwardsEnabled(bool))));
+    connect(browser,SIGNAL(forwardAvailable(bool)),navigationBar,(SLOT(setForwardsEnabled(bool))));
     // When the browser's document queue changes condition, the previous and next
     // documents will also undergo changes. When this happens, navigationBar will
     // need to update its previous and next document titles.
-    connect(browser,SIGNAL(historyChanged(const QString &,const QString &)),
-            navigationBar,SLOT(labelsChanged(const QString &,const QString &)));
+    /* XXX No such signal yet
+    connect(browser,SIGNAL(historyChanged(QString,QString)),
+            navigationBar,SLOT(labelsChanged(QString,QString)));
+    */
 
     boxLayout->addWidget(navigationBar);
 
-    browser->setSearchPaths( QStringList( "pics" ) );
-    connect( browser, SIGNAL( sourceChanged( const QUrl& ) ),
-             this, SLOT( textChanged() ) );
-
-    // Set up navigationBar's initial status, (i.e. whether or not the buttons
-    // should be enabled) by forcing the browser to emit the appropriate signals.
-    browser->emitStatus();
+    QStringList helpPath = Qtopia::helpPaths();
+    helpPath.append("pics");
+    browser->setSearchPaths(helpPath);
+    connect( browser, SIGNAL(sourceChanged(QUrl)),
+             this, SLOT(textChanged()) );
 
     setCentralWidget( box );
-
-#ifdef QTOPIA4_TODO
-    setToolBarsMovable( false );
-#endif
 
     // Hook onto the application channel to process Help service messages.
     new HelpService( this );
@@ -314,13 +226,13 @@ void HelpBrowser::init()
     backAction->setWhatsThis(tr("Move backward one page."));
     backAction->setEnabled( false );
     connect( backAction, SIGNAL(triggered()), browser, SLOT(backward()) );
-    connect( browser, SIGNAL(hasBack(bool)), backAction, SLOT(setEnabled(bool)) );
+    connect( browser, SIGNAL(backwardAvailable(bool)), backAction, SLOT(setEnabled(bool)) );
 
     forwardAction = new QAction(QIcon(":icon/i18n/next"), tr("Forward"), this );
     forwardAction->setWhatsThis( tr( "Move forward one page." ) );
     forwardAction->setEnabled( false );
     connect( forwardAction, SIGNAL(triggered()), browser, SLOT(forward()) );
-    connect( browser, SIGNAL(hasForward(bool)), forwardAction, SLOT(setEnabled(bool)) );
+    connect( browser, SIGNAL(forwardAvailable(bool)), forwardAction, SLOT(setEnabled(bool)) );
 
     QAction *bookmarksAction = new QAction(QIcon(":icon/list"), tr("Bookmarks"), this );
     bookmarksAction->setWhatsThis( tr( "Go to Bookmarks listing." ) );
@@ -332,9 +244,8 @@ void HelpBrowser::init()
 
     QAction *homeAction = new QAction(QIcon(":icon/home"), tr("Home"), this );
     homeAction->setWhatsThis( tr( "Go to the home page." ) );
-    connect( homeAction, SIGNAL( triggered() ), this, SLOT( goHome() ) );
+    connect( homeAction, SIGNAL(triggered()), this, SLOT(goHome()) );
 
-#ifdef QTOPIA_PHONE
     contextMenu = QSoftMenuBar::menuFor(this);
 
     contextMenu->addAction( backAction );
@@ -342,37 +253,14 @@ void HelpBrowser::init()
     contextMenu->addAction( bookmarksAction );
     contextMenu->addAction( addBookmarkAction );
     contextMenu->addAction( homeAction );
-#else
-    QToolBar* toolbar = new QToolBar( this );
-    addToolBar(toolbar);
-#ifdef QTOPIA4_TODO
-    toolbar->setHorizontalStretchable( true );
-#endif
-
-    QMenuBar *menu = new QMenuBar( toolbar );
-    toolbar->addWidget(menu);
-    toolbar = new QToolBar( this );
-    addToolBar(toolbar);
-
-    QMenu *helpMenu = new QMenu(tr("Page"), this);
-    helpMenu->addAction(homeAction);
-    helpMenu->addAction(backAction);
-    helpMenu->addAction(forwardAction);
-
-    menu->addMenu(helpMenu);
-
-    toolbar->addAction(backAction);
-    toolbar->addAction(forwardAction);
-    toolbar->addAction(homeAction);
-#endif
 
     setFocusProxy( browser );
     browser->setFrameStyle( QFrame::NoFrame );
 
-#ifdef QTOPIA_PHONE
     browser->installEventFilter( this );
-#endif
-
+    QString sheet = "a { color: palette(link) } a:visited { color: palette(link-visted) }";
+    if (browser->document())
+        browser->document()->setDefaultStyleSheet(sheet);
     browser->setSource( HOMEPAGE );
 }
 
@@ -395,7 +283,7 @@ BookmarksUI *HelpBrowser:: getBookmarksUI()
 void HelpBrowser::setDocument( const QString &doc )
 {
     if ( !doc.isEmpty() ) {
-        browser->clear();
+        browser->clearHistory();
 
         browser->setSource( doc );
         QtopiaApplication::instance()->showMainWidget();
@@ -409,7 +297,7 @@ void HelpBrowser::setDocument( const QString &doc )
 void HelpBrowser::bookmarkSelected(Bookmark bookmark)
 {
     // Clear out history.
-    browser->clear();
+    browser->clearHistory();
     // Display the Url.
     browser->setSource(bookmark.getUrl());
 }
@@ -440,7 +328,7 @@ void HelpBrowser::addBookmark()
     // Add the current filename as a bookmark, with the current title, if there is one.
     QString title;
     if ( browser->documentTitle().isNull() ) {
-        title = browser->source().section('/',-1);
+        title = browser->source().path().section('/',-1);
     } else {
         title = browser->documentTitle();
     }
@@ -458,27 +346,10 @@ void HelpBrowser::textChanged()
     else
         setWindowTitle( browser->documentTitle() ) ;
 #ifdef DEBUG
-    location->setText( browser->source() );
+    location->setText( browser->source().toString() );
 #endif
 }
 
-// Private slot to handle NavigationBar's forward() signal. Takes the browser
-// forwards in its history, and calls textChanged().
-void HelpBrowser::forward()
-{
-    browser->forward();
-    textChanged();
-}
-
-// Private slot to handle NavigationBar's backward() signal. Takes the browser
-// backwards in its history, and calls textChanged().
-void HelpBrowser::backward()
-{
-    browser->backward();
-    textChanged();
-}
-
-#ifdef QTOPIA_PHONE
 bool HelpBrowser::eventFilter( QObject*obj, QEvent* e )
 {
     Q_UNUSED(obj);
@@ -507,15 +378,9 @@ bool HelpBrowser::eventFilter( QObject*obj, QEvent* e )
     // Allow the parent to handle it.
     return false;
 }
-#endif
-// endif QTOPIA_PHONE
 
 void HelpBrowser::closeEvent( QCloseEvent* e )
 {
-#ifndef QTOPIA_PHONE
-    browser->clear();
-    browser->setSource( HOMEPAGE );
-#endif
     e->accept();
 }
 
@@ -543,3 +408,4 @@ void HelpService::setDocument( const QString& doc )
 {
     parent->setDocument( doc );
 }
+

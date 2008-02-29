@@ -14,7 +14,7 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QHardwareInterface Class Reference</h1>
 <p>The QHardwareInterface class is the base class of all accessory classes. <a href="#details">More...</a></p>
 <pre>    #include &lt;QHardwareInterface&gt;</pre><p>Inherits <a href="qabstractipcinterface.html">QAbstractIpcInterface</a>.</p>
-<p>Inherited by <a href="qbatteryaccessory.html">QBatteryAccessory</a>, <a href="qbootsourceaccessory.html">QBootSourceAccessory</a>, <a href="qhandsetaccessory.html">QHandsetAccessory</a>, <a href="qhandsfreeaccessory.html">QHandsfreeAccessory</a>, <a href="qheadsetaccessory.html">QHeadsetAccessory</a>, <a href="qinfraredaccessory.html">QInfraredAccessory</a>, <a href="qkeypadlightaccessory.html">QKeypadLightAccessory</a>, <a href="qserialcommaccessory.html">QSerialCommAccessory</a>, <a href="qsignalsource.html">QSignalSource</a>, <a href="qspeakerphoneaccessory.html">QSpeakerPhoneAccessory</a>, and <a href="qvibrateaccessory.html">QVibrateAccessory</a>.</p>
+<p>Inherited by <a href="qbootsourceaccessory.html">QBootSourceAccessory</a>, <a href="qkeypadlightaccessory.html">QKeypadLightAccessory</a>, <a href="qpowersource.html">QPowerSource</a>, <a href="qsignalsource.html">QSignalSource</a>, and <a href="qvibrateaccessory.html">QVibrateAccessory</a>.</p>
 <ul>
 <li><a href="qhardwareinterface-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -48,10 +48,13 @@
 <p>QHardwareInterface and the accessory classes are part of the <a href="syscust-accessories.html">Qtopia Accessory System</a>, which provides information and on the availability of physical accessories and an API for controlling those accessories. The accessory API is split into two sets of classes: accessory provider classes and accessory client classes. Both sets are subclasses of QHardwareInterface.</p>
 <p>The accessory provider classes implement device-specific code for controlling the hardware feature and manage the state that is reported to the rest of Qtopia through the accessory client API. Provider classes are created by passing <a href="qabstractipcinterface.html#Mode-enum">QAbstractIpcInterface::Server</a> as the mode parameter when constructing QHardwareInterface derived classes.</p>
 <p>The accessory client classes provide an API for querying the state of and controlling accessories. Client classes communicate with provider classes through an Inter Process Communication (IPC) mechanism. Multiple client instances can connect to a single accessory provider. Client classes are created by passing <a href="qabstractipcinterface.html#Mode-enum">QAbstractIpcInterface::Client</a> as the mode parameter when constructing QHardwareInterface derived classes.</p>
-<p>The accessory system supports multiple accessory providers of the same interface type. For example, a device could have a primary and secondary battery. Each battery would be exposed as a separate instance of a <a href="qbatteryaccessoryprovider.html">QBatteryAccessoryProvider</a> derived class. Default accessories are defined in <tt>&lt;Qtopia Runtime Prefix&gt;/etc/default/Trolltech/HardwareAccessories.conf</tt>. This file contains a list of interface names and the identity of the default accessory, for example:</p>
+<p>Qtopia automatically recognizes any subclass of QHardwareInterface as a Qtopia accessory. Each accessory follows the principal of accessory and accessory provider whereby the provider is a subclass of the accessory class. See the documentation for <a href="qabstractipcinterface.html">QAbstractIpcInterface</a> for more information on wrting and using interface classes.</p>
+<p>The accessory system supports multiple accessory providers of the same interface type. For example, a device could have a primary and secondary battery. Each battery would be exposed as a separate instance of a <a href="qpowersourceprovider.html">QPowerSourceProvider</a> derived class. Default accessories can be defined in the <tt>Trolltech/HardwareAccessories.conf</tt> configuration file. The file contains a list of interface names and the identity of the default accessory, for example:</p>
 <pre>    [Defaults]
-    QBatteryAccessory = StandardBattery</pre>
-<p>See also <a href="qhardwaremanager.html">QHardwareManager</a>.</p>
+    QPowerSource = DefaultBattery
+    QSignalSource = DefaultSignal
+    QVibrateAccessory = Modem</pre>
+<p>See also <a href="qhardwaremanager.html">QHardwareManager</a> and <a href="qabstractipcinterface.html">QAbstractIpcInterface</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QHardwareInterface"></a>QHardwareInterface::QHardwareInterface ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>id</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QAbstractIpcInterface::Mode</a> <i>mode</i> = Client )</h3>
@@ -63,6 +66,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

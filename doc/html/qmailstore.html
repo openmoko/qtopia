@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QMailStore Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QMailStore Class Reference</h1>
+<p>The QMailStore class represents the main interface for storage and retrieval of messages and folders on the message store. <a href="#details">More...</a></p>
+<pre>    #include &lt;QMailStore&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
+<ul>
+<li><a href="qmailstore-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/>virtual <b><a href="qmailstore.html#dtor.QMailStore">~QMailStore</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qmailstore.html#addFolder">addFolder</a></b> ( QMailFolder * <i>a</i> )</li>
+<li><div class="fn"/>bool <b><a href="qmailstore.html#addMessage">addMessage</a></b> ( QMailMessage * <i>m</i> )</li>
+<li><div class="fn"/>int <b><a href="qmailstore.html#countFolders">countFolders</a></b> ( const QMailFolderKey &amp; <i>key</i> ) const</li>
+<li><div class="fn"/>int <b><a href="qmailstore.html#countFolders-2">countFolders</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qmailstore.html#countMessages">countMessages</a></b> ( const QMailMessageKey &amp; <i>key</i> ) const</li>
+<li><div class="fn"/>int <b><a href="qmailstore.html#countMessages-2">countMessages</a></b> () const</li>
+<li><div class="fn"/>QMailFolder <b><a href="qmailstore.html#folder">folder</a></b> ( const QMailId &amp; <i>id</i> ) const</li>
+<li><div class="fn"/>QMailMessage <b><a href="qmailstore.html#message">message</a></b> ( const QMailId &amp; <i>id</i> ) const</li>
+<li><div class="fn"/>QMailMessage <b><a href="qmailstore.html#messageHeader">messageHeader</a></b> ( const QMailId &amp; <i>id</i> ) const</li>
+<li><div class="fn"/>QMailIdList <b><a href="qmailstore.html#queryFolders">queryFolders</a></b> () const</li>
+<li><div class="fn"/>QMailIdList <b><a href="qmailstore.html#queryFolders-2">queryFolders</a></b> ( const QMailFolderSortKey &amp; <i>sortKey</i> ) const</li>
+<li><div class="fn"/>QMailIdList <b><a href="qmailstore.html#queryFolders-3">queryFolders</a></b> ( const QMailFolderKey &amp; <i>key</i> ) const</li>
+<li><div class="fn"/>QMailIdList <b><a href="qmailstore.html#queryFolders-4">queryFolders</a></b> ( const QMailFolderKey &amp; <i>key</i>, const QMailFolderSortKey &amp; <i>sortKey</i> ) const</li>
+<li><div class="fn"/>QMailIdList <b><a href="qmailstore.html#queryMessages">queryMessages</a></b> () const</li>
+<li><div class="fn"/>QMailIdList <b><a href="qmailstore.html#queryMessages-2">queryMessages</a></b> ( const QMailMessageSortKey &amp; <i>sortKey</i> ) const</li>
+<li><div class="fn"/>QMailIdList <b><a href="qmailstore.html#queryMessages-3">queryMessages</a></b> ( const QMailMessageKey &amp; <i>key</i> ) const</li>
+<li><div class="fn"/>QMailIdList <b><a href="qmailstore.html#queryMessages-4">queryMessages</a></b> ( const QMailMessageKey &amp; <i>key</i>, const QMailMessageSortKey &amp; <i>sortKey</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qmailstore.html#removeFolder">removeFolder</a></b> ( const QMailId &amp; <i>id</i> )</li>
+<li><div class="fn"/>bool <b><a href="qmailstore.html#removeMessage">removeMessage</a></b> ( const QMailId &amp; <i>id</i> )</li>
+<li><div class="fn"/>bool <b><a href="qmailstore.html#updateFolder">updateFolder</a></b> ( QMailFolder * <i>f</i> )</li>
+<li><div class="fn"/>bool <b><a href="qmailstore.html#updateMessage">updateMessage</a></b> ( QMailMessage * <i>m</i> )</li>
+</ul>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>QMailStore * <b><a href="qmailstore.html#instance">instance</a></b> ()</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QMailStore class represents the main interface for storage and retrieval of messages and folders on the message store.</p>
+<p>The QMailStore class is accessed through a singleton interface and provides functions for adding, updating and deleting of QMailFolders and QMailMessages on the message store.</p>
+<p>QMailStore also provides functions for querying and counting of QMailFolders and QMailMessages when used in conjunction with <a href="qmailmessagekey.html">QMailMessageKey</a> and <a href="qmailfolderkey.html">QMailFolderKey</a> classes.</p>
+<p>See also <a href="qmailmessage.html">QMailMessage</a>, <a href="qmailfolder.html">QMailFolder</a>, <a href="qmailmessagekey.html">QMailMessageKey</a>, and <a href="qmailfolderkey.html">QMailFolderKey</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="dtor.QMailStore"></a>QMailStore::~QMailStore ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Destroys this <a href="qmailstore.html">QMailStore</a> object.</p>
+<h3 class="fn"><a name="addFolder"></a>bool QMailStore::addFolder ( <a href="qmailfolder.html">QMailFolder</a> * <i>a</i> )</h3>
+<p>Adds a new <a href="qmailfolder.html">QMailFolder</a> object <i>a</i> into the message store, performing respective integrity checks. Returns <tt>true</tt> if the operation completed successfully, <tt>false</tt> otherwise.</p>
+<h3 class="fn"><a name="addMessage"></a>bool QMailStore::addMessage ( <a href="qmailmessage.html">QMailMessage</a> * <i>m</i> )</h3>
+<p>Adds a new <a href="qmailmessage.html">QMailMessage</a> object <i>m</i> into the message store, performing respective integrity checks. Returns <tt>true</tt> if the operation completed successfully, <tt>false</tt> otherwise.</p>
+<h3 class="fn"><a name="countFolders"></a>int QMailStore::countFolders ( const <a href="qmailfolderkey.html">QMailFolderKey</a> &amp; <i>key</i> ) const</h3>
+<p>Returns the count of the number of folders which pass the filtering criteria defined in <a href="qmailfolderkey.html">QMailFolderKey</a> <i>key</i>.</p>
+<h3 class="fn"><a name="countFolders-2"></a>int QMailStore::countFolders () const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the count of all the folders in the message store.</p>
+<h3 class="fn"><a name="countMessages"></a>int QMailStore::countMessages ( const <a href="qmailmessagekey.html">QMailMessageKey</a> &amp; <i>key</i> ) const</h3>
+<p>Returns the count of the number of messages which pass the filtering criteria defined in <a href="qmailmessagekey.html">QMailMessageKey</a> <i>key</i>.</p>
+<h3 class="fn"><a name="countMessages-2"></a>int QMailStore::countMessages () const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the count of all the messages in the message store</p>
+<h3 class="fn"><a name="folder"></a><a href="qmailfolder.html">QMailFolder</a> QMailStore::folder ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> ) const</h3>
+<p>Returns the <a href="qmailfolder.html">QMailFolder</a> defined by a <a href="qmailid.html">QMailId</a> <i>id</i> from the message store.</p>
+<h3 class="fn"><a name="instance"></a>QMailStore * QMailStore::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns an instance of the <a href="qmailstore.html">QMailStore</a> object.</p>
+<h3 class="fn"><a name="message"></a><a href="qmailmessage.html">QMailMessage</a> QMailStore::message ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> ) const</h3>
+<p>Returns the <a href="qmailmessage.html">QMailMessage</a> defined by a <a href="qmailid.html">QMailId</a> <i>id</i> from the message store.</p>
+<h3 class="fn"><a name="messageHeader"></a><a href="qmailmessage.html">QMailMessage</a> QMailStore::messageHeader ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> ) const</h3>
+<p>Returns the <a href="qmailmessage.html">QMailMessage</a> header defined by a <a href="qmailid.html">QMailId</a> <i>id</i> from the message store.</p>
+<h3 class="fn"><a name="queryFolders"></a>QMailIdList QMailStore::queryFolders () const</h3>
+<p>Returns the <a href="qmailid.html">QMailId</a>'s of all folders in the message store</p>
+<h3 class="fn"><a name="queryFolders-2"></a>QMailIdList QMailStore::queryFolders ( const <a href="qmailfoldersortkey.html">QMailFolderSortKey</a> &amp; <i>sortKey</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the <a href="qmailid.html">QMailId</a>'s of all folders in the message store sorted by the <a href="qmailfoldersortkey.html">QMailFolderSortKey</a> <i>sortKey</i>.</p>
+<h3 class="fn"><a name="queryFolders-3"></a>QMailIdList QMailStore::queryFolders ( const <a href="qmailfolderkey.html">QMailFolderKey</a> &amp; <i>key</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns a list of <a href="qmailid.html">QMailId</a>'s which pass the query criteria defined in <a href="qmailfolderkey.html">QMailFolderKey</a> <i>key</i>.</p>
+<h3 class="fn"><a name="queryFolders-4"></a>QMailIdList QMailStore::queryFolders ( const <a href="qmailfolderkey.html">QMailFolderKey</a> &amp; <i>key</i>, const <a href="qmailfoldersortkey.html">QMailFolderSortKey</a> &amp; <i>sortKey</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns a list of <a href="qmailid.html">QMailId</a>'s which pass the query criteria defined in <a href="qmailfolderkey.html">QMailFolderKey</a> <i>key</i> and the <a href="qmailfoldersortkey.html">QMailFolderSortKey</a> <i>sortKey</i>.</p>
+<h3 class="fn"><a name="queryMessages"></a>QMailIdList QMailStore::queryMessages () const</h3>
+<p>Returns the <a href="qmailid.html">QMailId</a>'s of all messages in the message store</p>
+<h3 class="fn"><a name="queryMessages-2"></a>QMailIdList QMailStore::queryMessages ( const <a href="qmailmessagesortkey.html">QMailMessageSortKey</a> &amp; <i>sortKey</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the <a href="qmailid.html">QMailId</a>'s of all messages in the message store sorted by the <a href="qmailmessagesortkey.html">QMailMessageSortKey</a> <i>sortKey</i>.</p>
+<h3 class="fn"><a name="queryMessages-3"></a>QMailIdList QMailStore::queryMessages ( const <a href="qmailmessagekey.html">QMailMessageKey</a> &amp; <i>key</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns a list of <a href="qmailid.html">QMailId</a>'s which pass the query criteria defined in <a href="qmailmessagekey.html">QMailMessageKey</a> <i>key</i>.</p>
+<h3 class="fn"><a name="queryMessages-4"></a>QMailIdList QMailStore::queryMessages ( const <a href="qmailmessagekey.html">QMailMessageKey</a> &amp; <i>key</i>, const <a href="qmailmessagesortkey.html">QMailMessageSortKey</a> &amp; <i>sortKey</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns a list of <a href="qmailid.html">QMailId</a>'s which pass the query criteria defined in <a href="qmailfolderkey.html">QMailFolderKey</a> <i>key</i> and the <a href="qmailfoldersortkey.html">QMailFolderSortKey</a> <i>sortKey</i>.</p>
+<h3 class="fn"><a name="removeFolder"></a>bool QMailStore::removeFolder ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> )</h3>
+<p>Removes a <a href="qmailfolder.html">QMailFolder</a> with <a href="qmailid.html">QMailId</a> <i>id</i> from the message store. This action also removes the sub-folder and messages of the folder. Returns <tt>true</tt> if the operation completed successfully, <tt>false</tt> otherwise.</p>
+<h3 class="fn"><a name="removeMessage"></a>bool QMailStore::removeMessage ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> )</h3>
+<p>Removes a <a href="qmailmessage.html">QMailMessage</a> with <a href="qmailid.html">QMailId</a> <i>id</i> from the message store. Returns <tt>true</tt> if the operation completed successfully, <tt>false</tt> otherwise.</p>
+<h3 class="fn"><a name="updateFolder"></a>bool QMailStore::updateFolder ( <a href="qmailfolder.html">QMailFolder</a> * <i>f</i> )</h3>
+<p>Updates the existing <a href="qmailfolder.html">QMailFolder</a> <i>f</i> on the message store. Returns <tt>true</tt> if the operation completed successfully, <tt>false</tt> otherwise.</p>
+<h3 class="fn"><a name="updateMessage"></a>bool QMailStore::updateMessage ( <a href="qmailmessage.html">QMailMessage</a> * <i>m</i> )</h3>
+<p>Updates the existing <a href="qmailmessage.html">QMailMessage</a> <i>m</i> on the message store. Returns <tt>true</tt> if the operation completed successfully, or <tt>false</tt> otherwise.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+</tr></table></div></address></body>
+</html>

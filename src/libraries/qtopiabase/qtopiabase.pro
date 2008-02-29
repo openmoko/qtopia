@@ -1,13 +1,12 @@
 CONFIG+=no_qtopiabase
 qtopia_project(qtopia core lib)
 TARGET=qtopiabase
-CONFIG += no_auto_translatables qtopia_visibility
+CONFIG += qtopia_visibility
 
 QTOPIABASE_HEADERS+=\
     qtopiaglobal.h \
     qtopiasxe.h \
     custom.h \
-    custom-qtopia.h \
     qlog.h \
     qtopialog.h \
     qtopialog-config.h \
@@ -19,7 +18,6 @@ QTOPIABASE_HEADERS+=\
     qtopiaabstractservice.h \
     qtopiachannel.h \
     qtopiaipcadaptor.h \
-    qpowerstatus.h \
     qtopiaipcenvelope.h \
     qtopiaipcmarshal.h \
     qabstractipcinterfacegroup.h \
@@ -28,22 +26,18 @@ QTOPIABASE_HEADERS+=\
     qsoundcontrol.h \
     quniqueid.h \
     qtranslatablesettings.h \
+    qtopiatimer.h \
     qdawg.h \
     version.h \
     qglobalpixmapcache.h
 
 QTOPIABASE_PRIVATE_HEADERS+=\
-    dbusapplicationchannel_p.h \
-    dbusipccommon_p.h \
     qactionconfirm_p.h\
     qcopenvelope_p.h \
-    qmemoryfile_p.h \
-    qsharedmemorycache_p.h
+    qmemoryfile_p.h
 
 QTOPIABASE_SOURCES+=\
-    dbusapplicationchannel_p.cpp \
     qtopiasxe.cpp \
-    dbusipccommon_p.cpp \
     qactionconfirm.cpp\
     qabstractipcinterface.cpp \
     qabstractipcinterfacegroup.cpp \
@@ -58,16 +52,18 @@ QTOPIABASE_SOURCES+=\
     qtopiaabstractservice.cpp \
     qtopiachannel.cpp \
     qtopiaipcadaptor.cpp \
-    qpowerstatus.cpp \
     qtopiaipcenvelope.cpp \
     qtopiaipcmarshal.cpp \
     qtopialog.cpp \
     qsoundcontrol.cpp \
     quniqueid.cpp \
     qtranslatablesettings.cpp \
+    qtopiatimer.cpp \
     qdawg.cpp \
     qmemoryfile.cpp \
-    qsharedmemorycache.cpp
+    qmemoryfile_unix.cpp
+
+enable_sxe:QTOPIABASE_SOURCES+=qtopiasxe.cpp
 
 VPATH+=$$QTOPIA_DEPOT_PATH/src/libraries/qtopiail
 INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/qtopiail
@@ -95,56 +91,85 @@ QTOPIABASE_HEADERS+=\
 QTOPIABASE_PRIVATE_HEADERS+=\
     framework/qfixedpointnumber_p.h
 
+x11 {
+    VPATH+=$$QT_DEPOT_PATH/src/gui/embedded
+    INCLUDEPATH+=$$QT_DEPOT_PATH/src/gui/embedded
+
+    QTOPIABASE_HEADERS+=\
+        qcopchannel_x11.h
+
+    QTOPIABASE_PRIVATE_HEADERS+=\
+        qcopchannel_x11_p.h \
+        qunixsocket_p.h \
+        qunixsocketserver_p.h
+
+    QTOPIABASE_SOURCES+=\
+        qcopchannel_x11.cpp \
+        qunixsocket.cpp \
+        qunixsocketserver.cpp \
+        qglobalpixmapcache_x11.cpp
+
+    enable_sxe {
+        QTOPIABASE_HEADERS+=\
+            qtransportauth_qws.h
+
+        QTOPIABASE_PRIVATE_HEADERS+=\
+            qtransportauth_qws_p.h
+
+        QTOPIABASE_SOURCES+=\
+            qtransportauth_qws.cpp
+    }
+}
+
+!x11 {
+    QTOPIABASE_PRIVATE_HEADERS+=\
+        qsharedmemorycache_p.h
+
+    QTOPIABASE_SOURCES+=\
+        qsharedmemorycache.cpp
+}
+
+QTOPIA_CUSTOM=$$QPEDIR/src/libraries/qtopiabase/custom-qtopia
+QTOPIABASE_HEADERS+=$${QTOPIA_CUSTOM}.h
+QTOPIABASE_SOURCES+=$${QTOPIA_CUSTOM}.cpp
+
 PREFIX=QTOPIABASE
 resolve_include()
 
-enable_dbusipc:depends(3rdparty/libraries/qtdbus)
+enable_dbusipc {
+    depends(3rdparty/libraries/qtdbus)
 
-#These are being marked for future removal.
-#dealing with these should save 200k of the
-#stripped lib size.
-# contact - used by passwd to print contact info
-# event - used by datebookdb
-# datebookdb - used by settime to reset alarms
-# palmtoprecord - used by contact && event
+    QTOPIABASE_PRIVATE_HEADERS+=\
+        dbusapplicationchannel_p.h \
+        dbusipccommon_p.h
 
-win32 { 
-    SOURCES+=qmemoryfile_win.cpp
-        DEFINES+=\
-        QTOPIA_INTERNAL_APPLNKASSIGN QTOPIA_INTERNAL_FSLP\
-        QTOPIA_INTERNAL_PRELOADACCESS QTOPIA_INTERNAL_FD\
-        QTOPIA_WIN32PROCESS_SUPPORT
+    QTOPIABASE_SOURCES+=\
+        dbusapplicationchannel_p.cpp \
+        dbusipccommon_p.cpp
 }
 
-TRANSLATABLES+=qmemoryfile_win.cpp
 
-unix {
-    SOURCES+=qmemoryfile_unix.cpp
-        LIBS          +=-lm
-#!staticlib:LIBS+=$$QMAKE_LIBS_DYNLOAD
-}
+LIBS          +=-lm
 
-TRANSLATABLES+=qmemoryfile_unix.cpp \
-               qtopianamespace.cpp
+# We need to prevent some files from appearing in TRANSLATABLES
+TRANSLATABLES*=$$FORMS $$HEADERS $$SOURCES
+TRANSLATABLES-=$${QTOPIA_CUSTOM}.h $${QTOPIA_CUSTOM}.cpp
+CONFIG+=no_auto_translatables
 
 sdk_qtopiabase_headers.files=$$QTOPIABASE_HEADERS
 sdk_qtopiabase_headers.path=/include/qtopiabase
 sdk_qtopiabase_headers.hint=sdk headers
+INSTALLS+=sdk_qtopiabase_headers
 
 sdk_qtopiabase_private_headers.files=$$QTOPIABASE_PRIVATE_HEADERS
 sdk_qtopiabase_private_headers.path=/include/qtopiabase/private
 sdk_qtopiabase_private_headers.hint=sdk headers
+INSTALLS+=sdk_qtopiabase_private_headers
 
 sdk_qtopiabase_custom_headers.files=custom-*-*.h
 sdk_qtopiabase_custom_headers.path=/src/libraries/qtopiabase
 sdk_qtopiabase_custom_headers.hint=sdk
 INSTALLS+=sdk_qtopiabase_custom_headers
-
-INSTALLS+=sdk_qtopiabase_headers sdk_qtopiabase_private_headers
-
-QTOPIA_CUSTOM=$$QPEDIR/src/libraries/qtopiabase/custom-qtopia
-HEADERS+=$${QTOPIA_CUSTOM}.h
-SOURCES+=$${QTOPIA_CUSTOM}.cpp
 
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)

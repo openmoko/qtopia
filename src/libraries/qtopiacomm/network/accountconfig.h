@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -31,6 +31,7 @@ class QComboBox;
 class QLabel;
 class QLineEdit;
 
+class AccountPagePrivate;
 class QTOPIACOMM_EXPORT AccountPage : public QWidget
 {
     Q_OBJECT
@@ -59,6 +60,10 @@ private:
     QLineEdit* user;
     QLabel* password_label;
     QLineEdit* password;
+
+    AccountPagePrivate* d;
+    Q_PRIVATE_SLOT( d, void _q_selectBluetoothDevice() );
+    Q_PRIVATE_SLOT( d, void _q_BluetoothStateChanged() );
 };
 #endif// ACCOUNTPAGEIMPL_H
 

@@ -18,11 +18,15 @@ enable_infrared:DEFINES+=QTOPIA_INFRARED
 enable_vpn:DEFINES+=QTOPIA_VPN
 enable_dbusipc:DEFINES+=QTOPIA_DBUS_IPC
 !enable_sxe:DEFINES+=QT_NO_SXE
-free_package:DEFINES+=QTOPIA_FREE
 DEFINES+=QTOPIA_KEYPAD_NAVIGATION
+desktop:DEFINES+=QTOPIA_HOST
 
 # Stuff for apps
 app {
+    # Don't let force_quicklaunch apply to third party projects when SXE is enabled.
+    # Quicklaunch apps can't be installed by package manager so ignoring no_quicklaunch
+    # creates apps that can't be installed.
+    !depotProject:enable_sxe:CONFIG-=force_quicklaunch
     # If quicklaunch is forced on, ignore no_quicklaunch from the .pro file
     qtopia_main:force_quicklaunch:CONFIG-=no_quicklaunch
     # If we don't use the app macros, quicklaunch and singleexec won't work
@@ -41,7 +45,8 @@ app {
         CONFIG+=qtopia_visibility
         plugin_type=application
         DEFINES+=QTOPIA_APP_INTERFACE
-        !enable_singleexec:!no_singleexec {
+        # In singleexec builds the symlink is created is singleexec.prf
+        !enable_singleexec {
             instsymlink.path=$$bindir
             instsymlink.commands=$$COMMAND_HEADER\
                 rm -f $(INSTALL_ROOT)$$instsymlink.path/$$ORIG_TARGET $$LINE_SEP_VERBOSE\

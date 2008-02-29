@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -22,18 +22,14 @@
 #include "writemail.h"
 #include "accountlist.h"
 #include "account.h"
-#ifdef QTOPIA_PHONE
-#ifndef QTOPIA_NO_MMS
-#include "mmscomposer.h"
-#endif
-#include "composer.h"
-#else
-#include "pdacomposer.h"
-#endif
 #include "qtmailwindow.h"
 
-#include <QValueSpaceItem>
+#include <qtopia/mail/qmailaddress.h>
+#include <qtopia/mail/qmailcomposer.h>
+#include <qtopia/mail/qmailtimestamp.h>
+
 #include <qtopiaapplication.h>
+#include <QtopiaItemDelegate>
 #include <QSettings>
 #include <QMenu>
 #include <qsoftmenubar.h>
@@ -46,73 +42,112 @@
 #include <QMessageBox>
 #include <QDateTime>
 #include <QBoxLayout>
-#ifdef QTOPIA_PHONE
 #include <QTextEdit>
-#endif
 #include <QDir>
 #include <QFileInfo>
-#include <qmimetype.h>
 #include <QToolTip>
 #include <QWhatsThis>
 #include <QStackedWidget>
-#ifndef Q_OS_WIN32
-#ifndef Q_OS_MACX
 #include <sys/vfs.h>  // sharp 1862
-#endif
-#endif
 
-#ifdef QTOPIA_PHONE
 #include "detailspage.h"
-#endif
 
-static QString createFrom(QString name, QString email)
+
+class SelectListWidgetItem : public QListWidgetItem
 {
-    QString from;
-    if ( !name.trimmed().isEmpty() )
-        from = Email::quoteString( name.trimmed() );
+public:
+    SelectListWidgetItem(const QString& id, QListWidget* listWidget)
+        : QListWidgetItem(QMailComposerFactory::name(id), listWidget),
+          _key(id)
+    {
+        setIcon(QMailComposerFactory::displayIcon(_key));
+    }
 
-    if ( email.isEmpty() )
-        return from; // Error no email address specified
+    const QString& key() const { return _key; }
 
-    if ( email[0] == '<' )
-        from += " " + email;
-    else
-        from += " <" + email + ">";
+private:
+    QString _key;
+};
 
-    return from;
-}
+class SelectListWidget : public QListWidget
+{
+    Q_OBJECT
 
+public:
+    SelectListWidget( QWidget* parent );
 
-//===========================================================================
+    void setKeys(const QStringList& keys);
+    void setSelected(const QString& selected);
 
-SelectListWidget::SelectListWidget( QDialog *parent )
+signals:
+    void selected(const QString& key);
+    void cancel();
+
+protected slots:
+    void accept(QListWidgetItem* item);
+
+protected:
+    void keyPressEvent(QKeyEvent *e);
+};
+
+SelectListWidget::SelectListWidget( QWidget *parent )
     : QListWidget( parent )
 {
-    mParent = parent;
     setFrameStyle( QFrame::NoFrame );
-    mKeyBackPressed = false;
+    setContentsMargins(0, 0, 0, 0);
+    setItemDelegate(new QtopiaItemDelegate);
+
+    connect(this, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(accept(QListWidgetItem*)));
 }
 
-bool SelectListWidget::keyBackPressed()
+void SelectListWidget::setKeys(const QStringList& keys)
 {
-    return mKeyBackPressed;
+    foreach (const QString& key, keys)
+        (void)new SelectListWidgetItem(key, this);
+}
+
+void SelectListWidget::setSelected(const QString& selected)
+{
+    int selectIndex = 0;
+
+    if (!selected.isEmpty()) {
+        for (int i = 1; i < count() && selectIndex == 0; ++i) {
+            if (static_cast<SelectListWidgetItem*>(item(i))->key() == selected)
+                selectIndex = i;
+        }
+    }
+
+    setCurrentRow(selectIndex);
+}
+
+void SelectListWidget::accept(QListWidgetItem* item)
+{
+    if (item) {
+        // Allow this event to be acted upon before we return control to our parent
+        emit selected(static_cast<SelectListWidgetItem*>(item)->key());
+    }
 }
 
 void SelectListWidget::keyPressEvent(QKeyEvent *e)
 {
     if (e->key() == Qt::Key_Back) {
-        mKeyBackPressed = true;
-        mParent->reject();
         e->accept();
+
+        // Allow this event to be acted upon before we return control to our parent
+        emit cancel();
         return;
     }
+
     QListWidget::keyPressEvent( e );
 }
 
 //===========================================================================
 
 WriteMail::WriteMail(QWidget* parent,  const char* name, Qt::WFlags fl )
-    : QMainWindow( parent, fl ), mail(),_detailsOnly(false)
+    : QMainWindow( parent, fl ), m_composerInterface(0), m_composerWidget(0), 
+      m_detailsPage(0), m_previousAction(0), m_cancelAction(0), m_draftAction(0), 
+      widgetStack(0), _detailsOnly(false), _action(Create), _selectComposer(0),
+      _composerList(0)
 {
     setObjectName(name);
 
@@ -122,11 +157,7 @@ WriteMail::WriteMail(QWidget* parent,  const char* name, Qt::WFlags fl )
       because its parent is also a main window. have to set it through
       the real main window.
     */
-#ifdef QTOPIA_DESKTOP
-    m_mainWindow = this;
-#else
     m_mainWindow = QTMailWindow::singleton();
-#endif
 
     init();
 }
@@ -140,14 +171,30 @@ WriteMail::~WriteMail()
 void WriteMail::setAccountList(AccountList *list)
 {
     accountList = list;
-#ifdef QTOPIA_PHONE
     if (m_detailsPage )
         m_detailsPage->setFromFields( accountList->emailAccounts() );
-#else
-    m_composerInterface->setFromFields( accountList->emailAccounts() );
-#endif
     QStringList::Iterator it;
     QStringList as = accountList->emailAccounts();
+}
+
+static int messageTypeValue(QMailMessage::MessageType type)
+{
+    if (type == QMailMessage::Sms) return 0;
+    if (type == QMailMessage::Mms) return 1;
+    if (type == QMailMessage::Email) return 2;
+    if (type == QMailMessage::System) return 3;
+    return 4;
+}
+
+static bool compareComposerByType(const QString& lhs, const QString& rhs)
+{
+    QMailMessage::MessageType lhsType = QMailComposerFactory::messageType(lhs);
+    QMailMessage::MessageType rhsType = QMailComposerFactory::messageType(rhs);
+
+    if (lhsType != rhsType)
+        return (messageTypeValue(lhsType) < messageTypeValue(rhsType));
+
+    return false;
 }
 
 void WriteMail::init()
@@ -155,40 +202,14 @@ void WriteMail::init()
     widgetStack = new QStackedWidget(this);
     setCentralWidget(widgetStack);
 
-#ifdef QTOPIA_PHONE
-    // stage 1 - composing
-    m_composerInterface = 0;
-    m_composerWidget = 0;
-    // setup when a composer is set
-
-    // stage 2 - specifying recipients and other message details
-    // also setup when a composer is set
-    m_detailsPage = 0;
-
-    keyEventAccepted = false;
-#else
-    m_composerInterface = new PDAComposer( this, "pdaComposer" );
-    connect( m_composerInterface, SIGNAL(contentChanged()),
-             this, SLOT(messageChanged()) );
-    connect( m_composerInterface, SIGNAL(recipientsChanged()),
-             this, SLOT(messageChanged()) );
-    m_mainWindow->setWindowTitle( tr("Write Mail") );
-#endif
-
-    // stage 3 - sending
     /*
     TODO  : composers should handle this
     wrapLines = new QAction( tr("Wrap lines"), QString::null, 0, this, 0);
     wrapLines->setToggleAction( true );
-    connect(wrapLines, SIGNAL( activated() ), this, SLOT( wrapToggled() ) );
+    connect(wrapLines, SIGNAL(activated()), this, SLOT(wrapToggled()) );
     */
 
-#ifdef QTOPIA_PHONE
     m_cancelAction = new QAction(QIcon(":icon/cancel"),tr("Cancel"),this);
-#else
-    m_cancelAction = new QAction(QIcon(":icon/discard"),tr("Discard"),this);
-#endif
-
     connect( m_cancelAction, SIGNAL(triggered()), this, SLOT(discard()) );
 
     m_draftAction = new QAction(QIcon(":icon/draft"),tr("Save in drafts"),this);
@@ -197,29 +218,42 @@ void WriteMail::init()
 
     m_previousAction = new QAction( QIcon(":icon/i18n/previous"),tr("Previous"),this);
     connect( m_previousAction, SIGNAL(triggered()), this, SLOT(previousStage()) );
+
+    _selectComposer = new QWidget(this);
+    _selectComposer->setObjectName("selectComposer");
+    widgetStack->addWidget(_selectComposer);
+    QSoftMenuBar::setLabel(_selectComposer, Qt::Key_Back, QSoftMenuBar::Cancel);
+
+    QList<QString> keys = QMailComposerFactory::keys();
+    qSort(keys.begin(), keys.end(), compareComposerByType);
+
+    _composerList = new SelectListWidget( _selectComposer );
+    _composerList->setKeys(keys);
+    _composerList->setFrameStyle(QFrame::NoFrame);
+    connect(_composerList, SIGNAL(selected(QString)), this, SLOT(composerSelected(QString)));
+    connect(_composerList, SIGNAL(cancel()), this, SLOT(selectionCanceled()));
+    
+    QVBoxLayout *l = new QVBoxLayout( _selectComposer );
+    l->setContentsMargins(0, 0, 0, 0);
+    l->addWidget( _composerList );
 }
 
 void WriteMail::nextStage()
 {
-#ifdef QTOPIA_PHONE
     QWidget *curPage = widgetStack->currentWidget();
     if (!curPage) {
         composeStage();
     } else if (curPage == m_composerWidget) {
-        if (!m_composerInterface)
-            qWarning( "BUG: NULL composer interface in composer stage" );
-        if (!m_composerInterface->hasContent()) {
+        if (m_composerInterface->isEmpty()) {
             discard();
-            //QTimer::singleShot( 0, this, SIGNAL(discardMail()) );
-            return;
+        } else {
+            detailsStage();
         }
-        detailsStage();
     } else if (curPage == m_detailsPage) {
         sendStage();
     } else {
         qWarning("BUG: WriteMail::nextStage() called in unknown stage.");
     }
-#endif
 }
 
 void WriteMail::sendStage()
@@ -229,78 +263,84 @@ void WriteMail::sendStage()
 
 void WriteMail::detailsStage()
 {
-#ifdef QTOPIA_PHONE
     if (!changed() && !_detailsOnly) {
         discard();
         return;
     }
-    m_detailsPage->setType( m_composerInterface->type() );
+
+    m_detailsPage->setType( m_composerInterface->messageType() );
+
     if (_detailsOnly) //fix resize problem if not showing composer
         widgetStack->setCurrentWidget(m_composerWidget);
+
     widgetStack->setCurrentWidget(m_detailsPage);
-    QTimer::singleShot( 0, this, SLOT(updateUI()) );
-#endif
+    
+    m_mainWindow->setWindowTitle(m_composerInterface->displayName() + " " + tr("details"));
+    m_previousAction->setVisible(!_detailsOnly);
 }
 
 void WriteMail::composeStage()
 {
-#ifdef QTOPIA_PHONE
     if (composer().isEmpty())
-        setComposer( ComposerFactory::defaultInterface() );
+        setComposer( QMailComposerFactory::defaultKey() );
+
     widgetStack->setCurrentWidget(m_composerWidget);
-    setComposerFocus();
-    QTimer::singleShot( 0, this, SLOT(updateUI()) );
-#endif
+
+    QString task;
+    if ((_action == Create) || (_action == Forward)) {
+        task = (_action == Create ? tr("Create") : tr("Forward"));
+        task += " " + m_composerInterface->displayName();
+    } else if (_action == Reply) {
+        task = tr("Reply");
+    } else if (_action == ReplyToAll) {
+        task = tr("Reply to all");
+    }
+
+    m_mainWindow->setWindowTitle(task);
+    m_previousAction->setVisible(false);
+
+    // Reset the action to default - create
+    _action = Create;
 }
 
-bool WriteMail::hasRecipients() const // Also check from field is not empty
+bool WriteMail::readyToSend() const // Also check from field is not empty
 {
-#ifdef QTOPIA_PHONE
+    // Not ready to send if there's no 'from' address...
     if ((m_composerInterface
-         && m_composerInterface->type() == MailMessage::Email)
+         && m_composerInterface->messageType() == QMailMessage::Email)
          && m_detailsPage->from().trimmed().isEmpty() )
         return false;
-    return !m_detailsPage->to().trimmed().isEmpty();
-#else
-    if (m_composerInterface->from().trimmed().isEmpty())
-        return false;
-    return !m_composerInterface->to().trimmed().isEmpty()
-        || !m_composerInterface->cc().trimmed().isEmpty()
-        || !m_composerInterface->bcc().trimmed().isEmpty();
-#endif
+
+    return ( !m_detailsPage->to().trimmed().isEmpty()
+             || !m_detailsPage->cc().trimmed().isEmpty()
+             || !m_detailsPage->bcc().trimmed().isEmpty() );
 }
 
 bool WriteMail::isComplete() const
 {
-    return changed() && hasRecipients();
+    return changed() && readyToSend();
 }
 
-/*  QtMailWindow calls this method when it receives a close event, meaning the user
-    just closed the window.  For the PDA Autosave is called, where the emailclient
-    needs to determine what to do ( add to draft or outbox)
-*/
-bool WriteMail::tryAccept()
+bool WriteMail::saveChangesOnRequest()
 {
-    int r = -1;
     // ideally, you'd also check to see if the message is the same as it was
     // when we started working on it
-    if (hasMessageChanged) {
-        r = QMessageBox::warning( this, tr("Save to drafts"),
-                                  "<qt>" + tr("Do you wish to save the message"
-                                              " to drafts?") + "</qt>",
-                                  tr("Yes"), tr("No"),
-                                  0, 0, 1 );
-    }
-    if (!r)
+    if (hasMessageChanged && 
+        QMessageBox::warning(this, 
+                             tr("Save to drafts"),
+                             tr("Do you wish to save the message to drafts?"),
+                             QMessageBox::Yes, 
+                             QMessageBox::No) == QMessageBox::Yes) {
         draft();
-    else // empty or user chose not to save
+    } else {
         discard();
+    }
+
     return true;
 }
 
 void WriteMail::previousStage()
 {
-#ifdef QTOPIA_PHONE
     QWidget *curPage = widgetStack->currentWidget();
     if (curPage == m_composerWidget)
         return; // no previous
@@ -310,7 +350,6 @@ void WriteMail::previousStage()
         composeStage();
     else
         qWarning("BUG: WriteMail::nextStage() called in unknown stage.");
-#endif
 }
 
 bool WriteMail::buildMail()
@@ -323,28 +362,35 @@ bool WriteMail::buildMail()
       }
     */
 
-    m_composerInterface->getContent( mail );
+    //retain the old mail id since it may have been a draft
+    
+    QMailId oglId = mail.id();
+    
+    mail = m_composerInterface->message();
+    
+    mail.setId(oglId);
 
-#ifdef QTOPIA_PHONE
     m_detailsPage->getDetails( mail );
-#endif
 
-    mail.setDateTime( QDateTime::currentDateTime() );
+    mail.setDate( QMailTimeStamp::currentDateTime() );
 
     //FIXME : DetailsPage::getDetails should do this, but needs account list
-    QString fromName, fromEmail = mail.from();
+    QString fromName, fromEmail;
+    QMailAddress fromAddress = mail.from();
     QListIterator<MailAccount*> itAccount = accountList->accountIterator();
     while (itAccount.hasNext()) {
         MailAccount* current = itAccount.next();
-        if (current->emailAddress() == fromEmail ||
-            current->userName().toLower() == fromEmail.toLower() ) {
+        if (current->emailAddress() == fromAddress.address() ||
+            current->userName().toLower() == fromAddress.name().toLower() ) {
             fromName = current->userName();
             fromEmail = current->emailAddress();
             break;
         }
     }
-    mail.setFrom( createFrom( fromName, fromEmail ) );
-    mail.setStatus(EFlag_Outgoing | EFlag_Downloaded, true);
+    mail.setFrom( QMailAddress(fromName, fromEmail) );
+    mail.setStatus( QMailMessage::Outgoing, true);
+    mail.setStatus( QMailMessage::Downloaded, true);
+    mail.setStatus( QMailMessage::Read,true);
 
     return true;
 }
@@ -353,7 +399,7 @@ bool WriteMail::buildMail()
     the mail was changed or not */
 bool WriteMail::changed() const
 {
-    if (!m_composerInterface || !m_composerInterface->hasContent())
+    if (!m_composerInterface || m_composerInterface->isEmpty())
         return false;
 
     return true;
@@ -409,275 +455,231 @@ void WriteMail::attach( const QString &fileName )
 }
 
 // type 1 = reply, 2 = reply all, 3 = forward
-void WriteMail::reply(const Email &replyMail, int type)
+void WriteMail::reply(const QMailMessage& replyMail, int type)
 {
-    int pos;
+    const QString fwdIndicator(tr("Fwd"));
+    const QString shortFwdIndicator(tr("Fw", "2 letter short version of Fwd for forward"));
+    const QString replyIndicator(tr("Re"));
 
-    // work out the kind of mail to response
-    // type of reply depends on the type of message
-    // a reply to an mms is just a new mms message with the sender as recipient
-    // a reply to an sms is a new sms message with the sender as recipient
+    const QMailAddress replyAddress(replyMail.from());
+    const QString subject = replyMail.subject().toLower();
 
-    mail = replyMail;
-    QUuid id;
-    mail.setUuid( id );
-    QString fromEmail = mail.fromEmail();
-    QString fromName = mail.fromName();
-    QString fromBody = mail.plainTextBody();
-    QStringList fileNames;
-
-    if ((replyMail.type() ==  MailMessage::Email) &&
-        (type == 3)) {// forwarded email
-        for ( int i = 0; i < (int)mail.messagePartCount(); i++ ) {
-            MailMessagePart &part = mail.messagePartAt( i );
-            mail.validateFile( part );
-            fileNames.append( part.storedFilename() );
-        }
-    }
-
-#ifdef QTOPIA_PHONE
-    newMail(ComposerFactory::defaultInterface( replyMail ));
-#else
-    newMail();
-#endif
-
-#ifdef QTOPIA_PHONE
-    if(replyMail.type() == MailMessage::SMS) {
-        // SMS
-        if (!fromEmail.isEmpty()) {
-            QString from = fromEmail;
-            if (from.right( 4 ) == "@sms") {
-                int len = replyMail.fromEmail().length();
-                from = replyMail.fromEmail().left( len - 4 );
-            }
-            m_detailsPage->setTo( from );
-        }
-    } else if (replyMail.type() == MailMessage::MMS) {
-        // MMS
-        if (type == 3) {
-            if (replyMail.subject().left(4).toLower() != "fwd:"
-                && replyMail.subject().left(4).toLower() != "fw:") {
-                m_detailsPage->setSubject("Fwd: " + replyMail.subject() );
-            } else {
-                m_detailsPage->setSubject( replyMail.subject() );
-            }
-            m_composerInterface->setMailMessage( mail );
-            detailsStage();
-        } else {
-            m_detailsPage->setTo(replyMail.fromEmail());
-            if (replyMail.subject().left(3).toLower() != "re:")
-                m_detailsPage->setSubject("Re: " + replyMail.subject());
-            else
-                m_detailsPage->setSubject(replyMail.subject());
-            if (type == 2) {
-                QStringList all = replyMail.to();
-                all += replyMail.cc();
-
-                QString cc = all.join(", ");
-                checkOutlookString( cc );
-
-                m_detailsPage->setCc( cc );
-            }
-        }
-    } else
-#endif
-    if( replyMail.type() ==  MailMessage::Email ) {
-        // EMAIL
-        if ( type == 3 ) {
-            if (replyMail.subject().left(4).toLower() != "fwd:") {
-#ifdef QTOPIA_PHONE
-                m_detailsPage->setSubject("Fwd: " + replyMail.subject() );
-#else
-                m_composerInterface->setSubject("Fwd: " + replyMail.subject() );
-#endif
-            } else {
-#ifdef QTOPIA_PHONE
-                m_detailsPage->setSubject( replyMail.subject() );
-#else
-                m_composerInterface->setSubject( replyMail.subject() );
-#endif
-            }
-
-            // Restore attachments
-            for ( int i = 0; i < fileNames.count(); i++ )
-                attach( fileNames[i] );
-        } else {
-            if (replyMail.subject().left(3).toLower() != "re:") {
-#ifdef QTOPIA_PHONE
-                m_detailsPage->setSubject( "Re: " + replyMail.subject() );
-#else
-                m_composerInterface->setSubject( "Re: " + replyMail.subject() );
-#endif
-            } else {
-#ifdef QTOPIA_PHONE
-                m_detailsPage->setSubject( replyMail.subject() );
-#else
-                m_composerInterface->setSubject( replyMail.subject() );
-#endif
-            }
-
-            mail.removeAllMessageParts();
-
-            QString str;
-
-            if ( replyMail.replyTo().isEmpty() ) {
-                str = replyMail.fromEmail();
-            } else {
-                str = replyMail.replyTo();
-                mail.setReplyTo( "" );
-            }
-
-            checkOutlookString(str);
-#ifdef QTOPIA_PHONE
-            m_detailsPage->setTo( str );
-#else
-            m_composerInterface->setTo( str );
-#endif
-
-            mail.setInReplyTo( mail.messageId() );
-
-            if ( type == 2 ) {  //reply all
-                QStringList all = replyMail.to();
-                all += replyMail.cc();
-
-                QString cc = all.join(", ");
-                checkOutlookString( cc );
-
-#ifdef QTOPIA_PHONE
-                m_detailsPage->setCc( cc );
-#else
-                m_composerInterface->setCc( cc );
-#endif
-            }
-        }
-        QString str;
-        if (type == 3) {
-            str = "\n------------ Forwarded Message ------------\n";
-            str += "Date: " + replyMail.dateString() + "\n";
-            str += "From: " + replyMail.fromName() + "<"
-                   + replyMail.fromEmail() + ">\n";
-            str += "To: " + replyMail.to().join(", ") + "\n";
-            str += "Subject: " + replyMail.subject() + "\n";
-
-            str += "\n" + replyMail.plainTextBody();
-        } else {
-            if (!replyMail.dateTime().isNull()) {
-                str = "\nOn " + QTimeString::localYMDHMS(replyMail.dateTime(), QTimeString::Long) + ", " + fromName + " wrote:\n> ";
-            } else {
-                str = "\nOn " + replyMail.dateString() + ", "
-                      + replyMail.fromName() + " wrote:\n> ";
-            }
-
-            pos = str.length();
-            str += replyMail.plainTextBody();
-
-            while (pos != -1) {
-                pos = str.indexOf('\n', pos);
-                if (pos != -1)
-                    str.insert(++pos, "> ");
-            }
-        }
-
-        mail.setPlainTextBody( str );
-        mail.setFrom("");
-#ifdef QTOPIA_PHONE
-        if (m_composerInterface->inherits( "TextComposerInterface" )) {
-            TextComposerInterface *iface;
-            iface = (TextComposerInterface *)m_composerInterface;
-            iface->setText( fromBody );
-        } else {
-            qWarning("Don't know how to set text of unknown email "
-                     "composer type.");
-        }
-#else
-        m_composerInterface->setText( fromBody );
-#endif
-    }
+    QString toAddress;
+    QString fromAddress;
+    QString ccAddress;
+    QString subjectText;
 
     //accountId stored in mail, but email address used for selecting
     //account, so loop through and find the matching account
     QListIterator<MailAccount*> it = accountList->accountIterator();
     while (it.hasNext()) {
         MailAccount* current = it.next();
-        if (current->id() == mail.fromAccount()) {
-#ifdef QTOPIA_PHONE
-        m_detailsPage->setFrom( current->emailAddress() );
-#else
-        m_composerInterface->setFrom( current->emailAddress() );
-#endif
-        break;
+        if (current->id() == replyMail.fromAccount()) {
+            fromAddress = current->emailAddress();
+            break;
         }
     }
+
+    // work out the kind of mail to response
+    // type of reply depends on the type of message
+    // a reply to an mms is just a new mms message with the sender as recipient
+    // a reply to an sms is a new sms message with the sender as recipient
+
+    newMail(QMailComposerFactory::defaultKey( replyMail.messageType() ));
+    if (composer().isEmpty())
+	return;
+
+    if (replyMail.messageType() == QMailMessage::Sms) {
+        // SMS
+        QString from = replyAddress.address();
+        if (!from.isEmpty()) {
+            toAddress = from;
+        }
+    } else if (replyMail.messageType() == QMailMessage::Mms) {
+        // MMS
+        if (type == 3) {
+            // Copy the existing mail
+            mail = replyMail;
+            mail.setId(QMailId());
+
+            if ((subject.left(fwdIndicator.length() + 1) == (fwdIndicator.toLower() + ":")) ||
+                (subject.left(shortFwdIndicator.length() + 1) == (shortFwdIndicator.toLower() + ":"))) {
+                subjectText = replyMail.subject();
+            } else {
+                subjectText = fwdIndicator + ": " + replyMail.subject();
+            }
+            m_composerInterface->setMessage( mail );
+
+            QTimer::singleShot(0, this, SLOT(detailsStage()));
+        } else {
+            if (subject.left(replyIndicator.length() + 1) == (replyIndicator.toLower() + ":")) {
+                subjectText = replyMail.subject();
+            } else {
+                subjectText = replyIndicator + ": " + replyMail.subject();
+            }
+            toAddress = replyAddress.address();
+        }
+    } else if( replyMail.messageType() ==  QMailMessage::Email ) {
+        // EMAIL
+        QString originalText;
+        int textPart = -1;
+
+        // Find the body of this message
+        if ( replyMail.hasBody() ) {
+            originalText = replyMail.body().data();
+        } else {
+            for ( uint i = 0; i < replyMail.partCount(); ++i ) {
+                const QMailMessagePart &part = replyMail.partAt(i);
+
+                if (part.contentType().type().toLower() == "text") {
+                    // This is the first text part, we will use as the forwarded text body
+                    originalText = part.body().data();
+                    textPart = i;
+                    break;
+                }
+            }
+        }
+
+        if ( type == 3 ) {
+            // Copy the existing mail
+            mail = replyMail;
+            mail.setId(QMailId());
+
+            if ((subject.left(fwdIndicator.length() + 1) == (fwdIndicator.toLower() + ":")) ||
+                (subject.left(shortFwdIndicator.length() + 1) == (shortFwdIndicator.toLower() + ":"))) {
+                subjectText = replyMail.subject();
+            } else {
+                subjectText = fwdIndicator + ": " + replyMail.subject();
+            }
+        } else {
+            if (subject.left(replyIndicator.length() + 1) == (replyIndicator.toLower() + ":")) {
+                subjectText = replyMail.subject();
+            } else {
+                subjectText = replyIndicator + ": " + replyMail.subject();
+            }
+
+            QString str;
+            if ( replyMail.replyTo().isNull() ) {
+                str = replyAddress.address();
+            } else {
+                str = replyMail.replyTo().toString();
+                mail.setReplyTo( QMailAddress() );
+            }
+
+            checkOutlookString(str);
+            toAddress = str;
+
+            QString messageId = mail.headerFieldText( "message-id" ).trimmed();
+            if ( !messageId.isEmpty() )
+                mail.setInReplyTo( messageId );
+        }
+
+        QString bodyText;
+        if (type == 3) {
+            bodyText = "\n------------ Forwarded Message ------------\n";
+            bodyText += "Date: " + replyMail.date().toString() + "\n";
+            bodyText += "From: " + replyAddress.toString() + "\n";
+            bodyText += "To: " + QMailAddress::toStringList(replyMail.to()).join(", ") + "\n";
+            bodyText += "Subject: " + replyMail.subject() + "\n";
+            bodyText += "\n" + originalText;
+        } else {
+            QDateTime dateTime = replyMail.date().toLocalTime();
+            bodyText = "\nOn " + QTimeString::localYMDHMS(dateTime, QTimeString::Long) + ", ";
+            bodyText += replyAddress.name() + " wrote:\n> ";
+
+            int pos = bodyText.length();
+            bodyText += originalText;
+            while ((pos = bodyText.indexOf('\n', pos)) != -1)
+                bodyText.insert(++pos, "> ");
+
+            bodyText.append("\n");
+        }
+
+        // Whatever text subtype it was before, it's now plain...
+        QMailMessageContentType contentType("text/plain; charset=UTF-8");
+
+        if (mail.partCount() == 0) {
+            // Set the modified text as the body
+            mail.setBody(QMailMessageBody::fromData(bodyText, contentType, QMailMessageBody::Base64));
+        } else if (textPart != -1) {
+            // Replace the original text with our modified version
+            QMailMessagePart& part = mail.partAt(textPart);
+            part.setBody(QMailMessageBody::fromData(bodyText, contentType, QMailMessageBody::Base64));
+        }
+
+        if (type == 2) {
+            // Set the reply-to-all address list
+            QList<QMailAddress> all;
+            foreach (const QMailAddress& addr, replyMail.to() + replyMail.cc())
+                if ((addr.address() != fromAddress) && (addr.address() != toAddress))
+                    all.append(addr);
+
+            QString cc = QMailAddress::toStringList(all).join(", ");
+            checkOutlookString( cc );
+            ccAddress = cc;
+        }
+
+        mail.removeHeaderField("From");
+        m_composerInterface->setMessage( mail );
+    }
+
+    if (!toAddress.isEmpty())
+        m_detailsPage->setTo( toAddress );
+    if (!fromAddress.isEmpty())
+        m_detailsPage->setFrom( fromAddress );
+    if (!ccAddress.isEmpty())
+        m_detailsPage->setCc( ccAddress );
+    if (!subjectText.isEmpty())
+        m_detailsPage->setSubject( subjectText );
 
     // ugh. we need to do this everywhere
     hasMessageChanged = false;
 }
 
-void WriteMail::modify(Email *previousMail)
+void WriteMail::modify(const QMailMessage& previousMessage)
 {
     QString recipients = "";
 
-#ifdef QTOPIA_PHONE
-    newMail( ComposerFactory::defaultInterface( previousMail->type() ));
-#else
-    newMail();
-#endif
-    mail.setUuid( previousMail->uuid() );
-    mail.setFrom( previousMail->from() );
+    QString key( QMailComposerFactory::defaultKey( previousMessage.messageType() ) );
+    if (key.isEmpty()) {
+        qWarning() << "Cannot edit message of type:" << previousMessage.messageType();
+    } else {
+        newMail( QMailComposerFactory::defaultKey( previousMessage.messageType() ));
+        if (composer().isEmpty())
+            return;
+        
+        mail.setId( previousMessage.id() );
+        mail.setFrom( previousMessage.from() );
 
-#ifdef QTOPIA_PHONE
-    m_detailsPage->setFrom( previousMail->fromEmail() );
-    m_detailsPage->setSubject( previousMail->subject() );
-    m_composerInterface->setMailMessage( *previousMail );
-    m_detailsPage->setTo( previousMail->to().join(", ") );
-    m_detailsPage->setCc( previousMail->cc().join(", ") );
-    m_detailsPage->setBcc( previousMail->bcc().join(", ") );
-#else
-    m_composerInterface->setFrom( previousMail->fromEmail() );
-    m_composerInterface->setSubject( previousMail->subject() );
-    m_composerInterface->setText( previousMail->plainTextBody() );
-    m_composerInterface->setTo( previousMail->to().join(", ") );
-    m_composerInterface->setCc( previousMail->cc().join(", ") );
-    m_composerInterface->setBcc( previousMail->bcc().join(", ") );
+        QMailAddress fromAddress( previousMessage.from() );
+        m_detailsPage->setFrom( fromAddress.address() );
+        m_detailsPage->setSubject( previousMessage.subject() );
+        m_composerInterface->setMessage( previousMessage );
+        m_detailsPage->setTo( QMailAddress::toStringList(previousMessage.to()).join(", ") );
+        m_detailsPage->setCc( QMailAddress::toStringList(previousMessage.cc()).join(", ") );
+        m_detailsPage->setBcc( QMailAddress::toStringList(previousMessage.bcc()).join(", ") );
 
-    // Restore attachments
-    for ( int i = 0; i < (int)previousMail->messagePartCount(); i++ ) {
-      MailMessagePart &part = previousMail->messagePartAt( i );
-      previousMail->validateFile( part );
-      attach( part.storedFilename() );
+        // ugh. we need to do this everywhere
+        hasMessageChanged = false;
     }
-
-#endif
-
-    // ugh. we need to do this everywhere
-    hasMessageChanged = false;
 }
 
 void WriteMail::setRecipient(const QString &recipient)
 {
-#ifdef QTOPIA_PHONE
-    m_detailsPage->setTo( recipient );
-#else
-    m_composerInterface->setTo( recipient );
-#endif
+    if (m_detailsPage ) {
+	m_detailsPage->setTo( recipient );
+    } else {
+        qWarning("WriteMail::setRecipient called with no composer interface present.");
+    }
 }
 
-void WriteMail::setBody(const QString &text)
+void WriteMail::setBody(const QString &text, const QString &type)
 {
-#ifdef QTOPIA_PHONE
     if (!m_composerInterface)
         return;
-    if (m_composerInterface->type() == MailMessage::MMS)
+    if (m_composerInterface->messageType() == QMailMessage::Mms)
         return;
-    if (m_composerInterface->inherits( "TextComposerInterface" )) {
-        TextComposerInterface *iface = (TextComposerInterface *)m_composerInterface;
-        iface->setText( text );
-    } else {
-        qWarning("Can't set body of mail with unknown composer interface.");
-    }
-#else
-    m_composerInterface->setText( text );
-#endif
+    m_composerInterface->setText( text, type );
 }
 
 bool WriteMail::hasContent()
@@ -686,10 +688,10 @@ bool WriteMail::hasContent()
     // be discarded without user confirmation.
     if (!m_composerInterface)
         return true;
-    return m_composerInterface->hasContent();
+    return !m_composerInterface->isEmpty();
 }
 
-#ifdef QTOPIA_PHONE
+#ifndef QTOPIA_NO_SMS
 void WriteMail::setSmsRecipient(const QString &recipient)
 {
   m_detailsPage->setTo( recipient );
@@ -700,122 +702,64 @@ void WriteMail::setRecipients(const QString &emails, const QString & numbers)
 {
     QString to;
     to += emails;
-#ifdef QTOPIA_PHONE
     to = to.trimmed();
     if (to.right( 1 ) != "," && !numbers.isEmpty()
         && !numbers.trimmed().startsWith( "," ))
         to += ", ";
     to +=  numbers;
-    m_detailsPage->setTo( to );
-#else
-    Q_UNUSED(numbers);
-    m_composerInterface->setTo( to );
-#endif
+    if (m_detailsPage ) {
+	m_detailsPage->setTo( to );
+    } else {
+        qWarning("WriteMail::setRecipients called with no composer interface present.");
+    }
 }
 
 void WriteMail::reset()
 {
-    mail = MailMessage();
-    mail.removeAllMessageParts();
-    mail.setAllStatusFields(0);
-    mail.setServerUid("");
-    mail.setMessageId("");
-    mail.setInReplyTo("");
-    mail.setMultipartRelated( false );
-    QUuid id;
-    mail.setUuid( id );
-    mail.setAllStatusFields(0);
-    mail.setTo( QStringList() );
-    mail.setCc( QStringList() );
-    mail.setBcc( QStringList() );
+    mail = QMailMessage();
 
-#ifdef QTOPIA_PHONE
-    if (m_detailsPage)
-        m_detailsPage->clear();
-#else
-    m_composerInterface->clear();
-#endif
-
-#ifdef QTOPIA_PHONE
     if (m_composerInterface) {
+        // Remove any associated widgets
+        if (m_composerWidget) {
+            widgetStack->removeWidget(m_composerWidget);
+            m_composerWidget = 0;
+        }
+
+        // Remove and delete any existing details page
+        if (m_detailsPage) {
+            widgetStack->removeWidget(m_detailsPage);
+            m_detailsPage->deleteLater();
+            m_detailsPage = 0;
+        }
+
         m_composerInterface->deleteLater();
         m_composerInterface = 0;
-        m_composerWidget = 0;
     }
-#endif
 
     hasMessageChanged = false;
 }
 
-void WriteMail::newMail(const QString& cmpsr, bool detailsOnly)
+void WriteMail::newMail(const QString& key, bool detailsOnly)
 {
-#ifndef QTOPIA_PHONE
-    Q_UNUSED(numbers);
-#endif
     reset();
+
     _detailsOnly = detailsOnly;
 
-#ifdef QTOPIA_PHONE
-    QString comp = cmpsr;
-    if (comp.isNull()) {
-        if (!selectComposer()) {
-            setComposer(ComposerFactory::defaultInterface());
-            QTimer::singleShot(0,this,SLOT(discard()));
-            return;
-        }
+    if (key.isEmpty()) {
+        _composerList->setSelected(composer());
+
+        m_mainWindow->setWindowTitle( tr("Select type") );
+        _selectComposer->setVisible(true);
+        widgetStack->setCurrentWidget(_selectComposer);
     } else {
-        setComposer( comp );
+        composerSelected(key);
     }
-    if( m_composerInterface )
-        m_detailsPage->setType( m_composerInterface->type() );
-    if(_detailsOnly)
-        detailsStage();
-    else
-        composeStage();
-//     TODO  : attachments
-//     addAtt->clear();
-    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Next);
-#endif
-}
-
-//updates actions, labels, captions based on the current stage
-void WriteMail::updateUI()
-{
-#ifdef QTOPIA_PHONE
-    QWidget *curPage = widgetStack->currentWidget();
-    m_previousAction->setVisible( curPage != m_composerWidget && !_detailsOnly);
-
-    if (curPage == m_detailsPage)
-      m_mainWindow->setWindowTitle( m_composerInterface->nickName() + " " + tr("Details") );
-    else if (curPage == m_composerWidget)
-      m_mainWindow->setWindowTitle( tr("Create") + " " + m_composerInterface->nickName() );
-    else
-      m_mainWindow->setWindowTitle( tr("Write Message") );
-
-    if (curPage == m_detailsPage)
-        if( hasRecipients() )
-            QSoftMenuBar::setLabel( this, Qt::Key_Back, "qtmail/enqueue", tr("Send") );
-        else
-            QSoftMenuBar::setLabel( this, Qt::Key_Back, "qtmail/draft", tr("Draft") );
-    else if(curPage == m_composerWidget && m_composerInterface
-            && !m_composerInterface->hasContent() )
-        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Cancel);
-    else
-        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Next);
-#endif
 }
 
 void WriteMail::discard()
 {
-#ifdef QTOPIA_PHONE
-    // The follow if clause fixes a crash for the case when an email is being
-    // composed and while the textwidget has focus cancel is selected from
-    // the context menu
-    if (m_composerInterface)
-        m_composerInterface->widget()->hide();
-#endif
-
     emit discardMail();
+
     // Must delete the composer widget after emitting the discardMail signal
     reset();
 }
@@ -824,156 +768,168 @@ void WriteMail::enqueue()
 {
     if (!isComplete()) {
         if (!changed()) {
-            QString title = tr("Unmodified");
-            QString temp = tr("<qt>The unmodified message has been discarded "
-                              "without being sent</qt>" );
             QMessageBox::warning(qApp->activeWindow(),
                                  tr("Incomplete message"),
-                                 temp,
+                                 tr("The unmodified message has been discarded without being sent"),
                                  tr("OK") );
             discard();
         } else {
-            QString title;
             QString temp;
-            title = tr("No recipients" );
-            temp = tr("<qt>The message could not be sent as no recipients "
-                      "have been entered. The message has been saved in "
-                      "the drafts folder</qt>" );
             QMessageBox::warning(qApp->activeWindow(),
-                                 tr("Incomplete message"),
-                                 temp,
+                                 tr("Incomplete message"), 
+                                 tr("The message could not be sent as no recipients have been entered. The message has been saved in the Drafts folder"),
                                  tr("OK") );
             draft();
         }
         return;
     }
 
-    QValueSpaceItem item("/UI/Profile/PlaneMode");
-    if (item.value().toBool()) {
-        // Cannot send right now, in plane mode!
-        QMessageBox::information(this, tr("Airplane Safe Mode"),
-                                 tr("<qt>Cannot send message while "
-                                    "in Airplane Safe Mode.</qt>"));
-        return;
+    if (buildMail())
+    {
+        if(largeAttachments())
+        {
+            //prompt for action
+            QMessageBox::StandardButton result;
+            result = QMessageBox::question(qApp->activeWindow(),
+                                           tr("Large attachments"),
+                                           tr("The message has large attachments. Continue?"),
+                                           QMessageBox::Yes | QMessageBox::No);
+            if(result == QMessageBox::No)
+            {
+                draft();
+                QMessageBox::warning(qApp->activeWindow(),
+                                     tr("Message saved"), 
+                                     tr("The message has been saved in the Drafts folder"),
+                                     tr("OK") );
+
+                return;
+            }
+        }
+        emit enqueueMail(mail);
     }
 
-    if (buildMail())
-        emit enqueueMail(mail);
     // Prevent double deletion of composer textedit that leads to crash on exit
     reset();
 }
 
-void WriteMail::draft()
+bool WriteMail::draft()
 {
-  if (!changed()) {
-      discard();
-      return;
-  }
-  if (buildMail())
-      emit saveAsDraft( mail );
-}
+    bool result(false);
 
-void WriteMail::keyPressEvent(QKeyEvent *e)
-{
-#ifdef QTOPIA_PHONE
-    if (e->key() == Qt::Key_Back || e->key() == Qt::Key_Yes) {
-        keyEventAccepted = false;
-        /*
-          don't call nextStage directly here, because it
-          might delete the composer that this key press
-          originated from.
-        */
-        QTimer::singleShot( 0, this, SLOT(nextStage()) );
-        e->accept();
-        if (!Qtopia::mousePreferred())
-            keyEventAccepted = true;
-    } else
-#endif
-        QMainWindow::keyPressEvent( e );
-}
-
-bool WriteMail::selectComposer()
-{
-#ifdef QTOPIA_PHONE
-    QDialog *dlg = new QDialog( this);
-    dlg->setObjectName("selectComposer");
-    dlg->setWindowTitle( tr("Select Type") );
-    QtopiaApplication::setMenuLike( dlg, true );
-    QVBoxLayout *l = new QVBoxLayout( dlg );
-    SelectListWidget *lb = new SelectListWidget( dlg );
-    lb->setSpacing(2);
-    lb->setFrameStyle(QFrame::NoFrame);
-    l->addWidget( lb );
-    QList<QString> interfaces = ComposerFactory::interfaces();
-    QList<QString>::ConstIterator it;
-    for( it = interfaces.begin() ; it != interfaces.end() ; ++it ) {
-        // list is order dependent
-        QIcon icon = ComposerFactory::displayIcon( *it );
-        QListWidgetItem* lwItem;
-        lwItem = new QListWidgetItem(ComposerFactory::fullName( *it ), lb);
-        lwItem->setIcon(icon);
-        if( *it == composer() )
-            lb->setCurrentRow( lb->count() -1 );
+    if (changed()) {
+        if (!buildMail()) {
+            qWarning() << "draft() - Unable to buildMail for saveAsDraft!";
+        } else {
+            emit saveAsDraft( mail );
+        }
+        result = true;
     }
-    if (lb->currentRow() == -1)
-        lb->setCurrentRow(0);
-    connect( lb, SIGNAL(itemActivated(QListWidgetItem*)), dlg, SLOT(accept()));
-    dlg->showMaximized();
-    int result = QtopiaApplication::execDialog( dlg ) ;
-    bool ok = result == QDialog::Accepted && lb->currentRow() != -1;
-    // The dialog always seems to be accepted even when Key_Back is pressed
-    // hence explicitly check to see if keyBack was pressed and if so
-    // treat the dialog as rejected.
-    ok &= !lb->keyBackPressed();
-    if (ok) {
-        QString inf = interfaces[lb->currentRow()];
-        setComposer( inf );
-    }
-    delete dlg;
-    return ok;
-#else
-    return false;
-#endif
+
+    // Since the existing details page may have hijacked the focus, we need to reset
+    reset();
+
+    return result;
 }
 
-#ifdef QTOPIA_PHONE
-
-void WriteMail::setComposer( const QString &id )
+void WriteMail::selectionCanceled()
 {
-    if (m_composerInterface && m_composerInterface->id() == id)
+    emit discardMail();
+
+    _selectComposer->setVisible(false);
+}
+
+void WriteMail::composerSelected(const QString &key)
+{
+    // We need to ensure that we can send for this composer
+    QMailMessage::MessageType selectedType = QMailComposerFactory::messageType(key);
+
+    bool sendAccount(false);
+    QListIterator<MailAccount*> itAccount = accountList->accountIterator();
+    while (itAccount.hasNext() && !sendAccount) {
+        MailAccount* current = itAccount.next();
+
+        sendAccount |= ((current->accountType() == MailAccount::SMS && selectedType == QMailMessage::Sms) ||
+                        (current->accountType() == MailAccount::MMS && selectedType == QMailMessage::Mms));
+
+        if (!sendAccount && selectedType == QMailMessage::Email) {
+            if (current->accountType() == MailAccount::POP ||
+                current->accountType() == MailAccount::IMAP) {
+                // This account can (attempt to) send if it has SMTP details configured 
+                sendAccount = !current->emailAddress().isEmpty();
+            }
+        }
+    }
+
+    if (!sendAccount) {
+        selectionCanceled();
+
+        emit noSendAccount(selectedType);
+    } else {
+        setComposer(key);
+
+        if(_detailsOnly) {
+            detailsStage();
+        } else {
+            composeStage();
+            QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Next);
+        }
+
+        _selectComposer->setVisible(false);
+    }
+}
+
+void WriteMail::setComposer( const QString &key )
+{
+    if (m_composerInterface && m_composerInterface->key() == key)
         return;
+
     if (m_composerInterface) {
+        // Remove any associated widgets
+        if (m_composerWidget) {
+            widgetStack->removeWidget(m_composerWidget);
+            m_composerWidget = 0;
+        }
+
+        // Remove and delete any existing details page
+        if (m_detailsPage) {
+            widgetStack->removeWidget(m_detailsPage);
+            delete m_detailsPage;
+            m_detailsPage = 0;
+        }
+
         delete m_composerInterface;
         m_composerInterface = 0;
     }
-    if (m_composerWidget)
-        widgetStack->removeWidget(m_composerWidget);
-    m_composerWidget = 0;
-    m_composerInterface = ComposerFactory::create( id, this );
+
+    m_composerInterface = QMailComposerFactory::create( key, this );
     if (!m_composerInterface)
         return;
-    m_composerWidget = m_composerInterface->widget();
-    widgetStack->addWidget(m_composerWidget);
-    connect( m_composerInterface, SIGNAL(contentChanged()),
-             this, SLOT(updateUI()) );
-    connect( m_composerInterface, SIGNAL(contentChanged()),
-             this, SLOT(messageChanged()) );
 
-    // add standard actions to context menu for this composer
-    QMenu* menu = QSoftMenuBar::menuFor(m_composerInterface->widget());
+    m_composerWidget = m_composerInterface->widget();
+    connect( m_composerInterface, SIGNAL(contentChanged()), this, SLOT(messageChanged()) );
+    connect( m_composerInterface, SIGNAL(finished()), this, SLOT(nextStage()), Qt::QueuedConnection );
+
+    // Add standard actions to context menu for this composer (or its focus proxy)
+    QWidget* focusWidget = m_composerWidget;
+    if (focusWidget->focusProxy() != 0)
+        focusWidget = focusWidget->focusProxy();
+
+    QMenu* menu = QSoftMenuBar::menuFor(focusWidget);
+
+    menu->addSeparator();
+    m_composerInterface->addActions(menu);
 
     menu->addSeparator();
     menu->addAction(m_previousAction);
     menu->addAction(m_draftAction);
     menu->addAction(m_cancelAction);
 
-    m_composerInterface->widget()->show();
-    m_composerInterface->widget()->setFocus();
-
     m_detailsPage = new DetailsPage( this );
-    widgetStack->addWidget(m_detailsPage);
-    connect( m_detailsPage, SIGNAL(recipientsChanged()), this, SLOT(updateUI()) );
     m_detailsPage->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
+    m_detailsPage->setType( m_composerInterface->messageType() );
+    connect( m_detailsPage, SIGNAL(changed()), this, SLOT(detailsChanged()));
+    connect( m_detailsPage, SIGNAL(sendMessage()), this, SLOT(sendStage()));
+    connect( m_detailsPage, SIGNAL(cancel()), this, SLOT(saveChangesOnRequest()));
 
     if (accountList)
         m_detailsPage->setFromFields( accountList->emailAccounts() );
@@ -984,37 +940,98 @@ void WriteMail::setComposer( const QString &id )
     detailsMenu->addAction(m_draftAction);
     detailsMenu->addAction(m_cancelAction);
 
-    QTimer::singleShot( 0, this, SLOT(updateUI()) );
-}
+    // Can't save as draft until there has been a change
+    m_draftAction->setVisible(false);
 
-void WriteMail::setComposerFocus()
-{
-    if (m_composerInterface)
-        m_composerWidget->setFocus();
+    widgetStack->addWidget(m_composerWidget);
+    widgetStack->addWidget(m_detailsPage);
 }
 
 QString WriteMail::composer() const
 {
-    QString id;
+    QString key;
     if (m_composerInterface)
-        id = m_composerInterface->id();
-    return id;
+        key = m_composerInterface->key();
+    return key;
 }
 
-bool WriteMail::keyPressAccepted()
+bool WriteMail::canClose()
 {
-    if (keyEventAccepted) {
-        keyEventAccepted = false;
-        return true;
-    }
-    return false;
+    return widgetStack->currentWidget() == m_detailsPage;
 }
-
-#endif // QTOPIA_PHONE
 
 void WriteMail::messageChanged()
 {
     hasMessageChanged = true;
+
+    if ( m_composerInterface ) {
+        m_draftAction->setVisible( !m_composerInterface->isEmpty() );
+
+        if ( m_composerInterface->isEmpty() ) 
+            QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::RevertEdit);
+    }
 }
 
+void WriteMail::detailsChanged()
+{
+    hasMessageChanged = true;
+}
+
+void WriteMail::setAction(ComposeAction action)
+{
+    _action = action;
+}
+
+bool WriteMail::forcedClosure()
+{
+    if (draft()) 
+        return true;
+
+    emit discardMail();
+    return false;
+}
+
+bool WriteMail::largeAttachments() 
+{
+    //determine if the message attachments exceed our
+    //limits
+
+    quint64 totalAttachmentKB = 0;
+
+    for(unsigned int i = 0; i < mail.partCount(); ++i)
+    {
+        const QMailMessagePart part = mail.partAt(i);
+        if(!part.attachmentPath().isEmpty())
+        {
+            QFileInfo fi(part.attachmentPath());
+            if(fi.exists())
+                totalAttachmentKB += fi.size();
+        }
+    }
+
+    totalAttachmentKB /= 1024;
+
+    return (totalAttachmentKB > largeAttachmentsLimit());
+}
+
+uint WriteMail::largeAttachmentsLimit() const
+{
+    static uint limit = 0; 
+
+    if(limit == 0)
+    {
+        const QString key("emailattachlimitkb");
+        QSettings mailconf("Trolltech","qtmail");
+
+        mailconf.beginGroup("qtmailglobal");
+        if (mailconf.contains(key)) 
+            limit = mailconf.value(key).value<uint>();
+        else 
+            limit = 2048; //default to 2MB
+        mailconf.endGroup();
+    }
+    return limit;
+}
+
+#include "writemail.moc"
 

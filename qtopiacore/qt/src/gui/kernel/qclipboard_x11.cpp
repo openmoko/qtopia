@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -136,6 +151,8 @@ public:
 
     void setSource(QMimeData* s)
     {
+        if (s == src)
+            return;
         delete src;
         src = s;
     }
@@ -356,12 +373,20 @@ static bool qt_x11_clipboard_event_filter(void *message, long *)
     return false;
 }
 
+static Bool checkForClipboardEvents(Display *, XEvent *e, XPointer)
+{
+    return ((e->type == SelectionRequest && (e->xselectionrequest.selection == XA_PRIMARY
+                                             || e->xselectionrequest.selection == ATOM(CLIPBOARD)))
+            || (e->type == SelectionClear && (e->xselectionclear.selection == XA_PRIMARY
+                                              || e->xselectionclear.selection == ATOM(CLIPBOARD))));
+}
+
 bool QX11Data::clipboardWaitForEvent(Window win, int type, XEvent *event, int timeout)
 {
     QTime started = QTime::currentTime();
     QTime now = started;
 
-    if (QAbstractEventDispatcher::instance()->inherits("QMotif")) {
+    if (QAbstractEventDispatcher::instance()->inherits("QtMotif")) {
         if (waiting_for_data)
             qFatal("QClipboard: internal error, qt_xclb_wait_for_event recursed");
         waiting_for_data = true;
@@ -409,6 +434,11 @@ bool QX11Data::clipboardWaitForEvent(Window win, int type, XEvent *event, int ti
         do {
             if (XCheckTypedWindowEvent(X11->display,win,type,event))
                 return true;
+
+            // process other clipboard events, since someone is probably requesting data from us
+            XEvent e;
+            if (XCheckIfEvent(X11->display, &e, checkForClipboardEvents, 0))
+                qApp->x11ProcessEvent(&e);
 
             now = QTime::currentTime();
             if ( started > now )                        // crossed midnight
@@ -904,7 +934,7 @@ bool QClipboard::event(QEvent *e)
                     ;
                 } else if (target == xa_timestamp) {
                     if (d->timestamp != CurrentTime) {
-                        XChangeProperty(dpy, req->requestor, property, xa_timestamp, 32,
+                        XChangeProperty(dpy, req->requestor, property, XA_INTEGER, 32,
                                         PropModeReplace, (uchar *) &d->timestamp, 1);
                         ret = property;
                     } else {
@@ -1040,7 +1070,7 @@ bool QClipboardWatcher::hasFormat_sys(const QString &format) const
     return list.contains(format);
 }
 
-QVariant QClipboardWatcher::retrieveData_sys(const QString &fmt, QVariant::Type) const
+QVariant QClipboardWatcher::retrieveData_sys(const QString &fmt, QVariant::Type requestedType) const
 {
     if (fmt.isEmpty() || empty())
         return QByteArray();
@@ -1054,12 +1084,13 @@ QVariant QClipboardWatcher::retrieveData_sys(const QString &fmt, QVariant::Type)
     for (int i = 0; i < size; ++i)
         atoms.append(targets[i]);
 
-    Atom fmtatom = X11->xdndMimeAtomForFormat(fmt, atoms);
+    QByteArray encoding;
+    Atom fmtatom = X11->xdndMimeAtomForFormat(fmt, requestedType, atoms, &encoding);
 
     if (fmtatom == 0)
         return QVariant();
 
-    return X11->xdndMimeConvertToFormat(fmtatom, getDataInFormat(fmtatom), fmt);
+    return X11->xdndMimeConvertToFormat(fmtatom, getDataInFormat(fmtatom), fmt, requestedType, encoding);
 }
 
 QByteArray QClipboardWatcher::getDataInFormat(Atom fmtatom) const
@@ -1235,7 +1266,7 @@ bool qt_check_selection_sentinel()
           and have already emitted dataChanged() as a result of that)
         */
 
-        Window* owners;
+        unsigned char *retval;
         Atom actualType;
         int actualFormat;
         ulong nitems;
@@ -1245,7 +1276,8 @@ bool qt_check_selection_sentinel()
                                QApplication::desktop()->screen(0)->internalWinId(),
                                ATOM(_QT_SELECTION_SENTINEL), 0, 2, False, XA_WINDOW,
                                &actualType, &actualFormat, &nitems,
-                               &bytesLeft, (unsigned char**)&owners) == Success) {
+                               &bytesLeft, &retval) == Success) {
+            Window *owners = (Window *)retval;
             if (actualType == XA_WINDOW && actualFormat == 32 && nitems == 2) {
                 Window win = owner->internalWinId();
                 if (owners[0] == win || owners[1] == win)
@@ -1275,7 +1307,7 @@ bool qt_check_clipboard_sentinel()
 {
     bool doIt = true;
     if (owner) {
-        Window *owners;
+        unsigned char *retval;
         Atom actualType;
         int actualFormat;
         unsigned long nitems, bytesLeft;
@@ -1284,7 +1316,8 @@ bool qt_check_clipboard_sentinel()
                                QApplication::desktop()->screen(0)->internalWinId(),
                                ATOM(_QT_CLIPBOARD_SENTINEL), 0, 2, False, XA_WINDOW,
                                &actualType, &actualFormat, &nitems, &bytesLeft,
-                               (unsigned char **) &owners) == Success) {
+                               &retval) == Success) {
+            Window *owners = (Window *)retval;
             if (actualType == XA_WINDOW && actualFormat == 32 && nitems == 2) {
                 Window win = owner->internalWinId();
                 if (owners[0] == win || owners[1] == win)

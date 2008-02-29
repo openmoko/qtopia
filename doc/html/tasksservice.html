@@ -26,6 +26,7 @@
 <li><div class="fn"/>void <b><a href="tasksservice.html#removeTask">removeTask</a></b> ( const QTask &amp; <i>task</i> )</li>
 <li><div class="fn"/>void <b><a href="tasksservice.html#requestLinks">requestLinks</a></b> ( const QDSActionRequest &amp; <i>request</i> )</li>
 <li><div class="fn"/>void <b><a href="tasksservice.html#showTask">showTask</a></b> ( const QUniqueId &amp; <i>uid</i> )</li>
+<li><div class="fn"/>void <b><a href="tasksservice.html#updateRecurringTasks">updateRecurringTasks</a></b> ( const QDateTime &amp; <i>datetime</i>, int <i>data</i> )</li>
 <li><div class="fn"/>void <b><a href="tasksservice.html#updateTask">updateTask</a></b> ( const QTask &amp; <i>task</i> )</li>
 </ul>
 <ul>
@@ -70,6 +71,10 @@
 <h3 class="fn"><a name="showTask"></a>void TasksService::showTask ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>uid</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Show the task identified by <i>uid</i>.</p>
 <p>This slot corresponds to the QCop service message <tt>Tasks::showTask(QUniqueId)</tt>.</p>
+<h3 class="fn"><a name="updateRecurringTasks"></a>void TasksService::updateRecurringTasks ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>datetime</i>, int <i>data</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Process any recurring task due date changes by calling <a href="qtaskmodel.html#updateRecurringTasks">QTaskModel::updateRecurringTasks</a>().</p>
+<p>This slot corresponds to the QCop service message <tt>Tasks::updateRecurringTasks(QDateTime,int)</tt>.</p>
+<p>This message is usually generated at the appropriate times by the PIM library. The <i>datetime</i> parameter describes when the updates are expected to be required, and the <i>data</i> parameter is currently unused.</p>
 <h3 class="fn"><a name="updateTask"></a>void TasksService::updateTask ( const <a href="qtask.html">QTask</a> &amp; <i>task</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Update an existing <i>task</i>.</p>
 <p>This slot corresponds to the QCop service message <tt>Tasks::updateTask(QTask)</tt>.</p>
@@ -77,6 +82,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

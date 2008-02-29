@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -40,7 +55,7 @@
 #include "qdebug.h"
 
 void qt_format_text(const QFont &fnt, const QRectF &_r,
-                    int tf, const QString& str, QRectF *brect,
+                    int tf, const QTextOption *opt, const QString& str, QRectF *brect,
                     int tabstops, int *, int tabarraylen,
                     QPainter *painter);
 
@@ -92,9 +107,10 @@ void qt_format_text(const QFont &fnt, const QRectF &_r,
 */
 
 const char  *qt_mfhdr_tag = "QPIC"; // header tag
-static const quint16 mfhdr_maj = 8; // major version #
+static const quint16 mfhdr_maj = 9; // major version #
 static const quint16 mfhdr_min = 0; // minor version #
-extern int qt_defaultDpi();
+extern int qt_defaultDpiX();
+extern int qt_defaultDpiY();
 
 /*!
     Constructs an empty picture.
@@ -436,6 +452,35 @@ bool QPicture::play(QPainter *painter)
 }
 
 
+//
+// FakeDevice is used to create fonts with a custom DPI
+//
+class FakeDevice : public QPaintDevice
+{
+public:
+    FakeDevice() { dpi_x = qt_defaultDpiX(); dpi_y = qt_defaultDpiY(); }
+    void setDpiX(int dpi) { dpi_x = dpi; }
+    void setDpiY(int dpi) { dpi_y = dpi; }
+    QPaintEngine *paintEngine() const { return 0; }
+    int metric(PaintDeviceMetric m) const
+    {
+        switch(m) {
+            case PdmPhysicalDpiX:
+            case PdmDpiX:
+                return dpi_x;
+            case PdmPhysicalDpiY:
+            case PdmDpiY:
+                return dpi_y;
+            default:
+                return QPaintDevice::metric(m);
+        }
+    }
+
+private:
+    int dpi_x;
+    int dpi_y;
+};
+
 /*!
   \internal
   Iterates over the internal picture data and draws the picture using
@@ -454,23 +499,28 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
     qint16     i_16, i1_16, i2_16;     // parameters...
     qint8      i_8;
     quint32    ul;
+    double     dbl;
+    bool       bl;
     QByteArray  str1;
     QString     str;
     QPointF     p, p1, p2;
+    QPoint      ip, ip1, ip2;
+    QRect       ir;
     QRectF      r;
     QPolygonF   a;
-    QPolygon    pa;
+    QPolygon    ia;
     QColor      color;
     QFont       font;
     QPen        pen;
     QBrush      brush;
     QRegion     rgn;
-    QMatrix     matrix;
+    QMatrix     wmatrix;
+    QTransform  matrix;
 
-    QMatrix worldMatrix = painter->matrix();
-    worldMatrix.scale(qreal(painter->device()->logicalDpiX()) / qreal(qt_defaultDpi()),
-                      qreal(painter->device()->logicalDpiY()) / qreal(qt_defaultDpi()));
-    painter->setMatrix(worldMatrix);
+    QTransform worldMatrix = painter->transform();
+    worldMatrix.scale(qreal(painter->device()->logicalDpiX()) / qreal(qt_defaultDpiX()),
+                      qreal(painter->device()->logicalDpiY()) / qreal(qt_defaultDpiY()));
+    painter->setTransform(worldMatrix);
 
     while (nrecords-- && !s.atEnd()) {
         s >> c;                 // read cmd
@@ -486,8 +536,13 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
         case QPicturePrivate::PdcNOP:
             break;
         case QPicturePrivate::PdcDrawPoint:
-            s >> p;
-            painter->drawPoint(p);
+            if (d->formatMajor <= 5) {
+                s >> ip;
+                painter->drawPoint(ip);
+            } else {
+                s >> p;
+                painter->drawPoint(p);
+            }
             break;
         case QPicturePrivate::PdcDrawPoints:
 // ## implement me in the picture paint engine
@@ -501,104 +556,206 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
             break;
         }
         case QPicturePrivate::PdcDrawLine:
-            s >> p1 >> p2;
-            painter->drawLine(p1, p2);
+            if (d->formatMajor <= 5) {
+                s >> ip1 >> ip2;
+                painter->drawLine(ip1, ip2);
+            } else {
+                s >> p1 >> p2;
+                painter->drawLine(p1, p2);
+            }
             break;
         case QPicturePrivate::PdcDrawRect:
-            s >> r;
-            painter->drawRect(r);
+            if (d->formatMajor <= 5) {
+                s >> ir;
+                painter->drawRect(ir);
+            } else {
+                s >> r;
+                painter->drawRect(r);
+            }
             break;
         case QPicturePrivate::PdcDrawRoundRect:
-            s >> r >> i1_16 >> i2_16;
-            painter->drawRoundRect(r, i1_16, i2_16);
+            if (d->formatMajor <= 5) {
+                s >> ir >> i1_16 >> i2_16;
+                painter->drawRoundRect(ir, i1_16, i2_16);
+            } else {
+                s >> r >> i1_16 >> i2_16;
+                painter->drawRoundRect(r, i1_16, i2_16);
+            }
             break;
         case QPicturePrivate::PdcDrawEllipse:
-            s >> r;
-            painter->drawEllipse(r);
+            if (d->formatMajor <= 5) {
+                s >> ir;
+                painter->drawEllipse(ir);
+            } else {
+                s >> r;
+                painter->drawEllipse(r);
+            }
             break;
         case QPicturePrivate::PdcDrawArc:
-            s >> r >> i1_16 >> i2_16;
+            if (d->formatMajor <= 5) {
+                s >> ir;
+                r = ir;
+            } else {
+                s >> r;
+            }
+            s >> i1_16 >> i2_16;
             painter->drawArc(r, i1_16, i2_16);
             break;
         case QPicturePrivate::PdcDrawPie:
-            s >> r >> i1_16 >> i2_16;
+            if (d->formatMajor <= 5) {
+                s >> ir;
+                r = ir;
+            } else {
+                s >> r;
+            }
+            s >> i1_16 >> i2_16;
             painter->drawPie(r, i1_16, i2_16);
             break;
         case QPicturePrivate::PdcDrawChord:
-            s >> r >> i1_16 >> i2_16;
+            if (d->formatMajor <= 5) {
+                s >> ir;
+                r = ir;
+            } else {
+                s >> r;
+            }
+            s >> i1_16 >> i2_16;
             painter->drawChord(r, i1_16, i2_16);
             break;
         case QPicturePrivate::PdcDrawLineSegments:
-            s >> pa;
-            painter->drawLines(pa);
-            pa.clear();
+            s >> ia;
+            painter->drawLines(ia);
+            ia.clear();
             break;
         case QPicturePrivate::PdcDrawPolyline:
-            s >> a;
-            painter->drawPolyline(a);
-            a.clear();
+            if (d->formatMajor <= 5) {
+                s >> ia;
+                painter->drawPolyline(ia);
+                ia.clear();
+            } else {
+                s >> a;
+                painter->drawPolyline(a);
+                a.clear();
+            }
             break;
         case QPicturePrivate::PdcDrawPolygon:
-            s >> a >> i_8;
-            painter->drawPolygon(a, i_8 ? Qt::WindingFill : Qt::OddEvenFill);
-            a.clear();
+            if (d->formatMajor <= 5) {
+                s >> ia >> i_8;
+                painter->drawPolygon(ia, i_8 ? Qt::WindingFill : Qt::OddEvenFill);
+                a.clear();
+            } else {
+                s >> a >> i_8;
+                painter->drawPolygon(a, i_8 ? Qt::WindingFill : Qt::OddEvenFill);
+                a.clear();
+            }
             break;
         case QPicturePrivate::PdcDrawCubicBezier: {
-            s >> a;
+            s >> ia;
             QPainterPath path;
-            Q_ASSERT(a.size() == 4);
-            path.moveTo(a.at(0));
-            path.cubicTo(a.at(1), a.at(2), a.at(3));
+            Q_ASSERT(ia.size() == 4);
+            path.moveTo(ia.at(0));
+            path.cubicTo(ia.at(1), ia.at(2), ia.at(3));
             painter->strokePath(path, painter->pen());
             a.clear();
         }
             break;
         case QPicturePrivate::PdcDrawText:
-            s >> p >> str1;
-            painter->drawText(p, str1);
+            s >> ip >> str1;
+            painter->drawText(ip, QString::fromLatin1(str1));
             break;
         case QPicturePrivate::PdcDrawTextFormatted:
-            s >> r >> i_16 >> str1;
-            painter->drawText(r, i_16, str1);
+            s >> ir >> i_16 >> str1;
+            painter->drawText(ir, i_16, QString::fromLatin1(str1));
             break;
         case QPicturePrivate::PdcDrawText2:
-            s >> p >> str;
-            painter->drawText(p, str);
+            if (d->formatMajor <= 5) {
+                s >> ip >> str;
+                painter->drawText(ip, str);
+            } else {
+                s >> p >> str;
+                painter->drawText(p, str);
+            }
             break;
         case QPicturePrivate::PdcDrawText2Formatted:
-            s >> r >> i_16 >> str;
-            painter->drawText(r, i_16, str);
+            s >> ir;
+            s >> i_16;
+            s >> str;
+            painter->drawText(ir, i_16, str);
             break;
         case QPicturePrivate::PdcDrawTextItem: {
-            Qt::LayoutDirection oldDir = painter->layoutDirection();
-
             s >> p >> str >> font >> ul;
 
-            if (ul & QTextItem::RightToLeft)
-                painter->setLayoutDirection(Qt::RightToLeft);
-            else
-                painter->setLayoutDirection(Qt::LeftToRight);
+            // the text layout direction is not used here because it's already
+            // aligned when QPicturePaintEngine::drawTextItem() serializes the
+            // drawText() call, therefore ul is unsed in this context
 
-            qt_format_text(font, QRectF(p, QSizeF(1, 1)), Qt::TextSingleLine | Qt::TextDontClip, str, /*brect=*/0, /*tabstops=*/0, /*...*/0, /*tabarraylen=*/0, painter);
+            if (d->formatMajor >= 9) {
+                s >> dbl;
+                QFont fnt(font);
+                if (dbl != 1.0) {
+                    FakeDevice fake;
+                    fake.setDpiX(qRound(dbl*qt_defaultDpiX()));
+                    fake.setDpiY(qRound(dbl*qt_defaultDpiY()));
+                    fnt = QFont(font, &fake);
+                }
 
-            painter->setLayoutDirection(oldDir);
+                qreal justificationWidth;
+                s >> justificationWidth;
+
+                int flags = Qt::TextSingleLine | Qt::TextDontClip;
+
+                QTextOption opt;
+                opt.setTextDirection(painter->layoutDirection());
+
+                QSizeF size(1, 1);
+                if (justificationWidth > 0) {
+                    size.setWidth(justificationWidth);
+                    flags |= Qt::TextJustificationForced;
+                    opt.setAlignment(Qt::AlignJustify);
+                }
+
+                QFontMetrics fm(fnt);
+                QPointF pt(p.x(), p.y() - fm.ascent());
+                qt_format_text(fnt, QRectF(pt, size), flags, &opt,
+                               str, /*brect=*/0, /*tabstops=*/0, /*...*/0, /*tabarraylen=*/0, painter);
+            } else {
+                qt_format_text(font, QRectF(p, QSizeF(1, 1)), Qt::TextSingleLine | Qt::TextDontClip, /*opt*/0,
+                               str, /*brect=*/0, /*tabstops=*/0, /*...*/0, /*tabarraylen=*/0, painter);
+            }
+
             break;
         }
         case QPicturePrivate::PdcDrawPixmap: {
             QPixmap pixmap;
             if (d->formatMajor < 4) {
-                s >> p >> pixmap;
-                painter->drawPixmap(p, pixmap);
+                s >> ip >> pixmap;
+                painter->drawPixmap(ip, pixmap);
+            } else if (d->formatMajor <= 5) {
+                s >> ir >> pixmap;
+                painter->drawPixmap(ir, pixmap);
             } else {
                 QRectF sr;
-                s >> r >> pixmap >> sr;
+                if (d->dont_stream_pixmaps) {
+                    int index;
+                    s >> r >> index >> sr;
+                    Q_ASSERT(index < d->pixmap_list.size());
+                    pixmap = d->pixmap_list.at(index);
+                } else {
+                    s >> r >> pixmap >> sr;
+                }
                 painter->drawPixmap(r, pixmap, sr);
             }
         }
             break;
         case QPicturePrivate::PdcDrawTiledPixmap: {
             QPixmap pixmap;
-            s >> r >> pixmap >> p;
+            if (d->dont_stream_pixmaps) {
+                int index;
+                s >> r >> index >> p;
+                Q_ASSERT(index < d->pixmap_list.size());
+                pixmap = d->pixmap_list.at(index);
+            } else {
+                s >> r >> pixmap >> p;
+            }
             painter->drawTiledPixmap(r, pixmap, p);
         }
             break;
@@ -607,6 +764,9 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
             if (d->formatMajor < 4) {
                 s >> p >> image;
                 painter->drawPixmap(p, QPixmap::fromImage(image));
+            } else if (d->formatMajor <= 5){
+                s >> ir >> image;
+                painter->drawPixmap(ir, QPixmap::fromImage(image), QRect(0, 0, ir.width(), ir.height()));
             } else {
                 s >> r >> image;
                 painter->drawPixmap(r, QPixmap::fromImage(image), QRectF(0, 0, r.width(), r.height()));
@@ -637,10 +797,16 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
             painter->setBackgroundMode((Qt::BGMode)i_8);
             break;
         case QPicturePrivate::PdcSetROP: // NOP
+            s >> i_8;
             break;
         case QPicturePrivate::PdcSetBrushOrigin:
-            s >> p;
-            painter->setBrushOrigin(p);
+            if (d->formatMajor <= 5) {
+                s >> ip;
+                painter->setBrushOrigin(ip);
+            } else {
+                s >> p;
+                painter->setBrushOrigin(p);
+            }
             break;
         case QPicturePrivate::PdcSetFont:
             s >> font;
@@ -691,9 +857,14 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
             painter->setMatrixEnabled(i_8);
             break;
         case QPicturePrivate::PdcSetWMatrix:
-            s >> matrix >> i_8;
+            if (d->formatMajor >= 8) {
+                s >> matrix >> i_8;
+            } else {
+                s >> wmatrix >> i_8;
+                matrix = QTransform(wmatrix);
+            }
             // i_8 is always false due to updateXForm() in qpaintengine_pic.cpp
-            painter->setMatrix(matrix * worldMatrix, false);
+            painter->setTransform(matrix * worldMatrix, i_8);
             break;
 // #ifdef Q_Q3PAINTER
 //             case QPicturePrivate::PdcSaveWMatrix:
@@ -709,7 +880,11 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
             break;
         case QPicturePrivate::PdcSetClipRegion:
             s >> rgn >> i_8;
-            painter->setClipRegion(rgn);
+            if (d->formatMajor >= 9) {
+                painter->setClipRegion(rgn, Qt::ClipOperation(i_8));
+            } else {
+                painter->setClipRegion(rgn);
+            }
             break;
         case QPicturePrivate::PdcSetClipPath:
             {
@@ -725,13 +900,25 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
             painter->setRenderHint(QPainter::SmoothPixmapTransform,
                                    bool(ul & QPainter::SmoothPixmapTransform));
             break;
+        case QPicturePrivate::PdcSetCompositionMode:
+            s >> ul;
+            painter->setCompositionMode((QPainter::CompositionMode)ul);
+            break;
+        case QPicturePrivate::PdcSetClipEnabled:
+            s >> bl;
+            painter->setClipping(bl);
+            break;
+        case QPicturePrivate::PdcSetOpacity:
+            s >> dbl;
+            painter->setOpacity(qreal(dbl));
+            break;
         default:
             qWarning("QPicture::play: Invalid command %d", c);
             if (len)                        // skip unknown command
                 s.device()->seek(s.device()->pos()+len);
         }
 #if defined(QT_DEBUG)
-        //qDebug("device->at(): %i, strm_pos: %i len: %i", s.device()->at(), strm_pos, len);
+        //qDebug("device->at(): %i, strm_pos: %i len: %i", (int)s.device()->pos(), strm_pos, len);
         Q_ASSERT(qint32(s.device()->pos() - strm_pos) == len);
 #endif
     }
@@ -760,18 +947,18 @@ int QPicture::metric(PaintDeviceMetric m) const
             val = brect.height();
             break;
         case PdmWidthMM:
-            val = int(25.4/qt_defaultDpi()*brect.width());
+            val = int(25.4/qt_defaultDpiX()*brect.width());
             break;
         case PdmHeightMM:
-            val = int(25.4/qt_defaultDpi()*brect.height());
+            val = int(25.4/qt_defaultDpiY()*brect.height());
             break;
         case PdmDpiX:
         case PdmPhysicalDpiX:
-            val = qt_defaultDpi();
+            val = qt_defaultDpiX();
             break;
         case PdmDpiY:
         case PdmPhysicalDpiY:
-            val = qt_defaultDpi();
+            val = qt_defaultDpiY();
             break;
         case PdmNumColors:
             val = 16777216;
@@ -1751,3 +1938,13 @@ bool QPictureIO::write()
 */
 
 #endif // QT_NO_PICTURE
+
+/*!
+    \typedef QPicture::DataPtr
+    \internal
+*/
+
+/*!
+    \fn DataPtr &QPicture::data_ptr()
+    \internal
+*/

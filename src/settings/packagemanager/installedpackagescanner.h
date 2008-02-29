@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -43,16 +43,16 @@ public:
     void setLocations( const QStringList & );
     bool wasAborted() const { return aborted; }
     QString getError() const { return error; }
-    
-    bool isPackageEnabled( const QString &md5Sum ) const;
-    bool isPackageInstalled( const QString &md5Sum ) const;
+
+    static bool isPackageEnabled( const InstallControl::PackageInfo &pkgInfo );
+    static bool isPackageInstalled( const InstallControl::PackageInfo &pkgInfo );
 public slots:
     void cancel();
 signals:
     void progressValue( int );
     void newPackage( InstallControl::PackageInfo * );
 private:
-    InstallControl::PackageInfo scan( const QString & );
+    static InstallControl::PackageInfo scan( const QString & );
     AbstractPackageController *pkgController;
     QEventLoop *eventLoop;
     QStringList locations;

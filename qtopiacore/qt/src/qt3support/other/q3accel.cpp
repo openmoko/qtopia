@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -466,7 +481,7 @@ bool Q3AccelManager::dispatchAccelEvent(QWidget* w, QKeyEvent* e)
         // Only display message if we are, or were, in a partial match
         if (mainStatusBar && (QKeySequence::PartialMatch == currentState || intermediate.count())) {
             if (currentState == QKeySequence::PartialMatch) {
-                mainStatusBar->showMessage((QString)partial + ", ...");
+                mainStatusBar->showMessage((QString)partial + QLatin1String(", ..."));
             } else if (!identicalDisabled) {
                 QString message = Q3Accel::tr("%1, %2 not defined").
                     arg((QString)intermediate).
@@ -500,7 +515,7 @@ bool Q3AccelManager::dispatchAccelEvent(QWidget* w, QKeyEvent* e)
 
  doclash: // found more than one match
 #ifndef QT_NO_STATUSBAR
-    if (!mainStatusBar) // if "goto doclash", we need to get statusbar again.
+    if (!mainStatusBar) // if "goto doclash", we need to get status bar again.
         mainStatusBar = (QStatusBar*) w->window()->child(0, "QStatusBar");
 #endif
 
@@ -780,7 +795,7 @@ void Q3Accel::setItemEnabled(int id, bool enable)
 
 /*!
     Connects the accelerator item \a id to the slot \a member of \a
-    receiver.
+    receiver. Returns true if the connection is successful.
 
     \code
         a->connectItem(201, mainView, SLOT(quit()));
@@ -795,7 +810,7 @@ void Q3Accel::setItemEnabled(int id, bool enable)
     emitted if the associated key sequence is pressed but no \c
     activated(int id) signal is emitted.
 
-    \sa disconnectItem()
+    \sa disconnectItem(), QObject::connect()
 */
 
 bool Q3Accel::connectItem(int id, const QObject *receiver, const char *member)
@@ -812,10 +827,12 @@ bool Q3Accel::connectItem(int id, const QObject *receiver, const char *member)
 }
 
 /*!
-    Disconnects an accelerator item with id \a id from the function
-    called \a member in the \a receiver object.
+    Disconnects the accelerator item identified by \a id from
+    the function called \a member in the \a receiver object.
+    Returns true if the connection existed and the disconnect
+    was successful.
 
-    \sa connectItem()
+    \sa connectItem(), QObject::disconnect()
 */
 
 bool Q3Accel::disconnectItem(int id, const QObject *receiver,
@@ -866,15 +883,15 @@ QKeySequence Q3Accel::shortcutKey(const QString &str)
 
     int p = 0;
     while (p >= 0) {
-        p = str.find('&', p) + 1;
+        p = str.find(QLatin1Char('&'), p) + 1;
         if (p <= 0 || p >= (int)str.length())
             return 0;
-        if (str[p] != '&') {
+        if (str[p] != QLatin1Char('&')) {
             QChar c = str[p];
             if (c.isPrint()) {
                 char ltr = c.upper().latin1();
                 if (ltr >= (char)Key_A && ltr <= (char)Key_Z)
-                    c = ltr;
+                    c = QLatin1Char(ltr);
                 else
                     c = c.lower();
                 return QKeySequence(c.unicode() + ALT + UNICODE_ACCEL);

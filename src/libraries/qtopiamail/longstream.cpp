@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -18,14 +18,12 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <longstream.h>
+#include "longstream_p.h"
 #include <QApplication>
 #include <QIODevice>
 #include <QTextStream>
 #include <QTemporaryFile>
-#ifdef Q_OS_LINUX
 #include <sys/vfs.h>
-#endif
 
 /*  Helper class to reduce memory usage while downloading large mails */
 LongStream::LongStream()
@@ -52,6 +50,7 @@ void LongStream::reset()
     ts->seek( 0 );
     tmpFile->resize( 0 );
     len = 0;
+    c = QChar::Null;
     resetStatus();
 }
 
@@ -72,10 +71,17 @@ QString LongStream::fileName()
     return tmpFile->fileName();
 }
 
+// QTextStream is currently not memory-efficient enough for our purposes
+//#define USE_QTEXTSTREAM_READLINE
+
 QString LongStream::readLine()
 {
+#ifdef USE_QTEXTSTREAM_READLINE
+    return ts->readLine();
+#else
     QString s;
 
+    // Don't return any of CR, LF, CRLF
     if (!c.isNull() && (c != '\r') && (c != '\n'))
         s += c;
     while (!ts->atEnd() && (c != '\r') && (c != '\n')) {
@@ -90,32 +96,35 @@ QString LongStream::readLine()
             *ts >> c;
     } else if ((!ts->atEnd()) && (c == '\n')) {
         *ts >> c;
+        /* LFCR is not a valid newline sequence...
         if (c == '\r')
             *ts >> c;
+        */
     }
     if (s.isNull() && !ts->atEnd())
         return "";
     return s;
+#endif
 }
+
 
 QString LongStream::first()
 {
     ts->seek( 0 );
-    // todo uncomment when QTextStream::readLine is memory efficient
-//  lastLine = ts->readLine();
+
     lastLine = readLine();
     if (!lastLine.isEmpty())
-        lastLine += "\n";
+        lastLine += "\015\012";
+
     return lastLine;
 }
 
 QString LongStream::next()
 {
-    // todo uncomment when QTextStream::readLine is memory efficient
-//  lastLine = ts->readLine();
     lastLine = readLine();
     if (!lastLine.isNull())
-        lastLine += "\n";
+        lastLine += "\015\012";
+
     return lastLine;
 }
 
@@ -147,7 +156,6 @@ void LongStream::setStatus( Status status )
 
 bool LongStream::freeSpace( const QString &path, int min)
 {
-#ifdef Q_OS_LINUX
     unsigned long long boundary = minFree;
     if (min >= 0)
         boundary = min;
@@ -160,9 +168,6 @@ bool LongStream::freeSpace( const QString &path, int min)
     unsigned long long bavail = ((unsigned long long)stats.f_bavail);
     unsigned long long bsize = ((unsigned long long)stats.f_bsize);
     return (bavail * bsize) > boundary;
-#else
-    return true;
-#endif
 }
 
 QString LongStream::errorMessage( const QString &prefix )

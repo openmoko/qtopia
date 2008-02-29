@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,6 +49,7 @@
 #include <qvariant.h>
 #include <qhash.h>
 #include <qdebug.h>
+#include <qsemaphore.h>
 
 #include "private/qobject_p.h"
 #include "private/qmetaobject_p.h"
@@ -768,7 +784,7 @@ QByteArray QMetaObject::normalizedType(const char *type)
     if (!type || !*type)
         return result;
 
-    QVarLengthArray<char> stackbuf(strlen(type));
+    QVarLengthArray<char> stackbuf((int)strlen(type));
     qRemoveWhitespace(type, stackbuf.data());
     int templdepth = 0;
     qNormalizeType(stackbuf.data(), templdepth, result);
@@ -792,7 +808,7 @@ QByteArray QMetaObject::normalizedSignature(const char *method)
     QByteArray result;
     if (!method || !*method)
         return result;
-    int len = strlen(method);
+    int len = int(strlen(method));
     char stackbuf[64];
     char *buf = (len >= 64 ? new char[len+1] : stackbuf);
     qRemoveWhitespace(method, buf);
@@ -913,20 +929,20 @@ bool QMetaObject::invokeMethod(QObject *obj, const char *member, Qt::ConnectionT
     sig.append(member, len);
     sig.append('(');
 
-    enum { ParamCount = 11 };
+    enum { MaximumParamCount = 11 };
     const char *typeNames[] = {ret.name(), val0.name(), val1.name(), val2.name(), val3.name(),
                                val4.name(), val5.name(), val6.name(), val7.name(), val8.name(),
                                val9.name()};
 
-    int i;
-    for (i = 1; i < ParamCount; ++i) {
-        len = qstrlen(typeNames[i]);
+    int paramCount;
+    for (paramCount = 1; paramCount < MaximumParamCount; ++paramCount) {
+        len = qstrlen(typeNames[paramCount]);
         if (len <= 0)
             break;
-        sig.append(typeNames[i], len);
+        sig.append(typeNames[paramCount], len);
         sig.append(',');
     }
-    if (i == 1)
+    if (paramCount == 1)
         sig.append(')'); // no parameters
     else
         sig[sig.size() - 1] = ')';
@@ -970,7 +986,7 @@ bool QMetaObject::invokeMethod(QObject *obj, const char *member, Qt::ConnectionT
                : Qt::QueuedConnection;
     }
 
-    if (type != Qt::QueuedConnection) {
+    if (type == Qt::DirectConnection) {
         return obj->qt_metacall(QMetaObject::InvokeMetaMethod, idx, param) < 0;
     } else {
         if (ret.data()) {
@@ -979,11 +995,11 @@ bool QMetaObject::invokeMethod(QObject *obj, const char *member, Qt::ConnectionT
             return false;
         }
         int nargs = 1; // include return type
-        void **args = (void **) qMalloc(ParamCount * sizeof(void *));
-        int *types = (int *) qMalloc(ParamCount * sizeof(int));
+        void **args = (void **) qMalloc(paramCount * sizeof(void *));
+        int *types = (int *) qMalloc(paramCount * sizeof(int));
         types[0] = 0; // return type
         args[0] = 0;
-        for (i = 1; i < ParamCount; ++i) {
+        for (int i = 1; i < paramCount; ++i) {
             types[i] = QMetaType::type(typeNames[i]);
             if (types[i]) {
                 args[i] = QMetaType::construct(types[i], param[i]);
@@ -995,7 +1011,25 @@ bool QMetaObject::invokeMethod(QObject *obj, const char *member, Qt::ConnectionT
             }
         }
 
-        QCoreApplication::postEvent(obj, new QMetaCallEvent(idx, 0, -1, -1, nargs, types, args));
+        if (type == Qt::QueuedConnection) {
+            QCoreApplication::postEvent(obj, new QMetaCallEvent(idx, 0, -1, -1, nargs, types, args));
+        } else {
+            if (QThread::currentThread() == obj->thread()) {
+                qWarning("QMetaObject::invokeMethod: Dead lock detected in BlockingQueuedConnection: "
+                         "Receiver is %s(%p)",
+                         obj->metaObject()->className(), obj);
+            }
+
+            // blocking queued connection
+#ifdef QT_NO_THREAD
+            QCoreApplication::postEvent(obj, new QMetaCallEvent(idx, 0, -1, -1, nargs, types, args));
+#else
+            QSemaphore semaphore;
+            QCoreApplication::postEvent(obj, new QMetaCallEvent(idx, 0, -1, -1, nargs, types, args,
+                                                                &semaphore));
+            semaphore.acquire();
+#endif // QT_NO_THREAD
+        }
     }
     return true;
 }
@@ -1363,19 +1397,19 @@ int QMetaEnum::keyToValue(const char *key) const
 {
     if (!mobj || !key)
         return -1;
-    int scope = 0;
+    uint scope = 0;
     const char *qualified_key = key;
-    const char *s = key;
-    while (*s  && *s != ':')
-        ++s;
-    if (*s && *(s+1)==':') {
-        scope = s - key;
+    const char *s = key + qstrlen(key);
+    while (s > key && *s != ':')
+        --s;
+    if (s > key && *(s-1)==':') {
+        scope = s - key - 1;
         key += scope + 2;
     }
     int count = mobj->d.data[handle + 2];
     int data = mobj->d.data[handle + 3];
     for (int i = 0; i < count; ++i)
-        if ((!scope || strncmp(qualified_key, mobj->d.stringdata, scope) == 0)
+        if ((!scope || (qstrlen(mobj->d.stringdata) == scope && strncmp(qualified_key, mobj->d.stringdata, scope) == 0))
              && strcmp(key, mobj->d.stringdata + mobj->d.data[data + 2*i]) == 0)
             return mobj->d.data[data + 2*i + 1];
     return -1;
@@ -1421,17 +1455,17 @@ int QMetaEnum::keysToValue(const char *keys) const
         QString trimmed = l.at(li).trimmed();
         QByteArray qualified_key = trimmed.toLatin1();
         const char *key = qualified_key.constData();
-        int scope = 0;
-        const char *s = key;
-        while (*s  && *s != ':')
-            ++s;
-        if (*s && *(s+1)==':') {
-            scope = s - key;
+        uint scope = 0;
+        const char *s = key + qstrlen(key);
+        while (s > key && *s != ':')
+            --s;
+        if (s > key && *(s-1)==':') {
+            scope = s - key - 1;
             key += scope + 2;
         }
         int i;
         for (i = count-1; i >= 0; --i)
-            if ((!scope || strncmp(qualified_key.constData(), mobj->d.stringdata, scope) == 0)
+            if ((!scope || (qstrlen(mobj->d.stringdata) == scope && strncmp(qualified_key.constData(), mobj->d.stringdata, scope) == 0))
                  && strcmp(key, mobj->d.stringdata + mobj->d.data[data + 2*i]) == 0) {
                 value |= mobj->d.data[data + 2*i + 1];
                 break;
@@ -1456,7 +1490,7 @@ QByteArray QMetaEnum::valueToKeys(int value) const
     int count = mobj->d.data[handle + 2];
     int data = mobj->d.data[handle + 3];
     int v = value;
-    for(int i = count - 1; i >= 0; --i) {
+    for(int i = 0; i < count; i++) {
         int k = mobj->d.data[data + 2*i + 1];
         if ((k != 0 && (v & k) == k ) ||  (k == value))  {
             v = v & ~k;
@@ -1652,7 +1686,7 @@ QVariant QMetaProperty::read(const QObject *object) const
     if (!object || !mobj)
         return QVariant();
 
-    int  t = QVariant::Int;
+    uint t = QVariant::Int;
     if (!isEnumType()) {
         int handle = priv(mobj->d.data)->propertyData + 3*idx;
         uint flags = mobj->d.data[handle + 2];
@@ -1672,7 +1706,7 @@ QVariant QMetaProperty::read(const QObject *object) const
     }
     QVariant value;
     void *argv[1];
-    if (t == int(QVariant::LastType)) {
+    if (t == QVariant::LastType) {
         argv[0] = &value;
     } else {
         value = QVariant(t, (void*)0);
@@ -1681,7 +1715,7 @@ QVariant QMetaProperty::read(const QObject *object) const
     const_cast<QObject*>(object)->qt_metacall(QMetaObject::ReadProperty,
                                               idx + mobj->propertyOffset(),
                                               argv);
-    if (t != int(QVariant::LastType) && argv[0] != value.data())
+    if (t != QVariant::LastType && argv[0] != value.data())
         return QVariant((QVariant::Type)t, argv[0]);
     return value;
 }

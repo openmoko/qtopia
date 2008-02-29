@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -36,11 +36,17 @@
 #include <qtelephonynamespace.h>
 #include <qstringlist.h>
 #include <qdatetime.h>
+#include <qtopiaglobal.h>
+
+#include "qmailid.h"
+#include "qmailaddress.h"
 
 struct RawSms
 {
     QString number;
     QString body;
+    QString mimetype;
+    QMailId msgId;
 };
 
 
@@ -48,58 +54,60 @@ class QSMSReader;
 class QSMSSender;
 class QSMSMessage;
 class QRegExp;
-class Email;
+class QMailMessage;
 
 class SmsClient: public Client
 {
         Q_OBJECT
 
 public:
-        static QString vCardPrefix();
-public:
         SmsClient();
         ~SmsClient();
         void setAccount(MailAccount *_account);
         void newConnection();
-//      void addMail(const QString& number, const QString& body);
-        int addMail(Email* mail);
+        bool addMail(const QMailMessage& mail);
         void clearList();
         // Determines if a string is in the form *
-        bool smsAddress(const QString &);
+        bool smsAddress(const QMailAddress &);
         // Determines if a string is in the form "^\\+?\\d[\\d-]*$"
-        bool validSmsAddress(const QString &);
+        bool validSmsAddress(const QMailAddress &);
         // Separates the sms (phone numbers) addresses from the passed address list
         // Returns the sms addressses and modifies the passed list
-        QStringList separateSmsAddresses(QStringList &);
+        QList<QMailAddress> separateSmsAddresses(const QList<QMailAddress> &);
         // Format an outgoing message
         QString formatOutgoing( const QString& subject, const QString &body );
         bool hasDeleteImmediately() const;
         void deleteImmediately(const QString& serverUid);
         void resetNewMailCount();
         int unreceivedSmsCount();
+        int unreadSmsCount();
         bool readyToDelete();
+        void checkForNewMessages();
+        int newMessageCount();
 
 signals:
         void errorOccurred(int, QString &);
         void updateStatus(const QString &);
-        void transferredSize(int);
         void mailSent(int);
-        void newMessage(const Email&);
+        void transmissionCompleted();
+        void newMessage(const QMailMessage&);
+        void allMessagesReceived();
+        void sendProgress(const QMailId&, uint);    // Not implemented
+        void messageProcessed(const QMailId&);
 
 public slots:
         void errorHandling(int, QString msg);
-        void mailRead(Email *mail);
+        void mailRead(const QMailMessage& mail);
 
 private slots:
-        void finished(const QString &, QTelephony::Result);
+        void finished(const QString&, QTelephony::Result);
         void messageCount( int );
         void fetched( const QString&, const QSMSMessage& );
         void simIdentityChanged();
         void smsReadyChanged();
 private:
-        void createMail(Email& mail, QString& message, QString& id, QUuid& uuid, uint size);
-private:
         QList<RawSms> smsList;
+        QMap<QString, RawSms> sentMessages;
         QSMSReader *req;
         QSMSSender *sender;
         bool smsFetching, smsSending;

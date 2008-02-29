@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,11 +24,11 @@
 
 #include <QObject>
 #include <qirnamespace.h>
-#include <qtopiaglobal.h>
+#include <qirglobal.h>
 
 class QIrRemoteDeviceWatcher_Private;
 
-class QTOPIACOMM_EXPORT QIrRemoteDeviceWatcher : public QObject
+class QIR_EXPORT QIrRemoteDeviceWatcher : public QObject
 {
     Q_OBJECT
     friend class QIrRemoteDeviceWatcher_Private;

@@ -64,7 +64,7 @@
 <p>In addition to <a href="qtopianetwork.html#online">QtopiaNetwork::online</a>() which returns the current connectivity state QNetworkState provides the <a href="qnetworkstate.html#connected">connected</a>() and <a href="qnetworkstate.html#disconnected">disconnected</a>() signals which are emitted when the connectivity changes. If more specific information about a particular device is required <a href="qnetworkdevice.html">QNetworkDevice</a> should be used.</p>
 <p><a href="qnetworkstate.html#interfacesOnline">interfacesOnline</a>() returns the list of interfaces which are online. An network interface is identified via its device handle which is the configuration file that specifies the device parameter. If it is required to enumerate all or a particular type of network devices (regardless of their state) <a href="qnetworkstate.html#availableNetworkDevices">availableNetworkDevices</a>() can be used. The reverse operation is provided by <a href="qnetworkstate.html#deviceType">deviceType</a>().</p>
 <p>QNetworkState also provides gateway/routing information. The <a href="qnetworkstate.html#gateway">gateway</a>() function returns the devHandle belonging to the network device that currently provides the default route. The <a href="qnetworkstate.html#defaultGatewayChanged">defaultGatewayChanged</a>() signal is emitted when the default route changes. The default WAP configuration is returned via <a href="qnetworkstate.html#defaultWapAccount">defaultWapAccount</a>().</p>
-<p>See also <a href="qtopianetwork.html">QtopiaNetwork</a> and <a href="qnetworkdevice.html">QNetworkDevice</a>.</p>
+<p>See also <a href="qtopianetwork.html">QtopiaNetwork</a>, <a href="qnetworkdevice.html">QNetworkDevice</a>, and <a href="qnetworkconnection.html">QNetworkConnection</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QNetworkState"></a>QNetworkState::QNetworkState ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -81,7 +81,14 @@
 <p>This signal is emitted when the default gateway for network packages changes. Such a change usually implies that a new route and new DNS information have been set. <i>handle</i> is the new default interface and <i>local</i> contains the IP details for <i>handle</i>. An empty <i>handle</i> implies that no new default gateway is available. This may happen when the last online interface changes its state to offline.</p>
 <p>See also <a href="qnetworkstate.html#gateway">gateway</a>().</p>
 <h3 class="fn"><a name="defaultWapAccount"></a><a href="qstring.html">QString</a> QNetworkState::defaultWapAccount () const</h3>
-<p>Returns the default WAP account. If no default account has been set this function returns an empty string.</p>
+<p>Returns the default WAP account. If no default account has been set this function returns an empty string. The returned account can be accessed via <a href="qwapaccount.html">QWapAccount</a>.</p>
+<pre>    QNetworkState state;
+    QString wapConf = state.defaultWapAccount();
+    if ( !wapConf.isEmpty() ) {
+        QWapAccount acc( state.defaultWapAccount() );
+        QString name = acc.name();  <span class="comment">//returns user visibile name</span>
+    }</pre>
+<p>See also <a href="qwapaccount.html">QWapAccount</a>.</p>
 <h3 class="fn"><a name="deviceType"></a><a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::Type</a> QNetworkState::deviceType ( const <a href="qstring.html">QString</a> &amp; <i>devHandle</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the type of <i>devHandle</i>.</p>
 <h3 class="fn"><a name="disconnected"></a>void QNetworkState::disconnected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -95,6 +102,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

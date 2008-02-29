@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -54,6 +69,11 @@ template<> inline char *toString(const QString &str)
     return qstrdup(str.toLatin1().constData());
 }
 
+template<> inline char *toString(const QByteArray &ba)
+{
+    return QTest::toHexRepresentation(ba.constData(), ba.length());
+}
+
 template<> inline char *toString(const QTime &time)
 {
     return time.isValid()
@@ -71,7 +91,8 @@ template<> inline char *toString(const QDate &date)
 template<> inline char *toString(const QDateTime &dateTime)
 {
     return dateTime.isValid()
-        ? qstrdup(dateTime.toString(QLatin1String("yyyy/MM/dd hh:mm:ss.zzz")).toLatin1())
+        ? qstrdup((dateTime.toString(QLatin1String("yyyy/MM/dd hh:mm:ss.zzz")) +
+                  (dateTime.timeSpec() == Qt::LocalTime ? QLatin1String("[local time]") : QLatin1String("[UTC]"))).toLatin1())
         : qstrdup("Invalid QDateTime");
 }
 
@@ -182,6 +203,8 @@ int main(int argc, char *argv[]) \
     QObject tc; \
     return QTest::qExec(&tc, argc, argv); \
 }
+
+#include <QtTest/qtestsystem.h>
 
 #ifdef QT_GUI_LIB
 

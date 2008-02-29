@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -80,7 +95,7 @@ QByteArray combinePath(const char *infile, const char *outfile)
 
   \sa createFormImpl()
 */
-void Ui3Reader::createFormDecl(const QDomElement &e)
+void Ui3Reader::createFormDecl(const QDomElement &e, bool implicitIncludes)
 {
     QDomElement body = e;
 
@@ -107,7 +122,6 @@ void Ui3Reader::createFormDecl(const QDomElement &e)
     QMap<QString, int> customWidgets;
     QStringList forwardDecl;
     QStringList forwardDecl2;
-    QString exportMacro;
     for (n = e; !n.isNull(); n = n.nextSibling().toElement()) {
         if (n.tagName().toLower() == QLatin1String("customwidgets")) {
             QDomElement n2 = n.firstChild().toElement();
@@ -204,10 +218,6 @@ void Ui3Reader::createFormDecl(const QDomElement &e)
     for (i = 0; i < (int) nl.length(); i++)
         forwardDecl2 << fixDeclaration(nl.item(i).toElement().firstChild().toText().data());
 
-    nl = e.parentNode().toElement().elementsByTagName(QLatin1String("exportmacro"));
-    if (nl.length() == 1)
-        exportMacro = nl.item(0).firstChild().toText().data();
-
     forwardDecl = unique(forwardDecl);
     for (it = forwardDecl.constBegin(); it != forwardDecl.constEnd(); ++it) {
         if (!(*it).isEmpty() && (*it) != objClass) {
@@ -240,11 +250,51 @@ void Ui3Reader::createFormDecl(const QDomElement &e)
     Driver d;
     d.option().headerProtection = false;
     d.option().copyrightHeader = false;
+    d.option().extractImages = m_extractImages;
+    d.option().qrcOutputFile = m_qrcOutputFile;
+    d.option().implicitIncludes = implicitIncludes;
     if (trmacro.size())
         d.option().translateFunction = trmacro;
-    DomUI *ui = generateUi4(e);
+    DomUI *ui = generateUi4(e, implicitIncludes);
     d.uic(fileName, ui, &out);
     delete ui;
+
+    createWrapperDeclContents(e);
+
+    out << "#endif // " << protector << endl;
+}
+
+void Ui3Reader::createWrapperDecl(const QDomElement &e, const QString &convertedUiFile)
+{
+    QString objName = getObjectName(e);
+
+    objName = registerObject(objName);
+    QString protector = objName.toUpper() + QLatin1String("_H");
+    protector.replace(QLatin1String("::"), QLatin1String("_"));
+    out << "#ifndef " << protector << endl;
+    out << "#define " << protector << endl;
+    out << endl;
+    out << "#include \"" << convertedUiFile << "\"" << endl;
+
+    createWrapperDeclContents(e);
+    out << endl;
+    out << "#endif // " << protector << endl;
+}
+
+void Ui3Reader::createWrapperDeclContents(const QDomElement &e)
+{
+    QString objClass = getClassName(e);
+    if (objClass.isEmpty())
+        return;
+
+    QDomNodeList nl;
+    QString exportMacro;
+    int i;
+    QDomElement n;
+    QStringList::ConstIterator it;
+    nl = e.parentNode().toElement().elementsByTagName(QLatin1String("exportmacro"));
+    if (nl.length() == 1)
+        exportMacro = nl.item(0).firstChild().toText().data();
 
     QStringList::ConstIterator ns = namespaces.constBegin();
     while (ns != namespaces.constEnd()) {
@@ -461,7 +511,6 @@ void Ui3Reader::createFormDecl(const QDomElement &e)
         out << "}" << endl;
 
     out << endl;
-    out << "#endif // " << protector << endl;
 }
 
 void Ui3Reader::writeFunctionsDecl(const QStringList &fuLst, const QStringList &typLst, const QStringList &specLst)

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -37,7 +37,7 @@ SmilLayout::~SmilLayout()
 //===========================================================================
 
 SmilRootLayout::SmilRootLayout(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
-    : SmilElement(sys, p, n, atts), bgColor(Qt::white)
+    : SmilElement(sys, p, n, atts)
 {
     currentState = Active;
     vis = true;
@@ -51,7 +51,9 @@ SmilRootLayout::SmilRootLayout(SmilSystem *sys, SmilElement *p, const QString &n
     if (val.isEmpty())
         val = atts.value("background-color");
     if (!val.isEmpty())
-        bgColor = parseColor(val);
+        setBackgroundColor(parseColor(val));
+    else
+        setBackgroundColor(Qt::white);
 }
 
 void SmilRootLayout::process()
@@ -74,7 +76,7 @@ void SmilRootLayout::process()
 
 void SmilRootLayout::paint(QPainter *p)
 {
-    p->fillRect(rect(), bgColor);
+    p->fillRect(rect(), backgroundColor());
 }
 
 //===========================================================================
@@ -88,9 +90,9 @@ SmilRegion::SmilRegion(SmilSystem *sys, SmilElement *p, const QString &n, const 
     if (val.isEmpty())
         val = atts.value("background-color");
     if (!val.isEmpty())
-        backgroundColor = parseColor(val);
+        setBackgroundColor(parseColor(val));
     else
-        backgroundColor = Qt::white;
+        setBackgroundColor(Qt::white);
     val = atts.value("fit");
     if (val == "hidden")
         fit = HiddenFit;
@@ -199,8 +201,8 @@ void SmilRegion::paint(QPainter *p)
             }
         }
     }
-    if (show && backgroundColor.isValid())
-        p->fillRect(rect(), backgroundColor);
+    if (show)
+        p->fillRect(rect(), backgroundColor());
 }
 
 void SmilRegion::addReferrer(SmilElement *e)
@@ -266,8 +268,33 @@ bool SmilLayoutModule::parseAttributes(SmilSystem *, SmilElement *e, const QXmlA
     return false;
 }
 
-void SmilLayoutModule::endParseElement(SmilElement *, const QString &)
+void SmilLayoutModule::endParseElement(SmilElement *e, const QString &)
 {
+    if (e->name() == "head") {
+        // Ensure there is a layout
+        if (!e->findChild(QString(), "layout")) {
+            // We need to add a default layout
+            QXmlAttributes atts;
+            SmilLayout* layout = new SmilLayout(e->system(), e, "layout", atts);
+
+            atts.clear();
+            atts.append("id", QString(), QString(), "image");
+            atts.append("width", QString(), QString(), "100%");
+            atts.append("height", QString(), QString(), "67%");
+            SmilRegion* region = new SmilRegion(e->system(), layout, "region", atts);
+            layout->addChild(region);
+
+            atts.clear();
+            atts.append("id", QString(), QString(), "text");
+            atts.append("width", QString(), QString(), "100%");
+            atts.append("height", QString(), QString(), "33%");
+            region = new SmilRegion(e->system(), layout, "region", atts);
+            layout->addChild(region);
+
+            e->addChild(layout);
+            layouts.append(layout);
+        }
+    }
 }
 
 QStringList SmilLayoutModule::elements() const
@@ -316,8 +343,10 @@ void RegionAttribute::process()
 {
     SmilRegion *r = layoutModule->findRegion(rgn);
     if (r) {
-        element->setRect(r->rect());
         r->addReferrer(element);
+
+        element->setRect(r->rect());
+        element->setBackgroundColor(r->backgroundColor());
     } else {
         qWarning("Cannot find region: %s", rgn.toLatin1().constData());
     }

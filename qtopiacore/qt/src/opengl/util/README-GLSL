@@ -1,7 +1,7 @@
 Use of GLSL for vertex and fragment programs in Qt
 ---------------------------------------------------
 
-We don't distribute the *.glsl files because we don't want the build process of
+We don't compile the *.glsl files because we don't want the build process of
 Qt to require cgc from nVidia to build the fragment programs.
 
 The script src/opengl/util/glsl_to_include.sh will compile a GLSL program to a file

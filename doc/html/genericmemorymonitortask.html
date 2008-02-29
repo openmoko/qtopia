@@ -17,11 +17,19 @@
 <ul>
 <li><a href="genericmemorymonitortask-members.html">List of all members, including inherited members</a></li>
 </ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/>virtual MemState <b><a href="genericmemorymonitortask.html#memoryState">memoryState</a></b> () const</li>
+<li><div class="fn"/>virtual unsigned int <b><a href="genericmemorymonitortask.html#timeInState">timeInState</a></b> () const</li>
+</ul>
+<ul>
+<li><div class="fn"/>2 public functions inherited from <a href="memorymonitor.html#public-functions">MemoryMonitor</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>2 public functions inherited from <a href="memorymonitor.html#public-functions">MemoryMonitor</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="memorymonitor.html#signals">MemoryMonitor</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
@@ -49,10 +57,19 @@
 <tr valign="top" class="even"><td><tt>/ServerTasks/GenericMemoryMonitorTask/ChangedTime</tt></td><td>The date and time at which the memory level last changed.</td></tr>
 </table></p>
 <p>As polling is used to sample memory usage information from the /c {/proc} filesystem, the GenericMemoryMonitorTask should generally be replaced by system integrators with a more efficient, system specific mechanism.</p>
+<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="memoryState"></a><a href="memorymonitor.html#MemState-enum">MemState</a> GenericMemoryMonitorTask::memoryState () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Returns the current memory state, ie Critical, Very Low, Low, or Normal.</p>
+<p>Reimplemented from <a href="memorymonitor.html#memoryState">MemoryMonitor</a>.</p>
+<h3 class="fn"><a name="timeInState"></a>unsigned int GenericMemoryMonitorTask::timeInState () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Return the time in seconds since the last memory state change.</p>
+<p>Reimplemented from <a href="memorymonitor.html#timeInState">MemoryMonitor</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,18 +52,31 @@
 
 #include "shared_global_p.h"
 
+#include <QtDesigner/private/formscriptrunner_p.h>
 #include <QtDesigner/formbuilder.h>
+
 #include <QtCore/QMap>
+#include <QtCore/QSet>
 
 class QDesignerFormEditorInterface;
-class QDesignerCustomWidgetInterface;
+class QDesignerFormWindowInterface;
 
 namespace qdesigner_internal {
 
+// Form builder used for previewing forms
 class QDESIGNER_SHARED_EXPORT QDesignerFormBuilder: public QFormBuilder
 {
 public:
-    QDesignerFormBuilder(QDesignerFormEditorInterface *core);
+    enum Mode {
+        // Use container extension to populate containers. Disable scripts.
+        DisableScripts,
+        // Use container extension to populate containers as well as scripts
+        UseScriptAndContainerExtension,
+        // Experimental: Use scripts to populate the container
+        UseScriptForContainerExtension
+    };
+
+    QDesignerFormBuilder(QDesignerFormEditorInterface *core, Mode mode);
 
     QWidget *createWidgetFromContents(const QString &contents, QWidget *parentWidget = 0);
 
@@ -58,10 +86,19 @@ public:
     inline QDesignerFormEditorInterface *core() const
     { return m_core; }
 
+    typedef QFormScriptRunner::Errors ScriptErrors;
+    // Create a preview widget (for integrations) or return 0. The widget has to be embedded into a main window.
+    // Experimental, depending on script support.
+    static QWidget *createPreview(const QDesignerFormWindowInterface *fw, const QString &styleName /* ="" */,
+                                  ScriptErrors *scriptErrors, QString *errorMessage);
+    // Convenience that pops up message boxes in case of failures.
+    static QWidget *createPreview(const QDesignerFormWindowInterface *fw, const QString &styleName = QString());
+
 protected:
     using QFormBuilder::createDom;
     using QFormBuilder::create;
 
+    virtual QWidget *create(DomUI *ui, QWidget *parentWidget);
     virtual DomWidget *createDom(QWidget *widget, DomWidget *ui_parentWidget, bool recursive = true);
     virtual QWidget *create(DomWidget *ui_widget, QWidget *parentWidget);
     virtual QLayout *create(DomLayout *ui_layout, QLayout *layout, QWidget *parentWidget);
@@ -78,7 +115,12 @@ protected:
     virtual void loadExtraInfo(DomWidget *ui_widget, QWidget *widget, QWidget *parentWidget);
 
 private:
+    bool addItemContainerExtension(QWidget *widget, QWidget *parentWidget);
     QDesignerFormEditorInterface *m_core;
+    const Mode m_mode;
+    
+    typedef QSet<QWidget *> WidgetSet;
+    WidgetSet m_customWidgetsWithScript;
 };
 
 } // namespace qdesigner_internal

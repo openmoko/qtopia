@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,17 +21,13 @@
 
 
 
-#include "email.h"
 #include "maillistview.h"
-#include "common.h"
 
 #include <qapplication.h>
 #include <qwhatsthis.h>
 
 #include <qsettings.h>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 #include <qtopianamespace.h>
 #include <qdesktopwidget.h>
 #include <qheaderview.h>
@@ -51,31 +47,37 @@ MailListView::MailListView(QWidget *parent, const char *name)
 
     sortColumn = -1;
     ascending = false;
+    emailsOnly = false;
 
-    connect( &menuTimer, SIGNAL( timeout() ), SLOT( itemMenuRequested() ) );
-    connect( this, SIGNAL( itemSelectionChanged() ), SLOT( cancelMenuTimer() ) );
-    connect( horizontalScrollBar(), SIGNAL( valueChanged(int) ),
-             this, SLOT( scrollToLeft(int) ) );
+    connect( &menuTimer, SIGNAL(timeout()), SLOT(itemMenuRequested()) );
+    connect( this, SIGNAL(itemSelectionChanged()), SLOT(cancelMenuTimer()) );
+    connect( horizontalScrollBar(), SIGNAL(valueChanged(int)),
+             this, SLOT(scrollToLeft(int)) );
 
     arrival = false;
 
     hVisible = true;    //part of sizeChangefix (avoid unnecessary flickering)
     maxColumnWidth = 0;
-#ifdef QTOPIA_PHONE
     mSingleColumnMode = true;
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
-#else
-    mSingleColumnMode = false;
-#endif
     columns << "";
-    columns << tr( "From" );
-    columns <<  tr( "Subject" );
-    columns <<  tr( "Date" );
+    if(!mSingleColumnMode)
+    {
+        columns << tr( "From" );
+        columns <<  tr( "Subject" );
+        columns <<  tr( "Date" );
+    }
     setColumnCount( columns.count() );
     setHorizontalHeaderLabels( columns );
     verticalHeader()->hide();
-    int oldSize = verticalHeader()->defaultSectionSize();
-    verticalHeader()->setDefaultSectionSize( oldSize * 5 / 4 );
+
+    // Row height should be the size of the text - the second line being 3/4ths of the first
+    int textHeight = QFontMetrics(font()).height() * 7 / 4;
+
+    // Also, the icon could be larger than the text
+    int iconHeight = style()->pixelMetric(QStyle::PM_ListViewIconSize);
+    verticalHeader()->setDefaultSectionSize( qMax(textHeight, iconHeight) );
+
     setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     setAlternatingRowColors( true );
 
@@ -85,7 +87,7 @@ MailListView::MailListView(QWidget *parent, const char *name)
     hhWhatsThis->setText( tr("Select the sort order by tapping any of the columns in this header.  Tapping the same column twice will switch between ascending and descending order.") );
 
     QAction *tWhatsThis = QWhatsThis::createAction( this );
-    tWhatsThis->setText( tr("A list of the messages in your current folder.  Tap a mail to examine it.") );
+    tWhatsThis->setText( tr("A list of the messages in your current folder.  Tap a message to examine it.") );
 
 //    setRootIsDecorated( true );
 
@@ -93,7 +95,7 @@ MailListView::MailListView(QWidget *parent, const char *name)
     EmailListItemDelegate *delegate = new EmailListItemDelegate( this );
     setItemDelegate( delegate );
     scrollToLeft( 0 );
-    mContactModel = 0;
+    horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 }
 
 /*  Fix for a Qt-bug.  Item replacing the horizontal scrollbar is not
@@ -128,22 +130,18 @@ void MailListView::keyPressEvent( QKeyEvent *e ) // sharp and phone
     switch( e->key() ) {
         case Qt::Key_Space:
         case Qt::Key_Return:
-#ifdef QTOPIA_PHONE
         case Qt::Key_Select:
-#endif
         case Qt::Key_Enter:
         {
             emit clicked(currentIndex());
         }
         break;
-#ifdef QTOPIA_PHONE
         case Qt::Key_No:
         case Qt::Key_Back:
-#endif
         case Qt::Key_Backspace:
         {
             //if (!Qtopia::mousePreferred())
-                emit viewFolderList();
+                emit backPressed();
             //else
             //    e->ignore();
         }
@@ -167,6 +165,15 @@ void MailListView::setSorting(int col, bool a)
         scrollTo( currentIndex() );
 }
 
+void MailListView::setShowEmailsOnly(bool onlyEmails)
+{
+    emailsOnly = onlyEmails;
+}
+
+bool MailListView::showEmailsOnly()
+{
+    return emailsOnly;
+}
 
 /*  ArrivalDate sorts by the internalId, which is the order
         the mails arrived.  */
@@ -179,7 +186,7 @@ void MailListView::setByArrival(bool on)
 {
     arrival = on;
 
-    if ( arrival )
+    if ( arrival && !mSingleColumnMode )
         horizontalHeaderItem(3)->setText( tr("Arrival") );
 }
 
@@ -204,7 +211,7 @@ void MailListView::cancelMenuTimer()
 
 void MailListView::itemMenuRequested()
 {
-    EmailListItem *item = (EmailListItem * ) currentItem();
+    EmailListItem *item = static_cast<EmailListItem *>( currentItem() );
     if ( item )
         emit itemPressed( item );
 }
@@ -237,54 +244,11 @@ bool MailListView::isAscending()
     return ascending;
 }
 
-uint MailListView::getMailCount(QString type)
-{
-    int st = 0;
-    if ( type == "new" ) // No tr
-        st = 1;
-    else if ( type == "unsent" ) // No tr
-        st = 2;
-    else if ( type == "unfinished" ) // No tr
-        st = 3;
-
-    if ( st == 0 )
-        return rowCount();
-
-    Email *mail;
-    uint count = 0;
-    for (int i = 0; i < rowCount(); ++i) {
-        mail = ( (EmailListItem *) item(i, 0) )->mail();
-        switch( st ) {
-            case 1:
-            {
-                if ( !mail->status(EFlag_Read) )
-                    count++;
-                break;
-            }
-            case 2:
-            {
-                if ( !mail->status(EFlag_Sent) && !mail->unfinished()  )
-                    count++;
-                break;
-            }
-            case 3:
-            {
-                if ( mail->unfinished() )
-                    count++;
-                break;
-            }
-            default: break;
-        }
-    }
-
-    return count;
-}
-
-EmailListItem* MailListView::getRef(QUuid id)
+EmailListItem* MailListView::getRef(QMailId id)
 {
     for (int i = 0; i < rowCount(); ++i) {
-        if ( ( (EmailListItem *) item(i, 0) )->id() == id)
-            return (EmailListItem *) item(i, 0);
+        if ( static_cast<EmailListItem *>( item(i, 0) )->id() == id)
+            return static_cast<EmailListItem *>( item(i, 0) );
     }
 
     return NULL;
@@ -300,19 +264,32 @@ void MailListView::setCurrentMailbox(const QString &mailbox)
     _mailbox = mailbox;
 }
 
+void MailListView::treeInsert(const QMailIdList& idList)
+{
+    this->clear();
+    setRowCount(idList.count());
+    for(int i = 0; i < idList.count(); ++i) {
+        setItem(i, 0, new EmailListItem(this, idList[i], 0) );
+    }
+
+    QSoftMenuBar::setLabel(this, Qt::Key_Select, rowCount() ? QSoftMenuBar::View : QSoftMenuBar::NoLabel);
+}
+
+
 /*  May be expanded to have a thread-view of messages.  Ignore all disabled
     code for now ( doesn't work yet either way )
 */
-void MailListView::treeInsert(Email *mail)
+void MailListView::treeInsert(const QMailId& id)
 {
+//    bool isEmail = (message.messageType() == QMailMessage::Email);
+//    if ((showEmailsOnly() && !isEmail) ||
+//	!showEmailsOnly() && isEmail)
+//	return;
+    
     insertRow(0);
-    setItem(0, 0, new EmailListItem(this, mail, 0) );
-#ifdef QTOPIA4_TODO
-    // For PDA need to make several EmailListItems, one for each column.
-#endif
-#ifdef QTOPIA_PHONE
+    setItem(0, 0, new EmailListItem(this, id, 0) );
     QSoftMenuBar::setLabel(this, Qt::Key_Select, rowCount() ? QSoftMenuBar::View : QSoftMenuBar::NoLabel);
-#endif
+
 /*
     if ( mail->inReplyTo().isEmpty() ) {
         new EmailListItem(this, mail);
@@ -351,9 +328,7 @@ void MailListView::clear()
     setRowCount( 0 );
     setColumnCount( columns.count() );
     setHorizontalHeaderLabels( columns );
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
-#endif
     emit enableMessageActions( false );
 }
 
@@ -431,7 +406,7 @@ void MailListView::writeConfig( QSettings *conf)
 
 EmailListItem* MailListView::emailItemFromIndex( const QModelIndex & i ) const
 {
-    return (EmailListItem *)itemFromIndex( i );
+    return static_cast<EmailListItem *>(itemFromIndex( i ));
 }
 
 // Keep the list of message headers scrolled hard to the left
@@ -445,10 +420,26 @@ void MailListView::scrollToLeft(int)
     horizontalScrollBar()->setValue( 0 );
 }
 
-QContactModel *MailListView::contactModel()
+void MailListView::setSelectedItem(QTableWidgetItem* item)
 {
-    if (!mContactModel)
-        mContactModel = new QContactModel( this );
+    // Replace any existing selection with this item
+    clearSelection();
+    item->setSelected(true);
 
-    return mContactModel;
+    // Make this item the current item, also
+    setCurrentItem(item);
+    scrollToItem(item);
 }
+
+void MailListView::setSelectedId(const QMailId& id)
+{
+    if (EmailListItem* item = getRef(id))
+        setSelectedItem(item);
+}
+
+void MailListView::setSelectedRow(int row)
+{
+    if (QTableWidgetItem* rowItem = item(row, 0))
+        setSelectedItem(rowItem);
+}
+

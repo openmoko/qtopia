@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -103,6 +103,8 @@ public:
 
     bool removeOccurrence(const QOccurrence& occurrence);
     bool removeOccurrence(const QAppointment& appointment, const QDate &date);
+    bool restoreOccurrence(const QUniqueId &, const QDate &);
+
     bool removeOccurrence(const QUniqueId &id, const QDate &date);
     QUniqueId replaceOccurrence(const QAppointment& appointment, const QOccurrence& replacement, const QDate& date = QDate());
     QUniqueId replaceRemaining(const QAppointment& appointment, const QAppointment& replacement, const QDate& date = QDate());
@@ -131,8 +133,6 @@ public:
     DurationType durationType() const;
 
 private:
-
-    QAppointment simpleAppointment(int row);
 
     static void initMaps();
     static QMap<Field, QString> k2t;
@@ -178,8 +178,8 @@ public:
     QOccurrence occurrence(const QUniqueId &, const QDate &) const;
     QOccurrence occurrence(int) const;
     QAppointment appointment(const QUniqueId &id) const;
-    QAppointment appointment(const QModelIndex &index) const { return occurrence(index).appointment(); }
-    QAppointment appointment(int index) const { return occurrence(index).appointment(); }
+    QAppointment appointment(const QModelIndex &index) const;
+    QAppointment appointment(int index) const;
 
 
     void setRange(const QDateTime &, int);
@@ -201,8 +201,9 @@ public:
     bool editable(const QModelIndex &index) const;
     bool editable(const QUniqueId &) const;
 
+    // refresh, fetching, completeFetch and fetchCompleted
+    // no longer do anything.
     void refresh();
-
     // will want similar fetch calls for contacts:sim
     bool fetching() const;
     void completeFetch(); // can be expensive
@@ -210,7 +211,11 @@ signals:
     void fetchCompleted();
 
 public slots:
-    void rebuildCache();
+    // there is no longer any reason for calling this function
+    void rebuildCache() const;
+
+private slots:
+    void forwardAppointmentReset();
 
 private:
     QVariant appointmentData(int row, int column) const;

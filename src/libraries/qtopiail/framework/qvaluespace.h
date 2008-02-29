@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -34,8 +34,13 @@ class QTOPIAIL_EXPORT IValueSpaceLayer : public QObject
 {
 Q_OBJECT
 public:
+#ifdef QT_ARCH_X86_64
+    typedef unsigned long HANDLE;
+    static const HANDLE InvalidHandle = 0xFFFFFFFFFFFFFFFF;
+#else
     typedef unsigned int HANDLE;
     static const HANDLE InvalidHandle = 0xFFFFFFFF;
+#endif
 
     /* Returns the layer name */
     virtual QString name() = 0;

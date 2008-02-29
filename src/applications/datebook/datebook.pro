@@ -8,32 +8,23 @@ HEADERS		+= dayview.h \
 		  dayviewheaderimpl.h \
 		  datebooksettings.h \
                   datebookcategoryselector.h\
-		  #datebookweek.h \
-		  #datebookweekheaderimpl.h \
 		  monthview.h \
                   timedview.h \
-		  periodview.h \
-		  repeatentry.h \
 		  finddialog.h \
 		  findwidget_p.h \
 		  appointmentpicker.h \
 		  exceptiondialog.h \
 		  alarmdialog.h \
 		  appointmentdetails.h \
-                  appointmentlist.h \
-                  datebookgui.h
+                  appointmentlist.h
 
 SOURCES		+= dayview.cpp \
 		  datebook.cpp \
 		  entrydialog.cpp \
 		  dayviewheaderimpl.cpp \
 		  datebooksettings.cpp \
-		  #datebookweek.cpp \
-		  #datebookweekheaderimpl.cpp \
 		  monthview.cpp \
                   timedview.cpp \
-		  periodview.cpp \
-		  repeatentry.cpp \
 		  finddialog.cpp \
 		  findwidget_p.cpp \
 		  appointmentpicker.cpp \
@@ -41,42 +32,35 @@ SOURCES		+= dayview.cpp \
 		  alarmdialog.cpp \
 		  appointmentdetails.cpp \
                   appointmentlist.cpp \
-                  datebookgui.cpp \
                   main.cpp
 
 
-FORMS	+=        repeatentry.ui \
-                   #datebookweekheader.ui \
-		   findwidgetbase_p.ui \
-		   exceptiondialogbase.ui
+FORMS	+=         findwidgetbase_p.ui \
+		   exceptiondialogbase.ui \
+                   datebooksettingsbase_phone.ui
 
-PHONE_FORMS    += entrydetails_phone.ui \
-                       datebooksettingsbase_phone.ui
-PDA_FORMS      += entrydetails.ui \
-                       datebooksettingsbase.ui
-
-phone {
-    FORMS      += $$PHONE_FORMS
-} else {
-    FORMS      += $$PDA_FORMS 
-}
-
-enable_ssl {
     HEADERS += googleaccount.h \
                accounteditor.h
     SOURCES += googleaccount.cpp \
                accounteditor.cpp
-    FORMS   += googleaccount.ui
     DEFINES += GOOGLE_CALENDAR_CONTEXT
-}
 
-TRANSLATABLES   +=  $$PHONE_FORMS \
-                    $$PDA_FORMS \
+TRANSLATABLES   +=  datebooksettingsbase_phone.ui \
                     googleaccount.h \
                     googleaccount.cpp \
                     accounteditor.h \
-                    accounteditor.cpp \
-                    googleaccount.ui
+                    accounteditor.cpp
+
+!enable_singleexec {
+    SOURCES += ../todo/reminderpicker.cpp \
+               ../todo/recurrencedetails.cpp\
+               ../todo/qdelayedscrollarea.cpp\
+               ../todo/qtopiatabwidget.cpp
+    HEADERS += ../todo/reminderpicker.h \
+               ../todo/recurrencedetails.h\
+               ../todo/qdelayedscrollarea.h\
+               ../todo/qtopiatabwidget.h
+}
 
 
 depends(libraries/qtopiapim)
@@ -84,21 +68,27 @@ depends(libraries/qtopiapim)
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/datebook.desktop
 desktop.path=/apps/Applications
 desktop.hint=desktop
+INSTALLS+=desktop
 calservice.files=$$QTOPIA_DEPOT_PATH/services/Calendar/datebook
 calservice.path=/services/Calendar
+INSTALLS+=calservice
 timeservice.files=$$QTOPIA_DEPOT_PATH/services/TimeMonitor/datebook
 timeservice.path=/services/TimeMonitor
+INSTALLS+=timeservice
 recservice.files=$$QTOPIA_DEPOT_PATH/services/Receive/text/x-vcalendar-Events/datebook
 recservice.path=/services/Receive/text/x-vcalendar-Events
+INSTALLS+=recservice
 qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/Calendar
 qdsservice.path=/etc/qds
+INSTALLS+=qdsservice
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=datebook*
 help.hint=help
+INSTALLS+=help
 pics.files=$$QTOPIA_DEPOT_PATH/pics/datebook/*
 pics.path=/pics/datebook
 pics.hint=pics
-INSTALLS+=desktop calservice timeservice recservice qdsservice help pics
+INSTALLS+=pics
  
 pkg.desc=Calendar for Qtopia.
-pkg.domain=window,pim,alarm,qdl,qds,docapi,beaming,cardreader,bluetooth
+pkg.domain=window,pim,alarm,qdl,qds,beaming,cardreader,bluetooth,categories

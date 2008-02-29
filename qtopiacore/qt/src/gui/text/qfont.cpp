@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,6 +37,7 @@
 ****************************************************************************/
 
 #include "qfont.h"
+#include "qdebug.h"
 #include "qpaintdevice.h"
 #include "qfontdatabase.h"
 #include "qfontmetrics.h"
@@ -46,6 +62,10 @@ extern const QX11Info *qt_x11Info(const QPaintDevice *pd);
 #endif
 #ifdef Q_WS_QWS
 #include "qscreen_qws.h"
+#if !defined(QT_NO_QWS_QPF2)
+#include <qfile.h>
+#include "qfontengine_qpf_p.h"
+#endif
 #endif
 
 // #define QFONTCACHE_DEBUG
@@ -116,7 +136,33 @@ extern HDC shared_dc;
 
 extern bool qt_is_gui_used;
 
-Q_GUI_EXPORT int qt_defaultDpi()
+Q_GUI_EXPORT int qt_defaultDpiX()
+{
+    if (!qt_is_gui_used)
+        return 75;
+
+    int dpi;
+#ifdef Q_WS_X11
+    dpi = QX11Info::appDpiX();
+#elif defined(Q_WS_WIN)
+    dpi = GetDeviceCaps(shared_dc,LOGPIXELSX);
+#elif defined(Q_WS_MAC)
+    extern float qt_mac_defaultDpi_x(); //qpaintdevice_mac.cpp
+    dpi = qt_mac_defaultDpi_x();
+#elif defined(Q_WS_QWS)
+    if (!qt_screen)
+        return 72;
+    QScreen *screen = qt_screen;
+    const QList<QScreen*> subScreens = qt_screen->subScreens();
+    if (!subScreens.isEmpty())
+        screen = subScreens.at(0);
+    dpi = qRound(screen->width() / double(screen->physicalWidth() / 25.4));
+#endif // Q_WS_X11
+
+    return dpi;
+}
+
+Q_GUI_EXPORT int qt_defaultDpiY()
 {
     if (!qt_is_gui_used)
         return 75;
@@ -127,10 +173,8 @@ Q_GUI_EXPORT int qt_defaultDpi()
 #elif defined(Q_WS_WIN)
     dpi = GetDeviceCaps(shared_dc,LOGPIXELSY);
 #elif defined(Q_WS_MAC)
-    short hr;
-    short mdpi;
-    ScreenRes(&hr, &mdpi);
-    dpi = int(mdpi);
+    extern float qt_mac_defaultDpi_y(); //qpaintdevice_mac.cpp
+    dpi = qt_mac_defaultDpi_y();
 #elif defined(Q_WS_QWS)
     if (!qt_screen)
         return 72;
@@ -144,13 +188,21 @@ Q_GUI_EXPORT int qt_defaultDpi()
     return dpi;
 }
 
+Q_GUI_EXPORT int qt_defaultDpi()
+{
+    return qt_defaultDpiY();
+}
+
 QFontPrivate::QFontPrivate()
     : engineData(0), dpi(qt_defaultDpi()), screen(0),
       rawMode(false), underline(false), overline(false), strikeOut(false), kerning(true)
 {
     ref = 1;
 #ifdef Q_WS_X11
-    screen = QX11Info::appScreen();
+    if (QX11Info::display())
+        screen = QX11Info::appScreen();
+    else
+        screen = 0;
 #endif
 #ifdef Q_WS_WIN
     hdc = 0;
@@ -229,16 +281,16 @@ void QFontPrivate::resolve(uint mask, const QFontPrivate *other)
 QFontEngineData::QFontEngineData()
 {
     ref = 1;
-#if defined(Q_WS_X11) || defined(Q_WS_WIN)
+#if !defined(Q_WS_MAC)
     memset(engines, 0, QUnicodeTables::ScriptCount * sizeof(QFontEngine *));
 #else
     engine = 0;
-#endif // Q_WS_X11 || Q_WS_WIN
+#endif
 }
 
 QFontEngineData::~QFontEngineData()
 {
-#if defined(Q_WS_X11) || defined(Q_WS_WIN)
+#if !defined(Q_WS_MAC)
     for (int i = 0; i < QUnicodeTables::ScriptCount; ++i) {
         if (engines[i])
             engines[i]->ref.deref();
@@ -248,7 +300,7 @@ QFontEngineData::~QFontEngineData()
     if (engine)
         engine->ref.deref();
     engine = 0;
-#endif // Q_WS_X11 || Q_WS_WIN
+#endif // Q_WS_X11 || Q_WS_WIN || Q_WS_MAC
 }
 
 
@@ -284,7 +336,7 @@ QFontEngineData::~QFontEngineData()
     Create QFonts like this:
 
     \code
-        QFont serifFont("Times", 10, Bold);
+        QFont serifFont("Times", 10, QFont::Bold);
         QFont sansFont("Helvetica [Cronyx]", 12);
     \endcode
 
@@ -432,11 +484,13 @@ QFontEngineData::~QFontEngineData()
     \sa Weight
 */
 
-void qt_font_tread_test()
+#ifndef QT_NO_DEBUG
+static void qt_font_thread_test()
 {
     if (QApplication::instance() && QThread::currentThread() != QApplication::instance()->thread())
         qWarning("QFont: It is not safe to use text and fonts outside the GUI thread");
 }
+#endif
 
 /*!
   Constructs a font from \a font for use on the paint device \a pd.
@@ -472,7 +526,9 @@ QFont::QFont(const QFont &font, QPaintDevice *pd)
 QFont::QFont(QFontPrivate *data)
     : resolve_mask(QFontPrivate::Complete)
 {
-    qt_font_tread_test();
+#ifndef QT_NO_DEBUG
+    qt_font_thread_test();
+#endif
 
     d = data;
     d->ref.ref();
@@ -523,7 +579,9 @@ QFont::QFont()
 QFont::QFont(const QString &family, int pointSize, int weight, bool italic)
     :d(new QFontPrivate)
 {
-    qt_font_tread_test();
+#ifndef QT_NO_DEBUG
+    qt_font_thread_test();
+#endif
 
     resolve_mask = QFontPrivate::Family;
 
@@ -1719,9 +1777,12 @@ QDataStream &operator<<(QDataStream &s, const QFont &font)
     s << (quint8) font.d->request.styleHint;
     if (s.version() >= 5)
         s << (quint8) font.d->request.styleStrategy;
-    return s << (quint8) 0
-             << (quint8) font.d->request.weight
-             << get_font_bits(s.version(), font.d);
+    s << (quint8) 0
+      << (quint8) font.d->request.weight
+      << get_font_bits(s.version(), font.d);
+    if (s.version() >= QDataStream::Qt_4_3)
+        s << (quint16)font.d->request.stretch;
+    return s;
 }
 
 
@@ -1770,6 +1831,7 @@ QDataStream &operator>>(QDataStream &s, QFont &font)
     s >> styleHint;
     if (s.version() >= 5)
         s >> styleStrategy;
+
     s >> charSet;
     s >> weight;
     s >> bits;
@@ -1779,6 +1841,12 @@ QDataStream &operator>>(QDataStream &s, QFont &font)
     font.d->request.weight = weight;
 
     set_font_bits(s.version(), bits, font.d);
+
+    if (s.version() >= QDataStream::Qt_4_3) {
+        quint16 stretch;
+        s >> stretch;
+        font.d->request.stretch = stretch;
+    }
 
     return s;
 }
@@ -2027,7 +2095,7 @@ bool QFontInfo::fixedPitch() const
     Q_ASSERT(engine != 0);
 #ifdef Q_OS_MAC
     if (!engine->fontDef.fixedPitchComputed) {
-        QChar ch[2] = { QChar('i'), QChar('m') };
+        QChar ch[2] = { QLatin1Char('i'), QLatin1Char('m') };
         QGlyphLayout g[2];
         int l = 2;
         engine->stringToCMap(ch, 2, g, &l, 0);
@@ -2120,7 +2188,7 @@ QFontCache::~QFontCache()
                 delete it.value();
             else
                 FC_DEBUG("QFontCache::~QFontCache: engineData %p still has refcount %d",
-                         it.value(), it.value()->ref.atomic);
+                         it.value(), int(it.value()->ref));
             ++it;
         }
     }
@@ -2137,7 +2205,7 @@ QFontCache::~QFontCache()
                 delete it.value().data;
             } else {
                 FC_DEBUG("QFontCache::~QFontCache: engine = %p still has refcount %d",
-                         it.value().data, it.value().data->ref.atomic);
+                         it.value().data, int(it.value().data->ref));
             }
         }
         ++it;
@@ -2152,7 +2220,7 @@ void QFontCache::clear()
                                  end = engineDataCache.end();
         while (it != end) {
             QFontEngineData *data = it.value();
-#if defined(Q_WS_X11) || defined(Q_WS_WIN)
+#if !defined(Q_WS_MAC)
             for (int i = 0; i < QUnicodeTables::ScriptCount; ++i) {
                 if (data->engines[i]) {
                     data->engines[i]->ref.deref();
@@ -2188,6 +2256,18 @@ void QFontCache::clear()
     engineCache.clear();
 }
 
+#if defined(Q_WS_QWS) && !defined(QT_NO_QWS_QPF2)
+void QFontCache::removeEngineForFont(const QByteArray &_fontName)
+{
+
+    /* This could be optimized but the code becomes much more complex if we want to handle multi
+     * font engines and it is probably not worth it. Therefore we just clear the entire font cache.
+     */
+    Q_UNUSED(_fontName);
+    clear();
+}
+#endif
+
 QFontEngineData *QFontCache::findEngineData(const Key &key) const
 {
     EngineDataCache::ConstIterator it = engineDataCache.find(key),
@@ -2217,10 +2297,10 @@ QFontEngine *QFontCache::findEngine(const Key &key)
     it.value().timestamp = ++current_timestamp;
 
     FC_DEBUG("QFontCache: found font engine\n"
-            "  %p: timestamp %4u hits %3u ref %2d/%2d, type '%s'",
-            it.value().data, it.value().timestamp, it.value().hits,
-            it.value().data->ref.atomic, it.value().data->cache_count,
-            it.value().data->name());
+             "  %p: timestamp %4u hits %3u ref %2d/%2d, type '%s'",
+             it.value().data, it.value().timestamp, it.value().hits,
+             int(it.value().data->ref), it.value().data->cache_count,
+             it.value().data->name());
 
     return it.value().data;
 }
@@ -2292,19 +2372,12 @@ void QFontCache::cleanupPrinterFonts()
             }
 
             if(it.value()->ref != 0) {
-#ifdef Q_WS_WIN
                 for(int i = 0; i < QUnicodeTables::ScriptCount; ++i) {
                     if(it.value()->engines[i]) {
                         it.value()->engines[i]->ref.deref();
                         it.value()->engines[i] = 0;
                     }
                 }
-#else
-                if (it.value()->engine) {
-                    it.value()->engine->ref.deref();
-                    it.value()->engine = 0;
-                }
-#endif
                 ++it;
             } else {
 
@@ -2329,9 +2402,9 @@ void QFontCache::cleanupPrinterFonts()
         }
 
         FC_DEBUG("    %p: timestamp %4u hits %2u ref %2d/%2d, type '%s'",
-                  it.value().data, it.value().timestamp, it.value().hits,
-                  it.value().data->ref.atomic, it.value().data->cache_count,
-                  it.value().data->name());
+                 it.value().data, it.value().timestamp, it.value().hits,
+                 int(it.value().data->ref), it.value().data->cache_count,
+                 it.value().data->name());
 
         if (--it.value().data->cache_count == 0) {
             FC_DEBUG("    DELETE: last occurrence in cache");
@@ -2398,9 +2471,9 @@ void QFontCache::timerEvent(QTimerEvent *)
                                   end = engineCache.constEnd();
         for (; it != end; ++it) {
             FC_DEBUG("    %p: timestamp %4u hits %2u ref %2d/%2d, cost %u bytes",
-                      it.value().data, it.value().timestamp, it.value().hits,
-                      it.value().data->ref.atomic, it.value().data->cache_count,
-                      it.value().data->cache_cost);
+                     it.value().data, it.value().timestamp, it.value().hits,
+                     int(it.value().data->ref), it.value().data->cache_count,
+                     it.value().data->cache_cost);
 
             if (it.value().data->ref != 0)
                 in_use_cost += it.value().data->cache_cost / it.value().data->cache_count;
@@ -2501,9 +2574,9 @@ void QFontCache::timerEvent(QTimerEvent *)
 
         if (it != end) {
             FC_DEBUG("    %p: timestamp %4u hits %2u ref %2d/%2d, type '%s'",
-                      it.value().data, it.value().timestamp, it.value().hits,
-                      it.value().data->ref.atomic, it.value().data->cache_count,
-                      it.value().data->name());
+                     it.value().data, it.value().timestamp, it.value().hits,
+                     int(it.value().data->ref), it.value().data->cache_count,
+                     it.value().data->name());
 
             if (--it.value().data->cache_count == 0) {
                 FC_DEBUG("    DELETE: last occurrence in cache");

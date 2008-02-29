@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -29,6 +44,7 @@
 #include <QtCore/qvector.h>
 #include <QtGui/qcolor.h>
 #include <QtGui/qmatrix.h>
+#include <QtGui/qtransform.h>
 #include <QtGui/qimage.h>
 #include <QtGui/qpixmap.h>
 
@@ -68,6 +84,9 @@ public:
     inline const QMatrix &matrix() const;
     void setMatrix(const QMatrix &mat);
 
+    inline QTransform transform() const;
+    void setTransform(const QTransform &);
+
     QPixmap texture() const;
     void setTexture(const QPixmap &pixmap);
 
@@ -97,17 +116,25 @@ private:
 #endif
     friend class QRasterPaintEngine;
     friend class QRasterPaintEnginePrivate;
+    friend struct QSpanData;
     friend class QPainter;
+    friend bool hasPixmapTexture(const QBrush& brush);
     void detach(Qt::BrushStyle newStyle);
     void init(const QColor &color, Qt::BrushStyle bs);
     QBrushData *d;
     void cleanUp(QBrushData *x);
+
+public:
+    inline bool isDetached() const;
+    typedef QBrushData * DataPtr;
+    inline DataPtr &data_ptr() { return d; }
 };
 
 inline void QBrush::setColor(Qt::GlobalColor acolor)
 { setColor(QColor(acolor)); }
 
 Q_DECLARE_TYPEINFO(QBrush, Q_MOVABLE_TYPE);
+Q_DECLARE_SHARED(QBrush)
 
 /*****************************************************************************
   QBrush stream functions
@@ -127,13 +154,16 @@ struct QBrushData
     QAtomic ref;
     Qt::BrushStyle style;
     QColor color;
-    QMatrix transform;
-    bool hasTransform;
+    QTransform transform;
+    uint hasTransform : 1;
+    uint forceTextureClamp : 1;
 };
 
 inline Qt::BrushStyle QBrush::style() const { return d->style; }
 inline const QColor &QBrush::color() const { return d->color; }
-inline const QMatrix &QBrush::matrix() const { return d->transform; }
+inline const QMatrix &QBrush::matrix() const { return d->transform.toAffine(); }
+inline QTransform QBrush::transform() const { return d->transform; }
+inline bool QBrush::isDetached() const { return d->ref == 1; }
 
 #ifdef QT3_SUPPORT
 inline QBrush::operator const QColor&() const { return d->color; }
@@ -168,7 +198,8 @@ public:
 
     enum CoordinateMode {
         LogicalMode,
-        StretchToDeviceMode
+        StretchToDeviceMode,
+        ObjectBoundingMode
     };
 
     QGradient();
@@ -190,7 +221,7 @@ public:
     inline bool operator!=(const QGradient &other) const
     { return !operator==(other); }
 
-    bool operator==(const QGradient &gradient); // ### Qt 5.0 - remove me
+    bool operator==(const QGradient &gradient); // ### Qt 5: remove
 
 private:
     friend class QLinearGradient;

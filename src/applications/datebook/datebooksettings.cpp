@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,27 +21,16 @@
 
 #include "datebooksettings.h"
 
-#include <qtopiaapplication.h>
-
-#include <qspinbox.h>
-#include <qcheckbox.h>
-#include <qcombobox.h>
-#include <qgroupbox.h>
-
 DateBookSettings::DateBookSettings( bool whichClock, QWidget *parent, Qt::WFlags fl )
     : QDialog( parent, fl ),
       ampm( whichClock ), oldtime(0)
 {
     setupUi( this );
-    // TODO make this check based on the screensize, not QTOPIA_PHONE
-    // Need to change use of compressed day to do the same first
-#ifdef QTOPIA_PHONE
     widCompress->hide();
-#endif
     init();
     setObjectName("settings");
-    QObject::connect( qApp, SIGNAL( clockChanged(bool) ),
-                      this, SLOT( slotChangeClock(bool) ) );
+    QObject::connect( qApp, SIGNAL(clockChanged(bool)),
+                      this, SLOT(slotChangeClock(bool)) );
 
     connect(chkAlarmPreset, SIGNAL(stateChanged(int)), this, SLOT(enablePresetDetails(int)));
 }

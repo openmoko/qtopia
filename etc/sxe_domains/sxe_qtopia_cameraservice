@@ -1,0 +1,3 @@
+#!/bin/sh
+lidsconf -A POSTBOOT -s ${BIN} -o /dev/video -j WRITE
+lidsconf -A POSTBOOT -s ${BIN} -o /dev/video0 -j WRITE

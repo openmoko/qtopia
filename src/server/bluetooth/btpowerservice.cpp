@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -32,6 +32,8 @@
 #include <QValueSpaceObject>
 
 #include <qtopiacomm/qbluetoothaddress.h>
+
+#include <unistd.h>
 
 class BtPowerServicePrivate
 {
@@ -81,6 +83,7 @@ BtPowerServicePrivate::~BtPowerServicePrivate()
     but the system integrator might change the application that
     implements this service.
 
+    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
     \sa QCommDeviceController, QCommDeviceSession
  */
 
@@ -100,13 +103,15 @@ BtPowerService::BtPowerService(const QByteArray &serverPath,
 
     connect(m_data->m_device, SIGNAL(stateChanged(QBluetoothLocalDevice::State)),
             this, SLOT(stateChanged(QBluetoothLocalDevice::State)));
-    connect(m_data->m_device, SIGNAL(error(QBluetoothLocalDevice::Error,const QString&)),
-            this, SLOT(error(QBluetoothLocalDevice::Error,const QString&)));
+    connect(m_data->m_device, SIGNAL(error(QBluetoothLocalDevice::Error,QString)),
+            this, SLOT(error(QBluetoothLocalDevice::Error,QString)));
 
     connect(m_data->m_phoneProfileMgr, SIGNAL(planeModeChanged(bool)),
             this, SLOT(planeModeChanged(bool)));
 
-    m_data->m_localDeviceValues->setAttribute("Enabled", QVariant(isUp()));
+    // init value space values
+    m_data->m_localDeviceValues->setAttribute("Enabled", isUp());
+    m_data->m_localDeviceValues->setAttribute("Visible", m_data->m_device->discoverable().value());
 
     if (m_data->m_device->discoverable())
         m_data->m_prevState = QBluetoothLocalDevice::Discoverable;
@@ -116,9 +121,8 @@ BtPowerService::BtPowerService(const QByteArray &serverPath,
         m_data->m_prevState = QBluetoothLocalDevice::Off;
 
     // ensure the service is down if plane mode is on
-    m_data->m_stateBeforePlaneModeOn = QBluetoothLocalDevice::State(-1);
+    m_data->m_stateBeforePlaneModeOn = m_data->m_prevState;
     if (m_data->m_phoneProfileMgr->planeMode()) {
-        m_data->m_stateBeforePlaneModeOn = m_data->m_prevState;
         bringDown();
     }
 }
@@ -196,13 +200,16 @@ void BtPowerService::stateChanged(QBluetoothLocalDevice::State state)
         m_data->m_btsettings->setValue("LocalDeviceVisible",
             QVariant((state == QBluetoothLocalDevice::Discoverable)) );
 
-        // this is used for determining whether to use the bluetooth status
+        // this is used for determining the bluetooth status
         // icon in the home screen status bar
-        m_data->m_localDeviceValues->setAttribute("Enabled", QVariant(true));
-    }
-    else {
+        m_data->m_localDeviceValues->setAttribute("Enabled", true);
+        m_data->m_localDeviceValues->setAttribute("Visible",
+                (state == QBluetoothLocalDevice::Discoverable));
+
+    } else {
         emit downStatus(false, QString());
-        m_data->m_localDeviceValues->setAttribute("Enabled", QVariant(false));
+        m_data->m_localDeviceValues->setAttribute("Enabled", false);
+        m_data->m_localDeviceValues->setAttribute("Visible", false);
     }
 }
 
@@ -249,11 +256,7 @@ bool BtPowerService::shouldBringDown(QUnixSocket *) const
                                        QMessageBox::Yes|QMessageBox::Default,
                                        QMessageBox::No|QMessageBox::Escape,
                                        QMessageBox::NoButton);
-#ifdef QTOPIA_PHONE
     int result = QtopiaApplication::execDialog(box);
-#else
-    int result = box->exec();
-#endif
 
     if (result == QMessageBox::No) {
         qLog(Bluetooth) << "User doesn't want to shut down the device..";
@@ -277,6 +280,8 @@ bool BtPowerService::shouldBringDown(QUnixSocket *) const
   The \i BtPower service is typically supplied by the Qtopia server,
   but the system integrator might change the application that
   implements this service.
+  
+  This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 */
 
 /*!
@@ -288,13 +293,19 @@ BtPowerServiceTask::BtPowerServiceTask(QObject *parent)
     QBluetoothLocalDeviceManager *mgr = new QBluetoothLocalDeviceManager(this);
 
     // get notifications when a local device is added or removed
-    connect(mgr, SIGNAL(deviceAdded(const QString &)),
-            SLOT(deviceAdded(const QString &)));
-    connect(mgr, SIGNAL(deviceRemoved(const QString &)),
-            SLOT(deviceRemoved(const QString &)));
+    connect(mgr, SIGNAL(deviceAdded(QString)),
+            SLOT(deviceAdded(QString)));
+    connect(mgr, SIGNAL(deviceRemoved(QString)),
+            SLOT(deviceRemoved(QString)));
+    connect(mgr, SIGNAL(defaultDeviceChanged(QString)),
+            SLOT(defaultDeviceChanged(QString)));
 
-    startService();
+    //we start this once the GUI is up and running
+    serverWidgetVsi = new QValueSpaceItem("/System/ServerWidgets/Initialized", this);
+    connect( serverWidgetVsi, SIGNAL(contentsChanged()), this, SLOT(delayedServiceStart()) );
+    delayedServiceStart(); //in case its visible already
 }
+
 
 /*!
     \internal
@@ -306,6 +317,24 @@ BtPowerServiceTask::~BtPowerServiceTask()
         delete m_btPower;
         m_btPower = 0;
     }
+}
+
+/*!
+  \internal
+  */
+void BtPowerServiceTask::delayedServiceStart()
+{
+    if ( serverWidgetVsi && serverWidgetVsi->value( QByteArray(), false ).toBool() ) {
+        serverWidgetVsi->disconnect();
+        serverWidgetVsi->deleteLater();
+        serverWidgetVsi = 0;
+        QTimer::singleShot( 5000, this, SLOT(startService()) );
+    }
+}
+
+void BtPowerServiceTask::defaultDeviceChanged(const QString &devName)
+{
+   qLog(Bluetooth) << "BtPowerServiceTask::defaultDeviceChanged" << devName;
 }
 
 /*!

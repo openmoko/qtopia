@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -28,14 +28,18 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <custom.h>
 
 #include "videocapturedevice.h"
 
-
-#define VIDEO_DEVICE            "/dev/video"
 #define VIDEO_DEFAULT_WIDTH     640
 #define VIDEO_DEFAULT_HEIGHT    480
 
+/*!
+ * \class VideoCaptureDevice
+ *
+ * \brief  This class provides an interface for Capture Devices
+ */
 
 VideoCaptureDevice::VideoCaptureDevice():
     m_frames(NULL),
@@ -167,7 +171,7 @@ void VideoCaptureDevice::setupCamera()
     v4l2_capability     capability;
 
     // Open the video device.
-    if (m_fd = open(VIDEO_DEVICE, O_RDWR) != -1) {
+    if (m_fd = open(V4L_VIDEO_DEVICE, O_RDWR) != -1) {
 
         memset(&capability, 0, sizeof(capability));
 
@@ -193,15 +197,15 @@ void VideoCaptureDevice::setupCamera()
                 }
             }
             else {
-                qWarning("%s is not a suitable capture device", VIDEO_DEVICE);
+                qWarning("%s is not a suitable capture device", V4L_VIDEO_DEVICE);
             }
         }
         else {
-            qWarning("%s: could not retrieve the video capabilities", VIDEO_DEVICE);
+            qWarning("%s: could not retrieve the video capabilities", V4L_VIDEO_DEVICE);
         }
     }
     else {
-        qWarning("Unable to open %s: %s", VIDEO_DEVICE, strerror(errno));
+        qWarning("Unable to open %s: %s", V4L_VIDEO_DEVICE, strerror(errno));
     }
 
     if (!success && m_fd != -1) {

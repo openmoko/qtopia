@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -19,16 +19,19 @@
 **
 ****************************************************************************/
 
+#ifndef CONTEXTLABEL_H
+#define CONTEXTLABEL_H
+
 #include <qtopiaglobal.h>
 #include <themedview.h>
-#include <qwindowsystem_qws.h>
+#include "qtopiainputevents.h"
 #include "phonethemeview.h"
 #include "qsoftmenubarprovider.h"
 
 class QTimer;
 class QSettings;
 
-class ContextLabel : public PhoneThemedView, public QWSServer::KeyboardFilter
+class ContextLabel : public PhoneThemedView, public QtopiaKeyboardFilter
 {
     Q_OBJECT
 public:
@@ -51,6 +54,9 @@ protected slots:
 protected:
     virtual void themeLoaded(const QString &);
 
+private slots:
+    void initializeButtons();
+
 private:
     struct Button {
         int key;
@@ -65,6 +71,10 @@ private:
     int buttonCount;
     bool blockUpdates;
     int pressedBtn;
+    bool loadedTheme;
+    bool themeInit;
     QSoftMenuBarProvider *menuProvider;
 };
+
+#endif
 

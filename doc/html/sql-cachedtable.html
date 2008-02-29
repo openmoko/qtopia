@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: Cached Table Example</title>
+  <title>Qt 4.3: Cached Table Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,7 +11,8 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Cached Table Example<br /><small></small></h1>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Cached Table Example<br /><span class="subtitle"></span>
+</h1>
 <p>Files:</p>
 <ul>
 <li><a href="sql-cachedtable-tableeditor-cpp.html">sql/cachedtable/tableeditor.cpp</a></li>
@@ -78,6 +79,55 @@
      query.exec(&quot;insert into person values(103, 'Lars', 'Gordon')&quot;);
      query.exec(&quot;insert into person values(104, 'Roberto', 'Robitaille')&quot;);
      query.exec(&quot;insert into person values(105, 'Maria', 'Papadopoulos')&quot;);
+
+     query.exec(&quot;create table trolltechoffice (id int primary key,&quot;
+                                              &quot;imagefile int,&quot;
+                                              &quot;location varchar(20),&quot;
+                                              &quot;country varchar(20),&quot;
+                                              &quot;description varchar(100))&quot;);
+     query.exec(&quot;insert into trolltechoffice &quot;
+                &quot;values(0, 0, 'Oslo', 'Norway',&quot;
+                &quot;'Oslo is home to more than 500 000 citizens and has a &quot;
+                &quot;lot to offer.It has been called \&quot;The city with the big &quot;
+                &quot;heart\&quot; and this is a nickname we are happy to live up to.')&quot;);
+     query.exec(&quot;insert into trolltechoffice &quot;
+                &quot;values(1, 1, 'Brisbane', 'Australia',&quot;
+                &quot;'Brisbane is the capital of Queensland, the Sunshine State, &quot;
+                &quot;where it is beautiful one day, perfect the next.  &quot;
+                &quot;Brisbane is Australia''s 3rd largest city, being home &quot;
+                &quot;to almost 2 million people.')&quot;);
+     query.exec(&quot;insert into trolltechoffice &quot;
+                &quot;values(2, 2, 'Redwood City', 'US',&quot;
+                &quot;'You find Redwood City in the heart of the Bay Area &quot;
+                &quot;just north of Silicon Valley. The largest nearby city is &quot;
+                &quot;San Jose which is the third largest city in California &quot;
+                &quot;and the 10th largest in the US.')&quot;);
+     query.exec(&quot;insert into trolltechoffice &quot;
+                &quot;values(3, 3, 'Berlin', 'Germany',&quot;
+                &quot;'Berlin, the capital of Germany is dynamic, cosmopolitan &quot;
+                &quot;and creative, allowing for every kind of lifestyle. &quot;
+                &quot;East meets West in the metropolis at the heart of a &quot;
+                &quot;changing Europe.')&quot;);
+     query.exec(&quot;insert into trolltechoffice &quot;
+                &quot;values(4, 4, 'Munich', 'Germany',&quot;
+                &quot;'Several technology companies are represented in Munich, &quot;
+                &quot;and the city is often called the \&quot;Bavarian Silicon Valley\&quot;. &quot;
+                &quot;The exciting city is also filled with culture, &quot;
+                &quot;art and music. ')&quot;);
+     query.exec(&quot;insert into trolltechoffice &quot;
+                &quot;values(5, 5, 'Beijing', 'China',&quot;
+                &quot;'Beijing as a capital city has more than 3000 years of &quot;
+                &quot;history. Today the city counts 12 million citizens, and &quot;
+                &quot;is the political, economic and cultural centre of China.')&quot;);
+
+     query.exec(&quot;create table images (locationid int, file varchar(20))&quot;);
+     query.exec(&quot;insert into images values(0, 'images/oslo.png')&quot;);
+     query.exec(&quot;insert into images values(1, 'images/brisbane.png')&quot;);
+     query.exec(&quot;insert into images values(2, 'images/redwood.png')&quot;);
+     query.exec(&quot;insert into images values(3, 'images/berlin.png')&quot;);
+     query.exec(&quot;insert into images values(4, 'images/munich.png')&quot;);
+     query.exec(&quot;insert into images values(5, 'images/beijing.png')&quot;);
+
      return true;
  }</pre>
 <p>The <tt>createConnection</tt> function opens a connection to an in-memory SQLITE database and creates a test table. If you want to use another database, simply modify this function's code.</p>
@@ -98,11 +148,11 @@
      model-&gt;setHeaderData(1, Qt::Horizontal, tr(&quot;First name&quot;));
      model-&gt;setHeaderData(2, Qt::Horizontal, tr(&quot;Last name&quot;));</pre>
 <p>First we create the data model and set the SQL database table we want the model to operate on. Note that the <a href="qsqltablemodel.html#setTable">QSqlTableModel::setTable</a>() function does not select data from the table; it only fetches its field information. For that reason we call the <a href="qsqltablemodel.html#select">QSqlTableModel::select</a>() function later on, populating the model with data from the table. The selection can be customized by specifying filters and sort conditions (see the <a href="qsqltablemodel.html">QSqlTableModel</a> class documentation for more details).</p>
-<p>We also set the model's edit strategy. The edit strategy dictates when the changes done by the user in the view, are actually applied to the database. Since we want to cache the changes in the table view (i.e. in the model) until the user explicitly submits them, we choose the <a href="qsqltablemodel.html#EditStrategy-enum">QSqlTableModel::OnManualSubmit</a> strategy. The alternatives are <a href="qsqltablemodel.html#EditStrategy-enum">QSqlTableModel::OnFieldChange</a> and <a href="qsqltablemodel.html#EditStrategy-enum">QSqlTableModel::OnRowChange</a>.</p>
+<p>We also set the model's edit strategy. The edit strategy dictates when the changes done by the user in the view, are actually applied to the database. Since we want to cache the changes in the table view (i.e&#x2e; in the model) until the user explicitly submits them, we choose the <a href="qsqltablemodel.html#EditStrategy-enum">QSqlTableModel::OnManualSubmit</a> strategy. The alternatives are <a href="qsqltablemodel.html#EditStrategy-enum">QSqlTableModel::OnFieldChange</a> and <a href="qsqltablemodel.html#EditStrategy-enum">QSqlTableModel::OnRowChange</a>.</p>
 <p>Finally, we set up the labels displayed in the view header using the <a href="qsqlquerymodel.html#setHeaderData">setHeaderData()</a> function that the model inherits from the <a href="qsqlquerymodel.html">QSqlQueryModel</a> class.</p>
 <pre>     QTableView *view = new QTableView;
      view-&gt;setModel(model);</pre>
-<p>Then we create a table view. The <a href="qtableview.html">QTableView</a> class provides a default model/view implementation of a table view, i.e. it implements a table view that displays items from a model. It also allows the user to edit the items, storing the changes in the model. To create a read only view, set the proper flag using the <a href="qabstractitemview.html#editTriggers-prop">editTriggers</a> property the view inherits from the <a href="qabstractitemview.html">QAbstractItemView</a> class.</p>
+<p>Then we create a table view. The <a href="qtableview.html">QTableView</a> class provides a default model/view implementation of a table view, i.e&#x2e; it implements a table view that displays items from a model. It also allows the user to edit the items, storing the changes in the model. To create a read only view, set the proper flag using the <a href="qabstractitemview.html#editTriggers-prop">editTriggers</a> property the view inherits from the <a href="qabstractitemview.html">QAbstractItemView</a> class.</p>
 <p>To make the view present our data, we pass our model to the view using the <a href="qabstractitemview.html#setModel">setModel()</a> function.</p>
 <pre>     submitButton = new QPushButton(tr(&quot;Submit&quot;));
      submitButton-&gt;setDefault(true);
@@ -114,11 +164,11 @@
      buttonBox-&gt;addButton(revertButton, QDialogButtonBox::ActionRole);
      buttonBox-&gt;addButton(quitButton, QDialogButtonBox::RejectRole);</pre>
 <p>The <tt>TableEditor</tt>'s buttons are regular <a href="qpushbutton.html">QPushButton</a> objects. We add them to a button box to ensure that the buttons are presented in a layout that is appropriate to the current widget style. The rationale for this is that dialogs and message boxes typically present buttons in a layout that conforms to the interface guidelines for that platform. Invariably, different platforms have different layouts for their dialogs. <a href="qdialogbuttonbox.html">QDialogButtonBox</a> allows a developer to add buttons to it and will automatically use the appropriate layout for the user's desktop environment.</p>
-<p>Most buttons for a dialog follow certain roles. When adding a button to a button box using the <a href="qdialogbuttonbox.html">addButton()</a> function, the button's role must be specified using the <a href="qdialogbuttonbox.html#ButtonRole-enum">QDialogButtonBox::ButtonRole</a> enum. Alternatively, <a href="qdialogbuttonbox.html">QDialogButtonBox</a> provides several standard buttons (e.g. <b>OK</b>, <b>Cancel</b>, <b>Save</b>) that you can use. They exist as flags so you can OR them together in the constructor.</p>
+<p>Most buttons for a dialog follow certain roles. When adding a button to a button box using the <a href="qdialogbuttonbox.html">addButton()</a> function, the button's role must be specified using the <a href="qdialogbuttonbox.html#ButtonRole-enum">QDialogButtonBox::ButtonRole</a> enum. Alternatively, <a href="qdialogbuttonbox.html">QDialogButtonBox</a> provides several standard buttons (e.g&#x2e; <b>OK</b>, <b>Cancel</b>, <b>Save</b>) that you can use. They exist as flags so you can OR them together in the constructor.</p>
 <pre>     connect(submitButton, SIGNAL(clicked()), this, SLOT(submit()));
      connect(revertButton, SIGNAL(clicked()), model, SLOT(revertAll()));
      connect(quitButton, SIGNAL(clicked()), this, SLOT(close()));</pre>
-<p>We connect the <b>Quit</b> button to the table editor's <a href="qwidget.html#close">close()</a> slot, and the <b>Submit</b> button to our private <tt>submit()</tt> slot. The latter slot will take care of the data transactions. Finally, we connect the <b>Revert</b> button to our model's <a href="qsqltablemodel.html#revertAll">revertAll()</a> slot, reverting all pending changes (i.e., restoring the original data).</p>
+<p>We connect the <b>Quit</b> button to the table editor's <a href="qwidget.html#close">close()</a> slot, and the <b>Submit</b> button to our private <tt>submit()</tt> slot. The latter slot will take care of the data transactions. Finally, we connect the <b>Revert</b> button to our model's <a href="qsqltablemodel.html#revertAll">revertAll()</a> slot, reverting all pending changes (i.e&#x2e;, restoring the original data).</p>
 <pre>     QHBoxLayout *mainLayout = new QHBoxLayout;
      mainLayout-&gt;addWidget(view);
      mainLayout-&gt;addWidget(buttonBox);
@@ -141,7 +191,7 @@
  }</pre>
 <p>The <tt>submit()</tt> slot is called whenever the users hit the <b>Submit</b> button to save their changes.</p>
 <p>First, we begin a transaction on the database using the <a href="qsqldatabase.html#transaction">QSqlDatabase::transaction</a>() function. A database transaction is a unit of interaction with a database management system or similar system that is treated in a coherent and reliable way independent of other transactions. A pointer to the used database can be obtained using the <a href="qsqltablemodel.html#database">QSqlTableModel::database</a>() function.</p>
-<p>Then, we try to submit all the pending changes, i.e. the model's modified items. If no error occurs, we commit the transaction to the database using the <a href="qsqldatabase.html#commit">QSqlDatabase::commit</a>() function (note that on some databases, this function will not work if there is an active <a href="qsqlquery.html">QSqlQuery</a> on the database). Otherwise we perform a rollback of the transaction using the <a href="qsqldatabase.html#rollback">QSqlDatabase::rollback</a>() function and post a warning to the user.</p>
+<p>Then, we try to submit all the pending changes, i.e&#x2e; the model's modified items. If no error occurs, we commit the transaction to the database using the <a href="qsqldatabase.html#commit">QSqlDatabase::commit</a>() function (note that on some databases, this function will not work if there is an active <a href="qsqlquery.html">QSqlQuery</a> on the database). Otherwise we perform a rollback of the transaction using the <a href="qsqldatabase.html#rollback">QSqlDatabase::rollback</a>() function and post a warning to the user.</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><b>See also:</b><p>A complete list of Qt's SQL <a href="database.html">Database Classes</a>, and the <a href="model-view-programming.html">Model/View Programming</a> documentation.</p>
 </td></tr>
@@ -150,6 +200,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

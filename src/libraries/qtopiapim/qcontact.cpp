@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -34,6 +34,7 @@
 #include <QTextDocument>
 #include <QFileInfo>
 #include <QImage>
+#include <QIcon>
 #include <QBuffer>
 #include <QTextCodec>
 #include <QDataStream>
@@ -129,7 +130,7 @@ QString emailSeparator() { return " "; }
   be specified, provides functions for matching a contact against a
   regular expression, and converting to and from vCard format.
 
-  \sa QContactAddress
+  \sa QContactAddress, {Pim Library}
 */
 
 /*!
@@ -251,59 +252,67 @@ QString QContact::toRichText() const
     QString str;
     str = emailList().join(", ");
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim", "Email Addresses: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim", "Email Addresses:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = homePhone();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Home Phone: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Home Phone:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = homeFax();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Home Fax: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Home Fax:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = homeMobile();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Home Mobile: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Home Mobile:") + " </b>"
+                + Qt::escape(str) + "<br>";
+    str = homeVOIP();
+    if ( !str.isEmpty() )
+        text += "<b>" + qApp->translate( "QtopiaPim","Home VOIP:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = homeWebpage();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Home Web Page: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Home Web Page:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = businessWebpage();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Business Web Page: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Business Web Page:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = office();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Office: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Office:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = businessPhone();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Business Phone: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Business Phone:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = businessFax();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Business Fax: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Business Fax:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = businessMobile();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Business Mobile: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Business Mobile:") + " </b>"
+                + Qt::escape(str) + "<br>";
+    str = businessVOIP();
+    if ( !str.isEmpty() )
+        text += "<b>" + qApp->translate( "QtopiaPim","Business VOIP:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = businessPager();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Business Pager: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Business Pager:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = profession();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Profession: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Profession:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = assistant();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Assistant: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Assistant:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = manager();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Manager: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Manager:") + " </b>"
                 + Qt::escape(str) + "<br>";
     str = gender();
     if ( !str.isEmpty() && str.toInt() != 0 ) {
@@ -311,27 +320,27 @@ QString QContact::toRichText() const
             str = qApp->translate( "QtopiaPim", "Male" );
         else if ( str.toInt() == 2 )
             str = qApp->translate( "QtopiaPim", "Female" );
-        text += "<b>" + qApp->translate( "QtopiaPim","Gender: ") + "</b>" + str + "<br>";
+        text += "<b>" + qApp->translate( "QtopiaPim","Gender:") + " </b>" + str + "<br>";
     }
     str = spouse();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Spouse: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Spouse:") + " </b>"
                 + Qt::escape(str) + "<br>";
     if ( birthday().isValid() ) {
         str = QTimeString::localYMD( birthday() );
         if ( !str.isEmpty() )
-            text += "<b>" + qApp->translate( "QtopiaPim","Birthday: ") + "</b>"
+            text += "<b>" + qApp->translate( "QtopiaPim","Birthday:") + " </b>"
                 + Qt::escape(str) + "<br>";
     }
     if ( anniversary().isValid() ) {
         str = QTimeString::localYMD( anniversary() );
         if ( !str.isEmpty() )
-            text += "<b>" + qApp->translate( "QtopiaPim","Anniversary: ") + "</b>"
+            text += "<b>" + qApp->translate( "QtopiaPim","Anniversary:") + " </b>"
                 + Qt::escape(str) + "<br>";
     }
     str = nickname();
     if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Nickname: ") + "</b>"
+        text += "<b>" + qApp->translate( "QtopiaPim","Nickname:") + " </b>"
                 + Qt::escape(str) + "<br>";
 
     // notes last
@@ -436,10 +445,12 @@ QList<QContact::PhoneType> QContact::phoneTypes()
         //result.append(Pager);
         result.append(HomeMobile);
         result.append(HomeFax);
+        result.append(HomeVOIP);
         //result.append(HomePager);
         result.append(BusinessMobile);
         result.append(BusinessFax);
         result.append(BusinessPager);
+        result.append(BusinessVOIP);
     }
     return result;
 }
@@ -474,12 +485,16 @@ QString QContact::phoneIconResource(PhoneType type)
             return ":icon/addressbook/homephone";
         case HomeMobile:
             return ":icon/addressbook/homemobile";
+        case HomeVOIP:
+            return ":icon/addressbook/homevoip";
         case HomeFax:
             return ":icon/addressbook/homefax";
         case BusinessPhone:
             return ":icon/addressbook/businessphone";
         case BusinessMobile:
             return ":icon/addressbook/businessmobile";
+        case BusinessVOIP:
+            return ":icon/addressbook/businessvoip";
         case BusinessFax:
             return ":icon/addressbook/businessfax";
         case BusinessPager:
@@ -503,6 +518,38 @@ QMap<QContact::PhoneType, QString> QContact::phoneNumbers() const
 QMap<QContact::Location, QContactAddress> QContact::addresses() const
 {
     return d->address;
+}
+
+/*!
+    Sets the set of phone numbers of the contact to the given \a numbers
+*/
+void QContact::setPhoneNumbers(const QMap<PhoneType, QString> &numbers)
+{
+    d->phoneNumbers = numbers;
+}
+
+/*!
+  Sets the contact addresses to the given \a addresses
+*/
+void QContact::setAddresses(const QMap<Location, QContactAddress> &addresses)
+{
+    d->address = addresses;
+}
+
+/*!
+  Clears the phone number list of the contact, including the default phone number.
+*/
+void QContact::clearPhoneNumbers()
+{
+    d->phoneNumbers.clear();
+}
+
+/*!
+  Clears the addresses of the contact.
+*/
+void QContact::clearAddresses()
+{
+    d->address.clear();
 }
 
 /*!
@@ -689,7 +736,7 @@ void QContact::clearEmailList()
   will be the first pattern for which all fields specified are non null for the contact.
 
   For example:
-  \c {LastName , _ FirstName | LastName | FirstName | Company}
+  \c {lastname , _ firstname | lastname | firstname | company}
 
   \sa labelFormat(), labelFields(), label()
 */
@@ -708,7 +755,7 @@ void QContact::setLabelFormat(const QString &f)
   will the first pattern for which all fields specified are non null for the contact.
 
   For example:
-  \c {LastName , _ FirstName | LastName | FirstName | Company}
+  \c {lastname , _ firstname | lastname | firstname | company}
 
   \sa setLabelFormat(), labelFields(), label()
 */
@@ -801,6 +848,8 @@ QStringList QContact::emailList() const
 void QContact::setDefaultEmail( const QString &v )
 {
     QString e = v.simplified();
+    if (e.isEmpty())
+        return;
 
     replace( DefaultEmail, e );
     if (!d->emails.contains(e))
@@ -839,20 +888,29 @@ QPixmap QContact::thumbnail() const
 {
     QPixmap result;
 
-    QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
-    if( !portraitFile().isEmpty() ) {
+    QString pFile = portraitFile();
+
+    if( !pFile.isEmpty() ) {
         QString key("pimcontact" + uid().toString() + "-cfl-thumb");
         QPixmap *cached = QPixmapCache::find( key );
         if( cached ) {
             result = *cached;
         } else {
             QSize tsize = thumbnailSize();
-            QString pFileName( baseDirStr + portraitFile() );
-            QThumbnail thumbnail( pFileName );
-            result = thumbnail.pixmap( tsize, Qt::KeepAspectRatioByExpanding );
-            result = result.copy( ( result.width() - tsize.width() ) / 2,
+            QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
+            QString pPath( pFile.startsWith(QChar(':')) ? pFile : baseDirStr + pFile );
+            QThumbnail thumbnail( pPath );
+            result = thumbnail.pixmap( tsize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            if (tsize != result.size()) {
+                // Make a transparent version, centered (we scale first, so not too many pixels)
+                QImage img = result.toImage();
+                if (img.format() != QImage::Format_ARGB32 && img.format() != QImage::Format_ARGB32_Premultiplied)
+                    img = img.convertToFormat(QImage::Format_ARGB32);
+                img = img.copy( ( result.width() - tsize.width() ) / 2,
                                   ( result.height() - tsize.height() ) / 2,
                                   tsize.width(), tsize.height() );
+                result = QPixmap::fromImage(img);
+            }
             QPixmapCache::insert( key, result );
         }
     }
@@ -886,7 +944,61 @@ QPixmap QContact::thumbnail() const
 }
 
 /*!
-  Returns the size of the thumbnail pixmap of a contact's portrait.
+  Returns the portrait of the contact as an icon.
+  If there is no portrait set for the contact will return a default icon.
+
+  \sa portrait(), thumbnailSize()
+*/
+QIcon QContact::icon() const
+{
+
+    if( !portraitFile().isEmpty() ) {
+        QString pFile = portraitFile();
+        QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
+        QString pPath( pFile.startsWith(QChar(':')) ? pFile : baseDirStr + pFile );
+        QIcon i(pPath);
+        if (!i.isNull())
+            return i;
+    }
+
+    if (nameTitle().isEmpty() && firstName().isEmpty()
+            && middleName().isEmpty() && lastName().isEmpty()
+            && suffix().isEmpty() && !company().isEmpty()) {
+        return corporationIcon();
+    } else if (d->mCategories.contains("Business")) { // no tr
+        return genericIcon();
+    } else {
+        return personalIcon();
+    }
+}
+
+QIcon &QContact::corporationIcon()
+{
+    if (cIcon.isNull())
+        cIcon = QIcon(QLatin1String(":icon/addressbook/generic-corporation-contact"));
+    return cIcon;
+}
+
+QIcon &QContact::genericIcon()
+{
+    if (gIcon.isNull())
+        gIcon = QIcon(QLatin1String(":icon/addressbook/generic-contact"));
+    return gIcon;
+}
+
+QIcon &QContact::personalIcon()
+{
+    if (pIcon.isNull())
+        pIcon = QIcon(QLatin1String(":icon/addressbook/generic-personal-contact"));
+    return pIcon;
+}
+
+QIcon QContact::cIcon;
+QIcon QContact::gIcon;
+QIcon QContact::pIcon;
+
+/*!
+  Returns the size of the thumbnail of a contact's portrait.
 
   \sa thumbnail(), portraitSize()
 */
@@ -910,25 +1022,27 @@ QSize QContact::thumbnailSize()
 }
 
 /*!
-  Returns the portrait pixmap of the contact.
+  Returns the portrait of the contact as a pixmap.
   If there is no portrait set for the contact, this will return a default pixmap
   based on the contact's fields.
 
-  \sa portraitSize()
+  \sa icon(), portraitSize()
 */
 QPixmap QContact::portrait() const
 {
     QPixmap result;
 
-    QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
     if( !portraitFile().isEmpty() ) {
         QPixmap *cached = QPixmapCache::find( "pimcontact" + uid().toString() + "-cfl" );
         if( cached ) {
             result = *cached;
         } else {
-            QString pFileName( baseDirStr + portraitFile() );
-            result.load( pFileName );
-            QPixmapCache::insert( "pimcontact" + uid().toString() + "-cfl", result );
+            QString pFile = portraitFile();
+            QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
+            QString pPath( pFile.startsWith(QChar(':')) ? pFile : baseDirStr + pFile );
+            result.load( pPath );
+            if (!result.isNull())
+                QPixmapCache::insert( "pimcontact" + uid().toString() + "-cfl", result );
         }
     }
 
@@ -1474,15 +1588,17 @@ bool QContact::operator==(const QContact &other) const
             return false;
     }
 
-    if (d->emails != other.d->emails)
+    if (d->emails.count() != other.d->emails.count())
+        return false;
+    if (QSet<QString>::fromList(d->emails) != QSet<QString>::fromList(other.d->emails))
+        return false;
+    if (defaultEmail() != other.defaultEmail())
         return false;
     if (d->gender != other.d->gender)
         return false;
     if (d->birthday != other.d->birthday)
         return false;
     if (d->anniversary != other.d->anniversary)
-        return false;
-    if (categories() != other.categories())
         return false;
 
     if (d->defaultPhoneNumber != other.d->defaultPhoneNumber)
@@ -1496,7 +1612,7 @@ bool QContact::operator==(const QContact &other) const
 }
 
 /*!
-  Returns false if \a other is identical to the contact. Otherwise return true.
+  Returns false if \a other is identical to this contact. Otherwise return true.
 */
 bool QContact::operator!=(const QContact &other) const
 {
@@ -1504,6 +1620,70 @@ bool QContact::operator!=(const QContact &other) const
 }
 
 /*!
+  Writes the given list of \a contacts to the given \a device as vCards.
+
+  Returns true on success.
+  \sa readVCard()
+*/
+bool QContact::writeVCard( QIODevice *device, const QList<QContact> &contacts )
+{
+    foreach (QContact c, contacts)
+        if (!writeVCard(device, c))
+            return false;
+    return true;
+}
+
+/*!
+  Writes the given \a contact to the given \a device as vCards.
+
+  Returns true on success.
+  \sa readVCard()
+*/
+bool QContact::writeVCard( QIODevice *device, const QContact &contact )
+{
+    VObject *obj = contact.createVObject();
+    writeVObject( device, obj );
+    cleanVObject( obj );
+    cleanStrTbl();
+    return true;
+}
+
+/*!
+  Reads a list of vCards from the given \a device and returns the
+  equivalent set of contacts.
+
+  \sa writeVCard()
+*/
+QList<QContact> QContact::readVCard( QIODevice *device )
+{
+    QList<QContact> contacts;
+
+    QBuffer *buffer = qobject_cast<QBuffer *>(device);
+    QFile *file = qobject_cast<QFile *>(device);
+    if (file) {
+        int handle = file->handle();
+        FILE *input = fdopen(handle, "r");
+        if (input) {
+            q_DontDecodeBase64Photo++;
+            contacts = readVCard( Parse_MIME_FromFile( input ) );
+            q_DontDecodeBase64Photo--;
+        }
+    } else if (buffer) {
+        q_DontDecodeBase64Photo++;
+        contacts = readVCard( Parse_MIME( (const char*)buffer->data(), buffer->data().count() ) );
+        q_DontDecodeBase64Photo--;
+    } else {
+        const QByteArray bytes = device->readAll();
+        q_DontDecodeBase64Photo++;
+        contacts = readVCard( Parse_MIME( (const char*)bytes, bytes.count() ) );
+        q_DontDecodeBase64Photo--;
+    }
+
+    return contacts;
+}
+
+/*!
+  \deprecated
    Write the list of \a contacts as vCard objects to the file
    specified by \a filename.
 
@@ -1518,15 +1698,11 @@ bool QContact::writeVCard( const QString &filename, const QList<QContact> &conta
         qWarning( "Unable to open vcard file for write!" );
         return false;
     }
-
-    QList<QContact>::ConstIterator it;
-    for( it = contacts.begin(); it != contacts.end(); ++it )
-        (*it).writeVCard( f );
-
-    return true;
+    return writeVCard( &f, contacts);
 }
 
 /*!
+  \deprecated
    Writes the contact as a vCard object to the file specified
    by \a filename.
 
@@ -1541,13 +1717,11 @@ bool QContact::writeVCard( const QString &filename ) const
         qWarning( "Unable to open vcard file for write!" );
         return false;
     }
-
-    writeVCard( f );
-    return true;
+    return writeVCard( &f, *this);
 }
 
 /*!
-   \overload
+  \deprecated
 
    Writes the contact as a vCard object to the given \a file,
    which must be already open for writing.
@@ -1556,12 +1730,11 @@ bool QContact::writeVCard( const QString &filename ) const
 */
 void QContact::writeVCard( QFile &file ) const
 {
-    QDataStream stream( &file );
-    writeVCard( &stream );
+    writeVCard( &file, *this );
 }
 
 /*!
-   \overload
+  \deprecated
 
    Writes the contact as a vCard object to the given \a stream,
    which must be writable.
@@ -1570,13 +1743,12 @@ void QContact::writeVCard( QFile &file ) const
 */
 void QContact::writeVCard( QDataStream *stream ) const
 {
-    VObject *obj = createVObject();
-    writeVObject( stream, obj );
-    cleanVObject( obj );
-    cleanStrTbl();
+    writeVCard(stream->device(), *this);
 }
 
 /*!
+  \deprecated
+
   Reads the file specified by \a filename as a list of vCard objects
   and returns the list of contacts that correspond to the vCard objects.
 
@@ -1586,16 +1758,16 @@ void QContact::writeVCard( QDataStream *stream ) const
 */
 QList<QContact> QContact::readVCard( const QString &filename )
 {
-    QList<QContact> contacts;
+    QFile file(filename);
+    if (file.open(QIODevice::ReadOnly))
+        return readVCard(&file);
 
-    q_DontDecodeBase64Photo++; // don't decode the base64 encoded data automatically - we want the base64 encoded version
-    contacts = readVCard( Parse_MIME_FromFileName( (const char *)filename.toUtf8() ) );
-    q_DontDecodeBase64Photo--;
-
-    return contacts;
+    return QList<QContact>();
 }
 
 /*!
+  \deprecated
+
   Reads the given vCard data in \a vcard, and returns the list of
   corresponding contacts.
 
@@ -1605,13 +1777,9 @@ QList<QContact> QContact::readVCard( const QString &filename )
 */
 QList<QContact> QContact::readVCard( const QByteArray &vcard )
 {
-    QList<QContact> contacts;
-
-    q_DontDecodeBase64Photo++;
-    contacts = readVCard( Parse_MIME( (const char*)vcard, vcard.count() ) );
-    q_DontDecodeBase64Photo--;
-
-    return contacts;
+    QBuffer buffer;
+    buffer.setData(vcard.constData(), vcard.size());
+    return readVCard(&buffer);
 }
 
 /*!
@@ -1644,28 +1812,61 @@ QList<QContact> QContact::readVCard( VObject* vobject )
 }
 
 /*!
-  Returns true if one of this contact's fields matches \a regexp. Otherwise returns false.
+  \overload
+  Returns true if one of this contact's fields matches the given \a expression.
+
+  The function does not compare the gender, unique identifier, birthday or anniversary of the contact.
 */
-bool QContact::match( const QString &regexp ) const
+bool QContact::match( const QString &expression ) const
 {
-    return match(QRegExp(regexp));
+    return match(QRegExp(expression));
 }
 
 /*!
-  Returns true if one of this contact's fields matches \a r. Otherwise returns false.
+  Returns true if one of this contact's fields matches the given \a expression.
+
+  The function does not compare the gender, unique identifier, birthday or anniversary of the contact.
 */
-bool QContact::match( const QRegExp &r ) const
+bool QContact::match( const QRegExp &expression ) const
 {
     QMap<int, QString>::ConstIterator it;
     for ( it = d->mMap.begin(); it != d->mMap.end(); ++it ) {
-        if ( (*it).contains( r ) )
+        if ( (*it).contains( expression ) )
             return true;
     }
     QListIterator<QString> eit(d->emails);
     while(eit.hasNext()) {
-        if (eit.next().contains(r))
+        if (eit.next().contains(expression))
             return true;
     }
+    QMapIterator<QContact::PhoneType, QString> pit(d->phoneNumbers);
+    while(pit.hasNext()) {
+        pit.next();
+        if (pit.value().contains(expression))
+            return true;
+    }
+    QMapIterator<QContact::Location, QContactAddress> ait(d->address);
+    while(ait.hasNext()) {
+        ait.next();
+        QContactAddress address = ait.value();
+        if (address.street.contains(expression))
+            return true;
+        if (address.city.contains(expression))
+            return true;
+        if (address.state.contains(expression))
+            return true;
+        if (address.zip.contains(expression))
+            return true;
+        if (address.country.contains(expression))
+            return true;
+    }
+    QListIterator<QString> cit(d->mCategories);
+    while(cit.hasNext()) {
+        if (cit.next().contains(expression))
+            return true;
+    }
+    if (notes().contains(expression))
+        return true;
     return false;
 }
 
@@ -1699,9 +1900,80 @@ QMap<QString, QString> &QContact::customFieldsRef() { return d->customMap; }
 */
 const QMap<QString, QString> &QContact::customFieldsRef() const { return d->customMap; }
 
-/*! \fn void QContact::setPortraitFile( const QString &str )
+/*!
   Sets the path for the portrait file of the contact to \a str.
 */
+void QContact::setPortraitFile( const QString &str )
+{
+    replace(Portrait, str);
+}
+
+
+/*!
+  \internal
+  Removes the existing portrait file and clears pixmap caches
+*/
+void QContact::removeExistingPortrait()
+{
+    QString photoFile = portraitFile();
+    QString baseDir = Qtopia::applicationFileName( "addressbook", "contactimages/" );
+
+    QDir dir( baseDir );
+    if( !dir.exists() )
+        dir.mkdir( baseDir );
+
+    if( !photoFile.isEmpty()  && !photoFile.startsWith(QChar(':'))) {
+        QFile pFile( baseDir + photoFile );
+        if( pFile.exists() )
+            pFile.remove();
+    }
+
+    // Clear out any cached pixmaps
+    QString key("pimcontact" + uid().toString() + "-cfl");
+    QPixmapCache::remove(key);
+    QPixmapCache::remove(key + "-thumb");
+}
+
+/*!
+  \internal
+  Saves the given \a image as the portrait.  Assumes the image has already
+  been scaled appropriately.
+*/
+void QContact::saveScaledPortrait(const QImage &scaled)
+{
+    QString extension;
+    char *format;
+    if (scaled.format() == QImage::Format_ARGB32_Premultiplied
+            || scaled.format() == QImage::Format_ARGB32)
+    {
+        extension = QLatin1String(".png");
+        format = "PNG";
+    } else {
+        extension = QLatin1String(".jpg");
+        format = "JPEG";
+    }
+
+    // Always generate a new name for the file, since it could be a
+    // different file type.
+    QString baseFileName = "ci-" + QString::number( ::time(0) ) + "-";
+    int i = 0;
+    QFile pFile;
+
+    QString photoFile;
+    QString baseDir = Qtopia::applicationFileName( "addressbook", "contactimages/" );
+    do {
+        photoFile = baseFileName + QString::number( i++ ) + extension;
+        pFile.setFileName( baseDir + photoFile );
+    } while( pFile.exists() );
+
+    //  Save the image, scaled to the maximum image size
+    if( scaled.save( baseDir + photoFile, format, 50 ) ) {
+        setPortraitFile( photoFile );
+        return;
+    } else {
+        qWarning("Unable to store contact photo to: %s", (const char *)photoFile.toLocal8Bit());
+    }
+}
 
 /*!
   Changes the contacts portrait to the given pixmap \a p. The pixmap is saved
@@ -1714,64 +1986,79 @@ const QMap<QString, QString> &QContact::customFieldsRef() const { return d->cust
 */
 void QContact::changePortrait( const QPixmap &p )
 {
-    //  Check for existing contact portraits, and delete them if necessary.
-    QString photoFile = portraitFile();
-    QString baseDir = Qtopia::applicationFileName( "addressbook", "contactimages/" );
-
-    QString extension(".jpg");
-
-    if (p.hasAlpha())
-        extension = ".png";
-
-    QDir dir( baseDir );
-    if( !dir.exists() )
-        dir.mkdir( baseDir );
-
-    if( !photoFile.isEmpty() ) {
-        QFile pFile( baseDir + photoFile );
-        if( pFile.exists() )
-            pFile.remove();
-    }
-
-    // Clear out any cached pixmaps
-    QString key("pimcontact" + uid().toString() + "-cfl");
-    QPixmapCache::remove(key);
-    QPixmapCache::remove(key + "-thumb");
-
-    if( !p.isNull() ) {
-        // Always generate a new name for the file, since it could be a
-        // diferent file type.
-        QString baseFileName = "ci-" + QString::number( ::time(0) ) + "-";
-        int i = 0;
-        QFile pFile;
-
-        do {
-            photoFile = baseFileName + QString::number( i++ ) + extension;
-            pFile.setFileName( baseDir + photoFile );
-        } while( pFile.exists() );
-
-        //  Save the image, scaled to the maximum image size
-        QImage scaled = p.toImage().scaled( portraitSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation );
-        if( scaled.save( baseDir + photoFile, p.hasAlpha()?"PNG":"JPEG", 50 ) ) {
-            setPortraitFile( photoFile );
-            return;
-        } else {
-            qWarning("Unable to store contact photo to: %s", (const char *)photoFile.toLocal8Bit());
-        }
-    }
-
-    setPortraitFile( QString() );
+    changePortrait(p.toImage());
 }
 
 /*!
-  \internal
-  e.g. it will be in 4.2, its not in 4.1 officially since its only in since 4.1.6
+  Changes the contacts portrait to the given \a image. The image is saved
+  to the contactimages directory in the Qtopia "addressbook" application
+  storage directory, and removes the file previously used as the contact's
+  portrait.  The corresponding filename will be set as the \c Portrait field of this contact.
 
+  Note: the previous image is removed immediately, but the database will not
+  be updated until \c QContactModel::updateContact is called.
+*/
+void QContact::changePortrait( const QImage &image )
+{
+    removeExistingPortrait();
+
+    if( !image.isNull() ) {
+        // only scale the image if its bigger than the recommended portrait size.
+        if (image.size().boundedTo(portraitSize()) != image.size())
+            saveScaledPortrait(image.scaled( portraitSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation ));
+        else
+            saveScaledPortrait(image);
+    } else {
+        setPortraitFile( QString() );
+    }
+}
+
+/*!
+  Changes the contacts portrait to the image at the given \a imageLocation.
+  The image is loaded, scaled and then saved to the contactimages directory
+  in the Qtopia "addressbook" application storage directory.  If the
+  specified clip rectangle \a rect is not null, only the clip area of the
+  image specified is used.  The file previously used as the contact's
+  portrait is removed.  The corresponding filename will be set as
+  the \c Portrait field of this contact.
+
+  Note: the previous image is removed immediately, but the database will not
+  be updated until \c QContactModel::updateContact is called.
+*/
+void QContact::changePortrait( const QString &imageLocation, const QRect &rect )
+{
+    removeExistingPortrait();
+
+    QImageReader reader(imageLocation);
+
+    QSize imageSize = reader.size();
+    if (rect.isNull())
+        reader.setClipRect(rect);
+
+    // only scale the image if its bigger than the recommended portrait size.
+    if (imageSize.isNull())
+        imageSize = portraitSize();
+    else if (imageSize.boundedTo(portraitSize()) != imageSize)
+        imageSize.scale(portraitSize(), Qt::KeepAspectRatio);
+    reader.setScaledSize(portraitSize());
+
+    QImage image = reader.read();
+
+    if( !image.isNull() )
+        saveScaledPortrait(image);
+    else
+        setPortraitFile( QString() );
+}
+
+/*!
   Parses the the \a text using contact name formatting rules and merges the
   information with \a contact.  Returns the merged contact.
 
   Formatting rules include using () for the nick name, "" for pronunciation,
-  standard name titles and suffixes as well as detecting first, middle and last name ordering.
+  standard name titles and suffixes as well as detecting first, middle and last name ordering,
+  similar to the default label formatting.
+
+  \sa label()
 */
 QContact QContact::parseLabel(const QString &text, const QContact &contact)
 {
@@ -1830,7 +2117,7 @@ QContact QContact::parseLabel(const QString &text, const QContact &contact)
     }
     if (suffixesRE.count() != suffixes.count()) {
         foreach(QString affix, suffixes) {
-            QRegExp *re = new QRegExp("^\\s*\\b"+QRegExp::escape(affix)+"\\b\\.?\\s+");
+            QRegExp *re = new QRegExp("\\b"+QRegExp::escape(affix)+"\\b\\.?");
             re->setCaseSensitivity(Qt::CaseInsensitive);
             suffixesRE.append(re);
         }
@@ -1873,7 +2160,11 @@ QContact QContact::parseLabel(const QString &text, const QContact &contact)
         c.setLastName(flRE.cap(2));
     } else {
         // don't throw away name if you can't parse it.
-        c.setFirstName(label.simplified());
+        // if we got one name and a title, assume surname
+        if (c.nameTitle().isEmpty())
+            c.setFirstName(label.simplified());
+        else
+            c.setLastName(label.simplified());
     }
 
     return c;
@@ -1950,6 +2241,8 @@ template <typename Stream> void QContact::serialize(Stream &s) const
     A non-business fax number.
   \value HomePager
     A non-business pager number.
+  \value HomeVOIP
+    A non-business VOIP URL
   \value BusinessPhone
     A business land line.
   \value BusinessMobile
@@ -1958,6 +2251,8 @@ template <typename Stream> void QContact::serialize(Stream &s) const
     A business fax number.
   \value BusinessPager
     A business pager number.
+  \value BusinessVOIP
+    A business VOIP URL
   \value OtherPhone
     A land line.  Whether the phone number is for Home or Business use
     is unspecified.
@@ -1969,6 +2264,9 @@ template <typename Stream> void QContact::serialize(Stream &s) const
     use is unspecified.
   \value Pager
     A pager number.  Whether the phone is for Home or Business
+    use is unspecified.
+  \value VOIP
+    A VOIP URL.  Whether the URL is for Home or Business
     use is unspecified.
 */
 
@@ -2075,6 +2373,11 @@ void QContact::setHomeCountry( const QString &str )
   Sets the home mobile phone number of the contact to \a str.
 */
 
+/*! \fn void QContact::setHomeVOIP( const QString &str )
+  Sets the home VOIP URL of the contact to \a str.  This should
+  be in the form of a URL (e.g. 'sip:user@sipserver').
+*/
+
 /*! \fn void QContact::setHomeWebpage( const QString &str )
   Sets the home webpage of the contact to \a str.
 */
@@ -2147,6 +2450,11 @@ void QContact::setBusinessCountry( const QString &str )
   Sets the business fax number of the contact to \a str.
 */
 
+/*! \fn void QContact::setBusinessVOIP( const QString &str )
+  Sets the business VOIP URL of the contact to \a str.  This should
+  be in the form of a URL (e.g. 'sip:user@sipserver').
+*/
+
 /*! \fn void QContact::setBusinessMobile( const QString &str )
   Sets the business mobile phone number of the contact to \a str.
 */
@@ -2183,9 +2491,13 @@ void QContact::setBusinessCountry( const QString &str )
   Sets the children of the contact to \a str.
 */
 
-/*! \fn void QContact::setNotes( const QString &str )
+/*!
   Sets the notes about the contact to \a str.
 */
+void QContact::setNotes( const QString &str )
+{
+    replace( Notes, str );
+}
 
 /*! \fn QString QContact::nameTitle() const
   Returns the title of the contact (e.g. Dr., Prof.)
@@ -2241,6 +2553,10 @@ void QContact::setBusinessCountry( const QString &str )
 
 /*! \fn QString QContact::homeMobile() const
   Returns the home mobile number of the contact.
+*/
+
+/*! \fn QString QContact::homeVOIP() const
+  Returns the home VOIP URL of the contact.
 */
 
 /*! \fn QString QContact::homeWebpage() const
@@ -2307,6 +2623,10 @@ void QContact::setBusinessCountry( const QString &str )
   Returns the business mobile number of the contact.
 */
 
+/*! \fn QString QContact::businessVOIP() const
+  Returns the business VOIP URL of the contact.
+*/
+
 /*! \fn QString QContact::businessPager() const
   Returns the business pager number of the contact.
 */
@@ -2357,7 +2677,7 @@ void QContact::setBusinessCountry( const QString &str )
    It also provides two functions - \l {QContactAddress::}{isEmpty()} and
    \l {QContactAddress::}{operator==()}.
 
-   \sa QContact
+   \sa QContact, {Pim Library}
 */
 
 /*!

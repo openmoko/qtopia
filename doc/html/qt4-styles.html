@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.2: The Qt 4 Style API</title>
+  <title>Qt 4.3: The Qt 4 Style API</title>
   <link rel="prev" href="qt4-network.html" />
   <link rel="contents" href="qt4-intro.html" />
   <link rel="next" href="qt4-threads.html" />
@@ -19,7 +19,8 @@
 [<a href="qt4-intro.html">Home</a>]
 [Next: <a href="qt4-threads.html">Thread Support in Qt 4</a>]
 </p>
-<h1 align="center">The Qt 4 Style API<br /><small></small></h1>
+<h1 align="center">The Qt 4 Style API<br /><span class="subtitle"></span>
+</h1>
 <p>Qt's style API is responsible for performing the widget drawing for built-in widgets. The Qt 4 style API has been revised to make it possible for a style to draw widgets without calling any functions on the widget.</p>
 <p>Because Qt 4 is split across multiple libraries, Qt needed this update to be able to draw widgets from other libraries than <a href="qtgui.html">QtGui</a>. For application developers, this has other benefits, such as more managable parameter lists and the possibility of drawing any graphical element without having a widget of a specific type.</p>
 <a name="general-overview"></a>
@@ -35,7 +36,7 @@
 <p>The style gets all the information it needs to render the graphical element from <a href="qstyleoption.html">QStyleOption</a>. The widget is passed as the last argument in case the style needs it to perform special effects (such as animated default buttons on Mac OS X), but it isn't mandatory. In fact, <a href="qstyle.html">QStyle</a> can be used to draw on any paint device, not just widgets, by setting the <a href="qpainter.html">QPainter</a> properly.</p>
 <p>Thanks to <a href="qstyleoption.html">QStyleOption</a>, it is now possible to make <a href="qstyle.html">QStyle</a> draw widgets without linking in any code for the widget. This is how Qt's built-in styles can draw Qt 3 widgets such as Q3ListView without necessarily linking against the <a href="qt3support.html">Qt3Support</a> library. Another significant benefit of the new approach is that it's now possible to use <a href="qstyle.html">QStyle</a>'s draw functions on other widgets than the built-in widgets; for example, you can draw a combobox on any widget, not just on a <a href="qcombobox.html">QComboBox</a>.</p>
 <p><a href="qstyleoption.html">QStyleOption</a> has various subclasses for the various types of graphical elements that can be drawn, and it's possible to create custom subclasses. For example, the <a href="qstyle.html#PrimitiveElement-enum">QStyle::PE_FrameFocusRect</a> element expects a <a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a> argument. This is documented for each enum value.</p>
-<p>When reimplementing <a href="qstyle.html">QStyle</a> functions that take a <a href="qstyleoption.html">QStyleOption</a> parameter, you often need to cast the <a href="qstyleoption.html">QStyleOption</a> to a subclass (e.g., <a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a>). For safety, you can use <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() to ensure that the pointer type is correct. If the object isn't of the right type, <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() returns 0. For example:</p>
+<p>When reimplementing <a href="qstyle.html">QStyle</a> functions that take a <a href="qstyleoption.html">QStyleOption</a> parameter, you often need to cast the <a href="qstyleoption.html">QStyleOption</a> to a subclass (e.g&#x2e;, <a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a>). For safety, you can use <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() to ensure that the pointer type is correct. If the object isn't of the right type, <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() returns 0. For example:</p>
 <pre> const QStyleOptionFocusRect *focusRectOption =
          qstyleoption_cast&lt;const QStyleOptionFocusRect *&gt;(option);
  if (focusRectOption) {
@@ -130,6 +131,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

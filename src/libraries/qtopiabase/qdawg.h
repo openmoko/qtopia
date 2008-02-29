@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -45,23 +45,29 @@ public:
     class QTOPIABASE_EXPORT Node {
         friend class QDawgPrivate;
         uint let:16;
-        uint a : 14 ; //not used
+        int val:14; //not used
         uint isword:1;
         uint islast:1;
-        int offset:18;
-        int b : 14 ; //not used
-        Node() { a = b = 0; /*set zero for better compression*/ }
+        int offset:32;
+        Node() { val = 0; /*set zero for better compression*/ }
     public:
         QChar letter() const { return QChar((ushort)let); }
         bool isWord() const { return isword; }
         bool isLast() const { return islast; }
         const Node* next() const { return islast ? 0 : this+1; }
         const Node* jump() const { return offset ? this+offset : 0; }
+
+#ifdef QTOPIA_INTERNAL_QDAWG_TRIE
+        int value() const { return val; }
+#endif
     };
 
     const Node* root() const;
 
     void dump() const; // debug
+#ifdef QTOPIA_INTERNAL_QDAWG_TRIE
+    bool createTrieFromWords(QIODevice* dev);
+#endif
 
 private:
     friend class QDawgPrivate;

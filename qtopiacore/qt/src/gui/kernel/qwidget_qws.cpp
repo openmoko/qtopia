@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -170,7 +185,6 @@ void QWidgetPrivate::create_sys(WId window, bool initializeWindow, bool /*destro
         if (initializeWindow) {
             //XXX XDefineCursor(dpy, winid, oc ? oc->handle() : cursor().handle());
         }
-        q->setAttribute(Qt::WA_SetCursor);
         QWidget::qwsDisplay()->nameRegion(q->internalWinId(), q->objectName(), q->windowTitle());
     }
 
@@ -260,7 +274,7 @@ void QWidget::destroy(bool destroyWindow, bool destroySubWindows)
                 d->hide_sys();
             }
             if (destroyWindow && isWindow()) {
-                d->extra->topextra->backingStore->windowSurface->release();
+                d->extra->topextra->backingStore->windowSurface->setGeometry(QRect());
                 qwsDisplay()->destroyRegion(internalWinId());
             }
         }
@@ -317,7 +331,7 @@ void QWidgetPrivate::setParent_sys(QWidget *newparent, Qt::WindowFlags f)
     q->setAttribute(Qt::WA_WState_Hidden, false);
     adjustFlags(data.window_flags, q);
     // keep compatibility with previous versions, we need to preserve the created state
-    // (but we recreate the winId for the widget being reparented, again for compability)
+    // (but we recreate the winId for the widget being reparented, again for compatibility)
     if (wasCreated || (!q->isWindow() && newparent->testAttribute(Qt::WA_WState_Created)))
         createWinId();
     if (q->isWindow() || (!newparent || newparent->isVisible()) || explicitlyHidden)
@@ -341,7 +355,7 @@ void QWidgetPrivate::setParent_sys(QWidget *newparent, Qt::WindowFlags f)
     }
     if ((int)old_winid > 0) {
         QWidget::qwsDisplay()->destroyRegion(old_winid);
-        extra->topextra->backingStore->windowSurface->release();
+        extra->topextra->backingStore->windowSurface->setGeometry(QRect());
     }
 #ifndef QT_NO_CURSOR
     if (setcurs) {
@@ -411,20 +425,19 @@ void QWidget::setMicroFocusHint(int x, int y, int width, int height,
 void QWidgetPrivate::updateSystemBackground() {}
 
 #ifndef QT_NO_CURSOR
-
 void QWidgetPrivate::setCursor_sys(const QCursor &cursor)
 {
     Q_UNUSED(cursor);
-//    if (isVisible())
-//        d->updateCursor(d->paintableRegion());
-    //@@@@@@ cursor stuff
+    Q_Q(QWidget);
+    if (q->isVisible())
+        updateCursor();
 }
 
 void QWidgetPrivate::unsetCursor_sys()
 {
-//    if (isVisible())
-//        d->updateCursor(d->paintableRegion());
-    //@@@@@@ cursor stuff
+    Q_Q(QWidget);
+    if (q->isVisible())
+        updateCursor();
 }
 #endif //QT_NO_CURSOR
 
@@ -542,8 +555,22 @@ void QWidgetPrivate::dirtyWidget_sys(const QRegion &rgn)
     }
 
     QWSWindowSurface *surface = static_cast<QWSWindowSurface*>(wbs->windowSurface);
-    if (surface)
+    if (surface) {
         surface->setDirty(wrgn);
+
+
+#ifdef Q_BACKINGSTORE_SUBSURFACES
+        // dirty on all subsurfaces...
+
+        QList<QWindowSurface*> subSurfaces = wbs->subSurfaces;
+        // XXX: hw: only if region intersects any of the subsurfaces
+        for (int i = 0; i < subSurfaces.size(); ++i) {
+            QWSWindowSurface *s = static_cast<QWSWindowSurface*>(subSurfaces.at(i));
+            QPoint p = s->window()->mapTo(tlw, QPoint()); // must use widget?
+            s->setDirty(wrgn.translated(-p));
+        }
+#endif // Q_BACKINGSTORE_SUBSURFACES
+    }
 }
 
 void QWidgetPrivate::cleanWidget_sys(const QRegion& rgn)
@@ -564,7 +591,7 @@ void QWidgetPrivate::blitToScreen(const QRegion &globalrgn)
     QWidget *win = q->window();
     QBrush bgBrush = win->palette().brush(win->backgroundRole());
     bool opaque = bgBrush.style() == Qt::NoBrush || bgBrush.isOpaque();
-    QWidget::qwsDisplay()->repaintRegion(win->data->winid, opaque, globalrgn);
+    QWidget::qwsDisplay()->repaintRegion(win->data->winid, win->windowFlags(), opaque, globalrgn);
 }
 
 void QWidgetPrivate::show_sys()
@@ -572,6 +599,13 @@ void QWidgetPrivate::show_sys()
     Q_Q(QWidget);
     q->setAttribute(Qt::WA_Mapped);
     if (q->isWindow()) {
+
+        if (QWindowSurface *surface = q->windowSurface()) {
+            const QRect frameRect = q->frameGeometry();
+            if (surface->geometry() != frameRect)
+                surface->setGeometry(frameRect);
+        }
+
         QRegion r = localRequestedRegion();
 #ifndef QT_NO_QWS_MANAGER
         if (extra && extra->topextra && extra->topextra->qwsManager) {
@@ -595,6 +629,14 @@ void QWidgetPrivate::show_sys()
         altitude = staysontop ? QWSChangeAltitudeCommand::StaysOnTop : QWSChangeAltitudeCommand::Raise;
         QWidget::qwsDisplay()->setAltitude(data.winid, altitude, true);
     }
+#ifdef Q_BACKINGSTORE_SUBSURFACES
+    else if (q->windowSurface()) {
+        QWSWindowSurface *surface;
+        surface = static_cast<QWSWindowSurface*>(q->windowSurface());
+        const QPoint p = q->mapToGlobal(QPoint());
+        surface->setGeometry(QRect(p, q->size()));
+    }
+#endif
 
     if (!q->window()->data->in_show) {
          invalidateBuffer(q->rect());
@@ -718,6 +760,11 @@ void QWidget::setWindowState(Qt::WindowStates newstate)
     QApplication::sendEvent(this, &e);
 }
 
+void QWidgetPrivate::setFocus_sys()
+{
+
+}
+
 void QWidgetPrivate::raise_sys()
 {
     Q_Q(QWidget);
@@ -726,6 +773,7 @@ void QWidgetPrivate::raise_sys()
         Q_ASSERT(q->testAttribute(Qt::WA_WState_Created));
         QWidget::qwsDisplay()->setAltitude(q->internalWinId(),
                                            QWSChangeAltitudeCommand::Raise);
+        // XXX: subsurfaces?
 #ifdef QT_NO_WINDOWGROUPHINT
 #else
         QObjectList childObjects =  q->children();
@@ -747,8 +795,9 @@ void QWidgetPrivate::raise_sys()
             }
         }
 #endif // QT_NO_WINDOWGROUPHINT
-    } else if (QWidget *p = q->parentWidget()) {
-        p->update(q->geometry());
+    } else {
+        setDirtyOpaqueRegion();
+        invalidateBuffer(q->rect());
     }
 }
 
@@ -760,7 +809,8 @@ void QWidgetPrivate::lower_sys()
         QWidget::qwsDisplay()->setAltitude(data.winid,
                                            QWSChangeAltitudeCommand::Lower);
     } else if (QWidget *p = q->parentWidget()) {
-        p->update(q->geometry());
+        setDirtyOpaqueRegion();
+        p->d_func()->invalidateBuffer(q->geometry());
     }
 }
 
@@ -768,8 +818,18 @@ void QWidgetPrivate::stackUnder_sys(QWidget*)
 {
     Q_Q(QWidget);
     if (QWidget *p = q->parentWidget()) {
-        p->update(q->geometry());
+        setDirtyOpaqueRegion();
+        p->d_func()->invalidateBuffer(q->geometry());
     }
+}
+
+void QWidgetPrivate::moveSurface(QWindowSurface *surface, const QPoint &offset)
+{
+    QWSWindowSurface *s = static_cast<QWSWindowSurface*>(surface);
+    if (!s->move(offset))
+        s->invalidateBuffer();
+
+    QWSDisplay::instance()->moveRegion(s->winId(), offset.x(), offset.y());
 }
 
 void QWidgetPrivate::setGeometry_sys(int x, int y, int w, int h, bool isMove)
@@ -815,21 +875,29 @@ void QWidgetPrivate::setGeometry_sys(int x, int y, int w, int h, bool isMove)
     if (q->isVisible()) {
 
         bool toplevelMove = false;
+        QWSWindowSurface *surface = 0;
+
         if (q->isWindow()) {
             //### ConfigPending not implemented, do we need it?
             //setAttribute(Qt::WA_WState_ConfigPending);
             const QWidgetBackingStore *bs = maybeBackingStore();
-            QWSWindowSurface *surface = 0;
             if (bs)
                 surface = static_cast<QWSWindowSurface*>(bs->windowSurface);
-            if (isMove && !isResize && (!surface || surface->isBuffered())) {
-                QWidget::qwsDisplay()->moveRegion(data.winid, x - oldp.x(), y - oldp.y());
+            if (isMove && !isResize && surface) {
+                const QPoint offset(x - oldp.x(), y - oldp.y());
+                moveSurface(surface, offset);
                 toplevelMove = true; //server moves window, but we must send moveEvent, which might trigger painting
 
+#ifdef Q_BACKINGSTORE_SUBSURFACES
+                QList<QWindowSurface*> surfaces = bs->subSurfaces;
+                for (int i = 0; i < surfaces.size(); ++i)
+                    moveSurface(surfaces.at(i), offset);
+#endif
             } else {
                     updateFrameStrut();
             }
         }
+
 
         //### must have frame geometry correct before sending move/resize events
         if (isMove) {
@@ -842,8 +910,39 @@ void QWidgetPrivate::setGeometry_sys(int x, int y, int w, int h, bool isMove)
         }
         if (!toplevelMove) {
             if (q->isWindow()) {
-                invalidateBuffer(q->rect()); //###
-            } else {
+                if (surface)
+                    surface->setGeometry(q->frameGeometry());
+                else
+                    invalidateBuffer(q->rect()); //###
+
+#ifdef Q_BACKINGSTORE_SUBSURFACES
+                // XXX: should not resize subsurfaces. Children within a layout
+                // will be resized automatically while children with a static
+                // geometry should get a new clip region instead.
+                const QRect clipRect = q->geometry();
+                QWidgetBackingStore *bs = maybeBackingStore();
+                QList<QWindowSurface*> surfaces = bs->subSurfaces;
+                for (int i = 0; i < surfaces.size(); ++i) {
+                    QWSWindowSurface *s = static_cast<QWSWindowSurface*>(surfaces.at(i));
+                    QRect srect = s->geometry();
+                    s->setGeometry(clipRect & srect);
+                }
+#endif
+            }
+#ifdef Q_BACKINGSTORE_SUBSURFACES
+            // XXX: merge this case with the isWindow() case
+            else if (maybeTopData() && maybeTopData()->windowSurface) {
+                QWSWindowSurface *surface;
+                surface = static_cast<QWSWindowSurface*>(q->windowSurface());
+                if (isMove && !isResize) {
+                    moveSurface(surface, QPoint(x - oldp.x(), y - oldp.y()));
+                } else {
+                    const QPoint p = q->mapToGlobal(QPoint());
+                    surface->setGeometry(QRect(p, QSize(w, h)));
+                }
+            }
+#endif
+            else {
                 if (isMove && !isResize) {
                     moveRect(QRect(oldPos, olds), x - oldPos.x(), y - oldPos.y());
                 } else {
@@ -880,26 +979,16 @@ QScreen* QWidgetPrivate::getScreen() const
     return qt_screen->subScreens().at(screen < 0 ? 0 : screen);
 }
 
-void QWidget::scroll(int dx, int dy)
+void QWidgetPrivate::scroll_sys(int dx, int dy)
 {
-
-    Q_D(QWidget);
-    if (!updatesEnabled() && children().size() == 0 || !isVisible())
-        return;
-    if (dx == 0 && dy == 0)
-        return;
-    d->scrollChildren(dx, dy);
-    d->scrollRect(rect(), dx, dy);
+    Q_Q(QWidget);
+    scrollChildren(dx, dy);
+    scrollRect(q->rect(), dx, dy);
 }
 
-void QWidget::scroll(int dx, int dy, const QRect& r)
+void QWidgetPrivate::scroll_sys(int dx, int dy, const QRect &r)
 {
-   Q_D(QWidget);
-    if (!updatesEnabled() && children().size() == 0 || !isVisible())
-        return;
-    if (dx == 0 && dy == 0)
-        return;
-    d->scrollRect(r, dx, dy);
+    scrollRect(r, dx, dy);
 }
 
 int QWidget::metric(PaintDeviceMetric m) const
@@ -1008,8 +1097,12 @@ void QWidget::setMask(const QRegion& region)
             d->data.fstrut_dirty = true;
             d->invalidateBuffer(rect());
             QWindowSurface *surface = d->extra->topextra->backingStore->windowSurface;
-            if (surface)
+            if (surface) {
+                // QWSWindowSurface::setGeometry() returns without doing anything
+                // if old geom  == new geom. Therefore, we need to reset the old value.
+                surface->QWindowSurface::setGeometry(QRect());
                 surface->setGeometry(frameGeometry());
+            }
         } else {
             parentR += d->extra->mask;
             parentWidget()->update(parentR.translated(geometry().topLeft()));
@@ -1057,16 +1150,26 @@ void QWidgetPrivate::updateFrameStrut()
 }
 
 #ifndef QT_NO_CURSOR
-void QWidgetPrivate::updateCursor(const QRegion &r) const
+void QWidgetPrivate::updateCursor() const
 {
     Q_Q(const QWidget);
-    //@@@ region stuff must be redone
-    if (qt_last_x && (!QWidget::mouseGrabber() || QWidget::mouseGrabber() == q) &&
-            qt_last_cursor != (WId)q->cursor().handle() && !qws_overrideCursor) {
-        QSize s(qt_screen->width(), qt_screen->height());
-        QPoint pos = qt_screen->mapToDevice(QPoint(*qt_last_x, *qt_last_y), s);
-        if (r.contains(pos))
-            QWidget::qwsDisplay()->selectCursor(const_cast<QWidget*>(q), q->cursor().handle());
+
+    if (QApplication::overrideCursor())
+        return;
+
+    if (qt_last_x
+        && (!QWidget::mouseGrabber() || QWidget::mouseGrabber() == q)
+        && qt_last_cursor != (WId)q->cursor().handle())
+    {
+        const QPoint pos(*qt_last_x, *qt_last_y);
+        const QPoint offset = q->mapToGlobal(QPoint());
+        if (!localAllocatedRegion().contains(pos - offset))
+            return;
+
+        const QWidget *w = q->childAt(q->mapFromGlobal(pos));
+        if (!w || w->cursor().handle() == q->cursor().handle())
+            QWidget::qwsDisplay()->selectCursor(const_cast<QWidget*>(q),
+                                                q->cursor().handle());
     }
 }
 #endif
@@ -1116,9 +1219,3 @@ void QWidgetPrivate::setModal_sys()
 {
 }
 
-QWindowSurface *QWidgetPrivate::currentWindowSurface()
-{
-    Q_Q(QWidget);
-    QWidgetBackingStore *bs =  q->window()->d_func()->maybeBackingStore();
-    return bs ? bs->windowSurface : 0;
-}

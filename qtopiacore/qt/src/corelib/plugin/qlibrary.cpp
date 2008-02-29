@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -276,7 +291,7 @@ static bool qt_parse_pattern(const char *s, uint *version, bool *debug, QByteArr
     return ret;
 }
 
-#if defined(Q_OS_UNIX)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 
 #if defined(Q_OS_FREEBSD) || defined(Q_OS_LINUX)
 #  define USE_MMAP
@@ -399,21 +414,20 @@ static bool qt_unix_query(const QString &library, uint *version, bool *debug, QB
     return ret;
 }
 
-#endif // Q_OS_UNIX
+#endif // Q_OS_UNIX && !Q_OS_MAC
 
 typedef QMap<QString, QLibraryPrivate*> LibraryMap;
 Q_GLOBAL_STATIC(LibraryMap, libraryMap)
 
 QLibraryPrivate::QLibraryPrivate(const QString &canonicalFileName, int verNum)
     :pHnd(0), fileName(canonicalFileName), majorVerNum(verNum), instance(0), qt_version(0),
-     libraryRefCount(1), libraryUnloadCount(1), pluginState(MightBeAPlugin)
+     libraryRefCount(1), libraryUnloadCount(0), pluginState(MightBeAPlugin)
 { libraryMap()->insert(canonicalFileName, this); }
 
 QLibraryPrivate *QLibraryPrivate::findOrCreate(const QString &fileName, int verNum)
 {
     QMutexLocker locker(qt_library_mutex());
     if (QLibraryPrivate *lib = libraryMap()->value(fileName)) {
-        lib->libraryUnloadCount.ref();
         lib->libraryRefCount.ref();
         return lib;
     }
@@ -441,6 +455,7 @@ void *QLibraryPrivate::resolve(const char *symbol)
 
 bool QLibraryPrivate::load()
 {
+    libraryUnloadCount.ref();
     if (pHnd)
         return true;
     if (fileName.isEmpty())
@@ -451,10 +466,11 @@ bool QLibraryPrivate::load()
 bool QLibraryPrivate::unload()
 {
     if (!pHnd)
-        return true;
+        return false;
     if (!libraryUnloadCount.deref()) // only unload if ALL QLibrary instance wanted to
         if  (unload_sys())
             pHnd = 0;
+
     return (pHnd == 0);
 }
 
@@ -467,8 +483,10 @@ void QLibraryPrivate::release()
 
 bool QLibraryPrivate::loadPlugin()
 {
-    if (instance)
+    if (instance) {
+        libraryUnloadCount.ref();
         return true;
+    }
     if (load()) {
         instance = (QtPluginInstanceFunction)resolve("qt_plugin_instance");
         return instance;
@@ -520,7 +538,7 @@ bool QLibrary::isLibrary(const QString &fileName)
  */
     bool valid = (suffix == QLatin1String("sl"));
 #  if defined __ia64
-    valid = valid || (suffix == QLatin1String("so"))
+    valid = valid || (suffix == QLatin1String("so"));
 #  endif
 # elif defined(Q_OS_AIX)
     bool valid = (suffix == QLatin1String("a") || suffix == QLatin1String("so"));
@@ -567,7 +585,7 @@ bool QLibraryPrivate::isPlugin()
         key = reg.at(2).toLatin1();
         success = qt_version != 0;
     } else {
-#if defined(Q_OS_UNIX)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
         if (!pHnd) {
             // use unix shortcut to avoid loading the library
             success = qt_unix_query(fileName, &qt_version, &debug, &key, this);
@@ -604,8 +622,14 @@ bool QLibraryPrivate::isPlugin()
         settings.setValue(regkey, queried);
     }
 
-    if (!success)
+    if (!success) {
+        if (fileName.isEmpty()) {
+            errorString = QLibrary::tr("The shared library was not found.");
+        } else {
+            errorString = QLibrary::tr("The file '%1' is not a valid Qt plugin.").arg(fileName);
+        }
         return false;
+    }
 
     pluginState = IsNotAPlugin; // be pessimistic
 
@@ -640,6 +664,8 @@ bool QLibraryPrivate::isPlugin()
 #ifndef QT_NO_DEBUG_PLUGIN_CHECK
     } else if(debug != QLIBRARY_AS_DEBUG) {
         //don't issue a qWarning since we will hopefully find a non-debug? --Sam
+        errorString = QLibrary::tr("The plugin '%1' uses incompatible Qt library."
+                 " (Cannot mix debug and release libraries.)").arg(fileName);
 #endif
     } else {
         pluginState = IsAPlugin;
@@ -773,9 +799,14 @@ QLibrary::~QLibrary()
     When loading the library, QLibrary searches in all system-specific
     library locations (e.g. \c LD_LIBRARY_PATH on Unix), unless the
     file name has an absolute path. After loading the library
-    successfully, fileName() returns the fully qualified file name of
-    the library. For example, after successfully loading the "GL"
-    library on unix, fileName() will return "libGL.so".
+    successfully, fileName() returns the fully-qualified file name of
+    the library, including the full path to the library if one was given
+    in the constructor or passed to setFileName().
+
+    For example, after successfully loading the "GL" library on Unix
+    platforms, fileName() will return "libGL.so". If the file name was
+    originally passed as "/usr/lib/libGL", fileName() will return
+    "/usr/lib/libGL.so".
 */
 
 void QLibrary::setFileName(const QString &fileName)
@@ -786,9 +817,6 @@ void QLibrary::setFileName(const QString &fileName)
         did_load = false;
     }
     d = QLibraryPrivate::findOrCreate(fileName);
-    if (d && d->pHnd)
-        did_load = true;
-
 }
 
 QString QLibrary::fileName() const
@@ -814,8 +842,6 @@ void QLibrary::setFileNameAndVersion(const QString &fileName, int verNum)
         did_load = false;
     }
     d = QLibraryPrivate::findOrCreate(fileName, verNum);
-    if (d && d->pHnd)
-        did_load = true;
 }
 
 /*!
@@ -860,10 +886,8 @@ void QLibrary::setFileNameAndVersion(const QString &fileName, int verNum)
 */
 void *QLibrary::resolve(const char *symbol)
 {
-    if (!d)
+    if (!load())
         return 0;
-    if (!d->pHnd)
-        d->load();
     return d->resolve(symbol);
 }
 
@@ -926,7 +950,7 @@ void *QLibrary::resolve(const QString &fileName, int verNum, const char *symbol)
 */
 QString QLibrary::errorString() const
 {
-    return d->errorString.isEmpty() ? tr("Unknown error") : d->errorString;
+    return (!d || d->errorString.isEmpty()) ? tr("Unknown error") : d->errorString;
 }
 
 /*!

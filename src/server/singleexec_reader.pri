@@ -58,8 +58,8 @@ for(pr,PROJECT_ROOTS) {
         plugin_type=
         LAST_CMDS=
 
-        # Projects use this to identify themselves. It's normally set by config.prf but we have to do it
-        # manually because config.prf has already been read.
+        # Projects use this to identify themselves. It's normally set by Makefile but we have to do it
+        # manually because we're not running a new instance of qmake.
         QTOPIA_ID=$$p
         self=$$tail($$file)
 
@@ -145,3 +145,8 @@ for(pr,PROJECT_ROOTS) {
     CONFIG=$$TMP2_CONFIG
 }
 
+# Qtopia Core plugins are special
+LIBS=
+exists($$QPEDIR/src/plugins/qtopiacore/singleexec.pri):include($$QPEDIR/src/plugins/qtopiacore/singleexec.pri)
+else:error(Missing $$QPEDIR/src/plugins/qtopiacore/singleexec.pri)
+!isEmpty(LIBS):SINGLEEXEC_READER_CMD+="LIBS*=$$LIBS"

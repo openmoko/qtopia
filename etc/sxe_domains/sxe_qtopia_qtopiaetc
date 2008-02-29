@@ -1,0 +1,3 @@
+#!/bin/sh
+lidsconf -A POSTBOOT -s ${BIN} -o $QTOPIA_DIR/etc -j WRITE
+lidsconf -A POSTBOOT -s ${BIN} -o $UPDATE_DIR/etc -j WRITE

@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -33,10 +33,12 @@
 #include "../engine.h"
 #include "../doubledata.h"
 
+#include "ui_helperpanel.h"
+
 class QTimer;
 class QSignalMapper;
 
-class FormPhone:public CalcUserInterface {
+class FormPhone:public CalcUserInterface, Ui::HelperPanel {
 Q_OBJECT
 public:
     FormPhone(QWidget *parent = 0);

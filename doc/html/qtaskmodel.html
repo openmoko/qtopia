@@ -20,7 +20,7 @@
 <a name="public-types"></a>
 <h3>Public Types</h3>
 <ul>
-<li><div class="fn"/>enum <b><a href="qtaskmodel.html#Field-enum">Field</a></b> { Invalid, Description, Priority, Completed, ..., Categories }</li>
+<li><div class="fn"/>enum <b><a href="qtaskmodel.html#Field-enum">Field</a></b> { Invalid, Description, Priority, Completed, ..., RepeatWeekFlags }</li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
@@ -44,10 +44,11 @@
 <li><div class="fn"/>QTask <b><a href="qtaskmodel.html#task-2">task</a></b> ( const QUniqueId &amp; <i>identifier</i> ) const</li>
 <li><div class="fn"/>QTask <b><a href="qtaskmodel.html#task-3">task</a></b> ( int <i>row</i> ) const</li>
 <li><div class="fn"/>virtual bool <b><a href="qtaskmodel.html#updateRecord">updateRecord</a></b> ( const QUniqueId &amp; <i>id</i>, const QByteArray &amp; <i>bytes</i>, const QString &amp; <i>format</i> = QString() )</li>
+<li><div class="fn"/>bool <b><a href="qtaskmodel.html#updateRecurringTasks">updateRecurringTasks</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qtaskmodel.html#updateTask">updateTask</a></b> ( const QTask &amp; <i>task</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>31 public functions inherited from <a href="qpimmodel.html#public-functions">QPimModel</a></li>
+<li><div class="fn"/>32 public functions inherited from <a href="qpimmodel.html#public-functions">QPimModel</a></li>
 <li><div class="fn"/>34 public functions inherited from <a href="qabstractitemmodel.html#public-functions">QAbstractItemModel</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
@@ -71,7 +72,6 @@
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>14 signals inherited from <a href="qabstractitemmodel.html#signals">QAbstractItemModel</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qabstractitemmodel.html#public-variables">QAbstractItemModel</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>15 protected functions inherited from <a href="qabstractitemmodel.html#protected-functions">QAbstractItemModel</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
@@ -87,7 +87,7 @@
 <p>The task model provides functions for filtering of tasks by category and completion status, and by default will sort by completion status, priority and description. Note that this sort order may change in future versions of Qtopia.</p>
 <p>The appointment model provides functions for sorting and some filtering of items. For filters or sorting that is not provided by the task model, it is recommended that <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a> be used to wrap the task model.</p>
 <p>A QTaskModel instance will also reflect changes made in other instances of QTaskModel, both within this application and from other applications. This will result in the <a href="qabstractitemmodel.html#modelReset">modelReset</a>() signal being emitted.</p>
-<p>See also <a href="qtask.html">QTask</a>, <a href="qtasklistview.html">QTaskListView</a>, and <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a>.</p>
+<p>See also <a href="qtask.html">QTask</a>, <a href="qtasklistview.html">QTaskListView</a>, <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a>, and <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Field-enum"></a>enum QTaskModel::Field</h3>
@@ -106,6 +106,11 @@
 <tr><td valign="top"><tt>QTaskModel::Notes</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">The notes of the task</td></tr>
 <tr><td valign="top"><tt>QTaskModel::Identifier</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">The identifier of the task</td></tr>
 <tr><td valign="top"><tt>QTaskModel::Categories</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">The list of categories the task belongs to</td></tr>
+<tr><td valign="top"><tt>QTaskModel::Alarm</tt></td><td align="center" valign="top"><tt>11</tt></td><td valign="top">The type of alarm of the task, if it has a due date</td></tr>
+<tr><td valign="top"><tt>QTaskModel::RepeatRule</tt></td><td align="center" valign="top"><tt>12</tt></td><td valign="top">The repeat rule of the task, if it has a due date</td></tr>
+<tr><td valign="top"><tt>QTaskModel::RepeatFrequency</tt></td><td align="center" valign="top"><tt>14</tt></td><td valign="top">The repeat frequency of the task, if it has a due date</td></tr>
+<tr><td valign="top"><tt>QTaskModel::RepeatEndDate</tt></td><td align="center" valign="top"><tt>13</tt></td><td valign="top">The date a repeating task repeats until, if it has a due date. If null the task repeats forever</td></tr>
+<tr><td valign="top"><tt>QTaskModel::RepeatWeekFlags</tt></td><td align="center" valign="top"><tt>15</tt></td><td valign="top">The flags specifying what days of the week the task repeats on, if it has a due date.</td></tr>
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -194,6 +199,7 @@
 <p>Return the task for the given <i>row</i>.</p>
 <h3 class="fn"><a name="taskField"></a><a href="qvariant.html">QVariant</a> QTaskModel::taskField ( const <a href="qtask.html">QTask</a> &amp; <i>task</i>, <a href="qtaskmodel.html#Field-enum">QTaskModel::Field</a> <i>field</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the value for the specified <i>field</i> of the given <i>task</i>.</p>
+<p>Note: Certain fields (<tt>Alarm</tt>, <tt>RepeatRule</tt>, <tt>RepeatFrequency</tt>, <tt>RepeatEndDate</tt> and <tt>RepeatWeekFlags</tt>) are not accessible by this function. Use <a href="qtaskmodel.html#data">data</a>() instead, or fetch the dependent <a href="qappointment.html">QAppointment</a> directly.</p>
 <p>See also <a href="qtaskmodel.html#setTaskField">setTaskField</a>() and <a href="qtaskmodel.html#data">data</a>().</p>
 <h3 class="fn"><a name="updateRecord"></a>bool QTaskModel::updateRecord ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>bytes</i>, const <a href="qstring.html">QString</a> &amp; <i>format</i> = QString() )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Updates the corresponding record in the model to equal the record encoded in <i>bytes</i>. The format of the record in <i>bytes</i> is given by the <i>format</i> string. An empty <i>format</i> string will cause the record to be read using the data stream operators for the PIM data type of the model. If <i>id</i> is not null will set the record identifier to <i>id</i> before attempting to update the record.</p>
@@ -201,6 +207,10 @@
 <p>Valid formats are &quot;vCalendar&quot; or an empty string.</p>
 <p>Reimplemented from <a href="qpimmodel.html#updateRecord">QPimModel</a>.</p>
 <p>See also <a href="qtaskmodel.html#updateTask">updateTask</a>().</p>
+<h3 class="fn"><a name="updateRecurringTasks"></a>bool QTaskModel::updateRecurringTasks ()</h3>
+<p>This function will update any recurring tasks that require updating (for example, to set the new due date). This should be called in response to the QCop message &quot;Tasks::updateRecurringTasks()&quot;, or when the application wants to ensure that all recurring tasks are up to date.</p>
+<p>The library will generate the QCop message at the appropriate times.</p>
+<p>Returns true if updates were successful, false otherwise.</p>
 <h3 class="fn"><a name="updateTask"></a>bool QTaskModel::updateTask ( const <a href="qtask.html">QTask</a> &amp; <i>task</i> )</h3>
 <p>Updates the task in the model with the same identifier as the specified <i>task</i> to equal the specified task.</p>
 <p>Returns true if the task was successfully updated.</p>
@@ -208,6 +218,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+<td align="right"><div align="right">Qtopia 4.3.0</div></td>
 </tr></table></div></address></body>
 </html>

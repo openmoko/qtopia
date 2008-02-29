@@ -18,7 +18,7 @@ HEADERS += \
         widgets/qdialogbuttonbox.h \
         widgets/qdockwidget.h \
         widgets/qdockwidget_p.h \
-        widgets/qdockwidgetlayout_p.h \
+        widgets/qdockarealayout_p.h \
         widgets/qfontcombobox.h \
         widgets/qframe.h \
         widgets/qframe_p.h \
@@ -30,6 +30,10 @@ HEADERS += \
         widgets/qlineedit_p.h \
         widgets/qmainwindow.h \
         widgets/qmainwindowlayout_p.h \
+        widgets/qmdiarea.h \
+        widgets/qmdiarea_p.h \
+        widgets/qmdisubwindow.h \
+        widgets/qmdisubwindow_p.h \
         widgets/qmenu.h \
         widgets/qmenubar.h \
         widgets/qmenudata.h \
@@ -55,8 +59,8 @@ HEADERS += \
         widgets/qtextbrowser.h \
         widgets/qtoolbar.h \
         widgets/qtoolbar_p.h \
+        widgets/qtoolbarlayout_p.h \
         widgets/qtoolbarextension_p.h \
-        widgets/qtoolbarhandle_p.h \
         widgets/qtoolbarseparator_p.h \
         widgets/qtoolbox.h \
         widgets/qtoolbutton.h \
@@ -67,7 +71,8 @@ HEADERS += \
         widgets/qfocusframe.h \
         widgets/qscrollarea.h \
         widgets/qworkspace.h \
-        widgets/qwidgetanimator_p.h
+        widgets/qwidgetanimator_p.h \
+        widgets/qtoolbararealayout_p.h
 
 SOURCES += \
         widgets/qabstractbutton.cpp \
@@ -80,7 +85,7 @@ SOURCES += \
         widgets/qdial.cpp \
         widgets/qdialogbuttonbox.cpp \
         widgets/qdockwidget.cpp \
-        widgets/qdockwidgetlayout.cpp \
+        widgets/qdockarealayout.cpp \
         widgets/qeffects.cpp \
         widgets/qfontcombobox.cpp \
         widgets/qframe.cpp \
@@ -90,6 +95,8 @@ SOURCES += \
         widgets/qlineedit.cpp \
         widgets/qmainwindow.cpp \
         widgets/qmainwindowlayout.cpp \
+        widgets/qmdiarea.cpp \
+        widgets/qmdisubwindow.cpp \
         widgets/qmenu.cpp \
         widgets/qmenubar.cpp \
         widgets/qmenudata.cpp \
@@ -110,8 +117,8 @@ SOURCES += \
         widgets/qtextedit.cpp \
         widgets/qtextbrowser.cpp \
         widgets/qtoolbar.cpp \
+        widgets/qtoolbarlayout.cpp \
         widgets/qtoolbarextension.cpp \
-        widgets/qtoolbarhandle.cpp \
         widgets/qtoolbarseparator.cpp \
         widgets/qtoolbox.cpp \
         widgets/qtoolbutton.cpp \
@@ -121,7 +128,8 @@ SOURCES += \
         widgets/qfocusframe.cpp \
         widgets/qscrollarea.cpp \
         widgets/qworkspace.cpp \
-        widgets/qwidgetanimator.cpp
+        widgets/qwidgetanimator.cpp \
+        widgets/qtoolbararealayout.cpp
 
 
 !embedded:mac {

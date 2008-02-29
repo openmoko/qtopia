@@ -9,12 +9,27 @@
 ** and appearing in the file LICENSE.GPL included in the packaging of
 ** this file.  Please review the following information to ensure GNU
 ** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
+** http://trolltech.com/products/qt/licenses/licensing/opensource/
 **
 ** If you are unsure which license is appropriate for your use, please
 ** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
+** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
+** or contact the sales department at sales@trolltech.com.
+**
+** In addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.0, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
+**
+** In addition, as a special exception, Trolltech, as the sole copyright
+** holder for Qt Designer, grants users of the Qt/Eclipse Integration
+** plug-in the right for the Qt/Eclipse Integration to link to
+** functionality provided by Qt Designer and its related libraries.
+**
+** Trolltech reserves all rights not expressly granted herein.
+** 
+** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,6 +49,7 @@
 #include "qtimer.h"
 #include "qfile.h"
 #include "qtextstream.h"
+#include "qstringlist.h"
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -285,7 +301,7 @@ protected:
         tty.c_oflag     = 0;
         tty.c_lflag     = 0;
         tty.c_cflag     = f | CREAD | CLOCAL | HUPCL;
-#if !defined(Q_OS_DARWIN) && !defined(Q_OS_SOLARIS)
+#if !defined(Q_OS_DARWIN) && !defined(Q_OS_SOLARIS) && !defined(Q_OS_INTEGRITY)
         tty.c_line      = 0;
 #endif
         tty.c_cc[VTIME] = 0;
@@ -446,6 +462,8 @@ private:
     QWSPcMouseHandler *handler;
     QString driver;
     QString device;
+    qreal accel;
+    int accel_limit;
 };
 
 QWSPcMouseHandler::QWSPcMouseHandler(const QString &driver, const QString &device)
@@ -471,9 +489,31 @@ void QWSPcMouseHandler::resume()
 
 
 QWSPcMouseHandlerPrivate::QWSPcMouseHandlerPrivate(QWSPcMouseHandler *h,
-    const QString &drv, const QString &dev)
-    : handler(h), driver(drv), device(dev)
+    const QString &drv, const QString &arg)
+    : handler(h), driver(drv)
 {
+    QStringList args = arg.split(QLatin1Char(':'), QString::SkipEmptyParts);
+
+    int index;
+
+    accel = qreal(2.0);
+    QRegExp accelRegex(QLatin1String("^accel=(\\d+\\.?\\d*)$"));
+    index = args.indexOf(accelRegex);
+    if (index >= 0) {
+        accel = qreal(accelRegex.cap(1).toDouble());
+        args.removeAt(index);
+    }
+
+    accel_limit = 5;
+    QRegExp accelLimitRegex(QLatin1String("^accel_limit=(\\d+)$"));
+    index = args.indexOf(accelLimitRegex);
+    if (index >= 0) {
+        accel_limit = accelLimitRegex.cap(1).toInt();
+        args.removeAt(index);
+    }
+
+    device = args.join(QString());
+
     retries = 0;
     openDevices();
 }
@@ -530,9 +570,6 @@ QWSPcMouseHandler::UsageResult QWSPcMouseHandler::useDev(Dev& d)
 
 bool QWSPcMouseHandlerPrivate::sendEvent(QWSPcMouseSubHandler& h)
 {
-    static const int accel_limit = 5;
-    static const int accel = 2;
-
     if (h.reliable()) {
         QPoint motion = h.takeMotion();
         if (qAbs(motion.x()) > accel_limit || qAbs(motion.y()) > accel_limit)

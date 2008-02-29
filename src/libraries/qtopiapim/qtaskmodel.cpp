@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -79,6 +79,12 @@ void QTaskModel::initMaps()
 
         { "identifier", QT_TR_NOOP( "Identifier" ), Identifier},
         { "categories", QT_TR_NOOP( "Categories" ), Categories},
+
+        { "alarms", QT_TR_NOOP( "Alarms" ), Alarm },
+        { "repeatrule", QT_TR_NOOP( "Repeat Rule" ), RepeatRule },
+        { "repeatfrequency", QT_TR_NOOP( "Repeat Frequency" ), RepeatFrequency },
+        { "repeatenddate", QT_TR_NOOP( "Repeat End Date" ), RepeatEndDate },
+        { "repeatweekflags", QT_TR_NOOP( "Repeat Week Flags" ), RepeatWeekFlags },
         { 0, 0, Invalid }
     };
 
@@ -178,7 +184,7 @@ QTaskModel::Field QTaskModel::identifierField(const QString &identifier)
   both within this application and from other applications.  This will result in
   the modelReset() signal being emitted.
 
-  \sa QTask, QTaskListView, QSortFilterProxyModel
+  \sa QTask, QTaskListView, QSortFilterProxyModel, {Pim Library}
 */
 
 /*!
@@ -211,6 +217,18 @@ QTaskModel::Field QTaskModel::identifierField(const QString &identifier)
     The identifier of the task
   \value Categories
     The list of categories the task belongs to
+  \value Alarm
+    The type of alarm of the task, if it has a due date
+  \value RepeatRule
+    The repeat rule of the task, if it has a due date
+  \value RepeatFrequency
+    The repeat frequency of the task, if it has a due date
+  \value RepeatEndDate
+    The date a repeating task repeats until, if it has a due
+    date.  If null the task repeats forever
+  \value RepeatWeekFlags
+    The flags specifying what days of the week the task repeats on,
+    if it has a due date.
 */
 
 /*!
@@ -220,7 +238,7 @@ QTaskModel::QTaskModel(QObject *parent)
     : QPimModel(parent)
 {
     d = new QTaskModelData;
-    QtopiaSql::openDatabase();
+    QtopiaSql::instance()->openDatabase();
 
     QTaskIO *access = new QTaskSqlIO(this);
     QTaskDefaultContext *context = new QTaskDefaultContext(this, access);
@@ -243,7 +261,7 @@ QTaskModel::~QTaskModel()
 int QTaskModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return Categories+1;// last column + 1
+    return RepeatWeekFlags+1;// last column + 1
 }
 
 /*!
@@ -521,46 +539,21 @@ bool QTaskModel::filterCompleted() const
   The row of the index specifies which task to access and the column of the index is treated as
   a \c QTaskModel::Field.
 
-
   \sa taskField()
 */
 QVariant QTaskModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
-        switch (index.column()) {
-            default:
-            case Invalid:
-                return QVariant();
-            case Description:
-                return task(index).description();
-            case Priority:
-                return task(index).priority();
-            case Completed:
-                return task(index).isCompleted();
-            case PercentCompleted:
-                return task(index).percentCompleted();
-            case Status:
-                return task(index).status();
-            case DueDate:
-                return task(index).dueDate();
-            case StartedDate:
-                return task(index).startedDate();
-            case CompletedDate:
-                return task(index).completedDate();
-            case Notes:
-                return task(index).notes();
-        }
+        QTaskIO * io = qobject_cast<QTaskIO*>(access(index.row()));
+        if (io)
+            return io->taskField(index.row(), (Field) index.column());
     } else if (role == Qt::DecorationRole && index.column() == 0) {
-        QTask t = task(index);
-        if (t.isCompleted())
-            return d->getCachedIcon(":icon/ok");
-        else switch (t.priority()) {
-            case 1:
-            case 2:
+        QTaskIO * io = qobject_cast<QTaskIO*>(access(index.row()));
+        if (io) {
+            if (io->taskField(index.row(), Completed).toBool())
+                return d->getCachedIcon(":icon/ok");
+            else if(io->taskField(index.row(), Priority).toInt() <= 2)
                 return d->getCachedIcon(":icon/priority");
-
-            default:
-                break;
         }
     }
     return QVariant();
@@ -688,6 +681,36 @@ QStringList QTaskModel::mimeTypes() const
 }
 
 /*!
+  This function will update any recurring tasks
+  that require updating (for example, to set the new due
+  date).  This should be called in response to
+  the QCop message "Tasks::updateRecurringTasks()", or when
+  the application wants to ensure that all recurring tasks
+  are up to date.
+
+  The library will generate the QCop message at the
+  appropriate times.
+
+  Returns true if updates were successful, false otherwise.
+*/
+bool QTaskModel::updateRecurringTasks()
+{
+    bool ret = false;
+    QList<QPimContext *> ctexts = contexts();
+
+    foreach(QPimContext* p, ctexts) {
+        QTaskDefaultContext *td = qobject_cast<QTaskDefaultContext*>(p);
+        if (td) {
+            td->processRecurringTasks();
+            ret = true;
+        }
+    }
+
+    return ret;
+}
+
+
+/*!
   \overload
 
   Sorts the model by \a column in ascending order
@@ -704,6 +727,11 @@ void QTaskModel::sort(int column, Qt::SortOrder order)
 
 /*!
   Returns the value for the specified \a field of the given \a task.
+
+  Note:  Certain fields (\c Alarm, \c RepeatRule, \c RepeatFrequency,
+  \c RepeatEndDate and \c RepeatWeekFlags) are not accessible by this
+  function.  Use \l data() instead, or fetch the dependent QAppointment
+  directly.
 
   \sa data()
  */

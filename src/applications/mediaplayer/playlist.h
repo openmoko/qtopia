@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,8 @@
 
 #ifndef PLAYLIST_H
 #define PLAYLIST_H
+
+#include <qcontentset.h>
 
 #include <QtGui>
 
@@ -43,6 +45,7 @@ public:
     virtual ~PlaylistCue() { }
 
     virtual void cue( Playlist* playlist ) = 0;
+    virtual void playNow( Playlist* playlist ) = 0;
 };
 
 Q_DECLARE_INTERFACE(PlaylistCue,
@@ -76,6 +79,84 @@ public:
 Q_DECLARE_INTERFACE(PlaylistSave,
     "com.trolltech.Qtopia.MediaPlayer.PlaylistSave/1.0")
 
+class PlaylistMyShuffle
+{
+public:
+    virtual ~PlaylistMyShuffle() { }
+
+    enum Probability { Frequent, Infrequent, Never };
+
+    // Set track probability
+    virtual void setProbability( const QModelIndex& index, Probability probability ) = 0;
+
+    // Reset all track ratings
+    virtual void reset() = 0;
+};
+
+Q_DECLARE_INTERFACE(PlaylistMyShuffle,
+    "com.trolltech.Qtopia.MediaPlayer.PlaylistMyShuffle/1.0")
+
+class StringCache
+{
+public:
+    StringCache( int size )
+        : m_cache( size ), m_index( 0 ), m_size( size )
+    { }
+
+    void insert( const QString& string )
+    {
+        m_cache[m_index++%m_size] = string;
+    }
+
+    bool contains( const QString& string ) const
+    {
+        return m_cache.contains( string );
+    }
+
+private:
+    QVector<QString> m_cache;
+    int m_index, m_size;
+};
+
+class MyShufflePlaylist : public Playlist,
+    public PlaylistMyShuffle,
+    public PlaylistCue
+{
+    Q_OBJECT
+    Q_INTERFACES(PlaylistMyShuffle)
+    Q_INTERFACES(PlaylistCue)
+public:
+    MyShufflePlaylist( const QContentFilter& filter = QContentFilter() );
+    ~MyShufflePlaylist();
+
+    // PlaylistMyShuffle
+    void setProbability( const QModelIndex& index, Probability probability );
+    void reset();
+
+    // PlaylistCue
+    void cue( Playlist* playlist );
+    void playNow( Playlist* playlist );
+
+    // Playlist
+    QModelIndex playing() const;
+    void setPlaying( const QModelIndex& index );
+
+    QVariant data( const QModelIndex& index, int role = Qt::DisplayRole ) const;
+
+    int rowCount( const QModelIndex& parent = QModelIndex() ) const;
+
+private:
+    // Return the filename of random track
+    // Track is biased towards frequent
+    QString randomTrack() const;
+
+    mutable StringCache m_recent;
+    QContentFilter m_filter;
+    QStringList m_list;
+    QStringList m_cued;
+    QPersistentModelIndex m_playing;
+};
+
 class BasicPlaylist : public Playlist,
     public PlaylistCue,
     public PlaylistRemove,
@@ -96,6 +177,7 @@ public:
 
     // PlaylistCue
     void cue( Playlist* playlist );
+    void playNow( Playlist* playlist );
 
     // PlaylistRemove
     void remove( const QModelIndex& index );

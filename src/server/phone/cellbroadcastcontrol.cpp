@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -29,6 +29,8 @@
   \class CellBroadcastControl
   \ingroup QtopiaServer
   \brief The CellBroadcastControl class monitors incoming cell broadcast messages.
+  
+  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
 /*!
@@ -48,7 +50,7 @@ CellBroadcastControl::CellBroadcastControl(QObject *parent)
 {
     cb = new QCellBroadcast(QString(), this);
     QObject::connect(cb, SIGNAL(broadcast(QCBSMessage)),
-                    this, SLOT(cellBroadcast(const QCBSMessage&)));
+                    this, SLOT(cellBroadcast(QCBSMessage)));
 
     firstSubscribe = false;
 

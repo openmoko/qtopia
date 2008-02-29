@@ -1,0 +1,74 @@
+/*!
+
+\page index.html
+\title Qtopia Sync Agent Documentation
+
+\list
+\o \l Classes
+\o \l Headers
+\o \l Overviews
+\o \l{What's New?}
+\endlist
+
+*/
+
+/*!
+
+\page classes.html
+\title Classes
+
+\generatelist classes
+
+*/
+
+/*!
+
+\group headers
+\title Headers
+
+\generatelist related
+
+*/
+
+/*!
+
+\page examples.html
+\title Examples
+
+The Qtopia Sync Agent Documentation does not have Examples.
+
+Please refer to the \l{Qtopia Sync Agent Documentation}.
+
+*/
+
+/*!
+
+\group overviews
+\title Overviews
+
+\section1 Overview
+
+These are topical overviews relating to Qtopia Sync Agent.
+
+\section1 Overviews
+
+\generatelist related
+
+*/
+
+/*!
+
+\group changes
+\title What's new?
+
+\section1 Overview
+
+There have been changes to the way Qtopia Sync Agent works. These pages describe the changes for all releases
+where such information was recorded.
+
+\section1 Releases
+
+\generatelist related
+
+*/
+

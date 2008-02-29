@@ -8,8 +8,7 @@ else:error(Missing $$fixpath($$QPEDIR/src/config.pri). Please configure Qtopia.)
 !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/config.pri):include($$DEVICE_CONFIG_PATH/config.pri)
 
 QTDIR=$$(QTDIR)
-equals(QTDIR,$$QTEDIR):QT_DEPOT_PATH=$$QTE_DEPOT_PATH
-else:QT_DEPOT_PATH=$$DQT_DEPOT_PATH
+QT_DEPOT_PATH=$$QTE_DEPOT_PATH
 
 # qmake should load this automatically...
 exists($$QTDIR/.qmake.cache):include($$QTDIR/.qmake.cache)
@@ -39,7 +38,7 @@ else:QT_DEBUG_LIBS=0
 CONFIG*=qt
 # Basic Qt modules
 QT=core gui network xml sql
-equals(DQT_MINOR_VERSION,2):QT+=svg
+!equals(DQT_MINOR_VERSION,1):QT+=svg
 # FIXME compat code should be removed
 DEFINES+=QPE_NO_COMPAT
 
@@ -60,17 +59,19 @@ contains(QMAKE_BEHAVIORS,keep_quotes) {
 
 # Platform/make stuff
 win32 {
+    QBS_BIN=$$QPEDIR/bin
     COMMAND_HEADER=@
     COMMAND_SEP=&&
-    PATH_SEP=:
-    MAKE=$$fixpath($$QPEDIR/bin/winmake)
+    PATH_SEP=;
+    MAKE=$$fixpath($$QBS_BIN/winmake)
     DUMMY_COMMAND=echo >nul
-    PRINTDOT=@$$fixpath($$QPEDIR/bin/printdot) >&2
-    ENV=$$fixpath($$QPEDIR/bin/runwithvars)
+    PRINTDOT=@$$fixpath($$QBS_BIN/printdot) >&2
+    ENV=$$fixpath($$QBS_BIN/runwithvars)
 } else {
+    QBS_BIN=$$QPEDIR/src/build/bin
     COMMAND_HEADER=@[ -z $$LITERAL_QUOTE\$$VERBOSE_SHELL$$LITERAL_QUOTE ] || set -x;
     COMMAND_SEP=;
-    PATH_SEP=;
+    PATH_SEP=:
     MAKE=$(MAKE)
     DUMMY_COMMAND=true
     PRINTDOT=@echo -n . >&2
@@ -113,26 +114,21 @@ equals(LAUNCH_METHOD,normal):CONFIG+=no_singleexec
 exists($$PROJECT_ROOT/projects.pri):include($$PROJECT_ROOT/projects.pri)
 else:include($$QTOPIA_PROJECT_ROOT/projects.pri)
 
-# Setup the QTOPIA_ID of this project
-QTOPIA_ID=$$fixpath($$OUT_PWD)
-P_ROOT=$$PROJECT_ROOT
-P_ROOT~=s,$$QTOPIA_DEPOT_PATH,$$QPEDIR,q
-QTOPIA_ID~=s,$$fixpath($$P_ROOT/),,q
-
-containsre($$QTOPIA_ID,^3rdparty) {
-    # Disable warnings for third-party code.
-    CONFIG+=warn_off
-} else {
-    # If enabled, make warnings into errors. This helps us pick up
-    # warnings, useful due to our "no warnings in our code" policy.
-    enable_werror {
-        QMAKE_CFLAGS+=-Werror
-        QMAKE_CXXFLAGS+=-Werror
-    }
-    # If enabled, warn about overloaded virtual functions.
-    # This will help us to track down certain bugs more easily.
-    enable_woverloaded_virtual {
-        QMAKE_CXXFLAGS+=-Woverloaded-virtual
+depotProject {
+    containsre($$QTOPIA_ID,^3rdparty) {
+        # Disable warnings for third-party code.
+        CONFIG+=warn_off
+    } else {
+        # If enabled, make warnings into errors. This helps us pick up
+        # warnings, useful due to our "no warnings in our code" policy.
+        enable_werror {
+            QMAKE_CFLAGS+=-Werror
+            QMAKE_CXXFLAGS+=-Werror
+        }
+        # This enables all of the strict warning flags your compiler supports (as tested by configure)
+        enable_strict_flags {
+            QMAKE_CXXFLAGS+=$$QTOPIA_STRICT_FLAGS
+        }
     }
 }
 

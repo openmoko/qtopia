@@ -19,6 +19,9 @@ DEPENDPATH+=$$INCLUDEPATH
 # Fairly useless define
 DEFINES+=QTOPIA_TARGET=$$LITERAL_ESCAPED_QUOTE$$ORIG_TARGET$$LITERAL_ESCAPED_QUOTE
 
+# Indicate host mode when compiling desktop apps.
+desktop:app:DEFINES+=QTOPIA_HOST
+
 # This macro used to be defined by Qt in debug mode
 qt:CONFIG(debug,debug|release):DEFINES+=DEBUG
 
@@ -59,16 +62,21 @@ QMAKE_LIBDIR_QT = $$QTDIR/lib
 }
 
 # Test integration
-depotProject:part_of_qtopia {
-    exists($$QPEDIR/tests/src/$$QTOPIA_ID) {
-        test.commands=$$MAKE -C $$QPEDIR/tests/src/$$QTOPIA_ID test
+depotProject {
+    destProject=$$QPEDIR/tests/src/$$QTOPIA_ID
+    qtopiadesktop:destProject=$$QPEDIR/tests/src/qtopiadesktop/$$QTOPIA_ID
+    exists($$destProject) {
+        test.commands=$$MAKE -C $$destProject test TESTS=$$LITERAL_QUOTE$(TESTS)$$LITERAL_QUOTE
+        listtests.commands=$$MAKE -C $$destProject listtests
     } else {
+        destProject~=s,$$QPEDIR,$$QTOPIA_DEPOT_PATH,q
         test.commands=$$COMMAND_HEADER\
             echo No tests exist for $${QTOPIA_ID}. $$LINE_SEP\
-            echo Please add some tests to $$QTOPIA_DEPOT_PATH/tests/src/$$QTOPIA_ID
+            echo Please add some tests to $$destProject
+        listtests.commands=$$test.commands
     }
 }
-QMAKE_EXTRA_TARGETS*=test
+QMAKE_EXTRA_TARGETS*=test listtests
 
 !subdirs {
     # checkp4 helps us to find not-checked-in files
@@ -86,17 +94,22 @@ QMAKE_EXTRA_TARGETS*=test
     QMAKE_EXTRA_TARGETS+=checkp4
 
     # remove_target removes the TARGET file
-    win32|app:tg=$(TARGET)
-    else:tg=$(DESTDIR)$(TARGET)
+    tg=$(DESTDIR)$(TARGET)
     remove_target.commands=-$(DEL_FILE) $$tg
     QMAKE_EXTRA_TARGETS+=remove_target
 
     QMAKE_EXTRA_TARGETS*=printdependrules qmake_check
 
     # Don't let this fail
-    !contains(INSTALLS,target):QMAKE_EXTRA_TARGETS+=install_target
+    !contains(INSTALLS,target) {
+        QMAKE_EXTRA_TARGETS+=install_target
+        build_target.commands=@$$DUMMY_COMMAND
+        build_target.CONFIG=no_path
+        build_target.depends=all
+        INSTALLS+=build_target
+    }
 
-    # Desktop apps (not Qtopia Desktop) get an RPATH to the host Qt lib directory
+    # Desktop apps (not Qtopia Sync Agent) get an RPATH to the host Qt lib directory
     # so they can run without LD_LIBRARY_PATH.
     desktop:app:!qtopiadesktop:!isEmpty(QTOPIA_RPATH) {
         dqt=$$DQTDIR
@@ -108,6 +121,11 @@ QMAKE_EXTRA_TARGETS*=test
         LIBS+=$${QTOPIA_RPATH}$$fixpath($$QTOPIA_SDKROOT/lib/host)
     }
 
+    # Qtopia Sync Agent gets an RPATH to the dprefix
+    #qtopiadesktop:!isEmpty(QTOPIA_RPATH) {
+    #    LIBS+=$${QTOPIA_RPATH}$$fixpath($$QTOPIA_DPREFIX/lib)
+    #}
+
     QMAKE_EXTRA_TARGETS*=regenerate regenerate_all
 
     # make first_syncqtopia just runs make syncqtopia but it prints out dots in subdirs (used by configure)
@@ -115,7 +133,7 @@ QMAKE_EXTRA_TARGETS*=test
 
     # Add the implicit RPATH to embedded targets
     contains(PROJECT_TYPE,embedded)|qtopia {
-        qt:!isEmpty(EMBEDDED_RPATH):LIBS+=$$EMBEDDED_RPATH
+        enable_rpath:qt:!isEmpty(EMBEDDED_RPATH):LIBS+=$$EMBEDDED_RPATH
     }
 
     qtopia_depot:!win32 {
@@ -132,6 +150,26 @@ QMAKE_EXTRA_TARGETS*=test
 
         # make auto_docs is run automatically if the -qdoc switch is passed to configure
         qdoc:ALL_DEPS+=auto_docs
+    }
+
+    embedded:qtopia:app:CONFIG+=sxe_test
+    quicklaunch:plugin:CONFIG+=sxe_test
+    no_sxe_test|!enable_sxe:CONFIG-=sxe_test
+
+    sxe_test {
+        sxe_test.commands+=$$COMMAND_HEADER\
+            echo sxe_test $(TARGET) $$LINE_SEP\
+            if strings $(TARGET) | grep XOXOXOauthOXOXOX99 >/dev/null 2>&1; then\
+                :;\
+            else\
+                echo $${LITERAL_QUOTE}ERROR: $(TARGET) does not have the required SXE symbols.$${LITERAL_QUOTE};\
+                echo $${LITERAL_QUOTE}Please see the QSXE_APP_KEY documentation for details.$${LITERAL_QUOTE};\
+                echo $${LITERAL_QUOTE}Hint: Type QSXE_APP_KEY into assistant's index box.$${LITERAL_QUOTE};\
+                exit 1;\
+            fi
+        sxe_test.depends=$(TARGET)
+        QMAKE_EXTRA_TARGETS+=sxe_test
+        ALL_DEPS+=sxe_test
     }
 }
 

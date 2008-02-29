@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -109,12 +109,15 @@ private:
     Ownership of the sound object is not taken.
 */
 QSoundControl::QSoundControl( QSound* sound, QObject* parent )
-    : QObject( parent ), m_sound( sound ), m_volume( 100 ), m_priority( Default ), m_channel( 0 )
+    : QObject( parent ), m_sound( sound ), m_volume( 100 ), m_priority( Default )
+#ifndef QT_NO_COP
+    , m_channel( 0 )
+#endif
 {
 #ifndef QT_NO_COP
     m_channel = new QCopChannel( QString( "QPE/QSound/" ).append( m_sound->objectName() ), this );
-    connect( m_channel, SIGNAL(received(const QString&,const QByteArray&)),
-        this, SLOT(processMessage(const QString&,const QByteArray&)) );
+    connect( m_channel, SIGNAL(received(QString,QByteArray)),
+        this, SLOT(processMessage(QString,QByteArray)) );
 #endif
 
     m_id = m_sound->objectName();
@@ -169,6 +172,8 @@ void QSoundControl::setPriority( Priority priority )
     Returns the sound object the control is associated with.
 */
 
+#ifndef QT_NO_COP
+
 void QSoundControl::processMessage( const QString& msg, const QByteArray& data )
 {
     Q_UNUSED(data);
@@ -179,6 +184,8 @@ void QSoundControl::processMessage( const QString& msg, const QByteArray& data )
         }
     }
 }
+
+#endif
 
 /*!
     \fn void QSoundControl::done()

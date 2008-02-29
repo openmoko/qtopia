@@ -2,7 +2,7 @@
 **
 ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -24,16 +24,17 @@
 #include "qtopiaserverapplication.h"
 #include "themecontrol.h"
 #include "windowmanagement.h"
+#include "themebackground_p.h"
 
+#include <custom.h>
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
 #include <qexportedbackground.h>
+#endif
 
 #include <QVBoxLayout>
 #include <QDesktopWidget>
 #include <QPainter>
 
-
-//XXX Should probably get secondary screen number from config.
-const int SecondaryScreen = 1;
 
 class SecondaryHomeScreen : public PhoneThemedView
 {
@@ -41,67 +42,89 @@ class SecondaryHomeScreen : public PhoneThemedView
 public:
     SecondaryHomeScreen(QWidget *parent=0, Qt::WFlags f=0);
 
-private slots:
+    ~SecondaryHomeScreen();
+
+    void applyBackgroundImage();
+
+public slots:
+
     void updateBackground();
 
+protected:
+
+    void themeLoaded(const QString &);
+
 private:
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
     QExportedBackground *exportedBg;
+#endif
+    ThemedItemPlugin *bgIface;
+    ThemeBackground *themeBackground;
 };
 
 SecondaryHomeScreen::SecondaryHomeScreen(QWidget *parent, Qt::WFlags f)
-    : PhoneThemedView(parent, f), exportedBg(0)
+    : PhoneThemedView(parent, f)
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
+    , exportedBg(0)
+#endif
+    , bgIface(0)
 {
     ThemeControl::instance()->registerThemedView(this, "SecondaryHome");
 
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
     QDesktopWidget *desktop = QApplication::desktop();
-    QRect desktopRect = desktop->screenGeometry(SecondaryScreen);
+    QRect desktopRect = desktop->screenGeometry(ThemeBackground::SecondaryScreen);
     QExportedBackground::initExportedBackground(desktopRect.width(),
                                                 desktopRect.height(),
-                                                SecondaryScreen);
+                                                ThemeBackground::SecondaryScreen);
 
     if (ThemeControl::instance()->exportBackground())
-        exportedBg = new QExportedBackground(SecondaryScreen, this);
+        exportedBg = new QExportedBackground(ThemeBackground::SecondaryScreen, this);
+#endif
+
     connect(ThemeControl::instance(), SIGNAL(themeChanged()),
             this, SLOT(updateBackground()));
+
+    themeBackground = new ThemeBackground(ThemeBackground::SecondaryScreen, this);
+}
+
+SecondaryHomeScreen::~SecondaryHomeScreen()
+{
+    if ( bgIface ) {
+        delete bgIface;
+    }
+}
+
+void SecondaryHomeScreen::applyBackgroundImage()
+{
+    ThemePluginItem *ip = (ThemePluginItem *)findItem("bgplugin", Plugin);
+    if (ip) {
+        QSettings cfg("Trolltech","Launcher");
+        cfg.beginGroup("SecondaryHomeScreen");
+        QString pname = cfg.value("Plugin", "Background").toString();
+        if (pname == "Background") {
+            // DON'T delete the existing object here - it causes it to crash. Something else
+            // must be deleting it, "ip" presumably <sigh>.
+            bgIface = new ThemeBackgroundImagePlugin(ThemeBackground::SecondaryScreen);
+            ip->setBuiltin(bgIface);
+        } else {
+            ip->setPlugin(pname);
+        }
+    }
 }
 
 void SecondaryHomeScreen::updateBackground()
 {
-    if (ThemeControl::instance()->exportBackground()) {
-        ThemeItem *item = findItem("background", ThemedView::Item);
-        if (!exportedBg)
-            exportedBg = new QExportedBackground(SecondaryScreen, this);
-        bool wasExported = exportedBg->isAvailable();
-        if (item) {
-            QDesktopWidget *desktop = QApplication::desktop();
-            QRect desktopRect = desktop->screenGeometry(SecondaryScreen);
-            QPixmap pm(desktopRect.width(),
-                       desktopRect.height());
-            QPainter p(&pm);
-            QRect rect(QPoint(0,0), desktopRect.size());
-            paint(&p, rect, item);
-            QExportedBackground::setExportedBackground(pm, SecondaryScreen);
-        } else {
-            QExportedBackground::clearExportedBackground(SecondaryScreen);
-        }
+    themeBackground->updateBackground(this);
+}
 
-        if (!wasExported && exportedBg->isAvailable()) {
-            QApplication::setPalette(QApplication::palette());
-            foreach (QWidget *w, QApplication::topLevelWidgets()) {
-                if (QApplication::desktop()->screenNumber(w) == SecondaryScreen) {
-                    QApplication::style()->polish(w);
-                    foreach (QObject *o, w->children()) {
-                        QWidget *sw = qobject_cast<QWidget*>(o);
-                        if (sw) {
-                            QApplication::style()->polish(sw);
-                        }
-                    }
-                }
-            }
-        }
-    } else {
-        QExportedBackground::clearExportedBackground(SecondaryScreen);
-    }
+void SecondaryHomeScreen::themeLoaded(const QString&)
+{
+    applyBackgroundImage();
+
+    ThemeTextItem *textItem = (ThemeTextItem *)findItem("infobox", Text);
+    if (textItem)
+        textItem->setTextFormat(Qt::RichText);
 }
 
 //===========================================================================
@@ -116,7 +139,7 @@ SecondaryTitle::SecondaryTitle(QWidget *parent, Qt::WFlags f)
     : PhoneThemedView(parent, f)
 {
     ThemeControl::instance()->registerThemedView(this, "SecondaryTitle");
-    WindowManagement::dockWindow(this, WindowManagement::Top, SecondaryScreen);
+    WindowManagement::dockWindow(this, WindowManagement::Top, ThemeBackground::SecondaryScreen);
 }
 
 //===========================================================================
@@ -127,6 +150,7 @@ SecondaryTitle::SecondaryTitle(QWidget *parent, Qt::WFlags f)
   \ingroup QtopiaServer::PhoneUI
 
   This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+  It is part of the Qtopia server and cannot be used by other Qtopia applications.
 
   \sa QAbstractServerInterface, QAbstractSecondaryDisplay
   */
@@ -147,6 +171,22 @@ ThemedSecondaryDisplay::ThemedSecondaryDisplay(QWidget *parent, Qt::WFlags f)
     setLayout(vbox);
     home = new SecondaryHomeScreen;
     vbox->addWidget(home);
+}
+
+/*!
+  \reimp
+  */
+void ThemedSecondaryDisplay::applyBackgroundImage()
+{
+    home->applyBackgroundImage();
+}
+
+/*!
+  \reimp
+  */
+void ThemedSecondaryDisplay::updateBackground()
+{
+    home->updateBackground();
 }
 
 QTOPIA_REPLACE_WIDGET(QAbstractSecondaryDisplay, ThemedSecondaryDisplay);
